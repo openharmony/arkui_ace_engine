@@ -56,6 +56,16 @@ class FrameNode;
 class InspectorFilter;
 class Modifier;
 
+struct PaintFocusExtraInfo final {
+    PaintFocusExtraInfo() = default;
+    PaintFocusExtraInfo(bool isAccessibilityFocus, bool isFocusBoxGlow)
+        : isAccessibilityFocus(isAccessibilityFocus), isFocusBoxGlow(isFocusBoxGlow)
+    {}
+    ~PaintFocusExtraInfo() = default;
+    bool isAccessibilityFocus { false };
+    bool isFocusBoxGlow { false };
+};
+
 using CanvasDrawFunction = std::function<void(RSCanvas& canvas)>;
 
 inline constexpr int32_t ZINDEX_DEFAULT_VALUE = 0;
@@ -153,7 +163,13 @@ public:
 #endif
     };
 
-    enum class PatternType : int8_t { DEFAULT, VIDEO };
+    enum class PatternType : int8_t {
+        DEFAULT,
+        VIDEO,
+#ifdef PLATFORM_VIEW_SUPPORTED
+        PLATFORM_VIEW,
+#endif
+    };
     struct ContextParam {
         ContextType type;
         std::optional<std::string> surfaceName;
@@ -185,14 +201,15 @@ public:
 
     // Paint focus state by component's setting. It will paint along the paintRect
     virtual void PaintFocusState(const RoundRect& paintRect, const Color& paintColor, const Dimension& paintWidth,
-        bool isAccessibilityFocus = false)
+        bool isAccessibilityFocus = false, bool isFocusBoxGlow = false)
     {}
     // Paint focus state by component's setting. It will paint along the frameRect(padding: focusPaddingVp)
     virtual void PaintFocusState(const RoundRect& paintRect, const Dimension& focusPaddingVp, const Color& paintColor,
-        const Dimension& paintWidth, bool isAccessibilityFocus = false)
+        const Dimension& paintWidth, const PaintFocusExtraInfo& paintFocusExtraInfo)
     {}
     // Paint focus state by default. It will paint along the component rect(padding: focusPaddingVp)
-    virtual void PaintFocusState(const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth)
+    virtual void PaintFocusState(const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth,
+        bool isFocusBoxGlow = false)
     {}
 
     virtual void ClearFocusState() {}
@@ -307,6 +324,7 @@ public:
 
     virtual void SavePaintRect(bool isRound = true, uint8_t flag = 0) {}
     virtual void SyncPartialRsProperties() {}
+    virtual void UpdatePaintRect(const RectF& paintRect) {}
 
     virtual std::pair<RectF, bool> GetPaintRectWithTranslate()
     {
@@ -639,6 +657,11 @@ public:
     }
 
     virtual void SetSurfaceRotation(bool isLock) {}
+
+    virtual Matrix4 GetRevertMatrix()
+    {
+        return Matrix4();
+    }
 
 protected:
     RenderContext() = default;

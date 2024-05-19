@@ -55,12 +55,8 @@ JSRef<JSObject> JsGestureFunction::CreateGestureEvent(const GestureEvent& info)
         "pinchCenterY", PipelineBase::Px2VpWithCurrentDensity(info.GetPinchCenter().GetY()));
     gestureInfoObj->SetProperty<double>("source", static_cast<int32_t>(info.GetSourceDevice()));
     gestureInfoObj->SetProperty<double>("pressure", info.GetForce());
-    if (info.GetTiltX().has_value()) {
-        gestureInfoObj->SetProperty<double>("tiltX", info.GetTiltX().value());
-    }
-    if (info.GetTiltY().has_value()) {
-        gestureInfoObj->SetProperty<double>("tiltY", info.GetTiltY().value());
-    }
+    gestureInfoObj->SetProperty<double>("tiltX", info.GetTiltX().value_or(0.0f));
+    gestureInfoObj->SetProperty<double>("tiltY", info.GetTiltY().value_or(0.0f));
     gestureInfoObj->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
 
     gestureInfoObj->SetProperty<double>(

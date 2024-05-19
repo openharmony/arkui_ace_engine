@@ -28,7 +28,10 @@ ace_unittest("distributed_ui_test_ng") {
 ace_unittest("frame_node_test_ng") {
   type = "new"
   module_output = "basic"
-  sources = [ "frame_node_test_ng.cpp" ]
+  sources = [
+    "frame_node_test_ng.cpp",
+    "frame_node_test_ng_new.cpp",
+  ]
 }
 
 ace_unittest("geometry_node_test_ng") {

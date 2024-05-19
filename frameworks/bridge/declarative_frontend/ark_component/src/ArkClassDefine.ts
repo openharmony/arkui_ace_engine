@@ -1177,6 +1177,19 @@ class ArkGeometryTransition {
   }
 }
 
+class ArkSymbolEffect {
+  symbolEffect: SymbolEffect;
+  action: boolean | number | undefined;
+
+  constructor() {
+    this.symbolEffect = undefined;
+    this.action = undefined;
+  }
+  isEqual(another: ArkSymbolEffect): boolean {
+    return (this.symbolEffect === another.symbolEffect) && (this.action === another.action);
+  }
+}
+
 class ArkTextBackGroundStyle {
   color: ResourceColor;
   radius: Dimension | BorderRadiuses;
@@ -1216,6 +1229,18 @@ class ArkTextBackGroundStyle {
       }
     }
     return true;
+  }
+}
+
+class ArkScrollOffsetOptions {
+  xOffset: Dimension;
+  yOffset: Dimension;
+  constructor() {
+    this.xOffset = undefined;
+    this.yOffset = undefined;
+  }
+  isEqual(another: ArkScrollOffsetOptions): boolean {
+    return this.xOffset === another.xOffset && this.yOffset === another.yOffset;
   }
 }
 

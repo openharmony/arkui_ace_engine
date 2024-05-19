@@ -72,7 +72,9 @@ void JSGauge::JSBind(BindingTarget globalObj)
     JSClass<JSGauge>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSGauge>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSGauge>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSGauge>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSGauge>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSGauge>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSGauge>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
 
     JSClass<JSGauge>::InheritAndBind<JSViewAbstract>(globalObj);
@@ -121,7 +123,10 @@ void JSGauge::SetStartAngle(const JSCallbackInfo& info)
 {
     float startAngle = NG::DEFAULT_START_DEGREE;
     if (info[0]->IsNumber()) {
-        startAngle = info[0]->ToNumber<float>();
+        startAngle = std::fmod(info[0]->ToNumber<double>(), NG::DEFAULT_END_DEGREE);
+        if (Negative(startAngle)) {
+            startAngle += NG::DEFAULT_END_DEGREE;
+        }
     }
     GaugeModel::GetInstance()->SetStartAngle(startAngle);
 }
@@ -130,7 +135,10 @@ void JSGauge::SetEndAngle(const JSCallbackInfo& info)
 {
     float endAngle = NG::DEFAULT_END_DEGREE;
     if (info[0]->IsNumber()) {
-        endAngle = info[0]->ToNumber<float>();
+        endAngle = std::fmod(info[0]->ToNumber<double>(), NG::DEFAULT_END_DEGREE);
+        if (Negative(endAngle)) {
+            endAngle += NG::DEFAULT_END_DEGREE;
+        }
     }
     GaugeModel::GetInstance()->SetEndAngle(endAngle);
 }

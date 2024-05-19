@@ -27,6 +27,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_text_editable_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textfield.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_textinput_theme.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #include "frameworks/core/common/ime/text_input_action.h"
 #include "frameworks/core/common/ime/text_input_type.h"
@@ -96,7 +97,9 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSTextInput>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSTextInput>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSTextInput>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSTextInput>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSTextInput>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSTextInput>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTextInput>::StaticMethod("passwordIcon", &JSTextField::SetPasswordIcon);
     JSClass<JSTextInput>::StaticMethod("showUnderline", &JSTextField::SetShowUnderline);
@@ -127,6 +130,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
 void JSTextInput::Create(const JSCallbackInfo& info)
 {
     JSTextField::CreateTextInput(info);
+    JSTextInputTheme::ApplyTheme();
 }
 
 void JSTextInputController::JSBind(BindingTarget globalObj)

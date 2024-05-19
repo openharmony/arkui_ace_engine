@@ -477,7 +477,7 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
         paragraph->Build();
         ApplyIndent(spanParagraphStyle, paragraph, maxWidth);
         UpdateSymbolSpanEffect(frameNode, paragraph, group);
-        if (paraStyle.maxLines != INT32_MAX && !spanStringHasMaxLines_ && isSpanStringMode_) {
+        if (paraStyle.maxLines != UINT32_MAX && !spanStringHasMaxLines_ && isSpanStringMode_) {
             paragraph->Layout(static_cast<float>(maxWidth));
         }
         paragraphManager_->AddParagraph({ .paragraph = paragraph,
@@ -503,9 +503,9 @@ void MultipleParagraphLayoutAlgorithm::AddSymbolSpanToParagraph(const RefPtr<Spa
 void MultipleParagraphLayoutAlgorithm::AddTextSpanToParagraph(const RefPtr<SpanItem>& child, int32_t& spanTextLength,
     const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph)
 {
-    child->UpdateParagraph(frameNode, paragraph, isSpanStringMode_);
     spanTextLength += StringUtils::ToWstring(child->content).length();
     child->position = spanTextLength;
+    child->UpdateParagraph(frameNode, paragraph, isSpanStringMode_);
 }
 
 void MultipleParagraphLayoutAlgorithm::AddImageToParagraph(RefPtr<ImageSpanItem>& imageSpanItem,

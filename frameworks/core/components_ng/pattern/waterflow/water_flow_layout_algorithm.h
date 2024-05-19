@@ -74,6 +74,7 @@ private:
     float footerMainSize_ = 0.0f;
     float footerMainStartPos_ = 0.0f;
     bool canOverScroll_ = false;
+    bool skipMeasure_ = false;
     WaterFlowLayoutInfo layoutInfo_;
 };
 } // namespace OHOS::Ace::NG

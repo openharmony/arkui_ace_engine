@@ -16,6 +16,7 @@
 #include "core/components_ng/svg/parse/svg_fe_blend.h"
 
 #include "base/utils/utils.h"
+#include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -64,7 +65,7 @@ void SvgFeBlend::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter,
 bool SvgFeBlend::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
 {
     static const LinearMapNode<void (*)(const std::string&, SvgFeBlendAttribute&)> attrs[] = {
-        { DOM_SVG_FE_IN2,
+        { SVG_FE_IN2,
             [](const std::string& val, SvgFeBlendAttribute& attr) {
                 static const LinearMapNode<SvgFeInType> IN_TABLE[] = {
                     { "BackgroundAlpha", SvgFeInType::BACKGROUND_ALPHA },
@@ -81,7 +82,7 @@ bool SvgFeBlend::ParseAndSetSpecializedAttr(const std::string& name, const std::
                     attr.in2.id = val;
                 }
             } },
-        { DOM_SVG_FE_MODE,
+        { SVG_FE_MODE,
             [](const std::string& val, SvgFeBlendAttribute& attr) {
                 static const LinearMapNode<SvgFeBlendMode> EDGE_MODE_TABLE[] = {
                     { "darken", SvgFeBlendMode::DARKEN },

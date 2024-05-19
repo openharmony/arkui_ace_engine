@@ -17,6 +17,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/animation/spring_curve.h"
@@ -1143,6 +1144,7 @@ ScrollResult RefreshPattern::HandleScroll(float offset, int32_t source, NestedSt
 
 void RefreshPattern::OnScrollStartRecursive(float position, float velocity)
 {
+    SetIsNestedInterrupt(false);
     if (!GetIsFixedNestedScrollMode()) {
         SetParentScrollable();
     }
@@ -1167,7 +1169,7 @@ bool RefreshPattern::HandleScrollVelocity(float velocity)
             return true;
         }
     }
-    if (Positive(scrollOffset_)) {
+    if (Positive(scrollOffset_) || Positive(velocity)) {
         HandleDragEnd(velocity);
         result = true;
     } else if (parent && ((Negative(velocity) && nestedScroll.forward == NestedScrollMode::SELF_FIRST) ||
@@ -1182,8 +1184,15 @@ void RefreshPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
     HandleDragEnd(velocity.value_or(0.f));
     auto parent = GetNestedScrollParent();
     auto nestedScroll = GetNestedScroll();
-    if (parent && nestedScroll.NeedParent()) {
+    if (parent && (nestedScroll.NeedParent() || GetIsNestedInterrupt())) {
         parent->OnScrollEndRecursive(velocity);
     }
+    SetIsNestedInterrupt(false);
+}
+
+void RefreshPattern::DumpInfo()
+{
+    DumpLog::GetInstance().AddDesc(
+        std::string("RefreshStatus: ").append(std::to_string(static_cast<int32_t>(refreshStatus_))));
 }
 } // namespace OHOS::Ace::NG

@@ -148,10 +148,7 @@ OffsetF RichEditorOverlayModifier::GetCaretOffset() const
 
 void RichEditorOverlayModifier::PaintPreviewTextDecoration(DrawingContext& drawingContext) const
 {
-    if (!showPreviewTextDecoration_->Get()) {
-        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "not show PreviewTextDecoration");
-        return;
-    }
+    CHECK_NULL_VOID(showPreviewTextDecoration_->Get());
     if (previewTextStyle_ != PreviewTextStyle::UNDERLINE) {
         TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "is not UNDERLINE style");
         return;

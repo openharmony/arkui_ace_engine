@@ -259,6 +259,15 @@ public:
                 }
             }
         }
+        for (auto& [key, node] : expiringItem_) {
+            if (!node.second) {
+                continue;
+            }
+            auto frameNode = AceType::DynamicCast<FrameNode>(node.second->GetFrameChildByIndex(0, true));
+            if (frameNode && frameNode == targetNode) {
+                return node.first;
+            }
+        }
         return -1;
     }
 
@@ -410,7 +419,10 @@ public:
     void ProcessCachedIndex(std::unordered_map<std::string, LazyForEachCacheChild>& cache,
         std::set<int32_t>& idleIndexes)
     {
-        for (auto& [key, node] : expiringItem_) {
+        auto expiringIter = expiringItem_.begin();
+        while (expiringIter != expiringItem_.end()) {
+            const auto& key = expiringIter->first;
+            const auto& node = expiringIter->second;
             auto iter = idleIndexes.find(node.first);
             if (iter != idleIndexes.end() && node.second) {
                 ProcessOffscreenNode(node.second, false);
@@ -421,10 +433,12 @@ public:
                     cachedItems_.try_emplace(node.first, LazyForEachChild(key, nullptr));
                     idleIndexes.erase(iter);
                 }
+                expiringIter++;
             } else {
                 NotifyDataDeleted(node.second, static_cast<size_t>(node.first), true);
                 ProcessOffscreenNode(node.second, true);
                 NotifyItemDeleted(RawPtr(node.second), key);
+                expiringIter = expiringItem_.erase(expiringIter);
             }
         }
     }

@@ -54,7 +54,8 @@ constexpr char ABILITY_KEY_ASYNC[] = "ability.want.params.KeyAsync";
 }
 UIExtensionPattern::UIExtensionPattern(
     bool isTransferringCaller, bool isModal, bool isAsyncModalBinding, SessionType sessionType)
-    : isTransferringCaller_(isTransferringCaller), isModal_(isModal), isAsyncModalBinding_(isAsyncModalBinding)
+    : isTransferringCaller_(isTransferringCaller), isModal_(isModal),
+    isAsyncModalBinding_(isAsyncModalBinding), sessionType_(sessionType)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -94,19 +95,6 @@ FocusPattern UIExtensionPattern::GetFocusPattern() const
 RefPtr<AccessibilitySessionAdapter> UIExtensionPattern::GetAccessibilitySessionAdapter()
 {
     return accessibilitySessionAdapter_;
-}
-
-void UIExtensionPattern::InitializeDynamicComponent(
-    const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint, void* runtime)
-{
-    componentType_ = ComponentType::DYNAMIC;
-
-    if (!dynamicComponentRenderer_) {
-        ContainerScope scope(instanceId_);
-        dynamicComponentRenderer_ = DynamicComponentRenderer::Create(GetHost(), hapPath, abcPath, entryPoint, runtime);
-        CHECK_NULL_VOID(dynamicComponentRenderer_);
-        dynamicComponentRenderer_->CreateContent();
-    }
 }
 
 void UIExtensionPattern::UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
@@ -180,7 +168,10 @@ void UIExtensionPattern::OnConnect()
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(contentNode_->GetRenderContext());
     CHECK_NULL_VOID(context);
     auto surfaceNode = sessionWrapper_->GetSurfaceNode();
-    CHECK_NULL_VOID(surfaceNode);
+    if (!surfaceNode) {
+        UIEXT_LOGE("Get surfaceNode from session is null.");
+        return;
+    }
     context->SetRSNode(surfaceNode);
     RemovePlaceholderNode();
     host->AddChild(contentNode_, 0);
@@ -195,6 +186,7 @@ void UIExtensionPattern::OnConnect()
     bool isFocused = focusHub && focusHub->IsCurrentFocus();
     RegisterVisibleAreaChange();
     DispatchFocusState(isFocused);
+    DispatchFollowHostDensity(GetDensityDpi());
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
@@ -236,9 +228,6 @@ void UIExtensionPattern::OnAreaChangedInner()
 
 bool UIExtensionPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (componentType_ == ComponentType::DYNAMIC) {
-        return OnDirtyLayoutWrapperSwapForDynamicComponent(dirty, config);
-    }
     CHECK_NULL_RETURN(sessionWrapper_, false);
     CHECK_NULL_RETURN(dirty, false);
     auto host = dirty->GetHostNode();
@@ -249,32 +238,6 @@ bool UIExtensionPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     auto displaySize = geometryNode->GetFrameSize();
     displayArea_ = RectF(displayOffset, displaySize);
     sessionWrapper_->NotifyDisplayArea(displayArea_);
-    return false;
-}
-
-bool UIExtensionPattern::OnDirtyLayoutWrapperSwapForDynamicComponent(
-    const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
-{
-    CHECK_NULL_RETURN(dynamicComponentRenderer_, false);
-
-    CHECK_NULL_RETURN(dirty, false);
-    auto host = dirty->GetHostNode();
-    CHECK_NULL_RETURN(host, false);
-    auto offset = host->GetPaintRectGlobalOffsetWithTranslate().first;
-    auto size = dirty->GetGeometryNode()->GetFrameSize();
-    Ace::ViewportConfig vpConfig;
-    vpConfig.SetSize(size.Width(), size.Height());
-    vpConfig.SetPosition(offset.GetX(), offset.GetY());
-    float density = 1.0f;
-    int32_t orientation = 0;
-    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
-    if (defaultDisplay) {
-        density = defaultDisplay->GetVirtualPixelRatio();
-        orientation = static_cast<int32_t>(defaultDisplay->GetOrientation());
-    }
-    vpConfig.SetDensity(density);
-    vpConfig.SetOrientation(orientation);
-    dynamicComponentRenderer_->UpdateViewportConfig(vpConfig, Rosen::WindowSizeChangeReason::UNDEFINED, nullptr);
     return false;
 }
 
@@ -348,13 +311,6 @@ void UIExtensionPattern::OnAttachToFrameNode()
 
 void UIExtensionPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-    if (componentType_ == ComponentType::DYNAMIC) {
-        CHECK_NULL_VOID(dynamicComponentRenderer_);
-        dynamicComponentRenderer_->DestroyContent();
-        dynamicComponentRenderer_ = nullptr;
-        return;
-    }
-
     auto id = frameNode->GetId();
     ContainerScope scope(instanceId_);
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -508,7 +464,10 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
         return;
     }
     const auto pointerEvent = info.GetPointerEvent();
-    CHECK_NULL_VOID(pointerEvent);
+    if (!pointerEvent) {
+        UIEXT_LOGE("The pointerEvent is empty.");
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto selfGlobalOffset = host->GetTransformRelativeOffset();
@@ -516,7 +475,10 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto window = static_cast<RosenWindow*>(pipeline->GetWindow());
-    CHECK_NULL_VOID(window);
+    if (!window) {
+        UIEXT_LOGE("The pipline window is empty.");
+        return;
+    }
     auto rsWindow = window->GetRSWindow();
     auto udegree = WindowPattern::CalculateTranslateDegree(host->GetId());
     if (rsWindow->GetType() == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD) {
@@ -565,12 +527,8 @@ void UIExtensionPattern::HandleHoverEvent(bool isHover)
 void UIExtensionPattern::DispatchKeyEvent(const KeyEvent& event)
 {
     CHECK_NULL_VOID(event.rawKeyEvent);
-    if (componentType_ == ComponentType::DYNAMIC) {
-        CHECK_NULL_VOID(dynamicComponentRenderer_);
-        dynamicComponentRenderer_->TransferKeyEvent(event.rawKeyEvent);
-    } else if (sessionWrapper_) {
-        sessionWrapper_->NotifyKeyEventAsync(event.rawKeyEvent);
-    }
+    CHECK_NULL_VOID(sessionWrapper_);
+    sessionWrapper_->NotifyKeyEventAsync(event.rawKeyEvent);
 }
 
 bool UIExtensionPattern::DispatchKeyEventSync(const KeyEvent& event)
@@ -599,12 +557,8 @@ void UIExtensionPattern::DispatchFocusState(bool focusState)
 void UIExtensionPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     CHECK_NULL_VOID(pointerEvent);
-    if (componentType_ == ComponentType::DYNAMIC) {
-        CHECK_NULL_VOID(dynamicComponentRenderer_);
-        dynamicComponentRenderer_->TransferPointerEvent(pointerEvent);
-    } else if (sessionWrapper_) {
-        sessionWrapper_->NotifyPointerEventAsync(pointerEvent);
-    }
+    CHECK_NULL_VOID(sessionWrapper_);
+    sessionWrapper_->NotifyPointerEventAsync(pointerEvent);
 }
 
 void UIExtensionPattern::DispatchDisplayArea(bool isForce)
@@ -615,7 +569,9 @@ void UIExtensionPattern::DispatchDisplayArea(bool isForce)
     auto [displayOffset, err] = host->GetPaintRectGlobalOffsetWithTranslate();
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    auto displaySize = geometryNode->GetFrameSize();
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto displaySize = renderContext->GetPaintRectWithoutTransform().GetSize();
     auto displayArea = RectF(displayOffset, displaySize);
     if (displayArea_ != displayArea || isForce) {
         displayArea_ = displayArea;
@@ -742,6 +698,12 @@ void UIExtensionPattern::FireOnResultCallback(int32_t code, const AAFwk::Want& w
     state_ = AbilityState::DESTRUCTION;
 }
 
+bool UIExtensionPattern::IsCompatibleOldVersion()
+{
+    ContainerScope scope(instanceId_);
+    return (sessionType_ == SessionType::UI_EXTENSION_ABILITY) && (onTerminatedCallback_ == nullptr);
+}
+
 void UIExtensionPattern::SetOnTerminatedCallback(
     const std::function<void(int32_t, const RefPtr<WantWrap>& wantWrap)>&& callback)
 {
@@ -816,6 +778,30 @@ void UIExtensionPattern::FireBindModalCallback()
     if (bindModalCallback_) {
         bindModalCallback_();
     }
+}
+
+void UIExtensionPattern::SetDensityDpi(bool densityDpi)
+{
+    densityDpi_ = densityDpi;
+}
+
+void UIExtensionPattern::DispatchFollowHostDensity(bool densityDpi)
+{
+    densityDpi_ = densityDpi;
+    CHECK_NULL_VOID(sessionWrapper_);
+    sessionWrapper_->SetDensityDpiImpl(densityDpi_);
+}
+
+void UIExtensionPattern::OnDpiConfigurationUpdate()
+{
+    if (GetDensityDpi()) {
+        DispatchFollowHostDensity(true);
+    }
+}
+
+bool UIExtensionPattern::GetDensityDpi()
+{
+    return densityDpi_;
 }
 
 void UIExtensionPattern::OnVisibleChange(bool visible)

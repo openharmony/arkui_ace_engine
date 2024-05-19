@@ -376,12 +376,12 @@ void RenderTabContent::UpdateScrollPosition(double dragDelta)
     double newDragOffset = scrollOffset_ + dragDelta;
     int32_t newIndex = IsRightToLeft() ? (newDragOffset < 0.0 ? GetPrevIndex() : GetNextIndex())
                                        : (newDragOffset > 0.0 ? GetPrevIndex() : GetNextIndex());
-
     if ((currentIndex_ == 0 && newIndex == -1) || (currentIndex_ == (contentCount_ - 1) && newIndex == contentCount_)) {
         scrollOffset_ += GetOffset(dragDelta);
     } else {
         scrollOffset_ = newDragOffset;
     }
+
     if (contentMap_.find(newIndex) == contentMap_.end() && newIndex >= 0 && newIndex < contentCount_) {
         if (requireCallback_) {
             requireCallback_(newIndex);

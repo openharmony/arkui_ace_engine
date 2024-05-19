@@ -13,7 +13,11 @@
  * limitations under the License.
  */
 
+#include "drawing_text_typography.h"
+#include "native_styled_string.h"
 #include "node_extened.h"
+#include "styled_string.h"
+
 #include "base/utils/utils.h"
 
 #ifdef __cplusplus
@@ -188,22 +192,21 @@ ArkUI_IntSize OH_ArkUI_DrawContext_GetSize(ArkUI_DrawContext* context)
 
 ArkUI_SwiperIndicator* OH_ArkUI_SwiperIndicator_Create(ArkUI_SwiperIndicatorType indicatorType)
 {
-    if (indicatorType != ARKUI_SWIPER_INDICATOR_TYPE_DOT &&
-        indicatorType != ARKUI_SWIPER_INDICATOR_TYPE_DOT) {
+    if (indicatorType != ARKUI_SWIPER_INDICATOR_TYPE_DOT) {
         return nullptr;
     }
     ArkUI_SwiperIndicator* indicator = new ArkUI_SwiperIndicator;
     indicator->type = indicatorType;
     indicator->dimLeft = ArkUI_OptionalFloat { 0, 0.0f };
-    indicator->dimLeft = ArkUI_OptionalFloat { 0, 0.0f };
-    indicator->dimLeft = ArkUI_OptionalFloat { 0, 0.0f };
-    indicator->dimLeft = ArkUI_OptionalFloat { 0, 0.0f };
+    indicator->dimRight = ArkUI_OptionalFloat { 0, 0.0f };
+    indicator->dimTop = ArkUI_OptionalFloat { 0, 0.0f };
+    indicator->dimBottom = ArkUI_OptionalFloat { 0, 0.0f };
     if (indicatorType == ARKUI_SWIPER_INDICATOR_TYPE_DOT) {
         indicator->itemWidth = ArkUI_OptionalFloat { 0, 0.0f };
         indicator->itemHeight = ArkUI_OptionalFloat { 0, 0.0f };
         indicator->selectedItemWidth = ArkUI_OptionalFloat { 0, 0.0f };
         indicator->selectedItemHeight = ArkUI_OptionalFloat { 0, 0.0f };
-        indicator->maskValue = ArkUI_OptionalInt { 0, 0};
+        indicator->maskValue = ArkUI_OptionalInt { 0, 0 };
         indicator->colorValue = ArkUI_OptionalUint { 0, 0xFF000000 };
         indicator->selectedColorValue = ArkUI_OptionalUint { 0, 0xFF000000 };
     } else {
@@ -358,6 +361,72 @@ uint32_t OH_ArkUI_SwiperIndicator_GetSelectedColor(ArkUI_SwiperIndicator* indica
 {
     CHECK_NULL_RETURN(indicator, 0);
     return indicator->selectedColorValue.value;
+}
+
+ArkUI_StyledString* OH_ArkUI_StyledString_Create(
+    OH_Drawing_TypographyStyle* typoStyle, OH_Drawing_FontCollection* collection)
+{
+    ArkUI_StyledString* storage = new ArkUI_StyledString;
+    storage->builder = OH_Drawing_CreateTypographyHandler(typoStyle, collection);
+    storage->paragraphStyle = typoStyle;
+    return storage;
+}
+
+void OH_ArkUI_StyledString_Destroy(ArkUI_StyledString* storage)
+{
+    OH_Drawing_DestroyTypographyHandler(reinterpret_cast<OH_Drawing_TypographyCreate*>(storage->builder));
+    for (auto item : storage->items) {
+        delete item;
+    }
+    storage->styles = std::stack<void*>();
+    storage->items.clear();
+    delete storage;
+}
+
+void OH_ArkUI_StyledString_PushTextStyle(ArkUI_StyledString* storage, OH_Drawing_TextStyle* style)
+{
+    OH_Drawing_TypographyHandlerPushTextStyle(reinterpret_cast<OH_Drawing_TypographyCreate*>(storage->builder), style);
+    storage->styles.push(style);
+}
+
+void OH_ArkUI_StyledString_AddText(ArkUI_StyledString* storage, const char* content)
+{
+    OH_Drawing_TypographyHandlerAddText(reinterpret_cast<OH_Drawing_TypographyCreate*>(storage->builder), content);
+
+    ArkUI_SpanItem* spanItem = new ArkUI_SpanItem;
+    spanItem->content = content;
+    if (storage->styles.empty()) {
+        spanItem->textStyle = nullptr;
+    } else {
+        spanItem->textStyle = storage->styles.top();
+    }
+    storage->items.emplace_back(spanItem);
+}
+
+void OH_ArkUI_StyledString_PopTextStyle(ArkUI_StyledString* storage)
+{
+    OH_Drawing_TypographyHandlerPopTextStyle(reinterpret_cast<OH_Drawing_TypographyCreate*>(storage->builder));
+    if (storage->styles.empty()) {
+        return;
+    }
+    storage->styles.pop();
+}
+
+OH_Drawing_Typography* OH_ArkUI_StyledString_CreateTypography(ArkUI_StyledString* storage)
+{
+    OH_Drawing_Typography* paragraph =
+        OH_Drawing_CreateTypography(reinterpret_cast<OH_Drawing_TypographyCreate*>(storage->builder));
+    storage->paragraph = paragraph;
+    return reinterpret_cast<OH_Drawing_Typography*>(paragraph);
+}
+
+void OH_ArkUI_StyledString_AddPlaceholder(ArkUI_StyledString* storage, OH_Drawing_PlaceholderSpan* placeholder)
+{
+    OH_Drawing_TypographyHandlerAddPlaceholder(
+        reinterpret_cast<OH_Drawing_TypographyCreate*>(storage->builder), placeholder);
+    ArkUI_SpanItem* spanItem = new ArkUI_SpanItem;
+    spanItem->placeholder = placeholder;
+    storage->items.emplace_back(spanItem);
 }
 #ifdef __cplusplus
 };

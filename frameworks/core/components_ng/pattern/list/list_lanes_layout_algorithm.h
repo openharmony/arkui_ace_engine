@@ -76,6 +76,9 @@ private:
         LayoutWrapper* layoutWrapper, int32_t& index, float& endPos, float crossSize);
     static int32_t FindLanesStartIndex(LayoutWrapper* layoutWrapper, int32_t startIndex, int32_t index);
     static int32_t GetLazyForEachIndex(const RefPtr<FrameNode>& host);
+    void MeasureGroup(LayoutWrapper* listWrapper, const RefPtr<LayoutWrapper>& groupWrapper,
+        int32_t index, float pos, bool forward);
+    void MeasureItem(const RefPtr<LayoutWrapper>& itemWrapper, int32_t index, bool forward);
 
     int32_t lanes_ = 1;
     std::optional<float> minLaneLength_;

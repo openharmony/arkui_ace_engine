@@ -134,6 +134,7 @@ public:
     static std::shared_ptr<SwiperParameters> GetDotIndicator(FrameNode* frameNode);
     static int32_t GetIndicatorType(FrameNode* frameNode);
     static RefPtr<SwiperController> GetSwiperController(FrameNode* frameNode);
+    static void SetOnContentDidScroll(FrameNode* frameNode, ContentDidScrollEvent&& onContentDidScroll);
 };
 
 } // namespace OHOS::Ace::NG

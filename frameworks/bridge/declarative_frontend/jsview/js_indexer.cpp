@@ -22,6 +22,7 @@
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/indexer_model_impl.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_indexer_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/text_style.h"
@@ -109,6 +110,7 @@ void JSIndexer::Create(const JSCallbackInfo& args)
     if (selectedProperty->IsNumber()) {
         selectedVal = selectedProperty->ToNumber<int32_t>();
         IndexerModel::GetInstance()->Create(indexerArray, selectedVal);
+        JSIndexerTheme::ApplyTheme();
     } else if (length > 0 && selectedProperty->IsObject()) {
         JSRef<JSObject> selectedObj = JSRef<JSObject>::Cast(selectedProperty);
         auto selectedValueProperty = selectedObj->GetProperty("value");
@@ -116,6 +118,7 @@ void JSIndexer::Create(const JSCallbackInfo& args)
             selectedVal = selectedValueProperty->ToNumber<int32_t>();
         }
         IndexerModel::GetInstance()->Create(indexerArray, selectedVal);
+        JSIndexerTheme::ApplyTheme();
         JSRef<JSVal> changeEventVal = selectedObj->GetProperty("changeEvent");
         if (!changeEventVal.IsEmpty()) {
             if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
@@ -127,6 +130,7 @@ void JSIndexer::Create(const JSCallbackInfo& args)
         args.ReturnSelf();
     } else {
         IndexerModel::GetInstance()->Create(indexerArray, selectedVal);
+        JSIndexerTheme::ApplyTheme();
     }
 }
 
@@ -564,7 +568,9 @@ void JSIndexer::JSBind(BindingTarget globalObj)
     // keep compatible, need remove after
     JSClass<JSIndexer>::StaticMethod("onPopupSelected", &JSIndexer::JsOnPopupSelected, opt);
     JSClass<JSIndexer>::StaticMethod("onPopupSelect", &JSIndexer::JsOnPopupSelected, opt);
+    JSClass<JSIndexer>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSIndexer>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSIndexer>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSIndexer>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSIndexer>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSIndexer>::InheritAndBind<JSViewAbstract>(globalObj);

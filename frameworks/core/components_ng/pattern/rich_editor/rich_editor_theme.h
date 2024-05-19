@@ -47,8 +47,6 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->textStyle_.SetTextColor(DEFAULT_TEXT_COLOR);
-            theme->textStyle_.SetTextDecorationColor(DEFAULT_TEXT_COLOR);
             theme->padding_ = Edge(themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_HORIZONTAL),
                 themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_VERTICAL),
                 themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_HORIZONTAL),
@@ -85,6 +83,8 @@ public:
             }
             auto textfieldShowHandle = textfieldPattern->GetAttr<std::string>("textfield_show_handle", "0");
             theme->richeditorShowHandle_ = StringUtils::StringToInt(textfieldShowHandle);
+            theme->textStyle_.SetTextColor(pattern->GetAttr<Color>("default_text_color", DEFAULT_TEXT_COLOR));
+            theme->textStyle_.SetTextDecorationColor(pattern->GetAttr<Color>("default_text_color", DEFAULT_TEXT_COLOR));
         }
     };
 

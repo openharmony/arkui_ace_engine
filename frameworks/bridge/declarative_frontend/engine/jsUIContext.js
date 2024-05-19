@@ -916,11 +916,11 @@ function __getUIContext__(instanceId) {
 
 /**
  * Get FrameNode by id of UIContext instance.
- * @param nodeId the id of frameNode.
  * @param instanceId obtained on the C++ side.
+ * @param nodeId the id of frameNode.
  * @returns FrameNode instance.
  */
-function __getFrameNodeByNodeId__(nodeId, instanceId) {
+function __getFrameNodeByNodeId__(instanceId, nodeId) {
     const uiContext = __getUIContext__(instanceId);
     return uiContext.getFrameNodeByNodeId(nodeId);
 }

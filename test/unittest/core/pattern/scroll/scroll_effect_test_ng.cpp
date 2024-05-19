@@ -536,7 +536,7 @@ HWTEST_F(ScrolleEffectTestNg, EdgeEffectOption001, TestSize.Level1)
         CreateContent(VIEW_LINE_NUMBER);
     });
     EXPECT_FALSE(pattern_->GetAlwaysEnabled());
-    EXPECT_FALSE(pattern_->GetScrollableEvent()->GetEnable());
+    EXPECT_FALSE(pattern_->GetScrollableEvent()->GetEnabled());
 }
 
 /**
@@ -551,7 +551,7 @@ HWTEST_F(ScrolleEffectTestNg, EdgeEffectOption002, TestSize.Level1)
         CreateContent(VIEW_LINE_NUMBER);
     });
     EXPECT_TRUE(pattern_->GetAlwaysEnabled());
-    EXPECT_TRUE(pattern_->GetScrollableEvent()->GetEnable());
+    EXPECT_TRUE(pattern_->GetScrollableEvent()->GetEnabled());
 }
 
 /**
@@ -567,7 +567,7 @@ HWTEST_F(ScrolleEffectTestNg, EdgeEffectOption003, TestSize.Level1)
         CreateContent(20);
     });
     EXPECT_FALSE(pattern_->GetAlwaysEnabled());
-    EXPECT_TRUE(pattern_->GetScrollableEvent()->GetEnable());
+    EXPECT_TRUE(pattern_->GetScrollableEvent()->GetEnabled());
 }
 
 /**
@@ -583,7 +583,7 @@ HWTEST_F(ScrolleEffectTestNg, EdgeEffectOption004, TestSize.Level1)
         CreateContent(20);
     });
     EXPECT_TRUE(pattern_->GetAlwaysEnabled());
-    EXPECT_TRUE(pattern_->GetScrollableEvent()->GetEnable());
+    EXPECT_TRUE(pattern_->GetScrollableEvent()->GetEnabled());
 }
 
 /**

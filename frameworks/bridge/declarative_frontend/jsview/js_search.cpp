@@ -33,6 +33,7 @@
 #include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components/common/properties/text_style_parser.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_search_theme.h"
 
 namespace OHOS::Ace {
 
@@ -65,6 +66,7 @@ namespace {
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END };
 constexpr double DEFAULT_OPACITY = 0.2;
 const int32_t DEFAULT_ALPHA = 255;
+constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 } // namespace
 
 void JSSearch::JSBind(BindingTarget globalObj)
@@ -99,7 +101,9 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSSearch>::StaticMethod("requestKeyboardOnFocus", &JSSearch::SetEnableKeyboardOnFocus);
     JSClass<JSSearch>::StaticMethod("enableKeyboardOnFocus", &JSSearch::SetEnableKeyboardOnFocus);
+    JSClass<JSSearch>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSSearch>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSSearch>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSSearch>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSSearch>::StaticMethod("onCopy", &JSSearch::SetOnCopy);
     JSClass<JSSearch>::StaticMethod("onCut", &JSSearch::SetOnCut);
@@ -150,9 +154,6 @@ void JSSearch::SetDragPreviewOptions(const JSCallbackInfo& info)
 void JSSearch::SetFontFeature(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        return;
-    }
-    if (!info[0]->IsString()) {
         return;
     }
 
@@ -212,6 +213,7 @@ void JSSearch::Create(const JSCallbackInfo& info)
     if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
         ParseSearchValueObject(info, changeEventVal);
     }
+    JSSeacrhTheme::ApplyTheme();
 }
 
 void JSSearch::SetSelectedBackgroundColor(const JSCallbackInfo& info)
@@ -270,6 +272,8 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
         buttonValue = info[0]->ToString();
     }
     SearchModel::GetInstance()->SetSearchButton(buttonValue);
+    // set font color
+    Color fontColor = theme->GetSearchButtonTextColor();
     if (info[1]->IsObject()) {
         auto param = JSRef<JSObject>::Cast(info[1]);
 
@@ -284,16 +288,19 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
         }
         SearchModel::GetInstance()->SetSearchButtonFontSize(size);
 
-        // set font color
-        Color fontColor;
         auto fontColorProp = param->GetProperty("fontColor");
         if (fontColorProp->IsUndefined() || fontColorProp->IsNull() || !ParseJsColor(fontColorProp, fontColor)) {
-            fontColor = theme->GetSearchButtonTextColor();
+            if (!JSSeacrhTheme::ObtainSearchButtonFontColor(fontColor)) {
+                SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor);
+            }
+        } else {
+                SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor);
         }
-        SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor);
     } else {
         SearchModel::GetInstance()->SetSearchButtonFontSize(theme->GetFontSize());
-        SearchModel::GetInstance()->SetSearchButtonFontColor(theme->GetSearchButtonTextColor());
+        if (!JSSeacrhTheme::ObtainSearchButtonFontColor(fontColor)) {
+            SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor);
+        }
     }
 }
 
@@ -368,9 +375,12 @@ void JSSearch::SetCancelButton(const JSCallbackInfo& info)
     SearchModel::GetInstance()->SetCancelButtonStyle(cancelButtonStyle);
 
     auto iconProp = param->GetProperty("icon");
+    Color iconColor = theme->GetSearchIconColor();
     if (iconProp->IsUndefined() || iconProp->IsNull()) {
         SearchModel::GetInstance()->SetCancelIconSize(theme->GetIconHeight());
-        SearchModel::GetInstance()->SetCancelIconColor(theme->GetSearchIconColor());
+        if (!JSSeacrhTheme::ObtainCancelIconColor(iconColor)) {
+            SearchModel::GetInstance()->SetCancelIconColor(iconColor);
+        }
         SearchModel::GetInstance()->SetRightIconSrcPath("");
     } else {
         SetIconStyle(info);
@@ -910,6 +920,8 @@ void JSSearch::SetDecoration(const JSCallbackInfo& info)
         std::optional<TextDecorationStyle> textDecorationStyle;
         if (styleValue->IsNumber()) {
             textDecorationStyle = static_cast<TextDecorationStyle>(styleValue->ToNumber<int32_t>());
+        } else {
+            textDecorationStyle = DEFAULT_TEXT_DECORATION_STYLE;
         }
         SearchModel::GetInstance()->SetTextDecoration(textDecoration);
         SearchModel::GetInstance()->SetTextDecorationColor(result);

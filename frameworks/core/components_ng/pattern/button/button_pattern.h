@@ -75,7 +75,17 @@ public:
             focusPaintParam.SetPaintWidth(focusBorderWidth_);
             return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, focusPaintParam };
         }
-        return { FocusType::NODE, true, FocusStyleType::OUTER_BORDER };
+        FocusPattern focusPattern(FocusType::NODE, true, FocusStyleType::OUTER_BORDER);
+        auto pipline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipline, focusPattern);
+        auto theme = pipline->GetTheme<ButtonTheme>();
+        CHECK_NULL_RETURN(theme, focusPattern);
+        FocusPaintParam focusPaintParam;
+        focusPaintParam.SetPaintColor(theme->GetFocusBorderColor());
+        focusPaintParam.SetPaintWidth(theme->GetFocusBorderWidth());
+        focusPaintParam.SetFocusBoxGlow(theme->IsFocusBoxGlow());
+        focusPattern.SetFocusPaintParams(focusPaintParam);
+        return focusPattern;
     }
 
     bool IsNeedAdjustByAspectRatio() override
@@ -294,25 +304,16 @@ public:
         return touchListener_;
     }
 
-    void SetBuilderFunc(ButtonMakeCallback&& makeFunc)
-    {
-        if (makeFunc == nullptr) {
-            makeFunc_ = std::nullopt;
-            contentModifierNode_ = nullptr;
-            OnModifyDone();
-            return;
-        }
-        makeFunc_ = std::move(makeFunc);
-    }
+    void SetBuilderFunc(ButtonMakeCallback&& makeFunc);
 
-    int32_t GetBuilderId()
+    virtual int32_t GetBuilderId() const
     {
         return nodeId_;
     }
 
     void SetButtonPress(double xPos, double yPos);
 
-    bool UseContentModifier()
+    virtual bool UseContentModifier() const
     {
         return contentModifierNode_ != nullptr;
     }
@@ -348,15 +349,9 @@ protected:
     void OnTouchDown();
     void OnTouchUp();
     void HandleHoverEvent(bool isHover);
-    void HandleBackgroundColor();
-    void HandleBorderColorAndWidth();
+    void HandleButtonStyle();
     void HandleEnabled();
     void InitButtonLabel();
-    void InitFocusEvent();
-    void HandleFocusEvent(RefPtr<ButtonLayoutProperty>,
-        RefPtr<RenderContext>, RefPtr<ButtonTheme>, RefPtr<TextLayoutProperty>, RefPtr<FrameNode>);
-    void HandleBlurEvent(RefPtr<ButtonLayoutProperty>,
-        RefPtr<RenderContext>, RefPtr<ButtonTheme>, RefPtr<TextLayoutProperty>, RefPtr<FrameNode>);
     Color GetColorFromType(const RefPtr<ButtonTheme>& theme, const int32_t& type);
     void AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, int32_t typeFrom, int32_t typeTo, int32_t duration,
         const RefPtr<Curve>& curve);
@@ -405,6 +400,17 @@ private:
     bool bgColorModify_ = false;
     bool scaleModify_ = false;
     bool shadowModify_ = false;
+    
+    void HandleBorderStyle(RefPtr<ButtonLayoutProperty>& layoutProperty,
+        RefPtr<RenderContext>& renderContext, RefPtr<ButtonTheme>& buttonTheme);
+    void HandleBackgroundStyle(RefPtr<ButtonLayoutProperty>& layoutProperty,
+        RefPtr<RenderContext>& renderContext, RefPtr<ButtonTheme>& buttonTheme);
+    void HandleFocusStatusStyle(RefPtr<ButtonLayoutProperty>& layoutProperty,
+        RefPtr<RenderContext>& renderContext, RefPtr<ButtonTheme>& buttonTheme);
+    void HandleFocusStyleTask(RefPtr<ButtonLayoutProperty>,
+        RefPtr<RenderContext>, RefPtr<ButtonTheme>, RefPtr<TextLayoutProperty>, RefPtr<FrameNode>);
+    void HandleBlurStyleTask(RefPtr<ButtonLayoutProperty>,
+        RefPtr<RenderContext>, RefPtr<ButtonTheme>, RefPtr<TextLayoutProperty>, RefPtr<FrameNode>);
 };
 } // namespace OHOS::Ace::NG
 

@@ -204,7 +204,7 @@ void SearchPattern::SetAccessibilityAction()
         CHECK_NULL_VOID(textFieldFrameNode);
         auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
         CHECK_NULL_VOID(textFieldPattern);
-        textFieldPattern->SetSelectionFlag(start, end, std::nullopt);
+        textFieldPattern->SetSelectionFlag(start, end, std::nullopt, isForward);
     });
 
     textAccessibilityProperty->SetActionSetIndex([weakPtr = WeakClaim(this)](int32_t index) {
@@ -1182,27 +1182,27 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
         GreatOrEqual(maxLength, Infinity<uint32_t>()) ? "INF" : std::to_string(maxLength).c_str(), filter);
     json->PutExtAttr("type", SearchTypeToString().c_str(), filter);
     textFieldLayoutProperty->HasCopyOptions();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        json->PutExtAttr("letterSpacing",
-            textFieldLayoutProperty->GetLetterSpacing().value_or(Dimension()).ToString().c_str(), filter);
-        json->PutExtAttr("lineHeight",
-            textFieldLayoutProperty->GetLineHeight().value_or(0.0_vp).ToString().c_str(), filter);
-        auto jsonDecoration = JsonUtil::Create(true);
-        std::string type = V2::ConvertWrapTextDecorationToStirng(
-            textFieldLayoutProperty->GetTextDecoration().value_or(TextDecoration::NONE));
-        jsonDecoration->Put("type", type.c_str());
-        jsonDecoration->Put("color",
-            textFieldLayoutProperty->GetTextDecorationColor().value_or(Color::BLACK).ColorToString().c_str());
-        std::string style =
-            V2::ConvertWrapTextDecorationStyleToString(
-                textFieldLayoutProperty->GetTextDecorationStyle().value_or(TextDecorationStyle::SOLID));
-        jsonDecoration->Put("style", style.c_str());
-        json->PutExtAttr("decoration", jsonDecoration->ToString().c_str(), filter);
-        json->PutExtAttr("minFontSize",
-            textFieldLayoutProperty->GetAdaptMinFontSize().value_or(Dimension()).ToString().c_str(), filter);
-        json->PutExtAttr("maxFontSize",
-            textFieldLayoutProperty->GetAdaptMaxFontSize().value_or(Dimension()).ToString().c_str(), filter);
-    }
+    json->PutExtAttr("letterSpacing",
+        textFieldLayoutProperty->GetLetterSpacing().value_or(Dimension()).ToString().c_str(), filter);
+    json->PutExtAttr("lineHeight",
+        textFieldLayoutProperty->GetLineHeight().value_or(0.0_vp).ToString().c_str(), filter);
+    auto jsonDecoration = JsonUtil::Create(true);
+    std::string type = V2::ConvertWrapTextDecorationToStirng(
+        textFieldLayoutProperty->GetTextDecoration().value_or(TextDecoration::NONE));
+    jsonDecoration->Put("type", type.c_str());
+    jsonDecoration->Put("color",
+        textFieldLayoutProperty->GetTextDecorationColor().value_or(Color::BLACK).ColorToString().c_str());
+    std::string style = V2::ConvertWrapTextDecorationStyleToString(
+        textFieldLayoutProperty->GetTextDecorationStyle().value_or(TextDecorationStyle::SOLID));
+    jsonDecoration->Put("style", style.c_str());
+    json->PutExtAttr("decoration", jsonDecoration->ToString().c_str(), filter);
+    json->PutExtAttr("minFontSize",
+        textFieldLayoutProperty->GetAdaptMinFontSize().value_or(Dimension()).ToString().c_str(), filter);
+    json->PutExtAttr("maxFontSize",
+        textFieldLayoutProperty->GetAdaptMaxFontSize().value_or(Dimension()).ToString().c_str(), filter);
+    json->PutExtAttr("inputFilter", textFieldLayoutProperty->GetInputFilterValue("").c_str(), filter);
+    json->PutExtAttr("textIndent",
+        textFieldLayoutProperty->GetTextIndent().value_or(0.0_vp).ToString().c_str(), filter);
 }
 
 std::string SearchPattern::SearchTypeToString() const
@@ -1339,6 +1339,9 @@ void SearchPattern::ToJsonValueForCursor(std::unique_ptr<JsonValue>& json, const
     auto caretWidth = textFieldPaintProperty->GetCursorWidth().value_or(Dimension(0, DimensionUnit::VP));
     cursorJson->Put("width", caretWidth.ToString().c_str());
     json->PutExtAttr("caretStyle", cursorJson, filter);
+    auto selectedBackgroundColor = textFieldPaintProperty->GetSelectedBackgroundColor().value_or(Color());
+    json->PutExtAttr("selectedBackgroundColor",
+        selectedBackgroundColor.ColorToString().c_str(), filter);
 }
 
 void SearchPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const

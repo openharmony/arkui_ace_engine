@@ -28,6 +28,7 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#include "core/common/container_scope.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/theme/shadow_theme.h"
@@ -794,6 +795,20 @@ void ViewAbstract::DisableOnDisAppear()
     eventHub->ClearUserOnDisAppear();
 }
 
+void ViewAbstract::DisableOnAttach()
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearOnAttach();
+}
+
+void ViewAbstract::DisableOnDetach()
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearOnDetach();
+}
+
 void ViewAbstract::DisableOnAreaChange()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -864,6 +879,20 @@ void ViewAbstract::DisableOnDisappear(FrameNode* frameNode)
     auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearUserOnDisAppear();
+}
+
+void ViewAbstract::DisableOnAttach(FrameNode* frameNode)
+{
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearOnAttach();
+}
+
+void ViewAbstract::DisableOnDetach(FrameNode* frameNode)
+{
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearOnDetach();
 }
 
 void ViewAbstract::DisableOnFocus(FrameNode* frameNode)
@@ -1035,6 +1064,20 @@ void ViewAbstract::SetOnDisappear(std::function<void()> &&onDisappear)
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDisappear(std::move(onDisappear));
+}
+
+void ViewAbstract::SetOnAttach(std::function<void()> &&onAttach)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnAttach(std::move(onAttach));
+}
+
+void ViewAbstract::SetOnDetach(std::function<void()> &&onDetach)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDetach(std::move(onDetach));
 }
 
 void ViewAbstract::SetOnAreaChanged(std::function<void(const RectF &oldRect, const OffsetF &oldOrigin,
@@ -2097,6 +2140,11 @@ void ViewAbstract::SetSystemBarEffect(bool systemBarEffect)
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(SystemBarEffect, systemBarEffect);
+}
+
+void ViewAbstract::SetSystemBarEffect(FrameNode *frameNode, bool enable)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(SystemBarEffect, enable, frameNode);
 }
 
 void ViewAbstract::SetHueRotate(float hueRotate)
@@ -3272,6 +3320,22 @@ void ViewAbstract::SetOnDisappear(FrameNode* frameNode, std::function<void()> &&
     eventHub->SetOnDisappear(std::move(onDisappear));
 }
 
+void ViewAbstract::SetOnAttach(FrameNode* frameNode, std::function<void()> &&onAttach)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnAttach(std::move(onAttach));
+}
+
+void ViewAbstract::SetOnDetach(FrameNode* frameNode, std::function<void()> &&onDetach)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDetach(std::move(onDetach));
+}
+
 void ViewAbstract::SetOnAreaChanged(FrameNode* frameNode, std::function<void(const RectF &oldRect,
     const OffsetF &oldOrigin, const RectF &rect, const OffsetF &origin)> &&onAreaChanged)
 {
@@ -3372,6 +3436,8 @@ void ViewAbstract::SetNeedFocus(FrameNode* frameNode, bool value)
     CHECK_NULL_VOID(frameNode);
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
+    auto instanceId = frameNode->GetContext()->GetInstanceId();
+    ContainerScope scope(instanceId);
     if (value) {
         focusHub->RequestFocus();
     } else {
@@ -4326,5 +4392,13 @@ NG::RectF ViewAbstract::GetLayoutRect(FrameNode* frameNode)
     const auto& layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, NG::RectF());
     return layoutProperty->GetLayoutRect().value_or(NG::RectF());
+}
+
+bool ViewAbstract::GetFocusOnTouch(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto focusHub = frameNode->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    return focusHub->IsFocusOnTouch().value_or(false);
 }
 } // namespace OHOS::Ace::NG

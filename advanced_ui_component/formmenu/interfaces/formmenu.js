@@ -75,19 +75,19 @@ export function AddFormMenuItem(want, componentId, options, parent = null) {
   If.pop();
   this.observeComponentCreation2((elmtId, isInitialRender) => {
     FormMenuItem.create(options?.style?.options ? options.style.options : {
-      startIcon: { 
-        "id": 125830229, 
-        "type": 20000, 
+      startIcon: {
+        'id': 125830229,
+        'type': 20000,
         params: ['sys.media.ohos_ic_public_add'],
-        "bundleName": "", 
-        "moduleName": "" 
+        'bundleName': '',
+        'moduleName': ''
       },
-      content: { 
-        "id": 125832726, 
-        "type": 10003, 
+      content: {
+        'id': 125832726,
+        'type': 10003,
         params: ['sys.string.ohos_add_form_to_desktop'],
-        "bundleName": "", 
-        "moduleName": "" 
+        'bundleName': '',
+        'moduleName': ''
       }
     });
     FormMenuItem.onClick(() => { }, want, componentId, options?.formBindingData, options?.callback);

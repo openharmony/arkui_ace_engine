@@ -317,6 +317,7 @@ ohos_source_set("ace_base") {
     "$ace_root/frameworks/base/geometry/matrix4.cpp",
     "$ace_root/frameworks/base/geometry/quaternion.cpp",
     "$ace_root/frameworks/base/geometry/transform_util.cpp",
+    "$ace_root/frameworks/base/i18n/date_time_sequence.cpp",
     "$ace_root/frameworks/base/json/json_util.cpp",
     "$ace_root/frameworks/base/json/node_object.cpp",
     "$ace_root/frameworks/base/json/uobject.cpp",
@@ -336,6 +337,8 @@ ohos_source_set("ace_base") {
     "$ace_root/frameworks/core/components/theme:build_theme_code",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/cJSON:cjson_static",
+    "//third_party/icu/icu4c:static_icui18n",
+    "//third_party/icu/icu4c:static_icuuc",
   ]
   configs = [ ":ace_unittest_config" ]
 }
@@ -580,6 +583,15 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/custom/custom_title_node.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom_paint/canvas_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom_paint/canvas_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom_paint/canvas_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom_paint/canvas_paint_method.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom_paint/canvas_paint_op.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom_paint/canvas_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom_paint/custom_paint_paint_method.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom_paint/offscreen_canvas_paint_method.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/data_panel/data_panel_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/data_panel/data_panel_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/data_panel/data_panel_modifier.cpp",

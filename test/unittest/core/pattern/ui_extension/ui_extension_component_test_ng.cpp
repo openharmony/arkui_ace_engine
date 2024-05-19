@@ -87,4 +87,43 @@ HWTEST_F(UIExtensionComponentTextNg, UIExtensionComponentTest001, TestSize.Level
     EXPECT_EQ(uiExtensionPattern->IsShowPlaceholder(), false);
 #endif
 }
+
+/**
+ * @tc.name: UIExtensionComponentTest002
+ * @tc.desc: Test UIExtensionPattern SetDensityDpi function
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTextNg, UIExtensionComponentTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. get UIExtensionPattern
+     */
+    auto uiExtensionPattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(uiExtensionPattern, nullptr);
+    bool densityDpi = uiExtensionPattern->GetDensityDpi();
+    EXPECT_FALSE(densityDpi);
+
+    /**
+     * @tc.steps: step3. SetDensityDpi false
+     */
+    uiExtensionPattern->SetDensityDpi(false);
+    densityDpi = uiExtensionPattern->GetDensityDpi();
+    EXPECT_FALSE(densityDpi);
+
+    /**
+     * @tc.steps: step4. SetDensityDpi true
+     */
+    uiExtensionPattern->SetDensityDpi(true);
+    densityDpi = uiExtensionPattern->GetDensityDpi();
+    EXPECT_TRUE(densityDpi);
+}
 } // namespace OHOS::Ace::NG

@@ -34,8 +34,8 @@ namespace {
     constexpr float DEFAULT_ANIMATION_SCALE = 0.95f;
     constexpr float GATHER_SPRING_RESPONSE = 0.304f;
     constexpr float GATHER_SPRING_DAMPING_FRACTION = 0.97f;
-    constexpr float GRID_MOVE_SCALE = 0.1f;
-    constexpr float LIST_MOVE_SCALE = 0.1f;
+    constexpr float GRID_MOVE_SCALE = 0.2f;
+    constexpr float LIST_MOVE_SCALE = 0.2f;
     constexpr float EULER_NUMBER = 2.71828f;
     constexpr float GATHER_OFFSET_RADIUS = 0.1f;
     constexpr float PIXELMAP_DRAG_SCALE_MULTIPLE = 1.05f;
@@ -270,10 +270,15 @@ void DragAnimationHelper::PlayGatherAnimation(const RefPtr<FrameNode>& frameNode
         CHECK_NULL_VOID(dragDropManager);
         dragDropManager->SetIsTouchGatherAnimationPlaying(false);
     });
+
+    auto geometryNode = frameNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameNodeSize = geometryNode->GetFrameSize();
     AnimationUtils::Animate(
         option,
-        [overlayManager, gatherNodeCenter]() {
-            DragDropManager::UpdateGatherNodeAttr(overlayManager, gatherNodeCenter, PIXELMAP_DRAG_SCALE_MULTIPLE);
+        [overlayManager, gatherNodeCenter, frameNodeSize]() {
+            DragDropManager::UpdateGatherNodeAttr(overlayManager, gatherNodeCenter, PIXELMAP_DRAG_SCALE_MULTIPLE,
+                frameNodeSize.Width(), frameNodeSize.Height());
         },
         option.GetOnFinishEvent());
 }

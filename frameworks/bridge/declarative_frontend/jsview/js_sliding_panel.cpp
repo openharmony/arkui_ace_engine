@@ -108,7 +108,9 @@ void JSSlidingPanel::JSBind(BindingTarget globalObj)
     JSClass<JSSlidingPanel>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSSlidingPanel>::StaticMethod("onChange", &JSSlidingPanel::SetOnSizeChange);
     JSClass<JSSlidingPanel>::StaticMethod("onHeightChange", &JSSlidingPanel::SetOnHeightChange);
+    JSClass<JSSlidingPanel>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSSlidingPanel>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSSlidingPanel>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSSlidingPanel>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
 
     JSClass<JSSlidingPanel>::InheritAndBind<JSContainerBase>(globalObj);

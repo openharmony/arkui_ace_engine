@@ -147,6 +147,33 @@ private:
     T value_;
 };
 
+
+template<typename T>
+class JSFuncObjRef {
+public:
+    ~JSFuncObjRef()
+    {
+        jsStrongObj.Reset();
+    }
+    explicit JSFuncObjRef(const T& jsObject, bool isWeak = false) : isWeak_(isWeak)
+    {
+        if (isWeak) {
+            jsWeakObj = JsWeak(jsObject);
+        } else {
+            jsStrongObj = jsObject;
+        }
+    }
+    T Lock() const
+    {
+        return isWeak_ ? jsWeakObj.Lock() : jsStrongObj;
+    }
+
+private:
+    bool isWeak_ = false;
+    JsWeak<T> jsWeakObj;
+    T jsStrongObj;
+};
+
 class NativeUtilsBridge {
 public:
     static ArkUINativeModuleValue CreateNativeWeakRef(ArkUIRuntimeCallInfo* runtimeCallInfo);

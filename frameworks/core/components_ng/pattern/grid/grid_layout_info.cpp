@@ -744,6 +744,9 @@ float GridLayoutInfo::GetTotalHeightOfItemsInView(float mainGap, bool regular) c
     if (!regular) {
         it = SkipLinesAboveView(mainGap).first;
     }
+    if (it == lineHeightMap_.end()) {
+        return -mainGap;
+    }
     auto endIt = lineHeightMap_.find(endMainLineIndex_ + 1);
     for (; it != endIt; ++it) {
         len += it->second + mainGap;
@@ -814,9 +817,13 @@ float GridLayoutInfo::GetHeightInRange(int32_t startLine, int32_t endLine, float
     if (endLine <= startLine) {
         return 0.0f;
     }
-    float totalHeight = 0.0f;
     auto endIt = lineHeightMap_.find(endLine);
-    for (auto it = lineHeightMap_.find(startLine); it != endIt; ++it) {
+    auto it = lineHeightMap_.find(startLine);
+    if (it == lineHeightMap_.end()) {
+        return 0.0f;
+    }
+    float totalHeight = 0.0f;
+    for (; it != lineHeightMap_.end() && it != endIt; ++it) {
         totalHeight += it->second + mainGap;
     }
     return totalHeight;

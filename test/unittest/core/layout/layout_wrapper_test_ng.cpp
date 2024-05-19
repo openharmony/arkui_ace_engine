@@ -1504,151 +1504,6 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest039, TestSize.Level1)
 }
 
 /**
- * @tc.name: LayoutWrapperTest040
- * @tc.desc: Test SaveGeoState and RestoreGeoState.
- * @tc.type: FUNC
- */
-HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest040, TestSize.Level1)
-{
-    auto pipeline = PipelineContext::GetCurrentContext();
-    EXPECT_TRUE(pipeline);
-    auto [host, wrapper] = CreateNodeAndWrapper(V2::ROOT_ETS_TAG, 0);
-    host->GetLayoutProperty()->UpdateSafeAreaExpandOpts({ SAFE_AREA_TYPE_ALL, SAFE_AREA_EDGE_ALL });
-
-    auto manager = pipeline->GetSafeAreaManager();
-
-    wrapper->SaveGeoState();
-    EXPECT_EQ(wrapper->geometryNode_->GetFrameOffset(), OffsetF(0, 0));
-    EXPECT_EQ(manager->GetGeoRestoreNodes().size(), 1UL);
-    EXPECT_TRUE(wrapper->geometryNode_->previousState_);
-
-    // change frame offset after save
-    wrapper->geometryNode_->SetFrameOffset({ RK356_WIDTH, RK356_HEIGHT });
-
-    // recreate wrapper to simulate next layout
-    auto wrapper2 = AceType::MakeRefPtr<LayoutWrapperNode>(host, wrapper->geometryNode_, host->GetLayoutProperty());
-    wrapper2->RestoreGeoState();
-    EXPECT_EQ(manager->GetGeoRestoreNodes().size(), 1UL);
-    EXPECT_FALSE(wrapper2->geometryNode_->previousState_);
-    EXPECT_EQ(wrapper2->geometryNode_->GetFrameOffset(), OffsetF(0, 0));
-}
-
-/**
- * @tc.name: LayoutWrapperTest041
- * @tc.desc: Test ExpandSafeArea.
- * @tc.type: FUNC
- */
-HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest041, TestSize.Level1)
-{
-    auto safeAreaManager = PipelineContext::GetCurrentContext()->safeAreaManager_;
-    safeAreaManager->systemSafeArea_ = SafeAreaInsets({}, { 0, 1 }, {}, {});
-    /**
-     * @tc.steps: step1. call CreateLayoutWrapper create a layoutwrapper and setup properties.
-     */
-    auto [node, layoutWrapper] = CreateNodeAndWrapper(ROW_FRAME_NODE, NODE_ID_0);
-    layoutWrapper->geometryNode_->SetFrameOffset({ 0, 1 });
-    layoutWrapper->geometryNode_->SetFrameSize({ RK356_WIDTH, RK356_HEIGHT });
-    layoutWrapper->layoutProperty_->UpdateSafeAreaExpandOpts({ SAFE_AREA_TYPE_ALL, SAFE_AREA_EDGE_ALL });
-    /**
-     * @tc.steps: step2. call ExpandSafeArea on a frame that overlaps with SafeAreaInset {top = (0, 1)}.
-     * @tc.expected: frame is expanded.
-     */
-    layoutWrapper->ExpandSafeArea();
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(0, 1));
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize(), SizeF(RK356_WIDTH, RK356_HEIGHT));
-
-    /**
-     * @tc.steps: step3. call ExpandSafeArea on a frame that does not overlap with SafeAreaInset.
-     * @tc.expected: frame is not expanded.
-     */
-    layoutWrapper->geometryNode_->SetFrameOffset({ 0, 5 });
-    layoutWrapper->geometryNode_->SetFrameSize({ RK356_WIDTH, RK356_HEIGHT });
-    layoutWrapper->ExpandSafeArea();
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(0, 5));
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize(), SizeF(RK356_WIDTH, RK356_HEIGHT));
-
-    /**
-     * @tc.steps: step5. call ExpandSafeArea on a frame that completely covers SafeAreaInset.
-     * @tc.expected: frame is not expanded.
-     */
-    layoutWrapper->geometryNode_->SetFrameOffset({ 0, -1 });
-    layoutWrapper->geometryNode_->SetFrameSize({ RK356_WIDTH, RK356_HEIGHT + 2 });
-    layoutWrapper->ExpandSafeArea();
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(0, -1));
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize(), SizeF(RK356_WIDTH, RK356_HEIGHT + 2));
-
-    /**
-     * @tc.steps: step6. call ExpandSafeArea on a frame that has user defined size.
-     * @tc.expected: frame is moved but size remains the same.
-     */
-    layoutWrapper->geometryNode_->SetFrameOffset({ 0, 1 });
-    layoutWrapper->geometryNode_->SetFrameSize({ RK356_WIDTH, RK356_HEIGHT });
-    layoutWrapper->layoutProperty_->UpdateUserDefinedIdealSize({ CalcLength(RK356_WIDTH), CalcLength(RK356_HEIGHT) });
-    layoutWrapper->ExpandSafeArea();
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(0, 1));
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize(), SizeF(RK356_WIDTH, RK356_HEIGHT));
-
-    /**
-     * @tc.steps: step7. call ExpandSafeArea on a frame with SafeAreaExpandOpts SAFE_AREA_TYPE_NONE.
-     * @tc.expected: frame is not expanded.
-     */
-    layoutWrapper->geometryNode_->SetFrameOffset({ 0, 1 });
-    layoutWrapper->geometryNode_->SetFrameSize({ RK356_WIDTH, RK356_HEIGHT });
-    layoutWrapper->layoutProperty_->UpdateSafeAreaExpandOpts({ SAFE_AREA_TYPE_NONE, SAFE_AREA_EDGE_NONE });
-    layoutWrapper->ExpandSafeArea();
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(0, 1));
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize(), SizeF(RK356_WIDTH, RK356_HEIGHT));
-
-    /**
-     * @tc.steps: step8. call ExpandSafeArea on a frame with SafeAreaExpandOpts SAFE_AREA_EDGE_START.
-     * @tc.expected: frame is not expanded.
-     */
-    safeAreaManager->systemSafeArea_ = SafeAreaInsets({ 0, 1 }, { 0, 1 }, {}, {});
-    layoutWrapper->geometryNode_->SetFrameOffset({ 1, 0 });
-    layoutWrapper->geometryNode_->SetFrameSize({ RK356_WIDTH, RK356_HEIGHT });
-    layoutWrapper->layoutProperty_->UpdateSafeAreaExpandOpts({ SAFE_AREA_TYPE_ALL, SAFE_AREA_EDGE_START });
-    layoutWrapper->ExpandSafeArea();
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(1, 0));
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize(), SizeF(RK356_WIDTH, RK356_HEIGHT));
-
-    /**
-     * @tc.steps: step9. call ExpandSafeArea on a frame with SafeAreaExpandOpts SAFE_AREA_TYPE_NONE.
-     * @tc.expected: frame is not expanded.
-     */
-    safeAreaManager->systemSafeArea_ = SafeAreaInsets({}, {}, { 0, RK356_WIDTH + 3 }, {});
-    layoutWrapper->geometryNode_->SetFrameOffset({ 0, 0 });
-    layoutWrapper->geometryNode_->SetFrameSize({ RK356_WIDTH, RK356_HEIGHT });
-    layoutWrapper->layoutProperty_->UpdateSafeAreaExpandOpts({ SAFE_AREA_TYPE_ALL, SAFE_AREA_EDGE_END });
-    layoutWrapper->ExpandSafeArea();
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(0, 0));
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize(), SizeF(RK356_WIDTH, RK356_HEIGHT));
-
-    /**
-     * @tc.steps: step10. call ExpandSafeArea on a frame with SafeAreaExpandOpts SAFE_AREA_EDGE_BOTTOM.
-     * @tc.expected: frame is not expanded.
-     */
-    safeAreaManager->systemSafeArea_ = SafeAreaInsets({}, {}, {}, { 0, RK356_HEIGHT + 3 });
-    layoutWrapper->geometryNode_->SetFrameOffset({ 0, 0 });
-    layoutWrapper->geometryNode_->SetFrameSize({ RK356_WIDTH, RK356_HEIGHT });
-    layoutWrapper->layoutProperty_->UpdateSafeAreaExpandOpts({ SAFE_AREA_TYPE_ALL, SAFE_AREA_EDGE_BOTTOM });
-    layoutWrapper->ExpandSafeArea();
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(0, 0));
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize(), SizeF(RK356_WIDTH, RK356_HEIGHT));
-
-    /**
-     * @tc.steps: step11. call ExpandSafeArea on a frame with SafeAreaExpandOpts SAFE_AREA_EDGE_BOTTOM.
-     * @tc.expected: frame is not expanded.
-     */
-    safeAreaManager->systemSafeArea_ = SafeAreaInsets({}, {}, {}, {});
-    layoutWrapper->geometryNode_->SetFrameOffset({ 0, 0 });
-    layoutWrapper->geometryNode_->SetFrameSize({ RK356_WIDTH, RK356_HEIGHT });
-    layoutWrapper->layoutProperty_->UpdateSafeAreaExpandOpts({ SAFE_AREA_TYPE_ALL, SAFE_AREA_EDGE_ALL });
-    layoutWrapper->layoutProperty_->UpdateAspectRatio(1.0);
-    layoutWrapper->ExpandSafeArea();
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize(), SizeF(RK356_WIDTH, RK356_WIDTH));
-}
-
-/**
  * @tc.name: LayoutWrapperTest042
  * @tc.desc: Test OffsetNodeToSafeArea.
  * @tc.type: FUNC
@@ -1703,16 +1558,15 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest043, TestSize.Level1)
 
     auto safeAreaManager = PipelineContext::GetCurrentContext()->safeAreaManager_;
     safeAreaManager->UpdateKeyboardOffset(50.0f);
-    parent->ExpandIntoKeyboard();
-    EXPECT_EQ(parent->GetGeometryNode()->GetFrameOffset(), OffsetF(0, -50.0f));
+    EXPECT_EQ(parent->ExpandIntoKeyboard(), OffsetF(0, -50.0f));
 
     // parent already expanded
     child->ExpandIntoKeyboard();
-    EXPECT_EQ(child->GetGeometryNode()->GetFrameOffset(), OffsetF(0, 0));
+    EXPECT_EQ(child->ExpandIntoKeyboard(), OffsetF(0, 0));
 
     layoutWrapper->layoutProperty_->UpdateSafeAreaExpandOpts({ SAFE_AREA_TYPE_NONE, SAFE_AREA_EDGE_ALL });
     child->ExpandIntoKeyboard();
-    EXPECT_EQ(child->GetGeometryNode()->GetFrameOffset(), OffsetF(0, -50.0f));
+    EXPECT_EQ(child->ExpandIntoKeyboard(), OffsetF(0, -50.0f));
 }
 
 /**
@@ -1784,73 +1638,6 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest046, TestSize.Level1)
     node1->tag_ = ROW_FRAME_NODE;
     childWrapper->AddNodeFlexLayouts();
     EXPECT_EQ(child->GetFlexLayouts(), 0);
-}
-
-/**
- * @tc.name: LayoutWrapperTest047
- * @tc.desc: Test SaveGeoState.
- * @tc.type: FUNC
- */
-HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest047, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create LayoutWrapper.
-     */
-    auto rowFrameNode = FrameNode::CreateFrameNode(
-        OHOS::Ace::V2::FLEX_ETS_TAG, NODE_ID_0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
-
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    geometryNode->frame_.rect_.x_ = 1.0f;
-    geometryNode->frame_.rect_.y_ = 1.0f;
-    RefPtr<LayoutWrapperNode> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
-
-    /**
-     * @tc.steps: step2. set expandOpts and tag = V2::PAGE_ETS_TAG.
-     * @tc.expected: Save success.
-     */
-    layoutWrapper->geometryNode_->previousState_ = nullptr;
-    layoutWrapper->layoutProperty_->safeAreaExpandOpts_ = nullptr;
-    layoutWrapper->layoutProperty_->UpdateSafeAreaExpandOpts({ SAFE_AREA_TYPE_ALL, SAFE_AREA_EDGE_ALL });
-    layoutWrapper->hostNode_.Upgrade()->tag_ = V2::PAGE_ETS_TAG;
-    layoutWrapper->SaveGeoState();
-    EXPECT_EQ(layoutWrapper->GetGeometryNode()->previousState_->x_, 1.0f);
-    EXPECT_EQ(layoutWrapper->GetGeometryNode()->previousState_->y_, 1.0f);
-
-    /**
-     * @tc.steps: step3. set expandOpts and tag = V2::PAGE_ETS_TAG.
-     * @tc.expected: Save success.
-     */
-    layoutWrapper->geometryNode_->previousState_ = nullptr;
-    layoutWrapper->layoutProperty_->safeAreaExpandOpts_ = nullptr;
-    layoutWrapper->layoutProperty_->UpdateSafeAreaExpandOpts({ SAFE_AREA_TYPE_ALL, SAFE_AREA_EDGE_ALL });
-    layoutWrapper->hostNode_.Upgrade()->tag_ = V2::STAGE_ETS_TAG;
-    layoutWrapper->SaveGeoState();
-    EXPECT_EQ(layoutWrapper->GetGeometryNode()->previousState_->x_, 1.0f);
-    EXPECT_EQ(layoutWrapper->GetGeometryNode()->previousState_->y_, 1.0f);
-
-    /**
-     * @tc.steps: step4. set expandOpts and tag = V2::PAGE_ETS_TAG.
-     * @tc.expected: Save success.
-     */
-    layoutWrapper->geometryNode_->previousState_ = nullptr;
-    layoutWrapper->layoutProperty_->safeAreaExpandOpts_ = nullptr;
-    layoutWrapper->layoutProperty_->UpdateSafeAreaExpandOpts({ SAFE_AREA_TYPE_NONE, SAFE_AREA_EDGE_NONE });
-    layoutWrapper->hostNode_.Upgrade()->tag_ = V2::PAGE_ETS_TAG;
-    layoutWrapper->SaveGeoState();
-    EXPECT_EQ(layoutWrapper->GetGeometryNode()->previousState_->x_, 1.0f);
-    EXPECT_EQ(layoutWrapper->GetGeometryNode()->previousState_->y_, 1.0f);
-
-    /**
-     * @tc.steps: step4. set expandOpts and tag = V2::PAGE_ETS_TAG.
-     * @tc.expected: Save fail.
-     */
-    layoutWrapper->geometryNode_->previousState_ = nullptr;
-    layoutWrapper->layoutProperty_->safeAreaExpandOpts_ = nullptr;
-    layoutWrapper->layoutProperty_->UpdateSafeAreaExpandOpts({ SAFE_AREA_TYPE_NONE, SAFE_AREA_EDGE_NONE });
-    layoutWrapper->hostNode_.Upgrade()->tag_ = V2::STAGE_ETS_TAG;
-    layoutWrapper->SaveGeoState();
-    EXPECT_TRUE(layoutWrapper->GetGeometryNode()->previousState_);
 }
 
 /**

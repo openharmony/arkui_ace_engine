@@ -318,7 +318,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        FocusPattern focusPattern = { FocusType::NODE, true };
+        FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::FORCE_NONE };
         focusPattern.SetIsFocusActiveWhenFocused(true);
         return focusPattern;
     }
@@ -548,6 +548,7 @@ public:
         return selectController_->GetSelectedRects();
     }
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+    void ToJsonValueForOption(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
     void InitEditingValueText(std::string content);
     void InitValueText(std::string content);
@@ -807,7 +808,7 @@ public:
     std::string GetShowPasswordIconString() const;
     int32_t GetNakedCharPosition() const;
     void SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd,
-        const std::optional<SelectionOptions>& options = std::nullopt);
+        const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false);
     void HandleBlurEvent();
     void HandleFocusEvent();
     void SetFocusStyle();
@@ -986,7 +987,32 @@ public:
 
     void EditingValueFilterChange();
 
-    void SetCustomKeyboard(const RefPtr<UINode>& keyboardBuilder)
+    void SetCustomKeyboard(const std::function<void()>&& keyboardBuilder)
+    {
+        if (customKeyboardBuilder_ && isCustomKeyboardAttached_ && !keyboardBuilder) {
+            // close customKeyboard and request system keyboard
+            CloseCustomKeyboard();
+            customKeyboardBuilder_ = keyboardBuilder; // refresh current keyboard
+            RequestKeyboard(false, true, true);
+            StartTwinkling();
+            return;
+        }
+        if (!customKeyboardBuilder_ && keyboardBuilder) {
+            // close system keyboard and request custom keyboard
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+            if (imeShown_) {
+                CloseKeyboard(true);
+                customKeyboardBuilder_ = keyboardBuilder; // refresh current keyboard
+                RequestKeyboard(false, true, true);
+                StartTwinkling();
+                return;
+            }
+#endif
+        }
+        customKeyboardBuilder_ = keyboardBuilder;
+    }
+
+    void SetCustomKeyboardWithNode(const RefPtr<UINode>& keyboardBuilder)
     {
         if (customKeyboard_ && isCustomKeyboardAttached_ && !keyboardBuilder) {
             // close customKeyboard and request system keyboard
@@ -1013,7 +1039,7 @@ public:
 
     bool HasCustomKeyboard()
     {
-        return customKeyboard_ != nullptr;
+        return customKeyboard_ != nullptr || customKeyboardBuilder_ != nullptr;
     }
 
     void DumpInfo() override;
@@ -1195,7 +1221,7 @@ public:
 
     float GetPreviewUnderlineWidth() const
     {
-        return static_cast<float>(previewUnderlineWidth_.Value());
+        return static_cast<float>(previewUnderlineWidth_.ConvertToPx());
     }
 
     void ReceivePreviewTextStyle(const std::string& style) override;
@@ -1363,6 +1389,8 @@ private:
         CHECK_NULL_RETURN(cleanNodeArea, false);
         return cleanNodeArea->IsShow();
     }
+
+    void InitPanEvent();
 
     void PasswordResponseKeyEvent();
     void UnitResponseKeyEvent();
@@ -1550,6 +1578,7 @@ private:
     BlurReason blurReason_ = BlurReason::FOCUS_SWITCH;
     bool isFocusedBeforeClick_ = false;
     bool isCustomKeyboardAttached_ = false;
+    std::function<void()> customKeyboardBuilder_;
     RefPtr<UINode> customKeyboard_;
     RefPtr<OverlayManager> keyboardOverlay_;
     bool isCustomFont_ = false;
@@ -1597,7 +1626,7 @@ private:
 
     bool isFocusBGColorSet_ = false;
     bool isFocusTextColorSet_ = false;
-    Dimension previewUnderlineWidth_ = 2.0_px;
+    Dimension previewUnderlineWidth_ = 2.0_vp;
     bool hasSupportedPreviewText = true;
     bool hasPreviewText = false;
     std::queue<PreviewTextInfo> previewTextOperation;

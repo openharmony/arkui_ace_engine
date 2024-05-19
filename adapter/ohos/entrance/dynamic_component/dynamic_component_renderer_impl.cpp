@@ -28,7 +28,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
+#include "core/components_ng/pattern/ui_extension/isolated_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -52,7 +52,7 @@ void DynamicComponentRendererImpl::CreateContent()
 
     CHECK_NULL_VOID(runtime_);
     if (!runtime_->IsRestrictedWorkerThread()) {
-        TAG_LOGW(AceLogTag::ACE_DYNAMIC_COMPONENT, "DynamicComponent should run in restricted worker thread");
+        TAG_LOGW(AceLogTag::ACE_ISOLATED_COMPONENT, "DynamicComponent should run in restricted worker thread");
         return;
     }
 
@@ -63,7 +63,7 @@ void DynamicComponentRendererImpl::CreateContent()
         CHECK_NULL_VOID(renderer);
 
         // create UI Content
-        TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "create dynamic UI Content");
+        TAG_LOGI(AceLogTag::ACE_ISOLATED_COMPONENT, "create dynamic UI Content");
         renderer->uiContent_ = UIContent::Create(nullptr, renderer->runtime_, true);
         CHECK_NULL_VOID(renderer->uiContent_);
 
@@ -71,7 +71,7 @@ void DynamicComponentRendererImpl::CreateContent()
         ContainerScope scope(renderer->uiContent_->GetInstanceId());
         renderer->RegisterSizeChangedCallback();
         renderer->AttachRenderContext();
-        TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "foreground dynamic UI content");
+        TAG_LOGI(AceLogTag::ACE_ISOLATED_COMPONENT, "foreground dynamic UI content");
         renderer->uiContent_->Foreground();
 
         std::function<void()> contentReadyCallback;
@@ -109,10 +109,10 @@ void DynamicComponentRendererImpl::RegisterSizeChangedCallback()
         CHECK_NULL_VOID(renderer);
         auto width = size.Width();
         auto height = size.Height();
-        TAG_LOGD(AceLogTag::ACE_DYNAMIC_COMPONENT, "page size callback: wh(%{public}f,%{public}f)", width, height);
+        TAG_LOGD(AceLogTag::ACE_ISOLATED_COMPONENT, "page size callback: wh(%{public}f,%{public}f)", width, height);
         if (!NearEqual(renderer->contentSize_.Width(), width) || !NearEqual(renderer->contentSize_.Height(), height)) {
             renderer->contentSize_.SetSizeT(size);
-            TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "dynamic card size: wh(%{public}f,%{public}f)", width, height);
+            TAG_LOGI(AceLogTag::ACE_ISOLATED_COMPONENT, "dynamic card size: wh(%{public}f,%{public}f)", width, height);
             auto hostTaskExecutor = renderer->GetHostTaskExecutor();
             CHECK_NULL_VOID(hostTaskExecutor);
             hostTaskExecutor->PostTask(
@@ -120,7 +120,7 @@ void DynamicComponentRendererImpl::RegisterSizeChangedCallback()
                     ContainerScope scope(hostInstanceId);
                     auto host = hostWeak.Upgrade();
                     CHECK_NULL_VOID(host);
-                    auto pattern = AceType::DynamicCast<UIExtensionPattern>(host->GetPattern());
+                    auto pattern = AceType::DynamicCast<IsolatedPattern>(host->GetPattern());
                     CHECK_NULL_VOID(pattern);
                     pattern->OnSizeChanged(width, height);
                 },
@@ -157,7 +157,7 @@ void DynamicComponentRendererImpl::AttachRenderContext()
             renderContext->SetClipToFrame(true);
             renderContext->SetClipToBounds(true);
 
-            TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "add render context of dynamic component for '%{public}d'",
+            TAG_LOGI(AceLogTag::ACE_ISOLATED_COMPONENT, "add render context of dynamic component for '%{public}d'",
                 instanceId);
             hostRenderContext->ClearChildren();
             hostRenderContext->AddChild(renderContext, -1);
@@ -213,7 +213,7 @@ void DynamicComponentRendererImpl::UpdateViewportConfig(const ViewportConfig& co
             if (height == 0) {
                 height = defaultDisplay->GetHeight();
             }
-            TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "set adaptive size (%{public}d, %{public}d) for DC(%{public}d)",
+            TAG_LOGI(AceLogTag::ACE_ISOLATED_COMPONENT, "set adaptive size (%{public}d, %{public}d) for DC(%{public}d)",
                 width, height, uiContent_->GetInstanceId());
         }
     }
@@ -257,7 +257,7 @@ void DynamicComponentRendererImpl::DestroyContent()
     taskExecutor->PostTask(
         [uiContent = uiContent_]() {
             ContainerScope scope(uiContent->GetInstanceId());
-            TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "destroy dynamic UI content");
+            TAG_LOGI(AceLogTag::ACE_ISOLATED_COMPONENT, "destroy dynamic UI content");
             uiContent->Destroy();
         },
         TaskExecutor::TaskType::UI, "ArkUIDynamicComponentDestroy");

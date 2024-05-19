@@ -139,15 +139,21 @@ public:
     {
         return !scrollableEvent_ || scrollableEvent_->Idle();
     }
-    void SetScrollEnable(bool enable)
+    void SetScrollEnabled(bool enabled)
     {
         CHECK_NULL_VOID(scrollableEvent_);
-        scrollableEvent_->SetEnabled(enable);
-        if (!enable) {
+        scrollableEvent_->SetEnabled(enabled);
+        if (!enabled) {
             scrollableEvent_->SetAxis(Axis::NONE);
         } else {
             scrollableEvent_->SetAxis(axis_);
         }
+    }
+
+    bool GetScrollEnabled() const
+    {
+        CHECK_NULL_RETURN(scrollableEvent_, false);
+        return scrollableEvent_->GetEnabled();
     }
 
     RefPtr<GestureEventHub> GetGestureHub();
@@ -377,6 +383,8 @@ public:
 
     static ScrollState GetScrollState(int32_t scrollSource);
 
+    static ScrollSource ConvertScrollSource(int32_t source);
+
     static float CalculateFriction(float gamma)
     {
         constexpr float RATIO = 1.848f;
@@ -504,6 +512,7 @@ public:
     }
     virtual void InitScrollBarClickEvent();
     void HandleClickEvent(GestureEvent& info);
+    void InitScrollBarGestureEvent();
     void InitScrollBarMouseEvent();
     virtual void ScrollPage(bool reverse, bool smooth = false);
     void PrintOffsetLog(AceLogTag tag, int32_t id, double finalOffset);
@@ -563,7 +572,7 @@ protected:
 
     virtual void OnScrollStop(const OnScrollStopEvent& onScrollStop);
 
-    void FireOnWillScroll(float offset) const;
+    float FireOnWillScroll(float offset) const;
 
     // select with mouse
     struct ItemSelectedStatus {

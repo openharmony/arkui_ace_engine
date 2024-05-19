@@ -78,6 +78,8 @@ void JSForm::JSBind(BindingTarget globalObj)
     JSClass<JSForm>::StaticMethod("onRouter", &JSForm::Mock);
     JSClass<JSForm>::StaticMethod("onAppear", &JSForm::Mock);
     JSClass<JSForm>::StaticMethod("onDisAppear", &JSForm::Mock);
+    JSClass<JSForm>::StaticMethod("onAttach", &JSForm::Mock);
+    JSClass<JSForm>::StaticMethod("onDetach", &JSForm::Mock);
     JSClass<JSForm>::StaticMethod("onTouch", &JSForm::Mock);
     JSClass<JSForm>::StaticMethod("onKeyEvent", &JSForm::Mock);
     JSClass<JSForm>::StaticMethod("onDeleteEvent", &JSForm::Mock);
@@ -305,6 +307,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onClientAuthenticationRequest", &JSWeb::Mock);
     JSClass<JSWeb>::StaticMethod("onRenderProcessNotResponding", &JSWeb::Mock);
     JSClass<JSWeb>::StaticMethod("onRenderProcessResponding", &JSWeb::Mock);
+    JSClass<JSWeb>::StaticMethod("onViewportFitChanged", &JSWeb::Mock);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
 
     JSWebDialog::JSBind(globalObj);
@@ -449,6 +452,8 @@ void JSVideo::JSBind(BindingTarget globalObj)
     JSClass<JSVideo>::StaticMethod("onClick", &JSVideo::Mock);
     JSClass<JSVideo>::StaticMethod("onAppear", &JSVideo::Mock);
     JSClass<JSVideo>::StaticMethod("onDisAppear", &JSVideo::Mock);
+    JSClass<JSVideo>::StaticMethod("onAttach", &JSVideo::Mock);
+    JSClass<JSVideo>::StaticMethod("onDetach", &JSVideo::Mock);
     JSClass<JSVideo>::StaticMethod("remoteMessage", &JSVideo::Mock);
     JSClass<JSVideo>::InheritAndBind<JSViewAbstract>(globalObj);
 }
@@ -489,6 +494,8 @@ void JSPlugin::JSBind(BindingTarget globalObj)
     JSClass<JSPlugin>::StaticMethod("onError", &JSPlugin::Mock);
     JSClass<JSPlugin>::StaticMethod("onAppear", &JSPlugin::Mock);
     JSClass<JSPlugin>::StaticMethod("onDisAppear", &JSPlugin::Mock);
+    JSClass<JSPlugin>::StaticMethod("onAttach", &JSPlugin::Mock);
+    JSClass<JSPlugin>::StaticMethod("onDetach", &JSPlugin::Mock);
     JSClass<JSPlugin>::StaticMethod("onTouch", &JSPlugin::Mock);
     JSClass<JSPlugin>::StaticMethod("onKeyEvent", &JSPlugin::Mock);
     JSClass<JSPlugin>::StaticMethod("onDeleteEvent", &JSPlugin::Mock);

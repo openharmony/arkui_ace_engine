@@ -96,6 +96,7 @@ public:
         : jsonBuf_(std::move(jsonBuf)), len_(len)
     {
         InitialResource(resourceMgr);
+        jsonBuf_.reset();
     };
     LayeredDrawableDescriptor(std::unique_ptr<uint8_t[]> jsonBuf, size_t len,
         const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr, std::string path, uint32_t iconType,
@@ -103,6 +104,7 @@ public:
         : jsonBuf_(std::move(jsonBuf)), len_(len), maskPath_(std::move(path)), iconType_(iconType), density_(density)
     {
         InitialResource(resourceMgr);
+        jsonBuf_.reset();
     };
     LayeredDrawableDescriptor(std::unique_ptr<uint8_t[]> jsonBuf, size_t len,
         const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr, std::string path, uint32_t iconType,
@@ -112,6 +114,7 @@ public:
     {
         InitLayeredParam(foregroundInfo, backgroundInfo);
         InitialResource(resourceMgr);
+        jsonBuf_.reset();
     };
 
     ~LayeredDrawableDescriptor() override = default;

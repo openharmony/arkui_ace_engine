@@ -234,10 +234,10 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                     gestureHub->SetPixelMap(nullptr);
                 }
             } else if (!isNotInPreviewState_) {
+                HideEventColumn();
                 if (gestureHub->GetTextDraggable()) {
                     HideTextAnimation(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
                 } else {
-                    HideEventColumn();
                     HidePixelMap(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
                     HideFilter();
                     SubwindowManager::GetInstance()->HideMenuNG(false, true);
@@ -316,6 +316,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
         if (gestureHub->GetTextDraggable()) {
+            actuator->HideEventColumn();
             actuator->textPixelMap_ = nullptr;
             actuator->HideTextAnimation();
         }
@@ -410,7 +411,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         return;
     }
     auto longPressUpdateValue = [weak = WeakClaim(this)](GestureEvent& info) {
-        TAG_LOGD(AceLogTag::ACE_DRAG, "Trigger long press for 500ms.");
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger long press for 500ms.");
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
         actuator->SetIsNotInPreviewState(true);
@@ -467,6 +468,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             actuator->SetIsNotInPreviewState(false);
             if (gestureHub->GetIsTextDraggable()) {
                 actuator->SetTextAnimation(gestureHub, info.GetGlobalLocation());
+                actuator->SetEventColumn(actuator);
             }
             return;
         }
@@ -563,6 +565,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     bool isAllowedDrag = gestureHub->IsAllowedDrag(eventHub);
     if (!longPressRecognizer_->HasThumbnailCallback() && isAllowedDrag) {
         auto callback = [weakPtr = gestureEventHub_, weak = WeakClaim(this)](Offset point) {
+            TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger 150ms timer Thumbnail callback.");
             auto gestureHub = weakPtr.Upgrade();
             CHECK_NULL_VOID(gestureHub);
             auto frameNode = gestureHub->GetFrameNode();
@@ -789,7 +792,9 @@ void DragEventActuator::CreatePreviewNode(const RefPtr<FrameNode>& frameNode, OH
     CHECK_NULL_VOID(frameNode);
     auto pixelMap = frameNode->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
-    auto frameOffset = frameNode->GetOffsetInScreen();
+    auto center = frameNode->GetPaintRectCenter();
+    auto frameOffset = OffsetF(center.GetX() - (pixelMap->GetWidth() / 2.0f),
+        center.GetY() - (pixelMap->GetHeight() / 2.0f));
     imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() {return AceType::MakeRefPtr<ImagePattern>(); });
     CHECK_NULL_VOID(imageNode);
@@ -1005,10 +1010,7 @@ void DragEventActuator::UpdatePreviewOptionFromModifier(const RefPtr<FrameNode>&
 {
     UpdatePreviewOptionDefaultAttr(frameNode);
     auto modifierOnApply = frameNode->GetDragPreviewOption().onApply;
-    if (modifierOnApply == nullptr) {
-        TAG_LOGE(AceLogTag::ACE_DRAG, "OnApply is null");
-        return;
-    }
+    CHECK_NULL_VOID(modifierOnApply);
 
     // create one temporary frame node for receiving the value from the modifier
     auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -1204,10 +1206,18 @@ void DragEventActuator::HideEventColumn()
 
 void DragEventActuator::BindClickEvent(const RefPtr<FrameNode>& columnNode)
 {
-    auto callback = [this, weak = WeakClaim(this)](GestureEvent& /* info */) {
-        HideEventColumn();
-        HidePixelMap();
-        HideFilter();
+    auto callback = [weak = WeakClaim(this)](GestureEvent& /* info */) {
+        auto actuator = weak.Upgrade();
+        CHECK_NULL_VOID(actuator);
+        auto gestureHub = actuator->gestureEventHub_.Upgrade();
+        CHECK_NULL_VOID(gestureHub);
+        actuator->HideEventColumn();
+        if (gestureHub->GetTextDraggable()) {
+            actuator->HideTextAnimation();
+        } else {
+            actuator->HidePixelMap();
+            actuator->HideFilter();
+        }
     };
     auto columnGestureHub = columnNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(columnGestureHub);
@@ -1853,7 +1863,7 @@ void DragEventActuator::HandleTouchUpEvent()
     DragAnimationHelper::PlayNodeResetAnimation(Claim(this));
     auto preDragStatus = dragDropManager->GetPreDragStatus();
     if (preDragStatus >= PreDragStatus::ACTION_DETECTING_STATUS &&
-        preDragStatus < PreDragStatus::PREVIEW_LIFT_STARTED) {
+        preDragStatus < PreDragStatus::PREVIEW_LIFT_FINISHED) {
         if (IsNeedGather()) {
             SetGatherNode(nullptr);
             ClearGatherNodeChildrenInfo();

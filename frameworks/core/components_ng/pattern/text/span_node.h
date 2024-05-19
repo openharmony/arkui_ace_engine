@@ -22,6 +22,7 @@
 #include <string>
 
 #include "base/memory/referenced.h"
+#include "base/log/dump_log.h"
 #include "core/common/ai/data_detector_adapter.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
@@ -179,6 +180,7 @@ public:
         children.clear();
     }
     // position of last char + 1
+    int32_t rangeStart = -1;
     int32_t position = -1;
     int32_t imageNodeId = -1;
     std::string inspectId;
@@ -209,11 +211,11 @@ public:
         bool isSpanStringMode = false, PlaceholderStyle placeholderStyle = PlaceholderStyle());
     virtual void UpdateSymbolSpanColor(const RefPtr<FrameNode>& frameNode, TextStyle& symbolSpanStyle);
     virtual void UpdateTextStyleForAISpan(
-        const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle);
+        const std::string& content, const RefPtr<Paragraph>& builder, const TextStyle& textStyle);
     virtual void UpdateTextStyle(const std::string& content, const RefPtr<Paragraph>& builder,
-        const std::optional<TextStyle>& textStyle, const int32_t selStart, const int32_t selEnd);
+        const TextStyle& textStyle, const int32_t selStart, const int32_t selEnd);
     virtual void UpdateContentTextStyle(
-        const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle);
+        const std::string& content, const RefPtr<Paragraph>& builder, const TextStyle& textStyle);
     virtual void SetAiSpanTextStyle(std::optional<TextStyle>& textStyle);
     virtual void GetIndex(int32_t& start, int32_t& end) const;
     virtual void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);
@@ -226,6 +228,10 @@ public:
     TextStyle InheritParentProperties(const RefPtr<FrameNode>& frameNode, bool isSpanStringMode = false);
     virtual RefPtr<SpanItem> GetSameStyleSpanItem() const;
     std::optional<std::pair<int32_t, int32_t>> GetIntersectionInterval(std::pair<int32_t, int32_t> interval) const;
+    bool Contains(int32_t index)
+    {
+        return rangeStart < index && index < position;
+    }
     std::optional<TextStyle> GetTextStyle() const
     {
         return textStyle_;
@@ -480,6 +486,24 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override {};
     int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
         bool isSpanStringMode = false, PlaceholderStyle placeholderStyle = PlaceholderStyle()) override;
+
+    void DumpInfo() const
+    {
+        auto& dumpLog = DumpLog::GetInstance();
+        dumpLog.AddDesc("--------------- print run info ---------------");
+        dumpLog.AddDesc(std::string("Width: ").append(std::to_string(run_.width)));
+        dumpLog.AddDesc(std::string("Height: ").append(std::to_string(run_.height)));
+        dumpLog.AddDesc(std::string("Alignment: ").append(StringUtils::ToString(run_.alignment)));
+        dumpLog.AddDesc(std::string("Baseline: ").append(StringUtils::ToString(run_.baseline)));
+        dumpLog.AddDesc(std::string("BaselineOffset: ").append(std::to_string(run_.baseline_offset)));
+        dumpLog.AddDesc("--------------- print text style ---------------");
+        dumpLog.AddDesc(std::string("FontSize: ").append(textStyle.GetFontSize().ToString()));
+        dumpLog.AddDesc(std::string("LineHeight: ").append(textStyle.GetLineHeight().ToString()));
+        dumpLog.AddDesc(std::string("LineSpacing: ").append(textStyle.GetLineSpacing().ToString()));
+        dumpLog.AddDesc(std::string("VerticalAlign: ").append(StringUtils::ToString(textStyle.GetTextVerticalAlign())));
+        dumpLog.AddDesc(std::string("HalfLeading: ").append(std::to_string(textStyle.GetHalfLeading())));
+        dumpLog.AddDesc(std::string("TextBaseline: ").append(StringUtils::ToString(textStyle.GetTextBaseline())));
+    }
     ACE_DISALLOW_COPY_AND_MOVE(PlaceholderSpanItem);
 };
 
@@ -529,6 +553,13 @@ public:
         return false;
     }
 
+    void DumpInfo() override
+    {
+        FrameNode::DumpInfo();
+        CHECK_NULL_VOID(placeholderSpanItem_);
+        placeholderSpanItem_->DumpInfo();
+    }
+
 private:
     RefPtr<PlaceholderSpanItem> placeholderSpanItem_ = MakeRefPtr<PlaceholderSpanItem>();
 
@@ -560,7 +591,6 @@ public:
         this->spanItemType = SpanItemType::IMAGE;
     }
     ~ImageSpanItem() override = default;
-    PlaceholderRun run_;
     int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
         bool isSpanStringMode = false, PlaceholderStyle placeholderStyle = PlaceholderStyle()) override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override {};
@@ -602,7 +632,13 @@ public:
         return imageSpanItem_;
     }
 
-    void DumpInfo() override;
+    void DumpInfo() override
+    {
+        FrameNode::DumpInfo();
+        CHECK_NULL_VOID(imageSpanItem_);
+        imageSpanItem_->DumpInfo();
+    }
+
     void SetImageItem(const RefPtr<ImageSpanItem>& imageSpan)
     {
         imageSpanItem_ = imageSpan;

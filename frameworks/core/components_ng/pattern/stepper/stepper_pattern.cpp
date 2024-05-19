@@ -674,30 +674,30 @@ void StepperPattern::OnLanguageConfigurationUpdate()
 
         auto stepperTheme = GetTheme();
         CHECK_NULL_VOID(stepperTheme);
-
-        auto leftimageLayoutProperty = leftImage_->GetLayoutProperty<ImageLayoutProperty>();
-        CHECK_NULL_VOID(leftimageLayoutProperty);
-
-        ImageSourceInfo leftimageSourceInfo;
-        if (isRightToLeft_) {
-            leftimageSourceInfo.SetResourceId(InternalResource::ResourceId::STEPPER_NEXT_ARROW);
-        } else {
-            leftimageSourceInfo.SetResourceId(InternalResource::ResourceId::STEPPER_BACK_ARROW);
+        if (leftImage_) {
+            auto leftimageLayoutProperty = leftImage_->GetLayoutProperty<ImageLayoutProperty>();
+            CHECK_NULL_VOID(leftimageLayoutProperty);
+            ImageSourceInfo leftimageSourceInfo;
+            if (isRightToLeft_) {
+                leftimageSourceInfo.SetResourceId(InternalResource::ResourceId::STEPPER_NEXT_ARROW);
+            } else {
+                leftimageSourceInfo.SetResourceId(InternalResource::ResourceId::STEPPER_BACK_ARROW);
+            }
+            leftimageSourceInfo.SetFillColor(stepperTheme->GetArrowColor());
+            leftimageLayoutProperty->UpdateImageSourceInfo(leftimageSourceInfo);
         }
-        leftimageSourceInfo.SetFillColor(stepperTheme->GetArrowColor());
-        leftimageLayoutProperty->UpdateImageSourceInfo(leftimageSourceInfo);
-
-        auto rightimageLayoutProperty = rightImage_->GetLayoutProperty<ImageLayoutProperty>();
-        CHECK_NULL_VOID(rightimageLayoutProperty);
-
-        ImageSourceInfo rightimageSourceInfo;
-        if (isRightToLeft_) {
-            rightimageSourceInfo.SetResourceId(InternalResource::ResourceId::STEPPER_BACK_ARROW);
-        } else {
-            rightimageSourceInfo.SetResourceId(InternalResource::ResourceId::STEPPER_NEXT_ARROW);
+        if (rightImage_) {
+            auto rightimageLayoutProperty = rightImage_->GetLayoutProperty<ImageLayoutProperty>();
+            CHECK_NULL_VOID(rightimageLayoutProperty);
+            ImageSourceInfo rightimageSourceInfo;
+            if (isRightToLeft_) {
+                rightimageSourceInfo.SetResourceId(InternalResource::ResourceId::STEPPER_BACK_ARROW);
+            } else {
+                rightimageSourceInfo.SetResourceId(InternalResource::ResourceId::STEPPER_NEXT_ARROW);
+            }
+            rightimageSourceInfo.SetFillColor(stepperTheme->GetArrowColor());
+            rightimageLayoutProperty->UpdateImageSourceInfo(rightimageSourceInfo);
         }
-        rightimageSourceInfo.SetFillColor(stepperTheme->GetArrowColor());
-        rightimageLayoutProperty->UpdateImageSourceInfo(rightimageSourceInfo);
     }
 }
 } // namespace OHOS::Ace::NG

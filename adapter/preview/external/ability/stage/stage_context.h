@@ -20,6 +20,7 @@
 
 #include "adapter/preview/external/ability/context.h"
 #include "adapter/preview/external/ability/stage/stage_app_info.h"
+#include "adapter/preview/external/ability/stage/stage_pkg_context_info.h"
 #include "adapter/preview/external/ability/stage/stage_hap_module_info.h"
 #include "base/json/json_util.h"
 #include "base/log/log.h"
@@ -36,10 +37,12 @@ public:
     void Parse(const std::string& contents) override;
     const RefPtr<StageAppInfo>& GetAppInfo() const;
     const RefPtr<StageHapModuleInfo>& GetHapModuleInfo() const;
-
+    const RefPtr<StagePkgContextInfo>& GetPkgContextInfo() const;
+    
 private:
     RefPtr<StageAppInfo> appInfo_;
     RefPtr<StageHapModuleInfo> hapModuleInfo_;
+    RefPtr<StagePkgContextInfo> pkgContextInfo_;
     ACE_DISALLOW_COPY_AND_MOVE(StageContext);
 };
 } // namespace OHOS::Ace

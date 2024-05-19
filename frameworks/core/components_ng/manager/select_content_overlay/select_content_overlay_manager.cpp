@@ -414,6 +414,14 @@ void SelectContentOverlayManager::CloseInternal(int32_t id, bool animation, Clos
     auto node = DynamicCast<SelectOverlayNode>(overlay);
     auto callback = selectOverlayHolder_->GetCallback();
     auto menuType = shareOverlayInfo_->menuInfo.menuType;
+    auto pattern = GetSelectOverlayPattern(selectOverlayNode_);
+    RefPtr<OverlayInfo> info = nullptr;
+    if (pattern) {
+        info = AceType::MakeRefPtr<OverlayInfo>();
+        info->isSingleHandle = shareOverlayInfo_->isSingleHandle;
+        info->isShowMenu = shareOverlayInfo_->menuInfo.menuIsShow;
+        info->isHiddenHandle = pattern->IsHiddenHandle();
+    }
     if (node && animation) {
         ClearAllStatus();
         node->HideSelectOverlay([weakOverlay = WeakClaim(AceType::RawPtr(overlay)), managerWeak = WeakClaim(this)]() {
@@ -426,7 +434,7 @@ void SelectContentOverlayManager::CloseInternal(int32_t id, bool animation, Clos
         ClearAllStatus();
     }
     if (callback) {
-        callback->OnCloseOverlay(menuType, reason);
+        callback->OnCloseOverlay(menuType, reason, info);
     }
 }
 

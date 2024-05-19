@@ -573,18 +573,18 @@ void JSTabContent::SetBottomTabBarStyle(const JSCallbackInfo& info)
     std::optional<TabBarSymbol> tabBarSymbol = std::nullopt;
     if (ParseJsMedia(iconParam, icon)) {
         iconOpt = icon;
-    } else {
-        TabBarSymbol symbolApply;
+    } else if (iconParam->IsObject()) {
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(iconParam);
         JSRef<JSVal> normalModifier = jsObj->GetProperty("normal");
         JSRef<JSVal> selectedModifier = jsObj->GetProperty("selected");
         if (normalModifier->IsObject()) {
+            TabBarSymbol symbolApply;
             JSViewAbstract::SetTabBarSymbolOptionApply(info, symbolApply, normalModifier, selectedModifier);
+            if (selectedModifier->IsObject()) {
+                symbolApply.selectedFlag = true;
+            }
+            tabBarSymbol = symbolApply;
         }
-        if (selectedModifier->IsObject()) {
-            symbolApply.selectedFlag = true;
-        }
-        tabBarSymbol = symbolApply;
     }
 
     JSRef<JSVal> paddingParam = paramObject->GetProperty("padding");
@@ -647,7 +647,9 @@ void JSTabContent::JSBind(BindingTarget globalObj)
     JSClass<JSTabContent>::StaticMethod("create", &JSTabContent::Create);
     JSClass<JSTabContent>::StaticMethod("pop", &JSTabContent::Pop);
     JSClass<JSTabContent>::StaticMethod("tabBar", &JSTabContent::SetTabBar);
+    JSClass<JSTabContent>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSTabContent>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSTabContent>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSTabContent>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTabContent>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSTabContent>::StaticMethod("onHover", &JSInteractableView::JsOnHover);

@@ -68,6 +68,10 @@ public:
             if (!themeConstants) {
                 return theme;
             }
+            theme->leftSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_left");
+            theme->rightSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_right");
+            theme->upSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_up");
+            theme->downSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_down");
             ParsePattern(themeConstants, theme);
             return theme;
         }
@@ -106,6 +110,9 @@ public:
             theme->digitalIndicatorTextStyle_.SetFontSize(
                 swiperPattern->GetAttr<Dimension>("indicator_text_font_size", 14.0_vp));
             theme->selectedColor_ = swiperPattern->GetAttr<Color>("indicator_color_selected", Color::TRANSPARENT);
+            theme->unSelectedColor_ = swiperPattern->GetAttr<Color>("color_focus_unselected", Color::TRANSPARENT);
+            theme->focusedBgColor_ = swiperPattern->GetAttr<Color>("color_focus_bg", Color::TRANSPARENT);
+            theme->indicatorBgHeight_ = swiperPattern->GetAttr<Dimension>("indicator_bg_height", 12.0_vp);
             theme->focusedSelectedColor_ =
                 swiperPattern->GetAttr<Color>("indicator_color_focused_selected", Color::TRANSPARENT);
             theme->hoverColor_ = swiperPattern->GetAttr<Color>("indicator_color_hover", Color::TRANSPARENT);
@@ -154,6 +161,16 @@ public:
     const Color& GetSelectedColor() const
     {
         return selectedColor_;
+    }
+
+    const Color& GetFocusedBgColor() const
+    {
+        return focusedBgColor_;
+    }
+
+    const Color& GetFocusUnSelectedColor() const
+    {
+        return unSelectedColor_;
     }
 
     const Color& GetFocusedSelectedColor() const
@@ -383,17 +400,45 @@ public:
         return indicatorPaddingDot_;
     }
 
+    const Dimension& GetIndicatorBgHeight() const
+    {
+        return indicatorBgHeight_;
+    }
+
+    uint32_t GetLeftSymbolId() const
+    {
+        return leftSymbolId_;
+    }
+
+    uint32_t GetRightSymbolId() const
+    {
+        return rightSymbolId_;
+    }
+
+    uint32_t GetUpSymbolId() const
+    {
+        return upSymbolId_;
+    }
+
+    uint32_t GetDownSymbolId() const
+    {
+        return downSymbolId_;
+    }
+
 protected:
     SwiperIndicatorTheme() = default;
 
 private:
     Color color_;
     Color selectedColor_;
+    Color unSelectedColor_;
+    Color focusedBgColor_;
     Color focusedSelectedColor_;
     Color hoverColor_;
     Color pressedColor_;
     Color focusedColor_;
     Dimension focusedBorderWidth_;
+    Dimension indicatorBgHeight_;
     Dimension size_;
     Dimension selectedSize_;
     Dimension indicatorPointPadding_;
@@ -435,6 +480,10 @@ private:
     Dimension indicatorDigitHeight_;
     Dimension indicatorDotItemSpace_;
     Dimension indicatorPaddingDot_;
+    uint32_t leftSymbolId_ = 0;
+    uint32_t rightSymbolId_ = 0;
+    uint32_t upSymbolId_ = 0;
+    uint32_t downSymbolId_ = 0;
 };
 
 } // namespace OHOS::Ace

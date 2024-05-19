@@ -37,7 +37,6 @@ private:
 #else
     RSRoundRect MakeRRect(const Offset& offset, const Size& size, const Border& border) const;
 #endif
-
 };
 
 } // namespace OHOS::Ace

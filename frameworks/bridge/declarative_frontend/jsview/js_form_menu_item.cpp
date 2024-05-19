@@ -66,16 +66,18 @@ void JSFormMenuItem::RequestPublishFormWithSnapshot(JSRef<JSVal> wantValue, RefP
         !want.HasParameter("ohos.extra.param.key.add_form_to_host_height") ||
         !want.HasParameter("ohos.extra.param.key.add_form_to_host_screenx") ||
         !want.HasParameter("ohos.extra.param.key.add_form_to_host_screeny")) {
-        TAG_LOGI(AceLogTag::ACE_FORM, "want has no component snapshot info");
+        TAG_LOGE(AceLogTag::ACE_FORM, "want has no component snapshot info");
         return;
     }
 
     if (!FormModel::GetInstance()->RequestPublishFormWithSnapshot(want, formId)) {
+        if (!jsCBFunc) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "jsCBFunc is null");
+            return;
+        }
         JSRef<JSVal> params[1];
         params[0] = JSRef<JSVal>::Make(ToJSValue(formId));
-        if (!jsCBFunc) {
-            jsCBFunc->ExecuteJS(1, params);
-        }
+        jsCBFunc->ExecuteJS(1, params);
     }
 }
 
@@ -117,13 +119,13 @@ void JSFormMenuItem::JsOnClick(const JSCallbackInfo& info)
     std::string compId;
     JSViewAbstract::ParseJsString(info[NUM_ID_2], compId);
     if (compId.empty()) {
-        TAG_LOGI(AceLogTag::ACE_FORM, "JsOnClick compId is empty.Input parameter componentId check failed.");
+        TAG_LOGE(AceLogTag::ACE_FORM, "JsOnClick compId is empty.Input parameter componentId check failed.");
         return;
     }
 
     JSRef<JSVal> wantValue = JSRef<JSVal>::Cast(info[NUM_WANT_1]);
     if (wantValue->IsNull()) {
-        TAG_LOGI(AceLogTag::ACE_FORM, "JsOnClick wantValue is null");
+        TAG_LOGE(AceLogTag::ACE_FORM, "JsOnClick wantValue is null");
         return;
     }
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());

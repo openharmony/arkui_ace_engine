@@ -187,6 +187,11 @@ void AceContainer::InitializeFrontend()
         EngineHelper::AddEngine(instanceId_, jsEngine);
         declarativeFrontend->SetJsEngine(jsEngine);
         declarativeFrontend->SetPageProfile(pageProfile_);
+        if (PkgContextInfo_) {
+            declarativeFrontend->SetPkgNameList(PkgContextInfo_->GetPkgNameMap());
+            declarativeFrontend->SetPkgAliasList(PkgContextInfo_->GetPkgAliasMap());
+            declarativeFrontend->SetpkgContextInfoList(PkgContextInfo_->GetPkgContextInfoMap());
+        }
     } else if (type_ == FrontendType::JS_CARD) {
         AceApplicationInfo::GetInstance().SetCardType();
         frontend_ = AceType::MakeRefPtr<CardFrontend>();
@@ -200,6 +205,11 @@ void AceContainer::InitializeFrontend()
         cardFrontend->SetRunningCardId(0);
         cardFrontend->SetIsFormRender(true);
         cardFrontend->SetTaskExecutor(taskExecutor_);
+        if (PkgContextInfo_) {
+            cardFrontend->SetPkgNameList(PkgContextInfo_->GetPkgNameMap());
+            cardFrontend->SetPkgAliasList(PkgContextInfo_->GetPkgAliasMap());
+            cardFrontend->SetpkgContextInfoList(PkgContextInfo_->GetPkgContextInfoMap());
+        }
         SetIsFRSCardContainer(true);
     }
     ACE_DCHECK(frontend_);
@@ -289,6 +299,11 @@ void AceContainer::SetStageCardConfig(const std::string& pageProfile, const std:
         cardFront->SetFormSrc(selectUrl);
         cardFront->SetCardWindowConfig(stageCardParser->GetWindowConfig());
     }
+}
+
+void AceContainer::SetPkgContextInfo(const RefPtr<StagePkgContextInfo>& PkgContextInfo)
+{
+    PkgContextInfo_ = PkgContextInfo;
 }
 
 void AceContainer::InitializeCallback()

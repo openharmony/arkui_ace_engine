@@ -51,10 +51,11 @@ void UpdateSymbolBarButton(const RefPtr<BarItemNode>& barItemNode, const RefPtr<
     auto iconSize = theme->GetToolbarIconSize();
     if (symbol != nullptr) {
         // symbol -> symbol
-        symbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconNode)));
         auto symbolProperty = iconNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(symbolProperty);
         symbolProperty->UpdateSymbolColorList({iconColor});
+        // User-defined color overrides the default color of the theme
+        symbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconNode)));
         iconNode->MarkModifyDone();
         iconNode->MarkDirtyNode();
     } else {

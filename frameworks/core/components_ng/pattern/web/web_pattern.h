@@ -96,6 +96,7 @@ public:
     using OnControllerAttachedCallback = std::function<void()>;
     using PermissionClipboardCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     using OnOpenAppLinkCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
+    using DefaultFileSelectorShowCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     WebPattern();
     WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController,
                RenderMode type = RenderMode::ASYNC_RENDER, bool incognitoMode = false);
@@ -209,6 +210,16 @@ public:
     void SetPermissionClipboardCallback(PermissionClipboardCallback&& Callback)
     {
         permissionClipboardCallback_ = std::move(Callback);
+    }
+
+    void SetDefaultFileSelectorShowCallback(DefaultFileSelectorShowCallback&& Callback)
+    {
+        defaultFileSelectorShowCallback_ = std::move(Callback);
+    }
+
+    DefaultFileSelectorShowCallback GetDefaultFileSelectorShowCallback()
+    {
+        return defaultFileSelectorShowCallback_;
     }
 
     PermissionClipboardCallback GetPermissionClipboardCallback() const
@@ -448,6 +459,8 @@ public:
     bool IsSelectHandleReverse();
     void OnCompleteSwapWithNewSize();
     void OnResizeNotWork();
+    void UpdateOnFocusTextField(bool isFocus);
+    bool OnBackPressed() override;
     bool OnBackPressedForFullScreen() const;
     void SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterEvent>& fullScreenExitHandler);
     bool NotifyStartDragTask();
@@ -456,7 +469,8 @@ public:
     void UpdateJavaScriptOnDocumentEnd();
     void JavaScriptOnDocumentStart(const ScriptItems& scriptItems);
     void JavaScriptOnDocumentEnd(const ScriptItems& scriptItems);
-    void SetTouchEventInfo(const TouchEvent& touchEvent, TouchEventInfo& touchEventInfo);
+    void SetTouchEventInfo(const TouchEvent& touchEvent,
+        TouchEventInfo& touchEventInfo, const std::string& embdedId);
     DragRet GetDragAcceptableStatus();
     Offset GetDragOffset() const;
     void OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling);
@@ -501,6 +515,7 @@ public:
     std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);
     void Backward();
     void OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMenuOption);
+    void CloseKeyboard();
 
 private:
     friend class WebContextSelectOverlay;
@@ -664,9 +679,14 @@ private:
     RectF ComputeTouchHandleRect(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> touchHandle);
     void DelTouchOverlayInfoByTouchId(int32_t touchId);
     std::optional<OffsetF> GetCoordinatePoint();
-    void RegisterSelectPopupCallback(RefPtr<FrameNode>& menu,
+    static void InitSelectPopupMenuViewOption(const std::vector<RefPtr<FrameNode>>& options,
+        const std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback>& callback,
+        const std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam>& params,
+        const double& dipScale);
+    static void InitSelectPopupMenuView(RefPtr<FrameNode>& menuWrapper,
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback,
-        std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params);
+        std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
+        const double& dipScale);
     OffsetF GetSelectPopupPostion(std::shared_ptr<OHOS::NWeb::NWebSelectMenuBound> bound);
     void SetSelfAsParentOfWebCoreNode(std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> info) const;
     bool GetAccessibilityFocusRect(RectT<int32_t>& paintRect, int64_t accessibilityId) const;
@@ -709,6 +729,7 @@ private:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertTouchHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> beginTouchHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endTouchHandle);
+    double GetNewScale(double& scale);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -717,6 +738,7 @@ private:
     SetWebIdCallback setWebIdCallback_ = nullptr;
     PermissionClipboardCallback permissionClipboardCallback_ = nullptr;
     OnOpenAppLinkCallback onOpenAppLinkCallback_ = nullptr;
+    DefaultFileSelectorShowCallback defaultFileSelectorShowCallback_ = nullptr;
     RenderMode renderMode_;
     bool incognitoMode_ = false;
     SetHapPathCallback setHapPathCallback_ = nullptr;
@@ -808,8 +830,13 @@ private:
     ReachEdge isFlingReachEdge_ = { false, false };
     RefPtr<PinchGesture> pinchGesture_ = nullptr;
     std::queue<TouchEventInfo> touchEventQueue_;
-    std::unordered_map<int32_t, bool> naitve_map_;
     std::vector<NG::MenuOptionsParam> menuOptionParam_ {};
+    bool embedNeedKeyboard_ = false;
+    double startPinchScale_ = -1.0;
+    double preScale_ = -1.0;
+    double pageScale_ = 1.0;
+    int32_t pinchIndex_ = 0;
+    bool zoomOutSwitch_ = false;
 };
 } // namespace OHOS::Ace::NG
 

@@ -28,9 +28,9 @@ void TaskRunnerAdapterImpl::Initialize(bool useCurrentEventRunner, const std::st
     eventHandler_ = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner_);
 }
 
-void TaskRunnerAdapterImpl::PostTask(std::function<void()> task, const std::string& name)
+void TaskRunnerAdapterImpl::PostTask(std::function<void()> task, const std::string& name, PriorityType priorityType)
 {
-    eventHandler_->PostTask(std::move(task), name);
+    eventHandler_->PostTask(std::move(task), name, 0, ConvertPriority(priorityType));
 }
 
 void TaskRunnerAdapterImpl::PostTaskForTime(std::function<void()> task, uint32_t targetTime, const std::string& caller)
@@ -38,13 +38,33 @@ void TaskRunnerAdapterImpl::PostTaskForTime(std::function<void()> task, uint32_t
     eventHandler_->PostTimingTask(std::move(task), targetTime, "");
 }
 
-void TaskRunnerAdapterImpl::PostDelayedTask(std::function<void()> task, uint32_t delay, const std::string& name)
+void TaskRunnerAdapterImpl::PostDelayedTask(
+    std::function<void()> task, uint32_t delay, const std::string& name, PriorityType priorityType)
 {
-    eventHandler_->PostTask(std::move(task), name, delay);
+    eventHandler_->PostTask(std::move(task), name, delay, ConvertPriority(priorityType));
 }
 
 bool TaskRunnerAdapterImpl::RunsTasksOnCurrentThread()
 {
     return eventRunner_->IsCurrentRunnerThread();
+}
+
+AppExecFwk::EventQueue::Priority TaskRunnerAdapterImpl::ConvertPriority(PriorityType priorityType)
+{
+    switch (priorityType) {
+        case PriorityType::VIP:
+            return AppExecFwk::EventQueue::Priority::VIP;
+        case PriorityType::IMMEDIATE:
+            return AppExecFwk::EventQueue::Priority::IMMEDIATE;
+        case PriorityType::HIGH:
+            return AppExecFwk::EventQueue::Priority::HIGH;
+        case PriorityType::LOW:
+            return AppExecFwk::EventQueue::Priority::LOW;
+        case PriorityType::IDLE:
+            return AppExecFwk::EventQueue::Priority::IDLE;
+        default:
+            LOGW("unknown priority type");
+            return AppExecFwk::EventQueue::Priority::LOW;
+    }
 }
 } // namespace OHOS::Ace

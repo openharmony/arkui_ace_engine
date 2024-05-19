@@ -271,7 +271,8 @@ SelectionInfo TextPattern::GetSpansInfo(int32_t start, int32_t end, GetSpansMeth
         selection.SetResultObjectList(result);
         return selection;
     }
-    for (const auto& uinode : childNodes_) {
+    const auto& children = GetAllChildren();
+    for (const auto& uinode : children) {
         if (uinode->GetTag() == V2::IMAGE_ETS_TAG) {
             ResultObject resultObject = GetImageResultObject(uinode, index, realStart, realEnd);
             if (!resultObject.valueString.empty() || resultObject.valuePixelMap) {
@@ -358,7 +359,7 @@ void TextPattern::HandleSpanLongPressEvent(GestureEvent& info)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(renderContext);
     PointF textOffset = { static_cast<float>(localLocation.GetX()) - textContentRect.GetX(),
         static_cast<float>(localLocation.GetY()) - textContentRect.GetY() };
     if (renderContext->GetClipEdge().has_value() && !renderContext->GetClipEdge().value() && overlayMod_) {
@@ -975,7 +976,6 @@ void TextPattern::InitMouseEvent()
     auto mouseTask = [weak = WeakClaim(this)](MouseInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->sourceType_ = info.GetSourceDevice();
         pattern->HandleMouseEvent(info);
     };
     auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
@@ -1041,8 +1041,10 @@ void TextPattern::HandleMouseEvent(const MouseInfo& info)
         if (IsSelected()) {
             selectOverlay_->SetSelectionHoldCallback();
         }
+        sourceType_ = info.GetSourceDevice();
     } else if (info.GetButton() == MouseButton::RIGHT_BUTTON) {
         HandleMouseRightButton(info, textOffset);
+        sourceType_ = info.GetSourceDevice();
     }
 }
 
@@ -1356,7 +1358,7 @@ void TextPattern::UpdateSpanItemDragStatus(const std::list<ResultObject>& result
         }
         auto it = pattern->spans_.begin();
         if (resultObj.spanPosition.spanIndex >= static_cast<int32_t>(pattern->spans_.size())) {
-            std::advance(it, pattern->spans_.size() - 1);
+            std::advance(it, pattern->spans_.size() ? pattern->spans_.size() - 1 : 0);
             TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "resultObj.spanPosition.spanIndex is larger than spans size.");
         } else {
             std::advance(it, resultObj.spanPosition.spanIndex);
@@ -1534,6 +1536,11 @@ std::function<void(Offset)> TextPattern::GetThumbnailCallback()
     };
 }
 
+const std::list<RefPtr<UINode>>& TextPattern::GetAllChildren() const
+{
+    return childNodes_;
+}
+
 std::string TextPattern::GetSelectedSpanText(std::wstring value, int32_t start, int32_t end) const
 {
     if (start < 0 || end > static_cast<int32_t>(value.length()) || start >= end) {
@@ -1559,7 +1566,7 @@ TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
         fontFamilyValue += str;
         fontFamilyValue += ",";
     }
-    fontFamilyValue = fontFamilyValue.substr(0, fontFamilyValue.size() - 1);
+    fontFamilyValue = fontFamilyValue.substr(0, fontFamilyValue.size() ? fontFamilyValue.size() - 1 : 0);
     textStyle.fontFamily = !fontFamilyValue.empty() ? fontFamilyValue : defaultFontFamily.front();
     textStyle.decorationType = static_cast<int32_t>(node->GetTextDecorationValue(TextDecoration::NONE));
     textStyle.decorationColor = node->GetTextDecorationColorValue(Color::BLACK).ColorToString();
@@ -1691,7 +1698,7 @@ SymbolSpanStyle TextPattern::GetSymbolSpanStyleObject(const RefPtr<SpanNode>& no
     for (const auto& color : *symbolColors) {
         symbolColorValue += color.ColorToString() + ",";
     }
-    symbolColorValue = symbolColorValue.substr(0, symbolColorValue.size() - 1);
+    symbolColorValue = symbolColorValue.substr(0, symbolColorValue.size() ? symbolColorValue.size() - 1 : 0);
     symbolSpanStyle.symbolColor = !symbolColorValue.empty() ? symbolColorValue : SYMBOL_COLOR;
     symbolSpanStyle.fontSize = node->GetFontSizeValue(Dimension(DIMENSION_VALUE, DimensionUnit::VP)).ConvertToVp();
     symbolSpanStyle.fontWeight = static_cast<int32_t>(node->GetFontWeightValue(FontWeight::NORMAL));
@@ -1926,6 +1933,32 @@ void TextPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorF
     const auto& selector = GetTextSelector();
     auto result = "[" + std::to_string(selector.GetTextStart()) + "," + std::to_string(selector.GetTextEnd()) + "]";
     json->PutExtAttr("selection", result.c_str(), filter);
+    if (textStyle_.has_value() && textStyle_->GetAdaptTextSize()) {
+        auto adaptedFontSize = textStyle_->GetFontSize();
+        json->PutExtAttr("fontSize", adaptedFontSize.ToString().c_str(), filter);
+    } else {
+        auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProp);
+        json->PutExtAttr("fontSize", GetFontSizeInJson(textLayoutProp->GetFontSize()).c_str(), filter);
+    }
+    json->PutExtAttr("font", GetFontInJson().c_str(), filter);
+}
+
+std::string TextPattern::GetFontInJson() const
+{
+    auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProp, "");
+    auto jsonValue = JsonUtil::Create(true);
+    jsonValue->Put("style", GetFontStyleInJson(textLayoutProp->GetItalicFontStyle()).c_str());
+    if (textStyle_.has_value() && textStyle_->GetAdaptTextSize()) {
+        auto adaptedFontSize = textStyle_->GetFontSize();
+        jsonValue->Put("size", adaptedFontSize.ToString().c_str());
+    } else {
+        jsonValue->Put("size", GetFontSizeInJson(textLayoutProp->GetFontSize()).c_str());
+    }
+    jsonValue->Put("weight", GetFontWeightInJson(textLayoutProp->GetFontWeight()).c_str());
+    jsonValue->Put("family", GetFontFamilyInJson(textLayoutProp->GetFontFamily()).c_str());
+    return jsonValue->ToString();
 }
 
 void TextPattern::OnAfterModifyDone()
@@ -1970,6 +2003,9 @@ void TextPattern::ActSetSelection(int32_t start, int32_t end)
         ShowSelectOverlay();
     } else {
         CloseSelectOverlay();
+        if (IsSelected()) {
+            selectOverlay_->SetSelectionHoldCallback();
+        }
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -2262,14 +2298,7 @@ void TextPattern::CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanH
             textForDisplay_.append(StringUtils::Str16ToStr8(SYMBOL_TRANS));
             childNodes_.push_back(current.node);
         } else if (spanNode && tag != V2::PLACEHOLDER_SPAN_ETS_TAG) {
-            spanNode->CleanSpanItemChildren();
-            UpdateChildProperty(spanNode);
-            spanNode->MountToParagraph();
-            textForDisplay_.append(spanNode->GetSpanItem()->content);
-            dataDetectorAdapter_->textForAI_.append(spanNode->GetSpanItem()->content);
-            if (spanNode->GetSpanItem()->onClick) {
-                isSpanHasClick = true;
-            }
+            CollectTextSpanNodes(spanNode, isSpanHasClick);
             childNodes_.push_back(current.node);
         } else if (tag == V2::IMAGE_ETS_TAG || tag == V2::PLACEHOLDER_SPAN_ETS_TAG) {
             placeholderCount_++;
@@ -2296,6 +2325,18 @@ void TextPattern::CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanH
         for (auto iter = nextChildren.rbegin(); iter != nextChildren.rend(); ++iter) {
             nodes.push({ .node = *iter, .containerSpanNode = containerSpanNode });
         }
+    }
+}
+
+void TextPattern::CollectTextSpanNodes(const RefPtr<SpanNode>& spanNode, bool& isSpanHasClick)
+{
+    spanNode->CleanSpanItemChildren();
+    UpdateChildProperty(spanNode);
+    spanNode->MountToParagraph();
+    textForDisplay_.append(spanNode->GetSpanItem()->content);
+    dataDetectorAdapter_->textForAI_.append(spanNode->GetSpanItem()->content);
+    if (spanNode->GetSpanItem()->onClick) {
+        isSpanHasClick = true;
     }
 }
 
@@ -2462,11 +2503,12 @@ void TextPattern::DumpAdvanceInfo()
     CHECK_NULL_VOID(textLayoutProp);
     DumpLog::GetInstance().AddDesc(std::string("Content: ").append(textLayoutProp->GetContent().value_or(" ")));
     DumpLog::GetInstance().AddDesc(
-        std::string("FontColor: ").append(textLayoutProp->GetTextColor().value_or(Color::BLACK).ColorToString()));
+        std::string("FontColor: ")
+            .append((textStyle_.has_value() ? textStyle_->GetTextColor() : Color::BLACK).ColorToString()));
     DumpLog::GetInstance().AddDesc(
         std::string("FontSize: ")
-            .append(
-                (textStyle_.has_value() ? textStyle_->GetFontSize() : Dimension(16.0, DimensionUnit::FP)).ToString()));
+            .append((textStyle_.has_value() ? textStyle_->GetFontSize() : Dimension(DIMENSION_VALUE, DimensionUnit::FP))
+                        .ToString()));
     DumpLog::GetInstance().AddDesc(std::string("contentRect-->x:")
                                        .append(std::to_string(contentRect_.GetX()))
                                        .append(" y:")
@@ -2475,7 +2517,7 @@ void TextPattern::DumpAdvanceInfo()
     if (SystemProperties::GetDebugEnabled() && pManager_) {
         DumpLog::GetInstance().AddDesc(std::string("from TextEngine paragraphs_ info :"));
         DumpLog::GetInstance().AddDesc(
-            std::string("DidExceedMaxLinesx:").append(std::to_string(pManager_->DidExceedMaxLines())));
+            std::string("DidExceedMaxLines:").append(std::to_string(pManager_->DidExceedMaxLines())));
 
         DumpLog::GetInstance().AddDesc(std::string("GetTextWidth:")
                                            .append(std::to_string(pManager_->GetTextWidth()))
@@ -2501,14 +2543,23 @@ void TextPattern::DumpInfo()
     CHECK_NULL_VOID(textLayoutProp);
     DumpLog::GetInstance().AddDesc(std::string("Content: ").append(textLayoutProp->GetContent().value_or(" ")));
     DumpLog::GetInstance().AddDesc(
-        std::string("FontColor: ").append(textLayoutProp->GetTextColor().value_or(Color::BLACK).ColorToString()));
+        std::string("FontColor: ")
+            .append((textStyle_.has_value() ? textStyle_->GetTextColor() : Color::BLACK).ColorToString()));
     DumpLog::GetInstance().AddDesc(
         std::string("FontSize: ")
-            .append(
-                (textStyle_.has_value() ? textStyle_->GetFontSize() : Dimension(16.0, DimensionUnit::FP)).ToString()));
+            .append((textStyle_.has_value() ? textStyle_->GetFontSize() : Dimension(DIMENSION_VALUE, DimensionUnit::FP))
+                        .ToString()));
     DumpLog::GetInstance().AddDesc(std::string("Selection: ").append("(").append(textSelector_.ToString()).append(")"));
     DumpLog::GetInstance().AddDesc(
         std::string("LineBreakStrategy: ").append(GetLineBreakStrategyInJson(textStyle_->GetLineBreakStrategy())));
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (renderContext->HasForegroundColor() || renderContext->HasForegroundColorStrategy()) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("ForegroundColor: ").append(renderContext->GetForegroundColorValue().ColorToString()));
+    }
 }
 
 void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const
@@ -3093,6 +3144,7 @@ void TextPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
     imageNode->MarkModifyDone();
     imageItem->imageNodeId = imageNode->GetId();
     imageNode->SetImageItem(imageItem);
+    childNodes_.emplace_back(imageNode);
 }
 
 ImageSourceInfo TextPattern::CreateImageSourceInfo(const ImageSpanOptions& options)
@@ -3128,6 +3180,7 @@ void TextPattern::ProcessSpanString()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     textForDisplay_.clear();
+    childNodes_.clear();
     dataDetectorAdapter_->textForAI_.clear();
     host->Clean();
 
@@ -3179,5 +3232,15 @@ Offset TextPattern::ConvertGlobalToLocalOffset(const Offset& globalOffset)
     auto localPoint = OffsetF(globalOffset.GetX(), globalOffset.GetY());
     selectOverlay_->RevertLocalPointWithTransform(localPoint);
     return Offset(localPoint.GetX(), localPoint.GetY());
+}
+
+void TextPattern::SetExternalSpanItem(const std::list<RefPtr<SpanItem>>& spans)
+{
+    isSpanStringMode_ = !spans.empty();
+    spans_ = spans;
+    ProcessSpanString();
+    auto layoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateContent(textForDisplay_);
 }
 } // namespace OHOS::Ace::NG

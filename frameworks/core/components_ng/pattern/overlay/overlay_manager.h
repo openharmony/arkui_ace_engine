@@ -466,6 +466,7 @@ public:
         const RefPtr<UINode>& windowScene);
     void RemoveGatherNode();
     void RemoveGatherNodeWithAnimation();
+    void UpdateGatherNodeToTop();
     RefPtr<FrameNode> GetGatherNode() const
     {
         return gatherNodeWeak_.Upgrade();
@@ -496,6 +497,7 @@ public:
             menuMap_.erase(targetId);
         }
     }
+    void DumpOverlayInfo() const;
 
 private:
     void PopToast(int32_t targetId);
@@ -524,6 +526,7 @@ private:
     void CloseDialogInner(const RefPtr<FrameNode>& dialogNode);
 
     void ShowMenuAnimation(const RefPtr<FrameNode>& menu);
+    void SetPatternFirstShow(const RefPtr<FrameNode>& menu);
     void PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation = true, bool startDrag = false);
     void ClearMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation = true, bool startDrag = false);
     void ShowMenuClearAnimation(const RefPtr<FrameNode>& menu, AnimationOption& option,
@@ -590,14 +593,24 @@ private:
         std::optional<ModalTransition> modalTransition);
     void HandleModalPop(std::function<void()>&& onWillDisappear, const RefPtr<UINode> rootNode, int32_t targetId);
 
-    bool ExceptComponent(const RefPtr<NG::UINode>& rootNode, RefPtr<NG::FrameNode>& overlay,
+    int32_t ExceptComponent(const RefPtr<NG::UINode>& rootNode, RefPtr<NG::FrameNode>& overlay,
         bool isBackPressed, bool isPageRouter);
-    bool WebBackward(RefPtr<NG::FrameNode>& overlay);
+    int32_t WebBackward(RefPtr<NG::FrameNode>& overlay);
     void FindWebNode(const RefPtr<NG::UINode>& node, RefPtr<NG::FrameNode>& webNode);
 
     RefPtr<FrameNode> GetDialogNodeWithExistContent(const RefPtr<UINode>& node);
     void RegisterDialogLifeCycleCallback(const RefPtr<FrameNode>& dialog, const DialogProperties& dialogProps);
     void CustomDialogRecordEvent(const DialogProperties& dialogProps);
+
+    void DumpPopupMapInfo() const;
+    void DumpMapInfo(
+        std::unordered_map<int32_t, RefPtr<FrameNode>> map, const std::string mapName, bool hasTarget = true) const;
+    void DumpMapInfo(
+        std::unordered_map<int32_t, WeakPtr<FrameNode>> map, const std::string mapName, bool hasTarget = true) const;
+    void DumpMaskNodeIdMapInfo() const;
+    void DumpModalListInfo() const;
+    void DumpEntry(const RefPtr<FrameNode>& targetNode, int32_t targetId, const RefPtr<FrameNode>& node) const;
+    std::string GetMapNodeLog(const RefPtr<FrameNode>& node, bool hasTarget = true) const;
 
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index

@@ -199,6 +199,9 @@ private:
     void InitFocusEvent();
     void HandleFocusEvent();
     void HandleBlurEvent();
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
+    void OnIsFocusActiveUpdate(bool isFocusAcitve);
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -214,6 +217,7 @@ private:
     bool focusEventInitialized_ = false;
 
     std::optional<int32_t> mouseClickIndex_ = std::nullopt;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
     RefPtr<DotIndicatorModifier> dotIndicatorModifier_;
     SwiperIndicatorType swiperIndicatorType_ = SwiperIndicatorType::DOT;
     ACE_DISALLOW_COPY_AND_MOVE(SwiperIndicatorPattern);

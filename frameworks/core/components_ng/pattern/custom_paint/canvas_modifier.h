@@ -21,17 +21,9 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/modifier.h"
-#ifdef USE_ROSEN_DRAWING
 #include "core/components_ng/render/drawing.h"
-#endif
-
-namespace OHOS::Rosen {
-class RSRecordingCanvas;
-}
 
 namespace OHOS::Ace::NG {
-class Pattern;
-
 class CanvasModifier : public ContentModifier {
     DECLARE_ACE_TYPE(CanvasModifier, ContentModifier)
 
@@ -49,24 +41,16 @@ public:
         needRender_->Set(!needRender_->Get());
     }
 
-#ifndef USE_ROSEN_DRAWING
-    void UpdateCanvas(std::shared_ptr<OHOS::Rosen::RSRecordingCanvas> rsRecordingCanvas)
-#else
     void UpdateCanvas(std::shared_ptr<RSRecordingCanvas> rsRecordingCanvas)
-#endif
     {
         rsRecordingCanvas_ = rsRecordingCanvas;
     }
 
 private:
     RefPtr<PropertyBool> needRender_;
-#ifndef USE_ROSEN_DRAWING
-    std::shared_ptr<OHOS::Rosen::RSRecordingCanvas> rsRecordingCanvas_;
-#else
     std::shared_ptr<RSRecordingCanvas> rsRecordingCanvas_;
-#endif
-    SizeT<int32_t> recordingCanvasDrawSize_ = {0.0f, 0.0f};
-    SizeT<int32_t> drawCmdSize_ = {0.0f, 0.0f};
+    SizeT<int32_t> recordingCanvasDrawSize_ = { 0.0f, 0.0f };
+    SizeT<int32_t> drawCmdSize_ = { 0.0f, 0.0f };
     ACE_DISALLOW_COPY_AND_MOVE(CanvasModifier);
 };
 } // namespace OHOS::Ace::NG

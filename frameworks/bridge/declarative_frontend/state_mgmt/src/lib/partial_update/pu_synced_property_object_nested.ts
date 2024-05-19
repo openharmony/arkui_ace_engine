@@ -54,10 +54,6 @@ class SynchedPropertyNestedObjectPU<C extends Object>
     super.aboutToBeDeleted();
   }
 
-  public debugInfoDecorator() : string {
-    return `@ObjectLink (class SynchedPropertyNestedObjectPU)`;
-  }
-
   public getUnmonitored(): C {
     stateMgmtConsole.propertyAccess(`${this.debugInfo()}: getUnmonitored.`);
     // unmonitored get access , no call to notifyPropertyRead !

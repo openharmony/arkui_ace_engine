@@ -95,6 +95,10 @@ class ArkRatingComponent extends ArkComponent implements RatingAttribute {
   onChange(callback: (value: number) => void): this {
     throw new Error('Method not implemented.');
   }
+  contentModifier(value: ContentModifier<RatingConfiguration>): this {
+    this.setContentModifier(value);
+    return this;
+  }
   setContentModifier(modifier: ContentModifier<RatingConfiguration>): this {
     if (modifier === undefined || modifier === null) {
       getUINativeModule().rating.setContentModifierBuilder(this.nativePtr, false);

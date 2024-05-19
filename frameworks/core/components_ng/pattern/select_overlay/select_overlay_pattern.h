@@ -160,8 +160,15 @@ public:
         return info_ && info_->menuInfo.menuBuilder != nullptr;
     }
 
+    bool IsHiddenHandle()
+    {
+        return isHiddenHandle_;
+    }
+
     void StartHiddenHandleTask(bool isDelay = true);
     void UpdateSelectArea(const RectF& selectArea);
+
+    void SetIsNewAvoid(bool isNewAvoid);
 
 protected:
     virtual void CheckHandleReverse();

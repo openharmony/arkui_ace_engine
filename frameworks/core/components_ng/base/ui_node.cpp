@@ -344,6 +344,56 @@ void UINode::DoAddChild(
     MarkNeedSyncRenderTree(true);
 }
 
+void UINode::GetBestBreakPoint(RefPtr<UINode>& breakPointChild, RefPtr<UINode>& breakPointParent)
+{
+    while (breakPointParent && !breakPointChild->IsDisappearing()) {
+        // recursively looking up the node tree, until we reach the breaking point (IsDisappearing() == true).
+        // Because when trigger transition, only the breakPoint will be marked as disappearing and
+        // moved to disappearingChildren.
+        breakPointChild = breakPointParent;
+        breakPointParent = breakPointParent->GetParent();
+    }
+    RefPtr<UINode> betterChild = breakPointChild;
+    RefPtr<UINode> betterParent = breakPointParent;
+    // when current breakPointParent is UINode, looking up the node tree to see whether there is a better breakPoint.
+    while (betterParent && !InstanceOf<FrameNode>(betterParent)) {
+        if (betterChild->IsDisappearing()) {
+            if (!betterChild->RemoveImmediately()) {
+                break;
+            }
+            breakPointChild = betterChild;
+            breakPointParent = betterParent;
+        }
+        betterChild = betterParent;
+        betterParent = betterParent->GetParent();
+    }
+}
+
+void UINode::RemoveFromParentCleanly(const RefPtr<UINode>& child, const RefPtr<UINode>& parent)
+{
+    if (!parent->RemoveDisappearingChild(child)) {
+        auto& children = parent->ModifyChildren();
+        auto iter = std::find(children.begin(), children.end(), child);
+        if (iter != children.end()) {
+            children.erase(iter);
+        }
+    }
+    auto frameChild = DynamicCast<FrameNode>(child);
+    if (frameChild->GetRenderContext()->HasTransitionOutAnimation()) {
+        // delete the real breakPoint.
+        RefPtr<UINode> breakPointChild = child;
+        RefPtr<UINode> breakPointParent = parent;
+        GetBestBreakPoint(breakPointChild, breakPointParent);
+        if (breakPointParent && breakPointChild->RemoveImmediately()) {
+            // Result of RemoveImmediately of the breakPointChild is true and
+            // result of RemoveImmediately of the child is false,
+            // so breakPointChild must be different from child in this branch.
+            breakPointParent->RemoveDisappearingChild(breakPointChild);
+            breakPointParent->MarkNeedSyncRenderTree();
+        }
+    }
+}
+
 RefPtr<FrameNode> UINode::GetParentFrameNode() const
 {
     auto parent = GetParent();
@@ -538,10 +588,10 @@ void UINode::AdjustParentLayoutFlag(PropertyChangeFlag& flag)
     }
 }
 
-void UINode::MarkDirtyNode(PropertyChangeFlag extraFlag, bool childExpansiveAndMark)
+void UINode::MarkDirtyNode(PropertyChangeFlag extraFlag)
 {
     for (const auto& child : GetChildren()) {
-        child->MarkDirtyNode(extraFlag, childExpansiveAndMark);
+        child->MarkDirtyNode(extraFlag);
     }
 }
 

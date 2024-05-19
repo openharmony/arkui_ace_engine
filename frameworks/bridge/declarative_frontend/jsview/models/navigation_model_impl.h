@@ -61,6 +61,7 @@ public:
     void SetOnNavigationModeChange(std::function<void(NG::NavigationMode)>&& modeChange) override;
     void SetIsCustomAnimation(bool isCustom) override;
     void SetCustomTransition(NavigationTransitionEvent&& animationTransition) override;
+    void SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) override;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_NAVIGATION_MODEL_IMPL_H

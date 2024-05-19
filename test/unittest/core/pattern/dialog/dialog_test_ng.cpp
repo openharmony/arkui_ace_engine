@@ -665,7 +665,7 @@ HWTEST_F(DialogPatternTestNg, CustomDialogTestNg001, TestSize.Level1)
     param.maskColor = Color::BLACK;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<DialogTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
     /**
      * @tc.steps: step2. create dialog node.
      * @tc.expected: the dialog node created successfully.
@@ -694,7 +694,7 @@ HWTEST_F(DialogPatternTestNg, CustomDialogTestNg002, TestSize.Level1)
     param.type = DialogType::ALERT_DIALOG;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<DialogTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
     /**
      * @tc.steps: step2. create dialog node.
      * @tc.expected: the dialog node created successfully.
@@ -723,7 +723,7 @@ HWTEST_F(DialogPatternTestNg, CustomDialogTestNg003, TestSize.Level1)
     param.type = DialogType::ACTION_SHEET;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<DialogTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
     /**
      * @tc.steps: step2. create dialog node.
      * @tc.expected: the dialog node created successfully.
@@ -753,7 +753,7 @@ HWTEST_F(DialogPatternTestNg, CustomDialogTestNg004, TestSize.Level1)
     param.openAnimation = animationOption;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<DialogTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
     /**
      * @tc.steps: step2. create dialog node.
      * @tc.expected: the dialog node created successfully.
@@ -799,7 +799,7 @@ HWTEST_F(DialogPatternTestNg, CustomDialogTestNg005, TestSize.Level1)
     param.autoCancel = false;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<DialogTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
     /**
      * @tc.steps: step2. create dialog node.
      * @tc.expected: the dialog node created successfully.

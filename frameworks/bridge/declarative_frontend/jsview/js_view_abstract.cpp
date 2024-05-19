@@ -1524,6 +1524,26 @@ void ParseCommonEdgeWidthsProps(const JSRef<JSObject>& object, CommonCalcDimensi
     }
     ParseEdgeWidthsProps(object, commonCalcDimension);
 }
+
+bool ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result)
+{
+    if (jsValue->IsNumber()) {
+        result = CalcDimension(jsValue->ToNumber<double>(), DimensionUnit::FP);
+        return true;
+    }
+    if (jsValue->IsString()) {
+        auto value = jsValue->ToString();
+        return StringUtils::StringToCalcDimensionNG(value, result, false, DimensionUnit::FP);
+    }
+    if (jsValue->IsObject()) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+        double value = jsObj->GetProperty("value")->ToNumber<double>();
+        auto unit = static_cast<DimensionUnit>(jsObj->GetProperty("unit")->ToNumber<int32_t>());
+        result = CalcDimension(value, unit);
+        return true;
+    }
+    return false;
+}
 } // namespace
 
 RefPtr<ResourceObject> GetResourceObject(const JSRef<JSObject>& jsObj)
@@ -4906,27 +4926,9 @@ bool JSViewAbstract::ParseColorMetricsToColor(const JSRef<JSVal>& jsValue, Color
     return false;
 }
 
-bool JSViewAbstract::ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result)
+bool JSViewAbstract::ParseLengthMetricsToPositiveDimension(const JSRef<JSVal>& jsValue, CalcDimension& result)
 {
-    if (jsValue->IsNumber()) {
-        result = CalcDimension(jsValue->ToNumber<double>(), DimensionUnit::FP);
-        return true;
-    }
-    if (jsValue->IsString()) {
-        auto value = jsValue->ToString();
-        return StringUtils::StringToCalcDimensionNG(value, result, false, DimensionUnit::FP);
-    }
-    if (jsValue->IsObject()) {
-        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-        double value = jsObj->GetProperty("value")->ToNumber<double>();
-        if (LessNotEqual(value, 0.0f)) {
-            return false;
-        }
-        auto unit = static_cast<DimensionUnit>(jsObj->GetProperty("unit")->ToNumber<int32_t>());
-        result = CalcDimension(value, unit);
-        return true;
-    }
-    return false;
+    return ParseLengthMetricsToDimension(jsValue, result) ? GreatOrEqual(result.Value(), 0.0f) : false;
 }
 
 bool JSViewAbstract::ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& result)
@@ -5168,20 +5170,41 @@ bool JSViewAbstract::ParseJsSymbolId(
         return false;
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    CompleteResourceObject(jsObj);
     JSRef<JSVal> resId = jsObj->GetProperty("id");
     if (resId->IsNull() || !resId->IsNumber()) {
         return false;
     }
     auto resourceObject = GetResourceObject(jsObj);
-    symbolResourceObject = resourceObject;
-    if (!resourceObject) {
-        return false;
-    }
     auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+    symbolResourceObject = resourceObject;
     if (!resourceWrapper) {
         return false;
     }
-    auto symbol = resourceWrapper->GetSymbolById(resId->ToNumber<uint32_t>());
+    if (!resourceObject) {
+        return false;
+    }
+ 
+    auto resIdNum = resId->ToNumber<int32_t>();
+    if (resIdNum == -1) {
+        if (!IsGetResourceByName(jsObj)) {
+            return false;
+        }
+        JSRef<JSVal> args = jsObj->GetProperty("params");
+        if (!args->IsArray()) {
+            return false;
+        }
+        JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
+        auto param = params->GetValueAt(0);
+        auto symbol = resourceWrapper->GetSymbolByName(param->ToString().c_str());
+        if (!symbol) {
+            return false;
+        }
+        symbolId = symbol;
+        return true;
+    }
+ 
+    auto symbol = resourceWrapper->GetSymbolById(resIdNum);
     if (!symbol) {
         return false;
     }
@@ -6748,7 +6771,7 @@ void JSViewAbstract::JsFocusBox(const JSCallbackInfo& info)
         style.margin = margin;
     }
     CalcDimension strokeWidth;
-    if (ParseLengthMetricsToDimension(obj->GetProperty("strokeWidth"), strokeWidth)) {
+    if (ParseLengthMetricsToPositiveDimension(obj->GetProperty("strokeWidth"), strokeWidth)) {
         style.strokeWidth = strokeWidth;
     }
     Color strokeColor;
@@ -9795,7 +9818,7 @@ void JSViewAbstract::JsFocusScopePriority(const JSCallbackInfo& info)
 }
 
 void JSViewAbstract::SetSymbolOptionApply(const JSCallbackInfo& info,
-    std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const JSRef<JSObject> modifierObj)
+    std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const JSRef<JSVal> modifierObj)
 {
     auto vm = info.GetVm();
     auto globalObj = JSNApi::GetGlobalObject(vm);
@@ -9805,7 +9828,7 @@ void JSViewAbstract::SetSymbolOptionApply(const JSCallbackInfo& info,
     if (globalFuncRef->IsFunction()) {
         RefPtr<JsFunction> jsFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(globalFuncRef));
-        if (modifierObj->IsUndefined()) {
+        if (!modifierObj->IsObject()) {
             symbolApply = nullptr;
         } else {
             auto onApply = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),

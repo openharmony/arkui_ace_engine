@@ -38,6 +38,10 @@ common_napi_libs = [
   "graphics/display_sync",
 ]
 
+if (is_arkui_x) {
+  common_napi_libs += [ "arkui/drawabledescriptor" ]
+}
+
 template("ace_napi_lib") {
   forward_variables_from(invoker, "*")
 

@@ -83,12 +83,13 @@ const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALI
 const std::vector<std::string> INPUT_FONT_FAMILY_VALUE = { "sans-serif" };
 const std::vector<WordBreak> WORD_BREAK_TYPES = { WordBreak::NORMAL, WordBreak::BREAK_ALL, WordBreak::BREAK_WORD };
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
-    TextOverflow::MARQUEE };
+    TextOverflow::MARQUEE, TextOverflow::DEFAULT };
 constexpr uint32_t MAX_LINES = 3;
 constexpr uint32_t MINI_VAILD_VALUE = 1;
 constexpr uint32_t MAX_VAILD_VALUE = 100;
 constexpr uint32_t ILLEGAL_VALUE = 0;
 constexpr uint32_t DEFAULT_MODE = -1;
+constexpr uint32_t DEFAULT_OVERFLOW = 4;
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
 constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyle::SOLID;
@@ -402,11 +403,16 @@ void JSTextField::SetCaretStyle(const JSCallbackInfo& info)
 
         // set caret color
         Color caretColor;
-        auto caretColorProp = paramObject->GetProperty("color");
-        if (caretColorProp->IsUndefined() || caretColorProp->IsNull() || !ParseJsColor(caretColorProp, caretColor)) {
-            caretColor = theme->GetCursorColor();
+        if (!paramObject->HasProperty("color")) {
+            return;
+        } else {
+            auto caretColorProp = paramObject->GetProperty("color");
+            if (caretColorProp->IsUndefined() || caretColorProp->IsNull()
+                || !ParseJsColor(caretColorProp, caretColor)) {
+                caretColor = theme->GetCursorColor();
+            }
+            TextFieldModel::GetInstance()->SetCaretColor(caretColor);
         }
-        TextFieldModel::GetInstance()->SetCaretColor(caretColor);
     }
 }
 
@@ -1535,7 +1541,7 @@ void JSTextField::SetMaxFontSize(const JSCallbackInfo& info)
 void JSTextField::SetHeightAdaptivePolicy(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(HEIGHT_ADAPTIVE_POLICY.size())) {
-        return;
+        value = 0;
     }
     TextFieldModel::GetInstance()->SetHeightAdaptivePolicy(HEIGHT_ADAPTIVE_POLICY[value]);
 }
@@ -1568,7 +1574,7 @@ void JSTextField::SetLineHeight(const JSCallbackInfo& info)
 void JSTextField::SetLineSpacing(const JSCallbackInfo& info)
 {
     CalcDimension value;
-    if (!ParseLengthMetricsToDimension(info[0], value)) {
+    if (!ParseLengthMetricsToPositiveDimension(info[0], value)) {
         value.Reset();
     }
     if (value.IsNegative()) {
@@ -1583,11 +1589,10 @@ void JSTextField::SetFontFeature(const JSCallbackInfo& info)
         return;
     }
     auto jsValue = info[0];
-    if (!jsValue->IsString()) {
-        return;
+    std::string fontFeatureSettings = "";
+    if (jsValue->IsString()) {
+        fontFeatureSettings = jsValue->ToString();
     }
-
-    std::string fontFeatureSettings = jsValue->ToString();
     TextFieldModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
 }
 
@@ -1599,13 +1604,12 @@ void JSTextField::SetTextOverflow(const JSCallbackInfo& info)
         if (info.Length() < 1) {
             break;
         }
-        if (!tmpInfo->IsNumber() && !tmpInfo->IsUndefined()) {
-            break;
-        }
-        if (!tmpInfo->IsUndefined()) {
+        if (tmpInfo->IsUndefined() || tmpInfo->IsNull() || !tmpInfo->IsNumber()) {
+            overflow = DEFAULT_OVERFLOW;
+        } else if (tmpInfo->IsNumber()) {
             overflow = tmpInfo->ToNumber<int32_t>();
             if (overflow < 0 || overflow >= static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
-                break;
+                overflow = DEFAULT_OVERFLOW;
             }
         }
         TextFieldModel::GetInstance()->SetTextOverflow(TEXT_OVERFLOWS[overflow]);

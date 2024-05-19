@@ -19,6 +19,8 @@
 #include <functional>
 #include <string>
 
+#include "interfaces/native/node/styled_string.h"
+
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/text/text_model.h"
 
@@ -80,7 +82,8 @@ public:
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& content);
     static void InitText(FrameNode* frameNode, std::string& value);
-    static void InitTextController(FrameNode* frameNode, const RefPtr<SpanStringBase>& spanBase);
+    static void InitSpanStringController(FrameNode* frameNode, const RefPtr<SpanStringBase>& spanBase);
+    static RefPtr<TextControllerBase> InitTextController(FrameNode* frameNode);
     static void SetFontWeight(FrameNode* frameNode, Ace::FontWeight value);
     static void SetItalicFontStyle(FrameNode* frameNode, Ace::FontStyle value);
     static void SetTextAlign(FrameNode* frameNode, Ace::TextAlign value);
@@ -113,6 +116,7 @@ public:
     static void SetTextDetectConfig(FrameNode* frameNode, const std::string& value);
     static void SetOnDetectResultUpdate(FrameNode* frameNode,  std::function<void(const std::string&)>&& onResult);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value);
+    static void SetTextContentWithStyledString(FrameNode* frameNode, ArkUI_StyledString* value);
     static std::vector<std::string> GetFontFamily(FrameNode* frameNode);
     static CopyOptions GetCopyOption(FrameNode* frameNode);
     static TextMarqueeOptions GetMarqueeOptions(FrameNode* frameNode);
