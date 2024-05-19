@@ -422,50 +422,6 @@ void SheetPresentationPattern::ChangeSheetPage(float height)
     ProcessColumnRect(height);
 }
 
-void SheetPresentationPattern::OnCoordScrollStart()
-{
-    if (animation_ && isAnimationProcess_) {
-        AnimationUtils::StopAnimation(animation_);
-        isAnimationBreak_ = true;
-    }
-    currentOffset_ = 0.0f;
-}
-
-bool SheetPresentationPattern::OnCoordScrollUpdate(float scrollOffset)
-{
-    if (!GetShowState() || !IsScrollable()) {
-        return false;
-    }
-
-    auto sheetType = GetSheetType();
-    auto sheetDetentsSize = sheetDetentHeight_.size();
-    if ((sheetType == SheetType::SHEET_POPUP) || (sheetDetentsSize == 0)) {
-        return false;
-    }
-    auto height = height_ + sheetHeightUp_;
-    if ((NearZero(currentOffset_)) && (LessNotEqual(scrollOffset, 0.0f)) &&
-        (GreatOrEqual(height, sheetDetentHeight_[sheetDetentsSize - 1]))) {
-        return false;
-    }
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    currentOffset_ = currentOffset_ + scrollOffset;
-    auto pageHeight = GetPageHeight();
-    auto offset = pageHeight - height + currentOffset_;
-    if (LessOrEqual(offset, pageHeight - sheetMaxHeight_)) {
-        offset = pageHeight - sheetMaxHeight_;
-        currentOffset_ = height - sheetMaxHeight_;
-    }
-    ProcessColumnRect(height - currentOffset_);
-    auto renderContext = host->GetRenderContext();
-    renderContext->UpdateTransformTranslate({ 0.0f, offset, 0.0f });
-    return true;
-}
-
-void SheetPresentationPattern::OnCoordScrollEnd(float dragVelocity)
-{
-    HandleDragEnd(dragVelocity);
-}
 void SheetPresentationPattern::InitialLayoutProps()
 {
     CheckSheetHeightChange();
@@ -1802,4 +1758,93 @@ float SheetPresentationPattern::GetTitleHeight()
     auto titleHeight = titleGeometryNode->GetFrameSize().Height();
     return titleHeight;
 }
+
+void SheetPresentationPattern::OnScrollStartRecursive(float position, float velocity)
+{
+    if (animation_ && isAnimationProcess_) {
+        AnimationUtils::StopAnimation(animation_);
+        isAnimationBreak_ = true;
+    }
+    currentOffset_ = 0.0f;
+    isSheetNeedScroll_ = false;
+}
+
+ScrollResult SheetPresentationPattern::HandleScroll(float scrollOffset, int32_t source, NestedState state,
+    float velocity)
+{
+    ScrollResult result = {0, true};
+    if (GreatOrEqual(currentOffset_, 0.0) && (source == SCROLL_FROM_UPDATE) && !isSheetNeedScroll_) {
+        isSheetNeedScroll_ = true;
+    }
+    if (!isSheetNeedScroll_) {
+        return {scrollOffset, true};
+    }
+    ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
+    if (state == NestedState::CHILD_SCROLL) {
+        if (scrollState == ScrollState::SCROLL) {
+            return HandleScrollWithSheet(scrollOffset);
+        }
+        if (isSheetPosChanged_) {
+            HandleDragEnd(SHEET_VELOCITY_THRESHOLD);
+            isSheetPosChanged_ = false;
+        }
+    } else if (state == NestedState::CHILD_OVER_SCROLL) {
+        isSheetNeedScroll_ = false;
+        return {scrollOffset, true};
+    }
+    return result;
+}
+
+ScrollResult SheetPresentationPattern::HandleScrollWithSheet(float scrollOffset)
+{
+    ScrollResult result = {0, true};
+    auto sheetType = GetSheetType();
+    auto sheetDetentsSize = sheetDetentHeight_.size();
+    if ((sheetType == SheetType::SHEET_POPUP) || (sheetDetentsSize == 0)) {
+        isSheetNeedScroll_ = false;
+        return {scrollOffset, true};
+    }
+    auto currentHeightPos = height_ + sheetHeightUp_;
+    if ((NearZero(currentOffset_)) && (LessNotEqual(scrollOffset, 0.0f)) &&
+        (GreatOrEqual(currentHeightPos, sheetDetentHeight_[sheetDetentsSize - 1]))) {
+        isSheetNeedScroll_ = false;
+        return {scrollOffset, true};
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, result);
+    currentOffset_ = currentOffset_ + scrollOffset;
+    auto pageHeight = GetPageHeightWithoutOffset();
+    auto sheetOffsetInPage = pageHeight - currentHeightPos + currentOffset_;
+    if (LessOrEqual(sheetOffsetInPage, pageHeight - sheetMaxHeight_)) {
+        sheetOffsetInPage = pageHeight - sheetMaxHeight_;
+        currentOffset_ = currentHeightPos - sheetMaxHeight_;
+    }
+    ProcessColumnRect(currentHeightPos - currentOffset_);
+    auto renderContext = host->GetRenderContext();
+    renderContext->UpdateTransformTranslate({ 0.0f, sheetOffsetInPage, 0.0f });
+    isSheetPosChanged_ = true;
+    return result;
+}
+
+void SheetPresentationPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
+{
+    if (isSheetPosChanged_) {
+        HandleDragEnd(velocity.value_or(0.f));
+        isSheetPosChanged_ = false;
+    }
+}
+
+bool SheetPresentationPattern::HandleScrollVelocity(float velocity)
+{
+    if (isSheetPosChanged_) {
+        HandleDragEnd(velocity);
+        isSheetPosChanged_ = false;
+    }
+    // Use child edge effect
+    if (!isSheetNeedScroll_) {
+        return false;
+    }
+    return true;
+}
+
 } // namespace OHOS::Ace::NG

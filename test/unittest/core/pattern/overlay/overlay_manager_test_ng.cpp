@@ -1154,7 +1154,7 @@ HWTEST_F(OverlayManagerTestNg, HandleDragUpdate001, TestSize.Level1)
     topSheetPattern->height_ = 20;
     topSheetPattern->pageHeight_ = 50;
     topSheetPattern->sheetMaxHeight_ = 30;
-    topSheetPattern->OnCoordScrollStart();
+    topSheetPattern->HandleDragStart();
     GestureEvent info;
     info.SetMainDelta(MINUS_HEIGHT);
     topSheetPattern->HandleDragUpdate(info);
@@ -1167,14 +1167,6 @@ HWTEST_F(OverlayManagerTestNg, HandleDragUpdate001, TestSize.Level1)
     topSheetPattern->currentOffset_ = -5;
     topSheetPattern->HandleDragUpdate(info);
     EXPECT_TRUE(NearEqual(topSheetPattern->currentOffset_, -10));
-
-    /**
-     * @tc.steps: step5. Do OnCoordScrollUpdate when scrollOffset < 0 and showstate = true.
-     * @tc.expected: return false
-     */
-    topSheetPattern->OnCoordScrollEnd(*topSheetPattern->sheetDetentHeight_.end());
-    auto ret = topSheetPattern->OnCoordScrollUpdate(*topSheetPattern->sheetDetentHeight_.end());
-    EXPECT_FALSE(ret);
 }
 /**
  * @tc.name: TestOnBindSheet

@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/overlay/sheet_presentation_layout_algorithm.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_property.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
+#include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -40,8 +41,10 @@ enum class BindSheetDismissReason {
     CLOSE_BUTTON,
     SLIDE_DOWN,
 };
-class ACE_EXPORT SheetPresentationPattern : public LinearLayoutPattern, public PopupBasePattern, public FocusView {
-    DECLARE_ACE_TYPE(SheetPresentationPattern, LinearLayoutPattern, PopupBasePattern, FocusView);
+class ACE_EXPORT SheetPresentationPattern :
+    public LinearLayoutPattern, public PopupBasePattern, public FocusView, public NestableScrollContainer{
+    DECLARE_ACE_TYPE(SheetPresentationPattern,
+        LinearLayoutPattern, PopupBasePattern, FocusView, NestableScrollContainer);
 
 public:
     SheetPresentationPattern(
@@ -288,12 +291,6 @@ public:
 
     void HandleDragEnd(float dragVelocity);
 
-    void OnCoordScrollStart();
-
-    bool OnCoordScrollUpdate(float scrollOffset);
-
-    void OnCoordScrollEnd(float dragVelocity);
-
     void SheetTransition(bool isTransitionIn, float dragVelocity = 0.0f);
 
     void ModifyFireSheetTransition(float dragVelocity = 0.0f);
@@ -509,6 +506,18 @@ public:
     void ChangeSheetPage(float height);
     void DumpAdvanceInfo() override;
     float GetTitleHeight();
+
+    // Nestable Scroll
+    Axis GetAxis() const override
+    {
+        return Axis::VERTICAL;
+    }
+    ScrollResult HandleScroll(float scrollOffset, int32_t source,
+        NestedState state = NestedState::GESTURE, float velocity = 0.f) override;
+    void OnScrollStartRecursive(float position, float dragVelocity = 0.0f) override;
+    void OnScrollEndRecursive (const std::optional<float>& velocity) override;
+    bool HandleScrollVelocity(float velocity) override;
+    ScrollResult HandleScrollWithSheet(float scrollOffset);
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
@@ -598,6 +607,8 @@ private:
     bool show_ = true;
     bool isDrag_ = false;
     bool isNeedProcessHeight_ = false;
+    bool isSheetNeedScroll_ = false; // true if Sheet is ready to receive scroll offset.
+    bool isSheetPosChanged_ = false; // UpdateTransformTranslate end
 
     double start_ = 0.0; // start position of detents changed
     RefPtr<NodeAnimatablePropertyFloat> property_;
