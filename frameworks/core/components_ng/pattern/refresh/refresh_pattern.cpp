@@ -304,18 +304,17 @@ void RefreshPattern::InitChildNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    auto accessibilityLevel = accessibilityProperty->GetAccessibilityLevel();
     if (isCustomBuilderExist_) {
         if (progressChild_) {
             if (HasLoadingText()) {
                 CHECK_NULL_VOID(columnNode_);
-                host->RemoveChild(loadingTextNode_);
-                loadingTextNode_ = nullptr;
-                host->RemoveChild(progressChild_);
-                progressChild_ = nullptr;
-                auto host = GetHost();
-                CHECK_NULL_VOID(host);
                 host->RemoveChild(columnNode_);
                 columnNode_ = nullptr;
+                progressChild_ = nullptr;
+                loadingTextNode_ = nullptr;
             } else {
                 host->RemoveChild(progressChild_);
                 progressChild_ = nullptr;
@@ -331,6 +330,10 @@ void RefreshPattern::InitChildNode()
         } else {
             UpdateLoadingProgress();
         }
+    } else {
+        auto progressAccessibilityProperty = progressChild_->GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_VOID(progressAccessibilityProperty);
+        progressAccessibilityProperty->SetAccessibilityLevel(accessibilityLevel);
     }
 
     if (HasLoadingText()) {
@@ -340,6 +343,9 @@ void RefreshPattern::InitChildNode()
         CHECK_NULL_VOID(layoutProperty);
         loadingTextLayoutProperty->UpdateContent(layoutProperty->GetLoadingTextValue());
         loadingTextNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        auto textAccessibilityProperty = loadingTextNode_->GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_VOID(textAccessibilityProperty);
+        textAccessibilityProperty->SetAccessibilityLevel(accessibilityLevel);
     }
 
     OnColorConfigurationUpdate();
