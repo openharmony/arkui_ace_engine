@@ -22,7 +22,7 @@ const util = requireNapi('util');
 
 const tag = 'AddFormMenuItem::js::';
 
-async function querySnapshot(want, componentId) {
+async function querySnapshotAsync(want, componentId) {
   let compInfo = componentUtils.getRectangleById(componentId);
   try {
     const imagePackageApi = image.createImagePacker();
@@ -46,6 +46,11 @@ async function querySnapshot(want, componentId) {
   }
 }
 
+function querySnapshot(want, componentId) {
+  querySnapshotAsync(want, componentId);
+  return true;
+}
+
 /**
  * Build function of AddFormMenuItem.
  *
@@ -55,8 +60,20 @@ async function querySnapshot(want, componentId) {
  * @syscap SystemCapability.ArkUI.ArkUI.Full
  * @since 12
  */
-export async function AddFormMenuItem(want, componentId, options = {}) {
-  this.observeComponentCreation2(() => {
+export function AddFormMenuItem(want, componentId, options, parent = null) {
+  this.observeComponentCreation2((elmtId, isInitialRender) => {
+    If.create();
+    if (querySnapshot(want, componentId)) {
+      this.ifElseBranchUpdateFunction(0, () => {
+      });
+    }
+    else {
+      this.ifElseBranchUpdateFunction(1, () => {
+      });
+    }
+  }, If);
+  If.pop();
+  this.observeComponentCreation2((elmtId, isInitialRender) => {
     FormMenuItem.create(options?.style?.options ? options.style.options : {
       startIcon: {
         'id': 125830229,
@@ -72,10 +89,6 @@ export async function AddFormMenuItem(want, componentId, options = {}) {
         'bundleName': '',
         'moduleName': ''
       }
-    });
-    FormMenuItem.onAppear(async () => {
-      await querySnapshot(want, componentId);
-      FormMenuItem.onClick(() => { }, want, componentId, options?.formBindingData, options?.callback);
     });
     FormMenuItem.onClick(() => { }, want, componentId, options?.formBindingData, options?.callback);
   }, FormMenuItem);
