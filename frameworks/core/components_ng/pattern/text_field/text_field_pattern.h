@@ -1434,6 +1434,8 @@ private:
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
     void HandleCountStyle();
     void HandleDeleteOnCounterScene();
+    bool ParseJsonValue(const std::unique_ptr<JsonValue>& jsonObject,
+        std::unordered_map<std::string, std::variant<std::string, bool, int32_t>>& map);
     void HandleContentSizeChange(const RectF& textRect);
     void UpdatePreviewIndex(int32_t start, int32_t end)
     {

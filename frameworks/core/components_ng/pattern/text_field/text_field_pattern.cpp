@@ -2130,6 +2130,10 @@ bool TextFieldPattern::ProcessAutoFill(bool& isPopup, bool isFromKeyBoard, bool 
     CHECK_NULL_RETURN(host, false);
     auto autoFillType = GetAutoFillType();
     auto container = Container::Current();
+    if (container == nullptr) {
+        TAG_LOGW(AceLogTag::ACE_AUTO_FILL, "Get current container is nullptr.");
+        container = Container::GetActive();
+    }
     CHECK_NULL_RETURN(container, false);
     SetAutoFillTriggeredStateByType(autoFillType);
     SetFillRequestFinish(false);
@@ -5852,6 +5856,37 @@ void TextFieldPattern::NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWra
     }
 }
 
+bool TextFieldPattern::ParseJsonValue(const std::unique_ptr<JsonValue>& jsonObject,
+    std::unordered_map<std::string, std::variant<std::string, bool, int32_t>>& map)
+{
+    bool ret = false;
+
+    if (!jsonObject->IsValid() || jsonObject->IsArray() || !jsonObject->IsObject()) {
+        TAG_LOGE(AceLogTag::ACE_AUTO_FILL, "fillContent format is not right");
+        return ret;
+    }
+    auto child = jsonObject->GetChild();
+
+    while (child && child->IsValid()) {
+        if (!child->IsObject() && child->IsString())
+        {
+            std::string strKey = child->GetKey();
+            std::string strVal = child->GetString();
+            if (strKey.empty()) {
+                continue;
+            }
+            if (map.size() < 5) {
+                map.insert(std::pair<std::string, std::variant<std::string, bool, int32_t> >(strKey, strVal));
+            } else {
+                TAG_LOGE(AceLogTag::ACE_AUTO_FILL, "fillContent is more than 5");
+                break;
+            }
+        }
+        child = child->GetNext();
+    }
+    return true;
+}
+
 void TextFieldPattern::NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent)
 {
     TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "errCode:%{public}d", errCode);
@@ -5861,7 +5896,7 @@ void TextFieldPattern::NotifyFillRequestFailed(int32_t errCode, const std::strin
     }
 
     if (RequestKeyboard(false, true, true)) {
-       NotifyOnEditChanged(true);
+        NotifyOnEditChanged(true);
     }
 
 #if defined(ENABLE_STANDARD_INPUT)
@@ -5872,14 +5907,8 @@ void TextFieldPattern::NotifyFillRequestFailed(int32_t errCode, const std::strin
         if (jsonObject == nullptr) {
             break;
         }
-        if (jsonObject->Contains("userName")) {
-            userNamesOrPassWordMap.insert(std::pair<std::string, MiscServices::PrivateDataValue>(
-                AUTO_FILL_PARAMS_USERNAME, jsonObject->GetString("userName")));
-        } else if (jsonObject->Contains("newPassword")) {
-            userNamesOrPassWordMap.insert(std::pair<std::string, MiscServices::PrivateDataValue>(
-                AUTO_FILL_PARAMS_NEWPASSWORD, jsonObject->GetString("newPassword")));
-        } else {
-            TAG_LOGE(AceLogTag::ACE_AUTO_FILL, "fillContent is empty");
+
+        if (!ParseJsonValue(jsonObject, userNamesOrPassWordMap)) {
             break;
         }
         MiscServices::InputMethodController::GetInstance()->SendPrivateCommand(userNamesOrPassWordMap);
