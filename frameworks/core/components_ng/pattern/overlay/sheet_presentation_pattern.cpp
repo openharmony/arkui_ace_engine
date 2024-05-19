@@ -1824,4 +1824,81 @@ float SheetPresentationPattern::GetTitleHeight()
     auto titleHeight = titleGeometryNode->GetFrameSize().Height();
     return titleHeight;
 }
+
+ScrollResult HandleScroll(float scrollOffset, int32_t source, NestedState state, float velocity)
+{
+    ScrollResult result = {0, true};
+    if (GreatOrEqual(currentOffset_, 0.0) && (source = SCROLL_FROM_UPDATE) && !isSheetInReactive_) {
+        isSheetInReactive_ = true;
+    }
+    if (!isSheetInReactive_ || !GetShowState()) {
+        return {scrollOffset, true};
+    }
+    ScrollState scrollState = source ==SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
+    if (state == NestedState::CHILD_SCROLL) {
+        if (scrollState == ScrollState::SCROLL) {
+            auto sheetType = GetSheetType();
+            auto sheetDetentsSize = sheetDetentHeight_.size();
+            if ((sheetType == SheetType::SHEET_POPUP) || (sheetDetentsSize == 0)) {
+                return {scrollOffset, true};
+            }
+            auto height = height_ + sheetHeightUp_;
+            if ((NearZero(currentOffset_)) && (LessNotEqual(scrollOffset, 0.0f)) &&
+                (GreatOrEqual(height, sheetDetentHeight_[sheetDetentsSize - 1]))) {
+                return {scrollOffset, true};
+            }
+            auto host = GetHost();
+            CHECK_NULL_RETURN(host, result);
+            currentOffset_ = currentOffset_ + scrollOffset;
+            auto pageHeight = GetPageHeightWithoutOffset();
+            auto offset = pageHeight - height + currentOffset_;
+            if (LessOrEqual(offset, pageHeight - sheetMaxHeight_)) {
+                offset = pageHeight - sheetMaxHeight_;
+                currentOffset_ = height - sheetMaxHeight_;
+            }
+            ProcessColumnRect(height - currentOffset_);
+            auto renderContext = host->GetRenderContext();
+            renderContext->UpdateTransformTranslate({ 0.0f, offset, 0.0f });
+            isScrollHanding_ = true;
+            return result;
+        } else if (isScrollHanding_) {
+            HandleDragEnd(velocity);
+            isScrollHanding_ = false;
+        }
+    } else if (state == NestedState::CHILD_OVER_SCROLL) {
+        isSheetInReactive_ = false;
+        return {scrollOffset, true};
+    }
+    isSheetInReactive_ = false;
+    return {scrollOffset, true};
+}
+
+void OnScrollStartRecursive(float position, float velocity)
+{
+    if (animation_ && isAnimationProcess_) {
+        AnimationUtils::StopAnimation(animation_);
+        isAnimationBreak_ = true;
+    }
+    currentOffset_ = 0.0f;
+}
+
+void OnScrollEndRecursive(const std::optional<float>& velocity)
+{
+    if (isScrollHanding_) {
+        HandleDragEnd(velocity.value_or(0.f));
+        isScrollHanding_ = false;
+    }
+}
+
+bool HandleScrollVelocity(float velocity)
+{
+    if (isScrollHanding_) {
+        HandleDragEnd(velocity);
+        isScrollHanding_ = false;
+    }
+    if (isSheetInReactive_) {
+        return false;
+    }
+    return true;
+}
 } // namespace OHOS::Ace::NG

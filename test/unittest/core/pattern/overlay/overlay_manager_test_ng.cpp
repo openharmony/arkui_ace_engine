@@ -1176,6 +1176,40 @@ HWTEST_F(OverlayManagerTestNg, HandleDragUpdate001, TestSize.Level1)
     auto ret = topSheetPattern->OnCoordScrollUpdate(*topSheetPattern->sheetDetentHeight_.end());
     EXPECT_FALSE(ret);
 }
+
+/**
+ * @tc.name: TestOnBindSheet
+ * @tc.desc: SheetPresentationPattern::HandleScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, HandleScroll001, TestSize.Level1)
+{
+    auto operationColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    NG::SheetStyle style;
+    auto sheetNode = SheetView::CreateSheetPage(0, "", operationColumn, operationColumn, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto scrollNode = AceType::DynamicCast<FrameNode>(sheetNode->GetChildAtIndex(1));
+    ASSERT_NE(scrollNode, nullptr);
+    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+
+    scrollPattern->nestedScroll_ = { .forward = NestedScrollMode::PARENT_FIRST, .backward = NestedScrollMode::SELF_FIRST };
+    scrollPattern->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
+    scrollPattern->edgeEffect_ = EdgeEffect::SPRING;
+
+    auto result = scrollPattern->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+    EXPECT_TRUE(result.reachEdge);
+    EXPECT_EQ(result.remain, 0);
+
+    result = scrollPattern->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
+    EXPECT_TRUE(result.reachEdge);
+    EXPECT_EQ(result.remain, 20.f);
+}
+
 /**
  * @tc.name: TestOnBindSheet
  * @tc.desc: Test SheetPresentationPattern::AvoidSafeArea().

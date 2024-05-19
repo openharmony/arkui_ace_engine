@@ -171,9 +171,7 @@ bool ScrollablePattern::OnScrollPosition(double& offset, int32_t source)
             refreshCoordinateMode = CoordinateWithRefresh(offset, source, isAtTop);
         }
         auto navigationInCoordination = CoordinateWithNavigation(offset, source, isAtTop);
-        auto modalSheetCoordinationMode = CoordinateWithSheet(offset, source, isAtTop);
-        if ((refreshCoordinateMode == RefreshCoordinationMode::REFRESH_SCROLL) || navigationInCoordination ||
-            (modalSheetCoordinationMode == ModalSheetCoordinationMode::SHEET_SCROLL)) {
+        if ((refreshCoordinateMode == RefreshCoordinationMode::REFRESH_SCROLL) || navigationInCoordination) {
             return false;
         }
     }
