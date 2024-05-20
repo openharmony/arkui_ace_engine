@@ -82,6 +82,8 @@ const std::string FADE_PROPERTY_NAME = "fade";
 const std::string SPRING_PROPERTY_NAME = "spring";
 const std::string INDICATOR_PROPERTY_NAME = "indicator";
 const std::string TRANSLATE_PROPERTY_NAME = "translate";
+constexpr int32_t SWIPER_HALF = 2;
+constexpr int32_t CAPTURE_COUNT = 2;
 // TODO define as common method
 float CalculateFriction(float gamma)
 {
@@ -2645,10 +2647,10 @@ int32_t SwiperPattern::ComputeNextIndexInSinglePage(float velocity, bool onlyDis
     if (iter == itemPosition_.end() || overTurnPageVelocity) {
         return direction ? currentIndex_ - 1 : currentIndex_ + 1;
     }
-    if (-iter->second.startPos > swiperWidth / 2) {
+    if (-iter->second.startPos > swiperWidth / SWIPER_HALF) {
         return currentIndex_ + 1;
     }
-    if (iter->second.startPos > swiperWidth / 2) {
+    if (iter->second.startPos > swiperWidth / SWIPER_HALF) {
         return currentIndex_ - 1;
     }
     return currentIndex_;
@@ -3287,7 +3289,6 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-
     auto mainSize = CalculateVisibleSize();
     if (LessOrEqual(mainSize, 0) || itemPosition_.empty()) {
         return;
@@ -3296,20 +3297,17 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
     auto leading = currentIndexOffset_ + mainSize - itemPosition_.rbegin()->second.endPos;
     auto trailing = currentIndexOffset_ - itemPosition_.begin()->second.startPos;
     ExtentPair extentPair = ExtentPair(leading, trailing);
-
     CreateSpringProperty();
     host->UpdateAnimatablePropertyFloat(SPRING_PROPERTY_NAME, currentIndexOffset_);
     auto delta = currentIndexOffset_ < 0.0f ? extentPair.Leading() : extentPair.Trailing();
     if (IsVisibleChildrenSizeLessThanSwiper()) {
         delta = extentPair.Trailing();
     }
-
     // spring curve: (velocity: 0.0, mass: 1.0, stiffness: 228.0, damping: 30.0)
     auto springCurve = MakeRefPtr<SpringCurve>(0.0f, 1.0f, 228.0f, 30.0f);
     AnimationOption option;
     option.SetCurve(springCurve);
     option.SetDuration(SPRING_DURATION);
-
     nextIndex_ = currentIndex_;
     springAnimation_ = AnimationUtils::StartAnimation(
         option,
@@ -3721,7 +3719,7 @@ int32_t SwiperPattern::RealTotalCount() const
         num += 1;
     }
     if (hasCachedCapture_ && leftCaptureId_.has_value() && rightCaptureId_.has_value()) {
-        num += 2;
+        num += CAPTURE_COUNT;
     }
     return host->TotalChildCount() - num;
 }
@@ -4013,7 +4011,7 @@ void SwiperPattern::UpdateIndexOnSwipePageStop(int32_t pauseTargetIndex)
 
     auto swiperWidth = MainSize();
     auto currentOffset = iter->second.startPos;
-    if (std::abs(currentOffset) < (swiperWidth / 2)) {
+    if (std::abs(currentOffset) < (swiperWidth / SWIPER_HALF)) {
         return;
     }
 

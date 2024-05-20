@@ -225,7 +225,6 @@ void PipelineBase::SetRootSize(double density, float width, float height)
             return;
         }
         context->SetRootRect(width, height);
-
     };
 #ifdef NG_BUILD
     if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
