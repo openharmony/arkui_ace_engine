@@ -870,14 +870,27 @@ void ListItemGroupLayoutAlgorithm::LayoutListItem(LayoutWrapper* layoutWrapper,
         int32_t laneIndex = pos.first % lanes_;
         float childCrossSize = GetCrossAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
         float laneCrossOffset = CalculateLaneCrossOffset((crossSize + GetLaneGutter()) / lanes_, childCrossSize);
-        if (axis_ == Axis::VERTICAL) {
-            offset =
-                offset + OffsetF(0, pos.second.startPos) + OffsetF(laneCrossOffset, 0) +
-                OffsetF(((crossSize + laneGutter_) / lanes_) * laneIndex, 0);
+        auto layoutDirection = wrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
+        if (layoutDirection == TextDirection::RTL) {
+            if (axis_ == Axis::VERTICAL) {
+                auto size = wrapper->GetGeometryNode()->GetFrameSize();
+                auto tmpX = crossSize - laneCrossOffset -
+                    ((crossSize + laneGutter_) / lanes_) * laneIndex - size.Width();
+                offset = offset + OffsetF(tmpX, pos.second.startPos);
+            } else {
+                auto tmpY = laneCrossOffset + ((crossSize + laneGutter_) / lanes_) * laneIndex;
+                offset = offset + OffsetF(totalMainSize_ - pos.second.endPos, tmpY);
+            }
         } else {
-            offset =
-                offset + OffsetF(pos.second.startPos, 0) + OffsetF(0, laneCrossOffset) +
-                OffsetF(0, ((crossSize + laneGutter_) / lanes_) * laneIndex);
+            if (axis_ == Axis::VERTICAL) {
+                offset =
+                    offset + OffsetF(0, pos.second.startPos) + OffsetF(laneCrossOffset, 0) +
+                    OffsetF(((crossSize + laneGutter_) / lanes_) * laneIndex, 0);
+            } else {
+                offset =
+                    offset + OffsetF(pos.second.startPos, 0) + OffsetF(0, laneCrossOffset) +
+                    OffsetF(0, ((crossSize + laneGutter_) / lanes_) * laneIndex);
+            }
         }
         SetListItemIndex(layoutWrapper, wrapper, pos.first);
         wrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
@@ -920,7 +933,7 @@ void ListItemGroupLayoutAlgorithm::LayoutHeaderFooter(LayoutWrapper* layoutWrapp
             }
             headerPos = std::max(headerPos, stickyPos);
         }
-        LayoutIndex(wrapper, paddingOffset, crossSize, headerPos);
+        LayoutIndex(wrapper, paddingOffset, crossSize, headerPos, headerMainSize);
         startHeaderPos_ = startHeaderPos_ > mainPos ? mainPos : startHeaderPos_;
     }
 
@@ -940,22 +953,32 @@ void ListItemGroupLayoutAlgorithm::LayoutHeaderFooter(LayoutWrapper* layoutWrapp
                 endPos = stickyPos;
             }
         }
-        LayoutIndex(wrapper, paddingOffset, crossSize, endPos);
+        LayoutIndex(wrapper, paddingOffset, crossSize, endPos, footerMainSize_);
         endFooterPos_ = mainPos + totalMainSize_ - footerMainSize_ - listMainSize;
     }
 }
 
 void ListItemGroupLayoutAlgorithm::LayoutIndex(const RefPtr<LayoutWrapper>& wrapper, const OffsetF& paddingOffset,
-    float crossSize, float startPos)
+    float crossSize, float startPos, float childMainSize)
 {
     CHECK_NULL_VOID(wrapper);
     auto offset = paddingOffset;
     float childCrossSize = GetCrossAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
     float laneCrossOffset = CalculateLaneCrossOffset(crossSize, childCrossSize);
-    if (axis_ == Axis::VERTICAL) {
-        offset = offset + OffsetF(laneCrossOffset, startPos);
+    auto layoutDirection = wrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
+    if (layoutDirection == TextDirection::RTL) {
+        if (axis_ == Axis::VERTICAL) {
+            auto size = wrapper->GetGeometryNode()->GetFrameSize();
+            offset = offset + OffsetF(crossSize - laneCrossOffset - size.Width(), startPos);
+        } else {
+            offset = offset + OffsetF(totalMainSize_ - startPos - childMainSize, laneCrossOffset);
+        }
     } else {
-        offset = offset + OffsetF(startPos, laneCrossOffset);
+        if (axis_ == Axis::VERTICAL) {
+            offset = offset + OffsetF(laneCrossOffset, startPos);
+        } else {
+            offset = offset + OffsetF(startPos, laneCrossOffset);
+        }
     }
     wrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
     wrapper->Layout();
