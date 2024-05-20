@@ -36,10 +36,14 @@ async function querySnapshotAsync(want, componentId) {
     let uint8Arr = new Uint8Array(arrayBuffer);
     let pixelStr = base64Helper.encodeToStringSync(uint8Arr);
     !want.parameters && (want.parameters = {});
-    want.parameters['ohos.extra.param.key.add_form_to_host_width'] = compInfo.size.width;
-    want.parameters['ohos.extra.param.key.add_form_to_host_height'] = compInfo.size.height;
-    want.parameters['ohos.extra.param.key.add_form_to_host_screenx'] = compInfo.screenOffset.x;
-    want.parameters['ohos.extra.param.key.add_form_to_host_screeny'] = compInfo.screenOffset.y;
+    want.parameters['ohos.extra.param.key.add_form_to_host_width'] =
+      (Math.floor(compInfo.size.width * 100) / 100).toString();
+    want.parameters['ohos.extra.param.key.add_form_to_host_height'] =
+      (Math.floor(compInfo.size.height * 100) / 100).toString();
+    want.parameters['ohos.extra.param.key.add_form_to_host_screenx'] =
+      (Math.floor(compInfo.screenOffset.x * 100) / 100).toString();
+    want.parameters['ohos.extra.param.key.add_form_to_host_screeny'] =
+      (Math.floor(compInfo.screenOffset.y * 100) / 100).toString();
     want.parameters['ohos.extra.param.key.add_form_to_host_snapshot'] = pixelStr;
   } catch (err) {
     hilog.error(0x3900, tag, 'get pixelmap string error:' + err);
