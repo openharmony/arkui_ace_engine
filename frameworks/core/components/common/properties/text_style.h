@@ -263,6 +263,11 @@ public:
         textBaseline_ = baseline;
     }
 
+    void ResetTextBaseline()
+    {
+        baselineOffset_.Reset();
+    }
+
     void SetTextDecoration(TextDecoration textDecoration)
     {
         textDecoration_ = textDecoration;
