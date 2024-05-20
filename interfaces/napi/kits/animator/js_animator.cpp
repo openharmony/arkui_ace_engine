@@ -286,7 +286,9 @@ static napi_value JSReset(napi_env env, napi_callback_info info)
                 napi_close_handle_scope(env, scope);
                 return;
             }
+#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
             ACE_SCOPED_TRACE("ohos.animator onframe. duration:%d, curve:%s", option->duration, option->easing.c_str());
+#endif
             napi_create_double(env, value, &valueNapi);
             napi_call_function(env, nullptr, onframe, 1, &valueNapi, &ret);
             napi_close_handle_scope(env, scope);
@@ -540,7 +542,9 @@ static napi_value SetOnframe(napi_env env, napi_callback_info info)
             napi_close_handle_scope(env, scope);
             return;
         }
+#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
         ACE_SCOPED_TRACE("ohos.animator onframe. duration:%d, curve:%s", option->duration, option->easing.c_str());
+#endif
         napi_create_double(env, value, &valueNapi);
         napi_call_function(env, nullptr, onframe, 1, &valueNapi, &ret);
         napi_close_handle_scope(env, scope);

@@ -91,6 +91,7 @@ template("ace_base_source_set") {
         "${ace_graphic}/rosen/modules/render_service_client:librender_service_client_static",
         "${ace_root}/interfaces/inner_api/drawable_descriptor:native_drawabledescriptor_static",
       ]
+      include_dirs += [ "//foundation/graphic/graphic_surface/interfaces/inner_api/surface", ]
     } else {
       external_deps += [ "graphic_2d:librender_service_client" ]
     }

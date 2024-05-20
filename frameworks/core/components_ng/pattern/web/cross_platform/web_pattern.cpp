@@ -1191,9 +1191,14 @@ void WebPattern::InitSlideUpdateListener()
     // cross platform is not support now;
 }
 
-void WebPattern::UpdateSlideOffset()
+void WebPattern::UpdateSlideOffset(bool isNeedReset)
 {
    // cross platform is not support now;
+}
+
+void WebPattern::Backward()
+{
+    // cross platform is not support now;
 }
 
 void WebPattern::CalculateHorizontalDrawRect()

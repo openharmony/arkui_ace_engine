@@ -14,6 +14,7 @@
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/build/ace_ext.gni")
+import("//foundation/graphic/graphic_2d/graphic_config.gni")
 import("../../../build/uicast.gni")
 
 template("build_component_ng") {
@@ -113,6 +114,7 @@ template("build_component_ng") {
           "//foundation/graphic/graphic_2d/interfaces/inner_api/common",
           "//foundation/graphic/graphic_2d/interfaces/inner_api/surface",
           "//foundation/graphic/graphic_2d/rosen/modules",
+          "//foundation/graphic/graphic_2d/rosen/modules/platform/image_native",
           "//foundation/graphic/graphic_2d/rosen/modules/platform/utils",
           "//foundation/graphic/graphic_2d/rosen/modules/render_service_base",
           "//foundation/graphic/graphic_2d/rosen/modules/render_service_client/core",
@@ -120,6 +122,7 @@ template("build_component_ng") {
           "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics",
           "//foundation/graphic/graphic_2d/utils/color_manager/export",
           "//foundation/multimedia/image_framework/interfaces/innerkits/include",
+          "//foundation/graphic/graphic_surface/interfaces/inner_api/surface",
         ]
         defines += [ "CROSS_PLATFORM" ]
         if (ace_enable_gpu) {
