@@ -281,7 +281,7 @@ static PngInfo *png_info_create(const uint8_t *data, uint32_t length)
         return nullptr;
     }
 
-    if(png_sig_compare((png_const_bytep)data, 0, PngHeadLength)){
+    if(png_sig_compare((png_const_bytep)data, 0, PngHeadLength)) {
         LOGE("image not a apng file");
         return nullptr;
     }
@@ -827,8 +827,8 @@ uint8_t *PNGImageDecoder::GetFrameData(uint32_t index, uint32_t *size, bool oldW
             for (uint32_t c = 0; c < frameInfo->chunkNum; c++) {
                 PngChunkInfo *insertChunkInfo = pngInfo_->chunks + frameInfo->chunkIndex + c;
                 if (insertChunkInfo->fourcc == FOUR_CC('f', 'd', 'A', 'T')) {
-                    *((uint32_t *) (frameData + dataOffset)) = swap_endian_uint32(
-                            insertChunkInfo->length - PngFOURCCLen);
+                    *((uint32_t *) (frameData + dataOffset)) =
+                        swap_endian_uint32(insertChunkInfo->length - PngFOURCCLen);
                     *((uint32_t *) (frameData + dataOffset + PngFOURCCLen)) = FOUR_CC('I', 'D', 'A', 'T');
                     memcpy_s(frameData + dataOffset + PngHeadLength, insertChunkInfo->length - PngFOURCCLen,
                         data + insertChunkInfo->offset + Byte12, insertChunkInfo->length - PngFOURCCLen);

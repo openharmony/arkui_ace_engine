@@ -200,6 +200,9 @@ public:
 
     RefPtr<FrameNode> FindTargetInChildNodes(const RefPtr<UINode> parentNode,
         std::vector<RefPtr<FrameNode>> hitFrameNodes, bool findDrop);
+    
+    RefPtr<FrameNode> FindTargetDropNode(const RefPtr<UINode> parentNode,
+        const std::map<int32_t, WeakPtr<FrameNode>>& frameNodes, PointF localPoint);
 
     std::unordered_set<int32_t> FindHitFrameNodes(const Point& point);
 

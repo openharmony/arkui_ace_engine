@@ -194,6 +194,9 @@ constexpr double DEFAULT_PINCH_SCALE = 1.0;
 constexpr double DEFAULT_PINCH_SCALE_MAX = 5.0;
 constexpr double DEFAULT_PINCH_SCALE_MIN = 0.32;
 constexpr int32_t PINCH_INDEX_ONE = 1;
+constexpr int32_t STATUS_ZOOMIN = 1;
+constexpr int32_t STATUS_ZOOMOUT = 2;
+constexpr int32_t ZOOM_ERROR_COUNT_MAX = 5;
 
 WebPattern::WebPattern() = default;
 
@@ -439,15 +442,19 @@ void WebPattern::InitPinchEvent(const RefPtr<GestureEventHub>& gestureHub)
         pattern->preScale_ = event.GetScale();
         pattern->pinchIndex_ = 0;
         pattern->zoomOutSwitch_ = false;
-        TAG_LOGI(AceLogTag::ACE_WEB, "InitPinchEvent StartScale: %{public}lf", pattern->startPinchScale_);
+        pattern->zoomStatus_ = 0;
+        pattern->zoomErrorCount_ = 0;
+        TAG_LOGI(AceLogTag::ACE_WEB, "InitPinchEvent StartScale: %{public}f", pattern->startPinchScale_);
 
         return;
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& event) {
         ACE_SCOPED_TRACE("WebPattern::InitPinchEvent actionUpdateTask");
+        TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::InitPinchEvent actionUpdateTask");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleScaleGestureChange(event);
+        TAG_LOGD(AceLogTag::ACE_WEB, "InitPinchEvent actionUpdateTask event scale:%{public}f: ", event.GetScale());
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& event) { return; };
     auto actionCancelTask = [weak = WeakClaim(this)]() { return; };
@@ -461,32 +468,47 @@ void WebPattern::InitPinchEvent(const RefPtr<GestureEventHub>& gestureHub)
     gestureHub->AddGesture(pinchGesture_);
 }
 
-void WebPattern::HandleScaleGestureChange(const GestureEvent& event)
+bool WebPattern::CheckZoomStatus(const double& curScale)
 {
-    CHECK_NULL_VOID(delegate_);
-
-    double curScale = event.GetScale();
-    if (std::fabs(curScale - preScale_) <= std::numeric_limits<double>::epsilon()) {
-        TAG_LOGD(AceLogTag::ACE_WEB, "HandleScaleGestureChange curScale == preScale");
-        return;
+    // check zoom status
+    if ((zoomStatus_ == STATUS_ZOOMOUT && curScale - preScale_ < 0)
+            && zoomErrorCount_ < ZOOM_ERROR_COUNT_MAX) {
+        zoomErrorCount_++;
+        TAG_LOGI(AceLogTag::ACE_WEB, "HandleScaleGestureChange zoomStatus = zoomout && curScale < preScale,"
+            "ignore date.");
+        return false;
+    } else if ((zoomStatus_ == STATUS_ZOOMIN && curScale - preScale_ >= 0)
+                && zoomErrorCount_ < ZOOM_ERROR_COUNT_MAX) {
+        zoomErrorCount_++;
+        TAG_LOGI(AceLogTag::ACE_WEB, "HandleScaleGestureChange zoomStatus = zoomin && curScale >= preScale,"
+            "ignore date.");
+        return false;
+    } else {
+        // nothing
     }
+    return true;
+}
 
-    pinchIndex_++;
-
-    double scale = 0.0;
+bool WebPattern::ZoomOutAndIn(const double& curScale, double& scale)
+{
     // zoom out
     if (curScale - preScale_ >= 0) {
         if (preScale_ >= DEFAULT_PINCH_SCALE) {
-            scale = curScale;
+            if (startPinchScale_  >= DEFAULT_PINCH_SCALE) {
+                scale = curScale;
+            } else {
+                scale = DEFAULT_PINCH_SCALE + (curScale - startPinchScale_);
+            }
+
             // Prevent shaking in index 1
             if (pinchIndex_ == PINCH_INDEX_ONE) {
                 pageScale_ = scale;
             }
         } else {
-            // The scale is from 0.4 to 0.5, and for Chrome, the scale conversion should be from 1.0 to 1.1
+            // The scale is from 0.4 to 0.5, the scale conversion should be from 1.0 to 1.1
             if (pageScale_ < DEFAULT_PINCH_SCALE) {
                 TAG_LOGI(AceLogTag::ACE_WEB, "HandleScaleGestureChange Switch from zoomin to zoomout.");
-                // must be chrome page scale form 0.4 to 1
+                // must be page scale form 0.4 to 1
                 scale = DEFAULT_PINCH_SCALE;
                 // reset
                 startPinchScale_ = preScale_;
@@ -497,6 +519,7 @@ void WebPattern::HandleScaleGestureChange(const GestureEvent& event)
                 zoomOutSwitch_ = false;
             }
         }
+        zoomStatus_ = STATUS_ZOOMOUT;
         // zoom in
     } else {
         // When zooming in from a scale less than 1,
@@ -504,18 +527,43 @@ void WebPattern::HandleScaleGestureChange(const GestureEvent& event)
         if (zoomOutSwitch_) {
             TAG_LOGI(AceLogTag::ACE_WEB, "HandleScaleGestureChange the current scale must be greater "
                                          "than the previous scale value, ignore data.");
-            return;
+            return false;
         }
         scale = curScale;
+
+        zoomStatus_ = STATUS_ZOOMIN;
+    }
+    return true;
+}
+
+void WebPattern::HandleScaleGestureChange(const GestureEvent& event)
+{
+    CHECK_NULL_VOID(delegate_);
+
+    double curScale = event.GetScale();
+    if (std::fabs(curScale - preScale_) <= std::numeric_limits<double>::epsilon()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "HandleScaleGestureChange curScale == preScale");
+        return;
     }
 
+    if (!CheckZoomStatus(curScale)) {
+        return;
+    }
+    zoomErrorCount_ = 0;
+
+    pinchIndex_++;
+
+    double scale = 0.0;
+    if (!ZoomOutAndIn(curScale, scale)) {
+        return;
+    }
     double newScale = GetNewScale(scale);
 
     double centerX = event.GetPinchCenter().GetX();
     double centerY = event.GetPinchCenter().GetY();
     TAG_LOGD(AceLogTag::ACE_WEB,
-        "HandleScaleGestureChange curScale:%{public}lf pageScale: %{public}lf newScale: %{public}lf centerX: "
-        "%{public}lf centerY: %{public}lf",
+        "HandleScaleGestureChange curScale:%{public}f pageScale: %{public}f newScale: %{public}f centerX: "
+        "%{public}f centerY: %{public}f",
         curScale, scale, newScale, centerX, centerY);
     delegate_->ScaleGestureChange(newScale, centerX, centerY);
 
@@ -523,7 +571,7 @@ void WebPattern::HandleScaleGestureChange(const GestureEvent& event)
     pageScale_ = scale;
 }
 
-double WebPattern::GetNewScale(double& scale)
+double WebPattern::GetNewScale(double& scale) const
 {
     double newScale = 0.0;
     if (scale >= DEFAULT_PINCH_SCALE) {

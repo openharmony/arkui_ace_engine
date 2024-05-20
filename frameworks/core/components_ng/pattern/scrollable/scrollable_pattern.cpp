@@ -2297,15 +2297,9 @@ void ScrollablePattern::HotZoneScroll(const float offsetPct)
             offsetPct, [weak = WeakClaim(this)](float offset) -> bool {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_RETURN(pattern, true);
-
-                if (LessNotEqual(offset, 0) && pattern->IsAtBottom()) {
-                    // Stop scrolling when reach the bottom
-                    return true;
-                } else if (GreatNotEqual(offset, 0) && pattern->IsAtTop()) {
-                    // Stop scrolling when reach the top
-                    return true;
-                }
-                return false;
+                // Stop scrolling when reach the bottom or top
+                return ((LessNotEqual(offset, 0) && pattern->IsAtBottom()) ||
+                    (GreatNotEqual(offset, 0) && pattern->IsAtTop()));
             });
         velocityMotion_->AddListener([weakScroll = AceType::WeakClaim(this)](double offset) {
             // Get the distance component need to roll from BezierVariableVelocityMotion
@@ -2315,6 +2309,9 @@ void ScrollablePattern::HotZoneScroll(const float offsetPct)
             pattern->UpdateCurrentOffset(offset, SCROLL_FROM_AXIS);
             pattern->UpdateMouseStart(offset);
             pattern->AddHotZoneSenceInterface(SceneStatus::RUNNING);
+            if (pattern->hotZoneScrollCallback_) {
+                pattern->hotZoneScrollCallback_();
+            }
         });
         velocityMotion_->ReInit(offsetPct);
     } else {

@@ -186,7 +186,6 @@ public:
 
     void SetWebController(const RefPtr<WebController>& webController)
     {
-        // TODO: add web controller diff function.
         webController_ = webController;
     }
 
@@ -625,6 +624,8 @@ private:
     void CalculateHorizontalDrawRect(bool isNeedReset);
     void CalculateVerticalDrawRect(bool isNeedReset);
     void InitPinchEvent(const RefPtr<GestureEventHub>& gestureHub);
+    bool CheckZoomStatus(const double& curScale);
+    bool ZoomOutAndIn(const double& curScale, double& scale);
     void HandleScaleGestureChange(const GestureEvent& event);
 
     NG::DragDropInfo HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent>& info);
@@ -727,8 +728,7 @@ private:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertTouchHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> beginTouchHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endTouchHandle);
-    double GetNewScale(double& scale);
-    void UpdateSlideOffset(bool isNeedReset = false);
+    double GetNewScale(double& scale) const;
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -836,6 +836,8 @@ private:
     double pageScale_ = 1.0;
     int32_t pinchIndex_ = 0;
     bool zoomOutSwitch_ = false;
+    int32_t zoomStatus_ = 0;
+    int32_t zoomErrorCount_ = 0;
 };
 } // namespace OHOS::Ace::NG
 

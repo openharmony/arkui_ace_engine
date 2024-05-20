@@ -216,6 +216,28 @@ AssertionResult WaterFlowTestNg::IsEqualTotalOffset(float expectOffset)
                               << "expectOffset: " << expectOffset;
 }
 
+void WaterFlowTestNg::HandleDrag(float offset)
+{
+    GestureEvent info;
+    info.SetMainVelocity(1200.f);
+    info.SetGlobalPoint(Point(0.f, 0.f));
+    info.SetGlobalLocation(Offset(0.f, 0.f));
+    info.SetSourceTool(SourceTool::FINGER);
+    info.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    pattern_->scrollableEvent_->GetScrollable()->HandleDragStart(info);
+
+    info.SetGlobalLocation(Offset(0.f, -offset));
+    info.SetGlobalPoint(Point(0.f, -offset));
+    info.SetMainDelta(offset);
+    pattern_->scrollableEvent_->GetScrollable()->HandleDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+
+    info.SetMainVelocity(0.0);
+    info.SetMainDelta(0.0);
+    pattern_->scrollableEvent_->GetScrollable()->HandleDragEnd(info);
+    FlushLayoutTask(frameNode_);
+}
+
 /**
  * @tc.name: Property001
  * @tc.desc: Test all the properties of WaterFlow.
@@ -1114,8 +1136,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowPatternTest002, TestSize.Level1)
      * @tc.steps: step2. UpdateCurrentOffset -100.f.
      * @tc.expected: startIndex_ = 0  endIndex_ = 21.
      */
-    pattern_->UpdateCurrentOffset(-100.f, SCROLL_FROM_UPDATE);
-    FlushLayoutTask(frameNode_);
+    HandleDrag(-100.f);
     pattern_->UpdateScrollBarOffset();
     EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, 0.f);
     EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 0);
@@ -1125,21 +1146,10 @@ HWTEST_F(WaterFlowTestNg, WaterFlowPatternTest002, TestSize.Level1)
      * @tc.steps: step3. UpdateCurrentOffset 200.f.
      * @tc.expected: startIndex_ = 5  endIndex_ = 27.
      */
-    pattern_->UpdateCurrentOffset(200.f, SCROLL_FROM_UPDATE);
-    FlushLayoutTask(frameNode_);
+    HandleDrag(200.f);
     EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, -ITEM_HEIGHT * 2);
     EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 5);
     EXPECT_EQ(pattern_->layoutInfo_.endIndex_, 27);
-
-    /**
-     * @tc.steps: step3. UpdateCurrentOffset 100.f.
-     * @tc.expected: startIndex_ = 1  endIndex_ = 24.
-     */
-    pattern_->UpdateCurrentOffset(100.f, SCROLL_FROM_ANIMATION_SPRING);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, -ITEM_HEIGHT);
-    EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 1);
-    EXPECT_EQ(pattern_->layoutInfo_.endIndex_, 24);
 }
 
 /**

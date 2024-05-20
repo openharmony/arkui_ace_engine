@@ -107,6 +107,11 @@ public:
         customCallback_ = dragEvent;
     }
 
+    bool HasDragEvent() const
+    {
+        return static_cast<bool>(userCallback_);
+    }
+
     void ClearDragEvent()
     {
         if (userCallback_) {

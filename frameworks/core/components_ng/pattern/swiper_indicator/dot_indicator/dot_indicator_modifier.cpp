@@ -55,13 +55,7 @@ constexpr int32_t BLACK_POINT_DURATION = 400;
 void DotIndicatorModifier::onDraw(DrawingContext& context)
 {
     ContentProperty contentProperty;
-    if (isFocused_->Get()) {
-        auto swiperTheme = GetSwiperIndicatorTheme();
-        CHECK_NULL_VOID(swiperTheme);
-        contentProperty.backgroundColor = swiperTheme->GetFocusedBgColor();
-    } else {
-        contentProperty.backgroundColor = backgroundColor_->Get().ToColor();
-    }
+    contentProperty.backgroundColor = backgroundColor_->Get().ToColor();
     contentProperty.vectorBlackPointCenterX = vectorBlackPointCenterX_->Get();
     contentProperty.longPointLeftCenterX = longPointLeftCenterX_->Get();
     contentProperty.longPointRightCenterX = longPointRightCenterX_->Get();
@@ -71,32 +65,33 @@ void DotIndicatorModifier::onDraw(DrawingContext& context)
     contentProperty.indicatorPadding = indicatorPadding_->Get();
     contentProperty.indicatorMargin = indicatorMargin_->Get();
     contentProperty.itemHalfSizes = itemHalfSizes_->Get();
+    SetFocusedAndSelectedColor(contentProperty);
     PaintBackground(context, contentProperty);
     PaintContent(context, contentProperty);
 }
 
-void DotIndicatorModifier::SetFocusedAndSelectedColor(PaintWrapper* paintWrapper)
+void DotIndicatorModifier::SetFocusedAndSelectedColor(ContentProperty& contentProperty)
 {
-    auto paintProperty = DynamicCast<DotIndicatorPaintProperty>(paintWrapper->GetPaintProperty());
-    CHECK_NULL_VOID(paintProperty);
     auto swiperTheme = GetSwiperIndicatorTheme();
     CHECK_NULL_VOID(swiperTheme);
-    Color unselectedFocusedColor = swiperTheme->GetColor();
-    Color selectedFocusedColor = swiperTheme->GetSelectedColor();
+    Color currentSelectedColor = selectedColor_->Get().ToColor();
+    Color currentUnselectedColor = unselectedColor_->Get();
     if (isFocused_->Get()) {
-        if (selectedFocusedColor == paintProperty->GetSelectedColor()) {
-            SetSelectedColor(swiperTheme->GetFocusedSelectedColor());
-        } else {
-            SetSelectedColor(paintProperty->GetSelectedColorValue(selectedFocusedColor));
-        }
-        if (unselectedFocusedColor == paintProperty->GetColor()) {
+        if (swiperTheme->GetColor() == currentUnselectedColor) {
             SetUnselectedColor(swiperTheme->GetFocusUnSelectedColor());
         } else {
-            SetUnselectedColor(paintProperty->GetColorValue(unselectedFocusedColor));
+            SetSelectedColor(currentUnselectedColor);
         }
+        if (swiperTheme->GetSelectedColor() == currentSelectedColor) {
+            SetSelectedColor(swiperTheme->GetFocusedSelectedColor());
+        } else {
+            SetSelectedColor(currentSelectedColor);
+        }
+        contentProperty.backgroundColor = swiperTheme->GetFocusedBgColor();
     } else {
-        SetUnselectedColor(paintProperty->GetColorValue(unselectedFocusedColor));
-        SetSelectedColor(paintProperty->GetSelectedColorValue(selectedFocusedColor));
+        SetUnselectedColor(currentUnselectedColor);
+        SetSelectedColor(currentSelectedColor);
+        contentProperty.backgroundColor = backgroundColor_->Get().ToColor();
     }
 }
 

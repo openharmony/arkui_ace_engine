@@ -326,11 +326,16 @@ void AnimatedPixmap::DecodeImpl(uint32_t idx)
         intrSizeInitial_ = false;
     }
     RefPtr<PixelMap> frame;
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_IMAGE,
+            "gif decode to pixmap, src=%{public}s, idx = %{public}d, resolutionQuality = %{public}s",
+            GetCacheKey().c_str(), idx, GetResolutionQuality(size_.imageQuality).c_str());
+    }
     if (size_.forceResize) {
-        frame = src_->CreatePixelMap(idx, { size_.width, size_.height });
+        frame = src_->CreatePixelMap(idx, { size_.width, size_.height }, size_.imageQuality);
     } else {
         // decode to intrinsic size
-        frame = src_->CreatePixelMap(idx, { -1, -1 });
+        frame = src_->CreatePixelMap(idx, { -1, -1 }, size_.imageQuality);
     }
     std::scoped_lock<std::mutex> lock(frameMtx_);
     currentFrame_ = frame;

@@ -688,15 +688,16 @@ void UIContentImpl::InitializeDynamic(
 void UIContentImpl::Initialize(
     OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowId)
 {
-    if (window) {
-        CommonInitialize(window, url, storage);
-        AddWatchSystemParameter();
+    if (window == nullptr) {
+        LOGE("UIExtensionAbility [%{public}s][%{public}s][%{public}d][%{public}s] initialize ui instance failed, the"
+             "window is invalid", bundleName_.c_str(), moduleName_.c_str(), instanceId_, startUrl_.c_str());
+        return;
     }
-    if (focusWindowId != 0) {
-        LOGI("[%{public}s][%{public}s][%{public}d]: UIExtension host window id:%{public}u", bundleName_.c_str(),
-            moduleName_.c_str(), instanceId_, focusWindowId);
-        Platform::AceContainer::GetContainer(instanceId_)->SetFocusWindowId(focusWindowId);
+    auto errorCode = CommonInitialize(window, url, storage, focusWindowId);
+    if (errorCode != UIContentErrorCode::NO_ERRORS) {
+        return;
     }
+    AddWatchSystemParameter();
 
     LOGI("[%{public}s][%{public}s][%{public}d]: UIExtension startUrl = %{public}s",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, startUrl_.c_str());
@@ -1185,7 +1186,7 @@ void UIContentImpl::SetFontScaleAndWeightScale(const RefPtr<Platform::AceContain
 }
 
 UIContentErrorCode UIContentImpl::CommonInitialize(
-    OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage)
+    OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, uint32_t focusWindowId)
 {
     ACE_FUNCTION_TRACE();
     auto errorCode = UIContentErrorCode::NO_ERRORS;
@@ -1468,6 +1469,9 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     CHECK_NULL_RETURN(container, UIContentErrorCode::NULL_POINTER);
     container->SetWindowName(window_->GetWindowName());
     container->SetWindowId(window_->GetWindowId());
+    if (focusWindowId != 0) {
+        container->SetFocusWindowId(focusWindowId);
+    }
     auto token = context->GetToken();
     container->SetToken(token);
     container->SetParentToken(parentToken_);
@@ -2911,6 +2915,7 @@ void UIContentImpl::UpdateCustomPopupUIExtension(const CustomPopupUIExtensionCon
             auto record = popupUIExtensionRecords_.find(targetId);
             int32_t uiExtNodeId = (record != popupUIExtensionRecords_.end()) ? record->second : 0;
             auto uiExtNode = NG::FrameNode::GetFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, uiExtNodeId);
+            CHECK_NULL_VOID(uiExtNode);
             if (config.targetSize.has_value()) {
                 auto layoutProperty = uiExtNode->GetLayoutProperty();
                 CHECK_NULL_VOID(layoutProperty);
@@ -2921,6 +2926,7 @@ void UIContentImpl::UpdateCustomPopupUIExtension(const CustomPopupUIExtensionCon
                 layoutProperty->UpdateUserDefinedIdealSize(NG::CalcSize(width, height));
             }
             auto popupParam = CreateCustomPopupParam(true, config);
+            popupParam->SetIsCaretMode(false);
             auto popupConfig = customPopupConfigMap_.find(targetId);
             if (popupConfig != customPopupConfigMap_.end()) {
                 auto createConfig = popupConfig->second;

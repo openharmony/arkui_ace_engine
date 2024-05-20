@@ -51,6 +51,8 @@ private:
     void HandleOnItemDragEnd(const GestureEvent& info);
     void HandleOnItemDragCancel();
     void HandleDragEndAnimation();
+    void HandleScrollCallback();
+    void HandleSwapAnimation(int32_t from, int32_t to);
     void SetNearbyNodeScale(RefPtr<FrameNode> node, float scale);
     ScaleResult ScaleAxisNearItem(int32_t index, const RectF& rect, const OffsetF& delta, Axis axis);
     void ScaleDiagonalItem(int32_t index, const RectF& rect, const OffsetF& delta);
@@ -59,6 +61,7 @@ private:
     void ResetPrevScaleNode();
     int32_t ScaleNearItem(int32_t index, const RectF& rect, const OffsetF& delta);
     int32_t GetIndex() const;
+    bool IsInHotZone(int32_t index, const RectF& frameRect) const;
     RefPtr<FrameNode> GetListFrameNode() const;
 
     OffsetF dragOffset_;
@@ -72,6 +75,7 @@ private:
     int32_t totalCount_ = -1;
     int32_t lanes_ = 1;
     bool scrolling_ = false;
+    OffsetF realOffset_;
 
     int32_t fromIndex_ = -1;
 

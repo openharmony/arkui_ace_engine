@@ -4928,8 +4928,9 @@ class PropertyDependencies {
         const formatElmtId = owningView ? (elmtId => owningView.debugInfoElmtId(elmtId)) : (elmtId => elmtId);
         let result = `dependencies: variable assignment (or object prop change in compat mode) affects elmtIds: ${Array.from(this.propertyDependencies_).map(formatElmtId).join(', ')}`;
         const arr = Array.from(this.propertyDependencies_).map(formatElmtId);
-        if (dumpDependantElements)
+        if (dumpDependantElements) {
             return (arr.length > 1 ? arr.join(', ') : arr[0]);
+        }
         this.trackedObjectPropertyDependencies_.forEach((propertyElmtId, propertyName) => {
             result += `  property '@Track ${propertyName}' change affects elmtIds: ${Array.from(propertyElmtId).map(formatElmtId).join(', ')}`;
         });

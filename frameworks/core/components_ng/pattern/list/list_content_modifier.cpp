@@ -27,6 +27,7 @@ ListContentModifier::ListContentModifier(const OffsetF& clipOffset, const SizeF&
     clipOffset_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(clipOffset);
     clipSize_ = AceType::MakeRefPtr<AnimatablePropertySizeF>(clipSize);
     clip_ = AceType::MakeRefPtr<PropertyBool>(true);
+    refDivider_ = AceType::MakeRefPtr<RefDividerMap>();
     RefPtr<ListDividerArithmetic> lda = AceType::MakeRefPtr<ListDividerArithmetic>();
     dividerList_ = AceType::MakeRefPtr<AnimatableArithmeticProperty>(
         AceType::DynamicCast<CustomAnimatableArithmetic>(lda));
@@ -53,11 +54,11 @@ void ListContentModifier::onDraw(DrawingContext& context)
     CHECK_NULL_VOID(dividerlist);
     auto lda = AceType::DynamicCast<ListDividerArithmetic>(dividerlist);
     CHECK_NULL_VOID(lda);
-    auto dividerMap = lda->GetDividerMap();
+    const auto& dividerMap = lda->GetDividerMap();
     if (!dividerMap.empty()) {
         DividerPainter dividerPainter(
             width_, 0, isVertical_, color_->Get().ToColor(), LineCap::SQUARE);
-        for (auto child : dividerMap) {
+        for (const auto& child : dividerMap) {
             if (child.second.length > 0) {
                 dividerPainter.SetDividerLength(child.second.length);
                 dividerPainter.DrawLine(context.canvas, child.second.offset);

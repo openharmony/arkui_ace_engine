@@ -46,7 +46,23 @@ public:
         int32_t width = 0;
         int32_t height = 0;
         bool forceResize = false;
+        AIImageQuality imageQuality = AIImageQuality::NONE;
     };
+
+    std::string GetResolutionQuality(AIImageQuality imageQuality)
+    {
+        switch (imageQuality) {
+            case AIImageQuality::NONE:
+                return "LOW";
+            case AIImageQuality::NORMAL:
+                return "MEDIUM";
+            case AIImageQuality::HIGH:
+                return "HIGH";
+            default:
+                return "LOW";
+        }
+    }
+
 #ifndef USE_ROSEN_DRAWING
     static RefPtr<CanvasImage> Create(
         const RefPtr<SkiaImageData>& data, const ResizeParam& size, const std::string& url);
@@ -63,6 +79,11 @@ public:
     bool IsStatic() override
     {
         return false;
+    }
+
+    const std::string& GetCacheKey() const
+    {
+        return cacheKey_;
     }
 
 protected:

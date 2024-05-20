@@ -163,11 +163,8 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     } else {
         contentIdealSize = CreateIdealSizeByPercentRef(contentConstraint, axis, MeasureType::MATCH_PARENT_MAIN_AXIS);
         if (!layoutWrapper->IsContraintNoChanged()) {
-            const auto& changeFlags = layoutWrapper->GetContentChanges();
-            if (changeFlags.minSize && !changeFlags.parentIdealSize) {
-                mainSizeIsMeasured_ = false;
-                jumpIndex_ = currentIndex_;
-            }
+            mainSizeIsMeasured_ = false;
+            jumpIndex_ = currentIndex_;
         }
     }
 
