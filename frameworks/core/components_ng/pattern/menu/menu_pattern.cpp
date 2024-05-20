@@ -1053,7 +1053,8 @@ void MenuPattern::ShowMenuAppearAnimation()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (isMenuShow_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
+    if (isMenuShow_ &&
+        (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) || IsSelectOverlayExtensionMenu()) &&
         previewMode_ == MenuPreviewMode::NONE) {
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
