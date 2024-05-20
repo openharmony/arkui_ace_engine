@@ -97,17 +97,17 @@ class SetGutterModifier extends ModifierWithKey<number | GutterOption> {
           } else {
             getUINativeModule().gridRow.setGutter(node,
               this.value.x, this.value.x, this.value.x, this.value.x, this.value.x, this.value.x,
-              this.value.y.xs, this.value.y.sm, this.value.y.md, this.value.y.lg, this.value.y.xl, this.value.y.xxl);
+              this.value.y?.xs, this.value.y?.sm, this.value.y?.md, this.value.y?.lg, this.value.y?.xl, this.value.y?.xxl);
           }
         } else {
           if (isNumber(this.value.y)) {
             getUINativeModule().gridRow.setGutter(node,
-              this.value.x.xs, this.value.x.sm, this.value.x.md, this.value.x.lg, this.value.x.xl, this.value.x.xxl,
+              this.value.x?.xs, this.value.x?.sm, this.value.x?.md, this.value.x?.lg, this.value.x?.xl, this.value.x?.xxl,
               this.value.y, this.value.y, this.value.y, this.value.y, this.value.y, this.value.y);
           } else {
             getUINativeModule().gridRow.setGutter(node,
-              this.value.x.xs, this.value.x.sm, this.value.x.md, this.value.x.lg, this.value.x.xl, this.value.x.xxl,
-              this.value.y.xs, this.value.y.sm, this.value.y.md, this.value.y.lg, this.value.y.xl, this.value.y.xxl);
+              this.value.x?.xs, this.value.x?.sm, this.value.x?.md, this.value.x?.lg, this.value.x?.xl, this.value.x?.xxl,
+              this.value.y?.xs, this.value.y?.sm, this.value.y?.md, this.value.y?.lg, this.value.y?.xl, this.value.y?.xxl);
           }
         }
       }
