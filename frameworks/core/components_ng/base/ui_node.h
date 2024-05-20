@@ -150,7 +150,7 @@ public:
         needCallChildrenUpdate_ = needCallChildrenUpdate;
     }
 
-    void SetParent(const WeakPtr<UINode>& parent)
+    virtual void SetParent(const WeakPtr<UINode>& parent)
     {
         parent_ = parent;
     }
@@ -577,6 +577,7 @@ public:
 
     virtual void PaintDebugBoundaryTreeAll(bool flag);
     static void DFSAllChild(const RefPtr<UINode>& root, std::vector<RefPtr<UINode>>& res);
+    static void GetBestBreakPoint(RefPtr<UINode>& breakPointChild, RefPtr<UINode>& breakPointParent);
 
     void AddFlag(uint32_t flag)
     {
@@ -638,6 +639,22 @@ public:
         }
     }
 
+    virtual void SetOnNodeDestroyCallback(std::function<void(int32_t)>&& destroyCallback)
+    {
+        destroyCallback_ = std::move(destroyCallback);
+    }
+
+    virtual bool HasOnNodeDestroyCallback()
+    {
+        return destroyCallback_ != nullptr;
+    }
+
+    virtual void FireOnNodeDestroyCallback()
+    {
+        CHECK_NULL_VOID(destroyCallback_);
+        destroyCallback_(GetId());
+    }
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -680,6 +697,7 @@ protected:
 
     virtual bool RemoveImmediately() const;
     void ResetParent();
+    static void RemoveFromParentCleanly(const RefPtr<UINode>& child, const RefPtr<UINode>& parent);
 
     // update visible change signal to children
     void UpdateChildrenVisible(bool isVisible) const;
@@ -738,7 +756,7 @@ private:
     std::string debugLine_;
     std::string viewId_;
     void* externalData_ = nullptr;
-
+    std::function<void(int32_t)> destroyCallback_;
     friend class RosenRenderContext;
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
 };

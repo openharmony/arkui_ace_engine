@@ -80,6 +80,10 @@ public:
 
     void GetRouteInfo(const JSCallbackInfo& info);
 
+    void SetNavDestinationId(const JSCallbackInfo& info);
+
+    void GetNavDestinationId(const JSCallbackInfo& info);
+
     void SetNavDestinationContext(const RefPtr<NG::NavDestinationContext> context)
     {
         context_ = context;

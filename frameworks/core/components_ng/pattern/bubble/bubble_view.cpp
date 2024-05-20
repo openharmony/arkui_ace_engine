@@ -139,6 +139,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     popupProp->UpdateShowInSubWindow(param->IsShowInSubWindow());
     popupProp->UpdatePositionOffset(OffsetF(param->GetTargetOffset().GetX(), param->GetTargetOffset().GetY()));
     popupProp->UpdateBlockEvent(param->IsBlockEvent());
+    popupProp->UpdateIsCaretMode(param->IsCaretMode());
     if (param->GetArrowHeight().has_value()) {
         popupProp->UpdateArrowHeight(param->GetArrowHeight().value());
     }
@@ -528,6 +529,7 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
     }
     popupLayoutProp->UpdateShowInSubWindow(param->IsShowInSubWindow());
     popupLayoutProp->UpdateBlockEvent(param->IsBlockEvent());
+    popupLayoutProp->UpdateIsCaretMode(param->IsCaretMode());
     if (param->GetErrorArrowHeight()) {
         popupLayoutProp->ResetArrowHeight();
     }

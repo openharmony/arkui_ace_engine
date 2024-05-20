@@ -578,6 +578,13 @@ public:
         }
     }
 
+    void SetOnAttach(std::function<void()>&& onAttach);
+    void ClearOnAttach();
+    void FireOnAttach();
+    void SetOnDetach(std::function<void()>&& onDetach);
+    void ClearOnDetach();
+    void FireOnDetach();
+
 protected:
     virtual void OnModifyDone() {}
     std::function<void()> onAppear_;
@@ -597,6 +604,9 @@ private:
     OnSizeChangedFunc onSizeChanged_;
     std::unordered_map<int32_t, OnSizeChangedFunc> onSizeChangedInnerCallbacks_;
     OnSizeChangedFunc onJsFrameNodeSizeChanged_;
+
+    std::function<void()> onAttach_;
+    std::function<void()> onDetach_;
 
     OnPreDragFunc onPreDragFunc_;
     OnDragStartFunc onDragStart_;

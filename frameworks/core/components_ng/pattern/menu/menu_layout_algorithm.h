@@ -37,6 +37,7 @@ struct MenuDumpInfo {
     std::string targetNode;
     OffsetF targetOffset;
     SizeF targetSize;
+    Rect wrapperRect;
     float previewBeginScale = 0.0f;
     float previewEndScale = 0.0f;
     float top = 0.0f;

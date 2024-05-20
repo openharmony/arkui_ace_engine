@@ -515,11 +515,18 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, RSText
 #endif
 }
 
-void OffscreenCanvasPaintMethod::PaintShadow(const RSPath& path,
-    const Shadow& shadow, RSCanvas* canvas, const RSBrush* brush, const RSPen* pen)
+void OffscreenCanvasPaintMethod::PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas,
+    const RSBrush* brush, const RSPen* pen, RSSaveLayerOps* slo)
 {
 #ifndef ACE_UNITTEST
-    RosenDecorationPainter::PaintShadow(path, shadow, canvas, brush, pen);
+    CHECK_NULL_VOID(rsCanvas_);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) && slo != nullptr) {
+        rsCanvas_->SaveLayer(*slo);
+        RosenDecorationPainter::PaintShadow(path, shadow, canvas, brush, pen);
+        rsCanvas_->Restore();
+    } else {
+        RosenDecorationPainter::PaintShadow(path, shadow, canvas, brush, pen);
+    }
 #endif
 }
 

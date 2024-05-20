@@ -86,6 +86,12 @@ class BuilderNode {
     dispose() {
         this._JSBuilderNode.dispose();
     }
+    reuse(param) {
+        this._JSBuilderNode.reuse(param);
+    }
+    recycle(){
+        this._JSBuilderNode.recycle();
+    }
 }
 class JSBuilderNode extends BaseNode {
     constructor(uiContext, options) {
@@ -93,6 +99,34 @@ class JSBuilderNode extends BaseNode {
         this.childrenWeakrefMap_ = new Map();
         this.uiContext_ = uiContext;
         this.updateFuncByElmtId = new Map();
+    }
+    reuse(param) {
+        this.childrenWeakrefMap_.forEach((weakRefChild) => {
+            const child = weakRefChild.deref();
+            if (child) {
+                if (child instanceof ViewPU) {
+                    child.aboutToReuseInternal(param);
+                }
+                else {
+                    // FIXME fix for mixed V2 - V3 Hierarchies
+                    throw new Error('aboutToReuseInternal: Recycle not implemented for ViewV2, yet');
+                }
+            } // if child
+        });
+    }
+    recycle(){
+        this.childrenWeakrefMap_.forEach((weakRefChild) => {
+            const child = weakRefChild.deref();
+            if (child) {
+                if (child instanceof ViewPU) {
+                    child.aboutToRecycleInternal();
+                }
+                else {
+                    // FIXME fix for mixed V2 - V3 Hierarchies
+                    throw new Error('aboutToRecycleInternal: Recycle not yet implemented for ViewV2');
+                }
+            } // if child
+        });
     }
     getCardId() {
         return -1;
@@ -505,13 +539,17 @@ class FrameNodeFinalizationRegisterProxy {
 FrameNodeFinalizationRegisterProxy.instance_ = new FrameNodeFinalizationRegisterProxy();
 FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_ = new Map();
 FrameNodeFinalizationRegisterProxy.FrameNodeInMainTree_ = new Map();
-globalThis.__AttachToMainTree__ = function __AttachToMainTree__(nodeId) {
-    if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-        FrameNodeFinalizationRegisterProxy.FrameNodeInMainTree_.set(nodeId, FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref());
-    }
+class NodeControllerRegisterProxy {
+}
+NodeControllerRegisterProxy.instance_ = new NodeControllerRegisterProxy();
+NodeControllerRegisterProxy.__NodeControllerMap__ = new Map();
+globalThis.__AddToNodeControllerMap__ = function __AddToNodeControllerMap__(containerId, nodeController) {
+    NodeControllerRegisterProxy.__NodeControllerMap__.set(containerId, nodeController);
 };
-globalThis.__DetachToMainTree__ = function __DetachToMainTree__(nodeId) {
-    FrameNodeFinalizationRegisterProxy.FrameNodeInMainTree_.delete(nodeId);
+globalThis.__RemoveFromNodeControllerMap__ = function __RemoveFromNodeControllerMap__(containerId) {
+    let nodeController = NodeControllerRegisterProxy.__NodeControllerMap__.get(containerId);
+    nodeController._nodeContainerId.__rootNodeOfNodeController__ = undefined;
+    NodeControllerRegisterProxy.__NodeControllerMap__.delete(containerId);
 };
 /*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
@@ -535,6 +573,10 @@ class __InternalField__ {
 class NodeController {
     constructor() {
         this._nodeContainerId = new __InternalField__();
+    }
+    __makeNode__(UIContext) {
+        this._nodeContainerId.__rootNodeOfNodeController__ = this.makeNode(UIContext);
+        return this._nodeContainerId.__rootNodeOfNodeController__;
     }
     rebuild() {
         if (this._nodeContainerId != undefined && this._nodeContainerId !== null && this._nodeContainerId._value >= 0) {
@@ -1150,6 +1192,11 @@ const __creatorMap__ = new Map([
     ["LoadingProgress", (context) => {
         return new TypedFrameNode(context, "LoadingProgress", (node, type) => {
             return new ArkLoadingProgressComponent(node, type);
+            });
+        }],
+    ["Search", (context) => {
+        return new TypedFrameNode(context, "Search", (node, type) => {
+            return new ArkSearchComponent(node, type);
             });
         }],
 ]);
@@ -1918,6 +1965,12 @@ class ComponentContent extends Content {
     }
     getNodePtr() {
         return this.builderNode_.getNodePtr();
+    }
+    reuse(param) {
+        this.builderNode_.reuse(param);
+    }
+    recycle(){
+        this.builderNode_.recycle();
     }
 }
 /*

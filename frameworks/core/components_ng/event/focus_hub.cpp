@@ -527,6 +527,17 @@ bool FocusHub::IsCurrentFocusWholePath()
     return false;
 }
 
+bool FocusHub::HasFocusedChild()
+{
+    if (!currentFocus_ || focusType_ != FocusType::SCOPE) {
+        return false;
+    }
+    std::list<RefPtr<FocusHub>> focusNodes;
+    GetChildrenFocusHub(focusNodes);
+    return std::any_of(focusNodes.begin(), focusNodes.end(),
+        [](const RefPtr<FocusHub>& node) { return node && node->IsCurrentFocus(); });
+}
+
 void FocusHub::SetIsFocusOnTouch(bool isFocusOnTouch)
 {
     if (!focusCallbackEvents_) {
@@ -1190,7 +1201,7 @@ void FocusHub::OnFocusNode()
     if (parentFocusHub) {
         parentFocusHub->SetLastFocusNodeIndex(AceType::Claim(this));
     }
-    
+
     auto focusManager = pipeline->GetOrCreateFocusManager();
     CHECK_NULL_VOID(focusManager);
     focusManager->PaintFocusState();
@@ -1398,8 +1409,7 @@ bool FocusHub::PaintFocusState(bool isNeedStateStyles)
     } else {
         if (focusStyleType_ == FocusStyleType::INNER_BORDER) {
             focusPaddingVp = -appTheme->GetFocusWidthVp();
-        } else if (focusStyleType_ == FocusStyleType::OUTER_BORDER ||
-            focusStyleType_ == FocusStyleType::FORCE_BORDER) {
+        } else if (focusStyleType_ == FocusStyleType::OUTER_BORDER || focusStyleType_ == FocusStyleType::FORCE_BORDER) {
             focusPaddingVp = appTheme->GetFocusOutPaddingVp();
         }
     }
@@ -1850,7 +1860,7 @@ RefPtr<FocusHub> FocusHub::GetChildFocusNodeByType(FocusNodeType nodeType)
             continue;
         }
         auto childFocusView = childFrame->GetPattern<FocusView>();
-        if (childFocusView && childFocusView->IsFocusViewLegal()) {
+        if (childFocusView && childFocusView->IsFocusViewLegal() && childFocusView->IsEntryFocusView()) {
             continue;
         }
         auto findNode = child->GetChildFocusNodeByType(nodeType);
@@ -2272,8 +2282,8 @@ void FocusHub::SetFocusScopeId(const std::string& focusScopeId, bool isGroup)
         return;
     }
     if (focusManager && !focusManager->AddFocusScope(focusScopeId, AceType::Claim(this))) {
-        TAG_LOGW(AceLogTag::ACE_FOCUS, "node(%{public}s/%{public}d) focusScopeId exist.",
-            GetFrameName().c_str(), GetFrameId());
+        TAG_LOGW(AceLogTag::ACE_FOCUS, "node(%{public}s/%{public}d) focusScopeId exist.", GetFrameName().c_str(),
+            GetFrameId());
         return;
     }
     focusScopeId_ = focusScopeId;
@@ -2347,7 +2357,7 @@ bool FocusHub::IsInFocusGroup()
     return false;
 }
 
-void FocusHub::SetLastWeakFocusNodeWholeScope(const std::string &focusScopeId)
+void FocusHub::SetLastWeakFocusNodeWholeScope(const std::string& focusScopeId)
 {
     RefPtr<FocusHub> thisNode = AceType::Claim(this);
     auto parent = GetParentFocusHub();

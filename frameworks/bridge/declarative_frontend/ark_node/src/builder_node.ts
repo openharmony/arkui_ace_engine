@@ -51,6 +51,12 @@ class BuilderNode {
   public dispose(): void {
     this._JSBuilderNode.dispose();
   }
+  public reuse(param?: Object): void {
+    this._JSBuilderNode.reuse(param);
+  }
+  public recycle(): void {
+    this._JSBuilderNode.recycle();
+  }
 }
 
 class JSBuilderNode extends BaseNode {
@@ -66,7 +72,34 @@ class JSBuilderNode extends BaseNode {
     this.uiContext_ = uiContext;
     this.updateFuncByElmtId = new Map();
   }
-
+  public reuse(param: Object): void {
+    this.childrenWeakrefMap_.forEach((weakRefChild) => {
+      const child = weakRefChild.deref();
+      if (child) {
+        if (child instanceof ViewPU) {
+          child.aboutToReuseInternal(param);
+        }
+        else {
+          // FIXME fix for mixed V2 - V3 Hierarchies
+          throw new Error('aboutToReuseInternal: Recycle not implemented for ViewV2, yet');
+        }
+      } // if child
+    });
+  }
+  public recycle(): void {
+    this.childrenWeakrefMap_.forEach((weakRefChild) => {
+      const child = weakRefChild.deref();
+      if (child) {
+        if (child instanceof ViewPU) {
+          child.aboutToRecycleInternal();
+        }
+        else {
+          // FIXME fix for mixed V2 - V3 Hierarchies
+          throw new Error('aboutToRecycleInternal: Recycle not yet implemented for ViewV2');
+        }
+      } // if child
+    });
+  }
   public getCardId(): number {
     return -1;
   }

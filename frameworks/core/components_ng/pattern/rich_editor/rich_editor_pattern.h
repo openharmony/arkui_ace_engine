@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_RICH_EDITOR_PATTERN_H
 
 #include <cstdint>
+#include <map>
 #include <optional>
 #include <set>
 #include <string>
@@ -78,13 +79,14 @@ struct AutoScrollParam {
     Offset eventOffset;
     bool isFirstRun_ = true;
 };
-enum class RecordType {
-    DEL_FORWARD = 0,
-    DEL_BACKWARD = 1,
-    INSERT = 2,
-    UNDO = 3,
-    REDO = 4,
-    DRAG = 5
+enum class RecordType { DEL_FORWARD = 0, DEL_BACKWARD = 1, INSERT = 2, UNDO = 3, REDO = 4, DRAG = 5 };
+enum class SelectorAdjustPolicy { INCLUDE = 0, EXCLUDE };
+enum class HandleType { FIRST = 0, SECOND };
+const std::map<std::pair<HandleType, SelectorAdjustPolicy>, MoveDirection> SELECTOR_ADJUST_DIR_MAP = {
+    {{ HandleType::FIRST, SelectorAdjustPolicy::INCLUDE }, MoveDirection::BACKWARD },
+    {{ HandleType::FIRST, SelectorAdjustPolicy::EXCLUDE }, MoveDirection::FORWARD },
+    {{ HandleType::SECOND, SelectorAdjustPolicy::INCLUDE }, MoveDirection::FORWARD },
+    {{ HandleType::SECOND, SelectorAdjustPolicy::EXCLUDE }, MoveDirection::BACKWARD }
 };
 
 class RichEditorPattern
@@ -239,6 +241,7 @@ public:
     {
         uint32_t spanTextLength = 0;
         for (auto& span : spans_) {
+            span->rangeStart = static_cast<int32_t>(spanTextLength);
             spanTextLength += StringUtils::ToWstring(span->content).length();
             span->position = static_cast<int32_t>(spanTextLength);
         }
@@ -360,6 +363,7 @@ public:
     bool GetCaretVisible() const;
     OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight,
         bool downStreamFirst = false, bool needLineHighest = true);
+    bool IsCustomSpanInCaretPos(int32_t position, bool downStreamFirst);
     void CopyTextSpanStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target, bool needLeadingMargin = false);
     void CopyTextSpanFontStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target);
     void CopyTextSpanLineStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target, bool needLeadingMargin = false);
@@ -706,8 +710,11 @@ public:
         return MakeRefPtr<RichEditorAccessibilityProperty>();
     }
 
-    void AdjustSelector(int32_t& index, bool isFirst);
-    void AdjustSelector(int32_t& start, int32_t& end);
+    void AdjustSelector(int32_t& index, HandleType handleType,
+        SelectorAdjustPolicy policy = SelectorAdjustPolicy::INCLUDE);
+    void AdjustSelector(int32_t& start, int32_t& end, SelectorAdjustPolicy policy = SelectorAdjustPolicy::INCLUDE);
+    bool AdjustSelectorForSymbol(int32_t& index, HandleType handleType, SelectorAdjustPolicy policy);
+    bool AdjustSelectorForEmoji(int32_t& index, HandleType handleType, SelectorAdjustPolicy policy);
     void UpdateSelector(int32_t start, int32_t end);
     std::list<RefPtr<SpanItem>>::iterator GetSpanIter(int32_t index);
 

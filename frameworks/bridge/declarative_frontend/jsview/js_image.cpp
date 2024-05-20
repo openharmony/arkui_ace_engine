@@ -681,7 +681,9 @@ void JSImage::JSBind(BindingTarget globalObj)
 
     JSClass<JSImage>::StaticMethod("border", &JSImage::JsBorder);
     JSClass<JSImage>::StaticMethod("borderRadius", &JSImage::JsBorderRadius);
+    JSClass<JSImage>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSImage>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSImage>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSImage>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSImage>::StaticMethod("autoResize", &JSImage::SetAutoResize);
     JSClass<JSImage>::StaticMethod("resizable", &JSImage::JsImageResizable);

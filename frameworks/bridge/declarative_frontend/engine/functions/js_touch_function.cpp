@@ -56,12 +56,8 @@ JSRef<JSObject> JsTouchFunction::CreateJSEventInfo(TouchEventInfo& info)
     eventObj->SetPropertyObject("target", target);
     eventObj->SetProperty<double>("pressure", info.GetForce());
     eventObj->SetPropertyObject("preventDefault", JSRef<JSFunc>::New<FunctionCallback>(JsTouchPreventDefault));
-    if (info.GetTiltX().has_value()) {
-        eventObj->SetProperty<double>("tiltX", info.GetTiltX().value());
-    }
-    if (info.GetTiltY().has_value()) {
-        eventObj->SetProperty<double>("tiltY", info.GetTiltY().value());
-    }
+    eventObj->SetProperty<double>("tiltX", info.GetTiltX().value_or(0.0f));
+    eventObj->SetProperty<double>("tiltY", info.GetTiltY().value_or(0.0f));
     eventObj->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
 
     const std::list<TouchLocationInfo>& touchList = info.GetTouches();

@@ -2315,6 +2315,7 @@ void JsAccessibilityManager::DumpTreeNG(bool useWindowId, uint32_t windowId, int
     auto pipeline = GetPipelineByWindowId(windowId);
     if (pipeline == nullptr) {
         DumpLog::GetInstance().Print("Error: pipeline is not found!");
+        return;
     }
     auto rootNode = pipeline->GetRootElement();
     CHECK_NULL_VOID(rootNode);

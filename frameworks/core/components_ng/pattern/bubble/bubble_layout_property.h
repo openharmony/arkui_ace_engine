@@ -43,6 +43,7 @@ public:
         value->propArrowHeight_ = CloneArrowHeight();
         value->propArrowWidth_ = CloneArrowWidth();
         value->propRadius_ = CloneRadius();
+        value->propIsCaretMode_ = CloneIsCaretMode();
         return value;
     }
 
@@ -60,6 +61,7 @@ public:
         ResetArrowHeight();
         ResetArrowWidth();
         ResetRadius();
+        ResetIsCaretMode();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableArrow, bool, PROPERTY_UPDATE_MEASURE);
@@ -73,6 +75,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ArrowHeight, Dimension, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ArrowWidth, Dimension, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Radius, Dimension, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsCaretMode, bool, PROPERTY_UPDATE_LAYOUT);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(BubbleLayoutProperty);

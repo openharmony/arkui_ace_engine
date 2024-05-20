@@ -188,7 +188,9 @@ void JSGridItem::JSBind(BindingTarget globalObj)
     JSClass<JSGridItem>::StaticMethod("height", &JSGridItem::SetGridItemHeight);
     JSClass<JSGridItem>::StaticMethod("selected", &JSGridItem::SetSelected);
     JSClass<JSGridItem>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSGridItem>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSGridItem>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSGridItem>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSGridItem>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSGridItem>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSGridItem>::StaticMethod("onHover", &JSInteractableView::JsOnHover);

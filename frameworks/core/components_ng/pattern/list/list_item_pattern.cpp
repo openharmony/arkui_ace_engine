@@ -479,7 +479,7 @@ void ListItemPattern::UpdatePostion(float delta)
     auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(listItemEventHub);
     auto offset = curOffset_;
-    curOffset_ += delta;
+    IsRTLAndVertical() ? curOffset_ -= delta : curOffset_ += delta;
     ChangeDeleteAreaStage();
     auto edgeEffect = GetEdgeEffect();
     if (edgeEffect == V2::SwipeEdgeEffect::None) {
@@ -510,6 +510,27 @@ void ListItemPattern::UpdatePostion(float delta)
     if (!NearEqual(offset, curOffset_)) {
         MarkDirtyNode();
         FireSwipeActionOffsetChange(offset, curOffset_);
+    }
+}
+
+bool ListItemPattern::IsRTLAndVertical() const
+{
+    auto layoutProperty = GetLayoutProperty<ListItemLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+    if (layoutDirection == TextDirection::RTL && axis_ == Axis::VERTICAL) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+float ListItemPattern::SetReverseValue(float offset)
+{
+    if (IsRTLAndVertical()) {
+        return -offset;
+    } else {
+        return offset;
     }
 }
 
@@ -575,7 +596,11 @@ void ListItemPattern::StartSpringMotion(float start, float end, float velocity, 
             listItem->springController_->Stop();
             position = end;
         }
-        listItem->UpdatePostion(position - listItem->curOffset_);
+        if (listItem->IsRTLAndVertical()) {
+            listItem->UpdatePostion(listItem->curOffset_-position);
+        } else {
+            listItem->UpdatePostion(position - listItem->curOffset_);
+        }
     });
     springController_->ClearStopListeners();
     springController_->PlayMotion(springMotion_);
@@ -594,7 +619,7 @@ void ListItemPattern::StartSpringMotion(float start, float end, float velocity, 
     });
 }
 
-void ListItemPattern::DoDeleteAnimation(bool isRightDelete)
+void ListItemPattern::DoDeleteAnimation(bool isStartDelete)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -611,7 +636,7 @@ void ListItemPattern::DoDeleteAnimation(bool isRightDelete)
     context->OpenImplicitAnimation(option, option.GetCurve(), nullptr);
     swiperIndex_ = ListItemSwipeIndex::SWIPER_ACTION;
     float oldOffset = curOffset_;
-    curOffset_ = isRightDelete ? itemWidth : -itemWidth;
+    curOffset_ = isStartDelete ? itemWidth : -itemWidth;
     FireSwipeActionOffsetChange(oldOffset, curOffset_);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     context->FlushUITasks();
@@ -678,8 +703,11 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
     float friction = GetFriction();
     float threshold = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) ? NEW_SWIPER_TH : SWIPER_TH;
     float speedThreshold = SWIPER_SPEED_TH;
-    bool reachRightSpeed = info.GetMainVelocity() > speedThreshold;
-    bool reachLeftSpeed = -info.GetMainVelocity() > speedThreshold;
+
+    float velocity = IsRTLAndVertical() ? -info.GetMainVelocity() : info.GetMainVelocity();
+    bool reachRightSpeed = velocity > speedThreshold;
+    bool reachLeftSpeed = -velocity > speedThreshold;
+    
     auto startOnDelete = listItemEventHub->GetStartOnDelete();
     auto endOnDelete = listItemEventHub->GetEndOnDelete();
 
@@ -704,7 +732,7 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
     if (GreatNotEqual(curOffset_, 0.0) && HasStartNode()) {
         float width = startNodeSize_;
         if (swiperIndex_ == ListItemSwipeIndex::ITEM_CHILD && reachLeftSpeed) {
-            StartSpringMotion(curOffset_, 0, info.GetMainVelocity() * friction);
+            StartSpringMotion(curOffset_, 0, velocity * friction);
             FireSwipeActionStateChange(SwipeActionState::COLLAPSED);
             return;
         }
@@ -718,8 +746,8 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
             (curOffset_ > width * threshold || reachRightSpeed)) {
             swiperIndex_ = ListItemSwipeIndex::SWIPER_START;
             FireSwipeActionStateChange(SwipeActionState::EXPANDED);
-        } else if (swiperIndex_ == ListItemSwipeIndex::SWIPER_START &&
-                   (curOffset_ < width * (1 - threshold) || (reachLeftSpeed && curOffset_ < width))) {
+        } else if (swiperIndex_ == ListItemSwipeIndex::SWIPER_START && (curOffset_ < width *
+                  (1 - threshold) || (reachLeftSpeed && curOffset_ < width))) {
             ResetToItemChild();
         } else if (swiperIndex_ == ListItemSwipeIndex::SWIPER_END ||
                    swiperIndex_ == ListItemSwipeIndex::SWIPER_ACTION) {
@@ -729,7 +757,7 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
     } else if (LessNotEqual(curOffset_, 0.0) && HasEndNode()) {
         float width = endNodeSize_;
         if (swiperIndex_ == ListItemSwipeIndex::ITEM_CHILD && reachRightSpeed) {
-            StartSpringMotion(curOffset_, 0, info.GetMainVelocity() * friction);
+            StartSpringMotion(curOffset_, 0, velocity * friction);
             FireSwipeActionStateChange(SwipeActionState::COLLAPSED);
             return;
         }
@@ -743,8 +771,8 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
             (width * threshold < -curOffset_ || reachLeftSpeed)) {
             swiperIndex_ = ListItemSwipeIndex::SWIPER_END;
             FireSwipeActionStateChange(SwipeActionState::EXPANDED);
-        } else if (swiperIndex_ == ListItemSwipeIndex::SWIPER_END &&
-                   (-curOffset_ < width * (1 - threshold) || (reachRightSpeed && -curOffset_ < width))) {
+        } else if (swiperIndex_ == ListItemSwipeIndex::SWIPER_END && (-curOffset_ < width *
+                  (1 - threshold) || (reachRightSpeed && -curOffset_ < width))) {
             ResetToItemChild();
         } else if (swiperIndex_ == ListItemSwipeIndex::SWIPER_START ||
                    swiperIndex_ == ListItemSwipeIndex::SWIPER_ACTION) {
@@ -752,7 +780,7 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
         }
         end = width * static_cast<int32_t>(swiperIndex_);
     }
-    StartSpringMotion(curOffset_, end, info.GetMainVelocity() * friction);
+    StartSpringMotion(curOffset_, end, velocity * friction);
 }
 
 void ListItemPattern::SwiperReset(bool isCloseSwipeAction)

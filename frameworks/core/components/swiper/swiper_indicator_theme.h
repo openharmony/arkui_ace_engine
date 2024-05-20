@@ -68,10 +68,10 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->leftSymbolId_ = themeConstants->GetSymbolByName("chevron_left");
-            theme->rightSymbolId_ = themeConstants->GetSymbolByName("chevron_right");
-            theme->upSymbolId_ = themeConstants->GetSymbolByName("chevron_up");
-            theme->downSymbolId_ = themeConstants->GetSymbolByName("chevron_down");
+            theme->leftSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_left");
+            theme->rightSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_right");
+            theme->upSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_up");
+            theme->downSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_down");
             ParsePattern(themeConstants, theme);
             return theme;
         }

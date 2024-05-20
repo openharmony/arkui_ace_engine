@@ -36,6 +36,7 @@ int32_t GridIrregularFiller::InitPos(int32_t lineIdx)
 using Result = GridIrregularFiller::FillResult;
 Result GridIrregularFiller::Fill(const FillParameters& params, float targetLen, int32_t startingLine)
 {
+    startingLine = std::max(0, startingLine);
     int32_t idx = InitPos(startingLine);
     // no gap on first row
     float len = -params.mainGap;

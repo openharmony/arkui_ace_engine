@@ -1534,6 +1534,32 @@ class OnDisappearModifier extends ModifierWithKey {
   }
 }
 OnDisappearModifier.identity = Symbol('onDisappear');
+class OnAttachModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnAttach(node);
+    } else {
+      getUINativeModule().common.setOnAttach(node, this.value);
+    }
+  }
+}
+OnAttachModifier.identity = Symbol('onAttach');
+class OnDetachModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnDetach(node);
+    } else {
+      getUINativeModule().common.setOnDetach(node, this.value);
+    }
+  }
+}
+OnDetachModifier.identity = Symbol('onDetach');
 class OnKeyEventModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -3366,6 +3392,14 @@ class ArkComponent {
     modifierWithKey(this._modifiersWithKeys, OnDisappearModifier.identity, OnDisappearModifier, event);
     return this;
   }
+  onAttach(event) {
+    modifierWithKey(this._modifiersWithKeys, OnAttachModifier.identity, OnAttachModifier, event);
+    return this;
+  }
+  onDetach(event) {
+    modifierWithKey(this._modifiersWithKeys, OnDetachModifier.identity, OnDetachModifier, event);
+    return this;
+  }
   onAreaChange(event) {
     modifierWithKey(this._modifiersWithKeys, OnAreaChangeModifier.identity, OnAreaChangeModifier, event);
     return this;
@@ -4014,6 +4048,14 @@ class UICommonEvent {
   setOnDisappear(callback) {
     this._onDisappearEvent = callback;
     getUINativeModule().frameNode.setOnDisappear(this._nodePtr, callback, this._instanceId);
+  }
+  setOnAttach(callback) {
+    this._onAttachEvent = callback;
+    getUINativeModule().frameNode.setOnAttach(this._nodePtr, callback, this._instanceId);
+  }
+  setOnDetach(callback) {
+    this._onDetachEvent = callback;
+    getUINativeModule().frameNode.setOnDetach(this._nodePtr, callback, this._instanceId);
   }
   setOnKeyEvent(callback) {
     this._onKeyEvent = callback;
@@ -6037,6 +6079,36 @@ class ImageSrcModifier extends ModifierWithKey {
 }
 ImageSrcModifier.identity = Symbol('imageShowSrc');
 
+class ImageEnableAnalyzerModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().image.enableAnalyzer(node, "");
+    }
+    else {
+      getUINativeModule().image.enableAnalyzer(node, this.value);
+    }
+  }
+}
+ImageSrcModifier.identity = Symbol('enableAnalyzer');
+
+class ImageAnalyzerConfigModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().image.analyzerConfig(node, "");
+    }
+    else {
+      getUINativeModule().image.analyzerConfig(node, this.value);
+    }
+  }
+}
+ImageSrcModifier.identity = Symbol('analyzerConfig');
+
 class ArkImageComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -6144,6 +6216,16 @@ class ArkImageComponent extends ArkComponent {
   enhancedImageQuality(value) {
     modifierWithKey(
       this._modifiersWithKeys, ImageEnhancedImageQualityModifier.identity, ImageEnhancedImageQualityModifier, value);
+    return this;
+  }
+  enableAnalyzer(value) {
+    modifierWithKey(
+      this._modifiersWithKeys, ImageEnableAnalyzerModifier.identity, ImageEnableAnalyzerModifier, value);
+    return this;
+  }
+  analyzerConfig(value) {
+    modifierWithKey(
+      this._modifiersWithKeys, ImageAnalyzerConfigModifier.identity, ImageAnalyzerConfigModifier, value);
     return this;
   }
 }
@@ -6481,6 +6563,20 @@ class ImageSpanBaselineOffsetModifier extends ModifierWithKey {
   }
 }
 ImageSpanBaselineOffsetModifier.identity = Symbol('imagespanBaselineOffset');
+class ImageSpanAltModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().imageSpan.resetAlt(node);
+    }
+    else {
+      getUINativeModule().imageSpan.setAlt(node, this.value);
+    }
+  }
+}
+ImageSpanAltModifier.identity = Symbol('imagespanAlt');
 class ArkImageSpanComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -6499,6 +6595,10 @@ class ArkImageSpanComponent extends ArkComponent {
   }
   baselineOffset(value) {
     modifierWithKey(this._modifiersWithKeys, ImageSpanBaselineOffsetModifier.identity, ImageSpanBaselineOffsetModifier, value);
+    return this;
+  }
+  alt(value) {
+    modifierWithKey(this._modifiersWithKeys, ImageSpanAltModifier.identity, ImageSpanAltModifier, value);
     return this;
   }
 }
@@ -7623,9 +7723,31 @@ class SearchShowCounterModifier extends ModifierWithKey {
   }
 }
 SearchShowCounterModifier.identity = Symbol('searchShowCounter');
+class SearchInitializeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetSearchInitialize(node);
+    } else {
+      getUINativeModule().search.setSearchInitialize(node, this.value.value,
+        this.value.placeholder, this.value.icon, this.value.controller);
+    }
+  }
+}
+SearchInitializeModifier.identity = Symbol('searchInitialize');
 class ArkSearchComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
+  }
+  initialize(value) {
+    if (value[0] !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, SearchInitializeModifier.identity, SearchInitializeModifier, value[0]);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, SearchInitializeModifier.identity, SearchInitializeModifier, null);
+    }
+    return this;
   }
   onEditChange(callback) {
     modifierWithKey(this._modifiersWithKeys, SearchOnEditChangeModifier.identity, SearchOnEditChangeModifier, callback);
@@ -8359,6 +8481,12 @@ class ArkSpanComponent {
     throw new Error('Method not implemented.');
   }
   onDisAppear(event) {
+    throw new Error('Method not implemented.');
+  }
+  onAttach(event) {
+    throw new Error('Method not implemented.');
+  }
+  onDetach(event) {
     throw new Error('Method not implemented.');
   }
   onAreaChange(event) {
@@ -16997,6 +17125,16 @@ class ArkNavDestinationComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, HideTitleBarModifier.identity, HideTitleBarModifier, value);
     return this;
   }
+  backButtonIcon(value) {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationBackButtonIconModifier.identity,
+      NavDestinationBackButtonIconModifier, value);
+    return this;
+  }
+  mode(value) {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationModeModifier.identity,
+      NavDestinationModeModifier, value);
+    return this;
+  }
   onShown(callback) {
     throw new Error('Method not implemented.');
   }
@@ -17774,6 +17912,7 @@ class ModeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
+  static identity = Symbol('mode');
   applyPeer(node, reset) {
     if (reset) {
       getUINativeModule().navigation.resetMode(node);
@@ -17783,7 +17922,34 @@ class ModeModifier extends ModifierWithKey {
     }
   }
 }
-ModeModifier.identity = Symbol('mode');
+class NavDestinationBackButtonIconModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  static identity = Symbol('backButtonIcon');
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetBackButtonIcon(node);
+    } else {
+      getUINativeModule().navDestination.setBackButtonIcon(node, this.value);
+    }
+  }
+}
+
+class NavDestinationModeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetMode(node);
+    }
+    else {
+      getUINativeModule().navDestination.setMode(node, this.value);
+    }
+  }
+}
+NavDestinationModeModifier.identity = Symbol('mode');
 class HideToolBarModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -20282,14 +20448,16 @@ class ArkStepperItemComponent extends ArkComponent {
     super(nativePtr, classType);
   }
   prevLabel(value) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, PrevLabelModifier.identity, PrevLabelModifier, value);
+    return this;
   }
   nextLabel(value) {
     modifierWithKey(this._modifiersWithKeys, NextLabelModifier.identity, NextLabelModifier, value);
     return this;
   }
   status(value) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, StatusModifier.identity, StatusModifier, value);
+    return this;
   }
 }
 class NextLabelModifier extends ModifierWithKey {
@@ -20306,6 +20474,36 @@ class NextLabelModifier extends ModifierWithKey {
   }
 }
 NextLabelModifier.identity = Symbol('NextLabel');
+
+class PrevLabelModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  static identity = Symbol('prevLabel');
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().stepperItem.resetPrevLabel(node);
+    }
+    else {
+      getUINativeModule().stepperItem.setPrevLabel(node, this.value);
+    }
+  }
+}
+
+class StatusModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  static identity = Symbol('status');
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().stepperItem.resetStatus(node);
+    }
+    else {
+      getUINativeModule().stepperItem.setStatus(node, this.value);
+    }
+  }
+}
 // @ts-ignore
 if (globalThis.StepperItem !== undefined) {
   globalThis.StepperItem.attributeModifier = function (modifier) {
@@ -21209,6 +21407,12 @@ class ArkXComponentComponent {
     throw new Error('Method not implemented.');
   }
   onDisAppear(event) {
+    throw new Error('Method not implemented.');
+  }
+  onAttach(event) {
+    throw new Error('Method not implemented.');
+  }
+  onDetach(event) {
     throw new Error('Method not implemented.');
   }
   onAreaChange(event) {

@@ -379,6 +379,7 @@ public:
     void SavePaintRect(bool isRound = true, uint8_t flag = 0) override;
     void SyncPartialRsProperties() override;
     void UpdatePaintRect(const RectF& paintRect) override;
+    Matrix4 GetRevertMatrix() override;
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -474,7 +475,6 @@ private:
     void OnTransitionInFinish();
     void OnTransitionOutFinish();
     void RemoveDefaultTransition();
-    static void GetBestBreakPoint(RefPtr<UINode>& breakPointChild, RefPtr<UINode>& breakPointParent);
     void SetTransitionPivot(const SizeF& frameSize, bool transitionIn);
     void SetPivot(float xPivot, float yPivot, float zPivot = 0.0f);
     void SetPositionToRSNode();
@@ -571,13 +571,13 @@ private:
     void RoundToPixelGrid(bool isRound, uint8_t flag);
     void OnePixelRounding();
     void OnePixelRounding(bool isRound, uint8_t flag);
-    Matrix4 GetRevertMatrix();
     Matrix4 GetMatrix();
     Matrix4 GetMatrixWithTransformRotate();
     bool IsUniRenderEnabled() override;
     void AddFrameNodeInfoToRsNode();
     // Use rect to update the drawRegion rect at index.
     void UpdateDrawRegion(uint32_t index, const std::shared_ptr<Rosen::RectF>& rect);
+    void NotifyHostTransformUpdated();
 
     void InitAccessibilityFocusModidifer(const RoundRect&, const Color&, float);
 

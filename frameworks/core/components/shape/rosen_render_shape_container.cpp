@@ -154,7 +154,10 @@ void RosenRenderShapeContainer::Paint(RenderContext& context, const Offset& offs
             offCanvas_->Bind(offBitmap_);
             auto cmdList = tmpCanvas->GetDrawCmdList();
             cmdList->Playback(*offCanvas_);
+            RSBrush brush;
+            canvas_->AttachBrush(brush);
             canvas_->DrawBitmap(offBitmap_, 0, 0);
+            canvas_->DetachBrush();
         }
     } else {
         BitmapMesh(context, offset);
@@ -244,7 +247,10 @@ void RosenRenderShapeContainer::BitmapMesh(RenderContext& context, const Offset&
 
         skCanvas_->drawImage(skOffBitmap_.asImage(), 0, 0, SkSamplingOptions());
 #else
+        RSBrush brush;
+        canvas_->AttachBrush(brush);
         canvas_->DrawBitmap(offBitmap_, 0, 0);
+        canvas_->DetachBrush();
 #endif
         return;
     }

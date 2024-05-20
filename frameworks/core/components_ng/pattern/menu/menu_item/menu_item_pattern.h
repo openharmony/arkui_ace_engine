@@ -19,6 +19,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/slider/render_slider.h"
+#include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_accessibility_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_event_hub.h"
@@ -152,6 +153,7 @@ public:
     {
         return bgBlendColor_;
     }
+    bool IsDisabled();
 
     RefPtr<FrameNode> GetMenu(bool needTopMenu = false);
     RefPtr<MenuPattern> GetMenuPattern(bool needTopMenu = false);
@@ -171,6 +173,7 @@ public:
     }
 
     void OnVisibleChange(bool isVisible) override;
+    void InitLongPressEvent();
 
 protected:
     void RegisterOnKeyEvent();
@@ -200,7 +203,6 @@ private:
     RefPtr<FrameNode> GetClickableArea();
     void ShowEmbeddedSubMenu(bool hasFurtherExpand);
 
-    bool IsDisabled();
     void UpdateDisabledStyle();
 
     RefPtr<FrameNode> GetMenuWrapper();
@@ -253,6 +255,7 @@ private:
     RefPtr<FrameNode> endIcon_ = nullptr;
     RefPtr<FrameNode> selectIcon_ = nullptr;
     RefPtr<FrameNode> expandIcon_ = nullptr;
+    RefPtr<LongPressEvent> longPressEvent_;
     std::vector<RefPtr<FrameNode>> expandableItems_;
     bool onTouchEventSet_ = false;
     bool onHoverEventSet_ = false;

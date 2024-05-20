@@ -14,6 +14,7 @@
  */
 
 import { Theme } from '@ohos.arkui.theme';
+import { LengthMetrics } from '@ohos.arkui.node';
 
 export enum IconType {
   BADGE = 1,
@@ -210,8 +211,8 @@ struct ContentItemStruct {
       this.createIcon()
       this.createText()
     }
-    .margin({ right: 16 })
-    .padding({ left: LISTITEM_PADDING })
+    .margin({ end: LengthMetrics.vp(16) })
+    .padding({ start: LengthMetrics.vp(LISTITEM_PADDING) })
     .width(this.leftWidth)
     .flexShrink(1)
   }
@@ -278,7 +279,7 @@ struct OperateItemStruct {
         right: TEXT_SAFE_MARGIN
       })
     }
-    .margin({ right: LISTITEM_PADDING })
+    .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
     .hitTestBehavior(HitTestMode.Block)
     .fontSize($r('sys.float.ohos_id_text_size_button3'))
     .fontColor($r('sys.color.ohos_id_color_text_primary_activated_transparent'))
@@ -361,13 +362,13 @@ struct OperateItemStruct {
       .height(OPERATEITEM_IMAGE_SIZE)
       .width(OPERATEITEM_IMAGE_SIZE)
       .draggable(false)
-      .margin({ right: LISTITEM_PADDING })
+      .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
   }
 
   @Builder
   createText(text: ResourceStr) {
     Text(text)
-      .margin({ right: LISTITEM_PADDING })
+      .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
       .fontSize($r('sys.float.ohos_id_text_size_body2'))
       .fontColor(this.secondaryTextColor)
       .focusable(true)
@@ -385,7 +386,7 @@ struct OperateItemStruct {
         .fillColor($r('sys.color.ohos_id_color_fourth'))
         .draggable(false)
     }
-    .margin({ right: LISTITEM_PADDING })
+    .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
     .hitTestBehavior(HitTestMode.Block)
     .backgroundColor(Color.Transparent)
     .height(OPERATEITEM_ICONLIKE_SIZE)
@@ -420,7 +421,7 @@ struct OperateItemStruct {
   @Builder
   createRadio(radio: OperateCheck) {
     Radio({ value: '', group: '' })
-      .margin({ right: LISTITEM_PADDING })
+      .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
       .checked(this.radioState)
       .onChange(radio.onChange)
       .height(OPERATEITEM_ICONLIKE_SIZE)
@@ -455,7 +456,7 @@ struct OperateItemStruct {
   @Builder
   createCheckBox(checkBox: OperateCheck) {
     Checkbox()
-      .margin({ right: LISTITEM_PADDING })
+      .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
       .select(this.checkBoxState)
       .onChange(checkBox.onChange)
       .height(OPERATEITEM_ICONLIKE_SIZE)
@@ -497,7 +498,7 @@ struct OperateItemStruct {
         })
         .hitTestBehavior(HitTestMode.Block)
     }
-    .margin({ right: SWITCH_PADDING })
+    .margin({ end: LengthMetrics.vp(SWITCH_PADDING) })
     .height(OPERATEITEM_ICON_CLICKABLE_SIZE)
     .width(OPERATEITEM_ICON_CLICKABLE_SIZE)
     .justifyContent(FlexAlign.Center)
@@ -547,8 +548,8 @@ struct OperateItemStruct {
           .draggable(false)
       }
       .padding({
-        left: TEXT_SAFE_MARGIN,
-        right: LISTITEM_PADDING
+        start: LengthMetrics.vp(TEXT_SAFE_MARGIN),
+        end: LengthMetrics.vp(LISTITEM_PADDING)
       })
     }
     .hitTestBehavior(HitTestMode.Block)

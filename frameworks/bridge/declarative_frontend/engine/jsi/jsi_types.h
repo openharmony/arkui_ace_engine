@@ -16,6 +16,8 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_JSI_TYPES_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_JSI_TYPES_H
 
+#include <string>
+
 #include "ecmascript/napi/include/jsnapi.h"
 
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
@@ -112,11 +114,15 @@ public:
  * @brief A wrapper around a panda::StringRef
  *
  */
-class JsiString : public JsiValue {
+class JsiString : public JsiType<panda::StringRef> {
 public:
-    explicit JsiString(const char* str);
-    explicit JsiString(JsiValue str);
-    static JsiString New(const char* str);
+    JsiString() = default;
+    explicit JsiString(panda::Local<panda::StringRef> val);
+    explicit JsiString(const panda::CopyableGlobal<panda::StringRef>& val);
+    ~JsiString() override = default;
+
+    static panda::Local<panda::StringRef> New(const char* str);
+    static panda::Local<panda::StringRef> New(const std::string& str);
     FAKE_PTR_FOR_FUNCTION_ACCESS(JsiString)
 };
 
