@@ -165,6 +165,8 @@ bool WebClientImpl::OnFocus()
     CHECK_NULL_RETURN(delegate, false);
     bool isFocused = delegate->RequestFocus();
     delegate->OnRequestFocus();
+
+    delegate->SetToken();
     return isFocused;
 }
 
