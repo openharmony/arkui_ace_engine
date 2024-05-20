@@ -150,6 +150,7 @@ public:
 
     void SetOnMove(std::function<void(int32_t, int32_t)>&& onMove);
     void MoveData(int32_t from, int32_t to) override;
+    void FireOnMove(int32_t from, int32_t to) override;
     RefPtr<FrameNode> GetFrameNode(int32_t index) override;
     int32_t GetFrameNodeIndex(RefPtr<FrameNode> node) override;
     void InitDragManager(const RefPtr<FrameNode>& childNode);

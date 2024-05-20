@@ -27,7 +27,7 @@ public:
         : UINode(tag, nodeId, isRoot) {}
     virtual void MoveData(int32_t from, int32_t to) = 0;
     virtual RefPtr<FrameNode> GetFrameNode(int32_t index) = 0;
-    void FireOnMove(int32_t from, int32_t to)
+    virtual void FireOnMove(int32_t from, int32_t to)
     {
         if (onMoveEvent_) {
             onMoveEvent_(from, to);

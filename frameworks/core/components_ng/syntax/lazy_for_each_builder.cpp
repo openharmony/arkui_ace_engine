@@ -42,9 +42,9 @@ namespace OHOS::Ace::NG {
             ACE_SCOPED_TRACE("Builder:BuildLazyItem [%d]", index);
             std::pair<std::string, RefPtr<UINode>> itemInfo;
             if (useNewInterface_) {
-                itemInfo = OnGetChildByIndexNew(index, cachedItems_, expiringItem_);
+                itemInfo = OnGetChildByIndexNew(ConvertFormToIndex(index), cachedItems_, expiringItem_);
             } else {
-                itemInfo = OnGetChildByIndex(index, expiringItem_);
+                itemInfo = OnGetChildByIndex(ConvertFormToIndex(index), expiringItem_);
             }
             CHECK_NULL_RETURN(itemInfo.second, itemInfo);
             if (isCache) {
@@ -591,5 +591,36 @@ namespace OHOS::Ace::NG {
             RecycleChildByIndex(i);
         }
         outOfBoundaryNodes_.clear();
+    }
+
+    void LazyForEachBuilder::UpdateMoveFromTo(int32_t from, int32_t to)
+    {
+        if (moveFromTo_) {
+            moveFromTo_.value().second = to;
+        } else {
+            moveFromTo_ = { from, to };
+        }
+    }
+
+    void LazyForEachBuilder::ResetMoveFromTo()
+    {
+        moveFromTo_.reset();
+    }
+
+    int32_t LazyForEachBuilder::ConvertFormToIndex(int32_t index)
+    {
+        if (!moveFromTo_) {
+            return index;
+        }
+        if (moveFromTo_.value().second == index) {
+            return moveFromTo_.value().first;
+        }
+        if (moveFromTo_.value().first <= index && index < moveFromTo_.value().second) {
+            return index + 1;
+        }
+        if (moveFromTo_.value().second < index && index <= moveFromTo_.value().first) {
+            return index - 1;
+        }
+        return index;
     }
 }
