@@ -601,6 +601,7 @@ private:
     RefPtr<FrameNode> GetDialogNodeWithExistContent(const RefPtr<UINode>& node);
     void RegisterDialogLifeCycleCallback(const RefPtr<FrameNode>& dialog, const DialogProperties& dialogProps);
     void CustomDialogRecordEvent(const DialogProperties& dialogProps);
+    RefPtr<UINode> RebuildCustomBuilder(RefPtr<UINode>& contentNode);
 
     void DumpPopupMapInfo() const;
     void DumpMapInfo(

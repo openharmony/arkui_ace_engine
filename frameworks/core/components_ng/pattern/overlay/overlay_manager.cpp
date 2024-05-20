@@ -1877,6 +1877,30 @@ void OverlayManager::CustomDialogRecordEvent(const DialogProperties& dialogProps
     }
 }
 
+RefPtr<UINode> OverlayManager::RebuildCustomBuilder(RefPtr<UINode>& contentNode)
+{
+    auto currentId = Container::CurrentId();
+    if (!(currentId >= MIN_SUBCONTAINER_ID && currentId < MIN_PLUGIN_SUBCONTAINER_ID)) {
+        return contentNode;
+    }
+
+    RefPtr<UINode> customNode;
+    auto lazyBuilderFunc = contentNode->GetBuilderFunc();
+    if (lazyBuilderFunc) {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        lazyBuilderFunc();
+        customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    } else {
+        customNode = contentNode;
+    }
+
+    auto updateNodeFunc = contentNode->GetUpdateNodeFunc();
+    if (updateNodeFunc) {
+        updateNodeFunc(currentId, customNode);
+    }
+    return customNode;
+}
+
 void OverlayManager::OpenCustomDialog(const DialogProperties& dialogProps, std::function<void(int32_t)> &&callback)
 {
     RefPtr<UINode> customNode;
@@ -1887,7 +1911,7 @@ void OverlayManager::OpenCustomDialog(const DialogProperties& dialogProps, std::
     }
     if (dialogProps.customBuilder) {
         TAG_LOGD(AceLogTag::ACE_OVERLAY, "open custom dialog with custom builder.");
-        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        NG::ScopedViewStackProcessor builderViewStackProcessor(Container::CurrentId());
         dialogProps.customBuilder();
         customNode = NG::ViewStackProcessor::GetInstance()->Finish();
         if (!customNode) {
@@ -1905,7 +1929,7 @@ void OverlayManager::OpenCustomDialog(const DialogProperties& dialogProps, std::
             return;
         }
         TAG_LOGD(AceLogTag::ACE_OVERLAY, "OpenCustomDialog ComponentContent id: %{public}d", contentNode->GetId());
-        customNode = contentNode;
+        customNode = RebuildCustomBuilder(contentNode);
         showComponentContent = true;
     }
     auto dialog = DialogView::CreateDialogNode(dialogProps, customNode);
