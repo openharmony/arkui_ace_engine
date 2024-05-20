@@ -4603,6 +4603,9 @@ void TextFieldPattern::SetSelectionFlag(
     if (!HasFocus() || GetIsPreviewText()) {
         return;
     }
+    auto length = static_cast<int32_t>(contentController_->GetWideText().length());
+    selectionStart = std::clamp(selectionStart, 0, length);
+    selectionEnd = std::clamp(selectionEnd, 0, length);
     isTouchCaret_ = false;
     bool isShowMenu = selectOverlay_->IsCurrentMenuVisibile();
     if (selectionStart == selectionEnd) {
