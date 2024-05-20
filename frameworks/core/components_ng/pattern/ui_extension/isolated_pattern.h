@@ -26,6 +26,10 @@ struct IsolatedInfo {
     std::string entryPoint;
 };
 
+struct IsolatedDumpInfo {
+    int64_t createLimitedWorkerTime;
+};
+
 class IsolatedPattern : public PlatformPattern {
     DECLARE_ACE_TYPE(IsolatedPattern, PlatformPattern);
 
@@ -53,6 +57,8 @@ public:
         onSizeChanged_ = std::move(callback);
     }
 
+    void DumpInfo() override;
+
 protected:
     virtual void DispatchPointerEvent(
         const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
@@ -65,6 +71,7 @@ private:
     RefPtr<DynamicComponentRenderer> dynamicComponentRenderer_;
     std::function<void(int32_t, int32_t)> onSizeChanged_;
     IsolatedInfo curIsolatedInfo_;
+    IsolatedDumpInfo isolatedDumpInfo_;
 
     static int32_t isolatedIdGenerator_; // only run on JS thread, and do not require mutex
     ACE_DISALLOW_COPY_AND_MOVE(IsolatedPattern);
