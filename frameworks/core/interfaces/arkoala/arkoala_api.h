@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 101
+#define ARKUI_FULL_API_VERSION 102
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 101
+#define ARKUI_NODE_API_VERSION 102
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 7
@@ -2273,6 +2273,12 @@ struct ArkUISliderModifier {
     void (*resetSliderBlockType)(ArkUINodeHandle node);
     void (*setSliderValidSlideRange)(ArkUINodeHandle node, ArkUI_Float32 from, ArkUI_Float32 to);
     void (*resetSliderValidSlideRange)(ArkUINodeHandle node);
+    void (*setSelectedBorderRadius)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetSelectedBorderRadius)(ArkUINodeHandle node);
+    void (*setInteractionMode)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetInteractionMode)(ArkUINodeHandle node);
+    void (*setMinResponsiveDistance)(ArkUINodeHandle node, ArkUI_Float32 value);
+    void (*resetMinResponsiveDistance)(ArkUINodeHandle node);
 
     ArkUI_Uint32 (*getBlockColor)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getTrackBackgroundColor)(ArkUINodeHandle node);

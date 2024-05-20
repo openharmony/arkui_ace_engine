@@ -16376,6 +16376,10 @@ class ArkSliderComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TrackBorderRadiusModifier.identity, TrackBorderRadiusModifier, value);
     return this;
   }
+  selectedBorderRadius(value) {
+    modifierWithKey(this._modifiersWithKeys, SelectedBorderRadiusModifier.identity, SelectedBorderRadiusModifier, value);
+    return this;
+  }
   blockSize(value) {
     modifierWithKey(this._modifiersWithKeys, BlockSizeModifier.identity, BlockSizeModifier, value);
     return this;
@@ -16386,6 +16390,14 @@ class ArkSliderComponent extends ArkComponent {
   }
   stepSize(value) {
     modifierWithKey(this._modifiersWithKeys, StepSizeModifier.identity, StepSizeModifier, value);
+    return this;
+  }
+  sliderInteractionMode(value) {
+    modifierWithKey(this._modifiersWithKeys, InteractionModeModifier.identity, InteractionModeModifier, value);
+    return this;
+  }
+  minResponsiveDistance(value) {
+    modifierWithKey(this._modifiersWithKeys, MinResponsiveDistanceModifier.identity, MinResponsiveDistanceModifier, value);
     return this;
   }
   contentModifier(value) {
@@ -16669,6 +16681,54 @@ class ValidSlideRangeModifier extends ModifierWithKey {
   }
 }
 ValidSlideRangeModifier.identity = Symbol('slideRange');
+class SelectedBorderRadiusModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().slider.resetSelectedBorderRadius(node);
+    } else {
+      getUINativeModule().slider.setSelectedBorderRadius(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SelectedBorderRadiusModifier.identity = Symbol('sliderSelectedBorderRadius');
+class InteractionModeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().slider.resetInteractionMode(node);
+    } else {
+      getUINativeModule().slider.setInteractionMode(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+InteractionModeModifier.identity = Symbol('sliderInteractionMode');
+class MinResponsiveDistanceModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().slider.resetMinResponsiveDistance(node);
+    } else {
+      getUINativeModule().slider.setMinResponsiveDistance(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+MinResponsiveDistanceModifier.identity = Symbol('sliderMinResponsiveDistance');
 // @ts-ignore
 if (globalThis.Slider !== undefined) {
   globalThis.Slider.attributeModifier = function (modifier) {

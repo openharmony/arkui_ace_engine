@@ -2275,6 +2275,18 @@ void ArkUINativeModule::RegisterSliderAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetValidSlideRange));
     slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetValidSlideRange"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::ResetValidSlideRange));
+    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectedBorderRadius"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetSelectedBorderRadius));
+    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectedBorderRadius"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::ResetSelectedBorderRadius));
+    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setInteractionMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetInteractionMode));
+    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetInteractionMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::ResetInteractionMode));
+    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMinResponsiveDistance"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetMinResponsiveDistance));
+    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMinResponsiveDistance"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::ResetMinResponsiveDistance));
     slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContentModifierBuilder"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetContentModifierBuilder));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "slider"), slider);

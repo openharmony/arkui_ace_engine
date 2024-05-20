@@ -502,6 +502,92 @@ ArkUINativeModuleValue SliderBridge::ResetValidSlideRange(ArkUIRuntimeCallInfo* 
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue SliderBridge::SetSelectedBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+
+    CalcDimension borderRadius;
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, secondArg, borderRadius, true)) {
+        GetArkUINodeModifiers()->getSliderModifier()->resetSelectedBorderRadius(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    if (LessNotEqual(borderRadius.Value(), 0.0)) {
+        GetArkUINodeModifiers()->getSliderModifier()->resetSelectedBorderRadius(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    GetArkUINodeModifiers()->getSliderModifier()->setSelectedBorderRadius(nativeNode,
+        borderRadius.Value(), static_cast<int>(borderRadius.Unit()));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SliderBridge::ResetSelectedBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSliderModifier()->resetSelectedBorderRadius(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SliderBridge::SetInteractionMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    if (!secondArg->IsNumber()) {
+        GetArkUINodeModifiers()->getSliderModifier()->resetInteractionMode(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    int32_t interactionMode = secondArg->Int32Value(vm);
+    GetArkUINodeModifiers()->getSliderModifier()->setInteractionMode(nativeNode, interactionMode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SliderBridge::ResetInteractionMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSliderModifier()->resetInteractionMode(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SliderBridge::SetMinResponsiveDistance(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    if (!secondArg->IsNumber()) {
+        GetArkUINodeModifiers()->getSliderModifier()->resetMinResponsiveDistance(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    float distance = secondArg->ToNumber(vm)->Value();
+    GetArkUINodeModifiers()->getSliderModifier()->setMinResponsiveDistance(nativeNode, distance);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SliderBridge::ResetMinResponsiveDistance(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSliderModifier()->resetMinResponsiveDistance(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue SliderBridge::SetContentModifierBuilder(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
