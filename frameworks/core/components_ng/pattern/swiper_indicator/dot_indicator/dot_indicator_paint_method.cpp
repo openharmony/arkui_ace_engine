@@ -65,6 +65,8 @@ void DotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     IsCustomSizeValue_ = paintProperty->GetIsCustomSizeValue(false);
     dotIndicatorModifier_->SetAxis(axis_);
     dotIndicatorModifier_->SetCurrentIndex(currentIndex_);
+    dotIndicatorModifier_->SetSelectedColor(paintProperty->GetSelectedColorValue(swiperTheme->GetSelectedColor()));
+    dotIndicatorModifier_->SetUnselectedColor(paintProperty->GetColorValue(swiperTheme->GetColor()));
     dotIndicatorModifier_->SetIndicatorMask(paintProperty->GetIndicatorMaskValue(false));
     dotIndicatorModifier_->SetIsIndicatorCustomSize(IsCustomSizeValue_);
     dotIndicatorModifier_->SetOffset(geometryNode->GetContentOffset());
@@ -88,7 +90,6 @@ void DotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         dotIndicatorModifier_->SetIsHover(false);
         dotIndicatorModifier_->SetIsPressed(false);
     }
-    dotIndicatorModifier_->SetFocusedAndSelectedColor(paintWrapper);
 }
 
 void DotIndicatorPaintMethod::GetLongPointAnimationStateSecondCenter(
