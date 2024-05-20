@@ -31,6 +31,7 @@ namespace {
     constexpr int32_t IMAGE_SHOW_TIME = 50;
     constexpr int32_t PIXELMAP_ANIMATION_DURATION = 300;
     constexpr int32_t BADGE_ANIMATION_DURATION = 200;
+    constexpr int32_t BADGE_ANIMATION_DELAY = 100;
     constexpr float DEFAULT_ANIMATION_SCALE = 0.95f;
     constexpr float GATHER_SPRING_RESPONSE = 0.304f;
     constexpr float GATHER_SPRING_DAMPING_FRACTION = 0.97f;
@@ -39,8 +40,7 @@ namespace {
     constexpr float EULER_NUMBER = 2.71828f;
     constexpr float GATHER_OFFSET_RADIUS = 0.1f;
     constexpr float PIXELMAP_DRAG_SCALE_MULTIPLE = 1.05f;
-    constexpr float BADGE_FIRST_ANIMATION_SCALE = 1.2f;
-    constexpr float BADGE_SECOND_ANIMATION_SCALE = 1.0f;
+    constexpr float BADGE_ANIMATION_SCALE = 1.0f;
     constexpr Dimension BADGE_RELATIVE_OFFSET = 8.0_vp;
     constexpr Dimension BADGE_DEFAULT_SIZE = 24.0_vp;
     constexpr Dimension BADGE_TEXT_FONT_SIZE = 14.0_fp;
@@ -291,30 +291,16 @@ void DragAnimationHelper::ShowBadgeAnimation(const RefPtr<FrameNode>& textNode)
     auto textNodeContext = textNode->GetRenderContext();
     CHECK_NULL_VOID(textNodeContext);
     textNodeContext->UpdateTransformScale({ 0.0f, 0.0f });
-    RefPtr<Curve> firstCubicCurve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.45f, 1.0f);
-    CHECK_NULL_VOID(firstCubicCurve);
+    RefPtr<Curve> interpolatingSpring = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 628.0f, 40.0f);
+    CHECK_NULL_VOID(interpolatingSpring);
     AnimationOption textOption;
     textOption.SetDuration(BADGE_ANIMATION_DURATION);
-    textOption.SetCurve(firstCubicCurve);
-    textOption.SetDelay(BADGE_ANIMATION_DURATION);
-    textOption.SetOnFinishEvent([textNodeContext]() {
-        RefPtr<Curve> secondCubicCurve = AceType::MakeRefPtr<CubicCurve>(0.24f, 0.0f, 0.36f, 1.0f);
-        CHECK_NULL_VOID(secondCubicCurve);
-        AnimationOption animationOption;
-        animationOption.SetDuration(BADGE_ANIMATION_DURATION);
-        animationOption.SetCurve(secondCubicCurve);
-        textNodeContext->UpdateTransformScale({ BADGE_FIRST_ANIMATION_SCALE, BADGE_FIRST_ANIMATION_SCALE });
-        AnimationUtils::Animate(
-            animationOption,
-            [textNodeContext]() mutable {
-                textNodeContext->UpdateTransformScale({ BADGE_SECOND_ANIMATION_SCALE, BADGE_SECOND_ANIMATION_SCALE });
-            },
-            animationOption.GetOnFinishEvent());
-    });
+    textOption.SetCurve(interpolatingSpring);
+    textOption.SetDelay(BADGE_ANIMATION_DELAY);
     AnimationUtils::Animate(
         textOption,
         [textNodeContext]() mutable {
-            textNodeContext->UpdateTransformScale({ BADGE_FIRST_ANIMATION_SCALE, BADGE_FIRST_ANIMATION_SCALE });
+            textNodeContext->UpdateTransformScale({ BADGE_ANIMATION_SCALE, BADGE_ANIMATION_SCALE });
         },
         textOption.GetOnFinishEvent());
 
