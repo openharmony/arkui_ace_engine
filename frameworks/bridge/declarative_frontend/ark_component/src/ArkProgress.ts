@@ -34,6 +34,9 @@ class ArkProgressComponent extends ArkComponent implements ProgressAttribute {
     }
     return this;
   }
+  allowChildCount(): number {
+    return 0;
+  }
   value(value: number): ProgressAttribute<keyof ProgressStyleMap, LinearStyleOptions |
   ProgressStyleOptions | RingStyleOptions | EclipseStyleOptions | ScaleRingStyleOptions |
   CapsuleStyleOptions> {
