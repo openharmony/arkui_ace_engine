@@ -384,6 +384,12 @@ public:
                 pattern->GetAttr<Dimension>("schedule_marker_radius", 2.0_vp);
             theme->cardCalendarTheme_.boundaryColOffset =
                 pattern->GetAttr<Dimension>("boundary_col_offset", 50.0_vp);
+            std::string isButtonTransparent =
+                pattern->GetAttr<std::string>("calendar_picker_dialog_button_transparent", "true");
+            theme->isButtonTransparent_ = (isButtonTransparent == "true");
+            std::string isDividerTransparent =
+                pattern->GetAttr<std::string>("calendar_picker_dialog_divider_transparent", "false");
+            theme->isDividerTransparent_ = (isDividerTransparent == "true");
         }
     };
 
@@ -626,6 +632,16 @@ public:
     {
         return dialogButtonBackgroundColor_;
     }
+    
+    bool GetIsButtonTransparent() const
+    {
+        return isButtonTransparent_;
+    }
+
+    bool GetIsDividerTransparent() const
+    {
+        return isDividerTransparent_;
+    }
 protected:
     CalendarTheme() = default;
 
@@ -678,6 +694,8 @@ private:
     Dimension calendarDayKeyFocusedPenWidth_;
     Dimension entryFontSize_;
     Dimension dialogBorderRadius_;
+    bool isButtonTransparent_ = true;
+    bool isDividerTransparent_ = false;
 };
 
 } // namespace OHOS::Ace

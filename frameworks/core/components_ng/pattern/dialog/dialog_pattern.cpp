@@ -329,12 +329,11 @@ RefPtr<FrameNode> DialogPattern::CreateDialogScroll(const DialogProperties& dial
     props->UpdateAxis(Axis::VERTICAL);
     props->UpdateAlignment(Alignment::CENTER_LEFT);
     // If title not exist, set scroll align center so that text align center.
-    if ((dialogProps.title.empty() && dialogProps.subtitle.empty()) ||
-        SystemProperties::GetDeviceType() == DeviceType::WATCH) {
-        props->UpdateAlignSelf(FlexAlign::CENTER);
-    } else {
-        props->UpdateAlignSelf(FlexAlign::FLEX_START);
+    auto scrollFlexAlign = dialogTheme_->GetScrollFlexAlign();
+    if ((dialogProps.title.empty() && dialogProps.subtitle.empty())) {
+        scrollFlexAlign = FlexAlign::CENTER;
     }
+    props->UpdateAlignSelf(scrollFlexAlign);
     return scroll;
 }
 
@@ -389,12 +388,8 @@ void DialogPattern::BuildChild(const DialogProperties& props)
     auto columnProp = AceType::DynamicCast<LinearLayoutProperty>(contentColumn->GetLayoutProperty());
     CHECK_NULL_VOID(columnProp);
     // content is full screen in Watch mode
-    auto deviceType = SystemProperties::GetDeviceType();
-    if (deviceType == DeviceType::WATCH) {
-        columnProp->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    } else {
-        columnProp->UpdateMeasureType(MeasureType::MATCH_CONTENT);
-    }
+    auto measureType = dialogTheme_->GetColumnMeasureType();
+    columnProp->UpdateMeasureType(measureType);
 
     // build ActionSheet child
     if (props.type == DialogType::ACTION_SHEET && !props.sheetsInfo.empty()) {
