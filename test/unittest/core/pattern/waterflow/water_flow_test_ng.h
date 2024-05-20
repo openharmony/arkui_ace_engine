@@ -56,6 +56,7 @@ protected:
     void AddItems(int32_t number);
 
     AssertionResult IsEqualTotalOffset(float expectOffset);
+    void HandleDrag(float offset);
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<WaterFlowPattern> pattern_;
