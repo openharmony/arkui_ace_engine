@@ -321,7 +321,7 @@ void XComponentPattern::RegisterPlatformViewEvent()
                 return;
             }
             xComponentPattern->OnTextureRefresh(nativeWindow);
-        });
+        }, "ArkUIXComponentPatternTextureRefreshEvent");
     };
     platformView_->RegisterTextureEvent(textureRefreshEvent);
 
@@ -332,7 +332,7 @@ void XComponentPattern::RegisterPlatformViewEvent()
             auto host = xComponentPattern->GetHost();
             CHECK_NULL_VOID(host);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        });
+        }, "ArkUIXComponentPatternPlatformViewReadyEvent");
     };
     platformView_->RegisterPlatformViewReadyEvent(platformViewReadyEvent);
 }
@@ -431,7 +431,7 @@ void XComponentPattern::OnModifyDone()
         CHECK_NULL_VOID(xComponentPattern);
         xComponentPattern->RegisterPlatformViewEvent();
         xComponentPattern->PrepareSurface();
-    });
+    }, "ArkUIXComponentPatternOnModifyDone");
 #endif
 }
 
