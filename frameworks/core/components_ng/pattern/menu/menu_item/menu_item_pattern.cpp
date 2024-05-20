@@ -468,7 +468,7 @@ void MenuItemPattern::ShowSubMenu()
         host->GetId(), host->GetTag(), param);
     CHECK_NULL_VOID(subMenu);
     ShowSubMenuHelper(subMenu);
-    parentMenuPattern->SetShowedSubMenu(subMenu);
+    menuPattern->SetShowedSubMenu(subMenu);
 }
 
 void MenuItemPattern::ShowSubMenuHelper(const RefPtr<FrameNode>& subMenu)
@@ -781,6 +781,13 @@ void CustomMenuItemPattern::OnTouch(const TouchEventInfo& info)
     // recognize gesture as click if touch up position is close to last touch down position
     if (touchType == TouchType::DOWN) {
         lastTouchOffset_ = std::make_unique<Offset>(info.GetTouches().front().GetLocalLocation());
+        auto menuWrapper = GetMenuWrapper();
+        CHECK_NULL_VOID(menuWrapper);
+        auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(menuWrapperPattern);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        menuWrapperPattern->SetLastTouchItem(host);
     } else if (touchType == TouchType::UP) {
         auto touchUpOffset = info.GetTouches().front().GetLocalLocation();
         if (lastTouchOffset_ && (touchUpOffset - *lastTouchOffset_).GetDistance() <= DEFAULT_CLICK_DISTANCE) {
