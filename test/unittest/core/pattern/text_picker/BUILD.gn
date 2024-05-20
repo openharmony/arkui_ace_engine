@@ -18,5 +18,6 @@ ace_unittest("text_picker_test_ng") {
   sources = [
     "text_picker_gradient_height_test_ng.cpp",
     "text_picker_test_ng.cpp",
+    "text_picker_test_update.cpp",
   ]
 }
