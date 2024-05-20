@@ -41,6 +41,7 @@ public:
         const RefPtr<DialogTheme>& dialogTheme, SizeF& frameSize, const RefPtr<FrameNode>& pickerNode);
     float GetGradientPercent(const RefPtr<TextPickerLayoutProperty>& LayoutProperty,
         const RefPtr<TextPickerPattern>& textPickerPattern, SizeF& frameSize, const RefPtr<PickerTheme>& pickerTheme);
+    void UpdateContentSize(const SizeF& size, const RefPtr<LayoutWrapper> layoutWrapper);
 
     std::vector<int32_t> GetCurrentOffset() const
     {
