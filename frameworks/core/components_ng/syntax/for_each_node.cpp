@@ -82,19 +82,60 @@ void ForEachNode::CompareAndUpdateChildren()
     // result of id gen function of previous render/re-render
     // create a map for quicker find/search
     std::unordered_set<std::string> oldIdsSet(tempIds_.begin(), tempIds_.end());
+    std::unordered_set<std::string> tempOldIdsSet(tempIds_.begin(), tempIds_.end());
 
     // ForEachNode only includes children for newly created_ array items
     // it does not include children of array items that were rendered on a previous
     // render
     std::list<RefPtr<UINode>> additionalChildComps;
     auto& children = ModifyChildren();
-    std::swap(additionalChildComps, children);
 
     // create map id -> Node
     // old children
     std::map<std::string, RefPtr<UINode>> oldNodeByIdMap;
     MakeNodeMapById(tempChildren_, tempIds_, oldNodeByIdMap);
+    // swap new children to tempChildren, old children back to children
+    std::swap(children, tempChildren_);
 
+    for (const auto& newId : ids_) {
+        auto oldIdIt = tempOldIdsSet.find(newId);
+        if (oldIdIt != tempOldIdsSet.end()) {
+            tempOldIdsSet.erase(oldIdIt);
+        }
+    }
+
+    for (const auto& oldId : tempOldIdsSet) {
+        auto iter = oldNodeByIdMap.find(oldId);
+        if (iter != oldNodeByIdMap.end()) {
+            // Remove and trigger all Detach callback.
+            RemoveChild(iter->second, true);
+        }
+    }
+
+    std::swap(additionalChildComps, tempChildren_);
+    std::swap(children, tempChildren_);
+
+    MappingChildWithId(oldIdsSet, additionalChildComps, oldNodeByIdMap);
+
+    ACE_SCOPED_TRACE("ForEachNode::Update Id[%d] preIds[%zu] newIds[%zu] tempOldIdsSet[%zu] additionalChildComps[%zu]",
+        GetId(), tempIds_.size(), ids_.size(), tempOldIdsSet.size(), additionalChildComps.size());
+
+    if (IsOnMainTree()) {
+        for (const auto& newChild : additionalChildComps) {
+            newChild->AttachToMainTree(false, GetContext());
+        }
+    }
+
+    tempChildren_.clear();
+
+    if (auto frameNode = GetParentFrameNode()) {
+        frameNode->ChildrenUpdatedFrom(0);
+    }
+}
+
+void ForEachNode::MappingChildWithId(std::unordered_set<std::string>& oldIdsSet,
+    std::list<RefPtr<UINode>>& additionalChildComps, std::map<std::string, RefPtr<UINode>>& oldNodeByIdMap)
+{
     int32_t additionalChildIndex = 0;
     for (const auto& newId : ids_) {
         auto oldIdIt = oldIdsSet.find(newId);
@@ -115,37 +156,7 @@ void ForEachNode::CompareAndUpdateChildren()
             if (iter != oldNodeByIdMap.end() && iter->second) {
                 AddChild(iter->second, DEFAULT_NODE_SLOT, true);
             }
-            oldIdsSet.erase(oldIdIt);
         }
-    }
-
-    for (const auto& oldId : oldIdsSet) {
-        auto iter = oldNodeByIdMap.find(oldId);
-        if (iter != oldNodeByIdMap.end()) {
-            // Adding silently, so that upon removal
-            // node is a part the tree.
-            // OnDetachFromMainTree to be called while node
-            // still part of the tree, we need to find
-            // position in the tab tab for the tab.
-            AddChild(iter->second, DEFAULT_NODE_SLOT, true);
-            // Remove and trigger all Detach callback.
-            RemoveChild(iter->second, true);
-        }
-    }
-
-    ACE_SCOPED_TRACE("ForEachNode::Update Id[%d] preIds[%zu] newIds[%zu] oldIdsSet[%zu] additionalChildComps[%zu]",
-        GetId(), tempIds_.size(), ids_.size(), oldIdsSet.size(), additionalChildComps.size());
-
-    if (IsOnMainTree()) {
-        for (const auto& newChild : additionalChildComps) {
-            newChild->AttachToMainTree(false, GetContext());
-        }
-    }
-
-    tempChildren_.clear();
-
-    if (auto frameNode = GetParentFrameNode()) {
-        frameNode->ChildrenUpdatedFrom(0);
     }
 }
 
@@ -192,14 +203,18 @@ void ForEachNode::FinishRepeatRender(std::list<int32_t>& removedElmtId)
         }
     }
 
+    if (IsOnMainTree()) {
+        for (const auto& child : children) {
+            child->AttachToMainTree(false, GetContext());
+        }
+    }
+
     tempChildren_.clear();
     tempChildrenOfRepeat_.clear();
 
     if (auto frameNode = GetParentFrameNode()) {
         frameNode->ChildrenUpdatedFrom(0);
     }
-
-    LOGE("ForEachNode::FinishRepeatRender END");
 }
 
 // RepeatNode only
