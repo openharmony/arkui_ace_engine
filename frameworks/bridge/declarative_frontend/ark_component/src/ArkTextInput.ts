@@ -479,8 +479,8 @@ class TextInputEnableAutoFillModifier extends ModifierWithKey<boolean> {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
-class TextInputShowErrorModifier extends ModifierWithKey<string | undefined> {
-  constructor(value: string | undefined) {
+class TextInputShowErrorModifier extends ModifierWithKey<ResourceStr | undefined> {
+  constructor(value: ResourceStr | undefined) {
     super(value);
   }
   static identity: Symbol = Symbol('textInputShowError');
@@ -1444,7 +1444,7 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
       TextInputPasswordIconModifier, value);
     return this;
   }
-  showError(value: string | undefined): TextInputAttribute {
+  showError(value: ResourceStr | undefined): TextInputAttribute {
     modifierWithKey(this._modifiersWithKeys, TextInputShowErrorModifier.identity,
       TextInputShowErrorModifier, value);
     return this;
