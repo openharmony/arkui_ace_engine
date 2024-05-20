@@ -633,6 +633,63 @@ class SearchInitializeModifier extends ModifierWithKey<SearchParam> {
   }
 }
 
+
+class SearchOnWillInsertModifier extends ModifierWithKey<Callback<InsertValue, boolean>> {
+  constructor(value: Callback<InsertValue, boolean>) {
+    super(value);
+  }
+  static identity = Symbol('searchOnWillInsert');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetOnWillInsert(node);
+    } else {
+      getUINativeModule().search.setOnWillInsert(node, this.value);
+    }
+  }
+}
+
+class SearchOnDidInsertModifier extends ModifierWithKey<Callback<InsertValue>> {
+  constructor(value: Callback<InsertValue>) {
+    super(value);
+  }
+  static identity = Symbol('searchOnDidInsert');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetOnDidInsert(node);
+    } else {
+      getUINativeModule().search.setOnDidInsert(node, this.value);
+    }
+  }
+}
+
+class SearchOnWillDeleteModifier extends ModifierWithKey<Callback<DeleteValue, boolean>> {
+  constructor(value: Callback<DeleteValue, boolean>) {
+    super(value);
+  }
+  static identity = Symbol('searchOnWillDelete');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetOnWillDelete(node);
+    } else {
+      getUINativeModule().search.setOnWillDelete(node, this.value);
+    }
+  }
+}
+
+class SearchOnDidDeleteModifier extends ModifierWithKey<Callback<DeleteValue>> {
+  constructor(value: Callback<DeleteValue>) {
+    super(value);
+  }
+  static identity = Symbol('searchOnDidDelete');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetOnDidDelete(node);
+    } else {
+      getUINativeModule().search.setOnDidDelete(node, this.value);
+    }
+  }
+}
+
 interface SearchParam {
   value?: string;
   placeholder?: ResourceStr;
@@ -830,6 +887,22 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
     searchInputFilter.value = value;
     searchInputFilter.error = error;
     modifierWithKey(this._modifiersWithKeys, SearchInputFilterModifier.identity, SearchInputFilterModifier, searchInputFilter);
+    return this;
+  }
+  onWillInsert(callback: Callback<InsertValue, boolean>): this {
+    modifierWithKey(this._modifiersWithKeys, SearchOnWillInsertModifier.identity, SearchOnWillInsertModifier, callback);
+    return this;
+  }
+  onDidInsert(callback: Callback<InsertValue>): this {
+    modifierWithKey(this._modifiersWithKeys, SearchOnDidInsertModifier.identity, SearchOnDidInsertModifier, callback);
+    return this;
+  }
+  onWillDelete(callback: Callback<DeleteValue, boolean>): this {
+    modifierWithKey(this._modifiersWithKeys, SearchOnWillDeleteModifier.identity, SearchOnWillDeleteModifier, callback);
+    return this;
+  }
+  onDidDelete(callback: Callback<DeleteValue>): this {
+    modifierWithKey(this._modifiersWithKeys, SearchOnDidDeleteModifier.identity, SearchOnDidDeleteModifier, callback);
     return this;
   }
 }

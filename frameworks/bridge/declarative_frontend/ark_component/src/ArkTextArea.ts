@@ -992,6 +992,62 @@ class TextAreaMarginModifier extends ModifierWithKey<ArkPadding> {
   }
 }
 
+class TextAreaOnWillInsertModifier extends ModifierWithKey<Callback<InsertValue, boolean>> {
+  constructor(value: Callback<InsertValue, boolean>) {
+    super(value);
+  }
+  static identity = Symbol('textAreaOnWillInsert');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetOnWillInsert(node);
+    } else {
+      getUINativeModule().textArea.setOnWillInsert(node, this.value);
+    }
+  }
+}
+
+class TextAreaOnDidInsertModifier extends ModifierWithKey<Callback<InsertValue>> {
+  constructor(value: Callback<InsertValue>) {
+    super(value);
+  }
+  static identity = Symbol('textAreaOnDidInsert');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetOnDidInsert(node);
+    } else {
+      getUINativeModule().textArea.setOnDidInsert(node, this.value);
+    }
+  }
+}
+
+class TextAreaOnWillDeleteModifier extends ModifierWithKey<Callback<DeleteValue, boolean>> {
+  constructor(value: Callback<DeleteValue, boolean>) {
+    super(value);
+  }
+  static identity = Symbol('textAreaOnWillDelete');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetOnWillDelete(node);
+    } else {
+      getUINativeModule().textArea.setOnWillDelete(node, this.value);
+    }
+  }
+}
+
+class TextAreaOnDidDeleteModifier extends ModifierWithKey<Callback<DeleteValue>> {
+  constructor(value: Callback<DeleteValue>) {
+    super(value);
+  }
+  static identity = Symbol('textAreaOnDidDelete');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetOnDidDelete(node);
+    } else {
+      getUINativeModule().textArea.setOnDidDelete(node, this.value);
+    }
+  }
+}
+
 class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextAreaAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -1321,6 +1377,22 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
     } else {
       modifierWithKey(this._modifiersWithKeys, TextAreaMarginModifier.identity, TextAreaMarginModifier, undefined);
     }
+    return this;
+  }
+  onWillInsert(callback: Callback<InsertValue, boolean>): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnWillInsertModifier.identity, TextAreaOnWillInsertModifier, callback);
+    return this;
+  }
+  onDidInsert(callback: Callback<InsertValue>): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnDidInsertModifier.identity, TextAreaOnDidInsertModifier, callback);
+    return this;
+  }
+  onWillDelete(callback: Callback<DeleteValue, boolean>): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnWillDeleteModifier.identity, TextAreaOnWillDeleteModifier, callback);
+    return this;
+  }
+  onDidDelete(callback: Callback<DeleteValue>): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnDidDeleteModifier.identity, TextAreaOnDidDeleteModifier, callback);
     return this;
   }
 }
