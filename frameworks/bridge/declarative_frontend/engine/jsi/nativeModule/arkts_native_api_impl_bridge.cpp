@@ -396,6 +396,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetClip));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetClip"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetClip));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setClipShape"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetClipShape));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetClipShape"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetClipShape));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPixelStretchEffect"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetPixelStretchEffect));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPixelStretchEffect"),
@@ -460,6 +464,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetMask));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMask"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetMask));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMaskShape"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetMaskShape));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMaskShape"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetMaskShape));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOffset"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), CommonBridge::SetOffset));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOffset"),

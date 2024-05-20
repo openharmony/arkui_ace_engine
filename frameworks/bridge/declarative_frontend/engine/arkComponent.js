@@ -1331,6 +1331,23 @@ class ClipModifier extends ModifierWithKey {
   }
 }
 ClipModifier.identity = Symbol('clip');
+class ClipShapeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetClipShape(node);
+    }
+    else {
+      getUINativeModule().common.setClipShape(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return true;
+  }
+}
+ClipShapeModifier.identity = Symbol('clipShape');
 class MaskModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -1348,6 +1365,23 @@ class MaskModifier extends ModifierWithKey {
   }
 }
 MaskModifier.identity = Symbol('mask');
+class MaskShapeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetMaskShape(node);
+    }
+    else {
+      getUINativeModule().common.setMaskShape(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return true;
+  }
+}
+MaskShapeModifier.identity = Symbol('maskShape');
 class PixelStretchEffectModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -3595,6 +3629,10 @@ class ArkComponent {
     modifierWithKey(this._modifiersWithKeys, MaskModifier.identity, MaskModifier, value);
     return this;
   }
+  maskShape(value) {
+    modifierWithKey(this._modifiersWithKeys, MaskShapeModifier.identity, MaskShapeModifier, value);
+    return this;
+  }
   key(value) {
     if (typeof value === 'string') {
       modifierWithKey(this._modifiersWithKeys, KeyModifier.identity, KeyModifier, value);
@@ -3641,6 +3679,10 @@ class ArkComponent {
   }
   clip(value) {
     modifierWithKey(this._modifiersWithKeys, ClipModifier.identity, ClipModifier, value);
+    return this;
+  }
+  clipShape(value) {
+    modifierWithKey(this._modifiersWithKeys, ClipShapeModifier.identity, ClipShapeModifier, value);
     return this;
   }
   bindSheet(isShow, builder, options) {
