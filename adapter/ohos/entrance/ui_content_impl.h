@@ -310,7 +310,7 @@ private:
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
     UIContentErrorCode CommonInitialize(
-        OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage);
+        OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, uint32_t focusWindowId = 0);
     UIContentErrorCode CommonInitializeForm(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage);
     void InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog = false);
