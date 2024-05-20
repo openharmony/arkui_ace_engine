@@ -58,7 +58,7 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
     if (!IsDataValid(info_)) {
         return;
     }
-    if (info_.childrenCount_ == 0) {
+    if (info_->childrenCount_ == 0) {
         return;
     }
 
@@ -87,7 +87,7 @@ void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
     if (!IsDataValid(info_)) {
         return;
     }
-    if (info_.childrenCount_ == 0) {
+    if (info_->childrenCount_ == 0) {
         return;
     }
 

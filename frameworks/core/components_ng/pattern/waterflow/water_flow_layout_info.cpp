@@ -29,7 +29,7 @@ RefPtr<WaterFlowLayoutInfoBase> WaterFlowLayoutInfoBase::Create(WaterFlowLayoutM
 {
     switch (mode) {
         case WaterFlowLayoutMode::SLIDING_WINDOW:
-            return MakeRefPtr<WaterFlowLayoutInfoSW>();
+            return nullptr;
         default:
             return MakeRefPtr<WaterFlowLayoutInfo>();
     }

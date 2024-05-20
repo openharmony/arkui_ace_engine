@@ -131,7 +131,7 @@ RefPtr<LayoutAlgorithm> WaterFlowPattern::CreateLayoutAlgorithm()
     if (sections_ || SystemProperties::WaterFlowUseSegmentedLayout()) {
         algorithm = MakeRefPtr<WaterFlowSegmentedLayout>(DynamicCast<WaterFlowLayoutInfo>(layoutInfo_));
     } else if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW) {
-        algorithm = MakeRefPtr<WaterFlowLayoutSW>(DynamicCast<WaterFlowLayoutInfoSW>(layoutInfo_));
+        algorithm = MakeRefPtr<WaterFlowLayoutSW>(layoutInfo_);
     } else {
         int32_t footerIndex = -1;
         auto footer = footer_.Upgrade();
@@ -451,14 +451,19 @@ void WaterFlowPattern::OnSectionChanged(int32_t start)
 
 void WaterFlowPattern::OnSectionChangedNow(int32_t start)
 {
+    if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW) {
+        return;
+    }
+    auto info = DynamicCast<WaterFlowLayoutInfo>(layoutInfo_);
+    CHECK_NULL_VOID(info);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     int32_t childUpdateIdx = host->GetChildrenUpdated();
     if (sections_->IsSpecialUpdateCAPI(childUpdateIdx)) {
         start += sections_->GetSectionInfo().size();
     }
-    layoutInfo_.InitSegments(sections_->GetSectionInfo(), start);
-    layoutInfo_.margins_.clear();
+    info->InitSegments(sections_->GetSectionInfo(), start);
+    info->margins_.clear();
     MarkDirtyNodeSelf();
 }
 
@@ -533,33 +538,15 @@ void WaterFlowPattern::MarkDirtyNodeSelf()
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
-namespace {
-// check if layout is misaligned after a scroll event
-void CheckMisalignment(const RefPtr<WaterFlowLayoutInfoBase>& info)
-{
-    if (info->Mode() != WaterFlowLayoutMode::SLIDING_WINDOW) {
-        return;
-    }
-    auto infoSW = AceType::DynamicCast<WaterFlowLayoutInfoSW>(info);
-    if (infoSW->IsMisaligned()) {
-        infoSW->ResetBeforeJump(0.0f);
-        info->jumpIndex_ = 0;
-        info->align_ = ScrollAlign::START;
-    }
-}
-} // namespace
-
 void WaterFlowPattern::OnScrollEndCallback()
 {
     scrollStop_ = true;
-    CheckMisalignment(layoutInfo_);
     MarkDirtyNodeSelf();
 }
 
 void WaterFlowPattern::OnAnimateStop()
 {
     scrollStop_ = true;
-    CheckMisalignment(layoutInfo_);
     MarkDirtyNodeSelf();
 }
 
