@@ -392,6 +392,8 @@ void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
     ContainerScope scope(currentId);
     auto root = node->GetParent();
     CHECK_NULL_VOID(root);
+    node->OnAccessibilityEvent(
+        AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     root->RemoveChild(node);
     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     auto lastChild = AceType::DynamicCast<FrameNode>(root->GetLastChild());
@@ -2260,8 +2262,6 @@ void OverlayManager::CloseDialogInner(const RefPtr<FrameNode>& dialogNode)
     if (dialogCount_ == 0) {
         SetContainerButtonEnable(true);
     }
-    dialogNode->OnAccessibilityEvent(
-        AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     CallOnHideDialogCallback();
 }
 
