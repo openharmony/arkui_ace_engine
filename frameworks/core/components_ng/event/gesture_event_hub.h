@@ -410,6 +410,11 @@ public:
         dragEventActuator_->SetCustomDragEvent(dragEvent);
     }
 
+    bool HasDragEvent() const
+    {
+        return dragEventActuator_ && dragEventActuator_->HasDragEvent();
+    }
+
     // the return value means prevents event bubbling.
     bool ProcessTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint,
