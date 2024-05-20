@@ -408,7 +408,6 @@ const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildren() const
             } else {
                 node.second->DetachFromMainTree();
             }
-            builder_->NotifyItemDeleted(RawPtr(node.second), node.first);
         }
         for (const auto& [index, item] : items) {
             if (item.second) {
