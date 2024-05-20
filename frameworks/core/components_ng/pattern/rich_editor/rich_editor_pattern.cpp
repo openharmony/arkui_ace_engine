@@ -147,13 +147,10 @@ void RichEditorPattern::SetStyledString(const RefPtr<SpanString>& value)
     CloseSelectOverlay();
     ResetSelection();
     auto length = styledString_->GetLength();
-    bool isPreventChange = !BeforeStyledStringChange(0, length, value);
-    CHECK_NULL_VOID(!isPreventChange);
     styledString_->ReplaceSpanString(0, length, value);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    AfterStyledStringChange(0, length, styledString_->GetString());
 }
 
 void RichEditorPattern::UpdateSpanItems(const std::list<RefPtr<NG::SpanItem>>& spanItems)
@@ -416,9 +413,8 @@ bool RichEditorPattern::BeforeStyledStringChange(int32_t start, int32_t length, 
             if (spanType == SpanType::Image || spanType == SpanType::CustomSpan) {
                 continue;
             }
-            style->UpdateStartIndex(0);
-            style->UpdateEndIndex(stringLength);
-            styledString->AddSpan(style);
+            auto span = style->GetSubSpan(0, stringLength);
+            styledString->AddSpan(span);
         }
     }
     return BeforeStyledStringChange(changeStart, length, styledString);
@@ -6386,6 +6382,12 @@ void RichEditorPattern::UpdateChildrenOffset()
         }
         if (!(childNode->GetPattern<ImagePattern>() || childNode->GetPattern<PlaceholderSpanPattern>())) {
             continue;
+        }
+        if (isSpanStringMode_) {
+            auto imageSpanNode = AceType::DynamicCast<ImageSpanNode>(child);
+            if (imageSpanNode && imageSpanNode->GetSpanItem()) {
+                index = imageSpanNode->GetSpanItem()->placeholderIndex;
+            }
         }
         if (index >= rectsForPlaceholders.size()) {
             break;
