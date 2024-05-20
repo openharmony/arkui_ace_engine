@@ -91,6 +91,7 @@ group("core_pattern_unittest") {
     "swiper:swiper_test_ng",
     "symbol:symbol_test_ng",
     "tabs:tabs_test_ng",
+    "text:text_html_convert_ng",
     "text:text_test_ng",
     "text_clock:text_clock_test_ng",
     "text_drag:text_drag_test_ng",

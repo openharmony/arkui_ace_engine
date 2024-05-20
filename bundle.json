@@ -77,6 +77,7 @@
                 "app_file_service",
                 "ets_utils",
                 "bounds_checking_function",
+                "libxml2",
                 "ffrt"
             ],
             "third_party": [
@@ -162,6 +163,15 @@
                         ]
                     },
                     "name": "//foundation/arkui/ace_engine/interfaces/inner_api/xcomponent_controller:ace_xcomponent_controller"
+                },
+                {
+                    "header": {
+                        "header_base": "//foundation/arkui/ace_engine/interfaces/inner_api/span_string/",
+                        "header_files": [
+                            "html_convert.h"
+                        ]
+                    },
+                    "name": "//foundation/arkui/ace_engine/interfaces/inner_api/span_string:ace_htmlconvert"
                 },
                 {
                     "header": {

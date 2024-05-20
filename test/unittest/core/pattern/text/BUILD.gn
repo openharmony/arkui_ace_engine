@@ -22,3 +22,12 @@ ace_unittest("text_test_ng") {
     "text_test_ng.cpp",
   ]
 }
+
+ace_unittest("text_html_convert_ng") {
+  type = "new"
+  sources = [
+    "html_convert_test_ng.cpp",
+  ]
+
+  external_deps = ["libxml2:libxml2", "ace_engine:ace_htmlconvert"]
+}

@@ -452,6 +452,8 @@ build_component_ng("pattern_ng") {
     "tabs/tabs_node.cpp",
     "tabs/tabs_pattern.cpp",
     "text/base_text_select_overlay.cpp",
+    "text/html/html_to_span.cpp",
+    "text/html/span_to_html.cpp",
     "text/image_span_view.cpp",
     "text/multiple_paragraph_layout_algorithm.cpp",
     "text/span/mutable_span_string.cpp",
@@ -539,7 +541,7 @@ build_component_ng("pattern_ng") {
     "waterflow/water_flow_segmented_layout.cpp",
   ]
 
-  external_deps = []
+  external_deps = [ "libxml2:libxml2" ]
   deps = [ "container_modal/interfaces:customtitle" ]
 
   if (defined(vendor_configs.ace_engine_advanced)) {
