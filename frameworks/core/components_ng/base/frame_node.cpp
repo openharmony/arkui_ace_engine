@@ -1032,7 +1032,6 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
         pipeline->OnLayoutCompleted(GetInspectorId()->c_str());
     }
     auto needRerender = pattern_->OnDirtyLayoutWrapperSwap(dirty, config);
-    // TODO: temp use and need to delete.
     needRerender = needRerender || pattern_->OnDirtyLayoutWrapperSwap(dirty, config.skipMeasure, config.skipLayout);
     if (needRerender || CheckNeedRender(paintProperty_->GetPropertyChangeFlag())) {
         MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
@@ -2095,7 +2094,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         if (childHitResult == HitTestResult::BUBBLING &&
             ((child->GetHitTestMode() == HitTestMode::HTMDEFAULT) ||
                 (child->GetHitTestMode() == HitTestMode::HTMTRANSPARENT_SELF) ||
-                ((child->GetHitTestMode() != HitTestMode::HTMTRANSPARENT) && IsExclusiveEventForChild()))) {
+                    ((child->GetHitTestMode() != HitTestMode::HTMTRANSPARENT) && IsExclusiveEventForChild()))) {
             consumed = true;
             break;
         }
@@ -2231,9 +2230,7 @@ HitTestResult FrameNode::AxisTest(
     const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult)
 {
     const auto& rect = renderContext_->GetPaintRectWithTransform();
-    // TODO: disableTouchEvent || disabled_ need handle
 
-    // TODO: Region need change to RectList
     if (!rect.IsInRegion(parentLocalPoint)) {
         return HitTestResult::OUT_OF_REGION;
     }

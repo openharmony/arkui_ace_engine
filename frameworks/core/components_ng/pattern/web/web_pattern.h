@@ -188,7 +188,6 @@ public:
 
     void SetWebController(const RefPtr<WebController>& webController)
     {
-        // TODO: add web controller diff function.
         webController_ = webController;
     }
 
