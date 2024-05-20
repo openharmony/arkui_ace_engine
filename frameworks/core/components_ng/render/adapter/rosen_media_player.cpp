@@ -80,6 +80,7 @@ RosenMediaPlayer::~RosenMediaPlayer()
 
 void RosenMediaPlayer::CreateMediaPlayer()
 {
+    ACE_SCOPED_TRACE("Video RosenMediaPlayer::CreateMediaPlayer");
     if (mediaPlayer_) {
         LOGE("CreateMediaPlayer has exist");
         return;
@@ -99,12 +100,14 @@ bool RosenMediaPlayer::IsMediaPlayerValid()
 
 void RosenMediaPlayer::SetVolume(float leftVolume, float rightVolume)
 {
+    ACE_SCOPED_TRACE("Video RosenMediaPlayer::SetVolume");
     CHECK_NULL_VOID(mediaPlayer_);
     mediaPlayer_->SetVolume(leftVolume, rightVolume);
 }
 
 bool RosenMediaPlayer::SetSource(const std::string& src)
 {
+    ACE_SCOPED_TRACE("Video RosenMediaPlayer::SetSource");
     auto videoSrc = src;
     int32_t fd = -1;
     bool useFd = false;
@@ -335,6 +338,7 @@ void RosenMediaPlayer::RegisterMediaPlayerEvent(PositionUpdatedEvent&& positionU
     StateChangedEvent&& stateChangedEvent, CommonEvent&& errorEvent, CommonEvent&& resolutionChangeEvent,
     CommonEvent&& startRenderFrameEvent)
 {
+    ACE_SCOPED_TRACE("Video RosenMediaPlayer::RegisterMediaPlayerEvent");
     CHECK_NULL_VOID(mediaPlayer_);
     mediaPlayerCallback_ = std::make_shared<MediaPlayerCallback>(ContainerScope::CurrentId());
     mediaPlayerCallback_->SetPositionUpdatedEvent(std::move(positionUpdatedEvent));
@@ -347,36 +351,42 @@ void RosenMediaPlayer::RegisterMediaPlayerEvent(PositionUpdatedEvent&& positionU
 
 int32_t RosenMediaPlayer::GetDuration(int32_t& duration)
 {
+    ACE_SCOPED_TRACE("Video RosenMediaPlayer::GetDuration");
     CHECK_NULL_RETURN(mediaPlayer_, -1);
     return mediaPlayer_->GetDuration(duration);
 }
 
 int32_t RosenMediaPlayer::GetVideoWidth()
 {
+    ACE_SCOPED_TRACE("Video RosenMediaPlayer::GetVideoWidth");
     CHECK_NULL_RETURN(mediaPlayer_, -1);
     return mediaPlayer_->GetVideoWidth();
 }
 
 int32_t RosenMediaPlayer::GetVideoHeight()
 {
+    ACE_SCOPED_TRACE("Video RosenMediaPlayer::GetVideoHeight");
     CHECK_NULL_RETURN(mediaPlayer_, -1);
     return mediaPlayer_->GetVideoHeight();
 }
 
 int32_t RosenMediaPlayer::SetLooping(bool loop)
 {
+    ACE_SCOPED_TRACE("Video RosenMediaPlayer::SetLooping");
     CHECK_NULL_RETURN(mediaPlayer_, -1);
     return mediaPlayer_->SetLooping(loop);
 }
 
 int32_t RosenMediaPlayer::SetPlaybackSpeed(float speed)
 {
+    ACE_SCOPED_TRACE("Video RosenMediaPlayer::SetPlaybackSpeed");
     CHECK_NULL_RETURN(mediaPlayer_, -1);
     return mediaPlayer_->SetPlaybackSpeed(ConvertToMediaPlaybackSpeed(static_cast<float>(speed)));
 }
 
 int32_t RosenMediaPlayer::SetSurface()
 {
+    ACE_SCOPED_TRACE("Video RosenMediaPlayer::SetSurface");
     CHECK_NULL_RETURN(mediaPlayer_, -1);
     auto renderSurface = renderSurface_.Upgrade();
     CHECK_NULL_RETURN(renderSurface, -1);
@@ -385,18 +395,21 @@ int32_t RosenMediaPlayer::SetSurface()
 
 int32_t RosenMediaPlayer::PrepareAsync()
 {
+    ACE_SCOPED_TRACE("Video RosenMediaPlayer::PrepareAsync");
     CHECK_NULL_RETURN(mediaPlayer_, -1);
     return mediaPlayer_->PrepareAsync();
 }
 
 bool RosenMediaPlayer::IsPlaying()
 {
+    ACE_SCOPED_TRACE("Video RosenMediaPlayer::IsPlaying");
     CHECK_NULL_RETURN(mediaPlayer_, false);
     return mediaPlayer_->IsPlaying();
 }
 
 int32_t RosenMediaPlayer::Play()
 {
+    ACE_SCOPED_TRACE("Video RosenMediaPlayer::Play");
     LOGI("Media player start to play.");
     CHECK_NULL_RETURN(mediaPlayer_, -1);
     return mediaPlayer_->Play();
@@ -404,6 +417,7 @@ int32_t RosenMediaPlayer::Play()
 
 int32_t RosenMediaPlayer::Pause()
 {
+    ACE_SCOPED_TRACE("Video RosenMediaPlayer::Pause");
     LOGI("Media player start to pause.");
     CHECK_NULL_RETURN(mediaPlayer_, -1);
     return mediaPlayer_->Pause();
@@ -411,6 +425,7 @@ int32_t RosenMediaPlayer::Pause()
 
 int32_t RosenMediaPlayer::Stop()
 {
+    ACE_SCOPED_TRACE("Video RosenMediaPlayer::Stop");
     LOGI("Media player start to stop.");
     CHECK_NULL_RETURN(mediaPlayer_, -1);
     return mediaPlayer_->Stop();
@@ -418,6 +433,7 @@ int32_t RosenMediaPlayer::Stop()
 
 int32_t RosenMediaPlayer::Seek(int32_t mSeconds, OHOS::Ace::SeekMode mode)
 {
+    ACE_SCOPED_TRACE("Video RosenMediaPlayer::Seek %{public}d", mSeconds);
     LOGI("Media player start to seek.");
     CHECK_NULL_RETURN(mediaPlayer_, -1);
     return mediaPlayer_->Seek(mSeconds, ConvertToMediaSeekMode(mode));

@@ -139,6 +139,7 @@ SizeF CalculateFitScaleDown(const SizeF& videoSize, const SizeF& layoutSize)
 
 SizeF MeasureVideoContentLayout(const SizeF& layoutSize, const RefPtr<VideoLayoutProperty>& layoutProperty)
 {
+    ACE_SCOPED_TRACE("Video VideoPattern MeasureVideoContentLayout");
     if (!layoutProperty || !layoutProperty->HasVideoSize()) {
         return layoutSize;
     }
@@ -205,6 +206,7 @@ void VideoPattern::ResetMediaPlayer()
 
 void VideoPattern::UpdateMediaPlayerOnBg()
 {
+    ACE_SCOPED_TRACE("Video UpdateMediaPlayerOnBg");
     PrepareMediaPlayer();
     UpdateSpeed();
     UpdateLooping();
@@ -722,6 +724,7 @@ void VideoPattern::OnAttachToFrameNode()
 {
     // full screen node is not supposed to register js controller event
     if (!InstanceOf<VideoFullScreenPattern>(this)) {
+        ACE_SCOPED_TRACE("Video OnAttachToFrameNode::SetMethodCall");
         SetMethodCall();
     }
     auto host = GetHost();
@@ -739,15 +742,20 @@ void VideoPattern::OnAttachToFrameNode()
     static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, "MediaPlayerSurface",
                                                  RenderContext::PatternType::VIDEO };
 #endif
-    renderContextForMediaPlayer_->InitContext(false, param);
-
+    {
+        ACE_SCOPED_TRACE("Video OnAttachToFrameNode::InitContext(CreateSurfaceNode)");
+        renderContextForMediaPlayer_->InitContext(false, param);
+    }
     if (SystemProperties::GetExtSurfaceEnabled()) {
         RegisterRenderContextCallBack();
     }
 
-    renderContext->UpdateBackgroundColor(Color::BLACK);
-    renderContextForMediaPlayer_->UpdateBackgroundColor(Color::BLACK);
-    renderContext->SetClipToBounds(true);
+    {
+        ACE_SCOPED_TRACE("Video OnAttachToFrameNode::UpdateBackgroundColor&SetClipToBounds");
+        renderContext->UpdateBackgroundColor(Color::BLACK);
+        renderContextForMediaPlayer_->UpdateBackgroundColor(Color::BLACK);
+        renderContext->SetClipToBounds(true);
+    }
 }
 
 void VideoPattern::OnDetachFromMainTree()
@@ -811,8 +819,12 @@ void VideoPattern::RegisterRenderContextCallBack()
 
 void VideoPattern::OnModifyDone()
 {
-    Pattern::OnModifyDone();
+    {
+        ACE_SCOPED_TRACE("Video OnModifyDone::Pattern::OnModifyDone()");
+        Pattern::OnModifyDone();
+    }
     if (!hiddenChangeEvent_) {
+        ACE_SCOPED_TRACE("Video OnModifyDone::SetHiddenChangeEvent");
         SetHiddenChangeEvent([weak = WeakClaim(this)](bool hidden) {
             auto videoPattern = weak.Upgrade();
             CHECK_NULL_VOID(videoPattern);
@@ -836,6 +848,7 @@ void VideoPattern::OnModifyDone()
 
     // Update the media player when video node is not in full screen or current node is full screen node
     if (!fullScreenNodeId_.has_value() || InstanceOf<VideoFullScreenNode>(this)) {
+        ACE_SCOPED_TRACE("Video post UpdateMediaPlayerOnBg");
         ContainerScope scope(instanceId_);
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
@@ -862,15 +875,19 @@ void VideoPattern::OnModifyDone()
         CHECK_NULL_VOID(host);
         eventHub->SetInspectorId(host->GetInspectorIdValue(""));
     }
-    if (!IsSupportImageAnalyzer()) {
-        DestroyAnalyzerOverlay();
-    } else if (isPaused_ && !isPlaying_ && !GetAnalyzerState()) {
-        StartImageAnalyzer();
+    {
+        ACE_SCOPED_TRACE("Video prepare ImageAnalyzer");
+        if (!IsSupportImageAnalyzer()) {
+            DestroyAnalyzerOverlay();
+        } else if (isPaused_ && !isPlaying_ && !GetAnalyzerState()) {
+            StartImageAnalyzer();
+        }
     }
 }
 
 void VideoPattern::UpdatePreviewImage()
 {
+    ACE_SCOPED_TRACE("Video::UpdatePreviewImage");
     auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (!layoutProperty->HasPosterImageInfo()) {
@@ -912,6 +929,7 @@ void VideoPattern::UpdatePreviewImage()
 
 void VideoPattern::UpdateControllerBar()
 {
+    ACE_SCOPED_TRACE("Video::UpdateControllerBar");
     auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto host = GetHost();
@@ -993,6 +1011,7 @@ void VideoPattern::OnRebuildFrame()
 
 bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    ACE_SCOPED_TRACE("Video VideoPattern::OnDirtyLayoutWrapperSwap");
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
@@ -1004,6 +1023,7 @@ bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     auto videoFrameSize = MeasureVideoContentLayout(videoNodeSize, layoutProperty);
     // Change the surface layout for drawing video frames
     if (renderContextForMediaPlayer_) {
+        ACE_SCOPED_TRACE("Video VideoPattern surfaceNode::SetBounds");
         renderContextForMediaPlayer_->SetBounds((videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
             (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE, videoFrameSize.Width(),
             videoFrameSize.Height());
@@ -1571,6 +1591,7 @@ void VideoPattern::FullScreen()
 
 void VideoPattern::EnableDrag()
 {
+    ACE_SCOPED_TRACE("Video EnableDrag");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
@@ -1663,6 +1684,7 @@ void VideoPattern::RecoverState(const RefPtr<VideoPattern>& videoPattern)
 
 void VideoPattern::UpdateFsState()
 {
+    ACE_SCOPED_TRACE("Video::UpdateFsState");
     if (!fullScreenNodeId_.has_value()) {
         return;
     }
