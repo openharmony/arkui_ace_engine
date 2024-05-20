@@ -761,7 +761,7 @@ void SwiperLayoutAlgorithm::SetInactive(
             continue;
         }
         if (LessOrEqual(
-                pos->second.endPos, prevMargin_ != 0.0f ? startMainPos - prevMargin_ - spaceWidth_ : startMainPos) ||
+            pos->second.endPos, prevMargin_ != 0.0f ? startMainPos - prevMargin_ - spaceWidth_ : startMainPos) ||
             GreatOrEqual(
                 pos->second.startPos, nextMargin_ != 0.0f ? endMainPos + nextMargin_ + spaceWidth_ : endMainPos)) {
             removeIndexes.emplace_back(pos->first);
@@ -914,6 +914,18 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             LayoutItem(layoutWrapper, axis, paddingOffset, pos);
         }
     }
+    LayoutSwiperIndicator(layoutWrapper, swiperLayoutProperty, padding);
+    CaptureLayout(layoutWrapper);
+}
+
+void SwiperLayoutAlgorithm::LayoutSwiperIndicator(
+    LayoutWrapper* layoutWrapper, const RefPtr<SwiperLayoutProperty>& swiperLayoutProperty,
+    const PaddingPropertyF& padding)
+{
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(hostNode);
+    auto swiperPattern = hostNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
 
     // Layout swiper indicator
     if (swiperLayoutProperty->GetShowIndicatorValue(true)) {
@@ -938,8 +950,6 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             }
         }
     }
-
-    CaptureLayout(layoutWrapper);
 }
 
 void SwiperLayoutAlgorithm::LayoutItem(
@@ -1267,8 +1277,7 @@ void SwiperLayoutAlgorithm::ArrowLayout(
                 static_cast<float>(theme->GetIndicatorDotItemSpace().ConvertToPx()) * (itemCount - 1);
             auto indicatorWidth = indicatorPadding + allPointDiameterSum + allPointSpaceSum + indicatorPadding;
             normalArrowMargin = ((axis == Axis::HORIZONTAL ? indicatorFrameSize.Width() : indicatorFrameSize.Height()) -
-                                    indicatorWidth) *
-                                0.5f;
+                                    indicatorWidth) * 0.5f;
         }
     }
     auto isLeftArrow = arrowWrapper->GetHostTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG;
@@ -1298,7 +1307,7 @@ void SwiperLayoutAlgorithm::ArrowLayout(
             arrowOffset.SetX(padding.left.value_or(0.0f));
         }
         if (GreatOrEqual(
-                arrowOffset.GetX() + arrowFrameSize.Width(), swiperFrameSize.Width() - padding.right.value_or(0.0f))) {
+            arrowOffset.GetX() + arrowFrameSize.Width(), swiperFrameSize.Width() - padding.right.value_or(0.0f))) {
             arrowOffset.SetX(swiperFrameSize.Width() - arrowFrameSize.Width() - padding.right.value_or(0.0f));
         }
         arrowOffset.SetY(indicatorFrameRect.Top() + (indicatorFrameSize.Height() - arrowFrameSize.Height()) * 0.5f);
@@ -1334,7 +1343,7 @@ void SwiperLayoutAlgorithm::ArrowLayout(
             arrowOffset.SetY(padding.top.value_or(0.0f));
         }
         if (GreatOrEqual(arrowOffset.GetY() + arrowFrameSize.Height(),
-                swiperFrameSize.Height() - padding.bottom.value_or(0.0f))) {
+            swiperFrameSize.Height() - padding.bottom.value_or(0.0f))) {
             arrowOffset.SetY(swiperFrameSize.Height() - arrowFrameSize.Height() - padding.bottom.value_or(0.0f));
         }
     } else {

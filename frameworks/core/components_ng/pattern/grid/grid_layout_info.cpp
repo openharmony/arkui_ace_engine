@@ -687,7 +687,9 @@ GridLayoutInfo::EndIndexInfo GridLayoutInfo::FindEndIdx(int32_t endLine) const
             }
         }
     }
-    return { .itemIdx = 0, .y = 0, .x = 0 };
+    return {
+        .itemIdx = 0, .y = 0, .x = 0
+    };
 }
 
 void GridLayoutInfo::ClearMapsToEnd(int32_t idx)
