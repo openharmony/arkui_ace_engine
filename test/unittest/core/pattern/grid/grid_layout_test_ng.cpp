@@ -2189,22 +2189,23 @@ HWTEST_F(GridLayoutTestNg, GetResetMode001, TestSize.Level1)
     auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
     auto layoutAlgorithm =
         AceType::DynamicCast<GridScrollLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
-    EXPECT_EQ(layoutAlgorithm->GetResetMode(-1), std::make_pair(false, false));
-    EXPECT_EQ(layoutAlgorithm->GetResetMode(1), std::make_pair(true, false));
+    auto* wrapper = AceType::RawPtr(frameNode_);
+    EXPECT_EQ(layoutAlgorithm->GetResetMode(wrapper, -1), std::make_pair(false, false));
+    EXPECT_EQ(layoutAlgorithm->GetResetMode(wrapper, 1), std::make_pair(true, false));
 
     pattern_->ScrollToIndex(30, false, ScrollAlign::START);
     layoutAlgorithm->gridLayoutInfo_.startIndex_ = 30;
     frameNode_->childrenUpdatedFrom_ = 20;
     FlushLayoutTask(frameNode_);
 
-    EXPECT_EQ(layoutAlgorithm->GetResetMode(0), std::make_pair(true, false));
-    EXPECT_EQ(layoutAlgorithm->GetResetMode(10), std::make_pair(true, false));
-    EXPECT_EQ(layoutAlgorithm->GetResetMode(25), std::make_pair(true, false));
+    EXPECT_EQ(layoutAlgorithm->GetResetMode(wrapper, 0), std::make_pair(true, false));
+    EXPECT_EQ(layoutAlgorithm->GetResetMode(wrapper, 10), std::make_pair(true, false));
+    EXPECT_EQ(layoutAlgorithm->GetResetMode(wrapper, 25), std::make_pair(true, false));
 
     layoutAlgorithm->gridLayoutInfo_.hasBigItem_ = true;
 
-    EXPECT_EQ(layoutAlgorithm->GetResetMode(0), std::make_pair(true, false));
-    EXPECT_EQ(layoutAlgorithm->GetResetMode(10), std::make_pair(true, false));
-    EXPECT_EQ(layoutAlgorithm->GetResetMode(25), std::make_pair(false, true));
+    EXPECT_EQ(layoutAlgorithm->GetResetMode(wrapper, 0), std::make_pair(true, false));
+    EXPECT_EQ(layoutAlgorithm->GetResetMode(wrapper, 10), std::make_pair(true, false));
+    EXPECT_EQ(layoutAlgorithm->GetResetMode(wrapper, 25), std::make_pair(false, true));
 }
 } // namespace OHOS::Ace::NG
