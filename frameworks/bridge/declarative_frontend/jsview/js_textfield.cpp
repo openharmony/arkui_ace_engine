@@ -1626,4 +1626,85 @@ void JSTextField::SetTextIndent(const JSCallbackInfo& info)
     }
     TextFieldModel::GetInstance()->SetTextIndent(value);
 }
+
+JSRef<JSVal> JSTextField::CreateJsAboutToIMEInputObj(const InsertValueInfo& insertValue)
+{
+    JSRef<JSObject> aboutToIMEInputObj = JSRef<JSObject>::New();
+    aboutToIMEInputObj->SetProperty<int32_t>("insertOffset", insertValue.insertOffset);
+    aboutToIMEInputObj->SetProperty<std::string>("insertValue", insertValue.insertValue);
+    return JSRef<JSVal>::Cast(aboutToIMEInputObj);
+}
+
+void JSTextField::OnWillInsertValue(const JSCallbackInfo& info)
+{
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(jsValue->IsFunction());
+    auto jsAboutToIMEInputFunc = AceType::MakeRefPtr<JsEventFunction<InsertValueInfo, 1>>(
+        JSRef<JSFunc>::Cast(jsValue), CreateJsAboutToIMEInputObj);
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsAboutToIMEInputFunc)](
+                        const InsertValueInfo& insertValue) -> bool {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, true);
+        auto ret = func->ExecuteWithValue(insertValue);
+        if (ret->IsBoolean()) {
+            return ret->ToBoolean();
+        }
+        return true;
+    };
+    TextFieldModel::GetInstance()->SetOnWillInsertValueEvent(std::move(callback));
+}
+
+JSRef<JSVal> JSTextField::CreateJsDeleteToIMEObj(const DeleteValueInfo& deleteValueInfo)
+{
+    JSRef<JSObject> aboutToIMEInputObj = JSRef<JSObject>::New();
+    aboutToIMEInputObj->SetProperty<int32_t>("deleteOffset", deleteValueInfo.deleteOffset);
+    aboutToIMEInputObj->SetProperty<int32_t>("direction", static_cast<int32_t>(deleteValueInfo.direction));
+    aboutToIMEInputObj->SetProperty<std::string>("deleteValue", deleteValueInfo.deleteValue);
+    return JSRef<JSVal>::Cast(aboutToIMEInputObj);
+}
+
+void JSTextField::OnDidInsertValue(const JSCallbackInfo& info)
+{
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(jsValue->IsFunction());
+    auto jsAboutToIMEInputFunc = AceType::MakeRefPtr<JsEventFunction<InsertValueInfo, 1>>(
+        JSRef<JSFunc>::Cast(jsValue), CreateJsAboutToIMEInputObj);
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsAboutToIMEInputFunc)](
+                        const InsertValueInfo& insertValue) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        func->ExecuteWithValue(insertValue);
+    };
+    TextFieldModel::GetInstance()->SetOnDidInsertValueEvent(std::move(callback));
+}
+
+void JSTextField::OnWillDelete(const JSCallbackInfo& info)
+{
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(jsValue->IsFunction());
+    auto jsAboutToIMEInputFunc =
+        AceType::MakeRefPtr<JsEventFunction<DeleteValueInfo, 1>>(JSRef<JSFunc>::Cast(jsValue), CreateJsDeleteToIMEObj);
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsAboutToIMEInputFunc)](
+                        const DeleteValueInfo& deleteValue) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, true);
+        auto ret = func->ExecuteWithValue(deleteValue);
+        if (ret->IsBoolean()) {
+            return ret->ToBoolean();
+        }
+        return true;
+    };
+    TextFieldModel::GetInstance()->SetOnWillDeleteEvent(std::move(callback));
+}
+
+void JSTextField::OnDidDelete(const JSCallbackInfo& info)
+{
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(jsValue->IsFunction());
+    auto jsAboutToIMEInputFunc =
+        AceType::MakeRefPtr<JsEventFunction<DeleteValueInfo, 1>>(JSRef<JSFunc>::Cast(jsValue), CreateJsDeleteToIMEObj);
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsAboutToIMEInputFunc)](
+                        const DeleteValueInfo& deleteValue) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        func->ExecuteWithValue(deleteValue);
+    };
+    TextFieldModel::GetInstance()->SetOnDidDeleteEvent(std::move(callback));
+}
 } // namespace OHOS::Ace::Framework

@@ -3034,7 +3034,7 @@ bool RichEditorPattern::SelectOverlayIsOn()
 
 void RichEditorPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent)
 {
-    InsertValue(value->text);
+    InsertValue(value->text, true);
 }
 
 void RichEditorPattern::InitMouseEvent()
@@ -3544,7 +3544,7 @@ void RichEditorPattern::UpdatePreviewTextOnInsert(const std::string& insertValue
     FinishTextPreview();
 }
 
-void RichEditorPattern::InsertValue(const std::string& insertValue)
+void RichEditorPattern::InsertValue(const std::string& insertValue, bool isIME)
 {
     if (isSpanStringMode_) {
         InsertValueInStyledString(insertValue);
@@ -3553,11 +3553,6 @@ void RichEditorPattern::InsertValue(const std::string& insertValue)
     if (IsPreviewTextInputting()) {
         UpdatePreviewTextOnInsert(insertValue);
     }
-    InsertValue(insertValue, true);
-}
-
-void RichEditorPattern::InsertValue(const std::string& insertValue, bool isIME)
-{
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "insertValue=[%{public}s]", StringUtils::RestoreEscape(insertValue).c_str());
     OperationRecord record;
     record.beforeCaretPosition = caretPosition_ + moveLength_;
@@ -7253,7 +7248,7 @@ void RichEditorPattern::PerformAction(TextInputAction action, bool forceCloseKey
     // When the Enter key is triggered, perform a line feed operation.
     // It will not exit the editing state, nor will it trigger the Enter key type callback.
     if (action == TextInputAction::NEW_LINE) {
-        InsertValue("\n");
+        InsertValue("\n", true);
         return;
     }
     // Enter key type callback

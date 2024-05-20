@@ -288,8 +288,7 @@ public:
 
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = true) override;
-    void InsertValue(const std::string& insertValue) override;
-    void InsertValue(const std::string& insertValue, bool isIME);
+    void InsertValue(const std::string& insertValue, bool isIME = false) override;
     void InsertValueOperation(
         const std::string& insertValue, OperationRecord* const record = nullptr, bool isIME = true);
     void DeleteSelectOperation(OperationRecord* const record);
