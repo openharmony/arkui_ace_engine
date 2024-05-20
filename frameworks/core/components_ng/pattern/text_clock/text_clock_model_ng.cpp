@@ -128,6 +128,16 @@ void TextClockModelNG::SetFormat(FrameNode* frameNode, const std::string& format
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, Format, format, frameNode);
 }
 
+void TextClockModelNG::SetTextShadow(FrameNode* frameNode, const std::vector<Shadow>& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, TextShadow, value, frameNode);
+}
+
+void TextClockModelNG::SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, FontFeature, value, frameNode);
+}
+
 void TextClockModelNG::SetFontColor(FrameNode* frameNode, const Color& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, TextColor, value, frameNode);

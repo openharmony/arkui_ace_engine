@@ -28,6 +28,11 @@ namespace {
 constexpr int32_t NUM_0 = 0;
 constexpr int32_t NUM_1 = 1;
 constexpr int32_t NUM_2 = 2;
+constexpr int32_t NUM_3 = 3;
+constexpr int32_t NUM_4 = 4;
+constexpr int32_t NUM_5 = 5;
+constexpr int32_t NUM_6 = 6;
+constexpr int32_t NUM_7 = 7;
 const std::string DEFAULT_STR = "-1";
 const char* TEXTCLOCK_NODEPTR_OF_UINODE = "nodePtr_";
 } // namespace
@@ -199,6 +204,96 @@ ArkUINativeModuleValue TextClockBridge::ResetFontFamily(ArkUIRuntimeCallInfo* ru
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
     GetArkUINodeModifiers()->getTextClockModifier()->resetFontFamily(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextClockBridge::SetFontFeature(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (secondArg->IsString()) {
+        auto value = secondArg->ToString(vm)->ToString();
+        GetArkUINodeModifiers()->getTextClockModifier()->setFontFeature(nativeNode, value.c_str());
+    } else {
+        GetArkUINodeModifiers()->getTextClockModifier()->resetFontFeature(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextClockBridge::ResetFontFeature(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextClockModifier()->resetFontFeature(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextClockBridge::SetTextShadow(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> radiusArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> typeArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> offsetXArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+    Local<JSValueRef> offsetYArg = runtimeCallInfo->GetCallArgRef(NUM_5);
+    Local<JSValueRef> fillArg = runtimeCallInfo->GetCallArgRef(NUM_6);
+    Local<JSValueRef> lengthArg = runtimeCallInfo->GetCallArgRef(NUM_7);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    uint32_t length;
+    if (!lengthArg->IsNumber() || lengthArg->Uint32Value(vm) == 0) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    length = lengthArg->Uint32Value(vm);
+    auto radiusArray = std::make_unique<double[]>(length);
+    auto typeArray = std::make_unique<uint32_t[]>(length);
+    auto colorArray = std::make_unique<uint32_t[]>(length);
+    auto offsetXArray = std::make_unique<double[]>(length);
+    auto offsetYArray = std::make_unique<double[]>(length);
+    auto fillArray = std::make_unique<uint32_t[]>(length);
+    bool radiusParseResult = ArkTSUtils::ParseArray<double>(
+        vm, radiusArg, radiusArray.get(), length, ArkTSUtils::parseShadowRadius);
+    bool typeParseResult = ArkTSUtils::ParseArray<uint32_t>(
+        vm, typeArg, typeArray.get(), length, ArkTSUtils::parseShadowType);
+    bool colorParseResult = ArkTSUtils::ParseArray<uint32_t>(
+        vm, colorArg, colorArray.get(), length, ArkTSUtils::parseShadowColor);
+    bool offsetXParseResult = ArkTSUtils::ParseArray<double>(
+        vm, offsetXArg, offsetXArray.get(), length, ArkTSUtils::parseShadowOffset);
+    bool offsetYParseResult = ArkTSUtils::ParseArray<double>(
+        vm, offsetYArg, offsetYArray.get(), length, ArkTSUtils::parseShadowOffset);
+    bool fillParseResult = ArkTSUtils::ParseArray<uint32_t>(
+        vm, fillArg, fillArray.get(), length, ArkTSUtils::parseShadowFill);
+    if (!radiusParseResult || !colorParseResult || !offsetXParseResult ||
+        !offsetYParseResult || !fillParseResult || !typeParseResult) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto textShadowArray = std::make_unique<ArkUITextShadowStruct[]>(length);
+    CHECK_NULL_RETURN(textShadowArray.get(), panda::JSValueRef::Undefined(vm));
+    for (uint32_t i = 0; i < length; i++) {
+        textShadowArray[i].radius = radiusArray[i];
+        textShadowArray[i].type = typeArray[i];
+        textShadowArray[i].color = colorArray[i];
+        textShadowArray[i].offsetX = offsetXArray[i];
+        textShadowArray[i].offsetY = offsetYArray[i];
+        textShadowArray[i].fill = fillArray[i];
+    }
+    GetArkUINodeModifiers()->getTextClockModifier()->setTextShadow(nativeNode, textShadowArray.get(), length);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextClockBridge::ResetTextShadow(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextClockModifier()->resetTextShadow(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

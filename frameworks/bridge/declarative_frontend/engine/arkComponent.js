@@ -19967,10 +19967,12 @@ class ArkTextClockComponent extends ArkComponent {
     return this;
   }
   textShadow(value) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextClockTextShadowModifier.identity, TextClockTextShadowModifier, value);
+    return this;
   }
   fontFeature(value) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextClockFontFeatureModifier.identity, TextClockFontFeatureModifier, value);
+    return this;
   }
   contentModifier(value) {
     this.setContentModifier(value);
@@ -20095,6 +20097,40 @@ class TextClockFontFamilyModifier extends ModifierWithKey {
   }
 }
 TextClockFontFamilyModifier.identity = Symbol('textClockFontFamily');
+class TextClockFontFeatureModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textClock.resetFontFeature(node);
+    }
+    else {
+      getUINativeModule().textClock.setFontFeature(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextClockFontFeatureModifier.identity = Symbol('textClockFontFeature');
+class TextClockTextShadowModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textClock.resetTextShadow(node);
+    }
+    else {
+      getUINativeModule().textClock.setTextShadow(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextClockTextShadowModifier.identity = Symbol('textClockTextShadow');
 // @ts-ignore
 if (globalThis.TextClock !== undefined) {
   globalThis.TextClock.attributeModifier = function (modifier) {

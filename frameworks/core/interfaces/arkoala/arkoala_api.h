@@ -3155,6 +3155,10 @@ struct ArkUITextClockModifier {
     void (*resetFontWeight)(ArkUINodeHandle node);
     void (*setFontFamily)(ArkUINodeHandle node, ArkUI_CharPtr fontFamily);
     void (*resetFontFamily)(ArkUINodeHandle node);
+    void (*setTextShadow)(ArkUINodeHandle node, struct ArkUITextShadowStruct* shadows, ArkUI_Uint32 length);
+    void (*resetTextShadow)(ArkUINodeHandle node);
+    void (*setFontFeature)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetFontFeature)(ArkUINodeHandle node);
 };
 
 struct ArkUITextClockControllerModifier {

@@ -51,10 +51,12 @@ class ArkTextClockComponent extends ArkComponent implements TextClockAttribute {
     return this;
   }
   textShadow(value: ShadowOptions): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextClockTextShadowModifier.identity, TextClockTextShadowModifier, value);
+    return this;
   }
   fontFeature(value: string): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextClockFontFeatureModifier.identity, TextClockFontFeatureModifier, value);
+    return this;
   }
   contentModifier(value: ContentModifier<TextClockConfiguration>): this {
     this.setContentModifier(value);
@@ -160,6 +162,57 @@ class TextClockFontWeightModifier extends ModifierWithKey<number | FontWeight | 
       getUINativeModule().textClock.resetFontWeight(node);
     } else {
       getUINativeModule().textClock.setFontWeight(node, this.value!);
+    }
+  }
+}
+
+class TextClockTextShadowModifier extends ModifierWithKey<ShadowOptions | Array<ShadowOptions>> {
+  constructor(value: ShadowOptions | Array<ShadowOptions>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textClockTextShadow');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textClock.resetTextShadow(node);
+    } else {
+      getUINativeModule().textClock.setTextShadow(node, this.value!);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    let checkDiff = true;
+    let arkShadow = new ArkShadowInfoToArray();
+    if (Object.getPrototypeOf(this.stageValue).constructor === Object &&
+      Object.getPrototypeOf(this.value).constructor === Object) {
+      checkDiff = arkShadow.checkDiff(<ShadowOptions> this.stageValue, <ShadowOptions> this.value);
+    } else if (Object.getPrototypeOf(this.stageValue).constructor === Array &&
+      Object.getPrototypeOf(this.value).constructor === Array &&
+      (<Array<ShadowOptions>> this.stageValue).length === (<Array<ShadowOptions>> this.value).length) {
+      let isDiffItem = false;
+      for (let i: number = 0; i < (<Array<ShadowOptions>> this.value).length; i++) {
+        if (arkShadow.checkDiff(this.stageValue[i], this.value[1])) {
+          isDiffItem = true;
+          break;
+        }
+      }
+      if (!isDiffItem) {
+        checkDiff = false;
+      }
+    }
+    return checkDiff;
+  }
+}
+
+class TextClockFontFeatureModifier extends ModifierWithKey<FontFeature> {
+  constructor(value: FontFeature) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textClockFontFeature');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textClock.resetFontFeature(node);
+    } else {
+      getUINativeModule().textClock.setFontFeature(node, this.value!);
     }
   }
 }
