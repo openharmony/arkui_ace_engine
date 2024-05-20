@@ -130,6 +130,7 @@ public:
         return MakeRefPtr<WebAccessibilityProperty>();
     }
 
+
     void OnModifyDone() override;
 
     void SetWebSrc(const std::string& webSrc)
@@ -729,6 +730,7 @@ private:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> beginTouchHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endTouchHandle);
     double GetNewScale(double& scale) const;
+    void UpdateSlideOffset(bool isNeedReset = false);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
