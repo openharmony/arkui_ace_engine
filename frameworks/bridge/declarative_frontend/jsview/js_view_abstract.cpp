@@ -5060,6 +5060,20 @@ bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     CompleteResourceObject(jsObj);
+
+    auto ok = JSViewAbstract::ParseJsObjColorFromResource(jsObj, result);
+    if (ok) {
+        JSRef<JSVal> jsOpacityRatio = jsObj->GetProperty("opacityRatio");
+        if (jsOpacityRatio->IsNumber()) {
+            double opacityRatio = jsOpacityRatio->ToNumber<double>();
+            result = result.BlendOpacity(opacityRatio);
+        }
+    }
+    return ok;
+}
+
+bool JSViewAbstract::ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, Color& result)
+{
     JSRef<JSVal> resId = jsObj->GetProperty("id");
     if (!resId->IsNumber()) {
         return false;
@@ -5085,6 +5099,7 @@ bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color
         result = resourceWrapper->GetColorByName(param->ToString());
         return true;
     }
+
     auto type = jsObj->GetPropertyValue<int32_t>("type", UNKNOWN_RESOURCE_TYPE);
     if (type == static_cast<int32_t>(ResourceType::STRING)) {
         auto value = resourceWrapper->GetString(resId->ToNumber<uint32_t>());

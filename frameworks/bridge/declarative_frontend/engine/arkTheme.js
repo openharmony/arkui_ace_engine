@@ -360,8 +360,9 @@ globalThis.WithTheme.pop = function () {
 };
 class ArkColorsImpl {
     constructor(colors = {}, baselineColors) {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31, _32, _33, _34, _35;
         this.brand = (_a = colors === null || colors === void 0 ? void 0 : colors.brand) !== null && _a !== void 0 ? _a : baselineColors.brand;
+        const brandColors = ArkColorsImpl.makeBrandColors(colors === null || colors === void 0 ? void 0 : colors.brand);
         this.warning = (_b = colors === null || colors === void 0 ? void 0 : colors.warning) !== null && _b !== void 0 ? _b : baselineColors.warning;
         this.alert = (_c = colors === null || colors === void 0 ? void 0 : colors.alert) !== null && _c !== void 0 ? _c : baselineColors.alert;
         this.confirm = (_d = colors === null || colors === void 0 ? void 0 : colors.confirm) !== null && _d !== void 0 ? _d : baselineColors.confirm;
@@ -369,49 +370,97 @@ class ArkColorsImpl {
         this.fontSecondary = (_f = colors === null || colors === void 0 ? void 0 : colors.fontSecondary) !== null && _f !== void 0 ? _f : baselineColors.fontSecondary;
         this.fontTertiary = (_g = colors === null || colors === void 0 ? void 0 : colors.fontTertiary) !== null && _g !== void 0 ? _g : baselineColors.fontTertiary;
         this.fontFourth = (_h = colors === null || colors === void 0 ? void 0 : colors.fontFourth) !== null && _h !== void 0 ? _h : baselineColors.fontFourth;
-        this.fontEmphasize = (_j = colors === null || colors === void 0 ? void 0 : colors.fontEmphasize) !== null && _j !== void 0 ? _j : baselineColors.fontEmphasize;
-        this.fontOnPrimary = (_k = colors === null || colors === void 0 ? void 0 : colors.fontOnPrimary) !== null && _k !== void 0 ? _k : baselineColors.fontOnPrimary;
-        this.fontOnSecondary = (_l = colors === null || colors === void 0 ? void 0 : colors.fontOnSecondary) !== null && _l !== void 0 ? _l : baselineColors.fontOnSecondary;
-        this.fontOnTertiary = (_m = colors === null || colors === void 0 ? void 0 : colors.fontOnTertiary) !== null && _m !== void 0 ? _m : baselineColors.fontOnTertiary;
-        this.fontOnFourth = (_o = colors === null || colors === void 0 ? void 0 : colors.fontOnFourth) !== null && _o !== void 0 ? _o : baselineColors.fontOnFourth;
-        this.iconPrimary = (_p = colors === null || colors === void 0 ? void 0 : colors.iconPrimary) !== null && _p !== void 0 ? _p : baselineColors.iconPrimary;
-        this.iconSecondary = (_q = colors === null || colors === void 0 ? void 0 : colors.iconSecondary) !== null && _q !== void 0 ? _q : baselineColors.iconSecondary;
-        this.iconTertiary = (_r = colors === null || colors === void 0 ? void 0 : colors.iconTertiary) !== null && _r !== void 0 ? _r : baselineColors.iconTertiary;
-        this.iconFourth = (_s = colors === null || colors === void 0 ? void 0 : colors.iconFourth) !== null && _s !== void 0 ? _s : baselineColors.iconFourth;
-        this.iconEmphasize = (_t = colors === null || colors === void 0 ? void 0 : colors.iconEmphasize) !== null && _t !== void 0 ? _t : baselineColors.iconEmphasize;
-        this.iconSubEmphasize = (_u = colors === null || colors === void 0 ? void 0 : colors.iconSubEmphasize) !== null && _u !== void 0 ? _u : baselineColors.iconSubEmphasize;
-        this.iconOnPrimary = (_v = colors === null || colors === void 0 ? void 0 : colors.iconOnPrimary) !== null && _v !== void 0 ? _v : baselineColors.iconOnPrimary;
-        this.iconOnSecondary = (_w = colors === null || colors === void 0 ? void 0 : colors.iconOnSecondary) !== null && _w !== void 0 ? _w : baselineColors.iconOnSecondary;
-        this.iconOnTertiary = (_x = colors === null || colors === void 0 ? void 0 : colors.iconOnTertiary) !== null && _x !== void 0 ? _x : baselineColors.iconOnTertiary;
-        this.iconOnFourth = (_y = colors === null || colors === void 0 ? void 0 : colors.iconOnFourth) !== null && _y !== void 0 ? _y : baselineColors.iconOnFourth;
-        this.backgroundPrimary = (_z = colors === null || colors === void 0 ? void 0 : colors.backgroundPrimary) !== null && _z !== void 0 ? _z : baselineColors.backgroundPrimary;
-        this.backgroundSecondary = (_0 = colors === null || colors === void 0 ? void 0 : colors.backgroundSecondary) !== null && _0 !== void 0 ? _0 : baselineColors.backgroundSecondary;
-        this.backgroundTertiary = (_1 = colors === null || colors === void 0 ? void 0 : colors.backgroundTertiary) !== null && _1 !== void 0 ? _1 : baselineColors.backgroundTertiary;
-        this.backgroundFourth = (_2 = colors === null || colors === void 0 ? void 0 : colors.backgroundFourth) !== null && _2 !== void 0 ? _2 : baselineColors.backgroundFourth;
-        this.backgroundEmphasize = (_3 = colors === null || colors === void 0 ? void 0 : colors.backgroundEmphasize) !== null && _3 !== void 0 ? _3 : baselineColors.backgroundEmphasize;
-        this.compForegroundPrimary = (_4 = colors === null || colors === void 0 ? void 0 : colors.compForegroundPrimary) !== null && _4 !== void 0 ? _4 : baselineColors.compForegroundPrimary;
-        this.compBackgroundPrimary = (_5 = colors === null || colors === void 0 ? void 0 : colors.compBackgroundPrimary) !== null && _5 !== void 0 ? _5 : baselineColors.compBackgroundPrimary;
-        this.compBackgroundPrimaryTran = (_6 = colors === null || colors === void 0 ? void 0 : colors.compBackgroundPrimaryTran) !== null && _6 !== void 0 ? _6 : baselineColors.compBackgroundPrimaryTran;
-        this.compBackgroundPrimaryContrary = (_7 = colors === null || colors === void 0 ? void 0 : colors.compBackgroundPrimaryContrary) !== null && _7 !== void 0 ? _7 : baselineColors.compBackgroundPrimaryContrary;
-        this.compBackgroundGray = (_8 = colors === null || colors === void 0 ? void 0 : colors.compBackgroundGray) !== null && _8 !== void 0 ? _8 : baselineColors.compBackgroundGray;
-        this.compBackgroundSecondary = (_9 = colors === null || colors === void 0 ? void 0 : colors.compBackgroundSecondary) !== null && _9 !== void 0 ? _9 : baselineColors.compBackgroundSecondary;
-        this.compBackgroundTertiary = (_10 = colors === null || colors === void 0 ? void 0 : colors.compBackgroundTertiary) !== null && _10 !== void 0 ? _10 : baselineColors.compBackgroundTertiary;
-        this.compBackgroundEmphasize = (_11 = colors === null || colors === void 0 ? void 0 : colors.compBackgroundEmphasize) !== null && _11 !== void 0 ? _11 : baselineColors.compBackgroundEmphasize;
-        this.compBackgroundNeutral = (_12 = colors === null || colors === void 0 ? void 0 : colors.compBackgroundNeutral) !== null && _12 !== void 0 ? _12 : baselineColors.compBackgroundNeutral;
-        this.compEmphasizeSecondary = (_13 = colors === null || colors === void 0 ? void 0 : colors.compEmphasizeSecondary) !== null && _13 !== void 0 ? _13 : baselineColors.compEmphasizeSecondary;
-        this.compEmphasizeTertiary = (_14 = colors === null || colors === void 0 ? void 0 : colors.compEmphasizeTertiary) !== null && _14 !== void 0 ? _14 : baselineColors.compEmphasizeTertiary;
-        this.compDivider = (_15 = colors === null || colors === void 0 ? void 0 : colors.compDivider) !== null && _15 !== void 0 ? _15 : baselineColors.compDivider;
-        this.compCommonContrary = (_16 = colors === null || colors === void 0 ? void 0 : colors.compCommonContrary) !== null && _16 !== void 0 ? _16 : baselineColors.compCommonContrary;
-        this.compBackgroundFocus = (_17 = colors === null || colors === void 0 ? void 0 : colors.compBackgroundFocus) !== null && _17 !== void 0 ? _17 : baselineColors.compBackgroundFocus;
-        this.compFocusedPrimary = (_18 = colors === null || colors === void 0 ? void 0 : colors.compFocusedPrimary) !== null && _18 !== void 0 ? _18 : baselineColors.compFocusedPrimary;
-        this.compFocusedSecondary = (_19 = colors === null || colors === void 0 ? void 0 : colors.compFocusedSecondary) !== null && _19 !== void 0 ? _19 : baselineColors.compFocusedSecondary;
-        this.compFocusedTertiary = (_20 = colors === null || colors === void 0 ? void 0 : colors.compFocusedTertiary) !== null && _20 !== void 0 ? _20 : baselineColors.compFocusedTertiary;
-        this.interactiveHover = (_21 = colors === null || colors === void 0 ? void 0 : colors.interactiveHover) !== null && _21 !== void 0 ? _21 : baselineColors.interactiveHover;
-        this.interactivePressed = (_22 = colors === null || colors === void 0 ? void 0 : colors.interactivePressed) !== null && _22 !== void 0 ? _22 : baselineColors.interactivePressed;
-        this.interactiveFocus = (_23 = colors === null || colors === void 0 ? void 0 : colors.interactiveFocus) !== null && _23 !== void 0 ? _23 : baselineColors.interactiveFocus;
-        this.interactiveActive = (_24 = colors === null || colors === void 0 ? void 0 : colors.interactiveActive) !== null && _24 !== void 0 ? _24 : baselineColors.interactiveActive;
-        this.interactiveSelect = (_25 = colors === null || colors === void 0 ? void 0 : colors.interactiveSelect) !== null && _25 !== void 0 ? _25 : baselineColors.interactiveSelect;
-        this.interactiveClick = (_26 = colors === null || colors === void 0 ? void 0 : colors.interactiveClick) !== null && _26 !== void 0 ? _26 : baselineColors.interactiveClick;
+        this.fontEmphasize = (_k = (_j = colors === null || colors === void 0 ? void 0 : colors.fontEmphasize) !== null && _j !== void 0 ? _j : brandColors.primary) !== null && _k !== void 0 ? _k : baselineColors.fontEmphasize;
+        this.fontOnPrimary = (_l = colors === null || colors === void 0 ? void 0 : colors.fontOnPrimary) !== null && _l !== void 0 ? _l : baselineColors.fontOnPrimary;
+        this.fontOnSecondary = (_m = colors === null || colors === void 0 ? void 0 : colors.fontOnSecondary) !== null && _m !== void 0 ? _m : baselineColors.fontOnSecondary;
+        this.fontOnTertiary = (_o = colors === null || colors === void 0 ? void 0 : colors.fontOnTertiary) !== null && _o !== void 0 ? _o : baselineColors.fontOnTertiary;
+        this.fontOnFourth = (_p = colors === null || colors === void 0 ? void 0 : colors.fontOnFourth) !== null && _p !== void 0 ? _p : baselineColors.fontOnFourth;
+        this.iconPrimary = (_q = colors === null || colors === void 0 ? void 0 : colors.iconPrimary) !== null && _q !== void 0 ? _q : baselineColors.iconPrimary;
+        this.iconSecondary = (_r = colors === null || colors === void 0 ? void 0 : colors.iconSecondary) !== null && _r !== void 0 ? _r : baselineColors.iconSecondary;
+        this.iconTertiary = (_s = colors === null || colors === void 0 ? void 0 : colors.iconTertiary) !== null && _s !== void 0 ? _s : baselineColors.iconTertiary;
+        this.iconFourth = (_t = colors === null || colors === void 0 ? void 0 : colors.iconFourth) !== null && _t !== void 0 ? _t : baselineColors.iconFourth;
+        this.iconEmphasize = (_v = (_u = colors === null || colors === void 0 ? void 0 : colors.iconEmphasize) !== null && _u !== void 0 ? _u : brandColors.primary) !== null && _v !== void 0 ? _v : baselineColors.iconEmphasize;
+        this.iconSubEmphasize = (_x = (_w = colors === null || colors === void 0 ? void 0 : colors.iconSubEmphasize) !== null && _w !== void 0 ? _w : brandColors.tertiary) !== null && _x !== void 0 ? _x : baselineColors.iconSubEmphasize;
+        this.iconOnPrimary = (_y = colors === null || colors === void 0 ? void 0 : colors.iconOnPrimary) !== null && _y !== void 0 ? _y : baselineColors.iconOnPrimary;
+        this.iconOnSecondary = (_z = colors === null || colors === void 0 ? void 0 : colors.iconOnSecondary) !== null && _z !== void 0 ? _z : baselineColors.iconOnSecondary;
+        this.iconOnTertiary = (_0 = colors === null || colors === void 0 ? void 0 : colors.iconOnTertiary) !== null && _0 !== void 0 ? _0 : baselineColors.iconOnTertiary;
+        this.iconOnFourth = (_1 = colors === null || colors === void 0 ? void 0 : colors.iconOnFourth) !== null && _1 !== void 0 ? _1 : baselineColors.iconOnFourth;
+        this.backgroundPrimary = (_2 = colors === null || colors === void 0 ? void 0 : colors.backgroundPrimary) !== null && _2 !== void 0 ? _2 : baselineColors.backgroundPrimary;
+        this.backgroundSecondary = (_3 = colors === null || colors === void 0 ? void 0 : colors.backgroundSecondary) !== null && _3 !== void 0 ? _3 : baselineColors.backgroundSecondary;
+        this.backgroundTertiary = (_4 = colors === null || colors === void 0 ? void 0 : colors.backgroundTertiary) !== null && _4 !== void 0 ? _4 : baselineColors.backgroundTertiary;
+        this.backgroundFourth = (_5 = colors === null || colors === void 0 ? void 0 : colors.backgroundFourth) !== null && _5 !== void 0 ? _5 : baselineColors.backgroundFourth;
+        this.backgroundEmphasize = (_7 = (_6 = colors === null || colors === void 0 ? void 0 : colors.backgroundEmphasize) !== null && _6 !== void 0 ? _6 : brandColors.primary) !== null && _7 !== void 0 ? _7 : baselineColors.backgroundEmphasize;
+        this.compForegroundPrimary = (_8 = colors === null || colors === void 0 ? void 0 : colors.compForegroundPrimary) !== null && _8 !== void 0 ? _8 : baselineColors.compForegroundPrimary;
+        this.compBackgroundPrimary = (_9 = colors === null || colors === void 0 ? void 0 : colors.compBackgroundPrimary) !== null && _9 !== void 0 ? _9 : baselineColors.compBackgroundPrimary;
+        this.compBackgroundPrimaryTran = (_10 = colors === null || colors === void 0 ? void 0 : colors.compBackgroundPrimaryTran) !== null && _10 !== void 0 ? _10 : baselineColors.compBackgroundPrimaryTran;
+        this.compBackgroundPrimaryContrary = (_11 = colors === null || colors === void 0 ? void 0 : colors.compBackgroundPrimaryContrary) !== null && _11 !== void 0 ? _11 : baselineColors.compBackgroundPrimaryContrary;
+        this.compBackgroundGray = (_12 = colors === null || colors === void 0 ? void 0 : colors.compBackgroundGray) !== null && _12 !== void 0 ? _12 : baselineColors.compBackgroundGray;
+        this.compBackgroundSecondary = (_13 = colors === null || colors === void 0 ? void 0 : colors.compBackgroundSecondary) !== null && _13 !== void 0 ? _13 : baselineColors.compBackgroundSecondary;
+        this.compBackgroundTertiary = (_14 = colors === null || colors === void 0 ? void 0 : colors.compBackgroundTertiary) !== null && _14 !== void 0 ? _14 : baselineColors.compBackgroundTertiary;
+        this.compBackgroundEmphasize = (_16 = (_15 = colors === null || colors === void 0 ? void 0 : colors.compBackgroundEmphasize) !== null && _15 !== void 0 ? _15 : brandColors.primary) !== null && _16 !== void 0 ? _16 : baselineColors.compBackgroundEmphasize;
+        this.compBackgroundNeutral = (_17 = colors === null || colors === void 0 ? void 0 : colors.compBackgroundNeutral) !== null && _17 !== void 0 ? _17 : baselineColors.compBackgroundNeutral;
+        this.compEmphasizeSecondary = (_19 = (_18 = colors === null || colors === void 0 ? void 0 : colors.compEmphasizeSecondary) !== null && _18 !== void 0 ? _18 : brandColors.fourth) !== null && _19 !== void 0 ? _19 : baselineColors.compEmphasizeSecondary;
+        this.compEmphasizeTertiary = (_21 = (_20 = colors === null || colors === void 0 ? void 0 : colors.compEmphasizeTertiary) !== null && _20 !== void 0 ? _20 : brandColors.fifth) !== null && _21 !== void 0 ? _21 : baselineColors.compEmphasizeTertiary;
+        this.compDivider = (_22 = colors === null || colors === void 0 ? void 0 : colors.compDivider) !== null && _22 !== void 0 ? _22 : baselineColors.compDivider;
+        this.compCommonContrary = (_23 = colors === null || colors === void 0 ? void 0 : colors.compCommonContrary) !== null && _23 !== void 0 ? _23 : baselineColors.compCommonContrary;
+        this.compBackgroundFocus = (_24 = colors === null || colors === void 0 ? void 0 : colors.compBackgroundFocus) !== null && _24 !== void 0 ? _24 : baselineColors.compBackgroundFocus;
+        this.compFocusedPrimary = (_25 = colors === null || colors === void 0 ? void 0 : colors.compFocusedPrimary) !== null && _25 !== void 0 ? _25 : baselineColors.compFocusedPrimary;
+        this.compFocusedSecondary = (_26 = colors === null || colors === void 0 ? void 0 : colors.compFocusedSecondary) !== null && _26 !== void 0 ? _26 : baselineColors.compFocusedSecondary;
+        this.compFocusedTertiary = (_27 = colors === null || colors === void 0 ? void 0 : colors.compFocusedTertiary) !== null && _27 !== void 0 ? _27 : baselineColors.compFocusedTertiary;
+        this.interactiveHover = (_28 = colors === null || colors === void 0 ? void 0 : colors.interactiveHover) !== null && _28 !== void 0 ? _28 : baselineColors.interactiveHover;
+        this.interactivePressed = (_29 = colors === null || colors === void 0 ? void 0 : colors.interactivePressed) !== null && _29 !== void 0 ? _29 : baselineColors.interactivePressed;
+        this.interactiveFocus = (_31 = (_30 = colors === null || colors === void 0 ? void 0 : colors.interactiveFocus) !== null && _30 !== void 0 ? _30 : brandColors.primary) !== null && _31 !== void 0 ? _31 : baselineColors.interactiveFocus;
+        this.interactiveActive = (_33 = (_32 = colors === null || colors === void 0 ? void 0 : colors.interactiveActive) !== null && _32 !== void 0 ? _32 : brandColors.primary) !== null && _33 !== void 0 ? _33 : baselineColors.interactiveActive;
+        this.interactiveSelect = (_34 = colors === null || colors === void 0 ? void 0 : colors.interactiveSelect) !== null && _34 !== void 0 ? _34 : baselineColors.interactiveSelect;
+        this.interactiveClick = (_35 = colors === null || colors === void 0 ? void 0 : colors.interactiveClick) !== null && _35 !== void 0 ? _35 : baselineColors.interactiveClick;
+    }
+    static makeBrandColors(brandColor) {
+        const result = {
+            primary: undefined,
+            secondary: undefined,
+            tertiary: undefined,
+            fourth: undefined,
+            fifth: undefined,
+            sixth: undefined
+        };
+        if (brandColor) {
+            if (brandColor instanceof Object) {
+                result.primary = brandColor;
+                result.secondary = ArkColorsImpl.makeResourceWithOpacity(brandColor, 0.6);
+                result.tertiary = ArkColorsImpl.makeResourceWithOpacity(brandColor, 0.4);
+                result.fourth = ArkColorsImpl.makeResourceWithOpacity(brandColor, 0.2);
+                result.fifth = ArkColorsImpl.makeResourceWithOpacity(brandColor, 0.1);
+                result.sixth = ArkColorsImpl.makeResourceWithOpacity(brandColor, 0.05);
+            }
+            else {
+                const argbColor = getUINativeModule().resource.getColorValue(brandColor);
+                result.primary = argbColor;
+                result.secondary = ArkColorsImpl.blendOpacity(argbColor, 0.6);
+                result.tertiary = ArkColorsImpl.blendOpacity(argbColor, 0.4);
+                result.fourth = ArkColorsImpl.blendOpacity(argbColor, 0.2);
+                result.fifth = ArkColorsImpl.blendOpacity(argbColor, 0.1);
+                result.sixth = ArkColorsImpl.blendOpacity(argbColor, 0.05);
+            }
+        }
+        return result;
+    }
+    static makeResourceWithOpacity(resourceColor, opacityRatio) {
+        return {
+            "id": resourceColor.id,
+            "type": resourceColor.type,
+            "params": [...resourceColor.params],
+            "bundleName": resourceColor.bundleName,
+            "moduleName": resourceColor.moduleName,
+            "opacityRatio": opacityRatio
+        };
+    }
+    static blendOpacity(argbColor, opacityRatio) {
+        if (opacityRatio < 0 || opacityRatio > 1.0) {
+            return argbColor;
+        }
+        const alpha = (argbColor >> 24) & 0xFF;
+        const outAlpha = (alpha * opacityRatio) & 0xFF;
+        return ((argbColor & 0x00FFFFFF) | (outAlpha & 0xFF) << 24) >>> 0;
     }
 }
 class ArkCornerRadiusImpl {
