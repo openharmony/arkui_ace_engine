@@ -95,6 +95,7 @@ if (defined(global_parts_info.graphic_graphic_3d)) {
 window_scene_support = true
 dynamic_component_support = true
 vsync_timeout_check = true
+use_fast_taskpool = true
 
 if (defined(preview_support) && preview_support) {
   defines += [ "PREVIEW" ]
@@ -197,6 +198,10 @@ if (dynamic_component_support) {
 
 if (vsync_timeout_check) {
   defines += [ "VSYNC_TIMEOUT_CHECK" ]
+}
+
+if (use_fast_taskpool) {
+  defines += [ "USE_FAST_TASKPOOL" ]
 }
 
 cflags_cc = [

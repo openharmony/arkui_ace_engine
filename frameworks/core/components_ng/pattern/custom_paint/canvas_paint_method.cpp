@@ -120,12 +120,12 @@ void CanvasPaintMethod::FlushTask()
         task(*this);
     }
     tasks_.clear();
-    needMarkDirty_ = true;
 #else
     CHECK_NULL_VOID(fastTaskPool_);
     fastTaskPool_->Draw(this);
     fastTaskPool_->Reset();
 #endif
+    needMarkDirty_ = true;
 }
 
 void CanvasPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
@@ -170,10 +170,14 @@ void CanvasPaintMethod::ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj)
     skiaDom_ = AceType::DynamicCast<SvgSkiaImageObject>(imageObj_)->GetSkiaDom();
     currentSource_ = loadingSource_;
     Ace::CanvasImage canvasImage = canvasImage_;
+#ifndef USE_FAST_TASKPOOL
     TaskFunc func = [canvasImage](CanvasPaintMethod& paintMethod) {
         paintMethod.DrawImage(canvasImage, 0, 0);
     };
     PushTask(func);
+#else
+    PushTask<DrawImageOp>(canvasImage, 0, 0);
+#endif
 #endif
 }
 
