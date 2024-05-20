@@ -440,9 +440,9 @@ void SetWaterFlowSectionOptions(ArkUINodeHandle node, ArkUI_Int32 start, ArkUIWa
 
         NG::PaddingProperty paddings;
         paddings.top = std::optional<CalcLength>(sectionData.margin[0]);
-        paddings.bottom = std::optional<CalcLength>(sectionData.margin[1]);
-        paddings.left = std::optional<CalcLength>(sectionData.margin[2]);
-        paddings.right = std::optional<CalcLength>(sectionData.margin[3]);
+        paddings.right = std::optional<CalcLength>(sectionData.margin[1]);
+        paddings.bottom = std::optional<CalcLength>(sectionData.margin[2]);
+        paddings.left = std::optional<CalcLength>(sectionData.margin[3]);
         section.margin = paddings;
         if (sectionData.onGetItemMainSizeByIndex) {
             section.onGetItemMainSizeByIndex = [sectionData](int32_t value) -> float {
