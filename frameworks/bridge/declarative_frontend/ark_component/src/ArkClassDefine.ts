@@ -1297,3 +1297,29 @@ class ArkPositionType {
     }
   }
 }
+
+class ArkSelection {
+  selectionStart: number;
+  selectionEnd: number;
+  constructor() {
+    this.selectionStart = undefined;
+    this.selectionEnd = undefined;
+  }
+  isEqual(another: ArkSelection): boolean {
+    return this.selectionStart === another.selectionStart &&
+      this.selectionEnd === another.selectionEnd;
+  }
+}
+
+class TextDataDetectorConfig {
+  types: TextDataDetectorType;
+  onDetectResultUpdate: (result: string) => void;
+  constructor() {
+    this.types = undefined;
+    this.onDetectResultUpdate = undefined;
+  }
+  isEqual(another: TextDataDetectorConfig): boolean {
+    return (this.types === another.types) &&
+      (this.onDetectResultUpdate === another.onDetectResultUpdate);
+  }
+}

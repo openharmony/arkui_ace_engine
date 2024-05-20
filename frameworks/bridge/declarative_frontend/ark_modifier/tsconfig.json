@@ -79,7 +79,8 @@
         "src/toggle_modifier.ts",
         "src/video_modifier.ts",
         "src/water_flow_modifier.ts",
-        "src/symbol_glyph_modifier.ts"
+        "src/symbol_glyph_modifier.ts",
+        "src/symbol_span_modifier.ts"
     ],
     "compilerOptions": {
         "module": "none",

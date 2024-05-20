@@ -591,6 +591,71 @@ class TextContentModifier extends ModifierWithKey<string | Resource> {
   }
 }
 
+class TextSelectionModifier extends ModifierWithKey<ArkSelection> {
+  constructor(value: ArkSelection) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textSelection');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetSelection(node);
+    } else {
+      getUINativeModule().text.setSelection(node, this.value.selectionStart, this.value.selectionEnd);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.selectionStart, this.value.selectionStart) ||
+    !isBaseOrResourceEqual(this.stageValue.selectionEnd, this.value.selectionEnd);
+  }
+}
+
+class TextDataDetectorConfigModifier extends ModifierWithKey<TextDataDetectorConfig> {
+  constructor(value: TextDataDetectorConfig) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textDataDetectorConfig');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetDataDetectorConfig(node);
+    } else {
+      getUINativeModule().text.setDataDetectorConfig(node, this.value.types, this.value.onDetectResultUpdate);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.types, this.value.types) ||
+    !isBaseOrResourceEqual(this.stageValue.onDetectResultUpdate, this.value.onDetectResultUpdate);
+  }
+}
+
+class TextOnCopyModifier extends ModifierWithKey<(value: string) => void> {
+  constructor(value: (value: string) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textOnCopy');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetOnCopy(node);
+    } else {
+      getUINativeModule().text.setOnCopy(node, this.value);
+    }
+  }
+}
+
+class TextOnTextSelectionChangeModifier extends ModifierWithKey<(selectionStart: number,
+    selectionEnd: number) => void> {
+  constructor(value: (selectionStart: number, selectionEnd: number) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textOnTextSelectionChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetOnTextSelectionChange(node);
+    } else {
+      getUINativeModule().text.setOnTextSelectionChange(node, this.value);
+    }
+  }
+}
+
 class TextControllerModifier extends ModifierWithKey<TextOptions> {
   constructor(value: TextOptions) {
     super(value);
@@ -620,7 +685,11 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     return this;
   }
   dataDetectorConfig(config: any): this {
-    throw new Error('Method not implemented.');
+    let detectorConfig = new TextDataDetectorConfig();
+    detectorConfig.types = config.type;
+    detectorConfig.onDetectResultUpdate = config.onDetectResultUpdate;
+    modifierWithKey(this._modifiersWithKeys, TextDataDetectorConfigModifier.identity, TextDataDetectorConfigModifier, detectorConfig);
+    return this;
   }
   font(value: Font): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextFontModifier.identity, TextFontModifier, value);
@@ -726,10 +795,16 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     return this;
   }
   onCopy(callback: (value: string) => void): TextAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextOnCopyModifier.identity,
+      TextOnCopyModifier, callback);
+    return this;
   }
   selection(selectionStart: number, selectionEnd: number): TextAttribute {
-    throw new Error('Method not implemented.');
+    let arkSelection = new ArkSelection();
+    arkSelection.selectionStart = selectionStart;
+    arkSelection.selectionEnd = selectionEnd;
+    modifierWithKey(this._modifiersWithKeys, TextSelectionModifier.identity, TextSelectionModifier, arkSelection);
+    return this;
   }
   ellipsisMode(value: EllipsisMode): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextEllipsisModeModifier.identity, TextEllipsisModeModifier, value);
@@ -746,6 +821,11 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   foregroundColor(value: ResourceColor | ColoringStrategy) {
     modifierWithKey(
       this._modifiersWithKeys, TextForegroundColorModifier.identity, TextForegroundColorModifier, value);
+    return this;
+  }
+  onTextSelectionChange(callback: (selectionStart: number, selectionEnd: number) => void) {
+    modifierWithKey(this._modifiersWithKeys, TextOnTextSelectionChangeModifier.identity,
+      TextOnTextSelectionChangeModifier, callback);
     return this;
   }
 }
