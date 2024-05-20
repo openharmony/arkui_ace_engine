@@ -2649,6 +2649,7 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
     if (selectInfo.isNewAvoid && selectOverlayProxy_) {
         selectOverlayProxy_->ShowOrHiddenMenu(false);
     }
+    selectOverlayProxy_->SetHandleReverse(false);
     dropParams_ = params;
     menuCallback_ = callback;
     selectMenuInfo_ = selectInfo.menuInfo;
