@@ -3410,7 +3410,7 @@ void RosenRenderContext::FlushContentModifier(const RefPtr<Modifier>& modifier)
             std::make_shared<Rosen::RectF>(rect->GetX(), rect->GetY(), rect->Width(), rect->Height());
         UpdateDrawRegion(DRAW_REGION_CONTENT_MODIFIER_INDEX, overlayRect);
     }
-    rsNode_->SetIsCustomTypeface(contentModifier->GetIsCustomFont());
+    rsNode_->SetIsCustomTextType(contentModifier->GetIsCustomFont());
     rsNode_->AddModifier(modifierAdapter);
     modifierAdapter->AttachProperties();
 }
@@ -4564,7 +4564,7 @@ void RosenRenderContext::PaintOverlayText()
             overlayRect = std::make_shared<Rosen::RectF>(overlayOffset.GetX(), overlayOffset.GetY(),
                 std::max(paragraphSize.Width(), paintRect.Width()),
                 std::max(paragraphSize.Height(), paintRect.Height()));
-            rsNode_->SetIsCustomTypeface(modifier_->IsCustomFont());
+            rsNode_->SetIsCustomTextType(modifier_->IsCustomFont());
             UpdateDrawRegion(DRAW_REGION_OVERLAY_TEXT_MODIFIER_INDEX, overlayRect);
         } else {
             modifier_ = std::make_shared<OverlayTextModifier>();
@@ -4575,7 +4575,7 @@ void RosenRenderContext::PaintOverlayText()
             overlayRect = std::make_shared<Rosen::RectF>(overlayOffset.GetX(), overlayOffset.GetY(),
                 std::max(paragraphSize.Width(), paintRect.Width()),
                 std::max(paragraphSize.Height(), paintRect.Height()));
-            rsNode_->SetIsCustomTypeface(modifier_->IsCustomFont());
+            rsNode_->SetIsCustomTextType(modifier_->IsCustomFont());
             UpdateDrawRegion(DRAW_REGION_OVERLAY_TEXT_MODIFIER_INDEX, overlayRect);
         }
     }
