@@ -64,8 +64,8 @@ class BuilderNode {
     update(params) {
         this._JSBuilderNode.update(params);
     }
-    build(builder, params, needPrxoy = true) {
-        this._JSBuilderNode.build(builder, params, needPrxoy);
+    build(builder, params) {
+        this._JSBuilderNode.build(builder, params);
         this.nodePtr_ = this._JSBuilderNode.getNodePtr();
     }
     getNodePtr() {
@@ -89,7 +89,7 @@ class BuilderNode {
     reuse(param) {
         this._JSBuilderNode.reuse(param);
     }
-    recycle(){
+    recycle() {
         this._JSBuilderNode.recycle();
     }
 }
@@ -114,7 +114,7 @@ class JSBuilderNode extends BaseNode {
             } // if child
         });
     }
-    recycle(){
+    recycle() {
         this.childrenWeakrefMap_.forEach((weakRefChild) => {
             const child = weakRefChild.deref();
             if (child) {
@@ -169,11 +169,11 @@ class JSBuilderNode extends BaseNode {
         }
         return nodeInfo;
     }
-    build(builder, params, needPrxoy = true) {
+    build(builder, params) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this.params_ = params;
         this.updateFuncByElmtId.clear();
-        this.nodePtr_ = super.create(builder.builder, this.params_, needPrxoy);
+        this.nodePtr_ = super.create(builder.builder, this.params_);
         this._nativeRef = getUINativeModule().nativeUtils.createNativeStrongRef(this.nodePtr_);
         if (this.frameNode_ === undefined || this.frameNode_ === null) {
             this.frameNode_ = new BuilderRootFrameNode(this.uiContext_);
@@ -759,7 +759,7 @@ class FrameNode {
             return;
         }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        let flag = getUINativeModule().frameNode.appendChild(this.nodePtr_, content.getNodePtr());
+        let flag = getUINativeModule().frameNode.appendChild(this.nodePtr_, content.getNodeWithoutProxy());
         __JSScopeUtil__.restoreInstanceId();
         if (!flag) {
             throw { message: 'The FrameNode is not modifiable.', code: 100021 };
@@ -1185,18 +1185,18 @@ const __creatorMap__ = new Map([
             });
         }],
     ["Divider", (context) => {
-        return new TypedFrameNode(context, "Divider", (node, type) => {
-            return new ArkDividerComponent(node, type);
+            return new TypedFrameNode(context, "Divider", (node, type) => {
+                return new ArkDividerComponent(node, type);
             });
         }],
     ["LoadingProgress", (context) => {
-        return new TypedFrameNode(context, "LoadingProgress", (node, type) => {
-            return new ArkLoadingProgressComponent(node, type);
+            return new TypedFrameNode(context, "LoadingProgress", (node, type) => {
+                return new ArkLoadingProgressComponent(node, type);
             });
         }],
     ["Search", (context) => {
-        return new TypedFrameNode(context, "Search", (node, type) => {
-            return new ArkSearchComponent(node, type);
+            return new TypedFrameNode(context, "Search", (node, type) => {
+                return new ArkSearchComponent(node, type);
             });
         }],
 ]);
@@ -1955,7 +1955,7 @@ class ComponentContent extends Content {
         super();
         let builderNode = new BuilderNode(uiContext, {});
         this.builderNode_ = builderNode;
-        this.builderNode_.build(builder, params ?? undefined, false);
+        this.builderNode_.build(builder, params ?? undefined);
     }
     update(params) {
         this.builderNode_.update(params);
@@ -1969,8 +1969,19 @@ class ComponentContent extends Content {
     reuse(param) {
         this.builderNode_.reuse(param);
     }
-    recycle(){
+    recycle() {
         this.builderNode_.recycle();
+    }
+    getNodeWithoutProxy() {
+        const node = this.getNodePtr();
+        const nodeType = getUINativeModule().frameNode.getNodeType(node);
+        if (nodeType === "BuilderProxyNode") {
+            const result = getUINativeModule().frameNode.getFirstUINode(node);
+            this.attachNodeRef_ = getUINativeModule().nativeUtils.createNativeStrongRef(result);
+            getUINativeModule().frameNode.clearChildren(node);
+            return result;
+        }
+        return node;
     }
 }
 /*

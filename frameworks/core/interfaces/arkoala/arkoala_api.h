@@ -3779,6 +3779,7 @@ struct ArkUIFrameNodeModifier {
     ArkUINodeHandle (*getFrameNodeByKey)(ArkUI_CharPtr key);
     void (*propertyUpdate)(ArkUINodeHandle node);
     ArkUINodeHandle (*getLast)(ArkUINodeHandle node);
+    ArkUINodeHandle (*getFirstUINode)(ArkUINodeHandle node);
 };
 
 struct ArkUINodeContentEvent {
