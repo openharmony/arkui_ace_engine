@@ -406,6 +406,7 @@ public:
     bool LoadDataWithRichText() override;
 
     void SetBoundsOrResize(const Size& drawSize, const Offset& offset) override;
+    void DragResize(const double& width, const double& height, const double& pre_height, const double& pre_width) override;
 private:
     void ReleasePlatformResource();
     void CreatePluginResource(const Size& size, const Offset& position, const WeakPtr<NG::PipelineContext>& context);
