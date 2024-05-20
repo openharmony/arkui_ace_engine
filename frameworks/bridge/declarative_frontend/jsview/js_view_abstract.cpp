@@ -5060,6 +5060,20 @@ bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     CompleteResourceObject(jsObj);
+
+    auto ok = JSViewAbstract::ParseJsObjColorFromResource(jsObj, result);
+    if (ok) {
+        JSRef<JSVal> jsOpacityRatio = jsObj->GetProperty("opacityRatio");
+        if (jsOpacityRatio->IsNumber()) {
+            double opacityRatio = jsOpacityRatio->ToNumber<double>();
+            result = result.BlendOpacity(opacityRatio);
+        }
+    }
+    return ok;
+}
+
+bool JSViewAbstract::ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, Color& result)
+{
     JSRef<JSVal> resId = jsObj->GetProperty("id");
     if (!resId->IsNumber()) {
         return false;
@@ -5086,32 +5100,18 @@ bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color
         return true;
     }
 
-    JSRef<JSVal> jsOpacityRatio = jsObj->GetProperty("opacityRatio");
-    std::optional<float> optOpacityRatio = jsOpacityRatio->IsNumber()
-        ? std::make_optional(jsOpacityRatio->ToNumber<float>())
-        : std::nullopt;
-
     auto type = jsObj->GetPropertyValue<int32_t>("type", UNKNOWN_RESOURCE_TYPE);
     if (type == static_cast<int32_t>(ResourceType::STRING)) {
         auto value = resourceWrapper->GetString(resId->ToNumber<uint32_t>());
-        if (optOpacityRatio) {
-            result = result.BlendOpacity(*optOpacityRatio);
-        }
         return Color::ParseColorString(value, result);
     }
     if (type == static_cast<int32_t>(ResourceType::INTEGER)) {
         auto value = resourceWrapper->GetInt(resId->ToNumber<uint32_t>());
         result = Color(ColorAlphaAdapt(value));
-        if (optOpacityRatio) {
-            result = result.BlendOpacity(*optOpacityRatio);
-        }
         return true;
     }
     if (type == static_cast<int32_t>(ResourceType::COLOR)) {
         result = resourceWrapper->GetColor(resId->ToNumber<uint32_t>());
-        if (optOpacityRatio) {
-            result = result.BlendOpacity(*optOpacityRatio);
-        }
         return true;
     }
     return false;
