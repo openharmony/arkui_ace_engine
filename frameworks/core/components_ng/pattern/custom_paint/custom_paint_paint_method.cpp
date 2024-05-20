@@ -568,6 +568,9 @@ void CustomPaintPaintMethod::DrawImageInternal(
     InitPaintBlend(compositeOperationpBrush);
     auto rect = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
     RSSaveLayerOps slo(&rect, &compositeOperationpBrush);
+    if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
+        rsCanvas_->SaveLayer(slo);
+    }
     InitImagePaint(nullptr, &imageBrush_, sampleOptions_);
     if (globalState_.HasGlobalAlpha()) {
         imageBrush_.SetAlphaF(globalState_.GetAlpha());
@@ -577,10 +580,9 @@ void CustomPaintPaintMethod::DrawImageInternal(
             canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx, canvasImage.dHeight + canvasImage.dy);
         RSPath path;
         path.AddRect(rsRect);
-        PaintShadow(path, shadow_, rsCanvas, &imageBrush_, nullptr, &slo);
+        PaintImageShadow(path, shadow_, rsCanvas, &imageBrush_, nullptr,
+            (globalState_.GetType() != CompositeOperation::SOURCE_OVER) ? &slo : nullptr);
     }
-
-    rsCanvas_->SaveLayer(slo);
     rsCanvas->AttachBrush(imageBrush_);
     switch (canvasImage.flag) {
         case DrawImageType::THREE_PARAMS:
@@ -605,7 +607,9 @@ void CustomPaintPaintMethod::DrawImageInternal(
             break;
     }
     rsCanvas->DetachBrush();
-    rsCanvas_->Restore();
+    if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
+        rsCanvas_->Restore();
+    }
 }
 
 void CustomPaintPaintMethod::DrawImage(const Ace::CanvasImage& canvasImage, double width, double height)
