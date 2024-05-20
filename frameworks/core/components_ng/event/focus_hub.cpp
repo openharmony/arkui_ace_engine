@@ -1127,6 +1127,7 @@ void FocusHub::OnBlur()
     } else if (focusType_ == FocusType::SCOPE) {
         OnBlurScope();
     }
+    BlurFocusView();
     auto frameNode = GetFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto* pipeline = frameNode->GetContext();
@@ -2260,6 +2261,19 @@ bool FocusHub::UpdateFocusView()
             focusView->SetIsViewRootScopeFocused(false);
         }
         focusView->FocusViewShow(true);
+    }
+    return true;
+}
+
+bool FocusHub::BlurFocusView()
+{
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto focusView = frameNode->GetPattern<FocusView>();
+    CHECK_NULL_RETURN(focusView, false);
+    auto curFocusView = FocusView::GetCurrentFocusView();
+    if (focusView->IsFocusViewLegal() && focusView == curFocusView) {
+        focusView->FocusViewClose();
     }
     return true;
 }
