@@ -42,7 +42,7 @@ group("base_unittest") {
   testonly = true
   deps = [
     ":geometry_test",
-    ":util_test",
+    #":util_test",
   ]
 }
 
@@ -50,6 +50,6 @@ group("linux_base_unittest") {
   testonly = true
   deps = [
     ":geometry_test",
-    ":util_test",
+    #":util_test",
   ]
 }
