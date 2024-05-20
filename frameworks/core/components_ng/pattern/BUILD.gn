@@ -541,6 +541,7 @@ build_component_ng("pattern_ng") {
 
   external_deps = []
   deps = [ "container_modal/interfaces:customtitle" ]
+  defines = [ "USE_FAST_TASKPOOL" ]
 
   if (defined(vendor_configs.ace_engine_advanced)) {
     sources += vendor_configs.ace_engine_advanced_pattern
