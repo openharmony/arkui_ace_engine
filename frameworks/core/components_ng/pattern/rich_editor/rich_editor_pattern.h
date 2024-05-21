@@ -549,11 +549,7 @@ public:
 
     // Add for Scroll
 
-    void OnAttachToFrameNode() override
-    {
-        TextPattern::OnAttachToFrameNode();
-        richEditorInstanceId_ = Container::CurrentIdSafely();
-    }
+    void OnAttachToFrameNode() override;
 
     void OnDetachFromFrameNode(FrameNode* node) override
     {
