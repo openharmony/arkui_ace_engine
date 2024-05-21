@@ -1139,8 +1139,8 @@ void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp)
                     *lastFrameRect_, *lastParentOffsetToWindow_, currFrameRect, currParentOffsetToWindow);
             }
             if (eventHub_->HasOnAreaChanged()) {
-                eventHub_->FireOnAreaChanged(
-                    *lastFrameRect_, *lastParentOffsetToWindow_, currFrameRect, currParentOffsetToWindow);
+                eventHub_->FireOnAreaChanged(*lastFrameRect_, *lastParentOffsetToWindow_, GetFrameRectWithSafeArea(),
+                    GetParentGlobalOffsetWithSafeArea(true, true));
             }
             *lastFrameRect_ = currFrameRect;
             *lastParentOffsetToWindow_ = currParentOffsetToWindow;
@@ -2331,7 +2331,7 @@ void FrameNode::OnWindowUnfocused()
 }
 
 std::pair<float, float> FrameNode::ContextPositionConvertToPX(
-    const RefPtr<RenderContext>& context, const SizeF& percentReference) const
+    const RefPtr<RenderContext>& context, const SizeF& percentReference)
 {
     std::pair<float, float> position;
     CHECK_NULL_RETURN(context, position);
