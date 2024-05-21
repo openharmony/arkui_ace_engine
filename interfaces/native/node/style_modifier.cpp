@@ -270,43 +270,43 @@ std::string CurveToString(int curve)
     std::string curveStr = "linear";
     switch (curve) {
         case ArkUI_AnimationCurve::ARKUI_CURVE_LINEAR:
-            curveStr = "Linear";
+            curveStr = "linear";
             break;
         case ArkUI_AnimationCurve::ARKUI_CURVE_EASE:
-            curveStr = "Ease";
+            curveStr = "ease";
             break;
         case ArkUI_AnimationCurve::ARKUI_CURVE_EASE_IN:
-            curveStr = "EaseIn";
+            curveStr = "ease-in";
             break;
         case ArkUI_AnimationCurve::ARKUI_CURVE_EASE_OUT:
-            curveStr = "EaseOut";
+            curveStr = "ease-out";
             break;
         case ArkUI_AnimationCurve::ARKUI_CURVE_EASE_IN_OUT:
-            curveStr = "EaseInOut";
+            curveStr = "ease-in-out";
             break;
         case ArkUI_AnimationCurve::ARKUI_CURVE_FAST_OUT_SLOW_IN:
-            curveStr = "FastOutSlowIn";
+            curveStr = "fast-out-slow-in";
             break;
         case ArkUI_AnimationCurve::ARKUI_CURVE_LINEAR_OUT_SLOW_IN:
-            curveStr = "LinearOutSlowIn";
+            curveStr = "linear-out-slow-in";
             break;
         case ArkUI_AnimationCurve::ARKUI_CURVE_FAST_OUT_LINEAR_IN:
-            curveStr = "FastOutLinearIn";
+            curveStr = "fast-out-linear-in";
             break;
         case ArkUI_AnimationCurve::ARKUI_CURVE_EXTREME_DECELERATION:
-            curveStr = "ExtremeDeceleration";
+            curveStr = "extreme-deceleration";
             break;
         case ArkUI_AnimationCurve::ARKUI_CURVE_SHARP:
-            curveStr = "Sharp";
+            curveStr = "sharp";
             break;
         case ArkUI_AnimationCurve::ARKUI_CURVE_RHYTHM:
-            curveStr = "Rhythm";
+            curveStr = "rhythm";
             break;
         case ArkUI_AnimationCurve::ARKUI_CURVE_SMOOTH:
-            curveStr = "Smooth";
+            curveStr = "smooth";
             break;
         case ArkUI_AnimationCurve::ARKUI_CURVE_FRICTION:
-            curveStr = "Friction";
+            curveStr = "friction";
             break;
         default:
             break;

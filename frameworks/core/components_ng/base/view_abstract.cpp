@@ -3628,8 +3628,14 @@ TextDirection ViewAbstract::GetDirection(FrameNode* frameNode)
 
 FlexAlign ViewAbstract::GetAlignSelf(FrameNode* frameNode)
 {
+    FlexAlign value = FlexAlign::AUTO;
     const auto& flexItemProperty = frameNode->GetLayoutProperty()->GetFlexItemProperty();
-    return flexItemProperty->GetAlignSelf().value_or(FlexAlign::AUTO);
+    CHECK_NULL_RETURN(flexItemProperty, value);
+    auto getValue = flexItemProperty->GetAlignSelf();
+    if (getValue.has_value()) {
+        return getValue.value();
+    }
+    return value;
 }
 
 float ViewAbstract::GetFlexGrow(FrameNode* frameNode)
