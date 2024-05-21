@@ -155,8 +155,7 @@ HWTEST_F(ListScrollerTestNg, ScrollToIndex005, TestSize.Level1)
     CreateList();
     CreateListItems(20);
     CreateDone(frameNode_);
-    pattern_->ScrollTo(ITEM_HEIGHT * 8);
-    FlushLayoutTask(frameNode_);
+    ScrollTo(ITEM_HEIGHT * 8);
     EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT * 8);
     EXPECT_EQ(accessibilityProperty_->GetScrollOffSet(), pattern_->GetTotalOffset());
     EXPECT_FALSE(pattern_->IsAtTop());
@@ -442,8 +441,7 @@ HWTEST_F(ListScrollerTestNg, ScrollToIndex013, TestSize.Level1)
      * @tc.cases: bottomOffset > topOffset > 0
      * @tc.expected: top Align
      */
-    pattern_->ScrollTo(800);
-    FlushLayoutTask(frameNode_);
+    ScrollTo(800);
     EXPECT_EQ(pattern_->GetTotalOffset(), 800);
     EXPECT_TRUE(ScrollToIndex(1, true, ScrollAlign::AUTO, 1000));
 
@@ -451,8 +449,7 @@ HWTEST_F(ListScrollerTestNg, ScrollToIndex013, TestSize.Level1)
      * @tc.cases: bottomOffset > topOffset == 0
      * @tc.expected: top Align
      */
-    pattern_->ScrollTo(1000);
-    FlushLayoutTask(frameNode_);
+    ScrollTo(1000);
     EXPECT_EQ(pattern_->GetTotalOffset(), 1000);
     EXPECT_TRUE(ScrollToIndex(1, true, ScrollAlign::AUTO, 1000));
 
@@ -460,8 +457,7 @@ HWTEST_F(ListScrollerTestNg, ScrollToIndex013, TestSize.Level1)
      * @tc.cases: bottomOffset > 0 > topOffset and |topOffset| < |bottomOffset|
      * @tc.expected: top Align
      */
-    pattern_->ScrollTo(1050);
-    FlushLayoutTask(frameNode_);
+    ScrollTo(1050);
     EXPECT_EQ(pattern_->GetTotalOffset(), 1050);
     EXPECT_TRUE(ScrollToIndex(1, true, ScrollAlign::AUTO, 1000));
 
@@ -469,7 +465,7 @@ HWTEST_F(ListScrollerTestNg, ScrollToIndex013, TestSize.Level1)
      * @tc.cases: bottomOffset > 0 > topOffset and |topOffset| == |bottomOffset|
      * @tc.expected: bottom Align
      */
-    pattern_->ScrollTo(1300);
+    ScrollTo(1300);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), 1300);
     EXPECT_TRUE(ScrollToIndex(1, true, ScrollAlign::AUTO, 1600));
@@ -478,8 +474,7 @@ HWTEST_F(ListScrollerTestNg, ScrollToIndex013, TestSize.Level1)
      * @tc.cases: bottomOffset == 0 > topOffset
      * @tc.expected: bottom Align
      */
-    pattern_->ScrollTo(1400);
-    FlushLayoutTask(frameNode_);
+    ScrollTo(1400);
     EXPECT_EQ(pattern_->GetTotalOffset(), 1400);
     EXPECT_TRUE(ScrollToIndex(1, true, ScrollAlign::AUTO, 1600));
 
@@ -487,8 +482,7 @@ HWTEST_F(ListScrollerTestNg, ScrollToIndex013, TestSize.Level1)
      * @tc.cases: 0 > bottomOffset > topOffset
      * @tc.expected: bottom Align
      */
-    pattern_->ScrollTo(1700);
-    FlushLayoutTask(frameNode_);
+    ScrollTo(1700);
     EXPECT_EQ(pattern_->GetTotalOffset(), 1700);
     EXPECT_TRUE(ScrollToIndex(1, true, ScrollAlign::AUTO, 1600));
 }
@@ -553,14 +547,14 @@ HWTEST_F(ListScrollerTestNg, ScrollToItemInGroup001, TestSize.Level1)
     EXPECT_TRUE(pattern_->IsAtTop());
     int32_t index = 0;
     int32_t indexInGroup = 0;
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::START, 0.f));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER, 0.f));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::END, 0.f));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::AUTO, 0.f));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, true, ScrollAlign::START, 0.f));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, true, ScrollAlign::CENTER, 0.f));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, true, ScrollAlign::END, 0.f));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, true, ScrollAlign::AUTO, 0.f));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::START, 0.f));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER, 0.f));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::END, 0.f));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::AUTO, 0.f));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::START, 0.f));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::CENTER, 0.f));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::END, 0.f));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::AUTO, 0.f));
 }
 
 /**
@@ -580,18 +574,18 @@ HWTEST_F(ListScrollerTestNg, DISABLED_ScrollToItemInGroup002, TestSize.Level1)
     int32_t index = 1;
     int32_t indexInGroup = 1;
     float groupHeight = GROUP_ITEM_NUMBER * ITEM_HEIGHT; // 400.f
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::START,
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::START,
                                     groupHeight * index + ITEM_HEIGHT * indexInGroup)); // 500.f
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER,
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER,
                                     ITEM_HEIGHT * (indexInGroup + 0.5))); // 150.f
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::END, 0.f));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::AUTO, 0.f));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, true, ScrollAlign::START,
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::END, 0.f));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::AUTO, 0.f));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::START,
                                     groupHeight * index + ITEM_HEIGHT * indexInGroup)); // 500.f
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, true, ScrollAlign::CENTER,
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::CENTER,
                                     ITEM_HEIGHT * (indexInGroup + 0.5))); // 150.f
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, true, ScrollAlign::END, 0.f));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, true, ScrollAlign::AUTO, 0.f));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::END, 0.f));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::AUTO, 0.f));
 }
 
 /**
@@ -612,19 +606,19 @@ HWTEST_F(ListScrollerTestNg, DISABLED_ScrollToItemInGroup003, TestSize.Level1)
     int32_t index = 3;
     int32_t indexInGroup = 2;
     float scrollToStartDistance = groupHeight * index + ITEM_HEIGHT * indexInGroup; // 1400.f
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::START, scrollToStartDistance)); // 1400.f
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER,
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::START, scrollToStartDistance)); // 1400.f
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER,
                                     scrollToStartDistance - (LIST_HEIGHT - ITEM_HEIGHT) / 2)); // 1050.f
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::END,
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::END,
                                     scrollToStartDistance - (LIST_HEIGHT - ITEM_HEIGHT))); // 700.f
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::AUTO,
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::AUTO,
                                     scrollToStartDistance - (LIST_HEIGHT - ITEM_HEIGHT))); // 700.f
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, true, ScrollAlign::START, scrollToStartDistance)); // 1400.f
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, true, ScrollAlign::CENTER,
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::START, scrollToStartDistance)); // 1400.f
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::CENTER,
                                     scrollToStartDistance - (LIST_HEIGHT - ITEM_HEIGHT) / 2)); // 1050.f
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, true, ScrollAlign::END,
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::END,
                                     scrollToStartDistance - (LIST_HEIGHT - ITEM_HEIGHT))); // 700.f
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, true, ScrollAlign::AUTO,
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::AUTO,
                                     scrollToStartDistance - (LIST_HEIGHT - ITEM_HEIGHT))); // 700.f
 }
 
@@ -646,14 +640,14 @@ HWTEST_F(ListScrollerTestNg, DISABLED_ScrollToItemInGroup004, TestSize.Level1)
     int32_t index = ListLayoutAlgorithm::LAST_ITEM;
     int32_t indexInGroup = 3;
     float scrollableDistance = pattern_->GetScrollableDistance(); // 2400.f
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::START, scrollableDistance));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER, scrollableDistance));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::END, scrollableDistance));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::AUTO, scrollableDistance));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, true, ScrollAlign::START, scrollableDistance));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, true, ScrollAlign::CENTER, scrollableDistance));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, true, ScrollAlign::END, scrollableDistance));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, true, ScrollAlign::AUTO, scrollableDistance));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::START, scrollableDistance));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER, scrollableDistance));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::END, scrollableDistance));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::AUTO, scrollableDistance));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::START, scrollableDistance));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::CENTER, scrollableDistance));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::END, scrollableDistance));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::AUTO, scrollableDistance));
 }
 
 /**
@@ -670,21 +664,20 @@ HWTEST_F(ListScrollerTestNg, ScrollToItemInGroup005, TestSize.Level1)
     CreateList();
     CreateListItemGroups(8);
     CreateDone(frameNode_);
-    pattern_->ScrollTo(ITEM_HEIGHT * 4);
-    FlushLayoutTask(frameNode_);
+    ScrollTo(ITEM_HEIGHT * 4);
     EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT * 4);
     EXPECT_FALSE(pattern_->IsAtTop());
     EXPECT_FALSE(pattern_->IsAtBottom());
     int32_t index = 0;
     int32_t indexInGroup = 0;
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::START, 0.f));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER, 0.f));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::END, 0.f));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::AUTO, 0.f));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, true, ScrollAlign::START, 0.f));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, true, ScrollAlign::CENTER, 0.f));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, true, ScrollAlign::END, 0.f));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, true, ScrollAlign::AUTO, 0.f));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::START, 0.f));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER, 0.f));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::END, 0.f));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::AUTO, 0.f));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::START, 0.f));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::CENTER, 0.f));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::END, 0.f));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::AUTO, 0.f));
 }
 
 /**
@@ -709,14 +702,14 @@ HWTEST_F(ListScrollerTestNg, DISABLED_ScrollToItemInGroup006, TestSize.Level1)
     int32_t index = ListLayoutAlgorithm::LAST_ITEM;
     int32_t indexInGroup = 3;
     float scrollableDistance = pattern_->GetScrollableDistance(); // 2400.f
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::START, scrollableDistance));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER, scrollableDistance));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::END, scrollableDistance));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::AUTO, scrollableDistance));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, true, ScrollAlign::START, scrollableDistance));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, true, ScrollAlign::CENTER, scrollableDistance));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, true, ScrollAlign::END, scrollableDistance));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, true, ScrollAlign::AUTO, scrollableDistance));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::START, scrollableDistance));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER, scrollableDistance));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::END, scrollableDistance));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::AUTO, scrollableDistance));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::START, scrollableDistance));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::CENTER, scrollableDistance));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::END, scrollableDistance));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::AUTO, scrollableDistance));
 }
 
 /**
@@ -735,14 +728,14 @@ HWTEST_F(ListScrollerTestNg, ScrollToItemInGroup007, TestSize.Level1)
     CreateDone(frameNode_);
     int32_t index = 4;
     int32_t indexInGroup = -2;
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::START, 0.f));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER, 0.f));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::END, 0.f));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::AUTO, 0.f));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, true, ScrollAlign::START, 0.f));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, true, ScrollAlign::CENTER, 0.f));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, true, ScrollAlign::END, 0.f));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, true, ScrollAlign::AUTO, 0.f));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::START, 0.f));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER, 0.f));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::END, 0.f));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::AUTO, 0.f));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::START, 0.f));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::CENTER, 0.f));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::END, 0.f));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::AUTO, 0.f));
 }
 
 /**
@@ -766,19 +759,19 @@ HWTEST_F(ListScrollerTestNg, DISABLED_ScrollToItemInGroup008, TestSize.Level1)
     int32_t indexInGroup = 2;
     float scrollToStartDistance = groupHeight * index + GROUP_HEADER_LEN
                                   + (ITEM_HEIGHT + SPACE) * indexInGroup - SPACE; // 2380.f
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::START, scrollToStartDistance)); // 2380.f
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER,
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::START, scrollToStartDistance)); // 2380.f
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER,
                                     scrollToStartDistance - (LIST_HEIGHT - ITEM_HEIGHT) / 2)); // 2030.f
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::END,
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::END,
                                     scrollToStartDistance - LIST_HEIGHT + ITEM_HEIGHT)); // 1680.f
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::AUTO,
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::AUTO,
                                     scrollToStartDistance - LIST_HEIGHT + ITEM_HEIGHT)); // 1680.f
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, true, ScrollAlign::START, scrollToStartDistance)); // 2380.f
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, true, ScrollAlign::CENTER,
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::START, scrollToStartDistance)); // 2380.f
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::CENTER,
                                     scrollToStartDistance - (LIST_HEIGHT - ITEM_HEIGHT) / 2)); // 2030.f
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, true, ScrollAlign::END,
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::END,
                                     scrollToStartDistance - LIST_HEIGHT + ITEM_HEIGHT)); // 1680.f
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, true, ScrollAlign::AUTO,
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::AUTO,
                                     scrollToStartDistance - LIST_HEIGHT + ITEM_HEIGHT)); // 1680.f
 }
 
@@ -802,19 +795,19 @@ HWTEST_F(ListScrollerTestNg, DISABLED_ScrollToItemInGroup009, TestSize.Level1)
     int32_t index = 4;
     int32_t indexInGroup = 2;
     float scrollToStartDistance = groupHeight * index + GROUP_HEADER_LEN + ITEM_HEIGHT + SPACE; // 1400.f
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::START, scrollToStartDistance)); // 1400.f
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER,
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::START, scrollToStartDistance)); // 1400.f
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER,
                                     scrollToStartDistance - (LIST_HEIGHT - ITEM_HEIGHT) / 2)); // 1050.f
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::END,
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::END,
                                     scrollToStartDistance - (LIST_HEIGHT - ITEM_HEIGHT))); // 700.f
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::AUTO,
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::AUTO,
                                     scrollToStartDistance - (LIST_HEIGHT - ITEM_HEIGHT))); // 700.f
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, true, ScrollAlign::START, scrollToStartDistance));  // 1400.f
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, true, ScrollAlign::CENTER,
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::START, scrollToStartDistance));  // 1400.f
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::CENTER,
                                     scrollToStartDistance - (LIST_HEIGHT - ITEM_HEIGHT) / 2)); // 1050.f
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, true, ScrollAlign::END,
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::END,
                                     scrollToStartDistance - (LIST_HEIGHT - ITEM_HEIGHT))); // 700.f
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, true, ScrollAlign::AUTO,
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::AUTO,
                                     scrollToStartDistance - (LIST_HEIGHT - ITEM_HEIGHT))); // 700.f
 }
 
@@ -825,9 +818,6 @@ HWTEST_F(ListScrollerTestNg, DISABLED_ScrollToItemInGroup009, TestSize.Level1)
  */
 HWTEST_F(ListScrollerTestNg, ScrollToItemInGroup010, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. create list
-     */
     CreateList();
     CreateListItemGroups(8);
     CreateDone(frameNode_);
@@ -881,9 +871,6 @@ HWTEST_F(ListScrollerTestNg, ScrollToItemInGroup010, TestSize.Level1)
  */
 HWTEST_F(ListScrollerTestNg, ScrollToItemInGroup011, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. create list
-     */
     const int32_t number = 8;
     CreateList();
     CreateGroupWithItem(number);
@@ -936,9 +923,6 @@ HWTEST_F(ListScrollerTestNg, ScrollToItemInGroup011, TestSize.Level1)
  */
 HWTEST_F(ListScrollerTestNg, ScrollToItemInGroup012, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. create list
-     */
     ListModelNG model = CreateList();
     model.SetSticky(V2::StickyStyle::BOTH);
     CreateGroupWithSetting(8, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
@@ -1017,8 +1001,7 @@ HWTEST_F(ListScrollerTestNg, ScrollToItemInGroup013, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[3].startPos, -50);
     EXPECT_EQ(pattern_->itemPosition_[4].endPos, 350);
 
-    pattern_->ScrollTo(0);
-    FlushLayoutTask(frameNode_);
+    ScrollTo(0);
     ScrollToItemInGroup(4, 1, false, ScrollAlign::AUTO);
     EXPECT_EQ(pattern_->startIndex_, 3);
     EXPECT_EQ(pattern_->endIndex_, 4);
@@ -1124,100 +1107,6 @@ HWTEST_F(ListScrollerTestNg, PositionController001, TestSize.Level1)
     curve = Curves::EASE_IN;
     EXPECT_TRUE(controller->AnimateTo(Dimension(1), 1.0, curve, false));
     EXPECT_TRUE(controller->AnimateTo(Dimension(1), 1.0, curve, true));
-}
-
-/**
- * @tc.name: PositionController002
- * @tc.desc: Test PositionController function with Axis::HORIZONTAL
- * @tc.type: FUNC
- */
-HWTEST_F(ListScrollerTestNg, PositionController002, TestSize.Level1)
-{
-    constexpr int32_t itemNumber = 20;
-    ListModelNG model = CreateList();
-    model.SetListDirection(Axis::HORIZONTAL);
-    CreateListItems(itemNumber);
-    CreateDone(frameNode_);
-    auto controller = pattern_->positionController_;
-
-    /**
-     * @tc.steps: step1. Verify initial value
-     */
-    EXPECT_EQ(controller->GetScrollDirection(), Axis::HORIZONTAL);
-    EXPECT_EQ(controller->GetCurrentOffset(), Offset::Zero());
-    EXPECT_EQ(pattern_->GetCurrentOffset(), Offset::Zero());
-
-    /**
-     * @tc.steps: step2. Test ScrollBy
-     */
-    controller->ScrollBy(ITEM_WIDTH, ITEM_HEIGHT, false);
-    EXPECT_TRUE(IsEqualTotalOffset(ITEM_WIDTH));
-    controller->ScrollBy(-ITEM_WIDTH, ITEM_HEIGHT, false);
-    EXPECT_TRUE(IsEqualTotalOffset(0));
-
-    /**
-     * @tc.steps: step3. Test ScrollPage
-     */
-    controller->ScrollPage(false, false);
-    EXPECT_TRUE(IsEqualTotalOffset(ITEM_WIDTH * VIEW_ITEM_NUMBER));
-    controller->ScrollPage(true, false);
-    EXPECT_TRUE(IsEqualTotalOffset(0));
-
-    /**
-     * @tc.steps: step4. Test ScrollToEdge
-     */
-    controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    EXPECT_TRUE(IsEqualTotalOffset((itemNumber - VIEW_ITEM_NUMBER) * ITEM_WIDTH));
-    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
-    EXPECT_TRUE(IsEqualTotalOffset(0));
-    controller->ScrollToEdge(ScrollEdgeType::SCROLL_NONE, false);
-    EXPECT_TRUE(IsEqualTotalOffset(0));
-
-    /**
-     * @tc.steps: step5. Test JumpTo
-     */
-    controller->JumpTo(1, false, ScrollAlign::START, -1);
-    EXPECT_TRUE(IsEqualTotalOffset(ITEM_WIDTH));
-    controller->JumpTo(0, false, ScrollAlign::START, -1);
-    EXPECT_TRUE(IsEqualTotalOffset(0));
-
-    /**
-     * @tc.steps: step6. Test IsAtEnd
-     */
-    EXPECT_FALSE(controller->IsAtEnd());
-    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
-    EXPECT_TRUE(controller->IsAtEnd());
-    ScrollToEdge(ScrollEdgeType::SCROLL_TOP);
-    EXPECT_FALSE(controller->IsAtEnd());
-}
-
-/**
- * @tc.name: PositionController003
- * @tc.desc: Test PositionController function with Axis::NONE
- * @tc.type: FUNC
- */
-HWTEST_F(ListScrollerTestNg, PositionController003, TestSize.Level1)
-{
-    ListModelNG model = CreateList();
-    model.SetListDirection(Axis::NONE);
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    auto controller = pattern_->positionController_;
-
-    /**
-     * @tc.steps: step1. Verify initial value
-     */
-    EXPECT_EQ(controller->GetScrollDirection(), Axis::NONE);
-    EXPECT_EQ(controller->GetCurrentOffset(), Offset::Zero());
-
-    /**
-     * @tc.steps: step2. Test others
-     */
-    controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
-    EXPECT_TRUE(IsEqualTotalOffset(0));
-    controller->ScrollPage(false, false);
-    EXPECT_TRUE(IsEqualTotalOffset(0));
-    EXPECT_FALSE(controller->AnimateTo(Dimension(1), 0, nullptr, false));
 }
 
 /**
@@ -1329,47 +1218,6 @@ HWTEST_F(ListScrollerTestNg, PositionController005, TestSize.Level1)
     }
 }
 
-/**
- * @tc.name: PositionController006
- * @tc.desc: Test GetItemRect function when set ListItemGroup space and set List Space
- * @tc.type: FUNC
- */
-HWTEST_F(ListScrollerTestNg, PositionController006, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create List/ListItemGroup and Set Space
-     */
-    CreateList();
-    CreateListItemGroups(8);
-    CreateDone(frameNode_);
-    auto controller = pattern_->positionController_;
-
-    /**
-     * @tc.steps: step2. Test JumpToItemInGroup
-     */
-    controller->JumpToItemInGroup(2, 1, false, ScrollAlign::NONE);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->startIndex_, 2);
-    EXPECT_EQ(pattern_->endIndex_, 4);
-    controller->JumpToItemInGroup(2, 1, false, ScrollAlign::START);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->startIndex_, 2);
-    EXPECT_EQ(pattern_->endIndex_, 4);
-    controller->JumpToItemInGroup(2, 1, false, ScrollAlign::END);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->startIndex_, 1);
-    EXPECT_EQ(pattern_->endIndex_, 2);
-    controller->JumpToItemInGroup(2, 1, false, ScrollAlign::CENTER);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->startIndex_, 1);
-    EXPECT_EQ(pattern_->endIndex_, 3);
-    controller->JumpToItemInGroup(2, 1, false, ScrollAlign::AUTO);
-    pattern_->DumpAdvanceInfo();
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->startIndex_, 1);
-    EXPECT_EQ(pattern_->endIndex_, 3);
-}
-
 namespace {
 constexpr float SCROLL_FIXED_VELOCITY = 200.f;
 constexpr float OFFSET_TIME = 100.f;
@@ -1419,350 +1267,6 @@ HWTEST_F(ListScrollerTestNg, PositionController007, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateCurrentOffset001
- * @tc.desc: Test UpdateCurrentOffset
- * @tc.type: FUNC
- */
-HWTEST_F(ListScrollerTestNg, UpdateCurrentOffset001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. has no listItem
-     */
-    CreateList();
-    CreateDone(frameNode_);
-    UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualTotalOffset(0));
-
-    /**
-     * @tc.steps: step2. unscrollable List
-     */
-    ClearOldNodes();
-    CreateList();
-    CreateListItems(VIEW_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualTotalOffset(0));
-
-    /**
-     * @tc.steps: step3. UpdateCurrentOffset with SCROLL_FROM_START
-     * @tc.expected: The offset was not effected by friction
-     */
-    ClearOldNodes();
-    CreateList();
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_START);
-    EXPECT_TRUE(IsEqualTotalOffset(ITEM_HEIGHT));
-
-    /**
-     * @tc.steps: step4. UpdateCurrentOffset with SCROLL_FROM_START
-     * @tc.expected: The offset was not effected by friction
-     */
-    ClearOldNodes();
-    ListModelNG model = CreateList();
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_UPDATE);
-    float offset = -pattern_->itemPosition_.begin()->second.startPos;
-    EXPECT_EQ(pattern_->GetTotalOffset(), offset);
-    UpdateCurrentOffset(-ITEM_HEIGHT * 8, SCROLL_FROM_UPDATE);
-    EXPECT_EQ(pattern_->GetTotalOffset(), 350.f);
-}
-
-/**
- * @tc.name: Event001
- * @tc.desc: Test scroll callback
- * @tc.type: FUNC
- */
-HWTEST_F(ListScrollerTestNg, Event001, TestSize.Level1)
-{
-    bool isTrigger = false;
-    auto event = [&isTrigger](Dimension offset, ScrollState state) { isTrigger = true; };
-    ListModelNG model = CreateList();
-    model.SetOnScroll(event);
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-
-    /**
-     * @tc.steps: step1. Cover condition that GetMinPlatformVersion() >= 10  && scrollStop_ && !GetScrollAbort()
-     */
-    isTrigger = false;
-    UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(isTrigger);
-
-    isTrigger = false;
-    UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_AXIS);
-    EXPECT_TRUE(isTrigger);
-
-    isTrigger = false;
-    UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_BAR);
-    EXPECT_TRUE(isTrigger);
-
-    isTrigger = false;
-    UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_ANIMATION);
-    EXPECT_TRUE(isTrigger);
-
-    isTrigger = false;
-    UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_SPRING);
-    EXPECT_TRUE(isTrigger);
-
-    isTrigger = false;
-    UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_NONE);
-    EXPECT_TRUE(isTrigger);
-
-    /**
-     * @tc.steps: step2. Cover condition that onScroll && !NearZero(finalOffset)
-     */
-    isTrigger = false;
-    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_UPDATE);
-    pattern_->OnScrollEndCallback(); // set scrollStop_ to true
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(isTrigger);
-
-    isTrigger = false;
-    pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_ANIMATION);
-    pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(isTrigger);
-
-    isTrigger = false;
-    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_SPRING);
-    pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(isTrigger);
-
-    isTrigger = false;
-    pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_NONE);
-    pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(isTrigger);
-
-    isTrigger = false;
-    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_AXIS);
-    pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(isTrigger);
-
-    isTrigger = false;
-    pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_BAR);
-    pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(isTrigger);
-
-    isTrigger = false;
-    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_CONTROLLER);
-    pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(isTrigger);
-
-    isTrigger = false;
-    pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_BAR_FLING);
-    pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(isTrigger);
-
-    // SetMinPlatformVersion
-    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINE));
-
-    isTrigger = false;
-    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_AXIS);
-    pattern_->OnScrollEndCallback(); // set scrollStop_ to true
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(isTrigger);
-
-    isTrigger = false;
-    pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_BAR);
-    pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(isTrigger);
-
-    isTrigger = false;
-    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_CONTROLLER);
-    pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(isTrigger);
-
-    // set back
-    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
-}
-
-/**
- * @tc.name: Event002
- * @tc.desc: Test scroll callback
- * @tc.type: FUNC
- */
-HWTEST_F(ListScrollerTestNg, Event002, TestSize.Level1)
-{
-    int32_t startIndex;
-    int32_t endIndex;
-    int32_t centerIndex;
-    auto event = [&startIndex, &endIndex, &centerIndex](int32_t start, int32_t end, int32_t center) {
-        startIndex = start;
-        endIndex = end;
-        centerIndex = center;
-    };
-    ListModelNG model = CreateList();
-    model.SetOnScrollIndex(event);
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-
-    ScrollDown();
-    EXPECT_EQ(startIndex, 1);
-    EXPECT_EQ(endIndex, 4);
-    EXPECT_EQ(centerIndex, 2);
-
-    ScrollDown();
-    EXPECT_EQ(startIndex, 2);
-    EXPECT_EQ(endIndex, 5);
-    EXPECT_EQ(centerIndex, 3);
-}
-
-/**
- * @tc.name: Event003
- * @tc.desc: Test scroll callback
- * @tc.type: FUNC
- */
-HWTEST_F(ListScrollerTestNg, Event003, TestSize.Level1)
-{
-    bool isTrigger = false;
-    auto event = [&isTrigger]() { isTrigger = true; };
-    ListModelNG model = CreateList();
-    model.SetOnReachStart(event);
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-
-    /**
-     * @tc.steps: step1. list first init will trigger ReachStart.
-     */
-    EXPECT_TRUE(isTrigger);
-
-    /**
-     * @tc.steps: step2. Scroll to middle.
-     */
-    isTrigger = false;
-    ScrollDown();
-    EXPECT_FALSE(isTrigger);
-
-    /**
-     * @tc.steps: step3. Scroll up half item.
-     */
-    UpdateCurrentOffset(ITEM_HEIGHT / 2.0f);
-
-    /**
-     * @tc.steps: step4. Scroll up to start
-     */
-    isTrigger = false;
-    ScrollUp(2);
-    EXPECT_TRUE(isTrigger);
-}
-
-/**
- * @tc.name: Event004
- * @tc.desc: Test scroll callback
- * @tc.type: FUNC
- */
-HWTEST_F(ListScrollerTestNg, Event004, TestSize.Level1)
-{
-    bool isTrigger = false;
-    auto event = [&isTrigger]() { isTrigger = true; };
-    ListModelNG model = CreateList();
-    model.SetOnReachEnd(event);
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-
-    /**
-     * @tc.steps: step1. Scroll down to end
-     */
-    ScrollDown(3);
-    EXPECT_TRUE(isTrigger);
-}
-
-/**
- * @tc.name: Event005
- * @tc.desc: Verify onScrollStart, onScrollStop callback
- * @tc.type: FUNC
- */
-HWTEST_F(ListScrollerTestNg, Event005, TestSize.Level1)
-{
-    bool isScrollStartCalled = false;
-    bool isScrollStopCalled = false;
-    auto scrollStart = [&isScrollStartCalled]() { isScrollStartCalled = true; };
-    auto scrollStop = [&isScrollStopCalled]() { isScrollStopCalled = true; };
-    ListModelNG model = CreateList();
-    model.SetChainAnimation(true);
-    model.SetChainAnimationOptions({ Dimension(0), Dimension(10), 0, 0, 0, DEFAULT_STIFFNESS, DEFAULT_DAMPING });
-    model.SetOnScrollStart(scrollStart);
-    model.SetOnScrollStop(scrollStop);
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-
-    pattern_->OnScrollCallback(100.f, SCROLL_FROM_START);
-    EXPECT_TRUE(isScrollStartCalled);
-
-    pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(isScrollStopCalled);
-
-    isScrollStopCalled = false;
-    pattern_->OnScrollEndCallback();
-    pattern_->SetScrollAbort(true);
-    FlushLayoutTask(frameNode_);
-    EXPECT_FALSE(isScrollStopCalled);
-}
-
-/**
- * @tc.name: Event006
- * @tc.desc: Test other condition
- * @tc.type: FUNC
- */
-HWTEST_F(ListScrollerTestNg, Event006, TestSize.Level1)
-{
-    auto event = [](Dimension, ScrollState) {
-        ScrollFrameResult result;
-        return result;
-    };
-    ListModelNG model = CreateList();
-    model.SetOnScrollFrameBegin(event);
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-
-    auto scrollableEvent = pattern_->GetScrollableEvent();
-    ASSERT_NE(scrollableEvent, nullptr);
-    auto scrollable = scrollableEvent->GetScrollable();
-    EXPECT_NE(scrollable->callback_, nullptr);
-    FlushLayoutTask(frameNode_);
-}
-
-/**
- * @tc.name: Event007
- * @tc.desc: Test scroll callback
- * @tc.type: FUNC
- */
-HWTEST_F(ListScrollerTestNg, Event007, TestSize.Level1)
-{
-    int32_t startIndex = -1;
-    int32_t endIndex = -1;
-    auto onScrollVisibleContentChange = [&startIndex, &endIndex](
-                                 const ListItemIndex start, const ListItemIndex end) {
-        startIndex = start.index;
-        endIndex = end.index;
-    };
-    ListModelNG model = CreateList();
-    model.SetOnScrollVisibleContentChange(onScrollVisibleContentChange);
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-
-    ScrollDown();
-    EXPECT_EQ(startIndex, 1);
-    EXPECT_EQ(endIndex, 4);
-
-    ScrollDown();
-    EXPECT_EQ(startIndex, 2);
-    EXPECT_EQ(endIndex, 5);
-}
-
-/**
  * @tc.name: Pattern002
  * @tc.desc: Test list_pattern AnimateTo function
  * @tc.type: FUNC
@@ -1783,71 +1287,6 @@ HWTEST_F(ListScrollerTestNg, Pattern002, TestSize.Level1)
     pattern_->StopAnimate();
     pattern_->AnimateTo(3, 0, nullptr, false);
     EXPECT_NE(pattern_->curveAnimation_, nullptr);
-}
-
-/**
- * @tc.name: Pattern005
- * @tc.desc: Test OnScrollCallback
- * @tc.type: FUNC
- */
-HWTEST_F(ListScrollerTestNg, Pattern005, TestSize.Level1)
-{
-    ListModelNG model = CreateList();
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
-    model.SetChainAnimation(true);
-    auto startFunc = GetDefaultSwiperBuilder(START_NODE_LEN);
-    CreateItemWithSwipe(startFunc, nullptr, V2::SwipeEdgeEffect::None);
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-
-    // Set swiperItem_ to list pattern
-    DragSwiperItem(0, 1.f);
-
-    /**
-     * @tc.steps: step1. When has animator_ and not stop, call OnScrollCallback.
-     * @tc.expected: Would stop.
-     */
-    pattern_->AnimateTo(1, 0, nullptr, true);
-    EXPECT_FALSE(pattern_->AnimateStoped());
-    double offset = 100.0;
-    pattern_->OnScrollPosition(offset, SCROLL_FROM_START);
-    EXPECT_TRUE(pattern_->scrollAbort_);
-    pattern_->OnScrollCallback(100.f, SCROLL_FROM_START);
-    EXPECT_TRUE(pattern_->scrollAbort_);
-    EXPECT_TRUE(IsEqualTotalOffset(0));
-    EXPECT_TRUE(pattern_->AnimateStoped());
-
-    /**
-     * @tc.steps: step2. When has animator_ and stop, call OnScrollCallback.
-     * @tc.expected:
-     */
-    ASSERT_NE(pattern_->GetScrollBar(), nullptr);
-    pattern_->OnScrollCallback(100.f, SCROLL_FROM_UPDATE);
-    FlushLayoutTask(frameNode_);
-    EXPECT_GT(pattern_->GetTotalOffset(), -ITEM_HEIGHT);
-
-    /**
-     * @tc.steps: step3. Offset is 0, ProcessDragUpdate do nothing.
-     * @tc.expected: CurrentOffset unchange.
-     */
-    pattern_->OnScrollCallback(0, SCROLL_FROM_UPDATE);
-    FlushLayoutTask(frameNode_);
-    EXPECT_GT(pattern_->GetTotalOffset(), -ITEM_HEIGHT);
-
-    /**
-     * @tc.steps: step4. When has animator_ and stop, call StopAnimate.
-     * @tc.expected: Nothing.
-     */
-    pattern_->StopAnimate();
-
-    pattern_->OnScrollCallback(850.f, SCROLL_FROM_START);
-    EXPECT_EQ(pattern_->chainAnimation_->GetControlIndex(), 4);
-    pattern_->OnScrollCallback(0.f, SCROLL_FROM_UPDATE);
-    FlushLayoutTask(frameNode_);
-    pattern_->OnScrollCallback(-100.f, SCROLL_FROM_UPDATE);
-    FlushLayoutTask(frameNode_);
-    pattern_->OnScrollCallback(100.f, SCROLL_FROM_UPDATE);
-    FlushLayoutTask(frameNode_);
 }
 
 /**
@@ -1912,8 +1351,7 @@ HWTEST_F(ListScrollerTestNg, Pattern013, TestSize.Level1)
     /**
      * @tc.steps: step2. swipe forward 3 listItem
      */
-    pattern_->ScrollTo(3 * LIST_HEIGHT);
-    FlushLayoutTask(frameNode_);
+    ScrollTo(3 * LIST_HEIGHT);
     EXPECT_TRUE(IsEqual(pattern_->GetItemRect(3), Rect(0, 0, LIST_WIDTH, LIST_HEIGHT)));
 
     /**
@@ -1933,16 +1371,14 @@ HWTEST_F(ListScrollerTestNg, Pattern013, TestSize.Level1)
     /**
      * @tc.steps: step5. swipe backward 2.5 listItem
      */
-    pattern_->ScrollTo(LIST_HEIGHT);
-    FlushLayoutTask(frameNode_);
+    ScrollTo(LIST_HEIGHT);
     EXPECT_TRUE(IsEqual(pattern_->GetItemRect(1), Rect(0, 0, LIST_WIDTH, LIST_HEIGHT)));
 
     /**
      * @tc.cases: bottomOffset == topOffset > 0
      * @tc.expected: top Align
      */
-    pattern_->ScrollTo(400);
-    FlushLayoutTask(frameNode_);
+    ScrollTo(400);
     EXPECT_EQ(pattern_->GetTotalOffset(), 400);
     EXPECT_TRUE(ScrollToIndex(1, true, ScrollAlign::AUTO, 400));
 
@@ -1950,8 +1386,7 @@ HWTEST_F(ListScrollerTestNg, Pattern013, TestSize.Level1)
      * @tc.cases: 0 > bottomOffset == topOffset
      * @tc.expected: top Align
      */
-    pattern_->ScrollTo(1200);
-    FlushLayoutTask(frameNode_);
+    ScrollTo(1200);
     EXPECT_EQ(pattern_->GetTotalOffset(), 1200);
     EXPECT_TRUE(ScrollToIndex(1, true, ScrollAlign::AUTO, 400));
 
@@ -1959,8 +1394,7 @@ HWTEST_F(ListScrollerTestNg, Pattern013, TestSize.Level1)
      * @tc.cases: JumpIndex == StartIndex == EndIndex
      * @tc.expected: top Align
      */
-    pattern_->ScrollTo(800);
-    FlushLayoutTask(frameNode_);
+    ScrollTo(800);
     ScrollToIndex(1, false, ScrollAlign::AUTO);
     EXPECT_EQ(pattern_->GetTotalOffset(), 400);
 }
@@ -1972,9 +1406,6 @@ HWTEST_F(ListScrollerTestNg, Pattern013, TestSize.Level1)
  */
 HWTEST_F(ListScrollerTestNg, Pattern014, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. create List
-     */
     int32_t itemNumber = 16;
     ListModelNG model = CreateList();
     model.SetScrollBar(DisplayMode::ON);
@@ -2014,9 +1445,6 @@ HWTEST_F(ListScrollerTestNg, Pattern014, TestSize.Level1)
  */
 HWTEST_F(ListScrollerTestNg, Pattern015, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. create List
-     */
     int32_t itemNumber = 16;
     ListModelNG model = CreateList();
     model.SetScrollBar(DisplayMode::ON);
@@ -2056,9 +1484,6 @@ HWTEST_F(ListScrollerTestNg, Pattern015, TestSize.Level1)
  */
 HWTEST_F(ListScrollerTestNg, Pattern016, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. create List
-     */
     int32_t itemNumber = 16;
     ListModelNG model = CreateList();
     model.SetScrollBar(DisplayMode::ON);
@@ -2097,9 +1522,6 @@ HWTEST_F(ListScrollerTestNg, Pattern016, TestSize.Level1)
  */
 HWTEST_F(ListScrollerTestNg, Pattern017, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. create List
-     */
     CreateList();
     CreateListItems(16);
     CreateDone(frameNode_);
@@ -2145,261 +1567,6 @@ HWTEST_F(ListScrollerTestNg, ListPattern_UpdateScrollSnap001, TestSize.Level1)
     pattern_->StopAnimate();
     pattern_->UpdateScrollSnap();
     EXPECT_EQ(pattern_->predictSnapOffset_.value(), 0.0);
-}
-
-/**
- * @tc.name: onWillScrollAndOnDidScroll001
- * @tc.desc: Test scroll callback
- * @tc.type: FUNC
- */
-HWTEST_F(ListScrollerTestNg, onWillScrollAndOnDidScroll001, TestSize.Level1)
-{
-    bool isWillTrigger = false;
-    bool isDidTrigger = false;
-    Dimension willOffset;
-    Dimension didOffset;
-    auto willTriggerEvent = [&isWillTrigger, &willOffset](Dimension offset, ScrollState state, ScrollSource source) {
-        isWillTrigger = true;
-        willOffset = offset;
-        ScrollFrameResult result;
-        result.offset = offset;
-        return result;
-    };
-    auto didTriggerEvent = [&isDidTrigger, &didOffset](Dimension offset, ScrollState state) {
-        isDidTrigger = true;
-        didOffset = offset;
-    };
-    CreateList();
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    eventHub_->SetOnWillScroll(willTriggerEvent);
-    eventHub_->SetOnDidScroll(didTriggerEvent);
-
-    /**
-     * @tc.steps: Cover condition that  scrollStop_ && !GetScrollAbort()
-     */
-    isWillTrigger = false;
-    isDidTrigger = false;
-    willOffset.Reset();
-    didOffset.Reset();
-    UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(isWillTrigger);
-    EXPECT_TRUE(isDidTrigger);
-    EXPECT_EQ(willOffset.Value(), ITEM_HEIGHT);
-    EXPECT_EQ(didOffset.Value(), ITEM_HEIGHT);
-
-    isWillTrigger = false;
-    isDidTrigger = false;
-    willOffset.Reset();
-    didOffset.Reset();
-    UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_AXIS);
-    EXPECT_TRUE(isWillTrigger);
-    EXPECT_TRUE(isDidTrigger);
-    EXPECT_EQ(willOffset.Value(), -ITEM_HEIGHT);
-    EXPECT_EQ(didOffset.Value(), -ITEM_HEIGHT);
-
-    isWillTrigger = false;
-    isDidTrigger = false;
-    willOffset.Reset();
-    didOffset.Reset();
-    UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_BAR);
-    EXPECT_TRUE(isWillTrigger);
-    EXPECT_TRUE(isDidTrigger);
-    EXPECT_EQ(willOffset.Value(), ITEM_HEIGHT);
-    EXPECT_EQ(didOffset.Value(), ITEM_HEIGHT);
-
-    isWillTrigger = false;
-    isDidTrigger = false;
-    willOffset.Reset();
-    didOffset.Reset();
-    UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_ANIMATION);
-    EXPECT_TRUE(isWillTrigger);
-    EXPECT_TRUE(isDidTrigger);
-    EXPECT_EQ(willOffset.Value(), -ITEM_HEIGHT);
-    EXPECT_EQ(didOffset.Value(), -ITEM_HEIGHT);
-
-    isWillTrigger = false;
-    isDidTrigger = false;
-    willOffset.Reset();
-    didOffset.Reset();
-    UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_SPRING);
-    EXPECT_TRUE(isWillTrigger);
-    EXPECT_TRUE(isDidTrigger);
-    EXPECT_EQ(willOffset.Value(), ITEM_HEIGHT);
-    EXPECT_EQ(didOffset.Value(), ITEM_HEIGHT);
-
-    isWillTrigger = false;
-    isDidTrigger = false;
-    willOffset.Reset();
-    didOffset.Reset();
-    UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_NONE);
-    EXPECT_TRUE(isWillTrigger);
-    EXPECT_TRUE(isDidTrigger);
-    EXPECT_EQ(willOffset.Value(), -ITEM_HEIGHT);
-    EXPECT_EQ(didOffset.Value(), -ITEM_HEIGHT);
-}
-
-/**
- * @tc.name: onWillScrollAndOnDidScroll002
- * @tc.desc: Test scroll callback
- * @tc.type: FUNC
- */
-HWTEST_F(ListScrollerTestNg, onWillScrollAndOnDidScroll002, TestSize.Level1)
-{
-    bool isWillTrigger = false;
-    bool isDidTrigger = false;
-    Dimension willOffset;
-    Dimension didOffset;
-    auto willTriggerEvent = [&isWillTrigger, &willOffset](Dimension offset, ScrollState state, ScrollSource source) {
-        isWillTrigger = true;
-        willOffset = offset;
-        ScrollFrameResult result;
-        result.offset = offset;
-        return result;
-    };
-    auto didTriggerEvent = [&isDidTrigger, &didOffset](Dimension offset, ScrollState state) {
-        isDidTrigger = true;
-        didOffset = offset;
-    };
-    CreateList();
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    eventHub_->SetOnWillScroll(willTriggerEvent);
-    eventHub_->SetOnDidScroll(didTriggerEvent);
-    /**
-     * @tc.steps: Cover condition that onScroll && !NearZero(finalOffset)
-     */
-    isWillTrigger = false;
-    isDidTrigger = false;
-    willOffset.Reset();
-    didOffset.Reset();
-    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_UPDATE);
-    pattern_->OnScrollEndCallback(); // set scrollStop_ to true
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(isWillTrigger);
-    EXPECT_TRUE(isDidTrigger);
-    EXPECT_EQ(willOffset.Value(), ITEM_HEIGHT);
-    EXPECT_EQ(didOffset.Value(), 0);
-
-    isWillTrigger = false;
-    isDidTrigger = false;
-    willOffset.Reset();
-    didOffset.Reset();
-    pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_ANIMATION);
-    pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(isWillTrigger);
-    EXPECT_TRUE(isDidTrigger);
-    EXPECT_EQ(willOffset.Value(), -ITEM_HEIGHT);
-    EXPECT_EQ(didOffset.Value(), 0);
-
-    isWillTrigger = false;
-    isDidTrigger = false;
-    willOffset.Reset();
-    didOffset.Reset();
-    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_SPRING);
-    pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(isWillTrigger);
-    EXPECT_TRUE(isDidTrigger);
-    EXPECT_EQ(willOffset.Value(), ITEM_HEIGHT);
-    EXPECT_EQ(didOffset.Value(), 0);
-
-    isWillTrigger = false;
-    isDidTrigger = false;
-    willOffset.Reset();
-    didOffset.Reset();
-    pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_NONE);
-    pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(isWillTrigger);
-    EXPECT_TRUE(isDidTrigger);
-    EXPECT_EQ(willOffset.Value(), -ITEM_HEIGHT);
-    EXPECT_EQ(didOffset.Value(), -ITEM_HEIGHT);
-
-    isWillTrigger = false;
-    isDidTrigger = false;
-    willOffset.Reset();
-    didOffset.Reset();
-    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_AXIS);
-    pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(isWillTrigger);
-    EXPECT_TRUE(isDidTrigger);
-    EXPECT_EQ(willOffset.Value(), ITEM_HEIGHT);
-    EXPECT_EQ(didOffset.Value(), 0);
-
-    isWillTrigger = false;
-    isDidTrigger = false;
-    willOffset.Reset();
-    didOffset.Reset();
-    pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_BAR);
-    pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(isWillTrigger);
-    EXPECT_TRUE(isDidTrigger);
-    EXPECT_EQ(willOffset.Value(), -ITEM_HEIGHT);
-    EXPECT_EQ(didOffset.Value(), 0);
-
-    isWillTrigger = false;
-    isDidTrigger = false;
-    willOffset.Reset();
-    didOffset.Reset();
-    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_CONTROLLER);
-    pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(isWillTrigger);
-    EXPECT_TRUE(isDidTrigger);
-    EXPECT_EQ(willOffset.Value(), ITEM_HEIGHT);
-    EXPECT_EQ(didOffset.Value(), 0);
-
-    isWillTrigger = false;
-    isDidTrigger = false;
-    willOffset.Reset();
-    didOffset.Reset();
-    pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_BAR_FLING);
-    pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(isWillTrigger);
-    EXPECT_TRUE(isDidTrigger);
-    EXPECT_EQ(willOffset.Value(), -ITEM_HEIGHT);
-    EXPECT_EQ(didOffset.Value(), 0);
-
-    isWillTrigger = false;
-    isDidTrigger = false;
-    willOffset.Reset();
-    didOffset.Reset();
-    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_AXIS);
-    pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(isWillTrigger);
-    EXPECT_TRUE(isDidTrigger);
-    EXPECT_EQ(willOffset.Value(), ITEM_HEIGHT);
-    EXPECT_EQ(didOffset.Value(), 0);
-
-    isWillTrigger = false;
-    isDidTrigger = false;
-    willOffset.Reset();
-    didOffset.Reset();
-    pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_BAR);
-    pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(isWillTrigger);
-    EXPECT_TRUE(isDidTrigger);
-    EXPECT_EQ(willOffset.Value(), -ITEM_HEIGHT);
-    EXPECT_EQ(didOffset.Value(), 0);
-
-    isWillTrigger = false;
-    isDidTrigger = false;
-    willOffset.Reset();
-    didOffset.Reset();
-    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_CONTROLLER);
-    pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(isWillTrigger);
-    EXPECT_TRUE(isDidTrigger);
-    EXPECT_EQ(willOffset.Value(), ITEM_HEIGHT);
-    EXPECT_EQ(didOffset.Value(), 0);
 }
 
 /**
@@ -2489,159 +1656,6 @@ HWTEST_F(ListScrollerTestNg, PostListItemPressStyleTask_scroll002, TestSize.Leve
 }
 
 /**
- * @tc.name: OnScrollVisibleContentChange001
- * @tc.desc: Test OnScrollVisibleContentChange
- * @tc.type: FUNC
- */
-HWTEST_F(ListScrollerTestNg, OnScrollVisibleContentChange001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create List
-     * @tc.expected: Init callback OnScrollVisibleContentChange
-     */
-    ListItemIndex startInfo, endInfo;
-    auto onVisibleChange = [&startInfo, &endInfo](ListItemIndex start, ListItemIndex end) {
-        startInfo = start;
-        endInfo = end;
-    };
-    ListModelNG model = CreateList();
-    model.SetOnScrollVisibleContentChange(onVisibleChange);
-    CreateListItems(20);
-    CreateDone(frameNode_);
-
-    EXPECT_TRUE(IsEqual(startInfo, { 0 }));
-    EXPECT_TRUE(IsEqual(endInfo, { 3 }));
-
-    /**
-     * @tc.steps: step2. scroll to the end
-     * @tc.expected: Init callback OnScrollVisibleContentChange
-     */
-    pattern_->ScrollTo(1200);
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(IsEqual(startInfo, { 12 }));
-    EXPECT_TRUE(IsEqual(endInfo, { 15 }));
-
-    /**
-     * @tc.steps: step3. create List with ContentStartOffset, ContentEndOffset and Space
-     * @tc.expected: endTop.index = 6
-     */
-    ClearOldNodes();
-    model = CreateList();
-    model.SetContentStartOffset(50.f);
-    model.SetContentEndOffset(50.f);
-    model.SetSpace(Dimension(10.f));
-    model.SetOnScrollVisibleContentChange(onVisibleChange);
-    CreateListItems(20);
-    CreateDone(frameNode_);
-    EXPECT_TRUE(IsEqual(startInfo, { 0 }));
-    EXPECT_TRUE(IsEqual(endInfo, { 3 }));
-
-    /**
-     * @tc.steps: step4. scroll to the end
-     * @tc.expected: startBottom.index = 13
-     */
-    pattern_->ScrollTo(1500);
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(IsEqual(startInfo, { 13 }));
-    EXPECT_TRUE(IsEqual(endInfo, { 17 }));
-
-    /**
-     * @tc.steps: step5. create List with multiple Lanes
-     * @tc.expected: endTop.index = 15
-     */
-    ClearOldNodes();
-    model = CreateList();
-    model.SetLanes(2);
-    model.SetOnScrollVisibleContentChange(onVisibleChange);
-    CreateListItems(20);
-    CreateDone(frameNode_);
-    EXPECT_TRUE(IsEqual(startInfo, { 0 }));
-    EXPECT_TRUE(IsEqual(endInfo, { 7 }));
-
-     /**
-     * @tc.steps: step6. scroll to the end
-     * @tc.expected: startBottom.index = 4
-     */
-    pattern_->ScrollTo(200);
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(IsEqual(startInfo, { 4 }));
-    EXPECT_TRUE(IsEqual(endInfo, { 11 }));
-}
-
-/**
- * @tc.name: OnScrollVisibleContentChange002
- * @tc.desc: Test OnScrollVisibleContentChange
- * @tc.type: FUNC
- */
-HWTEST_F(ListScrollerTestNg, OnScrollVisibleContentChange002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create List
-     * @tc.expected: Init callback OnScrollVisibleContentChange
-     */
-    ListItemIndex startInfo, endInfo;
-    auto onVisibleChange = [&startInfo, &endInfo](ListItemIndex start, ListItemIndex end) {
-        startInfo = start;
-        endInfo = end;
-    };
-    ListModelNG model = CreateList();
-    model.SetOnScrollVisibleContentChange(onVisibleChange);
-    CreateGroupWithSetting(5, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
-    CreateDone(frameNode_);
-    ListItemIndex startExpect = { 0, 2 };
-    ListItemIndex endExpect = { 1, 1, 0 };
-    EXPECT_TRUE(IsEqual(startInfo, startExpect));
-    EXPECT_TRUE(IsEqual(endInfo, endExpect));
-
-    /**
-     * @tc.steps: step2. scroll to 30
-     * @tc.cases: indexChanged == startChanged == endChanged == false
-     * @tc.expected: startExpect.index = 0
-     */
-    pattern_->ScrollTo(30);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetTotalOffset(), 30);
-    EXPECT_TRUE(IsEqual(startInfo, startExpect));
-    EXPECT_TRUE(IsEqual(endInfo, endExpect));
-
-    /**
-     * @tc.steps: step3. scroll to 60
-     * @tc.cases: startChanged == true and indexChanged == endChanged == false
-     * @tc.expected: startExpect.indexInGroup = 0
-     */
-    startExpect = { 0, 1, 0 };
-    pattern_->ScrollTo(60);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetTotalOffset(), 60);
-    EXPECT_TRUE(IsEqual(startInfo, startExpect));
-    EXPECT_TRUE(IsEqual(endInfo, endExpect));
-
-    /**
-     * @tc.steps: step4. scroll to 120
-     * @tc.cases: endChanged == true and indexChanged == startChanged == false
-     * @tc.expected: endExpect.indexInGroup = 3
-     */
-    endExpect = { 1, 1, 1 };
-    pattern_->ScrollTo(120);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetTotalOffset(), 120);
-    EXPECT_TRUE(IsEqual(startInfo, startExpect));
-    EXPECT_TRUE(IsEqual(endInfo, endExpect));
-
-    /**
-     * @tc.steps: step4. scroll to 240
-     * @tc.expected: endExpect.index = 1
-     */
-    startExpect = { 0, 1, 1 };
-    endExpect = { 2, 2, -1 };
-    pattern_->ScrollTo(240);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetTotalOffset(), 240);
-    EXPECT_TRUE(IsEqual(startInfo, startExpect));
-    EXPECT_TRUE(IsEqual(endInfo, endExpect));
-}
-
-/**
  * @tc.name: ChildrenMainSize001
  * @tc.desc: Test childrenMainSize layout
  * @tc.type: FUNC
@@ -2691,15 +1705,13 @@ HWTEST_F(ListScrollerTestNg, ChildrenMainSize001, TestSize.Level1)
     /**
      * @tc.steps: step4. ScrollTo, 400.f is in the view
      */
-    pattern_->ScrollTo(400.f);
-    FlushLayoutTask(frameNode_);
+    ScrollTo(400.f);
     EXPECT_EQ(pattern_->GetTotalOffset(), 400.f);
 
     /**
      * @tc.steps: step5. ScrollTo, 1400.f is out of the view
      */
-    pattern_->ScrollTo(1400.f);
-    FlushLayoutTask(frameNode_);
+    ScrollTo(1400.f);
     EXPECT_EQ(pattern_->GetTotalOffset(), 1400.f);
 }
 
@@ -2744,33 +1756,31 @@ HWTEST_F(ListScrollerTestNg, ChildrenMainSize002, TestSize.Level1)
      */
     index = 1;
     int32_t indexInGroup = 2;
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::START, 350.f));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER, 250.f));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::END, 150.f));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::AUTO, 150.f));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::START, 350.f));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER, 250.f));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::END, 150.f));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::AUTO, 150.f));
 
     /**
      * @tc.steps: step5. ScrollToItemInGroup, index:4 is out of the view
      */
     index = 4;
     indexInGroup = 3;
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::START, 1350.f));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER, 1350.f));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::END, 1350.f));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::AUTO, 1350.f));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::START, 1350.f));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER, 1350.f));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::END, 1350.f));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::AUTO, 1350.f));
 
     /**
      * @tc.steps: step4. ScrollTo, 400.f is in the view
      */
-    pattern_->ScrollTo(400.f);
-    FlushLayoutTask(frameNode_);
+    ScrollTo(400.f);
     EXPECT_EQ(pattern_->GetTotalOffset(), 400.f);
 
     /**
      * @tc.steps: step5. ScrollTo, 1400.f is out of the view
      */
-    pattern_->ScrollTo(1400.f);
-    FlushLayoutTask(frameNode_);
+    ScrollTo(1400.f);
     EXPECT_EQ(pattern_->GetTotalOffset(), 1350.f);
 }
 
@@ -2807,8 +1817,7 @@ HWTEST_F(ListScrollerTestNg, ChildrenMainSize003, TestSize.Level1)
      * @tc.steps: step2. ScrollTo 120
      * @tc.expected: endExpect.area == footer
      */
-    pattern_->ScrollTo(120);
-    FlushLayoutTask(frameNode_);
+    ScrollTo(120);
     endExpect = { 4, 1, 0 };
     EXPECT_TRUE(IsEqual(endInfo, endExpect));
 
@@ -2816,8 +1825,7 @@ HWTEST_F(ListScrollerTestNg, ChildrenMainSize003, TestSize.Level1)
      * @tc.steps: step3. ScrollTo 300
      * @tc.expected: index:5 indexInGroup:1 height == 50
      */
-    pattern_->ScrollTo(300);
-    FlushLayoutTask(frameNode_);
+    ScrollTo(300);
     auto groupPattern = frameNode_->GetChildByIndex(5)->GetHostNode()->GetPattern<ListItemGroupPattern>();
     EXPECT_EQ(groupPattern->childrenSize_->GetChildSize(1), 50.f);
     endExpect = { 4, 3, -1 };
@@ -2827,8 +1835,7 @@ HWTEST_F(ListScrollerTestNg, ChildrenMainSize003, TestSize.Level1)
      * @tc.steps: step4. ScrollTo 540
      * @tc.expected: index:5 indexInGroup:2 height == 200
      */
-    pattern_->ScrollTo(540);
-    FlushLayoutTask(frameNode_);
+    ScrollTo(540);
     EXPECT_EQ(groupPattern->childrenSize_->GetChildSize(2), 200.f);
     endExpect = { 5, 2, -1 };
     EXPECT_TRUE(IsEqual(endInfo, endExpect));
@@ -2867,12 +1874,12 @@ HWTEST_F(ListScrollerTestNg, ChildrenMainSize004, TestSize.Level1)
     CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(200.f)));
     CreateListItems(8);
     CreateDone(frameNode_);
-    EXPECT_TRUE(ScrollToItemInGroup(4, 1, false, ScrollAlign::START, 220));
-    EXPECT_TRUE(ScrollToItemInGroup(4, 1, false, ScrollAlign::CENTER, 70));
-    EXPECT_TRUE(ScrollToItemInGroup(4, 1, false, ScrollAlign::END, 0));
-    EXPECT_TRUE(ScrollToItemInGroup(9, 1, false, ScrollAlign::START, 650));
-    EXPECT_TRUE(ScrollToItemInGroup(9, 1, false, ScrollAlign::CENTER, 500));
-    EXPECT_TRUE(ScrollToItemInGroup(9, 1, false, ScrollAlign::END, 350));
+    EXPECT_TRUE(JumpToItemInGroup(4, 1, false, ScrollAlign::START, 220));
+    EXPECT_TRUE(JumpToItemInGroup(4, 1, false, ScrollAlign::CENTER, 70));
+    EXPECT_TRUE(JumpToItemInGroup(4, 1, false, ScrollAlign::END, 0));
+    EXPECT_TRUE(JumpToItemInGroup(9, 1, false, ScrollAlign::START, 650));
+    EXPECT_TRUE(JumpToItemInGroup(9, 1, false, ScrollAlign::CENTER, 500));
+    EXPECT_TRUE(JumpToItemInGroup(9, 1, false, ScrollAlign::END, 350));
 
     /**
      * @tc.steps: step2. ScrollToIndex 12 / ScrollToIndex 13
