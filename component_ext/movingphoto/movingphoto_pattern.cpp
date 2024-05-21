@@ -514,7 +514,7 @@ SizeF MovingPhotoPattern::CalculateFitCover(const SizeF& rawSize, const SizeF& l
 
 SizeF MovingPhotoPattern::CalculateFitNone(const SizeF& rawSize)
 {
-    return rawSize; 
+    return rawSize;
 }
 
 SizeF MovingPhotoPattern::CalculateFitScaleDown(const SizeF& rawSize, const SizeF& layoutSize)
