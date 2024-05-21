@@ -17,6 +17,7 @@
 #include "bridge/common/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
@@ -138,6 +139,36 @@ void ResetFormat(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextTimerModelNG::SetFormat(frameNode, DEFAULT_FORMAT);
+}
+
+void SetTextShadow(ArkUINodeHandle node, struct ArkUITextShadowStruct* shadows, ArkUI_Uint32 length)
+{
+    CHECK_NULL_VOID(shadows);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<Shadow> shadowList(length);
+    for (uint32_t i = 0; i < length; i++) {
+        Shadow shadow;
+        ArkUITextShadowStruct* shadowStruct = shadows + i;
+        shadow.SetBlurRadius(shadowStruct->radius);
+        shadow.SetShadowType(static_cast<ShadowType>(shadowStruct->type));
+        shadow.SetColor(Color(shadowStruct->color));
+        shadow.SetOffsetX(shadowStruct->offsetX);
+        shadow.SetOffsetY(shadowStruct->offsetY);
+        shadow.SetIsFilled(static_cast<bool>(shadowStruct->fill));
+        shadowList.at(i) = shadow;
+    }
+    TextTimerModelNG::SetTextShadow(frameNode, shadowList);
+}
+
+void ResetTextShadow(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Shadow shadow;
+    shadow.SetOffsetX(0.0);
+    shadow.SetOffsetY(0.0);
+    TextTimerModelNG::SetTextShadow(frameNode, std::vector<Shadow> { shadow });
 }
 } // namespace TextTimerModifier
 

@@ -20144,6 +20144,10 @@ class ArkTextTimerComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextTimerFormatModifier.identity, TextTimerFormatModifier, value);
     return this;
   }
+  textShadow(value) {
+    modifierWithKey(this._modifiersWithKeys, TextTimerTextShadowModifier.identity, TextTimerTextShadowModifier, value);
+    return this;
+  }
   contentModifier(value) {
     this.setContentModifier(value);
     return this;
@@ -20250,6 +20254,50 @@ class TextTimerFormatModifier extends ModifierWithKey {
   }
 }
 TextTimerFormatModifier.identity = Symbol('textTimerFormat');
+class TextTimerTextShadowModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textTimer.resetTextShadow(node);
+    }
+    else {
+      let shadow = new ArkShadowInfoToArray();
+      if (!shadow.convertShadowOptions(this.value)) {
+        getUINativeModule().textTimer.resetTextShadow(node);
+      }
+      else {
+        getUINativeModule().textTimer.setTextShadow(node, shadow.radius, shadow.type, shadow.color,
+          shadow.offsetX, shadow.offsetY, shadow.fill, shadow.radius.length);
+      }
+    }
+  }
+  checkObjectDiff() {
+    let checkDiff = true;
+    let arkShadow = new ArkShadowInfoToArray();
+    if (Object.getPrototypeOf(this.stageValue).constructor === Object &&
+      Object.getPrototypeOf(this.value).constructor === Object) {
+      checkDiff = arkShadow.checkDiff(this.stageValue, this.value);
+    }
+    else if (Object.getPrototypeOf(this.stageValue).constructor === Array &&
+      Object.getPrototypeOf(this.value).constructor === Array &&
+      this.stageValue.length === this.value.length) {
+      let isDiffItem = false;
+      for (let i = 0; i < this.value.length; i++) {
+        if (arkShadow.checkDiff(this.stageValue[i], this.value[1])) {
+          isDiffItem = true;
+          break;
+        }
+      }
+      if (!isDiffItem) {
+        checkDiff = false;
+      }
+    }
+    return checkDiff;
+  }
+}
+TextTimerTextShadowModifier.identity = Symbol('textTimerTextShadow');
 // @ts-ignore
 if (globalThis.TextTimer !== undefined) {
   globalThis.TextTimer.attributeModifier = function (modifier) {

@@ -56,6 +56,7 @@ public:
     static void SetFontWeight(FrameNode* frameNode, FontWeight value);
     static void SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value);
     static void SetFormat(FrameNode* frameNode, const std::string& format);
+    static void SetTextShadow(FrameNode* frameNode, const std::vector<Shadow>& value);
     static void SetBuilderFunc(FrameNode* frameNode, TextTimerMakeCallback&& jsMake);
 };
 } // namespace OHOS::Ace::NG
