@@ -515,6 +515,7 @@ public:
     void Backward();
     void OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMenuOption);
     void CloseKeyboard();
+    void RequestFocus();
 
 private:
     friend class WebContextSelectOverlay;
@@ -833,7 +834,6 @@ private:
     RefPtr<PinchGesture> pinchGesture_ = nullptr;
     std::queue<TouchEventInfo> touchEventQueue_;
     std::vector<NG::MenuOptionsParam> menuOptionParam_ {};
-    bool embedNeedKeyboard_ = false;
     double startPinchScale_ = -1.0;
     double preScale_ = -1.0;
     double pageScale_ = 1.0;

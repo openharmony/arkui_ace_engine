@@ -6171,11 +6171,9 @@ void WebDelegate::OnNativeEmbedLifecycleChange(std::shared_ptr<OHOS::NWeb::NWebN
 void WebDelegate::OnNativeEmbedGestureEvent(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedTouchEvent> event)
 {
     if (event->GetId() == NO_NATIVE_FINGER_TYPE) {
-        if (!NeedSoftKeyboard() && event->GetType() == OHOS::NWeb::TouchType::DOWN) {
-            auto webPattern = webPattern_.Upgrade();
-            CHECK_NULL_VOID(webPattern);
-            webPattern->CloseKeyboard();
-        }
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->RequestFocus();
         return;
     }
     auto context = context_.Upgrade();
@@ -6200,7 +6198,7 @@ void WebDelegate::OnNativeEmbedGestureEvent(std::shared_ptr<OHOS::NWeb::NWebNati
                 if (!param->GetEventResult() && type == OHOS::NWeb::TouchType::DOWN) {
                     auto webPattern = delegate->webPattern_.Upgrade();
                     CHECK_NULL_VOID(webPattern);
-                    webPattern->CloseKeyboard();
+                    webPattern->RequestFocus();
                 }
             }
         },
