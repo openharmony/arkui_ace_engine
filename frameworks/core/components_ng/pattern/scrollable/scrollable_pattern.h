@@ -148,6 +148,9 @@ public:
         } else {
             scrollableEvent_->SetAxis(axis_);
         }
+        if (scrollBarProxy_) {
+            scrollBarProxy_->SetScrollEnabled(enabled, AceType::WeakClaim(this));
+        }
     }
 
     bool GetScrollEnabled() const
