@@ -818,6 +818,10 @@ void TabBarPattern::RemoveTabBarEventCallback()
             gestureHub->RemoveScrollableEvent(tabBarPattern->scrollableEvent_);
         }
         gestureHub->RemoveTouchEvent(tabBarPattern->touchEvent_);
+        gestureHub->RemoveDragEvent();
+        gestureHub->SetLongPressEvent(nullptr);
+        tabBarPattern->longPressEvent_ = nullptr;
+        tabBarPattern->dragEvent_ = nullptr;
         tabBarPattern->isTouchingSwiper_ = true;
         for (const auto& childNode : host->GetChildren()) {
             CHECK_NULL_VOID(childNode);
@@ -867,6 +871,7 @@ void TabBarPattern::AddTabBarEventCallback()
                 childGestureHub->AddClickEvent(iter->second);
             }
         }
+        tabBarPattern->InitLongPressAndDragEvent();
     };
     swiperController_->SetAddTabBarEventCallback(std::move(addEventCallback));
 }
