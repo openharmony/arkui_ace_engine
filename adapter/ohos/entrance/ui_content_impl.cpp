@@ -2045,8 +2045,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
         taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::PLATFORM)) {
         task();
     } else {
-        AceViewportConfig aceViewportConfig(modifyConfig, reason, rsTransaction);
-        viewportConfigMgr_->UpdateConfig(aceViewportConfig, container, std::move(task), "ArkUIUpdateViewportConfig");
+        taskExecutor->PostTask(task, TaskExecutor::TaskType::PLATFORM, "ArkUIUpdateViewportConfig");
     }
 }
 
