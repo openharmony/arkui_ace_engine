@@ -215,6 +215,9 @@ class TextClockFontFeatureModifier extends ModifierWithKey<FontFeature> {
       getUINativeModule().textClock.setFontFeature(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
 
 class TextClockFontFamilyModifier extends ModifierWithKey<ResourceStr> {
