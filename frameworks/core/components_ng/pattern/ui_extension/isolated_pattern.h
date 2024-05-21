@@ -58,6 +58,8 @@ public:
     }
 
     void DumpInfo() override;
+    void FireOnErrorCallbackOnUI(
+        int32_t code, const std::string& name, const std::string& msg);
 
 protected:
     virtual void DispatchPointerEvent(

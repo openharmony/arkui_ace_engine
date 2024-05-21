@@ -22,6 +22,7 @@
 #include "base/log/dump_log.h"
 #include "core/event/key_event.h"
 #include "core/event/pointer_event.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "display_manager.h"
 #include "session/host/include/session.h"
 
@@ -94,6 +95,21 @@ void IsolatedPattern::InitializeRender(void* runtime)
 #else
     PLATFORM_LOGE("IsolatedComponent not support preview.");
 #endif
+}
+
+void IsolatedPattern::FireOnErrorCallbackOnUI(
+    int32_t code, const std::string& name, const std::string& msg)
+{
+    ContainerScope scope(instanceId_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto uiTaskExecutor = SingleTaskExecutor::Make(
+        host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    uiTaskExecutor.PostTask([weak = WeakClaim(this), code, name, msg] {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->FireOnErrorCallback(code, name, msg);
+        }, "FireOnErrorCallback");
 }
 
 void IsolatedPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)

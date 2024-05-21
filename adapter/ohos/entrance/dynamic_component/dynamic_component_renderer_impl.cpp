@@ -124,7 +124,7 @@ void DynamicComponentRendererImpl::FireOnErrorCallback(
     CHECK_NULL_VOID(isolatedHost);
     auto pattern = AceType::DynamicCast<IsolatedPattern>(isolatedHost->GetPattern());
     CHECK_NULL_VOID(pattern);
-    pattern->FireOnErrorCallback(code, name, msg);
+    pattern->FireOnErrorCallbackOnUI(code, name, msg);
 }
 
 void DynamicComponentRendererImpl::RegisterSizeChangedCallback()
