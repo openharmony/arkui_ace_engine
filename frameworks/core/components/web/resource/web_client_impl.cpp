@@ -170,6 +170,18 @@ bool WebClientImpl::OnFocus()
     return isFocused;
 }
 
+bool WebClientImpl::OnFocus(OHOS::NWeb::NWebFocusSource source)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_RETURN(delegate, false);
+    bool isFocused = delegate->RequestFocus(source);
+    delegate->OnRequestFocus();
+
+    delegate->SetToken();
+    return isFocused;
+}
+
 bool WebClientImpl::OnConsoleLog(const std::shared_ptr<OHOS::NWeb::NWebConsoleLog> message)
 {
     ContainerScope scope(instanceId_);
