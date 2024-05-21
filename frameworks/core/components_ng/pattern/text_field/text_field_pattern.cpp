@@ -5919,8 +5919,6 @@ void TextFieldPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap)
         autoFillOtherAccount_ = false;
     } else {
         info->SetValue(contentController_->GetTextValue());
-        viewDataWrap->SetUserSelected(false);
-        viewDataWrap->SetOtherAccount(false);
     }
     info->SetPlaceholder(GetPlaceHolder());
     info->SetPasswordRules(layoutProperty->GetPasswordRulesValue(""));
