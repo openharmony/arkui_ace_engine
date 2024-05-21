@@ -837,7 +837,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest013, TestSize.Level1)
         onDropInfo = EXTRA_INFO;
     };
     eventHub->SetOnDrop(std::move(onDrop));
-    Point point;
+    PointerEvent point;
     TouchEvent event;
     event.x = 1.0f;
     event.y = 2.0f;

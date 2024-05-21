@@ -184,6 +184,7 @@ void RotationRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>
             info.SetTiltY(touchPoint.tiltY.value());
         }
         info.SetSourceTool(touchPoint.sourceTool);
+        info.SetPressedKeyCodes(touchPoint.pressedKeyCodes_);
         (*callback)(info);
     }
 }
