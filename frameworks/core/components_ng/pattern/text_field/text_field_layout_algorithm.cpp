@@ -944,11 +944,12 @@ bool TextFieldLayoutAlgorithm::AdaptInlineFocusMinFontSize(TextStyle& textStyle,
     auto textFieldLayoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(textFieldLayoutProperty, false);
     auto maxViewLines = textFieldLayoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
+    auto newContentConstraint = BuildInlineFocusLayoutConstraint(contentConstraint, layoutWrapper);
     auto maxSize = GetMaxMeasureSize(contentConstraint);
     GetSuitableSize(maxSize, layoutWrapper);
     while (GreatOrEqual(maxFontSize, minFontSize)) {
         textStyle.SetFontSize(Dimension(maxFontSize));
-        if (!CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper)) {
+        if (!CreateParagraphAndLayout(textStyle, content, newContentConstraint, layoutWrapper)) {
             return false;
         }
         if (!IsInlineFocusAdaptMinExceedLimit(maxSize, maxViewLines)) {
@@ -957,6 +958,26 @@ bool TextFieldLayoutAlgorithm::AdaptInlineFocusMinFontSize(TextStyle& textStyle,
         maxFontSize -= stepSize;
     }
     return true;
+}
+
+LayoutConstraintF TextFieldLayoutAlgorithm::BuildInlineFocusLayoutConstraint(
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+{
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(frameNode, contentConstraint);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, contentConstraint);
+    auto textFieldTheme = pattern->GetTheme();
+    CHECK_NULL_RETURN(textFieldTheme, contentConstraint);
+    auto safeBoundary = textFieldTheme->GetInlineBorderWidth().ConvertToPx() * 2;
+    auto inlineBoundary = static_cast<float>(safeBoundary) + PARAGRAPH_SAVE_BOUNDARY;
+    auto newContentConstraint = contentConstraint;
+    newContentConstraint.maxSize.SetWidth(newContentConstraint.maxSize.Width() - inlineBoundary);
+    if (newContentConstraint.selfIdealSize.Width()) {
+        newContentConstraint.selfIdealSize.SetWidth(newContentConstraint.selfIdealSize.Width().value() -
+            inlineBoundary);
+    }
+    return newContentConstraint;
 }
 
 bool TextFieldLayoutAlgorithm::IsInlineFocusAdaptMinExceedLimit(const SizeF& maxSize, uint32_t maxViewLines)
