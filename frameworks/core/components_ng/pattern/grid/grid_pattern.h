@@ -168,8 +168,6 @@ public:
     OverScrollOffset GetOverScrollOffset(double delta) const override;
     void GetEndOverScrollIrregular(OverScrollOffset& offset, float delta) const;
 
-    bool OutBoundaryCallback() override;
-
     void ScrollPage(bool reverse, bool smooth = false) override;
 
     bool UpdateStartIndex(int32_t index);
