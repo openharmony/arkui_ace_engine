@@ -480,8 +480,6 @@ private:
     void SetPositionToRSNode();
 
     RefPtr<PageTransitionEffect> GetDefaultPageTransition(PageTransitionType type);
-    void SlideTransitionEffect(const RefPtr<PageTransitionEffect>& transition, RectF& rect,
-        TranslateOptions& translate);
     RefPtr<PageTransitionEffect> GetPageTransitionEffect(const RefPtr<PageTransitionEffect>& transition);
 
     // Convert BorderRadiusProperty to Rosen::Vector4f
