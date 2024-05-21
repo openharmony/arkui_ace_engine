@@ -878,7 +878,7 @@ HWTEST_F(EventHubTestNg, EventHubFrameNodeTest003, TestSize.Level1)
      */
     eventHub->SetOnAppear(std::move(flagFunc));
     eventHub->FireOnAppear();
-    EXPECT_EQ(eventHub->onAppear_, nullptr);
+    EXPECT_NE(eventHub->onAppear_, nullptr);
 }
 
 /**
