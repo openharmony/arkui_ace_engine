@@ -2040,8 +2040,9 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
             pipelineContext->ChangeDarkModeBrightness(true);
         }
     };
-    if (container->IsUseStageModel() && (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION ||
-        reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC)) {
+    if ((container->IsUseStageModel() && (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION ||
+                                             reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC)) ||
+        taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::PLATFORM)) {
         task();
     } else {
         AceViewportConfig aceViewportConfig(modifyConfig, reason, rsTransaction);
