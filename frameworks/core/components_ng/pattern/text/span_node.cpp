@@ -433,6 +433,8 @@ void SpanItem::UpdateTextStyle(const std::string& content, const RefPtr<Paragrap
         UpdateContentTextStyle(content, builder, textStyle);
     } else {
         if (content.empty()) {
+            builder->PushStyle(textStyle);
+            builder->PopStyle();
             return;
         }
         auto displayContent = StringUtils::Str8ToStr16(content);
@@ -473,14 +475,13 @@ void SpanItem::UpdateTextStyle(const std::string& content, const RefPtr<Paragrap
 void SpanItem::UpdateContentTextStyle(
     const std::string& content, const RefPtr<Paragraph>& builder, const TextStyle& textStyle)
 {
-    if (content.empty()) {
-        return;
-    }
-    auto displayText = content;
-    auto textCase = textStyle.GetTextCase();
-    StringUtils::TransformStrCase(displayText, static_cast<int32_t>(textCase));
     builder->PushStyle(textStyle);
-    builder->AddText(StringUtils::Str8ToStr16(displayText));
+    if (!content.empty()) {
+        auto displayText = content;
+        auto textCase = textStyle.GetTextCase();
+        StringUtils::TransformStrCase(displayText, static_cast<int32_t>(textCase));
+        builder->AddText(StringUtils::Str8ToStr16(displayText));
+    }
     builder->PopStyle();
 }
 
