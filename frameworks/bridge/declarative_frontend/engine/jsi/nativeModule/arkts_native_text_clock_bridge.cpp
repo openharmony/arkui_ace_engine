@@ -238,19 +238,12 @@ ArkUINativeModuleValue TextClockBridge::SetTextShadow(ArkUIRuntimeCallInfo* runt
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> radiusArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    Local<JSValueRef> typeArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(NUM_3);
-    Local<JSValueRef> offsetXArg = runtimeCallInfo->GetCallArgRef(NUM_4);
-    Local<JSValueRef> offsetYArg = runtimeCallInfo->GetCallArgRef(NUM_5);
-    Local<JSValueRef> fillArg = runtimeCallInfo->GetCallArgRef(NUM_6);
     Local<JSValueRef> lengthArg = runtimeCallInfo->GetCallArgRef(NUM_7);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    uint32_t length;
     if (!lengthArg->IsNumber() || lengthArg->Uint32Value(vm) == 0) {
         return panda::JSValueRef::Undefined(vm);
     }
-    length = lengthArg->Uint32Value(vm);
+    uint32_t length = lengthArg->Uint32Value(vm);
     auto radiusArray = std::make_unique<double[]>(length);
     auto typeArray = std::make_unique<uint32_t[]>(length);
     auto colorArray = std::make_unique<uint32_t[]>(length);
@@ -258,17 +251,17 @@ ArkUINativeModuleValue TextClockBridge::SetTextShadow(ArkUIRuntimeCallInfo* runt
     auto offsetYArray = std::make_unique<double[]>(length);
     auto fillArray = std::make_unique<uint32_t[]>(length);
     bool radiusParseResult = ArkTSUtils::ParseArray<double>(
-        vm, radiusArg, radiusArray.get(), length, ArkTSUtils::parseShadowRadius);
+        vm, runtimeCallInfo->GetCallArgRef(NUM_1), radiusArray.get(), length, ArkTSUtils::parseShadowRadius);
     bool typeParseResult = ArkTSUtils::ParseArray<uint32_t>(
-        vm, typeArg, typeArray.get(), length, ArkTSUtils::parseShadowType);
+        vm, runtimeCallInfo->GetCallArgRef(NUM_2), typeArray.get(), length, ArkTSUtils::parseShadowType);
     bool colorParseResult = ArkTSUtils::ParseArray<uint32_t>(
-        vm, colorArg, colorArray.get(), length, ArkTSUtils::parseShadowColor);
+        vm, runtimeCallInfo->GetCallArgRef(NUM_3), colorArray.get(), length, ArkTSUtils::parseShadowColor);
     bool offsetXParseResult = ArkTSUtils::ParseArray<double>(
-        vm, offsetXArg, offsetXArray.get(), length, ArkTSUtils::parseShadowOffset);
+        vm, runtimeCallInfo->GetCallArgRef(NUM_4), offsetXArray.get(), length, ArkTSUtils::parseShadowOffset);
     bool offsetYParseResult = ArkTSUtils::ParseArray<double>(
-        vm, offsetYArg, offsetYArray.get(), length, ArkTSUtils::parseShadowOffset);
+        vm, runtimeCallInfo->GetCallArgRef(NUM_5), offsetYArray.get(), length, ArkTSUtils::parseShadowOffset);
     bool fillParseResult = ArkTSUtils::ParseArray<uint32_t>(
-        vm, fillArg, fillArray.get(), length, ArkTSUtils::parseShadowFill);
+        vm, runtimeCallInfo->GetCallArgRef(NUM_6), fillArray.get(), length, ArkTSUtils::parseShadowFill);
     if (!radiusParseResult || !colorParseResult || !offsetXParseResult ||
         !offsetYParseResult || !fillParseResult || !typeParseResult) {
         return panda::JSValueRef::Undefined(vm);
