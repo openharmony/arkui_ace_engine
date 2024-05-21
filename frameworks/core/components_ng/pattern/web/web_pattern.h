@@ -120,8 +120,6 @@ public:
 
     bool NeedSoftKeyboard() const override;
 
-    void UpdateSlideOffset(bool isNeedReset = false) override;
-
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<WebEventHub>();
@@ -131,6 +129,7 @@ public:
     {
         return MakeRefPtr<WebAccessibilityProperty>();
     }
+
 
     void OnModifyDone() override;
 
@@ -731,6 +730,7 @@ private:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> beginTouchHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endTouchHandle);
     double GetNewScale(double& scale) const;
+    void UpdateSlideOffset(bool isNeedReset = false);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
