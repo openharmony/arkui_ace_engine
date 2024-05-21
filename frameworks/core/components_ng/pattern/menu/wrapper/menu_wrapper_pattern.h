@@ -317,6 +317,8 @@ public:
     }
 
     RefPtr<FrameNode> GetMenuChild(const RefPtr<UINode>& node);
+    RefPtr<FrameNode> GetShowedSubMenu();
+    bool IsSelectOverlayCustomMenu(const RefPtr<FrameNode>& menu) const;
 
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
@@ -331,7 +333,6 @@ private:
     {
         return false;
     }
-    bool IsSelectOverlayCustomMenu(const RefPtr<FrameNode>& menu) const;
     void OnModifyDone() override;
     void InitFocusEvent();
     void OnAttachToFrameNode() override;
