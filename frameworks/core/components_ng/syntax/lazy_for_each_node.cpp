@@ -408,7 +408,6 @@ const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildren() const
             } else {
                 node.second->DetachFromMainTree();
             }
-            builder_->NotifyItemDeleted(RawPtr(node.second), node.first);
         }
         for (const auto& [index, item] : items) {
             if (item.second) {
@@ -447,10 +446,19 @@ void LazyForEachNode::MoveData(int32_t from, int32_t to)
 {
     if (builder_) {
         builder_->OnDataMoveToNewPlace(from, to);
+        builder_->UpdateMoveFromTo(from, to);
     }
     children_.clear();
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+}
+
+void LazyForEachNode::FireOnMove(int32_t from, int32_t to)
+{
+    if (builder_) {
+        builder_->ResetMoveFromTo();
+    }
+    ForEachBaseNode::FireOnMove(from, to);
 }
 
 RefPtr<FrameNode> LazyForEachNode::GetFrameNode(int32_t index)

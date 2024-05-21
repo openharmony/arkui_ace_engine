@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/web/slide_update_listener.h"
+#ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_SYMBOL_SPAN_MODIFIER_H
+#define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_SYMBOL_SPAN_MODIFIER_H
 
-namespace OHOS::Ace::NG {
-void SlideUpdateListener::OnSlideUpdate()
-{
-    auto pattern = pattern_.Upgrade();
-    CHECK_NULL_VOID(pattern);
-    pattern->UpdateSlideOffset();
+#include "core/interfaces/native/node/node_api.h"
+
+namespace OHOS::Ace::NG::NodeModifier {
+const ArkUISymbolSpanModifier* GetSymbolSpanModifier();
 }
-} // namespace OHOS::Ace::NG
+
+#endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_SYMBOL_SPAN_MODIFIER_H

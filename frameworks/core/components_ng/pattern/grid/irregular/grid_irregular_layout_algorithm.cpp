@@ -342,7 +342,17 @@ void GridIrregularLayoutAlgorithm::UpdateLayoutInfo()
     }
     info.prevOffset_ = info.currentOffset_;
 
-    auto props = DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
+    // validity check
+    for (int i = info.startMainLineIndex_; i <= info.endMainLineIndex_; ++i) {
+        if (info.lineHeightMap_.find(i) == info.lineHeightMap_.end()) {
+            TAG_LOGW(AceLogTag::ACE_GRID,
+                "lineHeight at line %d not ready. Data is corrupted. StartLine = %d, EndLine = %d", i,
+                info.startMainLineIndex_, info.endMainLineIndex_);
+            info.endMainLineIndex_ = i - 1;
+            info.endIndex_ = info.startIndex_ - 1;
+            return;
+        }
+    }
 }
 
 void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset)

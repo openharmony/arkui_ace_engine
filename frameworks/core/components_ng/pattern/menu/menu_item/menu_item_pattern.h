@@ -179,6 +179,7 @@ protected:
     void RegisterOnKeyEvent();
     void RegisterOnTouch();
     void OnAfterModifyDone() override;
+    RefPtr<FrameNode> GetMenuWrapper();
 
 private:
     // register menu item's callback
@@ -204,8 +205,6 @@ private:
     void ShowEmbeddedSubMenu(bool hasFurtherExpand);
 
     void UpdateDisabledStyle();
-
-    RefPtr<FrameNode> GetMenuWrapper();
 
     void ShowSubMenu();
     void ShowSubMenuHelper(const RefPtr<FrameNode>& subMenu);

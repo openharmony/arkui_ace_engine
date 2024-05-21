@@ -23,34 +23,6 @@ namespace OHOS::Ace {
 
 using namespace icu;
 
-const std::unordered_map<std::string, std::string> DateTimeSequence::DATE_ORDER_MAP = {
-    { "ug", "M-d-y" },
-    { "ar", "y-M-d" },
-    { "fa", "y-M-d" },
-    { "ur", "y-M-d" },
-    { "iw", "y-M-d" },
-    { "he", "y-M-d" },
-};
-
-const std::unordered_map<std::string, std::string> DateTimeSequence::DATETIME_ORDER_MAP = {
-    { "ug", "01" },
-    { "ar", "10" },
-    { "fa", "01" },
-    { "ur", "10" },
-    { "iw", "10" },
-    { "he", "10" },
-};
-
-const std::unordered_map<std::string, std::string> DateTimeSequence::AM_PM_TIME_ORDER_MAP = {
-    { "ug", "10" },
-    { "ar", "01" },
-    { "fa", "01" },
-    { "ur", "10" },
-    { "iw", "01" },
-    { "he", "01" },
-    { "bo", "10" },
-};
-
 OrderResult DateTimeSequence::GetDateOrder(const std::string& locale)
 {
     UErrorCode icuStatus = U_ZERO_ERROR;
@@ -63,6 +35,14 @@ OrderResult DateTimeSequence::GetDateOrder(const std::string& locale)
     if (language == nullptr) {
         return orderResult;
     }
+    const std::unordered_map<std::string, std::string> DATE_ORDER_MAP = {
+        { "ug", "M-d-y" },
+        { "ar", "y-M-d" },
+        { "fa", "y-M-d" },
+        { "ur", "y-M-d" },
+        { "iw", "y-M-d" },
+        { "he", "y-M-d" },
+    };
     std::string languageTag = language;
     if (DATE_ORDER_MAP.find(languageTag) != DATE_ORDER_MAP.end()) {
         orderResult.dateOrder = DATE_ORDER_MAP.find(languageTag)->second;
@@ -96,6 +76,14 @@ OrderResult DateTimeSequence::GetDateTimeOrder(const std::string& locale)
         orderResult.dateTimeOrder = "-1";
         return orderResult;
     }
+    const std::unordered_map<std::string, std::string> DATETIME_ORDER_MAP = {
+        { "ug", "01" },
+        { "ar", "10" },
+        { "fa", "01" },
+        { "ur", "10" },
+        { "iw", "10" },
+        { "he", "10" },
+    };
     const char* language = localeObj.getBaseName();
     std::string languageTag = language == nullptr ? "" : language;
     if (DATETIME_ORDER_MAP.find(languageTag) != DATETIME_ORDER_MAP.end()) {
@@ -133,6 +121,15 @@ OrderResult DateTimeSequence::GetAmPmTimeOrder(const std::string& locale)
         return orderResult;
     }
     const char* language = localeObj.getBaseName();
+    const std::unordered_map<std::string, std::string> AM_PM_TIME_ORDER_MAP = {
+        { "ug", "10" },
+        { "ar", "01" },
+        { "fa", "01" },
+        { "ur", "10" },
+        { "iw", "01" },
+        { "he", "01" },
+        { "bo", "10" },
+    };
     std::string languageTag = language == nullptr ? "" : language;
     if (AM_PM_TIME_ORDER_MAP.find(languageTag) != AM_PM_TIME_ORDER_MAP.end()) {
         orderResult.amPmTimeOrder = AM_PM_TIME_ORDER_MAP.find(languageTag)->second;

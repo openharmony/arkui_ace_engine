@@ -36,6 +36,8 @@ struct SwiperParameters {
     std::optional<Dimension> dimTop;
     std::optional<Dimension> dimRight;
     std::optional<Dimension> dimBottom;
+    std::optional<Dimension> dimStart;
+    std::optional<Dimension> dimEnd;
     std::optional<Dimension> itemWidth;
     std::optional<Dimension> itemHeight;
     std::optional<Dimension> selectedItemWidth;

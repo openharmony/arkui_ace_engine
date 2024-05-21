@@ -41,7 +41,7 @@ void OnTextChangedListenerImpl::InsertText(const std::u16string& text)
         auto client = textFieldPattern.Upgrade();
         CHECK_NULL_VOID(client);
         ContainerScope scope(client->GetInstanceId());
-        client->InsertValue(StringUtils::Str16ToStr8(text));
+        client->InsertValue(StringUtils::Str16ToStr8(text), true);
     };
     PostTaskToUI(task, "ArkUITextFieldInsertText");
 }

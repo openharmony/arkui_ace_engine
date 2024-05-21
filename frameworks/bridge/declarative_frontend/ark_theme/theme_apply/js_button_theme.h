@@ -60,10 +60,6 @@ private:
         }
         ButtonModel::GetInstance()->BackgroundColor(JSButtonTheme::BackgroundColor(themeColors, false), true);
 
-        // pressed
-        ViewStackModel::GetInstance()->SetVisualState(VisualState::PRESSED);
-        ButtonModel::GetInstance()->BackgroundColor(JSButtonTheme::BackgroundColor(themeColors, true), true);
-
         // clear state
         ViewStackModel::GetInstance()->ClearVisualState();
         return true;
@@ -90,17 +86,11 @@ private:
             case ButtonStyleMode::TEXT:
                 return Color::TRANSPARENT;
             case ButtonStyleMode::NORMAL:
-                if (isPressed) {
-                    return themeColors->InteractivePressed();
-                }
                 return themeColors->CompBackgroundTertiary();
             case ButtonStyleMode::EMPHASIZE:
             default:
                 if (JSButtonTheme::buttonRole == ButtonRole::ERROR) {
                     return themeColors->Warning();
-                }
-                if (isPressed) {
-                    return themeColors->InteractivePressed();
                 }
                 return themeColors->BackgroundEmphasize();
         }

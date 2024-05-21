@@ -39,6 +39,36 @@ const char* NODE_CONTAINER_ID = "_nodeContainerId";
 const char* INTERNAL_FIELD_VALUE = "_value";
 const char* NODEPTR_OF_UINODE = "nodePtr_";
 constexpr int32_t INVALID_NODE_CONTAINER_ID = -1;
+
+void BindFunc(const Framework::JSCallbackInfo& info, const RefPtr<NG::FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(!frameNode->HasOnNodeDestroyCallback());
+    EcmaVM* vm = info.GetVm();
+    auto global = JSNApi::GetGlobalObject(vm);
+    auto funcName = panda::StringRef::NewFromUtf8(vm, "__RemoveFromNodeControllerMap__");
+    auto obj = global->Get(vm, funcName);
+    if (obj->IsFunction()) {
+        panda::Local<panda::FunctionRef> detachFunc = obj;
+        frameNode->SetOnNodeDestroyCallback([vm, func = panda::CopyableGlobal(vm, detachFunc)](int32_t nodeId) {
+            panda::Local<panda::JSValueRef> params[] = { panda::NumberRef::New(vm, nodeId) };
+            func->Call(vm, func.ToLocal(), params, ArraySize(params));
+        });
+    }
+}
+
+void AddToNodeControllerMap(EcmaVM* vm, int32_t nodeId, const Framework::JSRef<Framework::JSObject>& object)
+{
+    auto global = JSNApi::GetGlobalObject(vm);
+    auto funcName = panda::StringRef::NewFromUtf8(vm, "__AddToNodeControllerMap__");
+    auto obj = global->Get(vm, funcName);
+    if (obj->IsFunction()) {
+        panda::Local<panda::FunctionRef> attachFunc = obj;
+        panda::Local<panda::JSValueRef> params[] = { panda::NumberRef::New(vm, nodeId),
+            panda::CopyableGlobal(vm, object->GetLocalHandle()).ToLocal() };
+        attachFunc->Call(vm, attachFunc, params, ArraySize(params));
+    }
+}
 } // namespace
 
 std::unique_ptr<NodeContainerModel> NodeContainerModel::instance_;
@@ -95,6 +125,8 @@ void JSNodeContainer::Create(const JSCallbackInfo& info)
     // clear the _nodeContainerId in pre controller;
     NodeContainerModel::GetInstance()->ResetController();
 
+    BindFunc(info, AceType::Claim(frameNode));
+    AddToNodeControllerMap(info.GetVm(), frameNode->GetId(), object);
     // set a function to reset the _nodeContainerId in controller;
     auto resetFunc = [firstArg = JSWeak<JSObject>(object)]() {
         CHECK_NULL_VOID(!firstArg.IsEmpty());
@@ -119,7 +151,7 @@ void JSNodeContainer::Create(const JSCallbackInfo& info)
 void JSNodeContainer::SetNodeController(const JSRef<JSObject>& object, JsiExecutionContext execCtx)
 {
     // get the function to makeNode
-    JSRef<JSVal> jsMakeNodeFunc = object->GetProperty("makeNode");
+    JSRef<JSVal> jsMakeNodeFunc = object->GetProperty("__makeNode__");
     if (!jsMakeNodeFunc->IsFunction()) {
         ResetNodeController();
         return;

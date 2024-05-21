@@ -379,6 +379,9 @@ void PageRouterManager::EnableAlertBeforeBackPage(const std::string& message, st
 
 void PageRouterManager::DisableAlertBeforeBackPage()
 {
+    if (pageRouterStack_.empty()) {
+        return;
+    }
     auto currentPage = pageRouterStack_.back().Upgrade();
     CHECK_NULL_VOID(currentPage);
     auto pagePattern = currentPage->GetPattern<PagePattern>();

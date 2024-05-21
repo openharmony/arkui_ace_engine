@@ -813,6 +813,7 @@ void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeigh
             scrollBar_->SetScrollable(scrollable);
             if (scrollBarOverlayModifier_) {
                 scrollBarOverlayModifier_->SetOpacity(scrollable ? UINT8_MAX : 0);
+                scrollBarOverlayModifier_->SetScrollable(scrollable);
             }
             if (scrollable) {
                 scrollBar_->ScheduleDisappearDelayTask();
@@ -1958,6 +1959,7 @@ void ScrollablePattern::ExecuteScrollFrameBegin(float& mainDelta, ScrollState st
 
 void ScrollablePattern::OnScrollStartRecursive(float position, float velocity)
 {
+    SetIsNestedInterrupt(false);
     HandleScrollImpl(position, SCROLL_FROM_START);
     auto parent = GetNestedScrollParent();
     auto nestedScroll = GetNestedScroll();
@@ -1971,9 +1973,10 @@ void ScrollablePattern::OnScrollEndRecursive(const std::optional<float>& velocit
     OnScrollEnd();
     auto parent = GetNestedScrollParent();
     auto nestedScroll = GetNestedScroll();
-    if (parent && nestedScroll.NeedParent()) {
+    if (parent && (nestedScroll.NeedParent() || GetIsNestedInterrupt())) {
         parent->OnScrollEndRecursive(velocity);
     }
+    SetIsNestedInterrupt(false);
 }
 
 float ScrollablePattern::GetVelocity() const
@@ -2295,15 +2298,9 @@ void ScrollablePattern::HotZoneScroll(const float offsetPct)
             offsetPct, [weak = WeakClaim(this)](float offset) -> bool {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_RETURN(pattern, true);
-
-                if (LessNotEqual(offset, 0) && pattern->IsAtBottom()) {
-                    // Stop scrolling when reach the bottom
-                    return true;
-                } else if (GreatNotEqual(offset, 0) && pattern->IsAtTop()) {
-                    // Stop scrolling when reach the top
-                    return true;
-                }
-                return false;
+                // Stop scrolling when reach the bottom or top
+                return ((LessNotEqual(offset, 0) && pattern->IsAtBottom()) ||
+                    (GreatNotEqual(offset, 0) && pattern->IsAtTop()));
             });
         velocityMotion_->AddListener([weakScroll = AceType::WeakClaim(this)](double offset) {
             // Get the distance component need to roll from BezierVariableVelocityMotion
@@ -2313,6 +2310,9 @@ void ScrollablePattern::HotZoneScroll(const float offsetPct)
             pattern->UpdateCurrentOffset(offset, SCROLL_FROM_AXIS);
             pattern->UpdateMouseStart(offset);
             pattern->AddHotZoneSenceInterface(SceneStatus::RUNNING);
+            if (pattern->hotZoneScrollCallback_) {
+                pattern->hotZoneScrollCallback_();
+            }
         });
         velocityMotion_->ReInit(offsetPct);
     } else {

@@ -536,7 +536,7 @@ abstract class ViewPU extends PUV2ViewBase
     if (this.dirtDescendantElementIds_.size) {
       this.markNeedUpdate();
     }
-    aceTrace.end()
+    aceTrace.end();
     stateMgmtProfiler.end();
   }
 
@@ -830,7 +830,7 @@ abstract class ViewPU extends PUV2ViewBase
     }, "aboutToReuse", this.constructor.name);
 
     for (const stateLinkPropVar of this.ownObservedPropertiesStore_) {
-      const changedElmtIds =  stateLinkPropVar.moveElmtIdsForDelayedUpdate(true);
+      const changedElmtIds = stateLinkPropVar.moveElmtIdsForDelayedUpdate(true);
       if (changedElmtIds) {
         if (changedElmtIds.size && !this.isFirstRender()) {
           for (const elmtId of changedElmtIds) {
@@ -1116,6 +1116,35 @@ abstract class ViewPU extends PUV2ViewBase
     return retVaL;
   }
 
+
+
+  /**
+    * onDumpInspetor is invoked by native side to create Inspector tree including state variables
+    * @returns dump info
+    */
+  protected onDumpInspetor(): string {
+    let res: DumpInfo = new DumpInfo();
+    res.viewInfo = { componentName: this.constructor.name, id: this.id__() };
+    Object.getOwnPropertyNames(this)
+      .filter((varName: string) => varName.startsWith('__') && !varName.startsWith(ObserveV2.OB_PREFIX))
+      .forEach((varName) => {
+        const prop: any = Reflect.get(this, varName);
+        if ('debugInfoDecorator' in prop) {
+          const observedProp: ObservedPropertyAbstractPU<any> = prop as ObservedPropertyAbstractPU<any>;
+          let observedPropertyInfo: ObservedPropertyInfo = {
+            decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(),
+            value: typeof observedProp.getUnmonitored() !== 'object' ? observedProp.getUnmonitored() : ObservedObject.GetRawObject(observedProp.getUnmonitored()),
+            dependentElementIds: observedProp.debugInfoDependentElmtIds(),
+            owningView: { componentName: this.constructor.name, id: this.id__() }, syncPeers: observedProp.dumpSyncPeers()
+          };
+          res.observedPropertiesInfo.push(observedPropertyInfo);
+        }
+      });
+    return JSON.stringify(res);
+  }
+
+
+
   /**
    * on first render create a new Instance of Repeat
    * on re-render connect to existing instance
@@ -1125,15 +1154,15 @@ abstract class ViewPU extends PUV2ViewBase
   public __mkRepeatAPI: <I>(arr: Array<I>) => RepeatAPI<I> = <I>(arr: Array<I>): RepeatAPI<I> => {
     // factory is for future extensions, currently always return the same
     const elmtId = this.getCurrentlyRenderedElmtId();
-    let repeat = this.elmtId2Repeat_.get(elmtId) as __RepeatPU<I>
+    let repeat = this.elmtId2Repeat_.get(elmtId) as __RepeatPU<I>;
     if (!repeat) {
         repeat = new __RepeatPU<I>(this, arr);
         this.elmtId2Repeat_.set(elmtId, repeat);
     } else {
-        repeat.updateArr(arr)
+        repeat.updateArr(arr);
     }
 
     return repeat;
   }
-}  // class ViewPU
+} // class ViewPU
 

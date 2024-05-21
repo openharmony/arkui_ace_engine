@@ -124,6 +124,9 @@ class ArkGridRowComponent extends ArkComponent implements CommonMethod<GridRowAt
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
+  allowChildTypes(): string[] {
+    return ["GridCol"];
+  }
   onBreakpointChange(callback: (breakpoints: string) => void): GridRowAttribute {
     throw new Error('Method not implemented.');
   }

@@ -1394,8 +1394,8 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                                                 };
                                                 if (t7.width) {
                                                     this.buttonItemsPosition[x5] = {
-                                                        x: Number.parseInt(this.options.componentPadding.toString()) + (Number.parseInt(t7.width.toString()) + 1) * x5,
-                                                        y: Number.parseInt(this.options.componentPadding.toString())
+                                                        x: Number.parseFloat(this.options.componentPadding.toString()) + (Number.parseFloat(t7.width.toString()) + 1) * x5,
+                                                        y: Number.parseFloat(this.options.componentPadding.toString())
                                                     };
                                                 }
                                             });

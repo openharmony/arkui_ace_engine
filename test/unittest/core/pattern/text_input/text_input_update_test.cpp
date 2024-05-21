@@ -472,6 +472,76 @@ HWTEST_F(TextInputUpdateTestNg, AdjustTextInReasonableArea, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AdjustTextInReasonableArea002
+ * @tc.desc: test AdjustTextInReasonableArea002
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, AdjustTextInReasonableArea002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps:set textRect
+     */
+    RectF textRect = RectF(5.0f, 5.0f, 800.0f, 60.0f);
+    pattern_->SetTextRect(textRect);
+    std::cout<<pattern_->textRect_.GetY()<<", "<<pattern_->contentRect_.GetY()<<std::endl;
+    pattern_->AdjustTextInReasonableArea();
+    EXPECT_EQ(pattern_->GetTextRect().GetOffset(), OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: ProcessOverlayAfterLayout
+ * @tc.desc: Test function ProcessOverlayAfterLayout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, ProcessOverlayAfterLayout, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    pattern_->ProcessOverlayAfterLayout(true);
+    GetFocus();
+    pattern_->HandleSetSelection(5, 10, true);
+    pattern_->needToRefreshSelectOverlay_ = true;
+    pattern_->ProcessOverlayAfterLayout(false);
+    EXPECT_FALSE(pattern_->needToRefreshSelectOverlay_);
+}
+
+/**
+ * @tc.name: OnDragStart
+ * @tc.desc: Test function OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, OnDragStart, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. callback the InitDragDrop in OnModifyDone.
+     * @tc.expected: Check if return true.
+     */
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+
+    /**
+     * @tc.steps: step3. mock drag start.
+     */
+    auto gestureHub = pattern_->
+        GetHost()->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
+    gestureHub->SetIsTextDraggable(true);
+    pattern_->OnDragStart().operator()(dragEvent, "");
+    EXPECT_FALSE(pattern_->showSelect_);
+}
+
+/**
  * @tc.name: HandleTouchUp
  * @tc.desc: test HandleTouchUp
  * @tc.type: FUNC

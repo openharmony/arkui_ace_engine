@@ -49,21 +49,20 @@ RefPtr<NodePaintMethod> DataPanelPattern::CreateNodePaintMethod()
     if (paintProperty->HasShadowOption()) {
         shadowOption = paintProperty->GetShadowOptionValue();
     }
-    auto oldBoundsRect = dataPanelModifier_->GetBoundsRect();
-    float x = std::min<float>(shadowOption.offsetX - shadowOption.radius, oldBoundsRect->GetX());
-    float y = std::min<float>(shadowOption.offsetY - shadowOption.radius, oldBoundsRect->GetY());
+    float x = std::min<float>(shadowOption.offsetX - shadowOption.radius, boundsRect_.GetX());
+    float y = std::min<float>(shadowOption.offsetY - shadowOption.radius, boundsRect_.GetY());
     float width = std::max<float>(
-        { oldBoundsRect->Width(), oldBoundsRect->GetX() + oldBoundsRect->Width() - x,
+        { boundsRect_.Width(), boundsRect_.GetX() + boundsRect_.Width() - x,
         shadowOption.offsetX - x + frameSize.Width() + shadowOption.radius * 2.0f,
         std::abs(shadowOption.offsetX) + frameSize.Width() + shadowOption.radius * 2.0f }
     );
     float height = std::max<float>(
-        { oldBoundsRect->Height(), oldBoundsRect->GetY() + oldBoundsRect->Height() - y,
+        { boundsRect_.Height(), boundsRect_.GetY() + boundsRect_.Height() - y,
         shadowOption.offsetY - y + frameSize.Height() + shadowOption.radius * 2.0f,
         std::abs(shadowOption.offsetY) + frameSize.Height() + shadowOption.radius * 2.0f }
     );
-    RectF boundsRect(x, y, width, height);
-    dataPanelModifier_->SetBoundsRect(boundsRect);
+    boundsRect_.SetRect(x, y, width, height);
+    dataPanelModifier_->SetBoundsRect(boundsRect_);
     dataPanelModifier_->SetUseContentModifier(UseContentModifier());
     return paintMethod;
 }

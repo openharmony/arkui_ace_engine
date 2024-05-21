@@ -114,6 +114,10 @@ public:
     void SetTextDecorationStyle(Ace::TextDecorationStyle value) override;
     void SetFontFeature(const FONT_FEATURES_LIST& value) override;
     void SetBackBorder() override;
+    void SetOnWillInsertValueEvent(std::function<bool(const InsertValueInfo&)>&& func) override;
+    void SetOnDidInsertValueEvent(std::function<void(const InsertValueInfo&)>&& func) override;
+    void SetOnWillDeleteEvent(std::function<bool(const DeleteValueInfo&)>&& func) override;
+    void SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func) override;
 
     static void SetTextDecoration(FrameNode* frameNode, TextDecoration value);
     static void SetTextDecorationColor(FrameNode* frameNode, const Color& value);

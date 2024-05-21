@@ -658,6 +658,11 @@ public:
 
     virtual void SetSurfaceRotation(bool isLock) {}
 
+    virtual Matrix4 GetRevertMatrix()
+    {
+        return Matrix4();
+    }
+
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;

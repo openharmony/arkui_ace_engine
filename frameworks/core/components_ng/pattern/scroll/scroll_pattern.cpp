@@ -488,11 +488,6 @@ void ScrollPattern::HandleCrashBottom() const
 
 bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
 {
-    for (auto listenerItem : listenerVector_) {
-        if (listenerItem) {
-            listenerItem->OnSlideUpdate();
-        }
-    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     if (source != SCROLL_FROM_JUMP && !HandleEdgeEffect(delta, source, viewSize_)) {
@@ -964,11 +959,6 @@ Rect ScrollPattern::GetItemRect(int32_t index) const
     CHECK_NULL_RETURN(itemGeometry, Rect());
     return Rect(itemGeometry->GetFrameRect().GetX(), itemGeometry->GetFrameRect().GetY(),
         itemGeometry->GetFrameRect().Width(), itemGeometry->GetFrameRect().Height());
-}
-
-void ScrollPattern::registerSlideUpdateListener(const std::shared_ptr<ISlideUpdateCallback>& listener)
-{
-    listenerVector_.emplace_back(listener);
 }
 
 float ScrollPattern::GetSelectScrollWidth()

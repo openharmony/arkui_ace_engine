@@ -3406,37 +3406,63 @@ bool TextFieldPattern::CloseCustomKeyboard()
 
 void TextFieldPattern::OnTextInputActionUpdate(TextInputAction value) {}
 
-void TextFieldPattern::InsertValueOperation(const std::string& insertValue)
+bool TextFieldPattern::BeforeIMEInsertValue(const std::string& insertValue, int32_t offset)
 {
-    auto caretStart = 0;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, true);
+    auto eventHub = host->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_RETURN(eventHub, true);
+    InsertValueInfo insertValueInfo;
+    insertValueInfo.insertOffset = offset;
+    insertValueInfo.insertValue = insertValue;
+    return eventHub->FireOnWillInsertValueEvent(insertValueInfo);
+}
+
+void TextFieldPattern::AfterIMEInsertValue(const std::string& insertValue)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    InsertValueInfo insertValueInfo;
+    insertValueInfo.insertOffset = selectController_->GetCaretIndex();
+    insertValueInfo.insertValue = insertValue;
+    return eventHub->FireOnDidInsertValueEvent(insertValueInfo);
+}
+
+void TextFieldPattern::InsertValueOperation(const SourceAndValueInfo& info)
+{
+    auto insertValue = info.insertValue;
+    auto isIME = info.isIME;
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-
-    if (GetIsPreviewText()) {
-        PreviewTextInfo info = {
-            .text = insertValue,
-            .range = {-1, -1}
-        };
-        SetPreviewTextOperation(info);
-        FinishTextPreview();
+    if (FinishTextPreviewByPreview(insertValue)) {
         return;
     }
-
     auto start = selectController_->GetStartIndex();
     auto end = selectController_->GetEndIndex();
-    UpdateEditingValueToRecord();
-    if (IsSelected()) {
-        caretStart = start;
-    } else {
-        caretStart = selectController_->GetCaretIndex();
+    auto caretStart = IsSelected() ? start : selectController_->GetCaretIndex();
+    if (isIME) {
+        auto isInsert = BeforeIMEInsertValue(insertValue, caretStart);
+        CHECK_NULL_VOID(isInsert);
     }
+    UpdateEditingValueToRecord();
     int32_t caretMoveLength = 0;
     bool hasInsertValue = false;
     int32_t originLength = 0;
     if (IsSelected()) {
+        auto value = contentController_->GetSelectedValue(start, end);
+        auto isDelete = true;
+        if (isIME) {
+            isDelete = BeforeIMEDeleteValue(value, TextDeleteDirection::BACKWARD, end);
+        }
+        end = isDelete ? end : start;
         originLength = static_cast<int32_t>(contentController_->GetWideText().length()) - (end - start);
         hasInsertValue = contentController_->ReplaceSelectedValue(start, end, insertValue);
         caretMoveLength = abs(static_cast<int32_t>(contentController_->GetWideText().length()) - originLength);
+        if (isIME && isDelete) {
+            AfterIMEDeleteValue(value, TextDeleteDirection::BACKWARD);
+        }
     } else {
         originLength = static_cast<int32_t>(contentController_->GetWideText().length());
         hasInsertValue = contentController_->InsertValue(selectController_->GetCaretIndex(), insertValue);
@@ -3450,6 +3476,14 @@ void TextFieldPattern::InsertValueOperation(const std::string& insertValue)
     }
     selectController_->UpdateCaretIndex(caretStart + caretMoveLength);
     UpdateObscure(insertValue, hasInsertValue);
+    if (isIME) {
+        AfterIMEInsertValue(insertValue);
+    }
+    TwinklingByFocus();
+}
+
+void TextFieldPattern::TwinklingByFocus()
+{
     if (HasFocus()) {
         cursorVisible_ = true;
         StartTwinkling();
@@ -3457,6 +3491,17 @@ void TextFieldPattern::InsertValueOperation(const std::string& insertValue)
         cursorVisible_ = false;
         StopTwinkling();
     }
+}
+
+bool TextFieldPattern::FinishTextPreviewByPreview(const std::string& insertValue)
+{
+    if (GetIsPreviewText()) {
+        PreviewTextInfo info = { .text = insertValue, .range = { -1, -1 } };
+        SetPreviewTextOperation(info);
+        FinishTextPreview();
+        return true;
+    }
+    return false;
 }
 
 void TextFieldPattern::UpdateObscure(const std::string& insertValue, bool hasInsertValue)
@@ -3484,7 +3529,7 @@ void TextFieldPattern::UpdateObscure(const std::string& insertValue, bool hasIns
     }
 }
 
-void TextFieldPattern::InsertValue(const std::string& insertValue)
+void TextFieldPattern::InsertValue(const std::string& insertValue, bool isIME)
 {
     if (!HasFocus()) {
         TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "text field on blur, can't insert value");
@@ -3498,7 +3543,10 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     inputOperations_.emplace(InputOperation::INSERT);
-    insertValueOperations_.emplace(insertValue);
+    SourceAndValueInfo info;
+    info.insertValue = insertValue;
+    info.isIME = isIME;
+    insertValueOperations_.emplace(info);
     CloseSelectOverlay(true);
     ScrollToSafeArea();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
@@ -4104,7 +4152,7 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
     if (IsTextArea() && action == TextInputAction::NEW_LINE) {
         if (!textAreaBlurOnSubmit_) {
             if (GetInputFilter() != "\n") {
-                InsertValue("\n");
+                InsertValue("\n", true);
             }
         } else {
             CloseKeyboard(forceCloseKeyboard, false);
@@ -4313,9 +4361,15 @@ void TextFieldPattern::DeleteBackward(int32_t length)
     if (selectController_->GetCaretIndex() <= 0) {
         return;
     }
-    UpdateEditingValueToRecord();
     if (IsSelected()) {
-        Delete(selectController_->GetStartIndex(), selectController_->GetEndIndex());
+        auto start = selectController_->GetStartIndex();
+        auto end = selectController_->GetEndIndex();
+        auto value = contentController_->GetSelectedValue(start, end);
+        auto isDelete = BeforeIMEDeleteValue(value, TextDeleteDirection::BACKWARD, end);
+        CHECK_NULL_VOID(isDelete);
+        UpdateEditingValueToRecord();
+        Delete(start, end);
+        AfterIMEDeleteValue(value, TextDeleteDirection::BACKWARD);
         showCountBorderStyle_ = false;
         HandleCountStyle();
         return;
@@ -4332,29 +4386,47 @@ void TextFieldPattern::DeleteBackward(int32_t length)
 void TextFieldPattern::DeleteBackwardOperation(int32_t length)
 {
     int32_t idx = selectController_->GetCaretIndex();
+    auto value = contentController_->GetSelectedValue(idx - length, idx);
+    auto isDelete = BeforeIMEDeleteValue(value, TextDeleteDirection::BACKWARD, idx);
+    CHECK_NULL_VOID(isDelete);
+    UpdateEditingValueToRecord();
     int32_t count = contentController_->Delete(selectController_->GetCaretIndex(), length, true);
     selectController_->UpdateCaretIndex(std::max(idx - count, 0));
     if (GetIsPreviewText()) {
         UpdatePreviewIndex(GetPreviewTextStart(), GetPreviewTextEnd() - length);
     }
+    AfterIMEDeleteValue(value, TextDeleteDirection::BACKWARD);
     StartTwinkling();
 }
 
 void TextFieldPattern::DeleteForwardOperation(int32_t length)
 {
-    contentController_->Delete(selectController_->GetCaretIndex(), length, false);
+    auto caretIndex = selectController_->GetCaretIndex();
+    auto value = contentController_->GetSelectedValue(caretIndex, caretIndex + length);
+    auto isDelete = BeforeIMEDeleteValue(value, TextDeleteDirection::FORWARD, caretIndex);
+    CHECK_NULL_VOID(isDelete);
+    ResetObscureTickCountDown();
+    UpdateEditingValueToRecord();
+    contentController_->Delete(caretIndex, length, false);
     if (GetIsPreviewText()) {
         UpdatePreviewIndex(GetPreviewTextStart(), GetPreviewTextEnd() - length);
     }
+    AfterIMEDeleteValue(value, TextDeleteDirection::FORWARD);
     StartTwinkling();
 }
 
 void TextFieldPattern::DeleteForward(int32_t length)
 {
-    ResetObscureTickCountDown();
-    UpdateEditingValueToRecord();
     if (IsSelected()) {
-        Delete(selectController_->GetStartIndex(), selectController_->GetEndIndex());
+        auto start = selectController_->GetStartIndex();
+        auto end = selectController_->GetEndIndex();
+        auto value = contentController_->GetSelectedValue(start, end);
+        auto isDelete = BeforeIMEDeleteValue(value, TextDeleteDirection::FORWARD, start);
+        CHECK_NULL_VOID(isDelete);
+        ResetObscureTickCountDown();
+        UpdateEditingValueToRecord();
+        Delete(start, end);
+        AfterIMEDeleteValue(value, TextDeleteDirection::FORWARD);
         showCountBorderStyle_ = false;
         HandleCountStyle();
         return;
@@ -4368,6 +4440,33 @@ void TextFieldPattern::DeleteForward(int32_t length)
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+}
+
+bool TextFieldPattern::BeforeIMEDeleteValue(
+    const std::string& deleteValue, TextDeleteDirection direction, int32_t offset)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, true);
+    auto eventHub = host->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_RETURN(eventHub, true);
+    DeleteValueInfo deleteValueInfo;
+    deleteValueInfo.deleteOffset = offset;
+    deleteValueInfo.deleteValue = deleteValue;
+    deleteValueInfo.direction = direction;
+    return eventHub->FireOnWillDeleteEvent(deleteValueInfo);
+}
+
+void TextFieldPattern::AfterIMEDeleteValue(const std::string& deleteValue, TextDeleteDirection direction)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    DeleteValueInfo deleteValueInfo;
+    deleteValueInfo.deleteOffset = selectController_->GetCaretIndex();
+    deleteValueInfo.deleteValue = deleteValue;
+    deleteValueInfo.direction = direction;
+    return eventHub->FireOnDidInsertValueEvent(deleteValueInfo);
 }
 
 std::u16string TextFieldPattern::GetLeftTextOfCursor(int32_t number)
@@ -4607,6 +4706,9 @@ void TextFieldPattern::SetSelectionFlag(
     if (!HasFocus() || GetIsPreviewText()) {
         return;
     }
+    auto length = static_cast<int32_t>(contentController_->GetWideText().length());
+    selectionStart = std::clamp(selectionStart, 0, length);
+    selectionEnd = std::clamp(selectionEnd, 0, length);
     isTouchCaret_ = false;
     bool isShowMenu = selectOverlay_->IsCurrentMenuVisibile();
     if (selectionStart == selectionEnd) {
@@ -5494,10 +5596,19 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
         GreatOrEqual(maxLines, Infinity<uint32_t>()) ? "INF" : std::to_string(maxLines).c_str(), filter);
     json->PutExtAttr("barState", GetBarStateString().c_str(), filter);
     json->PutExtAttr("caretPosition", std::to_string(GetCaretIndex()).c_str(), filter);
-    json->PutExtAttr("normalUnderlineColor", GetNormalUnderlineColorStr().c_str(), filter);
-    json->PutExtAttr("typingUnderlineColor", GetTypingUnderlineColorStr().c_str(), filter);
-    json->PutExtAttr("errorUnderlineColor", GetErrorUnderlineColorStr().c_str(), filter);
-    json->PutExtAttr("disableUnderlineColor", GetDisableUnderlineColorStr().c_str(), filter);
+    
+    ToJsonValueForOption(json, filter);
+}
+
+void TextFieldPattern::ToJsonValueForOption(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    auto underlineColorJsonValue = JsonUtil::Create(true);
+    underlineColorJsonValue->Put("normal", GetNormalUnderlineColorStr().c_str());
+    underlineColorJsonValue->Put("typing", GetTypingUnderlineColorStr().c_str());
+    underlineColorJsonValue->Put("error", GetErrorUnderlineColorStr().c_str());
+    underlineColorJsonValue->Put("disable", GetDisableUnderlineColorStr().c_str());
+    json->PutExtAttr("underlineColor", underlineColorJsonValue->ToString().c_str(), filter);
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
