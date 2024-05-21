@@ -513,7 +513,7 @@ public:
     void OnTooltip(const std::string& tooltip);
     bool IsRootNeedExportTexture();
     std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);
-    void Backward();
+    bool Backward();
     void OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMenuOption);
     void CloseKeyboard();
 

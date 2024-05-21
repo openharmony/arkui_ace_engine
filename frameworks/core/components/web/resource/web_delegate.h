@@ -877,6 +877,7 @@ public:
     std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);
     // Backward
     void Backward();
+    bool AccessBackward();
     bool OnOpenAppLink(const std::string& url, std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback);
 
     void OnRenderProcessNotResponding(
@@ -946,7 +947,6 @@ private:
     void ClearClientAuthenticationCache();
     bool AccessStep(int32_t step);
     void BackOrForward(int32_t step);
-    bool AccessBackward();
     bool AccessForward();
 
     void SearchAllAsync(const std::string& searchStr);

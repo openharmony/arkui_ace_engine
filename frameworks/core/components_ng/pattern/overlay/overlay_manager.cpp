@@ -2445,7 +2445,7 @@ int32_t OverlayManager::ExceptComponent(const RefPtr<NG::UINode>& rootNode, RefP
     if (overlay->GetTag() == V2::SHEET_WRAPPER_TAG) {
         return WebBackward(overlay);
     }
-    return OVERLAY_EXISTS;
+    return OVERLAY_NOTHING;
 }
 
 int32_t OverlayManager::WebBackward(RefPtr<NG::FrameNode>& overlay)
@@ -2456,8 +2456,9 @@ int32_t OverlayManager::WebBackward(RefPtr<NG::FrameNode>& overlay)
     if (webNode && InstanceOf<WebPattern>(webNode->GetPattern())) {
         auto webPattern = DynamicCast<WebPattern>(webNode->GetPattern());
         CHECK_NULL_RETURN(webPattern, OVERLAY_EXISTS);
-        webPattern->Backward();
-        return OVERLAY_REMOVE;
+        if (webPattern->Backward()) {
+            return OVERLAY_REMOVE;
+        }
     }
 #endif
     return OVERLAY_NOTHING;
