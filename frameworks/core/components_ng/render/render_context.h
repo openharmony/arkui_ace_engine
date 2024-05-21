@@ -50,6 +50,15 @@ enum class Gravity;
 }
 
 namespace OHOS::Ace::NG {
+
+typedef enum {
+    OPINC_INVALID,
+    OPINC_NODE,
+    OPINC_SUGGESTED_OR_EXCLUDED,
+    OPINC_PARENT_POSSIBLE,
+    OPINC_NODE_POSSIBLE,
+} OPINC_TYPE_E;
+
 class GeometryNode;
 class RenderPropertyNode;
 class FrameNode;
@@ -662,6 +671,8 @@ public:
     {
         return Matrix4();
     }
+
+    virtual void SuggestOpIncNode(bool isOpincNode, bool isNeedCalculate) {}
 
 protected:
     RenderContext() = default;

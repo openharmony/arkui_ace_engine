@@ -380,6 +380,7 @@ public:
     void SyncPartialRsProperties() override;
     void UpdatePaintRect(const RectF& paintRect) override;
     Matrix4 GetRevertMatrix() override;
+    void SuggestOpIncNode(bool isOpincNode, bool isNeedCalculate) override;
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -591,7 +592,7 @@ private:
     std::shared_ptr<Rosen::RSNode> CreateHardwareTexture(
         const std::optional<ContextParam>& param, bool isTextureExportNode);
 #endif
-    
+
     RefPtr<ImageLoadingContext> bgLoadingCtx_;
     RefPtr<CanvasImage> bgImage_;
     RefPtr<ImageLoadingContext> bdImageLoadingCtx_;

@@ -247,6 +247,10 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             if (NonNegative(mainOffset + item.second.second)) {
                 firstIndex = std::min(firstIndex, item.first);
             }
+            auto frameNode = AceType::DynamicCast<FrameNode>(wrapper);
+            if (frameNode) {
+                frameNode->MarkAndCheckNewOpIncNode();
+            }
         }
     }
     layoutInfo_.firstIndex_ = firstIndex;
