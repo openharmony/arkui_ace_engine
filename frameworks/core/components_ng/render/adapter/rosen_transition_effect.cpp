@@ -456,10 +456,18 @@ void RosenMoveTransitionEffect::OnUpdateTransitionContext(
             break;
         }
         case TransitionEdge::START: {
+            if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+                value[0] = viewSize.Width() - selfRect.Left();
+                break;
+            }
             value[0] = -selfRect.Right();
             break;
         }
         case TransitionEdge::END: {
+            if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+                value[0] = -selfRect.Right();
+                break;
+            }
             value[0] = viewSize.Width() - selfRect.Left();
             break;
         }
