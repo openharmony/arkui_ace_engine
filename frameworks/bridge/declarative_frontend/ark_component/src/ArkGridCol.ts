@@ -122,6 +122,9 @@ class ArkGridColComponent extends ArkComponent implements GridColAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
+  allowChildCount(): number {
+    return 1;
+  }
   span(value: number | GridColColumnOption): GridColAttribute {
     modifierWithKey(this._modifiersWithKeys, GridColSpanModifier.identity, GridColSpanModifier, value);
     return this;

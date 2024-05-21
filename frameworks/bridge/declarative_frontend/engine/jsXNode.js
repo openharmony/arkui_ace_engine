@@ -739,11 +739,14 @@ class FrameNode {
         }
         return null;
     }
+    checkValid(node) {
+        return true;
+    }
     appendChild(node) {
         if (node === undefined || node === null) {
             return;
         }
-        if (node.getType() === 'ProxyFrameNode') {
+        if (node.getType() === 'ProxyFrameNode' || !this.checkValid(node)) {
             throw { message: 'The FrameNode is not modifiable.', code: 100021 };
         }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
@@ -758,6 +761,9 @@ class FrameNode {
         if (content === undefined || content === null || content.getNodePtr() === null || content.getNodePtr() == undefined) {
             return;
         }
+        if (!this.checkValid()) {
+            throw { message: 'The FrameNode is not modifiable.', code: 100021 };
+        }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let flag = getUINativeModule().frameNode.appendChild(this.nodePtr_, content.getNodeWithoutProxy());
         __JSScopeUtil__.restoreInstanceId();
@@ -769,7 +775,7 @@ class FrameNode {
         if (child === undefined || child === null) {
             return;
         }
-        if (child.getType() === 'ProxyFrameNode') {
+        if (child.getType() === 'ProxyFrameNode' || !this.checkValid(child)) {
             throw { message: 'The FrameNode is not modifiable.', code: 100021 };
         }
         let flag = true;
@@ -1101,6 +1107,29 @@ class TypedFrameNode extends FrameNode {
         }
         this.attribute_.setNodePtr(this.nodePtr_);
         return this.attribute_;
+    }
+    checkValid(node) {
+        if (this.attribute_ === undefined) {
+            this.attribute_ = this.attrCreator_(this.nodePtr_, ModifierType.FRAME_NODE);
+        }
+        if (this.attribute_.allowChildCount !== undefined) {
+            const allowCount = this.attribute_.allowChildCount();
+            if (this.getChildrenCount() >= allowCount) {
+                return false;
+            }
+        }
+        if (this.attribute_.allowChildTypes !== undefined && node !== undefined) {
+            const childType = node.getNodeType();
+            const allowTypes = this.attribute_.allowChildTypes();
+            let isValid = false;
+            allowTypes.forEach((nodeType) => {
+                if (nodeType === childType) {
+                    isValid = true;
+                }
+            });
+            return isValid;
+        }
+        return true;
     }
 }
 const __creatorMap__ = new Map([

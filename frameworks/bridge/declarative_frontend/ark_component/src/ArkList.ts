@@ -379,6 +379,9 @@ class ArkListComponent extends ArkComponent implements ListAttribute {
     }
     return this;
   }
+  allowChildTypes(): string[] {
+    return ["ListItem", "ListItemGroup"];
+  }
   lanes(value: number | LengthConstrain, gutter?: any): this {
     let opt: ArkLanesOpt = new ArkLanesOpt();
     opt.gutter = gutter;

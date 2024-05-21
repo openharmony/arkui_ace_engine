@@ -675,6 +675,9 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
+  allowChildTypes(): string[] {
+    return ["Span", "ImageSpan", "SymbolSpan", "ContainerSpan"];
+  }
   initialize(value: Object[]) {
     modifierWithKey(this._modifiersWithKeys, TextContentModifier.identity, TextContentModifier, value[0]);
     modifierWithKey(this._modifiersWithKeys, TextControllerModifier.identity, TextControllerModifier, value[1]);

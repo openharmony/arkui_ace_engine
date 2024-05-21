@@ -4474,6 +4474,9 @@ class ArkBlankComponent extends ArkComponent {
     }
     return this;
   }
+  allowChildCount() {
+    return 0;
+  }
 }
 // @ts-ignore
 if (globalThis.Blank !== undefined) {
@@ -4742,6 +4745,9 @@ class ArkDividerComponent extends ArkComponent {
   initialize(value) {
     return this;
   }
+  allowChildCount() {
+    return 0;
+  }
   vertical(value) {
     modifierWithKey(this._modifiersWithKeys, DividerVerticalModifier.identity, DividerVerticalModifier, value);
     return this;
@@ -4924,6 +4930,9 @@ SetGutterModifier.identity = Symbol('gridRowGutter');
 class ArkGridRowComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
+  }
+  allowChildTypes() {
+    return ["GridCol"];
   }
   onBreakpointChange(callback) {
     throw new Error('Method not implemented.');
@@ -5548,6 +5557,9 @@ class ArkGridColComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
+  allowChildCount() {
+    return 1;
+  }
   span(value) {
     modifierWithKey(this._modifiersWithKeys, GridColSpanModifier.identity, GridColSpanModifier, value);
     return this;
@@ -6118,6 +6130,9 @@ class ArkImageComponent extends ArkComponent {
       modifierWithKey(this._modifiersWithKeys, ImageSrcModifier.identity, ImageSrcModifier, value[0]);
     }
     return this;
+  }
+  allowChildCount() {
+    return 0;
   }
   draggable(value) {
     modifierWithKey(this._modifiersWithKeys, ImageDraggableModifier.identity, ImageDraggableModifier, value);
@@ -9710,6 +9725,9 @@ class ArkTextComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextContentModifier.identity, TextContentModifier, content[0]);
     modifierWithKey(this._modifiersWithKeys, TextControllerModifier.identity, TextControllerModifier, content[1]);
     return this;
+  }
+  allowChildTypes() {
+    return ["Span", "ImageSpan", "SymbolSpan", "ContainerSpan"];
   }
   enableDataDetector(value) {
     modifierWithKey(this._modifiersWithKeys, TextEnableDataDetectorModifier.identity, TextEnableDataDetectorModifier, value);
@@ -14271,6 +14289,9 @@ class ArkLoadingProgressComponent extends ArkComponent {
   initialize(value) {
     return this;
   }
+  allowChildCount() {
+    return 0;
+  }
   color(value) {
     modifierWithKey(this._modifiersWithKeys, LoadingProgressColorModifier.identity, LoadingProgressColorModifier, value);
     return this;
@@ -14685,6 +14706,9 @@ class ArkScrollComponent extends ArkComponent {
       modifierWithKey(this._modifiersWithKeys, ScrollInitializeModifier.identity, ScrollInitializeModifier, value[0]);
     }
     return this;
+  }
+  allowChildCount() {
+    return 1;
   }
   scrollable(value) {
     modifierWithKey(this._modifiersWithKeys, ScrollScrollableModifier.identity, ScrollScrollableModifier, value);
@@ -20324,6 +20348,9 @@ class ArkProgressComponent extends ArkComponent {
     }
     return this;
   }
+  allowChildCount() {
+    return 0;
+  }
   value(value) {
     modifierWithKey(this._modifiersWithKeys, ProgressValueModifier.identity, ProgressValueModifier, value);
     return this;
@@ -22739,7 +22766,9 @@ class ArkListComponent extends ArkComponent {
     }
     return this;
   }
-
+  allowChildTypes() {
+    return ["ListItem", "ListItemGroup"];
+  }
   lanes(value, gutter) {
     let opt = new ArkLanesOpt();
     opt.gutter = gutter;
