@@ -1758,6 +1758,8 @@ struct ArkUIFlexModifier {
     void (*setFlexOptions)(ArkUINodeHandle node, ArkUI_Int32* options, ArkUI_Int32 length);
     void (*resetFlexOptions)(ArkUINodeHandle node);
     void (*getFlexOptions)(ArkUINodeHandle node, ArkUIFlexOptions* options);
+    void (*setFlexCrossSpace)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*setFlexMainSpace)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
 };
 
 struct ArkUIListModifier {

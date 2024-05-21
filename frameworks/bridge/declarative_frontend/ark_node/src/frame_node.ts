@@ -728,7 +728,7 @@ const __creatorMap__ = new Map<string, (context: UIContext) => FrameNode>(
   ]
 )
 
-class TypedNode {
+class typeNode {
   static createNode(context: UIContext, type: string): FrameNode {
     let creator = __creatorMap__.get(type)
     if (creator === undefined) {

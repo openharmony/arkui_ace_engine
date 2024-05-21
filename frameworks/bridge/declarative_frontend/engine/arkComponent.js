@@ -4786,7 +4786,8 @@ class FlexInitializeModifier extends ModifierWithKey {
       getUINativeModule().flex.resetFlexInitialize(node);
     } else {
       getUINativeModule().flex.setFlexInitialize(node, this.value.direction, this.value.wrap,
-        this.value.justifyContent, this.value.alignItems, this.value.alignContent);
+        this.value.justifyContent, this.value.alignItems, this.value.alignContent, this.value?.space?.main,
+        this.value?.space?.cross);
     }
   }
 }
@@ -4909,17 +4910,17 @@ class SetGutterModifier extends ModifierWithKey {
           } else {
             getUINativeModule().gridRow.setGutter(node,
               this.value.x, this.value.x, this.value.x, this.value.x, this.value.x, this.value.x,
-              this.value.y.xs, this.value.y.sm, this.value.y.md, this.value.y.lg, this.value.y.xl, this.value.y.xxl);
+              this.value.y?.xs, this.value.y?.sm, this.value.y?.md, this.value.y?.lg, this.value.y?.xl, this.value.y?.xxl);
           }
         } else {
           if (isNumber(this.value.y)) {
             getUINativeModule().gridRow.setGutter(node,
-              this.value.x.xs, this.value.x.sm, this.value.x.md, this.value.x.lg, this.value.x.xl, this.value.x.xxl,
+              this.value.x?.xs, this.value.x?.sm, this.value.x?.md, this.value.x?.lg, this.value.x?.xl, this.value.x?.xxl,
               this.value.y, this.value.y, this.value.y, this.value.y, this.value.y, this.value.y);
           } else {
             getUINativeModule().gridRow.setGutter(node,
-              this.value.x.xs, this.value.x.sm, this.value.x.md, this.value.x.lg, this.value.x.xl, this.value.x.xxl,
-              this.value.y.xs, this.value.y.sm, this.value.y.md, this.value.y.lg, this.value.y.xl, this.value.y.xxl);
+              this.value.x?.xs, this.value.x?.sm, this.value.x?.md, this.value.x?.lg, this.value.x?.xl, this.value.x?.xxl,
+              this.value.y?.xs, this.value.y?.sm, this.value.y?.md, this.value.y?.lg, this.value.y?.xl, this.value.y?.xxl);
           }
         }
       }
@@ -5470,12 +5471,12 @@ class GridColSpanModifier extends ModifierWithKey {
       return this.stageValue !== this.value;
     }
     else if (isObject(this.stageValue) && isObject(this.value)) {
-      return this.stageValue.xs !== this.value.xs ||
-        this.stageValue.sm !== this.value.sm ||
-        this.stageValue.md !== this.value.md ||
-        this.stageValue.lg !== this.value.lg ||
-        this.stageValue.xl !== this.value.xl ||
-        this.stageValue.xxl !== this.value.xxl;
+      return this.stageValue?.xs !== this.value?.xs ||
+        this.stageValue?.sm !== this.value?.sm ||
+        this.stageValue?.md !== this.value?.md ||
+        this.stageValue?.lg !== this.value?.lg ||
+        this.stageValue?.xl !== this.value?.xl ||
+        this.stageValue?.xxl !== this.value?.xxl;
     }
     else {
       return true;
@@ -5505,12 +5506,12 @@ class GridColOffsetModifier extends ModifierWithKey {
       return this.stageValue !== this.value;
     }
     else if (isObject(this.stageValue) && isObject(this.value)) {
-      return this.stageValue.xs !== this.value.xs ||
-        this.stageValue.sm !== this.value.sm ||
-        this.stageValue.md !== this.value.md ||
-        this.stageValue.lg !== this.value.lg ||
-        this.stageValue.xl !== this.value.xl ||
-        this.stageValue.xxl !== this.value.xxl;
+      return this.stageValue?.xs !== this.value?.xs ||
+        this.stageValue?.sm !== this.value?.sm ||
+        this.stageValue?.md !== this.value?.md ||
+        this.stageValue?.lg !== this.value?.lg ||
+        this.stageValue?.xl !== this.value?.xl ||
+        this.stageValue?.xxl !== this.value?.xxl;
     }
     else {
       return true;
@@ -5540,12 +5541,12 @@ class GridColOrderModifier extends ModifierWithKey {
       return this.stageValue !== this.value;
     }
     else if (isObject(this.stageValue) && isObject(this.value)) {
-      return this.stageValue.xs !== this.value.xs ||
-        this.stageValue.sm !== this.value.sm ||
-        this.stageValue.md !== this.value.md ||
-        this.stageValue.lg !== this.value.lg ||
-        this.stageValue.xl !== this.value.xl ||
-        this.stageValue.xxl !== this.value.xxl;
+      return this.stageValue?.xs !== this.value?.xs ||
+        this.stageValue?.sm !== this.value?.sm ||
+        this.stageValue?.md !== this.value?.md ||
+        this.stageValue?.lg !== this.value?.lg ||
+        this.stageValue?.xl !== this.value?.xl ||
+        this.stageValue?.xxl !== this.value?.xxl;
     }
     else {
       return true;
@@ -9424,7 +9425,7 @@ class TextLineSpacingModifier extends ModifierWithKey {
       getUINativeModule().text.resetLineSpacing(node);
     }
     else {
-      getUINativeModule().text.setLineSpacing(node, this.value);
+      getUINativeModule().text.setLineSpacing(node, this.value.value, this.value.unit);
     }
   }
   checkObjectDiff() {
