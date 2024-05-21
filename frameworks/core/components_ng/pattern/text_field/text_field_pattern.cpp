@@ -4370,6 +4370,9 @@ void TextFieldPattern::DeleteBackward(int32_t length)
         HandleCountStyle();
         return;
     }
+    if (selectController_->GetCaretIndex() <= 0) {
+        return;
+    }
     inputOperations_.emplace(InputOperation::DELETE_BACKWARD);
     deleteBackwardOperations_.emplace(length);
     CloseSelectOverlay();
