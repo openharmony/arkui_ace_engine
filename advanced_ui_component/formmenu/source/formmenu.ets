@@ -36,14 +36,10 @@ const querySnapshotAsync = async (want: Want, componentId: string): Promise<void
     let uint8Arr = new Uint8Array(arrayBuffer);
     let pixelStr = base64Helper.encodeToStringSync(uint8Arr);
     !want.parameters && (want.parameters = {});
-    want.parameters['ohos.extra.param.key.add_form_to_host_width'] =
-      (Math.floor(compInfo.size.width * 100) / 100).toString();
-    want.parameters['ohos.extra.param.key.add_form_to_host_height'] =
-      (Math.floor(compInfo.size.height * 100) / 100).toString();
-    want.parameters['ohos.extra.param.key.add_form_to_host_screenx'] =
-      (Math.floor(compInfo.screenOffset.x * 100) / 100).toString();
-    want.parameters['ohos.extra.param.key.add_form_to_host_screeny'] =
-      (Math.floor(compInfo.screenOffset.y * 100) / 100).toString();
+    want.parameters['ohos.extra.param.key.add_form_to_host_width'] = compInfo.size.width.toFixed(2);
+    want.parameters['ohos.extra.param.key.add_form_to_host_height'] = compInfo.size.height.toFixed(2);
+    want.parameters['ohos.extra.param.key.add_form_to_host_screenx'] = compInfo.screenOffset.x.toFixed(2);
+    want.parameters['ohos.extra.param.key.add_form_to_host_screeny'] = compInfo.screenOffset.y.toFixed(2);
     want.parameters['ohos.extra.param.key.add_form_to_host_snapshot'] = pixelStr;
   } catch (err) {
     hilog.error(0x3900, tag, 'get pixelmap string error:' + err);
@@ -56,13 +52,12 @@ const querySnapshot = (want: Want, componentId: string): boolean => {
 }
 
 @Builder
-FormMenuItem(want: Want, componentId: string, options?: AddFormOptions): void {
+AddFormMenuItem(want: Want, componentId: string, options?: AddFormOptions): void {
   if (querySnapshot(want, componentId)) {
   }
   FormMenuItem(options?.style?.options ? options.style.options : {
     startIcon: $r('sys.media.ohos_ic_public_add'),
     content: $r('sys.string.ohos_add_form_to_desktop')
   })
-  .onClick(() => {
-  }, want, componentId, options?.formBindingData, options?.callback)
+  .onRegClick(want, componentId, options?.formBindingData?.data, options?.callback)
 }
