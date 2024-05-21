@@ -336,7 +336,7 @@ void RefreshPattern::InitChildNode()
         progressAccessibilityProperty->SetAccessibilityLevel(accessibilityLevel);
     }
 
-    if (HasLoadingText()) {
+    if (HasLoadingText() && loadingTextNode_) {
         auto loadingTextLayoutProperty = loadingTextNode_->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(loadingTextLayoutProperty);
         auto layoutProperty = host->GetLayoutProperty<RefreshLayoutProperty>();
