@@ -194,6 +194,16 @@ public:
         return isDragUserReject_;
     }
 
+    void SetIsDefaultOnDragStartExecuted(bool defaultOnDragStartExecuted)
+    {
+        defaultOnDragStartExecuted_ = defaultOnDragStartExecuted;
+    }
+
+    bool IsDefaultOnDragStartExecuted() const
+    {
+        return defaultOnDragStartExecuted_;
+    }
+
     void CopyDragEvent(const RefPtr<DragEventActuator>& dragEventActuator);
 
     void SetGatherNodeAboveFilter(const RefPtr<DragEventActuator>& actuator);
@@ -277,6 +287,7 @@ private:
     bool isOnBeforeLiftingAnimation = false;
 
     bool isDragUserReject_ = false;
+    bool defaultOnDragStartExecuted_ = false;
 
     PanDirection direction_;
     int32_t fingers_ = 1;
