@@ -738,6 +738,8 @@ var SlideEffect;
   SlideEffect[SlideEffect["Right"] = 2] = "Right";
   SlideEffect[SlideEffect["Top"] = 3] = "Top";
   SlideEffect[SlideEffect["Bottom"] = 4] = "Bottom";
+  SlideEffect[SlideEffect["Start"] = 5] = "Start";
+  SlideEffect[SlideEffect["End"] = 6] = "End";
 })(SlideEffect || (SlideEffect = {}));
 
 var GradientDirection;
