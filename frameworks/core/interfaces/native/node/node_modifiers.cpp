@@ -242,7 +242,6 @@ const ArkUINodeModifiers impl = {
     nullptr,
 #endif
 };
-
 } // namespace
 
 } // namespace OHOS::Ace::NG
