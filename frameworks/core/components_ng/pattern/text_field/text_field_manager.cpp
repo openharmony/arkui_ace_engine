@@ -40,6 +40,21 @@ void TextFieldManagerNG::ClearOnFocusTextField(int32_t id)
     }
 }
 
+void TextFieldManagerNG::SetClickPosition(const Offset& position)
+{
+    auto pipeline =  PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto rootHeight = pipeline->GetRootHeight();
+    if (GreatOrEqual(position.GetY(), rootHeight) || LessOrEqual(position.GetY(), 0.0f)) {
+        return;
+    }
+    auto rootWidth = pipeline->GetRootWidth();
+    if (GreatOrEqual(position.GetX(), rootWidth) || LessOrEqual(position.GetX(), 0.0f)) {
+        return;
+    }
+    position_ = position;
+}
+
 bool TextFieldManagerNG::OnBackPressed()
 {
     auto pattern = onFocusTextField_.Upgrade();
