@@ -1800,7 +1800,7 @@ void DragDropManager::PushGatherPixelMap(DragDataCore& dragData, float scale, fl
         auto height = pixelMapDuplicated->GetHeight() * scale;
         auto updateScale = scale;
         if (((width > previewWidth) || (height > previewHeight)) && !NearZero(width) && !NearZero(height)) {
-            updateScale = std::min(previewWidth / width, previewHeight / height);
+            updateScale *= std::min(previewWidth / width, previewHeight / height);
         }
         pixelMapDuplicated->Scale(updateScale, updateScale, AceAntiAliasingOption::HIGH);
         dragData.shadowInfos.push_back({pixelMapDuplicated, 0.0f, 0.0f});
