@@ -83,7 +83,7 @@ public:
 
     const Dimension& GetSearchIconSize() const
     {
-        return searchIconSize_ ;
+        return searchIconSize_;
     }
 
     const Dimension& GetCancelIconSize() const
@@ -101,34 +101,34 @@ public:
         return cancelIconColor_;
     }
 
-    void SetSearchIconSize(const Dimension  searchIconSize)  
+    void SetSearchIconSize(const Dimension searchIconSize)
     {
         searchIconSize_ = searchIconSize;
     }
 
-    void SetCancelIconSize(const Dimension  cancelIconSize)  
+    void SetCancelIconSize(const Dimension cancelIconSize)
     {
         cancelIconSize_ = cancelIconSize;
     }
 
-    void SetSearchIconColor(const Color  searchIconColor)  
+    void SetSearchIconColor(const Color searchIconColor)
     {
         searchIconColor_ = searchIconColor;
     }
 
-    void SetCancelIconColor(const Color  cancelIconColor)  
+    void SetCancelIconColor(const Color cancelIconColor)
     {
         cancelIconColor_ = cancelIconColor;
     }
 
-    void UpdateHasSearchIconNodeCreated(bool hasNodeCreated)  
+    void UpdateHasSearchIconNodeCreated(bool hasNodeCreated)
     {
-          searchIconNodeCreated_= hasNodeCreated;
+        searchIconNodeCreated_ = hasNodeCreated;
     }
 
-    void UpdateHasCancelIconNodeCreated(bool hasNodeCreated)  
+    void UpdateHasCancelIconNodeCreated(bool hasNodeCreated)
     {
-          cancelIconNodeCreated_= hasNodeCreated;
+        cancelIconNodeCreated_ = hasNodeCreated;
     }
 
 private:

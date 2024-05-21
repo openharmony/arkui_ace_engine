@@ -1584,39 +1584,13 @@ void SearchPattern::CreateOrUpdateImage(int32_t index, const std::string& src, b
 {
     CHECK_NULL_VOID(GetSearchNode());
     imageClickListener_ = nullptr;
-    CHECK_NULL_VOID(GetSearchNode());
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-
-    ImageSourceInfo imageSourceInfo("");
-    auto iconTheme = pipeline->GetTheme<IconTheme>();
-    CHECK_NULL_VOID(iconTheme);
     auto searchTheme = pipeline->GetTheme<SearchTheme>();
     CHECK_NULL_VOID(searchTheme);
-    if (src.empty()) {
-        imageSourceInfo.SetResourceId(
-            index == IMAGE_INDEX ? InternalResource::ResourceId::SEARCH_SVG : InternalResource::ResourceId::CLOSE_SVG);
-        auto iconPath = iconTheme->GetIconPath(
-            index == IMAGE_INDEX ? InternalResource::ResourceId::SEARCH_SVG : InternalResource::ResourceId::CLOSE_SVG);
-        imageSourceInfo.SetSrc(iconPath,
-            index == IMAGE_INDEX ? GetSearchNode()->GetSearchIconColor() : GetSearchNode()->GetCancelIconColor());
-    } else {
-        imageSourceInfo.SetSrc(src);
-    }
-    if (index == IMAGE_INDEX) {
-        imageSourceInfo.SetBundleName(bundleName);
-        imageSourceInfo.SetModuleName(moduleName);
-    }
-    imageSourceInfo.SetFillColor(
-        index == IMAGE_INDEX ? GetSearchNode()->GetSearchIconColor() : GetSearchNode()->GetCancelIconColor());
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
-    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
-    imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-    CalcSize imageCalcSize((CalcLength(searchTheme->GetIconHeight())), CalcLength(searchTheme->GetIconHeight())); //?
-    imageLayoutProperty->UpdateUserDefinedIdealSize(imageCalcSize);
-
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    HandleImageLayoutProperty(frameNode, index, src, bundleName, moduleName);
     auto imageRenderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(imageRenderContext);
     auto imageOriginHeight = searchTheme->GetIconHeight().ConvertToPx();
@@ -1629,7 +1603,6 @@ void SearchPattern::CreateOrUpdateImage(int32_t index, const std::string& src, b
     imageRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
     auto parentInspector = GetSearchNode()->GetInspectorIdValue("");
     frameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[index] + parentInspector);
-
     auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_VOID(imageRenderProperty);
     imageRenderProperty->UpdateSvgFillColor(
@@ -1652,6 +1625,39 @@ void SearchPattern::CreateOrUpdateImage(int32_t index, const std::string& src, b
         frameNode->MarkModifyDone();
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
+}
+
+void SearchPattern::HandleImageLayoutProperty(RefPtr<FrameNode>& frameNode, int32_t index, const std::string& src,
+    const std::string& bundleName, const std::string& moduleName)
+{
+    CHECK_NULL_VOID(GetSearchNode());
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    ImageSourceInfo imageSourceInfo("");
+    auto iconTheme = pipeline->GetTheme<IconTheme>();
+    CHECK_NULL_VOID(iconTheme);
+    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    CHECK_NULL_VOID(searchTheme);
+    if (src.empty()) {
+        imageSourceInfo.SetResourceId(
+            index == IMAGE_INDEX ? InternalResource::ResourceId::SEARCH_SVG : InternalResource::ResourceId::CLOSE_SVG);
+        auto iconPath = iconTheme->GetIconPath(
+            index == IMAGE_INDEX ? InternalResource::ResourceId::SEARCH_SVG : InternalResource::ResourceId::CLOSE_SVG);
+        imageSourceInfo.SetSrc(iconPath,
+            index == IMAGE_INDEX ? GetSearchNode()->GetSearchIconColor() : GetSearchNode()->GetCancelIconColor());
+    } else {
+        imageSourceInfo.SetSrc(src);
+    }
+    if (index == IMAGE_INDEX) {
+        imageSourceInfo.SetBundleName(bundleName);
+        imageSourceInfo.SetModuleName(moduleName);
+    }
+    imageSourceInfo.SetFillColor(
+        index == IMAGE_INDEX ? GetSearchNode()->GetSearchIconColor() : GetSearchNode()->GetCancelIconColor());
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+    CalcSize imageCalcSize((CalcLength(searchTheme->GetIconHeight())), CalcLength(searchTheme->GetIconHeight()));
+    imageLayoutProperty->UpdateUserDefinedIdealSize(imageCalcSize);
 }
 
 void SearchPattern::SetSearchIconSize(const Dimension& value)
