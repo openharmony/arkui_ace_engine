@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/search/search_event_hub.h"
 #include "core/components_ng/pattern/search/search_layout_algorithm.h"
 #include "core/components_ng/pattern/search/search_layout_property.h"
+#include "core/components_ng/pattern/search/search_node.h"
 #include "core/components_ng/pattern/search/search_paint_method.h"
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
@@ -127,7 +128,7 @@ public:
 
     enum class FocusChoice { SEARCH = 0, CANCEL_BUTTON, SEARCH_BUTTON };
 
-    void UpdateChangeEvent(const std::string& value);
+    void UpdateChangeEvent(const std::string& value, int16_t style = -1);
 
     void SetCancelButtonNode(const RefPtr<FrameNode>& cancelButtonNode)
     {
@@ -144,8 +145,49 @@ public:
         textField_ = textField;
     }
 
+    void SetSearchIconNode(const RefPtr<FrameNode>& searchIcon)
+    {
+        searchIcon_ = searchIcon;
+    }
+
+    void SetCancelIconNode(const RefPtr<FrameNode>& cancelIcon)
+    {
+        cancelIcon_ = cancelIcon;
+    }
+
+    void SetSearchNode(const RefPtr<SearchNode>& searchNode)
+    {
+        searchNode_ = searchNode;
+    }
+
+    RefPtr<FrameNode> GetSearchIconNode() const
+    {
+        return searchIcon_;
+    }
+
+    RefPtr<FrameNode> GetCancelIconNode() const
+    {
+        return cancelIcon_;
+    }
+
+    RefPtr<SearchNode> GetSearchNode() const
+    {
+        return searchNode_;
+    }
+
     void ResetDragOption() override;
     void OnColorConfigurationUpdate() override;
+
+    void SetSearchIconSize(const Dimension& value);
+    void SetSearchIconColor(const Color& color);
+    void SetSearchSrcPath(const std::string& src, const std::string& bundleName, const std::string& moduleName);
+    void SetRightIconSrcPath(const std::string& src);
+    void SetCancelButtonStyle(const CancelButtonStyle& cancelButtonStyle);
+    void SetCancelIconSize(const Dimension& value);
+    void SetCancelIconColor(const Color& color);
+    void InitIconColorSize();
+    void CreateSearchIcon(const std::string& src);
+    void CreateCancelIcon();
 
 private:
     void OnModifyDone() override;
@@ -191,6 +233,9 @@ private:
     void ToJsonValueForCancelButton(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void ToJsonValueForSearchButtonOption(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void ToJsonValueForCursor(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void ToJsonValueForCancelButtonStyle(
+        std::unique_ptr<JsonValue>& cancelButtonJson, const CancelButtonStyle& cancelButtonStyle) const;
+    std::string SymbolColorToString(std::vector<Color>& colors) const;
 
     void AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
         int32_t duration, const RefPtr<Curve>& curve);
@@ -199,6 +244,19 @@ private:
     void HandleBlurEvent();
     void InitClickEvent();
     void HandleClickEvent(GestureEvent& info);
+    void UpdateIconChangeEvent();
+    bool IsEventEnabled(const std::string& textValue, int16_t style);
+
+    void CreateOrUpdateSymbol(int32_t index, bool isCreateNode);
+    void CreateOrUpdateImage(int32_t index, const std::string& src, bool isCreateNode, const std::string& bundleName,
+        const std::string& moduleName);
+    bool IsSymbolIcon(int32_t index);
+    void UpdateIconNode(
+        int32_t index, const std::string& src, const std::string& bundleName, const std::string& moduleName);
+    void UpdateIconSrc(int32_t index, const std::string& src);
+    void UpdateIconColor(int32_t index, const Color& color);
+    void UpdateIconSize(int32_t index, const Dimension& value);
+
     uint32_t GetMaxLength() const;
     std::string SearchTypeToString() const;
     std::string searchButton_;
@@ -231,6 +289,9 @@ private:
     RefPtr<FrameNode> cancelButtonNode_;
     RefPtr<FrameNode> buttonNode_;
     RefPtr<FrameNode> textField_;
+    RefPtr<FrameNode> searchIcon_;
+    RefPtr<FrameNode> cancelIcon_;
+    RefPtr<SearchNode> searchNode_;
 };
 
 } // namespace OHOS::Ace::NG

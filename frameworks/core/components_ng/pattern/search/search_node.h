@@ -37,9 +37,9 @@ public:
         return textFieldId_.has_value();
     }
 
-    bool HasImageNode() const
+    bool HasSearchIconNodeCreated() const
     {
-        return imageId_.has_value();
+        return searchIconNodeCreated_;
     }
 
     bool HasButtonNode() const
@@ -47,9 +47,9 @@ public:
         return buttonId_.has_value();
     }
 
-    bool HasCancelImageNode() const
+    bool HasCancelIconNodeCreated() const
     {
-        return cancelImageId_.has_value();
+        return cancelIconNodeCreated_;
     }
 
     bool HasCancelButtonNode() const
@@ -65,28 +65,12 @@ public:
         return textFieldId_.value();
     }
 
-    int32_t GetImageId()
-    {
-        if (!imageId_.has_value()) {
-            imageId_ = ElementRegister::GetInstance()->MakeUniqueId();
-        }
-        return imageId_.value();
-    }
-
     int32_t GetButtonId()
     {
         if (!buttonId_.has_value()) {
             buttonId_ = ElementRegister::GetInstance()->MakeUniqueId();
         }
         return buttonId_.value();
-    }
-
-    int32_t GetCancelImageId()
-    {
-        if (!cancelImageId_.has_value()) {
-            cancelImageId_ = ElementRegister::GetInstance()->MakeUniqueId();
-        }
-        return cancelImageId_.value();
     }
 
     int32_t GetCancelButtonId()
@@ -97,14 +81,69 @@ public:
         return cancelButtonId_.value();
     }
 
+    const Dimension& GetSearchIconSize() const
+    {
+        return searchIconSize_ ;
+    }
+
+    const Dimension& GetCancelIconSize() const
+    {
+        return cancelIconSize_;
+    }
+
+    const Color& GetSearchIconColor() const
+    {
+        return searchIconColor_;
+    }
+
+    const Color& GetCancelIconColor() const
+    {
+        return cancelIconColor_;
+    }
+
+    void SetSearchIconSize(const Dimension  searchIconSize)  
+    {
+        searchIconSize_ = searchIconSize;
+    }
+
+    void SetCancelIconSize(const Dimension  cancelIconSize)  
+    {
+        cancelIconSize_ = cancelIconSize;
+    }
+
+    void SetSearchIconColor(const Color  searchIconColor)  
+    {
+        searchIconColor_ = searchIconColor;
+    }
+
+    void SetCancelIconColor(const Color  cancelIconColor)  
+    {
+        cancelIconColor_ = cancelIconColor;
+    }
+
+    void UpdateHasSearchIconNodeCreated(bool hasNodeCreated)  
+    {
+          searchIconNodeCreated_= hasNodeCreated;
+    }
+
+    void UpdateHasCancelIconNodeCreated(bool hasNodeCreated)  
+    {
+          cancelIconNodeCreated_= hasNodeCreated;
+    }
+
 private:
     std::optional<int32_t> textFieldId_;
-    std::optional<int32_t> imageId_;
     std::optional<int32_t> buttonId_;
-    std::optional<int32_t> cancelImageId_;
     std::optional<int32_t> cancelButtonId_;
 
     std::set<int32_t> searchChildren_;
+
+    Dimension searchIconSize_ = 20.0_vp;
+    Color searchIconColor_;
+    Dimension cancelIconSize_ = 20.0_vp;
+    Color cancelIconColor_;
+    bool searchIconNodeCreated_ = false;
+    bool cancelIconNodeCreated_ = false;
 };
 
 } // namespace OHOS::Ace::NG

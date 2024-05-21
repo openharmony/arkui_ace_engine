@@ -1014,11 +1014,13 @@ HWTEST_F(SearchTestNg, Create001, TestSize.Level1)
 
     searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, EMPTY_VALUE);
     auto frameNode = AceType::DynamicCast<SearchNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    CHECK_NULL_VOID(pattern);
 
     ASSERT_NE(frameNode, nullptr);
     searchModelInstance.CreateTextField(frameNode, PLACEHOLDER, EMPTY_VALUE, true);
-    searchModelInstance.CreateImage(frameNode, SEARCH_SVG, true);
-    searchModelInstance.CreateCancelImage(frameNode, true);
+    pattern->CreateSearchIcon(SEARCH_SVG);
+    pattern->CreateCancelIcon();
     searchModelInstance.CreateButton(frameNode, true);
     searchModelInstance.CreateCancelButton(frameNode, true);
     auto textFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));

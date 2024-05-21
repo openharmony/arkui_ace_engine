@@ -89,6 +89,9 @@ public:
             theme->iconHeight_ = pattern->GetAttr<Dimension>("search_icon_height", Dimension());
             theme->searchIconLeftSpace_ = pattern->GetAttr<Dimension>("search_icon_left_space", Dimension());
             theme->searchIconRightSpace_ = pattern->GetAttr<Dimension>("search_icon_right_space", Dimension());
+            theme->symbolIconColor_ = pattern->GetAttr<Color>("font_secondary", Color());
+            theme->searchSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.magnifyingglass");
+            theme->cancelSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.xmark");
         }
     };
 
@@ -239,6 +242,21 @@ public:
         return textStyle_;
     }
 
+    uint32_t GetSearchSymbolId() const
+    {
+        return searchSymbolId_;
+    }
+
+    uint32_t GetCancelSymbolId() const
+    {
+        return cancelSymbolId_;
+    }
+
+    const Color& GetSymbolIconColor() const
+    {
+        return symbolIconColor_;
+    }
+
 protected:
     SearchTheme() = default;
 
@@ -272,6 +290,9 @@ private:
     Color searchIconColor_;
     CancelButtonStyle cancelButtonStyle_ = CancelButtonStyle::INPUT;
     TextStyle textStyle_;
+    uint32_t searchSymbolId_ = 0;
+    uint32_t cancelSymbolId_ = 0;
+    Color symbolIconColor_;
 };
 
 } // namespace OHOS::Ace
