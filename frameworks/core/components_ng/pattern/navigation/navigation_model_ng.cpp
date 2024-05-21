@@ -363,6 +363,7 @@ void UpdateBarItemPattern(const RefPtr<BarItemNode>& barItemNode, const BarItem&
         }
         barItemPattern->SetToolbarItemStatus(barItem.status);
         barItemPattern->SetCurrentIconStatus(NG::ToolbarIconStatus::INITIAL);
+        barItemPattern->UpdateBarItemActiveStatusResource();
     }
 }
 
