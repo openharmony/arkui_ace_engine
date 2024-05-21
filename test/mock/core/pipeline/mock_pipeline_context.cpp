@@ -765,5 +765,10 @@ Dimension NG::PipelineContext::GetCustomTitleHeight()
 {
     return Dimension();
 }
+
+void PipelineBase::SetFontScale(float fontScale)
+{
+    fontScale_ = fontScale;
+}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================
