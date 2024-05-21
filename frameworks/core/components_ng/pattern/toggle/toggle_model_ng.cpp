@@ -279,8 +279,24 @@ void ToggleModelNG::ReplaceAllChild(const RefPtr<FrameNode>& oldFrameNode)
     auto currentNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     CHECK_NULL_VOID(currentNode);
     const auto& children = oldFrameNode->GetChildren();
+    auto switchPattern = oldFrameNode->GetPattern<SwitchPattern>();
+    auto checkboxPattern = oldFrameNode->GetPattern<CheckBoxPattern>();
+    auto toggleButtonPattern = oldFrameNode->GetPattern<ToggleButtonPattern>();
     for (const auto& child : children) {
         if (!child) {
+            continue;
+        }
+        if (switchPattern && switchPattern->UseContentModifier() && switchPattern->GetBuilderId() == child->GetId()) {
+            continue;
+        }
+        if (checkboxPattern && checkboxPattern->UseContentModifier()) {
+            auto modifierNode = checkboxPattern->GetContentModifierNode();
+            if (modifierNode && modifierNode->GetId() == child->GetId()) {
+                continue;
+            }
+        }
+        if (toggleButtonPattern && toggleButtonPattern->UseContentModifier() &&
+            toggleButtonPattern->GetBuilderId() == child->GetId()) {
             continue;
         }
         child->MountToParent(currentNode);

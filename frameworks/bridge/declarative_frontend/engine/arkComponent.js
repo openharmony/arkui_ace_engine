@@ -15138,6 +15138,7 @@ globalThis.Toggle.contentModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkToggleComponent(nativeNode);
   });
+  component.setNodePtr(nativeNode);
   component.setContentModifier(modifier);
 };
 
