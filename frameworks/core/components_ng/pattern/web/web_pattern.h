@@ -838,6 +838,7 @@ private:
     double pageScale_ = 1.0;
     int32_t pinchIndex_ = 0;
     bool zoomOutSwitch_ = false;
+    bool isTouchUpEvent_ = false;
     int32_t zoomStatus_ = 0;
     int32_t zoomErrorCount_ = 0;
 };
