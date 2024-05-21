@@ -31,8 +31,10 @@ public:
             return;
         }
 
+        SelectModel::GetInstance()->SetSelectedOptionBgColor(themeColors->CompBackgroundTertiary());
         ViewAbstractModel::GetInstance()->SetBackgroundColor(themeColors->CompBackgroundTertiary());
         SelectModel::GetInstance()->SetFontColor(themeColors->FontPrimary());
+        SelectModel::GetInstance()->SetSelectedOptionFontColor(themeColors->FontPrimary());
     }
 };
 }
