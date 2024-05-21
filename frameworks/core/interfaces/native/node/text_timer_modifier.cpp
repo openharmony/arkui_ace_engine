@@ -187,7 +187,9 @@ const ArkUITextTimerModifier* GetTextTimerModifier()
         TextTimerModifier::SetFontFamily,
         TextTimerModifier::ResetFontFamily,
         TextTimerModifier::SetFormat,
-        TextTimerModifier::ResetFormat
+        TextTimerModifier::ResetFormat,
+        TextTimerModifier::SetTextShadow,
+        TextTimerModifier::ResetTextShadow
     };
 
     return &modifier;
