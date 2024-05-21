@@ -624,6 +624,7 @@ public:
         SetDeviceId(event.deviceId);
         SetTimeStamp(event.timeStamp);
         keyMsg_ = event.msg;
+        SetPressedKeyCodes(event.pressedCodes);
     };
     ~KeyEventInfo() override = default;
 

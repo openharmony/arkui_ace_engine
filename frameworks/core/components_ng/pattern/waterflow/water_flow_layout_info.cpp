@@ -40,6 +40,9 @@ int32_t WaterFlowLayoutInfo::GetCrossIndex(int32_t itemIndex) const
 
 void WaterFlowLayoutInfo::UpdateStartIndex()
 {
+    if (childrenCount_ == 0) {
+        return;
+    }
     if (!itemInfos_.empty()) {
         // don't use in new segmented layout
         return;

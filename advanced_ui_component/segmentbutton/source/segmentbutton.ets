@@ -711,8 +711,8 @@ struct SegmentButtonItemArrayComponent {
               //measure position
               if (newValue.width) {
                 this.buttonItemsPosition[index] = {
-                  x: Number.parseInt(this.options.componentPadding.toString()) + (Number.parseInt(newValue.width.toString()) + 1) * index,
-                  y: Number.parseInt(this.options.componentPadding.toString())
+                  x: Number.parseFloat(this.options.componentPadding.toString()) + (Number.parseFloat(newValue.width.toString()) + 1) * index,
+                  y: Number.parseFloat(this.options.componentPadding.toString())
                 }
               }
             })

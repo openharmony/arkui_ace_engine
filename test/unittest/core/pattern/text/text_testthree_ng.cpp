@@ -59,29 +59,24 @@ HWTEST_F(TextTestThreeNg, TextModelSetFont001, TestSize.Level1)
 }
 
 /**
- * @tc.name: TextModelGetFont001
- * @tc.desc: Test if GetFont is successful
+ * @tc.name: TextModelGetFontInJson001
+ * @tc.desc: Test if GetFontInJson is successful
  * @tc.type: FUNC
  */
-HWTEST_F(TextTestThreeNg, TextModelGetFont001, TestSize.Level1)
+HWTEST_F(TextTestThreeNg, TextModelGetFontInJson001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Initialize textModelNG and FrameNode
      */
     TextModelNG textModelNG;
     textModelNG.Create(CREATE_VALUE);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto layoutProperty = frameNode->GetLayoutProperty();
-    ASSERT_NE(layoutProperty, nullptr);
-    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
-    ASSERT_NE(textLayoutProperty, nullptr);
+    auto [frameNode, pattern] = Init();
 
     /**
      * @tc.steps: step2. not set and Gets the relevant properties of the Font
      * @tc.expected: step2. Check the font value
      */
-    EXPECT_EQ(textLayoutProperty->GetFont(), TEXT_DEFAULT_VALUE);
+    EXPECT_EQ(pattern->GetFontInJson(), TEXT_DEFAULT_VALUE);
 
     /**
      * @tc.steps: step2. call SetFont and Gets the relevant properties of the Font
@@ -93,7 +88,7 @@ HWTEST_F(TextTestThreeNg, TextModelGetFont001, TestSize.Level1)
     font.fontFamilies = FONT_FAMILY_VALUE;
     font.fontStyle = ITALIC_FONT_STYLE_VALUE;
     textModelNG.SetFont(font);
-    EXPECT_EQ(textLayoutProperty->GetFont(), TEXT_EQUALS_VALUE);
+    EXPECT_EQ(pattern->GetFontInJson(), TEXT_EQUALS_VALUE);
 }
 
 /**

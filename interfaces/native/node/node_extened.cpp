@@ -62,17 +62,25 @@ int32_t RegisterNodeCustomEvent(ArkUI_NodeHandle node, ArkUI_NodeCustomEventType
     if (!node) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    if (eventType <= 0 || node->type != ARKUI_NODE_CUSTOM) {
+    if (eventType <= 0) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Custom event is not supported %{public}d", eventType);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
     }
 
     if (eventType & ARKUI_NODE_CUSTOM_EVENT_ON_MEASURE) {
-        NodeAddExtraData(node, ARKUI_NODE_CUSTOM_EVENT_ON_MEASURE, targetId, userData);
+        if (node->type == ARKUI_NODE_CUSTOM) {
+            NodeAddExtraData(node, ARKUI_NODE_CUSTOM_EVENT_ON_MEASURE, targetId, userData);
+        } else {
+            return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
+        }
     }
 
     if (eventType & ARKUI_NODE_CUSTOM_EVENT_ON_LAYOUT) {
-        NodeAddExtraData(node, ARKUI_NODE_CUSTOM_EVENT_ON_LAYOUT, targetId, userData);
+        if (node->type == ARKUI_NODE_CUSTOM) {
+            NodeAddExtraData(node, ARKUI_NODE_CUSTOM_EVENT_ON_LAYOUT, targetId, userData);
+        } else {
+            return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
+        }
     }
 
     if (eventType & ARKUI_NODE_CUSTOM_EVENT_ON_DRAW) {

@@ -164,6 +164,8 @@ void SideBarContainerModelImpl::SetControlButtonSwitchingIconInfo(
     component->SetSwitchIcon(switchingIconStr);
 }
 
+void SideBarContainerModelImpl::ResetControlButtonIconInfo() {}
+
 void SideBarContainerModelImpl::SetOnChange(std::function<void(const bool)>&& onChange)
 {
     JSViewSetProperty(&SideBarContainerComponent::SetOnChange, std::move(onChange));

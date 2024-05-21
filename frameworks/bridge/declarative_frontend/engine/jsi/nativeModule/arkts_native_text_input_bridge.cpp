@@ -716,13 +716,10 @@ ArkUINativeModuleValue TextInputBridge::SetShowError(ArkUIRuntimeCallInfo *runti
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    bool visible;
-    std::string error = "";
-    if (secondArg->IsString()) {
+    bool visible = false;
+    std::string error;
+    if (ArkTSUtils::ParseJsString(vm, secondArg, error)) {
         visible = true;
-        error = secondArg->ToString(vm)->ToString();
-    } else {
-        visible = false;
     }
 
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputShowError(nativeNode, error.c_str(),

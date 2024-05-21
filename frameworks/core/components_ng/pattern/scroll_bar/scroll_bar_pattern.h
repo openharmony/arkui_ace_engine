@@ -285,6 +285,17 @@ public:
         return false;
     }
 
+    void SetScrollEnabled(bool enabled)
+    {
+        CHECK_NULL_VOID(scrollableEvent_);
+        scrollableEvent_->SetEnabled(enabled);
+        if (!enabled) {
+            scrollableEvent_->SetAxis(Axis::NONE);
+        } else {
+            scrollableEvent_->SetAxis(axis_);
+        }
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;

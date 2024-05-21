@@ -263,6 +263,11 @@ public:
         textBaseline_ = baseline;
     }
 
+    void ResetTextBaseline()
+    {
+        baselineOffset_.Reset();
+    }
+
     void SetTextDecoration(TextDecoration textDecoration)
     {
         textDecoration_ = textDecoration;
@@ -798,21 +803,11 @@ inline WordBreak StringToWordBreak(const std::string& wordBreak)
 inline std::string FontWeightToString(const FontWeight& fontWeight)
 {
     static const LinearEnumMapNode<FontWeight, std::string> fontWeightTable[] = {
-        { FontWeight::W100, "100" },
-        { FontWeight::W200, "200" },
-        { FontWeight::W300, "300" },
-        { FontWeight::W400, "400" },
-        { FontWeight::W500, "500" },
-        { FontWeight::W600, "600" },
-        { FontWeight::W700, "700" },
-        { FontWeight::W800, "800" },
-        { FontWeight::W900, "900" },
-        { FontWeight::BOLD, "bold" },
-        { FontWeight::BOLDER, "bolder" },
-        { FontWeight::LIGHTER, "lighter" },
-        { FontWeight::MEDIUM, "medium" },
-        { FontWeight::NORMAL, "normal" },
-        { FontWeight::REGULAR, "regular" },
+        { FontWeight::W100, "100" }, { FontWeight::W200, "200" }, { FontWeight::W300, "300" },
+        { FontWeight::W400, "400" }, { FontWeight::W500, "500" }, { FontWeight::W600, "600" },
+        { FontWeight::W700, "700" }, { FontWeight::W800, "800" }, { FontWeight::W900, "900" },
+        { FontWeight::BOLD, "bold" }, { FontWeight::BOLDER, "bolder" }, { FontWeight::LIGHTER, "lighter" },
+        { FontWeight::MEDIUM, "medium" }, { FontWeight::NORMAL, "normal" }, { FontWeight::REGULAR, "regular" },
     };
     auto weightIter = BinarySearchFindIndex(fontWeightTable, ArraySize(fontWeightTable), fontWeight);
     return weightIter != -1 ? fontWeightTable[weightIter].value : "";

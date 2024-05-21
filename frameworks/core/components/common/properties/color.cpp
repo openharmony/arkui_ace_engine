@@ -137,7 +137,7 @@ Color Color::FromString(std::string colorStr, uint32_t maskAlpha, Color defaultC
     auto uint32Color = StringUtils::StringToUint(colorStr);
     if (uint32Color > 0) {
         Color value;
-        if (uint32Color >> COLOR_ALPHA_OFFSET == 0) {
+        if ((uint32Color >> COLOR_ALPHA_OFFSET) == 0) {
             value = Color(uint32Color).ChangeAlpha(MAX_ALPHA);
         } else {
             value = Color(uint32Color);
@@ -509,7 +509,7 @@ bool Color::ParseUintColorString(const std::string& colorStr, Color& color, cons
 {
     auto uint32Color = StringUtils::StringToUintCheck(colorStr, defaultColor.GetValue());
     if (uint32Color > 0) {
-        if (uint32Color >> COLOR_ALPHA_OFFSET == 0) {
+        if ((uint32Color >> COLOR_ALPHA_OFFSET) == 0) {
             color = Color(uint32Color).ChangeAlpha(MAX_ALPHA);
         } else {
             color = Color(uint32Color);
@@ -524,7 +524,7 @@ bool Color::ParseUintColorString(const std::string& colorStr, Color& color)
 {
     auto uint32Color = StringUtils::StringToUint(colorStr);
     if (uint32Color > 0) {
-        if (uint32Color >> COLOR_ALPHA_OFFSET == 0) {
+        if ((uint32Color >> COLOR_ALPHA_OFFSET) == 0) {
             color = Color(uint32Color).ChangeAlpha(MAX_ALPHA);
         } else {
             color = Color(uint32Color);

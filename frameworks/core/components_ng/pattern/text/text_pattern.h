@@ -348,6 +348,7 @@ public:
     ResultObject GetTextResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
     ResultObject GetSymbolSpanResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
     ResultObject GetImageResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
+    std::string GetFontInJson() const;
 
     const std::vector<std::string>& GetDragContents() const
     {
@@ -653,6 +654,13 @@ protected:
     bool CalculateClickedSpanPosition(const PointF& textOffset);
     void HiddenMenu();
     std::shared_ptr<SelectionMenuParams> GetMenuParams(TextSpanType type, TextResponseType responseType);
+    void InitKeyEvent();
+    bool HandleKeyEvent(const KeyEvent& keyEvent);
+    void HandleOnSelect(KeyCode code);
+    void HandleSelectionUp(int32_t start, int32_t end);
+    void HandleSelectionDown(int32_t start, int32_t end);
+    void HandleSelection(int32_t start, int32_t end);
+    float GetTextHeight();
 
     virtual bool CanStartAITask()
     {
@@ -681,6 +689,7 @@ protected:
     bool focusInitialized_ = false;
     bool hoverInitialized_ = false;
     bool isSpanStringMode_ = false;
+    bool keyEventInitialized_ = false;
 
     RefPtr<FrameNode> dragNode_;
     RefPtr<LongPressEvent> longPressEvent_;

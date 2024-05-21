@@ -811,7 +811,7 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
      */
     const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
     const auto& rawConstraint = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint();
-    bool needToConstraint = CheckSetConstraint(rawConstraint);
+    bool needToConstraint = CheckSetConstraint(rawConstraint) && children.empty();
     const auto& measureType = layoutWrapper->GetLayoutProperty()->GetMeasureType();
     InitFlexProperties(layoutWrapper);
     Axis axis = (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) ? Axis::HORIZONTAL

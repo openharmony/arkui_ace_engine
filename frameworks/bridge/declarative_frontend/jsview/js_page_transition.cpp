@@ -79,7 +79,6 @@ void JSPageTransition::Slide(const JSCallbackInfo& info)
 {
     if (info.Length() > 0 && info[0]->IsNumber()) {
         auto effect = info[0]->ToNumber<int32_t>();
-
         if (effect >= static_cast<int32_t>(SlideEffect::LEFT) && effect <= static_cast<int32_t>(SlideEffect::BOTTOM)) {
             PageTransitionModel::GetInstance()->SetSlideEffect(static_cast<SlideEffect>(effect));
         }

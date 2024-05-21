@@ -299,7 +299,8 @@ void GridIrregularLayoutAlgorithm::MeasureOnJump(float mainSize)
     }
 
     if (info.scrollAlign_ == ScrollAlign::AUTO) {
-        info.scrollAlign_ = TransformAutoScrollAlign(mainSize);
+        int32_t height = GridLayoutUtils::GetItemSize(&info, wrapper_, info.jumpIndex_).rows;
+        info.scrollAlign_ = info.TransformAutoScrollAlign(info.jumpIndex_, height, mainSize, mainGap_);
     }
     if (info.scrollAlign_ == ScrollAlign::NONE) {
         info.jumpIndex_ = EMPTY_JUMP_INDEX;
@@ -421,33 +422,6 @@ std::vector<float> GridIrregularLayoutAlgorithm::CalculateCrossPositions(const P
         res[i] = res[i - 1] + crossLens_[i - 1] + crossGap_;
     }
     return res;
-}
-
-ScrollAlign GridIrregularLayoutAlgorithm::TransformAutoScrollAlign(float mainSize) const
-{
-    const auto& info = gridLayoutInfo_;
-    if (info.jumpIndex_ >= info.startIndex_ && info.jumpIndex_ <= info.endIndex_) {
-        auto [line, _] = info.FindItemInRange(info.jumpIndex_);
-        int32_t height = GridLayoutUtils::GetItemSize(&info, wrapper_, info.jumpIndex_).rows;
-        float topPos = info.GetItemTopPos(line, mainGap_);
-        float botPos = info.GetItemBottomPos(line, height, mainGap_);
-        if (NonPositive(topPos) && GreatOrEqual(botPos, mainSize)) {
-            // item occupies the whole viewport
-            return ScrollAlign::NONE;
-        }
-        // scrollAlign start / end if the item is not fully in viewport
-        if (Negative(topPos)) {
-            return ScrollAlign::START;
-        }
-        if (GreatNotEqual(botPos, mainSize)) {
-            return ScrollAlign::END;
-        }
-        return ScrollAlign::NONE;
-    }
-    if (info.jumpIndex_ > info.endIndex_) {
-        return ScrollAlign::END;
-    }
-    return ScrollAlign::START;
 }
 
 int32_t GridIrregularLayoutAlgorithm::FindJumpLineIdx(int32_t jumpIdx)

@@ -120,8 +120,6 @@ public:
 
     bool NeedSoftKeyboard() const override;
 
-    void UpdateSlideOffset(bool isNeedReset = false) override;
-
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<WebEventHub>();
@@ -131,6 +129,7 @@ public:
     {
         return MakeRefPtr<WebAccessibilityProperty>();
     }
+
 
     void OnModifyDone() override;
 
@@ -188,7 +187,6 @@ public:
 
     void SetWebController(const RefPtr<WebController>& webController)
     {
-        // TODO: add web controller diff function.
         webController_ = webController;
     }
 
@@ -469,7 +467,8 @@ public:
     void UpdateJavaScriptOnDocumentEnd();
     void JavaScriptOnDocumentStart(const ScriptItems& scriptItems);
     void JavaScriptOnDocumentEnd(const ScriptItems& scriptItems);
-    void SetTouchEventInfo(const TouchEvent& touchEvent, TouchEventInfo& touchEventInfo);
+    void SetTouchEventInfo(const TouchEvent& touchEvent,
+        TouchEventInfo& touchEventInfo, const std::string& embdedId);
     DragRet GetDragAcceptableStatus();
     Offset GetDragOffset() const;
     void OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling);
@@ -510,11 +509,13 @@ public:
     void SetAccessibilityState(bool state);
     void UpdateFocusedAccessibilityId(int64_t accessibilityId = -1);
     void OnTooltip(const std::string& tooltip);
+    bool IsDefaultFocusNodeExist();
     bool IsRootNeedExportTexture();
     std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);
     void Backward();
     void OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMenuOption);
     void CloseKeyboard();
+    void RequestFocus();
 
 private:
     friend class WebContextSelectOverlay;
@@ -626,6 +627,8 @@ private:
     void CalculateHorizontalDrawRect(bool isNeedReset);
     void CalculateVerticalDrawRect(bool isNeedReset);
     void InitPinchEvent(const RefPtr<GestureEventHub>& gestureHub);
+    bool CheckZoomStatus(const double& curScale);
+    bool ZoomOutAndIn(const double& curScale, double& scale);
     void HandleScaleGestureChange(const GestureEvent& event);
 
     NG::DragDropInfo HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent>& info);
@@ -728,7 +731,8 @@ private:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertTouchHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> beginTouchHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endTouchHandle);
-    double GetNewScale(double& scale);
+    double GetNewScale(double& scale) const;
+    void UpdateSlideOffset(bool isNeedReset = false);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -829,14 +833,15 @@ private:
     ReachEdge isFlingReachEdge_ = { false, false };
     RefPtr<PinchGesture> pinchGesture_ = nullptr;
     std::queue<TouchEventInfo> touchEventQueue_;
-    std::unordered_map<int32_t, bool> naitve_map_;
     std::vector<NG::MenuOptionsParam> menuOptionParam_ {};
-    bool embedNeedKeyboard_ = false;
     double startPinchScale_ = -1.0;
     double preScale_ = -1.0;
     double pageScale_ = 1.0;
     int32_t pinchIndex_ = 0;
     bool zoomOutSwitch_ = false;
+    bool isTouchUpEvent_ = false;
+    int32_t zoomStatus_ = 0;
+    int32_t zoomErrorCount_ = 0;
 };
 } // namespace OHOS::Ace::NG
 

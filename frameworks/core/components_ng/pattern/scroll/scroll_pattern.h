@@ -27,7 +27,6 @@
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
-#include "core/components_ng/pattern/web/slide_update_listener.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
@@ -72,6 +71,11 @@ public:
             paint->SetEdgeEffect(scrollEffect);
         }
         return paint;
+    }
+
+    OPINC_TYPE_E OpIncType() override
+    {
+        return OPINC_PARENT_POSSIBLE;
     }
 
     RefPtr<EventHub> CreateEventHub() override
@@ -262,26 +266,24 @@ public:
         return scrollLayoutProperty->GetScrollSnapAlign().value_or(ScrollSnapAlign::NONE);
     }
 
-    void registerSlideUpdateListener(const std::shared_ptr<ISlideUpdateCallback>& listener);
-
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
-	
+
     void SetIsWidthModifiedBySelect(bool isModified)
     {
         isWidthModifiedBySelect_ = isModified;
     }
-    
+
     bool IsWidthModifiedBySelect() const
     {
         return isWidthModifiedBySelect_;
     }
-    
+
     void SetIsSelectScroll(bool isSelect)
     {
         isSelectScroll_ = isSelect;
     }
-    
+
     bool IsSelectScroll() const
     {
         return isSelectScroll_;
@@ -376,7 +378,6 @@ private:
     SizeF viewSize_;
     SizeF viewPortExtent_;
     FlexDirection direction_ { FlexDirection::COLUMN };
-    std::vector<std::shared_ptr<ISlideUpdateCallback>> listenerVector_;
 
     // scrollSnap
     std::vector<float> snapOffsets_;
@@ -384,7 +385,7 @@ private:
     std::pair<bool, bool> enableSnapToSide_ = { true, true };
     Dimension intervalSize_;
     bool scrollSnapUpdate_ = false;
-    
+
     bool isWidthModifiedBySelect_ = false;
     bool isSelectScroll_ = false;
     bool hasOptionWidth_ = false;

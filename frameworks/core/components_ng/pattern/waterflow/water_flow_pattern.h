@@ -138,6 +138,8 @@ public:
      */
     void OnSectionChanged(int32_t start);
 
+    void OnSectionChangedNow(int32_t start);
+
 private:
     DisplayMode GetDefaultScrollBarDisplayMode() const override
     {

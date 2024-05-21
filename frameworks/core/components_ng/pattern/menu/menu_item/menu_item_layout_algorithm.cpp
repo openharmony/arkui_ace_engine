@@ -90,13 +90,12 @@ void MenuItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
     auto leftRow = layoutWrapper->GetOrCreateChildByIndex(0);
-    CHECK_NULL_VOID(leftRow);
-    auto leftRowSize = leftRow->GetGeometryNode()->GetFrameSize();
+    auto leftRowSize = leftRow ? leftRow->GetGeometryNode()->GetFrameSize() : SizeT(0.0f, 0.0f);
     auto rightRow = layoutWrapper->GetOrCreateChildByIndex(1);
-    CHECK_NULL_VOID(rightRow);
-    auto rightRowSize = rightRow->GetGeometryNode()->GetFrameSize();
+    auto rightRowSize = rightRow ? rightRow->GetGeometryNode()->GetFrameSize() : SizeT(0.0f, 0.0f);
 
     auto itemHeight = std::max(leftRowSize.Height(), rightRowSize.Height());
+    CHECK_NULL_VOID(leftRow);
     float topSpace = (itemHeight - leftRowSize.Height()) / 2.0f;
     if (padding.top.has_value() && Positive(padding.top.value()) && padding.top.value() > topSpace) {
         topSpace = padding.top.value();
@@ -111,6 +110,7 @@ void MenuItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     leftRow->Layout();
 
+    CHECK_NULL_VOID(rightRow);
     topSpace = (itemHeight - rightRowSize.Height()) / 2.0f;
     if (padding.top.has_value() && Positive(padding.top.value()) && padding.top.value() > topSpace) {
         topSpace = padding.top.value();

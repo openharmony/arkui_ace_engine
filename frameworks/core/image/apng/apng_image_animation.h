@@ -64,7 +64,6 @@ public:
         this->duration_ = NORMALIZED_DURATION_MAX;
     }
 
-
     void UpdateAndNotifyPicture(const RefPtr<PictureFrame<int32_t>> &picture);
 
     /**

@@ -51,9 +51,6 @@ public:
 
 private:
    static std::string ModifyOrder(std::string& pattern);
-   const static std::unordered_map<std::string, std::string> DATE_ORDER_MAP;
-   const static std::unordered_map<std::string, std::string> DATETIME_ORDER_MAP;
-   const static std::unordered_map<std::string, std::string> AM_PM_TIME_ORDER_MAP;
    static void ProcessNormal(char ch, int* order, size_t orderSize, int* lengths, size_t lengsSize);
 };
 } // namespace OHOS::Ace

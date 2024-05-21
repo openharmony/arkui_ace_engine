@@ -28,6 +28,7 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#include "core/common/container_scope.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/theme/shadow_theme.h"
@@ -2466,6 +2467,9 @@ void ViewAbstract::SetRenderGroup(bool isRenderGroup)
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(RenderGroup, isRenderGroup);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetApplicationRenderGroupMarked(true);
 }
 
 void ViewAbstract::SetRenderFit(RenderFit renderFit)
@@ -2712,6 +2716,8 @@ void ViewAbstract::SetSphericalEffect(FrameNode* frameNode, double radio)
 void ViewAbstract::SetRenderGroup(FrameNode* frameNode, bool isRenderGroup)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(RenderGroup, isRenderGroup, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetApplicationRenderGroupMarked(true);
 }
 
 void ViewAbstract::SetRenderFit(FrameNode* frameNode, RenderFit renderFit)
@@ -3435,6 +3441,8 @@ void ViewAbstract::SetNeedFocus(FrameNode* frameNode, bool value)
     CHECK_NULL_VOID(frameNode);
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
+    auto instanceId = frameNode->GetContext()->GetInstanceId();
+    ContainerScope scope(instanceId);
     if (value) {
         focusHub->RequestFocus();
     } else {
