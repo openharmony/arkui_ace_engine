@@ -1488,7 +1488,7 @@ Dimension JSCanvasRenderer::GetDimensionValue(const std::string& str)
         return Dimension(dimension.Value());
     }
     if (dimension.Unit() == DimensionUnit::VP) {
-        return Dimension(dimension.Value() * SystemProperties::GetResolution());
+        return Dimension(dimension.Value() * GetDensity());
     }
     return Dimension(0.0);
 }
