@@ -35,6 +35,7 @@ constexpr float SWIPER_TH = 0.25f;
 constexpr float NEW_SWIPER_TH = 0.5f;
 constexpr float SWIPER_SPEED_TH = 1500.f;
 constexpr float SWIPE_RATIO = 0.6f;
+constexpr float NEW_SWIPE_RATIO = 1.848f;
 constexpr float SWIPE_SPRING_MASS = 1.f;
 constexpr float SWIPE_SPRING_STIFFNESS = 228.f;
 constexpr float SWIPE_SPRING_DAMPING = 30.f;
@@ -400,6 +401,10 @@ float ListItemPattern::CalculateFriction(float gamma)
     float ratio = SWIPE_RATIO;
     if (GreatOrEqual(gamma, 1.0)) {
         gamma = 1.0f;
+    }
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        ratio = NEW_SWIPE_RATIO;
+        return exp(-ratio * gamma);
     }
     float result = ratio * std::pow(1.0 - gamma, SQUARE);
     if (!std::isnan(result) && LessNotEqual(result, 1.0f)) {
