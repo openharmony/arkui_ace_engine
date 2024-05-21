@@ -106,6 +106,10 @@ constexpr uint32_t DESTRUCT_DELAY_MILLISECONDS = 1000;
 
 constexpr uint32_t NO_NATIVE_FINGER_TYPE = 100;
 const std::string DEFAULT_NATIVE_EMBED_ID = "0";
+const std::string WEB_INFO_PC = "8";
+const std::string WEB_INFO_TABLET = "4";
+const std::string WEB_INFO_PHONE = "2";
+const std::string WEB_INFO_DEFAULT = "1";
 
 const std::vector<std::string> CANONICALENCODINGNAMES = {
     "Big5",         "EUC-JP",       "EUC-KR",       "GB18030",
@@ -6698,4 +6702,23 @@ void WebDelegate::OnSafeInsetsChange()
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebSafeInsetsChange");
 }
 
+NG::WebInfoType WebDelegate::GetWebInfoType()
+{
+    std::string factoryLevel = NWebAdapterHelper::Instance()
+        .ParsePerfConfig("factoryConfig", "factoryLevel");
+    if (factoryLevel.empty()) {
+        NWebAdapterHelper::Instance().ReadConfigIfNeeded();
+        factoryLevel = NWebAdapterHelper::Instance().
+            ParsePerfConfig("factoryConfig", "factoryLevel");
+    }
+    TAG_LOGD(AceLogTag::ACE_WEB, "read config factoryLevel: %{public}s ", factoryLevel.c_str());
+    if (factoryLevel == WEB_INFO_PHONE || factoryLevel == WEB_INFO_DEFAULT) {
+        return NG::WebInfoType::TYPE_MOBILE;
+    } else if (factoryLevel == WEB_INFO_TABLET) {
+        return NG::WebInfoType::TYPE_TABLET;
+    } else if (factoryLevel == WEB_INFO_PC) {
+        return NG::WebInfoType::TYPE_2IN1;
+    }
+    return NG::WebInfoType::TYPE_UNKNOWN;
+}
 } // namespace OHOS::Ace

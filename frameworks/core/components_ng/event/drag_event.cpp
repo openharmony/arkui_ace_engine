@@ -670,7 +670,8 @@ void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
             auto webPattern = frameNode->GetPattern<WebPattern>();
             CHECK_NULL_VOID(webPattern);
             bool isWebmageDrag = webPattern->IsImageDrag();
-            CHECK_NULL_VOID(isWebmageDrag && SystemProperties::GetDeviceType() == DeviceType::PHONE);
+            WebInfoType type = webPattern->GetWebInfoType();
+            CHECK_NULL_VOID(isWebmageDrag && type == WebInfoType::TYPE_MOBILE);
 #endif
         } else {
             bool isBindOverlayValue = frameNode->GetLayoutProperty()->GetIsBindOverlayValue(false);

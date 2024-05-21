@@ -320,7 +320,7 @@ void WebPattern::InitEvent()
     InitTouchEvent(gestureHub);
     InitDragEvent(gestureHub);
     InitPanEvent(gestureHub);
-    if (SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE) {
+    if (GetWebInfoType() == WebInfoType::TYPE_2IN1) {
         InitPinchEvent(gestureHub);
     }
 
@@ -3175,7 +3175,7 @@ void WebPattern::OnDateTimeChooserPopup(std::shared_ptr<OHOS::NWeb::NWebDateTime
 DialogProperties WebPattern::GetDialogProperties(const RefPtr<DialogTheme>& theme)
 {
     DialogProperties properties;
-    if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
+    if (GetWebInfoType() == WebInfoType::TYPE_MOBILE) {
         properties.alignment = DialogAlignment::BOTTOM;
     } else {
         properties.alignment = DialogAlignment::CENTER;
@@ -4435,5 +4435,13 @@ void WebPattern::CloseKeyboard()
     CHECK_NULL_VOID(focusHub);
     focusHub->CloseKeyboard();
     embedNeedKeyboard_ = false;
+}
+
+WebInfoType WebPattern::GetWebInfoType()
+{
+    if (delegate_) {
+        return delegate_->GetWebInfoType();
+    }
+    return WebInfoType::TYPE_UNKNOWN;
 }
 } // namespace OHOS::Ace::NG
