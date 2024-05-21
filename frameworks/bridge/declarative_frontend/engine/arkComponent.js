@@ -25806,3 +25806,59 @@ if (globalThis.SymbolSpan !== undefined) {
     });
   };
 }
+
+class ShaderInputBufferModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().component3D.resetShaderInputBuffer(node);
+    } else {
+      getUINativeModule().component3D.setShaderInputBuffer(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+ShaderInputBufferModifier.identity = Symbol('shaderInputBuffer');
+
+/// <reference path='./import.ts' />
+class ArkComponent3DComponent extends ArkComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+  }
+  environment(uri) {
+    throw new Error('Method not implemented.');
+  };
+  customRender(uri, selfRenderUpdate) {
+    throw new Error('Method not implemented.');
+  };
+  shader(uri) {
+    throw new Error('Method not implemented.');
+  };
+  shaderImageTexture(uri) {
+    throw new Error('Method not implemented.');
+  };
+  shaderInputBuffer(buffer) {
+    modifierWithKey(this._modifiersWithKeys, ShaderInputBufferModifier.identity, ShaderInputBufferModifier, buffer);
+    return this;
+  };
+  renderWidth(value) {
+    throw new Error('Method not implemented.');
+  };
+  renderHeight(value) {
+    throw new Error('Method not implemented.');
+  };
+}
+// @ts-ignore
+if (globalThis.Component3D !== undefined) {
+  globalThis.Component3D.attributeModifier = function (modifier) {
+    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+      return new ArkComponent3DComponent(nativePtr);
+    }, (nativePtr, classType, modifierJS) => {
+      return new modifierJS.Component3DModifier(nativePtr, classType);
+    });
+  };
+}

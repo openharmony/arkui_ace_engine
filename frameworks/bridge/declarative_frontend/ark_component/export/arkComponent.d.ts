@@ -1976,3 +1976,14 @@ declare class ArkParticleComponent extends ArkComponent implements ParticleAttri
     constructor(nativePtr: KNode, classType?: ModifierType);
     emitter(fields: Array<EmitterProperty>): ParticleAttribute;
 }
+
+declare class ArkComponent3DComponent extends ArkComponent implements Component3DAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    environment(uri: Resource): Component3DAttribute;
+    customRender(uri: Resource, selfRenderUpdate: boolean): Component3DAttribute;
+    shader(uri: Resource): Component3DAttribute;
+    shaderImageTexture(uri: Resource): Component3DAttribute;
+    shaderInputBuffer(buffer: Array<number>): Component3DAttribute;
+    renderWidth(value: Dimension): Component3DAttribute;
+    renderHeight(value: Dimension): Component3DAttribute;
+}

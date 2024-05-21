@@ -265,6 +265,12 @@ template("declarative_js_engine_ark") {
       }
     }
 
+    if (defined(config.model_component_support) &&
+        config.model_component_support) {
+      sources += [ "nativeModule/arkts_native_component3d_bridge.cpp" ]
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/model:ace_core_components_model_pattern_ng_$platform" ]
+    }
+
     if (defined(config.form_components_support) &&
         config.form_components_support) {
       sources += [ "nativeModule/arkts_native_form_component_bridge.cpp" ]

@@ -51,6 +51,7 @@ public:
     void AddShaderInputBuffer(const std::shared_ptr<Render3D::ShaderInputBuffer>& buffer) override;
     std::optional<std::shared_ptr<Render3D::ShaderInputBuffer>> GetShaderInputBuffer() override;
 
+    static void AddShaderInputBuffer(FrameNode* frameNode, const std::shared_ptr<Render3D::ShaderInputBuffer>& buffer);
 private:
     void PerformCameraUpdate();
     void PerformLightUpdate();

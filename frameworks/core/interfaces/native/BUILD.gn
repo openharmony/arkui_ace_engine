@@ -129,6 +129,11 @@ template("ace_core_interfaces_native_node") {
       "${ace_root}/interfaces/native/node",
     ]
 
+    if (defined(config.model_component_support) &&
+        config.model_component_support) {
+      sources += [ "node/node_component3d_modifier.cpp" ]
+    }
+
     if (defined(config.xcomponent_components_support) &&
         config.xcomponent_components_support) {
       sources += [ "node/node_xcomponent_modifier.cpp" ]
@@ -144,6 +149,10 @@ template("ace_core_interfaces_native_node") {
       sources += [ "node/plugin_modifier.cpp" ]
     }
     external_deps = [ "graphic_2d:librender_service_client" ]
+    if (defined(config.model_component_support) &&
+        config.model_component_support) {
+      external_deps += [ "graphic_3d:lib3dWidgetAdapter" ]
+    }
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]
     }
