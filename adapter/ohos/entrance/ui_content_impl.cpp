@@ -1673,7 +1673,7 @@ void UIContentImpl::InitializeDisplayAvailableRect(const RefPtr<Platform::AceCon
     auto defaultDisplay = DMManager.GetDefaultDisplay();
     if (pipeline && defaultDisplay) {
         Rosen::DMError ret = defaultDisplay->GetAvailableArea(availableArea);
-        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+        TAG_LOGI(AceLogTag::ACE_WINDOW,
             "DisplayAvailableRect info: %{public}d, %{public}d, %{public}d, %{public}d", availableArea.posX_,
             availableArea.posX_, availableArea.width_, availableArea.height_);
         if (ret == Rosen::DMError::DM_OK) {
@@ -1994,7 +1994,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
         moduleName_.c_str(), instanceId_, config.ToString().c_str());
     SystemProperties::SetDeviceOrientation(config.Orientation());
     TAG_LOGI(
-        AceLogTag::ACE_WINDOW_SCENE, "Update orientation to : %{public}d", static_cast<uint32_t>(config.Orientation()));
+        AceLogTag::ACE_WINDOW, "Update orientation to : %{public}d", static_cast<uint32_t>(config.Orientation()));
     ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -2015,7 +2015,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
         if (pipelineContext) {
             pipelineContext->SetDisplayWindowRectInfo(
                 Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
-            TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "Update displayAvailableRect to : %{public}s",
+            TAG_LOGI(AceLogTag::ACE_WINDOW, "Update displayAvailableRect to : %{public}s",
                 pipelineContext->GetDisplayWindowRectInfo().ToString().c_str());
             if (rsWindow) {
                 pipelineContext->SetIsLayoutFullScreen(

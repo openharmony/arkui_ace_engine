@@ -60,6 +60,13 @@ void MenuWrapperPattern::InitFocusEvent()
     focusHub->SetOnBlurInternal(std::move(blurTask));
 }
 
+RefPtr<FrameNode> MenuWrapperPattern::GetShowedSubMenu()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    return DynamicCast<FrameNode>(host->GetLastChild());
+}
+
 RefPtr<FrameNode> MenuWrapperPattern::FindTouchedMenuItem(const RefPtr<UINode>& menuNode, const OffsetF& position)
 {
     CHECK_NULL_RETURN(menuNode, nullptr);
@@ -96,12 +103,10 @@ void MenuWrapperPattern::HandleInteraction(const TouchEventInfo& info)
     position -= host->GetPaintRectOffset();
     auto outterMenuNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
     CHECK_NULL_VOID(outterMenuNode);
-    auto menuPattern = outterMenuNode->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    auto subMenuNode = menuPattern->GetShowedSubMenu();
     auto menuZone = outterMenuNode->GetGeometryNode()->GetFrameRect();
     auto innerMenuNode = GetMenuChild(outterMenuNode);
     CHECK_NULL_VOID(innerMenuNode);
+    auto subMenuNode = GetShowedSubMenu();
     if (subMenuNode) {
         innerMenuNode = subMenuNode;
         auto scrollNode = DynamicCast<FrameNode>(innerMenuNode->GetChildAtIndex(0));

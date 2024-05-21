@@ -490,9 +490,9 @@ void MenuItemPattern::ShowSubMenuHelper(const RefPtr<FrameNode>& subMenu)
     auto expandingMode = layoutProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
         expandingMode == SubMenuExpandingMode::STACK) {
-            subMenu->MountToParent(menuWrapper);
-            menuWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-            menuPattern->SetSubMenuShow();
+        subMenu->MountToParent(menuWrapper);
+        menuWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+        menuPattern->SetSubMenuShow();
     } else {
         subMenu->MountToParent(menuWrapper);
         OffsetF offset = GetSubMenuPosition(host);
@@ -526,18 +526,21 @@ void MenuItemPattern::HideSubMenu()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto parentMenu = GetMenu();
-    CHECK_NULL_VOID(parentMenu);
-    auto parentMenuPattern = parentMenu->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(parentMenuPattern);
-
-    auto showedSubMenu = parentMenuPattern->GetShowedSubMenu();
+    auto menuWrapper = GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapper);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    auto showedSubMenu = menuWrapperPattern->GetShowedSubMenu();
     if (showedSubMenu) {
         auto showedSubMenuPattern = showedSubMenu->GetPattern<MenuPattern>();
         CHECK_NULL_VOID(showedSubMenuPattern);
         auto showedMenuItem = showedSubMenuPattern->GetParentMenuItem();
         CHECK_NULL_VOID(showedMenuItem);
         if (showedMenuItem->GetId() != host->GetId()) {
+            auto parentMenu = GetMenu();
+            CHECK_NULL_VOID(parentMenu);
+            auto parentMenuPattern = parentMenu->GetPattern<MenuPattern>();
+            CHECK_NULL_VOID(parentMenuPattern);
             parentMenuPattern->HideSubMenu();
         }
     }
@@ -879,7 +882,15 @@ void MenuItemPattern::InitLongPressEvent()
     CHECK_NULL_VOID(gesture);
     auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto itemPattern = weak.Upgrade();
-        if (itemPattern && itemPattern->GetSubBuilder() != nullptr) {
+        auto menuWrapper = itemPattern->GetMenuWrapper();
+        CHECK_NULL_VOID(menuWrapper);
+        auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(menuWrapperPattern);
+        auto topLevelMenuPattern = itemPattern->GetMenuPattern(true);
+        CHECK_NULL_VOID(topLevelMenuPattern);
+        if (itemPattern && itemPattern->GetSubBuilder() != nullptr &&
+            menuWrapperPattern->GetPreviewMode() == MenuPreviewMode::NONE &&
+            !(topLevelMenuPattern->IsSelectOverlayCustomMenu())) {
             itemPattern->ShowSubMenu();
         }
     };
@@ -1312,7 +1323,7 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     if (layoutDirection == TextDirection::RTL) {
         if (textAlign == TextAlign::LEFT) {
             textAlign = TextAlign::RIGHT;
-        } else if (textAlign ==TextAlign::RIGHT) {
+        } else if (textAlign == TextAlign::RIGHT) {
             textAlign = TextAlign::LEFT;
         } else if (textAlign == TextAlign::START) {
             textAlign = TextAlign::END;
