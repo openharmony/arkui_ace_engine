@@ -19,9 +19,10 @@
 #include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
-    const ArkUIRefreshModifier* GetRefreshModifier();
-    void SetRefreshOnStateChange(ArkUINodeHandle node, void* extraParam);
-    void SetOnRefreshing(ArkUINodeHandle node, void* extraParam);
+const ArkUIRefreshModifier* GetRefreshModifier();
+void SetRefreshOnStateChange(ArkUINodeHandle node, void* extraParam);
+void SetOnRefreshing(ArkUINodeHandle node, void* extraParam);
+void SetRefreshOnOffsetChange(ArkUINodeHandle node, void* extraParam);
 } // namespace OHOS::Ace::NG::NodeModifier
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_REFRESH_MODIFIER_H

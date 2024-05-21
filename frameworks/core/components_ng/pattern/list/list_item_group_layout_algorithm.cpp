@@ -254,8 +254,12 @@ float ListItemGroupLayoutAlgorithm::UpdateReferencePos(
     return referencePos;
 }
 
-bool ListItemGroupLayoutAlgorithm::NeedMeasureItem()
+bool ListItemGroupLayoutAlgorithm::NeedMeasureItem(LayoutWrapper* layoutWrapper)
 {
+    auto contentMainSize = layoutWrapper->GetGeometryNode()->GetPaddingSize().MainSize(axis_);
+    if (NearZero(contentMainSize)) {
+        return true;
+    }
     if (forwardLayout_) {
         if (childrenSize_ && needAdjustRefPos_) {
             referencePos_ -= (totalMainSize_ - posMap_->GetPrevTotalHeight());
@@ -370,7 +374,7 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
             ModifyReferencePos(GetLanesCeil(endIndex), endPos);
         }
         itemPosition_.clear();
-    } else if (!NeedMeasureItem()) {
+    } else if (!NeedMeasureItem(layoutWrapper)) {
         itemPosition_.clear();
         return;
     }

@@ -777,9 +777,6 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 
 #if defined(PIXEL_MAP_SUPPORTED)
     if (dragDropInfo.pixelMap == nullptr && dragDropInfo.customNode) {
-        bool hasImageNode = false;
-        std::list<RefPtr<FrameNode>> imageNodes;
-        PrintBuilderNode(dragPreviewInfo.customNode, hasImageNode, imageNodes);
         auto callback = [id = Container::CurrentId(), pipeline, info, gestureEventHubPtr = AceType::Claim(this),
                             frameNode, dragDropInfo, event](
                             std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg, std::function<void()>) mutable {
@@ -798,8 +795,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
                 TaskExecutor::TaskType::UI, "ArkUIGestureDragStart");
         };
         NG::ComponentSnapshot::Create(dragDropInfo.customNode, std::move(callback), false, CREATE_PIXELMAP_TIME);
-        CheckImageDecode(imageNodes);
-        imageNodes.clear();
+        PrintBuilderNode(dragPreviewInfo.customNode);
         return;
     }
 #endif
@@ -947,8 +943,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     pixelMapDuplicated->Scale(scale, scale, AceAntiAliasingOption::HIGH);
     auto width = pixelMapDuplicated->GetWidth();
     auto height = pixelMapDuplicated->GetHeight();
-    auto pixelMapOffset = GetPixelMapOffset(info, SizeF(width, height), scale,
-        !NearEqual(scale, windowScale * defaultPixelMapScale));
+    auto pixelMapOffset = GetPixelMapOffset(info, SizeF(width, height), scale, IsPixelMapNeedScale());
     windowScale = NearZero(windowScale) ? 1.0f : windowScale;
     dragDropManager->SetPixelMapOffset(pixelMapOffset / windowScale);
     DragEventActuator::ResetNode(frameNode);
@@ -1744,24 +1739,26 @@ void GestureEventHub::ClearModifierGesture()
 }
 
 #if defined(PIXEL_MAP_SUPPORTED)
-void GestureEventHub::PrintBuilderNode(
-    const RefPtr<UINode>& customNode, bool& hasImageNode, std::list<RefPtr<FrameNode>>& imageNodes)
+void GestureEventHub::PrintBuilderNode(const RefPtr<UINode>& customNode)
 {
     CHECK_NULL_VOID(customNode);
-    
+    bool hasImageNode = false;
+    std::list<RefPtr<FrameNode>> imageNodes;
     int32_t depth = 1;
     PrintIfImageNode(customNode, depth, hasImageNode, imageNodes);
+    CheckImageDecode(imageNodes);
+    imageNodes.clear();
 }
 
 void GestureEventHub::PrintIfImageNode(
     const RefPtr<UINode>& builderNode, int32_t depth, bool& hasImageNode, std::list<RefPtr<FrameNode>>& imageNodes)
 {
-    auto frameNode = AceType::DynamicCast<FrameNode>(builderNode);
-    CHECK_NULL_VOID(frameNode);
     if (depth > MAX_BUILDER_DEPTH) {
         return;
     }
-    if (frameNode->GetTag() == V2::IMAGE_ETS_TAG) {
+    if (builderNode->GetTag() == V2::IMAGE_ETS_TAG) {
+        auto frameNode = AceType::DynamicCast<FrameNode>(builderNode);
+        CHECK_NULL_VOID(frameNode);
         auto pattern = frameNode->GetPattern<ImagePattern>();
         CHECK_NULL_VOID(pattern);
         hasImageNode = true;
@@ -1771,12 +1768,9 @@ void GestureEventHub::PrintIfImageNode(
             frameNode->GetId(), pattern->GetSyncLoad(), pattern->GetCanvasImage() != nullptr);
     }
 
-    auto children = frameNode->GetChildren();
+    auto children = builderNode->GetChildren();
     for (const auto& child : children) {
-        auto node = AceType::DynamicCast<FrameNode>(child);
-        if (node) {
-            PrintIfImageNode(node, depth + 1, hasImageNode, imageNodes);
-        }
+        PrintIfImageNode(child, depth + 1, hasImageNode, imageNodes);
     }
 }
 
@@ -1787,12 +1781,11 @@ void GestureEventHub::CheckImageDecode(std::list<RefPtr<FrameNode>>& imageNodes)
     }
 
     for (const auto& imageNode : imageNodes) {
-        auto node = AceType::DynamicCast<FrameNode>(imageNode);
-        CHECK_NULL_VOID(node);
-        auto pattern = node->GetPattern<ImagePattern>();
+        auto pattern = imageNode->GetPattern<ImagePattern>();
         CHECK_NULL_VOID(pattern);
         if (!pattern->GetCanvasImage()) {
-            TAG_LOGW(AceLogTag::ACE_DRAG, "ImageNode did not complete decoding, nodeId: %{public}d", node->GetId());
+            TAG_LOGW(
+                AceLogTag::ACE_DRAG, "ImageNode did not complete decoding, nodeId: %{public}d", imageNode->GetId());
         }
     }
 }

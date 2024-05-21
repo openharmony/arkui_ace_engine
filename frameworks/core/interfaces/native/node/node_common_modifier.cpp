@@ -791,8 +791,8 @@ void SetTransform(ArkUINodeHandle node, const ArkUI_Float32* matrix, ArkUI_Int32
     }
     NG::ViewAbstract::SetTransformMatrix(
         frameNode, Matrix4(matrix[NUM_0], matrix[NUM_4], matrix[NUM_8], matrix[NUM_12], matrix[NUM_1], matrix[NUM_5],
-                       matrix[NUM_9], matrix[NUM_13], matrix[NUM_2], matrix[NUM_6], matrix[NUM_10], matrix[NUM_14],
-                       matrix[NUM_3], matrix[NUM_7], matrix[NUM_11], matrix[NUM_15]));
+            matrix[NUM_9], matrix[NUM_13], matrix[NUM_2], matrix[NUM_6], matrix[NUM_10], matrix[NUM_14],
+                matrix[NUM_3], matrix[NUM_7], matrix[NUM_11], matrix[NUM_15]));
 }
 
 void ResetTransform(ArkUINodeHandle node)
@@ -808,8 +808,8 @@ void ResetTransform(ArkUINodeHandle node)
     }
     NG::ViewAbstract::SetTransformMatrix(
         frameNode, Matrix4(matrix[NUM_0], matrix[NUM_4], matrix[NUM_8], matrix[NUM_12], matrix[NUM_1], matrix[NUM_5],
-                       matrix[NUM_9], matrix[NUM_13], matrix[NUM_2], matrix[NUM_6], matrix[NUM_10], matrix[NUM_14],
-                       matrix[NUM_3], matrix[NUM_7], matrix[NUM_11], matrix[NUM_15]));
+            matrix[NUM_9], matrix[NUM_13], matrix[NUM_2], matrix[NUM_6], matrix[NUM_10], matrix[NUM_14],
+                matrix[NUM_3], matrix[NUM_7], matrix[NUM_11], matrix[NUM_15]));
 }
 
 void SetBorderColor(
@@ -3008,7 +3008,7 @@ void ResetFlexGrow(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetFlexGrow(static_cast<float>(0.0));
+    ViewAbstract::SetFlexGrow(frameNode, static_cast<float>(0.0));
 }
 
 void SetFlexShrink(ArkUINodeHandle node, ArkUI_Float32 value)

@@ -73,63 +73,63 @@ class ArkSystemColors implements Colors {
     interactiveClick: ResourceColor;
 
     constructor() {
-        this.brand = ArkResourcesHelper.$r('sys.color.brand');
-        this.warning = ArkResourcesHelper.$r('sys.color.warning');
-        this.alert = ArkResourcesHelper.$r('sys.color.alert');
-        this.confirm = ArkResourcesHelper.$r('sys.color.confirm');
+        this.brand = ArkResourcesHelper.$r('sys.color.brand', 125830976);
+        this.warning = ArkResourcesHelper.$r('sys.color.warning', 125830979);
+        this.alert = ArkResourcesHelper.$r('sys.color.alert', 125830980);
+        this.confirm = ArkResourcesHelper.$r('sys.color.confirm', 125830981);
 
-        this.fontPrimary = ArkResourcesHelper.$r('sys.color.font_primary');
-        this.fontSecondary = ArkResourcesHelper.$r('sys.color.font_secondary');
-        this.fontTertiary = ArkResourcesHelper.$r('sys.color.font_tertiary');
-        this.fontFourth = ArkResourcesHelper.$r('sys.color.font_fourth');
-        this.fontEmphasize = ArkResourcesHelper.$r('sys.color.font_emphasize');
+        this.fontPrimary = ArkResourcesHelper.$r('sys.color.font_primary', 125830982);
+        this.fontSecondary = ArkResourcesHelper.$r('sys.color.font_secondary', 125830983);
+        this.fontTertiary = ArkResourcesHelper.$r('sys.color.font_tertiary', 125830984);
+        this.fontFourth = ArkResourcesHelper.$r('sys.color.font_fourth', 125830985);
+        this.fontEmphasize = ArkResourcesHelper.$r('sys.color.font_emphasize', 125830986);
 
-        this.fontOnPrimary = ArkResourcesHelper.$r('sys.color.font_on_primary');
-        this.fontOnSecondary = ArkResourcesHelper.$r('sys.color.font_on_secondary');
-        this.fontOnTertiary = ArkResourcesHelper.$r('sys.color.font_on_tertiary');
-        this.fontOnFourth = ArkResourcesHelper.$r('sys.color.font_on_fourth');
+        this.fontOnPrimary = ArkResourcesHelper.$r('sys.color.font_on_primary', 125830987);
+        this.fontOnSecondary = ArkResourcesHelper.$r('sys.color.font_on_secondary', 125830988);
+        this.fontOnTertiary = ArkResourcesHelper.$r('sys.color.font_on_tertiary', 125830989);
+        this.fontOnFourth = ArkResourcesHelper.$r('sys.color.font_on_fourth', 125830990);
 
-        this.iconPrimary = ArkResourcesHelper.$r('sys.color.icon_primary');
-        this.iconSecondary = ArkResourcesHelper.$r('sys.color.icon_secondary');
-        this.iconTertiary = ArkResourcesHelper.$r('sys.color.icon_tertiary');
-        this.iconFourth = ArkResourcesHelper.$r('sys.color.icon_fourth');
-        this.iconEmphasize = ArkResourcesHelper.$r('sys.color.icon_emphasize');
-        this.iconSubEmphasize = ArkResourcesHelper.$r('sys.color.icon_sub_emphasize');
+        this.iconPrimary = ArkResourcesHelper.$r('sys.color.icon_primary', 125830991);
+        this.iconSecondary = ArkResourcesHelper.$r('sys.color.icon_secondary', 125830992);
+        this.iconTertiary = ArkResourcesHelper.$r('sys.color.icon_tertiary', 125830993);
+        this.iconFourth = ArkResourcesHelper.$r('sys.color.icon_fourth', 125830994);
+        this.iconEmphasize = ArkResourcesHelper.$r('sys.color.icon_emphasize', 125830995);
+        this.iconSubEmphasize = ArkResourcesHelper.$r('sys.color.icon_sub_emphasize', 125830996);
 
-        this.iconOnPrimary = ArkResourcesHelper.$r('sys.color.icon_on_primary');
-        this.iconOnSecondary = ArkResourcesHelper.$r('sys.color.icon_on_secondary');
-        this.iconOnTertiary = ArkResourcesHelper.$r('sys.color.icon_on_tertiary');
-        this.iconOnFourth = ArkResourcesHelper.$r('sys.color.icon_on_fourth');
+        this.iconOnPrimary = ArkResourcesHelper.$r('sys.color.icon_on_primary', 125831057);
+        this.iconOnSecondary = ArkResourcesHelper.$r('sys.color.icon_on_secondary', 125831058);
+        this.iconOnTertiary = ArkResourcesHelper.$r('sys.color.icon_on_tertiary', 125831059);
+        this.iconOnFourth = ArkResourcesHelper.$r('sys.color.icon_on_fourth', 125831060);
 
-        this.backgroundPrimary = ArkResourcesHelper.$r('sys.color.background_primary');
-        this.backgroundSecondary = ArkResourcesHelper.$r('sys.color.background_secondary');
-        this.backgroundTertiary = ArkResourcesHelper.$r('sys.color.background_tertiary');
-        this.backgroundFourth = ArkResourcesHelper.$r('sys.color.background_fourth');
-        this.backgroundEmphasize = ArkResourcesHelper.$r('sys.color.background_emphasize');
+        this.backgroundPrimary = ArkResourcesHelper.$r('sys.color.background_primary', 125831061);
+        this.backgroundSecondary = ArkResourcesHelper.$r('sys.color.background_secondary', 125831062);
+        this.backgroundTertiary = ArkResourcesHelper.$r('sys.color.background_tertiary', 125831063);
+        this.backgroundFourth = ArkResourcesHelper.$r('sys.color.background_fourth', 125831064);
+        this.backgroundEmphasize = ArkResourcesHelper.$r('sys.color.background_emphasize', 125831065);
 
-        this.compForegroundPrimary = ArkResourcesHelper.$r('sys.color.comp_foreground_primary');
-        this.compBackgroundPrimary = ArkResourcesHelper.$r('sys.color.comp_background_primary');
+        this.compForegroundPrimary = ArkResourcesHelper.$r('sys.color.comp_foreground_primary', 125831003);
+        this.compBackgroundPrimary = ArkResourcesHelper.$r('sys.color.comp_background_primary', 125831004);
         this.compBackgroundPrimaryTran = ArkResourcesHelper.$r('sys.color.comp_background_primary_tran');
-        this.compBackgroundPrimaryContrary = ArkResourcesHelper.$r('sys.color.comp_background_primary_contrary');
-        this.compBackgroundGray = ArkResourcesHelper.$r('sys.color.comp_background_gray');
-        this.compBackgroundSecondary = ArkResourcesHelper.$r('sys.color.comp_background_secondary');
-        this.compBackgroundTertiary = ArkResourcesHelper.$r('sys.color.comp_background_tertiary');
-        this.compBackgroundEmphasize = ArkResourcesHelper.$r('sys.color.comp_background_emphasize');
-        this.compBackgroundNeutral = ArkResourcesHelper.$r('sys.color.neutral');
-        this.compEmphasizeSecondary = ArkResourcesHelper.$r('sys.color.comp_emphasize_secondary');
-        this.compEmphasizeTertiary = ArkResourcesHelper.$r('sys.color.comp_emphasize_tertiary');
-        this.compDivider = ArkResourcesHelper.$r('sys.color.comp_divider');
-        this.compCommonContrary = ArkResourcesHelper.$r('sys.color.comp_common_contrary');
-        this.compBackgroundFocus = ArkResourcesHelper.$r('sys.color.comp_background_focus');
-        this.compFocusedPrimary = ArkResourcesHelper.$r('sys.color.comp_focused_primary');
-        this.compFocusedSecondary = ArkResourcesHelper.$r('sys.color.comp_focused_secondary');
-        this.compFocusedTertiary = ArkResourcesHelper.$r('sys.color.comp_focused_tertiary');
+        this.compBackgroundPrimaryContrary = ArkResourcesHelper.$r('sys.color.comp_background_primary_contrary', 125831005);
+        this.compBackgroundGray = ArkResourcesHelper.$r('sys.color.comp_background_gray', 125831006);
+        this.compBackgroundSecondary = ArkResourcesHelper.$r('sys.color.comp_background_secondary', 125831007);
+        this.compBackgroundTertiary = ArkResourcesHelper.$r('sys.color.comp_background_tertiary', 125831008);
+        this.compBackgroundEmphasize = ArkResourcesHelper.$r('sys.color.comp_background_emphasize', 125831009);
+        this.compBackgroundNeutral = ArkResourcesHelper.$r('sys.color.neutral', 125831066);
+        this.compEmphasizeSecondary = ArkResourcesHelper.$r('sys.color.comp_emphasize_secondary', 125831011);
+        this.compEmphasizeTertiary = ArkResourcesHelper.$r('sys.color.comp_emphasize_tertiary', 125831012);
+        this.compDivider = ArkResourcesHelper.$r('sys.color.comp_divider', 125831013);
+        this.compCommonContrary = ArkResourcesHelper.$r('sys.color.comp_common_contrary', 125831014);
+        this.compBackgroundFocus = ArkResourcesHelper.$r('sys.color.comp_background_focus', 125831015);
+        this.compFocusedPrimary = ArkResourcesHelper.$r('sys.color.comp_focused_primary', 125831016);
+        this.compFocusedSecondary = ArkResourcesHelper.$r('sys.color.comp_focused_secondary', 125831017);
+        this.compFocusedTertiary = ArkResourcesHelper.$r('sys.color.comp_focused_tertiary', 125831018);
 
-        this.interactiveHover = ArkResourcesHelper.$r('sys.color.interactive_hover');
-        this.interactivePressed = ArkResourcesHelper.$r('sys.color.interactive_pressed');
-        this.interactiveFocus = ArkResourcesHelper.$r('sys.color.interactive_focus');
-        this.interactiveActive = ArkResourcesHelper.$r('sys.color.interactive_active');
-        this.interactiveSelect = ArkResourcesHelper.$r('sys.color.interactive_select');
-        this.interactiveClick = ArkResourcesHelper.$r('sys.color.interactive_click');
+        this.interactiveHover = ArkResourcesHelper.$r('sys.color.interactive_hover', 125831019);
+        this.interactivePressed = ArkResourcesHelper.$r('sys.color.interactive_pressed', 125831020);
+        this.interactiveFocus = ArkResourcesHelper.$r('sys.color.interactive_focus', 125831021);
+        this.interactiveActive = ArkResourcesHelper.$r('sys.color.interactive_active', 125831022);
+        this.interactiveSelect = ArkResourcesHelper.$r('sys.color.interactive_select', 125831023);
+        this.interactiveClick = ArkResourcesHelper.$r('sys.color.interactive_click', 125831024);
     }
 }

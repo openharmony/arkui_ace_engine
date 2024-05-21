@@ -752,18 +752,19 @@ HWTEST_F(TabBarTestNg, TabsModelSetTabBarWidth001, TestSize.Level1)
 HWTEST_F(TabBarTestNg, TabBarPatternInitClick001, TestSize.Level1)
 {
     CreateWithItem([](TabsModelNG model) {});
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
-    tabBarPattern_->clickEvent_ = nullptr;
 
     /**
      * @tc.steps: step2. Test function InitClick.
      * @tc.expected: Related function runs ok.
      */
     for (int i = 0; i <= 1; i++) {
-        tabBarPattern_->InitClick(gestureHub);
-        tabBarPattern_->clickEvent_ = AceType::MakeRefPtr<ClickEvent>([](GestureEvent&) {});
+        auto firstChildNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+        tabBarPattern_->AddTabBarItemClickEvent(firstChildNode);
+        auto secondChildNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(1));
+        tabBarPattern_->AddTabBarItemClickEvent(secondChildNode);
     }
+    auto info = GestureEvent();
+    tabBarPattern_->clickEvents_.begin()->second->callback_(info);
 }
 
 /**
@@ -1162,27 +1163,6 @@ HWTEST_F(TabBarTestNg, TabBarPatternUpdateTextColorAndFontWeight002, TestSize.Le
      */
     int32_t index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
-}
-
-/**
- * @tc.name: TabBarPatternInitClick002
- * @tc.desc: test InitClick
- * @tc.type: FUNC
- */
-HWTEST_F(TabBarTestNg, TabBarPatternInitClick002, TestSize.Level1)
-{
-    CreateWithItem([](TabsModelNG model) {});
-    tabBarPattern_->clickEvent_ = nullptr;
-
-    /**
-     * @tc.steps: step2. Test function InitClick.
-     * @tc.expected: Related function runs ok.
-     */
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
-    tabBarPattern_->InitClick(gestureHub);
-    auto info = GestureEvent();
-    tabBarPattern_->clickEvent_->callback_(info);
 }
 
 /**

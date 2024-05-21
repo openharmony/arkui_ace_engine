@@ -87,14 +87,14 @@ export struct ProgressButton {
           .key(PROGRESS_BUTTON_PROGRESS_KEY)
           .color(this.progressColor)
         Row() {
-          Text(this.isLoading? this.textProgress: this.content)
+          Text(this.isLoading ? this.textProgress: this.content)
             .fontSize($r('sys.float.ohos_id_text_size_button3'))
             .fontWeight(FontWeight.Medium)
             .key(PROGRESS_BUTTON_PRIMARY_FONT_KEY)
             .maxLines(1)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
             .padding({left: 8, right: 8})
-            .opacity(this.enable? TEXT_ENABLE : TEXT_OPACITY)
+            .opacity(this.enable ? TEXT_ENABLE : TEXT_OPACITY)
         }
         Row()
           .key(PROGRESS_BUTTON_CONTAINER_BACKGROUND_COLOR_KEY)
@@ -115,7 +115,7 @@ export struct ProgressButton {
       BUTTON_NORMARL_WIDTH : this.progressButtonWidth)
     .stateEffect(this.enable)
     .onClick(() => {
-      if(!this.enable){
+      if (!this.enable) {
         return
       }
       if (this.progress < MAX_PROGRESS) {

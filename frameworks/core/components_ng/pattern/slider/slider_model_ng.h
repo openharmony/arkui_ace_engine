@@ -99,6 +99,7 @@ public:
     static void SetValidSlideRange(FrameNode* frameNode, float fromValue, float toValue);
     static void SetBlockImage(
         FrameNode* frameNode, const std::string& value, const std::string& bundleName, const std::string& moduleName);
+    static void SetSelectedBorderRadius(FrameNode* frameNode, const Dimension& value);
 
     static void ResetBlockBorderColor(FrameNode* frameNode);
     static void ResetBlockBorderWidth(FrameNode* frameNode);
@@ -111,6 +112,9 @@ public:
     static void ResetStepSize(FrameNode* frameNode);
     static void ResetBlockColor(FrameNode* frameNode);
     static void ResetValidSlideRange(FrameNode* frameNode);
+    static void ResetSelectedBorderRadius(FrameNode* frameNode);
+    static void ResetSliderInteractionMode(FrameNode* frameNode);
+    static void ResetMinResponsiveDistance(FrameNode* frameNode);
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetOnChange(FrameNode* frameNode, SliderOnChangeEvent&& eventOnChange);

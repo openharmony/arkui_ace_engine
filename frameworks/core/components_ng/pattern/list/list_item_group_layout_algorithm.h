@@ -290,7 +290,7 @@ private:
     void MeasureHeaderFooter(LayoutWrapper* layoutWrapper);
     void SetActiveChildRange(LayoutWrapper* layoutWrapper);
     float UpdateReferencePos(RefPtr<LayoutProperty> layoutProperty, bool forwardLayout, float referencePos);
-    bool NeedMeasureItem();
+    bool NeedMeasureItem(LayoutWrapper* layoutWrapper);
     static void SetListItemIndex(const LayoutWrapper* groupLayoutWrapper,
         const RefPtr<LayoutWrapper>& itemLayoutWrapper, int32_t indexInGroup);
     bool IsCardStyleForListItemGroup(const LayoutWrapper* groupLayoutWrapper);

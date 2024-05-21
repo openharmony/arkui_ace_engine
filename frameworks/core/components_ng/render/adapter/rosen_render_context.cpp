@@ -1586,6 +1586,7 @@ void RosenRenderContext::OnTransformScaleUpdate(const VectorF& scale)
     auto curScale = rsNode_->GetStagingProperties().GetScale();
     hasScales_ = !NearEqual(curScale, Vector2f(1.0f, 1.0f)) && !NearEqual(scale, VectorF(1.0f, 1.0f));
     SetAnimatableProperty<Rosen::RSScaleModifier, Rosen::Vector2f>(scaleXYUserModifier_, { scale.x, scale.y });
+    NotifyHostTransformUpdated();
     RequestNextFrame();
 }
 
@@ -1618,6 +1619,7 @@ void RosenRenderContext::OnTransformTranslateUpdate(const TranslateOptions& tran
         translateXYUserModifier_, { translateVec.x, translateVec.y });
     SetAnimatableProperty<Rosen::RSTranslateZModifier, float>(translateZUserModifier_, translateVec.z);
     ElementRegister::GetInstance()->ReSyncGeometryTransition(GetHost());
+    NotifyHostTransformUpdated();
     RequestNextFrame();
 }
 
@@ -1632,6 +1634,7 @@ void RosenRenderContext::OnTransformRotateUpdate(const Vector5F& rotate)
     rsNode_->SetRotation(-rotate.w * rotate.x / norm, -rotate.w * rotate.y / norm, rotate.w * rotate.z / norm);
     // set camera distance
     rsNode_->SetCameraDistance(rotate.v);
+    NotifyHostTransformUpdated();
     RequestNextFrame();
 }
 
@@ -1647,6 +1650,7 @@ void RosenRenderContext::OnTransformCenterUpdate(const DimensionOffset& center)
             zPivot = static_cast<float>(z.value().ConvertToVp());
         }
         SetPivot(xPivot, yPivot, zPivot);
+        NotifyHostTransformUpdated();
     }
     RequestNextFrame();
 }
@@ -1686,6 +1690,7 @@ void RosenRenderContext::OnTransformMatrixUpdate(const Matrix4& matrix)
         AddOrChangeQuaternionModifier(
             rsNode_, transformMatrixModifier_->quaternion, transformMatrixModifier_->quaternionValue, quaternion);
     }
+    NotifyHostTransformUpdated();
     RequestNextFrame();
 }
 
@@ -5870,5 +5875,12 @@ void RosenRenderContext::UpdateDrawRegion(uint32_t index, const std::shared_ptr<
         return;
     }
     rsNode_->SetDrawRegion(result);
+}
+
+void RosenRenderContext::NotifyHostTransformUpdated()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->NotifyTransformInfoChanged();
 }
 } // namespace OHOS::Ace::NG

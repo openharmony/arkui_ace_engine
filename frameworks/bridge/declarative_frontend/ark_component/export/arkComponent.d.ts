@@ -1963,6 +1963,15 @@ declare class ArkSymbolGlyphComponent extends ArkComponent implements SymbolGlyp
     effectStrategy(value: SymbolEffectStrategy): SymbolGlyphAttribute;
 }
 
+declare class ArkSymbolSpanComponent extends ArkComponent implements SymbolSpanAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    fontColor(value: ResourceColor[]): SymbolSpanAttribute;
+    fontSize(value: number | string | Resource): SymbolSpanAttribute;
+    fontWeight(value: number | FontWeight | string): SymbolSpanAttribute;
+    renderingStrategy(value: SymbolRenderingStrategy): SymbolSpanAttribute;
+    effectStrategy(value: SymbolEffectStrategy): SymbolSpanAttribute;
+}
+
 declare class ArkParticleComponent extends ArkComponent implements ParticleAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
     emitter(fields: Array<EmitterProperty>): ParticleAttribute;

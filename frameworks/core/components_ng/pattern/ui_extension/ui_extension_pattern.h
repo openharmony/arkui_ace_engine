@@ -128,6 +128,7 @@ public:
     void OnDpiConfigurationUpdate() override;
     void SetDensityDpi(bool densityDpi);
     bool GetDensityDpi();
+    bool IsCompatibleOldVersion();
 
     void NotifySizeChangeReason(
         WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction);
@@ -243,6 +244,7 @@ private:
     int32_t callbackId_ = 0;
     RectF displayArea_;
     bool isKeyAsync_ = false;
+    SessionType sessionType_ = SessionType::UI_EXTENSION_ABILITY;
 
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
 };

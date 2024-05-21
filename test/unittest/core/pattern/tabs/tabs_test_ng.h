@@ -128,7 +128,7 @@ public:
         const std::function<void(TabContentModelNG)>& callback, int32_t nodeId);
     static TabBarBuilderFunc TabBarItemBuilder();
     void SwipeToWithoutAnimation(int32_t index);
-    void ClickTo(Offset offset);
+    void ClickTo(Offset offset, int32_t index);
     void MouseTo(MouseAction action, Offset location, bool isHover);
     void TouchTo(TouchType type, Offset location);
 

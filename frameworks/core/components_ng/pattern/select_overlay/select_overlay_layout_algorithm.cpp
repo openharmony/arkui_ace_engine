@@ -147,28 +147,36 @@ void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     menu->Layout();
     auto button = layoutWrapper->GetOrCreateChildByIndex(1);
     CHECK_NULL_VOID(button);
-    auto menuNode = menu->GetHostNode();
-    CHECK_NULL_VOID(menuNode);
-    auto menuContext = menuNode->GetRenderContext();
-    CHECK_NULL_VOID(menuContext);
-    auto offset = OffsetF();
-    if (menuContext->GetOffset()) {
-        offset =
-            OffsetF(menuContext->GetOffset()->GetX().ConvertToPx(), menuContext->GetOffset()->GetY().ConvertToPx());
-    }
     if (!info_->menuInfo.menuIsShow || info_->menuInfo.menuDisable) {
         hasExtensionMenu_ = false;
         return;
     }
     hasExtensionMenu_ = true;
-    button->GetGeometryNode()->SetMarginFrameOffset(menuOffset);
+    auto buttonSize = button->GetGeometryNode()->GetMarginFrameSize();
+    auto menuSize = menu->GetGeometryNode()->GetMarginFrameSize();
+    OffsetF buttonOffset;
+    if (GreatNotEqual(menuSize.Width(), menuSize.Height())) {
+        buttonOffset = OffsetF(menuOffset.GetX() + menuSize.Width() - buttonSize.Width(), menuOffset.GetY());
+    } else {
+        buttonOffset = menuOffset;
+    }
+    button->GetGeometryNode()->SetMarginFrameOffset(buttonOffset);
     button->Layout();
-    auto extensionMenuOffset = ComputeExtensionMenuPosition(layoutWrapper, offset);
-
     auto extensionMenu = layoutWrapper->GetOrCreateChildByIndex(2);
     CHECK_NULL_VOID(extensionMenu);
-    extensionMenu->GetGeometryNode()->SetMarginFrameOffset(extensionMenuOffset);
     extensionMenu->Layout();
+    CheckHideBackOrMoreButton(extensionMenu, button);
+}
+
+void SelectOverlayLayoutAlgorithm::CheckHideBackOrMoreButton(
+    const RefPtr<LayoutWrapper>& extensionMenu, const RefPtr<LayoutWrapper>& button)
+{
+    auto extensionMenuRect = extensionMenu->GetGeometryNode()->GetFrameRect();
+    auto buttonRect = button->GetGeometryNode()->GetFrameRect();
+    auto constraintRect = extensionMenuRect.Constrain(buttonRect);
+    if (GreatNotEqual(constraintRect.Width(), 0.0f) && GreatNotEqual(constraintRect.Height(), 0.0f)) {
+        hideMoreOrBack_ = true;
+    }
 }
 
 bool SelectOverlayLayoutAlgorithm::CheckInShowArea(const SelectOverlayInfo& info)
@@ -270,7 +278,7 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
             menuPosition.SetX(defaultMenuPositionX);
         } else if (GreatOrEqual(
             menuPosition.GetX() + menuWidth, viewPort.GetX() + viewPort.Width() - defaultMenuPositionX)) {
-                menuPosition.SetX(overlayWidth - menuWidth - defaultMenuPositionX);
+            menuPosition.SetX(overlayWidth - menuWidth - defaultMenuPositionX);
         }
     };
     adjustPositionXWithViewPort(menuPosition);

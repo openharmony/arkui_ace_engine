@@ -545,6 +545,10 @@ public:
 
     void HandleMoveEventInComp(const PointF& point);
     void HandleLeaveHotzoneEvent();
+    void SetHotZoneScrollCallback(std::function<void(void)>&& func)
+    {
+        hotZoneScrollCallback_ = func;
+    }
 
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -777,6 +781,7 @@ private:
     float lastHonezoneOffsetPct_ = 0.0f;
     RefPtr<BezierVariableVelocityMotion> velocityMotion_;
     RefPtr<VelocityMotion> fixedVelocityMotion_;
+    std::function<void(void)> hotZoneScrollCallback_;
     void UnRegister2DragDropManager();
     float IsInHotZone(const PointF& point);
     void HotZoneScroll(const float offset);

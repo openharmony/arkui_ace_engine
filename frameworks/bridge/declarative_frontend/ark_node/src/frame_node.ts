@@ -145,7 +145,7 @@ class FrameNode {
 
   disposeTree(): void {
     let parent = this.getParent();
-    if (parent?.getNodeType() == "NodeContainer") {
+    if (parent?.getNodeType() === "NodeContainer") {
       getUINativeModule().nodeContainer.clean(parent?.getNodePtr());
     } else {
       parent?.removeChild(this);
@@ -199,7 +199,7 @@ class FrameNode {
       return;
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    let flag = getUINativeModule().frameNode.appendChild(this.nodePtr_, content.getNodePtr());
+    let flag = getUINativeModule().frameNode.appendChild(this.nodePtr_, content.getNodeWithoutProxy());
     __JSScopeUtil__.restoreInstanceId();
     if (!flag) {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
