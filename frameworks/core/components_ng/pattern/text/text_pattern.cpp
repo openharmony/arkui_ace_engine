@@ -3243,4 +3243,23 @@ void TextPattern::SetExternalSpanItem(const std::list<RefPtr<SpanItem>>& spans)
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateContent(textForDisplay_);
 }
+
+RectF TextPattern::GetTextContentRect(bool isActualText) const
+{
+    auto textRect = contentRect_;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, textRect);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, textRect);
+    CHECK_NULL_RETURN(pManager_, textRect);
+    if (!renderContext->GetClipEdge().value_or(false) &&
+        LessNotEqual(textRect.Width(), pManager_->GetLongestLine())) {
+        textRect.SetWidth(pManager_->GetLongestLine());
+    }
+    if (isActualText && !renderContext->GetClipEdge().value_or(false) &&
+        LessNotEqual(textRect.Height(), pManager_->GetHeight())) {
+        textRect.SetHeight(pManager_->GetHeight());
+    }
+    return textRect;
+}
 } // namespace OHOS::Ace::NG

@@ -723,6 +723,11 @@ public:
         contentChange_ = onChange;
     }
 
+    RectF GetTextContentRect(bool isActualText = false) const override
+    {
+        return contentRect_;
+    }
+
 protected:
     bool CanStartAITask() override;
 

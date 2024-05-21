@@ -718,7 +718,7 @@ public:
         return parentGlobalOffset_;
     }
 
-    RectF GetTextContentRect() const override
+    RectF GetTextContentRect(bool isActualText = false) const override
     {
         return contentRect_;
     }
