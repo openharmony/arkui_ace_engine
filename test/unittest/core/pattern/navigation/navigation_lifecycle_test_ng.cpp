@@ -98,6 +98,10 @@ void NavigationLifecycleTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
     MockContainer::SetUp();
+    auto context = MockPipelineContext::GetCurrent();
+    if (context) {
+        context->stageManager_ = nullptr;
+    }
 }
 
 void NavigationLifecycleTestNg::TearDownTestSuite()
