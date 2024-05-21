@@ -59,6 +59,7 @@ config("ace_unittest_config") {
   ]
 
   cflags_cc = [
+    "-Wno-unused-private-field",
     "-Wno-thread-safety-attributes",
     "-Wno-thread-safety-analysis",
     "-Wno-non-c-typedef-for-linkage",

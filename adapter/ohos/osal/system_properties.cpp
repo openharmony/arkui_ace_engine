@@ -99,11 +99,6 @@ bool IsDownloadByNetworkDisabled()
     return system::GetParameter(ENABLE_DOWNLOAD_BY_NETSTACK_KEY, "true") == "true";
 }
 
-bool IsTraceEnabled()
-{
-    return (system::GetParameter("persist.ace.trace.enabled", "1") == "1");
-}
-
 bool IsSvgTraceEnabled()
 {
     return (system::GetParameter("persist.ace.trace.svg.enabled", "0") == "1");
@@ -319,7 +314,6 @@ std::pair<float, float> GetPercent()
     return percent;
 }
 
-bool SystemProperties::traceEnabled_ = IsTraceEnabled();
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::developerModeOn_ = IsDeveloperModeOn();
 bool SystemProperties::layoutTraceEnable_ = IsLayoutTraceEnabled() && developerModeOn_;
@@ -493,7 +487,6 @@ void SystemProperties::InitDeviceInfo(
     releaseType_ = ::GetOsReleaseType();
     paramDeviceType_ = ::GetDeviceType();
     debugEnabled_ = IsDebugEnabled();
-    traceEnabled_ = IsTraceEnabled();
     svgTraceEnable_ = IsSvgTraceEnabled();
     layoutTraceEnable_ = IsLayoutTraceEnabled() && developerModeOn_;
     traceInputEventEnable_ = IsTraceInputEventEnabled() && developerModeOn_;
