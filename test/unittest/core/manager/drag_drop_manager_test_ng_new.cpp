@@ -440,7 +440,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerFireOnDragEventTest001, TestSi
         onDropInfo = EXTRA_INFO;
     };
     eventHub->SetOnDrop(std::move(onDrop));
-    Point point;
+    PointerEvent point;
     TouchEvent event;
     event.x = 1.0f;
     event.y = 2.0f;
@@ -501,7 +501,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerFireOnItemDragEventTest003, Te
         onDropInfo = EXTRA_INFO;
     };
     eventHub->SetOnDrop(std::move(onDrop));
-    Point point;
+    PointerEvent point;
     TouchEvent event;
     event.x = 1.0f;
     event.y = 2.0f;
@@ -813,7 +813,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerGetItemIndexTest002, TestSize.
         onDropInfo = EXTRA_INFO;
     };
     eventHub->SetOnDrop(std::move(onDrop));
-    Point point;
+    PointerEvent point;
     TouchEvent event;
     event.x = 1.0f;
     event.y = 2.0f;
@@ -889,7 +889,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerGetItemIndexTest003, TestSize.
         onDropInfo = EXTRA_INFO;
     };
     eventHub->SetOnDrop(std::move(onDrop));
-    Point point;
+    PointerEvent point;
     TouchEvent event;
     event.x = 1.0f;
     event.y = 2.0f;
@@ -1517,7 +1517,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest050, TestSize.Level1)
      * @tc.steps: step2. Construct frameNode and update the properties.
      * @tc.expected: frameNode and geometryNode are not null.
      */
-    Point point;
+    PointerEvent point;
     std::string extraInfo;
     dragDropManager->extraInfo_ = EXTRA_INFO;
     dragDropManager->isMouseDragged_ = true;

@@ -76,12 +76,23 @@ public:
         actionLongPress_ = std::move(actionLongPress);
     }
 
+    const std::vector<KeyCode>& GetPressedKeyCodes() const
+    {
+        return pressedKeyCodes_;
+    }
+
+    void SetPressedKeyCodes(const std::vector<KeyCode>& pressedKeyCodes)
+    {
+        pressedKeyCodes_ = pressedKeyCodes;
+    }
+
 private:
     GestureEventFunc actionStart_;
     GestureEventFunc actionUpdate_;
     GestureEventFunc actionEnd_;
     GestureEventNoParameter actionCancel_;
     GestureEventFunc actionLongPress_;
+    std::vector<KeyCode> pressedKeyCodes_;
 };
 
 class ACE_EXPORT DragEventActuator : public GestureEventActuator {
