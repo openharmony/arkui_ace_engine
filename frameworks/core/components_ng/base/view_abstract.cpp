@@ -1593,7 +1593,8 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam> &param, const RefPtr<Frame
     popupInfo.targetOffset = OffsetF(param->GetTargetOffset().GetX(), param->GetTargetOffset().GetY());
     if (showInSubWindow) {
         if (isShow) {
-            SubwindowManager::GetInstance()->ShowPopupNG(targetId, popupInfo);
+            SubwindowManager::GetInstance()->ShowPopupNG(
+                targetId, popupInfo, param->GetOnWillDismiss(), param->GetInteractiveDismiss());
         } else {
             SubwindowManager::GetInstance()->HidePopupNG(targetId);
         }
