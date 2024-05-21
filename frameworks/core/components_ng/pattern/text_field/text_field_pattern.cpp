@@ -4354,9 +4354,6 @@ void TextFieldPattern::HandleOnDelete(bool backward)
 void TextFieldPattern::DeleteBackward(int32_t length)
 {
     ResetObscureTickCountDown();
-    if (selectController_->GetCaretIndex() <= 0) {
-        return;
-    }
     if (IsSelected()) {
         auto start = selectController_->GetStartIndex();
         auto end = selectController_->GetEndIndex();
@@ -4368,6 +4365,9 @@ void TextFieldPattern::DeleteBackward(int32_t length)
         AfterIMEDeleteValue(value, TextDeleteDirection::BACKWARD);
         showCountBorderStyle_ = false;
         HandleCountStyle();
+        return;
+    }
+    if (selectController_->GetCaretIndex() <= 0) {
         return;
     }
     inputOperations_.emplace(InputOperation::DELETE_BACKWARD);

@@ -16,5 +16,20 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("gestures_test_ng") {
   type = "new"
   module_output = "gestures"
-  sources = [ "gestures_test_ng.cpp" ]
+  sources = [
+    "click_recognizer_test_ng.cpp",
+    "exclusive_recognizer_test_ng.cpp",
+    "gesture_group_test_ng.cpp",
+    "gesture_recognizer_test_ng.cpp",
+    "gesture_referee_test_ng.cpp",
+    "gestures_common_test_ng.cpp",
+    "long_press_recognizer_test_ng.cpp",
+    "pan_recognizer_test_ng.cpp",
+    "parallel_recognizer_test_ng.cpp",
+    "pinch_recognizer_test_ng.cpp",
+    "rotation_recognizer_test_ng.cpp",
+    "sequenced_recognizer_test_ng.cpp",
+    "swipe_recognizer_test_ng.cpp",
+    "tap_gesture_test_ng.cpp",
+  ]
 }

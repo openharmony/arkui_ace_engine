@@ -307,12 +307,12 @@ void WebPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     pipeline->RemoveNodesToNotifyMemoryLevel(id);
 }
 
-void WebPattern::OnAttachToMainTree() 
+void WebPattern::OnAttachToMainTree()
 {
     isAttachedToMainTree_ = true;
 }
 
-void WebPattern::OnDetachFromMainTree() 
+void WebPattern::OnDetachFromMainTree()
 {
     isAttachedToMainTree_ = false;
 }
@@ -1094,8 +1094,9 @@ DragRet WebPattern::GetDragAcceptableStatus()
 
 bool WebPattern::NotifyStartDragTask()
 {
-    if (isDisableDrag_) {
-        TAG_LOGW(AceLogTag::ACE_WEB, "DragDrop disable drag in web");
+    if (isDisableDrag_ || isTouchUpEvent_) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "DragDrop disable drag in web. isDisableDrag_:%{public}d,"
+            "isTouchUpEvent_:%{public}d", isDisableDrag_, isTouchUpEvent_);
         return false;
     }
     isDragging_ = true;
@@ -2279,6 +2280,7 @@ void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeybo
 
 void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
 {
+    isTouchUpEvent_ = false;
     CHECK_NULL_VOID(delegate_);
     Offset touchOffset = Offset(0, 0);
     std::list<TouchInfo> touchInfos;
@@ -2302,6 +2304,7 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
 
 void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
 {
+    isTouchUpEvent_ = true;
     CHECK_NULL_VOID(delegate_);
     if (!isReceivedArkDrag_) {
         ResetDragAction();
