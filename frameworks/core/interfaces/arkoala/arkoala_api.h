@@ -2492,6 +2492,14 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaMargin)(ArkUINodeHandle node);
     void (*setTextAreaCaret)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*getTextAreaMargin)(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 length, ArkUI_Int32 unit);
+    void (*setTextAreaOnWillInsert)(ArkUINodeHandle node, ArkUI_Int64 callback);
+    void (*resetTextAreaOnWillInsert)(ArkUINodeHandle node);
+    void (*setTextAreaOnDidInsert)(ArkUINodeHandle node, ArkUI_Int64 callback);
+    void (*resetTextAreaOnDidInsert)(ArkUINodeHandle node);
+    void (*setTextAreaOnWillDelete)(ArkUINodeHandle node, ArkUI_Int64 callback);
+    void (*resetTextAreaOnWillDelete)(ArkUINodeHandle node);
+    void (*setTextAreaOnDidDelete)(ArkUINodeHandle node, ArkUI_Int64 callback);
+    void (*resetTextAreaOnDidDelete)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -3223,6 +3231,14 @@ struct ArkUISearchModifier {
         ArkUINodeHandle node, ArkUI_Bool open, ArkUI_Int32 thresholdPercentage, ArkUI_Bool highlightBorderr);
     void (*resetSearchShowCounter)(ArkUINodeHandle node);
     ArkUINodeHandle (*getSearchController)(ArkUINodeHandle node);
+    void (*setSearchOnWillInsert)(ArkUINodeHandle node, ArkUI_Int64 callback);
+    void (*resetSearchOnWillInsert)(ArkUINodeHandle node);
+    void (*setSearchOnDidInsert)(ArkUINodeHandle node, ArkUI_Int64 callback);
+    void (*resetSearchOnDidInsert)(ArkUINodeHandle node);
+    void (*setSearchOnWillDelete)(ArkUINodeHandle node, ArkUI_Int64 callback);
+    void (*resetSearchOnWillDelete)(ArkUINodeHandle node);
+    void (*setSearchOnDidDelete)(ArkUINodeHandle node, ArkUI_Int64 callback);
+    void (*resetSearchOnDidDelete)(ArkUINodeHandle node);
 };
 
 struct ArkUISearchControllerModifier {

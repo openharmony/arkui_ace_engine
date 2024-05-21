@@ -138,6 +138,11 @@ public:
     static void SetCounterType(FrameNode* frameNode, int32_t value);
     static void SetShowCounterBorder(FrameNode* frameNode, bool value);
     static RefPtr<TextFieldControllerBase> GetSearchController(FrameNode* frameNode);
+    static void SetOnWillInsertValueEvent(FrameNode* frameNode, std::function<bool(const InsertValueInfo&)>&& func);
+    static void SetOnDidInsertValueEvent(FrameNode* frameNode, std::function<void(const InsertValueInfo&)>&& func);
+    static void SetOnWillDeleteEvent(FrameNode* frameNode, std::function<bool(const DeleteValueInfo&)>&& func);
+    static void SetOnDidDeleteEvent(FrameNode* frameNode, std::function<void(const DeleteValueInfo&)>&& func);
+
 private:
     static RefPtr<SearchNode> CreateSearchNode(int32_t nodeId, const std::optional<std::string>& value,
         const std::optional<std::string>& placeholder, const std::optional<std::string>& icon);
