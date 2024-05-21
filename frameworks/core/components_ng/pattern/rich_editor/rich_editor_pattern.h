@@ -425,7 +425,7 @@ public:
     void HandleOnSelectAll() override;
     void OnCopyOperation(bool isUsingExternalKeyboard = false);
     void HandleOnCopy(bool isUsingExternalKeyboard = false) override;
-    void HandleDraggableFlag(bool isInterceptEvent);
+    void HandleDraggableFlag(bool isTouchSelectArea);
     bool JudgeContentDraggable();
     std::pair<OffsetF, float> CalculateCaretOffsetAndHeight();
     OffsetF CalculateEmptyValueCaretRect();
@@ -493,6 +493,7 @@ public:
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
     void ResetSelection();
+    bool BetweenSelection(const Offset& globalOffset);
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
     void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) override;
     void HandleSurfacePositionChanged(int32_t posX, int32_t posY) override;

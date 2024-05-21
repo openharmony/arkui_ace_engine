@@ -99,12 +99,16 @@ void RichEditorDragOverlayModifier::PaintImage(DrawingContext& context)
         auto offset = OffsetF(rect.Left(), rect.Top()) + pattern->GetTextRect().GetOffset();
         auto imageChild = DynamicCast<ImagePattern>(child->GetPattern());
         if (imageChild) {
-            auto pixelMap = child->GetRenderContext()->GetThumbnailPixelMap();
-            CHECK_NULL_VOID(pixelMap);
-            auto canvasImage = CanvasImage::Create(pixelMap);
-            CHECK_NULL_VOID(canvasImage);
+            auto geometryNode = child->GetGeometryNode();
+            auto canvasImage = imageChild->GetCanvasImage();
             auto layoutProperty = imageChild->GetLayoutProperty<ImageLayoutProperty>();
-            CHECK_NULL_VOID(layoutProperty);
+            if (!geometryNode || !canvasImage || !layoutProperty) {
+                continue;
+            }
+            auto pixelMapImage = DynamicCast<PixelMapImage>(canvasImage);
+            if (!pixelMapImage) {
+                continue;
+            }
             const auto& marginProperty = layoutProperty->GetMarginProperty();
             float marginTop = 0.0f;
             float marginLeft = 0.0f;
@@ -113,11 +117,9 @@ void RichEditorDragOverlayModifier::PaintImage(DrawingContext& context)
                     marginProperty->left.has_value() ? marginProperty->left->GetDimension().ConvertToPx() : 0.0f;
                 marginTop = marginProperty->top.has_value() ? marginProperty->top->GetDimension().ConvertToPx() : 0.0f;
             }
+            auto frameSize = geometryNode->GetFrameSize();
             RectF imageRect(
-                offset.GetX() + marginLeft, offset.GetY() + marginTop, pixelMap->GetWidth(), pixelMap->GetHeight());
-            CHECK_NULL_VOID(canvasImage);
-            auto pixelMapImage = DynamicCast<PixelMapImage>(canvasImage);
-            CHECK_NULL_VOID(pixelMapImage);
+                offset.GetX() + marginLeft, offset.GetY() + marginTop, frameSize.Width(), frameSize.Height());
             pixelMapImage->DrawRect(canvas, ToRSRect(imageRect));
         }
         ++index;
