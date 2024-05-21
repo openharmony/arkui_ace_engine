@@ -4316,6 +4316,14 @@ void ArkUINativeModule::RegisterTextClockAttributes(Local<panda::ObjectRef> obje
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextClockBridge::SetFontFamily));
     textClock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontFamily"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextClockBridge::ResetFontFamily));
+    textClock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextShadow"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextClockBridge::SetTextShadow));
+    textClock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextShadow"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextClockBridge::ResetTextShadow));
+    textClock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontFeature"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextClockBridge::SetFontFeature));
+    textClock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontFeature"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextClockBridge::ResetFontFeature));
     textClock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContentModifierBuilder"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextClockBridge::SetContentModifierBuilder));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textClock"), textClock);

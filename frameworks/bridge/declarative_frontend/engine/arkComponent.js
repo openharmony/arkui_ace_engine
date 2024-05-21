@@ -20984,10 +20984,12 @@ class ArkTextClockComponent extends ArkComponent {
     return this;
   }
   textShadow(value) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextClockTextShadowModifier.identity, TextClockTextShadowModifier, value);
+    return this;
   }
   fontFeature(value) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextClockFontFeatureModifier.identity, TextClockFontFeatureModifier, value);
+    return this;
   }
   contentModifier(value) {
     this.setContentModifier(value);
@@ -21112,6 +21114,67 @@ class TextClockFontFamilyModifier extends ModifierWithKey {
   }
 }
 TextClockFontFamilyModifier.identity = Symbol('textClockFontFamily');
+class TextClockFontFeatureModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textClock.resetFontFeature(node);
+    }
+    else {
+      getUINativeModule().textClock.setFontFeature(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextClockFontFeatureModifier.identity = Symbol('textClockFontFeature');
+class TextClockTextShadowModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textClock.resetTextShadow(node);
+    }
+    else {
+      let shadow = new ArkShadowInfoToArray();
+      if (!shadow.convertShadowOptions(this.value)) {
+        getUINativeModule().textClock.resetTextShadow(node);
+      }
+      else {
+        getUINativeModule().textClock.setTextShadow(node, shadow.radius, shadow.type, shadow.color,
+          shadow.offsetX, shadow.offsetY, shadow.fill, shadow.radius.length);
+      }
+    }
+  }
+  checkObjectDiff() {
+    let checkDiff = true;
+    let arkShadow = new ArkShadowInfoToArray();
+    if (Object.getPrototypeOf(this.stageValue).constructor === Object &&
+      Object.getPrototypeOf(this.value).constructor === Object) {
+      checkDiff = arkShadow.checkDiff(this.stageValue, this.value);
+    }
+    else if (Object.getPrototypeOf(this.stageValue).constructor === Array &&
+      Object.getPrototypeOf(this.value).constructor === Array &&
+      this.stageValue.length === this.value.length) {
+      let isDiffItem = false;
+      for (let i = 0; i < this.value.length; i++) {
+        if (arkShadow.checkDiff(this.stageValue[i], this.value[1])) {
+          isDiffItem = true;
+          break;
+        }
+      }
+      if (!isDiffItem) {
+        checkDiff = false;
+      }
+    }
+    return checkDiff;
+  }
+}
+TextClockTextShadowModifier.identity = Symbol('textClockTextShadow');
 // @ts-ignore
 if (globalThis.TextClock !== undefined) {
   globalThis.TextClock.attributeModifier = function (modifier) {
