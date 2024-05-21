@@ -813,6 +813,7 @@ void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeigh
             scrollBar_->SetScrollable(scrollable);
             if (scrollBarOverlayModifier_) {
                 scrollBarOverlayModifier_->SetOpacity(scrollable ? UINT8_MAX : 0);
+                scrollBarOverlayModifier_->SetScrollable(scrollable);
             }
             if (scrollable) {
                 scrollBar_->ScheduleDisappearDelayTask();
