@@ -42,14 +42,6 @@ JSRef<JSObject> JsGestureFunction::CreateGestureEvent(const GestureEvent& info)
     gestureInfoObj->SetProperty<double>("speed", info.GetSpeed());
     gestureInfoObj->SetProperty<double>("timestamp", info.GetTimeStamp().time_since_epoch().count());
     gestureInfoObj->SetProperty<double>(
-        "globalX", PipelineBase::Px2VpWithCurrentDensity(info.GetGlobalLocation().GetX()));
-    gestureInfoObj->SetProperty<double>(
-        "globalY", PipelineBase::Px2VpWithCurrentDensity(info.GetGlobalLocation().GetY()));
-    gestureInfoObj->SetProperty<double>(
-        "localX", PipelineBase::Px2VpWithCurrentDensity(info.GetLocalLocation().GetX()));
-    gestureInfoObj->SetProperty<double>(
-        "localY", PipelineBase::Px2VpWithCurrentDensity(info.GetLocalLocation().GetY()));
-    gestureInfoObj->SetProperty<double>(
         "pinchCenterX", PipelineBase::Px2VpWithCurrentDensity(info.GetPinchCenter().GetX()));
     gestureInfoObj->SetProperty<double>(
         "pinchCenterY", PipelineBase::Px2VpWithCurrentDensity(info.GetPinchCenter().GetY()));
