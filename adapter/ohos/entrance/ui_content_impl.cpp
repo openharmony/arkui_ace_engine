@@ -2040,12 +2040,14 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
             pipelineContext->ChangeDarkModeBrightness(true);
         }
     };
+
+    AceViewportConfig aceViewportConfig(modifyConfig, reason, rsTransaction);
     if ((container->IsUseStageModel() && (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION ||
                                              reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC)) ||
         taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::PLATFORM)) {
-        task();
+        viewportConfigMgr_->UpdateConfigSync(aceViewportConfig, std::move(task));
     } else {
-        taskExecutor->PostTask(task, TaskExecutor::TaskType::PLATFORM, "ArkUIUpdateViewportConfig");
+        viewportConfigMgr_->UpdateConfig(aceViewportConfig, std::move(task), container, "ArkUIUpdateViewportConfig");
     }
 }
 
