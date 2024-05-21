@@ -101,7 +101,7 @@ void MutableSpanString::ApplyReplaceStringToSpans(
             ++it;
             continue;
         }
-        it = HandleSpanOperation(it, start, end, other, op, intersection.value());
+        it = HandleSpanOperation(it, start, length, other, op, intersection.value());
     }
 }
 
