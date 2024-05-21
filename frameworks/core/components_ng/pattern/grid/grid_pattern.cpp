@@ -1866,48 +1866,29 @@ void GridPattern::AnimateToTarget(ScrollAlign align, RefPtr<LayoutAlgorithmWrapp
 // scroll to the item where the index is located
 bool GridPattern::AnimateToTargetImp(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper)
 {
-    bool irregular = UseIrregularLayout();
-    // use as reference
-    GridLayoutInfo* infoPtr {};
-    if (irregular) {
-        infoPtr = &gridLayoutInfo_;
-    } else {
-        auto gridScrollLayoutAlgorithm =
-            DynamicCast<GridScrollLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
-        scrollGridLayoutInfo_ = gridScrollLayoutAlgorithm->GetScrollGridLayoutInfo();
-        infoPtr = &scrollGridLayoutInfo_;
-    }
-
     float mainGap = GetMainGap();
     float targetPos = 0.0f;
-    if (irregular && align == ScrollAlign::CENTER) {
-        targetPos = IrregularAnimateToCenter(mainGap);
+    if (UseIrregularLayout()) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto size = GridLayoutUtils::GetItemSize(&gridLayoutInfo_, RawPtr(host), *targetIndex_);
+        targetPos = gridLayoutInfo_.GetAnimatePosIrregular(*targetIndex_, size.rows, align, mainGap);
         if (Negative(targetPos)) {
             return false;
         }
     } else {
+        auto gridScrollLayoutAlgorithm =
+            DynamicCast<GridScrollLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+        scrollGridLayoutInfo_ = gridScrollLayoutAlgorithm->GetScrollGridLayoutInfo();
         // Based on the index, align gets the position to scroll to
-        bool success = infoPtr->GetGridItemAnimatePos(gridLayoutInfo_, targetIndex_.value(), align, mainGap, targetPos);
+        bool success = scrollGridLayoutInfo_.GetGridItemAnimatePos(
+            gridLayoutInfo_, targetIndex_.value(), align, mainGap, targetPos);
         CHECK_NULL_RETURN(success, false);
     }
 
     isSmoothScrolling_ = true;
     AnimateTo(targetPos, -1, nullptr, true);
     return true;
-}
-
-float GridPattern::IrregularAnimateToCenter(float mainGap) const
-{
-    const auto& info = gridLayoutInfo_;
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, -1.0f);
-    auto it = info.FindInMatrix(*targetIndex_);
-    if (it == info.gridMatrix_.end()) {
-        return -1.0f;
-    }
-    auto size = GridLayoutUtils::GetItemSize(&info, RawPtr(host), *targetIndex_);
-    auto [center, offset] = info.FindItemCenter(it->first, size.rows, mainGap);
-    return info.GetTotalHeightFromZeroIndex(center, mainGap) + offset - info.lastMainSize_ / 2.0f;
 }
 
 std::vector<RefPtr<FrameNode>> GridPattern::GetVisibleSelectedItems()
