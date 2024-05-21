@@ -16,18 +16,18 @@
 
 class Utils {
     public static getApiVersion() : number {
-        return typeof ViewStackProcessor["getApiVersion"] == "function"
+        return typeof ViewStackProcessor["getApiVersion"] === "function"
                ? ViewStackProcessor["getApiVersion"]()
                : undefined;
     }
 
     public static isApiVersionEQAbove(target: number): boolean {
-        var version = Utils.getApiVersion();
+        let version = Utils.getApiVersion();
 
         if (version == null) {
             return false;
         }
-        if (typeof version == "number") {
+        if (typeof version === "number") {
             version = version % 1000;
         }
         return version >= target;
