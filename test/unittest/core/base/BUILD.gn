@@ -34,6 +34,12 @@ ace_unittest("frame_node_test_ng") {
   ]
 }
 
+ace_unittest("frame_node_drop_test_ng") {
+  type = "new"
+  module_output = "basic"
+  sources = [ "frame_node_drop_test_ng.cpp" ]
+}
+
 ace_unittest("geometry_node_test_ng") {
   type = "new"
   module_output = "basic"
@@ -89,6 +95,7 @@ group("core_base_unittest") {
   testonly = true
   deps = [
     ":distributed_ui_test_ng",
+    ":frame_node_drop_test_ng",
     ":frame_node_test_ng",
     ":geometry_node_test_ng",
     ":inspector_test_ng",
