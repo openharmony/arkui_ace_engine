@@ -3330,6 +3330,11 @@ struct ArkUISymbolSpanModifier {
     void (*setSymbolSpanId)(ArkUINodeHandle node, ArkUI_Uint32 symbolId);
 };
 
+struct ArkUIComponent3DModifier {
+    void (*setShaderInputBuffer)(ArkUINodeHandle node, ArkUI_Float32* buffer, ArkUI_Int32 size);
+    void (*resetShaderInputBuffer)(ArkUINodeHandle node);
+};
+
 struct ArkUITextTimerControllerModifier {
     ArkUINodeHandle (*getTextTimerController)(ArkUINodeHandle node);
     void (*setTextTimerStart)(ArkUINodeHandle node);
@@ -4010,6 +4015,7 @@ struct ArkUINodeModifiers {
     const ArkUINodeContentModifier* (*getNodeContentModifier)();
     const ArkUISymbolGlyphModifier* (*getSymbolGlyphModifier)();
     const ArkUISymbolSpanModifier* (*getSymbolSpanModifier)();
+    const ArkUIComponent3DModifier* (*getComponent3DModifier)();
 };
 
 // same as inner defines in property.h

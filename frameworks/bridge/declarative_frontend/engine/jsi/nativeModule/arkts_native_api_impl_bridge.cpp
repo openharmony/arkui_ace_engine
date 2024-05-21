@@ -23,6 +23,9 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_checkboxgroup_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_column_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
+#ifdef MODEL_COMPONENT_SUPPORTED
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_component3d_bridge.h"
+#endif
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_animator_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_counter_bridge.h"
@@ -2043,6 +2046,15 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     symbolSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "setId"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolSpanBridge::SetId));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "symbolSpan"), symbolSpan);
+
+#ifdef MODEL_COMPONENT_SUPPORTED
+    auto component3D = panda::ObjectRef::New(vm);
+    component3D->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShaderInputBuffer"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Component3DBridge::SetShaderInputBuffer));
+    component3D->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetShaderInputBuffer"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Component3DBridge::ResetShaderInputBuffer));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "component3D"), component3D);
+#endif
 
     RegisterButtonAttributes(object, vm);
     RegisterToggleAttributes(object, vm);
