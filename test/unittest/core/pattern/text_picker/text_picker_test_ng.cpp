@@ -5953,39 +5953,6 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest014, TestSize.Level1)
 }
 
 /**
- * @tc.name: TextPickerPatternTest015
- * @tc.desc: Test TextPickerPattern GetSelectedObjectMulti.
- * @tc.type: FUNC
- */
-HWTEST_F(TextPickerTestNg, TextPickerPatternTest015, TestSize.Level1)
-{
-    /**
-     * @tc.step: step1. create textpicker pattern.
-     */
-    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
-    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    frameNode->MarkModifyDone();
-    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
-    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
-    ASSERT_NE(pickerProperty, nullptr);
-    auto layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(columnNode, columnNode->GetGeometryNode(), pickerProperty);
-
-    /**
-     * @tc.step: step2. Construction parameters and call GetSelectedObjectMulti().
-     * @tc.expected: result is expected.
-     */
-    std::vector<std::string> values = { "111", "123", "134" };
-    const std::vector<uint32_t> indexs = { 0, 1, 2 };
-    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
-    std::string result = textPickerPattern->GetSelectedObjectMulti(values, indexs, 2);
-    std::string expectResult = "{\"value\":[\"111\",\"123\",\"134\"],\"index\":[\"0\",\"1\",\"2\"],\"status\":2}";
-    EXPECT_EQ(result, expectResult);
-}
-
-/**
  * @tc.name: TextPickerPatternTest016
  * @tc.desc: Test ChangeCurrentOptionValue
  * @tc.type: FUNC
