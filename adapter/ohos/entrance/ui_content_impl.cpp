@@ -1971,6 +1971,8 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
             parsedConfig.direction = config->GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DIRECTION);
             parsedConfig.densitydpi = config->GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DENSITYDPI);
             parsedConfig.themeTag = config->GetItem("ohos.application.theme");
+            parsedConfig.colorModeIsSetByApp =
+                config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP);
             // EtsCard Font followSytem disable
             if (formFontUseDefault) {
                 LOGW("[%{public}s] UIContentImpl: UpdateConfiguration use default", bundleName.c_str());
