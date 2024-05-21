@@ -696,6 +696,42 @@ void SearchModelNG::SetOnPasteWithEvent(std::function<void(const std::string&, N
     eventHub->SetOnPasteWithEvent(std::move(searchPasteFunc));
 }
 
+void SearchModelNG::SetOnWillInsertValueEvent(std::function<bool(const InsertValueInfo&)>&& func)
+{
+    auto searchTextField = GetSearchTextFieldFrameNode();
+    CHECK_NULL_VOID(searchTextField);
+    auto eventHub = searchTextField->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillInsertValueEvent(std::move(func));
+}
+
+void SearchModelNG::SetOnDidInsertValueEvent(std::function<void(const InsertValueInfo&)>&& func)
+{
+    auto searchTextField = GetSearchTextFieldFrameNode();
+    CHECK_NULL_VOID(searchTextField);
+    auto eventHub = searchTextField->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidInsertValueEvent(std::move(func));
+}
+
+void SearchModelNG::SetOnWillDeleteEvent(std::function<bool(const DeleteValueInfo&)>&& func)
+{
+    auto searchTextField = GetSearchTextFieldFrameNode();
+    CHECK_NULL_VOID(searchTextField);
+    auto eventHub = searchTextField->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillDeleteEvent(std::move(func));
+}
+
+void SearchModelNG::SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func)
+{
+    auto searchTextField = GetSearchTextFieldFrameNode();
+    CHECK_NULL_VOID(searchTextField);
+    auto eventHub = searchTextField->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidDeleteEvent(std::move(func));
+}
+
 void SearchModelNG::SetOnPaste(std::function<void(const std::string&)>&& func)
 {
     auto searchTextField = GetSearchTextFieldFrameNode();

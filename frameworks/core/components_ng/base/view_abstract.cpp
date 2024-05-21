@@ -28,6 +28,7 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#include "core/common/container_scope.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/theme/shadow_theme.h"
@@ -3435,6 +3436,8 @@ void ViewAbstract::SetNeedFocus(FrameNode* frameNode, bool value)
     CHECK_NULL_VOID(frameNode);
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
+    auto instanceId = frameNode->GetContext()->GetInstanceId();
+    ContainerScope scope(instanceId);
     if (value) {
         focusHub->RequestFocus();
     } else {

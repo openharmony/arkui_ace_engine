@@ -237,13 +237,55 @@ RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
     return nullptr;
 }
 
+RefPtr<FrameNode> DragDropManager::FindTargetDropNode(const RefPtr<UINode> parentNode,
+    const std::map<int32_t, WeakPtr<FrameNode>>& frameNodes, PointF localPoint)
+{
+    CHECK_NULL_RETURN(parentNode, nullptr);
+    auto parentFrameNode = AceType::DynamicCast<FrameNode>(parentNode);
+    CHECK_NULL_RETURN(parentFrameNode, nullptr);
+    if (!parentFrameNode->IsActive() || !parentFrameNode->IsVisible()) {
+        return nullptr;
+    }
+    auto renderContext = parentFrameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, nullptr);
+    auto paintRect = renderContext->GetPaintRectWithoutTransform();
+    FrameNode::MapPointTo(localPoint, parentFrameNode->GetOrRefreshRevertMatrixFromCache());
+    auto subLocalPoint = localPoint - paintRect.GetOffset();
+
+    auto children = parentFrameNode->GetFrameChildren();
+    for (auto iter = children.rbegin(); iter != children.rend(); iter++) {
+        auto child = iter->Upgrade();
+        if (child == nullptr) {
+            continue;
+        }
+        auto childNode = AceType::DynamicCast<UINode>(child);
+        auto childFindResult = FindTargetDropNode(childNode, frameNodes, subLocalPoint);
+        if (childFindResult) {
+            return childFindResult;
+        }
+    }
+
+    if (frameNodes.count(parentFrameNode->GetId()) && paintRect.IsInRegion(localPoint)) {
+        auto eventHub = parentFrameNode->GetEventHub<EventHub>();
+        CHECK_NULL_RETURN(eventHub, nullptr);
+        if ((eventHub->HasOnDrop()) || (eventHub->HasOnItemDrop()) || (eventHub->HasCustomerOnDrop())) {
+            return parentFrameNode;
+        }
+        if ((V2::UI_EXTENSION_COMPONENT_ETS_TAG == parentFrameNode->GetTag() ||
+            V2::EMBEDDED_COMPONENT_ETS_TAG == parentFrameNode->GetTag()) &&
+            (!IsUIExtensionShowPlaceholder(parentFrameNode))) {
+            return parentFrameNode;
+        }
+    }
+    return nullptr;
+}
+
 RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(
     float globalX, float globalY, DragType dragType, bool findDrop)
 {
-    std::map<int32_t, WeakPtr<FrameNode>> frameNodes;
+    auto& frameNodes = dragFrameNodes_;
     switch (dragType) {
         case DragType::COMMON:
-            frameNodes = dragFrameNodes_;
             break;
         case DragType::GRID:
             frameNodes = gridDragFrameNodes_;
@@ -255,7 +297,7 @@ RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(
             frameNodes = textFieldDragFrameNodes_;
             break;
         default:
-            break;
+            return nullptr;
     }
 
     if (frameNodes.empty()) {
@@ -264,34 +306,9 @@ RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(
 
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
-    auto nanoTimestamp = pipeline->GetVsyncTime();
-    PointF point(globalX, globalY);
-    std::vector<RefPtr<FrameNode>> hitFrameNodes;
-    for (auto iterOfFrameNode = frameNodes.begin(); iterOfFrameNode != frameNodes.end(); iterOfFrameNode++) {
-        auto frameNode = iterOfFrameNode->second.Upgrade();
-        if (!frameNode || !frameNode->IsVisible()) {
-            continue;
-        }
-        auto geometryNode = frameNode->GetGeometryNode();
-        if (!geometryNode) {
-            continue;
-        }
-        auto globalFrameRect = geometryNode->GetFrameRect();
-        globalFrameRect.SetOffset(frameNode->CalculateCachedTransformRelativeOffset(nanoTimestamp));
-        if (globalFrameRect.IsInRegion(point)) {
-            hitFrameNodes.push_back(frameNode);
-        }
-    }
-
-    if (hitFrameNodes.empty()) {
-        TAG_LOGD(AceLogTag::ACE_DRAG, "Cannot find targetNodes.");
-        return nullptr;
-    }
-    auto manager = pipeline->GetOverlayManager();
-    CHECK_NULL_RETURN(manager, nullptr);
     auto rootNode = pipeline->GetRootElement();
 
-    auto result = FindTargetInChildNodes(rootNode, hitFrameNodes, findDrop);
+    auto result = FindTargetDropNode(rootNode, frameNodes, {globalX, globalY});
     if (result) {
         return result;
     }

@@ -33,7 +33,7 @@ float ParagraphManager::GetHeight() const
 float ParagraphManager::GetMaxIntrinsicWidth() const
 {
     float res = 0.0f;
-    for (auto && info : paragraphs_) {
+    for (auto &&info : paragraphs_) {
         res = std::max(res, info.paragraph->GetMaxIntrinsicWidth());
     }
     return res;
@@ -41,7 +41,7 @@ float ParagraphManager::GetMaxIntrinsicWidth() const
 bool ParagraphManager::DidExceedMaxLines() const
 {
     bool res = false;
-    for (auto && info : paragraphs_) {
+    for (auto &&info : paragraphs_) {
         res |= info.paragraph->DidExceedMaxLines();
     }
     return res;
@@ -49,7 +49,7 @@ bool ParagraphManager::DidExceedMaxLines() const
 float ParagraphManager::GetLongestLine() const
 {
     float res = 0.0f;
-    for (auto && info : paragraphs_) {
+    for (auto &&info : paragraphs_) {
         res = std::max(res, info.paragraph->GetLongestLine());
     }
     return res;
@@ -57,7 +57,7 @@ float ParagraphManager::GetLongestLine() const
 float ParagraphManager::GetMaxWidth() const
 {
     float res = 0.0f;
-    for (auto && info : paragraphs_) {
+    for (auto &&info : paragraphs_) {
         res = std::max(res, info.paragraph->GetMaxWidth());
     }
     return res;
@@ -65,7 +65,7 @@ float ParagraphManager::GetMaxWidth() const
 float ParagraphManager::GetTextWidth() const
 {
     float res = 0.0f;
-    for (auto && info : paragraphs_) {
+    for (auto &&info : paragraphs_) {
         res = std::max(res, info.paragraph->GetTextWidth());
     }
     return res;
@@ -74,7 +74,7 @@ float ParagraphManager::GetTextWidth() const
 float ParagraphManager::GetTextWidthIncludeIndent() const
 {
     float res = 0.0f;
-    for (auto && info : paragraphs_) {
+    for (auto &&info : paragraphs_) {
         auto width = info.paragraph->GetTextWidth();
         if (info.paragraph->GetLineCount() == 1) {
             width += static_cast<float>(info.paragraphStyle.indent.ConvertToPx());
@@ -90,7 +90,7 @@ float ParagraphManager::GetTextWidthIncludeIndent() const
 size_t ParagraphManager::GetLineCount() const
 {
     size_t count = 0;
-    for (auto && info : paragraphs_) {
+    for (auto &&info : paragraphs_) {
         count += info.paragraph->GetLineCount();
     }
     return count;
@@ -119,7 +119,7 @@ int32_t ParagraphManager::GetGlyphIndexByCoordinate(Offset offset, bool isSelect
 {
     CHECK_NULL_RETURN(!paragraphs_.empty(), 0);
     for (auto it = paragraphs_.begin(); it != paragraphs_.end(); ++it) {
-        auto && info = *it;
+        auto &&info = *it;
         if (LessOrEqual(offset.GetY(), info.paragraph->GetHeight())) {
             return info.paragraph->GetGlyphIndexByCoordinate(offset, isSelectionPos) + info.start;
         }
@@ -136,7 +136,7 @@ bool ParagraphManager::GetWordBoundary(int32_t offset, int32_t& start, int32_t& 
     auto startIndex = 0;
     auto endIndex = 0;
     for (auto it = paragraphs_.begin(); it != paragraphs_.end(); ++it) {
-        auto && info = *it;
+        auto &&info = *it;
         if (LessNotEqual(offset, info.end)) {
             auto flag = info.paragraph->GetWordBoundary(offsetIndex, start, end);
             start += startIndex;
@@ -159,7 +159,7 @@ bool ParagraphManager::CalcCaretMetricsByPosition(
     auto offsetY = 0.0f;
     auto result = false;
     for (auto it = paragraphs_.begin(); it != paragraphs_.end(); ++it) {
-        auto && info = *it;
+        auto &&info = *it;
         if (textAffinity == TextAffinity::UPSTREAM || std::next(it) == paragraphs_.end()) {
             if (LessOrEqual(extent, info.end)) {
                 result = info.paragraph->CalcCaretMetricsByPosition(offsetIndex, caretCaretMetric, textAffinity);

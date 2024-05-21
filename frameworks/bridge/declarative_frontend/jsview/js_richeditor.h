@@ -78,6 +78,7 @@ private:
     static void CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::RichEditorAbstractSpanResult& spanResult);
     static void CreateImageStyleObj(JSRef<JSObject>& imageStyleObj, JSRef<JSObject>& spanResultObj,
         const NG::RichEditorAbstractSpanResult& spanResult);
+    static JSRef<JSArray> CreateJSDeleteSpans(const NG::RichEditorDeleteValue& deleteValue);
     static void ParseUserGesture(
         const JSCallbackInfo& args, UserGestureOptions& gestureOption, const std::string& spanType);
     static void ParseJsFont(const JSRef<JSObject>& fontObject, Font& font);

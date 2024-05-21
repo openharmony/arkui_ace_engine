@@ -109,6 +109,7 @@ public:
     }
 
     void HideSubMenu();
+    RefPtr<FrameNode> MenuFocusViewShow();
     void HideStackExpandMenu(const RefPtr<UINode>& subMenu);
 
     RefPtr<FrameNode> GetMenu() const
@@ -338,7 +339,6 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper);
     void StartShowAnimation();
-    void InitPanRecognizer();
     void HandleInteraction(const TouchEventInfo& info);
     RefPtr<FrameNode> FindTouchedMenuItem(const RefPtr<UINode>& menuNode, const OffsetF& position);
 

@@ -105,6 +105,7 @@ const std::string DEFAULT_CANONICAL_ENCODING_NAME = "UTF-8";
 constexpr uint32_t DESTRUCT_DELAY_MILLISECONDS = 1000;
 
 constexpr uint32_t NO_NATIVE_FINGER_TYPE = 100;
+const std::string DEFAULT_NATIVE_EMBED_ID = "0";
 
 const std::vector<std::string> CANONICALENCODINGNAMES = {
     "Big5",         "EUC-JP",       "EUC-KR",       "GB18030",
@@ -6075,11 +6076,11 @@ void WebDelegate::SetTouchEventInfo(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedT
             .SetScreenX(touchEvent->GetScreenX())
             .SetScreenY(touchEvent->GetScreenY())
             .SetType(static_cast<OHOS::Ace::TouchType>(touchEvent->GetType()));
-        webPattern->SetTouchEventInfo(event, touchEventInfo);
+        webPattern->SetTouchEventInfo(event, touchEventInfo, touchEvent->GetEmbedId());
     } else {
         TouchEvent event;
         event.SetId(0);
-        webPattern->SetTouchEventInfo(event, touchEventInfo);
+        webPattern->SetTouchEventInfo(event, touchEventInfo, DEFAULT_NATIVE_EMBED_ID);
     }
 }
 
@@ -6561,6 +6562,19 @@ std::string WebDelegate::GetSelectInfo() const
 {
     CHECK_NULL_RETURN(nweb_, std::string());
     return nweb_->GetSelectInfo();
+}
+
+Offset WebDelegate::GetPosition(const std::string& embedId)
+{
+    auto iter = embedDataInfo_.find(embedId);
+    if (iter != embedDataInfo_.end()) {
+        std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo> dataInfo  = iter->second;
+        if (dataInfo) {
+            auto embedInfo = dataInfo->GetNativeEmbedInfo();
+            return Offset(embedInfo->GetX(), embedInfo->GetY());
+        }
+    }
+    return Offset();
 }
 
 void WebDelegate::OnShowAutofillPopup(

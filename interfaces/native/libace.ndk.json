@@ -737,6 +737,10 @@
     },
     {
         "first_introduced": "12",
+        "name": "OH_ArkUI_WaterFlowSectionOption_RegisterGetItemMainSizeCallbackByIndexWithUserData"
+    },
+    {
+        "first_introduced": "12",
         "name": "OH_ArkUI_GuidelineOption_Create"
     },
     {
@@ -1158,5 +1162,9 @@
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_ListItemSwipeActionOption_SetOnOffsetChange"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CreateFromNapiDrawable"
     }
 ]

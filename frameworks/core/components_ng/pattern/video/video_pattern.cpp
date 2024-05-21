@@ -1595,9 +1595,14 @@ void VideoPattern::EnableDrag()
             videoSrc = json->GetString(key);
         }
 
+        if (videoSrc == videoPattern->GetSrc()) {
+            return;
+        }
+
         std::regex extensionRegex("\\.(" + PNG_FILE_EXTENSION + ")$");
         bool isPng = std::regex_search(videoSrc, extensionRegex);
-        if (videoSrc == videoPattern->GetSrc() || isPng) {
+        if (isPng) {
+            event->SetResult(DragRet::DRAG_FAIL);
             return;
         }
 

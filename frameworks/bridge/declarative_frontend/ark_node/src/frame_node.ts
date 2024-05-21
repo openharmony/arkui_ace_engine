@@ -145,7 +145,7 @@ class FrameNode {
 
   disposeTree(): void {
     let parent = this.getParent();
-    if (parent?.getNodeType() == "NodeContainer") {
+    if (parent?.getNodeType() === "NodeContainer") {
       getUINativeModule().nodeContainer.clean(parent?.getNodePtr());
     } else {
       parent?.removeChild(this);
@@ -178,11 +178,15 @@ class FrameNode {
     return null;
   }
 
+  checkValid(node?: FrameNode): boolean {
+    return true;
+  }
+
   appendChild(node: FrameNode): void {
     if (node === undefined || node === null) {
       return;
     }
-    if (node.getType() === 'ProxyFrameNode') {
+    if (node.getType() === 'ProxyFrameNode' || !this.checkValid(node)) {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
@@ -198,8 +202,11 @@ class FrameNode {
     if (content === undefined || content === null || content.getNodePtr() === null || content.getNodePtr() == undefined) {
       return;
     }
+    if (!this.checkValid()) {
+      throw { message: 'The FrameNode is not modifiable.', code: 100021 };
+    }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    let flag = getUINativeModule().frameNode.appendChild(this.nodePtr_, content.getNodePtr());
+    let flag = getUINativeModule().frameNode.appendChild(this.nodePtr_, content.getNodeWithoutProxy());
     __JSScopeUtil__.restoreInstanceId();
     if (!flag) {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
@@ -210,7 +217,7 @@ class FrameNode {
     if (child === undefined || child === null) {
       return;
     }
-    if (child.getType() === 'ProxyFrameNode') {
+    if (child.getType() === 'ProxyFrameNode'|| !this.checkValid(child)) {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
     }
     let flag = true;
@@ -593,6 +600,32 @@ class TypedFrameNode<T extends ArkComponent> extends FrameNode {
     this.attribute_.setNodePtr(this.nodePtr_);
     return this.attribute_;
   }
+
+  checkValid(node?: FrameNode): boolean {
+    if (this.attribute_ === undefined) {
+      this.attribute_ = this.attrCreator_(this.nodePtr_, ModifierType.FRAME_NODE);
+    }
+
+    if (this.attribute_.allowChildCount !== undefined) {
+      const allowCount = this.attribute_.allowChildCount();
+      if (this.getChildrenCount() >= allowCount) {
+        return false;
+      }
+    }
+
+    if (this.attribute_.allowChildTypes !== undefined && node !== undefined) {
+      const childType = node.getNodeType();
+      const allowTypes = this.attribute_.allowChildTypes();
+      let isValid = false;
+      allowTypes.forEach((nodeType: string) => {
+        if (nodeType === childType) {
+          isValid = true;
+        }
+      })
+      return isValid;
+    }
+    return true;
+  }
 }
 
 const __creatorMap__ = new Map<string, (context: UIContext) => FrameNode>(
@@ -665,7 +698,7 @@ const __creatorMap__ = new Map<string, (context: UIContext) => FrameNode>(
     ["RelativeContainer", (context: UIContext) => {
       return new TypedFrameNode(context, "RelativeContainer", (node: NodePtr, type: ModifierType) => {
         return new ArkRelativeContainerComponent(node, type);
-          })
+      })
     }],
     ["List", (context: UIContext) => {
       return new TypedFrameNode(context, "List", (node: NodePtr, type: ModifierType) => {

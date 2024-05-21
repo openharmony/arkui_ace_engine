@@ -542,7 +542,7 @@ struct MultiFilterRow {
           } else {
             this.arrowShowStateRow.value = false
           }
-        } else if (this.filterColumnWidth !== this.lastFilterColumnWidth){
+        } else if (this.filterColumnWidth !== this.lastFilterColumnWidth) {
           let curLineSum = this.calcMultiFilterRowItemNum()
           if (this.filterRow && curLineSum < this.filterRow.options.length - 1) {
             if (!this.arrowShowStateRow.value || this.isArrowIconDown.value) {

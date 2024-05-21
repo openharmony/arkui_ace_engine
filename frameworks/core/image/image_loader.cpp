@@ -283,7 +283,7 @@ bool NetworkImageLoader::DownloadImage(DownloadCallback&& downloadCallback, cons
 {
     return sync ? DownloadManager::GetInstance()->DownloadSync(std::move(downloadCallback), src, Container::CurrentId())
                 : DownloadManager::GetInstance()->DownloadAsync(
-                      std::move(downloadCallback), src, Container::CurrentId());
+                    std::move(downloadCallback), src, Container::CurrentId());
 }
 
 #ifndef USE_ROSEN_DRAWING

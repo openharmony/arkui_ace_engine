@@ -72,16 +72,6 @@ std::string TextLayoutProperty::GetCopyOptionString() const
     return copyOptionString;
 }
 
-std::string TextLayoutProperty::GetFont() const
-{
-    auto jsonValue = JsonUtil::Create(true);
-    jsonValue->Put("style", GetFontStyleInJson(GetItalicFontStyle()).c_str());
-    jsonValue->Put("size", GetFontSizeInJson(GetFontSize()).c_str());
-    jsonValue->Put("weight", GetFontWeightInJson(GetFontWeight()).c_str());
-    jsonValue->Put("family", GetFontFamilyInJson(GetFontFamily()).c_str());
-    return jsonValue->ToString();
-}
-
 std::string TextLayoutProperty::GetTextMarqueeOptionsString() const
 {
     auto jsonValue = JsonUtil::Create(true);
@@ -118,8 +108,6 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
 {
     LayoutProperty::ToJsonValue(json, filter);
     json->PutFixedAttr("content", GetContent().value_or("").c_str(), filter, FIXED_ATTR_CONTENT);
-    json->PutExtAttr("font", GetFont().c_str(), filter);
-    json->PutExtAttr("fontSize", GetFontSizeInJson(GetFontSize()).c_str(), filter);
     json->PutExtAttr("fontColor",
         GetForegroundColor().value_or(GetTextColor().value_or(Color::BLACK)).ColorToString().c_str(), filter);
     json->PutExtAttr("fontStyle", GetFontStyleInJson(GetItalicFontStyle()).c_str(), filter);

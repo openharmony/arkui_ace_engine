@@ -161,6 +161,8 @@ float MeasureContentChild(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinat
     float contentHeight = size.Height() - titleBarHeight;
     if (NavigationLayoutAlgorithm::IsAutoHeight(navDestinationLayoutProperty)) {
         constraint.selfIdealSize.SetWidth(size.Width());
+        contentWrapper->Measure(constraint);
+        return static_cast<float>(contentWrapper->GetGeometryNode()->GetFrameSize().Height());
     } else {
         constraint.selfIdealSize = OptionalSizeF(size.Width(), contentHeight);
     }

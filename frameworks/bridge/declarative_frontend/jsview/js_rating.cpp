@@ -133,6 +133,9 @@ void JSRating::SetStepSize(const JSCallbackInfo& info)
 void JSRating::SetStarStyle(const JSCallbackInfo& info)
 {
     if (!info[0]->IsObject()) {
+        RatingModel::GetInstance()->SetBackgroundSrc("", true);
+        RatingModel::GetInstance()->SetForegroundSrc("", true);
+        RatingModel::GetInstance()->SetSecondarySrc("", true);
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);

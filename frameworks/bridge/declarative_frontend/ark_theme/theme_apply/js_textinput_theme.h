@@ -58,7 +58,6 @@ public:
 
         // pressed
         ViewStackModel::GetInstance()->SetVisualState(VisualState::PRESSED);
-        TextFieldModel::GetInstance()->SetBackgroundColor(themeColors->InteractivePressed(), false);
         TextFieldModel::GetInstance()->SetCaretColor(themeColors->Brand());
         ViewAbstractModel::GetInstance()->SetOuterBorderWidth({});
 

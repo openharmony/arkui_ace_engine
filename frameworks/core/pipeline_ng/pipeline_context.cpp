@@ -2333,6 +2333,10 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-default") {
         rootNode_->DumpTree(0);
         DumpLog::GetInstance().OutPutDefault();
+    } else if (params[0] == "-overlay") {
+        if (overlayManager_) {
+            overlayManager_->DumpOverlayInfo();
+        }
     }
     return true;
 }
@@ -2677,6 +2681,8 @@ MouseEvent ConvertAxisToMouse(const AxisEvent& event)
     result.sourceType = event.sourceType;
     result.sourceTool = event.sourceTool;
     result.pointerEvent = event.pointerEvent;
+    result.screenX = event.screenX;
+    result.screenY = event.screenY;
     return result;
 }
 

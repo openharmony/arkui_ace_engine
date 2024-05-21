@@ -428,7 +428,7 @@ FrameNode::~FrameNode()
     if (eventHub_) {
         eventHub_->ClearOnAreaChangedInnerCallbacks();
     }
-    auto pipeline = GetContext();
+    auto pipeline = PipelineContext::GetCurrentContext();
     if (pipeline) {
         pipeline->RemoveOnAreaChangeNode(GetId());
         pipeline->RemoveVisibleAreaChangeNode(GetId());
@@ -445,6 +445,7 @@ FrameNode::~FrameNode()
             frameRateManager->RemoveNodeRate(GetId());
         }
     }
+    FireOnNodeDestroyCallback();
 }
 
 RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
@@ -883,9 +884,7 @@ void FrameNode::OnAttachToMainTree(bool recursive)
     eventHub_->FireOnAppear();
     renderContext_->OnNodeAppear(recursive);
     pattern_->OnAttachToMainTree();
-    if (attachFunc_) {
-        attachFunc_(GetId());
-    }
+
     // node may have been measured before AttachToMainTree
     if (geometryNode_->GetParentLayoutConstraint().has_value() && !UseOffscreenProcess()) {
         layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
@@ -981,11 +980,8 @@ void FrameNode::OnDetachFromMainTree(bool recursive)
             focusHub->RemoveSelf();
         }
     }
-    pattern_->OnDetachFromMainTree();
-    if (detachFunc_) {
-        detachFunc_(GetId());
-    }
     eventHub_->FireOnDetach();
+    pattern_->OnDetachFromMainTree();
     eventHub_->FireOnDisappear();
     renderContext_->OnNodeDisappear(recursive);
 }
@@ -1036,7 +1032,6 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
         pipeline->OnLayoutCompleted(GetInspectorId()->c_str());
     }
     auto needRerender = pattern_->OnDirtyLayoutWrapperSwap(dirty, config);
-    // TODO: temp use and need to delete.
     needRerender = needRerender || pattern_->OnDirtyLayoutWrapperSwap(dirty, config.skipMeasure, config.skipLayout);
     if (needRerender || CheckNeedRender(paintProperty_->GetPropertyChangeFlag())) {
         MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
@@ -1904,30 +1899,25 @@ bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentRevertPoint, int32_t 
     auto paintRect = renderContext_->GetPaintRectWithoutTransform();
     auto paintRectWithTransform = renderContext_->GetPaintRectWithTransform();
     auto responseRegionList = GetResponseRegionList(paintRect, sourceType);
-    auto renderContext = GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, false);
 
     auto revertPoint = parentRevertPoint;
-    renderContext->GetPointWithRevert(revertPoint);
+    MapPointTo(revertPoint, GetOrRefreshRevertMatrixFromCache());
     auto subRevertPoint = revertPoint - paintRect.GetOffset();
-    auto clip = renderContext->GetClipEdge().value_or(false);
+    auto clip = renderContext_->GetClipEdge().value_or(false);
     if (!InResponseRegionList(revertPoint, responseRegionList) || !GetTouchable() ||
         NearZero(paintRectWithTransform.Width() ||
         NearZero(paintRectWithTransform.Height()))) {
         if (clip) {
-            LOGD("TouchTest: frameNode use clip, point is out of region in %{public}s", GetTag().c_str());
             return true;
         }
         for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
             const auto& child = iter->Upgrade();
             if (child && !child->IsOutOfTouchTestRegion(subRevertPoint, sourceType)) {
-                LOGD("TouchTest: point is out of region in %{public}s, but is in child region", GetTag().c_str());
                 isInChildRegion = true;
                 break;
             }
         }
         if (!isInChildRegion) {
-            LOGD("TouchTest: point is out of region in %{public}s", GetTag().c_str());
             return true;
         }
     }
@@ -2026,7 +2016,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     auto localTransformOffset = preLocation - localPoint;
 
     auto revertPoint = parentRevertPoint;
-    renderContext_->GetPointWithRevert(revertPoint);
+    MapPointTo(revertPoint, GetOrRefreshRevertMatrixFromCache());
     auto subRevertPoint = revertPoint - origRect.GetOffset();
     bool consumed = false;
 
@@ -2104,7 +2094,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         if (childHitResult == HitTestResult::BUBBLING &&
             ((child->GetHitTestMode() == HitTestMode::HTMDEFAULT) ||
                 (child->GetHitTestMode() == HitTestMode::HTMTRANSPARENT_SELF) ||
-                ((child->GetHitTestMode() != HitTestMode::HTMTRANSPARENT) && IsExclusiveEventForChild()))) {
+                    ((child->GetHitTestMode() != HitTestMode::HTMTRANSPARENT) && IsExclusiveEventForChild()))) {
             consumed = true;
             break;
         }
@@ -2240,9 +2230,7 @@ HitTestResult FrameNode::AxisTest(
     const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult)
 {
     const auto& rect = renderContext_->GetPaintRectWithTransform();
-    // TODO: disableTouchEvent || disabled_ need handle
 
-    // TODO: Region need change to RectList
     if (!rect.IsInRegion(parentLocalPoint)) {
         return HitTestResult::OUT_OF_REGION;
     }
@@ -4057,6 +4045,28 @@ bool FrameNode::IsContextTransparent()
         }
     }
     return true;
+}
+
+Matrix4& FrameNode::GetOrRefreshRevertMatrixFromCache(bool forceRefresh)
+{
+    // the caller is trying to refresh cache forcedly or the cache is invalid
+    if (forceRefresh || !isLocalRevertMatrixAvailable_) {
+        localRevertMatrix_ = renderContext_->GetRevertMatrix();
+        isLocalRevertMatrixAvailable_ = true;
+        return localRevertMatrix_;
+    }
+
+    // cache valid
+    return localRevertMatrix_;
+}
+
+// apply the matrix to the given point specified by dst
+void FrameNode::MapPointTo(PointF& dst, Matrix4& matrix)
+{
+    Point tmp(dst.GetX(), dst.GetY());
+    auto transformPoint = matrix * tmp;
+    dst.SetX(transformPoint.GetX());
+    dst.SetY(transformPoint.GetY());
 }
 
 } // namespace OHOS::Ace::NG

@@ -259,8 +259,21 @@ public:
                 }
             }
         }
+        for (auto& [key, node] : expiringItem_) {
+            if (!node.second) {
+                continue;
+            }
+            auto frameNode = AceType::DynamicCast<FrameNode>(node.second->GetFrameChildByIndex(0, true));
+            if (frameNode && frameNode == targetNode) {
+                return node.first;
+            }
+        }
         return -1;
     }
+
+    void UpdateMoveFromTo(int32_t from, int32_t to);
+    void ResetMoveFromTo();
+    int32_t ConvertFormToIndex(int32_t index);
 
     void SetFlagForGeneratedItem(PropertyChangeFlag propertyChangeFlag)
     {
@@ -276,7 +289,7 @@ public:
         const std::optional<LayoutConstraintF>& itemConstraint, int64_t deadline, bool& isTimeout)
     {
         ACE_SCOPED_TRACE("Builder:BuildLazyItem [%d]", index);
-        auto itemInfo = OnGetChildByIndex(index, expiringItem_);
+        auto itemInfo = OnGetChildByIndex(ConvertFormToIndex(index), expiringItem_);
         CHECK_NULL_RETURN(itemInfo.second, nullptr);
         cache.try_emplace(itemInfo.first, LazyForEachCacheChild(index, itemInfo.second));
         if (!itemInfo.second->RenderCustomChild(deadline)) {
@@ -592,6 +605,7 @@ private:
         {"reload", 6}
     };
     std::list<int32_t> outOfBoundaryNodes_;
+    std::optional<std::pair<int32_t, int32_t>> moveFromTo_;
 
     int32_t startIndex_ = -1;
     int32_t endIndex_ = -1;

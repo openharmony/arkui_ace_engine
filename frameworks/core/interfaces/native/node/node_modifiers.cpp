@@ -92,6 +92,7 @@
 #include "core/interfaces/native/node/node_gesture_modifier.h"
 #include "core/interfaces/native/node/node_refresh_modifier.h"
 #include "core/interfaces/native/node/node_symbol_glyph_modifier.h"
+#include "core/interfaces/native/node/node_symbol_span_modifier.h"
 #include "core/interfaces/native/node/tabs_modifier.h"
 #include "core/interfaces/native/node/text_clock_modifier.h"
 #include "core/interfaces/native/node/text_timer_modifier.h"
@@ -229,6 +230,7 @@ const ArkUINodeModifiers impl = {
     NodeModifier::GetParticleModifier,
     NodeModifier::GetNodeContentModifier,
     NodeModifier::GetSymbolGlyphModifier,
+    NodeModifier::GetSymbolSpanModifier,
 };
 
 } // namespace

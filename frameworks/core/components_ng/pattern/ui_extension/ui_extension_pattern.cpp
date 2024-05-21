@@ -54,7 +54,8 @@ constexpr char ABILITY_KEY_ASYNC[] = "ability.want.params.KeyAsync";
 }
 UIExtensionPattern::UIExtensionPattern(
     bool isTransferringCaller, bool isModal, bool isAsyncModalBinding, SessionType sessionType)
-    : isTransferringCaller_(isTransferringCaller), isModal_(isModal), isAsyncModalBinding_(isAsyncModalBinding)
+    : isTransferringCaller_(isTransferringCaller), isModal_(isModal),
+    isAsyncModalBinding_(isAsyncModalBinding), sessionType_(sessionType)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -695,6 +696,12 @@ void UIExtensionPattern::FireOnResultCallback(int32_t code, const AAFwk::Want& w
         onResultCallback_(code, want);
     }
     state_ = AbilityState::DESTRUCTION;
+}
+
+bool UIExtensionPattern::IsCompatibleOldVersion()
+{
+    ContainerScope scope(instanceId_);
+    return (sessionType_ == SessionType::UI_EXTENSION_ABILITY) && (onTerminatedCallback_ == nullptr);
 }
 
 void UIExtensionPattern::SetOnTerminatedCallback(

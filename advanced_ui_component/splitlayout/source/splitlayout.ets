@@ -125,8 +125,7 @@ export struct SplitLayout {
           breakpoints: {
             reference: BreakpointsReference.WindowSize },
           direction: GridRowDirection.Row
-        })
-        {
+        }) {
           GridCol({ span: { xs: 4, sm: 4, md: 4, lg: 4 } }) {
             Column() {
               Image(this.mainImage)

@@ -4524,6 +4524,17 @@ typedef enum {
      *
      */
     NODE_REFRESH_CONTENT,
+    /**
+     * @brief 设置下拉跟手系数，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
+     * .value[0].f32：下拉跟手系数,有效值为0-1之间的值。
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].f32：下拉跟手系数,有效值为0-1之间的值。
+     *
+     */
+    NODE_REFRESH_PULL_DOWN_RATIO = 1009002,
 
     /**
      * @brief Defines the main axis direction of the <b><WaterFlow></b> component layout.
@@ -5575,6 +5586,15 @@ typedef enum {
      * {@link ArkUI_NodeComponentEvent} does not contain parameters:\n
      */
     NODE_REFRESH_ON_REFRESH,
+    /**
+     * @brief Defines the event that is triggered when the <b>ARKUI_NODE_REFRESH</b> drop-down distance changes.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: Pull-down distance. \n
+     */
+    NODE_REFRESH_ON_OFFSET_CHANGE = 1009002,
 
     /**
      * @brief Defines the event triggered when the <b>ARKUI_NODE_SCROLL</b> component is about to scroll.

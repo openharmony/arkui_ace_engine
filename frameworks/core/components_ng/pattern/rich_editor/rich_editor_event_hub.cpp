@@ -168,6 +168,36 @@ double RichEditorAbstractSpanResult::GetFontSize() const
     return fontSize_;
 }
 
+void RichEditorAbstractSpanResult::SetValueResource(const RefPtr<ResourceObject>& valueResource)
+{
+    valueResource_ = valueResource;
+}
+
+const RefPtr<ResourceObject> RichEditorAbstractSpanResult::GetValueResource() const
+{
+    return valueResource_;
+}
+
+void RichEditorAbstractSpanResult::SetValueString(const std::string& valueString)
+{
+    valueString_ = valueString;
+}
+
+const std::string RichEditorAbstractSpanResult::GetValueString() const
+{
+    return valueString_;
+}
+
+void RichEditorAbstractSpanResult::SetSymbolSpanStyle(const SymbolSpanStyle& symbolSpanStyle)
+{
+    symbolSpanStyle_ = symbolSpanStyle;
+}
+
+const SymbolSpanStyle RichEditorAbstractSpanResult::GetSymbolSpanStyle() const
+{
+    return symbolSpanStyle_;
+}
+
 void RichEditorAbstractSpanResult::SetFontWeight(int32_t fontWeigth)
 {
     fontWeigth_ = fontWeigth;

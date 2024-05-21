@@ -231,7 +231,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
         }
         child = columnNode;
     }
-    // TODO: GridSystemManager is not completed, need to check later.
+    // GridSystemManager is not completed, need to check later.
     auto childLayoutProperty = child->GetLayoutProperty();
     CHECK_NULL_RETURN(childLayoutProperty, nullptr);
     float popupMaxWidth = 0.0f;
