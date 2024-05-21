@@ -750,7 +750,7 @@ bool JSNavigationStack::LoadDestinationByBuilder(const std::string& name, const 
     auto builderObj = JSRef<JSObject>::Cast(navDestBuilderFunc_);
     const int32_t number = builderObj->GetProperty("length")->ToNumber<int32_t>();
     JSRef<JSVal> params[number];
-    if (number > 1) {
+    if (number >= 1) {
         params[0] = JSRef<JSVal>::Make(ToJSValue(name));
     }
     if (number >= ARGC_COUNT_TWO) {
@@ -801,7 +801,7 @@ int32_t JSNavigationStack::LoadDestination(const std::string& name, const JSRef<
     auto builderObj = JSRef<JSObject>::Cast(builderProp);
     const int32_t number = builderObj->GetProperty("length")->ToNumber<int32_t>();
     JSRef<JSVal> params[number];
-    if (number > 1) {
+    if (number >= 1) {
         params[0] = JSRef<JSVal>::Make(ToJSValue(name));
     }
     if (number >= ARGC_COUNT_TWO) {
