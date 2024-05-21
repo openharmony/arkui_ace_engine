@@ -307,6 +307,7 @@ void RosenRenderContext::SetPivot(float xPivot, float yPivot, float zPivot)
         rsNode_->AddModifier(modifier);
     }
     rsNode_->SetPivotZ(zPivot);
+    NotifyHostTransformUpdated();
 }
 
 void RosenRenderContext::SetTransitionPivot(const SizeF& frameSize, bool transitionIn)
@@ -4678,6 +4679,7 @@ void RosenRenderContext::SetSharedTranslate(float xTranslate, float yTranslate)
     }
     AddOrChangeTranslateModifier(rsNode_, sharedTransitionModifier_->translateXY,
         sharedTransitionModifier_->translateXYValue, { xTranslate, yTranslate });
+    NotifyHostTransformUpdated();
 }
 
 void RosenRenderContext::ResetSharedTranslate()
@@ -4688,6 +4690,7 @@ void RosenRenderContext::ResetSharedTranslate()
     rsNode_->RemoveModifier(sharedTransitionModifier_->translateXY);
     sharedTransitionModifier_->translateXYValue = nullptr;
     sharedTransitionModifier_->translateXY = nullptr;
+    NotifyHostTransformUpdated();
 }
 
 void RosenRenderContext::ResetPageTransitionEffect()
@@ -5626,6 +5629,7 @@ void RosenRenderContext::SetRotation(float rotationX, float rotationY, float rot
 {
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetRotation(rotationX, rotationY, rotationZ);
+    NotifyHostTransformUpdated();
 }
 
 void RosenRenderContext::SetShadowColor(uint32_t color)
@@ -5667,6 +5671,7 @@ void RosenRenderContext::SetScale(float scaleX, float scaleY)
 {
     CHECK_NULL_VOID(rsNode_);
     SetAnimatableProperty<Rosen::RSScaleModifier, Rosen::Vector2f>(scaleXYUserModifier_, { scaleX, scaleY });
+    NotifyHostTransformUpdated();
 }
 
 void RosenRenderContext::SetBackgroundColor(uint32_t colorValue)
@@ -5679,6 +5684,7 @@ void RosenRenderContext::SetRenderPivot(float pivotX, float pivotY)
 {
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetPivot(pivotX, pivotY);
+    NotifyHostTransformUpdated();
 }
 
 void RosenRenderContext::SetFrame(float positionX, float positionY, float width, float height)
@@ -5699,6 +5705,7 @@ void RosenRenderContext::SetTranslate(float translateX, float translateY, float 
     SetAnimatableProperty<Rosen::RSTranslateModifier, Rosen::Vector2f>(
         translateXYUserModifier_, { translateX, translateY });
     SetAnimatableProperty<Rosen::RSTranslateZModifier, float>(translateZUserModifier_, translateZ);
+    NotifyHostTransformUpdated();
 }
 
 void RosenRenderContext::SetTransitionInCallback(std::function<void()>&& callback)

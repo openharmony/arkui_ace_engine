@@ -1033,6 +1033,8 @@ private:
     bool customerSet_ = false;
     bool isWindowBoundary_ = false;
     uint8_t suggestOpIncByte_ = 0;
+    uint64_t getCacheNanoTime_ = 0;
+    RectF prePaintRect_;
 
     std::map<std::string, RefPtr<NodeAnimatablePropertyBase>> nodeAnimatablePropertyMap_;
     Matrix4 localMat_ = Matrix4::CreateIdentity();
