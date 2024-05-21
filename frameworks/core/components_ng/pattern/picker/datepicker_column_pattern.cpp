@@ -43,7 +43,7 @@ namespace OHOS::Ace::NG {
 
 namespace {
 
-// TODO datepicker style modification
+// Datepicker style modification
 constexpr float PADDING_WEIGHT = 10.0f;
 const Dimension FONT_SIZE = Dimension(2.0);
 const float TEXT_HEIGHT_NUMBER = 3.0f;

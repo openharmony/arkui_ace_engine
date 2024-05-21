@@ -536,7 +536,7 @@ abstract class ViewPU extends PUV2ViewBase
     if (this.dirtDescendantElementIds_.size) {
       this.markNeedUpdate();
     }
-    aceTrace.end()
+    aceTrace.end();
     stateMgmtProfiler.end();
   }
 
@@ -830,7 +830,7 @@ abstract class ViewPU extends PUV2ViewBase
     }, "aboutToReuse", this.constructor.name);
 
     for (const stateLinkPropVar of this.ownObservedPropertiesStore_) {
-      const changedElmtIds =  stateLinkPropVar.moveElmtIdsForDelayedUpdate(true);
+      const changedElmtIds = stateLinkPropVar.moveElmtIdsForDelayedUpdate(true);
       if (changedElmtIds) {
         if (changedElmtIds.size && !this.isFirstRender()) {
           for (const elmtId of changedElmtIds) {
@@ -925,7 +925,7 @@ abstract class ViewPU extends PUV2ViewBase
         ? undefined
         : new SynchedPropertyTwoWayPU<T>(source, this, viewVariableName)
     ) as ObservedPropertyAbstractPU<T>;
-    appStorageLink.setDecoratorInfo('@StorageLink');
+    appStorageLink?.setDecoratorInfo('@StorageLink');
     return appStorageLink;
   }
 
@@ -935,7 +935,7 @@ abstract class ViewPU extends PUV2ViewBase
         ? undefined
         : new SynchedPropertyOneWayPU<T>(source, this, viewVariableName)
     ) as ObservedPropertyAbstractPU<T>;
-    appStorageProp.setDecoratorInfo('@StorageProp');
+    appStorageProp?.setDecoratorInfo('@StorageProp');
     return appStorageProp;
   }
 
@@ -946,7 +946,7 @@ abstract class ViewPU extends PUV2ViewBase
         ? undefined
         : new SynchedPropertyTwoWayPU<T>(source, this, viewVariableName)
     ) as ObservedPropertyAbstractPU<T>;
-    localStorageLink.setDecoratorInfo('@LocalStorageLink');
+    localStorageLink?.setDecoratorInfo('@LocalStorageLink');
     return localStorageLink;
   }
 
@@ -957,7 +957,7 @@ abstract class ViewPU extends PUV2ViewBase
         ? undefined
         : new SynchedPropertyObjectOneWayPU<T>(source, this, viewVariableName)
     ) as ObservedPropertyAbstractPU<T>;
-    localStorageProp.setDecoratorInfo('@LocalStorageProp');
+    localStorageProp?.setDecoratorInfo('@LocalStorageProp');
     return localStorageProp;
   }
 
@@ -1154,15 +1154,15 @@ abstract class ViewPU extends PUV2ViewBase
   public __mkRepeatAPI: <I>(arr: Array<I>) => RepeatAPI<I> = <I>(arr: Array<I>): RepeatAPI<I> => {
     // factory is for future extensions, currently always return the same
     const elmtId = this.getCurrentlyRenderedElmtId();
-    let repeat = this.elmtId2Repeat_.get(elmtId) as __RepeatPU<I>
+    let repeat = this.elmtId2Repeat_.get(elmtId) as __RepeatPU<I>;
     if (!repeat) {
         repeat = new __RepeatPU<I>(this, arr);
         this.elmtId2Repeat_.set(elmtId, repeat);
     } else {
-        repeat.updateArr(arr)
+        repeat.updateArr(arr);
     }
 
     return repeat;
   }
-}  // class ViewPU
+} // class ViewPU
 

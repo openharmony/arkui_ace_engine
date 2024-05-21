@@ -4023,7 +4023,7 @@ void RosenRenderContext::OnBgDynamicBrightnessOptionUpdate(const std::optional<B
     rsNode_->SetBgBrightnessFract(brightnessOption->fraction);
     RequestNextFrame();
 }
- 
+
 void RosenRenderContext::OnFgDynamicBrightnessOptionUpdate(const std::optional<BrightnessOption>& brightnessOption)
 {
     if (!brightnessOption.has_value()) {
@@ -4032,10 +4032,10 @@ void RosenRenderContext::OnFgDynamicBrightnessOptionUpdate(const std::optional<B
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetFgBrightnessParams(
         {
-            brightnessOption->rate, 
+            brightnessOption->rate,
             brightnessOption->lightUpDegree,
-            brightnessOption->cubicCoeff, 
-            brightnessOption->quadCoeff, 
+            brightnessOption->cubicCoeff,
+            brightnessOption->quadCoeff,
             brightnessOption->saturation,
             { brightnessOption->posRGB[0], brightnessOption->posRGB[1], brightnessOption->posRGB[2] },
             { brightnessOption->negRGB[0], brightnessOption->negRGB[1], brightnessOption->negRGB[2] }
@@ -5882,5 +5882,11 @@ void RosenRenderContext::NotifyHostTransformUpdated()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->NotifyTransformInfoChanged();
+}
+
+void RosenRenderContext::SuggestOpIncNode(bool isOpincNode, bool isNeedCalculate)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->MarkSuggestOpincNode(isOpincNode, isNeedCalculate);
 }
 } // namespace OHOS::Ace::NG

@@ -75,13 +75,12 @@ public:
         auto itemSpaceCount = CaculateDisplayItemSpaceCount(property, prevMargin, nextMargin);
         auto childSelfIdealSize = idealSize;
         float childCalcIdealLength = 0.0f;
-
-        if ((axis == Axis::HORIZONTAL && idealSize.Width().has_value()) ||
-            (axis == Axis::VERTICAL && idealSize.Height().has_value())) {
-            auto length = axis == Axis::HORIZONTAL ? idealSize.Width().value() :
-                idealSize.Height().value();
-            childCalcIdealLength = (length - itemSpace * itemSpaceCount -
-                                        static_cast<float>(prevMargin + nextMargin)) / displayCount;
+        // Invalid size need not to calculate margin
+        if (!idealSize.IsNonPositive() && ((axis == Axis::HORIZONTAL && idealSize.Width().has_value()) ||
+                                              (axis == Axis::VERTICAL && idealSize.Height().has_value()))) {
+            auto length = axis == Axis::HORIZONTAL ? idealSize.Width().value() : idealSize.Height().value();
+            childCalcIdealLength =
+                (length - itemSpace * itemSpaceCount - static_cast<float>(prevMargin + nextMargin)) / displayCount;
             if (LessNotEqual(childCalcIdealLength, 0.0)) {
                 // prioritize margin and displayCount, ignore itemSpace to create a positive idealLength.
                 property->MarkIgnoreItemSpace();

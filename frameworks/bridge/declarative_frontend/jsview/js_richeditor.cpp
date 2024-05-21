@@ -630,9 +630,15 @@ JSRef<JSVal> JSRichEditor::CreateJsAboutToDelet(const NG::RichEditorDeleteValue&
     AboutToDeletObj->SetProperty<int32_t>(
         "direction", static_cast<int32_t>(deleteValue.GetRichEditorDeleteDirection()));
     AboutToDeletObj->SetProperty<int32_t>("length", deleteValue.GetLength());
+    AboutToDeletObj->SetPropertyObject("richEditorDeleteSpans", CreateJSDeleteSpans(deleteValue));
+    return JSRef<JSVal>::Cast(AboutToDeletObj);
+}
+
+JSRef<JSArray> JSRichEditor::CreateJSDeleteSpans(const NG::RichEditorDeleteValue& deleteValue)
+{
     JSRef<JSArray> richEditorDeleteSpans = JSRef<JSArray>::New();
-    auto list = deleteValue.GetRichEditorDeleteSpans();
     int32_t index = 0;
+    auto list = deleteValue.GetRichEditorDeleteSpans();
     for (const auto& it : list) {
         JSRef<JSObject> spanResultObj = JSRef<JSObject>::New();
         JSRef<JSObject> spanPositionObj = JSRef<JSObject>::New();
@@ -665,13 +671,19 @@ JSRef<JSVal> JSRichEditor::CreateJsAboutToDelet(const NG::RichEditorDeleteValue&
                 spanResultObj->SetPropertyObject("imageStyle", imageStyleObj);
                 break;
             }
+            case NG::SpanResultType::SYMBOL: {
+                spanResultObj->SetProperty<std::string>("value", it.GetValueString());
+                spanResultObj->SetPropertyObject(
+                    "symbolSpanStyle", CreateJSSymbolSpanStyleResult(it.GetSymbolSpanStyle()));
+                spanResultObj->SetPropertyObject("valueResource", CreateJSValueResource(it.GetValueResource()));
+                break;
+            }
             default:
                 break;
         }
         richEditorDeleteSpans->SetValueAt(index++, spanResultObj);
     }
-    AboutToDeletObj->SetPropertyObject("richEditorDeleteSpans", richEditorDeleteSpans);
-    return JSRef<JSVal>::Cast(AboutToDeletObj);
+    return richEditorDeleteSpans;
 }
 
 void JSRichEditor::SetChangeTextSpans(

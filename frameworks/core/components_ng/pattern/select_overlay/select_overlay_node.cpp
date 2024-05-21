@@ -28,6 +28,7 @@
 #include "core/animation/curves.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/placement.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/theme/shadow_theme.h"
@@ -47,6 +48,7 @@
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/menu_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -296,30 +298,32 @@ RefPtr<FrameNode> BuildMoreOrBackButton(int32_t overlayId, bool isMoreButton)
 
     const auto& padding = textOverlayTheme->GetMenuPadding();
 
-    auto sideWidth = CalcLength(textOverlayTheme->GetMenuToolbarHeight().ConvertToPx() - padding.Top().ConvertToPx() -
-                                padding.Bottom().ConvertToPx());
-    buttonLayoutProperty->UpdateUserDefinedIdealSize({ sideWidth, sideWidth });
-
-    if (!isMoreButton) {
+    if (isMoreButton) {
+        auto sideWidth = CalcLength(textOverlayTheme->GetMenuToolbarHeight().ConvertToPx() -
+                                    padding.Top().ConvertToPx() - padding.Bottom().ConvertToPx());
+        buttonLayoutProperty->UpdateUserDefinedIdealSize({ sideWidth, sideWidth });
+    } else {
+        auto sideWidth = CalcLength(textOverlayTheme->GetMenuToolbarHeight().ConvertToPx());
+        buttonLayoutProperty->UpdateUserDefinedIdealSize({ sideWidth, sideWidth });
         auto left = CalcLength(padding.Left().ConvertToPx());
         auto right = CalcLength(padding.Right().ConvertToPx());
         auto top = CalcLength(padding.Top().ConvertToPx());
         auto bottom = CalcLength(padding.Bottom().ConvertToPx());
-        buttonLayoutProperty->UpdateMargin({ left, right, top, bottom });
-        buttonLayoutProperty->UpdateVisibility(VisibleType::GONE);
+        buttonLayoutProperty->UpdatePadding({ left, right, top, bottom });
+        button->GetOrCreateGestureEventHub()->SetUserOnClick([overlayId](GestureEvent& /*info*/) {
+            auto pipeline = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto overlayManager = pipeline->GetSelectOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
+            auto selectOverlay = overlayManager->GetSelectOverlayNode(overlayId);
+            CHECK_NULL_VOID(selectOverlay);
+            // When click button , change to extensionMenu or change to the default menu(selectMenu_).
+            auto isMore = !selectOverlay->GetIsExtensionMenu();
+            selectOverlay->MoreOrBackAnimation(isMore);
+        });
     }
 
     button->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
-    button->GetOrCreateGestureEventHub()->SetUserOnClick([overlayId, isMore = isMoreButton](GestureEvent& /*info*/) {
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto overlayManager = pipeline->GetSelectOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-        auto selectOverlay = overlayManager->GetSelectOverlayNode(overlayId);
-        CHECK_NULL_VOID(selectOverlay);
-        // When click button , change to extensionMenu or change to the default menu(selectMenu_).
-        selectOverlay->MoreOrBackAnimation(isMore);
-    });
     button->MarkModifyDone();
     return button;
 }
@@ -655,12 +659,12 @@ void SelectOverlayNode::MoreAnimation()
 
     AnimationUtils::Animate(
         extensionOption, [extensionContext, selectMenuInnerContext, id = Container::CurrentId(), shadowTheme]() {
-        ContainerScope scope(id);
-        extensionContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
-        auto colorMode = SystemProperties::GetColorMode();
-        extensionContext->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultMD, colorMode));
-        selectMenuInnerContext->UpdateOpacity(0.0);
-    });
+            ContainerScope scope(id);
+            extensionContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
+            auto colorMode = SystemProperties::GetColorMode();
+            extensionContext->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultMD, colorMode));
+            selectMenuInnerContext->UpdateOpacity(0.0);
+        });
     modifier->SetOtherPointRadius(MIN_DIAMETER / 2.0f);
     modifier->SetHeadPointRadius(MIN_ARROWHEAD_DIAMETER / 2.0f);
     modifier->SetLineEndOffset(true);
@@ -673,7 +677,6 @@ void SelectOverlayNode::MoreAnimation()
         ContainerScope scope(id);
         selectMenuInnerProperty->UpdateVisibility(VisibleType::GONE);
         extensionProperty->UpdateVisibility(VisibleType::VISIBLE);
-        backButtonProperty->UpdateVisibility(VisibleType::VISIBLE);
         auto selectOverlay = weak.Upgrade();
         CHECK_NULL_VOID(selectOverlay);
         selectOverlay->SetAnimationStatus(false);
@@ -752,7 +755,6 @@ void SelectOverlayNode::BackAnimation()
         ContainerScope scope(id);
         selectMenuInnerProperty->UpdateVisibility(VisibleType::VISIBLE);
         extensionProperty->UpdateVisibility(VisibleType::GONE);
-        backButtonProperty->UpdateVisibility(VisibleType::GONE);
         auto selectOverlay = weak.Upgrade();
         CHECK_NULL_VOID(selectOverlay);
         selectOverlay->SetAnimationStatus(false);
@@ -843,8 +845,12 @@ void SelectOverlayNode::AddExtensionMenuOptions(const std::vector<MenuOptionsPar
         itemNum++;
     }
     if (!params.empty()) {
-        auto menuWrapper =
-            MenuView::Create(std::move(params), -1, "ExtensionMenu", MenuType::SELECT_OVERLAY_EXTENSION_MENU);
+        CHECK_NULL_VOID(backButton_);
+        auto buttonId = backButton_->GetId();
+        MenuParam menuParam;
+        menuParam.placement = Placement::BOTTOM_RIGHT;
+        auto menuWrapper = MenuView::Create(
+            std::move(params), buttonId, "SelectMoreOrBackButton", MenuType::SELECT_OVERLAY_EXTENSION_MENU, menuParam);
         CHECK_NULL_VOID(menuWrapper);
         auto menu = DynamicCast<FrameNode>(menuWrapper->GetChildAtIndex(0));
         CHECK_NULL_VOID(menu);
@@ -874,10 +880,8 @@ void SelectOverlayNode::AddExtensionMenuOptions(const std::vector<MenuOptionsPar
 
         extensionMenu_->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
         extensionMenuStatus_ = FrameNodeStatus::GONE;
-        extensionMenuContext->UpdateOpacity(0.0);
 
         extensionMenuContext->UpdateTransformTranslate({ 0.0f, MORE_MENU_TRANSLATE.ConvertToPx(), 0.0f });
-        extensionMenu_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         extensionMenu_->MarkModifyDone();
         menuPattern->SetSelectOverlayExtensionMenuShow();
     }
@@ -969,7 +973,7 @@ bool SelectOverlayNode::AddSystemDefaultOptions(float maxWidth, float& allocated
 {
     auto info = GetPattern<SelectOverlayPattern>()->GetSelectOverlayInfo();
     memset_s(isShowInDefaultMenu_, sizeof(isShowInDefaultMenu_), 0, sizeof(isShowInDefaultMenu_));
-    
+
     if (ShowCutCopy(maxWidth, allocatedSize, info)) {
         return true;
     }
@@ -1206,7 +1210,6 @@ void SelectOverlayNode::UpdateMenuInner(const std::shared_ptr<SelectOverlayInfo>
         if (!backButton_) {
             backButton_ = BuildMoreOrBackButton(GetId(), false);
             CHECK_NULL_VOID(backButton_);
-            backButton_->GetRenderContext()->UpdateOpacity(0.0);
             backButton_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             backButton_->MountToParent(Claim(this));
         }

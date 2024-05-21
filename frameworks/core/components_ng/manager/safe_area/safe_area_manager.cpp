@@ -82,9 +82,15 @@ bool SafeAreaManager::UpdateKeyboardSafeArea(float keyboardHeight)
 SafeAreaInsets SafeAreaManager::GetCombinedSafeArea(const SafeAreaExpandOpts& opts) const
 {
     SafeAreaInsets res;
+#ifdef PREVIEW
+    if (ignoreSafeArea_) {
+        return res;
+    }
+#else
     if (ignoreSafeArea_ || (!isFullScreen_ && !isNeedAvoidWindow_)) {
         return res;
     }
+#endif
     if (opts.type & SAFE_AREA_TYPE_CUTOUT) {
         res = res.Combine(cutoutSafeArea_);
     }

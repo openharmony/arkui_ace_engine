@@ -814,7 +814,7 @@ public:
     void OnNativeEmbedLifecycleChange(std::shared_ptr<NWeb::NWebNativeEmbedDataInfo> dataInfo);
     void OnNativeEmbedGestureEvent(std::shared_ptr<NWeb::NWebNativeEmbedTouchEvent> event);
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
-    bool RequestFocus();
+    bool RequestFocus(OHOS::NWeb::NWebFocusSource source = OHOS::NWeb::NWebFocusSource::FOCUS_SOURCE_DEFAULT);
     void SetDrawSize(const Size& drawSize);
     void SetEnhanceSurfaceFlag(const bool& isEnhanceSurface);
     EGLConfig GLGetConfig(int version, EGLDisplay eglDisplay);

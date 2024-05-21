@@ -82,7 +82,7 @@ public:
     // Requests that this client perform the given action.
     virtual void PerformAction(TextInputAction action, bool forceCloseKeyboard = false) = 0;
 
-    virtual void InsertValue(const std::string& insertValue) {};
+    virtual void InsertValue(const std::string& insertValue, bool isIME = false) {};
     virtual void DeleteBackward(int32_t length) {};
     virtual void DeleteForward(int32_t length) {};
     virtual void SetInputMethodStatus(bool keyboardShown) {}

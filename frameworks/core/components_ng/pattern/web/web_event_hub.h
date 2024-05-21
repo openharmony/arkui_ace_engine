@@ -40,7 +40,7 @@ public:                                                                         
     }                                                                                                          \
                                                                                                                \
 private:                                                                                                       \
-    std::function<type(const std::shared_ptr<BaseEventInfo>& info)> prop##name##Event_;
+    std::function<type(const std::shared_ptr<BaseEventInfo>& info)> prop##name##Event_
 
 namespace OHOS::Ace::NG {
 class WebEventHub : public EventHub {

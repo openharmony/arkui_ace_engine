@@ -69,6 +69,28 @@ constexpr int32_t SIZE_CHANGE_DUMP_SIZE = 5;
 constexpr double MIN_WIDTH = 5.0;
 constexpr double MIN_HEIGHT = 5.0;
 constexpr double MIN_OPACITY = 0.1;
+/* suggestOpIncByte_s status mask, to indicate different aspects of node status
+ * related with suggestion OPINC improvements.
+ * for internal use; subject to change.
+ */
+// suggest opinc marked.
+constexpr uint8_t SUGGEST_OPINC_MARKED_MASK = 1;
+// Whether the node can be suggest opinc marked.
+constexpr uint8_t CAN_SUGGEST_OPINC_MASK = 1 << 1;
+// The node already activated for suggest opinc.
+constexpr uint8_t SUGGEST_OPINC_ACTIVATED_ONCE = 1 << 2;
+// The node already checked for suggest opinc.
+constexpr uint8_t SUGGEST_OPINC_CHCKED_ONCE = 1 << 3;
+// The node has checked through for lazy new nodes.
+constexpr uint8_t SUGGEST_OPINC_CHECKED_THROUGH = 1 << 4;
+// Node has rendergroup marked.
+constexpr uint8_t APP_RENDER_GROUP_MARKED_MASK = 1 << 7;
+// OPINC must more then 2 leaf;
+constexpr int32_t THRESH_CHILD_NO = 2;
+// OPINC max ratio for scroll scope(height);
+constexpr float HIGHT_RATIO_LIMIT = 0.8;
+// Min area for OPINC
+constexpr int32_t MIN_OPINC_AREA = 10000;
 } // namespace
 namespace OHOS::Ace::NG {
 
@@ -182,6 +204,12 @@ public:
                 AddFrameNode(child.node, allFrameNodeChildren_, partFrameNodeChildren_, count);
             }
         }
+        return ChildrenListWithGuard(allFrameNodeChildren_, *this);
+    }
+
+    ChildrenListWithGuard GetCurrentFrameChildren()
+    {
+        auto guard = GetGuard();
         return ChildrenListWithGuard(allFrameNodeChildren_, *this);
     }
 
@@ -1032,7 +1060,6 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
         pipeline->OnLayoutCompleted(GetInspectorId()->c_str());
     }
     auto needRerender = pattern_->OnDirtyLayoutWrapperSwap(dirty, config);
-    // TODO: temp use and need to delete.
     needRerender = needRerender || pattern_->OnDirtyLayoutWrapperSwap(dirty, config.skipMeasure, config.skipLayout);
     if (needRerender || CheckNeedRender(paintProperty_->GetPropertyChangeFlag())) {
         MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
@@ -2095,7 +2122,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         if (childHitResult == HitTestResult::BUBBLING &&
             ((child->GetHitTestMode() == HitTestMode::HTMDEFAULT) ||
                 (child->GetHitTestMode() == HitTestMode::HTMTRANSPARENT_SELF) ||
-                ((child->GetHitTestMode() != HitTestMode::HTMTRANSPARENT) && IsExclusiveEventForChild()))) {
+                    ((child->GetHitTestMode() != HitTestMode::HTMTRANSPARENT) && IsExclusiveEventForChild()))) {
             consumed = true;
             break;
         }
@@ -2231,9 +2258,7 @@ HitTestResult FrameNode::AxisTest(
     const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult)
 {
     const auto& rect = renderContext_->GetPaintRectWithTransform();
-    // TODO: disableTouchEvent || disabled_ need handle
 
-    // TODO: Region need change to RectList
     if (!rect.IsInRegion(parentLocalPoint)) {
         return HitTestResult::OUT_OF_REGION;
     }
@@ -3564,34 +3589,50 @@ void FrameNode::DoSetActiveChildRange(int32_t start, int32_t end)
 void FrameNode::OnInspectorIdUpdate(const std::string& id)
 {
     renderContext_->UpdateNodeName(id);
+    auto parent = GetAncestorNodeOfFrame();
+    if (parent && parent->GetTag() == V2::RELATIVE_CONTAINER_ETS_TAG) {
+        parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
     if (Recorder::EventRecorder::Get().IsExposureRecordEnable()) {
         if (exposureProcessor_) {
             return;
         }
         auto* context = GetContext();
-        if (context) {
-            context->AddAfterRenderTask([weak = WeakClaim(this), inspectorId = id]() {
-                auto host = weak.Upgrade();
-                CHECK_NULL_VOID(host);
-                host->RecordExposureIfNeed(inspectorId);
-            });
-        }
-    }
-    auto parent = GetAncestorNodeOfFrame();
-    CHECK_NULL_VOID(parent);
-    if (parent->GetTag() == V2::RELATIVE_CONTAINER_ETS_TAG) {
-        parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        CHECK_NULL_VOID(context);
+        context->AddAfterRenderTask([weak = WeakClaim(this), inspectorId = id]() {
+            auto host = weak.Upgrade();
+            CHECK_NULL_VOID(host);
+            auto pageUrl = Recorder::GetPageUrlByNode(host);
+            host->exposureProcessor_ = MakeRefPtr<Recorder::ExposureProcessor>(pageUrl, inspectorId);
+            if (!host->exposureProcessor_->IsNeedRecord()) {
+                return;
+            }
+            host->RecordExposureInner();
+        });
     }
 }
 
-void FrameNode::RecordExposureIfNeed(const std::string& inspectorId)
+void FrameNode::SetExposureProcessor(const RefPtr<Recorder::ExposureProcessor>& processor)
 {
-    auto pageUrl = Recorder::GetPageUrlByNode(Claim(this));
-    exposureProcessor_ = MakeRefPtr<Recorder::ExposureProcessor>(pageUrl, inspectorId);
-    if (!exposureProcessor_->IsNeedRecord()) {
+    if (exposureProcessor_ && exposureProcessor_->isListening()) {
         return;
+    } else {
+        exposureProcessor_ = MakeRefPtr<Recorder::ExposureProcessor>(processor);
+        exposureProcessor_->SetContainerId(processor->GetContainerId());
     }
+    exposureProcessor_->OnVisibleChange(true, "");
+    RecordExposureInner();
+}
+
+void FrameNode::RecordExposureInner()
+{
     auto pipeline = GetContext();
+    if (!pipeline) {
+        auto piplineRef = PipelineContext::GetContextByContainerId(exposureProcessor_->GetContainerId());
+        if (!piplineRef) {
+            pipeline = piplineRef.GetRawPtr();
+        }
+    }
     CHECK_NULL_VOID(pipeline);
     auto callback = [weak = WeakClaim(RawPtr(exposureProcessor_)), weakNode = WeakClaim(this)](
                         bool visible, double ratio) {
@@ -3605,8 +3646,9 @@ void FrameNode::RecordExposureIfNeed(const std::string& inspectorId)
             processor->OnVisibleChange(visible);
         }
     };
-    std::vector<double> ratios = {exposureProcessor_->GetRatio()};
+    std::vector<double> ratios = { exposureProcessor_->GetRatio() };
     pipeline->AddVisibleAreaChangeNode(Claim(this), ratios, callback, false);
+    exposureProcessor_->SetListenState(true);
 }
 
 void FrameNode::AddFrameNodeSnapshot(bool isHit, int32_t parentId, std::vector<RectF> responseRegionList)
@@ -4072,4 +4114,213 @@ void FrameNode::MapPointTo(PointF& dst, Matrix4& matrix)
     dst.SetY(transformPoint.GetY());
 }
 
+void FrameNode::SetSuggestOpIncMarked(bool flag)
+{
+    if (flag) {
+        suggestOpIncByte_ |= SUGGEST_OPINC_MARKED_MASK;
+    } else {
+        suggestOpIncByte_ &= (~SUGGEST_OPINC_MARKED_MASK);
+    }
+}
+
+bool FrameNode::GetSuggestOpIncMarked()
+{
+    return (suggestOpIncByte_ & SUGGEST_OPINC_MARKED_MASK) > 0;
+}
+
+void FrameNode::SetCanSuggestOpInc(bool flag)
+{
+    if (flag) {
+        suggestOpIncByte_ |= CAN_SUGGEST_OPINC_MASK;
+    } else {
+        suggestOpIncByte_ &= (~CAN_SUGGEST_OPINC_MASK);
+    }
+}
+
+bool FrameNode::GetCanSuggestOpInc()
+{
+    return (suggestOpIncByte_ & CAN_SUGGEST_OPINC_MASK) > 0;
+}
+
+void FrameNode::SetApplicationRenderGroupMarked(bool flag)
+{
+    if (flag) {
+        suggestOpIncByte_ |= APP_RENDER_GROUP_MARKED_MASK;
+    } else {
+        suggestOpIncByte_ &= (~APP_RENDER_GROUP_MARKED_MASK);
+    }
+}
+
+bool FrameNode::GetApplicationRenderGroupMarked()
+{
+    return (suggestOpIncByte_ & APP_RENDER_GROUP_MARKED_MASK) > 0;
+}
+
+void FrameNode::SetSuggestOpIncActivatedOnce()
+{
+    suggestOpIncByte_ |= SUGGEST_OPINC_ACTIVATED_ONCE;
+}
+
+bool FrameNode::GetSuggestOpIncActivatedOnce()
+{
+    return (suggestOpIncByte_ & SUGGEST_OPINC_ACTIVATED_ONCE) > 0;
+}
+
+void FrameNode::SetOpIncGroupCheckedThrough(bool flag)
+{
+    if (flag) {
+        suggestOpIncByte_ |= SUGGEST_OPINC_CHECKED_THROUGH;
+    } else {
+        suggestOpIncByte_ &= (~SUGGEST_OPINC_CHECKED_THROUGH);
+    }
+}
+
+bool FrameNode::GetOpIncGroupCheckedThrough()
+{
+    return (suggestOpIncByte_ & SUGGEST_OPINC_CHECKED_THROUGH) > 0;
+}
+
+void FrameNode::SetOpIncCheckedOnce()
+{
+    suggestOpIncByte_ |= SUGGEST_OPINC_CHCKED_ONCE;
+}
+bool FrameNode::GetOpIncCheckedOnce()
+{
+    return (suggestOpIncByte_ & SUGGEST_OPINC_CHCKED_ONCE) > 0;
+}
+
+bool FrameNode::MarkSuggestOpIncGroup(bool suggest, bool calc)
+{
+    CHECK_NULL_RETURN(renderContext_, false);
+    if (!GetSuggestOpIncMarked() && GetCanSuggestOpInc()) {
+        renderContext_->SuggestOpIncNode(suggest, calc);
+        SetSuggestOpIncMarked(true);
+    }
+    return true;
+}
+
+OPINC_TYPE_E FrameNode::IsOpIncValidNode(const SizeF& boundary, int32_t childNumber)
+{
+    auto ret = GetPattern()->OpIncType();
+    switch (ret) {
+        case OPINC_NODE:
+            SetCanSuggestOpInc(true);
+            break;
+        case OPINC_PARENT_POSSIBLE:
+            break;
+        case OPINC_NODE_POSSIBLE: {
+            int32_t height = static_cast<int>(GetGeometryNode()->GetFrameSize().Height());
+            int32_t width = static_cast<int>(GetGeometryNode()->GetFrameSize().Width());
+            int32_t heightBoundary = static_cast<int>(boundary.Height() * HIGHT_RATIO_LIMIT);
+            int32_t area = height * width;
+            if (area >= MIN_OPINC_AREA && height <= heightBoundary) {
+                SetCanSuggestOpInc(true);
+                ret = OPINC_NODE;
+            } else if (height > heightBoundary) {
+                ret = OPINC_PARENT_POSSIBLE;
+            } else {
+                ret = OPINC_SUGGESTED_OR_EXCLUDED;
+            }
+            break;
+        }
+        default:
+            break;
+    }
+    return ret;
+}
+
+ChildrenListWithGuard FrameNode::GetAllChildren()
+{
+    // frameProxy_ never be null in frame node;
+    return frameProxy_->GetCurrentFrameChildren();
+}
+
+OPINC_TYPE_E FrameNode::FindSuggestOpIncNode(std::string& path, const SizeF& boundary, int32_t depth)
+{
+    if (GetSuggestOpIncActivatedOnce()) {
+        return OPINC_SUGGESTED_OR_EXCLUDED;
+    }
+    SetSuggestOpIncActivatedOnce();
+
+    if (GetApplicationRenderGroupMarked()) {
+        return OPINC_INVALID;
+    }
+    auto status = IsOpIncValidNode(boundary);
+    if (SystemProperties::GetDebugEnabled()) {
+        const auto& hostTag = GetHostTag();
+        path = path + " --> " + hostTag;
+        LOGI("FindSuggestOpIncNode : %{public}s, with depth %{public}d, boundary: %{public}f, self: %{public}f, "
+             "status: %{public}d",
+            path.c_str(),
+            depth,
+            boundary.Height(),
+            GetGeometryNode()->GetFrameSize().Height(),
+            status);
+    }
+    if (status == OPINC_NODE) {
+        MarkSuggestOpIncGroup(true, true);
+        return OPINC_SUGGESTED_OR_EXCLUDED;
+    } else if (status == OPINC_SUGGESTED_OR_EXCLUDED) {
+        return OPINC_SUGGESTED_OR_EXCLUDED;
+    } else if (status == OPINC_PARENT_POSSIBLE) {
+        for (auto child : GetAllChildren()) {
+            if (!child) {
+                continue;
+            }
+            auto frameNode = AceType::DynamicCast<FrameNode>(child);
+            if (frameNode) {
+                frameNode->FindSuggestOpIncNode(path, boundary, depth + 1);
+            }
+        }
+        return OPINC_PARENT_POSSIBLE;
+    } else if (status == OPINC_INVALID) {
+        return OPINC_INVALID;
+    }
+    return OPINC_SUGGESTED_OR_EXCLUDED;
+}
+
+void FrameNode::MarkAndCheckNewOpIncNode()
+{
+    auto parent = GetAncestorNodeOfFrame();
+    CHECK_NULL_VOID(parent);
+    if (parent->GetSuggestOpIncActivatedOnce() && !GetSuggestOpIncActivatedOnce()) {
+        SetSuggestOpIncActivatedOnce();
+        if (!parent->GetOpIncCheckedOnce()) {
+            parent->SetOpIncCheckedOnce();
+            auto status = IsOpIncValidNode(parent->GetGeometryNode()->GetFrameSize());
+            if (status == OPINC_NODE) {
+                parent->SetOpIncGroupCheckedThrough(true);
+            } else if (FrameNode::GetValidLeafChildNumber(Claim(this), THRESH_CHILD_NO) >= THRESH_CHILD_NO) {
+                parent->SetOpIncGroupCheckedThrough(true);
+            } else {
+                parent->SetOpIncGroupCheckedThrough(false);
+            }
+        }
+        if (parent->GetOpIncGroupCheckedThrough()) {
+            SetCanSuggestOpInc(true);
+            MarkSuggestOpIncGroup(true, true);
+        }
+    }
+}
+
+int FrameNode::GetValidLeafChildNumber(const RefPtr<FrameNode>& host, int32_t thresh)
+{
+    CHECK_NULL_RETURN(host, 0);
+    auto total = 0;
+    auto childSize = host->GetTotalChildCount();
+    if (childSize < 1) {
+        return 1;
+    }
+    for (auto i = 0; i < childSize; i++) {
+        auto child = AceType::DynamicCast<FrameNode>(host->GetChildByIndex(i));
+        if (!child) {
+            continue;
+        }
+        total += GetValidLeafChildNumber(child, thresh);
+        if (total >= thresh) {
+            return total;
+        }
+    }
+    return total;
+}
 } // namespace OHOS::Ace::NG

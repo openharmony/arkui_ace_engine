@@ -26,6 +26,20 @@ ExposureProcessor::ExposureProcessor(const std::string& pageUrl, const std::stri
     }
 }
 
+ExposureProcessor::ExposureProcessor(
+    const std::string& pageUrl, const std::string& inspectorId, double ratio, int duration)
+    : cfg_({ inspectorId, ratio, duration }), pageUrl_(pageUrl)
+{}
+
+ExposureProcessor::ExposureProcessor(const RefPtr<ExposureProcessor>& processor)
+{
+    pageUrl_ = processor->pageUrl_;
+    cfg_.id = processor->cfg_.id;
+    cfg_.ratio = processor->cfg_.ratio;
+    cfg_.duration = processor->cfg_.duration;
+    containerId_ = processor->containerId_;
+}
+
 bool ExposureProcessor::IsNeedRecord() const
 {
     return !cfg_.id.empty();

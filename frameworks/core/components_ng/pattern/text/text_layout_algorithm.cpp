@@ -465,7 +465,9 @@ bool TextLayoutAlgorithm::UpdateSingleParagraph(LayoutWrapper* layoutWrapper, Pa
         paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
     }
     CHECK_NULL_RETURN(paragraph, false);
-    paragraph->PushStyle(textStyle);
+    auto textStyleTmp = textStyle;
+    textStyleTmp.ResetTextBaseline();
+    paragraph->PushStyle(textStyleTmp);
     if (pattern->NeedShowAIDetect()) {
         UpdateParagraphForAISpan(textStyle, layoutWrapper, paragraph);
     } else {

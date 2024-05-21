@@ -71,7 +71,7 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     if (!divider_.strokeWidth.IsValid() || totalItemCount_ <= 0 ||
         divider_.strokeWidth.Unit() == DimensionUnit::PERCENT ||
         GreatOrEqual(divider_.strokeWidth.ConvertToPx(), contentSize)) {
-        ListDividerArithmetic::DividerMap dividerMap;
+        ListDividerMap dividerMap;
         listContentModifier_->SetDividerMap(std::move(dividerMap));
         return;
     }
@@ -108,7 +108,7 @@ void ListPaintMethod::UpdateDividerList(const DividerInfo& dividerInfo)
     bool lastIsItemGroup = false;
     bool isFirstItem = (itemPosition_.begin()->first == 0);
     std::map<int32_t, int32_t> lastLineIndex;
-    ListDividerArithmetic::DividerMap dividerMap;
+    ListDividerMap dividerMap;
     bool nextIsPressed = false;
     for (const auto& child : itemPosition_) {
         auto nextId = child.first - lanes;

@@ -838,6 +838,8 @@ public:
     void AttachContext(PipelineContext* context, bool recursive = false) override;
     void DetachContext(bool recursive = false) override;
 
+    void SetExposureProcessor(const RefPtr<Recorder::ExposureProcessor>& processor);
+
     void SetGeometryTransitionInRecursive(bool isGeometryTransitionIn) override
     {
         SetSkipSyncGeometryNode();
@@ -857,11 +859,29 @@ public:
 
     // apply the matrix to the given point specified by dst
     static void MapPointTo(PointF& dst, Matrix4& matrix);
+    void SetSuggestOpIncMarked(bool flag);
+    bool GetSuggestOpIncMarked();
+    void SetCanSuggestOpInc(bool flag);
+    bool GetCanSuggestOpInc();
+    void SetApplicationRenderGroupMarked(bool flag);
+    bool GetApplicationRenderGroupMarked();
+    void SetSuggestOpIncActivatedOnce();
+    bool GetSuggestOpIncActivatedOnce();
+    bool MarkSuggestOpIncGroup(bool suggest, bool calc);
+    void SetOpIncGroupCheckedThrough(bool flag);
+    bool GetOpIncGroupCheckedThrough();
+    void SetOpIncCheckedOnce();
+    bool GetOpIncCheckedOnce();
+    void MarkAndCheckNewOpIncNode();
+    ChildrenListWithGuard GetAllChildren();
+    OPINC_TYPE_E FindSuggestOpIncNode(std::string& path, const SizeF& boundary, int32_t depth);
 
 protected:
     void DumpInfo() override;
 
 private:
+    OPINC_TYPE_E IsOpIncValidNode(const SizeF& boundary, int32_t childNumber = 0);
+    static int GetValidLeafChildNumber(const RefPtr<FrameNode>& host, int32_t thresh);
     void MarkNeedRender(bool isRenderBoundary);
     std::pair<float, float> ContextPositionConvertToPX(
         const RefPtr<RenderContext>& context, const SizeF& percentReference) const;
@@ -929,7 +949,7 @@ private:
 
     int32_t GetNodeExpectedRate();
 
-    void RecordExposureIfNeed(const std::string& inspectorId);
+    void RecordExposureInner();
 
     OffsetF CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp);
 
@@ -1012,6 +1032,7 @@ private:
     bool userSet_ = false;
     bool customerSet_ = false;
     bool isWindowBoundary_ = false;
+    uint8_t suggestOpIncByte_ = 0;
 
     std::map<std::string, RefPtr<NodeAnimatablePropertyBase>> nodeAnimatablePropertyMap_;
     Matrix4 localMat_ = Matrix4::CreateIdentity();

@@ -813,7 +813,7 @@ protected:
     void FlushAnimation(uint64_t nanoTimestamp) override;
     void FlushReload(const ConfigurationChange& configurationChange) override;
     void FlushReloadTransition() override;
-    void FlushUITasks() override
+    void FlushUITasks(bool triggeredByImplicitAnimation = false) override
     {
         FlushLayout();
     }

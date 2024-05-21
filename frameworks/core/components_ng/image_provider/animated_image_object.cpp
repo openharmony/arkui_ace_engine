@@ -30,6 +30,7 @@ void AnimatedImageObject::MakeCanvasImage(
         .width = size.Width(),
         .height = size.Height(),
         .forceResize = forceResize,
+        .imageQuality = ctx->GetImageQuality()
     };
 
 #ifndef USE_ROSEN_DRAWING

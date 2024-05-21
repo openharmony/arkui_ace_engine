@@ -1748,6 +1748,34 @@ Dimension TextFieldModelNG::GetAdaptMinFontSize(FrameNode* frameNode)
     return value;
 }
 
+void TextFieldModelNG::SetOnWillInsertValueEvent(std::function<bool(const InsertValueInfo&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillInsertValueEvent(std::move(func));
+}
+
+void TextFieldModelNG::SetOnDidInsertValueEvent(std::function<void(const InsertValueInfo&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidInsertValueEvent(std::move(func));
+}
+
+void TextFieldModelNG::SetOnWillDeleteEvent(std::function<bool(const DeleteValueInfo&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillDeleteEvent(std::move(func));
+}
+
+void TextFieldModelNG::SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidDeleteEvent(std::move(func));
+}
+
 Dimension TextFieldModelNG::GetAdaptMaxFontSize(FrameNode* frameNode)
 {
     Dimension value;
@@ -1886,6 +1914,42 @@ PaddingProperty TextFieldModelNG::GetMargin(FrameNode* frameNode)
         margins.left = std::optional<CalcLength>(property.left);
     }
     return margins;
+}
+
+void TextFieldModelNG::SetOnWillInsertValueEvent(FrameNode* frameNode,
+    std::function<bool(const InsertValueInfo&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillInsertValueEvent(std::move(func));
+}
+
+void TextFieldModelNG::SetOnDidInsertValueEvent(FrameNode* frameNode,
+    std::function<void(const InsertValueInfo&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidInsertValueEvent(std::move(func));
+}
+
+void TextFieldModelNG::SetOnWillDeleteEvent(FrameNode* frameNode,
+    std::function<bool(const DeleteValueInfo&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillDeleteEvent(std::move(func));
+}
+
+void TextFieldModelNG::SetOnDidDeleteEvent(FrameNode* frameNode,
+    std::function<void(const DeleteValueInfo&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidDeleteEvent(std::move(func));
 }
 
 } // namespace OHOS::Ace::NG

@@ -23,6 +23,7 @@ ace_unittest("water_flow_test_ng") {
   defines = [ "TEST_SEGMENTED_WATER_FLOW" ]
   sources = [
     "water_flow_layout_info_test.cpp",
+    "water_flow_scroller_test_ng.cpp",
     "water_flow_segment_layout_test.cpp",
     "water_flow_test_ng.cpp",
   ]

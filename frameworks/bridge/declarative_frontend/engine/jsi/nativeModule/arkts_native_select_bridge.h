@@ -61,6 +61,10 @@ public:
     static ArkUINativeModuleValue SetControlSize(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetControlSize(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetContentModifierBuilder(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetMenuBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetMenuBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetMenuBackgroundBlurStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetMenuBackgroundBlurStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
 private:
     static Local<panda::ObjectRef> ConstructSelect(EcmaVM* vm, FrameNode* frameNode, MenuItemConfiguration& config);
 };

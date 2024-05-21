@@ -99,6 +99,7 @@ public:
     static ArkUINativeModuleValue CreateNodeContent(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue AddFrameNodeToNodeContent(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue RemoveFrameNodeFromNodeContent(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue GetFirstUINode(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 
 } // namespace OHOS::Ace::NG

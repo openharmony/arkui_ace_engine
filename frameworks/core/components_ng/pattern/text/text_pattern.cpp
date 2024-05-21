@@ -1196,6 +1196,136 @@ void TextPattern::HandleTouchEvent(const TouchEventInfo& info)
     return;
 }
 
+void TextPattern::InitKeyEvent()
+{
+    CHECK_NULL_VOID(!keyEventInitialized_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+
+    auto keyTask = [weak = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        return pattern->HandleKeyEvent(event);
+    };
+    focusHub->SetOnKeyEventInternal(std::move(keyTask));
+    keyEventInitialized_ = true;
+}
+
+bool TextPattern::HandleKeyEvent(const KeyEvent& keyEvent)
+{
+    if (keyEvent.action != KeyAction::DOWN) {
+        return false;
+    }
+
+    if (keyEvent.IsCtrlWith(KeyCode::KEY_C) && copyOption_ != CopyOptions::None) {
+        HandleOnCopy();
+        return true;
+    }
+
+    if (keyEvent.IsShiftWith(keyEvent.code)) {
+        HandleOnSelect(keyEvent.code);
+        return true;
+    }
+    return false;
+}
+
+void TextPattern::HandleOnSelect(KeyCode code)
+{
+    auto start = textSelector_.GetStart();
+    auto end = textSelector_.GetEnd();
+    switch (code) {
+        case KeyCode::KEY_DPAD_LEFT: {
+            HandleSelection(start, end - 1);
+            break;
+        }
+        case KeyCode::KEY_DPAD_RIGHT: {
+            HandleSelection(start, end + 1);
+            break;
+        }
+        case KeyCode::KEY_DPAD_UP: {
+            HandleSelectionUp(start, end);
+            break;
+        }
+        case KeyCode::KEY_DPAD_DOWN: {
+            HandleSelectionDown(start, end);
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+void TextPattern::HandleSelectionUp(int32_t start, int32_t end)
+{
+    auto line = pManager_->GetLineCount();
+    if (line == 1) {
+        HandleSelection(start, 0);
+        return;
+    }
+    CaretMetricsF secondHandleMetrics;
+    CalcCaretMetricsByPosition(0, secondHandleMetrics, TextAffinity::UPSTREAM);
+    auto firstIndexOffsetY = secondHandleMetrics.offset.GetY();
+    CalcCaretMetricsByPosition(textSelector_.destinationOffset, secondHandleMetrics, TextAffinity::UPSTREAM);
+    auto secondOffsetX = secondHandleMetrics.offset.GetX();
+    auto secondOffsetY = secondHandleMetrics.offset.GetY();
+    float height = GetTextHeight();
+    if (secondOffsetY - height < firstIndexOffsetY) {
+        end = 0;
+    } else {
+        Offset offset = { secondOffsetX, secondOffsetY - height * 0.5 };
+        end = GetHandleIndex(offset);
+    }
+    HandleSelection(start, end);
+}
+
+void TextPattern::HandleSelectionDown(int32_t start, int32_t end)
+{
+    auto line = pManager_->GetLineCount();
+    if (line == 1) {
+        HandleSelection(start, GetWideText().length());
+        return;
+    }
+    CaretMetricsF secondHandleMetrics;
+    CalcCaretMetricsByPosition(
+        static_cast<int32_t>(GetWideText().length()), secondHandleMetrics, TextAffinity::UPSTREAM);
+    auto lastIndexOffsetY = secondHandleMetrics.offset.GetY();
+    CalcCaretMetricsByPosition(textSelector_.destinationOffset, secondHandleMetrics, TextAffinity::UPSTREAM);
+    auto secondOffsetX = secondHandleMetrics.offset.GetX();
+    auto secondOffsetY = secondHandleMetrics.offset.GetY();
+    float height = GetTextHeight();
+    if (secondOffsetY + height > lastIndexOffsetY) {
+        end = GetWideText().length();
+    } else {
+        Offset offset = { secondOffsetX, secondOffsetY + height + height * 0.5 };
+        end = GetHandleIndex(offset);
+    }
+    HandleSelection(start, end);
+}
+
+void TextPattern::HandleSelection(int32_t start, int32_t end)
+{
+    if (start < 0 || start > static_cast<int32_t>(GetWideText().length()) ||
+        end < 0 || end > static_cast<int32_t>(GetWideText().length())) {
+        return;
+    }
+    HandleSelectionChange(start, end);
+    CalculateHandleOffsetAndShowOverlay();
+    CloseSelectOverlay(true);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+float TextPattern::GetTextHeight()
+{
+    if (pManager_ && !NearZero(pManager_->GetHeight()) && pManager_->GetLineCount() > 0) {
+        return pManager_->GetHeight() / pManager_->GetLineCount();
+    }
+    return 0.0;
+}
+
 bool TextPattern::IsDraggable(const Offset& offset)
 {
     auto host = GetHost();
@@ -1904,6 +2034,7 @@ void TextPattern::InitCopyOption()
         if (host->IsDraggable()) {
             InitDragEvent();
         }
+        InitKeyEvent();
         InitMouseEvent();
         InitTouchEvent();
         SetAccessibilityAction();

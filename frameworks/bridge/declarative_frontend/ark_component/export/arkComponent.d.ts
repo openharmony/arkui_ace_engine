@@ -1963,7 +1963,27 @@ declare class ArkSymbolGlyphComponent extends ArkComponent implements SymbolGlyp
     effectStrategy(value: SymbolEffectStrategy): SymbolGlyphAttribute;
 }
 
+declare class ArkSymbolSpanComponent extends ArkComponent implements SymbolSpanAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    fontColor(value: ResourceColor[]): SymbolSpanAttribute;
+    fontSize(value: number | string | Resource): SymbolSpanAttribute;
+    fontWeight(value: number | FontWeight | string): SymbolSpanAttribute;
+    renderingStrategy(value: SymbolRenderingStrategy): SymbolSpanAttribute;
+    effectStrategy(value: SymbolEffectStrategy): SymbolSpanAttribute;
+}
+
 declare class ArkParticleComponent extends ArkComponent implements ParticleAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
     emitter(fields: Array<EmitterProperty>): ParticleAttribute;
+}
+
+declare class ArkComponent3DComponent extends ArkComponent implements Component3DAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    environment(uri: Resource): Component3DAttribute;
+    customRender(uri: Resource, selfRenderUpdate: boolean): Component3DAttribute;
+    shader(uri: Resource): Component3DAttribute;
+    shaderImageTexture(uri: Resource): Component3DAttribute;
+    shaderInputBuffer(buffer: Array<number>): Component3DAttribute;
+    renderWidth(value: Dimension): Component3DAttribute;
+    renderHeight(value: Dimension): Component3DAttribute;
 }

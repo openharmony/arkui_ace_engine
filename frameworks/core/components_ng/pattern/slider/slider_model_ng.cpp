@@ -752,4 +752,27 @@ Dimension SliderModelNG::GetThickness(FrameNode* frameNode)
         SliderLayoutProperty, Thickness, trackThickness, frameNode, defaultTrackThickness);
     return trackThickness;
 }
+
+void SliderModelNG::SetSelectedBorderRadius(FrameNode* frameNode, const Dimension& value)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, SelectedBorderRadius, value, frameNode);
+}
+
+void SliderModelNG::ResetSelectedBorderRadius(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+        SliderPaintProperty, SelectedBorderRadius, PROPERTY_UPDATE_RENDER, frameNode);
+}
+
+void SliderModelNG::ResetSliderInteractionMode(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+        SliderPaintProperty, SliderInteractionMode, PROPERTY_UPDATE_RENDER, frameNode);
+}
+
+void SliderModelNG::ResetMinResponsiveDistance(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+        SliderPaintProperty, MinResponsiveDistance, PROPERTY_UPDATE_RENDER, frameNode);
+}
 } // namespace OHOS::Ace::NG

@@ -58,6 +58,9 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
     if (!IsDataValid(info_)) {
         return;
     }
+    if (info_.childrenCount_ == 0) {
+        return;
+    }
 
     mainSize_ = GetMainAxisSize(idealSize, axis_);
 
@@ -82,6 +85,9 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
 void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
 {
     if (!IsDataValid(info_)) {
+        return;
+    }
+    if (info_.childrenCount_ == 0) {
         return;
     }
 
@@ -145,6 +151,9 @@ float PrepareJump(WaterFlowLayoutInfo& info)
 void WaterFlowSegmentedLayout::Init(const SizeF& frameSize)
 {
     info_.childrenCount_ = wrapper_->GetTotalChildCount();
+    if (info_.childrenCount_ == 0) {
+        return;
+    }
     sections_ = wrapper_->GetHostNode()->GetPattern<WaterFlowPattern>()->GetSections();
     if (sections_) {
         const auto& sections = sections_->GetSectionInfo();

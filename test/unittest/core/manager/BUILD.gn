@@ -16,7 +16,10 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("drag_drop_manager_test_ng") {
   type = "new"
   module_output = "manager"
-  sources = [ "drag_drop_manager_test_ng.cpp" ]
+  sources = [
+    "drag_drop_manager_test_ng.cpp",
+    "drag_drop_manager_test_ng_new.cpp",
+  ]
 }
 
 ace_unittest("drag_drop_proxy_test_ng") {

@@ -120,6 +120,8 @@ declare class ArkComponent {
   constructor(nativePtr: NodePtr, classType?: ModifierType);
   setNodePtr(noed: NodePtr);
   initialize(...args: Object[]);
+  allowChildCount?(): number;
+  allowChildTypes?(): string[];
 }
 declare class ArkTextInputComponent extends ArkComponent {}
 

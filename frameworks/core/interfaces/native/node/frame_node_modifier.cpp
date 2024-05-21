@@ -365,6 +365,14 @@ ArkUINodeHandle GetLast(ArkUINodeHandle node)
     return reinterpret_cast<ArkUINodeHandle>(child);
 }
 
+ArkUINodeHandle GetFirstUINode(ArkUINodeHandle node)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_RETURN(currentNode, nullptr);
+    auto child = currentNode->GetFirstChild();
+    return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(child));
+}
+
 namespace NodeModifier {
 const ArkUIFrameNodeModifier* GetFrameNodeModifier()
 {
@@ -374,7 +382,7 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         GetPositionToParent, GetPositionToScreen, GetPositionToWindow, GetPositionToParentWithTransform,
         GetPositionToScreenWithTransform, GetPositionToWindowWithTransform, GetMeasuredSize, GetLayoutPosition,
         GetInspectorId, GetNodeType, IsVisible, IsAttached, GetInspectorInfo, GetFrameNodeById, GetFrameNodeByUniqueId,
-        GetFrameNodeByKey, PropertyUpdate, GetLast };
+        GetFrameNodeByKey, PropertyUpdate, GetLast, GetFirstUINode };
     return &modifier;
 }
 } // namespace NodeModifier
