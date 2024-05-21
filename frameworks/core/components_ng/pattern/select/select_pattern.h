@@ -264,6 +264,7 @@ private:
     void InitTextProps(const RefPtr<TextLayoutProperty>& textProps, const RefPtr<SelectTheme>& theme);
     void InitSpinner(
         const RefPtr<FrameNode>& spinner, const RefPtr<IconTheme>& iconTheme, const RefPtr<SelectTheme>& selectTheme);
+    void InitSpinner(const RefPtr<FrameNode>& spinner, const RefPtr<SelectTheme>& selectTheme);
     void ResetParams();
     void UpdateOptionsWidth(float selectWidth);
 
