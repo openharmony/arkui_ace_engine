@@ -840,7 +840,6 @@ public:
 
     void SetGeometryTransitionInRecursive(bool isGeometryTransitionIn) override
     {
-        SetSkipSyncGeometryNode();
         UINode::SetGeometryTransitionInRecursive(isGeometryTransitionIn);
     }
 
