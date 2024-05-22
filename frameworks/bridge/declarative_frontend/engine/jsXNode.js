@@ -1169,9 +1169,11 @@ const __creatorMap__ = new Map([
             });
         }],
     ["GridRow", (context) => {
-            return new TypedFrameNode(context, "GridRow", (node, type) => {
+            let node = new TypedFrameNode(context, "GridRow", (node, type) => {
                 return new ArkGridRowComponent(node, type);
             });
+            node.initialize();
+            return node;
         }],
     ["TextInput", (context) => {
             return new TypedFrameNode(context, "TextInput", (node, type) => {
@@ -1179,9 +1181,11 @@ const __creatorMap__ = new Map([
             });
         }],
     ["GridCol", (context) => {
-            return new TypedFrameNode(context, "GridCol", (node, type) => {
+            let node = new TypedFrameNode(context, "GridCol", (node, type) => {
                 return new ArkGridColComponent(node, type);
             });
+            node.initialize();
+            return node;
         }],
     ["Blank", (context) => {
             return new TypedFrameNode(context, "Blank", (node, type) => {
