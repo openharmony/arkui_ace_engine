@@ -1928,8 +1928,6 @@ class NavPathInfo {
 class NavPathStack {
   constructor() {
     this.pathArray = [];
-    // indicate class has changed.
-    this.changeFlag = 0;
     // replace value 0: don't do anything;
     // 1: replace value and do replace animation;
     // 2: don't replace value but do replace animation
@@ -1991,7 +1989,6 @@ class NavPathStack {
   pushName(name, param) {
     this.pathArray.push(new NavPathInfo(name, param));
     this.findInPopArray(name);
-    this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     this.nativeStack?.onStateChanged();
   }
@@ -2005,7 +2002,6 @@ class NavPathStack {
       this.pathArray.push(new NavPathInfo(name, param, onPop));
     }
     this.findInPopArray(name);
-    this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (typeof onPop === 'boolean') {
       this.animated = onPop;
@@ -2025,7 +2021,6 @@ class NavPathStack {
     }
     info.checkNavDestinationFlag = true;
     this.pathArray.push(info);
-    this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (typeof onPop === 'boolean') {
       this.animated = onPop;
@@ -2050,7 +2045,6 @@ class NavPathStack {
     this.pathArray.push(info);
     let name = this.pathArray[this.pathArray.length - 1].name;
     this.findInPopArray(name);
-    this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (animated === undefined) {
       this.animated = true;
@@ -2062,7 +2056,6 @@ class NavPathStack {
   pushDestination(info, animated) {
     info.checkNavDestinationFlag = true;
     this.pathArray.push(info);
-    this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (animated === undefined) {
       this.animated = true;
@@ -2088,7 +2081,6 @@ class NavPathStack {
     this.pathArray.push(info);
     this.pathArray[this.pathArray.length - 1].index = -1;
     this.isReplace = 1;
-    this.changeFlag = this.changeFlag + 1;
     if (animated === undefined) {
       this.animated = true;
     } else {
@@ -2103,7 +2095,6 @@ class NavPathStack {
     this.isReplace = 1;
     this.pathArray.push(new NavPathInfo(name, param));
     this.pathArray[this.pathArray.length - 1].index = -1;
-    this.changeFlag = this.changeFlag + 1;
     if (animated === undefined) {
       this.animated = true;
     } else {
@@ -2124,7 +2115,6 @@ class NavPathStack {
     let currentPathInfo = this.pathArray[this.pathArray.length - 1];
     let pathInfo = this.pathArray.pop();
     this.popArray.push(pathInfo);
-    this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (result !== undefined && typeof result !== 'boolean' && currentPathInfo.onPop !== undefined) {
       let popInfo = {
@@ -2153,7 +2143,6 @@ class NavPathStack {
     }
     let currentPathInfo = this.pathArray[this.pathArray.length - 1];
     this.pathArray.splice(index + 1);
-    this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (result !== undefined && typeof result !== 'boolean' && currentPathInfo.onPop !== undefined) {
       let popInfo = {
@@ -2178,7 +2167,6 @@ class NavPathStack {
     }
     let currentPathInfo = this.pathArray[this.pathArray.length - 1];
     this.pathArray.splice(index + 1);
-    this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (result !== undefined && typeof result !== 'boolean' && currentPathInfo.onPop !== undefined) {
       let popInfo = {
@@ -2203,7 +2191,6 @@ class NavPathStack {
     }
     let info = this.pathArray.splice(index, 1);
     this.pathArray.push(info[0]);
-    this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (animated === undefined) {
       this.animated = true;
@@ -2219,7 +2206,6 @@ class NavPathStack {
     }
     let info = this.pathArray.splice(index, 1);
     this.pathArray.push(info[0]);
-    this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (animated === undefined) {
       this.animated = true;
@@ -2233,7 +2219,6 @@ class NavPathStack {
       return;
     }
     this.pathArray.splice(0);
-    this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (animated === undefined) {
       this.animated = true;
@@ -2252,7 +2237,6 @@ class NavPathStack {
     });
     let cnt = originLength - this.pathArray.length;
     if (cnt > 0) {
-      this.changeFlag = this.changeFlag + 1;
       this.isReplace = 0;
       this.nativeStack?.onStateChanged();
     }
@@ -2263,7 +2247,6 @@ class NavPathStack {
     this.pathArray = this.pathArray.filter(item => { return name !== item.name });
     let cnt = originLength - this.pathArray.length;
     if (cnt > 0) {
-      this.changeFlag = this.changeFlag + 1;
       this.isReplace = 0;
       this.nativeStack?.onStateChanged();
     }
@@ -2274,7 +2257,6 @@ class NavPathStack {
       return;
     }
     this.pathArray.splice(index, 1);
-    this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     this.nativeStack?.onStateChanged();
   }
