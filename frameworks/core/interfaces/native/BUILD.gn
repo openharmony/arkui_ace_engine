@@ -149,7 +149,10 @@ template("ace_core_interfaces_native_node") {
         config.plugin_components_support) {
       sources += [ "node/plugin_modifier.cpp" ]
     }
-    external_deps = [ "graphic_2d:librender_service_client" ]
+    external_deps = [
+      "graphic_2d:drawing_napi_impl",
+      "graphic_2d:librender_service_client",
+    ]
     if (defined(config.model_component_support) &&
         config.model_component_support) {
       external_deps += [ "graphic_3d:lib3dWidgetAdapter" ]
