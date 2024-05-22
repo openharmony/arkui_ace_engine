@@ -550,7 +550,7 @@ void SwiperPattern::InitSurfaceChangedCallback()
         auto callbackId = pipeline->RegisterSurfaceChangedCallback(
             [weak = WeakClaim(this)](int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight,
                 WindowSizeChangeReason type) {
-                if (type == WindowSizeChangeReason::UNDEFINED) {
+                if (type == WindowSizeChangeReason::UNDEFINED && newWidth == prevWidth && newHeight == prevHeight) {
                     return;
                 }
                 auto swiper = weak.Upgrade();
@@ -558,7 +558,7 @@ void SwiperPattern::InitSurfaceChangedCallback()
                     return;
                 }
 
-                if (type == WindowSizeChangeReason::ROTATION) {
+                if (type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::UNDEFINED) {
                     swiper->windowSizeChangeReason_ = type;
                     swiper->StopAutoPlay();
                 }
