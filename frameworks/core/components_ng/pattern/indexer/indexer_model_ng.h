@@ -60,6 +60,7 @@ public:
     void SetPopupBackgroundBlurStyle(const BlurStyleOption& indexerBlurStyle) override;
     void SetPopupTitleBackground(const std::optional<Color>& color) override;
     void SetAdaptiveWidth(bool state) override;
+    void SetEnableHapticFeedback(bool state) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetArrayValue(FrameNode* frameNode, const std::vector<std::string>& arrayValue);
@@ -104,6 +105,7 @@ public:
         std::function<void(const int32_t selected)>&& onPopupSelected);
     static void SetChangeEvent(FrameNode* frameNode, std::function<void(const int32_t selected)>&& changeEvent);
     static void SetCreatChangeEvent(FrameNode* frameNode, std::function<void(const int32_t selected)>&& changeEvent);
+    static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_INDEXER_INDEXER_MODEL_NG_H
