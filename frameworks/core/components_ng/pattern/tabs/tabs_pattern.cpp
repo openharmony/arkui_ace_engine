@@ -66,6 +66,8 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
 
     ChangeEvent changeEvent([weak = WeakClaim(this), tabBarNode, tabBarPattern, jsEvent = std::move(event)](
                                 int32_t index) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         if (tabBarPattern->IsMaskAnimationExecuted()) {
             return;
         }
@@ -78,28 +80,14 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
 
         /* js callback */
         if (jsEvent && tabsNode->IsOnMainTree()) {
-            if (Recorder::EventRecorder::Get().IsComponentRecordEnable() && weak.Upgrade()) {
-                auto inspectorId = tabsNode->GetInspectorId().value_or("");
-                auto pattern = weak.Upgrade();
-                auto tabBarText = pattern->GetTabBarTextByIndex(index);
-                Recorder::EventParamsBuilder builder;
-                builder.SetId(inspectorId)
-                    .SetType(tabsNode->GetTag())
-                    .SetIndex(index)
-                    .SetText(tabBarText)
-                    .SetDescription(tabsNode->GetAutoEventParamValue(""));
-                Recorder::EventRecorder::Get().OnChange(std::move(builder));
-                if (!inspectorId.empty()) {
-                    Recorder::NodeDataCache::Get().PutMultiple(tabsNode, inspectorId, tabBarText, index);
-                }
-            }
-
+            pattern->RecordChangeEvent(index);
             auto context = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(context);
-            context->AddAfterLayoutTask([index, jsEvent]() {
-                TabContentChangeEvent eventInfo(index);
-                jsEvent(&eventInfo);
-            }, true);
+            context->AddAfterLayoutTask(
+                [index, jsEvent]() {
+                    TabContentChangeEvent eventInfo(index);
+                    jsEvent(&eventInfo);
+                }, true);
         }
     });
 
@@ -110,6 +98,26 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
         auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->AddOnChangeEvent(onChangeEvent_);
+    }
+}
+
+void TabsPattern::RecordChangeEvent(int32_t index)
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+        auto inspectorId = tabsNode->GetInspectorId().value_or("");
+        auto tabBarText = GetTabBarTextByIndex(index);
+        Recorder::EventParamsBuilder builder;
+        builder.SetId(inspectorId)
+            .SetType(tabsNode->GetTag())
+            .SetIndex(index)
+            .SetText(tabBarText)
+            .SetDescription(tabsNode->GetAutoEventParamValue(""));
+        Recorder::EventRecorder::Get().OnChange(std::move(builder));
+        if (!inspectorId.empty()) {
+            Recorder::NodeDataCache::Get().PutMultiple(tabsNode, inspectorId, tabBarText, index);
+        }
     }
 }
 

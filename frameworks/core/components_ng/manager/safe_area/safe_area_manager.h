@@ -185,7 +185,8 @@ public:
     }
 
     bool IsSafeAreaValid() const;
-
+    // check if the page node needs to be avoid keyboard
+    bool CheckPageNeedAvoidKeyboard(const RefPtr<FrameNode>& frameNode);
 private:
     bool isAtomicService_ = false;
 

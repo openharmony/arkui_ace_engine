@@ -257,7 +257,7 @@ class FrameNode {
       return null;
     }
     if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-      var frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+      let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
       return frameNode === undefined ? null : frameNode;
     }
     return this.convertToFrameNode(result.nodePtr, result.nodeId);
@@ -270,7 +270,7 @@ class FrameNode {
       return null;
     }
     if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-      var frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+      let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
       return frameNode === undefined ? null : frameNode;
     }
     return this.convertToFrameNode(result.nodePtr, result.nodeId);
@@ -283,7 +283,7 @@ class FrameNode {
       return null;
     }
     if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-      var frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+      let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
       return frameNode === undefined ? null : frameNode;
     }
     return this.convertToFrameNode(result.nodePtr, result.nodeId);
@@ -296,7 +296,7 @@ class FrameNode {
       return null;
     }
     if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-      var frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+      let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
       return frameNode === undefined ? null : frameNode;
     }
     return this.convertToFrameNode(result.nodePtr, result.nodeId);
@@ -309,7 +309,7 @@ class FrameNode {
       return null;
     }
     if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-      var frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+      let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
       return frameNode === undefined ? null : frameNode;
     }
     return this.convertToFrameNode(result.nodePtr, result.nodeId);
@@ -477,7 +477,7 @@ class FrameNode {
     this._commonEvent.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
     return this._commonEvent;
   }
-  updateInstance(uiContext: UIContext) {
+  updateInstance(uiContext: UIContext): void {
     this.uiContext_ = uiContext;
     this.instanceId_ = uiContext.instanceId_;
   }

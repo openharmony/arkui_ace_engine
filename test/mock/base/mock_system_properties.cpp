@@ -96,6 +96,11 @@ bool SystemProperties::GetIsUseMemoryMonitor()
     return false;
 }
 
+bool SystemProperties::IsOpIncEnable()
+{
+    return true;
+}
+
 void SystemProperties::SetDeviceOrientation(int32_t orientation)
 {
     if (orientation == ORIENTATION_PORTRAIT && orientation_ != DeviceOrientation::PORTRAIT) {

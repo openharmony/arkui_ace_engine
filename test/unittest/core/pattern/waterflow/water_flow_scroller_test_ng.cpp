@@ -88,44 +88,44 @@ HWTEST_F(WaterFlowScrollerTestNg, UpdateCurrentOffset002, TestSize.Level1)
         model.SetEdgeEffect(EdgeEffect::SPRING, false);
         CreateItem(TOTAL_LINE_NUMBER * 2);
     });
-    EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 0);
-    EXPECT_EQ(pattern_->layoutInfo_.endIndex_, 10);
-    EXPECT_TRUE(pattern_->layoutInfo_.itemStart_);
-    EXPECT_FALSE(pattern_->layoutInfo_.itemEnd_);
-    EXPECT_FALSE(pattern_->layoutInfo_.offsetEnd_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 10);
+    EXPECT_TRUE(pattern_->layoutInfo_->itemStart_);
+    EXPECT_FALSE(pattern_->layoutInfo_->itemEnd_);
+    EXPECT_FALSE(pattern_->layoutInfo_->offsetEnd_);
 
     /**
      * @tc.steps: step2. Scroll down
      * @tc.expected: startIndex_ = 1 endIndex_ = 13.
      */
     UpdateCurrentOffset(-2 * ITEM_HEIGHT);
-    EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 1);
-    EXPECT_EQ(pattern_->layoutInfo_.endIndex_, 13);
-    EXPECT_FALSE(pattern_->layoutInfo_.itemStart_);
-    EXPECT_FALSE(pattern_->layoutInfo_.itemEnd_);
-    EXPECT_FALSE(pattern_->layoutInfo_.offsetEnd_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 1);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 13);
+    EXPECT_FALSE(pattern_->layoutInfo_->itemStart_);
+    EXPECT_FALSE(pattern_->layoutInfo_->itemEnd_);
+    EXPECT_FALSE(pattern_->layoutInfo_->offsetEnd_);
 
     /**
      * @tc.steps: step3. scroll down
      * @tc.expected: startIndex_ = 11 endIndex_ = 19.
      */
     UpdateCurrentOffset(-10000.f);
-    EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 11);
-    EXPECT_EQ(pattern_->layoutInfo_.endIndex_, 19);
-    EXPECT_FALSE(pattern_->layoutInfo_.itemStart_);
-    EXPECT_TRUE(pattern_->layoutInfo_.itemEnd_);
-    EXPECT_TRUE(pattern_->layoutInfo_.offsetEnd_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 11);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 19);
+    EXPECT_FALSE(pattern_->layoutInfo_->itemStart_);
+    EXPECT_TRUE(pattern_->layoutInfo_->itemEnd_);
+    EXPECT_TRUE(pattern_->layoutInfo_->offsetEnd_);
 
     /**
      * @tc.steps: step4. scroll up
      * @tc.expected: startIndex_ = 7 endIndex_ = 19.
      */
     UpdateCurrentOffset(2 * ITEM_HEIGHT);
-    EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 7);
-    EXPECT_EQ(pattern_->layoutInfo_.endIndex_, 19);
-    EXPECT_FALSE(pattern_->layoutInfo_.itemStart_);
-    EXPECT_TRUE(pattern_->layoutInfo_.itemEnd_);
-    EXPECT_FALSE(pattern_->layoutInfo_.offsetEnd_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 7);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 19);
+    EXPECT_FALSE(pattern_->layoutInfo_->itemStart_);
+    EXPECT_TRUE(pattern_->layoutInfo_->itemEnd_);
+    EXPECT_FALSE(pattern_->layoutInfo_->offsetEnd_);
 }
 
 /**
@@ -148,8 +148,8 @@ HWTEST_F(WaterFlowScrollerTestNg, UpdateCurrentOffset003, TestSize.Level1)
     pattern_->SetAnimateCanOverScroll(true);
     pattern_->UpdateCurrentOffset(10000, SCROLL_FROM_UPDATE);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->layoutInfo_.firstIndex_, 0);
-    EXPECT_EQ(pattern_->layoutInfo_.endIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->FirstIdx(), 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 0);
 
     /**
      * @tc.steps: step1. create waterFlow
@@ -159,8 +159,8 @@ HWTEST_F(WaterFlowScrollerTestNg, UpdateCurrentOffset003, TestSize.Level1)
     pattern_->SetAnimateCanOverScroll(true);
     pattern_->UpdateCurrentOffset(-99999, SCROLL_FROM_UPDATE);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->layoutInfo_.firstIndex_, 19);
-    EXPECT_EQ(pattern_->layoutInfo_.endIndex_, 19);
+    EXPECT_EQ(pattern_->layoutInfo_->FirstIdx(), 19);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 19);
 }
 
 /**
@@ -192,9 +192,9 @@ HWTEST_F(WaterFlowScrollerTestNg, PositionController001, TestSize.Level1)
      * @tc.steps: step2. Test JumpTo func.
      */
     controller->JumpTo(2, false, ScrollAlign::START, 0);
-    EXPECT_EQ(pattern_->layoutInfo_.jumpIndex_, 2);
+    EXPECT_EQ(pattern_->layoutInfo_->jumpIndex_, 2);
     controller->JumpTo(0, false, ScrollAlign::START, 0);
-    EXPECT_EQ(pattern_->layoutInfo_.jumpIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->jumpIndex_, 0);
 }
 
 /**
@@ -483,51 +483,51 @@ HWTEST_F(WaterFlowScrollerTestNg, ScrollToIndex002, TestSize.Level1)
 
     pattern_->ScrollToIndex(3, false, ScrollAlign::AUTO);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 0);
-    EXPECT_EQ(pattern_->layoutInfo_.storedOffset_, 0);
-    EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->storedOffset_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), 0);
 
     pattern_->ScrollToIndex(15, false, ScrollAlign::START);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 15);
-    EXPECT_EQ(pattern_->layoutInfo_.storedOffset_, 0);
-    EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, -1100);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 15);
+    EXPECT_EQ(pattern_->layoutInfo_->storedOffset_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -1100);
 
     pattern_->ScrollToIndex(LAST_ITEM);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 19);
-    EXPECT_EQ(pattern_->layoutInfo_.storedOffset_, -100);
-    EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, -1500);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 19);
+    EXPECT_EQ(pattern_->layoutInfo_->storedOffset_, -100);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -1500);
 
     pattern_->ScrollToIndex(0, false, ScrollAlign::START);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 0);
-    EXPECT_EQ(pattern_->layoutInfo_.storedOffset_, 0);
-    EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->storedOffset_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), 0);
 
     pattern_->ScrollToIndex(15, false, ScrollAlign::AUTO);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 7);
-    EXPECT_EQ(pattern_->layoutInfo_.storedOffset_, 0);
-    EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, -500);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 7);
+    EXPECT_EQ(pattern_->layoutInfo_->storedOffset_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -500);
 
     pattern_->ScrollToIndex(7, false, ScrollAlign::CENTER);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 3);
-    EXPECT_EQ(pattern_->layoutInfo_.storedOffset_, 0);
-    EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, -200);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 3);
+    EXPECT_EQ(pattern_->layoutInfo_->storedOffset_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -200);
 
     pattern_->ScrollToIndex(14, false, ScrollAlign::END);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 3);
-    EXPECT_EQ(pattern_->layoutInfo_.storedOffset_, -100);
-    EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, -300);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 3);
+    EXPECT_EQ(pattern_->layoutInfo_->storedOffset_, -100);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -300);
 
     pattern_->ScrollToIndex(2, false, ScrollAlign::AUTO);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 1);
-    EXPECT_EQ(pattern_->layoutInfo_.storedOffset_, -100);
-    EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, -100);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 1);
+    EXPECT_EQ(pattern_->layoutInfo_->storedOffset_, -100);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -100);
 }
 
 /**
@@ -564,7 +564,7 @@ HWTEST_F(WaterFlowScrollerTestNg, ScrollToIndex003, TestSize.Level1)
 
     pattern_->ScrollPage(false);
     FlushLayoutTask(frameNode_);
-    EXPECT_LT(pattern_->layoutInfo_.currentOffset_, 0.f);
+    EXPECT_LT(pattern_->layoutInfo_->Offset(), 0.f);
 
     pattern_->ScrollToIndex(3, true, ScrollAlign::AUTO);
     FlushLayoutTask(frameNode_);

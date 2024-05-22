@@ -2487,6 +2487,12 @@ class WaterFlowSections {
   }
 }
 
+var WaterFlowLayoutMode;
+(function (WaterFlowLayoutMode) {
+  WaterFlowLayoutMode[WaterFlowLayoutMode["ALWAYS_TOP_DOWN"] = 0] = "ALWAYS_TOP_DOWN";
+  WaterFlowLayoutMode[WaterFlowLayoutMode["SLIDING_WINDOW"] = 1] = "SLIDING_WINDOW";
+})(WaterFlowLayoutMode || (WaterFlowLayoutMode = {}));
+
 class ChildrenMainSizeParamError extends Error {
   constructor(message, code) {
     super(message);

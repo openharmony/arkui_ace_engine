@@ -1501,6 +1501,82 @@ void GetTextAreaMargin(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 
     values[NUM_3] = margin.left->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
     length = NUM_4;
 }
+
+void SetTextAreaOnWillInsert(ArkUINodeHandle node, ArkUI_Int64 callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onWillInsert = reinterpret_cast<std::function<bool(const InsertValueInfo&)>*>(callback);
+        TextFieldModelNG::SetOnWillInsertValueEvent(frameNode, std::move(*onWillInsert));
+    } else {
+        TextFieldModelNG::SetOnWillInsertValueEvent(frameNode, nullptr);
+    }
+}
+
+void ResetTextAreaOnWillInsert(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnWillInsertValueEvent(frameNode, nullptr);
+}
+
+void SetTextAreaOnDidInsert(ArkUINodeHandle node, ArkUI_Int64 callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onDidInsert = reinterpret_cast<std::function<void(const InsertValueInfo&)>*>(callback);
+        TextFieldModelNG::SetOnDidInsertValueEvent(frameNode, std::move(*onDidInsert));
+    } else {
+        TextFieldModelNG::SetOnDidInsertValueEvent(frameNode, nullptr);
+    }
+}
+
+void ResetTextAreaOnDidInsert(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnDidInsertValueEvent(frameNode, nullptr);
+}
+
+void SetTextAreaOnWillDelete(ArkUINodeHandle node, ArkUI_Int64 callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onWillDelete = reinterpret_cast<std::function<bool(const DeleteValueInfo&)>*>(callback);
+        TextFieldModelNG::SetOnWillDeleteEvent(frameNode, std::move(*onWillDelete));
+    } else {
+        TextFieldModelNG::SetOnWillDeleteEvent(frameNode, nullptr);
+    }
+}
+
+void ResetTextAreaOnWillDelete(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnWillDeleteEvent(frameNode, nullptr);
+}
+
+void SetTextAreaOnDidDelete(ArkUINodeHandle node, ArkUI_Int64 callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onDidDelete = reinterpret_cast<std::function<void(const DeleteValueInfo&)>*>(callback);
+        TextFieldModelNG::SetOnDidDeleteEvent(frameNode, std::move(*onDidDelete));
+    } else {
+        TextFieldModelNG::SetOnDidDeleteEvent(frameNode, nullptr);
+    }
+}
+
+void ResetTextAreaOnDidDelete(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnDidDeleteEvent(frameNode, nullptr);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1543,7 +1619,11 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         SetTextAreaBorder, ResetTextAreaBorder, SetTextAreaBorderWidth, ResetTextAreaBorderWidth,
         SetTextAreaBorderColor, ResetTextAreaBorderColor, SetTextAreaBorderStyle, ResetTextAreaBorderStyle,
         SetTextAreaBorderRadius, ResetTextAreaBorderRadius, SetTextAreaMargin, ResetTextAreaMargin, SetTextAreaCaret,
-        GetTextAreaMargin };
+        GetTextAreaMargin,
+        SetTextAreaOnWillInsert, ResetTextAreaOnWillInsert,
+        SetTextAreaOnDidInsert, ResetTextAreaOnDidInsert,
+        SetTextAreaOnWillDelete, ResetTextAreaOnWillDelete,
+        SetTextAreaOnDidDelete, ResetTextAreaOnDidDelete };
     return &modifier;
 }
 

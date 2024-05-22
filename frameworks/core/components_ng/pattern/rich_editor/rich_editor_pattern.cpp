@@ -40,6 +40,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/ime/text_input_client.h"
+#include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/base/inspector_filter.h"
@@ -715,6 +716,16 @@ void RichEditorPattern::AddSpanItem(const RefPtr<SpanItem>& item, int32_t offset
     spans_.insert(it, item);
     UpdateSpanPosition();
 }
+
+void RichEditorPattern::OnAttachToFrameNode()
+{
+    TextPattern::OnAttachToFrameNode();
+    richEditorInstanceId_ = Container::CurrentIdSafely();
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    StylusDetectorMgr::GetInstance()->AddTextFieldFrameNode(frameNode);
+}
+
 
 int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options)
 {

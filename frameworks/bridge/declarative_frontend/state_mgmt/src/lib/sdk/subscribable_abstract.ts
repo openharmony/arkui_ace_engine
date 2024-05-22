@@ -88,9 +88,9 @@ abstract class SubscribableAbstract {
    * @since 10
    */
   protected notifyPropertyHasChanged(propName: string, newValue: any) {
-    stateMgmtConsole.debug(`SubscribableAbstract: notifyPropertyHasChanged '${propName}'.`)
+    stateMgmtConsole.debug(`SubscribableAbstract: notifyPropertyHasChanged '${propName}'.`);
     this.owningProperties_.forEach((subscribedId) => {
-      var owningProperty: IPropertySubscriber = SubscriberManager.Find(subscribedId)
+      let owningProperty: IPropertySubscriber = SubscriberManager.Find(subscribedId);
       if (!owningProperty) {
         stateMgmtConsole.error(`SubscribableAbstract: notifyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
         return;
@@ -133,7 +133,7 @@ abstract class SubscribableAbstract {
    */
 
   public addOwningProperty(subscriber: IPropertySubscriber): void {
-    stateMgmtConsole.debug(`SubscribableAbstract: addOwningProperty: subscriber '${subscriber.id__()}'.`)
+    stateMgmtConsole.debug(`SubscribableAbstract: addOwningProperty: subscriber '${subscriber.id__()}'.`);
     this.owningProperties_.add(subscriber.id__());
   }
 
@@ -157,7 +157,7 @@ abstract class SubscribableAbstract {
    * framework internal function, not to be used by applications.
    */
   public removeOwningPropertyById(subscriberId: number): void {
-    stateMgmtConsole.debug(`SubscribableAbstract: removeOwningProperty '${subscriberId}'.`)
+    stateMgmtConsole.debug(`SubscribableAbstract: removeOwningProperty '${subscriberId}'.`);
     this.owningProperties_.delete(subscriberId);
   }
 

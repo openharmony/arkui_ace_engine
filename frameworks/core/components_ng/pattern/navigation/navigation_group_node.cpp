@@ -357,6 +357,11 @@ bool NavigationGroupNode::CheckCanHandleBack()
         return false;
     }
     auto navDestinationPattern = AceType::DynamicCast<NavDestinationPattern>(navDestination->GetPattern());
+    if (navDestinationPattern->OverlayOnBackPressed()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navDestination's ovelay consume backPressed event: %{public}s",
+            navDestinationPattern->GetName().c_str());
+        return true;
+    }
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navDestination consume back button event: %{public}s",
         navDestinationPattern->GetName().c_str());
     GestureEvent gestureEvent;

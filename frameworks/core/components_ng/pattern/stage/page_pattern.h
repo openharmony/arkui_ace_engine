@@ -184,6 +184,11 @@ public:
         return overlayManager_;
     }
 
+    void DeleteOverlayManager()
+    {
+        overlayManager_.Reset();
+    }
+
     bool RemoveOverlay();
     void MarkDirtyOverlay();
 

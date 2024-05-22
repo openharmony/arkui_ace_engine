@@ -262,6 +262,10 @@ public:
     static void SetBorderStyle(FrameNode* frameNode, NG::BorderStyleProperty borderStyles);
     static void SetMargin(FrameNode* frameNode, NG::PaddingProperty& margin);
     static PaddingProperty GetMargin(FrameNode* frameNode);
+    static void SetOnWillInsertValueEvent(FrameNode* frameNode, std::function<bool(const InsertValueInfo&)>&& func);
+    static void SetOnDidInsertValueEvent(FrameNode* frameNode, std::function<void(const InsertValueInfo&)>&& func);
+    static void SetOnWillDeleteEvent(FrameNode* frameNode, std::function<bool(const DeleteValueInfo&)>&& func);
+    static void SetOnDidDeleteEvent(FrameNode* frameNode, std::function<void(const DeleteValueInfo&)>&& func);
 
 private:
     void AddDragFrameNodeToManager() const;

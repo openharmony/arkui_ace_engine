@@ -139,6 +139,7 @@ bool ScrollablePattern::OnScrollCallback(float offset, int32_t source)
         FireOnScrollStart();
         return true;
     }
+    SuggestOpIncGroup(true);
     return UpdateCurrentOffset(offset, source);
 }
 
@@ -1307,6 +1308,7 @@ void ScrollablePattern::HandleDragStart(const GestureEvent& info)
 {
     auto mouseOffsetX = static_cast<float>(info.GetRawGlobalLocation().GetX());
     auto mouseOffsetY = static_cast<float>(info.GetRawGlobalLocation().GetY());
+    SuggestOpIncGroup(true);
     if (!IsItemSelected(info)) {
         ClearMultiSelect();
         ClearInvisibleItemsSelectedStatus();
@@ -2066,6 +2068,7 @@ void ScrollablePattern::FireOnScrollStart()
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(hub);
+    SuggestOpIncGroup(true);
     if (scrollStop_ && !GetScrollAbort()) {
         OnScrollStop(hub->GetOnScrollStop());
     }
@@ -2104,6 +2107,38 @@ void ScrollablePattern::FireOnScroll(float finalOffset, OnScrollEvent& onScroll)
     if (scrollStop_ && !GetScrollAbort()) {
         if (scrollState != ScrollState::IDLE || !isTriggered) {
             onScroll(0.0_vp, ScrollState::IDLE);
+        }
+    }
+}
+
+void ScrollablePattern::SuggestOpIncGroup(bool flag)
+{
+    if (!SystemProperties::IsOpIncEnable()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (host->GetSuggestOpIncActivatedOnce()) {
+        return;
+    }
+    flag = flag && isVertical();
+    if (flag) {
+        ACE_SCOPED_TRACE("SuggestOpIncGroup %s", host->GetHostTag().c_str());
+        auto parent = host->GetAncestorNodeOfFrame();
+        CHECK_NULL_VOID(parent);
+        parent->SetSuggestOpIncActivatedOnce();
+        host->SetSuggestOpIncActivatedOnce();
+        // get 1st layer
+        for (auto child : host->GetAllChildren()) {
+            if (!child) {
+                continue;
+            }
+            auto frameNode = AceType::DynamicCast<FrameNode>(child);
+            if (!frameNode || frameNode->GetSuggestOpIncActivatedOnce()) {
+                continue;
+            }
+            std::string path(host->GetHostTag());
+            frameNode->FindSuggestOpIncNode(path, host->GetGeometryNode()->GetFrameSize(), 1);
         }
     }
 }
