@@ -1469,9 +1469,6 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     CHECK_NULL_RETURN(container, UIContentErrorCode::NULL_POINTER);
     container->SetWindowName(window_->GetWindowName());
     container->SetWindowId(window_->GetWindowId());
-    if (focusWindowId != 0) {
-        container->SetFocusWindowId(focusWindowId);
-    }
     auto token = context->GetToken();
     container->SetToken(token);
     container->SetParentToken(parentToken_);
@@ -1582,6 +1579,10 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     errorCode = Platform::AceContainer::SetViewNew(aceView, density, 0, 0, window_);
     CHECK_ERROR_CODE_RETURN(errorCode);
 #endif
+    // set focus window id for ui extension after pipeline context created.
+    if (focusWindowId != 0) {
+        container->SetFocusWindowId(focusWindowId);
+    }
 
     // after frontend initialize
     if (window_->IsFocused()) {

@@ -262,11 +262,6 @@ public:
         return downloadByNetworkEnabled_;
     }
 
-    static bool GetTraceEnabled()
-    {
-        return traceEnabled_;
-    }
-
     static bool GetSvgTraceEnabled()
     {
         return svgTraceEnable_;
@@ -508,7 +503,6 @@ public:
 
 private:
     static bool opincEnabled_;
-    static bool traceEnabled_;
     static bool developerModeOn_;
     static bool svgTraceEnable_;
     static bool layoutTraceEnable_;
