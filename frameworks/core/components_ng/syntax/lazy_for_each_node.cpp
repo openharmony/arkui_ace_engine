@@ -45,6 +45,7 @@ RefPtr<LazyForEachNode> LazyForEachNode::GetOrCreateLazyForEachNode(
     }
     node = MakeRefPtr<LazyForEachNode>(nodeId, forEachBuilder);
     ElementRegister::GetInstance()->AddUINode(node);
+    node->RegisterBuilderListener();
     return node;
 }
 
