@@ -13,10 +13,16 @@
  * limitations under the License.
  */
 
-#include "adapter/ohos/entrance/vibrator/vibrator_impl.h"
-
+#ifndef FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_VIBRATOR_VIBRATOR_IMPL_H
+#define FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_VIBRATOR_VIBRATOR_IMPL_H
 namespace OHOS::Ace::NG {
-void VibratorImpl::StartVibraFeedback()
-{
-}
+class VibratorImpl {
+public:
+    VibratorImpl() = delete;
+    ~VibratorImpl() = delete;
+
+    static void StartVibraFeedback();
+};
 } // namespace OHOS::Ace::NG
+#endif // FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_VIBRATOR_VIBRATOR_IMPL_H
+
