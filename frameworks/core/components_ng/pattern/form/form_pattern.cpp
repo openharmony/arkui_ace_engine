@@ -219,14 +219,10 @@ void FormPattern::UpdateBackgroundColorWhenUnTrustForm()
         return;
     }
 
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto formTheme = pipelineContext->GetTheme<FormTheme>();
-    CHECK_NULL_VOID(formTheme);
-    Color unTrustBackgroundColor = formTheme->GetUnTrustBackgroundColor();
-    host->GetRenderContext()->UpdateBackgroundColor(unTrustBackgroundColor);
+    if (colorMode != SystemProperties::GetColorMode()) {
+        colorMode = SystemProperties::GetColorMode();
+        HandleUnTrustForm();
+    }
 }
 
 void FormPattern::HandleSnapshot(uint32_t delayTime)

@@ -175,6 +175,7 @@ private:
     TimeStamp touchDownTime_;
     bool shouldResponseClick_ = false;
     Offset lastTouchLocation_;
+    ColorMode colorMode = ColorMode::LIGHT;
 
     bool isFormObscured_ = false;
     bool isJsCard_ = true;
