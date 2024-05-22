@@ -277,7 +277,6 @@ export class ToolBar extends ViewPU {
       Image.fillColor(ObservedObject.GetRawObject(this.iconPrimaryColor));
       Image.margin({ top: 8, bottom: 2 });
       Image.objectFit(ImageFit.Contain);
-      Image.bindMenu(ObservedObject.GetRawObject(this.menuContent), { offset: { x: 5, y: -10 } });
     }, Image);
     this.observeComponentCreation2((l2, m2) => {
       Text.create(this.moreText);
