@@ -79,6 +79,10 @@ protected:
     std::list<RefPtr<NG::SpanItem>>::iterator SplitSpansAndForward(std::list<RefPtr<NG::SpanItem>>::iterator& it);
     RefPtr<NG::ImageSpanItem> MakeImageSpanItem(const RefPtr<ImageSpan>& imageSpan);
     RefPtr<NG::CustomSpanItem> MakeCustomSpanItem(const RefPtr<CustomSpan>& customSpan);
+    void GetSpecialTypesVector(std::list<int32_t>& indexList, int32_t start, int32_t length);
+    void GetNormalTypesVector(std::list<std::pair<int32_t, int32_t>>& indexList, int32_t start, int32_t length);
+    bool ContainSpecialNode(int32_t start, int32_t length);
+    bool IsSpecialNode(RefPtr<SpanBase> span);
 
     std::string text_;
     std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>> spansMap_;
