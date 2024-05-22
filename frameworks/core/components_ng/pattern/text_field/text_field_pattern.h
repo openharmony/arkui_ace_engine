@@ -396,11 +396,6 @@ public:
         movingCaretOffset_ = offset;
     }
 
-    float GetCaretOffsetX() const
-    {
-        return selectController_->GetCaretRect().GetX();
-    }
-
     CaretUpdateType GetCaretUpdateType() const
     {
         return caretUpdateType_;
