@@ -86,10 +86,21 @@ public:
         isDefaultHasBeFocused_ = isDefaultHasBeFocused;
     }
 
+    void SetViewRootScope(const RefPtr<FocusHub>& viewRootScope)
+    {
+        if (!viewRootScope) {
+            rootScopeSpecified_ = nullptr;
+            return;
+        }
+        rootScopeSpecified_ = AceType::WeakClaim(AceType::RawPtr(viewRootScope));
+    }
+
 private:
     bool isDefaultHasBeFocused_ = false;
     bool isViewRootScopeFocused_ = true;
     bool isViewHasFocused_ = false;
+
+    WeakPtr<FocusHub> rootScopeSpecified_;
 
     ACE_DISALLOW_COPY_AND_MOVE(FocusView);
 };
