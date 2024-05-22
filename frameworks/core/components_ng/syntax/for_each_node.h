@@ -53,12 +53,6 @@ public:
 
     void FlushUpdateAndMarkDirty() override;
 
-    // RepeatNode only
-    void FinishRepeatRender(std::list<int32_t>& removedElmtId);
-
-    // RepeatNode only
-    void MoveChild(uint32_t fromIndex);
-
     const std::list<std::string>& GetTempIds() const
     {
         return tempIds_;

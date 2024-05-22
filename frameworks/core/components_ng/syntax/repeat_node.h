@@ -49,12 +49,11 @@ public:
 
     void CreateTempItems();
 
-    void CompareAndUpdateChildren();
+    // RepeatNode only
+    void FinishRepeatRender(std::list<int32_t>& removedElmtId);
 
     void FlushUpdateAndMarkDirty() override;
 
-    // RepeatNode only
-    void FinishRepeatRender(std::list<int32_t>& removedElmtId);
 
     // RepeatNode only
     void MoveChild(uint32_t fromIndex);

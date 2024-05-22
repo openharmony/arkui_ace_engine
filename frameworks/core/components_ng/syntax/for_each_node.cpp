@@ -152,56 +152,6 @@ void ForEachNode::FlushUpdateAndMarkDirty()
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT | PROPERTY_UPDATE_BY_CHILD_REQUEST);
 }
 
-// RepeatNode only
-void ForEachNode::FinishRepeatRender(std::list<int32_t>& removedElmtId)
-{
-    ACE_SCOPED_TRACE("ForEachNode::FinishRepeatRender");
-
-    // Required to build unordered_set of RefPtr<UINodes>
-    struct Hash {
-        size_t operator()(const RefPtr<UINode>& node) const
-        {
-            return node->GetId();
-        }
-    };
-
-    // includes "newly-added" and "reused" children
-    const auto& children = GetChildren();
-
-    std::unordered_set<RefPtr<UINode>, Hash>
-        newNodeSet(children.begin(), children.end());
-
-    // remove "unused" children
-    for (const auto& oldNode: tempChildrenOfRepeat_) {
-        if (newNodeSet.find(oldNode) == newNodeSet.end()) {
-            // Adding silently, so that upon removal node is a part the tree.
-            AddChild(oldNode, DEFAULT_NODE_SLOT, true);
-            // Remove and trigger all Detach callback.
-            RemoveChild(oldNode, true);
-            // Collect IDs of removed nodes starting from 'oldNode' (incl.)
-            CollectRemovedChildren({ oldNode }, removedElmtId, false);
-        }
-    }
-
-    tempChildren_.clear();
-    tempChildrenOfRepeat_.clear();
-
-    if (auto frameNode = GetParentFrameNode()) {
-        frameNode->ChildrenUpdatedFrom(0);
-    }
-
-    LOGE("ForEachNode::FinishRepeatRender END");
-}
-
-// RepeatNode only
-void ForEachNode::MoveChild(uint32_t fromIndex)
-{
-    // copy child from tempChildrenOfRepeat_[fromIndex] and append to children_
-    if (fromIndex < tempChildrenOfRepeat_.size()) {
-        auto& node = tempChildrenOfRepeat_.at(fromIndex);
-        AddChild(node, DEFAULT_NODE_SLOT, true);
-    }
-}
 
 void ForEachNode::SetOnMove(std::function<void(int32_t, int32_t)>&& onMove)
 {
