@@ -31,7 +31,8 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
-    void MeasureSwiper(LayoutWrapper* layoutWrapper, LayoutConstraintF swiperLayoutConstraint);
+    void MeasureSwiper(LayoutWrapper* layoutWrapper, LayoutConstraintF swiperLayoutConstraint, float rightButtonHeight,
+        float leftButtonHeight);
     void MeasureLeftButton(LayoutWrapper* layoutWrapper, LayoutConstraintF buttonLayoutConstraint);
     void MeasureRightButton(LayoutWrapper* layoutWrapper, LayoutConstraintF buttonLayoutConstraint);
     void MeasureText(
@@ -40,6 +41,9 @@ private:
     void LayoutSwiper(LayoutWrapper* layoutWrapper);
     void LayoutLeftButton(LayoutWrapper* layoutWrapper);
     void LayoutRightButton(LayoutWrapper* layoutWrapper);
+    float CaluateButtonHeight(LayoutWrapper* layoutWrapper, bool isRight);
+    void SuitAgeLayoutButton(
+        LayoutWrapper* layoutWrapper, float rightButtonHeight, float leftButtonHeight, bool isRight);
     bool layoutLeftButton_ = true;
     ACE_DISALLOW_COPY_AND_MOVE(StepperLayoutAlgorithm);
 };

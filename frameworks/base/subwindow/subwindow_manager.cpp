@@ -303,7 +303,8 @@ void SubwindowManager::ClearPopupInSubwindow(int32_t instanceId)
     }
 }
 
-void SubwindowManager::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo)
+void SubwindowManager::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo,
+    const std::function<void(int32_t)>&& onWillDismiss, bool interactiveDismiss)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show popup ng enter");
     auto containerId = Container::CurrentId();
@@ -315,7 +316,7 @@ void SubwindowManager::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupI
         subwindow->InitContainer();
         manager->AddSubwindow(containerId, subwindow);
     }
-    subwindow->ShowPopupNG(targetId, popupInfo);
+    subwindow->ShowPopupNG(targetId, popupInfo, std::move(onWillDismiss), interactiveDismiss);
 }
 
 void SubwindowManager::HidePopupNG(int32_t targetId, int32_t instanceId)
@@ -597,7 +598,7 @@ void SubwindowManager::ShowToast(const std::string& message, int32_t duration, c
     const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show toast enter");
-    auto containerId = Container::CurrentIdSafely();
+    auto containerId = Container::CurrentId();
     // for pa service
     if (containerId >= MIN_PA_SERVICE_ID || containerId < 0) {
         auto subwindow = GetOrCreateSubWindow();
@@ -606,8 +607,7 @@ void SubwindowManager::ShowToast(const std::string& message, int32_t duration, c
         subwindow->ShowToast(message, duration, bottom, showMode, alignment, offset);
     } else {
         // for ability
-        auto container = Container::CurrentSafely();
-        auto taskExecutor = container->GetTaskExecutor();
+        auto taskExecutor = Container::CurrentTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
             [containerId, message, duration, bottom, showMode, alignment, offset] {

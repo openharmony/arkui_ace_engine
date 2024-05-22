@@ -52,6 +52,19 @@ RefPtr<PaintWrapper> TestNG::FlushLayoutTask(const RefPtr<FrameNode>& frameNode)
     return wrapper;
 }
 
+void TestNG::CreateDone(const RefPtr<FrameNode>& frameNode)
+{
+    auto& elementsStack = ViewStackProcessor::GetInstance()->elementsStack_;
+    while (elementsStack.size() > 1) {
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+    ViewStackProcessor::GetInstance()->Finish();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    frameNode->MarkModifyDone();
+    FlushLayoutTask(frameNode);
+}
+
 uint64_t TestNG::GetActions(const RefPtr<AccessibilityProperty>& accessibilityProperty)
 {
     std::unordered_set<AceAction> supportAceActions = accessibilityProperty->GetSupportAction();

@@ -218,7 +218,9 @@ void PipelineContext::FlushMessages() {}
 
 void PipelineContext::FlushModifier() {}
 
-void PipelineContext::FlushUITasks() {}
+void PipelineContext::FlushUITasks(bool triggeredByImplicitAnimation) {}
+
+void PipelineContext::FlushAfterLayoutCallbackInImplicitAnimationTask() {}
 
 void PipelineContext::DetachNode(RefPtr<UINode>) {}
 
@@ -368,7 +370,7 @@ void PipelineContext::AddDirtyPropertyNode(const RefPtr<FrameNode>& dirty) {}
 void PipelineContext::AddDirtyRequestFocus(const RefPtr<FrameNode>& node) {}
 
 // core/pipeline_ng/pipeline_context.h depends on the specific impl
-void UITaskScheduler::FlushTask() {}
+void UITaskScheduler::FlushTask(bool triggeredByImplicitAnimation) {}
 
 UITaskScheduler::UITaskScheduler() {}
 
@@ -385,7 +387,7 @@ void PipelineContext::AddBuildFinishCallBack(std::function<void()>&& callback)
 
 void PipelineContext::AddPredictTask(PredictTask&& task) {}
 
-void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task)
+void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task, bool isFlushInImplicitAnimationTask)
 {
     if (task) {
         task();
@@ -583,6 +585,18 @@ bool PipelineContext::IsContainerModalVisible()
 {
     return false;
 }
+
+void PipelineContext::CheckAndLogLastReceivedTouchEventInfo(int32_t eventId, TouchType type) {}
+
+void PipelineContext::CheckAndLogLastConsumedTouchEventInfo(int32_t eventId, TouchType type) {}
+
+void PipelineContext::CheckAndLogLastReceivedMouseEventInfo(int32_t eventId, MouseAction action) {}
+
+void PipelineContext::CheckAndLogLastConsumedMouseEventInfo(int32_t eventId, MouseAction action) {}
+
+void PipelineContext::CheckAndLogLastReceivedAxisEventInfo(int32_t eventId, AxisAction action) {}
+
+void PipelineContext::CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, AxisAction action) {}
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 

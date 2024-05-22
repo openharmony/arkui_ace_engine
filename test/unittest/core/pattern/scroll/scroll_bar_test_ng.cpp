@@ -274,11 +274,11 @@ HWTEST_F(ScrolleBarTestNg, ScrollBarAnimation002, TestSize.Level1)
     auto modifier = scrollPaint->GetOverlayModifier(&paintWrapper);
     auto scrollBarOverlayModifier = AceType::DynamicCast<ScrollBarOverlayModifier>(modifier);
     pattern_->SetScrollBar(DisplayMode::ON);
+    scrollBarOverlayModifier->SetScrollable(true);
     EXPECT_EQ(scrollBar->displayMode_, DisplayMode::ON);
     EXPECT_TRUE(scrollBar->NeedPaint());
     ASSERT_NE(scrollBarOverlayModifier, nullptr);
     EXPECT_EQ(scrollBarOverlayModifier->GetOpacity(), UINT8_MAX);
-    EXPECT_NE(scrollBarOverlayModifier->opacityAnimation_, nullptr);
     EXPECT_EQ(scrollBarOverlayModifier->opacityAnimatingType_, OpacityAnimationType::NONE);
 
     /**
@@ -298,6 +298,7 @@ HWTEST_F(ScrolleBarTestNg, ScrollBarAnimation002, TestSize.Level1)
      */
     scrollBar->PlayScrollBarAppearAnimation();
     scrollPaint->UpdateOverlayModifier(&paintWrapper);
+    EXPECT_NE(scrollBarOverlayModifier->opacityAnimation_, nullptr);
     EXPECT_EQ(scrollBarOverlayModifier->opacityAnimatingType_, OpacityAnimationType::NONE);
 
     /**

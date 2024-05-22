@@ -271,7 +271,14 @@ void FolderStackLayoutAlgorithm::AdjustNodeTree(const RefPtr<FolderStackGroupNod
             controlPartsStackNode->AddChild(childNode);
         }
     } else {
-        AddNodeToParent(hoverNode, controlPartsStackNode, hostNode);
+        auto itemId = hostNode->GetItemId();
+        for (auto& childNode : hostNode->GetChildNode()) {
+            if (std::count(itemId.begin(), itemId.end(), childNode->GetInspectorId())) {
+                hoverNode->AddChild(childNode);
+            } else {
+                controlPartsStackNode->AddChild(childNode);
+            }
+        }
     }
 }
 
@@ -357,46 +364,6 @@ void FolderStackLayoutAlgorithm::MeasureByStack(
     CHECK_NULL_VOID(hoverStackWrapper);
     auto geometryNode = hoverStackWrapper->GetGeometryNode();
     geometryNode->SetFrameSize(controlPartsWrapper->GetGeometryNode()->GetFrameSize());
-}
-
-bool FolderStackLayoutAlgorithm::JudgeSkipNode(const std::string& nodeTag)
-{
-    return nodeTag == V2::JS_IF_ELSE_ETS_TAG || nodeTag == V2::JS_FOR_EACH_ETS_TAG ||
-           nodeTag == V2::JS_LAZY_FOR_EACH_ETS_TAG;
-}
-
-void FolderStackLayoutAlgorithm::AdjustChildren(RefPtr<UINode> childUI, std::list<RefPtr<FrameNode>>& childList)
-{
-    auto child = DynamicCast<FrameNode>(childUI);
-    if (!child) {
-        if (!JudgeSkipNode(childUI->GetTag())) {
-            TAG_LOGD(AceLogTag::ACE_FOLDER_STACK, "%{public}s node is skipped", childUI->GetTag().c_str());
-            return;
-        }
-
-        for (const auto& syntaxChild : childUI->GetChildren()) {
-            AdjustChildren(syntaxChild, childList);
-        }
-        return;
-    }
-    childList.emplace_back(child);
-}
-
-void FolderStackLayoutAlgorithm::AddNodeToParent(const RefPtr<UINode>& hoverNode,
-    const RefPtr<UINode>& controlPartsStackNode, const RefPtr<FolderStackGroupNode>& hostNode)
-{
-    auto itemId = hostNode->GetItemId();
-    std::list<RefPtr<FrameNode>> childList;
-    for (auto& childNode : hostNode->GetChildNode()) {
-        AdjustChildren(childNode, childList);
-        for (auto& child : childList) {
-            if (std::count(itemId.begin(), itemId.end(), child->GetInspectorId())) {
-                hoverNode->AddChild(child);
-            } else {
-                controlPartsStackNode->AddChild(child);
-            }
-        }
-    }
 }
 
 } // namespace OHOS::Ace::NG

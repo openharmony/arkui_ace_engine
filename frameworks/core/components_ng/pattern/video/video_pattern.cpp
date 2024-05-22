@@ -569,7 +569,6 @@ void VideoPattern::checkNeedAutoPlay()
 {
     if (isStop_) {
         isStop_ = false;
-        Start();
     }
     if (dragEndAutoPlay_) {
         dragEndAutoPlay_ = false;
@@ -1333,6 +1332,15 @@ void VideoPattern::SetMethodCall()
             fullScreenPattern->ExitFullScreen();
         }, "ArkUIVideoExitFullScreen");
     });
+    videoController->SetResetImpl([weak = WeakClaim(this), uiTaskExecutor]() {
+        uiTaskExecutor.PostTask([weak]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto targetPattern = pattern->GetTargetVideoPattern();
+            CHECK_NULL_VOID(targetPattern);
+            targetPattern->ResetMediaPlayer();
+        }, "ArkUIVideoReset");
+    });
     CHECK_NULL_VOID(videoControllerV2_);
     videoControllerV2_->AddVideoController(videoController);
 }
@@ -1587,9 +1595,14 @@ void VideoPattern::EnableDrag()
             videoSrc = json->GetString(key);
         }
 
+        if (videoSrc == videoPattern->GetSrc()) {
+            return;
+        }
+
         std::regex extensionRegex("\\.(" + PNG_FILE_EXTENSION + ")$");
         bool isPng = std::regex_search(videoSrc, extensionRegex);
-        if (videoSrc == videoPattern->GetSrc() || isPng) {
+        if (isPng) {
+            event->SetResult(DragRet::DRAG_FAIL);
             return;
         }
 
@@ -1692,9 +1705,10 @@ void VideoPattern::EnableAnalyzer(bool enable)
         return;
     }
 
-    if (!imageAnalyzerManager_) {
-        imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(GetHost(), ImageAnalyzerHolder::VIDEO_CUSTOM);
-    }
+    CHECK_NULL_VOID(!imageAnalyzerManager_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(host, ImageAnalyzerHolder::VIDEO_CUSTOM);
 }
 
 void VideoPattern::SetImageAnalyzerConfig(void* config)
@@ -1743,6 +1757,7 @@ void VideoPattern::CreateAnalyzerOverlay()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    host->SetOverlayNode(nullptr);
     auto context = host->GetRenderContext();
     CHECK_NULL_VOID(context);
     auto nailPixelMap = context->GetThumbnailPixelMap();

@@ -60,12 +60,7 @@ void ListTestNg::TearDown()
     layoutProperty_ = nullptr;
     paintProperty_ = nullptr;
     accessibilityProperty_ = nullptr;
-    ClearOldList();  // Each testcase will create new list at begin
-}
-
-void ListTestNg::ClearOldList()
-{
-    ElementRegister::GetInstance()->Clear(); // Will create new list after clear
+    ClearOldNodes();  // Each testcase will create new list at begin
 }
 
 void ListTestNg::GetList()
@@ -134,19 +129,6 @@ ListItemGroupModelNG ListTestNg::CreateListItemGroup(V2::ListItemGroupStyle list
     ListItemGroupModelNG groupModel;
     groupModel.Create(listItemGroupStyle);
     return groupModel;
-}
-
-void ListTestNg::CreateDone()
-{
-    auto& elementsStack = ViewStackProcessor::GetInstance()->elementsStack_;
-    while (elementsStack.size() > 1) {
-        ViewStackProcessor::GetInstance()->Pop();
-        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
-    }
-    ViewStackProcessor::GetInstance()->Finish();
-    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
-    frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
 }
 
 void ListTestNg::CreateItemWithSize(int32_t itemNumber, SizeT<Dimension> itemSize)
@@ -558,11 +540,12 @@ AssertionResult ListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlig
     return IsEqual(currentOffset, expectOffset);
 }
 
-AssertionResult ListTestNg::ScrollToItemInGroup(
+AssertionResult ListTestNg::JumpToItemInGroup(
     int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align, float expectOffset)
 {
+    auto controller = pattern_->positionController_;
     float startOffset = pattern_->GetTotalOffset();
-    pattern_->ScrollToItemInGroup(index, indexInGroup, smooth, align);
+    controller->JumpToItemInGroup(index, indexInGroup, smooth, align);
     FlushLayoutTask(frameNode_);
     if (smooth) {
         // Because can not get targetPos, use source code
@@ -621,5 +604,11 @@ int32_t ListTestNg::findFocusNodeIndex(RefPtr<FocusHub>& focusNode)
         }
     }
     return NULL_VALUE;
+}
+
+void ListTestNg::ScrollTo(float position)
+{
+    pattern_->ScrollTo(position);
+    FlushLayoutTask(frameNode_);
 }
 } // namespace OHOS::Ace::NG

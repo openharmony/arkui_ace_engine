@@ -131,7 +131,9 @@ void JSRadio::JSBind(BindingTarget globalObj)
     JSClass<JSRadio>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSRadio>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSRadio>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSRadio>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSRadio>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSRadio>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSRadio>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSRadio>::InheritAndBind<JSViewAbstract>(globalObj);
 }
@@ -300,28 +302,32 @@ NG::PaddingProperty JSRadio::GetPadding(const std::optional<CalcDimension>& top,
 
 void JSRadio::JsRadioStyle(const JSCallbackInfo& info)
 {
-    if (info[0]->IsObject()) {
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
-        JSRef<JSVal> checkedBackgroundColor = obj->GetProperty("checkedBackgroundColor");
-        JSRef<JSVal> uncheckedBorderColor = obj->GetProperty("uncheckedBorderColor");
-        JSRef<JSVal> indicatorColor = obj->GetProperty("indicatorColor");
-        Color checkedBackgroundColorVal;
-        auto theme = GetTheme<RadioTheme>();
-        if (!ParseJsColor(checkedBackgroundColor, checkedBackgroundColorVal)) {
-            checkedBackgroundColorVal = theme->GetActiveColor();
-        }
-        RadioModel::GetInstance()->SetCheckedBackgroundColor(checkedBackgroundColorVal);
-        Color uncheckedBorderColorVal;
-        if (!ParseJsColor(uncheckedBorderColor, uncheckedBorderColorVal)) {
-            uncheckedBorderColorVal = theme->GetInactiveColor();
-        }
-        RadioModel::GetInstance()->SetUncheckedBorderColor(uncheckedBorderColorVal);
-        Color indicatorColorVal;
-        if (!ParseJsColor(indicatorColor, indicatorColorVal)) {
-            indicatorColorVal = theme->GetPointColor();
-        }
-        RadioModel::GetInstance()->SetIndicatorColor(indicatorColorVal);
+    auto theme = GetTheme<RadioTheme>();
+    if (!info[0]->IsObject()) {
+        RadioModel::GetInstance()->SetCheckedBackgroundColor(theme->GetActiveColor());
+        RadioModel::GetInstance()->SetUncheckedBorderColor(theme->GetInactiveColor());
+        RadioModel::GetInstance()->SetIndicatorColor(theme->GetPointColor());
+        return;
     }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> checkedBackgroundColor = obj->GetProperty("checkedBackgroundColor");
+    JSRef<JSVal> uncheckedBorderColor = obj->GetProperty("uncheckedBorderColor");
+    JSRef<JSVal> indicatorColor = obj->GetProperty("indicatorColor");
+    Color checkedBackgroundColorVal;
+    if (!ParseJsColor(checkedBackgroundColor, checkedBackgroundColorVal)) {
+        checkedBackgroundColorVal = theme->GetActiveColor();
+    }
+    RadioModel::GetInstance()->SetCheckedBackgroundColor(checkedBackgroundColorVal);
+    Color uncheckedBorderColorVal;
+    if (!ParseJsColor(uncheckedBorderColor, uncheckedBorderColorVal)) {
+        uncheckedBorderColorVal = theme->GetInactiveColor();
+    }
+    RadioModel::GetInstance()->SetUncheckedBorderColor(uncheckedBorderColorVal);
+    Color indicatorColorVal;
+    if (!ParseJsColor(indicatorColor, indicatorColorVal)) {
+        indicatorColorVal = theme->GetPointColor();
+    }
+    RadioModel::GetInstance()->SetIndicatorColor(indicatorColorVal);
 }
 
 void JSRadio::JsResponseRegion(const JSCallbackInfo& info)

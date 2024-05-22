@@ -14,38 +14,39 @@
  */
 
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
-#include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 
 #include <memory>
 #include <optional>
+
 #include "menu_item_model.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
 #include "base/utils/system_properties.h"
+#include "base/utils/utils.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/select/select_theme.h"
+#include "core/components/text/text_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_event_hub.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
-#include "core/components_ng/pattern/menu/menu_view.h"
-#include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/menu_theme.h"
+#include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
-#include "core/components/text/text_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -188,6 +189,9 @@ void MenuItemPattern::OnModifyDone()
     host->GetRenderContext()->SetClipToBounds(true);
 
     InitFocusEvent();
+    if (!longPressEvent_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        InitLongPressEvent();
+    }
     RegisterOnKeyEvent();
     RegisterOnTouch();
     RegisterOnHover();
@@ -226,24 +230,28 @@ void MenuItemPattern::InitFocusEvent()
     auto focusTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->HandleFocusEvent();
         if (pattern->content_ && pattern->isTextFadeOut_) {
             auto textLayoutProperty = pattern->content_->GetLayoutProperty<TextLayoutProperty>();
-            textLayoutProperty->UpdateTextMarqueeStart(true);
-            pattern->content_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            if (textLayoutProperty) {
+                textLayoutProperty->UpdateTextMarqueeStart(pattern->isFocused_);
+                pattern->content_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            }
         }
-        pattern->HandleFocusEvent();
     };
     focusHub->SetOnFocusInternal(focusTask);
 
     auto blurTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->HandleBlurEvent();
         if (pattern->content_ && pattern->isTextFadeOut_) {
             auto textLayoutProperty = pattern->content_->GetLayoutProperty<TextLayoutProperty>();
-            textLayoutProperty->UpdateTextMarqueeStart(false);
-            pattern->content_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            if (textLayoutProperty) {
+                textLayoutProperty->UpdateTextMarqueeStart(pattern->isHovered_);
+                pattern->content_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            }
         }
-        pattern->HandleBlurEvent();
     };
     focusHub->SetOnBlurInternal(blurTask);
 }
@@ -390,11 +398,13 @@ RefPtr<FrameNode> MenuItemPattern::GetMenu(bool needTopMenu)
         if (parent->GetTag() == V2::MENU_ETS_TAG) {
             menuNode = AceType::DynamicCast<FrameNode>(parent);
             if (!needTopMenu) {
+                // innner menu
                 return menuNode;
             }
         }
         parent = parent->GetParent();
     }
+    // outter menu
     return menuNode;
 }
 
@@ -458,7 +468,7 @@ void MenuItemPattern::ShowSubMenu()
         host->GetId(), host->GetTag(), param);
     CHECK_NULL_VOID(subMenu);
     ShowSubMenuHelper(subMenu);
-    parentMenuPattern->SetShowedSubMenu(subMenu);
+    menuPattern->SetShowedSubMenu(subMenu);
 }
 
 void MenuItemPattern::ShowSubMenuHelper(const RefPtr<FrameNode>& subMenu)
@@ -480,9 +490,9 @@ void MenuItemPattern::ShowSubMenuHelper(const RefPtr<FrameNode>& subMenu)
     auto expandingMode = layoutProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
         expandingMode == SubMenuExpandingMode::STACK) {
-            subMenu->MountToParent(menuWrapper);
-            menuWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-            menuPattern->SetSubMenuShow();
+        subMenu->MountToParent(menuWrapper);
+        menuWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+        menuPattern->SetSubMenuShow();
     } else {
         subMenu->MountToParent(menuWrapper);
         OffsetF offset = GetSubMenuPosition(host);
@@ -516,18 +526,21 @@ void MenuItemPattern::HideSubMenu()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto parentMenu = GetMenu();
-    CHECK_NULL_VOID(parentMenu);
-    auto parentMenuPattern = parentMenu->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(parentMenuPattern);
-
-    auto showedSubMenu = parentMenuPattern->GetShowedSubMenu();
+    auto menuWrapper = GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapper);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    auto showedSubMenu = menuWrapperPattern->GetShowedSubMenu();
     if (showedSubMenu) {
         auto showedSubMenuPattern = showedSubMenu->GetPattern<MenuPattern>();
         CHECK_NULL_VOID(showedSubMenuPattern);
         auto showedMenuItem = showedSubMenuPattern->GetParentMenuItem();
         CHECK_NULL_VOID(showedMenuItem);
         if (showedMenuItem->GetId() != host->GetId()) {
+            auto parentMenu = GetMenu();
+            CHECK_NULL_VOID(parentMenu);
+            auto parentMenuPattern = parentMenu->GetPattern<MenuPattern>();
+            CHECK_NULL_VOID(parentMenuPattern);
             parentMenuPattern->HideSubMenu();
         }
     }
@@ -631,7 +644,8 @@ void MenuItemPattern::CloseMenu()
 
 void MenuItemPattern::RegisterOnClick()
 {
-    if (onClickEventSet_) return;
+    if (onClickEventSet_)
+        return;
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -675,7 +689,8 @@ void MenuItemPattern::RegisterOnClick()
 
 void MenuItemPattern::RegisterOnTouch()
 {
-    if (onTouchEventSet_) return;
+    if (onTouchEventSet_)
+        return;
 
     auto clickableArea = GetClickableArea();
     CHECK_NULL_VOID(clickableArea);
@@ -694,7 +709,8 @@ void MenuItemPattern::RegisterOnTouch()
 
 void MenuItemPattern::RegisterOnHover()
 {
-    if (onHoverEventSet_) return;
+    if (onHoverEventSet_)
+        return;
 
     auto clickableArea = GetClickableArea();
     CHECK_NULL_VOID(clickableArea);
@@ -704,6 +720,13 @@ void MenuItemPattern::RegisterOnHover()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->OnHover(isHover);
+        if (pattern->content_ && pattern->isTextFadeOut_) {
+            auto textLayoutProperty = pattern->content_->GetLayoutProperty<TextLayoutProperty>();
+            if (textLayoutProperty) {
+                textLayoutProperty->UpdateTextMarqueeStart(isHover || pattern->isFocused_);
+                pattern->content_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            }
+        }
     };
     auto onHover = MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnHoverEvent(onHover);
@@ -712,8 +735,9 @@ void MenuItemPattern::RegisterOnHover()
 
 void MenuItemPattern::RegisterOnKeyEvent()
 {
-    if (onKeyEventSet_) return;
-    
+    if (onKeyEventSet_)
+        return;
+
     auto clickableArea = GetClickableArea();
     CHECK_NULL_VOID(clickableArea);
     auto focusHub = clickableArea->GetOrCreateFocusHub();
@@ -736,17 +760,22 @@ void MenuItemPattern::OnTouch(const TouchEventInfo& info)
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
 
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     if (touchType == TouchType::DOWN) {
         // change background color, update press status
         SetBgBlendColor(GetSubBuilder() ? theme->GetHoverColor() : theme->GetClickedColor());
+        auto menuWrapper = GetMenuWrapper();
+        CHECK_NULL_VOID(menuWrapper);
+        auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(menuWrapperPattern);
+        menuWrapperPattern->SetLastTouchItem(host);
     } else if (touchType == TouchType::UP) {
         SetBgBlendColor(isHovered_ ? theme->GetHoverColor() : Color::TRANSPARENT);
     } else {
         return;
     }
     PlayBgColorAnimation(false);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -759,6 +788,13 @@ void CustomMenuItemPattern::OnTouch(const TouchEventInfo& info)
     // recognize gesture as click if touch up position is close to last touch down position
     if (touchType == TouchType::DOWN) {
         lastTouchOffset_ = std::make_unique<Offset>(info.GetTouches().front().GetLocalLocation());
+        auto menuWrapper = GetMenuWrapper();
+        CHECK_NULL_VOID(menuWrapper);
+        auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(menuWrapperPattern);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        menuWrapperPattern->SetLastTouchItem(host);
     } else if (touchType == TouchType::UP) {
         auto touchUpOffset = info.GetTouches().front().GetLocalLocation();
         if (lastTouchOffset_ && (touchUpOffset - *lastTouchOffset_).GetDistance() <= DEFAULT_CLICK_DISTANCE) {
@@ -844,6 +880,28 @@ bool CustomMenuItemPattern::OnKeyEvent(const KeyEvent& event)
     return false;
 }
 
+void MenuItemPattern::InitLongPressEvent()
+{
+    auto gesture = GetHost()->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+        auto itemPattern = weak.Upgrade();
+        auto menuWrapper = itemPattern->GetMenuWrapper();
+        CHECK_NULL_VOID(menuWrapper);
+        auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(menuWrapperPattern);
+        auto topLevelMenuPattern = itemPattern->GetMenuPattern(true);
+        CHECK_NULL_VOID(topLevelMenuPattern);
+        if (itemPattern && itemPattern->GetSubBuilder() != nullptr &&
+            menuWrapperPattern->GetPreviewMode() == MenuPreviewMode::NONE &&
+            !(topLevelMenuPattern->IsSelectOverlayCustomMenu())) {
+            itemPattern->ShowSubMenu();
+        }
+    };
+    longPressEvent_ = MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
+    gesture->SetLongPressEvent(longPressEvent_);
+}
+
 void MenuItemPattern::RegisterWrapperMouseEvent()
 {
     auto menuWrapper = GetMenuWrapper();
@@ -876,12 +934,11 @@ void MenuItemPattern::AddSelfHoverRegion(const RefPtr<FrameNode>& targetNode)
 }
 
 OffsetF MenuItemPattern::GetSubMenuPosition(const RefPtr<FrameNode>& targetNode)
-{    // show menu at left top point of targetNode
+{ // show menu at left top point of targetNode
     auto frameSize = targetNode->GetGeometryNode()->GetMarginFrameSize();
     OffsetF position = targetNode->GetPaintRectOffset() + OffsetF(frameSize.Width(), 0.0);
     return position;
 }
-
 
 void MenuItemPattern::AddHoverRegions(const OffsetF& topLeftPoint, const OffsetF& bottomRightPoint)
 {
@@ -932,7 +989,7 @@ void MenuItemPattern::UpdateImageNode(RefPtr<FrameNode>& selectIcon_)
 {
     auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
     CHECK_NULL_VOID(itemProperty);
-    
+
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
@@ -973,7 +1030,6 @@ void MenuItemPattern::UpdateSymbolNode(RefPtr<FrameNode>& selectIcon_)
         props->UpdateSymbolSourceInfo(SymbolSourceInfo(symbolId));
     }
 }
-
 
 void MenuItemPattern::AddSelectIcon(RefPtr<FrameNode>& row)
 {
@@ -1091,11 +1147,13 @@ void MenuItemPattern::UpdateExpandableArea()
 void MenuItemPattern::BuildEmbeddedMenuItems(RefPtr<UINode>& node, bool needNextLevel)
 {
     auto children = node->GetChildren();
-    if (children.empty()) return;
+    if (children.empty())
+        return;
 
     for (auto child : children) {
         if (child->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
-            if (!needNextLevel) return;
+            if (!needNextLevel)
+                return;
             BuildEmbeddedMenuItems(child, false);
         } else if (child->GetTag() == V2::MENU_ITEM_ETS_TAG) {
             auto childItem = AceType::DynamicCast<FrameNode>(child);
@@ -1224,7 +1282,7 @@ void MenuItemPattern::UpdateIcon(RefPtr<FrameNode>& row, bool isStart)
         props->UpdateImageSourceInfo(imageSourceInfo);
         UpdateIconSrc(iconNode, iconWidth, iconHeight, selectTheme->GetMenuIconColor(), false);
     } else {
-        auto props = selectIcon_->GetLayoutProperty<TextLayoutProperty>();
+        auto props = iconNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(props);
         props->UpdateSymbolColorList({selectTheme->GetMenuIconColor()});
         props->UpdateFontSize(selectTheme->GetEndIconWidth());
@@ -1271,7 +1329,7 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     if (layoutDirection == TextDirection::RTL) {
         if (textAlign == TextAlign::LEFT) {
             textAlign = TextAlign::RIGHT;
-        } else if (textAlign ==TextAlign::RIGHT) {
+        } else if (textAlign == TextAlign::RIGHT) {
             textAlign = TextAlign::LEFT;
         } else if (textAlign == TextAlign::START) {
             textAlign = TextAlign::END;

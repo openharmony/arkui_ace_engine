@@ -172,7 +172,8 @@ struct SelectionMenuComponent {
         if ((item as RichEditorTextSpanResult)?.textStyle) {
           let span = item as RichEditorTextSpanResult
           let style = span.textStyle
-          let data = pasteboard.createRecord(pasteboard.MIMETYPE_TEXT_PLAIN, span.value.substring(span.offsetInSpan[0], span.offsetInSpan[1]))
+          let data = pasteboard.createRecord(pasteboard.MIMETYPE_TEXT_PLAIN,
+            span.value.substring(span.offsetInSpan[0], span.offsetInSpan[1]))
           let prop = pasteData.getProperty()
           let temp: Record<string, Object> = {
             'color': style.fontColor,
@@ -269,7 +270,8 @@ struct SelectionMenuComponent {
 
   measureButtonWidth(): number {
     if (this.editorMenuOptions && this.editorMenuOptions.length < 5) {
-      return (this.theme.defaultMenuWidth - this.theme.expandedOptionPadding * 2 - this.theme.editorOptionMargin * 2 * this.editorMenuOptions.length) / this.editorMenuOptions.length
+      return (this.theme.defaultMenuWidth - this.theme.expandedOptionPadding * 2 -
+        this.theme.editorOptionMargin * 2 * this.editorMenuOptions.length) / this.editorMenuOptions.length
     }
     return this.theme.buttonSize
   }
@@ -331,7 +333,8 @@ struct SelectionMenuComponent {
   @Builder
   SystemMenu() {
     Column() {
-      if (this.showCustomerIndex === -1 && (this.controller || (this.expandedMenuOptions && this.expandedMenuOptions.length > 0))) {
+      if (this.showCustomerIndex === -1 &&
+        (this.controller || (this.expandedMenuOptions && this.expandedMenuOptions.length > 0))) {
         Menu() {
           if (this.controller) {
             MenuItemGroup() {

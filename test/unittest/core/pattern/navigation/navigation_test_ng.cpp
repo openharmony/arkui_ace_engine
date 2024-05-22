@@ -19,61 +19,21 @@
 #include "mock_navigation_route.h"
 #include "mock_navigation_stack.h"
 
-#include "base/memory/ace_type.h"
-#include "core/components_ng/animation/geometry_transition.h"
-
 #define protected public
 #define private public
-#include "base/json/json_util.h"
 #include "test/mock/base/mock_task_executor.h"
-#include "core/animation/animator.h"
 #include "core/components/button/button_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
-#include "core/components_ng/pattern/button/toggle_button_model_ng.h"
-#include "core/components_ng/pattern/custom/custom_node.h"
-#include "core/components_ng/pattern/divider/divider_pattern.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/pattern/navigation/bar_item_node.h"
-#include "core/components_ng/pattern/navigation/bar_item_pattern.h"
-#include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
-#include "core/components_ng/pattern/navigation/nav_bar_node.h"
-#include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_content_layout_algorithm.h"
-#include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
-#include "core/components_ng/pattern/navigation/navigation_stack.h"
-#include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
-#include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
-#include "core/components_ng/pattern/navigation/tool_bar_layout_algorithm.h"
-#include "core/components_ng/pattern/navigation/tool_bar_node.h"
-#include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
-#include "core/components_ng/pattern/navigator/navigator_event_hub.h"
-#include "core/components_ng/pattern/navigator/navigator_pattern.h"
-#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
-#include "core/components_ng/pattern/navrouter/navdestination_layout_algorithm.h"
-#include "core/components_ng/pattern/navrouter/navdestination_model.h"
-#include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
-#include "core/components_ng/pattern/stage/page_pattern.h"
-#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
-#include "core/components_ng/pattern/navrouter/navrouter_event_hub.h"
-#include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
-#include "core/components_ng/pattern/navrouter/navrouter_model.h"
-#include "core/components_ng/pattern/navrouter/navrouter_model_ng.h"
-#include "core/components_ng/pattern/navrouter/navrouter_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#include "core/components_ng/pattern/stack/stack_layout_algorithm.h"
-#include "core/components_ng/pattern/stack/stack_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "test/mock/core/common/mock_theme_manager.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/common/mock_container.h"
 
@@ -101,6 +61,10 @@ void NavigationTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
     MockContainer::SetUp();
+    auto context = MockPipelineContext::GetCurrent();
+    if (context) {
+        context->stageManager_ = nullptr;
+    }
 }
 
 void NavigationTestNg::TearDownTestSuite()
@@ -1052,7 +1016,7 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest001, TestSize.Level1)
     navigationPattern->OnModifyDone();
     navigationPattern->MarkNeedSyncWithJsStack();
     navigationPattern->SyncWithJsStackIfNeeded();
-    ASSERT_EQ(stack->GetReplaceValue(), 2);
+    ASSERT_EQ(stack->GetReplaceValue(), 0);
 
     /**
      * @tc.steps: step2.push A
@@ -1061,7 +1025,7 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest001, TestSize.Level1)
     navigationPattern->OnModifyDone();
     navigationPattern->MarkNeedSyncWithJsStack();
     navigationPattern->SyncWithJsStackIfNeeded();
-    ASSERT_EQ(stack->GetReplaceValue(), 2);
+    ASSERT_EQ(stack->GetReplaceValue(), 0);
 }
 
 HWTEST_F(NavigationTestNg, NavigationReplaceTest002, TestSize.Level1)
@@ -1105,7 +1069,7 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest002, TestSize.Level1)
     navigationPattern->OnModifyDone();
     navigationPattern->MarkNeedSyncWithJsStack();
     navigationPattern->SyncWithJsStackIfNeeded();
-    ASSERT_EQ(stack->GetReplaceValue(), 2);
+    ASSERT_EQ(stack->GetReplaceValue(), 0);
 
     /**
      * @tc.steps: step3.pop page B
@@ -1114,7 +1078,7 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest002, TestSize.Level1)
     navigationPattern->OnModifyDone();
     navigationPattern->MarkNeedSyncWithJsStack();
     navigationPattern->SyncWithJsStackIfNeeded();
-    ASSERT_EQ(stack->GetReplaceValue(), 2);
+    ASSERT_EQ(stack->GetReplaceValue(), 0);
 }
 
 HWTEST_F(NavigationTestNg, NavigationReplaceTest003, TestSize.Level1)
@@ -1158,7 +1122,7 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest003, TestSize.Level1)
     navigationPattern->OnModifyDone();
     navigationPattern->MarkNeedSyncWithJsStack();
     navigationPattern->SyncWithJsStackIfNeeded();
-    ASSERT_EQ(stack->GetReplaceValue(), 2);
+    ASSERT_EQ(stack->GetReplaceValue(), 0);
 
     /**
      * @tc.steps: step3.pop page B

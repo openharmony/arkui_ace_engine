@@ -194,8 +194,8 @@ public:
     void UpdateCaretOffset(const OffsetF& offset);
     void UpdateFirstHandleOffset();
     void UpdateSecondHandleOffset();
-    void MoveFirstHandleToContentRect(int32_t index);
-    void MoveSecondHandleToContentRect(int32_t index);
+    void MoveFirstHandleToContentRect(int32_t index, bool moveHandle = true);
+    void MoveSecondHandleToContentRect(int32_t index, bool moveHandle = true);
     void MoveCaretToContentRect(
         int32_t index, TextAffinity textAffinity = TextAffinity::UPSTREAM, bool isEditorValueChanged = true);
     void MoveHandleToContentRect(RectF& handleRect, float boundaryAdjustment = 0.0f) const;

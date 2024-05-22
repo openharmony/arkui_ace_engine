@@ -134,13 +134,9 @@ public:
         return {};
     }
 
-    std::string GetEntryFocusViewName() override
+    bool IsEntryFocusView() override
     {
-        /*
-        |-> Navigation (root focus view)
-          |-> NavBar
-        */
-        return V2::NAVIGATION_VIEW_ETS_TAG;
+        return false;
     }
 
     int32_t GetMaxMenuNum() const
@@ -157,6 +153,7 @@ public:
     {
         return titleMode_ == NavigationTitleMode::FREE;
     }
+    OffsetF GetShowMenuOffset(const RefPtr<BarItemNode> barItemNode, RefPtr<FrameNode> menuNode);
 
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;

@@ -153,7 +153,7 @@ void TextSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto contentRect = textPattern->GetTextContentRect();
-    auto contentOffset = textPattern->GetTextPaintOffset() + contentRect.GetOffset();
+    auto contentOffset = GetPaintOffsetWithoutTransform() + contentRect.GetOffset();
     auto handleOffset = handleRect.GetOffset();
     if (!selectTextUseTopHandle) {
         bool isUseHandleTop = (isFirst != IsHandleReverse());

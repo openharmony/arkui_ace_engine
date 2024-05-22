@@ -5981,7 +5981,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest015, TestSize.Level1)
     const std::vector<uint32_t> indexs = { 0, 1, 2 };
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     std::string result = textPickerPattern->GetSelectedObjectMulti(values, indexs, 2);
-    std::string expectResult = "{\"value\":[\"111\",\"123\",\"134\"],\"index\":[\"0\",\"1\",\"2\"],\"status\":2}";
+    std::string expectResult = "{\"value\":[\"111\",\"123\",\"134\"],\"index\":[0,1,2],\"status\":2}";
     EXPECT_EQ(result, expectResult);
 }
 

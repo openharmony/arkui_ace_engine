@@ -26,6 +26,8 @@
 
 namespace OHOS::Ace {
 
+const std::unordered_set<SpanType> specailTypes = { SpanType::Image, SpanType::CustomSpan };
+
 std::wstring SpanString::GetWideStringSubstr(const std::wstring& content, int32_t start, int32_t length)
 {
     if (start >= content.length()) {
@@ -707,5 +709,66 @@ void SpanString::RemoveSpecialSpan(int32_t start, int32_t end, SpanType type)
         }
         ++iter;
     }
+}
+
+void SpanString::GetSpecialTypesVector(std::list<int32_t>& indexList, int32_t start, int32_t length)
+{
+    int32_t end = start + length;
+    auto iter = indexList.begin();
+    for (const auto& type : specailTypes) {
+        auto spans = spansMap_[type];
+        for (const auto& span : spans) {
+            auto intersection = span->GetIntersectionInterval({ start, end });
+            if (!intersection) {
+                continue;
+            }
+            iter = indexList.insert(iter, span->GetStartIndex());
+        }
+    }
+    indexList.sort([](const int32_t& a, const int32_t& b) { return a < b; });
+}
+
+void SpanString::GetNormalTypesVector(std::list<std::pair<int32_t, int32_t>>& indexList, int32_t start, int32_t length)
+{
+    std::list<int32_t> specialList;
+    GetSpecialTypesVector(specialList, start, length);
+    auto next = start;
+    auto iter = indexList.begin();
+    for (const auto& index : specialList) {
+        if (index > next) {
+            iter = indexList.insert(iter, { next, index - next });
+        }
+        next = index + 1;
+    }
+    if (next < start + length) {
+        indexList.insert(iter, { next, start + length - next });
+    }
+}
+
+bool SpanString::ContainSpecialNode(int32_t start, int32_t length)
+{
+    int32_t end = start + length;
+    for (const auto& type : specailTypes) {
+        auto spans = spansMap_[type];
+        for (const auto& span : spans) {
+            auto intersection = span->GetIntersectionInterval({ start, end });
+            if (intersection) {
+                return true;
+            }
+            if (span->GetStartIndex() >= end) {
+                break;
+            }
+        }
+    }
+    return false;
+}
+
+bool SpanString::IsSpecialNode(RefPtr<SpanBase> span)
+{
+    auto type = span->GetSpanType();
+    if (specailTypes.find(type) == specailTypes.end()) {
+        return false;
+    }
+    return true;
 }
 } // namespace OHOS::Ace

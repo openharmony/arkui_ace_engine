@@ -19,6 +19,7 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "base/log/log_wrapper.h"
+#include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_form_menu_item.h"
 #include "bridge/declarative_frontend/jsview/models/form_model_impl.h"
 #include "bridge/declarative_frontend/jsview/models/menu_item_model_impl.h"
@@ -60,7 +61,20 @@ void JSFormMenuItem::RequestPublishFormWithSnapshot(JSRef<JSVal> wantValue, RefP
     }
     int64_t formId = 0;
     AAFwk::Want& want = const_cast<AAFwk::Want&>(wantWrap->GetWant());
+    if (!want.HasParameter("ohos.extra.param.key.add_form_to_host_snapshot") ||
+        !want.HasParameter("ohos.extra.param.key.add_form_to_host_width") ||
+        !want.HasParameter("ohos.extra.param.key.add_form_to_host_height") ||
+        !want.HasParameter("ohos.extra.param.key.add_form_to_host_screenx") ||
+        !want.HasParameter("ohos.extra.param.key.add_form_to_host_screeny")) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "want has no component snapshot info");
+        return;
+    }
+
     if (!FormModel::GetInstance()->RequestPublishFormWithSnapshot(want, formId)) {
+        if (!jsCBFunc) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "jsCBFunc is null");
+            return;
+        }
         JSRef<JSVal> params[1];
         params[0] = JSRef<JSVal>::Make(ToJSValue(formId));
         jsCBFunc->ExecuteJS(1, params);
@@ -99,14 +113,19 @@ void JSFormMenuItem::JsOnClick(const JSCallbackInfo& info)
     auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[NUM_CALL_0]));
     RefPtr<JsFunction> jsCallBackFunc = nullptr;
     if (!info[ NUM_FUN_4]->IsUndefined() && info[ NUM_FUN_4]->IsFunction()) {
-        jsCallBackFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[ NUM_FUN_4]));
+        jsCallBackFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[NUM_FUN_4]));
     }
 
     std::string compId;
     JSViewAbstract::ParseJsString(info[NUM_ID_2], compId);
+    if (compId.empty()) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "JsOnClick compId is empty.Input parameter componentId check failed.");
+        return;
+    }
+
     JSRef<JSVal> wantValue = JSRef<JSVal>::Cast(info[NUM_WANT_1]);
     if (wantValue->IsNull()) {
-        TAG_LOGI(AceLogTag::ACE_FORM, "JsOnClick wantValue is null");
+        TAG_LOGE(AceLogTag::ACE_FORM, "JsOnClick wantValue is null");
         return;
     }
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());

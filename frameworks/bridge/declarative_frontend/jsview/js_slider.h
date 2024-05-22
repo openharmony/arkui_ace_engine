@@ -34,11 +34,6 @@ enum class SliderChangeMode {
     END,
 };
 
-enum class SliderInteraction {
-    SLIDE_AND_CLICK = 0,
-    SLIDE_ONLY,
-};
-
 class JSSlider : public JSViewAbstract {
 public:
     static void Create(const JSCallbackInfo& info);

@@ -198,7 +198,6 @@ public:
     void OnCollectLongPressTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent);
     void SetScrollBar(DisplayMode displayMode);
-    void SetScrollProperties(const RefPtr<LayoutWrapper>& dirty);
     void UpdateScrollBarOffset();
     void HandleScrollBarOutBoundary(float scrollBarOutBoundaryExtent);
     void UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset);
@@ -284,6 +283,17 @@ public:
             return true;
         }
         return false;
+    }
+
+    void SetScrollEnabled(bool enabled)
+    {
+        CHECK_NULL_VOID(scrollableEvent_);
+        scrollableEvent_->SetEnabled(enabled);
+        if (!enabled) {
+            scrollableEvent_->SetAxis(Axis::NONE);
+        } else {
+            scrollableEvent_->SetAxis(axis_);
+        }
     }
 
 private:

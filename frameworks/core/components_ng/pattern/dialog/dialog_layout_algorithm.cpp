@@ -47,7 +47,6 @@ namespace OHOS::Ace::NG {
 namespace {
 
 // Using UX spec: Constrain max height within 4/5 of screen height.
-// TODO: move these values to theme.
 constexpr double DIALOG_HEIGHT_RATIO_FOR_LANDSCAPE = 0.9;
 constexpr double DIALOG_HEIGHT_RATIO_FOR_CAR = 0.95;
 constexpr double DIALOG_MAX_HEIGHT_RATIO = 0.9;
@@ -336,7 +335,7 @@ void DialogLayoutAlgorithm::ComputeInnerLayoutParam(LayoutConstraintF& innerLayo
     CHECK_EQUAL_VOID(ComputeInnerLayoutSizeParam(innerLayout, dialogProp), true);
     auto maxSize = innerLayout.maxSize;
     // Set different layout param for different devices
-    // TODO: need to use theme json to replace this function.
+    // need to use theme json to replace this function.
     // get grid size type based on the screen where the dialog locate
     auto gridSizeType = ScreenSystemManager::GetInstance().GetSize(maxSize.Width());
     RefPtr<GridColumnInfo> columnInfo;
@@ -400,31 +399,31 @@ int32_t DialogLayoutAlgorithm::GetDeviceColumns(GridSizeType type, DeviceType de
     int32_t deviceColumns;
     if (deviceType == DeviceType::WATCH) {
         if (type == GridSizeType::SM) {
-            deviceColumns = 3;
+            deviceColumns = 3; // 3: the number of deviceColumns
         } else if (type == GridSizeType::MD) {
-            deviceColumns = 4;
+            deviceColumns = 4; // 4: the number of deviceColumns
         } else {
-            deviceColumns = 5;
+            deviceColumns = 5; // 5: the number of deviceColumns
         }
     } else if (deviceType == DeviceType::PHONE) {
         if (type == GridSizeType::SM) {
-            deviceColumns = 4;
+            deviceColumns = 4; // 4: the number of deviceColumns
         } else if (type == GridSizeType::MD) {
-            deviceColumns = 5;
+            deviceColumns = 5; // 5: the number of deviceColumns
         } else {
-            deviceColumns = 6;
+            deviceColumns = 6; // 6: the number of deviceColumns
         }
     } else if (deviceType == DeviceType::CAR) {
         if (type == GridSizeType::SM) {
-            deviceColumns = 4;
+            deviceColumns = 4; // 4: the number of deviceColumns
         } else if (type == GridSizeType::MD) {
-            deviceColumns = 6;
+            deviceColumns = 6; // 6: the number of deviceColumns
         } else {
-            deviceColumns = 8;
+            deviceColumns = 8; // 8: the number of deviceColumns
         }
     } else if (deviceType == DeviceType::TABLET && type == GridSizeType::MD &&
                Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        deviceColumns = 5;
+        deviceColumns = 5; // 5: the number of deviceColumns
     } else {
         deviceColumns = GetDeviceColumn(type);
     }
@@ -742,7 +741,7 @@ bool DialogLayoutAlgorithm::SetAlignmentSwitchLessThanAPITwelve(const SizeF& max
 
 void DialogLayoutAlgorithm::UpdateTouchRegion()
 {
-    // TODO: update touch region is not completed.
+    //update touch region is not completed.
 }
 
 double DialogLayoutAlgorithm::GetPaddingBottom() const

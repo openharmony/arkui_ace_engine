@@ -45,7 +45,7 @@ enum class SpanType {
 
 struct SpanParagraphStyle {
     std::optional<TextAlign> align;
-    std::optional<uint32_t> maxLines;
+    std::optional<int32_t> maxLines;
     std::optional<WordBreak> wordBreak;
     std::optional<TextOverflow> textOverflow;
     std::optional<NG::LeadingMargin> leadingMargin;

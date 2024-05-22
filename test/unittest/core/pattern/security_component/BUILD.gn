@@ -16,7 +16,10 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ohos_unittest("security_component_test_ng") {
   module_out_path = pattern_test_output_path
 
-  sources = [ "security_component_test_ng.cpp" ]
+  sources = [
+    "security_component_test_ng.cpp",
+    "security_component_test_ng_extension.cpp",
+  ]
 
   deps = [
     "$ace_root/frameworks/core/components/theme:build_theme_code",

@@ -287,12 +287,14 @@ void AceViewOhos::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& po
     TouchEvent touchPoint = ConvertTouchEvent(pointerEvent);
     touchPoint.SetIsInjected(isInjected);
     if (SystemProperties::GetDebugEnabled()) {
-        ACE_SCOPED_TRACE("ProcessTouchEvent pointX=%f pointY=%f type=%d timeStamp=%lld id=%d", touchPoint.x,
-            touchPoint.y, (int)touchPoint.type, touchPoint.time.time_since_epoch().count(), touchPoint.id);
+        ACE_SCOPED_TRACE("ProcessTouchEvent pointX=%f pointY=%f type=%d timeStamp=%lld id=%d eventId=%d", touchPoint.x,
+            touchPoint.y, (int)touchPoint.type, touchPoint.time.time_since_epoch().count(), touchPoint.id,
+            touchPoint.touchEventId);
     }
     auto markProcess = [touchPoint, finallyCallback = callback, enabled = pointerEvent->IsMarkEnabled()]() {
-        if (touchPoint.type != TouchType::MOVE) {
-            TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "touchEvent markProcessed in ace_view, eventInfo: id:%{public}d",
+        if (touchPoint.type != TouchType::MOVE && touchPoint.type != TouchType::PULL_MOVE &&
+            touchPoint.type != TouchType::HOVER_MOVE) {
+            TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "touchEvent markProcessed in ace_view, eventInfo: id:%{public}d",
                 touchPoint.touchEventId);
         }
         MMI::InputManager::GetInstance()->MarkProcessed(touchPoint.touchEventId,
@@ -368,7 +370,16 @@ void AceViewOhos::ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>& po
         markEnabled = pointerEvent->IsMarkEnabled();
     }
     event.isInjected = isInjected;
+    if (SystemProperties::GetDebugEnabled()) {
+        ACE_SCOPED_TRACE("ProcessMouseEvent pointX=%f pointY=%f type=%d timeStamp=%lld id=%d eventId=%d", event.x,
+            event.y, (int)event.action, event.time.time_since_epoch().count(), event.id, event.touchEventId);
+    }
     auto markProcess = [event, markEnabled]() {
+        if (event.action != MouseAction::MOVE && event.action != MouseAction::HOVER_MOVE &&
+            event.action != MouseAction::PULL_MOVE) {
+            TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "mouseEvent markProcessed in ace_view, eventInfo: id:%{public}d",
+                event.touchEventId);
+        }
         MMI::InputManager::GetInstance()->MarkProcessed(event.touchEventId,
             std::chrono::duration_cast<std::chrono::microseconds>(event.time.time_since_epoch()).count(),
             markEnabled);

@@ -309,18 +309,18 @@ void TextFieldOverlayModifier::PaintPreviewTextDecoration(DrawingContext& contex
         canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     }
 
-    RSPen pen;
-    pen.SetColor(ToRSColor(previewTextDecorationColor_->Get()));
-    pen.SetWidth(textFieldPattern->GetPreviewUnderlineWidth());
-    pen.SetAntiAlias(true);
-    canvas.AttachPen(pen);
+    auto underlineWidth = textFieldPattern->GetPreviewUnderlineWidth();
+    RSBrush brush;
+    brush.SetAntiAlias(true);
+    brush.SetColor(ToRSColor(previewTextDecorationColor_->Get()));
+    canvas.AttachBrush(brush);
     for (const auto& drawRect : previewTextRect) {
-        Point leftPoint(drawRect.Left() + offsetX, drawRect.Bottom() + offsetY);
-        Point rightPoint(drawRect.Right() + offsetX, drawRect.Bottom() + offsetY);
-        canvas.DrawLine(ToRSPoint(PointF(leftPoint.GetX(), leftPoint.GetY())),
-            ToRSPoint(PointF(rightPoint.GetX(), rightPoint.GetY())));
+        RSRect rect(drawRect.Left() + offsetX, drawRect.Bottom() + offsetY - underlineWidth,
+                drawRect.Right() + offsetX, drawRect.Bottom() + offsetY);
+        canvas.DrawRoundRect(RSRoundRect(rect, underlineWidth / 2, underlineWidth / 2));
     }
-    canvas.DetachPen();
+    canvas.DetachBrush();
+    canvas.Restore();
 }
 
 void TextFieldOverlayModifier::SetCursorColor(Color& value)

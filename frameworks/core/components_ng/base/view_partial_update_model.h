@@ -48,6 +48,7 @@ struct NodeInfoPU {
     std::function<void(RefPtr<NG::CustomNodeBase>)> recycleCustomNodeFunc;
     std::function<void(bool)> setActiveFunc;
     std::function<void(const std::vector<std::string>&)> onDumpInfoFunc;
+    std::function<std::string()> onDumpInspectorFunc;
     std::function<void*()> getThisFunc;
 
     bool hasMeasureOrLayout = false;

@@ -20,11 +20,11 @@ class MeasureText {
     constructor() { }
 
     static measureText(options) {
-        __measure__.measureText(options)
+        return __measure__.measureText(options)
     }
 
     static measureTextSize(options) {
-        __measure__.measureTextSize(options)
+        return __measure__.measureTextSize(options)
     }
 }
 

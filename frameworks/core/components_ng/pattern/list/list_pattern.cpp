@@ -912,7 +912,6 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
         }
         return false;
     }
-    UpdateFrameSizeToWeb();
     SetScrollSource(source);
     FireAndCleanScrollingListener();
     auto lastDelta = currentDelta_;
@@ -2402,20 +2401,6 @@ std::vector<RefPtr<FrameNode>> ListPattern::GetVisibleSelectedItems()
         children.emplace_back(itemFrameNode);
     }
     return children;
-}
-
-void ListPattern::registerSlideUpdateListener(const std::shared_ptr<ISlideUpdateCallback>& listener)
-{
-    listenerVector_.emplace_back(listener);
-}
-
-void ListPattern::UpdateFrameSizeToWeb()
-{
-    for (auto listenerItem : listenerVector_) {
-        if (listenerItem) {
-            listenerItem->OnSlideUpdate();
-        }
-    }
 }
 
 RefPtr<ListChildrenMainSize> ListPattern::GetOrCreateListChildrenMainSize()

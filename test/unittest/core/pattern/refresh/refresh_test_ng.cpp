@@ -174,6 +174,8 @@ HWTEST_F(RefreshTestNg, RefreshNestedSwiper001, TestSize.Level1)
     auto result = swiperPattern_->HandleScrollVelocity(5.f);
     EXPECT_TRUE(result);
     result = pattern_->HandleScrollVelocity(5.f);
+    EXPECT_TRUE(result);
+    result = pattern_->HandleScrollVelocity(-5.f);
     EXPECT_FALSE(result);
 
     /**

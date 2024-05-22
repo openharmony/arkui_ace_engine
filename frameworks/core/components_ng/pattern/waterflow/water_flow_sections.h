@@ -40,6 +40,12 @@ public:
             return !(*this == other);
         }
 
+        bool OnlyCountChange(const Section& other) const
+        {
+            return crossCount == other.crossCount && columnsGap == other.columnsGap && rowsGap == other.rowsGap &&
+                   margin == other.margin;
+        }
+
         int32_t itemsCount = 0;
         std::optional<int32_t> crossCount;
         GetItemMainSizeByIndex onGetItemMainSizeByIndex;
@@ -54,9 +60,12 @@ public:
     {
         onSectionDataChange_ = func;
     }
-
+    void SetOnDataChangeNow(std::function<void(int32_t start)>&& func)
+    {
+        onSectionDataChangeNow_ = func;
+    }
     void ChangeData(int32_t start, int32_t deleteCount, const std::vector<Section>& newSections);
-
+    void ChangeDataNow(int32_t start, int32_t deleteCount, const std::vector<Section>& newSections);
     const std::vector<Section>& GetSectionInfo() const
     {
         return sections_;
@@ -68,13 +77,16 @@ public:
      * @return true only if itemCount in the modified section has changed and everything else remains the same.
      */
     bool IsSpecialUpdate() const;
-
+    bool IsSpecialUpdateCAPI(int32_t updateIndex) const;
 private:
     // {first changed section, index of that section}
     // for comparing and handling special update case
     std::optional<std::pair<Section, int32_t>> prevSection_;
     std::vector<Section> sections_;
+    // for comparing and handling special case
+    std::vector<Section> prevSections_;
     std::function<void(int32_t start)> onSectionDataChange_;
+    std::function<void(int32_t start)> onSectionDataChangeNow_;
 };
 
 } // namespace OHOS::Ace::NG

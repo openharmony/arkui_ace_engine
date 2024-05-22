@@ -148,10 +148,7 @@ OffsetF RichEditorOverlayModifier::GetCaretOffset() const
 
 void RichEditorOverlayModifier::PaintPreviewTextDecoration(DrawingContext& drawingContext) const
 {
-    if (!showPreviewTextDecoration_->Get()) {
-        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "not show PreviewTextDecoration");
-        return;
-    }
+    CHECK_NULL_VOID(showPreviewTextDecoration_->Get());
     if (previewTextStyle_ != PreviewTextStyle::UNDERLINE) {
         TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "is not UNDERLINE style");
         return;
@@ -161,18 +158,19 @@ void RichEditorOverlayModifier::PaintPreviewTextDecoration(DrawingContext& drawi
 
     auto previewTextDecorationColor = ToRSColor(previewTextDecorationColor_->Get());
     auto previewTextUnderlineWidth = previewTextUnderlineWidth_->Get();
+    auto roundRectRadius = previewTextUnderlineWidth / 2;
     auto previewTextRects = pattern->GetPreviewTextRects();
     drawingContext.canvas.Save();
-    RSPen pen;
-    pen.SetColor(previewTextDecorationColor);
-    pen.SetWidth(previewTextUnderlineWidth);
-    drawingContext.canvas.AttachPen(pen);
+    RSBrush brush;
+    brush.SetAntiAlias(true);
+    brush.SetColor(previewTextDecorationColor);
+    drawingContext.canvas.AttachBrush(brush);
     for (const auto& previewTextRect : previewTextRects) {
-        drawingContext.canvas.DrawLine(
-            ToRSPoint(PointF(previewTextRect.Left(), previewTextRect.Bottom() - previewTextUnderlineWidth)),
-            ToRSPoint(PointF(previewTextRect.Right(), previewTextRect.Bottom() - previewTextUnderlineWidth)));
+        RSRect rect(previewTextRect.Left(), previewTextRect.Bottom() - previewTextUnderlineWidth,
+            previewTextRect.Right(), previewTextRect.Bottom());
+        drawingContext.canvas.DrawRoundRect(RSRoundRect(rect, roundRectRadius, roundRectRadius));
     }
-    drawingContext.canvas.DetachPen();
+    drawingContext.canvas.DetachBrush();
     drawingContext.canvas.Restore();
 }
 

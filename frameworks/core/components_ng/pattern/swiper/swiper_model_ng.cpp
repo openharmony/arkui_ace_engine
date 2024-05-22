@@ -275,22 +275,32 @@ void SwiperModelNG::SetMainSwiperSizeHeight() {}
 
 void SwiperModelNG::SetPreviousMargin(const Dimension& prevMargin, bool ignoreBlank)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, PrevMargin, prevMargin);
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(swiperNode);
     auto pattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetPrevMarginIgnoreBlank(ignoreBlank);
+    if (pattern->GetDirection() == Axis::HORIZONTAL && AceApplicationInfo::GetInstance().IsRightToLeft()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMargin, prevMargin);
+        pattern->SetNextMarginIgnoreBlank(ignoreBlank);
+    } else  {
+        ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, PrevMargin, prevMargin);
+        pattern->SetPrevMarginIgnoreBlank(ignoreBlank);
+    }
 }
 
 void SwiperModelNG::SetNextMargin(const Dimension& nextMargin, bool ignoreBlank)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMargin, nextMargin);
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(swiperNode);
     auto pattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetNextMarginIgnoreBlank(ignoreBlank);
+    if (pattern->GetDirection() == Axis::HORIZONTAL && AceApplicationInfo::GetInstance().IsRightToLeft()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, PrevMargin, nextMargin);
+        pattern->SetPrevMarginIgnoreBlank(ignoreBlank);
+    } else  {
+        ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMargin, nextMargin);
+        pattern->SetNextMarginIgnoreBlank(ignoreBlank);
+    }
 }
 
 void SwiperModelNG::SetIndicatorInteractive(FrameNode* frameNode, bool interactive)
@@ -386,6 +396,14 @@ void SwiperModelNG::SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidSc
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(swiperNode);
     auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnContentDidScroll(std::move(onContentDidScroll));
+}
+
+void SwiperModelNG::SetOnContentDidScroll(FrameNode* frameNode, ContentDidScrollEvent&& onContentDidScroll)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetOnContentDidScroll(std::move(onContentDidScroll));
 }
@@ -753,6 +771,17 @@ void SwiperModelNG::SetSwiperToIndex(FrameNode* frameNode, int32_t index, bool u
 
 float SwiperModelNG::GetPreviousMargin(FrameNode* frameNode, int32_t unit)
 {
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    if (swiperNode != nullptr) {
+        auto pattern = swiperNode->GetPattern<SwiperPattern>();
+        if (pattern != nullptr && pattern->GetDirection() == Axis::HORIZONTAL &&
+            AceApplicationInfo::GetInstance().IsRightToLeft()) {
+            Dimension nextMargin(0.0f, static_cast<DimensionUnit>(unit));
+            ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+                SwiperLayoutProperty, NextMargin, nextMargin, frameNode, nextMargin);
+            return nextMargin.Value();
+        }
+    }
     Dimension prevMargin(0.0f, static_cast<DimensionUnit>(unit));
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
         SwiperLayoutProperty, PrevMargin, prevMargin, frameNode, prevMargin);
@@ -761,6 +790,17 @@ float SwiperModelNG::GetPreviousMargin(FrameNode* frameNode, int32_t unit)
 
 float SwiperModelNG::GetNextMargin(FrameNode* frameNode, int32_t unit)
 {
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    if (swiperNode != nullptr) {
+        auto pattern = swiperNode->GetPattern<SwiperPattern>();
+        if (pattern != nullptr && pattern->GetDirection() == Axis::HORIZONTAL &&
+            AceApplicationInfo::GetInstance().IsRightToLeft()) {
+            Dimension prevMargin(0.0f, static_cast<DimensionUnit>(unit));
+            ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+                SwiperLayoutProperty, PrevMargin, prevMargin, frameNode, prevMargin);
+            return prevMargin.Value();
+        }
+    }
     Dimension nextMargin(0.0f, static_cast<DimensionUnit>(unit));
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
         SwiperLayoutProperty, NextMargin, nextMargin, frameNode, nextMargin);

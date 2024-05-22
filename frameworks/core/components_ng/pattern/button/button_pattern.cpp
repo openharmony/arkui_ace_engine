@@ -625,11 +625,12 @@ void ButtonPattern::FireBuilder()
     } else {
         gestureEventHub->SetRedirectClick(true);
     }
-    if (contentModifierNode_ == BuildContentModifierNode()) {
+    auto builderNode = BuildContentModifierNode();
+    if (contentModifierNode_ == builderNode) {
         return;
     }
     host->RemoveChildAndReturnIndex(contentModifierNode_);
-    contentModifierNode_ = BuildContentModifierNode();
+    contentModifierNode_ = builderNode;
     CHECK_NULL_VOID(contentModifierNode_);
     nodeId_ = contentModifierNode_->GetId();
     host->AddChild(contentModifierNode_, 0);
@@ -679,5 +680,24 @@ void ButtonPattern::OnColorConfigurationUpdate()
         textLayoutProperty->UpdateTextColor(buttonTheme->GetTextColor(buttonStyle, buttonRole));
         textNode->MarkDirtyNode();
     }
+}
+
+void ButtonPattern::SetBuilderFunc(ButtonMakeCallback&& makeFunc)
+{
+    if (makeFunc == nullptr) {
+        makeFunc_ = std::nullopt;
+        contentModifierNode_ = nullptr;
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        for (auto child : host->GetChildren()) {
+            auto childNode = DynamicCast<FrameNode>(child);
+            if (childNode) {
+                childNode->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+            }
+        }
+        OnModifyDone();
+        return;
+    }
+    makeFunc_ = std::move(makeFunc);
 }
 } // namespace OHOS::Ace::NG

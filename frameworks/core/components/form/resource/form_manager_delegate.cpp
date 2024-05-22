@@ -749,6 +749,10 @@ void FormManagerDelegate::HandleSnapshotCallback(const uint32_t& delayTime)
 
 void FormManagerDelegate::ReAddForm()
 {
+    {
+        std::lock_guard<std::mutex> lock(recycleMutex_);
+        recycleStatus_ = RecycleStatus::RECOVERED;
+    }
     formRendererDispatcher_ = nullptr; // formRendererDispatcher_ need reset, otherwise PointerEvent will disable
     auto clientInstance = OHOS::AppExecFwk::FormHostClient::GetInstance();
     auto ret =

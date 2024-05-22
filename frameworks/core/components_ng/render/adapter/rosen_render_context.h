@@ -166,6 +166,9 @@ public:
         rsNode_->SetVisible(visible);
     }
 
+    template<typename ModifierName, typename T>
+    void SetAnimatableProperty(std::shared_ptr<ModifierName>& modifier, const T& value);
+
     void FlushContentDrawFunction(CanvasDrawFunction&& contentDraw) override;
 
     void FlushForegroundDrawFunction(CanvasDrawFunction&& foregroundDraw) override;
@@ -376,6 +379,8 @@ public:
     void SavePaintRect(bool isRound = true, uint8_t flag = 0) override;
     void SyncPartialRsProperties() override;
     void UpdatePaintRect(const RectF& paintRect) override;
+    Matrix4 GetRevertMatrix() override;
+    void SuggestOpIncNode(bool isOpincNode, bool isNeedCalculate) override;
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -471,7 +476,6 @@ private:
     void OnTransitionInFinish();
     void OnTransitionOutFinish();
     void RemoveDefaultTransition();
-    static void GetBestBreakPoint(RefPtr<UINode>& breakPointChild, RefPtr<UINode>& breakPointParent);
     void SetTransitionPivot(const SizeF& frameSize, bool transitionIn);
     void SetPivot(float xPivot, float yPivot, float zPivot = 0.0f);
     void SetPositionToRSNode();
@@ -568,13 +572,13 @@ private:
     void RoundToPixelGrid(bool isRound, uint8_t flag);
     void OnePixelRounding();
     void OnePixelRounding(bool isRound, uint8_t flag);
-    Matrix4 GetRevertMatrix();
     Matrix4 GetMatrix();
     Matrix4 GetMatrixWithTransformRotate();
     bool IsUniRenderEnabled() override;
     void AddFrameNodeInfoToRsNode();
     // Use rect to update the drawRegion rect at index.
     void UpdateDrawRegion(uint32_t index, const std::shared_ptr<Rosen::RectF>& rect);
+    void NotifyHostTransformUpdated();
 
     void InitAccessibilityFocusModidifer(const RoundRect&, const Color&, float);
 
@@ -588,12 +592,13 @@ private:
     std::shared_ptr<Rosen::RSNode> CreateHardwareTexture(
         const std::optional<ContextParam>& param, bool isTextureExportNode);
 #endif
-    
+
     RefPtr<ImageLoadingContext> bgLoadingCtx_;
     RefPtr<CanvasImage> bgImage_;
     RefPtr<ImageLoadingContext> bdImageLoadingCtx_;
     RefPtr<CanvasImage> bdImage_;
 
+    PatternType patternType_ = PatternType::DEFAULT;
     std::shared_ptr<Rosen::RSNode> rsNode_;
     bool isHdr_ = false;
     bool isHoveredScale_ = false;
@@ -634,10 +639,14 @@ private:
     std::unique_ptr<SharedTransitionModifier> sharedTransitionModifier_;
     std::shared_ptr<OverlayTextModifier> modifier_ = nullptr;
     std::shared_ptr<GradientStyleModifier> gradientStyleModifier_;
+    // translate and scale modifier for developer
+    std::shared_ptr<Rosen::RSTranslateModifier> translateXYUserModifier_;
+    std::shared_ptr<Rosen::RSTranslateZModifier> translateZUserModifier_;
+    std::shared_ptr<Rosen::RSScaleModifier> scaleXYUserModifier_;
     std::shared_ptr<Rosen::RectF> drawRegionRects_[DRAW_REGION_RECT_COUNT] = { nullptr };
     RefPtr<FocusAnimationModifier> focusAnimationModifier_;
 
-    // translate modifiers for developer
+    // translate modifiers for interruption
     std::shared_ptr<Rosen::RSTranslateModifier> translateXY_;
 
     std::optional<OffsetF> frameOffset_;

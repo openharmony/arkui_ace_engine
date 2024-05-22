@@ -209,7 +209,11 @@ void JSScroll::OnScrollCallback(const JSCallbackInfo& args)
 
 void JSScroll::OnWillScrollCallback(const JSCallbackInfo& args)
 {
-    if (args.Length() > 0 && args[0]->IsFunction()) {
+    if (args.Length() <= 0) {
+        return;
+    }
+
+    if (args[0]->IsFunction()) {
         auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
                             const Dimension& xOffset, const Dimension& yOffset, const ScrollState& scrollState,
                             ScrollSource scrollSource) {
@@ -237,6 +241,8 @@ void JSScroll::OnWillScrollCallback(const JSCallbackInfo& args)
             return scrollRes;
         };
         ScrollModel::GetInstance()->SetOnWillScroll(std::move(onScroll));
+    } else {
+        ScrollModel::GetInstance()->SetOnWillScroll(nullptr);
     }
 }
 
@@ -349,7 +355,9 @@ void JSScroll::JSBind(BindingTarget globalObj)
     JSClass<JSScroll>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSScroll>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSScroll>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSScroll>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSScroll>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSScroll>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSScroll>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSScroll>::StaticMethod("edgeEffect", &JSScroll::SetEdgeEffect, opt);
     JSClass<JSScroll>::StaticMethod("scrollBar", &JSScroll::SetScrollBar, opt);

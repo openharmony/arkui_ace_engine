@@ -567,6 +567,13 @@ void ImagePattern::LoadImage(const ImageSourceInfo& src)
     if (onProgressCallback_) {
         loadingCtx_->SetOnProgressCallback(std::move(onProgressCallback_));
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProp = host->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(layoutProp);
+    if (!((layoutProp->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE) == PROPERTY_UPDATE_MEASURE)) {
+        loadingCtx_->FinishMearuse();
+    }
     loadingCtx_->LoadImageData();
 }
 
@@ -857,9 +864,7 @@ void ImagePattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
 
 void ImagePattern::OnNotifyMemoryLevel(int32_t level)
 {
-    // TODO: do different data cleaning operation according to level
     // when image component is [onShow], do not clean image data
-    // TODO: use [isActive_] to determine image data management
     if (isShow_) {
         return;
     }
@@ -871,7 +876,6 @@ void ImagePattern::OnNotifyMemoryLevel(int32_t level)
     altImage_ = nullptr;
 
     // clean rs node to release the sk_sp<SkImage> held by it
-    // TODO: release PixelMap resource when use PixelMap resource to draw image
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     auto rsRenderContext = frameNode->GetRenderContext();

@@ -121,12 +121,12 @@ RefPtr<FrameNode> ContainerModalViewEnhance::Create(RefPtr<FrameNode>& content)
     stack->AddChild(content);
     column->AddChild(stack);
     column->AddChild(BuildGestureRow(containerModalNode));
+    auto containerPattern = containerModalNode->GetPattern<ContainerModalPatternEnhance>();
+    CHECK_NULL_RETURN(containerPattern, nullptr);
+    SetContainerModalPattern(containerPattern);
     containerModalNode->AddChild(column);
     containerModalNode->AddChild(BuildTitle(containerModalNode, true));
     containerModalNode->AddChild(AddControlButtons(containerModalNode, controlButtonsRow));
-
-    auto containerPattern = containerModalNode->GetPattern<ContainerModalPatternEnhance>();
-    CHECK_NULL_RETURN(containerPattern, nullptr);
     containerPattern->Init();
     return containerModalNode;
 }

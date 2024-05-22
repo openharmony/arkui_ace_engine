@@ -18,6 +18,7 @@ import hilog from '@ohos.hilog';
 import { KeyCode } from '@ohos.multimodalInput.keyCode';
 import resourceManager from '@ohos.resourceManager';
 import { Theme } from '@ohos.arkui.theme';
+import { LengthMetrics } from '@ohos.arkui.node';
 
 export enum EditableLeftIconType {
   Back,
@@ -172,7 +173,7 @@ export struct EditableTitleBar {
           bottom: $r('sys.float.titlebar_padding_bottom'),
         })
         .margin({
-          left: $r('sys.float.titlebar_icon_background_space_horizontal'),
+          start: LengthMetrics.vp(EditableTitleBar.titlePadding),
         })
         .alignItems(HorizontalAlign.Start)
         .constraintSize({ maxWidth: this.titleMaxWidth })
@@ -187,8 +188,8 @@ export struct EditableTitleBar {
         minHeight: EditableTitleBar.totalHeight,
       })
       .margin({
-        left: EditableTitleBar.leftMargin,
-        right: EditableTitleBar.rightMargin,
+        start: LengthMetrics.vp(EditableTitleBar.leftMargin),
+        end: LengthMetrics.vp(EditableTitleBar.rightMargin),
       })
     }
     .width('100%')
@@ -398,12 +399,13 @@ struct ImageMenuItem {
         .fillColor(this.editableTitleBarTheme.iconColor)
         .focusable(this.item.isEnabled)
         .enabled(this.item.isEnabled)
+        .matchTextDirection(this.item.value == PUBLIC_BACK ? true : false)
     }
     .backgroundButtonStyle()
     .borderRadius($r('sys.float.titlebar_icon_background_shape'))
     .margin({
-      left: this.attribute === ItemType.LeftIcon ? EditableTitleBar.commonZero :
-      ImageMenuItem.iconBackgroundSpaceHorizontal,
+      start: LengthMetrics.vp(this.attribute === ItemType.LeftIcon ? EditableTitleBar.commonZero :
+      ImageMenuItem.iconBackgroundSpaceHorizontal),
     })
     .foregroundColor(this.getFgColor())
     .backgroundColor(this.getBgColor())
@@ -430,7 +432,7 @@ struct ImageMenuItem {
         .buttonEventStyle()
     }
     .margin({
-      left: ImageMenuItem.iconBackgroundSpaceHorizontal,
+      start: LengthMetrics.vp(ImageMenuItem.iconBackgroundSpaceHorizontal),
     })
   }
 

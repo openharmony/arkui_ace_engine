@@ -168,20 +168,7 @@ public:
 
     void GetGlobalOffset(Offset& offset);
 
-    RectF GetTextContentRect() const override
-    {
-        auto textRect = contentRect_;
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, textRect);
-        auto renderContext = host->GetRenderContext();
-        CHECK_NULL_RETURN(renderContext, textRect);
-        CHECK_NULL_RETURN(pManager_, textRect);
-        if (!renderContext->GetClipEdge().value_or(true) &&
-            LessNotEqual(textRect.Width(), pManager_->GetLongestLine())) {
-            textRect.SetWidth(pManager_->GetLongestLine());
-        }
-        return textRect;
-    }
+    RectF GetTextContentRect(bool isActualText = false) const override;
 
     float GetBaselineOffset() const
     {
@@ -348,6 +335,7 @@ public:
     ResultObject GetTextResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
     ResultObject GetSymbolSpanResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
     ResultObject GetImageResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
+    std::string GetFontInJson() const;
 
     const std::vector<std::string>& GetDragContents() const
     {
@@ -507,6 +495,8 @@ public:
         selectionMenuMap_.clear();
     }
 
+    virtual const std::list<RefPtr<UINode>>& GetAllChildren() const;
+
     void HandleSelectionChange(int32_t start, int32_t end);
 
     CopyOptions GetCopyOptions() const
@@ -591,7 +581,28 @@ public:
     {
         return childNodes_;
     }
+    // add for capi NODE_TEXT_CONTENT_WITH_STYLED_STRING
+    void SetExternalParagraph(void* paragraph)
+    {
+        externalParagraph_ = paragraph;
+    }
 
+    const std::optional<void*>& GetExternalParagraph()
+    {
+        return externalParagraph_;
+    }
+
+    void SetExternalSpanItem(const std::list<RefPtr<SpanItem>>& spans);
+
+    void SetExternalParagraphStyle(std::optional<ParagraphStyle> paragraphStyle)
+    {
+        externalParagraphStyle_ = paragraphStyle;
+    }
+
+    std::optional<ParagraphStyle> GetExternalParagraphStyle()
+    {
+        return externalParagraphStyle_;
+    }
 protected:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
@@ -630,6 +641,13 @@ protected:
     bool CalculateClickedSpanPosition(const PointF& textOffset);
     void HiddenMenu();
     std::shared_ptr<SelectionMenuParams> GetMenuParams(TextSpanType type, TextResponseType responseType);
+    void InitKeyEvent();
+    bool HandleKeyEvent(const KeyEvent& keyEvent);
+    void HandleOnSelect(KeyCode code);
+    void HandleSelectionUp(int32_t start, int32_t end);
+    void HandleSelectionDown(int32_t start, int32_t end);
+    void HandleSelection(int32_t start, int32_t end);
+    float GetTextHeight();
 
     virtual bool CanStartAITask()
     {
@@ -658,6 +676,7 @@ protected:
     bool focusInitialized_ = false;
     bool hoverInitialized_ = false;
     bool isSpanStringMode_ = false;
+    bool keyEventInitialized_ = false;
 
     RefPtr<FrameNode> dragNode_;
     RefPtr<LongPressEvent> longPressEvent_;
@@ -671,6 +690,7 @@ protected:
     std::string textForDisplay_;
     std::optional<TextStyle> textStyle_;
     std::list<RefPtr<SpanItem>> spans_;
+    mutable std::list<RefPtr<UINode>> childNodes_;
     float baselineOffset_ = 0.0f;
     int32_t placeholderCount_ = 0;
     SelectMenuInfo selectMenuInfo_;
@@ -700,6 +720,7 @@ private:
     bool IsShowHandle();
     void SetAccessibilityAction();
     void CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanHasClick);
+    void CollectTextSpanNodes(const RefPtr<SpanNode>& child, bool& isSpanHasClick);
     void UpdateContainerChildren(const RefPtr<UINode>& parent, const RefPtr<UINode>& child);
     RefPtr<RenderContext> GetRenderContext();
     void ProcessBoundRectByTextShadow(RectF& rect);
@@ -776,12 +797,13 @@ private:
     int32_t dragRecordSize_ = -1;
     RefPtr<TextController> textController_;
     TextSpanType oldSelectedType_ = TextSpanType::NONE;
-    std::list<RefPtr<UINode>> childNodes_;
     bool isShowMenu_ = true;
     RefPtr<TextSelectOverlay> selectOverlay_;
     std::vector<WeakPtr<FrameNode>> imageNodeList_;
     std::vector<CustomSpanPlaceholderInfo> customSpanPlaceholder_;
     bool isDetachFromMainTree_ = false;
+    std::optional<void*> externalParagraph_;
+    std::optional<ParagraphStyle> externalParagraphStyle_;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
 };
 } // namespace OHOS::Ace::NG

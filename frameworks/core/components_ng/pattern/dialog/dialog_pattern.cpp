@@ -123,6 +123,13 @@ void DialogPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddWindowSizeChangeCallback(host->GetId());
     InitHostWindowRect();
+    auto foldModeChangeCallback =  [weak = WeakClaim(this)](FoldDisplayMode foldDisplayMode) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->isFoldStatusChanged_ = true;
+    };
+    auto callbackId = pipelineContext->RegisterFoldDisplayModeChangedCallback(std::move(foldModeChangeCallback));
+    UpdateFoldDisplayModeChangedCallbackId(callbackId);
 }
 
 void DialogPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -130,6 +137,9 @@ void DialogPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
+    if (HasFoldDisplayModeChangedCallbackId()) {
+        pipeline->UnRegisterFoldDisplayModeChangedCallback(foldDisplayModeChangedCallbackId_.value_or(-1));
+    }
 }
 
 void DialogPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -260,6 +270,8 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
         BorderWidthProperty borderWidth;
         Dimension width = dialogTheme_->GetBackgroudBorderWidth();
         borderWidth.SetBorderWidth(width);
+        auto layoutProps = contentNode->GetLayoutProperty<LinearLayoutProperty>();
+        layoutProps->UpdateBorderWidth(borderWidth);
         contentRenderContext->UpdateBorderWidth(borderWidth);
     }
     if (props.borderStyle.has_value()) {
@@ -319,12 +331,11 @@ RefPtr<FrameNode> DialogPattern::CreateDialogScroll(const DialogProperties& dial
     props->UpdateAxis(Axis::VERTICAL);
     props->UpdateAlignment(Alignment::CENTER_LEFT);
     // If title not exist, set scroll align center so that text align center.
-    if ((dialogProps.title.empty() && dialogProps.subtitle.empty()) ||
-        SystemProperties::GetDeviceType() == DeviceType::WATCH) {
-        props->UpdateAlignSelf(FlexAlign::CENTER);
-    } else {
-        props->UpdateAlignSelf(FlexAlign::FLEX_START);
+    auto scrollFlexAlign = dialogTheme_->GetScrollFlexAlign();
+    if ((dialogProps.title.empty() && dialogProps.subtitle.empty())) {
+        scrollFlexAlign = FlexAlign::CENTER;
     }
+    props->UpdateAlignSelf(scrollFlexAlign);
     return scroll;
 }
 
@@ -379,12 +390,8 @@ void DialogPattern::BuildChild(const DialogProperties& props)
     auto columnProp = AceType::DynamicCast<LinearLayoutProperty>(contentColumn->GetLayoutProperty());
     CHECK_NULL_VOID(columnProp);
     // content is full screen in Watch mode
-    auto deviceType = SystemProperties::GetDeviceType();
-    if (deviceType == DeviceType::WATCH) {
-        columnProp->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    } else {
-        columnProp->UpdateMeasureType(MeasureType::MATCH_CONTENT);
-    }
+    auto measureType = dialogTheme_->GetColumnMeasureType();
+    columnProp->UpdateMeasureType(measureType);
 
     // build ActionSheet child
     if (props.type == DialogType::ACTION_SHEET && !props.sheetsInfo.empty()) {
@@ -643,9 +650,6 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
         V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<ButtonPattern>());
     CHECK_NULL_RETURN(buttonNode, nullptr);
     UpdateDialogButtonProperty(buttonNode, index, isVertical, length);
-    auto buttonProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_RETURN(buttonProp, nullptr);
-    buttonProp->UpdateLabel(params.text);
     // parse button text color and background color
     std::string textColor;
     std::optional<Color> bgColor;
@@ -657,9 +661,6 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
     textNode->MountToParent(buttonNode);
     textNode->MarkModifyDone();
     SetButtonEnabled(buttonNode, params.enabled);
-    auto buttonNodeFocus = buttonNode->GetOrCreateFocusHub();
-    CHECK_NULL_RETURN(buttonNodeFocus, nullptr);
-    buttonNodeFocus->SetIsDefaultFocus(params.defaultFocus);
     auto hub = buttonNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(hub, nullptr);
     // bind click event
@@ -787,7 +788,6 @@ RefPtr<FrameNode> DialogPattern::BuildButtons(
     actionPadding.bottom = CalcLength(dialogTheme_->GetButtonPaddingBottom());
     container->GetLayoutProperty()->UpdatePadding(actionPadding);
     AddButtonAndDivider(buttons, container, isVertical);
-    container->GetOrCreateFocusHub()->SetFocusable(true);
     container->MarkModifyDone();
     buttonContainer_ = container;
     return container;
@@ -822,6 +822,7 @@ RefPtr<FrameNode> DialogPattern::CreateButtonText(const std::string& text, const
     auto textNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_RETURN(textNode, nullptr);
+    textNode->GetOrCreateFocusHub()->SetFocusable(true);
     auto textProps = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textProps, nullptr);
     textProps->UpdateContent(text);
@@ -1311,11 +1312,12 @@ void DialogPattern::DumpObjectProperty()
 }
 void DialogPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
-    if (type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::RESIZE) {
+    if (isFoldStatusChanged_ || type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::RESIZE) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         InitHostWindowRect();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        isFoldStatusChanged_ = false;
     }
 }
 

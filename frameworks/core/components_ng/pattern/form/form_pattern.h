@@ -138,6 +138,7 @@ private:
     void DeleteImageNodeAfterRecover();
     RefPtr<FrameNode> GetImageNode();
     void HandleStaticFormEvent(const PointF& touchPoint);
+    void ProcDeleteImageNode(bool isRecover);
 
     void InitClickEvent();
     void HandleTouchDownEvent(const TouchEventInfo& event);
@@ -175,6 +176,7 @@ private:
     TimeStamp touchDownTime_;
     bool shouldResponseClick_ = false;
     Offset lastTouchLocation_;
+    ColorMode colorMode = ColorMode::LIGHT;
 
     bool isFormObscured_ = false;
     bool isJsCard_ = true;

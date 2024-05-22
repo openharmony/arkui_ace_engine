@@ -36,18 +36,18 @@ class ArkThemeWhiteList {
         'Progress',
         'QRCode',
         'Radio',
-        "Scroll",
+        'Scroll',
         'Search',
         'Select',
         'Slider',
         'Swiper',
         'Text',
         'TextClock',
-        'TextPicker',
         'TextInput',
+        'TextPicker',
         'TimePicker',
         'Toggle',
-    ]
+    ];
 
     /**
      * Check whether component is in whitelist
@@ -72,3 +72,4 @@ class ArkThemeWhiteList {
         return false;
     }
 }
+

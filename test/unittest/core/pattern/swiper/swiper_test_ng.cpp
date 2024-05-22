@@ -38,7 +38,8 @@ void SwiperTestNg::SetUpTestSuite()
     themeConstants->currentThemeStyle_ = AceType::MakeRefPtr<ThemeStyle>();
     themeConstants->currentThemeStyle_->SetAttributes(attributes);
     // call Builder::Build to trigger ParsePattern to return error themeValue
-    auto swiperIndicatorTheme = SwiperIndicatorTheme::Builder().Build(themeConstants);
+    auto swiperIndicatorTheme = AceType::MakeRefPtr<SwiperIndicatorTheme>();
+    SwiperIndicatorTheme::Builder().ParsePattern(themeConstants, swiperIndicatorTheme);
     swiperIndicatorTheme->color_ = Color::FromString("#182431");
     swiperIndicatorTheme->selectedColor_ = Color::FromString("#007DFF");
     swiperIndicatorTheme->hoverArrowBackgroundColor_ = HOVER_ARROW_COLOR;

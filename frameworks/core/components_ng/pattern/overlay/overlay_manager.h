@@ -25,10 +25,12 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
+#include "base/utils/utils.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/picker/picker_data.h"
 #include "core/components_ng/animation/geometry_transition.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_type_define.h"
 #include "core/components_ng/pattern/overlay/content_cover_param.h"
@@ -377,7 +379,12 @@ public:
         std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack,
         const RefPtr<FrameNode>& targetNode);
     void CloseSheet(int32_t targetId);
-
+    void InitSheetMask(
+        const RefPtr<FrameNode>& maskNode, const RefPtr<FrameNode>& sheetNode, const SheetStyle& sheetStyle);
+    bool IsModalEmpty() const
+    {
+        return modalStack_.empty();
+    }
     void DismissSheet();
     void DismissContentCover();
     void SheetSpringBack();
@@ -386,7 +393,23 @@ public:
     {
         dismissTargetId_ = targetId;
     }
-
+    void SetDismissSheet(int32_t sheetId)
+    {
+        dismissSheetId_ = sheetId;
+    }
+    int32_t GetDismissSheet() const
+    {
+        return dismissSheetId_;
+    }
+    bool IsRootExpansive() const
+    {
+        auto rootNode = rootNodeWeak_.Upgrade();
+        CHECK_NULL_RETURN(rootNode, false);
+        auto layoutProp = DynamicCast<FrameNode>(rootNode)->GetLayoutProperty();
+        CHECK_NULL_RETURN(layoutProp, false);
+        const auto& opts = layoutProp->GetSafeAreaExpandOpts();
+        return opts && opts->Expansive();
+    }
     void RemoveSheetNode(const RefPtr<FrameNode>& sheetNode);
 
     void DestroySheet(const RefPtr<FrameNode>& sheetNode, int32_t targetId);
@@ -399,8 +422,6 @@ public:
     void PopTopModalNode();
 
     void DeleteModalNode(int32_t targetId, RefPtr<FrameNode>& modalNode, bool isModal, bool needOnWillDisappear);
-
-    void RemoveSheetMask(RefPtr<FrameNode>& sheetNode, RefPtr<UINode>& rootNode);
 
     void BindKeyboard(const std::function<void()>& keyboardBuilder, int32_t targetId);
     void BindKeyboardWithNode(const RefPtr<UINode>& keyboard, int32_t targetId);
@@ -466,6 +487,7 @@ public:
         const RefPtr<UINode>& windowScene);
     void RemoveGatherNode();
     void RemoveGatherNodeWithAnimation();
+    void UpdateGatherNodeToTop();
     RefPtr<FrameNode> GetGatherNode() const
     {
         return gatherNodeWeak_.Upgrade();
@@ -496,6 +518,7 @@ public:
             menuMap_.erase(targetId);
         }
     }
+    void DumpOverlayInfo() const;
 
 private:
     void PopToast(int32_t targetId);
@@ -591,14 +614,25 @@ private:
         std::optional<ModalTransition> modalTransition);
     void HandleModalPop(std::function<void()>&& onWillDisappear, const RefPtr<UINode> rootNode, int32_t targetId);
 
-    bool ExceptComponent(const RefPtr<NG::UINode>& rootNode, RefPtr<NG::FrameNode>& overlay,
+    int32_t ExceptComponent(const RefPtr<NG::UINode>& rootNode, RefPtr<NG::FrameNode>& overlay,
         bool isBackPressed, bool isPageRouter);
-    bool WebBackward(RefPtr<NG::FrameNode>& overlay);
+    int32_t WebBackward(RefPtr<NG::FrameNode>& overlay);
     void FindWebNode(const RefPtr<NG::UINode>& node, RefPtr<NG::FrameNode>& webNode);
 
     RefPtr<FrameNode> GetDialogNodeWithExistContent(const RefPtr<UINode>& node);
     void RegisterDialogLifeCycleCallback(const RefPtr<FrameNode>& dialog, const DialogProperties& dialogProps);
     void CustomDialogRecordEvent(const DialogProperties& dialogProps);
+    RefPtr<UINode> RebuildCustomBuilder(RefPtr<UINode>& contentNode);
+
+    void DumpPopupMapInfo() const;
+    void DumpMapInfo(
+        std::unordered_map<int32_t, RefPtr<FrameNode>> map, const std::string mapName, bool hasTarget = true) const;
+    void DumpMapInfo(
+        std::unordered_map<int32_t, WeakPtr<FrameNode>> map, const std::string mapName, bool hasTarget = true) const;
+    void DumpMaskNodeIdMapInfo() const;
+    void DumpModalListInfo() const;
+    void DumpEntry(const RefPtr<FrameNode>& targetNode, int32_t targetId, const RefPtr<FrameNode>& node) const;
+    std::string GetMapNodeLog(const RefPtr<FrameNode>& node, bool hasTarget = true) const;
 
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index
@@ -618,6 +652,7 @@ private:
     WeakPtr<UINode> rootNodeWeak_;
     int32_t dialogCount_ = 0;
     int32_t dismissTargetId_ = 0;
+    int32_t dismissSheetId_ = 0;
     int32_t dismissDialogId_ = 0;
     std::unordered_map<int32_t, int32_t> maskNodeIdMap_;
     int32_t subWindowId_ = -1;

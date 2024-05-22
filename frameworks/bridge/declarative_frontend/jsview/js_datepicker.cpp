@@ -307,7 +307,9 @@ void JSDatePicker::JSBind(BindingTarget globalObj)
     JSClass<JSDatePicker>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSDatePicker>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSDatePicker>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSDatePicker>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSDatePicker>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSDatePicker>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSDatePicker>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSDatePicker>::StaticMethod("disappearTextStyle", &JSDatePicker::SetDisappearTextStyle);
     JSClass<JSDatePicker>::StaticMethod("textStyle", &JSDatePicker::SetTextStyle);
@@ -436,6 +438,7 @@ void JSDatePicker::SetDisappearTextStyle(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle);
     }
+    JSDatePickerTheme::ObtainTextStyle(textStyle);
     DatePickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
 }
 
@@ -447,6 +450,7 @@ void JSDatePicker::SetTextStyle(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle);
     }
+    JSDatePickerTheme::ObtainTextStyle(textStyle);
     DatePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
 }
 
@@ -458,6 +462,7 @@ void JSDatePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle);
     }
+    JSDatePickerTheme::ObtainSelectedTextStyle(textStyle);
     DatePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
 }
 
@@ -1270,7 +1275,9 @@ void JSTimePicker::JSBind(BindingTarget globalObj)
     JSClass<JSTimePicker>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSTimePicker>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSTimePicker>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSTimePicker>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSTimePicker>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSTimePicker>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSTimePicker>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTimePicker>::StaticMethod("disappearTextStyle", &JSTimePicker::SetDisappearTextStyle);
     JSClass<JSTimePicker>::StaticMethod("textStyle", &JSTimePicker::SetTextStyle);
@@ -1357,6 +1364,7 @@ void JSTimePicker::SetDisappearTextStyle(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle);
     }
+    JSTimePickerTheme::ObtainTextStyle(textStyle);
     TimePickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
 }
 
@@ -1368,6 +1376,7 @@ void JSTimePicker::SetTextStyle(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle);
     }
+    JSTimePickerTheme::ObtainTextStyle(textStyle);
     TimePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
 }
 
@@ -1379,6 +1388,7 @@ void JSTimePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle);
     }
+    JSTimePickerTheme::ObtainSelectedTextStyle(textStyle);
     TimePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
 }
 

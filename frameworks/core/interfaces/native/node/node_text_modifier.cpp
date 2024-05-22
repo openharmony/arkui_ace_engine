@@ -28,6 +28,7 @@
 #include "frameworks/core/components_ng/pattern/text/text_model_ng.h"
 
 namespace OHOS::Ace::NG {
+constexpr int DEFAULT_SELECTION = -1;
 constexpr Dimension DEFAULT_LINE_HEIGHT = Dimension(0.0, DimensionUnit::PX);
 constexpr Dimension DEFAULT_LINE_SPACING = Dimension(0.0, DimensionUnit::PX);
 constexpr TextDecoration DEFAULT_TEXT_DECORATION = TextDecoration::NONE;
@@ -882,6 +883,92 @@ void ResetTextSelectedBackgroundColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextModelNG::ResetSelectedBackgroundColor(frameNode);
 }
+
+void SetTextContentWithStyledString(ArkUINodeHandle node, ArkUI_StyledString* styledString)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(styledString);
+    TextModelNG::SetTextContentWithStyledString(frameNode, styledString);
+}
+
+void ResetTextContentWithStyledString(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetTextContentWithStyledString(frameNode, nullptr);
+}
+
+void SetTextSelection(ArkUINodeHandle node, int32_t startIndex, int32_t endIndex)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetTextSelection(frameNode, startIndex, endIndex);
+}
+
+void ResetTextSelection(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetTextSelection(frameNode, DEFAULT_SELECTION, DEFAULT_SELECTION);
+}
+
+void SetTextDataDetectorConfigWithEvent(ArkUINodeHandle node, ArkUI_CharPtr types, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string strValue = types;
+    std::function<void(const std::string&)>* onResult = nullptr;
+    if (callback) {
+        onResult = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
+    }
+    TextModelNG::SetTextDetectConfig(frameNode, strValue, std::move(*onResult));
+}
+
+void ResetTextDataDetectorConfigWithEvent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetTextDetectConfig(frameNode, "", nullptr);
+}
+
+void SetTextOnCopy(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onCopy = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
+        TextModelNG::SetOnCopy(frameNode, std::move(*onCopy));
+    } else {
+        TextModelNG::SetOnCopy(frameNode, nullptr);
+    }
+}
+
+void ResetTextOnCopy(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetOnCopy(frameNode, nullptr);
+}
+
+void SetTextOnTextSelectionChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onChange = reinterpret_cast<std::function<void(int32_t, int32_t)>*>(callback);
+        TextModelNG::SetOnTextSelectionChange(frameNode, std::move(*onChange));
+    } else {
+        TextModelNG::SetOnTextSelectionChange(frameNode, nullptr);
+    }
+}
+
+void ResetTextOnTextSelectionChange(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetOnTextSelectionChange(frameNode, nullptr);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -980,6 +1067,16 @@ const ArkUITextModifier* GetTextModifier()
         SetTextSelectedBackgroundColor,
         GetTextSelectedBackgroundColor,
         ResetTextSelectedBackgroundColor,
+        SetTextContentWithStyledString,
+        ResetTextContentWithStyledString,
+        SetTextSelection,
+        ResetTextSelection,
+        SetTextDataDetectorConfigWithEvent,
+        ResetTextDataDetectorConfigWithEvent,
+        SetTextOnCopy,
+        ResetTextOnCopy,
+        SetTextOnTextSelectionChange,
+        ResetTextOnTextSelectionChange
     };
 
     return &modifier;

@@ -15,32 +15,101 @@
 
 #include "core/components_ng/pattern/ui_extension/isolated_pattern.h"
 
+#include <sys/stat.h>
+#include <sys/statfs.h>
+
+#include "adapter/ohos/osal/want_wrap_ohos.h"
+#include "base/log/dump_log.h"
 #include "core/event/key_event.h"
 #include "core/event/pointer_event.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "display_manager.h"
 #include "session/host/include/session.h"
 
 namespace OHOS::Ace::NG {
-IsolatedPattern::IsolatedPattern() : UIExtensionPattern()
+namespace {
+constexpr char RESOURCE_PATH[] = "resourcePath";
+constexpr char ABC_PATH[] = "abcPath";
+constexpr char ENTRY_POINT[] = "entryPoint";
+constexpr int32_t PARAM_ERR_CODE = 10001;
+constexpr char PARAM_NAME[] = "paramError";
+constexpr char PARAM_MSG[] = "The param is empty";
+}
+
+int32_t IsolatedPattern::isolatedIdGenerator_ = 0;
+
+IsolatedPattern::IsolatedPattern()
+    : PlatformPattern(AceLogTag::ACE_ISOLATED_COMPONENT, ++isolatedIdGenerator_)
 {
-    UIEXT_LOGI("The IsolatedPattern is created.");
+    PLATFORM_LOGI("The IsolatedPattern is created.");
 }
 
 IsolatedPattern::~IsolatedPattern()
 {
-    UIEXT_LOGI("The IsolatedPattern is destroyed.");
+    PLATFORM_LOGI("The IsolatedPattern is destroyed.");
 }
 
 void IsolatedPattern::InitializeDynamicComponent(
     const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint, void* runtime)
 {
-    componentType_ = ComponentType::DYNAMIC;
+    if (hapPath.empty() || abcPath.empty() || entryPoint.empty() || runtime == nullptr) {
+        PLATFORM_LOGE("The param empty.");
+        return;
+    }
+
+    curIsolatedInfo_.abcPath = abcPath;
+    curIsolatedInfo_.reourcePath = hapPath;
+    curIsolatedInfo_.entryPoint = entryPoint;
+    InitializeRender(runtime);
+}
+
+void IsolatedPattern::InitializeIsolatedComponent(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, void* runtime)
+{
+    auto want = AceType::DynamicCast<WantWrapOhos>(wantWrap)->GetWant();
+    auto resourcePath = want.GetStringParam(RESOURCE_PATH);
+    auto abcPath = want.GetStringParam(ABC_PATH);
+    auto entryPoint = want.GetStringParam(ENTRY_POINT);
+    if (resourcePath.empty() || abcPath.empty() || entryPoint.empty() || runtime == nullptr) {
+        PLATFORM_LOGE("The param empty.");
+        FireOnErrorCallback(PARAM_ERR_CODE, PARAM_NAME, PARAM_MSG);
+        return;
+    }
+
+    curIsolatedInfo_.abcPath = abcPath;
+    curIsolatedInfo_.reourcePath = resourcePath;
+    curIsolatedInfo_.entryPoint = entryPoint;
+    InitializeRender(runtime);
+}
+
+void IsolatedPattern::InitializeRender(void* runtime)
+{
+    isolatedDumpInfo_.createLimitedWorkerTime = GetCurrentTimestamp();
+#if !defined(PREVIEW)
     if (!dynamicComponentRenderer_) {
         ContainerScope scope(instanceId_);
-        dynamicComponentRenderer_ = DynamicComponentRenderer::Create(GetHost(), hapPath, abcPath, entryPoint, runtime);
+        dynamicComponentRenderer_ = DynamicComponentRenderer::Create(GetHost(),
+            curIsolatedInfo_.reourcePath, curIsolatedInfo_.abcPath, curIsolatedInfo_.entryPoint, runtime);
         CHECK_NULL_VOID(dynamicComponentRenderer_);
         dynamicComponentRenderer_->CreateContent();
     }
+#else
+    PLATFORM_LOGE("IsolatedComponent not support preview.");
+#endif
+}
+
+void IsolatedPattern::FireOnErrorCallbackOnUI(
+    int32_t code, const std::string& name, const std::string& msg)
+{
+    ContainerScope scope(instanceId_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto uiTaskExecutor = SingleTaskExecutor::Make(
+        host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    uiTaskExecutor.PostTask([weak = WeakClaim(this), code, name, msg] {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->FireOnErrorCallback(code, name, msg);
+        }, "FireOnErrorCallback");
 }
 
 void IsolatedPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
@@ -86,5 +155,24 @@ void IsolatedPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(dynamicComponentRenderer_);
     dynamicComponentRenderer_->DestroyContent();
     dynamicComponentRenderer_ = nullptr;
+}
+
+void IsolatedPattern::DumpInfo()
+{
+    DumpLog::GetInstance().AddDesc(std::string("isolatedId: ").append(std::to_string(platformId_)));
+    DumpLog::GetInstance().AddDesc(std::string("abcPath: ").append(curIsolatedInfo_.abcPath));
+    DumpLog::GetInstance().AddDesc(std::string("reourcePath: ").append(curIsolatedInfo_.reourcePath));
+    DumpLog::GetInstance().AddDesc(std::string("entryPoint: ").append(curIsolatedInfo_.entryPoint));
+    DumpLog::GetInstance().AddDesc(std::string("createLimitedWorkerTime: ")
+        .append(std::to_string(isolatedDumpInfo_.createLimitedWorkerTime)));
+    CHECK_NULL_VOID(dynamicComponentRenderer_);
+    RendererDumpInfo rendererDumpInfo;
+    dynamicComponentRenderer_->Dump(rendererDumpInfo);
+    DumpLog::GetInstance().AddDesc(std::string("createUiContenTime: ")
+        .append(std::to_string(rendererDumpInfo.createUiContenTime)));
+    DumpLog::GetInstance().AddDesc(std::string("limitedWorkerInitTime: ")
+        .append(std::to_string(rendererDumpInfo.limitedWorkerInitTime)));
+    DumpLog::GetInstance().AddDesc(std::string("loadAbcTime: ")
+        .append(std::to_string(rendererDumpInfo.loadAbcTime)));
 }
 } // namespace OHOS::Ace::NG

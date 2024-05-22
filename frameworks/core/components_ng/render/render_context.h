@@ -50,6 +50,15 @@ enum class Gravity;
 }
 
 namespace OHOS::Ace::NG {
+
+typedef enum {
+    OPINC_INVALID,
+    OPINC_NODE,
+    OPINC_SUGGESTED_OR_EXCLUDED,
+    OPINC_PARENT_POSSIBLE,
+    OPINC_NODE_POSSIBLE,
+} OPINC_TYPE_E;
+
 class GeometryNode;
 class RenderPropertyNode;
 class FrameNode;
@@ -163,7 +172,13 @@ public:
 #endif
     };
 
-    enum class PatternType : int8_t { DEFAULT, VIDEO };
+    enum class PatternType : int8_t {
+        DEFAULT,
+        VIDEO,
+#ifdef PLATFORM_VIEW_SUPPORTED
+        PLATFORM_VIEW,
+#endif
+    };
     struct ContextParam {
         ContextType type;
         std::optional<std::string> surfaceName;
@@ -651,6 +666,13 @@ public:
     }
 
     virtual void SetSurfaceRotation(bool isLock) {}
+
+    virtual Matrix4 GetRevertMatrix()
+    {
+        return Matrix4();
+    }
+
+    virtual void SuggestOpIncNode(bool isOpincNode, bool isNeedCalculate) {}
 
 protected:
     RenderContext() = default;

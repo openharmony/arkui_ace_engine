@@ -20,7 +20,6 @@
 #include "include/effects/SkGradientShader.h"
 
 #include "base/utils/utils.h"
-#include "core/components/declaration/svg/svg_declaration.h"
 
 namespace OHOS::Ace::NG {
 void SvgGraphic::OnDraw(RSCanvas& canvas, const Size& layout, const std::optional<Color>& color)
@@ -33,10 +32,11 @@ void SvgGraphic::OnDraw(RSCanvas& canvas, const Size& layout, const std::optiona
     strokePen_.Reset();
 #endif
     path_ = AsPath(layout); // asPath override by graphic tag
-    UpdateGradient(layout);
+    UpdateFillGradient(layout);
     if (UpdateFillStyle(color)) {
         OnGraphicFill();
     }
+    UpdateStrokeGradient(layout);
     if (UpdateStrokeStyle()) {
         OnGraphicStroke();
     }
@@ -48,51 +48,89 @@ void SvgGraphic::OnDraw(RSCanvas& canvas, const Size& layout, const std::optiona
     }
 }
 
-void SvgGraphic::UpdateGradient(const Size& viewPort)
+void SvgGraphic::SetLinearGradient(const Size& viewPort, Gradient& gradient)
+{
+    auto bounds = AsBounds(viewPort);
+    auto width = bounds.Width();
+    auto height = bounds.Height();
+
+    const auto& linearGradient = gradient.GetLinearGradient();
+    auto gradientInfo = LinearGradientInfo();
+
+    gradientInfo.x1 = linearGradient.x1 ? ConvertDimensionToPx(linearGradient.x1.value(), width) : 0.0;
+    if (linearGradient.x1 && linearGradient.x1.value().Unit() == DimensionUnit::PERCENT) {
+        gradientInfo.x1 += bounds.Left();
+    }
+    gradientInfo.y1 = linearGradient.y1 ? ConvertDimensionToPx(linearGradient.y1.value(), height) : 0.0;
+    if (linearGradient.y1 && linearGradient.y1.value().Unit() == DimensionUnit::PERCENT) {
+        gradientInfo.y1 += bounds.Top();
+    }
+    gradientInfo.x2 = ConvertDimensionToPx((linearGradient.x2 ? linearGradient.x2.value() : 1.0_pct), width);
+    if (linearGradient.x2 && linearGradient.x2.value().Unit() == DimensionUnit::PERCENT) {
+        gradientInfo.x2 += bounds.Left();
+    }
+    gradientInfo.y2 = linearGradient.y2 ? ConvertDimensionToPx(linearGradient.y2.value(), height) : 0.0;
+    if (linearGradient.y2 && linearGradient.y2.value().Unit() == DimensionUnit::PERCENT) {
+        gradientInfo.y2 += bounds.Top();
+    }
+
+    gradient.SetLinearGradientInfo(gradientInfo);
+}
+
+void SvgGraphic::SetRadialGradient(const Size& viewPort, Gradient& gradient)
+{
+    auto bounds = AsBounds(viewPort);
+    auto width = bounds.Width();
+    auto height = bounds.Height();
+
+    const auto& radialGradient = gradient.GetRadialGradient();
+    auto gradientInfo = RadialGradientInfo();
+
+    Dimension radialHorizontalSize = Dimension(
+        radialGradient.radialHorizontalSize.value().Value(), radialGradient.radialHorizontalSize.value().Unit());
+    gradientInfo.r = ConvertDimensionToPx(
+        radialGradient.radialHorizontalSize ? radialHorizontalSize : 0.5_pct, sqrt(width * height));
+    Dimension radialCenterX =
+        Dimension(radialGradient.radialCenterX.value().Value(), radialGradient.radialCenterX.value().Unit());
+    gradientInfo.cx =
+        ConvertDimensionToPx(radialGradient.radialCenterX ? radialCenterX : 0.5_pct, width) + bounds.Left();
+    Dimension radialCenterY =
+        Dimension(radialGradient.radialCenterY.value().Value(), radialGradient.radialCenterY.value().Unit());
+    gradientInfo.cy =
+        ConvertDimensionToPx(radialGradient.radialCenterY ? radialCenterY : 0.5_pct, height) + bounds.Top();
+    if (radialGradient.fRadialCenterX && radialGradient.fRadialCenterX->IsValid()) {
+        gradientInfo.fx = ConvertDimensionToPx(radialGradient.fRadialCenterX.value(), width) + bounds.Left();
+    } else {
+        gradientInfo.fx = gradientInfo.cx;
+    }
+    if (radialGradient.fRadialCenterY && radialGradient.fRadialCenterY->IsValid()) {
+        gradientInfo.fy = ConvertDimensionToPx(radialGradient.fRadialCenterY.value(), height) + bounds.Top();
+    } else {
+        gradientInfo.fy = gradientInfo.cy;
+    }
+    gradient.SetRadialGradientInfo(gradientInfo);
+}
+
+void SvgGraphic::UpdateFillGradient(const Size& viewPort)
 {
     fillState_ = attributes_.fillState;
     auto& gradient = fillState_.GetGradient();
     CHECK_NULL_VOID(gradient);
-    auto bounds = AsBounds(viewPort);
-    auto width = bounds.Width();
-    auto height = bounds.Height();
     if (gradient->GetType() == GradientType::LINEAR) {
-        const auto& linearGradient = gradient->GetLinearGradient();
-        auto gradientInfo = LinearGradientInfo();
-        gradientInfo.x1 = linearGradient.x1 ? ConvertDimensionToPx(linearGradient.x1.value(), width) : 0.0;
-        gradientInfo.y1 = linearGradient.y1 ? ConvertDimensionToPx(linearGradient.y1.value(), height) : 0.0;
-        gradientInfo.x2 = linearGradient.y1
-                              ? ConvertDimensionToPx((linearGradient.x2 ? linearGradient.x2.value() : 1.0_pct), width)
-                              : 0.0;
-        gradientInfo.y2 = linearGradient.y2 ? ConvertDimensionToPx(linearGradient.y2.value(), height) : 0.0;
-        gradient->SetLinearGradientInfo(gradientInfo);
+        SetLinearGradient(viewPort, gradient.value());
+    } else if (gradient->GetType() == GradientType::RADIAL) {
+        SetRadialGradient(viewPort, gradient.value());
     }
-    if (gradient->GetType() == GradientType::RADIAL) {
-        const auto& radialGradient = gradient->GetRadialGradient();
-        auto gradientInfo = RadialGradientInfo();
-        Dimension radialHorizontalSize = Dimension(
-            radialGradient.radialHorizontalSize.value().Value(), radialGradient.radialHorizontalSize.value().Unit());
-        gradientInfo.r = ConvertDimensionToPx(
-            radialGradient.radialHorizontalSize ? radialHorizontalSize : 0.5_pct, sqrt(width * height));
-        Dimension radialCenterX =
-            Dimension(radialGradient.radialCenterX.value().Value(), radialGradient.radialCenterX.value().Unit());
-        gradientInfo.cx =
-            ConvertDimensionToPx(radialGradient.radialCenterX ? radialCenterX : 0.5_pct, width) + bounds.Left();
-        Dimension radialCenterY =
-            Dimension(radialGradient.radialCenterY.value().Value(), radialGradient.radialCenterY.value().Unit());
-        gradientInfo.cy =
-            ConvertDimensionToPx(radialGradient.radialCenterY ? radialCenterY : 0.5_pct, height) + bounds.Top();
-        if (radialGradient.fRadialCenterX && radialGradient.fRadialCenterX->IsValid()) {
-            gradientInfo.fx = ConvertDimensionToPx(radialGradient.fRadialCenterX.value(), width) + bounds.Left();
-        } else {
-            gradientInfo.fx = gradientInfo.cx;
-        }
-        if (radialGradient.fRadialCenterY && radialGradient.fRadialCenterY->IsValid()) {
-            gradientInfo.fy = ConvertDimensionToPx(radialGradient.fRadialCenterY.value(), height) + bounds.Top();
-        } else {
-            gradientInfo.fy = gradientInfo.cy;
-        }
-        gradient->SetRadialGradientInfo(gradientInfo);
+}
+
+void SvgGraphic::UpdateStrokeGradient(const Size& viewPort)
+{
+    auto& gradient = attributes_.strokeState.GetGradient();
+    CHECK_NULL_VOID(gradient);
+    if (gradient->GetType() == GradientType::LINEAR) {
+        SetLinearGradient(viewPort, gradient.value());
+    } else if (gradient->GetType() == GradientType::RADIAL) {
+        SetRadialGradient(viewPort, gradient.value());
     }
 }
 
@@ -129,37 +167,7 @@ void SvgGraphic::SetGradientStyle(double opacity)
     if (gradientColors.empty()) {
         return;
     }
-#ifndef USE_ROSEN_DRAWING
-    std::vector<SkScalar> pos;
-    std::vector<SkColor> colors;
-    for (const auto& gradientColor : gradientColors) {
-        pos.push_back(static_cast<SkScalar>(gradientColor.GetDimension().Value()));
-        colors.push_back(
-            gradientColor.GetColor().BlendOpacity(gradientColor.GetOpacity()).BlendOpacity(opacity).GetValue());
-    }
-    if (gradient->GetType() == GradientType::LINEAR) {
-        auto info = gradient->GetLinearGradientInfo();
-        std::array<SkPoint, 2> pts = { SkPoint::Make(static_cast<SkScalar>(info.x1), static_cast<SkScalar>(info.y1)),
-            SkPoint::Make(static_cast<SkScalar>(info.x2), static_cast<SkScalar>(info.y2)) };
-
-        fillPaint_.setShader(SkGradientShader::MakeLinear(pts.data(), colors.data(), pos.data(), gradientColors.size(),
-            static_cast<SkTileMode>(gradient->GetSpreadMethod()), 0, nullptr));
-    }
-    if (gradient->GetType() == GradientType::RADIAL) {
-        auto info = gradient->GetRadialGradientInfo();
-        auto center = SkPoint::Make(static_cast<SkScalar>(info.cx), static_cast<SkScalar>(info.cy));
-        auto focal = SkPoint::Make(static_cast<SkScalar>(info.fx), static_cast<SkScalar>(info.fx));
-
-        if (center == focal) {
-            fillPaint_.setShader(SkGradientShader::MakeRadial(center, static_cast<SkScalar>(info.r), colors.data(),
-                pos.data(), gradientColors.size(), static_cast<SkTileMode>(gradient->GetSpreadMethod()), 0, nullptr));
-        } else {
-            fillPaint_.setShader(SkGradientShader::MakeTwoPointConical(focal, 0, center, static_cast<SkScalar>(info.r),
-                colors.data(), pos.data(), gradientColors.size(), static_cast<SkTileMode>(gradient->GetSpreadMethod()),
-                0, nullptr));
-        }
-    }
-#else
+#ifdef USE_ROSEN_DRAWING
     std::vector<RSScalar> pos;
     std::vector<RSColorQuad> colors;
     for (const auto& gradientColor : gradientColors) {
@@ -191,40 +199,64 @@ void SvgGraphic::SetGradientStyle(double opacity)
 #endif
 }
 
+void SvgGraphic::SetStrokeGradientStyle(double opacity)
+{
+    const auto& strokeState = attributes_.strokeState;
+    auto gradient = strokeState.GetGradient();
+    CHECK_NULL_VOID(gradient);
+    auto gradientColors = gradient->GetColors();
+    if (gradientColors.empty()) {
+        return;
+    }
+#ifdef USE_ROSEN_DRAWING
+    std::vector<RSScalar> pos;
+    std::vector<RSColorQuad> colors;
+    for (const auto& gradientColor : gradientColors) {
+        pos.push_back(static_cast<RSScalar>(gradientColor.GetDimension().Value()));
+        colors.push_back(
+            gradientColor.GetColor().BlendOpacity(gradientColor.GetOpacity()).BlendOpacity(opacity).GetValue());
+    }
+    if (gradient->GetType() == GradientType::LINEAR) {
+        auto info = gradient->GetLinearGradientInfo();
+        std::array<RSPoint, 2> pts = { RSPoint(static_cast<RSScalar>(info.x1), static_cast<RSScalar>(info.y1)),
+            RSPoint(static_cast<RSScalar>(info.x2), static_cast<RSScalar>(info.y2)) };
+        strokePen_.SetShaderEffect(RSRecordingShaderEffect::CreateLinearGradient(
+            pts[0], pts[1], colors, pos, static_cast<RSTileMode>(gradient->GetSpreadMethod())));
+    }
+    if (gradient->GetType() == GradientType::RADIAL) {
+        auto info = gradient->GetRadialGradientInfo();
+        auto center = RSPoint(static_cast<RSScalar>(info.cx), static_cast<RSScalar>(info.cy));
+        auto focal = RSPoint(static_cast<RSScalar>(info.fx), static_cast<RSScalar>(info.fx));
+        if (center == focal) {
+            strokePen_.SetShaderEffect(RSRecordingShaderEffect::CreateRadialGradient(center,
+                static_cast<RSScalar>(info.r), colors, pos, static_cast<RSTileMode>(gradient->GetSpreadMethod())));
+        } else {
+            RSMatrix matrix;
+            strokePen_.SetShaderEffect(RSRecordingShaderEffect::CreateTwoPointConical(focal, 0, center,
+                static_cast<RSScalar>(info.r), colors, pos, static_cast<RSTileMode>(gradient->GetSpreadMethod()),
+                &matrix));
+        }
+    }
+#endif
+}
+
 bool SvgGraphic::UpdateStrokeStyle(bool antiAlias)
 {
     const auto& strokeState = attributes_.strokeState;
     auto colorFilter = GetColorFilter();
-    if (!colorFilter.has_value() && strokeState.GetColor() == Color::TRANSPARENT) {
+    if (!colorFilter.has_value() && strokeState.GetColor() == Color::TRANSPARENT && !strokeState.GetGradient()) {
         return false;
     }
     if (!GreatNotEqual(strokeState.GetLineWidth().Value(), 0.0)) {
         return false;
     }
-#ifndef USE_ROSEN_DRAWING
-    strokePaint_.setStyle(SkPaint::Style::kStroke_Style);
+#ifdef USE_ROSEN_DRAWING
     double curOpacity = strokeState.GetOpacity().GetValue() * opacity_ * (1.0f / UINT8_MAX);
-    strokePaint_.setColor(strokeState.GetColor().BlendOpacity(curOpacity).GetValue());
-    if (strokeState.GetLineCap() == LineCapStyle::ROUND) {
-        strokePaint_.setStrokeCap(SkPaint::Cap::kRound_Cap);
-    } else if (strokeState.GetLineCap() == LineCapStyle::SQUARE) {
-        strokePaint_.setStrokeCap(SkPaint::Cap::kSquare_Cap);
+    if (strokeState.GetGradient()) {
+        SetStrokeGradientStyle(curOpacity);
     } else {
-        strokePaint_.setStrokeCap(SkPaint::Cap::kButt_Cap);
+        strokePen_.SetColor(strokeState.GetColor().BlendOpacity(curOpacity).GetValue());
     }
-    if (strokeState.GetLineJoin() == LineJoinStyle::ROUND) {
-        strokePaint_.setStrokeJoin(SkPaint::Join::kRound_Join);
-    } else if (strokeState.GetLineJoin() == LineJoinStyle::BEVEL) {
-        strokePaint_.setStrokeJoin(SkPaint::Join::kBevel_Join);
-    } else {
-        strokePaint_.setStrokeJoin(SkPaint::Join::kMiter_Join);
-    }
-    strokePaint_.setStrokeWidth(static_cast<SkScalar>(strokeState.GetLineWidth().Value()));
-    strokePaint_.setStrokeMiter(static_cast<SkScalar>(strokeState.GetMiterLimit()));
-    strokePaint_.setAntiAlias(antiAlias);
-#else
-    double curOpacity = strokeState.GetOpacity().GetValue() * opacity_ * (1.0f / UINT8_MAX);
-    strokePen_.SetColor(strokeState.GetColor().BlendOpacity(curOpacity).GetValue());
     if (strokeState.GetLineCap() == LineCapStyle::ROUND) {
         strokePen_.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
     } else if (strokeState.GetLineCap() == LineCapStyle::SQUARE) {
@@ -250,6 +282,7 @@ bool SvgGraphic::UpdateStrokeStyle(bool antiAlias)
     UpdateLineDash();
     return true;
 }
+
 void SvgGraphic::UpdateLineDash()
 {
     const auto& strokeState = attributes_.strokeState;

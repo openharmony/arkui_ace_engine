@@ -100,6 +100,26 @@ void ParseSections(
     }
     waterFlowSections->ChangeData(0, waterFlowSections->GetSectionInfo().size(), newSections);
 }
+
+void ParseScroller(const JSRef<JSObject>& obj)
+{
+    auto scroller = obj->GetProperty("scroller");
+    if (scroller->IsObject()) {
+        auto* jsScroller = JSRef<JSObject>::Cast(scroller)->Unwrap<JSScroller>();
+        CHECK_NULL_VOID(jsScroller);
+        jsScroller->SetInstanceId(Container::CurrentId());
+        auto positionController = WaterFlowModel::GetInstance()->CreateScrollController();
+        jsScroller->SetController(positionController);
+
+        // Init scroll bar proxy.
+        auto proxy = jsScroller->GetScrollBarProxy();
+        if (!proxy) {
+            proxy = WaterFlowModel::GetInstance()->CreateScrollBarProxy();
+            jsScroller->SetScrollBarProxy(proxy);
+        }
+        WaterFlowModel::GetInstance()->SetScroller(positionController, proxy);
+    }
+}
 } // namespace
 
 void UpdateWaterFlowSections(const JSCallbackInfo& args, const JSRef<JSVal>& sections)
@@ -147,22 +167,20 @@ void JSWaterFlow::Create(const JSCallbackInfo& args)
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
 
-    auto scroller = obj->GetProperty("scroller");
-    if (scroller->IsObject()) {
-        auto* jsScroller = JSRef<JSObject>::Cast(scroller)->Unwrap<JSScroller>();
-        CHECK_NULL_VOID(jsScroller);
-        jsScroller->SetInstanceId(Container::CurrentId());
-        auto positionController = WaterFlowModel::GetInstance()->CreateScrollController();
-        jsScroller->SetController(positionController);
-
-        // Init scroll bar proxy.
-        auto proxy = jsScroller->GetScrollBarProxy();
-        if (!proxy) {
-            proxy = WaterFlowModel::GetInstance()->CreateScrollBarProxy();
-            jsScroller->SetScrollBarProxy(proxy);
+    // set layout mode first. SetFooter is dependent to it
+    using LayoutMode = NG::WaterFlowLayoutMode;
+    auto mode = LayoutMode::TOP_DOWN;
+    auto jsMode = obj->GetProperty("layoutMode");
+    if (jsMode->IsNumber()) {
+        mode = static_cast<LayoutMode>(jsMode->ToNumber<int32_t>());
+        if (mode < LayoutMode::TOP_DOWN || mode > LayoutMode::SLIDING_WINDOW) {
+            mode = LayoutMode::TOP_DOWN;
         }
-        WaterFlowModel::GetInstance()->SetScroller(positionController, proxy);
     }
+    WaterFlowModel::GetInstance()->SetLayoutMode(mode);
+
+    ParseScroller(obj);
+
     auto sections = obj->GetProperty("sections");
     auto footerObject = obj->GetProperty("footer");
     if (sections->IsObject()) {
@@ -201,7 +219,9 @@ void JSWaterFlow::JSBind(BindingTarget globalObj)
     JSClass<JSWaterFlow>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSWaterFlow>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSWaterFlow>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSWaterFlow>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSWaterFlow>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSWaterFlow>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSWaterFlow>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSWaterFlow>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSWaterFlow>::StaticMethod("friction", &JSWaterFlow::SetFriction);

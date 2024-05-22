@@ -143,13 +143,43 @@ void SwiperIndicatorPattern::InitFocusEvent()
 void SwiperIndicatorPattern::HandleFocusEvent()
 {
     CHECK_NULL_VOID(dotIndicatorModifier_);
-    dotIndicatorModifier_->SetIsFocused(true);
+    AddIsFocusActiveUpdateEvent();
+    OnIsFocusActiveUpdate(true);
 }
 
 void SwiperIndicatorPattern::HandleBlurEvent()
 {
     CHECK_NULL_VOID(dotIndicatorModifier_);
-    dotIndicatorModifier_->SetIsFocused(false);
+    RemoveIsFocusActiveUpdateEvent();
+    OnIsFocusActiveUpdate(false);
+}
+
+void SwiperIndicatorPattern::AddIsFocusActiveUpdateEvent()
+{
+    if (!isFocusActiveUpdateEvent_) {
+        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusAcitve) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnIsFocusActiveUpdate(isFocusAcitve);
+        };
+    }
+
+    auto pipline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipline);
+    pipline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
+}
+
+void SwiperIndicatorPattern::RemoveIsFocusActiveUpdateEvent()
+{
+    auto pipline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipline);
+    pipline->RemoveIsFocusActiveUpdateEvent(GetHost());
+}
+
+void SwiperIndicatorPattern::OnIsFocusActiveUpdate(bool isFocusAcitve)
+{
+    CHECK_NULL_VOID(dotIndicatorModifier_);
+    dotIndicatorModifier_->SetIsFocused(isFocusAcitve);
 }
 
 bool SwiperIndicatorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -410,28 +440,28 @@ void SwiperIndicatorPattern::GetMouseClickIndex()
     float itemHeightValue = static_cast<float>(paintProperty->GetItemHeightValue(swiperTheme->GetSize()).ConvertToPx());
     float selectedItemWidthValue =
         static_cast<float>(paintProperty->GetSelectedItemWidthValue(swiperTheme->GetSize()).ConvertToPx() * 2);
-    if (paintProperty->GetIsCustomSizeValue(false)) {
-        selectedItemWidthValue *= 0.5f;
-    }
+    paintProperty->GetIsCustomSizeValue(false) ? selectedItemWidthValue *= 0.5f : selectedItemWidthValue;
     // diameter calculation
     double scaleIndicator = swiperTheme->GetScaleSwiper();
     float itemWidth = itemWidthValue * scaleIndicator;
     float itemHeight = itemHeightValue * scaleIndicator;
     float selectedItemWidth = selectedItemWidthValue * scaleIndicator;
-    Dimension paddingSide = swiperTheme->GetIndicatorPaddingDot();
-    float padding = static_cast<float>(paddingSide.ConvertToPx());
     float space = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx());
     int32_t currentIndex = swiperPattern->GetCurrentShownIndex();
     int32_t itemCount = swiperPattern->RealTotalCount();
     int32_t loopCount = itemCount == 0 ? 0 : std::abs(currentIndex / itemCount);
     auto frameSize = host->GetGeometryNode()->GetFrameSize();
     auto axis = swiperPattern->GetDirection();
-    float centerX = padding;
+    float centerX = static_cast<float>((swiperTheme->GetIndicatorPaddingDot()).ConvertToPx());
     float centerY = ((axis == Axis::HORIZONTAL ? frameSize.Height() : frameSize.Width()) - itemHeight) * 0.5f;
     PointF hoverPoint = axis == Axis::HORIZONTAL ? hoverPoint_ : PointF(hoverPoint_.GetY(), hoverPoint_.GetX());
     int start = currentIndex >= 0 ? loopCount * itemCount : -(loopCount + 1) * itemCount;
     int end = currentIndex >= 0 ? (loopCount + 1) * itemCount : -loopCount * itemCount;
-    for (int32_t i = start; i < end; ++i) {
+    if (axis == Axis::HORIZONTAL && AceApplicationInfo::GetInstance().IsRightToLeft()) {
+        end = currentIndex >= 0 ? loopCount * itemCount - 1 : -(loopCount + 1) * itemCount - 1;
+        start = currentIndex >= 0 ? (loopCount + 1) * itemCount - 1 : -loopCount * itemCount - 1;
+    }
+    for (int32_t i = start; i != end; start > end ? --i : ++i) {
         if (i != currentIndex) {
             if (hoverPoint.GetX() >= centerX && hoverPoint.GetX() <= centerX + itemWidth &&
                 hoverPoint.GetY() >= centerY && hoverPoint.GetY() <= centerY + itemHeight) {
@@ -514,7 +544,12 @@ void SwiperIndicatorPattern::UpdateTextContentSub(const RefPtr<SwiperIndicatorLa
             currentIndex = 1;
         }
     }
-    firstTextLayoutProperty->UpdateContent(std::to_string(currentIndex));
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    std::string firstContent = isRtl ? std::to_string(swiperPattern->RealTotalCount()) : std::to_string(currentIndex);
+    std::string lastContent = isRtl ? std::to_string(currentIndex) + "\\" :
+        "/" + std::to_string(swiperPattern->RealTotalCount());
+
+    firstTextLayoutProperty->UpdateContent(firstContent);
     auto lastTextLayoutProperty = lastTextNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(lastTextLayoutProperty);
     auto fontColor = layoutProperty->GetFontColorValue(theme->GetDigitalIndicatorTextStyle().GetTextColor());
@@ -526,7 +561,7 @@ void SwiperIndicatorPattern::UpdateTextContentSub(const RefPtr<SwiperIndicatorLa
     lastTextLayoutProperty->UpdateTextColor(fontColor);
     lastTextLayoutProperty->UpdateFontSize(fontSize);
     lastTextLayoutProperty->UpdateFontWeight(fontWeight);
-    lastTextLayoutProperty->UpdateContent("/" + std::to_string(swiperPattern->RealTotalCount()));
+    lastTextLayoutProperty->UpdateContent(lastContent);
     firstTextNode->MarkModifyDone();
     firstTextNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     lastTextNode->MarkModifyDone();
@@ -643,14 +678,26 @@ bool SwiperIndicatorPattern::CheckIsTouchBottom(const TouchLocationInfo& info)
     TouchBottomType touchBottomType = TouchBottomType::NONE;
 
     if (currentIndex <= 0) {
-        if (NonPositive(touchOffset)) {
-            touchBottomType = TouchBottomType::START;
+        if (swiperPattern->GetDirection() == Axis::HORIZONTAL && AceApplicationInfo::GetInstance().IsRightToLeft()) {
+            if (Positive(touchOffset)) {
+                touchBottomType = TouchBottomType::END;
+            }
+        } else {
+            if (NonPositive(touchOffset)) {
+                touchBottomType = TouchBottomType::START;
+            }
         }
     }
 
     if (currentIndex >= childrenSize - displayCount) {
-        if (Positive(touchOffset)) {
-            touchBottomType = TouchBottomType::END;
+        if (swiperPattern->GetDirection() == Axis::HORIZONTAL && AceApplicationInfo::GetInstance().IsRightToLeft()) {
+            if (NonPositive(touchOffset)) {
+                touchBottomType = TouchBottomType::START;
+            }
+        } else {
+            if (Positive(touchOffset)) {
+                touchBottomType = TouchBottomType::END;
+            }
         }
     }
     touchBottomType_ = touchBottomType;
@@ -719,7 +766,9 @@ void SwiperIndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
     if (LessNotEqual(std::abs(turnPageRateOffset), INDICATOR_DRAG_MIN_DISTANCE.ConvertToPx())) {
         return;
     }
-
+    if (swiperPattern->GetDirection() == Axis::HORIZONTAL && AceApplicationInfo::GetInstance().IsRightToLeft()) {
+        turnPageRateOffset = -turnPageRateOffset;
+    }
     auto turnPageRate = -(turnPageRateOffset / INDICATOR_DRAG_MAX_DISTANCE.ConvertToPx());
     swiperPattern->SetTurnPageRate(turnPageRate);
     if (std::abs(turnPageRate) >= 1) {

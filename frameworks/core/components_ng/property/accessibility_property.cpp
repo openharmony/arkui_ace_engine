@@ -240,8 +240,6 @@ void UpdateSearchStrategyByHitTestMode(HitTestMode hitTestMode, bool& shouldSear
             shouldSearchChildren = false;
             break;
         case HitTestMode::HTMTRANSPARENT:
-            shouldSearchSelf = false;
-            shouldSearchChildren = false;
             break;
         case HitTestMode::HTMNONE:
             shouldSearchSelf = false;
