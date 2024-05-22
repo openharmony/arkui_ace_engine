@@ -1061,6 +1061,9 @@ public:
             JsiRef<JsiArrayBuffer> arrayBuffer = JsiRef<JsiArrayBuffer>::Cast(args[0]);
             int32_t bufferSize = arrayBuffer->ByteLength();
             void* buffer = arrayBuffer->GetBuffer();
+            const char* charPtr = static_cast<const char*>(buffer);
+            std::string data(charPtr, bufferSize);
+            response_->SetData(data);
             response_->SetBuffer(static_cast<char*>(buffer), bufferSize);
             return;
         }
