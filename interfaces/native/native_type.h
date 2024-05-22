@@ -184,6 +184,13 @@ typedef struct ArkUI_StyledString ArkUI_StyledString;
 typedef struct ArkUI_ImageAnimatorFrameInfo ArkUI_ImageAnimatorFrameInfo;
 
 /**
+ * @brief Define the ChildrenMainSize class information for a List.
+ *
+ * @since 12
+*/
+typedef struct ArkUI_ListChildrenMainSize ArkUI_ListChildrenMainSize;
+
+/**
  * @brief Provides the number types of ArkUI in the native code.
  *
  * @since 12
@@ -1833,6 +1840,28 @@ typedef enum {
 } ArkUI_AnimationFillMode;
 
 /**
+ * @brief 定义错误码枚举值。
+ *
+ * @since 12
+*/
+typedef enum {
+    /** 无错误。*/
+    ARKUI_ERROR_CODE_NO_ERROR = 0,
+    /** 参数错误。*/
+    ARKUI_ERROR_CODE_PARAM_INVALID = 401,
+    /** 组件不支持特点的属性或者事件。*/
+    ARKUI_ERROR_CODE_ATTRIBUTE_OR_EVENT_NOT_SUPPORTED = 106102,
+    /** 对应的操作不支持ArkTS创建的节点。*/
+    ARKUI_ERROR_CODE_NOT_SUPPROTED_FOR_ARKTS_NODE = 106103,
+    /** 懒加载适配器未绑定到组件上。*/
+    ARKUI_ERROR_CODE_NODE_ADAPTER_NONE_HOST = 106104,
+    /** 适配器已存在。*/
+    ARKUI_ERROR_CODE_NODE_ADAPTER_EXIST_IN_HOST = 106105,
+    /** 对应节点已存在子节点，无法添加适配器。*/
+    ARKUI_ERROR_CODE_NODE_ADAPTER_CHILD_NODE_EXIST = 106106,
+} ArkUI_ErrorCode;
+
+/**
 * @brief Creates a size constraint.
 *
 * @since 12
@@ -3044,6 +3073,93 @@ void OH_ArkUI_ImageAnimatorFrameInfo_SetDuration(ArkUI_ImageAnimatorFrameInfo* i
  * @since 12
 */
 int32_t OH_ArkUI_ImageAnimatorFrameInfo_GetDuration(ArkUI_ImageAnimatorFrameInfo* imageInfo);
+/**
+ * @brief Create configuration items for the ListChildrenMainSize interface settings.
+ *
+ * @return ListChildrenMainSize configuration item instance.If the object returns a null pointer,
+ *         it indicates a creation failure, and the reason for the failure may be that the address space is full.
+ * @since 12
+*/
+ArkUI_ListChildrenMainSize* OH_ArkUI_ListChildrenMainSizeOption_Create();
+
+/**
+* @brief Destroy the ListChildrenMainSize instance.
+*
+* @param option The ListChildrenMainSize instance to be destroyed.
+* @since 12
+*/
+void OH_ArkUI_ListChildrenMainSizeOption_Dispose(ArkUI_ListChildrenMainSize* option);
+
+/**
+ * @brief Set the default size of ChildrenMainSizeOption for the List component.
+ *
+ * @param option ListChildrenMainSize instance.
+ * @param defaultMainSize The default size of the ListItem under the List, measured in vp.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 12
+*/
+int32_t OH_ArkUI_ListChildrenMainSizeOption_SetDefaultMainSize(ArkUI_ListChildrenMainSize* option,
+    float defaultMainSize);
+
+/**
+ * @brief Get the default size of ChildrenMainSizeOption for the List component.
+ *
+ * @param option ListChildrenMainSize instance.
+ * @return The default size of the ListItem under the List is 0, measured in vp.
+ *         When the option is a null pointer, it returns -1.
+ * @since 12
+*/
+float OH_ArkUI_ListChildrenMainSizeOption_GetDefaultMainSize(ArkUI_ListChildrenMainSize* option);
+
+/**
+ * @brief Reset the array size of ChildrenMainSizeOption for the List component.
+ *
+ * @param option ListChildrenMainSize instance.
+ * @param totalSize Array size.
+ * @since 12
+*/
+void OH_ArkUI_ListChildrenMainSizeOption_Resize(ArkUI_ListChildrenMainSize* option, int32_t totalSize);
+
+/**
+ * @brief Resize the ChildrenMainSizeOption array operation on the List component.
+ *
+ * @param option ListChildrenMainSize instance.
+ * @param index To modify the starting position of the MainSize array.
+ * @param deleteCount The number of MainSize arrays to be deleted starting from index.
+ * @param addCount The number of MainSize arrays to be added starting from index.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 12
+*/
+int32_t OH_ArkUI_ListChildrenMainSizeOption_Splice(ArkUI_ListChildrenMainSize* option, int32_t index,
+    int32_t deleteCount, int32_t addCount);
+
+/**
+ * @brief Update the value of the ChildrenMainSizeOption array in the List component.
+ *
+ * @param option ListChildrenMainSize instance.
+ * @param index To modify the starting position of the MainSize array.
+ * @param mainSize The actual modified value.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 12
+*/
+int32_t OH_ArkUI_ListChildrenMainSizeOption_UpdateSize(ArkUI_ListChildrenMainSize* option,
+    int32_t index, float mainSize);
+
+/**
+ * @brief Get the value of the ChildrenMainSizeOption array for the List component.
+ *
+ * @param option ListChildrenMainSize instance.
+ * @param index The index position of the value to be obtained.
+ * @return The value of the specific position of the array. If the function parameter is abnormal, return -1.
+ * @since 12
+*/
+float OH_ArkUI_ListChildrenMainSizeOption_GetMainSize(ArkUI_ListChildrenMainSize* option, int32_t index);
 #ifdef __cplusplus
 };
 #endif
