@@ -31,7 +31,6 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/waterflow/water_flow_test_ng.h"
-#include "water_flow_item_maps.h"
 
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
@@ -732,34 +731,6 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest011, TestSize.Level1)
 }
 
 /**
- * @tc.name: WaterFlowTest012
- * @tc.desc: Test GetOverScrollOffset
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowTestNg, WaterFlowTest012, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create waterFlow that is less than one screen
-     * @tc.expected: itemStart_ = true  itemEnd_ = true.
-     */
-    Create([](WaterFlowModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateItem(TOTAL_LINE_NUMBER);
-    });
-    EXPECT_TRUE(pattern_->layoutInfo_->itemStart_);
-    EXPECT_TRUE(pattern_->layoutInfo_->itemEnd_);
-    EXPECT_TRUE(pattern_->layoutInfo_->offsetEnd_);
-    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
-    if (info) {
-        EXPECT_EQ(info->maxHeight_, 500);
-    }
-    EXPECT_EQ(pattern_->layoutInfo_->lastMainSize_, 800);
-
-    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(ITEM_HEIGHT), { 100, 100 }));
-    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(3 * ITEM_HEIGHT), { 300, 300 }));
-}
-
-/**
  * @tc.name: WaterFlowTest013
  * @tc.desc: Test direction
  * @tc.type: FUNC
@@ -1057,45 +1028,6 @@ HWTEST_F(WaterFlowTestNg, Callback002, TestSize.Level1)
 }
 
 /**
- * @tc.name: WaterFlowLayoutInfoTest001
- * @tc.desc: Test functions in WaterFlowLayoutInfo.
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest001, TestSize.Level1)
-{
-    Create([](WaterFlowModelNG model) {
-        model.SetRowsTemplate("1fr 1fr");
-        model.SetRowsGap(Dimension(5));
-        for (int32_t i = 0; i < TOTAL_LINE_NUMBER; i++) {
-            WaterFlowItemModelNG waterFlowItemModel;
-            waterFlowItemModel.Create();
-            ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
-            ViewAbstract::SetHeight(CalcLength(Dimension(ITEM_HEIGHT)));
-            ViewStackProcessor::GetInstance()->Pop();
-        }
-    });
-
-    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
-    /**
-     * @tc.steps: Test IsAllCrossReachEnd function
-     * @tc.expected: step1. Check whether the return value is correct.
-     */
-    auto reached = info->IsAllCrossReachEnd(ITEM_HEIGHT);
-    EXPECT_TRUE(reached);
-    reached = info->IsAllCrossReachEnd(WATERFLOW_HEIGHT);
-    EXPECT_TRUE(reached);
-
-    /**
-     * @tc.steps: Test GetEndIndexByOffset function
-     * @tc.expected: step2. Check whether the return value is correct.
-     */
-    auto offset = info->GetEndIndexByOffset(0);
-    EXPECT_EQ(0, offset);
-    offset = info->GetEndIndexByOffset(-100.f);
-    EXPECT_EQ(1, offset);
-}
-
-/**
  * @tc.name: WaterFlowSetFriction001
  * @tc.desc: Test SetFriction. friction shouled be more than 0.0,if out of range,should be default value.
  * @tc.type: FUNC
@@ -1247,115 +1179,6 @@ HWTEST_F(WaterFlowTestNg, WaterFlowPattern_OnDirtyLayoutWrapperSwap001, TestSize
 }
 
 /**
- * @tc.name: WaterFlowLayoutInfoTest002
- * @tc.desc: Test functions in WaterFlowLayoutInfo.
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest002, TestSize.Level1)
-{
-    CreateWithItem([](WaterFlowModelNG model) {});
-
-    /**
-     * @tc.steps: Test GetStartMainPos and GetMainHeight
-     * @tc.expected: step2. Check whether the return value is correct.
-     */
-    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
-    int32_t crossIndex = info->items_[0].rbegin()->first;
-    int32_t itemIndex = info->items_[0].rbegin()->second.rbegin()->first;
-    EXPECT_EQ(info->GetStartMainPos(crossIndex + 1, itemIndex), 0.0f);
-    EXPECT_EQ(info->GetMainHeight(crossIndex + 1, itemIndex), 0.0f);
-
-    EXPECT_EQ(info->GetStartMainPos(crossIndex, itemIndex + 1), 0.0f);
-    EXPECT_EQ(info->GetMainHeight(crossIndex, itemIndex + 1), 0.0f);
-}
-
-/**
- * @tc.name: WaterFlowLayoutInfoTest003
- * @tc.desc: Test functions in WaterFlowLayoutInfo.
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest003, TestSize.Level1)
-{
-    CreateWithItem([](WaterFlowModelNG model) {});
-
-    /**
-     * @tc.steps: Test GetMainCount function
-     * @tc.expected: step2. Check whether the size is correct.
-     */
-    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
-
-    std::size_t waterFlowItemsSize = info->items_[0].size();
-    int32_t mainCount = info->GetMainCount();
-
-    int32_t index = info->items_[0].rbegin()->first;
-    info->items_[0][index + 1] = std::map<int32_t, std::pair<float, float>>();
-    EXPECT_EQ(info->items_[0].size(), waterFlowItemsSize + 1);
-    EXPECT_EQ(info->GetMainCount(), mainCount);
-
-    auto lastItem = info->items_[0].begin()->second.rbegin();
-    float mainSize = lastItem->second.first + lastItem->second.second - 1.0f;
-    EXPECT_FALSE(info->IsAllCrossReachEnd(mainSize));
-
-    info->ClearCacheAfterIndex(index + 1);
-    EXPECT_EQ(info->items_[0].size(), waterFlowItemsSize + 1);
-}
-
-/**
- * @tc.name: WaterFlowLayoutInfoTest004
- * @tc.desc: Test Reset functions in WaterFlowLayoutInfo.
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest004, TestSize.Level1)
-{
-    CreateWithItem([](WaterFlowModelNG model) {});
-
-    /**
-     * @tc.steps: Test Reset function
-     * @tc.expected: step2. Check whether the endIndex_ is correct.
-     */
-    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
-
-    int32_t resetFrom = pattern_->layoutInfo_->endIndex_;
-    info->Reset(resetFrom + 1);
-    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, resetFrom);
-
-    info->Reset(resetFrom - 1);
-    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, resetFrom);
-}
-
-/**
- * @tc.name: WaterFlowLayoutInfoTest005
- * @tc.desc: Test functions in WaterFlowLayoutInfo.
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest005, TestSize.Level1)
-{
-    CreateWithItem([](WaterFlowModelNG model) {});
-
-    /**
-     * @tc.steps: Test GetMaxMainHeight function
-     * @tc.expected: step2. Check whether the return value is correct.
-     */
-    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
-
-    float maxMainHeight = info->GetMaxMainHeight();
-    int32_t crossIndex = info->items_[0].rbegin()->first;
-    info->items_[0][crossIndex + 1][0] = std::pair<float, float>(1.0f, maxMainHeight);
-    info->itemInfos_.clear();
-    info->endPosArray_.clear();
-    EXPECT_EQ(info->GetMaxMainHeight(), maxMainHeight + 1.0f);
-
-    /**
-     * @tc.steps: Test GetCrossIndexForNextItem function
-     * @tc.expected: step3. Check whether the return value is correct.
-     */
-    info->items_[0][crossIndex + 1][1] = std::pair<float, float>(0.0f, 0.0f);
-    FlowItemIndex position = info->GetCrossIndexForNextItem(0);
-    EXPECT_EQ(position.crossIndex, crossIndex + 1);
-    EXPECT_EQ(position.lastItemIndex, 1);
-}
-
-/**
  * @tc.name: WaterFlowGetItemRectTest001
  * @tc.desc: Test WaterFlow GetItemRect function.
  * @tc.type: FUNC
@@ -1410,51 +1233,5 @@ HWTEST_F(WaterFlowTestNg, MeasureForAnimation001, TestSize.Level1)
      */
     auto crossIndex = pattern_->layoutInfo_->GetCrossIndex(10);
     EXPECT_FALSE(IsEqual(crossIndex, -1));
-}
-
-/**
- * @tc.name: ResetSections001
- * @tc.desc: Layout WaterFlow and then reset to old layout
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowTestNg, ResetSections001, TestSize.Level1)
-{
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(60);
-        },
-        false);
-    auto secObj = pattern_->GetOrCreateWaterFlowSections();
-    secObj->ChangeData(0, 0, SECTION_5);
-    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
-    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
-
-    UpdateCurrentOffset(-205.0f);
-    EXPECT_EQ(info->Offset(), -205.0f);
-    EXPECT_EQ(info->startIndex_, 3);
-    EXPECT_EQ(info->endIndex_, 11);
-
-    // fallback to layout without sections
-    pattern_->ResetSections();
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(info->Offset(), -205.0f);
-    EXPECT_EQ(info->startIndex_, 1);
-    EXPECT_EQ(info->endIndex_, 5);
-    EXPECT_EQ(info->GetCrossCount(), 1);
-    if (SystemProperties::WaterFlowUseSegmentedLayout()) {
-        EXPECT_EQ(info->segmentTails_.size(), 1);
-        EXPECT_EQ(info->margins_.size(), 1);
-    } else {
-        EXPECT_TRUE(info->segmentTails_.empty());
-        EXPECT_TRUE(info->margins_.empty());
-    }
-
-    UpdateCurrentOffset(250.0f);
-    EXPECT_EQ(info->Offset(), 0.0f);
-    EXPECT_EQ(info->startIndex_, 0);
-    EXPECT_EQ(info->endIndex_, 3);
 }
 } // namespace OHOS::Ace::NG

@@ -166,8 +166,8 @@ group("linux_core_unittest") {
 
     # "pattern/video:video_test_ng",
 
-    # "pattern/waterflow:water_flow_test_ng",
-    "pattern/waterflow:water_flow_test_old",
+    "pattern/waterflow:water_flow_test_original",
+    "pattern/waterflow:water_flow_test_segmented",
     "pattern/waterflow:water_flow_test_sw",
 
     # "pattern/xcomponent:xcomponent_test_ng",

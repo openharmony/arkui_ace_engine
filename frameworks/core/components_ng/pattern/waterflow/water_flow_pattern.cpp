@@ -131,7 +131,7 @@ RefPtr<LayoutAlgorithm> WaterFlowPattern::CreateLayoutAlgorithm()
     if (sections_ || SystemProperties::WaterFlowUseSegmentedLayout()) {
         algorithm = MakeRefPtr<WaterFlowSegmentedLayout>(DynamicCast<WaterFlowLayoutInfo>(layoutInfo_));
     } else if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW) {
-        algorithm = MakeRefPtr<WaterFlowLayoutSW>(layoutInfo_);
+        algorithm = MakeRefPtr<WaterFlowLayoutSW>(DynamicCast<WaterFlowLayoutInfoSW>(layoutInfo_));
     } else {
         int32_t footerIndex = -1;
         auto footer = footer_.Upgrade();
@@ -538,15 +538,33 @@ void WaterFlowPattern::MarkDirtyNodeSelf()
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
+namespace {
+// check if layout is misaligned after a scroll event
+void CheckMisalignment(const RefPtr<WaterFlowLayoutInfoBase>& info)
+{
+    if (info->Mode() != WaterFlowLayoutMode::SLIDING_WINDOW) {
+        return;
+    }
+    auto infoSW = AceType::DynamicCast<WaterFlowLayoutInfoSW>(info);
+    if (infoSW->IsMisaligned()) {
+        infoSW->ResetBeforeJump(0.0f);
+        info->jumpIndex_ = 0;
+        info->align_ = ScrollAlign::START;
+    }
+}
+} // namespace
+
 void WaterFlowPattern::OnScrollEndCallback()
 {
     scrollStop_ = true;
+    CheckMisalignment(layoutInfo_);
     MarkDirtyNodeSelf();
 }
 
 void WaterFlowPattern::OnAnimateStop()
 {
     scrollStop_ = true;
+    CheckMisalignment(layoutInfo_);
     MarkDirtyNodeSelf();
 }
 
