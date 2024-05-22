@@ -1025,10 +1025,12 @@ HWTEST_F(SearchTestNg, Create001, TestSize.Level1)
     searchModelInstance.CreateCancelButton(frameNode, true);
     auto textFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
     ASSERT_NE(textFrameNode, nullptr);
-    auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
-    ASSERT_NE(imageFrameNode, nullptr);
-    auto cancelImageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
-    ASSERT_NE(cancelImageFrameNode, nullptr);
+    auto searchIconFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
+    ASSERT_NE(searchIconFrameNode, nullptr);
+    EXPECT_EQ(searchIconFrameNode.GetTag(), V2::IMAGE_ETS_TAG);
+    auto cancelIconFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
+    ASSERT_NE(cancelIconFrameNode, nullptr);
+    EXPECT_EQ(cancelIconFrameNode.GetTag(), V2::SYMBOL_ETS_TAG);
     auto cancelButtonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_BUTTON_INDEX));
     ASSERT_NE(cancelButtonFrameNode, nullptr);
     auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));

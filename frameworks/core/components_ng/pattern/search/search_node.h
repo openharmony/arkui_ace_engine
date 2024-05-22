@@ -138,9 +138,9 @@ private:
 
     std::set<int32_t> searchChildren_;
 
-    Dimension searchIconSize_ = 20.0_vp;
+    Dimension searchIconSize_ = 16.0_vp;
     Color searchIconColor_;
-    Dimension cancelIconSize_ = 20.0_vp;
+    Dimension cancelIconSize_ = 16.0_vp;
     Color cancelIconColor_;
     bool searchIconNodeCreated_ = false;
     bool cancelIconNodeCreated_ = false;

@@ -70,13 +70,11 @@ void SearchPattern::UpdateChangeEvent(const std::string& textValue, int16_t styl
     CHECK_NULL_VOID(cancelImageRenderContext);
     auto cancelButtonEvent = buttonHost->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(cancelButtonEvent);
-
     if (style == ERROR) {
         auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
         style = static_cast<int16_t>(layoutProperty->GetCancelButtonStyle().value_or(CancelButtonStyle::INPUT));
     }
-
     if (IsEventEnabled(textValue, style)) {
         cancelButtonRenderContext->UpdateOpacity(1.0);
         cancelImageRenderContext->UpdateOpacity(1.0);
@@ -99,6 +97,14 @@ void SearchPattern::UpdateChangeEvent(const std::string& textValue, int16_t styl
     imageHost->MarkModifyDone();
     buttonHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     imageHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    if (imageHost->GetTag() == V2::SYMBOL_ETS_TAG) {
+        auto textLayoutProperty = imageHost->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        auto layoutConstraint = textLayoutProperty->GetLayoutConstraint();
+        auto textLayoutWrapper = imageHost->CreateLayoutWrapper();
+        CHECK_NULL_VOID(textLayoutWrapper);
+        textLayoutWrapper->Measure(layoutConstraint);
+    }
 }
 
 bool SearchPattern::IsEventEnabled(const std::string& textValue, int16_t style)
@@ -1182,8 +1188,7 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
     json->PutExtAttr("placeholder", textFieldPattern->GetPlaceHolder().c_str(), filter);
     json->PutExtAttr("placeholderColor", textFieldPattern->GetPlaceholderColor().c_str(), filter);
     json->PutExtAttr("placeholderFont", textFieldPattern->GetPlaceholderFont().c_str(), filter);
-    json->PutExtAttr("textAlign",
-        V2::ConvertWrapTextAlignToString(textFieldPattern->GetTextAlign()).c_str(), filter);
+    json->PutExtAttr("textAlign", V2::ConvertWrapTextAlignToString(textFieldPattern->GetTextAlign()).c_str(), filter);
     auto textColor = textFieldLayoutProperty->GetTextColor().value_or(Color());
     json->PutExtAttr("fontColor", textColor.ColorToString().c_str(), filter);
     auto textFontJson = JsonUtil::Create(true);
@@ -1193,34 +1198,34 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
     textFontJson->Put("fontWeight", V2::ConvertWrapFontWeightToStirng(textFieldPattern->GetFontWeight()).c_str());
     textFontJson->Put("fontFamily", textFieldPattern->GetFontFamily().c_str());
     json->PutExtAttr("textFont", textFontJson->ToString().c_str(), filter);
-    json->PutExtAttr("copyOption", ConvertCopyOptionsToString(
-        textFieldLayoutProperty->GetCopyOptionsValue(CopyOptions::None)).c_str(), filter);
+    json->PutExtAttr("copyOption",
+        ConvertCopyOptionsToString(textFieldLayoutProperty->GetCopyOptionsValue(CopyOptions::None)).c_str(), filter);
     auto maxLength = GetMaxLength();
-    json->PutExtAttr("maxLength",
-        GreatOrEqual(maxLength, Infinity<uint32_t>()) ? "INF" : std::to_string(maxLength).c_str(), filter);
+    json->PutExtAttr(
+        "maxLength", GreatOrEqual(maxLength, Infinity<uint32_t>()) ? "INF" : std::to_string(maxLength).c_str(), filter);
     json->PutExtAttr("type", SearchTypeToString().c_str(), filter);
     textFieldLayoutProperty->HasCopyOptions();
-    json->PutExtAttr("letterSpacing",
-        textFieldLayoutProperty->GetLetterSpacing().value_or(Dimension()).ToString().c_str(), filter);
-    json->PutExtAttr("lineHeight",
-        textFieldLayoutProperty->GetLineHeight().value_or(0.0_vp).ToString().c_str(), filter);
+    json->PutExtAttr(
+        "letterSpacing", textFieldLayoutProperty->GetLetterSpacing().value_or(Dimension()).ToString().c_str(), filter);
+    json->PutExtAttr(
+        "lineHeight", textFieldLayoutProperty->GetLineHeight().value_or(0.0_vp).ToString().c_str(), filter);
     auto jsonDecoration = JsonUtil::Create(true);
     std::string type = V2::ConvertWrapTextDecorationToStirng(
         textFieldLayoutProperty->GetTextDecoration().value_or(TextDecoration::NONE));
     jsonDecoration->Put("type", type.c_str());
-    jsonDecoration->Put("color",
-        textFieldLayoutProperty->GetTextDecorationColor().value_or(Color::BLACK).ColorToString().c_str());
+    jsonDecoration->Put(
+        "color", textFieldLayoutProperty->GetTextDecorationColor().value_or(Color::BLACK).ColorToString().c_str());
     std::string style = V2::ConvertWrapTextDecorationStyleToString(
         textFieldLayoutProperty->GetTextDecorationStyle().value_or(TextDecorationStyle::SOLID));
     jsonDecoration->Put("style", style.c_str());
     json->PutExtAttr("decoration", jsonDecoration->ToString().c_str(), filter);
-    json->PutExtAttr("minFontSize",
-        textFieldLayoutProperty->GetAdaptMinFontSize().value_or(Dimension()).ToString().c_str(), filter);
-    json->PutExtAttr("maxFontSize",
-        textFieldLayoutProperty->GetAdaptMaxFontSize().value_or(Dimension()).ToString().c_str(), filter);
+    json->PutExtAttr(
+        "minFontSize", textFieldLayoutProperty->GetAdaptMinFontSize().value_or(Dimension()).ToString().c_str(), filter);
+    json->PutExtAttr(
+        "maxFontSize", textFieldLayoutProperty->GetAdaptMaxFontSize().value_or(Dimension()).ToString().c_str(), filter);
     json->PutExtAttr("inputFilter", textFieldLayoutProperty->GetInputFilterValue("").c_str(), filter);
-    json->PutExtAttr("textIndent",
-        textFieldLayoutProperty->GetTextIndent().value_or(0.0_vp).ToString().c_str(), filter);
+    json->PutExtAttr(
+        "textIndent", textFieldLayoutProperty->GetTextIndent().value_or(0.0_vp).ToString().c_str(), filter);
 }
 
 std::string SearchPattern::SearchTypeToString() const
@@ -1381,8 +1386,7 @@ void SearchPattern::ToJsonValueForCursor(std::unique_ptr<JsonValue>& json, const
     cursorJson->Put("width", caretWidth.ToString().c_str());
     json->PutExtAttr("caretStyle", cursorJson, filter);
     auto selectedBackgroundColor = textFieldPaintProperty->GetSelectedBackgroundColor().value_or(Color());
-    json->PutExtAttr("selectedBackgroundColor",
-        selectedBackgroundColor.ColorToString().c_str(), filter);
+    json->PutExtAttr("selectedBackgroundColor", selectedBackgroundColor.ColorToString().c_str(), filter);
 }
 
 void SearchPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -1568,9 +1572,6 @@ void SearchPattern::CreateOrUpdateSymbol(int32_t index, bool isCreateNode)
         auto oldFrameNode = AceType::DynamicCast<FrameNode>(GetSearchNode()->GetChildAtIndex(index));
         CHECK_NULL_VOID(oldFrameNode);
         GetSearchNode()->ReplaceChild(oldFrameNode, frameNode);
-
-        auto cancelIconFrameNode1 = AceType::DynamicCast<FrameNode>(GetSearchNode()->GetChildAtIndex(index));
-        CHECK_NULL_VOID(cancelIconFrameNode1);
         if (index == CANCEL_IMAGE_INDEX) {
             UpdateIconChangeEvent();
         }
@@ -1739,12 +1740,14 @@ void SearchPattern::UpdateIconSrc(int32_t index, const std::string& src)
         auto imageLayoutProperty = iconFrameNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
         auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value();
-
         if (src.empty()) {
-            imageSourceInfo.SetResourceId(InternalResource::ResourceId::CLOSE_SVG);
+            imageSourceInfo.SetResourceId(index == IMAGE_INDEX ? InternalResource::ResourceId::SEARCH_SVG
+                                                               : InternalResource::ResourceId::CLOSE_SVG);
             auto pipeline = PipelineBase::GetCurrentContext();
             CHECK_NULL_VOID(pipeline);
-            auto iconPath = pipeline->GetTheme<IconTheme>()->GetIconPath(InternalResource::ResourceId::CLOSE_SVG);
+            auto iconPath = pipeline->GetTheme<IconTheme>()->GetIconPath(index == IMAGE_INDEX
+                                                                             ? InternalResource::ResourceId::SEARCH_SVG
+                                                                             : InternalResource::ResourceId::CLOSE_SVG);
             auto color = pipeline->GetTheme<SearchTheme>()->GetSearchIconColor();
             imageSourceInfo.SetSrc(iconPath, color);
         } else {

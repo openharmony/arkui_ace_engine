@@ -89,7 +89,7 @@ public:
             theme->iconHeight_ = pattern->GetAttr<Dimension>("search_icon_height", Dimension());
             theme->searchIconLeftSpace_ = pattern->GetAttr<Dimension>("search_icon_left_space", Dimension());
             theme->searchIconRightSpace_ = pattern->GetAttr<Dimension>("search_icon_right_space", Dimension());
-            theme->symbolIconColor_ = pattern->GetAttr<Color>("font_secondary", Color());
+            theme->symbolIconColor_ = pattern->GetAttr<Color>("search_symbol_icon_color", Color());
             theme->searchSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.magnifyingglass");
             theme->cancelSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.xmark");
         }
