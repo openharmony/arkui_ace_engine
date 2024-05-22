@@ -1495,12 +1495,10 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam> &param, const RefPtr<Frame
     CHECK_NULL_VOID(targetNode);
     auto targetId = targetNode->GetId();
     auto targetTag = targetNode->GetTag();
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    auto context = targetNode->GetContext();
     CHECK_NULL_VOID(context);
+    auto instanceId = context->GetInstanceId();
+
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     auto popupInfo = overlayManager->GetPopupInfo(targetId);
@@ -1509,7 +1507,7 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam> &param, const RefPtr<Frame
     auto showInSubWindow = param->IsShowInSubWindow();
     // subwindow model needs to use subContainer to get popupInfo
     if (showInSubWindow) {
-        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(instanceId);
         if (subwindow) {
             subwindow->GetPopupInfoNG(targetId, popupInfo);
         }
@@ -1559,7 +1557,7 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam> &param, const RefPtr<Frame
             targetNode->PushDestroyCallback(destructor);
         } else {
             // erase popup in subwindow when target node destroy
-            auto destructor = [id = targetNode->GetId(), containerId = Container::CurrentId()]() {
+            auto destructor = [id = targetNode->GetId(), containerId = instanceId]() {
                 auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
                 CHECK_NULL_VOID(subwindow);
                 auto overlayManager = subwindow->GetOverlayManager();
@@ -1594,7 +1592,7 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam> &param, const RefPtr<Frame
     if (showInSubWindow) {
         if (isShow) {
             SubwindowManager::GetInstance()->ShowPopupNG(
-                targetId, popupInfo, param->GetOnWillDismiss(), param->GetInteractiveDismiss());
+                targetNode, popupInfo, param->GetOnWillDismiss(), param->GetInteractiveDismiss());
         } else {
             SubwindowManager::GetInstance()->HidePopupNG(targetId);
         }
@@ -1672,7 +1670,8 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam> &&params, const Re
         SubwindowManager::GetInstance()->ShowMenuNG(menuNode, menuParam, targetNode, offset);
         return;
     }
-    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+
+    auto pipelineContext = targetNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto overlayManager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
@@ -1695,7 +1694,7 @@ void ViewAbstract::BindMenuWithCustomNode(std::function<void()>&& buildFunc, con
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     auto expandDisplay = theme->GetExpandDisplay();
-    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    auto pipelineContext = targetNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto overlayManager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);

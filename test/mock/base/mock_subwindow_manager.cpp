@@ -34,7 +34,7 @@ std::shared_ptr<SubwindowManager> SubwindowManager::GetInstance()
 
 void SubwindowManager::HidePopupNG(int32_t targetId, int32_t instanceId) {}
 
-void SubwindowManager::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo,
+void SubwindowManager::ShowPopupNG(const RefPtr<NG::FrameNode>& targetNode, const NG::PopupInfo& popupInfo,
     const std::function<void(int32_t)>&& onWillDismiss, bool interactiveDismiss)
 {}
 

@@ -73,7 +73,7 @@ public:
     void HideMenuNG(bool showPreviewAnimation = true, bool startDrag = false);
     void UpdateHideMenuOffsetNG(const NG::OffsetF& offset = NG::OffsetF(0.0f, 0.0f));
     void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true);
-    void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo,
+    void ShowPopupNG(const RefPtr<NG::FrameNode>& targetNode, const NG::PopupInfo& popupInfo,
         const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = true);
     void HidePopupNG(int32_t targetId, int32_t instanceId = -1);
     bool CancelPopup(const std::string& id);
