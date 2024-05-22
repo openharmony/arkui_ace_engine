@@ -138,6 +138,7 @@ private:
     void DeleteImageNodeAfterRecover();
     RefPtr<FrameNode> GetImageNode();
     void HandleStaticFormEvent(const PointF& touchPoint);
+    void ProcDeleteImageNode(bool isRecover);
 
     void InitClickEvent();
     void HandleTouchDownEvent(const TouchEventInfo& event);
