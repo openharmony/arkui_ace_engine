@@ -160,6 +160,7 @@ class LengthMetrics {
 }
 
 declare interface Resource {}
+declare type BusinessError = any
 
 declare enum Color {
   White,
@@ -180,6 +181,8 @@ declare type ResourceColor = Color | number | string | Resource;
 
 const MAX_CHANNEL_VALUE = 0xFF;
 const MAX_ALPHA_VALUE = 1;
+const ERROR_CODE_RESOURCE_GET_FAILED = 180003;
+const ERROR_CODE_COLOR_PARAMETER_INCORRECT = 401;
 
 class ColorMetrics {
   private red_: number;
@@ -223,7 +226,9 @@ class ColorMetrics {
       const [, red, green, blue, alpha] = rgbaMatch;
       return new ColorMetrics(Number.parseInt(red, 10), Number.parseInt(green, 10), Number.parseInt(blue, 10), Number.parseFloat(alpha) * MAX_CHANNEL_VALUE);
     } else {
-      throw new TypeError('Invalid color format.');
+      const error = new Error("Parameter error. The format of input color parameter is incorrect.") as BusinessError;
+      error.code = ERROR_CODE_COLOR_PARAMETER_INCORRECT;
+      throw error;
     }
   }
 
@@ -232,7 +237,9 @@ class ColorMetrics {
     if (typeof color === 'object') {
       chanels = getUINativeModule().nativeUtils.parseResourceColor(color);
       if (chanels === undefined) {
-        throw new TypeError('Invalid color format.');
+        const error = new Error("Parameter error. Get color resource failed.") as BusinessError;
+        error.code = ERROR_CODE_RESOURCE_GET_FAILED;
+        throw error;
       }
       const red = chanels[0];
       const green = chanels[1];
@@ -248,7 +255,9 @@ class ColorMetrics {
         return ColorMetrics.rgbOrRGBA(color);
       }
     } else {
-      throw new TypeError('Invalid color format.');
+      const error = new Error("Parameter error. Get color resource failed.") as BusinessError;
+      error.code = ERROR_CODE_RESOURCE_GET_FAILED;
+      throw error;
     }
   }
   private static isHexFormat(format: string): boolean {
@@ -284,7 +293,9 @@ class ColorMetrics {
   blendColor(overlayColor: ColorMetrics): ColorMetrics {
     const chanels = getUINativeModule().nativeUtils.blendColor(this.toNumeric(), overlayColor.toNumeric());
     if (chanels === undefined) {
-      throw new TypeError('Invalid color format.');
+      const error = new Error("Parameter error. The format of input color parameter is incorrect.") as BusinessError;
+      error.code = ERROR_CODE_COLOR_PARAMETER_INCORRECT;
+      throw error;
     }
     const red = chanels[0];
     const green = chanels[1];

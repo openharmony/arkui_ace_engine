@@ -1210,6 +1210,8 @@ class LengthMetrics {
 }
 const MAX_CHANNEL_VALUE = 0xFF;
 const MAX_ALPHA_VALUE = 1;
+const ERROR_CODE_RESOURCE_GET_FAILED = 180003;
+const ERROR_CODE_COLOR_PARAMETER_INCORRECT = 401;
 class ColorMetrics {
     constructor(red, green, blue, alpha = MAX_CHANNEL_VALUE) {
         this.red_ = ColorMetrics.clamp(red);
@@ -1247,15 +1249,24 @@ class ColorMetrics {
             return new ColorMetrics(Number.parseInt(red, 10), Number.parseInt(green, 10), Number.parseInt(blue, 10), Number.parseFloat(alpha) * MAX_CHANNEL_VALUE);
         }
         else {
-            throw new TypeError('Invalid color format.');
+            const error = new Error("Parameter error. The format of the input color string is not rgb or rgba.");
+            error.code = ERROR_CODE_COLOR_PARAMETER_INCORRECT;
+            throw error;
         }
     }
     static resourceColor(color) {
+        if (color === undefined || color === null) {
+            const error = new Error("Parameter error. The type of input color parameter is not ResourceColor.");
+            error.code = ERROR_CODE_COLOR_PARAMETER_INCORRECT;
+            throw error;
+        }
         let chanels = [];
         if (typeof color === 'object') {
             chanels = getUINativeModule().nativeUtils.parseResourceColor(color);
             if (chanels === undefined) {
-                throw new TypeError('Invalid color format.');
+                const error = new Error("Get color resource failed.");
+                error.code = ERROR_CODE_RESOURCE_GET_FAILED;
+                throw error;
             }
             const red = chanels[0];
             const green = chanels[1];
@@ -1275,7 +1286,9 @@ class ColorMetrics {
             }
         }
         else {
-            throw new TypeError('Invalid color format.');
+            const error = new Error("Parameter error. The type of input color parameter is not ResourceColor.");
+            error.code = ERROR_CODE_RESOURCE_GET_FAILED;
+            throw error;
         }
     }
     static isHexFormat(format) {
@@ -1311,9 +1324,16 @@ class ColorMetrics {
         return new ColorMetrics(r, g, b, a);
     }
     blendColor(overlayColor) {
+        if (overlayColor === undefined || overlayColor === null) {
+            const error = new Error("Parameter error. The type of input parameter is not ColorMetrics.");
+            error.code = ERROR_CODE_COLOR_PARAMETER_INCORRECT;
+            throw error;
+        }
         const chanels = getUINativeModule().nativeUtils.blendColor(this.toNumeric(), overlayColor.toNumeric());
         if (chanels === undefined) {
-            throw new TypeError('Invalid color format.');
+            const error = new Error("Parameter error. The type of input parameter is not ColorMetrics.");
+            error.code = ERROR_CODE_COLOR_PARAMETER_INCORRECT;
+            throw error;
         }
         const red = chanels[0];
         const green = chanels[1];
