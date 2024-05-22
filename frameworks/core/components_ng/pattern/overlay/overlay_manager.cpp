@@ -3886,6 +3886,11 @@ void OverlayManager::ComputeSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<Frame
 
     auto sheetType = sheetPattern->GetSheetType();
     switch (sheetType) {
+        case SheetType::SHEET_BOTTOMLANDSPACE:
+            if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                sheetHeight_ = largeHeight;
+                break;
+            }
         case SheetType::SHEET_BOTTOM:
         case SheetType::SHEET_BOTTOM_FREE_WINDOW:
             if (sheetStyle.detents.size() > 0) {
@@ -3893,9 +3898,6 @@ void OverlayManager::ComputeSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<Frame
             } else {
                 ComputeSingleGearSheetOffset(sheetStyle, sheetNode);
             }
-            break;
-        case SheetType::SHEET_BOTTOMLANDSPACE:
-            sheetHeight_ = largeHeight;
             break;
         case SheetType::SHEET_CENTER:
             sheetHeight_ = (sheetHeight + sheetMaxHeight) / SHEET_HALF_SIZE;
@@ -3918,8 +3920,12 @@ void OverlayManager::ComputeSingleGearSheetOffset(NG::SheetStyle& sheetStyle, Re
     auto safeAreaInsets = pipelineContext->GetSafeAreaWithoutProcess();
     auto statusBarHeight = safeAreaInsets.top_.Length();
     auto windowManager = pipelineContext->GetWindowManager();
+    auto sheetType = sheetPattern->GetSheetType();
     if (windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
         statusBarHeight = SHEET_BLANK_FLOATING_STATUS_BAR.ConvertToPx();
+    } else if (sheetType == SheetType::SHEET_BOTTOMLANDSPACE &&
+        AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        statusBarHeight = 0.0f;
     }
     auto largeHeight = sheetMaxHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx() - statusBarHeight;
     if (sheetStyle.sheetMode.has_value()) {
@@ -3963,8 +3969,12 @@ void OverlayManager::ComputeDetentsSheetOffset(NG::SheetStyle& sheetStyle, RefPt
     auto safeAreaInsets = pipelineContext->GetSafeAreaWithoutProcess();
     auto statusBarHeight = safeAreaInsets.top_.Length();
     auto windowManager = pipelineContext->GetWindowManager();
+    auto sheetType = sheetPattern->GetSheetType();
     if (windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
         statusBarHeight = SHEET_BLANK_FLOATING_STATUS_BAR.ConvertToPx();
+    } else if (sheetType == SheetType::SHEET_BOTTOMLANDSPACE &&
+        AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        statusBarHeight = 0.0f;
     }
     auto largeHeight = sheetMaxHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx() - statusBarHeight;
     auto selection = sheetStyle.detents[0];

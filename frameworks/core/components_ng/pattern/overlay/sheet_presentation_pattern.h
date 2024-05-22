@@ -528,6 +528,16 @@ public:
     void ChangeSheetPage(float height);
     void DumpAdvanceInfo() override;
     float GetTitleHeight();
+
+    bool IsSheetBottomStyle()
+    {
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            return sheetType_ == SheetType::SHEET_BOTTOM || sheetType_ == SheetType::SHEET_BOTTOM_FREE_WINDOW ||
+            sheetType_ == SheetType::SHEET_BOTTOMLANDSPACE;
+        }
+        return sheetType_ == SheetType::SHEET_BOTTOM || sheetType_ == SheetType::SHEET_BOTTOM_FREE_WINDOW;
+    }
+    
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 

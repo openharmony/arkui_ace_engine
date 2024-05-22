@@ -349,7 +349,7 @@ void SheetPresentationPattern::HandleDragUpdate(const GestureEvent& info)
     ProcessColumnRect(height - currentOffset_);
     auto renderContext = host->GetRenderContext();
     renderContext->UpdateTransformTranslate({ 0.0f, offset, 0.0f });
-    if (sheetType_ == SheetType::SHEET_BOTTOM) {
+    if (IsSheetBottomStyle()) {
         OnHeightDidChange(height_ - currentOffset_ + sheetHeightUp_);
     }
 }
@@ -554,7 +554,7 @@ void SheetPresentationPattern::AvoidSafeArea()
         // offset: translate endpoint, calculated from top
         renderContext->UpdateTransformTranslate({ 0.0f, offset, 0.0f });
     }
-    if (sheetType_ == SheetType::SHEET_BOTTOM) {
+    if (IsSheetBottomStyle()) {
         OnHeightDidChange(height_ + sheetHeightUp_);
     }
 }
@@ -638,6 +638,7 @@ void SheetPresentationPattern::ModifyFireSheetTransition(float dragVelocity)
         }
         ref->AvoidAiBar();
         ref->isNeedProcessHeight_ = false;
+        ref->FireOnDetentsDidChange(ref->height_);
     };
 
     isAnimationProcess_ = true;
@@ -658,7 +659,7 @@ void SheetPresentationPattern::ModifyFireSheetTransition(float dragVelocity)
 
 void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVelocity)
 {
-    if (HasOnHeightDidChange() && sheetType_ == SheetType::SHEET_BOTTOM && isTransitionIn && isNeedProcessHeight_) {
+    if (HasOnHeightDidChange() && IsSheetBottomStyle() && isTransitionIn && isNeedProcessHeight_) {
         ModifyFireSheetTransition(dragVelocity);
         return;
     }
@@ -794,9 +795,7 @@ void SheetPresentationPattern::UpdateDragBarStatus()
         sheetDragBar->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         return;
     }
-    auto sheetType = GetSheetType();
-    if (((sheetType == SheetType::SHEET_BOTTOM) || (sheetType == SheetType::SHEET_BOTTOM_FREE_WINDOW)) &&
-        (sheetDetentHeight_.size() > 1)) {
+    if (IsSheetBottomStyle() && (sheetDetentHeight_.size() > 1)) {
         if (sheetStyle.isTitleBuilder.has_value()) {
             dragBarLayoutProperty->UpdateVisibility(showDragIndicator ? VisibleType::VISIBLE : VisibleType::INVISIBLE);
         } else {
@@ -1036,6 +1035,12 @@ void SheetPresentationPattern::InitSheetDetents()
         mediumSize = MEDIUM_SIZE_PRE;
     }
     switch (sheetType) {
+        case SheetType::SHEET_BOTTOMLANDSPACE:
+            if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                height = sheetFrameHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx();
+                sheetDetentHeight_.emplace_back(height);
+                break;
+            }
         case SheetType::SHEET_BOTTOM:
         case SheetType::SHEET_BOTTOM_FREE_WINDOW:
             if (LessOrEqual(sheetStyle.detents.size(), 0)) {
@@ -1071,10 +1076,6 @@ void SheetPresentationPattern::InitSheetDetents()
             std::sort(sheetDetentHeight_.begin(), sheetDetentHeight_.end(), std::less<float>());
             sheetDetentHeight_.erase(
                 std::unique(sheetDetentHeight_.begin(), sheetDetentHeight_.end()), sheetDetentHeight_.end());
-            break;
-        case SheetType::SHEET_BOTTOMLANDSPACE:
-            height = sheetFrameHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx();
-            sheetDetentHeight_.emplace_back(height);
             break;
         case SheetType::SHEET_CENTER:
             height = (centerHeight_ + pageHeight_) / SHEET_HALF_HEIGHT;
@@ -1798,7 +1799,7 @@ void SheetPresentationPattern::FireOnDetentsDidChange(float height)
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
-    if (sheetType_ != SheetType::SHEET_BOTTOM || NearEqual(preDetentsHeight_, height) ||
+    if (!IsSheetBottomStyle() || NearEqual(preDetentsHeight_, height) ||
         LessOrEqual(sheetStyle.detents.size(), 0)) {
         return;
     }
