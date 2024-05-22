@@ -723,7 +723,7 @@ void SheetPresentationPattern::DismissTransition(bool isTransitionIn, float drag
     const auto& overlayManager = GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->ModalPageLostFocus(GetHost());
-    if (!isTransitionIn) {
+    if (!isTransitionIn && !HasCallback()) {
         OnWillDisappear();
     }
     auto sheetType = GetSheetType();
