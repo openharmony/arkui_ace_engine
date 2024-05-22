@@ -126,6 +126,8 @@ private:
     int32_t preParagraphsPlaceholderCount_ = 0;
     int32_t currentParagraphPlaceholderCount_ = 0;
 
+    float paragraphFontSize_ = 0.0f;
+
     ACE_DISALLOW_COPY_AND_MOVE(MultipleParagraphLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

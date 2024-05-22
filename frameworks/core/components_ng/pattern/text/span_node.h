@@ -140,6 +140,9 @@ public:                                                                         
     }
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr double DEFAULT_FONT_SIZE_VALUE = 16.0;
+}
 using FONT_FEATURES_LIST = std::list<std::pair<std::string, int32_t>>;
 class InspectorFilter;
 class Paragraph;
@@ -152,6 +155,7 @@ struct PlaceholderStyle {
     double baselineOffset = 0.0f;
     VerticalAlign verticalAlign = VerticalAlign::BOTTOM;
     TextBaseline baseline = TextBaseline::ALPHABETIC;
+    Dimension paragraphFontSize = Dimension(DEFAULT_FONT_SIZE_VALUE, DimensionUnit::FP);
 };
 
 struct CustomSpanPlaceholderInfo {
