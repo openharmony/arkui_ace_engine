@@ -20,6 +20,7 @@
 #include <sys/time.h>
 
 #include "base/i18n/localization.h"
+#include "base/log/dump_log.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
@@ -169,6 +170,9 @@ void TextClockPattern::InitTextClockController()
 
 void TextClockPattern::OnVisibleChange(bool isVisible)
 {
+    TAG_LOGI(AceLogTag::ACE_TEXT_CLOCK,
+        "Clock is %{public}s and clock %{public}s running",
+        isVisible ? "visible" : "invisible", isVisible ? "starts" : "stops");
     if (isVisible && !isSetVisible_) {
         isSetVisible_ = isVisible;
         UpdateTimeText();
@@ -180,6 +184,9 @@ void TextClockPattern::OnVisibleChange(bool isVisible)
 
 void TextClockPattern::OnVisibleAreaChange(bool visible)
 {
+    TAG_LOGI(AceLogTag::ACE_TEXT_CLOCK,
+        "Clock is %{public}s the visible area and clock %{public}s running",
+        visible ? "in" : "out of", visible ? "starts" : "stops");
     if (visible && !isInVisibleArea_) {
         isInVisibleArea_ = visible;
         UpdateTimeText();
@@ -720,6 +727,7 @@ RefPtr<FrameNode> TextClockPattern::GetTextNode()
 
 void TextClockPattern::OnTimeChange()
 {
+    TAG_LOGI(AceLogTag::ACE_TEXT_CLOCK, "Time is changed and clock updates");
     is24H_ = SystemProperties::Is24HourClock();
     UpdateTimeText(ON_TIME_CHANGE);
 }
@@ -765,5 +773,13 @@ RefPtr<FrameNode> TextClockPattern::BuildContentModifierNode()
     auto enabled = eventHub->IsEnabled();
     TextClockConfiguration textClockConfiguration(timeZoneOffset, started, timeValue, enabled);
     return (makeFunc_.value())(textClockConfiguration);
+}
+
+void TextClockPattern::DumpInfo()
+{
+    DumpLog::GetInstance().AddDesc(std::string("hourWest: ").append(std::to_string(hourWest_)));
+    DumpLog::GetInstance().AddDesc(std::string("is24H: ").append(std::to_string(is24H_)));
+    DumpLog::GetInstance().AddDesc(std::string("isInVisibleArea: ").append(std::to_string(isInVisibleArea_)));
+    DumpLog::GetInstance().AddDesc(std::string("isStart: ").append(std::to_string(isStart_)));
 }
 } // namespace OHOS::Ace::NG
