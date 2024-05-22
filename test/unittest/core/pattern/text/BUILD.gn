@@ -18,6 +18,7 @@ ace_unittest("text_test_ng") {
   sources = [
     "paragraph_manager_test_ng.cpp",
     "span_string_test_ng.cpp",
+    "span_sub_test_ng.cpp",
     "span_test_ng.cpp",
     "text_base.cpp",
     "text_test_ng.cpp",
