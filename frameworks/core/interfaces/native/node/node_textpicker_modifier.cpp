@@ -118,7 +118,9 @@ void SetTextPickerTextStyle(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Char
     CHECK_NULL_VOID(frameNode);
     NG::PickerTextStyle pickerTextStyle;
     NodeModifier::GetPickerTextStyle(color, fontInfo, styleVal, pickerTextStyle);
-    auto themeManager = PipelineBase::CurrentThemeManager();
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto themeManager = context->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
     auto pickerTheme = themeManager->GetTheme<PickerTheme>();
     TextPickerModelNG::SetNormalTextStyle(frameNode, pickerTheme, pickerTextStyle);
@@ -129,7 +131,9 @@ void ResetTextPickerTextStyle(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NG::PickerTextStyle pickerTextStyle;
-    auto themeManager = PipelineBase::CurrentThemeManager();
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto themeManager = context->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
     auto pickerTheme = themeManager->GetTheme<PickerTheme>();
     TextPickerModelNG::SetNormalTextStyle(frameNode, pickerTheme, pickerTextStyle);
@@ -142,7 +146,9 @@ void SetTextPickerSelectedTextStyle(
     CHECK_NULL_VOID(frameNode);
     NG::PickerTextStyle pickerTextStyle;
     NodeModifier::GetPickerTextStyle(color, fontInfo, styleVal, pickerTextStyle);
-    auto themeManager = PipelineBase::CurrentThemeManager();
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto themeManager = context->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
     auto pickerTheme = themeManager->GetTheme<PickerTheme>();
     TextPickerModelNG::SetSelectedTextStyle(frameNode, pickerTheme, pickerTextStyle);
@@ -153,7 +159,9 @@ void ResetTextPickerSelectedTextStyle(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NG::PickerTextStyle pickerTextStyle;
-    auto themeManager = PipelineBase::CurrentThemeManager();
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto themeManager = context->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
     auto pickerTheme = themeManager->GetTheme<PickerTheme>();
     TextPickerModelNG::SetSelectedTextStyle(frameNode, pickerTheme, pickerTextStyle);
@@ -166,7 +174,9 @@ void SetTextPickerDisappearTextStyle(
     CHECK_NULL_VOID(frameNode);
     NG::PickerTextStyle pickerTextStyle;
     NodeModifier::GetPickerTextStyle(color, fontInfo, styleVal, pickerTextStyle);
-    auto themeManager = PipelineBase::CurrentThemeManager();
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto themeManager = context->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
     auto pickerTheme = themeManager->GetTheme<PickerTheme>();
     TextPickerModelNG::SetDisappearTextStyle(frameNode, pickerTheme, pickerTextStyle);
@@ -177,7 +187,9 @@ void ResetTextPickerDisappearTextStyle(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NG::PickerTextStyle pickerTextStyle;
-    auto themeManager = PipelineBase::CurrentThemeManager();
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto themeManager = context->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
     auto pickerTheme = themeManager->GetTheme<PickerTheme>();
     TextPickerModelNG::SetDisappearTextStyle(frameNode, pickerTheme, pickerTextStyle);
