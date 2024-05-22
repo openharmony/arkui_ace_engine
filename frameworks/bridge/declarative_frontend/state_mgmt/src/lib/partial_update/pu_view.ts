@@ -247,6 +247,11 @@ abstract class ViewPU extends PUV2ViewBase
     this.localStoragebackStore_ = undefined;
   }
 
+  protected purgeVariableDependenciesOnElmtIdOwnFunc(elmtId: number): void {
+    this.ownObservedPropertiesStore_.forEach((stateVar: ObservedPropertyAbstractPU<any>) => {
+      stateVar.purgeDependencyOnElmtId(elmtId);
+    });
+  }
   protected debugInfoStateVars(): string {
     let result: string = `|--${this.constructor.name}[${this.id__()}]`;
     Object.getOwnPropertyNames(this)
