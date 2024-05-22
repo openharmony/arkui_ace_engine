@@ -53,6 +53,12 @@ public:
     static void SetOnCut(const JSCallbackInfo& info);
     static void SetOnPaste(const JSCallbackInfo& info);
     static void SetCopyOption(const JSCallbackInfo& info);
+    static JSRef<JSVal> CreateJsAboutToIMEInputObj(const InsertValueInfo& insertValue);
+    static JSRef<JSVal> CreateJsDeleteToIMEObj(const DeleteValueInfo& deleteValueInfo);
+    static void OnWillInsertValue(const JSCallbackInfo& info);
+    static void OnDidInsertValue(const JSCallbackInfo& info);
+    static void OnWillDelete(const JSCallbackInfo& info);
+    static void OnDidDelete(const JSCallbackInfo& info);
     static void SetIconStyle(const JSCallbackInfo& info);
     static void JsMenuOptionsExtension(const JSCallbackInfo& info);
     static void SetSelectionMenuHidden(const JSCallbackInfo& info);

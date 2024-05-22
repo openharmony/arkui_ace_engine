@@ -1490,6 +1490,43 @@ typedef enum {
     NODE_FOCUS_ON_TOUCH,
 
     /**
+     * @brief 边框宽度属性，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * 1: .value[0].f32：统一设置四条边的边框宽度，单位为百分比。 \n
+     * 2: .value[0].f32：设置上边框的边框宽度，单位为百分比。 \n
+     * .value[1].f32：设置右边框的边框宽度，单位为百分比。 \n
+     * .value[2].f32：设置下边框的边框宽度，单位为百分比。 \n
+     * .value[3].f32：设置左边框的边框宽度，单位为百分比。 \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].f32：设置上边框的边框宽度，单位为百分比。 \n
+     * .value[1].f32：设置右边框的边框宽度，单位为百分比。 \n
+     * .value[2].f32：设置下边框的边框宽度，单位为百分比。 \n
+     * .value[3].f32：设置左边框的边框宽度，单位为百分比。 \n
+     *
+     */
+    NODE_BORDER_WIDTH_PERCENT,
+    /**
+     * @brief 边框圆角属性，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * 1: .value[0].f32：统一设置四条边的边框圆角半径，单位为百分比。 \n
+     * 2: .value[0].f32：设置左上角圆角半径，单位为百分比。 \n
+     * .value[1].f32：设置右上角圆角半径，单位为百分比。 \n
+     * .value[2].f32：设置左下角圆角半径，单位为百分比。 \n
+     * .value[3].f32：设置右下角圆角半径，单位为百分比。 \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].f32：设置左上角圆角半径，单位为百分比。 \n
+     * .value[1].f32：设置右上角圆角半径，单位为百分比。 \n
+     * .value[2].f32：设置左下角圆角半径，单位为百分比。 \n
+     * .value[3].f32：设置右下角圆角半径，单位为百分比。 \n
+     *
+     */
+    NODE_BORDER_RADIUS_PERCENT,
+
+    /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
@@ -4487,6 +4524,17 @@ typedef enum {
      *
      */
     NODE_REFRESH_CONTENT,
+    /**
+     * @brief 设置下拉跟手系数，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
+     * .value[0].f32：下拉跟手系数,有效值为0-1之间的值。
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].f32：下拉跟手系数,有效值为0-1之间的值。
+     *
+     */
+    NODE_REFRESH_PULL_DOWN_RATIO = 1009002,
 
     /**
      * @brief Defines the main axis direction of the <b><WaterFlow></b> component layout.
@@ -4905,6 +4953,24 @@ typedef enum {
      * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_UIInputEvent}。\n
      */
     NODE_ON_MOUSE,
+    /**
+     * @brief Defines the mount event.
+     *
+     * This event is triggered when the component is mounted. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} does not contain parameters.
+     */
+    NODE_EVENT_ON_ATTACH,
+    /**
+     * @brief Defines the unmount event.
+     *
+     * This event is triggered when the component is unmount. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} does not contain parameters.
+     */
+    NODE_EVENT_ON_DETACH,
     /**
      * @brief 文本设置TextDataDetectorConfig且识别成功时，触发onDetectResultUpdate回调。
      *
@@ -5520,6 +5586,15 @@ typedef enum {
      * {@link ArkUI_NodeComponentEvent} does not contain parameters:\n
      */
     NODE_REFRESH_ON_REFRESH,
+    /**
+     * @brief Defines the event that is triggered when the <b>ARKUI_NODE_REFRESH</b> drop-down distance changes.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: Pull-down distance. \n
+     */
+    NODE_REFRESH_ON_OFFSET_CHANGE = 1009002,
 
     /**
      * @brief Defines the event triggered when the <b>ARKUI_NODE_SCROLL</b> component is about to scroll.

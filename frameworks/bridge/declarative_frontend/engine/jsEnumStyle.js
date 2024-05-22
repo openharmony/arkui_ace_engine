@@ -738,6 +738,8 @@ var SlideEffect;
   SlideEffect[SlideEffect["Right"] = 2] = "Right";
   SlideEffect[SlideEffect["Top"] = 3] = "Top";
   SlideEffect[SlideEffect["Bottom"] = 4] = "Bottom";
+  SlideEffect[SlideEffect["START"] = 5] = "START";
+  SlideEffect[SlideEffect["END"] = 6] = "END";
 })(SlideEffect || (SlideEffect = {}));
 
 var GradientDirection;
@@ -1739,6 +1741,14 @@ class Indicator {
     this.bottomValue = value;
     return this;
   }
+  start(value) {
+    this.startValue = value;
+    return this;
+  }
+  end(value) {
+    this.endValue = value;
+    return this;
+  }
   static dot() {
     return new DotIndicator();
   }
@@ -2479,6 +2489,12 @@ class WaterFlowSections {
   }
 }
 
+var WaterFlowLayoutMode;
+(function (WaterFlowLayoutMode) {
+  WaterFlowLayoutMode[WaterFlowLayoutMode["ALWAYS_TOP_DOWN"] = 0] = "ALWAYS_TOP_DOWN";
+  WaterFlowLayoutMode[WaterFlowLayoutMode["SLIDING_WINDOW"] = 1] = "SLIDING_WINDOW";
+})(WaterFlowLayoutMode || (WaterFlowLayoutMode = {}));
+
 class ChildrenMainSizeParamError extends Error {
   constructor(message, code) {
     super(message);
@@ -2753,6 +2769,17 @@ var SafeAreaEdge;
   SafeAreaEdge[SafeAreaEdge["START"] = 2] = "START";
   SafeAreaEdge[SafeAreaEdge["END"] = 3] = "END";
 })(SafeAreaEdge || (SafeAreaEdge = {}));
+
+let LayoutSafeAreaType;
+(function (LayoutSafeAreaType) {
+  LayoutSafeAreaType[LayoutSafeAreaType.SYSTEM = 0] = "SYSTEM";
+})(LayoutSafeAreaType || (LayoutSafeAreaType = {}));
+
+let LayoutSafeAreaEdge;
+(function (LayoutSafeAreaEdge) {
+  LayoutSafeAreaEdge[LayoutSafeAreaEdge.TOP = 0] = "TOP";
+  LayoutSafeAreaEdge[LayoutSafeAreaEdge.BOTTOM = 1] = "BOTTOM";
+})(LayoutSafeAreaEdge || (LayoutSafeAreaEdge = {}));
 
 var RenderFit;
 (function (RenderFit) {
@@ -3083,3 +3110,9 @@ var ViewportFit;
   ViewportFit[ViewportFit["CONTAINS"] = 1] = "CONTAINS";
   ViewportFit[ViewportFit["COVER"] = 2] = "COVER";
 })(ViewportFit || (ViewportFit = {}));
+
+var TextDeleteDirection;
+(function (TextDeleteDirection) {
+    TextDeleteDirection[TextDeleteDirection["BACKWARD"] = 0] = "BACKWARD";
+    TextDeleteDirection[TextDeleteDirection["FORWARD"] = 1] = "FORWARD";
+})(TextDeleteDirection || (TextDeleteDirection = {}));

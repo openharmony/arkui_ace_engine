@@ -57,7 +57,7 @@ class LocalStorage extends NativeLocalStorage {
       ArkTools.print("NativeLocalStorage", NativeLocalStorage);
       throw error;
     }
-    stateMgmtConsole.debug(`${this.constructor.name} constructor.`)
+    stateMgmtConsole.debug(`${this.constructor.name} constructor.`);
     this.storage_ = new Map<string, ObservedPropertyAbstract<any>>();
     if (Object.keys(initializingProperties).length) {
       this.initializeProps(initializingProperties);
@@ -71,7 +71,7 @@ class LocalStorage extends NativeLocalStorage {
    * not a public / sdk function
    */
   public initializeProps(initializingProperties: Object = {}) {
-    stateMgmtConsole.debug(`${this.constructor.name} initializing with Object keys: [${Object.keys(initializingProperties)}].`)
+    stateMgmtConsole.debug(`${this.constructor.name} initializing with Object keys: [${Object.keys(initializingProperties)}].`);
     this.storage_.clear();
     Object.keys(initializingProperties)
       .filter((propName) => (initializingProperties[propName] != null || Utils.isApiVersionEQAbove(12)))
@@ -140,7 +140,7 @@ class LocalStorage extends NativeLocalStorage {
    * @since 9
    */
   public get<T>(propName: string): T | undefined {
-    var p: ObservedPropertyAbstract<T> | undefined = this.storage_.get(propName);
+    let p: ObservedPropertyAbstract<T> | undefined = this.storage_.get(propName);
     return (p) ? p.get() : undefined;
   }
 
@@ -157,13 +157,13 @@ class LocalStorage extends NativeLocalStorage {
    */
   public set<T>(propName: string, newValue: T): boolean {
     stateMgmtProfiler.begin("LocalStorage.set");
-    if (newValue == undefined && !Utils.isApiVersionEQAbove(12)) {
+    if (newValue === undefined && !Utils.isApiVersionEQAbove(12)) {
       stateMgmtConsole.warn(`${this.constructor.name}: set('${propName}') with newValue == undefined not allowed.`);
       stateMgmtProfiler.end();
       return false;
     }
     var p: ObservedPropertyAbstract<T> | undefined = this.storage_.get(propName);
-    if (p == undefined) {
+    if (p === undefined) {
       stateMgmtConsole.warn(`${this.constructor.name}: set: no property ${propName} error.`);
       stateMgmtProfiler.end();
       return false;
@@ -193,7 +193,7 @@ class LocalStorage extends NativeLocalStorage {
       return false;
     }
 
-    var p: ObservedPropertyAbstract<T> = this.storage_.get(propName);
+    let p: ObservedPropertyAbstract<T> = this.storage_.get(propName);
     if (p) {
       stateMgmtConsole.debug(`${this.constructor.name}.setOrCreate(${propName}, ${newValue}) update existing property`);
       p.set(newValue);
@@ -363,7 +363,7 @@ class LocalStorage extends NativeLocalStorage {
    */
   public setAndProp<T>(propName: string, defaultValue: T, propUser?: IPropertySubscriber, subscribersName?: string): SubscribedAbstractProperty<T> {
     stateMgmtProfiler.begin("LocalStorage.setAndProp");
-    var p: ObservedPropertyAbstract<T> | undefined = this.storage_.get(propName);
+    let p: ObservedPropertyAbstract<T> | undefined = this.storage_.get(propName);
     if (!p) {
         this.setOrCreate(propName, defaultValue);
     }
@@ -394,7 +394,7 @@ class LocalStorage extends NativeLocalStorage {
   */
   public delete(propName: string): boolean {
     stateMgmtProfiler.begin("LocalStorage.delete");
-    var p: ObservedPropertyAbstract<any> | undefined = this.storage_.get(propName);
+    let p: ObservedPropertyAbstract<any> | undefined = this.storage_.get(propName);
     if (p) {
       if (p.numberOfSubscrbers()) {
         stateMgmtConsole.error(`${this.constructor.name}: Attempt to delete property ${propName} that has \

@@ -48,6 +48,8 @@
 #include "core/common/container.h"
 #include "core/common/font_manager.h"
 #include "core/common/layout_inspector.h"
+#include "core/common/stylus/stylus_detector_mgr.h"
+#include "core/common/stylus/stylus_detector_default.h"
 #include "core/common/text_field_manager.h"
 #include "core/common/thread_checker.h"
 #include "core/common/window.h"
@@ -780,10 +782,17 @@ void PipelineContext::FlushMessages()
     window_->FlushTasks();
 }
 
-void PipelineContext::FlushUITasks()
+void PipelineContext::FlushUITasks(bool triggeredByImplicitAnimation)
 {
     window_->Lock();
-    taskScheduler_->FlushTask();
+    taskScheduler_->FlushTask(triggeredByImplicitAnimation);
+    window_->Unlock();
+}
+
+void PipelineContext::FlushAfterLayoutCallbackInImplicitAnimationTask()
+{
+    window_->Lock();
+    taskScheduler_->FlushAfterLayoutCallbackInImplicitAnimationTask();
     window_->Unlock();
 }
 
@@ -1971,6 +1980,10 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         touchRestrict.sourceType = point.sourceType;
         touchRestrict.touchEvent = point;
         touchRestrict.inputEventType = InputEventType::TOUCH_SCREEN;
+        if (StylusDetectorMgr::GetInstance()->IsNeedInterceptedTouchEvent(scalePoint)) {
+            return;
+        }
+
         eventManager_->TouchTest(scalePoint, node, touchRestrict, GetPluginEventOffset(), viewScale_, isSubPipe);
         if (!touchRestrict.childTouchTestList.empty()) {
             scalePoint.childTouchTestList = touchRestrict.childTouchTestList;
@@ -2333,6 +2346,12 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-default") {
         rootNode_->DumpTree(0);
         DumpLog::GetInstance().OutPutDefault();
+    } else if (params[0] == "-overlay") {
+        if (overlayManager_) {
+            overlayManager_->DumpOverlayInfo();
+        }
+    } else if (params[0] == "--stylus") {
+        StylusDetectorDefault::GetInstance()->ExecuteCommand(params);
     }
     return true;
 }
@@ -2677,6 +2696,8 @@ MouseEvent ConvertAxisToMouse(const AxisEvent& event)
     result.sourceType = event.sourceType;
     result.sourceTool = event.sourceTool;
     result.pointerEvent = event.pointerEvent;
+    result.screenX = event.screenX;
+    result.screenY = event.screenY;
     return result;
 }
 
@@ -3222,9 +3243,9 @@ void PipelineContext::Finish(bool /* autoFinish */) const
     }
 }
 
-void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task)
+void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task, bool isFlushInImplicitAnimationTask)
 {
-    taskScheduler_->AddAfterLayoutTask(std::move(task));
+    taskScheduler_->AddAfterLayoutTask(std::move(task), isFlushInImplicitAnimationTask);
 }
 
 void PipelineContext::AddPersistAfterLayoutTask(std::function<void()>&& task)
@@ -3719,5 +3740,35 @@ bool PipelineContext::IsContainerModalVisible()
     auto windowManager = GetWindowManager();
     bool isFloatingWindow = windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
     return isShowTitle_ && isFloatingWindow && customTitleSettedShow_;
+}
+
+void PipelineContext::CheckAndLogLastReceivedTouchEventInfo(int32_t eventId, TouchType type)
+{
+    eventManager_->CheckAndLogLastReceivedTouchEventInfo(eventId, type);
+}
+
+void PipelineContext::CheckAndLogLastConsumedTouchEventInfo(int32_t eventId, TouchType type)
+{
+    eventManager_->CheckAndLogLastReceivedTouchEventInfo(eventId, type);
+}
+
+void PipelineContext::CheckAndLogLastReceivedMouseEventInfo(int32_t eventId, MouseAction action)
+{
+    eventManager_->CheckAndLogLastReceivedMouseEventInfo(eventId, action);
+}
+
+void PipelineContext::CheckAndLogLastConsumedMouseEventInfo(int32_t eventId, MouseAction action)
+{
+    eventManager_->CheckAndLogLastConsumedMouseEventInfo(eventId, action);
+}
+
+void PipelineContext::CheckAndLogLastReceivedAxisEventInfo(int32_t eventId, AxisAction action)
+{
+    eventManager_->CheckAndLogLastReceivedAxisEventInfo(eventId, action);
+}
+
+void PipelineContext::CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, AxisAction action)
+{
+    eventManager_->CheckAndLogLastConsumedAxisEventInfo(eventId, action);
 }
 } // namespace OHOS::Ace::NG

@@ -33,8 +33,8 @@ void SetOptionBuilder(FrameNode* frameNode, ArkUIListItemSwipeActionItemHandle i
             }
         };
         auto onEnterActionArea = [item]() {
-            if (item->onExitActionArea) {
-                item->onExitActionArea();
+            if (item->onEnterActionArea) {
+                item->onEnterActionArea();
             }
         };
         auto onExitActionArea = [item]() {

@@ -16,6 +16,8 @@
 
 #include "base/utils/utils.h"
 #include "core/components/container_modal/container_modal_constants.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -82,9 +84,15 @@ bool SafeAreaManager::UpdateKeyboardSafeArea(float keyboardHeight)
 SafeAreaInsets SafeAreaManager::GetCombinedSafeArea(const SafeAreaExpandOpts& opts) const
 {
     SafeAreaInsets res;
+#ifdef PREVIEW
+    if (ignoreSafeArea_) {
+        return res;
+    }
+#else
     if (ignoreSafeArea_ || (!isFullScreen_ && !isNeedAvoidWindow_)) {
         return res;
     }
+#endif
     if (opts.type & SAFE_AREA_TYPE_CUTOUT) {
         res = res.Combine(cutoutSafeArea_);
     }
@@ -167,9 +175,15 @@ SafeAreaInsets SafeAreaManager::GetCutoutSafeArea() const
 
 SafeAreaInsets SafeAreaManager::GetSafeArea() const
 {
+#ifdef PREVIEW
+    if (ignoreSafeArea_) {
+        return {};
+    }
+#else
     if (ignoreSafeArea_ || (!isFullScreen_ && !isNeedAvoidWindow_)) {
         return {};
     }
+#endif
     return systemSafeArea_.Combine(cutoutSafeArea_).Combine(navSafeArea_);
 }
 
@@ -218,5 +232,27 @@ void SafeAreaManager::ExpandSafeArea()
         ++iter;
     }
     ClearNeedExpandNode();
+}
+
+bool SafeAreaManager::CheckPageNeedAvoidKeyboard(const RefPtr<FrameNode>& frameNode)
+{
+    if (frameNode->GetTag() != V2::PAGE_ETS_TAG) {
+        return false;
+    }
+    // page will not avoid keyboard when lastChild is sheet
+    RefPtr<OverlayManager> overlay;
+    if (!frameNode->PageLevelIsNavDestination()) {
+        auto pattern = frameNode->GetPattern<PagePattern>();
+        CHECK_NULL_RETURN(pattern, true);
+        overlay = pattern->GetOverlayManager();
+    } else {
+        auto navNode = FrameNode::GetFrameNode(V2::NAVDESTINATION_VIEW_ETS_TAG, frameNode->GetPageLevelNodeId());
+        CHECK_NULL_RETURN(navNode, true);
+        auto pattern = navNode->GetPattern<NavDestinationPattern>();
+        CHECK_NULL_RETURN(pattern, true);
+        overlay = pattern->GetOverlayManager();
+    }
+    CHECK_NULL_RETURN(overlay, true);
+    return overlay->CheckPageNeedAvoidKeyboard();
 }
 } // namespace OHOS::Ace::NG

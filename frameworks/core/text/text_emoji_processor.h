@@ -19,6 +19,7 @@
 #include "base/utils/string_utils.h"
 
 namespace OHOS::Ace {
+enum class EmojiRelation { NO_EMOJI, IN_EMOJI, BEFORE_EMOJI, AFTER_EMOJI, MIDDLE_EMOJI };
 class TextEmojiProcessor {
 public:
     // static functions
@@ -43,9 +44,11 @@ public:
     static bool IsEmojiModifier(uint32_t codePoint);
     static bool IsTagSpec(uint32_t codePoint);
     static bool IsKeycapBase(uint32_t codePoint);
-    static bool IsIndexInEmoji(int32_t index, std::string content, int32_t& startIndex, int32_t& endIndex);
-    static bool IsIndexBeforeOrInEmoji(int32_t index, std::string content);
-    static bool IsIndexAfterOrInEmoji(int32_t index, std::string content);
+    static bool IsIndexInEmoji(int32_t index, const std::string& content, int32_t& startIndex, int32_t& endIndex);
+    static EmojiRelation GetIndexRelationToEmoji(int32_t index,
+        const std::string& content, int32_t& startIndex, int32_t& endIndex);
+    static bool IsIndexBeforeOrInEmoji(int32_t index, const std::string& content);
+    static bool IsIndexAfterOrInEmoji(int32_t index, const std::string& content);
 
 private:
     static void OnBeginState(uint32_t codePoint, int& state, int& deleteCount, bool isBackward);
@@ -61,10 +64,14 @@ private:
     static bool BackwardDelete(std::u32string& u32Content);
     static bool ForwardDelete(std::u32string& u32Content);
     static bool HandleDeleteAction(std::u32string& u32Content, int32_t deleteCount, bool isBackward);
-    static int32_t GetEmojiLengthBackward(std::u32string& u32Content, int32_t& startIndex, std::u16string u16Content);
-    static int32_t GetEmojiLengthForward(std::u32string& u32Content, int32_t& startIndex, std::u16string u16Content);
-    static int32_t GetEmojiLengthAtEnd(std::u32string u32Content, bool isCountNonEmoji);
-    static int32_t GetEmojiLengthAtFront(std::u32string u32Content, bool isCountNonEmoji);
+    static int32_t GetEmojiLengthBackward(std::u32string& u32Content,
+        int32_t& startIndex, const std::u16string& u16Content);
+    static int32_t GetEmojiLengthForward(std::u32string& u32Content,
+        int32_t& startIndex, const std::u16string& u16Content);
+    static int32_t GetEmojiLengthU16Forward(std::u32string& u32Content,
+        int32_t& startIndex, const std::u16string& u16Content);
+    static int32_t GetEmojiLengthAtEnd(const std::u32string& u32Content, bool isCountNonEmoji);
+    static int32_t GetEmojiLengthAtFront(const std::u32string& u32Content, bool isCountNonEmoji);
     static std::u16string U32ToU16string(const std::u32string& u32str);
 };
 

@@ -73,7 +73,10 @@ bool HoursWestIsValid(int32_t hoursWest)
 
 float GetHoursWest(float hoursWest)
 {
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+    RefPtr<Container> container = Container::Current();
+    CHECK_NULL_RETURN(container, int32_t(hoursWest));
+    auto apiTargetVersion = container->GetApiTargetVersion();
+    if (apiTargetVersion >= static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN)) {
         for (float i : HOURS_WEST) {
             if (NearEqual(hoursWest, i)) {
                 return hoursWest;
@@ -126,7 +129,9 @@ void JSTextClock::JSBind(BindingTarget globalObj)
     JSClass<JSTextClock>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSTextClock>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSTextClock>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSTextClock>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSTextClock>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSTextClock>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSTextClock>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTextClock>::StaticMethod("fontColor", &JSTextClock::SetTextColor, opt);
     JSClass<JSTextClock>::StaticMethod("fontSize", &JSTextClock::SetFontSize, opt);
@@ -240,6 +245,7 @@ void JSTextClock::SetFormat(const JSCallbackInfo& info)
     if (!info[0]->IsString()) {
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
             TextClockModel::GetInstance()->SetFormat(DEFAULT_FORMAT_API_ELEVEN);
+            TextClockModel::GetInstance()->IsDefaultFormat(true);
         } else {
             TextClockModel::GetInstance()->SetFormat(DEFAULT_FORMAT_API_TEN);
         }
@@ -250,6 +256,7 @@ void JSTextClock::SetFormat(const JSCallbackInfo& info)
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         if (format.length() == 0) {
             TextClockModel::GetInstance()->SetFormat(DEFAULT_FORMAT_API_ELEVEN);
+            TextClockModel::GetInstance()->IsDefaultFormat(true);
             return;
         }
     } else {

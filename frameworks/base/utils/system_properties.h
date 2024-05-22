@@ -504,7 +504,10 @@ public:
         return brightUpPercent_;
     }
 
+    static bool IsOpIncEnable();
+
 private:
+    static bool opincEnabled_;
     static bool traceEnabled_;
     static bool developerModeOn_;
     static bool svgTraceEnable_;

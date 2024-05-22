@@ -25,7 +25,6 @@
 #include "ability_context.h"
 #include "ability_info.h"
 #include "auto_fill_manager.h"
-#include "base/json/json_util.h"
 #include "js_native_api.h"
 #include "pointer_event.h"
 #include "scene_board_judgement.h"
@@ -43,6 +42,7 @@
 #include "adapter/ohos/osal/resource_adapter_impl_v2.h"
 #include "adapter/ohos/osal/view_data_wrap_ohos.h"
 #include "base/i18n/localization.h"
+#include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
@@ -54,11 +54,13 @@
 #include "base/thread/task_executor.h"
 #include "base/utils/device_config.h"
 #include "base/utils/system_properties.h"
+#include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "bridge/card_frontend/card_frontend.h"
 #include "bridge/card_frontend/form_frontend_declarative.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/declarative_frontend.h"
+#include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "bridge/js_frontend/engine/common/js_engine_loader.h"
 #include "bridge/js_frontend/js_frontend.h"
 #include "core/common/ace_application_info.h"
@@ -78,6 +80,9 @@
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/render/adapter/form_render_window.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
+#include "core/event/axis_event.h"
+#include "core/event/mouse_event.h"
+#include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -770,6 +775,7 @@ void AceContainer::InitializeCallback()
                                     const TouchEvent& event, const std::function<void()>& markProcess,
                                     const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
+        context->CheckAndLogLastReceivedTouchEventInfo(event.touchEventId, event.type);
         auto touchTask = [context, event, markProcess, node]() {
             if (node) {
                 context->OnTouchEvent(event, node);
@@ -778,6 +784,7 @@ void AceContainer::InitializeCallback()
             }
             CHECK_NULL_VOID(markProcess);
             markProcess();
+            context->CheckAndLogLastConsumedTouchEventInfo(event.touchEventId, event.type);
         };
         auto uiTaskRunner = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         if (uiTaskRunner.IsRunOnCurrentThread()) {
@@ -793,6 +800,7 @@ void AceContainer::InitializeCallback()
                                     const MouseEvent& event, const std::function<void()>& markProcess,
                                     const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
+        context->CheckAndLogLastReceivedMouseEventInfo(event.touchEventId, event.action);
         auto mouseTask = [context, event, markProcess, node]() {
             if (node) {
                 context->OnMouseEvent(event, node);
@@ -801,6 +809,7 @@ void AceContainer::InitializeCallback()
             }
             CHECK_NULL_VOID(markProcess);
             markProcess();
+            context->CheckAndLogLastConsumedMouseEventInfo(event.touchEventId, event.action);
         };
         auto uiTaskRunner = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         if (uiTaskRunner.IsRunOnCurrentThread()) {
@@ -816,6 +825,7 @@ void AceContainer::InitializeCallback()
                                    const AxisEvent& event, const std::function<void()>& markProcess,
                                    const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
+        context->CheckAndLogLastReceivedAxisEventInfo(event.touchEventId, event.action);
         auto axisTask = [context, event, markProcess, node]() {
             if (node) {
                 context->OnAxisEvent(event, node);
@@ -824,6 +834,7 @@ void AceContainer::InitializeCallback()
             }
             CHECK_NULL_VOID(markProcess);
             markProcess();
+            context->CheckAndLogLastConsumedAxisEventInfo(event.touchEventId, event.action);
         };
         auto uiTaskRunner = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         if (uiTaskRunner.IsRunOnCurrentThread()) {
@@ -935,9 +946,19 @@ void AceContainer::InitializeCallback()
         auto&& dragEventCallback = [context = pipelineContext_, id = instanceId_](
                                        const PointerEvent& pointerEvent, const DragEventAction& action) {
             ContainerScope scope(id);
-            context->GetTaskExecutor()->PostTask(
-                [context, pointerEvent, action]() { context->OnDragEvent(pointerEvent, action); },
-                TaskExecutor::TaskType::UI, "ArkUIAceContainerDragEvent");
+            CHECK_NULL_VOID(context);
+            auto callback = [context, pointerEvent, action]() {
+                context->OnDragEvent(pointerEvent, action);
+            };
+            auto taskExecutor = context->GetTaskExecutor();
+            CHECK_NULL_VOID(taskExecutor);
+            auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
+            if (uiTaskRunner.IsRunOnCurrentThread()) {
+                callback();
+                return;
+            }
+            taskExecutor->PostTask(
+                callback, TaskExecutor::TaskType::UI, "ArkUIAceContainerDragEvent", PriorityType::VIP);
         };
         aceView_->RegisterDragEventCallback(dragEventCallback);
     }
@@ -1749,6 +1770,19 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, dou
 
     aceView_->Launch();
 
+#ifdef NG_BUILD
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontendNG>(frontend_);
+#else
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
+#endif
+    if (declarativeFrontend) {
+        auto jsEngine = AceType::DynamicCast<Framework::JsiDeclarativeEngine>(declarativeFrontend->GetJsEngine());
+        if (jsEngine) {
+            // register state profiler callback
+            jsEngine->JsStateProfilerResgiter();
+        }
+    }
+
     if (!isSubContainer_) {
         // Only MainWindow instance in FA model will be registered to watch dog.
         if (!GetSettings().usingSharedRuntime && !AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint()) {
@@ -1756,11 +1790,6 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, dou
         }
         frontend_->AttachPipelineContext(pipelineContext_);
     } else {
-#ifdef NG_BUILD
-        auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontendNG>(frontend_);
-#else
-        auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
-#endif
         if (declarativeFrontend) {
             declarativeFrontend->AttachSubPipelineContext(pipelineContext_);
         }

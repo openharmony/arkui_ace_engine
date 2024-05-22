@@ -495,12 +495,18 @@ bool JsiCallbackInfo::GetDoubleArrayArg(size_t index, std::vector<double>& value
 // -----------------------
 // Implementation of JsiString
 // -----------------------
-JsiString::JsiString(const char* str) : JsiValue(StringRef::NewFromUtf8(GetEcmaVM(), str)) {}
-JsiString::JsiString(JsiValue str) : JsiValue(str) {}
+JsiString::JsiString(const panda::CopyableGlobal<panda::StringRef>& val) : JsiType(val) {}
+JsiString::JsiString(panda::Local<panda::StringRef> val) : JsiType(val) {}
 
-JsiString JsiString::New(const char* str)
+panda::Local<panda::StringRef> JsiString::New(const char* str)
 {
-    return JsiString(str);
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    return panda::StringRef::NewFromUtf8(runtime->GetEcmaVm(), str);
+}
+
+panda::Local<panda::StringRef> JsiString::New(const std::string& str)
+{
+    return JsiString::New(str.c_str());
 }
 
 // -----------------------

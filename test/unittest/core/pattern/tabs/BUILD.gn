@@ -18,6 +18,7 @@ ace_unittest("tabs_test_ng") {
   sources = [
     "tab_bar_event_test_ng.cpp",
     "tab_bar_layout_test_ng.cpp",
+    "tab_bar_modifier_test_ng.cpp",
     "tab_bar_test_ng.cpp",
     "tabs_attr_test_ng.cpp",
     "tabs_common_test_ng.cpp",

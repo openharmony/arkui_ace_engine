@@ -22,6 +22,18 @@
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
+struct RendererDumpInfo {
+    int64_t createUiContenTime;
+    int64_t limitedWorkerInitTime;
+    int64_t loadAbcTime;
+
+    void ReSet()
+    {
+        createUiContenTime = 0;
+        limitedWorkerInitTime = 0;
+        loadAbcTime = 0;
+    }
+};
 
 class DynamicComponentRenderer : public virtual AceType {
     DECLARE_ACE_TYPE(DynamicComponentRenderer, AceType);
@@ -41,6 +53,8 @@ public:
 
     virtual void TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) = 0;
     virtual void TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) = 0;
+
+    virtual void Dump(RendererDumpInfo &rendererDumpInfo) {}
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(DynamicComponentRenderer);

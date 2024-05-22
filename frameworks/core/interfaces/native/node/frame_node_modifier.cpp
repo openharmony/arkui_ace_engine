@@ -268,8 +268,7 @@ ArkUI_CharPtr GetInspectorId(ArkUINodeHandle node)
     CHECK_NULL_RETURN(currentNode, "");
     auto inspectorIdProp = currentNode->GetInspectorId();
     if (inspectorIdProp.has_value()) {
-        static std::string inspectorId;
-        inspectorId = inspectorIdProp.value();
+        static std::string inspectorId = inspectorIdProp.value();
         return inspectorId.c_str();
     }
     
@@ -280,8 +279,7 @@ ArkUI_CharPtr GetNodeType(ArkUINodeHandle node)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(currentNode, "");
-    static std::string nodeType;
-    nodeType = currentNode->GetTag();
+    static std::string nodeType = currentNode->GetTag();
     return nodeType.c_str();
 }
 
@@ -309,8 +307,8 @@ ArkUI_CharPtr GetInspectorInfo(ArkUINodeHandle node)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(currentNode, "{}");
-    static std::string inspectorInfo;
-    inspectorInfo = NG::Inspector::GetInspectorOfNode(OHOS::Ace::AceType::Claim<FrameNode>(currentNode));
+    static std::string inspectorInfo =
+        NG::Inspector::GetInspectorOfNode(OHOS::Ace::AceType::Claim<FrameNode>(currentNode));
     return inspectorInfo.c_str();
 }
 
@@ -365,6 +363,14 @@ ArkUINodeHandle GetLast(ArkUINodeHandle node)
     return reinterpret_cast<ArkUINodeHandle>(child);
 }
 
+ArkUINodeHandle GetFirstUINode(ArkUINodeHandle node)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_RETURN(currentNode, nullptr);
+    auto child = currentNode->GetFirstChild();
+    return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(child));
+}
+
 namespace NodeModifier {
 const ArkUIFrameNodeModifier* GetFrameNodeModifier()
 {
@@ -374,7 +380,7 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         GetPositionToParent, GetPositionToScreen, GetPositionToWindow, GetPositionToParentWithTransform,
         GetPositionToScreenWithTransform, GetPositionToWindowWithTransform, GetMeasuredSize, GetLayoutPosition,
         GetInspectorId, GetNodeType, IsVisible, IsAttached, GetInspectorInfo, GetFrameNodeById, GetFrameNodeByUniqueId,
-        GetFrameNodeByKey, PropertyUpdate, GetLast };
+        GetFrameNodeByKey, PropertyUpdate, GetLast, GetFirstUINode };
     return &modifier;
 }
 } // namespace NodeModifier

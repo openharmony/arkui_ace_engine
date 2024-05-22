@@ -136,6 +136,14 @@ public:
         return range;
     }
 #endif
+    double GetAlphabeticBaseline()
+    {
+        return 0.0;
+    }
+    double GetIdeographicBaseline()
+    {
+        return 0.0;
+    }
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_TYPOGRAPHY_H

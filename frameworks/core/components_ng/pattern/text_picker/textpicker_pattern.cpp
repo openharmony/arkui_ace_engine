@@ -36,7 +36,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-// TODO datepicker style modification
+// Datepicker style modification
 const Dimension PRESS_INTERVAL = 4.0_vp;
 const Dimension PRESS_RADIUS = 8.0_vp;
 constexpr uint32_t RATE = 2;

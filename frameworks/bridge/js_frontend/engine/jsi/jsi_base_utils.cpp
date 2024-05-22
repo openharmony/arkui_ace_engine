@@ -704,11 +704,6 @@ bool GetLogTag(
     if (argc < 1) {
         return false;
     }
-    // after stateMgmt.js remediation, this will be delete
-    if (!argv[0]->IsNumber(runtime)) {
-        tag = AceLogTag::ACE_STATE_MGMT;
-        return false;
-    }
     auto tagNum = argv[0]->ToInt32(runtime);
     switch (tagNum) {
         case 0:
@@ -791,9 +786,6 @@ shared_ptr<JsValue> JsLogPrint(
     auto getTagSuccess = GetLogTag(runtime, argv, argc, tag);
     if (getTagSuccess) {
         content = GetLogContentFromStartIndex(runtime, argv, argc, 1);
-    } else {
-        // after stateMgmt.js remediation, this will be delete
-        content = GetLogContentFromStartIndex(runtime, argv, argc, 0);
     }
     switch (level) {
         case JsLogLevel::DEBUG:

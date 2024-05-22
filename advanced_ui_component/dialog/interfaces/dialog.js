@@ -17,15 +17,18 @@ const display = requireNapi('display');
 const hilog = requireNapi('hilog');
 const measure = requireNapi('measure');
 const resourceManager = requireNapi('resourceManager');
-
+const bundleManager = requireNapi('bundleManager');
+const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 if (!('finalizeConstruction' in ViewPU.prototype)) {
-  Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => { });
+    Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {
+    });
 }
 class CustomThemeImpl {
-  constructor(d21) {
-    this.colors = d21;
-  }
+    constructor(v20) {
+        this.colors = v20;
+    }
 }
+
 const TITLE_MAX_LINES = 2;
 const HORIZON_BUTTON_MAX_COUNT = 2;
 const VERTICAL_BUTTON_MAX_COUNT = 4;
@@ -51,2956 +54,3113 @@ const KEYCODE_UP = 2012;
 const KEYCODE_DOWN = 2013;
 const IGNORE_KEY_EVENT_TYPE = 1;
 const FIRST_ITEM_INDEX = 0;
+const VERSION_TWELVE = 50000012;
 
 export class TipsDialog extends ViewPU {
-  constructor(x20, y20, z20, a21 = -1, b21 = undefined, c21) {
-    super(x20, z20, a21, c21);
-    if (typeof b21 === 'function') {
-      this.paramsGenerator_ = b21;
-    }
-    this.controller = undefined;
-    this.imageRes = null;
-    this.__imageSize = new ObservedPropertyObjectPU({ width: DEFAULT_IMAGE_SIZE, height: DEFAULT_IMAGE_SIZE }, this, 'imageSize');
-    this.title = null;
-    this.content = null;
-    this.checkAction = undefined;
-    this.checkTips = null;
-    this.__isChecked = new ObservedPropertySimplePU(false, this, 'isChecked');
-    this.primaryButton = null;
-    this.secondaryButton = null;
-    this.buttons = undefined;
-    this.__imageSizeHeight = new ObservedPropertySimplePU(0, this, 'imageSizeHeight');
-    this.__textAlignment = new ObservedPropertySimplePU(TextAlign.Start, this, 'textAlignment');
-    this.marginOffset = 0;
-    this.__checkBoxHeight = new ObservedPropertySimplePU(0, this, 'checkBoxHeight');
-    this.buttonHeight = 0;
-    this.contentScroller = new Scroller();
-    this.__fontColorWithTheme = new ObservedPropertyObjectPU({
-      'id': -1,
-      'type': 10001,
-      params: ['sys.color.font_primary'],
-      'bundleName': '__harDefaultBundleName__',
-      'moduleName': '__harDefaultModuleName__',
-    }, this, 'fontColorWithTheme');
-    this.theme = new CustomThemeImpl({});
-    this.setInitiallyProvidedValue(y20);
-    this.finalizeConstruction();
-  }
-  setInitiallyProvidedValue(w20) {
-    if (w20.controller !== undefined) {
-      this.controller = w20.controller;
-    }
-    if (w20.imageRes !== undefined) {
-      this.imageRes = w20.imageRes;
-    }
-    if (w20.imageSize !== undefined) {
-      this.imageSize = w20.imageSize;
-    }
-    if (w20.title !== undefined) {
-      this.title = w20.title;
-    }
-    if (w20.content !== undefined) {
-      this.content = w20.content;
-    }
-    if (w20.checkAction !== undefined) {
-      this.checkAction = w20.checkAction;
-    }
-    if (w20.checkTips !== undefined) {
-      this.checkTips = w20.checkTips;
-    }
-    if (w20.isChecked !== undefined) {
-      this.isChecked = w20.isChecked;
-    }
-    if (w20.primaryButton !== undefined) {
-      this.primaryButton = w20.primaryButton;
-    }
-    if (w20.secondaryButton !== undefined) {
-      this.secondaryButton = w20.secondaryButton;
-    }
-    if (w20.buttons !== undefined) {
-      this.buttons = w20.buttons;
-    }
-    if (w20.imageSizeHeight !== undefined) {
-      this.imageSizeHeight = w20.imageSizeHeight;
-    }
-    if (w20.textAlignment !== undefined) {
-      this.textAlignment = w20.textAlignment;
-    }
-    if (w20.marginOffset !== undefined) {
-      this.marginOffset = w20.marginOffset;
-    }
-    if (w20.checkBoxHeight !== undefined) {
-      this.checkBoxHeight = w20.checkBoxHeight;
-    }
-    if (w20.buttonHeight !== undefined) {
-      this.buttonHeight = w20.buttonHeight;
-    }
-    if (w20.contentScroller !== undefined) {
-      this.contentScroller = w20.contentScroller;
-    }
-    if (w20.fontColorWithTheme !== undefined) {
-      this.fontColorWithTheme = w20.fontColorWithTheme;
-    }
-    if (w20.theme !== undefined) {
-      this.theme = w20.theme;
-    }
-  }
-  updateStateVars(v20) {
-  }
-  purgeVariableDependenciesOnElmtId(u20) {
-    this.__imageSize.purgeDependencyOnElmtId(u20);
-    this.__isChecked.purgeDependencyOnElmtId(u20);
-    this.__imageSizeHeight.purgeDependencyOnElmtId(u20);
-    this.__textAlignment.purgeDependencyOnElmtId(u20);
-    this.__checkBoxHeight.purgeDependencyOnElmtId(u20);
-    this.__fontColorWithTheme.purgeDependencyOnElmtId(u20);
-  }
-  aboutToBeDeleted() {
-    this.__imageSize.aboutToBeDeleted();
-    this.__isChecked.aboutToBeDeleted();
-    this.__imageSizeHeight.aboutToBeDeleted();
-    this.__textAlignment.aboutToBeDeleted();
-    this.__checkBoxHeight.aboutToBeDeleted();
-    this.__fontColorWithTheme.aboutToBeDeleted();
-    SubscriberManager.Get().delete(this.id__());
-    this.aboutToBeDeletedInternal();
-  }
-  setController(t20) {
-    this.controller = t20;
-  }
-  get imageSize() {
-    return this.__imageSize.get();
-  }
-  set imageSize(s20) {
-    this.__imageSize.set(s20);
-  }
-  get isChecked() {
-    return this.__isChecked.get();
-  }
-  set isChecked(r20) {
-    this.__isChecked.set(r20);
-  }
-  get imageSizeHeight() {
-    return this.__imageSizeHeight.get();
-  }
-  set imageSizeHeight(q20) {
-    this.__imageSizeHeight.set(q20);
-  }
-  get textAlignment() {
-    return this.__textAlignment.get();
-  }
-  set textAlignment(p20) {
-    this.__textAlignment.set(p20);
-  }
-  get checkBoxHeight() {
-    return this.__checkBoxHeight.get();
-  }
-  set checkBoxHeight(o20) {
-    this.__checkBoxHeight.set(o20);
-  }
-  get fontColorWithTheme() {
-    return this.__fontColorWithTheme.get();
-  }
-  set fontColorWithTheme(n20) {
-    this.__fontColorWithTheme.set(n20);
-  }
-  initialRender() {
-    {
-      this.observeComponentCreation2((h20, i20) => {
-        if (i20) {
-          let j20 = new CustomDialogComponent(this, {
-            controller: this.controller,
-            contentBuilder: () => {
-              this.contentBuilder();
-            },
-            buttons: this.buttons,
-            theme: this.theme,
-          }, undefined, h20, () => {
-          }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 82, col: 5 });
-          ViewPU.create(j20);
-          let k20 = () => {
-            return {
-              controller: this.controller,
-              contentBuilder: () => {
-                this.contentBuilder();
-              },
-              buttons: this.buttons,
-              theme: this.theme,
-            };
-          };
-          j20.paramsGenerator_ = k20;
+    constructor(p20, q20, r20, s20 = -1, t20 = undefined, u20) {
+        super(p20, r20, s20, u20);
+        if (typeof t20 === 'function') {
+            this.paramsGenerator_ = t20;
         }
-        else {
-          this.updateStateVarsOfChildByElmtId(h20, {});
-        }
-      }, { name: 'CustomDialogComponent' });
+        this.controller = undefined;
+        this.imageRes = null;
+        this.__imageSize =
+            new ObservedPropertyObjectPU({ width: DEFAULT_IMAGE_SIZE, height: DEFAULT_IMAGE_SIZE }, this, 'imageSize');
+        this.title = null;
+        this.content = null;
+        this.checkAction = undefined;
+        this.checkTips = null;
+        this.__isChecked = new ObservedPropertySimplePU(false, this, 'isChecked');
+        this.primaryButton = null;
+        this.secondaryButton = null;
+        this.buttons = undefined;
+        this.__imageSizeHeight = new ObservedPropertySimplePU(0, this, 'imageSizeHeight');
+        this.__textAlignment = new ObservedPropertySimplePU(TextAlign.Start, this, 'textAlignment');
+        this.marginOffset = 0;
+        this.__checkBoxHeight = new ObservedPropertySimplePU(0, this, 'checkBoxHeight');
+        this.buttonHeight = 0;
+        this.contentScroller = new Scroller();
+        this.__fontColorWithTheme = new ObservedPropertyObjectPU({
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.font_primary'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'fontColorWithTheme');
+        this.theme = new CustomThemeImpl({});
+        this.setInitiallyProvidedValue(q20);
+        this.finalizeConstruction();
     }
-  }
-  contentBuilder(p19 = null) {
-    this.observeComponentCreation2((e20, f20) => {
-      Column.create();
-    }, Column);
-    this.imagePart.bind(this)();
-    this.observeComponentCreation2((x19, y19) => {
-      If.create();
-      if (this.title != null || this.content != null) {
-        this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation2((c20, d20) => {
+
+    setInitiallyProvidedValue(o20) {
+        if (o20.controller !== undefined) {
+            this.controller = o20.controller;
+        }
+        if (o20.imageRes !== undefined) {
+            this.imageRes = o20.imageRes;
+        }
+        if (o20.imageSize !== undefined) {
+            this.imageSize = o20.imageSize;
+        }
+        if (o20.title !== undefined) {
+            this.title = o20.title;
+        }
+        if (o20.content !== undefined) {
+            this.content = o20.content;
+        }
+        if (o20.checkAction !== undefined) {
+            this.checkAction = o20.checkAction;
+        }
+        if (o20.checkTips !== undefined) {
+            this.checkTips = o20.checkTips;
+        }
+        if (o20.isChecked !== undefined) {
+            this.isChecked = o20.isChecked;
+        }
+        if (o20.primaryButton !== undefined) {
+            this.primaryButton = o20.primaryButton;
+        }
+        if (o20.secondaryButton !== undefined) {
+            this.secondaryButton = o20.secondaryButton;
+        }
+        if (o20.buttons !== undefined) {
+            this.buttons = o20.buttons;
+        }
+        if (o20.imageSizeHeight !== undefined) {
+            this.imageSizeHeight = o20.imageSizeHeight;
+        }
+        if (o20.textAlignment !== undefined) {
+            this.textAlignment = o20.textAlignment;
+        }
+        if (o20.marginOffset !== undefined) {
+            this.marginOffset = o20.marginOffset;
+        }
+        if (o20.checkBoxHeight !== undefined) {
+            this.checkBoxHeight = o20.checkBoxHeight;
+        }
+        if (o20.buttonHeight !== undefined) {
+            this.buttonHeight = o20.buttonHeight;
+        }
+        if (o20.contentScroller !== undefined) {
+            this.contentScroller = o20.contentScroller;
+        }
+        if (o20.fontColorWithTheme !== undefined) {
+            this.fontColorWithTheme = o20.fontColorWithTheme;
+        }
+        if (o20.theme !== undefined) {
+            this.theme = o20.theme;
+        }
+    }
+
+    updateStateVars(n20) {
+    }
+
+    purgeVariableDependenciesOnElmtId(m20) {
+        this.__imageSize.purgeDependencyOnElmtId(m20);
+        this.__isChecked.purgeDependencyOnElmtId(m20);
+        this.__imageSizeHeight.purgeDependencyOnElmtId(m20);
+        this.__textAlignment.purgeDependencyOnElmtId(m20);
+        this.__checkBoxHeight.purgeDependencyOnElmtId(m20);
+        this.__fontColorWithTheme.purgeDependencyOnElmtId(m20);
+    }
+
+    aboutToBeDeleted() {
+        this.__imageSize.aboutToBeDeleted();
+        this.__isChecked.aboutToBeDeleted();
+        this.__imageSizeHeight.aboutToBeDeleted();
+        this.__textAlignment.aboutToBeDeleted();
+        this.__checkBoxHeight.aboutToBeDeleted();
+        this.__fontColorWithTheme.aboutToBeDeleted();
+        SubscriberManager.Get().delete(this.id__());
+        this.aboutToBeDeletedInternal();
+    }
+
+    setController(l20) {
+        this.controller = l20;
+    }
+
+    get imageSize() {
+        return this.__imageSize.get();
+    }
+
+    set imageSize(k20) {
+        this.__imageSize.set(k20);
+    }
+
+    get isChecked() {
+        return this.__isChecked.get();
+    }
+
+    set isChecked(j20) {
+        this.__isChecked.set(j20);
+    }
+
+    get imageSizeHeight() {
+        return this.__imageSizeHeight.get();
+    }
+
+    set imageSizeHeight(i20) {
+        this.__imageSizeHeight.set(i20);
+    }
+
+    get textAlignment() {
+        return this.__textAlignment.get();
+    }
+
+    set textAlignment(h20) {
+        this.__textAlignment.set(h20);
+    }
+
+    get checkBoxHeight() {
+        return this.__checkBoxHeight.get();
+    }
+
+    set checkBoxHeight(g20) {
+        this.__checkBoxHeight.set(g20);
+    }
+
+    get fontColorWithTheme() {
+        return this.__fontColorWithTheme.get();
+    }
+
+    set fontColorWithTheme(f20) {
+        this.__fontColorWithTheme.set(f20);
+    }
+
+    initialRender() {
+        {
+            this.observeComponentCreation2((z19, a20) => {
+                if (a20) {
+                    let b20 = new CustomDialogComponent(this, {
+                        controller: this.controller,
+                        contentBuilder: () => {
+                            this.contentBuilder();
+                        },
+                        buttons: this.buttons,
+                        theme: this.theme,
+                    }, undefined, z19, () => {
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 85, col: 5 });
+                    ViewPU.create(b20);
+                    let c20 = () => {
+                        return {
+                            controller: this.controller,
+                            contentBuilder: () => {
+                                this.contentBuilder();
+                            },
+                            buttons: this.buttons,
+                            theme: this.theme
+                        };
+                    };
+                    b20.paramsGenerator_ = c20;
+                } else {
+                    this.updateStateVarsOfChildByElmtId(z19, {});
+                }
+            }, { name: 'CustomDialogComponent' });
+        }
+    }
+
+    contentBuilder(h19 = null) {
+        this.observeComponentCreation2((w19, x19) => {
             Column.create();
-            Column.padding({
-              top: {
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.padding_level8'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__',
-              }
-            });
-            Column.constraintSize({
-              maxHeight: `calc(100% - ${this.checkBoxHeight}vp - ${this.imageSizeHeight}vp - ${this.buttonHeight}vp)`
-            });
-          }, Column);
-          this.textPart.bind(this)();
-          Column.pop();
-        });
-      }
-      else {
-        this.ifElseBranchUpdateFunction(1, () => {
-        });
-      }
-    }, If);
-    If.pop();
-    this.observeComponentCreation2((t19, u19) => {
-      If.create();
-      if (this.checkTips != null) {
-        this.ifElseBranchUpdateFunction(0, () => {
-          this.checkBoxPart.bind(this)(this.checkTips);
-        });
-      }
-      else {
-        this.ifElseBranchUpdateFunction(1, () => {
-        });
-      }
-    }, If);
-    If.pop();
-    Column.pop();
-  }
-  checkBoxPart(y18, z18 = null) {
-    this.observeComponentCreation2((k19, l19) => {
-      Row.create();
-      Row.padding({
-        top: {
-          'id': -1,
-          'type': 10002,
-          params: ['sys.float.padding_level8'],
-          'bundleName': '__harDefaultBundleName__',
-          'moduleName': '__harDefaultModuleName__',
-        }
-      });
-      Row.constraintSize({ minHeight: CHECKBOX_CONTAINER_HEIGHT });
-      Row.width('100%');
-      Row.onAreaChange((n19, o19) => {
-        this.checkBoxHeight = Number(o19.height);
-      });
-    }, Row);
-    this.observeComponentCreation2((g19, h19) => {
-      Checkbox.create({ name: 'checkbox', group: 'checkboxGroup' });
-      Checkbox.select(this.isChecked);
-      Checkbox.onChange((j19) => {
-        this.isChecked = j19;
-        if (this.checkAction) {
-          this.checkAction(j19);
-        }
-      });
-      Checkbox.margin({
-        right: {
-          'id': -1,
-          'type': 10002,
-          params: ['sys.float.padding_level4'],
-          'bundleName': '__harDefaultBundleName__',
-          'moduleName': '__harDefaultModuleName__',
-        }
-      });
-    }, Checkbox);
-    Checkbox.pop();
-    this.observeComponentCreation2((d19, e19) => {
-      Text.create(y18);
-      Text.fontSize({
-        'id': -1,
-        'type': 10002,
-        params: ['sys.float.Body_M'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__',
-      });
-      Text.fontWeight(FontWeight.Regular);
-      Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
-      Text.maxLines(CONTENT_MAX_LINES);
-      Text.layoutWeight(1);
-      Text.focusable(false);
-      Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-      Text.onClick(() => {
-        this.isChecked = !this.isChecked;
-        if (this.checkAction) {
-          this.checkAction(this.isChecked);
-        }
-      });
-    }, Text);
-    Text.pop();
-    Row.pop();
-  }
-  imagePart(o18 = null) {
-    this.observeComponentCreation2((t18, u18) => {
-      Column.create();
-      Column.width('100%');
-      Column.constraintSize({
-        maxHeight: `calc(100% - ${this.checkBoxHeight}vp - ${this.buttonHeight}vp - ${TEXT_MIN_HEIGHT}vp + ${this.marginOffset}vp)`
-      });
-      Column.onAreaChange((w18, x18) => {
-        this.imageSizeHeight = Number(x18.height);
-      });
-    }, Column);
-    this.observeComponentCreation2((r18, s18) => {
-      Image.create(this.imageRes);
-      Image.size(ObservedObject.GetRawObject(this.imageSize));
-      Image.objectFit(ImageFit.Contain);
-      Image.borderRadius({
-        'id': -1,
-        'type': 10002,
-        params: ['sys.float.corner_radius_level6'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__',
-      });
-      Image.constraintSize({
-        maxWidth: '100%',
-        maxHeight: `calc(100% - ${this.checkBoxHeight}vp - ${this.buttonHeight}vp - ${TEXT_MIN_HEIGHT}vp + ${this.marginOffset}vp)`
-      });
-    }, Image);
-    Column.pop();
-  }
-  textPart(g17 = null) {
-    this.observeComponentCreation2((m18, n18) => {
-      Scroll.create(this.contentScroller);
-      Scroll.margin({ right: `${this.marginOffset}vp` });
-    }, Scroll);
-    this.observeComponentCreation2((k18, l18) => {
-      Column.create();
-      Column.margin({
-        right: {
-          'id': -1,
-          'type': 10002,
-          params: ['sys.float.padding_level8'],
-          'bundleName': '__harDefaultBundleName__',
-          'moduleName': '__harDefaultModuleName__',
-        }
-      });
-    }, Column);
-    this.observeComponentCreation2((a18, b18) => {
-      If.create();
-      if (this.title != null) {
-        this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation2((i18, j18) => {
+        }, Column);
+        this.imagePart.bind(this)(h19 ? h19 : this);
+        this.observeComponentCreation2((p19, q19) => {
+            If.create();
+            if (this.title != null || this.content != null) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((u19, v19) => {
+                        Column.create();
+                        Column.padding({
+                            top: {
+                                'id': -1,
+                                'type': 10002,
+                                params: ['sys.float.padding_level8'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
+                            }
+                        });
+                        Column.constraintSize({
+                            maxHeight: `calc(100% - ${this.checkBoxHeight}vp - ${this.imageSizeHeight}vp - ${this.buttonHeight}vp)`
+                        });
+                    }, Column);
+                    this.textPart.bind(this)(h19 ? h19 : this);
+                    Column.pop();
+                });
+            } else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                });
+            }
+        }, If);
+        If.pop();
+        this.observeComponentCreation2((l19, m19) => {
+            If.create();
+            if (this.checkTips != null) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.checkBoxPart.bind(this)(this.checkTips, h19 ? h19 : this);
+                });
+            } else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                });
+            }
+        }, If);
+        If.pop();
+        Column.pop();
+    }
+
+    checkBoxPart(q18, r18 = null) {
+        this.observeComponentCreation2((c19, d19) => {
             Row.create();
             Row.padding({
-              bottom: {
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.padding_level8'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__',
-              }
+                top: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.padding_level8'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                }
             });
-          }, Row);
-          this.observeComponentCreation2((g18, h18) => {
-            Text.create(this.title);
-            Text.fontSize({
-              'id': -1,
-              'type': 10002,
-              params: ['sys.float.Title_S'],
-              'bundleName': '__harDefaultBundleName__',
-              'moduleName': '__harDefaultModuleName__',
-            });
-            Text.fontWeight(FontWeight.Medium);
-            Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
-            Text.textAlign(TextAlign.Center);
-            Text.maxLines(CONTENT_MAX_LINES);
-            Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-            Text.minFontSize({
-              'id': -1,
-              'type': 10002,
-              params: ['sys.float.Body_L'],
-              'bundleName': '__harDefaultBundleName__',
-              'moduleName': '__harDefaultModuleName__',
-            });
-            Text.maxFontSize({
-              'id': -1,
-              'type': 10002,
-              params: ['sys.float.Title_S'],
-              'bundleName': '__harDefaultBundleName__',
-              'moduleName': '__harDefaultModuleName__',
-            });
-            Text.width('100%');
-          }, Text);
-          Text.pop();
-          Row.pop();
-        });
-      }
-      else {
-        this.ifElseBranchUpdateFunction(1, () => {
-        });
-      }
-    }, If);
-    If.pop();
-    this.observeComponentCreation2((l17, m17) => {
-      If.create();
-      if (this.content != null) {
-        this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation2((y17, z17) => {
-            Row.create();
-          }, Row);
-          this.observeComponentCreation2((r17, s17) => {
-            Text.create(this.content);
-            Text.focusable(true);
-            Text.defaultFocus(!(this.primaryButton || this.secondaryButton));
-            Text.fontSize({
-              'id': -1,
-              'type': 10002,
-              params: ['sys.float.Body_L'],
-              'bundleName': '__harDefaultBundleName__',
-              'moduleName': '__harDefaultModuleName__',
-            });
-            Text.fontWeight(FontWeight.Medium);
-            Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
-            Text.textAlign(this.textAlignment);
-            Text.width('100%');
-            Text.onKeyEvent((x17) => {
-              if (x17) {
-                resolveKeyEvent(x17, this.contentScroller);
-              }
-            });
-            Text.onAreaChange((v17, w17) => {
-              this.getTextAlign(Number(w17.width));
-            });
-          }, Text);
-          Text.pop();
-          Row.pop();
-        });
-      }
-      else {
-        this.ifElseBranchUpdateFunction(1, () => {
-        });
-      }
-    }, If);
-    If.pop();
-    Column.pop();
-    Scroll.pop();
-  }
-  aboutToAppear() {
-    this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
-      this.theme.colors.fontPrimary : {
-        'id': -1,
-        'type': 10001,
-        params: ['sys.color.font_primary'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__',
-      };
-    this.initButtons();
-    this.initMargin();
-  }
-  getTextAlign(d17) {
-    let e17 = measure.measureTextSize({
-      textContent: this.content,
-      fontSize: {
-        'id': -1,
-        'type': 10002,
-        params: ['sys.float.Body_L'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__',
-      },
-      constraintWidth: d17,
-    });
-    let f17 = measure.measureTextSize({
-      textContent: this.content,
-      fontSize: {
-        'id': -1,
-        'type': 10002,
-        params: ['sys.float.Body_L'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__',
-      },
-    });
-    if (this.getTextHeight(e17) <= this.getTextHeight(f17)) {
-      this.textAlignment = TextAlign.Center;
-    }
-  }
-  getTextHeight(c17) {
-    if (c17 && c17.height !== null && c17.height !== undefined) {
-      return Number(c17.height);
-    }
-    return 0;
-  }
-  initButtons() {
-    if (!this.primaryButton && !this.secondaryButton) {
-      return;
-    }
-    this.buttons = [];
-    if (this.primaryButton) {
-      this.buttons.push(this.primaryButton);
-    }
-    if (this.secondaryButton) {
-      this.buttons.push(this.secondaryButton);
-    }
-    this.buttonHeight = this.getButtonsHeight();
-  }
-  getButtonsHeight() {
-    if (!this.buttons || this.buttons.length === 0) {
-      return 0;
-    }
-    let b17 = getNumberByResource('alert_button_top_padding');
-    b17 += BUTTON_DEFAULT_HEIGHT + getNumberByResource('alert_button_bottom_padding_horizontal');
-    return b17;
-  }
-  initMargin() {
-    this.marginOffset = 0 - getNumberByResource('padding_level8');
-  }
-  rerender() {
-    this.updateDirtyElements();
-  }
-}
-export class SelectDialog extends ViewPU {
-  constructor(r16, s16, t16, u16 = -1, v16 = undefined, w16) {
-    super(r16, t16, u16, w16);
-    if (typeof v16 === 'function') {
-      this.paramsGenerator_ = v16;
-    }
-    this.title = '';
-    this.content = '';
-    this.selectedIndex = -1;
-    this.confirm = null;
-    this.radioContent = [];
-    this.buttons = [];
-    this.contentPadding = undefined;
-    this.contentBuilder = this.buildContent;
-    this.__fontColorWithTheme = new ObservedPropertyObjectPU({
-      'id': -1,
-      'type': 10001,
-      params: ['sys.color.font_primary'],
-      'bundleName': '__harDefaultBundleName__',
-      'moduleName': '__harDefaultModuleName__',
-    }, this, 'fontColorWithTheme');
-    this.__dividerColorWithTheme = new ObservedPropertyObjectPU({
-      'id': -1,
-      'type': 10001,
-      params: ['sys.color.comp_divider'],
-      'bundleName': '__harDefaultBundleName__',
-      'moduleName': '__harDefaultModuleName__',
-    }, this, 'dividerColorWithTheme');
-    this.theme = new CustomThemeImpl({});
-    this.controller = new CustomDialogController({
-      builder: () => {
-        let x16 = new CustomContentDialog(this, {
-          primaryTitle: this.title,
-          contentBuilder: () => {
-            this.contentBuilder();
-          },
-          buttons: this.buttons,
-        }, undefined, -1, () => {
-        }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 287, col: 14 });
-        x16.setController(this.controller);
-        ViewPU.create(x16);
-        let y16 = () => {
-          return {
-            primaryTitle: this.title,
-            contentBuilder: () => {
-              this.contentBuilder();
-            },
-            buttons: this.buttons
-          };
-        };
-        x16.paramsGenerator_ = y16;
-      }
-    }, this);
-    this.contentScroller = new Scroller();
-    this.setInitiallyProvidedValue(s16);
-    this.finalizeConstruction();
-  }
-  setInitiallyProvidedValue(q16) {
-    if (q16.title !== undefined) {
-      this.title = q16.title;
-    }
-    if (q16.content !== undefined) {
-      this.content = q16.content;
-    }
-    if (q16.selectedIndex !== undefined) {
-      this.selectedIndex = q16.selectedIndex;
-    }
-    if (q16.confirm !== undefined) {
-      this.confirm = q16.confirm;
-    }
-    if (q16.radioContent !== undefined) {
-      this.radioContent = q16.radioContent;
-    }
-    if (q16.buttons !== undefined) {
-      this.buttons = q16.buttons;
-    }
-    if (q16.contentPadding !== undefined) {
-      this.contentPadding = q16.contentPadding;
-    }
-    if (q16.contentBuilder !== undefined) {
-      this.contentBuilder = q16.contentBuilder;
-    }
-    if (q16.fontColorWithTheme !== undefined) {
-      this.fontColorWithTheme = q16.fontColorWithTheme;
-    }
-    if (q16.dividerColorWithTheme !== undefined) {
-      this.dividerColorWithTheme = q16.dividerColorWithTheme;
-    }
-    if (q16.theme !== undefined) {
-      this.theme = q16.theme;
-    }
-    if (q16.controller !== undefined) {
-      this.controller = q16.controller;
-    }
-    if (q16.contentScroller !== undefined) {
-      this.contentScroller = q16.contentScroller;
-    }
-  }
-  updateStateVars(p16) {
-  }
-  purgeVariableDependenciesOnElmtId(o16) {
-    this.__fontColorWithTheme.purgeDependencyOnElmtId(o16);
-    this.__dividerColorWithTheme.purgeDependencyOnElmtId(o16);
-  }
-  aboutToBeDeleted() {
-    this.__fontColorWithTheme.aboutToBeDeleted();
-    this.__dividerColorWithTheme.aboutToBeDeleted();
-    SubscriberManager.Get().delete(this.id__());
-    this.aboutToBeDeletedInternal();
-  }
-  get fontColorWithTheme() {
-    return this.__fontColorWithTheme.get();
-  }
-  set fontColorWithTheme(n16) {
-    this.__fontColorWithTheme.set(n16);
-  }
-  get dividerColorWithTheme() {
-    return this.__dividerColorWithTheme.get();
-  }
-  set dividerColorWithTheme(m16) {
-    this.__dividerColorWithTheme.set(m16);
-  }
-  setController(l16) {
-    this.controller = l16;
-  }
-  buildContent(w13 = null) {
-    this.observeComponentCreation2((j16, k16) => {
-      Scroll.create(this.contentScroller);
-      Scroll.scrollBar(BarState.Auto);
-    }, Scroll);
-    this.observeComponentCreation2((h16, i16) => {
-      Column.create();
-    }, Column);
-    this.observeComponentCreation2((x15, y15) => {
-      If.create();
-      if (this.content) {
-        this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation2((f16, g16) => {
-            Row.create();
-            Row.padding({
-              left: {
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.padding_level12'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__',
-              },
-              right: {
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.padding_level12'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__',
-              },
-              bottom: {
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.padding_level4'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__',
-              },
-            });
+            Row.constraintSize({ minHeight: CHECKBOX_CONTAINER_HEIGHT });
             Row.width('100%');
-          }, Row);
-          this.observeComponentCreation2((d16, e16) => {
-            Text.create(this.content);
+            Row.onAreaChange((f19, g19) => {
+                this.checkBoxHeight = Number(g19.height);
+            });
+        }, Row);
+        this.observeComponentCreation2((y18, z18) => {
+            Checkbox.create({ name: 'checkbox', group: 'checkboxGroup' });
+            Checkbox.select(this.isChecked);
+            Checkbox.onChange((b19) => {
+                this.isChecked = b19;
+                if (this.checkAction) {
+                    this.checkAction(b19);
+                }
+            });
+            Checkbox.margin({
+                right: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.padding_level4'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                }
+            });
+        }, Checkbox);
+        Checkbox.pop();
+        this.observeComponentCreation2((v18, w18) => {
+            Text.create(q18);
             Text.fontSize({
-              'id': -1,
-              'type': 10002,
-              params: ['sys.float.Body_M'],
-              'bundleName': '__harDefaultBundleName__',
-              'moduleName': '__harDefaultModuleName__',
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.Body_M'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             });
             Text.fontWeight(FontWeight.Regular);
             Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
+            Text.maxLines(CONTENT_MAX_LINES);
+            Text.layoutWeight(1);
+            Text.focusable(false);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-          }, Text);
-          Text.pop();
-          Row.pop();
-        });
-      }
-      else {
-        this.ifElseBranchUpdateFunction(1, () => {
-        });
-      }
-    }, If);
-    If.pop();
-    this.observeComponentCreation2((u15, v15) => {
-      List.create({ space: 1 });
-      List.width('100%');
-      List.clip(false);
-      List.onFocus(() => {
-        if (!this.contentScroller.isAtEnd()) {
-          this.contentScroller.scrollEdge(Edge.Top);
-          focusControl.requestFocus(String(FIRST_ITEM_INDEX));
-        }
-      });
-      List.defaultFocus(this.buttons?.length == 0 ? true : false);
-    }, List);
-    this.observeComponentCreation2((c14, d14) => {
-      ForEach.create();
-      const e14 = (g14, h14) => {
-        const i14 = g14;
-        {
-          const j14 = (s15, t15) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(s15);
-            k14(s15, t15);
-            if (!t15) {
-              ListItem.pop();
-            }
-            ViewStackProcessor.StopGetAccessRecording();
-          };
-          const k14 = (q15, r15) => {
-            ListItem.create(l14, true);
-          };
-          const l14 = (p14, q14) => {
-            j14(p14, q14);
-            this.observeComponentCreation2((o15, p15) => {
-              Column.create();
-              Column.padding({
-                left: {
-                  'id': -1,
-                  'type': 10002,
-                  params: ['sys.float.padding_level6'],
-                  'bundleName': '__harDefaultBundleName__',
-                  'moduleName': '__harDefaultModuleName__',
-                },
-                right: {
-                  'id': -1,
-                  'type': 10002,
-                  params: ['sys.float.padding_level6'],
-                  'bundleName': '__harDefaultBundleName__',
-                  'moduleName': '__harDefaultModuleName__',
-                },
-              });
-            }, Column);
-            this.observeComponentCreation2((l15, m15) => {
-              Button.createWithChild();
-              Button.type(ButtonType.Normal);
-              Button.borderRadius({
+            Text.onClick(() => {
+                this.isChecked = !this.isChecked;
+                if (this.checkAction) {
+                    this.checkAction(this.isChecked);
+                }
+            });
+        }, Text);
+        Text.pop();
+        Row.pop();
+    }
+
+    imagePart(g18 = null) {
+        this.observeComponentCreation2((l18, m18) => {
+            Column.create();
+            Column.width('100%');
+            Column.constraintSize({
+                maxHeight: `calc(100% - ${this.checkBoxHeight}vp - ${this.buttonHeight}vp - ${TEXT_MIN_HEIGHT}vp + ${this.marginOffset}vp)`
+            });
+            Column.onAreaChange((o18, p18) => {
+                this.imageSizeHeight = Number(p18.height);
+            });
+        }, Column);
+        this.observeComponentCreation2((j18, k18) => {
+            Image.create(this.imageRes);
+            Image.size(ObservedObject.GetRawObject(this.imageSize));
+            Image.objectFit(ImageFit.Contain);
+            Image.borderRadius({
                 'id': -1,
                 'type': 10002,
-                params: ['sys.float.corner_radius_level8'],
+                params: ['sys.float.corner_radius_level6'],
                 'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__',
-              });
-              Button.buttonStyle(ButtonStyleMode.TEXTUAL);
-              Button.padding({
-                left: {
-                  'id': -1,
-                  'type': 10002,
-                  params: ['sys.float.padding_level6'],
-                  'bundleName': '__harDefaultBundleName__',
-                  'moduleName': '__harDefaultModuleName__',
-                },
+                'moduleName': '__harDefaultModuleName__'
+            });
+            Image.constraintSize({
+                maxWidth: '100%',
+                maxHeight: `calc(100% - ${this.checkBoxHeight}vp - ${this.buttonHeight}vp - ${TEXT_MIN_HEIGHT}vp + ${this.marginOffset}vp)`
+            });
+        }, Image);
+        Column.pop();
+    }
+
+    textPart(y16 = null) {
+        this.observeComponentCreation2((e18, f18) => {
+            Scroll.create(this.contentScroller);
+            Scroll.margin({ right: `${this.marginOffset}vp` });
+        }, Scroll);
+        this.observeComponentCreation2((c18, d18) => {
+            Column.create();
+            Column.margin({
                 right: {
-                  'id': -1,
-                  'type': 10002,
-                  params: ['sys.float.padding_level6'],
-                  'bundleName': '__harDefaultBundleName__',
-                  'moduleName': '__harDefaultModuleName__',
-                },
-              });
-              Button.onClick(() => {
-                i14.action && i14.action();
-                this.controller.close();
-              });
-            }, Button);
-            this.observeComponentCreation2((j15, k15) => {
-              Row.create();
-              Row.constraintSize({ minHeight: LIST_MIN_HEIGHT });
-              Row.clip(false);
-              Row.padding({
-                top: {
-                  'id': -1,
-                  'type': 10002,
-                  params: ['sys.float.padding_level4'],
-                  'bundleName': '__harDefaultBundleName__',
-                  'moduleName': '__harDefaultModuleName__',
-                },
-                bottom: {
-                  'id': -1,
-                  'type': 10002,
-                  params: ['sys.float.padding_level4'],
-                  'bundleName': '__harDefaultBundleName__',
-                  'moduleName': '__harDefaultModuleName__',
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.padding_level8'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 }
-              });
-            }, Row);
-            this.observeComponentCreation2((h15, i15) => {
-              Text.create(i14.title);
-              Text.fontSize({
+            });
+        }, Column);
+        this.observeComponentCreation2((s17, t17) => {
+            If.create();
+            if (this.title != null) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((a18, b18) => {
+                        Row.create();
+                        Row.padding({
+                            bottom: {
+                                'id': -1,
+                                'type': 10002,
+                                params: ['sys.float.padding_level8'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
+                            }
+                        });
+                    }, Row);
+                    this.observeComponentCreation2((y17, z17) => {
+                        Text.create(this.title);
+                        Text.fontSize({
+                            'id': -1,
+                            'type': 10002,
+                            params: ['sys.float.Title_S'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
+                        });
+                        Text.fontWeight(FontWeight.Medium);
+                        Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
+                        Text.textAlign(TextAlign.Center);
+                        Text.maxLines(CONTENT_MAX_LINES);
+                        Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+                        Text.minFontSize({
+                            'id': -1,
+                            'type': 10002,
+                            params: ['sys.float.Body_L'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
+                        });
+                        Text.maxFontSize({
+                            'id': -1,
+                            'type': 10002,
+                            params: ['sys.float.Title_S'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
+                        });
+                        Text.width('100%');
+                    }, Text);
+                    Text.pop();
+                    Row.pop();
+                });
+            } else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                });
+            }
+        }, If);
+        If.pop();
+        this.observeComponentCreation2((d17, e17) => {
+            If.create();
+            if (this.content != null) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((q17, r17) => {
+                        Row.create();
+                    }, Row);
+                    this.observeComponentCreation2((j17, k17) => {
+                        Text.create(this.content);
+                        Text.focusable(true);
+                        Text.defaultFocus(!(this.primaryButton || this.secondaryButton));
+                        Text.fontSize({
+                            'id': -1,
+                            'type': 10002,
+                            params: ['sys.float.Body_L'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
+                        });
+                        Text.fontWeight(FontWeight.Medium);
+                        Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
+                        Text.textAlign(this.textAlignment);
+                        Text.width('100%');
+                        Text.onKeyEvent((p17) => {
+                            if (p17) {
+                                resolveKeyEvent(p17, this.contentScroller);
+                            }
+                        });
+                        Text.onAreaChange((n17, o17) => {
+                            this.getTextAlign(Number(o17.width));
+                        });
+                    }, Text);
+                    Text.pop();
+                    Row.pop();
+                });
+            } else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                });
+            }
+        }, If);
+        If.pop();
+        Column.pop();
+        Scroll.pop();
+    }
+
+    aboutToAppear() {
+        this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
+        this.theme.colors.fontPrimary : {
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.font_primary'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            };
+        this.initButtons();
+        this.initMargin();
+    }
+
+    getTextAlign(v16) {
+        let w16 = measure.measureTextSize({
+            textContent: this.content,
+            fontSize: {
                 'id': -1,
                 'type': 10002,
                 params: ['sys.float.Body_L'],
                 'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__',
-              });
-              Text.fontWeight(FontWeight.Medium);
-              Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
-              Text.layoutWeight(1);
-            }, Text);
-            Text.pop();
-            this.observeComponentCreation2((e15, f15) => {
-              Radio.create({ value: 'item.title', group: 'radioGroup' });
-              Radio.size({ width: CHECKBOX_CONTAINER_LENGTH, height: CHECKBOX_CONTAINER_LENGTH });
-              Radio.checked(this.selectedIndex === h14);
-              Radio.hitTestBehavior(HitTestMode.None);
-              Radio.id(String(h14));
-              Radio.onFocus(() => {
-                if (h14 == FIRST_ITEM_INDEX) {
-                  this.contentScroller.scrollEdge(Edge.Top);
-                }
-                else if (h14 == this.radioContent.length - 1) {
-                  this.contentScroller.scrollEdge(Edge.Bottom);
-                }
-              });
-            }, Radio);
-            Row.pop();
-            Button.pop();
-            this.observeComponentCreation2((x14, y14) => {
-              If.create();
-              if (h14 < this.radioContent.length - 1) {
+                'moduleName': '__harDefaultModuleName__'
+            },
+            constraintWidth: v16,
+        });
+        let x16 = measure.measureTextSize({
+            textContent: this.content,
+            fontSize: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.Body_L'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            },
+        });
+        if (this.getTextHeight(w16) <= this.getTextHeight(x16)) {
+            this.textAlignment = TextAlign.Center;
+        }
+    }
+
+    getTextHeight(u16) {
+        if (u16 && u16.height !== null && u16.height !== undefined) {
+            return Number(u16.height);
+        }
+        return 0;
+    }
+
+    initButtons() {
+        if (!this.primaryButton && !this.secondaryButton) {
+            return;
+        }
+        this.buttons = [];
+        if (this.primaryButton) {
+            this.buttons.push(this.primaryButton);
+        }
+        if (this.secondaryButton) {
+            this.buttons.push(this.secondaryButton);
+        }
+        this.buttonHeight = this.getButtonsHeight();
+    }
+
+    getButtonsHeight() {
+        if (!this.buttons || this.buttons.length === 0) {
+            return 0;
+        }
+        let t16 = getNumberByResource('alert_button_top_padding');
+        t16 += BUTTON_DEFAULT_HEIGHT + getNumberByResource('alert_button_bottom_padding_horizontal');
+        return t16;
+    }
+
+    initMargin() {
+        this.marginOffset = 0 - getNumberByResource('padding_level8');
+    }
+
+    rerender() {
+        this.updateDirtyElements();
+    }
+}
+
+export class SelectDialog extends ViewPU {
+    constructor(j16, k16, l16, m16 = -1, n16 = undefined, o16) {
+        super(j16, l16, m16, o16);
+        if (typeof n16 === 'function') {
+            this.paramsGenerator_ = n16;
+        }
+        this.title = '';
+        this.content = '';
+        this.selectedIndex = -1;
+        this.confirm = null;
+        this.radioContent = [];
+        this.buttons = [];
+        this.contentPadding = undefined;
+        this.contentBuilder = this.buildContent;
+        this.__fontColorWithTheme = new ObservedPropertyObjectPU({
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.font_primary'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'fontColorWithTheme');
+        this.__dividerColorWithTheme = new ObservedPropertyObjectPU({
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.comp_divider'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'dividerColorWithTheme');
+        this.theme = new CustomThemeImpl({});
+        this.controller = new CustomDialogController({
+            builder: () => {
+                let p16 = new CustomContentDialog(this, {
+                    primaryTitle: this.title,
+                    contentBuilder: () => {
+                        this.contentBuilder();
+                    },
+                    buttons: this.buttons,
+                }, undefined, -1, () => {
+                }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 289, col: 14 });
+                p16.setController(this.controller);
+                ViewPU.create(p16);
+                let q16 = () => {
+                    return {
+                        primaryTitle: this.title,
+                        contentBuilder: () => {
+                            this.contentBuilder();
+                        },
+                        buttons: this.buttons
+                    };
+                };
+                p16.paramsGenerator_ = q16;
+            }
+        }, this);
+        this.contentScroller = new Scroller();
+        this.setInitiallyProvidedValue(k16);
+        this.finalizeConstruction();
+    }
+
+    setInitiallyProvidedValue(i16) {
+        if (i16.title !== undefined) {
+            this.title = i16.title;
+        }
+        if (i16.content !== undefined) {
+            this.content = i16.content;
+        }
+        if (i16.selectedIndex !== undefined) {
+            this.selectedIndex = i16.selectedIndex;
+        }
+        if (i16.confirm !== undefined) {
+            this.confirm = i16.confirm;
+        }
+        if (i16.radioContent !== undefined) {
+            this.radioContent = i16.radioContent;
+        }
+        if (i16.buttons !== undefined) {
+            this.buttons = i16.buttons;
+        }
+        if (i16.contentPadding !== undefined) {
+            this.contentPadding = i16.contentPadding;
+        }
+        if (i16.contentBuilder !== undefined) {
+            this.contentBuilder = i16.contentBuilder;
+        }
+        if (i16.fontColorWithTheme !== undefined) {
+            this.fontColorWithTheme = i16.fontColorWithTheme;
+        }
+        if (i16.dividerColorWithTheme !== undefined) {
+            this.dividerColorWithTheme = i16.dividerColorWithTheme;
+        }
+        if (i16.theme !== undefined) {
+            this.theme = i16.theme;
+        }
+        if (i16.controller !== undefined) {
+            this.controller = i16.controller;
+        }
+        if (i16.contentScroller !== undefined) {
+            this.contentScroller = i16.contentScroller;
+        }
+    }
+
+    updateStateVars(h16) {
+    }
+
+    purgeVariableDependenciesOnElmtId(g16) {
+        this.__fontColorWithTheme.purgeDependencyOnElmtId(g16);
+        this.__dividerColorWithTheme.purgeDependencyOnElmtId(g16);
+    }
+
+    aboutToBeDeleted() {
+        this.__fontColorWithTheme.aboutToBeDeleted();
+        this.__dividerColorWithTheme.aboutToBeDeleted();
+        SubscriberManager.Get().delete(this.id__());
+        this.aboutToBeDeletedInternal();
+    }
+
+    get fontColorWithTheme() {
+        return this.__fontColorWithTheme.get();
+    }
+
+    set fontColorWithTheme(f16) {
+        this.__fontColorWithTheme.set(f16);
+    }
+
+    get dividerColorWithTheme() {
+        return this.__dividerColorWithTheme.get();
+    }
+
+    set dividerColorWithTheme(e16) {
+        this.__dividerColorWithTheme.set(e16);
+    }
+
+    setController(d16) {
+        this.controller = d16;
+    }
+
+    buildContent(o13 = null) {
+        this.observeComponentCreation2((b16, c16) => {
+            Scroll.create(this.contentScroller);
+            Scroll.scrollBar(BarState.Auto);
+        }, Scroll);
+        this.observeComponentCreation2((z15, a16) => {
+            Column.create();
+        }, Column);
+        this.observeComponentCreation2((p15, q15) => {
+            If.create();
+            if (this.content) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                  this.observeComponentCreation2((c15, d15) => {
-                    Divider.create();
-                    Divider.color(ObservedObject.GetRawObject(this.dividerColorWithTheme));
-                    Divider.padding({
-                      left: {
-                        'id': -1,
-                        'type': 10002,
-                        params: ['sys.float.padding_level6'],
-                        'bundleName': '__harDefaultBundleName__',
-                        'moduleName': '__harDefaultModuleName__',
-                      },
-                      right: {
-                        'id': -1,
-                        'type': 10002,
-                        params: ['sys.float.padding_level6'],
-                        'bundleName': '__harDefaultBundleName__',
-                        'moduleName': '__harDefaultModuleName__',
-                      },
-                    });
-                  }, Divider);
+                    this.observeComponentCreation2((x15, y15) => {
+                        Row.create();
+                        Row.padding({
+                            left: {
+                                'id': -1,
+                                'type': 10002,
+                                params: ['sys.float.padding_level12'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
+                            },
+                            right: {
+                                'id': -1,
+                                'type': 10002,
+                                params: ['sys.float.padding_level12'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
+                            },
+                            bottom: {
+                                'id': -1,
+                                'type': 10002,
+                                params: ['sys.float.padding_level4'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
+                            }
+                        });
+                        Row.width('100%');
+                    }, Row);
+                    this.observeComponentCreation2((v15, w15) => {
+                        Text.create(this.content);
+                        Text.fontSize({
+                            'id': -1,
+                            'type': 10002,
+                            params: ['sys.float.Body_M'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
+                        });
+                        Text.fontWeight(FontWeight.Regular);
+                        Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
+                        Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+                    }, Text);
+                    Text.pop();
+                    Row.pop();
                 });
-              }
-              else {
+            } else {
                 this.ifElseBranchUpdateFunction(1, () => {
                 });
-              }
-            }, If);
-            If.pop();
-            Column.pop();
-            ListItem.pop();
-          };
-          this.observeComponentCreation2(k14, ListItem);
-          ListItem.pop();
-        }
-      };
-      this.forEachUpdateFunction(c14, this.radioContent, e14, undefined, true, false);
-    }, ForEach);
-    ForEach.pop();
-    List.pop();
-    Column.pop();
-    Scroll.pop();
-  }
-  initialRender() {
-    {
-      this.observeComponentCreation2((q13, r13) => {
-        if (r13) {
-          let s13 = new CustomDialogComponent(this, {
-            controller: this.controller,
-            primaryTitle: this.title,
-            contentBuilder: () => {
-              this.contentBuilder();
-            },
-            buttons: this.buttons,
-            contentAreaPadding: this.contentPadding,
-            theme: this.theme,
-          }, undefined, q13, () => {
-          }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 376, col: 5 });
-          ViewPU.create(s13);
-          let t13 = () => {
-            return {
-              controller: this.controller,
-              primaryTitle: this.title,
-              contentBuilder: () => {
-                this.contentBuilder();
-              },
-              buttons: this.buttons,
-              contentAreaPadding: this.contentPadding,
-              theme: this.theme,
+            }
+        }, If);
+        If.pop();
+        this.observeComponentCreation2((m15, n15) => {
+            List.create({ space: 1 });
+            List.width('100%');
+            List.clip(false);
+            List.onFocus(() => {
+                if (!this.contentScroller.isAtEnd()) {
+                    this.contentScroller.scrollEdge(Edge.Top);
+                    focusControl.requestFocus(String(FIRST_ITEM_INDEX));
+                }
+            });
+            List.defaultFocus(this.buttons?.length == 0 ? true : false);
+        }, List);
+        this.observeComponentCreation2((u13, v13) => {
+            ForEach.create();
+            const w13 = (y13, z13) => {
+                const a14 = y13;
+                {
+                    const b14 = (k15, l15) => {
+                        ViewStackProcessor.StartGetAccessRecordingFor(k15);
+                        c14(k15, l15);
+                        if (!l15) {
+                            ListItem.pop();
+                        }
+                        ViewStackProcessor.StopGetAccessRecording();
+                    };
+                    const c14 = (i15, j15) => {
+                        ListItem.create(d14, true);
+                    };
+                    const d14 = (h14, i14) => {
+                        b14(h14, i14);
+                        this.observeComponentCreation2((g15, h15) => {
+                            Column.create();
+                            Column.padding({
+                                left: {
+                                    'id': -1,
+                                    'type': 10002,
+                                    params: ['sys.float.padding_level6'],
+                                    'bundleName': '__harDefaultBundleName__',
+                                    'moduleName': '__harDefaultModuleName__'
+                                },
+                                right: {
+                                    'id': -1,
+                                    'type': 10002,
+                                    params: ['sys.float.padding_level6'],
+                                    'bundleName': '__harDefaultBundleName__',
+                                    'moduleName': '__harDefaultModuleName__'
+                                }
+                            });
+                        }, Column);
+                        this.observeComponentCreation2((d15, e15) => {
+                            Button.createWithChild();
+                            Button.type(ButtonType.Normal);
+                            Button.borderRadius({
+                                'id': -1,
+                                'type': 10002,
+                                params: ['sys.float.corner_radius_level8'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
+                            });
+                            Button.buttonStyle(ButtonStyleMode.TEXTUAL);
+                            Button.padding({
+                                left: {
+                                    'id': -1,
+                                    'type': 10002,
+                                    params: ['sys.float.padding_level6'],
+                                    'bundleName': '__harDefaultBundleName__',
+                                    'moduleName': '__harDefaultModuleName__'
+                                },
+                                right: {
+                                    'id': -1,
+                                    'type': 10002,
+                                    params: ['sys.float.padding_level6'],
+                                    'bundleName': '__harDefaultBundleName__',
+                                    'moduleName': '__harDefaultModuleName__'
+                                }
+                            });
+                            Button.onClick(() => {
+                                a14.action && a14.action();
+                                this.controller.close();
+                            });
+                        }, Button);
+                        this.observeComponentCreation2((b15, c15) => {
+                            Row.create();
+                            Row.constraintSize({ minHeight: LIST_MIN_HEIGHT });
+                            Row.clip(false);
+                            Row.padding({
+                                top: {
+                                    'id': -1,
+                                    'type': 10002,
+                                    params: ['sys.float.padding_level4'],
+                                    'bundleName': '__harDefaultBundleName__',
+                                    'moduleName': '__harDefaultModuleName__'
+                                },
+                                bottom: {
+                                    'id': -1,
+                                    'type': 10002,
+                                    params: ['sys.float.padding_level4'],
+                                    'bundleName': '__harDefaultBundleName__',
+                                    'moduleName': '__harDefaultModuleName__'
+                                }
+                            });
+                        }, Row);
+                        this.observeComponentCreation2((z14, a15) => {
+                            Text.create(a14.title);
+                            Text.fontSize({
+                                'id': -1,
+                                'type': 10002,
+                                params: ['sys.float.Body_L'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
+                            });
+                            Text.fontWeight(FontWeight.Medium);
+                            Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
+                            Text.layoutWeight(1);
+                        }, Text);
+                        Text.pop();
+                        this.observeComponentCreation2((w14, x14) => {
+                            Radio.create({ value: 'item.title', group: 'radioGroup' });
+                            Radio.size({ width: CHECKBOX_CONTAINER_LENGTH, height: CHECKBOX_CONTAINER_LENGTH });
+                            Radio.checked(this.selectedIndex === z13);
+                            Radio.hitTestBehavior(HitTestMode.None);
+                            Radio.id(String(z13));
+                            Radio.onFocus(() => {
+                                if (z13 == FIRST_ITEM_INDEX) {
+                                    this.contentScroller.scrollEdge(Edge.Top);
+                                } else if (z13 == this.radioContent.length - 1) {
+                                    this.contentScroller.scrollEdge(Edge.Bottom);
+                                }
+                            });
+                        }, Radio);
+                        Row.pop();
+                        Button.pop();
+                        this.observeComponentCreation2((p14, q14) => {
+                            If.create();
+                            if (z13 < this.radioContent.length - 1) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    this.observeComponentCreation2((u14, v14) => {
+                                        Divider.create();
+                                        Divider.color(ObservedObject.GetRawObject(this.dividerColorWithTheme));
+                                        Divider.padding({
+                                            left: {
+                                                'id': -1,
+                                                'type': 10002,
+                                                params: ['sys.float.padding_level6'],
+                                                'bundleName': '__harDefaultBundleName__',
+                                                'moduleName': '__harDefaultModuleName__'
+                                            },
+                                            right: {
+                                                'id': -1,
+                                                'type': 10002,
+                                                params: ['sys.float.padding_level6'],
+                                                'bundleName': '__harDefaultBundleName__',
+                                                'moduleName': '__harDefaultModuleName__'
+                                            }
+                                        });
+                                    }, Divider);
+                                });
+                            } else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                });
+                            }
+                        }, If);
+                        If.pop();
+                        Column.pop();
+                        ListItem.pop();
+                    };
+                    this.observeComponentCreation2(c14, ListItem);
+                    ListItem.pop();
+                }
             };
-          };
-          s13.paramsGenerator_ = t13;
+            this.forEachUpdateFunction(u13, this.radioContent, w13, undefined, true, false);
+        }, ForEach);
+        ForEach.pop();
+        List.pop();
+        Column.pop();
+        Scroll.pop();
+    }
+
+    initialRender() {
+        {
+            this.observeComponentCreation2((i13, j13) => {
+                if (j13) {
+                    let k13 = new CustomDialogComponent(this, {
+                        controller: this.controller,
+                        primaryTitle: this.title,
+                        contentBuilder: () => {
+                            this.contentBuilder();
+                        },
+                        buttons: this.buttons,
+                        contentAreaPadding: this.contentPadding,
+                        theme: this.theme,
+                    }, undefined, i13, () => {
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 384, col: 5 });
+                    ViewPU.create(k13);
+                    let l13 = () => {
+                        return {
+                            controller: this.controller,
+                            primaryTitle: this.title,
+                            contentBuilder: () => {
+                                this.contentBuilder();
+                            },
+                            buttons: this.buttons,
+                            contentAreaPadding: this.contentPadding,
+                            theme: this.theme
+                        };
+                    };
+                    k13.paramsGenerator_ = l13;
+                } else {
+                    this.updateStateVarsOfChildByElmtId(i13, {});
+                }
+            }, { name: 'CustomDialogComponent' });
         }
-        else {
-          this.updateStateVarsOfChildByElmtId(q13, {});
+    }
+
+    aboutToAppear() {
+        this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
+        this.theme.colors.fontPrimary : {
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.font_primary'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            };
+        this.dividerColorWithTheme = this.theme?.colors?.compDivider ?
+        this.theme.colors.compDivider : {
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.comp_divider'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            };
+        this.initContentPadding();
+        this.initButtons();
+    }
+
+    initContentPadding() {
+        this.contentPadding = {
+            left: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.padding_level0'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            },
+            right: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.padding_level0'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            }
+        };
+        if (!this.title && !this.confirm) {
+            this.contentPadding = {
+                top: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.padding_level12'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                bottom: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.padding_level12'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                }
+            };
+            return;
         }
-      }, { name: 'CustomDialogComponent' });
-    }
-  }
-  aboutToAppear() {
-    this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
-      this.theme.colors.fontPrimary : {
-        'id': -1,
-        'type': 10001,
-        params: ['sys.color.font_primary'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__',
-      };
-    this.dividerColorWithTheme = this.theme?.colors?.compDivider ?
-      this.theme.colors.compDivider : {
-        'id': -1,
-        'type': 10001,
-        params: ['sys.color.comp_divider'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__',
-      };
-    this.initContentPadding();
-    this.initButtons();
-  }
-  initContentPadding() {
-    this.contentPadding = {
-      left: {
-        'id': -1,
-        'type': 10002,
-        params: ['sys.float.padding_level0'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__',
-      },
-      right: {
-        'id': -1,
-        'type': 10002,
-        params: ['sys.float.padding_level0'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__',
-      },
-    };
-    if (!this.title && !this.confirm) {
-      this.contentPadding = {
-        top: {
-          'id': -1,
-          'type': 10002,
-          params: ['sys.float.padding_level12'],
-          'bundleName': '__harDefaultBundleName__',
-          'moduleName': '__harDefaultModuleName__',
-        },
-        bottom: {
-          'id': -1,
-          'type': 10002,
-          params: ['sys.float.padding_level12'],
-          'bundleName': '__harDefaultBundleName__',
-          'moduleName': '__harDefaultModuleName__',
-        },
-      };
-      return;
-    }
-    if (!this.title) {
-      this.contentPadding = {
-        top: {
-          'id': -1,
-          'type': 10002,
-          params: ['sys.float.padding_level12'],
-          'bundleName': '__harDefaultBundleName__',
-          'moduleName': '__harDefaultModuleName__',
+        if (!this.title) {
+            this.contentPadding = {
+                top: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.padding_level12'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                }
+            };
+        } else if (!this.confirm) {
+            this.contentPadding = {
+                bottom: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.padding_level12'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                }
+            };
         }
-      };
     }
-    else if (!this.confirm) {
-      this.contentPadding = {
-        bottom: {
-          'id': -1,
-          'type': 10002,
-          params: ['sys.float.padding_level12'],
-          'bundleName': '__harDefaultBundleName__',
-          'moduleName': '__harDefaultModuleName__',
+
+    initButtons() {
+        this.buttons = [];
+        if (this.confirm) {
+            this.buttons.push(this.confirm);
         }
-      };
     }
-  }
-  initButtons() {
-    this.buttons = [];
-    if (this.confirm) {
-      this.buttons.push(this.confirm);
+
+    rerender() {
+        this.updateDirtyElements();
     }
-  }
-  rerender() {
-    this.updateDirtyElements();
-  }
 }
 
 export class ConfirmDialog extends ViewPU {
-  constructor(j13, k13, l13, m13 = -1, n13 = undefined, o13) {
-    super(j13, l13, m13, o13);
-    if (typeof n13 === 'function') {
-      this.paramsGenerator_ = n13;
+    constructor(x12, y12, z12, a13 = -1, b13 = undefined, c13) {
+        super(x12, z12, a13, c13);
+        if (typeof b13 === 'function') {
+            this.paramsGenerator_ = b13;
+        }
+        this.controller = undefined;
+        this.title = '';
+        this.content = '';
+        this.checkTips = '';
+        this.__isChecked = new ObservedPropertySimplePU(false, this, 'isChecked');
+        this.primaryButton = { value: '' };
+        this.secondaryButton = { value: '' };
+        this.__fontColorWithTheme = new ObservedPropertyObjectPU({
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.font_primary'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'fontColorWithTheme');
+        this.__buttonFontColorWithTheme = new ObservedPropertyObjectPU({
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.font_emphasize'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'buttonFontColorWithTheme');
+        this.theme = new CustomThemeImpl({});
+        this.checkAction = undefined;
+        this.contentScroller = new Scroller();
+        this.buttons = undefined;
+        this.marginOffset = 0;
+        this.__titleHeight = new ObservedPropertySimplePU(0, this, 'titleHeight');
+        this.__buttonHeight = new ObservedPropertySimplePU(0, this, 'buttonHeight');
+        this.__checkBoxHeight = new ObservedPropertySimplePU(CHECKBOX_CONTAINER_HEIGHT, this, 'checkBoxHeight');
+        this.__maxContentHeight =
+            new ObservedPropertySimplePU(`calc(100% - ${this.checkBoxHeight}vp - ${this.titleHeight}vp - ${this.buttonHeight}vp)`,
+                this, 'maxContentHeight');
+        this.updateTitleHeight = (g13) => {
+            this.titleHeight = g13;
+            this.maxContentHeight =
+                `calc(100% - ${this.checkBoxHeight}vp - ${this.titleHeight}vp - ${this.buttonHeight}vp)`;
+        };
+        this.updateButtonHeight = (f13) => {
+            this.buttonHeight = f13;
+            this.maxContentHeight =
+                `calc(100% - ${this.checkBoxHeight}vp - ${this.titleHeight}vp - ${this.buttonHeight}vp)`;
+        };
+        this.setInitiallyProvidedValue(y12);
+        this.finalizeConstruction();
     }
-    this.controller = undefined;
-    this.title = '';
-    this.content = '';
-    this.checkTips = '';
-    this.__isChecked = new ObservedPropertySimplePU(false, this, 'isChecked');
-    this.primaryButton = { value: '' };
-    this.secondaryButton = { value: '' };
-    this.__fontColorWithTheme = new ObservedPropertyObjectPU({
-      'id': -1,
-      'type': 10001,
-      params: ['sys.color.font_primary'],
-      'bundleName': '__harDefaultBundleName__',
-      'moduleName': '__harDefaultModuleName__',
-    }, this, 'fontColorWithTheme');
-    this.__buttonFontColorWithTheme = new ObservedPropertyObjectPU({
-      'id': -1,
-      'type': 10001,
-      params: ['sys.color.font_emphasize'],
-      'bundleName': '__harDefaultBundleName__',
-      'moduleName': '__harDefaultModuleName__',
-    }, this, 'buttonFontColorWithTheme');
-    this.theme = new CustomThemeImpl({});
-    this.setInitiallyProvidedValue(k13);
-    this.finalizeConstruction();
-  }
-  setInitiallyProvidedValue(i13) {
-    if (i13.controller !== undefined) {
-      this.controller = i13.controller;
+
+    setInitiallyProvidedValue(w12) {
+        if (w12.controller !== undefined) {
+            this.controller = w12.controller;
+        }
+        if (w12.title !== undefined) {
+            this.title = w12.title;
+        }
+        if (w12.content !== undefined) {
+            this.content = w12.content;
+        }
+        if (w12.checkTips !== undefined) {
+            this.checkTips = w12.checkTips;
+        }
+        if (w12.isChecked !== undefined) {
+            this.isChecked = w12.isChecked;
+        }
+        if (w12.primaryButton !== undefined) {
+            this.primaryButton = w12.primaryButton;
+        }
+        if (w12.secondaryButton !== undefined) {
+            this.secondaryButton = w12.secondaryButton;
+        }
+        if (w12.fontColorWithTheme !== undefined) {
+            this.fontColorWithTheme = w12.fontColorWithTheme;
+        }
+        if (w12.buttonFontColorWithTheme !== undefined) {
+            this.buttonFontColorWithTheme = w12.buttonFontColorWithTheme;
+        }
+        if (w12.theme !== undefined) {
+            this.theme = w12.theme;
+        }
+        if (w12.checkAction !== undefined) {
+            this.checkAction = w12.checkAction;
+        }
+        if (w12.contentScroller !== undefined) {
+            this.contentScroller = w12.contentScroller;
+        }
+        if (w12.buttons !== undefined) {
+            this.buttons = w12.buttons;
+        }
+        if (w12.marginOffset !== undefined) {
+            this.marginOffset = w12.marginOffset;
+        }
+        if (w12.titleHeight !== undefined) {
+            this.titleHeight = w12.titleHeight;
+        }
+        if (w12.buttonHeight !== undefined) {
+            this.buttonHeight = w12.buttonHeight;
+        }
+        if (w12.checkBoxHeight !== undefined) {
+            this.checkBoxHeight = w12.checkBoxHeight;
+        }
+        if (w12.maxContentHeight !== undefined) {
+            this.maxContentHeight = w12.maxContentHeight;
+        }
+        if (w12.updateTitleHeight !== undefined) {
+            this.updateTitleHeight = w12.updateTitleHeight;
+        }
+        if (w12.updateButtonHeight !== undefined) {
+            this.updateButtonHeight = w12.updateButtonHeight;
+        }
     }
-    if (i13.title !== undefined) {
-      this.title = i13.title;
+
+    updateStateVars(v12) {
     }
-    if (i13.content !== undefined) {
-      this.content = i13.content;
+
+    purgeVariableDependenciesOnElmtId(u12) {
+        this.__isChecked.purgeDependencyOnElmtId(u12);
+        this.__fontColorWithTheme.purgeDependencyOnElmtId(u12);
+        this.__buttonFontColorWithTheme.purgeDependencyOnElmtId(u12);
+        this.__titleHeight.purgeDependencyOnElmtId(u12);
+        this.__buttonHeight.purgeDependencyOnElmtId(u12);
+        this.__checkBoxHeight.purgeDependencyOnElmtId(u12);
+        this.__maxContentHeight.purgeDependencyOnElmtId(u12);
     }
-    if (i13.checkTips !== undefined) {
-      this.checkTips = i13.checkTips;
+
+    aboutToBeDeleted() {
+        this.__isChecked.aboutToBeDeleted();
+        this.__fontColorWithTheme.aboutToBeDeleted();
+        this.__buttonFontColorWithTheme.aboutToBeDeleted();
+        this.__titleHeight.aboutToBeDeleted();
+        this.__buttonHeight.aboutToBeDeleted();
+        this.__checkBoxHeight.aboutToBeDeleted();
+        this.__maxContentHeight.aboutToBeDeleted();
+        SubscriberManager.Get().delete(this.id__());
+        this.aboutToBeDeletedInternal();
     }
-    if (i13.isChecked !== undefined) {
-      this.isChecked = i13.isChecked;
+
+    setController(t12) {
+        this.controller = t12;
     }
-    if (i13.primaryButton !== undefined) {
-      this.primaryButton = i13.primaryButton;
+
+    get isChecked() {
+        return this.__isChecked.get();
     }
-    if (i13.secondaryButton !== undefined) {
-      this.secondaryButton = i13.secondaryButton;
+
+    set isChecked(s12) {
+        this.__isChecked.set(s12);
     }
-    if (i13.fontColorWithTheme !== undefined) {
-      this.fontColorWithTheme = i13.fontColorWithTheme;
+
+    get fontColorWithTheme() {
+        return this.__fontColorWithTheme.get();
     }
-    if (i13.buttonFontColorWithTheme !== undefined) {
-      this.buttonFontColorWithTheme = i13.buttonFontColorWithTheme;
+
+    set fontColorWithTheme(r12) {
+        this.__fontColorWithTheme.set(r12);
     }
-    if (i13.theme !== undefined) {
-      this.theme = i13.theme;
+
+    get buttonFontColorWithTheme() {
+        return this.__buttonFontColorWithTheme.get();
     }
-  }
-  updateStateVars(h13) {
-  }
-  purgeVariableDependenciesOnElmtId(g13) {
-    this.__isChecked.purgeDependencyOnElmtId(g13);
-    this.__fontColorWithTheme.purgeDependencyOnElmtId(g13);
-    this.__buttonFontColorWithTheme.purgeDependencyOnElmtId(g13);
-  }
-  aboutToBeDeleted() {
-    this.__isChecked.aboutToBeDeleted();
-    this.__fontColorWithTheme.aboutToBeDeleted();
-    this.__buttonFontColorWithTheme.aboutToBeDeleted();
-    SubscriberManager.Get().delete(this.id__());
-    this.aboutToBeDeletedInternal();
-  }
-  setController(f13) {
-    this.controller = f13;
-  }
-  get isChecked() {
-    return this.__isChecked.get();
-  }
-  set isChecked(e13) {
-    this.__isChecked.set(e13);
-  }
-  get fontColorWithTheme() {
-    return this.__fontColorWithTheme.get();
-  }
-  set fontColorWithTheme(d13) {
-    this.__fontColorWithTheme.set(d13);
-  }
-  get buttonFontColorWithTheme() {
-    return this.__buttonFontColorWithTheme.get();
-  }
-  set buttonFontColorWithTheme(c13) {
-    this.__buttonFontColorWithTheme.set(c13);
-  }
-  initialRender() {
-    this.observeComponentCreation2((a13, b13) => {
-      Column.create();
-      Column.backgroundBlurStyle(BlurStyle.Thick);
-      Column.borderRadius({
-        'id': -1,
-        'type': 10002,
-        params: ['sys.float.ohos_id_corner_radius_dialog'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__',
-      });
-      Column.margin({
-        left: {
-          'id': -1,
-          'type': 10002,
-          params: ['sys.float.ohos_id_dialog_margin_start'],
-          'bundleName': '__harDefaultBundleName__',
-          'moduleName': '__harDefaultModuleName__',
-        },
-        right: {
-          'id': -1,
-          'type': 10002,
-          params: ['sys.float.ohos_id_dialog_margin_end'],
-          'bundleName': '__harDefaultBundleName__',
-          'moduleName': '__harDefaultModuleName__',
-        },
-        bottom: {
-          'id': -1,
-          'type': 10002,
-          params: ['sys.float.ohos_id_dialog_margin_bottom'],
-          'bundleName': '__harDefaultBundleName__',
-          'moduleName': '__harDefaultModuleName__',
-        },
-      });
-      Column.backgroundColor({
-        'id': -1,
-        'type': 10001,
-        params: ['sys.color.ohos_id_color_dialog_bg'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__',
-      });
-    }, Column);
-    this.observeComponentCreation2((y12, z12) => {
-      Row.create();
-      Row.padding({ left: 24, right: 24, top: 24 });
-      Row.constraintSize({ minHeight: 56 });
-    }, Row);
-    this.observeComponentCreation2((w12, x12) => {
-      Text.create(this.title);
-      Text.fontSize({
-        'id': -1,
-        'type': 10002,
-        params: ['sys.float.ohos_id_text_size_dialog_tittle'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__',
-      });
-      Text.fontWeight(FontWeight.Medium);
-      Text.maxLines(CONTENT_MAX_LINES);
-      Text.minFontSize(15);
-      Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-      Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
-      Text.textAlign(TextAlign.Start);
-      Text.width('100%');
-    }, Text);
-    Text.pop();
-    Row.pop();
-    this.observeComponentCreation2((m12, n12) => {
-      If.create();
-      if (this.content) {
-        this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation2((u12, v12) => {
+
+    set buttonFontColorWithTheme(q12) {
+        this.__buttonFontColorWithTheme.set(q12);
+    }
+
+    get titleHeight() {
+        return this.__titleHeight.get();
+    }
+
+    set titleHeight(p12) {
+        this.__titleHeight.set(p12);
+    }
+
+    get buttonHeight() {
+        return this.__buttonHeight.get();
+    }
+
+    set buttonHeight(o12) {
+        this.__buttonHeight.set(o12);
+    }
+
+    get checkBoxHeight() {
+        return this.__checkBoxHeight.get();
+    }
+
+    set checkBoxHeight(n12) {
+        this.__checkBoxHeight.set(n12);
+    }
+
+    get maxContentHeight() {
+        return this.__maxContentHeight.get();
+    }
+
+    set maxContentHeight(m12) {
+        this.__maxContentHeight.set(m12);
+    }
+
+    buildContent(a11 = null) {
+        this.observeComponentCreation2((k12, l12) => {
+            Column.create();
+        }, Column);
+        this.observeComponentCreation2((v11, w11) => {
+            If.create();
+            if (this.content) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((i12, j12) => {
+                        Row.create();
+                        Row.padding({ bottom: 8 });
+                        Row.margin({ right: `${this.marginOffset}vp` });
+                        Row.constraintSize({
+                            minHeight: 36,
+                            maxHeight: this.maxContentHeight
+                        });
+                    }, Row);
+                    this.observeComponentCreation2((g12, h12) => {
+                        Scroll.create(this.contentScroller);
+                        Scroll.width('100%');
+                    }, Scroll);
+                    this.observeComponentCreation2((c12, d12) => {
+                        Text.create(this.content);
+                        Text.focusable(true);
+                        Text.defaultFocus(!(this.primaryButton?.value || this.secondaryButton?.value));
+                        Text.fontSize({
+                            'id': -1,
+                            'type': 10002,
+                            params: ['sys.float.Body_L'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
+                        });
+                        Text.fontWeight(FontWeight.Medium);
+                        Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
+                        Text.textAlign(TextAlign.Start);
+                        Text.margin({
+                            right: {
+                                'id': -1,
+                                'type': 10002,
+                                params: ['sys.float.padding_level8'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
+                            }
+                        });
+                        Text.onKeyEvent((f12) => {
+                            if (f12) {
+                                resolveKeyEvent(f12, this.contentScroller);
+                            }
+                        });
+                        Text.width(`calc(100% - ${getNumberByResource('padding_level8')}vp)`);
+                    }, Text);
+                    Text.pop();
+                    Scroll.pop();
+                    Row.pop();
+                });
+            } else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                });
+            }
+        }, If);
+        If.pop();
+        this.observeComponentCreation2((q11, r11) => {
             Row.create();
-            Row.padding({ left: 24, right: 24, top: 8, bottom: 8 });
+            Row.onSizeChange((t11, u11) => {
+                this.checkBoxHeight = Number(u11.height);
+            });
+            Row.constraintSize({ minHeight: CHECKBOX_CONTAINER_HEIGHT });
             Row.width('100%');
-            Row.constraintSize({ minHeight: 36 });
-          }, Row);
-          this.observeComponentCreation2((s12, t12) => {
-            Text.create(this.content);
-            Text.focusable(true);
-            Text.defaultFocus(!(this.primaryButton?.value || this.secondaryButton?.value));
+            Row.padding({ top: 8, bottom: 8 });
+        }, Row);
+        this.observeComponentCreation2((o11, p11) => {
+            WithTheme.create({ theme: this.theme });
+        }, WithTheme);
+        this.observeComponentCreation2((k11, l11) => {
+            Checkbox.create({ name: 'checkbox', group: 'checkboxGroup' });
+            Checkbox.select(this.isChecked);
+            Checkbox.onChange((n11) => {
+                this.isChecked = n11;
+                if (this.checkAction) {
+                    this.checkAction(this.isChecked);
+                }
+            });
+            Checkbox.hitTestBehavior(HitTestMode.Block);
+            Checkbox.margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(8) });
+        }, Checkbox);
+        Checkbox.pop();
+        WithTheme.pop();
+        this.observeComponentCreation2((h11, i11) => {
+            Text.create(this.checkTips);
             Text.fontSize({
-              'id': -1,
-              'type': 10002,
-              params: ['sys.float.ohos_id_text_size_body1'],
-              'bundleName': '__harDefaultBundleName__',
-              'moduleName': '__harDefaultModuleName__',
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.Body_M'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             });
             Text.fontWeight(FontWeight.Medium);
             Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
             Text.maxLines(CONTENT_MAX_LINES);
+            Text.focusable(false);
+            Text.layoutWeight(1);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-            Text.minFontSize({
-              'id': -1,
-              'type': 10002,
-              params: ['sys.float.ohos_id_text_size_body3'],
-              'bundleName': '__harDefaultBundleName__',
-              'moduleName': '__harDefaultModuleName__',
+            Text.onClick(() => {
+                this.isChecked = !this.isChecked;
             });
-          }, Text);
-          Text.pop();
-          Row.pop();
-        });
-      }
-      else {
-        this.ifElseBranchUpdateFunction(1, () => {
-        });
-      }
-    }, If);
-    If.pop();
-    this.observeComponentCreation2((k12, l12) => {
-      Row.create();
-      Row.height(CHECKBOX_CONTAINER_HEIGHT);
-      Row.width('100%');
-      Row.padding({ left: 24, right: 24, top: 8, bottom: 8 });
-    }, Row);
-    this.observeComponentCreation2((l12, m12) => {
-      WithTheme.create({ theme: this.theme });
-    }, WithTheme);
-    this.observeComponentCreation2((g12, h12) => {
-      Checkbox.create({ name: 'checkbox', group: 'checkboxGroup' });
-      Checkbox.select(this.isChecked);
-      Checkbox.onChange((j12) => {
-        this.isChecked = j12;
-      });
-      Checkbox.margin({ left: 0, right: 8 });
-    }, Checkbox);
-    Checkbox.pop();
-    WithTheme.pop();
-    this.observeComponentCreation2((d12, e12) => {
-      Text.create(this.checkTips);
-      Text.fontSize({
-        'id': -1,
-        'type': 10002,
-        params: ['sys.float.ohos_id_text_size_body2'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__',
-      });
-      Text.fontWeight(FontWeight.Medium);
-      Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
-      Text.maxLines(CONTENT_MAX_LINES);
-      Text.layoutWeight(1);
-      Text.focusable(false);
-      Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-      Text.onClick(() => {
-        this.isChecked = !this.isChecked;
-      });
-    }, Text);
-    Text.pop();
-    Row.pop();
-    this.observeComponentCreation2((b12, c12) => {
-      Row.create();
-      Row.width('100%');
-      Row.padding({ left: 16, right: 16, top: 16, bottom: 16 });
-    }, Row);
-    this.observeComponentCreation2((t11, u11) => {
-      If.create();
-      if (this.primaryButton?.value) {
-        this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation2((y11, z11) => {
-            Button.createWithLabel(this.primaryButton.value);
-            Button.fontSize({
-              'id': -1,
-              'type': 10002,
-              params: ['sys.float.ohos_id_text_size_button1'],
-              'bundleName': '__harDefaultBundleName__',
-              'moduleName': '__harDefaultModuleName__',
-            });
-            Button.fontWeight(FontWeight.Medium);
-            Button.layoutWeight(1);
-            Button.defaultFocus(true);
-            Button.backgroundColor(this.primaryButton.background ? this.primaryButton.background : {
-              'id': -1,
-              'type': 10001,
-              params: ['sys.color.ohos_id_color_background_transparent'],
-              'bundleName': '__harDefaultBundleName__',
-              'moduleName': '__harDefaultModuleName__',
-            });
-            Button.fontColor(this.primaryButton.fontColor ? this.primaryButton.fontColor : this.buttonFontColorWithTheme);
-            Button.onClick(() => {
-              if (this.primaryButton?.action)
-                this.primaryButton.action();
-              this.controller.close();
-            });
-          }, Button);
-          Button.pop();
-        });
-      }
-      else {
-        this.ifElseBranchUpdateFunction(1, () => {
-        });
-      }
-    }, If);
-    If.pop();
-    this.observeComponentCreation2((e11, f11) => {
-      If.create();
-      if (this.secondaryButton?.value && this.primaryButton?.value) {
-        this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation2((r11, s11) => {
-            Column.create();
-            Column.width(DIVIDER_CONTAINER_WIDTH);
-            Column.alignItems(HorizontalAlign.Center);
-          }, Column);
-          this.observeComponentCreation2((k11, l11) => {
-            If.create();
-            if (!this.secondaryButton.background) {
-              this.ifElseBranchUpdateFunction(0, () => {
-                this.observeComponentCreation2((p11, q11) => {
-                  Divider.create();
-                  Divider.width(DIVIDER_WIDTH);
-                  Divider.height(DIVIDER_HEIGHT);
-                  Divider.color({
-                    'id': -1,
-                    'type': 10001,
-                    params: ['sys.color.ohos_id_color_list_separator'],
-                    'bundleName': '__harDefaultBundleName__',
-                    'moduleName': '__harDefaultModuleName__',
-                  });
-                  Divider.vertical(true);
-                }, Divider);
-              });
-            }
-            else {
-              this.ifElseBranchUpdateFunction(1, () => {
-              });
-            }
-          }, If);
-          If.pop();
-          Column.pop();
-        });
-      }
-      else {
-        this.ifElseBranchUpdateFunction(1, () => {
-        });
-      }
-    }, If);
-    If.pop();
-    this.observeComponentCreation2((w10, x10) => {
-      If.create();
-      if (this.secondaryButton?.value) {
-        this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation2((b11, c11) => {
-            Button.createWithLabel(this.secondaryButton.value);
-            Button.fontSize({
-              'id': -1,
-              'type': 10002,
-              params: ['sys.float.ohos_id_text_size_button1'],
-              'bundleName': '__harDefaultBundleName__',
-              'moduleName': '__harDefaultModuleName__',
-            });
-            Button.fontWeight(FontWeight.Medium);
-            Button.layoutWeight(1);
-            Button.defaultFocus(true);
-            Button.backgroundColor(this.secondaryButton.background ? this.secondaryButton.background : {
-              'id': -1,
-              'type': 10001,
-              params: ['sys.color.ohos_id_color_background_transparent'],
-              'bundleName': '__harDefaultBundleName__',
-              'moduleName': '__harDefaultModuleName__',
-            });
-            Button.fontColor(this.secondaryButton.fontColor ?
-            this.secondaryButton.fontColor : this.buttonFontColorWithTheme);
-            Button.onClick(() => {
-              if (this.secondaryButton?.action)
-                this.secondaryButton.action();
-              this.controller.close();
-            });
-          }, Button);
-          Button.pop();
-        });
-      }
-      else {
-        this.ifElseBranchUpdateFunction(1, () => {
-        });
-      }
-    }, If);
-    If.pop();
-    Row.pop();
-    Column.pop();
-  }
-  aboutToAppear() {
-    this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
-      this.theme.colors.fontPrimary : {
-        'id': -1,
-        'type': 10001,
-        params: ['sys.color.font_primary'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__',
-      };
-    this.buttonFontColorWithTheme = this.theme?.colors?.fontEmphasize ?
-      this.theme.colors.fontEmphasize : {
-        'id': -1,
-        'type': 10001,
-        params: ['sys.color.font_emphasize'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__',
-      };
-  }
-  rerender() {
-    this.updateDirtyElements();
-  }
+        }, Text);
+        Text.pop();
+        Row.pop();
+        Column.pop();
+    }
+
+    initialRender() {
+        {
+            this.observeComponentCreation2((u10, v10) => {
+                if (v10) {
+                    let w10 = new CustomDialogComponent(this, {
+                        primaryTitle: this.title,
+                        controller: this.controller,
+                        contentBuilder: () => {
+                            this.buildContent();
+                        },
+                        updateTitleHeight: this.updateTitleHeight,
+                        updateButtonHeight: this.updateButtonHeight,
+                        buttons: this.buttons,
+                        theme: this.theme,
+                    }, undefined, u10, () => {
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 534, col: 5 });
+                    ViewPU.create(w10);
+                    let x10 = () => {
+                        return {
+                            primaryTitle: this.title,
+                            controller: this.controller,
+                            contentBuilder: () => {
+                                this.buildContent();
+                            },
+                            updateTitleHeight: this.updateTitleHeight,
+                            updateButtonHeight: this.updateButtonHeight,
+                            buttons: this.buttons,
+                            theme: this.theme
+                        };
+                    };
+                    w10.paramsGenerator_ = x10;
+                } else {
+                    this.updateStateVarsOfChildByElmtId(u10, {});
+                }
+            }, { name: 'CustomDialogComponent' });
+        }
+    }
+
+    aboutToAppear() {
+        this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
+        this.theme.colors.fontPrimary : {
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.font_primary'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            };
+        this.buttonFontColorWithTheme = this.theme?.colors?.fontEmphasize ?
+        this.theme.colors.fontEmphasize : {
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.font_emphasize'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            };
+        this.initButtons();
+        this.initMargin();
+    }
+
+    initMargin() {
+        this.marginOffset = 0 - getNumberByResource('padding_level8');
+    }
+
+    initButtons() {
+        if (!this.primaryButton && !this.secondaryButton) {
+            return;
+        }
+        this.buttons = [];
+        if (this.primaryButton) {
+            this.buttons.push(this.primaryButton);
+        }
+        if (this.secondaryButton) {
+            this.buttons.push(this.secondaryButton);
+        }
+    }
+
+    rerender() {
+        this.updateDirtyElements();
+    }
 }
 
 export class AlertDialog extends ViewPU {
-  constructor(f10, g10, h10, i10 = -1, j10 = undefined, k10) {
-    super(f10, h10, i10, k10);
-    if (typeof j10 === 'function') {
-      this.paramsGenerator_ = j10;
-    }
-    this.controller = undefined;
-    this.primaryTitle = undefined;
-    this.secondaryTitle = undefined;
-    this.content = '';
-    this.primaryButton = null;
-    this.secondaryButton = null;
-    this.buttons = undefined;
-    this.__textAlign = new ObservedPropertySimplePU(TextAlign.Start, this, 'textAlign');
-    this.contentScroller = new Scroller();
-    this.__fontColorWithTheme = new ObservedPropertyObjectPU({
-      'id': -1,
-      'type': 10001,
-      params: ['sys.color.font_primary'],
-      'bundleName': '__harDefaultBundleName__',
-      'moduleName': '__harDefaultModuleName__',
-    }, this, 'fontColorWithTheme');
-    this.theme = new CustomThemeImpl({});
-    this.setInitiallyProvidedValue(g10);
-    this.finalizeConstruction();
-  }
-  setInitiallyProvidedValue(e10) {
-    if (e10.controller !== undefined) {
-      this.controller = e10.controller;
-    }
-    if (e10.primaryTitle !== undefined) {
-      this.primaryTitle = e10.primaryTitle;
-    }
-    if (e10.secondaryTitle !== undefined) {
-      this.secondaryTitle = e10.secondaryTitle;
-    }
-    if (e10.content !== undefined) {
-      this.content = e10.content;
-    }
-    if (e10.primaryButton !== undefined) {
-      this.primaryButton = e10.primaryButton;
-    }
-    if (e10.secondaryButton !== undefined) {
-      this.secondaryButton = e10.secondaryButton;
-    }
-    if (e10.buttons !== undefined) {
-      this.buttons = e10.buttons;
-    }
-    if (e10.textAlign !== undefined) {
-      this.textAlign = e10.textAlign;
-    }
-    if (e10.contentScroller !== undefined) {
-      this.contentScroller = e10.contentScroller;
-    }
-    if (e10.fontColorWithTheme !== undefined) {
-      this.fontColorWithTheme = e10.fontColorWithTheme;
-    }
-    if (e10.theme !== undefined) {
-      this.theme = e10.theme;
-    }
-  }
-  updateStateVars(d10) {
-  }
-  purgeVariableDependenciesOnElmtId(c10) {
-    this.__textAlign.purgeDependencyOnElmtId(c10);
-    this.__fontColorWithTheme.purgeDependencyOnElmtId(c10);
-  }
-  aboutToBeDeleted() {
-    this.__textAlign.aboutToBeDeleted();
-    this.__fontColorWithTheme.aboutToBeDeleted();
-    SubscriberManager.Get().delete(this.id__());
-    this.aboutToBeDeletedInternal();
-  }
-  setController(b10) {
-    this.controller = b10;
-  }
-  get textAlign() {
-    return this.__textAlign.get();
-  }
-  set textAlign(a10) {
-    this.__textAlign.set(a10);
-  }
-  get fontColorWithTheme() {
-    return this.__fontColorWithTheme.get();
-  }
-  set fontColorWithTheme(z9) {
-    this.__fontColorWithTheme.set(z9);
-  }
-  initialRender() {
-    {
-      this.observeComponentCreation2((t9, u9) => {
-        if (u9) {
-          let v9 = new CustomDialogComponent(this, {
-            primaryTitle: this.primaryTitle,
-            secondaryTitle: this.secondaryTitle,
-            controller: this.controller,
-            contentBuilder: () => {
-              this.AlertDialogContentBuilder();
-            },
-            buttons: this.buttons,
-            theme: this.theme,
-          }, undefined, t9, () => {
-          }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 565, col: 5 });
-          ViewPU.create(v9);
-          let w9 = () => {
-            return {
-              primaryTitle: this.primaryTitle,
-              secondaryTitle: this.secondaryTitle,
-              controller: this.controller,
-              contentBuilder: () => {
-                this.AlertDialogContentBuilder();
-              },
-              buttons: this.buttons,
-              theme: this.theme,
-            };
-          };
-          v9.paramsGenerator_ = w9;
+    constructor(n10, o10, p10, q10 = -1, r10 = undefined, s10) {
+        super(n10, p10, q10, s10);
+        if (typeof r10 === 'function') {
+            this.paramsGenerator_ = r10;
         }
-        else {
-          this.updateStateVarsOfChildByElmtId(t9, {});
+        this.controller = undefined;
+        this.primaryTitle = undefined;
+        this.secondaryTitle = undefined;
+        this.content = '';
+        this.primaryButton = null;
+        this.secondaryButton = null;
+        this.buttons = undefined;
+        this.__textAlign = new ObservedPropertySimplePU(TextAlign.Start, this, 'textAlign');
+        this.contentScroller = new Scroller();
+        this.__fontColorWithTheme = new ObservedPropertyObjectPU({
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.font_primary'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'fontColorWithTheme');
+        this.theme = new CustomThemeImpl({});
+        this.setInitiallyProvidedValue(o10);
+        this.finalizeConstruction();
+    }
+
+    setInitiallyProvidedValue(m10) {
+        if (m10.controller !== undefined) {
+            this.controller = m10.controller;
         }
-      }, { name: 'CustomDialogComponent' });
-    }
-  }
-  AlertDialogContentBuilder(d9 = null) {
-    this.observeComponentCreation2((q9, r9) => {
-      Column.create();
-      Column.margin({ right: `${this.getMargin()}vp`, });
-    }, Column);
-    this.observeComponentCreation2((o9, p9) => {
-      Scroll.create(this.contentScroller);
-      Scroll.width('100%');
-    }, Scroll);
-    this.observeComponentCreation2((h9, i9) => {
-      Text.create(this.content);
-      Text.focusable(true);
-      Text.defaultFocus(!(this.primaryButton || this.secondaryButton));
-      Text.fontSize({
-        'id': -1,
-        'type': 10002,
-        params: ['sys.float.Body_L'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__',
-      });
-      Text.fontWeight(this.getFontWeight());
-      Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
-      Text.margin({
-        right: {
-          'id': -1,
-          'type': 10002,
-          params: ['sys.float.padding_level8'],
-          'bundleName': '__harDefaultBundleName__',
-          'moduleName': '__harDefaultModuleName__',
-        },
-      });
-      Text.width(`calc(100% - ${getNumberByResource('padding_level8')}vp)`);
-      Text.textAlign(this.textAlign);
-      Text.onAreaChange((m9, n9) => {
-        this.getTextAlign(Number(n9.width));
-      });
-      Text.onKeyEvent((l9) => {
-        if (l9) {
-          resolveKeyEvent(l9, this.contentScroller);
+        if (m10.primaryTitle !== undefined) {
+            this.primaryTitle = m10.primaryTitle;
         }
-      });
-    }, Text);
-    Text.pop();
-    Scroll.pop();
-    Column.pop();
-  }
-  aboutToAppear() {
-    this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
-      this.theme.colors.fontPrimary : {
-        'id': -1,
-        'type': 10001,
-        params: ['sys.color.font_primary'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__',
-      };
-    this.initButtons();
-  }
-  getTextAlign(a9) {
-    let b9 = measure.measureTextSize({
-      textContent: this.content,
-      fontSize: {
-        'id': -1,
-        'type': 10002,
-        params: ['sys.float.Body_L'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__',
-      },
-      constraintWidth: a9,
-    });
-    let c9 = measure.measureTextSize({
-      textContent: this.content,
-      fontSize: {
-        'id': -1,
-        'type': 10002,
-        params: ['sys.float.Body_L'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__',
-      },
-    });
-    if (this.getTextHeight(b9) <= this.getTextHeight(c9)) {
-      this.textAlign = TextAlign.Center;
-    }
-  }
-  getTextHeight(z8) {
-    if (z8 && z8.height !== null && z8.height !== undefined) {
-      return Number(z8.height);
-    }
-    return 0;
-  }
-  initButtons() {
-    if (!this.primaryButton && !this.secondaryButton) {
-      return;
-    }
-    this.buttons = [];
-    if (this.primaryButton) {
-      this.buttons.push(this.primaryButton);
-    }
-    if (this.secondaryButton) {
-      this.buttons.push(this.secondaryButton);
-    }
-  }
-  getMargin() {
-    return 0 - getNumberByResource('padding_level8');
-  }
-  getFontWeight() {
-    if (this.primaryTitle || this.secondaryTitle) {
-      return FontWeight.Regular;
-    }
-    return FontWeight.Medium;
-  }
-  rerender() {
-    this.updateDirtyElements();
-  }
-}
-export class CustomContentDialog extends ViewPU {
-  constructor(t8, u8, v8, w8 = -1, x8 = undefined, y8) {
-    super(t8, v8, w8, y8);
-    if (typeof x8 === 'function') {
-      this.paramsGenerator_ = x8;
-    }
-    this.controller = undefined;
-    this.primaryTitle = undefined;
-    this.secondaryTitle = undefined;
-    this.contentBuilder = undefined;
-    this.contentAreaPadding = undefined;
-    this.buttons = undefined;
-    this.theme = new CustomThemeImpl({});
-    this.setInitiallyProvidedValue(u8);
-    this.finalizeConstruction();
-  }
-  setInitiallyProvidedValue(s8) {
-    if (s8.controller !== undefined) {
-      this.controller = s8.controller;
-    }
-    if (s8.primaryTitle !== undefined) {
-      this.primaryTitle = s8.primaryTitle;
-    }
-    if (s8.secondaryTitle !== undefined) {
-      this.secondaryTitle = s8.secondaryTitle;
-    }
-    if (s8.contentBuilder !== undefined) {
-      this.contentBuilder = s8.contentBuilder;
-    }
-    if (s8.contentAreaPadding !== undefined) {
-      this.contentAreaPadding = s8.contentAreaPadding;
-    }
-    if (s8.buttons !== undefined) {
-      this.buttons = s8.buttons;
-    }
-    if (s8.theme !== undefined) {
-      this.theme = s8.theme;
-    }
-  }
-  updateStateVars(r8) {
-  }
-  purgeVariableDependenciesOnElmtId(q8) {
-  }
-  aboutToBeDeleted() {
-    SubscriberManager.Get().delete(this.id__());
-    this.aboutToBeDeletedInternal();
-  }
-  setController(p8) {
-    this.controller = p8;
-  }
-  initialRender() {
-    {
-      this.observeComponentCreation2((j8, k8) => {
-        if (k8) {
-          let l8 = new CustomDialogContentComponent(this, {
-            controller: this.controller,
-            primaryTitle: this.primaryTitle,
-            secondaryTitle: this.secondaryTitle,
-            contentBuilder: () => {
-              this.contentBuilder();
-            },
-            contentAreaPadding: this.contentAreaPadding,
-            buttons: this.buttons,
-            theme: this.theme,
-          }, undefined, j8, () => {
-          }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 669, col: 5 });
-          ViewPU.create(l8);
-          let m8 = () => {
-            return {
-              controller: this.controller,
-              primaryTitle: this.primaryTitle,
-              secondaryTitle: this.secondaryTitle,
-              contentBuilder: () => {
-                this.contentBuilder();
-              },
-              contentAreaPadding: this.contentAreaPadding,
-              buttons: this.buttons,
-              theme: this.theme,
-            };
-          };
-          l8.paramsGenerator_ = m8;
+        if (m10.secondaryTitle !== undefined) {
+            this.secondaryTitle = m10.secondaryTitle;
         }
-        else {
-          this.updateStateVarsOfChildByElmtId(j8, {});
+        if (m10.content !== undefined) {
+            this.content = m10.content;
         }
-      }, { name: 'CustomDialogContentComponent' });
+        if (m10.primaryButton !== undefined) {
+            this.primaryButton = m10.primaryButton;
+        }
+        if (m10.secondaryButton !== undefined) {
+            this.secondaryButton = m10.secondaryButton;
+        }
+        if (m10.buttons !== undefined) {
+            this.buttons = m10.buttons;
+        }
+        if (m10.textAlign !== undefined) {
+            this.textAlign = m10.textAlign;
+        }
+        if (m10.contentScroller !== undefined) {
+            this.contentScroller = m10.contentScroller;
+        }
+        if (m10.fontColorWithTheme !== undefined) {
+            this.fontColorWithTheme = m10.fontColorWithTheme;
+        }
+        if (m10.theme !== undefined) {
+            this.theme = m10.theme;
+        }
     }
-  }
-  rerender() {
-    this.updateDirtyElements();
-  }
-}
-class CustomDialogContentComponent extends ViewPU {
-  constructor(c8, d8, e8, f8 = -1, g8 = undefined, h8) {
-    super(c8, e8, f8, h8);
-    if (typeof g8 === 'function') {
-      this.paramsGenerator_ = g8;
+
+    updateStateVars(l10) {
     }
-    this.controller = undefined;
-    this.primaryTitle = undefined;
-    this.secondaryTitle = undefined;
-    this.contentBuilder = this.defaultContentBuilder;
-    this.buttons = undefined;
-    this.contentAreaPadding = undefined;
-    this.keyIndex = 0;
-    this.__primaryTitleFontColorWithTheme = new ObservedPropertyObjectPU({
-      'id': -1,
-      'type': 10001,
-      params: ['sys.color.font_primary'],
-      'bundleName': '__harDefaultBundleName__',
-      'moduleName': '__harDefaultModuleName__',
-    }, this, 'primaryTitleFontColorWithTheme');
-    this.__secondaryTitleFontColorWithTheme = new ObservedPropertyObjectPU({
-      'id': -1,
-      'type': 10001,
-      params: ['sys.color.font_secondary'],
-      'bundleName': '__harDefaultBundleName__',
-      'moduleName': '__harDefaultModuleName__',
-    }, this, 'secondaryTitleFontColorWithTheme');
-    this.__buttonFontColorWithTheme = new ObservedPropertyObjectPU('', this, 'buttonFontColorWithTheme');
-    this.__errorButtonFontColorWithTheme = new ObservedPropertyObjectPU('', this, 'errorButtonFontColorWithTheme');
-    this.theme = new CustomThemeImpl({});
-    this.titleHeight = 0;
-    this.__contentMaxHeight = new ObservedPropertySimplePU('', this, 'contentMaxHeight');
-    this.setInitiallyProvidedValue(d8);
-    this.finalizeConstruction();
-  }
-  setInitiallyProvidedValue(b8) {
-    if (b8.controller !== undefined) {
-      this.controller = b8.controller;
+
+    purgeVariableDependenciesOnElmtId(k10) {
+        this.__textAlign.purgeDependencyOnElmtId(k10);
+        this.__fontColorWithTheme.purgeDependencyOnElmtId(k10);
     }
-    if (b8.primaryTitle !== undefined) {
-      this.primaryTitle = b8.primaryTitle;
+
+    aboutToBeDeleted() {
+        this.__textAlign.aboutToBeDeleted();
+        this.__fontColorWithTheme.aboutToBeDeleted();
+        SubscriberManager.Get().delete(this.id__());
+        this.aboutToBeDeletedInternal();
     }
-    if (b8.secondaryTitle !== undefined) {
-      this.secondaryTitle = b8.secondaryTitle;
+
+    setController(j10) {
+        this.controller = j10;
     }
-    if (b8.contentBuilder !== undefined) {
-      this.contentBuilder = b8.contentBuilder;
+
+    get textAlign() {
+        return this.__textAlign.get();
     }
-    if (b8.buttons !== undefined) {
-      this.buttons = b8.buttons;
+
+    set textAlign(i10) {
+        this.__textAlign.set(i10);
     }
-    if (b8.contentAreaPadding !== undefined) {
-      this.contentAreaPadding = b8.contentAreaPadding;
+
+    get fontColorWithTheme() {
+        return this.__fontColorWithTheme.get();
     }
-    if (b8.keyIndex !== undefined) {
-      this.keyIndex = b8.keyIndex;
+
+    set fontColorWithTheme(h10) {
+        this.__fontColorWithTheme.set(h10);
     }
-    if (b8.primaryTitleFontColorWithTheme !== undefined) {
-      this.primaryTitleFontColorWithTheme = b8.primaryTitleFontColorWithTheme;
+
+    initialRender() {
+        {
+            this.observeComponentCreation2((b10, c10) => {
+                if (c10) {
+                    let d10 = new CustomDialogComponent(this, {
+                        primaryTitle: this.primaryTitle,
+                        secondaryTitle: this.secondaryTitle,
+                        controller: this.controller,
+                        contentBuilder: () => {
+                            this.AlertDialogContentBuilder();
+                        },
+                        buttons: this.buttons,
+                        theme: this.theme,
+                    }, undefined, b10, () => {
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 590, col: 5 });
+                    ViewPU.create(d10);
+                    let e10 = () => {
+                        return {
+                            primaryTitle: this.primaryTitle,
+                            secondaryTitle: this.secondaryTitle,
+                            controller: this.controller,
+                            contentBuilder: () => {
+                                this.AlertDialogContentBuilder();
+                            },
+                            buttons: this.buttons,
+                            theme: this.theme
+                        };
+                    };
+                    d10.paramsGenerator_ = e10;
+                } else {
+                    this.updateStateVarsOfChildByElmtId(b10, {});
+                }
+            }, { name: 'CustomDialogComponent' });
+        }
     }
-    if (b8.secondaryTitleFontColorWithTheme !== undefined) {
-      this.secondaryTitleFontColorWithTheme = b8.secondaryTitleFontColorWithTheme;
-    }
-    if (b8.buttonFontColorWithTheme !== undefined) {
-      this.buttonFontColorWithTheme = b8.buttonFontColorWithTheme;
-    }
-    if (b8.errorButtonFontColorWithTheme !== undefined) {
-      this.errorButtonFontColorWithTheme = b8.errorButtonFontColorWithTheme;
-    }
-    if (b8.theme !== undefined) {
-      this.theme = b8.theme;
-    }
-    if (b8.titleHeight !== undefined) {
-      this.titleHeight = b8.titleHeight;
-    }
-    if (b8.contentMaxHeight !== undefined) {
-      this.contentMaxHeight = b8.contentMaxHeight;
-    }
-  }
-  updateStateVars(a8) {
-  }
-  purgeVariableDependenciesOnElmtId(z7) {
-    this.__primaryTitleFontColorWithTheme.purgeDependencyOnElmtId(z7);
-    this.__secondaryTitleFontColorWithTheme.purgeDependencyOnElmtId(z7);
-    this.__buttonFontColorWithTheme.purgeDependencyOnElmtId(z7);
-    this.__errorButtonFontColorWithTheme.purgeDependencyOnElmtId(z7);
-    this.__contentMaxHeight.purgeDependencyOnElmtId(z7);
-  }
-  aboutToBeDeleted() {
-    this.__primaryTitleFontColorWithTheme.aboutToBeDeleted();
-    this.__secondaryTitleFontColorWithTheme.aboutToBeDeleted();
-    this.__buttonFontColorWithTheme.aboutToBeDeleted();
-    this.__errorButtonFontColorWithTheme.aboutToBeDeleted();
-    this.__contentMaxHeight.aboutToBeDeleted();
-    SubscriberManager.Get().delete(this.id__());
-    this.aboutToBeDeletedInternal();
-  }
-  get primaryTitleFontColorWithTheme() {
-    return this.__primaryTitleFontColorWithTheme.get();
-  }
-  set primaryTitleFontColorWithTheme(y7) {
-    this.__primaryTitleFontColorWithTheme.set(y7);
-  }
-  get secondaryTitleFontColorWithTheme() {
-    return this.__secondaryTitleFontColorWithTheme.get();
-  }
-  set secondaryTitleFontColorWithTheme(x7) {
-    this.__secondaryTitleFontColorWithTheme.set(x7);
-  }
-  get buttonFontColorWithTheme() {
-    return this.__buttonFontColorWithTheme.get();
-  }
-  set buttonFontColorWithTheme(w7) {
-    this.__buttonFontColorWithTheme.set(w7);
-  }
-  get errorButtonFontColorWithTheme() {
-    return this.__errorButtonFontColorWithTheme.get();
-  }
-  set errorButtonFontColorWithTheme(v7) {
-    this.__errorButtonFontColorWithTheme.set(v7);
-  }
-  defaultContentBuilder(u7 = null) {
-  }
-  get contentMaxHeight() {
-    return this.__contentMaxHeight.get();
-  }
-  set contentMaxHeight(t7) {
-    this.__contentMaxHeight.set(t7);
-  }
-  initialRender() {
-    this.observeComponentCreation2((r7, s7) => {
-      WithTheme.create({ theme: this.theme });
-    }, WithTheme);
-    this.observeComponentCreation2((p7, q7) => {
-      Column.create();
-      Column.width('100%');
-    }, Column);
-    this.buildTitles.bind(this)();
-    this.observeComponentCreation2((n7, o7) => {
-      Column.create();
-      Column.padding(this.getContentPadding());
-      Column.constraintSize({ maxHeight: this.contentMaxHeight });
-    }, Column);
-    this.contentBuilder.bind(this)();
-    Column.pop();
-    this.buildButtons.bind(this)();
-    Column.pop();
-    WithTheme.pop();
-  }
-  buildTitles(g6 = null) {
-    this.observeComponentCreation2((f7, g7) => {
-      Column.create();
-      Column.constraintSize({
-        minHeight: this.getTitleAreaMinHeight(),
-      });
-      Column.justifyContent(FlexAlign.Center);
-      Column.width('100%');
-      Column.padding(this.getTitleAreaPadding());
-      Column.onAreaChange((i7, j7) => {
-        this.titleHeight = Number(j7.height);
-        this.contentMaxHeight = `calc(100% - ${this.titleHeight}vp - ${this.getButtonsHeight()}vp)`;
-      });
-    }, Column);
-    this.observeComponentCreation2((d7, e7) => {
-      Row.create();
-      Row.width('100%');
-    }, Row);
-    this.observeComponentCreation2((b7, c7) => {
-      Text.create(this.primaryTitle);
-      Text.fontWeight(FontWeight.Bold);
-      Text.fontColor(ObservedObject.GetRawObject(this.primaryTitleFontColorWithTheme));
-      Text.textAlign(this.getTitleTextAlign());
-      Text.maxFontSize({
-        'id': -1,
-        'type': 10002,
-        params: ['sys.float.Title_S'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__',
-      });
-      Text.minFontSize({
-        'id': -1,
-        'type': 10002,
-        params: ['sys.float.Body_L'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__',
-      });
-      Text.maxLines(TITLE_MAX_LINES);
-      Text.heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST);
-      Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-      Text.width('100%');
-    }, Text);
-    Text.pop();
-    Row.pop();
-    this.observeComponentCreation2((r6, s6) => {
-      If.create();
-      if (this.primaryTitle && this.secondaryTitle) {
-        this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation2((z6, a7) => {
-            Row.create();
-          }, Row);
-          this.observeComponentCreation2((x6, y6) => {
-            Divider.create();
-            Divider.margin({
-              'id': -1,
-              'type': 10002,
-              params: ['sys.float.padding_level1'],
-              'bundleName': '__harDefaultBundleName__',
-              'moduleName': '__harDefaultModuleName__',
-            });
-            Divider.color(Color.Transparent);
-          }, Divider);
-          Row.pop();
-        });
-      }
-      else {
-        this.ifElseBranchUpdateFunction(1, () => {
-        });
-      }
-    }, If);
-    If.pop();
-    this.observeComponentCreation2((p6, q6) => {
-      Row.create();
-      Row.width('100%');
-    }, Row);
-    this.observeComponentCreation2((n6, o6) => {
-      Text.create(this.secondaryTitle);
-      Text.fontWeight(FontWeight.Regular);
-      Text.fontColor(ObservedObject.GetRawObject(this.secondaryTitleFontColorWithTheme));
-      Text.textAlign(this.getTitleTextAlign());
-      Text.maxFontSize({
-        'id': -1,
-        'type': 10002,
-        params: ['sys.float.Subtitle_S'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__',
-      });
-      Text.minFontSize({
-        'id': -1,
-        'type': 10002,
-        params: ['sys.float.Body_S'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__',
-      });
-      Text.maxLines(TITLE_MAX_LINES);
-      Text.heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST);
-      Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-      Text.width('100%');
-    }, Text);
-    Text.pop();
-    Row.pop();
-    Column.pop();
-  }
-  buildButtons(c6 = null) {
-    this.observeComponentCreation2((e6, f6) => {
-      Column.create();
-      Column.width('100%');
-      Column.padding(this.getOperationAreaPadding());
-    }, Column);
-    this.buildHorizontalAlignButtons.bind(this)();
-    this.buildVerticalAlignButtons.bind(this)();
-    Column.pop();
-  }
-  buildSingleButton(d5, e5 = null) {
-    this.observeComponentCreation2((g5, h5) => {
-      If.create();
-      if (this.isNewPropertiesHighPriority(d5)) {
-        this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation2((a6, b6) => {
-            Button.createWithLabel(d5.value);
-            __Button__setButtonProperties(d5, this.controller);
-            Button.role(d5.role ?? ButtonRole.NORMAL);
-            Button.key(`advanced_dialog_button_${this.keyIndex++}`);
-          }, Button);
-          Button.pop();
-        });
-      }
-      else if (d5.background !== undefined && d5.fontColor !== undefined) {
-        this.ifElseBranchUpdateFunction(1, () => {
-          this.observeComponentCreation2((w5, x5) => {
-            Button.createWithLabel(d5.value);
-            __Button__setButtonProperties(d5, this.controller);
-            Button.backgroundColor(d5.background);
-            Button.fontColor(d5.fontColor);
-            Button.key(`advanced_dialog_button_${this.keyIndex++}`);
-          }, Button);
-          Button.pop();
-        });
-      }
-      else if (d5.background !== undefined) {
-        this.ifElseBranchUpdateFunction(2, () => {
-          this.observeComponentCreation2((s5, t5) => {
-            Button.createWithLabel(d5.value);
-            __Button__setButtonProperties(d5, this.controller);
-            Button.backgroundColor(d5.background);
-            Button.key(`advanced_dialog_button_${this.keyIndex++}`);
-          }, Button);
-          Button.pop();
-        });
-      }
-      else if (d5.background !== undefined && d5.fontColor === undefined || '') {
-        this.ifElseBranchUpdateFunction(3, () => {
-          this.observeComponentCreation2((o5, p5) => {
-            Button.createWithLabel(d5.value);
-            __Button__setButtonProperties(d5, this.controller);
-            Button.backgroundColor(d5.background);
-            Button.fontColor(d5.role === ButtonRole.ERROR ?
-            this.errorButtonFontColorWithTheme : this.buttonFontColorWithTheme);
-            Button.key(`advanced_dialog_button_${this.keyIndex++}`);
-          }, Button);
-          Button.pop();
-        });
-      }
-      else {
-        this.ifElseBranchUpdateFunction(4, () => {
-          this.observeComponentCreation2((k5, l5) => {
-            Button.createWithLabel(d5.value);
-            __Button__setButtonProperties(d5, this.controller);
-            Button.fontColor(d5.fontColor);
-            Button.key(`advanced_dialog_button_${this.keyIndex++}`);
-          }, Button);
-          Button.pop();
-        });
-      }
-    }, If);
-    If.pop();
-  }
-  buildHorizontalAlignButtons(m4 = null) {
-    this.observeComponentCreation2((o4, p4) => {
-      If.create();
-      if (this.buttons && this.buttons.length > 0 && this.buttons.length <= HORIZON_BUTTON_MAX_COUNT) {
-        this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation2((b5, c5) => {
-            Row.create();
-          }, Row);
-          this.buildSingleButton.bind(this)(this.buttons[0]);
-          this.observeComponentCreation2((u4, v4) => {
-            If.create();
-            if (this.buttons.length === HORIZON_BUTTON_MAX_COUNT) {
-              this.ifElseBranchUpdateFunction(0, () => {
-                this.observeComponentCreation2((z4, a5) => {
-                  Divider.create();
-                  Divider.width({
-                    'id': -1,
-                    'type': 10002,
-                    params: ['sys.float.alert_divider_width'],
-                    'bundleName': '__harDefaultBundleName__',
-                    'moduleName': '__harDefaultModuleName__',
-                  });
-                  Divider.height({
-                    'id': -1,
-                    'type': 10002,
-                    params: ['sys.float.alert_divider_height'],
-                    'bundleName': '__harDefaultBundleName__',
-                    'moduleName': '__harDefaultModuleName__',
-                  });
-                  Divider.color(this.getDividerColor());
-                  Divider.vertical(true);
-                  Divider.margin({
-                    left: {
-                      'id': -1,
-                      'type': 10002,
-                      params: ['sys.float.alert_button_horizontal_space'],
-                      'bundleName': '__harDefaultBundleName__',
-                      'moduleName': '__harDefaultModuleName__',
-                    },
-                    right: {
-                      'id': -1,
-                      'type': 10002,
-                      params: ['sys.float.alert_button_horizontal_space'],
-                      'bundleName': '__harDefaultBundleName__',
-                      'moduleName': '__harDefaultModuleName__',
-                    },
-                  });
-                }, Divider);
-                this.buildSingleButton.bind(this)(this.buttons[HORIZON_BUTTON_MAX_COUNT - 1]);
-              });
-            }
-            else {
-              this.ifElseBranchUpdateFunction(1, () => {
-              });
-            }
-          }, If);
-          If.pop();
-          Row.pop();
-        });
-      }
-      else {
-        this.ifElseBranchUpdateFunction(1, () => {
-        });
-      }
-    }, If);
-    If.pop();
-  }
-  buildVerticalAlignButtons(t3 = null) {
-    this.observeComponentCreation2((v3, w3) => {
-      If.create();
-      if (this.buttons && this.isVerticalAlignButton()) {
-        this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation2((k4, l4) => {
+
+    AlertDialogContentBuilder(l9 = null) {
+        this.observeComponentCreation2((y9, z9) => {
             Column.create();
-          }, Column);
-          this.observeComponentCreation2((b4, c4) => {
-            ForEach.create();
-            const d4 = (h4, i4) => {
-              const j4 = h4;
-              this.buildButtonWithDivider.bind(this)(i4);
-            };
-            this.forEachUpdateFunction(b4, this.buttons.slice(0, VERTICAL_BUTTON_MAX_COUNT), d4,
-              (g4) => g4.value.toString(), true, false);
-          }, ForEach);
-          ForEach.pop();
-          Column.pop();
-        });
-      }
-      else {
-        this.ifElseBranchUpdateFunction(1, () => {
-        });
-      }
-    }, If);
-    If.pop();
-  }
-  buildButtonWithDivider(b3, c3 = null) {
-    this.observeComponentCreation2((e3, f3) => {
-      If.create();
-      if (this.buttons && this.buttons[b3]) {
-        this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation2((r3, s3) => {
-            Row.create();
-          }, Row);
-          this.buildSingleButton.bind(this)(this.buttons[b3]);
-          Row.pop();
-          this.observeComponentCreation2((k3, l3) => {
-            If.create();
-            if (b3 < Math.min(this.buttons.length, VERTICAL_BUTTON_MAX_COUNT) - 1) {
-              this.ifElseBranchUpdateFunction(0, () => {
-                this.observeComponentCreation2((p3, q3) => {
-                  Row.create();
-                  Row.height({
+            Column.margin({ right: `${this.getMargin()}vp`, });
+        }, Column);
+        this.observeComponentCreation2((w9, x9) => {
+            Scroll.create(this.contentScroller);
+            Scroll.width('100%');
+        }, Scroll);
+        this.observeComponentCreation2((p9, q9) => {
+            Text.create(this.content);
+            Text.focusable(true);
+            Text.defaultFocus(!(this.primaryButton || this.secondaryButton));
+            Text.fontSize({
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.Body_L'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            });
+            Text.fontWeight(this.getFontWeight());
+            Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
+            Text.margin({
+                right: {
                     'id': -1,
                     'type': 10002,
-                    params: ['sys.float.alert_button_vertical_space'],
+                    params: ['sys.float.padding_level8'],
                     'bundleName': '__harDefaultBundleName__',
-                    'moduleName': '__harDefaultModuleName__',
-                  });
-                }, Row);
-                Row.pop();
-              });
-            }
-            else {
-              this.ifElseBranchUpdateFunction(1, () => {
-              });
-            }
-          }, If);
-          If.pop();
+                    'moduleName': '__harDefaultModuleName__'
+                },
+            });
+            Text.width(`calc(100% - ${getNumberByResource('padding_level8')}vp)`);
+            Text.textAlign(this.textAlign);
+            Text.onAreaChange((u9, v9) => {
+                this.getTextAlign(Number(v9.width));
+            });
+            Text.onKeyEvent((t9) => {
+                if (t9) {
+                    resolveKeyEvent(t9, this.contentScroller);
+                }
+            });
+        }, Text);
+        Text.pop();
+        Scroll.pop();
+        Column.pop();
+    }
+
+    aboutToAppear() {
+        this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
+        this.theme.colors.fontPrimary : {
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.font_primary'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            };
+        this.initButtons();
+    }
+
+    getTextAlign(i9) {
+        let j9 = measure.measureTextSize({
+            textContent: this.content,
+            fontSize: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.Body_L'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            },
+            constraintWidth: i9,
         });
-      }
-      else {
-        this.ifElseBranchUpdateFunction(1, () => {
+        let k9 = measure.measureTextSize({
+            textContent: this.content,
+            fontSize: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.Body_L'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            },
         });
-      }
-    }, If);
-    If.pop();
-  }
-  aboutToAppear() {
-    if (this.primaryTitle) {
-      this.titleHeight = getNumberByResource('alert_title_primary_height');
+        if (this.getTextHeight(j9) <= this.getTextHeight(k9)) {
+            this.textAlign = TextAlign.Center;
+        }
     }
-    if (this.secondaryTitle) {
-      this.titleHeight = getNumberByResource('alert_title_secondary_height');
+
+    getTextHeight(h9) {
+        if (h9 && h9.height !== null && h9.height !== undefined) {
+            return Number(h9.height);
+        }
+        return 0;
     }
-    this.contentMaxHeight = `calc(100% - ${this.titleHeight}vp - ${this.getButtonsHeight()}vp)`;
-    this.primaryTitleFontColorWithTheme = this.theme?.colors?.fontPrimary ?
-      this.theme.colors.fontPrimary : {
-        'id': -1,
-        'type': 10001,
-        params: ['sys.color.font_primary'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__',
-      };
-    this.secondaryTitleFontColorWithTheme = this.theme?.colors?.fontSecondary ?
-      this.theme.colors.fontSecondary : {
-        'id': -1,
-        'type': 10001,
-        params: ['sys.color.font_secondary'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__',
-      };
-    this.buttonFontColorWithTheme = this.theme?.colors?.fontEmphasize ?
-      this.theme.colors.fontEmphasize : '';
-    this.errorButtonFontColorWithTheme = this.theme?.colors?.warning ?
-      this.theme.colors.warning : '';
-  }
-  getDividerColor() {
-    if (!this.buttons || this.buttons.length === 0 || !getNumberByResource('dialog_divider_show')) {
-      return Color.Transparent;
+
+    initButtons() {
+        if (!this.primaryButton && !this.secondaryButton) {
+            return;
+        }
+        this.buttons = [];
+        if (this.primaryButton) {
+            this.buttons.push(this.primaryButton);
+        }
+        if (this.secondaryButton) {
+            this.buttons.push(this.secondaryButton);
+        }
     }
-    if (this.buttons[0].buttonStyle === ButtonStyleMode.TEXTUAL || this.buttons[0].buttonStyle === undefined) {
-      if (this.buttons[HORIZON_BUTTON_MAX_COUNT - 1].buttonStyle === ButtonStyleMode.TEXTUAL ||
-        this.buttons[HORIZON_BUTTON_MAX_COUNT - 1].buttonStyle === undefined) {
-        return {
-          'id': -1,
-          'type': 10001,
-          params: ['sys.color.alert_divider_color'],
-          'bundleName': '__harDefaultBundleName__',
-          'moduleName': '__harDefaultModuleName__',
-        };
-      }
+
+    getMargin() {
+        return 0 - getNumberByResource('padding_level8');
     }
-    return Color.Transparent;
-  }
-  getButtonsHeight() {
-    if (!this.buttons || this.buttons.length === 0) {
-      return 0;
+
+    getFontWeight() {
+        if (this.primaryTitle || this.secondaryTitle) {
+            return FontWeight.Regular;
+        }
+        return FontWeight.Medium;
     }
-    let a3 = getNumberByResource('alert_button_top_padding');
-    if (this.buttons.length <= HORIZON_BUTTON_MAX_COUNT) {
-      a3 += BUTTON_DEFAULT_HEIGHT +
-      getNumberByResource('alert_button_bottom_padding_horizontal');
+
+    rerender() {
+        this.updateDirtyElements();
     }
-    else {
-      a3 += BUTTON_DEFAULT_HEIGHT * this.buttons.length +
-        (this.buttons.length - 1) * getNumberByResource('alert_button_vertical_space') +
-      getNumberByResource('alert_button_bottom_padding_vertical');
-    }
-    return a3;
-  }
-  getContentPadding() {
-    if (this.contentAreaPadding) {
-      return this.contentAreaPadding;
-    }
-    if ((this.primaryTitle || this.secondaryTitle) && this.buttons && this.buttons.length > 0) {
-      return {
-        top: 0,
-        right: {
-          'id': -1,
-          'type': 10002,
-          params: ['sys.float.alert_content_default_padding'],
-          'bundleName': '__harDefaultBundleName__',
-          'moduleName': '__harDefaultModuleName__',
-        },
-        bottom: 0,
-        left: {
-          'id': -1,
-          'type': 10002,
-          params: ['sys.float.alert_content_default_padding'],
-          'bundleName': '__harDefaultBundleName__',
-          'moduleName': '__harDefaultModuleName__',
-        },
-      };
-    }
-    else if (this.primaryTitle || this.secondaryTitle) {
-      return {
-        top: 0,
-        right: {
-          'id': -1,
-          'type': 10002,
-          params: ['sys.float.alert_content_default_padding'],
-          'bundleName': '__harDefaultBundleName__',
-          'moduleName': '__harDefaultModuleName__',
-        },
-        bottom: {
-          'id': -1,
-          'type': 10002,
-          params: ['sys.float.alert_content_default_padding'],
-          'bundleName': '__harDefaultBundleName__',
-          'moduleName': '__harDefaultModuleName__',
-        },
-        left: {
-          'id': -1,
-          'type': 10002,
-          params: ['sys.float.alert_content_default_padding'],
-          'bundleName': '__harDefaultBundleName__',
-          'moduleName': '__harDefaultModuleName__',
-        },
-      };
-    }
-    else if (this.buttons && this.buttons.length > 0) {
-      return {
-        top: {
-          'id': -1,
-          'type': 10002,
-          params: ['sys.float.alert_content_default_padding'],
-          'bundleName': '__harDefaultBundleName__',
-          'moduleName': '__harDefaultModuleName__',
-        },
-        right: {
-          'id': -1,
-          'type': 10002,
-          params: ['sys.float.alert_content_default_padding'],
-          'bundleName': '__harDefaultBundleName__',
-          'moduleName': '__harDefaultModuleName__',
-        },
-        bottom: 0,
-        left: {
-          'id': -1,
-          'type': 10002,
-          params: ['sys.float.alert_content_default_padding'],
-          'bundleName': '__harDefaultBundleName__',
-          'moduleName': '__harDefaultModuleName__',
-        },
-      };
-    }
-    else {
-      return {
-        top: {
-          'id': -1,
-          'type': 10002,
-          params: ['sys.float.alert_content_default_padding'],
-          'bundleName': '__harDefaultBundleName__',
-          'moduleName': '__harDefaultModuleName__',
-        },
-        right: {
-          'id': -1,
-          'type': 10002,
-          params: ['sys.float.alert_content_default_padding'],
-          'bundleName': '__harDefaultBundleName__',
-          'moduleName': '__harDefaultModuleName__',
-        },
-        bottom: {
-          'id': -1,
-          'type': 10002,
-          params: ['sys.float.alert_content_default_padding'],
-          'bundleName': '__harDefaultBundleName__',
-          'moduleName': '__harDefaultModuleName__',
-        },
-        left: {
-          'id': -1,
-          'type': 10002,
-          params: ['sys.float.alert_content_default_padding'],
-          'bundleName': '__harDefaultBundleName__',
-          'moduleName': '__harDefaultModuleName__',
-        },
-      };
-    }
-  }
-  getTitleAreaMinHeight() {
-    if (this.secondaryTitle) {
-      return {
-        'id': -1,
-        'type': 10002,
-        params: ['sys.float.alert_title_secondary_height'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__',
-      };
-    }
-    else if (this.primaryTitle) {
-      return {
-        'id': -1,
-        'type': 10002,
-        params: ['sys.float.alert_title_primary_height'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__',
-      };
-    }
-    else {
-      return 0;
-    }
-  }
-  getTitleAreaPadding() {
-    if (this.primaryTitle || this.secondaryTitle) {
-      return {
-        top: {
-          'id': -1,
-          'type': 10002,
-          params: ['sys.float.alert_title_padding_top'],
-          'bundleName': '__harDefaultBundleName__',
-          'moduleName': '__harDefaultModuleName__',
-        },
-        right: {
-          'id': -1,
-          'type': 10002,
-          params: ['sys.float.alert_title_padding_right'],
-          'bundleName': '__harDefaultBundleName__',
-          'moduleName': '__harDefaultModuleName__',
-        },
-        left: {
-          'id': -1,
-          'type': 10002,
-          params: ['sys.float.alert_title_padding_left'],
-          'bundleName': '__harDefaultBundleName__',
-          'moduleName': '__harDefaultModuleName__',
-        },
-        bottom: {
-          'id': -1,
-          'type': 10002,
-          params: ['sys.float.alert_title_padding_bottom'],
-          'bundleName': '__harDefaultBundleName__',
-          'moduleName': '__harDefaultModuleName__',
-        },
-      };
-    }
-    return {
-      top: 0,
-      right: {
-        'id': -1,
-        'type': 10002,
-        params: ['sys.float.alert_title_padding_right'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__',
-      },
-      left: {
-        'id': -1,
-        'type': 10002,
-        params: ['sys.float.alert_title_padding_left'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__',
-      },
-      bottom: 0,
-    };
-  }
-  isVerticalAlignButton() {
-    if (this.buttons) {
-      return this.buttons.length > HORIZON_BUTTON_MAX_COUNT;
-    }
-    return false;
-  }
-  getOperationAreaPadding() {
-    if (this.isVerticalAlignButton()) {
-      return {
-        top: {
-          'id': -1,
-          'type': 10002,
-          params: ['sys.float.alert_button_top_padding'],
-          'bundleName': '__harDefaultBundleName__',
-          'moduleName': '__harDefaultModuleName__',
-        },
-        right: {
-          'id': -1,
-          'type': 10002,
-          params: ['sys.float.alert_right_padding_vertical'],
-          'bundleName': '__harDefaultBundleName__',
-          'moduleName': '__harDefaultModuleName__',
-        },
-        left: {
-          'id': -1,
-          'type': 10002,
-          params: ['sys.float.alert_left_padding_vertical'],
-          'bundleName': '__harDefaultBundleName__',
-          'moduleName': '__harDefaultModuleName__',
-        },
-        bottom: {
-          'id': -1,
-          'type': 10002,
-          params: ['sys.float.alert_button_bottom_padding_vertical'],
-          'bundleName': '__harDefaultBundleName__',
-          'moduleName': '__harDefaultModuleName__',
-        },
-      };
-    }
-    return {
-      top: {
-        'id': -1,
-        'type': 10002,
-        params: ['sys.float.alert_button_top_padding'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__',
-      },
-      right: {
-        'id': -1,
-        'type': 10002,
-        params: ['sys.float.alert_right_padding_horizontal'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__',
-      },
-      left: {
-        'id': -1,
-        'type': 10002,
-        params: ['sys.float.alert_left_padding_horizontal'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__',
-      },
-      bottom: {
-        'id': -1,
-        'type': 10002,
-        params: ['sys.float.alert_button_bottom_padding_horizontal'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__',
-      },
-    };
-  }
-  isNewPropertiesHighPriority(z2) {
-    if (z2.role === ButtonRole.ERROR) {
-      return true;
-    }
-    if (z2.buttonStyle !== undefined &&
-      z2.buttonStyle !== getNumberByResource('alert_button_style')) {
-      return true;
-    }
-    if (z2.background === undefined && z2.fontColor === undefined) {
-      return true;
-    }
-    return false;
-  }
-  getTitleTextAlign() {
-    let y2 = getEnumNumberByResource('alert_title_alignment');
-    if (y2 === TextAlign.Start) {
-      return TextAlign.Start;
-    }
-    else if (y2 === TextAlign.Center) {
-      return TextAlign.Center;
-    }
-    else if (y2 === TextAlign.End) {
-      return TextAlign.End;
-    }
-    else if (y2 === TextAlign.JUSTIFY) {
-      return TextAlign.JUSTIFY;
-    }
-    else {
-      return TextAlign.Center;
-    }
-  }
-  rerender() {
-    this.updateDirtyElements();
-  }
 }
+
+export class CustomContentDialog extends ViewPU {
+    constructor(b9, c9, d9, e9 = -1, f9 = undefined, g9) {
+        super(b9, d9, e9, g9);
+        if (typeof f9 === 'function') {
+            this.paramsGenerator_ = f9;
+        }
+        this.controller = undefined;
+        this.primaryTitle = undefined;
+        this.secondaryTitle = undefined;
+        this.contentBuilder = undefined;
+        this.contentAreaPadding = undefined;
+        this.buttons = undefined;
+        this.theme = new CustomThemeImpl({});
+        this.setInitiallyProvidedValue(c9);
+        this.finalizeConstruction();
+    }
+
+    setInitiallyProvidedValue(a9) {
+        if (a9.controller !== undefined) {
+            this.controller = a9.controller;
+        }
+        if (a9.primaryTitle !== undefined) {
+            this.primaryTitle = a9.primaryTitle;
+        }
+        if (a9.secondaryTitle !== undefined) {
+            this.secondaryTitle = a9.secondaryTitle;
+        }
+        if (a9.contentBuilder !== undefined) {
+            this.contentBuilder = a9.contentBuilder;
+        }
+        if (a9.contentAreaPadding !== undefined) {
+            this.contentAreaPadding = a9.contentAreaPadding;
+        }
+        if (a9.buttons !== undefined) {
+            this.buttons = a9.buttons;
+        }
+        if (a9.theme !== undefined) {
+            this.theme = a9.theme;
+        }
+    }
+
+    updateStateVars(z8) {
+    }
+
+    purgeVariableDependenciesOnElmtId(y8) {
+    }
+
+    aboutToBeDeleted() {
+        SubscriberManager.Get().delete(this.id__());
+        this.aboutToBeDeletedInternal();
+    }
+
+    setController(x8) {
+        this.controller = x8;
+    }
+
+    initialRender() {
+        {
+            this.observeComponentCreation2((r8, s8) => {
+                if (s8) {
+                    let t8 = new CustomDialogContentComponent(this, {
+                        controller: this.controller,
+                        primaryTitle: this.primaryTitle,
+                        secondaryTitle: this.secondaryTitle,
+                        contentBuilder: () => {
+                            this.contentBuilder();
+                        },
+                        contentAreaPadding: this.contentAreaPadding,
+                        buttons: this.buttons,
+                        theme: this.theme,
+                    }, undefined, r8, () => {
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 694, col: 5 });
+                    ViewPU.create(t8);
+                    let u8 = () => {
+                        return {
+                            controller: this.controller,
+                            primaryTitle: this.primaryTitle,
+                            secondaryTitle: this.secondaryTitle,
+                            contentBuilder: () => {
+                                this.contentBuilder();
+                            },
+                            contentAreaPadding: this.contentAreaPadding,
+                            buttons: this.buttons,
+                            theme: this.theme
+                        };
+                    };
+                    t8.paramsGenerator_ = u8;
+                } else {
+                    this.updateStateVarsOfChildByElmtId(r8, {});
+                }
+            }, { name: 'CustomDialogContentComponent' });
+        }
+    }
+
+    rerender() {
+        this.updateDirtyElements();
+    }
+}
+
+class CustomDialogContentComponent extends ViewPU {
+    constructor(k8, l8, m8, n8 = -1, o8 = undefined, p8) {
+        super(k8, m8, n8, p8);
+        if (typeof o8 === 'function') {
+            this.paramsGenerator_ = o8;
+        }
+        this.controller = undefined;
+        this.primaryTitle = undefined;
+        this.secondaryTitle = undefined;
+        this.contentBuilder = this.defaultContentBuilder;
+        this.buttons = undefined;
+        this.contentAreaPadding = undefined;
+        this.keyIndex = 0;
+        this.__primaryTitleFontColorWithTheme = new ObservedPropertyObjectPU({
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.font_primary'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'primaryTitleFontColorWithTheme');
+        this.__secondaryTitleFontColorWithTheme = new ObservedPropertyObjectPU({
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.font_secondary'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'secondaryTitleFontColorWithTheme');
+        this.__buttonFontColorWithTheme = new ObservedPropertyObjectPU('', this, 'buttonFontColorWithTheme');
+        this.__errorButtonFontColorWithTheme = new ObservedPropertyObjectPU('', this, 'errorButtonFontColorWithTheme');
+        this.theme = new CustomThemeImpl({});
+        this.titleHeight = 0;
+        this.buttonHeight = 0;
+        this.__contentMaxHeight = new ObservedPropertySimplePU('', this, 'contentMaxHeight');
+        this.updateTitleHeight = undefined;
+        this.updateButtonHeight = undefined;
+        this.setInitiallyProvidedValue(l8);
+        this.finalizeConstruction();
+    }
+
+    setInitiallyProvidedValue(j8) {
+        if (j8.controller !== undefined) {
+            this.controller = j8.controller;
+        }
+        if (j8.primaryTitle !== undefined) {
+            this.primaryTitle = j8.primaryTitle;
+        }
+        if (j8.secondaryTitle !== undefined) {
+            this.secondaryTitle = j8.secondaryTitle;
+        }
+        if (j8.contentBuilder !== undefined) {
+            this.contentBuilder = j8.contentBuilder;
+        }
+        if (j8.buttons !== undefined) {
+            this.buttons = j8.buttons;
+        }
+        if (j8.contentAreaPadding !== undefined) {
+            this.contentAreaPadding = j8.contentAreaPadding;
+        }
+        if (j8.keyIndex !== undefined) {
+            this.keyIndex = j8.keyIndex;
+        }
+        if (j8.primaryTitleFontColorWithTheme !== undefined) {
+            this.primaryTitleFontColorWithTheme = j8.primaryTitleFontColorWithTheme;
+        }
+        if (j8.secondaryTitleFontColorWithTheme !== undefined) {
+            this.secondaryTitleFontColorWithTheme = j8.secondaryTitleFontColorWithTheme;
+        }
+        if (j8.buttonFontColorWithTheme !== undefined) {
+            this.buttonFontColorWithTheme = j8.buttonFontColorWithTheme;
+        }
+        if (j8.errorButtonFontColorWithTheme !== undefined) {
+            this.errorButtonFontColorWithTheme = j8.errorButtonFontColorWithTheme;
+        }
+        if (j8.theme !== undefined) {
+            this.theme = j8.theme;
+        }
+        if (j8.titleHeight !== undefined) {
+            this.titleHeight = j8.titleHeight;
+        }
+        if (j8.buttonHeight !== undefined) {
+            this.buttonHeight = j8.buttonHeight;
+        }
+        if (j8.contentMaxHeight !== undefined) {
+            this.contentMaxHeight = j8.contentMaxHeight;
+        }
+        if (j8.updateTitleHeight !== undefined) {
+            this.updateTitleHeight = j8.updateTitleHeight;
+        }
+        if (j8.updateButtonHeight !== undefined) {
+            this.updateButtonHeight = j8.updateButtonHeight;
+        }
+    }
+
+    updateStateVars(i8) {
+    }
+
+    purgeVariableDependenciesOnElmtId(h8) {
+        this.__primaryTitleFontColorWithTheme.purgeDependencyOnElmtId(h8);
+        this.__secondaryTitleFontColorWithTheme.purgeDependencyOnElmtId(h8);
+        this.__buttonFontColorWithTheme.purgeDependencyOnElmtId(h8);
+        this.__errorButtonFontColorWithTheme.purgeDependencyOnElmtId(h8);
+        this.__contentMaxHeight.purgeDependencyOnElmtId(h8);
+    }
+
+    aboutToBeDeleted() {
+        this.__primaryTitleFontColorWithTheme.aboutToBeDeleted();
+        this.__secondaryTitleFontColorWithTheme.aboutToBeDeleted();
+        this.__buttonFontColorWithTheme.aboutToBeDeleted();
+        this.__errorButtonFontColorWithTheme.aboutToBeDeleted();
+        this.__contentMaxHeight.aboutToBeDeleted();
+        SubscriberManager.Get().delete(this.id__());
+        this.aboutToBeDeletedInternal();
+    }
+
+    get primaryTitleFontColorWithTheme() {
+        return this.__primaryTitleFontColorWithTheme.get();
+    }
+
+    set primaryTitleFontColorWithTheme(g8) {
+        this.__primaryTitleFontColorWithTheme.set(g8);
+    }
+
+    get secondaryTitleFontColorWithTheme() {
+        return this.__secondaryTitleFontColorWithTheme.get();
+    }
+
+    set secondaryTitleFontColorWithTheme(f8) {
+        this.__secondaryTitleFontColorWithTheme.set(f8);
+    }
+
+    get buttonFontColorWithTheme() {
+        return this.__buttonFontColorWithTheme.get();
+    }
+
+    set buttonFontColorWithTheme(e8) {
+        this.__buttonFontColorWithTheme.set(e8);
+    }
+
+    get errorButtonFontColorWithTheme() {
+        return this.__errorButtonFontColorWithTheme.get();
+    }
+
+    set errorButtonFontColorWithTheme(d8) {
+        this.__errorButtonFontColorWithTheme.set(d8);
+    }
+
+    defaultContentBuilder(c8 = null) {
+    }
+
+    get contentMaxHeight() {
+        return this.__contentMaxHeight.get();
+    }
+
+    set contentMaxHeight(b8) {
+        this.__contentMaxHeight.set(b8);
+    }
+
+    initialRender() {
+        this.observeComponentCreation2((z7, a8) => {
+            WithTheme.create({ theme: this.theme });
+        }, WithTheme);
+        this.observeComponentCreation2((x7, y7) => {
+            Column.create();
+            Column.width('100%');
+        }, Column);
+        this.buildTitles.bind(this)(this);
+        this.observeComponentCreation2((v7, w7) => {
+            Column.create();
+            Column.padding(this.getContentPadding());
+            Column.constraintSize({ maxHeight: this.contentMaxHeight });
+        }, Column);
+        this.contentBuilder.bind(this)(this);
+        Column.pop();
+        this.buildButtons.bind(this)(this);
+        Column.pop();
+        WithTheme.pop();
+    }
+
+    buildTitles(o6 = null) {
+        this.observeComponentCreation2((n7, o7) => {
+            Column.create();
+            Column.constraintSize({
+                minHeight: this.getTitleAreaMinHeight(),
+            });
+            Column.justifyContent(FlexAlign.Center);
+            Column.width('100%');
+            Column.padding(this.getTitleAreaPadding());
+            Column.onAreaChange((q7, r7) => {
+                this.titleHeight = Number(r7.height);
+                if (this.updateTitleHeight) {
+                    this.updateTitleHeight(this.titleHeight);
+                }
+                this.contentMaxHeight = `calc(100% - ${this.titleHeight}vp - ${this.getButtonsHeight()}vp)`;
+            });
+        }, Column);
+        this.observeComponentCreation2((l7, m7) => {
+            Row.create();
+            Row.width('100%');
+        }, Row);
+        this.observeComponentCreation2((j7, k7) => {
+            Text.create(this.primaryTitle);
+            Text.fontWeight(FontWeight.Bold);
+            Text.fontColor(ObservedObject.GetRawObject(this.primaryTitleFontColorWithTheme));
+            Text.textAlign(this.getTitleTextAlign());
+            Text.maxFontSize({
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.Title_S'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            });
+            Text.minFontSize({
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.Body_L'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            });
+            Text.maxLines(TITLE_MAX_LINES);
+            Text.heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST);
+            Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+            Text.width('100%');
+        }, Text);
+        Text.pop();
+        Row.pop();
+        this.observeComponentCreation2((z6, a7) => {
+            If.create();
+            if (this.primaryTitle && this.secondaryTitle) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((h7, i7) => {
+                        Row.create();
+                    }, Row);
+                    this.observeComponentCreation2((f7, g7) => {
+                        Divider.create();
+                        Divider.margin({
+                            'id': -1,
+                            'type': 10002,
+                            params: ['sys.float.padding_level1'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
+                        });
+                        Divider.color(Color.Transparent);
+                    }, Divider);
+                    Row.pop();
+                });
+            } else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                });
+            }
+        }, If);
+        If.pop();
+        this.observeComponentCreation2((x6, y6) => {
+            Row.create();
+            Row.width('100%');
+        }, Row);
+        this.observeComponentCreation2((v6, w6) => {
+            Text.create(this.secondaryTitle);
+            Text.fontWeight(FontWeight.Regular);
+            Text.fontColor(ObservedObject.GetRawObject(this.secondaryTitleFontColorWithTheme));
+            Text.textAlign(this.getTitleTextAlign());
+            Text.maxFontSize({
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.Subtitle_S'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            });
+            Text.minFontSize({
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.Body_S'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            });
+            Text.maxLines(TITLE_MAX_LINES);
+            Text.heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST);
+            Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+            Text.width('100%');
+        }, Text);
+        Text.pop();
+        Row.pop();
+        Column.pop();
+    }
+
+    buildButtons(h6 = null) {
+        this.observeComponentCreation2((j6, k6) => {
+            Column.create();
+            Column.width('100%');
+            Column.onSizeChange((m6, n6) => {
+                this.buttonHeight = Number(n6.height);
+                if (this.updateButtonHeight) {
+                    this.updateButtonHeight(this.buttonHeight);
+                }
+            });
+            Column.padding(this.getOperationAreaPadding());
+        }, Column);
+        this.buildHorizontalAlignButtons.bind(this)(h6 ? h6 : this);
+        this.buildVerticalAlignButtons.bind(this)(h6 ? h6 : this);
+        Column.pop();
+    }
+
+    buildSingleButton(i5, j5 = null) {
+        this.observeComponentCreation2((l5, m5) => {
+            If.create();
+            if (this.isNewPropertiesHighPriority(i5)) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((f6, g6) => {
+                        Button.createWithLabel(i5.value);
+                        __Button__setButtonProperties(i5, this.controller);
+                        Button.role(i5.role ?? ButtonRole.NORMAL);
+                        Button.key(`advanced_dialog_button_${this.keyIndex++}`);
+                    }, Button);
+                    Button.pop();
+                });
+            } else if (i5.background !== undefined && i5.fontColor !== undefined) {
+                this.ifElseBranchUpdateFunction(1, () => {
+                    this.observeComponentCreation2((b6, c6) => {
+                        Button.createWithLabel(i5.value);
+                        __Button__setButtonProperties(i5, this.controller);
+                        Button.backgroundColor(i5.background);
+                        Button.fontColor(i5.fontColor);
+                        Button.key(`advanced_dialog_button_${this.keyIndex++}`);
+                    }, Button);
+                    Button.pop();
+                });
+            } else if (i5.background !== undefined) {
+                this.ifElseBranchUpdateFunction(2, () => {
+                    this.observeComponentCreation2((x5, y5) => {
+                        Button.createWithLabel(i5.value);
+                        __Button__setButtonProperties(i5, this.controller);
+                        Button.backgroundColor(i5.background);
+                        Button.key(`advanced_dialog_button_${this.keyIndex++}`);
+                    }, Button);
+                    Button.pop();
+                });
+            } else if (i5.background !== undefined && i5.fontColor === undefined || '') {
+                this.ifElseBranchUpdateFunction(3, () => {
+                    this.observeComponentCreation2((t5, u5) => {
+                        Button.createWithLabel(i5.value);
+                        __Button__setButtonProperties(i5, this.controller);
+                        Button.backgroundColor(i5.background);
+                        Button.fontColor(i5.role === ButtonRole.ERROR ?
+                        this.errorButtonFontColorWithTheme : this.buttonFontColorWithTheme);
+                        Button.key(`advanced_dialog_button_${this.keyIndex++}`);
+                    }, Button);
+                    Button.pop();
+                });
+            } else {
+                this.ifElseBranchUpdateFunction(4, () => {
+                    this.observeComponentCreation2((p5, q5) => {
+                        Button.createWithLabel(i5.value);
+                        __Button__setButtonProperties(i5, this.controller);
+                        Button.fontColor(i5.fontColor);
+                        Button.key(`advanced_dialog_button_${this.keyIndex++}`);
+                    }, Button);
+                    Button.pop();
+                });
+            }
+        }, If);
+        If.pop();
+    }
+
+    buildHorizontalAlignButtons(r4 = null) {
+        this.observeComponentCreation2((t4, u4) => {
+            If.create();
+            if (this.buttons && this.buttons.length > 0 && this.buttons.length <= HORIZON_BUTTON_MAX_COUNT) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((g5, h5) => {
+                        Row.create();
+                    }, Row);
+                    this.buildSingleButton.bind(this)(this.buttons[0], r4 ? r4 : this);
+                    this.observeComponentCreation2((z4, a5) => {
+                        If.create();
+                        if (this.buttons.length === HORIZON_BUTTON_MAX_COUNT) {
+                            this.ifElseBranchUpdateFunction(0, () => {
+                                this.observeComponentCreation2((e5, f5) => {
+                                    Divider.create();
+                                    Divider.width({
+                                        'id': -1,
+                                        'type': 10002,
+                                        params: ['sys.float.alert_divider_width'],
+                                        'bundleName': '__harDefaultBundleName__',
+                                        'moduleName': '__harDefaultModuleName__'
+                                    });
+                                    Divider.height({
+                                        'id': -1,
+                                        'type': 10002,
+                                        params: ['sys.float.alert_divider_height'],
+                                        'bundleName': '__harDefaultBundleName__',
+                                        'moduleName': '__harDefaultModuleName__'
+                                    });
+                                    Divider.color(this.getDividerColor());
+                                    Divider.vertical(true);
+                                    Divider.margin({
+                                        left: {
+                                            'id': -1,
+                                            'type': 10002,
+                                            params: ['sys.float.alert_button_horizontal_space'],
+                                            'bundleName': '__harDefaultBundleName__',
+                                            'moduleName': '__harDefaultModuleName__'
+                                        },
+                                        right: {
+                                            'id': -1,
+                                            'type': 10002,
+                                            params: ['sys.float.alert_button_horizontal_space'],
+                                            'bundleName': '__harDefaultBundleName__',
+                                            'moduleName': '__harDefaultModuleName__'
+                                        },
+                                    });
+                                }, Divider);
+                                this.buildSingleButton.bind(this)(this.buttons[HORIZON_BUTTON_MAX_COUNT - 1],
+                                    r4 ? r4 : this);
+                            });
+                        } else {
+                            this.ifElseBranchUpdateFunction(1, () => {
+                            });
+                        }
+                    }, If);
+                    If.pop();
+                    Row.pop();
+                });
+            } else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                });
+            }
+        }, If);
+        If.pop();
+    }
+
+    buildVerticalAlignButtons(y3 = null) {
+        this.observeComponentCreation2((a4, b4) => {
+            If.create();
+            if (this.buttons && this.isVerticalAlignButton()) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((p4, q4) => {
+                        Column.create();
+                    }, Column);
+                    this.observeComponentCreation2((g4, h4) => {
+                        ForEach.create();
+                        const i4 = (m4, n4) => {
+                            const o4 = m4;
+                            this.buildButtonWithDivider.bind(this)(n4, y3 ? y3 : this);
+                        };
+                        this.forEachUpdateFunction(g4, this.buttons.slice(0, VERTICAL_BUTTON_MAX_COUNT), i4,
+                            (l4) => l4.value.toString(), true, false);
+                    }, ForEach);
+                    ForEach.pop();
+                    Column.pop();
+                });
+            } else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                });
+            }
+        }, If);
+        If.pop();
+    }
+
+    buildButtonWithDivider(g3, h3 = null) {
+        this.observeComponentCreation2((j3, k3) => {
+            If.create();
+            if (this.buttons && this.buttons[g3]) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((w3, x3) => {
+                        Row.create();
+                    }, Row);
+                    this.buildSingleButton.bind(this)(this.buttons[g3], h3 ? h3 : this);
+                    Row.pop();
+                    this.observeComponentCreation2((p3, q3) => {
+                        If.create();
+                        if (g3 < Math.min(this.buttons.length, VERTICAL_BUTTON_MAX_COUNT) - 1) {
+                            this.ifElseBranchUpdateFunction(0, () => {
+                                this.observeComponentCreation2((u3, v3) => {
+                                    Row.create();
+                                    Row.height({
+                                        'id': -1,
+                                        'type': 10002,
+                                        params: ['sys.float.alert_button_vertical_space'],
+                                        'bundleName': '__harDefaultBundleName__',
+                                        'moduleName': '__harDefaultModuleName__'
+                                    });
+                                }, Row);
+                                Row.pop();
+                            });
+                        } else {
+                            this.ifElseBranchUpdateFunction(1, () => {
+                            });
+                        }
+                    }, If);
+                    If.pop();
+                });
+            } else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                });
+            }
+        }, If);
+        If.pop();
+    }
+
+    aboutToAppear() {
+        if (this.primaryTitle) {
+            this.titleHeight = getNumberByResource('alert_title_primary_height');
+        }
+        if (this.secondaryTitle) {
+            this.titleHeight = getNumberByResource('alert_title_secondary_height');
+        }
+        this.contentMaxHeight = `calc(100% - ${this.titleHeight}vp - ${this.getButtonsHeight()}vp)`;
+        if (this.updateButtonHeight) {
+            this.updateButtonHeight(this.buttonHeight);
+        }
+        this.primaryTitleFontColorWithTheme = this.theme?.colors?.fontPrimary ?
+        this.theme.colors.fontPrimary : {
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.font_primary'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            };
+        this.secondaryTitleFontColorWithTheme = this.theme?.colors?.fontSecondary ?
+        this.theme.colors.fontSecondary : {
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.font_secondary'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            };
+        this.buttonFontColorWithTheme = this.theme?.colors?.fontEmphasize ?
+        this.theme.colors.fontEmphasize : '';
+        this.errorButtonFontColorWithTheme = this.theme?.colors?.warning ?
+        this.theme.colors.warning : '';
+    }
+
+    getDividerColor() {
+        if (!this.buttons || this.buttons.length === 0 || !getNumberByResource('dialog_divider_show')) {
+            return Color.Transparent;
+        }
+        if (this.buttons[0].buttonStyle === ButtonStyleMode.TEXTUAL || this.buttons[0].buttonStyle === undefined) {
+            if (this.buttons[HORIZON_BUTTON_MAX_COUNT - 1].buttonStyle === ButtonStyleMode.TEXTUAL ||
+                this.buttons[HORIZON_BUTTON_MAX_COUNT - 1].buttonStyle === undefined) {
+                return {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.alert_divider_color'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                };
+            }
+        }
+        return Color.Transparent;
+    }
+
+    getButtonsHeight() {
+        if (!this.buttons || this.buttons.length === 0) {
+            return 0;
+        }
+        let f3 = getNumberByResource('alert_button_top_padding');
+        if (this.buttons.length <= HORIZON_BUTTON_MAX_COUNT) {
+            f3 += BUTTON_DEFAULT_HEIGHT +
+            getNumberByResource('alert_button_bottom_padding_horizontal');
+        } else {
+            f3 += BUTTON_DEFAULT_HEIGHT * this.buttons.length +
+                (this.buttons.length - 1) * getNumberByResource('alert_button_vertical_space') +
+            getNumberByResource('alert_button_bottom_padding_vertical');
+        }
+        this.buttonHeight = f3;
+        return f3;
+    }
+
+    getContentPadding() {
+        if (this.contentAreaPadding) {
+            return this.contentAreaPadding;
+        }
+        if ((this.primaryTitle || this.secondaryTitle) && this.buttons && this.buttons.length > 0) {
+            return {
+                top: 0,
+                right: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_content_default_padding'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                bottom: 0,
+                left: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_content_default_padding'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+            };
+        } else if (this.primaryTitle || this.secondaryTitle) {
+            return {
+                top: 0,
+                right: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_content_default_padding'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                bottom: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_content_default_padding'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                left: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_content_default_padding'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+            };
+        } else if (this.buttons && this.buttons.length > 0) {
+            return {
+                top: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_content_default_padding'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                right: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_content_default_padding'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                bottom: 0,
+                left: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_content_default_padding'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+            };
+        } else {
+            return {
+                top: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_content_default_padding'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                right: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_content_default_padding'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                bottom: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_content_default_padding'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                left: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_content_default_padding'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+            };
+        }
+    }
+
+    getTitleAreaMinHeight() {
+        if (this.secondaryTitle) {
+            return {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.alert_title_secondary_height'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            };
+        } else if (this.primaryTitle) {
+            return {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.alert_title_primary_height'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            };
+        } else {
+            return 0;
+        }
+    }
+
+    getTitleAreaPadding() {
+        if (this.primaryTitle || this.secondaryTitle) {
+            return {
+                top: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_title_padding_top'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                right: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_title_padding_right'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                left: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_title_padding_left'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                bottom: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_title_padding_bottom'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+            };
+        }
+        return {
+            top: 0,
+            right: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.alert_title_padding_right'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            },
+            left: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.alert_title_padding_left'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            },
+            bottom: 0,
+        };
+    }
+
+    isVerticalAlignButton() {
+        if (this.buttons) {
+            return this.buttons.length > HORIZON_BUTTON_MAX_COUNT;
+        }
+        return false;
+    }
+
+    getOperationAreaPadding() {
+        if (this.isVerticalAlignButton()) {
+            return {
+                top: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_button_top_padding'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                right: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_right_padding_vertical'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                left: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_left_padding_vertical'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                bottom: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_button_bottom_padding_vertical'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+            };
+        }
+        return {
+            top: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.alert_button_top_padding'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            },
+            right: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.alert_right_padding_horizontal'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            },
+            left: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.alert_left_padding_horizontal'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            },
+            bottom: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.alert_button_bottom_padding_horizontal'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            },
+        };
+    }
+
+    isNewPropertiesHighPriority(e3) {
+        if (e3.role === ButtonRole.ERROR) {
+            return true;
+        }
+        if (e3.buttonStyle !== undefined &&
+            e3.buttonStyle !== getNumberByResource('alert_button_style')) {
+            return true;
+        }
+        if (e3.background === undefined && e3.fontColor === undefined) {
+            return true;
+        }
+        return false;
+    }
+
+    getTitleTextAlign() {
+        let d3 = getEnumNumberByResource('alert_title_alignment');
+        if (d3 === TextAlign.Start) {
+            return TextAlign.Start;
+        } else if (d3 === TextAlign.Center) {
+            return TextAlign.Center;
+        } else if (d3 === TextAlign.End) {
+            return TextAlign.End;
+        } else if (d3 === TextAlign.JUSTIFY) {
+            return TextAlign.JUSTIFY;
+        } else {
+            return TextAlign.Center;
+        }
+    }
+
+    rerender() {
+        this.updateDirtyElements();
+    }
+}
+
 export class CustomDialogComponent extends ViewPU {
-  constructor(s2, t2, u2, v2 = -1, w2 = undefined, x2) {
-    super(s2, u2, v2, x2);
-    if (typeof w2 === 'function') {
-      this.paramsGenerator_ = w2;
+    constructor(x2, y2, z2, a3 = -1, b3 = undefined, c3) {
+        super(x2, z2, a3, c3);
+        if (typeof b3 === 'function') {
+            this.paramsGenerator_ = b3;
+        }
+        this.controller = undefined;
+        this.primaryTitle = undefined;
+        this.secondaryTitle = undefined;
+        this.contentBuilder = undefined;
+        this.buttons = undefined;
+        this.contentAreaPadding = undefined;
+        this.screenWidth = 0;
+        this.__columnModifier = new ObservedPropertyObjectPU(new ColumnModifier(), this, 'columnModifier');
+        this.isFirstInit = true;
+        this.theme = new CustomThemeImpl({});
+        this.targetSdk = VERSION_TWELVE;
+        this.dialogWidth = 0;
+        this.updateTitleHeight = undefined;
+        this.updateButtonHeight = undefined;
+        this.setInitiallyProvidedValue(y2);
+        this.finalizeConstruction();
     }
-    this.controller = undefined;
-    this.primaryTitle = undefined;
-    this.secondaryTitle = undefined;
-    this.contentBuilder = undefined;
-    this.buttons = undefined;
-    this.contentAreaPadding = undefined;
-    this.screenWidth = 0;
-    this.__columnModifier = new ObservedPropertyObjectPU(new ColumnModifier(), this, 'columnModifier');
-    this.isFirstInit = true;
-    this.theme = new CustomThemeImpl({});
-    this.setInitiallyProvidedValue(t2);
-    this.finalizeConstruction();
-  }
-  setInitiallyProvidedValue(r2) {
-    if (r2.controller !== undefined) {
-      this.controller = r2.controller;
+
+    setInitiallyProvidedValue(w2) {
+        if (w2.controller !== undefined) {
+            this.controller = w2.controller;
+        }
+        if (w2.primaryTitle !== undefined) {
+            this.primaryTitle = w2.primaryTitle;
+        }
+        if (w2.secondaryTitle !== undefined) {
+            this.secondaryTitle = w2.secondaryTitle;
+        }
+        if (w2.contentBuilder !== undefined) {
+            this.contentBuilder = w2.contentBuilder;
+        }
+        if (w2.buttons !== undefined) {
+            this.buttons = w2.buttons;
+        }
+        if (w2.contentAreaPadding !== undefined) {
+            this.contentAreaPadding = w2.contentAreaPadding;
+        }
+        if (w2.screenWidth !== undefined) {
+            this.screenWidth = w2.screenWidth;
+        }
+        if (w2.columnModifier !== undefined) {
+            this.columnModifier = w2.columnModifier;
+        }
+        if (w2.isFirstInit !== undefined) {
+            this.isFirstInit = w2.isFirstInit;
+        }
+        if (w2.theme !== undefined) {
+            this.theme = w2.theme;
+        }
+        if (w2.targetSdk !== undefined) {
+            this.targetSdk = w2.targetSdk;
+        }
+        if (w2.dialogWidth !== undefined) {
+            this.dialogWidth = w2.dialogWidth;
+        }
+        if (w2.updateTitleHeight !== undefined) {
+            this.updateTitleHeight = w2.updateTitleHeight;
+        }
+        if (w2.updateButtonHeight !== undefined) {
+            this.updateButtonHeight = w2.updateButtonHeight;
+        }
     }
-    if (r2.primaryTitle !== undefined) {
-      this.primaryTitle = r2.primaryTitle;
+
+    updateStateVars(v2) {
     }
-    if (r2.secondaryTitle !== undefined) {
-      this.secondaryTitle = r2.secondaryTitle;
+
+    purgeVariableDependenciesOnElmtId(u2) {
+        this.__columnModifier.purgeDependencyOnElmtId(u2);
     }
-    if (r2.contentBuilder !== undefined) {
-      this.contentBuilder = r2.contentBuilder;
+
+    aboutToBeDeleted() {
+        this.__columnModifier.aboutToBeDeleted();
+        SubscriberManager.Get().delete(this.id__());
+        this.aboutToBeDeletedInternal();
     }
-    if (r2.buttons !== undefined) {
-      this.buttons = r2.buttons;
+
+    get columnModifier() {
+        return this.__columnModifier.get();
     }
-    if (r2.contentAreaPadding !== undefined) {
-      this.contentAreaPadding = r2.contentAreaPadding;
+
+    set columnModifier(t2) {
+        this.__columnModifier.set(t2);
     }
-    if (r2.screenWidth !== undefined) {
-      this.screenWidth = r2.screenWidth;
+
+    initialRender() {
+        this.observeComponentCreation2((o2, p2) => {
+            Column.create();
+            Column.onAreaChange((r2, s2) => {
+                if (!this.isFirstInit) {
+                    return;
+                }
+                this.dialogWidth = s2.width;
+                this.updateCustomStyle();
+                if (this.screenWidth > getNumberByResource('alert_container_max_width')) {
+                    this.columnModifier.customStyle = s2.width > getNumberByResource('alert_container_max_width');
+                } else {
+                    this.columnModifier.customStyle = s2.width >= this.screenWidth;
+                }
+                this.isFirstInit = false;
+            });
+        }, Column);
+        this.observeComponentCreation2((m2, n2) => {
+            Column.create();
+            Column.attributeModifier.bind(this)(ObservedObject.GetRawObject(this.columnModifier));
+        }, Column);
+        {
+            this.observeComponentCreation2((g2, h2) => {
+                if (h2) {
+                    let i2 = new CustomDialogContentComponent(this, {
+                        controller: this.controller,
+                        primaryTitle: this.primaryTitle,
+                        secondaryTitle: this.secondaryTitle,
+                        contentBuilder: () => {
+                            this.contentBuilder();
+                        },
+                        updateTitleHeight: this.updateTitleHeight,
+                        updateButtonHeight: this.updateButtonHeight,
+                        buttons: this.buttons,
+                        contentAreaPadding: this.contentAreaPadding,
+                        theme: this.theme,
+                    }, undefined, g2, () => {
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 1137, col: 9 });
+                    ViewPU.create(i2);
+                    let j2 = () => {
+                        return {
+                            controller: this.controller,
+                            primaryTitle: this.primaryTitle,
+                            secondaryTitle: this.secondaryTitle,
+                            contentBuilder: () => {
+                                this.contentBuilder();
+                            },
+                            updateTitleHeight: this.updateTitleHeight,
+                            updateButtonHeight: this.updateButtonHeight,
+                            buttons: this.buttons,
+                            contentAreaPadding: this.contentAreaPadding,
+                            theme: this.theme
+                        };
+                    };
+                    i2.paramsGenerator_ = j2;
+                } else {
+                    this.updateStateVarsOfChildByElmtId(g2, {});
+                }
+            }, { name: 'CustomDialogContentComponent' });
+        }
+        Column.pop();
+        Column.pop();
     }
-    if (r2.columnModifier !== undefined) {
-      this.columnModifier = r2.columnModifier;
-    }
-    if (r2.isFirstInit !== undefined) {
-      this.isFirstInit = r2.isFirstInit;
-    }
-    if (r2.theme !== undefined) {
-      this.theme = r2.theme;
-    }
-  }
-  updateStateVars(q2) {
-  }
-  purgeVariableDependenciesOnElmtId(p2) {
-    this.__columnModifier.purgeDependencyOnElmtId(p2);
-  }
-  aboutToBeDeleted() {
-    this.__columnModifier.aboutToBeDeleted();
-    SubscriberManager.Get().delete(this.id__());
-    this.aboutToBeDeletedInternal();
-  }
-  get columnModifier() {
-    return this.__columnModifier.get();
-  }
-  set columnModifier(o2) {
-    this.__columnModifier.set(o2);
-  }
-  initialRender() {
-    this.observeComponentCreation2((j2, k2) => {
-      Column.create();
-      Column.onAreaChange((m2, n2) => {
-        if (!this.isFirstInit) {
-          return;
+
+    updateCustomStyle() {
+        if (this.targetSdk >= VERSION_TWELVE) {
+            return;
         }
         if (this.screenWidth > getNumberByResource('alert_container_max_width')) {
-          this.columnModifier.customStyle = n2.width > getNumberByResource('alert_container_max_width');
+            this.columnModifier.customStyle = this.dialogWidth > getNumberByResource('alert_container_max_width');
+        } else {
+            this.columnModifier.customStyle = this.dialogWidth >= this.screenWidth;
         }
-        else {
-          this.columnModifier.customStyle = n2.width >= this.screenWidth;
-        }
-        this.isFirstInit = false;
-      });
-    }, Column);
-    this.observeComponentCreation2((h2, i2) => {
-      Column.create();
-      Column.attributeModifier.bind(this)(ObservedObject.GetRawObject(this.columnModifier));
-    }, Column);
-    {
-      this.observeComponentCreation2((b2, c2) => {
-        if (c2) {
-          let d2 = new CustomDialogContentComponent(this, {
-            controller: this.controller,
-            primaryTitle: this.primaryTitle,
-            secondaryTitle: this.secondaryTitle,
-            contentBuilder: () => {
-              this.contentBuilder();
-            },
-            buttons: this.buttons,
-            contentAreaPadding: this.contentAreaPadding,
-            theme: this.theme,
-          }, undefined, b2, () => {
-          }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 1093, col: 9 });
-          ViewPU.create(d2);
-          let e2 = () => {
-            return {
-              controller: this.controller,
-              primaryTitle: this.primaryTitle,
-              secondaryTitle: this.secondaryTitle,
-              contentBuilder: () => {
-                this.contentBuilder();
-              },
-              buttons: this.buttons,
-              contentAreaPadding: this.contentAreaPadding,
-              theme: this.theme,
-            };
-          };
-          d2.paramsGenerator_ = e2;
-        }
-        else {
-          this.updateStateVarsOfChildByElmtId(b2, {});
-        }
-      }, { name: 'CustomDialogContentComponent' });
     }
-    Column.pop();
-    Column.pop();
-  }
-  aboutToAppear() {
-    try {
-      this.screenWidth = px2vp(display.getDefaultDisplaySync().width);
+
+    aboutToAppear() {
+        try {
+            this.screenWidth = px2vp(display.getDefaultDisplaySync().width);
+            let y1 = bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION |
+            bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_METADATA;
+            bundleManager.getBundleInfoForSelf(y1).then((c2) => {
+                this.targetSdk = c2.targetVersion;
+                this.updateCustomStyle();
+            }).catch((b2) => {
+                hilog.error(0x3900, 'Ace', 'getBundleInfoForSelf failed Cause: %{public}s', b2.message);
+            });
+        } catch (x1) {
+            hilog.error(0x3900, 'Ace', `CustomDialogComponent getDefaultDisplaySync error: ${JSON.stringify(x1)}`);
+        }
+        ;
     }
-    catch (x1) {
-      hilog.error(0x3900, 'Ace', `CustomDialogComponent getDefaultDisplaySync error: ${JSON.stringify(x1)}`);
+
+    rerender() {
+        this.updateDirtyElements();
     }
-  }
-  rerender() {
-    this.updateDirtyElements();
-  }
 }
+
 class ColumnModifier {
-  constructor() {
-    this.customStyle = false;
-  }
-  applyNormalAttribute(w1) {
-    if (!this.customStyle) {
-      return;
+    constructor() {
+        this.customStyle = false;
     }
-    w1.backgroundBlurStyle(BlurStyle.Thick);
-    w1.borderRadius({
-      'id': -1,
-      'type': 10002,
-      params: ['sys.float.ohos_id_corner_radius_dialog'],
-      'bundleName': '__harDefaultBundleName__',
-      'moduleName': '__harDefaultModuleName__',
-    });
-    w1.margin({
-      left: {
-        'id': -1,
-        'type': 10002,
-        params: ['sys.float.ohos_id_dialog_margin_start'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__',
-      },
-      right: {
-        'id': -1,
-        'type': 10002,
-        params: ['sys.float.ohos_id_dialog_margin_end'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__',
-      },
-      bottom: {
-        'id': -1,
-        'type': 10002,
-        params: ['sys.float.ohos_id_dialog_margin_bottom'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__',
-      },
-    });
-    w1.backgroundColor({
-      'id': -1,
-      'type': 10001,
-      params: ['sys.color.ohos_id_color_dialog_bg'],
-      'bundleName': '__harDefaultBundleName__',
-      'moduleName': '__harDefaultModuleName__',
-    });
-  }
-}
-function __Button__setButtonProperties(t1, u1) {
-  Button.onClick(() => {
-    if (t1.action) {
-      t1.action();
-    }
-    u1?.close();
-  });
-  Button.defaultFocus(true);
-  Button.buttonStyle(t1.buttonStyle ?? getNumberByResource('alert_button_style'));
-  Button.layoutWeight(BUTTON_LAYOUT_WEIGHT);
-}
-function getNumberByResource(p1) {
-  try {
-    return resourceManager.getSystemResourceManager().getNumberByName(p1);
-  }
-  catch (q1) {
-    let r1 = q1.code;
-    let s1 = q1.message;
-    hilog.error(0x3900, 'Ace', `CustomContentDialog getNumberByResource error, code: ${r1}, message: ${s1}`);
-    return 0;
-  }
-}
-function getEnumNumberByResource(l1) {
-  try {
-    return getContext().resourceManager.getNumberByName(l1);
-  }
-  catch (m1) {
-    let n1 = m1.code;
-    let o1 = m1.message;
-    hilog.error(0x3900, 'Ace', `getEnumNumberByResource error, code: ${n1}, message: ${o1}`);
-    return -1;
-  }
-}
-function resolveKeyEvent(j1, k1) {
-  if (j1.type == IGNORE_KEY_EVENT_TYPE) {
-    return;
-  }
-  if (j1.keyCode == KEYCODE_UP) {
-    k1.scrollPage({ next: false });
-    j1.stopPropagation();
-  }
-  else if (j1.keyCode == KEYCODE_DOWN) {
-    if (k1.isAtEnd()) {
-      return;
-    }
-    else {
-      k1.scrollPage({ next: true });
-      j1.stopPropagation();
-    }
-  }
-}
-export class LoadingDialog extends ViewPU {
-  constructor(d1, e1, f1, g1 = -1, h1 = undefined, i1) {
-    super(d1, f1, g1, i1);
-    if (typeof h1 === 'function') {
-      this.paramsGenerator_ = h1;
-    }
-    this.controller = undefined;
-    this.content = '';
-    this.__fontColorWithTheme = new ObservedPropertyObjectPU({
-      'id': -1,
-      'type': 10001,
-      params: ['sys.color.font_primary'],
-      'bundleName': '__harDefaultBundleName__',
-      'moduleName': '__harDefaultModuleName__',
-    }, this, 'fontColorWithTheme');
-    this.__loadingProgressIconColorWithTheme = new ObservedPropertyObjectPU({
-      'id': -1,
-      'type': 10001,
-      params: ['sys.color.icon_secondary'],
-      'bundleName': '__harDefaultBundleName__',
-      'moduleName': '__harDefaultModuleName__',
-    }, this, 'loadingProgressIconColorWithTheme');
-    this.theme = new CustomThemeImpl({});
-    this.setInitiallyProvidedValue(e1);
-    this.finalizeConstruction();
-  }
-  setInitiallyProvidedValue(c1) {
-    if (c1.controller !== undefined) {
-      this.controller = c1.controller;
-    }
-    if (c1.content !== undefined) {
-      this.content = c1.content;
-    }
-    if (c1.fontColorWithTheme !== undefined) {
-      this.fontColorWithTheme = c1.fontColorWithTheme;
-    }
-    if (c1.loadingProgressIconColorWithTheme !== undefined) {
-      this.loadingProgressIconColorWithTheme = c1.loadingProgressIconColorWithTheme;
-    }
-    if (c1.theme !== undefined) {
-      this.theme = c1.theme;
-    }
-  }
-  updateStateVars(b1) {
-  }
-  purgeVariableDependenciesOnElmtId(a1) {
-    this.__fontColorWithTheme.purgeDependencyOnElmtId(a1);
-    this.__loadingProgressIconColorWithTheme.purgeDependencyOnElmtId(a1);
-  }
-  aboutToBeDeleted() {
-    this.__fontColorWithTheme.aboutToBeDeleted();
-    this.__loadingProgressIconColorWithTheme.aboutToBeDeleted();
-    SubscriberManager.Get().delete(this.id__());
-    this.aboutToBeDeletedInternal();
-  }
-  setController(z) {
-    this.controller = z;
-  }
-  get fontColorWithTheme() {
-    return this.__fontColorWithTheme.get();
-  }
-  set fontColorWithTheme(y) {
-    this.__fontColorWithTheme.set(y);
-  }
-  get loadingProgressIconColorWithTheme() {
-    return this.__loadingProgressIconColorWithTheme.get();
-  }
-  set loadingProgressIconColorWithTheme(x) {
-    this.__loadingProgressIconColorWithTheme.set(x);
-  }
-  initialRender() {
-    this.observeComponentCreation2((v, w) => {
-      Column.create();
-    }, Column);
-    {
-      this.observeComponentCreation2((p, q) => {
-        if (q) {
-          let r = new CustomDialogComponent(this, {
-            controller: this.controller,
-            contentBuilder: () => {
-              this.contentBuilder();
+
+    applyNormalAttribute(w1) {
+        if (!this.customStyle) {
+            return;
+        }
+        w1.backgroundBlurStyle(BlurStyle.Thick);
+        w1.borderRadius({
+            'id': -1,
+            'type': 10002,
+            params: ['sys.float.ohos_id_corner_radius_dialog'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        });
+        w1.margin({
+            left: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.ohos_id_dialog_margin_start'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             },
-            theme: this.theme,
-          }, undefined, p, () => {
-          }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 1229, col: 7 });
-          ViewPU.create(r);
-          let s = () => {
-            return {
-              controller: this.controller,
-              contentBuilder: () => {
-                this.contentBuilder();
-              },
-              theme: this.theme,
-            };
-          };
-          r.paramsGenerator_ = s;
-        }
-        else {
-          this.updateStateVarsOfChildByElmtId(p, {});
-        }
-      }, { name: 'CustomDialogComponent' });
+            right: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.ohos_id_dialog_margin_end'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            },
+            bottom: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.ohos_id_dialog_margin_bottom'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            },
+        });
+        w1.backgroundColor({
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.ohos_id_color_dialog_bg'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        });
     }
-    Column.pop();
-  }
-  contentBuilder(a = null) {
-    this.observeComponentCreation2((l, m) => {
-      Column.create();
-    }, Column);
-    this.observeComponentCreation2((j, k) => {
-      Row.create();
-      Row.constraintSize({ minHeight: LOADING_MIN_HEIGHT });
-    }, Row);
-    this.observeComponentCreation2((h, i) => {
-      Text.create(this.content);
-      Text.fontSize({
-        'id': -1,
-        'type': 10002,
-        params: ['sys.float.Body_L'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__',
-      });
-      Text.fontWeight(FontWeight.Regular);
-      Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
-      Text.layoutWeight(LOADING_TEXT_LAYOUT_WEIGHT);
-      Text.maxLines(LOADING_MAX_LINES);
-      Text.focusable(true);
-      Text.defaultFocus(true);
-      Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-    }, Text);
-    Text.pop();
-    this.observeComponentCreation2((f, g) => {
-      LoadingProgress.create();
-      LoadingProgress.color(ObservedObject.GetRawObject(this.loadingProgressIconColorWithTheme));
-      LoadingProgress.width(LOADING_PROGRESS_WIDTH);
-      LoadingProgress.height(LOADING_PROGRESS_HEIGHT);
-      LoadingProgress.margin({ left: LOADING_TEXT_MARGIN_LEFT });
-    }, LoadingProgress);
-    Row.pop();
-    Column.pop();
-  }
-  aboutToAppear() {
-    this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
-      this.theme.colors.fontPrimary : {
-        'id': -1,
-        'type': 10001,
-        params: ['sys.color.font_primary'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__',
-      };
-    this.loadingProgressIconColorWithTheme = this.theme?.colors?.iconSecondary ?
-      this.theme.colors.iconSecondary : {
-        'id': -1,
-        'type': 10001,
-        params: ['sys.color.icon_secondary'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__',
-      };
-  }
-  rerender() {
-    this.updateDirtyElements();
-  }
+}
+
+function __Button__setButtonProperties(t1, u1) {
+    Button.onClick(() => {
+        if (t1.action) {
+            t1.action();
+        }
+        u1?.close();
+    });
+    Button.defaultFocus(true);
+    Button.buttonStyle(t1.buttonStyle ?? getNumberByResource('alert_button_style'));
+    Button.layoutWeight(BUTTON_LAYOUT_WEIGHT);
+}
+
+function getNumberByResource(p1) {
+    try {
+        return resourceManager.getSystemResourceManager().getNumberByName(p1);
+    } catch (q1) {
+        let r1 = q1.code;
+        let s1 = q1.message;
+        hilog.error(0x3900, 'Ace', `CustomContentDialog getNumberByResource error, code: ${r1}, message: ${s1}`);
+        return 0;
+    }
+}
+
+function getEnumNumberByResource(l1) {
+    try {
+        return getContext().resourceManager.getNumberByName(l1);
+    } catch (m1) {
+        let n1 = m1.code;
+        let o1 = m1.message;
+        hilog.error(0x3900, 'Ace', `getEnumNumberByResource error, code: ${n1}, message: ${o1}`);
+        return -1;
+    }
+}
+
+function resolveKeyEvent(j1, k1) {
+    if (j1.type == IGNORE_KEY_EVENT_TYPE) {
+        return;
+    }
+    if (j1.keyCode == KEYCODE_UP) {
+        k1.scrollPage({ next: false });
+        j1.stopPropagation();
+    } else if (j1.keyCode == KEYCODE_DOWN) {
+        if (k1.isAtEnd()) {
+            return;
+        } else {
+            k1.scrollPage({ next: true });
+            j1.stopPropagation();
+        }
+    }
+}
+
+export class LoadingDialog extends ViewPU {
+    constructor(d1, e1, f1, g1 = -1, h1 = undefined, i1) {
+        super(d1, f1, g1, i1);
+        if (typeof h1 === 'function') {
+            this.paramsGenerator_ = h1;
+        }
+        this.controller = undefined;
+        this.content = '';
+        this.__fontColorWithTheme = new ObservedPropertyObjectPU({
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.font_primary'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'fontColorWithTheme');
+        this.__loadingProgressIconColorWithTheme = new ObservedPropertyObjectPU({
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.icon_secondary'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'loadingProgressIconColorWithTheme');
+        this.theme = new CustomThemeImpl({});
+        this.setInitiallyProvidedValue(e1);
+        this.finalizeConstruction();
+    }
+
+    setInitiallyProvidedValue(c1) {
+        if (c1.controller !== undefined) {
+            this.controller = c1.controller;
+        }
+        if (c1.content !== undefined) {
+            this.content = c1.content;
+        }
+        if (c1.fontColorWithTheme !== undefined) {
+            this.fontColorWithTheme = c1.fontColorWithTheme;
+        }
+        if (c1.loadingProgressIconColorWithTheme !== undefined) {
+            this.loadingProgressIconColorWithTheme = c1.loadingProgressIconColorWithTheme;
+        }
+        if (c1.theme !== undefined) {
+            this.theme = c1.theme;
+        }
+    }
+
+    updateStateVars(b1) {
+    }
+
+    purgeVariableDependenciesOnElmtId(a1) {
+        this.__fontColorWithTheme.purgeDependencyOnElmtId(a1);
+        this.__loadingProgressIconColorWithTheme.purgeDependencyOnElmtId(a1);
+    }
+
+    aboutToBeDeleted() {
+        this.__fontColorWithTheme.aboutToBeDeleted();
+        this.__loadingProgressIconColorWithTheme.aboutToBeDeleted();
+        SubscriberManager.Get().delete(this.id__());
+        this.aboutToBeDeletedInternal();
+    }
+
+    setController(z) {
+        this.controller = z;
+    }
+
+    get fontColorWithTheme() {
+        return this.__fontColorWithTheme.get();
+    }
+
+    set fontColorWithTheme(y) {
+        this.__fontColorWithTheme.set(y);
+    }
+
+    get loadingProgressIconColorWithTheme() {
+        return this.__loadingProgressIconColorWithTheme.get();
+    }
+
+    set loadingProgressIconColorWithTheme(x) {
+        this.__loadingProgressIconColorWithTheme.set(x);
+    }
+
+    initialRender() {
+        this.observeComponentCreation2((v, w) => {
+            Column.create();
+        }, Column);
+        {
+            this.observeComponentCreation2((p, q) => {
+                if (q) {
+                    let r = new CustomDialogComponent(this, {
+                        controller: this.controller,
+                        contentBuilder: () => {
+                            this.contentBuilder();
+                        },
+                        theme: this.theme,
+                    }, undefined, p, () => {
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 1297, col: 7 });
+                    ViewPU.create(r);
+                    let s = () => {
+                        return {
+                            controller: this.controller,
+                            contentBuilder: () => {
+                                this.contentBuilder();
+                            },
+                            theme: this.theme
+                        };
+                    };
+                    r.paramsGenerator_ = s;
+                } else {
+                    this.updateStateVarsOfChildByElmtId(p, {});
+                }
+            }, { name: 'CustomDialogComponent' });
+        }
+        Column.pop();
+    }
+
+    contentBuilder(a = null) {
+        this.observeComponentCreation2((l, m) => {
+            Column.create();
+        }, Column);
+        this.observeComponentCreation2((j, k) => {
+            Row.create();
+            Row.constraintSize({ minHeight: LOADING_MIN_HEIGHT });
+        }, Row);
+        this.observeComponentCreation2((h, i) => {
+            Text.create(this.content);
+            Text.fontSize({
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.Body_L'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            });
+            Text.fontWeight(FontWeight.Regular);
+            Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
+            Text.layoutWeight(LOADING_TEXT_LAYOUT_WEIGHT);
+            Text.maxLines(LOADING_MAX_LINES);
+            Text.focusable(true);
+            Text.defaultFocus(true);
+            Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+        }, Text);
+        Text.pop();
+        this.observeComponentCreation2((f, g) => {
+            LoadingProgress.create();
+            LoadingProgress.color(ObservedObject.GetRawObject(this.loadingProgressIconColorWithTheme));
+            LoadingProgress.width(LOADING_PROGRESS_WIDTH);
+            LoadingProgress.height(LOADING_PROGRESS_HEIGHT);
+            LoadingProgress.margin({ start: LengthMetrics.vp(LOADING_TEXT_MARGIN_LEFT) });
+        }, LoadingProgress);
+        Row.pop();
+        Column.pop();
+    }
+
+    aboutToAppear() {
+        this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
+        this.theme.colors.fontPrimary : {
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.font_primary'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            };
+        this.loadingProgressIconColorWithTheme = this.theme?.colors?.iconSecondary ?
+        this.theme.colors.iconSecondary : {
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.icon_secondary'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            };
+    }
+
+    rerender() {
+        this.updateDirtyElements();
+    }
 }
 
 export default { TipsDialog, ConfirmDialog, SelectDialog, AlertDialog, LoadingDialog, CustomContentDialog };

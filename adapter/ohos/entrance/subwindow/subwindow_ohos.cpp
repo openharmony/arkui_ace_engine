@@ -123,7 +123,7 @@ void SubwindowOhos::InitContainer()
     auto subSurface = window_->GetSurfaceNode();
     CHECK_NULL_VOID(subSurface);
     subSurface->SetShadowElevation(0.0f);
-    window_->NapiSetUIContent(url, nullptr, nullptr, false);
+    window_->NapiSetUIContent(url, nullptr, nullptr, Rosen::BackupAndRestoreType::NONE);
     childContainerId_ = SubwindowManager::GetInstance()->GetContainerId(window_->GetWindowId());
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Window child containerId : %{public}d", childContainerId_);
     SubwindowManager::GetInstance()->AddParentContainerId(childContainerId_, parentContainerId_);
@@ -270,7 +270,8 @@ bool SubwindowOhos::CancelPopup(const std::string& id)
     return true;
 }
 
-void SubwindowOhos::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo)
+void SubwindowOhos::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo,
+    const std::function<void(int32_t)>&& onWillDismiss, bool interactiveDismiss)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show popup ng enter");
     popupTargetId_ = targetId;
@@ -284,7 +285,7 @@ void SubwindowOhos::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo
     window_->SetTouchable(true);
     ResizeWindow();
     ContainerScope scope(childContainerId_);
-    overlayManager->ShowPopup(targetId, popupInfo);
+    overlayManager->ShowPopup(targetId, popupInfo, std::move(onWillDismiss), interactiveDismiss);
     window_->SetFocusable(true);
 }
 
@@ -984,7 +985,7 @@ bool SubwindowOhos::InitToastDialogView(int32_t width, int32_t height, float den
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "init toast dialog view enter");
 #ifndef NG_BUILD
-    dialogWindow_->NapiSetUIContent("", nullptr, nullptr, false);
+    dialogWindow_->NapiSetUIContent("", nullptr, nullptr, Rosen::BackupAndRestoreType::NONE);
     childContainerId_ = SubwindowManager::GetInstance()->GetContainerId(dialogWindow_->GetWindowId());
     SubwindowManager::GetInstance()->AddParentContainerId(childContainerId_, parentContainerId_);
     ContainerScope scope(childContainerId_);

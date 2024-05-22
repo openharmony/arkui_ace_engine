@@ -238,36 +238,31 @@ void GetGestureEvent(ArkUIAPIEventGestureAsyncEvent& ret, GestureEvent& info)
     ret.pinchCenterY = info.GetPinchCenter().GetY();
 }
 
-ArkUIAPIEventGestureAsyncEvent getBaseGestureEvent(const std::shared_ptr<BaseGestureEvent>& info)
+void GetBaseGestureEvent(ArkUIAPIEventGestureAsyncEvent* ret, ArkUITouchEvent& rawInputEvent,
+    const std::shared_ptr<BaseGestureEvent>& info)
 {
-    ArkUIAPIEventGestureAsyncEvent ret;
-    ArkUITouchEvent rawInputEvent;
     rawInputEvent.sourceType = static_cast<ArkUI_Int32>(info->GetSourceDevice());
     rawInputEvent.timeStamp = info->GetTimeStamp().time_since_epoch().count();
     rawInputEvent.actionTouchPoint.tiltX = info->GetTiltX().value_or(0.0f);
     rawInputEvent.actionTouchPoint.tiltY = info->GetTiltY().value_or(0.0f);
     rawInputEvent.actionTouchPoint.toolType = static_cast<ArkUI_Int32>(info->GetSourceTool());
     rawInputEvent.actionTouchPoint.pressure = info->GetForce();
-    double density = PipelineBase::GetCurrentDensity();
     std::array<ArkUITouchPoint, MAX_POINTS> points;
     auto fingerList = info->GetFingerList();
     auto fingureIterator = std::begin(fingerList);
     for (size_t i = 0; i < fingerList.size(); i++) {
         points[i].id = fingureIterator->fingerId_;
-        points[i].windowX = NearEqual(density, 0.0) ? 0.0f :
-            fingureIterator->globalLocation_.GetX() / density;
-        points[i].windowY = NearEqual(density, 0.0) ? 0.0f :
-            fingureIterator->globalLocation_.GetY() / density;
-        points[i].nodeX = NearEqual(density, 0.0) ? 0.0f :
-            fingureIterator->localLocation_.GetX() / density;
-        points[i].nodeY = NearEqual(density, 0.0) ? 0.0f :
-            fingureIterator->localLocation_.GetY() / density;
+        points[i].windowX = fingureIterator->globalLocation_.GetX();
+        points[i].windowY = fingureIterator->globalLocation_.GetY();
+        points[i].nodeX = fingureIterator->localLocation_.GetX();
+        points[i].nodeY = fingureIterator->localLocation_.GetY();
+        points[i].tiltX = rawInputEvent.actionTouchPoint.tiltX;
+        points[i].tiltY = rawInputEvent.actionTouchPoint.tiltY;
         fingureIterator++;
     }
     rawInputEvent.touchPointes = &(points[0]);
     rawInputEvent.touchPointSize = fingerList.size();
-    ret.rawPointerEvent = &rawInputEvent;
-    return ret;
+    ret->rawPointerEvent = &rawInputEvent;
 }
 
 void setCancelActionFunc(Gesture* gestureRef, void* extraParam)
@@ -393,13 +388,16 @@ void setGestureInterrupterToNode(
     auto onGestureJudgeBegin = [interrupter](
         const RefPtr<NG::GestureInfo>& gestureInfo,
         const std::shared_ptr<BaseGestureEvent>& info)-> GestureJudgeResult {
-        auto gestureEvent = getBaseGestureEvent(info);
+        ArkUIAPIEventGestureAsyncEvent* gestureEvent = new ArkUIAPIEventGestureAsyncEvent();
+        ArkUITouchEvent rawInputEvent;
+        GetBaseGestureEvent(gestureEvent, rawInputEvent, info);
         ArkUIGestureInterruptInfo interruptInfo;
         interruptInfo.isSystemGesture = gestureInfo->IsSystemGesture();
         interruptInfo.systemRecognizerType = static_cast<ArkUI_Int32>(gestureInfo->GetType());
-        interruptInfo.event = &gestureEvent;
+        interruptInfo.event = gestureEvent;
         interruptInfo.userData = gestureInfo->GetUserData();
         auto result = interrupter(&interruptInfo);
+        delete gestureEvent;
         return static_cast<GestureJudgeResult>(result);
     };
     ViewAbstract::SetOnGestureJudgeBegin(frameNode, std::move(onGestureJudgeBegin));

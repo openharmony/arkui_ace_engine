@@ -156,7 +156,7 @@ HWTEST_F(TabsEventTestNg, OnChange002, TestSize.Level1)
     CreateWithItem([=](TabsModelNG model) {
         model.SetOnChangeEvent(event);
     });
-    ClickTo(Offset(200.f, 30.f)); // click second tabBarItem
+    ClickTo(Offset(200.f, 30.f), 1); // click second tabBarItem
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
     EXPECT_TRUE(isTrigger);
 }
@@ -177,7 +177,7 @@ HWTEST_F(TabsEventTestNg, OnTabBarClick001, TestSize.Level1)
     CreateWithItem([=](TabsModelNG model) {
         model.SetOnTabBarClick(event);
     });
-    ClickTo(Offset(200.f, 30.f)); // click second tabBarItem
+    ClickTo(Offset(200.f, 30.f), 1); // click second tabBarItem
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
     EXPECT_TRUE(isTrigger);
 }
@@ -201,7 +201,7 @@ HWTEST_F(TabsEventTestNg, OnContentWillChange001, TestSize.Level1)
     CreateWithItem([=](TabsModelNG model) {
         model.SetOnContentWillChange(event);
     });
-    ClickTo(Offset(200.f, 30.f)); // click second tabBarItem
+    ClickTo(Offset(200.f, 30.f), 1); // click second tabBarItem
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
     EXPECT_TRUE(isTrigger);
 }
@@ -225,7 +225,7 @@ HWTEST_F(TabsEventTestNg, OnContentWillChange002, TestSize.Level1)
     CreateWithItem([=](TabsModelNG model) {
         model.SetOnContentWillChange(event);
     });
-    ClickTo(Offset(200.f, 30.f)); // click second tabBarItem
+    ClickTo(Offset(200.f, 30.f), 1); // click second tabBarItem
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 0);
     EXPECT_TRUE(isTrigger);
 }
@@ -254,7 +254,7 @@ HWTEST_F(TabsEventTestNg, onAnimationStartEnd001, TestSize.Level1)
         model.SetOnAnimationStart(startEvent);
         model.SetOnAnimationEnd(endEvent);
     });
-    ClickTo(Offset(200.f, 30.f)); // click second tabBarItem
+    ClickTo(Offset(200.f, 30.f), 1); // click second tabBarItem
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
     EXPECT_TRUE(isStartTrigger);
     EXPECT_TRUE(isEndTrigger);
@@ -295,7 +295,7 @@ HWTEST_F(TabsEventTestNg, onAnimationStartEnd002, TestSize.Level1)
     });
     pattern_->SetAnimationStartEvent(std::move(startEvent2));
     pattern_->SetAnimationEndEvent(std::move(endEvent2));
-    ClickTo(Offset(200.f, 30.f)); // click second tabBarItem
+    ClickTo(Offset(200.f, 30.f), 1); // click second tabBarItem
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
     EXPECT_FALSE(isStartTrigger);
     EXPECT_FALSE(isEndTrigger);
@@ -318,7 +318,7 @@ HWTEST_F(TabsEventTestNg, HandleClick001, TestSize.Level1)
     GestureEvent info;
     info.SetLocalLocation(Offset(200.f, 30.f));
     info.SetSourceDevice(SourceType::KEYBOARD);
-    tabBarPattern_->HandleClick(info);
+    tabBarPattern_->HandleClick(info, 1);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 0);
@@ -336,7 +336,7 @@ HWTEST_F(TabsEventTestNg, HandleClick002, TestSize.Level1)
      * @tc.expected: Can not swipe
      */
     Create([](TabsModelNG model) {}); // empty item
-    ClickTo(Offset(200.f, 30.f));
+    ClickTo(Offset(200.f, 30.f), 1);
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 0);
 }
 
@@ -354,7 +354,7 @@ HWTEST_F(TabsEventTestNg, HandleClick003, TestSize.Level1)
     Create([](TabsModelNG model) {
         CreateSingleItem([](TabContentModelNG tabContentModel) {}, 0);
     });
-    ClickTo(Offset(200.f, 30.f));
+    ClickTo(Offset(200.f, 30.f), 1);
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 0);
 }
 
@@ -376,8 +376,8 @@ HWTEST_F(TabsEventTestNg, HandleClick004, TestSize.Level1)
     auto scrollable = tabBarPattern_->scrollableEvent_->GetScrollable();
     scrollable->GetSpringProperty();
     scrollable->isSpringAnimationStop_ = false;
-    ClickTo(Offset(200.f, 30.f)); // click second tabBarItem
-    EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 0);
+    ClickTo(Offset(200.f, 30.f), 1); // click second tabBarItem
+    EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
     EXPECT_TRUE(scrollable->IsSpringStopped());
 }
 
@@ -400,7 +400,7 @@ HWTEST_F(TabsEventTestNg, HandleClick005, TestSize.Level1)
         }, 1);
     });
     
-    ClickTo(Offset(400.f, 30.f)); // click second tabBarItem
+    ClickTo(Offset(400.f, 30.f), 1); // click second tabBarItem
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
     EXPECT_EQ(tabBarLayoutProperty_->GetIndicatorValue(), 1);
 }

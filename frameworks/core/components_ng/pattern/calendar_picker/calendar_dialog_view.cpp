@@ -439,9 +439,8 @@ RefPtr<FrameNode> CalendarDialogView::CreateButtonNode(bool isConfirm, const std
     buttonEventHub->SetStateEffect(true);
 
     auto buttonRenderContext = buttonNode->GetRenderContext();
-    auto defaultBGColor = SystemProperties::GetDeviceType() == DeviceType::PHONE
-                              ? Color::TRANSPARENT
-                              : calendarTheme->GetDialogButtonBackgroundColor();
+    auto defaultBGColor =
+        calendarTheme->GetIsButtonTransparent() ? Color::TRANSPARENT : calendarTheme->GetDialogButtonBackgroundColor();
     buttonRenderContext->UpdateBackgroundColor(defaultBGColor);
     UpdateButtonStyles(buttonInfos, index, buttonLayoutProperty, buttonRenderContext);
     UpdateButtonDefaultFocus(buttonInfos, buttonNode, isConfirm);
@@ -572,8 +571,8 @@ RefPtr<FrameNode> CalendarDialogView::CreateDividerNode()
     dividerLayoutProperty->UpdateVertical(true);
     auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
     CHECK_NULL_RETURN(dividerRenderProperty, nullptr);
-    dividerRenderProperty->UpdateDividerColor(SystemProperties::GetDeviceType() == DeviceType::PHONE ?
-        theme->GetDialogDividerColor() : Color::TRANSPARENT);
+    dividerRenderProperty->UpdateDividerColor(
+        theme->GetIsDividerTransparent() ? Color::TRANSPARENT : theme->GetDialogDividerColor());
 
     dividerNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(dialogTheme->GetDividerWidth()), CalcLength(theme->GetEntryArrowWidth())));

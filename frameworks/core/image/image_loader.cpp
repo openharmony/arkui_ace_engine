@@ -283,7 +283,7 @@ bool NetworkImageLoader::DownloadImage(DownloadCallback&& downloadCallback, cons
 {
     return sync ? DownloadManager::GetInstance()->DownloadSync(std::move(downloadCallback), src, Container::CurrentId())
                 : DownloadManager::GetInstance()->DownloadAsync(
-                      std::move(downloadCallback), src, Container::CurrentId());
+                    std::move(downloadCallback), src, Container::CurrentId());
 }
 
 #ifndef USE_ROSEN_DRAWING
@@ -769,6 +769,10 @@ RefPtr<NG::ImageData> DecodedDataProviderImageLoader::LoadDecodedImageData(
     }
 
     auto cache = pipeline->GetImageCache();
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "DecodedDataProvider src=%{public}s,Key=%{public}s", src.ToString().c_str(),
+            src.GetKey().c_str());
+    }
     if (cache) {
         cache->CacheImageData(src.GetKey(), MakeRefPtr<NG::PixmapData>(pixmap));
     }
@@ -880,6 +884,10 @@ RefPtr<NG::ImageData> AstcImageLoader::LoadDecodedImageData(
     CHECK_NULL_RETURN(pixmap, nullptr);
 
     auto cache = pipeline->GetImageCache();
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "DecodedDataProvider src=%{public}s,Key=%{public}s", src.ToString().c_str(),
+            src.GetKey().c_str());
+    }
     if (cache) {
         cache->CacheImageData(src.GetKey(), MakeRefPtr<NG::PixmapData>(pixmap));
     }

@@ -494,6 +494,30 @@ void NavDestinationModelNG::SetHideTitleBar(FrameNode* frameNode, bool hideTitle
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, HideTitleBar, hideTitleBar, frameNode);
 }
 
+void NavDestinationModelNG::SetBackButtonIcon(
+    FrameNode* frameNode, const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap)
+{
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationNode);
+
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    ImageSourceInfo imageSourceInfo(src);
+    titleBarLayoutProperty->UpdateImageSource(imageSourceInfo);
+    titleBarLayoutProperty->UpdateNoPixMap(noPixMap);
+    titleBarLayoutProperty->UpdatePixelMap(pixMap);
+    titleBarNode->MarkModifyDone();
+}
+
+void NavDestinationModelNG::SetNavDestinationMode(FrameNode* frameNode, NavDestinationMode mode)
+{
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationNode);
+    navDestinationNode->SetNavDestinationMode(mode);
+}
+
 void NavDestinationModelNG::SetNavDestinationMode(NavDestinationMode mode)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

@@ -79,7 +79,9 @@ void JSMenuItemGroup::JSBind(BindingTarget globalObj)
     JSClass<JSMenuItemGroup>::Declare("MenuItemGroup");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSMenuItemGroup>::StaticMethod("create", &JSMenuItemGroup::Create, opt);
+    JSClass<JSMenuItemGroup>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSMenuItemGroup>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSMenuItemGroup>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSMenuItemGroup>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSMenuItemGroup>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSMenuItemGroup>::InheritAndBind<JSViewAbstract>(globalObj);

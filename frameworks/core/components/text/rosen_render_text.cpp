@@ -56,7 +56,7 @@ void RosenRenderText::Update(const RefPtr<Component>& component)
         bool shouldClipToContent = (textStyle_.GetTextOverflow() == TextOverflow::CLIP);
         rsNode->SetClipToFrame(shouldClipToContent);
         if (isCustomFont_) {
-            rsNode->SetIsCustomTypeface(isCustomFont_);
+            rsNode->SetIsCustomTextType(isCustomFont_);
         }
     }
 }

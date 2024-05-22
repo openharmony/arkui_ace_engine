@@ -814,7 +814,7 @@ public:
     void OnNativeEmbedLifecycleChange(std::shared_ptr<NWeb::NWebNativeEmbedDataInfo> dataInfo);
     void OnNativeEmbedGestureEvent(std::shared_ptr<NWeb::NWebNativeEmbedTouchEvent> event);
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
-    bool RequestFocus();
+    bool RequestFocus(OHOS::NWeb::NWebFocusSource source = OHOS::NWeb::NWebFocusSource::FOCUS_SOURCE_DEFAULT);
     void SetDrawSize(const Size& drawSize);
     void SetEnhanceSurfaceFlag(const bool& isEnhanceSurface);
     EGLConfig GLGetConfig(int version, EGLDisplay eglDisplay);
@@ -877,12 +877,14 @@ public:
     std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);
     // Backward
     void Backward();
+    bool AccessBackward();
     bool OnOpenAppLink(const std::string& url, std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback);
 
     void OnRenderProcessNotResponding(
         const std::string& jsStack, int pid, OHOS::NWeb::RenderProcessNotRespondingReason reason);
     void OnRenderProcessResponding();
     std::string GetSelectInfo() const;
+    Offset GetPosition(const std::string& embedId);
 
     void OnOnlineRenderToForeground();
 
@@ -945,7 +947,6 @@ private:
     void ClearClientAuthenticationCache();
     bool AccessStep(int32_t step);
     void BackOrForward(int32_t step);
-    bool AccessBackward();
     bool AccessForward();
 
     void SearchAllAsync(const std::string& searchStr);

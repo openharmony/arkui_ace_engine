@@ -148,6 +148,9 @@ public:
         } else {
             scrollableEvent_->SetAxis(axis_);
         }
+        if (scrollBarProxy_) {
+            scrollBarProxy_->SetScrollEnabled(enabled, AceType::WeakClaim(this));
+        }
     }
 
     bool GetScrollEnabled() const
@@ -504,7 +507,7 @@ public:
         std::vector<RefPtr<FrameNode>> children;
         return children;
     }
-    
+
     void SetAnimateCanOverScroll(bool animateCanOverScroll)
     {
         bool isScrollable = !(IsAtBottom() && IsAtTop() && !GetAlwaysEnabled());
@@ -545,8 +548,13 @@ public:
 
     void HandleMoveEventInComp(const PointF& point);
     void HandleLeaveHotzoneEvent();
+    void SetHotZoneScrollCallback(std::function<void(void)>&& func)
+    {
+        hotZoneScrollCallback_ = func;
+    }
 
 protected:
+    void SuggestOpIncGroup(bool flag);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     virtual DisplayMode GetDefaultScrollBarDisplayMode() const
     {
@@ -777,6 +785,7 @@ private:
     float lastHonezoneOffsetPct_ = 0.0f;
     RefPtr<BezierVariableVelocityMotion> velocityMotion_;
     RefPtr<VelocityMotion> fixedVelocityMotion_;
+    std::function<void(void)> hotZoneScrollCallback_;
     void UnRegister2DragDropManager();
     float IsInHotZone(const PointF& point);
     void HotZoneScroll(const float offset);

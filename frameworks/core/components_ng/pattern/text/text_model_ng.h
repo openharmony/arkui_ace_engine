@@ -82,7 +82,8 @@ public:
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& content);
     static void InitText(FrameNode* frameNode, std::string& value);
-    static void InitTextController(FrameNode* frameNode, const RefPtr<SpanStringBase>& spanBase);
+    static void InitSpanStringController(FrameNode* frameNode, const RefPtr<SpanStringBase>& spanBase);
+    static RefPtr<TextControllerBase> InitTextController(FrameNode* frameNode);
     static void SetFontWeight(FrameNode* frameNode, Ace::FontWeight value);
     static void SetItalicFontStyle(FrameNode* frameNode, Ace::FontStyle value);
     static void SetTextAlign(FrameNode* frameNode, Ace::TextAlign value);
@@ -151,6 +152,11 @@ public:
     static LineBreakStrategy GetLineBreakStrategy(FrameNode* frameNode);
     static Color GetSelectedBackgroundColor(FrameNode* frameNode);
     static void ResetSelectedBackgroundColor(FrameNode* frameNode);
+    static void SetTextSelection(FrameNode* frameNode, int32_t startIndex, int32_t endIndex);
+    static void SetTextDetectConfig(FrameNode* frameNode, const std::string& value,
+        std::function<void(const std::string&)>&& onResult);
+    static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
+    static void SetOnTextSelectionChange(FrameNode* frameNode, std::function<void(int32_t, int32_t)>&& func);
 };
 } // namespace OHOS::Ace::NG
 

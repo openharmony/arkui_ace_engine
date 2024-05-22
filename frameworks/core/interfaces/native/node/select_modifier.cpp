@@ -493,7 +493,10 @@ void SetSelectValue(ArkUINodeHandle node, ArkUI_CharPtr* values, ArkUI_CharPtr* 
         if (!values[i]) {
             return;
         }
-        params.emplace_back(std::make_pair(values[i], icons[i]));
+        SelectParam param;
+        param.text = values[i];
+        param.icon = icons[i];
+        params.emplace_back(param);
     }
     SelectModelNG::InitSelect(frameNode, params);
 }

@@ -440,16 +440,16 @@ void SetWaterFlowSectionOptions(ArkUINodeHandle node, ArkUI_Int32 start, ArkUIWa
 
         NG::PaddingProperty paddings;
         paddings.top = std::optional<CalcLength>(sectionData.margin[0]);
-        paddings.bottom = std::optional<CalcLength>(sectionData.margin[1]);
-        paddings.left = std::optional<CalcLength>(sectionData.margin[2]);
-        paddings.right = std::optional<CalcLength>(sectionData.margin[3]);
+        paddings.right = std::optional<CalcLength>(sectionData.margin[1]);
+        paddings.bottom = std::optional<CalcLength>(sectionData.margin[2]);
+        paddings.left = std::optional<CalcLength>(sectionData.margin[3]);
         section.margin = paddings;
         if (sectionData.onGetItemMainSizeByIndex) {
             section.onGetItemMainSizeByIndex = [sectionData](int32_t value) -> float {
                 // onGetItemMainSizeByIndex是一个返回float的函数指针
-                using FuncType = float (*)(int32_t);
+                using FuncType = float (*)(int32_t, void*);
                 FuncType func = reinterpret_cast<FuncType>(sectionData.onGetItemMainSizeByIndex);
-                float result = func(value);
+                float result = func(value, sectionData.userData);
                 return result;
             };
         } else {
@@ -457,7 +457,7 @@ void SetWaterFlowSectionOptions(ArkUINodeHandle node, ArkUI_Int32 start, ArkUIWa
         }
     }
 
-    waterFlowSections->ChangeData(start, 0, newSections);
+    waterFlowSections->ChangeDataNow(start, newSections.size(), newSections);
 }
 
 void ResetWaterFlowSectionOptions(ArkUINodeHandle node)
@@ -556,6 +556,19 @@ void ResetWaterflowFooter(ArkUINodeHandle node)
     WaterFlowModelNG::SetWaterflowFooter(frameNode, nullptr);
 }
 
+void SetWaterFlowFlingSpeedLimit(ArkUINodeHandle node, ArkUI_Float32 maxSpeed)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WaterFlowModelNG::SetFlingSpeedLimit(frameNode, maxSpeed);
+}
+
+void ResetWaterFlowFlingSpeedLimit(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WaterFlowModelNG::SetFlingSpeedLimit(frameNode, -1.0);
+}
 } // namespace
 namespace NodeModifier {
 const ArkUIWaterFlowModifier* GetWaterFlowModifier()
@@ -572,7 +585,8 @@ const ArkUIWaterFlowModifier* GetWaterFlowModifier()
         GetWaterFlowBarWidth, SetWaterFlowScrollBarColor, ResetWaterFlowScrollBarColor, GetWaterFlowScrollBarColor,
         GetEdgeEffect, SetWaterFlowSectionOptions, ResetWaterFlowSectionOptions, GetWaterFlowSectionOptions,
         GetItemMinWidth, GetItemMaxWidth, GetItemMinHeight, GetItemMaxHeight, GetWaterFlowEnableScrollInteraction,
-        GetWaterFlowFriction, SetScrollToIndex, SetWaterflowFooter, ResetWaterflowFooter, };
+        GetWaterFlowFriction, SetScrollToIndex, SetWaterflowFooter, ResetWaterflowFooter, SetWaterFlowFlingSpeedLimit,
+        ResetWaterFlowFlingSpeedLimit, };
     return &modifier;
 }
 
@@ -619,7 +633,7 @@ void SetOnDidScroll(ArkUINodeHandle node, void* extraParam)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
-    auto SetOnDidScroll = [nodeId, node, extraParam](const Dimension& offset, const ScrollState& state) -> void {
+    auto setOnDidScroll = [nodeId, node, extraParam](const Dimension& offset, const ScrollState& state) -> void {
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
@@ -630,7 +644,7 @@ void SetOnDidScroll(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.data[1].i32 = static_cast<int>(state);
         SendArkUIAsyncEvent(&event);
     };
-    ScrollableModelNG::SetOnDidScroll(frameNode, std::move(SetOnDidScroll));
+    ScrollableModelNG::SetOnDidScroll(frameNode, std::move(setOnDidScroll));
 }
 
 void SetOnWaterFlowScrollStart(ArkUINodeHandle node, void* extraParam)

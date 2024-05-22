@@ -466,7 +466,7 @@ void OptionPattern::UpdateText(const std::string& content)
     text_->MarkDirtyNode();
 }
 
-void OptionPattern::UpdateIcon(const std::string& src)
+void OptionPattern::UpdateIcon(const std::string& src, const std::function<void(WeakPtr<NG::FrameNode>)> symbolIcon)
 {
     iconSrc_ = src;
     auto host = GetHost();
@@ -474,28 +474,39 @@ void OptionPattern::UpdateIcon(const std::string& src)
     RefPtr<FrameNode> row =
         host->GetChildAtIndex(0) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0)) : nullptr;
     CHECK_NULL_VOID(row);
-    if (src.empty()) {
-        row->RemoveChild(icon_); // it's safe even if icon_ is nullptr
-        row->MarkModifyDone();
-        row->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        icon_ = nullptr;
-        return;
-    }
-    if (!icon_) {
-        icon_ = OptionView::CreateIcon(src, row);
+    if (symbolIcon && (!icon_ || icon_->GetTag() != V2::SYMBOL_ETS_TAG)) {
+        icon_ = OptionView::CreateSymbol(symbolIcon, row, icon_);
         row->MarkModifyDone();
         row->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
+    } else if (symbolIcon == nullptr && !src.empty() && (!icon_ || icon_->GetTag() != V2::IMAGE_ETS_TAG)) {
+        icon_ = OptionView::CreateIcon(src, row, icon_);
+        row->MarkModifyDone();
+        row->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        return;
+    } else if (icon_) {
+        if (symbolIcon != nullptr) {
+            symbolIcon(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(icon_)));
+            icon_->MarkModifyDone();
+            icon_->MarkDirtyNode();
+            return;
+        } else if (!src.empty()) {
+            auto props = icon_->GetLayoutProperty<ImageLayoutProperty>();
+            CHECK_NULL_VOID(props);
+            auto imageSrcInfo = props->GetImageSourceInfo();
+            CHECK_NULL_VOID(imageSrcInfo);
+            imageSrcInfo->SetSrc(src);
+            props->UpdateImageSourceInfo(imageSrcInfo.value());
+            icon_->MarkModifyDone();
+            icon_->MarkDirtyNode();
+            return;
+        }
     }
-
-    auto props = icon_->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(props);
-    auto imageSrcInfo = props->GetImageSourceInfo();
-    CHECK_NULL_VOID(imageSrcInfo);
-    imageSrcInfo->SetSrc(src);
-    props->UpdateImageSourceInfo(imageSrcInfo.value());
-    icon_->MarkModifyDone();
-    icon_->MarkDirtyNode();
+  
+    row->RemoveChild(icon_); // it's safe even if icon_ is nullptr
+    row->MarkModifyDone();
+    row->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    icon_ = nullptr;
 }
 
 void OptionPattern::SetAccessibilityAction()

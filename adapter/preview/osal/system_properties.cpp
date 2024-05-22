@@ -97,6 +97,11 @@ bool SystemProperties::acePerformanceMonitorEnable_ = false;
 std::pair<float, float> SystemProperties::brightUpPercent_ = {};
 bool SystemProperties::faultInjectEnabled_ = false;
 
+bool SystemProperties::IsOpIncEnable()
+{
+    return false;
+}
+
 void SystemProperties::InitDeviceType(DeviceType type)
 {
     // Properties: "phone", "tv", "tablet", "watch", "car"

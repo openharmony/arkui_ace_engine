@@ -26,6 +26,7 @@ public:
     static ArkUINativeModuleValue UpdateColorMode(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue Restore(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetColorValue(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ClearCache(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 } // namespace OHOS::Ace::NG
 

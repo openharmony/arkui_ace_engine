@@ -101,7 +101,9 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSSearch>::StaticMethod("requestKeyboardOnFocus", &JSSearch::SetEnableKeyboardOnFocus);
     JSClass<JSSearch>::StaticMethod("enableKeyboardOnFocus", &JSSearch::SetEnableKeyboardOnFocus);
+    JSClass<JSSearch>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSSearch>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSSearch>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSSearch>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSSearch>::StaticMethod("onCopy", &JSSearch::SetOnCopy);
     JSClass<JSSearch>::StaticMethod("onCut", &JSSearch::SetOnCut);
@@ -132,6 +134,10 @@ void JSSearch::JSBindMore()
     JSClass<JSSearch>::StaticMethod("inputFilter", &JSSearch::SetInputFilter);
     JSClass<JSSearch>::StaticMethod("onEditChange", &JSSearch::SetOnEditChange);
     JSClass<JSSearch>::StaticMethod("textIndent", &JSSearch::SetTextIndent);
+    JSClass<JSSearch>::StaticMethod("onWillInsert", &JSSearch::OnWillInsertValue);
+    JSClass<JSSearch>::StaticMethod("onDidInsert", &JSSearch::OnDidInsertValue);
+    JSClass<JSSearch>::StaticMethod("onWillDelete", &JSSearch::OnWillDelete);
+    JSClass<JSSearch>::StaticMethod("onDidDelete", &JSSearch::OnDidDelete);
 }
 
 void ParseSearchValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -791,6 +797,87 @@ void JSSearch::SetCopyOption(const JSCallbackInfo& info)
         copyOptions = static_cast<CopyOptions>(emunNumber);
     }
     SearchModel::GetInstance()->SetCopyOption(copyOptions);
+}
+
+JSRef<JSVal> JSSearch::CreateJsAboutToIMEInputObj(const InsertValueInfo& insertValue)
+{
+    JSRef<JSObject> aboutToIMEInputObj = JSRef<JSObject>::New();
+    aboutToIMEInputObj->SetProperty<int32_t>("insertOffset", insertValue.insertOffset);
+    aboutToIMEInputObj->SetProperty<std::string>("insertValue", insertValue.insertValue);
+    return JSRef<JSVal>::Cast(aboutToIMEInputObj);
+}
+
+void JSSearch::OnWillInsertValue(const JSCallbackInfo& info)
+{
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(jsValue->IsFunction());
+    auto jsAboutToIMEInputFunc = AceType::MakeRefPtr<JsEventFunction<InsertValueInfo, 1>>(
+        JSRef<JSFunc>::Cast(jsValue), CreateJsAboutToIMEInputObj);
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsAboutToIMEInputFunc)](
+                        const InsertValueInfo& insertValue) -> bool {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, true);
+        auto ret = func->ExecuteWithValue(insertValue);
+        if (ret->IsBoolean()) {
+            return ret->ToBoolean();
+        }
+        return true;
+    };
+    SearchModel::GetInstance()->SetOnWillInsertValueEvent(std::move(callback));
+}
+
+JSRef<JSVal> JSSearch::CreateJsDeleteToIMEObj(const DeleteValueInfo& deleteValueInfo)
+{
+    JSRef<JSObject> aboutToIMEInputObj = JSRef<JSObject>::New();
+    aboutToIMEInputObj->SetProperty<int32_t>("deleteOffset", deleteValueInfo.deleteOffset);
+    aboutToIMEInputObj->SetProperty<int32_t>("direction", static_cast<int32_t>(deleteValueInfo.direction));
+    aboutToIMEInputObj->SetProperty<std::string>("deleteValue", deleteValueInfo.deleteValue);
+    return JSRef<JSVal>::Cast(aboutToIMEInputObj);
+}
+
+void JSSearch::OnDidInsertValue(const JSCallbackInfo& info)
+{
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(jsValue->IsFunction());
+    auto jsAboutToIMEInputFunc = AceType::MakeRefPtr<JsEventFunction<InsertValueInfo, 1>>(
+        JSRef<JSFunc>::Cast(jsValue), CreateJsAboutToIMEInputObj);
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsAboutToIMEInputFunc)](
+                        const InsertValueInfo& insertValue) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        func->ExecuteWithValue(insertValue);
+    };
+    SearchModel::GetInstance()->SetOnDidInsertValueEvent(std::move(callback));
+}
+
+void JSSearch::OnWillDelete(const JSCallbackInfo& info)
+{
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(jsValue->IsFunction());
+    auto jsAboutToIMEInputFunc =
+        AceType::MakeRefPtr<JsEventFunction<DeleteValueInfo, 1>>(JSRef<JSFunc>::Cast(jsValue), CreateJsDeleteToIMEObj);
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsAboutToIMEInputFunc)](
+                        const DeleteValueInfo& deleteValue) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, true);
+        auto ret = func->ExecuteWithValue(deleteValue);
+        if (ret->IsBoolean()) {
+            return ret->ToBoolean();
+        }
+        return true;
+    };
+    SearchModel::GetInstance()->SetOnWillDeleteEvent(std::move(callback));
+}
+
+void JSSearch::OnDidDelete(const JSCallbackInfo& info)
+{
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(jsValue->IsFunction());
+    auto jsAboutToIMEInputFunc =
+        AceType::MakeRefPtr<JsEventFunction<DeleteValueInfo, 1>>(JSRef<JSFunc>::Cast(jsValue), CreateJsDeleteToIMEObj);
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsAboutToIMEInputFunc)](
+                        const DeleteValueInfo& deleteValue) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        func->ExecuteWithValue(deleteValue);
+    };
+    SearchModel::GetInstance()->SetOnDidDeleteEvent(std::move(callback));
 }
 
 void JSSearch::JsMenuOptionsExtension(const JSCallbackInfo& info)

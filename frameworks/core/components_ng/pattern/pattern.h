@@ -172,6 +172,11 @@ public:
 
     virtual void OnContextAttached() {}
 
+    virtual OPINC_TYPE_E OpIncType()
+    {
+        return OPINC_NODE_POSSIBLE;
+    }
+
     virtual void OnModifyDone()
     {
 #if (defined(__aarch64__) || defined(__x86_64__))
@@ -265,8 +270,6 @@ public:
     {
         return true;
     }
-
-    virtual void UpdateSlideOffset(bool isNeedReset = false) {}
 
     // TODO: for temp use, need to delete this.
     virtual bool OnDirtyLayoutWrapperSwap(

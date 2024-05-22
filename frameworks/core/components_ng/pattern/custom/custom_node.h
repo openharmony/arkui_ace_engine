@@ -117,6 +117,8 @@ public:
         navigationNode_ = navigationNode;
     }
 
+    std::unique_ptr<JsonValue> GetStateInspectorInfo();
+
 private:
     std::string viewKey_;
     RenderFunction renderFunction_;

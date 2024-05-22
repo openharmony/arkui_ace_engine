@@ -161,6 +161,8 @@ float MeasureContentChild(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinat
     float contentHeight = size.Height() - titleBarHeight;
     if (NavigationLayoutAlgorithm::IsAutoHeight(navDestinationLayoutProperty)) {
         constraint.selfIdealSize.SetWidth(size.Width());
+        contentWrapper->Measure(constraint);
+        return static_cast<float>(contentWrapper->GetGeometryNode()->GetFrameSize().Height());
     } else {
         constraint.selfIdealSize = OptionalSizeF(size.Width(), contentHeight);
     }
@@ -222,6 +224,29 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationGrou
     contentWrapper->Layout();
 }
 
+void MeasureSheet(const RefPtr<NavDestinationGroupNode>& hostNode,
+    const LayoutConstraintF& constraint)
+{
+    auto children = hostNode->GetAllChildrenWithBuild();
+    const auto& sheetWrapper = children.back();
+    CHECK_NULL_VOID(sheetWrapper);
+    if (sheetWrapper->GetHostNode()->GetTag() != V2::SHEET_WRAPPER_TAG) {
+        return;
+    }
+    sheetWrapper->Measure(constraint);
+}
+
+void LayoutSheet(const RefPtr<NavDestinationGroupNode>& hostNode)
+{
+    auto children = hostNode->GetAllChildrenWithBuild();
+    const auto& sheetWrapper = children.back();
+    CHECK_NULL_VOID(sheetWrapper);
+    if (sheetWrapper->GetHostNode()->GetTag() != V2::SHEET_WRAPPER_TAG) {
+        return;
+    }
+    sheetWrapper->Layout();
+}
+
 float TransferTitleBarHeight(const RefPtr<NavDestinationGroupNode>& hostNode, float titleBarHeight)
 {
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
@@ -272,6 +297,7 @@ void NavDestinationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         size.AddHeight(padding.top.value_or(0.0f) + padding.bottom.value_or(0.0f));
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
+    MeasureSheet(hostNode, navDestinationLayoutProperty->CreateChildConstraint());
 }
 
 void NavDestinationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -302,6 +328,7 @@ void NavDestinationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             "Navdestination id is %d{public}, frameRect is %{public}s",
             hostNode->GetId(), geometryNode->GetFrameRect().ToString().c_str());
     }
+    LayoutSheet(hostNode);
 }
 
 } // namespace OHOS::Ace::NG

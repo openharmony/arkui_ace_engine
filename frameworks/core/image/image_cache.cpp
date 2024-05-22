@@ -98,6 +98,7 @@ void ImageCache::CacheImageData(const std::string& key, const RefPtr<NG::ImageDa
     if (key.empty() || !imageData || dataSizeLimit_ == 0) {
         return;
     }
+    ACE_SCOPED_TRACE("CacheImageData key:%s", key.c_str());
     std::scoped_lock lock(dataCacheMutex_);
     auto dataSize = imageData->GetSize();
     auto iter = imageDataCache_.find(key);
@@ -149,6 +150,7 @@ bool ImageCache::ProcessImageDataCacheInner(size_t dataSize)
 
 RefPtr<NG::ImageData> ImageCache::GetCacheImageData(const std::string& key)
 {
+    ACE_SCOPED_TRACE("GetCacheImageData key:%s", key.c_str());
     std::scoped_lock lock(dataCacheMutex_);
     auto iter = imageDataCache_.find(key);
     if (iter != imageDataCache_.end()) {
@@ -161,6 +163,7 @@ RefPtr<NG::ImageData> ImageCache::GetCacheImageData(const std::string& key)
 
 void ImageCache::ClearCacheImage(const std::string& key)
 {
+    ACE_SCOPED_TRACE("ClearCacheImage key:%s", key.c_str());
     {
         std::scoped_lock lock(imageCacheMutex_);
         auto iter = imageCache_.find(key);
@@ -182,6 +185,7 @@ void ImageCache::ClearCacheImage(const std::string& key)
 
 void ImageCache::Clear()
 {
+    ACE_SCOPED_TRACE("ImageCache Clear");
     {
         std::scoped_lock lock(imageCacheMutex_);
         cacheList_.clear();

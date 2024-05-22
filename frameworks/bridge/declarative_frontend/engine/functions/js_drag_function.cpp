@@ -27,6 +27,8 @@
 #include "core/common/udmf/udmf_client.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_converter.h"
+#include "frameworks/bridge/declarative_frontend/engine/js_types.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 
 namespace OHOS::Ace::Framework {
@@ -125,6 +127,7 @@ void JsDragEvent::JSBind(BindingTarget globalObj)
     JSClass<JsDragEvent>::CustomMethod("getVelocityX", &JsDragEvent::GetVelocityX);
     JSClass<JsDragEvent>::CustomMethod("getVelocityY", &JsDragEvent::GetVelocityY);
     JSClass<JsDragEvent>::CustomMethod("getVelocity", &JsDragEvent::GetVelocity);
+    JSClass<JsDragEvent>::CustomMethod("getModifierKeyState", &JsDragEvent::GetModifierKeyState);
     JSClass<JsDragEvent>::Bind(globalObj, &JsDragEvent::Constructor, &JsDragEvent::Destructor);
 }
 
@@ -356,9 +359,23 @@ void JsDragEvent::GetVelocity(const JSCallbackInfo& args)
     args.SetReturnValue(jsValueRef);
 }
 
+void JsDragEvent::GetModifierKeyState(const JSCallbackInfo& args)
+{
+    bool ret = false;
+    auto keyState = NG::ArkTSUtils::GetModifierKeyState(args.GetJsiRuntimeCallInfo(),
+        dragEvent_->GetPressedKeyCodes());
+    if (keyState->IsTrue()) {
+        ret = true;
+    }
+
+    auto jsValueRef = JSRef<JSVal>::Make(ToJSValue(ret));
+    args.SetReturnValue(jsValueRef);
+}
+
 void JsDragEvent::Constructor(const JSCallbackInfo& args)
 {
     auto dragEvent = Referenced::MakeRefPtr<JsDragEvent>();
+    CHECK_NULL_VOID(dragEvent);
     dragEvent->IncRefCount();
     args.SetReturnValue(Referenced::RawPtr(dragEvent));
 }
@@ -459,6 +476,7 @@ JSRef<JSObject> JsDragFunction::CreateDragEvent(const RefPtr<DragEvent>& info)
 {
     JSRef<JSObject> dragObj = JSClass<JsDragEvent>::NewInstance();
     auto dragEvent = Referenced::Claim(dragObj->Unwrap<JsDragEvent>());
+    CHECK_NULL_RETURN(dragEvent, dragObj);
     dragEvent->SetDragEvent(info);
     auto pasteDataInfo = dragEvent->GetDragEvent()->GetPasteData();
     JSRef<JSObject> pasteData = CreatePasteData(pasteDataInfo);
@@ -470,6 +488,7 @@ JSRef<JSObject> JsDragFunction::CreatePasteData(const RefPtr<PasteData>& info)
 {
     JSRef<JSObject> pasteObj = JSClass<JsPasteData>::NewInstance();
     auto pasteData = Referenced::Claim(pasteObj->Unwrap<JsPasteData>());
+    CHECK_NULL_RETURN(pasteData, pasteObj);
     pasteData->SetPasteData(info);
     return pasteObj;
 }

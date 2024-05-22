@@ -240,6 +240,7 @@ enum class TextOverflow {
     CLIP,
     ELLIPSIS,
     MARQUEE,
+    DEFAULT,
 };
 
 namespace StringUtils {

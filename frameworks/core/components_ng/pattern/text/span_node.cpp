@@ -19,7 +19,6 @@
 #include <string>
 
 #include "base/geometry/dimension.h"
-#include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "core/common/font_manager.h"
 #include "core/components/common/layout/constants.h"
@@ -434,6 +433,8 @@ void SpanItem::UpdateTextStyle(const std::string& content, const RefPtr<Paragrap
         UpdateContentTextStyle(content, builder, textStyle);
     } else {
         if (content.empty()) {
+            builder->PushStyle(textStyle);
+            builder->PopStyle();
             return;
         }
         auto displayContent = StringUtils::Str8ToStr16(content);
@@ -474,14 +475,13 @@ void SpanItem::UpdateTextStyle(const std::string& content, const RefPtr<Paragrap
 void SpanItem::UpdateContentTextStyle(
     const std::string& content, const RefPtr<Paragraph>& builder, const TextStyle& textStyle)
 {
-    if (content.empty()) {
-        return;
-    }
-    auto displayText = content;
-    auto textCase = textStyle.GetTextCase();
-    StringUtils::TransformStrCase(displayText, static_cast<int32_t>(textCase));
     builder->PushStyle(textStyle);
-    builder->AddText(StringUtils::Str8ToStr16(displayText));
+    if (!content.empty()) {
+        auto displayText = content;
+        auto textCase = textStyle.GetTextCase();
+        StringUtils::TransformStrCase(displayText, static_cast<int32_t>(textCase));
+        builder->AddText(StringUtils::Str8ToStr16(displayText));
+    }
     builder->PopStyle();
 }
 
@@ -672,27 +672,6 @@ std::optional<std::pair<int32_t, int32_t>> SpanItem::GetIntersectionInterval(std
     return std::make_optional<std::pair<int32_t, int32_t>>(std::make_pair(start, end));
 }
 
-void ImageSpanNode::DumpInfo()
-{
-    FrameNode::DumpInfo();
-    auto& dumpLog = DumpLog::GetInstance();
-    auto& run = imageSpanItem_->run_;
-    dumpLog.AddDesc("--------------- print run info ---------------");
-    dumpLog.AddDesc(std::string("Width: ").append(std::to_string(run.width)));
-    dumpLog.AddDesc(std::string("Height: ").append(std::to_string(run.height)));
-    dumpLog.AddDesc(std::string("Alignment: ").append(StringUtils::ToString(run.alignment)));
-    dumpLog.AddDesc(std::string("Baseline: ").append(StringUtils::ToString(run.baseline)));
-    dumpLog.AddDesc(std::string("BaselineOffset: ").append(std::to_string(run.baseline_offset)));
-    auto& textStyle = imageSpanItem_->textStyle;
-    dumpLog.AddDesc("--------------- print text style ---------------");
-    dumpLog.AddDesc(std::string("FontSize: ").append(textStyle.GetFontSize().ToString()));
-    dumpLog.AddDesc(std::string("LineHeight: ").append(textStyle.GetLineHeight().ToString()));
-    dumpLog.AddDesc(std::string("LineSpacing: ").append(textStyle.GetLineSpacing().ToString()));
-    dumpLog.AddDesc(std::string("VerticalAlign: ").append(StringUtils::ToString(textStyle.GetTextVerticalAlign())));
-    dumpLog.AddDesc(std::string("HalfLeading: ").append(std::to_string(textStyle.GetHalfLeading())));
-    dumpLog.AddDesc(std::string("TextBaseline: ").append(StringUtils::ToString(textStyle.GetTextBaseline())));
-}
-
 int32_t ImageSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */, const RefPtr<Paragraph>& builder,
     bool /* isSpanStringMode */, PlaceholderStyle placeholderStyle)
 {
@@ -727,6 +706,7 @@ int32_t ImageSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */,
     // ImageSpan should ignore decoration styles
     textStyle.SetTextDecoration(TextDecoration::NONE);
     textStyle.SetTextBackgroundStyle(backgroundStyle);
+    textStyle.SetFontSize(placeholderStyle.paragraphFontSize);
     builder->PushStyle(textStyle);
     int32_t index = builder->AddPlaceholder(run);
     run_ = run;

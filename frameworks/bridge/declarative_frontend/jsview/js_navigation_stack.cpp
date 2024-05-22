@@ -744,14 +744,19 @@ bool JSNavigationStack::LoadDestinationByBuilder(const std::string& name, const 
     RefPtr<NG::UINode>& node, RefPtr<NG::NavDestinationGroupNode>& desNode)
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
-    const int8_t paramSize = 2;
     if (navDestBuilderFunc_->IsEmpty()) {
         return false;
     }
-    JSRef<JSVal> params[paramSize];
-    params[0] = JSRef<JSVal>::Make(ToJSValue(name));
-    params[1] = param;
-    navDestBuilderFunc_->Call(JSRef<JSObject>(), paramSize, params);
+    auto builderObj = JSRef<JSObject>::Cast(navDestBuilderFunc_);
+    const int32_t number = builderObj->GetProperty("length")->ToNumber<int32_t>();
+    JSRef<JSVal> params[number];
+    if (number >= 1) {
+        params[0] = JSRef<JSVal>::Make(ToJSValue(name));
+    }
+    if (number >= ARGC_COUNT_TWO) {
+        params[1] = param;
+    }
+    navDestBuilderFunc_->Call(JSRef<JSObject>(), number, params);
     node = NG::ViewStackProcessor::GetInstance()->Finish();
     return GetNavDestinationNodeInUINode(node, desNode);
 }
@@ -796,7 +801,7 @@ int32_t JSNavigationStack::LoadDestination(const std::string& name, const JSRef<
     auto builderObj = JSRef<JSObject>::Cast(builderProp);
     const int32_t number = builderObj->GetProperty("length")->ToNumber<int32_t>();
     JSRef<JSVal> params[number];
-    if (number > 1) {
+    if (number >= 1) {
         params[0] = JSRef<JSVal>::Make(ToJSValue(name));
     }
     if (number >= ARGC_COUNT_TWO) {

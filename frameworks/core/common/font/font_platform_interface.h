@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_I_SLIDE_UPDATE_CALLBACK_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_I_SLIDE_UPDATE_CALLBACK_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_FONT_FONT_PLATFORM_INTERFACE_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_FONT_FONT_PLATFORM_INTERFACE_H
 
-#include "base/geometry/ng/size_t.h"
+#include "base/memory/referenced.h"
+#include "core/common/font/font_platform.h"
 
-namespace OHOS::Ace::NG {
-class ISlideUpdateCallback {
+namespace OHOS::Ace {
+
+class FontPlatformInterface {
 public:
-    ISlideUpdateCallback() = default;
-    virtual ~ISlideUpdateCallback() = default;
-    virtual void OnSlideUpdate() = 0;
+    virtual ~FontPlatformInterface() = default;
+
+    virtual RefPtr<FontPlatform> GetFontPlatform() const = 0;
 };
-} // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_I_SLIDE_UPDATE_CALLBACK_H
+
+} // namespace OHOS::Ace
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_FONT_FONT_PLATFORM_INTERFACE_H

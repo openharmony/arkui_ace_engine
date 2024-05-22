@@ -27,7 +27,6 @@ class JSSwiperTheme : public JSSwiper {
 public:
     static void ApplyThemeInConstructor()
     {
-        SwiperModel::GetInstance()->SetIndicatorIsBoolean(false);
         JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
         JSRef<JSObject> obj = objectTemplate->NewInstance();
         SwiperParameters swiperParameters = JSSwiper::GetDotIndicatorInfo(obj);

@@ -146,6 +146,7 @@ private:
     std::string GetTabBarTextByIndex(int32_t index) const;
     void UpdateSwiperDisableSwipe(bool disableSwipe);
     void SetSwiperPaddingAndBorder();
+    void RecordChangeEvent(int32_t index);
 
     bool isCustomAnimation_ = false;
     bool isDisableSwipe_ = false;

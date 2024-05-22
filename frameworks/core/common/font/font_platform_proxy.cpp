@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,13 +13,25 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/web/slide_update_listener.h"
+#include "core/common/font/font_platform_proxy.h"
 
-namespace OHOS::Ace::NG {
-void SlideUpdateListener::OnSlideUpdate()
+#include "base/utils/utils.h"
+
+namespace OHOS::Ace {
+
+FontPlatformProxy::FontPlatformProxy() = default;
+
+FontPlatformProxy::~FontPlatformProxy() = default;
+
+void FontPlatformProxy::SetDelegate(std::unique_ptr<FontPlatformInterface>&& delegate)
 {
-    auto pattern = pattern_.Upgrade();
-    CHECK_NULL_VOID(pattern);
-    pattern->UpdateSlideOffset();
+    delegate_ = std::move(delegate);
 }
-} // namespace OHOS::Ace::NG
+
+RefPtr<FontPlatform> FontPlatformProxy::GetFontPlatform() const
+{
+    CHECK_NULL_RETURN(delegate_, nullptr);
+    return delegate_->GetFontPlatform();
+}
+
+} // namespace OHOS::Ace

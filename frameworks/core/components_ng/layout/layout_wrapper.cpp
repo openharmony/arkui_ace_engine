@@ -25,7 +25,6 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/layout/layout_wrapper_builder.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
-#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/property.h"
@@ -79,25 +78,16 @@ void LayoutWrapper::OffsetNodeToSafeArea()
     geometryNode->SetMarginFrameOffset(offset);
 }
 
-bool LayoutWrapper::CheckPageNeedAvoidKeyboard() const
-{
-    // page will not avoid keyboard when lastChild is sheet
-    auto pattern = GetHostNode()->GetPattern<PagePattern>();
-    CHECK_NULL_RETURN(pattern, true);
-    auto overlay = pattern->GetOverlayManager();
-    CHECK_NULL_RETURN(overlay, true);
-    return overlay->CheckPageNeedAvoidKeyboard();
-}
-
 bool LayoutWrapper::AvoidKeyboard(bool isFocusOnPage)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
+    auto manager = pipeline->GetSafeAreaManager();
     bool isFocusOnOverlay = pipeline->CheckOverlayFocus();
+    bool isNeedAvoidKeyboard = manager->CheckPageNeedAvoidKeyboard(GetHostNode());
     // apply keyboard avoidance on Page or Overlay
-    if ((GetHostTag() == V2::PAGE_ETS_TAG && CheckPageNeedAvoidKeyboard() && !isFocusOnOverlay) ||
+    if ((GetHostTag() == V2::PAGE_ETS_TAG && isNeedAvoidKeyboard && !isFocusOnOverlay) ||
         GetHostTag() == V2::OVERLAY_ETS_TAG) {
-        auto manager = pipeline->GetSafeAreaManager();
         if (!(isFocusOnPage || isFocusOnOverlay) && LessNotEqual(manager->GetKeyboardOffset(), 0.0)) {
             return false;
         }
@@ -142,21 +132,43 @@ bool LayoutWrapper::CheckValidSafeArea()
     return safeArea.IsValid();
 }
 
-OffsetF LayoutWrapper::GetParentGlobalPaintRectOffset() const
+OffsetF LayoutWrapper::GetParentGlobalOffsetWithSafeArea(bool checkBoundary, bool checkPosition) const
 {
     OffsetF offset {};
     auto host = GetHostNode();
     CHECK_NULL_RETURN(host, offset);
-    auto parent = host->GetAncestorNodeOfFrame();
+    auto parent = host->GetAncestorNodeOfFrame(checkBoundary);
     while (parent) {
         auto parentRenderContext = parent->GetRenderContext();
-        if (!parentRenderContext) {
-            break;
+        if (checkPosition && parentRenderContext && parentRenderContext->GetPositionProperty() &&
+            parentRenderContext->GetPositionProperty()->HasPosition()) {
+            auto parentLayoutProp = parent->GetLayoutProperty();
+            CHECK_NULL_RETURN(parentLayoutProp, offset);
+            auto parentLayoutConstraint = parentLayoutProp->GetLayoutConstraint();
+            CHECK_NULL_RETURN(parentLayoutConstraint.has_value(), offset);
+            auto renderPosition = FrameNode::ContextPositionConvertToPX(
+                parentRenderContext, parentLayoutConstraint.value().percentReference);
+            offset += OffsetF(static_cast<float>(renderPosition.first), static_cast<float>(renderPosition.second));
+        } else {
+            offset += parent->GetFrameRectWithSafeArea().GetOffset();
         }
-        offset += parentRenderContext->GetPaintRectWithoutTransform().GetOffset();
-        parent = parent->GetAncestorNodeOfFrame();
+        parent = parent->GetAncestorNodeOfFrame(checkBoundary);
     }
     return offset;
+}
+
+RectF LayoutWrapper::GetFrameRectWithoutSafeArea() const
+{
+    auto geometryNode = GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, RectF());
+    return geometryNode->GetFrameRect();
+}
+
+RectF LayoutWrapper::GetFrameRectWithSafeArea() const
+{
+    auto geometryNode = GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, RectF());
+    return geometryNode->GetSelfAdjust() + geometryNode->GetFrameRect();
 }
 
 void LayoutWrapper::ExpandSafeArea(bool isFocusOnPage)
@@ -175,29 +187,31 @@ void LayoutWrapper::ExpandSafeArea(bool isFocusOnPage)
         CHECK_NULL_VOID(renderContext);
         auto geometryNode = GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
-        auto adjustedRect = geometryNode->GetPixelGridRoundRect();
+        auto adjustedRect = geometryNode->GetFrameRect();
         if (safeAreaManager->IsSafeAreaValid()) {
             adjustedRect += geometryNode->GetParentAdjust();
         }
-        renderContext->UpdatePaintRect(adjustedRect);
+        geometryNode->SetSelfAdjust(adjustedRect - geometryNode->GetFrameRect());
+        renderContext->UpdatePaintRect(
+            adjustedRect + geometryNode->GetPixelGridRoundRect() - geometryNode->GetFrameRect());
         return;
     }
     CHECK_NULL_VOID(selfExpansive);
+    auto geometryNode = GetGeometryNode();
     OffsetF keyboardAdjust;
     if ((opts->edges & SAFE_AREA_EDGE_BOTTOM) && (opts->type & SAFE_AREA_TYPE_KEYBOARD) && isFocusOnPage) {
         keyboardAdjust = ExpandIntoKeyboard();
     }
 
     // get frame in global offset
-    auto parentGlobalOffset = GetParentGlobalPaintRectOffset();
-    auto geometryNode = GetGeometryNode();
+    auto parentGlobalOffset = GetParentGlobalOffsetWithSafeArea();
     auto parentAdjust = geometryNode->GetParentAdjust();
     if (!safeAreaManager->IsSafeAreaValid()) {
         parentAdjust = RectF();
     }
     auto frame = geometryNode->GetPixelGridRoundRect() + parentGlobalOffset + keyboardAdjust + parentAdjust.GetOffset();
     auto originGlobal = frame;
-    
+
     auto safeArea = pipeline->GetSafeAreaManager()->GetCombinedSafeArea(*opts);
     if ((opts->edges & SAFE_AREA_EDGE_START) && safeArea.left_.IsOverlapped(frame.Left())) {
         frame.SetWidth(frame.Width() + frame.Left() - safeArea.left_.start);
@@ -229,10 +243,9 @@ void LayoutWrapper::ExpandSafeArea(bool isFocusOnPage)
     // restore to local offset
     auto diff = originGlobal.GetOffset() - frame.GetOffset();
     frame -= parentGlobalOffset;
-    if (!diff.NonOffset()) {
-        // children's position should remain the same.
-        AdjustChildren(diff);
-    }
+    // since adjustment is not accumulated and we did not track previous diff, diff need to be updated
+    AdjustChildren(diff);
+
     auto selfAdjust = frame - geometryNode->GetFrameRect();
     geometryNode->SetSelfAdjust(selfAdjust);
     auto parent = host->GetAncestorNodeOfFrame();
@@ -241,7 +254,7 @@ void LayoutWrapper::ExpandSafeArea(bool isFocusOnPage)
     }
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdatePaintRect(frame);
+    renderContext->UpdatePaintRect(frame + geometryNode->GetPixelGridRoundRect() - geometryNode->GetFrameRect());
 }
 
 void LayoutWrapper::AdjustChildren(const OffsetF& offset)

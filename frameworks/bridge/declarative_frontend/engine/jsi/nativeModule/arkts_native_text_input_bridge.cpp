@@ -42,10 +42,11 @@ constexpr uint32_t ILLEGAL_VALUE = 0;
 constexpr uint32_t DEFAULT_MODE = -1;
 const int32_t MINI_VALID_VALUE = 1;
 const int32_t MAX_VALID_VALUE = 100;
+constexpr uint32_t DEFAULT_OVERFLOW = 4;
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
-    TextOverflow::MARQUEE };
+    TextOverflow::MARQUEE, TextOverflow::DEFAULT };
 
 ArkUINativeModuleValue TextInputBridge::SetCaretColor(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
@@ -715,13 +716,10 @@ ArkUINativeModuleValue TextInputBridge::SetShowError(ArkUIRuntimeCallInfo *runti
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    bool visible;
-    std::string error = "";
-    if (secondArg->IsString()) {
+    bool visible = false;
+    std::string error;
+    if (ArkTSUtils::ParseJsString(vm, secondArg, error)) {
         visible = true;
-        error = secondArg->ToString(vm)->ToString();
-    } else {
-        visible = false;
     }
 
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputShowError(nativeNode, error.c_str(),
@@ -1238,14 +1236,14 @@ ArkUINativeModuleValue TextInputBridge::SetTextOverflow(ArkUIRuntimeCallInfo* ru
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     int32_t value;
     if (secondArg->IsUndefined()) {
-        value = 0;
+        value = DEFAULT_OVERFLOW;
     } else if (secondArg->IsNumber()) {
         value = secondArg->Int32Value(vm);
     } else {
-        return panda::JSValueRef::Undefined(vm);
+        value = DEFAULT_OVERFLOW;
     }
     if (value < 0 || value >= static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
-        return panda::JSValueRef::Undefined(vm);
+        value = DEFAULT_OVERFLOW;
     }
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputTextOverflow(nativeNode, value);
     return panda::JSValueRef::Undefined(vm);

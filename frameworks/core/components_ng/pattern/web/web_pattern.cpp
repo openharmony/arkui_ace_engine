@@ -189,7 +189,14 @@ constexpr char MEMORY_LEVEL_ENABEL[] = "persist.web.memory_level_enable";
 const std::vector<std::string> SYNC_RENDER_SLIDE {V2::LIST_ETS_TAG, V2::SCROLL_ETS_TAG};
 
 constexpr int32_t DEFAULT_PINCH_FINGER = 2;
-constexpr double DEFAULT_PINCH_DISTANCE = 1.0;
+constexpr double DEFAULT_PINCH_DISTANCE = 5.0;
+constexpr double DEFAULT_PINCH_SCALE = 1.0;
+constexpr double DEFAULT_PINCH_SCALE_MAX = 5.0;
+constexpr double DEFAULT_PINCH_SCALE_MIN = 0.32;
+constexpr int32_t PINCH_INDEX_ONE = 1;
+constexpr int32_t STATUS_ZOOMIN = 1;
+constexpr int32_t STATUS_ZOOMOUT = 2;
+constexpr int32_t ZOOM_ERROR_COUNT_MAX = 5;
 
 WebPattern::WebPattern() = default;
 
@@ -264,9 +271,6 @@ void WebPattern::OnContextMenuHide()
 
 bool WebPattern::NeedSoftKeyboard() const
 {
-    if (embedNeedKeyboard_) {
-        return true;
-    }
     if (delegate_) {
         return delegate_->NeedSoftKeyboard();
     }
@@ -428,12 +432,26 @@ void WebPattern::InitPinchEvent(const RefPtr<GestureEventHub>& gestureHub)
     if (pinchGesture_) {
         return;
     }
-    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& event) { return; };
+    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& event) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->startPinchScale_ = event.GetScale();
+        pattern->preScale_ = event.GetScale();
+        pattern->pinchIndex_ = 0;
+        pattern->zoomOutSwitch_ = false;
+        pattern->zoomStatus_ = 0;
+        pattern->zoomErrorCount_ = 0;
+        TAG_LOGI(AceLogTag::ACE_WEB, "InitPinchEvent StartScale: %{public}f", pattern->startPinchScale_);
+
+        return;
+    };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& event) {
         ACE_SCOPED_TRACE("WebPattern::InitPinchEvent actionUpdateTask");
+        TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::InitPinchEvent actionUpdateTask");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleScaleGestureChange(event);
+        TAG_LOGD(AceLogTag::ACE_WEB, "InitPinchEvent actionUpdateTask event scale:%{public}f: ", event.GetScale());
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& event) { return; };
     auto actionCancelTask = [weak = WeakClaim(this)]() { return; };
@@ -447,17 +465,130 @@ void WebPattern::InitPinchEvent(const RefPtr<GestureEventHub>& gestureHub)
     gestureHub->AddGesture(pinchGesture_);
 }
 
+bool WebPattern::CheckZoomStatus(const double& curScale)
+{
+    // check zoom status
+    if ((zoomStatus_ == STATUS_ZOOMOUT && curScale - preScale_ < 0)
+            && zoomErrorCount_ < ZOOM_ERROR_COUNT_MAX) {
+        zoomErrorCount_++;
+        TAG_LOGI(AceLogTag::ACE_WEB, "HandleScaleGestureChange zoomStatus = zoomout && curScale < preScale,"
+            "ignore date.");
+        return false;
+    } else if ((zoomStatus_ == STATUS_ZOOMIN && curScale - preScale_ >= 0)
+                && zoomErrorCount_ < ZOOM_ERROR_COUNT_MAX) {
+        zoomErrorCount_++;
+        TAG_LOGI(AceLogTag::ACE_WEB, "HandleScaleGestureChange zoomStatus = zoomin && curScale >= preScale,"
+            "ignore date.");
+        return false;
+    } else {
+        // nothing
+    }
+    return true;
+}
+
+bool WebPattern::ZoomOutAndIn(const double& curScale, double& scale)
+{
+    // zoom out
+    if (curScale - preScale_ >= 0) {
+        if (preScale_ >= DEFAULT_PINCH_SCALE) {
+            if (startPinchScale_  >= DEFAULT_PINCH_SCALE) {
+                scale = curScale;
+            } else {
+                scale = DEFAULT_PINCH_SCALE + (curScale - startPinchScale_);
+            }
+
+            // Prevent shaking in index 1
+            if (pinchIndex_ == PINCH_INDEX_ONE) {
+                pageScale_ = scale;
+            }
+        } else {
+            // The scale is from 0.4 to 0.5, the scale conversion should be from 1.0 to 1.1
+            if (pageScale_ < DEFAULT_PINCH_SCALE) {
+                TAG_LOGI(AceLogTag::ACE_WEB, "HandleScaleGestureChange Switch from zoomin to zoomout.");
+                // must be page scale form 0.4 to 1
+                scale = DEFAULT_PINCH_SCALE;
+                // reset
+                startPinchScale_ = preScale_;
+                pageScale_ = scale;
+                zoomOutSwitch_ = true;
+            } else {
+                scale = DEFAULT_PINCH_SCALE + (curScale - startPinchScale_);
+                zoomOutSwitch_ = false;
+            }
+        }
+        zoomStatus_ = STATUS_ZOOMOUT;
+        // zoom in
+    } else {
+        // When zooming in from a scale less than 1,
+        // the current scale must be greater than the previous scale value
+        if (zoomOutSwitch_) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "HandleScaleGestureChange the current scale must be greater "
+                                         "than the previous scale value, ignore data.");
+            return false;
+        }
+        scale = curScale;
+
+        zoomStatus_ = STATUS_ZOOMIN;
+    }
+    return true;
+}
+
 void WebPattern::HandleScaleGestureChange(const GestureEvent& event)
 {
     CHECK_NULL_VOID(delegate_);
 
-    double scale = event.GetScale();
-    double centerX =  event.GetPinchCenter().GetX();
-    double centerY =  event.GetPinchCenter().GetY();
-    TAG_LOGI(AceLogTag::ACE_WEB,
-        "HandleScaleGestureChange scale: %{public}lf centerX: %{public}lf centerY: %{public}lf",
-        scale, centerX, centerY);
-    delegate_->ScaleGestureChange(scale, centerX, centerY);
+    double curScale = event.GetScale();
+    if (std::fabs(curScale - preScale_) <= std::numeric_limits<double>::epsilon()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "HandleScaleGestureChange curScale == preScale");
+        return;
+    }
+
+    if (!CheckZoomStatus(curScale)) {
+        return;
+    }
+    zoomErrorCount_ = 0;
+
+    pinchIndex_++;
+
+    double scale = 0.0;
+    if (!ZoomOutAndIn(curScale, scale)) {
+        return;
+    }
+    double newScale = GetNewScale(scale);
+
+    double centerX = event.GetPinchCenter().GetX();
+    double centerY = event.GetPinchCenter().GetY();
+    TAG_LOGD(AceLogTag::ACE_WEB,
+        "HandleScaleGestureChange curScale:%{public}f pageScale: %{public}f newScale: %{public}f centerX: "
+        "%{public}f centerY: %{public}f",
+        curScale, scale, newScale, centerX, centerY);
+    delegate_->ScaleGestureChange(newScale, centerX, centerY);
+
+    preScale_ = curScale;
+    pageScale_ = scale;
+}
+
+double WebPattern::GetNewScale(double& scale) const
+{
+    double newScale = 0.0;
+    if (scale >= DEFAULT_PINCH_SCALE) {
+        // In order to achieve a sequence similar to scale, eg. 1.1, 1.2, 1.3
+        newScale = scale / pageScale_;
+        // scale max
+        if (newScale > DEFAULT_PINCH_SCALE_MAX) {
+            newScale = DEFAULT_PINCH_SCALE_MAX;
+            scale = DEFAULT_PINCH_SCALE_MAX;
+        }
+    } else {
+        newScale = scale;
+        // scale min
+        if (newScale < DEFAULT_PINCH_SCALE_MIN) {
+            newScale = DEFAULT_PINCH_SCALE_MIN;
+            scale = DEFAULT_PINCH_SCALE_MIN;
+        }
+    }
+
+    return newScale;
 }
 
 void WebPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -906,7 +1037,6 @@ void WebPattern::InitWebEventHubDragDropEnd(const RefPtr<WebEventHub>& eventHub)
             " x:%{public}lf, y:%{public}lf", info->GetX(), info->GetY());
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->isDragEndMenuShow_ = false;
         TAG_LOGI(AceLogTag::ACE_WEB,
             "DragDrop event WebEventHub onDragLeaveId, x:%{public}lf, y:%{public}lf, webId:%{public}d",
             info->GetX(), info->GetY(), pattern->GetWebId());
@@ -951,8 +1081,9 @@ DragRet WebPattern::GetDragAcceptableStatus()
 
 bool WebPattern::NotifyStartDragTask()
 {
-    if (isDisableDrag_) {
-        TAG_LOGW(AceLogTag::ACE_WEB, "DragDrop disable drag in web");
+    if (isDisableDrag_ || isTouchUpEvent_) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "DragDrop disable drag in web. isDisableDrag_:%{public}d,"
+            "isTouchUpEvent_:%{public}d", isDisableDrag_, isTouchUpEvent_);
         return false;
     }
     isDragging_ = true;
@@ -1160,7 +1291,6 @@ void WebPattern::HandleOnDragLeave(int32_t x, int32_t y)
 {
     CHECK_NULL_VOID(delegate_);
     isDragging_ = false;
-    isReceivedArkDrag_ = false;
     isW3cDragEvent_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1254,9 +1384,6 @@ void WebPattern::HandleFocusEvent()
 {
     CHECK_NULL_VOID(delegate_);
     isFocus_ = true;
-    if (GetNativeEmbedModeEnabledValue(false)) {
-        embedNeedKeyboard_ = true;
-    }
     if (needOnFocus_) {
         delegate_->OnFocus();
     } else {
@@ -1268,12 +1395,14 @@ void WebPattern::HandleBlurEvent(const BlurReason& blurReason)
 {
     CHECK_NULL_VOID(delegate_);
     isFocus_ = false;
-    embedNeedKeyboard_ = false;
     if (!selectPopupMenuShowing_) {
         delegate_->SetBlurReason(static_cast<OHOS::NWeb::BlurReason>(blurReason));
         delegate_->OnBlur();
     }
     OnQuickMenuDismissed();
+    if (isReceivedArkDrag_) {
+        return;
+    }
     CloseContextSelectionMenu();
 }
 
@@ -1359,9 +1488,6 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
     if (GreatOrEqual(drawSize.Height(), Infinity<double>())) {
         drawSize.SetHeight(DEFAULT_WEB_HEIGHT);
     }
-    if (layoutMode_ == WebLayoutMode::FIT_CONTENT) {
-        drawSize.SetHeight(DEFAULT_WEB_HEIGHT);
-    }
 
     drawSize_ = drawSize;
     drawSizeCache_ = drawSize_;
@@ -1393,6 +1519,28 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
     return false;
 }
 
+void WebPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
+{
+    if (!CheckSafeAreaIsExpand()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "Not set safeArea, return.");
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto drawSize = Size(geometryNode->GetFrameRect().Width(), geometryNode->GetFrameRect().Height());
+    if (renderContextForSurface_) {
+        auto localposition = geometryNode->GetContentOffset();
+        renderContextForSurface_->SetBounds(
+            localposition.GetX(), localposition.GetY(), drawSize.Width(), drawSize.Height());
+        TAG_LOGD(AceLogTag::ACE_WEB,
+            "Before sync geometry properties set bounds, X:%{public}f, Y:%{public}f, width:%{public}f, "
+            "height:%{public}f",
+            localposition.GetX(), localposition.GetY(), drawSize.Width(), drawSize.Height());
+    }
+}
+
 void WebPattern::UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, double keyboard, double oldWebHeight)
 {
     if (isVirtualKeyBoardShow_ != VkState::VK_SHOW) {
@@ -1402,18 +1550,19 @@ void WebPattern::UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, do
     TAG_LOGI(AceLogTag::ACE_WEB,
         "KeyboardShow height:%{public}d, keyboard:%{public}f, offset:%{public}f, oldWebHeight:%{public}f",
         height, keyboard, GetCoordinatePoint()->GetY(), oldWebHeight);
-
+    if (CheckSafeAreaKeyBoard()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "CheckSafeAreaKeyBoard, no need resize");
+        return;
+    }
     if (GreatOrEqual(height, keyboard + GetCoordinatePoint()->GetY())) {
-        if (!CheckSafeAreaIsExpand()) {
-            double newHeight = height - keyboard - GetCoordinatePoint()->GetY();
-            if (GreatOrEqual(newHeight, oldWebHeight)) {
-                newHeight = oldWebHeight;
-            }
-            if (NearEqual(newHeight, oldWebHeight)) {
-                return;
-            }
-            drawSize_.SetHeight(newHeight);
+        double newHeight = height - keyboard - GetCoordinatePoint()->GetY();
+        if (GreatOrEqual(newHeight, oldWebHeight)) {
+            newHeight = oldWebHeight;
         }
+        if (NearEqual(newHeight, oldWebHeight)) {
+            return;
+        }
+        drawSize_.SetHeight(newHeight);
         UpdateWebLayoutSize(width, height, true);
     }
 }
@@ -1427,11 +1576,22 @@ void WebPattern::OnAreaChangedInner()
     CHECK_NULL_VOID(frameNode);
     auto geometryNode = frameNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    Size webSize = Size(geometryNode->GetFrameRect().Width(), geometryNode->GetFrameRect().Height());
+    auto size = Size(geometryNode->GetFrameRect().Width(), geometryNode->GetFrameRect().Height());
 
-    delegate_->OnAreaChange({resizeOffset.GetX(), resizeOffset.GetY(), webSize.Width(), webSize.Height()});
-    if (CheckSafeAreaIsExpand()) {
-        drawSize_ = webSize;
+    delegate_->OnAreaChange({ resizeOffset.GetX(), resizeOffset.GetY(), size.Width(), size.Height() });
+    if (CheckSafeAreaIsExpand() &&
+        ((size.Width() != areaChangeSize_.Width()) || (size.Height() != areaChangeSize_.Height()))) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "OnAreaChangedInner setbounds: height:%{public}f, offsetY:%{public}f",
+            size.Height(), resizeOffset.GetY());
+        areaChangeSize_ = size;
+        drawSize_ = size;
+        drawSizeCache_ = drawSize_;
+
+        if (renderContextForSurface_) {
+            auto localposition = geometryNode->GetContentOffset();
+            renderContextForSurface_->SetBounds(
+                localposition.GetX(), localposition.GetY(), drawSize_.Width(), drawSize_.Height());
+        }
         delegate_->SetBoundsOrResize(drawSize_, resizeOffset);
     }
     if (layoutMode_ != WebLayoutMode::FIT_CONTENT) {
@@ -1444,7 +1604,7 @@ void WebPattern::OnAreaChangedInner()
     if (isInWindowDrag_)
         return;
     delegate_->SetBoundsOrResize(drawSize_, resizeOffset);
-    if (isNeedReDrawRect_) {
+    if (layoutMode_ == WebLayoutMode::FIT_CONTENT) {
         UpdateSlideOffset(true);
     }
 }
@@ -2084,7 +2244,7 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
         if (height - GetCoordinatePoint()->GetY() < keyboard) {
             return true;
         }
-        if (!delegate_->NeedSoftKeyboard() && embedNeedKeyboard_) {
+        if (!delegate_->NeedSoftKeyboard()) {
             return false;
         }
         isVirtualKeyBoardShow_ = VkState::VK_SHOW;
@@ -2137,6 +2297,7 @@ void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeybo
 
 void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
 {
+    isTouchUpEvent_ = false;
     CHECK_NULL_VOID(delegate_);
     Offset touchOffset = Offset(0, 0);
     std::list<TouchInfo> touchInfos;
@@ -2153,13 +2314,14 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
         }
         delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
     }
-    if (!touchInfos.empty()) {
+    if (!touchInfos.empty() && !GetNativeEmbedModeEnabledValue(false)) {
         WebRequestFocus();
     }
 }
 
 void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
 {
+    isTouchUpEvent_ = true;
     CHECK_NULL_VOID(delegate_);
     if (!isReceivedArkDrag_) {
         ResetDragAction();
@@ -2474,6 +2636,9 @@ void WebPattern::UpdateClippedSelectionBounds(int32_t x, int32_t y, int32_t w, i
 
 void WebPattern::SelectCancel() const
 {
+    if (isReceivedArkDrag_) {
+        return;
+    }
     CHECK_NULL_VOID(menuCallback_);
     menuCallback_->Cancel();
 }
@@ -2579,16 +2744,8 @@ void WebPattern::DragDropSelectionMenu()
     if (!isDragEndMenuShow_ || IsImageDrag()) {
         return;
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<WebEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto focusHub = eventHub->GetOrCreateFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    if (!focusHub->IsCurrentFocus()) {
-        TAG_LOGD(AceLogTag::ACE_WEB, "DragDrop event web page has lost focus, no need to draw menu handles");
-        return;
-    }
+    CHECK_NULL_VOID(dropParams_);
+    CHECK_NULL_VOID(menuCallback_);
     SelectOverlayInfo selectInfo;
     selectInfo.hitTestMode = HitTestMode::HTMDEFAULT;
     selectInfo.firstHandle.isShow = IsTouchHandleShow(startSelectionHandle_);
@@ -3602,6 +3759,7 @@ void WebPattern::OnScrollStartRecursive(float position, float velocity)
 void WebPattern::OnScrollStartRecursive(std::vector<float> positions)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnScrollStartRecursive");
+    SetIsNestedInterrupt(false);
     auto it = positions.begin();
     for (auto parentMap : parentsMap_) {
         auto parent = parentMap.second.Upgrade();
@@ -3635,6 +3793,7 @@ void WebPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
         }
     }
     isScrollStarted_ = false;
+    SetIsNestedInterrupt(false);
 }
 
 void WebPattern::OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling)
@@ -3836,10 +3995,22 @@ void WebPattern::UpdateFlingReachEdgeState(const float value, bool status)
     }
 }
 
+bool WebPattern::IsDefaultFocusNodeExist()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto focusManager = pipeline->GetFocusManager();
+    CHECK_NULL_RETURN(focusManager, false);
+    auto focusView =  focusManager->GetLastFocusView().Upgrade();
+    CHECK_NULL_RETURN(focusView, false);
+    auto focusHub = focusView->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    bool result = focusHub->GetChildFocusNodeByType();
+    return result;
+}
+
 void WebPattern::InitSlideUpdateListener()
 {
-    std::shared_ptr<SlideUpdateListener> listener = std::make_shared<SlideUpdateListener>();
-    listener->SetPatternToListener(AceType::WeakClaim(this));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     for (auto parent = host->GetParent(); parent != nullptr; parent = parent->GetParent()) {
@@ -3853,14 +4024,10 @@ void WebPattern::InitSlideUpdateListener()
         if (parent->GetTag() == V2::LIST_ETS_TAG) {
             auto pattern = frameNode->GetPattern<ListPattern>();
             CHECK_NULL_VOID(pattern);
-            TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern registerSlideUpdateListener List");
-            pattern->registerSlideUpdateListener(listener);
             syncAxis_ = pattern->GetAxis();
         } else {
             auto pattern = frameNode->GetPattern<ScrollPattern>();
             CHECK_NULL_VOID(pattern);
-            TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern registerSlideUpdateListener SCROLL");
-            pattern->registerSlideUpdateListener(listener);
             syncAxis_ = pattern->GetAxis();
         }
         CHECK_NULL_VOID(renderSurface_);
@@ -4103,11 +4270,14 @@ bool WebPattern::GetAccessibilityFocusRect(RectT<int32_t>& paintRect, int64_t ac
     return true;
 }
 
-void WebPattern::SetTouchEventInfo(const TouchEvent& touchEvent, TouchEventInfo& touchEventInfo)
+void WebPattern::SetTouchEventInfo(const TouchEvent& touchEvent,
+    TouchEventInfo& touchEventInfo, const std::string& embedId)
 {
+    CHECK_NULL_VOID(delegate_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto offset = host->GetOffsetRelativeToWindow();
+    auto offset = host->GetTransformRelativeOffset();
+
     TouchEventInfo tempTouchInfo = touchEventInfo_;
     if (touchEvent.type == TouchType::DOWN || touchEvent.type == TouchType::UP) {
         while (!touchEventQueue_.empty()) {
@@ -4117,11 +4287,7 @@ void WebPattern::SetTouchEventInfo(const TouchEvent& touchEvent, TouchEventInfo&
             touchEventQueue_.pop();
         }
     }
-    if (touchEvent.type == TouchType::CANCEL) {
-        naitve_map_[touchEvent.id] = true;
-    } else {
-        naitve_map_[touchEvent.id] = false;
-    }
+    auto pos = delegate_->GetPosition(embedId);
     touchEventInfo.SetSourceDevice(tempTouchInfo.GetSourceDevice());
     touchEventInfo.SetTarget(tempTouchInfo.GetTarget());
     touchEventInfo.SetForce(tempTouchInfo.GetForce());
@@ -4131,8 +4297,10 @@ void WebPattern::SetTouchEventInfo(const TouchEvent& touchEvent, TouchEventInfo&
 
     TouchLocationInfo changedInfo("onTouch", touchEvent.id);
     changedInfo.SetLocalLocation(Offset(touchEvent.x, touchEvent.y));
-    changedInfo.SetGlobalLocation(Offset(touchEvent.x + offset.GetX(), touchEvent.y + offset.GetY()));
-    changedInfo.SetScreenLocation(Offset(touchEvent.x + offset.GetX(), touchEvent.y + offset.GetY()));
+    changedInfo.SetGlobalLocation(Offset(touchEvent.x + offset.GetX() + pos.GetX(),
+        touchEvent.y + offset.GetY() + pos.GetY()));
+    changedInfo.SetScreenLocation(Offset(touchEvent.x + offset.GetX() + pos.GetX(),
+        touchEvent.y + offset.GetY() + pos.GetY()));
     changedInfo.SetTouchType(touchEvent.type);
 
     SetTouchLocationInfo(touchEvent, changedInfo, tempTouchInfo, touchEventInfo);
@@ -4167,11 +4335,7 @@ void WebPattern::SetTouchLocationInfo(const TouchEvent& touchEvent, const TouchL
             info.SetGlobalLocation(Offset(globalLocation.GetX() - scaleX, globalLocation.GetY() - scaleY));
             info.SetLocalLocation(Offset(localLocation.GetX() - scaleX, localLocation.GetY() - scaleY));
             info.SetScreenLocation(Offset(screenLocation.GetX() - scaleX, screenLocation.GetY() - scaleY));
-            if (naitve_map_[location.GetFingerId()]) {
-                info.SetTouchType(TouchType::CANCEL);
-            } else {
-                info.SetTouchType(location.GetTouchType());
-            }
+            info.SetTouchType(location.GetTouchType());
         }
         touchEventInfo.AddTouchLocationInfo(std::move(info));
     }
@@ -4202,9 +4366,24 @@ bool WebPattern::CheckSafeAreaIsExpand()
     CHECK_NULL_RETURN(host, false);
     auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, false);
-    auto && opts = layoutProperty->GetSafeAreaExpandOpts();
+    auto &&opts = layoutProperty->GetSafeAreaExpandOpts();
     CHECK_NULL_RETURN(opts, false);
     if ((opts->type & SAFE_AREA_TYPE_SYSTEM) || (opts->type & SAFE_AREA_TYPE_KEYBOARD)) {
+        return true;
+    }
+    return false;
+}
+
+bool WebPattern::CheckSafeAreaKeyBoard()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto &&opts = layoutProperty->GetSafeAreaExpandOpts();
+    CHECK_NULL_RETURN(opts, false);
+    if ((opts->type & SAFE_AREA_TYPE_KEYBOARD)) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "SafeArea type is KEYBOARD.");
         return true;
     }
     return false;
@@ -4215,13 +4394,18 @@ std::vector<int8_t> WebPattern::GetWordSelection(const std::string& text, int8_t
     return DataDetectorMgr::GetInstance().GetWordSelection(text, offset);
 }
 
-void WebPattern::Backward()
+
+bool WebPattern::Backward()
 {
     if (!delegate_) {
         TAG_LOGE(AceLogTag::ACE_WEB, "delegate is null");
-        return;
+        return false;
     }
-    delegate_->Backward();
+    if (delegate_->AccessBackward()) {
+        delegate_->Backward();
+        return true;
+    }
+    return false;
 }
 
 void WebPattern::SuggestionSelected(int32_t index)
@@ -4296,6 +4480,7 @@ void WebPattern::OnHideAutofillPopup()
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDisappear(destructor);
 }
+
 void WebPattern::CloseKeyboard()
 {
     auto host = GetHost();
@@ -4305,6 +4490,11 @@ void WebPattern::CloseKeyboard()
     auto focusHub = eventHub->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->CloseKeyboard();
-    embedNeedKeyboard_ = false;
 }
+
+void WebPattern::RequestFocus()
+{
+    WebRequestFocus();
+}
+
 } // namespace OHOS::Ace::NG

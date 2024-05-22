@@ -105,6 +105,7 @@ const std::string DEFAULT_CANONICAL_ENCODING_NAME = "UTF-8";
 constexpr uint32_t DESTRUCT_DELAY_MILLISECONDS = 1000;
 
 constexpr uint32_t NO_NATIVE_FINGER_TYPE = 100;
+const std::string DEFAULT_NATIVE_EMBED_ID = "0";
 
 const std::vector<std::string> CANONICALENCODINGNAMES = {
     "Big5",         "EUC-JP",       "EUC-KR",       "GB18030",
@@ -1311,13 +1312,13 @@ void WebDelegate::SetPortMessageCallback(std::string& port, std::function<void(c
     }
 }
 
-bool WebDelegate::RequestFocus()
+bool WebDelegate::RequestFocus(OHOS::NWeb::NWebFocusSource source)
 {
     auto context = context_.Upgrade();
     CHECK_NULL_RETURN(context, false);
     bool result = false;
     context->GetTaskExecutor()->PostSyncTask(
-        [weak = WeakClaim(this), &result]() {
+        [weak = WeakClaim(this), &result, source]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
 
@@ -1328,6 +1329,12 @@ bool WebDelegate::RequestFocus()
                 CHECK_NULL_VOID(eventHub);
                 auto focusHub = eventHub->GetOrCreateFocusHub();
                 CHECK_NULL_VOID(focusHub);
+                if (source == OHOS::NWeb::NWebFocusSource::FOCUS_SOURCE_NAVIGATION &&
+                    webPattern->IsDefaultFocusNodeExist() && !focusHub->IsDefaultFocus()) {
+                    TAG_LOGI(AceLogTag::ACE_WEB, "there are other default focusNodes, web don't focus on navigation");
+                    result = false;
+                    return;
+                }
 
                 result = focusHub->RequestFocusImmediately(true);
                 return;
@@ -5214,6 +5221,9 @@ bool WebDelegate::OnDragAndDropDataUdmf(std::shared_ptr<OHOS::NWeb::NWebDragData
     if (!webPattern) {
         return false;
     }
+    if (webPattern->IsRootNeedExportTexture()) {
+        return false;
+    }
     return webPattern->NotifyStartDragTask();
 }
 
@@ -6072,11 +6082,11 @@ void WebDelegate::SetTouchEventInfo(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedT
             .SetScreenX(touchEvent->GetScreenX())
             .SetScreenY(touchEvent->GetScreenY())
             .SetType(static_cast<OHOS::Ace::TouchType>(touchEvent->GetType()));
-        webPattern->SetTouchEventInfo(event, touchEventInfo);
+        webPattern->SetTouchEventInfo(event, touchEventInfo, touchEvent->GetEmbedId());
     } else {
         TouchEvent event;
         event.SetId(0);
-        webPattern->SetTouchEventInfo(event, touchEventInfo);
+        webPattern->SetTouchEventInfo(event, touchEventInfo, DEFAULT_NATIVE_EMBED_ID);
     }
 }
 
@@ -6161,11 +6171,9 @@ void WebDelegate::OnNativeEmbedLifecycleChange(std::shared_ptr<OHOS::NWeb::NWebN
 void WebDelegate::OnNativeEmbedGestureEvent(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedTouchEvent> event)
 {
     if (event->GetId() == NO_NATIVE_FINGER_TYPE) {
-        if (!NeedSoftKeyboard() && event->GetType() == OHOS::NWeb::TouchType::DOWN) {
-            auto webPattern = webPattern_.Upgrade();
-            CHECK_NULL_VOID(webPattern);
-            webPattern->CloseKeyboard();
-        }
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->RequestFocus();
         return;
     }
     auto context = context_.Upgrade();
@@ -6190,7 +6198,7 @@ void WebDelegate::OnNativeEmbedGestureEvent(std::shared_ptr<OHOS::NWeb::NWebNati
                 if (!param->GetEventResult() && type == OHOS::NWeb::TouchType::DOWN) {
                     auto webPattern = delegate->webPattern_.Upgrade();
                     CHECK_NULL_VOID(webPattern);
-                    webPattern->CloseKeyboard();
+                    webPattern->RequestFocus();
                 }
             }
         },
@@ -6558,6 +6566,19 @@ std::string WebDelegate::GetSelectInfo() const
 {
     CHECK_NULL_RETURN(nweb_, std::string());
     return nweb_->GetSelectInfo();
+}
+
+Offset WebDelegate::GetPosition(const std::string& embedId)
+{
+    auto iter = embedDataInfo_.find(embedId);
+    if (iter != embedDataInfo_.end()) {
+        std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo> dataInfo  = iter->second;
+        if (dataInfo) {
+            auto embedInfo = dataInfo->GetNativeEmbedInfo();
+            return Offset(embedInfo->GetX(), embedInfo->GetY());
+        }
+    }
+    return Offset();
 }
 
 void WebDelegate::OnShowAutofillPopup(

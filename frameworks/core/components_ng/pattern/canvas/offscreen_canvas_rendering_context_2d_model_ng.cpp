@@ -23,6 +23,11 @@
 
 #ifdef PIXEL_MAP_SUPPORTED
 #include "pixel_map.h"
+#else
+constexpr int BUFFER_SIZE = 4;
+constexpr int STEP_1 = 1;
+constexpr int STEP_2 = 2;
+constexpr int STEP_3 = 3;
 #endif
 
 namespace OHOS::Ace::NG {
@@ -523,10 +528,10 @@ void OffscreenCanvasRenderingContext2DModelNG::GetImageDataModel(const ImageSize
 
     if (data != nullptr) {
         for (uint32_t idx = 0; idx < finalHeight * finalWidth; ++idx) {
-            buffer[4 * idx] = data->data[idx].GetRed();
-            buffer[4 * idx + 1] = data->data[idx].GetGreen();
-            buffer[4 * idx + 2] = data->data[idx].GetBlue();
-            buffer[4 * idx + 3] = data->data[idx].GetAlpha();
+            buffer[BUFFER_SIZE * idx] = data->data[idx].GetRed();
+            buffer[BUFFER_SIZE * idx + STEP_1] = data->data[idx].GetGreen();
+            buffer[BUFFER_SIZE * idx + STEP_2] = data->data[idx].GetBlue();
+            buffer[BUFFER_SIZE * idx + STEP_3] = data->data[idx].GetAlpha();
         }
     }
 #endif

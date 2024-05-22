@@ -76,7 +76,9 @@ void JSColumnSplit::JSBind(BindingTarget globalObj)
     JSClass<JSColumnSplit>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSColumnSplit>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSColumnSplit>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSColumnSplit>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSColumnSplit>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSColumnSplit>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSColumnSplit>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSColumnSplit>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSColumnSplit>::StaticMethod("clip", &JSColumnSplit::JsClip);

@@ -265,6 +265,8 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     nullptr,
     NodeModifier::SetOnFocus,
     NodeModifier::SetOnTouchIntercept,
+    NodeModifier::SetOnAttach,
+    NodeModifier::SetOnDetach,
 };
 
 const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
@@ -310,6 +312,7 @@ const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
 const ComponentAsyncEventHandler refreshNodeAsyncEventHandlers[] = {
     NodeModifier::SetRefreshOnStateChange,
     NodeModifier::SetOnRefreshing,
+    NodeModifier::SetRefreshOnOffsetChange,
 };
 
 const ComponentAsyncEventHandler TOGGLE_NODE_ASYNC_EVENT_HANDLERS[] = {

@@ -118,7 +118,7 @@ void UIExtensionModelNG::Create()
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::DYNAMIC_COMPONENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<IsolatedPattern>(); });
+        V2::ISOLATED_COMPONENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<IsolatedPattern>(); });
     auto pattern = frameNode->GetPattern<IsolatedPattern>();
     CHECK_NULL_VOID(pattern);
     stack->Push(frameNode);
@@ -199,6 +199,16 @@ void UIExtensionModelNG::SetOnError(
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnErrorCallback(std::move(onError));
+}
+
+void UIExtensionModelNG::SetPlatformOnError(
+    std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<IsolatedPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetOnErrorCallback(std::move(onError));
 }

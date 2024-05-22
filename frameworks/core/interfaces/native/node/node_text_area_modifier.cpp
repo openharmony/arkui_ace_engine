@@ -27,6 +27,7 @@
 #include "core/pipeline/base/element_register.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/components/common/properties/text_style_parser.h"
+#include "interfaces/native/node/node_model.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -818,7 +819,7 @@ void ResetTextAreaTextOverflow(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetTextOverflow(frameNode, TextOverflow::NONE);
+    TextFieldModelNG::SetTextOverflow(frameNode, TextOverflow::DEFAULT);
 }
 
 void SetTextAreaTextIndent(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit)
@@ -1488,6 +1489,94 @@ void ResetTextAreaMargin(ArkUINodeHandle node)
     paddings.right = NG::CalcLength(0.0);
     TextFieldModelNG::SetMargin(frameNode, paddings);
 }
+
+void GetTextAreaMargin(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 length, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto margin = TextFieldModelNG::GetMargin(frameNode);
+    values[NUM_0] = margin.top->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
+    values[NUM_1] = margin.right->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
+    values[NUM_2] = margin.bottom->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
+    values[NUM_3] = margin.left->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
+    length = NUM_4;
+}
+
+void SetTextAreaOnWillInsert(ArkUINodeHandle node, ArkUI_Int64 callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onWillInsert = reinterpret_cast<std::function<bool(const InsertValueInfo&)>*>(callback);
+        TextFieldModelNG::SetOnWillInsertValueEvent(frameNode, std::move(*onWillInsert));
+    } else {
+        TextFieldModelNG::SetOnWillInsertValueEvent(frameNode, nullptr);
+    }
+}
+
+void ResetTextAreaOnWillInsert(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnWillInsertValueEvent(frameNode, nullptr);
+}
+
+void SetTextAreaOnDidInsert(ArkUINodeHandle node, ArkUI_Int64 callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onDidInsert = reinterpret_cast<std::function<void(const InsertValueInfo&)>*>(callback);
+        TextFieldModelNG::SetOnDidInsertValueEvent(frameNode, std::move(*onDidInsert));
+    } else {
+        TextFieldModelNG::SetOnDidInsertValueEvent(frameNode, nullptr);
+    }
+}
+
+void ResetTextAreaOnDidInsert(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnDidInsertValueEvent(frameNode, nullptr);
+}
+
+void SetTextAreaOnWillDelete(ArkUINodeHandle node, ArkUI_Int64 callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onWillDelete = reinterpret_cast<std::function<bool(const DeleteValueInfo&)>*>(callback);
+        TextFieldModelNG::SetOnWillDeleteEvent(frameNode, std::move(*onWillDelete));
+    } else {
+        TextFieldModelNG::SetOnWillDeleteEvent(frameNode, nullptr);
+    }
+}
+
+void ResetTextAreaOnWillDelete(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnWillDeleteEvent(frameNode, nullptr);
+}
+
+void SetTextAreaOnDidDelete(ArkUINodeHandle node, ArkUI_Int64 callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onDidDelete = reinterpret_cast<std::function<void(const DeleteValueInfo&)>*>(callback);
+        TextFieldModelNG::SetOnDidDeleteEvent(frameNode, std::move(*onDidDelete));
+    } else {
+        TextFieldModelNG::SetOnDidDeleteEvent(frameNode, nullptr);
+    }
+}
+
+void ResetTextAreaOnDidDelete(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnDidDeleteEvent(frameNode, nullptr);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1529,7 +1618,12 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         SetTextAreaContentType, ResetTextAreaContentType, SetTextAreaEnableAutoFill, ResetTextAreaEnableAutoFill,
         SetTextAreaBorder, ResetTextAreaBorder, SetTextAreaBorderWidth, ResetTextAreaBorderWidth,
         SetTextAreaBorderColor, ResetTextAreaBorderColor, SetTextAreaBorderStyle, ResetTextAreaBorderStyle,
-        SetTextAreaBorderRadius, ResetTextAreaBorderRadius, SetTextAreaMargin, ResetTextAreaMargin, SetTextAreaCaret };
+        SetTextAreaBorderRadius, ResetTextAreaBorderRadius, SetTextAreaMargin, ResetTextAreaMargin, SetTextAreaCaret,
+        GetTextAreaMargin,
+        SetTextAreaOnWillInsert, ResetTextAreaOnWillInsert,
+        SetTextAreaOnDidInsert, ResetTextAreaOnDidInsert,
+        SetTextAreaOnWillDelete, ResetTextAreaOnWillDelete,
+        SetTextAreaOnDidDelete, ResetTextAreaOnDidDelete };
     return &modifier;
 }
 
@@ -1603,10 +1697,12 @@ void SetOnTextAreaContentSizeChange(ArkUINodeHandle node, void* extraParam)
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_TEXTAREA_CONTENT_SIZE_CHANGE;
+        bool usePx = NodeModel::UsePXUnit(reinterpret_cast<ArkUI_Node*>(extraParam));
+        double density = usePx ? 1 : PipelineBase::GetCurrentDensity();
         //0 width
-        event.componentAsyncEvent.data[0].f32 = width;
+        event.componentAsyncEvent.data[0].f32 = NearEqual(density, 0.0) ? 0.0f : width / density;
         //1 height
-        event.componentAsyncEvent.data[1].f32 = height;
+        event.componentAsyncEvent.data[1].f32 = NearEqual(density, 0.0) ? 0.0f : height / density;
         SendArkUIAsyncEvent(&event);
     };
     TextFieldModelNG::SetOnContentSizeChange(frameNode, std::move(onChange));

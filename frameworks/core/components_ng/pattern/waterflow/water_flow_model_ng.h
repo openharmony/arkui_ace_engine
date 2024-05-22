@@ -28,6 +28,7 @@ public:
     RefPtr<ScrollControllerBase> CreateScrollController() override;
     RefPtr<ScrollProxy> CreateScrollBarProxy() override;
     void SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy) override;
+    void SetLayoutMode(WaterFlowLayoutMode mode) override;
 
     void SetColumnsTemplate(const std::string& value) override;
     void SetRowsTemplate(const std::string& value) override;
@@ -111,6 +112,7 @@ public:
     static void SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
     static void SetWaterflowFooter(FrameNode* frameNode, FrameNode* footerNode);
     static bool hasFooter(FrameNode* frameNode);
+    static void SetFlingSpeedLimit(FrameNode* frameNode, double maxSpeed);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_MODEL_NG_H

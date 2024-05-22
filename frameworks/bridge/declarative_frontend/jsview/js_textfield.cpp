@@ -17,6 +17,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <string>
 #include <vector>
 
 #include "base/geometry/dimension.h"
@@ -83,12 +84,13 @@ const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALI
 const std::vector<std::string> INPUT_FONT_FAMILY_VALUE = { "sans-serif" };
 const std::vector<WordBreak> WORD_BREAK_TYPES = { WordBreak::NORMAL, WordBreak::BREAK_ALL, WordBreak::BREAK_WORD };
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
-    TextOverflow::MARQUEE };
+    TextOverflow::MARQUEE, TextOverflow::DEFAULT };
 constexpr uint32_t MAX_LINES = 3;
 constexpr uint32_t MINI_VAILD_VALUE = 1;
 constexpr uint32_t MAX_VAILD_VALUE = 100;
 constexpr uint32_t ILLEGAL_VALUE = 0;
 constexpr uint32_t DEFAULT_MODE = -1;
+constexpr uint32_t DEFAULT_OVERFLOW = 4;
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
 constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyle::SOLID;
@@ -1209,12 +1211,9 @@ void JSTextField::SetShowError(const JSCallbackInfo& info)
 {
     auto jsValue = info[0];
     if (Container::IsCurrentUseNewPipeline()) {
-        if (!jsValue->IsUndefined() && !jsValue->IsString()) {
-            TextFieldModel::GetInstance()->SetShowError("", false);
-            return;
-        }
-        TextFieldModel::GetInstance()->SetShowError(
-            jsValue->IsString() ? jsValue->ToString() : "", jsValue->IsUndefined() ? false : true);
+        std::string errorText;
+        ParseJsString(jsValue, errorText);
+        TextFieldModel::GetInstance()->SetShowError(errorText, !jsValue->IsUndefined());
     }
 }
 
@@ -1603,13 +1602,12 @@ void JSTextField::SetTextOverflow(const JSCallbackInfo& info)
         if (info.Length() < 1) {
             break;
         }
-        if (!tmpInfo->IsNumber() && !tmpInfo->IsUndefined()) {
-            break;
-        }
-        if (!tmpInfo->IsUndefined()) {
+        if (tmpInfo->IsUndefined() || tmpInfo->IsNull() || !tmpInfo->IsNumber()) {
+            overflow = DEFAULT_OVERFLOW;
+        } else if (tmpInfo->IsNumber()) {
             overflow = tmpInfo->ToNumber<int32_t>();
             if (overflow < 0 || overflow >= static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
-                break;
+                overflow = DEFAULT_OVERFLOW;
             }
         }
         TextFieldModel::GetInstance()->SetTextOverflow(TEXT_OVERFLOWS[overflow]);
@@ -1625,5 +1623,86 @@ void JSTextField::SetTextIndent(const JSCallbackInfo& info)
         value.Reset();
     }
     TextFieldModel::GetInstance()->SetTextIndent(value);
+}
+
+JSRef<JSVal> JSTextField::CreateJsAboutToIMEInputObj(const InsertValueInfo& insertValue)
+{
+    JSRef<JSObject> aboutToIMEInputObj = JSRef<JSObject>::New();
+    aboutToIMEInputObj->SetProperty<int32_t>("insertOffset", insertValue.insertOffset);
+    aboutToIMEInputObj->SetProperty<std::string>("insertValue", insertValue.insertValue);
+    return JSRef<JSVal>::Cast(aboutToIMEInputObj);
+}
+
+void JSTextField::OnWillInsertValue(const JSCallbackInfo& info)
+{
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(jsValue->IsFunction());
+    auto jsAboutToIMEInputFunc = AceType::MakeRefPtr<JsEventFunction<InsertValueInfo, 1>>(
+        JSRef<JSFunc>::Cast(jsValue), CreateJsAboutToIMEInputObj);
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsAboutToIMEInputFunc)](
+                        const InsertValueInfo& insertValue) -> bool {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, true);
+        auto ret = func->ExecuteWithValue(insertValue);
+        if (ret->IsBoolean()) {
+            return ret->ToBoolean();
+        }
+        return true;
+    };
+    TextFieldModel::GetInstance()->SetOnWillInsertValueEvent(std::move(callback));
+}
+
+JSRef<JSVal> JSTextField::CreateJsDeleteToIMEObj(const DeleteValueInfo& deleteValueInfo)
+{
+    JSRef<JSObject> aboutToIMEInputObj = JSRef<JSObject>::New();
+    aboutToIMEInputObj->SetProperty<int32_t>("deleteOffset", deleteValueInfo.deleteOffset);
+    aboutToIMEInputObj->SetProperty<int32_t>("direction", static_cast<int32_t>(deleteValueInfo.direction));
+    aboutToIMEInputObj->SetProperty<std::string>("deleteValue", deleteValueInfo.deleteValue);
+    return JSRef<JSVal>::Cast(aboutToIMEInputObj);
+}
+
+void JSTextField::OnDidInsertValue(const JSCallbackInfo& info)
+{
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(jsValue->IsFunction());
+    auto jsAboutToIMEInputFunc = AceType::MakeRefPtr<JsEventFunction<InsertValueInfo, 1>>(
+        JSRef<JSFunc>::Cast(jsValue), CreateJsAboutToIMEInputObj);
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsAboutToIMEInputFunc)](
+                        const InsertValueInfo& insertValue) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        func->ExecuteWithValue(insertValue);
+    };
+    TextFieldModel::GetInstance()->SetOnDidInsertValueEvent(std::move(callback));
+}
+
+void JSTextField::OnWillDelete(const JSCallbackInfo& info)
+{
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(jsValue->IsFunction());
+    auto jsAboutToIMEInputFunc =
+        AceType::MakeRefPtr<JsEventFunction<DeleteValueInfo, 1>>(JSRef<JSFunc>::Cast(jsValue), CreateJsDeleteToIMEObj);
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsAboutToIMEInputFunc)](
+                        const DeleteValueInfo& deleteValue) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, true);
+        auto ret = func->ExecuteWithValue(deleteValue);
+        if (ret->IsBoolean()) {
+            return ret->ToBoolean();
+        }
+        return true;
+    };
+    TextFieldModel::GetInstance()->SetOnWillDeleteEvent(std::move(callback));
+}
+
+void JSTextField::OnDidDelete(const JSCallbackInfo& info)
+{
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(jsValue->IsFunction());
+    auto jsAboutToIMEInputFunc =
+        AceType::MakeRefPtr<JsEventFunction<DeleteValueInfo, 1>>(JSRef<JSFunc>::Cast(jsValue), CreateJsDeleteToIMEObj);
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsAboutToIMEInputFunc)](
+                        const DeleteValueInfo& deleteValue) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        func->ExecuteWithValue(deleteValue);
+    };
+    TextFieldModel::GetInstance()->SetOnDidDeleteEvent(std::move(callback));
 }
 } // namespace OHOS::Ace::Framework

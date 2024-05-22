@@ -32,6 +32,8 @@
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/mouse_event.h"
@@ -55,6 +57,13 @@ RefPtr<OverlayManager> GetOverlayFromPage(int32_t pageLevelId, bool isNav)
         auto pattern = node->GetPattern<PagePattern>();
         return pattern->GetOverlayManager();
     }
+    if (tag == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+        auto node = AceType::DynamicCast<FrameNode>(frameNode);
+        CHECK_NULL_RETURN(node, nullptr);
+        auto pattern = node->GetPattern<NavDestinationPattern>();
+        CHECK_NULL_RETURN(pattern, nullptr);
+        return pattern->GetOverlayManager();
+    }
     return nullptr;
 }
 
@@ -63,22 +72,41 @@ RefPtr<OverlayManager> FindPageNodeOverlay(const RefPtr<FrameNode>& targetNode, 
     if (targetNode->GetPageLevelNodeId() > 0) {
         return GetOverlayFromPage(targetNode->GetPageLevelNodeId(), targetNode->PageLevelIsNavDestination());
     }
-    auto parent = targetNode->GetParent();
+    auto isNav = false;
+    RefPtr<OverlayManager> overlay;
+    RefPtr<UINode> parent = targetNode;
     while (parent) {
         if (parent->GetTag() == V2::PAGE_ETS_TAG) {
             auto node = AceType::DynamicCast<FrameNode>(parent);
             CHECK_NULL_RETURN(node, nullptr);
             auto pattern = node->GetPattern<PagePattern>();
             CHECK_NULL_RETURN(pattern, nullptr);
+            if (!isNav) {
+                pattern->CreateOverlayManager(isShow);
+                overlay = pattern->GetOverlayManager();
+                CHECK_NULL_RETURN(overlay, nullptr);
+                targetNode->SetPageLevelNodeId(node->GetId());
+            } else {
+                node->SetPageLevelToNav(true);
+                node->SetPageLevelNodeId(targetNode->GetPageLevelNodeId());
+            }
+            break;
+        }
+        if (parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+            auto node = AceType::DynamicCast<FrameNode>(parent);
+            CHECK_NULL_RETURN(node, nullptr);
+            auto pattern = node->GetPattern<NavDestinationPattern>();
+            CHECK_NULL_RETURN(pattern, nullptr);
             pattern->CreateOverlayManager(isShow);
-            auto overlay = pattern->GetOverlayManager();
+            overlay = pattern->GetOverlayManager();
             CHECK_NULL_RETURN(overlay, nullptr);
+            targetNode->SetPageLevelToNav(true);
             targetNode->SetPageLevelNodeId(node->GetId());
-            return overlay;
+            isNav = true;
         }
         parent = parent->GetParent();
     }
-    return nullptr;
+    return overlay;
 }
 } // namespace
 
@@ -209,6 +237,9 @@ void BindContextMenuSingle(
 {
     auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(targetNode);
+    auto gestureHub = targetNode->GetEventHub<EventHub>()->GetGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetPreviewMode(menuParam.previewMode);
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
     auto targetId = targetNode->GetId();
     auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
@@ -524,7 +555,11 @@ void ViewAbstractModelNG::DismissSheet()
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    overlayManager->DismissSheet();
+    auto sheet = FrameNode::GetFrameNode(V2::SHEET_PAGE_TAG, overlayManager->GetDismissSheet());
+    CHECK_NULL_VOID(sheet);
+    auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    sheetPattern->OverlayDismissSheet();
 }
 
 void ViewAbstractModelNG::DismissContentCover()

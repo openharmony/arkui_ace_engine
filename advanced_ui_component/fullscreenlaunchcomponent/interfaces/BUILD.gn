@@ -32,20 +32,30 @@ gen_js_obj("fullscreenlaunchcomponent_abc") {
   dep = ":gen_fullscreenlaunchcomponent_abc"
 }
 
+es2abc_gen_abc("gen_fullscreenlaunchcomponent_abc_preview") {
+  src_js = rebase_path("fullscreenlaunchcomponent_preview.js")
+  dst_file =
+      rebase_path(target_out_dir + "/fullscreenlaunchcomponent_preview.abc")
+  in_puts = [ "fullscreenlaunchcomponent_preview.js" ]
+  out_puts = [ target_out_dir + "/fullscreenlaunchcomponent_preview.abc" ]
+  extra_args = [ "--module" ]
+}
+
 gen_obj("fullscreenlaunchcomponent_abc_preview") {
-  input = get_label_info(":gen_fullscreenlaunchcomponent_abc",
-                         "target_out_dir") + "/fullscreenlaunchcomponent.abc"
-  output = target_out_dir + "/fullscreenlaunchcomponent_abc.c"
-  snapshot_dep = [ ":gen_fullscreenlaunchcomponent_abc" ]
+  input = get_label_info(":gen_fullscreenlaunchcomponent_abc_preview",
+                         "target_out_dir") +
+          "/fullscreenlaunchcomponent_preview.abc"
+  output = target_out_dir + "/fullscreenlaunchcomponent_abc_preview.c"
+  snapshot_dep = [ ":gen_fullscreenlaunchcomponent_abc_preview" ]
 }
 
 ohos_shared_library("fullscreenlaunchcomponent") {
-  sources = [ "fullscreenlaunchcomponent.cpp" ]
-
   if (use_mingw_win || use_mac || use_linux) {
+    sources = [ "fullscreenlaunchcomponent_preview.cpp" ]
     deps = [ ":gen_obj_src_fullscreenlaunchcomponent_abc_preview" ]
   } else {
     deps = [ ":fullscreenlaunchcomponent_abc" ]
+    sources = [ "fullscreenlaunchcomponent.cpp" ]
   }
 
   external_deps = [

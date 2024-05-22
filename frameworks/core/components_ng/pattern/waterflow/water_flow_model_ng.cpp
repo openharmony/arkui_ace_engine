@@ -90,6 +90,13 @@ void WaterFlowModelNG::SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr
     waterFlow->SetScrollBarProxy(AceType::DynamicCast<ScrollBarProxy>(proxy));
 }
 
+void WaterFlowModelNG::SetLayoutMode(WaterFlowLayoutMode mode)
+{
+    auto waterFlow = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WaterFlowPattern>();
+    CHECK_NULL_VOID(waterFlow);
+    waterFlow->SetLayoutMode(mode);
+}
+
 void WaterFlowModelNG::SetColumnsTemplate(const std::string& value)
 {
     if (value.empty()) {
@@ -639,5 +646,10 @@ bool WaterFlowModelNG::hasFooter(FrameNode* frameNode)
     auto pattern = frameNode->GetPattern<WaterFlowPattern>();
     CHECK_NULL_RETURN(pattern, false);
     return pattern->hasFooter();
+}
+
+void WaterFlowModelNG::SetFlingSpeedLimit(FrameNode* frameNode, double maxSpeed)
+{
+    ScrollableModelNG::SetMaxFlingSpeed(frameNode, maxSpeed);
 }
 } // namespace OHOS::Ace::NG

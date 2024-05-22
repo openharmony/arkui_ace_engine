@@ -304,6 +304,23 @@ struct GridLayoutInfo {
      */
     float GetDistanceToBottom(float mainSize, float heightInView, float mainGap) const;
 
+    /**
+     * @brief Transforms scrollAlign_ into other ScrollAlign values, based on current position of
+     * target item.
+     *
+     * @param height number of rows the item occupies.
+     * @param mainSize The main-axis length of the grid.
+     * @return ScrollAlign value transformed from AUTO.
+     */
+    ScrollAlign TransformAutoScrollAlign(int32_t itemIdx, int32_t height, float mainSize, float mainGap) const;
+
+    /**
+     * @param targetIdx target item's index.
+     * @param height number of rows the item occupies.
+     * @return item position to scroll to through animation.
+     */
+    float GetAnimatePosIrregular(int32_t targetIdx, int32_t height, ScrollAlign align, float mainGap) const;
+
     bool GetGridItemAnimatePos(const GridLayoutInfo& currentGridLayoutInfo, int32_t targetIndex, ScrollAlign align,
         float mainGap, float& targetPos);
 

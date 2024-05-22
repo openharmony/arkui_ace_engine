@@ -2098,6 +2098,19 @@ void OH_ArkUI_WaterFlowSectionOption_RegisterGetItemMainSizeCallbackByIndex(ArkU
     int32_t index, float(*callback)(int32_t itemIndex));
 
 /**
+* @brief 通过FlowItem分组配置信息根据flowItemIndex获取指定Item的主轴大小。
+*
+* @param option FlowItem分组配置信息。
+* @param index FlowItem索引值。
+* @param userData FlowItem自定义数据。
+* @param callback 根据index获取指定Item的主轴大小。
+* @since 12
+*/
+void OH_ArkUI_WaterFlowSectionOption_RegisterGetItemMainSizeCallbackByIndexWithUserData(
+    ArkUI_WaterFlowSectionOption* option, int32_t index, void* userData,
+    float (*callback)(int32_t itemIndex, void* userData));
+
+/**
  * @brief Create auxiliary line information in the RelativeContaine container.
  *
  * @param size The number of auxiliary lines.

@@ -66,6 +66,8 @@ void JSIsolatedComponent::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSIsolatedComponent>::StaticMethod("create", &JSIsolatedComponent::Create, opt);
     JSClass<JSIsolatedComponent>::StaticMethod("onError", &JSIsolatedComponent::JsOnError, opt);
+    JSClass<JSIsolatedComponent>::StaticMethod("onSizeChanged",
+        &JSIsolatedComponent::SetOnSizeChanged, opt);
     JSClass<JSIsolatedComponent>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSIsolatedComponent>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSIsolatedComponent>::InheritAndBind<JSViewAbstract>(globalObj);
@@ -141,6 +143,26 @@ void JSIsolatedComponent::JsOnError(const JSCallbackInfo& info)
             auto returnValue = JSRef<JSVal>::Cast(obj);
             func->ExecuteJS(1, &returnValue);
         };
-    UIExtensionModel::GetInstance()->SetOnError(std::move(onError));
+    UIExtensionModel::GetInstance()->SetPlatformOnError(std::move(onError));
+}
+
+void JSIsolatedComponent::SetOnSizeChanged(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        TAG_LOGW(AceLogTag::ACE_ISOLATED_COMPONENT, "OnSizeChanged argument is invalid");
+        return;
+    }
+    auto execCtx = info.GetExecutionContext();
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto onCardSizeChanged = [execCtx, func = std::move(jsFunc)](int32_t width, int32_t height) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("IsolatedComponent.onSizeChanged");
+        JSRef<JSObject> obj = JSRef<JSObject>::New();
+        obj->SetProperty<int32_t>("width", width);
+        obj->SetProperty<int32_t>("height", height);
+        auto returnValue = JSRef<JSVal>::Cast(obj);
+        func->ExecuteJS(1, &returnValue);
+    };
+    UIExtensionModel::GetInstance()->SetOnSizeChanged(std::move(onCardSizeChanged));
 }
 } // namespace OHOS::Ace::Framework
