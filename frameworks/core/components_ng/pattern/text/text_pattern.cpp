@@ -2992,7 +2992,7 @@ int32_t TextPattern::GetHandleIndex(const Offset& offset) const
     return pManager_->GetGlyphIndexByCoordinate(offset);
 }
 
-void TextPattern::OnAreaChangedInner()
+void TextPattern::OnHandleAreaChanged()
 {
     if (selectOverlay_->SelectOverlayIsOn()) {
         auto parentGlobalOffset = GetParentGlobalOffset();

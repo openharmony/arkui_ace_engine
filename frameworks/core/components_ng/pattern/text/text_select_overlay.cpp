@@ -37,7 +37,8 @@ bool TextSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
     SetUsingMouse(textPattern->IsUsingMouse());
     auto host = textPattern->GetHost();
     CHECK_NULL_RETURN(host, false);
-    pipeline->AddOnAreaChangeNode(host->GetId());
+    SetScrollableParentCallback();
+    SetkeyBoardChangeCallback();
     textPattern->CalculateHandleOffsetAndShowOverlay();
     selectTextUseTopHandle = true;
     return true;
@@ -130,18 +131,6 @@ void TextSelectOverlay::OnResetTextSelection()
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->ResetSelection();
-}
-
-void TextSelectOverlay::AfterCloseOverlay()
-{
-    RemoveAreaChangeInner();
-}
-
-void TextSelectOverlay::RemoveAreaChangeInner()
-{
-    auto textPattern = GetPattern<TextPattern>();
-    CHECK_NULL_VOID(textPattern);
-    textPattern->RemoveAreaChangeInner();
 }
 
 void TextSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
@@ -318,7 +307,8 @@ void TextSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reas
         CHECK_NULL_VOID(textPattern);
         textPattern->ResetSelection();
     }
-    RemoveAreaChangeInner();
+    ResetScrollableParentCallback();
+    RemoveKeyboardChangeCallback();
 }
 
 void TextSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType)
