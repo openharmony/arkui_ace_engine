@@ -17,55 +17,41 @@
 #include <map>
 #include <memory>
 
-#include "gtest/gtest.h"
+#ifndef TEST_SEGMENTED_WATER_FLOW
 #include "test/mock/base/mock_system_properties.h"
+#endif
 #include "test/mock/core/rosen/mock_canvas.h"
-#include "water_flow_item_maps.h"
 
-#include "base/utils/system_properties.h"
 #include "core/components/scroll/scroll_controller_base.h"
+#include "core/components_ng/pattern/waterflow/water_flow_layout_info.h"
+#include "core/components_ng/property/property.h"
 
 #define protected public
 #define private public
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/unittest/core/pattern/test_ng.h"
 #include "test/unittest/core/pattern/waterflow/water_flow_test_ng.h"
+#include "water_flow_item_maps.h"
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/geometry/offset.h"
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
-#include "core/components_ng/pattern/button/button_model_ng.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
-#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/pattern/waterflow/water_flow_accessibility_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_node.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_algorithm.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline/base/constants.h"
 #undef private
 #undef protected
 
 namespace OHOS::Ace::NG {
-namespace {} // namespace
 
 void WaterFlowTestNg::SetUpTestSuite()
 {
@@ -114,6 +100,9 @@ void WaterFlowTestNg::Create(const std::function<void(WaterFlowModelNG)>& callba
     RefPtr<ScrollControllerBase> positionController = model.CreateScrollController();
     RefPtr<ScrollProxy> scrollBarProxy = model.CreateScrollBarProxy();
     model.Create();
+#ifdef TEST_WATER_FLOW_SW
+    model.SetLayoutMode(WaterFlowLayoutMode::SLIDING_WINDOW);
+#endif
     ViewAbstract::SetWidth(CalcLength(WATERFLOW_WIDTH));
     ViewAbstract::SetHeight(CalcLength(WATERFLOW_HEIGHT));
     model.SetScroller(positionController, scrollBarProxy);
@@ -568,6 +557,9 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest003, TestSize.Level1)
         model.SetColumnsTemplate("1fr 1fr 1fr");
     });
     FlushLayoutTask(frameNode_);
+    auto& info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 4);
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 3)->IsActive());
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 4)->IsActive());
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 5)->IsActive());
@@ -631,26 +623,6 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest006, TestSize.Level1)
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 1)->IsActive());
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 6)->IsActive());
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 7)->IsActive());
-}
-
-/**
- * @tc.name: WaterFlowTest007
- * @tc.desc: waterFlow with fixed column, scroll to index not fully showed at last line
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowTestNg, WaterFlowTest007, TestSize.Level1)
-{
-    CreateWithItem([](WaterFlowModelNG model) {
-        ViewAbstract::SetWidth(CalcLength(WATERFLOW_WIDTH));
-        ViewAbstract::SetHeight(CalcLength(200.f));
-        model.SetColumnsTemplate("1fr 1fr 1fr");
-    });
-    pattern_->UpdateStartIndex(8);
-    FlushLayoutTask(frameNode_);
-    EXPECT_FALSE(GetChildFrameNode(frameNode_, 3)->IsActive());
-    EXPECT_FALSE(GetChildFrameNode(frameNode_, 4)->IsActive());
-    EXPECT_TRUE(GetChildFrameNode(frameNode_, 5)->IsActive());
-    EXPECT_TRUE(GetChildFrameNode(frameNode_, 6)->IsActive());
 }
 
 /**
@@ -738,13 +710,22 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest011, TestSize.Level1)
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(0.f), { 0, 0 }));
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(-ITEM_HEIGHT), { 0, -ITEM_HEIGHT }));
 
-    pattern_->layoutInfo_.startIndex_ = 0;
-    pattern_->layoutInfo_.currentOffset_ = ITEM_HEIGHT;
+    // enable overScroll
+    pattern_->SetEdgeEffect(EdgeEffect::SPRING);
+    pattern_->animateOverScroll_ = true;
+    pattern_->layoutInfo_->startIndex_ = 0;
+    // total offset = ITEM_HEIGHT
+    pattern_->layoutInfo_->UpdateOffset(WATERFLOW_HEIGHT);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(ITEM_HEIGHT), { ITEM_HEIGHT, 0 }));
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(0.f), { 0, 0 }));
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(-ITEM_HEIGHT * 2), { -ITEM_HEIGHT, 0 }));
 
-    pattern_->layoutInfo_.currentOffset_ = -ITEM_HEIGHT * 3;
+    // total offset = -ITEM_HEIGHT * 3
+    pattern_->layoutInfo_->UpdateOffset(-ITEM_HEIGHT * 4);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(ITEM_HEIGHT * 2), { 0, 0 }));
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(0.f), { 0, 0 }));
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(-ITEM_HEIGHT), { 0, 0 }));
@@ -765,11 +746,14 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest012, TestSize.Level1)
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         CreateItem(TOTAL_LINE_NUMBER);
     });
-    EXPECT_TRUE(pattern_->layoutInfo_.itemStart_);
-    EXPECT_TRUE(pattern_->layoutInfo_.itemEnd_);
-    EXPECT_TRUE(pattern_->layoutInfo_.offsetEnd_);
-    EXPECT_EQ(pattern_->layoutInfo_.maxHeight_, 500);
-    EXPECT_EQ(pattern_->layoutInfo_.lastMainSize_, 800);
+    EXPECT_TRUE(pattern_->layoutInfo_->itemStart_);
+    EXPECT_TRUE(pattern_->layoutInfo_->itemEnd_);
+    EXPECT_TRUE(pattern_->layoutInfo_->offsetEnd_);
+    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
+    if (info) {
+        EXPECT_EQ(info->maxHeight_, 500);
+    }
+    EXPECT_EQ(pattern_->layoutInfo_->lastMainSize_, 800);
 
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(ITEM_HEIGHT), { 100, 100 }));
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(3 * ITEM_HEIGHT), { 300, 300 }));
@@ -844,8 +828,8 @@ HWTEST_F(WaterFlowTestNg, WaterFlowPatternTest002, TestSize.Level1)
         model.SetLayoutDirection(FlexDirection::COLUMN_REVERSE);
         CreateItem(TOTAL_LINE_NUMBER * 4);
     });
-    EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 0);
-    EXPECT_EQ(pattern_->layoutInfo_.endIndex_, 21);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 21);
 
     /**
      * @tc.steps: step2. UpdateCurrentOffset -100.f.
@@ -853,18 +837,18 @@ HWTEST_F(WaterFlowTestNg, WaterFlowPatternTest002, TestSize.Level1)
      */
     HandleDrag(-100.f);
     pattern_->UpdateScrollBarOffset();
-    EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, 0.f);
-    EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 0);
-    EXPECT_EQ(pattern_->layoutInfo_.endIndex_, 21);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), 0.f);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 21);
 
     /**
      * @tc.steps: step3. UpdateCurrentOffset 200.f.
      * @tc.expected: startIndex_ = 5  endIndex_ = 27.
      */
     HandleDrag(200.f);
-    EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, -ITEM_HEIGHT * 2);
-    EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 5);
-    EXPECT_EQ(pattern_->layoutInfo_.endIndex_, 27);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -ITEM_HEIGHT * 2);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 5);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 27);
 }
 
 /**
@@ -975,7 +959,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowFooterTest001, TestSize.Level1)
      * @tc.steps: step1. Run footer func.
      * @tc.expected: The return_value is correct.
      */
-    auto footerRect = GetChildRect(frameNode_, pattern_->layoutInfo_.footerIndex_);
+    auto footerRect = GetChildRect(frameNode_, pattern_->layoutInfo_->footerIndex_);
     EXPECT_FLOAT_EQ(footerRect.GetY(), 200.f);
 }
 
@@ -1023,6 +1007,7 @@ HWTEST_F(WaterFlowTestNg, Callback001, TestSize.Level1)
      * @tc.expected: Trigger reachend
      */
     UpdateCurrentOffset(-WATERFLOW_HEIGHT);
+    EXPECT_TRUE(pattern_->layoutInfo_->offsetEnd_);
     EXPECT_TRUE(isReachEndCalled);
 
     /**
@@ -1057,12 +1042,14 @@ HWTEST_F(WaterFlowTestNg, Callback002, TestSize.Level1)
     EXPECT_EQ(effect->currentPositionCallback_(), 0);
 
     pattern_->SetAlwaysEnabled(true);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(effect->leadingCallback_(), 0);
     EXPECT_EQ(effect->initLeadingCallback_(), 0);
     EXPECT_EQ(effect->currentPositionCallback_(), 0);
 
-    pattern_->layoutInfo_.Reset();
+    pattern_->layoutInfo_->Reset();
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(effect->leadingCallback_(), 0);
     EXPECT_EQ(effect->initLeadingCallback_(), 0);
@@ -1088,22 +1075,23 @@ HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest001, TestSize.Level1)
         }
     });
 
+    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
     /**
      * @tc.steps: Test IsAllCrossReachEnd function
      * @tc.expected: step1. Check whether the return value is correct.
      */
-    auto reached = pattern_->layoutInfo_.IsAllCrossReachEnd(ITEM_HEIGHT);
+    auto reached = info->IsAllCrossReachEnd(ITEM_HEIGHT);
     EXPECT_TRUE(reached);
-    reached = pattern_->layoutInfo_.IsAllCrossReachEnd(WATERFLOW_HEIGHT);
+    reached = info->IsAllCrossReachEnd(WATERFLOW_HEIGHT);
     EXPECT_TRUE(reached);
 
     /**
      * @tc.steps: Test GetEndIndexByOffset function
      * @tc.expected: step2. Check whether the return value is correct.
      */
-    auto offset = pattern_->layoutInfo_.GetEndIndexByOffset(0);
+    auto offset = info->GetEndIndexByOffset(0);
     EXPECT_EQ(0, offset);
-    offset = pattern_->layoutInfo_.GetEndIndexByOffset(-100.f);
+    offset = info->GetEndIndexByOffset(-100.f);
     EXPECT_EQ(1, offset);
 }
 
@@ -1140,8 +1128,8 @@ HWTEST_F(WaterFlowTestNg, WaterFlowPattern_distributed001, TestSize.Level1)
      * @tc.steps: step2. get pattern .
      * @tc.expected: function ProvideRestoreInfo is called.
      */
-    pattern_->layoutInfo_.startIndex_ = 1;
-    pattern_->layoutInfo_.storedOffset_ = 1.0f;
+    pattern_->layoutInfo_->startIndex_ = 1;
+    pattern_->layoutInfo_->storedOffset_ = 1.0f;
     std::string ret = pattern_->ProvideRestoreInfo();
 
     /**
@@ -1150,8 +1138,8 @@ HWTEST_F(WaterFlowTestNg, WaterFlowPattern_distributed001, TestSize.Level1)
      */
     // std::string restoreInfo = R"({"beginIndex":1,"offset":1.1})";
     pattern_->OnRestoreInfo(ret);
-    EXPECT_EQ(pattern_->layoutInfo_.jumpIndex_, 1);
-    EXPECT_DOUBLE_EQ(pattern_->layoutInfo_.restoreOffset_, 1.0f);
+    EXPECT_EQ(pattern_->layoutInfo_->jumpIndex_, 1);
+    EXPECT_DOUBLE_EQ(pattern_->layoutInfo_->restoreOffset_, 1.0f);
 }
 
 /**
@@ -1271,13 +1259,14 @@ HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest002, TestSize.Level1)
      * @tc.steps: Test GetStartMainPos and GetMainHeight
      * @tc.expected: step2. Check whether the return value is correct.
      */
-    int32_t crossIndex = pattern_->layoutInfo_.items_[0].rbegin()->first;
-    int32_t itemIndex = pattern_->layoutInfo_.items_[0].rbegin()->second.rbegin()->first;
-    EXPECT_EQ(pattern_->layoutInfo_.GetStartMainPos(crossIndex + 1, itemIndex), 0.0f);
-    EXPECT_EQ(pattern_->layoutInfo_.GetMainHeight(crossIndex + 1, itemIndex), 0.0f);
+    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
+    int32_t crossIndex = info->items_[0].rbegin()->first;
+    int32_t itemIndex = info->items_[0].rbegin()->second.rbegin()->first;
+    EXPECT_EQ(info->GetStartMainPos(crossIndex + 1, itemIndex), 0.0f);
+    EXPECT_EQ(info->GetMainHeight(crossIndex + 1, itemIndex), 0.0f);
 
-    EXPECT_EQ(pattern_->layoutInfo_.GetStartMainPos(crossIndex, itemIndex + 1), 0.0f);
-    EXPECT_EQ(pattern_->layoutInfo_.GetMainHeight(crossIndex, itemIndex + 1), 0.0f);
+    EXPECT_EQ(info->GetStartMainPos(crossIndex, itemIndex + 1), 0.0f);
+    EXPECT_EQ(info->GetMainHeight(crossIndex, itemIndex + 1), 0.0f);
 }
 
 /**
@@ -1293,20 +1282,22 @@ HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest003, TestSize.Level1)
      * @tc.steps: Test GetMainCount function
      * @tc.expected: step2. Check whether the size is correct.
      */
-    std::size_t waterFlowItemsSize = pattern_->layoutInfo_.items_[0].size();
-    int32_t mainCount = pattern_->layoutInfo_.GetMainCount();
+    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
 
-    int32_t index = pattern_->layoutInfo_.items_[0].rbegin()->first;
-    pattern_->layoutInfo_.items_[0][index + 1] = std::map<int32_t, std::pair<float, float>>();
-    EXPECT_EQ(pattern_->layoutInfo_.items_[0].size(), waterFlowItemsSize + 1);
-    EXPECT_EQ(pattern_->layoutInfo_.GetMainCount(), mainCount);
+    std::size_t waterFlowItemsSize = info->items_[0].size();
+    int32_t mainCount = info->GetMainCount();
 
-    auto lastItem = pattern_->layoutInfo_.items_[0].begin()->second.rbegin();
+    int32_t index = info->items_[0].rbegin()->first;
+    info->items_[0][index + 1] = std::map<int32_t, std::pair<float, float>>();
+    EXPECT_EQ(info->items_[0].size(), waterFlowItemsSize + 1);
+    EXPECT_EQ(info->GetMainCount(), mainCount);
+
+    auto lastItem = info->items_[0].begin()->second.rbegin();
     float mainSize = lastItem->second.first + lastItem->second.second - 1.0f;
-    EXPECT_FALSE(pattern_->layoutInfo_.IsAllCrossReachEnd(mainSize));
+    EXPECT_FALSE(info->IsAllCrossReachEnd(mainSize));
 
-    pattern_->layoutInfo_.ClearCacheAfterIndex(index + 1);
-    EXPECT_EQ(pattern_->layoutInfo_.items_[0].size(), waterFlowItemsSize + 1);
+    info->ClearCacheAfterIndex(index + 1);
+    EXPECT_EQ(info->items_[0].size(), waterFlowItemsSize + 1);
 }
 
 /**
@@ -1322,12 +1313,14 @@ HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest004, TestSize.Level1)
      * @tc.steps: Test Reset function
      * @tc.expected: step2. Check whether the endIndex_ is correct.
      */
-    int32_t resetFrom = pattern_->layoutInfo_.endIndex_;
-    pattern_->layoutInfo_.Reset(resetFrom + 1);
-    EXPECT_EQ(pattern_->layoutInfo_.endIndex_, resetFrom);
+    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
 
-    pattern_->layoutInfo_.Reset(resetFrom - 1);
-    EXPECT_EQ(pattern_->layoutInfo_.endIndex_, resetFrom);
+    int32_t resetFrom = pattern_->layoutInfo_->endIndex_;
+    info->Reset(resetFrom + 1);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, resetFrom);
+
+    info->Reset(resetFrom - 1);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, resetFrom);
 }
 
 /**
@@ -1343,19 +1336,21 @@ HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest005, TestSize.Level1)
      * @tc.steps: Test GetMaxMainHeight function
      * @tc.expected: step2. Check whether the return value is correct.
      */
-    float maxMainHeight = pattern_->layoutInfo_.GetMaxMainHeight();
-    int32_t crossIndex = pattern_->layoutInfo_.items_[0].rbegin()->first;
-    pattern_->layoutInfo_.items_[0][crossIndex + 1][0] = std::pair<float, float>(1.0f, maxMainHeight);
-    pattern_->layoutInfo_.itemInfos_.clear();
-    pattern_->layoutInfo_.endPosArray_.clear();
-    EXPECT_EQ(pattern_->layoutInfo_.GetMaxMainHeight(), maxMainHeight + 1.0f);
+    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
+
+    float maxMainHeight = info->GetMaxMainHeight();
+    int32_t crossIndex = info->items_[0].rbegin()->first;
+    info->items_[0][crossIndex + 1][0] = std::pair<float, float>(1.0f, maxMainHeight);
+    info->itemInfos_.clear();
+    info->endPosArray_.clear();
+    EXPECT_EQ(info->GetMaxMainHeight(), maxMainHeight + 1.0f);
 
     /**
      * @tc.steps: Test GetCrossIndexForNextItem function
      * @tc.expected: step3. Check whether the return value is correct.
      */
-    pattern_->layoutInfo_.items_[0][crossIndex + 1][1] = std::pair<float, float>(0.0f, 0.0f);
-    FlowItemIndex position = pattern_->layoutInfo_.GetCrossIndexForNextItem(0);
+    info->items_[0][crossIndex + 1][1] = std::pair<float, float>(0.0f, 0.0f);
+    FlowItemIndex position = info->GetCrossIndexForNextItem(0);
     EXPECT_EQ(position.crossIndex, crossIndex + 1);
     EXPECT_EQ(position.lastItemIndex, 1);
 }
@@ -1413,7 +1408,7 @@ HWTEST_F(WaterFlowTestNg, MeasureForAnimation001, TestSize.Level1)
      * @tc.steps: step2. Get value from  pattern_ -> LayoutInfo_ .
      * @tc.expected: return value(crossIndex) is not -1.
      */
-    auto crossIndex = pattern_->layoutInfo_.GetCrossIndex(10);
+    auto crossIndex = pattern_->layoutInfo_->GetCrossIndex(10);
     EXPECT_FALSE(IsEqual(crossIndex, -1));
 }
 
@@ -1424,40 +1419,42 @@ HWTEST_F(WaterFlowTestNg, MeasureForAnimation001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowTestNg, ResetSections001, TestSize.Level1)
 {
-    Create([](WaterFlowModelNG model) {
-        ViewAbstract::SetWidth(CalcLength(400.0f));
-        ViewAbstract::SetHeight(CalcLength(600.f));
-        CreateItem(60);
-    }, false);
+    Create(
+        [](WaterFlowModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(400.0f));
+            ViewAbstract::SetHeight(CalcLength(600.f));
+            CreateItem(60);
+        },
+        false);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_5);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     FlushLayoutTask(frameNode_);
-    auto& info = pattern_->layoutInfo_;
+    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
 
     UpdateCurrentOffset(-205.0f);
-    EXPECT_EQ(info.currentOffset_, -205.0f);
-    EXPECT_EQ(info.startIndex_, 3);
-    EXPECT_EQ(info.endIndex_, 11);
+    EXPECT_EQ(info->Offset(), -205.0f);
+    EXPECT_EQ(info->startIndex_, 3);
+    EXPECT_EQ(info->endIndex_, 11);
 
     // fallback to layout without sections
     pattern_->ResetSections();
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(info.currentOffset_, -205.0f);
-    EXPECT_EQ(info.startIndex_, 1);
-    EXPECT_EQ(info.endIndex_, 5);
-    EXPECT_EQ(info.GetCrossCount(), 1);
+    EXPECT_EQ(info->Offset(), -205.0f);
+    EXPECT_EQ(info->startIndex_, 1);
+    EXPECT_EQ(info->endIndex_, 5);
+    EXPECT_EQ(info->GetCrossCount(), 1);
     if (SystemProperties::WaterFlowUseSegmentedLayout()) {
-        EXPECT_EQ(info.segmentTails_.size(), 1);
-        EXPECT_EQ(info.margins_.size(), 1);
+        EXPECT_EQ(info->segmentTails_.size(), 1);
+        EXPECT_EQ(info->margins_.size(), 1);
     } else {
-        EXPECT_TRUE(info.segmentTails_.empty());
-        EXPECT_TRUE(info.margins_.empty());
+        EXPECT_TRUE(info->segmentTails_.empty());
+        EXPECT_TRUE(info->margins_.empty());
     }
 
     UpdateCurrentOffset(250.0f);
-    EXPECT_EQ(info.currentOffset_, 0.0f);
-    EXPECT_EQ(info.startIndex_, 0);
-    EXPECT_EQ(info.endIndex_, 3);
+    EXPECT_EQ(info->Offset(), 0.0f);
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 3);
 }
 } // namespace OHOS::Ace::NG

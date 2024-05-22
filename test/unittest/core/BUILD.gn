@@ -168,6 +168,7 @@ group("linux_core_unittest") {
 
     # "pattern/waterflow:water_flow_test_ng",
     "pattern/waterflow:water_flow_test_old",
+    "pattern/waterflow:water_flow_test_sw",
 
     # "pattern/xcomponent:xcomponent_test_ng",
     "property:core_property_unittest",

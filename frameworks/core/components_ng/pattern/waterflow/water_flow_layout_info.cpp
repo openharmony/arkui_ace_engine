@@ -17,6 +17,7 @@
 
 #include <algorithm>
 
+#include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -24,6 +25,16 @@
 constexpr float HALF = 0.5f;
 
 namespace OHOS::Ace::NG {
+RefPtr<WaterFlowLayoutInfoBase> WaterFlowLayoutInfoBase::Create(WaterFlowLayoutMode mode)
+{
+    switch (mode) {
+        case WaterFlowLayoutMode::SLIDING_WINDOW:
+            return nullptr;
+        default:
+            return MakeRefPtr<WaterFlowLayoutInfo>();
+    }
+}
+
 int32_t WaterFlowLayoutInfo::GetCrossIndex(int32_t itemIndex) const
 {
     if (static_cast<size_t>(itemIndex) < itemInfos_.size()) {
@@ -155,6 +166,38 @@ float WaterFlowLayoutInfo::GetStartMainPos(int32_t crossIndex, int32_t itemIndex
     }
     result = item->second.first;
     return result;
+}
+
+OverScrollOffset WaterFlowLayoutInfo::GetOverScrolledDelta(float delta) const
+{
+    OverScrollOffset offset = { 0, 0 };
+    if (startIndex_ == 0) {
+        auto startPos = currentOffset_;
+        auto newStartPos = startPos + delta;
+        if (startPos > 0 && newStartPos > 0) {
+            offset.start = delta;
+        }
+        if (startPos > 0 && newStartPos <= 0) {
+            offset.start = -startPos;
+        }
+        if (startPos <= 0 && newStartPos > 0) {
+            offset.start = newStartPos;
+        }
+    }
+    if (itemEnd_) {
+        auto endPos = currentOffset_ + maxHeight_;
+        auto newEndPos = endPos + delta;
+        if (endPos < lastMainSize_ && newEndPos < lastMainSize_) {
+            offset.end = delta;
+        }
+        if (endPos < lastMainSize_ && newEndPos >= lastMainSize_) {
+            offset.end = lastMainSize_ - endPos;
+        }
+        if (endPos >= lastMainSize_ && newEndPos < lastMainSize_) {
+            offset.end = newEndPos - lastMainSize_;
+        }
+    }
+    return offset;
 }
 
 bool WaterFlowLayoutInfo::IsAllCrossReachEnd(float mainSize) const
@@ -532,5 +575,35 @@ void WaterFlowLayoutInfo::JumpTo(const std::pair<float, float>& item)
     currentOffset_ = JumpToTargetAlign(item);
     align_ = ScrollAlign::START;
     jumpIndex_ = EMPTY_JUMP_INDEX;
+}
+
+void WaterFlowLayoutInfo::UpdateOffset(float delta)
+{
+    prevOffset_ = currentOffset_;
+    currentOffset_ += delta;
+}
+
+float WaterFlowLayoutInfo::CalcTargetPosition(int32_t idx, int32_t crossIdx) const
+{
+    return -JumpToTargetAlign(items_[GetSegment(idx)].at(crossIdx).at(idx));
+}
+
+bool WaterFlowLayoutInfo::OutOfBounds() const
+{
+    bool outOfStart = itemStart_ && Positive(currentOffset_);
+    bool outOfEnd = offsetEnd_ && LessNotEqual(currentOffset_ + maxHeight_, lastMainSize_);
+    return outOfStart || outOfEnd;
+}
+
+float WaterFlowLayoutInfo::CalcOverScroll(float mainSize, float delta) const
+{
+    float res = 0;
+    if (itemStart_) {
+        res = currentOffset_ + delta;
+    }
+    if (offsetEnd_) {
+        res = mainSize - (GetMaxMainHeight() + currentOffset_ - delta);
+    }
+    return res;
 }
 } // namespace OHOS::Ace::NG
