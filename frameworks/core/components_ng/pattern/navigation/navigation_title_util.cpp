@@ -359,7 +359,35 @@ void NavigationTitleUtil::UpdateBarItemNodeWithItem(
     barItemNode->MarkModifyDone();
 }
 
-void NavigationTitleUtil::BuildMoreIemNode(const RefPtr<BarItemNode>& barItemNode, const bool isButtonEnabled)
+void BuildImageMoreItemNode(const RefPtr<BarItemNode>& barItemNode, const bool isButtonEnabled)
+{
+    int32_t imageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, imageNodeId, AceType::MakeRefPtr<ImagePattern>());
+    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+
+    auto info = ImageSourceInfo("");
+    info.SetResourceId(theme->GetMoreResourceId());
+    if (isButtonEnabled) {
+        info.SetFillColor(theme->GetMenuIconColor());
+    } else {
+        info.SetFillColor(theme->GetMenuIconColor().BlendOpacity(theme->GetAlphaDisabled()));
+    }
+
+    imageLayoutProperty->UpdateImageSourceInfo(info);
+    auto iconSize = theme->GetMenuIconSize();
+    imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
+    imageNode->MarkModifyDone();
+
+    barItemNode->SetIsMoreItemNode(true);
+    barItemNode->SetIconNode(imageNode);
+    barItemNode->AddChild(imageNode);
+    barItemNode->MarkModifyDone();
+}
+
+void BuildSymbolMoreItemNode(const RefPtr<BarItemNode>& barItemNode, const bool isButtonEnabled)
 {
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
@@ -374,15 +402,22 @@ void NavigationTitleUtil::BuildMoreIemNode(const RefPtr<BarItemNode>& barItemNod
     if (isButtonEnabled) {
         symbolProperty->UpdateSymbolColorList({ theme->GetMenuIconColor() });
     } else {
-        symbolProperty->UpdateSymbolColorList({ theme->GetMenuIconColor()
-            .BlendOpacity(theme->GetAlphaDisabled()) });
+        symbolProperty->UpdateSymbolColorList({ theme->GetMenuIconColor().BlendOpacity(theme->GetAlphaDisabled()) });
     }
     symbolNode->MarkModifyDone();
     barItemNode->SetIsMoreItemNode(true);
     barItemNode->SetIconNode(symbolNode);
     barItemNode->AddChild(symbolNode);
     barItemNode->MarkModifyDone();
-    return;
+}
+
+void NavigationTitleUtil::BuildMoreIemNode(const RefPtr<BarItemNode>& barItemNode, const bool isButtonEnabled)
+{
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        BuildSymbolMoreItemNode(barItemNode, isButtonEnabled);
+    } else {
+        BuildImageMoreItemNode(barItemNode, isButtonEnabled);
+    }
 }
 
 RefPtr<BarItemNode> NavigationTitleUtil::CreateBarItemNode(const bool isButtonEnabled)

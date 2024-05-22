@@ -342,24 +342,28 @@ ArkUINativeModuleValue NavigationBridge::SetBackButtonIcon(ArkUIRuntimeCallInfo*
     Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
     std::string src;
     auto noPixMap = Framework::JSViewAbstract::ParseJsMedia(info[1], src);
-
+    auto isValidImage = false;
     RefPtr<PixelMap> pixMap = nullptr;
 #if defined(PIXEL_MAP_SUPPORTED)
     if (!noPixMap) {
         pixMap = CreatePixelMapFromNapiValue(info[1]);
     }
 #endif
+    if (noPixMap || pixMap != nullptr) {
+        isValidImage = true;
+    }
     std::string bundleName;
     std::string moduleName;
     Framework::JSViewAbstract::GetJsMediaBundleInfo(info[1], bundleName, moduleName);
+    NG::ImageOption imageOption;
     std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
-    if (info[1]->IsObject()) {
-        if (src.empty() && pixMap == nullptr) {
-            Framework::JSViewAbstract::SetSymbolOptionApply(info, iconSymbol, info[1]);
-        }
+    auto isSymbol = info[1]->IsObject() && src.empty() && pixMap == nullptr;
+    if (isSymbol) {
+        Framework::JSViewAbstract::SetSymbolOptionApply(info, iconSymbol, info[1]);
     }
-
-    NavigationModelNG::SetBackButtonIcon(frameNode, iconSymbol, src, noPixMap, pixMap);
+    imageOption.noPixMap = noPixMap;
+    imageOption.isValidImage = isValidImage;
+    NavigationModelNG::SetBackButtonIcon(frameNode, iconSymbol, src, imageOption, pixMap);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -371,10 +375,13 @@ ArkUINativeModuleValue NavigationBridge::ResetBackButtonIcon(ArkUIRuntimeCallInf
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     bool noPixMap = false;
+    NG::ImageOption imageOption;
+    imageOption.noPixMap = noPixMap;
+    imageOption.isValidImage = false;
     RefPtr<PixelMap> pixMap = nullptr;
     std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
     std::string src;
-    NavigationModelNG::SetBackButtonIcon(frameNode, iconSymbol, src, noPixMap, pixMap);
+    NavigationModelNG::SetBackButtonIcon(frameNode, iconSymbol, src, imageOption, pixMap);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG
