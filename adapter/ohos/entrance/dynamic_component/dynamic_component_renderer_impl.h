@@ -43,6 +43,10 @@ public:
 
     void TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
+    void Dump(RendererDumpInfo &rendererDumpInfo) override;
+    void RegisterErrorEventHandler();
+    void FireOnErrorCallback(int32_t code, const std::string& name, const std::string& msg);
+    void InitUiContent();
 
 private:
     RefPtr<TaskExecutor> GetTaskExecutor();
@@ -62,6 +66,7 @@ private:
     NativeEngine* runtime_ = nullptr;
     WeakPtr<FrameNode> host_;
     int32_t hostInstanceId_ = -1;
+    RendererDumpInfo rendererDumpInfo_;
 
     SizeF contentSize_;
 
