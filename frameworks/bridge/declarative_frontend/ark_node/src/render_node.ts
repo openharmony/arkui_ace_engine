@@ -203,6 +203,9 @@ class ColorMetrics {
     const green = (value >> 8) & 0x000000FF;
     const blue = value & 0x000000FF;
     const alpha = (value >> 24) & 0x000000FF;
+    if (alpha === 0) {
+      return new ColorMetrics(red, green, blue);
+    }
     return new ColorMetrics(red, green, blue, alpha);
   }
   static rgba(red: number, green: number, blue: number, alpha: number = MAX_ALPHA_VALUE): ColorMetrics {
