@@ -14060,10 +14060,11 @@ class ArkButtonComponent extends ArkComponent {
       return;
     }
     this.needRebuild = false;
-    if (this.builder !== modifier.applyContent()) {
+    this.applyContent = modifier.applyContent()
+    if (this.builder !== this.applyContent) {
       this.needRebuild = true;
     }
-    this.builder = modifier.applyContent();
+    this.builder = this.applyContent;
     this.modifier = modifier;
     getUINativeModule().button.setContentModifierBuilder(this.nativePtr, this);
   }
