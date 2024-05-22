@@ -239,7 +239,8 @@ public:
     {
         images_.clear();
     }
-
+    void ResetImage();
+    void ResetAltImage();
     void ResetImageProperties();
 
     void ResetImageAndAlt();

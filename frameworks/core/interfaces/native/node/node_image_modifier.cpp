@@ -401,7 +401,9 @@ const char* GetAlt(ArkUINodeHandle node)
 
 void ResetAlt(ArkUINodeHandle node)
 {
-    return;
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::ResetImageAlt(frameNode);
 }
 
 void SetImageInterpolation(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -751,6 +753,13 @@ void AnalyzerConfig(ArkUINodeHandle node, void* config)
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetImageAnalyzerConfig(frameNode, config);
 }
+
+void ResetImageSrc(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::ResetImageSrc(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -769,7 +778,7 @@ const ArkUIImageModifier* GetImageModifier()
         ResetEnhancedImageQuality, GetImageSrc, GetAutoResize, GetObjectRepeat, GetObjectFit,
         GetImageInterpolation, GetColorFilter, GetAlt, GetImageDraggable, GetRenderMode, SetImageResizable,
         GetImageResizable, GetFitOriginalSize, GetFillColor, SetPixelMap, SetPixelMapArray, SetResourceSrc,
-        EnableAnalyzer, AnalyzerConfig, SetDrawingColorFilter, GetDrawingColorFilter };
+        EnableAnalyzer, AnalyzerConfig, SetDrawingColorFilter, GetDrawingColorFilter, ResetImageSrc };
     return &modifier;
 }
 

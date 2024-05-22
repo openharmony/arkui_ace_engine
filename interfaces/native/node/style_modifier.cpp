@@ -9677,7 +9677,7 @@ void ResetVerticalAlign(ArkUI_NodeHandle node)
 void ResetImageSrc(ArkUI_NodeHandle node)
 {
     auto fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getImageModifier()->setSrc(node->uiNodeHandle, "");
+    fullImpl->getNodeModifiers()->getImageModifier()->resetImageSrc(node->uiNodeHandle);
 }
 
 void ResetObjectFit(ArkUI_NodeHandle node)

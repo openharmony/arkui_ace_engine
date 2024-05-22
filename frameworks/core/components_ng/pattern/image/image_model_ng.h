@@ -116,6 +116,8 @@ public:
     static void EnableAnalyzer(FrameNode* frameNode, bool isEnableAnalyzer);
     static void SetImageAnalyzerConfig(FrameNode* frameNode, void* config);
     static RefPtr<DrawingColorFilter> GetDrawingColorFilter(FrameNode* frameNode);
+    static void ResetImageSrc(FrameNode* frameNode);
+    static void ResetImageAlt(FrameNode* frameNode);
 private:
     RefPtr<ImagePattern> GetImagePattern();
 };
