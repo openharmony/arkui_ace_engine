@@ -539,7 +539,7 @@ class ImageAnalyzerConfigModifier extends ModifierWithKey<object> {
   static identity: Symbol = Symbol('analyzerConfig');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().image.analyzerConfig(node);
+      getUINativeModule().image.analyzerConfig(node, '');
     } else {
       getUINativeModule().image.analyzerConfig(node, this.value!);
     }
@@ -551,9 +551,7 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
     super(nativePtr, classType);
   }
   initialize(value: Object[]): this {
-    if (value[0] != undefined) {
-      modifierWithKey(this._modifiersWithKeys, ImageSrcModifier.identity, ImageSrcModifier, value[0]);
-    }
+    modifierWithKey(this._modifiersWithKeys, ImageSrcModifier.identity, ImageSrcModifier, value[0]);
     return this;
   }
   allowChildCount(): number {

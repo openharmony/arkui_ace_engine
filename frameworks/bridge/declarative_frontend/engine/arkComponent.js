@@ -6127,9 +6127,7 @@ class ArkImageComponent extends ArkComponent {
     super(nativePtr, classType);
   }
   initialize(value) {
-    if (value[0] != undefined) {
-      modifierWithKey(this._modifiersWithKeys, ImageSrcModifier.identity, ImageSrcModifier, value[0]);
-    }
+    modifierWithKey(this._modifiersWithKeys, ImageSrcModifier.identity, ImageSrcModifier, value[0]);
     return this;
   }
   allowChildCount() {
@@ -8299,7 +8297,7 @@ class SpanInputModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      getUINativeModule().span.setSpanSrc(node, "");
+      getUINativeModule().span.setSpanSrc(node, '');
     }
     else {
       getUINativeModule().span.setSpanSrc(node, this.value);
@@ -8319,9 +8317,7 @@ class ArkSpanComponent {
     this._nativePtrChanged = false;
   }
   initialize(value) {
-    if (value[0] != undefined) {
-      modifierWithKey(this._modifiersWithKeys, SpanInputModifier.identity, SpanInputModifier, value[0]);
-    }
+    modifierWithKey(this._modifiersWithKeys, SpanInputModifier.identity, SpanInputModifier, value[0]);
     return this;
   }
   applyModifierPatch() {
