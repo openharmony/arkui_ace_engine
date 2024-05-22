@@ -582,11 +582,13 @@ void MenuLayoutAlgorithm::ModifyPositionToWrapper(LayoutWrapper* layoutWrapper, 
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     auto windowManager = pipelineContext->GetWindowManager();
-    auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
-                            windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+    auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL;
     if (isContainerModal) {
-        wrapperOffset = OffsetF(static_cast<float>((CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx()),
-            static_cast<float>((pipelineContext->GetCustomTitleHeight() + CONTAINER_BORDER_WIDTH).ConvertToPx()));
+        wrapperOffset = OffsetF(0.0f, static_cast<float>(pipelineContext->GetCustomTitleHeight().ConvertToPx()));
+        if (windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+            wrapperOffset += OffsetF(static_cast<float>((CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx()),
+                static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()));
+        }
         position -= wrapperOffset;
     }
 }
