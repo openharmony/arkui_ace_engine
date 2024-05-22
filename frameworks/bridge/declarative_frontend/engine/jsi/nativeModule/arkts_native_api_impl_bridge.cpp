@@ -750,6 +750,8 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NativeUtilsBridge::ParseResourceColor));
     nativeUtils->Set(vm, panda::StringRef::NewFromUtf8(vm, "blendColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NativeUtilsBridge::BlendColor));
+    nativeUtils->Set(vm, panda::StringRef::NewFromUtf8(vm, "resoureToLengthMetrics"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NativeUtilsBridge::ResoureToLengthMetrics));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "nativeUtils"), nativeUtils);
 
     auto nodeAdapter = panda::ObjectRef::New(vm);

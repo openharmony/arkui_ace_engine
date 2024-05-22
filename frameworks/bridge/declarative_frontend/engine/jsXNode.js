@@ -1197,6 +1197,10 @@ class LengthMetrics {
     static lpx(value) {
         return new LengthMetrics(value, LengthUnit.LPX);
     }
+    static resource(res) {
+        let length = getUINativeModule().nativeUtils.resoureToLengthMetrics(res);
+        return new LengthMetrics(length[0], length[1]);
+    }
 }
 const MAX_CHANNEL_VALUE = 0xFF;
 const MAX_ALPHA_VALUE = 1;

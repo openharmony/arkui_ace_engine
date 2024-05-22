@@ -159,6 +159,7 @@ public:
     static ArkUINativeModuleValue CreateStrongRef(EcmaVM* vm, const RefPtr<AceType>& ref);
     static ArkUINativeModuleValue ParseResourceColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue BlendColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResoureToLengthMetrics(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 } // namespace OHOS::Ace::NG
 
