@@ -8974,4 +8974,47 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg043, TestSize.Level1)
     auto result = menuAlgorithm->VerticalLayout(size, clickPosition, true);
     EXPECT_EQ(result, clickPosition);
 }
+
+/**
+ * @tc.name: MenuWrapperPatternTestNg011
+ * @tc.desc: Test Verify interaction effect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuWrapperPatternTestNg011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set API12.
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto menuWrapperNode = GetPreviewMenuWrapper();
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto wrapPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapPattern, nullptr);
+    TouchEventInfo info(MENU_TOUCH_EVENT_TYPE);
+    TouchLocationInfo locationInfo(TARGET_ID);
+    Offset location(1, 1);
+    locationInfo.SetTouchType(TouchType::MOVE);
+    locationInfo.SetLocalLocation(location);
+    info.touches_.emplace_back(locationInfo);
+    /**
+     * @tc.steps: step2. receive event and test hover event.
+     */
+    wrapPattern->OnTouchEvent(info);
+    EXPECT_EQ(wrapPattern->currentTouchItem_, nullptr);
+
+    auto menuframeNode = wrapPattern->GetMenuChild(menuWrapperNode);
+    EXPECT_NE(menuframeNode, nullptr);
+    /**
+     * @tc.steps: step3. create menuitem and test longpress event.
+     */
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 100, AceType::MakeRefPtr<MenuItemPattern>());
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    menuItemPattern->InitLongPressEvent();
+    ASSERT_NE(menuItemPattern->longPressEvent_, nullptr);
+    GestureEvent gestureEvent;
+    gestureEvent.offsetY_ = 1.0;
+    (*menuItemPattern->longPressEvent_)(gestureEvent);
+    ASSERT_FALSE(menuItemPattern->isSubMenuShowed_);
+}
 } // namespace OHOS::Ace::NG
