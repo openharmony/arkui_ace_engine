@@ -228,16 +228,6 @@ void ListItemPattern::SetSwiperItemForList()
     auto listPattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(listPattern);
     listPattern->SetSwiperItem(AceType::WeakClaim(this));
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        auto scrollableEvent = listPattern->GetScrollableEvent();
-        CHECK_NULL_VOID(scrollableEvent);
-        auto clickJudgeCallback = [weak = WeakClaim(this)](const PointF& localPoint) -> bool {
-            auto item = weak.Upgrade();
-            CHECK_NULL_RETURN(item, false);
-            return item->ClickJudge(localPoint);
-        };
-        scrollableEvent->SetClickJudgeCallback(clickJudgeCallback);
-    }
 }
 
 void ListItemPattern::SetOffsetChangeCallBack(OnOffsetChangeFunc&& offsetChangeCallback)
@@ -643,14 +633,23 @@ void ListItemPattern::FireSwipeActionStateChange(SwipeActionState newState)
     swipeActionState_ = newState;
     bool isStart = GreatNotEqual(curOffset_, 0.0);
     listItemEventHub->FireStateChangeEvent(newState, isStart);
+    auto frameNode = GetListFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto listPattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(listPattern);
+    auto scrollableEvent = listPattern->GetScrollableEvent();
+    CHECK_NULL_VOID(scrollableEvent);
     if (newState == SwipeActionState::COLLAPSED) {
-        auto frameNode = GetListFrameNode();
-        CHECK_NULL_VOID(frameNode);
-        auto listPattern = frameNode->GetPattern<ListPattern>();
-        CHECK_NULL_VOID(listPattern);
-        auto scrollableEvent = listPattern->GetScrollableEvent();
-        CHECK_NULL_VOID(scrollableEvent);
+        TAG_LOGI(AceLogTag::ACE_LIST, "RemoveClickJudgeCallback");
         scrollableEvent->SetClickJudgeCallback(nullptr);
+    } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto clickJudgeCallback = [weak = WeakClaim(this)](const PointF& localPoint) -> bool {
+            auto item = weak.Upgrade();
+            CHECK_NULL_RETURN(item, false);
+            return item->ClickJudge(localPoint);
+        };
+        TAG_LOGI(AceLogTag::ACE_LIST, "AddClickJudgeCallback");
+        scrollableEvent->SetClickJudgeCallback(clickJudgeCallback);
     }
 }
 
