@@ -51,7 +51,7 @@ class MarqueePattern : public Pattern {
 
 public:
     MarqueePattern() = default;
-    ~MarqueePattern() override = default;
+    ~MarqueePattern() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
@@ -83,6 +83,8 @@ public:
     void OnColorConfigurationUpdate() override;
     void DumpInfo() override;
     void OnVisibleChange(bool isVisible) override;
+    void OnWindowHide() override;
+    void OnWindowShow() override;
 
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -105,7 +107,6 @@ private:
     void OnAnimationFinish();
     float CalculateStart();
     float CalculateEnd();
-    void RegistOritationListener();
     float GetTextOffset();
     float GetTextNodeWidth();
     double GetScrollAmount();
@@ -113,13 +114,11 @@ private:
     bool IsRunMarquee();
     bool measureChanged_ = false;
     int32_t animationId_ = 0;
-    bool isRegistedAreaCallback_ = false;
     std::shared_ptr<AnimationUtils::Animation> animation_;
     bool playStatus_ = false;
     double scrollAmount_ = DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx();
     int32_t loop_ = -1;
     MarqueeDirection direction_ = MarqueeDirection::LEFT;
-    bool isOritationListenerRegisted_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(MarqueePattern);
     LastAnimationParam lastAnimationParam_;
     int32_t lastWindowHeight_ = 0.0;
