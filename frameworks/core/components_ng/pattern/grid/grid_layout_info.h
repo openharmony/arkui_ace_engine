@@ -30,6 +30,8 @@ namespace OHOS::Ace::NG {
 struct GridPredictLayoutParam {
     std::list<int32_t> items;
     LayoutConstraintF layoutConstraint;
+    std::map<int32_t, float> itemsCrossSizes;
+    float crossGap;
 };
 
 constexpr int32_t EMPTY_JUMP_INDEX = -2;
