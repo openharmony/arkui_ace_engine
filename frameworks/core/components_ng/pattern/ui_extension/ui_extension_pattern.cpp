@@ -487,6 +487,9 @@ void UIExtensionPattern::HandleMouseEvent(const MouseInfo& info)
     if (info.GetSourceDevice() != SourceType::MOUSE) {
         return;
     }
+    if (info.GetPullAction() == MouseAction::PULL_MOVE || info.GetPullAction() == MouseAction::PULL_UP) {
+        return;
+    }
     const auto pointerEvent = info.GetPointerEvent();
     CHECK_NULL_VOID(pointerEvent);
     lastPointerEvent_ = pointerEvent;
