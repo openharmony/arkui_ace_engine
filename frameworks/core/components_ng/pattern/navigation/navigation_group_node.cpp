@@ -489,9 +489,14 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation pop animation start");
             /* preNode */
             float flag = CheckLanguageDirection();
-            preNode->GetRenderContext()->ClipWithRRect(
-                RectF(preFrameSize.Width() * HALF * flag, 0.0f, preFrameSize.Width(), REMOVE_CLIP_SIZE),
-                RadiusF(EdgeF(0.0f, 0.0f)));
+            if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+                preNode->GetRenderContext()->ClipWithRRect(
+                    RectF(0.0f, 0.0f, preFrameSize.Width() * HALF, REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
+            } else {
+                preNode->GetRenderContext()->ClipWithRRect(
+                    RectF(preFrameSize.Width() * HALF, 0.0f, preFrameSize.Width(), REMOVE_CLIP_SIZE),
+                    RadiusF(EdgeF(0.0f, 0.0f)));
+            }
             preNode->GetRenderContext()->UpdateTranslateInXY({ preFrameSize.Width() * HALF * flag, 0.0f });
             preTitleNode->GetRenderContext()->UpdateTranslateInXY({ preFrameSize.Width() * HALF * flag, 0.0f });
 
@@ -631,9 +636,14 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
     preTitleNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
     /* curNode */
     float flag = CheckLanguageDirection();
-    curNode->GetRenderContext()->ClipWithRRect(
-        RectF(0.0f, 0.0f, curFrameSize.Width() * HALF, REMOVE_CLIP_SIZE),
-        RadiusF(EdgeF(0.0f, 0.0f)));
+    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+        curNode->GetRenderContext()->ClipWithRRect(
+            RectF(0.0f, 0.0f, curFrameSize.Width() * HALF, REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
+    } else {
+        curNode->GetRenderContext()->ClipWithRRect(
+            RectF(curFrameSize.Width() * HALF, 0.0f, curFrameSize.Width(), REMOVE_CLIP_SIZE),
+            RadiusF(EdgeF(0.0f, 0.0f)));
+    }
     curNode->GetRenderContext()->UpdateTranslateInXY({ curFrameSize.Width() * HALF * flag, 0.0f });
     curTitleNode->GetRenderContext()->UpdateTranslateInXY({ curFrameSize.Width() * HALF * flag, 0.0f });
 
