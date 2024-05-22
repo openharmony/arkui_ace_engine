@@ -69,13 +69,12 @@ void SearchLayoutAlgorithm::CancelImageMeasure(LayoutWrapper* layoutWrapper)
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto imageConstraint = imageLayoutProperty->GetLayoutConstraint();
     auto searchHeight = CalcSearchHeight(constraint.value(), layoutWrapper);
-    auto defaultImageHeight =
-        imageConstraint->selfIdealSize.Height().value_or(searchTheme->GetIconSize().ConvertToPx());
+    auto defaultImageHeight = static_cast<float>(searchTheme->GetIconSize().ConvertToPx());
     auto iconStretchSize = (NearZero(defaultImageHeight) || !imageConstraint->maxSize.IsPositive()) &&
                            !layoutProperty->HasCancelButtonUDSize();
-    auto imageHeight =
-        std::min(iconStretchSize ? static_cast<float>(searchTheme->GetIconSize().ConvertToPx()) : defaultImageHeight,
-            static_cast<float>(searchHeight));
+    auto imageHeight = static_cast<float>(std::min(layoutProperty->HasCancelButtonUDSize() ?
+        layoutProperty->GetCancelButtonUDSizeValue().ConvertToPx() : defaultImageHeight,
+        searchHeight));
     CalcSize imageCalcSize;
     if (iconStretchSize) {
         imageCalcSize.SetWidth(CalcLength(imageHeight));
