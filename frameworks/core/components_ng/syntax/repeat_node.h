@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_FOR_EACH_NODE_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_FOR_EACH_NODE_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_REPEAT_NODE_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_REPEAT_NODE_H
 
 #include <cstdint>
 #include <list>
@@ -28,15 +28,15 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT ForEachNode : public ForEachBaseNode {
-    DECLARE_ACE_TYPE(ForEachNode, ForEachBaseNode);
+class ACE_EXPORT RepeatNode : public ForEachBaseNode {
+    DECLARE_ACE_TYPE(RepeatNode, ForEachBaseNode);
 
 public:
-    static RefPtr<ForEachNode> GetOrCreateForEachNode(int32_t nodeId);
+    static RefPtr<RepeatNode> GetOrCreateRepeatNode(int32_t nodeId);
 
-    explicit ForEachNode(int32_t nodeId) : ForEachBaseNode(V2::JS_FOR_EACH_ETS_TAG, nodeId) {}
+    explicit RepeatNode(int32_t nodeId) : ForEachBaseNode(V2::JS_REPEAT_ETS_TAG, nodeId) {}
 
-    ~ForEachNode() override = default;
+    ~RepeatNode() override = default;
 
     // FIXME 
     void DoSetActiveChildRange(int32_t start, int32_t end) override;
@@ -87,9 +87,9 @@ private:
     // true when this is actually RepeatNode (not "ForEach")
     bool isThisRepeatNode_ = false;
 
-    ACE_DISALLOW_COPY_AND_MOVE(ForEachNode);
+    ACE_DISALLOW_COPY_AND_MOVE(RepeatNode);
 };
 
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_FOR_EACH_NODE_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_REPEAT_NODE_H

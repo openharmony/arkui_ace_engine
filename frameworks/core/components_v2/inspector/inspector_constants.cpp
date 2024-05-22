@@ -69,6 +69,8 @@ const char JS_LAZY_FOR_EACH_ETS_TAG[] = "LazyForEach";
 // js lazy foreach node
 const char JS_FOR_EACH_ETS_TAG[] = "ForEach";
 // js lazy foreach node
+const char JS_REPEAT_ETS_TAG[] = "Repeat";
+// js repeat node
 const char JS_SYNTAX_ITEM_ETS_TAG[] = "SyntaxItem";
 // js if lese node
 const char JS_IF_ELSE_ETS_TAG[] = "IfElse";

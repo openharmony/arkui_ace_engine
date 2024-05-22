@@ -74,6 +74,8 @@ ACE_EXPORT extern const char JS_LAZY_FOR_EACH_ETS_TAG[];
 // js lazy foreach node
 ACE_EXPORT extern const char JS_FOR_EACH_ETS_TAG[];
 // js lazy foreach node
+ACE_EXPORT extern const char JS_REPEAT_ETS_TAG[];
+// js repeat node
 ACE_EXPORT extern const char JS_SYNTAX_ITEM_ETS_TAG[];
 // js if lese node
 ACE_EXPORT extern const char JS_IF_ELSE_ETS_TAG[];

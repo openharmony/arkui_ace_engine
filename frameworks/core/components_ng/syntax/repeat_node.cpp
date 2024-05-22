@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/syntax/for_each_node.h"
+#include "core/components_ng/syntax/repeat_node.h"
 
 #include "base/log/ace_trace.h"
 #include "core/components_ng/base/frame_node.h"
@@ -37,18 +37,18 @@ void MakeNodeMapById(const std::list<RefPtr<UINode>>& nodes, const std::list<std
 }
 } // namespace
 
-RefPtr<ForEachNode> ForEachNode::GetOrCreateForEachNode(int32_t nodeId)
+RefPtr<RepeatNode> RepeatNode::GetOrCreateRepeatNode(int32_t nodeId)
 {
-    auto node = ElementRegister::GetInstance()->GetSpecificItemById<ForEachNode>(nodeId);
+    auto node = ElementRegister::GetInstance()->GetSpecificItemById<RepeatNode>(nodeId);
     if (node) {
         return node;
     }
-    node = MakeRefPtr<ForEachNode>(nodeId);
+    node = MakeRefPtr<RepeatNode>(nodeId);
     ElementRegister::GetInstance()->AddUINode(node);
     return node;
 }
 
-void ForEachNode::CreateTempItems()
+void RepeatNode::CreateTempItems()
 {
     std::swap(ids_, tempIds_);
     std::swap(ModifyChildren(), tempChildren_);
@@ -60,7 +60,7 @@ void ForEachNode::CreateTempItems()
 }
 
 // same as foundation/arkui/ace_engine/frameworks/core/components_part_upd/foreach/foreach_element.cpp.
-void ForEachNode::CompareAndUpdateChildren()
+void RepeatNode::CompareAndUpdateChildren()
 {
     if (isThisRepeatNode_) {
         return;
@@ -74,7 +74,7 @@ void ForEachNode::CompareAndUpdateChildren()
     // create a map for quicker find/search
     std::unordered_set<std::string> oldIdsSet(tempIds_.begin(), tempIds_.end());
 
-    // ForEachNode only includes children for newly created_ array items
+    // RepeatNode only includes children for newly created_ array items
     // it does not include children of array items that were rendered on a previous
     // render
     std::list<RefPtr<UINode>> additionalChildComps;
@@ -124,7 +124,7 @@ void ForEachNode::CompareAndUpdateChildren()
         }
     }
 
-    ACE_SCOPED_TRACE("ForEachNode::Update Id[%d] preIds[%zu] newIds[%zu] oldIdsSet[%zu] additionalChildComps[%zu]",
+    ACE_SCOPED_TRACE("RepeatNode::Update Id[%d] preIds[%zu] newIds[%zu] oldIdsSet[%zu] additionalChildComps[%zu]",
         GetId(), tempIds_.size(), ids_.size(), oldIdsSet.size(), additionalChildComps.size());
 
     if (IsOnMainTree()) {
@@ -140,7 +140,7 @@ void ForEachNode::CompareAndUpdateChildren()
     }
 }
 
-void ForEachNode::FlushUpdateAndMarkDirty()
+void RepeatNode::FlushUpdateAndMarkDirty()
 {
     if (ids_ == tempIds_ && !isThisRepeatNode_) {
         tempIds_.clear();
@@ -153,9 +153,9 @@ void ForEachNode::FlushUpdateAndMarkDirty()
 }
 
 // RepeatNode only
-void ForEachNode::FinishRepeatRender(std::list<int32_t>& removedElmtId)
+void RepeatNode::FinishRepeatRender(std::list<int32_t>& removedElmtId)
 {
-    ACE_SCOPED_TRACE("ForEachNode::FinishRepeatRender");
+    ACE_SCOPED_TRACE("RepeatNode::FinishRepeatRender");
 
     // Required to build unordered_set of RefPtr<UINodes>
     struct Hash {
@@ -190,11 +190,11 @@ void ForEachNode::FinishRepeatRender(std::list<int32_t>& removedElmtId)
         frameNode->ChildrenUpdatedFrom(0);
     }
 
-    LOGE("ForEachNode::FinishRepeatRender END");
+    LOGE("RepeatNode::FinishRepeatRender END");
 }
 
 // RepeatNode only
-void ForEachNode::MoveChild(uint32_t fromIndex)
+void RepeatNode::MoveChild(uint32_t fromIndex)
 {
     // copy child from tempChildrenOfRepeat_[fromIndex] and append to children_
     if (fromIndex < tempChildrenOfRepeat_.size()) {
@@ -203,7 +203,7 @@ void ForEachNode::MoveChild(uint32_t fromIndex)
     }
 }
 
-void ForEachNode::SetOnMove(std::function<void(int32_t, int32_t)>&& onMove)
+void RepeatNode::SetOnMove(std::function<void(int32_t, int32_t)>&& onMove)
 {
     if (onMove && !onMoveEvent_) {
         auto parentNode = GetParentFrameNode();
@@ -228,7 +228,7 @@ void ForEachNode::SetOnMove(std::function<void(int32_t, int32_t)>&& onMove)
     onMoveEvent_ = onMove;
 }
 
-void ForEachNode::MoveData(int32_t from, int32_t to)
+void RepeatNode::MoveData(int32_t from, int32_t to)
 {
     if (from == to) {
         return;
@@ -254,12 +254,12 @@ void ForEachNode::MoveData(int32_t from, int32_t to)
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT | PROPERTY_UPDATE_BY_CHILD_REQUEST);
 }
 
-RefPtr<FrameNode> ForEachNode::GetFrameNode(int32_t index)
+RefPtr<FrameNode> RepeatNode::GetFrameNode(int32_t index)
 {
     return AceType::DynamicCast<FrameNode>(GetFrameChildByIndex(index, false, false));
 }
 
-void ForEachNode::InitDragManager(const RefPtr<UINode>& child)
+void RepeatNode::InitDragManager(const RefPtr<UINode>& child)
 {
     CHECK_NULL_VOID(onMoveEvent_);
     CHECK_NULL_VOID(child);
@@ -275,7 +275,7 @@ void ForEachNode::InitDragManager(const RefPtr<UINode>& child)
     pattern->InitDragManager(AceType::Claim(this));
 }
 
-void ForEachNode::InitAllChildrenDragManager(bool init)
+void RepeatNode::InitAllChildrenDragManager(bool init)
 {
     auto parentNode = GetParentFrameNode();
     CHECK_NULL_VOID(parentNode);
@@ -305,13 +305,13 @@ void ForEachNode::InitAllChildrenDragManager(bool init)
 }
 
 
-void ForEachNode::DoSetActiveChildRange(int32_t start, int32_t end)
+void RepeatNode::DoSetActiveChildRange(int32_t start, int32_t end)
 {
-    LOGE("Guido ForEachNode::DoSetActiveChildRange nodeId: %{public}d: start: %{public}d, end: %{public}d", (int) GetId(),  (int) start, (int) end);
+    LOGE("Guido RepeatNode::DoSetActiveChildRange nodeId: %{public}d: start: %{public}d, end: %{public}d", (int) GetId(),  (int) start, (int) end);
 }
 
-RefPtr<LayoutWrapper> ForEachNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree, bool isCache) {
-    LOGE("Guido ForEachNode::GetOrCreateChildByIndex nodeId: %{public}d: $index: %{public}d, addToRenderTree %{public}d, isCache: %{public}d", (int) GetId(),  (int) index, (int) addToRenderTree, (int) isCache);
+RefPtr<LayoutWrapper> RepeatNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree, bool isCache) {
+    LOGE("Guido RepeatNode::GetOrCreateChildByIndex nodeId: %{public}d: $index: %{public}d, addToRenderTree %{public}d, isCache: %{public}d", (int) GetId(),  (int) index, (int) addToRenderTree, (int) isCache);
 
     return nullptr;
 }

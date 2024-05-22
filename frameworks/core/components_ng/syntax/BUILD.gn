@@ -27,5 +27,6 @@ build_component_ng("syntax_ng") {
     "lazy_layout_wrapper_builder.cpp",
     "node_content.cpp",
     "repeat_model_ng.cpp",
+    "repeat_node.cpp",
   ]
 }
