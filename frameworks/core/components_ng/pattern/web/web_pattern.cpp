@@ -189,7 +189,7 @@ constexpr char MEMORY_LEVEL_ENABEL[] = "persist.web.memory_level_enable";
 const std::vector<std::string> SYNC_RENDER_SLIDE {V2::LIST_ETS_TAG, V2::SCROLL_ETS_TAG};
 
 constexpr int32_t DEFAULT_PINCH_FINGER = 2;
-constexpr double DEFAULT_PINCH_DISTANCE = 5.0;
+constexpr double DEFAULT_PINCH_DISTANCE = 6.0;
 constexpr double DEFAULT_PINCH_SCALE = 1.0;
 constexpr double DEFAULT_PINCH_SCALE_MAX = 5.0;
 constexpr double DEFAULT_PINCH_SCALE_MIN = 0.32;
@@ -197,6 +197,7 @@ constexpr int32_t PINCH_INDEX_ONE = 1;
 constexpr int32_t STATUS_ZOOMIN = 1;
 constexpr int32_t STATUS_ZOOMOUT = 2;
 constexpr int32_t ZOOM_ERROR_COUNT_MAX = 5;
+constexpr double ZOOMIN_SMOOTH_SCALE = 0.97;
 
 WebPattern::WebPattern() = default;
 
@@ -447,7 +448,6 @@ void WebPattern::InitPinchEvent(const RefPtr<GestureEventHub>& gestureHub)
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& event) {
         ACE_SCOPED_TRACE("WebPattern::InitPinchEvent actionUpdateTask");
-        TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::InitPinchEvent actionUpdateTask");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleScaleGestureChange(event);
@@ -467,14 +467,17 @@ void WebPattern::InitPinchEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 bool WebPattern::CheckZoomStatus(const double& curScale)
 {
+    int32_t curScaleNew = (int32_t) (curScale * 100);
+    int32_t preScaleNew = (int32_t) (preScale_ * 100);
+
     // check zoom status
-    if ((zoomStatus_ == STATUS_ZOOMOUT && curScale - preScale_ < 0)
+    if ((zoomStatus_ == STATUS_ZOOMOUT && curScaleNew - preScaleNew < 0)
             && zoomErrorCount_ < ZOOM_ERROR_COUNT_MAX) {
         zoomErrorCount_++;
         TAG_LOGI(AceLogTag::ACE_WEB, "HandleScaleGestureChange zoomStatus = zoomout && curScale < preScale,"
             "ignore date.");
         return false;
-    } else if ((zoomStatus_ == STATUS_ZOOMIN && curScale - preScale_ >= 0)
+    } else if ((zoomStatus_ == STATUS_ZOOMIN && curScaleNew - preScaleNew > 0)
                 && zoomErrorCount_ < ZOOM_ERROR_COUNT_MAX) {
         zoomErrorCount_++;
         TAG_LOGI(AceLogTag::ACE_WEB, "HandleScaleGestureChange zoomStatus = zoomin && curScale >= preScale,"
@@ -526,7 +529,15 @@ bool WebPattern::ZoomOutAndIn(const double& curScale, double& scale)
                                          "than the previous scale value, ignore data.");
             return false;
         }
-        scale = curScale;
+        // The scale is from 1.x to 0.9, zomm in
+        if (preScale_ > DEFAULT_PINCH_SCALE) {
+            scale = curScale;
+
+            // reset
+            startPinchScale_ = curScale;
+        } else {
+            scale = ZOOMIN_SMOOTH_SCALE;
+        }
 
         zoomStatus_ = STATUS_ZOOMIN;
     }
