@@ -687,6 +687,11 @@ void TextFieldPattern::OnScrollEndCallback()
     if (scrollBar) {
         scrollBar->ScheduleDisappearDelayTask();
     }
+    auto selectArea = selectOverlay_->GetSelectArea();
+    if (!IsUsingMouse() && SelectOverlayIsOn() &&
+        !(Negative(selectArea.Width()) || Negative(selectArea.Height()))) {
+        selectOverlay_->ShowMenu();
+    }
 }
 
 void TextFieldPattern::OnTextAreaScroll(float offset)
