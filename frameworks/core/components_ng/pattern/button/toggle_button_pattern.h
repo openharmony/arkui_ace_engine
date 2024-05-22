@@ -113,10 +113,9 @@ private:
     void OnTouchDown();
     void OnTouchUp();
     void FireBuilder();
-    void OpenToCloseFocused();
-    void CloseToOpenFocused();
-    void OpenToCloseWithoutFocused();
-    void CloseToOpenWithoutFocused();
+    void HandleOnOffStatus();
+    void HandleOnOffStyle(RefPtr<RenderContext> const& renderContext, 
+        RefPtr<ToggleTheme>& toggleTheme, bool isOnToOff, bool isFocus);
 
     RefPtr<FrameNode> BuildContentModifierNode();
     std::optional<SwitchMakeCallback> toggleMakeFunc_;

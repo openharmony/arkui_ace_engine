@@ -483,18 +483,10 @@ void ToggleButtonPattern::OnClick()
     CHECK_NULL_VOID(buttonEventHub);
     buttonEventHub->UpdateChangeEvent(!isLastSelected);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    if (isFocus_ && isOn_.value()) {
-        CloseToOpenFocused();
-    } else if (isFocus_ && !isOn_.value()) {
-        OpenToCloseFocused();
-    } else if (!isFocus_ && isOn_.value()) {
-        CloseToOpenWithoutFocused();
-    } else if (!isFocus_ && !isOn_.value()) {
-        OpenToCloseWithoutFocused();
-    }
+    HandleOnOffStatus();
 }
 
-void ToggleButtonPattern::OpenToCloseFocused()
+void ToggleButtonPattern::HandleOnOffStatus()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -504,105 +496,51 @@ void ToggleButtonPattern::OpenToCloseFocused()
     CHECK_NULL_VOID(pipeline);
     auto toggleTheme = pipeline->GetTheme<ToggleTheme>();
     CHECK_NULL_VOID(toggleTheme);
-    auto && graphics = renderContext->GetOrCreateGraphics();
-    CHECK_NULL_VOID(graphics);
-    ShadowStyle focusShadowStyle = static_cast<ShadowStyle>(toggleTheme->GetShadowFocus());
-    Shadow shadow = Shadow::CreateShadow(focusShadowStyle);
-    isShadow_ = !graphics->HasBackShadow() || graphics->GetBackShadowValue() == shadow;
-    if (isShadow_) {
-        renderContext->UpdateBackShadow(shadow);
-    }
-    if (isbgColorFocus_) {
-        renderContext->UpdateBackgroundColor(toggleTheme->GetBackgroundColorFocusUnchecked());
-    }
-    BorderColorProperty borderColor;
-    borderColor.SetColor(toggleTheme->GetBorderColorChecked());
-    if (!renderContext->HasBorderColor() || renderContext->GetBorderColor() == borderColor) {
-        BorderColorProperty color;
-        color.SetColor(toggleTheme->GetBorderColorUnchecked());
-        renderContext->UpdateBorderColor(color);
+    if (isFocus_) {
+        if (isOn_.value()) {
+            HandleOnOffStyle(renderContext, toggleTheme, false, true);
+        } else {
+            HandleOnOffStyle(renderContext, toggleTheme, true, true);
+        }
+    } else {
+        if (isOn_.value()) {
+            HandleOnOffStyle(renderContext, toggleTheme, false, false);
+        } else {
+            HandleOnOffStyle(renderContext, toggleTheme, true, false);
+        }
     }
 }
 
-void ToggleButtonPattern::CloseToOpenFocused()
+void ToggleButtonPattern::HandleOnOffStyle(RefPtr<RenderContext> const& renderContext,
+    RefPtr<ToggleTheme>& toggleTheme, bool isOnToOff, bool isFocus)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    const auto& renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto toggleTheme = pipeline->GetTheme<ToggleTheme>();
-    CHECK_NULL_VOID(toggleTheme);
     auto && graphics = renderContext->GetOrCreateGraphics();
     CHECK_NULL_VOID(graphics);
-    ShadowStyle focusShadowStyle = static_cast<ShadowStyle>(toggleTheme->GetShadowFocus());
-    Shadow shadow = Shadow::CreateShadow(focusShadowStyle);
-    isCheckedShadow_ = !graphics->HasBackShadow() || graphics->GetBackShadowValue() == shadow;
-    if (isCheckedShadow_) {
-        renderContext->UpdateBackShadow(shadow);
-    }
-    if (isbgColorFocus_) {
-        renderContext->UpdateBackgroundColor(toggleTheme->GetBackgroundColorFocusChecked());
+    if (isFocus) {
+        ShadowStyle focusShadowStyle = static_cast<ShadowStyle>(toggleTheme->GetShadowFocus());
+        Shadow shadow = Shadow::CreateShadow(focusShadowStyle);
+        auto isShadow = !graphics->HasBackShadow() || graphics->GetBackShadowValue() == shadow;
+        isOnToOff ? isShadow_ = isShadow : isCheckedShadow_ = isShadow;
+        if (isShadow) {
+            renderContext->UpdateBackShadow(shadow);
+        }
+        if (isbgColorFocus_) {
+            renderContext->UpdateBackgroundColor(isOnToOff ? toggleTheme->GetBackgroundColorFocusUnchecked() :
+                toggleTheme->GetBackgroundColorFocusChecked());
+        }
+    } else {
+        Shadow shadowNone = Shadow::CreateShadow(ShadowStyle::None);
+        Shadow normalShadow = Shadow::CreateShadow(static_cast<ShadowStyle>(toggleTheme->GetShadowNormal()));
+        if (!graphics->HasBackShadow() || graphics->GetBackShadowValue() == (isOnToOff ? normalShadow : shadowNone)) {
+            renderContext->UpdateBackShadow(isOnToOff ? shadowNone : normalShadow);
+        }
     }
     BorderColorProperty borderColor;
-    borderColor.SetColor(toggleTheme->GetBorderColorUnchecked());
+    borderColor.SetColor(isOnToOff ? toggleTheme->GetBorderColorChecked() : toggleTheme->GetBorderColorUnchecked());
     if (!renderContext->HasBorderColor() || renderContext->GetBorderColor() == borderColor) {
         BorderColorProperty color;
-        color.SetColor(toggleTheme->GetBorderColorChecked());
+        color.SetColor(isOnToOff ? toggleTheme->GetBorderColorUnchecked() : toggleTheme->GetBorderColorChecked());
         renderContext->UpdateBorderColor(color);
-    }
-}
-
-void ToggleButtonPattern::OpenToCloseWithoutFocused()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    const auto& renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto toggleTheme = pipeline->GetTheme<ToggleTheme>();
-    CHECK_NULL_VOID(toggleTheme);
-    auto && graphics = renderContext->GetOrCreateGraphics();
-    CHECK_NULL_VOID(graphics);
-    BorderColorProperty borderColor;
-    borderColor.SetColor(toggleTheme->GetBorderColorChecked());
-    if (!renderContext->HasBorderColor() || renderContext->GetBorderColor() == borderColor) {
-        BorderColorProperty color;
-        color.SetColor(toggleTheme->GetBorderColorUnchecked());
-        renderContext->UpdateBorderColor(color);
-    }
-    Shadow shadowNone = Shadow::CreateShadow(ShadowStyle::None);
-    Shadow normalShadow = Shadow::CreateShadow(static_cast<ShadowStyle>(toggleTheme->GetShadowNormal()));
-    if (!graphics->HasBackShadow() || graphics->GetBackShadowValue() == normalShadow) {
-        renderContext->UpdateBackShadow(shadowNone);
-    }
-}
-
-void ToggleButtonPattern::CloseToOpenWithoutFocused()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    const auto& renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto toggleTheme = pipeline->GetTheme<ToggleTheme>();
-    CHECK_NULL_VOID(toggleTheme);
-    auto && graphics = renderContext->GetOrCreateGraphics();
-    CHECK_NULL_VOID(graphics);
-    BorderColorProperty borderColor;
-    borderColor.SetColor(toggleTheme->GetBorderColorUnchecked());
-    if (!renderContext->HasBorderColor() || renderContext->GetBorderColor() == borderColor) {
-        BorderColorProperty color;
-        color.SetColor(toggleTheme->GetBorderColorChecked());
-        renderContext->UpdateBorderColor(color);
-    }
-    Shadow shadowNone = Shadow::CreateShadow(ShadowStyle::None);
-    Shadow normalShadow = Shadow::CreateShadow(static_cast<ShadowStyle>(toggleTheme->GetShadowNormal()));
-    if (!graphics->HasBackShadow() || graphics->GetBackShadowValue() == shadowNone) {
-        renderContext->UpdateBackShadow(normalShadow);
     }
 }
 
