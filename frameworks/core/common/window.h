@@ -48,7 +48,7 @@ public:
 
     virtual void RequestFrame();
 
-    virtual void FlushFrameRate(int32_t rate, bool isAnimatorStopped) {}
+    virtual void FlushFrameRate(int32_t rate, bool isAnimatorStopped, int32_t rateTyte) {}
 
     virtual void SetTaskExecutor(const RefPtr<TaskExecutor>& taskExecutor) {}
 

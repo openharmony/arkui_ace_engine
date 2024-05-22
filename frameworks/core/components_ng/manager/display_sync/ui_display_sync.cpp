@@ -122,11 +122,13 @@ void UIDisplaySync::DelFromPipeline(WeakPtr<PipelineBase>& pipelineContext)
 {
     auto context = GetCurrentContext();
     if (!context) {
+        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[DisplaySync] CurrentContext is nullptr.");
         return;
     }
 
     RefPtr<UIDisplaySyncManager> dsm = context->GetOrCreateUIDisplaySyncManager();
     if (!dsm) {
+        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[DisplaySync] DSM is nullptr.");
         return;
     }
     dsm->RemoveDisplaySync(AceType::Claim(this));
