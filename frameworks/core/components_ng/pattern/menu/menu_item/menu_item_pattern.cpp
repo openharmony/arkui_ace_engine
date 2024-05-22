@@ -644,7 +644,8 @@ void MenuItemPattern::CloseMenu()
 
 void MenuItemPattern::RegisterOnClick()
 {
-    if (onClickEventSet_) return;
+    if (onClickEventSet_)
+        return;
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -688,7 +689,8 @@ void MenuItemPattern::RegisterOnClick()
 
 void MenuItemPattern::RegisterOnTouch()
 {
-    if (onTouchEventSet_) return;
+    if (onTouchEventSet_)
+        return;
 
     auto clickableArea = GetClickableArea();
     CHECK_NULL_VOID(clickableArea);
@@ -707,7 +709,8 @@ void MenuItemPattern::RegisterOnTouch()
 
 void MenuItemPattern::RegisterOnHover()
 {
-    if (onHoverEventSet_) return;
+    if (onHoverEventSet_)
+        return;
 
     auto clickableArea = GetClickableArea();
     CHECK_NULL_VOID(clickableArea);
@@ -732,8 +735,9 @@ void MenuItemPattern::RegisterOnHover()
 
 void MenuItemPattern::RegisterOnKeyEvent()
 {
-    if (onKeyEventSet_) return;
-    
+    if (onKeyEventSet_)
+        return;
+
     auto clickableArea = GetClickableArea();
     CHECK_NULL_VOID(clickableArea);
     auto focusHub = clickableArea->GetOrCreateFocusHub();
@@ -1143,11 +1147,13 @@ void MenuItemPattern::UpdateExpandableArea()
 void MenuItemPattern::BuildEmbeddedMenuItems(RefPtr<UINode>& node, bool needNextLevel)
 {
     auto children = node->GetChildren();
-    if (children.empty()) return;
+    if (children.empty())
+        return;
 
     for (auto child : children) {
         if (child->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
-            if (!needNextLevel) return;
+            if (!needNextLevel)
+                return;
             BuildEmbeddedMenuItems(child, false);
         } else if (child->GetTag() == V2::MENU_ITEM_ETS_TAG) {
             auto childItem = AceType::DynamicCast<FrameNode>(child);

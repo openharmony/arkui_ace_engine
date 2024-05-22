@@ -341,6 +341,7 @@ private:
     void SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper);
     void StartShowAnimation();
     void HandleInteraction(const TouchEventInfo& info);
+    RectF GetMenuZone(RefPtr<UINode>& innerMenuNode);
     RefPtr<FrameNode> FindTouchedMenuItem(const RefPtr<UINode>& menuNode, const OffsetF& position);
 
     void HideMenu(const RefPtr<FrameNode>& menu);
