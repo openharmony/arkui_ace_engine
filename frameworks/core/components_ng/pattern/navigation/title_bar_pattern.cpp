@@ -146,6 +146,7 @@ void UpdateSymbolBackButton(const RefPtr<FrameNode>& backButtonNode, const RefPt
         auto symbolProperty = backButtonIconNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(symbolProperty);
         symbolProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+        symbolProperty->UpdateFontSize(BACK_BUTTON_ICON_SIZE);
         if (theme) {
             symbolProperty->UpdateSymbolColorList({ theme->GetIconColor() });
         }
@@ -190,6 +191,7 @@ void CreateDefaultBackButton(const RefPtr<FrameNode>& backButtonNode, const RefP
         auto iconColor = theme->GetIconColor();
         symbolProperty->UpdateSymbolColorList({ iconColor });
         symbolProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(theme->GetBackSymbolId()));
+        symbolProperty->UpdateFontSize(BACK_BUTTON_ICON_SIZE);
         symbolNode->MountToParent(backButtonNode);
         symbolNode->MarkDirtyNode();
         symbolNode->MarkModifyDone();
@@ -223,6 +225,7 @@ void UpdateImageBackButton(const RefPtr<FrameNode>& backButtonNode, const RefPtr
         auto symbolProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(symbolProperty);
         symbolProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+        symbolProperty->UpdateFontSize(BACK_BUTTON_ICON_SIZE);
         if (theme) {
             symbolProperty->UpdateSymbolColorList({ theme->GetIconColor() });
         }

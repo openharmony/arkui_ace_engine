@@ -519,11 +519,11 @@ void BuildImageToolbarMoreItemNode(const RefPtr<BarItemNode>& barItemNode)
     CHECK_NULL_VOID(navigationGroupNode);
     auto hub = navigationGroupNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
-    auto renderContext = barItemNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
     auto info = ImageSourceInfo("");
     info.SetResourceId(theme->GetMoreResourceId());
     if (!hub->IsEnabled()) {
+        auto renderContext = barItemNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
         renderContext->UpdateOpacity(theme->GetToolbarItemDisabledAlpha());
     } else {
         info.SetFillColor(theme->GetToolbarIconColor());
