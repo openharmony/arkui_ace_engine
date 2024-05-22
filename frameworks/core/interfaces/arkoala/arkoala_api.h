@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 102
+#define ARKUI_FULL_API_VERSION 103
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 102
+#define ARKUI_NODE_API_VERSION 103
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 7
@@ -3059,6 +3059,8 @@ struct ArkUIAlphabetIndexerModifier {
     void (*resetAdaptiveWidth)(ArkUINodeHandle node);
     void (*setArrayValue)(ArkUINodeHandle node, ArkUI_CharPtr* value, ArkUI_Uint32 length);
     void (*resetArrayValue)(ArkUINodeHandle node);
+    void (*setAutoCollapse)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetAutoCollapse)(ArkUINodeHandle node);
 };
 
 struct ArkUILoadingProgressModifier {

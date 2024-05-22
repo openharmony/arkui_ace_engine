@@ -579,6 +579,11 @@ void IndexerModelNG::SetPopupPositionY(FrameNode* frameNode, const std::optional
     }
 }
 
+void IndexerModelNG::SetAutoCollapse(FrameNode* frameNode, bool autoCollapse)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, AutoCollapse, autoCollapse, frameNode);
+}
+
 void IndexerModelNG::SetOnSelected(FrameNode* frameNode, std::function<void(const int32_t selected)>&& onSelect)
 {
     CHECK_NULL_VOID(frameNode);

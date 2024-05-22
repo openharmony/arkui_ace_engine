@@ -18713,6 +18713,10 @@ class ArkAlphabetIndexerComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, AdaptiveWidthModifier.identity, AdaptiveWidthModifier, value);
     return this;
   }
+  autoCollapse(value) {
+    modifierWithKey(this._modifiersWithKeys, AutoCollapseModifier.identity, AutoCollapseModifier, value);
+    return this;
+  }
 }
 // @ts-ignore
 if (globalThis.AlphabetIndexer !== undefined) {
@@ -19091,6 +19095,23 @@ class AdaptiveWidthModifier extends ModifierWithKey {
   }
 }
 AdaptiveWidthModifier.identity = Symbol('adaptiveWidth');
+class AutoCollapseModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().alphabetIndexer.resetAutoCollapse(node);
+    }
+    else {
+      getUINativeModule().alphabetIndexer.setAutoCollapse(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+AutoCollapseModifier.identity = Symbol('autoCollapse');
 
 /// <reference path='./import.ts' />
 class TextStyleModifier extends ModifierWithKey {
