@@ -16,34 +16,22 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_LAYOUT_ALGORITHM_H
 
-#include "core/components_ng/layout/layout_algorithm.h"
+#include "core/components_ng/pattern/waterflow/water_flow_layout_algorithm_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_info.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 
 namespace OHOS::Ace::NG {
-class WaterFlowLayoutBase : public LayoutAlgorithm {
-    DECLARE_ACE_TYPE(WaterFlowLayoutBase, LayoutAlgorithm);
-
-public:
-    virtual WaterFlowLayoutInfo GetLayoutInfo() = 0;
-    virtual void SetCanOverScroll(bool canOverScroll) = 0;
-};
-
 class ACE_EXPORT WaterFlowLayoutAlgorithm : public WaterFlowLayoutBase {
     DECLARE_ACE_TYPE(WaterFlowLayoutAlgorithm, WaterFlowLayoutBase);
 
 public:
-    explicit WaterFlowLayoutAlgorithm(WaterFlowLayoutInfo layoutInfo) : layoutInfo_(std::move(layoutInfo)) {}
+    explicit WaterFlowLayoutAlgorithm(const RefPtr<WaterFlowLayoutInfo>& layoutInfo) : layoutInfo_(layoutInfo) {}
     ~WaterFlowLayoutAlgorithm() override = default;
 
     void Measure(LayoutWrapper* layoutWrapper) override;
 
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-    WaterFlowLayoutInfo GetLayoutInfo() override
-    {
-        return std::move(layoutInfo_);
-    }
     void SetCanOverScroll(bool canOverScroll) override
     {
         canOverScroll_ = canOverScroll;
@@ -59,14 +47,15 @@ private:
         const RefPtr<WaterFlowLayoutProperty>& layoutProperty, const SizeF& frameSize, int32_t childrenCount);
     int32_t GetChildIndexWithFooter(int32_t index) const
     {
-        return index + layoutInfo_.footerIndex_ + 1;
+        return index + layoutInfo_->footerIndex_ + 1;
     }
-    float MeasureFooter(LayoutWrapper* layoutWrapper);
     void LayoutFooter(LayoutWrapper* layoutWrapper, const OffsetF& childFrameOffset, bool reverse);
 
     std::map<int32_t, float> itemsCrossSize_;
     std::map<int32_t, float> itemsCrossPosition_;
     Axis axis_ = Axis::VERTICAL;
+
+    RefPtr<WaterFlowLayoutInfo> layoutInfo_;
 
     float mainGap_ = 0.0f;
     float crossGap_ = 0.0f;
@@ -75,7 +64,6 @@ private:
     float footerMainStartPos_ = 0.0f;
     bool canOverScroll_ = false;
     bool skipMeasure_ = false;
-    WaterFlowLayoutInfo layoutInfo_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_LAYOUT_ALGORITHM_H

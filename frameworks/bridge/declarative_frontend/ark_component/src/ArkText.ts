@@ -583,7 +583,7 @@ class TextContentModifier extends ModifierWithKey<string | Resource> {
   static identity: Symbol = Symbol('textContent');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().text.setContent(node, "");
+      getUINativeModule().text.setContent(node, '');
     }
     else {
       getUINativeModule().text.setContent(node, this.value);
@@ -678,7 +678,7 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   allowChildTypes(): string[] {
     return ["Span", "ImageSpan", "SymbolSpan", "ContainerSpan"];
   }
-  initialize(value: Object[]) {
+  initialize(value: Object[]): void {
     modifierWithKey(this._modifiersWithKeys, TextContentModifier.identity, TextContentModifier, value[0]);
     modifierWithKey(this._modifiersWithKeys, TextControllerModifier.identity, TextControllerModifier, value[1]);
     return this;
@@ -821,7 +821,7 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextClipModifier.identity, TextClipModifier, value);
     return this;
   }
-  foregroundColor(value: ResourceColor | ColoringStrategy) {
+  foregroundColor(value: ResourceColor | ColoringStrategy): void {
     modifierWithKey(
       this._modifiersWithKeys, TextForegroundColorModifier.identity, TextForegroundColorModifier, value);
     return this;

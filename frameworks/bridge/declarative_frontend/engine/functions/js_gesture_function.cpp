@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_gesture_function.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 #include "base/log/log.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
@@ -33,7 +34,9 @@ void JsGestureFunction::Execute(const GestureEvent& info)
 
 JSRef<JSObject> JsGestureFunction::CreateGestureEvent(const GestureEvent& info)
 {
-    JSRef<JSObject> gestureInfoObj = JSRef<JSObject>::New();
+    JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+    objectTemplate->SetInternalFieldCount(1);
+    JSRef<JSObject> gestureInfoObj = objectTemplate->NewInstance();
     gestureInfoObj->SetProperty<bool>("repeat", info.GetRepeat());
     gestureInfoObj->SetProperty<double>("offsetX", PipelineBase::Px2VpWithCurrentDensity(info.GetOffsetX()));
     gestureInfoObj->SetProperty<double>("offsetY", PipelineBase::Px2VpWithCurrentDensity(info.GetOffsetY()));
@@ -41,14 +44,6 @@ JSRef<JSObject> JsGestureFunction::CreateGestureEvent(const GestureEvent& info)
     gestureInfoObj->SetProperty<double>("angle", info.GetAngle());
     gestureInfoObj->SetProperty<double>("speed", info.GetSpeed());
     gestureInfoObj->SetProperty<double>("timestamp", info.GetTimeStamp().time_since_epoch().count());
-    gestureInfoObj->SetProperty<double>(
-        "globalX", PipelineBase::Px2VpWithCurrentDensity(info.GetGlobalLocation().GetX()));
-    gestureInfoObj->SetProperty<double>(
-        "globalY", PipelineBase::Px2VpWithCurrentDensity(info.GetGlobalLocation().GetY()));
-    gestureInfoObj->SetProperty<double>(
-        "localX", PipelineBase::Px2VpWithCurrentDensity(info.GetLocalLocation().GetX()));
-    gestureInfoObj->SetProperty<double>(
-        "localY", PipelineBase::Px2VpWithCurrentDensity(info.GetLocalLocation().GetY()));
     gestureInfoObj->SetProperty<double>(
         "pinchCenterX", PipelineBase::Px2VpWithCurrentDensity(info.GetPinchCenter().GetX()));
     gestureInfoObj->SetProperty<double>(
@@ -65,6 +60,9 @@ JSRef<JSObject> JsGestureFunction::CreateGestureEvent(const GestureEvent& info)
         "velocityY", PipelineBase::Px2VpWithCurrentDensity(info.GetVelocity().GetVelocityY()));
     gestureInfoObj->SetProperty<double>(
         "velocity", PipelineBase::Px2VpWithCurrentDensity(info.GetVelocity().GetVelocityValue()));
+    gestureInfoObj->SetPropertyObject(
+        "getModifierKeyState",
+        JSRef<JSFunc>::New<FunctionCallback>(NG::ArkTSUtils::JsGetModifierKeyState));
 
     JSRef<JSArray> fingerArr = JSRef<JSArray>::New();
     const std::list<FingerInfo>& fingerList = info.GetFingerList();
@@ -92,6 +90,7 @@ JSRef<JSObject> JsGestureFunction::CreateGestureEvent(const GestureEvent& info)
     gestureInfoObj->SetPropertyObject("target", target);
     gestureInfoObj->SetProperty<float>("axisVertical", info.GetVerticalAxis());
     gestureInfoObj->SetProperty<float>("axisHorizontal", info.GetHorizontalAxis());
+    gestureInfoObj->Wrap<GestureEvent>(const_cast<GestureEvent*> (&info));
     return gestureInfoObj;
 }
 

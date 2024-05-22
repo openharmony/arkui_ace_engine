@@ -165,6 +165,20 @@ bool WebClientImpl::OnFocus()
     CHECK_NULL_RETURN(delegate, false);
     bool isFocused = delegate->RequestFocus();
     delegate->OnRequestFocus();
+
+    delegate->SetToken();
+    return isFocused;
+}
+
+bool WebClientImpl::OnFocus(OHOS::NWeb::NWebFocusSource source)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_RETURN(delegate, false);
+    bool isFocused = delegate->RequestFocus(source);
+    delegate->OnRequestFocus();
+
+    delegate->SetToken();
     return isFocused;
 }
 

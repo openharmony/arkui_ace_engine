@@ -43,6 +43,7 @@
 #include "core/common/ime/text_input_type.h"
 #include "core/common/ime/text_selection.h"
 #include "core/common/recorder/node_data_cache.h"
+#include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components/theme/icon_theme.h"
@@ -819,6 +820,7 @@ void TextFieldPattern::HandleFocusEvent()
         underlineWidth_ = TYPING_UNDERLINE_WIDTH;
     }
     SetFocusStyle();
+    AddIsFocusActiveUpdateEvent();
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
                                                                                  : PROPERTY_UPDATE_MEASURE);
 }
@@ -849,6 +851,7 @@ void TextFieldPattern::SetFocusStyle()
         layoutProperty->UpdateTextColor(textFieldTheme->GetFocusTextColor());
         isFocusTextColorSet_ = true;
     }
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void TextFieldPattern::ClearFocusStyle()
@@ -874,6 +877,38 @@ void TextFieldPattern::ClearFocusStyle()
         CHECK_NULL_VOID(layoutProperty);
         layoutProperty->UpdateTextColor(textFieldTheme->GetTextColor());
         isFocusTextColorSet_ = false;
+    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void TextFieldPattern::AddIsFocusActiveUpdateEvent()
+{
+    if (!isFocusActiveUpdateEvent_) {
+        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusAcitve) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnIsFocusActiveUpdate(isFocusAcitve);
+        };
+    }
+
+    auto pipline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipline);
+    pipline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
+}
+
+void TextFieldPattern::RemoveIsFocusActiveUpdateEvent()
+{
+    auto pipline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipline);
+    pipline->RemoveIsFocusActiveUpdateEvent(GetHost());
+}
+
+void TextFieldPattern::OnIsFocusActiveUpdate(bool isFocusAcitve)
+{
+    if (isFocusAcitve) {
+        SetFocusStyle();
+    } else {
+        ClearFocusStyle();
     }
 }
 
@@ -1175,6 +1210,7 @@ void TextFieldPattern::HandleBlurEvent()
         context->RemoveOnAreaChangeNode(host->GetId());
     }
     ClearFocusStyle();
+    RemoveIsFocusActiveUpdateEvent();
     isCursorAlwaysDisplayed_ = false;
 }
 
@@ -4354,9 +4390,6 @@ void TextFieldPattern::HandleOnDelete(bool backward)
 void TextFieldPattern::DeleteBackward(int32_t length)
 {
     ResetObscureTickCountDown();
-    if (selectController_->GetCaretIndex() <= 0) {
-        return;
-    }
     if (IsSelected()) {
         auto start = selectController_->GetStartIndex();
         auto end = selectController_->GetEndIndex();
@@ -4368,6 +4401,9 @@ void TextFieldPattern::DeleteBackward(int32_t length)
         AfterIMEDeleteValue(value, TextDeleteDirection::BACKWARD);
         showCountBorderStyle_ = false;
         HandleCountStyle();
+        return;
+    }
+    if (selectController_->GetCaretIndex() <= 0) {
         return;
     }
     inputOperations_.emplace(InputOperation::DELETE_BACKWARD);
@@ -6145,6 +6181,10 @@ bool TextFieldPattern::RepeatClickCaret(const Offset& offset, int32_t lastCaretI
 
 void TextFieldPattern::OnAttachToFrameNode()
 {
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    StylusDetectorMgr::GetInstance()->AddTextFieldFrameNode(frameNode);
+
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateCopyOptions(CopyOptions::Distributed);
@@ -6996,9 +7036,26 @@ std::vector<RectF> TextFieldPattern::GetPreviewTextRects() const
     if (!GetIsPreviewText()) {
         return {};
     }
+    std::vector<RectF> boxes;
     std::vector<RectF> previewTextRects;
-    CHECK_NULL_RETURN(paragraph_, previewTextRects);
-    paragraph_->GetRectsForRange(GetPreviewTextStart(), GetPreviewTextEnd(), previewTextRects);
+    CHECK_NULL_RETURN(paragraph_, boxes);
+    paragraph_->GetRectsForRange(GetPreviewTextStart(), GetPreviewTextEnd(), boxes);
+    if (boxes.empty()) {
+        return {};
+    }
+    RectF linerRect(boxes.front().GetOffset(), SizeF(0, boxes.front().GetSize().Height()));
+    float checkedTop = boxes.front().Top();
+
+    for (const auto& drawRect : boxes) {
+        if (drawRect.Top() == checkedTop) {
+            linerRect += SizeF(drawRect.GetSize().Width(), 0);
+        } else {
+            previewTextRects.emplace_back(linerRect);
+            checkedTop = drawRect.Top();
+            linerRect = drawRect;
+        }
+    }
+    previewTextRects.emplace_back(linerRect);
     return previewTextRects;
 }
 

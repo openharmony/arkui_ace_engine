@@ -247,8 +247,7 @@ class ContentItemStruct extends ViewPU {
                                     });
                                 }, Image);
                             });
-                        }
-                        else {
+                        } else {
                             this.ifElseBranchUpdateFunction(1, () => {
                                 this.observeComponentCreation2((f10, g10) => {
                                     Image.create(this.icon);
@@ -281,8 +280,7 @@ class ContentItemStruct extends ViewPU {
                     }, If);
                     If.pop();
                 });
-            }
-            else {
+            } else {
                 this.ifElseBranchUpdateFunction(1, () => {
                 });
             }
@@ -1079,8 +1077,7 @@ class OperateItemStruct extends ViewPU {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.createButton.bind(this)(this.button.text, this);
                 });
-            }
-            else if (this.image != null) {
+            } else if (this.image != null) {
                 this.ifElseBranchUpdateFunction(1, () => {
                     this.createImage.bind(this)(this.image, this);
                 });
@@ -1398,8 +1395,7 @@ export class ComposeListItem extends ViewPU {
         if (this.contentItem?.secondaryText === undefined && this.contentItem?.description === undefined) {
             if (this.contentItem?.icon === undefined) {
                 this.itemHeight = ItemHeight.FIRST_HEIGHT;
-            }
-            else {
+            } else {
                 this.itemHeight = this.contentItem.iconStyle <= IconType.HEAD_SCULPTURE ? ItemHeight.SECOND_HEIGHT : ItemHeight.THIRD_HEIGHT;
             }
         }

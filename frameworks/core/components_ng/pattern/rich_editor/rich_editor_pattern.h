@@ -549,11 +549,7 @@ public:
 
     // Add for Scroll
 
-    void OnAttachToFrameNode() override
-    {
-        TextPattern::OnAttachToFrameNode();
-        richEditorInstanceId_ = Container::CurrentIdSafely();
-    }
+    void OnAttachToFrameNode() override;
 
     void OnDetachFromFrameNode(FrameNode* node) override
     {
@@ -720,6 +716,11 @@ public:
     void SetContentChange(bool onChange)
     {
         contentChange_ = onChange;
+    }
+
+    RectF GetTextContentRect(bool isActualText = false) const override
+    {
+        return contentRect_;
     }
 
 protected:

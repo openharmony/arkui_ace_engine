@@ -259,6 +259,10 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             gridItemLayoutProperty->UpdateMainIndex(line->first);
             gridItemLayoutProperty->UpdateCrossIndex(iter->first);
             UpdateRealGridItemPositionInfo(wrapper, line->first, iter->first);
+            auto frameNode = AceType::DynamicCast<FrameNode>(wrapper);
+            if (frameNode) {
+                frameNode->MarkAndCheckNewOpIncNode();
+            }
         }
         prevLineHeight += gridLayoutInfo_.lineHeightMap_[line->first] + mainGap_;
     }

@@ -40,6 +40,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/ime/text_input_client.h"
+#include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/base/inspector_filter.h"
@@ -715,6 +716,16 @@ void RichEditorPattern::AddSpanItem(const RefPtr<SpanItem>& item, int32_t offset
     spans_.insert(it, item);
     UpdateSpanPosition();
 }
+
+void RichEditorPattern::OnAttachToFrameNode()
+{
+    TextPattern::OnAttachToFrameNode();
+    richEditorInstanceId_ = Container::CurrentIdSafely();
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    StylusDetectorMgr::GetInstance()->AddTextFieldFrameNode(frameNode);
+}
+
 
 int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options)
 {
@@ -4509,7 +4520,7 @@ void RichEditorPattern::HandleOnSelectAll()
     FireOnSelect(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     SetCaretPosition(newPos);
     MoveCaretToContentRect();
-    StartTwinkling();
+    StopTwinkling();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -7355,17 +7366,19 @@ void RichEditorPattern::GetReplacedSpan(RichEditorChangeValue& changeValue, int3
     CHECK_NULL_VOID(host);
     auto uiNode = host->GetChildAtIndex(spanIndex);
     RefPtr<SpanNode> spanNode = DynamicCast<SpanNode>(uiNode);
-    if (uiNode && uiNode->GetTag() != V2::SPAN_ETS_TAG) {
+    if (!isCreate && textIndex && uiNode && uiNode->GetTag() != V2::SPAN_ETS_TAG) {
         spanNode = nullptr;
-        ++spanIndex; // create a new span When the span is not a textSpan(Image/Symbol/other)
+        ++spanIndex; // select/create a new span When the span is not a textSpan(Image/Symbol/other)
         offsetInSpan = 0;
+        spanNode = DynamicCast<SpanNode>(host->GetChildAtIndex(spanIndex));
     }
 
     auto wInsertValue = StringUtils::ToWstring(insertValue);
     changeValue.SetRangeAfter({ innerPosition, innerPosition + wInsertValue.length()});
     std::wstring textTemp = wInsertValue;
     if (!textStyle) {
-        if (typingStyle_.has_value() && spanNode && !HasSameTypingStyle(spanNode)) {
+        if (!isCreate && textIndex && offsetInSpan && typingStyle_.has_value() && spanNode &&
+            !HasSameTypingStyle(spanNode)) {
             textStyle = typingTextStyle_;
             ++spanIndex; // create a new span When have a different typingStyle
             offsetInSpan = 0;

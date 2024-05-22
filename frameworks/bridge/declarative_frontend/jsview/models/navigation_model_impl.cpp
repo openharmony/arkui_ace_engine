@@ -98,7 +98,8 @@ void NavigationModelImpl::SetHideNavBar(bool hideNavBar)
 }
 
 void NavigationModelImpl::SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
-    const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap, const std::vector<std::string>& nameList)
+    const std::string& src, const NG::ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
+    const std::vector<std::string>& nameList)
 {
     return;
 }

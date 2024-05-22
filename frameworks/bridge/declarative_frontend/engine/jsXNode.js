@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -173,7 +173,7 @@ class JSBuilderNode extends BaseNode {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this.params_ = params;
         this.updateFuncByElmtId.clear();
-        this.nodePtr_ = super.create(builder.builder, this.params_);
+        this.nodePtr_ = super.create(builder.builder, this.params_, this.updateNodeFromNative);
         this._nativeRef = getUINativeModule().nativeUtils.createNativeStrongRef(this.nodePtr_);
         if (this.frameNode_ === undefined || this.frameNode_ === null) {
             this.frameNode_ = new BuilderRootFrameNode(this.uiContext_);
@@ -365,6 +365,21 @@ class JSBuilderNode extends BaseNode {
         if (this.frameNode_ !== undefined && this.frameNode_ !== null) {
             this.frameNode_.updateInstance(uiContext);
         }
+    }
+    updateNodePtr(nodePtr) {
+        if (nodePtr != this.nodePtr_) {
+            this.dispose();
+            this.nodePtr_ = nodePtr;
+            this._nativeRef = getUINativeModule().nativeUtils.createNativeStrongRef(this.nodePtr_);
+            this.frameNode_.setNodePtr(this._nativeRef, this.nodePtr_);
+        }
+    }
+    updateInstanceId(instanceId) {
+        this.instanceId_ = instanceId;
+    }
+    updateNodeFromNative(instanceId, nodePtr) {
+        this.updateNodePtr(nodePtr);
+        this.updateInstanceId(instanceId);
     }
 }
 /*
@@ -1154,9 +1169,11 @@ const __creatorMap__ = new Map([
             });
         }],
     ["GridRow", (context) => {
-            return new TypedFrameNode(context, "GridRow", (node, type) => {
+            let node = new TypedFrameNode(context, "GridRow", (node, type) => {
                 return new ArkGridRowComponent(node, type);
             });
+            node.initialize();
+            return node;
         }],
     ["TextInput", (context) => {
             return new TypedFrameNode(context, "TextInput", (node, type) => {
@@ -1164,9 +1181,11 @@ const __creatorMap__ = new Map([
             });
         }],
     ["GridCol", (context) => {
-            return new TypedFrameNode(context, "GridCol", (node, type) => {
+            let node = new TypedFrameNode(context, "GridCol", (node, type) => {
                 return new ArkGridColComponent(node, type);
             });
+            node.initialize();
+            return node;
         }],
     ["Blank", (context) => {
             return new TypedFrameNode(context, "Blank", (node, type) => {
@@ -1229,7 +1248,7 @@ const __creatorMap__ = new Map([
             });
         }],
 ]);
-class TypedNode {
+class typeNode {
     static createNode(context, type) {
         let creator = __creatorMap__.get(type);
         if (creator === undefined) {
@@ -2059,5 +2078,5 @@ export default {
     NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, FrameNodeUtils,
     NodeRenderType, XComponentNode, LengthMetrics, ColorMetrics, LengthUnit, LengthMetricsUnit, ShapeMask,
     edgeColors, edgeWidths, borderStyles, borderRadiuses, Content, ComponentContent, NodeContent,
-    TypedNode, NodeAdapter
+    typeNode, NodeAdapter
 };

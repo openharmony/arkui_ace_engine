@@ -87,8 +87,19 @@ void MutableSpanString::ReplaceSpan(int32_t start, int32_t length, const RefPtr<
     if (!CheckRange(start, length)) {
         return;
     }
-    RemoveSpans(start, length);
-    AddSpan(span->GetSubSpan(start, start + length));
+    if (IsSpecialNode(span)) {
+        RemoveSpans(start, length);
+        AddSpan(span->GetSubSpan(start, start + length));
+        return;
+    }
+    std::list<std::pair<int32_t, int32_t>> indexList;
+    GetNormalTypesVector(indexList, start, length);
+    for (const auto& pair : indexList) {
+        auto startIndex = pair.first;
+        auto secondIndex = pair.second;
+        RemoveSpans(startIndex, secondIndex);
+        AddSpan(span->GetSubSpan(startIndex, startIndex + secondIndex));
+    }
 }
 
 void MutableSpanString::ApplyReplaceStringToSpans(
@@ -337,14 +348,7 @@ void MutableSpanString::RemoveString(int32_t start, int32_t length)
 void MutableSpanString::RemoveSpecialpanText()
 {
     std::list<int32_t> indexList;
-    auto iter = indexList.begin();
-    for (const auto& type : specailTypes) {
-        auto spans = spansMap_[type];
-        for (const auto& span : spans) {
-            iter = indexList.insert(iter, span->GetStartIndex());
-        }
-    }
-    indexList.sort([](const int32_t& a, const int32_t& b) { return a < b; });
+    GetSpecialTypesVector(indexList, 0, GetLength());
     int32_t count = 0;
     for (const auto& index : indexList) {
         auto wStr = GetWideString();

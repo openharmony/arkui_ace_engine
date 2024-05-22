@@ -51,7 +51,6 @@ int32_t SystemProperties::deviceWidth_ = 720;
 int32_t SystemProperties::deviceHeight_ = 1280;
 bool SystemProperties::debugOffsetLogEnabled_ = false;
 bool SystemProperties::downloadByNetworkEnabled_ = false;
-bool SystemProperties::traceEnabled_ = false;
 int32_t SystemProperties::devicePhysicalWidth_ = 0;
 int32_t SystemProperties::devicePhysicalHeight_ = 0;
 bool SystemProperties::enableScrollableItemPool_ = false;
@@ -94,6 +93,11 @@ float SystemProperties::GetAnimationScale()
 bool SystemProperties::GetIsUseMemoryMonitor()
 {
     return false;
+}
+
+bool SystemProperties::IsOpIncEnable()
+{
+    return true;
 }
 
 void SystemProperties::SetDeviceOrientation(int32_t orientation)

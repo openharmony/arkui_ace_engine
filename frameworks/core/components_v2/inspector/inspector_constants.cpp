@@ -580,9 +580,9 @@ const char SELECT_OVERLAY_ETS_TAG[] = "SelectOverlay";
 const char SYMBOL_COMPONENT_TAG[] = "SymbolGlyphComponent";
 const char SYMBOL_ETS_TAG[] = "SymbolGlyph";
 
-// DynamicComponent
-const char DYNAMIC_COMPONENT_TAG[] = "DynamicComponent";
-const char DYNAMIC_COMPONENT_ETS_TAG[] = "DynamicComponent";
+// IsolatedComponent
+const char ISOLATED_COMPONENT_TAG[] = "IsolatedComponent";
+const char ISOLATED_COMPONENT_ETS_TAG[] = "IsolatedComponent";
 
 // ContainerSpan
 const char CONTAINER_SPAN_COMPONENT_TAG[] = "ContainerSpanComponent";

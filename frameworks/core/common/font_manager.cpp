@@ -62,7 +62,6 @@ void FontManager::RegisterFont(const std::string& familyName, const std::string&
 
 void FontManager::SetFontFamily(const char* familyName, const char* familySrc)
 {
-    isDefaultFontChanged_ = true;
     RefPtr<FontLoader> fontLoader = FontLoader::Create(familyName, familySrc);
     fontLoader->SetDefaultFontFamily(familyName, familySrc);
 }
@@ -181,14 +180,12 @@ bool FontManager::RegisterCallback(
     const WeakPtr<RenderNode>& node, const std::string& familyName, const std::function<void()>& callback)
 {
     CHECK_NULL_RETURN(callback, false);
-    bool isCustomFont = false;
     for (auto& fontLoader : fontLoaders_) {
         if (fontLoader->GetFamilyName() == familyName) {
             fontLoader->SetOnLoaded(node, callback);
-            isCustomFont = true;
         }
     }
-    return isCustomFont;
+    return false;
 }
 
 const std::vector<std::string>& FontManager::GetFontNames() const
@@ -311,14 +308,12 @@ bool FontManager::RegisterCallbackNG(
     const WeakPtr<NG::UINode>& node, const std::string& familyName, const std::function<void()>& callback)
 {
     CHECK_NULL_RETURN(callback, false);
-    bool isCustomFont = false;
     for (auto& fontLoader : fontLoaders_) {
         if (fontLoader->GetFamilyName() == familyName) {
             fontLoader->SetOnLoadedNG(node, callback);
-            isCustomFont = true;
         }
     }
-    return isCustomFont;
+    return false;
 }
 
 void FontManager::AddFontNodeNG(const WeakPtr<NG::UINode>& node)

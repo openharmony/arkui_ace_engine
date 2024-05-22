@@ -137,6 +137,14 @@ constexpr Dimension CIRCULAR_HORIZON_OFFSET = 13.86_vp;
 constexpr Dimension TEXT_MAX = 36.0_vp;
 const SizeF BLOCK_SIZE_F(10.0f, 10.0f);
 const SizeF BLOCK_SIZE_F_ZREO(0.0f, 0.0f);
+constexpr Dimension BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_1_WIDTH = 92.0_vp;
+constexpr Dimension BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_1_HEIGHT = 52.0_vp;
+constexpr Dimension BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_1_WIDTH = 48.0_vp;
+constexpr Dimension BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_1_HEIGHT = 60.0_vp;
+constexpr Dimension BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_2_WIDTH = 96.0_vp;
+constexpr Dimension BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_2_HEIGHT = 56.0_vp;
+constexpr Dimension BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_2_WIDTH = 48.0_vp;
+constexpr Dimension BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_2_HEIGHT = 64.0_vp;
 } // namespace
 class SliderTestNg : public testing::Test {
 public:
@@ -5464,5 +5472,213 @@ HWTEST_F(SliderTestNg, SliderValidRangeTest007, TestSize.Level1)
     EXPECT_TRUE(validRange && validRange->HasValidValues());
     EXPECT_EQ(validRange->GetFromValue(), MIN_RANGE);
     EXPECT_EQ(validRange->GetToValue(), MAX_RANGE);
+}
+
+/**
+ * @tc.name: PaintHorizontalBubbleSuitableAgingTest001
+ * @tc.desc: TEST slider_tip_modifier PaintHorizontalBubbleSuitableAging
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderTestNg, PaintHorizontalBubbleSuitableAgingTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and sliderTipModifier.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    ASSERT_NE(sliderLayoutProperty, nullptr);
+    SliderTipModifier sliderTipModifier(
+        [sliderPattern]() { return sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()); });
+    /**
+     * @tc.steps: step2. set sliderTipModifier attribute and call PaintHorizontalBubbleSuitableAging function.
+     * @tc.cases: sliderGlobalOffset_ = SLIDER_GLOBAL_OFFSET, suitable aging level = 1.
+     */
+    sliderTipModifier.bubbleSize_ = SizeF(BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_1_WIDTH.ConvertToPx(),
+        BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_1_HEIGHT.ConvertToPx());
+    sliderTipModifier.SetSliderGlobalOffset(SLIDER_GLOBAL_OFFSET);
+    sliderTipModifier.tipFlag_ = AceType::MakeRefPtr<PropertyBool>(true);
+    auto offset = static_cast<float>(BUBBLE_TO_SLIDER_DISTANCE.ConvertToPx());
+    RSPath path1;
+    auto vertexPair = sliderTipModifier.GetBubbleVertex();
+    sliderTipModifier.vertex_ = vertexPair.first;
+    auto vertexOffsetFromBlock1 = vertexPair.second;
+    sliderTipModifier.PaintHorizontalBubbleSuitableAging(vertexOffsetFromBlock1, path1);
+    EXPECT_EQ(sliderTipModifier.bubbleSize_, SizeF(BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_1_WIDTH.ConvertToPx(),
+                                                 BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_1_HEIGHT.ConvertToPx()));
+    EXPECT_EQ(sliderTipModifier.vertex_.GetY(), 0 - offset);
+    EXPECT_EQ(sliderTipModifier.isMask_, false);
+    /**
+     * @tc.cases: sliderGlobalOffset_ = OffsetF(), suitable aging level = 1.
+     */
+    sliderTipModifier.bubbleSize_ = SizeF(BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_1_WIDTH.ConvertToPx(),
+        BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_1_HEIGHT.ConvertToPx());
+    sliderTipModifier.SetSliderGlobalOffset(OffsetF());
+    vertexPair = sliderTipModifier.GetBubbleVertex();
+    sliderTipModifier.vertex_ = vertexPair.first;
+    auto vertexOffsetFromBlock2 = vertexPair.second;
+    RSPath path2;
+    sliderTipModifier.PaintHorizontalBubbleSuitableAging(vertexOffsetFromBlock2, path2);
+    EXPECT_EQ(sliderTipModifier.vertex_.GetY(), offset);
+    EXPECT_EQ(sliderTipModifier.isMask_, true);
+    EXPECT_EQ(sliderTipModifier.bubbleSize_, SizeF(BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_1_WIDTH.ConvertToPx(),
+                                                 BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_1_HEIGHT.ConvertToPx()));
+}
+
+/**
+ * @tc.name: PaintHorizontalBubbleSuitableAgingTest002
+ * @tc.desc: TEST slider_tip_modifier PaintHorizontalBubbleSuitableAging
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderTestNg, PaintHorizontalBubbleSuitableAgingTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and sliderTipModifier.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    ASSERT_NE(sliderLayoutProperty, nullptr);
+    SliderTipModifier sliderTipModifier(
+        [sliderPattern]() { return sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()); });
+    /**
+     * @tc.steps: step2. set sliderTipModifier attribute and call PaintHorizontalBubbleSuitableAging function.
+     * @tc.cases: sliderGlobalOffset_ = SLIDER_GLOBAL_OFFSET, suitable aging level = 2.
+     */
+    sliderTipModifier.bubbleSize_ = SizeF(BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_2_WIDTH.ConvertToPx(),
+        BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_2_HEIGHT.ConvertToPx());
+    sliderTipModifier.SetSliderGlobalOffset(SLIDER_GLOBAL_OFFSET);
+    auto offset = static_cast<float>(BUBBLE_TO_SLIDER_DISTANCE.ConvertToPx());
+    RSPath path1;
+    auto vertexPair = sliderTipModifier.GetBubbleVertex();
+    sliderTipModifier.vertex_ = vertexPair.first;
+    auto vertexOffsetFromBlock1 = vertexPair.second;
+    sliderTipModifier.PaintHorizontalBubbleSuitableAging(vertexOffsetFromBlock1, path1);
+    EXPECT_EQ(sliderTipModifier.bubbleSize_, SizeF(BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_2_WIDTH.ConvertToPx(),
+                                                 BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_2_HEIGHT.ConvertToPx()));
+    EXPECT_EQ(sliderTipModifier.vertex_.GetY(), 0 - offset);
+    EXPECT_EQ(sliderTipModifier.isMask_, false);
+    /**
+     * @tc.cases: sliderGlobalOffset_ = OffsetF(), suitable aging level = 2.
+     */
+    sliderTipModifier.SetSliderGlobalOffset(OffsetF());
+    vertexPair = sliderTipModifier.GetBubbleVertex();
+    sliderTipModifier.vertex_ = vertexPair.first;
+    auto vertexOffsetFromBlock2 = vertexPair.second;
+    RSPath path2;
+    sliderTipModifier.PaintHorizontalBubbleSuitableAging(vertexOffsetFromBlock2, path2);
+    EXPECT_EQ(sliderTipModifier.vertex_.GetY(), offset);
+    EXPECT_EQ(sliderTipModifier.isMask_, true);
+    EXPECT_EQ(sliderTipModifier.bubbleSize_, SizeF(BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_2_WIDTH.ConvertToPx(),
+                                                 BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_2_HEIGHT.ConvertToPx()));
+}
+
+/**
+ * @tc.name: PaintVerticalBubbleSuitableAgingTest001
+ * @tc.desc: TEST slider_tip_modifier PaintVerticalBubbleSuitableAging
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderTestNg, PaintVerticalBubbleSuitableAgingTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and sliderTipModifier.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    ASSERT_NE(sliderLayoutProperty, nullptr);
+    SliderTipModifier sliderTipModifier(
+        [sliderPattern]() { return sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()); });
+    /**
+     * @tc.steps: step2. set sliderTipModifier attribute and call PaintVerticalBubbleSuitableAging function.
+     * @tc.cases: sliderGlobalOffset_ = OffsetF(), suitable aging level = 1.
+     */
+    sliderPattern->direction_ = Axis::VERTICAL;
+    sliderTipModifier.SetDirection(Axis::VERTICAL);
+    sliderTipModifier.bubbleSize_ = SizeF(BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_1_WIDTH.ConvertToPx(),
+        BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_1_HEIGHT.ConvertToPx());
+    sliderTipModifier.SetSliderGlobalOffset(OffsetF());
+    sliderTipModifier.tipFlag_ = AceType::MakeRefPtr<PropertyBool>(true);
+    auto offset = static_cast<float>(BUBBLE_TO_SLIDER_DISTANCE.ConvertToPx());
+    RSPath path1;
+    auto vertexPair = sliderTipModifier.GetBubbleVertex();
+    sliderTipModifier.vertex_ = vertexPair.first;
+    auto vertexOffsetFromBlock1 = vertexPair.second;
+    sliderTipModifier.PaintVerticalBubbleSuitableAging(vertexOffsetFromBlock1, path1);
+    EXPECT_EQ(sliderTipModifier.bubbleSize_, SizeF(BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_1_WIDTH.ConvertToPx(),
+                                                 BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_1_HEIGHT.ConvertToPx()));
+    EXPECT_EQ(sliderTipModifier.vertex_.GetX(), offset);
+    EXPECT_EQ(sliderTipModifier.isMask_, true);
+    /**
+     * @tc.cases: sliderGlobalOffset_ = SLIDER_GLOBAL_OFFSET, suitable aging level = 1.
+     */
+    sliderTipModifier.SetSliderGlobalOffset(SLIDER_GLOBAL_OFFSET);
+    vertexPair = sliderTipModifier.GetBubbleVertex();
+    sliderTipModifier.vertex_ = vertexPair.first;
+    auto vertexOffsetFromBlock2 = vertexPair.second;
+    RSPath path2;
+    sliderTipModifier.PaintVerticalBubbleSuitableAging(vertexOffsetFromBlock2, path2);
+    EXPECT_EQ(sliderTipModifier.vertex_.GetX(), 0 - offset);
+    EXPECT_EQ(sliderTipModifier.isMask_, false);
+    EXPECT_EQ(sliderTipModifier.bubbleSize_, SizeF(BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_1_WIDTH.ConvertToPx(),
+                                                 BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_1_HEIGHT.ConvertToPx()));
+}
+
+/**
+ * @tc.name: PaintVerticalBubbleSuitableAgingTest002
+ * @tc.desc: TEST slider_tip_modifier PaintVerticalBubbleSuitableAging
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderTestNg, PaintVerticalBubbleSuitableAgingTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and sliderTipModifier.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    ASSERT_NE(sliderLayoutProperty, nullptr);
+    SliderTipModifier sliderTipModifier(
+        [sliderPattern]() { return sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()); });
+    /**
+     * @tc.steps: step2. set sliderTipModifier attribute and call PaintVerticalBubbleSuitableAging function.
+     * @tc.cases: sliderGlobalOffset_ = OffsetF(), suitable aging level = 2.
+     */
+    sliderPattern->direction_ = Axis::VERTICAL;
+    sliderTipModifier.SetDirection(Axis::VERTICAL);
+    sliderTipModifier.bubbleSize_ = SizeF(BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_2_WIDTH.ConvertToPx(),
+        BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_2_HEIGHT.ConvertToPx());
+    sliderTipModifier.SetSliderGlobalOffset(OffsetF());
+    auto offset = static_cast<float>(BUBBLE_TO_SLIDER_DISTANCE.ConvertToPx());
+    RSPath path1;
+    auto vertexPair = sliderTipModifier.GetBubbleVertex();
+    sliderTipModifier.vertex_ = vertexPair.first;
+    auto vertexOffsetFromBlock1 = vertexPair.second;
+    sliderTipModifier.PaintVerticalBubbleSuitableAging(vertexOffsetFromBlock1, path1);
+    EXPECT_EQ(sliderTipModifier.bubbleSize_, SizeF(BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_2_WIDTH.ConvertToPx(),
+                                                 BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_2_HEIGHT.ConvertToPx()));
+    EXPECT_EQ(sliderTipModifier.vertex_.GetX(), offset);
+    EXPECT_EQ(sliderTipModifier.isMask_, true);
+    /**
+     * @tc.cases: sliderGlobalOffset_ = SLIDER_GLOBAL_OFFSET, suitable aging level = 2.
+     */
+    sliderTipModifier.SetSliderGlobalOffset(SLIDER_GLOBAL_OFFSET);
+    vertexPair = sliderTipModifier.GetBubbleVertex();
+    sliderTipModifier.vertex_ = vertexPair.first;
+    auto vertexOffsetFromBlock2 = vertexPair.second;
+    RSPath path2;
+    sliderTipModifier.PaintVerticalBubbleSuitableAging(vertexOffsetFromBlock2, path2);
+    EXPECT_EQ(sliderTipModifier.vertex_.GetX(), 0 - offset);
+    EXPECT_EQ(sliderTipModifier.isMask_, false);
+    EXPECT_EQ(sliderTipModifier.bubbleSize_, SizeF(BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_2_WIDTH.ConvertToPx(),
+                                                 BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_2_HEIGHT.ConvertToPx()));
 }
 } // namespace OHOS::Ace::NG

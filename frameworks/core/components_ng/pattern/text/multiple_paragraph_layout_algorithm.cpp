@@ -412,7 +412,7 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
     int32_t paragraphIndex = -1;
     preParagraphsPlaceholderCount_ = 0;
     currentParagraphPlaceholderCount_ = 0;
-
+    paragraphFontSize_ = paraStyle.fontSize;
     auto maxLines = static_cast<int32_t>(paraStyle.maxLines);
     for (auto && group : spans_) {
         ParagraphStyle spanParagraphStyle = paraStyle;
@@ -529,13 +529,15 @@ void MultipleParagraphLayoutAlgorithm::AddImageToParagraph(RefPtr<ImageSpanItem>
     CHECK_NULL_VOID(geometryNode);
     placeholderStyle.width = geometryNode->GetMarginFrameSize().Width();
     placeholderStyle.height = geometryNode->GetMarginFrameSize().Height();
+    placeholderStyle.paragraphFontSize = Dimension(paragraphFontSize_);
+    auto parentNode = frameNode->GetParentFrameNode();
     if (NearZero(baselineOffset.Value())) {
         imageSpanItem->placeholderIndex =
-            imageSpanItem->UpdateParagraph(frameNode, paragraph, isSpanStringMode_, placeholderStyle);
+            imageSpanItem->UpdateParagraph(parentNode, paragraph, isSpanStringMode_, placeholderStyle);
     } else {
         placeholderStyle.baselineOffset = (baselineOffset - Dimension(IMAGE_SPAN_BASELINE_OFFSET)).ConvertToPx();
         imageSpanItem->placeholderIndex =
-            imageSpanItem->UpdateParagraph(frameNode, paragraph, isSpanStringMode_, placeholderStyle);
+            imageSpanItem->UpdateParagraph(parentNode, paragraph, isSpanStringMode_, placeholderStyle);
     }
     currentParagraphPlaceholderCount_++;
     imageSpanItem->placeholderIndex += preParagraphsPlaceholderCount_;

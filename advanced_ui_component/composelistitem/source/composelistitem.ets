@@ -150,8 +150,7 @@ struct ContentItemStruct {
           .focusable(true)
           .draggable(false)
           .fillColor($r('sys.color.ohos_id_color_secondary'))
-      }
-      else {
+      } else {
         Image(this.icon)
           .objectFit(ImageFit.Contain)
           .constraintSize({
@@ -592,9 +591,7 @@ struct OperateItemStruct {
     }) {
       if (this.button != null) {
         this.createButton(this.button.text as ResourceStr)
-      }
-
-      else if (this.image != null) {
+      } else if (this.image != null) {
         this.createImage(this.image)
       }
       else if (this.icon != null && this.text != null) {
@@ -667,8 +664,7 @@ export struct ComposeListItem {
     if (this.contentItem?.secondaryText === undefined && this.contentItem?.description === undefined) {
       if (this.contentItem?.icon === undefined) {
         this.itemHeight = ItemHeight.FIRST_HEIGHT
-      }
-      else {
+      } else {
         this.itemHeight = this.contentItem.iconStyle as number <= IconType.HEAD_SCULPTURE ? ItemHeight.SECOND_HEIGHT : ItemHeight.THIRD_HEIGHT;
       }
     }

@@ -304,9 +304,9 @@ export class ToolBar extends ViewPU {
       Column.onClick(() => {
         let f2 = this.toolBarList[r1];
         if (f2.state === ItemState.ACTIVATE) {
-          if (this.activateIndex === r1)
+          if (this.activateIndex === r1) {
             this.activateIndex = -1;
-          else {
+          } else {
             this.activateIndex = r1;
           }
         }

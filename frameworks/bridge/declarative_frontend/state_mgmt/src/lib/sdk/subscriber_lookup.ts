@@ -219,11 +219,11 @@ class SubscriberManager {
    * not a public / sdk function
    */
   public dumpSubscriberInfo(): void {
-    stateMgmtConsole.debug("Dump of SubscriberManager +++ (sart)")
+    stateMgmtConsole.debug('Dump of SubscriberManager +++ (sart)');
     for (let [id, subscriber] of this.subscriberById_) {
-      stateMgmtConsole.debug(`Id: ${id} -> ${subscriber['info'] ? subscriber['info']() : 'unknown'}`)
+      stateMgmtConsole.debug(`Id: ${id} -> ${subscriber.info ? subscriber['info']() : 'unknown'}`);
     }
-    stateMgmtConsole.debug("Dump of SubscriberManager +++ (end)")
+    stateMgmtConsole.debug('Dump of SubscriberManager +++ (end)');
   }
 
   /**
@@ -242,6 +242,6 @@ class SubscriberManager {
    */
   private constructor() {
     this.subscriberById_ = new Map<number, IPropertySubscriber>();
-    stateMgmtConsole.debug("SubscriberManager has been created.");
+    stateMgmtConsole.debug('SubscriberManager has been created.');
   }
 }

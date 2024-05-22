@@ -119,7 +119,7 @@ public:
         return false;
     }
 
-    OffsetF GetParentGlobalPaintRectOffset() const;
+    OffsetF GetParentGlobalOffsetWithSafeArea(bool checkBoundary = false, bool checkPosition = false) const;
 
     virtual bool SkipMeasureContent() const;
 
@@ -163,8 +163,6 @@ public:
 
     static void ApplySafeArea(const SafeAreaInsets& insets, LayoutConstraintF& constraint);
 
-    // check if the page node needs to be avoid keyboard
-    bool CheckPageNeedAvoidKeyboard() const;
     // apply keyboard avoidance on content rootNodes
     bool AvoidKeyboard(bool isFocusOnPage = true);
     // expand the SafeArea of expansive nodes, which are previously recorded during Layout traversal
@@ -179,6 +177,9 @@ public:
     {
         needSkipSyncGeometryNode_ = needSkip;
     }
+
+    RectF GetFrameRectWithoutSafeArea() const;
+    RectF GetFrameRectWithSafeArea() const;
 
 protected:
     void CreateRootConstraint();

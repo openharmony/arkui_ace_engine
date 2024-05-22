@@ -30,12 +30,10 @@
 #include "dm/display_manager.h"
 
 #include "adapter/ohos/entrance/distributed_ui_manager.h"
-#include "adapter/ohos/entrance/ace_viewport_config.h"
 #include "base/thread/task_executor.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/asset_manager_impl.h"
 #include "core/common/render_boundary_manager.h"
-#include "core/common/update_config_manager.h"
 #include "core/components/common/properties/popup_param.h"
 
 namespace OHOS::Accessibility {
@@ -374,8 +372,6 @@ private:
     bool isUIExtensionSubWindow_ = false;
     bool isUIExtensionAbilityProcess_ = false;
     bool isUIExtensionAbilityHost_ = false;
-    RefPtr<UpdateConfigManager<AceViewportConfig>> viewportConfigMgr_ =
-        Referenced::MakeRefPtr<UpdateConfigManager<AceViewportConfig>>();
 };
 
 } // namespace OHOS::Ace

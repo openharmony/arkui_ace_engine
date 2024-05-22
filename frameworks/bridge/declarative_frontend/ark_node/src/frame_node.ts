@@ -217,7 +217,7 @@ class FrameNode {
     if (child === undefined || child === null) {
       return;
     }
-    if (child.getType() === 'ProxyFrameNode'|| !this.checkValid(child)) {
+    if (child.getType() === 'ProxyFrameNode' || !this.checkValid(child)) {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
     }
     let flag = true;
@@ -257,7 +257,7 @@ class FrameNode {
       return null;
     }
     if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-      var frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+      let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
       return frameNode === undefined ? null : frameNode;
     }
     return this.convertToFrameNode(result.nodePtr, result.nodeId);
@@ -270,7 +270,7 @@ class FrameNode {
       return null;
     }
     if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-      var frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+      let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
       return frameNode === undefined ? null : frameNode;
     }
     return this.convertToFrameNode(result.nodePtr, result.nodeId);
@@ -283,7 +283,7 @@ class FrameNode {
       return null;
     }
     if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-      var frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+      let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
       return frameNode === undefined ? null : frameNode;
     }
     return this.convertToFrameNode(result.nodePtr, result.nodeId);
@@ -296,7 +296,7 @@ class FrameNode {
       return null;
     }
     if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-      var frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+      let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
       return frameNode === undefined ? null : frameNode;
     }
     return this.convertToFrameNode(result.nodePtr, result.nodeId);
@@ -309,7 +309,7 @@ class FrameNode {
       return null;
     }
     if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-      var frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+      let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
       return frameNode === undefined ? null : frameNode;
     }
     return this.convertToFrameNode(result.nodePtr, result.nodeId);
@@ -477,7 +477,7 @@ class FrameNode {
     this._commonEvent.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
     return this._commonEvent;
   }
-  updateInstance(uiContext: UIContext) {
+  updateInstance(uiContext: UIContext): void {
     this.uiContext_ = uiContext;
     this.instanceId_ = uiContext.instanceId_;
   }
@@ -651,9 +651,11 @@ const __creatorMap__ = new Map<string, (context: UIContext) => FrameNode>(
       })
     }],
     ["GridRow", (context: UIContext) => {
-      return new TypedFrameNode(context, "GridRow", (node: NodePtr, type: ModifierType) => {
+      let node = new TypedFrameNode(context, "GridRow", (node: NodePtr, type: ModifierType) => {
         return new ArkGridRowComponent(node, type);
-      })
+      });
+      node.initialize();
+      return node;
     }],
     ["TextInput", (context: UIContext) => {
       return new TypedFrameNode(context, "TextInput", (node: NodePtr, type: ModifierType) => {
@@ -661,9 +663,11 @@ const __creatorMap__ = new Map<string, (context: UIContext) => FrameNode>(
       })
     }],
     ["GridCol", (context: UIContext) => {
-      return new TypedFrameNode(context, "GridCol", (node: NodePtr, type: ModifierType) => {
+      let node = new TypedFrameNode(context, "GridCol", (node: NodePtr, type: ModifierType) => {
         return new ArkGridColComponent(node, type);
-      })
+      });
+      node.initialize();
+      return node;
     }],
     ["Blank", (context: UIContext) => {
       return new TypedFrameNode(context, "Blank", (node: NodePtr, type: ModifierType) => {
@@ -728,7 +732,7 @@ const __creatorMap__ = new Map<string, (context: UIContext) => FrameNode>(
   ]
 )
 
-class TypedNode {
+class typeNode {
   static createNode(context: UIContext, type: string): FrameNode {
     let creator = __creatorMap__.get(type)
     if (creator === undefined) {

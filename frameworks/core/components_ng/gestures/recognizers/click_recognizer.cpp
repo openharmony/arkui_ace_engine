@@ -443,6 +443,7 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
     info.SetDisplayY(touchPoint.screenY);
 #endif
     info.SetPointerEvent(lastPointEvent_);
+    info.SetPressedKeyCodes(touchPoint.pressedKeyCodes_);
     return info;
 }
 

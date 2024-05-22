@@ -1102,6 +1102,7 @@ void GestureEventHub::HandleOnDragEnd(const GestureEvent& info)
             }
             event->SetScreenX(info.GetScreenLocation().GetX());
             event->SetScreenY(info.GetScreenLocation().GetY());
+            event->SetPressedKeyCodes(info.GetPressedKeyCodes());
             eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_DROP, event);
             eventHub->HandleInternalOnDrop(event, "");
         }
@@ -1376,6 +1377,7 @@ OnDragCallbackCore GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& 
                 dragDropManager->SetDraggingPointer(-1);
                 dragDropManager->SetDraggingPressedState(false);
                 dragDropManager->ResetDragPreviewInfo();
+                dragEvent->SetPressedKeyCodes(dragDropManager->GetDragDropPointerEvent().pressedKeyCodes_);
                 auto ret = InteractionInterface::GetInstance()->UnRegisterCoordinationListener();
                 if (ret != 0) {
                     TAG_LOGW(AceLogTag::ACE_DRAG, "Unregister coordination listener failed, error is %{public}d", ret);
@@ -1514,13 +1516,17 @@ DragDropInfo GestureEventHub::GetDragDropInfo(const GestureEvent& info, const Re
     DragDropInfo& dragPreviewInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent)
 {
     DragDropInfo dragDropInfo;
+    CHECK_NULL_RETURN(dragEventActuator_, dragDropInfo);
+    dragEventActuator_->SetIsDefaultOnDragStartExecuted(false);
     auto eventHub = eventHub_.Upgrade();
     CHECK_NULL_RETURN(eventHub, dragDropInfo);
     auto extraParams = eventHub->GetDragExtraParams(std::string(), info.GetGlobalPoint(), DragEventType::START);
     auto onDragStart = eventHub->GetOnDragStart();
     if (!onDragStart && eventHub->HasDefaultOnDragStart()) {
         onDragStart = eventHub->GetDefaultOnDragStart();
+        dragEventActuator_->SetIsDefaultOnDragStartExecuted(true);
     }
+    dragEvent->SetPressedKeyCodes(info.GetPressedKeyCodes());
     dragDropInfo = onDragStart(dragEvent, extraParams);
 
     auto frameTag = frameNode->GetTag();
@@ -1547,11 +1553,13 @@ RefPtr<UnifiedData> GestureEventHub::GetUnifiedData(const std::string& frameTag,
         if (dragDropInfo.extraInfo.empty()) {
             dragDropInfo.extraInfo = defaultDropInfo.extraInfo;
         }
+        CHECK_NULL_RETURN(dragEventActuator_, nullptr);
+        dragEventActuator_->SetIsDefaultOnDragStartExecuted(true);
         unifiedData = dragEvent->GetData();
     }
     auto defaultOnDragStart = eventHub->GetDefaultOnDragStart();
     CHECK_NULL_RETURN(defaultOnDragStart, unifiedData);
-    if (hasData && frameTag == V2::RICH_EDITOR_ETS_TAG) {
+    if (hasData && IsTextCategoryComponent(frameTag) && !dragEventActuator_->IsDefaultOnDragStartExecuted()) {
         defaultOnDragStart(dragEvent, "");
     }
     return unifiedData;

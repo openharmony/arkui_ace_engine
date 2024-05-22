@@ -258,7 +258,7 @@ private:
     void LayoutHeaderFooter(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize);
     void UpdateZIndex(const RefPtr<LayoutWrapper>& layoutWrapper);
     void LayoutIndex(const RefPtr<LayoutWrapper>& wrapper, const OffsetF& paddingOffset,
-        float crossSize, float startPos);
+        float crossSize, float startPos, float childMainSize);
     inline RefPtr<LayoutWrapper> GetListItem(LayoutWrapper* layoutWrapper, int32_t index) const
     {
         return layoutWrapper->GetOrCreateChildByIndex(index + itemStartIndex_);

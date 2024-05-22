@@ -738,6 +738,8 @@ var SlideEffect;
   SlideEffect[SlideEffect["Right"] = 2] = "Right";
   SlideEffect[SlideEffect["Top"] = 3] = "Top";
   SlideEffect[SlideEffect["Bottom"] = 4] = "Bottom";
+  SlideEffect[SlideEffect["START"] = 5] = "START";
+  SlideEffect[SlideEffect["END"] = 6] = "END";
 })(SlideEffect || (SlideEffect = {}));
 
 var GradientDirection;
@@ -2486,6 +2488,12 @@ class WaterFlowSections {
     this.changeArray.splice(0);
   }
 }
+
+var WaterFlowLayoutMode;
+(function (WaterFlowLayoutMode) {
+  WaterFlowLayoutMode[WaterFlowLayoutMode["ALWAYS_TOP_DOWN"] = 0] = "ALWAYS_TOP_DOWN";
+  WaterFlowLayoutMode[WaterFlowLayoutMode["SLIDING_WINDOW"] = 1] = "SLIDING_WINDOW";
+})(WaterFlowLayoutMode || (WaterFlowLayoutMode = {}));
 
 class ChildrenMainSizeParamError extends Error {
   constructor(message, code) {

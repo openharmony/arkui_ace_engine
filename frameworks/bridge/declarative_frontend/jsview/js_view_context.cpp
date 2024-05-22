@@ -149,6 +149,7 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
     });
     pipelineContext->CloseImplicitAnimation();
     pipelineContext->SetSyncAnimationOption(AnimationOption());
+    pipelineContext->FlushAfterLayoutCallbackInImplicitAnimationTask();
     if (immediately) {
         pipelineContext->FlushModifier();
         pipelineContext->FlushMessages();

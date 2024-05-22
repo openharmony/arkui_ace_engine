@@ -45,6 +45,33 @@ void WaterFlowSections::ChangeData(
     }
 }
 
+// for c-api, replace all
+void WaterFlowSections::ChangeDataNow(
+    int32_t start, int32_t deleteCount, const std::vector<WaterFlowSections::Section>& newSections)
+{
+    prevSections_ = sections_;
+
+    TAG_LOGI(AceLogTag::ACE_WATERFLOW,
+        "section changed, start:%{public}d, deleteCount:%{public}d, newSections:%{public}zu", start, deleteCount,
+        newSections.size());
+    if (static_cast<size_t>(start) < sections_.size()) {
+        auto it = sections_.begin() + start;
+        auto oldSize = sections_.size();
+        auto eraseCount = std::min(deleteCount, static_cast<int32_t>(oldSize) - start);
+        sections_.erase(it, it + eraseCount);
+        sections_.insert(sections_.begin() + start, newSections.begin(), newSections.end());
+    } else {
+        sections_.insert(sections_.end(), newSections.begin(), newSections.end());
+    }
+
+    if (onSectionDataChangeNow_) {
+        // push: start, 0, newSection
+        // update: start, 0, newSection
+        // splice: start, deleteCount, newSections
+        onSectionDataChangeNow_(start);
+    }
+}
+
 bool WaterFlowSections::IsSpecialUpdate() const
 {
     if (sections_.empty() || !prevSection_) {
@@ -58,5 +85,21 @@ bool WaterFlowSections::IsSpecialUpdate() const
     const auto& prev = prevSection_->first;
     return cur.itemsCount != prev.itemsCount && cur.crossCount == prev.crossCount &&
            cur.columnsGap == prev.columnsGap && cur.rowsGap == prev.rowsGap && cur.margin == prev.margin;
+}
+
+bool WaterFlowSections::IsSpecialUpdateCAPI(int32_t updateIndex) const
+{
+    if (sections_.empty()) {
+        return false;
+    }
+    if (prevSections_.size() != sections_.size()) {
+        return false;
+    }
+    for (size_t i = 0; i < sections_.size(); ++i) {
+        if (!sections_[i].OnlyCountChange(prevSections_[i])) {
+            return false;
+        }
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG

@@ -317,6 +317,8 @@ public:
     }
 
     RefPtr<FrameNode> GetMenuChild(const RefPtr<UINode>& node);
+    RefPtr<FrameNode> GetShowedSubMenu();
+    bool IsSelectOverlayCustomMenu(const RefPtr<FrameNode>& menu) const;
 
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
@@ -331,7 +333,6 @@ private:
     {
         return false;
     }
-    bool IsSelectOverlayCustomMenu(const RefPtr<FrameNode>& menu) const;
     void OnModifyDone() override;
     void InitFocusEvent();
     void OnAttachToFrameNode() override;
@@ -340,6 +341,7 @@ private:
     void SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper);
     void StartShowAnimation();
     void HandleInteraction(const TouchEventInfo& info);
+    RectF GetMenuZone(RefPtr<UINode>& innerMenuNode);
     RefPtr<FrameNode> FindTouchedMenuItem(const RefPtr<UINode>& menuNode, const OffsetF& position);
 
     void HideMenu(const RefPtr<FrameNode>& menu);

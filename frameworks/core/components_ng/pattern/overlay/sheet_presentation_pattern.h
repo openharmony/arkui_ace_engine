@@ -53,7 +53,12 @@ public:
         callback_ = std::move(callback);
     }
 
-    ~SheetPresentationPattern() override = default;
+    ~SheetPresentationPattern()
+    {
+        DeleteOverlay();
+    }
+
+    void DeleteOverlay();
 
     bool IsMeasureBoundary() const override
     {
@@ -258,6 +263,7 @@ public:
         }
     }
 
+    void OverlayDismissSheet();
     void DismissSheet()
     {
         DismissTransition(false);
@@ -450,6 +456,10 @@ public:
 
     float GetPageHeight()
     {
+        // OnTransformTranslateUpdate's offset is the relative to the upper left corner of the father
+        // Therefore, if the father is a PageNode, need to obtain the offsetY of the Page relative to the window
+        // On the basis of the normally calculated offset, move parentOffsetY up,
+        // It can be considered as the offset relative to the window
         auto parentOffsetY = GetRootOffsetYToWindow();
         return pageHeight_ - parentOffsetY;
     }
@@ -512,10 +522,7 @@ public:
         return Positive(keyboardHeight_);
     }
 
-    bool IsTypeNeedAvoidAiBar() const
-    {
-        return sheetType_ == SheetType::SHEET_BOTTOM || sheetType_ == SheetType::SHEET_BOTTOMLANDSPACE;
-    }
+    bool IsTypeNeedAvoidAiBar();
 
     void GetBuilderInitHeight();
     void ChangeSheetPage(float height);
@@ -536,7 +543,6 @@ private:
     void UpdateDragBarStatus();
     void UpdateCloseIconStatus();
     void UpdateSheetTitle();
-    void UpdateInteractive();
     void UpdateFontScaleStatus();
     RefPtr<RenderContext> GetRenderContext();
     bool PostTask(const TaskExecutor::Task& task, const std::string& name);

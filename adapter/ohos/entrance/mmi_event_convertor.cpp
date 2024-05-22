@@ -24,6 +24,7 @@
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/event/ace_events.h"
+#include "core/event/key_event.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::Platform {
@@ -158,6 +159,10 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
         event.y = item.GetWindowYPos();
         event.screenX = item.GetDisplayXPos();
         event.screenY = item.GetDisplayYPos();
+    }
+    event.pressedKeyCodes_.clear();
+    for (const auto& curCode : pointerEvent->GetPressedKeys()) {
+        event.pressedKeyCodes_.emplace_back(static_cast<KeyCode>(curCode));
     }
     return event;
 }
@@ -328,9 +333,9 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         events.originalId = events.id;
     }
     events.touchEventId = pointerEvent->GetId();
-    events.pressedCodes.clear();
+    events.pressedKeyCodes_.clear();
     for (const auto& curCode : pointerEvent->GetPressedKeys()) {
-        events.pressedCodes.emplace_back(static_cast<KeyCode>(curCode));
+        events.pressedKeyCodes_.emplace_back(static_cast<KeyCode>(curCode));
     }
 }
 
@@ -440,6 +445,10 @@ void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     event.time = TimeStamp(std::chrono::microseconds(pointerEvent->GetActionTime()));
     event.sourceTool = GetSourceTool(pointerItem.GetToolType());
     event.targetWindowId = pointerItem.GetTargetWindowId();
+    event.pressedKeyCodes_.clear();
+    for (const auto& curCode : pointerEvent->GetPressedKeys()) {
+        event.pressedKeyCodes_.emplace_back(static_cast<KeyCode>(curCode));
+    }
 }
 
 void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_t instanceId)

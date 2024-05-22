@@ -328,6 +328,9 @@ advanced_ui_component/tabtitlebar/ @hanyujia1
 advanced_ui_component/toolbar/ @hanyujia1
 advanced_ui_component/treeview/ @hanyujia1
 advanced_ui_component/splitlayout/ @hanyujia1
+advanced_ui_component/atomicservicenavigation @giteewzp
+advanced_ui_component/atomicservicetabs @giteewzp
+advanced_ui_component/interstitialdialogaction @giteewzp
 
 [Build configs]
 build/ @sunfei2021

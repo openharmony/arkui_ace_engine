@@ -271,9 +271,6 @@ void WebPattern::OnContextMenuHide()
 
 bool WebPattern::NeedSoftKeyboard() const
 {
-    if (embedNeedKeyboard_) {
-        return true;
-    }
     if (delegate_) {
         return delegate_->NeedSoftKeyboard();
     }
@@ -1084,8 +1081,9 @@ DragRet WebPattern::GetDragAcceptableStatus()
 
 bool WebPattern::NotifyStartDragTask()
 {
-    if (isDisableDrag_) {
-        TAG_LOGW(AceLogTag::ACE_WEB, "DragDrop disable drag in web");
+    if (isDisableDrag_ || isTouchUpEvent_) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "DragDrop disable drag in web. isDisableDrag_:%{public}d,"
+            "isTouchUpEvent_:%{public}d", isDisableDrag_, isTouchUpEvent_);
         return false;
     }
     isDragging_ = true;
@@ -1386,9 +1384,6 @@ void WebPattern::HandleFocusEvent()
 {
     CHECK_NULL_VOID(delegate_);
     isFocus_ = true;
-    if (GetNativeEmbedModeEnabledValue(false)) {
-        embedNeedKeyboard_ = true;
-    }
     if (needOnFocus_) {
         delegate_->OnFocus();
     } else {
@@ -1400,7 +1395,6 @@ void WebPattern::HandleBlurEvent(const BlurReason& blurReason)
 {
     CHECK_NULL_VOID(delegate_);
     isFocus_ = false;
-    embedNeedKeyboard_ = false;
     if (!selectPopupMenuShowing_) {
         delegate_->SetBlurReason(static_cast<OHOS::NWeb::BlurReason>(blurReason));
         delegate_->OnBlur();
@@ -1494,9 +1488,6 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
     if (GreatOrEqual(drawSize.Height(), Infinity<double>())) {
         drawSize.SetHeight(DEFAULT_WEB_HEIGHT);
     }
-    if (layoutMode_ == WebLayoutMode::FIT_CONTENT) {
-        drawSize.SetHeight(DEFAULT_WEB_HEIGHT);
-    }
 
     drawSize_ = drawSize;
     drawSizeCache_ = drawSize_;
@@ -1528,6 +1519,28 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
     return false;
 }
 
+void WebPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
+{
+    if (!CheckSafeAreaIsExpand()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "Not set safeArea, return.");
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto drawSize = Size(geometryNode->GetFrameRect().Width(), geometryNode->GetFrameRect().Height());
+    if (renderContextForSurface_) {
+        auto localposition = geometryNode->GetContentOffset();
+        renderContextForSurface_->SetBounds(
+            localposition.GetX(), localposition.GetY(), drawSize.Width(), drawSize.Height());
+        TAG_LOGD(AceLogTag::ACE_WEB,
+            "Before sync geometry properties set bounds, X:%{public}f, Y:%{public}f, width:%{public}f, "
+            "height:%{public}f",
+            localposition.GetX(), localposition.GetY(), drawSize.Width(), drawSize.Height());
+    }
+}
+
 void WebPattern::UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, double keyboard, double oldWebHeight)
 {
     if (isVirtualKeyBoardShow_ != VkState::VK_SHOW) {
@@ -1537,18 +1550,19 @@ void WebPattern::UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, do
     TAG_LOGI(AceLogTag::ACE_WEB,
         "KeyboardShow height:%{public}d, keyboard:%{public}f, offset:%{public}f, oldWebHeight:%{public}f",
         height, keyboard, GetCoordinatePoint()->GetY(), oldWebHeight);
-
+    if (CheckSafeAreaKeyBoard()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "CheckSafeAreaKeyBoard, no need resize");
+        return;
+    }
     if (GreatOrEqual(height, keyboard + GetCoordinatePoint()->GetY())) {
-        if (!CheckSafeAreaIsExpand()) {
-            double newHeight = height - keyboard - GetCoordinatePoint()->GetY();
-            if (GreatOrEqual(newHeight, oldWebHeight)) {
-                newHeight = oldWebHeight;
-            }
-            if (NearEqual(newHeight, oldWebHeight)) {
-                return;
-            }
-            drawSize_.SetHeight(newHeight);
+        double newHeight = height - keyboard - GetCoordinatePoint()->GetY();
+        if (GreatOrEqual(newHeight, oldWebHeight)) {
+            newHeight = oldWebHeight;
         }
+        if (NearEqual(newHeight, oldWebHeight)) {
+            return;
+        }
+        drawSize_.SetHeight(newHeight);
         UpdateWebLayoutSize(width, height, true);
     }
 }
@@ -1562,11 +1576,22 @@ void WebPattern::OnAreaChangedInner()
     CHECK_NULL_VOID(frameNode);
     auto geometryNode = frameNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    Size webSize = Size(geometryNode->GetFrameRect().Width(), geometryNode->GetFrameRect().Height());
+    auto size = Size(geometryNode->GetFrameRect().Width(), geometryNode->GetFrameRect().Height());
 
-    delegate_->OnAreaChange({resizeOffset.GetX(), resizeOffset.GetY(), webSize.Width(), webSize.Height()});
-    if (CheckSafeAreaIsExpand()) {
-        drawSize_ = webSize;
+    delegate_->OnAreaChange({ resizeOffset.GetX(), resizeOffset.GetY(), size.Width(), size.Height() });
+    if (CheckSafeAreaIsExpand() &&
+        ((size.Width() != areaChangeSize_.Width()) || (size.Height() != areaChangeSize_.Height()))) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "OnAreaChangedInner setbounds: height:%{public}f, offsetY:%{public}f",
+            size.Height(), resizeOffset.GetY());
+        areaChangeSize_ = size;
+        drawSize_ = size;
+        drawSizeCache_ = drawSize_;
+
+        if (renderContextForSurface_) {
+            auto localposition = geometryNode->GetContentOffset();
+            renderContextForSurface_->SetBounds(
+                localposition.GetX(), localposition.GetY(), drawSize_.Width(), drawSize_.Height());
+        }
         delegate_->SetBoundsOrResize(drawSize_, resizeOffset);
     }
     if (layoutMode_ != WebLayoutMode::FIT_CONTENT) {
@@ -1579,7 +1604,7 @@ void WebPattern::OnAreaChangedInner()
     if (isInWindowDrag_)
         return;
     delegate_->SetBoundsOrResize(drawSize_, resizeOffset);
-    if (isNeedReDrawRect_) {
+    if (layoutMode_ == WebLayoutMode::FIT_CONTENT) {
         UpdateSlideOffset(true);
     }
 }
@@ -2219,7 +2244,7 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
         if (height - GetCoordinatePoint()->GetY() < keyboard) {
             return true;
         }
-        if (!delegate_->NeedSoftKeyboard() && embedNeedKeyboard_) {
+        if (!delegate_->NeedSoftKeyboard()) {
             return false;
         }
         isVirtualKeyBoardShow_ = VkState::VK_SHOW;
@@ -2272,6 +2297,7 @@ void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeybo
 
 void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
 {
+    isTouchUpEvent_ = false;
     CHECK_NULL_VOID(delegate_);
     Offset touchOffset = Offset(0, 0);
     std::list<TouchInfo> touchInfos;
@@ -2288,13 +2314,14 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
         }
         delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
     }
-    if (!touchInfos.empty()) {
+    if (!touchInfos.empty() && !GetNativeEmbedModeEnabledValue(false)) {
         WebRequestFocus();
     }
 }
 
 void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
 {
+    isTouchUpEvent_ = true;
     CHECK_NULL_VOID(delegate_);
     if (!isReceivedArkDrag_) {
         ResetDragAction();
@@ -3968,10 +3995,22 @@ void WebPattern::UpdateFlingReachEdgeState(const float value, bool status)
     }
 }
 
+bool WebPattern::IsDefaultFocusNodeExist()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto focusManager = pipeline->GetFocusManager();
+    CHECK_NULL_RETURN(focusManager, false);
+    auto focusView =  focusManager->GetLastFocusView().Upgrade();
+    CHECK_NULL_RETURN(focusView, false);
+    auto focusHub = focusView->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    bool result = focusHub->GetChildFocusNodeByType();
+    return result;
+}
+
 void WebPattern::InitSlideUpdateListener()
 {
-    std::shared_ptr<SlideUpdateListener> listener = std::make_shared<SlideUpdateListener>();
-    listener->SetPatternToListener(AceType::WeakClaim(this));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     for (auto parent = host->GetParent(); parent != nullptr; parent = parent->GetParent()) {
@@ -3985,14 +4024,10 @@ void WebPattern::InitSlideUpdateListener()
         if (parent->GetTag() == V2::LIST_ETS_TAG) {
             auto pattern = frameNode->GetPattern<ListPattern>();
             CHECK_NULL_VOID(pattern);
-            TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern registerSlideUpdateListener List");
-            pattern->registerSlideUpdateListener(listener);
             syncAxis_ = pattern->GetAxis();
         } else {
             auto pattern = frameNode->GetPattern<ScrollPattern>();
             CHECK_NULL_VOID(pattern);
-            TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern registerSlideUpdateListener SCROLL");
-            pattern->registerSlideUpdateListener(listener);
             syncAxis_ = pattern->GetAxis();
         }
         CHECK_NULL_VOID(renderSurface_);
@@ -4331,9 +4366,24 @@ bool WebPattern::CheckSafeAreaIsExpand()
     CHECK_NULL_RETURN(host, false);
     auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, false);
-    auto && opts = layoutProperty->GetSafeAreaExpandOpts();
+    auto &&opts = layoutProperty->GetSafeAreaExpandOpts();
     CHECK_NULL_RETURN(opts, false);
     if ((opts->type & SAFE_AREA_TYPE_SYSTEM) || (opts->type & SAFE_AREA_TYPE_KEYBOARD)) {
+        return true;
+    }
+    return false;
+}
+
+bool WebPattern::CheckSafeAreaKeyBoard()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto &&opts = layoutProperty->GetSafeAreaExpandOpts();
+    CHECK_NULL_RETURN(opts, false);
+    if ((opts->type & SAFE_AREA_TYPE_KEYBOARD)) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "SafeArea type is KEYBOARD.");
         return true;
     }
     return false;
@@ -4344,13 +4394,18 @@ std::vector<int8_t> WebPattern::GetWordSelection(const std::string& text, int8_t
     return DataDetectorMgr::GetInstance().GetWordSelection(text, offset);
 }
 
-void WebPattern::Backward()
+
+bool WebPattern::Backward()
 {
     if (!delegate_) {
         TAG_LOGE(AceLogTag::ACE_WEB, "delegate is null");
-        return;
+        return false;
     }
-    delegate_->Backward();
+    if (delegate_->AccessBackward()) {
+        delegate_->Backward();
+        return true;
+    }
+    return false;
 }
 
 void WebPattern::SuggestionSelected(int32_t index)
@@ -4425,6 +4480,7 @@ void WebPattern::OnHideAutofillPopup()
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDisappear(destructor);
 }
+
 void WebPattern::CloseKeyboard()
 {
     auto host = GetHost();
@@ -4434,7 +4490,6 @@ void WebPattern::CloseKeyboard()
     auto focusHub = eventHub->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->CloseKeyboard();
-    embedNeedKeyboard_ = false;
 }
 
 WebInfoType WebPattern::GetWebInfoType()
@@ -4444,4 +4499,9 @@ WebInfoType WebPattern::GetWebInfoType()
     }
     return WebInfoType::TYPE_UNKNOWN;
 }
+void WebPattern::RequestFocus()
+{
+    WebRequestFocus();
+}
+
 } // namespace OHOS::Ace::NG

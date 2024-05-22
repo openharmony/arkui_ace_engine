@@ -60,6 +60,35 @@ void MenuWrapperPattern::InitFocusEvent()
     focusHub->SetOnBlurInternal(std::move(blurTask));
 }
 
+RefPtr<FrameNode> MenuWrapperPattern::GetShowedSubMenu()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    return DynamicCast<FrameNode>(host->GetLastChild());
+}
+
+RectF MenuWrapperPattern::GetMenuZone(RefPtr<UINode>& innerMenuNode)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, RectF());
+    auto outterMenuNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
+    CHECK_NULL_RETURN(outterMenuNode, RectF());
+    auto menuZone = outterMenuNode->GetGeometryNode()->GetFrameRect();
+    innerMenuNode = GetMenuChild(outterMenuNode);
+    CHECK_NULL_RETURN(innerMenuNode, RectF());
+    auto subMenuNode = GetShowedSubMenu();
+    if (subMenuNode) {
+        innerMenuNode = subMenuNode;
+        auto scrollNode = DynamicCast<FrameNode>(innerMenuNode->GetChildAtIndex(0));
+        CHECK_NULL_RETURN(scrollNode, RectF());
+        innerMenuNode = DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
+        CHECK_NULL_RETURN(innerMenuNode, RectF());
+        auto offset = DynamicCast<FrameNode>(innerMenuNode)->GetOffsetRelativeToWindow();
+        menuZone.SetOffset(offset);
+    }
+    return menuZone;
+}
+
 RefPtr<FrameNode> MenuWrapperPattern::FindTouchedMenuItem(const RefPtr<UINode>& menuNode, const OffsetF& position)
 {
     CHECK_NULL_RETURN(menuNode, nullptr);
@@ -94,40 +123,23 @@ void MenuWrapperPattern::HandleInteraction(const TouchEventInfo& info)
     auto position = OffsetF(
         static_cast<float>(touch.GetGlobalLocation().GetX()), static_cast<float>(touch.GetGlobalLocation().GetY()));
     position -= host->GetPaintRectOffset();
-    auto outterMenuNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
-    CHECK_NULL_VOID(outterMenuNode);
-    auto menuPattern = outterMenuNode->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    auto subMenuNode = menuPattern->GetShowedSubMenu();
-    auto menuZone = outterMenuNode->GetGeometryNode()->GetFrameRect();
-    auto innerMenuNode = GetMenuChild(outterMenuNode);
-    CHECK_NULL_VOID(innerMenuNode);
-    if (subMenuNode) {
-        innerMenuNode = subMenuNode;
-        auto scrollNode = DynamicCast<FrameNode>(innerMenuNode->GetChildAtIndex(0));
-        CHECK_NULL_VOID(scrollNode);
-        innerMenuNode = DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
-        CHECK_NULL_VOID(innerMenuNode);
-        auto offset = innerMenuNode->GetOffsetRelativeToWindow();
-        menuZone.SetOffset(offset);
-    }
+    RefPtr<UINode> innerMenuNode = nullptr;
+    auto menuZone = GetMenuZone(innerMenuNode);
     // get menuNode's touch region
     if (menuZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
         currentTouchItem_ = FindTouchedMenuItem(innerMenuNode, position);
         auto lastTouchItem = GetLastTouchItem();
-        if (currentTouchItem_ != lastTouchItem_) {
-            if (currentTouchItem_) {
-                auto pipeline = PipelineBase::GetCurrentContext();
-                CHECK_NULL_VOID(pipeline);
-                auto theme = pipeline->GetTheme<SelectTheme>();
-                CHECK_NULL_VOID(theme);
-                auto menuItemPattern = currentTouchItem_->GetPattern<MenuItemPattern>();
-                CHECK_NULL_VOID(menuItemPattern);
-                if (!(menuItemPattern->IsDisabled())) {
-                    menuItemPattern->SetBgBlendColor(
-                        menuItemPattern->GetSubBuilder() ? theme->GetHoverColor() : theme->GetClickedColor());
-                    menuItemPattern->PlayBgColorAnimation(false);
-                }
+        if (currentTouchItem_ && currentTouchItem_ != lastTouchItem_) {
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto theme = pipeline->GetTheme<SelectTheme>();
+            CHECK_NULL_VOID(theme);
+            auto curMenuItemPattern = currentTouchItem_->GetPattern<MenuItemPattern>();
+            CHECK_NULL_VOID(curMenuItemPattern);
+            if (!(curMenuItemPattern->IsDisabled())) {
+                curMenuItemPattern->SetBgBlendColor(
+                    curMenuItemPattern->GetSubBuilder() ? theme->GetHoverColor() : theme->GetClickedColor());
+                curMenuItemPattern->PlayBgColorAnimation(false);
             }
             if (lastTouchItem_) {
                 auto lastMenuItemPattern = lastTouchItem_->GetPattern<MenuItemPattern>();

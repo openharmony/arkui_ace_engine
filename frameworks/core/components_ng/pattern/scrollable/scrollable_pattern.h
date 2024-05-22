@@ -119,7 +119,7 @@ public:
     virtual bool IsAtBottom() const = 0;
     virtual bool OutBoundaryCallback()
     {
-        return IsAtTop() || IsAtBottom();
+        return IsOutOfBoundary();
     }
 
     virtual bool IsOutOfBoundary(bool useCurrentDelta = true)
@@ -147,6 +147,9 @@ public:
             scrollableEvent_->SetAxis(Axis::NONE);
         } else {
             scrollableEvent_->SetAxis(axis_);
+        }
+        if (scrollBarProxy_) {
+            scrollBarProxy_->SetScrollEnabled(enabled, AceType::WeakClaim(this));
         }
     }
 
@@ -504,7 +507,7 @@ public:
         std::vector<RefPtr<FrameNode>> children;
         return children;
     }
-    
+
     void SetAnimateCanOverScroll(bool animateCanOverScroll)
     {
         bool isScrollable = !(IsAtBottom() && IsAtTop() && !GetAlwaysEnabled());
@@ -551,6 +554,7 @@ public:
     }
 
 protected:
+    void SuggestOpIncGroup(bool flag);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     virtual DisplayMode GetDefaultScrollBarDisplayMode() const
     {

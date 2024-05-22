@@ -530,6 +530,21 @@ void OffscreenCanvasPaintMethod::PaintShadow(const RSPath& path, const Shadow& s
 #endif
 }
 
+void OffscreenCanvasPaintMethod::PaintImageShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas,
+    const RSBrush* brush, const RSPen* pen, RSSaveLayerOps* slo)
+{
+#ifndef ACE_UNITTEST
+    CHECK_NULL_VOID(rsCanvas_);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) && slo != nullptr) {
+        RosenDecorationPainter::PaintShadow(path, shadow, canvas, brush, pen);
+        rsCanvas_->Restore();
+        rsCanvas_->SaveLayer(*slo);
+    } else {
+        RosenDecorationPainter::PaintShadow(path, shadow, canvas, brush, pen);
+    }
+#endif
+}
+
 void OffscreenCanvasPaintMethod::Path2DRect(const PathArgs& args)
 {
     double left = args.para1;

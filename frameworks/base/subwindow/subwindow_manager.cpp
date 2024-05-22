@@ -303,7 +303,8 @@ void SubwindowManager::ClearPopupInSubwindow(int32_t instanceId)
     }
 }
 
-void SubwindowManager::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo)
+void SubwindowManager::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo,
+    const std::function<void(int32_t)>&& onWillDismiss, bool interactiveDismiss)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show popup ng enter");
     auto containerId = Container::CurrentId();
@@ -315,7 +316,7 @@ void SubwindowManager::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupI
         subwindow->InitContainer();
         manager->AddSubwindow(containerId, subwindow);
     }
-    subwindow->ShowPopupNG(targetId, popupInfo);
+    subwindow->ShowPopupNG(targetId, popupInfo, std::move(onWillDismiss), interactiveDismiss);
 }
 
 void SubwindowManager::HidePopupNG(int32_t targetId, int32_t instanceId)
