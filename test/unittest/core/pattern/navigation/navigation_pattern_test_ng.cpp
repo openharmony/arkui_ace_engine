@@ -1433,7 +1433,7 @@ HWTEST_F(NavigationPatternTestNg, NavigationToolbarConfigurationTest003, TestSiz
      */
     auto barItemPattern = barItemNode->GetPattern<BarItemPattern>();
     EXPECT_EQ(barItemPattern->GetToolbarItemStatus(), NavToolbarItemStatus::ACTIVE);
-    EXPECT_EQ(barItemPattern->GetCurrentIconStatus(), ToolbarIconStatus::INITIAL);
+    EXPECT_EQ(barItemPattern->GetCurrentIconStatus(), ToolbarIconStatus::ACTIVE);
 }
 
 /**
@@ -1658,9 +1658,9 @@ HWTEST_F(NavigationPatternTestNg, NavigationToolbarConfigurationTest006, TestSiz
      */
     auto barItemPattern = barItemNode->GetPattern<BarItemPattern>();
     barItemPattern->UpdateBarItemActiveStatusResource();
-    EXPECT_EQ(barItemPattern->GetCurrentIconStatus(), ToolbarIconStatus::ACTIVE);
-    barItemPattern->UpdateBarItemActiveStatusResource();
     EXPECT_EQ(barItemPattern->GetCurrentIconStatus(), ToolbarIconStatus::INITIAL);
+    barItemPattern->UpdateBarItemActiveStatusResource();
+    EXPECT_EQ(barItemPattern->GetCurrentIconStatus(), ToolbarIconStatus::ACTIVE);
 }
 
 /**
