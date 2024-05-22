@@ -1598,11 +1598,6 @@ void GridPattern::SyncLayoutBeforeSpring()
     host->CreateLayoutTask();
 }
 
-bool GridPattern::OutBoundaryCallback()
-{
-    return IsOutOfBoundary();
-}
-
 void GridPattern::GetEndOverScrollIrregular(OverScrollOffset& offset, float delta) const
 {
     const auto& info = gridLayoutInfo_;
