@@ -3497,13 +3497,32 @@ void ParseDragPreviewMode(NG::DragPreviewOption& previewOption, int32_t modeValu
     isAuto = false;
 }
 
-void SetDragPreviewOptions(ArkUINodeHandle node, ArkUI_Int32 dragPreviewMode)
+void SetDragPreviewOptions(ArkUINodeHandle node, ArkUIDragPreViewOptions dragPreviewOptions,
+    ArkUIDragInteractionOptions dragInteractionOptions)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NG::DragPreviewOption option;
     bool isAuto = true;
-    ParseDragPreviewMode(option, dragPreviewMode, isAuto);
+    if (!dragPreviewOptions.isModeArray) {
+        ParseDragPreviewMode(option, dragPreviewOptions.mode, isAuto);
+    } else {
+        for (size_t i = 0; i < dragPreviewOptions.modeArrayLength; i++) {
+            ParseDragPreviewMode(option, dragPreviewOptions.modeArray[i], isAuto);
+            if (isAuto) {
+                break;
+            }
+        }
+    }
+
+    if (dragPreviewOptions.isBadgeNumber) {
+        option.badgeNumber = dragPreviewOptions.badgeNumber;
+    } else {
+        option.isShowBadge = dragPreviewOptions.isShowBadge;
+    }
+    option.isNumber = dragPreviewOptions.isBadgeNumber;
+    option.isMultiSelectionEnabled = dragInteractionOptions.isMultiSelectionEnabled;
+    option.defaultAnimationBeforeLifting = dragInteractionOptions.defaultAnimationBeforeLifting;
     ViewAbstract::SetDragPreviewOptions(frameNode, option);
 }
 

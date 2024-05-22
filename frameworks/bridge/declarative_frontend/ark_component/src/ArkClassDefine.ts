@@ -1323,3 +1323,26 @@ class TextDataDetectorConfig {
       (this.onDetectResultUpdate === another.onDetectResultUpdate);
   }
 }
+
+class ArkDragPreviewOptions {
+  mode: DragPreviewMode | Array<DragPreviewMode> | undefined;
+  numberBadge: boolean | number | undefined;
+  isMultiSelectionEnabled: boolean | undefined;
+  defaultAnimationBeforeLifting: boolean | undefined;
+
+  constructor() {
+    this.mode = undefined;
+    this.numberBadge = undefined;
+    this.isMultiSelectionEnabled = undefined;
+    this.defaultAnimationBeforeLifting = undefined;
+  }
+
+  isEqual(another: ArkDragPreviewOptions): boolean {
+    return (
+      this.mode === another.mode &&
+      this.numberBadge === another.numberBadge &&
+      this.isMultiSelectionEnabled === another.isMultiSelectionEnabled &&
+      this.defaultAnimationBeforeLifting === another.defaultAnimationBeforeLifting
+    );
+  }
+}

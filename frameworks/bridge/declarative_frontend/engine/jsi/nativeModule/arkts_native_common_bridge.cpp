@@ -4615,15 +4615,52 @@ ArkUINativeModuleValue CommonBridge::SetDragPreviewOptions(ArkUIRuntimeCallInfo*
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> mode = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> mode = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> numberBadge = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> isMultiSelectionEnabled = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> defaultAnimationBeforeLifting = runtimeCallInfo->GetCallArgRef(NUM_4);
+ 
+    struct ArkUIDragPreViewOptions preViewOptions = { 1, 0, 0, nullptr, false, true, false};
+    int32_t* modeIntArray = nullptr;
     if (mode->IsNumber()) {
-        int32_t dragPreviewMode = mode->Int32Value(vm);
-        GetArkUINodeModifiers()->getCommonModifier()->setDragPreviewOptions(nativeNode, dragPreviewMode);
-    } else {
-        GetArkUINodeModifiers()->getCommonModifier()->resetDragPreviewOptions(nativeNode);
+        preViewOptions.isModeArray = false;
+        preViewOptions.mode = mode->Int32Value(vm);
+    } else if (mode->IsArray(vm)) {
+        Local<panda::ArrayRef> modeArray = static_cast<Local<panda::ArrayRef>>(mode);
+        auto arrLength = modeArray->Length(vm);
+        if (arrLength > NUM_4) {
+            arrLength = NUM_4;
+        }
+        modeIntArray = new int32_t[arrLength];
+        for (size_t i = 0; i < arrLength; i++) {
+            Local<JSValueRef> objValue = modeArray->GetValueAt(vm, modeArray, i);
+            modeIntArray[i] = objValue->Int32Value(vm);
+        }
+        preViewOptions.isModeArray = true;
+        preViewOptions.modeArray = modeIntArray;
+        preViewOptions.modeArrayLength = arrLength;
     }
+
+    if (numberBadge->IsBoolean()) {
+        preViewOptions.isBadgeNumber = false;
+        preViewOptions.isShowBadge = numberBadge->ToBoolean(vm)->Value();
+    } else if (numberBadge->IsNumber()) {
+        preViewOptions.isBadgeNumber = true;
+        preViewOptions.badgeNumber = numberBadge->Int32Value(vm);
+    }
+
+    struct ArkUIDragInteractionOptions interactionOptions = { false, false };
+    if (isMultiSelectionEnabled->IsBoolean()) {
+        interactionOptions.isMultiSelectionEnabled = isMultiSelectionEnabled->ToBoolean(vm)->Value();
+    }
+    if (defaultAnimationBeforeLifting->IsBoolean()) {
+        interactionOptions.defaultAnimationBeforeLifting = defaultAnimationBeforeLifting->ToBoolean(vm)->Value();
+    }
+    GetArkUINodeModifiers()->getCommonModifier()->setDragPreviewOptions(
+        nativeNode, preViewOptions, interactionOptions);
+    delete[] modeIntArray;
     return panda::JSValueRef::Undefined(vm);
 }
 
