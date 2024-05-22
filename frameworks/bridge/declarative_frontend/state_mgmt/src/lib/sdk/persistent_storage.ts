@@ -423,7 +423,7 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
 
   // FU code path method
   public propertyHasChanged(info?: PropertyInfo): void {
-    stateMgmtConsole.debug("PersistentStorage: property changed");
+    stateMgmtConsole.debug('PersistentStorage: property changed');
     this.write();
   }
 
@@ -435,7 +435,7 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
 
   // public required by the interface, use the static method instead!
   public aboutToBeDeleted(): void {
-    stateMgmtConsole.debug("PersistentStorage: about to be deleted");
+    stateMgmtConsole.debug('PersistentStorage: about to be deleted');
     this.links_.forEach((val, key, map) => {
       stateMgmtConsole.debug(`PersistentStorage: removing ${key}`);
       val.aboutToBeDeleted();

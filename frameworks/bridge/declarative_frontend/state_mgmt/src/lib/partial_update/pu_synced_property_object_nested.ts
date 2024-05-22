@@ -62,7 +62,7 @@ class SynchedPropertyNestedObjectPU<C extends Object>
 
   // get 'read through` from the ObservedProperty
   public get(): C {
-    stateMgmtProfiler.begin("SynchedPropertyNestedObjectPU.get");
+    stateMgmtProfiler.begin('SynchedPropertyNestedObjectPU.get');
     stateMgmtConsole.propertyAccess(`${this.debugInfo()}: get`)
     this.recordPropertyDependentUpdate();
     if (this.shouldInstallTrackedObjectReadCb) {
@@ -79,7 +79,7 @@ class SynchedPropertyNestedObjectPU<C extends Object>
   // calls ViewPU.updateStateVarsByElmtId, calls updateStateVars in application class, calls this 'set' function
   public set(newValue: C): void {
     if (this.obsObject_ === newValue) {
-      stateMgmtConsole.debug(`SynchedPropertyNestedObjectPU[${this.id__()}IP, '${this.info() || "unknown"}']: set @ObjectLink with unchanged value - nothing to do.`);
+      stateMgmtConsole.debug(`SynchedPropertyNestedObjectPU[${this.id__()}IP, '${this.info() || 'unknown'}']: set @ObjectLink with unchanged value - nothing to do.`);
       return;
     }
 
@@ -95,7 +95,7 @@ class SynchedPropertyNestedObjectPU<C extends Object>
   }
 
   protected onOptimisedObjectPropertyRead(readObservedObject: C, readPropertyName: string, isTracked: boolean): void {
-    stateMgmtProfiler.begin("SynchedPropertyNestedObjectPU.onOptimisedObjectPropertyRead");
+    stateMgmtProfiler.begin('SynchedPropertyNestedObjectPU.onOptimisedObjectPropertyRead');
     const renderingElmtId = this.getRenderingElmtId();
     if (renderingElmtId >= 0) {
       if (!isTracked) {
