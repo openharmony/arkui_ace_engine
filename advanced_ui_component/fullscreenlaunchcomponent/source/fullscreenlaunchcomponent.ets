@@ -30,40 +30,45 @@ export struct FullScreenLaunchComponent {
   private subscriber: commonEventManager.CommonEventSubscriber | null = null;
   aboutToAppear() {
     let subscribeInfo: commonEventManager.CommonEventSubscribeInfo = {
-      events: [ commonEventManager.Support.COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOUT ],
+      events: [commonEventManager.Support.COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOUT],
     }
 
-    commonEventManager.createSubscriber(subscribeInfo, (err: Base.BusinessError, data: commonEventManager.CommonEventSubscriber) => {
-      if (err) {
-        hilog.error(0x3900, 'FullScreenLaunchComponent', 'Failed to create subscriber, err: %{public}s.', JSON.stringify(err))
-        return;
-      }
-
-      if (data == null || data == undefined) {
-        hilog.error(0x3900, 'FullScreenLaunchComponent', 'Failed to create subscriber, data is null.')
-        return;
-      }
-
-      this.subscriber = data;
-      commonEventManager.subscribe(this.subscriber, (err: Base.BusinessError, data: commonEventManager.CommonEventData) => {
+    commonEventManager.createSubscriber(subscribeInfo,
+      (err: Base.BusinessError, data: commonEventManager.CommonEventSubscriber) => {
         if (err) {
-          hilog.error(0x3900, 'FullScreenLaunchComponent', 'Failed to subscribe common event, err: %{public}s.', JSON.stringify(err))
+          hilog.error(0x3900, 'FullScreenLaunchComponent',
+            'Failed to create subscriber, err: %{public}s.', JSON.stringify(err))
           return;
         }
 
-        hilog.info(0x3900, 'FullScreenLaunchComponent', 'Received account logout event.')
-        this.isShow = false;
+        if (data == null || data == undefined) {
+          hilog.error(0x3900, 'FullScreenLaunchComponent', 'Failed to create subscriber, data is null.')
+          return;
+        }
+
+        this.subscriber = data;
+        commonEventManager.subscribe(this.subscriber,
+          (err: Base.BusinessError, data: commonEventManager.CommonEventData) => {
+            if (err) {
+              hilog.error(0x3900, 'FullScreenLaunchComponent',
+                'Failed to subscribe common event, err: %{public}s.', JSON.stringify(err))
+              return;
+            }
+
+          hilog.info(0x3900, 'FullScreenLaunchComponent', 'Received account logout event.')
+          this.isShow = false;
+        })
       })
-    })
   }
 
   aboutToDisappear() {
     if (this.subscriber !== null) {
       commonEventManager.unsubscribe(this.subscriber, (err) => {
         if (err) {
-          hilog.error(0x3900, 'FullScreenLaunchComponent', 'UnsubscribeCallBack, err: %{public}s.', JSON.stringify(err))
+          hilog.error(0x3900, 'FullScreenLaunchComponent',
+            'UnsubscribeCallBack, err: %{public}s.', JSON.stringify(err))
         } else {
-          hilog.info(0x3900, 'FullScreenLaunchComponent', 'Unsubscribe success.')
+          hilog.info(0x3900, 'FullScreenLaunchComponent', 'Unsubscribe.')
           this.subscriber = null
         }
       })
