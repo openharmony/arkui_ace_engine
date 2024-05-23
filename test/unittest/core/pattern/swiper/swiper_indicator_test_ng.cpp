@@ -371,6 +371,42 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternCheckIsTouchBottom001, Tes
 }
 
 /**
+ * @tc.name: SwiperIndicatorPatternCheckIsTouchBottom002
+ * @tc.desc: CheckIsTouchBottom
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternCheckIsTouchBottom002, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    auto displayCount = pattern_->GetLayoutProperty<SwiperLayoutProperty>()->GetDisplayCount().value_or(1);
+    auto childrenSize = pattern_->RealTotalCount();
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    GestureEvent info;
+    layoutProperty_->UpdateLoop(false);
+    pattern_->leftButtonId_.reset();
+    pattern_->rightButtonId_.reset();
+    pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(false);
+    /**
+     * @tc.steps: step1. call no mirror func.
+     */
+    pattern_->currentIndex_ = -5;
+    layoutProperty_->UpdateLayoutDirection(TextDirection::LTR);
+    EXPECT_TRUE(indicatorPattern->CheckIsTouchBottom(info));
+    pattern_->currentIndex_ = 5;
+    EXPECT_TRUE(pattern_->currentIndex_ >= childrenSize - displayCount);
+    EXPECT_TRUE(indicatorPattern->CheckIsTouchBottom(info));
+    /**
+     * @tc.steps: step2. call mirror func.
+     */
+    pattern_->currentIndex_ = -5;
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    EXPECT_TRUE(indicatorPattern->CheckIsTouchBottom(info));
+    pattern_->currentIndex_ = 5;
+    EXPECT_TRUE(pattern_->currentIndex_ >= childrenSize - displayCount);
+    EXPECT_TRUE(indicatorPattern->CheckIsTouchBottom(info));
+}
+
+/**
  * @tc.name: SwiperPatternPlayIndicatorTranslateAnimation003
  * @tc.desc: PlayIndicatorTranslateAnimation
  * @tc.type: FUNC
@@ -437,6 +473,33 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorGetMouseClickIndex001, TestSize.L
     paintProperty->UpdateIsCustomSize(true);
     indicatorPattern->GetMouseClickIndex();
     ASSERT_TRUE(paintProperty->GetIsCustomSizeValue(false));
+}
+
+/**
+ * @tc.name: SwiperIndicatorGetMouseClickIndex002
+ * @tc.desc: Test GetMouseClickIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorGetMouseClickIndex002, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetDirection(Axis::HORIZONTAL);
+    });
+    RefPtr<SwiperIndicatorPattern> indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    auto paintProperty = indicatorNode_->GetPaintProperty<DotIndicatorPaintProperty>();
+    /**
+     * @tc.steps: step1. call no mirror func.
+     */
+    layoutProperty_->UpdateLayoutDirection(TextDirection::LTR);
+    MouseClickIndicator(SourceType::MOUSE, Offset(72.f, 16.f));
+    indicatorPattern->GetMouseClickIndex();
+    EXPECT_EQ(indicatorPattern->mouseClickIndex_, 3);
+    /**
+     * @tc.steps: step2. call mirror func.
+     */
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    indicatorPattern->GetMouseClickIndex();
+    EXPECT_EQ(indicatorPattern->mouseClickIndex_, 0);
 }
 
 /**
