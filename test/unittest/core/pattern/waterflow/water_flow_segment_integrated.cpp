@@ -523,4 +523,50 @@ HWTEST_F(WaterFlowSegmentIntegratedTest, Replace005, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 20), -53.0f);
     EXPECT_EQ(info->segmentStartPos_.size(), 4);
 }
+
+/**
+ * @tc.name: Replace006
+ * @tc.desc: Replace empty section with new data.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentIntegratedTest, Replace006, TestSize.Level1)
+{
+    Create(
+        [](WaterFlowModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(400.0f));
+            ViewAbstract::SetHeight(CalcLength(600.f));
+            CreateItem(37);
+        },
+        false);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_7);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    FlushLayoutTask(frameNode_);
+    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
+    UpdateCurrentOffset(-2000.0f);
+    EXPECT_EQ(info->currentOffset_, -2000.0f);
+    EXPECT_EQ(info->startIndex_, 20);
+
+    for (int i = 0; i < 37; ++i) {
+        frameNode_->RemoveChildAtIndex(0);
+    }
+    frameNode_->ChildrenUpdatedFrom(0);
+    auto newSection = SECTION_9;
+    newSection[0].itemsCount = 0;
+    secObj->ChangeData(0, 4, newSection);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, -1);
+
+    secObj->ChangeData(0, 1, SECTION_9);
+    AddItems(6);
+    frameNode_->ChildrenUpdatedFrom(0);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info->endIndex_, 5);
+    EXPECT_EQ(info->currentOffset_, 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+}
 } // namespace OHOS::Ace::NG
