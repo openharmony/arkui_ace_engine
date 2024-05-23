@@ -313,7 +313,7 @@ napi_value JSOffscreenCanvas::OnSetHeight(napi_env env, napi_callback_info info)
 
 napi_value JSOffscreenCanvas::onTransferToImageBitmap(napi_env env)
 {
-    if (offscreenCanvasContext_ == nullptr) {
+    if (offscreenCanvasPattern_ == nullptr || offscreenCanvasContext_ == nullptr) {
         return nullptr;
     }
     napi_value global = nullptr;
@@ -341,7 +341,8 @@ napi_value JSOffscreenCanvas::onTransferToImageBitmap(napi_env env)
     jsImage->SetUnit(GetUnit());
     jsImage->SetWidth(GetWidth());
     jsImage->SetHeight(GetHeight());
-    jsImage->SetContextId(offscreenCanvasContext_->GetId());
+    auto pixelMap = offscreenCanvasPattern_->TransferToImageBitmap();
+    jsImage->SetPixelMap(pixelMap);
     return renderImage;
 }
 
