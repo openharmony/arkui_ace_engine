@@ -474,7 +474,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     }
 
     auto oldParentGlobalOffset = parentGlobalOffset_;
-    parentGlobalOffset_ = textFieldLayoutAlgorithm->GetParentGlobalOffset();
+    parentGlobalOffset_ = GetPaintRectGlobalOffset();
     inlineMeasureItem_ = textFieldLayoutAlgorithm->GetInlineMeasureItem();
     auto isEditorValueChanged = FireOnTextChangeEvent();
     UpdateCancelNode();
@@ -3296,6 +3296,12 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
     auto textPaintOffset = GetPaintRectGlobalOffset();
     height = selectController_->GetCaretRect().Bottom() + windowRect.Top() +
              textPaintOffset.GetY() + offset - positionY;
+
+    auto manager = pipeline->GetSafeAreaManager();
+    if (manager) {
+        auto keyboardOffset = manager->GetKeyboardOffset();
+        positionY -= keyboardOffset;
+    }
 
     if (IsNormalInlineState()) {
         auto safeBoundary = theme->GetInlineBorderWidth().ConvertToPx() * 2;
