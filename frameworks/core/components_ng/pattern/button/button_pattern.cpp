@@ -203,16 +203,18 @@ void ButtonPattern::HandleFocusStyleTask(RefPtr<ButtonLayoutProperty> layoutProp
     if (scaleModify_) {
         buttonRenderContext->SetScale(scaleFocus, scaleFocus);
     }
-    if (buttonStyle == ButtonStyleMode::TEXT && controlSize == ControlSize::NORMAL) {
+    if (buttonStyle != ButtonStyleMode::EMPHASIZE && controlSize == ControlSize::NORMAL) {
+        bool isTextButton = buttonStyle == ButtonStyleMode::TEXT;
         bgColorModify_ = buttonRenderContext->GetBackgroundColor() == buttonTheme->GetBgColor(buttonStyle, buttonRole);
         if (bgColorModify_) {
-            buttonRenderContext->UpdateBackgroundColor(buttonTheme->GetTextBackgroundFocus());
+            buttonRenderContext->UpdateBackgroundColor(
+                isTextButton ? buttonTheme->GetTextBackgroundFocus() : buttonTheme->GetNormalBackgroundFocus());
         }
     }
 
     if (buttonStyle != ButtonStyleMode::EMPHASIZE) {
         focusTextColorModify_ =
-            textLayoutProperty->GetTextColor() == buttonTheme->GetFocusTextColor(buttonStyle, buttonRole);
+            textLayoutProperty->GetTextColor() == buttonTheme->GetTextColor(buttonStyle, buttonRole);
         if (focusTextColorModify_) {
             textLayoutProperty->UpdateTextColor(buttonTheme->GetFocusTextColor(buttonStyle, buttonRole));
             textNode->MarkDirtyNode();
