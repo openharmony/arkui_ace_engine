@@ -232,11 +232,11 @@ void WrapLayoutAlgorithm::PerformLayoutInitialize(const RefPtr<LayoutProperty>& 
     }
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         if (isHorizontal_) {
-            mainLengthLimit_ = constraint->percentReference.Width();
-            crossLengthLimit_ = constraint->percentReference.Height();
+            mainLengthLimit_ = std::min(constraint->maxSize.Width(), constraint->percentReference.Width());
+            crossLengthLimit_ = std::min(constraint->maxSize.Height(), constraint->percentReference.Height());
         } else {
-            mainLengthLimit_ = constraint->percentReference.Height();
-            crossLengthLimit_ = constraint->percentReference.Width();
+            mainLengthLimit_ = std::min(constraint->maxSize.Height(), constraint->percentReference.Height());
+            crossLengthLimit_ = std::min(constraint->maxSize.Width(), constraint->percentReference.Width());
         }
     } else {
         if (isHorizontal_) {
