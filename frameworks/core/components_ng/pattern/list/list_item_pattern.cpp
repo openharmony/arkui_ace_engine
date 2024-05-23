@@ -956,7 +956,7 @@ void ListItemPattern::InitPressEvent()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto touchType = info.GetTouches().front().GetTouchType();
-        if (touchType == TouchType::DOWN || touchType == TouchType::UP) {
+        if (touchType == TouchType::DOWN || touchType == TouchType::UP || touchType == TouchType::CANCEL) {
             pattern->HandlePressEvent(touchType == TouchType::DOWN, pattern->GetHost());
         }
     };
