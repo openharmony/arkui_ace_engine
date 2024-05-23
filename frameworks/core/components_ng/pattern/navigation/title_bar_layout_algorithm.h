@@ -138,11 +138,6 @@ private:
     Dimension menuCompPadding_;
     Dimension paddingTopTwolines_;
     Dimension titleSpaceVertical_;
-    Dimension marginLevelS_;
-    Dimension marginLevelM_;
-    Dimension marginLevelL_;
-    Dimension titlebarBreakpointS_;
-    Dimension titlebarBreakpointM_;
 
     float menuHeight_ = 0.0f;
     float initialTitleOffsetY_ = 0.0f;

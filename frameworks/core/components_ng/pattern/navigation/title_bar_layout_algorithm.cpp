@@ -968,23 +968,23 @@ void TitleBarLayoutAlgorithm::InitializeTheme(const SizeF& titleBarSize)
     navBackIconWidth_ = BACK_BUTTON_ICON_SIZE.ConvertToPx();
     navButtonPadding_ = BUTTON_PADDING.ConvertToPx();
     navHorizontalMargin_ = NAV_HORIZONTAL_MARGIN_L.ConvertToPx();
-    marginLevelS_ = theme->GetMarginLevelS();
-    marginLevelM_ = theme->GetMarginLevelM();
-    marginLevelL_ = theme->GetMarginLevelL();
+    Dimension marginLevelS = theme->GetMarginLevelS();
+    Dimension marginLevelM = theme->GetMarginLevelM();
+    Dimension marginLevelL = theme->GetMarginLevelL();
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         doubleLineTitleBarHeight_ = static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
         navTitleSpaceVertical_ = static_cast<float>(titleSpaceVertical_.ConvertToPx());
         navBackIconWidth_ = backIconWidth_.ConvertToPx();
         navButtonPadding_ = (MENU_BUTTON_PADDING + MENU_BUTTON_PADDING).ConvertToPx();
         navHorizontalMargin_ = navButtonPadding_ + menuCompPadding_.ConvertToPx();
-        titlebarBreakpointS_ = theme->GetTitlebarBreakpointS();
-        titlebarBreakpointM_ = theme->GetTitlebarBreakpointM();
-        if (titleBarSize.Width() < titlebarBreakpointS_.ConvertToPx()) {
-            navLeftMargin_ = marginLevelS_.ConvertToPx();
-        } else if (titleBarSize.Width() >= titlebarBreakpointM_.ConvertToPx()) {
-            navLeftMargin_ = marginLevelL_.ConvertToPx();
+        Dimension titlebarBreakpointS = theme->GetTitlebarBreakpointS();
+        Dimension titlebarBreakpointM = theme->GetTitlebarBreakpointM();
+        if (titleBarSize.Width() < titlebarBreakpointS.ConvertToPx()) {
+            navLeftMargin_ = marginLevelS.ConvertToPx();
+        } else if (titleBarSize.Width() >= titlebarBreakpointM.ConvertToPx()) {
+            navLeftMargin_ = marginLevelL.ConvertToPx();
         } else {
-            navLeftMargin_ = marginLevelM_.ConvertToPx();
+            navLeftMargin_ = marginLevelM.ConvertToPx();
         }
         navRightMargin_ = navLeftMargin_;
     }
