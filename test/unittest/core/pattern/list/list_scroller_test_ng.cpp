@@ -1266,6 +1266,303 @@ HWTEST_F(ListScrollerTestNg, PositionController007, TestSize.Level1)
     EXPECT_TRUE(pattern_->IsAtTop());
 }
 
+namespace {
+constexpr float SCROLL_FIXED_VELOCITY_008 = 400.f;
+constexpr float OFFSET_TIME_008 = 200.f;
+constexpr int32_t TIME_CHANGED_COUNTS_008 = 20 *10;
+} // namespace
+/**
+ * @tc.name: PositionController008
+ * @tc.desc: Test PositionController function with ScrollToIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerTestNg, PositionController008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List Item
+     */
+    constexpr int32_t itemNumber = 20;
+    ListModelNG model = CreateList();
+
+    /**
+     * @tc.steps: step2. Set the direction to VERTICAL
+     * expected: 1.The direction to VERTICAL
+     *           2.The current Offset is 0
+     */
+    model.SetListDirection(Axis::VERTICAL);
+    CreateListItems(itemNumber);
+    CreateDone(frameNode_);
+    auto controller = pattern_->positionController_;
+    EXPECT_EQ(controller->GetScrollDirection(), Axis::VERTICAL);
+    EXPECT_EQ(controller->GetCurrentOffset(), Offset::Zero());
+
+    /**
+     * @tc.steps: step3. Scroll to the left edge
+     * expected: Return fixed verify
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_LEFT, SCROLL_FIXED_VELOCITY_008);
+    EXPECT_FALSE(pattern_->fixedVelocityMotion_);
+
+    /**
+     * @tc.steps: step4. Scroll to the right edge
+     * expected: Return fixed verify
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_RIGHT, SCROLL_FIXED_VELOCITY_008);
+    EXPECT_FALSE(pattern_->fixedVelocityMotion_);
+
+    /**
+     * @tc.steps: step5. Scroll to the bottom edge
+     * expected: 1.Return fixed verify
+     * expected: 2.The current Velocity is equal to the set fixed velocity
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, SCROLL_FIXED_VELOCITY_008);
+    EXPECT_TRUE(pattern_->fixedVelocityMotion_);
+    EXPECT_EQ(pattern_->fixedVelocityMotion_->GetCurrentVelocity(), -SCROLL_FIXED_VELOCITY_008);
+
+    /**
+     * @tc.steps: step6. 1. Set offset time
+     *                   2. Set changed count
+     *                   3. Flush layout
+     * expected: Scroll to the bottom edge
+     */
+    int32_t offsetTime = OFFSET_TIME_008;
+    for (int i = 0; i < TIME_CHANGED_COUNTS_008; i++) {
+        pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
+        offsetTime = offsetTime + OFFSET_TIME_008;
+        FlushLayoutTask(frameNode_);
+    }
+    EXPECT_TRUE(pattern_->IsAtBottom());
+
+    /**
+     * @tc.steps: step7. Scroll to the top edge
+     * expected: 1.Fixed Verify is is non-zero.
+     *           2.The current Velocity is equal to the set fixed velocity
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, SCROLL_FIXED_VELOCITY_008);
+    EXPECT_TRUE(pattern_->fixedVelocityMotion_);
+    EXPECT_EQ(pattern_->fixedVelocityMotion_->GetCurrentVelocity(), SCROLL_FIXED_VELOCITY_008);
+
+    /**
+     * @tc.steps: step8. 1. Set offset time
+     *                   2. Set changed count
+     *                   3. Flush layout
+     * expected: Scroll to the top edge
+     */
+    offsetTime = OFFSET_TIME_008;
+    for (int i = 0; i < TIME_CHANGED_COUNTS_008; i++) {
+        pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
+        offsetTime = offsetTime + OFFSET_TIME_008;
+        FlushLayoutTask(frameNode_);
+    }
+    EXPECT_TRUE(pattern_->IsAtTop());
+
+    /**
+     * @tc.steps: step9. index is -1.
+     * @tc.expected: not scroll.
+     */
+    ScrollToIndex(ListLayoutAlgorithm::LAST_ITEM, true, ScrollAlign::START);
+    EXPECT_EQ(pattern_->startIndex_, 0);
+}
+
+namespace {
+constexpr float SCROLL_FIXED_VELOCITY_009 = 600.f;
+constexpr float OFFSET_TIME_009 = 100.f;
+constexpr int32_t TIME_CHANGED_COUNTS_009 = 20 * 60;
+} // namespace
+/**
+ * @tc.name: PositionController009
+ * @tc.desc: Test PositionController function with ScrollTo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerTestNg, PositionController009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List Item
+     */
+    constexpr int32_t itemNumber = 20;
+    ListModelNG model = CreateList();
+    
+    /**
+     * @tc.steps: step2. Set the direction to VERTICAL
+     * expected: 1.The direction to VERTICAL
+     *           2.The current Offset is 0
+     */
+    model.SetListDirection(Axis::VERTICAL);
+    CreateListItems(itemNumber);
+    CreateDone(frameNode_);
+    auto controller = pattern_->positionController_;
+
+    EXPECT_EQ(controller->GetScrollDirection(), Axis::VERTICAL);
+    EXPECT_EQ(controller->GetCurrentOffset(), Offset::Zero());
+
+    /**
+     * @tc.steps: step3. Scroll to the left edge
+     * expected: Return fixed verify
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_LEFT, SCROLL_FIXED_VELOCITY_009);
+    EXPECT_FALSE(pattern_->fixedVelocityMotion_);
+
+    /**
+     * @tc.steps: step4. Scroll to the right edge
+     * expected: Return fixed verify
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_RIGHT, SCROLL_FIXED_VELOCITY_009);
+    EXPECT_FALSE(pattern_->fixedVelocityMotion_);
+
+    /**
+     * @tc.steps: step5. Scroll to the bottom edge
+     * expected: 1.Return fixed verify
+     * expected: 2.The current Velocity is equal to the set fixed velocity
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, SCROLL_FIXED_VELOCITY_009);
+    EXPECT_TRUE(pattern_->fixedVelocityMotion_);
+    EXPECT_EQ(pattern_->fixedVelocityMotion_->GetCurrentVelocity(), -SCROLL_FIXED_VELOCITY_009);
+
+    /**
+     * @tc.steps: step6. 1. Set offset time
+     *                   2. Set changed count
+     *                   3. Flush layout
+     * expected: Scroll to the bottom edge
+     */
+    int32_t offsetTime = OFFSET_TIME_009;
+    for (int i = 0; i < TIME_CHANGED_COUNTS_009; i++) {
+        pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
+        offsetTime = offsetTime + OFFSET_TIME_009;
+        FlushLayoutTask(frameNode_);
+    }
+    EXPECT_TRUE(pattern_->IsAtBottom());
+
+    /**
+     * @tc.steps: step7. Scroll to the top edge
+     * expected: 1.Fixed Verify is is non-zero.
+     *           2.The current Velocity is equal to the set fixed velocity
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, SCROLL_FIXED_VELOCITY_009);
+    EXPECT_TRUE(pattern_->fixedVelocityMotion_);
+    EXPECT_EQ(pattern_->fixedVelocityMotion_->GetCurrentVelocity(), SCROLL_FIXED_VELOCITY_009);
+    offsetTime = OFFSET_TIME_009;
+    for (int i = 0; i < TIME_CHANGED_COUNTS_009; i++) {
+        pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
+        offsetTime = offsetTime + OFFSET_TIME_009;
+        FlushLayoutTask(frameNode_);
+    }
+    EXPECT_TRUE(pattern_->IsAtTop());
+
+    /**
+     * @tc.steps: step8. bottomOffset > topOffset == 0
+     * expected: top Align
+     */
+    pattern_->ScrollTo(1000);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 1000);
+}
+
+namespace {
+constexpr float SCROLL_FIXED_VELOCITY_010 = 800.f;
+constexpr float OFFSET_TIME_010 = 400.f;
+constexpr int32_t TIME_CHANGED_COUNTS_010 = 20 * 40;
+} // namespace
+/**
+ * @tc.name: PositionController010
+ * @tc.desc: Test PositionController function with ScrollToIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerTestNg, PositionController010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List Item
+     */
+    constexpr int32_t itemNumber = 20;
+    ListModelNG model = CreateList();
+    
+    /**
+     * @tc.steps: step2. Set the direction to VERTICAL
+     * expected: 1.The direction to VERTICAL
+     *           2.The current Offset is 0
+     */
+    model.SetListDirection(Axis::VERTICAL);
+    CreateListItems(itemNumber);
+    CreateDone(frameNode_);
+    auto controller = pattern_->positionController_;
+
+    EXPECT_EQ(controller->GetScrollDirection(), Axis::VERTICAL);
+    EXPECT_EQ(controller->GetCurrentOffset(), Offset::Zero());
+
+    /**
+     * @tc.steps: step3. Scroll to the left edge
+     * expected: Return fixed verify
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_LEFT, SCROLL_FIXED_VELOCITY_010);
+    EXPECT_FALSE(pattern_->fixedVelocityMotion_);
+
+    /**
+     * @tc.steps: step4. Scroll to the right edge
+     * expected: Return fixed verify
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_RIGHT, SCROLL_FIXED_VELOCITY_010);
+    EXPECT_FALSE(pattern_->fixedVelocityMotion_);
+
+    /**
+     * @tc.steps: step5. Scroll to the bottom edge
+     * expected: 1.Return fixed verify
+     * expected: 2.The current Velocity is equal to the set fixed velocity
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, SCROLL_FIXED_VELOCITY_010);
+    EXPECT_TRUE(pattern_->fixedVelocityMotion_);
+    EXPECT_EQ(pattern_->fixedVelocityMotion_->GetCurrentVelocity(), -SCROLL_FIXED_VELOCITY_010);
+
+    /**
+     * @tc.steps: step6. 1. Set offset time
+     *                   2. Set changed count
+     *                   3. Flush layout
+     * expected: Scroll to the bottom edge
+     */
+    int32_t offsetTime = OFFSET_TIME_010;
+    for (int i = 0; i < TIME_CHANGED_COUNTS_010; i++) {
+        pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
+        offsetTime = offsetTime + OFFSET_TIME_010;
+        FlushLayoutTask(frameNode_);
+    }
+    EXPECT_TRUE(pattern_->IsAtBottom());
+
+    /**
+     * @tc.steps: step7. Scroll to the top edge
+     * expected: 1.Fixed Verify is is non-zero.
+     *           2.The current Velocity is equal to the set fixed velocity
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, SCROLL_FIXED_VELOCITY_010);
+    EXPECT_TRUE(pattern_->fixedVelocityMotion_);
+    EXPECT_EQ(pattern_->fixedVelocityMotion_->GetCurrentVelocity(), SCROLL_FIXED_VELOCITY_010);
+
+    /**
+     * @tc.steps: step8. 1. Set offset time
+     *                   2. Set changed count
+     *                   3. Flush layout
+     * expected: Scroll to the top edge
+     */
+    offsetTime = OFFSET_TIME_010;
+    for (int i = 0; i < TIME_CHANGED_COUNTS_010; i++) {
+        pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
+        offsetTime = offsetTime + OFFSET_TIME_010;
+        FlushLayoutTask(frameNode_);
+    }
+    EXPECT_TRUE(pattern_->IsAtTop());
+
+    /**
+     * @tc.steps: step1. When has animator_ and not stop, call OnScrollCallback.
+     * @tc.expected: Would stop.
+     */
+    pattern_->AnimateTo(1, 0, nullptr, true);
+    EXPECT_FALSE(pattern_->AnimateStoped());
+    double offset = 100.0;
+    pattern_->OnScrollPosition(offset, SCROLL_FROM_START);
+    EXPECT_TRUE(pattern_->scrollAbort_);
+    pattern_->OnScrollCallback(100.f, SCROLL_FROM_START);
+    EXPECT_TRUE(pattern_->scrollAbort_);
+    EXPECT_TRUE(IsEqualTotalOffset(0));
+    EXPECT_TRUE(pattern_->AnimateStoped());
+}
+
 /**
  * @tc.name: Pattern002
  * @tc.desc: Test list_pattern AnimateTo function
