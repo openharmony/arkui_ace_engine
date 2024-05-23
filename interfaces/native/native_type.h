@@ -536,6 +536,51 @@ typedef struct {
 } ARKUI_TextPickerCascadeRangeContent;
 
 /**
+ * @brief 定义无障碍复选框状态类型枚举值。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 复选框未被选中。*/
+    ARKUI_ACCESSIBILITY_UNCHECKED = 0,
+    /** 复选框被选中。*/
+    ARKUI_ACCESSIBILITY_CHECKED,
+} ArkUI_AccessibilityCheckedState;
+
+
+/**
+ * @brief Define accessible action types.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** click action. */
+    ARKUI_ACCESSIBILITY_ACTION_CLICK = 1 << 0,
+    /** long click action. */
+    ARKUI_ACCESSIBILITY_ACTION_LONG_CLICK = 1 << 1,
+    /** cut action. */
+    ARKUI_ACCESSIBILITY_ACTION_CUT = 1 << 2,
+    /** copy action. */
+    ARKUI_ACCESSIBILITY_ACTION_COPY = 1 << 3,
+    /** paste action. */
+    ARKUI_ACCESSIBILITY_ACTION_PASTE = 1 << 4,
+} ArkUI_AccessibilityActionType;
+
+/**
+ * @brief 定义组件无障碍状态。
+ *
+ * @since 12
+ */
+typedef struct ArkUI_AccessibilityState ArkUI_AccessibilityState;
+
+/**
+ * @brief 定义组件无障碍信息值。
+ *
+ * @since 12
+ */
+typedef struct ArkUI_AccessibilityValue ArkUI_AccessibilityValue;
+
+/**
  * @brief Enumerates the effects used at the edges of the component when the boundary of the
  * scrollable content is reached.
  *
@@ -3044,6 +3089,177 @@ void OH_ArkUI_ImageAnimatorFrameInfo_SetDuration(ArkUI_ImageAnimatorFrameInfo* i
  * @since 12
 */
 int32_t OH_ArkUI_ImageAnimatorFrameInfo_GetDuration(ArkUI_ImageAnimatorFrameInfo* imageInfo);
+
+/**
+ * @brief Create accessibility state.
+ *
+ * @return accessibility state object. If the object returns a null pointer,
+ *         it indicates a creation failure, and the reason for the failure may be that the address space is full.
+ * @since 12
+*/
+ArkUI_AccessibilityState* OH_ArkUI_AccessibilityState_Create(void);
+
+/**
+* @brief Dispose accessibility state.
+*
+* @param state accessibility state object.
+* @since 12
+*/
+void OH_ArkUI_AccessibilityState_Dispose(ArkUI_AccessibilityState* state);
+
+/**
+ * @brief Set accessibility state disabled.
+ *
+ * @param state accessibility state object.
+ * @param isDisabled accessibility state disabled， Value 1 indicates disabled and 0 indicates enbled.
+ * @since 12
+*/
+void OH_ArkUI_AccessibilityState_SetDisabled(ArkUI_AccessibilityState* state, int32_t isDisabled);
+
+/**
+ * @brief Get accessibility state disabled.
+ *
+ * @param state accessibility state object.
+ * @return accessibility state disabled， Value 1 indicates disabled and 0 indicates enbled. The default value is 0.
+ *         If the function parameter is abnormal, return the default value.
+ * @since 12
+*/
+int32_t OH_ArkUI_AccessibilityState_IsDisabled(ArkUI_AccessibilityState* state);
+
+/**
+ * @brief Set accessibility state selected.
+ *
+ * @param state accessibility state object.
+ * @param isSelected accessibility state selected， Value 1 indicates selected， and 0 indicates not selected.
+ *        The default value is 0.
+ * @since 12
+*/
+void OH_ArkUI_AccessibilityState_SetSelected(ArkUI_AccessibilityState* state, int32_t isSelected);
+
+/**
+ * @brief Get accessibility state selected.
+ *
+ * @param state accessibility state object.
+ * @return accessibility state selected， Value 1 indicates selected， and 0 indicates not selected.
+ *         The default value is 0.
+ *         If the function parameter is abnormal, return the default value.
+ * @since 12
+*/
+int32_t OH_ArkUI_AccessibilityState_IsSelected(ArkUI_AccessibilityState* state);
+
+/**
+ * @brief Set accessibility checked state.
+ *
+ * @param state accessibility state object.
+ * @param checkedState checked state，and uses the {@link ArkUI_AccessibilityCheckedState} enumeration value,
+ *        The default value is ARKUI_ACCESSIBILITY_UNCHECKED.
+ * @since 12
+*/
+void OH_ArkUI_AccessibilityState_SetCheckedState(ArkUI_AccessibilityState* state, int32_t checkedState);
+
+/**
+ * @brief Get accessibility checked state.
+ *
+ * @param state accessibility state object.
+ * @return checked state，and uses the {@link ArkUI_AccessibilityCheckedState} enumeration value,
+ *         The default value is ARKUI_ACCESSIBILITY_UNCHECKED.
+ *         If the function parameter is abnormal, return the default value.
+ * @since 12
+*/
+int32_t OH_ArkUI_AccessibilityState_GetCheckedState(ArkUI_AccessibilityState* state);
+
+/**
+ * @brief Create accessibility value.
+ *
+ * @return accessibility value object. If the object returns a null pointer,
+ *         it indicates a creation failure, and the reason for the failure may be that the address space is full.
+ * @since 12
+*/
+ArkUI_AccessibilityValue* OH_ArkUI_AccessibilityValue_Create(void);
+
+/**
+* @brief Dispose accessibility value.
+*
+* @param state accessibility value object.
+* @since 12
+*/
+void OH_ArkUI_AccessibilityValue_Dispose(ArkUI_AccessibilityValue* value);
+
+/**
+ * @brief Set accessibility minimum value.
+ *
+ * @param value accessibility value object.
+ * @param min minimum value based on range components, The default value is -1。
+ * @since 12
+*/
+void OH_ArkUI_AccessibilityValue_SetMin(ArkUI_AccessibilityValue* value, int32_t min);
+
+/**
+ * @brief Get accessibility minimum value.
+ *
+ * @param value accessibility value object.
+ * @return minimum value based on range components, The default value is -1。
+ *         If the function parameter is abnormal, return -1.
+ * @since 12
+*/
+int32_t OH_ArkUI_AccessibilityValue_GetMin(ArkUI_AccessibilityValue* value);
+
+/**
+ * @brief Set accessibility minimum value.
+ *
+ * @param value accessibility value object.
+ * @param max maximum value based on range components, The default value is -1。
+ * @since 12
+*/
+void OH_ArkUI_AccessibilityValue_SetMax(ArkUI_AccessibilityValue* value, int32_t max);
+
+/**
+ * @brief Get accessibility minimum value.
+ *
+ * @param value accessibility value object.
+ * @return maximum value based on range components, The default value is -1。
+ *         If the function parameter is abnormal, return -1.
+ * @since 12
+*/
+int32_t OH_ArkUI_AccessibilityValue_GetMax(ArkUI_AccessibilityValue* value);
+
+/**
+ * @brief Set accessibility current value.
+ *
+ * @param value accessibility value object.
+ * @param current value based on range components, The default value is -1。
+ * @since 12
+*/
+void OH_ArkUI_AccessibilityValue_SetCurrent(ArkUI_AccessibilityValue* value, int32_t current);
+
+/**
+ * @brief Get accessibility current value.
+ *
+ * @param value accessibility value object.
+ * @return current value based on range components, The default value is -1。
+ *         If the function parameter is abnormal, return -1.
+ * @since 12
+*/
+int32_t OH_ArkUI_AccessibilityValue_GetCurrent(ArkUI_AccessibilityValue* value);
+
+/**
+ * @brief Set accessibility text value.
+ *
+ * @param value accessibility value object.
+ * @param text The textual description information of the component, which defaults to an empty string。
+ * @since 12
+*/
+void OH_ArkUI_AccessibilityValue_SetText(ArkUI_AccessibilityValue* value, const char* text);
+
+/**
+ * @brief Get accessibility text value。
+ *
+ * @param value accessibility value object.
+ * @return The textual description information of the component, which defaults to an empty string;
+ *         If the function parameter is abnormal, return null.
+ * @since 12
+*/
+const char* OH_ArkUI_AccessibilityValue_GetText(ArkUI_AccessibilityValue* value);
 #ifdef __cplusplus
 };
 #endif

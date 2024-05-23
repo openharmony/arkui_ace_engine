@@ -8164,6 +8164,103 @@ const ArkUI_AttributeItem* GetFocusOnTouch(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+const ArkUI_AttributeItem* GetAccessibilityID(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    ArkUI_Int32 value = fullImpl->getNodeModifiers()->getCommonModifier()->getAccessibilityID(node->uiNodeHandle);
+    g_numberValues[0].i32 = value;
+    g_attributeItem.size = NUM_1;
+    return &g_attributeItem;
+}
+
+int32_t SetAccessibilityState(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item->object, ERROR_CODE_PARAM_INVALID);
+    ArkUI_AccessibilityState* statePtr = reinterpret_cast<ArkUI_AccessibilityState*>(item->object);
+    CHECK_NULL_RETURN(statePtr, ERROR_CODE_PARAM_INVALID);
+    if (statePtr->isDisabled.isSet && !InRegion(NUM_0, NUM_1, statePtr->isDisabled.value)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (statePtr->isSelected.isSet && !InRegion(NUM_0, NUM_1, statePtr->isSelected.value)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (statePtr->checkedType.isSet && !InRegion(NUM_0, NUM_1, statePtr->checkedType.value)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    ArkUIAccessibilityState uiState;
+    uiState.isDisabled = ArkUIOptionalInt { statePtr->isDisabled.isSet, statePtr->isDisabled.value };
+    uiState.isSelected = ArkUIOptionalInt { statePtr->isSelected.isSet, statePtr->isSelected.value };
+    uiState.checkedType = ArkUIOptionalInt { statePtr->checkedType.isSet, statePtr->checkedType.value };
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->setAccessibilityState(node->uiNodeHandle, uiState);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetAccessibilityState(ArkUI_NodeHandle node)
+{
+    static ArkUI_AccessibilityState state;
+    ArkUIAccessibilityState uiState;
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->getAccessibilityState(node->uiNodeHandle, uiState);
+    state.isDisabled = ArkUI_OptionalInt { uiState.isDisabled.isSet, uiState.isDisabled.value };
+    state.isSelected = ArkUI_OptionalInt { uiState.isSelected.isSet, uiState.isSelected.value };
+    state.checkedType = ArkUI_OptionalInt { uiState.checkedType.isSet, uiState.checkedType.value };
+    g_attributeItem.object = &state;
+    g_attributeItem.size = NUM_0;
+    return &g_attributeItem;
+}
+
+void ResetAccessibilityState(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetAccessibilityState(node->uiNodeHandle);
+}
+
+int32_t SetAccessibilityValue(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item->object, ERROR_CODE_PARAM_INVALID);
+    ArkUI_AccessibilityValue* valuePtr = reinterpret_cast<ArkUI_AccessibilityValue*>(item->object);
+    CHECK_NULL_RETURN(valuePtr, ERROR_CODE_PARAM_INVALID);
+    if (valuePtr->current.isSet && ((!valuePtr->min.isSet) || (!valuePtr->max.isSet))) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (valuePtr->max.value < valuePtr->min.value) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if ((valuePtr->current.value < valuePtr->min.value) || (valuePtr->current.value > valuePtr->max.value)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    ArkUIAccessibilityValue uiValue;
+    uiValue.min = ArkUIOptionalInt { valuePtr->min.isSet, valuePtr->min.value };
+    uiValue.max = ArkUIOptionalInt { valuePtr->max.isSet, valuePtr->max.value };
+    uiValue.current = ArkUIOptionalInt { valuePtr->current.isSet, valuePtr->current.value };
+    uiValue.text = ArkUIOptionalCharPtr { valuePtr->text.isSet, valuePtr->text.value };
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->setAccessibilityValue(node->uiNodeHandle, uiValue);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetAccessibilityValue(ArkUI_NodeHandle node)
+{
+    static ArkUI_AccessibilityValue value;
+    ArkUIAccessibilityValue uiValue;
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->getAccessibilityValue(node->uiNodeHandle, uiValue);
+    value.min = ArkUI_OptionalInt { uiValue.min.isSet, uiValue.min.value };
+    value.max = ArkUI_OptionalInt { uiValue.max.isSet, uiValue.max.value };
+    value.current = ArkUI_OptionalInt { uiValue.current.isSet, uiValue.current.value };
+    value.text = ArkUI_OptionalCharPtr { uiValue.text.isSet, uiValue.text.value };
+    g_attributeItem.object = &value;
+    g_attributeItem.size = NUM_0;
+    return &g_attributeItem;
+}
+
+void ResetAccessibilityValue(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetAccessibilityValue(node->uiNodeHandle);
+}
+
 bool CheckTransformCenter(const ArkUI_AttributeItem* item, int32_t size)
 {
     CHECK_NULL_RETURN(item, false);
@@ -11858,6 +11955,11 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetFocusOnTouch,
         SetBorderWidthPercent,
         SetBorderRadiusPercent,
+        nullptr,
+        nullptr,
+        nullptr,
+        SetAccessibilityState,
+        SetAccessibilityValue,
     };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -11956,6 +12058,11 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         GetFocusOnTouch,
         GetBorderWidthPercent,
         GetBorderRadiusPercent,
+        GetAccessibilityID,
+        nullptr,
+        nullptr,
+        GetAccessibilityState,
+        GetAccessibilityValue,
     };
     if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -12058,6 +12165,11 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetFocusOnTouch,
         ResetBorderWidthPercent,
         ResetBorderRadiusPercent,
+        nullptr,
+        nullptr,
+        nullptr,
+        ResetAccessibilityState,
+        ResetAccessibilityValue,
     };
     if (subTypeId >= sizeof(resetters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);

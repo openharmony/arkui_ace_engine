@@ -1010,6 +1010,11 @@ struct ArkUIOptionalUint {
     ArkUI_Uint32 value;
 };
 
+struct ArkUIOptionalCharPtr {
+    ArkUI_Int32 isSet;
+    ArkUI_CharPtr value;
+};
+
 struct ArkUISwiperIndicator {
     ArkUISwiperIndicatorType type;
     ArkUI_Int32 dimUnit;
@@ -1041,6 +1046,19 @@ struct ArkUIImageFrameInfo {
     ArkUI_Int32 unit;
     ArkUI_Int32 duration;
     void* drawable;
+};
+
+struct ArkUIAccessibilityState {
+    ArkUIOptionalInt isDisabled;
+    ArkUIOptionalInt isSelected;
+    ArkUIOptionalInt checkedType;
+};
+
+struct ArkUIAccessibilityValue {
+    ArkUIOptionalInt min;
+    ArkUIOptionalInt max;
+    ArkUIOptionalInt current;
+    ArkUIOptionalCharPtr text;
 };
 
 struct ArkUICommonModifier {
@@ -1437,6 +1455,13 @@ struct ArkUICommonModifier {
     void (*resetLayoutRect)(ArkUINodeHandle node);
     ArkUI_Bool (*getFocusOnTouch)(ArkUINodeHandle node);
     void (*setSystemBarEffect)(ArkUINodeHandle node, ArkUI_Bool enable);
+    ArkUI_Int32 (*getAccessibilityID)(ArkUINodeHandle node);
+    void (*setAccessibilityState)(ArkUINodeHandle node, const ArkUIAccessibilityState& state);
+    void (*getAccessibilityState)(ArkUINodeHandle node, ArkUIAccessibilityState& state);
+    void (*resetAccessibilityState)(ArkUINodeHandle node);
+    void (*setAccessibilityValue)(ArkUINodeHandle node, const ArkUIAccessibilityValue& value);
+    void (*getAccessibilityValue)(ArkUINodeHandle node, ArkUIAccessibilityValue& value);
+    void (*resetAccessibilityValue)(ArkUINodeHandle node);
 };
 
 struct ArkUICommonShapeModifier {
