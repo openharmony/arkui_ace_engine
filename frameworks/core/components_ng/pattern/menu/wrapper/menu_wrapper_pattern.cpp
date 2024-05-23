@@ -240,12 +240,11 @@ void MenuWrapperPattern::HideSubMenu()
     auto layoutProps = innerMenuPattern->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(layoutProps);
     auto expandingMode = layoutProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
-    if (!(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && menuPattern->IsSubMenu()) ||
-        menuPattern->IsSelectOverlaySubMenu()) {
+    if (expandingMode == SubMenuExpandingMode::STACK && menuPattern->IsSubMenu()) {
+        HideStackExpandMenu(subMenu);
+    } else {
         host->RemoveChild(subMenu);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-    } else if (expandingMode == SubMenuExpandingMode::STACK && menuPattern->IsSubMenu()) {
-        HideStackExpandMenu(subMenu);
     }
 }
 
