@@ -237,12 +237,9 @@ void JSCheckboxGroup::Mark(const JSCallbackInfo& info)
     auto theme = GetTheme<CheckboxTheme>();
     Color strokeColor = theme->GetPointColor();
     if (!ParseJsColor(strokeColorValue, strokeColor)) {
-        if (!JSCheckBoxGroupTheme::ObtainCheckMarkColor(strokeColor)) {
-            CheckBoxGroupModel::GetInstance()->SetCheckMarkColor(strokeColor);
-        }
-    } else {
-        CheckBoxGroupModel::GetInstance()->SetCheckMarkColor(strokeColor);
+        JSCheckBoxGroupTheme::ObtainCheckMarkColor(strokeColor);
     }
+    CheckBoxGroupModel::GetInstance()->SetCheckMarkColor(strokeColor);
     auto sizeValue = markObj->GetProperty("size");
     CalcDimension size;
     if ((ParseJsDimensionVp(sizeValue, size)) && (size.Unit() != DimensionUnit::PERCENT) &&
