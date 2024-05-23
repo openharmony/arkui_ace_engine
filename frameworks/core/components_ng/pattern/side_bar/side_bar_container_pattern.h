@@ -233,6 +233,16 @@ private:
     Dimension controlImageHeight_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SideBarContainerPattern);
+
+    RefPtr<LongPressEvent> longPressEvent_;
+    GestureEventFunc longPressActionEnd_;
+    RefPtr<FrameNode> dialogNode_;
+    ImageSourceInfo imageInfo_;
+    void InitLongPressEvent(const RefPtr<FrameNode>& buttonNode);
+    void HandleLongPressEvent();
+    void HandleLongPressActionEnd();
+    void ShowDialogWithNode();
+    bool isDialogShow_ = false;
 };
 
 } // namespace OHOS::Ace::NG

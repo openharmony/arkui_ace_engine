@@ -23,6 +23,8 @@
 #include "base/resource/internal_resource.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/agingadapation/aging_adapation_dialog_util.h"
+#include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/container.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/components/common/layout/constants.h"
@@ -34,9 +36,12 @@
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_paint_method.h"
 #include "core/components_ng/pattern/side_bar/side_bar_theme.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/image/image_source_info.h"
@@ -47,15 +52,15 @@ namespace OHOS::Ace::NG {
 
 namespace {
 constexpr int32_t DEFAULT_MIN_CHILDREN_SIZE = 3;
-constexpr int32_t DIVIDER_HOT_ZONE_HORIZONTAL_PADDING_NUM = 2;
+constexpr int32_t DIVIDER_HOT_ZONE_HORIZONTAL_PADDING_VALUE = 2;
 constexpr float RATIO_NEGATIVE = -1.0f;
 constexpr float RATIO_ZERO = 0.0f;
 constexpr Dimension DEFAULT_DRAG_REGION = 20.0_vp;
 constexpr int32_t SIDEBAR_DURATION = 500;
 const RefPtr<CubicCurve> SIDEBAR_CURVE = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.2f, 0.1f, 1.0f);
 constexpr Dimension DEFAULT_DIVIDER_STROKE_WIDTH = 1.0_vp;
-constexpr Dimension DEFAULT_DIVIDER_START_MARGIN = 0.0_vp;
-constexpr Dimension DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING = 2.0_vp;
+constexpr Dimension DEFAULT_DIVIDER_START_MARGIN_VP = 0.0_vp;
+constexpr Dimension DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING_VP = 2.0_vp;
 constexpr Color DEFAULT_DIVIDER_COLOR = Color(0x08000000);
 constexpr static int32_t PLATFORM_VERSION_TEN = 10;
 constexpr static int32_t SIDE_BAR_INDEX = 2;
@@ -572,6 +577,7 @@ void SideBarContainerPattern::CreateAndMountControlButton(const RefPtr<NG::Frame
     CHECK_NULL_VOID(gestureHub);
     SetHasControlButton(true);
     InitControlButtonTouchEvent(gestureHub);
+    InitLongPressEvent(buttonNode);
 
     imgNode->MountToParent(buttonNode);
     buttonNode->MountToParent(parentNode);
@@ -620,6 +626,7 @@ RefPtr<FrameNode> SideBarContainerPattern::CreateControlImage(
         Color controlButtonColor = sideBarTheme->GetControlImageColor();
         info->SetFillColor(controlButtonColor);
     }
+    imageInfo_ = info.value();
     auto imageLayoutProperty = imgNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
     imageLayoutProperty->UpdateImageSourceInfo(info.value());
@@ -883,6 +890,7 @@ void SideBarContainerPattern::UpdateControlButtonIcon()
         default:
             break;
     }
+    imageInfo_ = imgSourceInfo.value();
 
     if (!imgSourceInfo.has_value()) {
         imgSourceInfo = std::make_optional<ImageSourceInfo>();
@@ -942,16 +950,16 @@ void SideBarContainerPattern::AddDividerHotZoneRect(const RefPtr<SideBarContaine
 
     auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto dividerStartMagin = layoutProperty->GetDividerStartMargin().value_or(DEFAULT_DIVIDER_START_MARGIN);
+    auto dividerStartMagin = layoutProperty->GetDividerStartMargin().value_or(DEFAULT_DIVIDER_START_MARGIN_VP);
 
     OffsetF hotZoneOffset;
-    hotZoneOffset.SetX(-DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING.ConvertToPx());
+    hotZoneOffset.SetX(-DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING_VP.ConvertToPx());
     hotZoneOffset.SetY(-dividerStartMagin.ConvertToPx());
     SizeF hotZoneSize;
     auto baseWidth = NearZero(realDividerWidth_, 0.0f) ?
         DEFAULT_DIVIDER_STROKE_WIDTH.ConvertToPx() : realDividerWidth_;
-    hotZoneSize.SetWidth(baseWidth + DIVIDER_HOT_ZONE_HORIZONTAL_PADDING_NUM *
-                                                 DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING.ConvertToPx());
+    hotZoneSize.SetWidth(baseWidth + DIVIDER_HOT_ZONE_HORIZONTAL_PADDING_VALUE *
+                                                 DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING_VP.ConvertToPx());
     hotZoneSize.SetHeight(realSideBarHeight_);
 
     DimensionRect hotZoneRegion;
@@ -1203,5 +1211,81 @@ void SideBarContainerPattern::WindowFocus(bool isFocus)
     auto buttonRenderContext = buttonNode->GetRenderContext();
     CHECK_NULL_VOID(buttonRenderContext);
     buttonRenderContext->UpdateProgressMask(maskProperty);
+}
+
+void SideBarContainerPattern::InitLongPressEvent(const RefPtr<FrameNode>& buttonNode)
+{
+    if (longPressEvent_) {
+        return;
+    }
+
+    auto buttonHub = buttonNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(buttonHub);
+    auto gestureHub = buttonHub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+
+    auto longPressTask = [weak = WeakClaim(this)](GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleLongPressEvent();
+        }
+    };
+    longPressEvent_ = MakeRefPtr<LongPressEvent>(std::move(longPressTask));
+    gestureHub->SetLongPressEvent(longPressEvent_, false, false);
+
+    auto longPressRecognizer = gestureHub->GetLongPressRecognizer();
+    CHECK_NULL_VOID(longPressRecognizer);
+    if (!longPressActionEnd_) {
+        auto longPressActionEnd = [weak = WeakClaim(this)] (GestureEvent& info) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->HandleLongPressActionEnd();
+        };
+        longPressActionEnd_ = longPressActionEnd;
+    }
+    longPressRecognizer->SetOnActionEnd(longPressActionEnd_);
+}
+
+void SideBarContainerPattern::HandleLongPressEvent()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    float scale = pipeline->GetFontScale();
+    if (LessNotEqual(scale, AgingAdapationDialogUtil::GetDialogBigFontSizeScale())) {
+        return;
+    }
+    ShowDialogWithNode();
+}
+
+void SideBarContainerPattern::HandleLongPressActionEnd()
+{
+    if (!isDialogShow_) {
+        return;
+    }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->CloseDialog(dialogNode_);
+    dialogNode_ = nullptr;
+    isDialogShow_ = false;
+}
+
+void SideBarContainerPattern::ShowDialogWithNode()
+{
+    if (isDialogShow_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto buttonNode = DynamicCast<FrameNode>(host->GetLastChild());
+    CHECK_NULL_VOID(buttonNode);
+    auto accessibilityProperty = buttonNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    auto text = accessibilityProperty->GetAccessibilityText();
+
+    dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(text, imageInfo_);
+
+    isDialogShow_ = true;
 }
 } // namespace OHOS::Ace::NG
