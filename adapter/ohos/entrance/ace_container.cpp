@@ -2423,7 +2423,9 @@ RefPtr<DisplayInfo> AceContainer::GetDisplayInfo()
     auto displayManager = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     CHECK_NULL_RETURN(displayManager, nullptr);
     auto dmRotation = displayManager->GetRotation();
-    auto deviceRotation = displayManager->GetDisplayInfo()->GetDefaultDeviceRotationOffset();
+    auto displayInfo = displayManager->GetDisplayInfo();
+    CHECK_NULL_RETURN(displayInfo, nullptr);
+    auto deviceRotation = displayInfo->GetDefaultDeviceRotationOffset();
     auto isFoldable = Rosen::DisplayManager::GetInstance().IsFoldable();
     auto dmFoldStatus = Rosen::DisplayManager::GetInstance().GetFoldStatus();
     std::vector<Rect> rects;
