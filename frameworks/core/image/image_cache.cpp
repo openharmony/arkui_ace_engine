@@ -117,7 +117,7 @@ void ImageCache::CacheImageData(const std::string& key, const RefPtr<NG::ImageDa
         imageDataCache_.emplace(key, dataCacheList_.begin());
     } else if (!largerHalfSize && inCache && oldSize >= dataSize) {
         // if the image is in the cache, and dataSize <= oldSize, we can replace the imageData in cache.
-        curDataSize_ += (dataSize - oldSize);
+        curDataSize_ = curDataSize_ + dataSize - oldSize;
         iter->second->cacheObj = imageData;
         dataCacheList_.splice(dataCacheList_.begin(), dataCacheList_, iter->second);
         iter->second = dataCacheList_.begin();
