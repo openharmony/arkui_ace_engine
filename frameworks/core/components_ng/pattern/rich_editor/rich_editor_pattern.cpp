@@ -1760,6 +1760,24 @@ void RichEditorPattern::GetSelectSpansPositionInfo(
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    std::find_if(spans_.begin(), spans_.end(), [&start](const RefPtr<SpanItem>& spanItem) {
+        if ((spanItem->rangeStart <= start) && (start < spanItem->position)) {
+            if (spanItem->spanItemType == NG::SpanItemType::NORMAL) {
+                return true;
+            }
+            start += StringUtils::ToWstring(spanItem->content).length();
+        }
+        return false;
+    });
+    std::find_if(spans_.rbegin(), spans_.rend(), [&end](const RefPtr<SpanItem>& spanItem) {
+        if ((spanItem->rangeStart < end) && (end <= spanItem->position)) {
+            if (spanItem->spanItemType == NG::SpanItemType::NORMAL) {
+                return true;
+            }
+            end = spanItem->rangeStart;
+        }
+        return false;
+    });
     startPositionSpanInfo = GetSpanPositionInfo(start);
     startPositionSpanInfo.spanIndex_ =
         std::clamp(startPositionSpanInfo.spanIndex_, 0, static_cast<int32_t>(host->GetChildren().size()) - 1);
@@ -7989,9 +8007,13 @@ bool RichEditorPattern::CursorMoveLineEnd()
 
 void RichEditorPattern::HandleSelectFontStyle(KeyCode code)
 {
+    if (textSelector_.SelectNothing()) {
+        return;
+    }
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     UpdateSelectSpanStyle(textSelector_.GetTextStart(), textSelector_.GetTextEnd(), code);
-    StartTwinkling();
+    StopTwinkling();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
