@@ -146,7 +146,7 @@ public:
 
     virtual void BuildLazyItem() {}
 
-    bool IsContraintNoChanged() const
+    bool IsConstraintNoChanged() const
     {
         return isConstraintNotChanged_;
     }

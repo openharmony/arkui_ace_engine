@@ -237,6 +237,7 @@ float WaterFlowLayoutInfoSW::CalcTargetPosition(int32_t idx, int32_t /* crossIdx
 void WaterFlowLayoutInfoSW::Reset()
 {
     jumpIndex_ = startIndex_;
+    align_ = ScrollAlign::START;
     delta_ = DistanceToTop(startIndex_, mainGap_);
     lanes_.clear();
     idxToLane_.clear();

@@ -172,7 +172,7 @@ public:
 
     bool SkipMeasureContent() const override;
 
-    bool IsContraintNoChanged() const
+    bool IsConstraintNoChanged() const
     {
         return isConstraintNotChanged_;
     }
