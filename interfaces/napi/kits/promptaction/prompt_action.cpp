@@ -179,6 +179,7 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
             NapiThrow(env, "Can not get message from resource manager.", ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
         }
+        TAG_LOGD(AceLogTag::ACE_DIALOG, "Toast message: %{public}s", messageString.c_str());
     } else {
         NapiThrow(env, "The type of message is incorrect.", ERROR_CODE_PARAM_INVALID);
         return nullptr;
