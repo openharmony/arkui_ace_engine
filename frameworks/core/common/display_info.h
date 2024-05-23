@@ -107,7 +107,7 @@ public:
         displayId_ = displayId;
     }
 
-    uint32_t GetDeviceRotation()
+    uint32_t GetDeviceRotation() const
     {
         return deviceRotation_;
     }
