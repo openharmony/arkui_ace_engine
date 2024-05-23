@@ -88,10 +88,10 @@ public:
 
 private:
     static void InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperController>& swiperController);
-    static RefPtr<SwiperController> GetSwiperController(RefPtr<FrameNode> swiperNode,
+    static RefPtr<SwiperController> GetSwiperController(const RefPtr<FrameNode>& swiperNode,
         const RefPtr<SwiperController>& swiperController);
-    static void InitSelectedMaskNode(RefPtr<FrameNode> maskNode);
-    static void InitUnselectedMaskNode(RefPtr<FrameNode> maskNode);
+    static void InitSelectedMaskNode(const RefPtr<FrameNode>& maskNode);
+    static void InitUnselectedMaskNode(const RefPtr<FrameNode>& maskNode);
     static RefPtr<TabBarLayoutProperty> GetTabBarLayoutProperty();
     static RefPtr<TabBarPaintProperty> GetTabBarPaintProperty();
     static RefPtr<SwiperLayoutProperty> GetSwiperLayoutProperty();

@@ -87,7 +87,7 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
     }
 }
 
-RefPtr<SwiperController> TabsModelNG::GetSwiperController(RefPtr<FrameNode> swiperNode,
+RefPtr<SwiperController> TabsModelNG::GetSwiperController(const RefPtr<FrameNode>& swiperNode,
     const RefPtr<SwiperController>& swiperController)
 {
     auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
@@ -116,7 +116,7 @@ RefPtr<SwiperController> TabsModelNG::GetSwiperController(RefPtr<FrameNode> swip
     return controller;
 }
 
-void TabsModelNG::InitSelectedMaskNode(RefPtr<FrameNode> selectedMaskNode)
+void TabsModelNG::InitSelectedMaskNode(const RefPtr<FrameNode>& selectedMaskNode)
 {
     auto selectedImageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
@@ -127,7 +127,7 @@ void TabsModelNG::InitSelectedMaskNode(RefPtr<FrameNode> selectedMaskNode)
     selectedMaskRenderContext->SetClipToBounds(true);
 }
 
-void TabsModelNG::InitUnselectedMaskNode(RefPtr<FrameNode> unselectedMaskNode)
+void TabsModelNG::InitUnselectedMaskNode(const RefPtr<FrameNode>& unselectedMaskNode)
 {
     auto unselectedImageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
