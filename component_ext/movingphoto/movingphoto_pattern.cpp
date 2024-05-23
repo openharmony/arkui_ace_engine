@@ -686,6 +686,7 @@ void MovingPhotoPattern::StartPlayback()
         return;
     }
     isPlayByController_ = true;
+    isFastKeyUp_ = false;
     Start();
 }
 
