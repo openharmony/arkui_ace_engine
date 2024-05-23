@@ -14,11 +14,12 @@
  */
 
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
-#include "core/components_ng/pattern/list/list_pattern.h"
-#include "core/components_ng/pattern/list/list_item_group_paint_method.h"
+
 #include "core/components/list/list_item_theme.h"
+#include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
+#include "core/components_ng/pattern/list/list_item_group_paint_method.h"
+#include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -225,6 +226,13 @@ RefPtr<ListChildrenMainSize> ListItemGroupPattern::GetOrCreateListChildrenMainSi
     return childrenSize_;
 }
 
+void ListItemGroupPattern::SetListChildrenMainSize(
+    float defaultSize, const std::vector<float>& mainSize)
+{
+    childrenSize_ = AceType::MakeRefPtr<ListChildrenMainSize>(mainSize, defaultSize);
+    OnChildrenSizeChanged({ -1, -1, -1 }, LIST_UPDATE_CHILD_SIZE);
+}
+
 void ListItemGroupPattern::OnChildrenSizeChanged(std::tuple<int32_t, int32_t, int32_t> change, ListChangeFlag flag)
 {
     if (!posMap_) {
@@ -259,7 +267,7 @@ VisibleContentInfo ListItemGroupPattern::GetStartListItemIndex()
     if (startHeaderMainSize == 0 && startFooterMainSize == 0 && GetTotalItemCount() == 0) {
         startArea = ListItemGroupArea::NONE_AREA;
     }
-    VisibleContentInfo startInfo = {startArea, startItemIndexInGroup};
+    VisibleContentInfo startInfo = { startArea, startItemIndexInGroup };
     return startInfo;
 }
 
@@ -282,7 +290,18 @@ VisibleContentInfo ListItemGroupPattern::GetEndListItemIndex()
     if (endHeaderMainSize == 0 && endFooterMainSize == 0 && GetTotalItemCount() == 0) {
         endArea = ListItemGroupArea::NONE_AREA;
     }
-    VisibleContentInfo endInfo = {endArea, endItemIndexInGroup};
+    VisibleContentInfo endInfo = { endArea, endItemIndexInGroup };
     return endInfo;
+}
+
+void ListItemGroupPattern::ResetChildrenSize()
+{
+    if (childrenSize_) {
+        childrenSize_ = nullptr;
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+        OnChildrenSizeChanged({ -1, -1, -1 }, LIST_UPDATE_CHILD_SIZE);
+    }
 }
 } // namespace OHOS::Ace::NG

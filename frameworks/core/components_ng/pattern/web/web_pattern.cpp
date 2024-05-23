@@ -305,6 +305,16 @@ void WebPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     pipeline->RemoveNodesToNotifyMemoryLevel(id);
 }
 
+void WebPattern::OnAttachToMainTree()
+{
+    isAttachedToMainTree_ = true;
+}
+
+void WebPattern::OnDetachFromMainTree()
+{
+    isAttachedToMainTree_ = false;
+}
+
 void WebPattern::InitEvent()
 {
     auto host = GetHost();
@@ -3514,7 +3524,7 @@ void WebPattern::OnWindowShow()
         delegate_->OnOnlineRenderToForeground();
     }
 
-    if (isWindowShow_ || !isVisible_) {
+    if (isWindowShow_ || !isVisible_ || !isAttachedToMainTree_) {
         return;
     }
     TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::OnWindowShow");

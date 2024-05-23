@@ -1172,6 +1172,10 @@ RefPtr<FrameNode> VideoPattern::CreateSlider()
     };
     auto sliderEventHub = sliderNode->GetEventHub<SliderEventHub>();
     sliderEventHub->SetOnChange(std::move(sliderOnChangeEvent));
+    if (InstanceOf<VideoFullScreenPattern>(this)) {
+        auto focusHub = sliderNode->GetOrCreateFocusHub();
+        focusHub->SetIsDefaultFocus(true);
+    }
 
     auto sliderPaintProperty = sliderNode->GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_RETURN(sliderPaintProperty, nullptr);

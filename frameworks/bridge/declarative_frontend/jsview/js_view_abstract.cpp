@@ -3919,7 +3919,7 @@ void JSViewAbstract::ParseBorderImageDimension(
         return;
     }
     JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-    if (object->HasProperty(START_PROPERTY) || object->HasProperty(END_PROPERTY)) {
+    if (CheckLengthMetrics(object)) {
         LocalizedCalcDimension localizedCalcDimension;
         ParseBorderImageLengthMetrics(object, localizedCalcDimension);
         auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
@@ -4106,7 +4106,7 @@ void JSViewAbstract::ParseBorderImageSlice(const JSRef<JSVal>& args, RefPtr<Bord
         return;
     }
     JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-    if (object->HasProperty(START_PROPERTY) || object->HasProperty(END_PROPERTY)) {
+    if (CheckLengthMetrics(object)) {
         LocalizedCalcDimension localizedCalcDimension;
         ParseBorderImageLengthMetrics(object, localizedCalcDimension);
         if (localizedCalcDimension.top.has_value()) {

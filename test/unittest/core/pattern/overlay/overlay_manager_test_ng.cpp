@@ -1154,7 +1154,7 @@ HWTEST_F(OverlayManagerTestNg, HandleDragUpdate001, TestSize.Level1)
     topSheetPattern->height_ = 20;
     topSheetPattern->pageHeight_ = 50;
     topSheetPattern->sheetMaxHeight_ = 30;
-    topSheetPattern->OnCoordScrollStart();
+    topSheetPattern->HandleDragStart();
     GestureEvent info;
     info.SetMainDelta(MINUS_HEIGHT);
     topSheetPattern->HandleDragUpdate(info);
@@ -1167,14 +1167,6 @@ HWTEST_F(OverlayManagerTestNg, HandleDragUpdate001, TestSize.Level1)
     topSheetPattern->currentOffset_ = -5;
     topSheetPattern->HandleDragUpdate(info);
     EXPECT_TRUE(NearEqual(topSheetPattern->currentOffset_, -10));
-
-    /**
-     * @tc.steps: step5. Do OnCoordScrollUpdate when scrollOffset < 0 and showstate = true.
-     * @tc.expected: return false
-     */
-    topSheetPattern->OnCoordScrollEnd(*topSheetPattern->sheetDetentHeight_.end());
-    auto ret = topSheetPattern->OnCoordScrollUpdate(*topSheetPattern->sheetDetentHeight_.end());
-    EXPECT_FALSE(ret);
 }
 /**
  * @tc.name: TestOnBindSheet
@@ -2349,6 +2341,57 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern13, TestSize.Level1)
     topSheetPattern->UpdateSheetSpringBack(springBackFunc2);
     topSheetPattern->HandleDragEnd(2000);
     EXPECT_TRUE(isDismiss);
+}
+
+/**
+ * @tc.name: SheetPresentationPattern13
+ * @tc.desc: Test onWidthDidChange and onTypeDidChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern14, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create sheetNode, get sheetPattern.
+     */
+    SheetStyle sheetStyle;
+    bool isShow = true;
+    CreateSheetBuilder();
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+        nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(topSheetNode, nullptr);
+    auto topSheetPattern = topSheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(topSheetPattern, nullptr);
+    auto sheetLayoutAlgorithm =
+    AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(topSheetPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(sheetLayoutAlgorithm, nullptr);
+
+    auto typeVal = float(SheetType::SHEET_BOTTOM);
+    auto onTypeDidChangeFunc = [&typeVal](float type) { typeVal = type; };
+    topSheetPattern->UpdateOnTypeDidChange(onTypeDidChangeFunc);
+    topSheetPattern->FireOnTypeDidChange();
+
+    auto maxSize = SizeF(10.0f, 10.0f);
+    sheetLayoutAlgorithm->sheetType_ = SHEET_CENTER;
+    auto widthVal = sheetLayoutAlgorithm->GetWidthByScreenSizeType(maxSize);
+    auto onWidthDidChangeFunc = [&widthVal](float width) { widthVal = width; };
+    topSheetPattern->UpdateOnWidthDidChange(onWidthDidChangeFunc);
+    topSheetPattern->FireOnWidthDidChange(topSheetNode);
+    EXPECT_EQ(widthVal, SHEET_LANDSCAPE_WIDTH.ConvertToPx());
 }
 
 /**

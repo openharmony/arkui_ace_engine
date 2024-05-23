@@ -20,6 +20,7 @@
 #include "interfaces/inner_api/ace/ui_content.h"
 #include "native_engine/native_engine.h"
 
+#include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.h"
 #include "adapter/ohos/entrance/ui_content_impl.h"
 #include "base/thread/task_executor.h"
@@ -87,6 +88,7 @@ void DynamicComponentRendererImpl::InitUiContent()
     ContainerScope scope(uiContent_->GetInstanceId());
     RegisterErrorEventHandler();
     RegisterSizeChangedCallback();
+    RegisterConfigChangedCallback();
     AttachRenderContext();
     rendererDumpInfo_.limitedWorkerInitTime = GetCurrentTimestamp();
     TAG_LOGI(AceLogTag::ACE_ISOLATED_COMPONENT, "foreground dynamic UI content");
@@ -167,6 +169,49 @@ void DynamicComponentRendererImpl::RegisterSizeChangedCallback()
         }
     };
     pagePattern->SetDynamicPageSizeCallback(std::move(dynamicPageSizeCallback));
+}
+
+RefPtr<Platform::AceContainer> DynamicComponentRendererImpl::GetAceConainer(int32_t instanceId)
+{
+    auto container = Container::GetContainer(instanceId);
+    CHECK_NULL_RETURN(container, nullptr);
+    return DynamicCast<Platform::AceContainer>(container);
+}
+
+void DynamicComponentRendererImpl::RegisterConfigChangedCallback()
+{
+    auto hostExecutor = GetHostTaskExecutor();
+    CHECK_NULL_VOID(hostExecutor);
+    hostExecutor->PostTask(
+        [hostInstanceId = hostInstanceId_, subInstanceId = uiContent_->GetInstanceId()]() {
+            auto configChangedCallback = [subInstanceId](
+                                             const Platform::ParsedConfig& config, const std::string& configuration) {
+                auto subContainer = Container::GetContainer(subInstanceId);
+                CHECK_NULL_VOID(subContainer);
+                subContainer->GetTaskExecutor()->PostTask(
+                    [subInstanceId, config, configuration]() {
+                        auto subContainer = GetAceConainer(subInstanceId);
+                        CHECK_NULL_VOID(subContainer);
+                        ContainerScope scope(subInstanceId);
+                        subContainer->UpdateConfiguration(config, configuration);
+                    },
+                    TaskExecutor::TaskType::UI, "ArkUIDynamicComponentConfigurationChanged");
+            };
+
+            auto hostContainer = GetAceConainer(hostInstanceId);
+            CHECK_NULL_VOID(hostContainer);
+            hostContainer->AddOnConfigurationChange(subInstanceId, configChangedCallback);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIDynamicComponentConfigurationChanged");
+}
+
+void DynamicComponentRendererImpl::UnRegisterConfigChangedCallback()
+{
+    auto container = Container::GetContainer(hostInstanceId_);
+    CHECK_NULL_VOID(container);
+    auto aceContainer = DynamicCast<Platform::AceContainer>(container);
+    CHECK_NULL_VOID(aceContainer);
+    aceContainer->RemoveOnConfigurationChange(uiContent_->GetInstanceId());
 }
 
 void DynamicComponentRendererImpl::AttachRenderContext()
@@ -291,6 +336,7 @@ void DynamicComponentRendererImpl::UpdateViewportConfig(const ViewportConfig& co
 
 void DynamicComponentRendererImpl::DestroyContent()
 {
+    UnRegisterConfigChangedCallback();
     auto taskExecutor = GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
