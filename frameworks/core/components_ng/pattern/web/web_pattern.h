@@ -86,6 +86,13 @@ enum WebOverlayType { INSERT_OVERLAY, SELECTION_OVERLAY, INVALID_OVERLAY };
 #endif
 } // namespace
 
+enum class WebInfoType : int32_t {
+    TYPE_MOBILE,
+    TYPE_TABLET,
+    TYPE_2IN1,
+    TYPE_UNKNOWN
+};
+
 class WebPattern : public NestableScrollContainer, public TextBase {
     DECLARE_ACE_TYPE(WebPattern, NestableScrollContainer, TextBase);
 
@@ -515,6 +522,7 @@ public:
     bool Backward();
     void OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMenuOption);
     void CloseKeyboard();
+    WebInfoType GetWebInfoType();
     void RequestFocus();
 
 private:
