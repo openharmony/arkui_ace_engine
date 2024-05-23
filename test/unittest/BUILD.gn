@@ -968,6 +968,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/text/span/mutable_span_string.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/span/span_object.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/span/span_string.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/text/span/tlv_util.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/span_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/span_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/symbol_span_model_ng.cpp",
