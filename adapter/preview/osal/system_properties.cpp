@@ -45,6 +45,7 @@ bool SystemProperties::traceInputEventEnable_ = false;
 bool SystemProperties::stateManagerEnable_ = false;
 bool SystemProperties::buildTraceEnable_ = false;
 bool SystemProperties::syncDebugTraceEnable_ = false;
+bool SystemProperties::textTraceEnable_ = false;
 bool SystemProperties::accessibilityEnabled_ = false;
 bool SystemProperties::isRound_ = false;
 bool SystemProperties::isDeviceAccess_ = false;

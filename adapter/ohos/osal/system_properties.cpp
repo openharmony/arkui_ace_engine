@@ -109,6 +109,11 @@ bool IsLayoutTraceEnabled()
     return (system::GetParameter("persist.ace.trace.layout.enabled", "false") == "true");
 }
 
+bool IsTextTraceEnabled()
+{
+    return (system::GetParameter("persist.ace.trace.text.enabled", "false") == "true");
+}
+
 bool IsTraceInputEventEnabled()
 {
     return (system::GetParameter("persist.ace.trace.inputevent.enabled", "false") == "true");
@@ -321,6 +326,7 @@ bool SystemProperties::traceInputEventEnable_ = IsTraceInputEventEnabled() && de
 bool SystemProperties::stateManagerEnable_ = IsStateManagerEnable();
 bool SystemProperties::buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
 bool SystemProperties::syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
+bool SystemProperties::textTraceEnable_ = IsTextTraceEnabled();
 bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
 bool SystemProperties::isRound_ = false;
 bool SystemProperties::isDeviceAccess_ = false;

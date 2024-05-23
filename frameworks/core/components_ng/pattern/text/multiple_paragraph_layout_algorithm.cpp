@@ -368,6 +368,7 @@ TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirection(
 
 bool MultipleParagraphLayoutAlgorithm::ParagraphReLayout(const LayoutConstraintF& contentConstraint)
 {
+    ACE_TEXT_SCOPED_TRACE("ParagraphReLayout");
     // Confirmed specification: The width of the text paragraph covers the width of the component, so this code is
     // generally not allowed to be modified
     CHECK_NULL_RETURN(paragraphManager_, false);
