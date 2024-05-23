@@ -475,6 +475,7 @@ void MenuItemPattern::ShowSubMenuHelper(const RefPtr<FrameNode>& subMenu)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    SetClickMenuItemId(host->GetId());
     bool isSelectOverlayMenu = IsSelectOverlayMenu();
     auto menuPattern = subMenu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
@@ -493,6 +494,7 @@ void MenuItemPattern::ShowSubMenuHelper(const RefPtr<FrameNode>& subMenu)
         subMenu->MountToParent(menuWrapper);
         menuWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
         menuPattern->SetSubMenuShow();
+        RegisterWrapperMouseEvent();
     } else {
         subMenu->MountToParent(menuWrapper);
         OffsetF offset = GetSubMenuPosition(host);
@@ -553,7 +555,7 @@ void MenuItemPattern::ShowEmbeddedExpandMenu(const RefPtr<FrameNode>& expandable
     CHECK_NULL_VOID(host);
     auto rightRow = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
     CHECK_NULL_VOID(rightRow);
-    auto imageNode = AceType::DynamicCast<FrameNode>(rightRow->GetChildAtIndex(0));
+    auto imageNode = AceType::DynamicCast<FrameNode>(rightRow->GetChildren().back());
     CHECK_NULL_VOID(imageNode);
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
@@ -572,7 +574,7 @@ void MenuItemPattern::ShowEmbeddedExpandMenu(const RefPtr<FrameNode>& expandable
         host->AddChildAfter(expandableNode, rightRow);
         imageContext->UpdateTransformRotate(Vector5F(0.0f, 0.0f, 1.0f, SEMI_CIRCLE_ANGEL, 0.0f));
         expandableNode->MarkModifyDone();
-        expandableNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+        expandableNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
@@ -590,9 +592,12 @@ void MenuItemPattern::HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandable
     CHECK_NULL_VOID(host);
     auto expandableAreaContext = expandableNode->GetRenderContext();
     CHECK_NULL_VOID(expandableAreaContext);
-
-    RefPtr<ChainedTransitionEffect> opacity = AceType::MakeRefPtr<ChainedOpacityEffect>(OPACITY_EFFECT);
-    expandableAreaContext->UpdateChainedTransition(opacity);
+    for (auto item : expandableItems_) {
+        auto itemContext = item->GetRenderContext();
+        CHECK_NULL_VOID(itemContext);
+        RefPtr<ChainedTransitionEffect> opacity = AceType::MakeRefPtr<ChainedOpacityEffect>(OPACITY_EFFECT);
+        itemContext->UpdateChainedTransition(opacity);
+    }
 
     AnimationOption option = AnimationOption();
     auto rotateOption = AceType::MakeRefPtr<InterpolatingSpring>(VELOCITY, MASS, STIFFNESS, DAMPING);
@@ -603,11 +608,11 @@ void MenuItemPattern::HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandable
             expandableNode->RemoveChild(item, true);
         }
         expandableNode->MarkModifyDone();
-        expandableNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+        expandableNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
         auto rightRow = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
         CHECK_NULL_VOID(rightRow);
-        auto imageNode = AceType::DynamicCast<FrameNode>(rightRow->GetChildAtIndex(0));
+        auto imageNode = AceType::DynamicCast<FrameNode>(rightRow->GetChildren().back());
         CHECK_NULL_VOID(imageNode);
         auto imageContext = imageNode->GetRenderContext();
         CHECK_NULL_VOID(imageContext);
@@ -627,18 +632,31 @@ void MenuItemPattern::CloseMenu()
     if (IsSelectOverlayMenu()) {
         return;
     }
-    auto parentMenu = GetMenu();
-    CHECK_NULL_VOID(parentMenu);
-    auto layoutProps = parentMenu->GetLayoutProperty<MenuLayoutProperty>();
-    CHECK_NULL_VOID(layoutProps);
-    auto expandingMode = layoutProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
-    if (IsSubMenu() && expandingMode == SubMenuExpandingMode::STACK) {
-        return;
-    }
     auto menuWrapper = GetMenuWrapper();
     CHECK_NULL_VOID(menuWrapper);
+    auto outterMenu = menuWrapper->GetFirstChild();
+    CHECK_NULL_VOID(outterMenu);
+    if (IsSubMenu()) {
+        auto scroll = outterMenu->GetFirstChild();
+        CHECK_NULL_VOID(scroll);
+        auto innerMenu = AceType::DynamicCast<FrameNode>(scroll->GetFirstChild());
+        CHECK_NULL_VOID(innerMenu);
+        auto innerMenuPattern = AceType::DynamicCast<MenuPattern>(innerMenu->GetPattern());
+        CHECK_NULL_VOID(innerMenuPattern);
+        auto layoutProps = innerMenuPattern->GetLayoutProperty<MenuLayoutProperty>();
+        CHECK_NULL_VOID(layoutProps);
+        auto expandingMode = layoutProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
+        if (expandingMode == SubMenuExpandingMode::STACK) {
+            return;
+        }
+    }
     auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
+    auto outterMenuPattern = AceType::DynamicCast<MenuPattern>(
+        AceType::DynamicCast<FrameNode>(outterMenu)->GetPattern<MenuPattern>());
+    CHECK_NULL_VOID(outterMenuPattern);
+    outterMenuPattern->SetHasDisappearAnimation(false);
+
     menuWrapperPattern->HideMenu();
 }
 

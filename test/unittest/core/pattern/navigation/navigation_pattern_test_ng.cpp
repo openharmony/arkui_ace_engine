@@ -1397,6 +1397,13 @@ HWTEST_F(NavigationPatternTestNg, NavigationToolbarConfigurationTest003, TestSiz
     bar.icon = "icon";
     bar.action = []() {};
     bar.activeIcon = "activeIcon";
+    auto onApply = [](WeakPtr<NG::FrameNode> frameNode) {
+        auto node = frameNode.Upgrade();
+        EXPECT_NE(node, nullptr);
+    };
+    std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = onApply;
+    bar.activeIconSymbol = iconSymbol;
+    bar.iconSymbol = iconSymbol;
     bar.status = NG::NavToolbarItemStatus::ACTIVE;
     std::vector<NG::BarItem> toolBarItems;
     toolBarItems.push_back(bar);
@@ -1443,6 +1450,8 @@ HWTEST_F(NavigationPatternTestNg, NavigationToolbarConfigurationTest003, TestSiz
     auto barItemPattern = barItemNode->GetPattern<BarItemPattern>();
     EXPECT_EQ(barItemPattern->GetToolbarItemStatus(), NavToolbarItemStatus::ACTIVE);
     EXPECT_EQ(barItemPattern->GetCurrentIconStatus(), ToolbarIconStatus::ACTIVE);
+    EXPECT_NE(barItemPattern->GetActiveIconSymbol(), nullptr);
+    EXPECT_NE(barItemPattern->GetInitialIconSymbol(), nullptr);
 }
 
 /**

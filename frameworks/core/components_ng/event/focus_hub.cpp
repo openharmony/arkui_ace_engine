@@ -2273,7 +2273,7 @@ bool FocusHub::BlurFocusView()
     CHECK_NULL_RETURN(focusView, false);
     auto curFocusView = FocusView::GetCurrentFocusView();
     if (focusView->IsFocusViewLegal() && focusView == curFocusView) {
-        focusView->FocusViewClose();
+        focusView->FocusViewHide();
     }
     return true;
 }
