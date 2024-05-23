@@ -13,17 +13,16 @@
  * limitations under the License.
  */
 
-if (!('finalizeConstruction' in ViewPU.prototype)) {
-    Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {
-    });
-}
 const display = requireNapi('display');
 const hilog = requireNapi('hilog');
 const measure = requireNapi('measure');
 const resourceManager = requireNapi('resourceManager');
 const bundleManager = requireNapi('bundleManager');
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
-
+if (!('finalizeConstruction' in ViewPU.prototype)) {
+    Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {
+    });
+}
 class CustomThemeImpl {
     constructor(v20) {
         this.colors = v20;
