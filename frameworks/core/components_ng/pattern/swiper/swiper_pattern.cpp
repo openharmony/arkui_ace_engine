@@ -84,6 +84,10 @@ const std::string INDICATOR_PROPERTY_NAME = "indicator";
 const std::string TRANSLATE_PROPERTY_NAME = "translate";
 constexpr int32_t SWIPER_HALF = 2;
 constexpr int32_t CAPTURE_COUNT = 2;
+constexpr uint8_t CAPTURE_PIXEL_ROUND_VALUE = static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_START) |
+                                              static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_TOP) |
+                                              static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_END) |
+                                              static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
 // TODO define as common method
 float CalculateFriction(float gamma)
 {
@@ -261,11 +265,17 @@ void SwiperPattern::InitCapture()
                           static_cast<uint32_t>(HasRightButtonNode()) + 1;
         auto leftCaptureNode = FrameNode::GetOrCreateFrameNode(
             V2::SWIPER_LEFT_CAPTURE_ETS_TAG, GetLeftCaptureId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+        auto imageLayoutProperty = leftCaptureNode->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
+        imageLayoutProperty->UpdatePixelRound(CAPTURE_PIXEL_ROUND_VALUE);
         leftCaptureNode->MarkModifyDone();
         host->AddChild(leftCaptureNode, -number);
 
         auto rightCaptureNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_RIGHT_CAPTURE_ETS_TAG, GetRightCaptureId(),
             []() { return AceType::MakeRefPtr<ImagePattern>(); });
+        imageLayoutProperty = rightCaptureNode->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
+        imageLayoutProperty->UpdatePixelRound(CAPTURE_PIXEL_ROUND_VALUE);
         rightCaptureNode->MarkModifyDone();
         host->AddChild(rightCaptureNode, -number);
     }
