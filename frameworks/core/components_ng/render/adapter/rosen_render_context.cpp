@@ -1056,19 +1056,19 @@ void RosenRenderContext::UpdateVisualEffect(const OHOS::Rosen::VisualEffect* vis
 void RosenRenderContext::UpdateBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter)
 {
     CHECK_NULL_VOID(backgroundFilter);
-    rsNode_->SetBackgroundFilter(backgroundFilter);
+    rsNode_->SetUIBackgroundFilter(backgroundFilter);
 }
 
 void RosenRenderContext::UpdateForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter)
 {
     CHECK_NULL_VOID(foregroundFilter);
-    rsNode_->SetForegroundFilter(foregroundFilter);
+    rsNode_->SetUIForegroundFilter(foregroundFilter);
 }
 
 void RosenRenderContext::UpdateCompositingFilter(const OHOS::Rosen::Filter* compositingFilter)
 {
     CHECK_NULL_VOID(compositingFilter);
-    rsNode_->SetCompositingFilter(compositingFilter);
+    rsNode_->SetUICompositingFilter(compositingFilter);
 }
 
 bool RosenRenderContext::NeedPreloadImage(const std::list<ParticleOption>& optionList, RectF& rect)
