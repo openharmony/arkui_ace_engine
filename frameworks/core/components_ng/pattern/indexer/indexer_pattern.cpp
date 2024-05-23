@@ -1929,5 +1929,6 @@ void IndexerPattern::DumpInfo()
         std::string("PopupPositionY: ")
             .append(layoutProperty->GetPopupPositionYValue(Dimension(NG::BUBBLE_POSITION_Y, DimensionUnit::VP))
                         .ToString()));
+    DumpLog::GetInstance().AddDesc(std::string("AutoCollapse: ").append(std::to_string(autoCollapse_)));
 }
 } // namespace OHOS::Ace::NG

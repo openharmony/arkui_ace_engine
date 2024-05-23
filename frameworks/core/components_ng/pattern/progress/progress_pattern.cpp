@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/log/dump_log.h"
 #include "core/components_ng/pattern/progress/progress_pattern.h"
 
 #include "core/components/progress/progress_theme.h"
@@ -259,6 +260,15 @@ void ProgressPattern::OnModifyDone()
     } else {
         RemoveTouchEvent();
     }
+}
+
+void ProgressPattern::DumpInfo()
+{
+    auto paintProperty = GetPaintProperty<ProgressPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    DumpLog::GetInstance().AddDesc(
+        std::string("EnableSmoothEffect: ")
+            .append(paintProperty->GetEnableSmoothEffectValue(true) ? "true" : "false"));
 }
 
 void ProgressPattern::OnVisibleChange(bool isVisible)
