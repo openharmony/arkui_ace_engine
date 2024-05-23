@@ -43,7 +43,9 @@ public:
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) override;
 
     void TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
-    void TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
+    bool TransferKeyEvent(const KeyEvent& event) override;
+    void TransferFocusState(bool isFocus) override;
+    void TransferFocusActiveEvent(bool isFocus) override;
     void Dump(RendererDumpInfo &rendererDumpInfo) override;
     void RegisterErrorEventHandler();
     void FireOnErrorCallback(int32_t code, const std::string& name, const std::string& msg);
@@ -52,7 +54,6 @@ public:
 private:
     RefPtr<TaskExecutor> GetTaskExecutor();
     RefPtr<TaskExecutor> GetHostTaskExecutor();
-    static RefPtr<Platform::AceContainer> GetAceConainer(int32_t instanceId);
 
     void AttachRenderContext();
     void RegisterSizeChangedCallback();

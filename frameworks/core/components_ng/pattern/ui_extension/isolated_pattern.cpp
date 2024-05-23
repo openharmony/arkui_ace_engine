@@ -19,12 +19,14 @@
 #include <sys/statfs.h>
 
 #include "adapter/ohos/osal/want_wrap_ohos.h"
+#include "core/common/dynamic_component_renderer.h"
 #include "base/log/dump_log.h"
 #include "core/event/key_event.h"
 #include "core/event/pointer_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "display_manager.h"
 #include "session/host/include/session.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -119,6 +121,43 @@ void IsolatedPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEve
     dynamicComponentRenderer_->TransferPointerEvent(pointerEvent);
 }
 
+void IsolatedPattern::DispatchFocusActiveEvent(bool isFocusActive)
+{
+    CHECK_NULL_VOID(dynamicComponentRenderer_);
+    dynamicComponentRenderer_->TransferFocusActiveEvent(isFocusActive);
+}
+
+bool IsolatedPattern::HandleKeyEvent(const KeyEvent& event)
+{
+    CHECK_NULL_RETURN(event.rawKeyEvent, false);
+    CHECK_NULL_RETURN(dynamicComponentRenderer_, false);
+    return dynamicComponentRenderer_->TransferKeyEvent(event);
+}
+
+void IsolatedPattern::HandleFocusEvent()
+{
+    CHECK_NULL_VOID(dynamicComponentRenderer_);
+    dynamicComponentRenderer_->TransferFocusActiveEvent(true);
+    dynamicComponentRenderer_->TransferFocusState(true);
+}
+
+void IsolatedPattern::HandleBlurEvent()
+{
+    CHECK_NULL_VOID(dynamicComponentRenderer_);
+    dynamicComponentRenderer_->TransferFocusActiveEvent(false);
+    dynamicComponentRenderer_->TransferFocusState(false);
+}
+
+void IsolatedPattern::OnAttachToFrameNode()
+{
+    ContainerScope scope(instanceId_);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    pipeline->AddOnAreaChangeNode(host->GetId());
+}
+
 bool IsolatedPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     CHECK_NULL_RETURN(dynamicComponentRenderer_, false);
@@ -141,13 +180,6 @@ bool IsolatedPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirt
     vpConfig.SetOrientation(orientation);
     dynamicComponentRenderer_->UpdateViewportConfig(vpConfig, Rosen::WindowSizeChangeReason::UNDEFINED, nullptr);
     return false;
-}
-
-void IsolatedPattern::DispatchKeyEvent(const KeyEvent& event)
-{
-    CHECK_NULL_VOID(event.rawKeyEvent);
-    CHECK_NULL_VOID(dynamicComponentRenderer_);
-    dynamicComponentRenderer_->TransferKeyEvent(event.rawKeyEvent);
 }
 
 void IsolatedPattern::OnDetachFromFrameNode(FrameNode* frameNode)

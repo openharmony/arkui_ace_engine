@@ -676,10 +676,13 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     FlushMessages();
     InspectDrew();
     UIObserverHandler::GetInstance().HandleDrawCommandSendCallBack();
-    if (!isFormRender_ && onShow_ && onFocus_ && isWindowHasFocused_) {
-        FlushFocusView();
-        FlushFocus();
-        FlushFocusScroll();
+    if (onShow_ && onFocus_ && isWindowHasFocused_) {
+        auto isDynamicRender = Container::Current() == nullptr ? false : Container::Current()->IsDynamicRender();
+        if ((!isFormRender_) || isDynamicRender) {
+            FlushFocusView();
+            FlushFocus();
+            FlushFocusScroll();
+        }
     }
     // Close input method in the SCB window.
     IsCloseSCBKeyboard();
@@ -868,7 +871,7 @@ void PipelineContext::FlushFocusView()
     auto lastFocusViewHub = lastFocusView->GetFocusHub();
     CHECK_NULL_VOID(lastFocusViewHub);
     auto container = Container::Current();
-    if (container && container->IsUIExtensionWindow()) {
+    if (container && (container->IsUIExtensionWindow() || container->IsDynamicRender())) {
         lastFocusView->SetIsViewRootScopeFocused(false);
     }
     if (lastFocusView && (!lastFocusView->IsRootScopeCurrentFocus() || !lastFocusView->GetIsViewHasFocused()) &&
@@ -2868,6 +2871,10 @@ void PipelineContext::WindowFocus(bool isFocus)
             if (container && container->IsUIExtensionWindow()) {
                 curFocusView->RequestDefaultFocus();
             }
+            if (container && container->IsDynamicRender()) {
+                curFocusView->SetIsViewRootScopeFocused(false);
+                curFocusView->RequestDefaultFocus();
+            }
         }
         windowFocus_ = true;
         RequestFrame();
@@ -3726,7 +3733,8 @@ void PipelineContext::ChangeDarkModeBrightness(bool isFocus)
     CalcDimension dimension;
     dimension.SetValue(1);
     if (SystemProperties::GetColorMode() == ColorMode::DARK && appBgColor_.ColorToString().compare("#FF000000") == 0 &&
-        mode != WindowMode::WINDOW_MODE_FULLSCREEN && !container->IsUIExtensionWindow()) {
+        mode != WindowMode::WINDOW_MODE_FULLSCREEN && !container->IsUIExtensionWindow() &&
+        !container->IsDynamicRender()) {
         if (!isFocus && mode == WindowMode::WINDOW_MODE_FLOATING) {
             dimension.SetValue(1 + percent.second);
         } else {
