@@ -770,4 +770,21 @@ RefPtr<ListChildrenMainSize> ListModelNG::GetOrCreateListChildrenMainSize()
     CHECK_NULL_RETURN(pattern, nullptr);
     return pattern->GetOrCreateListChildrenMainSize();
 }
+
+void ListModelNG::SetListChildrenMainSize(
+    FrameNode* frameNode, float defaultSize, const std::vector<float>& mainSize)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetListChildrenMainSize(defaultSize, mainSize);
+}
+
+void ListModelNG::ResetListChildrenMainSize(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetChildrenSize();
+}
 } // namespace OHOS::Ace::NG
