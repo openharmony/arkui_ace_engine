@@ -3721,7 +3721,6 @@ void OverlayManager::PlaySheetTransition(
                 pattern->FireOnDetentsDidChange(overlay->sheetHeight_);
                 pattern->FireOnHeightDidChange(overlay->sheetHeight_);
             });
-        sheetParent->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMDEFAULT);
         AnimationUtils::Animate(
             option,
             [context, offset]() {
@@ -3823,7 +3822,6 @@ void OverlayManager::PlaySheetMaskTransition(RefPtr<FrameNode> maskNode, bool is
     auto context = maskNode->GetRenderContext();
     CHECK_NULL_VOID(context);
     if (isTransitionIn) {
-        maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMDEFAULT);
         context->OpacityAnimation(option, 0.0, 1.0);
     } else {
         if (sheetMaskClickEvent_) {
