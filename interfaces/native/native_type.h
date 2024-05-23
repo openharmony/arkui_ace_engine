@@ -3126,7 +3126,7 @@ int32_t OH_ArkUI_ImageAnimatorFrameInfo_GetDuration(ArkUI_ImageAnimatorFrameInfo
  *         it indicates a creation failure, and the reason for the failure may be that the address space is full.
  * @since 12
 */
-ArkUI_AccessibilityState* OH_ArkUI_AccessibilityState_Create(void);
+ArkUI_AccessibilityState* OH_ArkUI_AccessibilityState_Create();
 
 /**
 * @brief Dispose accessibility state.
@@ -3204,7 +3204,7 @@ int32_t OH_ArkUI_AccessibilityState_GetCheckedState(ArkUI_AccessibilityState* st
  *         it indicates a creation failure, and the reason for the failure may be that the address space is full.
  * @since 12
 */
-ArkUI_AccessibilityValue* OH_ArkUI_AccessibilityValue_Create(void);
+ArkUI_AccessibilityValue* OH_ArkUI_AccessibilityValue_Create();
 
 /**
 * @brief Dispose accessibility value.

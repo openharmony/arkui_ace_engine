@@ -429,7 +429,7 @@ void OH_ArkUI_StyledString_AddPlaceholder(ArkUI_StyledString* storage, OH_Drawin
     storage->items.emplace_back(spanItem);
 }
 
-ArkUI_AccessibilityState* OH_ArkUI_AccessibilityState_Create(void)
+ArkUI_AccessibilityState* OH_ArkUI_AccessibilityState_Create()
 {
     ArkUI_AccessibilityState* state = new ArkUI_AccessibilityState;
     state->isDisabled = ArkUI_OptionalInt { 0, 0 };
@@ -482,7 +482,7 @@ int32_t OH_ArkUI_AccessibilityState_GetCheckedState(ArkUI_AccessibilityState* st
     return state->checkedType.value;
 }
 
-ArkUI_AccessibilityValue* OH_ArkUI_AccessibilityValue_Create(void)
+ArkUI_AccessibilityValue* OH_ArkUI_AccessibilityValue_Create()
 {
     ArkUI_AccessibilityValue* value = new ArkUI_AccessibilityValue;
     value->min = ArkUI_OptionalInt { 0, -1 };
