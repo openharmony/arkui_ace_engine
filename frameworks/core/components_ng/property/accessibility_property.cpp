@@ -422,7 +422,6 @@ bool AccessibilityProperty::HasAction() const
         IsDeletable();
 }
 
-
 void AccessibilityProperty::SetUserDisabled(const bool& isDisabled)
 {
     isDisabled_ = isDisabled;
