@@ -1598,15 +1598,11 @@ void GridPattern::SyncLayoutBeforeSpring()
     host->CreateLayoutTask();
 }
 
-bool GridPattern::OutBoundaryCallback()
-{
-    return IsOutOfBoundary();
-}
-
 void GridPattern::GetEndOverScrollIrregular(OverScrollOffset& offset, float delta) const
 {
     const auto& info = gridLayoutInfo_;
-    float disToBot = info.GetDistanceToBottom(info.lastMainSize_, info.totalHeightOfItemsInView_, GetMainGap());
+    float disToBot = info.GetDistanceToBottom(
+        info.lastMainSize_ - info.contentEndPadding_, info.totalHeightOfItemsInView_, GetMainGap());
     if (!info.offsetEnd_) {
         offset.end = std::min(0.0f, disToBot + static_cast<float>(delta));
     } else if (Negative(delta)) {
@@ -1638,19 +1634,20 @@ OverScrollOffset GridPattern::GetOverScrollOffset(double delta) const
     }
     if (gridLayoutInfo_.endIndex_ == gridLayoutInfo_.childrenCount_ - 1) {
         float endPos = gridLayoutInfo_.currentOffset_ + gridLayoutInfo_.totalHeightOfItemsInView_;
+        float mainSize = gridLayoutInfo_.lastMainSize_ - gridLayoutInfo_.contentEndPadding_;
         if (GreatNotEqual(
                 GetMainContentSize(), gridLayoutInfo_.currentOffset_ + gridLayoutInfo_.totalHeightOfItemsInView_)) {
             endPos = gridLayoutInfo_.currentOffset_ + GetMainContentSize();
         }
         float newEndPos = endPos + delta;
-        if (endPos < gridLayoutInfo_.lastMainSize_ && newEndPos < gridLayoutInfo_.lastMainSize_) {
+        if (endPos < mainSize && newEndPos < mainSize) {
             offset.end = delta;
         }
-        if (endPos < gridLayoutInfo_.lastMainSize_ && newEndPos >= gridLayoutInfo_.lastMainSize_) {
-            offset.end = gridLayoutInfo_.lastMainSize_ - endPos;
+        if (endPos < mainSize && newEndPos >= mainSize) {
+            offset.end = mainSize - endPos;
         }
-        if (endPos >= gridLayoutInfo_.lastMainSize_ && newEndPos < gridLayoutInfo_.lastMainSize_) {
-            offset.end = newEndPos - gridLayoutInfo_.lastMainSize_;
+        if (endPos >= mainSize && newEndPos < mainSize) {
+            offset.end = newEndPos - mainSize;
         }
     }
     return offset;

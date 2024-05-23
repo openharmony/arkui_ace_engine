@@ -113,9 +113,8 @@ group("core_pattern_unittest") {
     "toggle:toggle_test_ng",
     "ui_extension:ui_extension_component_test_ng",
     "video:video_test_ng",
-
-    # "waterflow:water_flow_test_ng",
-    "waterflow:water_flow_test_old",
+    "waterflow:water_flow_test_original",
+    "waterflow:water_flow_test_segmented",
     "waterflow:water_flow_test_sw",
     "xcomponent:xcomponent_test_ng",
   ]

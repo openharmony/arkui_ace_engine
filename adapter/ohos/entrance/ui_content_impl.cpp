@@ -1469,9 +1469,6 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     CHECK_NULL_RETURN(container, UIContentErrorCode::NULL_POINTER);
     container->SetWindowName(window_->GetWindowName());
     container->SetWindowId(window_->GetWindowId());
-    if (focusWindowId != 0) {
-        container->SetFocusWindowId(focusWindowId);
-    }
     auto token = context->GetToken();
     container->SetToken(token);
     container->SetParentToken(parentToken_);
@@ -1582,6 +1579,10 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     errorCode = Platform::AceContainer::SetViewNew(aceView, density, 0, 0, window_);
     CHECK_ERROR_CODE_RETURN(errorCode);
 #endif
+    // set focus window id for ui extension after pipeline context created.
+    if (focusWindowId != 0) {
+        container->SetFocusWindowId(focusWindowId);
+    }
 
     // after frontend initialize
     if (window_->IsFocused()) {
@@ -2040,12 +2041,14 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
             pipelineContext->ChangeDarkModeBrightness(true);
         }
     };
+
+    AceViewportConfig aceViewportConfig(modifyConfig, reason, rsTransaction);
     if ((container->IsUseStageModel() && (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION ||
                                              reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC)) ||
         taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::PLATFORM)) {
-        task();
+        viewportConfigMgr_->UpdateConfigSync(aceViewportConfig, std::move(task));
     } else {
-        taskExecutor->PostTask(task, TaskExecutor::TaskType::PLATFORM, "ArkUIUpdateViewportConfig");
+        viewportConfigMgr_->UpdateConfig(aceViewportConfig, std::move(task), container, "ArkUIUpdateViewportConfig");
     }
 }
 

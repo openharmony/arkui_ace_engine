@@ -86,6 +86,10 @@ void JSFlexImpl::CreateFlexComponent(const JSCallbackInfo& info)
         FlexModel::GetInstance()->SetCrossAxisAlign(FlexAlign::FLEX_START);
     }
     if (obj->HasProperty("space")) {
+        JSRef<JSVal> spaceVal = obj->GetProperty("space");
+        if (spaceVal->IsUndefined()) {
+            return;
+        }
         CalcDimension value;
         JSRef<JSObject> spaceObj = JSRef<JSObject>::Cast(obj->GetProperty("space"));
         JSRef<JSVal> mainSpaceVal = spaceObj->GetProperty("main");
@@ -143,6 +147,10 @@ void JSFlexImpl::CreateWrapComponent(const JSCallbackInfo& info, int32_t wrapVal
         }
     }
     if (obj->HasProperty("space")) {
+        JSRef<JSVal> spaceVal = obj->GetProperty("space");
+        if (spaceVal->IsUndefined()) {
+            return;
+        }
         CalcDimension mainValue;
         CalcDimension crossValue;
         JSRef<JSObject> spaceObj = JSRef<JSObject>::Cast(obj->GetProperty("space"));

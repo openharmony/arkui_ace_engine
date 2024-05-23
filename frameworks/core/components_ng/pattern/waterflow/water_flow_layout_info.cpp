@@ -29,7 +29,7 @@ RefPtr<WaterFlowLayoutInfoBase> WaterFlowLayoutInfoBase::Create(WaterFlowLayoutM
 {
     switch (mode) {
         case WaterFlowLayoutMode::SLIDING_WINDOW:
-            return nullptr;
+            return MakeRefPtr<WaterFlowLayoutInfoSW>();
         default:
             return MakeRefPtr<WaterFlowLayoutInfo>();
     }
@@ -356,7 +356,7 @@ bool WaterFlowLayoutInfo::ReachEnd(float prevOffset) const
 
 int32_t WaterFlowLayoutInfo::GetSegment(int32_t itemIdx) const
 {
-    if (segmentTails_.empty()) {
+    if (segmentTails_.empty() || itemIdx < 0) {
         return 0;
     }
     auto cache = segmentCache_.find(itemIdx);
@@ -417,12 +417,15 @@ void WaterFlowLayoutInfo::RecordItem(int32_t idx, const FlowItemPosition& pos, f
 
 void WaterFlowLayoutInfo::SetNextSegmentStartPos(int32_t itemIdx)
 {
-    size_t segment = static_cast<size_t>(GetSegment(itemIdx));
+    auto segment = static_cast<size_t>(GetSegment(itemIdx));
     if (segmentStartPos_.size() > segment + 1) {
         return;
     }
+    if (segmentStartPos_.size() <= segment || margins_.size() <= segment + 1) {
+        return;
+    }
 
-    float nextStartPos = endPosArray_.back().first;
+    float nextStartPos = endPosArray_.empty() ? segmentStartPos_[segment] : endPosArray_.back().first;
     while (segment < segmentTails_.size() - 1 && itemIdx == segmentTails_[segment]) {
         // use while loop to skip empty segments
         if (axis_ == Axis::VERTICAL) {
@@ -507,7 +510,7 @@ void WaterFlowLayoutInfo::InitMargins(
         ResetSegmentStartPos();
     }
     int32_t lastItem = static_cast<int32_t>(itemInfos_.size()) - 1;
-    if (GetSegment(lastItem) >= segmentTails_.size()) {
+    if (GetSegment(lastItem) >= static_cast<int32_t>(segmentTails_.size())) {
         TAG_LOGW(AceLogTag::ACE_WATERFLOW, "Section data not initialized before layout");
         return;
     }

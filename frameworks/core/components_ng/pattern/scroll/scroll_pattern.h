@@ -149,10 +149,6 @@ public:
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
     bool IsOutOfBoundary(bool useCurrentDelta = true) override;
-    bool OutBoundaryCallback() override
-    {
-        return IsOutOfBoundary();
-    }
     OverScrollOffset GetOverScrollOffset(double delta) const override;
 
     void OnAnimateStop() override;
@@ -311,8 +307,8 @@ public:
 
     bool IsScrollSnap() override
     {
-        return (!snapOffsets_.empty() && GetScrollSnapAlign() != ScrollSnapAlign::NONE)
-            || enablePagingStatus_ == ScrollPagingStatus::VALID;
+        return !snapOffsets_.empty() &&
+               (GetScrollSnapAlign() != ScrollSnapAlign::NONE || enablePagingStatus_ == ScrollPagingStatus::VALID);
     }
 
     void TriggerModifyDone();
@@ -333,6 +329,8 @@ public:
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+
+    bool OnScrollSnapCallback(double targetOffset, double velocity) override;
 
 protected:
     void DoJump(float position, int32_t source = SCROLL_FROM_JUMP);
@@ -364,7 +362,7 @@ private:
     void UpdateScrollBarOffset() override;
     void SetAccessibilityAction();
     bool SetScrollProperties(const RefPtr<LayoutWrapper>& dirty);
-    void ScrollSnapTrigger();
+    bool ScrollSnapTrigger();
     void CheckScrollable();
     OffsetF GetOffsetToScroll(const RefPtr<FrameNode>& childFrame) const;
 

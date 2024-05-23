@@ -16,10 +16,13 @@
 #include "list_option.h"
 
 #include <cstdint>
+#include <vector>
 
+#include "native_node.h"
 #include "native_type.h"
 #include "node_model.h"
 
+#include "base/error/error_code.h"
 #include "base/utils/utils.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 
@@ -127,6 +130,94 @@ void OH_ArkUI_ListItemSwipeActionOption_SetOnOffsetChange(
     CHECK_NULL_VOID(option);
     auto onOffsetChange = reinterpret_cast<void (*)(ArkUI_Int32)>(callback);
     option->onOffsetChange = onOffsetChange;
+}
+
+int32_t OH_ArkUI_List_CloseAllSwipeActions(ArkUI_NodeHandle node, void* userData, void (*onFinish)(void* userData))
+{
+    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    if (node->type != ARKUI_NODE_LIST) {
+        return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
+    }
+    auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(fullImpl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND);
+
+    fullImpl->getNodeModifiers()->getListModifier()->setListCloseAllSwipeActions(
+        node->uiNodeHandle, userData, onFinish);
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ListChildrenMainSize* OH_ArkUI_ListChildrenMainSizeOption_Create()
+{
+    ArkUI_ListChildrenMainSize* option = new ArkUI_ListChildrenMainSize { 0, { -1.0f } };
+    return option;
+}
+
+void OH_ArkUI_ListChildrenMainSizeOption_Dispose(ArkUI_ListChildrenMainSize* option)
+{
+    delete option;
+}
+
+int32_t OH_ArkUI_ListChildrenMainSizeOption_SetDefaultMainSize(
+    ArkUI_ListChildrenMainSize* option, float defaultMainSize)
+{
+    CHECK_NULL_RETURN(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID;);
+    if (defaultMainSize < 0) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    option->defaultMainSize = defaultMainSize;
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+float OH_ArkUI_ListChildrenMainSizeOption_GetDefaultMainSize(ArkUI_ListChildrenMainSize* option)
+{
+    CHECK_NULL_RETURN(option, -1);
+    return option->defaultMainSize;
+}
+
+void OH_ArkUI_ListChildrenMainSizeOption_Resize(ArkUI_ListChildrenMainSize* option, int32_t totalSize)
+{
+    CHECK_NULL_VOID(option);
+    option->mainSize.resize(std::max(totalSize, 0), -1.0f);
+}
+
+int32_t OH_ArkUI_ListChildrenMainSizeOption_Splice(
+    ArkUI_ListChildrenMainSize* option, int32_t index, int32_t deleteCount, int32_t addCount)
+{
+    CHECK_NULL_RETURN(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    if (index < 0 || deleteCount < 0 || addCount < 0 || option->mainSize.size() - 1 < index) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    while (deleteCount > 0) {
+        if (index < option->mainSize.size()) {
+            option->mainSize.erase(option->mainSize.begin() + index);
+        }
+        deleteCount--;
+    }
+    while (addCount > 0) {
+        option->mainSize.insert(option->mainSize.begin() + index, -1.0f);
+        addCount--;
+    }
+    return 0;
+}
+
+int32_t OH_ArkUI_ListChildrenMainSizeOption_UpdateSize(
+    ArkUI_ListChildrenMainSize* option, int32_t index, float mainSize)
+{
+    CHECK_NULL_RETURN(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    if (index < 0 || mainSize < 0 || option->mainSize.size() - 1 < index) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    option->mainSize[index] = mainSize;
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+float OH_ArkUI_ListChildrenMainSizeOption_GetMainSize(ArkUI_ListChildrenMainSize* option, int32_t index)
+{
+    CHECK_NULL_RETURN(option, -1);
+    if (index < 0 || option->mainSize.size() - 1 < index) {
+        return -1;
+    }
+    return option->mainSize[index];
 }
 
 #ifdef __cplusplus

@@ -148,8 +148,6 @@ private:
         const std::optional<std::string>& placeholder, const std::optional<std::string>& icon);
     static void CreateTextField(const RefPtr<SearchNode>& parentNode,
         const std::optional<std::string>& placeholder, const std::optional<std::string>& value, bool hasTextFieldNode);
-    static void CreateImage(const RefPtr<SearchNode>& parentNode, const std::string& src, bool hasImageNode);
-    static void CreateCancelImage(const RefPtr<SearchNode>& parentNode, bool hasCancelImageNode);
     static void CreateButton(const RefPtr<SearchNode>& parentNode, bool hasButtonNode);
     static void CreateCancelButton(const RefPtr<SearchNode>& parentNode, bool hasCancelButtonNode);
     static RefPtr<SearchNode> GetOrCreateSearchNode(

@@ -31,6 +31,7 @@
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/system_properties.h"
+#include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/display_info.h"
 #include "core/common/frontend.h"
@@ -493,12 +494,18 @@ public:
 
     static bool LessThanAPITargetVersion(PlatformVersion version)
     {
-        return (AceApplicationInfo::GetInstance().GetApiTargetVersion() % 1000) < static_cast<int32_t>(version);
+        auto container = Current();
+        CHECK_NULL_RETURN(container, false);
+        auto apiTargetVersion = container->GetApiTargetVersion();
+        return apiTargetVersion < static_cast<int32_t>(version);
     }
 
     static bool GreatOrEqualAPITargetVersion(PlatformVersion version)
     {
-        return (AceApplicationInfo::GetInstance().GetApiTargetVersion() % 1000) >= static_cast<int32_t>(version);
+        auto container = Current();
+        CHECK_NULL_RETURN(container, false);
+        auto apiTargetVersion = container->GetApiTargetVersion();
+        return apiTargetVersion >= static_cast<int32_t>(version);
     }
 
     void SetAppBar(const RefPtr<NG::AppBarView>& appBar)

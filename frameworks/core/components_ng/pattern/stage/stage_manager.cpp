@@ -527,4 +527,16 @@ RefPtr<FrameNode> StageManager::GetLastPageWithTransition() const
     }
 }
 
+RefPtr<FrameNode> StageManager::GetPrevPageWithTransition() const
+{
+    CHECK_NULL_RETURN(stageNode_, nullptr);
+    const auto& children = stageNode_->GetChildren();
+    if (children.empty()) {
+        return nullptr;
+    }
+    if (stageInTrasition_) {
+        return DynamicCast<FrameNode>(srcPageNode_.Upgrade());
+    }
+    return DynamicCast<FrameNode>(children.front());
+}
 } // namespace OHOS::Ace::NG

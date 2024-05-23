@@ -39,6 +39,8 @@
 #include <cstdint>
 #include <stdint.h>
 
+#include "drawable_descriptor.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -173,6 +175,20 @@ typedef struct ArkUI_SwiperIndicator ArkUI_SwiperIndicator;
  * @since 12
  */
 typedef struct ArkUI_StyledString ArkUI_StyledString;
+
+/**
+ * @brief Defines image animator frame infomation.
+ *
+ * @since 12
+*/
+typedef struct ArkUI_ImageAnimatorFrameInfo ArkUI_ImageAnimatorFrameInfo;
+
+/**
+ * @brief Define the ChildrenMainSize class information for a List.
+ *
+ * @since 12
+*/
+typedef struct ArkUI_ListChildrenMainSize ArkUI_ListChildrenMainSize;
 
 /**
  * @brief Provides the number types of ArkUI in the native code.
@@ -1792,6 +1808,60 @@ typedef enum {
 } ArkUI_ListItemSwipeEdgeEffect;
 
 /**
+ * @brief 定义帧动画的播放状态。
+ *
+ * @since 12
+*/
+typedef enum {
+    /** 动画初始状态。 */
+    ARKUI_ANIMATION_STATUS_INITIAL,
+    /** 动画处于播放状态。*/
+    ARKUI_ANIMATION_STATUS_RUNNING,
+    /** 动画处于暂停状态。*/
+    ARKUI_ANIMATION_STATUS_PAUSED,
+    /** 动画处于停止状态。*/
+    ARKUI_ANIMATION_STATUS_STOPPED,
+} ArkUI_AnimationStatus;
+
+/**
+ * @brief 定义帧动画组件在动画开始前和结束后的状态。
+ *
+ * @since 12
+*/
+typedef enum {
+    /** 动画未执行时不会将任何样式应用于目标，动画播放完成之后恢复初始默认状态。*/
+    ARKUI_ANIMATION_FILL_MODE_NONE,
+    /** 目标将保留动画执行期间最后一个关键帧的状态。*/
+    ARKUI_ANIMATION_FILL_MODE_FORWARDS,
+    /** 动画将在应用于目标时立即应用第一个关键帧中定义的值，并在delay期间保留此值。*/
+    ARKUI_ANIMATION_FILL_MODE_BACKWARDS,
+    /** 动画将遵循Forwards和Backwards的规则，从而在两个方向上扩展动画属性。*/
+    ARKUI_ANIMATION_FILL_MODE_BOTH,
+} ArkUI_AnimationFillMode;
+
+/**
+ * @brief 定义错误码枚举值。
+ *
+ * @since 12
+*/
+typedef enum {
+    /** 无错误。*/
+    ARKUI_ERROR_CODE_NO_ERROR = 0,
+    /** 参数错误。*/
+    ARKUI_ERROR_CODE_PARAM_INVALID = 401,
+    /** 组件不支持特点的属性或者事件。*/
+    ARKUI_ERROR_CODE_ATTRIBUTE_OR_EVENT_NOT_SUPPORTED = 106102,
+    /** 对应的操作不支持ArkTS创建的节点。*/
+    ARKUI_ERROR_CODE_NOT_SUPPROTED_FOR_ARKTS_NODE = 106103,
+    /** 懒加载适配器未绑定到组件上。*/
+    ARKUI_ERROR_CODE_NODE_ADAPTER_NONE_HOST = 106104,
+    /** 适配器已存在。*/
+    ARKUI_ERROR_CODE_NODE_ADAPTER_EXIST_IN_HOST = 106105,
+    /** 对应节点已存在子节点，无法添加适配器。*/
+    ARKUI_ERROR_CODE_NODE_ADAPTER_CHILD_NODE_EXIST = 106106,
+} ArkUI_ErrorCode;
+
+/**
 * @brief Creates a size constraint.
 *
 * @since 12
@@ -2886,6 +2956,210 @@ int32_t OH_ArkUI_ListItemSwipeActionOption_GetEdgeEffect(ArkUI_ListItemSwipeActi
 */
 void OH_ArkUI_ListItemSwipeActionOption_SetOnOffsetChange(
     ArkUI_ListItemSwipeActionOption* option, void (*callback)(float offset));
+
+/**
+ * @brief 使用图片路径创建帧图片信息，图片格式为svg，png和jpg。
+ *
+ * @param src 图片路径。
+ * @return 帧图片对象指针。
+ * @since 12
+*/
+ArkUI_ImageAnimatorFrameInfo* OH_ArkUI_ImageAnimatorFrameInfo_CreateFromString(char* src);
+
+/**
+ * @brief 使用 DrawableDescriptor 对象创建帧图片信息，图片格式为Resource和PixelMap。
+ *
+ * @param drawable 使用Resource或PixelMap创建的ArkUI_DrawableDescriptor对象指针。
+ * @return 帧图片对象指针。
+ * @since 12
+*/
+ArkUI_ImageAnimatorFrameInfo* OH_ArkUI_ImageAnimatorFrameInfo_CreateFromDrawableDescriptor(
+    ArkUI_DrawableDescriptor* drawable);
+
+/**
+ * @brief 销毁帧图片对象指针。
+ *
+ * @param imageInfo 帧图片对象指针。
+ * @since 12
+*/
+void OH_ArkUI_ImageAnimatorFrameInfo_Dispose(ArkUI_ImageAnimatorFrameInfo* imageInfo);
+
+/**
+ * @brief 设置图片宽度。
+ *
+ * @param imageInfo 帧图片对象指针。
+ * @param width 图片宽度，单位为PX。
+ * @since 12
+*/
+void OH_ArkUI_ImageAnimatorFrameInfo_SetWidth(ArkUI_ImageAnimatorFrameInfo* imageInfo, int32_t width);
+
+/**
+ * @brief 获取图片宽度。
+ *
+ * @param imageInfo 帧图片对象指针。
+ * @return 图片宽度，单位为PX，imageInfo为空指针时返回0。
+ * @since 12
+*/
+int32_t OH_ArkUI_ImageAnimatorFrameInfo_GetWidth(ArkUI_ImageAnimatorFrameInfo* imageInfo);
+
+/**
+ * @brief 设置图片高度。
+ *
+ * @param imageInfo 帧图片对象指针。
+ * @param height 图片高度，单位为PX。
+ * @since 12
+*/
+void OH_ArkUI_ImageAnimatorFrameInfo_SetHeight(ArkUI_ImageAnimatorFrameInfo* imageInfo, int32_t height);
+
+/**
+ * @brief 获取图片高度。
+ *
+ * @param imageInfo 帧图片对象指针。
+ * @return 图片高度，单位为PX，imageInfo为空指针时返回0。
+ * @since 12
+*/
+int32_t OH_ArkUI_ImageAnimatorFrameInfo_GetHeight(ArkUI_ImageAnimatorFrameInfo* imageInfo);
+
+/**
+ * @brief 设置图片相对于组件左上角的纵向坐标。
+ *
+ * @param imageInfo 帧图片对象指针。
+ * @param top 图片相对于组件左上角的纵向坐标，单位为PX。
+ * @since 12
+*/
+void OH_ArkUI_ImageAnimatorFrameInfo_SetTop(ArkUI_ImageAnimatorFrameInfo* imageInfo, int32_t top);
+
+/**
+ * @brief 获取图片相对于组件左上角的纵向坐标。
+ *
+ * @param imageInfo 帧图片对象指针。
+ * @return 图片相对于组件左上角的纵向坐标，单位为PX，imageInfo为空指针时返回0。
+ * @since 12
+*/
+int32_t OH_ArkUI_ImageAnimatorFrameInfo_GetTop(ArkUI_ImageAnimatorFrameInfo* imageInfo);
+
+/**
+ * @brief 设置图片相对于组件左上角的横向坐标。
+ *
+ * @param imageInfo 帧图片对象指针。
+ * @param left 图片相对于组件左上角的横向坐标，单位为PX。
+ * @since 12
+*/
+void OH_ArkUI_ImageAnimatorFrameInfo_SetLeft(ArkUI_ImageAnimatorFrameInfo* imageInfo, int32_t left);
+
+/**
+ * @brief 获取图片相对于组件左上角的横向坐标。
+ *
+ * @param imageInfo 帧图片对象指针。
+ * @return 图片相对于组件左上角的横向坐标，单位为PX，imageInfo为空指针时返回0。
+ * @since 12
+*/
+int32_t OH_ArkUI_ImageAnimatorFrameInfo_GetLeft(ArkUI_ImageAnimatorFrameInfo* imageInfo);
+
+/**
+ * @brief 设置图片的播放时长。
+ *
+ * @param imageInfo 帧图片对象指针。
+ * @param duration 图片的播放时长，单位为毫秒。
+ * @since 12
+*/
+void OH_ArkUI_ImageAnimatorFrameInfo_SetDuration(ArkUI_ImageAnimatorFrameInfo* imageInfo, int32_t duration);
+
+/**
+ * @brief 获取图片的播放时长。
+ *
+ * @param imageInfo 帧图片对象指针。
+ * @return 图片的播放时长，单位为毫秒，imageInfo为空指针时返回0。
+ * @since 12
+*/
+int32_t OH_ArkUI_ImageAnimatorFrameInfo_GetDuration(ArkUI_ImageAnimatorFrameInfo* imageInfo);
+/**
+ * @brief Create configuration items for the ListChildrenMainSize interface settings.
+ *
+ * @return ListChildrenMainSize configuration item instance.If the object returns a null pointer,
+ *         it indicates a creation failure, and the reason for the failure may be that the address space is full.
+ * @since 12
+*/
+ArkUI_ListChildrenMainSize* OH_ArkUI_ListChildrenMainSizeOption_Create();
+
+/**
+* @brief Destroy the ListChildrenMainSize instance.
+*
+* @param option The ListChildrenMainSize instance to be destroyed.
+* @since 12
+*/
+void OH_ArkUI_ListChildrenMainSizeOption_Dispose(ArkUI_ListChildrenMainSize* option);
+
+/**
+ * @brief Set the default size of ChildrenMainSizeOption for the List component.
+ *
+ * @param option ListChildrenMainSize instance.
+ * @param defaultMainSize The default size of the ListItem under the List, measured in vp.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 12
+*/
+int32_t OH_ArkUI_ListChildrenMainSizeOption_SetDefaultMainSize(ArkUI_ListChildrenMainSize* option,
+    float defaultMainSize);
+
+/**
+ * @brief Get the default size of ChildrenMainSizeOption for the List component.
+ *
+ * @param option ListChildrenMainSize instance.
+ * @return The default size of the ListItem under the List is 0, measured in vp.
+ *         When the option is a null pointer, it returns -1.
+ * @since 12
+*/
+float OH_ArkUI_ListChildrenMainSizeOption_GetDefaultMainSize(ArkUI_ListChildrenMainSize* option);
+
+/**
+ * @brief Reset the array size of ChildrenMainSizeOption for the List component.
+ *
+ * @param option ListChildrenMainSize instance.
+ * @param totalSize Array size.
+ * @since 12
+*/
+void OH_ArkUI_ListChildrenMainSizeOption_Resize(ArkUI_ListChildrenMainSize* option, int32_t totalSize);
+
+/**
+ * @brief Resize the ChildrenMainSizeOption array operation on the List component.
+ *
+ * @param option ListChildrenMainSize instance.
+ * @param index To modify the starting position of the MainSize array.
+ * @param deleteCount The number of MainSize arrays to be deleted starting from index.
+ * @param addCount The number of MainSize arrays to be added starting from index.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 12
+*/
+int32_t OH_ArkUI_ListChildrenMainSizeOption_Splice(ArkUI_ListChildrenMainSize* option, int32_t index,
+    int32_t deleteCount, int32_t addCount);
+
+/**
+ * @brief Update the value of the ChildrenMainSizeOption array in the List component.
+ *
+ * @param option ListChildrenMainSize instance.
+ * @param index To modify the starting position of the MainSize array.
+ * @param mainSize The actual modified value.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 12
+*/
+int32_t OH_ArkUI_ListChildrenMainSizeOption_UpdateSize(ArkUI_ListChildrenMainSize* option,
+    int32_t index, float mainSize);
+
+/**
+ * @brief Get the value of the ChildrenMainSizeOption array for the List component.
+ *
+ * @param option ListChildrenMainSize instance.
+ * @param index The index position of the value to be obtained.
+ * @return The value of the specific position of the array. If the function parameter is abnormal, return -1.
+ * @since 12
+*/
+float OH_ArkUI_ListChildrenMainSizeOption_GetMainSize(ArkUI_ListChildrenMainSize* option, int32_t index);
 #ifdef __cplusplus
 };
 #endif

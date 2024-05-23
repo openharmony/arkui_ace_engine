@@ -15,7 +15,9 @@
 #ifndef ARKUI_NATIVE_NODE_LIST_OPTION_H
 #define ARKUI_NATIVE_NODE_LIST_OPTION_H
 
+#include <vector>
 #include "core/interfaces/arkoala/arkoala_api.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -35,6 +37,11 @@ struct ArkUI_ListItemSwipeActionOption {
     ArkUI_ListItemSwipeActionItem* end;
     ArkUI_Int32 edgeEffect;
     void (*onOffsetChange)(ArkUI_Int32 offset);
+};
+
+struct ArkUI_ListChildrenMainSize {
+    float defaultMainSize;
+    std::vector<float> mainSize;
 };
 
 #ifdef __cplusplus

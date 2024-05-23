@@ -38,7 +38,6 @@ void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
 }
 } // namespace
 
-bool SystemProperties::traceEnabled_ = false;
 bool SystemProperties::svgTraceEnable_ = false;
 bool SystemProperties::developerModeOn_ = false;
 bool SystemProperties::layoutTraceEnable_ = false;

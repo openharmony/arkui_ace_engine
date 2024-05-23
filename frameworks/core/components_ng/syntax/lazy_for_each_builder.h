@@ -310,7 +310,8 @@ public:
         return itemInfo.second;
     }
 
-    void CheckCacheIndex(std::set<int32_t>& idleIndexes, int32_t count) {
+    void CheckCacheIndex(std::set<int32_t>& idleIndexes, int32_t count)
+    {
         for (int32_t i = 1; i <= cacheCount_; i++) {
             if (isLoop_) {
                 if ((startIndex_ <= endIndex_ && endIndex_ + i < count) ||
@@ -387,38 +388,7 @@ public:
         return PreBuildByIndex(preBuildingIndex_, cache, deadline, itemConstraint, canRunLongPredictTask);
     }
 
-    bool PreBuild(int64_t deadline, const std::optional<LayoutConstraintF>& itemConstraint, bool canRunLongPredictTask)
-    {
-        ACE_SCOPED_TRACE("expiringItem_ count:[%zu]", expiringItem_.size());
-        outOfBoundaryNodes_.clear();
-        if (itemConstraint && !canRunLongPredictTask) {
-            return false;
-        }
-        auto count = OnGetTotalCount();
-        std::unordered_map<std::string, LazyForEachCacheChild> cache;
-        std::set<int32_t> idleIndexes;
-        if (startIndex_ != -1 && endIndex_ != -1) {
-            CheckCacheIndex(idleIndexes, count);
-        }
-
-        ProcessCachedIndex(cache, idleIndexes);
-
-        bool result = true;
-        result = ProcessPreBuildingIndex(cache, deadline, itemConstraint, canRunLongPredictTask, idleIndexes);
-        if (!result) {
-            expiringItem_.swap(cache);
-            return result;
-        }
-
-        for (auto index : idleIndexes) {
-            result = PreBuildByIndex(index, cache, deadline, itemConstraint, canRunLongPredictTask);
-            if (!result) {
-                break;
-            }
-        }
-        expiringItem_.swap(cache);
-        return result;
-    }
+    bool PreBuild(int64_t deadline, const std::optional<LayoutConstraintF>& itemConstraint, bool canRunLongPredictTask);
 
     void ProcessCachedIndex(std::unordered_map<std::string, LazyForEachCacheChild>& cache,
         std::set<int32_t>& idleIndexes)
@@ -611,6 +581,7 @@ private:
     int32_t endIndex_ = -1;
     int32_t cacheCount_ = 0;
     int32_t preBuildingIndex_ = -1;
+    int32_t totalCountForDataset_ = 0;
     bool needTransition = false;
     bool isLoop_ = false;
     bool useNewInterface_ = false;

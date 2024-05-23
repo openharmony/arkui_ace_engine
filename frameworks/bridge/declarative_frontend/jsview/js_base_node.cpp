@@ -49,6 +49,7 @@ namespace OHOS::Ace::Framework {
 namespace {
 const std::unordered_set<std::string> EXPORT_TEXTURE_SUPPORT_TYPES = { V2::JS_VIEW_ETS_TAG, V2::COMMON_VIEW_ETS_TAG };
 const int32_t BUILD_MAX_PARAM_NUM = 3;
+constexpr uint32_t INFO_LENGTH_LIMIT = 2;
 } // namespace
 
 void JSBaseNode::BuildNode(const JSCallbackInfo& info)
@@ -59,7 +60,8 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
 
     auto infoLen = info.Length();
     JSRef<JSVal> param;
-    if ((infoLen >= BUILD_MAX_PARAM_NUM - 1) && info[1]->IsObject()) {
+    if (infoLen >= INFO_LENGTH_LIMIT && (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
+        || (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE) && info[1]->IsObject()))) {
         param = info[1];
     }
 
@@ -148,7 +150,8 @@ void JSBaseNode::Create(const JSCallbackInfo& info)
     if (info.Length() >= 1 && !info[0]->IsFunction()) {
         return;
     }
-    if ((info.Length() >= 2 && !(info[1]->IsObject() || info[1]->IsUndefined() || info[1]->IsNull()))) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE) && info.Length() >= INFO_LENGTH_LIMIT
+        && !(info[1]->IsObject() || info[1]->IsUndefined() || info[1]->IsNull())) {
         return;
     }
     BuildNode(info);
