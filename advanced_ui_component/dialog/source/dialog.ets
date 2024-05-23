@@ -123,6 +123,9 @@ export struct TipsDialog {
           if (this.checkAction) {
             this.checkAction(checked);
           }
+          if (this.onCheckedChange) {
+            this.onCheckedChange(checked);
+          }
         })
         .margin({ right: $r('sys.float.padding_level4') })
       Text(content)
