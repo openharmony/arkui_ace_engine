@@ -446,9 +446,9 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         StopSpringAnimation();
         if (usePropertyAnimation_) {
             StopPropertyTranslateAnimation(false, true);
-            currentDelta_ = 0.0f;
             StopIndicatorAnimation();
         }
+        currentDelta_ = 0.0f;
     }
     if (mainSizeIsMeasured_ && isNeedResetPrevMarginAndNextMargin_) {
         layoutProperty->UpdatePrevMarginWithoutMeasure(0.0_px);
