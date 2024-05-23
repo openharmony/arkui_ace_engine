@@ -420,6 +420,7 @@ void TitleBarPattern::MountTitle(const RefPtr<TitleBarNode>& hostNode)
         titleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     }
     titleNode->MarkModifyDone();
+    titleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void TitleBarPattern::MountMenu(const RefPtr<TitleBarNode>& hostNode, bool isWindowSizeChange)
