@@ -489,8 +489,7 @@ void SheetPresentationPattern::AvoidSafeArea()
     auto heightUp = GetSheetHeightChange();
     sheetHeightUp_ = heightUp;
     TAG_LOGD(AceLogTag::ACE_SHEET, "To avoid Keyboard, sheet height increase %{public}f.", heightUp);
-    auto parentOffsetY = GetRootOffsetYToWindow();
-    auto offset = pageHeight_ - height_ - heightUp - parentOffsetY;
+    auto offset = pageHeight_ - height_ - heightUp;
     auto renderContext = host->GetRenderContext();
     if (isScrolling_) {
         // if scrolling and keyboard will down, scroll needs to reset.
@@ -502,7 +501,7 @@ void SheetPresentationPattern::AvoidSafeArea()
             // Otherwise, sheet is necessary to raise and trigger scroll scrolling
             // sheet is raised to the top first
             renderContext->UpdateTransformTranslate(
-                { 0.0f, SHEET_BLANK_MINI_HEIGHT.ConvertToPx() + statusBarHeight_ - parentOffsetY, 0.0f });
+                { 0.0f, SHEET_BLANK_MINI_HEIGHT.ConvertToPx() + statusBarHeight_, 0.0f });
             // Then adjust the remaining height(heightUp = h - maxH) difference by scrolling
             ScrollTo(heightUp);
         }
