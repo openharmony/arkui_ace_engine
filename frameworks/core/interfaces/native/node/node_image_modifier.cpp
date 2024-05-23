@@ -17,7 +17,6 @@
 #include <cstdint>
 
 #include "base/utils/utils.h"
-#include "base/image/drawing_color_filter.h"
 #include "core/common/card_scope.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/image/image_component.h"
@@ -27,8 +26,6 @@
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/pipeline/base/element_register.h"
 #include "frameworks/core/components/common/layout/constants.h"
-
-#include "effect/color_filter.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -461,26 +458,6 @@ void ResetColorFilter(ArkUINodeHandle node)
     ImageModelNG::SetColorFilterMatrix(frameNode, DEFAULT_COLOR_FILTER);
 }
 
-void SetDrawingColorFilter(ArkUINodeHandle node, void* colorFilter)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto filter = reinterpret_cast<OHOS::Rosen::Drawing::ColorFilter*>(colorFilter);
-    auto filterPtr = std::make_shared<OHOS::Rosen::Drawing::ColorFilter>(*filter);
-    auto drawingColorFilter = DrawingColorFilter::CreateDrawingColorFilterFromNative(static_cast<void*>(&filterPtr));
-    ImageModelNG::SetDrawingColorFilter(frameNode, drawingColorFilter);
-}
-
-void* GetDrawingColorFilter(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    auto drawingColorFilter = ImageModelNG::GetDrawingColorFilter(frameNode);
-    auto filterSptr = reinterpret_cast<std::shared_ptr<OHOS::Rosen::Drawing::ColorFilter>*>(
-        drawingColorFilter->GetDrawingColorFilterSptrAddr());
-    return (*filterSptr).get();
-}
-
 void SetImageSyncLoad(ArkUINodeHandle node, ArkUI_Bool syncLoadValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -769,7 +746,7 @@ const ArkUIImageModifier* GetImageModifier()
         ResetEnhancedImageQuality, GetImageSrc, GetAutoResize, GetObjectRepeat, GetObjectFit,
         GetImageInterpolation, GetColorFilter, GetAlt, GetImageDraggable, GetRenderMode, SetImageResizable,
         GetImageResizable, GetFitOriginalSize, GetFillColor, SetPixelMap, SetPixelMapArray, SetResourceSrc,
-        EnableAnalyzer, AnalyzerConfig, SetDrawingColorFilter, GetDrawingColorFilter };
+        EnableAnalyzer, AnalyzerConfig };
     return &modifier;
 }
 

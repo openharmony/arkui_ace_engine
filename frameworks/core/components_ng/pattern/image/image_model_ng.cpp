@@ -669,15 +669,6 @@ std::vector<float> ImageModelNG::GetColorFilter(FrameNode* frameNode)
     return paintProperty->GetImagePaintStyle()->GetColorFilter().value_or(DEFAULT_COLOR_FILTER);
 }
 
-RefPtr<DrawingColorFilter> ImageModelNG::GetDrawingColorFilter(FrameNode* frameNode)
-{
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    auto paintProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
-    CHECK_NULL_RETURN(paintProperty, nullptr);
-    CHECK_NULL_RETURN(paintProperty->GetImagePaintStyle(), nullptr);
-    return paintProperty->GetImagePaintStyle()->GetDrawingColorFilter().value_or(nullptr);
-}
-
 bool ImageModelNG::GetAutoResize(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, true);

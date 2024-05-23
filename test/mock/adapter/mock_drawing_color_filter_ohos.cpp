@@ -28,11 +28,6 @@ RefPtr<DrawingColorFilter> DrawingColorFilter::CreateDrawingColorFilter(const st
     return nullptr;
 }
 
-RefPtr<DrawingColorFilter> DrawingColorFilter::CreateDrawingColorFilterFromNative(void* sptrAddr)
-{
-    return nullptr;
-}
-
 void* DrawingColorFilterOhos::GetDrawingColorFilterSptrAddr()
 {
     auto colorFilter = std::make_shared<RSColorFilter>();

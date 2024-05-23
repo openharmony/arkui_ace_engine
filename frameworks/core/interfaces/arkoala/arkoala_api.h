@@ -578,7 +578,6 @@ enum ArkUINodeType {
     ARKUI_GRID_ROW,
     ARKUI_GRID_COL,
     ARKUI_SELECT,
-    ARKUI_IMAGE_ANIMATOR,
 };
 
 enum ArkUIEventCategory {
@@ -676,12 +675,6 @@ enum ArkUIEventSubKind {
     ON_CANVAS_READY = ARKUI_MAX_EVENT_NUM * ARKUI_CANVAS,
 
     ON_RADIO_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_RADIO,
-
-    ON_IMAGE_ANIMATOR_ON_START = ARKUI_MAX_EVENT_NUM * ARKUI_IMAGE_ANIMATOR,
-    ON_IMAGE_ANIMATOR_ON_PAUSE,
-    ON_IMAGE_ANIMATOR_ON_REPEAT,
-    ON_IMAGE_ANIMATOR_ON_CANCEL,
-    ON_IMAGE_ANIMATOR_ON_FINISH,
 
     ON_GRID_SCROLL = ARKUI_MAX_EVENT_NUM * ARKUI_GRID,
     ON_GRID_START,
@@ -1030,17 +1023,6 @@ struct ArkUI_StyledString;
 struct ArkUISliderValidSlideRange {
     ArkUI_Float32 from;
     ArkUI_Float32 to;
-};
-
-struct ArkUIImageFrameInfo {
-    ArkUI_CharPtr src;
-    ArkUI_Int32 width;
-    ArkUI_Int32 height;
-    ArkUI_Int32 top;
-    ArkUI_Int32 left;
-    ArkUI_Int32 unit;
-    ArkUI_Int32 duration;
-    void* drawable;
 };
 
 struct ArkUICommonModifier {
@@ -1737,8 +1719,6 @@ struct ArkUIImageModifier {
     void (*setResourceSrc)(ArkUINodeHandle node, void* resource);
     void (*enableAnalyzer)(ArkUINodeHandle node, ArkUI_Bool enable);
     void (*analyzerConfig)(ArkUINodeHandle node, void* config);
-    void (*setDrawingColorFilter)(ArkUINodeHandle node, void* colorFilter);
-    void* (*getDrawingColorFilter)(ArkUINodeHandle node);
 };
 
 struct ArkUIColumnModifier {
@@ -3112,14 +3092,6 @@ struct ArkUIImageAnimatorModifier {
     void (*resetImages)(ArkUINodeHandle node);
     void (*setImageAnimatorIteration)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetImageAnimatorIteration)(ArkUINodeHandle node);
-    void (*setImageAnimatorSrc)(ArkUINodeHandle node, ArkUIImageFrameInfo* imageInfos, ArkUI_Int32 size);
-    void (*resetDuration)(ArkUINodeHandle node);
-    ArkUI_Bool (*getIsReverse)(ArkUINodeHandle node);
-    ArkUI_Int32 (*getDuration)(ArkUINodeHandle node);
-    ArkUI_Int32 (*getState)(ArkUINodeHandle node);
-    ArkUI_Bool (*getFixedSize)(ArkUINodeHandle node);
-    ArkUI_Int32 (*getFillMode)(ArkUINodeHandle node);
-    ArkUI_Int32 (*getIteration)(ArkUINodeHandle node);
 };
 
 struct ArkUISideBarContainerModifier {

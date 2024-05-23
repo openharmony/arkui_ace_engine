@@ -168,23 +168,22 @@ int32_t OH_ArkUI_GetDrawableDescriptorFromNapiValue(
     ArkUI_DrawableDescriptor* drawable =
         new ArkUI_DrawableDescriptor { nullptr, nullptr, 0, nullptr, nullptr, nullptr, nullptr };
     auto* descriptor = reinterpret_cast<OHOS::Ace::Napi::DrawableDescriptor*>(objectNapi);
-    if (!descriptor) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
     auto drawableType = descriptor->GetDrawableType();
-    if (drawableType == OHOS::Ace::Napi::DrawableDescriptor::DrawableType::ANIMATED) {
-        auto* animatedDrawable = static_cast<OHOS::Ace::Napi::AnimatedDrawableDescriptor*>(descriptor);
-        if (!animatedDrawable) {
-            return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-        }
-        int32_t duration = animatedDrawable->GetDuration();
-        int32_t iteration = animatedDrawable->GetIterations();
-        drawable->animatedDrawableDescriptor = std::make_shared<OHOS::Ace::Napi::AnimatedDrawableDescriptor>(
-            animatedDrawable->GetPixelMapList(), duration, iteration);
+    if (drawableType == OHOS::Ace::Napi::DrawableDescriptor::DrawableType::BASE) {
+        drawable->drawableDescriptor = std::make_shared<OHOS::Ace::Napi::DrawableDescriptor>(descriptor->GetPixelMap());
+        *drawableDescriptor = drawable;
+        return OHOS::Ace::ERROR_CODE_NO_ERROR;
+    } else if (drawableType == OHOS::Ace::Napi::DrawableDescriptor::DrawableType::LAYERED) {
+        drawable->layeredDrawableDescriptor = std::make_shared<OHOS::Ace::Napi::LayeredDrawableDescriptor>(
+            nullptr, 0, nullptr);
         *drawableDescriptor = drawable;
         return OHOS::Ace::ERROR_CODE_NO_ERROR;
     }
-    drawable->drawableDescriptor = std::make_shared<OHOS::Ace::Napi::DrawableDescriptor>(descriptor->GetPixelMap());
+    auto* animatedDrawable = static_cast<OHOS::Ace::Napi::AnimatedDrawableDescriptor*>(descriptor);
+    int32_t duration = animatedDrawable->GetDuration();
+    int32_t iteration = animatedDrawable->GetIterations();
+    drawable->animatedDrawableDescriptor = std::make_shared<OHOS::Ace::Napi::AnimatedDrawableDescriptor>(
+        animatedDrawable->GetPixelMapList(), duration, iteration);
     *drawableDescriptor = drawable;
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
