@@ -139,6 +139,10 @@ RefPtr<FocusView> FocusView::GetEntryFocusView()
 
 RefPtr<FocusHub> FocusView::GetViewRootScope()
 {
+    auto rootScopeSpecified = rootScopeSpecified_.Upgrade();
+    if (rootScopeSpecified) {
+        return rootScopeSpecified;
+    }
     auto focusViewPattern = AceType::DynamicCast<Pattern>(AceType::Claim(this));
     CHECK_NULL_RETURN(focusViewPattern, nullptr);
     auto focusViewFrame = focusViewPattern->GetHost();
