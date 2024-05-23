@@ -7336,7 +7336,7 @@ class SearchFontFeatureModifier extends ModifierWithKey {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
-SearchFontColorModifier.identity = Symbol('searchFontFeature');
+SearchFontFeatureModifier.identity = Symbol('searchFontFeature');
 class SearchCopyOptionModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -9367,7 +9367,7 @@ class TextFontFeatureModifier extends ModifierWithKey {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
-TextWordBreakModifier.identity = Symbol('textFontFeature');
+TextFontFeatureModifier.identity = Symbol('textFontFeature');
 
 class TextEllipsisModeModifier extends ModifierWithKey {
   constructor(value) {
@@ -10419,7 +10419,7 @@ class TextAreaFontFeatureModifier extends ModifierWithKey {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
-TextAreaFontFamilyModifier.identity = Symbol('textAreaFontFeature');
+TextAreaFontFeatureModifier.identity = Symbol('textAreaFontFeature');
 class TextAreaCaretColorModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -11770,7 +11770,7 @@ class TextInputFontFeatureModifier extends ModifierWithKey {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
-TextInputShowUnderlineModifier.identity = Symbol('textInputFontFeature');
+TextInputFontFeatureModifier.identity = Symbol('textInputFontFeature');
 class TextInputShowErrorModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

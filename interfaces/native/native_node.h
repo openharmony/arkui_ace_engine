@@ -1840,7 +1840,7 @@ typedef enum {
      * Attribute obtaining method return value {@Link ArkUI_AttributeItem} format:\n
      * .string indicates the content of the text feature. Multiple text features are separated by commas (,). \n
      */
-    NODE_FONT_FEATURE,
+    NODE_TEXT_FONT_FEATURE,
 
     /**
      * @brief 设置使能文本识别。
