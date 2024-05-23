@@ -96,6 +96,7 @@ window_scene_support = true
 dynamic_component_support = true
 vsync_timeout_check = true
 use_fast_taskpool = true
+state_mgmt_use_aot = true
 
 if (defined(preview_support) && preview_support) {
   defines += [ "PREVIEW" ]
@@ -202,6 +203,10 @@ if (vsync_timeout_check) {
 
 if (use_fast_taskpool) {
   defines += [ "USE_FAST_TASKPOOL" ]
+}
+
+if (defined(state_mgmt_use_aot) && state_mgmt_use_aot) {
+  defines += [ "STATE_MGMT_USE_AOT" ]
 }
 
 cflags_cc = [
