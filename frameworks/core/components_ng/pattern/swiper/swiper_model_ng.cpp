@@ -666,7 +666,7 @@ int SwiperModelNG::GetIndex(FrameNode* frameNode)
 
 Axis SwiperModelNG::GetDirection(FrameNode* frameNode)
 {
-    Axis value = Axis::VERTICAL;
+    Axis value = Axis::HORIZONTAL;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(SwiperLayoutProperty, Direction, value, frameNode, value);
     return value;
 }
