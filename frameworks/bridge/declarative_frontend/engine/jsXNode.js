@@ -1520,6 +1520,7 @@ class RenderNode {
             0, 0, 1, 0,
             0, 0, 0, 1];
         this.translationValue = { x: 0, y: 0 };
+        this.lengthMetricsUnitValue = LengthMetricsUnit.DEFAULT;
         if (type === 'BuilderRootFrameNode' || type === 'CustomFrameNode') {
             return;
         }
@@ -1567,7 +1568,7 @@ class RenderNode {
             this.frameValue.x = this.checkUndefinedOrNullWithDefaultValue(position.x, 0);
             this.frameValue.y = this.checkUndefinedOrNullWithDefaultValue(position.y, 0);
         }
-        getUINativeModule().common.setPosition(this.nodePtr, false, this.frameValue.x, this.frameValue.y);
+        getUINativeModule().renderNode.setPosition(this.nodePtr, this.frameValue.x, this.frameValue.y, this.lengthMetricsUnitValue);
     }
     set rotation(rotation) {
         if (rotation === undefined || rotation === null) {
@@ -1578,7 +1579,7 @@ class RenderNode {
             this.rotationValue.y = this.checkUndefinedOrNullWithDefaultValue(rotation.y, 0);
             this.rotationValue.z = this.checkUndefinedOrNullWithDefaultValue(rotation.z, 0);
         }
-        getUINativeModule().renderNode.setRotation(this.nodePtr, this.rotationValue.x, this.rotationValue.y, this.rotationValue.z);
+        getUINativeModule().renderNode.setRotation(this.nodePtr, this.rotationValue.x, this.rotationValue.y, this.rotationValue.z, this.lengthMetricsUnitValue);
     }
     set scale(scale) {
         if (scale === undefined || scale === null) {
@@ -1602,7 +1603,7 @@ class RenderNode {
             this.shadowOffsetValue.x = this.checkUndefinedOrNullWithDefaultValue(offset.x, 0);
             this.shadowOffsetValue.y = this.checkUndefinedOrNullWithDefaultValue(offset.y, 0);
         }
-        getUINativeModule().renderNode.setShadowOffset(this.nodePtr, this.shadowOffsetValue.x, this.shadowOffsetValue.y);
+        getUINativeModule().renderNode.setShadowOffset(this.nodePtr, this.shadowOffsetValue.x, this.shadowOffsetValue.y, this.lengthMetricsUnitValue);
     }
     set shadowAlpha(alpha) {
         this.shadowAlphaValue = this.checkUndefinedOrNullWithDefaultValue(alpha, 0);
@@ -1625,7 +1626,7 @@ class RenderNode {
             this.frameValue.width = this.checkUndefinedOrNullWithDefaultValue(size.width, 0);
             this.frameValue.height = this.checkUndefinedOrNullWithDefaultValue(size.height, 0);
         }
-        getUINativeModule().renderNode.setSize(this.nodePtr, this.frameValue.width, this.frameValue.height);
+        getUINativeModule().renderNode.setSize(this.nodePtr, this.frameValue.width, this.frameValue.height, this.lengthMetricsUnitValue);
     }
     set transform(transform) {
         if (transform === undefined || transform === null) {
@@ -1657,6 +1658,13 @@ class RenderNode {
             this.translationValue.y = this.checkUndefinedOrNullWithDefaultValue(translation.y, 0);
         }
         getUINativeModule().renderNode.setTranslate(this.nodePtr, this.translationValue.x, this.translationValue.y, 0);
+    }
+    set lengthMetricsUnit(unit) {
+        if (unit === undefined || unit == null) {
+            this.lengthMetricsUnitValue = LengthMetricsUnit.DEFAULT;
+        } else {
+            this.lengthMetricsUnitValue = unit;
+        }
     }
     get backgroundColor() {
         return this.backgroundColorValue;
@@ -1705,6 +1713,9 @@ class RenderNode {
     }
     get translation() {
         return this.translationValue;
+    }
+    get lengthMetricsUnit() {
+        return this.lengthMetricsUnitValue;
     }
     checkUndefinedOrNullWithDefaultValue(arg, defaultValue) {
         if (arg === undefined || arg === null) {
@@ -1852,7 +1863,7 @@ class RenderNode {
         else {
             this.borderWidthValue = width;
         }
-        getUINativeModule().renderNode.setBorderWidth(this.nodePtr, this.borderWidthValue.left, this.borderWidthValue.top, this.borderWidthValue.right, this.borderWidthValue.bottom);
+        getUINativeModule().renderNode.setBorderWidth(this.nodePtr, this.borderWidthValue.left, this.borderWidthValue.top, this.borderWidthValue.right, this.borderWidthValue.bottom, this.lengthMetricsUnitValue);
     }
     get borderWidth() {
         return this.borderWidthValue;
@@ -1876,7 +1887,7 @@ class RenderNode {
         else {
             this.borderRadiusValue = radius;
         }
-        getUINativeModule().renderNode.setBorderRadius(this.nodePtr, this.borderRadiusValue.topLeft, this.borderRadiusValue.topRight, this.borderRadiusValue.bottomLeft, this.borderRadiusValue.bottomRight);
+        getUINativeModule().renderNode.setBorderRadius(this.nodePtr, this.borderRadiusValue.topLeft, this.borderRadiusValue.topRight, this.borderRadiusValue.bottomLeft, this.borderRadiusValue.bottomRight, this.lengthMetricsUnitValue);
     }
     get borderRadius() {
         return this.borderRadiusValue;
