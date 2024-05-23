@@ -129,6 +129,9 @@ void StepperPattern::CreateLeftButtonNode()
     buttonPattern->setComponentButtonType(ComponentButtonType::STEPPER);
     buttonPattern->SetFocusBorderColor(stepperTheme->GetFocusColor());
     auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, buttonId, buttonPattern);
+    auto focusHub = buttonNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusDependence(FocusDependence::SELF);
     buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(buttonLayoutProperty);
@@ -288,6 +291,11 @@ void StepperPattern::CreateArrowRightButtonNode(int32_t index, bool isDisabled)
     }
     isDisabled ? buttonNode->GetEventHub<ButtonEventHub>()->SetEnabled(false)
                : buttonNode->GetEventHub<ButtonEventHub>()->SetEnabled(true);
+    if (!isDisabled) {
+        auto focusHub = buttonNode->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->SetFocusDependence(FocusDependence::SELF);
+    }
     buttonNode->MarkModifyDone();
 
     // Create rowNode
@@ -390,6 +398,11 @@ void StepperPattern::CreateArrowlessRightButtonNode(int32_t index, bool isDisabl
     }
     isDisabled ? buttonNode->GetEventHub<ButtonEventHub>()->SetEnabled(false)
                : buttonNode->GetEventHub<ButtonEventHub>()->SetEnabled(true);
+    if (!isDisabled) {
+        auto focusHub = buttonNode->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->SetFocusDependence(FocusDependence::SELF);
+    }
     buttonNode->MarkModifyDone();
 
     // Create textNode
