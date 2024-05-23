@@ -374,6 +374,24 @@ void TextPickerColumnPattern::ResetOptionPropertyHeight()
     }
 }
 
+bool TextPickerColumnPattern::IsTextFadeOut()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto textTheme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(textTheme, false);
+    return textTheme->GetIsTextFadeout();
+}
+
+void TextPickerColumnPattern::UpdateTexOverflow(bool isSel, const RefPtr<TextLayoutProperty>& textLayoutProperty)
+{
+    if (isTextFadeOut_) {
+        textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
+        textLayoutProperty->UpdateTextMarqueeFadeout(true);
+        textLayoutProperty->UpdateTextMarqueeStart(isSel && !isTossing_);
+    }
+}
+
 void TextPickerColumnPattern::FlushCurrentOptions(
     bool isDown, bool isUpateTextContentOnly, bool isDirectlyClear, bool isUpdateAnimationProperties)
 {
@@ -389,6 +407,7 @@ void TextPickerColumnPattern::FlushCurrentOptions(
     CHECK_NULL_VOID(parentNode);
     auto textPickerLayoutProperty = parentNode->GetLayoutProperty<TextPickerLayoutProperty>();
     CHECK_NULL_VOID(textPickerLayoutProperty);
+    isTextFadeOut_ = IsTextFadeOut();
 
     if (!isUpateTextContentOnly) {
         animationProperties_.clear();
@@ -459,6 +478,7 @@ void TextPickerColumnPattern::FlushCurrentTextOptions(
         CHECK_NULL_VOID(textPattern);
         auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
+        UpdateTexOverflow(index == middleIndex, textLayoutProperty);
         if (!isUpateTextContentOnly) {
             UpdatePickerTextProperties(textLayoutProperty, textPickerLayoutProperty, index, middleIndex, showCount);
         }
@@ -576,6 +596,7 @@ void TextPickerColumnPattern::FlushCurrentMixtureOptions(
         CHECK_NULL_VOID(textPattern);
         auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
+        UpdateTexOverflow(index == middleIndex, textLayoutProperty);
         if (!isUpateTextContentOnly) {
             UpdatePickerTextProperties(textLayoutProperty, textPickerLayoutProperty, index, middleIndex, showCount);
         }
@@ -673,9 +694,6 @@ void TextPickerColumnPattern::UpdateDisappearTextProperties(const RefPtr<PickerT
         pickerTheme->GetOptionStyle(false, false).GetFontFamilies()));
     textLayoutProperty->UpdateItalicFontStyle(textPickerLayoutProperty->GetDisappearFontStyle().value_or(
         pickerTheme->GetOptionStyle(false, false).GetFontStyle()));
-    if (isTextFadeOut_) {
-        textLayoutProperty->UpdateTextMarqueeStart(false);
-    }
 }
 
 void TextPickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerTheme>& pickerTheme,
@@ -698,9 +716,6 @@ void TextPickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerT
         pickerTheme->GetOptionStyle(false, false).GetFontFamilies()));
     textLayoutProperty->UpdateItalicFontStyle(
         textPickerLayoutProperty->GetFontStyle().value_or(pickerTheme->GetOptionStyle(false, false).GetFontStyle()));
-    if (isTextFadeOut_) {
-        textLayoutProperty->UpdateTextMarqueeStart(false);
-    }
 }
 
 void TextPickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme,
@@ -722,9 +737,6 @@ void TextPickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
         pickerTheme->GetOptionStyle(true, false).GetFontFamilies()));
     textLayoutProperty->UpdateItalicFontStyle(textPickerLayoutProperty->GetSelectedFontStyle().value_or(
         pickerTheme->GetOptionStyle(true, false).GetFontStyle()));
-    if (isTextFadeOut_) {
-        textLayoutProperty->UpdateTextMarqueeStart(true);
-    }
 }
 
 void TextPickerColumnPattern::AddAnimationTextProperties(
@@ -774,16 +786,6 @@ void TextPickerColumnPattern::UpdatePickerTextProperties(const RefPtr<TextLayout
     CHECK_NULL_VOID(context);
     auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto textTheme = pipeline->GetTheme<TextTheme>();
-    CHECK_NULL_VOID(textTheme);
-    isTextFadeOut_ = textTheme->GetIsTextFadeout();
-    if (isTextFadeOut_) {
-        textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
-        textLayoutProperty->UpdateTextMarqueeFadeout(true);
-        textLayoutProperty->UpdateTextMarqueeStart(false);
-    }
     if (currentIndex == middleIndex) {
         UpdateSelectedTextProperties(pickerTheme, textLayoutProperty, textPickerLayoutProperty);
         textLayoutProperty->UpdateAlignment(Alignment::CENTER);
@@ -870,6 +872,7 @@ void TextPickerColumnPattern::UpdateTextPropertiesLinear(bool isDown, double sca
     CHECK_NULL_VOID(host);
     uint32_t showCount = GetShowOptionCount();
     auto child = host->GetChildren();
+    auto middleIndex = showCount / 2;
     auto iter = child.begin();
     if (child.size() != showCount) {
         return;
@@ -883,7 +886,11 @@ void TextPickerColumnPattern::UpdateTextPropertiesLinear(bool isDown, double sca
             CHECK_NULL_VOID(textPattern);
             textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(textLayoutProperty);
-            TextPropertiesLinearAnimation(textLayoutProperty, index, showCount, isDown, scale);
+            if (!isTossing_) {
+                UpdateTexOverflow(index == middleIndex, textLayoutProperty);
+            } else {
+                TextPropertiesLinearAnimation(textLayoutProperty, index, showCount, isDown, scale);
+            }
         } else if (columnkind_ == MIXTURE) {
             auto children = rangeNode->GetChildren();
             if (children.size() != MIXTURE_CHILD_COUNT) {
@@ -893,7 +900,11 @@ void TextPickerColumnPattern::UpdateTextPropertiesLinear(bool isDown, double sca
             auto textPattern = textNode->GetPattern<TextPattern>();
             textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(textLayoutProperty);
-            TextPropertiesLinearAnimation(textLayoutProperty, index, showCount, isDown, scale);
+            if (!isTossing_) {
+                UpdateTexOverflow(index == middleIndex, textLayoutProperty);
+            } else {
+                TextPropertiesLinearAnimation(textLayoutProperty, index, showCount, isDown, scale);
+            }
             textNode->MarkModifyDone();
             textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
@@ -1289,6 +1300,7 @@ void TextPickerColumnPattern::SetOptionShiftDistance()
 
 void TextPickerColumnPattern::UpdateToss(double offsetY)
 {
+    isTossing_ = true;
     UpdateColumnChildPosition(offsetY);
 }
 
@@ -1302,6 +1314,8 @@ void TextPickerColumnPattern::TossStoped()
 void TextPickerColumnPattern::TossAnimationStoped()
 {
     yLast_ = 0.0;
+    isTossing_ = false;
+    ScrollOption(0.0);
 }
 
 void TextPickerColumnPattern::UpdateFinishToss(double offsetY)
