@@ -53,6 +53,7 @@ GaugeModel* GaugeModel::GetInstance()
 } // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
     constexpr Color ERROR_COLOR = Color(0xFFE84026);
+    constexpr float FIX_ANGLE = 720.0f;
 
 void JSGauge::JSBind(BindingTarget globalObj)
 {
@@ -123,10 +124,7 @@ void JSGauge::SetStartAngle(const JSCallbackInfo& info)
 {
     float startAngle = NG::DEFAULT_START_DEGREE;
     if (info[0]->IsNumber()) {
-        startAngle = std::fmod(info[0]->ToNumber<double>(), NG::DEFAULT_END_DEGREE);
-        if (Negative(startAngle)) {
-            startAngle += NG::DEFAULT_END_DEGREE;
-        }
+        startAngle = std::fmod(info[0]->ToNumber<double>(), FIX_ANGLE);
     }
     GaugeModel::GetInstance()->SetStartAngle(startAngle);
 }
@@ -135,10 +133,7 @@ void JSGauge::SetEndAngle(const JSCallbackInfo& info)
 {
     float endAngle = NG::DEFAULT_END_DEGREE;
     if (info[0]->IsNumber()) {
-        endAngle = std::fmod(info[0]->ToNumber<double>(), NG::DEFAULT_END_DEGREE);
-        if (Negative(endAngle)) {
-            endAngle += NG::DEFAULT_END_DEGREE;
-        }
+        endAngle = std::fmod(info[0]->ToNumber<double>(), FIX_ANGLE);
     }
     GaugeModel::GetInstance()->SetEndAngle(endAngle);
 }

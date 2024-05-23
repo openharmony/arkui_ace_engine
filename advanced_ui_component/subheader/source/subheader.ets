@@ -161,7 +161,6 @@ export struct SubHeader {
   operationItem: Array<OperationOption> | null = null;
   operationSymbolOptions?: Array<SymbolOptions> | null = null;
   // 内部变量
-  @State isDuplicateLine: boolean = false;
   @State textArrowBgColor: ResourceColor = $r('sys.color.ohos_id_color_sub_background_transparent');
   @State buttonBgColor: ResourceColor = $r('sys.color.ohos_id_color_sub_background_transparent');
   @State textArrowFocus: boolean = false;
@@ -210,7 +209,7 @@ export struct SubHeader {
     }
     .width('100%')
     .focusable(true)
-    .constraintSize({ minHeight: this.isDuplicateLine ? DOUBLE_LINE_HEIGHT : SINGLE_LINE_HEIGHT })
+    .constraintSize({ minHeight: this.getMinHeight() })
   }
 
   private getMarginRight(): Length {
@@ -226,6 +225,15 @@ export struct SubHeader {
     } else {
       return MAX_RIGHT_WIDTH;
     }
+  }
+
+  private getMinHeight(): Length {
+    if (this.secondaryTitle && this.icon) {
+      return SINGLE_LINE_HEIGHT;
+    } else if (this.secondaryTitle && this.primaryTitle) {
+      return DOUBLE_LINE_HEIGHT;
+    }
+    return SINGLE_LINE_HEIGHT;
   }
 
   @Builder
@@ -304,7 +312,6 @@ export struct SubHeader {
     }
     .commonListPadding()
     .onAppear(() => {
-      this.isDuplicateLine = false;
       this.changeFlexAlign(FlexAlign.SpaceBetween);
     })
   }
@@ -337,7 +344,6 @@ export struct SubHeader {
     .commonContentPadding()
     .alignItems(HorizontalAlign.Start)
     .onAppear(() => {
-      this.isDuplicateLine = true;
       this.changeFlexAlign(FlexAlign.SpaceBetween);
     })
   }
@@ -354,7 +360,6 @@ export struct SubHeader {
         })
         .width('100%')
         .onAppear(() => {
-          this.isDuplicateLine = false;
           this.changeFlexAlign(FlexAlign.SpaceBetween);
         })
         .attributeModifier(this.secondaryTitleModifier)
@@ -385,7 +390,6 @@ export struct SubHeader {
     }
     .alignItems(HorizontalAlign.Start)
     .onAppear(() => {
-      this.isDuplicateLine = false;
       this.changeFlexAlign(FlexAlign.SpaceBetween);
     })
   }
@@ -402,7 +406,6 @@ export struct SubHeader {
         })
         .width('100%')
         .onAppear(() => {
-          this.isDuplicateLine = false;
           this.changeFlexAlign(FlexAlign.SpaceBetween);
         })
         .attributeModifier(this.primaryTitleModifier)
@@ -663,9 +666,6 @@ export struct SubHeader {
         .height(LOADING_SIZE)
         .color($r('sys.color.icon_secondary'))
         .focusable(true)
-        .onAppear(() => {
-          this.isDuplicateLine = false;
-        })
     }
     .focusable(true)
     .justifyContent(FlexAlign.End)

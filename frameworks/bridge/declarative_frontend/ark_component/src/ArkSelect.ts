@@ -115,6 +115,16 @@ class ArkSelectComponent extends ArkComponent implements SelectAttribute {
       this._modifiersWithKeys, MenuAlignModifier.identity, MenuAlignModifier, menuAlign);
     return this;
   }
+  menuBackgroundColor(value: ResourceColor): this {
+    modifierWithKey(
+      this._modifiersWithKeys, MenuBackgroundColorModifier.identity, MenuBackgroundColorModifier, value);
+    return this;
+  }
+  menuBackgroundBlurStyle(value: BlurStyle): this {
+    modifierWithKey(
+      this._modifiersWithKeys, MenuBackgroundBlurStyleModifier.identity, MenuBackgroundBlurStyleModifier, value);
+    return this;
+  }
   controlSize(controlSize: ControlSize): this {
     modifierWithKey(
       this._modifiersWithKeys, ControlSizeModifier.identity, ControlSizeModifier, controlSize);
@@ -136,6 +146,42 @@ class ArkSelectComponent extends ArkComponent implements SelectAttribute {
     this.menuItemNodes = new xNode.BuilderNode(context);
     this.menuItemNodes.build(this.builder, menuItemConfiguration);
     return this.menuItemNodes.getFrameNode();
+  }
+}
+
+class MenuBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('selectMenuBackgroundColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().select.resetMenuBackgroundColor(node);
+    } else {
+      getUINativeModule().select.setMenuBackgroundColor(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class MenuBackgroundBlurStyleModifier extends ModifierWithKey<BlurStyle> {
+  constructor(value: BlurStyle) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('selectMenuBackgroundBlurStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().select.resetMenuBackgroundBlurStyle(node);
+    } else {
+      getUINativeModule().select.setMenuBackgroundBlurStyle(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 

@@ -60,6 +60,7 @@ public:
     void ReloadStage();
 
     RefPtr<FrameNode> GetLastPageWithTransition() const;
+    RefPtr<FrameNode> GetPrevPageWithTransition() const;
 
     void SetStageInTrasition (bool stageInTrasition) {
         stageInTrasition_ = stageInTrasition;

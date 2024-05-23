@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,6 +48,8 @@
 namespace OHOS::Ace::Framework {
 namespace {
 const std::unordered_set<std::string> EXPORT_TEXTURE_SUPPORT_TYPES = { V2::JS_VIEW_ETS_TAG, V2::COMMON_VIEW_ETS_TAG };
+const int32_t BUILD_MAX_PARAM_NUM = 3;
+constexpr uint32_t INFO_LENGTH_LIMIT = 2;
 } // namespace
 
 void JSBaseNode::BuildNode(const JSCallbackInfo& info)
@@ -55,23 +57,49 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
     auto builder = info[0];
     CHECK_NULL_VOID(builder->IsFunction());
     auto buildFunc = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(builder));
-    NG::ScopedViewStackProcessor builderViewStackProcessor;
-    NG::ViewStackProcessor::GetInstance()->SetIsBuilderNode(true);
-    NG::ViewStackProcessor::GetInstance()->SetIsExportTexture(renderType_ == NodeRenderType::RENDER_TYPE_TEXTURE);
-    if (info.Length() >= 2 && info[1]->IsObject()) {
-        JSRef<JSVal> param = info[1];
-        buildFunc->ExecuteJS(1, &param);
-    } else {
-        buildFunc->ExecuteJS();
+
+    auto infoLen = info.Length();
+    JSRef<JSVal> param;
+    if (infoLen >= INFO_LENGTH_LIMIT && (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
+        || (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE) && info[1]->IsObject()))) {
+        param = info[1];
     }
-    auto needProxyVal = info[2];
-    bool needProxy = needProxyVal->IsBoolean() ? needProxyVal->ToBoolean() : true;
+
+    auto lazyBuilderFunc = [buildFunc, param, renderType = renderType_]() mutable {
+        NG::ViewStackProcessor::GetInstance()->SetIsBuilderNode(true);
+        NG::ViewStackProcessor::GetInstance()->SetIsExportTexture(renderType == NodeRenderType::RENDER_TYPE_TEXTURE);
+        if (!param->IsEmpty()) {
+            buildFunc->ExecuteJS(1, &param);
+        } else {
+            buildFunc->ExecuteJS();
+        }
+    };
+
+    NG::ScopedViewStackProcessor builderViewStackProcessor;
+    lazyBuilderFunc();
     auto parent = viewNode_ ? viewNode_->GetParent() : nullptr;
     auto newNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    if (newNode) {
+        newNode->SetBuilderFunc(std::move(lazyBuilderFunc));
+    }
+
+    if (newNode && (infoLen >= BUILD_MAX_PARAM_NUM)) {
+        auto updateTsNodeBuilder = info[BUILD_MAX_PARAM_NUM - 1];
+        EcmaVM* vm = info.GetVm();
+        auto updateTsFunc = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(updateTsNodeBuilder));
+        auto updateNodeFunc = [updateTsFunc, vm](int32_t instanceId, RefPtr<NG::UINode>& node) mutable {
+            JSRef<JSVal> param[2];
+            param[0] = JSRef<JSVal>::Make(ToJSValue(instanceId));
+            param[1] = JSRef<JSVal>::Make(panda::NativePointerRef::New(vm, AceType::RawPtr(node)));
+            updateTsFunc->ExecuteJS(2, param);
+        };
+        newNode->SetUpdateNodeFunc(std::move(updateNodeFunc));
+    }
+
     // If the node is a UINode, amount it to a BuilderProxyNode if needProxy.
     auto flag = AceType::InstanceOf<NG::FrameNode>(newNode);
     auto isSupportExportTexture = newNode ? EXPORT_TEXTURE_SUPPORT_TYPES.count(newNode->GetTag()) > 0 : false;
-    if (!flag && newNode && needProxy) {
+    if (!flag && newNode) {
         auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
         auto proxyNode = NG::FrameNode::GetOrCreateFrameNode(
             "BuilderProxyNode", nodeId, []() { return AceType::MakeRefPtr<NG::StackPattern>(); });
@@ -84,7 +112,7 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
         parent->ReplaceChild(viewNode_, newNode);
         newNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
     }
-    viewNode_ = newNode;
+    viewNode_ = newNode ? AceType::DynamicCast<NG::FrameNode>(newNode) : nullptr;
     CHECK_NULL_VOID(viewNode_);
     ProccessNode(isSupportExportTexture);
     UpdateEnd(info);
@@ -122,7 +150,8 @@ void JSBaseNode::Create(const JSCallbackInfo& info)
     if (info.Length() >= 1 && !info[0]->IsFunction()) {
         return;
     }
-    if ((info.Length() >= 2 && !(info[1]->IsObject() || info[1]->IsUndefined() || info[1]->IsNull()))) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE) && info.Length() >= INFO_LENGTH_LIMIT
+        && !(info[1]->IsObject() || info[1]->IsUndefined() || info[1]->IsNull())) {
         return;
     }
     BuildNode(info);

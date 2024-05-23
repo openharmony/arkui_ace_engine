@@ -556,6 +556,9 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
     }
     return this;
   }
+  allowChildCount(): number {
+    return 0;
+  }
   draggable(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, ImageDraggableModifier.identity, ImageDraggableModifier, value);
     return this;

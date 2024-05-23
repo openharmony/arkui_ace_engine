@@ -262,11 +262,6 @@ public:
         return downloadByNetworkEnabled_;
     }
 
-    static bool GetTraceEnabled()
-    {
-        return traceEnabled_;
-    }
-
     static bool GetSvgTraceEnabled()
     {
         return svgTraceEnable_;
@@ -280,6 +275,11 @@ public:
     static bool GetSyncDebugTraceEnabled()
     {
         return syncDebugTraceEnable_;
+    }
+
+    static bool GetTextTraceEnabled()
+    {
+        return textTraceEnable_;
     }
 
     static bool GetTraceInputEventEnabled()
@@ -504,14 +504,17 @@ public:
         return brightUpPercent_;
     }
 
+    static bool IsOpIncEnable();
+
 private:
-    static bool traceEnabled_;
+    static bool opincEnabled_;
     static bool developerModeOn_;
     static bool svgTraceEnable_;
     static bool layoutTraceEnable_;
     static bool traceInputEventEnable_;
     static bool buildTraceEnable_;
     static bool syncDebugTraceEnable_;
+    static bool textTraceEnable_;
     static bool accessibilityEnabled_;
     static bool isRound_;
     static bool isDeviceAccess_;

@@ -55,7 +55,7 @@ public:
     virtual void SetHideTitleBar(bool hideTitleBar) = 0;
     virtual void SetHideNavBar(bool hideNavBar) = 0;
     virtual void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
-        const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap,
+        const std::string& src, const NG::ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
         const std::vector<std::string>& nameList);
     virtual void SetHideBackButton(bool hideBackButton) = 0;
     virtual void SetHideToolBar(bool hideToolBar) = 0;

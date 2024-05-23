@@ -15,6 +15,7 @@
 /// <reference path="../../state_mgmt/src/lib/common/ifelse_native.d.ts" />
 /// <reference path="../../state_mgmt/src/lib/puv2_common/puv2_viewstack_processor.d.ts" />
 
+
 class BuilderNode {
   private _JSBuilderNode: JSBuilderNode;
   // the name of "nodePtr_" is used in ace_engine/interfaces/native/node/native_node_napi.cpp.
@@ -29,8 +30,8 @@ class BuilderNode {
   public update(params: Object) {
     this._JSBuilderNode.update(params);
   }
-  public build(builder: WrappedBuilder<Object[]>, params: Object, needPrxoy: boolean = true) {
-    this._JSBuilderNode.build(builder, params, needPrxoy);
+  public build(builder: WrappedBuilder<Object[]>, params: Object) {
+    this._JSBuilderNode.build(builder, params);
     this.nodePtr_ = this._JSBuilderNode.getNodePtr();
   }
   public getNodePtr(): NodePtr {
@@ -142,11 +143,11 @@ class JSBuilderNode extends BaseNode {
     }
     return nodeInfo;
   }
-  public build(builder: WrappedBuilder<Object[]>, params: Object, needPrxoy: boolean = true) {
+  public build(builder: WrappedBuilder<Object[]>, params: Object) {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     this.params_ = params;
     this.updateFuncByElmtId.clear();
-    this.nodePtr_ = super.create(builder.builder, this.params_, needPrxoy);
+    this.nodePtr_ = super.create(builder.builder, this.params_, this.updateNodeFromNative);
     this._nativeRef = getUINativeModule().nativeUtils.createNativeStrongRef(this.nodePtr_);
     if (this.frameNode_ === undefined || this.frameNode_ === null) {
       this.frameNode_ = new BuilderRootFrameNode(this.uiContext_);
@@ -361,5 +362,26 @@ class JSBuilderNode extends BaseNode {
       if (this.frameNode_ !== undefined && this.frameNode_ !== null) {
           this.frameNode_.updateInstance(uiContext);
       }
+  }
+
+  private updateNodePtr(nodePtr: NodePtr)
+  {
+    if (nodePtr != this.nodePtr_) {
+      this.dispose();
+      this.nodePtr_ = nodePtr;
+      this._nativeRef = getUINativeModule().nativeUtils.createNativeStrongRef(this.nodePtr_);
+      this.frameNode_.setNodePtr(this._nativeRef, this.nodePtr_);
+    }
+  }
+
+  private updateInstanceId(instanceId: number)
+  {
+    this.instanceId_ = instanceId;
+  }
+
+  protected updateNodeFromNative(instanceId: number, nodePtr: NodePtr)
+  {
+    this.updateNodePtr(nodePtr);
+    this.updateInstanceId(instanceId);
   }
 }

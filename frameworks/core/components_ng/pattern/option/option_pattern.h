@@ -147,7 +147,8 @@ public:
     void PlayBgColorAnimation(bool isHoverChange = true);
 
     void UpdateText(const std::string& content);
-    void UpdateIcon(const std::string& src);
+    
+    void UpdateIcon(const std::string& src, const std::function<void(WeakPtr<NG::FrameNode>)> symbolIcon);
 
     void SetMenu(const WeakPtr<FrameNode>& menuWeak)
     {

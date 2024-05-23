@@ -38,7 +38,7 @@ public:
     virtual bool IsTextArea() const = 0;
 
     virtual const RectF& GetTextRect() = 0;
-    virtual RectF GetTextContentRect() const = 0;
+    virtual RectF GetTextContentRect(bool isActualText = false) const = 0;
     virtual float GetLineHeight() const = 0;
 
     virtual std::vector<RectF> GetTextBoxes() = 0;

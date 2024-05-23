@@ -61,8 +61,7 @@ void RefreshModelNG::Create()
 
 RefPtr<FrameNode> RefreshModelNG::CreateFrameNode(int32_t nodeId)
 {
-    auto frameNode = FrameNode::CreateFrameNode(
-        V2::REFRESH_ETS_TAG, nodeId, AceType::MakeRefPtr<RefreshPattern>());
+    auto frameNode = FrameNode::CreateFrameNode(V2::REFRESH_ETS_TAG, nodeId, AceType::MakeRefPtr<RefreshPattern>());
     CHECK_NULL_RETURN(frameNode, frameNode);
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         auto pattern = frameNode->GetPattern<RefreshPattern>();
@@ -167,6 +166,15 @@ void RefreshModelNG::SetPullDownRatio(const std::optional<float>& pullDownRatio)
     }
 }
 
+void RefreshModelNG::SetPullDownRatio(FrameNode* frameNode, const std::optional<float>& pullDownRatio)
+{
+    if (pullDownRatio.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, PullDownRatio, pullDownRatio.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, PullDownRatio, frameNode);
+    }
+}
+
 void RefreshModelNG::SetCustomBuilder(const RefPtr<NG::UINode>& customBuilder)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -236,5 +244,12 @@ void RefreshModelNG::SetRefreshOffset(FrameNode* frameNode, const Dimension& off
 void RefreshModelNG::SetPullToRefresh(FrameNode* frameNode, bool pullToRefresh)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, PullToRefresh, pullToRefresh, frameNode);
+}
+
+float RefreshModelNG::GetPullDownRatio(FrameNode* frameNode)
+{
+    float value = 0.0;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(RefreshLayoutProperty, PullDownRatio, value, frameNode, value);
+    return value;
 }
 } // namespace OHOS::Ace::NG

@@ -85,6 +85,10 @@ class ArkBlankComponent extends ArkComponent implements CommonMethod<BlankAttrib
     }
     return this;
   }
+
+  allowChildCount(): number {
+    return 0;
+  }
 }
 
 // @ts-ignore

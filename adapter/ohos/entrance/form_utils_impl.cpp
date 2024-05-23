@@ -75,12 +75,19 @@ int32_t FormUtilsImpl::RouterEvent(
     return AppExecFwk::FormMgr::GetInstance().RouterEvent(formId, want, token_);
 }
 
-int32_t FormUtilsImpl::RequestPublishFormEvent(const AAFwk::Want& want, int64_t& formId)
+int32_t FormUtilsImpl::RequestPublishFormEvent(const AAFwk::Want& want,
+    const std::string& formBindingDataStr, int64_t& formId)
 {
-    std::unique_ptr<AppExecFwk::FormProviderData> formBindingData;
+    std::unique_ptr<AppExecFwk::FormProviderData> formBindingData = std::make_unique<AppExecFwk::FormProviderData>();
+    bool withFormBindingData = false;
+    if (!formBindingDataStr.empty()) {
+        withFormBindingData = true;
+        formBindingData->SetDataString(const_cast<std::string&>(formBindingDataStr));
+        formBindingData->ParseImagesData();
+    }
     std::vector<AppExecFwk::FormDataProxy> formDataProxies;
     int32_t ret = AppExecFwk::FormMgr::GetInstance().RequestPublishFormWithSnapshot(const_cast<Want&>(want),
-        false, formBindingData, formId, formDataProxies);
+        withFormBindingData, formBindingData, formId, formDataProxies);
     return ret;
 }
 

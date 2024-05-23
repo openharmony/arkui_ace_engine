@@ -154,7 +154,7 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (isSingleCase) {
         contentIdealSize = CreateIdealSizeByPercentRef(contentConstraint, axis, MeasureType::MATCH_CONTENT);
         if (mainSizeIsMeasured_) {
-            if (layoutWrapper->IsContraintNoChanged()) {
+            if (layoutWrapper->IsConstraintNoChanged()) {
                 contentIdealSize.SetMainSize(contentMainSize_, axis);
             } else {
                 mainSizeIsMeasured_ = false;
@@ -162,12 +162,9 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
     } else {
         contentIdealSize = CreateIdealSizeByPercentRef(contentConstraint, axis, MeasureType::MATCH_PARENT_MAIN_AXIS);
-        if (!layoutWrapper->IsContraintNoChanged()) {
-            const auto& changeFlags = layoutWrapper->GetContentChanges();
-            if (changeFlags.minSize && !changeFlags.parentIdealSize) {
-                mainSizeIsMeasured_ = false;
-                jumpIndex_ = currentIndex_;
-            }
+        if (!layoutWrapper->IsConstraintNoChanged()) {
+            mainSizeIsMeasured_ = false;
+            jumpIndex_ = currentIndex_;
         }
     }
 
@@ -979,7 +976,9 @@ void SwiperLayoutAlgorithm::LayoutItem(
             offset += OffsetF(crossOffset, prevMargin_ + spaceWidth_);
         }
     } else {
-        offset += OffsetF(pos.second.startPos, crossOffset);
+        bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+        float offsetPos = isRtl ? contentMainSize_ - pos.second.endPos : pos.second.startPos;
+        offset += OffsetF(offsetPos, crossOffset);
         if (!NearZero(prevMargin_)) {
             offset += OffsetF(prevMargin_ + spaceWidth_, crossOffset);
         }

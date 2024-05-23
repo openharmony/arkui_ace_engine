@@ -272,7 +272,7 @@ HWTEST_F(WaterFlowLayoutInfoTest, InitSegments001, TestSize.Level1)
     auto mod = SECTION_7;
     mod.push_back(ADD_SECTION_6[0]);
     info.InitSegments(mod, 2);
-    EXPECT_EQ(info.items_.size(), 4);
+    EXPECT_EQ(info.items_.size(), 5);
     EXPECT_EQ(info.items_[1].size(), 2);
 }
 } // namespace OHOS::Ace::NG

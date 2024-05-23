@@ -27,6 +27,8 @@
 #include "core/common/udmf/udmf_client.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_converter.h"
+#include "frameworks/bridge/declarative_frontend/engine/js_types.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 
 namespace OHOS::Ace::Framework {
@@ -125,6 +127,7 @@ void JsDragEvent::JSBind(BindingTarget globalObj)
     JSClass<JsDragEvent>::CustomMethod("getVelocityX", &JsDragEvent::GetVelocityX);
     JSClass<JsDragEvent>::CustomMethod("getVelocityY", &JsDragEvent::GetVelocityY);
     JSClass<JsDragEvent>::CustomMethod("getVelocity", &JsDragEvent::GetVelocity);
+    JSClass<JsDragEvent>::CustomMethod("getModifierKeyState", &JsDragEvent::GetModifierKeyState);
     JSClass<JsDragEvent>::Bind(globalObj, &JsDragEvent::Constructor, &JsDragEvent::Destructor);
 }
 
@@ -353,6 +356,19 @@ void JsDragEvent::GetVelocity(const JSCallbackInfo& args)
     auto jsValue = JSVal(
         ToJSValue(PipelineBase::Px2VpWithCurrentDensity(dragEvent_->GetVelocity().GetVelocityValue())));
     auto jsValueRef = JSRef<JSVal>::Make(jsValue);
+    args.SetReturnValue(jsValueRef);
+}
+
+void JsDragEvent::GetModifierKeyState(const JSCallbackInfo& args)
+{
+    bool ret = false;
+    auto keyState = NG::ArkTSUtils::GetModifierKeyState(args.GetJsiRuntimeCallInfo(),
+        dragEvent_->GetPressedKeyCodes());
+    if (keyState->IsTrue()) {
+        ret = true;
+    }
+
+    auto jsValueRef = JSRef<JSVal>::Make(ToJSValue(ret));
     args.SetReturnValue(jsValueRef);
 }
 

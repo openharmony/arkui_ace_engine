@@ -1257,6 +1257,9 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxMarkNeedSyncRenderTreeTest001, Te
      */
     lazyForEachNode->needMarkParent_ = true;
     lazyForEachNode->MarkNeedSyncRenderTree(true);
+
+    lazyForEachNode->needMarkParent_ = false;
+    lazyForEachNode->MarkNeedSyncRenderTree(true);
     EXPECT_TRUE(lazyForEachNode->ids_.empty());
 }
 
@@ -1491,6 +1494,10 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachSyntaxOnDataAddedTest001, TestSize.
 
     for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
         lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
+    }
+    lazyForEachBuilder->useNewInterface_ = true;
+    for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
+        lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true, true);
     }
     lazyForEachBuilder->OnDataAdded(INDEX_0);
     lazyForEachBuilder->OnDataChanged(INDEX_1);

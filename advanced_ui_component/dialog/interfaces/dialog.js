@@ -17,13 +17,15 @@ const display = requireNapi('display');
 const hilog = requireNapi('hilog');
 const measure = requireNapi('measure');
 const resourceManager = requireNapi('resourceManager');
+const bundleManager = requireNapi('bundleManager');
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 if (!('finalizeConstruction' in ViewPU.prototype)) {
-  Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => { });
+    Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {
+    });
 }
 class CustomThemeImpl {
-    constructor(g21) {
-        this.colors = g21;
+    constructor(v20) {
+        this.colors = v20;
     }
 }
 
@@ -52,115 +54,114 @@ const KEYCODE_UP = 2012;
 const KEYCODE_DOWN = 2013;
 const IGNORE_KEY_EVENT_TYPE = 1;
 const FIRST_ITEM_INDEX = 0;
+const VERSION_TWELVE = 50000012;
 
 export class TipsDialog extends ViewPU {
-    constructor(a21, b21, c21, d21 = -1, e21 = undefined, f21) {
-        super(a21, c21, d21, f21);
-        if (typeof e21 === "function") {
-            this.paramsGenerator_ = e21;
+    constructor(p20, q20, r20, s20 = -1, t20 = undefined, u20) {
+        super(p20, r20, s20, u20);
+        if (typeof t20 === 'function') {
+            this.paramsGenerator_ = t20;
         }
         this.controller = undefined;
         this.imageRes = null;
-        this.__imageSize = new ObservedPropertyObjectPU({
-            width: DEFAULT_IMAGE_SIZE,
-            height: DEFAULT_IMAGE_SIZE
-        }, this, "imageSize");
+        this.__imageSize =
+            new ObservedPropertyObjectPU({ width: DEFAULT_IMAGE_SIZE, height: DEFAULT_IMAGE_SIZE }, this, 'imageSize');
         this.title = null;
         this.content = null;
         this.checkAction = undefined;
         this.checkTips = null;
-        this.__isChecked = new ObservedPropertySimplePU(false, this, "isChecked");
+        this.__isChecked = new ObservedPropertySimplePU(false, this, 'isChecked');
         this.primaryButton = null;
         this.secondaryButton = null;
         this.buttons = undefined;
-        this.__imageSizeHeight = new ObservedPropertySimplePU(0, this, "imageSizeHeight");
-        this.__textAlignment = new ObservedPropertySimplePU(TextAlign.Start, this, "textAlignment");
+        this.__imageSizeHeight = new ObservedPropertySimplePU(0, this, 'imageSizeHeight');
+        this.__textAlignment = new ObservedPropertySimplePU(TextAlign.Start, this, 'textAlignment');
         this.marginOffset = 0;
-        this.__checkBoxHeight = new ObservedPropertySimplePU(0, this, "checkBoxHeight");
+        this.__checkBoxHeight = new ObservedPropertySimplePU(0, this, 'checkBoxHeight');
         this.buttonHeight = 0;
         this.contentScroller = new Scroller();
         this.__fontColorWithTheme = new ObservedPropertyObjectPU({
-            "id": -1,
-            "type": 10001,
+            'id': -1,
+            'type': 10001,
             params: ['sys.color.font_primary'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
-        }, this, "fontColorWithTheme");
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'fontColorWithTheme');
         this.theme = new CustomThemeImpl({});
-        this.setInitiallyProvidedValue(b21);
+        this.setInitiallyProvidedValue(q20);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(z20) {
-        if (z20.controller !== undefined) {
-            this.controller = z20.controller;
+    setInitiallyProvidedValue(o20) {
+        if (o20.controller !== undefined) {
+            this.controller = o20.controller;
         }
-        if (z20.imageRes !== undefined) {
-            this.imageRes = z20.imageRes;
+        if (o20.imageRes !== undefined) {
+            this.imageRes = o20.imageRes;
         }
-        if (z20.imageSize !== undefined) {
-            this.imageSize = z20.imageSize;
+        if (o20.imageSize !== undefined) {
+            this.imageSize = o20.imageSize;
         }
-        if (z20.title !== undefined) {
-            this.title = z20.title;
+        if (o20.title !== undefined) {
+            this.title = o20.title;
         }
-        if (z20.content !== undefined) {
-            this.content = z20.content;
+        if (o20.content !== undefined) {
+            this.content = o20.content;
         }
-        if (z20.checkAction !== undefined) {
-            this.checkAction = z20.checkAction;
+        if (o20.checkAction !== undefined) {
+            this.checkAction = o20.checkAction;
         }
-        if (z20.checkTips !== undefined) {
-            this.checkTips = z20.checkTips;
+        if (o20.checkTips !== undefined) {
+            this.checkTips = o20.checkTips;
         }
-        if (z20.isChecked !== undefined) {
-            this.isChecked = z20.isChecked;
+        if (o20.isChecked !== undefined) {
+            this.isChecked = o20.isChecked;
         }
-        if (z20.primaryButton !== undefined) {
-            this.primaryButton = z20.primaryButton;
+        if (o20.primaryButton !== undefined) {
+            this.primaryButton = o20.primaryButton;
         }
-        if (z20.secondaryButton !== undefined) {
-            this.secondaryButton = z20.secondaryButton;
+        if (o20.secondaryButton !== undefined) {
+            this.secondaryButton = o20.secondaryButton;
         }
-        if (z20.buttons !== undefined) {
-            this.buttons = z20.buttons;
+        if (o20.buttons !== undefined) {
+            this.buttons = o20.buttons;
         }
-        if (z20.imageSizeHeight !== undefined) {
-            this.imageSizeHeight = z20.imageSizeHeight;
+        if (o20.imageSizeHeight !== undefined) {
+            this.imageSizeHeight = o20.imageSizeHeight;
         }
-        if (z20.textAlignment !== undefined) {
-            this.textAlignment = z20.textAlignment;
+        if (o20.textAlignment !== undefined) {
+            this.textAlignment = o20.textAlignment;
         }
-        if (z20.marginOffset !== undefined) {
-            this.marginOffset = z20.marginOffset;
+        if (o20.marginOffset !== undefined) {
+            this.marginOffset = o20.marginOffset;
         }
-        if (z20.checkBoxHeight !== undefined) {
-            this.checkBoxHeight = z20.checkBoxHeight;
+        if (o20.checkBoxHeight !== undefined) {
+            this.checkBoxHeight = o20.checkBoxHeight;
         }
-        if (z20.buttonHeight !== undefined) {
-            this.buttonHeight = z20.buttonHeight;
+        if (o20.buttonHeight !== undefined) {
+            this.buttonHeight = o20.buttonHeight;
         }
-        if (z20.contentScroller !== undefined) {
-            this.contentScroller = z20.contentScroller;
+        if (o20.contentScroller !== undefined) {
+            this.contentScroller = o20.contentScroller;
         }
-        if (z20.fontColorWithTheme !== undefined) {
-            this.fontColorWithTheme = z20.fontColorWithTheme;
+        if (o20.fontColorWithTheme !== undefined) {
+            this.fontColorWithTheme = o20.fontColorWithTheme;
         }
-        if (z20.theme !== undefined) {
-            this.theme = z20.theme;
+        if (o20.theme !== undefined) {
+            this.theme = o20.theme;
         }
     }
 
-    updateStateVars(y20) {
+    updateStateVars(n20) {
     }
 
-    purgeVariableDependenciesOnElmtId(x20) {
-        this.__imageSize.purgeDependencyOnElmtId(x20);
-        this.__isChecked.purgeDependencyOnElmtId(x20);
-        this.__imageSizeHeight.purgeDependencyOnElmtId(x20);
-        this.__textAlignment.purgeDependencyOnElmtId(x20);
-        this.__checkBoxHeight.purgeDependencyOnElmtId(x20);
-        this.__fontColorWithTheme.purgeDependencyOnElmtId(x20);
+    purgeVariableDependenciesOnElmtId(m20) {
+        this.__imageSize.purgeDependencyOnElmtId(m20);
+        this.__isChecked.purgeDependencyOnElmtId(m20);
+        this.__imageSizeHeight.purgeDependencyOnElmtId(m20);
+        this.__textAlignment.purgeDependencyOnElmtId(m20);
+        this.__checkBoxHeight.purgeDependencyOnElmtId(m20);
+        this.__fontColorWithTheme.purgeDependencyOnElmtId(m20);
     }
 
     aboutToBeDeleted() {
@@ -174,73 +175,73 @@ export class TipsDialog extends ViewPU {
         this.aboutToBeDeletedInternal();
     }
 
-    setController(w20) {
-        this.controller = w20;
+    setController(l20) {
+        this.controller = l20;
     }
 
     get imageSize() {
         return this.__imageSize.get();
     }
 
-    set imageSize(v20) {
-        this.__imageSize.set(v20);
+    set imageSize(k20) {
+        this.__imageSize.set(k20);
     }
 
     get isChecked() {
         return this.__isChecked.get();
     }
 
-    set isChecked(u20) {
-        this.__isChecked.set(u20);
+    set isChecked(j20) {
+        this.__isChecked.set(j20);
     }
 
     get imageSizeHeight() {
         return this.__imageSizeHeight.get();
     }
 
-    set imageSizeHeight(t20) {
-        this.__imageSizeHeight.set(t20);
+    set imageSizeHeight(i20) {
+        this.__imageSizeHeight.set(i20);
     }
 
     get textAlignment() {
         return this.__textAlignment.get();
     }
 
-    set textAlignment(s20) {
-        this.__textAlignment.set(s20);
+    set textAlignment(h20) {
+        this.__textAlignment.set(h20);
     }
 
     get checkBoxHeight() {
         return this.__checkBoxHeight.get();
     }
 
-    set checkBoxHeight(r20) {
-        this.__checkBoxHeight.set(r20);
+    set checkBoxHeight(g20) {
+        this.__checkBoxHeight.set(g20);
     }
 
     get fontColorWithTheme() {
         return this.__fontColorWithTheme.get();
     }
 
-    set fontColorWithTheme(q20) {
-        this.__fontColorWithTheme.set(q20);
+    set fontColorWithTheme(f20) {
+        this.__fontColorWithTheme.set(f20);
     }
 
     initialRender() {
         {
-            this.observeComponentCreation2((k20, l20) => {
-                if (l20) {
-                    let m20 = new CustomDialogComponent(this, {
+            this.observeComponentCreation2((z19, a20) => {
+                if (a20) {
+                    let b20 = new CustomDialogComponent(this, {
                         controller: this.controller,
                         contentBuilder: () => {
                             this.contentBuilder();
                         },
                         buttons: this.buttons,
                         theme: this.theme,
-                    }, undefined, k20, () => {
-                    }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 83, col: 5 });
-                    ViewPU.create(m20);
-                    let n20 = () => {
+                    }, undefined, z19, () => {
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 85, col: 5 });
+                    ViewPU.create(b20);
+                    let c20 = () => {
                         return {
                             controller: this.controller,
                             contentBuilder: () => {
@@ -250,57 +251,54 @@ export class TipsDialog extends ViewPU {
                             theme: this.theme
                         };
                     };
-                    m20.paramsGenerator_ = n20;
+                    b20.paramsGenerator_ = c20;
+                } else {
+                    this.updateStateVarsOfChildByElmtId(z19, {});
                 }
-                else {
-                    this.updateStateVarsOfChildByElmtId(k20, {});
-                }
-            }, { name: "CustomDialogComponent" });
+            }, { name: 'CustomDialogComponent' });
         }
     }
 
-    contentBuilder(s19 = null) {
-        this.observeComponentCreation2((h20, i20) => {
+    contentBuilder(h19 = null) {
+        this.observeComponentCreation2((w19, x19) => {
             Column.create();
         }, Column);
-        this.imagePart.bind(this)(s19 ? s19 : this);
-        this.observeComponentCreation2((a20, b20) => {
+        this.imagePart.bind(this)(h19 ? h19 : this);
+        this.observeComponentCreation2((p19, q19) => {
             If.create();
             if (this.title != null || this.content != null) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((f20, g20) => {
+                    this.observeComponentCreation2((u19, v19) => {
                         Column.create();
                         Column.padding({
                             top: {
-                                "id": -1,
-                                "type": 10002,
+                                'id': -1,
+                                'type': 10002,
                                 params: ['sys.float.padding_level8'],
-                                "bundleName": "__harDefaultBundleName__",
-                                "moduleName": "__harDefaultModuleName__"
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
                             }
                         });
                         Column.constraintSize({
                             maxHeight: `calc(100% - ${this.checkBoxHeight}vp - ${this.imageSizeHeight}vp - ${this.buttonHeight}vp)`
                         });
                     }, Column);
-                    this.textPart.bind(this)(s19 ? s19 : this);
+                    this.textPart.bind(this)(h19 ? h19 : this);
                     Column.pop();
                 });
-            }
-            else {
+            } else {
                 this.ifElseBranchUpdateFunction(1, () => {
                 });
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((w19, x19) => {
+        this.observeComponentCreation2((l19, m19) => {
             If.create();
             if (this.checkTips != null) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.checkBoxPart.bind(this)(this.checkTips, s19 ? s19 : this);
+                    this.checkBoxPart.bind(this)(this.checkTips, h19 ? h19 : this);
                 });
-            }
-            else {
+            } else {
                 this.ifElseBranchUpdateFunction(1, () => {
                 });
             }
@@ -309,52 +307,52 @@ export class TipsDialog extends ViewPU {
         Column.pop();
     }
 
-    checkBoxPart(b19, c19 = null) {
-        this.observeComponentCreation2((n19, o19) => {
+    checkBoxPart(q18, r18 = null) {
+        this.observeComponentCreation2((c19, d19) => {
             Row.create();
             Row.padding({
                 top: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.padding_level8'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 }
             });
             Row.constraintSize({ minHeight: CHECKBOX_CONTAINER_HEIGHT });
             Row.width('100%');
-            Row.onAreaChange((q19, r19) => {
-                this.checkBoxHeight = Number(r19.height);
+            Row.onAreaChange((f19, g19) => {
+                this.checkBoxHeight = Number(g19.height);
             });
         }, Row);
-        this.observeComponentCreation2((j19, k19) => {
+        this.observeComponentCreation2((y18, z18) => {
             Checkbox.create({ name: 'checkbox', group: 'checkboxGroup' });
             Checkbox.select(this.isChecked);
-            Checkbox.onChange((m19) => {
-                this.isChecked = m19;
+            Checkbox.onChange((b19) => {
+                this.isChecked = b19;
                 if (this.checkAction) {
-                    this.checkAction(m19);
+                    this.checkAction(b19);
                 }
             });
             Checkbox.margin({
                 right: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.padding_level4'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 }
             });
         }, Checkbox);
         Checkbox.pop();
-        this.observeComponentCreation2((g19, h19) => {
-            Text.create(b19);
+        this.observeComponentCreation2((v18, w18) => {
+            Text.create(q18);
             Text.fontSize({
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.Body_M'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             });
             Text.fontWeight(FontWeight.Regular);
             Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
@@ -373,27 +371,27 @@ export class TipsDialog extends ViewPU {
         Row.pop();
     }
 
-    imagePart(r18 = null) {
-        this.observeComponentCreation2((w18, x18) => {
+    imagePart(g18 = null) {
+        this.observeComponentCreation2((l18, m18) => {
             Column.create();
             Column.width('100%');
             Column.constraintSize({
                 maxHeight: `calc(100% - ${this.checkBoxHeight}vp - ${this.buttonHeight}vp - ${TEXT_MIN_HEIGHT}vp + ${this.marginOffset}vp)`
             });
-            Column.onAreaChange((z18, a19) => {
-                this.imageSizeHeight = Number(a19.height);
+            Column.onAreaChange((o18, p18) => {
+                this.imageSizeHeight = Number(p18.height);
             });
         }, Column);
-        this.observeComponentCreation2((u18, v18) => {
+        this.observeComponentCreation2((j18, k18) => {
             Image.create(this.imageRes);
             Image.size(ObservedObject.GetRawObject(this.imageSize));
             Image.objectFit(ImageFit.Contain);
             Image.borderRadius({
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.corner_radius_level6'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             });
             Image.constraintSize({
                 maxWidth: '100%',
@@ -403,47 +401,47 @@ export class TipsDialog extends ViewPU {
         Column.pop();
     }
 
-    textPart(j17 = null) {
-        this.observeComponentCreation2((p18, q18) => {
+    textPart(y16 = null) {
+        this.observeComponentCreation2((e18, f18) => {
             Scroll.create(this.contentScroller);
             Scroll.margin({ right: `${this.marginOffset}vp` });
         }, Scroll);
-        this.observeComponentCreation2((n18, o18) => {
+        this.observeComponentCreation2((c18, d18) => {
             Column.create();
             Column.margin({
                 right: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.padding_level8'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 }
             });
         }, Column);
-        this.observeComponentCreation2((d18, e18) => {
+        this.observeComponentCreation2((s17, t17) => {
             If.create();
             if (this.title != null) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((l18, m18) => {
+                    this.observeComponentCreation2((a18, b18) => {
                         Row.create();
                         Row.padding({
                             bottom: {
-                                "id": -1,
-                                "type": 10002,
+                                'id': -1,
+                                'type': 10002,
                                 params: ['sys.float.padding_level8'],
-                                "bundleName": "__harDefaultBundleName__",
-                                "moduleName": "__harDefaultModuleName__"
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
                             }
                         });
                     }, Row);
-                    this.observeComponentCreation2((j18, k18) => {
+                    this.observeComponentCreation2((y17, z17) => {
                         Text.create(this.title);
                         Text.fontSize({
-                            "id": -1,
-                            "type": 10002,
+                            'id': -1,
+                            'type': 10002,
                             params: ['sys.float.Title_S'],
-                            "bundleName": "__harDefaultBundleName__",
-                            "moduleName": "__harDefaultModuleName__"
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
                         });
                         Text.fontWeight(FontWeight.Medium);
                         Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
@@ -451,67 +449,65 @@ export class TipsDialog extends ViewPU {
                         Text.maxLines(CONTENT_MAX_LINES);
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                         Text.minFontSize({
-                            "id": -1,
-                            "type": 10002,
+                            'id': -1,
+                            'type': 10002,
                             params: ['sys.float.Body_L'],
-                            "bundleName": "__harDefaultBundleName__",
-                            "moduleName": "__harDefaultModuleName__"
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
                         });
                         Text.maxFontSize({
-                            "id": -1,
-                            "type": 10002,
+                            'id': -1,
+                            'type': 10002,
                             params: ['sys.float.Title_S'],
-                            "bundleName": "__harDefaultBundleName__",
-                            "moduleName": "__harDefaultModuleName__"
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
                         });
                         Text.width('100%');
                     }, Text);
                     Text.pop();
                     Row.pop();
                 });
-            }
-            else {
+            } else {
                 this.ifElseBranchUpdateFunction(1, () => {
                 });
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((o17, p17) => {
+        this.observeComponentCreation2((d17, e17) => {
             If.create();
             if (this.content != null) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((b18, c18) => {
+                    this.observeComponentCreation2((q17, r17) => {
                         Row.create();
                     }, Row);
-                    this.observeComponentCreation2((u17, v17) => {
+                    this.observeComponentCreation2((j17, k17) => {
                         Text.create(this.content);
                         Text.focusable(true);
                         Text.defaultFocus(!(this.primaryButton || this.secondaryButton));
                         Text.fontSize({
-                            "id": -1,
-                            "type": 10002,
+                            'id': -1,
+                            'type': 10002,
                             params: ['sys.float.Body_L'],
-                            "bundleName": "__harDefaultBundleName__",
-                            "moduleName": "__harDefaultModuleName__"
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
                         });
                         Text.fontWeight(FontWeight.Medium);
                         Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
                         Text.textAlign(this.textAlignment);
                         Text.width('100%');
-                        Text.onKeyEvent((a18) => {
-                            if (a18) {
-                                resolveKeyEvent(a18, this.contentScroller);
+                        Text.onKeyEvent((p17) => {
+                            if (p17) {
+                                resolveKeyEvent(p17, this.contentScroller);
                             }
                         });
-                        Text.onAreaChange((y17, z17) => {
-                            this.getTextAlign(Number(z17.width));
+                        Text.onAreaChange((n17, o17) => {
+                            this.getTextAlign(Number(o17.width));
                         });
                     }, Text);
                     Text.pop();
                     Row.pop();
                 });
-            }
-            else {
+            } else {
                 this.ifElseBranchUpdateFunction(1, () => {
                 });
             }
@@ -524,46 +520,46 @@ export class TipsDialog extends ViewPU {
     aboutToAppear() {
         this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
         this.theme.colors.fontPrimary : {
-                "id": -1,
-                "type": 10001,
+                'id': -1,
+                'type': 10001,
                 params: ['sys.color.font_primary'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             };
         this.initButtons();
         this.initMargin();
     }
 
-    getTextAlign(g17) {
-        let h17 = measure.measureTextSize({
+    getTextAlign(v16) {
+        let w16 = measure.measureTextSize({
             textContent: this.content,
             fontSize: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.Body_L'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             },
-            constraintWidth: g17,
+            constraintWidth: v16,
         });
-        let i17 = measure.measureTextSize({
+        let x16 = measure.measureTextSize({
             textContent: this.content,
             fontSize: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.Body_L'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             },
         });
-        if (this.getTextHeight(h17) <= this.getTextHeight(i17)) {
+        if (this.getTextHeight(w16) <= this.getTextHeight(x16)) {
             this.textAlignment = TextAlign.Center;
         }
     }
 
-    getTextHeight(f17) {
-        if (f17 && f17.height !== null && f17.height !== undefined) {
-            return Number(f17.height);
+    getTextHeight(u16) {
+        if (u16 && u16.height !== null && u16.height !== undefined) {
+            return Number(u16.height);
         }
         return 0;
     }
@@ -586,9 +582,9 @@ export class TipsDialog extends ViewPU {
         if (!this.buttons || this.buttons.length === 0) {
             return 0;
         }
-        let e17 = getNumberByResource('alert_button_top_padding');
-        e17 += BUTTON_DEFAULT_HEIGHT + getNumberByResource('alert_button_bottom_padding_horizontal');
-        return e17;
+        let t16 = getNumberByResource('alert_button_top_padding');
+        t16 += BUTTON_DEFAULT_HEIGHT + getNumberByResource('alert_button_bottom_padding_horizontal');
+        return t16;
     }
 
     initMargin() {
@@ -601,10 +597,10 @@ export class TipsDialog extends ViewPU {
 }
 
 export class SelectDialog extends ViewPU {
-    constructor(u16, v16, w16, x16 = -1, y16 = undefined, z16) {
-        super(u16, w16, x16, z16);
-        if (typeof y16 === "function") {
-            this.paramsGenerator_ = y16;
+    constructor(j16, k16, l16, m16 = -1, n16 = undefined, o16) {
+        super(j16, l16, m16, o16);
+        if (typeof n16 === 'function') {
+            this.paramsGenerator_ = n16;
         }
         this.title = '';
         this.content = '';
@@ -615,33 +611,33 @@ export class SelectDialog extends ViewPU {
         this.contentPadding = undefined;
         this.contentBuilder = this.buildContent;
         this.__fontColorWithTheme = new ObservedPropertyObjectPU({
-            "id": -1,
-            "type": 10001,
+            'id': -1,
+            'type': 10001,
             params: ['sys.color.font_primary'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
-        }, this, "fontColorWithTheme");
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'fontColorWithTheme');
         this.__dividerColorWithTheme = new ObservedPropertyObjectPU({
-            "id": -1,
-            "type": 10001,
+            'id': -1,
+            'type': 10001,
             params: ['sys.color.comp_divider'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
-        }, this, "dividerColorWithTheme");
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'dividerColorWithTheme');
         this.theme = new CustomThemeImpl({});
         this.controller = new CustomDialogController({
             builder: () => {
-                let a17 = new CustomContentDialog(this, {
+                let p16 = new CustomContentDialog(this, {
                     primaryTitle: this.title,
                     contentBuilder: () => {
                         this.contentBuilder();
                     },
                     buttons: this.buttons,
                 }, undefined, -1, () => {
-                }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 287, col: 14 });
-                a17.setController(this.controller);
-                ViewPU.create(a17);
-                let b17 = () => {
+                }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 289, col: 14 });
+                p16.setController(this.controller);
+                ViewPU.create(p16);
+                let q16 = () => {
                     return {
                         primaryTitle: this.title,
                         contentBuilder: () => {
@@ -650,62 +646,62 @@ export class SelectDialog extends ViewPU {
                         buttons: this.buttons
                     };
                 };
-                a17.paramsGenerator_ = b17;
+                p16.paramsGenerator_ = q16;
             }
         }, this);
         this.contentScroller = new Scroller();
-        this.setInitiallyProvidedValue(v16);
+        this.setInitiallyProvidedValue(k16);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(t16) {
-        if (t16.title !== undefined) {
-            this.title = t16.title;
+    setInitiallyProvidedValue(i16) {
+        if (i16.title !== undefined) {
+            this.title = i16.title;
         }
-        if (t16.content !== undefined) {
-            this.content = t16.content;
+        if (i16.content !== undefined) {
+            this.content = i16.content;
         }
-        if (t16.selectedIndex !== undefined) {
-            this.selectedIndex = t16.selectedIndex;
+        if (i16.selectedIndex !== undefined) {
+            this.selectedIndex = i16.selectedIndex;
         }
-        if (t16.confirm !== undefined) {
-            this.confirm = t16.confirm;
+        if (i16.confirm !== undefined) {
+            this.confirm = i16.confirm;
         }
-        if (t16.radioContent !== undefined) {
-            this.radioContent = t16.radioContent;
+        if (i16.radioContent !== undefined) {
+            this.radioContent = i16.radioContent;
         }
-        if (t16.buttons !== undefined) {
-            this.buttons = t16.buttons;
+        if (i16.buttons !== undefined) {
+            this.buttons = i16.buttons;
         }
-        if (t16.contentPadding !== undefined) {
-            this.contentPadding = t16.contentPadding;
+        if (i16.contentPadding !== undefined) {
+            this.contentPadding = i16.contentPadding;
         }
-        if (t16.contentBuilder !== undefined) {
-            this.contentBuilder = t16.contentBuilder;
+        if (i16.contentBuilder !== undefined) {
+            this.contentBuilder = i16.contentBuilder;
         }
-        if (t16.fontColorWithTheme !== undefined) {
-            this.fontColorWithTheme = t16.fontColorWithTheme;
+        if (i16.fontColorWithTheme !== undefined) {
+            this.fontColorWithTheme = i16.fontColorWithTheme;
         }
-        if (t16.dividerColorWithTheme !== undefined) {
-            this.dividerColorWithTheme = t16.dividerColorWithTheme;
+        if (i16.dividerColorWithTheme !== undefined) {
+            this.dividerColorWithTheme = i16.dividerColorWithTheme;
         }
-        if (t16.theme !== undefined) {
-            this.theme = t16.theme;
+        if (i16.theme !== undefined) {
+            this.theme = i16.theme;
         }
-        if (t16.controller !== undefined) {
-            this.controller = t16.controller;
+        if (i16.controller !== undefined) {
+            this.controller = i16.controller;
         }
-        if (t16.contentScroller !== undefined) {
-            this.contentScroller = t16.contentScroller;
+        if (i16.contentScroller !== undefined) {
+            this.contentScroller = i16.contentScroller;
         }
     }
 
-    updateStateVars(s16) {
+    updateStateVars(h16) {
     }
 
-    purgeVariableDependenciesOnElmtId(r16) {
-        this.__fontColorWithTheme.purgeDependencyOnElmtId(r16);
-        this.__dividerColorWithTheme.purgeDependencyOnElmtId(r16);
+    purgeVariableDependenciesOnElmtId(g16) {
+        this.__fontColorWithTheme.purgeDependencyOnElmtId(g16);
+        this.__dividerColorWithTheme.purgeDependencyOnElmtId(g16);
     }
 
     aboutToBeDeleted() {
@@ -719,69 +715,69 @@ export class SelectDialog extends ViewPU {
         return this.__fontColorWithTheme.get();
     }
 
-    set fontColorWithTheme(q16) {
-        this.__fontColorWithTheme.set(q16);
+    set fontColorWithTheme(f16) {
+        this.__fontColorWithTheme.set(f16);
     }
 
     get dividerColorWithTheme() {
         return this.__dividerColorWithTheme.get();
     }
 
-    set dividerColorWithTheme(p16) {
-        this.__dividerColorWithTheme.set(p16);
+    set dividerColorWithTheme(e16) {
+        this.__dividerColorWithTheme.set(e16);
     }
 
-    setController(o16) {
-        this.controller = o16;
+    setController(d16) {
+        this.controller = d16;
     }
 
-    buildContent(z13 = null) {
-        this.observeComponentCreation2((m16, n16) => {
+    buildContent(o13 = null) {
+        this.observeComponentCreation2((b16, c16) => {
             Scroll.create(this.contentScroller);
             Scroll.scrollBar(BarState.Auto);
         }, Scroll);
-        this.observeComponentCreation2((k16, l16) => {
+        this.observeComponentCreation2((z15, a16) => {
             Column.create();
         }, Column);
-        this.observeComponentCreation2((a16, b16) => {
+        this.observeComponentCreation2((p15, q15) => {
             If.create();
             if (this.content) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((i16, j16) => {
+                    this.observeComponentCreation2((x15, y15) => {
                         Row.create();
                         Row.padding({
                             left: {
-                                "id": -1,
-                                "type": 10002,
+                                'id': -1,
+                                'type': 10002,
                                 params: ['sys.float.padding_level12'],
-                                "bundleName": "__harDefaultBundleName__",
-                                "moduleName": "__harDefaultModuleName__"
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
                             },
                             right: {
-                                "id": -1,
-                                "type": 10002,
+                                'id': -1,
+                                'type': 10002,
                                 params: ['sys.float.padding_level12'],
-                                "bundleName": "__harDefaultBundleName__",
-                                "moduleName": "__harDefaultModuleName__"
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
                             },
                             bottom: {
-                                "id": -1,
-                                "type": 10002,
+                                'id': -1,
+                                'type': 10002,
                                 params: ['sys.float.padding_level4'],
-                                "bundleName": "__harDefaultBundleName__",
-                                "moduleName": "__harDefaultModuleName__"
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
                             }
                         });
                         Row.width('100%');
                     }, Row);
-                    this.observeComponentCreation2((g16, h16) => {
+                    this.observeComponentCreation2((v15, w15) => {
                         Text.create(this.content);
                         Text.fontSize({
-                            "id": -1,
-                            "type": 10002,
+                            'id': -1,
+                            'type': 10002,
                             params: ['sys.float.Body_M'],
-                            "bundleName": "__harDefaultBundleName__",
-                            "moduleName": "__harDefaultModuleName__"
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
                         });
                         Text.fontWeight(FontWeight.Regular);
                         Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
@@ -790,14 +786,13 @@ export class SelectDialog extends ViewPU {
                     Text.pop();
                     Row.pop();
                 });
-            }
-            else {
+            } else {
                 this.ifElseBranchUpdateFunction(1, () => {
                 });
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((x15, y15) => {
+        this.observeComponentCreation2((m15, n15) => {
             List.create({ space: 1 });
             List.width('100%');
             List.clip(false);
@@ -809,154 +804,152 @@ export class SelectDialog extends ViewPU {
             });
             List.defaultFocus(this.buttons?.length == 0 ? true : false);
         }, List);
-        this.observeComponentCreation2((f14, g14) => {
+        this.observeComponentCreation2((u13, v13) => {
             ForEach.create();
-            const h14 = (j14, k14) => {
-                const l14 = j14;
+            const w13 = (y13, z13) => {
+                const a14 = y13;
                 {
-                    const m14 = (v15, w15) => {
-                        ViewStackProcessor.StartGetAccessRecordingFor(v15);
-                        n14(v15, w15);
-                        if (!w15) {
+                    const b14 = (k15, l15) => {
+                        ViewStackProcessor.StartGetAccessRecordingFor(k15);
+                        c14(k15, l15);
+                        if (!l15) {
                             ListItem.pop();
                         }
                         ViewStackProcessor.StopGetAccessRecording();
                     };
-                    const n14 = (t15, u15) => {
-                        ListItem.create(o14, true);
+                    const c14 = (i15, j15) => {
+                        ListItem.create(d14, true);
                     };
-                    const o14 = (s14, t14) => {
-                        m14(s14, t14);
-                        this.observeComponentCreation2((r15, s15) => {
+                    const d14 = (h14, i14) => {
+                        b14(h14, i14);
+                        this.observeComponentCreation2((g15, h15) => {
                             Column.create();
                             Column.padding({
                                 left: {
-                                    "id": -1,
-                                    "type": 10002,
+                                    'id': -1,
+                                    'type': 10002,
                                     params: ['sys.float.padding_level6'],
-                                    "bundleName": "__harDefaultBundleName__",
-                                    "moduleName": "__harDefaultModuleName__"
+                                    'bundleName': '__harDefaultBundleName__',
+                                    'moduleName': '__harDefaultModuleName__'
                                 },
                                 right: {
-                                    "id": -1,
-                                    "type": 10002,
+                                    'id': -1,
+                                    'type': 10002,
                                     params: ['sys.float.padding_level6'],
-                                    "bundleName": "__harDefaultBundleName__",
-                                    "moduleName": "__harDefaultModuleName__"
+                                    'bundleName': '__harDefaultBundleName__',
+                                    'moduleName': '__harDefaultModuleName__'
                                 }
                             });
                         }, Column);
-                        this.observeComponentCreation2((o15, p15) => {
+                        this.observeComponentCreation2((d15, e15) => {
                             Button.createWithChild();
                             Button.type(ButtonType.Normal);
                             Button.borderRadius({
-                                "id": -1,
-                                "type": 10002,
+                                'id': -1,
+                                'type': 10002,
                                 params: ['sys.float.corner_radius_level8'],
-                                "bundleName": "__harDefaultBundleName__",
-                                "moduleName": "__harDefaultModuleName__"
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
                             });
                             Button.buttonStyle(ButtonStyleMode.TEXTUAL);
                             Button.padding({
                                 left: {
-                                    "id": -1,
-                                    "type": 10002,
+                                    'id': -1,
+                                    'type': 10002,
                                     params: ['sys.float.padding_level6'],
-                                    "bundleName": "__harDefaultBundleName__",
-                                    "moduleName": "__harDefaultModuleName__"
+                                    'bundleName': '__harDefaultBundleName__',
+                                    'moduleName': '__harDefaultModuleName__'
                                 },
                                 right: {
-                                    "id": -1,
-                                    "type": 10002,
+                                    'id': -1,
+                                    'type': 10002,
                                     params: ['sys.float.padding_level6'],
-                                    "bundleName": "__harDefaultBundleName__",
-                                    "moduleName": "__harDefaultModuleName__"
+                                    'bundleName': '__harDefaultBundleName__',
+                                    'moduleName': '__harDefaultModuleName__'
                                 }
                             });
                             Button.onClick(() => {
-                                l14.action && l14.action();
+                                a14.action && a14.action();
                                 this.controller.close();
                             });
                         }, Button);
-                        this.observeComponentCreation2((m15, n15) => {
+                        this.observeComponentCreation2((b15, c15) => {
                             Row.create();
                             Row.constraintSize({ minHeight: LIST_MIN_HEIGHT });
                             Row.clip(false);
                             Row.padding({
                                 top: {
-                                    "id": -1,
-                                    "type": 10002,
+                                    'id': -1,
+                                    'type': 10002,
                                     params: ['sys.float.padding_level4'],
-                                    "bundleName": "__harDefaultBundleName__",
-                                    "moduleName": "__harDefaultModuleName__"
+                                    'bundleName': '__harDefaultBundleName__',
+                                    'moduleName': '__harDefaultModuleName__'
                                 },
                                 bottom: {
-                                    "id": -1,
-                                    "type": 10002,
+                                    'id': -1,
+                                    'type': 10002,
                                     params: ['sys.float.padding_level4'],
-                                    "bundleName": "__harDefaultBundleName__",
-                                    "moduleName": "__harDefaultModuleName__"
+                                    'bundleName': '__harDefaultBundleName__',
+                                    'moduleName': '__harDefaultModuleName__'
                                 }
                             });
                         }, Row);
-                        this.observeComponentCreation2((k15, l15) => {
-                            Text.create(l14.title);
+                        this.observeComponentCreation2((z14, a15) => {
+                            Text.create(a14.title);
                             Text.fontSize({
-                                "id": -1,
-                                "type": 10002,
+                                'id': -1,
+                                'type': 10002,
                                 params: ['sys.float.Body_L'],
-                                "bundleName": "__harDefaultBundleName__",
-                                "moduleName": "__harDefaultModuleName__"
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
                             });
                             Text.fontWeight(FontWeight.Medium);
                             Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
                             Text.layoutWeight(1);
                         }, Text);
                         Text.pop();
-                        this.observeComponentCreation2((h15, i15) => {
+                        this.observeComponentCreation2((w14, x14) => {
                             Radio.create({ value: 'item.title', group: 'radioGroup' });
                             Radio.size({ width: CHECKBOX_CONTAINER_LENGTH, height: CHECKBOX_CONTAINER_LENGTH });
-                            Radio.checked(this.selectedIndex === k14);
+                            Radio.checked(this.selectedIndex === z13);
                             Radio.hitTestBehavior(HitTestMode.None);
-                            Radio.id(String(k14));
+                            Radio.id(String(z13));
                             Radio.onFocus(() => {
-                                if (k14 == FIRST_ITEM_INDEX) {
+                                if (z13 == FIRST_ITEM_INDEX) {
                                     this.contentScroller.scrollEdge(Edge.Top);
-                                }
-                                else if (k14 == this.radioContent.length - 1) {
+                                } else if (z13 == this.radioContent.length - 1) {
                                     this.contentScroller.scrollEdge(Edge.Bottom);
                                 }
                             });
                         }, Radio);
                         Row.pop();
                         Button.pop();
-                        this.observeComponentCreation2((a15, b15) => {
+                        this.observeComponentCreation2((p14, q14) => {
                             If.create();
-                            if (k14 < this.radioContent.length - 1) {
+                            if (z13 < this.radioContent.length - 1) {
                                 this.ifElseBranchUpdateFunction(0, () => {
-                                    this.observeComponentCreation2((f15, g15) => {
+                                    this.observeComponentCreation2((u14, v14) => {
                                         Divider.create();
                                         Divider.color(ObservedObject.GetRawObject(this.dividerColorWithTheme));
                                         Divider.padding({
                                             left: {
-                                                "id": -1,
-                                                "type": 10002,
+                                                'id': -1,
+                                                'type': 10002,
                                                 params: ['sys.float.padding_level6'],
-                                                "bundleName": "__harDefaultBundleName__",
-                                                "moduleName": "__harDefaultModuleName__"
+                                                'bundleName': '__harDefaultBundleName__',
+                                                'moduleName': '__harDefaultModuleName__'
                                             },
                                             right: {
-                                                "id": -1,
-                                                "type": 10002,
+                                                'id': -1,
+                                                'type': 10002,
                                                 params: ['sys.float.padding_level6'],
-                                                "bundleName": "__harDefaultBundleName__",
-                                                "moduleName": "__harDefaultModuleName__"
+                                                'bundleName': '__harDefaultBundleName__',
+                                                'moduleName': '__harDefaultModuleName__'
                                             }
                                         });
                                     }, Divider);
                                 });
-                            }
-                            else {
+                            } else {
                                 this.ifElseBranchUpdateFunction(1, () => {
                                 });
                             }
@@ -965,11 +958,11 @@ export class SelectDialog extends ViewPU {
                         Column.pop();
                         ListItem.pop();
                     };
-                    this.observeComponentCreation2(n14, ListItem);
+                    this.observeComponentCreation2(c14, ListItem);
                     ListItem.pop();
                 }
             };
-            this.forEachUpdateFunction(f14, this.radioContent, h14, undefined, true, false);
+            this.forEachUpdateFunction(u13, this.radioContent, w13, undefined, true, false);
         }, ForEach);
         ForEach.pop();
         List.pop();
@@ -979,9 +972,9 @@ export class SelectDialog extends ViewPU {
 
     initialRender() {
         {
-            this.observeComponentCreation2((t13, u13) => {
-                if (u13) {
-                    let v13 = new CustomDialogComponent(this, {
+            this.observeComponentCreation2((i13, j13) => {
+                if (j13) {
+                    let k13 = new CustomDialogComponent(this, {
                         controller: this.controller,
                         primaryTitle: this.title,
                         contentBuilder: () => {
@@ -990,10 +983,10 @@ export class SelectDialog extends ViewPU {
                         buttons: this.buttons,
                         contentAreaPadding: this.contentPadding,
                         theme: this.theme,
-                    }, undefined, t13, () => {
-                    }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 382, col: 5 });
-                    ViewPU.create(v13);
-                    let w13 = () => {
+                    }, undefined, i13, () => {
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 384, col: 5 });
+                    ViewPU.create(k13);
+                    let l13 = () => {
                         return {
                             controller: this.controller,
                             primaryTitle: this.title,
@@ -1005,31 +998,30 @@ export class SelectDialog extends ViewPU {
                             theme: this.theme
                         };
                     };
-                    v13.paramsGenerator_ = w13;
+                    k13.paramsGenerator_ = l13;
+                } else {
+                    this.updateStateVarsOfChildByElmtId(i13, {});
                 }
-                else {
-                    this.updateStateVarsOfChildByElmtId(t13, {});
-                }
-            }, { name: "CustomDialogComponent" });
+            }, { name: 'CustomDialogComponent' });
         }
     }
 
     aboutToAppear() {
         this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
         this.theme.colors.fontPrimary : {
-                "id": -1,
-                "type": 10001,
+                'id': -1,
+                'type': 10001,
                 params: ['sys.color.font_primary'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             };
         this.dividerColorWithTheme = this.theme?.colors?.compDivider ?
         this.theme.colors.compDivider : {
-                "id": -1,
-                "type": 10001,
+                'id': -1,
+                'type': 10001,
                 params: ['sys.color.comp_divider'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             };
         this.initContentPadding();
         this.initButtons();
@@ -1038,35 +1030,35 @@ export class SelectDialog extends ViewPU {
     initContentPadding() {
         this.contentPadding = {
             left: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.padding_level0'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             },
             right: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.padding_level0'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             }
         };
         if (!this.title && !this.confirm) {
             this.contentPadding = {
                 top: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.padding_level12'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
                 bottom: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.padding_level12'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 }
             };
             return;
@@ -1074,22 +1066,21 @@ export class SelectDialog extends ViewPU {
         if (!this.title) {
             this.contentPadding = {
                 top: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.padding_level12'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 }
             };
-        }
-        else if (!this.confirm) {
+        } else if (!this.confirm) {
             this.contentPadding = {
                 bottom: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.padding_level12'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 }
             };
         }
@@ -1108,245 +1099,306 @@ export class SelectDialog extends ViewPU {
 }
 
 export class ConfirmDialog extends ViewPU {
-    constructor(m13, n13, o13, p13 = -1, q13 = undefined, r13) {
-        super(m13, o13, p13, r13);
-        if (typeof q13 === "function") {
-            this.paramsGenerator_ = q13;
+    constructor(x12, y12, z12, a13 = -1, b13 = undefined, c13) {
+        super(x12, z12, a13, c13);
+        if (typeof b13 === 'function') {
+            this.paramsGenerator_ = b13;
         }
         this.controller = undefined;
         this.title = '';
         this.content = '';
         this.checkTips = '';
-        this.__isChecked = new ObservedPropertySimplePU(false, this, "isChecked");
-        this.primaryButton = { value: "" };
-        this.secondaryButton = { value: "" };
+        this.__isChecked = new ObservedPropertySimplePU(false, this, 'isChecked');
+        this.primaryButton = { value: '' };
+        this.secondaryButton = { value: '' };
         this.__fontColorWithTheme = new ObservedPropertyObjectPU({
-            "id": -1,
-            "type": 10001,
+            'id': -1,
+            'type': 10001,
             params: ['sys.color.font_primary'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
-        }, this, "fontColorWithTheme");
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'fontColorWithTheme');
         this.__buttonFontColorWithTheme = new ObservedPropertyObjectPU({
-            "id": -1,
-            "type": 10001,
+            'id': -1,
+            'type': 10001,
             params: ['sys.color.font_emphasize'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
-        }, this, "buttonFontColorWithTheme");
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'buttonFontColorWithTheme');
         this.theme = new CustomThemeImpl({});
-        this.setInitiallyProvidedValue(n13);
+        this.checkAction = undefined;
+        this.contentScroller = new Scroller();
+        this.buttons = undefined;
+        this.marginOffset = 0;
+        this.__titleHeight = new ObservedPropertySimplePU(0, this, 'titleHeight');
+        this.__buttonHeight = new ObservedPropertySimplePU(0, this, 'buttonHeight');
+        this.__checkBoxHeight = new ObservedPropertySimplePU(CHECKBOX_CONTAINER_HEIGHT, this, 'checkBoxHeight');
+        this.__maxContentHeight =
+            new ObservedPropertySimplePU(`calc(100% - ${this.checkBoxHeight}vp - ${this.titleHeight}vp - ${this.buttonHeight}vp)`,
+                this, 'maxContentHeight');
+        this.updateTitleHeight = (g13) => {
+            this.titleHeight = g13;
+            this.maxContentHeight =
+                `calc(100% - ${this.checkBoxHeight}vp - ${this.titleHeight}vp - ${this.buttonHeight}vp)`;
+        };
+        this.updateButtonHeight = (f13) => {
+            this.buttonHeight = f13;
+            this.maxContentHeight =
+                `calc(100% - ${this.checkBoxHeight}vp - ${this.titleHeight}vp - ${this.buttonHeight}vp)`;
+        };
+        this.setInitiallyProvidedValue(y12);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(l13) {
-        if (l13.controller !== undefined) {
-            this.controller = l13.controller;
+    setInitiallyProvidedValue(w12) {
+        if (w12.controller !== undefined) {
+            this.controller = w12.controller;
         }
-        if (l13.title !== undefined) {
-            this.title = l13.title;
+        if (w12.title !== undefined) {
+            this.title = w12.title;
         }
-        if (l13.content !== undefined) {
-            this.content = l13.content;
+        if (w12.content !== undefined) {
+            this.content = w12.content;
         }
-        if (l13.checkTips !== undefined) {
-            this.checkTips = l13.checkTips;
+        if (w12.checkTips !== undefined) {
+            this.checkTips = w12.checkTips;
         }
-        if (l13.isChecked !== undefined) {
-            this.isChecked = l13.isChecked;
+        if (w12.isChecked !== undefined) {
+            this.isChecked = w12.isChecked;
         }
-        if (l13.primaryButton !== undefined) {
-            this.primaryButton = l13.primaryButton;
+        if (w12.primaryButton !== undefined) {
+            this.primaryButton = w12.primaryButton;
         }
-        if (l13.secondaryButton !== undefined) {
-            this.secondaryButton = l13.secondaryButton;
+        if (w12.secondaryButton !== undefined) {
+            this.secondaryButton = w12.secondaryButton;
         }
-        if (l13.fontColorWithTheme !== undefined) {
-            this.fontColorWithTheme = l13.fontColorWithTheme;
+        if (w12.fontColorWithTheme !== undefined) {
+            this.fontColorWithTheme = w12.fontColorWithTheme;
         }
-        if (l13.buttonFontColorWithTheme !== undefined) {
-            this.buttonFontColorWithTheme = l13.buttonFontColorWithTheme;
+        if (w12.buttonFontColorWithTheme !== undefined) {
+            this.buttonFontColorWithTheme = w12.buttonFontColorWithTheme;
         }
-        if (l13.theme !== undefined) {
-            this.theme = l13.theme;
+        if (w12.theme !== undefined) {
+            this.theme = w12.theme;
+        }
+        if (w12.checkAction !== undefined) {
+            this.checkAction = w12.checkAction;
+        }
+        if (w12.contentScroller !== undefined) {
+            this.contentScroller = w12.contentScroller;
+        }
+        if (w12.buttons !== undefined) {
+            this.buttons = w12.buttons;
+        }
+        if (w12.marginOffset !== undefined) {
+            this.marginOffset = w12.marginOffset;
+        }
+        if (w12.titleHeight !== undefined) {
+            this.titleHeight = w12.titleHeight;
+        }
+        if (w12.buttonHeight !== undefined) {
+            this.buttonHeight = w12.buttonHeight;
+        }
+        if (w12.checkBoxHeight !== undefined) {
+            this.checkBoxHeight = w12.checkBoxHeight;
+        }
+        if (w12.maxContentHeight !== undefined) {
+            this.maxContentHeight = w12.maxContentHeight;
+        }
+        if (w12.updateTitleHeight !== undefined) {
+            this.updateTitleHeight = w12.updateTitleHeight;
+        }
+        if (w12.updateButtonHeight !== undefined) {
+            this.updateButtonHeight = w12.updateButtonHeight;
         }
     }
 
-    updateStateVars(k13) {
+    updateStateVars(v12) {
     }
 
-    purgeVariableDependenciesOnElmtId(j13) {
-        this.__isChecked.purgeDependencyOnElmtId(j13);
-        this.__fontColorWithTheme.purgeDependencyOnElmtId(j13);
-        this.__buttonFontColorWithTheme.purgeDependencyOnElmtId(j13);
+    purgeVariableDependenciesOnElmtId(u12) {
+        this.__isChecked.purgeDependencyOnElmtId(u12);
+        this.__fontColorWithTheme.purgeDependencyOnElmtId(u12);
+        this.__buttonFontColorWithTheme.purgeDependencyOnElmtId(u12);
+        this.__titleHeight.purgeDependencyOnElmtId(u12);
+        this.__buttonHeight.purgeDependencyOnElmtId(u12);
+        this.__checkBoxHeight.purgeDependencyOnElmtId(u12);
+        this.__maxContentHeight.purgeDependencyOnElmtId(u12);
     }
 
     aboutToBeDeleted() {
         this.__isChecked.aboutToBeDeleted();
         this.__fontColorWithTheme.aboutToBeDeleted();
         this.__buttonFontColorWithTheme.aboutToBeDeleted();
+        this.__titleHeight.aboutToBeDeleted();
+        this.__buttonHeight.aboutToBeDeleted();
+        this.__checkBoxHeight.aboutToBeDeleted();
+        this.__maxContentHeight.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
 
-    setController(i13) {
-        this.controller = i13;
+    setController(t12) {
+        this.controller = t12;
     }
 
     get isChecked() {
         return this.__isChecked.get();
     }
 
-    set isChecked(h13) {
-        this.__isChecked.set(h13);
+    set isChecked(s12) {
+        this.__isChecked.set(s12);
     }
 
     get fontColorWithTheme() {
         return this.__fontColorWithTheme.get();
     }
 
-    set fontColorWithTheme(g13) {
-        this.__fontColorWithTheme.set(g13);
+    set fontColorWithTheme(r12) {
+        this.__fontColorWithTheme.set(r12);
     }
 
     get buttonFontColorWithTheme() {
         return this.__buttonFontColorWithTheme.get();
     }
 
-    set buttonFontColorWithTheme(f13) {
-        this.__buttonFontColorWithTheme.set(f13);
+    set buttonFontColorWithTheme(q12) {
+        this.__buttonFontColorWithTheme.set(q12);
     }
 
-    initialRender() {
-        this.observeComponentCreation2((d13, e13) => {
+    get titleHeight() {
+        return this.__titleHeight.get();
+    }
+
+    set titleHeight(p12) {
+        this.__titleHeight.set(p12);
+    }
+
+    get buttonHeight() {
+        return this.__buttonHeight.get();
+    }
+
+    set buttonHeight(o12) {
+        this.__buttonHeight.set(o12);
+    }
+
+    get checkBoxHeight() {
+        return this.__checkBoxHeight.get();
+    }
+
+    set checkBoxHeight(n12) {
+        this.__checkBoxHeight.set(n12);
+    }
+
+    get maxContentHeight() {
+        return this.__maxContentHeight.get();
+    }
+
+    set maxContentHeight(m12) {
+        this.__maxContentHeight.set(m12);
+    }
+
+    buildContent(a11 = null) {
+        this.observeComponentCreation2((k12, l12) => {
             Column.create();
-            Column.backgroundBlurStyle(BlurStyle.Thick);
-            Column.borderRadius({
-                "id": -1,
-                "type": 10002,
-                params: ['sys.float.ohos_id_corner_radius_dialog'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
-            });
-            Column.margin({
-                start: LengthMetrics.vp(getNumberByResource('sys.float.ohos_id_dialog_margin_start')),
-                end: LengthMetrics.vp(getNumberByResource('sys.float.ohos_id_dialog_margin_end')),
-                bottom: {
-                    "id": -1,
-                    "type": 10002,
-                    params: ['sys.float.ohos_id_dialog_margin_bottom'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
-                }
-            });
-            Column.backgroundColor({
-                "id": -1,
-                "type": 10001,
-                params: ['sys.color.ohos_id_color_dialog_bg'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
-            });
         }, Column);
-        this.observeComponentCreation2((b13, c13) => {
-            Row.create();
-            Row.padding({ start: LengthMetrics.vp(24), end: LengthMetrics.vp(24), top: 24 });
-            Row.constraintSize({ minHeight: 56 });
-        }, Row);
-        this.observeComponentCreation2((z12, a13) => {
-            Text.create(this.title);
-            Text.fontSize({
-                "id": -1,
-                "type": 10002,
-                params: ['sys.float.ohos_id_text_size_dialog_tittle'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
-            });
-            Text.fontWeight(FontWeight.Medium);
-            Text.maxLines(CONTENT_MAX_LINES);
-            Text.minFontSize(15);
-            Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-            Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
-            Text.textAlign(TextAlign.Start);
-            Text.width('100%');
-        }, Text);
-        Text.pop();
-        Row.pop();
-        this.observeComponentCreation2((p12, q12) => {
+        this.observeComponentCreation2((v11, w11) => {
             If.create();
             if (this.content) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((x12, y12) => {
+                    this.observeComponentCreation2((i12, j12) => {
                         Row.create();
-                        Row.padding({ start: LengthMetrics.vp(24), end: LengthMetrics.vp(24), top: 8, bottom: 8 });
-                        Row.width('100%');
-                        Row.constraintSize({ minHeight: 36 });
+                        Row.padding({ bottom: 8 });
+                        Row.margin({ right: `${this.marginOffset}vp` });
+                        Row.constraintSize({
+                            minHeight: 36,
+                            maxHeight: this.maxContentHeight
+                        });
                     }, Row);
-                    this.observeComponentCreation2((v12, w12) => {
+                    this.observeComponentCreation2((g12, h12) => {
+                        Scroll.create(this.contentScroller);
+                        Scroll.width('100%');
+                    }, Scroll);
+                    this.observeComponentCreation2((c12, d12) => {
                         Text.create(this.content);
                         Text.focusable(true);
                         Text.defaultFocus(!(this.primaryButton?.value || this.secondaryButton?.value));
                         Text.fontSize({
-                            "id": -1,
-                            "type": 10002,
-                            params: ['sys.float.ohos_id_text_size_body1'],
-                            "bundleName": "__harDefaultBundleName__",
-                            "moduleName": "__harDefaultModuleName__"
+                            'id': -1,
+                            'type': 10002,
+                            params: ['sys.float.Body_L'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
                         });
                         Text.fontWeight(FontWeight.Medium);
                         Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
-                        Text.maxLines(CONTENT_MAX_LINES);
-                        Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-                        Text.minFontSize({
-                            "id": -1,
-                            "type": 10002,
-                            params: ['sys.float.ohos_id_text_size_body3'],
-                            "bundleName": "__harDefaultBundleName__",
-                            "moduleName": "__harDefaultModuleName__"
+                        Text.textAlign(TextAlign.Start);
+                        Text.margin({
+                            right: {
+                                'id': -1,
+                                'type': 10002,
+                                params: ['sys.float.padding_level8'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
+                            }
                         });
+                        Text.onKeyEvent((f12) => {
+                            if (f12) {
+                                resolveKeyEvent(f12, this.contentScroller);
+                            }
+                        });
+                        Text.width(`calc(100% - ${getNumberByResource('padding_level8')}vp)`);
                     }, Text);
                     Text.pop();
+                    Scroll.pop();
                     Row.pop();
                 });
-            }
-            else {
+            } else {
                 this.ifElseBranchUpdateFunction(1, () => {
                 });
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((n12, o12) => {
+        this.observeComponentCreation2((q11, r11) => {
             Row.create();
-            Row.height(CHECKBOX_CONTAINER_HEIGHT);
+            Row.onSizeChange((t11, u11) => {
+                this.checkBoxHeight = Number(u11.height);
+            });
+            Row.constraintSize({ minHeight: CHECKBOX_CONTAINER_HEIGHT });
             Row.width('100%');
-            Row.padding({ start: LengthMetrics.vp(24), end: LengthMetrics.vp(24), top: 8, bottom: 8 });
+            Row.padding({ top: 8, bottom: 8 });
         }, Row);
-        this.observeComponentCreation2((l12, m12) => {
+        this.observeComponentCreation2((o11, p11) => {
             WithTheme.create({ theme: this.theme });
         }, WithTheme);
-        this.observeComponentCreation2((h12, i12) => {
+        this.observeComponentCreation2((k11, l11) => {
             Checkbox.create({ name: 'checkbox', group: 'checkboxGroup' });
             Checkbox.select(this.isChecked);
-            Checkbox.onChange((k12) => {
-                this.isChecked = k12;
+            Checkbox.onChange((n11) => {
+                this.isChecked = n11;
+                if (this.checkAction) {
+                    this.checkAction(this.isChecked);
+                }
             });
+            Checkbox.hitTestBehavior(HitTestMode.Block);
             Checkbox.margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(8) });
         }, Checkbox);
         Checkbox.pop();
         WithTheme.pop();
-        this.observeComponentCreation2((e12, f12) => {
+        this.observeComponentCreation2((h11, i11) => {
             Text.create(this.checkTips);
             Text.fontSize({
-                "id": -1,
-                "type": 10002,
-                params: ['sys.float.ohos_id_text_size_body2'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.Body_M'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             });
             Text.fontWeight(FontWeight.Medium);
             Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
             Text.maxLines(CONTENT_MAX_LINES);
-            Text.layoutWeight(1);
             Text.focusable(false);
+            Text.layoutWeight(1);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.onClick(() => {
                 this.isChecked = !this.isChecked;
@@ -1354,154 +1406,83 @@ export class ConfirmDialog extends ViewPU {
         }, Text);
         Text.pop();
         Row.pop();
-        this.observeComponentCreation2((c12, d12) => {
-            Row.create();
-            Row.width('100%');
-            Row.padding({ start: LengthMetrics.vp(16), end: LengthMetrics.vp(16), top: 16, bottom: 16 });
-        }, Row);
-        this.observeComponentCreation2((u11, v11) => {
-            If.create();
-            if (this.primaryButton?.value) {
-                this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((z11, a12) => {
-                        Button.createWithLabel(this.primaryButton.value);
-                        Button.fontSize({
-                            "id": -1,
-                            "type": 10002,
-                            params: ['sys.float.ohos_id_text_size_button1'],
-                            "bundleName": "__harDefaultBundleName__",
-                            "moduleName": "__harDefaultModuleName__"
-                        });
-                        Button.fontWeight(FontWeight.Medium);
-                        Button.layoutWeight(1);
-                        Button.defaultFocus(true);
-                        Button.backgroundColor(this.primaryButton.background ? this.primaryButton.background : {
-                            "id": -1,
-                            "type": 10001,
-                            params: ['sys.color.ohos_id_color_background_transparent'],
-                            "bundleName": "__harDefaultBundleName__",
-                            "moduleName": "__harDefaultModuleName__"
-                        });
-                        Button.fontColor(this.primaryButton.fontColor ? this.primaryButton.fontColor : this.buttonFontColorWithTheme);
-                        Button.onClick(() => {
-                            if (this.primaryButton?.action)
-                                this.primaryButton.action();
-                            this.controller.close();
-                        });
-                    }, Button);
-                    Button.pop();
-                });
-            }
-            else {
-                this.ifElseBranchUpdateFunction(1, () => {
-                });
-            }
-        }, If);
-        If.pop();
-        this.observeComponentCreation2((f11, g11) => {
-            If.create();
-            if (this.secondaryButton?.value && this.primaryButton?.value) {
-                this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((s11, t11) => {
-                        Column.create();
-                        Column.width(DIVIDER_CONTAINER_WIDTH);
-                        Column.alignItems(HorizontalAlign.Center);
-                    }, Column);
-                    this.observeComponentCreation2((l11, m11) => {
-                        If.create();
-                        if (!this.secondaryButton.background) {
-                            this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((q11, r11) => {
-                                    Divider.create();
-                                    Divider.width(DIVIDER_WIDTH);
-                                    Divider.height(DIVIDER_HEIGHT);
-                                    Divider.color({
-                                        "id": -1,
-                                        "type": 10001,
-                                        params: ['sys.color.ohos_id_color_list_separator'],
-                                        "bundleName": "__harDefaultBundleName__",
-                                        "moduleName": "__harDefaultModuleName__"
-                                    });
-                                    Divider.vertical(true);
-                                }, Divider);
-                            });
-                        }
-                        else {
-                            this.ifElseBranchUpdateFunction(1, () => {
-                            });
-                        }
-                    }, If);
-                    If.pop();
-                    Column.pop();
-                });
-            }
-            else {
-                this.ifElseBranchUpdateFunction(1, () => {
-                });
-            }
-        }, If);
-        If.pop();
-        this.observeComponentCreation2((x10, y10) => {
-            If.create();
-            if (this.secondaryButton?.value) {
-                this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((c11, d11) => {
-                        Button.createWithLabel(this.secondaryButton.value);
-                        Button.fontSize({
-                            "id": -1,
-                            "type": 10002,
-                            params: ['sys.float.ohos_id_text_size_button1'],
-                            "bundleName": "__harDefaultBundleName__",
-                            "moduleName": "__harDefaultModuleName__"
-                        });
-                        Button.fontWeight(FontWeight.Medium);
-                        Button.layoutWeight(1);
-                        Button.defaultFocus(true);
-                        Button.backgroundColor(this.secondaryButton.background ? this.secondaryButton.background : {
-                            "id": -1,
-                            "type": 10001,
-                            params: ['sys.color.ohos_id_color_background_transparent'],
-                            "bundleName": "__harDefaultBundleName__",
-                            "moduleName": "__harDefaultModuleName__"
-                        });
-                        Button.fontColor(this.secondaryButton.fontColor ?
-                        this.secondaryButton.fontColor : this.buttonFontColorWithTheme);
-                        Button.onClick(() => {
-                            if (this.secondaryButton?.action)
-                                this.secondaryButton.action();
-                            this.controller.close();
-                        });
-                    }, Button);
-                    Button.pop();
-                });
-            }
-            else {
-                this.ifElseBranchUpdateFunction(1, () => {
-                });
-            }
-        }, If);
-        If.pop();
-        Row.pop();
         Column.pop();
+    }
+
+    initialRender() {
+        {
+            this.observeComponentCreation2((u10, v10) => {
+                if (v10) {
+                    let w10 = new CustomDialogComponent(this, {
+                        primaryTitle: this.title,
+                        controller: this.controller,
+                        contentBuilder: () => {
+                            this.buildContent();
+                        },
+                        updateTitleHeight: this.updateTitleHeight,
+                        updateButtonHeight: this.updateButtonHeight,
+                        buttons: this.buttons,
+                        theme: this.theme,
+                    }, undefined, u10, () => {
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 534, col: 5 });
+                    ViewPU.create(w10);
+                    let x10 = () => {
+                        return {
+                            primaryTitle: this.title,
+                            controller: this.controller,
+                            contentBuilder: () => {
+                                this.buildContent();
+                            },
+                            updateTitleHeight: this.updateTitleHeight,
+                            updateButtonHeight: this.updateButtonHeight,
+                            buttons: this.buttons,
+                            theme: this.theme
+                        };
+                    };
+                    w10.paramsGenerator_ = x10;
+                } else {
+                    this.updateStateVarsOfChildByElmtId(u10, {});
+                }
+            }, { name: 'CustomDialogComponent' });
+        }
     }
 
     aboutToAppear() {
         this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
         this.theme.colors.fontPrimary : {
-                "id": -1,
-                "type": 10001,
+                'id': -1,
+                'type': 10001,
                 params: ['sys.color.font_primary'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             };
         this.buttonFontColorWithTheme = this.theme?.colors?.fontEmphasize ?
         this.theme.colors.fontEmphasize : {
-                "id": -1,
-                "type": 10001,
+                'id': -1,
+                'type': 10001,
                 params: ['sys.color.font_emphasize'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             };
+        this.initButtons();
+        this.initMargin();
+    }
+
+    initMargin() {
+        this.marginOffset = 0 - getNumberByResource('padding_level8');
+    }
+
+    initButtons() {
+        if (!this.primaryButton && !this.secondaryButton) {
+            return;
+        }
+        this.buttons = [];
+        if (this.primaryButton) {
+            this.buttons.push(this.primaryButton);
+        }
+        if (this.secondaryButton) {
+            this.buttons.push(this.secondaryButton);
+        }
     }
 
     rerender() {
@@ -1510,10 +1491,10 @@ export class ConfirmDialog extends ViewPU {
 }
 
 export class AlertDialog extends ViewPU {
-    constructor(f10, g10, h10, i10 = -1, j10 = undefined, k10) {
-        super(f10, h10, i10, k10);
-        if (typeof j10 === "function") {
-            this.paramsGenerator_ = j10;
+    constructor(n10, o10, p10, q10 = -1, r10 = undefined, s10) {
+        super(n10, p10, q10, s10);
+        if (typeof r10 === 'function') {
+            this.paramsGenerator_ = r10;
         }
         this.controller = undefined;
         this.primaryTitle = undefined;
@@ -1522,62 +1503,62 @@ export class AlertDialog extends ViewPU {
         this.primaryButton = null;
         this.secondaryButton = null;
         this.buttons = undefined;
-        this.__textAlign = new ObservedPropertySimplePU(TextAlign.Start, this, "textAlign");
+        this.__textAlign = new ObservedPropertySimplePU(TextAlign.Start, this, 'textAlign');
         this.contentScroller = new Scroller();
         this.__fontColorWithTheme = new ObservedPropertyObjectPU({
-            "id": -1,
-            "type": 10001,
+            'id': -1,
+            'type': 10001,
             params: ['sys.color.font_primary'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
-        }, this, "fontColorWithTheme");
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'fontColorWithTheme');
         this.theme = new CustomThemeImpl({});
-        this.setInitiallyProvidedValue(g10);
+        this.setInitiallyProvidedValue(o10);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(e10) {
-        if (e10.controller !== undefined) {
-            this.controller = e10.controller;
+    setInitiallyProvidedValue(m10) {
+        if (m10.controller !== undefined) {
+            this.controller = m10.controller;
         }
-        if (e10.primaryTitle !== undefined) {
-            this.primaryTitle = e10.primaryTitle;
+        if (m10.primaryTitle !== undefined) {
+            this.primaryTitle = m10.primaryTitle;
         }
-        if (e10.secondaryTitle !== undefined) {
-            this.secondaryTitle = e10.secondaryTitle;
+        if (m10.secondaryTitle !== undefined) {
+            this.secondaryTitle = m10.secondaryTitle;
         }
-        if (e10.content !== undefined) {
-            this.content = e10.content;
+        if (m10.content !== undefined) {
+            this.content = m10.content;
         }
-        if (e10.primaryButton !== undefined) {
-            this.primaryButton = e10.primaryButton;
+        if (m10.primaryButton !== undefined) {
+            this.primaryButton = m10.primaryButton;
         }
-        if (e10.secondaryButton !== undefined) {
-            this.secondaryButton = e10.secondaryButton;
+        if (m10.secondaryButton !== undefined) {
+            this.secondaryButton = m10.secondaryButton;
         }
-        if (e10.buttons !== undefined) {
-            this.buttons = e10.buttons;
+        if (m10.buttons !== undefined) {
+            this.buttons = m10.buttons;
         }
-        if (e10.textAlign !== undefined) {
-            this.textAlign = e10.textAlign;
+        if (m10.textAlign !== undefined) {
+            this.textAlign = m10.textAlign;
         }
-        if (e10.contentScroller !== undefined) {
-            this.contentScroller = e10.contentScroller;
+        if (m10.contentScroller !== undefined) {
+            this.contentScroller = m10.contentScroller;
         }
-        if (e10.fontColorWithTheme !== undefined) {
-            this.fontColorWithTheme = e10.fontColorWithTheme;
+        if (m10.fontColorWithTheme !== undefined) {
+            this.fontColorWithTheme = m10.fontColorWithTheme;
         }
-        if (e10.theme !== undefined) {
-            this.theme = e10.theme;
+        if (m10.theme !== undefined) {
+            this.theme = m10.theme;
         }
     }
 
-    updateStateVars(d10) {
+    updateStateVars(l10) {
     }
 
-    purgeVariableDependenciesOnElmtId(c10) {
-        this.__textAlign.purgeDependencyOnElmtId(c10);
-        this.__fontColorWithTheme.purgeDependencyOnElmtId(c10);
+    purgeVariableDependenciesOnElmtId(k10) {
+        this.__textAlign.purgeDependencyOnElmtId(k10);
+        this.__fontColorWithTheme.purgeDependencyOnElmtId(k10);
     }
 
     aboutToBeDeleted() {
@@ -1587,31 +1568,31 @@ export class AlertDialog extends ViewPU {
         this.aboutToBeDeletedInternal();
     }
 
-    setController(b10) {
-        this.controller = b10;
+    setController(j10) {
+        this.controller = j10;
     }
 
     get textAlign() {
         return this.__textAlign.get();
     }
 
-    set textAlign(a10) {
-        this.__textAlign.set(a10);
+    set textAlign(i10) {
+        this.__textAlign.set(i10);
     }
 
     get fontColorWithTheme() {
         return this.__fontColorWithTheme.get();
     }
 
-    set fontColorWithTheme(z9) {
-        this.__fontColorWithTheme.set(z9);
+    set fontColorWithTheme(h10) {
+        this.__fontColorWithTheme.set(h10);
     }
 
     initialRender() {
         {
-            this.observeComponentCreation2((t9, u9) => {
-                if (u9) {
-                    let v9 = new CustomDialogComponent(this, {
+            this.observeComponentCreation2((b10, c10) => {
+                if (c10) {
+                    let d10 = new CustomDialogComponent(this, {
                         primaryTitle: this.primaryTitle,
                         secondaryTitle: this.secondaryTitle,
                         controller: this.controller,
@@ -1620,10 +1601,10 @@ export class AlertDialog extends ViewPU {
                         },
                         buttons: this.buttons,
                         theme: this.theme,
-                    }, undefined, t9, () => {
-                    }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 583, col: 5 });
-                    ViewPU.create(v9);
-                    let w9 = () => {
+                    }, undefined, b10, () => {
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 590, col: 5 });
+                    ViewPU.create(d10);
+                    let e10 = () => {
                         return {
                             primaryTitle: this.primaryTitle,
                             secondaryTitle: this.secondaryTitle,
@@ -1635,54 +1616,53 @@ export class AlertDialog extends ViewPU {
                             theme: this.theme
                         };
                     };
-                    v9.paramsGenerator_ = w9;
+                    d10.paramsGenerator_ = e10;
+                } else {
+                    this.updateStateVarsOfChildByElmtId(b10, {});
                 }
-                else {
-                    this.updateStateVarsOfChildByElmtId(t9, {});
-                }
-            }, { name: "CustomDialogComponent" });
+            }, { name: 'CustomDialogComponent' });
         }
     }
 
-    AlertDialogContentBuilder(d9 = null) {
-        this.observeComponentCreation2((q9, r9) => {
+    AlertDialogContentBuilder(l9 = null) {
+        this.observeComponentCreation2((y9, z9) => {
             Column.create();
             Column.margin({ right: `${this.getMargin()}vp`, });
         }, Column);
-        this.observeComponentCreation2((o9, p9) => {
+        this.observeComponentCreation2((w9, x9) => {
             Scroll.create(this.contentScroller);
             Scroll.width('100%');
         }, Scroll);
-        this.observeComponentCreation2((h9, i9) => {
+        this.observeComponentCreation2((p9, q9) => {
             Text.create(this.content);
             Text.focusable(true);
             Text.defaultFocus(!(this.primaryButton || this.secondaryButton));
             Text.fontSize({
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.Body_L'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             });
             Text.fontWeight(this.getFontWeight());
             Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
             Text.margin({
                 right: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.padding_level8'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
             });
             Text.width(`calc(100% - ${getNumberByResource('padding_level8')}vp)`);
             Text.textAlign(this.textAlign);
-            Text.onAreaChange((m9, n9) => {
-                this.getTextAlign(Number(n9.width));
+            Text.onAreaChange((u9, v9) => {
+                this.getTextAlign(Number(v9.width));
             });
-            Text.onKeyEvent((l9) => {
-                if (l9) {
-                    resolveKeyEvent(l9, this.contentScroller);
+            Text.onKeyEvent((t9) => {
+                if (t9) {
+                    resolveKeyEvent(t9, this.contentScroller);
                 }
             });
         }, Text);
@@ -1694,45 +1674,45 @@ export class AlertDialog extends ViewPU {
     aboutToAppear() {
         this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
         this.theme.colors.fontPrimary : {
-                "id": -1,
-                "type": 10001,
+                'id': -1,
+                'type': 10001,
                 params: ['sys.color.font_primary'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             };
         this.initButtons();
     }
 
-    getTextAlign(a9) {
-        let b9 = measure.measureTextSize({
+    getTextAlign(i9) {
+        let j9 = measure.measureTextSize({
             textContent: this.content,
             fontSize: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.Body_L'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             },
-            constraintWidth: a9,
+            constraintWidth: i9,
         });
-        let c9 = measure.measureTextSize({
+        let k9 = measure.measureTextSize({
             textContent: this.content,
             fontSize: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.Body_L'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             },
         });
-        if (this.getTextHeight(b9) <= this.getTextHeight(c9)) {
+        if (this.getTextHeight(j9) <= this.getTextHeight(k9)) {
             this.textAlign = TextAlign.Center;
         }
     }
 
-    getTextHeight(z8) {
-        if (z8 && z8.height !== null && z8.height !== undefined) {
-            return Number(z8.height);
+    getTextHeight(h9) {
+        if (h9 && h9.height !== null && h9.height !== undefined) {
+            return Number(h9.height);
         }
         return 0;
     }
@@ -1767,10 +1747,10 @@ export class AlertDialog extends ViewPU {
 }
 
 export class CustomContentDialog extends ViewPU {
-    constructor(t8, u8, v8, w8 = -1, x8 = undefined, y8) {
-        super(t8, v8, w8, y8);
-        if (typeof x8 === "function") {
-            this.paramsGenerator_ = x8;
+    constructor(b9, c9, d9, e9 = -1, f9 = undefined, g9) {
+        super(b9, d9, e9, g9);
+        if (typeof f9 === 'function') {
+            this.paramsGenerator_ = f9;
         }
         this.controller = undefined;
         this.primaryTitle = undefined;
@@ -1779,38 +1759,38 @@ export class CustomContentDialog extends ViewPU {
         this.contentAreaPadding = undefined;
         this.buttons = undefined;
         this.theme = new CustomThemeImpl({});
-        this.setInitiallyProvidedValue(u8);
+        this.setInitiallyProvidedValue(c9);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(s8) {
-        if (s8.controller !== undefined) {
-            this.controller = s8.controller;
+    setInitiallyProvidedValue(a9) {
+        if (a9.controller !== undefined) {
+            this.controller = a9.controller;
         }
-        if (s8.primaryTitle !== undefined) {
-            this.primaryTitle = s8.primaryTitle;
+        if (a9.primaryTitle !== undefined) {
+            this.primaryTitle = a9.primaryTitle;
         }
-        if (s8.secondaryTitle !== undefined) {
-            this.secondaryTitle = s8.secondaryTitle;
+        if (a9.secondaryTitle !== undefined) {
+            this.secondaryTitle = a9.secondaryTitle;
         }
-        if (s8.contentBuilder !== undefined) {
-            this.contentBuilder = s8.contentBuilder;
+        if (a9.contentBuilder !== undefined) {
+            this.contentBuilder = a9.contentBuilder;
         }
-        if (s8.contentAreaPadding !== undefined) {
-            this.contentAreaPadding = s8.contentAreaPadding;
+        if (a9.contentAreaPadding !== undefined) {
+            this.contentAreaPadding = a9.contentAreaPadding;
         }
-        if (s8.buttons !== undefined) {
-            this.buttons = s8.buttons;
+        if (a9.buttons !== undefined) {
+            this.buttons = a9.buttons;
         }
-        if (s8.theme !== undefined) {
-            this.theme = s8.theme;
+        if (a9.theme !== undefined) {
+            this.theme = a9.theme;
         }
     }
 
-    updateStateVars(r8) {
+    updateStateVars(z8) {
     }
 
-    purgeVariableDependenciesOnElmtId(q8) {
+    purgeVariableDependenciesOnElmtId(y8) {
     }
 
     aboutToBeDeleted() {
@@ -1818,15 +1798,15 @@ export class CustomContentDialog extends ViewPU {
         this.aboutToBeDeletedInternal();
     }
 
-    setController(p8) {
-        this.controller = p8;
+    setController(x8) {
+        this.controller = x8;
     }
 
     initialRender() {
         {
-            this.observeComponentCreation2((j8, k8) => {
-                if (k8) {
-                    let l8 = new CustomDialogContentComponent(this, {
+            this.observeComponentCreation2((r8, s8) => {
+                if (s8) {
+                    let t8 = new CustomDialogContentComponent(this, {
                         controller: this.controller,
                         primaryTitle: this.primaryTitle,
                         secondaryTitle: this.secondaryTitle,
@@ -1836,10 +1816,10 @@ export class CustomContentDialog extends ViewPU {
                         contentAreaPadding: this.contentAreaPadding,
                         buttons: this.buttons,
                         theme: this.theme,
-                    }, undefined, j8, () => {
-                    }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 687, col: 5 });
-                    ViewPU.create(l8);
-                    let m8 = () => {
+                    }, undefined, r8, () => {
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 694, col: 5 });
+                    ViewPU.create(t8);
+                    let u8 = () => {
                         return {
                             controller: this.controller,
                             primaryTitle: this.primaryTitle,
@@ -1852,12 +1832,11 @@ export class CustomContentDialog extends ViewPU {
                             theme: this.theme
                         };
                     };
-                    l8.paramsGenerator_ = m8;
+                    t8.paramsGenerator_ = u8;
+                } else {
+                    this.updateStateVarsOfChildByElmtId(r8, {});
                 }
-                else {
-                    this.updateStateVarsOfChildByElmtId(j8, {});
-                }
-            }, { name: "CustomDialogContentComponent" });
+            }, { name: 'CustomDialogContentComponent' });
         }
     }
 
@@ -1867,10 +1846,10 @@ export class CustomContentDialog extends ViewPU {
 }
 
 class CustomDialogContentComponent extends ViewPU {
-    constructor(c8, d8, e8, f8 = -1, g8 = undefined, h8) {
-        super(c8, e8, f8, h8);
-        if (typeof g8 === "function") {
-            this.paramsGenerator_ = g8;
+    constructor(k8, l8, m8, n8 = -1, o8 = undefined, p8) {
+        super(k8, m8, n8, p8);
+        if (typeof o8 === 'function') {
+            this.paramsGenerator_ = o8;
         }
         this.controller = undefined;
         this.primaryTitle = undefined;
@@ -1880,82 +1859,94 @@ class CustomDialogContentComponent extends ViewPU {
         this.contentAreaPadding = undefined;
         this.keyIndex = 0;
         this.__primaryTitleFontColorWithTheme = new ObservedPropertyObjectPU({
-            "id": -1,
-            "type": 10001,
+            'id': -1,
+            'type': 10001,
             params: ['sys.color.font_primary'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
-        }, this, "primaryTitleFontColorWithTheme");
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'primaryTitleFontColorWithTheme');
         this.__secondaryTitleFontColorWithTheme = new ObservedPropertyObjectPU({
-            "id": -1,
-            "type": 10001,
+            'id': -1,
+            'type': 10001,
             params: ['sys.color.font_secondary'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
-        }, this, "secondaryTitleFontColorWithTheme");
-        this.__buttonFontColorWithTheme = new ObservedPropertyObjectPU('', this, "buttonFontColorWithTheme");
-        this.__errorButtonFontColorWithTheme = new ObservedPropertyObjectPU('', this, "errorButtonFontColorWithTheme");
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'secondaryTitleFontColorWithTheme');
+        this.__buttonFontColorWithTheme = new ObservedPropertyObjectPU('', this, 'buttonFontColorWithTheme');
+        this.__errorButtonFontColorWithTheme = new ObservedPropertyObjectPU('', this, 'errorButtonFontColorWithTheme');
         this.theme = new CustomThemeImpl({});
         this.titleHeight = 0;
-        this.__contentMaxHeight = new ObservedPropertySimplePU('', this, "contentMaxHeight");
-        this.setInitiallyProvidedValue(d8);
+        this.buttonHeight = 0;
+        this.__contentMaxHeight = new ObservedPropertySimplePU('', this, 'contentMaxHeight');
+        this.updateTitleHeight = undefined;
+        this.updateButtonHeight = undefined;
+        this.setInitiallyProvidedValue(l8);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(b8) {
-        if (b8.controller !== undefined) {
-            this.controller = b8.controller;
+    setInitiallyProvidedValue(j8) {
+        if (j8.controller !== undefined) {
+            this.controller = j8.controller;
         }
-        if (b8.primaryTitle !== undefined) {
-            this.primaryTitle = b8.primaryTitle;
+        if (j8.primaryTitle !== undefined) {
+            this.primaryTitle = j8.primaryTitle;
         }
-        if (b8.secondaryTitle !== undefined) {
-            this.secondaryTitle = b8.secondaryTitle;
+        if (j8.secondaryTitle !== undefined) {
+            this.secondaryTitle = j8.secondaryTitle;
         }
-        if (b8.contentBuilder !== undefined) {
-            this.contentBuilder = b8.contentBuilder;
+        if (j8.contentBuilder !== undefined) {
+            this.contentBuilder = j8.contentBuilder;
         }
-        if (b8.buttons !== undefined) {
-            this.buttons = b8.buttons;
+        if (j8.buttons !== undefined) {
+            this.buttons = j8.buttons;
         }
-        if (b8.contentAreaPadding !== undefined) {
-            this.contentAreaPadding = b8.contentAreaPadding;
+        if (j8.contentAreaPadding !== undefined) {
+            this.contentAreaPadding = j8.contentAreaPadding;
         }
-        if (b8.keyIndex !== undefined) {
-            this.keyIndex = b8.keyIndex;
+        if (j8.keyIndex !== undefined) {
+            this.keyIndex = j8.keyIndex;
         }
-        if (b8.primaryTitleFontColorWithTheme !== undefined) {
-            this.primaryTitleFontColorWithTheme = b8.primaryTitleFontColorWithTheme;
+        if (j8.primaryTitleFontColorWithTheme !== undefined) {
+            this.primaryTitleFontColorWithTheme = j8.primaryTitleFontColorWithTheme;
         }
-        if (b8.secondaryTitleFontColorWithTheme !== undefined) {
-            this.secondaryTitleFontColorWithTheme = b8.secondaryTitleFontColorWithTheme;
+        if (j8.secondaryTitleFontColorWithTheme !== undefined) {
+            this.secondaryTitleFontColorWithTheme = j8.secondaryTitleFontColorWithTheme;
         }
-        if (b8.buttonFontColorWithTheme !== undefined) {
-            this.buttonFontColorWithTheme = b8.buttonFontColorWithTheme;
+        if (j8.buttonFontColorWithTheme !== undefined) {
+            this.buttonFontColorWithTheme = j8.buttonFontColorWithTheme;
         }
-        if (b8.errorButtonFontColorWithTheme !== undefined) {
-            this.errorButtonFontColorWithTheme = b8.errorButtonFontColorWithTheme;
+        if (j8.errorButtonFontColorWithTheme !== undefined) {
+            this.errorButtonFontColorWithTheme = j8.errorButtonFontColorWithTheme;
         }
-        if (b8.theme !== undefined) {
-            this.theme = b8.theme;
+        if (j8.theme !== undefined) {
+            this.theme = j8.theme;
         }
-        if (b8.titleHeight !== undefined) {
-            this.titleHeight = b8.titleHeight;
+        if (j8.titleHeight !== undefined) {
+            this.titleHeight = j8.titleHeight;
         }
-        if (b8.contentMaxHeight !== undefined) {
-            this.contentMaxHeight = b8.contentMaxHeight;
+        if (j8.buttonHeight !== undefined) {
+            this.buttonHeight = j8.buttonHeight;
+        }
+        if (j8.contentMaxHeight !== undefined) {
+            this.contentMaxHeight = j8.contentMaxHeight;
+        }
+        if (j8.updateTitleHeight !== undefined) {
+            this.updateTitleHeight = j8.updateTitleHeight;
+        }
+        if (j8.updateButtonHeight !== undefined) {
+            this.updateButtonHeight = j8.updateButtonHeight;
         }
     }
 
-    updateStateVars(a8) {
+    updateStateVars(i8) {
     }
 
-    purgeVariableDependenciesOnElmtId(z7) {
-        this.__primaryTitleFontColorWithTheme.purgeDependencyOnElmtId(z7);
-        this.__secondaryTitleFontColorWithTheme.purgeDependencyOnElmtId(z7);
-        this.__buttonFontColorWithTheme.purgeDependencyOnElmtId(z7);
-        this.__errorButtonFontColorWithTheme.purgeDependencyOnElmtId(z7);
-        this.__contentMaxHeight.purgeDependencyOnElmtId(z7);
+    purgeVariableDependenciesOnElmtId(h8) {
+        this.__primaryTitleFontColorWithTheme.purgeDependencyOnElmtId(h8);
+        this.__secondaryTitleFontColorWithTheme.purgeDependencyOnElmtId(h8);
+        this.__buttonFontColorWithTheme.purgeDependencyOnElmtId(h8);
+        this.__errorButtonFontColorWithTheme.purgeDependencyOnElmtId(h8);
+        this.__contentMaxHeight.purgeDependencyOnElmtId(h8);
     }
 
     aboutToBeDeleted() {
@@ -1972,55 +1963,55 @@ class CustomDialogContentComponent extends ViewPU {
         return this.__primaryTitleFontColorWithTheme.get();
     }
 
-    set primaryTitleFontColorWithTheme(y7) {
-        this.__primaryTitleFontColorWithTheme.set(y7);
+    set primaryTitleFontColorWithTheme(g8) {
+        this.__primaryTitleFontColorWithTheme.set(g8);
     }
 
     get secondaryTitleFontColorWithTheme() {
         return this.__secondaryTitleFontColorWithTheme.get();
     }
 
-    set secondaryTitleFontColorWithTheme(x7) {
-        this.__secondaryTitleFontColorWithTheme.set(x7);
+    set secondaryTitleFontColorWithTheme(f8) {
+        this.__secondaryTitleFontColorWithTheme.set(f8);
     }
 
     get buttonFontColorWithTheme() {
         return this.__buttonFontColorWithTheme.get();
     }
 
-    set buttonFontColorWithTheme(w7) {
-        this.__buttonFontColorWithTheme.set(w7);
+    set buttonFontColorWithTheme(e8) {
+        this.__buttonFontColorWithTheme.set(e8);
     }
 
     get errorButtonFontColorWithTheme() {
         return this.__errorButtonFontColorWithTheme.get();
     }
 
-    set errorButtonFontColorWithTheme(v7) {
-        this.__errorButtonFontColorWithTheme.set(v7);
+    set errorButtonFontColorWithTheme(d8) {
+        this.__errorButtonFontColorWithTheme.set(d8);
     }
 
-    defaultContentBuilder(u7 = null) {
+    defaultContentBuilder(c8 = null) {
     }
 
     get contentMaxHeight() {
         return this.__contentMaxHeight.get();
     }
 
-    set contentMaxHeight(t7) {
-        this.__contentMaxHeight.set(t7);
+    set contentMaxHeight(b8) {
+        this.__contentMaxHeight.set(b8);
     }
 
     initialRender() {
-        this.observeComponentCreation2((r7, s7) => {
+        this.observeComponentCreation2((z7, a8) => {
             WithTheme.create({ theme: this.theme });
         }, WithTheme);
-        this.observeComponentCreation2((p7, q7) => {
+        this.observeComponentCreation2((x7, y7) => {
             Column.create();
             Column.width('100%');
         }, Column);
         this.buildTitles.bind(this)(this);
-        this.observeComponentCreation2((n7, o7) => {
+        this.observeComponentCreation2((v7, w7) => {
             Column.create();
             Column.padding(this.getContentPadding());
             Column.constraintSize({ maxHeight: this.contentMaxHeight });
@@ -2032,8 +2023,8 @@ class CustomDialogContentComponent extends ViewPU {
         WithTheme.pop();
     }
 
-    buildTitles(g6 = null) {
-        this.observeComponentCreation2((f7, g7) => {
+    buildTitles(o6 = null) {
+        this.observeComponentCreation2((n7, o7) => {
             Column.create();
             Column.constraintSize({
                 minHeight: this.getTitleAreaMinHeight(),
@@ -2041,33 +2032,36 @@ class CustomDialogContentComponent extends ViewPU {
             Column.justifyContent(FlexAlign.Center);
             Column.width('100%');
             Column.padding(this.getTitleAreaPadding());
-            Column.onAreaChange((i7, j7) => {
-                this.titleHeight = Number(j7.height);
+            Column.onAreaChange((q7, r7) => {
+                this.titleHeight = Number(r7.height);
+                if (this.updateTitleHeight) {
+                    this.updateTitleHeight(this.titleHeight);
+                }
                 this.contentMaxHeight = `calc(100% - ${this.titleHeight}vp - ${this.getButtonsHeight()}vp)`;
             });
         }, Column);
-        this.observeComponentCreation2((d7, e7) => {
+        this.observeComponentCreation2((l7, m7) => {
             Row.create();
             Row.width('100%');
         }, Row);
-        this.observeComponentCreation2((b7, c7) => {
+        this.observeComponentCreation2((j7, k7) => {
             Text.create(this.primaryTitle);
             Text.fontWeight(FontWeight.Bold);
             Text.fontColor(ObservedObject.GetRawObject(this.primaryTitleFontColorWithTheme));
             Text.textAlign(this.getTitleTextAlign());
             Text.maxFontSize({
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.Title_S'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             });
             Text.minFontSize({
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.Body_L'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             });
             Text.maxLines(TITLE_MAX_LINES);
             Text.heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST);
@@ -2076,55 +2070,54 @@ class CustomDialogContentComponent extends ViewPU {
         }, Text);
         Text.pop();
         Row.pop();
-        this.observeComponentCreation2((r6, s6) => {
+        this.observeComponentCreation2((z6, a7) => {
             If.create();
             if (this.primaryTitle && this.secondaryTitle) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((z6, a7) => {
+                    this.observeComponentCreation2((h7, i7) => {
                         Row.create();
                     }, Row);
-                    this.observeComponentCreation2((x6, y6) => {
+                    this.observeComponentCreation2((f7, g7) => {
                         Divider.create();
                         Divider.margin({
-                            "id": -1,
-                            "type": 10002,
+                            'id': -1,
+                            'type': 10002,
                             params: ['sys.float.padding_level1'],
-                            "bundleName": "__harDefaultBundleName__",
-                            "moduleName": "__harDefaultModuleName__"
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
                         });
                         Divider.color(Color.Transparent);
                     }, Divider);
                     Row.pop();
                 });
-            }
-            else {
+            } else {
                 this.ifElseBranchUpdateFunction(1, () => {
                 });
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((p6, q6) => {
+        this.observeComponentCreation2((x6, y6) => {
             Row.create();
             Row.width('100%');
         }, Row);
-        this.observeComponentCreation2((n6, o6) => {
+        this.observeComponentCreation2((v6, w6) => {
             Text.create(this.secondaryTitle);
             Text.fontWeight(FontWeight.Regular);
             Text.fontColor(ObservedObject.GetRawObject(this.secondaryTitleFontColorWithTheme));
             Text.textAlign(this.getTitleTextAlign());
             Text.maxFontSize({
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.Subtitle_S'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             });
             Text.minFontSize({
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.Body_S'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             });
             Text.maxLines(TITLE_MAX_LINES);
             Text.heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST);
@@ -2136,73 +2129,75 @@ class CustomDialogContentComponent extends ViewPU {
         Column.pop();
     }
 
-    buildButtons(c6 = null) {
-        this.observeComponentCreation2((e6, f6) => {
+    buildButtons(h6 = null) {
+        this.observeComponentCreation2((j6, k6) => {
             Column.create();
             Column.width('100%');
+            Column.onSizeChange((m6, n6) => {
+                this.buttonHeight = Number(n6.height);
+                if (this.updateButtonHeight) {
+                    this.updateButtonHeight(this.buttonHeight);
+                }
+            });
             Column.padding(this.getOperationAreaPadding());
         }, Column);
-        this.buildHorizontalAlignButtons.bind(this)(c6 ? c6 : this);
-        this.buildVerticalAlignButtons.bind(this)(c6 ? c6 : this);
+        this.buildHorizontalAlignButtons.bind(this)(h6 ? h6 : this);
+        this.buildVerticalAlignButtons.bind(this)(h6 ? h6 : this);
         Column.pop();
     }
 
-    buildSingleButton(d5, e5 = null) {
-        this.observeComponentCreation2((g5, h5) => {
+    buildSingleButton(i5, j5 = null) {
+        this.observeComponentCreation2((l5, m5) => {
             If.create();
-            if (this.isNewPropertiesHighPriority(d5)) {
+            if (this.isNewPropertiesHighPriority(i5)) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((a6, b6) => {
-                        Button.createWithLabel(d5.value);
-                        __Button__setButtonProperties(d5, this.controller);
-                        Button.role(d5.role ?? ButtonRole.NORMAL);
+                    this.observeComponentCreation2((f6, g6) => {
+                        Button.createWithLabel(i5.value);
+                        __Button__setButtonProperties(i5, this.controller);
+                        Button.role(i5.role ?? ButtonRole.NORMAL);
                         Button.key(`advanced_dialog_button_${this.keyIndex++}`);
                     }, Button);
                     Button.pop();
                 });
-            }
-            else if (d5.background !== undefined && d5.fontColor !== undefined) {
+            } else if (i5.background !== undefined && i5.fontColor !== undefined) {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((w5, x5) => {
-                        Button.createWithLabel(d5.value);
-                        __Button__setButtonProperties(d5, this.controller);
-                        Button.backgroundColor(d5.background);
-                        Button.fontColor(d5.fontColor);
+                    this.observeComponentCreation2((b6, c6) => {
+                        Button.createWithLabel(i5.value);
+                        __Button__setButtonProperties(i5, this.controller);
+                        Button.backgroundColor(i5.background);
+                        Button.fontColor(i5.fontColor);
                         Button.key(`advanced_dialog_button_${this.keyIndex++}`);
                     }, Button);
                     Button.pop();
                 });
-            }
-            else if (d5.background !== undefined) {
+            } else if (i5.background !== undefined) {
                 this.ifElseBranchUpdateFunction(2, () => {
-                    this.observeComponentCreation2((s5, t5) => {
-                        Button.createWithLabel(d5.value);
-                        __Button__setButtonProperties(d5, this.controller);
-                        Button.backgroundColor(d5.background);
+                    this.observeComponentCreation2((x5, y5) => {
+                        Button.createWithLabel(i5.value);
+                        __Button__setButtonProperties(i5, this.controller);
+                        Button.backgroundColor(i5.background);
                         Button.key(`advanced_dialog_button_${this.keyIndex++}`);
                     }, Button);
                     Button.pop();
                 });
-            }
-            else if (d5.background !== undefined && d5.fontColor === undefined || '') {
+            } else if (i5.background !== undefined && i5.fontColor === undefined || '') {
                 this.ifElseBranchUpdateFunction(3, () => {
-                    this.observeComponentCreation2((o5, p5) => {
-                        Button.createWithLabel(d5.value);
-                        __Button__setButtonProperties(d5, this.controller);
-                        Button.backgroundColor(d5.background);
-                        Button.fontColor(d5.role === ButtonRole.ERROR ?
+                    this.observeComponentCreation2((t5, u5) => {
+                        Button.createWithLabel(i5.value);
+                        __Button__setButtonProperties(i5, this.controller);
+                        Button.backgroundColor(i5.background);
+                        Button.fontColor(i5.role === ButtonRole.ERROR ?
                         this.errorButtonFontColorWithTheme : this.buttonFontColorWithTheme);
                         Button.key(`advanced_dialog_button_${this.keyIndex++}`);
                     }, Button);
                     Button.pop();
                 });
-            }
-            else {
+            } else {
                 this.ifElseBranchUpdateFunction(4, () => {
-                    this.observeComponentCreation2((k5, l5) => {
-                        Button.createWithLabel(d5.value);
-                        __Button__setButtonProperties(d5, this.controller);
-                        Button.fontColor(d5.fontColor);
+                    this.observeComponentCreation2((p5, q5) => {
+                        Button.createWithLabel(i5.value);
+                        __Button__setButtonProperties(i5, this.controller);
+                        Button.fontColor(i5.fontColor);
                         Button.key(`advanced_dialog_button_${this.keyIndex++}`);
                     }, Button);
                     Button.pop();
@@ -2212,58 +2207,58 @@ class CustomDialogContentComponent extends ViewPU {
         If.pop();
     }
 
-    buildHorizontalAlignButtons(m4 = null) {
-        this.observeComponentCreation2((o4, p4) => {
+    buildHorizontalAlignButtons(r4 = null) {
+        this.observeComponentCreation2((t4, u4) => {
             If.create();
             if (this.buttons && this.buttons.length > 0 && this.buttons.length <= HORIZON_BUTTON_MAX_COUNT) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((b5, c5) => {
+                    this.observeComponentCreation2((g5, h5) => {
                         Row.create();
                     }, Row);
-                    this.buildSingleButton.bind(this)(this.buttons[0], m4 ? m4 : this);
-                    this.observeComponentCreation2((u4, v4) => {
+                    this.buildSingleButton.bind(this)(this.buttons[0], r4 ? r4 : this);
+                    this.observeComponentCreation2((z4, a5) => {
                         If.create();
                         if (this.buttons.length === HORIZON_BUTTON_MAX_COUNT) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((z4, a5) => {
+                                this.observeComponentCreation2((e5, f5) => {
                                     Divider.create();
                                     Divider.width({
-                                        "id": -1,
-                                        "type": 10002,
+                                        'id': -1,
+                                        'type': 10002,
                                         params: ['sys.float.alert_divider_width'],
-                                        "bundleName": "__harDefaultBundleName__",
-                                        "moduleName": "__harDefaultModuleName__"
+                                        'bundleName': '__harDefaultBundleName__',
+                                        'moduleName': '__harDefaultModuleName__'
                                     });
                                     Divider.height({
-                                        "id": -1,
-                                        "type": 10002,
+                                        'id': -1,
+                                        'type': 10002,
                                         params: ['sys.float.alert_divider_height'],
-                                        "bundleName": "__harDefaultBundleName__",
-                                        "moduleName": "__harDefaultModuleName__"
+                                        'bundleName': '__harDefaultBundleName__',
+                                        'moduleName': '__harDefaultModuleName__'
                                     });
                                     Divider.color(this.getDividerColor());
                                     Divider.vertical(true);
                                     Divider.margin({
                                         left: {
-                                            "id": -1,
-                                            "type": 10002,
+                                            'id': -1,
+                                            'type': 10002,
                                             params: ['sys.float.alert_button_horizontal_space'],
-                                            "bundleName": "__harDefaultBundleName__",
-                                            "moduleName": "__harDefaultModuleName__"
+                                            'bundleName': '__harDefaultBundleName__',
+                                            'moduleName': '__harDefaultModuleName__'
                                         },
                                         right: {
-                                            "id": -1,
-                                            "type": 10002,
+                                            'id': -1,
+                                            'type': 10002,
                                             params: ['sys.float.alert_button_horizontal_space'],
-                                            "bundleName": "__harDefaultBundleName__",
-                                            "moduleName": "__harDefaultModuleName__"
+                                            'bundleName': '__harDefaultBundleName__',
+                                            'moduleName': '__harDefaultModuleName__'
                                         },
                                     });
                                 }, Divider);
-                                this.buildSingleButton.bind(this)(this.buttons[HORIZON_BUTTON_MAX_COUNT - 1], m4 ? m4 : this);
+                                this.buildSingleButton.bind(this)(this.buttons[HORIZON_BUTTON_MAX_COUNT - 1],
+                                    r4 ? r4 : this);
                             });
-                        }
-                        else {
+                        } else {
                             this.ifElseBranchUpdateFunction(1, () => {
                             });
                         }
@@ -2271,8 +2266,7 @@ class CustomDialogContentComponent extends ViewPU {
                     If.pop();
                     Row.pop();
                 });
-            }
-            else {
+            } else {
                 this.ifElseBranchUpdateFunction(1, () => {
                 });
             }
@@ -2280,27 +2274,27 @@ class CustomDialogContentComponent extends ViewPU {
         If.pop();
     }
 
-    buildVerticalAlignButtons(t3 = null) {
-        this.observeComponentCreation2((v3, w3) => {
+    buildVerticalAlignButtons(y3 = null) {
+        this.observeComponentCreation2((a4, b4) => {
             If.create();
             if (this.buttons && this.isVerticalAlignButton()) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((k4, l4) => {
+                    this.observeComponentCreation2((p4, q4) => {
                         Column.create();
                     }, Column);
-                    this.observeComponentCreation2((b4, c4) => {
+                    this.observeComponentCreation2((g4, h4) => {
                         ForEach.create();
-                        const d4 = (h4, i4) => {
-                            const j4 = h4;
-                            this.buildButtonWithDivider.bind(this)(i4, t3 ? t3 : this);
+                        const i4 = (m4, n4) => {
+                            const o4 = m4;
+                            this.buildButtonWithDivider.bind(this)(n4, y3 ? y3 : this);
                         };
-                        this.forEachUpdateFunction(b4, this.buttons.slice(0, VERTICAL_BUTTON_MAX_COUNT), d4, (g4) => g4.value.toString(), true, false);
+                        this.forEachUpdateFunction(g4, this.buttons.slice(0, VERTICAL_BUTTON_MAX_COUNT), i4,
+                            (l4) => l4.value.toString(), true, false);
                     }, ForEach);
                     ForEach.pop();
                     Column.pop();
                 });
-            }
-            else {
+            } else {
                 this.ifElseBranchUpdateFunction(1, () => {
                 });
             }
@@ -2308,42 +2302,40 @@ class CustomDialogContentComponent extends ViewPU {
         If.pop();
     }
 
-    buildButtonWithDivider(b3, c3 = null) {
-        this.observeComponentCreation2((e3, f3) => {
+    buildButtonWithDivider(g3, h3 = null) {
+        this.observeComponentCreation2((j3, k3) => {
             If.create();
-            if (this.buttons && this.buttons[b3]) {
+            if (this.buttons && this.buttons[g3]) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((r3, s3) => {
+                    this.observeComponentCreation2((w3, x3) => {
                         Row.create();
                     }, Row);
-                    this.buildSingleButton.bind(this)(this.buttons[b3], c3 ? c3 : this);
+                    this.buildSingleButton.bind(this)(this.buttons[g3], h3 ? h3 : this);
                     Row.pop();
-                    this.observeComponentCreation2((k3, l3) => {
+                    this.observeComponentCreation2((p3, q3) => {
                         If.create();
-                        if (b3 < Math.min(this.buttons.length, VERTICAL_BUTTON_MAX_COUNT) - 1) {
+                        if (g3 < Math.min(this.buttons.length, VERTICAL_BUTTON_MAX_COUNT) - 1) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((p3, q3) => {
+                                this.observeComponentCreation2((u3, v3) => {
                                     Row.create();
                                     Row.height({
-                                        "id": -1,
-                                        "type": 10002,
+                                        'id': -1,
+                                        'type': 10002,
                                         params: ['sys.float.alert_button_vertical_space'],
-                                        "bundleName": "__harDefaultBundleName__",
-                                        "moduleName": "__harDefaultModuleName__"
+                                        'bundleName': '__harDefaultBundleName__',
+                                        'moduleName': '__harDefaultModuleName__'
                                     });
                                 }, Row);
                                 Row.pop();
                             });
-                        }
-                        else {
+                        } else {
                             this.ifElseBranchUpdateFunction(1, () => {
                             });
                         }
                     }, If);
                     If.pop();
                 });
-            }
-            else {
+            } else {
                 this.ifElseBranchUpdateFunction(1, () => {
                 });
             }
@@ -2359,21 +2351,24 @@ class CustomDialogContentComponent extends ViewPU {
             this.titleHeight = getNumberByResource('alert_title_secondary_height');
         }
         this.contentMaxHeight = `calc(100% - ${this.titleHeight}vp - ${this.getButtonsHeight()}vp)`;
+        if (this.updateButtonHeight) {
+            this.updateButtonHeight(this.buttonHeight);
+        }
         this.primaryTitleFontColorWithTheme = this.theme?.colors?.fontPrimary ?
         this.theme.colors.fontPrimary : {
-                "id": -1,
-                "type": 10001,
+                'id': -1,
+                'type': 10001,
                 params: ['sys.color.font_primary'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             };
         this.secondaryTitleFontColorWithTheme = this.theme?.colors?.fontSecondary ?
         this.theme.colors.fontSecondary : {
-                "id": -1,
-                "type": 10001,
+                'id': -1,
+                'type': 10001,
                 params: ['sys.color.font_secondary'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             };
         this.buttonFontColorWithTheme = this.theme?.colors?.fontEmphasize ?
         this.theme.colors.fontEmphasize : '';
@@ -2389,11 +2384,11 @@ class CustomDialogContentComponent extends ViewPU {
             if (this.buttons[HORIZON_BUTTON_MAX_COUNT - 1].buttonStyle === ButtonStyleMode.TEXTUAL ||
                 this.buttons[HORIZON_BUTTON_MAX_COUNT - 1].buttonStyle === undefined) {
                 return {
-                    "id": -1,
-                    "type": 10001,
+                    'id': -1,
+                    'type': 10001,
                     params: ['sys.color.alert_divider_color'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 };
             }
         }
@@ -2404,17 +2399,17 @@ class CustomDialogContentComponent extends ViewPU {
         if (!this.buttons || this.buttons.length === 0) {
             return 0;
         }
-        let a3 = getNumberByResource('alert_button_top_padding');
+        let f3 = getNumberByResource('alert_button_top_padding');
         if (this.buttons.length <= HORIZON_BUTTON_MAX_COUNT) {
-            a3 += BUTTON_DEFAULT_HEIGHT +
+            f3 += BUTTON_DEFAULT_HEIGHT +
             getNumberByResource('alert_button_bottom_padding_horizontal');
-        }
-        else {
-            a3 += BUTTON_DEFAULT_HEIGHT * this.buttons.length +
+        } else {
+            f3 += BUTTON_DEFAULT_HEIGHT * this.buttons.length +
                 (this.buttons.length - 1) * getNumberByResource('alert_button_vertical_space') +
             getNumberByResource('alert_button_bottom_padding_vertical');
         }
-        return a3;
+        this.buttonHeight = f3;
+        return f3;
     }
 
     getContentPadding() {
@@ -2425,103 +2420,100 @@ class CustomDialogContentComponent extends ViewPU {
             return {
                 top: 0,
                 right: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_content_default_padding'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
                 bottom: 0,
                 left: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_content_default_padding'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
             };
-        }
-        else if (this.primaryTitle || this.secondaryTitle) {
+        } else if (this.primaryTitle || this.secondaryTitle) {
             return {
                 top: 0,
                 right: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_content_default_padding'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
                 bottom: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_content_default_padding'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
                 left: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_content_default_padding'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
             };
-        }
-        else if (this.buttons && this.buttons.length > 0) {
+        } else if (this.buttons && this.buttons.length > 0) {
             return {
                 top: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_content_default_padding'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
                 right: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_content_default_padding'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
                 bottom: 0,
                 left: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_content_default_padding'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
             };
-        }
-        else {
+        } else {
             return {
                 top: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_content_default_padding'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
                 right: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_content_default_padding'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
                 bottom: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_content_default_padding'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
                 left: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_content_default_padding'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
             };
         }
@@ -2530,23 +2522,21 @@ class CustomDialogContentComponent extends ViewPU {
     getTitleAreaMinHeight() {
         if (this.secondaryTitle) {
             return {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.alert_title_secondary_height'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             };
-        }
-        else if (this.primaryTitle) {
+        } else if (this.primaryTitle) {
             return {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.alert_title_primary_height'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             };
-        }
-        else {
+        } else {
             return 0;
         }
     }
@@ -2555,50 +2545,50 @@ class CustomDialogContentComponent extends ViewPU {
         if (this.primaryTitle || this.secondaryTitle) {
             return {
                 top: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_title_padding_top'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
                 right: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_title_padding_right'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
                 left: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_title_padding_left'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
                 bottom: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_title_padding_bottom'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
             };
         }
         return {
             top: 0,
             right: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.alert_title_padding_right'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             },
             left: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.alert_title_padding_left'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             },
             bottom: 0,
         };
@@ -2615,96 +2605,92 @@ class CustomDialogContentComponent extends ViewPU {
         if (this.isVerticalAlignButton()) {
             return {
                 top: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_button_top_padding'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
                 right: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_right_padding_vertical'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
                 left: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_left_padding_vertical'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
                 bottom: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_button_bottom_padding_vertical'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
             };
         }
         return {
             top: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.alert_button_top_padding'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             },
             right: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.alert_right_padding_horizontal'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             },
             left: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.alert_left_padding_horizontal'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             },
             bottom: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.alert_button_bottom_padding_horizontal'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             },
         };
     }
 
-    isNewPropertiesHighPriority(z2) {
-        if (z2.role === ButtonRole.ERROR) {
+    isNewPropertiesHighPriority(e3) {
+        if (e3.role === ButtonRole.ERROR) {
             return true;
         }
-        if (z2.buttonStyle !== undefined &&
-            z2.buttonStyle !== getNumberByResource('alert_button_style')) {
+        if (e3.buttonStyle !== undefined &&
+            e3.buttonStyle !== getNumberByResource('alert_button_style')) {
             return true;
         }
-        if (z2.background === undefined && z2.fontColor === undefined) {
+        if (e3.background === undefined && e3.fontColor === undefined) {
             return true;
         }
         return false;
     }
 
     getTitleTextAlign() {
-        let y2 = getEnumNumberByResource('alert_title_alignment');
-        if (y2 === TextAlign.Start) {
+        let d3 = getEnumNumberByResource('alert_title_alignment');
+        if (d3 === TextAlign.Start) {
             return TextAlign.Start;
-        }
-        else if (y2 === TextAlign.Center) {
+        } else if (d3 === TextAlign.Center) {
             return TextAlign.Center;
-        }
-        else if (y2 === TextAlign.End) {
+        } else if (d3 === TextAlign.End) {
             return TextAlign.End;
-        }
-        else if (y2 === TextAlign.JUSTIFY) {
+        } else if (d3 === TextAlign.JUSTIFY) {
             return TextAlign.JUSTIFY;
-        }
-        else {
+        } else {
             return TextAlign.Center;
         }
     }
@@ -2715,10 +2701,10 @@ class CustomDialogContentComponent extends ViewPU {
 }
 
 export class CustomDialogComponent extends ViewPU {
-    constructor(s2, t2, u2, v2 = -1, w2 = undefined, x2) {
-        super(s2, u2, v2, x2);
-        if (typeof w2 === "function") {
-            this.paramsGenerator_ = w2;
+    constructor(x2, y2, z2, a3 = -1, b3 = undefined, c3) {
+        super(x2, z2, a3, c3);
+        if (typeof b3 === 'function') {
+            this.paramsGenerator_ = b3;
         }
         this.controller = undefined;
         this.primaryTitle = undefined;
@@ -2727,51 +2713,67 @@ export class CustomDialogComponent extends ViewPU {
         this.buttons = undefined;
         this.contentAreaPadding = undefined;
         this.screenWidth = 0;
-        this.__columnModifier = new ObservedPropertyObjectPU(new ColumnModifier(), this, "columnModifier");
+        this.__columnModifier = new ObservedPropertyObjectPU(new ColumnModifier(), this, 'columnModifier');
         this.isFirstInit = true;
         this.theme = new CustomThemeImpl({});
-        this.setInitiallyProvidedValue(t2);
+        this.targetSdk = VERSION_TWELVE;
+        this.dialogWidth = 0;
+        this.updateTitleHeight = undefined;
+        this.updateButtonHeight = undefined;
+        this.setInitiallyProvidedValue(y2);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(r2) {
-        if (r2.controller !== undefined) {
-            this.controller = r2.controller;
+    setInitiallyProvidedValue(w2) {
+        if (w2.controller !== undefined) {
+            this.controller = w2.controller;
         }
-        if (r2.primaryTitle !== undefined) {
-            this.primaryTitle = r2.primaryTitle;
+        if (w2.primaryTitle !== undefined) {
+            this.primaryTitle = w2.primaryTitle;
         }
-        if (r2.secondaryTitle !== undefined) {
-            this.secondaryTitle = r2.secondaryTitle;
+        if (w2.secondaryTitle !== undefined) {
+            this.secondaryTitle = w2.secondaryTitle;
         }
-        if (r2.contentBuilder !== undefined) {
-            this.contentBuilder = r2.contentBuilder;
+        if (w2.contentBuilder !== undefined) {
+            this.contentBuilder = w2.contentBuilder;
         }
-        if (r2.buttons !== undefined) {
-            this.buttons = r2.buttons;
+        if (w2.buttons !== undefined) {
+            this.buttons = w2.buttons;
         }
-        if (r2.contentAreaPadding !== undefined) {
-            this.contentAreaPadding = r2.contentAreaPadding;
+        if (w2.contentAreaPadding !== undefined) {
+            this.contentAreaPadding = w2.contentAreaPadding;
         }
-        if (r2.screenWidth !== undefined) {
-            this.screenWidth = r2.screenWidth;
+        if (w2.screenWidth !== undefined) {
+            this.screenWidth = w2.screenWidth;
         }
-        if (r2.columnModifier !== undefined) {
-            this.columnModifier = r2.columnModifier;
+        if (w2.columnModifier !== undefined) {
+            this.columnModifier = w2.columnModifier;
         }
-        if (r2.isFirstInit !== undefined) {
-            this.isFirstInit = r2.isFirstInit;
+        if (w2.isFirstInit !== undefined) {
+            this.isFirstInit = w2.isFirstInit;
         }
-        if (r2.theme !== undefined) {
-            this.theme = r2.theme;
+        if (w2.theme !== undefined) {
+            this.theme = w2.theme;
+        }
+        if (w2.targetSdk !== undefined) {
+            this.targetSdk = w2.targetSdk;
+        }
+        if (w2.dialogWidth !== undefined) {
+            this.dialogWidth = w2.dialogWidth;
+        }
+        if (w2.updateTitleHeight !== undefined) {
+            this.updateTitleHeight = w2.updateTitleHeight;
+        }
+        if (w2.updateButtonHeight !== undefined) {
+            this.updateButtonHeight = w2.updateButtonHeight;
         }
     }
 
-    updateStateVars(q2) {
+    updateStateVars(v2) {
     }
 
-    purgeVariableDependenciesOnElmtId(p2) {
-        this.__columnModifier.purgeDependencyOnElmtId(p2);
+    purgeVariableDependenciesOnElmtId(u2) {
+        this.__columnModifier.purgeDependencyOnElmtId(u2);
     }
 
     aboutToBeDeleted() {
@@ -2784,47 +2786,50 @@ export class CustomDialogComponent extends ViewPU {
         return this.__columnModifier.get();
     }
 
-    set columnModifier(o2) {
-        this.__columnModifier.set(o2);
+    set columnModifier(t2) {
+        this.__columnModifier.set(t2);
     }
 
     initialRender() {
-        this.observeComponentCreation2((j2, k2) => {
+        this.observeComponentCreation2((o2, p2) => {
             Column.create();
-            Column.onAreaChange((m2, n2) => {
+            Column.onAreaChange((r2, s2) => {
                 if (!this.isFirstInit) {
                     return;
                 }
+                this.dialogWidth = s2.width;
+                this.updateCustomStyle();
                 if (this.screenWidth > getNumberByResource('alert_container_max_width')) {
-                    this.columnModifier.customStyle = n2.width > getNumberByResource('alert_container_max_width');
-                }
-                else {
-                    this.columnModifier.customStyle = n2.width >= this.screenWidth;
+                    this.columnModifier.customStyle = s2.width > getNumberByResource('alert_container_max_width');
+                } else {
+                    this.columnModifier.customStyle = s2.width >= this.screenWidth;
                 }
                 this.isFirstInit = false;
             });
         }, Column);
-        this.observeComponentCreation2((h2, i2) => {
+        this.observeComponentCreation2((m2, n2) => {
             Column.create();
             Column.attributeModifier.bind(this)(ObservedObject.GetRawObject(this.columnModifier));
         }, Column);
         {
-            this.observeComponentCreation2((b2, c2) => {
-                if (c2) {
-                    let d2 = new CustomDialogContentComponent(this, {
+            this.observeComponentCreation2((g2, h2) => {
+                if (h2) {
+                    let i2 = new CustomDialogContentComponent(this, {
                         controller: this.controller,
                         primaryTitle: this.primaryTitle,
                         secondaryTitle: this.secondaryTitle,
                         contentBuilder: () => {
                             this.contentBuilder();
                         },
+                        updateTitleHeight: this.updateTitleHeight,
+                        updateButtonHeight: this.updateButtonHeight,
                         buttons: this.buttons,
                         contentAreaPadding: this.contentAreaPadding,
                         theme: this.theme,
-                    }, undefined, b2, () => {
-                    }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 1111, col: 9 });
-                    ViewPU.create(d2);
-                    let e2 = () => {
+                    }, undefined, g2, () => {
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 1137, col: 9 });
+                    ViewPU.create(i2);
+                    let j2 = () => {
                         return {
                             controller: this.controller,
                             primaryTitle: this.primaryTitle,
@@ -2832,29 +2837,49 @@ export class CustomDialogComponent extends ViewPU {
                             contentBuilder: () => {
                                 this.contentBuilder();
                             },
+                            updateTitleHeight: this.updateTitleHeight,
+                            updateButtonHeight: this.updateButtonHeight,
                             buttons: this.buttons,
                             contentAreaPadding: this.contentAreaPadding,
                             theme: this.theme
                         };
                     };
-                    d2.paramsGenerator_ = e2;
+                    i2.paramsGenerator_ = j2;
+                } else {
+                    this.updateStateVarsOfChildByElmtId(g2, {});
                 }
-                else {
-                    this.updateStateVarsOfChildByElmtId(b2, {});
-                }
-            }, { name: "CustomDialogContentComponent" });
+            }, { name: 'CustomDialogContentComponent' });
         }
         Column.pop();
         Column.pop();
     }
 
+    updateCustomStyle() {
+        if (this.targetSdk >= VERSION_TWELVE) {
+            return;
+        }
+        if (this.screenWidth > getNumberByResource('alert_container_max_width')) {
+            this.columnModifier.customStyle = this.dialogWidth > getNumberByResource('alert_container_max_width');
+        } else {
+            this.columnModifier.customStyle = this.dialogWidth >= this.screenWidth;
+        }
+    }
+
     aboutToAppear() {
         try {
             this.screenWidth = px2vp(display.getDefaultDisplaySync().width);
-        }
-        catch (x1) {
+            let y1 = bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION |
+            bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_METADATA;
+            bundleManager.getBundleInfoForSelf(y1).then((c2) => {
+                this.targetSdk = c2.targetVersion;
+                this.updateCustomStyle();
+            }).catch((b2) => {
+                hilog.error(0x3900, 'Ace', 'getBundleInfoForSelf failed Cause: %{public}s', b2.message);
+            });
+        } catch (x1) {
             hilog.error(0x3900, 'Ace', `CustomDialogComponent getDefaultDisplaySync error: ${JSON.stringify(x1)}`);
         }
+        ;
     }
 
     rerender() {
@@ -2873,41 +2898,41 @@ class ColumnModifier {
         }
         w1.backgroundBlurStyle(BlurStyle.Thick);
         w1.borderRadius({
-            "id": -1,
-            "type": 10002,
+            'id': -1,
+            'type': 10002,
             params: ['sys.float.ohos_id_corner_radius_dialog'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
         });
         w1.margin({
             left: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.ohos_id_dialog_margin_start'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             },
             right: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.ohos_id_dialog_margin_end'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             },
             bottom: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.ohos_id_dialog_margin_bottom'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             },
         });
         w1.backgroundColor({
-            "id": -1,
-            "type": 10001,
+            'id': -1,
+            'type': 10001,
             params: ['sys.color.ohos_id_color_dialog_bg'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
         });
     }
 }
@@ -2927,8 +2952,7 @@ function __Button__setButtonProperties(t1, u1) {
 function getNumberByResource(p1) {
     try {
         return resourceManager.getSystemResourceManager().getNumberByName(p1);
-    }
-    catch (q1) {
+    } catch (q1) {
         let r1 = q1.code;
         let s1 = q1.message;
         hilog.error(0x3900, 'Ace', `CustomContentDialog getNumberByResource error, code: ${r1}, message: ${s1}`);
@@ -2939,8 +2963,7 @@ function getNumberByResource(p1) {
 function getEnumNumberByResource(l1) {
     try {
         return getContext().resourceManager.getNumberByName(l1);
-    }
-    catch (m1) {
+    } catch (m1) {
         let n1 = m1.code;
         let o1 = m1.message;
         hilog.error(0x3900, 'Ace', `getEnumNumberByResource error, code: ${n1}, message: ${o1}`);
@@ -2955,12 +2978,10 @@ function resolveKeyEvent(j1, k1) {
     if (j1.keyCode == KEYCODE_UP) {
         k1.scrollPage({ next: false });
         j1.stopPropagation();
-    }
-    else if (j1.keyCode == KEYCODE_DOWN) {
+    } else if (j1.keyCode == KEYCODE_DOWN) {
         if (k1.isAtEnd()) {
             return;
-        }
-        else {
+        } else {
             k1.scrollPage({ next: true });
             j1.stopPropagation();
         }
@@ -2970,25 +2991,25 @@ function resolveKeyEvent(j1, k1) {
 export class LoadingDialog extends ViewPU {
     constructor(d1, e1, f1, g1 = -1, h1 = undefined, i1) {
         super(d1, f1, g1, i1);
-        if (typeof h1 === "function") {
+        if (typeof h1 === 'function') {
             this.paramsGenerator_ = h1;
         }
         this.controller = undefined;
         this.content = '';
         this.__fontColorWithTheme = new ObservedPropertyObjectPU({
-            "id": -1,
-            "type": 10001,
+            'id': -1,
+            'type': 10001,
             params: ['sys.color.font_primary'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
-        }, this, "fontColorWithTheme");
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'fontColorWithTheme');
         this.__loadingProgressIconColorWithTheme = new ObservedPropertyObjectPU({
-            "id": -1,
-            "type": 10001,
+            'id': -1,
+            'type': 10001,
             params: ['sys.color.icon_secondary'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
-        }, this, "loadingProgressIconColorWithTheme");
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'loadingProgressIconColorWithTheme');
         this.theme = new CustomThemeImpl({});
         this.setInitiallyProvidedValue(e1);
         this.finalizeConstruction();
@@ -3061,7 +3082,7 @@ export class LoadingDialog extends ViewPU {
                         },
                         theme: this.theme,
                     }, undefined, p, () => {
-                    }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 1247, col: 7 });
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 1297, col: 7 });
                     ViewPU.create(r);
                     let s = () => {
                         return {
@@ -3073,11 +3094,10 @@ export class LoadingDialog extends ViewPU {
                         };
                     };
                     r.paramsGenerator_ = s;
-                }
-                else {
+                } else {
                     this.updateStateVarsOfChildByElmtId(p, {});
                 }
-            }, { name: "CustomDialogComponent" });
+            }, { name: 'CustomDialogComponent' });
         }
         Column.pop();
     }
@@ -3093,11 +3113,11 @@ export class LoadingDialog extends ViewPU {
         this.observeComponentCreation2((h, i) => {
             Text.create(this.content);
             Text.fontSize({
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.Body_L'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             });
             Text.fontWeight(FontWeight.Regular);
             Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
@@ -3122,19 +3142,19 @@ export class LoadingDialog extends ViewPU {
     aboutToAppear() {
         this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
         this.theme.colors.fontPrimary : {
-                "id": -1,
-                "type": 10001,
+                'id': -1,
+                'type': 10001,
                 params: ['sys.color.font_primary'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             };
         this.loadingProgressIconColorWithTheme = this.theme?.colors?.iconSecondary ?
         this.theme.colors.iconSecondary : {
-                "id": -1,
-                "type": 10001,
+                'id': -1,
+                'type': 10001,
                 params: ['sys.color.icon_secondary'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             };
     }
 

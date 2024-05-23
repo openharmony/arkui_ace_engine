@@ -153,6 +153,7 @@ public:
     {
         return titleMode_ == NavigationTitleMode::FREE;
     }
+    OffsetF GetShowMenuOffset(const RefPtr<BarItemNode> barItemNode, RefPtr<FrameNode> menuNode);
 
     void SetKeyboardOffset(float keyboardOffset)
     {

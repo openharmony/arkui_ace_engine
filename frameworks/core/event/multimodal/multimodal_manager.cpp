@@ -116,14 +116,16 @@ void MultiModalManager::OpenChannel(const RefPtr<PipelineContext>& context)
             return;
         }
         auto weakScene = AceType::WeakClaim(AceType::RawPtr(scene));
-        context->GetTaskExecutor()->PostSyncTask([event, weakScene]() {
-            auto scene = weakScene.Upgrade();
-            if (scene == nullptr) {
-                LOGE("scene is null!");
-                return;
-            }
+        context->GetTaskExecutor()->PostSyncTask(
+            [event, weakScene]() {
+                auto scene = weakScene.Upgrade();
+                if (scene == nullptr) {
+                    LOGE("scene is null!");
+                    return;
+                }
             scene->OnNotifyMultimodalEvent(event);
-        }, TaskExecutor::TaskType::UI, "ArkUINotifyMultimodalEvent");
+            },
+            TaskExecutor::TaskType::UI, "ArkUINotifyMultimodalEvent");
     };
     subscriber_->RegisterCallback(callback, [weak = WeakClaim(this)]() {
         auto manager = weak.Upgrade();

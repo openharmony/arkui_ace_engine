@@ -479,8 +479,8 @@ class TextInputEnableAutoFillModifier extends ModifierWithKey<boolean> {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
-class TextInputShowErrorModifier extends ModifierWithKey<string | undefined> {
-  constructor(value: string | undefined) {
+class TextInputShowErrorModifier extends ModifierWithKey<ResourceStr | undefined> {
+  constructor(value: ResourceStr | undefined) {
     super(value);
   }
   static identity: Symbol = Symbol('textInputShowError');
@@ -1215,6 +1215,62 @@ class TextInputControllerModifier extends ModifierWithKey<TextInputController> {
 
 }
 
+class TextInputOnWillInsertModifier extends ModifierWithKey<Callback<InsertValue, boolean>> {
+  constructor(value: Callback<InsertValue, boolean>) {
+    super(value);
+  }
+  static identity = Symbol('textInputOnWillInsert');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetOnWillInsert(node);
+    } else {
+      getUINativeModule().textInput.setOnWillInsert(node, this.value);
+    }
+  }
+}
+
+class TextInputOnDidInsertModifier extends ModifierWithKey<Callback<InsertValue>> {
+  constructor(value: Callback<InsertValue>) {
+    super(value);
+  }
+  static identity = Symbol('textInputOnDidInsert');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetOnDidInsert(node);
+    } else {
+      getUINativeModule().textInput.setOnDidInsert(node, this.value);
+    }
+  }
+}
+
+class TextInputOnWillDeleteModifier extends ModifierWithKey<Callback<DeleteValue, boolean>> {
+  constructor(value: Callback<DeleteValue, boolean>) {
+    super(value);
+  }
+  static identity = Symbol('textInputOnWillDelete');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetOnWillDelete(node);
+    } else {
+      getUINativeModule().textInput.setOnWillDelete(node, this.value);
+    }
+  }
+}
+
+class TextInputOnDidDeleteModifier extends ModifierWithKey<Callback<DeleteValue>> {
+  constructor(value: Callback<DeleteValue>) {
+    super(value);
+  }
+  static identity = Symbol('textInputOnDidDelete');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetOnDidDelete(node);
+    } else {
+      getUINativeModule().textInput.setOnDidDelete(node, this.value);
+    }
+  }
+}
+
 interface TextInputParam {
   placeholder?: ResourceStr;
   text?: ResourceStr;
@@ -1444,7 +1500,7 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
       TextInputPasswordIconModifier, value);
     return this;
   }
-  showError(value: string | undefined): TextInputAttribute {
+  showError(value: ResourceStr | undefined): TextInputAttribute {
     modifierWithKey(this._modifiersWithKeys, TextInputShowErrorModifier.identity,
       TextInputShowErrorModifier, value);
     return this;
@@ -1649,6 +1705,22 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
     } else {
       modifierWithKey(this._modifiersWithKeys, TextInputMarginModifier.identity, TextInputMarginModifier, undefined);
     }
+    return this;
+  }
+  onWillInsert(callback: Callback<InsertValue, boolean>): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputOnWillInsertModifier.identity, TextInputOnWillInsertModifier, callback);
+    return this;
+  }
+  onDidInsert(callback: Callback<InsertValue>): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputOnDidInsertModifier.identity, TextInputOnDidInsertModifier, callback);
+    return this;
+  }
+  onWillDelete(callback: Callback<DeleteValue, boolean>): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputOnWillDeleteModifier.identity, TextInputOnWillDeleteModifier, callback);
+    return this;
+  }
+  onDidDelete(callback: Callback<DeleteValue>): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputOnDidDeleteModifier.identity, TextInputOnDidDeleteModifier, callback);
     return this;
   }
 }

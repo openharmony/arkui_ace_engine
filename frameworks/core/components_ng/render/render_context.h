@@ -50,6 +50,15 @@ enum class Gravity;
 }
 
 namespace OHOS::Ace::NG {
+
+typedef enum {
+    OPINC_INVALID,
+    OPINC_NODE,
+    OPINC_SUGGESTED_OR_EXCLUDED,
+    OPINC_PARENT_POSSIBLE,
+    OPINC_NODE_POSSIBLE,
+} OPINC_TYPE_E;
+
 class GeometryNode;
 class RenderPropertyNode;
 class FrameNode;
@@ -493,6 +502,7 @@ public:
 
     // Foreground
     ACE_DEFINE_PROPERTY_GROUP(Foreground, ForegroundProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Foreground, ForegroundEffect, float);
 
     // Background
     ACE_DEFINE_PROPERTY_GROUP(Background, BackgroundProperty);
@@ -518,7 +528,6 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(NodeName, std::string);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SuggestedRenderGroup, bool);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundColor, Color);
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundEffect, float);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundColorStrategy, ForegroundColorStrategy);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(DynamicRangeMode, DynamicRangeMode);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ForegroundColorFlag, bool);
@@ -662,6 +671,8 @@ public:
     {
         return Matrix4();
     }
+
+    virtual void SuggestOpIncNode(bool isOpincNode, bool isNeedCalculate) {}
 
 protected:
     RenderContext() = default;

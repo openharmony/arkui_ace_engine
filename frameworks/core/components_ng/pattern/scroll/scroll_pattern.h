@@ -27,7 +27,6 @@
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
-#include "core/components_ng/pattern/web/slide_update_listener.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
@@ -74,6 +73,11 @@ public:
         return paint;
     }
 
+    OPINC_TYPE_E OpIncType() override
+    {
+        return OPINC_PARENT_POSSIBLE;
+    }
+
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<ScrollEventHub>();
@@ -115,7 +119,6 @@ public:
 
     bool IsRowReverse() const
     {
-        // TODO: not consider rightToLeft
         return direction_ == FlexDirection::ROW_REVERSE;
     }
 
@@ -145,10 +148,6 @@ public:
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
     bool IsOutOfBoundary(bool useCurrentDelta = true) override;
-    bool OutBoundaryCallback() override
-    {
-        return IsOutOfBoundary();
-    }
     OverScrollOffset GetOverScrollOffset(double delta) const override;
 
     void OnAnimateStop() override;
@@ -262,26 +261,24 @@ public:
         return scrollLayoutProperty->GetScrollSnapAlign().value_or(ScrollSnapAlign::NONE);
     }
 
-    void registerSlideUpdateListener(const std::shared_ptr<ISlideUpdateCallback>& listener);
-
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
-	
+
     void SetIsWidthModifiedBySelect(bool isModified)
     {
         isWidthModifiedBySelect_ = isModified;
     }
-    
+
     bool IsWidthModifiedBySelect() const
     {
         return isWidthModifiedBySelect_;
     }
-    
+
     void SetIsSelectScroll(bool isSelect)
     {
         isSelectScroll_ = isSelect;
     }
-    
+
     bool IsSelectScroll() const
     {
         return isSelectScroll_;
@@ -309,8 +306,8 @@ public:
 
     bool IsScrollSnap() override
     {
-        return (!snapOffsets_.empty() && GetScrollSnapAlign() != ScrollSnapAlign::NONE)
-            || enablePagingStatus_ == ScrollPagingStatus::VALID;
+        return !snapOffsets_.empty() &&
+               (GetScrollSnapAlign() != ScrollSnapAlign::NONE || enablePagingStatus_ == ScrollPagingStatus::VALID);
     }
 
     void TriggerModifyDone();
@@ -331,6 +328,8 @@ public:
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+
+    bool OnScrollSnapCallback(double targetOffset, double velocity) override;
 
 protected:
     void DoJump(float position, int32_t source = SCROLL_FROM_JUMP);
@@ -362,7 +361,7 @@ private:
     void UpdateScrollBarOffset() override;
     void SetAccessibilityAction();
     bool SetScrollProperties(const RefPtr<LayoutWrapper>& dirty);
-    void ScrollSnapTrigger();
+    bool ScrollSnapTrigger();
     void CheckScrollable();
     OffsetF GetOffsetToScroll(const RefPtr<FrameNode>& childFrame) const;
 
@@ -376,7 +375,6 @@ private:
     SizeF viewSize_;
     SizeF viewPortExtent_;
     FlexDirection direction_ { FlexDirection::COLUMN };
-    std::vector<std::shared_ptr<ISlideUpdateCallback>> listenerVector_;
 
     // scrollSnap
     std::vector<float> snapOffsets_;
@@ -384,7 +382,7 @@ private:
     std::pair<bool, bool> enableSnapToSide_ = { true, true };
     Dimension intervalSize_;
     bool scrollSnapUpdate_ = false;
-    
+
     bool isWidthModifiedBySelect_ = false;
     bool isSelectScroll_ = false;
     bool hasOptionWidth_ = false;

@@ -98,7 +98,6 @@ export class SubHeader extends ViewPU {
     this.__operationType = new SynchedPropertySimpleOneWayPU(y11.operationType, this, "operationType");
     this.operationItem = null;
     this.operationSymbolOptions = null;
-    this.__isDuplicateLine = new ObservedPropertySimplePU(false, this, "isDuplicateLine");
     this.__textArrowBgColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_sub_background_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "textArrowBgColor");
     this.__buttonBgColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_sub_background_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "buttonBgColor");
     this.__textArrowFocus = new ObservedPropertySimplePU(false, this, "textArrowFocus");
@@ -148,9 +147,6 @@ export class SubHeader extends ViewPU {
     }
     if (w11.operationSymbolOptions !== undefined) {
       this.operationSymbolOptions = w11.operationSymbolOptions;
-    }
-    if (w11.isDuplicateLine !== undefined) {
-      this.isDuplicateLine = w11.isDuplicateLine;
     }
     if (w11.textArrowBgColor !== undefined) {
       this.textArrowBgColor = w11.textArrowBgColor;
@@ -209,7 +205,6 @@ export class SubHeader extends ViewPU {
     this.__secondaryTitle.purgeDependencyOnElmtId(u11);
     this.__secondaryTitleModifier.purgeDependencyOnElmtId(u11);
     this.__operationType.purgeDependencyOnElmtId(u11);
-    this.__isDuplicateLine.purgeDependencyOnElmtId(u11);
     this.__textArrowBgColor.purgeDependencyOnElmtId(u11);
     this.__buttonBgColor.purgeDependencyOnElmtId(u11);
     this.__textArrowFocus.purgeDependencyOnElmtId(u11);
@@ -232,7 +227,6 @@ export class SubHeader extends ViewPU {
     this.__secondaryTitle.aboutToBeDeleted();
     this.__secondaryTitleModifier.aboutToBeDeleted();
     this.__operationType.aboutToBeDeleted();
-    this.__isDuplicateLine.aboutToBeDeleted();
     this.__textArrowBgColor.aboutToBeDeleted();
     this.__buttonBgColor.aboutToBeDeleted();
     this.__textArrowFocus.aboutToBeDeleted();
@@ -285,12 +279,6 @@ export class SubHeader extends ViewPU {
   }
   set operationType(o11) {
     this.__operationType.set(o11);
-  }
-  get isDuplicateLine() {
-    return this.__isDuplicateLine.get();
-  }
-  set isDuplicateLine(n11) {
-    this.__isDuplicateLine.set(n11);
   }
   get textArrowBgColor() {
     return this.__textArrowBgColor.get();
@@ -391,7 +379,7 @@ export class SubHeader extends ViewPU {
       Flex.create({ direction: FlexDirection.Row, alignItems: ItemAlign.End });
       Flex.width('100%');
       Flex.focusable(true);
-      Flex.constraintSize({ minHeight: this.isDuplicateLine ? DOUBLE_LINE_HEIGHT : SINGLE_LINE_HEIGHT });
+      Flex.constraintSize({ minHeight: this.getMinHeight() });
     }, Flex);
     this.observeComponentCreation2((u10, v10) => {
       Row.create();
@@ -427,6 +415,15 @@ export class SubHeader extends ViewPU {
     else {
       return MAX_RIGHT_WIDTH;
     }
+  }
+  getMinHeight() {
+    if (this.secondaryTitle && this.icon) {
+      return SINGLE_LINE_HEIGHT;
+    }
+    else if (this.secondaryTitle && this.primaryTitle) {
+      return DOUBLE_LINE_HEIGHT;
+    }
+    return SINGLE_LINE_HEIGHT;
   }
   leftArea(e10 = null) {
     this.observeComponentCreation2((g10, h10) => {
@@ -536,7 +533,6 @@ export class SubHeader extends ViewPU {
         bottom: { "id": -1, "type": 10002, params: ['sys.float.padding_level4'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
       });
       Flex.onAppear(() => {
-        this.isDuplicateLine = false;
         this.changeFlexAlign(FlexAlign.SpaceBetween);
       });
     }, Flex);
@@ -597,7 +593,6 @@ export class SubHeader extends ViewPU {
       });
       Column.alignItems(HorizontalAlign.Start);
       Column.onAppear(() => {
-        this.isDuplicateLine = true;
         this.changeFlexAlign(FlexAlign.SpaceBetween);
       });
     }, Column);
@@ -651,7 +646,6 @@ export class SubHeader extends ViewPU {
       });
       Text.width('100%');
       Text.onAppear(() => {
-        this.isDuplicateLine = false;
         this.changeFlexAlign(FlexAlign.SpaceBetween);
       });
       Text.attributeModifier.bind(this)(ObservedObject.GetRawObject(this.secondaryTitleModifier));
@@ -664,7 +658,6 @@ export class SubHeader extends ViewPU {
       Column.create();
       Column.alignItems(HorizontalAlign.Start);
       Column.onAppear(() => {
-        this.isDuplicateLine = false;
         this.changeFlexAlign(FlexAlign.SpaceBetween);
       });
     }, Column);
@@ -710,7 +703,6 @@ export class SubHeader extends ViewPU {
       });
       Text.width('100%');
       Text.onAppear(() => {
-        this.isDuplicateLine = false;
         this.changeFlexAlign(FlexAlign.SpaceBetween);
       });
       Text.attributeModifier.bind(this)(ObservedObject.GetRawObject(this.primaryTitleModifier));
@@ -1110,9 +1102,6 @@ export class SubHeader extends ViewPU {
       LoadingProgress.height(LOADING_SIZE);
       LoadingProgress.color({ "id": -1, "type": 10001, params: ['sys.color.icon_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
       LoadingProgress.focusable(true);
-      LoadingProgress.onAppear(() => {
-        this.isDuplicateLine = false;
-      });
     }, LoadingProgress);
     Row.pop();
   }

@@ -177,7 +177,12 @@
                     "header": {
                         "header_base": "//foundation/arkui/ace_engine/",
                         "header_files": [
-                            "interfaces/native/native_interface_xcomponent.h"
+                            "interfaces/native/node/native_drawable_descriptor.h",
+                            "interfaces/native/native_interface_xcomponent.h",
+                            "interfaces/native/native_node.h",
+                            "interfaces/native/native_interface.h",
+                            "interfaces/native/native_type.h",
+                            "interfaces/native/native_node_napi.h"
                         ]
                     },
                     "name": "//foundation/arkui/ace_engine/interfaces/native:ace_ndk"

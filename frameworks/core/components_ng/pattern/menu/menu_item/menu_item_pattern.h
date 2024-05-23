@@ -172,6 +172,16 @@ public:
         return startIcon_ != nullptr;
     }
 
+    void SetClickMenuItemId(int32_t id)
+    {
+        clickMenuItemId_ = id;
+    }
+
+    int32_t GetClickMenuItemId() const
+    {
+        return clickMenuItemId_;
+    }
+
     void OnVisibleChange(bool isVisible) override;
     void InitLongPressEvent();
 
@@ -179,6 +189,7 @@ protected:
     void RegisterOnKeyEvent();
     void RegisterOnTouch();
     void OnAfterModifyDone() override;
+    RefPtr<FrameNode> GetMenuWrapper();
 
 private:
     // register menu item's callback
@@ -204,8 +215,6 @@ private:
     void ShowEmbeddedSubMenu(bool hasFurtherExpand);
 
     void UpdateDisabledStyle();
-
-    RefPtr<FrameNode> GetMenuWrapper();
 
     void ShowSubMenu();
     void ShowSubMenuHelper(const RefPtr<FrameNode>& subMenu);
@@ -244,6 +253,7 @@ private:
     bool isFocusShadowSet_ = false;
     bool isFocusBGColorSet_ = false;
     bool isExpanded_ = false;
+    int32_t clickMenuItemId_ = -1;
 
     std::function<void()> subBuilderFunc_ = nullptr;
 

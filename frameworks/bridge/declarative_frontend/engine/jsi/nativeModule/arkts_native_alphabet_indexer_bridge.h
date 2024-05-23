@@ -65,6 +65,8 @@ public:
     static ArkUINativeModuleValue ResetPopupTitleBackground(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetAdaptiveWidth(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetAdaptiveWidth(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetAutoCollapse(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetAutoCollapse(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 }
 

@@ -156,23 +156,25 @@ bool ScrollPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty)
     return true;
 }
 
-void ScrollPattern::ScrollSnapTrigger()
+bool ScrollPattern::ScrollSnapTrigger()
 {
     auto scrollBar = GetScrollBar();
     auto scrollBarProxy = GetScrollBarProxy();
     if (scrollBar && scrollBar->IsPressed()) {
-        return;
+        return false;
     }
     if (scrollBarProxy && scrollBarProxy->IsScrollSnapTrigger()) {
-        return;
+        return false;
     }
     if (ScrollableIdle() && !AnimateRunning()) {
         auto predictSnapOffset = CalePredictSnapOffset(0.0);
         if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
             StartScrollSnapMotion(predictSnapOffset.value(), 0.0f);
             FireOnScrollStart();
+            return true;
         }
     }
+    return false;
 }
 
 void ScrollPattern::CheckScrollable()
@@ -488,11 +490,6 @@ void ScrollPattern::HandleCrashBottom() const
 
 bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
 {
-    for (auto listenerItem : listenerVector_) {
-        if (listenerItem) {
-            listenerItem->OnSlideUpdate();
-        }
-    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     if (source != SCROLL_FROM_JUMP && !HandleEdgeEffect(delta, source, viewSize_)) {
@@ -966,11 +963,6 @@ Rect ScrollPattern::GetItemRect(int32_t index) const
         itemGeometry->GetFrameRect().Width(), itemGeometry->GetFrameRect().Height());
 }
 
-void ScrollPattern::registerSlideUpdateListener(const std::shared_ptr<ISlideUpdateCallback>& listener)
-{
-    listenerVector_.emplace_back(listener);
-}
-
 float ScrollPattern::GetSelectScrollWidth()
 {
     RefPtr<GridColumnInfo> columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
@@ -1055,5 +1047,10 @@ void ScrollPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     initialOffset->Put("xOffset", GetInitialOffset().GetX().ToString().c_str());
     initialOffset->Put("yOffset", GetInitialOffset().GetY().ToString().c_str());
     json->PutExtAttr("initialOffset", initialOffset, filter);
+}
+
+bool ScrollPattern::OnScrollSnapCallback(double targetOffset, double velocity)
+{
+    return ScrollSnapTrigger();
 }
 } // namespace OHOS::Ace::NG

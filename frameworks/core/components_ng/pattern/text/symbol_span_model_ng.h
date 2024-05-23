@@ -34,6 +34,10 @@ public:
 
     static void SetFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetFontWeight(FrameNode* frameNode, FontWeight value);
+    static void SetFontColor(FrameNode* frameNode, std::vector<Color>& symbolColor);
+    static void SetSymbolRenderingStrategy(FrameNode* frameNode, const uint32_t renderingStrategy);
+    static void SetSymbolEffect(FrameNode* frameNode, const uint32_t effectStrategy);
+    static void InitialSymbol(FrameNode* frameNode, const std::uint32_t& symbolId);
 };
 } // namespace OHOS::Ace::NG
 

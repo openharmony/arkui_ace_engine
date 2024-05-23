@@ -601,8 +601,7 @@ export class PopupComponent extends ViewPU {
         let w;
         if (this.title.text !== '' && this.title.text !== void (0)) {
             w = { left: this.theme.button.margin.left / 2 };
-        }
-        else {
+        } else {
             w = { left: this.theme.button.margin.left / 2, right: this.theme.closeButton.margin.right };
         }
         return w;
@@ -852,8 +851,7 @@ export class PopupComponent extends ViewPU {
                                     Button.onHover((h) => {
                                         if (h) {
                                             this.closeButtonBackgroundColor = this.getCloseButtonHoverColor();
-                                        }
-                                        else {
+                                        } else {
                                             this.closeButtonBackgroundColor = this.getCloseButtonBackgroundColor();
                                         }
                                     });

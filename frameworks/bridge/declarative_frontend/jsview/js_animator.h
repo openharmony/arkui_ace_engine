@@ -52,7 +52,6 @@ public:
 private:
     static EventMarker GetEventMarker(const JSCallbackInfo& info);
     static std::string animatorId_;
-
 };
 
 class JSSpringProp : public AceType {

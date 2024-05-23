@@ -262,6 +262,8 @@ export class ToolBar extends ViewPU {
   MoreTabBuilder(g2, h2 = null) {
     this.observeComponentCreation2((p2, q2) => {
       Column.create();
+      Column.bindMenu(ObservedObject.GetRawObject(this.menuContent),
+        { placement: Placement.TopRight, offset: { x: -12, y : -10 } });
       Column.width('100%');
       Column.height('100%');
       Column.padding({ start: LengthMetrics.vp(4), end: LengthMetrics.vp(4) });
@@ -275,7 +277,6 @@ export class ToolBar extends ViewPU {
       Image.fillColor(ObservedObject.GetRawObject(this.iconPrimaryColor));
       Image.margin({ top: 8, bottom: 2 });
       Image.objectFit(ImageFit.Contain);
-      Image.bindMenu(ObservedObject.GetRawObject(this.menuContent), { offset: { x: 5, y: -10 } });
     }, Image);
     this.observeComponentCreation2((l2, m2) => {
       Text.create(this.moreText);
@@ -304,9 +305,9 @@ export class ToolBar extends ViewPU {
       Column.onClick(() => {
         let f2 = this.toolBarList[r1];
         if (f2.state === ItemState.ACTIVATE) {
-          if (this.activateIndex === r1)
+          if (this.activateIndex === r1) {
             this.activateIndex = -1;
-          else {
+          } else {
             this.activateIndex = r1;
           }
         }

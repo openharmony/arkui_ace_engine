@@ -157,6 +157,10 @@ class LengthMetrics {
   static lpx(value: number) {
       return new LengthMetrics(value, LengthUnit.LPX);
   }
+  static resource(res: Resource) {
+    let length:Array<number> = getUINativeModule().nativeUtils.resoureToLengthMetrics(res);
+    return new LengthMetrics(length[0], length[1]);
+  }
 }
 
 declare interface Resource {}

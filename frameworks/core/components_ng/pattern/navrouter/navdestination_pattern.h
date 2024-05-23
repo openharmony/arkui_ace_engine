@@ -189,6 +189,25 @@ public:
         UIObserverHandler::GetInstance().NotifyNavigationStateChange(weak, NavDestinationState::ON_DISAPPEAR);
     }
 
+    bool OverlayOnBackPressed();
+
+    void CreateOverlayManager(bool isShow)
+    {
+        if (!overlayManager_ && isShow) {
+            overlayManager_ = MakeRefPtr<OverlayManager>(GetHost());
+        }
+    }
+
+    const RefPtr<OverlayManager>& GetOverlayManager()
+    {
+        return overlayManager_;
+    }
+
+    void DeleteOverlayManager()
+    {
+        overlayManager_.Reset();
+    }
+
     void SetNavigationId(const std::string& id)
     {
         inspectorId_ = id;
@@ -233,6 +252,7 @@ private:
     RefPtr<NavDestinationContext> navDestinationContext_;
     RefPtr<UINode> customNode_;
     WeakPtr<UINode> navigationNode_;
+    RefPtr<OverlayManager> overlayManager_;
     bool isOnShow_ = false;
     bool isUserDefinedBgColor_ = false;
     bool isRightToLeft_ = false;
