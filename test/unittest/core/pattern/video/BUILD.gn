@@ -16,6 +16,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("video_test_ng") {
   type = "new"
   sources = [
+    "video_property_test_ng.cpp",
     "video_test_ng.cpp",
     "video_test_ng_add.cpp",
   ]
