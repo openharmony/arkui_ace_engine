@@ -5681,4 +5681,43 @@ HWTEST_F(SliderTestNg, PaintVerticalBubbleSuitableAgingTest002, TestSize.Level1)
     EXPECT_EQ(sliderTipModifier.bubbleSize_, SizeF(BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_2_WIDTH.ConvertToPx(),
                                                  BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_2_HEIGHT.ConvertToPx()));
 }
+
+/**
+ * @tc.name: SliderTrackBackgroundColor001
+ * @tc.desc: Check "SetTrackBackgroundColor" an "GetTrackBackgroundColor"  API
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderTestNg, SliderTrackBackgroundColor001, TestSize.Level1)
+{
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->geometryNode_->SetContentSize(SizeF(MAX_WIDTH, MAX_HEIGHT));
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+
+    Gradient defaultGradient;
+    GradientColor gradientColor1;
+    gradientColor1.SetLinearColor(LinearColor(Color::GREEN));
+    gradientColor1.SetDimension(Dimension(0.0));
+    defaultGradient.AddColor(gradientColor1);
+    GradientColor gradientColor2;
+    gradientColor2.SetLinearColor(LinearColor(Color::RED));
+    gradientColor2.SetDimension(Dimension(1.0));
+    defaultGradient.AddColor(gradientColor2);
+    std::vector<GradientColor> defaultGradientColors = defaultGradient.GetColors();
+
+    SliderModelNG::SetTrackBackgroundColor(frameNode.GetRawPtr(), defaultGradient);
+    Gradient testGradient = SliderModelNG::GetTrackBackgroundColor(frameNode.GetRawPtr());
+    std::vector<GradientColor> testGradientColors = testGradient.GetColors();
+
+    EXPECT_EQ(defaultGradientColors.size(), testGradientColors.size());
+    EXPECT_EQ(defaultGradientColors.at(0).GetLinearColor().ToColor().GetValue(),
+    testGradientColors.at(0).GetLinearColor().ToColor().GetValue());
+    EXPECT_EQ(defaultGradientColors.at(1).GetLinearColor().ToColor().GetValue(),
+    testGradientColors.at(1).GetLinearColor().ToColor().GetValue());
+    EXPECT_EQ(defaultGradientColors.at(0).GetDimension(), testGradientColors.at(0).GetDimension());
+    EXPECT_EQ(defaultGradientColors.at(1).GetDimension(), testGradientColors.at(1).GetDimension());
+}
 } // namespace OHOS::Ace::NG

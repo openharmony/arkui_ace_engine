@@ -527,7 +527,7 @@ ArkUI_Uint32 GetTrackBackgroundColor(ArkUINodeHandle node)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
     NG::Gradient gradient = SliderModelNG::GetTrackBackgroundColor(frameNode);
-    return gradient.GetColors().at(0).GetColor().GetValue();
+    return gradient.GetColors().at(0).GetLinearColor().ToColor().GetValue();
 }
 
 ArkUI_Uint32 GetSelectColor(ArkUINodeHandle node)
