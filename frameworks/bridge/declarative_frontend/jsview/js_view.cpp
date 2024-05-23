@@ -1015,7 +1015,7 @@ void JSViewPartialUpdate::JSSendStateInfo(const std::string& stateInfo)
     }
     TAG_LOGD(AceLogTag::ACE_STATE_MGMT, "ArkUI SendStateInfo %{public}s", stateInfo.c_str());
     auto info = JsonUtil::ParseJsonString(stateInfo);
-    info->Put("timeStamp", GetCurrentTimestamp());
+    info->Put("timeStamp", GetCurrentTimestampMicroSecond());
     info->Put("vsyncID", (int32_t)pipeline->GetFrameCount());
     info->Put("processID", getpid());
     info->Put("windowID", (int32_t)pipeline->GetWindowId());

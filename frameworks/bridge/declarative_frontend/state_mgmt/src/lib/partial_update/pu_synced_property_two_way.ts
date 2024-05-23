@@ -24,7 +24,7 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
   implements PeerChangeEventReceiverPU<C>, ObservedObjectEventsPUReceiver<C> {
 
   private source_: ObservedPropertyObjectAbstract<C>;
-  private changeNotificationIsOngoing_: boolean = false;
+
 
   constructor(source: ObservedPropertyObjectAbstract<C>,
     owningChildView: IPropertySubscriber,
@@ -144,7 +144,7 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
     this.setObject(newValue);
     TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ newValue,
       this.notifyPropertyHasChangedPU,
-      this.notifyTrackedObjectPropertyHasChanged, this);
+      this.notifyTrackedObjectPropertyHasChanged, this, true);
     this.changeNotificationIsOngoing_ = false;
     stateMgmtProfiler.end();
   }
