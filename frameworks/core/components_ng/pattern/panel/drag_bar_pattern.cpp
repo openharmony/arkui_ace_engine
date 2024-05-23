@@ -278,6 +278,9 @@ void DragBarPattern::OnClick()
 
 void DragBarPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
+    if (info.GetTouches().empty()) {
+        return;
+    }
     auto touchType = info.GetTouches().front().GetTouchType();
     auto frontInfo = info.GetTouches().front();
     if (touchType == TouchType::DOWN) {
