@@ -268,6 +268,12 @@ public:
                     SetUIExtensionImeShow(keyboardRect, pipeline);
                 }
                 if (uiExtMgr && uiExtMgr->NotifyOccupiedAreaChangeInfo(info)) {
+                    taskExecutor->PostTask(
+                        [context] {
+                            CHECK_NULL_VOID(context);
+                            context->OnVirtualKeyboardAreaChange(Rect());
+                        },
+                        TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaChange");
                     return;
                 }
             }
