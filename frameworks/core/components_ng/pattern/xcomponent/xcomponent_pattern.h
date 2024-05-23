@@ -361,7 +361,7 @@ private:
     void PrepareSurface();
     void RegisterPlatformViewEvent();
     void PlatformViewDispatchTouchEvent(const TouchLocationInfo& changedPoint);
-    void UpdatePlatformViewLayout();
+    void UpdatePlatformViewLayoutIfNeeded();
 #endif
 #endif
 
@@ -381,6 +381,8 @@ private:
     RefPtr<RenderContext> renderContextForPlatformView_;
     WeakPtr<RenderContext> renderContextForPlatformViewWeakPtr_;
     RefPtr<PlatformViewInterface> platformView_;
+    SizeF lastDrawSize_;
+    OffsetF lastOffset_;
 #endif
 
     std::shared_ptr<OH_NativeXComponent> nativeXComponent_;
