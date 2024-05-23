@@ -20,6 +20,7 @@
 
 #include "interfaces/inner_api/ace/ui_content.h"
 
+#include "adapter/ohos/entrance/ace_container.h"
 #include "base/memory/ace_type.h"
 #include "base/thread/task_executor.h"
 #include "core/common/dynamic_component_renderer.h"
@@ -51,9 +52,12 @@ public:
 private:
     RefPtr<TaskExecutor> GetTaskExecutor();
     RefPtr<TaskExecutor> GetHostTaskExecutor();
+    static RefPtr<Platform::AceContainer> GetAceConainer(int32_t instanceId);
 
     void AttachRenderContext();
     void RegisterSizeChangedCallback();
+    void RegisterConfigChangedCallback();
+    void UnRegisterConfigChangedCallback();
 
     bool contentReady_ = false;
     std::function<void()> contentReadyCallback_;
