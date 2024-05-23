@@ -60,11 +60,11 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
     if (transitionType == PageTransitionType::EXIT_PUSH || transitionType == PageTransitionType::EXIT_POP) {
         pagePattern->TriggerPageTransition(
             transitionType, [weak = WeakPtr<FrameNode>(page), transitionType, statusBarHeight]() {
-                LOGI("pageTransition exit finish");
                 auto context = PipelineContext::GetCurrentContext();
                 CHECK_NULL_VOID(context);
                 auto page = weak.Upgrade();
                 CHECK_NULL_VOID(page);
+                TAG_LOGI(AceLogTag::ACE_ANIMATION, "pageTransition exit finish, nodeId:%{public}d", page->GetId());
                 auto pattern = page->GetPattern<PagePattern>();
                 CHECK_NULL_VOID(pattern);
                 pattern->FocusViewHide();
@@ -92,9 +92,9 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
     pagePattern->TriggerPageTransition(
         transitionType, [weak = WeakPtr<FrameNode>(page), statusBarHeight]() {
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
-            LOGI("pageTransition in finish");
             auto page = weak.Upgrade();
             CHECK_NULL_VOID(page);
+            TAG_LOGI(AceLogTag::ACE_ANIMATION, "pageTransition in finish, nodeId:%{public}d", page->GetId());
             page->GetEventHub<EventHub>()->SetEnabled(true);
             auto pattern = page->GetPattern<PagePattern>();
             CHECK_NULL_VOID(pattern);
@@ -123,6 +123,8 @@ void StageManager::StartTransition(const RefPtr<FrameNode>& srcPage, const RefPt
     sharedManager->StartSharedTransition(srcPage, destPage);
     srcPageNode_ = srcPage;
     destPageNode_ = destPage;
+    TAG_LOGI(AceLogTag::ACE_ANIMATION, "start pageTransition, from node %{public}d to %{public}d",
+        srcPage ? srcPage->GetId() : -1, destPage ? destPage->GetId() : -1);
     if (type == RouteType::PUSH) {
         FirePageTransition(srcPage, PageTransitionType::EXIT_PUSH);
         FirePageTransition(destPage, PageTransitionType::ENTER_PUSH);
@@ -345,9 +347,6 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTra
     if (needTransition) {
         // from the penultimate node, (popSize - 1) nodes are deleted.
         // the last node will be deleted after pageTransition
-        LOGI("PopPageToIndex, before pageTransition, to index:%{public}d, children size:%{public}zu, "
-             "stage children size:%{public}zu",
-            index, children.size(), stageNode_->GetChildren().size());
         for (int32_t current = 1; current < popSize; ++current) {
             auto pageNode = *(++children.rbegin());
             stageNode_->RemoveChild(pageNode);
