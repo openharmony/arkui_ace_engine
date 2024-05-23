@@ -82,6 +82,8 @@ public:
 
     int32_t GetInstanceId();
     int32_t GetNodeId();
+    int32_t GetUiExtensionId() override;
+    int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId) override;
 
 protected:
     virtual void DispatchPointerEvent(
@@ -93,6 +95,7 @@ protected:
     AceLogTag tag_ = AceLogTag::ACE_DEFAULT_DOMAIN;
     int32_t platformId_ = -1;
     int32_t instanceId_ = Container::CurrentId();
+    int32_t uiExtensionId_ = 0;
 
 private:
     struct ErrorMsg {

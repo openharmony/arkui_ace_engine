@@ -122,14 +122,12 @@ void IsolatedPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEve
 bool IsolatedPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     CHECK_NULL_RETURN(dynamicComponentRenderer_, false);
-    CHECK_NULL_RETURN(dirty, false);
-    auto host = dirty->GetHostNode();
+    auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto offset = host->GetPaintRectGlobalOffsetWithTranslate().first;
-    auto size = dirty->GetGeometryNode()->GetFrameSize();
+    auto rect = host->GetTransformRectRelativeToWindow();
     Ace::ViewportConfig vpConfig;
-    vpConfig.SetSize(size.Width(), size.Height());
-    vpConfig.SetPosition(offset.GetX(), offset.GetY());
+    vpConfig.SetSize(rect.Width(), rect.Height());
+    vpConfig.SetPosition(0, 0);
     float density = 1.0f;
     int32_t orientation = 0;
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
@@ -155,6 +153,41 @@ void IsolatedPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(dynamicComponentRenderer_);
     dynamicComponentRenderer_->DestroyContent();
     dynamicComponentRenderer_ = nullptr;
+}
+
+void IsolatedPattern::SearchExtensionElementInfoByAccessibilityId(int64_t elementId, int32_t mode, int64_t baseParent,
+    std::list<Accessibility::AccessibilityElementInfo>& output)
+{
+    CHECK_NULL_VOID(dynamicComponentRenderer_);
+    dynamicComponentRenderer_->SearchElementInfoByAccessibilityId(elementId, mode, baseParent, output);
+}
+
+void IsolatedPattern::SearchElementInfosByText(int64_t elementId, const std::string& text, int64_t baseParent,
+    std::list<Accessibility::AccessibilityElementInfo>& output)
+{
+    CHECK_NULL_VOID(dynamicComponentRenderer_);
+    dynamicComponentRenderer_->SearchElementInfosByText(elementId, text, baseParent, output);
+}
+
+void IsolatedPattern::FindFocusedElementInfo(int64_t elementId, int32_t focusType, int64_t baseParent,
+    Accessibility::AccessibilityElementInfo& output)
+{
+    CHECK_NULL_VOID(dynamicComponentRenderer_);
+    dynamicComponentRenderer_->FindFocusedElementInfo(elementId, focusType, baseParent, output);
+}
+
+void IsolatedPattern::FocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
+    Accessibility::AccessibilityElementInfo& output)
+{
+    CHECK_NULL_VOID(dynamicComponentRenderer_);
+    dynamicComponentRenderer_->FocusMoveSearch(elementId, direction, baseParent, output);
+}
+
+bool IsolatedPattern::TransferExecuteAction(int64_t elementId,
+    const std::map<std::string, std::string>& actionArguments, int32_t action, int64_t offset)
+{
+    CHECK_NULL_RETURN(dynamicComponentRenderer_, false);
+    return dynamicComponentRenderer_->NotifyExecuteAction(elementId, actionArguments, action, offset);
 }
 
 void IsolatedPattern::DumpInfo()

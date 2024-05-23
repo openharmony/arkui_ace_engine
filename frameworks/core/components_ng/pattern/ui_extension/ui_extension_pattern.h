@@ -161,13 +161,9 @@ public:
     void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t uiExtensionOffset);
 
 protected:
-    enum class ComponentType { DYNAMIC, UI_EXTENSION };
-
     virtual void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     virtual void DispatchKeyEvent(const KeyEvent& event);
 
-    // for DynamicComponent
-    ComponentType componentType_ = ComponentType::UI_EXTENSION;
     int32_t uiExtensionId_ = 0;
     int32_t instanceId_ = Container::CurrentId();
     std::function<void(int32_t code, const std::string& name, const std::string& message)> onErrorCallback_;
