@@ -554,6 +554,7 @@ void ListPattern::ProcessEvent(
             GreatOrEqual(startMainPos_, contentStartOffset_);
         if (scrollUpToStart || scrollDownToStart) {
             onReachStart();
+            AddEventsFiredInfo(ScrollableEventType::ON_REACH_START);
         }
     }
     auto onReachEnd = listEventHub->GetOnReachEnd();
@@ -565,6 +566,7 @@ void ListPattern::ProcessEvent(
         bool scrollDownToEnd = Negative(prevEndOffset) && NonNegative(endOffset);
         if (scrollUpToEnd || (scrollDownToEnd && GetScrollSource() != SCROLL_FROM_NONE)) {
             onReachEnd();
+            AddEventsFiredInfo(ScrollableEventType::ON_REACH_END);
         }
     }
 
@@ -2298,6 +2300,7 @@ void ListPattern::OnRestoreInfo(const std::string& restoreInfo)
 
 void ListPattern::DumpAdvanceInfo()
 {
+    ScrollablePattern::DumpAdvanceInfo();
     DumpLog::GetInstance().AddDesc("maxListItemIndex:" + std::to_string(maxListItemIndex_));
     DumpLog::GetInstance().AddDesc("startIndex:" + std::to_string(startIndex_));
     DumpLog::GetInstance().AddDesc("endIndex:" + std::to_string(endIndex_));
@@ -2338,8 +2341,6 @@ void ListPattern::DumpAdvanceInfo()
         DumpLog::GetInstance().AddDesc("predictSnapEndPos:null");
     }
     // DumpLog::GetInstance().AddDesc("scrollAlign:%{public}d", scrollAlign_);
-    isScrollable_ ? DumpLog::GetInstance().AddDesc("isScrollable:true")
-                  : DumpLog::GetInstance().AddDesc("isScrollable:false");
     paintStateFlag_ ? DumpLog::GetInstance().AddDesc("paintStateFlag:true")
                     : DumpLog::GetInstance().AddDesc("paintStateFlag:false");
     isFramePaintStateValid_ ? DumpLog::GetInstance().AddDesc("isFramePaintStateValid:true")

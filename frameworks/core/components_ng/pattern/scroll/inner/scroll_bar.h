@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -535,6 +535,25 @@ public:
     bool AnalysisUpOrDown(Point point, bool& reverse);
     void ScheduleCaretLongPress();
 
+    Axis GetPanDirection() const
+    {
+        CHECK_NULL_RETURN(panRecognizer_, Axis::NONE);
+        return panRecognizer_->GetAxisDirection();
+    }
+
+    // infos for dump
+    void AddScrollBarLayoutInfo();
+
+    void GetShapeModeDumpInfo();
+
+    void GetPositionModeDumpInfo();
+
+    void GetAxisDumpInfo();
+
+    void GetPanDirectionDumpInfo();
+
+    void DumpAdvanceInfo();
+
 protected:
     void InitTheme();
 
@@ -629,6 +648,10 @@ private:
     RefPtr<LongPressRecognizer> longPressRecognizer_;
     bool isMousePressed_ = false;
     Offset locationInfo_;
+
+    // dump info
+    std::list<InnerScrollBarLayoutInfo> innerScrollBarLayoutInfos_;
+    bool needAddLayoutInfo = false;
 };
 
 } // namespace OHOS::Ace::NG

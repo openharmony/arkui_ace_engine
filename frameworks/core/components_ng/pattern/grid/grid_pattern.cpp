@@ -477,6 +477,7 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
     if (onReachStart && gridLayoutInfo_.startIndex_ == 0) {
         if (!isInitialized_) {
             onReachStart();
+            AddEventsFiredInfo(ScrollableEventType::ON_REACH_START);
         }
 
         if (!NearZero(finalOffset)) {
@@ -486,6 +487,7 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
                 LessNotEqual(gridLayoutInfo_.prevHeight_, 0.0) && GreatOrEqual(gridLayoutInfo_.currentHeight_, 0.0);
             if (scrollUpToStart || scrollDownToStart) {
                 onReachStart();
+                AddEventsFiredInfo(ScrollableEventType::ON_REACH_START);
             }
         }
     }
@@ -499,6 +501,7 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
                                  LessOrEqual(gridLayoutInfo_.currentHeight_, endHeight_);
             if (scrollDownToEnd || scrollUpToEnd) {
                 onReachEnd();
+                AddEventsFiredInfo(ScrollableEventType::ON_REACH_END);
             }
         }
     }
@@ -1680,12 +1683,11 @@ void GridPattern::DumpAdvanceInfo()
 {
     auto property = GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_VOID(property);
+    ScrollablePattern::DumpAdvanceInfo();
     supportAnimation_ ? DumpLog::GetInstance().AddDesc("supportAnimation:true")
                       : DumpLog::GetInstance().AddDesc("supportAnimation:false");
     isConfigScrollable_ ? DumpLog::GetInstance().AddDesc("isConfigScrollable:true")
                         : DumpLog::GetInstance().AddDesc("isConfigScrollable:false");
-    scrollable_ ? DumpLog::GetInstance().AddDesc("scrollable:true")
-                : DumpLog::GetInstance().AddDesc("scrollable:false");
     gridLayoutInfo_.lastCrossCount_.has_value()
         ? DumpLog::GetInstance().AddDesc("lastCrossCount:" + std::to_string(gridLayoutInfo_.lastCrossCount_.value()))
         : DumpLog::GetInstance().AddDesc("lastCrossCount:null");
