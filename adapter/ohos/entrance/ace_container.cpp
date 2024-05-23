@@ -2221,6 +2221,11 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
             CheckAndSetFontFamily();
         }
     }
+    if (!parsedConfig.colorModeIsSetByApp.empty()) {
+        resConfig.SetColorModeIsSetByApp(true);
+    } else {
+        resConfig.SetColorModeIsSetByApp(false);
+    }
     SetFontScaleAndWeightScale(parsedConfig);
     SetResourceConfiguration(resConfig);
     themeManager->UpdateConfig(resConfig);
