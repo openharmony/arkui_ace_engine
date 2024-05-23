@@ -56,7 +56,7 @@ public:
         onFocusTextField_ = onFocusTextField;
     }
 
-    void ScrollTextFieldToSafeArea();
+    bool ScrollTextFieldToSafeArea();
 
     void ClearOnFocusTextField();
 
@@ -107,9 +107,16 @@ public:
         return imeShow_ || uiExtensionImeShow_;
     }
 
+    void AvoidKeyboard();
+
+    void NavContentToSafeAreaHelper();
+
+    void SetNavContentKeyboardOffset(RefPtr<FrameNode> navNode);
+
 private:
-    void ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bottomInset, bool isShowKeyboard);
+    bool ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bottomInset, bool isShowKeyboard);
     RefPtr<FrameNode> FindScrollableOfFocusedTextField(const RefPtr<FrameNode>& textField);
+    RefPtr<FrameNode> FindNavNode(const RefPtr<FrameNode>& textField);
 
     bool hasMove_ = false;
     bool imeShow_ = false;
@@ -118,6 +125,7 @@ private:
     Offset position_;
     float height_ = 0.0f;
     WeakPtr<Pattern> onFocusTextField_;
+    WeakPtr<FrameNode> weakNavNode_;
     int32_t onFocusTextFieldId = -1;
 };
 

@@ -261,4 +261,15 @@ void NavDestinationPattern::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc(std::string("name: ").append(name_));
 }
+
+bool NavDestinationPattern::NeedIgnoreKeyboard()
+{
+    auto layoutProperty = GetLayoutProperty<NavDestinationLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto& opts = layoutProperty->GetSafeAreaExpandOpts();
+    if (opts && (opts->type & SAFE_AREA_TYPE_KEYBOARD)) {
+        return true;
+    }
+    return false;
+}
 } // namespace OHOS::Ace::NG

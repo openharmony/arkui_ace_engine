@@ -1629,7 +1629,7 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
         FlushUITasks();
 
         CHECK_NULL_VOID(manager);
-        manager->ScrollTextFieldToSafeArea();
+        manager->AvoidKeyboard();
         FlushUITasks();
     };
     FlushUITasks();
@@ -1682,7 +1682,7 @@ void PipelineContext::OriginalAvoidanceLogic(
         FlushUITasks();
 
         CHECK_NULL_VOID(manager);
-        manager->ScrollTextFieldToSafeArea();
+        manager->AvoidKeyboard();
         FlushUITasks();
     };
     FlushUITasks();
@@ -1756,7 +1756,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         // layout immediately
         context->FlushUITasks();
 
-        manager->ScrollTextFieldToSafeArea();
+        manager->AvoidKeyboard();
         context->FlushUITasks();
     };
     FlushUITasks();
