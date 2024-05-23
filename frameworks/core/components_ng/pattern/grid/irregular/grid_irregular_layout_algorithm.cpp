@@ -177,7 +177,7 @@ void GridIrregularLayoutAlgorithm::CheckForReset()
         return;
     }
 
-    if (!wrapper_->IsContraintNoChanged()) {
+    if (!wrapper_->IsConstraintNoChanged()) {
         // need to remeasure all items in current view
         postJumpOffset_ = info.currentOffset_;
         PrepareJumpOnReset(info);

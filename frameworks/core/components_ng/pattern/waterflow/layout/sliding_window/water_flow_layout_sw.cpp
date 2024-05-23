@@ -144,12 +144,24 @@ void WaterFlowLayoutSW::Init(const SizeF& frameSize)
 void WaterFlowLayoutSW::CheckReset()
 {
     int32_t updateIdx = wrapper_->GetHostNode()->GetChildrenUpdated();
-    if (updateIdx == -1) {
+    if (CheckChildrenUpdate(updateIdx)) {
         return;
+    }
+    if (!wrapper_->IsConstraintNoChanged()) {
+        info_->Reset();
+        info_->lanes_.resize(itemCrossSize_.size());
+        return;
+    }
+}
+
+bool WaterFlowLayoutSW::CheckChildrenUpdate(int32_t updateIdx)
+{
+    if (updateIdx == -1) {
+        return false;
     }
     if (info_->footerIndex_ == 0 && updateIdx == 0) {
         // footer updated, no need to reset or clear cache
-        return;
+        return false;
     }
     // convert children node index to item index
     updateIdx -= (info_->footerIndex_ + 1);
@@ -159,6 +171,7 @@ void WaterFlowLayoutSW::CheckReset()
         info_->align_ = ScrollAlign::START;
     }
     wrapper_->GetHostNode()->ChildrenUpdatedFrom(-1);
+    return true;
 }
 
 void WaterFlowLayoutSW::MeasureOnOffset(float delta)
