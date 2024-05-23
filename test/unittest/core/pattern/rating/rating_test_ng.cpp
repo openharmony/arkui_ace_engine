@@ -673,6 +673,35 @@ HWTEST_F(RatingTestNg, RatingPatternTest012, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RatingPatternTest015
+ * @tc.desc: Test for CreateNodePaintMethod.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, RatingPatternTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create rating FrameNode and pattern loads ImageLoadingContext.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetBackgroundSrc(RATING_BACKGROUND_URL, false);
+    rating.SetForegroundSrc("", true);
+    rating.SetSecondarySrc(RATING_SVG_URL, false);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    auto ratingLayoutProperty = frameNode->GetLayoutProperty<RatingLayoutProperty>();
+    ASSERT_NE(ratingLayoutProperty, nullptr);
+    auto ratingPattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(ratingPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. create nodePaintMethod, should return a default method instead of nullptr.
+     */
+    auto paintMethod1 = ratingPattern->CreateNodePaintMethod();
+    ASSERT_NE(paintMethod1, nullptr);
+}
+
+/**
  * @tc.name: RatingMeasureTest013
  * @tc.desc: Test rating MeasureContent when rating component's width or height is not fully valid.
  * @tc.type: FUNC
