@@ -1866,6 +1866,10 @@ void TextFieldPattern::InitDragDropCallBack()
     auto onDragEnd = [weakPtr = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event) {
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
+        auto scrollBar = pattern->GetScrollBar();
+        if (scrollBar) {
+            scrollBar->ScheduleDisappearDelayTask();
+        }
         ContainerScope scope(pattern->GetHostInstanceId());
         if (pattern->dragStatus_ == DragStatus::DRAGGING && !pattern->isDetachFromMainTree_) {
             pattern->dragStatus_ = DragStatus::NONE;
@@ -5170,6 +5174,10 @@ bool TextFieldPattern::OnScrollCallback(float offset, int32_t source)
     }
     if (IsReachedBoundary(offset)) {
         return false;
+    }
+    auto scrollBar = GetScrollBar();
+    if (scrollBar) {
+        scrollBar->PlayScrollBarAppearAnimation();
     }
     OnTextInputScroll(offset);
     OnTextAreaScroll(offset);
