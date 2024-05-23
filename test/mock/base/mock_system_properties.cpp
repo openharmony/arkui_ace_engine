@@ -41,6 +41,7 @@ bool SystemProperties::layoutTraceEnable_ = false;
 bool SystemProperties::traceInputEventEnable_ = false;
 bool SystemProperties::buildTraceEnable_ = false;
 bool SystemProperties::syncDebugTraceEnable_ = false;
+bool SystemProperties::textTraceEnable_ = false;
 double SystemProperties::resolution_ = 0.0;
 constexpr float defaultAnimationScale = 1.0f;
 bool SystemProperties::extSurfaceEnabled_ = false;

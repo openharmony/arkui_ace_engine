@@ -18,6 +18,7 @@
 #include <limits>
 
 #include "base/geometry/dimension.h"
+#include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
@@ -111,6 +112,7 @@ void TextLayoutAlgorithm::OnReset() {}
 std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
+    ACE_TEXT_SCOPED_TRACE("TextLayoutAlgorithm::MeasureContent");
     TextStyle textStyle;
     ConstructTextStyles(contentConstraint, layoutWrapper, textStyle);
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -378,6 +380,7 @@ void TextLayoutAlgorithm::CreateParagraphDrag(
 bool TextLayoutAlgorithm::CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool needLayout)
 {
+    ACE_TEXT_SCOPED_TRACE("CreateParagraphAndLayout");
     auto maxSize = MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(contentConstraint);
     if (!CreateParagraph(textStyle, content, layoutWrapper, maxSize.Width())) {
         return false;
@@ -401,6 +404,7 @@ OffsetF TextLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper)
 bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::string& content,
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
+    ACE_TEXT_SCOPED_TRACE("TextLayoutAlgorithm::AdaptMinTextSize");
     double maxFontSize = 0.0;
     double minFontSize = 0.0;
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -453,6 +457,7 @@ float TextLayoutAlgorithm::GetBaselineOffset() const
 bool TextLayoutAlgorithm::UpdateSingleParagraph(LayoutWrapper* layoutWrapper, ParagraphStyle paraStyle,
     const TextStyle& textStyle, const std::string& content, double maxWidth)
 {
+    ACE_TEXT_SCOPED_TRACE("TextLayoutAlgorithm::UpdateSingleParagraph");
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, false);
     auto pattern = frameNode->GetPattern<TextPattern>();
