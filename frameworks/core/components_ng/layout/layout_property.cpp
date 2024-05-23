@@ -263,7 +263,6 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
 {
     layoutConstraint_ = parentConstraint;
     if (margin_) {
-        // TODO: add margin is negative case.
         marginResult_.reset();
         auto margin = CreateMargin();
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -376,7 +375,6 @@ void LayoutProperty::CheckAspectRatio()
     if (selfWidth) {
         layoutConstraint_->selfIdealSize.SetWidth(selfWidth);
     }
-    // TODO: after measure done, need to check AspectRatio again.
 }
 
 void LayoutProperty::BuildGridProperty(const RefPtr<FrameNode>& host)

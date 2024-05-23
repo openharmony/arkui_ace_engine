@@ -119,7 +119,6 @@ public:
 
     bool IsRowReverse() const
     {
-        // TODO: not consider rightToLeft
         return direction_ == FlexDirection::ROW_REVERSE;
     }
 
