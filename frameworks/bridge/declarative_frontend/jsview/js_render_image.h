@@ -55,6 +55,11 @@ public:
         return pixelMap_;
     }
 
+    void SetPixelMap(RefPtr<PixelMap> pixelMap)
+    {
+        pixelMap_ = pixelMap;
+    }
+
     RefPtr<NG::SvgDomBase> GetSvgDom()
     {
         return svgDom_;

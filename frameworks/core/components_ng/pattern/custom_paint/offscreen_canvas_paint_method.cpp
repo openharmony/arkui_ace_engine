@@ -96,6 +96,31 @@ void OffscreenCanvasPaintMethod::InitBitmap()
     rsCanvas_->Bind(bitmap_);
 }
 
+RefPtr<PixelMap> OffscreenCanvasPaintMethod::TransferToImageBitmap()
+{
+#ifdef PIXEL_MAP_SUPPORTED
+    OHOS::Media::InitializationOptions options;
+    options.alphaType = OHOS::Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL;
+    options.pixelFormat = OHOS::Media::PixelFormat::RGBA_8888;
+    options.scaleMode = OHOS::Media::ScaleMode::CENTER_CROP;
+    options.size.width = width_;
+    options.size.height = height_;
+    options.editable = true;
+    auto pixelMap = Ace::PixelMap::Create(OHOS::Media::PixelMap::Create(options));
+    if (pixelMap) {
+        std::shared_ptr<Ace::ImageData> imageData = std::make_shared<Ace::ImageData>();
+        imageData->pixelMap = pixelMap;
+        imageData->dirtyX = 0.0f;
+        imageData->dirtyY = 0.0f;
+        imageData->dirtyWidth = width_;
+        imageData->dirtyHeight = height_;
+        GetImageData(imageData);
+        return pixelMap;
+    }
+#endif
+    return nullptr;
+}
+
 void OffscreenCanvasPaintMethod::Reset()
 {
     matrix_.Reset();
