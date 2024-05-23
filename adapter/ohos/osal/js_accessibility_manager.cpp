@@ -1550,10 +1550,13 @@ void SearchExtensionElementInfoNG(const SearchParameter& searchParam,
         if (rootParentId == NG::UI_EXTENSION_ROOT_ID) {
             extensionElementInfos.front().SetParent(node->GetAccessibilityId());
         }
-        for (auto& info : extensionElementInfos) {
-            if (parentInfo.GetComponentType() == V2::ISOLATED_COMPONENT_ETS_TAG) {
-                info.SetWindowId(parentInfo.GetWindowId());
+        if (parentInfo.GetComponentType() == V2::ISOLATED_COMPONENT_ETS_TAG) {
+            auto windowId = parentInfo.GetWindowId();
+            for (auto& info : extensionElementInfos) {
+                info.SetWindowId(windowId);
             }
+        }
+        for (auto& info : extensionElementInfos) {
             infos.push_back(info);
         }
     }
