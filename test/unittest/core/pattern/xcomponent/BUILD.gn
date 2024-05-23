@@ -19,4 +19,6 @@ ace_unittest("xcomponent_test_ng") {
     "$ace_root/frameworks/core/components/xcomponent/native_interface_xcomponent_impl.cpp",
     "xcomponent_test_ng.cpp",
   ]
+
+  external_deps = [ "bounds_checking_function:libsec_shared" ]
 }
