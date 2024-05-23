@@ -91,7 +91,7 @@ RefPtr<FrameNode> TabContentModelNG::CreateFrameNode(int32_t nodeId)
 {
     auto frameNode = TabContentNode::GetOrCreateTabContentNode(
         V2::TAB_CONTENT_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabContentPattern>(nullptr); });
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_RETURN(tabTheme, nullptr);
