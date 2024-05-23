@@ -1046,8 +1046,10 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
     }
 #endif
 #ifdef PLATFORM_VIEW_SUPPORTED
-    const auto& changedPoint = touchInfoList.front();
-    PlatformViewDispatchTouchEvent(changedPoint);
+    if (type_ == XComponentType::PLATFORM_VIEW) {
+        const auto& changedPoint = touchInfoList.front();
+        PlatformViewDispatchTouchEvent(changedPoint);
+    }
 #endif
 }
 
