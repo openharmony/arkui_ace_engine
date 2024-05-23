@@ -844,7 +844,6 @@ void RenderTextField::OnClick(const ClickInfo& clickInfo)
     isValueFromRemote_ = false;
     auto globalPosition = clickInfo.GetGlobalLocation();
     auto globalOffset = GetGlobalOffset();
-
     if (SearchAction(globalPosition, globalOffset)) {
         return;
     }

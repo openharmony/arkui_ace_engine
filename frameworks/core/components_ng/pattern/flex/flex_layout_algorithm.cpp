@@ -359,7 +359,6 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(
                 for (const auto& child : childList) {
                     allocatedSize_ -= GetChildMainAxisSize(child.layoutWrapper);
                     allocatedSize_ -= space_;
-                    // TODO: reset size validity and baseline properties.
                     child.layoutWrapper->SetActive(false);
                     child.layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF());
                 }
