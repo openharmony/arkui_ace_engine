@@ -1063,7 +1063,8 @@ void MenuItemPattern::AddSelectIcon(RefPtr<FrameNode>& row)
         return;
     }
     if (!selectIcon_) {
-        if (!itemProperty->GetSelectIconSrc().value_or("").empty()) {
+        if (!itemProperty->GetSelectIconSrc().value_or("").empty() ||
+            Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
             selectIcon_ = FrameNode::CreateFrameNode(
                 V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
         } else {

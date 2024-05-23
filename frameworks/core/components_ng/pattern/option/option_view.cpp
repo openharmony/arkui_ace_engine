@@ -137,8 +137,6 @@ RefPtr<FrameNode> OptionView::CreateSymbol(const std::function<void(WeakPtr<NG::
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
-    props->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(theme->GetIconSideLength()), CalcLength(theme->GetIconSideLength())));
     props->UpdateFontSize(theme->GetEndIconWidth());
     props->UpdateSymbolColorList({theme->GetMenuIconColor()});
     props->UpdateAlignment(Alignment::CENTER_LEFT);
