@@ -644,6 +644,7 @@ public:
     void SetDragGatherPixelMaps(const GestureEvent& info);
     void SetMouseDragGatherPixelMaps();
     void SetNotMouseDragGatherPixelMaps();
+    void FireCustomerOnDragEnd(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub);
 #if defined(PIXEL_MAP_SUPPORTED)
     static void PrintBuilderNode(const RefPtr<UINode>& customNode);
     static void PrintIfImageNode(
