@@ -18,6 +18,7 @@
 #include <stack>
 #include <string>
 
+#include "base/log/dump_log.h"
 #include "base/i18n/localization.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
@@ -399,5 +400,18 @@ RefPtr<FrameNode> TextTimerPattern::BuildContentModifierNode()
     auto elapsedTime = GetFormatDuration(elapsedTime_);
     TextTimerConfiguration textTimerConfiguration(count, isCountDown, started, elapsedTime, enabled);
     return (makeFunc_.value())(textTimerConfiguration);
+}
+
+void TextTimerPattern::DumpInfo()
+{
+    auto textTimerLayoutProperty = GetLayoutProperty<TextTimerLayoutProperty>();
+    CHECK_NULL_VOID(textTimerLayoutProperty);
+    auto isCountDown = textTimerLayoutProperty->GetIsCountDown().value_or(false);
+    isCountDown ? DumpLog::GetInstance().AddDesc("isCountDown: true") :
+        DumpLog::GetInstance().AddDesc("isCountDown: false");
+    auto format = textTimerLayoutProperty->GetFormat().value_or(DEFAULT_FORMAT);
+    DumpLog::GetInstance().AddDesc("format: ", format);
+    auto elapsedTime = GetFormatDuration(elapsedTime_);
+    DumpLog::GetInstance().AddDesc("elapsedTime: ", elapsedTime);
 }
 } // namespace OHOS::Ace::NG
