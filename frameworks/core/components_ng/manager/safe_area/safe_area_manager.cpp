@@ -16,14 +16,35 @@
 
 #include "base/utils/utils.h"
 #include "core/components/container_modal/container_modal_constants.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 bool SafeAreaManager::UpdateCutoutSafeArea(const SafeAreaInsets& safeArea)
 {
-    // cutout regions currently not adjacent to edges, so ignore it.
-    return false;
+    // cutout regions adjacent to edges.
+    auto cutoutArea = safeArea;
+
+    if (cutoutArea.top_.IsValid()) {
+        cutoutArea.top_.start = 0;
+    }
+    if (safeArea.bottom_.IsValid()) {
+        cutoutArea.bottom_.end = PipelineContext::GetCurrentRootHeight();
+    }
+    if (cutoutArea.left_.IsValid()) {
+        cutoutArea.left_.start = 0;
+    }
+    if (cutoutArea.right_.IsValid()) {
+        cutoutArea.right_.end = PipelineContext::GetCurrentRootWidth();
+    }
+
+    if (cutoutSafeArea_ == cutoutArea) {
+        return false;
+    }
+    cutoutSafeArea_ = cutoutArea;
+    return true;
 }
 
 bool SafeAreaManager::UpdateSystemSafeArea(const SafeAreaInsets& safeArea)
@@ -63,9 +84,15 @@ bool SafeAreaManager::UpdateKeyboardSafeArea(float keyboardHeight)
 SafeAreaInsets SafeAreaManager::GetCombinedSafeArea(const SafeAreaExpandOpts& opts) const
 {
     SafeAreaInsets res;
+#ifdef PREVIEW
+    if (ignoreSafeArea_) {
+        return res;
+    }
+#else
     if (ignoreSafeArea_ || (!isFullScreen_ && !isNeedAvoidWindow_)) {
         return res;
     }
+#endif
     if (opts.type & SAFE_AREA_TYPE_CUTOUT) {
         res = res.Combine(cutoutSafeArea_);
     }
@@ -76,6 +103,11 @@ SafeAreaInsets SafeAreaManager::GetCombinedSafeArea(const SafeAreaExpandOpts& op
         res.bottom_ = res.bottom_.Combine(keyboardInset_);
     }
     return res;
+}
+
+bool SafeAreaManager::IsSafeAreaValid() const
+{
+    return !(ignoreSafeArea_ || (!isFullScreen_ && !isNeedAvoidWindow_));
 }
 
 bool SafeAreaManager::SetIsFullScreen(bool value)
@@ -143,9 +175,15 @@ SafeAreaInsets SafeAreaManager::GetCutoutSafeArea() const
 
 SafeAreaInsets SafeAreaManager::GetSafeArea() const
 {
+#ifdef PREVIEW
+    if (ignoreSafeArea_) {
+        return {};
+    }
+#else
     if (ignoreSafeArea_ || (!isFullScreen_ && !isNeedAvoidWindow_)) {
         return {};
     }
+#endif
     return systemSafeArea_.Combine(cutoutSafeArea_).Combine(navSafeArea_);
 }
 
@@ -182,18 +220,39 @@ void SafeAreaManager::ExpandSafeArea()
     ACE_LAYOUT_SCOPED_TRACE("ExpandSafeArea node count %zu", needExpandNodes_.size());
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetSafeAreaManager();
     bool isFocusOnPage = pipeline->CheckPageFocus();
     auto iter = needExpandNodes_.begin();
     while (iter != needExpandNodes_.end()) {
         auto frameNode = (*iter).Upgrade();
         if (frameNode) {
-            if (!frameNode->NeedRestoreSafeArea()) {
-                frameNode->SaveGeoState();
-            }
+            manager->AddGeoRestoreNode(frameNode);
             frameNode->ExpandSafeArea(isFocusOnPage);
         }
         ++iter;
     }
     ClearNeedExpandNode();
+}
+
+bool SafeAreaManager::CheckPageNeedAvoidKeyboard(const RefPtr<FrameNode>& frameNode)
+{
+    if (frameNode->GetTag() != V2::PAGE_ETS_TAG) {
+        return false;
+    }
+    // page will not avoid keyboard when lastChild is sheet
+    RefPtr<OverlayManager> overlay;
+    if (!frameNode->PageLevelIsNavDestination()) {
+        auto pattern = frameNode->GetPattern<PagePattern>();
+        CHECK_NULL_RETURN(pattern, true);
+        overlay = pattern->GetOverlayManager();
+    } else {
+        auto navNode = FrameNode::GetFrameNode(V2::NAVDESTINATION_VIEW_ETS_TAG, frameNode->GetPageLevelNodeId());
+        CHECK_NULL_RETURN(navNode, true);
+        auto pattern = navNode->GetPattern<NavDestinationPattern>();
+        CHECK_NULL_RETURN(pattern, true);
+        overlay = pattern->GetOverlayManager();
+    }
+    CHECK_NULL_RETURN(overlay, true);
+    return overlay->CheckPageNeedAvoidKeyboard();
 }
 } // namespace OHOS::Ace::NG

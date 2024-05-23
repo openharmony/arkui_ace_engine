@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -257,7 +257,7 @@ public:
 
     void AddPredictTask(PredictTask&& task);
 
-    void AddAfterLayoutTask(std::function<void()>&& task);
+    void AddAfterLayoutTask(std::function<void()>&& task, bool isFlushInImplicitAnimationTask = false);
 
     void AddPersistAfterLayoutTask(std::function<void()>&& task);
 
@@ -282,6 +282,8 @@ public:
     void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) override;
     void UpdateNavSafeArea(const SafeAreaInsets& navSafeArea) override;
     void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) override;
+
+    void CheckAndUpdateKeyboardInset() override;
 
     void UpdateSizeChangeReason(
         WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -417,7 +419,9 @@ public:
     void FlushModifier() override;
     void FlushMessages() override;
 
-    void FlushUITasks() override;
+    void FlushUITasks(bool triggeredByImplicitAnimation = false) override;
+
+    void FlushAfterLayoutCallbackInImplicitAnimationTask() override;
 
     bool IsLayouting() const override
     {
@@ -539,12 +543,13 @@ public:
     void RegisterDumpInfoListener(const std::function<void(const std::vector<std::string>&)>& callback);
     void DumpJsInfo(const std::vector<std::string>& params) const;
 
-    bool DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap);
+    bool DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap,
+        bool skipSubAutoFillContainer = false);
     bool CheckNeedAutoSave();
     bool CheckPageFocus();
     bool CheckOverlayFocus();
     void NotifyFillRequestSuccess(AceAutoFillType autoFillType, RefPtr<ViewDataWrap> viewDataWrap);
-    void NotifyFillRequestFailed(RefPtr<FrameNode> node, int32_t errCode);
+    void NotifyFillRequestFailed(RefPtr<FrameNode> node, int32_t errCode, const std::string& fillContent = "");
 
     std::shared_ptr<NavigationController> GetNavigationController(const std::string& id) override;
     void AddOrReplaceNavigationNode(const std::string& id, const WeakPtr<FrameNode>& node);
@@ -687,6 +692,8 @@ public:
 
     void TriggerOverlayNodePositionsUpdateCallback(std::vector<Ace::RectF> rects);
 
+    void DetachNode(RefPtr<UINode> uiNode);
+
     void CheckNeedUpdateBackgroundColor(Color& color);
 
     bool CheckNeedDisableUpdateBackgroundImage();
@@ -714,6 +721,22 @@ public:
         return isFreezeFlushMessage_;
     }
     bool IsContainerModalVisible() override;
+    void SetDoKeyboardAvoidAnimate(bool isDoKeyboardAvoidAnimate)
+    {
+        isDoKeyboardAvoidAnimate_ = isDoKeyboardAvoidAnimate;
+    }
+
+    void CheckAndLogLastReceivedTouchEventInfo(int32_t eventId, TouchType type) override;
+
+    void CheckAndLogLastConsumedTouchEventInfo(int32_t eventId, TouchType type) override;
+
+    void CheckAndLogLastReceivedMouseEventInfo(int32_t eventId, MouseAction action) override;
+
+    void CheckAndLogLastConsumedMouseEventInfo(int32_t eventId, MouseAction action) override;
+
+    void CheckAndLogLastReceivedAxisEventInfo(int32_t eventId, AxisAction action) override;
+
+    void CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, AxisAction action) override;
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -746,6 +769,8 @@ protected:
     void OriginalAvoidanceLogic(
         float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
     RefPtr<FrameNode> GetContainerModalNode();
+    void DoKeyboardAvoidAnimate(const KeyboardAnimationConfig& keyboardAnimationConfig, float keyboardHeight,
+        const std::function<void()>& func);
 
 private:
     void ExecuteSurfaceChangedCallbacks(int32_t newWidth, int32_t newHeight, WindowSizeChangeReason type);
@@ -937,6 +962,8 @@ private:
     std::atomic<int32_t> localColorMode_ = static_cast<int32_t>(ColorMode::COLOR_MODE_UNDEFINED);
     bool customTitleSettedShow_ = true;
     bool isShowTitle_ = false;
+    bool lastAnimationStatus_ = true;
+    bool isDoKeyboardAvoidAnimate_ = true;
 };
 } // namespace OHOS::Ace::NG
 

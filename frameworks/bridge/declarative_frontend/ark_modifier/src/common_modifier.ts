@@ -17,8 +17,10 @@
 class CommonModifier extends ArkComponent implements AttributeModifier<CommonAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {
+    if (!classType) {
+      classType = ModifierType.EXPOSE_MODIFIER;
+    }
     super(nativePtr, classType);
-    this._modifiersWithKeys = new ModifierMap();
   }
   
   applyNormalAttribute(instance: CommonAttribute): void {

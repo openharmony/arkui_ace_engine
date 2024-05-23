@@ -41,6 +41,8 @@ public:
     static void JsOnUpdate(const JSCallbackInfo& info);
     static void JsOnError(const JSCallbackInfo& info);
     static void JsOnStop(const JSCallbackInfo& info);
+    static void EnableAnalyzer(bool enable);
+    static void AnalyzerConfig(const JSCallbackInfo& info);
 
     static void JSBind(BindingTarget globalObj);
 

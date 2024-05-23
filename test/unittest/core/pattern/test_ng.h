@@ -47,6 +47,7 @@ public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
     RefPtr<PaintWrapper> FlushLayoutTask(const RefPtr<FrameNode>& frameNode);
+    void CreateDone(const RefPtr<FrameNode>& frameNode);
     uint64_t GetActions(const RefPtr<AccessibilityProperty>& accessibilityProperty);
     TouchEventInfo CreateTouchEventInfo(TouchType touchType, Offset location);
 
@@ -194,6 +195,24 @@ public:
     {
         return GetChildRect(frameNode, index).Height();
     }
+
+    void ClearOldNodes()
+    {
+        ElementRegister::GetInstance()->Clear();
+    }
+
+    ElementIdType GetElmtId()
+    {
+        elmtId_++;
+        return elmtId_;
+    }
+
+    void ResetElmtId()
+    {
+        elmtId_ = ElementRegister::UndefinedElementId;
+    }
+
+    ElementIdType elmtId_ = ElementRegister::UndefinedElementId;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_SCROLL_PATTERN_H

@@ -33,7 +33,7 @@ void JSCanvasPath::JsPath2DSetTransform(const JSCallbackInfo& info)
     double translateY = 0.0;
     if (info.GetDoubleArg(0, scaleX) && info.GetDoubleArg(1, skewX) && info.GetDoubleArg(2, skewY) &&
         info.GetDoubleArg(3, scaleY) && info.GetDoubleArg(4, translateX) && info.GetDoubleArg(5, translateY)) {
-        auto density = PipelineBase::GetCurrentDensity();
+        double density = GetDensity();
         path2d_->SetTransform(scaleX, skewX, skewY, scaleY, translateX * density, translateY * density);
         SetPathSize(info);
     }
@@ -45,7 +45,7 @@ void JSCanvasPath::JsPath2DMoveTo(const JSCallbackInfo& info)
     double x = 0.0;
     double y = 0.0;
     if (info.GetDoubleArg(0, x) && info.GetDoubleArg(1, y)) {
-        auto density = PipelineBase::GetCurrentDensity();
+        double density = GetDensity();
         path2d_->MoveTo(x * density, y * density);
         SetPathSize(info);
     }
@@ -57,7 +57,7 @@ void JSCanvasPath::JsPath2DLineTo(const JSCallbackInfo& info)
     double x = 0.0;
     double y = 0.0;
     if (info.GetDoubleArg(0, x) && info.GetDoubleArg(1, y)) {
-        auto density = PipelineBase::GetCurrentDensity();
+        double density = GetDensity();
         path2d_->LineTo(x * density, y * density);
         SetPathSize(info);
     }
@@ -75,7 +75,7 @@ void JSCanvasPath::JsPath2DArc(const JSCallbackInfo& info)
         info.GetDoubleArg(3, startAngle) && info.GetDoubleArg(4, endAngle)) {
         bool anticlockwise = false;
         info.GetBooleanArg(5, anticlockwise);
-        auto density = PipelineBase::GetCurrentDensity();
+        double density = GetDensity();
         path2d_->Arc(x * density, y * density, radius * density, startAngle, endAngle, anticlockwise);
         SetPathSize(info);
     }
@@ -91,7 +91,7 @@ void JSCanvasPath::JsPath2DArcTo(const JSCallbackInfo& info)
     double radius = 0.0;
     if (info.GetDoubleArg(0, x1) && info.GetDoubleArg(1, y1) && info.GetDoubleArg(2, x2) && info.GetDoubleArg(3, y2) &&
         info.GetDoubleArg(4, radius)) {
-        auto density = PipelineBase::GetCurrentDensity();
+        double density = GetDensity();
         path2d_->ArcTo(x1 * density, y1 * density, x2 * density, y2 * density, radius * density);
         SetPathSize(info);
     }
@@ -105,7 +105,7 @@ void JSCanvasPath::JsPath2DQuadraticCurveTo(const JSCallbackInfo& info)
     double x = 0.0;
     double y = 0.0;
     if (info.GetDoubleArg(0, cpx) && info.GetDoubleArg(1, cpy) && info.GetDoubleArg(2, x) && info.GetDoubleArg(3, y)) {
-        auto density = PipelineBase::GetCurrentDensity();
+        double density = GetDensity();
         path2d_->QuadraticCurveTo(cpx * density, cpy * density, x * density, y * density);
         SetPathSize(info);
     }
@@ -122,7 +122,7 @@ void JSCanvasPath::JsPath2DBezierCurveTo(const JSCallbackInfo& info)
     double y = 0.0;
     if (info.GetDoubleArg(0, cp1x) && info.GetDoubleArg(1, cp1y) && info.GetDoubleArg(2, cp2x) &&
         info.GetDoubleArg(3, cp2y) && info.GetDoubleArg(4, x) && info.GetDoubleArg(5, y)) {
-        auto density = PipelineBase::GetCurrentDensity();
+        double density = GetDensity();
         path2d_->BezierCurveTo(
             cp1x * density, cp1y * density, cp2x * density, cp2y * density, x * density, y * density);
         SetPathSize(info);
@@ -145,9 +145,9 @@ void JSCanvasPath::JsPath2DEllipse(const JSCallbackInfo& info)
         info.GetDoubleArg(6, endAngle)) {
         bool anticlockwise = false;
         info.GetBooleanArg(7, anticlockwise);
-        auto density = PipelineBase::GetCurrentDensity();
-        path2d_->Ellipse(x * density, y * density, radiusX * density, radiusY * density, rotation, startAngle, endAngle,
-            anticlockwise);
+        double density = GetDensity();
+        path2d_->Ellipse(x * density, y * density, radiusX * density, radiusY * density, rotation,
+            startAngle, endAngle, anticlockwise);
         SetPathSize(info);
     }
 }
@@ -161,7 +161,7 @@ void JSCanvasPath::JsPath2DRect(const JSCallbackInfo& info)
     double height = 0.0;
     if (info.GetDoubleArg(0, x) && info.GetDoubleArg(1, y) && info.GetDoubleArg(2, width) &&
         info.GetDoubleArg(3, height)) {
-        auto density = PipelineBase::GetCurrentDensity();
+        double density = GetDensity();
         path2d_->Rect(x * density, y * density, width * density, height * density);
         SetPathSize(info);
     }

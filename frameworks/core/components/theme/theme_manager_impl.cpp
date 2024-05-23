@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -66,6 +66,7 @@
 #include "core/components/tool_bar/tool_bar_theme.h"
 #include "core/components/video/video_theme.h"
 #include "core/components_ng/pattern/app_bar/app_bar_theme.h"
+#include "core/components_ng/pattern/container_modal/container_modal_theme.h"
 #include "core/components_ng/pattern/form/form_theme.h"
 #include "core/components_ng/pattern/gauge/gauge_theme.h"
 #include "core/components_ng/pattern/overlay/sheet_theme.h"
@@ -75,6 +76,8 @@
 #include "core/components_ng/pattern/grid/grid_item_theme.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_theme.h"
+#include "core/components_ng/pattern/stack/stack_theme.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -144,7 +147,10 @@ const std::unordered_map<ThemeType, RefPtr<Theme>(*)(const RefPtr<ThemeConstants
     { NG::GaugeTheme::TypeId(), &ThemeBuildFunc<NG::GaugeTheme::Builder> },
     { NG::SheetTheme::TypeId(), &ThemeBuildFunc<NG::SheetTheme::Builder> },
     { BlurStyleTheme::TypeId(), &ThemeBuildFunc<BlurStyleTheme::Builder> },
-    { ShadowTheme::TypeId(), &ThemeBuildFunc<ShadowTheme::Builder> }
+    { ShadowTheme::TypeId(), &ThemeBuildFunc<ShadowTheme::Builder> },
+    { NG::LinearLayoutTheme::TypeId(), &ThemeBuildFunc<NG::LinearLayoutTheme::Builder> },
+    { NG::StackTheme::TypeId(), &ThemeBuildFunc<NG::StackTheme::Builder> },
+    { NG::ContainerModalTheme::TypeId(), &ThemeBuildFunc<NG::ContainerModalTheme::Builder> },
 };
 } // namespace
 

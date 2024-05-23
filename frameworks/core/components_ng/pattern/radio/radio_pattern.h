@@ -55,12 +55,10 @@ public:
         if (!GetHost() || !GetHost()->IsActive()) {
             return nullptr;
         }
-        if (UseContentModifier()) {
-            return nullptr;
-        }
         if (!radioModifier_) {
             radioModifier_ = AceType::MakeRefPtr<RadioModifier>();
         }
+        radioModifier_->SetUseContentModifier(UseContentModifier());
         auto paintMethod = MakeRefPtr<RadioPaintMethod>(radioModifier_);
         paintMethod->SetTotalScale(totalScale_);
         paintMethod->SetPointScale(pointScale_);
@@ -153,6 +151,12 @@ public:
     void OnRestoreInfo(const std::string& restoreInfo) override;
     void SetBuilderFunc(RadioMakeCallback&& makeFunc)
     {
+        if (makeFunc == nullptr) {
+            makeFunc_ = std::nullopt;
+            customNode_ = nullptr;
+            OnModifyDone();
+            return;
+        }
         makeFunc_ = std::move(makeFunc);
     }
 
@@ -201,6 +205,9 @@ private:
     void InitFocusEvent();
     void HandleFocusEvent();
     void HandleBlurEvent();
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
+    void OnIsFocusActiveUpdate(bool isFocusAcitve);
     ImageSourceInfo GetImageSourceInfoFromTheme(int32_t RadioIndicator);
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
     RefPtr<FrameNode> BuildContentModifierNode();
@@ -237,6 +244,7 @@ private:
     bool enabled_ = true;
     std::optional<RadioMakeCallback> makeFunc_;
     bool focusEventInitialized_ = false;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
     RefPtr<RadioModifier> radioModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(RadioPattern);
 };

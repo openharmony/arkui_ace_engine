@@ -15,6 +15,9 @@
 
 #include "grid_test_ng.h"
 
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/grid/grid_item_model_ng.h"
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
 namespace OHOS::Ace::NG {
 
 namespace {
@@ -38,21 +41,21 @@ AssertionResult GridAttrTestNg::VerifyBigItemRect(int32_t index, RectF expectRec
  */
 HWTEST_F(GridAttrTestNg, Property001, TestSize.Level1)
 {
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        model.SetRowsTemplate("1fr 1fr 1fr");
-        model.SetColumnsGap(Dimension(COL_GAP));
-        model.SetRowsGap(Dimension(ROW_GAP));
-        model.SetCachedCount(2);
-        model.SetEditable(true);
-        model.SetLayoutDirection(FlexDirection::ROW);
-        model.SetMaxCount(5);
-        model.SetMinCount(2);
-        model.SetCellLength(100);
-        model.SetEdgeEffect(EdgeEffect::SPRING, false);
-        model.SetScrollEnabled(false);
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetRowsTemplate("1fr 1fr 1fr");
+    model.SetColumnsGap(Dimension(COL_GAP));
+    model.SetRowsGap(Dimension(ROW_GAP));
+    model.SetCachedCount(2);
+    model.SetEditable(true);
+    model.SetLayoutDirection(FlexDirection::ROW);
+    model.SetMaxCount(5);
+    model.SetMinCount(2);
+    model.SetCellLength(100);
+    model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    model.SetScrollEnabled(false);
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
 
     /**
      * @tc.steps: step1. Test ToJsonValue
@@ -107,11 +110,11 @@ HWTEST_F(GridAttrTestNg, Property002, TestSize.Level1)
      * @tc.cases: Invalid GapValue
      * @tc.expected: Gap would be null
     */
-    Create([](GridModelNG model) {
-        model.SetRowsGap(Dimension(-5));
-        model.SetColumnsGap(Dimension(-10));
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetRowsGap(Dimension(-5));
+    model.SetColumnsGap(Dimension(-10));
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     EXPECT_EQ(layoutProperty_->GetRowsGap(), std::nullopt);
     EXPECT_EQ(layoutProperty_->GetColumnsGap(), std::nullopt);
 }
@@ -184,12 +187,12 @@ HWTEST_F(GridAttrTestNg, ColumnsTemplate001, TestSize.Level1)
      * @tc.cases: Only set ColumnsTemplate, set gap
      * @tc.expected: Axis is VERTICAL, has four cols, has gap
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        model.SetColumnsGap(Dimension(COL_GAP));
-        model.SetRowsGap(Dimension(ROW_GAP));
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetColumnsGap(Dimension(COL_GAP));
+    model.SetRowsGap(Dimension(ROW_GAP));
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     EXPECT_EQ(pattern_->GetAxis(), Axis::VERTICAL);
     EXPECT_EQ(pattern_->GetCrossCount(), 4);
 
@@ -214,10 +217,10 @@ HWTEST_F(GridAttrTestNg, ColumnsTemplate002, TestSize.Level1)
      * @tc.cases: Set ColumnsTemplate "1fr 2fr 3fr 1fr"
      * @tc.expected: Cols has different width
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 2fr 3fr 1fr");
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 2fr 3fr 1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     float parts = 1 + 2 + 3 + 1; // 7
     float firstItemWidth = GRID_WIDTH / parts;
     EXPECT_EQ(GetChildWidth(frameNode_, 0), firstItemWidth * 1);
@@ -238,10 +241,10 @@ HWTEST_F(GridAttrTestNg, ColumnsTemplate003, TestSize.Level1)
      * @tc.cases: Set ColumnsTemplate "1fr 0fr 0fr 1fr"
      * @tc.expected: "0fr" col width is zero
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 0fr 0fr 1fr");
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 0fr 0fr 1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     EXPECT_GT(GetChildWidth(frameNode_, 0), 0.f);
     EXPECT_EQ(GetChildWidth(frameNode_, 1), 0.f);
     EXPECT_EQ(GetChildWidth(frameNode_, 2), 0.f);
@@ -260,10 +263,10 @@ HWTEST_F(GridAttrTestNg, ColumnsTemplate004, TestSize.Level1)
      * @tc.cases: Set ColumnsTemplate "repeat(auto-fit, 90px)"
      * @tc.expected: Cols number and gridItem width is self-adaptation
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("repeat(auto-fit, 90px)");
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("repeat(auto-fit, 90px)");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     float minItemWidth = 90.f;
     int32_t cols = floor(GRID_WIDTH / minItemWidth); // 5
     EXPECT_EQ(pattern_->GetCrossCount(), cols);
@@ -282,10 +285,10 @@ HWTEST_F(GridAttrTestNg, ColumnsTemplate005, TestSize.Level1)
      * @tc.cases: Set ColumnsTemplate "repeat(auto-fill, 90px)"
      * @tc.expected: GridItem width is fixed
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("repeat(auto-fill, 90px)");
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("repeat(auto-fill, 90px)");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     float itemWidth = 90.f;
     int32_t cols = floor(GRID_WIDTH / itemWidth); // 5
     EXPECT_EQ(pattern_->GetCrossCount(), cols);
@@ -303,10 +306,10 @@ HWTEST_F(GridAttrTestNg, ColumnsTemplate006, TestSize.Level1)
      * @tc.cases: Set Invalid ColumnsTemplate ""
      * @tc.expected: Only has one col
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("");
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     EXPECT_EQ(pattern_->GetCrossCount(), 1);
 }
 
@@ -322,12 +325,12 @@ HWTEST_F(GridAttrTestNg, RowsTemplate001, TestSize.Level1)
      * @tc.cases: Only set RowsTemplate, set gap
      * @tc.expected: Axis is HORIZONTAL, has four rows, has gap
      */
-    Create([](GridModelNG model) {
-        model.SetRowsTemplate("1fr 1fr 1fr 1fr");
-        model.SetColumnsGap(Dimension(COL_GAP));
-        model.SetRowsGap(Dimension(ROW_GAP));
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetRowsTemplate("1fr 1fr 1fr 1fr");
+    model.SetColumnsGap(Dimension(COL_GAP));
+    model.SetRowsGap(Dimension(ROW_GAP));
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     EXPECT_EQ(pattern_->GetAxis(), Axis::HORIZONTAL);
     EXPECT_EQ(pattern_->GetCrossCount(), 4);
 
@@ -352,10 +355,10 @@ HWTEST_F(GridAttrTestNg, RowsTemplate002, TestSize.Level1)
      * @tc.cases: Set RowsTemplate "1fr 2fr 3fr 1fr"
      * @tc.expected: Rows has different width
      */
-    Create([](GridModelNG model) {
-        model.SetRowsTemplate("1fr 2fr 3fr 1fr");
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetRowsTemplate("1fr 2fr 3fr 1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     float parts = 1 + 2 + 3 + 1; // 7
     float firstItemHeight = GRID_HEIGHT / parts;
     EXPECT_EQ(GetChildHeight(frameNode_, 0), firstItemHeight * 1);
@@ -376,10 +379,10 @@ HWTEST_F(GridAttrTestNg, RowsTemplate003, TestSize.Level1)
      * @tc.cases: Set RowsTemplate "1fr 0fr 0fr 1fr"
      * @tc.expected: "0fr" row width is zero
      */
-    Create([](GridModelNG model) {
-        model.SetRowsTemplate("1fr 0fr 0fr 1fr");
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetRowsTemplate("1fr 0fr 0fr 1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     EXPECT_GT(GetChildHeight(frameNode_, 0), 0.f);
     EXPECT_EQ(GetChildHeight(frameNode_, 1), 0.f);
     EXPECT_EQ(GetChildHeight(frameNode_, 2), 0.f);
@@ -398,10 +401,10 @@ HWTEST_F(GridAttrTestNg, RowsTemplate004, TestSize.Level1)
      * @tc.cases: Set RowsTemplate "repeat(auto-fit, 90px)"
      * @tc.expected: Rows number and gridItem height is self-adaptation
      */
-    Create([](GridModelNG model) {
-        model.SetRowsTemplate("repeat(auto-fit, 90px)");
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetRowsTemplate("repeat(auto-fit, 90px)");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     float minItemHeight = 90.f;
     int32_t rows = floor(GRID_HEIGHT / minItemHeight); // 8
     EXPECT_EQ(pattern_->GetCrossCount(), rows);
@@ -420,10 +423,10 @@ HWTEST_F(GridAttrTestNg, RowsTemplate005, TestSize.Level1)
      * @tc.cases: Set RowsTemplate "repeat(auto-fill, 90px)"
      * @tc.expected: GridItem width is fixed
      */
-    Create([](GridModelNG model) {
-        model.SetRowsTemplate("repeat(auto-fill, 90px)");
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetRowsTemplate("repeat(auto-fill, 90px)");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     float itemHeight = 90.f;
     int32_t rows = floor(GRID_HEIGHT / itemHeight); // 5
     EXPECT_EQ(pattern_->GetCrossCount(), rows);
@@ -441,10 +444,10 @@ HWTEST_F(GridAttrTestNg, RowsTemplate006, TestSize.Level1)
      * @tc.cases: Set Invalid RowsTemplate ""
      * @tc.expected: Only has one row
      */
-    Create([](GridModelNG model) {
-        model.SetRowsTemplate("");
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetRowsTemplate("");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     EXPECT_EQ(pattern_->GetCrossCount(), 1);
 }
 
@@ -460,11 +463,11 @@ HWTEST_F(GridAttrTestNg, ColumnsRows001, TestSize.Level1)
      * @tc.cases: Both set ColumnsTemplate and RowsTemplate
      * @tc.expected: GridItem will fill the mesh size by default
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        model.SetRowsTemplate("1fr 1fr 1fr 1fr");
-        CreateItem(20);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetRowsTemplate("1fr 1fr 1fr 1fr");
+    CreateGridItems(20);
+    CreateDone(frameNode_);
     EXPECT_EQ(pattern_->GetCrossCount(), 4);
     EXPECT_TRUE(IsEqual(GetChildSize(frameNode_, 0), SizeF(ITEM_WIDTH, ITEM_HEIGHT)));
 }
@@ -481,15 +484,15 @@ HWTEST_F(GridAttrTestNg, LayoutDirection001, TestSize.Level1)
      * @tc.cases: Set LayoutDirection ROW, set minCount maxCount, setgap
      * @tc.expected: Axis is VERTICAL, has three cols, has gap
      */
-    Create([](GridModelNG model) {
-        model.SetLayoutDirection(FlexDirection::ROW);
-        model.SetCellLength(ITEM_HEIGHT);
-        model.SetMinCount(2);
-        model.SetMaxCount(4);
-        model.SetColumnsGap(Dimension(COL_GAP));
-        model.SetRowsGap(Dimension(ROW_GAP));
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetLayoutDirection(FlexDirection::ROW);
+    model.SetCellLength(ITEM_HEIGHT);
+    model.SetMinCount(2);
+    model.SetMaxCount(4);
+    model.SetColumnsGap(Dimension(COL_GAP));
+    model.SetRowsGap(Dimension(ROW_GAP));
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     EXPECT_EQ(pattern_->GetAxis(), Axis::VERTICAL);
     EXPECT_EQ(pattern_->GetCrossCount(), 3);
 
@@ -511,13 +514,13 @@ HWTEST_F(GridAttrTestNg, LayoutDirection002, TestSize.Level1)
      */
     float minCount = 2;
     float itemWidth = GRID_WIDTH / minCount + 100.f; // greater than half of GRID_WIDTH
-    Create([=](GridModelNG model) {
-        model.SetLayoutDirection(FlexDirection::ROW_REVERSE);
-        model.SetCellLength(ITEM_HEIGHT);
-        model.SetMinCount(minCount);
-        model.SetMaxCount(4);
-        CreateItem(10, itemWidth, ITEM_HEIGHT);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetLayoutDirection(FlexDirection::ROW_REVERSE);
+    model.SetCellLength(ITEM_HEIGHT);
+    model.SetMinCount(minCount);
+    model.SetMaxCount(4);
+    CreateGridItems(10, itemWidth, ITEM_HEIGHT);
+    CreateDone(frameNode_);
     EXPECT_EQ(pattern_->GetCrossCount(), minCount);
     EXPECT_GT(GetChildX(frameNode_, 0), GetChildX(frameNode_, 1));
 }
@@ -536,13 +539,13 @@ HWTEST_F(GridAttrTestNg, LayoutDirection003, TestSize.Level1)
      */
     float maxCount = 4;
     float itemHeight = GRID_HEIGHT / maxCount - 100.f; // less than quarter of GRID_HEIGHT
-    Create([=](GridModelNG model) {
-        model.SetLayoutDirection(FlexDirection::COLUMN);
-        model.SetCellLength(ITEM_WIDTH);
-        model.SetMinCount(2);
-        model.SetMaxCount(maxCount);
-        CreateItem(10, ITEM_WIDTH, itemHeight);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetLayoutDirection(FlexDirection::COLUMN);
+    model.SetCellLength(ITEM_WIDTH);
+    model.SetMinCount(2);
+    model.SetMaxCount(maxCount);
+    CreateGridItems(10, ITEM_WIDTH, itemHeight);
+    CreateDone(frameNode_);
     EXPECT_LT(GetChildY(frameNode_, 0), GetChildY(frameNode_, 1));
     EXPECT_LT(GetChildY(frameNode_, 1), GetChildY(frameNode_, 2));
     EXPECT_LT(GetChildY(frameNode_, 2), GetChildY(frameNode_, 3));
@@ -561,13 +564,13 @@ HWTEST_F(GridAttrTestNg, LayoutDirection004, TestSize.Level1)
      * @tc.cases: Set LayoutDirection COLUMN_REVERSE
      * @tc.expected: GridItem from bottom to top
      */
-    Create([](GridModelNG model) {
-        model.SetLayoutDirection(FlexDirection::COLUMN_REVERSE);
-        model.SetCellLength(ITEM_WIDTH);
-        model.SetMinCount(2);
-        model.SetMaxCount(4);
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetLayoutDirection(FlexDirection::COLUMN_REVERSE);
+    model.SetCellLength(ITEM_WIDTH);
+    model.SetMinCount(2);
+    model.SetMaxCount(4);
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     EXPECT_GT(GetChildY(frameNode_, 0), GetChildY(frameNode_, 1));
     EXPECT_GT(GetChildY(frameNode_, 1), GetChildY(frameNode_, 2));
     EXPECT_GT(GetChildY(frameNode_, 2), GetChildY(frameNode_, 3));
@@ -585,14 +588,14 @@ HWTEST_F(GridAttrTestNg, BigItem001, TestSize.Level1)
      * @tc.cases: Set RowsTemplate and ColumnsTemplate, create big items
      * @tc.expected: Big items have bigger size
      */
-    Create([](GridModelNG model) {
-        model.SetRowsTemplate("1fr 1fr 1fr 1fr");
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    GridModelNG model = CreateGrid();
+    model.SetRowsTemplate("1fr 1fr 1fr 1fr");
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         CreateBigItem(1, 2, 1, 2);
         CreateBigItem(NULL_VALUE, NULL_VALUE, 1, 3);
         CreateBigItem(1, 3, NULL_VALUE, NULL_VALUE);
-        CreateItem(7);
-    });
+    CreateGridItems(7);
+    CreateDone(frameNode_);
     EXPECT_TRUE(VerifyBigItemRect(0, RectF(ITEM_WIDTH, ITEM_HEIGHT, ITEM_WIDTH * 2, ITEM_HEIGHT * 2)));
     EXPECT_TRUE(VerifyBigItemRect(1, RectF(0.f, 0.f, ITEM_WIDTH * 3, ITEM_HEIGHT)));
     EXPECT_TRUE(VerifyBigItemRect(2, RectF(ITEM_WIDTH * 3, 0.f, ITEM_WIDTH, ITEM_HEIGHT * 3)));
@@ -617,13 +620,13 @@ HWTEST_F(GridAttrTestNg, BigItem002, TestSize.Level1)
      * @tc.cases: Only set RowsTemplate, create big items
      * @tc.expected: Big items have bigger size
      */
-    Create([](GridModelNG model) {
-        model.SetRowsTemplate("1fr 1fr 1fr 1fr");
+    GridModelNG model = CreateGrid();
+    model.SetRowsTemplate("1fr 1fr 1fr 1fr");
         CreateBigRowItem(1, 2);
         CreateBigRowItem(0, 2);
         CreateBigRowItem(2, 3);
-        CreateFixedItem(7);
-    });
+    CreateFixedItems(7);
+    CreateDone(frameNode_);
     EXPECT_TRUE(VerifyBigItemRect(0, RectF(0.f, ITEM_HEIGHT, ITEM_WIDTH, ITEM_HEIGHT * 2)));
     EXPECT_TRUE(VerifyBigItemRect(1, RectF(ITEM_WIDTH, 0.f, ITEM_WIDTH, ITEM_HEIGHT * 3)));
     EXPECT_TRUE(VerifyBigItemRect(2, RectF(ITEM_WIDTH * 2, ITEM_HEIGHT * 2, ITEM_WIDTH, ITEM_HEIGHT * 2)));
@@ -648,13 +651,13 @@ HWTEST_F(GridAttrTestNg, BigItem003, TestSize.Level1)
      * @tc.cases: Only set ColumnsTemplate, create big items
      * @tc.expected: Big items have bigger size
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         CreateBigColItem(2, 3);
         CreateBigColItem(0, 2);
         CreateBigColItem(2, 1);
-        CreateFixedItem(7);
-    });
+    CreateFixedItems(7);
+    CreateDone(frameNode_);
     EXPECT_TRUE(VerifyBigItemRect(0, RectF(ITEM_WIDTH * 2, 0.f, ITEM_WIDTH * 2, ITEM_HEIGHT)));
     EXPECT_TRUE(VerifyBigItemRect(1, RectF(0.f, ITEM_HEIGHT, ITEM_WIDTH * 3, ITEM_HEIGHT)));
     EXPECT_TRUE(VerifyBigItemRect(2, RectF(ITEM_WIDTH * 2, ITEM_HEIGHT * 2, ITEM_WIDTH, ITEM_HEIGHT)));
@@ -679,13 +682,13 @@ HWTEST_F(GridAttrTestNg, BigItem004, TestSize.Level1)
      * @tc.steps: step1. Only set ColumnsTemplate, create big items
      * @tc.expected: Big item have bigger size
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         CreateBigColItem(2, 3);
-        CreateFixedItem(7);
-    });
+    CreateFixedItems(7);
+    CreateDone(frameNode_);
     EXPECT_TRUE(VerifyBigItemRect(0, RectF(ITEM_WIDTH * 2, 0.f, ITEM_WIDTH * 2, ITEM_HEIGHT))); // big item
-    EXPECT_TRUE(VerifyBigItemRect(1, RectF(0.f, ITEM_HEIGHT, ITEM_WIDTH, ITEM_HEIGHT))); // normal item
+    EXPECT_TRUE(VerifyBigItemRect(1, RectF(0.f, ITEM_HEIGHT, ITEM_WIDTH, ITEM_HEIGHT)));        // normal item
 
     /**
      * @tc.steps: step2. Change colStart and colEnd
@@ -696,7 +699,7 @@ HWTEST_F(GridAttrTestNg, BigItem004, TestSize.Level1)
     itemLayoutProperty->UpdateColumnEnd(1);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // update items
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(VerifyBigItemRect(0, RectF(0.f, 0.f, ITEM_WIDTH * 2, ITEM_HEIGHT))); // big item
+    EXPECT_TRUE(VerifyBigItemRect(0, RectF(0.f, 0.f, ITEM_WIDTH * 2, ITEM_HEIGHT)));        // big item
     EXPECT_TRUE(VerifyBigItemRect(1, RectF(ITEM_WIDTH * 2, 0.f, ITEM_WIDTH, ITEM_HEIGHT))); // normal item
 }
 
@@ -707,13 +710,13 @@ HWTEST_F(GridAttrTestNg, BigItem004, TestSize.Level1)
  */
 HWTEST_F(GridAttrTestNg, EnableScrollInteraction001, TestSize.Level1)
 {
-    Create([](GridModelNG model) {
-        model.SetScrollEnabled(true);
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetScrollEnabled(true);
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     EXPECT_TRUE(layoutProperty_->GetScrollEnabledValue());
 }
-    
+
 /**
  * @tc.name: EnableScrollInteraction002
  * @tc.desc: Test property about enableScrollInteraction.
@@ -721,10 +724,10 @@ HWTEST_F(GridAttrTestNg, EnableScrollInteraction001, TestSize.Level1)
  */
 HWTEST_F(GridAttrTestNg, EnableScrollInteraction002, TestSize.Level1)
 {
-    Create([](GridModelNG model) {
-        model.SetScrollEnabled(false);
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetScrollEnabled(false);
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     EXPECT_FALSE(layoutProperty_->GetScrollEnabledValue());
 }
 
@@ -739,11 +742,11 @@ HWTEST_F(GridAttrTestNg, Gap001, TestSize.Level1)
      * @tc.cases: Do not set gap
      * @tc.expected: Has no gap
      */
-    Create([](GridModelNG model) {
-        model.SetRowsTemplate("1fr 1fr 1fr 1fr");
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateItem(16, NULL_VALUE, NULL_VALUE);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetRowsTemplate("1fr 1fr 1fr 1fr");
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateGridItems(16, NULL_VALUE, NULL_VALUE);
+    CreateDone(frameNode_);
     EXPECT_EQ(GetChildX(frameNode_, 1) - GetChildWidth(frameNode_, 1), 0.f);
     EXPECT_EQ(GetChildY(frameNode_, 4) - GetChildHeight(frameNode_, 1), 0.f);
 }
@@ -759,13 +762,13 @@ HWTEST_F(GridAttrTestNg, Gap002, TestSize.Level1)
      * @tc.cases: Set normal gap
      * @tc.expected: Has gap
      */
-    Create([](GridModelNG model) {
-        model.SetRowsTemplate("1fr 1fr 1fr 1fr");
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        model.SetColumnsGap(Dimension(COL_GAP));
-        model.SetRowsGap(Dimension(ROW_GAP));
-        CreateItem(16, NULL_VALUE, NULL_VALUE);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetRowsTemplate("1fr 1fr 1fr 1fr");
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetColumnsGap(Dimension(COL_GAP));
+    model.SetRowsGap(Dimension(ROW_GAP));
+    CreateGridItems(16, NULL_VALUE, NULL_VALUE);
+    CreateDone(frameNode_);
     EXPECT_EQ(GetChildX(frameNode_, 1) - GetChildWidth(frameNode_, 1), COL_GAP);
     EXPECT_EQ(GetChildY(frameNode_, 4) - GetChildHeight(frameNode_, 1), ROW_GAP);
 }
@@ -781,13 +784,13 @@ HWTEST_F(GridAttrTestNg, Gap003, TestSize.Level1)
      * @tc.cases: Set out of range gap, less than zero
      * @tc.expected: Has no gap
      */
-    Create([](GridModelNG model) {
-        model.SetRowsTemplate("1fr 1fr 1fr 1fr");
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        model.SetColumnsGap(Dimension(-1));
-        model.SetRowsGap(Dimension(-1));
-        CreateItem(16, NULL_VALUE, NULL_VALUE);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetRowsTemplate("1fr 1fr 1fr 1fr");
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetColumnsGap(Dimension(-1));
+    model.SetRowsGap(Dimension(-1));
+    CreateGridItems(16, NULL_VALUE, NULL_VALUE);
+    CreateDone(frameNode_);
     EXPECT_EQ(GetChildX(frameNode_, 1) - GetChildWidth(frameNode_, 1), 0.f);
     EXPECT_EQ(GetChildY(frameNode_, 4) - GetChildHeight(frameNode_, 1), 0.f);
 }
@@ -803,13 +806,13 @@ HWTEST_F(GridAttrTestNg, Gap004, TestSize.Level1)
      * @tc.cases: Set out of range gap, total gap greater than grid size
      * @tc.expected: Has no gap
      */
-    Create([](GridModelNG model) {
-        model.SetRowsTemplate("1fr 1fr 1fr 1fr");
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        model.SetColumnsGap(Dimension(GRID_WIDTH / 3));
-        model.SetRowsGap(Dimension(GRID_HEIGHT / 3 + 1));
-        CreateItem(16, NULL_VALUE, NULL_VALUE);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetRowsTemplate("1fr 1fr 1fr 1fr");
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetColumnsGap(Dimension(GRID_WIDTH / 3));
+    model.SetRowsGap(Dimension(GRID_HEIGHT / 3 + 1));
+    CreateGridItems(16, NULL_VALUE, NULL_VALUE);
+    CreateDone(frameNode_);
     EXPECT_EQ(GetChildX(frameNode_, 1) - GetChildWidth(frameNode_, 1), 0.f);
     EXPECT_EQ(GetChildY(frameNode_, 4) - GetChildHeight(frameNode_, 1), 0.f);
 }
@@ -825,12 +828,12 @@ HWTEST_F(GridAttrTestNg, Gap005, TestSize.Level1)
      * @tc.cases: Only set ColumnsTemplate
      * @tc.expected: Grid is scrollable, the scrollable direction gap valid, the another one invalid
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        model.SetColumnsGap(Dimension(GRID_WIDTH / 3));
-        model.SetRowsGap(Dimension(GRID_HEIGHT / 3));
-        CreateFixedItem(16);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetColumnsGap(Dimension(GRID_WIDTH / 3));
+    model.SetRowsGap(Dimension(GRID_HEIGHT / 3));
+    CreateFixedItems(16);
+    CreateDone(frameNode_);
     EXPECT_TRUE(layoutProperty_->IsConfiguredScrollable());
     EXPECT_EQ(GetChildX(frameNode_, 1) - GetChildWidth(frameNode_, 1), 0.f);
     EXPECT_EQ(GetChildY(frameNode_, 4) - GetChildHeight(frameNode_, 1), GRID_HEIGHT / 3);
@@ -843,11 +846,11 @@ HWTEST_F(GridAttrTestNg, Gap005, TestSize.Level1)
  */
 HWTEST_F(GridAttrTestNg, EdgeEffectOption001, TestSize.Level1)
 {
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateFixedItem(20);
-        model.SetEdgeEffect(EdgeEffect::SPRING, false);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateFixedItems(20);
+    model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    CreateDone(frameNode_);
     EXPECT_FALSE(pattern_->GetAlwaysEnabled());
     EXPECT_TRUE(pattern_->scrollable_);
 }
@@ -859,11 +862,11 @@ HWTEST_F(GridAttrTestNg, EdgeEffectOption001, TestSize.Level1)
  */
 HWTEST_F(GridAttrTestNg, EdgeEffectOption002, TestSize.Level1)
 {
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateFixedItem(20);
-        model.SetEdgeEffect(EdgeEffect::SPRING, true);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateFixedItems(20);
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateDone(frameNode_);
     EXPECT_TRUE(pattern_->GetAlwaysEnabled());
     EXPECT_TRUE(pattern_->scrollable_);
 }
@@ -875,11 +878,11 @@ HWTEST_F(GridAttrTestNg, EdgeEffectOption002, TestSize.Level1)
  */
 HWTEST_F(GridAttrTestNg, EdgeEffectOption003, TestSize.Level1)
 {
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateFixedItem(3); // 3 is item count
-        model.SetEdgeEffect(EdgeEffect::SPRING, false);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateFixedItems(3); // 3 is item count
+    model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    CreateDone(frameNode_);
     EXPECT_FALSE(pattern_->GetAlwaysEnabled());
     EXPECT_FALSE(pattern_->scrollable_);
 }
@@ -891,11 +894,11 @@ HWTEST_F(GridAttrTestNg, EdgeEffectOption003, TestSize.Level1)
  */
 HWTEST_F(GridAttrTestNg, EdgeEffectOption004, TestSize.Level1)
 {
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateFixedItem(3); // 3 is item count
-        model.SetEdgeEffect(EdgeEffect::SPRING, true);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateFixedItems(3); // 3 is item count
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateDone(frameNode_);
     EXPECT_TRUE(pattern_->GetAlwaysEnabled());
     EXPECT_TRUE(pattern_->scrollable_);
 }
@@ -911,10 +914,10 @@ HWTEST_F(GridAttrTestNg, GridSetFriction001, TestSize.Level1)
      * @tc.cases: Set friction less than zero
      * @tc.expected: friction would be default
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        model.SetFriction(-1.0);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetFriction(-1.0);
+    CreateDone(frameNode_);
     EXPECT_DOUBLE_EQ(pattern_->GetFriction(), DEFAULT_FRICTION);
 }
 
@@ -929,10 +932,10 @@ HWTEST_F(GridAttrTestNg, GridSetFriction002, TestSize.Level1)
      * @tc.cases: Set friction equal to zero
      * @tc.expected: friction would be default
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        model.SetFriction(0.0);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetFriction(0.0);
+    CreateDone(frameNode_);
     EXPECT_DOUBLE_EQ(pattern_->GetFriction(), DEFAULT_FRICTION);
 }
 
@@ -947,10 +950,10 @@ HWTEST_F(GridAttrTestNg, GridSetFriction003, TestSize.Level1)
      * @tc.cases: Set friction greater than zero
      * @tc.expected: Friction would be itself
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        model.SetFriction(1.0);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetFriction(1.0);
+    CreateDone(frameNode_);
     EXPECT_DOUBLE_EQ(pattern_->GetFriction(), 1.0);
 }
 
@@ -961,10 +964,10 @@ HWTEST_F(GridAttrTestNg, GridSetFriction003, TestSize.Level1)
  */
 HWTEST_F(GridAttrTestNg, GridItemHoverEventTest001, TestSize.Level1)
 {
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateFixedItem(10, GridItemStyle::PLAIN);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateFixedItems(10, GridItemStyle::PLAIN);
+    CreateDone(frameNode_);
     auto gridItemPattern = GetChildPattern<GridItemPattern>(frameNode_, 0);
 
     /**
@@ -989,10 +992,10 @@ HWTEST_F(GridAttrTestNg, GridItemHoverEventTest001, TestSize.Level1)
  */
 HWTEST_F(GridAttrTestNg, GridItemPressEventTest001, TestSize.Level1)
 {
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateFixedItem(10, GridItemStyle::PLAIN);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateFixedItems(10, GridItemStyle::PLAIN);
+    CreateDone(frameNode_);
     auto gridItemPattern = GetChildPattern<GridItemPattern>(frameNode_, 0);
 
     /**
@@ -1022,12 +1025,12 @@ HWTEST_F(GridAttrTestNg, LayoutOptions001, TestSize.Level1)
      * @tc.expected: Each gridItem rect is correct
      */
     GridLayoutOptions option;
-    option.irregularIndexes = { 6, 1, 4};
-    Create([option](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        model.SetLayoutOptions(option);
-        CreateItem(10, -2, ITEM_HEIGHT);
-    });
+    option.irregularIndexes = { 6, 1, 4 };
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetLayoutOptions(option);
+    CreateGridItems(10, -2, ITEM_HEIGHT);
+    CreateDone(frameNode_);
     EXPECT_TRUE(VerifyBigItemRect(0, RectF(0.f, ITEM_HEIGHT * 0, ITEM_WIDTH, ITEM_HEIGHT)));
     EXPECT_TRUE(VerifyBigItemRect(1, RectF(0.f, ITEM_HEIGHT * 1, GRID_WIDTH, ITEM_HEIGHT)));
     EXPECT_TRUE(VerifyBigItemRect(2, RectF(0.f, ITEM_HEIGHT * 2, ITEM_WIDTH, ITEM_HEIGHT)));
@@ -1056,11 +1059,11 @@ HWTEST_F(GridAttrTestNg, LayoutOptions002, TestSize.Level1)
         return GridItemSize { 1, 4 };
     };
     option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
-    Create([option](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        model.SetLayoutOptions(option);
-        CreateItem(10, -2, ITEM_HEIGHT);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetLayoutOptions(option);
+    CreateGridItems(10, -2, ITEM_HEIGHT);
+    CreateDone(frameNode_);
     EXPECT_TRUE(VerifyBigItemRect(0, RectF(0.f, ITEM_HEIGHT * 0, GRID_WIDTH, ITEM_HEIGHT)));
     EXPECT_TRUE(VerifyBigItemRect(1, RectF(0.f, ITEM_HEIGHT * 1, GRID_WIDTH, ITEM_HEIGHT)));
     EXPECT_TRUE(VerifyBigItemRect(2, RectF(0.f, ITEM_HEIGHT * 2, ITEM_WIDTH * 1, ITEM_HEIGHT)));
@@ -1076,13 +1079,13 @@ HWTEST_F(GridAttrTestNg, LayoutOptions002, TestSize.Level1)
  */
 HWTEST_F(GridAttrTestNg, GridItemDumpAdvanceInfoTest001, TestSize.Level1)
 {
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        model.SetRowsTemplate("1fr 1fr 1fr");
-        model.SetColumnsGap(Dimension(COL_GAP));
-        model.SetRowsGap(Dimension(ROW_GAP));
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetRowsTemplate("1fr 1fr 1fr");
+    model.SetColumnsGap(Dimension(COL_GAP));
+    model.SetRowsGap(Dimension(ROW_GAP));
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
 
     /**
      * @tc.steps: step1. Get gridItemPattern and call dumpAdvanceInfo.
@@ -1104,10 +1107,10 @@ HWTEST_F(GridAttrTestNg, GridItemDumpAdvanceInfoTest001, TestSize.Level1)
  */
 HWTEST_F(GridAttrTestNg, GridItemSetSelectableTest001, TestSize.Level1)
 {
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateFixedItem(20);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateFixedItems(20);
+    CreateDone(frameNode_);
 
     /**
      * @tc.steps: step1. Get gridItemPattern.

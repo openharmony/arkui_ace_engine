@@ -863,6 +863,16 @@ class ArkKeyBoardShortCut {
   }
 }
 
+class ArkCustomProperty {
+  key: string;
+  value: object;
+
+  constructor() {
+    this.key = undefined;
+    this.value = undefined;
+  }
+}
+
 class ArkBlendMode {
   blendMode: number;
   blendApplyType: number;
@@ -924,16 +934,31 @@ class ArkConstraintSizeOptions {
   }
 }
 
-class ArkTextAreaShowCounter {
+class ArkTextFieldShowCounter {
   value: boolean;
-  options?: any;
+  highlightBorder?: any;
+  thresholdPercentage?: any;
   constructor() {
     this.value = undefined;
-    this.options = undefined;
+    this.highlightBorder = undefined;
+    this.thresholdPercentage = undefined;
   }
-  isEqual(another: ArkTextAreaShowCounter): boolean {
+  isEqual(another: ArkTextFieldShowCounter): boolean {
     return (this.value === another.value) &&
-      (this.options === another.options);
+      (this.highlightBorder === another.highlightBorder) &&
+      (this.thresholdPercentage === another.thresholdPercentage);
+  }
+}
+
+class ArkTextInputFilter {
+  value: ResourceStr | undefined;
+  error?: (value: string) => void;
+  constructor() {
+    this.value = undefined;
+    this.error = undefined;
+  }
+  isEqual(another: ArkSearchInputFilter): boolean {
+    return (this.value === another.value);
   }
 }
 
@@ -1152,6 +1177,19 @@ class ArkGeometryTransition {
   }
 }
 
+class ArkSymbolEffect {
+  symbolEffect: SymbolEffect;
+  action: boolean | number | undefined;
+
+  constructor() {
+    this.symbolEffect = undefined;
+    this.action = undefined;
+  }
+  isEqual(another: ArkSymbolEffect): boolean {
+    return (this.symbolEffect === another.symbolEffect) && (this.action === another.action);
+  }
+}
+
 class ArkTextBackGroundStyle {
   color: ResourceColor;
   radius: Dimension | BorderRadiuses;
@@ -1191,6 +1229,18 @@ class ArkTextBackGroundStyle {
       }
     }
     return true;
+  }
+}
+
+class ArkScrollOffsetOptions {
+  xOffset: Dimension;
+  yOffset: Dimension;
+  constructor() {
+    this.xOffset = undefined;
+    this.yOffset = undefined;
+  }
+  isEqual(another: ArkScrollOffsetOptions): boolean {
+    return this.xOffset === another.xOffset && this.yOffset === another.yOffset;
   }
 }
 
@@ -1245,5 +1295,31 @@ class ArkPositionType {
     } else {
       return false;
     }
+  }
+}
+
+class ArkSelection {
+  selectionStart: number;
+  selectionEnd: number;
+  constructor() {
+    this.selectionStart = undefined;
+    this.selectionEnd = undefined;
+  }
+  isEqual(another: ArkSelection): boolean {
+    return this.selectionStart === another.selectionStart &&
+      this.selectionEnd === another.selectionEnd;
+  }
+}
+
+class TextDataDetectorConfig {
+  types: TextDataDetectorType;
+  onDetectResultUpdate: (result: string) => void;
+  constructor() {
+    this.types = undefined;
+    this.onDetectResultUpdate = undefined;
+  }
+  isEqual(another: TextDataDetectorConfig): boolean {
+    return (this.types === another.types) &&
+      (this.onDetectResultUpdate === another.onDetectResultUpdate);
   }
 }

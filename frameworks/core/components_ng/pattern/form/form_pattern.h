@@ -113,8 +113,8 @@ private:
     void FireOnLoadEvent() const;
     void FireOnErrorEvent(const std::string& code, const std::string& msg) const;
     void FireOnUninstallEvent(int64_t id) const;
-    void FireFormSurfaceNodeCallback(const std::shared_ptr<Rosen::RSSurfaceNode>& node, bool isDynamic);
-    void FireFormSurfaceChangeCallback(float width, float height);
+    void FireFormSurfaceNodeCallback(const std::shared_ptr<Rosen::RSSurfaceNode>& node, bool isDynamic, bool isRecover);
+    void FireFormSurfaceChangeCallback(float width, float height, float borderWidth = 0.0);
     void FireFormSurfaceDetachCallback();
     void UpdateBackgroundColorWhenUnTrustForm();
 
@@ -134,8 +134,11 @@ private:
     void RemoveFrsNode();
     void ReleaseRenderer();
     void DeleteImageNode();
+    void DelayDeleteImageNode();
+    void DeleteImageNodeAfterRecover();
     RefPtr<FrameNode> GetImageNode();
     void HandleStaticFormEvent(const PointF& touchPoint);
+    void ProcDeleteImageNode(bool isRecover);
 
     void InitClickEvent();
     void HandleTouchDownEvent(const TouchEventInfo& event);
@@ -173,6 +176,7 @@ private:
     TimeStamp touchDownTime_;
     bool shouldResponseClick_ = false;
     Offset lastTouchLocation_;
+    ColorMode colorMode = ColorMode::LIGHT;
 
     bool isFormObscured_ = false;
     bool isJsCard_ = true;

@@ -15,10 +15,14 @@
 
 #pragma once
 
+#include "drawable_descriptor.h"
 #include "native_node.h"
 #include "native_type.h"
+#include "resource.h"
 
 #include "frameworks/core/interfaces/arkoala/arkoala_api.h"
+#include "interfaces/inner_api/drawable_descriptor/drawable_descriptor.h"
+#include "pixelmap_native_impl.h"
 
 
 #ifdef __cplusplus
@@ -76,6 +80,46 @@ struct ArkUI_NodeCustomEvent {
     void* userData;
 };
 
+struct ArkUI_OptionalFloat {
+    int32_t isSet;
+    float value;
+};
+
+struct ArkUI_OptionalInt {
+    int32_t isSet;
+    int32_t value;
+};
+
+struct ArkUI_OptionalUint {
+    int32_t isSet;
+    uint32_t value;
+};
+
+struct ArkUI_SwiperIndicator {
+    ArkUI_SwiperIndicatorType type;
+    ArkUI_OptionalFloat dimLeft;
+    ArkUI_OptionalFloat dimTop;
+    ArkUI_OptionalFloat dimRight;
+    ArkUI_OptionalFloat dimBottom;
+    ArkUI_OptionalFloat itemWidth;
+    ArkUI_OptionalFloat itemHeight;
+    ArkUI_OptionalFloat selectedItemWidth;
+    ArkUI_OptionalFloat selectedItemHeight;
+    ArkUI_OptionalInt maskValue;
+    ArkUI_OptionalUint colorValue;
+    ArkUI_OptionalUint selectedColorValue;
+};
+
+struct ArkUI_DrawableDescriptor {
+    OH_PixelmapNativeHandle pixelMap;
+    OH_PixelmapNativeHandle* pixelMapArray;
+    ArkUI_Int32 size;
+    std::shared_ptr<OHOS::Ace::Napi::DrawableDescriptor> drawableDescriptor;
+    std::shared_ptr<OHOS::Ace::Napi::AnimatedDrawableDescriptor> animatedDrawableDescriptor;
+    std::shared_ptr<OHOS::Ace::Napi::LayeredDrawableDescriptor> layeredDrawableDescriptor;
+    std::shared_ptr<ArkUI_Resource> resource;
+};
+
 #ifdef __cplusplus
 };
 #endif
@@ -108,5 +152,5 @@ ArkUI_NodeHandle GetFirstChild(ArkUI_NodeHandle node);
 ArkUI_NodeHandle GetLastChild(ArkUI_NodeHandle node);
 ArkUI_NodeHandle GetPreviousSibling(ArkUI_NodeHandle node);
 ArkUI_NodeHandle GetNextSibling(ArkUI_NodeHandle node);
-
+ArkUI_NodeHandle GetParent(ArkUI_NodeHandle node);
 } // namespace OHOS::Ace::NodeModel

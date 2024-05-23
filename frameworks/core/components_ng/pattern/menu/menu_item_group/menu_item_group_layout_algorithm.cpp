@@ -261,11 +261,28 @@ void MenuItemGroupLayoutAlgorithm::UpdateHeaderAndFooterMargin(LayoutWrapper* la
     auto iconWidth = selectTheme->GetIconSideLength();
     auto iconContentPadding = selectTheme->GetIconContentPadding();
     auto margin = MarginProperty();
-    if (pattern->HasSelectIcon()) {
-        margin.left = CalcLength(iconWidth + iconContentPadding);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (pattern->HasSelectIcon()) {
+            margin.left = CalcLength(iconWidth + iconContentPadding);
+        } else {
+            // no need to update zero margin.
+            return;
+        }
     } else {
-        // no need to update zero margin.
-        return;
+        if (pattern->HasSelectIcon() && pattern->HasStartIcon()) {
+            margin.left = CalcLength(iconWidth * 2.0 + iconContentPadding * 2.0);
+        } else if (pattern->HasSelectIcon() || pattern->HasStartIcon()) {
+            margin.left = CalcLength(iconWidth + iconContentPadding);
+        } else {
+            // no need to update zero margin.
+            return;
+        }
+    }
+    auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
+    if (layoutDirection == TextDirection::RTL) {
+        auto temp = margin.right;
+        margin.right = margin.left;
+        margin.left = margin.right;
     }
 
     if (headerIndex_ >= 0) {

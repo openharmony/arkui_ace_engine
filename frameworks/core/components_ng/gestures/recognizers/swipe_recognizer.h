@@ -78,6 +78,7 @@ private:
     std::map<int32_t, TouchEvent> downEvents_;
 
     AxisEvent axisEventStart_;
+    AxisEvent lastAxisEvent_;
     Offset axisOffset_;
 
     TimeStamp time_;

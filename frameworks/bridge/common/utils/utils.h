@@ -525,6 +525,8 @@ inline GradientDirection StrToGradientDirection(const std::string& direction)
     return index < 0 ? GradientDirection::BOTTOM : gradientDirectionTable[index].value;
 }
 
+std::string CurveIntToString(int curve);
+
 bool ParseBackgroundImagePosition(const std::string& value, BackgroundImagePosition& backgroundImagePosition);
 
 bool ParseBackgroundImageSize(const std::string& value, BackgroundImageSize& backgroundImageSize);
@@ -549,10 +551,13 @@ inline double ConvertTimeStr(const std::string& str)
     StringUtils::TrimStr(time);
     double result = 0.0;
     if (EndWith(time, "ms")) {
+        // remove 2 char "ms"
         result = StringToDouble(std::string(time.begin(), time.end() - 2.0));
     } else if (EndWith(time, "s")) {
+        // transform s to ms
         result = StringToDouble(std::string(time.begin(), time.end() - 1.0)) * 1000.0;
     } else if (EndWith(time, "m")) {
+        // transform m to ms
         result = StringToDouble(std::string(time.begin(), time.end() - 1.0)) * 60.0 * 1000.0;
     } else {
         result = StringToDouble(str);
@@ -662,11 +667,7 @@ inline int32_t ParseResourceInputNumberParam(const std::string& param)
         errno = 0;
         char* pEnd = nullptr;
         int64_t result = std::strtol(param.c_str(), &pEnd, STRTOL_BASE);
-        if ((result < INT_MIN || result > INT_MAX) || errno == ERANGE) {
-            return INT_MAX;
-        } else {
-            return static_cast<int32_t>(result);
-        }
+        return ((result < INT_MIN || result > INT_MAX) || errno == ERANGE) ? INT_MAX : static_cast<int32_t>(result);
     }
 }
 

@@ -102,6 +102,7 @@ RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogPropert
         auto contentRow =
             CreateOptionsNode(dialogNode, calendarNode, dialogEvent, std::move(dialogCancelEvent), buttonInfos);
         contentRow->MountToParent(contentColumn);
+        UpdateDialogDefaultFocus(contentRow, contentColumn);
     }
 
     contentColumn->MarkModifyDone();
@@ -438,9 +439,8 @@ RefPtr<FrameNode> CalendarDialogView::CreateButtonNode(bool isConfirm, const std
     buttonEventHub->SetStateEffect(true);
 
     auto buttonRenderContext = buttonNode->GetRenderContext();
-    auto defaultBGColor = SystemProperties::GetDeviceType() == DeviceType::PHONE
-                              ? Color::TRANSPARENT
-                              : calendarTheme->GetDialogButtonBackgroundColor();
+    auto defaultBGColor =
+        calendarTheme->GetIsButtonTransparent() ? Color::TRANSPARENT : calendarTheme->GetDialogButtonBackgroundColor();
     buttonRenderContext->UpdateBackgroundColor(defaultBGColor);
     UpdateButtonStyles(buttonInfos, index, buttonLayoutProperty, buttonRenderContext);
     UpdateButtonDefaultFocus(buttonInfos, buttonNode, isConfirm);
@@ -571,8 +571,8 @@ RefPtr<FrameNode> CalendarDialogView::CreateDividerNode()
     dividerLayoutProperty->UpdateVertical(true);
     auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
     CHECK_NULL_RETURN(dividerRenderProperty, nullptr);
-    dividerRenderProperty->UpdateDividerColor(SystemProperties::GetDeviceType() == DeviceType::PHONE ?
-        theme->GetDialogDividerColor() : Color::TRANSPARENT);
+    dividerRenderProperty->UpdateDividerColor(
+        theme->GetIsDividerTransparent() ? Color::TRANSPARENT : theme->GetDialogDividerColor());
 
     dividerNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(dialogTheme->GetDividerWidth()), CalcLength(theme->GetEntryArrowWidth())));
@@ -612,14 +612,12 @@ RefPtr<FrameNode> CalendarDialogView::CreateOptionsNode(
     }
     auto buttonCancelNode = CreateCancelNode(cancelEvent, buttonInfos);
     auto acceptIter = dialogEvent.find("acceptId");
-    DialogEvent acceptEvent = nullptr;
-    if (acceptIter != dialogEvent.end()) {
-        acceptEvent = acceptIter->second;
-    }
+    DialogEvent acceptEvent = (acceptIter != dialogEvent.end()) ? acceptIter->second : nullptr;
     auto buttonConfirmNode = CreateConfirmNode(dateNode, acceptEvent, buttonInfos);
 
     buttonCancelNode->MountToParent(contentRow);
     buttonConfirmNode->MountToParent(contentRow);
+    UpdateDefaultFocusByButtonInfo(contentRow, buttonConfirmNode, buttonCancelNode);
 
     auto event = [weakDialogNode = WeakPtr<FrameNode>(dialogNode),
                  weakPipelineContext = WeakPtr<PipelineContext>(pipelineContext)](const GestureEvent& /* info */) {
@@ -749,6 +747,32 @@ void CalendarDialogView::UpdateButtonDefaultFocus(const std::vector<ButtonInfo>&
         if (focusHub) {
             focusHub->SetIsDefaultFocus(true);
         }
+    }
+}
+
+void CalendarDialogView::UpdateDialogDefaultFocus(const RefPtr<FrameNode>& contentRow,
+    const RefPtr<FrameNode>& contentColumn)
+{
+    auto contentRowFocusHub = contentRow->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(contentRowFocusHub);
+    if (contentRowFocusHub->IsDefaultFocus()) {
+        auto contentColumnFocusHub = contentColumn->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(contentColumnFocusHub);
+        contentColumnFocusHub->SetIsDefaultFocus(true);
+    }
+}
+
+void CalendarDialogView::UpdateDefaultFocusByButtonInfo(const RefPtr<FrameNode>& optionsNode,
+    const RefPtr<FrameNode>& accept, const RefPtr<FrameNode>& cancel)
+{
+    auto acceptFocusHub = accept->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(acceptFocusHub);
+    auto cancelFocusHub = cancel->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(cancelFocusHub);
+    if (acceptFocusHub->IsDefaultFocus() || cancelFocusHub->IsDefaultFocus()) {
+        auto optionsNodeFocusHub = optionsNode->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(optionsNodeFocusHub);
+        optionsNodeFocusHub->SetIsDefaultFocus(true);
     }
 }
 } // namespace OHOS::Ace::NG

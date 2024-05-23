@@ -188,10 +188,12 @@ void BackgroundTaskExecutor::StartNewThreads(size_t num)
 
 void BackgroundTaskExecutor::ThreadLoop(uint32_t threadNo)
 {
+    if (threadNo == 0) {
+        return;
+    }
     SetThreadName(threadNo);
-
     Task task;
-    const uint32_t purgeFlag = (1 << (threadNo - 1));
+    const uint32_t purgeFlag = (1u << (threadNo - 1u));
     std::unique_lock<std::mutex> lock(mutex_);
     while (running_) {
         if (tasks_.empty() && lowPriorityTasks_.empty()) {

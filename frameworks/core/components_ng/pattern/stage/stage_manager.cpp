@@ -374,7 +374,7 @@ bool StageManager::CleanPageStack()
     if (children.size() <= 1) {
         return false;
     }
-    auto popSize = static_cast<int32_t>(children.size() - 1);
+    auto popSize = static_cast<int32_t>(children.size()) - 1;
     for (int32_t count = 1; count <= popSize; ++count) {
         auto pageNode = children.front();
         // mark pageNode child as destroying
@@ -406,7 +406,7 @@ bool StageManager::MovePageToFront(const RefPtr<FrameNode>& node, bool needHideL
     if (needHideLast) {
         FirePageHide(lastPage, needTransition ? PageTransitionType::EXIT_PUSH : PageTransitionType::NONE);
     }
-    node->MovePosition(static_cast<int32_t>(stageNode_->GetChildren().size() - 1));
+    node->MovePosition(static_cast<int32_t>(stageNode_->GetChildren().size()) - 1);
     node->GetRenderContext()->ResetPageTransitionEffect();
     FirePageShow(node, needTransition ? PageTransitionType::ENTER_PUSH : PageTransitionType::NONE);
 
@@ -527,4 +527,16 @@ RefPtr<FrameNode> StageManager::GetLastPageWithTransition() const
     }
 }
 
+RefPtr<FrameNode> StageManager::GetPrevPageWithTransition() const
+{
+    CHECK_NULL_RETURN(stageNode_, nullptr);
+    const auto& children = stageNode_->GetChildren();
+    if (children.empty()) {
+        return nullptr;
+    }
+    if (stageInTrasition_) {
+        return DynamicCast<FrameNode>(srcPageNode_.Upgrade());
+    }
+    return DynamicCast<FrameNode>(children.front());
+}
 } // namespace OHOS::Ace::NG

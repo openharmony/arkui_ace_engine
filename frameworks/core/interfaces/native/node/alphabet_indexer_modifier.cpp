@@ -454,8 +454,8 @@ void SetPopupBackgroundBlurStyle(ArkUINodeHandle node, ArkUI_Uint32 value)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     BlurStyleOption styleOption;
-    if (value >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
-        value <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
+    if (value >= static_cast<ArkUI_Uint32>(BlurStyle::NO_MATERIAL) &&
+        value <= static_cast<ArkUI_Uint32>(BlurStyle::COMPONENT_ULTRA_THICK)) {
         styleOption.blurStyle = static_cast<BlurStyle>(value);
     }
     IndexerModelNG::SetPopupBackgroundBlurStyle(frameNode, styleOption);
@@ -520,6 +520,20 @@ void ResetArrayValue(ArkUINodeHandle node)
     IndexerModelNG::SetArrayValue(frameNode, valueVector);
 }
 
+void SetAutoCollapse(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    IndexerModelNG::SetAutoCollapse(frameNode, value);
+}
+
+void ResetAutoCollapse(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    IndexerModelNG::SetAutoCollapse(frameNode, false);
+}
+
 namespace NodeModifier {
 const ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()
 {
@@ -533,7 +547,8 @@ const ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()
         ResetPopupHorizontalSpace, SetPopupSelectedColor, ResetPopupSelectedColor, SetItemSize, ResetItemSize,
         SetPopupPosition, ResetPopupPosition, SetPopupItemBorderRadius, ResetPopupItemBorderRadius, SetItemBorderRadius,
         ResetItemBorderRadius, SetPopupBackgroundBlurStyle, ResetPopupBackgroundBlurStyle, SetPopupTitleBackground,
-        ResetPopupTitleBackground, SetAdaptiveWidth, ResetAdaptiveWidth, SetArrayValue, ResetArrayValue };
+        ResetPopupTitleBackground, SetAdaptiveWidth, ResetAdaptiveWidth, SetArrayValue, ResetArrayValue,
+        SetAutoCollapse, ResetAutoCollapse };
 
     return &modifier;
 }

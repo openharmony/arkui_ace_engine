@@ -36,6 +36,7 @@
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
 #include "base/resource/internal_resource.h"
+#include "core/common/ai/image_analyzer_mgr.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/video/video_theme.h"
 #include "core/components/video/video_utils.h"
@@ -2295,5 +2296,35 @@ HWTEST_F(VideoTestNg, VideoPatternTest029, TestSize.Level1)
     videoPattern->OnColorConfigurationUpdate();
     EXPECT_FALSE(videoNode->needCallChildrenUpdate_);
     EXPECT_EQ(renderContext->GetBackgroundColorValue(), videoTheme->GetBkgColor());
+}
+
+/**
+ * @tc.name: VideoPatternTest030
+ * @tc.desc: VideoImageAnalyzerTest.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestNg, VideoPatternTest030, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video and get videoPattern.
+     */
+    VideoModelNG video;
+    video.Create(AceType::MakeRefPtr<VideoControllerV2>());
+    auto videoNode = AceType::DynamicCast<VideoNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(videoNode, nullptr);
+    auto videoPattern = videoNode->GetPattern<VideoPattern>();
+    ASSERT_NE(videoPattern, nullptr);
+
+    videoPattern->EnableAnalyzer(true);
+    EXPECT_TRUE(videoPattern->isEnableAnalyzer_);
+
+    if (ImageAnalyzerMgr::GetInstance().IsImageAnalyzerSupported()) {
+        EXPECT_TRUE(videoPattern->IsSupportImageAnalyzer());
+    } else {
+        EXPECT_FALSE(videoPattern->IsSupportImageAnalyzer());
+    }
+
+    videoPattern->imageAnalyzerManager_ = nullptr;
+    EXPECT_FALSE(videoPattern->IsSupportImageAnalyzer());
 }
 } // namespace OHOS::Ace::NG

@@ -1107,7 +1107,8 @@ void RenderList::UpdateStickyListItem(const RefPtr<RenderListItem>& newStickyIte
     }
 
     if (nextStickyItem && nextStickyItem == currentStickyItem_) {
-        ApplyPreviousStickyListItem(currentStickyIndex_ - 1, true);
+        size_t index = currentStickyIndex_ != 0 ? currentStickyIndex_ - 1 : INVALID_CHILD_INDEX;
+        ApplyPreviousStickyListItem(index, true);
         return;
     }
 
@@ -1362,7 +1363,7 @@ double RenderList::LayoutOrRecycleCurrentItemsForLaneList(double mainSize)
     }
 
     double curMainPos = currentOffset_;
-    size_t curIndex = startIndex_ - 1;
+    size_t curIndex = startIndex_ != 0 ? startIndex_ - 1 : INVALID_CHILD_INDEX;
     std::vector<RefPtr<RenderListItem>> itemsInOneRow;
     for (auto it = items_.begin(); it != items_.end();) {
         int32_t lackItemCount = 0;
@@ -2100,7 +2101,6 @@ size_t RenderList::GetNearChildByPosition(double mainOffset) const
 
     for (auto& child : items_) {
         auto childMainOffset = GetMainAxis(child->GetPosition());
-
         if (childMainOffset > mainOffset) {
             return prevIndex;
         }
@@ -2510,7 +2510,6 @@ void RenderList::CreateDragDropRecognizer()
 
             auto targetRenderlist = renderList->FindTargetRenderNode<V2::RenderList>(pipelineContext, info);
             auto preTargetRenderlist = renderList->GetPreTargetRenderList();
-
             if (preTargetRenderlist == targetRenderlist) {
                 if (targetRenderlist && targetRenderlist->GetOnItemDragMove()) {
                     Point point = info.GetGlobalPoint() - targetRenderlist->GetGlobalOffset();
@@ -2569,7 +2568,6 @@ void RenderList::CreateDragDropRecognizer()
         ACE_DCHECK(renderList->GetPreTargetRenderList() ==
                    renderList->FindTargetRenderNode<V2::RenderList>(pipelineContext, info));
         auto targetRenderlist = renderList->GetPreTargetRenderList();
-
         if (!targetRenderlist) {
             (renderList->GetOnItemDrop())(dragInfo, static_cast<int32_t>(renderList->selectedItemIndex_), -1, true);
             renderList->SetPreTargetRenderList(nullptr);

@@ -58,6 +58,7 @@ private:
     double lastAngle_ = 0.0;
     bool angleSignChanged_ = false;
     TimeStamp time_;
+    AxisEvent lastAxisEvent_;
 };
 
 } // namespace OHOS::Ace::NG

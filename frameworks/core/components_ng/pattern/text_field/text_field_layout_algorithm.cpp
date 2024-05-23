@@ -87,14 +87,23 @@ void TextFieldLayoutAlgorithm::UpdateTextStyleTextOverflowAndWordBreak(TextStyle
     bool isInlineStyle, const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty)
 {
     if (!isTextArea && isInlineStyle) {
+        //textinput inline
         if (textFieldLayoutProperty->HasTextOverflow()) {
-            textStyle.SetTextOverflow(textFieldLayoutProperty->GetTextOverflow().value());
+            if (textFieldLayoutProperty->GetTextOverflow() == TextOverflow::DEFAULT) {
+                textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
+            } else {
+                textStyle.SetTextOverflow(textFieldLayoutProperty->GetTextOverflow().value());
+            }
         } else {
             textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
         }
     } else {
         if (textFieldLayoutProperty->HasTextOverflow()) {
-            textStyle.SetTextOverflow(textFieldLayoutProperty->GetTextOverflow().value());
+            if (textFieldLayoutProperty->GetTextOverflow() == TextOverflow::DEFAULT) {
+                textStyle.SetTextOverflow(TextOverflow::CLIP);
+            } else {
+                textStyle.SetTextOverflow(textFieldLayoutProperty->GetTextOverflow().value());
+            }
         } else {
             textStyle.SetTextOverflow(TextOverflow::CLIP);
         }
@@ -232,7 +241,8 @@ float TextFieldLayoutAlgorithm::ConstraintWithMinWidth(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper,
     RefPtr<Paragraph>& paragraph, float removeValue)
 {
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
+        !layoutWrapper->GetLayoutProperty()->GetLayoutRect()) {
         const auto& calcLayoutConstraint = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint();
         if (calcLayoutConstraint && calcLayoutConstraint->minSize.has_value() &&
             calcLayoutConstraint->minSize->Width().has_value() &&
@@ -263,13 +273,13 @@ SizeF TextFieldLayoutAlgorithm::PlaceHolderMeasureContent(const LayoutConstraint
     }
 
     auto contentWidth = ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph_, imageWidth);
-    auto counterNodeHeight = CounterNodeMeasure(contentWidth, layoutWrapper);
+    CounterNodeMeasure(contentWidth, layoutWrapper);
 
     auto height = GreatNotEqual(paragraph_->GetLongestLine(), 0.0)
                       ? paragraph_->GetHeight()
                       : std::max(preferredHeight_, paragraph_->GetHeight());
 
-    auto contentHeight = std::min(contentConstraint.maxSize.Height() - counterNodeHeight, height);
+    auto contentHeight = std::min(contentConstraint.maxSize.Height(), height);
 
     textRect_.SetSize(SizeF(GetVisualTextWidth(), paragraph_->GetHeight()));
 
@@ -325,7 +335,8 @@ SizeF TextFieldLayoutAlgorithm::TextInputMeasureContent(const LayoutConstraintF&
         contentWidth = std::min(contentWidth, longestLine);
     }
 
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
+        !layoutWrapper->GetLayoutProperty()->GetLayoutRect()) {
         const auto& calcLayoutConstraint = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint();
         if (calcLayoutConstraint && calcLayoutConstraint->minSize.has_value() &&
             calcLayoutConstraint->minSize->Width().has_value() &&
@@ -565,7 +576,8 @@ LayoutConstraintF TextFieldLayoutAlgorithm::CalculateContentMaxSizeWithCalculate
     auto idealWidth = contentConstraint.selfIdealSize.Width().value_or(contentConstraint.maxSize.Width());
     auto idealHeight = contentConstraint.selfIdealSize.Height().value_or(contentConstraint.maxSize.Height());
     auto maxIdealSize = SizeF { idealWidth, idealHeight };
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN) &&
+        !layoutWrapper->GetLayoutProperty()->GetLayoutRect()) {
         auto frameIdealSize = maxIdealSize + SizeF(pattern->GetHorizontalPaddingAndBorderSum(),
                                                  pattern->GetVerticalPaddingAndBorderSum());
         auto finalSize = UpdateOptionSizeByCalcLayoutConstraint(static_cast<OptionalSize<float>>(frameIdealSize),
@@ -734,7 +746,7 @@ TextDirection TextFieldLayoutAlgorithm::GetTextDirection(const std::string& cont
     return textDirection;
 }
 
-const RefPtr<Paragraph>& TextFieldLayoutAlgorithm::GetParagraph() const
+RefPtr<Paragraph> TextFieldLayoutAlgorithm::GetParagraph() const
 {
     return paragraph_;
 }
@@ -822,15 +834,22 @@ bool TextFieldLayoutAlgorithm::AddAdaptFontSizeAndAnimations(TextStyle& textStyl
     bool result = false;
     switch (layoutProperty->GetHeightAdaptivePolicyValue(TextHeightAdaptivePolicy::MAX_LINES_FIRST)) {
         case TextHeightAdaptivePolicy::MAX_LINES_FIRST:
+            if (pattern->IsInlineMode()) {
+                result = AdaptInlineFocusMinFontSize(textStyle, textContent_, 1.0_fp, contentConstraint,
+                    layoutWrapper);
+            } else {
+                result = AdaptMinFontSize(textStyle, textContent_, 1.0_fp, contentConstraint, layoutWrapper);
+            }
+            break;
         case TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST:
-            if (pattern->IsNormalInlineState() && pattern->HasFocus()) {
+            if (pattern->IsInlineMode()) {
                 result = AdaptInlineFocusFontSize(textStyle, textContent_, 1.0_fp, contentConstraint, layoutWrapper);
             } else {
                 result = AdaptMinFontSize(textStyle, textContent_, 1.0_fp, contentConstraint, layoutWrapper);
             }
             break;
         case TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST:
-            if (pattern->IsNormalInlineState() && pattern->HasFocus()) {
+            if (pattern->IsInlineMode()) {
                 result = AdaptInlineFocusFontSize(textStyle, textContent_, 1.0_fp, contentConstraint, layoutWrapper);
             } else {
                 result = AdaptMaxFontSize(textStyle, textContent_, 1.0_fp, contentConstraint, layoutWrapper);
@@ -910,6 +929,51 @@ bool TextFieldLayoutAlgorithm::IsInlineFocusAdaptExceedLimit(const SizeF& maxSiz
     return didExceedMaxLines;
 }
 
+bool TextFieldLayoutAlgorithm::AdaptInlineFocusMinFontSize(TextStyle& textStyle, const std::string& content,
+    const Dimension& stepUnit, const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+{
+    double maxFontSize = 0.0;
+    double minFontSize = 0.0;
+    if (!GetAdaptMaxMinFontSize(textStyle, maxFontSize, minFontSize, contentConstraint)) {
+        return false;
+    }
+    if (LessNotEqual(maxFontSize, minFontSize) || LessOrEqual(minFontSize, 0.0)) {
+        return CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper, false);
+    }
+    double stepSize = 0.0;
+    if (!GetAdaptFontSizeStep(textStyle, stepSize, stepUnit, contentConstraint)) {
+        return false;
+    }
+    auto textFieldLayoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(textFieldLayoutProperty, false);
+    auto maxViewLines = textFieldLayoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
+    auto maxSize = GetMaxMeasureSize(contentConstraint);
+    GetSuitableSize(maxSize, layoutWrapper);
+    while (GreatOrEqual(maxFontSize, minFontSize)) {
+        textStyle.SetFontSize(Dimension(maxFontSize));
+        if (!CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper)) {
+            return false;
+        }
+        if (!IsInlineFocusAdaptMinExceedLimit(maxSize, maxViewLines)) {
+            break;
+        }
+        maxFontSize -= stepSize;
+    }
+    return true;
+}
+
+bool TextFieldLayoutAlgorithm::IsInlineFocusAdaptMinExceedLimit(const SizeF& maxSize, uint32_t maxViewLines)
+{
+    auto paragraph = GetParagraph();
+    CHECK_NULL_RETURN(paragraph, false);
+    bool didExceedMaxLines = paragraph->DidExceedMaxLines();
+    didExceedMaxLines = didExceedMaxLines || ((maxViewLines > 0) && (paragraph->GetLineCount() > maxViewLines));
+    didExceedMaxLines = didExceedMaxLines || GreatNotEqual(paragraph->GetHeight() / paragraph->GetLineCount(),
+        maxSize.Height());
+    didExceedMaxLines = didExceedMaxLines || GreatNotEqual(paragraph->GetLongestLine(), maxSize.Width());
+    return didExceedMaxLines;
+}
+
 bool TextFieldLayoutAlgorithm::CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool needLayout)
 {
@@ -919,6 +983,7 @@ bool TextFieldLayoutAlgorithm::CreateParagraphAndLayout(const TextStyle& textSty
     if (needLayout) {
         CHECK_NULL_RETURN(paragraph_, false);
         auto maxSize = GetMaxMeasureSize(contentConstraint);
+        ApplyIndent(maxSize.Width());
         paragraph_->Layout(maxSize.Width());
     }
     return true;

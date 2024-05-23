@@ -43,7 +43,6 @@ void TextSelectController::UpdateCaretIndex(int32_t index)
     caretInfo_.index = newIndex;
     firstHandleInfo_.index = newIndex;
     secondHandleInfo_.index = newIndex;
-    UpdateRecordCaretIndex(caretInfo_.index);
 }
 
 RectF TextSelectController::CalculateEmptyValueCaretRect() const
@@ -146,7 +145,6 @@ void TextSelectController::UpdateCaretInfoByOffset(const Offset& localOffset)
     if (!contentController_->IsEmpty()) {
         UpdateCaretRectByPositionNearTouchOffset(index, localOffset);
         MoveHandleToContentRect(caretInfo_.rect, 0.0f);
-        UpdateRecordCaretIndex(caretInfo_.index);
     } else {
         caretInfo_.rect = CalculateEmptyValueCaretRect();
     }
@@ -189,16 +187,6 @@ void TextSelectController::UpdateSelectByOffset(const Offset& localOffset)
     int32_t start = range.first;
     int32_t end = range.second;
     UpdateHandleIndex(start, end);
-    int32_t index = 0;
-    if (start != end) {
-        index = std::max(start, end);
-    } else {
-        index = ConvertTouchOffsetToPosition(localOffset);
-    }
-    auto textLength = static_cast<int32_t>(contentController_->GetWideText().length());
-    if (index == textLength && GreatNotEqual(localOffset.GetX(), caretInfo_.rect.GetOffset().GetX())) {
-        UpdateHandleIndex(GetCaretIndex());
-    }
     if (IsSelected()) {
         MoveFirstHandleToContentRect(GetFirstHandleIndex());
         MoveSecondHandleToContentRect(GetSecondHandleIndex());
@@ -375,7 +363,7 @@ void TextSelectController::AdjustHandleAtEdge(RectF& handleRect) const
     }
 }
 
-void TextSelectController::MoveFirstHandleToContentRect(int32_t index)
+void TextSelectController::MoveFirstHandleToContentRect(int32_t index, bool moveHandle)
 {
     CaretMetricsF firstHandleMetrics;
     firstHandleInfo_.index = index;
@@ -388,11 +376,11 @@ void TextSelectController::MoveFirstHandleToContentRect(int32_t index)
     firstHandleInfo_.rect = firstHandle;
 
     caretInfo_.index = std::max(firstHandleInfo_.index, secondHandleInfo_.index);
-    UpdateCaretOffset();
+    UpdateCaretOffset(TextAffinity::DOWNSTREAM, moveHandle);
     UpdateSecondHandleOffset();
 }
 
-void TextSelectController::MoveSecondHandleToContentRect(int32_t index)
+void TextSelectController::MoveSecondHandleToContentRect(int32_t index, bool moveHandle)
 {
     CaretMetricsF secondHandleMetrics;
     secondHandleInfo_.index = index;
@@ -405,7 +393,7 @@ void TextSelectController::MoveSecondHandleToContentRect(int32_t index)
     secondHandleInfo_.rect = secondHandle;
 
     caretInfo_.index = std::max(firstHandleInfo_.index, secondHandleInfo_.index);
-    UpdateCaretOffset();
+    UpdateCaretOffset(TextAffinity::DOWNSTREAM, moveHandle);
     UpdateFirstHandleOffset();
 }
 
@@ -451,7 +439,6 @@ void TextSelectController::MoveCaretToContentRect(int32_t index, TextAffinity te
     MoveHandleToContentRect(caretRect, boundaryAdjustment);
     caretInfo_.rect = caretRect;
     caretRect.SetWidth(SelectHandleInfo::GetDefaultLineWidth().ConvertToPx());
-    UpdateRecordCaretIndex(caretInfo_.index);
 }
 
 void TextSelectController::UpdateFirstHandleOffset()
@@ -470,7 +457,7 @@ void TextSelectController::UpdateSecondHandleOffset()
     secondHandleInfo_.rect.SetHeight(caretMetrics.height);
 }
 
-void TextSelectController::UpdateCaretOffset(TextAffinity textAffinity)
+void TextSelectController::UpdateCaretOffset(TextAffinity textAffinity, bool moveHandle)
 {
     textAffinity_ = textAffinity;
     if (contentController_->IsEmpty()) {
@@ -489,7 +476,9 @@ void TextSelectController::UpdateCaretOffset(TextAffinity textAffinity)
     caretRect.SetSize(SizeF(caretInfo_.rect.Width(),
         LessOrEqual(caretMetrics.height, 0.0) ? textFiled->PreferredLineHeight() : caretMetrics.height));
     caretInfo_.rect = caretRect;
-    MoveHandleToContentRect(caretInfo_.rect, 0.0f);
+    if (moveHandle) {
+        MoveHandleToContentRect(caretInfo_.rect, 0.0f);
+    }
 }
 
 void TextSelectController::UpdateCaretOffset(const OffsetF& offset)
@@ -551,16 +540,6 @@ void TextSelectController::FireSelectEvent()
     }
 }
 
-void TextSelectController::UpdateRecordCaretIndex(int32_t index) const
-{
-    auto pattern = pattern_.Upgrade();
-    CHECK_NULL_VOID(pattern);
-    auto textFiled = DynamicCast<TextFieldPattern>(pattern);
-    CHECK_NULL_VOID(textFiled);
-    textFiled->UpdateRecordCaretIndex(index);
-    textFiled->UpdateCaretInfoToController();
-}
-
 void TextSelectController::ResetHandles()
 {
     firstHandleInfo_.index = caretInfo_.index;
@@ -572,11 +551,26 @@ void TextSelectController::ResetHandles()
 bool TextSelectController::NeedAIAnalysis(int32_t& index, const CaretUpdateType targetType, const Offset& touchOffset,
     std::chrono::duration<float, std::ratio<1, SECONDS_TO_MILLISECONDS>> timeout)
 {
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, false);
+    auto textFiled = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_RETURN(textFiled, false);
+
     if (!InputAIChecker::NeedAIAnalysis(contentController_->GetTextValue(), targetType, timeout)) {
         return false;
     }
     if (IsClickAtBoundary(index, touchOffset) && targetType == CaretUpdateType::PRESSED) {
-        TAG_LOGI(AceLogTag::ACE_TEXTINPUT, "NeedAIAnalysis IsClickAtBoundary is boundary ,return!");
+        TAG_LOGI(AceLogTag::ACE_TEXTINPUT, "NeedAIAnalysis IsClickAtBoundary is boundary, return!");
+        return false;
+    }
+
+    if (textFiled->IsInPasswordMode()) {
+        TAG_LOGI(AceLogTag::ACE_TEXTINPUT, "NeedAIAnalysis IsInPasswordMode, return!");
+        return false;
+    }
+
+    if (contentController_->IsIndexBeforeOrInEmoji(index)) {
+        TAG_LOGI(AceLogTag::ACE_TEXTINPUT, "NeedAIAnalysis IsIndexBeforeOrInEmoji, return!");
         return false;
     }
     return true;

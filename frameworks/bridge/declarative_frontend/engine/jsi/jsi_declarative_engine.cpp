@@ -23,6 +23,7 @@
 
 #include "dfx_jsnapi.h"
 
+#include "base/thread/task_executor.h"
 #include "base/utils/utils.h"
 #ifdef WINDOWS_PLATFORM
 #include <algorithm>
@@ -77,14 +78,17 @@ extern const char _binary_jsMockSystemPlugin_abc_end[];
 extern const char _binary_stateMgmt_abc_start[];
 extern const char _binary_jsEnumStyle_abc_start[];
 extern const char _binary_arkComponent_abc_start[];
+extern const char _binary_arkTheme_abc_start[];
 #if !defined(IOS_PLATFORM)
 extern const char _binary_stateMgmt_abc_end[];
 extern const char _binary_jsEnumStyle_abc_end[];
 extern const char _binary_arkComponent_abc_end[];
+extern const char _binary_arkTheme_abc_end[];
 #else
 extern const char* _binary_stateMgmt_abc_end;
 extern const char* _binary_jsEnumStyle_abc_end;
 extern const char* _binary_arkComponent_abc_end;
+extern const char* _binary_arkTheme_abc_end;
 #endif
 
 namespace OHOS::Ace::Framework {
@@ -180,6 +184,12 @@ inline bool PreloadArkComponent(const shared_ptr<JsRuntime>& runtime)
 {
     return runtime->EvaluateJsCode(
         (uint8_t*)_binary_arkComponent_abc_start, _binary_arkComponent_abc_end - _binary_arkComponent_abc_start);
+}
+
+inline bool PreloadArkTheme(const shared_ptr<JsRuntime>& runtime)
+{
+    return runtime->EvaluateJsCode(
+        (uint8_t*)_binary_arkTheme_abc_start, _binary_arkTheme_abc_end - _binary_arkTheme_abc_start);
 }
 
 bool PreloadConsole(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& global)
@@ -295,6 +305,13 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
         return false;
     }
 
+#if defined(PREVIEW)
+    auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime_);
+    arkRuntime->SetPkgNameList(pkgNameMap_);
+    arkRuntime->SetPkgAliasList(pkgAliasMap_);
+    arkRuntime->SetpkgContextInfoList(pkgContextInfoMap_);
+#endif
+
     runtime_->SetLogPrint(PrintLog);
     std::string libraryPath = "";
     if (debuggerMode) {
@@ -357,8 +374,6 @@ void JsiDeclarativeEngineInstance::InitJsObject()
             shared_ptr<JsValue> global = runtime_->GetGlobal();
 
             PreloadConsole(runtime_, global);
-
-            // stateMgmt log method
             PreloadAceConsole(runtime_, global);
             PreloadAceTrace(runtime_, global);
 
@@ -370,6 +385,7 @@ void JsiDeclarativeEngineInstance::InitJsObject()
             PreloadRequireNative(runtime_, global);
             PreloadStateManagement(runtime_);
             PreloadArkComponent(runtime_);
+            PreloadArkTheme(runtime_);
         }
     }
 
@@ -395,6 +411,7 @@ void JsiDeclarativeEngineInstance::InitAceModule()
         PreloadStateManagement(runtime_);
         PreloadJsEnums(runtime_);
         PreloadArkComponent(runtime_);
+        PreloadArkTheme(runtime_);
     }
 #if defined(PREVIEW)
     std::string jsMockSystemPluginString(_binary_jsMockSystemPlugin_abc_start,
@@ -513,6 +530,14 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     // preload ark component
     bool arkComponentResult = PreloadArkComponent(arkRuntime);
     if (!arkComponentResult) {
+        std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
+        globalRuntime_ = nullptr;
+        return;
+    }
+
+    // preload ark styles
+    bool arkThemeResult = PreloadArkTheme(arkRuntime);
+    if (!arkThemeResult) {
         std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
         globalRuntime_ = nullptr;
         return;
@@ -973,7 +998,7 @@ napi_value JsiDeclarativeEngineInstance::GetFrameNodeValueByNodeId(int32_t nodeI
 
 thread_local std::unordered_map<std::string, NamedRouterProperty> JsiDeclarativeEngine::namedRouterRegisterMap_;
 thread_local std::unordered_map<std::string, panda::Global<panda::ObjectRef>> JsiDeclarativeEngine::builderMap_;
-panda::Global<panda::ObjectRef> JsiDeclarativeEngine::obj_;
+thread_local panda::Global<panda::ObjectRef> JsiDeclarativeEngine::obj_;
 
 // -----------------------
 // Start JsiDeclarativeEngine
@@ -1036,6 +1061,11 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     }
     engineInstance_->SetInstanceId(instanceId_);
     engineInstance_->SetDebugMode(NeedDebugBreakPoint());
+#if defined(PREVIEW)
+    engineInstance_->SetPkgNameList(pkgNameMap_);
+    engineInstance_->SetPkgAliasList(pkgAliasMap_);
+    engineInstance_->SetpkgContextInfoList(pkgContextInfoMap_);
+#endif
     bool result = engineInstance_->InitJsEnv(IsDebugVersion(), GetExtraNativeObject(), arkRuntime);
     if (!result) {
         return false;
@@ -1083,7 +1113,7 @@ void JsiDeclarativeEngine::SetPostTask(NativeEngine* nativeEngine)
             }
             ContainerScope scope(id);
             nativeEngine->Loop(LOOP_NOWAIT, needSync);
-            }, "ArkUISetNativeEngineLoop");
+        }, "ArkUISetNativeEngineLoop");
     };
     nativeEngine_->SetPostTask(postTask);
 }
@@ -1307,7 +1337,6 @@ bool JsiDeclarativeEngine::UpdateRootComponent()
         JsiDeclarativeEngine::obj_.Empty();
         return true;
     }
-    LOGE("global object is empty");
     return false;
 }
 
@@ -1540,7 +1569,20 @@ void JsiDeclarativeEngine::AddToNamedRouterMap(const EcmaVM* vm, panda::Global<p
     if (!pagePath->IsString()) {
         return;
     }
-    NamedRouterProperty namedRouterProperty({ pageGenerator, bundleName->ToString(vm)->ToString(),
+    auto name = bundleName->ToString(vm)->ToString();
+    std::string integratedHspName = "false";
+    // Integrated hsp adaptation
+    if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "integratedHsp"))) {
+        auto integratedHsp = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "integratedHsp"));
+        if (integratedHsp->IsString()) {
+            integratedHspName = integratedHsp->ToString(vm)->ToString();
+        }
+    }
+    if (integratedHspName == "true") {
+        LocalScope scope(vm);
+        name = JSNApi::GetBundleName(const_cast<EcmaVM *>(vm));
+    }
+    NamedRouterProperty namedRouterProperty({ pageGenerator, name,
         moduleName->ToString(vm)->ToString(), pagePath->ToString(vm)->ToString() });
     auto ret = namedRouterRegisterMap_.insert(std::make_pair(namedRoute, namedRouterProperty));
     if (!ret.second) {
@@ -1596,6 +1638,7 @@ bool JsiDeclarativeEngine::LoadNamedRouterSource(const std::string& namedRoute, 
             });
     }
     if (iter == namedRouterRegisterMap_.end()) {
+        LOGE("page is not in namedRouterRegisterMap_, please check bundleName、moduleName and url");
         return false;
     }
 
@@ -1787,6 +1830,11 @@ void JsiDeclarativeEngine::FireExternalEvent(
             nativeXComponentImpl->SetSurface(nativeWindow);
         }
         nativeXComponentImpl->SetXComponentId(componentId);
+#ifdef XCOMPONENT_SUPPORTED
+        xcPattern->SetExpectedRateRangeInit();
+        xcPattern->OnFrameEventInit();
+        xcPattern->UnregisterOnFrameEventInit();
+#endif
         auto* arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine_);
         if (arkNativeEngine == nullptr) {
             return;
@@ -2271,6 +2319,41 @@ panda::Global<panda::ObjectRef> JsiDeclarativeEngine::GetNavigationBuilder(std::
     return targetBuilder->second;
 }
 
+void JsiDeclarativeEngine::JsStateProfilerResgiter()
+{
+    CHECK_NULL_VOID(runtime_);
+    auto engine = reinterpret_cast<NativeEngine*>(runtime_);
+    CHECK_NULL_VOID(engine);
+    auto vm = engine->GetEcmaVm();
+    CHECK_NULL_VOID(vm);
+    auto globalObj = JSNApi::GetGlobalObject(vm);
+    const auto globalObject = JSRef<JSObject>::Make(globalObj);
+
+    const JSRef<JSVal> setProfilerStatus = globalObject->GetProperty("setProfilerStatus");
+    if (!setProfilerStatus->IsFunction()) {
+        return;
+    }
+
+    const auto globalFunc = JSRef<JSFunc>::Cast(setProfilerStatus);
+    std::function<void(bool)> callback = [globalFunc, globalObject, instanceId = instanceId_](
+                                             bool enableStateProfiler) {
+        ContainerScope scope(instanceId);
+
+        const std::function<void()> task = [globalFunc, globalObject, enableStateProfiler]() {
+            auto isInStateProfiler = JSRef<JSVal>::Make(ToJSValue(enableStateProfiler));
+            globalFunc->Call(globalObject, 1, &isInStateProfiler);
+        };
+
+        auto executor = Container::CurrentTaskExecutor();
+        CHECK_NULL_VOID(executor);
+        executor->PostSyncTask(task, TaskExecutor::TaskType::UI, "setProfilerStatus");
+    };
+
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetStateProfilerStatusCallback(std::move(callback));
+}
+
 // ArkTsCard start
 #ifdef FORM_SUPPORTED
 void JsiDeclarativeEngineInstance::PreloadAceModuleCard(
@@ -2326,6 +2409,14 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(
     // preload ark component
     bool arkComponentResult = PreloadArkComponent(arkRuntime);
     if (!arkComponentResult) {
+        std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
+        globalRuntime_ = nullptr;
+        return;
+    }
+
+    // preload ark styles
+    bool arkThemeResult = PreloadArkTheme(arkRuntime);
+    if (!arkThemeResult) {
         std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
         globalRuntime_ = nullptr;
         return;

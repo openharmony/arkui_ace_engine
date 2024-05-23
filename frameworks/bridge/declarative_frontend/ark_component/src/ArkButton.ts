@@ -37,6 +37,8 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
   builder: WrappedBuilder<Object[]> | null = null;
   buttonNode: BuilderNode<[ButtonConfiguration]> | null = null;
   modifier: ContentModifier<ButtonConfiguration>;
+  needRebuild: boolean = false;
+  applyContent: WrappedBuilder<[ButtonConfiguration]>;
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
@@ -88,20 +90,31 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
     modifierWithKey(this._modifiersWithKeys, ButtonSizeModifier.identity, ButtonSizeModifier, value);
     return this;
   }
+  contentModifier(value: ContentModifier<ButtonConfiguration>): this {
+    this.setContentModifier(value);
+    return this;
+  }
   setContentModifier(modifier: ContentModifier<ButtonConfiguration>): this {
     if (modifier === undefined || modifier === null) {
+      getUINativeModule().button.setContentModifierBuilder(this.nativePtr, false);
       return;
     }
-    this.builder = modifier.applyContent();
+    this.needRebuild = false;
+    this.applyContent = modifier.applyContent();
+    if (this.builder !== this.applyContent) {
+      this.needRebuild = true;
+    }
+    this.builder = this.applyContent;
     this.modifier = modifier;
     getUINativeModule().button.setContentModifierBuilder(this.nativePtr, this);
   }
   makeContentModifierNode(context: UIContext, buttonConfiguration: ButtonConfiguration): FrameNode | null {
     buttonConfiguration.contentModifier = this.modifier;
-    if (isUndefined(this.buttonNode)) {
+    if (isUndefined(this.buttonNode) || this.needRebuild) {
       const xNode = globalThis.requireNapi('arkui.node');
       this.buttonNode = new xNode.BuilderNode(context);
       this.buttonNode.build(this.builder, buttonConfiguration);
+      this.needRebuild = false;
     } else {
       this.buttonNode.update(buttonConfiguration);
     }

@@ -171,7 +171,9 @@ public:
     void SetOnHover(OnHoverFunc&& onHoverEventFunc) override;
     void SetOnDelete(std::function<void()>&& onDeleteCallback) override;
     void SetOnAppear(std::function<void()>&& onAppearCallback) override;
+    void SetOnAttach(std::function<void()>&& onAttachCallback) override {}
     void SetOnDisAppear(std::function<void()>&& onDisAppearCallback) override;
+    void SetOnDetach(std::function<void()>&& onDetachCallback) override {}
     void SetOnAccessibility(std::function<void(const std::string&)>&& onAccessibilityCallback) override;
     void SetOnRemoteMessage(RemoteCallback&& onRemoteCallback) override;
     void SetOnFocusMove(std::function<void(int32_t)>&& onFocusMoveCallback) override;
@@ -223,6 +225,8 @@ public:
     void DisableOnMouse() override {};
     void DisableOnAppear() override {};
     void DisableOnDisAppear() override {};
+    void DisableOnAttach() override {};
+    void DisableOnDetach() override {};
     void DisableOnAreaChange() override {};
     void DisableOnFocus() override {};
     void DisableOnBlur() override {};

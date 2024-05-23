@@ -74,6 +74,7 @@ public:
     static void SetDivider(FrameNode* frameNode, const TabsItemDivider& divider);
     static void SetFadingEdge(FrameNode* frameNode, bool fadingEdge);
     static void SetBarBackgroundColor(FrameNode* frameNode, const Color& backgroundColor);
+    static void SetBarBackgroundBlurStyle(FrameNode* frameNode, BlurStyle tabBarBlurStyle);
     static void SetBarOverlap(FrameNode* frameNode, bool barOverlap);
     static void SetIsVertical(FrameNode* frameNode, bool isVertical);
     static void SetTabBarPosition(FrameNode* frameNode, BarPosition tabBarPosition);

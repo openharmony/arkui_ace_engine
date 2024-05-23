@@ -182,7 +182,9 @@ int32_t FormRendererDelegateStub::HandleOnSurfaceChange(MessageParcel& data, Mes
 {
     float width = data.ReadFloat();
     float height = data.ReadFloat();
-    OnSurfaceChange(width, height);
+    float borderWidth = data.ReadFloat();
+
+    OnSurfaceChange(width, height, borderWidth);
     reply.WriteInt32(ERR_OK);
     return ERR_OK;
 }

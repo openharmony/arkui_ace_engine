@@ -24,6 +24,7 @@
 #include "frameworks/core/components_ng/render/adapter/image_painter_utils.h"
 #include "frameworks/core/components_ng/render/drawing.h"
 #include "frameworks/core/components_ng/svg/parse/svg_animation.h"
+#include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 #include "frameworks/core/components_ng/svg/parse/svg_circle.h"
 #include "frameworks/core/components_ng/svg/parse/svg_clip_path.h"
 #include "frameworks/core/components_ng/svg/parse/svg_defs.h"
@@ -128,7 +129,7 @@ bool SvgDom::ParseSvg(SkStream& svgStream)
     svgSize_ = svg->GetSize();
     viewBox_ = svg->GetViewBox();
     svgContext_->SetRootViewBox(viewBox_);
-    root_->InitStyle(nullptr);
+    root_->InitStyle(SvgBaseAttribute());
     return true;
 }
 
@@ -139,8 +140,6 @@ RefPtr<SvgNode> SvgDom::TranslateSvgNode(const SkDOM& dom, const SkDOM::Node* xm
         CHECK_NULL_RETURN(parent, nullptr);
         if (AceType::InstanceOf<SvgStyle>(parent)) {
             SvgStyle::ParseCssStyle(element, attrCallback_);
-        } else {
-            parent->SetText(element);
         }
     }
 
@@ -177,7 +176,7 @@ void SvgDom::ParseIdAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::string&
     auto svgNode = weakSvgNode.Upgrade();
     CHECK_NULL_VOID(svgNode);
     svgNode->SetNodeId(value);
-    svgNode->SetAttr(DOM_ID, value);
+    svgNode->SetAttr(DOM_SVG_ID, value);
     svgContext_->Push(value, svgNode);
 }
 
@@ -189,9 +188,9 @@ void SvgDom::ParseFillAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::strin
         std::stringstream stream;
         stream << std::hex << fillColor_.value().GetValue();
         std::string newValue(stream.str());
-        svgNode->SetAttr(DOM_SVG_FILL, "#" + newValue);
+        svgNode->SetAttr(SVG_FILL, "#" + newValue);
     } else {
-        svgNode->SetAttr(DOM_SVG_FILL, value);
+        svgNode->SetAttr(SVG_FILL, value);
     }
 }
 
@@ -232,9 +231,9 @@ void SvgDom::SetAttrValue(const std::string& name, const std::string& value, con
     static const LinearMapNode<void (*)(const std::string&, const WeakPtr<SvgNode>&, SvgDom&)> attrs[] = {
         { DOM_SVG_CLASS, [](const std::string& val, const WeakPtr<SvgNode>& svgNode,
                              SvgDom& svgDom) { svgDom.ParseClassAttr(svgNode, val); } },
-        { DOM_SVG_FILL, [](const std::string& val, const WeakPtr<SvgNode>& svgNode,
+        { SVG_FILL, [](const std::string& val, const WeakPtr<SvgNode>& svgNode,
                             SvgDom& svgDom) { svgDom.ParseFillAttr(svgNode, val); } },
-        { DOM_ID, [](const std::string& val, const WeakPtr<SvgNode>& svgNode,
+        { DOM_SVG_ID, [](const std::string& val, const WeakPtr<SvgNode>& svgNode,
                       SvgDom& svgDom) { svgDom.ParseIdAttr(svgNode, val); } },
         { DOM_SVG_STYLE, [](const std::string& val, const WeakPtr<SvgNode>& svgNode,
                              SvgDom& svgDom) { svgDom.ParseStyleAttr(svgNode, val); } },

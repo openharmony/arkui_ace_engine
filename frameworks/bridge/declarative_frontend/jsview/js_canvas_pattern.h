@@ -53,12 +53,28 @@ public:
         return id_;
     }
 
+    void SetUnit(CanvasUnit unit)
+    {
+        unit_ = unit;
+    }
+
+    CanvasUnit GetUnit()
+    {
+        return unit_;
+    }
+
+    double GetDensity()
+    {
+        return (GetUnit() == CanvasUnit::DEFAULT) ? PipelineBase::GetCurrentDensity() : 1.0;
+    }
+
     ACE_DISALLOW_COPY_AND_MOVE(JSCanvasPattern);
 
 private:
     int32_t id_ = 0;
     TransformParam transform_;
     WeakPtr<JSCanvasRenderer> canvasRenderWeak_;
+    CanvasUnit unit_ = CanvasUnit::DEFAULT;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_CANVAS_PATTERN_H

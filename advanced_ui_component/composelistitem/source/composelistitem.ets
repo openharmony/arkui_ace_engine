@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+import { Theme } from '@ohos.arkui.theme';
+import { LengthMetrics } from '@ohos.arkui.node';
+
 export enum IconType {
   BADGE = 1,
   NORMAL_ICON,
@@ -58,7 +61,7 @@ export declare class OperateIcon {
 }
 
 export declare class OperateButton {
-  text?: string;
+  text?: ResourceStr;
 }
 
 export declare class OperateCheck {
@@ -93,9 +96,6 @@ const OPERATEITEM_ICONLIKE_SIZE = 24;
 const OPERATEITEM_ARROW_WIDTH = 12
 const OPERATEITEM_ICON_CLICKABLE_SIZE = 40;
 const OPERATEITEM_IMAGE_SIZE = 48;
-const HOVERING_COLOR = '#0d000000';
-const TOUCH_DOWN_COLOR = '#1a000000';
-const ACTIVED_COLOR = '#1a0a59f7';
 const RIGHT_CONTENT_NULL_LEFTWIDTH = '100%';
 const RIGHT_CONTENT_NULL_RIGHTWIDTH = '0vp';
 const LEFT_PART_WIDTH = 'calc(66% - 16vp)';
@@ -116,12 +116,21 @@ const ICON_SIZE_MAP: Map<number, number> = new Map([
 @Component
 struct ContentItemStruct {
   iconStyle: IconType | null = null;
-  icon: Resource | null = null;
-  primaryText: string | null = null;
-  secondaryText: string | null = null;
-  description: string | null = null;
+  icon: ResourceStr | null = null;
+  primaryText: ResourceStr | null = null;
+  secondaryText: ResourceStr | null = null;
+  description: ResourceStr | null = null;
   private itemRowSpace: number = NORMAL_ITEM_ROW_SPACE
   @State leftWidth: string = LEFT_PART_WIDTH
+  @State primaryTextColor: ResourceColor = $r('sys.color.ohos_id_color_text_primary');
+  @State secondaryTextColor: ResourceColor = $r('sys.color.ohos_id_color_text_secondary');
+  @State descriptionColor: ResourceColor = $r('sys.color.ohos_id_color_text_secondary');
+
+  onWillApplyTheme(theme: Theme): void {
+    this.primaryTextColor = theme.colors.fontPrimary;
+    this.secondaryTextColor = theme.colors.fontSecondary;
+    this.descriptionColor = theme.colors.fontTertiary;
+  }
 
   aboutToAppear() {
     if (this.icon == null && this.iconStyle == null) {
@@ -141,8 +150,7 @@ struct ContentItemStruct {
           .focusable(true)
           .draggable(false)
           .fillColor($r('sys.color.ohos_id_color_secondary'))
-      }
-      else {
+      } else {
         Image(this.icon)
           .objectFit(ImageFit.Contain)
           .constraintSize({
@@ -164,7 +172,7 @@ struct ContentItemStruct {
     Column({ space: TEXT_COLUMN_SPACE }) {
       Text(this.primaryText)
         .fontSize($r('sys.float.ohos_id_text_size_body1'))
-        .fontColor($r('sys.color.ohos_id_color_text_primary'))
+        .fontColor(this.primaryTextColor)
         .maxLines(TEXT_MAX_LINE)
         .textOverflow({ overflow: TextOverflow.Ellipsis })
         .fontWeight(FontWeight.Medium)
@@ -173,7 +181,7 @@ struct ContentItemStruct {
       if (this.secondaryText != null) {
         Text(this.secondaryText)
           .fontSize($r('sys.float.ohos_id_text_size_body2'))
-          .fontColor($r('sys.color.ohos_id_color_text_secondary'))
+          .fontColor(this.secondaryTextColor)
           .maxLines(TEXT_MAX_LINE)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .focusable(true)
@@ -182,7 +190,7 @@ struct ContentItemStruct {
       if (this.description != null) {
         Text(this.description)
           .fontSize($r('sys.float.ohos_id_text_size_body2'))
-          .fontColor($r('sys.color.ohos_id_color_text_secondary'))
+          .fontColor(this.descriptionColor)
           .maxLines(TEXT_MAX_LINE)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .focusable(true)
@@ -202,8 +210,8 @@ struct ContentItemStruct {
       this.createIcon()
       this.createText()
     }
-    .margin({ right: 16 })
-    .padding({ left: LISTITEM_PADDING })
+    .margin({ end: LengthMetrics.vp(16) })
+    .padding({ start: LengthMetrics.vp(LISTITEM_PADDING) })
     .width(this.leftWidth)
     .flexShrink(1)
   }
@@ -218,19 +226,28 @@ struct OperateItemStruct {
   switch: OperateCheck | null = null;
   checkBox: OperateCheck | null = null;
   radio: OperateCheck | null = null;
-  image: Resource | null = null;
-  text: string | null = null;
+  image: ResourceStr | null = null;
+  text: ResourceStr | null = null;
   @State switchState: boolean = false
   @State radioState: boolean = false
   @State checkBoxState: boolean = false
   @State rightWidth: string = RIGHT_PART_WIDTH
+  @State secondaryTextColor: ResourceColor = $r('sys.color.ohos_id_color_text_secondary');
+  @State hoveringColor: ResourceColor = '#0d000000';
+  @State activedColor: ResourceColor = '#1a0a59f7';
   @Link parentCanFocus: boolean
   @Link parentCanTouch: boolean
   @Link parentIsHover: boolean
   @Link parentCanHover: boolean
   @Link parentIsActive: boolean
-  @Link parentFrontColor: string
+  @Link parentFrontColor: ResourceColor;
   private rowSpace: number = DEFAULT_ROW_SPACE
+
+  onWillApplyTheme(theme: Theme): void {
+    this.secondaryTextColor = theme.colors.fontSecondary;
+    this.hoveringColor = theme.colors.interactiveHover;
+    this.activedColor = theme.colors.interactiveActive;
+  }
 
   aboutToAppear() {
     if (this.switch != null) {
@@ -250,7 +267,7 @@ struct OperateItemStruct {
   }
 
   @Builder
-  createButton(text: string) {
+  createButton(text: ResourceStr) {
     Button() {
       Row() {
         Text(text)
@@ -261,7 +278,7 @@ struct OperateItemStruct {
         right: TEXT_SAFE_MARGIN
       })
     }
-    .margin({ right: LISTITEM_PADDING })
+    .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
     .hitTestBehavior(HitTestMode.Block)
     .fontSize($r('sys.float.ohos_id_text_size_button3'))
     .fontColor($r('sys.color.ohos_id_color_text_primary_activated_transparent'))
@@ -283,13 +300,14 @@ struct OperateItemStruct {
     })
     .onHover((isHover: boolean) => {
       this.parentCanHover = false
-      if (isHover && this.parentFrontColor == HOVERING_COLOR) {
-        this.parentFrontColor = this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString()
+      if (isHover && this.parentFrontColor === this.hoveringColor) {
+        this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
       }
       if (!isHover) {
         this.parentCanHover = true
         if (this.parentIsHover) {
-          this.parentFrontColor = this.parentIsHover ? HOVERING_COLOR : (this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString())
+          this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
+            (this.parentIsActive ? this.activedColor : Color.Transparent.toString());
         }
       }
     })
@@ -323,13 +341,14 @@ struct OperateItemStruct {
     })
     .onHover((isHover: boolean) => {
       this.parentCanHover = false
-      if (isHover && this.parentFrontColor == HOVERING_COLOR) {
-        this.parentFrontColor = this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString()
+      if (isHover && this.parentFrontColor === this.hoveringColor) {
+        this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
       }
       if (!isHover) {
         this.parentCanHover = true
         if (this.parentIsHover) {
-          this.parentFrontColor = this.parentIsHover ? HOVERING_COLOR : (this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString())
+          this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
+            (this.parentIsActive ? this.activedColor : Color.Transparent.toString());
         }
       }
     })
@@ -337,20 +356,20 @@ struct OperateItemStruct {
   }
 
   @Builder
-  createImage(image: Resource) {
+  createImage(image: ResourceStr) {
     Image(image)
       .height(OPERATEITEM_IMAGE_SIZE)
       .width(OPERATEITEM_IMAGE_SIZE)
       .draggable(false)
-      .margin({ right: LISTITEM_PADDING })
+      .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
   }
 
   @Builder
-  createText(text: string) {
+  createText(text: ResourceStr) {
     Text(text)
-      .margin({ right: LISTITEM_PADDING })
+      .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
       .fontSize($r('sys.float.ohos_id_text_size_body2'))
-      .fontColor($r('sys.color.ohos_id_color_text_secondary'))
+      .fontColor(this.secondaryTextColor)
       .focusable(true)
       .draggable(false)
       .flexShrink(1)
@@ -366,7 +385,7 @@ struct OperateItemStruct {
         .fillColor($r('sys.color.ohos_id_color_fourth'))
         .draggable(false)
     }
-    .margin({ right: LISTITEM_PADDING })
+    .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
     .hitTestBehavior(HitTestMode.Block)
     .backgroundColor(Color.Transparent)
     .height(OPERATEITEM_ICONLIKE_SIZE)
@@ -384,13 +403,14 @@ struct OperateItemStruct {
     })
     .onHover((isHover: boolean) => {
       this.parentCanHover = false
-      if (isHover && this.parentFrontColor == HOVERING_COLOR) {
-        this.parentFrontColor = this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString()
+      if (isHover && this.parentFrontColor === this.hoveringColor) {
+        this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
       }
       if (!isHover) {
         this.parentCanHover = true
         if (this.parentIsHover) {
-          this.parentFrontColor = this.parentIsHover ? HOVERING_COLOR : (this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString())
+          this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
+            (this.parentIsActive ? this.activedColor : Color.Transparent.toString());
         }
       }
     })
@@ -400,7 +420,7 @@ struct OperateItemStruct {
   @Builder
   createRadio(radio: OperateCheck) {
     Radio({ value: '', group: '' })
-      .margin({ right: LISTITEM_PADDING })
+      .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
       .checked(this.radioState)
       .onChange(radio.onChange)
       .height(OPERATEITEM_ICONLIKE_SIZE)
@@ -419,13 +439,14 @@ struct OperateItemStruct {
       })
       .onHover((isHover: boolean) => {
         this.parentCanHover = false
-        if (isHover && this.parentFrontColor == HOVERING_COLOR) {
-          this.parentFrontColor = this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString()
+        if (isHover && this.parentFrontColor === this.hoveringColor) {
+          this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
         }
         if (!isHover) {
           this.parentCanHover = true
           if (this.parentIsHover) {
-            this.parentFrontColor = this.parentIsHover ? HOVERING_COLOR : (this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString())
+            this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
+              (this.parentIsActive ? this.activedColor : Color.Transparent.toString());
           }
         }
       })
@@ -434,7 +455,7 @@ struct OperateItemStruct {
   @Builder
   createCheckBox(checkBox: OperateCheck) {
     Checkbox()
-      .margin({ right: LISTITEM_PADDING })
+      .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
       .select(this.checkBoxState)
       .onChange(checkBox.onChange)
       .height(OPERATEITEM_ICONLIKE_SIZE)
@@ -453,13 +474,14 @@ struct OperateItemStruct {
       })
       .onHover((isHover: boolean) => {
         this.parentCanHover = false
-        if (isHover && this.parentFrontColor == HOVERING_COLOR) {
-          this.parentFrontColor = this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString()
+        if (isHover && this.parentFrontColor === this.hoveringColor) {
+          this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
         }
         if (!isHover) {
           this.parentCanHover = true
           if (this.parentIsHover) {
-            this.parentFrontColor = this.parentIsHover ? HOVERING_COLOR : (this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString())
+            this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
+              (this.parentIsActive ? this.activedColor : Color.Transparent.toString());
           }
         }
       })
@@ -475,7 +497,7 @@ struct OperateItemStruct {
         })
         .hitTestBehavior(HitTestMode.Block)
     }
-    .margin({ right: SWITCH_PADDING })
+    .margin({ end: LengthMetrics.vp(SWITCH_PADDING) })
     .height(OPERATEITEM_ICON_CLICKABLE_SIZE)
     .width(OPERATEITEM_ICON_CLICKABLE_SIZE)
     .justifyContent(FlexAlign.Center)
@@ -492,20 +514,21 @@ struct OperateItemStruct {
     })
     .onHover((isHover: boolean) => {
       this.parentCanHover = false
-      if (isHover && this.parentFrontColor == HOVERING_COLOR) {
-        this.parentFrontColor = this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString()
+      if (isHover && this.parentFrontColor === this.hoveringColor) {
+        this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
       }
       if (!isHover) {
         this.parentCanHover = true
         if (this.parentIsHover) {
-          this.parentFrontColor = this.parentIsHover ? HOVERING_COLOR : (this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString())
+          this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
+            (this.parentIsActive ? this.activedColor : Color.Transparent.toString());
         }
       }
     })
   }
 
   @Builder
-  createTextArrow(text: string, icon: OperateIcon) {
+  createTextArrow(text: ResourceStr, icon: OperateIcon) {
     Button({ type: ButtonType.Normal }) {
       Row({ space: SPECICAL_ROW_SPACE }) {
         Text(text)
@@ -524,8 +547,8 @@ struct OperateItemStruct {
           .draggable(false)
       }
       .padding({
-        left: TEXT_SAFE_MARGIN,
-        right: LISTITEM_PADDING
+        start: LengthMetrics.vp(TEXT_SAFE_MARGIN),
+        end: LengthMetrics.vp(LISTITEM_PADDING)
       })
     }
     .hitTestBehavior(HitTestMode.Block)
@@ -548,13 +571,14 @@ struct OperateItemStruct {
     })
     .onHover((isHover: boolean) => {
       this.parentCanHover = false
-      if (isHover && this.parentFrontColor == HOVERING_COLOR) {
-        this.parentFrontColor = this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString()
+      if (isHover && this.parentFrontColor === this.hoveringColor) {
+        this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
       }
       if (!isHover) {
         this.parentCanHover = true
         if (this.parentIsHover) {
-          this.parentFrontColor = this.parentIsHover ? HOVERING_COLOR : (this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString())
+          this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
+            (this.parentIsActive ? this.activedColor : Color.Transparent.toString());
         }
       }
     })
@@ -566,10 +590,8 @@ struct OperateItemStruct {
       space: this.rowSpace
     }) {
       if (this.button != null) {
-        this.createButton(this.button.text as string)
-      }
-
-      else if (this.image != null) {
+        this.createButton(this.button.text as ResourceStr)
+      } else if (this.image != null) {
         this.createImage(this.image)
       }
       else if (this.icon != null && this.text != null) {
@@ -611,7 +633,7 @@ struct OperateItemStruct {
 export struct ComposeListItem {
   @Prop contentItem: ContentItem | null = null;
   @Prop operateItem: OperateItem | null = null;
-  @State frontColor: string = Color.Transparent.toString()
+  @State frontColor: ResourceColor = Color.Transparent.toString();
   @State borderSize: number = 0;
   @State canFocus: boolean = false
   @State canTouch: boolean = true
@@ -619,6 +641,17 @@ export struct ComposeListItem {
   @State isHover: boolean = true
   @State itemHeight: number = ItemHeight.FIRST_HEIGHT;
   @State isActive: boolean = false
+  @State hoveringColor: ResourceColor = '#0d000000';
+  @State touchDownColor: ResourceColor = '#1a000000';
+  @State activedColor: ResourceColor = '#1a0a59f7';
+  @State focusOutlineColor: ResourceColor = $r('sys.color.ohos_id_color_focused_outline');
+
+  onWillApplyTheme(theme: Theme): void {
+    this.hoveringColor = theme.colors.interactiveHover;
+    this.touchDownColor = theme.colors.interactivePressed;
+    this.activedColor = theme.colors.interactiveActive;
+    this.focusOutlineColor = theme.colors.interactiveFocus;
+  }
 
   aboutToAppear() {
     if (this.contentItem === undefined) {
@@ -631,8 +664,7 @@ export struct ComposeListItem {
     if (this.contentItem?.secondaryText === undefined && this.contentItem?.description === undefined) {
       if (this.contentItem?.icon === undefined) {
         this.itemHeight = ItemHeight.FIRST_HEIGHT
-      }
-      else {
+      } else {
         this.itemHeight = this.contentItem.iconStyle as number <= IconType.HEAD_SCULPTURE ? ItemHeight.SECOND_HEIGHT : ItemHeight.THIRD_HEIGHT;
       }
     }
@@ -681,11 +713,11 @@ export struct ComposeListItem {
         }
         if (this.contentItem !== null) {
           ContentItemStruct({
-            icon: typeof this.contentItem.icon === 'string' ? null : this.contentItem.icon,
+            icon: this.contentItem.icon,
             iconStyle: this.contentItem.iconStyle,
-            primaryText: typeof this.contentItem.primaryText === 'string' ? this.contentItem.primaryText : null,
-            secondaryText: typeof this.contentItem.secondaryText === 'string' ? this.contentItem.secondaryText : null,
-            description: typeof this.contentItem.description === 'string' ? this.contentItem.description : null,
+            primaryText: this.contentItem.primaryText,
+            secondaryText: this.contentItem.secondaryText,
+            description: this.contentItem.description,
             leftWidth: this.calculatedLeftWidth()
           })
         }
@@ -697,9 +729,9 @@ export struct ComposeListItem {
             switch: this.operateItem.switch,
             checkBox: this.operateItem.checkbox,
             radio: this.operateItem.radio,
-            image: typeof this.operateItem.image === 'string' ? null : this.operateItem.image,
-            text: typeof this.operateItem.text === 'string' ? this.operateItem.text : null,
-            arrow: typeof this.operateItem.arrow === 'string' ? null : this.operateItem.arrow,
+            image: this.operateItem.image,
+            text: this.operateItem.text,
+            arrow: this.operateItem.arrow,
             parentCanFocus: this.canFocus,
             parentCanTouch: this.canTouch,
             parentIsHover: this.isHover,
@@ -729,15 +761,16 @@ export struct ComposeListItem {
       .onHover((isHover: boolean) => {
         this.isHover = isHover
         if (this.canHover) {
-          this.frontColor = isHover ? HOVERING_COLOR : (this.isActive ? ACTIVED_COLOR : Color.Transparent.toString())
+          this.frontColor = isHover ? this.hoveringColor :
+            (this.isActive ? this.activedColor : Color.Transparent.toString());
         }
       })
       .onTouch((event: TouchEvent) => {
-        if (event.type == TouchType.Down && this.canTouch) {
-          this.frontColor = TOUCH_DOWN_COLOR
+        if (event.type === TouchType.Down && this.canTouch) {
+          this.frontColor = this.touchDownColor;
         }
-        if (event.type == TouchType.Up) {
-          this.frontColor = this.isActive ? ACTIVED_COLOR : Color.Transparent.toString()
+        if (event.type === TouchType.Up) {
+          this.frontColor = this.isActive ? this.activedColor : Color.Transparent.toString();
         }
       })
       .stateStyles({
@@ -745,7 +778,7 @@ export struct ComposeListItem {
           .border({
             radius: $r('sys.float.ohos_id_corner_radius_default_m'),
             width: ITEM_BORDER_SHOWN,
-            color: $r('sys.color.ohos_id_color_focused_outline'),
+            color: this.focusOutlineColor,
             style: BorderStyle.Solid
           })
         },

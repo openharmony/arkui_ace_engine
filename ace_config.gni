@@ -242,6 +242,13 @@ if (!defined(global_parts_info) ||
   security_component_enable = false
 }
 
+if (!defined(global_parts_info) ||
+    defined(global_parts_info.ability_form_fwk)) {
+  form_fwk_enable = true
+} else {
+  form_fwk_enable = false
+}
+
 ace_platforms = []
 
 _ace_adapter_dir = rebase_path("$ace_root/adapter", root_build_dir)

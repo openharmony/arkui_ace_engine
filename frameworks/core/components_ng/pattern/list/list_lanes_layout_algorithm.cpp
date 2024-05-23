@@ -85,6 +85,33 @@ float ListLanesLayoutAlgorithm::MeasureAndGetChildHeight(LayoutWrapper* layoutWr
     return mainLen;
 }
 
+void ListLanesLayoutAlgorithm::MeasureGroup(LayoutWrapper* listWrapper, const RefPtr<LayoutWrapper>& groupWrapper,
+    int32_t index, float pos, bool forward)
+{
+    CHECK_NULL_VOID(groupWrapper);
+    auto host = groupWrapper->GetHostNode();
+    const char* direction = forward ? "Forward" : "Backward";
+    if (host) {
+        ACE_SCOPED_TRACE("[Measure%sListItemGroup:%d][self:%d][parent:%d]", direction, index, host->GetId(),
+            host->GetParent() ? host->GetParent()->GetId() : 0);
+    }
+    auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(listWrapper->GetLayoutProperty());
+    SetListItemGroupParam(groupWrapper, index, pos, forward, listLayoutProperty, false);
+    groupWrapper->Measure(groupLayoutConstraint_);
+}
+
+void ListLanesLayoutAlgorithm::MeasureItem(const RefPtr<LayoutWrapper>& itemWrapper, int32_t index, bool forward)
+{
+    CHECK_NULL_VOID(itemWrapper);
+    auto host = itemWrapper->GetHostNode();
+    const char* direction = forward ? "Forward" : "Backward";
+    if (host) {
+        ACE_SCOPED_TRACE("[Measure%sListItem:%d][self:%d][parent:%d]", direction, index, host->GetId(),
+            host->GetParent() ? host->GetParent()->GetId() : 0);
+    }
+    itemWrapper->Measure(childLayoutConstraint_);
+}
+
 int32_t ListLanesLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper,
     int32_t& currentIndex, float startPos, float& endPos)
 {
@@ -102,7 +129,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrappe
     } else if (firstItemInfo_) {
         firstItemInfo_.reset();
     }
-    for (int32_t i = 0; i < lanes && currentIndex + 1 <= GetMaxListItemIndex(); i++) {
+    for (int32_t i = 0; i < lanes && currentIndex + 1 <= GetMaxListItemIndex() && !isGroup; i++) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex + 1);
         if (!wrapper) {
             break;
@@ -116,27 +143,12 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrappe
         cnt++;
         ++currentIndex;
         if (isGroup) {
-            if (wrapper->GetHostNode()) {
-                ACE_SCOPED_TRACE("[MeasureListForwardItemGroup:%d][self:%d][parent:%d]", currentIndex,
-                    wrapper->GetHostNode()->GetId(), wrapper->GetHostNode()->GetParent() ?
-                        wrapper->GetHostNode()->GetParent()->GetId() : 0);
-            }
-            auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
-            SetListItemGroupParam(wrapper, currentIndex, startPos, true, listLayoutProperty, false);
-            wrapper->Measure(groupLayoutConstraint_);
+            MeasureGroup(layoutWrapper, wrapper, currentIndex, startPos, true);
         } else if (CheckNeedMeasure(wrapper)) {
-            if (wrapper->GetHostNode()) {
-                ACE_SCOPED_TRACE("[MeasureListForwardItem:%d][self:%d][parent:%d]", currentIndex,
-                    wrapper->GetHostNode()->GetId(), wrapper->GetHostNode()->GetParent() ?
-                        wrapper->GetHostNode()->GetParent()->GetId() : 0);
-            }
-            wrapper->Measure(childLayoutConstraint_);
+            MeasureItem(wrapper, currentIndex, true);
         }
         mainLen = std::max(mainLen, childrenSize_ ? childrenSize_->GetChildSize(currentIndex) :
             GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_));
-        if (isGroup) {
-            break;
-        }
     }
     if (cnt > 0) {
         endPos = startPos + mainLen;
@@ -183,24 +195,11 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapp
             break;
         }
         --currentIndex;
-
         cnt++;
         if (isGroup) {
-            if (wrapper->GetHostNode()) {
-                ACE_SCOPED_TRACE("[MeasureListBackwardItemGroup:%d][self:%d][parent:%d]", currentIndex,
-                    wrapper->GetHostNode()->GetId(), wrapper->GetHostNode()->GetParent() ?
-                        wrapper->GetHostNode()->GetParent()->GetId() : 0);
-            }
-            auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
-            SetListItemGroupParam(wrapper, currentIndex, endPos, false, listLayoutProperty, false);
-            wrapper->Measure(groupLayoutConstraint_);
+            MeasureGroup(layoutWrapper, wrapper, currentIndex, endPos, false);
         } else if (CheckNeedMeasure(wrapper)) {
-            if (wrapper->GetHostNode()) {
-                ACE_SCOPED_TRACE("[MeasureListBackwardItem:%d][self:%d][parent:%d]", currentIndex,
-                    wrapper->GetHostNode()->GetId(), wrapper->GetHostNode()->GetParent() ?
-                        wrapper->GetHostNode()->GetParent()->GetId() : 0);
-            }
-            wrapper->Measure(childLayoutConstraint_);
+            MeasureItem(wrapper, currentIndex, false);
         }
         mainLen = std::max(mainLen, childrenSize_ ? childrenSize_->GetChildSize(currentIndex) :
             GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_));
@@ -216,8 +215,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapp
             SetItemInfo(currentIndex + i, { id, startPos, endPos, isGroup });
         }
     }
-    float startIndex = GetLanesFloor(layoutWrapper, currentIndex);
-    OnItemPositionAddOrUpdate(layoutWrapper, startIndex);
+    OnItemPositionAddOrUpdate(layoutWrapper, GetLanesFloor(layoutWrapper, currentIndex));
     return cnt;
 }
 

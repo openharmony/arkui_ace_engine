@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,12 @@ namespace OHOS::Ace::NG {
 
 class OnTextChangedListenerImpl : public MiscServices::OnTextChangedListener {
 public:
-    explicit OnTextChangedListenerImpl(const WeakPtr<TextInputClient>& pattern) : pattern_(pattern) {}
+    explicit OnTextChangedListenerImpl(const WeakPtr<TextInputClient>& pattern) : pattern_(pattern)
+    {
+        auto client = pattern_.Upgrade();
+        CHECK_NULL_VOID(client);
+        patternInstanceId_ = client->GetInstanceId();
+    }
     ~OnTextChangedListenerImpl() override = default;
 
     void InsertText(const std::u16string& text) override;
@@ -42,6 +47,13 @@ public:
     std::u16string GetRightTextOfCursor(int32_t number) override;
     int32_t GetTextIndexAtCursor() override;
     void NotifyPanelStatusInfo(const MiscServices::PanelStatusInfo& info) override;
+    void AutoFillReceivePrivateCommand(
+        const std::unordered_map<std::string, MiscServices::PrivateDataValue>& privateCommand);
+    int32_t SetPreviewText(const std::u16string &text, const MiscServices::Range &range) override;
+    void FinishTextPreview() override;
+    int32_t ReceivePrivateCommand(
+        const std::unordered_map<std::string, MiscServices::PrivateDataValue> &privateCommand) override;
+
 
 private:
     void PostTaskToUI(const std::function<void()>& task, const std::string& name);
@@ -50,6 +62,7 @@ private:
     void HandleFunctionKey(MiscServices::FunctionKey functionKey);
 
     WeakPtr<TextInputClient> pattern_;
+    int32_t patternInstanceId_;
 };
 
 } // namespace OHOS::Ace::NG

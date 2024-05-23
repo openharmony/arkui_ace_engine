@@ -225,6 +225,11 @@ public:
     void FireOnSizeChanged(const RectF& oldRect, const RectF& rect);
     bool HasOnSizeChanged() const;
 
+    void AddInnerOnSizeChanged(int32_t id, OnSizeChangedFunc&& onSizeChanged);
+    void FireInnerOnSizeChanged(const RectF& oldRect, const RectF& rect);
+    bool HasInnerOnSizeChanged() const;
+    void ClearInnerOnSizeChanged();
+
     void SetJSFrameNodeOnSizeChangeCallback(OnSizeChangedFunc&& onSizeChanged);
     void FireJSFrameNodeOnSizeChanged(const RectF& oldRect, const RectF& rect);
     void ClearJSFrameNodeOnSizeChange();
@@ -573,6 +578,13 @@ public:
         }
     }
 
+    void SetOnAttach(std::function<void()>&& onAttach);
+    void ClearOnAttach();
+    void FireOnAttach();
+    void SetOnDetach(std::function<void()>&& onDetach);
+    void ClearOnDetach();
+    void FireOnDetach();
+
 protected:
     virtual void OnModifyDone() {}
     std::function<void()> onAppear_;
@@ -590,7 +602,11 @@ private:
     OnAreaChangedFunc onAreaChanged_;
     std::unordered_map<int32_t, OnAreaChangedFunc> onAreaChangedInnerCallbacks_;
     OnSizeChangedFunc onSizeChanged_;
+    std::unordered_map<int32_t, OnSizeChangedFunc> onSizeChangedInnerCallbacks_;
     OnSizeChangedFunc onJsFrameNodeSizeChanged_;
+
+    std::function<void()> onAttach_;
+    std::function<void()> onDetach_;
 
     OnPreDragFunc onPreDragFunc_;
     OnDragStartFunc onDragStart_;

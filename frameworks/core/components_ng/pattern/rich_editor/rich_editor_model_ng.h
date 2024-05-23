@@ -22,8 +22,8 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT RichEditorModelNG : public OHOS::Ace::RichEditorModel {
 public:
-    void Create() override;
-    RefPtr<RichEditorControllerBase> GetRichEditorController() override;
+    void Create(bool isStyledStringMode = false) override;
+    RefPtr<RichEditorBaseControllerBase> GetRichEditorController() override;
     void SetOnReady(std::function<void()>&& func) override;
     void SetOnSelect(std::function<void(const BaseEventInfo*)>&& func) override;
     void SetOnSelectionChange(std::function<void(const BaseEventInfo*)>&& func) override;
@@ -43,7 +43,7 @@ public:
     void SetCaretColor(const Color& color) override;
     void SetOnEditingChange(std::function<void(const bool&)>&& func) override;
     void SetOnWillChange(std::function<bool(const RichEditorChangeValue&)>&& func) override;
-    void SetOnDidChange(std::function<void(const std::list<RichEditorAbstractSpanResult>&)>&& func) override;
+    void SetOnDidChange(std::function<void(const RichEditorChangeValue&)>&& func) override;
     void SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func) override;
     void SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func) override;
 
@@ -56,6 +56,7 @@ public:
 
 private:
     void SetDraggable(bool draggable);
+    bool isStyledStringMode_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_RICH_EDITOR_MODEL_NG_H

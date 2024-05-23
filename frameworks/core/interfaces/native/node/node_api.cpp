@@ -41,15 +41,19 @@
 #include "core/interfaces/native/node/node_scroll_modifier.h"
 #include "core/interfaces/native/node/node_slider_modifier.h"
 #include "core/interfaces/native/node/node_swiper_modifier.h"
+#include "core/interfaces/native/node/node_text_modifier.h"
 #include "core/interfaces/native/node/node_text_area_modifier.h"
 #include "core/interfaces/native/node/node_text_input_modifier.h"
 #include "core/interfaces/native/node/node_textpicker_modifier.h"
 #include "core/interfaces/native/node/node_timepicker_modifier.h"
 #include "core/interfaces/native/node/node_toggle_modifier.h"
+#include "core/interfaces/native/node/image_animator_modifier.h"
 #include "core/interfaces/native/node/util_modifier.h"
 #include "core/interfaces/native/node/grid_modifier.h"
 #include "core/interfaces/native/node/alphabet_indexer_modifier.h"
 #include "core/interfaces/native/node/search_modifier.h"
+#include "core/interfaces/native/node/radio_modifier.h"
+#include "core/interfaces/native/node/select_modifier.h"
 #include "core/interfaces/native/node/view_model.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -253,23 +257,33 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnDisappear,
     NodeModifier::SetOnTouch,
     NodeModifier::SetOnClick,
-    nullptr,
+    NodeModifier::SetOnHover,
     NodeModifier::SetOnBlur,
     nullptr,
-    nullptr,
+    NodeModifier::SetOnMouse,
     NodeModifier::SetOnAreaChange,
     nullptr,
     nullptr,
     NodeModifier::SetOnFocus,
     NodeModifier::SetOnTouchIntercept,
+    NodeModifier::SetOnAttach,
+    NodeModifier::SetOnDetach,
 };
 
 const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnScroll,
     NodeModifier::SetOnScrollFrameBegin,
+    NodeModifier::SetScrollOnWillScroll,
+    NodeModifier::SetScrollOnDidScroll,
     NodeModifier::SetOnScrollStart,
     NodeModifier::SetOnScrollStop,
     NodeModifier::SetOnScrollEdge,
+    NodeModifier::SetOnScrollReachStart,
+    NodeModifier::SetOnScrollReachEnd,
+};
+
+const ComponentAsyncEventHandler TEXT_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetOnDetectResultUpdate,
 };
 
 const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
@@ -279,6 +293,9 @@ const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnTextInputCut,
     NodeModifier::SetOnTextInputPaste,
     NodeModifier::SetOnTextInputSelectionChange,
+    NodeModifier::SetOnTextInputContentSizeChange,
+    NodeModifier::SetOnTextInputInputFilterError,
+    NodeModifier::SetTextInputOnTextContentScroll,
 };
 
 const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
@@ -287,12 +304,16 @@ const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnTextAreaChange,
     NodeModifier::SetOnTextAreaPaste,
     NodeModifier::SetOnTextAreaSelectionChange,
-    NodeModifier::SetTextInputOnSubmit,
+    NodeModifier::SetTextAreaOnSubmit,
+    NodeModifier::SetOnTextAreaContentSizeChange,
+    NodeModifier::SetOnTextAreaInputFilterError,
+    NodeModifier::SetTextAreaOnTextContentScroll,
 };
 
 const ComponentAsyncEventHandler refreshNodeAsyncEventHandlers[] = {
     NodeModifier::SetRefreshOnStateChange,
     NodeModifier::SetOnRefreshing,
+    NodeModifier::SetRefreshOnOffsetChange,
 };
 
 const ComponentAsyncEventHandler TOGGLE_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -303,6 +324,7 @@ const ComponentAsyncEventHandler imageNodeAsyncEventHandlers[] = {
     NodeModifier::SetImageOnComplete,
     NodeModifier::SetImageOnError,
     NodeModifier::SetImageOnSvgPlayFinish,
+    NodeModifier::SetImageOnDownloadProgress,
 };
 
 const ComponentAsyncEventHandler DATE_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -334,6 +356,7 @@ const ComponentAsyncEventHandler SWIPER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetSwiperAnimationStart,
     NodeModifier::SetSwiperAnimationEnd,
     NodeModifier::SetSwiperGestureSwipe,
+    NodeModifier::SetSwiperOnContentDidScroll,
 };
 
 const ComponentAsyncEventHandler CANVAS_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -342,16 +365,25 @@ const ComponentAsyncEventHandler CANVAS_NODE_ASYNC_EVENT_HANDLERS[] = {
 
 const ComponentAsyncEventHandler listNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnListScroll,
-    nullptr,
+    NodeModifier::SetOnListScrollIndex,
     NodeModifier::SetOnListScrollStart,
     NodeModifier::SetOnListScrollStop,
     NodeModifier::SetOnListScrollFrameBegin,
     NodeModifier::SetOnListWillScroll,
+    NodeModifier::SetOnListDidScroll,
+    NodeModifier::SetOnListReachStart,
+    NodeModifier::SetOnListReachEnd,
 };
 
 const ComponentAsyncEventHandler WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnWillScroll,
-    NodeModifier::SetOnReachEnd,
+    NodeModifier::SetOnWaterFlowReachEnd,
+    NodeModifier::SetOnDidScroll,
+    NodeModifier::SetOnWaterFlowScrollStart,
+    NodeModifier::SetOnWaterFlowScrollStop,
+    NodeModifier::SetOnWaterFlowScrollFrameBegin,
+    NodeModifier::SetOnWaterFlowScrollIndex,
+    NodeModifier::SetOnWaterFlowReachStart,
 };
 
 const ComponentAsyncEventHandler GRID_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -375,6 +407,22 @@ const ComponentAsyncEventHandler SEARCH_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnSearchCopy,
     NodeModifier::SetOnSearchCut,
     NodeModifier::SetOnSearchPaste,
+};
+
+const ComponentAsyncEventHandler RADIO_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetOnRadioChange,
+};
+
+const ComponentAsyncEventHandler SELECT_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetOnSelectSelect,
+};
+
+const ComponentAsyncEventHandler IMAGE_ANIMATOR_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetImageAnimatorOnStart,
+    NodeModifier::SetImageAnimatorOnPause,
+    NodeModifier::SetImageAnimatorOnRepeat,
+    NodeModifier::SetImageAnimatorOnCancel,
+    NodeModifier::SetImageAnimatorOnFinish,
 };
 
 /* clang-format on */
@@ -408,6 +456,15 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
                 return;
             }
             eventHandle = scrollNodeAsyncEventHandlers[subKind];
+            break;
+        }
+        case ARKUI_TEXT: {
+            // text event type.
+            if (subKind >= sizeof(TEXT_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = TEXT_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         case ARKUI_TEXT_INPUT: {
@@ -561,6 +618,33 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
             eventHandle = SEARCH_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
+        case ARKUI_RADIO: {
+            // search event type.
+            if (subKind >= sizeof(RADIO_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = RADIO_NODE_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_SELECT: {
+            // select event type.
+            if (subKind >= sizeof(SELECT_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = SELECT_NODE_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_IMAGE_ANIMATOR: {
+            // imageAnimator event type.
+            if (subKind >= sizeof(IMAGE_ANIMATOR_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = IMAGE_ANIMATOR_NODE_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
         default: {
             TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
         }
@@ -688,7 +772,7 @@ void RegisterCustomNodeAsyncEvent(ArkUINodeHandle node, int32_t eventType, void*
         companion->SetExtraParam(eventType, extraParam);
     } else {
         auto originEventType = companion->GetFlags();
-        companion->SetFlags(originEventType | eventType);
+        companion->SetFlags(static_cast<uint32_t>(originEventType) | static_cast<uint32_t>(eventType));
         companion->SetExtraParam(eventType, extraParam);
     }
 }
@@ -702,7 +786,7 @@ ArkUI_Int32 UnregisterCustomNodeEvent(ArkUINodeHandle node, ArkUI_Int32 eventTyp
     if ((originEventType & eventType) != eventType) {
         return -1;
     }
-    companion->SetFlags(originEventType ^ eventType);
+    companion->SetFlags(static_cast<uint32_t>(originEventType) ^ static_cast<uint32_t>(eventType));
     companion->EraseExtraParam(eventType);
     return 0;
 }

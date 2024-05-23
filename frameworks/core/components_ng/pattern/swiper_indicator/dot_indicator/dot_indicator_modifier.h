@@ -22,6 +22,7 @@
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_property.h"
 #include "core/components_ng/render/paint_wrapper.h"
 
 namespace OHOS::Ace::NG {
@@ -100,7 +101,7 @@ public:
     void PaintMask(DrawingContext& context);
     void PaintBackground(DrawingContext& context, const ContentProperty& contentProperty);
     LinearVector<float> GetItemHalfSizes(size_t index, ContentProperty& contentProperty);
-    void SetFocusedAndSelectedColor(PaintWrapper* paintWrapper);
+    void SetFocusedAndSelectedColor(ContentProperty& contentProperty);
     // Update property
     void UpdateShrinkPaintProperty(const OffsetF& margin, const LinearVector<float>& normalItemHalfSizes,
         const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX);

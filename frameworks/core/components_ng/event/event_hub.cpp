@@ -350,26 +350,26 @@ void EventHub::ClearJSFrameNodeOnDisappear()
 void EventHub::FireOnAppear()
 {
     if (onAppear_ || onJSFrameNodeAppear_) {
-        auto* host = UnsafeRawPtr(host_);
-        CHECK_NULL_VOID(host);
-        auto* pipeline = host->GetContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafely();
         CHECK_NULL_VOID(pipeline);
         auto taskScheduler = pipeline->GetTaskExecutor();
         CHECK_NULL_VOID(taskScheduler);
-        pipeline->SetBuildAfterCallback([weak = WeakClaim(this)]() {
-            auto eventHub = weak.Upgrade();
-            CHECK_NULL_VOID(eventHub);
-            if (eventHub->onAppear_) {
-                // callback may be overwritten in its invoke so we copy it first
-                auto onAppear = eventHub->onAppear_;
-                onAppear();
-            }
-            if (eventHub->onJSFrameNodeAppear_) {
-                // callback may be overwritten in its invoke so we copy it first
-                auto onJSFrameNodeAppear = eventHub->onJSFrameNodeAppear_;
-                onJSFrameNodeAppear();
-            }
-        });
+        taskScheduler->PostTask(
+            [weak = WeakClaim(this)]() {
+                auto eventHub = weak.Upgrade();
+                CHECK_NULL_VOID(eventHub);
+                if (eventHub->onAppear_) {
+                    // callback may be overwritten in its invoke so we copy it first
+                    auto onAppear = eventHub->onAppear_;
+                    onAppear();
+                }
+                if (eventHub->onJSFrameNodeAppear_) {
+                    // callback may be overwritten in its invoke so we copy it first
+                    auto onJSFrameNodeAppear = eventHub->onJSFrameNodeAppear_;
+                    onJSFrameNodeAppear();
+                }
+            },
+            TaskExecutor::TaskType::UI, "ArkUIFrameNodeAppearEvent");
     }
 }
 
@@ -384,6 +384,67 @@ void EventHub::FireOnDisappear()
         // callback may be overwritten in its invoke so we copy it first
         auto onJSFrameNodeDisappear = onJSFrameNodeDisappear_;
         onJSFrameNodeDisappear();
+    }
+}
+
+void EventHub::AddInnerOnSizeChanged(int32_t id, OnSizeChangedFunc&& callback)
+{
+    onSizeChangedInnerCallbacks_[id] = std::move(callback);
+}
+
+void EventHub::FireInnerOnSizeChanged(const RectF& oldRect, const RectF& rect)
+{
+    for (auto& innerCallbackInfo : onSizeChangedInnerCallbacks_) {
+        if (innerCallbackInfo.second) {
+            auto innerOnSizeCallback = innerCallbackInfo.second;
+            innerOnSizeCallback(oldRect, rect);
+        }
+    }
+}
+
+bool EventHub::HasInnerOnSizeChanged() const
+{
+    return !onSizeChangedInnerCallbacks_.empty();
+}
+
+void EventHub::ClearInnerOnSizeChanged()
+{
+    onSizeChangedInnerCallbacks_.clear();
+}
+
+void EventHub::SetOnAttach(std::function<void()>&& onAttach)
+{
+    onAttach_ = std::move(onAttach);
+}
+
+void EventHub::ClearOnAttach()
+{
+    onAttach_ = nullptr;
+}
+
+void EventHub::FireOnAttach()
+{
+    if (onAttach_) {
+        auto onAttach = onAttach_;
+        onAttach();
+    }
+}
+
+void EventHub::SetOnDetach(std::function<void()>&& onDetach)
+{
+    onDetach_ = std::move(onDetach);
+}
+
+void EventHub::ClearOnDetach()
+{
+    onDetach_ = nullptr;
+}
+
+void EventHub::FireOnDetach()
+{
+    if (onDetach_) {
+        auto onDetach = onDetach_;
+        onDetach();
     }
 }
 } // namespace OHOS::Ace::NG

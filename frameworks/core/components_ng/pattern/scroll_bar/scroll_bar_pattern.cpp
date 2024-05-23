@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,9 +23,9 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t BAR_DISAPPEAR_DELAY_DURATION = 2000; // 2000ms
-constexpr int32_t BAR_DISAPPEAR_DURATION = 400;        // 400ms
-constexpr int32_t BAR_APPEAR_DURATION = 100;        // 100ms
-constexpr int32_t BAR_DISAPPEAR_FRAME_RATE = 20;
+constexpr int32_t BAR_DISAPPEAR_DURATION = 300;        // 300ms
+constexpr int32_t BAR_APPEAR_DURATION = 100;           // 100ms
+constexpr int32_t BAR_DISAPPEAR_FRAME_RATE = 15;       // 15fps, the expected frame rate of opacity animation
 constexpr int32_t BAR_DISAPPEAR_MIN_FRAME_RATE = 0;
 constexpr int32_t BAR_DISAPPEAR_MAX_FRAME_RATE = 90;
 constexpr int32_t LONG_PRESS_PAGE_INTERVAL_MS = 100;
@@ -204,19 +204,10 @@ void ScrollBarPattern::SetScrollBar(DisplayMode displayMode)
     }
 }
 
-void ScrollBarPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty)
-{
-    auto scrollBarPattern = AceType::DynamicCast<ScrollBarPattern>(dirty->GetHostNode()->GetPattern());
-    CHECK_NULL_VOID(scrollBarPattern);
-    currentOffset_ = scrollBarPattern->GetScrollOffset();
-    scrollableDistance_ = scrollBarPattern->GetScrollableDistance();
-}
-
 void ScrollBarPattern::HandleScrollBarOutBoundary(float scrollBarOutBoundaryExtent)
 {
-    scrollBarOutBoundaryExtent_ = scrollBarOutBoundaryExtent;
     CHECK_NULL_VOID(scrollBar_ && scrollBar_->NeedScrollBar());
-    scrollBar_->SetOutBoundary(std::abs(scrollBarOutBoundaryExtent_));
+    scrollBar_->SetOutBoundary(std::abs(scrollBarOutBoundaryExtent));
 }
 
 void ScrollBarPattern::UpdateScrollBarOffset()
@@ -231,15 +222,7 @@ void ScrollBarPattern::UpdateScrollBarOffset()
     CHECK_NULL_VOID(layoutProperty);
     auto estimatedHeight = GetControlDistance() + (GetAxis() == Axis::VERTICAL ? viewSize.Height() : viewSize.Width());
 
-    float scrollBarOutBoundaryExtent = 0.0f;
-    if (Negative(currentOffset_)) {
-        scrollBarOutBoundaryExtent = currentOffset_;
-    } else if (GreatOrEqual(currentOffset_, (estimatedHeight - GetMainAxisSize(viewSize, axis_)))) {
-        scrollBarOutBoundaryExtent = currentOffset_ - (estimatedHeight - GetMainAxisSize(viewSize, axis_));
-    }
-    HandleScrollBarOutBoundary(scrollBarOutBoundaryExtent);
-    
-    UpdateScrollBarRegion(currentOffset_, estimatedHeight,
+    UpdateScrollBarRegion(scrollableNodeOffset_, estimatedHeight,
         Size(viewSize.Width(), viewSize.Height()), Offset(0.0f, 0.0f));
 }
 
@@ -313,7 +296,6 @@ bool ScrollBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     }
     bool updateFlag = false;
     if (!HasChild() && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        SetScrollProperties(dirty);
         UpdateScrollBarOffset();
         updateFlag = true;
     } else {
@@ -324,10 +306,10 @@ bool ScrollBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         scrollableDistance_ = layoutAlgorithm->GetScrollableDistance();
     }
     if (displayMode_ != DisplayMode::OFF) {
-        updateFlag |= UpdateScrollBarDisplay();
+        updateFlag = UpdateScrollBarDisplay() || updateFlag;
     }
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        updateFlag |= CheckChildState();
+        updateFlag = CheckChildState() || updateFlag;
     }
     return updateFlag;
 }
@@ -380,7 +362,7 @@ bool ScrollBarPattern::IsAtBottom() const
     return GreatOrEqual(currentOffset_, scrollableDistance_);
 }
 
-void ScrollBarPattern::ValidateOffset(int32_t source)
+void ScrollBarPattern::ValidateOffset()
 {
     if (scrollableDistance_ <= 0.0f) {
         return;
@@ -401,7 +383,7 @@ bool ScrollBarPattern::UpdateCurrentOffset(float delta, int32_t source)
 
     lastOffset_ = currentOffset_;
     currentOffset_ += delta;
-    ValidateOffset(source);
+    ValidateOffset();
     if (scrollBarProxy_ && lastOffset_ != currentOffset_) {
         scrollBarProxy_->NotifyScrollableNode(-delta, source, AceType::WeakClaim(this));
     }
@@ -501,8 +483,7 @@ void ScrollBarPattern::SetAccessibilityAction()
         if (pattern->GetAxis() == Axis::NONE || pattern->GetScrollableDistance() == 0.0f) {
             return;
         }
-        auto source = pattern->GetCurrentPosition();
-        pattern->UpdateCurrentOffset(pattern->GetChildOffset(), source);
+        pattern->UpdateCurrentOffset(pattern->GetChildOffset(), SCROLL_FROM_BAR);
         // AccessibilityEventType::SCROLL_END
     });
 
@@ -512,8 +493,7 @@ void ScrollBarPattern::SetAccessibilityAction()
         if (pattern->GetAxis() == Axis::NONE || pattern->GetScrollableDistance() == 0.0f) {
             return;
         }
-        auto source = pattern->GetCurrentPosition();
-        pattern->UpdateCurrentOffset(-pattern->GetChildOffset(), source);
+        pattern->UpdateCurrentOffset(-pattern->GetChildOffset(), SCROLL_FROM_BAR);
         // AccessibilityEventType::SCROLL_END
     });
 }
@@ -569,6 +549,9 @@ void ScrollBarPattern::HandleDragUpdate(const GestureEvent& info)
 {
     if (scrollPositionCallback_) {
         auto offset = info.GetMainDelta();
+        if (IsReverse()) {
+            offset = -offset;
+        }
         // The offset of the mouse wheel and gesture is opposite.
         if (info.GetInputEventType() == InputEventType::AXIS && !NearZero(controlDistance_)) {
             offset = - offset * scrollableDistance_ / controlDistance_;
@@ -788,5 +771,15 @@ void ScrollBarPattern::InitMouseEvent()
     };
     mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseCallback));
     inputHub->AddOnMouseEvent(mouseEvent_);
+}
+
+bool ScrollBarPattern::IsReverse() const
+{
+    return isReverse_;
+}
+
+void ScrollBarPattern::SetReverse(bool reverse)
+{
+    isReverse_ = reverse;
 }
 } // namespace OHOS::Ace::NG

@@ -43,21 +43,28 @@ public:
     void InsertSpanString(int32_t start, const RefPtr<SpanString>& spanString);
     void AppendSpanString(const RefPtr<SpanString>& spanString);
     bool IsSpeicalNode(int32_t location, SpanType speicalType);
+    void SetSpanWatcher(const WeakPtr<SpanWatcher>& watcher);
+    void NotifySpanWatcher();
 
 private:
+    WeakPtr<SpanWatcher> watcher_;
     void KeepSpansOrder();
+    std::list<RefPtr<NG::SpanItem>>::iterator HandleSpanOperation(
+        std::list<RefPtr<NG::SpanItem>>::iterator it, int32_t start, int32_t length,
+        const std::string& other, SpanStringOperation op, const std::pair<int32_t, int32_t>& intersection);
     void ApplyReplaceStringToSpans(int32_t start, int32_t length, const std::string& other, SpanStringOperation op);
+    void ApplyInsertStringToSpans(int32_t start, const std::string& other);
     void ApplyReplaceStringToSpanBase(int32_t start, int32_t length, const std::string& other, SpanStringOperation op);
     void ApplyInsertSpanStringToSpans(int32_t start, const RefPtr<SpanString>& spanString);
     void ApplyInsertSpanStringToSpanBase(int32_t start, const RefPtr<SpanString>& spanString);
-    static std::wstring GetWideStringSubstr(const std::wstring& content, int32_t start);
-    static std::wstring GetWideStringSubstr(const std::wstring& content, int32_t start, int32_t length);
+    void SplitSpansByNewLine();
     bool InsertUseFrontStyle(int32_t start);
     void UpdateSpanAndSpanMapAfterInsertSpanString(int32_t start, int32_t offset);
     void UpdateSpansAndSpanMapWithOffsetAfterInsert(int32_t start, int32_t offset, bool useFrontStyle);
     AroundSpecialNode IsInsertAroundSpecialNode(int32_t start);
     void InsertStringAroundSpecialNode(int32_t start, const std::string& str, AroundSpecialNode aroundMode);
     void RemoveSpecialpanText();
+    void RemoveSpecialSpans(int32_t start, int32_t length);
 };
 } // namespace OHOS::Ace
 

@@ -52,7 +52,7 @@ public:
     void SetAllowUpdate(bool allowUpdate) override;
     bool IsAllowUpdate();
 
-    void DispatchSurfaceChangeEvent(float width, float height) override;
+    void DispatchSurfaceChangeEvent(float width, float height, float borderWidth = 0.0) override;
     void SetObscured(bool isObscured) override;
 private:
     std::weak_ptr<UIContent> uiContent_;

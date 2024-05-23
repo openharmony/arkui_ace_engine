@@ -150,6 +150,19 @@ void ImageLoadingContext::OnDataReady()
     }
 }
 
+void ImageLoadingContext::OnDataReadyOnCompleteCallBack()
+{
+    if (notifiers_.onDataReadyComplete_) {
+        notifiers_.onDataReadyComplete_(src_);
+    }
+}
+
+void ImageLoadingContext::SetOnProgressCallback(
+    std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& onProgress)
+{
+    onProgressCallback_ = onProgress;
+}
+
 void ImageLoadingContext::OnDataLoading()
 {
     if (!src_.GetIsConfigurationChange()) {
@@ -241,6 +254,18 @@ void ImageLoadingContext::PerformDownload()
         async ? NG::ImageUtils::PostToUI(callback, "ArkUIImageDownloadFailed") : callback();
     };
     downloadCallback.cancelCallback = downloadCallback.failCallback;
+    if (onProgressCallback_) {
+        downloadCallback.onProgressCallback = [weak = AceType::WeakClaim(this)](
+            uint32_t dlTotal, uint32_t dlNow, bool async, int32_t instanceId) {
+            ContainerScope scope(instanceId);
+            auto callback = [weak = weak, dlTotal = dlTotal, dlNow = dlNow]() {
+                auto ctx = weak.Upgrade();
+                CHECK_NULL_VOID(ctx);
+                ctx->DownloadOnProgress(dlNow, dlTotal);
+            };
+            async ? NG::ImageUtils::PostToUI(callback, "ArkUIImageDownloadOnProcess") : callback();
+        };
+    }
     NetworkImageLoader::DownloadImage(std::move(downloadCallback), src_.GetSrc(), syncLoad_);
 }
 
@@ -275,6 +300,13 @@ void ImageLoadingContext::DownloadImageFailed(const std::string& errorMessage)
 {
     TAG_LOGI(AceLogTag::ACE_IMAGE, "Download image failed, the error message is %{public}s", errorMessage.c_str());
     FailCallback(errorMessage);
+}
+
+void ImageLoadingContext::DownloadOnProgress(const uint32_t& dlNow, const uint32_t& dlTotal)
+{
+    if (onProgressCallback_) {
+        onProgressCallback_(dlNow, dlTotal);
+    }
 }
 
 void ImageLoadingContext::OnMakeCanvasImage()
@@ -337,6 +369,11 @@ void ImageLoadingContext::DataReadyCallback(const RefPtr<ImageObject>& imageObj)
 {
     CHECK_NULL_VOID(imageObj);
     imageObj_ = imageObj->Clone();
+    if (measureFinish_) {
+        OnDataReadyOnCompleteCallBack();
+    } else {
+        needDataReadyCallBack_ = true;
+    }
     stateManager_->HandleCommand(ImageLoadingCommand::LOAD_DATA_SUCCESS);
 }
 
@@ -350,12 +387,27 @@ void ImageLoadingContext::SuccessCallback(const RefPtr<CanvasImage>& canvasImage
 void ImageLoadingContext::FailCallback(const std::string& errorMsg)
 {
     errorMsg_ = errorMsg;
+    needErrorCallBack_ = true;
+    CHECK_NULL_VOID(measureFinish_);
     TAG_LOGW(AceLogTag::ACE_IMAGE, "Image LoadFail, source = %{public}s, reason: %{public}s", src_.ToString().c_str(),
         errorMsg.c_str());
     if (Downloadable()) {
         ImageFileCache::GetInstance().EraseCacheFile(GetSourceInfo().GetSrc());
     }
     stateManager_->HandleCommand(ImageLoadingCommand::LOAD_FAIL);
+    needErrorCallBack_ = false;
+}
+
+void ImageLoadingContext::CallbackAfterMeasureIfNeed()
+{
+    if (needErrorCallBack_) {
+        stateManager_->HandleCommand(ImageLoadingCommand::LOAD_FAIL);
+        needErrorCallBack_ = false;
+    }
+    if (needDataReadyCallBack_) {
+        OnDataReadyOnCompleteCallBack();
+        needDataReadyCallBack_ = false;
+    }
 }
 
 const RectF& ImageLoadingContext::GetDstRect() const

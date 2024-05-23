@@ -251,6 +251,16 @@ ArkUI_GestureRecognizer* OH_ArkUI_GestureInterruptInfo_GetRecognizer(const ArkUI
 ArkUI_GestureEvent* OH_ArkUI_GestureInterruptInfo_GetGestureEvent(const ArkUI_GestureInterruptInfo* event);
 
 /**
+* @brief Obtains the type of the system gesture to trigger.
+*
+* @param event Indicates the pointer to the gesture interruption information.
+* @return Returns the type of the system gesture to trigger. If the gesture to trigger is not a system gesture,
+*         <b>-1</b> is returned.
+* @since 12
+*/
+int32_t OH_ArkUI_GestureInterruptInfo_GetSystemRecognizerType(const ArkUI_GestureInterruptInfo* event);
+
+/**
 * @brief Obtains the gesture event type.
 *
 * @param event Indicates the pointer to the gesture event.

@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/overlay/sheet_presentation_layout_algorithm.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_property.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
+#include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -40,8 +41,10 @@ enum class BindSheetDismissReason {
     CLOSE_BUTTON,
     SLIDE_DOWN,
 };
-class ACE_EXPORT SheetPresentationPattern : public LinearLayoutPattern, public PopupBasePattern, public FocusView {
-    DECLARE_ACE_TYPE(SheetPresentationPattern, LinearLayoutPattern, PopupBasePattern, FocusView);
+class ACE_EXPORT SheetPresentationPattern :
+    public LinearLayoutPattern, public PopupBasePattern, public FocusView, public NestableScrollContainer{
+    DECLARE_ACE_TYPE(SheetPresentationPattern,
+        LinearLayoutPattern, PopupBasePattern, FocusView, NestableScrollContainer);
 
 public:
     SheetPresentationPattern(
@@ -53,7 +56,12 @@ public:
         callback_ = std::move(callback);
     }
 
-    ~SheetPresentationPattern() override = default;
+    ~SheetPresentationPattern()
+    {
+        DeleteOverlay();
+    }
+
+    void DeleteOverlay();
 
     bool IsMeasureBoundary() const override
     {
@@ -125,6 +133,7 @@ public:
             isExecuteOnDisappear_ = true;
             onDisappear_();
         }
+        isDismissProcess_ = false;
     }
 
     void UpdateOnWillDisappear(std::function<void()>&& onWillDisappear)
@@ -257,6 +266,7 @@ public:
         }
     }
 
+    void OverlayDismissSheet();
     void DismissSheet()
     {
         DismissTransition(false);
@@ -264,6 +274,7 @@ public:
 
     void SheetSpringBack()
     {
+        isDismissProcess_ = false;
         SheetTransition(true);
     }
 
@@ -287,12 +298,6 @@ public:
     void HandleDragUpdate(const GestureEvent& info);
 
     void HandleDragEnd(float dragVelocity);
-
-    void OnCoordScrollStart();
-
-    bool OnCoordScrollUpdate(float scrollOffset);
-
-    void OnCoordScrollEnd(float dragVelocity);
 
     void SheetTransition(bool isTransitionIn, float dragVelocity = 0.0f);
 
@@ -399,6 +404,8 @@ public:
     }
 
     SheetType GetSheetType();
+    void GetSheetTypeWithAuto(SheetType& sheetType);
+    void GetSheetTypeWithPopup(SheetType& sheetType);
 
     void BubbleStyleSheetTransition(bool isTransitionIn);
 
@@ -429,6 +436,16 @@ public:
         return isAnimationProcess_;
     }
 
+    void SetDismissProcess(bool isProcess)
+    {
+        isDismissProcess_ = isProcess;
+    }
+
+    bool GetDismissProcess()
+    {
+        return isDismissProcess_;
+    }
+
     float GetPageHeightWithoutOffset() const
     {
         return pageHeight_;
@@ -436,6 +453,10 @@ public:
 
     float GetPageHeight()
     {
+        // OnTransformTranslateUpdate's offset is the relative to the upper left corner of the father
+        // Therefore, if the father is a PageNode, need to obtain the offsetY of the Page relative to the window
+        // On the basis of the normally calculated offset, move parentOffsetY up,
+        // It can be considered as the offset relative to the window
         auto parentOffsetY = GetRootOffsetYToWindow();
         return pageHeight_ - parentOffsetY;
     }
@@ -498,14 +519,24 @@ public:
         return Positive(keyboardHeight_);
     }
 
-    bool IsTypeNeedAvoidAiBar() const
-    {
-        return sheetType_ == SheetType::SHEET_BOTTOM || sheetType_ == SheetType::SHEET_BOTTOMLANDSPACE;
-    }
+    bool IsTypeNeedAvoidAiBar();
 
     void GetBuilderInitHeight();
     void ChangeSheetPage(float height);
     void DumpAdvanceInfo() override;
+    float GetTitleHeight();
+
+    // Nestable Scroll
+    Axis GetAxis() const override
+    {
+        return Axis::VERTICAL;
+    }
+    ScrollResult HandleScroll(float scrollOffset, int32_t source,
+        NestedState state = NestedState::GESTURE, float velocity = 0.f) override;
+    void OnScrollStartRecursive(float position, float dragVelocity = 0.0f) override;
+    void OnScrollEndRecursive (const std::optional<float>& velocity) override;
+    bool HandleScrollVelocity(float velocity) override;
+    ScrollResult HandleScrollWithSheet(float scrollOffset);
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
@@ -521,7 +552,7 @@ private:
     void UpdateDragBarStatus();
     void UpdateCloseIconStatus();
     void UpdateSheetTitle();
-    void UpdateInteractive();
+    void UpdateFontScaleStatus();
     RefPtr<RenderContext> GetRenderContext();
     bool PostTask(const TaskExecutor::Task& task, const std::string& name);
     void CheckSheetHeightChange();
@@ -556,6 +587,7 @@ private:
     std::function<void(const float)> onTypeDidChange_;
     std::function<void()> onAppear_;
     RefPtr<PanEvent> panEvent_;
+    OffsetF arrowOffset_;
     float currentOffset_ = 0.0f;
 
     float preDidHeight_ = 0.0f;
@@ -581,6 +613,7 @@ private:
     bool isFirstInit_ = true;
     bool isAnimationBreak_ = false;
     bool isAnimationProcess_ = false;
+    bool isDismissProcess_ = false;
     SheetType sheetType_ = SheetType::SHEET_BOTTOM;
     bool windowChanged_ = false;
 
@@ -593,6 +626,8 @@ private:
     bool show_ = true;
     bool isDrag_ = false;
     bool isNeedProcessHeight_ = false;
+    bool isSheetNeedScroll_ = false; // true if Sheet is ready to receive scroll offset.
+    bool isSheetPosChanged_ = false; // UpdateTransformTranslate end
 
     double start_ = 0.0; // start position of detents changed
     RefPtr<NodeAnimatablePropertyFloat> property_;
@@ -600,6 +635,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(SheetPresentationPattern);
 
     float preDetentsHeight_ = 0.0f;
+    float scale_ = 1.0;
 };
 } // namespace OHOS::Ace::NG
 

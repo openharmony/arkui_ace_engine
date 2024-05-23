@@ -18,6 +18,7 @@ class ArkSliderComponent extends ArkComponent implements SliderAttribute {
   builder: WrappedBuilder<Object[]> | null = null;
   sliderNode: BuilderNode<[SliderConfiguration]> | null = null;
   modifier: ContentModifier<SliderConfiguration>;
+  needRebuild: boolean = false;
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
@@ -71,6 +72,10 @@ class ArkSliderComponent extends ArkComponent implements SliderAttribute {
     modifierWithKey(this._modifiersWithKeys, TrackBorderRadiusModifier.identity, TrackBorderRadiusModifier, value);
     return this;
   }
+  selectedBorderRadius(value: Dimension): this {
+    modifierWithKey(this._modifiersWithKeys, SelectedBorderRadiusModifier.identity, SelectedBorderRadiusModifier, value);
+    return this;
+  }
   blockSize(value: SizeOptions): this {
     modifierWithKey(this._modifiersWithKeys, BlockSizeModifier.identity, BlockSizeModifier, value);
     return this;
@@ -83,9 +88,30 @@ class ArkSliderComponent extends ArkComponent implements SliderAttribute {
     modifierWithKey(this._modifiersWithKeys, StepSizeModifier.identity, StepSizeModifier, value);
     return this;
   }
+  sliderInteractionMode(value: SliderInteraction): this {
+    modifierWithKey(this._modifiersWithKeys, InteractionModeModifier.identity, InteractionModeModifier, value);
+    return this;
+  }
+  minResponsiveDistance(value: number): this {
+    modifierWithKey(this._modifiersWithKeys, MinResponsiveDistanceModifier.identity, MinResponsiveDistanceModifier, value);
+    return this;
+  }
+  contentModifier(value: ContentModifier<SliderConfiguration>): this {
+    this.setContentModifier(value);
+    return this;
+  }
+  slideRange(value: ValidSlideRange): this {
+    modifierWithKey(this._modifiersWithKeys, ValidSlideRangeModifier.identity, ValidSlideRangeModifier, value);
+    return this;
+  }
   setContentModifier(modifier: ContentModifier<SliderConfiguration>): this {
     if (modifier === undefined || modifier === null) {
+      getUINativeModule().slider.setContentModifierBuilder(this.nativePtr, false);
       return;
+    }
+    this.needRebuild = false;
+    if (this.builder !== modifier.applyContent()) {
+      this.needRebuild = true;
     }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
@@ -93,10 +119,11 @@ class ArkSliderComponent extends ArkComponent implements SliderAttribute {
   }
   makeContentModifierNode(context: UIContext, sliderConfiguration: SliderConfiguration): FrameNode | null {
     sliderConfiguration.contentModifier = this.modifier;
-    if (isUndefined(this.sliderNode)) {
+    if (isUndefined(this.sliderNode) || this.needRebuild) {
       const xNode = globalThis.requireNapi('arkui.node');
       this.sliderNode = new xNode.BuilderNode(context);
       this.sliderNode.build(this.builder, sliderConfiguration);
+      this.needRebuild = false;
     } else {
       this.sliderNode.update(sliderConfiguration);
     }
@@ -347,6 +374,78 @@ class TrackThicknessModifier extends ModifierWithKey<Length> {
   }
 }
 
+class ValidSlideRangeModifier extends ModifierWithKey<ValidSlideRange> {
+  constructor(value: ValidSlideRange) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('slideRange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().slider.resetValidSlideRange(node);
+    } else {
+      getUINativeModule().slider.setValidSlideRange(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class SelectedBorderRadiusModifier extends ModifierWithKey<Dimension> {
+  constructor(value: Dimension) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('sliderSelectedBorderRadius');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().slider.resetSelectedBorderRadius(node);
+    } else {
+      getUINativeModule().slider.setSelectedBorderRadius(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class InteractionModeModifier extends ModifierWithKey<SliderInteraction> {
+  constructor(value: SliderInteraction) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('sliderInteractionMode');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().slider.resetInteractionMode(node);
+    } else {
+      getUINativeModule().slider.setInteractionMode(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class MinResponsiveDistanceModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('sliderMinResponsiveDistance');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().slider.resetMinResponsiveDistance(node);
+    } else {
+      getUINativeModule().slider.setMinResponsiveDistance(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 // @ts-ignore
 globalThis.Slider.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
@@ -357,7 +456,7 @@ globalThis.Slider.attributeModifier = function (modifier: ArkComponent): void {
 };
 
 // @ts-ignore
-globalThis.Slider.contentModifier = function (modifier) {
+globalThis.Slider.contentModifier = function (modifier): void {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {

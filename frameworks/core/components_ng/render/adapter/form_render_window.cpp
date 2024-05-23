@@ -98,10 +98,11 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
     rsSurfaceNode_ = OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true);
     rsUIDirector_->SetRSSurfaceNode(rsSurfaceNode_);
 
-    rsUIDirector_->SetUITaskRunner([taskExecutor, id = id_](const std::function<void()>& task) {
+    rsUIDirector_->SetUITaskRunner([taskExecutor, id = id_](const std::function<void()>& task, uint32_t delay) {
         ContainerScope scope(id);
         CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIFormRenderWindowTask");
+        taskExecutor->PostDelayedTask(
+            task, TaskExecutor::TaskType::UI, delay, "ArkUIFormRenderServiceTask", PriorityType::HIGH);
     }, id);
 #else
     taskExecutor_ = nullptr;
@@ -140,8 +141,10 @@ void FormRenderWindow::SetRootFrameNode(const RefPtr<NG::FrameNode>& root)
         auto width = static_cast<float>(calcLayoutConstraint->maxSize->Width()->GetDimension().Value());
         auto height = static_cast<float>(calcLayoutConstraint->maxSize->Height()->GetDimension().Value());
         rootSRNode->SetBounds(0, 0, width, height);
+        CHECK_NULL_VOID(rsUIDirector_);
         rsUIDirector_->SetRoot(rosenRenderContext->GetRSNode()->GetId());
     }
+    CHECK_NULL_VOID(rsUIDirector_);
     rsUIDirector_->SendMessages();
 #endif
 }

@@ -18,6 +18,7 @@
 
 #include <vector>
 
+#include "testing_matrix.h"
 #include "testing_point.h"
 #include "testing_rect.h"
 #include "testing_round_rect.h"
@@ -75,9 +76,12 @@ public:
     virtual void Reset() {}
     virtual void Close() {}
     virtual void QuadTo(float ctrlPtX, float ctrlPtY, float endPtX, float endPtY) {}
+    virtual void ArcTo(float x1, float y1, float x2, float y2, float radius) {}
     virtual void ArcTo(float rx, float ry, float angle, TestingPathDirection direction, float endX, float endY) {}
     virtual void ArcTo(float pt1X, float pt1Y, float pt2X, float pt2Y, float startAngle, float sweepAngle) {}
     virtual void ArcTo(const TestingPoint& pt1, const TestingPoint& pt2, float startAngle, float sweepAngle) {}
+
+    virtual void CubicTo(float ctrlPt1X, float ctrlPt1Y, float ctrlPt2X, float ctrlPt2Y, float endPtX, float endPtY) {}
 
     virtual void Offset(float dx, float dy) {}
     virtual void AddPoly(const std::vector<TestingPoint>& points, int count, bool close) {}
@@ -112,6 +116,13 @@ public:
         float distance, TestingPoint& position, TestingPoint& tangent, bool forceClosed) const
     {
         return false;
+    }
+
+    virtual void Transform(const TestingMatrix& matrix) {}
+
+    virtual std::string ConvertToSVGString()
+    {
+        return "";
     }
 };
 } // namespace OHOS::Ace::Testing

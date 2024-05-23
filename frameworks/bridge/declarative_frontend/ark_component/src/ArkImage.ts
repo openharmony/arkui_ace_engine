@@ -175,6 +175,40 @@ class ImageResizableModifier extends ModifierWithKey<ResizableOptions> {
   }
 }
 
+class ImageDynamicRangeModeModifier extends ModifierWithKey<DynamicRangeMode> {
+  constructor(value: DynamicRangeMode) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('dynamicRangeMode');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().image.resetDynamicRangeMode(node);
+    } else {
+      getUINativeModule().image.setDynamicRangeMode(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
+}
+
+class ImageEnhancedImageQualityModifier extends ModifierWithKey<AIImageQuality> {
+  constructor(value: ResolutionQuality) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('enhancedImageQuality');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().image.resetEnhancedImageQuality(node);
+    } else {
+      getUINativeModule().image.setEnhancedImageQuality(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
+}
+
 class ImageInterpolationModifier extends ModifierWithKey<ImageInterpolation> {
   constructor(value: ImageInterpolation) {
     super(value);
@@ -469,9 +503,61 @@ class ImageTransitionModifier extends ModifierWithKey<object> {
   }
 }
 
+class ImageSrcModifier extends ModifierWithKey<ResourceStr | PixelMap | DrawableDescriptor> {
+  constructor(value: ResourceStr | PixelMap | DrawableDescriptor) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('imageShowSrc');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().image.setImageShowSrc(node, "");
+    }
+    else {
+      getUINativeModule().image.setImageShowSrc(node, this.value);
+    }
+  }
+}
+
+class ImageEnableAnalyzerModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('enableAnalyzer');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().image.enableAnalyzer(node);
+    } else {
+      getUINativeModule().image.enableAnalyzer(node, this.value!);
+    }
+  }
+}
+
+class ImageAnalyzerConfigModifier extends ModifierWithKey<object> {
+  constructor(value: object) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('analyzerConfig');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().image.analyzerConfig(node);
+    } else {
+      getUINativeModule().image.analyzerConfig(node, this.value!);
+    }
+  }
+}
+
 class ArkImageComponent extends ArkComponent implements ImageAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
+  }
+  initialize(value: Object[]): this {
+    if (value[0] != undefined) {
+      modifierWithKey(this._modifiersWithKeys, ImageSrcModifier.identity, ImageSrcModifier, value[0]);
+    }
+    return this;
+  }
+  allowChildCount(): number {
+    return 0;
   }
   draggable(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, ImageDraggableModifier.identity, ImageDraggableModifier, value);
@@ -584,6 +670,24 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
   }
   transition(value: TransitionOptions | TransitionEffect): this {
     modifierWithKey(this._modifiersWithKeys, ImageTransitionModifier.identity, ImageTransitionModifier, value);
+    return this;
+  }
+  dynamicRangeMode(value: DynamicRangeMode): this {
+    modifierWithKey(
+      this._modifiersWithKeys, ImageDynamicRangeModeModifier.identity, ImageDynamicRangeModeModifier, value);
+    return this;
+  }
+  enhancedImageQuality(value: ResolutionQuality): this {
+    modifierWithKey(
+      this._modifiersWithKeys, ImageDynamicRangeModeModifier.identity, ImageDynamicRangeModeModifier, value);
+    return this;
+  }
+  enableAnalyzer(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, ImageEnableAnalyzerModifier.identity, ImageEnableAnalyzerModifier, value);
+    return this;
+  }
+  analyzerConfig(value: object): this {
+    modifierWithKey(this._modifiersWithKeys, ImageAnalyzerConfigModifier.identity, ImageAnalyzerConfigModifier, value);
     return this;
   }
 }

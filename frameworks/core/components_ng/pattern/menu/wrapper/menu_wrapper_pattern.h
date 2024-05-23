@@ -109,6 +109,8 @@ public:
     }
 
     void HideSubMenu();
+    RefPtr<FrameNode> MenuFocusViewShow();
+    void HideStackExpandMenu(const RefPtr<UINode>& subMenu);
 
     RefPtr<FrameNode> GetMenu() const
     {
@@ -153,6 +155,8 @@ public:
     {
         isFirstShow_ = true;
     }
+
+    void RegisterMenuCallback(const RefPtr<FrameNode>& menuWrapperNode, const MenuParam& menuParam);
 
     void RegisterMenuAppearCallback(const std::function<void()>& onAppear)
     {
@@ -244,6 +248,8 @@ public:
         hasTransitionEffect_ = hasTransitionEffect;
     }
 
+    void SetMenuTransitionEffect(const RefPtr<FrameNode>& menuWrapperNode, const MenuParam& menuParam);
+
     bool HasPreviewTransitionEffect() const
     {
         return hasPreviewTransitionEffect_;
@@ -263,7 +269,7 @@ public:
     {
         return filterColumnNode_;
     }
-    
+
     void DumpInfo() override;
 
     MenuDumpInfo GetDumpInfo() const
@@ -279,6 +285,7 @@ public:
         dumpInfo_.targetNode = dumpInfo.targetNode;
         dumpInfo_.targetOffset = dumpInfo.targetOffset;
         dumpInfo_.targetSize = dumpInfo.targetSize;
+        dumpInfo_.wrapperRect = dumpInfo.wrapperRect;
         dumpInfo_.previewBeginScale = dumpInfo.previewBeginScale;
         dumpInfo_.previewEndScale = dumpInfo.previewEndScale;
         dumpInfo_.top = dumpInfo.top;
@@ -299,6 +306,20 @@ public:
         hasCustomRadius_ = hasCustomRadius;
     }
 
+    RefPtr<FrameNode> GetLastTouchItem()
+    {
+        return lastTouchItem_;
+    }
+
+    void SetLastTouchItem(const RefPtr<FrameNode>& lastTouchItem)
+    {
+        lastTouchItem_ = lastTouchItem;
+    }
+
+    RefPtr<FrameNode> GetMenuChild(const RefPtr<UINode>& node);
+    RefPtr<FrameNode> GetShowedSubMenu();
+    bool IsSelectOverlayCustomMenu(const RefPtr<FrameNode>& menu) const;
+
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
     void CheckAndShowAnimation();
@@ -312,12 +333,16 @@ private:
     {
         return false;
     }
-    bool IsSelectOverlayCustomMenu(const RefPtr<FrameNode>& menu) const;
+    void OnModifyDone() override;
+    void InitFocusEvent();
     void OnAttachToFrameNode() override;
     void RegisterOnTouch();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper);
     void StartShowAnimation();
+    void HandleInteraction(const TouchEventInfo& info);
+    RectF GetMenuZone(RefPtr<UINode>& innerMenuNode);
+    RefPtr<FrameNode> FindTouchedMenuItem(const RefPtr<UINode>& menuNode, const OffsetF& position);
 
     void HideMenu(const RefPtr<FrameNode>& menu);
 
@@ -327,6 +352,8 @@ private:
     std::function<void()> aboutToDisappearCallback_ = nullptr;
     std::function<void(const std::string&)> onStateChangeCallback_ = nullptr;
     RefPtr<TouchEventImpl> onTouch_;
+    RefPtr<FrameNode> lastTouchItem_ = nullptr;
+    RefPtr<FrameNode> currentTouchItem_ = nullptr;
     // menuId in OverlayManager's map
     int32_t targetId_ = -1;
 

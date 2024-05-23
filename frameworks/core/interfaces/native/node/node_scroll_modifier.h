@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,11 @@ const ArkUIScrollModifier* GetScrollModifier();
 
 void SetOnScroll(ArkUINodeHandle node, void* extraParam);
 void SetOnScrollFrameBegin(ArkUINodeHandle node, void* extraParam);
+void SetScrollOnWillScroll(ArkUINodeHandle node, void* extraParam);
+void SetScrollOnDidScroll(ArkUINodeHandle node, void* extraParam);
 void SetOnScrollStart(ArkUINodeHandle node, void* extraParam);
 void SetOnScrollStop(ArkUINodeHandle node, void* extraParam);
 void SetOnScrollEdge(ArkUINodeHandle node, void* extraParam);
+void SetOnScrollReachStart(ArkUINodeHandle node, void* extraParam);
+void SetOnScrollReachEnd(ArkUINodeHandle node, void* extraParam);
 } // namespace OHOS::Ace::NG::NodeModifier

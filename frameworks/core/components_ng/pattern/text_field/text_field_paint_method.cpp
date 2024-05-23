@@ -128,6 +128,20 @@ RefPtr<Modifier> TextFieldPaintMethod::GetOverlayModifier(PaintWrapper* paintWra
     return textFieldOverlayModifier_;
 }
 
+void TextFieldPaintMethod::SetShowUnderlineWidth()
+{
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    auto textFieldLayoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    if (textFieldLayoutProperty->HasShowUnderline() && textFieldLayoutProperty->GetShowUnderlineValue()) {
+        textFieldOverlayModifier_->SetUnderlineWidth(textFieldPattern->GetUnderlineWidth());
+        textFieldOverlayModifier_->SetUnderlineColor(textFieldPattern->GetUnderlineColor());
+    } else {
+        textFieldOverlayModifier_->SetUnderlineWidth(0.0f);
+    }
+}
+
 void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(paintWrapper);
@@ -168,8 +182,7 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     auto selectedColor = paintProperty->GetSelectedBackgroundColorValue(theme->GetSelectedColor());
     textFieldOverlayModifier_->SetSelectedBackGroundColor(selectedColor);
 
-    textFieldOverlayModifier_->SetUnderlineWidth(textFieldPattern->GetUnderlineWidth());
-    textFieldOverlayModifier_->SetUnderlineColor(textFieldPattern->GetUnderlineColor());
+    SetShowUnderlineWidth();
 
     textFieldOverlayModifier_->SetShowSelect(textFieldPattern->GetShowSelect());
     textFieldOverlayModifier_->SetChangeSelectedRects(textFieldPattern->NeedPaintSelect());
@@ -178,6 +191,10 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     textSelectController->FireSelectEvent();
 
     textFieldOverlayModifier_->SetTextRect(textFieldPattern->GetTextRect());
+    textFieldOverlayModifier_->SetShowPreviewTextDecoration(textFieldPattern->GetIsPreviewText());
+    textFieldOverlayModifier_->SetPreviewTextRects(textFieldPattern->NeedDrawPreviewText());
+    textFieldOverlayModifier_->SetPreviewTextDecorationColor(textFieldPattern->GetPreviewDecorationColor());
+    textFieldOverlayModifier_->SetPreviewTextStyle(textFieldPattern->GetPreviewTextStyle());
     UpdateScrollBar();
 }
 

@@ -24,7 +24,7 @@ namespace OHOS::Ace::NG {
 class WaterFlowLayoutUtils {
 public:
     static std::string PreParseArgs(const std::string& args);
-    static FlowItemPosition GetItemPosition(const WaterFlowLayoutInfo& info, int32_t index, float mainGap);
+    static FlowItemPosition GetItemPosition(const RefPtr<WaterFlowLayoutInfo>& info, int32_t index, float mainGap);
 
     struct ConstraintParams {
         float crossSize = 0.0f;
@@ -33,6 +33,20 @@ public:
     };
     static LayoutConstraintF CreateChildConstraint(const ConstraintParams& params,
         const RefPtr<WaterFlowLayoutProperty>& props, const RefPtr<LayoutWrapper>& child);
+
+    /**
+     * @brief Measure self before measuring children.
+     *
+     * @return [idealSize given by parent, whether measure is successful (need to adapt to children size if not)].
+     */
+    static std::pair<SizeF, bool> PreMeasureSelf(LayoutWrapper* wrapper, Axis axis);
+
+    /**
+     * @brief Helper to measure the footer node.
+     * REQUIRES: footer resides at index 0.
+     * @return main length of the footer node.
+     */
+    static float MeasureFooter(LayoutWrapper* layoutWrapper, Axis axis);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_LAYOUT_UTILS_H

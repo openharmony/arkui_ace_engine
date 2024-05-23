@@ -105,11 +105,15 @@ void TextPickerTossAnimationController::StartSpringMotion()
     CreatePropertyCallback();
     CHECK_NULL_VOID(property_);
     property_->Set(0);
+    isManualStopToss_ = false;
     renderContext->AttachNodeAnimatableProperty(property_);
     property_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
     auto finishCallback = [weak, column]() {
         auto ref = weak.Upgrade();
         CHECK_NULL_VOID(ref);
+        if (ref->isManualStopToss_) {
+            return;
+        }
         column->UpdateToss(static_cast<int>(ref->end_));
         column->TossAnimationStoped();
         auto isTouchBreak = column->GetTouchBreakStatus();
@@ -142,6 +146,7 @@ void TextPickerTossAnimationController::StopTossAnimation()
     option.SetDelay(0);
     AnimationUtils::Animate(option, [weak]() {
         auto ref = weak.Upgrade();
+        ref->isManualStopToss_ = true;
         ref->property_->Set(0.0);
     });
 }
@@ -185,5 +190,14 @@ void TextPickerTossAnimationController::CreatePropertyCallback()
         column->SetTossStatus(true);
     };
     property_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0f, std::move(propertyCallback));
+}
+
+double TextPickerTossAnimationController::GetTossOffset() const
+{
+    if (!property_) {
+        return 0.0;
+    }
+
+    return end_ - property_->Get();
 }
 } // namespace OHOS::Ace::NG

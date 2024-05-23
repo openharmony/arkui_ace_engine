@@ -17,8 +17,10 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_progress_bridge.h"
 
 #include "base/utils/utils.h"
+#include "bridge/declarative_frontend/jsview/js_progress.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components/progress/progress_theme.h"
+#include "core/components_ng/pattern/progress/progress_date.h"
 #include "core/components_ng/pattern/progress/progress_layout_property.h"
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
@@ -615,6 +617,63 @@ ArkUINativeModuleValue ProgressBridge::SetContentModifierBuilder(ArkUIRuntimeCal
         CHECK_NULL_RETURN(frameNode, nullptr);
         return AceType::Claim(frameNode);
     });
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ProgressBridge::ResetProgressInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getProgressModifier()->resetProgressInitialize(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ProgressBridge::SetProgressInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> totalArg = runtimeCallInfo->GetCallArgRef(2);
+    Local<JSValueRef> styleArg = runtimeCallInfo->GetCallArgRef(3);
+    Local<JSValueRef> typeArg = runtimeCallInfo->GetCallArgRef(4);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto value = 0;
+    if (valueArg->IsNumber()) {
+        value = valueArg->ToNumber(vm)->Value();
+    }
+    auto total = 100;
+    if (totalArg->IsNumber() && totalArg->ToNumber(vm)->Value() > 0) {
+        total = totalArg->Int32Value(vm);
+    }
+    if (value > total) {
+        value = total;
+    } else if (value < 0) {
+        value = 0;
+    }
+    auto type = 0;
+    if (styleArg->IsNull() || styleArg->IsUndefined()) {
+        if (typeArg->IsNumber()) {
+            type = typeArg->Int32Value(vm);
+        }
+    } else if (styleArg->IsNumber()) {
+        type = styleArg->Int32Value(vm);
+    }
+    auto progressStyle = static_cast<Framework::ProgressStyle>(type);
+    ProgressType g_progressType = NG::ProgressType::LINEAR;
+    if (progressStyle == Framework::ProgressStyle::Eclipse) {
+        g_progressType = NG::ProgressType::MOON;
+    } else if (progressStyle == Framework::ProgressStyle::Ring) {
+        g_progressType = NG::ProgressType::RING;
+    } else if (progressStyle == Framework::ProgressStyle::ScaleRing) {
+        g_progressType = NG::ProgressType::SCALE;
+    } else if (progressStyle == Framework::ProgressStyle::Capsule) {
+        g_progressType = NG::ProgressType::CAPSULE;
+    }
+    GetArkUINodeModifiers()->getProgressModifier()->setProgressInitialize(
+        nativeNode, value, total, static_cast<int>(g_progressType));
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

@@ -35,7 +35,19 @@ void ButtonLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto pattern = host->GetPattern<ButtonPattern>();
     CHECK_NULL_VOID(pattern);
     if (pattern->UseContentModifier()) {
-        BoxLayoutAlgorithm::Measure(layoutWrapper);
+        const auto& childList = layoutWrapper->GetAllChildrenWithBuild();
+        std::list<RefPtr<LayoutWrapper>> builderChildList;
+        for (const auto& child : childList) {
+            if (child->GetHostNode()->GetId() != pattern->GetBuilderId()) {
+                child->GetGeometryNode()->Reset();
+                child->GetGeometryNode()->SetContentSize(SizeF());
+            } else {
+                auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+                child->Measure(layoutConstraint);
+                builderChildList.push_back(child);
+            }
+        }
+        BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(layoutWrapper, builderChildList);
         return;
     }
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
@@ -165,12 +177,12 @@ void ButtonLayoutAlgorithm::HandleBorderRadius(LayoutWrapper* layoutWrapper)
         }
         renderContext->UpdateBorderRadius(BorderRadiusProperty(Dimension(minSize / 2)));
         MeasureCircleButton(layoutWrapper);
-    } else if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CAPSULE) {
-        renderContext->UpdateBorderRadius(BorderRadiusProperty(Dimension(frameSize.Height() / 2)));
-    } else {
+    } else if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::NORMAL) {
         auto normalRadius =
             buttonLayoutProperty->GetBorderRadiusValue(BorderRadiusProperty({ 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp }));
         renderContext->UpdateBorderRadius(normalRadius);
+    } else {
+        renderContext->UpdateBorderRadius(BorderRadiusProperty(Dimension(frameSize.Height() / 2)));
     }
 }
 

@@ -20,6 +20,7 @@ COMMON_SRC = [
   "grid_attr_test_ng.cpp",
   "grid_common_test_ng.cpp",
   "grid_layout_test_ng.cpp",
+  "grid_option_layout_test_ng.cpp",
   "grid_scroller_event_test_ng.cpp",
   "grid_scroller_test_ng.cpp",
   "grid_test_ng.cpp",
@@ -37,6 +38,7 @@ ace_unittest("grid_test_ng") {
   sources += [
     "irregular/grid_irregular_filler_test.cpp",
     "irregular/grid_irregular_layout_test.cpp",
+    "irregular/grid_layout_range_solver_test.cpp",
     "irregular/irregular_matrics.cpp",
     "layout_info_test.cpp",
   ]

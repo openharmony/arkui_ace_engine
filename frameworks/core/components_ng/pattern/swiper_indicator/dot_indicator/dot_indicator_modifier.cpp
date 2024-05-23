@@ -18,6 +18,7 @@
 #include "base/utils/utils.h"
 #include "core/animation/spring_curve.h"
 #include "core/components_ng/render/animation_utils.h"
+#include "core/components_ng/render/paint_property.h"
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
@@ -64,8 +65,34 @@ void DotIndicatorModifier::onDraw(DrawingContext& context)
     contentProperty.indicatorPadding = indicatorPadding_->Get();
     contentProperty.indicatorMargin = indicatorMargin_->Get();
     contentProperty.itemHalfSizes = itemHalfSizes_->Get();
+    SetFocusedAndSelectedColor(contentProperty);
     PaintBackground(context, contentProperty);
     PaintContent(context, contentProperty);
+}
+
+void DotIndicatorModifier::SetFocusedAndSelectedColor(ContentProperty& contentProperty)
+{
+    auto swiperTheme = GetSwiperIndicatorTheme();
+    CHECK_NULL_VOID(swiperTheme);
+    Color currentSelectedColor = selectedColor_->Get().ToColor();
+    Color currentUnselectedColor = unselectedColor_->Get();
+    if (isFocused_->Get()) {
+        if (swiperTheme->GetColor() == currentUnselectedColor) {
+            SetUnselectedColor(swiperTheme->GetFocusUnSelectedColor());
+        } else {
+            SetSelectedColor(currentUnselectedColor);
+        }
+        if (swiperTheme->GetSelectedColor() == currentSelectedColor) {
+            SetSelectedColor(swiperTheme->GetFocusedSelectedColor());
+        } else {
+            SetSelectedColor(currentSelectedColor);
+        }
+        contentProperty.backgroundColor = swiperTheme->GetFocusedBgColor();
+    } else {
+        SetUnselectedColor(currentUnselectedColor);
+        SetSelectedColor(currentSelectedColor);
+        contentProperty.backgroundColor = backgroundColor_->Get().ToColor();
+    }
 }
 
 void DotIndicatorModifier::PaintBackground(DrawingContext& context, const ContentProperty& contentProperty)
@@ -85,9 +112,12 @@ void DotIndicatorModifier::PaintBackground(DrawingContext& context, const Conten
     // Background necessary property
     float rectWidth =
         contentProperty.indicatorPadding + allPointDiameterSum + allPointSpaceSum + contentProperty.indicatorPadding;
-    float rectHeight = contentProperty.indicatorPadding + itemHeight + contentProperty.indicatorPadding;
+    auto swiperTheme = GetSwiperIndicatorTheme();
+    CHECK_NULL_VOID(swiperTheme);
+    auto indicatorHeightPadding = swiperTheme->GetIndicatorBgHeight().ConvertToPx();
+    float rectHeight = indicatorHeightPadding + itemHeight + indicatorHeightPadding;
     if (selectedItemHeight > itemHeight) {
-        rectHeight = contentProperty.indicatorPadding + selectedItemHeight + contentProperty.indicatorPadding;
+        rectHeight = indicatorHeightPadding + selectedItemHeight + indicatorHeightPadding;
     }
 
     auto widthChangeValue = (backgroundWidthDilateRatio_->Get() - 1.0f) * rectWidth;
@@ -141,7 +171,7 @@ std::pair<float, float> DotIndicatorModifier::GetTouchBottomCenterX(ContentPrope
     float leftCenterX = contentProperty.longPointLeftCenterX;
     float rightCenterX = contentProperty.longPointRightCenterX;
 
-    if (isCustomSize_) {
+    if (isCustomSize_ || contentProperty.vectorBlackPointCenterX.empty()) {
         return { leftCenterX, rightCenterX };
     }
     auto totalCount = contentProperty.vectorBlackPointCenterX.size();
@@ -192,7 +222,7 @@ void DotIndicatorModifier::PaintContent(DrawingContext& context, ContentProperty
     PaintSelectedIndicator(canvas, leftCenter, rightCenter,
         contentProperty.itemHalfSizes * contentProperty.longPointDilateRatio);
 
-    bool isLeftTouchBottom = (currentIndex_ == totalCount - 1);
+    bool isLeftTouchBottom = (currentIndex_ == static_cast<int32_t>(totalCount) - 1);
     bool isRightTouchBottom = (currentIndex_ == 0);
     bool isTouchBottom = (isLeftTouchBottom || isRightTouchBottom);
     if (!isTouchBottom || totalCount == 0 || !isTouchBottomLoop_) {

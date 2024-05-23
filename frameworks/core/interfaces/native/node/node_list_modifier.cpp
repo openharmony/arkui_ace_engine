@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,9 @@
 #include "core/interfaces/native/node/node_list_modifier.h"
 
 #include <cstdint>
+
+#include "interfaces/native/node/list_option.h"
+#include "interfaces/native/node/node_model.h"
 
 #include "base/error/error_code.h"
 #include "base/geometry/dimension.h"
@@ -266,6 +269,15 @@ void ResetListFriction(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     double friction = -1.0;
     ListModelNG::SetListFriction(frameNode, friction);
+}
+
+void GetListNestedScroll(ArkUINodeHandle node, ArkUI_Int32* values)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NestedScrollOptions options = ListModelNG::GetListNestedScroll(frameNode);
+    values[0] = static_cast<ArkUI_Int32>(options.forward);
+    values[1] = static_cast<ArkUI_Int32>(options.backward);
 }
 
 void SetListNestedScroll(ArkUINodeHandle node, ArkUI_Int32 forward, ArkUI_Int32 backward)
@@ -529,6 +541,62 @@ ArkUI_Int32 GetCachedCount(ArkUINodeHandle node)
     return ListModelNG::GetCachedCount(frameNode);
 }
 
+void SetScrollToIndex(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 animation, ArkUI_Int32 alignment)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetScrollToIndex(frameNode, index, animation, alignment);
+}
+
+void SetScrollBy(ArkUINodeHandle node, ArkUI_Float64 x, ArkUI_Float64 y)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetScrollBy(frameNode, x, y);
+}
+
+void SetInitialIndex(ArkUINodeHandle node, ArkUI_Int32 index)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetInitialIndex(frameNode, index);
+}
+
+void ResetInitialIndex(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetInitialIndex(frameNode, 0);
+}
+
+void SetListChildrenMainSize(ArkUINodeHandle node, ArkUIListChildrenMainSize option)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetListChildrenMainSize(frameNode, option->defaultMainSize, option->mainSize);
+}
+
+void ResetListChildrenMainSize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::ResetListChildrenMainSize(frameNode);
+}
+
+void SetListCloseAllSwipeActions(ArkUINodeHandle node, void* userData, void (onFinish) (void* userData))
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<ScrollControllerBase> scrollControllerBase = ListModelNG::GetOrCreateController(frameNode);
+    if (onFinish) {
+        auto onEvent = [userData, onFinish]() {
+            onFinish(userData);
+        };
+        scrollControllerBase->CloseAllSwipeActions(std::move(onEvent));
+    } else {
+        scrollControllerBase->CloseAllSwipeActions(nullptr);
+    }
+}
 } // namespace
 
 namespace NodeModifier {
@@ -538,14 +606,15 @@ const ArkUIListModifier* GetListModifier()
         SetMultiSelectable, ResetMultiSelectable, SetChainAnimation, ResetChainAnimation, SetCachedCount,
         ResetCachedCount, GetEnableScrollInteraction, SetEnableScrollInteraction, ResetEnableScrollInteraction,
         GetSticky, SetSticky, ResetSticky, GetListEdgeEffect, SetListEdgeEffect, ResetListEdgeEffect, GetListDirection,
-        SetListDirection, ResetListDirection, GetListFriction, SetListFriction, ResetListFriction, nullptr,
+        SetListDirection, ResetListDirection, GetListFriction, SetListFriction, ResetListFriction, GetListNestedScroll,
         SetListNestedScroll, ResetListNestedScroll, GetListScrollBar, SetListScrollBar, ResetListScrollBar,
         GetListScrollBarWidth, SetListScrollBarWidth, ResetListScrollBarWidth, GetListScrollBarColor,
         SetListScrollBarColor, ResetListScrollBarColor, GetAlignListItem, SetAlignListItem, ResetAlignListItem,
         SetScrollSnapAlign, ResetScrollSnapAlign, SetContentStartOffset, ResetContentStartOffset, SetContentEndOffset,
         ResetContentEndOffset, ListSetDivider, ListResetDivider, SetChainAnimationOptions, ResetChainAnimationOptions,
         GetListSpace, SetListSpace, ResetListSpace, SetFadingEdge, ResetFadingEdge, SetNodeAdapter, ResetNodeAdapter,
-        GetNodeAdapter, GetCachedCount };
+        GetNodeAdapter, GetCachedCount, SetScrollToIndex, SetScrollBy, SetInitialIndex, ResetInitialIndex,
+        SetListChildrenMainSize, ResetListChildrenMainSize, SetListCloseAllSwipeActions };
     return &modifier;
 }
 
@@ -621,16 +690,89 @@ void SetOnListWillScroll(ArkUINodeHandle node, void* extraParam)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
-    auto onWillScroll = [nodeId, node, extraParam](const Dimension& offset, const ScrollState& state) -> void {
+    auto onWillScroll = [nodeId, node, extraParam](const Dimension& offset, const ScrollState& state,
+                            ScrollSource source) -> ScrollFrameResult {
+        ScrollFrameResult scrollRes { .offset = offset };
+        ArkUINodeEvent event;
+        bool usePx = NodeModel::UsePXUnit(reinterpret_cast<ArkUI_Node*>(extraParam));
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_WATER_FLOW_WILL_SCROLL;
+        event.componentAsyncEvent.data[0].f32 =
+            usePx ? static_cast<float>(offset.ConvertToPx()) : static_cast<float>(offset.Value());
+        event.componentAsyncEvent.data[1].i32 = static_cast<int>(state);
+        event.componentAsyncEvent.data[2].i32 = static_cast<int>(source);
+        SendArkUIAsyncEvent(&event);
+        scrollRes.offset =
+            Dimension(event.componentAsyncEvent.data[0].f32, usePx ? DimensionUnit::PX : DimensionUnit::VP);
+        return scrollRes;
+    };
+    ScrollableModelNG::SetOnWillScroll(frameNode, std::move(onWillScroll));
+}
+
+void SetOnListDidScroll(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onDidScroll = [nodeId, node, extraParam](const Dimension& offset, const ScrollState& state) -> void {
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
-        event.componentAsyncEvent.subKind = ON_WILL_SCROLL;
-        event.componentAsyncEvent.data[0].f32 = static_cast<float>(offset.Value());
+        bool usePx = NodeModel::UsePXUnit(reinterpret_cast<ArkUI_Node*>(extraParam));
+        event.componentAsyncEvent.subKind = ON_LIST_DID_SCROLL;
+        event.componentAsyncEvent.data[0].f32 =
+            usePx ? static_cast<float>(offset.ConvertToPx()) : static_cast<float>(offset.Value());
         event.componentAsyncEvent.data[1].i32 = static_cast<int32_t>(state);
         SendArkUIAsyncEvent(&event);
     };
-    ScrollableModelNG::SetOnWillScroll(frameNode, std::move(onWillScroll));
+    ScrollableModelNG::SetOnDidScroll(frameNode, std::move(onDidScroll));
+}
+
+void SetOnListScrollIndex(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onScrollIndex = [nodeId, node, extraParam](int32_t first, int32_t last, int32_t center) -> void {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_LIST_SCROLL_INDEX;
+        event.componentAsyncEvent.data[0].i32 = first;
+        event.componentAsyncEvent.data[1].i32 = last;
+        event.componentAsyncEvent.data[2].i32 = center;
+        SendArkUIAsyncEvent(&event);
+    };
+    ListModelNG::SetOnScrollIndex(frameNode, std::move(onScrollIndex));
+}
+
+void SetOnListReachStart(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onReachStart = [node, extraParam]() -> void {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_LIST_REACH_START;
+        SendArkUIAsyncEvent(&event);
+    };
+    ListModelNG::SetOnReachStart(frameNode, std::move(onReachStart));
+}
+
+void SetOnListReachEnd(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onReachEnd = [node, extraParam]() -> void {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_LIST_REACH_END;
+        SendArkUIAsyncEvent(&event);
+    };
+    ListModelNG::SetOnReachEnd(frameNode, std::move(onReachEnd));
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

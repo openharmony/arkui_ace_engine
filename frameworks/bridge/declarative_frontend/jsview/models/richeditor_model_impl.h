@@ -19,8 +19,8 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 namespace OHOS::Ace::Framework {
 class ACE_EXPORT RichEditorModelImpl : public RichEditorModel {
-    void Create() override;
-    RefPtr<RichEditorControllerBase> GetRichEditorController() override;
+    void Create(bool isStyledStringMode = false) override;
+    RefPtr<RichEditorBaseControllerBase> GetRichEditorController() override;
     void SetOnReady(std::function<void()>&& func) override;
     void SetOnSelect(std::function<void(const BaseEventInfo*)>&& func) override;
     void SetOnSelectionChange(std::function<void(const BaseEventInfo*)>&& func) override;
@@ -42,7 +42,7 @@ class ACE_EXPORT RichEditorModelImpl : public RichEditorModel {
     void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) override;
     void SetEnterKeyType(TextInputAction value) override;
     void SetOnWillChange(std::function<bool(const NG::RichEditorChangeValue&)>&& func) override;
-    void SetOnDidChange(std::function<void(const std::list<NG::RichEditorAbstractSpanResult>&)>&& func) override;
+    void SetOnDidChange(std::function<void(const NG::RichEditorChangeValue&)>&& func) override;
     void SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func) override;
     void SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func) override;
 };

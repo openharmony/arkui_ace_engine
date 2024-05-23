@@ -18,6 +18,9 @@ class ArkRelativeContainerComponent extends ArkComponent implements RelativeCont
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
+  initialize(value: Object[]): RelativeContainerAttribute {
+    return this;
+  }
 }
 
 // @ts-ignore

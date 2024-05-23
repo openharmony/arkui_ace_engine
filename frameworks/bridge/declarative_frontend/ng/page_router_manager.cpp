@@ -49,6 +49,10 @@ constexpr int32_t BUNDLE_START_POS = 8;
 constexpr int32_t INVALID_PAGE_INDEX = -1;
 constexpr int32_t MAX_ROUTER_STACK_SIZE = 32;
 constexpr int32_t JS_FILE_EXTENSION_LENGTH = 3;
+constexpr char ETS_PATH[] = "/src/main/ets/";
+constexpr char DEBUG_PATH[] = "entry/build/default/cache/default/default@CompileArkTS/esmodule/debug/";
+constexpr char TS_SUFFIX[] = ".ts";
+constexpr char ETS_SUFFIX[] = ".ets";
 
 void ExitToDesktop()
 {
@@ -375,6 +379,9 @@ void PageRouterManager::EnableAlertBeforeBackPage(const std::string& message, st
 
 void PageRouterManager::DisableAlertBeforeBackPage()
 {
+    if (pageRouterStack_.empty()) {
+        return;
+    }
     auto currentPage = pageRouterStack_.back().Upgrade();
     CHECK_NULL_VOID(currentPage);
     auto pagePattern = currentPage->GetPattern<PagePattern>();
@@ -541,7 +548,7 @@ void PageRouterManager::GetState(int32_t& index, std::string& name, std::string&
         url = pagePath;
     }
     auto pos = url.rfind(".js");
-    if (pos == url.length() - 3) {
+    if (pos == url.length() - JS_FILE_EXTENSION_LENGTH) {
         url = url.substr(0, pos);
     }
     pos = url.rfind("/");
@@ -617,7 +624,7 @@ void PageRouterManager::GetStateByUrl(std::string& url, std::vector<Framework::S
             stateInfo.params = pageInfo->GetPageParams();
             stateInfo.index = counter;
             auto pos = url.rfind(".js");
-            if (pos == url.length() - 3) {
+            if (pos == url.length() - JS_FILE_EXTENSION_LENGTH) {
                 tempUrl = url.substr(0, pos);
             }
             tempUrl = url;
@@ -745,10 +752,11 @@ RefPtr<Framework::RevSourceMap> PageRouterManager::GetCurrentPageSourceMap(const
         auto moduleName = container->GetModuleName();
         std::string judgePath = "";
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            judgePath = "entry/build/default/cache/default/default@CompileArkTS/esmodule/debug/" + moduleName +
-                        "/src/main/ets/" + pagePath.substr(0, pagePath.size() - 3) + ".ts";
+            judgePath = DEBUG_PATH + moduleName + ETS_PATH +
+                        pagePath.substr(0, pagePath.size() - JS_FILE_EXTENSION_LENGTH) + TS_SUFFIX;
         } else {
-            judgePath = moduleName + "/src/main/ets/" + pagePath.substr(0, pagePath.size() - 3) + ".ets";
+            judgePath = moduleName + ETS_PATH +
+                        pagePath.substr(0, pagePath.size() - JS_FILE_EXTENSION_LENGTH) + ETS_SUFFIX;
         }
         if (Framework::GetAssetContentImpl(assetManager, "sourceMaps.map", jsSourceMap)) {
             auto jsonPages = JsonUtil::ParseJsonString(jsSourceMap);
@@ -914,7 +922,6 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
                 TaskExecutor::TaskType::JS, "ArkUIPageRouterErrorCallback");
         };
 
-        CleanPageOverlay();
         pageUrlChecker->LoadPageUrl(target.url, callback, silentInstallErrorCallBack);
         return;
     }
@@ -1043,9 +1050,11 @@ void PageRouterManager::StartBack(const RouterPageInfo& target)
                 StartRestore(RouterPageInfo());
                 return;
             }
+            LOGI("Router back start ExitToDesktop");
             ExitToDesktop();
             return;
         }
+        LOGI("Router back start PopPage");
         PopPage(target.params, true, true);
         return;
     }
@@ -1267,8 +1276,7 @@ void PageRouterManager::MovePageToFront(int32_t index, const RefPtr<FrameNode>& 
     auto last = pageRouterStack_.erase(iter);
     // push pageNode to top.
     pageRouterStack_.emplace_back(pageNode);
-    std::string tempParam;
-    tempParam = pageInfo->ReplacePageParams(target.params);
+    std::string tempParam = pageInfo->ReplacePageParams(target.params);
     if (!stageManager->MovePageToFront(pageNode, needHideLast, needTransition)) {
         // restore position and param.
         pageRouterStack_.pop_back();
@@ -1460,7 +1468,7 @@ void PageRouterManager::DealReplacePage(const RouterPageInfo& info)
         auto stageManager = pipelineContext->GetStageManager();
         auto stageNode = stageManager->GetStageNode();
         auto popNode = stageNode->GetChildren().back();
-        int8_t popIndex = static_cast<int8_t>(stageNode->GetChildren().size() - 1);
+        int32_t popIndex = stageNode->GetChildren().size() - 1;
         bool findPage = false;
         if (info.routerMode == RouterMode::SINGLE) {
             auto pageInfo = FindPageInStack(info.url);
@@ -1473,14 +1481,24 @@ void PageRouterManager::DealReplacePage(const RouterPageInfo& info)
         if (!findPage) {
             LoadPage(GenerateNextPageId(), info, true, false);
         }
-        if (popIndex < 0 || popNode == stageNode->GetChildren().back()) {
+        // if current pop node index not equals to popIndex, popNode is reused, don't need to popNode
+        if (popIndex < 0 || popNode == stageNode->GetChildren().back() ||
+            stageNode->GetChildIndex(popNode) != popIndex) {
             return;
         }
         auto iter = pageRouterStack_.begin();
         std::advance(iter, popIndex);
-        pageRouterStack_.erase(iter);
+        auto lastIter = pageRouterStack_.erase(iter);
         pageRouterStack_.emplace_back(WeakPtr<FrameNode>(AceType::DynamicCast<FrameNode>(popNode)));
         popNode->MovePosition(stageNode->GetChildren().size() - 1);
+        for (auto iter = lastIter; iter != pageRouterStack_.end(); iter++, popIndex++) {
+            auto pageNode = iter->Upgrade();
+            if (!pageNode) {
+                continue;
+            }
+            auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+            pagePattern->GetPageInfo()->SetPageIndex(popIndex);
+        }
         PopPage("", false, false);
         return;
     }

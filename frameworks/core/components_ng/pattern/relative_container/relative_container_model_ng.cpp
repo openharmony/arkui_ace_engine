@@ -46,4 +46,53 @@ void RelativeContainerModelNG::SetGuideline(const std::vector<GuidelineInfo>& gu
     }
     ACE_UPDATE_LAYOUT_PROPERTY(RelativeContainerLayoutProperty, Guideline, guidelineInfo);
 }
+
+RefPtr<FrameNode> RelativeContainerModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, nodeId,
+        []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
+    CHECK_NULL_RETURN(frameNode, frameNode);
+    return frameNode;
+}
+
+void RelativeContainerModelNG::SetBarrier(FrameNode* frameNode, const std::vector<BarrierInfo>& barrierInfo)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RelativeContainerLayoutProperty, Barrier, barrierInfo, frameNode);
+}
+
+void RelativeContainerModelNG::SetGuideline(FrameNode* frameNode, const std::vector<GuidelineInfo>& guidelineInfo)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RelativeContainerLayoutProperty, Guideline, guidelineInfo, frameNode);
+}
+
+std::vector<BarrierInfo> RelativeContainerModelNG::GetBarrier(FrameNode* frameNode)
+{
+    std::vector<BarrierInfo> value;
+    CHECK_NULL_RETURN(frameNode, value);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(RelativeContainerLayoutProperty, Barrier, value, frameNode, value);
+    return value;
+}
+
+std::vector<GuidelineInfo> RelativeContainerModelNG::GetGuideline(FrameNode* frameNode)
+{
+    std::vector<GuidelineInfo> value;
+    CHECK_NULL_RETURN(frameNode, value);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        RelativeContainerLayoutProperty, Guideline, value, frameNode, value);
+    return value;
+}
+
+void RelativeContainerModelNG::ResetGuideline(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(RelativeContainerLayoutProperty, Guideline, frameNode);
+}
+
+void RelativeContainerModelNG::ResetBarrier(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(RelativeContainerLayoutProperty, Barrier, frameNode);
+}
 } // namespace OHOS::Ace::NG

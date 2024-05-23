@@ -119,10 +119,11 @@ public:
     virtual void Destroy() = 0;
     virtual void OnNewWant(const OHOS::AAFwk::Want& want) = 0;
 
-    // distribute
-    virtual UIContentErrorCode Restore(OHOS::Rosen::Window *window, const std::string &contentInfo,
-                                       napi_value storage) = 0;
-    virtual std::string GetContentInfo() const = 0;
+    // restore
+    virtual UIContentErrorCode Restore(
+        OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage,
+        ContentInfoType type = ContentInfoType::CONTINUATION) = 0;
+    virtual std::string GetContentInfo(ContentInfoType type = ContentInfoType::CONTINUATION) const = 0;
     virtual void DestroyUIDirector() = 0;
 
     // UI content event process
@@ -139,6 +140,7 @@ public:
     virtual void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) = 0;
     virtual void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) = 0;
     virtual void UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode) {};
+    virtual void ProcessFormVisibleChange(bool isVisible) {};
     virtual void NotifyRotationAnimationEnd() {};
 
     // only vaild in ContainerModalPatternEnhance

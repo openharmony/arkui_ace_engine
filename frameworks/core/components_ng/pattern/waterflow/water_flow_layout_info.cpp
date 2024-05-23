@@ -17,6 +17,7 @@
 
 #include <algorithm>
 
+#include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -24,6 +25,16 @@
 constexpr float HALF = 0.5f;
 
 namespace OHOS::Ace::NG {
+RefPtr<WaterFlowLayoutInfoBase> WaterFlowLayoutInfoBase::Create(WaterFlowLayoutMode mode)
+{
+    switch (mode) {
+        case WaterFlowLayoutMode::SLIDING_WINDOW:
+            return MakeRefPtr<WaterFlowLayoutInfoSW>();
+        default:
+            return MakeRefPtr<WaterFlowLayoutInfo>();
+    }
+}
+
 int32_t WaterFlowLayoutInfo::GetCrossIndex(int32_t itemIndex) const
 {
     if (static_cast<size_t>(itemIndex) < itemInfos_.size()) {
@@ -40,6 +51,9 @@ int32_t WaterFlowLayoutInfo::GetCrossIndex(int32_t itemIndex) const
 
 void WaterFlowLayoutInfo::UpdateStartIndex()
 {
+    if (childrenCount_ == 0) {
+        return;
+    }
     if (!itemInfos_.empty()) {
         // don't use in new segmented layout
         return;
@@ -154,6 +168,38 @@ float WaterFlowLayoutInfo::GetStartMainPos(int32_t crossIndex, int32_t itemIndex
     return result;
 }
 
+OverScrollOffset WaterFlowLayoutInfo::GetOverScrolledDelta(float delta) const
+{
+    OverScrollOffset offset = { 0, 0 };
+    if (startIndex_ == 0) {
+        auto startPos = currentOffset_;
+        auto newStartPos = startPos + delta;
+        if (startPos > 0 && newStartPos > 0) {
+            offset.start = delta;
+        }
+        if (startPos > 0 && newStartPos <= 0) {
+            offset.start = -startPos;
+        }
+        if (startPos <= 0 && newStartPos > 0) {
+            offset.start = newStartPos;
+        }
+    }
+    if (itemEnd_) {
+        auto endPos = currentOffset_ + maxHeight_;
+        auto newEndPos = endPos + delta;
+        if (endPos < lastMainSize_ && newEndPos < lastMainSize_) {
+            offset.end = delta;
+        }
+        if (endPos < lastMainSize_ && newEndPos >= lastMainSize_) {
+            offset.end = lastMainSize_ - endPos;
+        }
+        if (endPos >= lastMainSize_ && newEndPos < lastMainSize_) {
+            offset.end = newEndPos - lastMainSize_;
+        }
+    }
+    return offset;
+}
+
 bool WaterFlowLayoutInfo::IsAllCrossReachEnd(float mainSize) const
 {
     bool result = true;
@@ -260,7 +306,7 @@ int32_t WaterFlowLayoutInfo::GetMainCount() const
 
 void WaterFlowLayoutInfo::ClearCacheAfterIndex(int32_t currentIndex)
 {
-    size_t segment = GetSegment(currentIndex);
+    size_t segment = static_cast<size_t>(GetSegment(currentIndex));
     for (auto& crossItems : items_[segment]) {
         if (crossItems.second.empty()) {
             continue;
@@ -310,7 +356,7 @@ bool WaterFlowLayoutInfo::ReachEnd(float prevOffset) const
 
 int32_t WaterFlowLayoutInfo::GetSegment(int32_t itemIdx) const
 {
-    if (segmentTails_.empty()) {
+    if (segmentTails_.empty() || itemIdx < 0) {
         return 0;
     }
     auto cache = segmentCache_.find(itemIdx);
@@ -371,12 +417,15 @@ void WaterFlowLayoutInfo::RecordItem(int32_t idx, const FlowItemPosition& pos, f
 
 void WaterFlowLayoutInfo::SetNextSegmentStartPos(int32_t itemIdx)
 {
-    size_t segment = GetSegment(itemIdx);
+    auto segment = static_cast<size_t>(GetSegment(itemIdx));
     if (segmentStartPos_.size() > segment + 1) {
         return;
     }
+    if (segmentStartPos_.size() <= segment || margins_.size() <= segment + 1) {
+        return;
+    }
 
-    float nextStartPos = endPosArray_.back().first;
+    float nextStartPos = endPosArray_.empty() ? segmentStartPos_[segment] : endPosArray_.back().first;
     while (segment < segmentTails_.size() - 1 && itemIdx == segmentTails_[segment]) {
         // use while loop to skip empty segments
         if (axis_ == Axis::VERTICAL) {
@@ -436,7 +485,7 @@ void WaterFlowLayoutInfo::InitSegments(const std::vector<WaterFlowSections::Sect
         [](int32_t index, const std::pair<float, int32_t>& pos) { return index < pos.second; });
     endPosArray_.erase(it, endPosArray_.end());
     items_.resize(n);
-    for (size_t i = start; i < n; ++i) {
+    for (size_t i = static_cast<size_t>(start); i < n; ++i) {
         items_[i].clear();
         for (int32_t j = 0; j < sections[i].crossCount; ++j) {
             items_[i][j] = {};
@@ -460,9 +509,13 @@ void WaterFlowLayoutInfo::InitMargins(
     if (segmentStartPos_.size() <= 1) {
         ResetSegmentStartPos();
     }
-    int32_t lastItem = itemInfos_.size() - 1;
+    int32_t lastItem = static_cast<int32_t>(itemInfos_.size()) - 1;
+    if (GetSegment(lastItem) >= static_cast<int32_t>(segmentTails_.size())) {
+        TAG_LOGW(AceLogTag::ACE_WATERFLOW, "Section data not initialized before layout");
+        return;
+    }
     if (segmentTails_[GetSegment(lastItem)] == lastItem) {
-        SetNextSegmentStartPos(itemInfos_.size() - 1);
+        SetNextSegmentStartPos(static_cast<int32_t>(itemInfos_.size()) - 1);
     }
 }
 
@@ -525,5 +578,35 @@ void WaterFlowLayoutInfo::JumpTo(const std::pair<float, float>& item)
     currentOffset_ = JumpToTargetAlign(item);
     align_ = ScrollAlign::START;
     jumpIndex_ = EMPTY_JUMP_INDEX;
+}
+
+void WaterFlowLayoutInfo::UpdateOffset(float delta)
+{
+    prevOffset_ = currentOffset_;
+    currentOffset_ += delta;
+}
+
+float WaterFlowLayoutInfo::CalcTargetPosition(int32_t idx, int32_t crossIdx) const
+{
+    return -JumpToTargetAlign(items_[GetSegment(idx)].at(crossIdx).at(idx));
+}
+
+bool WaterFlowLayoutInfo::OutOfBounds() const
+{
+    bool outOfStart = itemStart_ && Positive(currentOffset_);
+    bool outOfEnd = offsetEnd_ && LessNotEqual(currentOffset_ + maxHeight_, lastMainSize_);
+    return outOfStart || outOfEnd;
+}
+
+float WaterFlowLayoutInfo::CalcOverScroll(float mainSize, float delta) const
+{
+    float res = 0;
+    if (itemStart_) {
+        res = currentOffset_ + delta;
+    }
+    if (offsetEnd_) {
+        res = mainSize - (GetMaxMainHeight() + currentOffset_ - delta);
+    }
+    return res;
 }
 } // namespace OHOS::Ace::NG

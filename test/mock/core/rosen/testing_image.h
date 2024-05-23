@@ -16,6 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_IMAGE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_IMAGE_H
 
+#include <cstdint>
+#include <memory>
+
+#include "testing_bitmap.h"
 #include "testing_data.h"
 
 namespace OHOS::Ace::Testing {

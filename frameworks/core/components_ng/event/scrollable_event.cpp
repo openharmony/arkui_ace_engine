@@ -58,7 +58,7 @@ void ScrollableActuator::CollectTouchTarget(const OffsetF& coordinateOffset, con
         if (!event) {
             continue;
         }
-        if (event->GetEnable()) {
+        if (event->GetEnabled()) {
             if (event->InBarRegion(localPoint, touchRestrict.sourceType)) {
                 event->BarCollectTouchTarget(coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent);
             } else if (event->InBarRectRegion(localPoint, touchRestrict.sourceType)) {
@@ -72,7 +72,7 @@ void ScrollableActuator::CollectTouchTarget(const OffsetF& coordinateOffset, con
             }
         }
         bool clickJudge = event->ClickJudge(localPoint);
-        if (event->GetEnable() || clickJudge) {
+        if (event->GetEnabled() || clickJudge) {
             if (!clickRecognizer_) {
                 clickRecognizer_ = MakeRefPtr<ClickRecognizer>();
             }
@@ -85,6 +85,8 @@ void ScrollableActuator::CollectTouchTarget(const OffsetF& coordinateOffset, con
             clickRecognizer_->SetIsSystemGesture(true);
             clickRecognizer_->SetSysGestureJudge([isHitTestBlock, clickJudge](const RefPtr<GestureInfo>& gestureInfo,
                                                      const std::shared_ptr<BaseGestureEvent>&) -> GestureJudgeResult {
+                TAG_LOGI(AceLogTag::ACE_SCROLLABLE,
+                    "Scrollable GestureJudge:%{public}d, %{public}d", isHitTestBlock, clickJudge);
                 return isHitTestBlock || clickJudge ? GestureJudgeResult::CONTINUE : GestureJudgeResult::REJECT;
             });
             clickRecognizer_->SetOnClick([weak = WeakClaim(RawPtr(frameNode))](const ClickInfo&) {

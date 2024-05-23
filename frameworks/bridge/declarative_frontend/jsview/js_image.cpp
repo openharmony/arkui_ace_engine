@@ -617,10 +617,42 @@ void JSImage::SetSmoothEdge(const JSCallbackInfo& info)
     ImageModel::GetInstance()->SetSmoothEdge(static_cast<float>(parseRes));
 }
 
+void JSImage::SetDynamicRangeMode(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        ImageModel::GetInstance()->SetDynamicRangeMode(DynamicRangeMode::STANDARD);
+        return;
+    }
+    int32_t parseRes = static_cast<int32_t>(DynamicRangeMode::STANDARD);
+    ParseJsInteger(info[0], parseRes);
+    if (parseRes < static_cast<int32_t>(DynamicRangeMode::HIGH) ||
+        parseRes > static_cast<int32_t>(DynamicRangeMode::STANDARD)) {
+        parseRes = static_cast<int32_t>(DynamicRangeMode::STANDARD);
+    }
+    DynamicRangeMode dynamicRangeMode = static_cast<DynamicRangeMode>(parseRes);
+    ImageModel::GetInstance()->SetDynamicRangeMode(dynamicRangeMode);
+}
+
+void JSImage::SetEnhancedImageQuality(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        ImageModel::GetInstance()->SetEnhancedImageQuality(AIImageQuality::NONE);
+        return;
+    }
+    int32_t parseRes = static_cast<int32_t>(AIImageQuality::NONE);
+    ParseJsInteger(info[0], parseRes);
+    if (parseRes < static_cast<int32_t>(AIImageQuality::NONE) ||
+        parseRes > static_cast<int32_t>(AIImageQuality::HIGH)) {
+        parseRes = static_cast<int32_t>(AIImageQuality::NONE);
+    }
+    AIImageQuality resolutionQuality  = static_cast<AIImageQuality>(parseRes);
+    ImageModel::GetInstance()->SetEnhancedImageQuality(resolutionQuality);
+}
+
 void JSImage::CreateImageAnimation(std::vector<RefPtr<PixelMap>>& pixelMaps, int32_t duration, int32_t iterations)
 {
     std::vector<ImageProperties> imageList;
-    for (int i = 0; i < pixelMaps.size(); i++) {
+    for (int i = 0; i < static_cast<int32_t>(pixelMaps.size()); i++) {
         ImageProperties image;
         image.pixelMap = pixelMaps[i];
         imageList.push_back(image);
@@ -644,10 +676,14 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("interpolation", &JSImage::SetImageInterpolation, opt);
     JSClass<JSImage>::StaticMethod("colorFilter", &JSImage::SetColorFilter, opt);
     JSClass<JSImage>::StaticMethod("edgeAntialiasing", &JSImage::SetSmoothEdge, opt);
+    JSClass<JSImage>::StaticMethod("dynamicRangeMode", &JSImage::SetDynamicRangeMode, opt);
+    JSClass<JSImage>::StaticMethod("enhancedImageQuality", &JSImage::SetEnhancedImageQuality, opt);
 
     JSClass<JSImage>::StaticMethod("border", &JSImage::JsBorder);
     JSClass<JSImage>::StaticMethod("borderRadius", &JSImage::JsBorderRadius);
+    JSClass<JSImage>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSImage>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSImage>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSImage>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSImage>::StaticMethod("autoResize", &JSImage::SetAutoResize);
     JSClass<JSImage>::StaticMethod("resizable", &JSImage::JsImageResizable);

@@ -155,6 +155,13 @@ public:
         }
     }
 
+    void SetUseContentModifier(bool useContentModifier)
+    {
+        if (useContentModifier_) {
+            useContentModifier_->Set(useContentModifier);
+        }
+    }
+
     void SetHoverState(const RatingAnimationType& state)
     {
         if (state_ == state) {
@@ -209,7 +216,8 @@ private:
     RefPtr<PropertyInt> starNum_;
     RefPtr<PropertyInt> touchStar_;
     RefPtr<PropertyFloat> drawScore_;
-    RefPtr<PropertyFloat> stepSize_; 
+    RefPtr<PropertyFloat> stepSize_;
+    RefPtr<PropertyBool> useContentModifier_;
     RefPtr<PropertyOffsetF> contentOffset_;
     RefPtr<PropertySizeF> contentSize_;
     // animatable property

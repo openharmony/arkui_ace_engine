@@ -81,6 +81,8 @@ public:
     static double GetTotal(FrameNode* frameNode);
     static NG::ProgressType GetType(FrameNode* frameNode);
     static void SetBuilderFunc(FrameNode* frameNode, ProgressMakeCallback&& jsMake);
+    static void ProgressInitialize(
+        FrameNode* frameNode, double min, double value, double cachedValue, double max, NG::ProgressType type);
 
 private:
     static void SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, double value, double maxValue);

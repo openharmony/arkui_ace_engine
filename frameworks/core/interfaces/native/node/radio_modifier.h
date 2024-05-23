@@ -20,6 +20,8 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIRadioModifier* GetRadioModifier();
+
+void SetOnRadioChange(ArkUINodeHandle node, void* extraParam);
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_RADIO_MODIFIER_H

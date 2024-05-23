@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@ namespace OHOS::Ace {
 
 // theme attributes
 const char THEME_ATTR_BG_COLOR[] = "bg_color";
+const char THEME_ATTR_HOVER_COLOR[] = "hover_color";
 
 // component patterns
 const char THEME_PATTERN_BUTTON[] = "button_pattern";
@@ -80,6 +81,9 @@ const char THEME_PATTERN_SHEET[] = "sheet_pattern";
 
 const char THEME_BLUR_STYLE_COMMON[] = "blur_style_common";
 const char THEME_PATTERN_SHADOW[] = "shadow_pattern";
+const char THEME_PATTERN_LINEAR_LAYOUT[] = "linear_layout_pattern";
+const char THEME_PATTERN_STACK[] = "stack_pattern";
+const char THEME_PATTERN_CONTAINER_MODAL[] = "container_modal_pattern";
 
 // pattern general attributes
 const char PATTERN_FG_COLOR[] = "fg_color";
@@ -190,6 +194,9 @@ const char POPUP_BUTTON_TEXT_FONT_SIZE[] = "popup_button_text_font_size";
 // pattern attributes for badge
 const char BADGE_BORDER_COLOR[] = "border_color";
 const char BADGE_BORDER_WIDTH[] = "border_width";
+const char BADGE_AGE_FONT_SIZE[] = "text_age_font_size";
+const char BADGE_AGE_SIZE[] = "badge_age_size";
+const char BADGE_AFE_ADD_PADDING[] = "badge_age_add_padding";
 // swiper attributes
 const char INDICATOR_TEXT_FONT_SIZE[] = "indicator_text_font_size";
 const char INDICATOR_TEXT_FONT_COLOR[] = "indicator_text_font_color";
@@ -232,6 +239,9 @@ const char DISABLE_UNDERLINE_ALPHA[] = "disable_underline_alpha";
 
 const char DEFAULT_COUNTER_COLOR[] = "default_counter_color";
 const char OVER_COUNTER_COLOR[] = "over_counter_color";
+
+const char PREVIEW_UNDERLINE_COLOR[] = "preview_underline_color";
+const char PREVIEW_BOARD_COLOR[] = "preview_board_color";
 
 // linear split attributes
 const char LINEAR_SPLIT_CHILD_MIN_SIZE[] = "linear_split_child_min_size";

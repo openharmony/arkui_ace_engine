@@ -115,19 +115,11 @@ bool MagnifierPainter::GetMagnifierRect(
     auto magnifierWidth = MAGNIFIER_WIDTH.ConvertToPx();
     auto magnifierHeight = MAGNIFIER_HEIGHT.ConvertToPx();
     auto magnifierOffsetY = MAGNIFIER_OFFSET_Y.ConvertToPx();
-    auto localOffsetY = magnifierRect_.localOffset.GetY();
     localOffsetX = std::max(localOffsetX, magnifierRect_.contentOffset.GetX());
     localOffsetX = std::min(localOffsetX, magnifierRect_.contentSize.Width() + magnifierRect_.contentOffset.GetX());
     auto textBoxesLeft = 0.0f;
     if (!textDragBasePattern->GetTextBoxes().empty()) {
         textBoxesLeft = textDragBasePattern->GetTextBoxes()[0].Left();
-    }
-    auto firstHandleOffsetY = textBasePattern->GetFirstHandleOffset().GetY();
-    auto secondHandleOffsetY = textBasePattern->GetSecondHandleOffset().GetY();
-    if (textBasePattern->IsSelected() && firstHandleOffsetY != secondHandleOffsetY &&
-        localOffsetY < firstHandleOffsetY + textDragBasePattern->GetLineHeight() &&
-        localOffsetY < secondHandleOffsetY + textDragBasePattern->GetLineHeight()) {
-        cursorOffsetY = std::min(firstHandleOffsetY, secondHandleOffsetY);
     }
     startY = cursorOffsetY - magnifierHeight - magnifierOffsetY;
     if ((textDragBasePattern->GetParentGlobalOffset().GetY() + startY) < DEFAULT_STATUS_BAR_HEIGHT.ConvertToPx()) {

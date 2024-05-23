@@ -1,0 +1,39 @@
+{
+    "files": [
+        // utility
+        "src/utility/ArkResourcesHelper.ts",
+        "src/utility/ArkThemeNativeHelper.ts",
+
+        // styles
+        "src/styles/lazyforeach/ArkLazyForEachBindings.ts",
+        "src/styles/listitem/ArkListItemBindings.ts",
+
+        // theme management
+        "src/theme/system/ArkSystemColors.ts",
+        "src/theme/system/ArkSystemShapes.ts",
+        "src/theme/system/ArkSystemTypography.ts",
+        "src/theme/system/ArkSystemTheme.ts",
+        "src/theme/with_theme/ArkWithThemeBindings.ts",
+        "src/theme/ArkColorsImpl.ts",
+        "src/theme/ArkShapesImpl.ts",
+        "src/theme/ArkTypographyImpl.ts",
+        "src/theme/ArkThemeImpl.ts",
+        "src/theme/ArkThemeScope.ts",
+        "src/theme/ArkThemeScopeManager.ts",
+        "src/theme/ArkThemeWhiteList.ts",
+    ],
+    "compilerOptions": {
+        "module": "none",
+        "target": "ES2016",
+        "outDir": "./out/",
+        "outFile": "./out/arkTheme.js",
+        "rootDir": "./src/",
+        "declaration": false,
+        "noEmitOnError": true,
+        "experimentalDecorators": true,
+        "removeComments": true,
+        "lib": [
+            "ES2016"
+        ],
+    }
+}

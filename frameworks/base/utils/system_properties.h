@@ -262,11 +262,6 @@ public:
         return downloadByNetworkEnabled_;
     }
 
-    static bool GetTraceEnabled()
-    {
-        return traceEnabled_;
-    }
-
     static bool GetSvgTraceEnabled()
     {
         return svgTraceEnable_;
@@ -499,13 +494,15 @@ public:
 
     static std::string GetAtomicServiceBundleName();
 
-    static std::vector<double> GetDarkModeBrightnessPercent()
+    static std::pair<float, float> GetDarkModeBrightnessPercent()
     {
         return brightUpPercent_;
     }
 
+    static bool IsOpIncEnable();
+
 private:
-    static bool traceEnabled_;
+    static bool opincEnabled_;
     static bool developerModeOn_;
     static bool svgTraceEnable_;
     static bool layoutTraceEnable_;
@@ -559,7 +556,7 @@ private:
     static bool stateManagerEnable_;
     static bool acePerformanceMonitorEnable_;
     static bool faultInjectEnabled_;
-    static std::vector<double> brightUpPercent_;
+    static std::pair<float, float> brightUpPercent_;
 };
 
 } // namespace OHOS::Ace

@@ -91,11 +91,11 @@ public:
     /*
      * Notify scrollable node to snap scroll, called by scroll bar.
      */
-    bool NotifySnapScroll(float delta, float velocity, float controlDistance, float dragDistance) const;
+    bool NotifySnapScroll(float delta, float velocity, float barScrollableDistance, float dragDistance) const;
 
     void NotifyScrollBarNode(float distance, int32_t source) const;
 
-    float CalcPatternOffset(float scrollableDistance, float controlDistance, float delta) const;
+    float CalcPatternOffset(float controlDistance, float barScrollableDistance, float delta) const;
 
     void SetScrollSnapTrigger_(bool scrollSnapTrigger)
     {
@@ -108,6 +108,8 @@ public:
     }
 
     void ScrollPage(bool reverse, bool smooth);
+
+    void SetScrollEnabled(bool scrollEnabled, const WeakPtr<ScrollablePattern>& weakScrollableNode) const;
 
 private:
     /*

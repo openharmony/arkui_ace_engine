@@ -71,6 +71,10 @@ public:
     {
         pixelMap_ = pixelMap;
     }
+    bool HasPixelMap()
+    {
+        return pixelMap_.has_value();
+    }
     void ResetPixelMap()
     {
         pixelMap_.reset();
@@ -92,6 +96,7 @@ public:
         : jsonBuf_(std::move(jsonBuf)), len_(len)
     {
         InitialResource(resourceMgr);
+        jsonBuf_.reset();
     };
     LayeredDrawableDescriptor(std::unique_ptr<uint8_t[]> jsonBuf, size_t len,
         const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr, std::string path, uint32_t iconType,
@@ -99,6 +104,7 @@ public:
         : jsonBuf_(std::move(jsonBuf)), len_(len), maskPath_(std::move(path)), iconType_(iconType), density_(density)
     {
         InitialResource(resourceMgr);
+        jsonBuf_.reset();
     };
     LayeredDrawableDescriptor(std::unique_ptr<uint8_t[]> jsonBuf, size_t len,
         const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr, std::string path, uint32_t iconType,
@@ -108,6 +114,7 @@ public:
     {
         InitLayeredParam(foregroundInfo, backgroundInfo);
         InitialResource(resourceMgr);
+        jsonBuf_.reset();
     };
 
     ~LayeredDrawableDescriptor() override = default;
@@ -135,6 +142,11 @@ public:
     {
         mask_ = mask;
         customized_ = true;
+    }
+
+    bool Customized()
+    {
+        return customized_;
     }
 
     void InitialMask(const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr);
@@ -186,6 +198,8 @@ public:
     std::vector<std::shared_ptr<Media::PixelMap>> GetPixelMapList();
     int32_t GetDuration();
     int32_t GetIterations();
+    void SetDuration(int32_t duration);
+    void SetIterations(int32_t iterations);
 private:
     std::vector<std::shared_ptr<Media::PixelMap>> pixelMapList_;
     int32_t duration_ = -1;

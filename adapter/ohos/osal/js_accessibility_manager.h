@@ -83,6 +83,13 @@ public:
         windowId_ = windowId;
     }
 
+    void SaveLast(const int64_t elementId, const RefPtr<NG::FrameNode>& node)
+    {
+        lastElementId_ = elementId;
+        lastFrameNode_ = node;
+    }
+
+
     bool IsRegister();
     void Register(bool state);
     bool SubscribeToastObserver();
@@ -300,6 +307,9 @@ private:
     float scaleX_ = 1.0f;
     float scaleY_ = 1.0f;
     int64_t currentFocusNodeId_ = -1;
+
+    int64_t lastElementId_ = -1;
+    WeakPtr<NG::FrameNode> lastFrameNode_;
 };
 
 } // namespace OHOS::Ace::Framework

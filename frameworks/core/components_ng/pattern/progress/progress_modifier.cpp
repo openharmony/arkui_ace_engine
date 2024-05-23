@@ -21,14 +21,12 @@
 #include "core/common/container.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/base/modifier.h"
-#include "core/components_ng/pattern/progress/progress_paint_property.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr uint32_t DEFAULT_BORDER_COLOR = 0x33007dff;
 constexpr int32_t INT32_TWO = 2;
 constexpr int32_t ANGLE_45 = 45;
 constexpr int32_t ANGLE_90 = 90;
@@ -54,17 +52,17 @@ constexpr float RING_SHADOW_VALID_RADIUS_MIN = 10.0f;
 constexpr float RING_SHADOW_OPACITY = 0.4f;
 constexpr Dimension LINEAR_SWEEPING_LEN = 80.0_vp;
 } // namespace
-ProgressModifier::ProgressModifier()
-    : strokeWidth_(AceType::MakeRefPtr<AnimatablePropertyFloat>(FLOAT_TWO_ZERO)),
-      color_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::BLUE)),
-      bgColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::GRAY)),
-      borderColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(DEFAULT_BORDER_COLOR))),
+ProgressModifier::ProgressModifier(const ProgressAnimatableProperty& progressAnimatableProperty_)
+    : strokeWidth_(AceType::MakeRefPtr<AnimatablePropertyFloat>(progressAnimatableProperty_.strokeWidth)),
+      color_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(progressAnimatableProperty_.color))),
+      bgColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(progressAnimatableProperty_.bgColor))),
+      borderColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(progressAnimatableProperty_.borderColor))),
       value_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
       ringProgressColors_(AceType::MakeRefPtr<AnimatablePropertyVectorColor>(GradientArithmetic())),
       sweepingDate_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
       trailingHeadDate_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
       trailingTailDate_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
-      strokeRadius_(AceType::MakeRefPtr<AnimatablePropertyFloat>(FLOAT_TWO_ZERO / INT32_TWO)),
+      strokeRadius_(AceType::MakeRefPtr<AnimatablePropertyFloat>(progressAnimatableProperty_.strokeRadius)),
       offset_(AceType::MakeRefPtr<PropertyOffsetF>(OffsetF())),
       contentSize_(AceType::MakeRefPtr<PropertySizeF>(SizeF())),
       maxValue_(AceType::MakeRefPtr<PropertyFloat>(DEFAULT_MAX_VALUE)),
@@ -1088,7 +1086,9 @@ void ProgressModifier::PaintEndHalf(RSCanvas& canvas, RSBrush& brush, const Ring
 
     std::vector<RSColorQuad> colors;
     std::vector<float> pos;
-    colors.emplace_back(gradientColors[gradientColors.size() - 1].GetLinearColor().GetValue());
+    if (gradientColors.size() != 0) {
+        colors.emplace_back(gradientColors[gradientColors.size() - 1].GetLinearColor().GetValue());
+    }
     pos.emplace_back(additionalAngle / ANGLE_360);
     for (size_t i = 0; i < gradientColors.size(); i++) {
         colors.emplace_back(gradientColors[i].GetLinearColor().GetValue());
@@ -1437,7 +1437,8 @@ void ProgressModifier::PaintCapsule(RSCanvas& canvas, const OffsetF& offset, con
     double radius = std::min(contentSize.Width() / INT32_TWO, contentSize.Height() / INT32_TWO);
     double offsetX = offset.GetX();
     double offsetY = offset.GetY();
-    double progressWidth = (value_->Get() / maxValue_->Get()) * totalDegree * contentSize.Width();
+    double progressWidth =
+        std::min((value_->Get() / maxValue_->Get()) * totalDegree * contentSize.Width(), contentSize.Width());
     RSBrush brush;
     brush.SetAntiAlias(true);
     RSPen pen;
@@ -1506,7 +1507,8 @@ void ProgressModifier::PaintVerticalCapsule(RSCanvas& canvas, const OffsetF& off
     double radius = std::min(contentSize.Width() / INT32_TWO, contentSize.Height() / INT32_TWO);
     double offsetX = offset.GetX();
     double offsetY = offset.GetY();
-    double progressWidth = (value_->Get() / maxValue_->Get()) * totalDegree * contentSize.Height();
+    double progressWidth =
+        std::min((value_->Get() / maxValue_->Get()) * totalDegree * contentSize.Height(), contentSize.Height());
     RSBrush brush;
     brush.SetAntiAlias(true);
     RSPen pen;
@@ -1687,14 +1689,14 @@ void ProgressModifier::PaintScaleRingForApiNine(RSCanvas& canvas, const OffsetF&
     canvas.AttachPen(pen);
     canvas.DrawArc({
         centerPt.GetX() - radius, centerPt.GetY() - radius, centerPt.GetX() + radius, centerPt.GetY() + radius },
-            ANGLE_270, ANGLE_360);
+        ANGLE_270, ANGLE_360);
     canvas.DetachPen();
     pen.SetColor(ToRSColor((color_->Get())));
     canvas.AttachPen(pen);
     double angle = (value_->Get() / maxValue_->Get()) * ANGLE_360;
     canvas.DrawArc({
         centerPt.GetX() - radius, centerPt.GetY() - radius, centerPt.GetX() + radius, centerPt.GetY() + radius },
-            ANGLE_270, angle);
+        ANGLE_270, angle);
     canvas.DetachPen();
 }
 
@@ -1719,7 +1721,7 @@ void ProgressModifier::PaintCapsuleForApiNine(RSCanvas& canvas, const OffsetF& o
         // startAngle:270  sweepAngle:-180
         path.AddArc({
             offsetX + progressWidth, offsetY, 2 * radius - progressWidth + offsetX, frameSize.Height() + offsetY },
-                ANGLE_270, -ANGLE_180);
+            ANGLE_270, -ANGLE_180);
     } else if (GreatNotEqual(progressWidth, frameSize.Width() - radius)) {
         path.AddRect({ offsetX + radius, offsetY, frameSize.Width() + offsetX - radius,
             frameSize.Height() + offsetY });
@@ -1761,7 +1763,7 @@ void ProgressModifier::PaintVerticalCapsuleForApiNine(
             offsetX, offsetY + radius, frameSize.Width() + offsetX, frameSize.Height() - radius + offsetY });
         // startAngle:180  sweepAngle:-180
         path.AddArc({ offsetX, offsetY + (frameSize.Height() - radius) * 2.0 - progressWidth,
-                        frameSize.Width() + offsetX, progressWidth + offsetY }, ANGLE_180, -ANGLE_180);
+            frameSize.Width() + offsetX, progressWidth + offsetY }, ANGLE_180, -ANGLE_180);
     } else {
         path.AddRect({ offsetX, radius + offsetY, offsetX + frameSize.Width(), progressWidth + offsetY });
     }

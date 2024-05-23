@@ -131,6 +131,23 @@ class TextAreaWordBreakModifier extends ModifierWithKey<WordBreak> {
   }
 }
 
+class TextAreaLineBreakStrategyModifier extends ModifierWithKey<LineBreakStrategy> {
+  constructor(value: LineBreakStrategy) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaLineBreakStrategy');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetLineBreakStrategy(node);
+    } else {
+      getUINativeModule().textArea.setLineBreakStrategy(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextAreaCopyOptionModifier extends ModifierWithKey<CopyOptions> {
   constructor(value: CopyOptions) {
     super(value);
@@ -446,8 +463,8 @@ class TextAreaTextAlignModifier extends ModifierWithKey<TextAlign> {
   }
 }
 
-class TextAreaShowCounterModifier extends ModifierWithKey<ArkTextAreaShowCounter> {
-  constructor(value: ArkTextAreaShowCounter) {
+class TextAreaShowCounterModifier extends ModifierWithKey<ArkTextFieldShowCounter> {
+  constructor(value: ArkTextFieldShowCounter) {
     super(value);
   }
   static identity: Symbol = Symbol('textAreaShowCounter');
@@ -455,12 +472,13 @@ class TextAreaShowCounterModifier extends ModifierWithKey<ArkTextAreaShowCounter
     if (reset) {
       getUINativeModule().textArea.resetShowCounter(node);
     } else {
-      getUINativeModule().textArea.setShowCounter(node, this.value.value!, this.value.options);
+      getUINativeModule().textArea.setShowCounter(node, this.value.value!, this.value.highlightBorder, this.value.thresholdPercentage);
     }
   }
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue.value, this.value.value) ||
-      !isBaseOrResourceEqual(this.stageValue.options, this.value.options);
+      !isBaseOrResourceEqual(this.stageValue.highlightBorder, this.value.highlightBorder) ||
+      !isBaseOrResourceEqual(this.stageValue.thresholdPercentage, this.value.thresholdPercentage);
   }
 }
 
@@ -507,7 +525,8 @@ class TextAreaCaretStyleModifier extends ModifierWithKey<CaretStyle> {
     if (reset) {
       getUINativeModule().textArea.resetCaretStyle(node);
     } else {
-      getUINativeModule().textArea.setCaretStyle(node, this.value.width!);
+      getUINativeModule().textArea.setCaretStyle(node, this.value.width!,
+        this.value.color);
     }
   }
   checkObjectDiff(): boolean {
@@ -549,12 +568,493 @@ class TextAreaTextIndentModifier extends ModifierWithKey<Dimension> {
   }
 }
 
+class TextAreaOnChangeModifier extends ModifierWithKey<(value: string) => void> {
+  constructor(value: (value: string) => void) {
+    super(value);
+  }
+  static identity = Symbol('textAreaOnChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetOnChange(node);
+    } else {
+      getUINativeModule().textArea.setOnChange(node, this.value);
+    }
+  }
+}
+
+class TextAreaEnterKeyTypeModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaEnterKeyType');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetEnterKeyType(node);
+    } else {
+      getUINativeModule().textArea.setEnterKeyType(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextAreaInputFilterModifier extends ModifierWithKey<ArkTextInputFilter> {
+  constructor(value: ArkTextInputFilter) {
+    super(value);
+  }
+  static identity = Symbol('textAreaInputFilter');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetInputFilter(node);
+    }
+    else {
+      getUINativeModule().textArea.setInputFilter(node, this.value.value, this.value.error);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.value, this.value.value) ||
+      !isBaseOrResourceEqual(this.stageValue.error, this.value.error);
+  }
+}
+
+class TextAreaOnTextSelectionChangeModifier extends ModifierWithKey<(selectionStart: number, selectionEnd: number) => void> {
+  constructor(value: (selectionStart: number, selectionEnd: number) => void) {
+    super(value);
+  }
+  static identity = Symbol('textAreaOnTextSelectionChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetOnTextSelectionChange(node);
+    } else {
+      getUINativeModule().textArea.setOnTextSelectionChange(node, this.value);
+    }
+  }
+}
+
+class TextAreaOnContentScrollModifier extends ModifierWithKey<(totalOffsetX: number, totalOffsetY: number) => void> {
+  constructor(value: (totalOffsetX: number, totalOffsetY: number) => void) {
+    super(value);
+  }
+  static identity = Symbol('textAreaOnContentScroll');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetOnContentScroll(node);
+    } else {
+      getUINativeModule().textArea.setOnContentScroll(node, this.value);
+    }
+  }
+}
+
+class TextAreaOnEditChangeModifier extends ModifierWithKey<(isEditing: boolean) => void> {
+  constructor(value: (isEditing: boolean) => void) {
+    super(value);
+  }
+  static identity = Symbol('textAreaOnEditChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetOnEditChange(node);
+    } else {
+      getUINativeModule().textArea.setOnEditChange(node, this.value);
+    }
+  }
+}
+
+class TextAreaOnCopyModifier extends ModifierWithKey<(value: string) => void> {
+  constructor(value: (value: string) => void) {
+    super(value);
+  }
+  static identity = Symbol('textAreaOnCopy');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetOnCopy(node);
+    } else {
+      getUINativeModule().textArea.setOnCopy(node, this.value);
+    }
+  }
+}
+
+class TextAreaOnCutModifier extends ModifierWithKey<(value: string) => void> {
+  constructor(value: (value: string) => void) {
+    super(value);
+  }
+  static identity = Symbol('textAreaOnCut');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetOnCut(node);
+    } else {
+      getUINativeModule().textArea.setOnCut(node, this.value);
+    }
+  }
+}
+
+class TextAreaOnPasteModifier extends ModifierWithKey<(value: string, event: PasteEvent) => void> {
+  constructor(value: (value: string, event: PasteEvent) => void) {
+    super(value);
+  }
+  static identity = Symbol('textAreaOnPaste');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetOnPaste(node);
+    } else {
+      getUINativeModule().textArea.setOnPaste(node, this.value);
+    }
+  }
+}
+
+class TextAreaTypeModifier extends ModifierWithKey<TextAreaType> {
+  constructor(value: TextAreaType) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaType');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetType(node);
+    }
+    else {
+      getUINativeModule().textArea.setType(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextAreaPaddingModifier extends ModifierWithKey<ArkPadding> {
+  constructor(value: ArkPadding) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaPadding');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetPadding(node);
+    }
+    else {
+      getUINativeModule().textArea.setPadding(node, this.value.top, this.value.right, this.value.bottom, this.value.left);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.top, this.value.top) ||
+      !isBaseOrResourceEqual(this.stageValue.right, this.value.right) ||
+      !isBaseOrResourceEqual(this.stageValue.bottom, this.value.bottom) ||
+      !isBaseOrResourceEqual(this.stageValue.left, this.value.left);
+  }
+}
+
+class TextAreaOnSubmitModifier extends ModifierWithKey<(enterKey: EnterKeyType, event: SubmitEvent) => void> {
+  constructor(value: (enterKey: EnterKeyType, event: SubmitEvent) => void) {
+    super(value);
+  }
+  static identity = Symbol('textAreaOnSubmit');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetOnSubmit(node);
+    } else {
+      getUINativeModule().textArea.setOnSubmit(node, this.value);
+    }
+  }
+}
+
+class TextAreaContentTypeModifier extends ModifierWithKey<ContentType> {
+  constructor(value: ContentType) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaContentType');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetContentType(node);
+    }
+    else {
+      getUINativeModule().textArea.setContentType(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextAreaEnableAutoFillModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaEnableAutoFill');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetEnableAutoFill(node);
+    } else {
+      getUINativeModule().textArea.setEnableAutoFill(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextAreaBorderModifier extends ModifierWithKey<ArkBorder> {
+  constructor(value: ArkBorder) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaBorder');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetBorder(node);
+    } else {
+      getUINativeModule().textArea.setBorder(node,
+        this.value.arkWidth.left, this.value.arkWidth.right, this.value.arkWidth.top, this.value.arkWidth.bottom,
+        this.value.arkColor.leftColor, this.value.arkColor.rightColor, this.value.arkColor.topColor, this.value.arkColor.bottomColor,
+        this.value.arkRadius.topLeft, this.value.arkRadius.topRight, this.value.arkRadius.bottomLeft, this.value.arkRadius.bottomRight,
+        this.value.arkStyle.top, this.value.arkStyle.right, this.value.arkStyle.bottom, this.value.arkStyle.left);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return this.value.checkObjectDiff(this.stageValue);
+  }
+}
+
+class TextAreaBorderWidthModifier extends ModifierWithKey<Length | EdgeWidths> {
+  constructor(value: Length | EdgeWidths) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaBorderWidth');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetBorderWidth(node);
+    } else {
+      if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
+        getUINativeModule().textArea.setBorderWidth(node, this.value, this.value, this.value, this.value);
+      } else {
+        getUINativeModule().textArea.setBorderWidth(node,
+          (this.value as EdgeWidths).top,
+          (this.value as EdgeWidths).right,
+          (this.value as EdgeWidths).bottom,
+          (this.value as EdgeWidths).left);
+      }
+    }
+  }
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !((this.stageValue as EdgeWidths).left === (this.value as EdgeWidths).left &&
+        (this.stageValue as EdgeWidths).right === (this.value as EdgeWidths).right &&
+        (this.stageValue as EdgeWidths).top === (this.value as EdgeWidths).top &&
+        (this.stageValue as EdgeWidths).bottom === (this.value as EdgeWidths).bottom);
+    } else {
+      return true;
+    }
+  }
+}
+
+class TextAreaBorderColorModifier extends ModifierWithKey<ResourceColor | EdgeColors> {
+  constructor(value: ResourceColor | EdgeColors) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaBorderColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetBorderColor(node);
+    } else {
+      const valueType: string = typeof this.value;
+      if (valueType === 'number' || valueType === 'string' || isResource(this.value)) {
+        getUINativeModule().textArea.setBorderColor(node, this.value, this.value, this.value, this.value);
+      } else {
+        getUINativeModule().textArea.setBorderColor(node, (this.value as EdgeColors).top,
+          (this.value as EdgeColors).right, (this.value as EdgeColors).bottom,
+          (this.value as EdgeColors).left);
+      }
+    }
+  }
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !((this.stageValue as EdgeColors).left === (this.value as EdgeColors).left &&
+        (this.stageValue as EdgeColors).right === (this.value as EdgeColors).right &&
+        (this.stageValue as EdgeColors).top === (this.value as EdgeColors).top &&
+        (this.stageValue as EdgeColors).bottom === (this.value as EdgeColors).bottom);
+    } else {
+      return true;
+    }
+  }
+}
+
+class TextAreaBorderStyleModifier extends ModifierWithKey<BorderStyle | EdgeStyles> {
+  constructor(value: BorderStyle | EdgeStyles) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaBorderStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetBorderStyle(node);
+    } else {
+      let type: boolean;
+      let style: BorderStyle;
+      let top: BorderStyle;
+      let right: BorderStyle;
+      let bottom: BorderStyle;
+      let left: BorderStyle;
+      if (isNumber(this.value)) {
+        style = this.value as BorderStyle;
+        type = true;
+      } else if (isObject(this.value)) {
+        top = (this.value as EdgeStyles)?.top;
+        right = (this.value as EdgeStyles)?.right;
+        bottom = (this.value as EdgeStyles)?.bottom;
+        left = (this.value as EdgeStyles)?.left;
+        type = true;
+      }
+      if (type === true) {
+        getUINativeModule().textArea.setBorderStyle(node, type, style, top, right, bottom, left);
+      } else {
+        getUINativeModule().textArea.resetBorderStyle(node);
+      }
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !((this.value as EdgeStyles)?.top === (this.stageValue as EdgeStyles)?.top &&
+      (this.value as EdgeStyles)?.right === (this.stageValue as EdgeStyles)?.right &&
+      (this.value as EdgeStyles)?.bottom === (this.stageValue as EdgeStyles)?.bottom &&
+      (this.value as EdgeStyles)?.left === (this.stageValue as EdgeStyles)?.left);
+  }
+}
+
+class TextAreaBorderRadiusModifier extends ModifierWithKey<Length | BorderRadiuses> {
+  constructor(value: Length | BorderRadiuses) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaBorderRadius');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetBorderRadius(node);
+    } else {
+      if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
+        getUINativeModule().textArea.setBorderRadius(node, this.value, this.value, this.value, this.value);
+      } else {
+        getUINativeModule().textArea.setBorderRadius(node,
+          (this.value as BorderRadiuses).topLeft,
+          (this.value as BorderRadiuses).topRight,
+          (this.value as BorderRadiuses).bottomLeft,
+          (this.value as BorderRadiuses).bottomRight);
+      }
+    }
+  }
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !((this.stageValue as BorderRadiuses).topLeft === (this.value as BorderRadiuses).topLeft &&
+        (this.stageValue as BorderRadiuses).topRight === (this.value as BorderRadiuses).topRight &&
+        (this.stageValue as BorderRadiuses).bottomLeft === (this.value as BorderRadiuses).bottomLeft &&
+        (this.stageValue as BorderRadiuses).bottomRight === (this.value as BorderRadiuses).bottomRight);
+    } else {
+      return true;
+    }
+  }
+}
+
+class TextAreaBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaBackgroundColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetBackgroundColor(node);
+    } else {
+      getUINativeModule().textArea.setBackgroundColor(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextAreaMarginModifier extends ModifierWithKey<ArkPadding> {
+  constructor(value: ArkPadding) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaMargin');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetMargin(node);
+    } else {
+      getUINativeModule().textArea.setMargin(node, this.value.top,
+        this.value.right, this.value.bottom, this.value.left);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.top, this.value.top) ||
+      !isBaseOrResourceEqual(this.stageValue.right, this.value.right) ||
+      !isBaseOrResourceEqual(this.stageValue.bottom, this.value.bottom) ||
+      !isBaseOrResourceEqual(this.stageValue.left, this.value.left);
+  }
+}
+
+class TextAreaOnWillInsertModifier extends ModifierWithKey<Callback<InsertValue, boolean>> {
+  constructor(value: Callback<InsertValue, boolean>) {
+    super(value);
+  }
+  static identity = Symbol('textAreaOnWillInsert');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetOnWillInsert(node);
+    } else {
+      getUINativeModule().textArea.setOnWillInsert(node, this.value);
+    }
+  }
+}
+
+class TextAreaOnDidInsertModifier extends ModifierWithKey<Callback<InsertValue>> {
+  constructor(value: Callback<InsertValue>) {
+    super(value);
+  }
+  static identity = Symbol('textAreaOnDidInsert');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetOnDidInsert(node);
+    } else {
+      getUINativeModule().textArea.setOnDidInsert(node, this.value);
+    }
+  }
+}
+
+class TextAreaOnWillDeleteModifier extends ModifierWithKey<Callback<DeleteValue, boolean>> {
+  constructor(value: Callback<DeleteValue, boolean>) {
+    super(value);
+  }
+  static identity = Symbol('textAreaOnWillDelete');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetOnWillDelete(node);
+    } else {
+      getUINativeModule().textArea.setOnWillDelete(node, this.value);
+    }
+  }
+}
+
+class TextAreaOnDidDeleteModifier extends ModifierWithKey<Callback<DeleteValue>> {
+  constructor(value: Callback<DeleteValue>) {
+    super(value);
+  }
+  static identity = Symbol('textAreaOnDidDelete');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetOnDidDelete(node);
+    } else {
+      getUINativeModule().textArea.setOnDidDelete(node, this.value);
+    }
+  }
+}
+
 class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextAreaAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
   type(value: TextAreaType): TextAreaAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextAreaTypeModifier.identity, TextAreaTypeModifier, value);
+    return this;
   }
   placeholderColor(value: ResourceColor): TextAreaAttribute {
     modifierWithKey(this._modifiersWithKeys, TextAreaPlaceholderColorModifier.identity, TextAreaPlaceholderColorModifier, value);
@@ -594,28 +1094,46 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
     return this;
   }
   inputFilter(value: ResourceStr, error?: (value: string) => void): TextAreaAttribute {
-    throw new Error('Method not implemented.');
+    let arkValue = new ArkTextInputFilter();
+    arkValue.value = value;
+    arkValue.error = error;
+    modifierWithKey(this._modifiersWithKeys, TextAreaInputFilterModifier.identity, TextAreaInputFilterModifier, arkValue);
+    return this;
   }
   onChange(callback: (value: string) => void): TextAreaAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnChangeModifier.identity,
+      TextAreaOnChangeModifier, callback);
+    return this;
   }
   onTextSelectionChange(callback: (selectionStart: number, selectionEnd: number) => void): TextAreaAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnTextSelectionChangeModifier.identity,
+      TextAreaOnTextSelectionChangeModifier, callback);
+    return this;
   }
   onContentScroll(callback: (totalOffsetX: number, totalOffsetY: number) => void): TextAreaAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnContentScrollModifier.identity,
+      TextAreaOnContentScrollModifier, callback);
+    return this;
   }
   onEditChange(callback: (isEditing: boolean) => void): TextAreaAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnEditChangeModifier.identity,
+      TextAreaOnEditChangeModifier, callback);
+    return this;
   }
   onCopy(callback: (value: string) => void): TextAreaAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnCopyModifier.identity,
+      TextAreaOnCopyModifier, callback);
+    return this;
   }
   onCut(callback: (value: string) => void): TextAreaAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnCutModifier.identity,
+      TextAreaOnCutModifier, callback);
+    return this;
   }
   onPaste(callback: (value: string) => void): TextAreaAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnPasteModifier.identity,
+      TextAreaOnPasteModifier, callback);
+    return this;
   }
   copyOption(value: CopyOptions): TextAreaAttribute {
     modifierWithKey(this._modifiersWithKeys, TextAreaCopyOptionModifier.identity, TextAreaCopyOptionModifier, value);
@@ -632,9 +1150,10 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
     return this;
   }
   showCounter(value: boolean, options?: InputCounterOptions): TextAreaAttribute {
-    let arkValue: ArkTextAreaShowCounter = new ArkTextAreaShowCounter();
+    let arkValue: ArkTextFieldShowCounter = new ArkTextFieldShowCounter();
     arkValue.value = value;
-    arkValue.options = options;
+    arkValue.highlightBorder = options?.highlightBorder;
+    arkValue.thresholdPercentage = options?.thresholdPercentage;
     modifierWithKey(this._modifiersWithKeys, TextAreaShowCounterModifier.identity, TextAreaShowCounterModifier, arkValue);
     return this;
   }
@@ -661,7 +1180,7 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
   customKeyboard(value: CustomBuilder): TextAreaAttribute {
     throw new Error('Method not implemented.');
   }
-  decoration(value: { type: TextDecorationType; color?: ResourceColor }): TextAreaAttribute {
+  decoration(value: { type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }): TextAreaAttribute {
     modifierWithKey(this._modifiersWithKeys, TextAreaDecorationModifier.identity, TextAreaDecorationModifier, value);
     return this;
   }
@@ -679,6 +1198,11 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
   }
   wordBreak(value: WordBreak): this {
     modifierWithKey(this._modifiersWithKeys, TextAreaWordBreakModifier.identity, TextAreaWordBreakModifier, value);
+    return this;
+  }
+  lineBreakStrategy(value: LineBreakStrategy): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaLineBreakStrategyModifier.identity,
+      TextAreaLineBreakStrategyModifier, value);
     return this;
   }
   minFontSize(value: number | string | Resource): TextAreaAttribute {
@@ -707,6 +1231,168 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
   }
   textIndent(value: Dimension): this {
     modifierWithKey(this._modifiersWithKeys, TextAreaTextIndentModifier.identity, TextAreaTextIndentModifier, value);
+    return this;
+  }
+  enterKeyType(value: EnterKeyType): TextAreaAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextAreaEnterKeyTypeModifier.identity,
+      TextAreaEnterKeyTypeModifier, value);
+    return this;
+  }
+  padding(value: Padding | Length): this {
+    let arkValue = new ArkPadding();
+    if (value !== null && value !== undefined) {
+      if (isLengthType(value) || isResource(value)) {
+        arkValue.top = value;
+        arkValue.right = value;
+        arkValue.bottom = value;
+        arkValue.left = value;
+      }
+      else {
+        arkValue.top = value.top;
+        arkValue.right = value.right;
+        arkValue.bottom = value.bottom;
+        arkValue.left = value.left;
+      }
+      modifierWithKey(this._modifiersWithKeys, TextAreaPaddingModifier.identity, TextAreaPaddingModifier, arkValue);
+    }
+    else {
+      modifierWithKey(this._modifiersWithKeys, TextAreaPaddingModifier.identity, TextAreaPaddingModifier, undefined);
+    }
+    return this;
+  }
+  onSubmit(callback: (enterKey: EnterKeyType, event: SubmitEvent) => void): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnSubmitModifier.identity,
+      TextAreaOnSubmitModifier, callback);
+    return this;
+  }
+  contentType(value: ContentType): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaContentTypeModifier.identity,
+      TextAreaContentTypeModifier, value);
+    return this;
+  }
+  enableAutoFill(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaEnableAutoFillModifier.identity,
+      TextAreaEnableAutoFillModifier, value);
+    return this;
+  }
+  border(value: BorderOptions): this {
+    let borderValue = new ArkBorder();
+    if (isUndefined(value)) {
+      borderValue = undefined;
+    }
+
+    if (!isUndefined(value?.width) && value?.width !== null) {
+      if (isNumber(value.width) || isString(value.width) || isResource(value.width)) {
+        borderValue.arkWidth.left = value.width;
+        borderValue.arkWidth.right = value.width;
+        borderValue.arkWidth.top = value.width;
+        borderValue.arkWidth.bottom = value.width;
+      } else {
+        borderValue.arkWidth.left = (value.width as EdgeWidths).left;
+        borderValue.arkWidth.right = (value.width as EdgeWidths).right;
+        borderValue.arkWidth.top = (value.width as EdgeWidths).top;
+        borderValue.arkWidth.bottom = (value.width as EdgeWidths).bottom;
+      }
+    }
+    if (!isUndefined(value?.color) && value?.color !== null) {
+      if (isNumber(value.color) || isString(value.color) || isResource(value.color)) {
+        borderValue.arkColor.leftColor = value.color;
+        borderValue.arkColor.rightColor = value.color;
+        borderValue.arkColor.topColor = value.color;
+        borderValue.arkColor.bottomColor = value.color;
+      } else {
+        borderValue.arkColor.leftColor = (value.color as EdgeColors).left;
+        borderValue.arkColor.rightColor = (value.color as EdgeColors).right;
+        borderValue.arkColor.topColor = (value.color as EdgeColors).top;
+        borderValue.arkColor.bottomColor = (value.color as EdgeColors).bottom;
+      }
+    }
+    if (!isUndefined(value?.radius) && value?.radius !== null) {
+      if (isNumber(value.radius) || isString(value.radius) || isResource(value.radius)) {
+        borderValue.arkRadius.topLeft = value.radius;
+        borderValue.arkRadius.topRight = value.radius;
+        borderValue.arkRadius.bottomLeft = value.radius;
+        borderValue.arkRadius.bottomRight = value.radius;
+      } else {
+        borderValue.arkRadius.topLeft = (value.radius as BorderRadiuses)?.topLeft;
+        borderValue.arkRadius.topRight = (value.radius as BorderRadiuses)?.topRight;
+        borderValue.arkRadius.bottomLeft = (value.radius as BorderRadiuses)?.bottomLeft;
+        borderValue.arkRadius.bottomRight = (value.radius as BorderRadiuses)?.bottomRight;
+      }
+    }
+    if (!isUndefined(value?.style) && value?.style !== null) {
+      let arkBorderStyle = new ArkBorderStyle();
+      if (arkBorderStyle.parseBorderStyle(value.style)) {
+        if (!isUndefined(arkBorderStyle.style)) {
+          borderValue.arkStyle.top = arkBorderStyle.style;
+          borderValue.arkStyle.left = arkBorderStyle.style;
+          borderValue.arkStyle.bottom = arkBorderStyle.style;
+          borderValue.arkStyle.right = arkBorderStyle.style;
+        } else {
+          borderValue.arkStyle.top = arkBorderStyle.top;
+          borderValue.arkStyle.left = arkBorderStyle.left;
+          borderValue.arkStyle.bottom = arkBorderStyle.bottom;
+          borderValue.arkStyle.right = arkBorderStyle.right;
+        }
+      }
+    }
+    modifierWithKey(this._modifiersWithKeys, TextAreaBorderModifier.identity, TextAreaBorderModifier, borderValue);
+    return this;
+  }
+  borderWidth(value: Length | EdgeWidths): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaBorderWidthModifier.identity, TextAreaBorderWidthModifier, value);
+    return this;
+  }
+  borderColor(value: ResourceColor | EdgeColors): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaBorderColorModifier.identity, TextAreaBorderColorModifier, value);
+    return this;
+  }
+  borderStyle(value: BorderStyle | EdgeStyles): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaBorderStyleModifier.identity, TextAreaBorderStyleModifier, value);
+    return this;
+  }
+  borderRadius(value: Length | BorderRadiuses): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaBorderRadiusModifier.identity, TextAreaBorderRadiusModifier, value);
+    return this;
+  }
+  backgroundColor(value: ResourceColor): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaBackgroundColorModifier.identity, TextAreaBackgroundColorModifier, value);
+    return this;
+  }
+  margin(value: Margin | Length): this {
+    let arkValue = new ArkPadding();
+    if (value !== null && value !== undefined) {
+      if (isLengthType(value) || isResource(value)) {
+        arkValue.top = <Length>value;
+        arkValue.right = <Length>value;
+        arkValue.bottom = <Length>value;
+        arkValue.left = <Length>value;
+      } else {
+        arkValue.top = (<Margin>value).top;
+        arkValue.right = (<Margin>value).right;
+        arkValue.bottom = (<Margin>value).bottom;
+        arkValue.left = (<Margin>value).left;
+      }
+      modifierWithKey(this._modifiersWithKeys, TextAreaMarginModifier.identity, TextAreaMarginModifier, arkValue);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, TextAreaMarginModifier.identity, TextAreaMarginModifier, undefined);
+    }
+    return this;
+  }
+  onWillInsert(callback: Callback<InsertValue, boolean>): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnWillInsertModifier.identity, TextAreaOnWillInsertModifier, callback);
+    return this;
+  }
+  onDidInsert(callback: Callback<InsertValue>): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnDidInsertModifier.identity, TextAreaOnDidInsertModifier, callback);
+    return this;
+  }
+  onWillDelete(callback: Callback<DeleteValue, boolean>): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnWillDeleteModifier.identity, TextAreaOnWillDeleteModifier, callback);
+    return this;
+  }
+  onDidDelete(callback: Callback<DeleteValue>): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnDidDeleteModifier.identity, TextAreaOnDidDeleteModifier, callback);
     return this;
   }
 }

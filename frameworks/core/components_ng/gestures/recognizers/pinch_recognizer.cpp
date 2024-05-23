@@ -85,7 +85,10 @@ bool PinchRecognizer::IsCtrlBeingPressed()
 
 void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Pinch recognizer receives touch down event, begin to detect pinch event");
+    TAG_LOGI(AceLogTag::ACE_GESTURE,
+        "InputTracking id:%{public}d, Pinch recognizer receives %{public}d touch down event, begin to detect pinch "
+        "event",
+        event.touchEventId, event.id);
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
@@ -117,10 +120,15 @@ void PinchRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     if (event.isRotationEvent) {
         return;
     }
+    touchPoints_[event.id] = TouchEvent();
+    UpdateTouchPointWithAxisEvent(event);
+    lastAxisEvent_ = event;
     if (IsRefereeFinished()) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Pinch recognizer receives axis start event, begin to detect pinch event");
+    TAG_LOGI(AceLogTag::ACE_GESTURE,
+        "InputTracking id:%{public}d, Pinch recognizer receives axis start event, begin to detect pinch event",
+        event.touchEventId);
     if (refereeState_ == RefereeState::READY && (NearEqual(event.pinchAxisScale, 1.0) || IsCtrlBeingPressed())) {
         scale_ = 1.0f;
         pinchCenter_ = Offset(event.x, event.y);
@@ -134,7 +142,8 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         return;
     }
 
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Pinch recognizer receives touch end event");
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "InputTracking id:%{public}d, Pinch recognizer receives %{public}d touch up event",
+        event.touchEventId, event.id);
     if (static_cast<int32_t>(activeFingers_.size()) < fingers_ && refereeState_ != RefereeState::SUCCEED) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
@@ -164,11 +173,13 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
 void PinchRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Pinch recognizer receives axis end event");
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "InputTracking id:%{public}d, Pinch recognizer receives axis end event",
+        event.touchEventId);
     // if axisEvent received rotateEvent, no need to active Pinch recognizer.
     if (isPinchEnd_ || event.isRotationEvent) {
         return;
     }
+    lastAxisEvent_ = event;
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
@@ -234,10 +245,7 @@ void PinchRecognizer::OnFlushTouchEventsEnd()
 
 void PinchRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 {
-    if (event.isRotationEvent) {
-        return;
-    }
-    if (isPinchEnd_) {
+    if (event.isRotationEvent || isPinchEnd_) {
         return;
     }
     if (NearZero(event.pinchAxisScale) && !IsCtrlBeingPressed()) {
@@ -252,12 +260,10 @@ void PinchRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
             return;
         }
     }
-    touchPoints_[event.id].x = event.x;
-    touchPoints_[event.id].y = event.y;
-    touchPoints_[event.id].sourceType = event.sourceType;
-    touchPoints_[event.id].sourceTool = event.sourceTool;
+    UpdateTouchPointWithAxisEvent(event);
     lastTouchEvent_ = touchPoints_[event.id];
     time_ = event.time;
+    lastAxisEvent_ = event;
     if (refereeState_ == RefereeState::DETECTING || refereeState_ == RefereeState::SUCCEED) {
         if (event.pinchAxisScale != 0.0) {
             scale_ = event.pinchAxisScale;
@@ -288,7 +294,9 @@ void PinchRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     if (!IsActiveFinger(event.id)) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Pinch recognizer receives touch cancel event");
+    TAG_LOGI(AceLogTag::ACE_GESTURE,
+        "InputTracking id:%{public}d, pinch recognizer receives %{public}d touch cancel event", event.touchEventId,
+        event.id);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
@@ -302,7 +310,8 @@ void PinchRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 
 void PinchRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Pinch recognizer receives axis cancel event");
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "InputTracking id:%{public}d, pinch recognizer receives axis cancel event",
+        event.touchEventId);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
@@ -343,6 +352,9 @@ double PinchRecognizer::ComputeAverageDeviation()
 
 Offset PinchRecognizer::ComputePinchCenter()
 {
+    if (touchPoints_.empty()) {
+        return Offset();
+    }
     double sumOfX = 0.0;
     double sumOfY = 0.0;
     for (auto& id : activeFingers_) {
@@ -353,7 +365,8 @@ Offset PinchRecognizer::ComputePinchCenter()
     double focalY = sumOfY / fingers_;
 
     PointF localPoint(focalX, focalY);
-    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
+    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
+        isPostEventResult_, touchPoints_[touchPoints_.begin()->first].postEventNodeId);
     Offset pinchCenter = Offset(localPoint.GetX(), localPoint.GetY());
 
     return pinchCenter;
@@ -384,8 +397,15 @@ void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
         if (lastTouchEvent_.tiltY.has_value()) {
             info.SetTiltY(lastTouchEvent_.tiltY.value());
         }
-        info.SetSourceTool(lastTouchEvent_.sourceTool);
-        info.SetPointerEvent(lastTouchEvent_.pointerEvent);
+        if (inputEventType_ == InputEventType::AXIS) {
+            info.SetVerticalAxis(lastAxisEvent_.verticalAxis);
+            info.SetHorizontalAxis(lastAxisEvent_.horizontalAxis);
+            info.SetSourceTool(lastAxisEvent_.sourceTool);
+        } else {
+            info.SetSourceTool(lastTouchEvent_.sourceTool);
+        }
+        info.SetPointerEvent(lastPointEvent_);
+        info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         callbackFunction(info);

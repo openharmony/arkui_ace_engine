@@ -224,17 +224,18 @@ void Scrollable::HandleTouchUp()
         return;
     }
     isTouching_ = false;
-    if (outBoundaryCallback_ && !outBoundaryCallback_()) {
-        if (isSnapScrollAnimationStop_ && scrollSnapCallback_) {
-            scrollSnapCallback_(0.0, 0.0);
+    // outBoundaryCallback_ is only set in ScrollablePattern::SetEdgeEffect and when the edge effect is spring
+    if (outBoundaryCallback_ && outBoundaryCallback_()) {
+        if (isSpringAnimationStop_ && scrollOverCallback_) {
+            ProcessScrollOverCallback(0.0);
+            if (onScrollStartRec_) {
+                onScrollStartRec_(static_cast<float>(axis_));
+            }
         }
         return;
     }
-    if (isSpringAnimationStop_ && scrollOverCallback_) {
-        ProcessScrollOverCallback(0.0);
-        if (onScrollStartRec_) {
-            onScrollStartRec_(static_cast<float>(axis_));
-        }
+    if (isSnapScrollAnimationStop_ && scrollSnapCallback_) {
+        scrollSnapCallback_(0.0, 0.0);
     }
 }
 
@@ -305,7 +306,7 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
 {
     ACE_FUNCTION_TRACE();
     if (info.GetSourceTool() == SourceTool::TOUCHPAD) {
-        isTouching_ = true;
+        HandleTouchDown();
     }
     currentVelocity_ = info.GetMainVelocity();
     if (dragFRCSceneCallback_) {
@@ -341,8 +342,8 @@ ScrollResult Scrollable::HandleScroll(double offset, int32_t source, NestedState
 {
     if (!handleScrollCallback_) {
         ExecuteScrollBegin(offset);
-        moved_ = UpdateScrollPosition(offset, source);
         canOverScroll_ = false;
+        moved_ = UpdateScrollPosition(offset, source);
         return { 0, false };
     }
     // call NestableScrollContainer::HandleScroll
@@ -383,10 +384,23 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
     }
 #endif
     auto mainDelta = info.GetMainDelta();
-    mainDelta = Round(mainDelta);
+    if (isReverseCallback_ && isReverseCallback_()) {
+        mainDelta = Round(-mainDelta);
+    } else {
+        mainDelta = Round(mainDelta);
+    }
     JankFrameReport::GetInstance().RecordFrameUpdate();
     auto source = IsMouseWheelScroll(info) ? SCROLL_FROM_AXIS : SCROLL_FROM_UPDATE;
     HandleScroll(mainDelta, source, NestedState::GESTURE);
+}
+
+void Scrollable::LayoutDirectionEst(double& correctVelocity)
+{
+    if (isReverseCallback_ && isReverseCallback_()) {
+        correctVelocity = -correctVelocity * sVelocityScale_.value_or(velocityScale_) * GetGain(GetDragOffset());
+    } else {
+        correctVelocity = correctVelocity * sVelocityScale_.value_or(velocityScale_) * GetGain(GetDragOffset());
+    }
 }
 
 void Scrollable::HandleDragEnd(const GestureEvent& info)
@@ -407,7 +421,7 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     lastVelocity_ = info.GetMainVelocity();
     double correctVelocity = info.GetMainVelocity();
     SetDragEndPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
-    correctVelocity = correctVelocity * sVelocityScale_.value_or(velocityScale_) * GetGain(GetDragOffset());
+    LayoutDirectionEst(correctVelocity);
     // Apply max fling velocity limit, it must be calculated after all fling velocity gain.
     correctVelocity = std::clamp(correctVelocity, -maxFlingVelocity_ + slipFactor_, maxFlingVelocity_ - slipFactor_);
     currentVelocity_ = correctVelocity;
@@ -919,6 +933,8 @@ void Scrollable::ProcessSpringMotion(double position)
         // trace stop at OnScrollStop
         if (!isFadingAway_) {
             AceAsyncTraceBegin(0, TRAILING_ANIMATION);
+        } else {
+            ACE_SCOPED_TRACE("Spring to same position");
         }
         UpdateScrollPosition(0.0, SCROLL_FROM_ANIMATION_SPRING);
     } else {

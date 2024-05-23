@@ -344,6 +344,7 @@ void JSUIExtension::JSBind(BindingTarget globalObj)
     JSClass<JSUIExtension>::StaticMethod("onRelease", &JSUIExtension::OnRelease);
     JSClass<JSUIExtension>::StaticMethod("onResult", &JSUIExtension::OnResult);
     JSClass<JSUIExtension>::StaticMethod("onError", &JSUIExtension::OnError);
+    JSClass<JSUIExtension>::StaticMethod("onTerminated", &JSUIExtension::OnTerminated);
     JSClass<JSUIExtension>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -356,12 +357,17 @@ void JSUIExtension::Create(const JSCallbackInfo& info)
     RefPtr<OHOS::Ace::WantWrap> want = CreateWantWrapFromNapiValue(wantObj);
 
     bool transferringCaller = false;
+    bool densityDpi = false;
     RefPtr<NG::FrameNode> placeholderNode = nullptr;
     if (info.Length() > 1 && info[1]->IsObject()) {
         auto obj = JSRef<JSObject>::Cast(info[1]);
         JSRef<JSVal> transferringCallerValue = obj->GetProperty("isTransferringCaller");
         if (transferringCallerValue->IsBoolean()) {
             transferringCaller = transferringCallerValue->ToBoolean();
+        }
+        JSRef<JSVal> enableDensityDPI = obj->GetProperty("dpiFollowStrategy");
+        if (enableDensityDPI->IsNumber()) {
+            densityDpi = (enableDensityDPI->ToNumber<int32_t>())==0 ? true : false;
         }
         do {
             JSRef<JSVal> componentContent = obj->GetProperty("placeholder");
@@ -387,7 +393,7 @@ void JSUIExtension::Create(const JSCallbackInfo& info)
             placeholderNode = AceType::Claim(frameNode);
         } while (false);
     }
-    UIExtensionModel::GetInstance()->Create(want, placeholderNode, transferringCaller);
+    UIExtensionModel::GetInstance()->Create(want, placeholderNode, transferringCaller, densityDpi);
 }
 
 void JSUIExtension::OnRemoteReady(const JSCallbackInfo& info)
@@ -521,5 +527,39 @@ void JSUIExtension::OnError(const JSCallbackInfo& info)
             func->ExecuteJS(1, &returnValue);
         };
     UIExtensionModel::GetInstance()->SetOnError(std::move(onError));
+}
+
+void JSUIExtension::OnTerminated(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto instanceId = ContainerScope::CurrentId();
+    auto onTerminated = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
+                            int32_t code, const RefPtr<WantWrap>& wantWrap) {
+        ContainerScope scope(instanceId);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("EmbeddedComponent.onTerminated");
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
+        auto engine = EngineHelper::GetCurrentEngine();
+        CHECK_NULL_VOID(engine);
+        NativeEngine* nativeEngine = engine->GetNativeEngine();
+        CHECK_NULL_VOID(nativeEngine);
+        JSRef<JSObject> obj = JSRef<JSObject>::New();
+        obj->SetProperty<int32_t>("code", code);
+        if (wantWrap) {
+            auto nativeWant =
+                WantWrap::ConvertToNativeValue(wantWrap->GetWant(), reinterpret_cast<napi_env>(nativeEngine));
+            auto wantJSVal = JsConverter::ConvertNapiValueToJsVal(nativeWant);
+            obj->SetPropertyObject("want", wantJSVal);
+        }
+        auto returnValue = JSRef<JSVal>::Cast(obj);
+        func->ExecuteJS(1, &returnValue);
+    };
+    UIExtensionModel::GetInstance()->SetOnTerminated(std::move(onTerminated));
 }
 } // namespace OHOS::Ace::Framework

@@ -23,8 +23,10 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
+#include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/text_event_hub.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -314,8 +316,7 @@ void TextModelNG::SetTextDetectEnable(bool value)
     textPattern->SetTextDetectEnable(value);
 }
 
-void TextModelNG::SetTextDetectConfig(const std::string& value,
-    std::function<void(const std::string&)>&& onResult)
+void TextModelNG::SetTextDetectConfig(const std::string& value, std::function<void(const std::string&)>&& onResult)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -421,6 +422,25 @@ void TextModelNG::InitText(FrameNode* frameNode, std::string& value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, Content, value, frameNode);
 }
 
+void TextModelNG::InitSpanStringController(FrameNode* frameNode, const RefPtr<SpanStringBase>& spanBase)
+{
+    auto textPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextPattern>(frameNode);
+    CHECK_NULL_VOID(textPattern);
+    auto spanString = AceType::DynamicCast<SpanString>(spanBase);
+    if (spanString) {
+        auto spans = spanString->GetSpanItems();
+        textPattern->SetSpanItemChildren(spans);
+        textPattern->SetSpanStringMode(true);
+    }
+}
+
+RefPtr<TextControllerBase> TextModelNG::InitTextController(FrameNode* frameNode)
+{
+    auto textPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextPattern>(frameNode);
+    CHECK_NULL_RETURN(textPattern, nullptr);
+    return textPattern->GetTextController();
+}
+
 void TextModelNG::SetTextCase(FrameNode* frameNode, Ace::TextCase value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextCase, value, frameNode);
@@ -501,6 +521,11 @@ void TextModelNG::SetLetterSpacing(FrameNode* frameNode, const Dimension& value)
 void TextModelNG::SetWordBreak(FrameNode* frameNode, Ace::WordBreak value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, WordBreak, value, frameNode);
+}
+
+void TextModelNG::SetLineBreakStrategy(FrameNode* frameNode, Ace::LineBreakStrategy value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LineBreakStrategy, value, frameNode);
 }
 
 void TextModelNG::SetEllipsisMode(FrameNode* frameNode, Ace::EllipsisMode value)
@@ -864,5 +889,142 @@ EllipsisMode TextModelNG::GetEllipsisMode(FrameNode* frameNode)
     EllipsisMode value = EllipsisMode::TAIL;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, EllipsisMode, value, frameNode, value);
     return value;
+}
+
+bool TextModelNG::GetTextDetectEnable(FrameNode* frameNode)
+{
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, false);
+    return textPattern->GetTextDetectEnable();
+}
+
+void TextModelNG::SetTextDetectConfig(FrameNode* frameNode, const std::string& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetTextDetectTypes(value);
+}
+
+void TextModelNG::SetOnDetectResultUpdate(FrameNode* frameNode,  std::function<void(const std::string&)>&& onResult)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetOnResult(std::move(onResult));
+}
+
+std::string TextModelNG::GetTextDetectConfig(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, "");
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, "");
+    return textPattern->GetTextDetectTypes();
+}
+
+FONT_FEATURES_LIST TextModelNG::GetFontFeature(FrameNode* frameNode)
+{
+    FONT_FEATURES_LIST value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, FontFeature, value, frameNode, value);
+    return value;
+}
+
+LineBreakStrategy TextModelNG::GetLineBreakStrategy(FrameNode* frameNode)
+{
+    LineBreakStrategy value = LineBreakStrategy::GREEDY;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, LineBreakStrategy, value, frameNode, value);
+    return value;
+}
+
+void TextModelNG::SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SelectedBackgroundColor, value, frameNode);
+}
+
+Color TextModelNG::GetSelectedBackgroundColor(FrameNode* frameNode)
+{
+    auto context = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(context, Color::BLACK);
+    auto theme = context->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(theme, Color::BLACK);
+    Color value = theme->GetSelectedColor();
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, SelectedBackgroundColor, value, frameNode,
+        value);
+    return value;
+}
+
+void TextModelNG::ResetSelectedBackgroundColor(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    if (textLayoutProperty) {
+        textLayoutProperty->ResetSelectedBackgroundColor();
+    }
+}
+
+void TextModelNG::SetTextContentWithStyledString(FrameNode* frameNode, ArkUI_StyledString* value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    std::list<RefPtr<SpanItem>> spanItems;
+    if (!value) {
+        textPattern->SetExternalParagraph(nullptr);
+        textPattern->SetExternalSpanItem(spanItems);
+        textPattern->SetExternalParagraphStyle(std::nullopt);
+    } else {
+        textPattern->SetExternalParagraph(value->paragraph);
+#ifdef USE_GRAPHIC_TEXT_GINE
+        auto position = 0;
+        for (const auto& item : value->items) {
+            auto spanItem = SpanModelNG::CreateSpanItem(item);
+            if (spanItem) {
+                auto wSpanContent = StringUtils::ToWstring(spanItem->content);
+                auto intervalStart = position;
+                position += wSpanContent.length();
+                auto intervalEnd = position;
+                spanItem->interval = { intervalStart, intervalEnd };
+                spanItems.emplace_back(spanItem);
+            }
+        }
+        textPattern->SetExternalSpanItem(spanItems);
+        textPattern->SetExternalParagraphStyle(SpanModelNG::CreateParagraphStyle(value));
+#endif
+    }
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void TextModelNG::SetTextSelection(FrameNode* frameNode, int32_t startIndex, int32_t endIndex)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetTextSelection(startIndex, endIndex);
+}
+
+void TextModelNG::SetTextDetectConfig(FrameNode* frameNode, const std::string& value,
+    std::function<void(const std::string&)>&& onResult)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetTextDetectTypes(value);
+    textPattern->SetOnResult(std::move(onResult));
+}
+
+void TextModelNG::SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnCopy(std::move(func));
+}
+
+void TextModelNG::SetOnTextSelectionChange(FrameNode* frameNode, std::function<void(int32_t, int32_t)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSelectionChange(std::move(func));
 }
 } // namespace OHOS::Ace::NG

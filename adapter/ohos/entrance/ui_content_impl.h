@@ -30,10 +30,12 @@
 #include "dm/display_manager.h"
 
 #include "adapter/ohos/entrance/distributed_ui_manager.h"
+#include "adapter/ohos/entrance/ace_viewport_config.h"
 #include "base/thread/task_executor.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/asset_manager_impl.h"
 #include "core/common/render_boundary_manager.h"
+#include "core/common/update_config_manager.h"
 #include "core/components/common/properties/popup_param.h"
 
 namespace OHOS::Accessibility {
@@ -69,10 +71,10 @@ public:
     void Destroy() override;
     void OnNewWant(const OHOS::AAFwk::Want& want) override;
 
-    // distribute
-    UIContentErrorCode Restore(
-        OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage) override;
-    std::string GetContentInfo() const override;
+    // restore
+    UIContentErrorCode Restore(OHOS::Rosen::Window* window, const std::string& contentInfo,
+        napi_value storage, ContentInfoType type) override;
+    std::string GetContentInfo(ContentInfoType type) const override;
     void DestroyUIDirector() override;
 
     // UI content event process
@@ -215,7 +217,8 @@ public:
     AbilityBase::AutoFillType ViewDataToType(const AbilityBase::ViewData& viewData);
     bool DumpViewData(AbilityBase::ViewData& viewData, AbilityBase::AutoFillType& type) override;
     bool CheckNeedAutoSave() override;
-    bool DumpViewData(const RefPtr<NG::FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap);
+    bool DumpViewData(const RefPtr<NG::FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap,
+        bool skipSubAutoFillContainer = false);
 
     void SearchElementInfoByAccessibilityId(
         int64_t elementId, int32_t mode,
@@ -307,7 +310,7 @@ private:
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
     UIContentErrorCode CommonInitialize(
-        OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage);
+        OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, uint32_t focusWindowId = 0);
     UIContentErrorCode CommonInitializeForm(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage);
     void InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog = false);
@@ -371,6 +374,8 @@ private:
     bool isUIExtensionSubWindow_ = false;
     bool isUIExtensionAbilityProcess_ = false;
     bool isUIExtensionAbilityHost_ = false;
+    RefPtr<UpdateConfigManager<AceViewportConfig>> viewportConfigMgr_ =
+        Referenced::MakeRefPtr<UpdateConfigManager<AceViewportConfig>>();
 };
 
 } // namespace OHOS::Ace

@@ -27,6 +27,8 @@ JsiValue::JsiValue(const panda::CopyableGlobal<panda::JSValueRef>& val) : JsiTyp
 
 JsiValue::JsiValue(panda::Local<panda::JSValueRef> val) : JsiType(val) {}
 
+JsiValue::JsiValue(const EcmaVM *vm, panda::Local<panda::JSValueRef> val) : JsiType(vm, val) {}
+
 bool JsiValue::IsEmpty() const
 {
     if (GetHandle().IsEmpty()) {
@@ -166,10 +168,11 @@ JsiRef<JsiValue> JsiValue::False()
 JsiArray::JsiArray() {}
 JsiArray::JsiArray(const panda::CopyableGlobal<panda::ArrayRef>& val) : JsiType(val) {}
 JsiArray::JsiArray(panda::Local<panda::ArrayRef> val) : JsiType(val) {}
+JsiArray::JsiArray(const EcmaVM *vm, panda::Local<panda::ArrayRef> val) : JsiType(vm, val) {}
 
 JsiRef<JsiValue> JsiArray::GetValueAt(size_t index) const
 {
-    return JsiRef<JsiValue>::Make(panda::ArrayRef::GetValueAt(GetEcmaVM(), GetLocalHandle(), index));
+    return JsiRef<JsiValue>::FastMake(GetEcmaVM(), panda::ArrayRef::GetValueAt(GetEcmaVM(), GetLocalHandle(), index));
 }
 
 void JsiArray::SetValueAt(size_t index, JsiRef<JsiValue> value) const
@@ -182,7 +185,7 @@ JsiRef<JsiValue> JsiArray::GetProperty(const char* prop) const
     auto vm = GetEcmaVM();
     auto stringRef = panda::StringRef::NewFromUtf8(vm, prop);
     auto value = GetHandle()->Get(vm, stringRef);
-    auto func = JsiValue(value);
+    auto func = JsiValue(vm, value);
     auto refValue =  JsiRef<JsiValue>(func);
     return refValue;
 }
@@ -256,6 +259,7 @@ JsiRef<JsiArrayBuffer> JsiUint8ClampedArray::GetArrayBuffer() const
 JsiObject::JsiObject() : JsiType() {}
 JsiObject::JsiObject(const panda::CopyableGlobal<panda::ObjectRef>& val) : JsiType(val) {}
 JsiObject::JsiObject(panda::Local<panda::ObjectRef> val) : JsiType(val) {}
+JsiObject::JsiObject(const EcmaVM *vm, panda::Local<panda::ObjectRef> val) : JsiType(vm, val) {}
 
 bool JsiObject::IsUndefined() const
 {
@@ -277,7 +281,7 @@ JsiRef<JsiValue> JsiObject::GetProperty(const char* prop) const
     auto vm = GetEcmaVM();
     auto stringRef = panda::StringRef::NewFromUtf8(vm, prop);
     auto value = GetHandle()->Get(vm, stringRef);
-    auto func = JsiValue(value);
+    auto func = JsiValue(vm, value);
     auto refValue =  JsiRef<JsiValue>(func);
     return refValue;
 }
@@ -326,13 +330,11 @@ void JsiObject::SetPropertyObject(const char* prop, JsiRef<JsiValue> value) cons
 // Implementation of JsiFunction
 // -----------------------
 JsiFunction::JsiFunction() {}
-JsiFunction::JsiFunction(const panda::CopyableGlobal<panda::FunctionRef>& val) : JsiType(val)
-{
-}
+JsiFunction::JsiFunction(const panda::CopyableGlobal<panda::FunctionRef>& val) : JsiType(val) {}
 
-JsiFunction::JsiFunction(panda::Local<panda::FunctionRef> val) : JsiType(val)
-{
-}
+JsiFunction::JsiFunction(panda::Local<panda::FunctionRef> val) : JsiType(val) {}
+
+JsiFunction::JsiFunction(const EcmaVM *vm, panda::Local<panda::FunctionRef> val) : JsiType(vm, val) {}
 
 JsiRef<JsiValue> JsiFunction::Call(JsiRef<JsiValue> thisVal, int argc, JsiRef<JsiValue> argv[]) const
 {
@@ -399,9 +401,9 @@ JsiCallbackInfo::JsiCallbackInfo(panda::JsiRuntimeCallInfo* info) : info_(info) 
 JsiRef<JsiValue> JsiCallbackInfo::operator[](size_t index) const
 {
     if (static_cast<int32_t>(index) < Length()) {
-        return JsiRef<JsiValue>::Make(info_->GetCallArgRef(index));
+        return JsiRef<JsiValue>::FastMake(info_->GetVM(), info_->GetCallArgRef(index));
     }
-    return JsiRef<JsiValue>::Make(panda::JSValueRef::Undefined(info_->GetVM()));
+    return JsiRef<JsiValue>::FastMake(info_->GetVM(), panda::JSValueRef::Undefined(info_->GetVM()));
 }
 
 JsiRef<JsiObject> JsiCallbackInfo::This() const
@@ -432,6 +434,26 @@ bool JsiCallbackInfo::GetBooleanArg(size_t index, bool& value) const
     return true;
 }
 
+bool JsiCallbackInfo::GetInt32Arg(size_t index, int32_t& value) const
+{
+    auto arg = info_->GetCallArgRef(index);
+    if (arg.IsEmpty() || !arg->IsNumber()) {
+        return false;
+    }
+    value = arg->Int32Value(info_->GetVM());
+    return true;
+}
+
+bool JsiCallbackInfo::GetUint32Arg(size_t index, uint32_t& value) const
+{
+    auto arg = info_->GetCallArgRef(index);
+    if (arg.IsEmpty() || !arg->IsNumber()) {
+        return false;
+    }
+    value = arg->Uint32Value(info_->GetVM());
+    return true;
+}
+
 bool JsiCallbackInfo::GetDoubleArg(size_t index, double& value) const
 {
     auto arg = info_->GetCallArgRef(index);
@@ -452,15 +474,39 @@ bool JsiCallbackInfo::GetStringArg(size_t index, std::string& value) const
     return true;
 }
 
+bool JsiCallbackInfo::GetDoubleArrayArg(size_t index, std::vector<double>& valueArr) const
+{
+    auto arg = info_->GetCallArgRef(index);
+    if (arg.IsEmpty() || !arg->IsArray(info_->GetVM())) {
+        return false;
+    }
+    auto arrayRef = Local<ArrayRef>(arg);
+    int32_t length = arrayRef->Length(info_->GetVM());
+    valueArr.reserve(length);
+    for (int32_t i = 0; i < length; ++i) {
+        auto jsDouble = panda::ArrayRef::GetValueAt(info_->GetVM(), arrayRef, i);
+        if (!jsDouble.IsEmpty() && jsDouble->IsNumber()) {
+            valueArr.emplace_back(jsDouble->ToNumber(info_->GetVM())->Value());
+        }
+    }
+    return true;
+}
+
 // -----------------------
 // Implementation of JsiString
 // -----------------------
-JsiString::JsiString(const char* str) : JsiValue(StringRef::NewFromUtf8(GetEcmaVM(), str)) {}
-JsiString::JsiString(JsiValue str) : JsiValue(str) {}
+JsiString::JsiString(const panda::CopyableGlobal<panda::StringRef>& val) : JsiType(val) {}
+JsiString::JsiString(panda::Local<panda::StringRef> val) : JsiType(val) {}
 
-JsiString JsiString::New(const char* str)
+panda::Local<panda::StringRef> JsiString::New(const char* str)
 {
-    return JsiString(str);
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    return panda::StringRef::NewFromUtf8(runtime->GetEcmaVm(), str);
+}
+
+panda::Local<panda::StringRef> JsiString::New(const std::string& str)
+{
+    return JsiString::New(str.c_str());
 }
 
 // -----------------------

@@ -85,10 +85,26 @@ void JSFlexImpl::CreateFlexComponent(const JSCallbackInfo& info)
     } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         FlexModel::GetInstance()->SetCrossAxisAlign(FlexAlign::FLEX_START);
     }
+    if (obj->HasProperty("space")) {
+        JSRef<JSVal> spaceVal = obj->GetProperty("space");
+        if (spaceVal->IsUndefined()) {
+            return;
+        }
+        CalcDimension value;
+        JSRef<JSObject> spaceObj = JSRef<JSObject>::Cast(obj->GetProperty("space"));
+        JSRef<JSVal> mainSpaceVal = spaceObj->GetProperty("main");
+        if (!ParseLengthMetricsToPositiveDimension(mainSpaceVal, value) || value.IsNegative()) {
+            value.Reset();
+        }
+        FlexModel::GetInstance()->SetMainSpace(value);
+    }
 }
 
 void JSFlexImpl::CreateWrapComponent(const JSCallbackInfo& info, int32_t wrapVal)
 {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        return;
+    }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> directionVal = obj->GetProperty("direction");
     JSRef<JSVal> justifyVal = obj->GetProperty("justifyContent");
@@ -129,6 +145,25 @@ void JSFlexImpl::CreateWrapComponent(const JSCallbackInfo& info, int32_t wrapVal
         if (alignContent >= 0 && alignContent <= MAIN_ALIGN_MAX_VALUE) {
             FlexModel::GetInstance()->SetWrapAlignment(WRAP_TABLE[alignContent]);
         }
+    }
+    if (obj->HasProperty("space")) {
+        JSRef<JSVal> spaceVal = obj->GetProperty("space");
+        if (spaceVal->IsUndefined()) {
+            return;
+        }
+        CalcDimension mainValue;
+        CalcDimension crossValue;
+        JSRef<JSObject> spaceObj = JSRef<JSObject>::Cast(obj->GetProperty("space"));
+        JSRef<JSVal> mainSpaceVal = spaceObj->GetProperty("main");
+        JSRef<JSVal> crossSpaceVal = spaceObj->GetProperty("cross");
+        if (!ParseLengthMetricsToPositiveDimension(mainSpaceVal, mainValue) || mainValue.IsNegative()) {
+            mainValue.Reset();
+        }
+        if (!ParseLengthMetricsToPositiveDimension(crossSpaceVal, crossValue) || crossValue.IsNegative()) {
+            crossValue.Reset();
+        }
+        FlexModel::GetInstance()->SetMainSpace(mainValue);
+        FlexModel::GetInstance()->SetCrossSpace(crossValue);
     }
 }
 
@@ -192,7 +227,9 @@ void JSFlexImpl::JSBind(BindingTarget globalObj)
     JSClass<JSFlexImpl>::StaticMethod("justifyContent", &JSFlex::SetJustifyContent, opt);
     JSClass<JSFlexImpl>::StaticMethod("alignItems", &JSFlex::SetAlignItems, opt);
     JSClass<JSFlexImpl>::StaticMethod("alignContent", &JSFlex::SetAlignContent, opt);
+    JSClass<JSFlexImpl>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSFlexImpl>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSFlexImpl>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSFlexImpl>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSFlexImpl>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSFlexImpl>::StaticMethod("onClick", &JSInteractableView::JsOnClick);

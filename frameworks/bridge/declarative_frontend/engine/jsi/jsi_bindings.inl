@@ -17,7 +17,6 @@
 
 #include "base/log/ace_performance_monitor.h"
 #include "base/log/ace_trace.h"
-#include "base/utils/system_properties.h"
 #include "ecmascript/napi/include/jsnapi.h"
 #include "jsi_bindings.h"
 
@@ -410,12 +409,12 @@ panda::Local<panda::JSValueRef> JsiClass<C>::InternalMemberFunctionCallback(pand
     if (binding == nullptr) {
         return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
     }
-    if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
-        STATIC_API_DURATION();
-    }
-    ACE_BUILD_SCOPED_TRACE("[%s][%s]", ThisJSClass::JSName(), binding->Name());
+    STATIC_API_DURATION();
+    ACE_BUILD_TRACE_BEGIN("[%s][%s]", ThisJSClass::JSName(), binding->Name());
+    panda::JsiFastNativeScope scope(vm);
     auto fnPtr = static_cast<FunctionBinding<T, panda::Local<panda::JSValueRef>, Args...>*>(binding)->Get();
     (instance->*fnPtr)(runtimeCallInfo);
+    ACE_BUILD_TRACE_END()
 }
 
 template<typename C>
@@ -440,16 +439,16 @@ panda::Local<panda::JSValueRef> JsiClass<C>::InternalJSMemberFunctionCallback(
     if (binding == nullptr) {
         return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
     }
-    if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
-        STATIC_API_DURATION();
-    }
-    ACE_BUILD_SCOPED_TRACE("[%s][%s]", ThisJSClass::JSName(), binding->Name());
+    STATIC_API_DURATION();
+    ACE_BUILD_TRACE_BEGIN("[%s][%s]", ThisJSClass::JSName(), binding->Name());
+    panda::JsiFastNativeScope scope(vm);
     auto fnPtr = static_cast<FunctionBinding<T, void, const JSCallbackInfo&>*>(binding)->Get();
     JsiCallbackInfo info(runtimeCallInfo);
     (instance->*fnPtr)(info);
 
     std::variant<void*, panda::CopyableGlobal<panda::JSValueRef>> retVal = info.GetReturnValue();
     auto jsVal = std::get_if<panda::CopyableGlobal<panda::JSValueRef>>(&retVal);
+    ACE_BUILD_TRACE_END()
     if (jsVal) {
         return jsVal->ToLocal();
     }
@@ -469,10 +468,9 @@ panda::Local<panda::JSValueRef> JsiClass<C>::MethodCallback(panda::JsiRuntimeCal
     if (binding == nullptr) {
         return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
     }
-    if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
-        STATIC_API_DURATION();
-    }
-    ACE_BUILD_SCOPED_TRACE("[%s][%s]", ThisJSClass::JSName(), binding->Name());
+    STATIC_API_DURATION();
+    ACE_BUILD_TRACE_BEGIN("[%s][%s]", ThisJSClass::JSName(), binding->Name());
+    panda::JsiFastNativeScope scope(vm);
     auto fnPtr = static_cast<FunctionBinding<Class, R, Args...>*>(binding)->Get();
     auto tuple = __detail__::ToTuple<std::decay_t<Args>...>(runtimeCallInfo);
     bool returnSelf = binding->Options() & MethodOptions::RETURN_SELF;
@@ -482,20 +480,25 @@ panda::Local<panda::JSValueRef> JsiClass<C>::MethodCallback(panda::JsiRuntimeCal
     if constexpr (isVoid && hasArguments) {
         // C::MemberFunction(Args...)
         FunctionUtils::CallMemberFunction(instance, fnPtr, tuple);
+        ACE_BUILD_TRACE_END()
         return returnSelf ? thisObj : panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
     } else if constexpr (isVoid && !hasArguments) {
         // C::MemberFunction()
         (instance->*fnPtr)();
+        ACE_BUILD_TRACE_END()
         return returnSelf ? thisObj : panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
     } else if constexpr (!isVoid && hasArguments) {
         // R C::MemberFunction(Args...)
         auto result = FunctionUtils::CallMemberFunction(instance, fnPtr, tuple);
+        ACE_BUILD_TRACE_END()
         return JsiValueConvertor::toJsiValueWithVM<R>(vm, result);
     } else if constexpr (!isVoid && !hasArguments) {
         // R C::MemberFunction()
         auto res = (instance->*fnPtr)();
+        ACE_BUILD_TRACE_END()
         return JsiValueConvertor::toJsiValueWithVM<R>(vm, res);
     }
+    ACE_BUILD_TRACE_END()
 }
 
 template<typename C>
@@ -511,15 +514,13 @@ panda::Local<panda::JSValueRef> JsiClass<C>::JSMethodCallback(panda::JsiRuntimeC
     if (binding == nullptr) {
         return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
     }
-    if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
-        if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
-        STATIC_API_DURATION();
-    }
-    }
-    ACE_BUILD_SCOPED_TRACE("[%s][%s]", ThisJSClass::JSName(), binding->Name());
+    STATIC_API_DURATION();
+    ACE_BUILD_TRACE_BEGIN("[%s][%s]", ThisJSClass::JSName(), binding->Name());
+    panda::JsiFastNativeScope scope(vm);
     JsiCallbackInfo info(runtimeCallInfo);
     auto fnPtr = static_cast<FunctionBinding<Class, R, Args...>*>(binding)->Get();
     (instance->*fnPtr)(info);
+    ACE_BUILD_TRACE_END()
 }
 
 template<typename C>
@@ -531,10 +532,9 @@ panda::Local<panda::JSValueRef> JsiClass<C>::StaticMethodCallback(panda::JsiRunt
     if (binding == nullptr) {
         return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
     }
-    if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
-        STATIC_API_DURATION();
-    }
-    ACE_BUILD_SCOPED_TRACE("[%s][%s]", ThisJSClass::JSName(), binding->Name());
+    STATIC_API_DURATION();
+    ACE_BUILD_TRACE_BEGIN("[%s][%s]", ThisJSClass::JSName(), binding->Name());
+    panda::JsiFastNativeScope scope(vm);
     auto fnPtr = binding->Get();
     auto tuple = __detail__::ToTuple<std::decay_t<Args>...>(runtimeCallInfo);
     bool returnSelf = binding->Options() & MethodOptions::RETURN_SELF;
@@ -545,20 +545,25 @@ panda::Local<panda::JSValueRef> JsiClass<C>::StaticMethodCallback(panda::JsiRunt
     if constexpr (isVoid && hasArguments) {
         // void C::MemberFunction(Args...)
         FunctionUtils::CallStaticMemberFunction(fnPtr, tuple);
+        ACE_BUILD_TRACE_END()
         return returnSelf ? thisObj : panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
     } else if constexpr (isVoid && !hasArguments) {
         // void C::MemberFunction()
         fnPtr();
+        ACE_BUILD_TRACE_END()
         return panda::JSValueRef::Undefined(vm);
     } else if constexpr (!isVoid && hasArguments) {
         // R C::MemberFunction(Args...)
         auto result = FunctionUtils::CallStaticMemberFunction(fnPtr, tuple);
+        ACE_BUILD_TRACE_END()
         return JsiValueConvertor::toJsiValueWithVM(vm, result);
     } else if constexpr (!isVoid && !hasArguments) {
         // R C::MemberFunction()
         auto res = fnPtr();
+        ACE_BUILD_TRACE_END()
         return JsiValueConvertor::toJsiValueWithVM(vm, res);
     }
+    ACE_BUILD_TRACE_END()
 }
 
 template<typename C>
@@ -569,15 +574,15 @@ panda::Local<panda::JSValueRef> JsiClass<C>::JSStaticMethodCallback(panda::JsiRu
     if (binding == nullptr) {
         return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
     }
-    if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
-        STATIC_API_DURATION();
-    }
-    ACE_BUILD_SCOPED_TRACE("[%s][%s]", ThisJSClass::JSName(), binding->Name());
+    STATIC_API_DURATION();
+    ACE_BUILD_TRACE_BEGIN("[%s][%s]", ThisJSClass::JSName(), binding->Name());
+    panda::JsiFastNativeScope scope(vm);
     auto fnPtr = binding->Get();
     JsiCallbackInfo info(runtimeCallInfo);
     fnPtr(info);
     std::variant<void*, panda::CopyableGlobal<panda::JSValueRef>> retVal = info.GetReturnValue();
     auto jsVal = std::get_if<panda::CopyableGlobal<panda::JSValueRef>>(&retVal);
+    ACE_BUILD_TRACE_END()
     if (jsVal) {
         return jsVal->ToLocal();
     }

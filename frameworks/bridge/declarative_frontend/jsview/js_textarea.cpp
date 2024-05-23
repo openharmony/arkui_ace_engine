@@ -75,7 +75,9 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSTextArea>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSTextArea>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSTextArea>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSTextArea>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSTextArea>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSTextArea>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTextArea>::StaticMethod("onEditChange", &JSTextField::SetOnEditChanged);
     JSClass<JSTextArea>::StaticMethod("copyOption", &JSTextField::SetCopyOption);
@@ -103,6 +105,10 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("caretStyle", &JSTextField::SetCaretStyle);
     JSClass<JSTextArea>::StaticMethod("textIndent", &JSTextField::SetTextIndent);
     JSClass<JSTextArea>::StaticMethod("textOverflow", &JSTextField::SetTextOverflow);
+    JSClass<JSTextArea>::StaticMethod("onWillInsert", &JSTextField::OnWillInsertValue);
+    JSClass<JSTextArea>::StaticMethod("onDidInsert", &JSTextField::OnDidInsertValue);
+    JSClass<JSTextArea>::StaticMethod("onWillDelete", &JSTextField::OnWillDelete);
+    JSClass<JSTextArea>::StaticMethod("onDidDelete", &JSTextField::OnDidDelete);
     JSClass<JSTextArea>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 

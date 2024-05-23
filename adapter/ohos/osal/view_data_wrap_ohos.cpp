@@ -13,11 +13,22 @@
  * limitations under the License.
  */
 
+#include <dlfcn.h>
 #include "view_data_wrap_ohos.h"
 
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace {
+#ifdef APP_USE_ARM
+constexpr char LIB_HINT2_TYPE_Z_SO_NAME[] = "/system/lib/module/core/atomicservicecomponent/libhint2type.z.so";
+#elif defined(APP_USE_X86_64)
+constexpr char LIB_HINT2_TYPE_Z_SO_NAME[] = "/system/lib64/module/core/atomicservicecomponent/libhint2type.z.so";
+#else
+constexpr char LIB_HINT2_TYPE_Z_SO_NAME[] = "/system/lib64/module/core/atomicservicecomponent/libhint2type.z.so";
+#endif
+constexpr char HINT_2_TYPE[] = "Hint2Type";
+using Hint2Type = int (*) (std::vector<std::string>, std::vector<int>&);
+
 RefPtr<PageNodeInfoWrap> PageNodeInfoWrap::CreatePageNodeInfoWrap()
 {
     return AceType::MakeRefPtr<PageNodeInfoWrapOhos>();
@@ -52,6 +63,86 @@ AbilityBase::AutoFillType ViewDataWrap::ViewDataToType(const AbilityBase::ViewDa
         }
     }
     return type;
+}
+
+bool ViewDataWrap::LoadHint2Type(const std::vector<std::string>& placeHolder, std::vector<int>& intType)
+{
+    void* handle = dlopen(LIB_HINT2_TYPE_Z_SO_NAME, RTLD_LAZY);
+    if (handle == nullptr) {
+        LOGE("Failed to open libhint2type library %{public}s, reason: %{public}sn",
+            LIB_HINT2_TYPE_Z_SO_NAME, dlerror());
+        return false;
+    }
+    Hint2Type hintFun = reinterpret_cast<Hint2Type>(dlsym(handle, HINT_2_TYPE));
+    if (hintFun == nullptr) {
+        dlclose(handle);
+        LOGE("Failed to get symbol %{public}s in %{public}s", HINT_2_TYPE, LIB_HINT2_TYPE_Z_SO_NAME);
+        return false;
+    }
+    if (hintFun(placeHolder, intType)) {
+        LOGE("Failed to Hint 2 intType");
+        dlclose(handle);
+        return false;
+    }
+    dlclose(handle);
+    return true;
+}
+
+bool ViewDataWrap::GetPlaceHolderValue(AbilityBase::ViewData& viewData)
+{
+    std::vector<std::string> placeHolder;
+    std::vector<int> intType;
+    for (auto it = viewData.nodes.begin(); it != viewData.nodes.end(); ++it) {
+        if (it->autoFillType == AbilityBase::AutoFillType::UNSPECIFIED) {
+            placeHolder.push_back(it->placeholder);
+        }
+    }
+    auto isSuccessLoadHint2Type = LoadHint2Type(placeHolder, intType);
+    if (!isSuccessLoadHint2Type) {
+        LOGE("Load Hint2Type Failed !");
+        return false;
+    }
+    size_t  index = 0;
+    for (auto it = viewData.nodes.begin(); it != viewData.nodes.end(); ++it) {
+        if (index >= intType.size()) {
+            LOGE("intType size err !");
+            break;
+        }
+        if (it->autoFillType == AbilityBase::AutoFillType::UNSPECIFIED) {
+            it->autoFillType = HintToAutoFillType(intType[index]);
+            ++index;
+        }
+    }
+    return true;
+}
+
+AbilityBase::AutoFillType ViewDataWrap::HintToAutoFillType(const int& intType)
+{
+    std::vector<AbilityBase::AutoFillType> hintVector = {
+        AbilityBase::AutoFillType::UNSPECIFIED,
+        AbilityBase::AutoFillType::NICKNAME,
+        AbilityBase::AutoFillType::PERSON_FULL_NAME,
+        AbilityBase::AutoFillType::PERSON_LAST_NAME,
+        AbilityBase::AutoFillType::PERSON_FIRST_NAME,
+        AbilityBase::AutoFillType::PHONE_NUMBER,
+        AbilityBase::AutoFillType::PHONE_COUNTRY_CODE,
+        AbilityBase::AutoFillType::FULL_PHONE_NUMBER,
+        AbilityBase::AutoFillType::EMAIL_ADDRESS,
+        AbilityBase::AutoFillType::ID_CARD_NUMBER,
+        AbilityBase::AutoFillType::FORMAT_ADDRESS,
+        AbilityBase::AutoFillType::COUNTRY_ADDRESS,
+        AbilityBase::AutoFillType::PROVINCE_ADDRESS,
+        AbilityBase::AutoFillType::CITY_ADDRESS,
+        AbilityBase::AutoFillType::DISTRICT_ADDRESS,
+        AbilityBase::AutoFillType::FULL_STREET_ADDRESS,
+        AbilityBase::AutoFillType::DETAIL_INFO_WITHOUT_STREET,
+        AbilityBase::AutoFillType::HOUSE_NUMBER,
+        AbilityBase::AutoFillType::BANK_CARD_NUMBER };
+
+    if (intType < 0 || (size_t)intType >= hintVector.size()) {
+        return hintVector[0];
+    }
+    return hintVector[intType];
 }
 
 RefPtr<ViewDataWrap> ViewDataWrap::CreateViewDataWrap(const AbilityBase::ViewData& viewData)

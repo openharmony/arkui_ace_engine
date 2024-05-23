@@ -39,12 +39,8 @@ GestureJudgeResult JsGestureJudgeFunction::Execute(
     obj->SetProperty<double>("timestamp", info->GetTimeStamp().time_since_epoch().count());
     obj->SetProperty<double>("source", static_cast<int32_t>(info->GetSourceDevice()));
     obj->SetProperty<double>("pressure", info->GetForce());
-    if (info->GetTiltX().has_value()) {
-        obj->SetProperty<double>("tiltX", info->GetTiltX().value());
-    }
-    if (info->GetTiltY().has_value()) {
-        obj->SetProperty<double>("tiltY", info->GetTiltY().value());
-    }
+    obj->SetProperty<double>("tiltX", info->GetTiltX().value_or(0.0f));
+    obj->SetProperty<double>("tiltY", info->GetTiltY().value_or(0.0f));
     obj->SetProperty<double>("sourceTool", static_cast<int32_t>(info->GetSourceTool()));
 
     JSRef<JSArray> fingerArr = JSRef<JSArray>::New();
@@ -54,9 +50,9 @@ GestureJudgeResult JsGestureJudgeFunction::Execute(
     for (const FingerInfo& fingerInfo : fingerList) {
         JSRef<JSObject> element = CreateFingerInfo(fingerInfo);
         if (fingerInfo.sourceType_ == SourceType::TOUCH && fingerInfo.sourceTool_ == SourceTool::FINGER) {
-            fingerArr->SetValueAt(fingerInfo.originalId_, element);
-            if (fingerInfo.originalId_ > maxFingerId) {
-                maxFingerId = fingerInfo.originalId_;
+            fingerArr->SetValueAt(fingerInfo.fingerId_, element);
+            if (fingerInfo.fingerId_ > maxFingerId) {
+                maxFingerId = fingerInfo.fingerId_;
             }
         } else {
             notTouchFingerList.emplace_back(fingerInfo);
@@ -87,11 +83,14 @@ JSRef<JSObject> JsGestureJudgeFunction::CreateFingerInfo(const FingerInfo& finge
     JSRef<JSObject> fingerInfoObj = JSRef<JSObject>::New();
     const OHOS::Ace::Offset& globalLocation = fingerInfo.globalLocation_;
     const OHOS::Ace::Offset& localLocation = fingerInfo.localLocation_;
-    fingerInfoObj->SetProperty<int32_t>("id", fingerInfo.originalId_);
+    const OHOS::Ace::Offset& screenLocation = fingerInfo.screenLocation_;
+    fingerInfoObj->SetProperty<int32_t>("id", fingerInfo.fingerId_);
     fingerInfoObj->SetProperty<double>("globalX", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX()));
     fingerInfoObj->SetProperty<double>("globalY", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY()));
     fingerInfoObj->SetProperty<double>("localX", PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX()));
     fingerInfoObj->SetProperty<double>("localY", PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY()));
+    fingerInfoObj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX()));
+    fingerInfoObj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY()));
     return fingerInfoObj;
 }
 

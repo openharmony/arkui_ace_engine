@@ -38,9 +38,6 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        if (UseContentModifier()) {
-            return nullptr;
-        }
         if (!IsSliderVisible()) {
             return nullptr;
         }
@@ -59,6 +56,7 @@ public:
                     pattern->UpdateImagePositionY(y);
                 });
         }
+        sliderContentModifier_->SetUseContentModifier(UseContentModifier());
         auto overlayGlobalOffset = CalculateGlobalSafeOffset();
         std::pair<OffsetF, float> BubbleVertex = GetBubbleVertexPosition(circleCenter_, trackThickness_, blockSize_);
         SliderPaintMethod::TipParameters tipParameters { bubbleFlag_, BubbleVertex.first, overlayGlobalOffset };
@@ -134,9 +132,15 @@ public:
     OffsetF CalculateGlobalSafeOffset();
     void UpdateValue(float value);
     void OnVisibleChange(bool isVisible) override;
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
     void SetBuilderFunc(SliderMakeCallback&& makeFunc)
     {
+        if (makeFunc == nullptr) {
+            makeFunc_ = std::nullopt;
+            OnModifyDone();
+            return;
+        }
         makeFunc_ = std::move(makeFunc);
     }
 
@@ -173,6 +177,8 @@ private:
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleTouchEvent(const TouchEventInfo& info);
+    void HandleTouchDown(const Offset& location, SourceType sourceType);
+    void HandleTouchUp(const Offset& location, SourceType sourceType);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputEventHub);
     void HandleMouseEvent(const MouseInfo& info);
     void HandleHoverEvent(bool isHover);
@@ -180,6 +186,7 @@ private:
     void HandlingGestureStart(const GestureEvent& info);
     void HandlingGestureEvent(const GestureEvent& info);
     void HandledGestureEvent();
+    void InitWindowSizeChanged(const RefPtr<FrameNode>& host);
 
     void UpdateValueByLocalLocation(const std::optional<Offset>& localLocation);
     void FireChangeEvent(int32_t mode);
@@ -218,13 +225,28 @@ private:
     bool isMinResponseExceed(const std::optional<Offset>& localLocation);
     void FireBuilder();
     RefPtr<FrameNode> BuildContentModifierNode();
+    float GetValueInValidRange(const RefPtr<SliderPaintProperty>& paintProperty, float value, float min, float max);
+    void UpdateToValidValue();
     std::optional<SliderMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
+    void SetSkipGestureEvents()
+    {
+        skipGestureEvents_ = true;
+    }
+    void ResetSkipGestureEvents()
+    {
+        skipGestureEvents_ = false;
+    }
+    bool IsSkipGestureEvents()
+    {
+        return skipGestureEvents_;
+    }
 
     Axis direction_ = Axis::HORIZONTAL;
     enum SliderChangeMode { Begin = 0, Moving = 1, End = 2, Click = 3 };
     float value_ = 0.0f;
     float minResponse_ = 0.0f;
+    bool skipGestureEvents_ = false;
     float minResponseStartValue_ = value_;
     bool isMinResponseExceedFlag_ = false;
     SourceType eventSourceDevice_ = SourceType::NONE;
@@ -242,6 +264,7 @@ private:
     SliderModelNG::SliderInteraction sliderInteractionMode_ = SliderModelNG::SliderInteraction::SLIDE_AND_CLICK;
     bool allowDragEvents_ = true;
     int32_t fingerId_ = -1;
+    std::optional<Offset> lastTouchLocation_ = std::nullopt;
 
     float stepRatio_ = 1.0f / 100.0f;
     float valueRatio_ = 0.0f;

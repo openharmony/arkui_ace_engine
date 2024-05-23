@@ -30,18 +30,25 @@ bool CheckScrollable(const RefPtr<Pattern>& pattern)
     return AceType::InstanceOf<ScrollablePattern>(pattern);
 }
 
-float GetScrollableDistance(RefPtr<Pattern> pattern)
+float GetScrollableNodeDistance(RefPtr<Pattern> pattern)
 {
-    auto scrollPattern = AceType::DynamicCast<ScrollablePattern>(pattern);
-    CHECK_NULL_RETURN(scrollPattern, 0.0f);
-    return scrollPattern->GetScrollableDistance();
+    auto scrollablePattern = AceType::DynamicCast<ScrollablePattern>(pattern);
+    CHECK_NULL_RETURN(scrollablePattern, 0.0f);
+    return scrollablePattern->GetScrollableDistance();
 }
 
-float GetScrollOffset(RefPtr<Pattern> pattern)
+double GetScrollBarOutBoundaryExtent(RefPtr<Pattern> pattern)
 {
-    auto scrollPattern = AceType::DynamicCast<ScrollablePattern>(pattern);
-    CHECK_NULL_RETURN(scrollPattern, 0.0f);
-    return scrollPattern->GetBarOffset();
+    auto scrollablePattern = AceType::DynamicCast<ScrollablePattern>(pattern);
+    CHECK_NULL_RETURN(scrollablePattern, 0.0f);
+    return scrollablePattern->GetScrollBarOutBoundaryExtent();
+}
+
+float GetScrollableNodeOffset(RefPtr<Pattern> pattern)
+{
+    auto scrollablePattern = AceType::DynamicCast<ScrollablePattern>(pattern);
+    CHECK_NULL_RETURN(scrollablePattern, 0.0f);
+    return scrollablePattern->GetBarOffset();
 }
 } // namespace
 
@@ -83,7 +90,7 @@ void ScrollBarProxy::NotifyScrollableNode(
 {
     auto scrollBar = weakScrollBar.Upgrade();
     CHECK_NULL_VOID(scrollBar);
-    float controlDistance = scrollBar->GetScrollableDistance();
+    float barScrollableDistance  = scrollBar->GetScrollableDistance();
 
     for (const auto& node : scrollableNodes_) {
         if (node.onPositionChanged == nullptr) {
@@ -93,7 +100,7 @@ void ScrollBarProxy::NotifyScrollableNode(
         if (!scrollable || !CheckScrollable(scrollable)) {
             continue;
         }
-        float value = CalcPatternOffset(GetScrollableDistance(scrollable), controlDistance, distance);
+        float value = CalcPatternOffset(GetScrollableNodeDistance(scrollable), barScrollableDistance, distance);
         node.onPositionChanged(value, source);
         if (node.scrollbarFRcallback) {
             node.scrollbarFRcallback(0, SceneStatus::RUNNING);
@@ -151,9 +158,9 @@ void ScrollBarProxy::NotifyScrollBar(const WeakPtr<ScrollablePattern>& weakScrol
         return;
     }
 
-    float controlDistance = GetScrollableDistance(scrollable);
-    float scrollOffset = -GetScrollOffset(scrollable); // scroll bar direction is reverse
-
+    float controlDistance = GetScrollableNodeDistance(scrollable);
+    float scrollableNodeOffset = -GetScrollableNodeOffset(scrollable); // scroll bar direction is reverse
+    double scrollBarOutBoundaryDistance = GetScrollBarOutBoundaryExtent(scrollable);
     for (const auto& weakScrollBar : scrollBars_) {
         auto scrollBar = weakScrollBar.Upgrade();
         if (!scrollBar) {
@@ -161,7 +168,10 @@ void ScrollBarProxy::NotifyScrollBar(const WeakPtr<ScrollablePattern>& weakScrol
         }
 
         scrollBar->SetControlDistance(controlDistance);
-        scrollBar->SetScrollOffset(!scrollable->IsReverse() ? scrollOffset : controlDistance - scrollOffset);
+        scrollBar->SetReverse(scrollable->IsReverse());
+        scrollBar->SetScrollableNodeOffset(
+            !scrollable->IsReverse() ? scrollableNodeOffset : controlDistance - scrollableNodeOffset);
+        scrollBar->HandleScrollBarOutBoundary(scrollBarOutBoundaryDistance);
         auto host = scrollBar->GetHost();
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -198,7 +208,8 @@ void ScrollBarProxy::StopScrollBarAnimator() const
     }
 }
 
-bool ScrollBarProxy::NotifySnapScroll(float delta, float velocity, float controlDistance, float dragDistance) const
+bool ScrollBarProxy::NotifySnapScroll(
+    float delta, float velocity, float barScrollableDistance, float dragDistance) const
 {
     for (const auto& node : scrollableNodes_) {
         auto scrollable = node.scrollableNode.Upgrade();
@@ -206,8 +217,9 @@ bool ScrollBarProxy::NotifySnapScroll(float delta, float velocity, float control
             !node.startScrollSnapMotionCallback) {
             continue;
         }
-        auto patternOffset = CalcPatternOffset(GetScrollableDistance(scrollable), controlDistance, delta);
-        dragDistance = CalcPatternOffset(GetScrollableDistance(scrollable), controlDistance, dragDistance);
+        auto controlDistance = GetScrollableNodeDistance(scrollable);
+        auto patternOffset = CalcPatternOffset(controlDistance, barScrollableDistance, delta);
+        dragDistance = CalcPatternOffset(controlDistance, barScrollableDistance, dragDistance);
         auto predictSnapOffset = node.calePredictSnapOffsetCallback(patternOffset, dragDistance, -velocity);
         // If snap scrolling, predictSnapOffset will has a value.
         if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
@@ -219,10 +231,10 @@ bool ScrollBarProxy::NotifySnapScroll(float delta, float velocity, float control
     return false;
 }
 
-float ScrollBarProxy::CalcPatternOffset(float scrollableDistance, float controlDistance, float delta) const
+float ScrollBarProxy::CalcPatternOffset(float controlDistance, float barScrollableDistance, float delta) const
 {
-    if (!NearZero(controlDistance)) {
-        return delta * scrollableDistance / controlDistance;
+    if (!NearZero(barScrollableDistance)) {
+        return delta * controlDistance / barScrollableDistance;
     } else {
         return 0.0f;
     }
@@ -235,6 +247,23 @@ void ScrollBarProxy::ScrollPage(bool reverse, bool smooth)
             continue;
         }
         node.scrollPageCallback(reverse, smooth);
+    }
+}
+
+void ScrollBarProxy::SetScrollEnabled(bool scrollEnabled, const WeakPtr<ScrollablePattern>& weakScrollableNode) const
+{
+    auto scrollable = weakScrollableNode.Upgrade();
+    if (!scrollable || !CheckScrollable(scrollable)) {
+        return;
+    }
+
+    for (const auto& weakScrollBar : scrollBars_) {
+        auto scrollBar = weakScrollBar.Upgrade();
+        if (!scrollBar) {
+            continue;
+        }
+
+        scrollBar->SetScrollEnabled(scrollEnabled);
     }
 }
 } // namespace OHOS::Ace::NG

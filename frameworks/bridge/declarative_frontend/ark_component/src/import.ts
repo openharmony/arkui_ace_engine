@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-/// <reference path="./ArkViewStackProcessor.ts" />
+/// <reference path="./ArkClassMock.ts" />
 
 /// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/ability_component.d.ts" />
 /// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/action_sheet.d.ts" />
@@ -33,6 +33,7 @@
 /// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/column_split.d.ts" />
 /// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/common.d.ts" />
 /// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/common_ts_ets_api.d.ts" />
+/// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/component3d.d.ts" />
 /// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/context_menu.d.ts" />
 /// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/counter.d.ts" />
 /// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/custom_dialog_controller.d.ts" />
@@ -113,6 +114,8 @@
 /// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/stepper.d.ts" />
 /// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/stepper_item.d.ts" />
 /// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/swiper.d.ts" />
+/// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/symbolglyph.d.ts" />
+/// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/symbol_span.d.ts" />
 /// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/tabs.d.ts" />
 /// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/tab_content.d.ts" />
 /// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/text.d.ts" />

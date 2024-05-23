@@ -57,6 +57,7 @@ RefPtr<NGGestureRecognizer> RotationGesture::CreateRecognizer()
     rotationRecognizer->SetPriority(priority_);
     rotationRecognizer->SetPriorityMask(gestureMask_);
     rotationRecognizer->SetGestureInfo(gestureInfo_);
+    rotationRecognizer->SetUserData(userData_);
     return rotationRecognizer;
 }
 

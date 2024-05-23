@@ -132,7 +132,9 @@ void JSMarquee::JSBind(BindingTarget globalObj)
     JSClass<JSMarquee>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSMarquee>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSMarquee>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSMarquee>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSMarquee>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSMarquee>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSMarquee>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSMarquee>::InheritAndBind<JSViewAbstract>(globalObj);
 }

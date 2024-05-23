@@ -225,17 +225,15 @@ void PipelineBase::SetRootSize(double density, float width, float height)
             return;
         }
         context->SetRootRect(width, height);
-
     };
-#ifdef NG_BUILD
-    if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+
+    auto container = Container::GetContainer(instanceId_);
+    auto settings = container->GetSettings();
+    if (settings.usePlatformAsUIThread && settings.useUIAsJSThread) {
         task();
     } else {
         taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI, "ArkUISetRootSize");
     }
-#else
-    taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI, "ArkUISetRootSize");
-#endif
 }
 
 void PipelineBase::SetFontScale(float fontScale)
@@ -603,7 +601,7 @@ void PipelineBase::PrepareOpenImplicitAnimation()
 
     // flush ui tasks before open implicit animation
     if (!IsLayouting()) {
-        FlushUITasks();
+        FlushUITasks(true);
     }
 #endif
 }
@@ -619,7 +617,7 @@ void PipelineBase::PrepareCloseImplicitAnimation()
     // the animation closure
     if (pendingImplicitLayout_.top() || pendingImplicitRender_.top()) {
         if (!IsLayouting()) {
-            FlushUITasks();
+            FlushUITasks(true);
         } else if (IsLayouting()) {
             LOGW("IsLayouting, prepareCloseImplicitAnimation has tasks not flushed");
         }
@@ -663,6 +661,7 @@ void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount)
 {
     CHECK_RUN_ON(UI);
     ACE_SCOPED_TRACE("OnVsyncEvent now:%" PRIu64 "", nanoTimestamp);
+    frameCount_ = frameCount;
 
     for (auto& callback : subWindowVsyncCallbacks_) {
         callback.second(nanoTimestamp, frameCount);
@@ -881,8 +880,7 @@ bool PipelineBase::MaybeRelease()
     } else {
         std::lock_guard lock(destructMutex_);
         LOGI("Post Destroy Pipeline Task to UI thread.");
-        return !taskExecutor_->PostTask([this] { delete this; }, TaskExecutor::TaskType::UI,
-            "ArkUIDestroyPipeline");
+        return !taskExecutor_->PostTask([this] { delete this; }, TaskExecutor::TaskType::UI, "ArkUIDestroyPipeline");
     }
 }
 

@@ -18,7 +18,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
-
+#include "core/common/container_scope.h"
 namespace OHOS::Ace::NG::ViewAnimate {
 namespace {
 const std::vector<OHOS::Ace::RefPtr<OHOS::Ace::Curve>> CURVES_LIST = {
@@ -49,6 +49,7 @@ void AnimateToInner(ArkUIContext* context, AnimationOption& option, const std::f
     const std::function<void()>& onFinishFunc, bool immediately)
 {
     CHECK_NULL_VOID(context);
+    ContainerScope scope(context->id);
     auto containerSafely = Container::GetContainer(context->id);
     CHECK_NULL_VOID(containerSafely);
     auto pipelineContext = containerSafely->GetPipelineContext();

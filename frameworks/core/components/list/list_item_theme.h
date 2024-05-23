@@ -83,8 +83,8 @@ public:
             theme->selectedColor_ = pattern->GetAttr<Color>("item_select_color", Color::WHITE);
             theme->selectedColorWithAlpha_ =
                 theme->selectedColor_.BlendOpacity(pattern->GetAttr<double>("item_selected_alpha", SELECTED_ALPHA));
-            theme->hoverAnimationDuration_ = 250;
-            theme->hoverToPressAnimationDuration_ = 100;
+            theme->hoverAnimationDuration_ = 250; //250: the duration of hover animation, unit is ms.
+            theme->hoverToPressAnimationDuration_ = 100; //100: the duration of hover to press animation, unit is ms.
             theme->clickAlphaBegin_ = pattern->GetAttr<double>("click_alpha_begin", 0.0f);
             theme->clickAlphaEnd_ = pattern->GetAttr<double>("click_alpha_end", 0.05f);
             theme->clickScale_ = pattern->GetAttr<double>("click_scale", 0.95f);

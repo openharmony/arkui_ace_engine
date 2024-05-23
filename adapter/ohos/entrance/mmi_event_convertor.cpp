@@ -24,6 +24,7 @@
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/event/ace_events.h"
+#include "core/event/key_event.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::Platform {
@@ -158,6 +159,10 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
         event.y = item.GetWindowYPos();
         event.screenX = item.GetDisplayXPos();
         event.screenY = item.GetDisplayYPos();
+    }
+    event.pressedKeyCodes_.clear();
+    for (const auto& curCode : pointerEvent->GetPressedKeys()) {
+        event.pressedKeyCodes_.emplace_back(static_cast<KeyCode>(curCode));
     }
     return event;
 }
@@ -317,9 +322,9 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     TimeStamp time(microseconds);
     events.time = time;
     events.pointerEvent = pointerEvent;
-    auto sourceTool = GetSourceTool(item.GetToolType());
-    if (events.sourceType == SourceType::TOUCH && sourceTool == SourceTool::PEN) {
-        events.id = TOUCH_TOOL_BASE_ID + static_cast<int32_t>(sourceTool);
+    events.sourceTool = GetSourceTool(item.GetToolType());
+    if (events.sourceType == SourceType::TOUCH && events.sourceTool == SourceTool::PEN) {
+        events.id = TOUCH_TOOL_BASE_ID + static_cast<int32_t>(events.sourceTool);
         // Pen use type double XY position.
         events.x = item.GetWindowXPos();
         events.y = item.GetWindowYPos();
@@ -328,6 +333,10 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         events.originalId = events.id;
     }
     events.touchEventId = pointerEvent->GetId();
+    events.pressedKeyCodes_.clear();
+    for (const auto& curCode : pointerEvent->GetPressedKeys()) {
+        events.pressedKeyCodes_.emplace_back(static_cast<KeyCode>(curCode));
+    }
 }
 
 void GetAxisEventAction(int32_t action, AxisEvent& event)
@@ -385,6 +394,10 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
     event.time = time;
     event.touchEventId = pointerEvent->GetId();
     event.targetDisplayId = pointerEvent->GetTargetDisplayId();
+    event.pressedCodes.clear();
+    for (const auto& curCode : pointerEvent->GetPressedKeys()) {
+        event.pressedCodes.emplace_back(static_cast<KeyCode>(curCode));
+    }
 }
 
 void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& event)
@@ -408,9 +421,8 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
 #ifdef SECURITY_COMPONENT_ENABLE
     event.enhanceData = keyEvent->GetEnhanceData();
 #endif
-    std::string pressedKeyStr = "Pressed Keys: ";
+    event.pressedCodes.clear();
     for (const auto& curCode : keyEvent->GetPressedKeys()) {
-        pressedKeyStr += (std::to_string(curCode) + " ");
         event.pressedCodes.emplace_back(static_cast<KeyCode>(curCode));
     }
 }
@@ -433,6 +445,10 @@ void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     event.time = TimeStamp(std::chrono::microseconds(pointerEvent->GetActionTime()));
     event.sourceTool = GetSourceTool(pointerItem.GetToolType());
     event.targetWindowId = pointerItem.GetTargetWindowId();
+    event.pressedKeyCodes_.clear();
+    for (const auto& curCode : pointerEvent->GetPressedKeys()) {
+        event.pressedKeyCodes_.emplace_back(static_cast<KeyCode>(curCode));
+    }
 }
 
 void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_t instanceId)

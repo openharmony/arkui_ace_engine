@@ -40,12 +40,21 @@ public:
         : paraStyle_(paraStyle), fontCollection_(std::move(fontCollection))
     {}
 
+    TxtParagraph(void* paragraph) : hasExternalParagraph_(true)
+    {}
+
     void SetParagraphSymbolAnimation(const RefPtr<FrameNode>& frameNode) override
     {}
 #else
     TxtParagraph(const ParagraphStyle& paraStyle, std::shared_ptr<RSFontCollection> fontCollection)
         : paraStyle_(paraStyle), fontCollection_(std::move(fontCollection))
     {}
+
+    TxtParagraph(void* paragraph)
+    {
+        hasExternalParagraph_ = true;
+        externalParagraph_ = reinterpret_cast<RSParagraph*>(paragraph);
+    }
 
     void SetParagraphSymbolAnimation(const RefPtr<FrameNode>& frameNode) override
     {
@@ -70,7 +79,9 @@ public:
         if (animationFunc == nullptr) {
             TAG_LOGE(AceLogTag::ACE_TEXT_FIELD, "HmSymbol txt_paragraph::SetAnimation failed ");
         } else {
-            paragraph_->SetAnimation(animationFunc);
+            auto paragraph = GetParagraph();
+            CHECK_NULL_VOID(paragraph);
+            paragraph->SetAnimation(animationFunc);
             TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "HmSymbol txt_paragraph::SetAnimation success ");
         }
     }
@@ -110,6 +121,7 @@ public:
 
     // interfaces for calculate the the specified paragraph position
     int32_t GetGlyphIndexByCoordinate(const Offset& offset, bool isSelectionPos = false) override;
+    void AdjustIndexForward(const Offset& offset, bool compareOffset, int32_t& index);
     void GetRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects) override;
     void GetRectsForPlaceholders(std::vector<RectF>& selectedRects) override;
     bool ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF& result, bool needLineHighest = true) override;
@@ -128,8 +140,9 @@ public:
     }
     void SetParagraphId(uint32_t id) override
     {
-        if (paragraph_) {
-            paragraph_->SetParagraghId(id);
+        auto paragraph = GetParagraph();
+        if (paragraph) {
+            paragraph->SetParagraghId(id);
         }
     }
     LineMetrics GetLineMetricsByRectF(RectF& rect) override;
@@ -145,15 +158,21 @@ private:
     bool HandleCaretWhenEmpty(CaretMetricsF& result);
     void HandleTextAlign(CaretMetricsF& result, TextAlign align);
     void HandleLeadingMargin(CaretMetricsF& result, LeadingMargin leadingMargin);
+    void GetRectsForRangeInner(int32_t start, int32_t end, std::vector<RectF>& selectedRects);
+    int32_t AdjustIndexForEmoji(int32_t index);
+    bool IsIndexInEmoji(int32_t index, int32_t& emojiStart, int32_t& emojiEnd);
 
     ParagraphStyle paraStyle_;
 #ifndef USE_GRAPHIC_TEXT_GINE
+    txt::Paragraph* GetParagraph();
     std::unique_ptr<txt::Paragraph> paragraph_;
     std::unique_ptr<txt::ParagraphBuilder> builder_;
     std::shared_ptr<txt::FontCollection> fontCollection_;
 #else
+    RSParagraph* GetParagraph();
     Rosen::RSSymbolAnimation rsSymbolAnimation_;
     std::unique_ptr<RSParagraph> paragraph_;
+    RSParagraph* externalParagraph_ = nullptr;
     std::unique_ptr<RSParagraphBuilder> builder_;
     std::shared_ptr<RSFontCollection> fontCollection_;
 #endif
@@ -162,6 +181,7 @@ private:
     TextAlign textAlign_;
     static uint32_t destructCount;
     std::list<size_t> placeholderPosition_;
+    bool hasExternalParagraph_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(TxtParagraph);
 };

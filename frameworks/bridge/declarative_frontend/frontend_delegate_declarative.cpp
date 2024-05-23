@@ -1931,11 +1931,18 @@ void FrontendDelegateDeclarative::ShowActionMenuInnerNG(DialogProperties& dialog
         [dialogProperties, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
+            auto container = Container::Current();
+            CHECK_NULL_VOID(container);
+            if (container->IsSubContainer()) {
+                auto currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+                container = AceEngine::Get().GetContainer(currentId);
+                CHECK_NULL_VOID(container);
+            }
             RefPtr<NG::FrameNode> dialog;
             if (dialogProperties.isShowInSubWindow) {
                 dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties, nullptr);
                 CHECK_NULL_VOID(dialog);
-                if (dialogProperties.isModal) {
+                if (dialogProperties.isModal && !container->IsUIExtensionWindow()) {
                     DialogProperties Maskarg;
                     Maskarg.isMask = true;
                     Maskarg.autoCancel = dialogProperties.autoCancel;
@@ -2297,12 +2304,40 @@ void FrontendDelegateDeclarative::OnMediaQueryUpdate(bool isSynchronous)
 
 void FrontendDelegateDeclarative::OnLayoutCompleted(const std::string& componentId)
 {
-    layoutInspectorCallback_(componentId);
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    if (!engine->IsLayoutCallBackFuncExist(componentId)) {
+        return;
+    }
+
+    taskExecutor_->PostTask(
+        [weak = AceType::WeakClaim(this), componentId] {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            delegate->layoutInspectorCallback_(componentId);
+        },
+        TaskExecutor::TaskType::JS, "ArkUIInspectorLayoutCompleted");
 }
 
 void FrontendDelegateDeclarative::OnDrawCompleted(const std::string& componentId)
 {
-    drawInspectorCallback_(componentId);
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    if (!engine->IsDrawCallBackFuncExist(componentId)) {
+        return;
+    }
+
+    taskExecutor_->PostTask(
+        [weak = AceType::WeakClaim(this), componentId] {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            delegate->drawInspectorCallback_(componentId);
+        },
+        TaskExecutor::TaskType::JS, "ArkUIInspectorDrawCompleted");
 }
 
 void FrontendDelegateDeclarative::OnPageReady(
@@ -3331,7 +3366,7 @@ RefPtr<NG::ChainedTransitionEffect> FrontendDelegateDeclarative::GetTransitionEf
 {
     napi_value napiVal = reinterpret_cast<napi_value>(value);
     JSRef<JSVal> transitionVal = JsConverter::ConvertNapiValueToJsVal(napiVal);
-    if (transitionVal.IsEmpty()) {
+    if (transitionVal.IsEmpty() || !transitionVal->IsObject()) {
         LOGE("Convert TransitionEffect from napi value to JSVal failed.");
         return nullptr;
     }

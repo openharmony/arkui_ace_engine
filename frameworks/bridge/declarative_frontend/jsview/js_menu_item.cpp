@@ -21,6 +21,8 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_menu_item_theme.h"
+#include "core/components_ng/pattern/symbol/symbol_source_info.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<MenuItemModel> MenuItemModel::instance_ = nullptr;
@@ -73,13 +75,19 @@ void JSMenuItem::Create(const JSCallbackInfo& info)
         std::string endIconPath;
         std::string labelStr;
         MenuItemProperties menuItemProps;
+        std::function<void(WeakPtr<NG::FrameNode>)> symbolApply;
 
         auto startIcon = menuItemObj->GetProperty("startIcon");
         auto content = menuItemObj->GetProperty("content");
         auto endIcon = menuItemObj->GetProperty("endIcon");
         auto label = menuItemObj->GetProperty("labelInfo");
+        auto symbolStart = menuItemObj->GetProperty("symbolStartIcon");
+        auto symbolEnd = menuItemObj->GetProperty("symbolEndIcon");
 
-        if (ParseJsMedia(startIcon, startIconPath)) {
+        if (symbolStart->IsObject()) {
+            JSViewAbstract::SetSymbolOptionApply(info, symbolApply, symbolStart);
+            menuItemProps.startApply = symbolApply;
+        } else if (ParseJsMedia(startIcon, startIconPath)) {
             std::string bundleName;
             std::string moduleName;
             GetJsMediaBundleInfo(startIcon, bundleName, moduleName);
@@ -90,7 +98,10 @@ void JSMenuItem::Create(const JSCallbackInfo& info)
         ParseJsString(content, contentStr);
         menuItemProps.content = contentStr;
 
-        if (ParseJsMedia(endIcon, endIconPath)) {
+        if (symbolEnd->IsObject()) {
+            JSViewAbstract::SetSymbolOptionApply(info, symbolApply, symbolEnd);
+            menuItemProps.endApply = symbolApply;
+        } else if (ParseJsMedia(endIcon, endIconPath)) {
             std::string bundleName;
             std::string moduleName;
             GetJsMediaBundleInfo(endIcon, bundleName, moduleName);
@@ -118,6 +129,7 @@ void JSMenuItem::Create(const JSCallbackInfo& info)
         }
         MenuItemModel::GetInstance()->Create(menuItemProps);
     }
+    JSMenuItemTheme::ApplyTheme();
 }
 
 void JSMenuItem::JSBind(BindingTarget globalObj)
@@ -133,7 +145,9 @@ void JSMenuItem::JSBind(BindingTarget globalObj)
     JSClass<JSMenuItem>::StaticMethod("contentFontColor", &JSMenuItem::ContentFontColor, opt);
     JSClass<JSMenuItem>::StaticMethod("labelFont", &JSMenuItem::LabelFont, opt);
     JSClass<JSMenuItem>::StaticMethod("labelFontColor", &JSMenuItem::LabelFontColor, opt);
+    JSClass<JSMenuItem>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSMenuItem>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSMenuItem>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSMenuItem>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSMenuItem>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSMenuItem>::InheritAndBind<JSContainerBase>(globalObj);
@@ -176,6 +190,7 @@ void JSMenuItem::SelectIcon(const JSCallbackInfo& info)
 {
     bool isShow = false;
     std::string icon;
+    std::function<void(WeakPtr<NG::FrameNode>)> symbolApply;
     if (info[0]->IsBoolean()) {
         isShow = info[0]->ToBoolean();
     } else if (info[0]->IsString()) {
@@ -183,9 +198,13 @@ void JSMenuItem::SelectIcon(const JSCallbackInfo& info)
         isShow = true;
     } else if (ParseJsMedia(info[0], icon)) {
         isShow = true;
+    } else if (info[0]->IsObject()) {
+        isShow = true;
+        JSViewAbstract::SetSymbolOptionApply(info, symbolApply, info[0]);
     }
     MenuItemModel::GetInstance()->SetSelectIcon(isShow);
     MenuItemModel::GetInstance()->SetSelectIconSrc(icon);
+    MenuItemModel::GetInstance()->SetSelectIconSymbol(std::move(symbolApply));
 }
 
 void JSMenuItem::OnChange(const JSCallbackInfo& info)

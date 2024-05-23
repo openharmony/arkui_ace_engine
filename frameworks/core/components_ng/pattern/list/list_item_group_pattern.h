@@ -194,11 +194,13 @@ public:
     }
 
     RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize();
+    void SetListChildrenMainSize(float defaultSize, const std::vector<float>& mainSize);
     void OnChildrenSizeChanged(std::tuple<int32_t, int32_t, int32_t> change, ListChangeFlag flag);
     bool ListChildrenSizeExist();
     RefPtr<FrameNode> GetListFrameNode() const;
     VisibleContentInfo GetStartListItemIndex();
     VisibleContentInfo GetEndListItemIndex();
+    void ResetChildrenSize();
 
 private:
     bool IsNeedInitClickEventRecorder() const override

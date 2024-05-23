@@ -62,9 +62,6 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        if (UseContentModifier()) {
-            return nullptr;
-        }
         auto host = GetHost();
         CHECK_NULL_RETURN(host, nullptr);
         if (!switchModifier_) {
@@ -76,6 +73,7 @@ public:
                                        : switchTheme->GetInactivePointColor();
             switchModifier_ = AceType::MakeRefPtr<SwitchModifier>(isSelect, boardColor, dragOffsetX_);
         }
+        switchModifier_->SetUseContentModifier(UseContentModifier());
         auto paintMethod = MakeRefPtr<SwitchPaintMethod>(switchModifier_);
         paintMethod->SetDirection(direction_);
         paintMethod->SetIsSelect(isOn_.value_or(false));
@@ -130,7 +128,18 @@ public:
     void OnColorConfigurationUpdate() override;
     void SetBuilderFunc(SwitchMakeCallback&& makeFunc)
     {
+        if (makeFunc == nullptr) {
+            makeFunc_ = std::nullopt;
+            contentModifierNode_ = nullptr;
+            OnModifyDone();
+            return;
+        }
         makeFunc_ = std::move(makeFunc);
+    }
+
+    int32_t GetBuilderId()
+    {
+        return nodeId_;
     }
 
     bool UseContentModifier()
@@ -148,13 +157,16 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
     RefPtr<Curve> GetCurve() const;
     int32_t GetDuration() const;
+    int32_t nodeId_ = -1;
     void UpdateChangeEvent() const;
     void OnChange();
     void OnTouchDown();
     void OnTouchUp();
     void HandleMouseEvent(bool isHover);
-    void HandleFocusEvent();
-    void HandleBlurEvent();
+    void HandleFocusEvent(const RefPtr<SwitchPaintProperty>& switchPaintProperty,
+        const RefPtr<SwitchTheme>& switchTheme);
+    void HandleBlurEvent(const RefPtr<SwitchPaintProperty>& switchPaintProperty,
+        const RefPtr<SwitchTheme>& switchTheme);
     float GetSwitchWidth() const;
     float GetSwitchContentOffsetX() const;
 
@@ -164,6 +176,10 @@ private:
     void InitTouchEvent();
     void InitMouseEvent();
     void InitFocusEvent();
+
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
+    void OnIsFocusActiveUpdate(bool isFocusAcitve);
 
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
@@ -199,6 +215,8 @@ private:
     bool isUserSetResponseRegion_ = false;
     bool showHoverEffect_ = true;
     bool enabled_ = true;
+    bool isBgColorUnselectFocus_ = false;
+    bool isPointColorUnselectFocus_ = false;
 
     float width_ = 0.0f;
     float height_ = 0.0f;
@@ -213,6 +231,7 @@ private:
     bool isDragEvent_ = false;
     RefPtr<SwitchModifier> switchModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(SwitchPattern);
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
 };
 } // namespace OHOS::Ace::NG
 

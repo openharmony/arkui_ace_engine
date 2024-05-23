@@ -45,7 +45,14 @@ public:
         copy->propNoPixMap_ = CloneNoPixMap();
         copy->propImageSource_ = CloneImageSource();
         copy->propPixelMap_ = ClonePixelMap();
+        copy->propIsValidImage_ = CloneIsValidImage();
+        copy->backIconSymbol_ = backIconSymbol_;
         return copy;
+    }
+
+    void ResetSymbol()
+    {
+        backIconSymbol_ = nullptr;
     }
 
     void Reset() override
@@ -58,6 +65,18 @@ public:
         ResetNoPixMap();
         ResetImageSource();
         ResetPixelMap();
+        ResetSymbol();
+        ResetIsValidImage();
+    }
+
+    const std::function<void(WeakPtr<NG::FrameNode>)>& GetBackIconSymbol() const
+    {
+        return backIconSymbol_;
+    }
+
+    void SetBackIconSymbol(const std::function<void(WeakPtr<NG::FrameNode>)>& backIconSymbol)
+    {
+        backIconSymbol_ = backIconSymbol;
     }
 
 private:
@@ -69,6 +88,8 @@ private:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NoPixMap, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageSource, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PixelMap, RefPtr<PixelMap>, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsValidImage, bool, PROPERTY_UPDATE_MEASURE);
+    std::function<void(WeakPtr<NG::FrameNode>)> backIconSymbol_;
 };
 
 } // namespace OHOS::Ace::NG

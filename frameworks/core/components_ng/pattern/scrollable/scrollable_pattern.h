@@ -89,7 +89,15 @@ public:
 
     virtual bool IsReverse() const
     {
-        return false;
+        if (GetAxis() != Axis::HORIZONTAL) {
+            return false;
+        }
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto layoutProperty = host->GetLayoutProperty<LayoutProperty>();
+        CHECK_NULL_RETURN(layoutProperty, false);
+        auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+        return (layoutDirection == TextDirection::RTL);
     };
 
     virtual bool ShouldDelayChildPressedState() const override
@@ -111,7 +119,7 @@ public:
     virtual bool IsAtBottom() const = 0;
     virtual bool OutBoundaryCallback()
     {
-        return IsAtTop() || IsAtBottom();
+        return IsOutOfBoundary();
     }
 
     virtual bool IsOutOfBoundary(bool useCurrentDelta = true)
@@ -131,15 +139,24 @@ public:
     {
         return !scrollableEvent_ || scrollableEvent_->Idle();
     }
-    void SetScrollEnable(bool enable)
+    void SetScrollEnabled(bool enabled)
     {
         CHECK_NULL_VOID(scrollableEvent_);
-        scrollableEvent_->SetEnabled(enable);
-        if (!enable) {
+        scrollableEvent_->SetEnabled(enabled);
+        if (!enabled) {
             scrollableEvent_->SetAxis(Axis::NONE);
         } else {
             scrollableEvent_->SetAxis(axis_);
         }
+        if (scrollBarProxy_) {
+            scrollBarProxy_->SetScrollEnabled(enabled, AceType::WeakClaim(this));
+        }
+    }
+
+    bool GetScrollEnabled() const
+    {
+        CHECK_NULL_RETURN(scrollableEvent_, false);
+        return scrollableEvent_->GetEnabled();
     }
 
     RefPtr<GestureEventHub> GetGestureHub();
@@ -150,7 +167,7 @@ public:
     {
         return scrollEffect_;
     }
-    bool HandleEdgeEffect(float offset, int32_t source, const SizeF& size, bool reverse = false);
+    bool HandleEdgeEffect(float offset, int32_t source, const SizeF& size);
     virtual void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) {}
     bool IsRestrictBoundary()
     {
@@ -235,7 +252,6 @@ public:
     }
 
     void GetParentNavigation();
-    void GetParentModalSheet();
 
     /**
      * @brief Return the portion of delta that's in overScroll range.
@@ -369,6 +385,8 @@ public:
 
     static ScrollState GetScrollState(int32_t scrollSource);
 
+    static ScrollSource ConvertScrollSource(int32_t source);
+
     static float CalculateFriction(float gamma)
     {
         constexpr float RATIO = 1.848f;
@@ -408,6 +426,15 @@ public:
         if (control) {
             control->SetScrollPattern(AceType::WeakClaim(this));
         }
+    }
+
+    RefPtr<ScrollableController> GetOrCreatePositionController()
+    {
+        if (!positionController_) {
+            auto controller = AceType::MakeRefPtr<NG::ScrollableController>();
+            SetPositionController(controller);
+        }
+        return positionController_;
     }
 
     virtual Rect GetItemRect(int32_t index) const
@@ -479,7 +506,7 @@ public:
         std::vector<RefPtr<FrameNode>> children;
         return children;
     }
-    
+
     void SetAnimateCanOverScroll(bool animateCanOverScroll)
     {
         bool isScrollable = !(IsAtBottom() && IsAtTop() && !GetAlwaysEnabled());
@@ -487,6 +514,7 @@ public:
     }
     virtual void InitScrollBarClickEvent();
     void HandleClickEvent(GestureEvent& info);
+    void InitScrollBarGestureEvent();
     void InitScrollBarMouseEvent();
     virtual void ScrollPage(bool reverse, bool smooth = false);
     void PrintOffsetLog(AceLogTag tag, int32_t id, double finalOffset);
@@ -519,8 +547,13 @@ public:
 
     void HandleMoveEventInComp(const PointF& point);
     void HandleLeaveHotzoneEvent();
+    void SetHotZoneScrollCallback(std::function<void(void)>&& func)
+    {
+        hotZoneScrollCallback_ = func;
+    }
 
 protected:
+    void SuggestOpIncGroup(bool flag);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     virtual DisplayMode GetDefaultScrollBarDisplayMode() const
     {
@@ -546,7 +579,7 @@ protected:
 
     virtual void OnScrollStop(const OnScrollStopEvent& onScrollStop);
 
-    void FireOnWillScroll(float offset) const;
+    float FireOnWillScroll(float offset) const;
 
     // select with mouse
     struct ItemSelectedStatus {
@@ -687,7 +720,6 @@ private:
     RefreshCoordinationMode CoordinateWithRefresh(double& offset, int32_t source, bool isAtTop);
     bool CoordinateWithNavigation(double& offset, int32_t source, bool isAtTop);
     void NotifyFRCSceneInfo(const std::string& scene, double velocity, SceneStatus sceneStatus);
-    ModalSheetCoordinationMode CoordinateWithSheet(double& offset, int32_t source, bool isAtTop);
     bool NeedCoordinateScrollWithNavigation(double offset, int32_t source, const OverScrollOffset& overOffsets);
 
     Axis axis_ = Axis::VERTICAL;
@@ -704,7 +736,6 @@ private:
     float estimatedHeight_ = 0.0f;
     bool isReactInParentMovement_ = false;
     bool isRefreshInReactive_ = false; // true if Refresh component is ready to receive scroll offset.
-    bool isSheetInReactive_ = false;
     bool isCoordEventNeedSpring_ = true;
     double scrollBarOutBoundaryExtent_ = 0.0;
     double friction_ = 0.0;
@@ -730,7 +761,6 @@ private:
     RefPtr<PanEvent> boxSelectPanEvent_;
 
     RefPtr<NavBarPattern> navBarPattern_;
-    RefPtr<SheetPresentationPattern> sheetPattern_;
     std::vector<RefPtr<ScrollingListener>> scrollingListener_;
 
     EdgeEffect edgeEffect_ = EdgeEffect::NONE;
@@ -751,6 +781,7 @@ private:
     float lastHonezoneOffsetPct_ = 0.0f;
     RefPtr<BezierVariableVelocityMotion> velocityMotion_;
     RefPtr<VelocityMotion> fixedVelocityMotion_;
+    std::function<void(void)> hotZoneScrollCallback_;
     void UnRegister2DragDropManager();
     float IsInHotZone(const PointF& point);
     void HotZoneScroll(const float offset);

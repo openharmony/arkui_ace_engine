@@ -17,6 +17,7 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_UTILS_BRIDGE_H
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
+#include "core/common/task_runner_adapter_factory.h"
 
 namespace OHOS::Ace::NG {
 struct NativeWeakRef {
@@ -49,7 +50,12 @@ template<typename T>
 void DestructorInterceptor(void* env, void* nativePtr, void* data)
 {
     auto* typePtr = reinterpret_cast<T*>(nativePtr);
-    delete typePtr;
+    auto taskExecutor = TaskRunnerAdapterFactory::Create(true, "");
+    if (!taskExecutor) {
+        delete typePtr;
+        return;
+    }
+    taskExecutor->PostTask([taskExecutor, typePtr]() { delete typePtr; }, "DestructorInterceptor");
 }
 
 template<typename T>
@@ -141,6 +147,33 @@ private:
     T value_;
 };
 
+
+template<typename T>
+class JSFuncObjRef {
+public:
+    ~JSFuncObjRef()
+    {
+        jsStrongObj.Reset();
+    }
+    explicit JSFuncObjRef(const T& jsObject, bool isWeak = false) : isWeak_(isWeak)
+    {
+        if (isWeak) {
+            jsWeakObj = JsWeak(jsObject);
+        } else {
+            jsStrongObj = jsObject;
+        }
+    }
+    T Lock() const
+    {
+        return isWeak_ ? jsWeakObj.Lock() : jsStrongObj;
+    }
+
+private:
+    bool isWeak_ = false;
+    JsWeak<T> jsWeakObj;
+    T jsStrongObj;
+};
+
 class NativeUtilsBridge {
 public:
     static ArkUINativeModuleValue CreateNativeWeakRef(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -151,6 +184,8 @@ public:
     static ArkUINativeModuleValue Upgrade(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue Dispose(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue CreateStrongRef(EcmaVM* vm, const RefPtr<AceType>& ref);
+    static ArkUINativeModuleValue ParseResourceColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue BlendColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 } // namespace OHOS::Ace::NG
 

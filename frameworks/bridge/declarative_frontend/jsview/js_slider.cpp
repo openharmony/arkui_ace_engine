@@ -18,6 +18,7 @@
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/slider_model_impl.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_slider_theme.h"
 #include "core/components/slider/render_slider.h"
 #include "core/components/slider/slider_element.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
@@ -78,9 +79,12 @@ void JSSlider::JSBind(BindingTarget globalObj)
     JSClass<JSSlider>::StaticMethod("blockStyle", &JSSlider::SetBlockStyle);
     JSClass<JSSlider>::StaticMethod("stepSize", &JSSlider::SetStepSize);
     JSClass<JSSlider>::StaticMethod("sliderInteractionMode", &JSSlider::SetSliderInteractionMode);
+    JSClass<JSSlider>::StaticMethod("slideRange", &JSSlider::SetValidSlideRange);
     JSClass<JSSlider>::StaticMethod("onChange", &JSSlider::OnChange);
+    JSClass<JSSlider>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSSlider>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSSlider>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSSlider>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSSlider>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSSlider>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSSlider>::InheritAndBind<JSViewAbstract>(globalObj);
@@ -126,6 +130,7 @@ void JSSlider::Create(const JSCallbackInfo& info)
     if (!info[0]->IsObject()) {
         SliderModel::GetInstance()->Create(
             static_cast<float>(value), static_cast<float>(step), static_cast<float>(min), static_cast<float>(max));
+        JSSliderTheme::ApplyTheme();
         return;
     }
 
@@ -206,6 +211,7 @@ void JSSlider::Create(const JSCallbackInfo& info)
     if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
         ParseSliderValueObject(info, changeEventVal);
     }
+    JSSliderTheme::ApplyTheme();
 }
 
 void JSSlider::SetThickness(const JSCallbackInfo& info)
@@ -318,6 +324,37 @@ void JSSlider::SetMaxLabel(const JSCallbackInfo& info)
     SliderModel::GetInstance()->SetMaxLabel(info[0]->ToNumber<float>());
 }
 
+void JSSlider::SetValidSlideRange(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject()) {
+        SliderModel::GetInstance()->ResetValidSlideRange();
+        return;
+    }
+
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    auto getValueRangeFrom = paramObject->GetProperty("from");
+    auto getValueRangeTo = paramObject->GetProperty("to");
+    float rangeFromValue = std::numeric_limits<float>::quiet_NaN();
+    float rangeToValue = std::numeric_limits<float>::quiet_NaN();
+    if (getValueRangeFrom->IsEmpty()) {
+        rangeFromValue = std::numeric_limits<float>::infinity();
+    } else if (getValueRangeFrom->IsNumber()) {
+        rangeFromValue = getValueRangeFrom->ToNumber<double>();
+    }
+    if (getValueRangeTo->IsEmpty()) {
+        rangeToValue = std::numeric_limits<float>::infinity();
+    } else if (getValueRangeTo->IsNumber()) {
+        rangeToValue = getValueRangeTo->ToNumber<double>();
+    }
+
+    if (std::isnan(rangeFromValue) || std::isnan(rangeToValue) ||
+        (std::isinf(rangeFromValue) && std::isinf(rangeToValue))) {
+        SliderModel::GetInstance()->ResetValidSlideRange();
+        return;
+    }
+    SliderModel::GetInstance()->SetValidSlideRange(rangeFromValue, rangeToValue);
+}
+
 void JSSlider::SetMinResponsiveDistance(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -354,11 +391,8 @@ void JSSlider::SetSliderInteractionMode(const JSCallbackInfo& info)
     }
 
     if (!info[0]->IsNull() && info[0]->IsNumber()) {
-        auto mode = static_cast<SliderInteraction>(info[0]->ToNumber<int32_t>());
-        auto sliderInteractionMode = mode == SliderInteraction::SLIDE_ONLY
-                                         ? SliderModel::SliderInteraction::SLIDE_ONLY
-                                         : SliderModel::SliderInteraction::SLIDE_AND_CLICK;
-        SliderModel::GetInstance()->SetSliderInteractionMode(sliderInteractionMode);
+        auto mode = static_cast<SliderModel::SliderInteraction>(info[0]->ToNumber<int32_t>());
+        SliderModel::GetInstance()->SetSliderInteractionMode(mode);
     } else {
         SliderModel::GetInstance()->ResetSliderInteractionMode();
     }

@@ -312,6 +312,8 @@ public:
 
     virtual void GetBoundingRectData(int32_t nodeId, Rect& rect) {}
 
+    virtual void CheckAndUpdateKeyboardInset() {}
+
     virtual RefPtr<AccessibilityManager> GetAccessibilityManager() const;
 
     virtual std::shared_ptr<NavigationController> GetNavigationController(const std::string& id)
@@ -918,7 +920,9 @@ public:
         gsVsyncCallback_ = std::move(callback);
     }
 
-    virtual void FlushUITasks() = 0;
+    virtual void FlushUITasks(bool triggeredByImplicitAnimation = false) = 0;
+
+    virtual void FlushAfterLayoutCallbackInImplicitAnimationTask() {}
 
     virtual void FlushPipelineImmediately() = 0;
 
@@ -1059,6 +1063,16 @@ public:
         return halfLeading_;
     }
 
+    void SetUseCutout(bool useCutout)
+    {
+        useCutout_ = useCutout;
+    }
+
+    bool GetUseCutout() const
+    {
+        return useCutout_;
+    }
+
     bool GetOnFoucs() const
     {
         return onFocus_;
@@ -1148,6 +1162,41 @@ public:
     {
         return false;
     }
+
+    void SetStateProfilerStatus(bool stateProfilerStatus)
+    {
+        stateProfilerStatus_ = stateProfilerStatus;
+        if (jsStateProfilerStatusCallback_) {
+            jsStateProfilerStatusCallback_(stateProfilerStatus);
+        }
+    }
+
+    void SetStateProfilerStatusCallback(std::function<void(bool)>&& callback)
+    {
+        jsStateProfilerStatusCallback_ = callback;
+    }
+
+    bool GetStateProfilerStatus() const
+    {
+        return stateProfilerStatus_;
+    }
+
+    uint32_t GetFrameCount() const
+    {
+        return frameCount_;
+    }
+
+    virtual void CheckAndLogLastReceivedTouchEventInfo(int32_t eventId, TouchType type) {}
+
+    virtual void CheckAndLogLastConsumedTouchEventInfo(int32_t eventId, TouchType type) {}
+
+    virtual void CheckAndLogLastReceivedMouseEventInfo(int32_t eventId, MouseAction action) {}
+
+    virtual void CheckAndLogLastConsumedMouseEventInfo(int32_t eventId, MouseAction action) {}
+
+    virtual void CheckAndLogLastReceivedAxisEventInfo(int32_t eventId, AxisAction action) {}
+
+    virtual void CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, AxisAction action) {}
 
 protected:
     virtual bool MaybeRelease() override;
@@ -1307,6 +1356,7 @@ private:
     int64_t formAnimationStartTime_ = 0;
     bool isFormAnimation_ = false;
     bool halfLeading_ = false;
+    bool useCutout_ = false;
     uint64_t vsyncTime_ = 0;
 
     bool delaySurfaceChange_ = false;
@@ -1314,6 +1364,9 @@ private:
     int32_t height_ = -1;
     WindowSizeChangeReason type_ = WindowSizeChangeReason::UNDEFINED;
     std::shared_ptr<Rosen::RSTransaction> rsTransaction_;
+    uint32_t frameCount_ = 0;
+    bool stateProfilerStatus_ = false;
+    std::function<void(bool)> jsStateProfilerStatusCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };

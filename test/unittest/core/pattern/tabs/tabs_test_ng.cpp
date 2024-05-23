@@ -29,6 +29,8 @@ void TabsTestNg::SetUpTestSuite()
     tabTheme->tabBarDefaultHeight_ = Dimension(TABBAR_DEFAULT_HEIGHT);
     tabTheme->subTabBarHoverColor_ = Color::RED;
     tabTheme->subTabBarPressedColor_ = Color::GREEN;
+    tabTheme->bottomTabIconOn_ = Color::BLUE;
+    tabTheme->bottomTabIconOff_ = Color::BLACK;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(tabTheme));
 }
 
@@ -139,7 +141,7 @@ void TabsTestNg::CreateItem(int32_t itemNumber, const std::function<void(TabCont
         TabContentModelNG model;
         model.Create();
         auto tabBarItemFunc = TabBarItemBuilder();
-        model.SetTabBar("", "", std::move(tabBarItemFunc), true);
+        model.SetTabBar("", "", std::nullopt, std::move(tabBarItemFunc), true);
         ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
         ViewAbstract::SetHeight(CalcLength(FILL_LENGTH));
         if (callback) {
@@ -162,7 +164,7 @@ void TabsTestNg::CreateSingleItem(const std::function<void(TabContentModelNG)>& 
     TabContentModelNG model;
     model.Create();
     auto tabBarItemFunc = TabBarItemBuilder();
-    model.SetTabBar("", "", std::move(tabBarItemFunc), true);
+    model.SetTabBar("", "", std::nullopt, std::move(tabBarItemFunc), true);
     if (callback) {
         callback(model);
     }
@@ -182,7 +184,7 @@ void TabsTestNg::CreateSingleItemWithoutBuilder(const std::function<void(TabCont
     auto weakTab = AceType::WeakClaim(AceType::RawPtr(tabFrameNode));
     TabContentModelNG model;
     model.Create();
-    model.SetTabBar("", "", nullptr, true);
+    model.SetTabBar("", "", std::nullopt, nullptr, true);
     if (callback) {
         callback(model);
     }
@@ -213,11 +215,11 @@ void TabsTestNg::SwipeToWithoutAnimation(int32_t index)
     FlushLayoutTask(frameNode_);
 }
 
-void TabsTestNg::ClickTo(Offset offset)
+void TabsTestNg::ClickTo(Offset offset, int32_t index)
 {
     GestureEvent info;
     info.SetLocalLocation(offset);
-    tabBarPattern_->HandleClick(info);
+    tabBarPattern_->HandleClick(info, index);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
     FlushLayoutTask(frameNode_);
 }
@@ -271,7 +273,7 @@ HWTEST_F(TabsTestNg, InitSurfaceChangedCallback001, TestSize.Level1)
      * @tc.expected: Nothing happend
      */
     func(100.f, 100.f, TABS_WIDTH, TABS_HEIGHT, WindowSizeChangeReason::TRANSFORM);
-    EXPECT_EQ(tabBarPattern_->windowSizeChangeReason_, WindowSizeChangeReason::ROTATION);
+    EXPECT_EQ(tabBarPattern_->windowSizeChangeReason_, WindowSizeChangeReason::TRANSFORM);
 }
 
 /**
@@ -897,7 +899,7 @@ HWTEST_F(TabsTestNg, CustomAnimationTest001, TestSize.Level1)
     Offset offset(1, 1);
     info.SetLocalLocation(offset);
     tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
-    tabBarPattern_->HandleClick(info);
+    tabBarPattern_->HandleClick(info, 0);
     EXPECT_TRUE(swiperPattern_->IsDisableSwipe());
     EXPECT_FALSE(swiperPattern_->customAnimationToIndex_.has_value());
 

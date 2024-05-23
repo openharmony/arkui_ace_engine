@@ -11,8 +11,41 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//arkcompiler/ets_frontend/es2panda/es2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/adapter/preview/build/config.gni")
+import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
+
+es2abc_gen_abc("gen_measure_abc") {
+  src_js = rebase_path("measure.js")
+  dst_file = rebase_path(target_out_dir + "/measure.abc")
+  in_puts = [ "measure.js" ]
+  out_puts = [ target_out_dir + "/measure.abc" ]
+  extra_args = [ "--module" ]
+}
+
+base_output_path = get_label_info(":gen_measure_abc", "target_out_dir")
+measure_obj_path = base_output_path + "/measure.o"
+measure_abc_obj_path = base_output_path + "/measure_abc.o"
+
+gen_obj("measure_js") {
+  input = "measure.js"
+  if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
+    measure_obj_path = base_output_path + "/measure.c"
+  }
+  output = measure_obj_path
+  snapshot_dep = []
+}
+
+gen_obj("measure_abc") {
+  input = get_label_info(":gen_measure_abc", "target_out_dir") + "/measure.abc"
+  if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
+    measure_abc_obj_path = base_output_path + "/measure_abc.c"
+  }
+  output = measure_abc_obj_path
+  snapshot_dep = [ ":gen_measure_abc" ]
+}
 
 template("napi_measure_static") {
   forward_variables_from(invoker, "*")
@@ -23,7 +56,10 @@ template("napi_measure_static") {
     configs = [ "$ace_root/interfaces/napi/kits:ace_napi_config" ]
 
     sources = [ "js_measure.cpp" ]
-    deps = []
+    deps = [
+      ":gen_obj_src_measure_abc",
+      ":gen_obj_src_measure_js",
+    ]
     external_deps = []
     if (platform != "" && is_arkui_x) {
       deps += [ "//plugins/libs/napi:napi_$platform" ]

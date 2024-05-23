@@ -410,6 +410,11 @@ public:
         dragEventActuator_->SetCustomDragEvent(dragEvent);
     }
 
+    bool HasDragEvent() const
+    {
+        return dragEventActuator_ && dragEventActuator_->HasDragEvent();
+    }
+
     // the return value means prevents event bubbling.
     bool ProcessTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint,
@@ -640,8 +645,7 @@ public:
     void SetMouseDragGatherPixelMaps();
     void SetNotMouseDragGatherPixelMaps();
 #if defined(PIXEL_MAP_SUPPORTED)
-    static void PrintBuilderNode(
-        const RefPtr<UINode>& customNode, bool& hasImageNode, std::list<RefPtr<FrameNode>>& imageNodes);
+    static void PrintBuilderNode(const RefPtr<UINode>& customNode);
     static void PrintIfImageNode(
         const RefPtr<UINode>& builderNode, int32_t depth, bool& hasImageNode, std::list<RefPtr<FrameNode>>& imageNodes);
     static void CheckImageDecode(std::list<RefPtr<FrameNode>>& imageNodes);
@@ -663,7 +667,8 @@ private:
 
     void OnDragStart(const GestureEvent& info, const RefPtr<PipelineBase>& context, const RefPtr<FrameNode> frameNode,
         DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
-    void UpdateExtraInfo(const RefPtr<FrameNode>& frameNode, std::unique_ptr<JsonValue>& arkExtraInfoJson);
+    void UpdateExtraInfo(const RefPtr<FrameNode>& frameNode, std::unique_ptr<JsonValue>& arkExtraInfoJson,
+        float scale);
 
     WeakPtr<EventHub> eventHub_;
     RefPtr<ScrollableActuator> scrollableActuator_;

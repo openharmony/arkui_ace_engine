@@ -47,7 +47,6 @@ namespace OHOS::Ace::NG {
 namespace {
 
 // Using UX spec: Constrain max height within 4/5 of screen height.
-// TODO: move these values to theme.
 constexpr double DIALOG_HEIGHT_RATIO_FOR_LANDSCAPE = 0.9;
 constexpr double DIALOG_HEIGHT_RATIO_FOR_CAR = 0.95;
 constexpr double DIALOG_MAX_HEIGHT_RATIO = 0.9;
@@ -104,7 +103,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (!customSize_) {
         auto maxSize = layoutConstraint->maxSize;
         maxSize.MinusPadding(0, 0, safeAreaInsets_.top_.Length(), 0);
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) && LessNotEqual(gridCount_, 0)) {
             maxSize.MinusPadding(0, 0, 0, safeAreaInsets_.bottom_.Length());
         }
         childLayoutConstraint.UpdateMaxSizeWithCheck(maxSize);
@@ -255,6 +254,10 @@ LayoutConstraintF DialogLayoutAlgorithm::CreateDialogChildConstraint(
 bool DialogLayoutAlgorithm::ComputeInnerLayoutSizeParam(LayoutConstraintF& innerLayout,
     const RefPtr<DialogLayoutProperty>& dialogProp)
 {
+    // when width is valid, gridCount_ is -1
+    if (GreatOrEqual(gridCount_, 0)) {
+        return false;
+    }
     CHECK_NULL_RETURN(Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE), false);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
@@ -266,7 +269,6 @@ bool DialogLayoutAlgorithm::ComputeInnerLayoutSizeParam(LayoutConstraintF& inner
         maxSize.Width() - dialogTheme->GetMarginLeft().ConvertToPx() - dialogTheme->GetMarginRight().ConvertToPx();
     auto defaultMaxWidth = dialogTheme->GetContainerMaxWidth().ConvertToPx();
     width = defaultMaxWidth < width ? defaultMaxWidth : width;
-    
     if (dialogProp->GetWidth().has_value()) {
         auto dialogWidth = dialogProp->GetWidth().value_or(Dimension(-1, DimensionUnit::VP));
         auto widthVal = dialogWidth.Unit() == DimensionUnit::PERCENT ? maxSize.Width() : dialogWidth.ConvertToPx();
@@ -333,7 +335,7 @@ void DialogLayoutAlgorithm::ComputeInnerLayoutParam(LayoutConstraintF& innerLayo
     CHECK_EQUAL_VOID(ComputeInnerLayoutSizeParam(innerLayout, dialogProp), true);
     auto maxSize = innerLayout.maxSize;
     // Set different layout param for different devices
-    // TODO: need to use theme json to replace this function.
+    // need to use theme json to replace this function.
     // get grid size type based on the screen where the dialog locate
     auto gridSizeType = ScreenSystemManager::GetInstance().GetSize(maxSize.Width());
     RefPtr<GridColumnInfo> columnInfo;
@@ -397,31 +399,31 @@ int32_t DialogLayoutAlgorithm::GetDeviceColumns(GridSizeType type, DeviceType de
     int32_t deviceColumns;
     if (deviceType == DeviceType::WATCH) {
         if (type == GridSizeType::SM) {
-            deviceColumns = 3;
+            deviceColumns = 3; // 3: the number of deviceColumns
         } else if (type == GridSizeType::MD) {
-            deviceColumns = 4;
+            deviceColumns = 4; // 4: the number of deviceColumns
         } else {
-            deviceColumns = 5;
+            deviceColumns = 5; // 5: the number of deviceColumns
         }
     } else if (deviceType == DeviceType::PHONE) {
         if (type == GridSizeType::SM) {
-            deviceColumns = 4;
+            deviceColumns = 4; // 4: the number of deviceColumns
         } else if (type == GridSizeType::MD) {
-            deviceColumns = 5;
+            deviceColumns = 5; // 5: the number of deviceColumns
         } else {
-            deviceColumns = 6;
+            deviceColumns = 6; // 6: the number of deviceColumns
         }
     } else if (deviceType == DeviceType::CAR) {
         if (type == GridSizeType::SM) {
-            deviceColumns = 4;
+            deviceColumns = 4; // 4: the number of deviceColumns
         } else if (type == GridSizeType::MD) {
-            deviceColumns = 6;
+            deviceColumns = 6; // 6: the number of deviceColumns
         } else {
-            deviceColumns = 8;
+            deviceColumns = 8; // 8: the number of deviceColumns
         }
     } else if (deviceType == DeviceType::TABLET && type == GridSizeType::MD &&
                Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        deviceColumns = 5;
+        deviceColumns = 5; // 5: the number of deviceColumns
     } else {
         deviceColumns = GetDeviceColumn(type);
     }
@@ -429,14 +431,14 @@ int32_t DialogLayoutAlgorithm::GetDeviceColumns(GridSizeType type, DeviceType de
 }
 int32_t DialogLayoutAlgorithm::GetDeviceColumn(GridSizeType type)
 {
-    int32_t columnNum = 16;
+    int32_t columnNum;
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, columnNum);
+    CHECK_NULL_RETURN(pipelineContext, 0);
     auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
-    CHECK_NULL_RETURN(dialogTheme, columnNum);
+    CHECK_NULL_RETURN(dialogTheme, 0);
     int32_t deviceColumn = dialogTheme->GetDeviceColumns();
     if (deviceColumn > 0) {
-        return deviceColumn;
+        columnNum = deviceColumn;
     } else {
         if (type == GridSizeType::SM) {
             columnNum = DIALOG_DEVICE_COLUMN_TWO;
@@ -739,7 +741,7 @@ bool DialogLayoutAlgorithm::SetAlignmentSwitchLessThanAPITwelve(const SizeF& max
 
 void DialogLayoutAlgorithm::UpdateTouchRegion()
 {
-    // TODO: update touch region is not completed.
+    //update touch region is not completed.
 }
 
 double DialogLayoutAlgorithm::GetPaddingBottom() const
@@ -755,7 +757,16 @@ double DialogLayoutAlgorithm::GetPaddingBottom() const
 OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
     OffsetF& topLeftPoint, const OffsetF& dialogOffset, const SizeF& childSize, bool needAvoidKeyboard) const
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto container = Container::Current();
+    auto currentId = Container::CurrentId();
+    if (isShowInSubWindow_ && !container->IsSubContainer()) {
+        currentId = SubwindowManager::GetInstance()->GetSubContainerId(Container::CurrentId());
+        container = AceEngine::Get().GetContainer(currentId);
+    }
+    CHECK_NULL_RETURN(container, topLeftPoint + dialogOffset);
+    auto context = container->GetPipelineContext();
+    CHECK_NULL_RETURN(context, topLeftPoint + dialogOffset);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(context);
     CHECK_NULL_RETURN(pipelineContext, topLeftPoint + dialogOffset);
     if (!customSize_ && topLeftPoint.GetY() < safeAreaInsets_.top_.end) {
         topLeftPoint.SetY(safeAreaInsets_.top_.end);

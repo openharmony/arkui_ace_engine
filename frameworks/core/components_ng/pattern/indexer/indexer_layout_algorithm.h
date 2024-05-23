@@ -48,6 +48,7 @@ public:
 private:
     void InitializeIndexer(LayoutWrapper* layoutWrapper);
     OffsetT<Dimension> GetPositionOfPopupNode(const RefPtr<IndexerLayoutProperty>& layoutProperty, float indexerWidth);
+    bool IsPopupAtLeft(const RefPtr<IndexerLayoutProperty>& layoutProperty, NG::AlignStyle alignment) const;
     float GetMaxItemWidth(LayoutWrapper* layoutWrapper);
     void MeasurePopup(LayoutWrapper* layoutWrapper, uint32_t childCount);
     std::vector<std::string> arrayValue_;

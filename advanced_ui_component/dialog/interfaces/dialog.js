@@ -17,6 +17,17 @@ const display = requireNapi('display');
 const hilog = requireNapi('hilog');
 const measure = requireNapi('measure');
 const resourceManager = requireNapi('resourceManager');
+const bundleManager = requireNapi('bundleManager');
+const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
+if (!('finalizeConstruction' in ViewPU.prototype)) {
+    Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {
+    });
+}
+class CustomThemeImpl {
+    constructor(v20) {
+        this.colors = v20;
+    }
+}
 
 const TITLE_MAX_LINES = 2;
 const HORIZON_BUTTON_MAX_COUNT = 2;
@@ -43,2456 +54,3113 @@ const KEYCODE_UP = 2012;
 const KEYCODE_DOWN = 2013;
 const IGNORE_KEY_EVENT_TYPE = 1;
 const FIRST_ITEM_INDEX = 0;
+const VERSION_TWELVE = 50000012;
 
 export class TipsDialog extends ViewPU {
-  constructor(k19, l19, m19, n19 = -1, o19 = undefined, p19) {
-    super(k19, m19, n19, p19);
-    if (typeof o19 === 'function') {
-      this.paramsGenerator_ = o19;
-    }
-    this.controller = undefined;
-    this.imageRes = null;
-    this.__imageSize = new ObservedPropertyObjectPU({ width: DEFAULT_IMAGE_SIZE, height: DEFAULT_IMAGE_SIZE }, this, 'imageSize');
-    this.title = null;
-    this.content = null;
-    this.checkAction = undefined;
-    this.checkTips = null;
-    this.__isChecked = new ObservedPropertySimplePU(false, this, 'isChecked');
-    this.primaryButton = null;
-    this.secondaryButton = null;
-    this.buttons = undefined;
-    this.__imageSizeHeight = new ObservedPropertySimplePU(0, this, 'imageSizeHeight');
-    this.__textAlignment = new ObservedPropertySimplePU(TextAlign.Start, this, 'textAlignment');
-    this.marginOffset = 0;
-    this.__checkBoxHeight = new ObservedPropertySimplePU(0, this, 'checkBoxHeight');
-    this.buttonHeight = 0;
-    this.contentScroller = new Scroller();
-    this.setInitiallyProvidedValue(l19);
-    this.finalizeConstruction();
-  }
-  setInitiallyProvidedValue(j19) {
-    if (j19.controller !== undefined) {
-      this.controller = j19.controller;
-    }
-    if (j19.imageRes !== undefined) {
-      this.imageRes = j19.imageRes;
-    }
-    if (j19.imageSize !== undefined) {
-      this.imageSize = j19.imageSize;
-    }
-    if (j19.title !== undefined) {
-      this.title = j19.title;
-    }
-    if (j19.content !== undefined) {
-      this.content = j19.content;
-    }
-    if (j19.checkAction !== undefined) {
-      this.checkAction = j19.checkAction;
-    }
-    if (j19.checkTips !== undefined) {
-      this.checkTips = j19.checkTips;
-    }
-    if (j19.isChecked !== undefined) {
-      this.isChecked = j19.isChecked;
-    }
-    if (j19.primaryButton !== undefined) {
-      this.primaryButton = j19.primaryButton;
-    }
-    if (j19.secondaryButton !== undefined) {
-      this.secondaryButton = j19.secondaryButton;
-    }
-    if (j19.buttons !== undefined) {
-      this.buttons = j19.buttons;
-    }
-    if (j19.imageSizeHeight !== undefined) {
-      this.imageSizeHeight = j19.imageSizeHeight;
-    }
-    if (j19.textAlignment !== undefined) {
-      this.textAlignment = j19.textAlignment;
-    }
-    if (j19.marginOffset !== undefined) {
-      this.marginOffset = j19.marginOffset;
-    }
-    if (j19.checkBoxHeight !== undefined) {
-      this.checkBoxHeight = j19.checkBoxHeight;
-    }
-    if (j19.buttonHeight !== undefined) {
-      this.buttonHeight = j19.buttonHeight;
-    }
-    if (j19.contentScroller !== undefined) {
-      this.contentScroller = j19.contentScroller;
-    }
-  }
-  updateStateVars(i19) {
-  }
-  purgeVariableDependenciesOnElmtId(h19) {
-    this.__imageSize.purgeDependencyOnElmtId(h19);
-    this.__isChecked.purgeDependencyOnElmtId(h19);
-    this.__imageSizeHeight.purgeDependencyOnElmtId(h19);
-    this.__textAlignment.purgeDependencyOnElmtId(h19);
-    this.__checkBoxHeight.purgeDependencyOnElmtId(h19);
-  }
-  aboutToBeDeleted() {
-    this.__imageSize.aboutToBeDeleted();
-    this.__isChecked.aboutToBeDeleted();
-    this.__imageSizeHeight.aboutToBeDeleted();
-    this.__textAlignment.aboutToBeDeleted();
-    this.__checkBoxHeight.aboutToBeDeleted();
-    SubscriberManager.Get().delete(this.id__());
-    this.aboutToBeDeletedInternal();
-  }
-  setController(g19) {
-    this.controller = g19;
-  }
-  get imageSize() {
-    return this.__imageSize.get();
-  }
-  set imageSize(f19) {
-    this.__imageSize.set(f19);
-  }
-  get isChecked() {
-    return this.__isChecked.get();
-  }
-  set isChecked(e19) {
-    this.__isChecked.set(e19);
-  }
-  get imageSizeHeight() {
-    return this.__imageSizeHeight.get();
-  }
-  set imageSizeHeight(d19) {
-    this.__imageSizeHeight.set(d19);
-  }
-  get textAlignment() {
-    return this.__textAlignment.get();
-  }
-  set textAlignment(c19) {
-    this.__textAlignment.set(c19);
-  }
-  get checkBoxHeight() {
-    return this.__checkBoxHeight.get();
-  }
-  set checkBoxHeight(b19) {
-    this.__checkBoxHeight.set(b19);
-  }
-  initialRender() {
-    {
-      this.observeComponentCreation((v18, w18) => {
-        ViewStackProcessor.StartGetAccessRecordingFor(v18);
-        if (w18) {
-          let x18 = new CustomDialogComponent(this, {
-            controller: this.controller,
-            contentBuilder: () => {
-              this.contentBuilder();
-            },
-            buttons: this.buttons,
-          }, undefined, v18, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 65 });
-          ViewPU.create(x18);
-          let y18 = () => {
-            return {
-              controller: this.controller,
-              contentBuilder: () => {
-                this.contentBuilder();
-              },
-              buttons: this.buttons
-            };
-          };
-          x18.paramsGenerator_ = y18;
+    constructor(p20, q20, r20, s20 = -1, t20 = undefined, u20) {
+        super(p20, r20, s20, u20);
+        if (typeof t20 === 'function') {
+            this.paramsGenerator_ = t20;
         }
-        else {
-          this.updateStateVarsOfChildByElmtId(v18, {});
-        }
-        ViewStackProcessor.StopGetAccessRecording();
-      });
+        this.controller = undefined;
+        this.imageRes = null;
+        this.__imageSize =
+            new ObservedPropertyObjectPU({ width: DEFAULT_IMAGE_SIZE, height: DEFAULT_IMAGE_SIZE }, this, 'imageSize');
+        this.title = null;
+        this.content = null;
+        this.checkAction = undefined;
+        this.checkTips = null;
+        this.__isChecked = new ObservedPropertySimplePU(false, this, 'isChecked');
+        this.primaryButton = null;
+        this.secondaryButton = null;
+        this.buttons = undefined;
+        this.__imageSizeHeight = new ObservedPropertySimplePU(0, this, 'imageSizeHeight');
+        this.__textAlignment = new ObservedPropertySimplePU(TextAlign.Start, this, 'textAlignment');
+        this.marginOffset = 0;
+        this.__checkBoxHeight = new ObservedPropertySimplePU(0, this, 'checkBoxHeight');
+        this.buttonHeight = 0;
+        this.contentScroller = new Scroller();
+        this.__fontColorWithTheme = new ObservedPropertyObjectPU({
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.font_primary'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'fontColorWithTheme');
+        this.theme = new CustomThemeImpl({});
+        this.setInitiallyProvidedValue(q20);
+        this.finalizeConstruction();
     }
-  }
-  contentBuilder(d18 = null) {
-    this.observeComponentCreation((s18, t18) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(s18);
-      Column.create();
-      if (!t18) {
-        Column.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    this.imagePart.bind(this)();
-    this.observeComponentCreation((l18, m18) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(l18);
-      If.create();
-      if (this.title != null || this.content != null) {
-        this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation((q18, r18) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(q18);
+
+    setInitiallyProvidedValue(o20) {
+        if (o20.controller !== undefined) {
+            this.controller = o20.controller;
+        }
+        if (o20.imageRes !== undefined) {
+            this.imageRes = o20.imageRes;
+        }
+        if (o20.imageSize !== undefined) {
+            this.imageSize = o20.imageSize;
+        }
+        if (o20.title !== undefined) {
+            this.title = o20.title;
+        }
+        if (o20.content !== undefined) {
+            this.content = o20.content;
+        }
+        if (o20.checkAction !== undefined) {
+            this.checkAction = o20.checkAction;
+        }
+        if (o20.checkTips !== undefined) {
+            this.checkTips = o20.checkTips;
+        }
+        if (o20.isChecked !== undefined) {
+            this.isChecked = o20.isChecked;
+        }
+        if (o20.primaryButton !== undefined) {
+            this.primaryButton = o20.primaryButton;
+        }
+        if (o20.secondaryButton !== undefined) {
+            this.secondaryButton = o20.secondaryButton;
+        }
+        if (o20.buttons !== undefined) {
+            this.buttons = o20.buttons;
+        }
+        if (o20.imageSizeHeight !== undefined) {
+            this.imageSizeHeight = o20.imageSizeHeight;
+        }
+        if (o20.textAlignment !== undefined) {
+            this.textAlignment = o20.textAlignment;
+        }
+        if (o20.marginOffset !== undefined) {
+            this.marginOffset = o20.marginOffset;
+        }
+        if (o20.checkBoxHeight !== undefined) {
+            this.checkBoxHeight = o20.checkBoxHeight;
+        }
+        if (o20.buttonHeight !== undefined) {
+            this.buttonHeight = o20.buttonHeight;
+        }
+        if (o20.contentScroller !== undefined) {
+            this.contentScroller = o20.contentScroller;
+        }
+        if (o20.fontColorWithTheme !== undefined) {
+            this.fontColorWithTheme = o20.fontColorWithTheme;
+        }
+        if (o20.theme !== undefined) {
+            this.theme = o20.theme;
+        }
+    }
+
+    updateStateVars(n20) {
+    }
+
+    purgeVariableDependenciesOnElmtId(m20) {
+        this.__imageSize.purgeDependencyOnElmtId(m20);
+        this.__isChecked.purgeDependencyOnElmtId(m20);
+        this.__imageSizeHeight.purgeDependencyOnElmtId(m20);
+        this.__textAlignment.purgeDependencyOnElmtId(m20);
+        this.__checkBoxHeight.purgeDependencyOnElmtId(m20);
+        this.__fontColorWithTheme.purgeDependencyOnElmtId(m20);
+    }
+
+    aboutToBeDeleted() {
+        this.__imageSize.aboutToBeDeleted();
+        this.__isChecked.aboutToBeDeleted();
+        this.__imageSizeHeight.aboutToBeDeleted();
+        this.__textAlignment.aboutToBeDeleted();
+        this.__checkBoxHeight.aboutToBeDeleted();
+        this.__fontColorWithTheme.aboutToBeDeleted();
+        SubscriberManager.Get().delete(this.id__());
+        this.aboutToBeDeletedInternal();
+    }
+
+    setController(l20) {
+        this.controller = l20;
+    }
+
+    get imageSize() {
+        return this.__imageSize.get();
+    }
+
+    set imageSize(k20) {
+        this.__imageSize.set(k20);
+    }
+
+    get isChecked() {
+        return this.__isChecked.get();
+    }
+
+    set isChecked(j20) {
+        this.__isChecked.set(j20);
+    }
+
+    get imageSizeHeight() {
+        return this.__imageSizeHeight.get();
+    }
+
+    set imageSizeHeight(i20) {
+        this.__imageSizeHeight.set(i20);
+    }
+
+    get textAlignment() {
+        return this.__textAlignment.get();
+    }
+
+    set textAlignment(h20) {
+        this.__textAlignment.set(h20);
+    }
+
+    get checkBoxHeight() {
+        return this.__checkBoxHeight.get();
+    }
+
+    set checkBoxHeight(g20) {
+        this.__checkBoxHeight.set(g20);
+    }
+
+    get fontColorWithTheme() {
+        return this.__fontColorWithTheme.get();
+    }
+
+    set fontColorWithTheme(f20) {
+        this.__fontColorWithTheme.set(f20);
+    }
+
+    initialRender() {
+        {
+            this.observeComponentCreation2((z19, a20) => {
+                if (a20) {
+                    let b20 = new CustomDialogComponent(this, {
+                        controller: this.controller,
+                        contentBuilder: () => {
+                            this.contentBuilder();
+                        },
+                        buttons: this.buttons,
+                        theme: this.theme,
+                    }, undefined, z19, () => {
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 85, col: 5 });
+                    ViewPU.create(b20);
+                    let c20 = () => {
+                        return {
+                            controller: this.controller,
+                            contentBuilder: () => {
+                                this.contentBuilder();
+                            },
+                            buttons: this.buttons,
+                            theme: this.theme
+                        };
+                    };
+                    b20.paramsGenerator_ = c20;
+                } else {
+                    this.updateStateVarsOfChildByElmtId(z19, {});
+                }
+            }, { name: 'CustomDialogComponent' });
+        }
+    }
+
+    contentBuilder(h19 = null) {
+        this.observeComponentCreation2((w19, x19) => {
             Column.create();
-            Column.padding({ top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level8'], 'bundleName': '', 'moduleName': '' } });
-            Column.constraintSize({
-              maxHeight: `calc(100% - ${this.checkBoxHeight}vp - ${this.imageSizeHeight}vp - ${this.buttonHeight}vp)`
-            });
-            if (!r18) {
-              Column.pop();
+        }, Column);
+        this.imagePart.bind(this)(h19 ? h19 : this);
+        this.observeComponentCreation2((p19, q19) => {
+            If.create();
+            if (this.title != null || this.content != null) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((u19, v19) => {
+                        Column.create();
+                        Column.padding({
+                            top: {
+                                'id': -1,
+                                'type': 10002,
+                                params: ['sys.float.padding_level8'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
+                            }
+                        });
+                        Column.constraintSize({
+                            maxHeight: `calc(100% - ${this.checkBoxHeight}vp - ${this.imageSizeHeight}vp - ${this.buttonHeight}vp)`
+                        });
+                    }, Column);
+                    this.textPart.bind(this)(h19 ? h19 : this);
+                    Column.pop();
+                });
+            } else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                });
             }
-            ViewStackProcessor.StopGetAccessRecording();
-          });
-          this.textPart.bind(this)();
-          Column.pop();
-        });
-      }
-      else {
-        this.ifElseBranchUpdateFunction(1, () => {
-        });
-      }
-      if (!m18) {
+        }, If);
         If.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    If.pop();
-    this.observeComponentCreation((h18, i18) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(h18);
-      If.create();
-      if (this.checkTips != null) {
-        this.ifElseBranchUpdateFunction(0, () => {
-          this.checkBoxPart.bind(this)(this.checkTips);
-        });
-      }
-      else {
-        this.ifElseBranchUpdateFunction(1, () => {
-        });
-      }
-      if (!i18) {
+        this.observeComponentCreation2((l19, m19) => {
+            If.create();
+            if (this.checkTips != null) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.checkBoxPart.bind(this)(this.checkTips, h19 ? h19 : this);
+                });
+            } else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                });
+            }
+        }, If);
         If.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    If.pop();
-    Column.pop();
-  }
-  checkBoxPart(m17, n17 = null) {
-    this.observeComponentCreation((y17, z17) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(y17);
-      Row.create();
-      Row.padding({ top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level8'], 'bundleName': '', 'moduleName': '' } });
-      Row.constraintSize({ minHeight: CHECKBOX_CONTAINER_HEIGHT });
-      Row.width('100%');
-      Row.onAreaChange((b18, c18) => {
-        this.checkBoxHeight = Number(c18.height);
-      });
-      if (!z17) {
-        Row.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    this.observeComponentCreation((u17, v17) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(u17);
-      Checkbox.create({ name: 'checkbox', group: 'checkboxGroup' });
-      Checkbox.select(this.isChecked);
-      Checkbox.onChange((x17) => {
-        this.isChecked = x17;
-        if (this.checkAction) {
-          this.checkAction(x17);
-        }
-      });
-      Checkbox.margin({ right: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'], 'bundleName': '', 'moduleName': '' } });
-      if (!v17) {
+        Column.pop();
+    }
+
+    checkBoxPart(q18, r18 = null) {
+        this.observeComponentCreation2((c19, d19) => {
+            Row.create();
+            Row.padding({
+                top: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.padding_level8'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                }
+            });
+            Row.constraintSize({ minHeight: CHECKBOX_CONTAINER_HEIGHT });
+            Row.width('100%');
+            Row.onAreaChange((f19, g19) => {
+                this.checkBoxHeight = Number(g19.height);
+            });
+        }, Row);
+        this.observeComponentCreation2((y18, z18) => {
+            Checkbox.create({ name: 'checkbox', group: 'checkboxGroup' });
+            Checkbox.select(this.isChecked);
+            Checkbox.onChange((b19) => {
+                this.isChecked = b19;
+                if (this.checkAction) {
+                    this.checkAction(b19);
+                }
+            });
+            Checkbox.margin({
+                right: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.padding_level4'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                }
+            });
+        }, Checkbox);
         Checkbox.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    Checkbox.pop();
-    this.observeComponentCreation((r17, s17) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(r17);
-      Text.create(m17);
-      Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Body_M'], 'bundleName': '', 'moduleName': '' });
-      Text.fontWeight(FontWeight.Regular);
-      Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '', 'moduleName': '' });
-      Text.maxLines(CONTENT_MAX_LINES);
-      Text.layoutWeight(1);
-      Text.focusable(false);
-      Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-      Text.onClick(() => {
-        this.isChecked = !this.isChecked;
-        if (this.checkAction) {
-          this.checkAction(this.isChecked);
-        }
-      });
-      if (!s17) {
-        Text.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    Text.pop();
-    Row.pop();
-  }
-  imagePart(c17 = null) {
-    this.observeComponentCreation((h17, i17) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(h17);
-      Column.create();
-      Column.width('100%');
-      Column.constraintSize({
-        maxHeight: `calc(100% - ${this.checkBoxHeight}vp - ${this.buttonHeight}vp - ${TEXT_MIN_HEIGHT}vp + ${this.marginOffset}vp)`
-      });
-      Column.onAreaChange((k17, l17) => {
-        this.imageSizeHeight = Number(l17.height);
-      });
-      if (!i17) {
-        Column.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    this.observeComponentCreation((f17, g17) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(f17);
-      Image.create(this.imageRes);
-      Image.size(this.imageSize);
-      Image.objectFit(ImageFit.Contain);
-      Image.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level6'], 'bundleName': '', 'moduleName': '' });
-      Image.constraintSize({
-        maxWidth: '100%',
-        maxHeight: `calc(100% - ${this.checkBoxHeight}vp - ${this.buttonHeight}vp - ${TEXT_MIN_HEIGHT}vp + ${this.marginOffset}vp)`
-      });
-      if (!g17) {
-        Image.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    Column.pop();
-  }
-  textPart(w15 = null) {
-    this.observeComponentCreation((a17, b17) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(a17);
-      Scroll.create(this.contentScroller);
-      Scroll.margin({ right: `${this.marginOffset}vp` });
-      if (!b17) {
-        Scroll.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    this.observeComponentCreation((y16, z16) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(y16);
-      Column.create();
-      Column.margin({ right: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level8'], 'bundleName': '', 'moduleName': '' } });
-      if (!z16) {
-        Column.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    this.observeComponentCreation((o16, p16) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(o16);
-      If.create();
-      if (this.title != null) {
-        this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation((w16, x16) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(w16);
-            Row.create();
-            Row.padding({ bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level8'], 'bundleName': '', 'moduleName': '' } });
-            if (!x16) {
-              Row.pop();
-            }
-            ViewStackProcessor.StopGetAccessRecording();
-          });
-          this.observeComponentCreation((u16, v16) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(u16);
-            Text.create(this.title);
-            Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Title_S'], 'bundleName': '', 'moduleName': '' });
-            Text.fontWeight(FontWeight.Medium);
-            Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '', 'moduleName': '' });
-            Text.textAlign(TextAlign.Center);
+        this.observeComponentCreation2((v18, w18) => {
+            Text.create(q18);
+            Text.fontSize({
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.Body_M'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            });
+            Text.fontWeight(FontWeight.Regular);
+            Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
             Text.maxLines(CONTENT_MAX_LINES);
+            Text.layoutWeight(1);
+            Text.focusable(false);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-            Text.minFontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Body_L'], 'bundleName': '', 'moduleName': '' });
-            Text.maxFontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Title_S'], 'bundleName': '', 'moduleName': '' });
-            Text.width('100%');
-            if (!v16) {
-              Text.pop();
-            }
-            ViewStackProcessor.StopGetAccessRecording();
-          });
-          Text.pop();
-          Row.pop();
-        });
-      }
-      else {
-        this.ifElseBranchUpdateFunction(1, () => {
-        });
-      }
-      if (!p16) {
-        If.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    If.pop();
-    this.observeComponentCreation((b16, c16) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(b16);
-      If.create();
-      if (this.content != null) {
-        this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation((m16, n16) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(m16);
-            Row.create();
-            if (!n16) {
-              Row.pop();
-            }
-            ViewStackProcessor.StopGetAccessRecording();
-          });
-          this.observeComponentCreation((h16, i16) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(h16);
-            Text.create(this.content);
-            Text.focusable(true);
-            Text.defaultFocus(!(this.primaryButton || this.secondaryButton));
-            Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Body_L'], 'bundleName': '', 'moduleName': '' });
-            Text.fontWeight(FontWeight.Medium);
-            Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '', 'moduleName': '' });
-            Text.textAlign(this.textAlignment);
-            Text.width('100%');
-            Text.onAreaChange((k16, l16) => {
-              this.getTextAlign(Number(l16.width));
+            Text.onClick(() => {
+                this.isChecked = !this.isChecked;
+                if (this.checkAction) {
+                    this.checkAction(this.isChecked);
+                }
             });
-            Text.onKeyEvent((f17) => {
-                if (f17) {
-                    resolveKeyEvent(f17, this.contentScroller);
-               }
+        }, Text);
+        Text.pop();
+        Row.pop();
+    }
+
+    imagePart(g18 = null) {
+        this.observeComponentCreation2((l18, m18) => {
+            Column.create();
+            Column.width('100%');
+            Column.constraintSize({
+                maxHeight: `calc(100% - ${this.checkBoxHeight}vp - ${this.buttonHeight}vp - ${TEXT_MIN_HEIGHT}vp + ${this.marginOffset}vp)`
             });
-            if (!i16) {
-              Text.pop();
+            Column.onAreaChange((o18, p18) => {
+                this.imageSizeHeight = Number(p18.height);
+            });
+        }, Column);
+        this.observeComponentCreation2((j18, k18) => {
+            Image.create(this.imageRes);
+            Image.size(ObservedObject.GetRawObject(this.imageSize));
+            Image.objectFit(ImageFit.Contain);
+            Image.borderRadius({
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.corner_radius_level6'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            });
+            Image.constraintSize({
+                maxWidth: '100%',
+                maxHeight: `calc(100% - ${this.checkBoxHeight}vp - ${this.buttonHeight}vp - ${TEXT_MIN_HEIGHT}vp + ${this.marginOffset}vp)`
+            });
+        }, Image);
+        Column.pop();
+    }
+
+    textPart(y16 = null) {
+        this.observeComponentCreation2((e18, f18) => {
+            Scroll.create(this.contentScroller);
+            Scroll.margin({ right: `${this.marginOffset}vp` });
+        }, Scroll);
+        this.observeComponentCreation2((c18, d18) => {
+            Column.create();
+            Column.margin({
+                right: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.padding_level8'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                }
+            });
+        }, Column);
+        this.observeComponentCreation2((s17, t17) => {
+            If.create();
+            if (this.title != null) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((a18, b18) => {
+                        Row.create();
+                        Row.padding({
+                            bottom: {
+                                'id': -1,
+                                'type': 10002,
+                                params: ['sys.float.padding_level8'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
+                            }
+                        });
+                    }, Row);
+                    this.observeComponentCreation2((y17, z17) => {
+                        Text.create(this.title);
+                        Text.fontSize({
+                            'id': -1,
+                            'type': 10002,
+                            params: ['sys.float.Title_S'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
+                        });
+                        Text.fontWeight(FontWeight.Medium);
+                        Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
+                        Text.textAlign(TextAlign.Center);
+                        Text.maxLines(CONTENT_MAX_LINES);
+                        Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+                        Text.minFontSize({
+                            'id': -1,
+                            'type': 10002,
+                            params: ['sys.float.Body_L'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
+                        });
+                        Text.maxFontSize({
+                            'id': -1,
+                            'type': 10002,
+                            params: ['sys.float.Title_S'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
+                        });
+                        Text.width('100%');
+                    }, Text);
+                    Text.pop();
+                    Row.pop();
+                });
+            } else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                });
             }
-            ViewStackProcessor.StopGetAccessRecording();
-          });
-          Text.pop();
-          Row.pop();
-        });
-      }
-      else {
-        this.ifElseBranchUpdateFunction(1, () => {
-        });
-      }
-      if (!c16) {
+        }, If);
         If.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    If.pop();
-    Column.pop();
-    Scroll.pop();
-  }
-  aboutToAppear() {
-    this.initButtons();
-    this.initMargin();
-  }
-  getTextAlign(t15) {
-    let u15 = measure.measureTextSize({
-      textContent: this.content,
-      fontSize: { 'id': -1, 'type': 10002, params: ['sys.float.Body_L'], 'bundleName': '', 'moduleName': '' },
-      constraintWidth: t15,
-    });
-    let v15 = measure.measureTextSize({
-      textContent: this.content,
-      fontSize: { 'id': -1, 'type': 10002, params: ['sys.float.Body_L'], 'bundleName': '', 'moduleName': '' },
-    });
-    if (this.getTextHeight(u15) <= this.getTextHeight(v15)) {
-      this.textAlignment = TextAlign.Center;
+        this.observeComponentCreation2((d17, e17) => {
+            If.create();
+            if (this.content != null) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((q17, r17) => {
+                        Row.create();
+                    }, Row);
+                    this.observeComponentCreation2((j17, k17) => {
+                        Text.create(this.content);
+                        Text.focusable(true);
+                        Text.defaultFocus(!(this.primaryButton || this.secondaryButton));
+                        Text.fontSize({
+                            'id': -1,
+                            'type': 10002,
+                            params: ['sys.float.Body_L'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
+                        });
+                        Text.fontWeight(FontWeight.Medium);
+                        Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
+                        Text.textAlign(this.textAlignment);
+                        Text.width('100%');
+                        Text.onKeyEvent((p17) => {
+                            if (p17) {
+                                resolveKeyEvent(p17, this.contentScroller);
+                            }
+                        });
+                        Text.onAreaChange((n17, o17) => {
+                            this.getTextAlign(Number(o17.width));
+                        });
+                    }, Text);
+                    Text.pop();
+                    Row.pop();
+                });
+            } else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                });
+            }
+        }, If);
+        If.pop();
+        Column.pop();
+        Scroll.pop();
     }
-  }
-  getTextHeight(s15) {
-    if (s15 && s15.height !== null && s15.height !== undefined) {
-      return Number(s15.height);
+
+    aboutToAppear() {
+        this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
+        this.theme.colors.fontPrimary : {
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.font_primary'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            };
+        this.initButtons();
+        this.initMargin();
     }
-    return 0;
-  }
-  initButtons() {
-    if (!this.primaryButton && !this.secondaryButton) {
-      return;
+
+    getTextAlign(v16) {
+        let w16 = measure.measureTextSize({
+            textContent: this.content,
+            fontSize: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.Body_L'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            },
+            constraintWidth: v16,
+        });
+        let x16 = measure.measureTextSize({
+            textContent: this.content,
+            fontSize: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.Body_L'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            },
+        });
+        if (this.getTextHeight(w16) <= this.getTextHeight(x16)) {
+            this.textAlignment = TextAlign.Center;
+        }
     }
-    this.buttons = [];
-    if (this.primaryButton) {
-      this.buttons.push(this.primaryButton);
+
+    getTextHeight(u16) {
+        if (u16 && u16.height !== null && u16.height !== undefined) {
+            return Number(u16.height);
+        }
+        return 0;
     }
-    if (this.secondaryButton) {
-      this.buttons.push(this.secondaryButton);
+
+    initButtons() {
+        if (!this.primaryButton && !this.secondaryButton) {
+            return;
+        }
+        this.buttons = [];
+        if (this.primaryButton) {
+            this.buttons.push(this.primaryButton);
+        }
+        if (this.secondaryButton) {
+            this.buttons.push(this.secondaryButton);
+        }
+        this.buttonHeight = this.getButtonsHeight();
     }
-    this.buttonHeight = this.getButtonsHeight();
-  }
-  getButtonsHeight() {
-    if (!this.buttons || this.buttons.length === 0) {
-      return 0;
+
+    getButtonsHeight() {
+        if (!this.buttons || this.buttons.length === 0) {
+            return 0;
+        }
+        let t16 = getNumberByResource('alert_button_top_padding');
+        t16 += BUTTON_DEFAULT_HEIGHT + getNumberByResource('alert_button_bottom_padding_horizontal');
+        return t16;
     }
-    let r15 = getNumberByResource('alert_button_top_padding');
-    r15 += BUTTON_DEFAULT_HEIGHT + getNumberByResource('alert_button_bottom_padding_horizontal');
-    return r15;
-  }
-  initMargin() {
-    this.marginOffset = 0 - getNumberByResource('padding_level8');
-  }
-  rerender() {
-    this.updateDirtyElements();
-  }
+
+    initMargin() {
+        this.marginOffset = 0 - getNumberByResource('padding_level8');
+    }
+
+    rerender() {
+        this.updateDirtyElements();
+    }
 }
 
 export class SelectDialog extends ViewPU {
-  constructor(j15, k15, l15, m15 = -1, n15 = undefined, o15) {
-    super(j15, l15, m15, o15);
-    if (typeof n15 === 'function') {
-      this.paramsGenerator_ = n15;
-    }
-    this.title = '';
-    this.content = '';
-    this.selectedIndex = -1;
-    this.confirm = null;
-    this.radioContent = [];
-    this.buttons = [];
-    this.contentPadding = undefined;
-    this.contentBuilder = this.buildContent;
-    this.controller = new CustomDialogController({
-      builder: () => {
-        let p15 = new CustomContentDialog(this, {
-          primaryTitle: this.title,
-          contentBuilder: () => {
-            this.contentBuilder();
-          },
-          buttons: this.buttons,
-        }, undefined, -1, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 254 });
-        p15.setController(this.controller);
-        ViewPU.create(p15);
-        let q15 = () => {
-          return {
-            primaryTitle: this.title,
-            contentBuilder: () => {
-              this.contentBuilder();
-            },
-            buttons: this.buttons
-          };
-        };
-        p15.paramsGenerator_ = q15;
-      }
-    }, this);
-    this.contentScroller = new Scroller();
-    this.setInitiallyProvidedValue(k15);
-    this.finalizeConstruction();
-  }
-  setInitiallyProvidedValue(i15) {
-    if (i15.title !== undefined) {
-      this.title = i15.title;
-    }
-    if (i15.content !== undefined) {
-      this.content = i15.content;
-    }
-    if (i15.selectedIndex !== undefined) {
-      this.selectedIndex = i15.selectedIndex;
-    }
-    if (i15.confirm !== undefined) {
-      this.confirm = i15.confirm;
-    }
-    if (i15.radioContent !== undefined) {
-      this.radioContent = i15.radioContent;
-    }
-    if (i15.buttons !== undefined) {
-      this.buttons = i15.buttons;
-    }
-    if (i15.contentPadding !== undefined) {
-      this.contentPadding = i15.contentPadding;
-    }
-    if (i15.contentBuilder !== undefined) {
-      this.contentBuilder = i15.contentBuilder;
-    }
-    if (i15.controller !== undefined) {
-      this.controller = i15.controller;
-    }
-    if (i15.contentScroller !== undefined) {
-        this.contentScroller = i15.contentScroller;
-    }
-  }
-  updateStateVars(h15) {
-  }
-  purgeVariableDependenciesOnElmtId(g15) {
-  }
-  aboutToBeDeleted() {
-    SubscriberManager.Get().delete(this.id__());
-    this.aboutToBeDeletedInternal();
-  }
-  setController(f15) {
-    this.controller = f15;
-  }
-  buildContent(s12 = null) {
-    this.observeComponentCreation((d15, e15) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(d15);
-      Scroll.create(this.contentScroller);
-      Scroll.scrollBar(BarState.Auto);
-      if (!e15) {
-        Scroll.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    this.observeComponentCreation((b15, c15) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(b15);
-      Column.create();
-      if (!c15) {
-        Column.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    this.observeComponentCreation((r14, s14) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(r14);
-      If.create();
-      if (this.content) {
-        this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation((z14, a15) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(z14);
-            Row.create();
-            Row.padding({
-              left: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level12'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-              right: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level12'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-              bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
-            });
-            Row.width('100%');
-            if (!a15) {
-              Row.pop();
+    constructor(j16, k16, l16, m16 = -1, n16 = undefined, o16) {
+        super(j16, l16, m16, o16);
+        if (typeof n16 === 'function') {
+            this.paramsGenerator_ = n16;
+        }
+        this.title = '';
+        this.content = '';
+        this.selectedIndex = -1;
+        this.confirm = null;
+        this.radioContent = [];
+        this.buttons = [];
+        this.contentPadding = undefined;
+        this.contentBuilder = this.buildContent;
+        this.__fontColorWithTheme = new ObservedPropertyObjectPU({
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.font_primary'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'fontColorWithTheme');
+        this.__dividerColorWithTheme = new ObservedPropertyObjectPU({
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.comp_divider'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'dividerColorWithTheme');
+        this.theme = new CustomThemeImpl({});
+        this.controller = new CustomDialogController({
+            builder: () => {
+                let p16 = new CustomContentDialog(this, {
+                    primaryTitle: this.title,
+                    contentBuilder: () => {
+                        this.contentBuilder();
+                    },
+                    buttons: this.buttons,
+                }, undefined, -1, () => {
+                }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 289, col: 14 });
+                p16.setController(this.controller);
+                ViewPU.create(p16);
+                let q16 = () => {
+                    return {
+                        primaryTitle: this.title,
+                        contentBuilder: () => {
+                            this.contentBuilder();
+                        },
+                        buttons: this.buttons
+                    };
+                };
+                p16.paramsGenerator_ = q16;
             }
-            ViewStackProcessor.StopGetAccessRecording();
-          });
-          this.observeComponentCreation((x14, y14) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(x14);
-            Text.create(this.content);
-            Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Body_M'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-            Text.fontWeight(FontWeight.Regular);
-            Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-            Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-            if (!y14) {
-              Text.pop();
-            }
-            ViewStackProcessor.StopGetAccessRecording();
-          });
-          Text.pop();
-          Row.pop();
-        });
-      }
-      else {
-        this.ifElseBranchUpdateFunction(1, () => {
-        });
-      }
-      if (!s14) {
-        If.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    If.pop();
-    this.observeComponentCreation((p14, q14) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(p14);
-      List.create({ space: 1 });
-      List.width('100%');
-      List.clip(false);
-      List.onFocus(() => {
-          if (!this.contentScroller.isAtEnd()) {
-              this.contentScroller.scrollEdge(Edge.Top);
-              focusControl.requestFocus(String(FIRST_ITEM_INDEX));
-          }
-      });
-      List.defaultFocus(this.buttons?.length == 0 ? true : false);
-      if (!q14) {
-        List.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    this.observeComponentCreation((y12, z12) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(y12);
-      ForEach.create();
-      const a13 = (c13, d13) => {
-        const e13 = c13;
-        {
-          const f13 = (n14, o14) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(n14);
-            g13(n14, o14);
-            if (!o14) {
-              ListItem.pop();
-            }
-            ViewStackProcessor.StopGetAccessRecording();
-          };
-          const g13 = (l14, m14) => {
-            ListItem.create(h13, true);
-          };
-          const h13 = (l13, m13) => {
-            f13(l13, m13);
-            this.updateFuncByElmtId.set(l13, f13);
-            this.observeComponentCreation((j14, k14) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(j14);
-              Column.create();
-              Column.padding({
-                left: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level6'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                right: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level6'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
-              });
-              if (!k14) {
-                Column.pop();
-              }
-              ViewStackProcessor.StopGetAccessRecording();
-            });
-            this.observeComponentCreation((g14, h14) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(g14);
-              Button.createWithChild();
-              Button.type(ButtonType.Normal);
-              Button.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level8'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-              Button.buttonStyle(ButtonStyleMode.TEXTUAL);
-              Button.padding({
-                left: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level6'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                right: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level6'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
-              });
-              Button.onClick(() => {
-                e13.action && e13.action();
-                this.controller.close();
-              });
-              if (!h14) {
-                Button.pop();
-              }
-              ViewStackProcessor.StopGetAccessRecording();
-            });
-            this.observeComponentCreation((e14, f14) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(e14);
-              Row.create();
-              Row.constraintSize({ minHeight: LIST_MIN_HEIGHT });
-              Row.clip(false);
-              Row.padding({
-                top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
-              });
-              if (!f14) {
-                Row.pop();
-              }
-              ViewStackProcessor.StopGetAccessRecording();
-            });
-            this.observeComponentCreation((c14, d14) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(c14);
-              Text.create(e13.title);
-              Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Body_L'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-              Text.fontWeight(FontWeight.Medium);
-              Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-              Text.layoutWeight(1);
-              if (!d14) {
-                Text.pop();
-              }
-              ViewStackProcessor.StopGetAccessRecording();
-            });
-            Text.pop();
-            this.observeComponentCreation((a14, b14) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(a14);
-              Radio.create({ value: 'item.title', group: 'radioGroup' });
-              Radio.size({ width: CHECKBOX_CONTAINER_LENGTH, height: CHECKBOX_CONTAINER_LENGTH });
-              Radio.checked(this.selectedIndex === d13);
-              Radio.hitTestBehavior(HitTestMode.None);
-              Radio.id(String(d13));
-              Radio.onFocus(() => {
-                  if (d13 == FIRST_ITEM_INDEX) {
-                      this.contentScroller.scrollEdge(Edge.Top);
-                  }
-                  else if (d13 == this.radioContent.length - 1) {
-                     this.contentScroller.scrollEdge(Edge.Bottom);
-                  }
-              });
-              if (!b14) {
-                Radio.pop();
-              }
-              ViewStackProcessor.StopGetAccessRecording();
-            });
-            Row.pop();
-            Button.pop();
-            this.observeComponentCreation((t13, u13) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(t13);
-              If.create();
-              if (d13 < this.radioContent.length - 1) {
+        }, this);
+        this.contentScroller = new Scroller();
+        this.setInitiallyProvidedValue(k16);
+        this.finalizeConstruction();
+    }
+
+    setInitiallyProvidedValue(i16) {
+        if (i16.title !== undefined) {
+            this.title = i16.title;
+        }
+        if (i16.content !== undefined) {
+            this.content = i16.content;
+        }
+        if (i16.selectedIndex !== undefined) {
+            this.selectedIndex = i16.selectedIndex;
+        }
+        if (i16.confirm !== undefined) {
+            this.confirm = i16.confirm;
+        }
+        if (i16.radioContent !== undefined) {
+            this.radioContent = i16.radioContent;
+        }
+        if (i16.buttons !== undefined) {
+            this.buttons = i16.buttons;
+        }
+        if (i16.contentPadding !== undefined) {
+            this.contentPadding = i16.contentPadding;
+        }
+        if (i16.contentBuilder !== undefined) {
+            this.contentBuilder = i16.contentBuilder;
+        }
+        if (i16.fontColorWithTheme !== undefined) {
+            this.fontColorWithTheme = i16.fontColorWithTheme;
+        }
+        if (i16.dividerColorWithTheme !== undefined) {
+            this.dividerColorWithTheme = i16.dividerColorWithTheme;
+        }
+        if (i16.theme !== undefined) {
+            this.theme = i16.theme;
+        }
+        if (i16.controller !== undefined) {
+            this.controller = i16.controller;
+        }
+        if (i16.contentScroller !== undefined) {
+            this.contentScroller = i16.contentScroller;
+        }
+    }
+
+    updateStateVars(h16) {
+    }
+
+    purgeVariableDependenciesOnElmtId(g16) {
+        this.__fontColorWithTheme.purgeDependencyOnElmtId(g16);
+        this.__dividerColorWithTheme.purgeDependencyOnElmtId(g16);
+    }
+
+    aboutToBeDeleted() {
+        this.__fontColorWithTheme.aboutToBeDeleted();
+        this.__dividerColorWithTheme.aboutToBeDeleted();
+        SubscriberManager.Get().delete(this.id__());
+        this.aboutToBeDeletedInternal();
+    }
+
+    get fontColorWithTheme() {
+        return this.__fontColorWithTheme.get();
+    }
+
+    set fontColorWithTheme(f16) {
+        this.__fontColorWithTheme.set(f16);
+    }
+
+    get dividerColorWithTheme() {
+        return this.__dividerColorWithTheme.get();
+    }
+
+    set dividerColorWithTheme(e16) {
+        this.__dividerColorWithTheme.set(e16);
+    }
+
+    setController(d16) {
+        this.controller = d16;
+    }
+
+    buildContent(o13 = null) {
+        this.observeComponentCreation2((b16, c16) => {
+            Scroll.create(this.contentScroller);
+            Scroll.scrollBar(BarState.Auto);
+        }, Scroll);
+        this.observeComponentCreation2((z15, a16) => {
+            Column.create();
+        }, Column);
+        this.observeComponentCreation2((p15, q15) => {
+            If.create();
+            if (this.content) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                  this.observeComponentCreation((y13, z13) => {
-                    ViewStackProcessor.StartGetAccessRecordingFor(y13);
-                    Divider.create();
-                    Divider.color({ 'id': -1, 'type': 10001, params: ['sys.color.comp_divider'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-                    Divider.padding({
-                      left: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level6'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                      right: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level6'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
-                    });
-                    if (!z13) {
-                      Divider.pop();
-                    }
-                    ViewStackProcessor.StopGetAccessRecording();
-                  });
+                    this.observeComponentCreation2((x15, y15) => {
+                        Row.create();
+                        Row.padding({
+                            left: {
+                                'id': -1,
+                                'type': 10002,
+                                params: ['sys.float.padding_level12'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
+                            },
+                            right: {
+                                'id': -1,
+                                'type': 10002,
+                                params: ['sys.float.padding_level12'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
+                            },
+                            bottom: {
+                                'id': -1,
+                                'type': 10002,
+                                params: ['sys.float.padding_level4'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
+                            }
+                        });
+                        Row.width('100%');
+                    }, Row);
+                    this.observeComponentCreation2((v15, w15) => {
+                        Text.create(this.content);
+                        Text.fontSize({
+                            'id': -1,
+                            'type': 10002,
+                            params: ['sys.float.Body_M'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
+                        });
+                        Text.fontWeight(FontWeight.Regular);
+                        Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
+                        Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+                    }, Text);
+                    Text.pop();
+                    Row.pop();
                 });
-              }
-              else {
+            } else {
                 this.ifElseBranchUpdateFunction(1, () => {
                 });
-              }
-              if (!u13) {
-                If.pop();
-              }
-              ViewStackProcessor.StopGetAccessRecording();
+            }
+        }, If);
+        If.pop();
+        this.observeComponentCreation2((m15, n15) => {
+            List.create({ space: 1 });
+            List.width('100%');
+            List.clip(false);
+            List.onFocus(() => {
+                if (!this.contentScroller.isAtEnd()) {
+                    this.contentScroller.scrollEdge(Edge.Top);
+                    focusControl.requestFocus(String(FIRST_ITEM_INDEX));
+                }
             });
-            If.pop();
-            Column.pop();
-            ListItem.pop();
-          };
-          this.observeComponentCreation(f13);
-          ListItem.pop();
-        }
-      };
-      this.forEachUpdateFunction(y12, this.radioContent, a13, undefined, true, false);
-      if (!z12) {
-        ForEach.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    ForEach.pop();
-    List.pop();
-    Column.pop();
-    Scroll.pop();
-  }
-  initialRender() {
-    {
-      this.observeComponentCreation((m12, n12) => {
-        ViewStackProcessor.StartGetAccessRecordingFor(m12);
-        if (n12) {
-          let o12 = new CustomDialogComponent(this, {
-            controller: this.controller,
-            primaryTitle: this.title,
-            contentBuilder: () => {
-              this.contentBuilder();
-            },
-            buttons: this.buttons,
-            contentAreaPadding: this.contentPadding
-          }, undefined, m12, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 332 });
-          ViewPU.create(o12);
-          let p12 = () => {
-            return {
-              controller: this.controller,
-              primaryTitle: this.title,
-              contentBuilder: () => {
-                this.contentBuilder();
-              },
-              buttons: this.buttons,
-              contentAreaPadding: this.contentPadding
+            List.defaultFocus(this.buttons?.length == 0 ? true : false);
+        }, List);
+        this.observeComponentCreation2((u13, v13) => {
+            ForEach.create();
+            const w13 = (y13, z13) => {
+                const a14 = y13;
+                {
+                    const b14 = (k15, l15) => {
+                        ViewStackProcessor.StartGetAccessRecordingFor(k15);
+                        c14(k15, l15);
+                        if (!l15) {
+                            ListItem.pop();
+                        }
+                        ViewStackProcessor.StopGetAccessRecording();
+                    };
+                    const c14 = (i15, j15) => {
+                        ListItem.create(d14, true);
+                    };
+                    const d14 = (h14, i14) => {
+                        b14(h14, i14);
+                        this.observeComponentCreation2((g15, h15) => {
+                            Column.create();
+                            Column.padding({
+                                left: {
+                                    'id': -1,
+                                    'type': 10002,
+                                    params: ['sys.float.padding_level6'],
+                                    'bundleName': '__harDefaultBundleName__',
+                                    'moduleName': '__harDefaultModuleName__'
+                                },
+                                right: {
+                                    'id': -1,
+                                    'type': 10002,
+                                    params: ['sys.float.padding_level6'],
+                                    'bundleName': '__harDefaultBundleName__',
+                                    'moduleName': '__harDefaultModuleName__'
+                                }
+                            });
+                        }, Column);
+                        this.observeComponentCreation2((d15, e15) => {
+                            Button.createWithChild();
+                            Button.type(ButtonType.Normal);
+                            Button.borderRadius({
+                                'id': -1,
+                                'type': 10002,
+                                params: ['sys.float.corner_radius_level8'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
+                            });
+                            Button.buttonStyle(ButtonStyleMode.TEXTUAL);
+                            Button.padding({
+                                left: {
+                                    'id': -1,
+                                    'type': 10002,
+                                    params: ['sys.float.padding_level6'],
+                                    'bundleName': '__harDefaultBundleName__',
+                                    'moduleName': '__harDefaultModuleName__'
+                                },
+                                right: {
+                                    'id': -1,
+                                    'type': 10002,
+                                    params: ['sys.float.padding_level6'],
+                                    'bundleName': '__harDefaultBundleName__',
+                                    'moduleName': '__harDefaultModuleName__'
+                                }
+                            });
+                            Button.onClick(() => {
+                                a14.action && a14.action();
+                                this.controller.close();
+                            });
+                        }, Button);
+                        this.observeComponentCreation2((b15, c15) => {
+                            Row.create();
+                            Row.constraintSize({ minHeight: LIST_MIN_HEIGHT });
+                            Row.clip(false);
+                            Row.padding({
+                                top: {
+                                    'id': -1,
+                                    'type': 10002,
+                                    params: ['sys.float.padding_level4'],
+                                    'bundleName': '__harDefaultBundleName__',
+                                    'moduleName': '__harDefaultModuleName__'
+                                },
+                                bottom: {
+                                    'id': -1,
+                                    'type': 10002,
+                                    params: ['sys.float.padding_level4'],
+                                    'bundleName': '__harDefaultBundleName__',
+                                    'moduleName': '__harDefaultModuleName__'
+                                }
+                            });
+                        }, Row);
+                        this.observeComponentCreation2((z14, a15) => {
+                            Text.create(a14.title);
+                            Text.fontSize({
+                                'id': -1,
+                                'type': 10002,
+                                params: ['sys.float.Body_L'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
+                            });
+                            Text.fontWeight(FontWeight.Medium);
+                            Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
+                            Text.layoutWeight(1);
+                        }, Text);
+                        Text.pop();
+                        this.observeComponentCreation2((w14, x14) => {
+                            Radio.create({ value: 'item.title', group: 'radioGroup' });
+                            Radio.size({ width: CHECKBOX_CONTAINER_LENGTH, height: CHECKBOX_CONTAINER_LENGTH });
+                            Radio.checked(this.selectedIndex === z13);
+                            Radio.hitTestBehavior(HitTestMode.None);
+                            Radio.id(String(z13));
+                            Radio.onFocus(() => {
+                                if (z13 == FIRST_ITEM_INDEX) {
+                                    this.contentScroller.scrollEdge(Edge.Top);
+                                } else if (z13 == this.radioContent.length - 1) {
+                                    this.contentScroller.scrollEdge(Edge.Bottom);
+                                }
+                            });
+                        }, Radio);
+                        Row.pop();
+                        Button.pop();
+                        this.observeComponentCreation2((p14, q14) => {
+                            If.create();
+                            if (z13 < this.radioContent.length - 1) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    this.observeComponentCreation2((u14, v14) => {
+                                        Divider.create();
+                                        Divider.color(ObservedObject.GetRawObject(this.dividerColorWithTheme));
+                                        Divider.padding({
+                                            left: {
+                                                'id': -1,
+                                                'type': 10002,
+                                                params: ['sys.float.padding_level6'],
+                                                'bundleName': '__harDefaultBundleName__',
+                                                'moduleName': '__harDefaultModuleName__'
+                                            },
+                                            right: {
+                                                'id': -1,
+                                                'type': 10002,
+                                                params: ['sys.float.padding_level6'],
+                                                'bundleName': '__harDefaultBundleName__',
+                                                'moduleName': '__harDefaultModuleName__'
+                                            }
+                                        });
+                                    }, Divider);
+                                });
+                            } else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                });
+                            }
+                        }, If);
+                        If.pop();
+                        Column.pop();
+                        ListItem.pop();
+                    };
+                    this.observeComponentCreation2(c14, ListItem);
+                    ListItem.pop();
+                }
             };
-          };
-          o12.paramsGenerator_ = p12;
+            this.forEachUpdateFunction(u13, this.radioContent, w13, undefined, true, false);
+        }, ForEach);
+        ForEach.pop();
+        List.pop();
+        Column.pop();
+        Scroll.pop();
+    }
+
+    initialRender() {
+        {
+            this.observeComponentCreation2((i13, j13) => {
+                if (j13) {
+                    let k13 = new CustomDialogComponent(this, {
+                        controller: this.controller,
+                        primaryTitle: this.title,
+                        contentBuilder: () => {
+                            this.contentBuilder();
+                        },
+                        buttons: this.buttons,
+                        contentAreaPadding: this.contentPadding,
+                        theme: this.theme,
+                    }, undefined, i13, () => {
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 384, col: 5 });
+                    ViewPU.create(k13);
+                    let l13 = () => {
+                        return {
+                            controller: this.controller,
+                            primaryTitle: this.title,
+                            contentBuilder: () => {
+                                this.contentBuilder();
+                            },
+                            buttons: this.buttons,
+                            contentAreaPadding: this.contentPadding,
+                            theme: this.theme
+                        };
+                    };
+                    k13.paramsGenerator_ = l13;
+                } else {
+                    this.updateStateVarsOfChildByElmtId(i13, {});
+                }
+            }, { name: 'CustomDialogComponent' });
         }
-        else {
-          this.updateStateVarsOfChildByElmtId(m12, {});
+    }
+
+    aboutToAppear() {
+        this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
+        this.theme.colors.fontPrimary : {
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.font_primary'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            };
+        this.dividerColorWithTheme = this.theme?.colors?.compDivider ?
+        this.theme.colors.compDivider : {
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.comp_divider'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            };
+        this.initContentPadding();
+        this.initButtons();
+    }
+
+    initContentPadding() {
+        this.contentPadding = {
+            left: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.padding_level0'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            },
+            right: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.padding_level0'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            }
+        };
+        if (!this.title && !this.confirm) {
+            this.contentPadding = {
+                top: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.padding_level12'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                bottom: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.padding_level12'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                }
+            };
+            return;
         }
-        ViewStackProcessor.StopGetAccessRecording();
-      });
+        if (!this.title) {
+            this.contentPadding = {
+                top: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.padding_level12'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                }
+            };
+        } else if (!this.confirm) {
+            this.contentPadding = {
+                bottom: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.padding_level12'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                }
+            };
+        }
     }
-  }
-  aboutToAppear() {
-    this.initContentPadding();
-    this.initButtons();
-  }
-  initContentPadding() {
-    this.contentPadding = {
-      left: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level0'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-      right: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level0'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
-    };
-    if (!this.title && !this.confirm) {
-      this.contentPadding = {
-        top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level12'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-        bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level12'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
-      };
-      return;
+
+    initButtons() {
+        this.buttons = [];
+        if (this.confirm) {
+            this.buttons.push(this.confirm);
+        }
     }
-    if (!this.title) {
-      this.contentPadding = {
-        top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level12'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
-      };
+
+    rerender() {
+        this.updateDirtyElements();
     }
-    else if (!this.confirm) {
-      this.contentPadding = {
-        bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level12'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
-      };
-    }
-  }
-  initButtons() {
-    this.buttons = [];
-    if (this.confirm) {
-      this.buttons.push(this.confirm);
-    }
-  }
-  rerender() {
-    this.updateDirtyElements();
-  }
 }
 
 export class ConfirmDialog extends ViewPU {
-  constructor(e, o, t, r = -1) {
-    super(e, t, r);
-    this.controller = void 0;
-    this.title = '';
-    this.content = '';
-    this.checkTips = '';
-    this.__isChecked = new ObservedPropertySimplePU(!1, this, 'isChecked');
-    this.primaryButton = { value: '' };
-    this.secondaryButton = { value: '' };
-    this.setInitiallyProvidedValue(o);
-  }
-
-  setInitiallyProvidedValue(e) {
-    void 0 !== e.controller && (this.controller = e.controller);
-    void 0 !== e.title && (this.title = e.title);
-    void 0 !== e.content && (this.content = e.content);
-    void 0 !== e.checkTips && (this.checkTips = e.checkTips);
-    void 0 !== e.isChecked && (this.isChecked = e.isChecked);
-    void 0 !== e.primaryButton && (this.primaryButton = e.primaryButton);
-    void 0 !== e.secondaryButton && (this.secondaryButton = e.secondaryButton);
-  }
-
-  updateStateVars(e) {
-  }
-
-  purgeVariableDependenciesOnElmtId(e) {
-    this.__isChecked.purgeDependencyOnElmtId(e);
-  }
-
-  aboutToBeDeleted() {
-    this.__isChecked.aboutToBeDeleted();
-    SubscriberManager.Get().delete(this.id__());
-    this.aboutToBeDeletedInternal();
-  }
-
-  setController(e) {
-    this.controller = e;
-  }
-
-  get isChecked() {
-    return this.__isChecked.get();
-  }
-
-  set isChecked(e) {
-    this.__isChecked.set(e);
-  }
-
-  initialRender() {
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      Column.create();
-      Column.backgroundBlurStyle(BlurStyle.Thick);
-      Column.borderRadius({
-        id: -1,
-        type: 10002,
-        params: ['sys.float.ohos_id_corner_radius_dialog'],
-        bundleName: '',
-        moduleName: ''
-      });
-      Column.margin({
-        left: {
-          id: -1,
-          type: 10002,
-          params: ['sys.float.ohos_id_dialog_margin_start'],
-          bundleName: '',
-          moduleName: ''
-        },
-        right: {
-          id: -1,
-          type: 10002,
-          params: ['sys.float.ohos_id_dialog_margin_end'],
-          bundleName: '',
-          moduleName: ''
-        },
-        bottom: {
-          id: -1,
-          type: 10002,
-          params: ['sys.float.ohos_id_dialog_margin_bottom'],
-          bundleName: '',
-          moduleName: ''
+    constructor(x12, y12, z12, a13 = -1, b13 = undefined, c13) {
+        super(x12, z12, a13, c13);
+        if (typeof b13 === 'function') {
+            this.paramsGenerator_ = b13;
         }
-      });
-      Column.backgroundColor({
-        id: -1,
-        type: 10001,
-        params: ['sys.color.ohos_id_color_dialog_bg'],
-        bundleName: '',
-        moduleName: ''
-      });
-      o || Column.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      Row.create();
-      Row.padding({ left: 24, right: 24, top: 24 });
-      Row.constraintSize({ minHeight: 56 });
-      o || Row.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      Text.create(this.title);
-      Text.fontSize({
-        id: -1,
-        type: 10002,
-        params: ['sys.float.ohos_id_text_size_dialog_tittle'],
-        bundleName: '',
-        moduleName: ''
-      });
-      Text.fontWeight(FontWeight.Medium);
-      Text.maxLines(CONTENT_MAX_LINES);
-      Text.minFontSize(15);
-      Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-      Text.fontColor({
-        id: -1,
-        type: 10001,
-        params: ['sys.color.ohos_id_color_text_primary'],
-        bundleName: '',
-        moduleName: ''
-      });
-      Text.textAlign(TextAlign.Start);
-      Text.width('100%');
-      o || Text.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    Text.pop();
-    Row.pop();
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      If.create();
-      this.content ? this.ifElseBranchUpdateFunction(0, (() => {
-        this.observeComponentCreation(((e, o) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(e);
-          Row.create();
-          Row.padding({ left: 24, right: 24, top: 8, bottom: 8 });
-          Row.width('100%');
-          Row.constraintSize({ minHeight: 36 });
-          o || Row.pop();
-          ViewStackProcessor.StopGetAccessRecording();
-        }));
-        this.observeComponentCreation(((e, o) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(e);
-          Text.create(this.content);
-          Text.focusable(true);
-          Text.defaultFocus(!(this.primaryButton?.value || this.secondaryButton?.value));
-          Text.fontSize({
-            id: -1,
-            type: 10002,
-            params: ['sys.float.ohos_id_text_size_body1'],
-            bundleName: '',
-            moduleName: ''
-          });
-          Text.fontWeight(FontWeight.Medium);
-          Text.fontColor({
-            id: -1,
-            type: 10001,
-            params: ['sys.color.ohos_id_color_text_primary'],
-            bundleName: '',
-            moduleName: ''
-          });
-          Text.maxLines(CONTENT_MAX_LINES);
-          Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-          Text.minFontSize({
-            id: -1,
-            type: 10002,
-            params: ['sys.float.ohos_id_text_size_body3'],
-            bundleName: '',
-            moduleName: ''
-          });
-          o || Text.pop();
-          ViewStackProcessor.StopGetAccessRecording();
-        }));
+        this.controller = undefined;
+        this.title = '';
+        this.content = '';
+        this.checkTips = '';
+        this.__isChecked = new ObservedPropertySimplePU(false, this, 'isChecked');
+        this.primaryButton = { value: '' };
+        this.secondaryButton = { value: '' };
+        this.__fontColorWithTheme = new ObservedPropertyObjectPU({
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.font_primary'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'fontColorWithTheme');
+        this.__buttonFontColorWithTheme = new ObservedPropertyObjectPU({
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.font_emphasize'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'buttonFontColorWithTheme');
+        this.theme = new CustomThemeImpl({});
+        this.checkAction = undefined;
+        this.contentScroller = new Scroller();
+        this.buttons = undefined;
+        this.marginOffset = 0;
+        this.__titleHeight = new ObservedPropertySimplePU(0, this, 'titleHeight');
+        this.__buttonHeight = new ObservedPropertySimplePU(0, this, 'buttonHeight');
+        this.__checkBoxHeight = new ObservedPropertySimplePU(CHECKBOX_CONTAINER_HEIGHT, this, 'checkBoxHeight');
+        this.__maxContentHeight =
+            new ObservedPropertySimplePU(`calc(100% - ${this.checkBoxHeight}vp - ${this.titleHeight}vp - ${this.buttonHeight}vp)`,
+                this, 'maxContentHeight');
+        this.updateTitleHeight = (g13) => {
+            this.titleHeight = g13;
+            this.maxContentHeight =
+                `calc(100% - ${this.checkBoxHeight}vp - ${this.titleHeight}vp - ${this.buttonHeight}vp)`;
+        };
+        this.updateButtonHeight = (f13) => {
+            this.buttonHeight = f13;
+            this.maxContentHeight =
+                `calc(100% - ${this.checkBoxHeight}vp - ${this.titleHeight}vp - ${this.buttonHeight}vp)`;
+        };
+        this.setInitiallyProvidedValue(y12);
+        this.finalizeConstruction();
+    }
+
+    setInitiallyProvidedValue(w12) {
+        if (w12.controller !== undefined) {
+            this.controller = w12.controller;
+        }
+        if (w12.title !== undefined) {
+            this.title = w12.title;
+        }
+        if (w12.content !== undefined) {
+            this.content = w12.content;
+        }
+        if (w12.checkTips !== undefined) {
+            this.checkTips = w12.checkTips;
+        }
+        if (w12.isChecked !== undefined) {
+            this.isChecked = w12.isChecked;
+        }
+        if (w12.primaryButton !== undefined) {
+            this.primaryButton = w12.primaryButton;
+        }
+        if (w12.secondaryButton !== undefined) {
+            this.secondaryButton = w12.secondaryButton;
+        }
+        if (w12.fontColorWithTheme !== undefined) {
+            this.fontColorWithTheme = w12.fontColorWithTheme;
+        }
+        if (w12.buttonFontColorWithTheme !== undefined) {
+            this.buttonFontColorWithTheme = w12.buttonFontColorWithTheme;
+        }
+        if (w12.theme !== undefined) {
+            this.theme = w12.theme;
+        }
+        if (w12.checkAction !== undefined) {
+            this.checkAction = w12.checkAction;
+        }
+        if (w12.contentScroller !== undefined) {
+            this.contentScroller = w12.contentScroller;
+        }
+        if (w12.buttons !== undefined) {
+            this.buttons = w12.buttons;
+        }
+        if (w12.marginOffset !== undefined) {
+            this.marginOffset = w12.marginOffset;
+        }
+        if (w12.titleHeight !== undefined) {
+            this.titleHeight = w12.titleHeight;
+        }
+        if (w12.buttonHeight !== undefined) {
+            this.buttonHeight = w12.buttonHeight;
+        }
+        if (w12.checkBoxHeight !== undefined) {
+            this.checkBoxHeight = w12.checkBoxHeight;
+        }
+        if (w12.maxContentHeight !== undefined) {
+            this.maxContentHeight = w12.maxContentHeight;
+        }
+        if (w12.updateTitleHeight !== undefined) {
+            this.updateTitleHeight = w12.updateTitleHeight;
+        }
+        if (w12.updateButtonHeight !== undefined) {
+            this.updateButtonHeight = w12.updateButtonHeight;
+        }
+    }
+
+    updateStateVars(v12) {
+    }
+
+    purgeVariableDependenciesOnElmtId(u12) {
+        this.__isChecked.purgeDependencyOnElmtId(u12);
+        this.__fontColorWithTheme.purgeDependencyOnElmtId(u12);
+        this.__buttonFontColorWithTheme.purgeDependencyOnElmtId(u12);
+        this.__titleHeight.purgeDependencyOnElmtId(u12);
+        this.__buttonHeight.purgeDependencyOnElmtId(u12);
+        this.__checkBoxHeight.purgeDependencyOnElmtId(u12);
+        this.__maxContentHeight.purgeDependencyOnElmtId(u12);
+    }
+
+    aboutToBeDeleted() {
+        this.__isChecked.aboutToBeDeleted();
+        this.__fontColorWithTheme.aboutToBeDeleted();
+        this.__buttonFontColorWithTheme.aboutToBeDeleted();
+        this.__titleHeight.aboutToBeDeleted();
+        this.__buttonHeight.aboutToBeDeleted();
+        this.__checkBoxHeight.aboutToBeDeleted();
+        this.__maxContentHeight.aboutToBeDeleted();
+        SubscriberManager.Get().delete(this.id__());
+        this.aboutToBeDeletedInternal();
+    }
+
+    setController(t12) {
+        this.controller = t12;
+    }
+
+    get isChecked() {
+        return this.__isChecked.get();
+    }
+
+    set isChecked(s12) {
+        this.__isChecked.set(s12);
+    }
+
+    get fontColorWithTheme() {
+        return this.__fontColorWithTheme.get();
+    }
+
+    set fontColorWithTheme(r12) {
+        this.__fontColorWithTheme.set(r12);
+    }
+
+    get buttonFontColorWithTheme() {
+        return this.__buttonFontColorWithTheme.get();
+    }
+
+    set buttonFontColorWithTheme(q12) {
+        this.__buttonFontColorWithTheme.set(q12);
+    }
+
+    get titleHeight() {
+        return this.__titleHeight.get();
+    }
+
+    set titleHeight(p12) {
+        this.__titleHeight.set(p12);
+    }
+
+    get buttonHeight() {
+        return this.__buttonHeight.get();
+    }
+
+    set buttonHeight(o12) {
+        this.__buttonHeight.set(o12);
+    }
+
+    get checkBoxHeight() {
+        return this.__checkBoxHeight.get();
+    }
+
+    set checkBoxHeight(n12) {
+        this.__checkBoxHeight.set(n12);
+    }
+
+    get maxContentHeight() {
+        return this.__maxContentHeight.get();
+    }
+
+    set maxContentHeight(m12) {
+        this.__maxContentHeight.set(m12);
+    }
+
+    buildContent(a11 = null) {
+        this.observeComponentCreation2((k12, l12) => {
+            Column.create();
+        }, Column);
+        this.observeComponentCreation2((v11, w11) => {
+            If.create();
+            if (this.content) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((i12, j12) => {
+                        Row.create();
+                        Row.padding({ bottom: 8 });
+                        Row.margin({ right: `${this.marginOffset}vp` });
+                        Row.constraintSize({
+                            minHeight: 36,
+                            maxHeight: this.maxContentHeight
+                        });
+                    }, Row);
+                    this.observeComponentCreation2((g12, h12) => {
+                        Scroll.create(this.contentScroller);
+                        Scroll.width('100%');
+                    }, Scroll);
+                    this.observeComponentCreation2((c12, d12) => {
+                        Text.create(this.content);
+                        Text.focusable(true);
+                        Text.defaultFocus(!(this.primaryButton?.value || this.secondaryButton?.value));
+                        Text.fontSize({
+                            'id': -1,
+                            'type': 10002,
+                            params: ['sys.float.Body_L'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
+                        });
+                        Text.fontWeight(FontWeight.Medium);
+                        Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
+                        Text.textAlign(TextAlign.Start);
+                        Text.margin({
+                            right: {
+                                'id': -1,
+                                'type': 10002,
+                                params: ['sys.float.padding_level8'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
+                            }
+                        });
+                        Text.onKeyEvent((f12) => {
+                            if (f12) {
+                                resolveKeyEvent(f12, this.contentScroller);
+                            }
+                        });
+                        Text.width(`calc(100% - ${getNumberByResource('padding_level8')}vp)`);
+                    }, Text);
+                    Text.pop();
+                    Scroll.pop();
+                    Row.pop();
+                });
+            } else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                });
+            }
+        }, If);
+        If.pop();
+        this.observeComponentCreation2((q11, r11) => {
+            Row.create();
+            Row.onSizeChange((t11, u11) => {
+                this.checkBoxHeight = Number(u11.height);
+            });
+            Row.constraintSize({ minHeight: CHECKBOX_CONTAINER_HEIGHT });
+            Row.width('100%');
+            Row.padding({ top: 8, bottom: 8 });
+        }, Row);
+        this.observeComponentCreation2((o11, p11) => {
+            WithTheme.create({ theme: this.theme });
+        }, WithTheme);
+        this.observeComponentCreation2((k11, l11) => {
+            Checkbox.create({ name: 'checkbox', group: 'checkboxGroup' });
+            Checkbox.select(this.isChecked);
+            Checkbox.onChange((n11) => {
+                this.isChecked = n11;
+                if (this.checkAction) {
+                    this.checkAction(this.isChecked);
+                }
+            });
+            Checkbox.hitTestBehavior(HitTestMode.Block);
+            Checkbox.margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(8) });
+        }, Checkbox);
+        Checkbox.pop();
+        WithTheme.pop();
+        this.observeComponentCreation2((h11, i11) => {
+            Text.create(this.checkTips);
+            Text.fontSize({
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.Body_M'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            });
+            Text.fontWeight(FontWeight.Medium);
+            Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
+            Text.maxLines(CONTENT_MAX_LINES);
+            Text.focusable(false);
+            Text.layoutWeight(1);
+            Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+            Text.onClick(() => {
+                this.isChecked = !this.isChecked;
+            });
+        }, Text);
         Text.pop();
         Row.pop();
-      })) : If.branchId(1);
-      o || If.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    If.pop();
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      Row.create();
-      Row.height(CHECKBOX_CONTAINER_HEIGHT);
-      Row.width('100%');
-      Row.padding({ left: 24, right: 24, top: 8, bottom: 8 });
-      o || Row.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      Checkbox.create({ name: 'checkbox', group: 'checkboxGroup' });
-      Checkbox.select(this.isChecked);
-      Checkbox.onChange((e => {
-        this.isChecked = e;
-      }));
-      Checkbox.margin({ left: 0, right: 8 });
-      o || Checkbox.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    Checkbox.pop();
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      Text.create(this.checkTips);
-      Text.fontSize({
-        id: -1,
-        type: 10002,
-        params: ['sys.float.ohos_id_text_size_body2'],
-        bundleName: '',
-        moduleName: ''
-      });
-      Text.fontWeight(FontWeight.Medium);
-      Text.fontColor({
-        id: -1,
-        type: 10001,
-        params: ['sys.color.ohos_id_color_text_primary'],
-        bundleName: '',
-        moduleName: ''
-      });
-      Text.maxLines(CONTENT_MAX_LINES);
-      Text.layoutWeight(1);
-      Text.focusable(false);
-      Text.onClick((() => {
-        this.isChecked = !this.isChecked;
-      }));
-      o || Text.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    Text.pop();
-    Row.pop();
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      Row.create();
-      Row.width('100%');
-      Row.padding({ left: 16, right: 16, top: 16, bottom: 16 });
-      o || Row.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      If.create();
-      this.primaryButton.value ? this.ifElseBranchUpdateFunction(0, (() => {
-        this.observeComponentCreation(((e, o) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(e);
-          Button.createWithLabel(this.primaryButton.value);
-          Button.fontSize({
-            id: -1,
-            type: 10002,
-            params: ['sys.float.ohos_id_text_size_button1'],
-            bundleName: '',
-            moduleName: ''
-          });
-          Button.fontWeight(FontWeight.Medium);
-          Button.layoutWeight(1);
-          Button.defaultFocus(true);
-          Button.backgroundColor(this.primaryButton.background ? this.primaryButton.background : {
-            id: -1,
-            type: 10001,
-            params: ['sys.color.ohos_id_color_background_transparent'],
-            bundleName: '',
-            moduleName: ''
-          });
-          Button.fontColor(this.primaryButton.fontColor ? this.primaryButton.fontColor : {
-            id: -1,
-            type: 10001,
-            params: ['sys.color.ohos_id_color_text_primary_activated'],
-            bundleName: '',
-            moduleName: ''
-          });
-          Button.onClick((() => {
-            this.primaryButton.action && this.primaryButton.action();
-            this.controller.close();
-          }));
-          o || Button.pop();
-          ViewStackProcessor.StopGetAccessRecording();
-        }));
-        Button.pop();
-      })) : If.branchId(1);
-      o || If.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    If.pop();
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      If.create();
-      this.secondaryButton.value && this.primaryButton.value ? this.ifElseBranchUpdateFunction(0, (() => {
-        this.observeComponentCreation(((e, o) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(e);
-          Column.create();
-          Column.width(DIVIDER_CONTAINER_WIDTH);
-          Column.alignItems(HorizontalAlign.Center);
-          o || Column.pop();
-          ViewStackProcessor.StopGetAccessRecording();
-        }));
-        this.observeComponentCreation(((e, o) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(e);
-          If.create();
-          this.secondaryButton.background ? If.branchId(1) : this.ifElseBranchUpdateFunction(0, (() => {
-            this.observeComponentCreation(((e, o) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(e);
-              Divider.create();
-              Divider.width(DIVIDER_WIDTH);
-              Divider.height(DIVIDER_HEIGHT);
-              Divider.color({
-                id: -1,
-                type: 10001,
-                params: ['sys.color.ohos_id_color_list_separator'],
-                bundleName: '',
-                moduleName: ''
-              });
-              Divider.vertical(!0);
-              o || Divider.pop();
-              ViewStackProcessor.StopGetAccessRecording();
-            }));
-          }));
-          o || If.pop();
-          ViewStackProcessor.StopGetAccessRecording();
-        }));
-        If.pop();
         Column.pop();
-      })) : If.branchId(1);
-      o || If.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    If.pop();
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      If.create();
-      this.secondaryButton.value ? this.ifElseBranchUpdateFunction(0, (() => {
-        this.observeComponentCreation(((e, o) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(e);
-          Button.createWithLabel(this.secondaryButton.value);
-          Button.fontSize({
-            id: -1,
-            type: 10002,
-            params: ['sys.float.ohos_id_text_size_button1'],
-            bundleName: '',
-            moduleName: ''
-          });
-          Button.fontWeight(FontWeight.Medium);
-          Button.layoutWeight(1);
-          Button.defaultFocus(true);
-          Button.backgroundColor(this.secondaryButton.background ? this.secondaryButton.background : {
-            id: -1,
-            type: 10001,
-            params: ['sys.color.ohos_id_color_background_transparent'],
-            bundleName: '',
-            moduleName: ''
-          });
-          Button.fontColor(this.secondaryButton.fontColor ? this.secondaryButton.fontColor : {
-            id: -1,
-            type: 10001,
-            params: ['sys.color.ohos_id_color_text_primary_activated'],
-            bundleName: '',
-            moduleName: ''
-          });
-          Button.onClick((() => {
-            this.secondaryButton.action && this.secondaryButton.action();
-            this.controller.close();
-          }));
-          o || Button.pop();
-          ViewStackProcessor.StopGetAccessRecording();
-        }));
-        Button.pop();
-      })) : If.branchId(1);
-      o || If.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    If.pop();
-    Row.pop();
-    Column.pop();
-  }
+    }
 
-  rerender() {
-    this.updateDirtyElements();
-  }
+    initialRender() {
+        {
+            this.observeComponentCreation2((u10, v10) => {
+                if (v10) {
+                    let w10 = new CustomDialogComponent(this, {
+                        primaryTitle: this.title,
+                        controller: this.controller,
+                        contentBuilder: () => {
+                            this.buildContent();
+                        },
+                        updateTitleHeight: this.updateTitleHeight,
+                        updateButtonHeight: this.updateButtonHeight,
+                        buttons: this.buttons,
+                        theme: this.theme,
+                    }, undefined, u10, () => {
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 534, col: 5 });
+                    ViewPU.create(w10);
+                    let x10 = () => {
+                        return {
+                            primaryTitle: this.title,
+                            controller: this.controller,
+                            contentBuilder: () => {
+                                this.buildContent();
+                            },
+                            updateTitleHeight: this.updateTitleHeight,
+                            updateButtonHeight: this.updateButtonHeight,
+                            buttons: this.buttons,
+                            theme: this.theme
+                        };
+                    };
+                    w10.paramsGenerator_ = x10;
+                } else {
+                    this.updateStateVarsOfChildByElmtId(u10, {});
+                }
+            }, { name: 'CustomDialogComponent' });
+        }
+    }
+
+    aboutToAppear() {
+        this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
+        this.theme.colors.fontPrimary : {
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.font_primary'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            };
+        this.buttonFontColorWithTheme = this.theme?.colors?.fontEmphasize ?
+        this.theme.colors.fontEmphasize : {
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.font_emphasize'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            };
+        this.initButtons();
+        this.initMargin();
+    }
+
+    initMargin() {
+        this.marginOffset = 0 - getNumberByResource('padding_level8');
+    }
+
+    initButtons() {
+        if (!this.primaryButton && !this.secondaryButton) {
+            return;
+        }
+        this.buttons = [];
+        if (this.primaryButton) {
+            this.buttons.push(this.primaryButton);
+        }
+        if (this.secondaryButton) {
+            this.buttons.push(this.secondaryButton);
+        }
+    }
+
+    rerender() {
+        this.updateDirtyElements();
+    }
 }
 
 export class AlertDialog extends ViewPU {
-  constructor(n9, o9, p9, q9 = -1, r9 = undefined, s9) {
-    super(n9, p9, q9, s9);
-    if (typeof r9 === 'function') {
-      this.paramsGenerator_ = r9;
-    }
-    this.controller = undefined;
-    this.primaryTitle = undefined;
-    this.secondaryTitle = undefined;
-    this.content = '';
-    this.primaryButton = null;
-    this.secondaryButton = null;
-    this.buttons = undefined;
-    this.__textAlign = new ObservedPropertySimplePU(TextAlign.Start, this, 'textAlign');
-    this.contentScroller = new Scroller();
-    this.setInitiallyProvidedValue(o9);
-    this.finalizeConstruction();
-  }
-  setInitiallyProvidedValue(m9) {
-    if (m9.controller !== undefined) {
-      this.controller = m9.controller;
-    }
-    if (m9.primaryTitle !== undefined) {
-      this.primaryTitle = m9.primaryTitle;
-    }
-    if (m9.secondaryTitle !== undefined) {
-      this.secondaryTitle = m9.secondaryTitle;
-    }
-    if (m9.content !== undefined) {
-      this.content = m9.content;
-    }
-    if (m9.primaryButton !== undefined) {
-      this.primaryButton = m9.primaryButton;
-    }
-    if (m9.secondaryButton !== undefined) {
-      this.secondaryButton = m9.secondaryButton;
-    }
-    if (m9.buttons !== undefined) {
-      this.buttons = m9.buttons;
-    }
-    if (m9.textAlign !== undefined) {
-      this.textAlign = m9.textAlign;
-    }
-    if (m9.contentScroller !== undefined) {
-      this.contentScroller = m9.contentScroller;
-    }
-  }
-  updateStateVars(l9) {
-  }
-  purgeVariableDependenciesOnElmtId(k9) {
-    this.__textAlign.purgeDependencyOnElmtId(k9);
-  }
-  aboutToBeDeleted() {
-    this.__textAlign.aboutToBeDeleted();
-    SubscriberManager.Get().delete(this.id__());
-    this.aboutToBeDeletedInternal();
-  }
-  setController(j9) {
-    this.controller = j9;
-  }
-  get textAlign() {
-    return this.__textAlign.get();
-  }
-  set textAlign(i9) {
-    this.__textAlign.set(i9);
-  }
-  initialRender() {
-    {
-      this.observeComponentCreation2((c9, d9) => {
-        if (d9) {
-          let e9 = new CustomDialogComponent(this, {
-            primaryTitle: this.primaryTitle,
-            secondaryTitle: this.secondaryTitle,
-            controller: this.controller,
-            contentBuilder: () => {
-              this.AlertDialogContentBuilder();
-            },
-            buttons: this.buttons,
-          }, undefined, c9, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 58 });
-          ViewPU.create(e9);
-          let f9 = () => {
-            return {
-              primaryTitle: this.primaryTitle,
-              secondaryTitle: this.secondaryTitle,
-              controller: this.controller,
-              contentBuilder: () => {
-                this.AlertDialogContentBuilder();
-              },
-              buttons: this.buttons
-            };
-          };
-          e9.paramsGenerator_ = f9;
+    constructor(n10, o10, p10, q10 = -1, r10 = undefined, s10) {
+        super(n10, p10, q10, s10);
+        if (typeof r10 === 'function') {
+            this.paramsGenerator_ = r10;
         }
-        else {
-          this.updateStateVarsOfChildByElmtId(c9, {});
-        }
-      }, { name: 'CustomDialogComponent' });
+        this.controller = undefined;
+        this.primaryTitle = undefined;
+        this.secondaryTitle = undefined;
+        this.content = '';
+        this.primaryButton = null;
+        this.secondaryButton = null;
+        this.buttons = undefined;
+        this.__textAlign = new ObservedPropertySimplePU(TextAlign.Start, this, 'textAlign');
+        this.contentScroller = new Scroller();
+        this.__fontColorWithTheme = new ObservedPropertyObjectPU({
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.font_primary'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'fontColorWithTheme');
+        this.theme = new CustomThemeImpl({});
+        this.setInitiallyProvidedValue(o10);
+        this.finalizeConstruction();
     }
-  }
-  AlertDialogContentBuilder(o8 = null) {
-    this.observeComponentCreation2((z8, a9) => {
-      Column.create();
-      Column.margin({ right: `${this.getMargin()}vp`, });
-    }, Column);
-    this.observeComponentCreation2((x8, y8) => {
-      Scroll.create(this.contentScroller);
-      Scroll.width('100%');
-    }, Scroll);
-    this.observeComponentCreation2((s8, t8) => {
-      Text.create(this.content);
-      Text.focusable(true);
-      Text.defaultFocus(!(this.primaryButton || this.secondaryButton));
-      Text.fontSize({ id: -1, type: 10002, params: ['sys.float.Body_L'], bundleName: '', moduleName: '' });
-      Text.fontWeight(this.getFontWeight());
-      Text.fontColor({ id: -1, type: 10001, params: ['sys.color.font_primary'], bundleName: '', moduleName: '' });
-      Text.margin({ right: { id: -1, type: 10002, params: ['sys.float.padding_level8'], bundleName: '', moduleName: '' }, });
-      Text.width(`calc(100% - ${getNumberByResource('padding_level8')}vp)`);
-      Text.textAlign(this.textAlign);
-      Text.onAreaChange((v8, w8) => {
-        this.getTextAlign(Number(w8.width));
-      });
-      Text.onKeyEvent((y8) => {
-          if (y8) {
-              resolveKeyEvent(y8, this.contentScroller);
-          }
-      });
-    }, Text);
-    Text.pop();
-    Scroll.pop();
-    Column.pop();
-  }
-  aboutToAppear() {
-    this.initButtons();
-  }
-  getTextAlign(l8) {
-    let m8 = measure.measureTextSize({
-      textContent: this.content,
-      fontSize: { id: -1, type: 10002, params: ['sys.float.Body_L'], bundleName: '', moduleName: '' },
-      constraintWidth: l8,
-    });
-    let n8 = measure.measureTextSize({
-      textContent: this.content,
-      fontSize: { id: -1, type: 10002, params: ['sys.float.Body_L'], bundleName: '', moduleName: '' },
-    });
-    if (this.getTextHeight(m8) <= this.getTextHeight(n8)) {
-      this.textAlign = TextAlign.Center;
-    }
-  }
-  getTextHeight(k8) {
-    if (k8 && k8.height !== null && k8.height !== undefined) {
-      return Number(k8.height);
-    }
-    return 0;
-  }
-  initButtons() {
-    if (!this.primaryButton && !this.secondaryButton) {
-      return;
-    }
-    this.buttons = [];
-    if (this.primaryButton) {
-      this.buttons.push(this.primaryButton);
-    }
-    if (this.secondaryButton) {
-      this.buttons.push(this.secondaryButton);
-    }
-  }
-  getMargin() {
-    return 0 - getNumberByResource('padding_level8');
-  }
-  getFontWeight() {
-    if (this.primaryTitle || this.secondaryTitle) {
-      return FontWeight.Regular;
-    }
-    return FontWeight.Medium;
-  }
-  rerender() {
-    this.updateDirtyElements();
-  }
-}
 
-if (!('finalizeConstruction' in ViewPU.prototype)) {
-  Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => { });
-}
-export class CustomContentDialog extends ViewPU {
-  constructor(e8, f8, g8, h8 = -1, i8 = undefined, j8) {
-    super(e8, g8, h8, j8);
-    if (typeof i8 === 'function') {
-      this.paramsGenerator_ = i8;
-    }
-    this.controller = undefined;
-    this.primaryTitle = undefined;
-    this.secondaryTitle = undefined;
-    this.contentBuilder = undefined;
-    this.contentAreaPadding = undefined;
-    this.buttons = undefined;
-    this.setInitiallyProvidedValue(f8);
-    this.finalizeConstruction();
-  }
-  setInitiallyProvidedValue(d8) {
-    if (d8.controller !== undefined) {
-      this.controller = d8.controller;
-    }
-    if (d8.primaryTitle !== undefined) {
-      this.primaryTitle = d8.primaryTitle;
-    }
-    if (d8.secondaryTitle !== undefined) {
-      this.secondaryTitle = d8.secondaryTitle;
-    }
-    if (d8.contentBuilder !== undefined) {
-      this.contentBuilder = d8.contentBuilder;
-    }
-    if (d8.contentAreaPadding !== undefined) {
-      this.contentAreaPadding = d8.contentAreaPadding;
-    }
-    if (d8.buttons !== undefined) {
-      this.buttons = d8.buttons;
-    }
-  }
-  updateStateVars(c8) {
-  }
-  purgeVariableDependenciesOnElmtId(b8) {
-  }
-  aboutToBeDeleted() {
-    SubscriberManager.Get().delete(this.id__());
-    this.aboutToBeDeletedInternal();
-  }
-  setController(a8) {
-    this.controller = a8;
-  }
-  initialRender() {
-    {
-      this.observeComponentCreation2((u7, v7) => {
-        if (v7) {
-          let w7 = new CustomDialogContentComponent(this, {
-            controller: this.controller,
-            primaryTitle: this.primaryTitle,
-            secondaryTitle: this.secondaryTitle,
-            contentBuilder: () => {
-              this.contentBuilder();
-            },
-            contentAreaPadding: this.contentAreaPadding,
-            buttons: this.buttons,
-          }, undefined, u7, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 151 });
-          ViewPU.create(w7);
-          let x7 = () => {
-            return {
-              controller: this.controller,
-              primaryTitle: this.primaryTitle,
-              secondaryTitle: this.secondaryTitle,
-              contentBuilder: () => {
-                this.contentBuilder();
-              },
-              contentAreaPadding: this.contentAreaPadding,
-              buttons: this.buttons
-            };
-          };
-          w7.paramsGenerator_ = x7;
+    setInitiallyProvidedValue(m10) {
+        if (m10.controller !== undefined) {
+            this.controller = m10.controller;
         }
-        else {
-          this.updateStateVarsOfChildByElmtId(u7, {});
+        if (m10.primaryTitle !== undefined) {
+            this.primaryTitle = m10.primaryTitle;
         }
-      }, { name: 'CustomDialogContentComponent' });
+        if (m10.secondaryTitle !== undefined) {
+            this.secondaryTitle = m10.secondaryTitle;
+        }
+        if (m10.content !== undefined) {
+            this.content = m10.content;
+        }
+        if (m10.primaryButton !== undefined) {
+            this.primaryButton = m10.primaryButton;
+        }
+        if (m10.secondaryButton !== undefined) {
+            this.secondaryButton = m10.secondaryButton;
+        }
+        if (m10.buttons !== undefined) {
+            this.buttons = m10.buttons;
+        }
+        if (m10.textAlign !== undefined) {
+            this.textAlign = m10.textAlign;
+        }
+        if (m10.contentScroller !== undefined) {
+            this.contentScroller = m10.contentScroller;
+        }
+        if (m10.fontColorWithTheme !== undefined) {
+            this.fontColorWithTheme = m10.fontColorWithTheme;
+        }
+        if (m10.theme !== undefined) {
+            this.theme = m10.theme;
+        }
     }
-  }
-  rerender() {
-    this.updateDirtyElements();
-  }
-}
-class CustomDialogContentComponent extends ViewPU {
-  constructor(r7, s7, t7, u7 = -1, v7 = undefined, w7) {
-    super(r7, t7, u7, w7);
-    if (typeof v7 === 'function') {
-      this.paramsGenerator_ = v7;
+
+    updateStateVars(l10) {
     }
-    this.controller = undefined;
-    this.primaryTitle = undefined;
-    this.secondaryTitle = undefined;
-    this.contentBuilder = this.defaultContentBuilder;
-    this.buttons = undefined;
-    this.contentAreaPadding = undefined;
-    this.keyIndex = 0;
-    this.titleHeight = 0;
-    this.__contentMaxHeight = new ObservedPropertySimplePU('', this, 'contentMaxHeight');
-    this.setInitiallyProvidedValue(s7);
-    this.finalizeConstruction();
-  }
-  setInitiallyProvidedValue(q7) {
-    if (q7.controller !== undefined) {
-      this.controller = q7.controller;
+
+    purgeVariableDependenciesOnElmtId(k10) {
+        this.__textAlign.purgeDependencyOnElmtId(k10);
+        this.__fontColorWithTheme.purgeDependencyOnElmtId(k10);
     }
-    if (q7.primaryTitle !== undefined) {
-      this.primaryTitle = q7.primaryTitle;
+
+    aboutToBeDeleted() {
+        this.__textAlign.aboutToBeDeleted();
+        this.__fontColorWithTheme.aboutToBeDeleted();
+        SubscriberManager.Get().delete(this.id__());
+        this.aboutToBeDeletedInternal();
     }
-    if (q7.secondaryTitle !== undefined) {
-      this.secondaryTitle = q7.secondaryTitle;
+
+    setController(j10) {
+        this.controller = j10;
     }
-    if (q7.contentBuilder !== undefined) {
-      this.contentBuilder = q7.contentBuilder;
+
+    get textAlign() {
+        return this.__textAlign.get();
     }
-    if (q7.buttons !== undefined) {
-      this.buttons = q7.buttons;
+
+    set textAlign(i10) {
+        this.__textAlign.set(i10);
     }
-    if (q7.contentAreaPadding !== undefined) {
-      this.contentAreaPadding = q7.contentAreaPadding;
+
+    get fontColorWithTheme() {
+        return this.__fontColorWithTheme.get();
     }
-    if (q7.keyIndex !== undefined) {
-      this.keyIndex = q7.keyIndex;
+
+    set fontColorWithTheme(h10) {
+        this.__fontColorWithTheme.set(h10);
     }
-    if (q7.titleHeight !== undefined) {
-      this.titleHeight = q7.titleHeight;
+
+    initialRender() {
+        {
+            this.observeComponentCreation2((b10, c10) => {
+                if (c10) {
+                    let d10 = new CustomDialogComponent(this, {
+                        primaryTitle: this.primaryTitle,
+                        secondaryTitle: this.secondaryTitle,
+                        controller: this.controller,
+                        contentBuilder: () => {
+                            this.AlertDialogContentBuilder();
+                        },
+                        buttons: this.buttons,
+                        theme: this.theme,
+                    }, undefined, b10, () => {
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 590, col: 5 });
+                    ViewPU.create(d10);
+                    let e10 = () => {
+                        return {
+                            primaryTitle: this.primaryTitle,
+                            secondaryTitle: this.secondaryTitle,
+                            controller: this.controller,
+                            contentBuilder: () => {
+                                this.AlertDialogContentBuilder();
+                            },
+                            buttons: this.buttons,
+                            theme: this.theme
+                        };
+                    };
+                    d10.paramsGenerator_ = e10;
+                } else {
+                    this.updateStateVarsOfChildByElmtId(b10, {});
+                }
+            }, { name: 'CustomDialogComponent' });
+        }
     }
-    if (q7.contentMaxHeight !== undefined) {
-      this.contentMaxHeight = q7.contentMaxHeight;
-    }
-  }
-  updateStateVars(p7) {
-  }
-  purgeVariableDependenciesOnElmtId(o7) {
-    this.__contentMaxHeight.purgeDependencyOnElmtId(o7);
-  }
-  aboutToBeDeleted() {
-    this.__contentMaxHeight.aboutToBeDeleted();
-    SubscriberManager.Get().delete(this.id__());
-    this.aboutToBeDeletedInternal();
-  }
-  defaultContentBuilder(n7 = null) {
-  }
-  get contentMaxHeight() {
-    return this.__contentMaxHeight.get();
-  }
-  set contentMaxHeight(m7) {
-    this.__contentMaxHeight.set(m7);
-  }
-  initialRender() {
-    this.observeComponentCreation((k7, l7) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(k7);
-      Column.create();
-      Column.width('100%');
-      if (!l7) {
-        Column.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    this.buildTitles.bind(this)();
-    this.observeComponentCreation((i7, j7) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(i7);
-      Column.create();
-      Column.padding(this.getContentPadding());
-      Column.constraintSize({ maxHeight: this.contentMaxHeight, });
-      if (!j7) {
-        Column.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    this.contentBuilder.bind(this)();
-    Column.pop();
-    this.buildButtons.bind(this)();
-    Column.pop();
-  }
-  buildTitles(c6 = null) {
-    this.observeComponentCreation((b7, c7) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(b7);
-      Column.create();
-      Column.constraintSize({
-        minHeight: this.getTitleAreaMinHeight(),
-      });
-      Column.justifyContent(FlexAlign.Center);
-      Column.width('100%');
-      Column.padding(this.getTitleAreaPadding());
-      Column.onAreaChange((e7, f7) => {
-        this.titleHeight = Number(f7.height);
-        this.contentMaxHeight = `calc(100% - ${this.titleHeight}vp - ${this.getButtonsHeight()}vp)`;
-      });
-      if (!c7) {
-        Column.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    this.observeComponentCreation((z6, a7) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(z6);
-      Row.create();
-      Row.width('100%');
-      if (!a7) {
-        Row.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    this.observeComponentCreation((x6, y6) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(x6);
-      Text.create(this.primaryTitle);
-      Text.fontWeight(FontWeight.Bold);
-      Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '', 'moduleName': '' });
-      Text.textAlign(this.getTitleTextAlign());
-      Text.maxFontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Title_S'], 'bundleName': '', 'moduleName': '' });
-      Text.minFontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Body_L'], 'bundleName': '', 'moduleName': '' });
-      Text.maxLines(TITLE_MAX_LINES);
-      Text.heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST);
-      Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-      Text.width('100%');
-      if (!y6) {
-        Text.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    Text.pop();
-    Row.pop();
-    this.observeComponentCreation((n6, o6) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(n6);
-      If.create();
-      if (this.primaryTitle && this.secondaryTitle) {
-        this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation((v6, w6) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(v6);
-            Row.create();
-            if (!w6) {
-              Row.pop();
-            }
-            ViewStackProcessor.StopGetAccessRecording();
-          });
-          this.observeComponentCreation((t6, u6) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(t6);
-            Divider.create();
-            Divider.margin({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level1'], 'bundleName': '', 'moduleName': '' });
-            Divider.color(Color.Transparent);
-            if (!u6) {
-              Divider.pop();
-            }
-            ViewStackProcessor.StopGetAccessRecording();
-          });
-          Row.pop();
-        });
-      }
-      else {
-        this.ifElseBranchUpdateFunction(1, () => {
-        });
-      }
-      if (!o6) {
-        If.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    If.pop();
-    this.observeComponentCreation((l6, m6) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(l6);
-      Row.create();
-      Row.width('100%');
-      if (!m6) {
-        Row.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    this.observeComponentCreation((j6, k6) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(j6);
-      Text.create(this.secondaryTitle);
-      Text.fontWeight(FontWeight.Regular);
-      Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'], 'bundleName': '', 'moduleName': '' });
-      Text.textAlign(this.getTitleTextAlign());
-      Text.maxFontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Subtitle_S'], 'bundleName': '', 'moduleName': '' });
-      Text.minFontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Body_S'], 'bundleName': '', 'moduleName': '' });
-      Text.maxLines(TITLE_MAX_LINES);
-      Text.heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST);
-      Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-      Text.width('100%');
-      if (!k6) {
-        Text.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    Text.pop();
-    Row.pop();
-    Column.pop();
-  }
-  buildButtons(y5 = null) {
-    this.observeComponentCreation((a6, b6) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(a6);
-      Column.create();
-      Column.width('100%');
-      Column.padding(this.getOperationAreaPadding());
-      if (!b6) {
-        Column.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    this.buildHorizontalAlignButtons.bind(this)();
-    this.buildVerticalAlignButtons.bind(this)();
-    Column.pop();
-  }
-  buildSingleButton(c5, d5 = null) {
-    this.observeComponentCreation((f5, g5) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(f5);
-      If.create();
-      if (this.isNewPropertiesHighPriority(c5)) {
-        this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation((v5, w5) => {
-            var x5;
-            ViewStackProcessor.StartGetAccessRecordingFor(v5);
-            Button.createWithLabel(c5.value);
-            __Button__setButtonProperties(c5, this.controller);
-            Button.role((x5 = c5.role) !== null && x5 !== void 0 ? x5 : ButtonRole.NORMAL);
-            Button.key(`advanced_dialog_button_${this.keyIndex++}`);
-            if (!w5) {
-              Button.pop();
-            }
-            ViewStackProcessor.StopGetAccessRecording();
-          });
-          Button.pop();
-        });
-      }
-      else if (c5.background !== undefined && c5.fontColor !== undefined) {
-        this.ifElseBranchUpdateFunction(1, () => {
-          this.observeComponentCreation((r5, s5) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(r5);
-            Button.createWithLabel(c5.value);
-            __Button__setButtonProperties(c5, this.controller);
-            Button.backgroundColor(c5.background);
-            Button.fontColor(c5.fontColor);
-            Button.key(`advanced_dialog_button_${this.keyIndex++}`);
-            if (!s5) {
-              Button.pop();
-            }
-            ViewStackProcessor.StopGetAccessRecording();
-          });
-          Button.pop();
-        });
-      }
-      else if (c5.background !== undefined) {
-        this.ifElseBranchUpdateFunction(2, () => {
-          this.observeComponentCreation((n5, o5) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(n5);
-            Button.createWithLabel(c5.value);
-            __Button__setButtonProperties(c5, this.controller);
-            Button.backgroundColor(c5.background);
-            Button.key(`advanced_dialog_button_${this.keyIndex++}`);
-            if (!o5) {
-              Button.pop();
-            }
-            ViewStackProcessor.StopGetAccessRecording();
-          });
-          Button.pop();
-        });
-      }
-      else {
-        this.ifElseBranchUpdateFunction(3, () => {
-          this.observeComponentCreation((j5, k5) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(j5);
-            Button.createWithLabel(c5.value);
-            __Button__setButtonProperties(c5, this.controller);
-            Button.fontColor(c5.fontColor);
-            Button.key(`advanced_dialog_button_${this.keyIndex++}`);
-            if (!k5) {
-              Button.pop();
-            }
-            ViewStackProcessor.StopGetAccessRecording();
-          });
-          Button.pop();
-        });
-      }
-      if (!g5) {
-        If.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    If.pop();
-  }
-  buildHorizontalAlignButtons(l4 = null) {
-    this.observeComponentCreation((n4, o4) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(n4);
-      If.create();
-      if (this.buttons && this.buttons.length > 0 && this.buttons.length <= HORIZON_BUTTON_MAX_COUNT) {
-        this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation((a5, b5) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(a5);
-            Row.create();
-            if (!b5) {
-              Row.pop();
-            }
-            ViewStackProcessor.StopGetAccessRecording();
-          });
-          this.buildSingleButton.bind(this)(this.buttons[0]);
-          this.observeComponentCreation((t4, u4) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(t4);
-            If.create();
-            if (this.buttons.length === HORIZON_BUTTON_MAX_COUNT) {
-              this.ifElseBranchUpdateFunction(0, () => {
-                this.observeComponentCreation((y4, z4) => {
-                  ViewStackProcessor.StartGetAccessRecordingFor(y4);
-                  Divider.create();
-                  Divider.width({ 'id': -1, 'type': 10002, params: ['sys.float.alert_divider_width'], 'bundleName': '', 'moduleName': '' });
-                  Divider.height({ 'id': -1, 'type': 10002, params: ['sys.float.alert_divider_height'], 'bundleName': '', 'moduleName': '' });
-                  Divider.color(this.getDividerColor());
-                  Divider.vertical(true);
-                  Divider.margin({
-                    left: { 'id': -1, 'type': 10002, params: ['sys.float.alert_button_horizontal_space'], 'bundleName': '', 'moduleName': '' },
-                    right: { 'id': -1, 'type': 10002, params: ['sys.float.alert_button_horizontal_space'], 'bundleName': '', 'moduleName': '' },
-                  });
-                  if (!z4) {
-                    Divider.pop();
-                  }
-                  ViewStackProcessor.StopGetAccessRecording();
-                });
-                this.buildSingleButton.bind(this)(this.buttons[HORIZON_BUTTON_MAX_COUNT - 1]);
-              });
-            }
-            else {
-              this.ifElseBranchUpdateFunction(1, () => {
-              });
-            }
-            if (!u4) {
-              If.pop();
-            }
-            ViewStackProcessor.StopGetAccessRecording();
-          });
-          If.pop();
-          Row.pop();
-        });
-      }
-      else {
-        this.ifElseBranchUpdateFunction(1, () => {
-        });
-      }
-      if (!o4) {
-        If.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    If.pop();
-  }
-  buildVerticalAlignButtons(s3 = null) {
-    this.observeComponentCreation((u3, v3) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(u3);
-      If.create();
-      if (this.buttons && this.isVerticalAlignButton()) {
-        this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation((j4, k4) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(j4);
+
+    AlertDialogContentBuilder(l9 = null) {
+        this.observeComponentCreation2((y9, z9) => {
             Column.create();
-            if (!k4) {
-              Column.pop();
-            }
-            ViewStackProcessor.StopGetAccessRecording();
-          });
-          this.observeComponentCreation((a4, b4) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(a4);
-            ForEach.create();
-            const c4 = (g4, h4) => {
-              const i4 = g4;
-              this.buildButtonWithDivider.bind(this)(h4);
+            Column.margin({ right: `${this.getMargin()}vp`, });
+        }, Column);
+        this.observeComponentCreation2((w9, x9) => {
+            Scroll.create(this.contentScroller);
+            Scroll.width('100%');
+        }, Scroll);
+        this.observeComponentCreation2((p9, q9) => {
+            Text.create(this.content);
+            Text.focusable(true);
+            Text.defaultFocus(!(this.primaryButton || this.secondaryButton));
+            Text.fontSize({
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.Body_L'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            });
+            Text.fontWeight(this.getFontWeight());
+            Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
+            Text.margin({
+                right: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.padding_level8'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+            });
+            Text.width(`calc(100% - ${getNumberByResource('padding_level8')}vp)`);
+            Text.textAlign(this.textAlign);
+            Text.onAreaChange((u9, v9) => {
+                this.getTextAlign(Number(v9.width));
+            });
+            Text.onKeyEvent((t9) => {
+                if (t9) {
+                    resolveKeyEvent(t9, this.contentScroller);
+                }
+            });
+        }, Text);
+        Text.pop();
+        Scroll.pop();
+        Column.pop();
+    }
+
+    aboutToAppear() {
+        this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
+        this.theme.colors.fontPrimary : {
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.font_primary'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             };
-            this.forEachUpdateFunction(a4, this.buttons.slice(0, VERTICAL_BUTTON_MAX_COUNT), c4, (f4) => f4.value.toString(), true, false);
-            if (!b4) {
-              ForEach.pop();
-            }
-            ViewStackProcessor.StopGetAccessRecording();
-          });
-          ForEach.pop();
-          Column.pop();
-        });
-      }
-      else {
-        this.ifElseBranchUpdateFunction(1, () => {
-        });
-      }
-      if (!v3) {
-        If.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    If.pop();
-  }
-  buildButtonWithDivider(a3, b3 = null) {
-    this.observeComponentCreation((d3, e3) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(d3);
-      If.create();
-      if (this.buttons && this.buttons[a3]) {
-        this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation((q3, r3) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(q3);
-            Row.create();
-            if (!r3) {
-              Row.pop();
-            }
-            ViewStackProcessor.StopGetAccessRecording();
-          });
-          this.buildSingleButton.bind(this)(this.buttons[a3]);
-          Row.pop();
-          this.observeComponentCreation((j3, k3) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(j3);
-            If.create();
-            if (a3 < Math.min(this.buttons.length, VERTICAL_BUTTON_MAX_COUNT) - 1) {
-              this.ifElseBranchUpdateFunction(0, () => {
-                this.observeComponentCreation((o3, p3) => {
-                  ViewStackProcessor.StartGetAccessRecordingFor(o3);
-                  Row.create();
-                  Row.height({ 'id': -1, 'type': 10002, params: ['sys.float.alert_button_vertical_space'], 'bundleName': '', 'moduleName': '' });
-                  if (!p3) {
-                    Row.pop();
-                  }
-                  ViewStackProcessor.StopGetAccessRecording();
-                });
-                Row.pop();
-              });
-            }
-            else {
-              this.ifElseBranchUpdateFunction(1, () => {
-              });
-            }
-            if (!k3) {
-              If.pop();
-            }
-            ViewStackProcessor.StopGetAccessRecording();
-          });
-          If.pop();
-        });
-      }
-      else {
-        this.ifElseBranchUpdateFunction(1, () => {
-        });
-      }
-      if (!e3) {
-        If.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    If.pop();
-  }
-  aboutToAppear() {
-    if (this.primaryTitle) {
-      this.titleHeight = getNumberByResource('alert_title_primary_height');
+        this.initButtons();
     }
-    if (this.secondaryTitle) {
-      this.titleHeight = getNumberByResource('alert_title_secondary_height');
-    }
-    this.contentMaxHeight = `calc(100% - ${this.titleHeight}vp - ${this.getButtonsHeight()}vp)`;
-  }
-  getDividerColor() {
-    if (!this.buttons || this.buttons.length === 0 || !getNumberByResource('dialog_divider_show')) {
-      return Color.Transparent;
-    }
-    if (this.buttons[0].buttonStyle !== ButtonStyleMode.TEXTUAL ||
-      this.buttons[HORIZON_BUTTON_MAX_COUNT - 1].buttonStyle !== ButtonStyleMode.TEXTUAL) {
-      return Color.Transparent;
-    }
-    else {
-      return { 'id': -1, 'type': 10001, params: ['sys.color.alert_divider_color'], 'bundleName': '', 'moduleName': '' };
-    }
-  }
-  getButtonsHeight() {
-    if (!this.buttons || this.buttons.length === 0) {
-      return 0;
-    }
-    let z2 = getNumberByResource('alert_button_top_padding');
-    if (this.buttons.length <= HORIZON_BUTTON_MAX_COUNT) {
-      z2 += BUTTON_DEFAULT_HEIGHT +
-      getNumberByResource('alert_button_bottom_padding_horizontal');
-    }
-    else {
-      z2 += BUTTON_DEFAULT_HEIGHT * this.buttons.length +
-        (this.buttons.length - 1) * getNumberByResource('alert_button_vertical_space') +
-      getNumberByResource('alert_button_bottom_padding_vertical');
-    }
-    return z2;
-  }
-  getContentPadding() {
-    if (this.contentAreaPadding) {
-      return this.contentAreaPadding;
-    }
-    if ((this.primaryTitle || this.secondaryTitle) && this.buttons && this.buttons.length > 0) {
-      return {
-        top: 0,
-        right: { 'id': -1, 'type': 10002, params: ['sys.float.alert_content_default_padding'], 'bundleName': '', 'moduleName': '' },
-        bottom: 0,
-        left: { 'id': -1, 'type': 10002, params: ['sys.float.alert_content_default_padding'], 'bundleName': '', 'moduleName': '' },
-      };
-    }
-    else if (this.primaryTitle || this.secondaryTitle) {
-      return {
-        top: 0,
-        right: { 'id': -1, 'type': 10002, params: ['sys.float.alert_content_default_padding'], 'bundleName': '', 'moduleName': '' },
-        bottom: { 'id': -1, 'type': 10002, params: ['sys.float.alert_content_default_padding'], 'bundleName': '', 'moduleName': '' },
-        left: { 'id': -1, 'type': 10002, params: ['sys.float.alert_content_default_padding'], 'bundleName': '', 'moduleName': '' },
-      };
-    }
-    else if (this.buttons && this.buttons.length > 0) {
-      return {
-        top: { 'id': -1, 'type': 10002, params: ['sys.float.alert_content_default_padding'], 'bundleName': '', 'moduleName': '' },
-        right: { 'id': -1, 'type': 10002, params: ['sys.float.alert_content_default_padding'], 'bundleName': '', 'moduleName': '' },
-        bottom: 0,
-        left: { 'id': -1, 'type': 10002, params: ['sys.float.alert_content_default_padding'], 'bundleName': '', 'moduleName': '' },
-      };
-    }
-    else {
-      return {
-        top: { 'id': -1, 'type': 10002, params: ['sys.float.alert_content_default_padding'], 'bundleName': '', 'moduleName': '' },
-        right: { 'id': -1, 'type': 10002, params: ['sys.float.alert_content_default_padding'], 'bundleName': '', 'moduleName': '' },
-        bottom: { 'id': -1, 'type': 10002, params: ['sys.float.alert_content_default_padding'], 'bundleName': '', 'moduleName': '' },
-        left: { 'id': -1, 'type': 10002, params: ['sys.float.alert_content_default_padding'], 'bundleName': '', 'moduleName': '' },
-      };
-    }
-  }
-  getTitleAreaMinHeight() {
-    if (this.secondaryTitle) {
-      return { 'id': -1, 'type': 10002, params: ['sys.float.alert_title_secondary_height'], 'bundleName': '', 'moduleName': '' };
-    }
-    else if (this.primaryTitle) {
-      return { 'id': -1, 'type': 10002, params: ['sys.float.alert_title_primary_height'], 'bundleName': '', 'moduleName': '' };
-    }
-    else {
-      return 0;
-    }
-  }
-  getTitleAreaPadding() {
-    if (this.primaryTitle || this.secondaryTitle) {
-      return {
-        top: { 'id': -1, 'type': 10002, params: ['sys.float.alert_title_padding_top'], 'bundleName': '', 'moduleName': '' },
-        right: { 'id': -1, 'type': 10002, params: ['sys.float.alert_title_padding_right'], 'bundleName': '', 'moduleName': '' },
-        left: { 'id': -1, 'type': 10002, params: ['sys.float.alert_title_padding_left'], 'bundleName': '', 'moduleName': '' },
-        bottom: { 'id': -1, 'type': 10002, params: ['sys.float.alert_title_padding_bottom'], 'bundleName': '', 'moduleName': '' },
-      };
-    }
-    return {
-      top: 0,
-      right: { 'id': -1, 'type': 10002, params: ['sys.float.alert_title_padding_right'], 'bundleName': '', 'moduleName': '' },
-      left: { 'id': -1, 'type': 10002, params: ['sys.float.alert_title_padding_left'], 'bundleName': '', 'moduleName': '' },
-      bottom: 0,
-    };
-  }
-  isVerticalAlignButton() {
-    if (this.buttons) {
-      return this.buttons.length > HORIZON_BUTTON_MAX_COUNT;
-    }
-    return false;
-  }
-  getOperationAreaPadding() {
-    if (this.isVerticalAlignButton()) {
-      return {
-        top: { 'id': -1, 'type': 10002, params: ['sys.float.alert_button_top_padding'], 'bundleName': '', 'moduleName': '' },
-        right: { 'id': -1, 'type': 10002, params: ['sys.float.alert_right_padding_vertical'], 'bundleName': '', 'moduleName': '' },
-        left: { 'id': -1, 'type': 10002, params: ['sys.float.alert_left_padding_vertical'], 'bundleName': '', 'moduleName': '' },
-        bottom: { 'id': -1, 'type': 10002, params: ['sys.float.alert_button_bottom_padding_vertical'], 'bundleName': '', 'moduleName': '' },
-      };
-    }
-    return {
-      top: { 'id': -1, 'type': 10002, params: ['sys.float.alert_button_top_padding'], 'bundleName': '', 'moduleName': '' },
-      right: { 'id': -1, 'type': 10002, params: ['sys.float.alert_right_padding_horizontal'], 'bundleName': '', 'moduleName': '' },
-      left: { 'id': -1, 'type': 10002, params: ['sys.float.alert_left_padding_horizontal'], 'bundleName': '', 'moduleName': '' },
-      bottom: { 'id': -1, 'type': 10002, params: ['sys.float.alert_button_bottom_padding_horizontal'], 'bundleName': '', 'moduleName': '' },
-    };
-  }
-  isNewPropertiesHighPriority(y2) {
-    if (y2.role === ButtonRole.ERROR) {
-      return true;
-    }
-    if (y2.buttonStyle !== undefined &&
-      y2.buttonStyle !== getNumberByResource('alert_button_style')) {
-      return true;
-    }
-    if (y2.background === undefined && y2.fontColor === undefined) {
-      return true;
-    }
-    return false;
-  }
-  getTitleTextAlign() {
-    let x2 = getEnumNumberByResource('alert_title_alignment');
-    if (x2 === TextAlign.Start) {
-      return TextAlign.Start;
-    }
-    else if (x2 === TextAlign.Center) {
-      return TextAlign.Center;
-    }
-    else if (x2 === TextAlign.End) {
-      return TextAlign.End;
-    }
-    else if (x2 === TextAlign.JUSTIFY) {
-      return TextAlign.JUSTIFY;
-    }
-    else {
-      return TextAlign.Center;
-    }
-  }
-  rerender() {
-    this.updateDirtyElements();
-  }
-}
-export class CustomDialogComponent extends ViewPU {
-  constructor(o2, p2, q2, r2 = -1, s2 = undefined, t2) {
-    super(o2, q2, r2, t2);
-    if (typeof s2 === 'function') {
-      this.paramsGenerator_ = s2;
-    }
-    this.controller = undefined;
-    this.primaryTitle = undefined;
-    this.secondaryTitle = undefined;
-    this.contentBuilder = undefined;
-    this.buttons = undefined;
-    this.contentAreaPadding = undefined;
-    this.screenWidth = 0;
-    this.__columnModifier = new ObservedPropertyObjectPU(new ColumnModifier(), this, 'columnModifier');
-    this.isFirstInit = true;
-    this.setInitiallyProvidedValue(p2);
-    this.finalizeConstruction();
-  }
-  setInitiallyProvidedValue(n2) {
-    if (n2.controller !== undefined) {
-      this.controller = n2.controller;
-    }
-    if (n2.primaryTitle !== undefined) {
-      this.primaryTitle = n2.primaryTitle;
-    }
-    if (n2.secondaryTitle !== undefined) {
-      this.secondaryTitle = n2.secondaryTitle;
-    }
-    if (n2.contentBuilder !== undefined) {
-      this.contentBuilder = n2.contentBuilder;
-    }
-    if (n2.buttons !== undefined) {
-      this.buttons = n2.buttons;
-    }
-    if (n2.contentAreaPadding !== undefined) {
-      this.contentAreaPadding = n2.contentAreaPadding;
-    }
-    if (n2.screenWidth !== undefined) {
-      this.screenWidth = n2.screenWidth;
-    }
-    if (n2.columnModifier !== undefined) {
-      this.columnModifier = n2.columnModifier;
-    }
-    if (n2.isFirstInit !== undefined) {
-      this.isFirstInit = n2.isFirstInit;
-    }
-  }
-  updateStateVars(m2) {
-  }
-  purgeVariableDependenciesOnElmtId(l2) {
-    this.__columnModifier.purgeDependencyOnElmtId(l2);
-  }
-  aboutToBeDeleted() {
-    this.__columnModifier.aboutToBeDeleted();
-    SubscriberManager.Get().delete(this.id__());
-    this.aboutToBeDeletedInternal();
-  }
-  get columnModifier() {
-    return this.__columnModifier.get();
-  }
-  set columnModifier(k2) {
-    this.__columnModifier.set(k2);
-  }
-  initialRender() {
-    this.observeComponentCreation2((f2, g2) => {
-      Column.create();
-      Column.onAreaChange((i2, j2) => {
-        if (!this.isFirstInit) {
-          return;
-        }
-        if (this.screenWidth > getNumberByResource('alert_container_max_width')) {
-          this.columnModifier.customStyle = j2.width > getNumberByResource('alert_container_max_width');
-        }
-        else {
-          this.columnModifier.customStyle = j2.width >= this.screenWidth;
-        }
-        this.isFirstInit = false;
-      });
-    }, Column);
-    this.observeComponentCreation2((d2, e2) => {
-      Column.create();
-      Column.attributeModifier.bind(this)(ObservedObject.GetRawObject(this.columnModifier));
-    }, Column);
-    {
-      this.observeComponentCreation2((x1, y1) => {
-        if (y1) {
-          let z1 = new CustomDialogContentComponent(this, {
-            controller: this.controller,
-            primaryTitle: this.primaryTitle,
-            secondaryTitle: this.secondaryTitle,
-            contentBuilder: () => {
-              this.contentBuilder();
+
+    getTextAlign(i9) {
+        let j9 = measure.measureTextSize({
+            textContent: this.content,
+            fontSize: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.Body_L'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             },
-            buttons: this.buttons,
-            contentAreaPadding: this.contentAreaPadding,
-          }, undefined, x1, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 519 });
-          ViewPU.create(z1);
-          let a2 = () => {
-            return {
-              controller: this.controller,
-              primaryTitle: this.primaryTitle,
-              secondaryTitle: this.secondaryTitle,
-              contentBuilder: () => {
-                this.contentBuilder();
-              },
-              buttons: this.buttons,
-              contentAreaPadding: this.contentAreaPadding
-            };
-          };
-          z1.paramsGenerator_ = a2;
+            constraintWidth: i9,
+        });
+        let k9 = measure.measureTextSize({
+            textContent: this.content,
+            fontSize: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.Body_L'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            },
+        });
+        if (this.getTextHeight(j9) <= this.getTextHeight(k9)) {
+            this.textAlign = TextAlign.Center;
         }
-        else {
-          this.updateStateVarsOfChildByElmtId(x1, {});
+    }
+
+    getTextHeight(h9) {
+        if (h9 && h9.height !== null && h9.height !== undefined) {
+            return Number(h9.height);
         }
-      }, { name: 'CustomDialogContentComponent' });
+        return 0;
     }
-    Column.pop();
-    Column.pop();
-  }
-  aboutToAppear() {
-    try {
-      this.screenWidth = px2vp(display.getDefaultDisplaySync().width);
-    }
-    catch (t1) {
-      hilog.error(0x3900, 'Ace', `CustomDialogComponent getDefaultDisplaySync error: ${JSON.stringify(t1)}`);
-    }
-  }
-  rerender() {
-    this.updateDirtyElements();
-  }
-}
-class ColumnModifier {
-  constructor() {
-    this.customStyle = false;
-  }
-  applyNormalAttribute(s1) {
-    if (!this.customStyle) {
-      return;
-    }
-    s1.backgroundBlurStyle(BlurStyle.Thick);
-    s1.borderRadius({ id: -1, type: 10002, params: ['sys.float.ohos_id_corner_radius_dialog'], bundleName: '', moduleName: '' });
-    s1.margin({
-      left: { id: -1, type: 10002, params: ['sys.float.ohos_id_dialog_margin_start'], bundleName: '', moduleName: '' },
-      right: { id: -1, type: 10002, params: ['sys.float.ohos_id_dialog_margin_end'], bundleName: '', moduleName: '' },
-      bottom: { id: -1, type: 10002, params: ['sys.float.ohos_id_dialog_margin_bottom'], bundleName: '', moduleName: '' },
-    });
-    s1.backgroundColor({ id: -1, type: 10001, params: ['sys.color.ohos_id_color_dialog_bg'], bundleName: '', moduleName: '' });
-  }
-}
-function __Button__setButtonProperties(p1, q1) {
-  Button.onClick(() => {
-    if (p1.action) {
-      p1.action();
-    }
-    q1?.close();
-  });
-  Button.defaultFocus(true);
-  Button.buttonStyle(p1.buttonStyle ?? getNumberByResource('alert_button_style'));
-  Button.layoutWeight(BUTTON_LAYOUT_WEIGHT);
-}
-function getNumberByResource(l1) {
-  try {
-    return resourceManager.getSystemResourceManager().getNumberByName(l1);
-  }
-  catch (m1) {
-    let n1 = m1.code;
-    let o1 = m1.message;
-    hilog.error(0x3900, 'Ace', `CustomContentDialog getNumberByResource error, code: ${n1}, message: ${o1}`);
-    return 0;
-  }
-}
-function getEnumNumberByResource(h1) {
-  try {
-    return getContext().resourceManager.getNumberByName(h1);
-  }
-  catch (i1) {
-    let j1 = i1.code;
-    let k1 = i1.message;
-    hilog.error(0x3900, 'Ace', `getEnumNumberByResource error, code: ${j1}, message: ${k1}`);
-    return -1;
-  }
-}
-function resolveKeyEvent(h1, i1) {
-    if (h1.type == IGNORE_KEY_EVENT_TYPE) {
-        return;
-    }
-    if (h1.keyCode == KEYCODE_UP) {
-        i1.scrollPage({ next: false });
-        h1.stopPropagation();
-    }
-    else if (h1.keyCode == KEYCODE_DOWN) {
-        if (i1.isAtEnd()) {
+
+    initButtons() {
+        if (!this.primaryButton && !this.secondaryButton) {
             return;
         }
-        else {
-            i1.scrollPage({ next: true });
-            h1.stopPropagation();
+        this.buttons = [];
+        if (this.primaryButton) {
+            this.buttons.push(this.primaryButton);
+        }
+        if (this.secondaryButton) {
+            this.buttons.push(this.secondaryButton);
+        }
+    }
+
+    getMargin() {
+        return 0 - getNumberByResource('padding_level8');
+    }
+
+    getFontWeight() {
+        if (this.primaryTitle || this.secondaryTitle) {
+            return FontWeight.Regular;
+        }
+        return FontWeight.Medium;
+    }
+
+    rerender() {
+        this.updateDirtyElements();
+    }
+}
+
+export class CustomContentDialog extends ViewPU {
+    constructor(b9, c9, d9, e9 = -1, f9 = undefined, g9) {
+        super(b9, d9, e9, g9);
+        if (typeof f9 === 'function') {
+            this.paramsGenerator_ = f9;
+        }
+        this.controller = undefined;
+        this.primaryTitle = undefined;
+        this.secondaryTitle = undefined;
+        this.contentBuilder = undefined;
+        this.contentAreaPadding = undefined;
+        this.buttons = undefined;
+        this.theme = new CustomThemeImpl({});
+        this.setInitiallyProvidedValue(c9);
+        this.finalizeConstruction();
+    }
+
+    setInitiallyProvidedValue(a9) {
+        if (a9.controller !== undefined) {
+            this.controller = a9.controller;
+        }
+        if (a9.primaryTitle !== undefined) {
+            this.primaryTitle = a9.primaryTitle;
+        }
+        if (a9.secondaryTitle !== undefined) {
+            this.secondaryTitle = a9.secondaryTitle;
+        }
+        if (a9.contentBuilder !== undefined) {
+            this.contentBuilder = a9.contentBuilder;
+        }
+        if (a9.contentAreaPadding !== undefined) {
+            this.contentAreaPadding = a9.contentAreaPadding;
+        }
+        if (a9.buttons !== undefined) {
+            this.buttons = a9.buttons;
+        }
+        if (a9.theme !== undefined) {
+            this.theme = a9.theme;
+        }
+    }
+
+    updateStateVars(z8) {
+    }
+
+    purgeVariableDependenciesOnElmtId(y8) {
+    }
+
+    aboutToBeDeleted() {
+        SubscriberManager.Get().delete(this.id__());
+        this.aboutToBeDeletedInternal();
+    }
+
+    setController(x8) {
+        this.controller = x8;
+    }
+
+    initialRender() {
+        {
+            this.observeComponentCreation2((r8, s8) => {
+                if (s8) {
+                    let t8 = new CustomDialogContentComponent(this, {
+                        controller: this.controller,
+                        primaryTitle: this.primaryTitle,
+                        secondaryTitle: this.secondaryTitle,
+                        contentBuilder: () => {
+                            this.contentBuilder();
+                        },
+                        contentAreaPadding: this.contentAreaPadding,
+                        buttons: this.buttons,
+                        theme: this.theme,
+                    }, undefined, r8, () => {
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 694, col: 5 });
+                    ViewPU.create(t8);
+                    let u8 = () => {
+                        return {
+                            controller: this.controller,
+                            primaryTitle: this.primaryTitle,
+                            secondaryTitle: this.secondaryTitle,
+                            contentBuilder: () => {
+                                this.contentBuilder();
+                            },
+                            contentAreaPadding: this.contentAreaPadding,
+                            buttons: this.buttons,
+                            theme: this.theme
+                        };
+                    };
+                    t8.paramsGenerator_ = u8;
+                } else {
+                    this.updateStateVarsOfChildByElmtId(r8, {});
+                }
+            }, { name: 'CustomDialogContentComponent' });
+        }
+    }
+
+    rerender() {
+        this.updateDirtyElements();
+    }
+}
+
+class CustomDialogContentComponent extends ViewPU {
+    constructor(k8, l8, m8, n8 = -1, o8 = undefined, p8) {
+        super(k8, m8, n8, p8);
+        if (typeof o8 === 'function') {
+            this.paramsGenerator_ = o8;
+        }
+        this.controller = undefined;
+        this.primaryTitle = undefined;
+        this.secondaryTitle = undefined;
+        this.contentBuilder = this.defaultContentBuilder;
+        this.buttons = undefined;
+        this.contentAreaPadding = undefined;
+        this.keyIndex = 0;
+        this.__primaryTitleFontColorWithTheme = new ObservedPropertyObjectPU({
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.font_primary'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'primaryTitleFontColorWithTheme');
+        this.__secondaryTitleFontColorWithTheme = new ObservedPropertyObjectPU({
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.font_secondary'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'secondaryTitleFontColorWithTheme');
+        this.__buttonFontColorWithTheme = new ObservedPropertyObjectPU('', this, 'buttonFontColorWithTheme');
+        this.__errorButtonFontColorWithTheme = new ObservedPropertyObjectPU('', this, 'errorButtonFontColorWithTheme');
+        this.theme = new CustomThemeImpl({});
+        this.titleHeight = 0;
+        this.buttonHeight = 0;
+        this.__contentMaxHeight = new ObservedPropertySimplePU('', this, 'contentMaxHeight');
+        this.updateTitleHeight = undefined;
+        this.updateButtonHeight = undefined;
+        this.setInitiallyProvidedValue(l8);
+        this.finalizeConstruction();
+    }
+
+    setInitiallyProvidedValue(j8) {
+        if (j8.controller !== undefined) {
+            this.controller = j8.controller;
+        }
+        if (j8.primaryTitle !== undefined) {
+            this.primaryTitle = j8.primaryTitle;
+        }
+        if (j8.secondaryTitle !== undefined) {
+            this.secondaryTitle = j8.secondaryTitle;
+        }
+        if (j8.contentBuilder !== undefined) {
+            this.contentBuilder = j8.contentBuilder;
+        }
+        if (j8.buttons !== undefined) {
+            this.buttons = j8.buttons;
+        }
+        if (j8.contentAreaPadding !== undefined) {
+            this.contentAreaPadding = j8.contentAreaPadding;
+        }
+        if (j8.keyIndex !== undefined) {
+            this.keyIndex = j8.keyIndex;
+        }
+        if (j8.primaryTitleFontColorWithTheme !== undefined) {
+            this.primaryTitleFontColorWithTheme = j8.primaryTitleFontColorWithTheme;
+        }
+        if (j8.secondaryTitleFontColorWithTheme !== undefined) {
+            this.secondaryTitleFontColorWithTheme = j8.secondaryTitleFontColorWithTheme;
+        }
+        if (j8.buttonFontColorWithTheme !== undefined) {
+            this.buttonFontColorWithTheme = j8.buttonFontColorWithTheme;
+        }
+        if (j8.errorButtonFontColorWithTheme !== undefined) {
+            this.errorButtonFontColorWithTheme = j8.errorButtonFontColorWithTheme;
+        }
+        if (j8.theme !== undefined) {
+            this.theme = j8.theme;
+        }
+        if (j8.titleHeight !== undefined) {
+            this.titleHeight = j8.titleHeight;
+        }
+        if (j8.buttonHeight !== undefined) {
+            this.buttonHeight = j8.buttonHeight;
+        }
+        if (j8.contentMaxHeight !== undefined) {
+            this.contentMaxHeight = j8.contentMaxHeight;
+        }
+        if (j8.updateTitleHeight !== undefined) {
+            this.updateTitleHeight = j8.updateTitleHeight;
+        }
+        if (j8.updateButtonHeight !== undefined) {
+            this.updateButtonHeight = j8.updateButtonHeight;
+        }
+    }
+
+    updateStateVars(i8) {
+    }
+
+    purgeVariableDependenciesOnElmtId(h8) {
+        this.__primaryTitleFontColorWithTheme.purgeDependencyOnElmtId(h8);
+        this.__secondaryTitleFontColorWithTheme.purgeDependencyOnElmtId(h8);
+        this.__buttonFontColorWithTheme.purgeDependencyOnElmtId(h8);
+        this.__errorButtonFontColorWithTheme.purgeDependencyOnElmtId(h8);
+        this.__contentMaxHeight.purgeDependencyOnElmtId(h8);
+    }
+
+    aboutToBeDeleted() {
+        this.__primaryTitleFontColorWithTheme.aboutToBeDeleted();
+        this.__secondaryTitleFontColorWithTheme.aboutToBeDeleted();
+        this.__buttonFontColorWithTheme.aboutToBeDeleted();
+        this.__errorButtonFontColorWithTheme.aboutToBeDeleted();
+        this.__contentMaxHeight.aboutToBeDeleted();
+        SubscriberManager.Get().delete(this.id__());
+        this.aboutToBeDeletedInternal();
+    }
+
+    get primaryTitleFontColorWithTheme() {
+        return this.__primaryTitleFontColorWithTheme.get();
+    }
+
+    set primaryTitleFontColorWithTheme(g8) {
+        this.__primaryTitleFontColorWithTheme.set(g8);
+    }
+
+    get secondaryTitleFontColorWithTheme() {
+        return this.__secondaryTitleFontColorWithTheme.get();
+    }
+
+    set secondaryTitleFontColorWithTheme(f8) {
+        this.__secondaryTitleFontColorWithTheme.set(f8);
+    }
+
+    get buttonFontColorWithTheme() {
+        return this.__buttonFontColorWithTheme.get();
+    }
+
+    set buttonFontColorWithTheme(e8) {
+        this.__buttonFontColorWithTheme.set(e8);
+    }
+
+    get errorButtonFontColorWithTheme() {
+        return this.__errorButtonFontColorWithTheme.get();
+    }
+
+    set errorButtonFontColorWithTheme(d8) {
+        this.__errorButtonFontColorWithTheme.set(d8);
+    }
+
+    defaultContentBuilder(c8 = null) {
+    }
+
+    get contentMaxHeight() {
+        return this.__contentMaxHeight.get();
+    }
+
+    set contentMaxHeight(b8) {
+        this.__contentMaxHeight.set(b8);
+    }
+
+    initialRender() {
+        this.observeComponentCreation2((z7, a8) => {
+            WithTheme.create({ theme: this.theme });
+        }, WithTheme);
+        this.observeComponentCreation2((x7, y7) => {
+            Column.create();
+            Column.width('100%');
+        }, Column);
+        this.buildTitles.bind(this)(this);
+        this.observeComponentCreation2((v7, w7) => {
+            Column.create();
+            Column.padding(this.getContentPadding());
+            Column.constraintSize({ maxHeight: this.contentMaxHeight });
+        }, Column);
+        this.contentBuilder.bind(this)(this);
+        Column.pop();
+        this.buildButtons.bind(this)(this);
+        Column.pop();
+        WithTheme.pop();
+    }
+
+    buildTitles(o6 = null) {
+        this.observeComponentCreation2((n7, o7) => {
+            Column.create();
+            Column.constraintSize({
+                minHeight: this.getTitleAreaMinHeight(),
+            });
+            Column.justifyContent(FlexAlign.Center);
+            Column.width('100%');
+            Column.padding(this.getTitleAreaPadding());
+            Column.onAreaChange((q7, r7) => {
+                this.titleHeight = Number(r7.height);
+                if (this.updateTitleHeight) {
+                    this.updateTitleHeight(this.titleHeight);
+                }
+                this.contentMaxHeight = `calc(100% - ${this.titleHeight}vp - ${this.getButtonsHeight()}vp)`;
+            });
+        }, Column);
+        this.observeComponentCreation2((l7, m7) => {
+            Row.create();
+            Row.width('100%');
+        }, Row);
+        this.observeComponentCreation2((j7, k7) => {
+            Text.create(this.primaryTitle);
+            Text.fontWeight(FontWeight.Bold);
+            Text.fontColor(ObservedObject.GetRawObject(this.primaryTitleFontColorWithTheme));
+            Text.textAlign(this.getTitleTextAlign());
+            Text.maxFontSize({
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.Title_S'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            });
+            Text.minFontSize({
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.Body_L'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            });
+            Text.maxLines(TITLE_MAX_LINES);
+            Text.heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST);
+            Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+            Text.width('100%');
+        }, Text);
+        Text.pop();
+        Row.pop();
+        this.observeComponentCreation2((z6, a7) => {
+            If.create();
+            if (this.primaryTitle && this.secondaryTitle) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((h7, i7) => {
+                        Row.create();
+                    }, Row);
+                    this.observeComponentCreation2((f7, g7) => {
+                        Divider.create();
+                        Divider.margin({
+                            'id': -1,
+                            'type': 10002,
+                            params: ['sys.float.padding_level1'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
+                        });
+                        Divider.color(Color.Transparent);
+                    }, Divider);
+                    Row.pop();
+                });
+            } else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                });
+            }
+        }, If);
+        If.pop();
+        this.observeComponentCreation2((x6, y6) => {
+            Row.create();
+            Row.width('100%');
+        }, Row);
+        this.observeComponentCreation2((v6, w6) => {
+            Text.create(this.secondaryTitle);
+            Text.fontWeight(FontWeight.Regular);
+            Text.fontColor(ObservedObject.GetRawObject(this.secondaryTitleFontColorWithTheme));
+            Text.textAlign(this.getTitleTextAlign());
+            Text.maxFontSize({
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.Subtitle_S'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            });
+            Text.minFontSize({
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.Body_S'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            });
+            Text.maxLines(TITLE_MAX_LINES);
+            Text.heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST);
+            Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+            Text.width('100%');
+        }, Text);
+        Text.pop();
+        Row.pop();
+        Column.pop();
+    }
+
+    buildButtons(h6 = null) {
+        this.observeComponentCreation2((j6, k6) => {
+            Column.create();
+            Column.width('100%');
+            Column.onSizeChange((m6, n6) => {
+                this.buttonHeight = Number(n6.height);
+                if (this.updateButtonHeight) {
+                    this.updateButtonHeight(this.buttonHeight);
+                }
+            });
+            Column.padding(this.getOperationAreaPadding());
+        }, Column);
+        this.buildHorizontalAlignButtons.bind(this)(h6 ? h6 : this);
+        this.buildVerticalAlignButtons.bind(this)(h6 ? h6 : this);
+        Column.pop();
+    }
+
+    buildSingleButton(i5, j5 = null) {
+        this.observeComponentCreation2((l5, m5) => {
+            If.create();
+            if (this.isNewPropertiesHighPriority(i5)) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((f6, g6) => {
+                        Button.createWithLabel(i5.value);
+                        __Button__setButtonProperties(i5, this.controller);
+                        Button.role(i5.role ?? ButtonRole.NORMAL);
+                        Button.key(`advanced_dialog_button_${this.keyIndex++}`);
+                    }, Button);
+                    Button.pop();
+                });
+            } else if (i5.background !== undefined && i5.fontColor !== undefined) {
+                this.ifElseBranchUpdateFunction(1, () => {
+                    this.observeComponentCreation2((b6, c6) => {
+                        Button.createWithLabel(i5.value);
+                        __Button__setButtonProperties(i5, this.controller);
+                        Button.backgroundColor(i5.background);
+                        Button.fontColor(i5.fontColor);
+                        Button.key(`advanced_dialog_button_${this.keyIndex++}`);
+                    }, Button);
+                    Button.pop();
+                });
+            } else if (i5.background !== undefined) {
+                this.ifElseBranchUpdateFunction(2, () => {
+                    this.observeComponentCreation2((x5, y5) => {
+                        Button.createWithLabel(i5.value);
+                        __Button__setButtonProperties(i5, this.controller);
+                        Button.backgroundColor(i5.background);
+                        Button.key(`advanced_dialog_button_${this.keyIndex++}`);
+                    }, Button);
+                    Button.pop();
+                });
+            } else if (i5.background !== undefined && i5.fontColor === undefined || '') {
+                this.ifElseBranchUpdateFunction(3, () => {
+                    this.observeComponentCreation2((t5, u5) => {
+                        Button.createWithLabel(i5.value);
+                        __Button__setButtonProperties(i5, this.controller);
+                        Button.backgroundColor(i5.background);
+                        Button.fontColor(i5.role === ButtonRole.ERROR ?
+                        this.errorButtonFontColorWithTheme : this.buttonFontColorWithTheme);
+                        Button.key(`advanced_dialog_button_${this.keyIndex++}`);
+                    }, Button);
+                    Button.pop();
+                });
+            } else {
+                this.ifElseBranchUpdateFunction(4, () => {
+                    this.observeComponentCreation2((p5, q5) => {
+                        Button.createWithLabel(i5.value);
+                        __Button__setButtonProperties(i5, this.controller);
+                        Button.fontColor(i5.fontColor);
+                        Button.key(`advanced_dialog_button_${this.keyIndex++}`);
+                    }, Button);
+                    Button.pop();
+                });
+            }
+        }, If);
+        If.pop();
+    }
+
+    buildHorizontalAlignButtons(r4 = null) {
+        this.observeComponentCreation2((t4, u4) => {
+            If.create();
+            if (this.buttons && this.buttons.length > 0 && this.buttons.length <= HORIZON_BUTTON_MAX_COUNT) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((g5, h5) => {
+                        Row.create();
+                    }, Row);
+                    this.buildSingleButton.bind(this)(this.buttons[0], r4 ? r4 : this);
+                    this.observeComponentCreation2((z4, a5) => {
+                        If.create();
+                        if (this.buttons.length === HORIZON_BUTTON_MAX_COUNT) {
+                            this.ifElseBranchUpdateFunction(0, () => {
+                                this.observeComponentCreation2((e5, f5) => {
+                                    Divider.create();
+                                    Divider.width({
+                                        'id': -1,
+                                        'type': 10002,
+                                        params: ['sys.float.alert_divider_width'],
+                                        'bundleName': '__harDefaultBundleName__',
+                                        'moduleName': '__harDefaultModuleName__'
+                                    });
+                                    Divider.height({
+                                        'id': -1,
+                                        'type': 10002,
+                                        params: ['sys.float.alert_divider_height'],
+                                        'bundleName': '__harDefaultBundleName__',
+                                        'moduleName': '__harDefaultModuleName__'
+                                    });
+                                    Divider.color(this.getDividerColor());
+                                    Divider.vertical(true);
+                                    Divider.margin({
+                                        left: {
+                                            'id': -1,
+                                            'type': 10002,
+                                            params: ['sys.float.alert_button_horizontal_space'],
+                                            'bundleName': '__harDefaultBundleName__',
+                                            'moduleName': '__harDefaultModuleName__'
+                                        },
+                                        right: {
+                                            'id': -1,
+                                            'type': 10002,
+                                            params: ['sys.float.alert_button_horizontal_space'],
+                                            'bundleName': '__harDefaultBundleName__',
+                                            'moduleName': '__harDefaultModuleName__'
+                                        },
+                                    });
+                                }, Divider);
+                                this.buildSingleButton.bind(this)(this.buttons[HORIZON_BUTTON_MAX_COUNT - 1],
+                                    r4 ? r4 : this);
+                            });
+                        } else {
+                            this.ifElseBranchUpdateFunction(1, () => {
+                            });
+                        }
+                    }, If);
+                    If.pop();
+                    Row.pop();
+                });
+            } else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                });
+            }
+        }, If);
+        If.pop();
+    }
+
+    buildVerticalAlignButtons(y3 = null) {
+        this.observeComponentCreation2((a4, b4) => {
+            If.create();
+            if (this.buttons && this.isVerticalAlignButton()) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((p4, q4) => {
+                        Column.create();
+                    }, Column);
+                    this.observeComponentCreation2((g4, h4) => {
+                        ForEach.create();
+                        const i4 = (m4, n4) => {
+                            const o4 = m4;
+                            this.buildButtonWithDivider.bind(this)(n4, y3 ? y3 : this);
+                        };
+                        this.forEachUpdateFunction(g4, this.buttons.slice(0, VERTICAL_BUTTON_MAX_COUNT), i4,
+                            (l4) => l4.value.toString(), true, false);
+                    }, ForEach);
+                    ForEach.pop();
+                    Column.pop();
+                });
+            } else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                });
+            }
+        }, If);
+        If.pop();
+    }
+
+    buildButtonWithDivider(g3, h3 = null) {
+        this.observeComponentCreation2((j3, k3) => {
+            If.create();
+            if (this.buttons && this.buttons[g3]) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((w3, x3) => {
+                        Row.create();
+                    }, Row);
+                    this.buildSingleButton.bind(this)(this.buttons[g3], h3 ? h3 : this);
+                    Row.pop();
+                    this.observeComponentCreation2((p3, q3) => {
+                        If.create();
+                        if (g3 < Math.min(this.buttons.length, VERTICAL_BUTTON_MAX_COUNT) - 1) {
+                            this.ifElseBranchUpdateFunction(0, () => {
+                                this.observeComponentCreation2((u3, v3) => {
+                                    Row.create();
+                                    Row.height({
+                                        'id': -1,
+                                        'type': 10002,
+                                        params: ['sys.float.alert_button_vertical_space'],
+                                        'bundleName': '__harDefaultBundleName__',
+                                        'moduleName': '__harDefaultModuleName__'
+                                    });
+                                }, Row);
+                                Row.pop();
+                            });
+                        } else {
+                            this.ifElseBranchUpdateFunction(1, () => {
+                            });
+                        }
+                    }, If);
+                    If.pop();
+                });
+            } else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                });
+            }
+        }, If);
+        If.pop();
+    }
+
+    aboutToAppear() {
+        if (this.primaryTitle) {
+            this.titleHeight = getNumberByResource('alert_title_primary_height');
+        }
+        if (this.secondaryTitle) {
+            this.titleHeight = getNumberByResource('alert_title_secondary_height');
+        }
+        this.contentMaxHeight = `calc(100% - ${this.titleHeight}vp - ${this.getButtonsHeight()}vp)`;
+        if (this.updateButtonHeight) {
+            this.updateButtonHeight(this.buttonHeight);
+        }
+        this.primaryTitleFontColorWithTheme = this.theme?.colors?.fontPrimary ?
+        this.theme.colors.fontPrimary : {
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.font_primary'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            };
+        this.secondaryTitleFontColorWithTheme = this.theme?.colors?.fontSecondary ?
+        this.theme.colors.fontSecondary : {
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.font_secondary'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            };
+        this.buttonFontColorWithTheme = this.theme?.colors?.fontEmphasize ?
+        this.theme.colors.fontEmphasize : '';
+        this.errorButtonFontColorWithTheme = this.theme?.colors?.warning ?
+        this.theme.colors.warning : '';
+    }
+
+    getDividerColor() {
+        if (!this.buttons || this.buttons.length === 0 || !getNumberByResource('dialog_divider_show')) {
+            return Color.Transparent;
+        }
+        if (this.buttons[0].buttonStyle === ButtonStyleMode.TEXTUAL || this.buttons[0].buttonStyle === undefined) {
+            if (this.buttons[HORIZON_BUTTON_MAX_COUNT - 1].buttonStyle === ButtonStyleMode.TEXTUAL ||
+                this.buttons[HORIZON_BUTTON_MAX_COUNT - 1].buttonStyle === undefined) {
+                return {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.alert_divider_color'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                };
+            }
+        }
+        return Color.Transparent;
+    }
+
+    getButtonsHeight() {
+        if (!this.buttons || this.buttons.length === 0) {
+            return 0;
+        }
+        let f3 = getNumberByResource('alert_button_top_padding');
+        if (this.buttons.length <= HORIZON_BUTTON_MAX_COUNT) {
+            f3 += BUTTON_DEFAULT_HEIGHT +
+            getNumberByResource('alert_button_bottom_padding_horizontal');
+        } else {
+            f3 += BUTTON_DEFAULT_HEIGHT * this.buttons.length +
+                (this.buttons.length - 1) * getNumberByResource('alert_button_vertical_space') +
+            getNumberByResource('alert_button_bottom_padding_vertical');
+        }
+        this.buttonHeight = f3;
+        return f3;
+    }
+
+    getContentPadding() {
+        if (this.contentAreaPadding) {
+            return this.contentAreaPadding;
+        }
+        if ((this.primaryTitle || this.secondaryTitle) && this.buttons && this.buttons.length > 0) {
+            return {
+                top: 0,
+                right: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_content_default_padding'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                bottom: 0,
+                left: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_content_default_padding'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+            };
+        } else if (this.primaryTitle || this.secondaryTitle) {
+            return {
+                top: 0,
+                right: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_content_default_padding'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                bottom: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_content_default_padding'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                left: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_content_default_padding'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+            };
+        } else if (this.buttons && this.buttons.length > 0) {
+            return {
+                top: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_content_default_padding'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                right: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_content_default_padding'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                bottom: 0,
+                left: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_content_default_padding'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+            };
+        } else {
+            return {
+                top: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_content_default_padding'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                right: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_content_default_padding'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                bottom: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_content_default_padding'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                left: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_content_default_padding'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+            };
+        }
+    }
+
+    getTitleAreaMinHeight() {
+        if (this.secondaryTitle) {
+            return {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.alert_title_secondary_height'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            };
+        } else if (this.primaryTitle) {
+            return {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.alert_title_primary_height'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            };
+        } else {
+            return 0;
+        }
+    }
+
+    getTitleAreaPadding() {
+        if (this.primaryTitle || this.secondaryTitle) {
+            return {
+                top: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_title_padding_top'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                right: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_title_padding_right'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                left: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_title_padding_left'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                bottom: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_title_padding_bottom'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+            };
+        }
+        return {
+            top: 0,
+            right: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.alert_title_padding_right'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            },
+            left: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.alert_title_padding_left'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            },
+            bottom: 0,
+        };
+    }
+
+    isVerticalAlignButton() {
+        if (this.buttons) {
+            return this.buttons.length > HORIZON_BUTTON_MAX_COUNT;
+        }
+        return false;
+    }
+
+    getOperationAreaPadding() {
+        if (this.isVerticalAlignButton()) {
+            return {
+                top: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_button_top_padding'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                right: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_right_padding_vertical'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                left: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_left_padding_vertical'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+                bottom: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.alert_button_bottom_padding_vertical'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                },
+            };
+        }
+        return {
+            top: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.alert_button_top_padding'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            },
+            right: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.alert_right_padding_horizontal'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            },
+            left: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.alert_left_padding_horizontal'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            },
+            bottom: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.alert_button_bottom_padding_horizontal'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            },
+        };
+    }
+
+    isNewPropertiesHighPriority(e3) {
+        if (e3.role === ButtonRole.ERROR) {
+            return true;
+        }
+        if (e3.buttonStyle !== undefined &&
+            e3.buttonStyle !== getNumberByResource('alert_button_style')) {
+            return true;
+        }
+        if (e3.background === undefined && e3.fontColor === undefined) {
+            return true;
+        }
+        return false;
+    }
+
+    getTitleTextAlign() {
+        let d3 = getEnumNumberByResource('alert_title_alignment');
+        if (d3 === TextAlign.Start) {
+            return TextAlign.Start;
+        } else if (d3 === TextAlign.Center) {
+            return TextAlign.Center;
+        } else if (d3 === TextAlign.End) {
+            return TextAlign.End;
+        } else if (d3 === TextAlign.JUSTIFY) {
+            return TextAlign.JUSTIFY;
+        } else {
+            return TextAlign.Center;
+        }
+    }
+
+    rerender() {
+        this.updateDirtyElements();
+    }
+}
+
+export class CustomDialogComponent extends ViewPU {
+    constructor(x2, y2, z2, a3 = -1, b3 = undefined, c3) {
+        super(x2, z2, a3, c3);
+        if (typeof b3 === 'function') {
+            this.paramsGenerator_ = b3;
+        }
+        this.controller = undefined;
+        this.primaryTitle = undefined;
+        this.secondaryTitle = undefined;
+        this.contentBuilder = undefined;
+        this.buttons = undefined;
+        this.contentAreaPadding = undefined;
+        this.screenWidth = 0;
+        this.__columnModifier = new ObservedPropertyObjectPU(new ColumnModifier(), this, 'columnModifier');
+        this.isFirstInit = true;
+        this.theme = new CustomThemeImpl({});
+        this.targetSdk = VERSION_TWELVE;
+        this.dialogWidth = 0;
+        this.updateTitleHeight = undefined;
+        this.updateButtonHeight = undefined;
+        this.setInitiallyProvidedValue(y2);
+        this.finalizeConstruction();
+    }
+
+    setInitiallyProvidedValue(w2) {
+        if (w2.controller !== undefined) {
+            this.controller = w2.controller;
+        }
+        if (w2.primaryTitle !== undefined) {
+            this.primaryTitle = w2.primaryTitle;
+        }
+        if (w2.secondaryTitle !== undefined) {
+            this.secondaryTitle = w2.secondaryTitle;
+        }
+        if (w2.contentBuilder !== undefined) {
+            this.contentBuilder = w2.contentBuilder;
+        }
+        if (w2.buttons !== undefined) {
+            this.buttons = w2.buttons;
+        }
+        if (w2.contentAreaPadding !== undefined) {
+            this.contentAreaPadding = w2.contentAreaPadding;
+        }
+        if (w2.screenWidth !== undefined) {
+            this.screenWidth = w2.screenWidth;
+        }
+        if (w2.columnModifier !== undefined) {
+            this.columnModifier = w2.columnModifier;
+        }
+        if (w2.isFirstInit !== undefined) {
+            this.isFirstInit = w2.isFirstInit;
+        }
+        if (w2.theme !== undefined) {
+            this.theme = w2.theme;
+        }
+        if (w2.targetSdk !== undefined) {
+            this.targetSdk = w2.targetSdk;
+        }
+        if (w2.dialogWidth !== undefined) {
+            this.dialogWidth = w2.dialogWidth;
+        }
+        if (w2.updateTitleHeight !== undefined) {
+            this.updateTitleHeight = w2.updateTitleHeight;
+        }
+        if (w2.updateButtonHeight !== undefined) {
+            this.updateButtonHeight = w2.updateButtonHeight;
+        }
+    }
+
+    updateStateVars(v2) {
+    }
+
+    purgeVariableDependenciesOnElmtId(u2) {
+        this.__columnModifier.purgeDependencyOnElmtId(u2);
+    }
+
+    aboutToBeDeleted() {
+        this.__columnModifier.aboutToBeDeleted();
+        SubscriberManager.Get().delete(this.id__());
+        this.aboutToBeDeletedInternal();
+    }
+
+    get columnModifier() {
+        return this.__columnModifier.get();
+    }
+
+    set columnModifier(t2) {
+        this.__columnModifier.set(t2);
+    }
+
+    initialRender() {
+        this.observeComponentCreation2((o2, p2) => {
+            Column.create();
+            Column.onAreaChange((r2, s2) => {
+                if (!this.isFirstInit) {
+                    return;
+                }
+                this.dialogWidth = s2.width;
+                this.updateCustomStyle();
+                if (this.screenWidth > getNumberByResource('alert_container_max_width')) {
+                    this.columnModifier.customStyle = s2.width > getNumberByResource('alert_container_max_width');
+                } else {
+                    this.columnModifier.customStyle = s2.width >= this.screenWidth;
+                }
+                this.isFirstInit = false;
+            });
+        }, Column);
+        this.observeComponentCreation2((m2, n2) => {
+            Column.create();
+            Column.attributeModifier.bind(this)(ObservedObject.GetRawObject(this.columnModifier));
+        }, Column);
+        {
+            this.observeComponentCreation2((g2, h2) => {
+                if (h2) {
+                    let i2 = new CustomDialogContentComponent(this, {
+                        controller: this.controller,
+                        primaryTitle: this.primaryTitle,
+                        secondaryTitle: this.secondaryTitle,
+                        contentBuilder: () => {
+                            this.contentBuilder();
+                        },
+                        updateTitleHeight: this.updateTitleHeight,
+                        updateButtonHeight: this.updateButtonHeight,
+                        buttons: this.buttons,
+                        contentAreaPadding: this.contentAreaPadding,
+                        theme: this.theme,
+                    }, undefined, g2, () => {
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 1137, col: 9 });
+                    ViewPU.create(i2);
+                    let j2 = () => {
+                        return {
+                            controller: this.controller,
+                            primaryTitle: this.primaryTitle,
+                            secondaryTitle: this.secondaryTitle,
+                            contentBuilder: () => {
+                                this.contentBuilder();
+                            },
+                            updateTitleHeight: this.updateTitleHeight,
+                            updateButtonHeight: this.updateButtonHeight,
+                            buttons: this.buttons,
+                            contentAreaPadding: this.contentAreaPadding,
+                            theme: this.theme
+                        };
+                    };
+                    i2.paramsGenerator_ = j2;
+                } else {
+                    this.updateStateVarsOfChildByElmtId(g2, {});
+                }
+            }, { name: 'CustomDialogContentComponent' });
+        }
+        Column.pop();
+        Column.pop();
+    }
+
+    updateCustomStyle() {
+        if (this.targetSdk >= VERSION_TWELVE) {
+            return;
+        }
+        if (this.screenWidth > getNumberByResource('alert_container_max_width')) {
+            this.columnModifier.customStyle = this.dialogWidth > getNumberByResource('alert_container_max_width');
+        } else {
+            this.columnModifier.customStyle = this.dialogWidth >= this.screenWidth;
+        }
+    }
+
+    aboutToAppear() {
+        try {
+            this.screenWidth = px2vp(display.getDefaultDisplaySync().width);
+            let y1 = bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION |
+            bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_METADATA;
+            bundleManager.getBundleInfoForSelf(y1).then((c2) => {
+                this.targetSdk = c2.targetVersion;
+                this.updateCustomStyle();
+            }).catch((b2) => {
+                hilog.error(0x3900, 'Ace', 'getBundleInfoForSelf failed Cause: %{public}s', b2.message);
+            });
+        } catch (x1) {
+            hilog.error(0x3900, 'Ace', `CustomDialogComponent getDefaultDisplaySync error: ${JSON.stringify(x1)}`);
+        }
+        ;
+    }
+
+    rerender() {
+        this.updateDirtyElements();
+    }
+}
+
+class ColumnModifier {
+    constructor() {
+        this.customStyle = false;
+    }
+
+    applyNormalAttribute(w1) {
+        if (!this.customStyle) {
+            return;
+        }
+        w1.backgroundBlurStyle(BlurStyle.Thick);
+        w1.borderRadius({
+            'id': -1,
+            'type': 10002,
+            params: ['sys.float.ohos_id_corner_radius_dialog'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        });
+        w1.margin({
+            left: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.ohos_id_dialog_margin_start'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            },
+            right: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.ohos_id_dialog_margin_end'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            },
+            bottom: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.ohos_id_dialog_margin_bottom'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            },
+        });
+        w1.backgroundColor({
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.ohos_id_color_dialog_bg'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        });
+    }
+}
+
+function __Button__setButtonProperties(t1, u1) {
+    Button.onClick(() => {
+        if (t1.action) {
+            t1.action();
+        }
+        u1?.close();
+    });
+    Button.defaultFocus(true);
+    Button.buttonStyle(t1.buttonStyle ?? getNumberByResource('alert_button_style'));
+    Button.layoutWeight(BUTTON_LAYOUT_WEIGHT);
+}
+
+function getNumberByResource(p1) {
+    try {
+        return resourceManager.getSystemResourceManager().getNumberByName(p1);
+    } catch (q1) {
+        let r1 = q1.code;
+        let s1 = q1.message;
+        hilog.error(0x3900, 'Ace', `CustomContentDialog getNumberByResource error, code: ${r1}, message: ${s1}`);
+        return 0;
+    }
+}
+
+function getEnumNumberByResource(l1) {
+    try {
+        return getContext().resourceManager.getNumberByName(l1);
+    } catch (m1) {
+        let n1 = m1.code;
+        let o1 = m1.message;
+        hilog.error(0x3900, 'Ace', `getEnumNumberByResource error, code: ${n1}, message: ${o1}`);
+        return -1;
+    }
+}
+
+function resolveKeyEvent(j1, k1) {
+    if (j1.type == IGNORE_KEY_EVENT_TYPE) {
+        return;
+    }
+    if (j1.keyCode == KEYCODE_UP) {
+        k1.scrollPage({ next: false });
+        j1.stopPropagation();
+    } else if (j1.keyCode == KEYCODE_DOWN) {
+        if (k1.isAtEnd()) {
+            return;
+        } else {
+            k1.scrollPage({ next: true });
+            j1.stopPropagation();
         }
     }
 }
+
 export class LoadingDialog extends ViewPU {
-  constructor(b1, c1, d1, e1 = -1, f1 = undefined, g1) {
-    super(b1, d1, e1, g1);
-    if (typeof f1 === 'function') {
-      this.paramsGenerator_ = f1;
-    }
-    this.controller = undefined;
-    this.content = '';
-    this.setInitiallyProvidedValue(c1);
-    this.finalizeConstruction();
-  }
-  setInitiallyProvidedValue(a1) {
-    if (a1.controller !== undefined) {
-      this.controller = a1.controller;
-    }
-    if (a1.content !== undefined) {
-      this.content = a1.content;
-    }
-  }
-  updateStateVars(z) {
-  }
-  purgeVariableDependenciesOnElmtId(y) {
-  }
-  aboutToBeDeleted() {
-    SubscriberManager.Get().delete(this.id__());
-    this.aboutToBeDeletedInternal();
-  }
-  setController(x) {
-    this.controller = x;
-  }
-  initialRender() {
-    this.observeComponentCreation((v, w) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(v);
-      Column.create();
-      if (!w) {
-        Column.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    {
-      this.observeComponentCreation((p, q) => {
-        ViewStackProcessor.StartGetAccessRecordingFor(p);
-        if (q) {
-          let r = new CustomDialogComponent(this, {
-            controller: this.controller,
-            contentBuilder: () => {
-              this.contentBuilder();
-            },
-          }, undefined, p, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 758 });
-          ViewPU.create(r);
-          let s = () => {
-            return {
-              controller: this.controller,
-              contentBuilder: () => {
-                this.contentBuilder();
-              }
-            };
-          };
-          r.paramsGenerator_ = s;
+    constructor(d1, e1, f1, g1 = -1, h1 = undefined, i1) {
+        super(d1, f1, g1, i1);
+        if (typeof h1 === 'function') {
+            this.paramsGenerator_ = h1;
         }
-        else {
-          this.updateStateVarsOfChildByElmtId(p, {});
-        }
-        ViewStackProcessor.StopGetAccessRecording();
-      });
+        this.controller = undefined;
+        this.content = '';
+        this.__fontColorWithTheme = new ObservedPropertyObjectPU({
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.font_primary'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'fontColorWithTheme');
+        this.__loadingProgressIconColorWithTheme = new ObservedPropertyObjectPU({
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.icon_secondary'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'loadingProgressIconColorWithTheme');
+        this.theme = new CustomThemeImpl({});
+        this.setInitiallyProvidedValue(e1);
+        this.finalizeConstruction();
     }
-    Column.pop();
-  }
-  contentBuilder(a = null) {
-    this.observeComponentCreation((l, m) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(l);
-      Column.create();
-      if (!m) {
+
+    setInitiallyProvidedValue(c1) {
+        if (c1.controller !== undefined) {
+            this.controller = c1.controller;
+        }
+        if (c1.content !== undefined) {
+            this.content = c1.content;
+        }
+        if (c1.fontColorWithTheme !== undefined) {
+            this.fontColorWithTheme = c1.fontColorWithTheme;
+        }
+        if (c1.loadingProgressIconColorWithTheme !== undefined) {
+            this.loadingProgressIconColorWithTheme = c1.loadingProgressIconColorWithTheme;
+        }
+        if (c1.theme !== undefined) {
+            this.theme = c1.theme;
+        }
+    }
+
+    updateStateVars(b1) {
+    }
+
+    purgeVariableDependenciesOnElmtId(a1) {
+        this.__fontColorWithTheme.purgeDependencyOnElmtId(a1);
+        this.__loadingProgressIconColorWithTheme.purgeDependencyOnElmtId(a1);
+    }
+
+    aboutToBeDeleted() {
+        this.__fontColorWithTheme.aboutToBeDeleted();
+        this.__loadingProgressIconColorWithTheme.aboutToBeDeleted();
+        SubscriberManager.Get().delete(this.id__());
+        this.aboutToBeDeletedInternal();
+    }
+
+    setController(z) {
+        this.controller = z;
+    }
+
+    get fontColorWithTheme() {
+        return this.__fontColorWithTheme.get();
+    }
+
+    set fontColorWithTheme(y) {
+        this.__fontColorWithTheme.set(y);
+    }
+
+    get loadingProgressIconColorWithTheme() {
+        return this.__loadingProgressIconColorWithTheme.get();
+    }
+
+    set loadingProgressIconColorWithTheme(x) {
+        this.__loadingProgressIconColorWithTheme.set(x);
+    }
+
+    initialRender() {
+        this.observeComponentCreation2((v, w) => {
+            Column.create();
+        }, Column);
+        {
+            this.observeComponentCreation2((p, q) => {
+                if (q) {
+                    let r = new CustomDialogComponent(this, {
+                        controller: this.controller,
+                        contentBuilder: () => {
+                            this.contentBuilder();
+                        },
+                        theme: this.theme,
+                    }, undefined, p, () => {
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 1297, col: 7 });
+                    ViewPU.create(r);
+                    let s = () => {
+                        return {
+                            controller: this.controller,
+                            contentBuilder: () => {
+                                this.contentBuilder();
+                            },
+                            theme: this.theme
+                        };
+                    };
+                    r.paramsGenerator_ = s;
+                } else {
+                    this.updateStateVarsOfChildByElmtId(p, {});
+                }
+            }, { name: 'CustomDialogComponent' });
+        }
         Column.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    this.observeComponentCreation((j, k) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(j);
-      Row.create();
-      Row.constraintSize({ minHeight: LOADING_MIN_HEIGHT });
-      if (!k) {
-        Row.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    this.observeComponentCreation((h, i) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(h);
-      Text.create(this.content);
-      Text.fontSize({ id: -1, type: 10002, params: ['sys.float.Body_L'], bundleName: '', moduleName: '' });
-      Text.fontWeight(FontWeight.Regular);
-      Text.fontColor({ id: -1, type: 10001, params: ['sys.color.font_primary'], bundleName: '', moduleName: '' });
-      Text.layoutWeight(LOADING_TEXT_LAYOUT_WEIGHT);
-      Text.maxLines(LOADING_MAX_LINES);
-      Text.focusable(true);
-      Text.defaultFocus(true);
-      Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-      if (!i) {
+    }
+
+    contentBuilder(a = null) {
+        this.observeComponentCreation2((l, m) => {
+            Column.create();
+        }, Column);
+        this.observeComponentCreation2((j, k) => {
+            Row.create();
+            Row.constraintSize({ minHeight: LOADING_MIN_HEIGHT });
+        }, Row);
+        this.observeComponentCreation2((h, i) => {
+            Text.create(this.content);
+            Text.fontSize({
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.Body_L'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            });
+            Text.fontWeight(FontWeight.Regular);
+            Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
+            Text.layoutWeight(LOADING_TEXT_LAYOUT_WEIGHT);
+            Text.maxLines(LOADING_MAX_LINES);
+            Text.focusable(true);
+            Text.defaultFocus(true);
+            Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+        }, Text);
         Text.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    Text.pop();
-    this.observeComponentCreation((f, g) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(f);
-      LoadingProgress.create();
-      LoadingProgress.color({ id: -1, type: 10001, params: ['sys.color.icon_secondary'], bundleName: '', moduleName: '' });
-      LoadingProgress.width(LOADING_PROGRESS_WIDTH);
-      LoadingProgress.height(LOADING_PROGRESS_HEIGHT);
-      LoadingProgress.margin({ left: LOADING_TEXT_MARGIN_LEFT });
-      if (!g) {
-        LoadingProgress.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    Row.pop();
-    Column.pop();
-  }
-  rerender() {
-    this.updateDirtyElements();
-  }
+        this.observeComponentCreation2((f, g) => {
+            LoadingProgress.create();
+            LoadingProgress.color(ObservedObject.GetRawObject(this.loadingProgressIconColorWithTheme));
+            LoadingProgress.width(LOADING_PROGRESS_WIDTH);
+            LoadingProgress.height(LOADING_PROGRESS_HEIGHT);
+            LoadingProgress.margin({ start: LengthMetrics.vp(LOADING_TEXT_MARGIN_LEFT) });
+        }, LoadingProgress);
+        Row.pop();
+        Column.pop();
+    }
+
+    aboutToAppear() {
+        this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
+        this.theme.colors.fontPrimary : {
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.font_primary'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            };
+        this.loadingProgressIconColorWithTheme = this.theme?.colors?.iconSecondary ?
+        this.theme.colors.iconSecondary : {
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.icon_secondary'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            };
+    }
+
+    rerender() {
+        this.updateDirtyElements();
+    }
 }
 
 export default { TipsDialog, ConfirmDialog, SelectDialog, AlertDialog, LoadingDialog, CustomContentDialog };

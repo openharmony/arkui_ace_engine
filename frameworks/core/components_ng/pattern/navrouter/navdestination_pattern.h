@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/common/autofill/auto_fill_trigger_state_holder.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/navigation/navigation_event_hub.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
@@ -32,8 +33,8 @@
 
 namespace OHOS::Ace::NG {
 
-class NavDestinationPattern : public Pattern, public FocusView {
-    DECLARE_ACE_TYPE(NavDestinationPattern, Pattern, FocusView);
+class NavDestinationPattern : public Pattern, public FocusView, public AutoFillTriggerStateHolder {
+    DECLARE_ACE_TYPE(NavDestinationPattern, Pattern, FocusView, AutoFillTriggerStateHolder);
 
 public:
     explicit NavDestinationPattern(const RefPtr<ShallowBuilder>& shallowBuilder);
@@ -148,13 +149,9 @@ public:
         return {};
     }
 
-    std::string GetEntryFocusViewName() override
+    bool IsEntryFocusView() override
     {
-        /*
-        |-> Any FocusView (entry focus view)
-          |-> NavDestination
-        */
-        return ENTRY_ANY_FOCUSVIEW;
+        return false;
     }
 
     void SetIsOnShow(bool isOnShow)
@@ -192,6 +189,25 @@ public:
         UIObserverHandler::GetInstance().NotifyNavigationStateChange(weak, NavDestinationState::ON_DISAPPEAR);
     }
 
+    bool OverlayOnBackPressed();
+
+    void CreateOverlayManager(bool isShow)
+    {
+        if (!overlayManager_ && isShow) {
+            overlayManager_ = MakeRefPtr<OverlayManager>(GetHost());
+        }
+    }
+
+    const RefPtr<OverlayManager>& GetOverlayManager()
+    {
+        return overlayManager_;
+    }
+
+    void DeleteOverlayManager()
+    {
+        overlayManager_.Reset();
+    }
+
     void SetNavigationId(const std::string& id)
     {
         inspectorId_ = id;
@@ -212,6 +228,8 @@ public:
         return isUserDefinedBgColor_;
     }
 
+    void OnLanguageConfigurationUpdate() override;
+
 private:
     void UpdateNameIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
     void UpdateBackgroundColorIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
@@ -223,8 +241,10 @@ private:
     RefPtr<NavDestinationContext> navDestinationContext_;
     RefPtr<UINode> customNode_;
     WeakPtr<UINode> navigationNode_;
+    RefPtr<OverlayManager> overlayManager_;
     bool isOnShow_ = false;
     bool isUserDefinedBgColor_ = false;
+    bool isRightToLeft_ = false;
     uint64_t navDestinationId_ = 0;
     void OnAttachToFrameNode() override;
 };

@@ -57,12 +57,18 @@
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
+#include "core/components_ng/pattern/relative_container/relative_container_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_item_model_ng.h"
+#include "core/components_ng/pattern/grid_col/grid_col_model_ng.h"
+#include "core/components_ng/pattern/grid_row/grid_row_model_ng.h"
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
 #include "core/components_ng/pattern/divider/divider_model_ng.h"
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
+#include "core/components_ng/pattern/radio/radio_model_ng.h"
+#include "core/components_ng/pattern/select/select_model_ng.h"
+#include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/pipeline/base/element_register.h"
 
@@ -321,6 +327,12 @@ void* createCircleNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createRelativeContainerNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = RelativeContainerModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
 void* createGridNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = GridModelNG::CreateFrameNode(nodeId);
@@ -363,6 +375,41 @@ void* createSearchNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createGridRowNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = GridRowModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createGridColNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = GridColModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createImageAnimatorNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = ImageAnimatorModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createRadioNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = RadioModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createSelectNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = SelectModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 using createArkUIFrameNode = void*(ArkUI_Int32 nodeId);
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
 {
@@ -392,7 +439,7 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
         nullptr, // Web
         createSliderNode,
         createCanvasNode,
-        nullptr, // Radio
+        createRadioNode, // Radio
         createGridNode,
 #ifdef XCOMPONENT_SUPPORTED
         createXComponentNode,
@@ -412,10 +459,15 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
         createCustomNode,
         createWaterFlowNode,
         createFlowItemNode,
+        createRelativeContainerNode,
         createBlankNode,
         createDividerNode,
         createAlphabetIndexerNode,
         createSearchNode,
+        createGridRowNode,
+        createGridColNode,
+        createSelectNode,
+        createImageAnimatorNode,
         createCircleNode,
     };
     if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {
@@ -439,8 +491,12 @@ ArkUI_CharPtr GetName(void* nativePtr)
 void DisposeNode(void* nativePtr)
 {
     CHECK_NULL_VOID(nativePtr);
-    auto* frameNode = reinterpret_cast<UINode*>(nativePtr);
-    frameNode->DecRefCount();
+    auto* uiNode = reinterpret_cast<UINode*>(nativePtr);
+    auto* frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    if (frameNode) {
+        frameNode->SetExtensionHandler(nullptr);
+    }
+    uiNode->DecRefCount();
 }
 
 void AddChild(void* parentNode, void* childNode)
@@ -462,7 +518,8 @@ void RemoveChild(void* parentNode, void* childNode)
     CHECK_NULL_VOID(childNode);
     auto* parent = reinterpret_cast<UINode*>(parentNode);
     auto* child = reinterpret_cast<UINode*>(childNode);
-    parent->RemoveChild(AceType::Claim(child));
+    child->MarkRemoving();
+    parent->RemoveChild(AceType::Claim(child), true);
 }
 
 void InsertChildAt(void* parentNode, void* childNode, int32_t position)

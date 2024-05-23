@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::NG {
 
-void FocusView::FocusViewShow()
+void FocusView::FocusViewShow(bool isTriggerByStep)
 {
     TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus view: %{public}s/%{public}d show", GetFrameName().c_str(), GetFrameId());
     auto viewRootScope = GetViewRootScope();
@@ -34,7 +34,7 @@ void FocusView::FocusViewShow()
     CHECK_NULL_VOID(pipeline);
     auto focusManager = pipeline->GetFocusManager();
     CHECK_NULL_VOID(focusManager);
-    focusManager->FocusViewShow(AceType::Claim(this));
+    focusManager->FocusViewShow(AceType::Claim(this), isTriggerByStep);
     pipeline->RequestFrame();
 }
 
@@ -117,8 +117,7 @@ RefPtr<FocusView> FocusView::GetCurrentFocusView()
 
 RefPtr<FocusView> FocusView::GetEntryFocusView()
 {
-    auto entryFocusViewName = GetEntryFocusViewName();
-    if (entryFocusViewName.empty()) {
+    if (IsEntryFocusView()) {
         return AceType::Claim(this);
     }
     auto focusViewHub = GetFocusHub();
@@ -130,7 +129,7 @@ RefPtr<FocusView> FocusView::GetEntryFocusView()
             parentFocusHub = parentFocusHub->GetParentFocusHub();
             continue;
         }
-        if (entryFocusViewName == ENTRY_ANY_FOCUSVIEW || entryFocusViewName == parentFocusView->GetFrameName()) {
+        if (parentFocusView->IsEntryFocusView()) {
             return parentFocusView;
         }
         parentFocusHub = parentFocusHub->GetParentFocusHub();
@@ -222,19 +221,25 @@ bool FocusView::RequestDefaultFocus()
     if (focusViewHub->GetFocusType() != FocusType::SCOPE || !focusViewHub->IsFocusableNode()) {
         return false;
     }
-    isViewHasFocused_ = true;
     auto viewRootScope = GetViewRootScope();
-    auto defaultFocusNode = focusViewHub->GetChildFocusNodeByType(FocusNodeType::DEFAULT);
-    if (!defaultFocusNode) {
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus view has no default focus.");
-    }
-    if (!isDefaultHasBeFocused_ && defaultFocusNode && defaultFocusNode->IsFocusableWholePath()) {
-        SetIsViewRootScopeFocused(false);
-        auto ret = defaultFocusNode->RequestFocusImmediately();
-        isDefaultHasBeFocused_ = true;
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on default focus: %{public}s/%{public}d return: %{public}d.",
-            defaultFocusNode->GetFrameName().c_str(), defaultFocusNode->GetFrameId(), ret);
-        return ret;
+    CHECK_NULL_RETURN(viewRootScope, false);
+    isViewHasFocused_ = true;
+    auto isViewRootScopeHasChildFocused = viewRootScope->HasFocusedChild();
+    if (!isDefaultHasBeFocused_ && !isViewRootScopeHasChildFocused) {
+        auto defaultFocusNode = focusViewHub->GetChildFocusNodeByType(FocusNodeType::DEFAULT);
+        if (!defaultFocusNode) {
+            TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus view has no default focus.");
+        } else if (!defaultFocusNode->IsFocusableWholePath()) {
+            TAG_LOGI(AceLogTag::ACE_FOCUS, "Default focus node: %{public}s/%{public}d is not focusable",
+                defaultFocusNode->GetFrameName().c_str(), defaultFocusNode->GetFrameId());
+        } else {
+            SetIsViewRootScopeFocused(false);
+            auto ret = defaultFocusNode->RequestFocusImmediately();
+            isDefaultHasBeFocused_ = true;
+            TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on default focus: %{public}s/%{public}d return: %{public}d.",
+                defaultFocusNode->GetFrameName().c_str(), defaultFocusNode->GetFrameId(), ret);
+            return ret;
+        }
     }
     if (isViewRootScopeFocused_ && viewRootScope) {
         SetIsViewRootScopeFocused(true);

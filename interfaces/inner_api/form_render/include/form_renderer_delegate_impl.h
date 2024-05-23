@@ -52,7 +52,7 @@ public:
      * @param width
      * @param height
      */
-    int32_t OnSurfaceChange(float width, float height) override;
+    int32_t OnSurfaceChange(float width, float height, float borderWidth = 0.0) override;
     /**
      * @brief OnSurfaceDetach.
      * @param surfaceId The surfaceNode ID.
@@ -65,7 +65,7 @@ public:
             const OHOS::AppExecFwk::FormJsInfo&, const AAFwk::Want&)>&& listener);
     void SetActionEventHandler(std::function<void(const std::string&)>&& listener);
     void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& listener);
-    void SetSurfaceChangeEventHandler(std::function<void(float width, float height)>&& listener);
+    void SetSurfaceChangeEventHandler(std::function<void(float width, float height, float borderWidth)>&& listener);
     void SetSurfaceDetachEventHandler(std::function<void()>&& listener);
     void SetFormLinkInfoUpdateHandler(std::function<void(const std::vector<std::string>&)>&& listener);
 
@@ -75,7 +75,7 @@ private:
         surfaceCreateEventHandler_;
     std::function<void(const std::string&)> actionEventHandler_;
     std::function<void(const std::string&, const std::string&)> errorEventHandler_;
-    std::function<void(float width, float height)> surfaceChangeEventHandler_;
+    std::function<void(float width, float height, float borderWidth)> surfaceChangeEventHandler_;
     std::function<void()> surfaceDetachEventHandler_;
     std::function<void(const std::vector<std::string>&)> formLinkInfoUpdateHandler_;
 };

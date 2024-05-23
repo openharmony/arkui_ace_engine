@@ -46,6 +46,11 @@ struct MenuItemSelectIconStyle {
 class ACE_EXPORT MenuItemLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(MenuItemLayoutProperty, LayoutProperty);
 
+private:
+    std::function<void(WeakPtr<NG::FrameNode>)> startSymbol_;
+    std::function<void(WeakPtr<NG::FrameNode>)> endSymbol_;
+    std::function<void(WeakPtr<NG::FrameNode>)> selectSymbol_;
+
 public:
     MenuItemLayoutProperty() = default;
     ~MenuItemLayoutProperty() override = default;
@@ -62,6 +67,8 @@ public:
         value->propLabel_ = CloneLabel();
         value->propSelectIconStyle_ = CloneSelectIconStyle();
         value->propMenuWidth_ = CloneMenuWidth();
+        value->propExpandingMode_ = CloneExpandingMode();
+        value->propHasFurtherExpand_ = CloneHasFurtherExpand();
         return value;
     }
 
@@ -76,6 +83,38 @@ public:
         ResetLabel();
         ResetSelectIconStyle();
         ResetMenuWidth();
+        ResetExpandingMode();
+        ResetHasFurtherExpand();
+    }
+
+    std::function<void(WeakPtr<NG::FrameNode>)>& GetStartSymbol()
+    {
+        return startSymbol_;
+    }
+
+    void SetStartSymbol(const std::function<void(WeakPtr<NG::FrameNode>)>& symbol)
+    {
+        startSymbol_ = symbol;
+    }
+
+    std::function<void(WeakPtr<NG::FrameNode>)>& GetEndSymbol()
+    {
+        return endSymbol_;
+    }
+
+    void SetEndSymbol(const std::function<void(WeakPtr<NG::FrameNode>)>& symbol)
+    {
+        endSymbol_ = symbol;
+    }
+
+    std::function<void(WeakPtr<NG::FrameNode>)>& GetSelectSymbol()
+    {
+        return selectSymbol_;
+    }
+
+    void SetSelectSymbol(const std::function<void(WeakPtr<NG::FrameNode>)>& symbol)
+    {
+        selectSymbol_ = symbol;
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StartIcon, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
@@ -83,6 +122,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EndIcon, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Label, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MenuWidth, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ExpandingMode, SubMenuExpandingMode, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HasFurtherExpand, bool, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_GROUP(SelectIconStyle, MenuItemSelectIconStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SelectIconStyle, SelectIcon, bool, PROPERTY_UPDATE_MEASURE);

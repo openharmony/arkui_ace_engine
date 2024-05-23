@@ -79,7 +79,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
     thisPropertyName: PropertyInfo) {
     super(owningChildView, thisPropertyName);
 
-    if (source && (typeof (source) === "object") && ("subscribeMe" in source)) {
+    if (source && (typeof (source) === 'object') && ('subscribeMe' in source)) {
       // code path for @(Local)StorageProp, the source is a ObservedPropertyObject<C> in a LocalStorage)
       this.source_ = source;
       this.sourceIsOwnObject = false;
@@ -103,7 +103,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
       }
     }
 
-    if (this.source_ != undefined) {
+    if (this.source_ !== undefined) {
       this.resetLocalValue(this.source_.get(), /* needCopyObject */ true);
     }
     this.setDecoratorInfo("@Prop");
@@ -118,7 +118,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
   aboutToBeDeleted() {
     if (this.source_) {
       this.source_.removeSubscriber(this);
-      if (this.sourceIsOwnObject == true && this.source_.numberOfSubscrbers() == 0) {
+      if (this.sourceIsOwnObject === true && this.source_.numberOfSubscrbers() === 0) {
         stateMgmtConsole.debug(`${this.debugInfo()}: aboutToBeDeleted. owning source_ ObservedPropertySimplePU, calling its aboutToBeDeleted`);
         this.source_.aboutToBeDeleted();
       }
@@ -133,13 +133,13 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
   // 2. a @Link or @Consume that uses this @Prop as a source.  FIXME is this possible? - see the if (eventSource && this.source_ == eventSource) {
   public syncPeerHasChanged(eventSource: ObservedPropertyAbstractPU<C>): void {
     stateMgmtProfiler.begin("SyncedPropertyOneWayPU.syncPeerHasChanged");
-    if (this.source_ == undefined) {
+    if (this.source_ === undefined) {
       stateMgmtConsole.error(`${this.debugInfo()}: syncPeerHasChanged from peer ${eventSource && eventSource.debugInfo && eventSource.debugInfo()}. source_ undefined. Internal error.`);
       stateMgmtProfiler.end();
       return;
     }
 
-    if (eventSource && this.source_ == eventSource) {
+    if (eventSource && this.source_ === eventSource) {
       // defensive programming: should always be the case!
       const newValue = this.source_.getUnmonitored();
       if (this.checkIsSupportedValue(newValue)) {
@@ -186,7 +186,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
   }
 
   public get(): C {
-    stateMgmtProfiler.begin("SynchedPropertyOneWayPU.get");
+    stateMgmtProfiler.begin('SynchedPropertyOneWayPU.get');
     stateMgmtConsole.propertyAccess(`${this.debugInfo()}: get.`)
     this.recordPropertyDependentUpdate();
     if (this.shouldInstallTrackedObjectReadCb) {
@@ -203,7 +203,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
   // assignment to local variable in the form of this.aProp = <object value>
   public set(newValue: C): void {
     if (this.localCopyObservedObject_ === newValue) {
-      stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value  - nothing to do.`);
+      stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}IP, '${this.info() || 'unknown'}']: set with unchanged value  - nothing to do.`);
       return;
     }
 
@@ -217,7 +217,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
   }
 
   protected onOptimisedObjectPropertyRead(readObservedObject: C, readPropertyName: string, isTracked: boolean): void {
-    stateMgmtProfiler.begin("SynchedPropertyOneWayPU.onOptimisedObjectPropertyRead");
+    stateMgmtProfiler.begin('SynchedPropertyOneWayPU.onOptimisedObjectPropertyRead');
     const renderingElmtId = this.getRenderingElmtId();
     if (renderingElmtId >= 0) {
       if (!isTracked) {
@@ -268,7 +268,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
     // InstanceOf error when target is not Callable/Can not get Prototype on non ECMA Object
     try {
       if (!this.checkIsSupportedValue(newObservedObjectValue)) {
-        return;
+        return false;
       }
       // unsubscribe from old local copy
       if (this.localCopyObservedObject_ instanceof SubscribableAbstract) {
@@ -301,7 +301,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
       this.localCopyObservedObject_ = newObservedObjectValue;
     }
 
-    if (typeof this.localCopyObservedObject_ == "object") {
+    if (typeof this.localCopyObservedObject_ === 'object') {
       if (this.localCopyObservedObject_ instanceof SubscribableAbstract) {
         // deep copy will copy Set of subscribers as well. But local copy only has its own subscribers 
         // not those of its parent value.
@@ -317,7 +317,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
         this.localCopyObservedObject_ = ObservedObject.createNew(this.localCopyObservedObject_, this);
         this.shouldInstallTrackedObjectReadCb = TrackedObject.needsPropertyReadCb(this.localCopyObservedObject_);
       }
-      stateMgmtConsole.propertyAccess("end of reset shouldInstallTrackedObjectReadCb=" + this.shouldInstallTrackedObjectReadCb);
+      stateMgmtConsole.propertyAccess('end of reset shouldInstallTrackedObjectReadCb=' + this.shouldInstallTrackedObjectReadCb);
     }
     return true;
   }
@@ -327,8 +327,8 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
     // therefore shallowCopyObject will always be used in API version 9 and before
     // but the code in this file is the same regardless of API version
     stateMgmtConsole.debug(`${this.debugInfo()}: copyObject: Version: \
-    ${(typeof ViewStackProcessor["getApiVersion"] == "function") ? ViewStackProcessor["getApiVersion"]() : 'unknown'}, \
-    will use ${((typeof ViewStackProcessor["getApiVersion"] == "function") && (ViewStackProcessor["getApiVersion"]() >= 10)) ? 'deep copy' : 'shallow copy'} .`);
+    ${(typeof ViewStackProcessor["getApiVersion"] === 'function') ? ViewStackProcessor["getApiVersion"]() : 'unknown'}, \
+    will use ${((typeof ViewStackProcessor["getApiVersion"] === 'function') && (ViewStackProcessor["getApiVersion"]() >= 10)) ? 'deep copy' : 'shallow copy'} .`);
 
     return ((typeof ViewStackProcessor["getApiVersion"] == "function") &&
       (ViewStackProcessor["getApiVersion"]() >= 10))
@@ -365,7 +365,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
         // subscribe
         (copy as unknown as SubscribableAbstract).addOwningProperty(this);
       }
-    } else if (typeof rawValue == "object") {
+    } else if (typeof rawValue === 'object') {
       // case Object that is not Array, not Date, not SubscribableAbstract
       copy = ObservedObject.createNew({ ...rawValue }, this);
       Object.setPrototypeOf(copy, Object.getPrototypeOf(rawValue));
@@ -424,20 +424,20 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
         copy = new Set<any>();
         Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
         copiedObjects.set(obj, copy);
-        for (const setKey of obj.keys()) {
+        obj.forEach((setKey: any) => {
           stack.push({ name: setKey });
           copy.add(getDeepCopyOfObjectRecursive(setKey));
           stack.pop();
-        }
+        });
       } else if (obj instanceof Map) {
         copy = new Map<any, any>();
         Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
         copiedObjects.set(obj, copy);
-        for (const mapKey of obj.keys()) {
+        obj.forEach((mapValue: any, mapKey: any) => {
           stack.push({ name: mapKey });
-          copy.set(mapKey, getDeepCopyOfObjectRecursive(obj.get(mapKey)));
+          copy.set(mapKey, getDeepCopyOfObjectRecursive(mapValue));
           stack.pop();
-        }
+        });
       } else if (obj instanceof Date) {
         copy = new Date()
         copy.setTime(obj.getTime());
@@ -448,11 +448,11 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
         Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
         copiedObjects.set(obj, copy);
       }
-      for (const objKey of Object.keys(obj)) {
+      Object.keys(obj).forEach((objKey: any) => {
         stack.push({ name: objKey });
         Reflect.set(copy, objKey, getDeepCopyOfObjectRecursive(obj[objKey]));
         stack.pop();
-      }
+      });
       return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, null) : copy;
     }
   }

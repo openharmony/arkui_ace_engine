@@ -26,6 +26,8 @@ public:
     ~TextInputLayoutAlgorithm() override = default;
 
     void Measure(LayoutWrapper* layoutWrapper) override;
+    void ResponseAreaMeasure(LayoutWrapper* layoutWrapper, OptionalSizeF& frameSize,
+        LayoutConstraintF& textFieldContentConstraint, float contentWidth, float contentHeight);
     std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;

@@ -59,9 +59,6 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        if (UseContentModifier()) {
-            return nullptr;
-        }
         auto host = GetHost();
         CHECK_NULL_RETURN(host, nullptr);
         auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
@@ -88,6 +85,7 @@ public:
             checkboxStyle = paintProperty->GetCheckBoxSelectedStyleValue(CheckBoxStyle::CIRCULAR_STYLE);
         }
         checkboxModifier_->SetCheckboxStyle(checkboxStyle);
+        checkboxModifier_->SetUseContentModifier(UseContentModifier());
         checkboxModifier_->SetHasBuilder(builder_.has_value());
         host->SetCheckboxFlag(true);
         auto paintMethod = MakeRefPtr<CheckBoxPaintMethod>(checkboxModifier_);
@@ -159,11 +157,26 @@ public:
 
     void SetBuilderFunc(CheckBoxMakeCallback&& makeFunc)
     {
+        if (makeFunc == nullptr) {
+            makeFunc_ = std::nullopt;
+            OnModifyDone();
+            return;
+        }
         makeFunc_ = std::move(makeFunc);
+    }
+
+    RefPtr<FrameNode> GetContentModifierNode()
+    {
+        return contentModifierNode_;
     }
 
     void SetToggleBuilderFunc(SwitchMakeCallback&& toggleMakeFunc)
     {
+        if (toggleMakeFunc == nullptr) {
+            toggleMakeFunc_ = std::nullopt;
+            OnModifyDone();
+            return;
+        }
         toggleMakeFunc_ = std::move(toggleMakeFunc);
     }
 
@@ -181,7 +194,7 @@ public:
 
     void SetIndicatorBuilder(const std::optional<std::function<void()>>& buildFunc)
     {
-        builder_ = buildFunc.value_or(nullptr);
+        builder_ = buildFunc;
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
@@ -235,6 +248,9 @@ private:
     void HandleMouseEvent(bool isHover);
     void HandleFocusEvent();
     void HandleBlurEvent();
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
+    void OnIsFocusActiveUpdate(bool isFocusAcitve);
     void CheckPageNode();
     void LoadBuilder();
     void UpdateIndicator();
@@ -243,12 +259,6 @@ private:
     void StartExitAnimation();
     void UpdateState();
     void UpdateUnSelect();
-    void UpdateCheckBoxGroupStatus(const RefPtr<FrameNode>& frameNode,
-        std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>>& checkBoxGroupMap, bool isSelected);
-    void NotifyCheckboxGroupStatusChange(
-        const RefPtr<FrameNode>& checkBoxGroupNode, std::vector<std::string> vec, bool isSameAsSelf, bool select);
-    void UpdateCheckBoxGroupStatusWhenDetach(const FrameNode* frameNode,
-        std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>>& checkBoxGroupMap);
     void CheckBoxGroupIsTrue();
     void SetPrePageIdToLastPageId();
     // Init key event
@@ -258,13 +268,15 @@ private:
     void RemoveLastHotZoneRect() const;
     void SetAccessibilityAction();
     void UpdateSelectStatus(bool isSelected);
-    void ChangeSelfStatusAndNotify(const RefPtr<CheckBoxPaintProperty>& paintProperty,
-        std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> checkBoxGroupMap);
+    void ChangeSelfStatusAndNotify(const RefPtr<CheckBoxPaintProperty>& paintProperty);
     void ChangeGroupStatusAndNotify(const RefPtr<FrameNode>& checkBoxGroupNode, const std::vector<std::string>& vec,
         bool haveCheckBoxSelected, bool isAllCheckBoxSelected);
     std::string GetGroupNameWithNavId();
     void FireBuilder();
     RefPtr<FrameNode> BuildContentModifierNode();
+    void InitCheckBoxStatusByGroup(RefPtr<FrameNode> checkBoxGroupNode,
+        const RefPtr<CheckBoxGroupPaintProperty>& groupPaintProperty, const std::list<RefPtr<FrameNode>>& list);
+    void UpdateCheckBoxGroupStatus(RefPtr<FrameNode> checkBoxGroupNode, const std::list<RefPtr<FrameNode>>& list);
 
     std::optional<CheckBoxMakeCallback> makeFunc_;
     std::optional<SwitchMakeCallback> toggleMakeFunc_;
@@ -294,6 +306,7 @@ private:
     OriginalCheckBoxStyle originalStyle_ = OriginalCheckBoxStyle::CIRCULAR_STYLE;
     RefPtr<FrameNode> builderNode_;
     std::optional<std::function<void()>> builder_;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
 
     RefPtr<CheckBoxModifier> checkboxModifier_;
     WeakPtr<GroupManager> groupManager_;

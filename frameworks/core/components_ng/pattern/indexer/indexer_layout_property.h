@@ -110,6 +110,7 @@ public:
 
 private:
     static std::unique_ptr<JsonValue> ToJsonObjectValue(const TextStyle& textStyle);
+    static std::string AlignStyleToString(const AlignStyle& alignStyle);
 };
 } // namespace OHOS::Ace::NG
 

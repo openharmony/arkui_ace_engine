@@ -17,6 +17,8 @@
 #include <cstdint>
 
 #include "base/utils/utils.h"
+#include "base/image/drawing_color_filter.h"
+#include "core/common/card_scope.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/image/image_component.h"
 #include "core/components/image/image_theme.h"
@@ -25,6 +27,8 @@
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/pipeline/base/element_register.h"
 #include "frameworks/core/components/common/layout/constants.h"
+
+#include "effect/color_filter.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -53,9 +57,25 @@ constexpr int32_t IMAGE_CONTENT_OFFSET_Y_INDEX = 6;
 constexpr int32_t IMAGE_CONTENT_WIDTH_INDEX = 7;
 constexpr int32_t IMAGE_CONTENT_HEIGHT_INDEX = 8;
 constexpr uint32_t MAX_COLOR_FILTER_SIZE = 20;
+constexpr uint32_t ERROR_UINT_CODE = -1;
+constexpr int32_t DEFAULT_FALSE = 0;
 const std::vector<ResizableOption> directions = { ResizableOption::TOP, ResizableOption::RIGHT,
     ResizableOption::BOTTOM, ResizableOption::LEFT };
 std::string g_strValue;
+
+enum class ResourceType : uint32_t {
+    COLOR = 10001,
+    FLOAT,
+    STRING,
+    PLURAL,
+    BOOLEAN,
+    INTARRAY,
+    INTEGER,
+    PATTERN,
+    STRARRAY,
+    MEDIA = 20000,
+    RAWFILE = 30000
+};
 
 bool SetCalcDimension(std::optional<CalcDimension>& optDimension, const ArkUIStringAndFloat* options,
     ArkUI_Int32 optionsLength, ArkUI_Int32 offset)
@@ -111,6 +131,54 @@ const char* GetImageSrc(ArkUINodeHandle node)
     return g_strValue.c_str();
 }
 
+RefPtr<ThemeConstants> GetThemeConstants(const char* bundleName, const char* moduleName)
+{
+    auto cardId = CardScope::CurrentId();
+    if (cardId != INVALID_CARD_ID) {
+        auto container = Container::Current();
+        auto weak = container->GetCardPipeline(cardId);
+        auto cardPipelineContext = weak.Upgrade();
+        CHECK_NULL_RETURN(cardPipelineContext, nullptr);
+        auto cardThemeManager = cardPipelineContext->GetThemeManager();
+        CHECK_NULL_RETURN(cardThemeManager, nullptr);
+        return cardThemeManager->GetThemeConstants(bundleName, moduleName);
+    }
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    auto themeManager = pipelineContext->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, nullptr);
+    return themeManager->GetThemeConstants(bundleName, moduleName);
+}
+
+void SetImageResource(
+    ArkUINodeHandle node, int id, int type, const char* name, const char* bundleName, const char* moduleName)
+{
+    auto themeConstants = GetThemeConstants(bundleName, moduleName);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (!themeConstants) {
+        return;
+    }
+    std::optional<std::string> src;
+    if (type == static_cast<int32_t>(ResourceType::RAWFILE)) {
+        src = themeConstants->GetRawfile(name);
+    }
+    if (type == static_cast<int32_t>(ResourceType::MEDIA)) {
+        if (id == -1) {
+            src = themeConstants->GetMediaPathByName(name);
+        } else {
+            src = themeConstants->GetMediaPath(id);
+        }
+    }
+    if (!src.has_value()) {
+        return;
+    }
+
+    ImageModelNG::InitImage(frameNode, src.value());
+}
+
 void SetCopyOption(ArkUINodeHandle node, ArkUI_Int32 copyOption)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -120,6 +188,14 @@ void SetCopyOption(ArkUINodeHandle node, ArkUI_Int32 copyOption)
         copyOptions = DEFAULT_IMAGE_COPYOPTION;
     }
     ImageModelNG::SetCopyOption(frameNode, copyOptions);
+}
+
+void SetImageShowSrc(ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundleName, ArkUI_CharPtr moduleName,
+    ArkUI_Bool isUriPureNumber)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetInitialSrc(frameNode, src, bundleName, moduleName, isUriPureNumber);
 }
 
 void ResetCopyOption(ArkUINodeHandle node)
@@ -385,6 +461,26 @@ void ResetColorFilter(ArkUINodeHandle node)
     ImageModelNG::SetColorFilterMatrix(frameNode, DEFAULT_COLOR_FILTER);
 }
 
+void SetDrawingColorFilter(ArkUINodeHandle node, void* colorFilter)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto filter = reinterpret_cast<OHOS::Rosen::Drawing::ColorFilter*>(colorFilter);
+    auto filterPtr = std::make_shared<OHOS::Rosen::Drawing::ColorFilter>(*filter);
+    auto drawingColorFilter = DrawingColorFilter::CreateDrawingColorFilterFromNative(static_cast<void*>(&filterPtr));
+    ImageModelNG::SetDrawingColorFilter(frameNode, drawingColorFilter);
+}
+
+void* GetDrawingColorFilter(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto drawingColorFilter = ImageModelNG::GetDrawingColorFilter(frameNode);
+    auto filterSptr = reinterpret_cast<std::shared_ptr<OHOS::Rosen::Drawing::ColorFilter>*>(
+        drawingColorFilter->GetDrawingColorFilterSptrAddr());
+    return (*filterSptr).get();
+}
+
 void SetImageSyncLoad(ArkUINodeHandle node, ArkUI_Bool syncLoadValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -535,21 +631,145 @@ void ResetResizable(ArkUINodeHandle node)
     ImageModelNG::SetResizableSlice(frameNode, DEFAULT_IMAGE_SLICE);
 }
 
+void SetDynamicRangeMode(ArkUINodeHandle node, ArkUI_Int32 dynamicRangeMode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    DynamicRangeMode dynamicRangeModeValue = static_cast<DynamicRangeMode>(dynamicRangeMode);
+    if (dynamicRangeModeValue < DynamicRangeMode::HIGH || dynamicRangeModeValue > DynamicRangeMode::STANDARD) {
+        dynamicRangeModeValue = DynamicRangeMode::STANDARD;
+    }
+    ImageModelNG::SetDynamicRangeMode(frameNode, dynamicRangeModeValue);
+}
+
+int32_t GetFitOriginalSize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, DEFAULT_FALSE);
+    return ImageModelNG::GetFitOriginalSize(frameNode);
+}
+
+uint32_t GetFillColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
+    return ImageModelNG::GetFillColor(frameNode);
+}
+
+void SetPixelMap(ArkUINodeHandle node, void* drawableDescriptor)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetPixelMap(frameNode, drawableDescriptor);
+}
+
+void SetPixelMapArray(ArkUINodeHandle node, void* animatedDrawableDescriptor)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetPixelMapArray(frameNode, animatedDrawableDescriptor);
+}
+
+void SetResourceSrc(ArkUINodeHandle node, void* resource)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetResource(frameNode, resource);
+}
+
+void ResetDynamicRangeMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetDynamicRangeMode(frameNode, DynamicRangeMode::STANDARD);
+}
+
+void SetEnhancedImageQuality(ArkUINodeHandle node, ArkUI_Int32 imageQuality)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    AIImageQuality imageQualityValue = static_cast<AIImageQuality>(imageQuality);
+    if (imageQualityValue < AIImageQuality::NONE || imageQualityValue > AIImageQuality::HIGH) {
+        imageQualityValue = AIImageQuality::NONE;
+    }
+    ImageModelNG::SetEnhancedImageQuality(frameNode, imageQualityValue);
+}
+
+void ResetEnhancedImageQuality(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetEnhancedImageQuality(frameNode, AIImageQuality::NONE);
+}
+
+void SetImageResizable(ArkUINodeHandle node, ArkUI_Float32 left, ArkUI_Float32 top,
+    ArkUI_Float32 right, ArkUI_Float32 bottom)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageResizableSlice resizable;
+    Dimension leftDimension(left, DimensionUnit::VP);
+    resizable.SetEdgeSlice(ResizableOption::LEFT, leftDimension);
+    Dimension topDimension(top, DimensionUnit::VP);
+    resizable.SetEdgeSlice(ResizableOption::TOP, topDimension);
+    Dimension rightDimension(right, DimensionUnit::VP);
+    resizable.SetEdgeSlice(ResizableOption::RIGHT, rightDimension);
+    Dimension bottomDimension(bottom, DimensionUnit::VP);
+    resizable.SetEdgeSlice(ResizableOption::BOTTOM, bottomDimension);
+    ImageModelNG::SetResizableSlice(frameNode, resizable);
+}
+
+void GetImageResizable(ArkUINodeHandle node, ArkUI_Float32* arrayValue, ArkUI_Int32 size)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto resizable = ImageModelNG::GetResizableSlice(frameNode);
+    if (0 < size) {
+        arrayValue[0] = resizable.left.Value();
+    }
+    if (NUM_1 < size) {
+        arrayValue[NUM_1] = resizable.top.Value();
+    }
+    if (NUM_2 < size) {
+        arrayValue[NUM_2] = resizable.right.Value();
+    }
+    if (NUM_3 < size) {
+        arrayValue[NUM_3] = resizable.bottom.Value();
+    }
+}
+
+void EnableAnalyzer(ArkUINodeHandle node, ArkUI_Bool enable)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::EnableAnalyzer(frameNode, enable);
+}
+
+void AnalyzerConfig(ArkUINodeHandle node, void* config)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetImageAnalyzerConfig(frameNode, config);
+}
 } // namespace
 
 namespace NodeModifier {
 const ArkUIImageModifier* GetImageModifier()
 {
-    static const ArkUIImageModifier modifier = { SetImageSrc, SetCopyOption, ResetCopyOption, SetAutoResize,
-        ResetAutoResize, SetObjectRepeat, ResetObjectRepeat, SetRenderMode, ResetRenderMode, SetSyncLoad, ResetSyncLoad,
-        SetObjectFit, ResetObjectFit, SetFitOriginalSize, ResetFitOriginalSize, SetSourceSize, ResetSourceSize,
-        SetMatchTextDirection, ResetMatchTextDirection, SetFillColor, ResetFillColor, SetAlt, ResetAlt,
-        SetImageInterpolation, ResetImageInterpolation, SetColorFilter, ResetColorFilter, SetImageSyncLoad,
-        ResetImageSyncLoad, SetImageObjectFit, ResetImageObjectFit, SetImageFitOriginalSize, ResetImageFitOriginalSize,
-        SetImageDraggable, ResetImageDraggable, SetImageBorderRadius, ResetImageBorderRadius, SetImageBorder,
-        ResetImageBorder, SetImageOpacity, ResetImageOpacity, SetEdgeAntialiasing, ResetEdgeAntialiasing, SetResizable,
-        ResetResizable, GetImageSrc, GetAutoResize, GetObjectRepeat, GetObjectFit, GetImageInterpolation,
-        GetColorFilter, GetAlt, GetImageDraggable, GetRenderMode };
+    static const ArkUIImageModifier modifier = { SetImageSrc, SetImageShowSrc, SetImageResource, SetCopyOption,
+        ResetCopyOption, SetAutoResize, ResetAutoResize, SetObjectRepeat, ResetObjectRepeat, SetRenderMode,
+        ResetRenderMode, SetSyncLoad, ResetSyncLoad, SetObjectFit, ResetObjectFit, SetFitOriginalSize,
+        ResetFitOriginalSize, SetSourceSize, ResetSourceSize, SetMatchTextDirection, ResetMatchTextDirection,
+        SetFillColor, ResetFillColor, SetAlt, ResetAlt, SetImageInterpolation, ResetImageInterpolation,
+        SetColorFilter, ResetColorFilter, SetImageSyncLoad, ResetImageSyncLoad, SetImageObjectFit,
+        ResetImageObjectFit, SetImageFitOriginalSize, ResetImageFitOriginalSize, SetImageDraggable,
+        ResetImageDraggable, SetImageBorderRadius, ResetImageBorderRadius, SetImageBorder, ResetImageBorder,
+        SetImageOpacity, ResetImageOpacity, SetEdgeAntialiasing, ResetEdgeAntialiasing, SetResizable,
+        ResetResizable, SetDynamicRangeMode, ResetDynamicRangeMode, SetEnhancedImageQuality,
+        ResetEnhancedImageQuality, GetImageSrc, GetAutoResize, GetObjectRepeat, GetObjectFit,
+        GetImageInterpolation, GetColorFilter, GetAlt, GetImageDraggable, GetRenderMode, SetImageResizable,
+        GetImageResizable, GetFitOriginalSize, GetFillColor, SetPixelMap, SetPixelMapArray, SetResourceSrc,
+        EnableAnalyzer, AnalyzerConfig, SetDrawingColorFilter, GetDrawingColorFilter };
     return &modifier;
 }
 
@@ -603,6 +823,22 @@ void SetImageOnSvgPlayFinish(ArkUINodeHandle node, void* extraParam)
         SendArkUIAsyncEvent(&event);
     };
     ImageModelNG::SetOnSvgPlayFinish(frameNode, std::move(onSvgPlayFinishEvent));
+}
+
+void SetImageOnDownloadProgress(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onDownloadProgress = [node, extraParam](const uint32_t& dlNow, const uint32_t& dlTotal) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_IMAGE_DOWNLOAD_PROGRESS;
+        event.componentAsyncEvent.data[0].u32 = dlNow;
+        event.componentAsyncEvent.data[1].u32 = dlTotal;
+        SendArkUIAsyncEvent(&event);
+    };
+    ImageModelNG::SetOnDownloadProgress(frameNode, std::move(onDownloadProgress));
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

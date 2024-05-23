@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_RECT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_RECT_H
 
+#include "frameworks/core/components_ng/svg/parse/svg_attributes_parser.h"
 #include "frameworks/core/components_ng/svg/parse/svg_graphic.h"
 
 namespace OHOS::Ace::NG {
@@ -33,6 +34,10 @@ public:
 #else
     RSRecordingPath AsPath(const Size& viewPort) const override;
 #endif
+    bool ParseAndSetSpecializedAttr(const std::string& name, const std::string& value) override;
+
+private:
+    SvgRectAttribute rectAttr_;
 };
 
 } // namespace OHOS::Ace::NG

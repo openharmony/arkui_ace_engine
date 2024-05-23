@@ -114,6 +114,10 @@ public:
     void SetTextDecorationStyle(Ace::TextDecorationStyle value) override;
     void SetFontFeature(const FONT_FEATURES_LIST& value) override;
     void SetBackBorder() override;
+    void SetOnWillInsertValueEvent(std::function<bool(const InsertValueInfo&)>&& func) override;
+    void SetOnDidInsertValueEvent(std::function<void(const InsertValueInfo&)>&& func) override;
+    void SetOnWillDeleteEvent(std::function<bool(const DeleteValueInfo&)>&& func) override;
+    void SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func) override;
 
     static void SetTextDecoration(FrameNode* frameNode, TextDecoration value);
     static void SetTextDecorationColor(FrameNode* frameNode, const Color& value);
@@ -168,6 +172,7 @@ public:
     static void SetShowError(FrameNode* frameNode, const std::string& errorText, bool visible);
     static void SetCounterType(FrameNode* frameNode, int32_t value);
     static void SetOnChange(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
+    static void SetOnContentSizeChange(FrameNode* frameNode, std::function<void(float, float)>&& func);
     static void SetOnTextSelectionChange(FrameNode* frameNode, std::function<void(int32_t, int32_t)>&& func);
     static void SetTextFieldText(FrameNode* frameNode, const std::string& value);
     static void SetTextFieldPlaceHolder(FrameNode* frameNode, const std::string& placeholder);
@@ -215,14 +220,53 @@ public:
     static int32_t GetTextSelectionIndex(FrameNode* frameNode, bool isEnd);
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
     static void SetWordBreak(FrameNode* frameNode, Ace::WordBreak value);
+    static void SetLineBreakStrategy(FrameNode* frameNode, LineBreakStrategy value);
     static void ResetTextInputPadding(FrameNode* frameNode);
     static void SetSelectAllValue(FrameNode* frameNode, bool isSelectAllValue);
+    static void SetBlurOnSubmit(FrameNode* frameNode, bool blurOnSubmit);
+    static bool GetBlurOnSubmit(FrameNode* frameNode);
     static void SetOnEditChange(FrameNode* frameNode, std::function<void(bool)>&& func);
     static void SetInputFilter(FrameNode* frameNode, const std::string& value,
         const std::function<void(const std::string&)>& onError);
     static void SetOnContentScroll(FrameNode* frameNode, std::function<void(float, float)>&& func);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
     static void SetOnEditChanged(FrameNode* frameNode, std::function<void(bool)>&& func);
+    static void SetCustomKeyboard(FrameNode* frameNode, FrameNode* customKeyboard, bool supportAvoidance = false);
+    static void SetInputFilter(FrameNode* frameNode, const std::string& value);
+    static void SetInputFilterError(FrameNode* frameNode, const std::function<void(const std::string&)>& onError);
+    static Ace::WordBreak GetWordBreak(FrameNode* frameNode);
+    static bool GetEnableAutoFill(FrameNode* frameNode);
+    static TextContentType GetContentType(FrameNode* frameNode);
+    static UserUnderlineColor GetUnderLineColor(FrameNode* frameNode);
+    static std::string GetPasswordRules(FrameNode* frameNode);
+    static bool GetSelectAllValue(FrameNode* frameNode);
+    static std::string GetInputFilter(FrameNode* frameNode);
+    static InputStyle GetInputStyle(FrameNode* frameNode);
+    static RefPtr<TextFieldControllerBase> GetOrCreateController(FrameNode* frameNode);
+    static FONT_FEATURES_LIST GetFontFeature(FrameNode* frameNode);
+    static Dimension GetAdaptMinFontSize(FrameNode* frameNode);
+    static Dimension GetAdaptMaxFontSize(FrameNode* frameNode);
+    static Dimension GetLineHeight(FrameNode* frameNode);
+    static uint32_t GetMaxLines(FrameNode* frameNode);
+    static void SetPadding(FrameNode* frameNode, NG::PaddingProperty& newPadding);
+    static RefPtr<UINode> GetCustomKeyboard(FrameNode* frameNode);
+    static bool GetCustomKeyboardOption(FrameNode* frameNode);
+    static void SetShowKeyBoardOnFocus(FrameNode* frameNode, bool value);
+    static bool GetShowKeyBoardOnFocus(FrameNode* frameNode);
+    static void SetNumberOfLines(FrameNode* frameNode, int32_t value);
+    static int32_t GetNumberOfLines(FrameNode* frameNode);
+    static void ResetNumberOfLines(FrameNode* frameNode);
+    static void SetBorderWidth(FrameNode* frameNode, NG::BorderWidthProperty borderWidth);
+    static void SetBorderRadius(FrameNode* frameNode, NG::BorderRadiusProperty borderRadius);
+    static void SetBorderColor(FrameNode* frameNode, NG::BorderColorProperty borderColors);
+    static void SetBorderStyle(FrameNode* frameNode, NG::BorderStyleProperty borderStyles);
+    static void SetMargin(FrameNode* frameNode, NG::PaddingProperty& margin);
+    static PaddingProperty GetMargin(FrameNode* frameNode);
+    static void SetOnWillInsertValueEvent(FrameNode* frameNode, std::function<bool(const InsertValueInfo&)>&& func);
+    static void SetOnDidInsertValueEvent(FrameNode* frameNode, std::function<void(const InsertValueInfo&)>&& func);
+    static void SetOnWillDeleteEvent(FrameNode* frameNode, std::function<bool(const DeleteValueInfo&)>&& func);
+    static void SetOnDidDeleteEvent(FrameNode* frameNode, std::function<void(const DeleteValueInfo&)>&& func);
+
 private:
     void AddDragFrameNodeToManager() const;
     void SetDraggable(bool draggable);

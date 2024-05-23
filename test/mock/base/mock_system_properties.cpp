@@ -51,7 +51,6 @@ int32_t SystemProperties::deviceWidth_ = 720;
 int32_t SystemProperties::deviceHeight_ = 1280;
 bool SystemProperties::debugOffsetLogEnabled_ = false;
 bool SystemProperties::downloadByNetworkEnabled_ = false;
-bool SystemProperties::traceEnabled_ = false;
 int32_t SystemProperties::devicePhysicalWidth_ = 0;
 int32_t SystemProperties::devicePhysicalHeight_ = 0;
 bool SystemProperties::enableScrollableItemPool_ = false;
@@ -64,7 +63,7 @@ bool SystemProperties::debugBoundaryEnabled_ = false;
 bool SystemProperties::developerModeOn_ = false;
 bool SystemProperties::faultInjectEnabled_ = false;
 bool SystemProperties::imageFileCacheConvertAstc_ = true;
-std::vector<double> SystemProperties::brightUpPercent_ = {};
+std::pair<float, float> SystemProperties::brightUpPercent_ = {};
 int32_t SystemProperties::imageFileCacheConvertAstcThreshold_ = 3;
 
 bool g_irregularGrid = true;
@@ -94,6 +93,11 @@ float SystemProperties::GetAnimationScale()
 bool SystemProperties::GetIsUseMemoryMonitor()
 {
     return false;
+}
+
+bool SystemProperties::IsOpIncEnable()
+{
+    return true;
 }
 
 void SystemProperties::SetDeviceOrientation(int32_t orientation)

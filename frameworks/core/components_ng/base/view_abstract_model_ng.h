@@ -48,9 +48,6 @@ class ACE_EXPORT ViewAbstractModelNG : public ViewAbstractModel {
 public:
     ~ViewAbstractModelNG() override = default;
 
-    static void CreateCustomMenu(const std::function<void()>& buildFunc, const RefPtr<NG::FrameNode>& targetNode,
-        const NG::OffsetF& offset, std::function<void()>& previewBuildFunc, MenuParam menuParam);
-
     void SetWidth(const CalcDimension& width) override
     {
         if (width.Unit() == DimensionUnit::CALC) {
@@ -674,16 +671,16 @@ public:
     {
         ViewAbstract::SetDynamicLightUp(rate, lightUpDegree);
     }
-    
+
     void SetBgDynamicBrightness(const BrightnessOption& brightnessOption) override
     {
         ViewAbstract::SetBgDynamicBrightness(brightnessOption);
     }
 
     void SetFgDynamicBrightness(const BrightnessOption& brightnessOption) override
-     {
+    {
         ViewAbstract::SetFgDynamicBrightness(brightnessOption);
-     }
+    }
 
     void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption) override
     {
@@ -828,9 +825,19 @@ public:
         ViewAbstract::SetOnAppear(std::move(onAppearCallback));
     }
 
+    void SetOnAttach(std::function<void()>&& onAttachCallback) override
+    {
+        ViewAbstract::SetOnAttach(std::move(onAttachCallback));
+    }
+
     void SetOnDisAppear(std::function<void()>&& onDisAppearCallback) override
     {
         ViewAbstract::SetOnDisappear(std::move(onDisAppearCallback));
+    }
+
+    void SetOnDetach(std::function<void()>&& onDetachCallback) override
+    {
+        ViewAbstract::SetOnDetach(std::move(onDetachCallback));
     }
 
     void SetOnAccessibility(std::function<void(const std::string&)>&& onAccessibilityCallback) override {}
@@ -1000,6 +1007,11 @@ public:
         ViewAbstract::SetGroupDefaultFocus(isSet);
     }
 
+    void SetFocusBoxStyle(const NG::FocusBoxStyle& style) override
+    {
+        ViewAbstract::SetFocusBoxStyle(style);
+    }
+
     void SetInspectorId(const std::string& inspectorId) override
     {
         ViewAbstract::SetInspectorId(inspectorId);
@@ -1112,12 +1124,12 @@ public:
     {
         ViewAbstract::SetForegroundColorStrategy(strategy);
     }
-    
+
     void SetForegroundEffect(float radius) override
     {
         ViewAbstract::SetForegroundEffect(radius);
     }
-    
+
     void DisableOnClick() override
     {
         ViewAbstract::DisableOnClick();
@@ -1158,6 +1170,16 @@ public:
     void DisableOnDisAppear() override
     {
         ViewAbstract::DisableOnDisAppear();
+    }
+
+    void DisableOnAttach() override
+    {
+        ViewAbstract::DisableOnAttach();
+    }
+
+    void DisableOnDetach() override
+    {
+        ViewAbstract::DisableOnDetach();
     }
 
     void DisableOnAreaChange() override

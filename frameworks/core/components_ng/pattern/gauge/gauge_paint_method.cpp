@@ -29,7 +29,7 @@
 #include "core/components_ng/render/paint_wrapper.h"
 
 namespace OHOS::Ace::NG {
-void GaugePaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
+void GaugePaintMethod::UpdateForegroundModifier(PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(gaugeModifier_);
     auto gaugePattern = DynamicCast<GaugePattern>(pattern_.Upgrade());

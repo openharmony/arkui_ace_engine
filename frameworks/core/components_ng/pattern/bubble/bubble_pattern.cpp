@@ -232,9 +232,11 @@ void BubblePattern::RegisterButtonOnHover()
         }
         auto inputHub = buttonNode->GetOrCreateInputEventHub();
         CHECK_NULL_VOID(inputHub);
-        auto mouseTask = [weak = WeakClaim(this), buttonNode](bool isHover) {
+        auto mouseTask = [weak = WeakClaim(this), buttonNodeWK = WeakPtr<FrameNode>(buttonNode)](bool isHover) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
+            auto buttonNode = buttonNodeWK.Upgrade();
+            CHECK_NULL_VOID(buttonNode);
             pattern->ButtonOnHover(isHover, buttonNode);
         };
         auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
@@ -288,9 +290,12 @@ void BubblePattern::RegisterButtonOnTouch()
         }
         auto gestureHub = buttonNode->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
-        auto touchCallback = [weak = WeakClaim(this), buttonNode](const TouchEventInfo& info) {
+        auto touchCallback = [weak = WeakClaim(this), buttonNodeWK = WeakPtr<FrameNode>(buttonNode)]
+            (const TouchEventInfo& info) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
+            auto buttonNode = buttonNodeWK.Upgrade();
+            CHECK_NULL_VOID(buttonNode);
             pattern->ButtonOnPress(info, buttonNode);
         };
         auto touchEvent = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));

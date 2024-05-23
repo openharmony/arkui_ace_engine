@@ -62,6 +62,8 @@ constexpr float BUTTON_ONLY_HAS_WIDTH_VALUE = 100.0f;
 const SizeF BUTTON_SIZE(BUTTON_WIDTH, BUTTON_HEIGHT);
 const SizeF TEXT_SIZE(TEXT_WIDTH, TEXT_HEIGHT);
 const std::string CREATE_VALUE = "Hello World";
+const std::string BUTTON_VALUE = "Test";
+const std::string TEST_RESULT = "result_ok";
 const ButtonType BUTTON_TYPE_CAPSULE_VALUE = ButtonType::CAPSULE;
 const ButtonType BUTTON_TYPE_CUSTOM_VALUE = ButtonType::CUSTOM;
 const ButtonType BUTTON_TYPE_DOWNLOAD_VALUE = ButtonType::DOWNLOAD;
@@ -1555,6 +1557,175 @@ HWTEST_F(ButtonTestNg, SetSizePropertyTest001, TestSize.Level1)
     buttonModelNG.SetSize(sizeWidth, sizeHeight);
     EXPECT_TRUE(sizeWidth.has_value());
     EXPECT_TRUE(sizeHeight.has_value());
+}
+
+/**
+ * @tc.name: ButtonPatternTestModifier001
+ * @tc.desc: Test ContentModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonTestNg, ButtonPatternTestModifier001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button frame node.
+     * @tc.expected: step1. node is not null.
+     */
+    TestProperty testProperty;
+    ButtonModelNG buttonModelNG;
+    std::list<RefPtr<Component>> buttonChildren;
+    CreateWithPara createWithPara;
+    createWithPara.parseSuccess = true;
+    createWithPara.label = BUTTON_VALUE;
+    buttonModelNG.CreateWithLabel(createWithPara, buttonChildren);
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. test BuildContentModifierNode
+     * @tc.expected: step2. func is ok,the result is ok.
+     */
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+
+    /**
+     * Mock the func, set the result to 'TEST_RESULT'.
+     * when the func is excuted successfully, the result will be changed.
+    */
+    std::string result;
+    auto node = [&result](ButtonConfiguration config) -> RefPtr<FrameNode> {
+        result = TEST_RESULT;
+        return nullptr;
+    };
+    buttonPattern->SetBuilderFunc(node);
+    buttonPattern->BuildContentModifierNode();
+    EXPECT_EQ(result, TEST_RESULT);
+}
+
+/**
+ * @tc.name: ButtonBuilderNameTest001
+ * @tc.desc: Test SetBuilderFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonTestNg, ButtonBuilderNameTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Button node
+     */
+    TestProperty testProperty;
+    const std::string buttonLabel = "Test Label";
+    auto frameNode = CreateLabelButtonParagraph(buttonLabel, testProperty);
+    auto gesture = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set buttonConfiguration
+     */
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    eventHub->SetEnabled(true);
+    buttonPattern->OnTouchDown();
+
+    /**
+     * @tc.steps: step3. make builderFunc
+     */
+    auto node = [buttonLabel](ButtonConfiguration config) -> RefPtr<FrameNode> {
+            EXPECT_EQ(buttonLabel, config.label_);
+            EXPECT_EQ(true, config.pressed_);
+            EXPECT_EQ(true, config.enabled_);
+            return nullptr;
+        };
+
+    /**
+     * @tc.steps: step4. Set parameters to pattern builderFunc
+     */
+    buttonPattern->SetBuilderFunc(node);
+    buttonPattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: ButtonBuilderNameTest002
+ * @tc.desc: Test SetBuilderFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonTestNg, ButtonBuilderNameTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Button node
+     */
+    TestProperty testProperty;
+    const std::string buttonLabel = "123";
+    auto frameNode = CreateLabelButtonParagraph(buttonLabel, testProperty);
+    auto gesture = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set buttonConfiguration
+     */
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    eventHub->SetEnabled(true);
+    buttonPattern->OnTouchDown();
+
+    /**
+     * @tc.steps: step3. make builderFunc
+     */
+    auto node = [buttonLabel](ButtonConfiguration config) -> RefPtr<FrameNode> {
+            EXPECT_EQ(buttonLabel, config.label_);
+            EXPECT_EQ(true, config.pressed_);
+            EXPECT_EQ(true, config.enabled_);
+            return nullptr;
+        };
+
+    /**
+     * @tc.steps: step4. Set parameters to pattern builderFunc
+     */
+    buttonPattern->SetBuilderFunc(node);
+    buttonPattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: ButtonBuilderNameTest003
+ * @tc.desc: Test SetBuilderFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonTestNg, ButtonBuilderNameTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Button node
+     */
+    TestProperty testProperty;
+    const std::string buttonLabel = "!!!";
+    auto frameNode = CreateLabelButtonParagraph(buttonLabel, testProperty);
+    auto gesture = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set buttonConfiguration
+     */
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    eventHub->SetEnabled(true);
+    buttonPattern->OnTouchDown();
+
+    /**
+     * @tc.steps: step3. make builderFunc
+     */
+    auto node = [buttonLabel](ButtonConfiguration config) -> RefPtr<FrameNode> {
+            EXPECT_EQ(buttonLabel, config.label_);
+            EXPECT_EQ(true, config.pressed_);
+            EXPECT_EQ(true, config.enabled_);
+            return nullptr;
+        };
+
+    /**
+     * @tc.steps: step4. Set parameters to pattern builderFunc
+     */
+    buttonPattern->SetBuilderFunc(node);
+    buttonPattern->BuildContentModifierNode();
 }
 
 } // namespace OHOS::Ace::NG

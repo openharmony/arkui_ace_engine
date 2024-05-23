@@ -2315,6 +2315,7 @@ void JsAccessibilityManager::DumpTreeNG(bool useWindowId, uint32_t windowId, int
     auto pipeline = GetPipelineByWindowId(windowId);
     if (pipeline == nullptr) {
         DumpLog::GetInstance().Print("Error: pipeline is not found!");
+        return;
     }
     auto rootNode = pipeline->GetRootElement();
     CHECK_NULL_VOID(rootNode);
@@ -3577,6 +3578,12 @@ bool JsAccessibilityManager::ExecuteActionNG(int64_t elementId,
 #endif
     ContainerScope instance(ngPipeline->GetInstanceId());
     auto frameNode = GetFramenodeByAccessibilityId(ngPipeline->GetRootElement(), elementId);
+
+    if (!frameNode && elementId == lastElementId_) {
+        frameNode = lastFrameNode_.Upgrade();
+    }
+
+
     CHECK_NULL_RETURN(frameNode, result);
 
 #ifdef WEB_SUPPORTED
@@ -3620,10 +3627,12 @@ bool JsAccessibilityManager::ConvertActionTypeToBoolen(ActionType action, RefPtr
             break;
         }
         case ActionType::ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS: {
+            SaveLast(elementId, frameNode);
             result = ActAccessibilityFocus(elementId, frameNode, context, currentFocusNodeId_, false);
             break;
         }
         case ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS: {
+            SaveLast(elementId, frameNode);
             result = ActAccessibilityFocus(elementId, frameNode, context, currentFocusNodeId_, true);
             break;
         }
@@ -3756,6 +3765,14 @@ void JsAccessibilityManager::DeregisterInteractionOperation()
     auto instance = AccessibilitySystemAbilityClient::GetInstance();
     CHECK_NULL_VOID(instance);
     Register(false);
+    if (currentFocusNodeId_ != -1 && lastElementId_ != -1) {
+        auto focusNode = lastFrameNode_.Upgrade();
+        if (focusNode != nullptr && focusNode->GetTag() != V2::WEB_CORE_TAG) {
+            focusNode->GetRenderContext()->UpdateAccessibilityFocus(false);
+        }
+    }
+    lastFrameNode_.Reset();
+    lastElementId_ = -1;
     currentFocusNodeId_ = -1;
     instance->DeregisterElementOperator(windowId);
     RefPtr<PipelineBase> context;

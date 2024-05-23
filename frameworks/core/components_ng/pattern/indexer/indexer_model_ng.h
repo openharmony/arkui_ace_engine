@@ -95,6 +95,7 @@ public:
     static void SetIndexerBorderRadius(FrameNode* frameNode, const Dimension& radius);
     static void SetPopupBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& indexerBlurStyle);
     static void SetPopupTitleBackground(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetAutoCollapse(FrameNode* frameNode, bool autoCollapse);
     static void SetOnSelected(FrameNode* frameNode,
         std::function<void(const int32_t selected)>&& onSelect);
     static void SetOnRequestPopupData(FrameNode* frameNode,

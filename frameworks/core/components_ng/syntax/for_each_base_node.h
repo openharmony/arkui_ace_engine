@@ -24,10 +24,10 @@ class ACE_EXPORT ForEachBaseNode : public UINode {
 
 public:
     ForEachBaseNode(const std::string& tag, int32_t nodeId, bool isRoot = false)
-        : UINode(V2::JS_FOR_EACH_ETS_TAG, nodeId, isRoot) {}
+        : UINode(tag, nodeId, isRoot) {}
     virtual void MoveData(int32_t from, int32_t to) = 0;
     virtual RefPtr<FrameNode> GetFrameNode(int32_t index) = 0;
-    void FireOnMove(int32_t from, int32_t to)
+    virtual void FireOnMove(int32_t from, int32_t to)
     {
         if (onMoveEvent_) {
             onMoveEvent_(from, to);

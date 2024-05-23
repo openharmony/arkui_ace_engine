@@ -1762,7 +1762,7 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest007, TestSize.Level1)
     textLayoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
     frameNode->AddChild(textFrameNode);
     layoutWrapper->AppendChild(textLayoutWrapper);
-    auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     EXPECT_FALSE(children.empty());
     bubbleLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
     bubbleLayoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));

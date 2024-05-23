@@ -19,6 +19,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/button/button_theme.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -547,11 +548,24 @@ void ButtonModelNG::TriggerClick(FrameNode* frameNode, double xPos, double yPos)
 {
     auto pattern = frameNode->GetPattern<ButtonPattern>();
     CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto gestureEventHub = host->GetOrCreateGestureEventHub();
+    if (!gestureEventHub->IsClickable()) {
+        return;
+    }
     pattern->SetButtonPress(xPos, yPos);
 }
 
 void ButtonModelNG::ResetBorderRadius()
 {
     ACE_RESET_LAYOUT_PROPERTY(ButtonLayoutProperty, BorderRadius);
+}
+
+ButtonType ButtonModelNG::GetType(FrameNode* frameNode)
+{
+    ButtonType value = ButtonType::CAPSULE;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ButtonLayoutProperty, Type, value, frameNode, ButtonType::CAPSULE);
+    return value;
 }
 } // namespace OHOS::Ace::NG

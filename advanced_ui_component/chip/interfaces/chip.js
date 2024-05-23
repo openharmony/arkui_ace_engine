@@ -13,65 +13,186 @@
  * limitations under the License.
  */
 
-const KeyCode = requireNapi("multimodalInput.keyCode").KeyCode;
+const KeyCode = requireNapi('multimodalInput.keyCode').KeyCode;
 const measure = requireNapi('measure');
 const mediaquery = requireNapi('mediaquery');
 const resourceManager = requireNapi('resourceManager');
+const componentUtils = requireNapi('arkui.componentUtils');
+const hilog = requireNapi('hilog');
+const ColorMetrics = requireNapi('arkui.node').ColorMetrics;
+const EnvironmentCallback = requireNapi('EnvironmentCallback');
 
 if (!("finalizeConstruction" in ViewPU.prototype)) {
-    Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
+    Reflect.set(ViewPU.prototype, "finalizeConstruction", () => {
+    });
 }
 
 
 export var ChipSize;
-(function (k4) {
-    k4["NORMAL"] = "NORMAL";
-    k4["SMALL"] = "SMALL";
+(function (u5) {
+    u5["NORMAL"] = "NORMAL";
+    u5["SMALL"] = "SMALL";
 })(ChipSize || (ChipSize = {}));
 var BreakPointsType;
-(function (j4) {
-    j4["SM"] = "SM";
-    j4["MD"] = "MD";
-    j4["LG"] = "LG";
+(function (t5) {
+    t5["SM"] = "SM";
+    t5["MD"] = "MD";
+    t5["LG"] = "LG";
 })(BreakPointsType || (BreakPointsType = {}));
+
 export const defaultTheme = {
     prefixIcon: {
         size: { width: 16, height: 16 },
-        fillColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        activatedFillColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary_contrary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        fillColor: {
+            "id": -1,
+            "type": 10001,
+            params: ['sys.color.ohos_id_color_secondary'],
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
+        },
+        activatedFillColor: {
+            "id": -1,
+            "type": 10001,
+            params: ['sys.color.ohos_id_color_text_primary_contrary'],
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
+        },
     },
     label: {
-        normalFontSize: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_button2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        smallFontSize: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_button2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        fontColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        activatedFontColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary_contrary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        normalFontSize: {
+            "id": -1,
+            "type": 10002,
+            params: ['sys.float.ohos_id_text_size_button2'],
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
+        },
+        smallFontSize: {
+            "id": -1,
+            "type": 10002,
+            params: ['sys.float.ohos_id_text_size_button2'],
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
+        },
+        fontColor: {
+            "id": -1,
+            "type": 10001,
+            params: ['sys.color.ohos_id_color_text_primary'],
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
+        },
+        activatedFontColor: {
+            "id": -1,
+            "type": 10001,
+            params: ['sys.color.ohos_id_color_text_primary_contrary'],
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
+        },
         fontFamily: "HarmonyOS Sans",
         normalMargin: { left: 6, right: 6, top: 0, bottom: 0 },
         smallMargin: { left: 4, right: 4, top: 0, bottom: 0 },
+        defaultFontSize: 14,
     },
     suffixIcon: {
         size: { width: 16, height: 16 },
-        fillColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        activatedFillColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary_contrary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        defaultDeleteIcon: { "id": -1, "type": 20000, params: ['sys.media.ohos_ic_public_cancel', 16, 16], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        fillColor: {
+            "id": -1,
+            "type": 10001,
+            params: ['sys.color.ohos_id_color_secondary'],
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
+        },
+        activatedFillColor: {
+            "id": -1,
+            "type": 10001,
+            params: ['sys.color.ohos_id_color_text_primary_contrary'],
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
+        },
+        defaultDeleteIcon: {
+            "id": -1,
+            "type": 20000,
+            params: ['sys.media.ohos_ic_public_cancel', 16, 16],
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
+        },
         focusable: false,
     },
+    defaultSymbol: {
+        normalFontColor: [{
+            "id": -1,
+            "type": 10001,
+            params: ['sys.color.ohos_id_color_secondary'],
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
+        }],
+        activatedFontColor: [{
+            "id": -1,
+            "type": 10001,
+            params: ['sys.color.ohos_id_color_text_primary_contrary'],
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
+        }],
+        fontSize: 16,
+    },
     chipNode: {
+        suitAgeScale: 1.75,
         minLabelWidth: 12,
         normalHeight: 36,
         smallHeight: 28,
         enabled: true,
         activated: false,
-        backgroundColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_button_normal'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        activatedBackgroundColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_emphasize'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        focusOutlineColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_focused_outline'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        normalBorderRadius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_tips_instant_tip'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        smallBorderRadius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_piece'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        backgroundColor: {
+            "id": -1,
+            "type": 10001,
+            params: ['sys.color.ohos_id_color_button_normal'],
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
+        },
+        activatedBackgroundColor: {
+            "id": -1,
+            "type": 10001,
+            params: ['sys.color.ohos_id_color_emphasize'],
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
+        },
+        focusOutlineColor: {
+            "id": -1,
+            "type": 10001,
+            params: ['sys.color.ohos_id_color_focused_outline'],
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
+        },
+        normalBorderRadius: {
+            "id": -1,
+            "type": 10002,
+            params: ['sys.float.ohos_id_corner_radius_tips_instant_tip'],
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
+        },
+        smallBorderRadius: {
+            "id": -1,
+            "type": 10002,
+            params: ['sys.float.ohos_id_corner_radius_piece'],
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
+        },
         borderWidth: 2,
-        normalPadding: { left: 16, right: 16, top: 0, bottom: 0 },
-        smallPadding: { left: 12, right: 12, top: 0, bottom: 0 },
-        hoverBlendColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_hover'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        pressedBlendColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_click_effect'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        normalPadding: { left: 16, right: 16, top: 4, bottom: 4 },
+        smallPadding: { left: 12, right: 12, top: 4, bottom: 4 },
+        hoverBlendColor: {
+            "id": -1,
+            "type": 10001,
+            params: ['sys.color.ohos_id_color_hover'],
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
+        },
+        pressedBlendColor: {
+            "id": -1,
+            "type": 10001,
+            params: ['sys.color.ohos_id_color_click_effect'],
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
+        },
         opacity: { normal: 1, hover: 0.95, pressed: 0.9, disabled: 0.4 },
         breakPointConstraintWidth: {
             breakPointMinWidth: 128,
@@ -83,78 +204,89 @@ export const defaultTheme = {
 };
 const noop = () => {
 };
-export function Chip(y3, z3 = null) {
-    const a4 = y3;
+
+export function Chip(i5, j5 = null) {
+    const k5 = i5;
     {
-        (z3 ? z3 : this).observeComponentCreation2((c4, d4, e4 = a4) => {
-            if (d4) {
-                let f4 = new ChipComponent(z3 ? z3 : this, {
-                    chipSize: e4.size,
-                    prefixIcon: e4.prefixIcon,
-                    label: e4.label,
-                    suffixIcon: e4.suffixIcon,
-                    allowClose: e4.allowClose,
-                    chipEnabled: e4.enabled,
-                    chipActivated: e4.activated,
-                    chipNodeBackgroundColor: e4.backgroundColor,
-                    chipNodeActivatedBackgroundColor: e4.activatedBackgroundColor,
-                    chipNodeRadius: e4.borderRadius,
-                    onClose: e4.onClose,
-                    onClicked: e4.onClicked,
-                }, undefined, c4, () => { }, { page: "library/src/main/ets/components/chip/chip.ets", line: 192, col: 3 });
-                ViewPU.create(f4);
-                let g4 = () => {
+        (j5 ? j5 : this).observeComponentCreation2((m5, n5, o5 = k5) => {
+            if (n5) {
+                let p5 = new ChipComponent(j5 ? j5 : this, {
+                    chipSize: o5.size,
+                    prefixIcon: o5.prefixIcon,
+                    prefixSymbol: o5.prefixSymbol,
+                    label: o5.label,
+                    suffixIcon: o5.suffixIcon,
+                    suffixSymbol: o5.suffixSymbol,
+                    allowClose: o5.allowClose,
+                    chipEnabled: o5.enabled,
+                    chipActivated: o5.activated,
+                    chipNodeBackgroundColor: o5.backgroundColor,
+                    chipNodeActivatedBackgroundColor: o5.activatedBackgroundColor,
+                    chipNodeRadius: o5.borderRadius,
+                    onClose: o5.onClose,
+                    onClicked: o5.onClicked,
+                }, undefined, m5, () => {
+                }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 219, col: 3 });
+                ViewPU.create(p5);
+                let q5 = () => {
                     return {
-                        chipSize: e4.size,
-                        prefixIcon: e4.prefixIcon,
-                        label: e4.label,
-                        suffixIcon: e4.suffixIcon,
-                        allowClose: e4.allowClose,
-                        chipEnabled: e4.enabled,
-                        chipActivated: e4.activated,
-                        chipNodeBackgroundColor: e4.backgroundColor,
-                        chipNodeActivatedBackgroundColor: e4.activatedBackgroundColor,
-                        chipNodeRadius: e4.borderRadius,
-                        onClose: e4.onClose,
-                        onClicked: e4.onClicked
+                        chipSize: o5.size,
+                        prefixIcon: o5.prefixIcon,
+                        prefixSymbol: o5.prefixSymbol,
+                        label: o5.label,
+                        suffixIcon: o5.suffixIcon,
+                        suffixSymbol: o5.suffixSymbol,
+                        allowClose: o5.allowClose,
+                        chipEnabled: o5.enabled,
+                        chipActivated: o5.activated,
+                        chipNodeBackgroundColor: o5.backgroundColor,
+                        chipNodeActivatedBackgroundColor: o5.activatedBackgroundColor,
+                        chipNodeRadius: o5.borderRadius,
+                        onClose: o5.onClose,
+                        onClicked: o5.onClicked
                     };
                 };
-                f4.paramsGenerator_ = g4;
+                p5.paramsGenerator_ = q5;
             }
             else {
-                (z3 ? z3 : this).updateStateVarsOfChildByElmtId(c4, {
-                    chipSize: e4.size,
-                    prefixIcon: e4.prefixIcon,
-                    label: e4.label,
-                    suffixIcon: e4.suffixIcon,
-                    allowClose: e4.allowClose,
-                    chipEnabled: e4.enabled,
-                    chipActivated: e4.activated,
-                    chipNodeBackgroundColor: e4.backgroundColor,
-                    chipNodeActivatedBackgroundColor: e4.activatedBackgroundColor,
-                    chipNodeRadius: e4.borderRadius
+                (j5 ? j5 : this).updateStateVarsOfChildByElmtId(m5, {
+                    chipSize: o5.size,
+                    prefixIcon: o5.prefixIcon,
+                    prefixSymbol: o5.prefixSymbol,
+                    label: o5.label,
+                    suffixIcon: o5.suffixIcon,
+                    suffixSymbol: o5.suffixSymbol,
+                    allowClose: o5.allowClose,
+                    chipEnabled: o5.enabled,
+                    chipActivated: o5.activated,
+                    chipNodeBackgroundColor: o5.backgroundColor,
+                    chipNodeActivatedBackgroundColor: o5.activatedBackgroundColor,
+                    chipNodeRadius: o5.borderRadius
                 });
             }
         }, { name: "ChipComponent" });
     }
 }
+
 export class ChipComponent extends ViewPU {
-    constructor(s3, t3, u3, v3 = -1, w3 = undefined, x3) {
-        super(s3, u3, v3, x3);
-        if (typeof w3 === "function") {
-            this.paramsGenerator_ = w3;
+    constructor(b5, c5, d5, e5 = -1, f5 = undefined, g5) {
+        super(b5, d5, e5, g5);
+        if (typeof f5 === "function") {
+            this.paramsGenerator_ = f5;
         }
         this.theme = defaultTheme;
-        this.__chipSize = new SynchedPropertyObjectOneWayPU(t3.chipSize, this, "chipSize");
-        this.__allowClose = new SynchedPropertySimpleOneWayPU(t3.allowClose, this, "allowClose");
-        this.__prefixIcon = new SynchedPropertyObjectOneWayPU(t3.prefixIcon, this, "prefixIcon");
-        this.__label = new SynchedPropertyObjectOneWayPU(t3.label, this, "label");
-        this.__suffixIcon = new SynchedPropertyObjectOneWayPU(t3.suffixIcon, this, "suffixIcon");
-        this.__chipNodeBackgroundColor = new SynchedPropertyObjectOneWayPU(t3.chipNodeBackgroundColor, this, "chipNodeBackgroundColor");
-        this.__chipNodeActivatedBackgroundColor = new SynchedPropertyObjectOneWayPU(t3.chipNodeActivatedBackgroundColor, this, "chipNodeActivatedBackgroundColor");
-        this.__chipNodeRadius = new SynchedPropertyObjectOneWayPU(t3.chipNodeRadius, this, "chipNodeRadius");
-        this.__chipEnabled = new SynchedPropertySimpleOneWayPU(t3.chipEnabled, this, "chipEnabled");
-        this.__chipActivated = new SynchedPropertySimpleOneWayPU(t3.chipActivated, this, "chipActivated");
+        this.__chipSize = new SynchedPropertyObjectOneWayPU(c5.chipSize, this, "chipSize");
+        this.__allowClose = new SynchedPropertySimpleOneWayPU(c5.allowClose, this, "allowClose");
+        this.__prefixIcon = new SynchedPropertyObjectOneWayPU(c5.prefixIcon, this, "prefixIcon");
+        this.__prefixSymbol = new SynchedPropertyObjectOneWayPU(c5.prefixSymbol, this, "prefixSymbol");
+        this.__label = new SynchedPropertyObjectOneWayPU(c5.label, this, "label");
+        this.__suffixIcon = new SynchedPropertyObjectOneWayPU(c5.suffixIcon, this, "suffixIcon");
+        this.__suffixSymbol = new SynchedPropertyObjectOneWayPU(c5.suffixSymbol, this, "suffixSymbol");
+        this.__chipNodeBackgroundColor = new SynchedPropertyObjectOneWayPU(c5.chipNodeBackgroundColor, this, "chipNodeBackgroundColor");
+        this.__chipNodeActivatedBackgroundColor = new SynchedPropertyObjectOneWayPU(c5.chipNodeActivatedBackgroundColor, this, "chipNodeActivatedBackgroundColor");
+        this.__chipNodeRadius = new SynchedPropertyObjectOneWayPU(c5.chipNodeRadius, this, "chipNodeRadius");
+        this.__chipEnabled = new SynchedPropertySimpleOneWayPU(c5.chipEnabled, this, "chipEnabled");
+        this.__chipActivated = new SynchedPropertySimpleOneWayPU(c5.chipActivated, this, "chipActivated");
         this.__isHover = new ObservedPropertySimplePU(false, this, "isHover");
         this.__chipScale = new ObservedPropertyObjectPU({ x: 1, y: 1 }, this, "chipScale");
         this.__chipOpacity = new ObservedPropertySimplePU(1, this, "chipOpacity");
@@ -171,132 +303,177 @@ export class ChipComponent extends ViewPU {
         this.mdListener = mediaquery.matchMediaSync("600vp<=width<840vp");
         this.lgListener = mediaquery.matchMediaSync("840vp<=width");
         this.__isShowPressedBackGroundColor = new ObservedPropertySimplePU(false, this, "isShowPressedBackGroundColor");
-        this.setInitiallyProvidedValue(t3);
+        this.__fontSizeScale = new ObservedPropertyObjectPU(0, this, "fontSizeScale");
+        this.__fontWeightScale = new ObservedPropertyObjectPU(0, this, "fontWeightScale");
+        this.callbacks = {
+            onConfigurationUpdated: (h5) => {
+                this.fontSizeScale = h5.fontSizeScale;
+                this.fontWeightScale = h5.fontWeightScale;
+            },
+            onMemoryLevel() {
+            }
+        };
+        this.callbackId = undefined;
+        this.__prefixSymbolWidth = new ObservedPropertyObjectPU(this.toVp(componentUtils.getRectangleById("PrefixSymbolGlyph")?.size?.width), this, "prefixSymbolWidth");
+        this.__suffixSymbolWidth = new ObservedPropertyObjectPU(this.toVp(componentUtils.getRectangleById("SuffixSymbolGlyph")?.size?.width), this, "suffixSymbolWidth");
+        this.setInitiallyProvidedValue(c5);
         this.finalizeConstruction();
     }
-    setInitiallyProvidedValue(r3) {
-        if (r3.theme !== undefined) {
-            this.theme = r3.theme;
+
+    setInitiallyProvidedValue(a5) {
+        if (a5.theme !== undefined) {
+            this.theme = a5.theme;
         }
-        if (r3.chipSize === undefined) {
+        if (a5.chipSize === undefined) {
             this.__chipSize.set(ChipSize.NORMAL);
         }
-        if (r3.allowClose === undefined) {
+        if (a5.allowClose === undefined) {
             this.__allowClose.set(true);
         }
-        if (r3.prefixIcon === undefined) {
+        if (a5.prefixIcon === undefined) {
             this.__prefixIcon.set({ src: "" });
         }
-        if (r3.label === undefined) {
+        if (a5.label === undefined) {
             this.__label.set({ text: "" });
         }
-        if (r3.suffixIcon === undefined) {
+        if (a5.suffixIcon === undefined) {
             this.__suffixIcon.set({ src: "" });
         }
-        if (r3.chipNodeBackgroundColor === undefined) {
+        if (a5.chipNodeBackgroundColor === undefined) {
             this.__chipNodeBackgroundColor.set(this.theme.chipNode.backgroundColor);
         }
-        if (r3.chipNodeActivatedBackgroundColor === undefined) {
+        if (a5.chipNodeActivatedBackgroundColor === undefined) {
             this.__chipNodeActivatedBackgroundColor.set(this.theme.chipNode.activatedBackgroundColor);
         }
-        if (r3.chipNodeRadius === undefined) {
+        if (a5.chipNodeRadius === undefined) {
             this.__chipNodeRadius.set(void (0));
         }
-        if (r3.chipEnabled === undefined) {
+        if (a5.chipEnabled === undefined) {
             this.__chipEnabled.set(true);
         }
-        if (r3.chipActivated === undefined) {
+        if (a5.chipActivated === undefined) {
             this.__chipActivated.set(false);
         }
-        if (r3.isHover !== undefined) {
-            this.isHover = r3.isHover;
+        if (a5.isHover !== undefined) {
+            this.isHover = a5.isHover;
         }
-        if (r3.chipScale !== undefined) {
-            this.chipScale = r3.chipScale;
+        if (a5.chipScale !== undefined) {
+            this.chipScale = a5.chipScale;
         }
-        if (r3.chipOpacity !== undefined) {
-            this.chipOpacity = r3.chipOpacity;
+        if (a5.chipOpacity !== undefined) {
+            this.chipOpacity = a5.chipOpacity;
         }
-        if (r3.chipBlendColor !== undefined) {
-            this.chipBlendColor = r3.chipBlendColor;
+        if (a5.chipBlendColor !== undefined) {
+            this.chipBlendColor = a5.chipBlendColor;
         }
-        if (r3.deleteChip !== undefined) {
-            this.deleteChip = r3.deleteChip;
+        if (a5.deleteChip !== undefined) {
+            this.deleteChip = a5.deleteChip;
         }
-        if (r3.chipNodeOnFocus !== undefined) {
-            this.chipNodeOnFocus = r3.chipNodeOnFocus;
+        if (a5.chipNodeOnFocus !== undefined) {
+            this.chipNodeOnFocus = a5.chipNodeOnFocus;
         }
-        if (r3.useDefaultSuffixIcon !== undefined) {
-            this.useDefaultSuffixIcon = r3.useDefaultSuffixIcon;
+        if (a5.useDefaultSuffixIcon !== undefined) {
+            this.useDefaultSuffixIcon = a5.useDefaultSuffixIcon;
         }
-        if (r3.chipNodeSize !== undefined) {
-            this.chipNodeSize = r3.chipNodeSize;
+        if (a5.chipNodeSize !== undefined) {
+            this.chipNodeSize = a5.chipNodeSize;
         }
-        if (r3.onClose !== undefined) {
-            this.onClose = r3.onClose;
+        if (a5.onClose !== undefined) {
+            this.onClose = a5.onClose;
         }
-        if (r3.onClicked !== undefined) {
-            this.onClicked = r3.onClicked;
+        if (a5.onClicked !== undefined) {
+            this.onClicked = a5.onClicked;
         }
-        if (r3.suffixIconOnFocus !== undefined) {
-            this.suffixIconOnFocus = r3.suffixIconOnFocus;
+        if (a5.suffixIconOnFocus !== undefined) {
+            this.suffixIconOnFocus = a5.suffixIconOnFocus;
         }
-        if (r3.chipBreakPoints !== undefined) {
-            this.chipBreakPoints = r3.chipBreakPoints;
+        if (a5.chipBreakPoints !== undefined) {
+            this.chipBreakPoints = a5.chipBreakPoints;
         }
-        if (r3.smListener !== undefined) {
-            this.smListener = r3.smListener;
+        if (a5.smListener !== undefined) {
+            this.smListener = a5.smListener;
         }
-        if (r3.mdListener !== undefined) {
-            this.mdListener = r3.mdListener;
+        if (a5.mdListener !== undefined) {
+            this.mdListener = a5.mdListener;
         }
-        if (r3.lgListener !== undefined) {
-            this.lgListener = r3.lgListener;
+        if (a5.lgListener !== undefined) {
+            this.lgListener = a5.lgListener;
         }
-        if (r3.isShowPressedBackGroundColor !== undefined) {
-            this.isShowPressedBackGroundColor = r3.isShowPressedBackGroundColor;
+        if (a5.isShowPressedBackGroundColor !== undefined) {
+            this.isShowPressedBackGroundColor = a5.isShowPressedBackGroundColor;
+        }
+        if (a5.fontSizeScale !== undefined) {
+            this.fontSizeScale = a5.fontSizeScale;
+        }
+        if (a5.fontWeightScale !== undefined) {
+            this.fontWeightScale = a5.fontWeightScale;
+        }
+        if (a5.callbacks !== undefined) {
+            this.callbacks = a5.callbacks;
+        }
+        if (a5.callbackId !== undefined) {
+            this.callbackId = a5.callbackId;
+        }
+        if (a5.prefixSymbolWidth !== undefined) {
+            this.prefixSymbolWidth = a5.prefixSymbolWidth;
+        }
+        if (a5.suffixSymbolWidth !== undefined) {
+            this.suffixSymbolWidth = a5.suffixSymbolWidth;
         }
     }
-    updateStateVars(q3) {
-        this.__chipSize.reset(q3.chipSize);
-        this.__allowClose.reset(q3.allowClose);
-        this.__prefixIcon.reset(q3.prefixIcon);
-        this.__label.reset(q3.label);
-        this.__suffixIcon.reset(q3.suffixIcon);
-        this.__chipNodeBackgroundColor.reset(q3.chipNodeBackgroundColor);
-        this.__chipNodeActivatedBackgroundColor.reset(q3.chipNodeActivatedBackgroundColor);
-        this.__chipNodeRadius.reset(q3.chipNodeRadius);
-        this.__chipEnabled.reset(q3.chipEnabled);
-        this.__chipActivated.reset(q3.chipActivated);
+
+    updateStateVars(z4) {
+        this.__chipSize.reset(z4.chipSize);
+        this.__allowClose.reset(z4.allowClose);
+        this.__prefixIcon.reset(z4.prefixIcon);
+        this.__prefixSymbol.reset(z4.prefixSymbol);
+        this.__label.reset(z4.label);
+        this.__suffixIcon.reset(z4.suffixIcon);
+        this.__suffixSymbol.reset(z4.suffixSymbol);
+        this.__chipNodeBackgroundColor.reset(z4.chipNodeBackgroundColor);
+        this.__chipNodeActivatedBackgroundColor.reset(z4.chipNodeActivatedBackgroundColor);
+        this.__chipNodeRadius.reset(z4.chipNodeRadius);
+        this.__chipEnabled.reset(z4.chipEnabled);
+        this.__chipActivated.reset(z4.chipActivated);
     }
-    purgeVariableDependenciesOnElmtId(p3) {
-        this.__chipSize.purgeDependencyOnElmtId(p3);
-        this.__allowClose.purgeDependencyOnElmtId(p3);
-        this.__prefixIcon.purgeDependencyOnElmtId(p3);
-        this.__label.purgeDependencyOnElmtId(p3);
-        this.__suffixIcon.purgeDependencyOnElmtId(p3);
-        this.__chipNodeBackgroundColor.purgeDependencyOnElmtId(p3);
-        this.__chipNodeActivatedBackgroundColor.purgeDependencyOnElmtId(p3);
-        this.__chipNodeRadius.purgeDependencyOnElmtId(p3);
-        this.__chipEnabled.purgeDependencyOnElmtId(p3);
-        this.__chipActivated.purgeDependencyOnElmtId(p3);
-        this.__isHover.purgeDependencyOnElmtId(p3);
-        this.__chipScale.purgeDependencyOnElmtId(p3);
-        this.__chipOpacity.purgeDependencyOnElmtId(p3);
-        this.__chipBlendColor.purgeDependencyOnElmtId(p3);
-        this.__deleteChip.purgeDependencyOnElmtId(p3);
-        this.__chipNodeOnFocus.purgeDependencyOnElmtId(p3);
-        this.__useDefaultSuffixIcon.purgeDependencyOnElmtId(p3);
-        this.__suffixIconOnFocus.purgeDependencyOnElmtId(p3);
-        this.__chipBreakPoints.purgeDependencyOnElmtId(p3);
-        this.__isShowPressedBackGroundColor.purgeDependencyOnElmtId(p3);
+
+    purgeVariableDependenciesOnElmtId(y4) {
+        this.__chipSize.purgeDependencyOnElmtId(y4);
+        this.__allowClose.purgeDependencyOnElmtId(y4);
+        this.__prefixIcon.purgeDependencyOnElmtId(y4);
+        this.__prefixSymbol.purgeDependencyOnElmtId(y4);
+        this.__label.purgeDependencyOnElmtId(y4);
+        this.__suffixIcon.purgeDependencyOnElmtId(y4);
+        this.__suffixSymbol.purgeDependencyOnElmtId(y4);
+        this.__chipNodeBackgroundColor.purgeDependencyOnElmtId(y4);
+        this.__chipNodeActivatedBackgroundColor.purgeDependencyOnElmtId(y4);
+        this.__chipNodeRadius.purgeDependencyOnElmtId(y4);
+        this.__chipEnabled.purgeDependencyOnElmtId(y4);
+        this.__chipActivated.purgeDependencyOnElmtId(y4);
+        this.__isHover.purgeDependencyOnElmtId(y4);
+        this.__chipScale.purgeDependencyOnElmtId(y4);
+        this.__chipOpacity.purgeDependencyOnElmtId(y4);
+        this.__chipBlendColor.purgeDependencyOnElmtId(y4);
+        this.__deleteChip.purgeDependencyOnElmtId(y4);
+        this.__chipNodeOnFocus.purgeDependencyOnElmtId(y4);
+        this.__useDefaultSuffixIcon.purgeDependencyOnElmtId(y4);
+        this.__suffixIconOnFocus.purgeDependencyOnElmtId(y4);
+        this.__chipBreakPoints.purgeDependencyOnElmtId(y4);
+        this.__isShowPressedBackGroundColor.purgeDependencyOnElmtId(y4);
+        this.__fontSizeScale.purgeDependencyOnElmtId(y4);
+        this.__fontWeightScale.purgeDependencyOnElmtId(y4);
+        this.__prefixSymbolWidth.purgeDependencyOnElmtId(y4);
+        this.__suffixSymbolWidth.purgeDependencyOnElmtId(y4);
     }
+
     aboutToBeDeleted() {
         this.__chipSize.aboutToBeDeleted();
         this.__allowClose.aboutToBeDeleted();
         this.__prefixIcon.aboutToBeDeleted();
+        this.__prefixSymbol.aboutToBeDeleted();
         this.__label.aboutToBeDeleted();
         this.__suffixIcon.aboutToBeDeleted();
+        this.__suffixSymbol.aboutToBeDeleted();
         this.__chipNodeBackgroundColor.aboutToBeDeleted();
         this.__chipNodeActivatedBackgroundColor.aboutToBeDeleted();
         this.__chipNodeRadius.aboutToBeDeleted();
@@ -312,315 +489,450 @@ export class ChipComponent extends ViewPU {
         this.__suffixIconOnFocus.aboutToBeDeleted();
         this.__chipBreakPoints.aboutToBeDeleted();
         this.__isShowPressedBackGroundColor.aboutToBeDeleted();
+        this.__fontSizeScale.aboutToBeDeleted();
+        this.__fontWeightScale.aboutToBeDeleted();
+        this.__prefixSymbolWidth.aboutToBeDeleted();
+        this.__suffixSymbolWidth.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
+
     get chipSize() {
         return this.__chipSize.get();
     }
-    set chipSize(o3) {
-        this.__chipSize.set(o3);
+
+    set chipSize(x4) {
+        this.__chipSize.set(x4);
     }
+
     get allowClose() {
         return this.__allowClose.get();
     }
-    set allowClose(n3) {
-        this.__allowClose.set(n3);
+
+    set allowClose(w4) {
+        this.__allowClose.set(w4);
     }
+
     get prefixIcon() {
         return this.__prefixIcon.get();
     }
-    set prefixIcon(m3) {
-        this.__prefixIcon.set(m3);
+
+    set prefixIcon(v4) {
+        this.__prefixIcon.set(v4);
     }
+
+    get prefixSymbol() {
+        return this.__prefixSymbol.get();
+    }
+
+    set prefixSymbol(u4) {
+        this.__prefixSymbol.set(u4);
+    }
+
     get label() {
         return this.__label.get();
     }
-    set label(l3) {
-        this.__label.set(l3);
+
+    set label(t4) {
+        this.__label.set(t4);
     }
+
     get suffixIcon() {
         return this.__suffixIcon.get();
     }
-    set suffixIcon(k3) {
-        this.__suffixIcon.set(k3);
+
+    set suffixIcon(s4) {
+        this.__suffixIcon.set(s4);
     }
+
+    get suffixSymbol() {
+        return this.__suffixSymbol.get();
+    }
+
+    set suffixSymbol(r4) {
+        this.__suffixSymbol.set(r4);
+    }
+
     get chipNodeBackgroundColor() {
         return this.__chipNodeBackgroundColor.get();
     }
-    set chipNodeBackgroundColor(j3) {
-        this.__chipNodeBackgroundColor.set(j3);
+
+    set chipNodeBackgroundColor(q4) {
+        this.__chipNodeBackgroundColor.set(q4);
     }
+
     get chipNodeActivatedBackgroundColor() {
         return this.__chipNodeActivatedBackgroundColor.get();
     }
-    set chipNodeActivatedBackgroundColor(i3) {
-        this.__chipNodeActivatedBackgroundColor.set(i3);
+
+    set chipNodeActivatedBackgroundColor(p4) {
+        this.__chipNodeActivatedBackgroundColor.set(p4);
     }
+
     get chipNodeRadius() {
         return this.__chipNodeRadius.get();
     }
-    set chipNodeRadius(h3) {
-        this.__chipNodeRadius.set(h3);
+
+    set chipNodeRadius(o4) {
+        this.__chipNodeRadius.set(o4);
     }
+
     get chipEnabled() {
         return this.__chipEnabled.get();
     }
-    set chipEnabled(g3) {
-        this.__chipEnabled.set(g3);
+
+    set chipEnabled(n4) {
+        this.__chipEnabled.set(n4);
     }
+
     get chipActivated() {
         return this.__chipActivated.get();
     }
-    set chipActivated(f3) {
-        this.__chipActivated.set(f3);
+
+    set chipActivated(m4) {
+        this.__chipActivated.set(m4);
     }
+
     get isHover() {
         return this.__isHover.get();
     }
-    set isHover(e3) {
-        this.__isHover.set(e3);
+
+    set isHover(l4) {
+        this.__isHover.set(l4);
     }
+
     get chipScale() {
         return this.__chipScale.get();
     }
-    set chipScale(d3) {
-        this.__chipScale.set(d3);
+
+    set chipScale(k4) {
+        this.__chipScale.set(k4);
     }
+
     get chipOpacity() {
         return this.__chipOpacity.get();
     }
-    set chipOpacity(c3) {
-        this.__chipOpacity.set(c3);
+
+    set chipOpacity(j4) {
+        this.__chipOpacity.set(j4);
     }
+
     get chipBlendColor() {
         return this.__chipBlendColor.get();
     }
-    set chipBlendColor(b3) {
-        this.__chipBlendColor.set(b3);
+
+    set chipBlendColor(i4) {
+        this.__chipBlendColor.set(i4);
     }
+
     get deleteChip() {
         return this.__deleteChip.get();
     }
-    set deleteChip(a3) {
-        this.__deleteChip.set(a3);
+
+    set deleteChip(h4) {
+        this.__deleteChip.set(h4);
     }
+
     get chipNodeOnFocus() {
         return this.__chipNodeOnFocus.get();
     }
-    set chipNodeOnFocus(z2) {
-        this.__chipNodeOnFocus.set(z2);
+
+    set chipNodeOnFocus(g4) {
+        this.__chipNodeOnFocus.set(g4);
     }
+
     get useDefaultSuffixIcon() {
         return this.__useDefaultSuffixIcon.get();
     }
-    set useDefaultSuffixIcon(y2) {
-        this.__useDefaultSuffixIcon.set(y2);
+
+    set useDefaultSuffixIcon(f4) {
+        this.__useDefaultSuffixIcon.set(f4);
     }
+
     get suffixIconOnFocus() {
         return this.__suffixIconOnFocus.get();
     }
-    set suffixIconOnFocus(x2) {
-        this.__suffixIconOnFocus.set(x2);
+
+    set suffixIconOnFocus(e4) {
+        this.__suffixIconOnFocus.set(e4);
     }
+
     get chipBreakPoints() {
         return this.__chipBreakPoints.get();
     }
-    set chipBreakPoints(w2) {
-        this.__chipBreakPoints.set(w2);
+
+    set chipBreakPoints(d4) {
+        this.__chipBreakPoints.set(d4);
     }
+
     get isShowPressedBackGroundColor() {
         return this.__isShowPressedBackGroundColor.get();
     }
-    set isShowPressedBackGroundColor(v2) {
-        this.__isShowPressedBackGroundColor.set(v2);
+
+    set isShowPressedBackGroundColor(c4) {
+        this.__isShowPressedBackGroundColor.set(c4);
     }
+
+    get fontSizeScale() {
+        return this.__fontSizeScale.get();
+    }
+
+    set fontSizeScale(b4) {
+        this.__fontSizeScale.set(b4);
+    }
+
+    get fontWeightScale() {
+        return this.__fontWeightScale.get();
+    }
+
+    set fontWeightScale(a4) {
+        this.__fontWeightScale.set(a4);
+    }
+
+    get prefixSymbolWidth() {
+        return this.__prefixSymbolWidth.get();
+    }
+
+    set prefixSymbolWidth(z3) {
+        this.__prefixSymbolWidth.set(z3);
+    }
+
+    get suffixSymbolWidth() {
+        return this.__suffixSymbolWidth.get();
+    }
+
+    set suffixSymbolWidth(y3) {
+        this.__suffixSymbolWidth.set(y3);
+    }
+
     isChipSizeEnum() {
         return typeof (this.chipSize) === 'string';
     }
+
     getLabelFontSize() {
-        try {
-            if (this.label?.fontSize !== void (0) && this.toVp(this.label.fontSize) >= 0) {
-                return this.label.fontSize;
+        if (this.label?.fontSize !== void (0) && this.toVp(this.label.fontSize) >= 0) {
+            return this.label.fontSize;
+        }
+        else {
+            if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {
+                try {
+                    resourceManager.getSystemResourceManager()
+                        .getNumberByName((this.theme.label.smallFontSize.params[0]).split('.')[2]);
+                    return this.theme.label.smallFontSize;
+                }
+                catch (x3) {
+                    return this.theme.label.defaultFontSize;
+                }
             }
             else {
-                if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {
-                    return resourceManager.getSystemResourceManager()
-                        .getNumberByName((this.theme.label.smallFontSize.params[0]).split('.')[2]);
-                }
-                else {
-                    return resourceManager.getSystemResourceManager()
+                try {
+                    resourceManager.getSystemResourceManager()
                         .getNumberByName((this.theme.label.normalFontSize.params[0]).split('.')[2]);
+                    return this.theme.label.normalFontSize;
+                }
+                catch (w3) {
+                    return this.theme.label.defaultFontSize;
                 }
             }
         }
-        catch (u2) {
-            return 0;
-        }
     }
+
     getLabelFontColor() {
         if (this.getChipActive()) {
             return this.label?.activatedFontColor ?? this.theme.label.activatedFontColor;
         }
         return this.label?.fontColor ?? this.theme.label.fontColor;
     }
+
     getLabelFontFamily() {
         return this.label?.fontFamily ?? this.theme.label.fontFamily;
     }
+
     getLabelFontWeight() {
         if (this.getChipActive()) {
             return FontWeight.Medium;
         }
         return FontWeight.Regular;
     }
-    toVp(o2) {
-        if (o2 === void (0)) {
+
+    toVp(q3) {
+        if (q3 === void (0)) {
             return Number.NEGATIVE_INFINITY;
         }
-        switch (typeof (o2)) {
+        switch (typeof (q3)) {
             case 'number':
-                return o2;
+                return q3;
             case 'object':
                 try {
-                    if (o2.id !== -1) {
-                        return px2vp(getContext(this).resourceManager.getNumber(o2.id));
+                    if (q3.id !== -1) {
+                        return px2vp(getContext(this).resourceManager.getNumber(q3.id));
                     }
                     else {
                         return px2vp(getContext(this)
                             .resourceManager
-                            .getNumberByName((o2.params[0]).split('.')[2]));
+                            .getNumberByName((q3.params[0]).split('.')[2]));
                     }
                 }
-                catch (t2) {
+                catch (v3) {
                     return Number.NEGATIVE_INFINITY;
                 }
             case 'string':
-                let p2 = new RegExp("(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$", "i");
-                let q2 = o2.match(p2);
-                if (!q2) {
+                let r3 = new RegExp("(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$", "i");
+                let s3 = q3.match(r3);
+                if (!s3) {
                     return Number.NEGATIVE_INFINITY;
                 }
-                let r2 = Number(q2?.[1] ?? 0);
-                let s2 = q2?.[2] ?? 'vp';
-                switch (s2.toLowerCase()) {
+                let t3 = Number(s3?.[1] ?? 0);
+                let u3 = s3?.[2] ?? 'vp';
+                switch (u3.toLowerCase()) {
                     case 'px':
-                        r2 = px2vp(r2);
+                        t3 = px2vp(t3);
                         break;
                     case 'fp':
-                        r2 = px2vp(fp2px(r2));
+                        t3 = px2vp(fp2px(t3));
                         break;
                     case 'lpx':
-                        r2 = px2vp(lpx2px(r2));
+                        t3 = px2vp(lpx2px(t3));
                         break;
                     case '%':
-                        r2 = Number.NEGATIVE_INFINITY;
+                        t3 = Number.NEGATIVE_INFINITY;
                         break;
                     case 'vp':
                         break;
                     default:
                         break;
                 }
-                return r2;
+                return t3;
             default:
                 return Number.NEGATIVE_INFINITY;
         }
     }
+
     getLabelMargin() {
-        let n2 = { left: 0, right: 0 };
+        let p3 = { left: 0, right: 0 };
         if (this.label?.labelMargin?.left !== void (0) && this.toVp(this.label.labelMargin.left) >= 0) {
-            n2.left = this.label?.labelMargin?.left;
+            p3.left = this.label?.labelMargin?.left;
         }
-        else if (this.prefixIcon?.src) {
+        else if ((this.prefixSymbol?.normal || this.prefixSymbol?.activated) || this.prefixIcon?.src) {
             if (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) {
-                n2.left = this.theme.label.smallMargin.left;
+                p3.left = this.theme.label.smallMargin.left;
             }
             else {
-                n2.left = this.theme.label.normalMargin.left;
+                p3.left = this.theme.label.normalMargin.left;
             }
         }
         if (this.label?.labelMargin?.right !== void (0) && this.toVp(this.label.labelMargin.right) >= 0) {
-            n2.right = this.label?.labelMargin?.right;
+            p3.right = this.label?.labelMargin?.right;
         }
-        else if (this.suffixIcon?.src || this.useDefaultSuffixIcon) {
+        else if ((this.suffixSymbol?.normal || this.suffixSymbol?.activated) ||
+            this.suffixIcon?.src || this.useDefaultSuffixIcon) {
             if (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) {
-                n2.right = this.theme.label.smallMargin.right;
+                p3.right = this.theme.label.smallMargin.right;
             }
             else {
-                n2.right = this.theme.label.normalMargin.right;
+                p3.right = this.theme.label.normalMargin.right;
             }
         }
-        return n2;
+        return p3;
     }
+
     getSuffixIconSize() {
-        let m2 = { width: 0, height: 0 };
+        let o3 = { width: 0, height: 0 };
         if (this.suffixIcon?.size?.width !== void (0) && this.toVp(this.suffixIcon?.size?.width) >= 0) {
-            m2.width = this.suffixIcon?.size?.width;
+            o3.width = this.suffixIcon?.size?.width;
         }
         else {
             if (this.getSuffixIconSrc()) {
-                m2.width = this.theme.suffixIcon.size.width;
+                o3.width = this.theme.suffixIcon.size.width;
             }
             else {
-                m2.width = 0;
+                o3.width = 0;
             }
         }
         if (this.suffixIcon?.size?.height !== void (0) && this.toVp(this.suffixIcon?.size?.height) >= 0) {
-            m2.height = this.suffixIcon?.size?.height;
+            o3.height = this.suffixIcon?.size?.height;
         }
         else {
             if (this.getSuffixIconSrc()) {
-                m2.height = this.theme.suffixIcon.size.height;
+                o3.height = this.theme.suffixIcon.size.height;
             }
             else {
-                m2.height = 0;
+                o3.height = 0;
             }
         }
-        return m2;
+        return o3;
     }
+
     getPrefixIconSize() {
-        let l2 = { width: 0, height: 0 };
+        let n3 = { width: 0, height: 0 };
         if (this.prefixIcon?.size?.width !== void (0) && this.toVp(this.prefixIcon?.size?.width) >= 0) {
-            l2.width = this.prefixIcon?.size?.width;
+            n3.width = this.prefixIcon?.size?.width;
         }
         else {
             if (this.prefixIcon?.src) {
-                l2.width = this.theme.prefixIcon.size.width;
+                n3.width = this.theme.prefixIcon.size.width;
             }
             else {
-                l2.width = 0;
+                n3.width = 0;
             }
         }
         if (this.prefixIcon?.size?.height !== void (0) && this.toVp(this.prefixIcon?.size?.height) >= 0) {
-            l2.height = this.prefixIcon?.size?.height;
+            n3.height = this.prefixIcon?.size?.height;
         }
         else {
             if (this.prefixIcon?.src) {
-                l2.height = this.theme.prefixIcon.size.height;
+                n3.height = this.theme.prefixIcon.size.height;
             }
             else {
-                l2.height = 0;
+                n3.height = 0;
             }
         }
-        return l2;
+        return n3;
     }
+
     getPrefixIconFilledColor() {
         if (this.getChipActive()) {
             return this.prefixIcon?.activatedFillColor ?? this.theme.prefixIcon.activatedFillColor;
         }
         return this.prefixIcon?.fillColor ?? this.theme.prefixIcon.fillColor;
     }
+
     getSuffixIconFilledColor() {
         if (this.getChipActive()) {
             return this.suffixIcon?.activatedFillColor ?? this.theme.suffixIcon.activatedFillColor;
         }
         return this.suffixIcon?.fillColor ?? this.theme.suffixIcon.fillColor;
     }
+
+    getDefaultSymbolColor() {
+        if (this.getChipActive()) {
+            return this.theme.defaultSymbol.activatedFontColor;
+        }
+        return this.theme.defaultSymbol.normalFontColor;
+    }
+
+    getPrefixSymbolModifier() {
+        if (this.getChipActive()) {
+            return this.prefixSymbol?.activated;
+        }
+        return this.prefixSymbol?.normal;
+    }
+
+    getSuffixSymbolModifier() {
+        if (this.getChipActive()) {
+            return this.suffixSymbol?.activated;
+        }
+        return this.suffixSymbol?.normal;
+    }
+
     getSuffixIconFocusable() {
         return (this.useDefaultSuffixIcon && this.allowClose) || this.suffixIcon?.action !== void (0);
     }
+
     getChipNodePadding() {
         return (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) ? this.theme.chipNode.smallPadding : this.theme.chipNode.normalPadding;
     }
+
     getChipNodeRadius() {
         if (this.chipNodeRadius !== void (0) && this.toVp(this.chipNodeRadius) >= 0) {
             return this.chipNodeRadius;
@@ -629,33 +941,35 @@ export class ChipComponent extends ViewPU {
             return ((this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) ? this.theme.chipNode.smallBorderRadius : this.theme.chipNode.normalBorderRadius);
         }
     }
+
     getChipNodeBackGroundColor() {
-        let i2;
+        let k3;
         if (this.getChipActive()) {
-            i2 = this.chipNodeActivatedBackgroundColor ?? this.theme.chipNode.activatedBackgroundColor;
+            k3 = this.chipNodeActivatedBackgroundColor ?? this.theme.chipNode.activatedBackgroundColor;
         }
         else {
-            i2 = this.chipNodeBackgroundColor ?? this.theme.chipNode.backgroundColor;
+            k3 = this.chipNodeBackgroundColor ?? this.theme.chipNode.backgroundColor;
         }
         if (!this.isShowPressedBackGroundColor) {
-            return i2;
+            return k3;
         }
-        let j2;
+        let l3;
         try {
-            j2 = ColorMetrics.resourceColor(i2);
+            l3 = ColorMetrics.resourceColor(k3);
         }
-        catch (k2) {
-            console.log(k2.toString());
+        catch (m3) {
+            hilog.error(0x3900, 'Ace', `Chip resourceColor, error: ${m3.toString()}`);
             if (this.getChipActive()) {
-                j2 = ColorMetrics.resourceColor(this.theme.chipNode.activatedBackgroundColor);
+                l3 = ColorMetrics.resourceColor(this.theme.chipNode.activatedBackgroundColor);
             }
             else {
-                j2 = ColorMetrics.resourceColor(this.theme.chipNode.backgroundColor);
+                l3 = ColorMetrics.resourceColor(this.theme.chipNode.backgroundColor);
             }
         }
-        return j2.blendColor(ColorMetrics.resourceColor("#19000000"))
+        return l3.blendColor(ColorMetrics.resourceColor("#19000000"))
             .color;
     }
+
     getChipNodeHeight() {
         if (this.isChipSizeEnum()) {
             return this.chipSize === ChipSize.SMALL ? this.theme.chipNode.smallHeight : this.theme.chipNode.normalHeight;
@@ -665,6 +979,7 @@ export class ChipComponent extends ViewPU {
             return (this.chipNodeSize?.height !== void (0) && this.toVp(this.chipNodeSize?.height) >= 0) ? this.toVp(this.chipNodeSize?.height) : this.theme.chipNode.normalHeight;
         }
     }
+
     getLabelWidth() {
         return px2vp(measure.measureText({
             textContent: this.label?.text ?? "",
@@ -676,55 +991,89 @@ export class ChipComponent extends ViewPU {
             textAlign: TextAlign.Center
         }));
     }
+
     getCalculateChipNodeWidth() {
-        let h2 = 0;
-        h2 += this.getChipNodePadding().left;
-        h2 += this.toVp(this.getPrefixIconSize().width);
-        h2 += this.toVp(this.getLabelMargin().left);
-        h2 += this.getLabelWidth();
-        h2 += this.toVp(this.getLabelMargin().right);
-        h2 += this.toVp(this.getSuffixIconSize().width);
-        h2 += this.getChipNodePadding().right;
-        return h2;
+        let j3 = 0;
+        j3 += this.getChipNodePadding().left;
+        j3 += this.toVp(this.getPrefixChipWidth());
+        j3 += this.toVp(this.getLabelMargin().left);
+        j3 += this.getLabelWidth();
+        j3 += this.toVp(this.getLabelMargin().right);
+        j3 += this.toVp(this.getSuffixChipWidth());
+        j3 += this.getChipNodePadding().right;
+        return j3;
     }
+
+    getPrefixChipWidth() {
+        if (this.prefixSymbol?.normal || this.prefixSymbol?.activated) {
+            return this.prefixSymbolWidth;
+        }
+        else if (this.prefixIcon?.src) {
+            return this.getPrefixIconSize().width;
+        }
+        else {
+            return 0;
+        }
+    }
+
+    getSuffixChipWidth() {
+        if (this.suffixSymbol?.normal || this.suffixSymbol?.activated) {
+            return this.suffixSymbolWidth;
+        }
+        else if (this.suffixIcon?.src) {
+            return this.getSuffixIconSize().width;
+        }
+        else if (!this.suffixIcon?.src && this.allowClose) {
+            return this.theme.defaultSymbol.fontSize;
+        }
+        else {
+            return 0;
+        }
+    }
+
     getReserveChipNodeWidth() {
         return this.getCalculateChipNodeWidth() - this.getLabelWidth() + this.theme.chipNode.minLabelWidth;
     }
+
     getChipEnable() {
         return this.chipEnabled || this.chipEnabled === void (0);
     }
+
     getChipActive() {
         return this.chipActivated;
     }
+
     getChipNodeOpacity() {
         return this.getChipEnable() ? this.chipOpacity : this.theme.chipNode.opacity.disabled;
     }
-    handleTouch(g2) {
+
+    handleTouch(i3) {
         if (!this.getChipEnable()) {
             return;
         }
         if (this.isHover) {
-            if (g2.type === TouchType.Down) {
+            if (i3.type === TouchType.Down) {
                 this.isShowPressedBackGroundColor = true;
             }
-            else if (g2.type === TouchType.Up) {
+            else if (i3.type === TouchType.Up) {
                 this.isShowPressedBackGroundColor = false;
             }
         }
         else {
-            if (g2.type === TouchType.Down) {
+            if (i3.type === TouchType.Down) {
                 this.isShowPressedBackGroundColor = true;
             }
-            else if (g2.type === TouchType.Up) {
+            else if (i3.type === TouchType.Up) {
                 this.isShowPressedBackGroundColor = false;
             }
         }
     }
-    hoverAnimate(f2) {
+
+    hoverAnimate(h3) {
         if (!this.getChipEnable()) {
             return;
         }
-        this.isHover = f2;
+        this.isHover = h3;
         if (this.isHover) {
             this.isShowPressedBackGroundColor = true;
         }
@@ -732,21 +1081,24 @@ export class ChipComponent extends ViewPU {
             this.isShowPressedBackGroundColor = false;
         }
     }
+
     deleteChipNodeAnimate() {
         Context.animateTo({ duration: 150, curve: Curve.Sharp }, () => {
             this.chipOpacity = 0;
             this.chipBlendColor = Color.Transparent;
         });
         Context.animateTo({ duration: 150, curve: Curve.FastOutLinearIn, onFinish: () => {
-                this.deleteChip = true;
-            } }, () => {
+            this.deleteChip = true;
+        } }, () => {
             this.chipScale = { x: 0.85, y: 0.85 };
         });
     }
+
     getSuffixIconSrc() {
         this.useDefaultSuffixIcon = !this.suffixIcon?.src && this.allowClose;
         return this.useDefaultSuffixIcon ? this.theme.suffixIcon.defaultDeleteIcon : (this.suffixIcon?.src ?? void (0));
     }
+
     getChipNodeWidth() {
         if (!this.isChipSizeEnum()) {
             this.chipNodeSize = this.chipSize;
@@ -754,55 +1106,72 @@ export class ChipComponent extends ViewPU {
                 return this.toVp(this.chipNodeSize.width);
             }
         }
-        let c2 = this.getChipConstraintWidth();
-        return Math.min(Math.max(this.getCalculateChipNodeWidth(), c2.minWidth), c2.maxWidth);
+        let e3 = this.getChipConstraintWidth();
+        return Math.min(Math.max(this.getCalculateChipNodeWidth(), e3.minWidth), e3.maxWidth);
     }
+
     getFocusOverlaySize() {
         return {
             width: Math.max(this.getChipNodeWidth(), this.getChipConstraintWidth().minWidth) + 8,
             height: this.getChipNodeHeight() + 8
         };
     }
+
     getChipConstraintWidth() {
-        let a2 = this.getReserveChipNodeWidth();
-        if (!this.isChipSizeEnum()) {
-            this.chipNodeSize = this.chipSize;
-            if (this.chipNodeSize?.width !== void (0) && this.toVp(this.chipNodeSize?.width) >= 0) {
-                return { minWidth: a2, maxWidth: this.chipNodeSize.width };
-            }
-        }
-        let b2 = this.getCalculateChipNodeWidth();
+        let b3 = this.getReserveChipNodeWidth();
+        let c3 = this.getCalculateChipNodeWidth();
+        let d3;
         switch (this.chipBreakPoints) {
             case BreakPointsType.SM:
-                return {
-                    minWidth: a2,
-                    maxWidth: Math.min(b2, this.theme.chipNode.breakPointConstraintWidth.breakPointSmMaxWidth)
+                d3 = {
+                    minWidth: b3,
+                    maxWidth: Math.min(c3, this.theme.chipNode.breakPointConstraintWidth.breakPointSmMaxWidth)
                 };
+                break;
             case BreakPointsType.MD:
-                return {
-                    minWidth: Math.max(b2, this.theme.chipNode.breakPointConstraintWidth.breakPointMinWidth),
-                    maxWidth: Math.min(b2, this.theme.chipNode.breakPointConstraintWidth.breakPointMdMaxWidth)
+                d3 = {
+                    minWidth: Math.max(c3, this.theme.chipNode.breakPointConstraintWidth.breakPointMinWidth),
+                    maxWidth: Math.min(c3, this.theme.chipNode.breakPointConstraintWidth.breakPointMdMaxWidth)
                 };
+                break;
             case BreakPointsType.LG:
-                return {
-                    minWidth: Math.max(b2, this.theme.chipNode.breakPointConstraintWidth.breakPointMinWidth),
-                    maxWidth: Math.min(b2, this.theme.chipNode.breakPointConstraintWidth.breakPointLgMaxWidth)
+                d3 = {
+                    minWidth: Math.max(c3, this.theme.chipNode.breakPointConstraintWidth.breakPointMinWidth),
+                    maxWidth: Math.min(c3, this.theme.chipNode.breakPointConstraintWidth.breakPointLgMaxWidth)
                 };
+                break;
             default:
-                return { minWidth: a2, maxWidth: b2 };
+                d3 = { minWidth: b3, maxWidth: c3 };
+                break;
         }
+        d3.minWidth = Math.min(Math.max(this.getCalculateChipNodeWidth(), d3.minWidth), d3.maxWidth);
+        d3.minHeight = this.getChipNodeHeight();
+        if (!this.isChipSizeEnum() && this.chipNodeSize?.height !== void (0) && this.toVp(this.chipNodeSize?.height) >= 0) {
+            d3.maxHeight = this.toVp(this.chipNodeSize.height);
+            d3.minHeight = this.toVp(this.chipNodeSize.height);
+        }
+        if (!this.isChipSizeEnum() && this.chipNodeSize?.width !== void (0) && this.toVp(this.chipNodeSize?.width) >= 0) {
+            d3.minWidth = this.toVp(this.chipNodeSize.width);
+            d3.maxWidth = this.toVp(this.chipNodeSize.width);
+        }
+        else if (this.toVp(this.fontSizeScale) >= this.theme.chipNode.suitAgeScale) {
+            d3.minWidth = void (0);
+            d3.maxWidth = void (0);
+        }
+        return d3;
     }
-    focusOverlay(o1 = null) {
-        this.observeComponentCreation2((y1, z1) => {
+
+    focusOverlay(p2 = null) {
+        this.observeComponentCreation2((z2, a3) => {
             Stack.create();
             Stack.size({ width: 1, height: 1 });
             Stack.align(Alignment.Center);
         }, Stack);
-        this.observeComponentCreation2((r1, s1) => {
+        this.observeComponentCreation2((s2, t2) => {
             If.create();
             if (this.chipNodeOnFocus && !this.suffixIconOnFocus) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((w1, x1) => {
+                    this.observeComponentCreation2((x2, y2) => {
                         Stack.create();
                         Stack.borderRadius(this.toVp(this.getChipNodeRadius()) + 4);
                         Stack.size(this.getFocusOverlaySize());
@@ -820,23 +1189,29 @@ export class ChipComponent extends ViewPU {
         If.pop();
         Stack.pop();
     }
+
     aboutToAppear() {
-        this.smListener.on("change", (n1) => {
-            if (n1.matches) {
+        this.smListener.on("change", (o2) => {
+            if (o2.matches) {
                 this.chipBreakPoints = BreakPointsType.SM;
             }
         });
-        this.mdListener.on("change", (m1) => {
-            if (m1.matches) {
+        this.mdListener.on("change", (n2) => {
+            if (n2.matches) {
                 this.chipBreakPoints = BreakPointsType.MD;
             }
         });
-        this.lgListener.on("change", (l1) => {
-            if (l1.matches) {
+        this.lgListener.on("change", (m2) => {
+            if (m2.matches) {
                 this.chipBreakPoints = BreakPointsType.LG;
             }
         });
+        this.callbackId = this.getUIContext()
+            .getHostContext()
+        ?.getApplicationContext()
+        ?.on('environment', this.callbacks);
     }
+
     getVisibility() {
         if (this.toVp(this.getChipNodeHeight()) > 0) {
             return Visibility.Visible;
@@ -845,42 +1220,40 @@ export class ChipComponent extends ViewPU {
             return Visibility.None;
         }
     }
+
     aboutToDisappear() {
         this.smListener.off("change");
         this.mdListener.off("change");
         this.lgListener.off("change");
+        if (this.callbackId) {
+            this.getUIContext()
+                .getHostContext()
+            ?.getApplicationContext()
+            ?.off('environment', this.callbackId);
+            this.callbackId = void (0);
+        }
     }
+
     chipBuilder(f = null) {
-        this.observeComponentCreation2((y, z) => {
-            Row.create();
-            Row.alignItems(VerticalAlign.Center);
-            Row.justifyContent(FlexAlign.Center);
-            Row.clip(false);
-            Row.padding(this.getChipNodePadding());
-            Row.height(this.getChipNodeHeight());
-            Row.width(this.getChipNodeWidth());
-            Row.constraintSize(this.getChipConstraintWidth());
-            Row.backgroundColor(this.getChipNodeBackGroundColor());
-            Row.borderRadius(this.getChipNodeRadius());
-            Row.enabled(this.getChipEnable());
-            Row.scale(ObservedObject.GetRawObject(this.chipScale));
-            Row.focusable(true);
-            Row.opacity(this.getChipNodeOpacity());
-            ViewStackProcessor.visualState("normal");
-            Row.overlay(undefined);
-            ViewStackProcessor.visualState("focused");
-            Row.overlay({ builder: this.focusOverlay.bind(this) }, { align: Alignment.Center });
-            ViewStackProcessor.visualState();
-            Row.onFocus(() => {
+        this.observeComponentCreation2((z1, a2) => {
+            Button.createWithChild();
+            Button.clip(false);
+            Button.backgroundColor(this.getChipNodeBackGroundColor());
+            Button.borderRadius(this.getChipNodeRadius());
+            Button.enabled(this.getChipEnable());
+            Button.scale(ObservedObject.GetRawObject(this.chipScale));
+            Button.focusable(true);
+            Button.opacity(this.getChipNodeOpacity());
+            Button.onFocus(() => {
                 this.chipNodeOnFocus = true;
             });
-            Row.onBlur(() => {
+            Button.onBlur(() => {
                 this.chipNodeOnFocus = false;
             });
-            Row.onTouch((h1) => {
-                this.handleTouch(h1);
+            Button.onTouch((i2) => {
+                this.handleTouch(i2);
             });
-            Row.onHover((g1) => {
+            Button.onHover((h2) => {
                 if (this.isShowPressedBackGroundColor == false) {
                     this.isShowPressedBackGroundColor = true;
                 }
@@ -888,18 +1261,39 @@ export class ChipComponent extends ViewPU {
                     this.isShowPressedBackGroundColor = false;
                 }
             });
-            Row.onKeyEvent((f1) => {
-                if (f1.type === KeyType.Down && f1.keyCode === KeyCode.KEYCODE_FORWARD_DEL && !this.suffixIconOnFocus) {
+            Button.onKeyEvent((g2) => {
+                if (g2.type === KeyType.Down && g2.keyCode === KeyCode.KEYCODE_FORWARD_DEL && !this.suffixIconOnFocus) {
                     this.deleteChipNodeAnimate();
                 }
             });
-            Row.onClick(this.onClicked === noop ? undefined : this.onClicked.bind(this));
+            Button.onClick(this.onClicked === noop ? undefined : this.onClicked.bind(this));
+        }, Button);
+        this.observeComponentCreation2((x1, y1) => {
+            Row.create();
+            Row.alignItems(VerticalAlign.Center);
+            Row.justifyContent(FlexAlign.Center);
+            Row.padding(this.getChipNodePadding());
+            Row.constraintSize(this.getChipConstraintWidth());
         }, Row);
-        this.observeComponentCreation2((r, s) => {
+        this.observeComponentCreation2((j1, k1) => {
             If.create();
-            if (this.prefixIcon?.src !== "") {
+            if (this.prefixSymbol?.normal || this.prefixSymbol?.activated) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((w, x) => {
+                    this.observeComponentCreation2((s1, t1) => {
+                        SymbolGlyph.create();
+                        SymbolGlyph.fontSize(this.theme.defaultSymbol.fontSize);
+                        SymbolGlyph.fontColor(this.getDefaultSymbolColor());
+                        SymbolGlyph.attributeModifier.bind(this)(this.getPrefixSymbolModifier());
+                        SymbolGlyph.onSizeChange((v1, w1) => {
+                            this.prefixSymbolWidth = w1?.width;
+                        });
+                        SymbolGlyph.key("PrefixSymbolGlyph");
+                    }, SymbolGlyph);
+                });
+            }
+            else if (this.prefixIcon?.src !== "") {
+                this.ifElseBranchUpdateFunction(1, () => {
+                    this.observeComponentCreation2((o1, p1) => {
                         Image.create(this.prefixIcon?.src);
                         Image.opacity(this.getChipNodeOpacity());
                         Image.size(this.getPrefixIconSize());
@@ -914,12 +1308,12 @@ export class ChipComponent extends ViewPU {
                 });
             }
             else {
-                this.ifElseBranchUpdateFunction(1, () => {
+                this.ifElseBranchUpdateFunction(2, () => {
                 });
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((p, q) => {
+        this.observeComponentCreation2((h1, i1) => {
             Text.create(this.label?.text ?? "");
             Text.opacity(this.getChipNodeOpacity());
             Text.fontSize(this.getLabelFontSize());
@@ -937,47 +1331,97 @@ export class ChipComponent extends ViewPU {
             Text.draggable(false);
         }, Text);
         Text.pop();
-        this.observeComponentCreation2((k, l) => {
-            Image.create(this.getSuffixIconSrc());
-            Image.opacity(this.getChipNodeOpacity());
-            Image.size(this.getSuffixIconSize());
-            Image.fillColor(this.getSuffixIconFilledColor());
-            Image.enabled(this.getChipEnable());
-            Image.focusable(this.getSuffixIconFocusable());
-            Image.objectFit(ImageFit.Cover);
-            Image.flexShrink(0);
-            Image.visibility(this.getVisibility());
-            Image.draggable(false);
-            Image.onFocus(() => {
-                this.suffixIconOnFocus = true;
-            });
-            Image.onBlur(() => {
-                this.suffixIconOnFocus = false;
-            });
-            Image.onClick(() => {
-                if (!this.getChipEnable()) {
-                    return;
-                }
-                if (this.suffixIcon?.action) {
-                    this.suffixIcon.action();
-                    return;
-                }
-                if (this.allowClose && this.useDefaultSuffixIcon) {
-                    this.onClose();
-                    this.deleteChipNodeAnimate();
-                    return;
-                }
-                this.onClicked();
-            });
-        }, Image);
+        this.observeComponentCreation2((l, m) => {
+            If.create();
+            if (this.suffixSymbol?.normal || this.suffixSymbol?.activated) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((c1, d1) => {
+                        SymbolGlyph.create();
+                        SymbolGlyph.fontSize(this.theme.defaultSymbol.fontSize);
+                        SymbolGlyph.fontColor(this.getDefaultSymbolColor());
+                        SymbolGlyph.attributeModifier.bind(this)(this.getSuffixSymbolModifier());
+                        SymbolGlyph.onSizeChange((f1, g1) => {
+                            this.suffixSymbolWidth = g1?.width;
+                        });
+                        SymbolGlyph.key("SuffixSymbolGlyph");
+                    }, SymbolGlyph);
+                });
+            }
+            else if (this.suffixIcon?.src !== "") {
+                this.ifElseBranchUpdateFunction(1, () => {
+                    this.observeComponentCreation2((v, w) => {
+                        Image.create(this.getSuffixIconSrc());
+                        Image.opacity(this.getChipNodeOpacity());
+                        Image.size(this.getSuffixIconSize());
+                        Image.fillColor(this.getSuffixIconFilledColor());
+                        Image.enabled(this.getChipEnable());
+                        Image.focusable(this.getSuffixIconFocusable());
+                        Image.objectFit(ImageFit.Cover);
+                        Image.flexShrink(0);
+                        Image.visibility(this.getVisibility());
+                        Image.draggable(false);
+                        Image.onFocus(() => {
+                            this.suffixIconOnFocus = true;
+                        });
+                        Image.onBlur(() => {
+                            this.suffixIconOnFocus = false;
+                        });
+                        Image.onClick(() => {
+                            if (!this.getChipEnable()) {
+                                return;
+                            }
+                            if (this.suffixIcon?.action) {
+                                this.suffixIcon.action();
+                                return;
+                            }
+                            if (this.allowClose && this.useDefaultSuffixIcon) {
+                                this.onClose();
+                                this.deleteChipNodeAnimate();
+                                return;
+                            }
+                            this.onClicked();
+                        });
+                    }, Image);
+                });
+            }
+            else if (this.allowClose) {
+                this.ifElseBranchUpdateFunction(2, () => {
+                    this.observeComponentCreation2((q, r) => {
+                        SymbolGlyph.create({
+                            "id": -1,
+                            "type": 40000,
+                            params: ['sys.symbol.xmark'],
+                            "bundleName": "__harDefaultBundleName__",
+                            "moduleName": "__harDefaultModuleName__"
+                        });
+                        SymbolGlyph.fontSize(this.theme.defaultSymbol.fontSize);
+                        SymbolGlyph.fontColor(this.getDefaultSymbolColor());
+                        SymbolGlyph.onClick(() => {
+                            if (!this.getChipEnable()) {
+                                return;
+                            }
+                            this.onClose();
+                            this.deleteChipNodeAnimate();
+                        });
+                    }, SymbolGlyph);
+                });
+            }
+            else {
+                this.ifElseBranchUpdateFunction(3, () => {
+                });
+            }
+        }, If);
+        If.pop();
         Row.pop();
+        Button.pop();
     }
+
     initialRender() {
         this.observeComponentCreation2((b, c) => {
             If.create();
             if (!this.deleteChip) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.chipBuilder.bind(this)();
+                    this.chipBuilder.bind(this)(this);
                 });
             }
             else {
@@ -987,11 +1431,11 @@ export class ChipComponent extends ViewPU {
         }, If);
         If.pop();
     }
+
     rerender() {
         this.updateDirtyElements();
     }
 }
-
 
 export default {
     Chip, ChipSize

@@ -16,21 +16,29 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CANVAS_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CANVAS_PAINT_METHOD_H
 
+#include "base/memory/referenced.h"
+#include "base/utils/utils.h"
+#include "core/components_ng/pattern/custom_paint/canvas_paint_op.h"
 #include "core/components_ng/pattern/custom_paint/custom_paint_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
 
+#ifdef USE_FAST_TASKPOOL
+#include <memory>
+#endif
+
 namespace OHOS::Ace::NG {
 class CanvasPaintMethod;
-class RosenRenderContext;
-using TaskFunc = std::function<void(CanvasPaintMethod&, PaintWrapper*)>;
+using TaskFunc = std::function<void(CanvasPaintMethod&)>;
 using OnModifierUpdateFunc = std::function<void(void)>;
 class CanvasPaintMethod : public CustomPaintPaintMethod {
     DECLARE_ACE_TYPE(CanvasPaintMethod, CustomPaintPaintMethod)
 public:
     CanvasPaintMethod() = default;
-    explicit CanvasPaintMethod(const WeakPtr<PipelineBase> context, RefPtr<RenderingContext2DModifier> contentModifier)
+    CanvasPaintMethod(const WeakPtr<PipelineBase> context, RefPtr<CanvasModifier> contentModifier,
+        const WeakPtr<FrameNode>& frameNode)
+        : frameNode_(frameNode)
     {
-        matrix_.reset();
+        matrix_.Reset();
         context_ = context;
         imageShadow_ = std::make_unique<Shadow>();
         contentModifier_ = contentModifier;
@@ -39,17 +47,27 @@ public:
 
     ~CanvasPaintMethod() override = default;
 
+    void GetFastTaskPool();
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
 
-    void PushTask(const TaskFunc& task)
+#ifndef USE_FAST_TASKPOOL
+    void PushTask(const TaskFunc& task);
+#else
+    template <typename T, typename... Args>
+    void PushTask(Args&&... args)
     {
-        tasks_.emplace_back(task);
+        CHECK_NULL_VOID(fastTaskPool_);
+        fastTaskPool_->Push<T>(0, std::forward<Args>(args)...);
+        if (needMarkDirty_) {
+            needMarkDirty_ = false;
+            auto host = frameNode_.Upgrade();
+            CHECK_NULL_VOID(host);
+            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
     }
-
-    bool HasTask() const
-    {
-        return !tasks_.empty();
-    }
+#endif
+    bool HasTask() const;
+    void FlushTask();
 
     double GetWidth()
     {
@@ -70,17 +88,15 @@ public:
     void DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage);
     void DrawPixelMapWithoutGlobalState(const RefPtr<PixelMap>& pixelMap, const Ace::CanvasImage& canvasImage);
     std::unique_ptr<Ace::ImageData> GetImageData(
-        RefPtr<RosenRenderContext> renderContext, double left, double top, double width, double height);
+        RefPtr<RenderContext> renderContext, double left, double top, double width, double height);
     void GetImageData(const RefPtr<RenderContext>& renderContext, const std::shared_ptr<Ace::ImageData>& imageData);
     void TransferFromImageBitmap(const RefPtr<OffscreenCanvasPattern>& offscreenCanvas);
-    std::string ToDataURL(RefPtr<RosenRenderContext> renderContext, const std::string& args);
-    bool DrawBitmap(RefPtr<RosenRenderContext> renderContext, RSBitmap& currentBitmap);
+    std::string ToDataURL(RefPtr<RenderContext> renderContext, const std::string& args);
+    bool DrawBitmap(RefPtr<RenderContext> renderContext, RSBitmap& currentBitmap);
     std::string GetJsonData(const std::string& path);
 
-    void FillText(
-        PaintWrapper* paintWrapper, const std::string& text, double x, double y, std::optional<double> maxWidth);
-    void StrokeText(
-        PaintWrapper* paintWrapper, const std::string& text, double x, double y, std::optional<double> maxWidth);
+    void FillText(const std::string& text, double x, double y, std::optional<double> maxWidth);
+    void StrokeText(const std::string& text, double x, double y, std::optional<double> maxWidth);
     double MeasureText(const std::string& text, const PaintState& state);
     double MeasureTextHeight(const std::string& text, const PaintState& state);
     TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
@@ -90,23 +106,33 @@ public:
 private:
     void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) override;
     void ImageObjFailed() override;
-    void PaintText(const SizeF& contentSize, double x, double y, std::optional<double> maxWidth,
-        bool isStroke, bool hasShadow = false);
-    double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<OHOS::Rosen::Typography>& paragraph);
+    void PaintText(const SizeF& contentSize, double x, double y, std::optional<double> maxWidth, bool isStroke,
+        bool hasShadow = false);
+    double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<RSParagraph>& paragraph);
     bool UpdateParagraph(const std::string& text, bool isStroke, bool hasShadow = false);
-    void UpdateTextStyleForeground(bool isStroke, Rosen::TextStyle& txtStyle, bool hasShadow);
-    void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas,
-        const RSBrush* brush = nullptr, const RSPen* pen = nullptr) override;
+    void UpdateTextStyleForeground(bool isStroke, RSTextStyle& txtStyle, bool hasShadow);
+    void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas, const RSBrush* brush = nullptr,
+        const RSPen* pen = nullptr, RSSaveLayerOps* slo = nullptr) override;
+    void PaintImageShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas, const RSBrush* brush = nullptr,
+        const RSPen* pen = nullptr, RSSaveLayerOps* slo = nullptr) override;
     void Path2DRect(const PathArgs& args) override;
     RSCanvas* GetRawPtrOfRSCanvas() override
     {
         return rsCanvas_.get();
     }
-
+#ifndef USE_FAST_TASKPOOL
     std::list<TaskFunc> tasks_;
+#else
+    friend class CanvasPattern;
+    std::unique_ptr<CanvasPaintOp> fastTaskPool_ = std::make_unique<CanvasPaintOp>();
+#endif
 
+#ifndef ACE_UNITTEST
     RefPtr<Ace::ImageObject> imageObj_ = nullptr;
+#endif
     OnModifierUpdateFunc onModifierUpdate_;
+    WeakPtr<FrameNode> frameNode_;
+    bool needMarkDirty_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(CanvasPaintMethod);
 };

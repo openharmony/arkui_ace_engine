@@ -38,7 +38,6 @@ void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
 }
 } // namespace
 
-bool SystemProperties::traceEnabled_ = false;
 bool SystemProperties::svgTraceEnable_ = false;
 bool SystemProperties::developerModeOn_ = false;
 bool SystemProperties::layoutTraceEnable_ = false;
@@ -94,8 +93,13 @@ bool SystemProperties::navigationBlurEnabled_ = true;
 bool SystemProperties::gridCacheEnabled_ = false;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
 bool SystemProperties::acePerformanceMonitorEnable_ = false;
-std::vector<double> SystemProperties::brightUpPercent_ = {};
+std::pair<float, float> SystemProperties::brightUpPercent_ = {};
 bool SystemProperties::faultInjectEnabled_ = false;
+
+bool SystemProperties::IsOpIncEnable()
+{
+    return false;
+}
 
 void SystemProperties::InitDeviceType(DeviceType type)
 {

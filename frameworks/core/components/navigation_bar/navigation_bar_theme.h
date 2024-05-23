@@ -40,11 +40,10 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-
+            SetSymbolTheme(themeConstants, theme);
             theme->backBtnResourceId_ = InternalResource::ResourceId::TITLEBAR_BACK;
             theme->backResourceId_ = themeConstants->GetResourceId(THEME_NAVIGATION_BAR_RESOURCE_ID_BACK);
             theme->moreResourceId_ = themeConstants->GetResourceId(THEME_NAVIGATION_BAR_RESOURCE_ID_MORE);
-
             RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_NAVIGATION_BAR);
             if (pattern) {
                 theme->height_ = pattern->GetAttr<Dimension>("navigation_bar_height", 0.0_vp);
@@ -82,12 +81,19 @@ public:
                 auto navBarUnfocusEffectEnable = pattern->GetAttr<std::string>("section_unfocus_effect_enable", "0");
                 theme->navBarUnfocusEffectEnable_ = StringUtils::StringToInt(navBarUnfocusEffectEnable);
                 theme->navBarUnfocusColor_ = pattern->GetAttr<Color>("section_unfocus_color", Color::TRANSPARENT);
+                theme->titlebarBackgroundBlurStyle_ = pattern->GetAttr<int>("titlebar_background_blur_style", 0);
+                theme->toolbarBackgroundBlurStyle_ = pattern->GetAttr<int>("toolbar_background_blur_style", 0);
             }
             ParsePattern(themeConstants, theme);
             return theme;
         }
 
     private:
+        void SetSymbolTheme(const RefPtr<ThemeConstants>& themeConstants, RefPtr<NavigationBarTheme>& theme) const
+        {
+            theme->backSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_left");
+            theme->moreSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.dot_grid_2x2");
+        }
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<NavigationBarTheme>& theme) const
         {
             RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_NAVIGATION_BAR);
@@ -123,8 +129,6 @@ public:
             theme->compBackgroundColor_ =
                 pattern->GetAttr<Color>("icon_background_color", Color(0x0c000000));
             theme->iconColor_ = pattern->GetAttr<Color>("icon_color", Color(0xe5000000));
-            theme->marginLeft_ = pattern->GetAttr<Dimension>("title_margin_left", 16.0_vp);
-            theme->marginRight_ = pattern->GetAttr<Dimension>("title_margin_right", 16.0_vp);
             theme->mainTitleFontSizeL_ = pattern->GetAttr<Dimension>("title_primary_size", 30.0_fp);
             theme->mainTitleFontSizeM_ = pattern->GetAttr<Dimension>("title_secondary_size", 26.0_fp);
             theme->mainTitleFontSizeS_ = pattern->GetAttr<Dimension>("title_tertiary_size", 20.0_fp);
@@ -155,6 +159,13 @@ public:
                 Color(0x0c000000));
             theme->backgroundPressedColor_ = pattern->GetAttr<Color>("icon_background_pressed_color",
                 Color(0x19000000));
+            theme->titlebarBackgroundBlurStyle_ = pattern->GetAttr<int>("titlebar_background_blur_style", 0);
+            theme->toolbarBackgroundBlurStyle_ = pattern->GetAttr<int>("toolbar_background_blur_style", 0);
+            theme->titlebarMarginLevelS_ = pattern->GetAttr<Dimension>("title_margin_level1", 16.0_vp);
+            theme->titlebarMarginLevelM_ = pattern->GetAttr<Dimension>("title_margin_level2", 24.0_vp);
+            theme->titlebarMarginLevelL_ = pattern->GetAttr<Dimension>("title_margin_level3", 32.0_vp);
+            theme->titlebarBreakpointS_ = pattern->GetAttr<Dimension>("titlebar_breakpoint_horizontal_s", 600.0_vp);
+            theme->titlebarBreakpointM_ = pattern->GetAttr<Dimension>("titlebar_breakpoint_horizontal_m", 840.0_vp);
         }
     };
 
@@ -199,6 +210,14 @@ public:
     InternalResource::ResourceId GetBackBtnResourceId() const
     {
         return backBtnResourceId_;
+    }
+    uint32_t GetBackSymbolId() const
+    {
+        return backSymbolId_;
+    }
+    uint32_t GetMoreSymbolId() const
+    {
+        return moreSymbolId_;
     }
     InternalResource::ResourceId GetBackResourceId() const
     {
@@ -407,14 +426,6 @@ public:
     {
         return backgroundBlurColor_;
     }
-    const Dimension& GetMarginLeft() const
-    {
-        return marginLeft_;
-    }
-    const Dimension& GetMarginRight() const
-    {
-        return marginRight_;
-    }
     const Dimension& GetMainTitleFontSizeL() const
     {
         return mainTitleFontSizeL_;
@@ -519,6 +530,34 @@ public:
     {
         return backgroundPressedColor_;
     }
+    const int& GetTitlebarBackgroundBlurStyle() const
+    {
+        return titlebarBackgroundBlurStyle_;
+    }
+    const int& GetToolbarBackgroundBlurStyle() const
+    {
+        return toolbarBackgroundBlurStyle_;
+    }
+    const Dimension& GetMarginLevelS() const
+    {
+        return titlebarMarginLevelS_;
+    }
+    const Dimension& GetMarginLevelM() const
+    {
+        return titlebarMarginLevelM_;
+    }
+    const Dimension& GetMarginLevelL() const
+    {
+        return titlebarMarginLevelL_;
+    }
+    const Dimension& GetTitlebarBreakpointS() const
+    {
+        return titlebarBreakpointS_;
+    }
+    const Dimension& GetTitlebarBreakpointM() const
+    {
+        return titlebarBreakpointM_;
+    }
 protected:
     NavigationBarTheme() = default;
 
@@ -534,6 +573,8 @@ private:
     InternalResource::ResourceId backBtnResourceId_ = InternalResource::ResourceId::NO_ID;
     InternalResource::ResourceId backResourceId_ = InternalResource::ResourceId::NO_ID;
     InternalResource::ResourceId moreResourceId_ = InternalResource::ResourceId::NO_ID;
+    uint32_t backSymbolId_;
+    uint32_t moreSymbolId_;
     Dimension menuZoneSize_;
     Dimension menuIconSize_;
     Dimension logoIconSize_;
@@ -586,8 +627,6 @@ private:
     uint32_t navBarUnfocusEffectEnable_ = 0;
     Color navBarUnfocusColor_ = Color::TRANSPARENT;
     Color backgroundBlurColor_;
-    Dimension marginLeft_;
-    Dimension marginRight_;
     Dimension mainTitleFontSizeL_;
     Dimension mainTitleFontSizeM_;
     Dimension mainTitleFontSizeS_;
@@ -614,6 +653,13 @@ private:
     double backgroundDisableAlpha_ = 0.4;
     Color backgroundHoverColor_;
     Color backgroundPressedColor_;
+    int titlebarBackgroundBlurStyle_;
+    int toolbarBackgroundBlurStyle_;
+    Dimension titlebarMarginLevelS_;
+    Dimension titlebarMarginLevelM_;
+    Dimension titlebarMarginLevelL_;
+    Dimension titlebarBreakpointS_;
+    Dimension titlebarBreakpointM_;
 };
 
 } // namespace OHOS::Ace

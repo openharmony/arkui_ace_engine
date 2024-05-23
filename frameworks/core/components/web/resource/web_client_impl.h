@@ -145,6 +145,7 @@ public:
                             std::shared_ptr<NWeb::NWebFileSelectorParams> params) override;
 
     bool OnFocus() override;
+    bool OnFocus(OHOS::NWeb::NWebFocusSource source) override;
     void OnResourceLoadError(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error) override;
     void OnHttpError(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
@@ -236,7 +237,9 @@ public:
     bool OnHandleOverrideUrlLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request) override;
     bool OnOpenAppLink(const std::string& url,
                        std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback) override;
-
+    void OnShowAutofillPopup(
+        const float offsetX, const float offsetY, const std::vector<std::string>& menu_items) override;
+    void OnHideAutofillPopup() override;
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {
         webDelegate_ = delegate;
@@ -248,7 +251,11 @@ public:
     }
 
     std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset) override;
+    void OnRenderProcessNotResponding(
+        const std::string& jsStack, int pid, OHOS::NWeb::RenderProcessNotRespondingReason reason) override;
+    void OnRenderProcessResponding() override;
 
+    void OnViewportFitChange(NWeb::ViewportFit viewportFit) override;
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;

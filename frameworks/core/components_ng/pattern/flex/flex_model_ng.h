@@ -38,6 +38,8 @@ public:
 
     void SetAlignItems(int32_t value) override;
     void SetWrapAlignment(WrapAlignment value) override;
+    void SetMainSpace(const std::optional<Dimension>& space) override;
+    void SetCrossSpace(const std::optional<Dimension>& space) override;
 
     void SetHasHeight() override {};
     void SetHasWidth() override {};
@@ -62,6 +64,8 @@ public:
     static int GetFlexJustifyContent(FrameNode* frameNode);
     static int GetFlexAlignItems(FrameNode* frameNode);
     static int GetFlexAlignContent(FrameNode* frameNode);
+    static void SetMainSpace(FrameNode* frameNode, const std::optional<Dimension>& space);
+    static void SetCrossSpace(FrameNode* frameNode, const std::optional<Dimension>& space);
 };
 
 } // namespace OHOS::Ace::NG

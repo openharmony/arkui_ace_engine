@@ -59,6 +59,8 @@ public:
     void SetOnDrop(OnDragDropFunc &&onDrop) override;
     void SetCopyOption(const CopyOptions &copyOption) override;
     void SetSmoothEdge(float value) override;
+    void SetDynamicRangeMode(DynamicRangeMode dynamicRangeMode) override;
+    void SetEnhancedImageQuality(AIImageQuality imageQuality) override;
     bool UpdateDragItemInfo(DragItemInfo &itemInfo) override;
     void EnableAnalyzer(bool isEnableAnalyzer) override;
     void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config) override;
@@ -67,6 +69,9 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& src, RefPtr<PixelMap>& pixMap,
         const std::string& bundleName, const std::string& moduleName, bool isUriPureNumber = false);
     static void InitImage(FrameNode *frameNode, std::string& src);
+    static void SetInitialSrc(FrameNode* frameNode, const std::string& src, const std::string& bundleName,
+        const std::string& moduleName, bool isUriPureNumber = false);
+    static void SetInitialPixelMap(FrameNode* frameNode, RefPtr<PixelMap>& pixMap);
     static void SetSmoothEdge(FrameNode *frameNode, float value);
     static void SetCopyOption(FrameNode *frameNode, CopyOptions copyOption);
     static void SetAutoResize(FrameNode *frameNode, bool autoResize);
@@ -88,6 +93,8 @@ public:
     static void SetOnComplete(FrameNode* frameNode, std::function<void(const LoadImageSuccessEvent& info)>&& callback);
     static void SetOnError(FrameNode* frameNode, std::function<void(const LoadImageFailEvent& info)>&& callback);
     static void SetOnSvgPlayFinish(FrameNode* frameNode, std::function<void()>&& callback);
+    static void SetOnDownloadProgress(FrameNode* frameNode,
+        std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& callback);
     static ImageSourceInfo GetSrc(FrameNode* frameNode);
     static ImageFit GetObjectFit(FrameNode* frameNode);
     static ImageInterpolation GetInterpolation(FrameNode* frameNode);
@@ -98,6 +105,17 @@ public:
     static bool GetDraggable(FrameNode* frameNode);
     static ImageRenderMode GetImageRenderMode(FrameNode* frameNode);
     static void SetResizableSlice(FrameNode *frameNode, const ImageResizableSlice& slice);
+    static ImageResizableSlice GetResizableSlice(FrameNode *frameNode);
+    static void SetDynamicRangeMode(FrameNode *frameNode, DynamicRangeMode dynamicRangeMode);
+    static void SetEnhancedImageQuality(FrameNode *frameNode, AIImageQuality imageQuality);
+    static bool GetFitOriginalSize(FrameNode *frameNode);
+    static uint32_t GetFillColor(FrameNode *frameNode);
+    static void SetPixelMap(FrameNode* frameNode, void* drawableDescriptor);
+    static void SetPixelMapArray(FrameNode* frameNode, void* animatedDrawableDescriptor);
+    static void SetResource(FrameNode* frameNode, void* resource);
+    static void EnableAnalyzer(FrameNode* frameNode, bool isEnableAnalyzer);
+    static void SetImageAnalyzerConfig(FrameNode* frameNode, void* config);
+    static RefPtr<DrawingColorFilter> GetDrawingColorFilter(FrameNode* frameNode);
 private:
     RefPtr<ImagePattern> GetImagePattern();
 };

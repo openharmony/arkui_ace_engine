@@ -124,6 +124,7 @@ private:
     void AdjustFixedItem(const RefPtr<LayoutWrapper>& childWrapper, const OptionalSizeF& frameSize, Axis axis) const;
     void MeasureMask(LayoutWrapper* layoutWrapper, int32_t childCount) const;
     void CheckMarqueeForScrollable(LayoutWrapper* layoutWrapper, int32_t childCount) const;
+    void UpdateChildMarginProperty(float rightMargin, float leftMargin, const RefPtr<LayoutWrapper>& childWrapper);
 
     std::vector<OffsetF> tabItemOffset_;
     float currentOffset_ = 0.0f;

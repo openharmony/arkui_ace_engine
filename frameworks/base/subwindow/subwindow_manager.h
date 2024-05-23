@@ -65,13 +65,16 @@ public:
     RefPtr<Subwindow> ShowPreviewNG();
     void HidePreviewNG();
     void ShowMenu(const RefPtr<Component>& newComponent);
-    void ShowMenuNG(
-        const RefPtr<NG::FrameNode>& menuNode, int32_t targetId, const NG::OffsetF& offset, bool isAboveApps = false);
+    void ShowMenuNG(const RefPtr<NG::FrameNode>& menuNode, const NG::MenuParam& menuParam,
+        const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset);
+    void ShowMenuNG(std::function<void()>&& buildFunc, std::function<void()>&& previewBuildFunc,
+        const NG::MenuParam& menuParam, const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset);
     void HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId);
     void HideMenuNG(bool showPreviewAnimation = true, bool startDrag = false);
     void UpdateHideMenuOffsetNG(const NG::OffsetF& offset = NG::OffsetF(0.0f, 0.0f));
     void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true);
-    void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo);
+    void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo,
+        const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = true);
     void HidePopupNG(int32_t targetId, int32_t instanceId = -1);
     bool CancelPopup(const std::string& id);
     void CloseMenu();
@@ -125,6 +128,7 @@ public:
     bool GetShown();
     void ResizeWindowForFoldStatus(int32_t parentContainerId);
     void MarkDirtyDialogSafeArea();
+
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow(bool isDialog = false);
 

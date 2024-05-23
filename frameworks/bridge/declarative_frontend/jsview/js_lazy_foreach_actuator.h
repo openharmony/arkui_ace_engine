@@ -123,6 +123,7 @@ public:
     void SetParentViewObj(const JSRef<JSObject>& parentViewObj)
     {
         AceType* aceType = parentViewObj->Unwrap<AceType>();
+        CHECK_NULL_VOID(aceType);
         std::string typeName = AceType::TypeName(aceType);
         if (typeName != "JSBaseNode") {
             parentView_ = parentViewObj->Unwrap<JSView>();

@@ -109,7 +109,8 @@ public:
     void MarkNeedSyncRenderTree(bool needRebuild = false) override;
 
     void BuildAllChildren();
-    RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false) override;
+    RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false,
+        bool addToRenderTree = false) override;
     void DoRemoveChildInRenderTree(uint32_t index, bool isAll) override;
     void DoSetActiveChildRange(int32_t start, int32_t end) override;
 
@@ -147,8 +148,17 @@ public:
         return builder_;
     }
 
+    void RegisterBuilderListener() {
+        CHECK_NULL_VOID(builder_);
+        if (!isRegisterListener_) {
+            builder_->RegisterDataChangeListener(Claim(this));
+            isRegisterListener_ = true;
+        }
+    }
+
     void SetOnMove(std::function<void(int32_t, int32_t)>&& onMove);
     void MoveData(int32_t from, int32_t to) override;
+    void FireOnMove(int32_t from, int32_t to) override;
     RefPtr<FrameNode> GetFrameNode(int32_t index) override;
     int32_t GetFrameNodeIndex(RefPtr<FrameNode> node) override;
     void InitDragManager(const RefPtr<FrameNode>& childNode);
@@ -157,21 +167,13 @@ private:
     void OnAttachToMainTree(bool recursive) override
     {
         UINode::OnAttachToMainTree(recursive);
-        CHECK_NULL_VOID(builder_);
-        if (!isRegisterListener_) {
-            builder_->RegisterDataChangeListener(Claim(this));
-            isRegisterListener_ = true;
-        }
+        RegisterBuilderListener();
     }
 
     void OnOffscreenProcess(bool recursive) override
     {
         UINode::OnOffscreenProcess(recursive);
-        CHECK_NULL_VOID(builder_);
-        if (!isRegisterListener_) {
-            builder_->RegisterDataChangeListener(Claim(this));
-            isRegisterListener_ = true;
-        }
+        RegisterBuilderListener();
     }
 
     void OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList) override

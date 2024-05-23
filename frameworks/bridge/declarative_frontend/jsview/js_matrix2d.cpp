@@ -29,6 +29,10 @@ void JSMatrix2d::Constructor(const JSCallbackInfo& info)
     auto matrix2d = Referenced::MakeRefPtr<JSMatrix2d>();
     matrix2d->IncRefCount();
     info.SetReturnValue(Referenced::RawPtr(matrix2d));
+    int32_t unit = 0;
+    if (info.GetInt32Arg(0, unit) && (static_cast<CanvasUnit>(unit) == CanvasUnit::PX)) {
+        matrix2d->SetUnit(CanvasUnit::PX);
+    }
 }
 
 void JSMatrix2d::Destructor(JSMatrix2d* matrix2d)
@@ -47,16 +51,13 @@ TransformParam JSMatrix2d::GetTransformInfo(const JSRef<JSObject>& obj)
     auto translateXVal = obj->GetProperty("translateX");
     auto translateYVal = obj->GetProperty("translateY");
 
-    TransformParam param = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    TransformParam param;
     JSViewAbstract::ParseJsDouble(scaleXVal, param.scaleX);
     JSViewAbstract::ParseJsDouble(rotateXVal, param.skewX);
     JSViewAbstract::ParseJsDouble(rotateYVal, param.skewY);
     JSViewAbstract::ParseJsDouble(scaleYVal, param.scaleY);
     JSViewAbstract::ParseJsDouble(translateXVal, param.translateX);
     JSViewAbstract::ParseJsDouble(translateYVal, param.translateY);
-    param.translateX = PipelineBase::Vp2PxWithCurrentDensity(param.translateX);
-    param.translateY = PipelineBase::Vp2PxWithCurrentDensity(param.translateY);
-
     return param;
 }
 
@@ -135,7 +136,8 @@ void JSMatrix2d::JsSetTranslateX(const JSCallbackInfo& info)
     if (info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
         double translateX = 0;
         JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_0], translateX);
-        translateX = PipelineBase::Vp2PxWithCurrentDensity(translateX);
+        double density = GetDensity();
+        translateX *= density;
         transform_.translateX = translateX;
     }
 }
@@ -148,7 +150,8 @@ void JSMatrix2d::JsSetTranslateY(const JSCallbackInfo& info)
     if (info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
         double translateY = 0;
         JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_0], translateY);
-        translateY = PipelineBase::Vp2PxWithCurrentDensity(translateY);
+        double density = GetDensity();
+        translateY *= density;
         transform_.translateY = translateY;
     }
 }
@@ -183,7 +186,10 @@ void JSMatrix2d::JsGetScaleY(const JSCallbackInfo& info)
 
 void JSMatrix2d::JsGetTranslateX(const JSCallbackInfo& info)
 {
-    double translateX = PipelineBase::Px2VpWithCurrentDensity(transform_.translateX);
+    double translateX = transform_.translateX;
+    double density = GetDensity();
+    density = (density == 0.0 ? 1.0 : density);
+    translateX /= density;
     auto returnValue = JSVal(ToJSValue(translateX));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
     info.SetReturnValue(returnPtr);
@@ -191,7 +197,10 @@ void JSMatrix2d::JsGetTranslateX(const JSCallbackInfo& info)
 
 void JSMatrix2d::JsGetTranslateY(const JSCallbackInfo& info)
 {
-    double translateY = PipelineBase::Px2VpWithCurrentDensity(transform_.translateY);
+    double translateY = transform_.translateY;
+    double density = GetDensity();
+    density = (density == 0.0 ? 1.0 : density);
+    translateY /= density;
     auto returnValue = JSVal(ToJSValue(translateY));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
     info.SetReturnValue(returnPtr);
@@ -236,12 +245,13 @@ void JSMatrix2d::JsRotate(const JSCallbackInfo& info)
     }
     if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_1 && info[JS_MATRIX2D_PARAMETER_COUNTS_1]->IsNumber()) {
         JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_1], rx);
-        rx = PipelineBase::Vp2PxWithCurrentDensity(rx);
     }
     if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_2 && info[JS_MATRIX2D_PARAMETER_COUNTS_2]->IsNumber()) {
         JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_2], ry);
-        ry = PipelineBase::Vp2PxWithCurrentDensity(ry);
     }
+    double density = GetDensity();
+    rx *= density;
+    ry *= density;
     NG::Matrix2D::Rotate(transform_, degree, rx, ry);
     info.SetReturnValue(info.This());
 }
@@ -255,12 +265,13 @@ void JSMatrix2d::JsTranslate(const JSCallbackInfo& info)
     double ty = 0;
     if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_0 && info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
         JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_0], tx);
-        tx = PipelineBase::Vp2PxWithCurrentDensity(tx);
     }
     if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_1 && info[JS_MATRIX2D_PARAMETER_COUNTS_1]->IsNumber()) {
         JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_1], ty);
-        ty = PipelineBase::Vp2PxWithCurrentDensity(ty);
     }
+    double density = GetDensity();
+    tx *= density;
+    ty *= density;
     NG::Matrix2D::Translate(transform_, tx, ty);
     info.SetReturnValue(info.This());
 }

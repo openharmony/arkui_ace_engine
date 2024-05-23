@@ -22,6 +22,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/core/components/tab_bar/tab_theme.h"
 #include "frameworks/core/components_ng/pattern/tabs/tabs_node.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 
 namespace OHOS::Ace::NG {
 constexpr int SIZE_OF_FIVE = 5;
@@ -306,6 +307,35 @@ ArkUINativeModuleValue TabsBridge::ResetBarBackgroundColor(ArkUIRuntimeCallInfo*
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue TabsBridge::SetBarBackgroundBlurStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (secondArg->IsNumber()) {
+        auto barBackgroundBlurStyle = secondArg->Int32Value(vm);
+        if (barBackgroundBlurStyle >= static_cast<int32_t>(BlurStyle::NO_MATERIAL) &&
+            barBackgroundBlurStyle <= static_cast<int32_t>(BlurStyle::COMPONENT_ULTRA_THICK)) {
+            GetArkUINodeModifiers()->getTabsModifier()->setBarBackgroundBlurStyle(nativeNode, barBackgroundBlurStyle);
+            return panda::JSValueRef::Undefined(vm);
+        }
+    }
+    GetArkUINodeModifiers()->getTabsModifier()->resetBarBackgroundBlurStyle(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::ResetBarBackgroundBlurStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTabsModifier()->resetBarBackgroundBlurStyle(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue TabsBridge::SetBarOverlap(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -583,37 +613,27 @@ ArkUINativeModuleValue TabsBridge::SetWidthAuto(ArkUIRuntimeCallInfo* runtimeCal
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
 
     CalcDimension width;
-    std::string calcStr;
-    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, secondArg, width)) {
-        GetArkUINodeModifiers()->getCommonModifier()->resetWidth(nativeNode);
+    ArkTSUtils::ParseJsDimensionVpNG(vm, secondArg, width);
+    if (width.Unit() == DimensionUnit::AUTO) {
+        CommonBridge::SetWidth(runtimeCallInfo);
+        GetArkUINodeModifiers()->getTabsModifier()->setTabWidthAuto(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
     } else {
-        if (LessNotEqual(width.Value(), 0.0)) {
-            width.SetValue(0.0);
-        }
-
-        if (width.Unit() == DimensionUnit::AUTO) {
-            GetArkUINodeModifiers()->getTabsModifier()->setTabWidthAuto(nativeNode);
-            return panda::JSValueRef::Undefined(vm);
-        }
-        if (width.Unit() == DimensionUnit::CALC) {
-            GetArkUINodeModifiers()->getCommonModifier()->setWidth(
-                nativeNode, 0, static_cast<int32_t>(width.Unit()), width.CalcValue().c_str());
-        } else {
-            GetArkUINodeModifiers()->getCommonModifier()->setWidth(
-                nativeNode, width.Value(), static_cast<int32_t>(width.Unit()), calcStr.c_str());
-        }
+        CommonBridge::SetWidth(runtimeCallInfo);
+        GetArkUINodeModifiers()->getTabsModifier()->resetTabWidthAuto(nativeNode);
     }
-    GetArkUINodeModifiers()->getTabsModifier()->resetTabWidthAuto(nativeNode);
+    CommonBridge::SetWidth(runtimeCallInfo);
     return panda::JSValueRef::Undefined(vm);
 }
 
 ArkUINativeModuleValue TabsBridge::ResetWidthAuto(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
+    CommonBridge::ResetWidth(runtimeCallInfo);
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getCommonModifier()->resetWidth(nativeNode);
+    GetArkUINodeModifiers()->getTabsModifier()->resetTabWidthAuto(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -626,37 +646,27 @@ ArkUINativeModuleValue TabsBridge::SetHeightAuto(ArkUIRuntimeCallInfo* runtimeCa
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     CalcDimension height;
-    std::string calcStr;
-    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, secondArg, height)) {
-        GetArkUINodeModifiers()->getCommonModifier()->resetHeight(nativeNode);
+    ArkTSUtils::ParseJsDimensionVpNG(vm, secondArg, height);
+    if (height.Unit() == DimensionUnit::AUTO) {
+        CommonBridge::SetHeight(runtimeCallInfo);
+        GetArkUINodeModifiers()->getTabsModifier()->setTabHeightAuto(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
     } else {
-        if (LessNotEqual(height.Value(), 0.0)) {
-            height.SetValue(0.0);
-        }
-        
-        if (height.Unit() == DimensionUnit::AUTO) {
-            GetArkUINodeModifiers()->getTabsModifier()->setTabHeightAuto(nativeNode);
-            return panda::JSValueRef::Undefined(vm);
-        }
-        if (height.Unit() == DimensionUnit::CALC) {
-            GetArkUINodeModifiers()->getCommonModifier()->setHeight(
-                nativeNode, height.Value(), static_cast<int32_t>(height.Unit()), height.CalcValue().c_str());
-        } else {
-            GetArkUINodeModifiers()->getCommonModifier()->setHeight(
-                nativeNode, height.Value(), static_cast<int32_t>(height.Unit()), calcStr.c_str());
-        }
+        CommonBridge::SetHeight(runtimeCallInfo);
+        GetArkUINodeModifiers()->getTabsModifier()->resetTabHeightAuto(nativeNode);
     }
-    GetArkUINodeModifiers()->getTabsModifier()->resetTabHeightAuto(nativeNode);
+    CommonBridge::SetHeight(runtimeCallInfo);
     return panda::JSValueRef::Undefined(vm);
 }
 
 ArkUINativeModuleValue TabsBridge::ResetHeightAuto(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
+    CommonBridge::ResetHeight(runtimeCallInfo);
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getCommonModifier()->resetHeight(nativeNode);
+    GetArkUINodeModifiers()->getTabsModifier()->resetTabHeightAuto(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

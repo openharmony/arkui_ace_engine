@@ -55,6 +55,7 @@ namespace {
 constexpr double FORM_CLICK_OPEN_LIMIT_DISTANCE = 20.0;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SUBCONTAINER_CACHE = 30000;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_3S = 3000;
+constexpr uint32_t DELAY_TIME_FOR_DELETE_IMAGE_NODE = 100;
 constexpr double ARC_RADIUS_TO_DIAMETER = 2.0;
 constexpr double NON_TRANSPARENT_VAL = 1.0;
 constexpr double TRANSPARENT_VAL = 0;
@@ -199,12 +200,10 @@ void FormPattern::HandleUnTrustForm()
     }
 
     isUnTrust_ = true;
-    UpdateBackgroundColorWhenUnTrustForm();
-    auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
-    layoutProperty->UpdateVisibility(visible);
     isLoaded_ = true;
+    if (!isJsCard_) {
+        LoadFormSkeleton();
+    }
 
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     auto parent = host->GetParent();
@@ -220,14 +219,10 @@ void FormPattern::UpdateBackgroundColorWhenUnTrustForm()
         return;
     }
 
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto formTheme = pipelineContext->GetTheme<FormTheme>();
-    CHECK_NULL_VOID(formTheme);
-    Color unTrustBackgroundColor = formTheme->GetUnTrustBackgroundColor();
-    host->GetRenderContext()->UpdateBackgroundColor(unTrustBackgroundColor);
+    if (colorMode != SystemProperties::GetColorMode()) {
+        colorMode = SystemProperties::GetColorMode();
+        HandleUnTrustForm();
+    }
 }
 
 void FormPattern::HandleSnapshot(uint32_t delayTime)
@@ -346,6 +341,35 @@ void FormPattern::DeleteImageNode()
     if (children.size() > 0 && child->GetTag() == V2::IMAGE_ETS_TAG) {
         host->RemoveChildAtIndex(children.size() - 1);
     }
+}
+
+void FormPattern::DeleteImageNodeAfterRecover()
+{
+    // delete image rs node
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto imageNode = GetImageNode();
+    if (imageNode) {
+        renderContext->RemoveChild(imageNode->GetRenderContext());
+
+        // delete image frame node
+        DeleteImageNode();
+    }
+
+    // set frs node non transparent
+    auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
+    CHECK_NULL_VOID(externalRenderContext);
+    externalRenderContext->SetOpacity(NON_TRANSPARENT_VAL);
+    TAG_LOGI(AceLogTag::ACE_FORM, "delete imageNode and setOpacity:1");
+
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    auto parent = host->GetParent();
+    CHECK_NULL_VOID(parent);
+    parent->MarkNeedSyncRenderTree();
+    parent->RebuildRenderContextTree();
+    renderContext->RequestNextFrame();
 }
 
 RefPtr<FrameNode> FormPattern::CreateImageNode()
@@ -512,6 +536,12 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     auto info = layoutProperty->GetRequestFormInfo().value_or(RequestFormInfo());
     info.width = Dimension(size.Width());
     info.height = Dimension(size.Height());
+    auto &&borderWidthProperty = layoutProperty->GetBorderWidthProperty();
+    float borderWidth = 0.0f;
+    if (borderWidthProperty && borderWidthProperty->topDimen) {
+        borderWidth = borderWidthProperty->topDimen->ConvertToPx();
+    }
+    info.borderWidth = borderWidth;
     layoutProperty->UpdateRequestFormInfo(info);
 
     UpdateBackgroundColorWhenUnTrustForm();
@@ -541,7 +571,8 @@ void FormPattern::AddFormComponent(const RequestFormInfo& info)
         TAG_LOGW(AceLogTag::ACE_FORM, "Invalid form size.");
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_FORM, "width: %{public}f   height: %{public}f", info.width.Value(), info.height.Value());
+    TAG_LOGI(AceLogTag::ACE_FORM, "width: %{public}f   height: %{public}f  borderWidth: %{public}f",
+        info.width.Value(), info.height.Value(), info.borderWidth);
     cardInfo_ = info;
     if (info.dimension == static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_1_1)
         || info.shape == FORM_SHAPE_CIRCLE) {
@@ -592,7 +623,7 @@ void FormPattern::UpdateFormComponent(const RequestFormInfo& info)
             formManagerBridge_->SetAllowUpdate(cardInfo_.allowUpdate);
         }
     }
-    if (cardInfo_.width != info.width || cardInfo_.height != info.height) {
+    if (cardInfo_.width != info.width || cardInfo_.height != info.height || cardInfo_.borderWidth != info.borderWidth) {
         UpdateFormComponentSize(info);
     }
     if (cardInfo_.obscuredMode != info.obscuredMode) {
@@ -620,19 +651,20 @@ void FormPattern::UpdateFormComponent(const RequestFormInfo& info)
 
 void FormPattern::UpdateFormComponentSize(const RequestFormInfo& info)
 {
-    TAG_LOGI(AceLogTag::ACE_FORM, "update size, width: %{public}f   height: %{public}f",
-        info.width.Value(), info.height.Value());
+    TAG_LOGI(AceLogTag::ACE_FORM, "update size, width: %{public}f   height: %{public}f  borderWidth: %{public}f",
+        info.width.Value(), info.height.Value(), info.borderWidth);
     cardInfo_.width = info.width;
     cardInfo_.height = info.height;
+    cardInfo_.borderWidth = info.borderWidth;
 
     if (formManagerBridge_) {
-        formManagerBridge_->NotifySurfaceChange(info.width.Value(), info.height.Value());
+        formManagerBridge_->NotifySurfaceChange(info.width.Value(), info.height.Value(), info.borderWidth);
     }
     if (isSnapshot_) {
         auto imageNode = GetImageNode();
         if (imageNode != nullptr) {
-            auto width = static_cast<float>(info.width.Value());
-            auto height = static_cast<float>(info.height.Value());
+            auto width = static_cast<float>(info.width.Value()) - info.borderWidth * DOUBLE;
+            auto height = static_cast<float>(info.height.Value()) - info.borderWidth * DOUBLE;
             CalcSize idealSize = { CalcLength(width), CalcLength(height) };
             MeasureProperty layoutConstraint;
             layoutConstraint.selfIdealSize = idealSize;
@@ -919,23 +951,25 @@ void FormPattern::InitFormManagerDelegate()
     });
 
     formManagerBridge_->AddFormSurfaceNodeCallback(
-        [weak = WeakClaim(this), instanceID](const std::shared_ptr<Rosen::RSSurfaceNode>& node, bool isDynamic) {
+        [weak = WeakClaim(this), instanceID](
+            const std::shared_ptr<Rosen::RSSurfaceNode>& node, bool isDynamic, bool isRecover) {
             ContainerScope scope(instanceID);
-            auto form = weak.Upgrade();
-            CHECK_NULL_VOID(form);
-            auto host = form->GetHost();
-            CHECK_NULL_VOID(host);
+            auto pipeline = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto executor = pipeline->GetTaskExecutor();
+            CHECK_NULL_VOID(executor);
             auto uiTaskExecutor =
-                SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-            uiTaskExecutor.PostTask([weak, instanceID, node, isDynamic] {
+                SingleTaskExecutor::Make(executor, TaskExecutor::TaskType::UI);
+            uiTaskExecutor.PostTask([weak, instanceID, node, isDynamic, isRecover] {
                 ContainerScope scope(instanceID);
                 auto form = weak.Upgrade();
                 CHECK_NULL_VOID(form);
-                form->FireFormSurfaceNodeCallback(node, isDynamic);
+                form->FireFormSurfaceNodeCallback(node, isDynamic, isRecover);
             }, "ArkUIFormFireSurfaceNodeCallback");
         });
 
-    formManagerBridge_->AddFormSurfaceChangeCallback([weak = WeakClaim(this), instanceID](float width, float height) {
+    formManagerBridge_->AddFormSurfaceChangeCallback([weak = WeakClaim(this), instanceID](float width, float height,
+        float borderWidth) {
         ContainerScope scope(instanceID);
         auto form = weak.Upgrade();
         CHECK_NULL_VOID(form);
@@ -943,11 +977,11 @@ void FormPattern::InitFormManagerDelegate()
         CHECK_NULL_VOID(host);
         auto uiTaskExecutor =
             SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        uiTaskExecutor.PostTask([weak, instanceID, width, height] {
+        uiTaskExecutor.PostTask([weak, instanceID, width, height, borderWidth] {
             ContainerScope scope(instanceID);
             auto form = weak.Upgrade();
             CHECK_NULL_VOID(form);
-            form->FireFormSurfaceChangeCallback(width, height);
+            form->FireFormSurfaceChangeCallback(width, height, borderWidth);
         }, "ArkUIFormFireSurfaceChange");
     });
 
@@ -998,31 +1032,47 @@ void FormPattern::InitFormManagerDelegate()
         });
 }
 
-void FormPattern::FireFormSurfaceNodeCallback(const std::shared_ptr<Rosen::RSSurfaceNode>& node, bool isDynamic)
+void FormPattern::ProcDeleteImageNode(bool isRecover)
+{
+    if (isRecover) {
+        DelayDeleteImageNode();
+    } else {
+        DeleteImageNode();
+    }
+}
+
+void FormPattern::FireFormSurfaceNodeCallback(
+    const std::shared_ptr<Rosen::RSSurfaceNode>& node, bool isDynamic, bool isRecover)
 {
     CHECK_NULL_VOID(node);
     node->CreateNodeInRenderThread();
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-
     RemoveFormSkeleton();
 
     auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
     CHECK_NULL_VOID(externalRenderContext);
     externalRenderContext->SetRSNode(node);
+    float boundWidth = cardInfo_.width.Value() - cardInfo_.borderWidth * DOUBLE;
+    float boundHeight = cardInfo_.height.Value() - cardInfo_.borderWidth * DOUBLE;
     if (isBeenLayout_) {
         auto geometryNode = host->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         auto size = geometryNode->GetFrameSize();
-        externalRenderContext->SetBounds(0, 0, size.Width(), size.Height());
-    } else {
-        externalRenderContext->SetBounds(0, 0, cardInfo_.width.Value(), cardInfo_.height.Value());
+        boundWidth = size.Width() - cardInfo_.borderWidth * DOUBLE;
+        boundHeight = size.Height() - cardInfo_.borderWidth * DOUBLE;
+    }
+    externalRenderContext->SetBounds(cardInfo_.borderWidth, cardInfo_.borderWidth, boundWidth, boundHeight);
+
+    if (isRecover) {
+        TAG_LOGI(AceLogTag::ACE_FORM, "surfaceNode: %{public}s setOpacity:0", std::to_string(node->GetId()).c_str());
+        externalRenderContext->SetOpacity(TRANSPARENT_VAL);
     }
 
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    if (isDynamic) {
+    if (isDynamic && !isRecover) {
         renderContext->ClearChildren();
     }
     renderContext->AddChild(externalRenderContext, 0);
@@ -1030,14 +1080,17 @@ void FormPattern::FireFormSurfaceNodeCallback(const std::shared_ptr<Rosen::RSSur
     auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
-    TAG_LOGI(AceLogTag::ACE_FORM, "VisibleType: %{public}d", static_cast<int32_t>(visible));
+    TAG_LOGI(AceLogTag::ACE_FORM, "VisibleType: %{public}d, surfaceNode: %{public}s",
+        static_cast<int32_t>(visible), std::to_string(node->GetId()).c_str());
     layoutProperty->UpdateVisibility(visible);
 
     isLoaded_ = true;
     isUnTrust_ = false;
     isFrsNodeDetached_ = false;
     isDynamic_ = isDynamic;
-    DeleteImageNode();
+
+    ProcDeleteImageNode(isRecover);
+
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     auto parent = host->GetParent();
     CHECK_NULL_VOID(parent);
@@ -1047,11 +1100,29 @@ void FormPattern::FireFormSurfaceNodeCallback(const std::shared_ptr<Rosen::RSSur
     OnLoadEvent();
 }
 
-void FormPattern::FireFormSurfaceChangeCallback(float width, float height)
+void FormPattern::DelayDeleteImageNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    uiTaskExecutor.PostDelayedTask(
+        [weak = WeakClaim(this)] {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->DeleteImageNodeAfterRecover();
+        },
+        DELAY_TIME_FOR_DELETE_IMAGE_NODE, "ArkUIFormDeleteImageNodeAfterRecover");
+}
+
+void FormPattern::FireFormSurfaceChangeCallback(float width, float height, float borderWidth)
 {
     auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
     CHECK_NULL_VOID(externalRenderContext);
-    externalRenderContext->SetBounds(0, 0, width, height);
+    externalRenderContext->SetBounds(borderWidth, borderWidth, width - borderWidth * DOUBLE,
+        height - borderWidth * DOUBLE);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
@@ -1277,6 +1348,7 @@ void FormPattern::OnActionEvent(const std::string& action)
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 auto eventAction = JsonUtil::ParseJsonString(action);
+                TAG_LOGI(AceLogTag::ACE_FORM, "UI task execute begin.");
                 pattern->FireOnRouterEvent(eventAction);
             }, "ArkUIFormFireRouterEvent");
         }

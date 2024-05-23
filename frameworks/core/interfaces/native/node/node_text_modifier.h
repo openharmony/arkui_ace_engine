@@ -16,10 +16,13 @@
 #ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_TEXT_MODIFIER_H
 #define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_TEXT_MODIFIER_H
 
+#include "interfaces/native/node/styled_string.h"
+
 #include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
-const ArkUITextModifier* GetTextModifier();
+    const ArkUITextModifier* GetTextModifier();
+    void SetOnDetectResultUpdate(ArkUINodeHandle node, void* extraParam);
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_TEXT_MODIFIER_H

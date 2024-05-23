@@ -33,6 +33,7 @@ struct GridPredictLayoutParam {
 };
 
 constexpr int32_t EMPTY_JUMP_INDEX = -2;
+constexpr int32_t JUMP_TO_BOTTOM_EDGE = -3;
 constexpr float HALF = 0.5f;
 
 // Try not to add more variables in [GridLayoutInfo] because the more state variables, the more problematic and the
@@ -45,6 +46,13 @@ struct GridLayoutInfo {
      * @return height of all lines in viewport.
      */
     float GetTotalHeightOfItemsInView(float mainGap, bool regular = true) const;
+    /**
+     * @brief skip starting lines that are outside viewport in LayoutIrregular
+     *
+     * @return [iterator to the first line in view, offset of that first line]
+     */
+    using HeightMapIt = std::map<int32_t, float>::const_iterator;
+    std::pair<HeightMapIt, float> SkipLinesAboveView(float mainGap) const;
 
     void UpdateStartIndexByStartLine()
     {
@@ -101,6 +109,23 @@ struct GridLayoutInfo {
         return (removeLastGap) ? totalHeight - mainGap : totalHeight;
     }
 
+    /**
+     * @brief set up jumpIndex_ and align_ to jump to the bottom edge of content.
+     */
+    void PrepareJumpToBottom();
+
+    /**
+     * @brief optimized function (early exit) to compare total height to [other].
+     * @param other height to compare to.
+     * @return true if total height is less than [other].
+     */
+    bool HeightSumSmaller(float other, float mainGap) const;
+
+    /**
+     * @return height sum of lines in range [startLine, endLine).
+     */
+    float GetHeightInRange(int32_t startLine, int32_t endLine, float mainGap) const;
+
     struct EndIndexInfo {
         int32_t itemIdx = -1; /**< Index of the last item. */
         int32_t y = -1;       /**< Main-axis position (line index) of the item. */
@@ -116,28 +141,29 @@ struct GridLayoutInfo {
     EndIndexInfo FindEndIdx(int32_t endLine) const;
 
     /**
-     * Checks if the item at the specified index is partially or fully above the viewport.
-     *
      * REQUIRES: Item is between startIndex_ and endIndex_. Otherwise, the result is undefined.
      *
-     * @param idx The index of the item.
+     * @param line starting line of the item.
      * @param mainGap The gap between lines.
-     * @return True if the item is at least partially above the viewport, false otherwise.
+     * @return position of the item's top edge relative to the viewport.
      */
-    bool ItemAboveViewport(int32_t idx, float mainGap) const;
+    inline float GetItemTopPos(int32_t line, float mainGap) const
+    {
+        return currentOffset_ + GetHeightInRange(startMainLineIndex_, line, mainGap);
+    }
 
     /**
-     * Checks if the item at the specified index is partially or fully below the viewport.
-     *
      * REQUIRES: Item is between startIndex_ and endIndex_. Otherwise, the result is undefined.
      *
-     * @param idx The index of the item.
+     * @param line starting line of the item.
      * @param itemHeight The number of rows the item occupies.
-     * @param mainSize The size of the viewport on the main axis.
      * @param mainGap The gap between items in the main axis.
-     * @return True if the item is at least partially below the viewport, false otherwise.
+     * @return position of the item's bottom edge relative to the viewport.
      */
-    bool ItemBelowViewport(int32_t idx, int32_t itemHeight, float mainSize, float mainGap) const;
+    inline float GetItemBottomPos(int32_t line, int32_t itemHeight, float mainGap) const
+    {
+        return currentOffset_ + GetHeightInRange(startMainLineIndex_, line + itemHeight, mainGap) - mainGap;
+    }
 
     /**
      * @brief Perform a binary search to find item with [index] in the gridMatrix_.
@@ -154,6 +180,15 @@ struct GridLayoutInfo {
      * @return The line index and column index of the found item.
      */
     std::pair<int32_t, int32_t> FindItemInRange(int32_t target) const;
+
+    /**
+     * @brief Find the offset and line index of an item's center point.
+     *
+     * @param startLine starting line index of this item.
+     * @param lineCnt number of rows the item occupies.
+     * @return [lineIdx, offset relative to this line] of the center point.
+     */
+    std::pair<int32_t, float> FindItemCenter(int32_t startLine, int32_t lineCnt, float mainGap) const;
 
     /**
      * @brief clears lineHeightMap_ and gridMatrix_ starting from line [idx]
@@ -237,13 +272,23 @@ struct GridLayoutInfo {
      * 1. all irregular lines must have the same height.
      * 2. all regular items must have the same height.
      *
-     * @param options contains irregular item info.
+     * @param options contains irregular item.
      * @param endIdx ending item index (exclusive).
      * @param mainGap gap between lines.
      * @return total height of the content.
      */
     float GetContentHeight(const GridLayoutOptions& options, int32_t endIdx, float mainGap) const;
+    void SkipStartIndexByOffset(const GridLayoutOptions& options, float mainGap);
     float GetCurrentLineHeight() const;
+
+    /**
+     * @brief Get Content Offset when using irregular layout.
+     */
+    float GetIrregularOffset(float mainGap) const;
+    /**
+     * @brief Get total content height when using irregular layout.
+     */
+    float GetIrregularHeight(float mainGap) const;
 
     bool GetLineIndexByIndex(int32_t targetIndex, int32_t& targetLineIndex) const;
     float GetTotalHeightFromZeroIndex(int32_t targetLineIndex, float mainGap) const;
@@ -259,19 +304,40 @@ struct GridLayoutInfo {
      */
     float GetDistanceToBottom(float mainSize, float heightInView, float mainGap) const;
 
+    /**
+     * @brief Transforms scrollAlign_ into other ScrollAlign values, based on current position of
+     * target item.
+     *
+     * @param height number of rows the item occupies.
+     * @param mainSize The main-axis length of the grid.
+     * @return ScrollAlign value transformed from AUTO.
+     */
+    ScrollAlign TransformAutoScrollAlign(int32_t itemIdx, int32_t height, float mainSize, float mainGap) const;
+
+    /**
+     * @param targetIdx target item's index.
+     * @param height number of rows the item occupies.
+     * @return item position to scroll to through animation.
+     */
+    float GetAnimatePosIrregular(int32_t targetIdx, int32_t height, ScrollAlign align, float mainGap) const;
+
     bool GetGridItemAnimatePos(const GridLayoutInfo& currentGridLayoutInfo, int32_t targetIndex, ScrollAlign align,
         float mainGap, float& targetPos);
 
     using MatIter = std::map<int32_t, std::map<int32_t, int32_t>>::const_iterator;
     MatIter FindStartLineInMatrix(MatIter iter, int32_t index) const;
     void ClearHeightsFromMatrix(int32_t lineIdx);
+
     Axis axis_ = Axis::VERTICAL;
 
     float currentOffset_ = 0.0f; // offset on the current top GridItem on [startMainLineIndex_]
     float prevOffset_ = 0.0f;
+    float currentHeight_ = 0.0f; // height from first item to current top GridItem on [startMainLineIndex_]
+    float prevHeight_ = 0.0f;
     float lastMainSize_ = 0.0f;
     float lastCrossSize_ = 0.0f;
     float totalHeightOfItemsInView_ = 0.0f;
+    float avgLineHeight_ = 0.0f;
 
     // additional padding to accommodate navigation bar when SafeArea is expanded
     float contentEndPadding_ = 0.0f;
@@ -319,10 +385,13 @@ struct GridLayoutInfo {
 
 private:
     float GetCurrentOffsetOfRegularGrid(float mainGap) const;
+    float GetContentHeightOfRegularGrid(float mainGap) const;
     int32_t GetItemIndexByPosition(int32_t position);
     int32_t GetPositionByItemIndex(int32_t itemIndex);
     void MoveItemsBack(int32_t from, int32_t to, int32_t itemIndex);
     void MoveItemsForward(int32_t from, int32_t to, int32_t itemIndex);
+    void GetLineHeights(
+        const GridLayoutOptions& options, float mainGap, float& regularHeight, float& irregularHeight) const;
 
     /**
      * @brief Find the number of GridItems in range [startLine, endLine].
@@ -334,6 +403,8 @@ private:
 
     int32_t currentMovingItemPosition_ = -1;
     std::map<int32_t, int32_t> positionItemIndexMap_;
+    float lastIrregularMainSize_ = 0.0f; // maybe no irregular item in current gridMatrix_
+    float lastRegularMainSize_ = 0.0f;
 };
 
 } // namespace OHOS::Ace::NG

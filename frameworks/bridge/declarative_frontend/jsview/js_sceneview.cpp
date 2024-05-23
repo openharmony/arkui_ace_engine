@@ -709,7 +709,9 @@ void JSSceneView::JSBind(BindingTarget globalObj)
     JSClass<JSSceneView>::StaticMethod("shaderImageTexture", &JSSceneView::JsShaderImageTexture);
     JSClass<JSSceneView>::StaticMethod("shaderInputBuffer", &JSSceneView::JsShaderInputBuffer);
     JSClass<JSSceneView>::StaticMethod("OnError", &JSSceneView::JsOnError);
+    JSClass<JSSceneView>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSSceneView>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSSceneView>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSSceneView>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSSceneView>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSSceneView>::InheritAndBind<JSViewAbstract>(globalObj);

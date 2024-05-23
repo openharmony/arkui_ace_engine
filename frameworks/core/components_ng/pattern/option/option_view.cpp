@@ -93,7 +93,8 @@ RefPtr<FrameNode> OptionView::CreateText(const std::string& value, const RefPtr<
     return textNode;
 }
 
-RefPtr<FrameNode> OptionView::CreateIcon(const std::string& icon, const RefPtr<FrameNode>& parent)
+RefPtr<FrameNode> OptionView::CreateIcon(const std::string& icon, const RefPtr<FrameNode>& parent,
+    const RefPtr<FrameNode>& child)
 {
     auto iconNode = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
@@ -115,13 +116,50 @@ RefPtr<FrameNode> OptionView::CreateIcon(const std::string& icon, const RefPtr<F
     margin.right = CalcLength(theme->GetIconContentPadding());
     props->UpdateMargin(margin);
 
-    iconNode->MountToParent(parent, 0);
+    if (child) {
+        parent->ReplaceChild(child, iconNode);
+    } else {
+        iconNode->MountToParent(parent, 0);
+    }
     iconNode->MarkModifyDone();
     return iconNode;
 }
 
+RefPtr<FrameNode> OptionView::CreateSymbol(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+    const RefPtr<FrameNode>& parent, const RefPtr<FrameNode>& child)
+{
+    auto iconNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    CHECK_NULL_RETURN(iconNode, nullptr);
+    auto props = iconNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(props, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, nullptr);
+    props->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(theme->GetIconSideLength()), CalcLength(theme->GetIconSideLength())));
+    props->UpdateFontSize(theme->GetEndIconWidth());
+    props->UpdateSymbolColorList({theme->GetMenuIconColor()});
+    props->UpdateAlignment(Alignment::CENTER_LEFT);
+    MarginProperty margin;
+    margin.right = CalcLength(theme->GetIconContentPadding());
+    props->UpdateMargin(margin);
+    if (symbolApply != nullptr) {
+        symbolApply(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconNode)));
+    }
+    if (child) {
+        parent->ReplaceChild(child, iconNode);
+    } else {
+        iconNode->MountToParent(parent, 0);
+    }
+    iconNode->MarkModifyDone();
+    return iconNode;
+}
+
+
 void OptionView::CreatePasteButton(const RefPtr<FrameNode>& option, const RefPtr<FrameNode>& row,
-    std::function<void()>&& onClickFunc)
+    const std::function<void()>& onClickFunc)
 {
     auto pasteNode =
         PasteButtonModelNG::GetInstance()->CreateNode(static_cast<int32_t>(PasteButtonPasteDescription::PASTE),
@@ -162,8 +200,28 @@ void OptionView::CreatePasteButton(const RefPtr<FrameNode>& option, const RefPtr
     pattern->SetPasteButton(pasteNode);
 }
 
+void OptionView::CreateOption(bool optionsHasIcon, const std::string& value,
+    const std::function<void(WeakPtr<NG::FrameNode>)>& symbol, const RefPtr<FrameNode>& row,
+    const RefPtr<FrameNode>& option, const std::function<void()>& onClickFunc)
+{
+    auto pattern = option->GetPattern<OptionPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (optionsHasIcon) {
+        auto iconNode = CreateSymbol(symbol, row);
+        pattern->SetIconNode(iconNode);
+    }
+    auto textNode = CreateText(value, row);
+    row->MountToParent(option);
+    row->MarkModifyDone();
+    pattern->SetTextNode(textNode);
+
+    auto eventHub = option->GetEventHub<OptionEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetMenuOnClick(onClickFunc);
+}
+
 void OptionView::CreateOption(bool optionsHasIcon, const std::string& value, const std::string& icon,
-    const RefPtr<FrameNode>& row, const RefPtr<FrameNode>& option, std::function<void()>&& onClickFunc)
+    const RefPtr<FrameNode>& row, const RefPtr<FrameNode>& option, const std::function<void()>& onClickFunc)
 {
     auto pattern = option->GetPattern<OptionPattern>();
     CHECK_NULL_VOID(pattern);
@@ -179,11 +237,11 @@ void OptionView::CreateOption(bool optionsHasIcon, const std::string& value, con
 
     auto eventHub = option->GetEventHub<OptionEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetMenuOnClick(std::move(onClickFunc));
+    eventHub->SetMenuOnClick(onClickFunc);
 }
 
 RefPtr<FrameNode> OptionView::CreateMenuOption(bool optionsHasIcon, const std::string& value,
-    std::function<void()>&& onClickFunc, int32_t index, const std::string& icon)
+    const std::function<void()>& onClickFunc, int32_t index, const std::function<void(WeakPtr<NG::FrameNode>)>& symbol)
 {
     auto option = Create(index);
     CHECK_NULL_RETURN(option, nullptr);
@@ -193,19 +251,40 @@ RefPtr<FrameNode> OptionView::CreateMenuOption(bool optionsHasIcon, const std::s
 #ifdef OHOS_PLATFORM
     constexpr char BUTTON_PASTE[] = "textoverlay.paste";
     if (value == Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE)) {
-        CreatePasteButton(option, row, std::move(onClickFunc));
+        CreatePasteButton(option, row, onClickFunc);
     } else {
-        CreateOption(optionsHasIcon, value, icon, row, option, std::move(onClickFunc));
+        CreateOption(optionsHasIcon, value, symbol, row, option, onClickFunc);
     }
 #else
-    CreateOption(optionsHasIcon, value, icon, row, option, std::move(onClickFunc));
+    CreateOption(optionsHasIcon, value, symbol, row, option, onClickFunc);
 #endif
     return option;
 }
 
-RefPtr<FrameNode> OptionView::CreateSelectOption(const std::string& value, const std::string& icon, int32_t index)
+RefPtr<FrameNode> OptionView::CreateMenuOption(bool optionsHasIcon, const std::string& value,
+    const std::function<void()>& onClickFunc, int32_t index, const std::string& icon)
 {
-    LOGI("create option value = %s", value.c_str());
+    auto option = Create(index);
+    CHECK_NULL_RETURN(option, nullptr);
+    auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+
+#ifdef OHOS_PLATFORM
+    constexpr char BUTTON_PASTE[] = "textoverlay.paste";
+    if (value == Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE)) {
+        CreatePasteButton(option, row, onClickFunc);
+    } else {
+        CreateOption(optionsHasIcon, value, icon, row, option, onClickFunc);
+    }
+#else
+    CreateOption(optionsHasIcon, value, icon, row, option, onClickFunc);
+#endif
+    return option;
+}
+
+RefPtr<FrameNode> OptionView::CreateSelectOption(const SelectParam& param, int32_t index)
+{
+    LOGI("create option value = %s", param.text.c_str());
     auto option = Create(index);
     auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
@@ -214,13 +293,16 @@ RefPtr<FrameNode> OptionView::CreateSelectOption(const std::string& value, const
     auto pattern = option->GetPattern<OptionPattern>();
     CHECK_NULL_RETURN(pattern, option);
     // create icon node
-    if (!icon.empty()) {
-        auto iconNode = CreateIcon(icon, row);
-        pattern->SetIconNode(iconNode);
-        pattern->SetIcon(icon);
+    RefPtr<FrameNode> iconNode;
+    if (param.symbolIcon != nullptr) {
+        iconNode = CreateSymbol(param.symbolIcon, row);
+    } else if (!param.icon.empty()) {
+        iconNode = CreateIcon(param.icon, row);
+        pattern->SetIcon(param.icon);
     }
+    pattern->SetIconNode(iconNode);
 
-    auto text = CreateText(value, row);
+    auto text = CreateText(param.text, row);
     pattern->SetTextNode(text);
     return option;
 }

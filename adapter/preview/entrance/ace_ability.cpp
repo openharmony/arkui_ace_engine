@@ -30,11 +30,13 @@
 #include "adapter/preview/entrance/ace_container.h"
 #include "adapter/preview/entrance/event_dispatcher.h"
 #include "adapter/preview/entrance/rs_dir_asset_provider.h"
+#include "adapter/preview/external/ability/stage/stage_context.h"
 #include "adapter/preview/inspector/inspector_client.h"
 #include "core/common/resource/resource_configuration.h"
 #include "frameworks/base/utils/utils.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/js_frontend/js_frontend.h"
+#include "frameworks/core/common/ace_engine.h"
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -102,11 +104,93 @@ inline void DumpAceRunArgs(const AceRunArgs& runArgs)
 
 } // namespace
 
+NG::SafeAreaInsets ConvertAvoidArea(const OHOS::Rosen::AvoidArea& avoidArea)
+{
+    return NG::SafeAreaInsets({ avoidArea.leftRect_.posX_, avoidArea.leftRect_.posX_ + avoidArea.leftRect_.width_ },
+        { avoidArea.topRect_.posY_, avoidArea.topRect_.posY_ + avoidArea.topRect_.height_ },
+        { avoidArea.rightRect_.posX_, avoidArea.rightRect_.posX_ + avoidArea.rightRect_.width_ },
+        { avoidArea.bottomRect_.posY_, avoidArea.bottomRect_.posY_ + avoidArea.bottomRect_.height_ });
+}
+class IIgnoreViewSafeAreaListenerPreview  : public OHOS::Rosen::IIgnoreViewSafeAreaListener {
+public:
+    explicit IIgnoreViewSafeAreaListenerPreview(int32_t instanceId) : instanceId_(instanceId) {}
+    ~IIgnoreViewSafeAreaListenerPreview() = default;
+
+    void SetIgnoreViewSafeArea(bool ignoreViewSafeArea)
+    {
+        LOGD("[instanceId_:%{public}d]: SetIgnoreViewSafeArea:%{public}u", instanceId_, ignoreViewSafeArea);
+        auto container = AceEngine::Get().GetContainer(instanceId_);
+        CHECK_NULL_VOID(container);
+        auto pipelineContext = container->GetPipelineContext();
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostSyncTask(
+            [&pipelineContext, container, ignoreSafeArea = ignoreViewSafeArea]() {
+                pipelineContext->SetIgnoreViewSafeArea(ignoreSafeArea);
+            },
+            TaskExecutor::TaskType::UI, "ArkUISetIgnoreViewSafeArea");
+    }
+
+private:
+    int32_t instanceId_ = -1;
+};
+
+class AvoidAreaChangedListenerPreview : public OHOS::Rosen::IAvoidAreaChangedListener {
+public:
+    explicit AvoidAreaChangedListenerPreview(int32_t instanceId) : instanceId_(instanceId) {}
+    ~AvoidAreaChangedListenerPreview() = default;
+
+    void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type)
+    {
+        LOGD("Avoid area changed, type:%{public}d, topRect: avoidArea:x:%{public}d, y:%{public}d, "
+             "width:%{public}d, height%{public}d; bottomRect: avoidArea:x:%{public}d, y:%{public}d, "
+             "width:%{public}d, height%{public}d",
+            type, avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, (int32_t)avoidArea.topRect_.width_,
+            (int32_t)avoidArea.topRect_.height_, avoidArea.bottomRect_.posX_, avoidArea.bottomRect_.posY_,
+            (int32_t)avoidArea.bottomRect_.width_, (int32_t)avoidArea.bottomRect_.height_);
+        auto container = Platform::AceContainer::GetContainerInstance(instanceId_);
+        CHECK_NULL_VOID(container);
+        auto pipeline = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipeline);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        if (type == Rosen::AvoidAreaType::TYPE_SYSTEM) {
+            systemSafeArea_ = ConvertAvoidArea(avoidArea);
+        } else if (type == Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
+            navigationBar_ = ConvertAvoidArea(avoidArea);
+        } else if (type == Rosen::AvoidAreaType::TYPE_CUTOUT) {
+            cutoutSafeArea_ = ConvertAvoidArea(avoidArea);
+        }
+        auto safeArea = systemSafeArea_;
+        auto navSafeArea = navigationBar_;
+        auto cutoutSafeArea = cutoutSafeArea_;
+        taskExecutor->PostTask(
+            [pipeline, safeArea, navSafeArea, cutoutSafeArea, type, avoidArea] {
+                if (type == Rosen::AvoidAreaType::TYPE_SYSTEM) {
+                    pipeline->UpdateSystemSafeArea(safeArea);
+                } else if (type == Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
+                    pipeline->UpdateNavSafeArea(navSafeArea);
+                } else if (type == Rosen::AvoidAreaType::TYPE_CUTOUT && pipeline->GetUseCutout()) {
+                    pipeline->UpdateCutoutSafeArea(cutoutSafeArea);
+                }
+                // for ui extension component
+                pipeline->UpdateOriginAvoidArea(avoidArea, static_cast<uint32_t>(type));
+            },
+            TaskExecutor::TaskType::UI, "ArkUIUpdateOriginAvoidArea");
+    }
+
+private:
+    NG::SafeAreaInsets systemSafeArea_;
+    NG::SafeAreaInsets navigationBar_;
+    NG::SafeAreaInsets cutoutSafeArea_;
+    int32_t instanceId_ = -1;
+};
+
 AceAbility::AceAbility(const AceRunArgs& runArgs) : runArgs_(runArgs)
 {
     static std::once_flag onceFlag;
     std::call_once(onceFlag, []() {
-        Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
+        Container::UpdateCurrent(ACE_INSTANCE_ID);
     });
     SystemProperties::SetExtSurfaceEnabled(!runArgs.containerSdkPath.empty());
     SystemProperties::InitDeviceInfo(runArgs.deviceWidth, runArgs.deviceHeight,
@@ -208,6 +292,10 @@ void AceAbility::InitEnv()
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
     CHECK_NULL_VOID(container);
     if (runArgs_.projectModel == ProjectModel::STAGE) {
+        auto pkgcontextinfo = Referenced::MakeRefPtr<StagePkgContextInfo>();
+        pkgcontextinfo->SetPkgNameList(runArgs_.packageNameList);
+        pkgcontextinfo->SetPkgContextInfoAndAliasMap(runArgs_.pkgContextInfoJsonStringMap);
+        container->SetPkgContextInfo(pkgcontextinfo);
         if (runArgs_.formsEnabled) {
             container->SetStageCardConfig(runArgs_.pageProfile, runArgs_.url);
         } else {
@@ -219,6 +307,10 @@ void AceAbility::InitEnv()
 
     auto view = AceViewPreview::CreateView(ACE_INSTANCE_ID);
     auto window = GetWindow();
+    avoidAreaChangedListener_ = new AvoidAreaChangedListenerPreview(ACE_INSTANCE_ID);
+    window->RegisterAvoidAreaChangeListener(avoidAreaChangedListener_);
+    ignoreViewSafeAreaListener_ = new IIgnoreViewSafeAreaListenerPreview(ACE_INSTANCE_ID);
+    window->RegisterIgnoreViewSafeAreaListener(ignoreViewSafeAreaListener_);
     UIEnvCallback callback = [window, id = ACE_INSTANCE_ID](const OHOS::Ace::RefPtr<PipelineContext>& context) mutable {
         CHECK_NULL_VOID(context);
         CHECK_NULL_VOID(window);
@@ -227,10 +319,12 @@ void AceAbility::InitEnv()
         director->SetRSSurfaceNode(window->GetSurfaceNode());
         auto container = AceContainer::GetContainerInstance(id);
         CHECK_NULL_VOID(container);
-        auto func = [taskExecutor = container->GetTaskExecutor(), id](const std::function<void()>& task) {
+        auto func = [taskExecutor = container->GetTaskExecutor(), id](
+            const std::function<void()>& task, uint32_t delay) {
             CHECK_NULL_VOID(taskExecutor);
             ContainerScope scope(id);
-            taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIInitEnv");
+            taskExecutor->PostDelayedTask(
+                task, TaskExecutor::TaskType::UI, delay, "ArkUIRenderServiceTask", PriorityType::HIGH);
         };
         director->SetUITaskRunner(func, id);
         director->Init();

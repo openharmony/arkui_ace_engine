@@ -17,11 +17,6 @@
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 namespace OHOS::Ace::NG {
-void RichEditorController::SetPattern(const WeakPtr<RichEditorPattern>& pattern)
-{
-    pattern_ = pattern;
-}
-
 int32_t RichEditorController::AddImageSpan(const ImageSpanOptions& options)
 {
     auto richEditorPattern = pattern_.Upgrade();
@@ -50,23 +45,6 @@ int32_t RichEditorController::AddPlaceholderSpan(const RefPtr<UINode>& customNod
     return richEditorPattern->AddPlaceholderSpan(customNode, options);
 }
 
-int32_t RichEditorController::GetCaretOffset()
-{
-    int32_t position = -1;
-    auto richEditorPattern = pattern_.Upgrade();
-    position = richEditorPattern->GetCaretPosition();
-    return position;
-}
-
-bool RichEditorController::SetCaretOffset(int32_t caretPosition)
-{
-    auto richEditorPattern = pattern_.Upgrade();
-    if (richEditorPattern) {
-        return richEditorPattern->SetCaretOffset(caretPosition);
-    }
-    return false;
-}
-
 void RichEditorController::UpdateSpanStyle(
     int32_t start, int32_t end, TextStyle textStyle, ImageSpanAttribute imageStyle)
 {
@@ -85,13 +63,6 @@ void RichEditorController::UpdateSpanStyle(
     }
     richEditorPattern->SetUpdateSpanStyle(updateSpanStyle_);
     richEditorPattern->UpdateSpanStyle(start, end, textStyle, imageStyle);
-}
-
-void RichEditorController::SetTypingStyle(struct UpdateSpanStyle& typingStyle, TextStyle textStyle)
-{
-    auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
-    CHECK_NULL_VOID(richEditorPattern);
-    richEditorPattern->SetTypingStyle(typingStyle, textStyle);
 }
 
 void RichEditorController::SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle)
@@ -125,57 +96,23 @@ SelectionInfo RichEditorController::GetSelectionSpansInfo()
     return value;
 }
 
-void RichEditorController::SetSelection(
-    int32_t selectionStart, int32_t selectionEnd, const std::optional<SelectionOptions>& options, bool isForward)
-{
-    auto richEditorPattern = pattern_.Upgrade();
-    if (richEditorPattern) {
-        richEditorPattern->SetSelection(selectionStart, selectionEnd, options, isForward);
-    }
-}
-
 void RichEditorController::DeleteSpans(const RangeOptions& options)
 {
     auto richEditorPattern = pattern_.Upgrade();
-    if (richEditorPattern) {
-        richEditorPattern->DeleteSpans(options);
-    }
-}
-
-void RichEditorController::CloseSelectionMenu()
-{
-    auto richEditorPattern = pattern_.Upgrade();
-    if (richEditorPattern) {
-        richEditorPattern->CloseSelectionMenu();
-    }
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->DeleteSpans(options);
 }
 
 void RichEditorController::UpdateParagraphStyle(int32_t start, int32_t end, const struct UpdateParagraphStyle& style)
 {
     auto richEditorPattern = pattern_.Upgrade();
-    if (richEditorPattern) {
-        richEditorPattern->UpdateParagraphStyle(start, end, style);
-    }
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->UpdateParagraphStyle(start, end, style);
 }
 std::vector<ParagraphInfo> RichEditorController::GetParagraphsInfo(int32_t start, int32_t end)
 {
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_RETURN(pattern, {});
     return pattern->GetParagraphInfo(start, end);
-}
-
-bool RichEditorController::IsEditing()
-{
-    auto richEditorPattern = pattern_.Upgrade();
-    CHECK_NULL_RETURN(richEditorPattern, false);
-    return richEditorPattern->IsEditing();
-}
-
-void RichEditorController::StopEditing()
-{
-    auto richEditorPattern = pattern_.Upgrade();
-    if (richEditorPattern) {
-        richEditorPattern->StopEditing();
-    }
 }
 } // namespace OHOS::Ace::NG

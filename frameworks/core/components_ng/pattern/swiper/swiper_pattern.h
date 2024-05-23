@@ -296,7 +296,8 @@ public:
      */
     bool SpringOverScroll(float offset);
 
-    void CheckMarkDirtyNodeForRenderIndicator(float additionalOffset = 0.0f);
+    void CheckMarkDirtyNodeForRenderIndicator(float additionalOffset = 0.0f,
+        std::optional<int32_t> nextIndex = std::nullopt);
 
     int32_t TotalCount() const;
 
@@ -617,7 +618,8 @@ public:
         return nextValidIndex_;
     }
     void UpdateNextValidIndex();
-
+    void CheckMarkForIndicatorBoundary();
+    bool IsHorizontalAndRightToLeft() const;
     void FireWillHideEvent(int32_t willHideIndex) const;
     void FireWillShowEvent(int32_t willShowIndex) const;
     void SetOnHiddenChangeForParent();
@@ -694,7 +696,7 @@ private:
     void StopPropertyTranslateAnimation(bool isFinishAnimation, bool isBeforeCreateLayoutWrapper = false);
     void UpdateOffsetAfterPropertyAnimation(float offset);
     void OnPropertyTranslateAnimationFinish(const OffsetF& offset);
-    void PlayIndicatorTranslateAnimation(float translate);
+    void PlayIndicatorTranslateAnimation(float translate, std::optional<int32_t> nextIndex = std::nullopt);
 
     // Implement of swiper controller
 
@@ -732,7 +734,6 @@ private:
     bool IsAutoPlay() const;
     bool IsDisableSwipe() const;
     bool IsShowIndicator() const;
-    float GetTranslateLength() const;
     std::pair<int32_t, SwiperItemInfo> GetFirstItemInfoInVisibleArea() const;
     std::pair<int32_t, SwiperItemInfo> GetLastItemInfoInVisibleArea() const;
     std::pair<int32_t, SwiperItemInfo> GetSecondItemInfoInVisibleArea() const;
@@ -754,7 +755,7 @@ private:
     void CheckAndSetArrowHoverState(const PointF& mousePoint);
     RectF GetArrowFrameRect(const int32_t index) const;
     float GetCustomPropertyOffset() const;
-    float GetCurrentFirstIndexStartPos() const;
+    float GetCustomPropertyTargetOffset() const;
     void UpdateAnimationProperty(float velocity);
     void TriggerAnimationEndOnForceStop();
     void TriggerAnimationEndOnSwipeToLeft();
@@ -925,6 +926,8 @@ private:
     void UpdateTabBarIndicatorCurve();
     bool CheckDragOutOfBoundary(double dragVelocity);
     void UpdateCurrentFocus();
+
+    void CreateSpringProperty();
 
     std::optional<RefPtr<UINode>> FindLazyForEachNode(RefPtr<UINode> baseNode, bool isSelfNode = true) const;
 

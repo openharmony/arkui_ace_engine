@@ -31,6 +31,7 @@
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/system_properties.h"
+#include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/display_info.h"
 #include "core/common/frontend.h"
@@ -83,6 +84,11 @@ public:
     virtual bool UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node)
     {
         return false;
+    }
+
+    virtual AceAutoFillType PlaceHolderToType(const std::string& onePlaceHolder)
+    {
+        return AceAutoFillType::ACE_UNSPECIFIED;
     }
 
     // Get the instance id of this container
@@ -295,6 +301,11 @@ public:
         useNewPipeline_ = true;
     }
 
+    void SetUsePartialUpdate()
+    {
+        usePartialUpdate_ = true;
+    }
+
     bool IsUseNewPipeline() const
     {
         return useNewPipeline_;
@@ -453,7 +464,8 @@ public:
         return false;
     }
 
-    virtual bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool &isPopup)
+    virtual bool RequestAutoFill(
+        const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool& isPopup, bool isNewPassWord = false)
     {
         return false;
     }
@@ -482,12 +494,18 @@ public:
 
     static bool LessThanAPITargetVersion(PlatformVersion version)
     {
-        return (AceApplicationInfo::GetInstance().GetApiTargetVersion() % 1000) < static_cast<int32_t>(version);
+        auto container = Current();
+        CHECK_NULL_RETURN(container, false);
+        auto apiTargetVersion = container->GetApiTargetVersion();
+        return apiTargetVersion < static_cast<int32_t>(version);
     }
 
     static bool GreatOrEqualAPITargetVersion(PlatformVersion version)
     {
-        return (AceApplicationInfo::GetInstance().GetApiTargetVersion() % 1000) >= static_cast<int32_t>(version);
+        auto container = Current();
+        CHECK_NULL_RETURN(container, false);
+        auto apiTargetVersion = container->GetApiTargetVersion();
+        return apiTargetVersion >= static_cast<int32_t>(version);
     }
 
     void SetAppBar(const RefPtr<NG::AppBarView>& appBar)
@@ -504,6 +522,16 @@ public:
 
     template<ContainerType type>
     static int32_t GenerateId();
+
+    int32_t GetApiTargetVersion() const
+    {
+        return apiTargetVersion_;
+    }
+
+    void SetApiTargetVersion(int32_t apiTargetVersion)
+    {
+        apiTargetVersion_ = apiTargetVersion % 1000;
+    }
 
 private:
     static bool IsIdAvailable(int32_t id);
@@ -531,6 +559,7 @@ private:
     bool isModule_ = false;
     std::shared_ptr<NG::DistributedUI> distributedUI_;
     RefPtr<NG::AppBarView> appBar_;
+    int32_t apiTargetVersion_ = 0;
     ACE_DISALLOW_COPY_AND_MOVE(Container);
 };
 

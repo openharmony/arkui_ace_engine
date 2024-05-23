@@ -35,6 +35,11 @@ RefPtr<AppTheme> AppTheme::Builder::Build(const RefPtr<ThemeConstants>& themeCon
     if (color != Color(0xff000000)) {
         theme->focusColor_ = color;
     }
+
+    auto hoverColor = themeStyle->GetAttr<Color>(THEME_ATTR_HOVER_COLOR, Color::FromRGBO(0, 0, 0, 0.05));
+    if (hoverColor != Color(0xff000000)) {
+        theme->hoverHighlightEnd_ = hoverColor;
+    }
     return theme;
 }
 } // namespace OHOS::Ace

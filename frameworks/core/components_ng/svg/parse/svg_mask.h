@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@
 #include "core/components_ng/render/drawing.h"
 #endif
 
+#include "frameworks/core/components_ng/svg/parse/svg_attributes_parser.h"
 #include "frameworks/core/components_ng/svg/parse/svg_quote.h"
 
 namespace OHOS::Ace::NG {
@@ -40,6 +41,7 @@ protected:
     void OnDrawTraversedAfter(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color) override;
 
     double ParseUnitsAttr(const Dimension& attr, double value);
+    bool ParseAndSetSpecializedAttr(const std::string& name, const std::string& value) override;
 
 private:
     Dimension x_ = Dimension(-0.1, DimensionUnit::PERCENT); // x-axis default value
@@ -48,6 +50,8 @@ private:
     Dimension width_ = Dimension(1.2, DimensionUnit::PERCENT); // masking area height default  value
     bool isDefaultMaskUnits_ = true;
     bool isDefaultMaskContentUnits_ = true;
+
+    SvgMaskAttribute maskAttr_;
 
 #ifndef USE_ROSEN_DRAWING
     SkRect maskBounds_;

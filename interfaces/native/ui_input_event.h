@@ -57,6 +57,7 @@ typedef enum {
     ARKUI_UIINPUTEVENT_TYPE_UNKNOWN = 0,
     ARKUI_UIINPUTEVENT_TYPE_TOUCH = 1,
     ARKUI_UIINPUTEVENT_TYPE_AXIS = 2,
+    ARKUI_UIINPUTEVENT_TYPE_MOUSE = 3,
 } ArkUI_UIInputEvent_Type;
 
 /**
@@ -140,6 +141,42 @@ typedef enum {
      */
     HTM_NONE,
 } HitTestMode;
+
+/**
+ * @brief 定义鼠标事件的Action Code。
+ *
+ * @since 12
+ */
+enum {
+    /** 无效行为 */
+    UI_MOUSE_EVENT_ACTION_UNKNOWN = 0,
+    /** 鼠标按键按下。 */
+    UI_MOUSE_EVENT_ACTION_PRESS = 1,
+    /** 鼠标按键松开。 */
+    UI_MOUSE_EVENT_ACTION_RELEASE = 2,
+    /** 鼠标移动。 */
+    UI_MOUSE_EVENT_ACTION_MOVE = 3,
+};
+
+/**
+ * @brief 定义鼠标事件的按键类型。
+ *
+ * @since 12
+ */
+enum {
+    /** 无按键。 */
+    UI_MOUSE_EVENT_BUTTON_NONE = 0,
+    /** 鼠标左键。 */
+    UI_MOUSE_EVENT_BUTTON_LEFT = 1,
+    /** 鼠标右键。 */
+    UI_MOUSE_EVENT_BUTTON_RIGHT = 2,
+    /** 鼠标中键。 */
+    UI_MOUSE_EVENT_BUTTON_MIDDLE = 3,
+    /** 鼠标左侧后退键。 */
+    UI_MOUSE_EVENT_BUTTON_BACK = 4,
+    /** 鼠标左侧前进键。 */
+    UI_MOUSE_EVENT_BUTTON_FORWARD = 5,
+};
 
 /**
  * @brief Obtains the type of this UI input event.
@@ -628,6 +665,24 @@ double OH_ArkUI_AxisEvent_GetPinchAxisScaleValue(const ArkUI_UIInputEvent* event
  * @since 12
  */
 int32_t OH_ArkUI_PointerEvent_SetInterceptHitTestMode(const ArkUI_UIInputEvent* event, HitTestMode mode);
+
+/**
+ * @brief 获取鼠标事件的按键类型的值。
+ *
+ * @param event 表示指向当前UI输入事件的指针。
+ * @return 返回鼠标按键类型，1为左键，2为右键，3为中键，4为后退键，5为前进键。
+ * @since 12
+ */
+int32_t OH_ArkUI_MouseEvent_GetMouseButton(const ArkUI_UIInputEvent* event);
+
+/**
+ * @brief 获取鼠标事件的鼠标动作类型的值。
+ *
+ * @param event 表示指向当前UI输入事件的指针。
+ * @return 返回鼠标动作类型，1表示按键按下，2表示按键松开，3表示鼠标移动。
+ * @since 12
+ */
+int32_t OH_ArkUI_MouseEvent_GetMouseAction(const ArkUI_UIInputEvent* event);
 
 #ifdef __cplusplus
 };

@@ -156,6 +156,21 @@ public:
         return isDetached_;
     }
 
+    void SetUnit(CanvasUnit unit)
+    {
+        unit_ = unit;
+    }
+
+    CanvasUnit GetUnit()
+    {
+        return unit_;
+    }
+
+    double GetDensity()
+    {
+        return (GetUnit() == CanvasUnit::DEFAULT) ? PipelineBase::GetCurrentDensity() : 1.0;
+    }
+
     bool IsGetContext() const
     {
         return isGetContext_;
@@ -184,6 +199,7 @@ private:
     double width_ = 0.0f;
     double height_ = 0.0f;
     ContextType contextType_;
+    CanvasUnit unit_ = CanvasUnit::DEFAULT;
     bool isGetContext_ = false;
     bool isDetached_ = false;
 };

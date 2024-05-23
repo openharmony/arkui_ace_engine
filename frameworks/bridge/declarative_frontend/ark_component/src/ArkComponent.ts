@@ -25,7 +25,8 @@ function getUINativeModule(): any {
 enum ModifierType {
   ORIGIN = 0,
   STATE = 1,
-  FRAME_NODE = 2
+  FRAME_NODE = 2,
+  EXPOSE_MODIFIER = 3,
 }
 
 type AttributeModifierWithKey = ModifierWithKey<number | string | boolean | object>;
@@ -1434,6 +1435,24 @@ class ClipModifier extends ModifierWithKey<boolean | object> {
   }
 }
 
+class ClipShapeModifier extends ModifierWithKey<object> {
+  constructor(value: object) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('clipShape');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetClipShape(node);
+    } else {
+      getUINativeModule().common.setClipShape(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return true;
+  }
+}
+
 class MaskModifier extends ModifierWithKey<boolean | object> {
   constructor(value: boolean | object) {
     super(value);
@@ -1444,6 +1463,24 @@ class MaskModifier extends ModifierWithKey<boolean | object> {
       getUINativeModule().common.resetMask(node);
     } else {
       getUINativeModule().common.setMask(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return true;
+  }
+}
+
+class MaskShapeModifier extends ModifierWithKey<object> {
+  constructor(value: object) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('maskShape');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetMaskShape(node);
+    } else {
+      getUINativeModule().common.setMaskShape(node, this.value);
     }
   }
 
@@ -1617,6 +1654,34 @@ class OnDisappearModifier extends ModifierWithKey<VoidCallback> {
       getUINativeModule().common.resetOnDisappear(node);
     } else {
       getUINativeModule().common.setOnDisappear(node, this.value);
+    }
+  }
+}
+
+class OnAttachModifier extends ModifierWithKey<VoidCallback> {
+  constructor(value: VoidCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onAttach');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnAttach(node);
+    } else {
+      getUINativeModule().common.setOnAttach(node, this.value);
+    }
+  }
+}
+
+class OnDetachModifier extends ModifierWithKey<VoidCallback> {
+  constructor(value: VoidCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onDetach');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnDetach(node);
+    } else {
+      getUINativeModule().common.setOnDetach(node, this.value);
     }
   }
 }
@@ -2237,6 +2302,24 @@ class ObscuredModifier extends ModifierWithKey<Array<ObscuredReasons>> {
   }
 }
 
+class ForegroundEffectModifier extends ModifierWithKey<ForegroundEffectOptions> {
+  constructor(value: ForegroundEffectOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('foregroundEffect');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetForegroundEffect(node);
+    } else {
+      getUINativeModule().common.setForegroundEffect(node, this.value.radius);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !(this.value.radius === this.stageValue.radius);
+  }
+}
+
 class BackgroundEffectModifier extends ModifierWithKey<BackgroundEffectOptions> {
   constructor(options: BackgroundEffectOptions) {
     super(options);
@@ -2674,6 +2757,21 @@ class KeyBoardShortCutModifier extends ModifierWithKey<ArkKeyBoardShortCut> {
   }
 }
 
+class CustomPropertyModifier extends ModifierWithKey<ArkCustomProperty> {
+  constructor(value: ArkCustomProperty) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('customProperty');
+  applyPeer(node: KNode, reset: boolean): void {
+    const nodeId = getUINativeModule().frameNode.getIdByNodePtr(node);
+    if (reset) {
+      __removeCustomProperty__(nodeId, this.value.key);
+    } else {
+      __setValidCustomProperty__(nodeId, this.value.key, this.value.value);
+    }
+  }
+}
+
 class TransitionModifier extends ModifierWithKey<object> {
   constructor(value: object) {
     super(value);
@@ -2698,6 +2796,18 @@ class SharedTransitionModifier extends ModifierWithKey<ArkSharedTransition> {
       getUINativeModule().common.resetSharedTransition(node);
     } else {
       getUINativeModule().common.setSharedTransition(node, this.value.id, this.value.options);
+    }
+  }
+}
+
+class SystemBarEffectModifier extends ModifierWithKey<null> {
+  constructor(value: null) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('systemBarEffect');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (!reset) {
+      getUINativeModule().common.setSystemBarEffect(node, true);
     }
   }
 }
@@ -2757,6 +2867,8 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         value.applyStage(this.nativePtr);
         getUINativeModule().frameNode.propertyUpdate(this.nativePtr);
       })
+    } else if (classType === ModifierType.EXPOSE_MODIFIER || classType === ModifierType.STATE) {
+      this._modifiersWithKeys = new ObservedMap();
     } else {
       this._modifiersWithKeys = new Map();
     }
@@ -3444,6 +3556,15 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
+  onAttach(event: () => void): this {
+    modifierWithKey(this._modifiersWithKeys, OnAttachModifier.identity, OnAttachModifier, event);
+    return this;
+  }
+
+  onDetach(event: () => void): this {
+    modifierWithKey(this._modifiersWithKeys, OnDetachModifier.identity, OnDetachModifier, event);
+    return this;
+  }
   onAreaChange(event: (oldValue: Area, newValue: Area) => void): this {
     modifierWithKey(this._modifiersWithKeys, OnAreaChangeModifier.identity, OnAreaChangeModifier, event);
     return this;
@@ -3733,7 +3854,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  motionPath(value: MotionBlurOptions): this {
+  motionBlur(value: MotionBlurOptions): this {
     modifierWithKey(this._modifiersWithKeys, MotionBlurModifier.identity, MotionBlurModifier, value);
     return this;
   }
@@ -3901,6 +4022,18 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   attributeModifier(modifier: AttributeModifier<CommonAttribute>): this {
     return this;
   }
+
+  customProperty(key: string, value: object): this {
+    const property = new ArkCustomProperty();
+    property.key = key;
+    property.value = value;
+    modifierWithKey(this._modifiersWithKeys, CustomPropertyModifier.identity, CustomPropertyModifier, property);
+    return this;
+  }
+
+  systemBarEffect(value:null):this {
+    modifierWithKey(this._modifiersWithKeys, SystemBarEffectModifier.identity, SystemBarEffectModifier, null);
+  }
 }
 
 const isNull = (val: any) => typeof val === 'object' && val === null;
@@ -3920,6 +4053,8 @@ class UICommonEvent {
   private _touchEvent?: (event: TouchEvent) => void;
   private _onAppearEvent?: () => void;
   private _onDisappearEvent?: () => void;
+  private _onAttachEvent?: () => void;
+  private _onDetachEvent?: () => void;
   private _onKeyEvent?: (event: KeyEvent) => void;
   private _onFocusEvent?: () => void;
   private _onBlur?: () => void;
@@ -3948,6 +4083,14 @@ class UICommonEvent {
   setOnDisappear(callback: () => void): void {
     this._onDisappearEvent = callback;
     getUINativeModule().frameNode.setOnDisappear(this._nodePtr, callback, this._instanceId);
+  }
+  setOnAttach(callback: () => void): void {
+    this._onAttachEvent = callback;
+    getUINativeModule().frameNode.setOnAttach(this._nodePtr, callback, this._instanceId);
+  }
+  setOnDetach(callback: () => void): void {
+    this._onDetachEvent = callback;
+    getUINativeModule().frameNode.setOnDetach(this._nodePtr, callback, this._instanceId);
   }
   setOnKeyEvent(callback: (event: KeyEvent) => void): void {
     this._onKeyEvent = callback;
@@ -4185,4 +4328,56 @@ function __gestureModifier__(modifier) {
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = new ArkComponent(nativeNode);
   applyGesture(modifier, component);
+}
+
+const __elementIdToCustomProperties__ = new Map();
+
+function __setValidCustomProperty__(nodeId: number, key: string, value: Object): void {
+  if (!__elementIdToCustomProperties__.has(nodeId)) {
+    __elementIdToCustomProperties__.set(nodeId, new Map());
+  }
+
+  const customProperties = __elementIdToCustomProperties__.get(nodeId);
+
+  if (customProperties) {
+    customProperties.set(key, value);
+  }
+}
+
+function __removeCustomProperty__(nodeId: number, key: string): boolean {
+  if (__elementIdToCustomProperties__.has(nodeId)) {
+    const customProperties = __elementIdToCustomProperties__.get(nodeId);
+
+    if (customProperties) {
+      customProperties.delete(key);
+      return customProperties.size > 0;
+    }
+  }
+
+  return false;
+}
+
+function __removeCustomProperties__(nodeId: number): void {
+  __elementIdToCustomProperties__.delete(nodeId);
+}
+
+function __getCustomProperty__(nodeId: number, key: string): Object | undefined {
+  if (__elementIdToCustomProperties__.has(nodeId)) {
+    const customProperties = __elementIdToCustomProperties__.get(nodeId);
+
+    if (customProperties) {
+      return customProperties.get(key);
+    }
+  }
+
+  return undefined;
+}
+
+function __setCustomProperty__(nodeId: number, key: string, value: Object): boolean {
+  if (value !== undefined) {
+    __setValidCustomProperty__(nodeId, key, value);
+    return true;
+  } else {
+    return __removeCustomProperty__(nodeId, key);
+  }
 }

@@ -29,6 +29,11 @@
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/pipeline/base/element_register.h"
 
+struct _ArkUINodeAdapter {
+    OHOS::Ace::RefPtr<OHOS::Ace::NG::NativeLazyForEachBuilder> builder;
+    OHOS::Ace::RefPtr<OHOS::Ace::NG::LazyForEachNode> node;
+};
+
 namespace OHOS::Ace::NG {
 
 void NativeLazyForEachBuilder::RegisterDataChangeListener(const RefPtr<V2::DataChangeListener>& listener)
@@ -86,6 +91,15 @@ LazyForEachChild NativeLazyForEachBuilder::OnGetChildByIndex(
     if (itemIter != cachedItems.end()) {
         child.second = itemIter->second.second;
         cachedItems.erase(itemIter);
+        // For not change C-API receiver
+        if (needUpdateEvent_) {
+            getIdevent.type = ON_UPDATE_NODE;
+            getIdevent.handle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(child.second));
+            if (!getIdevent.idSet) {
+                getIdevent.id = index;
+            }
+            receiver_(&getIdevent);
+        }
         return child;
     }
     ArkUINodeAdapterEvent getChildEvent {
@@ -124,19 +138,148 @@ ArkUI_Int32 NativeLazyForEachBuilder::GetAllItem(ArkUINodeHandle** items, ArkUI_
     return ERROR_CODE_NO_ERROR;
 }
 
-} // namespace OHOS::Ace::NG
+UINodeAdapter::UINodeAdapter(ArkUINodeAdapterHandle handle) : handle_(handle)
+{
+    CHECK_NULL_VOID(handle_);
+    CHECK_NULL_VOID(handle_->builder);
+    handle_->builder->SetUserData(this);
+    handle_->builder->SetReceiver([](ArkUINodeAdapterEvent* event) {
+        CHECK_NULL_VOID(event);
+        auto adapter = reinterpret_cast<UINodeAdapter*>(event->extraParam);
+        if (adapter != nullptr) {
+            adapter->OnEventReceived(event);
+        }
+    });
+    handle_->builder->SetNeedUpdateEvent(true);
+}
 
-struct _ArkUINodeAdapter {
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::NativeLazyForEachBuilder> builder;
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::LazyForEachNode> node;
-};
+UINodeAdapter::~UINodeAdapter()
+{
+    if (handle_ != nullptr) {
+        delete handle_;
+        handle_ = nullptr;
+    }
+}
+
+void UINodeAdapter::OnEventReceived(ArkUINodeAdapterEvent* event)
+{
+    switch (event->type) {
+        case ON_ATTACH_TO_NODE:
+            if (attachToNodeFunc_) {
+                attachToNodeFunc_(event->handle);
+            }
+            break;
+        case ON_DETACH_FROM_NODE:
+            if (detachFromNodeFunc_) {
+                detachFromNodeFunc_();
+            }
+            break;
+        case ON_GET_NODE_ID:
+            if (getChildIdFunc_) {
+                auto id = getChildIdFunc_(event->index);
+                event->idSet = true;
+                event->id = id;
+            }
+            break;
+        case ON_ADD_NODE_TO_ADAPTER:
+            if (createNewChildFunc_) {
+                auto handle = createNewChildFunc_(event->index);
+                event->nodeSet = true;
+                event->handle = handle;
+            }
+            break;
+        case ON_REMOVE_NODE_FROM_ADAPTER:
+            if (disposeChildFunc_) {
+                disposeChildFunc_(event->handle, event->id);
+            }
+            break;
+        case ON_UPDATE_NODE:
+            if (updateChildFunc_) {
+                updateChildFunc_(event->handle, event->id);
+            }
+            break;
+        default:
+            break;
+    }
+}
+
+void UINodeAdapter::SetTotalNodeCount(uint32_t count)
+{
+    CHECK_NULL_VOID(handle_);
+    CHECK_NULL_VOID(handle_->builder);
+    handle_->builder->SetNodeTotalCount(count);
+}
+
+uint32_t UINodeAdapter::GetTotalNodeCount() const
+{
+    CHECK_NULL_RETURN(handle_, 0);
+    CHECK_NULL_RETURN(handle_->builder, 0);
+    return handle_->builder->GetNodeTotalCount();
+}
+
+void UINodeAdapter::NotifyItemReloaded()
+{
+    CHECK_NULL_VOID(handle_);
+    CHECK_NULL_VOID(handle_->builder);
+    handle_->builder->NotifyItemReloaded();
+}
+
+void UINodeAdapter::NotifyItemChanged(uint32_t start, uint32_t count)
+{
+    CHECK_NULL_VOID(handle_);
+    CHECK_NULL_VOID(handle_->builder);
+    handle_->builder->NotifyItemChanged(start, count);
+}
+
+void UINodeAdapter::NotifyItemInserted(uint32_t start, uint32_t count)
+{
+    CHECK_NULL_VOID(handle_);
+    CHECK_NULL_VOID(handle_->builder);
+    handle_->builder->NotifyItemInserted(start, count);
+}
+
+void UINodeAdapter::NotifyItemMoved(uint32_t from, uint32_t to)
+{
+    CHECK_NULL_VOID(handle_);
+    CHECK_NULL_VOID(handle_->builder);
+    handle_->builder->NotifyItemMoved(from, to);
+}
+
+void UINodeAdapter::NotifyItemRemoved(uint32_t start, uint32_t count)
+{
+    CHECK_NULL_VOID(handle_);
+    CHECK_NULL_VOID(handle_->builder);
+    handle_->builder->NotifyItemRemoved(start, count);
+}
+
+std::vector<ArkUINodeHandle> UINodeAdapter::GetAllItems()
+{
+    std::vector<ArkUINodeHandle> items;
+    CHECK_NULL_RETURN(handle_, items);
+    CHECK_NULL_RETURN(handle_->builder, items);
+    
+    ArkUINodeHandle* itemArray = nullptr;
+    uint32_t size = 0;
+    handle_->builder->GetAllItem(&itemArray, &size);
+    for (uint32_t i = 0; i < size; i++) {
+        items.push_back(itemArray[i]);
+    }
+    if (itemArray != nullptr) {
+        delete[] itemArray;
+    }
+    return items;
+}
+
+} // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NodeAdapter {
 namespace {
 
 ArkUINodeAdapterHandle Create()
 {
-    return new _ArkUINodeAdapter { .builder = AceType::MakeRefPtr<NG::NativeLazyForEachBuilder>() };
+    auto* adapter = new _ArkUINodeAdapter { .builder = AceType::MakeRefPtr<NG::NativeLazyForEachBuilder>() };
+    adapter->builder->SetHostHandle(adapter);
+    return adapter;
 }
 
 void Dispose(ArkUINodeAdapterHandle handle)
@@ -149,6 +292,9 @@ void Dispose(ArkUINodeAdapterHandle handle)
         if (parent) {
             parent->RemoveChild(handle->node);
         }
+    }
+    if (handle->builder) {
+        handle->builder->SetHostHandle(nullptr);
     }
     delete handle;
 }
@@ -257,6 +403,11 @@ void DetachHostNode(ArkUINodeHandle host)
     const auto& child = AceType::DynamicCast<NG::LazyForEachNode>(uiNode->GetChildAtIndex(0));
     CHECK_NULL_VOID(child);
     uiNode->RemoveChild(child);
+    const auto& builder = AceType::DynamicCast<NG::NativeLazyForEachBuilder>(child->GetBuilder());
+    CHECK_NULL_VOID(builder);
+    auto handle = builder->GetHostHandle();
+    CHECK_NULL_VOID(handle);
+    handle->node = nullptr;
 }
 
 ArkUINodeAdapterHandle GetNodeAdapter(ArkUINodeHandle host)

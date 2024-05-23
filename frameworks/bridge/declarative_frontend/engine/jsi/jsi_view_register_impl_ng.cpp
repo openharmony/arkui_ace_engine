@@ -20,6 +20,7 @@
 #include "bridge/declarative_frontend/jsview/js_base_node.h"
 #include "bridge/declarative_frontend/jsview/js_content_slot.h"
 #include "bridge/declarative_frontend/jsview/js_dynamic_component.h"
+#include "bridge/declarative_frontend/jsview/js_isolated_component.h"
 #include "bridge/declarative_frontend/jsview/js_node_container.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "bridge/declarative_frontend/style_string/js_span_object.h"
@@ -52,7 +53,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_circle.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_circle_shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_clipboard.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_color_metrics.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_column.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_column_split.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_common_view.h"
@@ -162,6 +162,7 @@
 #include "frameworks/bridge/declarative_frontend/ng/frontend_delegate_declarative_ng.h"
 #include "frameworks/bridge/declarative_frontend/style_string/js_span_object.h"
 #include "frameworks/bridge/declarative_frontend/style_string/js_span_string.h"
+#include "frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_with_theme.h"
 
 #ifdef USE_COMPONENTS_LIB
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
@@ -185,6 +186,7 @@
 #endif
 #ifdef FORM_SUPPORTED
 #include "frameworks/bridge/declarative_frontend/jsview/js_form.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_form_menu_item.h"
 #endif
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "frameworks/bridge/declarative_frontend/jsview/js_plugin.h"
@@ -440,6 +442,8 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSGestureSpan::JSBind(globalObj);
     JSTextShadowSpan::JSBind(globalObj);
     JSImageAttachment::JSBind(globalObj);
+    JSParagraphStyleSpan::JSBind(globalObj);
+    JSLineHeightSpan::JSBind(globalObj);
     JSTabs::JSBind(globalObj);
     JSTabContent::JSBind(globalObj);
     JSTabsController::JSBind(globalObj);
@@ -453,8 +457,10 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSCounter::JSBind(globalObj);
     JSCalendarPicker::JSBind(globalObj);
     JSScopeUtil::JSBind(globalObj);
+    JSWithTheme::JSBind(globalObj);
     JSRichEditor::JSBind(globalObj);
     JSRichEditorController::JSBind(globalObj);
+    JSRichEditorStyledStringController::JSBind(globalObj);
 #ifdef VIDEO_SUPPORTED
     JSVideo::JSBind(globalObj);
     JSVideoController::JSBind(globalObj);
@@ -465,6 +471,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
 #endif
 #ifdef FORM_SUPPORTED
     JSForm::JSBind(globalObj);
+    JSFormMenuItem::JSBind(globalObj);
 #endif
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     JSPlugin::JSBind(globalObj);
@@ -492,6 +499,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSUIExtensionProxy::JSBind(globalObj);
 #if defined(DYNAMIC_COMPONENT_SUPPORT)
     JSDynamicComponent::JSBind(globalObj);
+    JSIsolatedComponent::JSBind(globalObj);
 #endif
 #endif
     JSRating::JSBind(globalObj);
@@ -581,7 +589,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSCommonView::JSBind(globalObj);
     JSRecycleView::JSBind(globalObj);
     JSLinearGradient::JSBind(globalObj);
-    JSColorMetrics::JSBind(globalObj);
     JSNavigation::JSBind(globalObj);
     JSNavPathStack::JSBind(globalObj);
     JSTextField::JSBind(globalObj);

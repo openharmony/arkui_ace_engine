@@ -51,6 +51,7 @@ TimeEventProxyOhos::TimeEventProxyOhos()
     MatchingSkills matchingSkills;
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_TIME_CHANGED);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_TIMEZONE_CHANGED);
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SCREEN_ON);
 
     CommonEventSubscribeInfo subscribeInfo(matchingSkills);
     subscribeInfo.SetThreadMode(CommonEventSubscribeInfo::ThreadMode::HANDLER);

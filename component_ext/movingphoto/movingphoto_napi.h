@@ -25,6 +25,7 @@ napi_value JsMuted(napi_env env, napi_callback_info info);
 napi_value JsObjectFit(napi_env env, napi_callback_info info);
 napi_value JsOnStart(napi_env env, napi_callback_info info);
 napi_value JsOnStop(napi_env env, napi_callback_info info);
+napi_value JsOnPause(napi_env env, napi_callback_info info);
 napi_value JsOnFinish(napi_env env, napi_callback_info info);
 napi_value JsOnError(napi_env env, napi_callback_info info);
 napi_value StartPlayback(napi_env env, napi_callback_info info);

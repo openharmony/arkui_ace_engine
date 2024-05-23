@@ -217,6 +217,16 @@ bool GetHasIcon(const std::vector<OptionParam>& params)
     return false;
 }
 
+bool GetHasSymbol(const std::vector<OptionParam>& params)
+{
+    for (size_t i = 0; i < params.size(); ++i) {
+        if (params[i].symbol != nullptr) {
+            return true;
+        }
+    }
+    return false;
+}
+
 OffsetF GetFloatImageOffset(const RefPtr<FrameNode>& frameNode)
 {
     auto offsetToWindow = frameNode->GetPaintRectOffset();
@@ -311,6 +321,7 @@ void ShowGatherAnimation(const RefPtr<FrameNode>& imageNode, const RefPtr<FrameN
     CHECK_NULL_VOID(mainPipeline);
     auto manager = mainPipeline->GetOverlayManager();
     CHECK_NULL_VOID(manager);
+    manager->UpdateGatherNodeToTop();
     auto gatherNode = manager->GetGatherNode();
     CHECK_NULL_VOID(gatherNode);
     auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -384,6 +395,7 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& menuN
     CHECK_NULL_VOID(imageGestureHub);
     InitPanEvent(imageGestureHub, menuNode);
 
+    ShowGatherAnimation(target, menuNode);
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
     imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(imageOffset.GetX()), Dimension(imageOffset.GetY())));
@@ -392,7 +404,6 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& menuN
     auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     ShowPixelMapAnimation(imageNode, menuNode);
-    ShowGatherAnimation(imageNode, menuNode);
 }
 
 void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& menuWrapperNode)
@@ -403,21 +414,27 @@ void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& men
         parent = parent->GetParent();
         CHECK_NULL_VOID(parent);
     }
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto containerId = Container::CurrentId();
+    if (containerId >= MIN_SUBCONTAINER_ID) {
+        containerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
+    }
+    ContainerScope scope(containerId);
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
+    auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
     if (!manager->GetHasFilter() && !manager->GetIsOnAnimation()) {
         bool isBindOverlayValue = targetNode->GetLayoutProperty()->GetIsBindOverlayValue(false);
-        CHECK_NULL_VOID(isBindOverlayValue && (SystemProperties::GetDeviceType() == DeviceType::PHONE ||
-                                                  SystemProperties::GetDeviceType() == DeviceType::TABLET));
+        CHECK_NULL_VOID(isBindOverlayValue && menuTheme->GetHasFilter());
         // insert columnNode to rootNode
         auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<LinearLayoutPattern>(true));
         columnNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
         // set filter
-        auto container = Container::Current();
-        CHECK_NULL_VOID(container);
         if (container->IsScenceBoardWindow()) {
             auto windowScene = manager->FindWindowScene(targetNode);
             manager->MountFilterToWindowScene(columnNode, windowScene);
@@ -432,6 +449,7 @@ void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& men
             columnNode->MountToParent(parent);
             columnNode->OnMountToParentDone();
             manager->SetHasFilter(true);
+            manager->SetFilterActive(true);
             manager->SetFilterColumnNode(columnNode);
             parent->MarkDirtyNode(NG::PROPERTY_UPDATE_BY_CHILD_REQUEST);
             manager->ShowFilterAnimation(columnNode);
@@ -472,10 +490,17 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_RETURN(menuPattern, nullptr);
     bool optionsHasIcon = GetHasIcon(params);
+    bool optionsHasSymbol = GetHasSymbol(params);
+    RefPtr<FrameNode> optionNode = nullptr;
     // append options to menu
     for (size_t i = 0; i < params.size(); ++i) {
-        auto optionNode = OptionView::CreateMenuOption(
-            optionsHasIcon, params[i].value, std::move(params[i].action), i, params[i].icon);
+        if (params[i].symbol != nullptr) {
+            optionNode = OptionView::CreateMenuOption(
+                optionsHasSymbol, params[i].value, params[i].action, i, params[i].symbol);
+        } else {
+            optionNode = OptionView::CreateMenuOption(
+                optionsHasIcon, params[i].value, params[i].action, i, params[i].icon);
+        }
         if (!optionNode) {
             continue;
         }
@@ -609,7 +634,7 @@ RefPtr<FrameNode> MenuView::Create(
     CHECK_NULL_RETURN(menuProperty, nullptr);
     menuProperty->UpdateShowInSubWindow(false);
     for (size_t i = 0; i < params.size(); ++i) {
-        auto optionNode = OptionView::CreateSelectOption(params[i].first, params[i].second, i);
+        auto optionNode = OptionView::CreateSelectOption(params[i], i);
         auto optionPattern = optionNode->GetPattern<OptionPattern>();
         CHECK_NULL_RETURN(optionPattern, nullptr);
         optionPattern->SetIsSelectOption(true);

@@ -36,6 +36,7 @@
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/tabs/tab_content_model.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/transition_property.h"
@@ -114,6 +115,8 @@ public:
     static void NewGetJsGradientColorStops(NG::Gradient& gradient, const JSRef<JSVal>& colorStops);
 
     static void JsScale(const JSCallbackInfo& info);
+    static void SetTabBarSymbolOptionApply(const JSCallbackInfo& info, TabBarSymbol& symbolApply,
+        const JSRef<JSVal>& modifierNormalObj, const JSRef<JSVal>& modifierSelectedObj);
     static void SetDragPreviewOptionApply(const JSCallbackInfo& info, NG::DragPreviewOption& previewOption);
     static void SetDefaultScale();
     static void JsScaleX(const JSCallbackInfo& info);
@@ -130,7 +133,7 @@ public:
     static void JsTransform(const JSCallbackInfo& info);
     static void SetDefaultTransform();
     static void JsTransition(const JSCallbackInfo& info);
-    static NG::DragPreviewOption ParseDragPreviewOptions (const JSCallbackInfo& info);
+    static NG::DragPreviewOption ParseDragPreviewOptions(const JSCallbackInfo& info);
     static NG::TransitionOptions ParseJsTransition(const JSRef<JSObject>& jsObj);
     static RefPtr<NG::ChainedTransitionEffect> ParseJsTransitionEffect(const JSCallbackInfo& info);
     static void JsWidth(const JSCallbackInfo& info);
@@ -281,10 +284,12 @@ public:
     static bool ParseJsDimensionVp(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static bool ParseJsDimensionFp(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static bool ParseJsDimensionPx(const JSRef<JSVal>& jsValue, CalcDimension& result);
-    static bool ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result);
+    static bool ParseLengthMetricsToPositiveDimension(const JSRef<JSVal>& jsValue, CalcDimension& result);
+    static bool ParseColorMetricsToColor(const JSRef<JSVal>& jsValue, Color& result);
     static bool ParseJsDouble(const JSRef<JSVal>& jsValue, double& result);
     static bool ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result);
     static bool ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color& result);
+    static bool ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, Color& result);
     static bool ParseJsColor(const JSRef<JSVal>& jsValue, Color& result);
     static bool ParseJsColor(const JSRef<JSVal>& jsValue, Color& result, const Color& defaultColor);
     static bool ParseJsColorStrategy(const JSRef<JSVal>& jsValue, ForegroundColorStrategy& strategy);
@@ -385,6 +390,7 @@ public:
     static void JsId(const JSCallbackInfo& info);
 
     static void JsFocusable(const JSCallbackInfo& info);
+    static void JsFocusBox(const JSCallbackInfo& info);
     static void JsOnFocusMove(const JSCallbackInfo& args);
     static void JsOnKeyEvent(const JSCallbackInfo& args);
     static void JsOnFocus(const JSCallbackInfo& args);
@@ -421,10 +427,14 @@ public:
     static void JSRenderFit(const JSCallbackInfo& info);
     static void JsExpandSafeArea(const JSCallbackInfo& info);
     static void JsGestureModifier(const JSCallbackInfo& info);
+    static void JsCustomProperty(const JSCallbackInfo& info);
+
     static void ParseMenuOptions(
         const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::MenuOptionsParam>& items);
     static void JsBackgroundImageResizable(const JSCallbackInfo& info);
     static void JsSetDragEventStrictReportingEnabled(const JSCallbackInfo& info);
+    static void SetSymbolOptionApply(const JSCallbackInfo& info,
+        std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const JSRef<JSVal> modifierObj);
 
 #ifndef WEARABLE_PRODUCT
     static void JsBindPopup(const JSCallbackInfo& info);
@@ -581,6 +591,7 @@ public:
         const JSRef<JSObject>& object, const JSExecutionContext& context);
     static void JsFocusScopeId(const JSCallbackInfo& info);
     static void JsFocusScopePriority(const JSCallbackInfo& info);
+    static int32_t ParseJsPropertyId(const JSRef<JSVal>& jsValue);
 };
 } // namespace OHOS::Ace::Framework
 #endif // JS_VIEW_ABSTRACT_H
