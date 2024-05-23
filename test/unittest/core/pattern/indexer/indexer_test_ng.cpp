@@ -91,7 +91,7 @@ public:
 
 void IndexerTestNg::SetUpTestSuite()
 {
-    MockPipelineContext::SetUp();
+    TestNG::SetUpTestSuite();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     PipelineContext::GetCurrentContext()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<IndexerTheme>()));
@@ -99,7 +99,7 @@ void IndexerTestNg::SetUpTestSuite()
 
 void IndexerTestNg::TearDownTestSuite()
 {
-    MockPipelineContext::TearDown();
+    TestNG::TearDownTestSuite();
 }
 
 void IndexerTestNg::SetUp() {}
@@ -617,8 +617,8 @@ HWTEST_F(IndexerTestNg, IndexerPattern004, TestSize.Level1)
      * @tc.steps: step1. create indexer when apiTargetVersion is PlatformVersion::VERSION_TWELVE
      * @tc.expected: BorderRadiusValue is Dimension(INDEXER_DEFAULT_RADIUS, DimensionUnit::VP)
      */
-    int32_t apiTargetVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    int32_t apiTargetVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     Create([](IndexerModelNG model) { model.SetUsingPopup(true); });
     auto indexerRenderContext = frameNode_->GetRenderContext();
     auto indexerRadius = Dimension(INDEXER_DEFAULT_RADIUS, DimensionUnit::VP);
@@ -658,7 +658,7 @@ HWTEST_F(IndexerTestNg, IndexerPattern004, TestSize.Level1)
     EXPECT_TRUE(columnRenderContext->HasBorderRadius());
     EXPECT_EQ(columnRenderContext->GetBorderRadiusValue(expectValue), expectValue);
     EXPECT_EQ(columnRenderContext->GetBackBlurStyle().value(), styleOption);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(apiTargetVersion);
+    Container::Current()->SetApiTargetVersion(apiTargetVersion);
 }
 
 /**
@@ -672,8 +672,8 @@ HWTEST_F(IndexerTestNg, IndexerPattern005, TestSize.Level1)
      * @tc.steps: step1. create indexer when apiTargetVersion is PlatformVersion::VERSION_TWELVE
      * @tc.expected: Colors.size is 3
      */
-    int32_t apiTargetVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    int32_t apiTargetVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     Create([](IndexerModelNG model) {
         model.SetUsingPopup(true);
         model.SetOnRequestPopupData(GetMorePopupData2);
@@ -717,7 +717,7 @@ HWTEST_F(IndexerTestNg, IndexerPattern005, TestSize.Level1)
     EXPECT_TRUE(listPattern->IsAtBottom());
     onScrollCallback(Dimension(0), ScrollState::SCROLL);
     EXPECT_EQ(stackRenderContext->GetLinearGradientValue(Gradient()).GetColors().size(), 3);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(apiTargetVersion);
+    Container::Current()->SetApiTargetVersion(apiTargetVersion);
 }
 
 /**
