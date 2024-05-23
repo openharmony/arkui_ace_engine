@@ -60,6 +60,21 @@ public:
         isMuted_ = isMuted;
     }
 
+    bool GetMuted()
+    {
+        return isMuted_;
+    }
+
+    bool GetPrepared()
+    {
+        return isPrepared_;
+    }
+
+    bool GetPlayByController()
+    {
+        return isPlayByController_;
+    }
+
     void OnVisibleChange(bool isVisible) override;
 
     void OnAreaChangedInner() override;

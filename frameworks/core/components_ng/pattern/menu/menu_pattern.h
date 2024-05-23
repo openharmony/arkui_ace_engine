@@ -22,6 +22,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/base/symbol_modifier.h"
 #include "core/components_ng/pattern/menu/menu_accessibility_property.h"
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
@@ -40,6 +41,7 @@ namespace OHOS::Ace::NG {
 struct SelectProperties {
     std::string value;
     std::string icon;
+    RefPtr<SymbolModifier> symbolModifier;
     int index;
     bool selected = false;
     bool selectEnable = true;
@@ -398,8 +400,9 @@ public:
         selectProperties_.clear();
         for (size_t i = 0; i < params.size(); i++) {
             SelectProperties selectProperty;
-            selectProperty.value = params[i].first;
-            selectProperty.icon = params[i].second;
+            selectProperty.value = params[i].text;
+            selectProperty.icon = params[i].icon;
+            selectProperty.symbolModifier = params[i].symbolModifier;
             selectProperty.index = static_cast<int>(i);
             if (i < list.size()) {
                 selectProperty.selected = list[i].selected;

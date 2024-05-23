@@ -224,17 +224,18 @@ void Scrollable::HandleTouchUp()
         return;
     }
     isTouching_ = false;
-    if (outBoundaryCallback_ && !outBoundaryCallback_()) {
-        if (isSnapScrollAnimationStop_ && scrollSnapCallback_) {
-            scrollSnapCallback_(0.0, 0.0);
+    // outBoundaryCallback_ is only set in ScrollablePattern::SetEdgeEffect and when the edge effect is spring
+    if (outBoundaryCallback_ && outBoundaryCallback_()) {
+        if (isSpringAnimationStop_ && scrollOverCallback_) {
+            ProcessScrollOverCallback(0.0);
+            if (onScrollStartRec_) {
+                onScrollStartRec_(static_cast<float>(axis_));
+            }
         }
         return;
     }
-    if (isSpringAnimationStop_ && scrollOverCallback_) {
-        ProcessScrollOverCallback(0.0);
-        if (onScrollStartRec_) {
-            onScrollStartRec_(static_cast<float>(axis_));
-        }
+    if (isSnapScrollAnimationStop_ && scrollSnapCallback_) {
+        scrollSnapCallback_(0.0, 0.0);
     }
 }
 

@@ -18,6 +18,7 @@ import measure from '@ohos.measure';
 import mediaquery from '@ohos.mediaquery';
 import resourceManager from '@ohos.resourceManager';
 import { ColorMetrics } from '@ohos.arkui.node';
+import EnvironmentCallback from '@ohos.app.ability.EnvironmentCallback';
 import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
 import componentUtils from '@ohos.arkui.componentUtils';
 import hilog from '@ohos.hilog';
@@ -110,6 +111,7 @@ interface ChipNodeConstraintWidth {
 }
 
 interface ChipNodeTheme {
+  suitAgeScale: number;
   minLabelWidth: Dimension;
   normalHeight: Dimension;
   smallHeight: Dimension;
@@ -166,6 +168,7 @@ export const defaultTheme: ChipTheme = {
     fontSize: 16,
   },
   chipNode: {
+    suitAgeScale: 1.75,
     minLabelWidth: 12,
     normalHeight: 36,
     smallHeight: 28,
@@ -177,8 +180,8 @@ export const defaultTheme: ChipTheme = {
     normalBorderRadius: $r('sys.float.ohos_id_corner_radius_tips_instant_tip'),
     smallBorderRadius: $r('sys.float.ohos_id_corner_radius_piece'),
     borderWidth: 2,
-    normalPadding: { left: 16, right: 16, top: 0, bottom: 0 },
-    smallPadding: { left: 12, right: 12, top: 0, bottom: 0 },
+    normalPadding: { left: 16, right: 16, top: 4, bottom: 4 },
+    smallPadding: { left: 12, right: 12, top: 4, bottom: 4 },
     hoverBlendColor: $r('sys.color.ohos_id_color_hover'),
     pressedBlendColor: $r('sys.color.ohos_id_color_click_effect'),
     opacity: { normal: 1, hover: 0.95, pressed: 0.9, disabled: 0.4 },
@@ -262,6 +265,16 @@ export struct ChipComponent {
   private mdListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("600vp<=width<840vp")
   private lgListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("840vp<=width")
   @State private isShowPressedBackGroundColor: boolean = false
+  @State fontSizeScale: number | undefined = 0
+  @State fontWeightScale: number | undefined = 0
+  private callbacks: EnvironmentCallback = {
+    onConfigurationUpdated: (configuration) => {
+      this.fontSizeScale = configuration.fontSizeScale;
+      this.fontWeightScale = configuration.fontWeightScale;
+    }, onMemoryLevel(){
+    }
+  }
+  private callbackId: number | undefined = undefined
   @State prefixSymbolWidth: Length | undefined = this.toVp(componentUtils.getRectangleById("PrefixSymbolGlyph")?.size?.width);
   @State suffixSymbolWidth: Length | undefined = this.toVp(componentUtils.getRectangleById("SuffixSymbolGlyph")?.size?.width);
 
@@ -659,34 +672,47 @@ export struct ChipComponent {
 
   private getChipConstraintWidth(): ConstraintSizeOptions {
     let calcMinWidth: number = this.getReserveChipNodeWidth()
-    if (!this.isChipSizeEnum()) {
-      this.chipNodeSize = this.chipSize as SizeOptions
-      if (this.chipNodeSize?.width !== void (0) && this.toVp(this.chipNodeSize?.width) >= 0) {
-        return { minWidth: calcMinWidth, maxWidth: this.chipNodeSize.width as number }
-      }
-    }
 
     let constraintWidth: number = this.getCalculateChipNodeWidth()
+    let constraintSize: ConstraintSizeOptions
     switch (this.chipBreakPoints) {
       case BreakPointsType.SM:
-        return {
+        constraintSize = {
           minWidth: calcMinWidth,
           maxWidth: Math.min(constraintWidth, this.theme.chipNode.breakPointConstraintWidth.breakPointSmMaxWidth)
         }
+        break
       case BreakPointsType.MD:
-        return {
+        constraintSize = {
           minWidth: Math.max(constraintWidth, this.theme.chipNode.breakPointConstraintWidth.breakPointMinWidth),
           maxWidth: Math.min(constraintWidth, this.theme.chipNode.breakPointConstraintWidth.breakPointMdMaxWidth)
         }
-
+        break
       case BreakPointsType.LG:
-        return {
+        constraintSize = {
           minWidth: Math.max(constraintWidth, this.theme.chipNode.breakPointConstraintWidth.breakPointMinWidth),
           maxWidth: Math.min(constraintWidth, this.theme.chipNode.breakPointConstraintWidth.breakPointLgMaxWidth)
         }
+        break
       default:
-        return { minWidth: calcMinWidth, maxWidth: constraintWidth }
+        constraintSize = { minWidth: calcMinWidth, maxWidth: constraintWidth }
+        break
     }
+    constraintSize.minWidth = Math.min(Math.max(this.getCalculateChipNodeWidth(),
+      constraintSize.minWidth as number), constraintSize.maxWidth as number)
+    constraintSize.minHeight = this.getChipNodeHeight()
+    if (!this.isChipSizeEnum() && this.chipNodeSize?.height !== void (0) && this.toVp(this.chipNodeSize?.height) >= 0) {
+      constraintSize.maxHeight = this.toVp(this.chipNodeSize.height)
+      constraintSize.minHeight = this.toVp(this.chipNodeSize.height)
+    }
+    if (!this.isChipSizeEnum() && this.chipNodeSize?.width !== void (0) && this.toVp(this.chipNodeSize?.width) >= 0) {
+      constraintSize.minWidth = this.toVp(this.chipNodeSize.width)
+      constraintSize.maxWidth = this.toVp(this.chipNodeSize.width)
+    } else if (this.toVp(this.fontSizeScale) >= this.theme.chipNode.suitAgeScale) {
+      constraintSize.minWidth = void (0)
+      constraintSize.maxWidth = void (0)
+    }
+    return constraintSize
   }
 
   @Builder
@@ -732,6 +758,10 @@ export struct ChipComponent {
         this.chipBreakPoints = BreakPointsType.LG
       }
     })
+    this.callbackId = this.getUIContext()
+      .getHostContext()
+    ?.getApplicationContext()
+    ?.on('environment', this.callbacks);
   }
 
   private getVisibility(): Visibility {
@@ -746,125 +776,124 @@ export struct ChipComponent {
     this.smListener.off("change")
     this.mdListener.off("change")
     this.lgListener.off("change")
+    if (this.callbackId) {
+      this.getUIContext()
+        .getHostContext()
+      ?.getApplicationContext()
+      ?.off('environment', this.callbackId);
+      this.callbackId = void (0)
+    }
   }
 
   @Builder
   chipBuilder() {
-    Row() {
-      if (this.prefixSymbol?.normal || this.prefixSymbol?.activated) {
-        SymbolGlyph()
-          .fontSize(this.theme.defaultSymbol.fontSize)
-          .fontColor(this.getDefaultSymbolColor())
-          .attributeModifier(this.getPrefixSymbolModifier())
-          .onSizeChange((oldValue, newValue) => {
-            this.prefixSymbolWidth = newValue?.width
-          })
-          .key("PrefixSymbolGlyph")
-      } else if (this.prefixIcon?.src !== "") {
-        Image(this.prefixIcon?.src)
+    Button() {
+      Row() {
+        if (this.prefixSymbol?.normal || this.prefixSymbol?.activated) {
+          SymbolGlyph()
+            .fontSize(this.theme.defaultSymbol.fontSize)
+            .fontColor(this.getDefaultSymbolColor())
+            .attributeModifier(this.getPrefixSymbolModifier())
+            .onSizeChange((oldValue, newValue) => {
+              this.prefixSymbolWidth = newValue?.width
+            })
+            .key("PrefixSymbolGlyph")
+        } else if (this.prefixIcon?.src !== "") {
+          Image(this.prefixIcon?.src)
+            .opacity(this.getChipNodeOpacity())
+            .size(this.getPrefixIconSize())
+            .fillColor(this.getPrefixIconFilledColor())
+            .enabled(this.getChipEnable())
+            .objectFit(ImageFit.Cover)
+            .focusable(false)
+            .flexShrink(0)
+            .visibility(this.getVisibility())
+            .draggable(false)
+        }
+
+        Text(this.label?.text ?? "")
           .opacity(this.getChipNodeOpacity())
-          .size(this.getPrefixIconSize())
-          .fillColor(this.getPrefixIconFilledColor())
+          .fontSize(this.getLabelFontSize())
+          .fontColor(this.getLabelFontColor())
+          .fontFamily(this.getLabelFontFamily())
+          .fontWeight(this.getLabelFontWeight())
+          .margin(this.getLabelMargin())
           .enabled(this.getChipEnable())
-          .objectFit(ImageFit.Cover)
-          .focusable(false)
-          .flexShrink(0)
+          .maxLines(1)
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .flexShrink(1)
+          .focusable(true)
+          .textAlign(TextAlign.Center)
           .visibility(this.getVisibility())
           .draggable(false)
-      }
 
-      Text(this.label?.text ?? "")
-        .opacity(this.getChipNodeOpacity())
-        .fontSize(this.getLabelFontSize())
-        .fontColor(this.getLabelFontColor())
-        .fontFamily(this.getLabelFontFamily())
-        .fontWeight(this.getLabelFontWeight())
-        .margin(this.getLabelMargin())
-        .enabled(this.getChipEnable())
-        .maxLines(1)
-        .textOverflow({ overflow: TextOverflow.Ellipsis })
-        .flexShrink(1)
-        .focusable(true)
-        .textAlign(TextAlign.Center)
-        .visibility(this.getVisibility())
-        .draggable(false)
-
-      if (this.suffixSymbol?.normal || this.suffixSymbol?.activated) {
-        SymbolGlyph()
-          .fontSize(this.theme.defaultSymbol.fontSize)
-          .fontColor(this.getDefaultSymbolColor())
-          .attributeModifier(this.getSuffixSymbolModifier())
-          .onSizeChange((oldValue, newValue) => {
-            this.suffixSymbolWidth = newValue?.width
-          })
-          .key("SuffixSymbolGlyph")
-      } else if (this.suffixIcon?.src !== "") {
-        Image(this.getSuffixIconSrc())
-          .opacity(this.getChipNodeOpacity())
-          .size(this.getSuffixIconSize())
-          .fillColor(this.getSuffixIconFilledColor())
-          .enabled(this.getChipEnable())
-          .focusable(this.getSuffixIconFocusable())
-          .objectFit(ImageFit.Cover)
-          .flexShrink(0)
-          .visibility(this.getVisibility())
-          .draggable(false)
-          .onFocus(() => {
-            this.suffixIconOnFocus = true
-          })
-          .onBlur(() => {
-            this.suffixIconOnFocus = false
-          })
-          .onClick(() => {
-            if (!this.getChipEnable()) {
-              return
-            }
-            if (this.suffixIcon?.action) {
-              this.suffixIcon.action()
-              return
-            }
-            if (this.allowClose && this.useDefaultSuffixIcon) {
+        if (this.suffixSymbol?.normal || this.suffixSymbol?.activated) {
+          SymbolGlyph()
+            .fontSize(this.theme.defaultSymbol.fontSize)
+            .fontColor(this.getDefaultSymbolColor())
+            .attributeModifier(this.getSuffixSymbolModifier())
+            .onSizeChange((oldValue, newValue) => {
+              this.suffixSymbolWidth = newValue?.width
+            })
+            .key("SuffixSymbolGlyph")
+        } else if (this.suffixIcon?.src !== "") {
+          Image(this.getSuffixIconSrc())
+            .opacity(this.getChipNodeOpacity())
+            .size(this.getSuffixIconSize())
+            .fillColor(this.getSuffixIconFilledColor())
+            .enabled(this.getChipEnable())
+            .focusable(this.getSuffixIconFocusable())
+            .objectFit(ImageFit.Cover)
+            .flexShrink(0)
+            .visibility(this.getVisibility())
+            .draggable(false)
+            .onFocus(() => {
+              this.suffixIconOnFocus = true
+            })
+            .onBlur(() => {
+              this.suffixIconOnFocus = false
+            })
+            .onClick(() => {
+              if (!this.getChipEnable()) {
+                return
+              }
+              if (this.suffixIcon?.action) {
+                this.suffixIcon.action()
+                return
+              }
+              if (this.allowClose && this.useDefaultSuffixIcon) {
+                this.onClose()
+                this.deleteChipNodeAnimate()
+                return
+              }
+              this.onClicked()
+            })
+        } else if (this.allowClose) {
+          SymbolGlyph($r('sys.symbol.xmark'))
+            .fontSize(this.theme.defaultSymbol.fontSize)
+            .fontColor(this.getDefaultSymbolColor())
+            .onClick(() => {
+              if (!this.getChipEnable()) {
+                return
+              }
               this.onClose()
               this.deleteChipNodeAnimate()
-              return
-            }
-            this.onClicked()
-          })
-      } else if (this.allowClose) {
-        SymbolGlyph($r('sys.symbol.xmark'))
-          .fontSize(this.theme.defaultSymbol.fontSize)
-          .fontColor(this.getDefaultSymbolColor())
-          .onClick(() => {
-            if (!this.getChipEnable()) {
-              return
-            }
-            this.onClose()
-            this.deleteChipNodeAnimate()
-          })
-      }
+            })
+        }
 
+      }
+      .alignItems(VerticalAlign.Center)
+      .justifyContent(FlexAlign.Center)
+      .padding(this.getChipNodePadding())
+      .constraintSize(this.getChipConstraintWidth())
     }
-    .alignItems(VerticalAlign.Center)
-    .justifyContent(FlexAlign.Center)
     .clip(false)
-    .padding(this.getChipNodePadding())
-    .height(this.getChipNodeHeight())
-    .width(this.getChipNodeWidth())
-    .constraintSize(this.getChipConstraintWidth())
     .backgroundColor(this.getChipNodeBackGroundColor())
     .borderRadius(this.getChipNodeRadius())
     .enabled(this.getChipEnable())
     .scale(this.chipScale)
     .focusable(true)
     .opacity(this.getChipNodeOpacity())
-    .stateStyles({
-      normal: {
-        .overlay(undefined)
-      },
-      focused: {
-        .overlay(this.focusOverlay, { align: Alignment.Center })
-      }
-    })
     .onFocus(() => {
       this.chipNodeOnFocus = true
     })

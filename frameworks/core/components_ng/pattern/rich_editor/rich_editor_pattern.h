@@ -549,11 +549,7 @@ public:
 
     // Add for Scroll
 
-    void OnAttachToFrameNode() override
-    {
-        TextPattern::OnAttachToFrameNode();
-        richEditorInstanceId_ = Container::CurrentIdSafely();
-    }
+    void OnAttachToFrameNode() override;
 
     void OnDetachFromFrameNode(FrameNode* node) override
     {
@@ -722,6 +718,11 @@ public:
         contentChange_ = onChange;
     }
 
+    RectF GetTextContentRect(bool isActualText = false) const override
+    {
+        return contentRect_;
+    }
+
 protected:
     bool CanStartAITask() override;
 
@@ -835,6 +836,7 @@ private:
     bool CloseKeyboard(bool forceClose) override;
     void CalcInsertValueObj(TextInsertValueInfo& info);
     void CalcDeleteValueObj(int32_t currentPosition, int32_t length, RichEditorDeleteValue& info);
+    RefPtr<SpanNode> GetSpanNodeBySpanItem(const RefPtr<SpanItem> spanItem);
     int32_t DeleteValueSetBuilderSpan(const RefPtr<SpanItem>& spanItem, RichEditorAbstractSpanResult& spanResult);
     int32_t DeleteValueSetImageSpan(const RefPtr<SpanItem>& spanItem, RichEditorAbstractSpanResult& spanResult);
     int32_t DeleteValueSetSymbolSpan(const RefPtr<SpanItem>& spanItem, RichEditorAbstractSpanResult& spanResult);

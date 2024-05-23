@@ -82,6 +82,8 @@ const std::string FADE_PROPERTY_NAME = "fade";
 const std::string SPRING_PROPERTY_NAME = "spring";
 const std::string INDICATOR_PROPERTY_NAME = "indicator";
 const std::string TRANSLATE_PROPERTY_NAME = "translate";
+constexpr int32_t SWIPER_HALF = 2;
+constexpr int32_t CAPTURE_COUNT = 2;
 // TODO define as common method
 float CalculateFriction(float gamma)
 {
@@ -444,9 +446,9 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         StopSpringAnimation();
         if (usePropertyAnimation_) {
             StopPropertyTranslateAnimation(false, true);
-            currentDelta_ = 0.0f;
             StopIndicatorAnimation();
         }
+        currentDelta_ = 0.0f;
     }
     if (mainSizeIsMeasured_ && isNeedResetPrevMarginAndNextMargin_) {
         layoutProperty->UpdatePrevMarginWithoutMeasure(0.0_px);
@@ -485,12 +487,20 @@ void SwiperPattern::CreateCaptureCallback(int32_t targetIndex, int32_t captureId
     CHECK_NULL_VOID(host);
     auto targetNode = AceType::DynamicCast<FrameNode>(host->GetOrCreateChildByIndex(targetIndex));
     CHECK_NULL_VOID(targetNode);
-    auto callback = [weak = WeakClaim(this), captureId, targetIndex](
+    auto callback = [weak = WeakClaim(this), captureId, targetIndex, hostInstanceId = GetHostInstanceId()](
                         std::shared_ptr<Media::PixelMap> pixelMap) {
-        auto swiper = weak.Upgrade();
-        CHECK_NULL_VOID(swiper);
-        ContainerScope scope(swiper->GetHostInstanceId());
-        swiper->UpdateCaptureSource(pixelMap, captureId, targetIndex);
+        ContainerScope scope(hostInstanceId);
+        auto piplineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(piplineContext);
+        auto taskExecutor = piplineContext->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [weak, pixelMap, captureId, targetIndex]() mutable {
+                auto swiper = weak.Upgrade();
+                CHECK_NULL_VOID(swiper);
+                swiper->UpdateCaptureSource(pixelMap, captureId, targetIndex);
+            },
+            TaskExecutor::TaskType::UI, "ArkUISwiperUpdateCaptureSource");
     };
     if (forceUpdate) {
         // The size changes caused by layout need to wait for rendering before taking a screenshot
@@ -524,20 +534,12 @@ void SwiperPattern::UpdateCaptureSource(
 
     auto captureNode = DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(captureId)));
     CHECK_NULL_VOID(captureNode);
-    auto piplineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(piplineContext);
-    auto taskExecutor = piplineContext->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [captureNode, pixelMap, margin]() mutable {
-            auto imageLayoutProperty = captureNode->GetLayoutProperty<ImageLayoutProperty>();
-            CHECK_NULL_VOID(imageLayoutProperty);
-            imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(PixelMap::CreatePixelMap(&pixelMap)));
-            imageLayoutProperty->UpdateMargin(margin);
-            captureNode->MarkModifyDone();
-            captureNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        },
-        TaskExecutor::TaskType::UI, "ArkUISwiperUpdateCaptureSource");
+    auto imageLayoutProperty = captureNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(PixelMap::CreatePixelMap(&pixelMap)));
+    imageLayoutProperty->UpdateMargin(margin);
+    captureNode->MarkModifyDone();
+    captureNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void SwiperPattern::InitSurfaceChangedCallback()
@@ -894,20 +896,22 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             float targetPos = iter->second.startPos + IgnoreBlankOffset(false);
             auto context = PipelineContext::GetCurrentContext();
             auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
-            auto lastItemIndex = Positive(swiperLayoutProperty->GetNextMarginValue(0.0_px).ConvertToPx())
-                                     ? targetIndexValue + GetDisplayCount()
-                                     : targetIndexValue + GetDisplayCount() - 1;
+            bool isNeedForwardTranslate = false;
+            if (!hasCachedCapture_ && IsLoop()) {
+                auto lastItemIndex = Positive(swiperLayoutProperty->GetNextMarginValue(0.0_px).ConvertToPx())
+                                         ? targetIndexValue + GetDisplayCount()
+                                         : targetIndexValue + GetDisplayCount() - 1;
+                isNeedForwardTranslate = itemPosition_.find(lastItemIndex) == itemPosition_.end();
+            }
             bool isNeedBackwardTranslate = false;
-            if (IsLoop() && targetIndexValue < currentIndex_) {
+            if (!hasCachedCapture_ && IsLoop() && targetIndexValue < currentIndex_) {
                 auto firstItemIndex = Positive(swiperLayoutProperty->GetPrevMarginValue(0.0_px).ConvertToPx())
                                           ? targetIndexValue + TotalCount() - 1
                                           : targetIndexValue + TotalCount();
                 isNeedBackwardTranslate = itemPosition_.find(firstItemIndex) != itemPosition_.end();
             }
-            bool isNeedPlayTranslateAnimation =
-                translateAnimationIsRunning_ ||
-                (IsLoop() && itemPosition_.find(lastItemIndex) == itemPosition_.end()) || isNeedBackwardTranslate ||
-                AutoLinearAnimationNeedReset(targetPos);
+            bool isNeedPlayTranslateAnimation = translateAnimationIsRunning_ || isNeedForwardTranslate ||
+                                                isNeedBackwardTranslate || AutoLinearAnimationNeedReset(targetPos);
             if (context && !isNeedPlayTranslateAnimation && !SupportSwiperCustomAnimation()) {
                 // displayCount is auto, loop is false, if the content width less than windows size
                 // need offset to keep right aligned
@@ -2645,10 +2649,10 @@ int32_t SwiperPattern::ComputeNextIndexInSinglePage(float velocity, bool onlyDis
     if (iter == itemPosition_.end() || overTurnPageVelocity) {
         return direction ? currentIndex_ - 1 : currentIndex_ + 1;
     }
-    if (-iter->second.startPos > swiperWidth / 2) {
+    if (-iter->second.startPos > swiperWidth / SWIPER_HALF) {
         return currentIndex_ + 1;
     }
-    if (iter->second.startPos > swiperWidth / 2) {
+    if (iter->second.startPos > swiperWidth / SWIPER_HALF) {
         return currentIndex_ - 1;
     }
     return currentIndex_;
@@ -3287,7 +3291,6 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-
     auto mainSize = CalculateVisibleSize();
     if (LessOrEqual(mainSize, 0) || itemPosition_.empty()) {
         return;
@@ -3296,20 +3299,17 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
     auto leading = currentIndexOffset_ + mainSize - itemPosition_.rbegin()->second.endPos;
     auto trailing = currentIndexOffset_ - itemPosition_.begin()->second.startPos;
     ExtentPair extentPair = ExtentPair(leading, trailing);
-
     CreateSpringProperty();
     host->UpdateAnimatablePropertyFloat(SPRING_PROPERTY_NAME, currentIndexOffset_);
     auto delta = currentIndexOffset_ < 0.0f ? extentPair.Leading() : extentPair.Trailing();
     if (IsVisibleChildrenSizeLessThanSwiper()) {
         delta = extentPair.Trailing();
     }
-
     // spring curve: (velocity: 0.0, mass: 1.0, stiffness: 228.0, damping: 30.0)
     auto springCurve = MakeRefPtr<SpringCurve>(0.0f, 1.0f, 228.0f, 30.0f);
     AnimationOption option;
     option.SetCurve(springCurve);
     option.SetDuration(SPRING_DURATION);
-
     nextIndex_ = currentIndex_;
     springAnimation_ = AnimationUtils::StartAnimation(
         option,
@@ -3721,7 +3721,7 @@ int32_t SwiperPattern::RealTotalCount() const
         num += 1;
     }
     if (hasCachedCapture_ && leftCaptureId_.has_value() && rightCaptureId_.has_value()) {
-        num += 2;
+        num += CAPTURE_COUNT;
     }
     return host->TotalChildCount() - num;
 }
@@ -4013,7 +4013,7 @@ void SwiperPattern::UpdateIndexOnSwipePageStop(int32_t pauseTargetIndex)
 
     auto swiperWidth = MainSize();
     auto currentOffset = iter->second.startPos;
-    if (std::abs(currentOffset) < (swiperWidth / 2)) {
+    if (std::abs(currentOffset) < (swiperWidth / SWIPER_HALF)) {
         return;
     }
 
@@ -4819,6 +4819,8 @@ void SwiperPattern::DumpAdvanceInfo()
         : DumpLog::GetInstance().AddDesc("pauseTargetIndex:null");
     velocity_.has_value() ? DumpLog::GetInstance().AddDesc("velocity:" + std::to_string(velocity_.value()))
                           : DumpLog::GetInstance().AddDesc("velocity:null");
+    GetCurveIncludeMotion() ? DumpLog::GetInstance().AddDesc("curve:" + GetCurveIncludeMotion()->ToString())
+                            : DumpLog::GetInstance().AddDesc("curve:null");
     isFinishAnimation_ ? DumpLog::GetInstance().AddDesc("isFinishAnimation:true")
                        : DumpLog::GetInstance().AddDesc("isFinishAnimation:false");
     mainSizeIsMeasured_ ? DumpLog::GetInstance().AddDesc("mainSizeIsMeasured:true")

@@ -15,5 +15,8 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("text_picker_test_ng") {
   type = "new"
-  sources = [ "text_picker_test_ng.cpp" ]
+  sources = [
+    "text_picker_gradient_height_test_ng.cpp",
+    "text_picker_test_ng.cpp",
+  ]
 }

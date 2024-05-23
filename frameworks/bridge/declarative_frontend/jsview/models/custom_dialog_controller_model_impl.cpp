@@ -232,7 +232,6 @@ void CustomDialogControllerModelImpl::SetOpenDialog(DialogProperties& dialogProp
     }
     buildFunc();
     customDialog = ViewStackProcessor::GetInstance()->Finish();
-
     if (!customDialog) {
         LOGE("Builder does not generate view.");
         return;

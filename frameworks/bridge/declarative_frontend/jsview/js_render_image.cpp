@@ -102,7 +102,7 @@ napi_value JSRenderImage::Constructor(napi_env env, napi_callback_info info)
     if (argc > 0) {
         napi_value argv[2] = { nullptr };
         napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-        if (argc == 2) {
+        if (argc == 2) { // 2: args count
             int32_t unit = 0;
             napi_get_value_int32(env, argv[1], &unit);
             if (static_cast<CanvasUnit>(unit) == CanvasUnit::PX) {

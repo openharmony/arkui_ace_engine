@@ -161,7 +161,6 @@ public:
     {
         return AceType::InstanceOf<SineCurve>(curve);
     }
-
 };
 
 class ElasticsCurve final : public Curve {

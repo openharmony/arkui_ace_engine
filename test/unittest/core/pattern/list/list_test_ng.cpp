@@ -540,11 +540,12 @@ AssertionResult ListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlig
     return IsEqual(currentOffset, expectOffset);
 }
 
-AssertionResult ListTestNg::ScrollToItemInGroup(
+AssertionResult ListTestNg::JumpToItemInGroup(
     int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align, float expectOffset)
 {
+    auto controller = pattern_->positionController_;
     float startOffset = pattern_->GetTotalOffset();
-    pattern_->ScrollToItemInGroup(index, indexInGroup, smooth, align);
+    controller->JumpToItemInGroup(index, indexInGroup, smooth, align);
     FlushLayoutTask(frameNode_);
     if (smooth) {
         // Because can not get targetPos, use source code
@@ -603,5 +604,11 @@ int32_t ListTestNg::findFocusNodeIndex(RefPtr<FocusHub>& focusNode)
         }
     }
     return NULL_VALUE;
+}
+
+void ListTestNg::ScrollTo(float position)
+{
+    pattern_->ScrollTo(position);
+    FlushLayoutTask(frameNode_);
 }
 } // namespace OHOS::Ace::NG

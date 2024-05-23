@@ -41,6 +41,7 @@ struct ArkUI_Node {
     void* alignRuleOption = nullptr;  
     void* userData = nullptr;
     void* swiperIndicator = nullptr;
+    void* imageFrameInfos = nullptr;
 };
 
 struct ArkUI_Context {

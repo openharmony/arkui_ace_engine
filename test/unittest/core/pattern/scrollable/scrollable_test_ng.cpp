@@ -29,9 +29,6 @@
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
-using namespace testing;
-using namespace testing::ext;
-
 namespace OHOS::Ace::NG {
 
 void ScrollableTestNg::SetUpTestSuite()
@@ -81,10 +78,7 @@ void ScrollableTestNg::InitNestedScrolls()
 HWTEST_F(ScrollableTestNg, HandleSelf001, TestSize.Level1)
 {
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
-    EXPECT_TRUE(mockPn);
-
     EXPECT_CALL(*mockPn, HandleScroll).Times(0);
     EXPECT_CALL(*scrollPn, GetOverScrollOffset).WillRepeatedly(Return(OverScrollOffset { .start = 5, .end = 0 }));
     EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(false));
@@ -116,10 +110,7 @@ HWTEST_F(ScrollableTestNg, HandleSelf001, TestSize.Level1)
 HWTEST_F(ScrollableTestNg, HandleParallel001, TestSize.Level1)
 {
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
-    EXPECT_TRUE(mockPn);
-
     EXPECT_CALL(*mockPn, HandleScroll)
         .Times(1)
         .WillOnce(Return(ScrollResult {
@@ -137,7 +128,6 @@ HWTEST_F(ScrollableTestNg, HandleParallel001, TestSize.Level1)
     auto result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
     EXPECT_TRUE(result.reachEdge);
     EXPECT_EQ(result.remain, 5.0f);
-
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
     scrollPn->edgeEffect_ = EdgeEffect::SPRING;
     result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
@@ -153,10 +143,7 @@ HWTEST_F(ScrollableTestNg, HandleParallel001, TestSize.Level1)
 HWTEST_F(ScrollableTestNg, HandleParallel002, TestSize.Level1)
 {
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
-    EXPECT_TRUE(mockPn);
-
     EXPECT_CALL(*mockPn, HandleScroll)
         .Times(2)
         .WillRepeatedly(Return(ScrollResult {
@@ -184,10 +171,7 @@ HWTEST_F(ScrollableTestNg, HandleParallel002, TestSize.Level1)
 HWTEST_F(ScrollableTestNg, HandleParallel003, TestSize.Level1)
 {
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
-    EXPECT_TRUE(mockPn);
-
     EXPECT_CALL(*mockPn, HandleScroll)
         .Times(1)
         .WillRepeatedly(Return(ScrollResult {
@@ -215,10 +199,7 @@ HWTEST_F(ScrollableTestNg, HandleParallel003, TestSize.Level1)
 HWTEST_F(ScrollableTestNg, HandleParallel004, TestSize.Level1)
 {
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
-    EXPECT_TRUE(mockPn);
-
     EXPECT_CALL(*mockPn, HandleScroll)
         .Times(1)
         .WillRepeatedly(Return(ScrollResult {
@@ -230,7 +211,6 @@ HWTEST_F(ScrollableTestNg, HandleParallel004, TestSize.Level1)
     EXPECT_CALL(*scrollPn, UpdateCurrentOffset).Times(1).WillRepeatedly(Return(true));
 
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::PARALLEL, .backward = NestedScrollMode::PARALLEL };
-
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
     scrollPn->edgeEffect_ = EdgeEffect::SPRING;
     auto result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::GESTURE);
@@ -246,10 +226,7 @@ HWTEST_F(ScrollableTestNg, HandleParallel004, TestSize.Level1)
 HWTEST_F(ScrollableTestNg, HandleParallel005, TestSize.Level1)
 {
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
-    EXPECT_TRUE(mockPn);
-
     EXPECT_CALL(*mockPn, HandleScroll)
         .Times(1)
         .WillRepeatedly(Return(ScrollResult {
@@ -261,7 +238,6 @@ HWTEST_F(ScrollableTestNg, HandleParallel005, TestSize.Level1)
     EXPECT_CALL(*scrollPn, UpdateCurrentOffset).Times(1).WillRepeatedly(Return(true));
 
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::PARALLEL, .backward = NestedScrollMode::PARALLEL };
-
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
     scrollPn->edgeEffect_ = EdgeEffect::SPRING;
     auto result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::GESTURE);
@@ -277,10 +253,7 @@ HWTEST_F(ScrollableTestNg, HandleParallel005, TestSize.Level1)
 HWTEST_F(ScrollableTestNg, HandleSelfFirst001, TestSize.Level1)
 {
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
-    EXPECT_TRUE(mockPn);
-
     EXPECT_CALL(*mockPn, HandleScroll)
         .Times(1)
         .WillRepeatedly(Return(ScrollResult {
@@ -292,7 +265,6 @@ HWTEST_F(ScrollableTestNg, HandleSelfFirst001, TestSize.Level1)
     EXPECT_CALL(*scrollPn, UpdateCurrentOffset).Times(1).WillRepeatedly(Return(true));
 
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::SELF_FIRST, .backward = NestedScrollMode::SELF_FIRST };
-
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
     scrollPn->edgeEffect_ = EdgeEffect::SPRING;
     auto result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
@@ -308,10 +280,7 @@ HWTEST_F(ScrollableTestNg, HandleSelfFirst001, TestSize.Level1)
 HWTEST_F(ScrollableTestNg, HandleSelfFirst002, TestSize.Level1)
 {
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
-    EXPECT_TRUE(mockPn);
-
     EXPECT_CALL(*mockPn, HandleScroll)
         .Times(1)
         .WillRepeatedly(Return(ScrollResult {
@@ -339,10 +308,7 @@ HWTEST_F(ScrollableTestNg, HandleSelfFirst002, TestSize.Level1)
 HWTEST_F(ScrollableTestNg, HandleSelfFirst003, TestSize.Level1)
 {
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
-    EXPECT_TRUE(mockPn);
-
     EXPECT_CALL(*mockPn, HandleScroll)
         .Times(1)
         .WillRepeatedly(Return(ScrollResult {
@@ -354,7 +320,6 @@ HWTEST_F(ScrollableTestNg, HandleSelfFirst003, TestSize.Level1)
     EXPECT_CALL(*scrollPn, UpdateCurrentOffset).Times(1).WillRepeatedly(Return(true));
 
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::SELF_FIRST, .backward = NestedScrollMode::SELF_FIRST };
-
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
     scrollPn->edgeEffect_ = EdgeEffect::SPRING;
     auto result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
@@ -370,17 +335,12 @@ HWTEST_F(ScrollableTestNg, HandleSelfFirst003, TestSize.Level1)
 HWTEST_F(ScrollableTestNg, HandleSelfFirst004, TestSize.Level1)
 {
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
-    EXPECT_TRUE(mockPn);
-
     EXPECT_CALL(*mockPn, HandleScroll).Times(0);
     EXPECT_CALL(*scrollPn, GetOverScrollOffset).WillRepeatedly(Return(OverScrollOffset { .start = 0, .end = 0 }));
     EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(false));
     EXPECT_CALL(*scrollPn, UpdateCurrentOffset).Times(1).WillRepeatedly(Return(true));
-
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::SELF_FIRST, .backward = NestedScrollMode::SELF_FIRST };
-
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
     scrollPn->edgeEffect_ = EdgeEffect::SPRING;
     auto result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::GESTURE);
@@ -396,10 +356,7 @@ HWTEST_F(ScrollableTestNg, HandleSelfFirst004, TestSize.Level1)
 HWTEST_F(ScrollableTestNg, HandleSelfFirst005, TestSize.Level1)
 {
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
-    EXPECT_TRUE(mockPn);
-
     EXPECT_CALL(*mockPn, HandleScroll)
         .Times(1)
         .WillRepeatedly(Return(ScrollResult {
@@ -409,9 +366,7 @@ HWTEST_F(ScrollableTestNg, HandleSelfFirst005, TestSize.Level1)
     EXPECT_CALL(*scrollPn, GetOverScrollOffset).WillRepeatedly(Return(OverScrollOffset { .start = 5, .end = 0 }));
     EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(false));
     EXPECT_CALL(*scrollPn, UpdateCurrentOffset).Times(1).WillRepeatedly(Return(true));
-
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::SELF_FIRST, .backward = NestedScrollMode::SELF_FIRST };
-
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
     scrollPn->edgeEffect_ = EdgeEffect::SPRING;
     auto result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::GESTURE);
@@ -427,10 +382,7 @@ HWTEST_F(ScrollableTestNg, HandleSelfFirst005, TestSize.Level1)
 HWTEST_F(ScrollableTestNg, HandleSelfFirst006, TestSize.Level1)
 {
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
-    EXPECT_TRUE(mockPn);
-
     EXPECT_CALL(*mockPn, HandleScroll)
         .Times(1)
         .WillRepeatedly(Return(ScrollResult {
@@ -440,9 +392,7 @@ HWTEST_F(ScrollableTestNg, HandleSelfFirst006, TestSize.Level1)
     EXPECT_CALL(*scrollPn, GetOverScrollOffset).WillRepeatedly(Return(OverScrollOffset { .start = 5, .end = 0 }));
     EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(false));
     EXPECT_CALL(*scrollPn, UpdateCurrentOffset).Times(1).WillRepeatedly(Return(true));
-
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::SELF_FIRST, .backward = NestedScrollMode::SELF_FIRST };
-
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
     scrollPn->edgeEffect_ = EdgeEffect::SPRING;
     auto result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
@@ -458,10 +408,7 @@ HWTEST_F(ScrollableTestNg, HandleSelfFirst006, TestSize.Level1)
 HWTEST_F(ScrollableTestNg, HandleSelfFirst007, TestSize.Level1)
 {
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
-    EXPECT_TRUE(mockPn);
-
     EXPECT_CALL(*mockPn, HandleScroll)
         .Times(2)
         .WillRepeatedly(Return(ScrollResult {
@@ -471,9 +418,7 @@ HWTEST_F(ScrollableTestNg, HandleSelfFirst007, TestSize.Level1)
     EXPECT_CALL(*scrollPn, GetOverScrollOffset).WillRepeatedly(Return(OverScrollOffset { .start = 5, .end = 0 }));
     EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(false));
     EXPECT_CALL(*scrollPn, UpdateCurrentOffset).Times(1).WillRepeatedly(Return(true));
-
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::SELF_FIRST, .backward = NestedScrollMode::SELF_FIRST };
-
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
     scrollPn->edgeEffect_ = EdgeEffect::SPRING;
     auto result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::GESTURE);
@@ -489,10 +434,7 @@ HWTEST_F(ScrollableTestNg, HandleSelfFirst007, TestSize.Level1)
 HWTEST_F(ScrollableTestNg, HandleScrollParent001, TestSize.Level1)
 {
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
-    EXPECT_TRUE(mockPn);
-
     EXPECT_CALL(*mockPn, HandleScroll)
         .Times(1)
         .WillRepeatedly(Return(ScrollResult {
@@ -502,9 +444,7 @@ HWTEST_F(ScrollableTestNg, HandleScrollParent001, TestSize.Level1)
     EXPECT_CALL(*scrollPn, GetOverScrollOffset).WillRepeatedly(Return(OverScrollOffset { .start = 5, .end = 0 }));
     EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(false));
     EXPECT_CALL(*scrollPn, UpdateCurrentOffset).Times(1).WillRepeatedly(Return(true));
-
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::PARENT_FIRST, .backward = NestedScrollMode::PARENT_FIRST };
-
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::NONE);
     scrollPn->edgeEffect_ = EdgeEffect::NONE;
     auto result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
@@ -520,17 +460,12 @@ HWTEST_F(ScrollableTestNg, HandleScrollParent001, TestSize.Level1)
 HWTEST_F(ScrollableTestNg, HandleScrollParent002, TestSize.Level1)
 {
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
-    EXPECT_TRUE(mockPn);
-
     EXPECT_CALL(*mockPn, HandleScroll).Times(0);
     EXPECT_CALL(*scrollPn, GetOverScrollOffset).WillRepeatedly(Return(OverScrollOffset { .start = 5, .end = 0 }));
     EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(false));
     EXPECT_CALL(*scrollPn, UpdateCurrentOffset).Times(1).WillRepeatedly(Return(true));
-
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::PARENT_FIRST, .backward = NestedScrollMode::PARENT_FIRST };
-
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
     scrollPn->edgeEffect_ = EdgeEffect::SPRING;
     auto result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
@@ -546,10 +481,7 @@ HWTEST_F(ScrollableTestNg, HandleScrollParent002, TestSize.Level1)
 HWTEST_F(ScrollableTestNg, HandleScrollParent003, TestSize.Level1)
 {
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
-    EXPECT_TRUE(mockPn);
-
     EXPECT_CALL(*mockPn, HandleScroll)
         .Times(1)
         .WillRepeatedly(Return(ScrollResult {
@@ -559,9 +491,7 @@ HWTEST_F(ScrollableTestNg, HandleScrollParent003, TestSize.Level1)
     EXPECT_CALL(*scrollPn, GetOverScrollOffset).WillRepeatedly(Return(OverScrollOffset { .start = 5, .end = 0 }));
     EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(false));
     EXPECT_CALL(*scrollPn, UpdateCurrentOffset).Times(1).WillRepeatedly(Return(true));
-
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::PARENT_FIRST, .backward = NestedScrollMode::PARENT_FIRST };
-
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::NONE);
     scrollPn->edgeEffect_ = EdgeEffect::NONE;
     auto result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::GESTURE);
@@ -577,10 +507,7 @@ HWTEST_F(ScrollableTestNg, HandleScrollParent003, TestSize.Level1)
 HWTEST_F(ScrollableTestNg, HandleScrollParent004, TestSize.Level1)
 {
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
-    EXPECT_TRUE(mockPn);
-
     EXPECT_CALL(*mockPn, HandleScroll)
         .Times(1)
         .WillRepeatedly(Return(ScrollResult {
@@ -590,9 +517,7 @@ HWTEST_F(ScrollableTestNg, HandleScrollParent004, TestSize.Level1)
     EXPECT_CALL(*scrollPn, GetOverScrollOffset).WillRepeatedly(Return(OverScrollOffset { .start = 0, .end = 0 }));
     EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(false));
     EXPECT_CALL(*scrollPn, UpdateCurrentOffset).Times(1).WillRepeatedly(Return(true));
-
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::PARENT_FIRST, .backward = NestedScrollMode::PARENT_FIRST };
-
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::NONE);
     scrollPn->edgeEffect_ = EdgeEffect::NONE;
     auto result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::GESTURE);
@@ -608,10 +533,7 @@ HWTEST_F(ScrollableTestNg, HandleScrollParent004, TestSize.Level1)
 HWTEST_F(ScrollableTestNg, HandleScrollParent005, TestSize.Level1)
 {
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
-    EXPECT_TRUE(mockPn);
-
     EXPECT_CALL(*mockPn, HandleScroll)
         .Times(1)
         .WillRepeatedly(Return(ScrollResult {
@@ -621,9 +543,7 @@ HWTEST_F(ScrollableTestNg, HandleScrollParent005, TestSize.Level1)
     EXPECT_CALL(*scrollPn, GetOverScrollOffset).WillRepeatedly(Return(OverScrollOffset { .start = 5, .end = 0 }));
     EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(false));
     EXPECT_CALL(*scrollPn, UpdateCurrentOffset).Times(1).WillRepeatedly(Return(true));
-
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::PARENT_FIRST, .backward = NestedScrollMode::PARENT_FIRST };
-
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::NONE);
     scrollPn->edgeEffect_ = EdgeEffect::NONE;
     auto result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
@@ -639,10 +559,7 @@ HWTEST_F(ScrollableTestNg, HandleScrollParent005, TestSize.Level1)
 HWTEST_F(ScrollableTestNg, HandleScrollParent006, TestSize.Level1)
 {
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
-    EXPECT_TRUE(mockPn);
-
     EXPECT_CALL(*mockPn, HandleScroll)
         .Times(2)
         .WillRepeatedly(Return(ScrollResult {
@@ -652,7 +569,6 @@ HWTEST_F(ScrollableTestNg, HandleScrollParent006, TestSize.Level1)
     EXPECT_CALL(*scrollPn, GetOverScrollOffset).WillRepeatedly(Return(OverScrollOffset { .start = 5, .end = 0 }));
     EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(false));
     EXPECT_CALL(*scrollPn, UpdateCurrentOffset).Times(1).WillRepeatedly(Return(true));
-
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::PARENT_FIRST, .backward = NestedScrollMode::PARENT_FIRST };
 
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::NONE);
@@ -670,10 +586,7 @@ HWTEST_F(ScrollableTestNg, HandleScrollParent006, TestSize.Level1)
 HWTEST_F(ScrollableTestNg, HandleScrollParent007, TestSize.Level1)
 {
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
-    EXPECT_TRUE(mockPn);
-
     EXPECT_CALL(*mockPn, HandleScroll)
         .Times(1)
         .WillRepeatedly(Return(ScrollResult {
@@ -683,9 +596,7 @@ HWTEST_F(ScrollableTestNg, HandleScrollParent007, TestSize.Level1)
     EXPECT_CALL(*scrollPn, GetOverScrollOffset).WillRepeatedly(Return(OverScrollOffset { .start = 0, .end = 0 }));
     EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(false));
     EXPECT_CALL(*scrollPn, UpdateCurrentOffset).Times(1).WillRepeatedly(Return(true));
-
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::PARENT_FIRST, .backward = NestedScrollMode::PARENT_FIRST };
-
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
     scrollPn->edgeEffect_ = EdgeEffect::SPRING;
     auto result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::GESTURE);
@@ -701,17 +612,12 @@ HWTEST_F(ScrollableTestNg, HandleScrollParent007, TestSize.Level1)
 HWTEST_F(ScrollableTestNg, HandleScroll002, TestSize.Level1)
 {
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
-    EXPECT_TRUE(mockPn);
-
     EXPECT_CALL(*mockPn, HandleScroll).Times(0);
     EXPECT_CALL(*scrollPn, GetOverScrollOffset).WillRepeatedly(Return(OverScrollOffset { .start = 0, .end = 5 }));
     EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(false));
     EXPECT_CALL(*scrollPn, UpdateCurrentOffset).Times(1).WillRepeatedly(Return(true));
-
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::PARENT_FIRST, .backward = NestedScrollMode::PARENT_FIRST };
-
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
     scrollPn->edgeEffect_ = EdgeEffect::SPRING;
     auto result = scrollPn->HandleScroll(0.f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
@@ -729,12 +635,10 @@ HWTEST_F(ScrollableTestNg, HandleScrollVelocity001, TestSize.Level1)
     auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
     mockScroll_->pattern_ = mockPn;
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     scrollPn->parent_ = mockPn;
 
     EXPECT_CALL(*mockPn, HandleScrollVelocity).Times(0);
     EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(true));
-
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
     scrollPn->edgeEffect_ = EdgeEffect::SPRING;
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::SELF_ONLY, .backward = NestedScrollMode::SELF_ONLY };
@@ -758,7 +662,6 @@ HWTEST_F(ScrollableTestNg, HandleScrollVelocity002, TestSize.Level1)
     auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
     mockScroll_->pattern_ = mockPn;
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     scrollPn->parent_ = mockPn;
 
     EXPECT_CALL(*mockPn, HandleScrollVelocity).Times(1).WillOnce(Return(true));
@@ -784,7 +687,6 @@ HWTEST_F(ScrollableTestNg, HandleScrollVelocity003, TestSize.Level1)
     auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
     mockScroll_->pattern_ = mockPn;
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     scrollPn->parent_ = mockPn;
 
     EXPECT_CALL(*mockPn, HandleScrollVelocity).Times(2).WillRepeatedly(Return(false));
@@ -806,7 +708,6 @@ HWTEST_F(ScrollableTestNg, HandleScrollVelocity004, TestSize.Level1)
     auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
     mockScroll_->pattern_ = mockPn;
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     scrollPn->parent_ = mockPn;
 
     EXPECT_CALL(*mockPn, HandleScrollVelocity).Times(0);
@@ -828,12 +729,10 @@ HWTEST_F(ScrollableTestNg, HandleScrollVelocity005, TestSize.Level1)
     auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
     mockScroll_->pattern_ = mockPn;
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     scrollPn->parent_ = mockPn;
 
     EXPECT_CALL(*mockPn, HandleScrollVelocity).Times(0);
     EXPECT_CALL(*scrollPn, IsAtTop).WillRepeatedly(Return(true));
-
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
     scrollPn->edgeEffect_ = EdgeEffect::SPRING;
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::PARENT_FIRST, .backward = NestedScrollMode::SELF_ONLY };
@@ -857,7 +756,6 @@ HWTEST_F(ScrollableTestNg, HandleScrollVelocity006, TestSize.Level1)
     auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
     mockScroll_->pattern_ = mockPn;
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     scrollPn->parent_ = mockPn;
 
     EXPECT_CALL(*mockPn, HandleScrollVelocity).Times(0);
@@ -876,10 +774,7 @@ HWTEST_F(ScrollableTestNg, HandleScrollVelocity006, TestSize.Level1)
 HWTEST_F(ScrollableTestNg, OnScrollStart001, TestSize.Level1)
 {
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
-    EXPECT_TRUE(mockPn);
-
     EXPECT_CALL(*scrollPn, IsAtTop).Times(AtLeast(1));
     EXPECT_CALL(*mockPn, GetAxis).Times(1);
 
@@ -895,10 +790,7 @@ HWTEST_F(ScrollableTestNg, OnScrollStart001, TestSize.Level1)
 HWTEST_F(ScrollableTestNg, OnScrollEnd001, TestSize.Level1)
 {
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
-    EXPECT_TRUE(mockPn);
-
     EXPECT_CALL(*mockPn, OnScrollEndRecursive).Times(1);
     scrollPn->OnScrollEndRecursive(std::nullopt);
 }
@@ -906,7 +798,6 @@ HWTEST_F(ScrollableTestNg, OnScrollEnd001, TestSize.Level1)
 HWTEST_F(ScrollableTestNg, IsInHotZone001, TestSize.Level1)
 {
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     auto pipeLine = PipelineBase::GetCurrentContext();
     auto frameNode = scrollPn->GetHost();
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -926,7 +817,6 @@ HWTEST_F(ScrollableTestNg, IsInHotZone001, TestSize.Level1)
 HWTEST_F(ScrollableTestNg, IsVertical, TestSize.Level1)
 {
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     scrollPn->SetAxis(Axis::HORIZONTAL);
     EXPECT_FALSE(scrollPn->isVertical());
     scrollPn->SetAxis(Axis::VERTICAL);
@@ -936,7 +826,6 @@ HWTEST_F(ScrollableTestNg, IsVertical, TestSize.Level1)
 HWTEST_F(ScrollableTestNg, HandleMoveEventInComp, TestSize.Level1)
 {
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     EXPECT_CALL(*scrollPn, IsScrollable).Times(1).WillOnce(Return(true));
     auto pt = PointF(0.0, 0.0);
     scrollPn->HandleMoveEventInComp(pt);
@@ -950,7 +839,6 @@ HWTEST_F(ScrollableTestNg, HandleMoveEventInComp, TestSize.Level1)
 HWTEST_F(ScrollableTestNg, HotZoneScroll, TestSize.Level1)
 {
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     float offsetPct = 0.5f;
     EXPECT_CALL(*scrollPn, IsScrollable).Times(1).WillOnce(Return(true));
     scrollPn->HotZoneScroll(offsetPct);
@@ -973,7 +861,6 @@ HWTEST_F(ScrollableTestNg, SetCanOverScroll001, TestSize.Level1)
     auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
     mockScroll_->pattern_ = mockPn;
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     scrollPn->parent_ = mockPn;
 
     /**
@@ -1001,7 +888,6 @@ HWTEST_F(ScrollableTestNg, HandleScrollVelocity007, TestSize.Level1)
     auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
     mockScroll_->pattern_ = mockPn;
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     scrollPn->parent_ = mockPn;
 
     /**
@@ -1037,7 +923,6 @@ HWTEST_F(ScrollableTestNg, IsReverse001, TestSize.Level1)
     auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
     mockScroll_->pattern_ = mockPn;
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     scrollPn->parent_ = mockPn;
 
     /**
@@ -1073,7 +958,6 @@ HWTEST_F(ScrollableTestNg, GetCanOverScroll001, TestSize.Level1)
     auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
     mockScroll_->pattern_ = mockPn;
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     scrollPn->parent_ = mockPn;
 
     /**
@@ -1109,7 +993,6 @@ HWTEST_F(ScrollableTestNg, SelectWithScroll001, TestSize.Level1)
     auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
     mockScroll_->pattern_ = mockPn;
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     scrollPn->parent_ = mockPn;
 
     /**
@@ -1135,7 +1018,6 @@ HWTEST_F(ScrollableTestNg, SelectWithScroll002, TestSize.Level1)
     auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
     mockScroll_->pattern_ = mockPn;
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     scrollPn->parent_ = mockPn;
 
     /**
@@ -1167,7 +1049,6 @@ HWTEST_F(ScrollableTestNg, SelectWithScroll003, TestSize.Level1)
     auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
     mockScroll_->pattern_ = mockPn;
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     scrollPn->parent_ = mockPn;
 
     /**
@@ -1198,7 +1079,6 @@ HWTEST_F(ScrollableTestNg, SelectWithScroll004, TestSize.Level1)
     auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
     mockScroll_->pattern_ = mockPn;
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     scrollPn->parent_ = mockPn;
 
     /**
@@ -1231,7 +1111,6 @@ HWTEST_F(ScrollableTestNg, SelectWithScroll005, TestSize.Level1)
     auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
     mockScroll_->pattern_ = mockPn;
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     scrollPn->parent_ = mockPn;
 
     /**
@@ -1266,7 +1145,6 @@ HWTEST_F(ScrollableTestNg, LimitMouseEndOffset001, TestSize.Level1)
     auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
     mockScroll_->pattern_ = mockPn;
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     scrollPn->parent_ = mockPn;
 
     /**
@@ -1306,7 +1184,6 @@ HWTEST_F(ScrollableTestNg, HotZoneScroll001, TestSize.Level1)
     auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
     mockScroll_->pattern_ = mockPn;
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     scrollPn->parent_ = mockPn;
 
     /**
@@ -1345,7 +1222,6 @@ HWTEST_F(ScrollableTestNg, CoordinateWithRefresh001, TestSize.Level1)
     auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
     mockScroll_->pattern_ = mockPn;
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     scrollPn->parent_ = mockPn;
 
     /**
@@ -1408,7 +1284,6 @@ HWTEST_F(ScrollableTestNg, SetMaxFlingVelocity001, TestSize.Level1)
     auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
     mockScroll_->pattern_ = mockPn;
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     scrollPn->parent_ = mockPn;
 
     /**
@@ -1437,7 +1312,6 @@ HWTEST_F(ScrollableTestNg, MarkSelectedItems001, TestSize.Level1)
     auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
     mockScroll_->pattern_ = mockPn;
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     scrollPn->parent_ = mockPn;
 
     /**
@@ -1472,7 +1346,6 @@ HWTEST_F(ScrollableTestNg, ShouldSelectScrollBeStopped001, TestSize.Level1)
     auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
     mockScroll_->pattern_ = mockPn;
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
 
     /**
      * @tc.steps: step2. When lastMouseMove is not nullptr, call the MarkSelectedItems method
@@ -1521,9 +1394,7 @@ HWTEST_F(ScrollableTestNg, ShouldSelectScrollBeStopped002, TestSize.Level1)
      * @tc.expected: Pointer is not nullptr and result is true
      */
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
-    EXPECT_TRUE(mockPn);
     scrollPn->parent_ = mockPn;
     auto result = scrollPn->ShouldSelectScrollBeStopped();
     EXPECT_TRUE(result);
@@ -1543,7 +1414,6 @@ HWTEST_F(ScrollableTestNg, ShouldSelectScrollBeStopped003, TestSize.Level1)
     auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
     mockScroll_->pattern_ = mockPn;
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     scrollPn->parent_ = mockPn;
 
     /**
@@ -1572,9 +1442,7 @@ HWTEST_F(ScrollableTestNg, UpdateMouseStart001, TestSize.Level1)
      * @tc.expected: Pointer is not nullptr.
      */
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
-    EXPECT_TRUE(mockPn);
     scrollPn->parent_ = mockPn;
 
     /**
@@ -1599,9 +1467,7 @@ HWTEST_F(ScrollableTestNg, UpdateMouseStart002, TestSize.Level1)
      * @tc.expected: Pointer is not nullptr.
      */
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
-    EXPECT_TRUE(mockPn);
     scrollPn->parent_ = mockPn;
 
     /**
@@ -1626,9 +1492,7 @@ HWTEST_F(ScrollableTestNg, GetOffsetWithLimit001, TestSize.Level1)
      * @tc.expected: Pointer is not nullptr.
      */
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
-    EXPECT_TRUE(mockPn);
     scrollPn->parent_ = mockPn;
 
     /**
@@ -1652,9 +1516,7 @@ HWTEST_F(ScrollableTestNg, GetOffsetWithLimit002, TestSize.Level1)
      * @tc.expected: Pointer is not nullptr.
      */
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
-    EXPECT_TRUE(mockPn);
     scrollPn->parent_ = mockPn;
 
     /**
@@ -1678,9 +1540,7 @@ HWTEST_F(ScrollableTestNg, GetOffsetWithLimit003, TestSize.Level1)
      * @tc.expected: Pointer is not nullptr.
      */
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
-    EXPECT_TRUE(mockPn);
     scrollPn->parent_ = mockPn;
 
     /**
@@ -1704,9 +1564,7 @@ HWTEST_F(ScrollableTestNg, OnScrollStop001, TestSize.Level1)
      * @tc.expected: Pointer is not nullptr.
      */
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
-    EXPECT_TRUE(mockPn);
     scrollPn->parent_ = mockPn;
 
     /**
@@ -1733,9 +1591,7 @@ HWTEST_F(ScrollableTestNg, HandleHotZone001, TestSize.Level1)
      * @tc.expected: Pointer is not nullptr.
      */
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
-    EXPECT_TRUE(mockPn);
     scrollPn->parent_ = mockPn;
 
     /**
@@ -1766,9 +1622,7 @@ HWTEST_F(ScrollableTestNg, HandleHotZone002, TestSize.Level1)
      * @tc.expected: Pointer is not nullptr.
      */
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
-    EXPECT_TRUE(mockPn);
     scrollPn->parent_ = mockPn;
 
     /**
@@ -1798,9 +1652,7 @@ HWTEST_F(ScrollableTestNg, HandleHotZone003, TestSize.Level1)
      * @tc.expected: Pointer is not nullptr.
      */
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
-    EXPECT_TRUE(mockPn);
     scrollPn->parent_ = mockPn;
 
     /**
@@ -1830,7 +1682,6 @@ HWTEST_F(ScrollableTestNg, NeedCoordinateScrollWithNavigation001, TestSize.Level
      * @tc.expected: Pointer is not nullptr and result is false
      */
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     scrollPn->navBarPattern_ = nullptr;
     OverScrollOffset overScrollOffset = { 0.0f, 0.5f };
     bool result = scrollPn->NeedCoordinateScrollWithNavigation(0.0f, SCROLL_FROM_ANIMATION_SPRING, overScrollOffset);
@@ -1849,7 +1700,6 @@ HWTEST_F(ScrollableTestNg, NeedCoordinateScrollWithNavigation002, TestSize.Level
      * @tc.expected: Pointer is not nullptr.
      */
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     scrollPn->GetParentNavigation();
 
     /**
@@ -1899,7 +1749,6 @@ HWTEST_F(ScrollableTestNg, NotifyMoved001, TestSize.Level1)
     auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
     mockScroll_->pattern_ = mockPn;
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     scrollPn->parent_ = mockPn;
 
     /**
@@ -1935,7 +1784,6 @@ HWTEST_F(ScrollableTestNg, NeedSplitScroll001, TestSize.Level1)
     auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
     mockScroll_->pattern_ = mockPn;
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     scrollPn->parent_ = mockPn;
 
     /**
@@ -1966,7 +1814,6 @@ HWTEST_F(ScrollableTestNg, Fling001, TestSize.Level1)
      * @tc.expected: Pointer is not nullptr
      */
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
 
     /**
      * @tc.steps: step2. Call the Fling method and the flingVelocity is 3000
@@ -1998,7 +1845,6 @@ HWTEST_F(ScrollableTestNg, HandleClickScroll001, TestSize.Level1)
     auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
     mockScroll_->pattern_ = mockPn;
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     scrollPn->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(Axis::VERTICAL);
     scrollPn->parent_ = mockPn;
     scrollPn->scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
@@ -2043,7 +1889,6 @@ HWTEST_F(ScrollableTestNg, HandleLongPressScroll001, TestSize.Level1)
     auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
     mockScroll_->pattern_ = mockPn;
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     scrollPn->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(Axis::VERTICAL);
     scrollPn->parent_ = mockPn;
     scrollPn->scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
@@ -2086,7 +1931,6 @@ HWTEST_F(ScrollableTestNg, InitMouseEvent001, TestSize.Level1)
     auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
     mockScroll_->pattern_ = mockPn;
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    EXPECT_TRUE(scrollPn);
     scrollPn->scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
     scrollPn->parent_ = mockPn;
     scrollPn->InitScrollBarMouseEvent();

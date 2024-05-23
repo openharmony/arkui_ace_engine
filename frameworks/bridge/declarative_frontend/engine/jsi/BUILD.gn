@@ -226,6 +226,7 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_stepper_item_bridge.cpp",
       "nativeModule/arkts_native_swiper_bridge.cpp",
       "nativeModule/arkts_native_symbol_glyph_bridge.cpp",
+      "nativeModule/arkts_native_symbol_span_bridge.cpp",
       "nativeModule/arkts_native_tabcontent_bridge.cpp",
       "nativeModule/arkts_native_tabs_bridge.cpp",
       "nativeModule/arkts_native_text_area_bridge.cpp",
@@ -262,6 +263,12 @@ template("declarative_js_engine_ark") {
           "graphic_2d:librender_service_client",
         ]
       }
+    }
+
+    if (defined(config.model_component_support) &&
+        config.model_component_support) {
+      sources += [ "nativeModule/arkts_native_component3d_bridge.cpp" ]
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/model:ace_core_components_model_pattern_ng_$platform" ]
     }
 
     if (defined(config.form_components_support) &&

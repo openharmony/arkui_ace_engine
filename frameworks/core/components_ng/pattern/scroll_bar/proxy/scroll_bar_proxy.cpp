@@ -249,4 +249,21 @@ void ScrollBarProxy::ScrollPage(bool reverse, bool smooth)
         node.scrollPageCallback(reverse, smooth);
     }
 }
+
+void ScrollBarProxy::SetScrollEnabled(bool scrollEnabled, const WeakPtr<ScrollablePattern>& weakScrollableNode) const
+{
+    auto scrollable = weakScrollableNode.Upgrade();
+    if (!scrollable || !CheckScrollable(scrollable)) {
+        return;
+    }
+
+    for (const auto& weakScrollBar : scrollBars_) {
+        auto scrollBar = weakScrollBar.Upgrade();
+        if (!scrollBar) {
+            continue;
+        }
+
+        scrollBar->SetScrollEnabled(scrollEnabled);
+    }
+}
 } // namespace OHOS::Ace::NG

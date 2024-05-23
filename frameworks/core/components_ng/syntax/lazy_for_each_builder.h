@@ -271,6 +271,10 @@ public:
         return -1;
     }
 
+    void UpdateMoveFromTo(int32_t from, int32_t to);
+    void ResetMoveFromTo();
+    int32_t ConvertFormToIndex(int32_t index);
+
     void SetFlagForGeneratedItem(PropertyChangeFlag propertyChangeFlag)
     {
         for (const auto& item : cachedItems_) {
@@ -285,7 +289,7 @@ public:
         const std::optional<LayoutConstraintF>& itemConstraint, int64_t deadline, bool& isTimeout)
     {
         ACE_SCOPED_TRACE("Builder:BuildLazyItem [%d]", index);
-        auto itemInfo = OnGetChildByIndex(index, expiringItem_);
+        auto itemInfo = OnGetChildByIndex(ConvertFormToIndex(index), expiringItem_);
         CHECK_NULL_RETURN(itemInfo.second, nullptr);
         cache.try_emplace(itemInfo.first, LazyForEachCacheChild(index, itemInfo.second));
         if (!itemInfo.second->RenderCustomChild(deadline)) {
@@ -306,7 +310,8 @@ public:
         return itemInfo.second;
     }
 
-    void CheckCacheIndex(std::set<int32_t>& idleIndexes, int32_t count) {
+    void CheckCacheIndex(std::set<int32_t>& idleIndexes, int32_t count)
+    {
         for (int32_t i = 1; i <= cacheCount_; i++) {
             if (isLoop_) {
                 if ((startIndex_ <= endIndex_ && endIndex_ + i < count) ||
@@ -383,38 +388,7 @@ public:
         return PreBuildByIndex(preBuildingIndex_, cache, deadline, itemConstraint, canRunLongPredictTask);
     }
 
-    bool PreBuild(int64_t deadline, const std::optional<LayoutConstraintF>& itemConstraint, bool canRunLongPredictTask)
-    {
-        ACE_SCOPED_TRACE("expiringItem_ count:[%zu]", expiringItem_.size());
-        outOfBoundaryNodes_.clear();
-        if (itemConstraint && !canRunLongPredictTask) {
-            return false;
-        }
-        auto count = OnGetTotalCount();
-        std::unordered_map<std::string, LazyForEachCacheChild> cache;
-        std::set<int32_t> idleIndexes;
-        if (startIndex_ != -1 && endIndex_ != -1) {
-            CheckCacheIndex(idleIndexes, count);
-        }
-
-        ProcessCachedIndex(cache, idleIndexes);
-
-        bool result = true;
-        result = ProcessPreBuildingIndex(cache, deadline, itemConstraint, canRunLongPredictTask, idleIndexes);
-        if (!result) {
-            expiringItem_.swap(cache);
-            return result;
-        }
-
-        for (auto index : idleIndexes) {
-            result = PreBuildByIndex(index, cache, deadline, itemConstraint, canRunLongPredictTask);
-            if (!result) {
-                break;
-            }
-        }
-        expiringItem_.swap(cache);
-        return result;
-    }
+    bool PreBuild(int64_t deadline, const std::optional<LayoutConstraintF>& itemConstraint, bool canRunLongPredictTask);
 
     void ProcessCachedIndex(std::unordered_map<std::string, LazyForEachCacheChild>& cache,
         std::set<int32_t>& idleIndexes)
@@ -601,11 +575,13 @@ private:
         {"reload", 6}
     };
     std::list<int32_t> outOfBoundaryNodes_;
+    std::optional<std::pair<int32_t, int32_t>> moveFromTo_;
 
     int32_t startIndex_ = -1;
     int32_t endIndex_ = -1;
     int32_t cacheCount_ = 0;
     int32_t preBuildingIndex_ = -1;
+    int32_t totalCountForDataset_ = 0;
     bool needTransition = false;
     bool isLoop_ = false;
     bool useNewInterface_ = false;

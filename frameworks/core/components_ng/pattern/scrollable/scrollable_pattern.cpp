@@ -139,6 +139,7 @@ bool ScrollablePattern::OnScrollCallback(float offset, int32_t source)
         FireOnScrollStart();
         return true;
     }
+    SuggestOpIncGroup(true);
     return UpdateCurrentOffset(offset, source);
 }
 
@@ -171,9 +172,7 @@ bool ScrollablePattern::OnScrollPosition(double& offset, int32_t source)
             refreshCoordinateMode = CoordinateWithRefresh(offset, source, isAtTop);
         }
         auto navigationInCoordination = CoordinateWithNavigation(offset, source, isAtTop);
-        auto modalSheetCoordinationMode = CoordinateWithSheet(offset, source, isAtTop);
-        if ((refreshCoordinateMode == RefreshCoordinationMode::REFRESH_SCROLL) || navigationInCoordination ||
-            (modalSheetCoordinationMode == ModalSheetCoordinationMode::SHEET_SCROLL)) {
+        if ((refreshCoordinateMode == RefreshCoordinationMode::REFRESH_SCROLL) || navigationInCoordination) {
             return false;
         }
     }
@@ -253,34 +252,6 @@ RefreshCoordinationMode ScrollablePattern::CoordinateWithRefresh(double& offset,
     return mode;
 }
 
-ModalSheetCoordinationMode ScrollablePattern::CoordinateWithSheet(double& offset, int32_t source, bool isAtTop)
-{
-    auto coordinationMode = ModalSheetCoordinationMode::UNKNOWN;
-    if (source == SCROLL_FROM_START) {
-        isSheetInReactive_ = false;
-
-        if (!sheetPattern_) {
-            GetParentModalSheet();
-        }
-    }
-    auto overOffsets = GetOverScrollOffset(offset);
-    if (IsAtTop() && (source == SCROLL_FROM_UPDATE) && !isSheetInReactive_ && (axis_ == Axis::VERTICAL)) {
-        isSheetInReactive_ = true;
-        if (sheetPattern_) {
-            sheetPattern_->OnCoordScrollStart();
-        }
-    }
-    if (sheetPattern_ && isSheetInReactive_) {
-        if (!sheetPattern_->OnCoordScrollUpdate(GreatNotEqual(overOffsets.start, 0.0) ? overOffsets.start : offset)) {
-            isSheetInReactive_ = false;
-            coordinationMode = ModalSheetCoordinationMode::SCROLLABLE_SCROLL;
-        } else {
-            coordinationMode = ModalSheetCoordinationMode::SHEET_SCROLL;
-        }
-    }
-    return coordinationMode;
-}
-
 bool ScrollablePattern::CoordinateWithNavigation(double& offset, int32_t source, bool isAtTop)
 {
     if (source == SCROLL_FROM_START) {
@@ -343,12 +314,6 @@ void ScrollablePattern::OnScrollEnd()
     if (refreshCoordination_) {
         isRefreshInReactive_ = false;
         refreshCoordination_->OnScrollEnd(GetVelocity());
-    }
-    if (isSheetInReactive_) {
-        isSheetInReactive_ = false;
-        if (sheetPattern_) {
-            sheetPattern_->OnCoordScrollEnd(GetVelocity());
-        }
     }
     if (isReactInParentMovement_) {
         isReactInParentMovement_ = false;
@@ -813,6 +778,7 @@ void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeigh
             scrollBar_->SetScrollable(scrollable);
             if (scrollBarOverlayModifier_) {
                 scrollBarOverlayModifier_->SetOpacity(scrollable ? UINT8_MAX : 0);
+                scrollBarOverlayModifier_->SetScrollable(scrollable);
             }
             if (scrollable) {
                 scrollBar_->ScheduleDisappearDelayTask();
@@ -954,32 +920,6 @@ void ScrollablePattern::GetParentNavigation()
         return;
     }
     navBarPattern_ = nullptr;
-    return;
-}
-
-void ScrollablePattern::GetParentModalSheet()
-{
-    if (sheetPattern_) {
-        return;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-
-    if (host->GetTag() != V2::SCROLL_ETS_TAG) {
-        return;
-    }
-
-    for (auto parent = host->GetParent(); parent != nullptr; parent = parent->GetParent()) {
-        RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
-        if (!frameNode) {
-            continue;
-        }
-        sheetPattern_ = frameNode->GetPattern<SheetPresentationPattern>();
-        if (!sheetPattern_) {
-            continue;
-        }
-        return;
-    }
     return;
 }
 
@@ -1306,6 +1246,7 @@ void ScrollablePattern::HandleDragStart(const GestureEvent& info)
 {
     auto mouseOffsetX = static_cast<float>(info.GetRawGlobalLocation().GetX());
     auto mouseOffsetY = static_cast<float>(info.GetRawGlobalLocation().GetY());
+    SuggestOpIncGroup(true);
     if (!IsItemSelected(info)) {
         ClearMultiSelect();
         ClearInvisibleItemsSelectedStatus();
@@ -2065,6 +2006,7 @@ void ScrollablePattern::FireOnScrollStart()
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(hub);
+    SuggestOpIncGroup(true);
     if (scrollStop_ && !GetScrollAbort()) {
         OnScrollStop(hub->GetOnScrollStop());
     }
@@ -2103,6 +2045,38 @@ void ScrollablePattern::FireOnScroll(float finalOffset, OnScrollEvent& onScroll)
     if (scrollStop_ && !GetScrollAbort()) {
         if (scrollState != ScrollState::IDLE || !isTriggered) {
             onScroll(0.0_vp, ScrollState::IDLE);
+        }
+    }
+}
+
+void ScrollablePattern::SuggestOpIncGroup(bool flag)
+{
+    if (!SystemProperties::IsOpIncEnable()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (host->GetSuggestOpIncActivatedOnce()) {
+        return;
+    }
+    flag = flag && isVertical();
+    if (flag) {
+        ACE_SCOPED_TRACE("SuggestOpIncGroup %s", host->GetHostTag().c_str());
+        auto parent = host->GetAncestorNodeOfFrame();
+        CHECK_NULL_VOID(parent);
+        parent->SetSuggestOpIncActivatedOnce();
+        host->SetSuggestOpIncActivatedOnce();
+        // get 1st layer
+        for (auto child : host->GetAllChildren()) {
+            if (!child) {
+                continue;
+            }
+            auto frameNode = AceType::DynamicCast<FrameNode>(child);
+            if (!frameNode || frameNode->GetSuggestOpIncActivatedOnce()) {
+                continue;
+            }
+            std::string path(host->GetHostTag());
+            frameNode->FindSuggestOpIncNode(path, host->GetGeometryNode()->GetFrameSize(), 1);
         }
     }
 }

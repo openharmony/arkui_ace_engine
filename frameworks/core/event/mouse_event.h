@@ -102,8 +102,8 @@ struct MouseEvent final {
     std::shared_ptr<MMI::PointerEvent> pointerEvent;
     int32_t touchEventId = 0;
     int32_t originalId = 0;
+    std::vector<KeyCode> pressedKeyCodes_;
     bool isInjected = false;
-    std::vector<KeyCode> pressedCodes;
 
     Offset GetOffset() const
     {
@@ -156,6 +156,7 @@ struct MouseEvent final {
             .sourceTool = sourceTool,
             .pointerEvent = pointerEvent,
             .originalId = originalId,
+            .pressedKeyCodes_ = pressedKeyCodes_,
             .isInjected = isInjected
         };
     }
@@ -210,6 +211,7 @@ struct MouseEvent final {
             .SetOriginalId(GetId())
             .SetIsInjected(isInjected);
         event.pointers.emplace_back(std::move(point));
+        event.pressedKeyCodes_ = pressedKeyCodes_;
         return event;
     }
 
@@ -236,6 +238,7 @@ struct MouseEvent final {
             .sourceTool = sourceTool,
             .pointerEvent = pointerEvent,
             .originalId = originalId,
+            .pressedKeyCodes_ = pressedKeyCodes_,
             .isInjected = isInjected
         };
     }
@@ -366,6 +369,7 @@ public:
         info.SetSourceDevice(event.sourceType);
         info.SetSourceTool(event.sourceTool);
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
+        info.SetPressedKeyCodes(event.pressedKeyCodes_);
         onMouseCallback_(info);
         return info.IsStopPropagation();
     }

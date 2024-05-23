@@ -110,9 +110,9 @@ export struct ToolBar {
     .onClick(() => {
       let toolbar = this.toolBarList[index];
       if (toolbar.state === ItemState.ACTIVATE) {
-        if (this.activateIndex === index)
+        if (this.activateIndex === index) {
           this.activateIndex = -1;
-        else {
+        } else {
           this.activateIndex = index;
         }
       }

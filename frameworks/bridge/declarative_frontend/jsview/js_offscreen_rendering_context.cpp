@@ -176,7 +176,7 @@ void JSOffscreenRenderingContext::Constructor(const JSCallbackInfo& args)
     jsRenderContext->SetAntiAlias();
 
     int32_t unit = 0;
-    if (args.GetInt32Arg(3, unit) && (static_cast<CanvasUnit>(unit) == CanvasUnit::PX)) {
+    if (args.GetInt32Arg(3, unit) && (static_cast<CanvasUnit>(unit) == CanvasUnit::PX)) { // 3: index of parameter
         jsRenderContext->SetUnit(CanvasUnit::PX);
     }
 }

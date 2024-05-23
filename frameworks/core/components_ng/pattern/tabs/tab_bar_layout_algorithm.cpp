@@ -848,10 +848,10 @@ void TabBarLayoutAlgorithm::LayoutMask(LayoutWrapper* layoutWrapper, const std::
         auto currentMask = (i == 0 ? layoutProperty->GetSelectedMask().value_or(-1)
                                    : layoutProperty->GetUnselectedMask().value_or(-1));
         if (currentMask < 0) {
-            currentWrapper->SetActive(false);
             currentWrapper->GetGeometryNode()->SetFrameSize(SizeF());
+            currentWrapper->Layout();
+            currentWrapper->SetActive(false);
         } else {
-            currentWrapper->SetActive(true);
             auto offset = currentWrapper->GetGeometryNode()->GetMarginFrameOffset();
             currentWrapper->GetGeometryNode()->SetMarginFrameOffset(offset + childOffsetDelta[currentMask]);
             auto imageWrapper = currentWrapper->GetOrCreateChildByIndex(0);
@@ -861,8 +861,9 @@ void TabBarLayoutAlgorithm::LayoutMask(LayoutWrapper* layoutWrapper, const std::
             auto imageRenderContext = imageNode->GetRenderContext();
             CHECK_NULL_VOID(imageRenderContext);
             imageRenderContext->SetVisible(true);
+            currentWrapper->Layout();
+            currentWrapper->SetActive(true);
         }
-        currentWrapper->Layout();
     }
 }
 

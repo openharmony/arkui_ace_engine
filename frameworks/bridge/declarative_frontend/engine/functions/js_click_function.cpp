@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
 
@@ -46,6 +47,8 @@ void JsClickFunction::Execute(const ClickInfo& info)
     obj->SetProperty<double>("y", PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
     obj->SetProperty<double>("timestamp", static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
     obj->SetProperty<double>("source", static_cast<int32_t>(info.GetSourceDevice()));
+    obj->SetPropertyObject("getModifierKeyState",
+        JSRef<JSFunc>::New<FunctionCallback>(NG::ArkTSUtils::JsGetModifierKeyState));
     auto target = CreateEventTargetObject(info);
     obj->SetPropertyObject("target", target);
     obj->SetProperty<double>("pressure", info.GetForce());
@@ -79,6 +82,8 @@ void JsClickFunction::Execute(GestureEvent& info)
     obj->SetProperty<double>("source", static_cast<int32_t>(info.GetSourceDevice()));
     obj->SetProperty<double>("pressure", info.GetForce());
     obj->SetPropertyObject("preventDefault", JSRef<JSFunc>::New<FunctionCallback>(JsClickPreventDefault));
+    obj->SetPropertyObject("getModifierKeyState",
+        JSRef<JSFunc>::New<FunctionCallback>(NG::ArkTSUtils::JsGetModifierKeyState));
     obj->SetProperty<double>("tiltX", info.GetTiltX().value_or(0.0f));
     obj->SetProperty<double>("tiltY", info.GetTiltY().value_or(0.0f));
     obj->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
@@ -112,6 +117,8 @@ void JsClickFunction::Execute(MouseInfo& info)
     obj->SetProperty<double>("timestamp", static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
     obj->SetPropertyObject(
         "stopPropagation", JSRef<JSFunc>::New<FunctionCallback>(JsStopPropagation));
+    obj->SetPropertyObject("getModifierKeyState",
+        JSRef<JSFunc>::New<FunctionCallback>(NG::ArkTSUtils::JsGetModifierKeyState));
     obj->SetProperty<double>("source", static_cast<int32_t>(info.GetSourceDevice()));
     obj->SetProperty<double>("pressure", info.GetForce());
     obj->SetProperty<double>("tiltX", info.GetTiltX().value_or(0.0f));

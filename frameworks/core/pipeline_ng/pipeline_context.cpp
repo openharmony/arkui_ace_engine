@@ -48,6 +48,8 @@
 #include "core/common/container.h"
 #include "core/common/font_manager.h"
 #include "core/common/layout_inspector.h"
+#include "core/common/stylus/stylus_detector_mgr.h"
+#include "core/common/stylus/stylus_detector_default.h"
 #include "core/common/text_field_manager.h"
 #include "core/common/thread_checker.h"
 #include "core/common/window.h"
@@ -610,7 +612,7 @@ void PipelineContext::FlushOnceVsyncTask()
 void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 {
     CHECK_RUN_ON(UI);
-    ACE_FUNCTION_TRACE();
+    ACE_FUNCTION_TRACE_COMMERCIAL();
     window_->Lock();
     auto recvTime = GetSysTimestamp();
     static const std::string abilityName = AceApplicationInfo::GetInstance().GetProcessName().empty()
@@ -780,10 +782,17 @@ void PipelineContext::FlushMessages()
     window_->FlushTasks();
 }
 
-void PipelineContext::FlushUITasks()
+void PipelineContext::FlushUITasks(bool triggeredByImplicitAnimation)
 {
     window_->Lock();
-    taskScheduler_->FlushTask();
+    taskScheduler_->FlushTask(triggeredByImplicitAnimation);
+    window_->Unlock();
+}
+
+void PipelineContext::FlushAfterLayoutCallbackInImplicitAnimationTask()
+{
+    window_->Lock();
+    taskScheduler_->FlushAfterLayoutCallbackInImplicitAnimationTask();
     window_->Unlock();
 }
 
@@ -1486,11 +1495,15 @@ PipelineBase::SafeAreaInsets PipelineContext::GetSafeAreaWithoutProcess() const
 void PipelineContext::SyncSafeArea(bool onKeyboard)
 {
     CHECK_NULL_VOID(stageManager_);
-    auto page = stageManager_->GetLastPageWithTransition();
-    if (page) {
-        page->MarkDirtyNode(onKeyboard && !safeAreaManager_->KeyboardSafeAreaEnabled() ? PROPERTY_UPDATE_LAYOUT
+    auto lastPage = stageManager_->GetLastPageWithTransition();
+    auto prevPage = stageManager_->GetPrevPageWithTransition();
+    if (lastPage) {
+        lastPage->MarkDirtyNode(onKeyboard && !safeAreaManager_->KeyboardSafeAreaEnabled() ? PROPERTY_UPDATE_LAYOUT
                                                                                        : PROPERTY_UPDATE_MEASURE);
-        page->GetPattern<PagePattern>()->MarkDirtyOverlay();
+        lastPage->GetPattern<PagePattern>()->MarkDirtyOverlay();
+    }
+    if (prevPage) {
+        prevPage->GetPattern<PagePattern>()->MarkDirtyOverlay();
     }
     SubwindowManager::GetInstance()->MarkDirtyDialogSafeArea();
     if (overlayManager_) {
@@ -1971,6 +1984,10 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         touchRestrict.sourceType = point.sourceType;
         touchRestrict.touchEvent = point;
         touchRestrict.inputEventType = InputEventType::TOUCH_SCREEN;
+        if (StylusDetectorMgr::GetInstance()->IsNeedInterceptedTouchEvent(scalePoint)) {
+            return;
+        }
+
         eventManager_->TouchTest(scalePoint, node, touchRestrict, GetPluginEventOffset(), viewScale_, isSubPipe);
         if (!touchRestrict.childTouchTestList.empty()) {
             scalePoint.childTouchTestList = touchRestrict.childTouchTestList;
@@ -2337,6 +2354,8 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         if (overlayManager_) {
             overlayManager_->DumpOverlayInfo();
         }
+    } else if (params[0] == "--stylus") {
+        StylusDetectorDefault::GetInstance()->ExecuteCommand(params);
     }
     return true;
 }
@@ -2681,6 +2700,8 @@ MouseEvent ConvertAxisToMouse(const AxisEvent& event)
     result.sourceType = event.sourceType;
     result.sourceTool = event.sourceTool;
     result.pointerEvent = event.pointerEvent;
+    result.screenX = event.screenX;
+    result.screenY = event.screenY;
     return result;
 }
 
@@ -3226,9 +3247,9 @@ void PipelineContext::Finish(bool /* autoFinish */) const
     }
 }
 
-void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task)
+void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task, bool isFlushInImplicitAnimationTask)
 {
-    taskScheduler_->AddAfterLayoutTask(std::move(task));
+    taskScheduler_->AddAfterLayoutTask(std::move(task), isFlushInImplicitAnimationTask);
 }
 
 void PipelineContext::AddPersistAfterLayoutTask(std::function<void()>&& task)

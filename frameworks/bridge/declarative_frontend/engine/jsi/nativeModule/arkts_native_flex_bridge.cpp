@@ -29,6 +29,8 @@ ArkUINativeModuleValue FlexBridge::SetFlexInitialize(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> justifyContentArg = runtimeCallInfo->GetCallArgRef(3);
     Local<JSValueRef> alignItemsArg = runtimeCallInfo->GetCallArgRef(4);
     Local<JSValueRef> alignContentArg = runtimeCallInfo->GetCallArgRef(5);
+    Local<JSValueRef> mainArg = runtimeCallInfo->GetCallArgRef(6);
+    Local<JSValueRef> crossArg = runtimeCallInfo->GetCallArgRef(7);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     int32_t options[5] = { 0, 0, 0, 1, 0 };
@@ -48,6 +50,22 @@ ArkUINativeModuleValue FlexBridge::SetFlexInitialize(ArkUIRuntimeCallInfo* runti
         options[4] = alignContentArg->Int32Value(vm);
     }
     GetArkUINodeModifiers()->getFlexModifier()->setFlexOptions(nativeNode, options, 5);
+    if (options[1] != 0) {
+        if (!crossArg->IsNull() && !crossArg->IsUndefined()) {
+            CalcDimension crossValue;
+            if (crossArg->IsObject() && ArkTSUtils::ParseJsLengthMetrics(vm, crossArg, crossValue)) {
+                GetArkUINodeModifiers()->getFlexModifier()->setFlexCrossSpace(
+                    nativeNode, crossValue.Value(), static_cast<int8_t>(crossValue.Unit()));
+            }
+        }
+    }
+    if (!mainArg->IsNull() && !mainArg->IsUndefined()) {
+        CalcDimension mainValue;
+        if (crossArg->IsObject() && ArkTSUtils::ParseJsLengthMetrics(vm, crossArg, mainValue)) {
+            GetArkUINodeModifiers()->getFlexModifier()->setFlexMainSpace(
+                nativeNode, mainValue.Value(), static_cast<int8_t>(mainValue.Unit()));
+        }
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 

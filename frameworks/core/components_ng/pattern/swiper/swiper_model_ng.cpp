@@ -821,6 +821,19 @@ int32_t SwiperModelNG::GetIndicatorType(FrameNode* frameNode)
     SwiperIndicatorType value = SwiperIndicatorType::DOT;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(SwiperLayoutProperty, IndicatorType, value, frameNode, value);
     return static_cast<int32_t>(value);
+
+}
+
+RefPtr<SwiperController> SwiperModelNG::GetOrCreateSwiperController(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    if (!pattern->GetSwiperController()) {
+        auto controller = AceType::MakeRefPtr<SwiperController>();
+        pattern->SetSwiperController(controller);
+    }
+    return pattern->GetSwiperController();
 }
 
 RefPtr<SwiperController> SwiperModelNG::GetSwiperController(FrameNode* frameNode)

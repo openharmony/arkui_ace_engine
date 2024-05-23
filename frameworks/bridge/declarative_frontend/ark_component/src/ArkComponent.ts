@@ -1435,6 +1435,24 @@ class ClipModifier extends ModifierWithKey<boolean | object> {
   }
 }
 
+class ClipShapeModifier extends ModifierWithKey<object> {
+  constructor(value: object) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('clipShape');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetClipShape(node);
+    } else {
+      getUINativeModule().common.setClipShape(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return true;
+  }
+}
+
 class MaskModifier extends ModifierWithKey<boolean | object> {
   constructor(value: boolean | object) {
     super(value);
@@ -1445,6 +1463,24 @@ class MaskModifier extends ModifierWithKey<boolean | object> {
       getUINativeModule().common.resetMask(node);
     } else {
       getUINativeModule().common.setMask(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return true;
+  }
+}
+
+class MaskShapeModifier extends ModifierWithKey<object> {
+  constructor(value: object) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('maskShape');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetMaskShape(node);
+    } else {
+      getUINativeModule().common.setMaskShape(node, this.value);
     }
   }
 

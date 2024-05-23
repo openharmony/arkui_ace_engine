@@ -673,6 +673,7 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
             info.SetTiltY(lastTouchEvent_.tiltY.value());
         }
         info.SetPointerEvent(lastPointEvent_);
+        info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         callbackFunction(info);

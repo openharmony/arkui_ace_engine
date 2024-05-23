@@ -425,10 +425,11 @@ void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& men
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
+    auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
     if (!manager->GetHasFilter() && !manager->GetIsOnAnimation()) {
         bool isBindOverlayValue = targetNode->GetLayoutProperty()->GetIsBindOverlayValue(false);
-        CHECK_NULL_VOID(isBindOverlayValue && (SystemProperties::GetDeviceType() == DeviceType::PHONE ||
-                                                  SystemProperties::GetDeviceType() == DeviceType::TABLET));
+        CHECK_NULL_VOID(isBindOverlayValue && menuTheme->GetHasFilter());
         // insert columnNode to rootNode
         auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -633,7 +634,7 @@ RefPtr<FrameNode> MenuView::Create(
     CHECK_NULL_RETURN(menuProperty, nullptr);
     menuProperty->UpdateShowInSubWindow(false);
     for (size_t i = 0; i < params.size(); ++i) {
-        auto optionNode = OptionView::CreateSelectOption(params[i].first, params[i].second, i);
+        auto optionNode = OptionView::CreateSelectOption(params[i], i);
         auto optionPattern = optionNode->GetPattern<OptionPattern>();
         CHECK_NULL_RETURN(optionPattern, nullptr);
         optionPattern->SetIsSelectOption(true);

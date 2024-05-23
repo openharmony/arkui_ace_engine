@@ -625,11 +625,12 @@ void ButtonPattern::FireBuilder()
     } else {
         gestureEventHub->SetRedirectClick(true);
     }
-    if (contentModifierNode_ == BuildContentModifierNode()) {
+    auto builderNode = BuildContentModifierNode();
+    if (contentModifierNode_ == builderNode) {
         return;
     }
     host->RemoveChildAndReturnIndex(contentModifierNode_);
-    contentModifierNode_ = BuildContentModifierNode();
+    contentModifierNode_ = builderNode;
     CHECK_NULL_VOID(contentModifierNode_);
     nodeId_ = contentModifierNode_->GetId();
     host->AddChild(contentModifierNode_, 0);

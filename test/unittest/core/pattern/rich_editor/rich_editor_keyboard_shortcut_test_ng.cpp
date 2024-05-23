@@ -387,7 +387,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts202, TestS
     richEditorPattern->textSelector_.Update(4, 20);
     EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 4);
     richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_B);
-    EXPECT_EQ(richEditorController->updateSpanStyle_.updateFontWeight, Ace::FontWeight::BOLD);
+    EXPECT_EQ(richEditorPattern->GetUpdateSpanStyle().updateFontWeight, Ace::FontWeight::BOLD);
 }
 
 /**
@@ -421,7 +421,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts203, TestS
     richEditorPattern->textSelector_.Update(4, 20);
     EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 20);
     richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_I);
-    EXPECT_EQ(richEditorController->updateSpanStyle_.updateItalicFontStyle, OHOS::Ace::FontStyle::ITALIC);
+    EXPECT_EQ(richEditorPattern->GetUpdateSpanStyle().updateItalicFontStyle, OHOS::Ace::FontStyle::ITALIC);
 }
 
 /**
@@ -454,6 +454,6 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts204, TestS
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->textSelector_.Update(4, 20);
     richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_U);
-    EXPECT_EQ(richEditorController->updateSpanStyle_.updateTextDecoration, TextDecoration::UNDERLINE);
+    EXPECT_EQ(richEditorPattern->GetUpdateSpanStyle().updateTextDecoration, TextDecoration::UNDERLINE);
 }
 } // namespace OHOS::Ace::NG

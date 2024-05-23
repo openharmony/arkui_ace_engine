@@ -77,15 +77,16 @@ public:
     void AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty);
     void AddDirtyRenderNode(const RefPtr<FrameNode>& dirty);
     void AddPredictTask(PredictTask&& task);
-    void AddAfterLayoutTask(std::function<void()>&& task);
+    void AddAfterLayoutTask(std::function<void()>&& task, bool isFlushInImplicitAnimationTask = false);
     void AddAfterRenderTask(std::function<void()>&& task);
     void AddPersistAfterLayoutTask(std::function<void()>&& task);
 
     void FlushLayoutTask(bool forceUseMainThread = false);
     void FlushRenderTask(bool forceUseMainThread = false);
-    void FlushTask();
+    void FlushTask(bool triggeredByImplicitAnimation = false);
     void FlushPredictTask(int64_t deadline, bool canUseLongPredictTask = false);
     void FlushAfterLayoutTask();
+    void FlushAfterLayoutCallbackInImplicitAnimationTask();
     void FlushAfterRenderTask();
     void FlushPersistAfterLayoutTask();
     void ExpandSafeArea();
@@ -170,6 +171,7 @@ private:
     RootDirtyMap dirtyRenderNodes_;
     std::list<PredictTask> predictTask_;
     std::list<std::function<void()>> afterLayoutTasks_;
+    std::list<std::function<void()>> afterLayoutCallbacksInImplicitAnimationTask_;
     std::list<std::function<void()>> afterRenderTasks_;
     std::list<std::function<void()>> persistAfterLayoutTasks_;
     std::list<std::function<void()>> syncGeometryNodeTasks_;

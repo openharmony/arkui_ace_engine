@@ -302,7 +302,7 @@ bool TextLayoutAlgorithm::CreateParagraph(
             paraStyle = externalParagraphStyle.value();
         }
     }
-    if ((Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && spans_.empty()) || isSpanStringMode_) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) || isSpanStringMode_) {
         paraStyle.fontSize = textStyle.GetFontSize().ConvertToPx();
     }
     paraStyle.leadingMarginAlign = Alignment::CENTER;
@@ -465,7 +465,9 @@ bool TextLayoutAlgorithm::UpdateSingleParagraph(LayoutWrapper* layoutWrapper, Pa
         paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
     }
     CHECK_NULL_RETURN(paragraph, false);
-    paragraph->PushStyle(textStyle);
+    auto textStyleTmp = textStyle;
+    textStyleTmp.ResetTextBaseline();
+    paragraph->PushStyle(textStyleTmp);
     if (pattern->NeedShowAIDetect()) {
         UpdateParagraphForAISpan(textStyle, layoutWrapper, paragraph);
     } else {

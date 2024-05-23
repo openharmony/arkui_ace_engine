@@ -315,17 +315,23 @@ void JSRadio::JsRadioStyle(const JSCallbackInfo& info)
     JSRef<JSVal> indicatorColor = obj->GetProperty("indicatorColor");
     Color checkedBackgroundColorVal;
     if (!ParseJsColor(checkedBackgroundColor, checkedBackgroundColorVal)) {
-        checkedBackgroundColorVal = theme->GetActiveColor();
+        if (!JSRadioTheme::ObtainCheckedBackgroundColor(checkedBackgroundColorVal)) {
+            checkedBackgroundColorVal = theme->GetActiveColor();
+        }
     }
     RadioModel::GetInstance()->SetCheckedBackgroundColor(checkedBackgroundColorVal);
     Color uncheckedBorderColorVal;
     if (!ParseJsColor(uncheckedBorderColor, uncheckedBorderColorVal)) {
-        uncheckedBorderColorVal = theme->GetInactiveColor();
+        if (!JSRadioTheme::ObtainUncheckedBorderColor(uncheckedBorderColorVal)) {
+            uncheckedBorderColorVal = theme->GetInactiveColor();
+        }
     }
     RadioModel::GetInstance()->SetUncheckedBorderColor(uncheckedBorderColorVal);
     Color indicatorColorVal;
     if (!ParseJsColor(indicatorColor, indicatorColorVal)) {
-        indicatorColorVal = theme->GetPointColor();
+        if (!JSRadioTheme::ObtainIndicatorColor(indicatorColorVal)) {
+            indicatorColorVal = theme->GetPointColor();
+        }
     }
     RadioModel::GetInstance()->SetIndicatorColor(indicatorColorVal);
 }

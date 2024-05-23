@@ -570,7 +570,8 @@ bool SelectOverlayPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     defaultMenuEndOffset_ = selectOverlayLayoutAlgorithm->GetDefaultMenuEndOffset();
     menuWidth_ = selectOverlayLayoutAlgorithm->GetMenuWidth();
     menuHeight_ = selectOverlayLayoutAlgorithm->GetMenuHeight();
-    hasExtensionMenu_ = selectOverlayLayoutAlgorithm->GetHasExtensionMenu();
+    hasExtensionMenu_ =
+        selectOverlayLayoutAlgorithm->GetHasExtensionMenu() && !selectOverlayLayoutAlgorithm->GetHideMoreOrBack();
     if (IsCustomMenu()) {
         MenuWrapperPattern::CheckAndShowAnimation();
     }

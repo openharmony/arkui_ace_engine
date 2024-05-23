@@ -38,16 +38,16 @@ void SelectModelImpl::Create(const std::vector<SelectParam>& params)
                 continue;
             }
             auto optionComponent = AceType::MakeRefPtr<OHOS::Ace::OptionComponent>(optionTheme);
-            auto textComponent = AceType::MakeRefPtr<OHOS::Ace::TextComponent>(params[i].first);
-            if (!params[i].second.empty()) {
-                optionComponent->SetIcon(AceType::MakeRefPtr<OHOS::Ace::ImageComponent>(params[i].second));
+            auto textComponent = AceType::MakeRefPtr<OHOS::Ace::TextComponent>(params[i].text);
+            if (!params[i].icon.empty()) {
+                optionComponent->SetIcon(AceType::MakeRefPtr<OHOS::Ace::ImageComponent>(params[i].icon));
             }
             optionComponent->SetTheme(optionTheme);
             optionComponent->SetText(textComponent);
             optionComponent->SetTextStyle(optionTheme->GetTitleStyle());
             optionComponent->SetSelectedTextStyle(optionTheme->GetTitleStyle());
             optionComponent->SetSelectedBackgroundColor(optionTheme->GetSelectedColor());
-            optionComponent->SetValue(params[i].first);
+            optionComponent->SetValue(params[i].text);
             selectComponent->AppendSelectOption(optionComponent);
     }
     ViewStackProcessor::GetInstance()->ClaimElementId(selectComponent);

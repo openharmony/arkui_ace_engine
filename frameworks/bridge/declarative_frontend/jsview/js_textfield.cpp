@@ -17,6 +17,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <string>
 #include <vector>
 
 #include "base/geometry/dimension.h"
@@ -1210,12 +1211,12 @@ void JSTextField::SetShowError(const JSCallbackInfo& info)
 {
     auto jsValue = info[0];
     if (Container::IsCurrentUseNewPipeline()) {
-        if (!jsValue->IsUndefined() && !jsValue->IsString()) {
-            TextFieldModel::GetInstance()->SetShowError("", false);
-            return;
+        bool isVisible = false;
+        std::string errorText;
+        if (ParseJsString(jsValue, errorText)) {
+            isVisible = true;
         }
-        TextFieldModel::GetInstance()->SetShowError(
-            jsValue->IsString() ? jsValue->ToString() : "", jsValue->IsUndefined() ? false : true);
+        TextFieldModel::GetInstance()->SetShowError(errorText, isVisible);
     }
 }
 

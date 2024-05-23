@@ -169,4 +169,97 @@ HWTEST_F(TextTestFourNg, UpdateParagraphBySpan001, TestSize.Level1)
     auto thirdParagraph = *(iter);
     ASSERT_NE(thirdParagraph.paragraph, nullptr);
 }
+
+/**
+ * @tc.name: InitKeyEvent001
+ * @tc.desc: test test_pattern.h InitKeyEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFourNg, InitKeyEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Initialize text and copyOption.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create("123456789");
+    textModelNG.SetCopyOption(CopyOptions::InApp);
+
+    /**
+     * @tc.steps: step3. test the param keyEventInitialized_ is or not true.
+     * @tc.expect: expect keyEventInitialized_ is true.
+     */
+    textPattern->InitKeyEvent();
+    EXPECT_TRUE(textPattern->keyEventInitialized_);
+}
+
+/**
+ * @tc.name: HandleKeyEvent001
+ * @tc.desc: test test_pattern.h HandleKeyEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFourNg, HandleKeyEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    textPattern->pManager_->Reset();
+    textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 1 });
+
+    /**
+     * @tc.steps: step2. Initialize text and textSelector_.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create("123456789");
+    textPattern->copyOption_ = CopyOptions::InApp;
+    textPattern->textSelector_.Update(2, 6);
+
+    /**
+     * @tc.steps: step3. test the enter key is or not legal.
+     * @tc.expect: expect the key is legal.
+     */
+    KeyEvent event;
+    event.action = KeyAction::UP;
+    EXPECT_FALSE(textPattern->HandleKeyEvent(event));
+    event.action = KeyAction::DOWN;
+    std::vector<KeyCode> pressCodes = {};
+    event.pressedCodes = pressCodes;
+    std::vector<KeyCode> ctrlCodes = { KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_CTRL_RIGHT };
+    for (auto ctrl : ctrlCodes) {
+        event.pressedCodes.clear();
+        event.pressedCodes.push_back(ctrl);
+        event.pressedCodes.push_back(KeyCode::KEY_C);
+        event.code = KeyCode::KEY_C;
+        EXPECT_TRUE(textPattern->HandleKeyEvent(event));
+    }
+
+    std::vector<KeyCode> shiftCodes = { KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_SHIFT_RIGHT };
+    std::vector<KeyCode> eventCodes = {
+        KeyCode::KEY_DPAD_RIGHT,
+        KeyCode::KEY_DPAD_LEFT,
+        KeyCode::KEY_DPAD_UP,
+        KeyCode::KEY_DPAD_DOWN,
+    };
+    for (auto shift : shiftCodes) {
+        for (auto code : eventCodes) {
+            event.pressedCodes.clear();
+            event.pressedCodes.push_back(shift);
+            event.pressedCodes.push_back(code);
+            event.code = code;
+            EXPECT_TRUE(textPattern->HandleKeyEvent(event));
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

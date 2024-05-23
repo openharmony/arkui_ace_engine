@@ -34,7 +34,7 @@ public:
     void SetRootSize(double rootWidth, double rootHeight);
     MOCK_CONST_METHOD0(GetSafeArea, SafeAreaInsets());
     MOCK_CONST_METHOD0(GetSafeAreaWithoutProcess, SafeAreaInsets());
-    MOCK_METHOD(void, FlushUITasks, (), (override));
+    MOCK_METHOD(void, FlushUITasks, (bool triggeredByImplicitAnimation), (override));
 
     bool GetIsDeclarative() const override
     {

@@ -17,6 +17,7 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_SELECT_BRIDGE_H
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
+#include "core/components_ng/pattern/select/select_model_ng.h"
 
 namespace OHOS::Ace::NG {
 class SelectBridge {
@@ -64,6 +65,8 @@ public:
     static ArkUINativeModuleValue ResetMenuBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetMenuBackgroundBlurStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetMenuBackgroundBlurStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
+private:
+    static Local<panda::ObjectRef> ConstructSelect(EcmaVM* vm, FrameNode* frameNode, MenuItemConfiguration& config);
 };
 } // namespace OHOS::Ace::NG
 

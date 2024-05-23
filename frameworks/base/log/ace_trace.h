@@ -27,6 +27,7 @@
 #include "base/utils/system_properties.h"
 
 #define ACE_SCOPED_TRACE(fmt, ...) AceScopedTrace aceScopedTrace(fmt, ##__VA_ARGS__)
+#define ACE_SCOPED_TRACE_COMMERCIAL(fmt, ...) AceScopedTraceCommercial aceScopedTrace(fmt, ##__VA_ARGS__)
 #define ACE_SCOPED_TRACE_FLAG(flag, fmt, ...) AceScopedTraceFlag aceScopedTraceFlag(flag, fmt, ##__VA_ARGS__)
 #define ACE_SVG_SCOPED_TRACE(fmt, ...) \
     AceScopedTraceFlag aceScopedTraceFlag(SystemProperties::GetSvgTraceEnabled(), fmt, ##__VA_ARGS__)
@@ -39,28 +40,28 @@
 #endif
 
 #define ACE_LAYOUT_TRACE_BEGIN(fmt, ...) \
-    if (SystemProperties::GetLayoutTraceEnabled() && AceTraceEnabled()) { \
+    if (SystemProperties::GetLayoutTraceEnabled()) { \
         AceTraceBeginWithArgs(fmt, ##__VA_ARGS__); \
     }
 #define ACE_LAYOUT_TRACE_END() \
-    if (SystemProperties::GetLayoutTraceEnabled() && AceTraceEnabled()) { \
+    if (SystemProperties::GetLayoutTraceEnabled()) { \
         AceTraceEnd(); \
     }
 
 // Enable trace for component creation and attribute settings
 #define ACE_BUILD_TRACE_BEGIN(fmt, ...) \
-    if (SystemProperties::GetBuildTraceEnabled() && AceTraceEnabled()) { \
+    if (SystemProperties::GetBuildTraceEnabled()) { \
         AceTraceBeginWithArgs(fmt, ##__VA_ARGS__); \
     }
 #define ACE_BUILD_TRACE_END() \
-    if (SystemProperties::GetBuildTraceEnabled() && AceTraceEnabled()) { \
+    if (SystemProperties::GetBuildTraceEnabled()) { \
         AceTraceEnd(); \
     }
 
 #define CHECK_NULL_VOID_LAYOUT_TRACE_END(ptr) \
     do {                           \
         if (!(ptr)) {              \
-            if (SystemProperties::GetLayoutTraceEnabled() && AceTraceEnabled()) { \
+            if (SystemProperties::GetLayoutTraceEnabled()) { \
                 AceTraceEnd();     \
             }                      \
             return;                \
@@ -68,12 +69,11 @@
     } while (0)                    \
 
 #define ACE_FUNCTION_TRACE() ACE_SCOPED_TRACE(__func__)
+#define ACE_FUNCTION_TRACE_COMMERCIAL() ACE_SCOPED_TRACE_COMMERCIAL(__func__)
 
 #define ACE_COUNT_TRACE(count, fmt, ...) AceCountTraceWidthArgs(count, fmt, ##__VA_ARGS__)
 
 namespace OHOS::Ace {
-
-bool ACE_EXPORT AceTraceEnabled();
 bool ACE_EXPORT AceAsyncTraceEnable();
 void ACE_EXPORT AceTraceBegin(const char* name);
 void ACE_EXPORT AceAsyncTraceBegin(int32_t taskId, const char* name, bool isAnimationTrace = false);
@@ -86,20 +86,33 @@ void ACE_EXPORT AceAsyncTraceEnd(int32_t taskId, const char* name, bool isAnimat
 void ACE_EXPORT AceCountTrace(const char *key, int32_t count);
 void ACE_EXPORT AceCountTraceWidthArgs(int32_t count, const char* format, ...);
 
+// for commercial trace
+void ACE_EXPORT AceTraceBeginCommercial(const char* name);
+void ACE_EXPORT AceTraceEndCommercial();
+
 class ACE_FORCE_EXPORT AceScopedTrace final {
 public:
     explicit AceScopedTrace(const char* format, ...) __attribute__((__format__(printf, 2, 3)));
     ~AceScopedTrace();
 
     ACE_DISALLOW_COPY_AND_MOVE(AceScopedTrace);
-
 private:
-    bool traceEnabled_ { false };
+    bool strValid_ = false;
+};
+
+class ACE_FORCE_EXPORT AceScopedTraceCommercial final {
+public:
+    explicit AceScopedTraceCommercial(const char* format, ...) __attribute__((__format__(printf, 2, 3)));
+    ~AceScopedTraceCommercial();
+
+    ACE_DISALLOW_COPY_AND_MOVE(AceScopedTraceCommercial);
+private:
+    bool strValid_ = false;
 };
 
 class ACE_FORCE_EXPORT AceScopedTraceFlag final {
 public:
-    explicit AceScopedTraceFlag(bool flag, const char* format, ...) __attribute__((__format__(printf, 3, 4)));
+    AceScopedTraceFlag(bool flag, const char* format, ...) __attribute__((__format__(printf, 3, 4)));
     ~AceScopedTraceFlag();
 
     ACE_DISALLOW_COPY_AND_MOVE(AceScopedTraceFlag);
@@ -116,7 +129,6 @@ public:
     ACE_DISALLOW_COPY_AND_MOVE(AceAsyncScopedTrace);
 
 private:
-    bool asyncTraceEnabled_ { false };
     std::string name_;
     int32_t taskId_;
     static std::atomic<std::int32_t> id_;
