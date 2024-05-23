@@ -1826,8 +1826,7 @@ bool ScrollablePattern::HandleScrollVelocity(float velocity)
 {
     // if edgeEffect is None and scrollable try to over scroll when it is at the boundary,
     // scrollable does not start fling animation.
-    auto needFlingAtEdge = !(GetEdgeEffect() == EdgeEffect::NONE &&
-                             ((IsAtTop() && Positive(velocity)) || (IsAtBottom() && Negative(velocity))));
+    auto needFlingAtEdge = !(((IsAtTop() && Positive(velocity)) || (IsAtBottom() && Negative(velocity))));
     if (!OutBoundaryCallback() && needFlingAtEdge) {
         // trigger scroll animation if edge not reached
         if (scrollableEvent_ && scrollableEvent_->GetScrollable()) {
