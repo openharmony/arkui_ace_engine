@@ -967,7 +967,9 @@ struct ArkUIContext {
 struct ArkUIGuidelineStyle {
     ArkUI_CharPtr id;
     ArkUI_Int32 direction;
+    ArkUI_Bool hasStart;
     ArkUI_Float32 start;
+    ArkUI_Bool hasEnd;
     ArkUI_Float32 end;
 };
 
