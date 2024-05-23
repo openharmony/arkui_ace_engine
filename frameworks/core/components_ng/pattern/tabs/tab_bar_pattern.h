@@ -207,9 +207,9 @@ public:
 
     SelectedMode GetSelectedMode() const;
 
-    void AddTabBarItemType(int32_t tabContentId, bool isBuilder)
+    void AddTabBarItemType(int32_t tabBarItemId, bool isBuilder)
     {
-        tabBarType_.emplace(std::make_pair(tabContentId, isBuilder));
+        tabBarType_.emplace(std::make_pair(tabBarItemId, isBuilder));
     }
 
     bool IsContainsBuilder();
@@ -232,6 +232,7 @@ public:
     void SetTabBarStyle(TabBarStyle tabBarStyle)
     {
         tabBarStyle_ = tabBarStyle;
+        InitLongPressAndDragEvent();
     }
 
     TabBarStyle GetTabBarStyle() const
@@ -427,13 +428,19 @@ public:
     bool ContentWillChange(int32_t comingIndex);
     bool ContentWillChange(int32_t currentIndex, int32_t comingIndex);
 
+    void AddTabBarItemClickEvent(const RefPtr<FrameNode>& tabBarItem);
+
+    void RemoveTabBarItemClickEvent(int32_t tabBarId)
+    {
+        clickEvents_.erase(tabBarId);
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     void InitSurfaceChangedCallback();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
-    void InitClick(const RefPtr<GestureEventHub>& gestureHub);
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitScrollable(const RefPtr<GestureEventHub>& gestureHub);
@@ -451,8 +458,9 @@ private:
     bool OnKeyEventWithoutClick(const RefPtr<FrameNode>& host, const KeyEvent& event);
     void HandleLongPressEvent(const GestureEvent& info);
     void ShowDialogWithNode(int32_t index);
-    void CloseDialog(int32_t index);
-    void HandleClick(const GestureEvent& info);
+    void CloseDialog();
+    void InitLongPressAndDragEvent();
+    void HandleClick(const GestureEvent& info, int32_t index);
     void ClickTo(const RefPtr<FrameNode>& host, int32_t index);
     void HandleTouchEvent(const TouchLocationInfo& info);
     void HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& layoutProperty, int32_t index);
@@ -466,6 +474,8 @@ private:
         int32_t maskIndex, float& selectedImageSize, float& unselectedImageSize, OffsetF& originalSelectedMaskOffset,
         OffsetF& originalUnselectedMaskOffset);
     void UpdateBottomTabBarImageColor(const std::vector<int32_t>& selectedIndexes, int32_t maskIndex);
+    void UpdateSymbolApply(const RefPtr<NG::FrameNode>& symbolNode, RefPtr<TextLayoutProperty>& symbolProperty,
+        int32_t index, std::string type);
     bool CheckSvg(int32_t index) const;
 
     void HandleTouchDown(int32_t index);
@@ -498,6 +508,8 @@ private:
     void AdjustOffset(double& offset) const;
     void InitTurnPageRateEvent();
     void GetIndicatorStyle(IndicatorStyle& indicatorStyle, OffsetF& indicatorOffset);
+    void CalculateIndicatorStyle(
+        int32_t startIndex, int32_t nextIndex, IndicatorStyle& indicatorStyle, OffsetF& indicatorOffset);
     Color GetTabBarBackgroundColor() const;
     float GetLeftPadding() const;
     void HandleBottomTabBarAnimation(int32_t index);
@@ -505,8 +517,12 @@ private:
         const RefPtr<TabBarLayoutProperty>& layoutProperty, int32_t index, int32_t indicator);
     void UpdatePaintIndicator(int32_t indicator, bool needMarkDirty);
     bool IsNeedUpdateFontWeight(int32_t index);
+    std::pair<float, float> GetOverScrollInfo(const SizeF& size);
+    void RemoveTabBarEventCallback();
+    void AddTabBarEventCallback();
+    void AddMaskItemClickEvent();
 
-    RefPtr<ClickEvent> clickEvent_;
+    std::map<int32_t, RefPtr<ClickEvent>> clickEvents_;
     RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<ScrollableEvent> scrollableEvent_;

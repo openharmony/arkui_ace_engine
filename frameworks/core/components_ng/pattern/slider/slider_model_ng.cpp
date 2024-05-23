@@ -560,6 +560,7 @@ void SliderModelNG::SetValidSlideRange(FrameNode* frameNode, float from, float t
     CHECK_NULL_VOID(paintProperty);
     auto minValue = paintProperty->GetMinValue(0.0f);
     auto maxValue = paintProperty->GetMaxValue(100.0f);
+    auto step = paintProperty->GetStepValue(1.0f);
     float fromValue = minValue;
     float toValue = maxValue;
     if (std::isfinite(from)) {
@@ -568,7 +569,12 @@ void SliderModelNG::SetValidSlideRange(FrameNode* frameNode, float from, float t
     if (std::isfinite(to)) {
         toValue = to;
     }
-    if (GreatOrEqual(fromValue, minValue) && LessOrEqual(toValue, maxValue)) {
+    if (GreatOrEqual(fromValue, minValue) && LessOrEqual(toValue, maxValue) && LessOrEqual(fromValue, toValue) &&
+        GreatNotEqual(step, 0.0f)) {
+        auto toValueCorrection = NearEqual(toValue - step * std::floor(toValue / step), 0) ? 0 : 1;
+        fromValue = LessOrEqual(fromValue, minValue) ? minValue : std::floor(fromValue / step) * step;
+        toValue = GreatOrEqual(toValue, maxValue) ?
+                  maxValue : (std::floor(toValue / step) + toValueCorrection) * step;
         auto sliderValue = std::clamp(paintProperty->GetValueValue(fromValue), fromValue, toValue);
         RefPtr<SliderModel::SliderValidRange> rangeValue =
             AceType::MakeRefPtr<SliderModel::SliderValidRange>(fromValue, toValue);
@@ -687,6 +693,13 @@ RefPtr<BasicShape> SliderModelNG::GetBlockShape(FrameNode* frameNode)
     return value;
 }
 
+RefPtr<SliderModel::SliderValidRange> SliderModelNG::GetValidSlideRange(FrameNode* frameNode)
+{
+    RefPtr<SliderModel::SliderValidRange> value = AceType::MakeRefPtr<SliderModel::SliderValidRange>();
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(SliderPaintProperty, ValidSlideRange, value, frameNode, value);
+    return value;
+}
+
 Gradient SliderModelNG::CreateSolidGradient(Color value)
 {
     Gradient gradient;
@@ -738,5 +751,28 @@ Dimension SliderModelNG::GetThickness(FrameNode* frameNode)
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
         SliderLayoutProperty, Thickness, trackThickness, frameNode, defaultTrackThickness);
     return trackThickness;
+}
+
+void SliderModelNG::SetSelectedBorderRadius(FrameNode* frameNode, const Dimension& value)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, SelectedBorderRadius, value, frameNode);
+}
+
+void SliderModelNG::ResetSelectedBorderRadius(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+        SliderPaintProperty, SelectedBorderRadius, PROPERTY_UPDATE_RENDER, frameNode);
+}
+
+void SliderModelNG::ResetSliderInteractionMode(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+        SliderPaintProperty, SliderInteractionMode, PROPERTY_UPDATE_RENDER, frameNode);
+}
+
+void SliderModelNG::ResetMinResponsiveDistance(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+        SliderPaintProperty, MinResponsiveDistance, PROPERTY_UPDATE_RENDER, frameNode);
 }
 } // namespace OHOS::Ace::NG

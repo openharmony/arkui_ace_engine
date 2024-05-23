@@ -22,6 +22,7 @@
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/checkbox_model_impl.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_checkbox_theme.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/container.h"
 #include "core/components/checkable/checkable_component.h"
@@ -91,9 +92,9 @@ void JSCheckbox::Create(const JSCallbackInfo& info)
         }
     }
     CheckBoxModel::GetInstance()->Create(checkboxName, checkboxGroup, V2::CHECK_BOX_ETS_TAG);
-    if (customBuilderFunc.has_value()) {
-        CheckBoxModel::GetInstance()->SetBuilder(customBuilderFunc);
-    }
+    CheckBoxModel::GetInstance()->SetBuilder(customBuilderFunc);
+
+    JSCheckBoxTheme::ApplyTheme();
 }
 
 void JSCheckbox::JSBind(BindingTarget globalObj)
@@ -116,7 +117,9 @@ void JSCheckbox::JSBind(BindingTarget globalObj)
     JSClass<JSCheckbox>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSCheckbox>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSCheckbox>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSCheckbox>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSCheckbox>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSCheckbox>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSCheckbox>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSCheckbox>::InheritAndBind<JSViewAbstract>(globalObj);
 }
@@ -276,23 +279,24 @@ void JSCheckbox::SetCheckboxStyle(int32_t checkBoxStyle)
 }
 void JSCheckbox::Mark(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        return;
-    }
-
+    auto theme = GetTheme<CheckboxTheme>();
     if (!info[0]->IsObject()) {
+        CheckBoxModel::GetInstance()->SetCheckMarkColor(theme->GetPointColor());
+        CheckBoxModel::GetInstance()->SetCheckMarkSize(Dimension(CHECK_BOX_MARK_SIZE_INVALID_VALUE));
+        CheckBoxModel::GetInstance()->SetCheckMarkWidth(theme->GetCheckStroke());
         return;
     }
 
     auto markObj = JSRef<JSObject>::Cast(info[0]);
     auto strokeColorValue = markObj->GetProperty("strokeColor");
-    Color strokeColor;
-    auto theme = GetTheme<CheckboxTheme>();
+    Color strokeColor = theme->GetPointColor();
     if (!ParseJsColor(strokeColorValue, strokeColor)) {
-        strokeColor = theme->GetPointColor();
+        if (!JSCheckBoxTheme::ObtainCheckMarkColor(strokeColor)) {
+            CheckBoxModel::GetInstance()->SetCheckMarkColor(strokeColor);
+        }
+    } else {
+        CheckBoxModel::GetInstance()->SetCheckMarkColor(strokeColor);
     }
-    CheckBoxModel::GetInstance()->SetCheckMarkColor(strokeColor);
-
     auto sizeValue = markObj->GetProperty("size");
     CalcDimension size;
     if ((ParseJsDimensionVp(sizeValue, size)) && (size.Unit() != DimensionUnit::PERCENT) && (size.ConvertToVp() >= 0)) {

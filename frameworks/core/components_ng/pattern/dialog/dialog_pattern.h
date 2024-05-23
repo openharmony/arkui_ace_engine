@@ -106,6 +106,9 @@ public:
 
     std::list<int32_t> GetRouteOfFirstScope() override
     {
+        if (dialogProperties_.type == DialogType::ALERT_DIALOG || dialogProperties_.type == DialogType::ACTION_SHEET) {
+            return { 0 };
+        }
         return { 0, 0 };
     }
 
@@ -231,6 +234,16 @@ public:
         return hostWindowRect_;
     }
 
+    void UpdateFoldDisplayModeChangedCallbackId(std::optional<int32_t> id)
+    {
+        foldDisplayModeChangedCallbackId_ = id;
+    }
+
+    bool HasFoldDisplayModeChangedCallbackId()
+    {
+        return foldDisplayModeChangedCallbackId_.has_value();
+    }
+
 private:
     bool AvoidKeyboard() const override
     {
@@ -298,6 +311,8 @@ private:
 
     std::optional<AnimationOption> openAnimation_;
     std::optional<AnimationOption> closeAnimation_;
+    std::optional<int32_t> foldDisplayModeChangedCallbackId_;
+    bool isFoldStatusChanged_ = false;
 
     // XTS inspector values
     std::string message_;

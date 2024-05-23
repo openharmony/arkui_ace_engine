@@ -112,7 +112,8 @@ class SpanTextBackgroundStyleModifier extends ModifierWithKey<TextBackgroundStyl
         getUINativeModule().span.resetTextBackgroundStyle(node);
       }
       else {
-        getUINativeModule().span.setTextBackgroundStyle(node, textBackgroundStyle.color, textBackgroundStyle.radius.topLeft, textBackgroundStyle.radius.topRight, textBackgroundStyle.radius.bottomLeft, textBackgroundStyle.radius.bottomRight);
+        getUINativeModule().span.setTextBackgroundStyle(node, textBackgroundStyle.color, textBackgroundStyle.radius.topLeft,
+          textBackgroundStyle.radius.topRight, textBackgroundStyle.radius.bottomLeft, textBackgroundStyle.radius.bottomRight);
       }
     }
   }
@@ -628,6 +629,14 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
   }
 
   onDisAppear(event: () => void): this {
+    throw new Error('Method not implemented.');
+  }
+
+  onAttach(event: () => void): this {
+    throw new Error('Method not implemented.');
+  }
+
+  onDetach(event: () => void): this {
     throw new Error('Method not implemented.');
   }
 

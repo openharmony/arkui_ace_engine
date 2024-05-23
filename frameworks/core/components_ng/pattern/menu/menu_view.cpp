@@ -321,6 +321,7 @@ void ShowGatherAnimation(const RefPtr<FrameNode>& imageNode, const RefPtr<FrameN
     CHECK_NULL_VOID(mainPipeline);
     auto manager = mainPipeline->GetOverlayManager();
     CHECK_NULL_VOID(manager);
+    manager->UpdateGatherNodeToTop();
     auto gatherNode = manager->GetGatherNode();
     CHECK_NULL_VOID(gatherNode);
     auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -394,6 +395,7 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& menuN
     CHECK_NULL_VOID(imageGestureHub);
     InitPanEvent(imageGestureHub, menuNode);
 
+    ShowGatherAnimation(target, menuNode);
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
     imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(imageOffset.GetX()), Dimension(imageOffset.GetY())));
@@ -402,7 +404,6 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& menuN
     auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     ShowPixelMapAnimation(imageNode, menuNode);
-    ShowGatherAnimation(imageNode, menuNode);
 }
 
 void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& menuWrapperNode)
@@ -424,10 +425,11 @@ void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& men
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
+    auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
     if (!manager->GetHasFilter() && !manager->GetIsOnAnimation()) {
         bool isBindOverlayValue = targetNode->GetLayoutProperty()->GetIsBindOverlayValue(false);
-        CHECK_NULL_VOID(isBindOverlayValue && (SystemProperties::GetDeviceType() == DeviceType::PHONE ||
-                                                  SystemProperties::GetDeviceType() == DeviceType::TABLET));
+        CHECK_NULL_VOID(isBindOverlayValue && menuTheme->GetHasFilter());
         // insert columnNode to rootNode
         auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -632,7 +634,7 @@ RefPtr<FrameNode> MenuView::Create(
     CHECK_NULL_RETURN(menuProperty, nullptr);
     menuProperty->UpdateShowInSubWindow(false);
     for (size_t i = 0; i < params.size(); ++i) {
-        auto optionNode = OptionView::CreateSelectOption(params[i].first, params[i].second, i);
+        auto optionNode = OptionView::CreateSelectOption(params[i], i);
         auto optionPattern = optionNode->GetPattern<OptionPattern>();
         CHECK_NULL_RETURN(optionPattern, nullptr);
         optionPattern->SetIsSelectOption(true);

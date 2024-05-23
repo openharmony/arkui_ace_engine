@@ -27,6 +27,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+    // titlebar ZINDEX
+    constexpr static int32_t DEFAULT_TITLEBAR_ZINDEX = 2;
     std::atomic<uint64_t> navDestinationPatternNextAutoGenId = 0;
 }
 
@@ -72,10 +74,15 @@ void NavDestinationPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
-
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarRenderContext = titleBarNode->GetRenderContext();
+    CHECK_NULL_VOID(titleBarRenderContext);
+    // set the titlebar to float on the top
+    titleBarRenderContext->UpdateZIndex(DEFAULT_TITLEBAR_ZINDEX);
     auto&& opts = hostNode->GetLayoutProperty()->GetSafeAreaExpandOpts();
     auto navDestinationContentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
-    if (opts && opts->Expansive() && navDestinationContentNode) {
+    if (opts && navDestinationContentNode) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION,
             "Navdestination SafArea expand as %{public}s", opts->ToString().c_str());
             navDestinationContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
@@ -171,7 +178,7 @@ void NavDestinationPattern::UpdateTitlebarVisibility(RefPtr<NavDestinationGroupN
         titleBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
         titleBarNode->SetJSViewActive(true);
         auto&& opts = navDestinationLayoutProperty->GetSafeAreaExpandOpts();
-        if (opts && opts->Expansive()) {
+        if (opts) {
             titleBarLayoutProperty->UpdateSafeAreaExpandOpts(*opts);
         }
     }
@@ -243,7 +250,8 @@ void NavDestinationPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
+        SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
+            .edges = SAFE_AREA_EDGE_ALL };
         host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
     }
     isRightToLeft_ = AceApplicationInfo::GetInstance().IsRightToLeft();
@@ -252,5 +260,12 @@ void NavDestinationPattern::OnAttachToFrameNode()
 void NavDestinationPattern::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc(std::string("name: ").append(name_));
+}
+
+bool NavDestinationPattern::OverlayOnBackPressed()
+{
+    CHECK_NULL_RETURN(overlayManager_, false);
+    CHECK_EQUAL_RETURN(overlayManager_->IsModalEmpty(), true,  false);
+    return overlayManager_->RemoveOverlay(true);
 }
 } // namespace OHOS::Ace::NG

@@ -155,6 +155,7 @@ void ImagePattern::OnCompleteInDataReady()
     CHECK_NULL_VOID(geometryNode);
     auto imageEventHub = GetEventHub<ImageEventHub>();
     CHECK_NULL_VOID(imageEventHub);
+    CHECK_NULL_VOID(loadingCtx_);
     LoadImageSuccessEvent event(loadingCtx_->GetImageSize().Width(), loadingCtx_->GetImageSize().Height(),
         geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height(), 0,
         geometryNode->GetContentSize().Width(), geometryNode->GetContentSize().Height(),
@@ -242,7 +243,11 @@ void ImagePattern::CalAndUpdateSelectOverlay()
     CHECK_NULL_VOID(host);
     auto rect = host->GetTransformRectRelativeToWindow();
     SelectOverlayInfo info;
-    SizeF handleSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), info.singleLineHeight };
+    const auto& geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    SizeF handleSize = {
+        SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(),
+        geometryNode->GetContentSize().Height() };
     info.firstHandle.paintRect = RectF(rect.GetOffset(), handleSize);
     CheckHandles(info.firstHandle);
     OffsetF offset(rect.Width() - handleSize.Width(), rect.Height() - handleSize.Height());
@@ -343,11 +348,10 @@ void ImagePattern::OnImageLoadSuccess()
     altImage_ = nullptr;
     altDstRect_.reset();
     altSrcRect_.reset();
-    if (!IsSupportImageAnalyzerFeature()) {
-        DestroyAnalyzerOverlay();
-    }
-    UpdateAnalyzerOverlay();
 
+    if (isPixelMapChanged_) {
+        UpdateAnalyzerOverlay();
+    }
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
@@ -357,6 +361,7 @@ void ImagePattern::OnImageLoadSuccess()
         ContainerScope scope(pattern->GetHostInstanceId());
         pattern->CreateAnalyzerOverlay();
     }, "ArkUIImageCreateAnalyzerOverlay");
+    ACE_LAYOUT_SCOPED_TRACE("OnImageLoadSuccess[self:%d]", host->GetId());
     host->MarkNeedRenderOnly();
 }
 
@@ -490,7 +495,7 @@ RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
 
 bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (!isLayouted_ && isAnimation_) {
+    if (!isLayouted_ && GetIsAnimation()) {
         isLayouted_ = true;
         if (images_.size()) {
             int32_t nextIndex = GetNextIndex(nowImageIndex_);
@@ -562,6 +567,13 @@ void ImagePattern::LoadImage(const ImageSourceInfo& src)
     if (onProgressCallback_) {
         loadingCtx_->SetOnProgressCallback(std::move(onProgressCallback_));
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProp = host->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(layoutProp);
+    if (!((layoutProp->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE) == PROPERTY_UPDATE_MEASURE)) {
+        loadingCtx_->FinishMearuse();
+    }
     loadingCtx_->LoadImageData();
 }
 
@@ -582,6 +594,12 @@ void ImagePattern::LoadImageDataIfNeed()
     auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
     UpdateInternalResource(src);
 
+    if (loadingCtx_) {
+        auto srcPixelMap = src.GetPixmap();
+        auto loadPixelMap = loadingCtx_->GetSourceInfo().GetPixmap();
+        isPixelMapChanged_ = !srcPixelMap || !loadPixelMap || srcPixelMap->GetRawPixelMapPtr() !=
+                                                              loadPixelMap->GetRawPixelMapPtr();
+    }
     if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != src || isImageQualityChange_) {
         LoadImage(src);
     } else {
@@ -637,10 +655,15 @@ void ImagePattern::UpdateGestureAndDragWhenModify()
 
 void ImagePattern::OnModifyDone()
 {
-    if (isAnimation_) {
-        OnAnimatedModifyDone();
-    } else {
-        OnImageModifyDone();
+    switch (imageType_) {
+        case ImageType::BASE:
+            OnImageModifyDone();
+            break;
+        case ImageType::ANIMATION:
+            OnAnimatedModifyDone();
+            break;
+        default:
+            break;
     }
 }
 
@@ -673,6 +696,9 @@ void ImagePattern::OnAnimatedModifyDone()
     }
     UpdateFormDurationByRemainder();
     SetObscured();
+    if (isSrcUndefined_) {
+        return;
+    }
     ControlAnimation(index);
 }
 
@@ -838,9 +864,7 @@ void ImagePattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
 
 void ImagePattern::OnNotifyMemoryLevel(int32_t level)
 {
-    // TODO: do different data cleaning operation according to level
     // when image component is [onShow], do not clean image data
-    // TODO: use [isActive_] to determine image data management
     if (isShow_) {
         return;
     }
@@ -852,7 +876,6 @@ void ImagePattern::OnNotifyMemoryLevel(int32_t level)
     altImage_ = nullptr;
 
     // clean rs node to release the sk_sp<SkImage> held by it
-    // TODO: release PixelMap resource when use PixelMap resource to draw image
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     auto rsRenderContext = frameNode->GetRenderContext();
@@ -927,7 +950,7 @@ void ImagePattern::OnVisibleAreaChange(bool visible)
         CloseSelectOverlay();
     }
     // control pixelMap List
-    if (isAnimation_ && !animator_->IsStopped()) {
+    if (GetIsAnimation() && !animator_->IsStopped()) {
         if (visible) {
             animator_->Forward();
         } else {
@@ -948,8 +971,8 @@ void ImagePattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderCtx = host->GetRenderContext();
-    if (isAnimation_) {
-        CHECK_NULL_VOID(renderCtx);
+    CHECK_NULL_VOID(renderCtx);
+    if (GetIsAnimation()) {
         renderCtx->SetClipToFrame(true);
     } else {
         renderCtx->SetClipToBounds(false);
@@ -1051,9 +1074,13 @@ void ImagePattern::OpenSelectOverlay()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    const auto& geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
     auto rect = host->GetTransformRectRelativeToWindow();
     SelectOverlayInfo info;
-    SizeF handleSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), info.singleLineHeight };
+    SizeF handleSize = {
+        SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(),
+        geometryNode->GetContentSize().Height() };
     info.firstHandle.paintRect = RectF(rect.GetOffset(), handleSize);
     OffsetF offset(rect.Width() - handleSize.Width(), rect.Height() - handleSize.Height());
     info.secondHandle.paintRect = RectF(rect.GetOffset() + offset, handleSize);
@@ -1824,7 +1851,7 @@ void ImagePattern::ResetFormAnimationFlag()
 void ImagePattern::SetIteration(int32_t iteration)
 {
     if (iteration < -1) {
-        iteration = DEFAULT_ITERATIONS;
+        return;
     }
     if (IsFormRender()) {
         iteration = DEFAULT_ITERATIONS;
@@ -1834,14 +1861,8 @@ void ImagePattern::SetIteration(int32_t iteration)
 
 void ImagePattern::SetDuration(int32_t duration)
 {
-    if (duration <= 0) {
+    if (duration < 0) {
         return;
-    }
-    if (durationTotal_ == 0) {
-        for (int i = 0; i < images_.size(); i++) {
-            images_[i].duration = duration / images_.size();
-            durationTotal_ += images_[i].duration;
-        }
     }
     int32_t finalDuration = durationTotal_ > 0 ? durationTotal_ : duration;
     if (IsFormRender()) {

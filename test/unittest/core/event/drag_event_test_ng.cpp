@@ -19,11 +19,14 @@
 #define private public
 #define protected public
 
+#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/components/theme/blur_style_theme.h"
+#include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -1735,5 +1738,217 @@ HWTEST_F(DragEventTestNg, TestMountGatherNode001, TestSize.Level1)
     std::vector<NG::GatherNodeChildInfo> gatherNodeChildrenInfo;
     dragEventActuator->MountGatherNode(overlayManager, frameNode, stackNode, gatherNodeChildrenInfo);
     EXPECT_EQ(overlayManager->hasGatherNode_, true);
+}
+
+/**
+ * @tc.name: TestUpdateDefaultShadow
+ * @tc.desc: Test get default shadow attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, TestUpdateDefaultShadow, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    /**
+     * @tc.steps: step2. get DragPreviewOption.
+     */
+    auto dragPreviewOption = frameNode->GetDragPreviewOption();
+    EXPECT_EQ(dragPreviewOption.options.shadow, std::nullopt);
+    /**
+     * @tc.steps: step3. set enableDefaultShadow.
+     */
+    dragPreviewOption.isDefaultShadowEnabled = true;
+    frameNode->SetDragPreviewOptions(dragPreviewOption);
+    /**
+     * @tc.steps: step4. Invoke UpdatePreviewOptionDefaultAttr.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ShadowTheme>()));
+
+    dragEventActuator->UpdatePreviewOptionDefaultAttr(frameNode);
+    dragPreviewOption = frameNode->GetDragPreviewOption();
+    EXPECT_NE(dragPreviewOption.options.shadow, std::nullopt);
+}
+
+/**
+ * @tc.name: TestApplyShadow
+ * @tc.desc: Test set default shadow attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, TestApplyShadow, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    EXPECT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. get DragPreviewOption.
+     */
+    auto dragPreviewOption = frameNode->GetDragPreviewOption();
+    EXPECT_EQ(dragPreviewOption.options.shadow, std::nullopt);
+    /**
+     * @tc.steps: step3. set defaultShadow.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ShadowTheme>()));
+    
+    dragPreviewOption.options.shadow = DragEventActuator::GetDefaultShadow();
+    frameNode->SetDragPreviewOptions(dragPreviewOption);
+    /**
+     * @tc.steps: step4. Invoke ApplyNewestOptionExecutedFromModifierToNode
+     */
+    auto imageNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    EXPECT_NE(imageNode, nullptr);
+    imageNode->SetDragPreviewOptions(frameNode->GetDragPreviewOption());
+    DragEventActuator::ApplyNewestOptionExecutedFromModifierToNode(frameNode, imageNode);
+    auto imageContext = imageNode->GetRenderContext();
+    EXPECT_NE(imageContext, nullptr);
+    auto shadow = imageContext->GetBackShadow();
+    EXPECT_NE(shadow, std::nullopt);
+}
+
+/**
+ * @tc.name: TestBrulStyleToEffection001
+ * @tc.desc: Test BrulStyleToEffection.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, TestBrulStyleToEffection001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DragEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    /**
+     * @tc.steps: step2. Invoke BrulStyleToEffection function.
+     */
+    std::vector<float> vecGrayScale = {0.0f, 0.0f};
+    BlurStyleOption blurStyleInfo = {BlurStyle::NO_MATERIAL, ThemeColorMode::SYSTEM,
+     AdaptiveColor::DEFAULT, 1.0, {vecGrayScale}};
+    std::optional<BlurStyleOption> optBlurStyleInfo(blurStyleInfo);
+    auto optEffectOption = dragEventActuator->BrulStyleToEffection(optBlurStyleInfo);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    EXPECT_EQ(optEffectOption.has_value(), false);
+    /**
+     * @tc.steps: step3. Create themeManager.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<BlurStyleTheme>()));
+    auto blurStyleTheme = pipeline->GetTheme<BlurStyleTheme>();
+    EXPECT_NE(blurStyleTheme, nullptr);
+    auto resAdapter = RefPtr<ResourceAdapter>();
+    auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(resAdapter);
+    std::unordered_map<std::string, ResValueWrapper> attributes;
+    ResValueWrapper resValueWrapper;
+    resValueWrapper.type = ThemeConstantsType::THEME;
+    resValueWrapper.value = AceType::MakeRefPtr<ThemeStyle>();
+    attributes.insert(std::pair<std::string, ResValueWrapper>(THEME_BLUR_STYLE_COMMON, resValueWrapper));
+    themeConstants->currentThemeStyle_ = AceType::MakeRefPtr<ThemeStyle>();
+    themeConstants->currentThemeStyle_->SetAttributes(attributes);
+    auto blThemeInstance = BlurStyleTheme::Builder().Build(themeConstants);
+    EXPECT_CALL(*themeManager, GetTheme(BlurStyleTheme::TypeId())).WillRepeatedly(Return(blThemeInstance));
+    /**
+     * @tc.steps: step4. Invoke BrulStyleToEffection function.
+     */
+    optEffectOption = dragEventActuator->BrulStyleToEffection(optBlurStyleInfo);
+    ASSERT_NE(optEffectOption.has_value(), true);
+}
+
+/**
+ * @tc.name: TestRadiusToSigma001
+ * @tc.desc: Test RadiusToSigma.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, TestRadiusToSigma001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DragEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    /**
+     * @tc.steps: step2. Invoke RadiusToSigma function invalid.
+     */
+    float radius = -1.0f;
+    auto sigMa = dragEventActuator->RadiusToSigma(radius);
+    EXPECT_EQ(sigMa, 0.0f);
+     /**
+     * @tc.steps: step3. Invoke RadiusToSigma function.
+     */
+    float scaleHalf = 0.5f;
+    float blurSigmaScale = 0.57735f;
+    radius = 2.0f;
+    float retSigMa = blurSigmaScale * radius + scaleHalf;
+    sigMa = dragEventActuator->RadiusToSigma(radius);
+    EXPECT_EQ(sigMa, retSigMa);
+}
+
+/**
+ * @tc.name: GetDefaultBorderRadiusTest001
+ * @tc.desc: Create DragEventActuator and invoke GetDefaultBorderRadius function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, GetDefaultBorderRadiusTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DragEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    /**
+     * @tc.steps: step2. Test GetDefaultBorderRadius
+     */
+    NG::DragPreviewOption dragPreviewOptions { false, false, false, false, true };
+    dragPreviewOptions.options.borderRadius = dragEventActuator->GetDefaultBorderRadius();
+    frameNode->SetDragPreviewOptions(dragPreviewOptions);
+    auto dragPreviewOption = frameNode->GetDragPreviewOption();
+    auto borderRadius = dragPreviewOption.options.borderRadius;
+    EXPECT_EQ(borderRadius.value().radiusTopLeft.value().Value(), 12.0);
+    EXPECT_EQ(borderRadius.value().radiusTopRight.value().Value(), 12.0);
+    EXPECT_EQ(borderRadius.value().radiusBottomRight.value().Value(), 12.0);
+    EXPECT_EQ(borderRadius.value().radiusBottomLeft.value().Value(), 12.0);
+    /**
+     * @tc.steps: step3. Test PrepareRadiusParametersForDragData
+     */
+    auto arkExtraInfoJson = JsonUtil::Create(true);
+    dragEventActuator->PrepareRadiusParametersForDragData(frameNode, arkExtraInfoJson);
+    auto radiusTopLeft = arkExtraInfoJson->GetDouble("drag_corner_radius1", -1);
+    auto radiusTopRight = arkExtraInfoJson->GetDouble("drag_corner_radius2", -1);
+    auto radiusBottomRight = arkExtraInfoJson->GetDouble("drag_corner_radius3", -1);
+    auto radiusBottomLeft = arkExtraInfoJson->GetDouble("drag_corner_radius4", -1);
+    EXPECT_EQ(radiusTopLeft, 12.0);
+    EXPECT_EQ(radiusTopRight, 12.0);
+    EXPECT_EQ(radiusBottomRight, 12.0);
+    EXPECT_EQ(radiusBottomLeft, 12.0);
 }
 } // namespace OHOS::Ace::NG

@@ -1437,7 +1437,8 @@ void ProgressModifier::PaintCapsule(RSCanvas& canvas, const OffsetF& offset, con
     double radius = std::min(contentSize.Width() / INT32_TWO, contentSize.Height() / INT32_TWO);
     double offsetX = offset.GetX();
     double offsetY = offset.GetY();
-    double progressWidth = (value_->Get() / maxValue_->Get()) * totalDegree * contentSize.Width();
+    double progressWidth =
+        std::min((value_->Get() / maxValue_->Get()) * totalDegree * contentSize.Width(), contentSize.Width());
     RSBrush brush;
     brush.SetAntiAlias(true);
     RSPen pen;
@@ -1506,7 +1507,8 @@ void ProgressModifier::PaintVerticalCapsule(RSCanvas& canvas, const OffsetF& off
     double radius = std::min(contentSize.Width() / INT32_TWO, contentSize.Height() / INT32_TWO);
     double offsetX = offset.GetX();
     double offsetY = offset.GetY();
-    double progressWidth = (value_->Get() / maxValue_->Get()) * totalDegree * contentSize.Height();
+    double progressWidth =
+        std::min((value_->Get() / maxValue_->Get()) * totalDegree * contentSize.Height(), contentSize.Height());
     RSBrush brush;
     brush.SetAntiAlias(true);
     RSPen pen;
@@ -1687,14 +1689,14 @@ void ProgressModifier::PaintScaleRingForApiNine(RSCanvas& canvas, const OffsetF&
     canvas.AttachPen(pen);
     canvas.DrawArc({
         centerPt.GetX() - radius, centerPt.GetY() - radius, centerPt.GetX() + radius, centerPt.GetY() + radius },
-            ANGLE_270, ANGLE_360);
+        ANGLE_270, ANGLE_360);
     canvas.DetachPen();
     pen.SetColor(ToRSColor((color_->Get())));
     canvas.AttachPen(pen);
     double angle = (value_->Get() / maxValue_->Get()) * ANGLE_360;
     canvas.DrawArc({
         centerPt.GetX() - radius, centerPt.GetY() - radius, centerPt.GetX() + radius, centerPt.GetY() + radius },
-            ANGLE_270, angle);
+        ANGLE_270, angle);
     canvas.DetachPen();
 }
 
@@ -1719,7 +1721,7 @@ void ProgressModifier::PaintCapsuleForApiNine(RSCanvas& canvas, const OffsetF& o
         // startAngle:270  sweepAngle:-180
         path.AddArc({
             offsetX + progressWidth, offsetY, 2 * radius - progressWidth + offsetX, frameSize.Height() + offsetY },
-                ANGLE_270, -ANGLE_180);
+            ANGLE_270, -ANGLE_180);
     } else if (GreatNotEqual(progressWidth, frameSize.Width() - radius)) {
         path.AddRect({ offsetX + radius, offsetY, frameSize.Width() + offsetX - radius,
             frameSize.Height() + offsetY });
@@ -1761,7 +1763,7 @@ void ProgressModifier::PaintVerticalCapsuleForApiNine(
             offsetX, offsetY + radius, frameSize.Width() + offsetX, frameSize.Height() - radius + offsetY });
         // startAngle:180  sweepAngle:-180
         path.AddArc({ offsetX, offsetY + (frameSize.Height() - radius) * 2.0 - progressWidth,
-                        frameSize.Width() + offsetX, progressWidth + offsetY }, ANGLE_180, -ANGLE_180);
+            frameSize.Width() + offsetX, progressWidth + offsetY }, ANGLE_180, -ANGLE_180);
     } else {
         path.AddRect({ offsetX, radius + offsetY, offsetX + frameSize.Width(), progressWidth + offsetY });
     }

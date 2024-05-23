@@ -23,8 +23,8 @@ void ParticleModelNG::Create(std::list<ParticleOption>& arrayValue)
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::PARTICLE_ETS_TAG, nodeId);
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::PARTICLE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ParticlePattern>(); });
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::PARTICLE_ETS_TAG, nodeId,
+        [count = arrayValue.size()]() { return AceType::MakeRefPtr<ParticlePattern>(count); });
     stack->Push(frameNode);
     ACE_UPDATE_RENDER_CONTEXT(ParticleOptionArray, arrayValue);
 }
@@ -45,14 +45,14 @@ void ParticleModelNG::DisturbanceField(const std::vector<ParticleDisturbance>& d
     pattern->UpdateDisturbance(disturbanceArray);
 }
 
-void ParticleModelNG::updateEmitter(const std::vector<EmitterProperty>& property, FrameNode* frameNode)
+void ParticleModelNG::updateEmitter(std::vector<EmitterProperty>& property, FrameNode* frameNode)
 {
     auto pattern = AceType::DynamicCast<ParticlePattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(pattern);
     pattern->updateEmitterPosition(property);
 }
 
-void ParticleModelNG::updateEmitter(const std::vector<EmitterProperty>& property)
+void ParticleModelNG::updateEmitter(std::vector<EmitterProperty>& property)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);

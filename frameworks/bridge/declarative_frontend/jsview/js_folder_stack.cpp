@@ -72,10 +72,10 @@ JSRef<JSVal> HoverStatusChangeEventToJSValue(const NG::FolderEventInfo& eventInf
 
 void JSFolderStack::Create(const JSCallbackInfo& info)
 {
-    if (info[0]->IsObject()) {
+    if (info.Length() > 0 && info[0]->IsObject()) {
         JSRef<JSArray> params = JSRef<JSArray>::Cast(info[0]);
         auto upperId = params->GetProperty("upperItems");
-        if (upperId->IsNull() || upperId->IsUndefined()) {
+        if (upperId->IsNull() || upperId->IsUndefined() || !upperId->IsArray()) {
             FolderStackModel::GetInstance()->Create();
             return;
         }
@@ -164,6 +164,7 @@ void JSFolderStack::JSBind(BindingTarget globalObj)
     JSClass<JSFolderStack>::StaticMethod("alignContent", &JSFolderStack::SetAlignContent);
     JSClass<JSFolderStack>::StaticMethod("enableAnimation", &JSFolderStack::JsEnableAnimation);
     JSClass<JSFolderStack>::StaticMethod("autoHalfFold", &JSFolderStack::SetAutoHalfFold);
+    JSClass<JSFolderStack>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSFolderStack>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSFolderStack>::StaticMethod("onFolderStateChange", &JSFolderStack::JSOnFolderStateChange);
     JSClass<JSFolderStack>::StaticMethod("onHoverStatusChange", &JSFolderStack::JSOnHoverStatusChange);

@@ -26,7 +26,9 @@ struct ArkUIWaterFlowSection {
     int32_t crossCount;
     float columnsGap;
     float rowsGap;
-    float* margin;
+    float margin[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    void* onGetItemMainSizeByIndex;
+    void* userData;
 };
 
 struct ArkUI_WaterFlowSectionOption {

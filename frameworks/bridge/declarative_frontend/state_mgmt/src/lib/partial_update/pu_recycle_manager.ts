@@ -24,8 +24,8 @@
 class RecycleManager {
   // key: recycle node name
   // value: recycle node JS object
-  private cachedRecycleNodes_: Map<string, Array<ViewPU>> = undefined
-  private biMap_: BidirectionalMap = undefined
+  private cachedRecycleNodes_: Map<string, Array<ViewPU>> = undefined;
+  private biMap_: BidirectionalMap = undefined;
 
   constructor() {
     this.cachedRecycleNodes_ = new Map<string, Array<ViewPU>>();
@@ -61,7 +61,7 @@ class RecycleManager {
     this.cachedRecycleNodes_.forEach((nodes, _) => {
       nodes.forEach((node) => {
         node.resetRecycleCustomNode();
-      })
+      });
     })
     this.cachedRecycleNodes_.clear();
   }
@@ -77,8 +77,8 @@ class RecycleManager {
 }
 
 class BidirectionalMap {
-  private fwdMap_: Map<number, number> = undefined
-  private revMap_: Map<number, number> = undefined
+  private fwdMap_: Map<number, number> = undefined;
+  private revMap_: Map<number, number> = undefined;
 
   constructor() {
     this.fwdMap_ = new Map<number, number>();
@@ -95,11 +95,11 @@ class BidirectionalMap {
   }
 
   get(key: number): number | undefined {
-    return this.fwdMap_[key] || this.revMap_[key]
+    return this.fwdMap_[key] || this.revMap_[key];
   }
 
   add(pair: [number, number]) {
-    this.fwdMap_[pair[0]] = pair[1]
-    this.revMap_[pair[1]] = pair[0]
+    this.fwdMap_[pair[0]] = pair[1];
+    this.revMap_[pair[1]] = pair[0];
   }
 }

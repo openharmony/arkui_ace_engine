@@ -52,6 +52,7 @@ constexpr char ENABLE_DEBUG_OFFSET_LOG_KEY[] = "persist.ace.scrollable.log.enabl
 constexpr char ANIMATION_SCALE_KEY[] = "persist.sys.arkui.animationscale";
 constexpr char CUSTOM_TITLE_KEY[] = "persist.sys.arkui.customtitle";
 constexpr char DISTRIBUTE_ENGINE_BUNDLE_NAME[] = "atomic.service.distribute.engine.bundle.name";
+constexpr char IS_OPINC_ENABLE[] = "persist.ddgr.opinctype";
 constexpr int32_t ORIENTATION_PORTRAIT = 0;
 constexpr int32_t ORIENTATION_LANDSCAPE = 1;
 constexpr int DEFAULT_THRESHOLD_JANK = 15;
@@ -65,6 +66,11 @@ constexpr char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_size_anima
 constexpr int32_t CONVERT_ASTC_THRESHOLD = 2;
 
 using RsOrientation = Rosen::DisplayOrientation;
+
+bool IsOpIncEnabled()
+{
+    return (system::GetParameter(IS_OPINC_ENABLE, "0") == "2");
+}
 
 void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
 {
@@ -91,11 +97,6 @@ bool IsDebugBoundaryEnabled()
 bool IsDownloadByNetworkDisabled()
 {
     return system::GetParameter(ENABLE_DOWNLOAD_BY_NETSTACK_KEY, "true") == "true";
-}
-
-bool IsTraceEnabled()
-{
-    return (system::GetParameter("persist.ace.trace.enabled", "1") == "1");
 }
 
 bool IsSvgTraceEnabled()
@@ -313,7 +314,6 @@ std::pair<float, float> GetPercent()
     return percent;
 }
 
-bool SystemProperties::traceEnabled_ = IsTraceEnabled();
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::developerModeOn_ = IsDeveloperModeOn();
 bool SystemProperties::layoutTraceEnable_ = IsLayoutTraceEnabled() && developerModeOn_;
@@ -368,7 +368,12 @@ std::pair<float, float> SystemProperties::brightUpPercent_ = GetPercent();
 bool SystemProperties::sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
 bool SystemProperties::acePerformanceMonitorEnable_ = IsAcePerformanceMonitorEnabled();
 bool SystemProperties::faultInjectEnabled_  = IsFaultInjectEnabled();
+bool SystemProperties::opincEnabled_ = IsOpIncEnabled();
 
+bool SystemProperties::IsOpIncEnable()
+{
+    return opincEnabled_;
+}
 bool SystemProperties::IsSyscapExist(const char* cap)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -482,7 +487,6 @@ void SystemProperties::InitDeviceInfo(
     releaseType_ = ::GetOsReleaseType();
     paramDeviceType_ = ::GetDeviceType();
     debugEnabled_ = IsDebugEnabled();
-    traceEnabled_ = IsTraceEnabled();
     svgTraceEnable_ = IsSvgTraceEnabled();
     layoutTraceEnable_ = IsLayoutTraceEnabled() && developerModeOn_;
     traceInputEventEnable_ = IsTraceInputEventEnabled() && developerModeOn_;

@@ -41,6 +41,7 @@ struct ArkUI_Node {
     void* alignRuleOption = nullptr;  
     void* userData = nullptr;
     void* swiperIndicator = nullptr;
+    void* imageFrameInfos = nullptr;
 };
 
 struct ArkUI_Context {
@@ -100,6 +101,11 @@ constexpr int BASIC_COMPONENT_NUM = 19;
 struct ArkUIFullNodeAPI;
 
 namespace OHOS::Ace::NodeModel {
+
+inline bool UsePXUnit(ArkUI_NodeHandle nodePtr)
+{
+    return nodePtr && (nodePtr->lengthMetricUnit == ARKUI_LENGTH_METRIC_UNIT_PX);
+}
 
 bool InitialFullImpl();
 ArkUIFullNodeAPI* GetFullImpl();

@@ -162,6 +162,24 @@ HWTEST_F(ScrolleBarTestNg, OnCollectTouchTarget001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleDragUpdate001
+ * @tc.desc: Test HandleDragUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrolleBarTestNg, HandleDragUpdate001, TestSize.Level1)
+{
+    CreateWithBar();
+    GestureEvent info;
+    info.SetMainDelta(10);
+    scrollBar_->SetReverse(false);
+    scrollBar_->HandleDragUpdate(info);
+    EXPECT_EQ(info.GetMainDelta(), 10);
+    scrollBar_->SetReverse(true);
+    scrollBar_->HandleDragUpdate(info);
+    EXPECT_NE(info.GetMainDelta(), -100);
+}
+
+/**
  * @tc.name: ScrollBarAnimation001
  * @tc.desc: Test ScrollBar Hover Animation
  * @tc.type: FUNC
@@ -256,11 +274,11 @@ HWTEST_F(ScrolleBarTestNg, ScrollBarAnimation002, TestSize.Level1)
     auto modifier = scrollPaint->GetOverlayModifier(&paintWrapper);
     auto scrollBarOverlayModifier = AceType::DynamicCast<ScrollBarOverlayModifier>(modifier);
     pattern_->SetScrollBar(DisplayMode::ON);
+    scrollBarOverlayModifier->SetScrollable(true);
     EXPECT_EQ(scrollBar->displayMode_, DisplayMode::ON);
     EXPECT_TRUE(scrollBar->NeedPaint());
     ASSERT_NE(scrollBarOverlayModifier, nullptr);
     EXPECT_EQ(scrollBarOverlayModifier->GetOpacity(), UINT8_MAX);
-    EXPECT_NE(scrollBarOverlayModifier->opacityAnimation_, nullptr);
     EXPECT_EQ(scrollBarOverlayModifier->opacityAnimatingType_, OpacityAnimationType::NONE);
 
     /**
@@ -280,6 +298,7 @@ HWTEST_F(ScrolleBarTestNg, ScrollBarAnimation002, TestSize.Level1)
      */
     scrollBar->PlayScrollBarAppearAnimation();
     scrollPaint->UpdateOverlayModifier(&paintWrapper);
+    EXPECT_NE(scrollBarOverlayModifier->opacityAnimation_, nullptr);
     EXPECT_EQ(scrollBarOverlayModifier->opacityAnimatingType_, OpacityAnimationType::NONE);
 
     /**

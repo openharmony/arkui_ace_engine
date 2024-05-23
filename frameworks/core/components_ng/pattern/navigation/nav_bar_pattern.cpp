@@ -38,6 +38,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+// titlebar ZINDEX
+constexpr static int32_t DEFAULT_TITLEBAR_ZINDEX = 2;
 void BuildMoreItemNodeAction(const RefPtr<FrameNode>& buttonNode, const RefPtr<BarItemNode>& barItemNode,
     const RefPtr<FrameNode>& barMenuNode, const RefPtr<NavBarNode>& navBarNode)
 {
@@ -66,23 +68,31 @@ void BuildMoreItemNodeAction(const RefPtr<FrameNode>& buttonNode, const RefPtr<B
 
         auto menuPattern = menuNode->GetPattern<MenuPattern>();
         CHECK_NULL_VOID(menuPattern);
-        // navigation menu show like select.
-        menuPattern->SetIsSelectMenu(true);
-
-        overlayManager->ShowMenu(id, OffsetF(0.0f, 0.0f), menu);
-
-        auto symbol = AceType::DynamicCast<FrameNode>(barItemNode->GetChildren().front());
-        auto symbolProperty = symbol->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(symbolProperty);
-        auto symbolEffectOptions = symbolProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
-        symbolEffectOptions.SetEffectType(SymbolEffectType::BOUNCE);
-        symbolEffectOptions.SetIsTxtActive(true);
-        symbolEffectOptions.SetIsTxtActiveSource(0);
-        symbolProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
-        symbol->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
         auto navBarNode = weakNavBarNode.Upgrade();
         CHECK_NULL_VOID(navBarNode);
+
+        auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
+        CHECK_NULL_VOID(navBarPattern);
+
+        // navigation menu show like select.
+        menuPattern->SetIsSelectMenu(true);
+        OffsetF offset(0.0f, 0.0f);
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            auto symbol = AceType::DynamicCast<FrameNode>(barItemNode->GetChildren().front());
+            CHECK_NULL_VOID(symbol);
+            auto symbolProperty = symbol->GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_VOID(symbolProperty);
+            auto symbolEffectOptions = symbolProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
+            symbolEffectOptions.SetEffectType(SymbolEffectType::BOUNCE);
+            symbolEffectOptions.SetIsTxtActive(true);
+            symbolEffectOptions.SetIsTxtActiveSource(0);
+            symbolProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
+            symbol->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        } else {
+            offset = navBarPattern->GetShowMenuOffset(barItemNode, menuNode);
+        }
+        overlayManager->ShowMenu(id, offset, menu);
         navBarNode->SetIsTitleMenuNodeShowing(true);
         auto hidMenuCallback = [weakNavBarNode = WeakPtr<NavBarNode>(navBarNode)]() {
             auto navBarNode = weakNavBarNode.Upgrade();
@@ -288,7 +298,7 @@ void MountTitleBar(const RefPtr<NavBarNode>& hostNode)
         titleBarNode->SetJSViewActive(true);
 
         auto&& opts = navBarLayoutProperty->GetSafeAreaExpandOpts();
-        if (opts && opts->Expansive()) {
+        if (opts) {
             titleBarLayoutProperty->UpdateSafeAreaExpandOpts(*opts);
         }
     }
@@ -317,7 +327,7 @@ void MountToolBar(const RefPtr<NavBarNode>& hostNode)
         toolBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
 
         auto&& opts = navBarLayoutProperty->GetSafeAreaExpandOpts();
-        if (opts && opts->Expansive()) {
+        if (opts) {
             toolBarLayoutProperty->UpdateSafeAreaExpandOpts(*opts);
         }
     }
@@ -325,6 +335,30 @@ void MountToolBar(const RefPtr<NavBarNode>& hostNode)
     toolBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 } // namespace
+
+OffsetF NavBarPattern::GetShowMenuOffset(const RefPtr<BarItemNode> barItemNode, RefPtr<FrameNode> menuNode)
+{
+    auto imageNode = barItemNode->GetChildAtIndex(0);
+    CHECK_NULL_RETURN(imageNode, OffsetF(0.0f, 0.0f));
+
+    auto imageFrameNode = AceType::DynamicCast<FrameNode>(imageNode);
+    CHECK_NULL_RETURN(imageFrameNode, OffsetF(0.0f, 0.0f));
+    auto imgOffset = imageFrameNode->GetOffsetRelativeToWindow();
+    auto imageSize = imageFrameNode->GetGeometryNode()->GetFrameSize();
+
+    auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_RETURN(menuLayoutProperty, OffsetF(0.0f, 0.0f));
+    menuLayoutProperty->UpdateTargetSize(imageSize);
+
+    bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (isRightToLeft) {
+        imgOffset.SetX(imgOffset.GetX() + imageSize.Width());
+    } else {
+        imgOffset.SetX(imgOffset.GetX());
+    }
+    imgOffset.SetY(imgOffset.GetY() + imageSize.Height());
+    return imgOffset;
+}
 
 void NavBarPattern::OnAttachToFrameNode()
 {
@@ -340,7 +374,8 @@ void NavBarPattern::OnAttachToFrameNode()
         pipelineContext->AddWindowFocusChangedCallback(host->GetId());
     }
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL };
+        SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
+            .edges = SAFE_AREA_EDGE_ALL };
         host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
     }
 }
@@ -468,6 +503,12 @@ void NavBarPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarRenderContext = titleBarNode->GetRenderContext();
+    CHECK_NULL_VOID(titleBarRenderContext);
+    // set the titlebar to float on the top
+    titleBarRenderContext->UpdateZIndex(DEFAULT_TITLEBAR_ZINDEX);
     MountTitleBar(hostNode);
     MountToolBar(hostNode);
     auto navBarLayoutProperty = hostNode->GetLayoutProperty<NavBarLayoutProperty>();
@@ -475,7 +516,7 @@ void NavBarPattern::OnModifyDone()
 
     auto&& opts = navBarLayoutProperty->GetSafeAreaExpandOpts();
     auto navBarContentNode = AceType::DynamicCast<FrameNode>(hostNode->GetNavBarContentNode());
-    if (opts && opts->Expansive() && navBarContentNode) {
+    if (opts && navBarContentNode) {
         navBarContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
         navBarContentNode->MarkModifyDone();
     }

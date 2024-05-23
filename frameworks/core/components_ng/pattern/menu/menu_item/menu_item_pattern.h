@@ -19,6 +19,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/slider/render_slider.h"
+#include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_accessibility_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_event_hub.h"
@@ -152,6 +153,7 @@ public:
     {
         return bgBlendColor_;
     }
+    bool IsDisabled();
 
     RefPtr<FrameNode> GetMenu(bool needTopMenu = false);
     RefPtr<MenuPattern> GetMenuPattern(bool needTopMenu = false);
@@ -171,11 +173,13 @@ public:
     }
 
     void OnVisibleChange(bool isVisible) override;
+    void InitLongPressEvent();
 
 protected:
     void RegisterOnKeyEvent();
     void RegisterOnTouch();
     void OnAfterModifyDone() override;
+    RefPtr<FrameNode> GetMenuWrapper();
 
 private:
     // register menu item's callback
@@ -200,21 +204,20 @@ private:
     RefPtr<FrameNode> GetClickableArea();
     void ShowEmbeddedSubMenu(bool hasFurtherExpand);
 
-    bool IsDisabled();
     void UpdateDisabledStyle();
-
-    RefPtr<FrameNode> GetMenuWrapper();
 
     void ShowSubMenu();
     void ShowSubMenuHelper(const RefPtr<FrameNode>& subMenu);
     void HideSubMenu();
+    void HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandableNode);
+    void ShowEmbeddedExpandMenu(const RefPtr<FrameNode>& expandableNode);
 
     OffsetF GetSubMenuPosition(const RefPtr<FrameNode>& targetNode);
 
     void AddSelfHoverRegion(const RefPtr<FrameNode>& targetNode);
     void SetAccessibilityAction();
     bool IsSelectOverlayMenu();
-
+    bool IsSubMenu();
     void RecordChangeEvent() const;
     void ParseMenuRadius(MenuParam& param);
 
@@ -222,8 +225,8 @@ private:
     void HandleFocusEvent();
     void HandleBlurEvent();
 
-    void CreateSymbolNode();
-    void CreateImageNode();
+    void UpdateSymbolNode(RefPtr<FrameNode>& selectIcon_);
+    void UpdateImageNode(RefPtr<FrameNode>& selectIcon_);
 
     std::list<TouchRegion> hoverRegions_;
 
@@ -251,6 +254,7 @@ private:
     RefPtr<FrameNode> endIcon_ = nullptr;
     RefPtr<FrameNode> selectIcon_ = nullptr;
     RefPtr<FrameNode> expandIcon_ = nullptr;
+    RefPtr<LongPressEvent> longPressEvent_;
     std::vector<RefPtr<FrameNode>> expandableItems_;
     bool onTouchEventSet_ = false;
     bool onHoverEventSet_ = false;

@@ -555,4 +555,85 @@ HWTEST_F(GridLayoutInfoTest, FindStartLineInMatrix001, TestSize.Level1)
     item = info.FindStartLineInMatrix(item, 2);
     EXPECT_EQ(item->first, 1);
 }
+
+/**
+ * @tc.name: GridIrregularLayout::TransformAutoScrollAlign001
+ * @tc.desc: Test IrregularLayout::TransformAutoScrollAlign
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, TransformAutoScrollAlign001, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.lineHeightMap_ = { { 0, 50.0f }, { 1, 300.0f }, { 2, 30.0f }, { 3, 50.0f }, { 4, 80.0f } };
+    info.gridMatrix_ = MATRIX_DEMO_8;
+
+    info.jumpIndex_ = 2;
+    info.startMainLineIndex_ = 0;
+    info.endMainLineIndex_ = 4;
+    info.startIndex_ = 0;
+    info.endIndex_ = 6;
+    EXPECT_EQ(info.TransformAutoScrollAlign(2, 2, 500.0f, 5.0f), ScrollAlign::NONE);
+
+    info.jumpIndex_ = 0;
+    info.startMainLineIndex_ = 3;
+    info.endMainLineIndex_ = 4;
+    info.startIndex_ = 3;
+    info.endIndex_ = 6;
+    info.currentOffset_ = -10.0f;
+    EXPECT_EQ(info.TransformAutoScrollAlign(0, 1, 100.0f, 5.0f), ScrollAlign::START);
+
+    info.jumpIndex_ = 2;
+    info.startMainLineIndex_ = 1;
+    info.endMainLineIndex_ = 2;
+    info.startIndex_ = 2;
+    info.endIndex_ = 2;
+    info.currentOffset_ = -25.0f;
+    EXPECT_EQ(info.TransformAutoScrollAlign(2, 2, 310.0f, 5.0f), ScrollAlign::NONE);
+}
+
+/**
+ * @tc.name: GridIrregularLayout::TransformAutoScrollAlign002
+ * @tc.desc: Test IrregularLayout::TransformAutoScrollAlign
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, TransformAutoScrollAlign002, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.lineHeightMap_ = { { 0, 50.0f }, { 1, 300.0f }, { 2, 30.0f }, { 3, 50.0f }, { 4, 80.0f } };
+    info.gridMatrix_ = MATRIX_DEMO_8;
+
+    // line 3 now matches with the end of the viewport, should endMainlineIndex_ be updated to 3?
+    info.currentOffset_ = -30.0f;
+    info.endMainLineIndex_ = 3;
+    info.endIndex_ = 5;
+    EXPECT_EQ(info.TransformAutoScrollAlign(0, 1, 310.0f, 5.0f), ScrollAlign::START);
+    info.currentOffset_ = -31.0f;
+    EXPECT_EQ(info.TransformAutoScrollAlign(0, 1, 310.0f, 5.0f), ScrollAlign::START);
+
+    info.jumpIndex_ = 0;
+    info.startMainLineIndex_ = 3;
+    info.endMainLineIndex_ = 4;
+    info.startIndex_ = 3;
+    info.endIndex_ = 6;
+    EXPECT_EQ(info.TransformAutoScrollAlign(0, 1, 100.0f, 5.0f), ScrollAlign::START);
+
+    info.jumpIndex_ = 4;
+    info.startMainLineIndex_ = 1;
+    info.endMainLineIndex_ = 4;
+    info.startIndex_ = 2;
+    info.endIndex_ = 6;
+
+    info.currentOffset_ = -379.0f;
+    EXPECT_EQ(info.TransformAutoScrollAlign(4, 1, 152.0f, 50.0f), ScrollAlign::NONE);
+
+    // emulate init
+    info.lineHeightMap_.clear();
+    info.gridMatrix_.clear();
+    info.jumpIndex_ = 3;
+    info.startMainLineIndex_ = 0;
+    info.endMainLineIndex_ = 0;
+    info.startIndex_ = 0;
+    info.endIndex_ = -1;
+    EXPECT_EQ(info.TransformAutoScrollAlign(3, 1, 300.0f, 5.0f), ScrollAlign::END);
+}
 } // namespace OHOS::Ace::NG

@@ -2304,12 +2304,40 @@ void FrontendDelegateDeclarative::OnMediaQueryUpdate(bool isSynchronous)
 
 void FrontendDelegateDeclarative::OnLayoutCompleted(const std::string& componentId)
 {
-    layoutInspectorCallback_(componentId);
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    if (!engine->IsLayoutCallBackFuncExist(componentId)) {
+        return;
+    }
+
+    taskExecutor_->PostTask(
+        [weak = AceType::WeakClaim(this), componentId] {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            delegate->layoutInspectorCallback_(componentId);
+        },
+        TaskExecutor::TaskType::JS, "ArkUIInspectorLayoutCompleted");
 }
 
 void FrontendDelegateDeclarative::OnDrawCompleted(const std::string& componentId)
 {
-    drawInspectorCallback_(componentId);
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    if (!engine->IsDrawCallBackFuncExist(componentId)) {
+        return;
+    }
+
+    taskExecutor_->PostTask(
+        [weak = AceType::WeakClaim(this), componentId] {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            delegate->drawInspectorCallback_(componentId);
+        },
+        TaskExecutor::TaskType::JS, "ArkUIInspectorDrawCompleted");
 }
 
 void FrontendDelegateDeclarative::OnPageReady(

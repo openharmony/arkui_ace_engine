@@ -19,6 +19,7 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/common/utils/engine_helper.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_text_picker_theme.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_datepicker.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
@@ -206,7 +207,9 @@ void JSTextPicker::JSBind(BindingTarget globalObj)
     JSClass<JSTextPicker>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSTextPicker>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSTextPicker>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSTextPicker>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSTextPicker>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSTextPicker>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSTextPicker>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTextPicker>::InheritAndBind<JSViewAbstract>(globalObj);
 }
@@ -357,6 +360,7 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
         if (param.selectedChangeEventVal->IsFunction()) {
             ParseTextPickerSelectedObject(info, param.selectedChangeEventVal);
         }
+        JSTextPickerTheme::ApplyTheme();
     }
 }
 
@@ -687,7 +691,7 @@ bool JSTextPickerParser::ParseInternalArray(const JSRef<JSArray>& jsRangeValue, 
     SetSelectedValues(selectedValues, values, index, isHasSelectAttr, resultStr);
 
     if (!jsRangeValue->GetValueAt(selectedValues[index])->IsObject()) {
-        return false;
+        return true;
     }
     auto jsObj = JSRef<JSObject>::Cast(jsRangeValue->GetValueAt(selectedValues[index]));
     auto getChildren = jsObj->GetProperty("children");
@@ -962,6 +966,7 @@ void JSTextPicker::SetDisappearTextStyle(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle);
     }
+    JSTextPickerTheme::ObtainTextStyle(textStyle);
     TextPickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
 }
 
@@ -973,6 +978,7 @@ void JSTextPicker::SetTextStyle(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle);
     }
+    JSTextPickerTheme::ObtainTextStyle(textStyle);
     TextPickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
 }
 
@@ -984,6 +990,7 @@ void JSTextPicker::SetSelectedTextStyle(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle);
     }
+    JSTextPickerTheme::ObtainSelectedTextStyle(textStyle);
     TextPickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
 }
 

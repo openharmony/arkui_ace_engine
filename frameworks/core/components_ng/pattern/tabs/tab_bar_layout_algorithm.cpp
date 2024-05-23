@@ -737,8 +737,7 @@ void TabBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         LayoutChildren(layoutWrapper, frameSize, axis, childOffset);
         return;
     }
-    if (tabBarStyle_ != TabBarStyle::SUBTABBATSTYLE || axis == Axis::VERTICAL ||
-        previousChildrenMainSize_ != childrenMainSize_) {
+    if (previousChildrenMainSize_ != childrenMainSize_) {
         auto scrollableDistance = std::max(childrenMainSize_ - frameSize.MainSize(axis), 0.0f);
         currentOffset_ = std::clamp(currentOffset_, -scrollableDistance, 0.0f);
     }
@@ -850,6 +849,8 @@ void TabBarLayoutAlgorithm::LayoutMask(LayoutWrapper* layoutWrapper, const std::
                                    : layoutProperty->GetUnselectedMask().value_or(-1));
         if (currentMask < 0) {
             currentWrapper->GetGeometryNode()->SetFrameSize(SizeF());
+            currentWrapper->Layout();
+            currentWrapper->SetActive(false);
         } else {
             auto offset = currentWrapper->GetGeometryNode()->GetMarginFrameOffset();
             currentWrapper->GetGeometryNode()->SetMarginFrameOffset(offset + childOffsetDelta[currentMask]);
@@ -860,8 +861,9 @@ void TabBarLayoutAlgorithm::LayoutMask(LayoutWrapper* layoutWrapper, const std::
             auto imageRenderContext = imageNode->GetRenderContext();
             CHECK_NULL_VOID(imageRenderContext);
             imageRenderContext->SetVisible(true);
+            currentWrapper->Layout();
+            currentWrapper->SetActive(true);
         }
-        currentWrapper->Layout();
     }
 }
 

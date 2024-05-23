@@ -652,7 +652,7 @@ void JSImage::SetEnhancedImageQuality(const JSCallbackInfo& info)
 void JSImage::CreateImageAnimation(std::vector<RefPtr<PixelMap>>& pixelMaps, int32_t duration, int32_t iterations)
 {
     std::vector<ImageProperties> imageList;
-    for (int i = 0; i < pixelMaps.size(); i++) {
+    for (int i = 0; i < static_cast<int32_t>(pixelMaps.size()); i++) {
         ImageProperties image;
         image.pixelMap = pixelMaps[i];
         imageList.push_back(image);
@@ -681,7 +681,9 @@ void JSImage::JSBind(BindingTarget globalObj)
 
     JSClass<JSImage>::StaticMethod("border", &JSImage::JsBorder);
     JSClass<JSImage>::StaticMethod("borderRadius", &JSImage::JsBorderRadius);
+    JSClass<JSImage>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSImage>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSImage>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSImage>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSImage>::StaticMethod("autoResize", &JSImage::SetAutoResize);
     JSClass<JSImage>::StaticMethod("resizable", &JSImage::JsImageResizable);

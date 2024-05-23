@@ -51,7 +51,6 @@ template("ace_core_interfaces_native_node") {
       "node/hyperlink_modifier.cpp",
       "node/image_animator_modifier.cpp",
       "node/line_modifier.cpp",
-      "node/list_item_modifier.cpp",
       "node/marquee_modifier.cpp",
       "node/menu_item_modifier.cpp",
       "node/menu_modifier.cpp",
@@ -72,6 +71,7 @@ template("ace_core_interfaces_native_node") {
       "node/node_image_modifier.cpp",
       "node/node_image_span_modifier.cpp",
       "node/node_list_item_group_modifier.cpp",
+      "node/node_list_item_modifier.cpp",
       "node/node_list_modifier.cpp",
       "node/node_loading_progress_modifier.cpp",
       "node/node_modifiers.cpp",
@@ -83,6 +83,7 @@ template("ace_core_interfaces_native_node") {
       "node/node_stack_modifier.cpp",
       "node/node_swiper_modifier.cpp",
       "node/node_symbol_glyph_modifier.cpp",
+      "node/node_symbol_span_modifier.cpp",
       "node/node_text_area_modifier.cpp",
       "node/node_text_input_modifier.cpp",
       "node/node_text_modifier.cpp",
@@ -110,6 +111,7 @@ template("ace_core_interfaces_native_node") {
       "node/shape_modifier.cpp",
       "node/side_bar_container_modifier.cpp",
       "node/stepper_item_modifier.cpp",
+      "node/swiper_controller_modifier.cpp",
       "node/tabs_modifier.cpp",
       "node/text_clock_modifier.cpp",
       "node/text_timer_modifier.cpp",
@@ -119,8 +121,19 @@ template("ace_core_interfaces_native_node") {
       "node/water_flow_modifier.cpp",
     ]
     deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+    if (is_arkui_x) {
+      deps += [ "//third_party/bounds_checking_function:libsec_static" ]
+    }
+    include_dirs = [
+      "${ace_root}/interfaces/inner_api/ace",
+      "${ace_root}/interfaces/native",
+      "${ace_root}/interfaces/native/node",
+    ]
 
-    include_dirs = [ "${ace_root}/interfaces/inner_api/ace" ]
+    if (defined(config.model_component_support) &&
+        config.model_component_support) {
+      sources += [ "node/node_component3d_modifier.cpp" ]
+    }
 
     if (defined(config.xcomponent_components_support) &&
         config.xcomponent_components_support) {
@@ -136,7 +149,14 @@ template("ace_core_interfaces_native_node") {
         config.plugin_components_support) {
       sources += [ "node/plugin_modifier.cpp" ]
     }
-    external_deps = [ "graphic_2d:librender_service_client" ]
+    external_deps = [
+      "graphic_2d:drawing_napi_impl",
+      "graphic_2d:librender_service_client",
+    ]
+    if (defined(config.model_component_support) &&
+        config.model_component_support) {
+      external_deps += [ "graphic_3d:lib3dWidgetAdapter" ]
+    }
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]
     }

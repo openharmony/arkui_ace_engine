@@ -135,9 +135,21 @@ void GridScrollLayoutAlgorithm::UpdateOffsetOnVirtualKeyboardHeightChange(Layout
 void GridScrollLayoutAlgorithm::AdaptToChildMainSize(LayoutWrapper* layoutWrapper,
     RefPtr<GridLayoutProperty>& gridLayoutProperty, float mainSize, SizeF idealSize, bool matchChildren)
 {
-    // grid with columnsTemplate/rowsTemplate and maxCount
-    if (!matchChildren && !gridLayoutProperty->HasMaxCount()) {
-        return;
+    if (!matchChildren) {
+        // grid with columnsTemplate/rowsTemplate and maxCount
+        if (!gridLayoutProperty->HasMaxCount()) {
+            return;
+        }
+        std::optional<CalcLength> mainAxisIdealSize;
+        const auto& selfLayoutConstraint = gridLayoutProperty->GetCalcLayoutConstraint();
+        if (selfLayoutConstraint && selfLayoutConstraint->selfIdealSize.has_value()) {
+            mainAxisIdealSize = axis_ == Axis::HORIZONTAL ? selfLayoutConstraint->selfIdealSize->Width()
+                                                          : selfLayoutConstraint->selfIdealSize->Height();
+        }
+
+        if (mainAxisIdealSize.has_value()) {
+            return;
+        }
     }
 
     auto lengthOfItemsInViewport = gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap_);
@@ -247,6 +259,10 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             gridItemLayoutProperty->UpdateMainIndex(line->first);
             gridItemLayoutProperty->UpdateCrossIndex(iter->first);
             UpdateRealGridItemPositionInfo(wrapper, line->first, iter->first);
+            auto frameNode = AceType::DynamicCast<FrameNode>(wrapper);
+            if (frameNode) {
+                frameNode->MarkAndCheckNewOpIncNode();
+            }
         }
         prevLineHeight += gridLayoutInfo_.lineHeightMap_[line->first] + mainGap_;
     }
@@ -1259,7 +1275,6 @@ float GridScrollLayoutAlgorithm::FillNewLineForward(float crossSize, float mainS
     cellAveLength_ = -1.0f;
     auto currentIndex = gridLayoutInfo_.startIndex_;
     bool hasNormalItem = false;
-    // TODO: shoule we use policy of adaptive layout according to size of [GridItem] ?
     if (gridLayoutInfo_.startMainLineIndex_ - 1 < 0) {
         if (currentIndex == 0) {
             return cellAveLength_;
@@ -1288,7 +1303,6 @@ float GridScrollLayoutAlgorithm::FillNewLineForward(float crossSize, float mainS
             break;
         }
         // Step2. Measure child
-        // TODO: need to use [isScrollable_]
         auto frameSize = axis_ == Axis::VERTICAL ? SizeF(crossSize, mainSize) : SizeF(mainSize, crossSize);
         AdjustRowColSpan(itemWrapper, layoutWrapper, currentIndex);
         auto crossStart = axis_ == Axis::VERTICAL ? currentItemColStart_ : currentItemRowStart_;
@@ -1411,7 +1425,6 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
     lastCross_ = 0;
     bool hasNormalItem = false;
     bool doneFillLine = false;
-    // TODO: shoule we use policy of adaptive layout according to size of [GridItem] ?
 
     for (uint32_t i = 0; i < crossCount_; i++) {
         // already finish first line forward
@@ -2117,7 +2130,7 @@ void GridScrollLayoutAlgorithm::UpdateMainLineOnReload(int32_t startIdx)
     }
 }
 
-std::pair<bool, bool> GridScrollLayoutAlgorithm::GetResetMode(int32_t updateIdx)
+std::pair<bool, bool> GridScrollLayoutAlgorithm::GetResetMode(LayoutWrapper* layoutWrapper, int32_t updateIdx)
 {
     if (updateIdx == -1) {
         return { 0, 0 };
@@ -2127,14 +2140,17 @@ std::pair<bool, bool> GridScrollLayoutAlgorithm::GetResetMode(int32_t updateIdx)
         int32_t startLine = 0;
         outOfMatrix = !IsIndexInMatrix(updateIdx, startLine);
     }
-    return { !gridLayoutInfo_.hasBigItem_ || outOfMatrix, gridLayoutInfo_.hasBigItem_ && !outOfMatrix };
+    auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    bool hasOptions = gridLayoutProperty->GetLayoutOptions().has_value();
+    return { !gridLayoutInfo_.hasBigItem_ || outOfMatrix || hasOptions,
+        gridLayoutInfo_.hasBigItem_ && !outOfMatrix && !hasOptions };
 }
 
 void GridScrollLayoutAlgorithm::CheckReset(float mainSize, float crossSize, LayoutWrapper* layoutWrapper)
 {
     int32_t updateIdx = layoutWrapper->GetHostNode()->GetChildrenUpdated();
     // [resetFromStart,resetFromUpdate]
-    std::pair<bool, bool> resetMode = GetResetMode(updateIdx);
+    std::pair<bool, bool> resetMode = GetResetMode(layoutWrapper, updateIdx);
     if (gridLayoutInfo_.lastCrossCount_ != crossCount_ || resetMode.first || gridLayoutInfo_.IsResetted()) {
         gridLayoutInfo_.lastCrossCount_ = crossCount_;
         gridLayoutInfo_.lineHeightMap_.clear();

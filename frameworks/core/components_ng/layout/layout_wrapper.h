@@ -119,6 +119,8 @@ public:
         return false;
     }
 
+    OffsetF GetParentGlobalOffsetWithSafeArea(bool checkBoundary = false, bool checkPosition = false) const;
+
     virtual bool SkipMeasureContent() const;
 
     virtual void SetCacheCount(
@@ -161,17 +163,10 @@ public:
 
     static void ApplySafeArea(const SafeAreaInsets& insets, LayoutConstraintF& constraint);
 
-    // check if the page node needs to be avoid keyboard
-    bool CheckPageNeedAvoidKeyboard() const;
     // apply keyboard avoidance on content rootNodes
-    void AvoidKeyboard(bool isFocusOnPage = true);
+    bool AvoidKeyboard(bool isFocusOnPage = true);
     // expand the SafeArea of expansive nodes, which are previously recorded during Layout traversal
     void ExpandSafeArea(bool isFocusOnPage = true);
-
-    // save geometry states before SafeArea expansion / keyboard avoidance
-    void SaveGeoState();
-    // restore to the geometry state after last Layout and before SafeArea expansion and keyboard avoidance
-    void RestoreGeoState();
 
     bool SkipSyncGeometryNode() const
     {
@@ -183,15 +178,16 @@ public:
         needSkipSyncGeometryNode_ = needSkip;
     }
 
+    RectF GetFrameRectWithoutSafeArea() const;
+    RectF GetFrameRectWithSafeArea() const;
+
 protected:
     void CreateRootConstraint();
     void ApplyConstraint(LayoutConstraintF constraint);
 
     void OffsetNodeToSafeArea();
     // keyboard avoidance is done by offsetting, to expand into keyboard area, reverse the offset.
-    void ExpandIntoKeyboard();
-    void RestoreExpansiveChildren();
-    void RestoreExpansiveChild(const RefPtr<UINode>& node);
+    OffsetF ExpandIntoKeyboard();
     bool CheckValidSafeArea();
 
     WeakPtr<FrameNode> hostNode_;

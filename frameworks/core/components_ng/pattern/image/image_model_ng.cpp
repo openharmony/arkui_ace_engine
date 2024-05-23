@@ -54,6 +54,12 @@ void ImageModelNG::Create(const std::string &src, RefPtr<PixelMap> &pixMap, cons
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, nodeId,
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
     stack->Push(frameNode);
+    auto pattern = GetImagePattern();
+    CHECK_NULL_VOID(pattern);
+    if (src.empty() && !pixMap && pattern->GetIsAnimation()) {
+        pattern->SetSrcUndefined(true);
+        return;
+    }
 
     // set draggable for framenode
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -68,9 +74,7 @@ void ImageModelNG::Create(const std::string &src, RefPtr<PixelMap> &pixMap, cons
     auto srcInfo = CreateSourceInfo(src, pixMap, bundleName, moduleName);
     srcInfo.SetIsUriPureNumber(isUriPureNumber);
 
-    auto pattern = GetImagePattern();
-    CHECK_NULL_VOID(pattern);
-    if (pattern->GetIsAnimation()) {
+    if (pattern->GetImageType() != ImagePattern::ImageType::BASE) {
         if (pattern->GetHasSizeChanged()) {
             pattern->ResetPictureSize();
         }
@@ -82,7 +86,7 @@ void ImageModelNG::Create(const std::string &src, RefPtr<PixelMap> &pixMap, cons
             frameNode->RemoveChild(imageFrameNode);
         }
     }
-    pattern->SetIsAnimation(false);
+    pattern->SetImageType(ImagePattern::ImageType::BASE);
 
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo);
 }
@@ -143,8 +147,9 @@ void ImageModelNG::CreateAnimation(const std::vector<ImageProperties>& imageList
         gestureHub->InitDragDropEvent();
     }
     frameNode->SetDraggable(draggable);
+    pattern->SetSrcUndefined(false);
     pattern->StopAnimation();
-    pattern->SetIsAnimation(true);
+    pattern->SetImageType(ImagePattern::ImageType::ANIMATION);
     std::vector<ImageProperties> images = imageList;
     pattern->SetImages(std::move(images));
     pattern->SetDuration(duration);
@@ -433,19 +438,9 @@ void ImageModelNG::SetPixelMapArray(FrameNode* frameNode, void* animatedDrawable
 
     auto pattern = AceType::DynamicCast<ImagePattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(pattern);
-    if (!pattern->GetIsAnimation()) {
-        auto castImageLayoutProperty = frameNode->GetLayoutPropertyPtr<ImageLayoutProperty>();
-        CHECK_NULL_VOID(castImageLayoutProperty);
-        castImageLayoutProperty->Reset();
-        auto castImageRenderProperty = frameNode->GetPaintPropertyPtr<ImageRenderProperty>();
-        CHECK_NULL_VOID(castImageRenderProperty);
-        castImageRenderProperty->Reset();
-        pattern->ResetImageAndAlt();
-        pattern->ResetImageProperties();
-    }
 
     pattern->StopAnimation();
-    pattern->SetIsAnimation(true);
+    pattern->SetImageType(ImagePattern::ImageType::ANIMATION);
     pattern->SetImages(std::move(images));
     pattern->SetDuration(duration);
     pattern->SetIteration(iterations);
@@ -674,6 +669,15 @@ std::vector<float> ImageModelNG::GetColorFilter(FrameNode* frameNode)
     return paintProperty->GetImagePaintStyle()->GetColorFilter().value_or(DEFAULT_COLOR_FILTER);
 }
 
+RefPtr<DrawingColorFilter> ImageModelNG::GetDrawingColorFilter(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(paintProperty, nullptr);
+    CHECK_NULL_RETURN(paintProperty->GetImagePaintStyle(), nullptr);
+    return paintProperty->GetImagePaintStyle()->GetDrawingColorFilter().value_or(nullptr);
+}
+
 bool ImageModelNG::GetAutoResize(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, true);
@@ -728,7 +732,9 @@ ImageRenderMode ImageModelNG::GetImageRenderMode(FrameNode* frameNode)
 
 bool ImageModelNG::GetIsAnimation()
 {
-    return GetImagePattern()->GetIsAnimation();
+    auto pattern = GetImagePattern();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->GetIsAnimation();
 }
 
 RefPtr<ImagePattern> ImageModelNG::GetImagePattern()
@@ -745,6 +751,22 @@ ImageResizableSlice ImageModelNG::GetResizableSlice(FrameNode *frameNode)
     auto renderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_RETURN(renderProperty, resizable);
     return renderProperty->GetImageResizableSlice().value_or(resizable);
+}
+
+void ImageModelNG::EnableAnalyzer(FrameNode* frameNode, bool isEnableAnalyzer)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(imagePattern);
+    imagePattern->EnableAnalyzer(isEnableAnalyzer);
+}
+
+void ImageModelNG::SetImageAnalyzerConfig(FrameNode* frameNode, void* config)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(imagePattern);
+    imagePattern->SetImageAnalyzerConfig(config);
 }
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_CPP

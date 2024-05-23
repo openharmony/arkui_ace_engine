@@ -292,7 +292,7 @@ void JSDecorationSpan::Constructor(const JSCallbackInfo& args)
     decorationSpan->IncRefCount();
 
     RefPtr<DecorationSpan> span;
-    if (args.Length() <= 0) {
+    if (args.Length() <= 0 || !args[0]->IsObject()) {
         span = AceType::MakeRefPtr<DecorationSpan>();
     } else {
         span = JSDecorationSpan::ParseJsDecorationSpan(JSRef<JSObject>::Cast(args[0]));
@@ -517,8 +517,13 @@ void JSGestureSpan::JSBind(BindingTarget globalObj)
 
 RefPtr<GestureSpan> JSGestureSpan::ParseJSGestureSpan(const JSCallbackInfo& args)
 {
-    JSRef<JSObject> object = JSRef<JSObject>::Cast(args[0]);
     GestureStyle gestureInfo;
+    if (args.Length() <= 0 || !args[0]->IsObject()) {
+        gestureInfo.onClick = std::nullopt;
+        gestureInfo.onLongPress = std::nullopt;
+        return AceType::MakeRefPtr<GestureSpan>(gestureInfo);
+    }
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(args[0]);
 
     auto clickFunc = object->GetProperty("onClick");
     if (!clickFunc->IsFunction() || clickFunc->IsUndefined()) {
@@ -576,7 +581,7 @@ void JSTextShadowSpan::Constructor(const JSCallbackInfo& args)
     textShadowSpan->IncRefCount();
 
     RefPtr<TextShadowSpan> span;
-    if (args.Length() <= 0) {
+    if (args.Length() <= 0 || !args[0]->IsObject()) {
         std::vector<Shadow> shadows;
         span = AceType::MakeRefPtr<TextShadowSpan>(shadows);
     } else {
@@ -728,7 +733,7 @@ ImageSpanAttribute JSImageAttachment::ParseJsImageSpanAttribute(const JSRef<JSOb
     auto sizeObj = obj->GetProperty("size");
     if (sizeObj->IsObject()) {
         ImageSpanSize imageSize;
-        JSRef<JSArray> size = JSRef<JSArray>::Cast(sizeObj);
+        auto size = JSRef<JSObject>::Cast(sizeObj);
         JSRef<JSVal> width = size->GetProperty("width");
         CalcDimension imageSpanWidth;
         if (!width->IsNull() && JSContainerBase::ParseJsDimensionVpNG(width, imageSpanWidth, false) &&
@@ -1199,11 +1204,13 @@ void JSParagraphStyleSpan::ParseJsMaxLines(const JSRef<JSObject>& obj, SpanParag
         return;
     }
     JSRef<JSVal> args = obj->GetProperty("maxLines");
-    int32_t value = Infinity<uint32_t>();
+    int32_t value = Infinity<int32_t>();
     if (args->ToString() != "Infinity") {
         JSContainerBase::ParseJsInt32(args, value);
     }
-    paragraphStyle.maxLines = value;
+    if (!args->IsUndefined()) {
+        paragraphStyle.maxLines = value;
+    }
 }
 
 void JSParagraphStyleSpan::ParseJsTextOverflow(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle)

@@ -89,7 +89,15 @@ public:
 
     virtual bool IsReverse() const
     {
-        return false;
+        if (GetAxis() != Axis::HORIZONTAL) {
+            return false;
+        }
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto layoutProperty = host->GetLayoutProperty<LayoutProperty>();
+        CHECK_NULL_RETURN(layoutProperty, false);
+        auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+        return (layoutDirection == TextDirection::RTL);
     };
 
     virtual bool ShouldDelayChildPressedState() const override
@@ -111,7 +119,7 @@ public:
     virtual bool IsAtBottom() const = 0;
     virtual bool OutBoundaryCallback()
     {
-        return IsAtTop() || IsAtBottom();
+        return IsOutOfBoundary();
     }
 
     virtual bool IsOutOfBoundary(bool useCurrentDelta = true)
@@ -131,15 +139,24 @@ public:
     {
         return !scrollableEvent_ || scrollableEvent_->Idle();
     }
-    void SetScrollEnable(bool enable)
+    void SetScrollEnabled(bool enabled)
     {
         CHECK_NULL_VOID(scrollableEvent_);
-        scrollableEvent_->SetEnabled(enable);
-        if (!enable) {
+        scrollableEvent_->SetEnabled(enabled);
+        if (!enabled) {
             scrollableEvent_->SetAxis(Axis::NONE);
         } else {
             scrollableEvent_->SetAxis(axis_);
         }
+        if (scrollBarProxy_) {
+            scrollBarProxy_->SetScrollEnabled(enabled, AceType::WeakClaim(this));
+        }
+    }
+
+    bool GetScrollEnabled() const
+    {
+        CHECK_NULL_RETURN(scrollableEvent_, false);
+        return scrollableEvent_->GetEnabled();
     }
 
     RefPtr<GestureEventHub> GetGestureHub();
@@ -150,7 +167,7 @@ public:
     {
         return scrollEffect_;
     }
-    bool HandleEdgeEffect(float offset, int32_t source, const SizeF& size, bool reverse = false);
+    bool HandleEdgeEffect(float offset, int32_t source, const SizeF& size);
     virtual void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) {}
     bool IsRestrictBoundary()
     {
@@ -369,6 +386,8 @@ public:
 
     static ScrollState GetScrollState(int32_t scrollSource);
 
+    static ScrollSource ConvertScrollSource(int32_t source);
+
     static float CalculateFriction(float gamma)
     {
         constexpr float RATIO = 1.848f;
@@ -488,7 +507,7 @@ public:
         std::vector<RefPtr<FrameNode>> children;
         return children;
     }
-    
+
     void SetAnimateCanOverScroll(bool animateCanOverScroll)
     {
         bool isScrollable = !(IsAtBottom() && IsAtTop() && !GetAlwaysEnabled());
@@ -496,6 +515,7 @@ public:
     }
     virtual void InitScrollBarClickEvent();
     void HandleClickEvent(GestureEvent& info);
+    void InitScrollBarGestureEvent();
     void InitScrollBarMouseEvent();
     virtual void ScrollPage(bool reverse, bool smooth = false);
     void PrintOffsetLog(AceLogTag tag, int32_t id, double finalOffset);
@@ -528,8 +548,13 @@ public:
 
     void HandleMoveEventInComp(const PointF& point);
     void HandleLeaveHotzoneEvent();
+    void SetHotZoneScrollCallback(std::function<void(void)>&& func)
+    {
+        hotZoneScrollCallback_ = func;
+    }
 
 protected:
+    void SuggestOpIncGroup(bool flag);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     virtual DisplayMode GetDefaultScrollBarDisplayMode() const
     {
@@ -555,7 +580,7 @@ protected:
 
     virtual void OnScrollStop(const OnScrollStopEvent& onScrollStop);
 
-    void FireOnWillScroll(float offset) const;
+    float FireOnWillScroll(float offset) const;
 
     // select with mouse
     struct ItemSelectedStatus {
@@ -760,6 +785,7 @@ private:
     float lastHonezoneOffsetPct_ = 0.0f;
     RefPtr<BezierVariableVelocityMotion> velocityMotion_;
     RefPtr<VelocityMotion> fixedVelocityMotion_;
+    std::function<void(void)> hotZoneScrollCallback_;
     void UnRegister2DragDropManager();
     float IsInHotZone(const PointF& point);
     void HotZoneScroll(const float offset);

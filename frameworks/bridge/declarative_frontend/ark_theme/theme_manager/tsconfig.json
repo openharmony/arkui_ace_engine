@@ -1,7 +1,6 @@
 {
     "files": [
         // utility
-        "src/utility/ArkStubs.ts",
         "src/utility/ArkResourcesHelper.ts",
         "src/utility/ArkThemeNativeHelper.ts",
 
@@ -21,6 +20,7 @@
         "src/theme/ArkThemeImpl.ts",
         "src/theme/ArkThemeScope.ts",
         "src/theme/ArkThemeScopeManager.ts",
+        "src/theme/ArkThemeWhiteList.ts",
     ],
     "compilerOptions": {
         "module": "none",

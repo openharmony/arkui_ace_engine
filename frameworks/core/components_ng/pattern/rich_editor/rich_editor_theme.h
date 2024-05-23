@@ -47,8 +47,6 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->textStyle_.SetTextColor(DEFAULT_TEXT_COLOR);
-            theme->textStyle_.SetTextDecorationColor(DEFAULT_TEXT_COLOR);
             theme->padding_ = Edge(themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_HORIZONTAL),
                 themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_VERTICAL),
                 themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_HORIZONTAL),
@@ -77,7 +75,7 @@ public:
             theme->caretColor_ = pattern->GetAttr<Color>("caret_color", Color(0xff007dff));
             theme->selectedBackgroundColor_ = pattern->GetAttr<Color>("selected_background_color", Color(0xff007dff));
             theme->previewUnderlineColor_ = pattern->GetAttr<Color>("preview_underline_color", Color(0xff007dff));
-            theme->previewUnderlineWidth_ = pattern->GetAttr<Dimension>("preview_underline_width", 1.0_vp);
+            theme->previewUnderlineWidth_ = pattern->GetAttr<Dimension>("preview_underline_width", 2.0_vp);
             RefPtr<ThemeStyle> textfieldPattern = themeConstants->GetPatternByName("textfield_pattern");
             if (!textfieldPattern) {
                 LOGW("find pattern of textfield fail");
@@ -85,6 +83,8 @@ public:
             }
             auto textfieldShowHandle = textfieldPattern->GetAttr<std::string>("textfield_show_handle", "0");
             theme->richeditorShowHandle_ = StringUtils::StringToInt(textfieldShowHandle);
+            theme->textStyle_.SetTextColor(pattern->GetAttr<Color>("default_text_color", DEFAULT_TEXT_COLOR));
+            theme->textStyle_.SetTextDecorationColor(pattern->GetAttr<Color>("default_text_color", DEFAULT_TEXT_COLOR));
         }
     };
 
@@ -179,7 +179,7 @@ private:
     Color selectedBackgroundColor_ = Color(0xff007dff);
     Color dragBackgroundColor_ = Color::WHITE;
     Color previewUnderlineColor_ = Color(0xff007dff);
-    Dimension previewUnderlineWidth_ = 1.0_vp;
+    Dimension previewUnderlineWidth_ = 2.0_vp;
     bool richeditorShowHandle_ = false;
 };
 } // namespace OHOS::Ace::NG

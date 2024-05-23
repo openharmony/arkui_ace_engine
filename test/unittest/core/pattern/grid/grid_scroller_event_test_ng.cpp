@@ -22,21 +22,18 @@ namespace {} // namespace
 
 class GridScrollerEventTestNg : public GridTestNg {
 public:
-    void CreateWithNoProxy(const std::function<void(GridModelNG)>& callback = nullptr);
+    GridModelNG CreateWithNoProxy();
 };
 
-void GridScrollerEventTestNg::CreateWithNoProxy(const std::function<void(GridModelNG)>& callback)
+GridModelNG GridScrollerEventTestNg::CreateWithNoProxy()
 {
     GridModelNG model;
     RefPtr<ScrollControllerBase> positionController = model.CreatePositionController();
     model.Create(positionController, nullptr);
     ViewAbstract::SetWidth(CalcLength(GRID_WIDTH));
     ViewAbstract::SetHeight(CalcLength(GRID_HEIGHT));
-    if (callback) {
-        callback(model);
-    }
-    GetInstance();
-    FlushLayoutTask(frameNode_);
+    GetGrid();
+    return model;
 }
 
 /**
@@ -49,10 +46,10 @@ HWTEST_F(GridScrollerEventTestNg, ScrollablePattern001, TestSize.Level1)
     /**
      * @tc.steps: step1. Test OnScrollPosition/OnScrollEnd.
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     double itemHeight = ITEM_HEIGHT;
     EXPECT_TRUE(pattern_->OnScrollPosition(itemHeight, SCROLL_FROM_UPDATE));
     EXPECT_TRUE(pattern_->OnScrollPosition(itemHeight, SCROLL_FROM_UPDATE));
@@ -75,10 +72,10 @@ HWTEST_F(GridScrollerEventTestNg, ScrollablePattern001, TestSize.Level1)
     /**
      * @tc.steps: step2. Test OnScrollCallback.
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateFixedItem(10);
-    });
+    model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     EXPECT_TRUE(pattern_->OnScrollCallback(-ITEM_HEIGHT, SCROLL_FROM_START));
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
     EXPECT_TRUE(pattern_->OnScrollCallback(-ITEM_HEIGHT, SCROLL_FROM_UPDATE));
@@ -100,11 +97,11 @@ HWTEST_F(GridScrollerEventTestNg, GridEventTestNg001, TestSize.Level1)
         offsetY = offset;
         scrollState = state;
     };
-    Create([event](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        model.SetOnScroll(event);
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetOnScroll(event);
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
 
     UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_UPDATE);
     EXPECT_EQ(offsetY.ConvertToPx(), ITEM_HEIGHT);
@@ -179,11 +176,11 @@ HWTEST_F(GridScrollerEventTestNg, GridEventTestNg002, TestSize.Level1)
         startIndex = start;
         endIndex = end;
     };
-    Create([event](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        model.SetOnScrollIndex(event);
-        CreateFixedItem(12);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetOnScrollIndex(event);
+    CreateFixedItems(12);
+    CreateDone(frameNode_);
 
     UpdateCurrentOffset(-ITEM_HEIGHT);
     EXPECT_EQ(startIndex, 0);
@@ -203,11 +200,11 @@ HWTEST_F(GridScrollerEventTestNg, GridEventTestNg003, TestSize.Level1)
 {
     bool isTrigger = false;
     auto event = [&isTrigger]() { isTrigger = true; };
-    Create([event](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        model.SetOnReachStart(event);
-        CreateFixedItem(12);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetOnReachStart(event);
+    CreateFixedItems(12);
+    CreateDone(frameNode_);
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
@@ -290,11 +287,11 @@ HWTEST_F(GridScrollerEventTestNg, GridEventTestNg004, TestSize.Level1)
 {
     bool isTrigger = false;
     auto event = [&isTrigger]() { isTrigger = true; };
-    Create([event](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        model.SetOnReachEnd(event);
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetOnReachEnd(event);
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
 
     isTrigger = false;
     UpdateCurrentOffset(-ITEM_HEIGHT * 3);
@@ -387,12 +384,12 @@ HWTEST_F(GridScrollerEventTestNg, GridEventTestNg005, TestSize.Level1)
     bool isScrollStopCalled = false;
     auto scrollStart = [&isScrollStartCalled]() { isScrollStartCalled = true; };
     auto scrollStop = [&isScrollStopCalled]() { isScrollStopCalled = true; };
-    Create([scrollStart, scrollStop](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        model.SetOnScrollStart(scrollStart);
-        model.SetOnScrollStop(scrollStop);
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetOnScrollStart(scrollStart);
+    model.SetOnScrollStop(scrollStop);
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
 
     pattern_->OnScrollCallback(100.f, SCROLL_FROM_START);
     EXPECT_TRUE(isScrollStartCalled);
@@ -417,11 +414,11 @@ HWTEST_F(GridScrollerEventTestNg, GridEventTestNg006, TestSize.Level1)
         ScrollFrameResult result;
         return result;
     };
-    Create([event](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        model.SetOnScrollFrameBegin(event);
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetOnScrollFrameBegin(event);
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
 
     auto scrollableEvent = pattern_->GetScrollableEvent();
     ASSERT_NE(scrollableEvent, nullptr);
@@ -440,12 +437,12 @@ HWTEST_F(GridScrollerEventTestNg, GridEventTestNg007, TestSize.Level1)
     bool isScrollStopCalled = false;
     auto scrollStart = [&isScrollStartCalled]() { isScrollStartCalled = true; };
     auto scrollStop = [&isScrollStopCalled]() { isScrollStopCalled = true; };
-    Create([scrollStart, scrollStop](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        model.SetOnScrollStart(scrollStart);
-        model.SetOnScrollStop(scrollStop);
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetOnScrollStart(scrollStart);
+    model.SetOnScrollStop(scrollStop);
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
 
     pattern_->OnScrollCallback(100.f, SCROLL_FROM_START);
     EXPECT_TRUE(isScrollStartCalled);
@@ -498,10 +495,13 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithoutScrollBarWithoutAnimation00
     Dimension willScrollOffset;
     ScrollState willScrollState;
     auto onWillScroll = [&willScrollOffset, &willScrollState, &isOnWillScrollCallBack](
-                            Dimension offset, ScrollState state) {
+                            Dimension offset, ScrollState state, ScrollSource source) {
         willScrollOffset = offset;
         willScrollState = state;
         isOnWillScrollCallBack = true;
+        ScrollFrameResult result;
+        result.offset = offset;
+        return result;
     };
     Dimension didScrollOffset;
     ScrollState didScrollState;
@@ -516,16 +516,15 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithoutScrollBarWithoutAnimation00
     auto onReachStart = [&isOnReachStartCallBack]() { isOnReachStartCallBack = true; };
     auto onReachEnd = [&isOnReachEndCallBack]() { isOnReachEndCallBack = true; };
 
-    CreateWithNoProxy([onScroll, onWillScroll, onDidScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd,
-                          this](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        model.SetOnScroll(onScroll);
-        model.SetOnScrollStart(onScrollStart);
-        model.SetOnScrollStop(onScrollStop);
-        model.SetOnReachStart(onReachStart);
-        model.SetOnReachEnd(onReachEnd);
-        CreateFixedItem(20);
-    });
+    GridModelNG model = CreateWithNoProxy();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetOnScroll(onScroll);
+    model.SetOnScrollStart(onScrollStart);
+    model.SetOnScrollStop(onScrollStop);
+    model.SetOnReachStart(onReachStart);
+    model.SetOnReachEnd(onReachEnd);
+    CreateFixedItems(20);
+    CreateDone(frameNode_);
     eventHub_->SetOnWillScroll(onWillScroll);
     eventHub_->SetOnDidScroll(onDidScroll);
     EXPECT_TRUE(isOnReachStartCallBack);
@@ -581,15 +580,15 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithoutScrollBarWithoutAnimation00
     auto onReachStart = [&isOnReachStartCallBack]() { isOnReachStartCallBack = true; };
     auto onReachEnd = [&isOnReachEndCallBack]() { isOnReachEndCallBack = true; };
 
-    CreateWithNoProxy([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd, this](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        model.SetOnScroll(onScroll);
-        model.SetOnScrollStart(onScrollStart);
-        model.SetOnScrollStop(onScrollStop);
-        model.SetOnReachStart(onReachStart);
-        model.SetOnReachEnd(onReachEnd);
-        CreateFixedItem(20);
-    });
+    GridModelNG model = CreateWithNoProxy();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetOnScroll(onScroll);
+    model.SetOnScrollStart(onScrollStart);
+    model.SetOnScrollStop(onScrollStop);
+    model.SetOnReachStart(onReachStart);
+    model.SetOnReachEnd(onReachEnd);
+    CreateFixedItems(20);
+    CreateDone(frameNode_);
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
 
@@ -636,16 +635,16 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithoutScrollBarWithAnimation001, 
     auto onReachStart = [&isOnReachStartCallBack]() { isOnReachStartCallBack = true; };
     auto onReachEnd = [&isOnReachEndCallBack]() { isOnReachEndCallBack = true; };
 
-    CreateWithNoProxy([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        model.SetOnScroll(onScroll);
-        model.SetOnScrollStart(onScrollStart);
-        model.SetOnScrollStop(onScrollStop);
-        model.SetOnReachStart(onReachStart);
-        model.SetOnReachEnd(onReachEnd);
-        model.SetSupportAnimation(true);
-        CreateFixedItem(20);
-    });
+    GridModelNG model = CreateWithNoProxy();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetOnScroll(onScroll);
+    model.SetOnScrollStart(onScrollStart);
+    model.SetOnScrollStop(onScrollStop);
+    model.SetOnReachStart(onReachStart);
+    model.SetOnReachEnd(onReachEnd);
+    model.SetSupportAnimation(true);
+    CreateFixedItems(20);
+    CreateDone(frameNode_);
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
     /**
@@ -696,16 +695,16 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithoutScrollBarWithAnimation002, 
     auto onReachStart = [&isOnReachStartCallBack]() { isOnReachStartCallBack = true; };
     auto onReachEnd = [&isOnReachEndCallBack]() { isOnReachEndCallBack = true; };
 
-    CreateWithNoProxy([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        model.SetOnScroll(onScroll);
-        model.SetOnScrollStart(onScrollStart);
-        model.SetOnScrollStop(onScrollStop);
-        model.SetOnReachStart(onReachStart);
-        model.SetOnReachEnd(onReachEnd);
-        model.SetSupportAnimation(true);
-        CreateFixedItem(20);
-    });
+    GridModelNG model = CreateWithNoProxy();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetOnScroll(onScroll);
+    model.SetOnScrollStart(onScrollStart);
+    model.SetOnScrollStop(onScrollStop);
+    model.SetOnReachStart(onReachStart);
+    model.SetOnReachEnd(onReachEnd);
+    model.SetSupportAnimation(true);
+    CreateFixedItems(20);
+    CreateDone(frameNode_);
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
 
@@ -759,15 +758,15 @@ HWTEST_F(GridScrollerEventTestNg, HorizontalGridWithoutScrollBarWithoutAnimation
     auto onReachStart = [&isOnReachStartCallBack]() { isOnReachStartCallBack = true; };
     auto onReachEnd = [&isOnReachEndCallBack]() { isOnReachEndCallBack = true; };
 
-    CreateWithNoProxy([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd](GridModelNG model) {
-        model.SetRowsTemplate("1fr 1fr");
-        model.SetOnScroll(onScroll);
-        model.SetOnScrollStart(onScrollStart);
-        model.SetOnScrollStop(onScrollStop);
-        model.SetOnReachStart(onReachStart);
-        model.SetOnReachEnd(onReachEnd);
-        CreateFixedItem(20);
-    });
+    GridModelNG model = CreateWithNoProxy();
+    model.SetRowsTemplate("1fr 1fr");
+    model.SetOnScroll(onScroll);
+    model.SetOnScrollStart(onScrollStart);
+    model.SetOnScrollStop(onScrollStop);
+    model.SetOnReachStart(onReachStart);
+    model.SetOnReachEnd(onReachEnd);
+    CreateFixedItems(20);
+    CreateDone(frameNode_);
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
 
@@ -815,15 +814,15 @@ HWTEST_F(GridScrollerEventTestNg, HorizontalGridWithoutScrollBarWithoutAnimation
     auto onReachStart = [&isOnReachStartCallBack]() { isOnReachStartCallBack = true; };
     auto onReachEnd = [&isOnReachEndCallBack]() { isOnReachEndCallBack = true; };
 
-    CreateWithNoProxy([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd](GridModelNG model) {
-        model.SetRowsTemplate("1fr 1fr");
-        model.SetOnScroll(onScroll);
-        model.SetOnScrollStart(onScrollStart);
-        model.SetOnScrollStop(onScrollStop);
-        model.SetOnReachStart(onReachStart);
-        model.SetOnReachEnd(onReachEnd);
-        CreateFixedItem(20);
-    });
+    GridModelNG model = CreateWithNoProxy();
+    model.SetRowsTemplate("1fr 1fr");
+    model.SetOnScroll(onScroll);
+    model.SetOnScrollStart(onScrollStart);
+    model.SetOnScrollStop(onScrollStop);
+    model.SetOnReachStart(onReachStart);
+    model.SetOnReachEnd(onReachEnd);
+    CreateFixedItems(20);
+    CreateDone(frameNode_);
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
 
@@ -870,16 +869,16 @@ HWTEST_F(GridScrollerEventTestNg, HorizontalGridWithoutScrollBarWithAnimation001
     auto onReachStart = [&isOnReachStartCallBack]() { isOnReachStartCallBack = true; };
     auto onReachEnd = [&isOnReachEndCallBack]() { isOnReachEndCallBack = true; };
 
-    CreateWithNoProxy([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd](GridModelNG model) {
-        model.SetRowsTemplate("1fr 1fr");
-        model.SetOnScroll(onScroll);
-        model.SetOnScrollStart(onScrollStart);
-        model.SetOnScrollStop(onScrollStop);
-        model.SetOnReachStart(onReachStart);
-        model.SetOnReachEnd(onReachEnd);
-        model.SetSupportAnimation(true);
-        CreateFixedItem(20);
-    });
+    GridModelNG model = CreateWithNoProxy();
+    model.SetRowsTemplate("1fr 1fr");
+    model.SetOnScroll(onScroll);
+    model.SetOnScrollStart(onScrollStart);
+    model.SetOnScrollStop(onScrollStop);
+    model.SetOnReachStart(onReachStart);
+    model.SetOnReachEnd(onReachEnd);
+    model.SetSupportAnimation(true);
+    CreateFixedItems(20);
+    CreateDone(frameNode_);
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
 
@@ -931,16 +930,16 @@ HWTEST_F(GridScrollerEventTestNg, HorizontalGridWithoutScrollBarWithAnimation002
     auto onReachStart = [&isOnReachStartCallBack]() { isOnReachStartCallBack = true; };
     auto onReachEnd = [&isOnReachEndCallBack]() { isOnReachEndCallBack = true; };
 
-    CreateWithNoProxy([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd](GridModelNG model) {
-        model.SetRowsTemplate("1fr 1fr");
-        model.SetOnScroll(onScroll);
-        model.SetOnScrollStart(onScrollStart);
-        model.SetOnScrollStop(onScrollStop);
-        model.SetOnReachStart(onReachStart);
-        model.SetOnReachEnd(onReachEnd);
-        model.SetSupportAnimation(true);
-        CreateFixedItem(20);
-    });
+    GridModelNG model = CreateWithNoProxy();
+    model.SetRowsTemplate("1fr 1fr");
+    model.SetOnScroll(onScroll);
+    model.SetOnScrollStart(onScrollStart);
+    model.SetOnScrollStop(onScrollStop);
+    model.SetOnReachStart(onReachStart);
+    model.SetOnReachEnd(onReachEnd);
+    model.SetSupportAnimation(true);
+    CreateFixedItems(20);
+    CreateDone(frameNode_);
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
 
@@ -992,15 +991,15 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithScrollBarWithoutAnimation001, 
     auto onReachStart = [&isOnReachStartCallBack]() { isOnReachStartCallBack = true; };
     auto onReachEnd = [&isOnReachEndCallBack]() { isOnReachEndCallBack = true; };
 
-    Create([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd, this](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        model.SetOnScroll(onScroll);
-        model.SetOnScrollStart(onScrollStart);
-        model.SetOnScrollStop(onScrollStop);
-        model.SetOnReachStart(onReachStart);
-        model.SetOnReachEnd(onReachEnd);
-        CreateFixedItem(20);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetOnScroll(onScroll);
+    model.SetOnScrollStart(onScrollStart);
+    model.SetOnScrollStop(onScrollStop);
+    model.SetOnReachStart(onReachStart);
+    model.SetOnReachEnd(onReachEnd);
+    CreateFixedItems(20);
+    CreateDone(frameNode_);
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
 
@@ -1049,15 +1048,15 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithScrollBarWithoutAnimation002, 
     auto onReachStart = [&isOnReachStartCallBack]() { isOnReachStartCallBack = true; };
     auto onReachEnd = [&isOnReachEndCallBack]() { isOnReachEndCallBack = true; };
 
-    Create([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd, this](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        model.SetOnScroll(onScroll);
-        model.SetOnScrollStart(onScrollStart);
-        model.SetOnScrollStop(onScrollStop);
-        model.SetOnReachStart(onReachStart);
-        model.SetOnReachEnd(onReachEnd);
-        CreateFixedItem(20);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetOnScroll(onScroll);
+    model.SetOnScrollStart(onScrollStart);
+    model.SetOnScrollStop(onScrollStop);
+    model.SetOnReachStart(onReachStart);
+    model.SetOnReachEnd(onReachEnd);
+    CreateFixedItems(20);
+    CreateDone(frameNode_);
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
 
@@ -1105,16 +1104,16 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithScrollBarWithAnimation001, Tes
     auto onReachStart = [&isOnReachStartCallBack]() { isOnReachStartCallBack = true; };
     auto onReachEnd = [&isOnReachEndCallBack]() { isOnReachEndCallBack = true; };
 
-    Create([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        model.SetOnScroll(onScroll);
-        model.SetOnScrollStart(onScrollStart);
-        model.SetOnScrollStop(onScrollStop);
-        model.SetOnReachStart(onReachStart);
-        model.SetOnReachEnd(onReachEnd);
-        model.SetSupportAnimation(true);
-        CreateFixedItem(20);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetOnScroll(onScroll);
+    model.SetOnScrollStart(onScrollStart);
+    model.SetOnScrollStop(onScrollStop);
+    model.SetOnReachStart(onReachStart);
+    model.SetOnReachEnd(onReachEnd);
+    model.SetSupportAnimation(true);
+    CreateFixedItems(20);
+    CreateDone(frameNode_);
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
 
@@ -1167,16 +1166,16 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithScrollBarWithAnimation002, Tes
     auto onReachStart = [&isOnReachStartCallBack]() { isOnReachStartCallBack = true; };
     auto onReachEnd = [&isOnReachEndCallBack]() { isOnReachEndCallBack = true; };
 
-    Create([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        model.SetOnScroll(onScroll);
-        model.SetOnScrollStart(onScrollStart);
-        model.SetOnScrollStop(onScrollStop);
-        model.SetOnReachStart(onReachStart);
-        model.SetOnReachEnd(onReachEnd);
-        model.SetSupportAnimation(true);
-        CreateFixedItem(20);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetOnScroll(onScroll);
+    model.SetOnScrollStart(onScrollStart);
+    model.SetOnScrollStop(onScrollStop);
+    model.SetOnReachStart(onReachStart);
+    model.SetOnReachEnd(onReachEnd);
+    model.SetSupportAnimation(true);
+    CreateFixedItems(20);
+    CreateDone(frameNode_);
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
 
@@ -1230,15 +1229,15 @@ HWTEST_F(GridScrollerEventTestNg, HorizontalGridWithScrollBarWithoutAnimation001
     auto onReachStart = [&isOnReachStartCallBack]() { isOnReachStartCallBack = true; };
     auto onReachEnd = [&isOnReachEndCallBack]() { isOnReachEndCallBack = true; };
 
-    Create([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd](GridModelNG model) {
-        model.SetRowsTemplate("1fr 1fr");
-        model.SetOnScroll(onScroll);
-        model.SetOnScrollStart(onScrollStart);
-        model.SetOnScrollStop(onScrollStop);
-        model.SetOnReachStart(onReachStart);
-        model.SetOnReachEnd(onReachEnd);
-        CreateFixedItem(20);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetRowsTemplate("1fr 1fr");
+    model.SetOnScroll(onScroll);
+    model.SetOnScrollStart(onScrollStart);
+    model.SetOnScrollStop(onScrollStop);
+    model.SetOnReachStart(onReachStart);
+    model.SetOnReachEnd(onReachEnd);
+    CreateFixedItems(20);
+    CreateDone(frameNode_);
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
 
@@ -1286,15 +1285,15 @@ HWTEST_F(GridScrollerEventTestNg, HorizontalGridWithScrollBarWithoutAnimation002
     auto onReachStart = [&isOnReachStartCallBack]() { isOnReachStartCallBack = true; };
     auto onReachEnd = [&isOnReachEndCallBack]() { isOnReachEndCallBack = true; };
 
-    Create([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd](GridModelNG model) {
-        model.SetRowsTemplate("1fr 1fr");
-        model.SetOnScroll(onScroll);
-        model.SetOnScrollStart(onScrollStart);
-        model.SetOnScrollStop(onScrollStop);
-        model.SetOnReachStart(onReachStart);
-        model.SetOnReachEnd(onReachEnd);
-        CreateFixedItem(20);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetRowsTemplate("1fr 1fr");
+    model.SetOnScroll(onScroll);
+    model.SetOnScrollStart(onScrollStart);
+    model.SetOnScrollStop(onScrollStop);
+    model.SetOnReachStart(onReachStart);
+    model.SetOnReachEnd(onReachEnd);
+    CreateFixedItems(20);
+    CreateDone(frameNode_);
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
 
@@ -1342,16 +1341,16 @@ HWTEST_F(GridScrollerEventTestNg, HorizontalGridWithScrollBarWithAnimation001, T
     auto onReachStart = [&isOnReachStartCallBack]() { isOnReachStartCallBack = true; };
     auto onReachEnd = [&isOnReachEndCallBack]() { isOnReachEndCallBack = true; };
 
-    Create([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd](GridModelNG model) {
-        model.SetRowsTemplate("1fr 1fr");
-        model.SetOnScroll(onScroll);
-        model.SetOnScrollStart(onScrollStart);
-        model.SetOnScrollStop(onScrollStop);
-        model.SetOnReachStart(onReachStart);
-        model.SetOnReachEnd(onReachEnd);
-        model.SetSupportAnimation(true);
-        CreateFixedItem(20);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetRowsTemplate("1fr 1fr");
+    model.SetOnScroll(onScroll);
+    model.SetOnScrollStart(onScrollStart);
+    model.SetOnScrollStop(onScrollStop);
+    model.SetOnReachStart(onReachStart);
+    model.SetOnReachEnd(onReachEnd);
+    model.SetSupportAnimation(true);
+    CreateFixedItems(20);
+    CreateDone(frameNode_);
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
 
@@ -1404,16 +1403,16 @@ HWTEST_F(GridScrollerEventTestNg, HorizontalGridWithScrollBarWithAnimation002, T
     auto onReachStart = [&isOnReachStartCallBack]() { isOnReachStartCallBack = true; };
     auto onReachEnd = [&isOnReachEndCallBack]() { isOnReachEndCallBack = true; };
 
-    Create([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd](GridModelNG model) {
-        model.SetRowsTemplate("1fr 1fr");
-        model.SetOnScroll(onScroll);
-        model.SetOnScrollStart(onScrollStart);
-        model.SetOnScrollStop(onScrollStop);
-        model.SetOnReachStart(onReachStart);
-        model.SetOnReachEnd(onReachEnd);
-        model.SetSupportAnimation(true);
-        CreateFixedItem(20);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetRowsTemplate("1fr 1fr");
+    model.SetOnScroll(onScroll);
+    model.SetOnScrollStart(onScrollStart);
+    model.SetOnScrollStop(onScrollStop);
+    model.SetOnReachStart(onReachStart);
+    model.SetOnReachEnd(onReachEnd);
+    model.SetSupportAnimation(true);
+    CreateFixedItems(20);
+    CreateDone(frameNode_);
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
 
@@ -1462,10 +1461,13 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll001, TestSize.Level1
     Dimension willScrollOffset;
     ScrollState willScrollState;
     auto onWillScroll = [&willScrollOffset, &willScrollState, &isOnWillScrollCallBack](
-                            Dimension offset, ScrollState state) {
+                            Dimension offset, ScrollState state, ScrollSource source) {
         willScrollOffset = offset * 2;
         willScrollState = state;
         isOnWillScrollCallBack = true;
+        ScrollFrameResult result;
+        result.offset = offset;
+        return result;
     };
     Dimension didScrollOffset;
     ScrollState didScrollState;
@@ -1476,11 +1478,11 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll001, TestSize.Level1
         isOnDidScrollCallBack = true;
     };
 
-    CreateWithNoProxy([onScroll](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        model.SetOnScroll(onScroll);
-        CreateFixedItem(20);
-    });
+    GridModelNG model = CreateWithNoProxy();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetOnScroll(onScroll);
+    CreateFixedItems(20);
+    CreateDone(frameNode_);
     eventHub_->SetOnWillScroll(onWillScroll);
     eventHub_->SetOnDidScroll(onDidScroll);
 
@@ -1524,10 +1526,13 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll002, TestSize.Level1
     Dimension willScrollOffset;
     ScrollState willScrollState;
     auto onWillScroll = [&willScrollOffset, &willScrollState, &isOnWillScrollCallBack](
-                            Dimension offset, ScrollState state) {
+                            Dimension offset, ScrollState state, ScrollSource source) {
         willScrollOffset = offset * 2;
         willScrollState = state;
         isOnWillScrollCallBack = true;
+        ScrollFrameResult result;
+        result.offset = offset;
+        return result;
     };
     Dimension didScrollOffset;
     ScrollState didScrollState;
@@ -1538,11 +1543,11 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll002, TestSize.Level1
         isOnDidScrollCallBack = true;
     };
 
-    CreateWithNoProxy([onScroll](GridModelNG model) {
-        model.SetRowsTemplate("1fr 1fr");
-        model.SetOnScroll(onScroll);
-        CreateFixedItem(20);
-    });
+    GridModelNG model = CreateWithNoProxy();
+    model.SetRowsTemplate("1fr 1fr");
+    model.SetOnScroll(onScroll);
+    CreateFixedItems(20);
+    CreateDone(frameNode_);
     eventHub_->SetOnWillScroll(onWillScroll);
     eventHub_->SetOnDidScroll(onDidScroll);
 
@@ -1588,10 +1593,13 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll003, TestSize.Level1
     Dimension willScrollOffset;
     ScrollState willScrollState;
     auto onWillScroll = [&willScrollOffset, &willScrollState, &isOnWillScrollCallBack](
-                            Dimension offset, ScrollState state) {
+                            Dimension offset, ScrollState state, ScrollSource source) {
         willScrollOffset = offset * 2;
         willScrollState = state;
         isOnWillScrollCallBack = true;
+        ScrollFrameResult result;
+        result.offset = offset;
+        return result;
     };
     Dimension didScrollOffset;
     ScrollState didScrollState;
@@ -1602,11 +1610,11 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll003, TestSize.Level1
         isOnDidScrollCallBack = true;
     };
 
-    CreateWithNoProxy([onScroll](GridModelNG model) {
-        model.SetRowsTemplate("1fr 1fr");
-        model.SetOnScroll(onScroll);
-        CreateFixedItem(20);
-    });
+    GridModelNG model = CreateWithNoProxy();
+    model.SetRowsTemplate("1fr 1fr");
+    model.SetOnScroll(onScroll);
+    CreateFixedItems(20);
+    CreateDone(frameNode_);
     eventHub_->SetOnWillScroll(onWillScroll);
     eventHub_->SetOnDidScroll(onDidScroll);
 
@@ -1652,10 +1660,13 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll004, TestSize.Level1
     Dimension willScrollOffset;
     ScrollState willScrollState;
     auto onWillScroll = [&willScrollOffset, &willScrollState, &isOnWillScrollCallBack](
-                            Dimension offset, ScrollState state) {
+                            Dimension offset, ScrollState state, ScrollSource source) {
         willScrollOffset = offset;
         willScrollState = state;
         isOnWillScrollCallBack = true;
+        ScrollFrameResult result;
+        result.offset = offset;
+        return result;
     };
     Dimension didScrollOffset;
     ScrollState didScrollState;
@@ -1666,11 +1677,11 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll004, TestSize.Level1
         isOnDidScrollCallBack = true;
     };
 
-    CreateWithNoProxy([onScroll](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        model.SetOnScroll(onScroll);
-        CreateFixedItem(20);
-    });
+    GridModelNG model = CreateWithNoProxy();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetOnScroll(onScroll);
+    CreateFixedItems(20);
+    CreateDone(frameNode_);
     eventHub_->SetOnWillScroll(onWillScroll);
     eventHub_->SetOnDidScroll(onDidScroll);
 
@@ -1716,10 +1727,13 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll005, TestSize.Level1
     Dimension willScrollOffset;
     ScrollState willScrollState;
     auto onWillScroll = [&willScrollOffset, &willScrollState, &isOnWillScrollCallBack](
-                            Dimension offset, ScrollState state) {
+                            Dimension offset, ScrollState state, ScrollSource source) {
         willScrollOffset = offset;
         willScrollState = state;
         isOnWillScrollCallBack = true;
+        ScrollFrameResult result;
+        result.offset = offset;
+        return result;
     };
     Dimension didScrollOffset;
     ScrollState didScrollState;
@@ -1730,11 +1744,11 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll005, TestSize.Level1
         isOnDidScrollCallBack = true;
     };
 
-    CreateWithNoProxy([onScroll](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        model.SetOnScroll(onScroll);
-        CreateFixedItem(20);
-    });
+    GridModelNG model = CreateWithNoProxy();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetOnScroll(onScroll);
+    CreateFixedItems(20);
+    CreateDone(frameNode_);
     eventHub_->SetOnWillScroll(onWillScroll);
     eventHub_->SetOnDidScroll(onDidScroll);
 
@@ -1780,10 +1794,13 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll006, TestSize.Level1
     Dimension willScrollOffset;
     ScrollState willScrollState;
     auto onWillScroll = [&willScrollOffset, &willScrollState, &isOnWillScrollCallBack](
-                            Dimension offset, ScrollState state) {
+                            Dimension offset, ScrollState state, ScrollSource source) {
         willScrollOffset = offset;
         willScrollState = state;
         isOnWillScrollCallBack = true;
+        ScrollFrameResult result;
+        result.offset = offset;
+        return result;
     };
     Dimension didScrollOffset;
     ScrollState didScrollState;
@@ -1794,12 +1811,12 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll006, TestSize.Level1
         isOnDidScrollCallBack = true;
     };
 
-    CreateWithNoProxy([onScroll](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        model.SetOnScroll(onScroll);
-        model.SetEdgeEffect(EdgeEffect::SPRING, true);
-        CreateFixedItem(20);
-    });
+    GridModelNG model = CreateWithNoProxy();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetOnScroll(onScroll);
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateFixedItems(20);
+    CreateDone(frameNode_);
     eventHub_->SetOnWillScroll(onWillScroll);
     eventHub_->SetOnDidScroll(onDidScroll);
 

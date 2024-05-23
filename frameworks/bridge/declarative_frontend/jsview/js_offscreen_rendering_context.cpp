@@ -16,6 +16,7 @@
 #include "bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
 
 #include "base/utils/utils.h"
+#include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/jsview/models/canvas/offscreen_canvas_rendering_context_2d_model_impl.h"
 #include "core/components_ng/pattern/canvas/offscreen_canvas_rendering_context_2d_model_ng.h"
@@ -175,7 +176,7 @@ void JSOffscreenRenderingContext::Constructor(const JSCallbackInfo& args)
     jsRenderContext->SetAntiAlias();
 
     int32_t unit = 0;
-    if (args.GetInt32Arg(3, unit) && (static_cast<CanvasUnit>(unit) == CanvasUnit::PX)) {
+    if (args.GetInt32Arg(3, unit) && (static_cast<CanvasUnit>(unit) == CanvasUnit::PX)) { // 3: index of parameter
         jsRenderContext->SetUnit(CanvasUnit::PX);
     }
 }
@@ -191,9 +192,9 @@ void JSOffscreenRenderingContext::Destructor(JSOffscreenRenderingContext* contex
 
 void JSOffscreenRenderingContext::JsTransferToImageBitmap(const JSCallbackInfo& info)
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
-    CHECK_NULL_VOID(runtime);
-    NativeEngine* nativeEngine = runtime->GetNativeEngine();
+    auto engine = EngineHelper::GetCurrentEngineSafely();
+    CHECK_NULL_VOID(engine);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
     CHECK_NULL_VOID(nativeEngine);
     napi_env env = reinterpret_cast<napi_env>(nativeEngine);
     napi_value global = nullptr;

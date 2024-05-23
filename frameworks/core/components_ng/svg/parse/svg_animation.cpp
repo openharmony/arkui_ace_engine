@@ -17,7 +17,7 @@
 
 #include <unordered_map>
 
-#include "frameworks/core/components/declaration/svg/svg_animate_declaration.h"
+#include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -75,11 +75,11 @@ RefPtr<SvgNode> SvgAnimation::CreateAnimateTransform()
 void SvgAnimation::SetAttr(const std::string& name, const std::string& value)
 {
     static const SvgAnimateMap svgMap = {
-        { DOM_SVG_ANIMATION_BEGIN,
+        { SVG_ANIMATION_BEGIN,
             [](const std::string& val, SvgAnimateAttribute& attr) {
                 attr.begin = ConvertTimeStr(val);
             } },
-        { DOM_SVG_ANIMATION_DUR,
+        { SVG_ANIMATION_DUR,
             [](const std::string& val, SvgAnimateAttribute& attr) {
                 if (val == "indefinite") {
                     attr.dur = 0;
@@ -87,11 +87,11 @@ void SvgAnimation::SetAttr(const std::string& name, const std::string& value)
                     attr.dur = ConvertTimeStr(val);
                 }
             } },
-        { DOM_SVG_ANIMATION_END,
+        { SVG_ANIMATION_END,
             [](const std::string& val, SvgAnimateAttribute& attr) {
                 attr.end = ConvertTimeStr(val);
             } },
-        { DOM_SVG_ANIMATION_REPEAT_COUNT,
+        { SVG_ANIMATION_REPEAT_COUNT,
             [](const std::string& val, SvgAnimateAttribute& attr) {
                 if (val == "indefinite") {
                     attr.repeatCount = -1;
@@ -99,60 +99,60 @@ void SvgAnimation::SetAttr(const std::string& name, const std::string& value)
                     attr.repeatCount = StringUtils::StringToInt(val);
                 }
             } },
-        { DOM_SVG_ANIMATION_FILL,
+        { SVG_ANIMATION_FILL,
             [](const std::string& val, SvgAnimateAttribute& attr) {
                 attr.fillMode = val;
             } },
-        { DOM_SVG_ANIMATION_CALC_MODE,
+        { SVG_ANIMATION_CALC_MODE,
             [](const std::string& val, SvgAnimateAttribute& attr) {
                 attr.calcMode = val;
             } },
-        { DOM_SVG_ANIMATION_VALUES,
+        { SVG_ANIMATION_VALUES,
             [](const std::string& val, SvgAnimateAttribute& attr) {
                 StringUtils::SplitStr(val, ";", attr.values);
             } },
-        { DOM_SVG_ANIMATION_KEY_TIMES,
+        { SVG_ANIMATION_KEY_TIMES,
             [](const std::string& val, SvgAnimateAttribute& attr) {
                 if (val.empty()) {
                     return;
                 }
                 StringUtils::StringSplitter(val, ';', attr.keyTimes);
             } },
-        { DOM_SVG_ANIMATION_KEY_SPLINES,
+        { SVG_ANIMATION_KEY_SPLINES,
             [](const std::string& val, SvgAnimateAttribute& attr) {
                 if (val.empty()) {
                     return;
                 }
                 StringUtils::SplitStr(val, ";", attr.keySplines);
             } },
-        { DOM_SVG_ANIMATION_FROM,
+        { SVG_ANIMATION_FROM,
             [](const std::string& val, SvgAnimateAttribute& attr) {
                 attr.from = val;
             } },
-        { DOM_SVG_ANIMATION_TO,
+        { SVG_ANIMATION_TO,
             [](const std::string& val, SvgAnimateAttribute& attr) {
                 attr.to = val;
             } },
-        { DOM_SVG_ANIMATION_ATTRIBUTE_NAME,
+        { SVG_ANIMATION_ATTRIBUTE_NAME,
             [](const std::string& val, SvgAnimateAttribute& attr) {
                 attr.attributeName = val;
             } },
-        { DOM_SVG_ANIMATION_KEY_POINTS,
+        { SVG_ANIMATION_KEY_POINTS,
             [](const std::string& val, SvgAnimateAttribute& attr) {
                 if (val.empty()) {
                     return;
                 }
                 StringUtils::StringSplitter(val, ';', attr.keyPoints);
             } },
-        { DOM_SVG_ANIMATION_PATH,
+        { SVG_ANIMATION_PATH,
             [](const std::string& val, SvgAnimateAttribute& attr) {
                 attr.path = val;
             } },
-        { DOM_SVG_ANIMATION_ROTATE,
+        { SVG_ANIMATION_ROTATE,
             [](const std::string& val, SvgAnimateAttribute& attr) {
                 attr.rotate = val;
             } },
-        { DOM_SVG_ANIMATION_TYPE,
+        { SVG_ANIMATION_TYPE,
             [](const std::string& val, SvgAnimateAttribute& attr) {
                 attr.transformType = val;
             } },
@@ -166,7 +166,7 @@ void SvgAnimation::SetAttr(const std::string& name, const std::string& value)
     }
 }
 
-// sync attributes from declaration to SvgAnimate
+// sync attributes to SvgAnimate
 void SvgAnimation::UpdateAttr()
 {
     SetBegin(animateAttr_.begin);

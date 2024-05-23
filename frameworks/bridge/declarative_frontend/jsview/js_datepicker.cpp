@@ -39,6 +39,8 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/ace_event_helper.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_date_picker_theme.h"
+#include "frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_time_picker_theme.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -305,7 +307,9 @@ void JSDatePicker::JSBind(BindingTarget globalObj)
     JSClass<JSDatePicker>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSDatePicker>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSDatePicker>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSDatePicker>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSDatePicker>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSDatePicker>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSDatePicker>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSDatePicker>::StaticMethod("disappearTextStyle", &JSDatePicker::SetDisappearTextStyle);
     JSClass<JSDatePicker>::StaticMethod("textStyle", &JSDatePicker::SetTextStyle);
@@ -434,6 +438,7 @@ void JSDatePicker::SetDisappearTextStyle(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle);
     }
+    JSDatePickerTheme::ObtainTextStyle(textStyle);
     DatePickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
 }
 
@@ -445,6 +450,7 @@ void JSDatePicker::SetTextStyle(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle);
     }
+    JSDatePickerTheme::ObtainTextStyle(textStyle);
     DatePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
 }
 
@@ -456,6 +462,7 @@ void JSDatePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle);
     }
+    JSDatePickerTheme::ObtainSelectedTextStyle(textStyle);
     DatePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
 }
 
@@ -686,7 +693,9 @@ void JSDatePicker::CreateDatePicker(const JSCallbackInfo& info, const JSRef<JSOb
         }
         DatePickerModel::GetInstance()->SetSelectedDate(parseSelectedDate);
     }
-    SetDefaultAttributes();
+    if (!JSDatePickerTheme::ApplyTheme()) {
+        SetDefaultAttributes();
+    }
 }
 
 void JSDatePicker::SetDefaultAttributes()
@@ -961,6 +970,11 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
     settingData.lunarswitch = lunarSwitch->ToBoolean();
     settingData.showTime = sTime->ToBoolean();
     settingData.useMilitary = useMilitary->ToBoolean();
+    auto dateTimeOptionsValue = paramObject->GetProperty("dateTimeOptions");
+    if (dateTimeOptionsValue->IsObject()) {
+        auto dateTimeOptionsObj = JSRef<JSObject>::Cast(dateTimeOptionsValue);
+        JSDatePickerDialog::ParseDateTimeOptions(dateTimeOptionsObj, settingData.dateTimeOptions);
+    }
     auto parseStartDate = ParseDate(startDate);
     auto parseEndDate = ParseDate(endDate);
     if (parseStartDate.GetYear() <= 0) {
@@ -1223,6 +1237,31 @@ PickerTime JSDatePickerDialog::ParseTime(const JSRef<JSVal>& timeVal)
     return pickerTime;
 }
 
+void JSDatePickerDialog::ParseDateTimeOptions(const JSRef<JSObject>& paramObj, DateTimeType& dateTimeOptions)
+{
+    dateTimeOptions.hourType = ZeroPrefixType::AUTO;
+    dateTimeOptions.minuteType = ZeroPrefixType::AUTO;
+    dateTimeOptions.secondType = ZeroPrefixType::AUTO;
+
+    auto hourValue = paramObj->GetProperty(TIMEPICKER_OPTIONS_HOUR);
+    if (hourValue->IsString()) {
+        std::string hour = hourValue->ToString();
+        if (hour == TIMEPICKER_OPTIONS_TWO_DIGIT_VAL) {
+            dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+        } else if (hour == TIMEPICKER_OPTIONS_NUMERIC_VAL) {
+            dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+        }
+    }
+    auto minuteValue = paramObj->GetProperty(TIMEPICKER_OPTIONS_MINUTE);
+    if (minuteValue->IsString()) {
+        dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+        std::string minute = minuteValue->ToString();
+        if (minute == TIMEPICKER_OPTIONS_NUMERIC_VAL) {
+            dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+        }
+    }
+}
+
 void JSTimePicker::JSBind(BindingTarget globalObj)
 {
     JSClass<JSTimePicker>::Declare("TimePicker");
@@ -1236,7 +1275,9 @@ void JSTimePicker::JSBind(BindingTarget globalObj)
     JSClass<JSTimePicker>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSTimePicker>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSTimePicker>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSTimePicker>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSTimePicker>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSTimePicker>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSTimePicker>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTimePicker>::StaticMethod("disappearTextStyle", &JSTimePicker::SetDisappearTextStyle);
     JSClass<JSTimePicker>::StaticMethod("textStyle", &JSTimePicker::SetTextStyle);
@@ -1323,6 +1364,7 @@ void JSTimePicker::SetDisappearTextStyle(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle);
     }
+    JSTimePickerTheme::ObtainTextStyle(textStyle);
     TimePickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
 }
 
@@ -1334,6 +1376,7 @@ void JSTimePicker::SetTextStyle(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle);
     }
+    JSTimePickerTheme::ObtainTextStyle(textStyle);
     TimePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
 }
 
@@ -1345,6 +1388,7 @@ void JSTimePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle);
     }
+    JSTimePickerTheme::ObtainSelectedTextStyle(textStyle);
     TimePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
 }
 
@@ -1373,7 +1417,9 @@ void JSTimePicker::CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSOb
             TimePickerModel::GetInstance()->SetSelectedTime(ParseTime(selectedTime));
         }
     }
-    SetDefaultAttributes();
+    if (!JSTimePickerTheme::ApplyTheme()) {
+        SetDefaultAttributes();
+    }
 }
 
 void JSTimePicker::SetDefaultAttributes()
@@ -1573,6 +1619,11 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
         }
     }
     JSDatePicker::ParseTextProperties(paramObject, settingData.properties);
+    auto dateTimeOptionsValue = paramObject->GetProperty("dateTimeOptions");
+    if (dateTimeOptionsValue->IsObject()) {
+        auto dateTimeOptionsObj = JSRef<JSObject>::Cast(dateTimeOptionsValue);
+        JSDatePickerDialog::ParseDateTimeOptions(dateTimeOptionsObj, settingData.dateTimeOptions);
+    }
 
     // Parse alignment
     auto alignmentValue = paramObject->GetProperty("alignment");

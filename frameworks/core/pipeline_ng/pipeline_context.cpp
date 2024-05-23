@@ -48,6 +48,8 @@
 #include "core/common/container.h"
 #include "core/common/font_manager.h"
 #include "core/common/layout_inspector.h"
+#include "core/common/stylus/stylus_detector_mgr.h"
+#include "core/common/stylus/stylus_detector_default.h"
 #include "core/common/text_field_manager.h"
 #include "core/common/thread_checker.h"
 #include "core/common/window.h"
@@ -484,11 +486,31 @@ RefPtr<FrameNode> PipelineContext::HandleFocusNode()
     CHECK_NULL_RETURN(curRootNode, nullptr);
     auto rootFocusHub = curRootNode->GetFocusHub();
     CHECK_NULL_RETURN(rootFocusHub, nullptr);
-    auto tmpFocusNode = rootFocusHub->GetLastWeakFocusNode().Upgrade();
-    auto lastFocusNode = rootFocusHub;
-    while (tmpFocusNode && tmpFocusNode->IsCurrentFocus()) {
-        lastFocusNode = tmpFocusNode;
-        tmpFocusNode = tmpFocusNode->GetLastWeakFocusNode().Upgrade();
+    RefPtr<FocusHub> lastFocusNode;
+    std::list<RefPtr<FocusHub>> focusNodes = rootFocusHub->GetChildren();
+    for (const auto& item : focusNodes) {
+        if (item->IsCurrentFocus()) {
+            lastFocusNode = item;
+        }
+    }
+    while (lastFocusNode) {
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "curLastFocusNodeTAG:(%{public}s).", lastFocusNode->GetFrameName().c_str());
+        if (!lastFocusNode->IsCurrentFocus() || !lastFocusNode->IsFocusableNode()) {
+            TAG_LOGD(AceLogTag::ACE_KEYBOARD, "Is not CurrentFocus Or not FocusableNode.");
+            break;
+        }
+        std::list<RefPtr<FocusHub>> focusNodesInner = lastFocusNode->GetChildren();
+        auto openBreak = false;
+        for (const auto& item : focusNodesInner) {
+            if (item->IsCurrentFocus()) {
+                lastFocusNode = item;
+                openBreak = true;
+            }
+        }
+        if (!openBreak) {
+            TAG_LOGD(AceLogTag::ACE_KEYBOARD, "Is LastFocusNode, break.");
+            break;
+        }
     }
     if (lastFocusNode == nullptr) {
         TAG_LOGD(AceLogTag::ACE_KEYBOARD, "lastFocusNode is null.");
@@ -504,7 +526,7 @@ RefPtr<FrameNode> PipelineContext::HandleFocusNode()
 }
 
 #ifdef WINDOW_SCENE_SUPPORTED
-void PipelineContext::IsSCBWindowKeyboard(const RefPtr<FrameNode>& curFrameNode)
+void PipelineContext::IsSCBWindowKeyboard(RefPtr<FrameNode> curFrameNode)
 {
     // Frame other window to SCB window Or inSCB window changes,hide keyboard.
     if ((windowFocus_.has_value() && windowFocus_.value()) ||
@@ -516,14 +538,14 @@ void PipelineContext::IsSCBWindowKeyboard(const RefPtr<FrameNode>& curFrameNode)
         return;
     }
     // In windowscene, focus change, need close keyboard.
-    auto pattern = curFrameNode->GetPattern();
-    if (pattern && !pattern->NeedSoftKeyboard()) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SCB WindowPage ready to close keyboard.");
+    if (needSoftKeyboard_.has_value() && !needSoftKeyboard_.value()) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SCB WindowscenePage ready to close keyboard.");
         WindowSceneHelper::IsCloseKeyboard(curFrameNode);
+        needSoftKeyboard_ = std::nullopt;
     }
 }
 
-void PipelineContext::IsNotSCBWindowKeyboard(const RefPtr<FrameNode>& curFrameNode)
+void PipelineContext::IsNotSCBWindowKeyboard(RefPtr<FrameNode> curFrameNode)
 {
     if ((windowFocus_.has_value() && windowFocus_.value()) ||
         (windowShow_.has_value() && windowShow_.value())) {
@@ -536,10 +558,16 @@ void PipelineContext::IsNotSCBWindowKeyboard(const RefPtr<FrameNode>& curFrameNo
         return;
     }
 
-    auto pattern = curFrameNode->GetPattern();
-    if (pattern && !pattern->NeedSoftKeyboard()) {
+    if (preNodeId_ != -1 && preNodeId_ == curFrameNode->GetId()) {
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "FocusNode not change.");
+        return;
+    }
+    preNodeId_ = -1;
+
+    if (needSoftKeyboard_.has_value() && !needSoftKeyboard_.value()) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Nomal WindowPage ready to close keyboard.");
         FocusHub::IsCloseKeyboard(curFrameNode);
+        needSoftKeyboard_ = std::nullopt;
     }
 }
 #endif
@@ -584,7 +612,7 @@ void PipelineContext::FlushOnceVsyncTask()
 void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 {
     CHECK_RUN_ON(UI);
-    ACE_FUNCTION_TRACE();
+    ACE_FUNCTION_TRACE_COMMERCIAL();
     window_->Lock();
     auto recvTime = GetSysTimestamp();
     static const std::string abilityName = AceApplicationInfo::GetInstance().GetProcessName().empty()
@@ -754,10 +782,17 @@ void PipelineContext::FlushMessages()
     window_->FlushTasks();
 }
 
-void PipelineContext::FlushUITasks()
+void PipelineContext::FlushUITasks(bool triggeredByImplicitAnimation)
 {
     window_->Lock();
-    taskScheduler_->FlushTask();
+    taskScheduler_->FlushTask(triggeredByImplicitAnimation);
+    window_->Unlock();
+}
+
+void PipelineContext::FlushAfterLayoutCallbackInImplicitAnimationTask()
+{
+    window_->Lock();
+    taskScheduler_->FlushAfterLayoutCallbackInImplicitAnimationTask();
     window_->Unlock();
 }
 
@@ -886,11 +921,13 @@ void PipelineContext::FlushPipelineWithoutAnimation()
 void PipelineContext::FlushFrameRate()
 {
     frameRateManager_->SetAnimateRate(window_->GetAnimateExpectedRate());
-    if (frameRateManager_->IsRateChanged()) {
+    bool currAnimationStatus = scheduleTasks_.empty() ? true : false;
+    if (frameRateManager_->IsRateChanged() || currAnimationStatus != lastAnimationStatus_) {
         auto rate = frameRateManager_->GetExpectedRate();
         ACE_SCOPED_TRACE("FlushFrameRate Expected frameRate = %d", rate);
-        window_->FlushFrameRate(rate);
+        window_->FlushFrameRate(rate, currAnimationStatus);
         frameRateManager_->SetIsRateChanged(false);
+        lastAnimationStatus_ = currAnimationStatus;
     }
 }
 
@@ -1604,8 +1641,8 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
         manager->ScrollTextFieldToSafeArea();
         FlushUITasks();
     };
-    AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig_, keyboardHeight);
-    Animate(option, option.GetCurve(), func);
+    FlushUITasks();
+    DoKeyboardAvoidAnimate(keyboardAnimationConfig_, keyboardHeight, func);
 }
 
 void PipelineContext::OriginalAvoidanceLogic(
@@ -1657,8 +1694,8 @@ void PipelineContext::OriginalAvoidanceLogic(
         manager->ScrollTextFieldToSafeArea();
         FlushUITasks();
     };
-    AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig_, keyboardHeight);
-    Animate(option, option.GetCurve(), func);
+    FlushUITasks();
+    DoKeyboardAvoidAnimate(keyboardAnimationConfig_, keyboardHeight, func);
 }
 
 void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double positionY, double height,
@@ -1731,9 +1768,9 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         manager->ScrollTextFieldToSafeArea();
         context->FlushUITasks();
     };
-    AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig_, keyboardHeight);
+    FlushUITasks();
     SetIsLayouting(true);
-    Animate(option, option.GetCurve(), func);
+    DoKeyboardAvoidAnimate(keyboardAnimationConfig_, keyboardHeight, func);
 
 #ifdef ENABLE_ROSEN_BACKEND
     if (rsTransaction) {
@@ -1943,6 +1980,10 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         touchRestrict.sourceType = point.sourceType;
         touchRestrict.touchEvent = point;
         touchRestrict.inputEventType = InputEventType::TOUCH_SCREEN;
+        if (StylusDetectorMgr::GetInstance()->IsNeedInterceptedTouchEvent(scalePoint)) {
+            return;
+        }
+
         eventManager_->TouchTest(scalePoint, node, touchRestrict, GetPluginEventOffset(), viewScale_, isSubPipe);
         if (!touchRestrict.childTouchTestList.empty()) {
             scalePoint.childTouchTestList = touchRestrict.childTouchTestList;
@@ -2063,6 +2104,14 @@ bool PipelineContext::CompensateTouchMoveEventFromUnhandledEvents(const TouchEve
                 lastMoveEvent = movePoint;
                 iter = touchEvents_.erase(iter);
             } else {
+                auto& pointers = iter->pointers;
+                for (auto pointerIter = pointers.begin(); pointerIter != pointers.end();) {
+                    if (pointerIter->id == event.id) {
+                        pointerIter = pointers.erase(pointerIter);
+                    } else {
+                        ++pointerIter;
+                    }
+                }
                 ++iter;
             }
         }
@@ -2297,6 +2346,12 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-default") {
         rootNode_->DumpTree(0);
         DumpLog::GetInstance().OutPutDefault();
+    } else if (params[0] == "-overlay") {
+        if (overlayManager_) {
+            overlayManager_->DumpOverlayInfo();
+        }
+    } else if (params[0] == "--stylus") {
+        StylusDetectorDefault::GetInstance()->ExecuteCommand(params);
     }
     return true;
 }
@@ -2641,6 +2696,8 @@ MouseEvent ConvertAxisToMouse(const AxisEvent& event)
     result.sourceType = event.sourceType;
     result.sourceTool = event.sourceTool;
     result.pointerEvent = event.pointerEvent;
+    result.screenX = event.screenX;
+    result.screenY = event.screenY;
     return result;
 }
 
@@ -3186,9 +3243,9 @@ void PipelineContext::Finish(bool /* autoFinish */) const
     }
 }
 
-void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task)
+void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task, bool isFlushInImplicitAnimationTask)
 {
-    taskScheduler_->AddAfterLayoutTask(std::move(task));
+    taskScheduler_->AddAfterLayoutTask(std::move(task), isFlushInImplicitAnimationTask);
 }
 
 void PipelineContext::AddPersistAfterLayoutTask(std::function<void()>&& task)
@@ -3523,6 +3580,17 @@ RefPtr<FrameNode> PipelineContext::GetContainerModalNode()
     return AceType::DynamicCast<FrameNode>(rootNode_->GetFirstChild());
 }
 
+void PipelineContext::DoKeyboardAvoidAnimate(const KeyboardAnimationConfig& keyboardAnimationConfig,
+    float keyboardHeight, const std::function<void()>& func)
+{
+    if (isDoKeyboardAvoidAnimate_) {
+        AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig, keyboardHeight);
+        Animate(option, option.GetCurve(), func);
+    } else {
+        func();
+    }
+}
+
 Dimension PipelineContext::GetCustomTitleHeight()
 {
     auto containerModal = GetContainerModalNode();
@@ -3644,21 +3712,24 @@ void PipelineContext::ChangeDarkModeBrightness(bool isFocus)
     auto windowManager = GetWindowManager();
     CHECK_NULL_VOID(windowManager);
     auto mode = windowManager->GetWindowMode();
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_VOID(container);
+    auto percent = SystemProperties::GetDarkModeBrightnessPercent();
+    auto stage = stageManager_->GetStageNode();
+    CHECK_NULL_VOID(stage);
+    auto renderContext = stage->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    CalcDimension dimension;
+    dimension.SetValue(1);
     if (SystemProperties::GetColorMode() == ColorMode::DARK && appBgColor_.ColorToString().compare("#FF000000") == 0 &&
-        mode != WindowMode::WINDOW_MODE_FULLSCREEN) {
-        auto percent = SystemProperties::GetDarkModeBrightnessPercent();
-        auto stage = stageManager_->GetStageNode();
-        CHECK_NULL_VOID(stage);
-        auto renderContext = stage->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        CalcDimension dimension;
+        mode != WindowMode::WINDOW_MODE_FULLSCREEN && !container->IsUIExtensionWindow()) {
         if (!isFocus && mode == WindowMode::WINDOW_MODE_FLOATING) {
             dimension.SetValue(1 + percent.second);
         } else {
             dimension.SetValue(1 + percent.first);
         }
-        renderContext->UpdateFrontBrightness(dimension);
     }
+    renderContext->UpdateFrontBrightness(dimension);
 }
 
 bool PipelineContext::IsContainerModalVisible()
@@ -3669,5 +3740,35 @@ bool PipelineContext::IsContainerModalVisible()
     auto windowManager = GetWindowManager();
     bool isFloatingWindow = windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
     return isShowTitle_ && isFloatingWindow && customTitleSettedShow_;
+}
+
+void PipelineContext::CheckAndLogLastReceivedTouchEventInfo(int32_t eventId, TouchType type)
+{
+    eventManager_->CheckAndLogLastReceivedTouchEventInfo(eventId, type);
+}
+
+void PipelineContext::CheckAndLogLastConsumedTouchEventInfo(int32_t eventId, TouchType type)
+{
+    eventManager_->CheckAndLogLastReceivedTouchEventInfo(eventId, type);
+}
+
+void PipelineContext::CheckAndLogLastReceivedMouseEventInfo(int32_t eventId, MouseAction action)
+{
+    eventManager_->CheckAndLogLastReceivedMouseEventInfo(eventId, action);
+}
+
+void PipelineContext::CheckAndLogLastConsumedMouseEventInfo(int32_t eventId, MouseAction action)
+{
+    eventManager_->CheckAndLogLastConsumedMouseEventInfo(eventId, action);
+}
+
+void PipelineContext::CheckAndLogLastReceivedAxisEventInfo(int32_t eventId, AxisAction action)
+{
+    eventManager_->CheckAndLogLastReceivedAxisEventInfo(eventId, action);
+}
+
+void PipelineContext::CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, AxisAction action)
+{
+    eventManager_->CheckAndLogLastConsumedAxisEventInfo(eventId, action);
 }
 } // namespace OHOS::Ace::NG

@@ -95,8 +95,8 @@ public:
     // handle close keyboard
     RefPtr<FrameNode> HandleFocusNode();
     void IsCloseSCBKeyboard();
-    void IsSCBWindowKeyboard(const RefPtr<FrameNode>& curFrameNode);
-    void IsNotSCBWindowKeyboard(const RefPtr<FrameNode>& curFrameNode);
+    void IsSCBWindowKeyboard(RefPtr<FrameNode> curFrameNode);
+    void IsNotSCBWindowKeyboard(RefPtr<FrameNode> curFrameNode);
     void SetNeedSoftKeyboard(std::optional<bool> flag)
     {
         needSoftKeyboard_ = flag;
@@ -257,7 +257,7 @@ public:
 
     void AddPredictTask(PredictTask&& task);
 
-    void AddAfterLayoutTask(std::function<void()>&& task);
+    void AddAfterLayoutTask(std::function<void()>&& task, bool isFlushInImplicitAnimationTask = false);
 
     void AddPersistAfterLayoutTask(std::function<void()>&& task);
 
@@ -419,7 +419,9 @@ public:
     void FlushModifier() override;
     void FlushMessages() override;
 
-    void FlushUITasks() override;
+    void FlushUITasks(bool triggeredByImplicitAnimation = false) override;
+
+    void FlushAfterLayoutCallbackInImplicitAnimationTask() override;
 
     bool IsLayouting() const override
     {
@@ -719,6 +721,22 @@ public:
         return isFreezeFlushMessage_;
     }
     bool IsContainerModalVisible() override;
+    void SetDoKeyboardAvoidAnimate(bool isDoKeyboardAvoidAnimate)
+    {
+        isDoKeyboardAvoidAnimate_ = isDoKeyboardAvoidAnimate;
+    }
+
+    void CheckAndLogLastReceivedTouchEventInfo(int32_t eventId, TouchType type) override;
+
+    void CheckAndLogLastConsumedTouchEventInfo(int32_t eventId, TouchType type) override;
+
+    void CheckAndLogLastReceivedMouseEventInfo(int32_t eventId, MouseAction action) override;
+
+    void CheckAndLogLastConsumedMouseEventInfo(int32_t eventId, MouseAction action) override;
+
+    void CheckAndLogLastReceivedAxisEventInfo(int32_t eventId, AxisAction action) override;
+
+    void CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, AxisAction action) override;
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -751,6 +769,8 @@ protected:
     void OriginalAvoidanceLogic(
         float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
     RefPtr<FrameNode> GetContainerModalNode();
+    void DoKeyboardAvoidAnimate(const KeyboardAnimationConfig& keyboardAnimationConfig, float keyboardHeight,
+        const std::function<void()>& func);
 
 private:
     void ExecuteSurfaceChangedCallbacks(int32_t newWidth, int32_t newHeight, WindowSizeChangeReason type);
@@ -942,6 +962,8 @@ private:
     std::atomic<int32_t> localColorMode_ = static_cast<int32_t>(ColorMode::COLOR_MODE_UNDEFINED);
     bool customTitleSettedShow_ = true;
     bool isShowTitle_ = false;
+    bool lastAnimationStatus_ = true;
+    bool isDoKeyboardAvoidAnimate_ = true;
 };
 } // namespace OHOS::Ace::NG
 

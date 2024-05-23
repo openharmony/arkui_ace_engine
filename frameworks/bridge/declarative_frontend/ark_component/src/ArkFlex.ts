@@ -24,8 +24,8 @@ class FlexInitializeModifier extends ModifierWithKey<FlexParam> {
       getUINativeModule().flex.resetFlexInitialize(node);
     } else {
       getUINativeModule().flex.setFlexInitialize(node, this.value.direction, this.value.wrap,
-        this.value.justifyContent, this.value.alignItems, this.value.alignContent);
-    }
+        this.value.justifyContent, this.value.alignItems, this.value.alignContent, this.value?.space?.main,
+        this.value?.space?.cross);
   }
 }
 interface FlexParam {
@@ -34,6 +34,7 @@ interface FlexParam {
   justifyContent?: FlexAlign;
   alignItems?: ItemAlign;
   alignContent?: FlexAlign;
+  space?: FlexSpaceOptions;
 }
 class ArkFlexComponent extends ArkComponent implements FlexAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {

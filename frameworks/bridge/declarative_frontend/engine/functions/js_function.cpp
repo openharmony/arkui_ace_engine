@@ -92,6 +92,9 @@ void JsFunctionBase::ExecuteInternal(const std::unique_ptr<JsonValue>& value, co
             if (item && item->IsString()) {
                 valueArray->SetValueAt(index, JSRef<JSVal>::Make(ToJSValue(item->GetString())));
             }
+            if (item && item->IsNumber()) {
+                valueArray->SetValueAt(index, JSRef<JSVal>::Make(ToJSValue(item->GetInt())));
+            }
         }
         eventInfo->SetPropertyObject(key.c_str(), valueArray);
     }

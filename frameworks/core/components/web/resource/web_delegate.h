@@ -533,10 +533,22 @@ public:
     void SetGestureEventResult(bool result) override;
     bool HasSendTask() { return sendTask_; }
     void SetSendTask() { sendTask_ = true; }
+    bool GetEventResult() { return eventResult_; }
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebGestureEventResult> result_;
     bool sendTask_ = false;
+    bool eventResult_ = false;
+};
+
+class WebAvoidAreaChangedListener : public OHOS::Rosen::IAvoidAreaChangedListener {
+public:
+    explicit WebAvoidAreaChangedListener(WeakPtr<WebDelegate> webDelegate) : webDelegate_(webDelegate) {}
+    ~WebAvoidAreaChangedListener() = default;
+
+    void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type) override;
+private:
+    WeakPtr<WebDelegate> webDelegate_;
 };
 
 enum class ScriptItemType {
@@ -802,7 +814,7 @@ public:
     void OnNativeEmbedLifecycleChange(std::shared_ptr<NWeb::NWebNativeEmbedDataInfo> dataInfo);
     void OnNativeEmbedGestureEvent(std::shared_ptr<NWeb::NWebNativeEmbedTouchEvent> event);
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
-    bool RequestFocus();
+    bool RequestFocus(OHOS::NWeb::NWebFocusSource source = OHOS::NWeb::NWebFocusSource::FOCUS_SOURCE_DEFAULT);
     void SetDrawSize(const Size& drawSize);
     void SetEnhanceSurfaceFlag(const bool& isEnhanceSurface);
     EGLConfig GLGetConfig(int version, EGLDisplay eglDisplay);
@@ -865,12 +877,20 @@ public:
     std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);
     // Backward
     void Backward();
+    bool AccessBackward();
     bool OnOpenAppLink(const std::string& url, std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback);
 
     void OnRenderProcessNotResponding(
         const std::string& jsStack, int pid, OHOS::NWeb::RenderProcessNotRespondingReason reason);
     void OnRenderProcessResponding();
     std::string GetSelectInfo() const;
+    Offset GetPosition(const std::string& embedId);
+
+    void OnOnlineRenderToForeground();
+
+    void OnViewportFitChange(OHOS::NWeb::ViewportFit viewportFit);
+    void OnAreaChange(const OHOS::Ace::Rect& area);
+    void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type);
 
 private:
     void InitWebEvent();
@@ -927,7 +947,6 @@ private:
     void ClearClientAuthenticationCache();
     bool AccessStep(int32_t step);
     void BackOrForward(int32_t step);
-    bool AccessBackward();
     bool AccessForward();
 
     void SearchAllAsync(const std::string& searchStr);
@@ -944,7 +963,6 @@ private:
     void UnregisterSurfacePositionChangedCallback();
 
     void NotifyPopupWindowResult(bool result);
-    void IsNativeType(const double& x, const double& y);
 
     EventCallbackV2 GetAudioStateChangedCallback(bool useNewPipe, const RefPtr<NG::WebEventHub>& eventHub);
     void SurfaceOcclusionCallback(float visibleRatio);
@@ -952,6 +970,9 @@ private:
     void ratioStrToFloat(const std::string& str);
     // Return canonical encoding name according to the encoding alias name.
     std::string GetCanonicalEncodingName(const std::string& alias_name) const;
+    void RegisterAvoidAreaChangeListener();
+    void UnregisterAvoidAreaChangeListener();
+    void OnSafeInsetsChange();
 #endif
 
     WeakPtr<WebComponent> webComponent_;
@@ -1013,6 +1034,7 @@ private:
     EventCallbackV2 onIntelligentTrackingPreventionResultV2_;
     EventCallbackV2 onRenderProcessNotRespondingV2_;
     EventCallbackV2 onRenderProcessRespondingV2_;
+    EventCallbackV2 onViewportFitChangedV2_;
 
     int32_t renderMode_;
     int32_t layoutMode_;
@@ -1059,6 +1081,11 @@ private:
     bool isSmoothDragResizeEnabled_ = false;
     double resizeWidth_ = 0.0;
     double resizeHeight_ = 0.0;
+    OHOS::Ace::Rect currentArea_;
+    NG::SafeAreaInsets systemSafeArea_;
+    NG::SafeAreaInsets cutoutSafeArea_;
+    NG::SafeAreaInsets navigationIndicatorSafeArea_;
+    sptr<Rosen::IAvoidAreaChangedListener> avoidAreaChangedListener_ = nullptr;
 #endif
 };
 

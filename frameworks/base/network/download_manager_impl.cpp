@@ -94,9 +94,6 @@ public:
         // Some servers don't like requests that are made without a user-agent field, so we provide one
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_USERAGENT, "libcurl-agent/1.0");
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_URL, url.c_str());
-#if !defined(PREVIEW)
-        ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_CAINFO, "/etc/ssl/certs/cacert.pem");
-#endif
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_VERBOSE, 1L);
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_ERRORBUFFER, errorStr.data());
 

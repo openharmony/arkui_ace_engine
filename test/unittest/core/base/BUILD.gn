@@ -28,7 +28,16 @@ ace_unittest("distributed_ui_test_ng") {
 ace_unittest("frame_node_test_ng") {
   type = "new"
   module_output = "basic"
-  sources = [ "frame_node_test_ng.cpp" ]
+  sources = [
+    "frame_node_test_ng.cpp",
+    "frame_node_test_ng_new.cpp",
+  ]
+}
+
+ace_unittest("frame_node_drop_test_ng") {
+  type = "new"
+  module_output = "basic"
+  sources = [ "frame_node_drop_test_ng.cpp" ]
 }
 
 ace_unittest("geometry_node_test_ng") {
@@ -52,7 +61,10 @@ ace_unittest("ui_node_test_ng") {
 ace_unittest("view_abstract_test_ng") {
   type = "new"
   module_output = "basic"
-  sources = [ "view_abstract_test_ng.cpp" ]
+  sources = [
+    "view_abstract_test_ng.cpp",
+    "view_abstract_test_ng_new.cpp",
+  ]
 }
 
 ace_unittest("view_full_update_model_ng_test") {
@@ -79,14 +91,22 @@ ace_unittest("view_abstract_model_test_ng") {
   sources = [ "view_abstract_model_test_ng.cpp" ]
 }
 
+ace_unittest("short_cuts_little_test_ng") {
+  type = "new"
+  module_output = "basic"
+  sources = [ "short_cuts_little_test_ng.cpp" ]
+}
+
 group("core_base_unittest") {
   testonly = true
   deps = [
     ":distributed_ui_test_ng",
+    ":frame_node_drop_test_ng",
     ":frame_node_test_ng",
     ":geometry_node_test_ng",
     ":inspector_test_ng",
     ":observer_test_ng",
+    ":short_cuts_little_test_ng",
     ":ui_node_test_ng",
     ":view_abstract_model_test_ng",
     ":view_abstract_test_ng",

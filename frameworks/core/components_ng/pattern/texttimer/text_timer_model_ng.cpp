@@ -133,6 +133,11 @@ void TextTimerModelNG::SetFormat(FrameNode* frameNode, const std::string& format
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, Format, format, frameNode);
 }
 
+void TextTimerModelNG::SetTextShadow(FrameNode* frameNode, const std::vector<Shadow>& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextShadow, value, frameNode);
+}
+
 void TextTimerModelNG::SetBuilderFunc(FrameNode* frameNode, TextTimerMakeCallback&& makeFunc)
 {
     auto pattern = frameNode->GetPattern<TextTimerPattern>();

@@ -20,6 +20,13 @@ declare enum ModifierType {
     FRAME_NODE = 2,
     EXPOSE_MODIFIER = 3,
 }
+declare class ArkLogConsole {
+  public static log(...args: Object[]): void;
+  public static debug(...args: Object[]): void;
+  public static info(...args: Object[]): void;
+  public static warn(...args: Object[]): void;
+  public static error(...args: Object[]): void;
+}
 declare class JsPointerClass {
     invalid(): boolean;
 }
@@ -225,6 +232,7 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     reuseId(id: string): this;
     renderFit(fitMode: RenderFit): this;
     attributeModifier(modifier: AttributeModifier<CommonAttribute>): this;
+    systemBarEffect(): this;
 }
 declare class ArkBlankComponent extends ArkComponent implements CommonMethod<BlankAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -876,6 +884,8 @@ declare class ArkScrollComponent extends ArkComponent implements ScrollAttribute
     friction(value: number | Resource): ScrollAttribute;
     scrollSnap(value: ScrollSnapOptions): ScrollAttribute;
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
+    initialOffset(value: OffsetOptions): this;
+    flingSpeedLimit(value: number): this;
 }
 declare class ArkToggleComponent extends ArkComponent implements ToggleAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1496,6 +1506,9 @@ declare class ArkWebComponent extends ArkComponent implements WebAttribute {
         data: RenderProcessNotRespondingData;
     }) => void): this;
     onRenderProcessResponding(callback: () => void): this;
+    onViewportFitChanged(callback: (event: {
+        viewportFit: ViewportFit;
+    }) => void): this;
 }
 declare class ArkXComponentComponent implements CommonMethod<XComponentAttribute> {
     _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;
@@ -1813,6 +1826,7 @@ declare class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     divider(value: DividerStyle | null): TabsAttribute;
     barOverlap(value: boolean): TabsAttribute;
     barBackgroundColor(value: ResourceColor): TabsAttribute;
+    barBackgroundBlurStyle(value: BlurStyle): TabsAttribute;
     barGridAlign(value: BarGridColumnOptions): TabsAttribute;
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
 }
@@ -1851,6 +1865,10 @@ declare class ArkWaterFlowComponent extends ArkComponent implements WaterFlowAtt
     }): this;
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
     edgeEffect(value: EdgeEffect, options?: EdgeEffectOptions | undefined): this;
+    scrollBarWidth(value: string | number): this;
+    scrollBarColor(value: string | number | Color): this;
+    scrollBar(value: BarState): this;
+    flingSpeedLimit(value: number): this;
 }
 declare class ArkCommonShapeComponent extends ArkComponent implements CommonShapeMethod<ShapeAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1946,7 +1964,27 @@ declare class ArkSymbolGlyphComponent extends ArkComponent implements SymbolGlyp
     effectStrategy(value: SymbolEffectStrategy): SymbolGlyphAttribute;
 }
 
+declare class ArkSymbolSpanComponent extends ArkComponent implements SymbolSpanAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    fontColor(value: ResourceColor[]): SymbolSpanAttribute;
+    fontSize(value: number | string | Resource): SymbolSpanAttribute;
+    fontWeight(value: number | FontWeight | string): SymbolSpanAttribute;
+    renderingStrategy(value: SymbolRenderingStrategy): SymbolSpanAttribute;
+    effectStrategy(value: SymbolEffectStrategy): SymbolSpanAttribute;
+}
+
 declare class ArkParticleComponent extends ArkComponent implements ParticleAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
     emitter(fields: Array<EmitterProperty>): ParticleAttribute;
+}
+
+declare class ArkComponent3DComponent extends ArkComponent implements Component3DAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    environment(uri: Resource): Component3DAttribute;
+    customRender(uri: Resource, selfRenderUpdate: boolean): Component3DAttribute;
+    shader(uri: Resource): Component3DAttribute;
+    shaderImageTexture(uri: Resource): Component3DAttribute;
+    shaderInputBuffer(buffer: Array<number>): Component3DAttribute;
+    renderWidth(value: Dimension): Component3DAttribute;
+    renderHeight(value: Dimension): Component3DAttribute;
 }

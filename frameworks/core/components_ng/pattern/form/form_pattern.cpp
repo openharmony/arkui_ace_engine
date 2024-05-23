@@ -200,12 +200,10 @@ void FormPattern::HandleUnTrustForm()
     }
 
     isUnTrust_ = true;
-    UpdateBackgroundColorWhenUnTrustForm();
-    auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
-    layoutProperty->UpdateVisibility(visible);
     isLoaded_ = true;
+    if (!isJsCard_) {
+        LoadFormSkeleton();
+    }
 
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     auto parent = host->GetParent();
@@ -221,14 +219,10 @@ void FormPattern::UpdateBackgroundColorWhenUnTrustForm()
         return;
     }
 
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto formTheme = pipelineContext->GetTheme<FormTheme>();
-    CHECK_NULL_VOID(formTheme);
-    Color unTrustBackgroundColor = formTheme->GetUnTrustBackgroundColor();
-    host->GetRenderContext()->UpdateBackgroundColor(unTrustBackgroundColor);
+    if (colorMode != SystemProperties::GetColorMode()) {
+        colorMode = SystemProperties::GetColorMode();
+        HandleUnTrustForm();
+    }
 }
 
 void FormPattern::HandleSnapshot(uint32_t delayTime)
@@ -357,16 +351,18 @@ void FormPattern::DeleteImageNodeAfterRecover()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto imageNode = GetImageNode();
-    CHECK_NULL_VOID(imageNode);
-    renderContext->RemoveChild(imageNode->GetRenderContext());
+    if (imageNode) {
+        renderContext->RemoveChild(imageNode->GetRenderContext());
 
-    // delete image frame node
-    DeleteImageNode();
+        // delete image frame node
+        DeleteImageNode();
+    }
 
     // set frs node non transparent
     auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
     CHECK_NULL_VOID(externalRenderContext);
     externalRenderContext->SetOpacity(NON_TRANSPARENT_VAL);
+    TAG_LOGI(AceLogTag::ACE_FORM, "delete imageNode and setOpacity:1");
 
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     auto parent = host->GetParent();
@@ -1036,6 +1032,15 @@ void FormPattern::InitFormManagerDelegate()
         });
 }
 
+void FormPattern::ProcDeleteImageNode(bool isRecover)
+{
+    if (isRecover) {
+        DelayDeleteImageNode();
+    } else {
+        DeleteImageNode();
+    }
+}
+
 void FormPattern::FireFormSurfaceNodeCallback(
     const std::shared_ptr<Rosen::RSSurfaceNode>& node, bool isDynamic, bool isRecover)
 {
@@ -1061,6 +1066,7 @@ void FormPattern::FireFormSurfaceNodeCallback(
     externalRenderContext->SetBounds(cardInfo_.borderWidth, cardInfo_.borderWidth, boundWidth, boundHeight);
 
     if (isRecover) {
+        TAG_LOGI(AceLogTag::ACE_FORM, "surfaceNode: %{public}s setOpacity:0", std::to_string(node->GetId()).c_str());
         externalRenderContext->SetOpacity(TRANSPARENT_VAL);
     }
 
@@ -1074,7 +1080,8 @@ void FormPattern::FireFormSurfaceNodeCallback(
     auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
-    TAG_LOGI(AceLogTag::ACE_FORM, "VisibleType: %{public}d", static_cast<int32_t>(visible));
+    TAG_LOGI(AceLogTag::ACE_FORM, "VisibleType: %{public}d, surfaceNode: %{public}s",
+        static_cast<int32_t>(visible), std::to_string(node->GetId()).c_str());
     layoutProperty->UpdateVisibility(visible);
 
     isLoaded_ = true;
@@ -1082,11 +1089,7 @@ void FormPattern::FireFormSurfaceNodeCallback(
     isFrsNodeDetached_ = false;
     isDynamic_ = isDynamic;
 
-    if (isRecover) {
-        DelayDeleteImageNode();
-    } else {
-        DeleteImageNode();
-    }
+    ProcDeleteImageNode(isRecover);
 
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     auto parent = host->GetParent();
@@ -1345,6 +1348,7 @@ void FormPattern::OnActionEvent(const std::string& action)
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 auto eventAction = JsonUtil::ParseJsonString(action);
+                TAG_LOGI(AceLogTag::ACE_FORM, "UI task execute begin.");
                 pattern->FireOnRouterEvent(eventAction);
             }, "ArkUIFormFireRouterEvent");
         }

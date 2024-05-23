@@ -83,6 +83,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/event/focus_box.h"
 #include "core/components_ng/gestures/base_gesture_event.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
@@ -1404,21 +1405,29 @@ void ParseEdgeWidthsProps(const JSRef<JSObject>& object, CommonCalcDimension& co
     if (JSViewAbstract::ParseJsDimensionVpNG(object->GetProperty(LEFT_PROPERTY), left, true)) {
         CheckDimensionUnit(left, false, true);
         commonCalcDimension.left = left;
+    } else {
+        commonCalcDimension.left = 0.0_vp;
     }
     CalcDimension right;
     if (JSViewAbstract::ParseJsDimensionVpNG(object->GetProperty(RIGHT_PROPERTY), right, true)) {
         CheckDimensionUnit(right, false, true);
         commonCalcDimension.right = right;
+    } else {
+        commonCalcDimension.right = 0.0_vp;
     }
     CalcDimension top;
     if (JSViewAbstract::ParseJsDimensionVpNG(object->GetProperty(TOP_PROPERTY), top, true)) {
         CheckDimensionUnit(top, false, true);
         commonCalcDimension.top = top;
+    } else {
+        commonCalcDimension.top = 0.0_vp;
     }
     CalcDimension bottom;
     if (JSViewAbstract::ParseJsDimensionVpNG(object->GetProperty(BOTTOM_PROPERTY), bottom, true)) {
         CheckDimensionUnit(bottom, false, true);
         commonCalcDimension.bottom = bottom;
+    } else {
+        commonCalcDimension.bottom = 0.0_vp;
     }
 }
 
@@ -1522,6 +1531,26 @@ void ParseCommonEdgeWidthsProps(const JSRef<JSObject>& object, CommonCalcDimensi
         return;
     }
     ParseEdgeWidthsProps(object, commonCalcDimension);
+}
+
+bool ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result)
+{
+    if (jsValue->IsNumber()) {
+        result = CalcDimension(jsValue->ToNumber<double>(), DimensionUnit::FP);
+        return true;
+    }
+    if (jsValue->IsString()) {
+        auto value = jsValue->ToString();
+        return StringUtils::StringToCalcDimensionNG(value, result, false, DimensionUnit::FP);
+    }
+    if (jsValue->IsObject()) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+        double value = jsObj->GetProperty("value")->ToNumber<double>();
+        auto unit = static_cast<DimensionUnit>(jsObj->GetProperty("unit")->ToNumber<int32_t>());
+        result = CalcDimension(value, unit);
+        return true;
+    }
+    return false;
 }
 } // namespace
 
@@ -3072,6 +3101,10 @@ void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
         ParseJsDimensionVp(object->GetProperty("y"), y);
         double valueX = x.Value();
         double valueY = y.Value();
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            valueX = x.ConvertToPx();
+            valueY = y.ConvertToPx();
+        }
         DimensionUnit typeX = DimensionUnit::PX;
         DimensionUnit typeY = DimensionUnit::PX;
         if (x.Unit() == DimensionUnit::PERCENT) {
@@ -3081,10 +3114,6 @@ void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
         if (y.Unit() == DimensionUnit::PERCENT) {
             valueY = y.Value();
             typeY = DimensionUnit::PERCENT;
-        }
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-            typeX = x.Unit();
-            typeY = y.Unit();
         }
         SetBgImgPosition(typeX, typeY, valueX, valueY, bgImgPosition);
     }
@@ -4890,27 +4919,24 @@ bool JSViewAbstract::ParseJsDimensionPx(const JSRef<JSVal>& jsValue, CalcDimensi
     return ParseJsDimension(jsValue, result, DimensionUnit::PX);
 }
 
-bool JSViewAbstract::ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result)
+bool JSViewAbstract::ParseColorMetricsToColor(const JSRef<JSVal>& jsValue, Color& result)
 {
-    if (jsValue->IsNumber()) {
-        result = CalcDimension(jsValue->ToNumber<double>(), DimensionUnit::FP);
-        return true;
+    if (!jsValue->IsObject()) {
+        return false;
     }
-    if (jsValue->IsString()) {
-        auto value = jsValue->ToString();
-        return StringUtils::StringToCalcDimensionNG(value, result, false, DimensionUnit::FP);
-    }
-    if (jsValue->IsObject()) {
-        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-        double value = jsObj->GetProperty("value")->ToNumber<double>();
-        if (LessNotEqual(value, 0.0f)) {
-            return false;
-        }
-        auto unit = static_cast<DimensionUnit>(jsObj->GetProperty("unit")->ToNumber<int32_t>());
-        result = CalcDimension(value, unit);
+    auto colorObj = JSRef<JSObject>::Cast(jsValue);
+    auto toNumericProp = colorObj->GetProperty("toNumeric");
+    if (toNumericProp->IsFunction()) {
+        auto colorVal = JSRef<JSFunc>::Cast(toNumericProp)->Call(colorObj, 0, nullptr);
+        result.SetValue(colorVal->ToNumber<uint32_t>());
         return true;
     }
     return false;
+}
+
+bool JSViewAbstract::ParseLengthMetricsToPositiveDimension(const JSRef<JSVal>& jsValue, CalcDimension& result)
+{
+    return ParseLengthMetricsToDimension(jsValue, result) ? GreatOrEqual(result.Value(), 0.0f) : false;
 }
 
 bool JSViewAbstract::ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& result)
@@ -5042,6 +5068,20 @@ bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     CompleteResourceObject(jsObj);
+
+    auto ok = JSViewAbstract::ParseJsObjColorFromResource(jsObj, result);
+    if (ok) {
+        JSRef<JSVal> jsOpacityRatio = jsObj->GetProperty("opacityRatio");
+        if (jsOpacityRatio->IsNumber()) {
+            double opacityRatio = jsOpacityRatio->ToNumber<double>();
+            result = result.BlendOpacity(opacityRatio);
+        }
+    }
+    return ok;
+}
+
+bool JSViewAbstract::ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, Color& result)
+{
     JSRef<JSVal> resId = jsObj->GetProperty("id");
     if (!resId->IsNumber()) {
         return false;
@@ -5067,6 +5107,7 @@ bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color
         result = resourceWrapper->GetColorByName(param->ToString());
         return true;
     }
+
     auto type = jsObj->GetPropertyValue<int32_t>("type", UNKNOWN_RESOURCE_TYPE);
     if (type == static_cast<int32_t>(ResourceType::STRING)) {
         auto value = resourceWrapper->GetString(resId->ToNumber<uint32_t>());
@@ -5152,20 +5193,41 @@ bool JSViewAbstract::ParseJsSymbolId(
         return false;
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    CompleteResourceObject(jsObj);
     JSRef<JSVal> resId = jsObj->GetProperty("id");
     if (resId->IsNull() || !resId->IsNumber()) {
         return false;
     }
     auto resourceObject = GetResourceObject(jsObj);
-    symbolResourceObject = resourceObject;
-    if (!resourceObject) {
-        return false;
-    }
     auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+    symbolResourceObject = resourceObject;
     if (!resourceWrapper) {
         return false;
     }
-    auto symbol = resourceWrapper->GetSymbolById(resId->ToNumber<uint32_t>());
+    if (!resourceObject) {
+        return false;
+    }
+ 
+    auto resIdNum = resId->ToNumber<int32_t>();
+    if (resIdNum == -1) {
+        if (!IsGetResourceByName(jsObj)) {
+            return false;
+        }
+        JSRef<JSVal> args = jsObj->GetProperty("params");
+        if (!args->IsArray()) {
+            return false;
+        }
+        JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
+        auto param = params->GetValueAt(0);
+        auto symbol = resourceWrapper->GetSymbolByName(param->ToString().c_str());
+        if (!symbol) {
+            return false;
+        }
+        symbolId = symbol;
+        return true;
+    }
+ 
+    auto symbol = resourceWrapper->GetSymbolById(resIdNum);
     if (!symbol) {
         return false;
     }
@@ -6719,6 +6781,30 @@ void JSViewAbstract::JsFocusable(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetFocusable(info[0]->ToBoolean());
 }
 
+void JSViewAbstract::JsFocusBox(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject() || info.Length() != 1) {
+        return;
+    }
+    auto obj = JSRef<JSObject>::Cast(info[0]);
+    NG::FocusBoxStyle style;
+
+    CalcDimension margin;
+    if (ParseLengthMetricsToDimension(obj->GetProperty("margin"), margin)) {
+        style.margin = margin;
+    }
+    CalcDimension strokeWidth;
+    if (ParseLengthMetricsToPositiveDimension(obj->GetProperty("strokeWidth"), strokeWidth)) {
+        style.strokeWidth = strokeWidth;
+    }
+    Color strokeColor;
+    if (ParseColorMetricsToColor(obj->GetProperty("strokeColor"), strokeColor)) {
+        style.strokeColor = strokeColor;
+    }
+
+    ViewAbstractModel::GetInstance()->SetFocusBoxStyle(style);
+}
+
 void JSViewAbstract::JsOnFocusMove(const JSCallbackInfo& args)
 {
     JSRef<JSVal> arg = args[0];
@@ -7317,6 +7403,44 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
     if (!maskColor->IsNull() && !maskColor->IsUndefined() && JSViewAbstract::ParseJsColor(maskColor, parseMaskColor)) {
         sheetStyle.maskColor = std::move(parseMaskColor);
     }
+
+    // Parse border width
+    auto borderWidthValue = paramObj->GetProperty("borderWidth");
+    NG::BorderWidthProperty borderWidth;
+    if (ParseBorderWidthProps(borderWidthValue, borderWidth)) {
+        sheetStyle.borderWidth = borderWidth;
+        // Parse border color
+        auto colorValue = paramObj->GetProperty("borderColor");
+        NG::BorderColorProperty borderColor;
+        if (ParseBorderColorProps(colorValue, borderColor)) {
+            sheetStyle.borderColor = borderColor;
+        } else {
+            sheetStyle.borderColor =
+                NG::BorderColorProperty({ Color::BLACK, Color::BLACK, Color::BLACK, Color::BLACK });
+        }
+        // Parse border style
+        auto styleValue = paramObj->GetProperty("borderStyle");
+        NG::BorderStyleProperty borderStyle;
+        if (ParseBorderStyleProps(styleValue, borderStyle)) {
+            sheetStyle.borderStyle = borderStyle;
+        } else {
+            sheetStyle.borderStyle = NG::BorderStyleProperty(
+                { BorderStyle::SOLID, BorderStyle::SOLID, BorderStyle::SOLID, BorderStyle::SOLID });
+        }
+    }
+    // Parse shadow
+    Shadow shadow;
+    auto shadowValue = paramObj->GetProperty("shadow");
+    if ((shadowValue->IsObject() || shadowValue->IsNumber()) && ParseShadowProps(shadowValue, shadow)) {
+            sheetStyle.shadow = shadow;
+    }
+
+    auto widthValue = paramObj->GetProperty("width");
+    CalcDimension width;
+    if (ParseJsDimensionVpNG(widthValue, width, true)) {
+        sheetStyle.width = width;
+    }
+
     CalcDimension sheetHeight;
     if (height->IsString()) {
         std::string heightStr = height->ToString();
@@ -7355,43 +7479,6 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
     } else {
         sheetStyle.height = sheetHeight;
         sheetStyle.sheetMode.reset();
-    }
-
-    // Parse border width
-    auto borderWidthValue = paramObj->GetProperty("borderWidth");
-    NG::BorderWidthProperty borderWidth;
-    if (ParseBorderWidthProps(borderWidthValue, borderWidth)) {
-        sheetStyle.borderWidth = borderWidth;
-        // Parse border color
-        auto colorValue = paramObj->GetProperty("borderColor");
-        NG::BorderColorProperty borderColor;
-        if (ParseBorderColorProps(colorValue, borderColor)) {
-            sheetStyle.borderColor = borderColor;
-        } else {
-            sheetStyle.borderColor =
-                NG::BorderColorProperty({ Color::BLACK, Color::BLACK, Color::BLACK, Color::BLACK });
-        }
-        // Parse border style
-        auto styleValue = paramObj->GetProperty("borderStyle");
-        NG::BorderStyleProperty borderStyle;
-        if (ParseBorderStyleProps(styleValue, borderStyle)) {
-            sheetStyle.borderStyle = borderStyle;
-        } else {
-            sheetStyle.borderStyle = NG::BorderStyleProperty(
-                { BorderStyle::SOLID, BorderStyle::SOLID, BorderStyle::SOLID, BorderStyle::SOLID });
-        }
-    }
-    // Parse shadow
-    Shadow shadow;
-    auto shadowValue = paramObj->GetProperty("shadow");
-    if ((shadowValue->IsObject() || shadowValue->IsNumber()) && ParseShadowProps(shadowValue, shadow)) {
-            sheetStyle.shadow = shadow;
-    }
-
-    auto widthValue = paramObj->GetProperty("width");
-    CalcDimension width;
-    if (ParseJsDimensionVpNG(widthValue, width, true)) {
-        sheetStyle.width = width;
     }
 }
 
@@ -7985,6 +8072,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("blendMode", &JSViewAbstract::JsBlendMode);
     JSClass<JSViewAbstract>::StaticMethod("grayscale", &JSViewAbstract::JsGrayScale);
     JSClass<JSViewAbstract>::StaticMethod("focusable", &JSViewAbstract::JsFocusable);
+    JSClass<JSViewAbstract>::StaticMethod("focusBox", &JSViewAbstract::JsFocusBox);
     JSClass<JSViewAbstract>::StaticMethod("onKeyEvent", &JSViewAbstract::JsOnKeyEvent);
     JSClass<JSViewAbstract>::StaticMethod("onKeyPreIme", &JSInteractableView::JsOnKeyPreIme);
     JSClass<JSViewAbstract>::StaticMethod("onFocusMove", &JSViewAbstract::JsOnFocusMove);
@@ -9754,7 +9842,7 @@ void JSViewAbstract::JsFocusScopePriority(const JSCallbackInfo& info)
 }
 
 void JSViewAbstract::SetSymbolOptionApply(const JSCallbackInfo& info,
-    std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const JSRef<JSObject> modifierObj)
+    std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const JSRef<JSVal> modifierObj)
 {
     auto vm = info.GetVm();
     auto globalObj = JSNApi::GetGlobalObject(vm);
@@ -9764,7 +9852,7 @@ void JSViewAbstract::SetSymbolOptionApply(const JSCallbackInfo& info,
     if (globalFuncRef->IsFunction()) {
         RefPtr<JsFunction> jsFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(globalFuncRef));
-        if (modifierObj->IsUndefined()) {
+        if (!modifierObj->IsObject()) {
             symbolApply = nullptr;
         } else {
             auto onApply = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),

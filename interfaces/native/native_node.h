@@ -89,6 +89,8 @@ typedef enum {
     ARKUI_NODE_SLIDER = 17,
     /** Radio */
     ARKUI_NODE_RADIO = 18,
+    /** 帧动画组件 */
+    ARKUI_NODE_IMAGE_ANIMATOR = 19,
     /** Stack container. */
     ARKUI_NODE_STACK = MAX_NODE_SCOPE_NUM,
     /** Swiper. */
@@ -1485,6 +1487,47 @@ typedef enum {
 
     NODE_FOREGROUND_BLUR_STYLE,
 
+    NODE_LAYOUT_RECT,
+
+    NODE_FOCUS_ON_TOUCH,
+
+    /**
+     * @brief 边框宽度属性，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * 1: .value[0].f32：统一设置四条边的边框宽度，单位为百分比。 \n
+     * 2: .value[0].f32：设置上边框的边框宽度，单位为百分比。 \n
+     * .value[1].f32：设置右边框的边框宽度，单位为百分比。 \n
+     * .value[2].f32：设置下边框的边框宽度，单位为百分比。 \n
+     * .value[3].f32：设置左边框的边框宽度，单位为百分比。 \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].f32：设置上边框的边框宽度，单位为百分比。 \n
+     * .value[1].f32：设置右边框的边框宽度，单位为百分比。 \n
+     * .value[2].f32：设置下边框的边框宽度，单位为百分比。 \n
+     * .value[3].f32：设置左边框的边框宽度，单位为百分比。 \n
+     *
+     */
+    NODE_BORDER_WIDTH_PERCENT,
+    /**
+     * @brief 边框圆角属性，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * 1: .value[0].f32：统一设置四条边的边框圆角半径，单位为百分比。 \n
+     * 2: .value[0].f32：设置左上角圆角半径，单位为百分比。 \n
+     * .value[1].f32：设置右上角圆角半径，单位为百分比。 \n
+     * .value[2].f32：设置左下角圆角半径，单位为百分比。 \n
+     * .value[3].f32：设置右下角圆角半径，单位为百分比。 \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].f32：设置左上角圆角半径，单位为百分比。 \n
+     * .value[1].f32：设置右上角圆角半径，单位为百分比。 \n
+     * .value[2].f32：设置左下角圆角半径，单位为百分比。 \n
+     * .value[3].f32：设置右下角圆角半径，单位为百分比。 \n
+     *
+     */
+    NODE_BORDER_RADIUS_PERCENT,
+
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
@@ -1761,17 +1804,6 @@ typedef enum {
      */
     NODE_TEXT_WORD_BREAK,
     /**
-     * @brief Defines the line break rule. This attribute can be set, reset, and obtained as required through APIs.
-     *
-     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].i32: The parameter type is {@link ArkUI_LineBreakStrategy}. \n
-     * \n
-     * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].i32: The parameter type is {@link ArkUI_LineBreakStrategy}. \n
-     *
-     */
-    NODE_TEXT_LINE_BREAK_STRATEGY,
-    /**
      * @brief Defines the ellipsis position. This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
@@ -1833,6 +1865,17 @@ typedef enum {
      */
     NODE_TEXT_ENABLE_DATA_DETECTOR_CONFIG,
     /**
+     * @brief Defines the line break rule. This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: The parameter type is {@link ArkUI_LineBreakStrategy}. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: The parameter type is {@link ArkUI_LineBreakStrategy}. \n
+     *
+     */
+    NODE_TEXT_LINE_BREAK_STRATEGY,
+    /**
      * @brief 文本选中时的背景色属性，支持属性设置，属性重置和属性获取接口。
      *
      * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
@@ -1843,6 +1886,19 @@ typedef enum {
      *
      */
     NODE_TEXT_SELECTED_BACKGROUND_COLOR,
+
+    /**
+    * @brief The text component uses a formatted string object to set text content properties,
+    * and supports property setting, property reset, and property acquisition interfaces.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .object indicates ArkUI_StyledString formatted string data. The parameter type is {@link ArkUI_StyledString}. \n
+    * \n
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .object indicates ArkUI_StyledString formatted string data. The parameter type is {@link ArkUI_StyledString}. \n
+    */
+    NODE_TEXT_CONTENT_WITH_STYLED_STRING,
+
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
@@ -1876,6 +1932,7 @@ typedef enum {
      *
      */
     NODE_SPAN_TEXT_BACKGROUND_STYLE,
+    NODE_SPAN_BASELINE_OFFSET,
     /**
      * @brief Defines the image source of the image span.
      * This attribute can be set, reset, and obtained as required through APIs.
@@ -1957,10 +2014,12 @@ typedef enum {
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
      * .value[0].f32 to .value[19].f32: filter matrix array. \n
      * .size: 5 x 4 filter array size. \n
+     * .object: the pointer to OH_Drawing_ColorFilter. Either .value or .object is set. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].f32 to .value[19].f32: filter matrix array. \n
      * .size: 5 x 4 filter array size. \n
+     * .object: the pointer to OH_Drawing_ColorFilter. \n
      *
      */
     NODE_IMAGE_COLOR_FILTER,
@@ -4036,15 +4095,15 @@ typedef enum {
     NODE_LIST_SCROLL_TO_INDEX,
 
     /**
-    * @brief 设置List交叉轴方向宽度大于ListItem交叉轴宽度 * lanes时，
-    * ListItem在List交叉轴方向的布局方式，支持属性设置，属性重置和属性获取接口。
-    *
-    * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * @brief 设置List交叉轴方向宽度大于ListItem交叉轴宽度 * lanes时，
+     * ListItem在List交叉轴方向的布局方式，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
      * .value[0].i32：交叉轴方向的布局方式。参数类型{@link ArkUI_ListItemAlignment} \n
      * \n
      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
      * .value[0].i32：交叉轴方向的布局方式。参数类型{@link ArkUI_ListItemAlignment}  \n
-    */
+     */
     NODE_LIST_ALIGN_LIST_ITEM,
 
     /**
@@ -4308,6 +4367,19 @@ typedef enum {
     NODE_SWIPER_SWIPE_TO_INDEX,
 
     /**
+     * @brief: Set the delineation component of the ListItem, supporting property settings, property resets, and
+     * property acquisition interfaces.
+     *
+     * Attribute setting method parameter {@link ArkUI_AttributeItem} format: \n
+     * .object: Construct using the {@link ArkUI_ListitemSwipeActionOption} object. \n
+     * \n
+     * The return value of the attribute acquisition method {@link ArkUI_AttributeItem} format: \n
+     * .object: Construct using the {@link ArkUI_ListitemSwipeActionOption} object. \n
+     *
+     */
+    NODE_LIST_ITEM_SWIPE_ACTION = MAX_NODE_SCOPE_NUM * ARKUI_NODE_LIST_ITEM,
+
+    /**
      * @brief Defines the header of the list item group.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -4456,6 +4528,17 @@ typedef enum {
      *
      */
     NODE_REFRESH_CONTENT,
+    /**
+     * @brief 设置下拉跟手系数，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
+     * .value[0].f32：下拉跟手系数,有效值为0-1之间的值。
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].f32：下拉跟手系数,有效值为0-1之间的值。
+     *
+     */
+    NODE_REFRESH_PULL_DOWN_RATIO = 1009002,
 
     /**
      * @brief Defines the main axis direction of the <b><WaterFlow></b> component layout.
@@ -4707,6 +4790,86 @@ typedef enum {
      */
     NODE_RELATIVE_CONTAINER_BARRIER,
 
+    /**
+     * @brief 设置帧动画组件的图片帧信息集合。不支持动态更新。支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .size：图片帧的数量； \n
+     * .object：图片帧数组，参数类型为{@ArkUI_ImageFrameInfo}数组； \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .size：图片帧的数量； \n
+     * .object：图片帧数组，参数类型为{@ArkUI_ImageFrameInfo}数组； \n
+     *
+    */
+    NODE_IMAGE_ANIMATOR_IMAGES = ARKUI_NODE_IMAGE_ANIMATOR * MAX_NODE_SCOPE_NUM,
+    /**
+     * @brief 控制帧动画组件的播放状态。支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：控制动画的播放状态，参数类型为{@link ArkUI_AnimationStatus}，默认值为初始状态。 \n
+     *
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：控制动画的播放状态，参数类型为{@link ArkUI_AnimationStatus}。 \n
+     *
+    */
+    NODE_IMAGE_ANIMATOR_STATE = 19001,
+    /**
+     * @brief 设置帧动画的播放时长，当数组中任意一帧图片单独设置了duration属性后，该属性设置无效。
+     * 支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：播放时长，单位为毫秒，默认值1000。 \n
+     *
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：播放时长，单位为毫秒，默认值1000。 \n
+     *
+    */
+    NODE_IMAGE_ANIMATOR_DURATION = 19002,
+    /**
+     * @brief 设置帧动画的播放方向。支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：播放方向，0表示从第一张图片播放到最后一张，1表示从最后一张图片播放到第一张，默认值为0。 \n
+     *
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：播放方向，0表示从第一张图片播放到最后一张，1表示从最后一张图片播放到第一张。 \n
+     *
+    */
+    NODE_IMAGE_ANIMATOR_REVERSE = 19003,
+    /**
+     * @brief 设置图片大小是否固定为组件大小。支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：设置图片大小是否固定为组件大小，1表示图片大小与组件大小一致。0表示每一张图片的width、height、top和left都要单独设置，默认值为1。\n
+     *
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：设置图片大小是否固定为组件大小，1表示图片大小与组件大小一致。0表示每一张图片的width、height、top和left都要单独设置。 \n
+     *
+    */
+    NODE_IMAGE_ANIMATOR_FIXED_SIZE = 19004,
+    /**
+     * @brief 设置帧动画在当前播放方向下，动画开始前和结束后的状态。支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：当前播放方向下，动画开始前和结束后的状态，参数类型为{ArkUI_AnimationFillMode}，默认值为FORWARDS。 \n
+     *
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：当前播放方向下，动画开始前和结束后的状态，参数类型为{ArkUI_AnimationFillMode}。 \n
+     *
+    */
+    NODE_IMAGE_ANIMATOR_FILL_MODE = 19005,
+    /**
+     * @brief 设置帧动画的播放次数。支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：播放次数。 \n
+     *
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：播放次数。 \n
+     *
+    */
+    NODE_IMAGE_ANIMATOR_ITERATION = 19006,
 } ArkUI_NodeAttributeType;
 
 #define MAX_COMPONENT_EVENT_ARG_NUM 12
@@ -4874,6 +5037,24 @@ typedef enum {
      * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_UIInputEvent}。\n
      */
     NODE_ON_MOUSE,
+    /**
+     * @brief Defines the mount event.
+     *
+     * This event is triggered when the component is mounted. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} does not contain parameters.
+     */
+    NODE_EVENT_ON_ATTACH,
+    /**
+     * @brief Defines the unmount event.
+     *
+     * This event is triggered when the component is unmount. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} does not contain parameters.
+     */
+    NODE_EVENT_ON_DETACH,
     /**
      * @brief 文本设置TextDataDetectorConfig且识别成功时，触发onDetectResultUpdate回调。
      *
@@ -5273,6 +5454,24 @@ typedef enum {
     NODE_SWIPER_EVENT_ON_GESTURE_SWIPE,
 
     /**
+     * @brief 定义ARKUI_NODE_SWIPER监听Swiper页面滑动事件。
+     * 使用说明 ：\n
+     * 1、设置{@link ArkUI_SwiperDisplayModeType}属性为ARKUI_SWIPER_DISPLAY_MODE_AUTO_LINEAR时，该接口不生效。\n
+     * 2、循环场景下，设置prevMargin和nextMargin属性，使得Swiper前后端显示同一页面时，该接口不生效。\n
+     * 3、在页面滑动过程中，会对视窗内所有页面逐帧触发ContentDidScrollCallback回调。\n
+     * 例如，当视窗内有下标为0、1的两个页面时，会每帧触发两次index值分别为0和1的回调。\n
+     * 4、设置displayCount属性的swipeByGroup参数为true时，若同组中至少有一个页面在视窗内时，\n
+     * 则会对同组中所有页面触发回调。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中包含4个参数：\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：Swiper组件的索引，和onChange事件中的index值变化保持一致。\n
+     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>：视窗内某个页面的索引。\n
+     * <b>ArkUI_NodeComponentEvent.data[2].f32</b>：页面相对于Swiper主轴起始位置（selectedIndex对应页面的起始位置）的移动比例。\n
+     * <b>ArkUI_NodeComponentEvent.data[3].f32</b>：主轴方向上页面的长度。\n
+     */
+    NODE_SWIPER_EVENT_ON_CONTENT_DID_SCROLL,
+
+    /**
      * @brief Defines the event triggered when the <b>ARKUI_NODE_SCROLL</b> component scrolls.
      *
      * Notes for triggering the event:\n
@@ -5305,7 +5504,6 @@ typedef enum {
      * needs to scroll based on the real-world situation and return the result in this parameter. \n
      */
     NODE_SCROLL_EVENT_ON_SCROLL_FRAME_BEGIN,
-
 
     /**
      * @brief Define the enumeration value of the pre sliding trigger event for the scrolling container component.
@@ -5472,6 +5670,15 @@ typedef enum {
      * {@link ArkUI_NodeComponentEvent} does not contain parameters:\n
      */
     NODE_REFRESH_ON_REFRESH,
+    /**
+     * @brief Defines the event that is triggered when the <b>ARKUI_NODE_REFRESH</b> drop-down distance changes.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: Pull-down distance. \n
+     */
+    NODE_REFRESH_ON_OFFSET_CHANGE = 1009002,
 
     /**
      * @brief Defines the event triggered when the <b>ARKUI_NODE_SCROLL</b> component is about to scroll.
@@ -5519,6 +5726,57 @@ typedef enum {
      * the end position of the currently displayed waterfall. \n
      */
     NODE_WATER_FLOW_ON_SCROLL_INDEX,
+
+    /**
+     * @brief 定义帧动画开始的状态回调。
+     *
+     * 触发该事件的条件：\n
+     * 1、帧动画开始播放时。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中不包含参数。\n
+     *
+    */
+    NODE_IMAGE_ANIMATOR_EVENT_ON_START = MAX_NODE_SCOPE_NUM * ARKUI_NODE_IMAGE_ANIMATOR,
+    /**
+     * @brief 定义帧动画播放暂停时的状态回调。
+     *
+     * 触发该事件的条件：\n
+     * 1、帧动画暂停播放时。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中不包含参数。\n
+     *
+    */
+    NODE_IMAGE_ANIMATOR_EVENT_ON_PAUSE = 19001,
+    /**
+     * @brief 定义帧动画c重复播放时的状态回调。
+     *
+     * 触发该事件的条件：\n
+     * 1、帧动画重复播放时。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中不包含参数。\n
+     *
+    */
+    NODE_IMAGE_ANIMATOR_EVENT_ON_REPEAT = 19002,
+    /**
+     * @brief 定义帧动画返回最初状态时的状态回调。
+     *
+     * 触发该事件的条件：\n
+     * 1、帧动画返回最初状态时。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中不包含参数。\n
+     *
+    */
+    NODE_IMAGE_ANIMATOR_EVENT_ON_CANCEL = 19003,
+    /**
+     * @brief 定义帧动画播放完成时或者停止播放时的状态回调。
+     *
+     * 触发该事件的条件：\n
+     * 1、帧动画播放完成时或停止播放时。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中不包含参数。\n
+     *
+    */
+    NODE_IMAGE_ANIMATOR_EVENT_ON_FINISH = 19004,
 } ArkUI_NodeEventType;
 
 /**

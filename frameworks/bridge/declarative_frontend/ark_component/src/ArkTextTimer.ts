@@ -51,6 +51,16 @@ class ArkTextTimerComponent extends ArkComponent implements TextTimerAttribute {
     return this;
   }
 
+  textShadow(value: ShadowOptions): this {
+    modifierWithKey(this._modifiersWithKeys, TextTimerTextShadowModifier.identity, TextTimerTextShadowModifier, value);
+    return this;
+  }
+
+  contentModifier(value: ContentModifier<TextTimerConfiguration>): this {
+    this.setContentModifier(value);
+    return this;
+  }
+
   setContentModifier(modifier: ContentModifier<TextTimerConfiguration>): this {
     if (modifier === undefined || modifier === null) {
       getUINativeModule().textTimer.setContentModifierBuilder(this.nativePtr, false);
@@ -154,6 +164,43 @@ class TextTimerFormatModifier extends ModifierWithKey<string> {
     } else {
       getUINativeModule().textTimer.setFormat(node, this.value);
     }
+  }
+}
+
+class TextTimerTextShadowModifier extends ModifierWithKey<ShadowOptions | Array<ShadowOptions>> {
+  constructor(value: ShadowOptions | Array<ShadowOptions>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textTimerTextShadow');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textTimer.resetTextShadow(node);
+    } else {
+      getUINativeModule().textTimer.setTextShadow(node, this.value!);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    let checkDiff = true;
+    let arkShadow = new ArkShadowInfoToArray();
+    if (Object.getPrototypeOf(this.stageValue).constructor === Object &&
+      Object.getPrototypeOf(this.value).constructor === Object) {
+      checkDiff = arkShadow.checkDiff(<ShadowOptions> this.stageValue, <ShadowOptions> this.value);
+    } else if (Object.getPrototypeOf(this.stageValue).constructor === Array &&
+      Object.getPrototypeOf(this.value).constructor === Array &&
+      (<Array<ShadowOptions>> this.stageValue).length === (<Array<ShadowOptions>> this.value).length) {
+      let isDiffItem = false;
+      for (let i: number = 0; i < (<Array<ShadowOptions>> this.value).length; i++) {
+        if (arkShadow.checkDiff(this.stageValue[i], this.value[1])) {
+          isDiffItem = true;
+          break;
+        }
+      }
+      if (!isDiffItem) {
+        checkDiff = false;
+      }
+    }
+    return checkDiff;
   }
 }
 

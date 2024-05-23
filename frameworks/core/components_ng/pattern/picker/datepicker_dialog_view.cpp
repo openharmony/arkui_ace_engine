@@ -17,6 +17,7 @@
 #include <utility>
 
 #include "base/geometry/dimension.h"
+#include "base/i18n/date_time_sequence.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/theme/icon_theme.h"
@@ -71,6 +72,15 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
     auto pickerStack = CreateStackNode();
     auto dateNode = CreateAndMountDateNode(settingData, pickerStack);
     auto pickerPattern = dateNode->GetPattern<DatePickerPattern>();
+    DateTimeSequence sequence;
+    auto language = AceApplicationInfo::GetInstance().GetLanguage();
+    OrderResult orderResult = sequence.GetDateOrder(language);
+    if (language == "ug") {
+        pickerPattern->SetDateOrder("y-d-M");
+    } else {
+        auto dateOrder = orderResult.dateOrder;
+        pickerPattern->SetDateOrder(dateOrder);
+    }
     CHECK_NULL_RETURN(pickerPattern, nullptr);
     pickerPattern->SetIsShowInDialog(true);
     auto buttonTitleNode = CreateAndMountButtonTitleNode(dateNode, contentColumn);
@@ -277,6 +287,9 @@ void DatePickerDialogView::CreateTitleIconNode(const RefPtr<FrameNode>& titleNod
     auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::SPINNER);
     imageSourceInfo.SetSrc(iconPath);
     imageSourceInfo.SetFillColor(pickerTheme->GetTitleStyle().GetTextColor());
+    auto spinnerRenderProperty = spinnerNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(spinnerRenderProperty);
+    spinnerRenderProperty->UpdateSvgFillColor(pickerTheme->GetTitleStyle().GetTextColor());
 
     auto spinnerLayoutProperty = spinnerNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(spinnerLayoutProperty);
@@ -656,10 +669,6 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTimeNode(
     CHECK_NULL_RETURN(pickerTheme, nullptr);
     uint32_t showCount = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
     timePickerRowPattern->SetShowCount(showCount);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        ZeroPrefixType hourType = ZeroPrefixType::SHOW;
-        timePickerRowPattern->SetPrefixHour(hourType);
-    }
 
     auto hasHourNode = timePickerRowPattern->HasHourNode();
     auto hasMinuteNode = timePickerRowPattern->HasMinuteNode();
@@ -1066,6 +1075,9 @@ std::function<void(bool)> DatePickerDialogView::CreateLunarChangeEvent(const Ref
     return [weak = AceType::WeakClaim(AceType::RawPtr(dateNode))](bool selected) {
         auto datePicker = weak.Upgrade();
         CHECK_NULL_VOID(datePicker);
+        auto datePickerPattern = datePicker->GetPattern<DatePickerPattern>();
+        CHECK_NULL_VOID(datePickerPattern);
+        SetSelectedDate(datePicker, datePickerPattern->GetCurrentDate());
         auto layoutProp = datePicker->GetLayoutProperty<DataPickerRowLayoutProperty>();
         CHECK_NULL_VOID(layoutProp);
         layoutProp->UpdateLunar(selected);
@@ -1088,6 +1100,12 @@ RefPtr<FrameNode> DatePickerDialogView::CreateAndMountMonthDaysNode(const DatePi
         auto dateNode = dateNodeWeak.Upgrade();
         CHECK_NULL_VOID(monthDaysNode);
         CHECK_NULL_VOID(dateNode);
+        auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
+        CHECK_NULL_VOID(datePickerPattern);
+        SetSelectedDate(dateNode, datePickerPattern->GetCurrentDate());
+        auto monthDaysPattern = monthDaysNode->GetPattern<DatePickerPattern>();
+        CHECK_NULL_VOID(monthDaysPattern);
+        SetSelectedDate(monthDaysNode, monthDaysPattern->GetCurrentDate());
         SetShowLunar(monthDaysNode, selected);
         SetShowLunar(dateNode, selected);
         monthDaysNode->MarkModifyDone();
@@ -1122,6 +1140,21 @@ RefPtr<FrameNode> DatePickerDialogView::CreateAndMountTimeNode(const DatePickerS
     auto timeNode = CreateTimeNode(settingData.timePickerProperty, settingData.properties, settingData.useMilitary);
     auto timePickerEventHub = timeNode->GetEventHub<TimePickerEventHub>();
     CHECK_NULL_RETURN(timePickerEventHub, nullptr);
+    auto timePickerRowPattern = timeNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_RETURN(timePickerRowPattern, nullptr);
+    auto timePickerLayout = timeNode->GetLayoutProperty<TimePickerLayoutProperty>();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        ZeroPrefixType hourOptions = settingData.dateTimeOptions.hourType;
+        ZeroPrefixType minuteOptions = settingData.dateTimeOptions.minuteType;
+        if ((timePickerRowPattern->GetPrefixHour() != hourOptions) ||
+            (timePickerRowPattern->GetPrefixMinute() != minuteOptions)) {
+            timePickerRowPattern->SetDateTimeOptionUpdate(true);
+        }
+        timePickerRowPattern->SetPrefixHour(hourOptions);
+        timePickerRowPattern->SetPrefixMinute(minuteOptions);
+        timePickerLayout->UpdatePrefixHour(static_cast<int32_t>(hourOptions));
+        timePickerLayout->UpdatePrefixMinute(static_cast<int32_t>(minuteOptions));
+    }
     auto onChangeCallback = [weak = WeakPtr<FrameNode>(monthDaysNode)]() {
         auto monthDaysNode = weak.Upgrade();
         CHECK_NULL_VOID(monthDaysNode);

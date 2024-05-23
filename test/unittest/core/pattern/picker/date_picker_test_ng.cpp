@@ -42,6 +42,7 @@
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/picker/date_time_animation_controller.h"
@@ -53,6 +54,7 @@
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/ace_events.h"
 #undef private
@@ -121,6 +123,10 @@ constexpr double COLUMN_VELOCITY = 2000.0;
 constexpr double COLUMN_WIDTH = 200.0;
 constexpr double SECLECTED_TEXTNODE_HEIGHT = 84.0;
 constexpr double OTHER_TEXTNODE_HEIGHT = 54.0;
+const std::string AM = "上午";
+const std::string PM = "下午";
+const std::string COLON = ":";
+const std::string ZERO = "0";
 } // namespace
 
 class DatePickerTestNg : public testing::Test {
@@ -3597,5 +3603,59 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewUpdateButtonDefaultFocus003, Test
     auto focusHub = buttonNode->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
     EXPECT_EQ(focusHub->IsDefaultFocus(), true);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewShow0013
+ * @tc.desc: Test DatePickerDialogView Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0013, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(3, 3, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(SMALL_SHOWCOUNT) + COLON + std::to_string(SMALL_SHOWCOUNT));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
 }
 } // namespace OHOS::Ace::NG

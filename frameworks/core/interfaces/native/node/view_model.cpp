@@ -67,6 +67,8 @@
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
+#include "core/components_ng/pattern/select/select_model_ng.h"
+#include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/pipeline/base/element_register.h"
 
@@ -387,9 +389,23 @@ void* createGridColNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createImageAnimatorNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = ImageAnimatorModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 void* createRadioNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = RadioModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createSelectNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = SelectModelNG::CreateFrameNode(nodeId);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -450,6 +466,8 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
         createSearchNode,
         createGridRowNode,
         createGridColNode,
+        createSelectNode,
+        createImageAnimatorNode,
         createCircleNode,
     };
     if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {
@@ -473,8 +491,12 @@ ArkUI_CharPtr GetName(void* nativePtr)
 void DisposeNode(void* nativePtr)
 {
     CHECK_NULL_VOID(nativePtr);
-    auto* frameNode = reinterpret_cast<UINode*>(nativePtr);
-    frameNode->DecRefCount();
+    auto* uiNode = reinterpret_cast<UINode*>(nativePtr);
+    auto* frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    if (frameNode) {
+        frameNode->SetExtensionHandler(nullptr);
+    }
+    uiNode->DecRefCount();
 }
 
 void AddChild(void* parentNode, void* childNode)
@@ -496,7 +518,8 @@ void RemoveChild(void* parentNode, void* childNode)
     CHECK_NULL_VOID(childNode);
     auto* parent = reinterpret_cast<UINode*>(parentNode);
     auto* child = reinterpret_cast<UINode*>(childNode);
-    parent->RemoveChild(AceType::Claim(child));
+    child->MarkRemoving();
+    parent->RemoveChild(AceType::Claim(child), true);
 }
 
 void InsertChildAt(void* parentNode, void* childNode, int32_t position)

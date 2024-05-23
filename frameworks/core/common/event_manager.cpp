@@ -1004,13 +1004,13 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
         handledResults.clear();
         auto container = Container::Current();
         CHECK_NULL_RETURN(container, false);
-        std::optional<RefPtr<MouseEventTarget>> isStopPropagation;
+        bool isStopPropagation = false;
         if (event.button == MouseButton::LEFT_BUTTON) {
             for (const auto& mouseTarget : pressMouseTestResults_) {
                 if (mouseTarget) {
                     handledResults.emplace_back(mouseTarget);
                     if (mouseTarget->HandleMouseEvent(event)) {
-                        isStopPropagation = mouseTarget;
+                        isStopPropagation = true;
                         break;
                     }
                 }
@@ -1025,13 +1025,22 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
             DoMouseActionRelease();
         }
         for (const auto& mouseTarget : currMouseTestResults_) {
-            if (isStopPropagation.has_value() && isStopPropagation.value() == mouseTarget) {
-                return true;
+            if (!mouseTarget) {
+                continue;
             }
-            if (mouseTarget &&
-                std::find(handledResults.begin(), handledResults.end(), mouseTarget) == handledResults.end()) {
-                if (mouseTarget->HandleMouseEvent(event)) {
+            if (!isStopPropagation) {
+                auto ret = std::find(handledResults.begin(), handledResults.end(), mouseTarget) == handledResults.end();
+                // if pressMouseTestResults doesn't have any isStopPropagation, use default handledResults.
+                if (ret && mouseTarget->HandleMouseEvent(event)) {
                     return true;
+                }
+            } else {
+                if (std::find(pressMouseTestResults_.begin(), pressMouseTestResults_.end(), mouseTarget) ==
+                    pressMouseTestResults_.end()) {
+                    // if pressMouseTestResults has isStopPropagation, use pressMouseTestResults as handledResults.
+                    if (mouseTarget->HandleMouseEvent(event)) {
+                        return true;
+                    }
                 }
             }
         }
@@ -1695,6 +1704,84 @@ void EventManager::CleanGestureEventHub()
         }
     }
     hittedFrameNode_.clear();
+}
+
+void EventManager::CheckAndLogLastReceivedTouchEventInfo(int32_t eventId, TouchType type)
+{
+    CheckAndLogLastReceivedEventInfo(
+        eventId, type == TouchType::DOWN || type == TouchType::UP || type == TouchType::CANCEL);
+}
+
+void EventManager::CheckAndLogLastConsumedTouchEventInfo(int32_t eventId, TouchType type)
+{
+    CheckAndLogLastConsumedEventInfo(
+        eventId, type == TouchType::DOWN || type == TouchType::UP || type == TouchType::CANCEL);
+}
+
+void EventManager::CheckAndLogLastReceivedMouseEventInfo(int32_t eventId, MouseAction action)
+{
+    CheckAndLogLastReceivedEventInfo(eventId, action == MouseAction::PRESS || action == MouseAction::RELEASE);
+}
+
+void EventManager::CheckAndLogLastConsumedMouseEventInfo(int32_t eventId, MouseAction action)
+{
+    CheckAndLogLastConsumedEventInfo(eventId, action == MouseAction::PRESS || action == MouseAction::RELEASE);
+}
+
+void EventManager::CheckAndLogLastReceivedAxisEventInfo(int32_t eventId, AxisAction action)
+{
+    CheckAndLogLastReceivedEventInfo(
+        eventId, action == AxisAction::BEGIN || action == AxisAction::END || action == AxisAction::CANCEL);
+}
+
+void EventManager::CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, AxisAction action)
+{
+    CheckAndLogLastConsumedEventInfo(
+        eventId, action == AxisAction::BEGIN || action == AxisAction::END || action == AxisAction::CANCEL);
+}
+
+void EventManager::CheckAndLogLastReceivedEventInfo(int32_t eventId, bool logImmediately)
+{
+    if (logImmediately) {
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+            "Received new event id=%{public}d in ace_container, lastEventInfo: id:%{public}d", eventId,
+            lastReceivedEvent_.eventId);
+        return;
+    }
+    auto currentTime = GetSysTimestamp();
+    auto lastLogTimeStamp = lastReceivedEvent_.lastLogTimeStamp;
+    if (lastReceivedEvent_.lastLogTimeStamp != 0 &&
+        (currentTime - lastReceivedEvent_.lastLogTimeStamp) > EVENT_CLEAR_DURATION * TRANSLATE_NS_TO_MS) {
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+            "Received new event id=%{public}d has been more than a second since the last one event "
+            "received "
+            "in ace_container, lastEventInfo: id:%{public}d",
+            eventId, lastReceivedEvent_.eventId);
+        lastLogTimeStamp = currentTime;
+    }
+    lastReceivedEvent_ = { eventId, lastLogTimeStamp };
+}
+
+void EventManager::CheckAndLogLastConsumedEventInfo(int32_t eventId, bool logImmediately)
+{
+    if (logImmediately) {
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+            "Consumed new event id=%{public}d in ace_container, lastEventInfo: id:%{public}d", eventId,
+            lastReceivedEvent_.eventId);
+        return;
+    }
+    auto currentTime = GetSysTimestamp();
+    auto lastLogTimeStamp = lastReceivedEvent_.lastLogTimeStamp;
+    if (lastConsumedEvent_.lastLogTimeStamp != 0 &&
+        (currentTime - lastConsumedEvent_.lastLogTimeStamp) > EVENT_CLEAR_DURATION * TRANSLATE_NS_TO_MS) {
+        TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
+            "Consumed new event id=%{public}d has been more than a second since the last one event "
+            "markProcessed "
+            "in ace_container, lastEventInfo: id:%{public}d",
+            eventId, lastConsumedEvent_.eventId);
+        lastLogTimeStamp = currentTime;
+    }
+    lastConsumedEvent_ = { eventId, lastLogTimeStamp };
 }
 
 } // namespace OHOS::Ace

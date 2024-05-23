@@ -60,7 +60,9 @@ void JSRelativeContainer::JSBind(BindingTarget globalObj)
     JSClass<JSRelativeContainer>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSRelativeContainer>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSRelativeContainer>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
+    JSClass<JSRelativeContainer>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSRelativeContainer>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSRelativeContainer>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSRelativeContainer>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSRelativeContainer>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSRelativeContainer>::StaticMethod("barrier", &JSRelativeContainer::JsBarrier);
@@ -75,6 +77,9 @@ void JSRelativeContainer::Create(const JSCallbackInfo& info)
 
 void JSRelativeContainer::ParseBarrierInfo(const JSRef<JSVal>& args, BarrierInfo& barrierInfoItem)
 {
+    if (!args->IsObject()) {
+        return;
+    }
     JSRef<JSObject> barrierInfoObj = JSRef<JSObject>::Cast(args);
     JSRef<JSVal> idVal = barrierInfoObj->GetProperty("id");
     JSRef<JSVal> directionVal = barrierInfoObj->GetProperty("direction");
@@ -127,6 +132,9 @@ void JSRelativeContainer::JsBarrier(const JSCallbackInfo& info)
 
 void JSRelativeContainer::ParseGuideline(const JSRef<JSVal>& args, GuidelineInfo& guidelineInfoItem)
 {
+    if (!args->IsObject()) {
+        return;
+    }
     JSRef<JSObject> guildLineInfoObj = JSRef<JSObject>::Cast(args);
     JSRef<JSVal> idVal = guildLineInfoObj->GetProperty("id");
     JSRef<JSVal> directionVal = guildLineInfoObj->GetProperty("direction");

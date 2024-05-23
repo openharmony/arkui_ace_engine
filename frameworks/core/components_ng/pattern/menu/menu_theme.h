@@ -49,7 +49,7 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->symbolId_ = themeConstants->GetSymbolByName("checkmark");
+            theme->symbolId_ = themeConstants->GetSymbolByName("sys.symbol.checkmark");
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
@@ -97,6 +97,8 @@ public:
             theme->filterRadius_ = Dimension(100.0f);
             theme->previewBorderRadius_ = 16.0_vp;
             theme->previewMenuScaleNumber_ = 0.95f;
+            std::string hasFilter = pattern->GetAttr<std::string>("menu_has_filter", "true");
+            theme->hasFilter_ = (hasFilter == "true");
         }
     };
 
@@ -257,6 +259,11 @@ public:
         return borderWidth_;
     }
 
+    bool GetHasFilter() const
+    {
+        return hasFilter_;
+    }
+
 protected:
     MenuTheme() = default;
 
@@ -292,6 +299,7 @@ private:
     Color borderColor_ = Color::TRANSPARENT;
     Dimension borderWidth_;
     uint32_t symbolId_;
+    bool hasFilter_ = true;
 };
 
 } // namespace OHOS::Ace::NG

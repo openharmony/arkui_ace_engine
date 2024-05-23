@@ -187,18 +187,19 @@ void RotationRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 void RotationRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     if (!IsActiveFinger(event.id) || currentFingers_ < fingers_) {
+        touchPoints_[event.id] = event;
         lastAngle_ = 0.0;
         angleSignChanged_ = false;
         return;
     }
     touchPoints_[event.id] = event;
+    currentAngle_ = ComputeAngle();
+    time_ = event.time;
     if (static_cast<int32_t>(activeFingers_.size()) < DEFAULT_ROTATION_FINGERS) {
         lastAngle_ = 0.0;
         angleSignChanged_ = false;
         return;
     }
-    currentAngle_ = ComputeAngle();
-    time_ = event.time;
 
     if (refereeState_ == RefereeState::DETECTING) {
         auto trueAngle = currentAngle_;
@@ -358,6 +359,7 @@ void RotationRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>
             info.SetSourceTool(touchPoint.sourceTool);
         }
         info.SetPointerEvent(lastPointEvent_);
+        info.SetPressedKeyCodes(touchPoint.pressedKeyCodes_);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         callbackFunction(info);

@@ -38,9 +38,9 @@ public:
     static JSRef<JSVal> CreateJsOnIMEInputComplete(const NG::RichEditorAbstractSpanResult& textSpanResult);
     static JSRef<JSVal> CreateJsAboutToDelet(const NG::RichEditorDeleteValue& deleteValue);
     static void SetChangeTextSpans(
-        JSRef<JSArray>& jsArray, const std::list<NG::RichEditorAbstractSpanResult>& spanList);
+        JSRef<JSArray>& jsArray, const std::vector<NG::RichEditorAbstractSpanResult>& spanList);
     static JSRef<JSVal> CreateJsOnWillChange(const NG::RichEditorChangeValue& changeValue);
-    static JSRef<JSVal> CreateJsOnDidChange(const std::list<NG::RichEditorAbstractSpanResult>& spanList);
+    static JSRef<JSVal> CreateJsOnDidChange(const std::vector<NG::RichEditorAbstractSpanResult>& spanList);
     static void JsClip(const JSCallbackInfo& info);
     static void JsFocusable(const JSCallbackInfo& info);
     static void SetCopyOptions(const JSCallbackInfo& info);
@@ -78,6 +78,7 @@ private:
     static void CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::RichEditorAbstractSpanResult& spanResult);
     static void CreateImageStyleObj(JSRef<JSObject>& imageStyleObj, JSRef<JSObject>& spanResultObj,
         const NG::RichEditorAbstractSpanResult& spanResult);
+    static JSRef<JSArray> CreateJSDeleteSpans(const NG::RichEditorDeleteValue& deleteValue);
     static void ParseUserGesture(
         const JSCallbackInfo& args, UserGestureOptions& gestureOption, const std::string& spanType);
     static void ParseJsFont(const JSRef<JSObject>& fontObject, Font& font);

@@ -19,6 +19,7 @@
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
 #include "bridge/declarative_frontend/jsview/models/progress_model_impl.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_progress_theme.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/components/text/text_theme.h"
@@ -96,6 +97,7 @@ void JSProgress::Create(const JSCallbackInfo& info)
     }
 
     ProgressModel::GetInstance()->Create(0.0, value, 0.0, total, static_cast<NG::ProgressType>(g_progressType));
+    JSProgressTheme::ApplyTheme(progressStyle);
 }
 
 void JSProgress::JSBind(BindingTarget globalObj)
@@ -114,7 +116,9 @@ void JSProgress::JSBind(BindingTarget globalObj)
     JSClass<JSProgress>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSProgress>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSProgress>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSProgress>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSProgress>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSProgress>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSProgress>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSProgress>::StaticMethod("borderColor", &JSProgress::JsBorderColor, opt);
     JSClass<JSProgress>::InheritAndBind<JSViewAbstract>(globalObj);

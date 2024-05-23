@@ -341,7 +341,7 @@ TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirection(
 {
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(textLayoutProperty, TextDirection::LTR);
-    
+
     auto direction = textLayoutProperty->GetLayoutDirection();
     if (direction == TextDirection::LTR || direction == TextDirection::RTL) {
         return direction;
@@ -412,7 +412,7 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
     int32_t paragraphIndex = -1;
     preParagraphsPlaceholderCount_ = 0;
     currentParagraphPlaceholderCount_ = 0;
-
+    paragraphFontSize_ = paraStyle.fontSize;
     auto maxLines = static_cast<int32_t>(paraStyle.maxLines);
     for (auto && group : spans_) {
         ParagraphStyle spanParagraphStyle = paraStyle;
@@ -477,7 +477,7 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
         paragraph->Build();
         ApplyIndent(spanParagraphStyle, paragraph, maxWidth);
         UpdateSymbolSpanEffect(frameNode, paragraph, group);
-        if (paraStyle.maxLines != INT32_MAX && !spanStringHasMaxLines_ && isSpanStringMode_) {
+        if (paraStyle.maxLines != UINT32_MAX && !spanStringHasMaxLines_ && isSpanStringMode_) {
             paragraph->Layout(static_cast<float>(maxWidth));
         }
         paragraphManager_->AddParagraph({ .paragraph = paragraph,
@@ -503,9 +503,9 @@ void MultipleParagraphLayoutAlgorithm::AddSymbolSpanToParagraph(const RefPtr<Spa
 void MultipleParagraphLayoutAlgorithm::AddTextSpanToParagraph(const RefPtr<SpanItem>& child, int32_t& spanTextLength,
     const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph)
 {
-    child->UpdateParagraph(frameNode, paragraph);
     spanTextLength += StringUtils::ToWstring(child->content).length();
     child->position = spanTextLength;
+    child->UpdateParagraph(frameNode, paragraph, isSpanStringMode_);
 }
 
 void MultipleParagraphLayoutAlgorithm::AddImageToParagraph(RefPtr<ImageSpanItem>& imageSpanItem,
@@ -529,11 +529,15 @@ void MultipleParagraphLayoutAlgorithm::AddImageToParagraph(RefPtr<ImageSpanItem>
     CHECK_NULL_VOID(geometryNode);
     placeholderStyle.width = geometryNode->GetMarginFrameSize().Width();
     placeholderStyle.height = geometryNode->GetMarginFrameSize().Height();
+    placeholderStyle.paragraphFontSize = Dimension(paragraphFontSize_);
+    auto parentNode = frameNode->GetParentFrameNode();
     if (NearZero(baselineOffset.Value())) {
-        imageSpanItem->placeholderIndex = imageSpanItem->UpdateParagraph(frameNode, paragraph, placeholderStyle);
+        imageSpanItem->placeholderIndex =
+            imageSpanItem->UpdateParagraph(parentNode, paragraph, isSpanStringMode_, placeholderStyle);
     } else {
         placeholderStyle.baselineOffset = (baselineOffset - Dimension(IMAGE_SPAN_BASELINE_OFFSET)).ConvertToPx();
-        imageSpanItem->placeholderIndex = imageSpanItem->UpdateParagraph(frameNode, paragraph, placeholderStyle);
+        imageSpanItem->placeholderIndex =
+            imageSpanItem->UpdateParagraph(parentNode, paragraph, isSpanStringMode_, placeholderStyle);
     }
     currentParagraphPlaceholderCount_++;
     imageSpanItem->placeholderIndex += preParagraphsPlaceholderCount_;
@@ -560,7 +564,7 @@ void MultipleParagraphLayoutAlgorithm::AddPlaceHolderToParagraph(RefPtr<Placehol
     placeholderStyle.height = geometryNode->GetMarginFrameSize().Height();
     placeholderStyle.verticalAlign = VerticalAlign::NONE;
     placeholderSpanItem->placeholderIndex =
-        placeholderSpanItem->UpdateParagraph(frameNode, paragraph, placeholderStyle);
+        placeholderSpanItem->UpdateParagraph(frameNode, paragraph, isSpanStringMode_, placeholderStyle);
     currentParagraphPlaceholderCount_++;
     placeholderSpanItem->placeholderIndex += preParagraphsPlaceholderCount_;
     placeholderSpanItem->content = " ";
@@ -598,7 +602,8 @@ void MultipleParagraphLayoutAlgorithm::UpdateParagraphByCustomSpan(RefPtr<Custom
     placeholderStyle.width = width;
     placeholderStyle.height = height;
     placeholderStyle.verticalAlign = VerticalAlign::NONE;
-    customSpanItem->placeholderIndex = customSpanItem->UpdateParagraph(nullptr, paragraph, placeholderStyle);
+    customSpanItem->placeholderIndex =
+        customSpanItem->UpdateParagraph(nullptr, paragraph, isSpanStringMode_, placeholderStyle);
     currentParagraphPlaceholderCount_++;
     customSpanItem->placeholderIndex += preParagraphsPlaceholderCount_;
     customSpanItem->content = " ";

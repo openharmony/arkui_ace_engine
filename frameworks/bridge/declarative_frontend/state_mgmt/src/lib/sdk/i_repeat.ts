@@ -24,6 +24,7 @@ interface RepeatItem<T> {
 
 type RepeatItemGenFunc<T> = (i: RepeatItem<T>) => void;
 type RepeatKeyGenFunc<T> = (item: T, index?: number) => string;
+type OnMoveHandler = (from: number, to: number) => void;
 
 /*
     global function Repeat()
@@ -36,15 +37,16 @@ const Repeat: <T>(arr: Array<T>, owningView?: PUV2ViewBase) => RepeatAPI<T> =
             throw new Error("Transpilation error, Repeat lacks 2nd parameter owningView");
         }
         return owningView!.__mkRepeatAPI(arr);
-    }
+    };
 
 /*
     repeat attribute function and internal function render()
 */
 interface RepeatAPI<T> {
-    each: (itemGenFunc: RepeatItemGenFunc<T>) => RepeatAPI<T>;  // chainable, call in this order
+    each: (itemGenFunc: RepeatItemGenFunc<T>) => RepeatAPI<T>; // chainable, call in this order
     key: (keyGenFunc: RepeatKeyGenFunc<T>) => RepeatAPI<T>;
     virtualScroll: () => RepeatAPI<T>;
+    onMove: (handler: OnMoveHandler) => RepeatAPI<T>;
 
     // do NOT use in app, transpiler adds as last of chained call
     render(isInitialRender: boolean): void;       

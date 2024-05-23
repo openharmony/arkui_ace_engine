@@ -32,7 +32,7 @@ TextBackgroundStyle JSContainerSpan::ParseTextBackgroundStyle(const JSCallbackIn
     if (!jsValue->IsObject()) {
         return textBackgroundStyle;
     }
-    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(jsValue);
     JSRef<JSVal> colorValue = obj->GetProperty("color");
     Color colorVal;
     if (ParseJsColor(colorValue, colorVal)) {

@@ -98,6 +98,12 @@ var WordBreak;
   WordBreak[WordBreak["BREAK_WORD"] = 2] = "break-word";
 })(WordBreak || (WordBreak = {}));
 
+var DpiFollowStrategy;
+(function (DpiFollowStrategy) {
+  DpiFollowStrategy[DpiFollowStrategy["FOLLOW_HOST_DPI"] = 0] = "follow-host-dpi";
+  DpiFollowStrategy[DpiFollowStrategy["FOLLOW_UI_EXTENSION_ABILITY_DPI"] = 1] = "follow-ui-extension-ability-dpi";
+})(DpiFollowStrategy || (DpiFollowStrategy = {}));
+
 var EllipsisMode;
 (function (EllipsisMode) {
   EllipsisMode[EllipsisMode["START"] = 0] = "start";
@@ -455,6 +461,18 @@ var ScrollState;
   ScrollState[ScrollState["Fling"] = 2] = "Fling";
 })(ScrollState || (ScrollState = {}));
 
+var ScrollSource;
+(function (ScrollSource) {
+  ScrollSource[ScrollSource["DRAG"] = 0] = "DRAG";
+  ScrollSource[ScrollSource["FLING"] = 1] = "FLING";
+  ScrollSource[ScrollSource["EDGE_EFFECT"] = 2] = "EDGE_EFFECT";
+  ScrollSource[ScrollSource["OTHER_USER_INPUT"] = 3] = "OTHER_USER_INPUT";
+  ScrollSource[ScrollSource["SCROLL_BAR"] = 4] = "SCROLL_BAR";
+  ScrollSource[ScrollSource["SCROLL_BAR_FLING"] = 5] = "SCROLL_BAR_FLING";
+  ScrollSource[ScrollSource["SCROLLER"] = 6] = "SCROLLER";
+  ScrollSource[ScrollSource["SCROLLER_ANIMATION"] = 7] = "SCROLLER_ANIMATION";
+})(ScrollSource || (ScrollSource = {}));
+
 var TouchType;
 (function (TouchType) {
   TouchType[TouchType["Down"] = 0] = "Down";
@@ -720,6 +738,8 @@ var SlideEffect;
   SlideEffect[SlideEffect["Right"] = 2] = "Right";
   SlideEffect[SlideEffect["Top"] = 3] = "Top";
   SlideEffect[SlideEffect["Bottom"] = 4] = "Bottom";
+  SlideEffect[SlideEffect["START"] = 5] = "START";
+  SlideEffect[SlideEffect["END"] = 6] = "END";
 })(SlideEffect || (SlideEffect = {}));
 
 var GradientDirection;
@@ -1065,6 +1085,9 @@ var SourceTool;
   SourceTool[SourceTool["Unknown"] = 0] = "Unknown";
   SourceTool[SourceTool["FINGER"] = 1] = "FINGER";
   SourceTool[SourceTool["PEN"] = 2] = "PEN";
+  SourceTool[SourceTool["MOUSE"] = 7] = "MOUSE";
+  SourceTool[SourceTool["TOUCHPAD"] = 9] = "TOUCHPAD";
+  SourceTool[SourceTool["JOYSTICK"] = 10] = "JOYSTICK";
 })(SourceTool || (SourceTool = {}));
 
 var KeySource;
@@ -1151,6 +1174,12 @@ var RenderExitReason;
   RenderExitReason[RenderExitReason["ProcessOom"] = 3] = "ProcessOom";
   RenderExitReason[RenderExitReason["ProcessExitUnknown"] = 4] = "ProcessExitUnknown";
 })(RenderExitReason || (RenderExitReason = {}));
+
+var RenderProcessNotRespondingReason;
+(function (RenderProcessNotRespondingReason) {
+  RenderProcessNotRespondingReason[RenderProcessNotRespondingReason["INPUT_TIMEOUT"] = 0] = "INPUT_TIMEOUT";
+  RenderProcessNotRespondingReason[RenderProcessNotRespondingReason["NAVIGATION_COMMIT_TIMEOUT"] = 1] = "NAVIGATION_COMMIT_TIMEOUT";
+})(RenderProcessNotRespondingReason || (RenderProcessNotRespondingReason = {}));
 
 var SslError;
 (function (SslError) {
@@ -1712,6 +1741,14 @@ class Indicator {
     this.bottomValue = value;
     return this;
   }
+  start(value) {
+    this.startValue = value;
+    return this;
+  }
+  end(value) {
+    this.endValue = value;
+    return this;
+  }
   static dot() {
     return new DotIndicator();
   }
@@ -1868,6 +1905,7 @@ var SliderInteraction;
 (function (SliderInteraction) {
   SliderInteraction[SliderInteraction["SLIDE_AND_CLICK"] = 0] = "SLIDE_AND_CLICK";
   SliderInteraction[SliderInteraction["SLIDE_ONLY"] = 1] = "SLIDE_ONLY";
+  SliderInteraction[SliderInteraction["SLIDE_AND_CLICK_UP"] = 2] = "SLIDE_AND_CLICK_UP";
 })(SliderInteraction || (SliderInteraction = {}));
 
 var TitleStyle;
@@ -2451,6 +2489,12 @@ class WaterFlowSections {
   }
 }
 
+var WaterFlowLayoutMode;
+(function (WaterFlowLayoutMode) {
+  WaterFlowLayoutMode[WaterFlowLayoutMode["ALWAYS_TOP_DOWN"] = 0] = "ALWAYS_TOP_DOWN";
+  WaterFlowLayoutMode[WaterFlowLayoutMode["SLIDING_WINDOW"] = 1] = "SLIDING_WINDOW";
+})(WaterFlowLayoutMode || (WaterFlowLayoutMode = {}));
+
 class ChildrenMainSizeParamError extends Error {
   constructor(message, code) {
     super(message);
@@ -2682,6 +2726,7 @@ var XComponentType;
   XComponentType[XComponentType["COMPONENT"] = 1] = "COMPONENT";
   XComponentType[XComponentType["TEXTURE"] = 2] = "TEXTURE";
   XComponentType[XComponentType["NODE"] = 3] = "NODE";
+  XComponentType[XComponentType["PLATFORM_VIEW"] = 999] = "PLATFORM_VIEW";
 })(XComponentType || (XComponentType = {}));
 
 var NestedScrollMode;
@@ -2724,6 +2769,17 @@ var SafeAreaEdge;
   SafeAreaEdge[SafeAreaEdge["START"] = 2] = "START";
   SafeAreaEdge[SafeAreaEdge["END"] = 3] = "END";
 })(SafeAreaEdge || (SafeAreaEdge = {}));
+
+let LayoutSafeAreaType;
+(function (LayoutSafeAreaType) {
+  LayoutSafeAreaType[LayoutSafeAreaType.SYSTEM = 0] = "SYSTEM";
+})(LayoutSafeAreaType || (LayoutSafeAreaType = {}));
+
+let LayoutSafeAreaEdge;
+(function (LayoutSafeAreaEdge) {
+  LayoutSafeAreaEdge[LayoutSafeAreaEdge.TOP = 0] = "TOP";
+  LayoutSafeAreaEdge[LayoutSafeAreaEdge.BOTTOM = 1] = "BOTTOM";
+})(LayoutSafeAreaEdge || (LayoutSafeAreaEdge = {}));
 
 var RenderFit;
 (function (RenderFit) {
@@ -3047,3 +3103,16 @@ var SubMenuExpandingMode;
   SubMenuExpandingMode[SubMenuExpandingMode["EMBEDDED_EXPAND"] = 1] = "EMBEDDED";
   SubMenuExpandingMode[SubMenuExpandingMode["STACK_EXPAND"] = 2] = "STACK";
 })(SubMenuExpandingMode || (SubMenuExpandingMode = {}));
+
+var ViewportFit;
+(function (ViewportFit) {
+  ViewportFit[ViewportFit["AUTO"] = 0] = "AUTO";
+  ViewportFit[ViewportFit["CONTAINS"] = 1] = "CONTAINS";
+  ViewportFit[ViewportFit["COVER"] = 2] = "COVER";
+})(ViewportFit || (ViewportFit = {}));
+
+var TextDeleteDirection;
+(function (TextDeleteDirection) {
+    TextDeleteDirection[TextDeleteDirection["BACKWARD"] = 0] = "BACKWARD";
+    TextDeleteDirection[TextDeleteDirection["FORWARD"] = 1] = "FORWARD";
+})(TextDeleteDirection || (TextDeleteDirection = {}));

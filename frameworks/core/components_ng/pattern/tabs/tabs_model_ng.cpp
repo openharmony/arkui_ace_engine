@@ -750,6 +750,18 @@ void TabsModelNG::SetBarBackgroundColor(FrameNode* frameNode, const Color& backg
     tabBarRenderContext->UpdateBackgroundColor(backgroundColor);
 }
 
+void TabsModelNG::SetBarBackgroundBlurStyle(FrameNode* frameNode, BlurStyle tabBarBlurStyle)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBarNode);
+    auto tabBarPaintProperty = tabBarNode->GetPaintProperty<TabBarPaintProperty>();
+    CHECK_NULL_VOID(tabBarPaintProperty);
+    tabBarPaintProperty->UpdateTabBarBlurStyle(tabBarBlurStyle);
+}
+
 void TabsModelNG::SetBarOverlap(FrameNode* frameNode, bool barOverlap)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, BarOverlap, barOverlap, frameNode);

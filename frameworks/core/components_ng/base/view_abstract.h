@@ -38,6 +38,7 @@
 #include "core/components/common/properties/popup_param.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/shared_transition_option.h"
+#include "core/components_ng/event/focus_box.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/property/border_property.h"
@@ -180,6 +181,7 @@ public:
     static void SetHueRotate(float value);
     static void SetColorBlend(const Color &value);
     static void SetSystemBarEffect(bool systemBarEffect);
+    static void SetSystemBarEffect(FrameNode *frameNode, bool enable);
 
     // gradient
     static void SetLinearGradient(const NG::Gradient &gradient);
@@ -236,8 +238,11 @@ public:
     static void SetFocusOnTouch(bool isSet);
     static void SetDefaultFocus(bool isSet);
     static void SetGroupDefaultFocus(bool isSet);
+    static void SetFocusBoxStyle(const NG::FocusBoxStyle& style);
     static void SetOnAppear(std::function<void()> &&onAppear);
     static void SetOnDisappear(std::function<void()> &&onDisappear);
+    static void SetOnAttach(std::function<void()> &&onAttach);
+    static void SetOnDetach(std::function<void()> &&onDetach);
     static void SetOnAreaChanged(std::function<void(const RectF &oldRect, const OffsetF &oldOrigin, const RectF &rect,
         const OffsetF &origin)> &&onAreaChanged);
     static void SetOnVisibleChange(std::function<void(bool, double)> &&onVisibleChange,
@@ -330,6 +335,8 @@ public:
     static void DisableOnMouse();
     static void DisableOnAppear();
     static void DisableOnDisAppear();
+    static void DisableOnAttach();
+    static void DisableOnDetach();
     static void DisableOnAreaChange();
     static void DisableOnFocus();
     static void DisableOnBlur();
@@ -340,6 +347,8 @@ public:
     static void DisableOnMouse(FrameNode* frameNode);
     static void DisableOnAppear(FrameNode* frameNode);
     static void DisableOnDisappear(FrameNode* frameNode);
+    static void DisableOnAttach(FrameNode* frameNode);
+    static void DisableOnDetach(FrameNode* frameNode);
     static void DisableOnFocus(FrameNode* frameNode);
     static void DisableOnBlur(FrameNode* frameNode);
     static void DisableOnAreaChange(FrameNode* frameNode);
@@ -526,6 +535,8 @@ public:
 
     static void SetOnAppear(FrameNode* frameNode, std::function<void()> &&onAppear);
     static void SetOnDisappear(FrameNode* frameNode, std::function<void()> &&onDisappear);
+    static void SetOnAttach(FrameNode* frameNode, std::function<void()> &&onAttach);
+    static void SetOnDetach(FrameNode* frameNode, std::function<void()> &&onDetach);
     static void SetOnAreaChanged(FrameNode* frameNode, std::function<void(const RectF &oldRect,
         const OffsetF &oldOrigin, const RectF &rect, const OffsetF &origin)> &&onAreaChanged);
     static void SetOnFocus(FrameNode* frameNode, OnFocusFunc &&onFocusCallback);
@@ -641,6 +652,10 @@ public:
     static Color GetColorBlend(FrameNode* frameNode);
     static void ResetAreaChanged(FrameNode* frameNode);
     static void ResetVisibleChange(FrameNode* frameNode);
+    static void SetLayoutRect(FrameNode* frameNode, const NG::RectF& rect);
+    static void ResetLayoutRect(FrameNode* frameNode);
+    static NG::RectF GetLayoutRect(FrameNode* frameNode);
+    static bool GetFocusOnTouch(FrameNode* frameNode);
 
 private:
     static void AddDragFrameNodeToManager();

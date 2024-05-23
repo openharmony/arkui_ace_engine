@@ -16,11 +16,12 @@
 class ComponentContent extends Content {
   // the name of "builderNode_" is used in ace_engine/interfaces/native/node/native_node_napi.cpp.
   private builderNode_: BuilderNode;
+  private attachNodeRef_: NativeStrongRef;
   constructor(uiContext: UIContext, builder: WrappedBuilder<[]> | WrappedBuilder<[Object]>, params?: Object) {
     super();
     let builderNode = new BuilderNode(uiContext, {});
     this.builderNode_ = builderNode;
-    this.builderNode_.build(builder, params ?? undefined, false);
+    this.builderNode_.build(builder, params ?? undefined);
   }
 
   public update(params: Object) {
@@ -32,5 +33,22 @@ class ComponentContent extends Content {
   }
   public getNodePtr(): NodePtr {
     return this.builderNode_.getNodePtr();
+  }
+  public reuse(param: Object): void {
+    this.builderNode_.reuse(param);
+  }
+  public recycle(): void {
+    this.builderNode_.recycle();
+  }
+  public getNodeWithoutProxy(): NodePtr {
+    const node = this.getNodePtr();
+    const nodeType = getUINativeModule().frameNode.getNodeType(node);
+    if (nodeType === "BuilderProxyNode") {
+      const result = getUINativeModule().frameNode.getFirstUINode(node);
+      this.attachNodeRef_ = getUINativeModule().nativeUtils.createNativeStrongRef(result);
+      getUINativeModule().frameNode.clearChildren(node);
+      return result;
+    }
+    return node;
   }
 }

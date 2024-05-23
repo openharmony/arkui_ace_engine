@@ -279,6 +279,8 @@ private:
     void SetDividerHeight(uint32_t showOptionCount);
     void OnTouchDown();
     void OnTouchUp();
+    void ParseTouchListener();
+    void ParseMouseEvent();
     void InitMouseAndPressEvent();
     void HandleMouseEvent(bool isHover);
     void SetButtonBackgroundColor(const Color& pressColor);
@@ -324,6 +326,7 @@ private:
     void FlushAnimationTextProperties(bool isDown);
     Dimension LinearFontSize(const Dimension& startFontSize, const Dimension& endFontSize, double percent);
     void SetAccessibilityAction();
+    DimensionRect CalculateHotZone(int32_t index, int32_t midSize, float middleChildHeight, float otherChildHeight);
     void AddHotZoneRectToText();
     float localDownDistance_ = 0.0f;
     RefPtr<TouchEventImpl> touchListener_;

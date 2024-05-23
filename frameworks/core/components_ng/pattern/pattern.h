@@ -89,6 +89,11 @@ public:
         return false;
     }
 
+    virtual bool IsNeedPercent() const
+    {
+        return false;
+    }
+
     virtual bool IsSupportDrawModifier() const
     {
         return true;
@@ -166,6 +171,11 @@ public:
     }
 
     virtual void OnContextAttached() {}
+
+    virtual OPINC_TYPE_E OpIncType()
+    {
+        return OPINC_NODE_POSSIBLE;
+    }
 
     virtual void OnModifyDone()
     {
@@ -260,8 +270,6 @@ public:
     {
         return true;
     }
-
-    virtual void UpdateSlideOffset(bool isNeedReset = false) {}
 
     // TODO: for temp use, need to delete this.
     virtual bool OnDirtyLayoutWrapperSwap(

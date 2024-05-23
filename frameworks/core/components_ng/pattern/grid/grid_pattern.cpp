@@ -254,6 +254,7 @@ void GridPattern::FireOnScrollStart()
 {
     UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
         AceType::WeakClaim(this), ScrollEventType::SCROLL_START);
+    SuggestOpIncGroup(true);
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
     if (GetScrollAbort()) {
         return;
@@ -310,17 +311,9 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
 
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, false);
-    if (layoutProperty->IsReverse()) {
-        if (source != SCROLL_FROM_ANIMATION_SPRING && source != SCROLL_FROM_ANIMATION_CONTROLLER &&
-            source != SCROLL_FROM_JUMP) {
-            offset = -offset;
-        }
-    }
 
     // check edgeEffect is not springEffect
-    if (!HandleEdgeEffect(offset, source, GetContentSize(), layoutProperty->IsReverse())) {
+    if (!HandleEdgeEffect(offset, source, GetContentSize())) {
         if (IsOutOfBoundary()) {
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
@@ -348,7 +341,8 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
             auto friction = ScrollablePattern::CalculateFriction(std::abs(overScroll) / GetMainContentSize());
             offset *= friction;
         }
-        gridLayoutInfo_.currentOffset_ += offset;
+        auto userOffset = FireOnWillScroll(-offset);
+        gridLayoutInfo_.currentOffset_ -= userOffset;
 
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
@@ -356,7 +350,6 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
             gridLayoutInfo_.offsetEnd_ = false;
             gridLayoutInfo_.reachEnd_ = false;
         }
-        FireOnWillScroll(-offset);
         return true;
     }
     if (gridLayoutInfo_.reachStart_) {
@@ -365,18 +358,18 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
                 ScrollablePattern::CalculateFriction(std::abs(gridLayoutInfo_.currentOffset_) / GetMainContentSize());
             offset *= friction;
         }
-        gridLayoutInfo_.currentOffset_ += offset;
+        auto userOffset = FireOnWillScroll(-offset);
+        gridLayoutInfo_.currentOffset_ -= userOffset;
 
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
         if (LessNotEqual(gridLayoutInfo_.currentOffset_, 0.0)) {
             gridLayoutInfo_.reachStart_ = false;
         }
-        FireOnWillScroll(-offset);
         return true;
     }
-    FireOnWillScroll(-offset);
-    gridLayoutInfo_.currentOffset_ += offset;
+    auto userOffset = FireOnWillScroll(-offset);
+    gridLayoutInfo_.currentOffset_ -= userOffset;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return true;
 }
@@ -449,10 +442,10 @@ void GridPattern::CheckScrollable()
         }
     }
 
-    SetScrollEnable(scrollable_);
+    SetScrollEnabled(scrollable_);
 
     if (!gridLayoutProperty->GetScrollEnabled().value_or(scrollable_)) {
-        SetScrollEnable(false);
+        SetScrollEnabled(false);
     }
 }
 
@@ -1605,11 +1598,6 @@ void GridPattern::SyncLayoutBeforeSpring()
     host->CreateLayoutTask();
 }
 
-bool GridPattern::OutBoundaryCallback()
-{
-    return IsOutOfBoundary();
-}
-
 void GridPattern::GetEndOverScrollIrregular(OverScrollOffset& offset, float delta) const
 {
     const auto& info = gridLayoutInfo_;
@@ -1874,48 +1862,29 @@ void GridPattern::AnimateToTarget(ScrollAlign align, RefPtr<LayoutAlgorithmWrapp
 // scroll to the item where the index is located
 bool GridPattern::AnimateToTargetImp(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper)
 {
-    bool irregular = UseIrregularLayout();
-    // use as reference
-    GridLayoutInfo* infoPtr {};
-    if (irregular) {
-        infoPtr = &gridLayoutInfo_;
-    } else {
-        auto gridScrollLayoutAlgorithm =
-            DynamicCast<GridScrollLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
-        scrollGridLayoutInfo_ = gridScrollLayoutAlgorithm->GetScrollGridLayoutInfo();
-        infoPtr = &scrollGridLayoutInfo_;
-    }
-
     float mainGap = GetMainGap();
     float targetPos = 0.0f;
-    if (irregular && align == ScrollAlign::CENTER) {
-        targetPos = IrregularAnimateToCenter(mainGap);
+    if (UseIrregularLayout()) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto size = GridLayoutUtils::GetItemSize(&gridLayoutInfo_, RawPtr(host), *targetIndex_);
+        targetPos = gridLayoutInfo_.GetAnimatePosIrregular(*targetIndex_, size.rows, align, mainGap);
         if (Negative(targetPos)) {
             return false;
         }
     } else {
+        auto gridScrollLayoutAlgorithm =
+            DynamicCast<GridScrollLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+        scrollGridLayoutInfo_ = gridScrollLayoutAlgorithm->GetScrollGridLayoutInfo();
         // Based on the index, align gets the position to scroll to
-        bool success = infoPtr->GetGridItemAnimatePos(gridLayoutInfo_, targetIndex_.value(), align, mainGap, targetPos);
+        bool success = scrollGridLayoutInfo_.GetGridItemAnimatePos(
+            gridLayoutInfo_, targetIndex_.value(), align, mainGap, targetPos);
         CHECK_NULL_RETURN(success, false);
     }
 
     isSmoothScrolling_ = true;
     AnimateTo(targetPos, -1, nullptr, true);
     return true;
-}
-
-float GridPattern::IrregularAnimateToCenter(float mainGap) const
-{
-    const auto& info = gridLayoutInfo_;
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, -1.0f);
-    auto it = info.FindInMatrix(*targetIndex_);
-    if (it == info.gridMatrix_.end()) {
-        return -1.0f;
-    }
-    auto size = GridLayoutUtils::GetItemSize(&info, RawPtr(host), *targetIndex_);
-    auto [center, offset] = info.FindItemCenter(it->first, size.rows, mainGap);
-    return info.GetHeightInRange(0, center, mainGap) + offset - info.lastMainSize_ / 2.0f;
 }
 
 std::vector<RefPtr<FrameNode>> GridPattern::GetVisibleSelectedItems()

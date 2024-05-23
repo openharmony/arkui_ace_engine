@@ -165,6 +165,20 @@ bool WebClientImpl::OnFocus()
     CHECK_NULL_RETURN(delegate, false);
     bool isFocused = delegate->RequestFocus();
     delegate->OnRequestFocus();
+
+    delegate->SetToken();
+    return isFocused;
+}
+
+bool WebClientImpl::OnFocus(OHOS::NWeb::NWebFocusSource source)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_RETURN(delegate, false);
+    bool isFocused = delegate->RequestFocus(source);
+    delegate->OnRequestFocus();
+
+    delegate->SetToken();
     return isFocused;
 }
 
@@ -1021,7 +1035,7 @@ bool WebClientImpl::OnHandleOverrideUrlLoading(std::shared_ptr<OHOS::NWeb::NWebU
     }
 
     bool result = delegate->OnHandleOverrideLoading(request);
-    
+
     return result;
 }
 
@@ -1082,5 +1096,13 @@ void WebClientImpl::OnHideAutofillPopup()
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
     delegate->OnHideAutofillPopup();
+}
+
+void WebClientImpl::OnViewportFitChange(OHOS::NWeb::ViewportFit viewportFit)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnViewportFitChange(viewportFit);
 }
 } // namespace OHOS::Ace

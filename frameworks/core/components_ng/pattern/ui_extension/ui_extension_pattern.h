@@ -27,7 +27,6 @@
 #include "base/memory/referenced.h"
 #include "base/want/want_wrap.h"
 #include "core/common/container.h"
-#include "core/common/dynamic_component_renderer.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
@@ -98,23 +97,6 @@ public:
     void OnMountToParentDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
-    // for DynamicComponent
-    void InitializeDynamicComponent(
-        const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint, void* runtime);
-    bool OnDirtyLayoutWrapperSwapForDynamicComponent(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config);
-
-    void OnSizeChanged(int32_t width, int32_t height)
-    {
-        if (onSizeChanged_) {
-            onSizeChanged_(width, height);
-        }
-    }
-
-    void SetOnSizeChangedCallback(std::function<void(int32_t, int32_t)>&& callback)
-    {
-        onSizeChanged_ = std::move(callback);
-    }
-
     void OnConnect();
     void OnDisconnect(bool isAbnormal);
     void HandleDragEvent(const PointerEvent& info) override;
@@ -135,13 +117,18 @@ public:
     void FireOnReceiveCallback(const AAFwk::WantParams& params);
     void SetOnErrorCallback(
         const std::function<void(int32_t code, const std::string& name, const std::string& message)>&& callback);
-    void FireOnErrorCallback(int32_t code, const std::string& name, const std::string& message);
+    virtual void FireOnErrorCallback(int32_t code, const std::string& name, const std::string& message);
     void SetSyncCallbacks(const std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>>&& callbackList);
     void FireSyncCallbacks();
     void SetAsyncCallbacks(const std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>>&& callbackList);
     void FireAsyncCallbacks();
     void SetBindModalCallback(const std::function<void()>&& callback);
     void FireBindModalCallback();
+    void DispatchFollowHostDensity(bool densityDpi);
+    void OnDpiConfigurationUpdate() override;
+    void SetDensityDpi(bool densityDpi);
+    bool GetDensityDpi();
+    bool IsCompatibleOldVersion();
 
     void NotifySizeChangeReason(
         WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction);
@@ -173,6 +160,18 @@ public:
         int32_t action, int64_t offset) override;
     void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t uiExtensionOffset);
 
+protected:
+    enum class ComponentType { DYNAMIC, UI_EXTENSION };
+
+    virtual void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    virtual void DispatchKeyEvent(const KeyEvent& event);
+
+    // for DynamicComponent
+    ComponentType componentType_ = ComponentType::UI_EXTENSION;
+    int32_t uiExtensionId_ = 0;
+    int32_t instanceId_ = Container::CurrentId();
+    std::function<void(int32_t code, const std::string& name, const std::string& message)> onErrorCallback_;
+
 private:
     enum class AbilityState {
         NONE = 0,
@@ -186,8 +185,6 @@ private:
         std::string name;
         std::string message;
     };
-
-    enum class ComponentType { DYNAMIC, UI_EXTENSION };
 
     const char* ToString(AbilityState state);
     void OnAttachToFrameNode() override;
@@ -206,11 +203,9 @@ private:
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleMouseEvent(const MouseInfo& info);
     void HandleHoverEvent(bool isHover);
-    void DispatchKeyEvent(const KeyEvent& event);
     bool DispatchKeyEventSync(const KeyEvent& event);
     void DispatchFocusActiveEvent(bool isFocusActive);
     void DispatchFocusState(bool focusState);
-    void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void DispatchDisplayArea(bool isForce = false);
 
     void RegisterVisibleAreaChange();
@@ -229,7 +224,6 @@ private:
     std::function<void(int32_t, const AAFwk::Want&)> onResultCallback_;
     std::function<void(int32_t, const RefPtr<WantWrap>&)> onTerminatedCallback_;
     std::function<void(const AAFwk::WantParams&)> onReceiveCallback_;
-    std::function<void(int32_t code, const std::string& name, const std::string& message)> onErrorCallback_;
     std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>> onSyncOnCallbackList_;
     std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>> onAsyncOnCallbackList_;
     std::function<void()> bindModalCallback_;
@@ -240,22 +234,17 @@ private:
     RefPtr<SessionWrapper> sessionWrapper_;
     RefPtr<AccessibilitySessionAdapterUIExtension> accessibilitySessionAdapter_;
     ErrorMsg lastError_;
-    int32_t instanceId_ = Container::CurrentId();
     AbilityState state_ = AbilityState::NONE;
     bool isTransferringCaller_ = false;
     bool isVisible_ = true;
     bool isModal_ = false;
     bool isAsyncModalBinding_ = false;
     bool isShowPlaceholder_ = false;
-    int32_t uiExtensionId_ = 0;
+    bool densityDpi_ = false;
     int32_t callbackId_ = 0;
     RectF displayArea_;
     bool isKeyAsync_ = false;
-
-    // for DynamicComponent
-    ComponentType componentType_ = ComponentType::UI_EXTENSION;
-    RefPtr<DynamicComponentRenderer> dynamicComponentRenderer_;
-    std::function<void(int32_t, int32_t)> onSizeChanged_;
+    SessionType sessionType_ = SessionType::UI_EXTENSION_ABILITY;
 
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
 };

@@ -60,6 +60,21 @@ public:
         isMuted_ = isMuted;
     }
 
+    bool GetMuted()
+    {
+        return isMuted_;
+    }
+
+    bool GetPrepared()
+    {
+        return isPrepared_;
+    }
+
+    bool GetPlayByController()
+    {
+        return isPlayByController_;
+    }
+
     void OnVisibleChange(bool isVisible) override;
 
     void OnAreaChangedInner() override;
@@ -84,6 +99,8 @@ private:
     void OnRebuildFrame() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnWindowHide() override;
+    
+    void RegisterVisibleAreaChange();
 
     void InitEvent();
     void HandleLongPress(GestureEvent& info);
@@ -111,6 +128,7 @@ private:
     void OnPlayPositionChanged(uint32_t pos) {};
     void FireMediaPlayerStart();
     void FireMediaPlayerStop();
+    void FireMediaPlayerPause();
     void FireMediaPlayerFinish();
     void FireMediaPlayerError();
     void OnResolutionChange();
@@ -135,12 +153,13 @@ private:
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<MovingPhotoController> controller_;
 
-    // video related params
     int32_t fd_ = -1;
+    std::string uri_ = "";
     bool isPrepared_ = false;
     bool isMuted_ = false;
     bool isPlayByController_ = false;
     bool isFastKeyUp_ = false;
+    bool hasVisibleChangeRegistered_ = false;
     PlaybackStatus currentPlayStatus_ = PlaybackStatus::NONE;
 
     Rect lastBoundsRect_;

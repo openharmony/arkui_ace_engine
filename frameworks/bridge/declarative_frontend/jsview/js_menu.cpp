@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/menu/menu_model.h"
 #include "core/components_ng/pattern/menu/menu_model_ng.h"
 #include "core/components_ng/property/measure_property.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_menu_theme.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<MenuModel> MenuModel::instance_ = nullptr;
@@ -50,6 +51,7 @@ namespace OHOS::Ace::Framework {
 void JSMenu::Create(const JSCallbackInfo& /* info */)
 {
     MenuModel::GetInstance()->Create();
+    JSMenuTheme::ApplyTheme();
 }
 
 void JSMenu::FontSize(const JSCallbackInfo& info)
@@ -217,7 +219,9 @@ void JSMenu::JSBind(BindingTarget globalObj)
     JSClass<JSMenu>::StaticMethod("width", &JSMenu::SetWidth, opt);
     JSClass<JSMenu>::StaticMethod("radius", &JSMenu::SetRadius, opt);
     JSClass<JSMenu>::StaticMethod("subMenuExpandingMode", &JSMenu::SetExpandingMode);
+    JSClass<JSMenu>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSMenu>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSMenu>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSMenu>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSMenu>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSMenu>::InheritAndBind<JSViewAbstract>(globalObj);

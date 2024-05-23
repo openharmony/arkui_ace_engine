@@ -36,7 +36,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-// TODO datepicker style modification
+// Datepicker style modification
 const Dimension PRESS_INTERVAL = 4.0_vp;
 const Dimension PRESS_RADIUS = 8.0_vp;
 constexpr uint32_t RATE = 2;
@@ -752,11 +752,11 @@ std::string TextPickerPattern::GetSelectedObjectMulti(const std::vector<std::str
     }
     result += std::string(",\"index\":") + "[";
     for (uint32_t i = 0; i < indexs.size(); i++) {
-        result += "\"" + std::to_string(indexs[i]);
+        result += std::to_string(indexs[i]);
         if (indexs.size() > 0 && indexs.size() != i + 1) {
-            result += "\",";
+            result += ",";
         } else {
-            result += "\"]";
+            result += "]";
         }
     }
     result += ",\"status\":" + std::to_string(status) + "}";

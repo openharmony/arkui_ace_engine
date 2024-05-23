@@ -33,9 +33,9 @@ public:
         IndexerModel::GetInstance()->SetColor(themeColors->FontSecondary());
         IndexerModel::GetInstance()->SetSelectedColor(themeColors->FontEmphasize());
         IndexerModel::GetInstance()->SetPopupColor(themeColors->FontEmphasize());
-        IndexerModel::GetInstance()->SetPopupSelectedColor(themeColors->FontEmphasize());
         IndexerModel::GetInstance()->SetPopupUnselectedColor(themeColors->FontPrimary());
-        IndexerModel::GetInstance()->SetPopupBackground(themeColors->CompBackgroundTertiary());
+        IndexerModel::GetInstance()->SetPopupTitleBackground(themeColors->CompBackgroundTertiary());
+        IndexerModel::GetInstance()->SetSelectedBackgroundColor(themeColors->CompEmphasizeSecondary());
     }
 };
 } // namespace OHOS::Ace::Framework

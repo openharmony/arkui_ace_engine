@@ -55,30 +55,40 @@ public:
 
     RefPtr<GeometryNode> Clone() const;
 
-    SizeF GetMarginFrameSize() const
+    SizeF GetMarginFrameSize(bool withSafeArea = false) const
     {
         // TODO: add margin in negative.
         auto size = frame_.rect_.GetSize();
+        if (withSafeArea) {
+            size += selfAdjust_.GetSize();
+        }
         if (margin_) {
             AddPaddingToSize(*margin_, size);
         }
         return size;
     }
 
-    OffsetF GetMarginFrameOffset() const
+    OffsetF GetMarginFrameOffset(bool withSafeArea = false) const
     {
         // TODO: add margin in negative.
         auto offset = frame_.rect_.GetOffset();
+        if (withSafeArea) {
+            offset += selfAdjust_.GetOffset();
+        }
         if (margin_) {
             offset -= OffsetF(margin_->left.value_or(0), margin_->top.value_or(0));
         }
         return offset;
     }
 
-    RectF GetMarginFrameRect() const
+    RectF GetMarginFrameRect(bool withSafeArea = false) const
     {
         auto offset = frame_.rect_.GetOffset();
         auto size = frame_.rect_.GetSize();
+        if (withSafeArea) {
+            offset += selfAdjust_.GetOffset();
+            size += selfAdjust_.GetSize();
+        }
         if (margin_) {
             offset -= OffsetF(margin_->left.value_or(0), margin_->top.value_or(0));
             AddPaddingToSize(*margin_, size);
@@ -95,19 +105,31 @@ public:
         frame_.rect_.SetOffset(translate + offset);
     }
 
-    const RectF& GetFrameRect() const
+    RectF GetFrameRect(bool withSafeArea = false) const
     {
-        return frame_.rect_;
+        auto result = frame_.rect_;
+        if (withSafeArea) {
+            result += selfAdjust_;
+        }
+        return result;
     }
 
-    SizeF GetFrameSize() const
+    SizeF GetFrameSize(bool withSafeArea = false) const
     {
-        return frame_.rect_.GetSize();
+        auto result = frame_.rect_.GetSize();
+        if (withSafeArea) {
+            result += selfAdjust_.GetSize();
+        }
+        return result;
     }
 
-    OffsetF GetFrameOffset() const
+    OffsetF GetFrameOffset(bool withSafeArea = false) const
     {
-        return frame_.rect_.GetOffset();
+        auto result = frame_.rect_.GetOffset();
+        if (withSafeArea) {
+            result += selfAdjust_.GetOffset();
+        }
+        return result;
     }
 
     void SetFrameOffset(const OffsetF& offset)
@@ -148,27 +170,36 @@ public:
         frame_.rect_.SetTop(offset);
     }
 
-    SizeF GetPaddingSize() const
+    SizeF GetPaddingSize(bool withSafeArea = false) const
     {
         auto size = frame_.rect_.GetSize();
+        if (withSafeArea) {
+            size += selfAdjust_.GetSize();
+        }
         if (padding_) {
             MinusPaddingToSize(*padding_, size);
         }
         return size;
     }
 
-    OffsetF GetPaddingOffset() const
+    OffsetF GetPaddingOffset(bool withSafeArea = false) const
     {
         auto offset = frame_.rect_.GetOffset();
+        if (withSafeArea) {
+            offset += selfAdjust_.GetOffset();
+        }
         if (padding_) {
             offset += OffsetF(padding_->left.value_or(0), padding_->top.value_or(0));
         }
         return offset;
     }
 
-    RectF GetPaddingRect() const
+    RectF GetPaddingRect(bool withSafeArea = false) const
     {
         auto rect = frame_.rect_;
+        if (withSafeArea) {
+            rect += selfAdjust_;
+        }
         if (padding_) {
             auto size = rect.GetSize();
             MinusPaddingToSize(*padding_, size);
@@ -302,6 +333,11 @@ public:
         return pixelGridRoundSize_;
     }
 
+    RectF GetPixelGridRoundRect() const
+    {
+        return RectF(pixelGridRoundOffset_, pixelGridRoundSize_);
+    }
+
     void SetPixelGridRoundSize(const SizeF& pixelGridRoundSize)
     {
         pixelGridRoundSize_ = pixelGridRoundSize;
@@ -342,13 +378,12 @@ public:
         return baselineDistance_.value_or(frame_.rect_.GetY());
     }
 
-    const std::unique_ptr<RectF>& GetPreviousState() const
-    {
-        return previousState_;
-    }
-    void Restore();
-    bool RestoreCache();
-    void Save();
+    RectF GetParentAdjust() const;
+    void SetParentAdjust(RectF parentAdjust);
+    RectF GetSelfAdjust() const;
+    void SetSelfAdjust(RectF selfAdjust);
+    RectF GetFrameRectWithoutSafeArea() const;
+    RectF GetFrameRectWithSafeArea() const;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
@@ -367,9 +402,8 @@ private:
     // the size of content rect in current node local coordinate.
     std::unique_ptr<GeometryProperty> content_;
 
-    // save node's state before SafeArea expansion
-    std::unique_ptr<RectF> previousState_;
-    std::unique_ptr<RectF> restoreCache_;
+    RectF parentAdjust_;
+    RectF selfAdjust_;
 
     OffsetF parentGlobalOffset_;
     OffsetF parentAbsoluteOffset_;

@@ -44,6 +44,8 @@ enum class SlideEffect {
     RIGHT,
     TOP,
     BOTTOM,
+    START,
+    END,
 };
 
 struct PageTransitionOption {

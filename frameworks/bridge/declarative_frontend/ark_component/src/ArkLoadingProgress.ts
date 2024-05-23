@@ -22,6 +22,12 @@ class ArkLoadingProgressComponent extends ArkComponent implements LoadingProgres
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
+  initialize(value: Object[]): LoadingProgressAttribute {
+    return this;
+  }
+  allowChildCount(): number {
+    return 0;
+  }
   color(value: ResourceColor): this {
     modifierWithKey(this._modifiersWithKeys, LoadingProgressColorModifier.identity, LoadingProgressColorModifier, value);
     return this;
@@ -33,6 +39,10 @@ class ArkLoadingProgressComponent extends ArkComponent implements LoadingProgres
   foregroundColor(value: ResourceColor): this {
     modifierWithKey(this._modifiersWithKeys, LoadingProgressForegroundColorModifier.identity,
       LoadingProgressForegroundColorModifier, value);
+    return this;
+  }
+  contentModifier(value: ContentModifier<LoadingProgressConfiguration>): this {
+    this.setContentModifier(value);
     return this;
   }
   setContentModifier(modifier: ContentModifier<LoadingProgressConfiguration>): this {

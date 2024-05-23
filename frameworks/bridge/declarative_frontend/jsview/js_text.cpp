@@ -46,6 +46,7 @@
 #include "core/event/ace_event_handler.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/components/common/properties/text_style_parser.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_text_theme.h"
 
 namespace OHOS::Ace {
 
@@ -380,7 +381,7 @@ void JSText::SetLineSpacing(const JSCallbackInfo& info)
 {
     CalcDimension value;
     JSRef<JSVal> args = info[0];
-    if (!ParseLengthMetricsToDimension(args, value)) {
+    if (!ParseLengthMetricsToPositiveDimension(args, value)) {
         value.Reset();
     }
     if (value.IsNegative()) {
@@ -596,6 +597,9 @@ void JSText::Create(const JSCallbackInfo& info)
     JSRef<JSVal> args = info[0];
     if (args->IsObject() && JSRef<JSObject>::Cast(args)->Unwrap<JSSpanString>()) {
         auto *spanString = JSRef<JSObject>::Cast(args)->Unwrap<JSSpanString>();
+        if (spanString == nullptr) {
+            return;
+        }
         auto spanStringController = spanString->GetController();
         if (spanStringController) {
             TextModel::GetInstance()->Create(spanStringController);
@@ -607,6 +611,7 @@ void JSText::Create(const JSCallbackInfo& info)
         TextModel::GetInstance()->Create(data);
     }
 
+    JSTextTheme::ApplyTheme();
     if (info.Length() <= 1 || !info[1]->IsObject()) {
         return;
     }
@@ -614,7 +619,7 @@ void JSText::Create(const JSCallbackInfo& info)
     JSTextController* jsController = nullptr;
     auto paramObject = JSRef<JSObject>::Cast(info[1]);
     auto controllerObj = paramObject->GetProperty("controller");
-    if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
+    if (!controllerObj->IsUndefined() && !controllerObj->IsNull() && controllerObj->IsObject()) {
         jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextController>();
     }
 
@@ -881,9 +886,6 @@ void JSText::SetFontFeature(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    if (!info[0]->IsString()) {
-        return;
-    }
 
     std::string fontFeatureSettings = info[0]->ToString();
     TextModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
@@ -929,7 +931,9 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("copyOption", &JSText::SetCopyOption);
     JSClass<JSText>::StaticMethod("onClick", &JSText::JsOnClick);
     JSClass<JSText>::StaticMethod("onCopy", &JSText::SetOnCopy);
+    JSClass<JSText>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSText>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSText>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSText>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSText>::StaticMethod("onDragStart", &JSText::JsOnDragStart);
     JSClass<JSText>::StaticMethod("onDragEnter", &JSText::JsOnDragEnter);

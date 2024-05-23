@@ -76,13 +76,13 @@ void RichEditorDragOverlayModifier::onDraw(DrawingContext& context)
         auto selectPosition = pattern->GetSelectPosition();
         auto rect = firstHandle_->Get();
         auto startY = rect.Top() - selectPosition.globalY_;
-        PaintHandle(canvas, firstHandle_->Get(), true, selectPosition.startX_, startY);
+        PaintHandle(canvas, firstHandle_->Get(), true, rect.Left() - selectPosition.globalX_, startY);
     }
     if (secondHandle_) {
         auto selectPosition = pattern->GetSelectPosition();
         auto rect = secondHandle_->Get();
         auto startY = rect.Bottom() - selectPosition.globalY_;
-        PaintHandle(canvas, secondHandle_->Get(), false, selectPosition.endX_, startY);
+        PaintHandle(canvas, secondHandle_->Get(), false, rect.Left() - selectPosition.globalX_, startY);
     }
 }
 

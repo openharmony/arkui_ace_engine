@@ -257,6 +257,7 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateBarItemIconNode(const BarItem& barI
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
         CHECK_NULL_RETURN(iconNode, nullptr);
         auto symbolProperty = iconNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_RETURN(symbolProperty, nullptr);
         symbolProperty->UpdateFontSize(iconWidth);
         if (isButtonEnabled) {
             symbolProperty->UpdateSymbolColorList({ iconColor });
@@ -266,22 +267,21 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateBarItemIconNode(const BarItem& barI
         barItem.iconSymbol.value()(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconNode)));
         iconNode->MarkModifyDone();
         return iconNode;
-    } else {
-        int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        ImageSourceInfo info(barItem.icon.value());
-        auto iconNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, nodeId, AceType::MakeRefPtr<ImagePattern>());
-        auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
-        CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
-        if (isButtonEnabled) {
-            info.SetFillColor(iconColor);
-        } else {
-            info.SetFillColor(iconColor.BlendOpacity(iconOpacity));
-        }
-        imageLayoutProperty->UpdateImageSourceInfo(info);
-        imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconWidth), CalcLength(iconHeight)));
-        iconNode->MarkModifyDone();
-        return iconNode;
     }
+    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    ImageSourceInfo info(barItem.icon.value());
+    auto iconNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, nodeId, AceType::MakeRefPtr<ImagePattern>());
+    auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
+    if (isButtonEnabled) {
+        info.SetFillColor(iconColor);
+    } else {
+        info.SetFillColor(iconColor.BlendOpacity(iconOpacity));
+    }
+    imageLayoutProperty->UpdateImageSourceInfo(info);
+    imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconWidth), CalcLength(iconHeight)));
+    iconNode->MarkModifyDone();
+    return iconNode;
 }
 
 void NavigationTitleUtil::InitTitleBarButtonEvent(const RefPtr<FrameNode>& buttonNode,
@@ -304,14 +304,18 @@ void NavigationTitleUtil::InitTitleBarButtonEvent(const RefPtr<FrameNode>& butto
         return;
     }
 
-    if (menuItem.action || iconNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+    if (menuItem.action) {
         auto gestureEventHub = buttonNode->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureEventHub);
         auto clickCallback = [action = menuItem.action, weakNode = WeakPtr<FrameNode>(iconNode)](GestureEvent& info) {
             if (info.GetSourceDevice() == SourceType::KEYBOARD) {
                 return;
             }
+            if (action) {
+                action();
+            }
             auto symbol = weakNode.Upgrade();
+            CHECK_NULL_VOID(symbol);
             if (symbol->GetTag() == V2::SYMBOL_ETS_TAG) {
                 auto symbolProperty = symbol->GetLayoutProperty<TextLayoutProperty>();
                 CHECK_NULL_VOID(symbolProperty);
@@ -321,9 +325,6 @@ void NavigationTitleUtil::InitTitleBarButtonEvent(const RefPtr<FrameNode>& butto
                 symbolEffectOptions.SetIsTxtActiveSource(0);
                 symbolProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
                 symbol->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-            }
-            if (action) {
-                action();
             }
         };
         gestureEventHub->AddClickEvent(AceType::MakeRefPtr<ClickEvent>(clickCallback));
@@ -358,7 +359,35 @@ void NavigationTitleUtil::UpdateBarItemNodeWithItem(
     barItemNode->MarkModifyDone();
 }
 
-void NavigationTitleUtil::BuildMoreIemNode(const RefPtr<BarItemNode>& barItemNode, const bool isButtonEnabled)
+void BuildImageMoreItemNode(const RefPtr<BarItemNode>& barItemNode, const bool isButtonEnabled)
+{
+    int32_t imageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, imageNodeId, AceType::MakeRefPtr<ImagePattern>());
+    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+
+    auto info = ImageSourceInfo("");
+    info.SetResourceId(theme->GetMoreResourceId());
+    if (isButtonEnabled) {
+        info.SetFillColor(theme->GetMenuIconColor());
+    } else {
+        info.SetFillColor(theme->GetMenuIconColor().BlendOpacity(theme->GetAlphaDisabled()));
+    }
+
+    imageLayoutProperty->UpdateImageSourceInfo(info);
+    auto iconSize = theme->GetMenuIconSize();
+    imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
+    imageNode->MarkModifyDone();
+
+    barItemNode->SetIsMoreItemNode(true);
+    barItemNode->SetIconNode(imageNode);
+    barItemNode->AddChild(imageNode);
+    barItemNode->MarkModifyDone();
+}
+
+void BuildSymbolMoreItemNode(const RefPtr<BarItemNode>& barItemNode, const bool isButtonEnabled)
 {
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
@@ -373,15 +402,22 @@ void NavigationTitleUtil::BuildMoreIemNode(const RefPtr<BarItemNode>& barItemNod
     if (isButtonEnabled) {
         symbolProperty->UpdateSymbolColorList({ theme->GetMenuIconColor() });
     } else {
-        symbolProperty->UpdateSymbolColorList({ theme->GetMenuIconColor()
-            .BlendOpacity(theme->GetAlphaDisabled()) });
+        symbolProperty->UpdateSymbolColorList({ theme->GetMenuIconColor().BlendOpacity(theme->GetAlphaDisabled()) });
     }
     symbolNode->MarkModifyDone();
     barItemNode->SetIsMoreItemNode(true);
     barItemNode->SetIconNode(symbolNode);
     barItemNode->AddChild(symbolNode);
     barItemNode->MarkModifyDone();
-    return;
+}
+
+void NavigationTitleUtil::BuildMoreIemNode(const RefPtr<BarItemNode>& barItemNode, const bool isButtonEnabled)
+{
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        BuildSymbolMoreItemNode(barItemNode, isButtonEnabled);
+    } else {
+        BuildImageMoreItemNode(barItemNode, isButtonEnabled);
+    }
 }
 
 RefPtr<BarItemNode> NavigationTitleUtil::CreateBarItemNode(const bool isButtonEnabled)

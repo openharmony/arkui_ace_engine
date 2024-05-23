@@ -48,19 +48,7 @@ public:
     void OnFlushTouchEventsBegin() override;
     void OnFlushTouchEventsEnd() override;
 
-    Axis GetAxisDirection() override
-    {
-        if (direction_.type == PanDirection::ALL) {
-            return Axis::FREE;
-        }
-        if ((direction_.type & PanDirection::VERTICAL) == 0) {
-            return Axis::HORIZONTAL;
-        }
-        if ((direction_.type & PanDirection::HORIZONTAL) == 0) {
-            return Axis::VERTICAL;
-        }
-        return Axis::NONE;
-    }
+    Axis GetAxisDirection() override;
 
     void SetDirection(const PanDirection& direction);
 

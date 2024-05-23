@@ -147,10 +147,22 @@ constexpr int32_t SCROLL_FROM_AXIS = 11;
 constexpr int32_t SCROLL_FROM_ANIMATION_CONTROLLER = 12;
 constexpr int32_t SCROLL_FROM_BAR_FLING = 13;
 
+enum class ScrollSource {
+    DRAG = 0,           // constexpr int32_t SCROLL_FROM_UPDATE = 1;
+    FLING,              // constexpr int32_t SCROLL_FROM_ANIMATION = 2;
+    EDGE_EFFECT,        // constexpr int32_t SCROLL_FROM_ANIMATION_SPRING = 4;
+    OTHER_USER_INPUT,   // constexpr int32_t SCROLL_FROM_AXIS = 11;
+    SCROLL_BAR,         // constexpr int32_t SCROLL_FROM_BAR = 6;
+    SCROLL_BAR_FLING,   // constexpr int32_t SCROLL_FROM_BAR_FLING = 13;
+    SCROLLER,           // constexpr int32_t SCROLL_FROM_JUMP = 3;
+    SCROLLER_ANIMATION, // constexpr int32_t SCROLL_FROM_ANIMATION_CONTROLLER = 12;
+};
+
 // app tail animation
 constexpr char TRAILING_ANIMATION[] = "TRAILING_ANIMATION";
 
 using OnScrollEvent = std::function<void(Dimension, ScrollState)>;
+using OnWillScrollEvent = std::function<ScrollFrameResult(Dimension, ScrollState, ScrollSource)>;
 using OnScrollBeginEvent = std::function<ScrollInfo(Dimension, Dimension)>;
 using OnScrollFrameBeginEvent = std::function<ScrollFrameResult(Dimension, ScrollState)>;
 using OnScrollStartEvent = std::function<void()>;

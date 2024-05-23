@@ -33,6 +33,9 @@ public:
     void SetCircleRadius(const Dimension& radius) override;
     void SetSideLength(const Dimension& sideLength) override;
     void SetStrokeWidth(const Dimension& lineWidth) override;
+    void SetActiveCircleColor(const Color& activeCircleColor) override;
+    void SetActiveCircleRadius(const Dimension& activeCircleRadius) override;
+    void SetEnableWaveEffect(bool enableWaveEffect) override;
 };
 
 } // namespace OHOS::Ace::Framework

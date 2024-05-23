@@ -64,7 +64,9 @@ void JSSymbol::JSBind(BindingTarget globalObj)
     JSClass<JSSymbol>::StaticMethod("fontColor", &JSSymbol::SetFontColor, opt);
     JSClass<JSSymbol>::StaticMethod("effectStrategy", &JSSymbol::SetSymbolEffect, opt);
     JSClass<JSSymbol>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSSymbol>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSSymbol>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSSymbol>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSSymbol>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSSymbol>::StaticMethod("clip", &JSSymbol::JsClip);
     JSClass<JSSymbol>::StaticMethod("symbolEffect", &JSSymbol::SetSymbolEffectOptions, opt);

@@ -64,8 +64,8 @@ void MovingPhotoPattern::OnAttachToFrameNode()
     static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, "MediaPlayerSurface",
                                                  RenderContext::PatternType::VIDEO };
     renderContextForMediaPlayer_->InitContext(false, param);
-    renderContext->UpdateBackgroundColor(Color::BLACK);
-    renderContextForMediaPlayer_->UpdateBackgroundColor(Color::BLACK);
+    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    renderContextForMediaPlayer_->UpdateBackgroundColor(Color::TRANSPARENT);
     renderContext->SetClipToBounds(true);
 
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -94,6 +94,8 @@ void MovingPhotoPattern::OnAttachToFrameNode()
             pattern->StopPlayback();
         }, "ArkUIMovingPhotoStop");
     });
+
+    RegisterVisibleAreaChange();
 }
 
 void MovingPhotoPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -102,6 +104,7 @@ void MovingPhotoPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
+    hasVisibleChangeRegistered_ = false;
 }
 
 void MovingPhotoPattern::OnDetachFromMainTree()
@@ -245,7 +248,12 @@ void MovingPhotoPattern::PrepareMediaPlayer()
 {
     auto layoutProperty = GetLayoutProperty<MovingPhotoLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (!layoutProperty->HasVideoSource() || layoutProperty->GetVideoSource().value() == fd_) {
+    if (!layoutProperty->HasMovingPhotoUri() || layoutProperty->GetMovingPhotoUri().value() == uri_) {
+        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MovingPhoto source is null or the source has not changed.");
+        return;
+    }
+    uri_ = layoutProperty->GetMovingPhotoUri().value();
+    if (!layoutProperty->HasVideoSource()) {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer source is null or the source has not changed.");
         return;
     }
@@ -387,6 +395,13 @@ void MovingPhotoPattern::FireMediaPlayerStop()
     auto eventHub = GetEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireStopEvent();
+}
+
+void MovingPhotoPattern::FireMediaPlayerPause()
+{
+    auto eventHub = GetEventHub<MovingPhotoEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->FirePauseEvent();
 }
 
 void MovingPhotoPattern::FireMediaPlayerFinish()
@@ -558,6 +573,7 @@ void MovingPhotoPattern::OnMediaPlayerStatusChanged(PlaybackStatus status)
             break;
         case PlaybackStatus::PAUSED:
             TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "Player current status is PAUSED.");
+            FireMediaPlayerPause();
             break;
         case PlaybackStatus::STOPPED:
             TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "Player current status is STOPPED.");
@@ -601,6 +617,7 @@ void MovingPhotoPattern::OnMediaPlayerPrepared()
 
 void MovingPhotoPattern::OnMediaPlayerStoped()
 {
+    isPlayByController_ = false;
     FireMediaPlayerStop();
 }
 
@@ -707,7 +724,7 @@ void MovingPhotoPattern::StopAnimation()
     option.SetDuration(ANIMATION_DURATION_300);
     option.SetCurve(Curves::FRICTION);
     option.SetOnFinishEvent([this]() {
-        Seek(0);
+        Seek(1);
     });
     AnimationUtils::Animate(option, [imageCtx = imageRsContext, videoCtx = videoRsContext]() {
             imageCtx->UpdateOpacity(1.0);
@@ -876,6 +893,27 @@ void MovingPhotoPattern::OnWindowHide()
     CHECK_NULL_VOID(rsContext);
     rsContext->UpdateOpacity(1.0);
     image->MarkModifyDone();
+}
+
+void MovingPhotoPattern::RegisterVisibleAreaChange()
+{
+    if (hasVisibleChangeRegistered_) {
+        return;
+    }
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (!visible) {
+            pattern->StopPlayback();
+        }
+    };
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    std::vector<double> ratioList = {0.0};
+    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
+    hasVisibleChangeRegistered_ = true;
 }
 
 MovingPhotoPattern::~MovingPhotoPattern()

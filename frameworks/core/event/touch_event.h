@@ -102,6 +102,7 @@ struct TouchEvent final : public UIInputEvent {
     std::shared_ptr<MMI::PointerEvent> pointerEvent { nullptr };
     // historical points
     std::vector<TouchEvent> history;
+    std::vector<KeyCode> pressedKeyCodes_;
 
     std::list<std::string> childTouchTestList;
 
@@ -250,6 +251,12 @@ struct TouchEvent final : public UIInputEvent {
         return *this;
     }
 
+    TouchEvent& SetPressedKeyCodes(const std::vector<KeyCode>& pressedKeyCodes)
+    {
+        this->pressedKeyCodes_ = pressedKeyCodes;
+        return *this;
+    }
+
     TouchEvent CloneWith(float scale) const
     {
         return CloneWith(scale, 0.0f, 0.0f, std::nullopt);
@@ -279,6 +286,7 @@ struct TouchEvent final : public UIInputEvent {
             .SetPointers(pointers)
             .SetPointerEvent(pointerEvent)
             .SetOriginalId(originalId)
+            .SetPressedKeyCodes(pressedKeyCodes_)
             .SetIsInjected(isInjected);
     }
 

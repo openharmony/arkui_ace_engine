@@ -17,7 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_GRAPHIC_H
 
 #include "include/core/SkMaskFilter.h"
+
 #include "base/utils/utils.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/components_ng/render/drawing_forward.h"
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkPaint.h"
@@ -126,11 +128,15 @@ protected:
     }
 
     // Update fillStates & strokeStates
-    void UpdateGradient(const Size& viewPort);
+    void UpdateFillGradient(const Size& viewPort);
+    void UpdateStrokeGradient(const Size& viewPort);
     bool UpdateFillStyle(const std::optional<Color>& color, bool antiAlias = true);
     bool UpdateStrokeStyle(bool antiAlias = true);
+    void SetStrokeGradientStyle(double opacity);
     void SetGradientStyle(double opacity);
     void UpdateLineDash();
+    void SetLinearGradient(const Size& viewPort, Gradient& gradient);
+    void SetRadialGradient(const Size& viewPort, Gradient& gradient);
 
 #ifndef USE_ROSEN_DRAWING
     SkPath path_;

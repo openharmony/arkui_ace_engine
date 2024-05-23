@@ -58,6 +58,7 @@ public:
     static uint32_t getTimepickerBackgroundColor(FrameNode* frameNode);
     static int32_t getTimepickerUseMilitaryTime(FrameNode* frameNode);
     static void SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const RefPtr<PickerTheme>& pickerTheme);
+    static void SetWheelModeEnabled(FrameNode* frameNode, bool wheelModeEnabled);
 
 private:
     static RefPtr<FrameNode> CreateStackNode();

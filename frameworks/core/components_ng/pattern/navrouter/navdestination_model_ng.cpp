@@ -147,7 +147,13 @@ void NavDestinationModelNG::Create()
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId);
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
         V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-
+    if (!navDestinationNode->GetTitleBarNode()) {
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+            CreateImageButton(navDestinationNode);
+        } else {
+            CreateBackButton(navDestinationNode);
+        }
+    }
     // content node
     if (!navDestinationNode->GetContentNode()) {
         int32_t contentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -156,14 +162,6 @@ void NavDestinationModelNG::Create()
             []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         navDestinationNode->AddChild(contentNode);
         navDestinationNode->SetContentNode(contentNode);
-    }
-
-    if (!navDestinationNode->GetTitleBarNode()) {
-        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-            CreateImageButton(navDestinationNode);
-        } else {
-            CreateBackButton(navDestinationNode);
-        }
     }
 
     stack->Push(navDestinationNode);
@@ -196,6 +194,49 @@ void NavDestinationModelNG::CreateImageButton(const RefPtr<NavDestinationGroupNo
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
     titleBarLayoutProperty->UpdateTitleBarParentType(TitleBarParentType::NAV_DESTINATION);
+}
+
+void CreateImageBackButton(RefPtr<FrameNode>& backButtonNode, RefPtr<TitleBarNode>& titleBarNode)
+{
+    auto backButtonImageNode = FrameNode::CreateFrameNode(V2::BACK_BUTTON_IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    CHECK_NULL_VOID(backButtonImageNode);
+
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    ImageSourceInfo imageSourceInfo;
+    imageSourceInfo.SetResourceId(theme->GetBackResourceId());
+    auto backButtonImageLayoutProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(backButtonImageLayoutProperty);
+    backButtonImageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+    backButtonImageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    backButtonNode->AddChild(backButtonImageNode);
+    backButtonImageNode->MarkModifyDone();
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    titleBarLayoutProperty->UpdateTitleBarParentType(TitleBarParentType::NAV_DESTINATION);
+    backButtonNode->MarkModifyDone();
+}
+
+void CreateSymbolBackButton(RefPtr<FrameNode>& backButtonNode, RefPtr<TitleBarNode>& titleBarNode)
+{
+    auto symbolNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    CHECK_NULL_VOID(symbolNode);
+    auto symbolProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(symbolProperty);
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    symbolProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(theme->GetBackSymbolId()));
+    symbolProperty->UpdateFontSize(BACK_BUTTON_ICON_SIZE);
+    symbolNode->MountToParent(backButtonNode);
+    auto iconColor = theme->GetIconColor();
+    symbolProperty->UpdateSymbolColorList({ iconColor });
+    symbolNode->MarkDirtyNode();
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    titleBarLayoutProperty->UpdateTitleBarParentType(TitleBarParentType::NAV_DESTINATION);
+    backButtonNode->MarkModifyDone();
 }
 
 void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode)
@@ -248,19 +289,11 @@ void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNod
         backButtonLayoutProperty->UpdatePadding(padding);
     }
 
-    auto symbolNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
-    CHECK_NULL_VOID(symbolNode);
-    auto symbolProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(symbolProperty);
-    symbolProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(theme->GetBackSymbolId()));
-    symbolProperty->UpdateFontSize(BACK_BUTTON_ICON_SIZE);
-    symbolNode->MountToParent(backButtonNode);
-    symbolNode->MarkModifyDone();
-    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
-    CHECK_NULL_VOID(titleBarLayoutProperty);
-    titleBarLayoutProperty->UpdateTitleBarParentType(TitleBarParentType::NAV_DESTINATION);
-    backButtonNode->MarkModifyDone();
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        CreateSymbolBackButton(backButtonNode, titleBarNode);
+    } else {
+        CreateImageBackButton(backButtonNode, titleBarNode);
+    }
 }
 
 void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc, RefPtr<NG::NavDestinationContext> context)
@@ -289,6 +322,13 @@ void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc, RefPt
             pattern->SetNavDestinationContext(context);
             return pattern;
         });
+    if (!navDestinationNode->GetTitleBarNode()) {
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+            CreateImageButton(navDestinationNode);
+        } else {
+            CreateBackButton(navDestinationNode);
+        }
+    }
     // content node
     if (!navDestinationNode->GetContentNode()) {
         int32_t contentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -299,18 +339,12 @@ void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc, RefPt
         navDestinationNode->SetContentNode(contentNode);
 
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-            SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
+            SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
+                .edges = SAFE_AREA_EDGE_ALL };
             contentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
         }
     }
 
-    if (!navDestinationNode->GetTitleBarNode()) {
-        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-            CreateImageButton(navDestinationNode);
-        } else {
-            CreateBackButton(navDestinationNode);
-        }
-    }
     stack->Push(navDestinationNode);
 }
 
@@ -337,7 +371,8 @@ void NavDestinationModelNG::SetTitlebarOptions(NavigationTitlebarOptions&& opt)
 }
 
 void NavDestinationModelNG::SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
-    const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap, const std::vector<std::string>& nameList)
+    const std::string& src, const ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
+    const std::vector<std::string>& nameList)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
@@ -349,9 +384,10 @@ void NavDestinationModelNG::SetBackButtonIcon(const std::function<void(WeakPtr<N
     CHECK_NULL_VOID(titleBarLayoutProperty);
     ImageSourceInfo imageSourceInfo(src, nameList[0], nameList[1]);
     titleBarLayoutProperty->UpdateImageSource(imageSourceInfo);
-    titleBarLayoutProperty->UpdateNoPixMap(noPixMap);
+    titleBarLayoutProperty->UpdateNoPixMap(imageOption.noPixMap);
     titleBarLayoutProperty->UpdatePixelMap(pixMap);
     titleBarLayoutProperty->SetBackIconSymbol(symbolApply);
+    titleBarLayoutProperty->UpdateIsValidImage(imageOption.isValidImage);
     titleBarNode->MarkModifyDone();
 }
 
@@ -456,6 +492,30 @@ RefPtr<AceType> NavDestinationModelNG::CreateEmpty()
 void NavDestinationModelNG::SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, HideTitleBar, hideTitleBar, frameNode);
+}
+
+void NavDestinationModelNG::SetBackButtonIcon(
+    FrameNode* frameNode, const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap)
+{
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationNode);
+
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    ImageSourceInfo imageSourceInfo(src);
+    titleBarLayoutProperty->UpdateImageSource(imageSourceInfo);
+    titleBarLayoutProperty->UpdateNoPixMap(noPixMap);
+    titleBarLayoutProperty->UpdatePixelMap(pixMap);
+    titleBarNode->MarkModifyDone();
+}
+
+void NavDestinationModelNG::SetNavDestinationMode(FrameNode* frameNode, NavDestinationMode mode)
+{
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationNode);
+    navDestinationNode->SetNavDestinationMode(mode);
 }
 
 void NavDestinationModelNG::SetNavDestinationMode(NavDestinationMode mode)
@@ -575,5 +635,15 @@ void NavDestinationModelNG::SetOnWillDisAppear(std::function<void()>&& willDisAp
     auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetOnWillDisAppear(willDisAppear);
+}
+
+void NavDestinationModelNG::SetIgnoreLayoutSafeArea(const SafeAreaExpandOpts& opts)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestination);
+
+    auto navdestinationLayoutProperty = navDestination->GetLayoutProperty<NavDestinationLayoutProperty>();
+    navdestinationLayoutProperty->UpdateIgnoreLayoutSafeArea(opts);
 }
 } // namespace OHOS::Ace::NG

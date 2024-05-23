@@ -30,7 +30,6 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
-#include "core/components_ng/pattern/web/slide_update_listener.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -262,7 +261,6 @@ public:
     }
 
     std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems() override;
-    void registerSlideUpdateListener(const std::shared_ptr<ISlideUpdateCallback>& listener);
 
     void SetItemPressed(bool isPressed, int32_t id)
     {
@@ -340,19 +338,19 @@ private:
     void GetListItemGroupEdge(bool& groupAtStart, bool& groupAtEnd) const;
     void RefreshLanesItemRange();
     void UpdateListDirectionInCardStyle();
-    void UpdateFrameSizeToWeb();
     bool UpdateStartListItemIndex();
     bool UpdateEndListItemIndex();
     float GetStartOverScrollOffset(float offset) const;
     float GetEndOverScrollOffset(float offset) const;
     RefPtr<ListContentModifier> listContentModifier_;
-    std::vector<std::shared_ptr<ISlideUpdateCallback>> listenerVector_;
 
+    void ReadThemeToFadingEdge();
     void UpdateFadingEdge(const RefPtr<ListPaintMethod> paint);
     void UpdateFadeInfo(bool isFadingTop, bool isFadingBottom, const RefPtr<ListPaintMethod> paint);
     bool isFadingEdge_ = false;
     bool isTopEdgeFading_ = false;
     bool isLowerEdgeFading_ = false;
+    Axis fadingAxis_ = Axis::VERTICAL;
 
     int32_t maxListItemIndex_ = 0;
     int32_t startIndex_ = -1;

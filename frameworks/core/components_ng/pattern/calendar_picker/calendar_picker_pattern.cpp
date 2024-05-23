@@ -17,6 +17,7 @@
 
 #include <algorithm>
 
+#include "base/i18n/localization.h"
 #include "core/components/calendar/calendar_theme.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
@@ -35,6 +36,7 @@ constexpr int32_t DAY_INDEX = 4;
 constexpr int32_t YEAR_LENTH = 4;
 constexpr int32_t ADD_BUTTON_INDEX = 0;
 constexpr int32_t SUB_BUTTON_INDEX = 1;
+constexpr int32_t DATE_NODE_COUNT = 3;
 constexpr uint32_t MIN_YEAR = 1;
 constexpr uint32_t MAX_YEAR = 5000;
 constexpr uint32_t DELAY_TIME = 2000;
@@ -48,6 +50,7 @@ void CalendarPickerPattern::OnModifyDone()
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    InitDateIndex();
     InitClickEvent();
     InitOnKeyEvent();
     InitOnHoverEvent();
@@ -56,6 +59,34 @@ void CalendarPickerPattern::OnModifyDone()
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddWindowSizeChangeCallback(host->GetId());
     UpdateEntryButtonColor();
+}
+
+void CalendarPickerPattern::InitDateIndex()
+{
+    std::vector<std::string> outOrder;
+    bool result = Localization::GetInstance()->GetDateColumnFormatOrder(outOrder);
+    if (!result || outOrder.size() < DATE_NODE_COUNT) {
+        yearIndex_ = YEAR_INDEX;
+        monthIndex_ = MONTH_INDEX;
+        dayIndex_ = DAY_INDEX;
+    } else {
+        int32_t index = 0;
+        for (size_t i = 0; i < outOrder.size(); ++i) {
+            if (outOrder[i] == "year") {
+                yearIndex_ = i + index;
+            }
+
+            if (outOrder[i] == "month") {
+                monthIndex_ = i + index;
+            }
+
+            if (outOrder[i] == "day") {
+                dayIndex_ = i + index;
+            }
+
+            index++;
+        }
+    }
 }
 
 void CalendarPickerPattern::UpdateEntryButtonColor()
@@ -149,9 +180,9 @@ void CalendarPickerPattern::HandleHoverEvent(bool state, const Offset& globalLoc
                 break;
         }
     }
-    HandleTextHoverEvent(yearState, YEAR_INDEX);
-    HandleTextHoverEvent(monthState, MONTH_INDEX);
-    HandleTextHoverEvent(dayState, DAY_INDEX);
+    HandleTextHoverEvent(yearState, yearIndex_);
+    HandleTextHoverEvent(monthState, monthIndex_);
+    HandleTextHoverEvent(dayState, dayIndex_);
     HandleButtonHoverEvent(addState, ADD_BUTTON_INDEX);
     HandleButtonHoverEvent(subState, SUB_BUTTON_INDEX);
 }
@@ -184,7 +215,7 @@ void CalendarPickerPattern::InitOnHoverEvent()
     CHECK_NULL_VOID(host);
     auto contentNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(contentNode);
-    int32_t hoverIndexs[] = { YEAR_INDEX, MONTH_INDEX, DAY_INDEX };
+    int32_t hoverIndexs[] = { yearIndex_, monthIndex_, dayIndex_ };
     for (auto index : hoverIndexs) {
         auto textFrameNode = DynamicCast<FrameNode>(contentNode->GetChildAtIndex(index));
         CHECK_NULL_VOID(textFrameNode);
@@ -239,11 +270,11 @@ void CalendarPickerPattern::ResetTextState()
     CHECK_NULL_VOID(layoutProperty);
     auto contentNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(contentNode);
-    ResetTextStateByNode(DynamicCast<FrameNode>(contentNode->GetChildAtIndex(YEAR_INDEX)));
+    ResetTextStateByNode(DynamicCast<FrameNode>(contentNode->GetChildAtIndex(yearIndex_)));
     ResetTextStateByNode(DynamicCast<FrameNode>(contentNode->GetChildAtIndex(FIRST_SLASH)));
-    ResetTextStateByNode(DynamicCast<FrameNode>(contentNode->GetChildAtIndex(MONTH_INDEX)));
+    ResetTextStateByNode(DynamicCast<FrameNode>(contentNode->GetChildAtIndex(monthIndex_)));
     ResetTextStateByNode(DynamicCast<FrameNode>(contentNode->GetChildAtIndex(SECOND_SLASH)));
-    ResetTextStateByNode(DynamicCast<FrameNode>(contentNode->GetChildAtIndex(DAY_INDEX)));
+    ResetTextStateByNode(DynamicCast<FrameNode>(contentNode->GetChildAtIndex(dayIndex_)));
 }
 
 void CalendarPickerPattern::ResetTextStateByNode(const RefPtr<FrameNode>& textFrameNode)
@@ -273,13 +304,13 @@ CalendarPickerSelectedType CalendarPickerPattern::CheckRegion(const Offset& glob
     CHECK_NULL_RETURN(contentNode, CalendarPickerSelectedType::OTHER);
 
     auto location = PointF(globalLocation.GetX(), globalLocation.GetY());
-    if (IsInNodeRegion(DynamicCast<FrameNode>(contentNode->GetChildAtIndex(YEAR_INDEX)), location)) {
+    if (IsInNodeRegion(DynamicCast<FrameNode>(contentNode->GetChildAtIndex(yearIndex_)), location)) {
         return CalendarPickerSelectedType::YEAR;
     }
-    if (IsInNodeRegion(DynamicCast<FrameNode>(contentNode->GetChildAtIndex(MONTH_INDEX)), location)) {
+    if (IsInNodeRegion(DynamicCast<FrameNode>(contentNode->GetChildAtIndex(monthIndex_)), location)) {
         return CalendarPickerSelectedType::MONTH;
     }
-    if (IsInNodeRegion(DynamicCast<FrameNode>(contentNode->GetChildAtIndex(DAY_INDEX)), location)) {
+    if (IsInNodeRegion(DynamicCast<FrameNode>(contentNode->GetChildAtIndex(dayIndex_)), location)) {
         return CalendarPickerSelectedType::DAY;
     }
 
@@ -398,7 +429,7 @@ bool CalendarPickerPattern::HandleFocusEvent(const KeyEvent& event)
             ResetTextState();
             if (isFirtFocus_) {
                 selected_ = CalendarPickerSelectedType::YEAR;
-                HandleTextFocusEvent(YEAR_INDEX);
+                HandleTextFocusEvent(yearIndex_);
                 if (!IsDialogShow()) {
                     ShowDialog();
                 }
@@ -416,11 +447,11 @@ bool CalendarPickerPattern::HandleFocusEvent(const KeyEvent& event)
             if (selected_ == CalendarPickerSelectedType::DAY) {
                 ResetTextState();
                 selected_ = CalendarPickerSelectedType::MONTH;
-                HandleTextFocusEvent(MONTH_INDEX);
+                HandleTextFocusEvent(monthIndex_);
             } else if (selected_ == CalendarPickerSelectedType::MONTH) {
                 ResetTextState();
                 selected_ = CalendarPickerSelectedType::YEAR;
-                HandleTextFocusEvent(YEAR_INDEX);
+                HandleTextFocusEvent(yearIndex_);
             }
             return true;
         }
@@ -428,11 +459,11 @@ bool CalendarPickerPattern::HandleFocusEvent(const KeyEvent& event)
             if (selected_ == CalendarPickerSelectedType::YEAR) {
                 ResetTextState();
                 selected_ = CalendarPickerSelectedType::MONTH;
-                HandleTextFocusEvent(MONTH_INDEX);
+                HandleTextFocusEvent(monthIndex_);
             } else if (selected_ == CalendarPickerSelectedType::MONTH) {
                 ResetTextState();
                 selected_ = CalendarPickerSelectedType::DAY;
-                HandleTextFocusEvent(DAY_INDEX);
+                HandleTextFocusEvent(dayIndex_);
             }
             return true;
         }
@@ -451,13 +482,13 @@ bool CalendarPickerPattern::HandleFocusEvent(const KeyEvent& event)
         case KeyCode::KEY_MOVE_HOME: {
             ResetTextState();
             selected_ = CalendarPickerSelectedType::YEAR;
-            HandleTextFocusEvent(YEAR_INDEX);
+            HandleTextFocusEvent(yearIndex_);
             return true;
         }
         case KeyCode::KEY_MOVE_END: {
             ResetTextState();
             selected_ = CalendarPickerSelectedType::DAY;
-            HandleTextFocusEvent(DAY_INDEX);
+            HandleTextFocusEvent(dayIndex_);
             return true;
         }
         case KeyCode::KEY_SPACE:
@@ -480,7 +511,7 @@ bool CalendarPickerPattern::HandleBlurEvent(const KeyEvent& event)
     CHECK_NULL_RETURN(host, false);
     auto contentNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_RETURN(contentNode, false);
-    auto textFrameNode = DynamicCast<FrameNode>(contentNode->GetChildAtIndex(YEAR_INDEX));
+    auto textFrameNode = DynamicCast<FrameNode>(contentNode->GetChildAtIndex(yearIndex_));
     CHECK_NULL_RETURN(textFrameNode, false);
     auto focusHub = textFrameNode->GetOrCreateFocusHub();
     CHECK_NULL_RETURN(focusHub, false);
@@ -783,9 +814,9 @@ void CalendarPickerPattern::HandleTextFocusEvent(int32_t index)
 
 void CalendarPickerPattern::HandleTextHoverEvent(bool state, int32_t index)
 {
-    if ((GetSelectedType() == CalendarPickerSelectedType::YEAR && index == YEAR_INDEX) ||
-        (GetSelectedType() == CalendarPickerSelectedType::MONTH && index == MONTH_INDEX) ||
-        (GetSelectedType() == CalendarPickerSelectedType::DAY && index == DAY_INDEX)) {
+    if ((GetSelectedType() == CalendarPickerSelectedType::YEAR && index == yearIndex_) ||
+        (GetSelectedType() == CalendarPickerSelectedType::MONTH && index == monthIndex_) ||
+        (GetSelectedType() == CalendarPickerSelectedType::DAY && index == dayIndex_)) {
         return;
     }
     auto host = GetHost();
@@ -1021,19 +1052,19 @@ std::string CalendarPickerPattern::GetEntryDateInfo()
     auto contentNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_RETURN(contentNode, "");
     auto json = JsonUtil::Create(true);
-    auto yearNode = AceType::DynamicCast<FrameNode>(contentNode->GetFirstChild());
+    auto yearNode = AceType::DynamicCast<FrameNode>(contentNode->GetChildAtIndex(yearIndex_));
     CHECK_NULL_RETURN(yearNode, "");
     auto textLayoutProperty = yearNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, "");
     json->Put("year", StringUtils::StringToInt(textLayoutProperty->GetContent().value_or("1970")));
 
-    auto monthNode = AceType::DynamicCast<FrameNode>(contentNode->GetChildAtIndex(MONTH_INDEX));
+    auto monthNode = AceType::DynamicCast<FrameNode>(contentNode->GetChildAtIndex(monthIndex_));
     CHECK_NULL_RETURN(monthNode, "");
     textLayoutProperty = monthNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, "");
     json->Put("month", StringUtils::StringToInt(textLayoutProperty->GetContent().value_or("01")));
 
-    auto dayNode = AceType::DynamicCast<FrameNode>(contentNode->GetLastChild());
+    auto dayNode = AceType::DynamicCast<FrameNode>(contentNode->GetChildAtIndex(dayIndex_));
     CHECK_NULL_RETURN(dayNode, "");
     textLayoutProperty = dayNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, "");
@@ -1054,7 +1085,7 @@ void CalendarPickerPattern::SetDate(const std::string& info)
     auto json = JsonUtil::ParseJsonString(info);
 
     calendarData_.selectedDate = PickerDate(json->GetUInt("year"), json->GetUInt("month"), json->GetUInt("day"));
-    auto yearNode = AceType::DynamicCast<FrameNode>(contentNode->GetFirstChild());
+    auto yearNode = AceType::DynamicCast<FrameNode>(contentNode->GetChildAtIndex(yearIndex_));
     CHECK_NULL_VOID(yearNode);
     auto textLayoutProperty = yearNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
@@ -1066,7 +1097,7 @@ void CalendarPickerPattern::SetDate(const std::string& info)
     textLayoutProperty->UpdateContent(yearStr);
     yearNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
-    auto monthNode = AceType::DynamicCast<FrameNode>(contentNode->GetChildAtIndex(MONTH_INDEX));
+    auto monthNode = AceType::DynamicCast<FrameNode>(contentNode->GetChildAtIndex(monthIndex_));
     CHECK_NULL_VOID(monthNode);
     textLayoutProperty = monthNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
@@ -1074,7 +1105,7 @@ void CalendarPickerPattern::SetDate(const std::string& info)
     textLayoutProperty->UpdateContent(monthString);
     monthNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
-    auto dayNode = AceType::DynamicCast<FrameNode>(contentNode->GetLastChild());
+    auto dayNode = AceType::DynamicCast<FrameNode>(contentNode->GetChildAtIndex(dayIndex_));
     CHECK_NULL_VOID(dayNode);
     textLayoutProperty = dayNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
@@ -1123,15 +1154,15 @@ void CalendarPickerPattern::SetSelectedType(CalendarPickerSelectedType type)
     switch (selected_) {
         case CalendarPickerSelectedType::YEAR:
             ResetTextState();
-            HandleTextFocusEvent(YEAR_INDEX);
+            HandleTextFocusEvent(yearIndex_);
             break;
         case CalendarPickerSelectedType::MONTH:
             ResetTextState();
-            HandleTextFocusEvent(MONTH_INDEX);
+            HandleTextFocusEvent(monthIndex_);
             break;
         case CalendarPickerSelectedType::DAY:
             ResetTextState();
-            HandleTextFocusEvent(DAY_INDEX);
+            HandleTextFocusEvent(dayIndex_);
             break;
         default:
             break;

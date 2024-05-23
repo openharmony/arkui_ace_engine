@@ -54,9 +54,14 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(listContentModifier_);
     const auto& geometryNode = paintWrapper->GetGeometryNode();
-    auto frameSize = geometryNode->GetPaddingSize();
     OffsetF paddingOffset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
     auto renderContext = paintWrapper->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto frameSize = renderContext->GetPaintRectWithoutTransform().GetSize();
+    auto& padding = geometryNode->GetPadding();
+    if (padding) {
+        frameSize.MinusPadding(*padding->left, *padding->right, *padding->top, *padding->bottom);
+    }
     UpdateFadingGradient(renderContext);
     bool clip = !renderContext || renderContext->GetClipEdge().value_or(true);
     listContentModifier_->SetClipOffset(paddingOffset);
@@ -66,7 +71,7 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     if (!divider_.strokeWidth.IsValid() || totalItemCount_ <= 0 ||
         divider_.strokeWidth.Unit() == DimensionUnit::PERCENT ||
         GreatOrEqual(divider_.strokeWidth.ConvertToPx(), contentSize)) {
-        ListDividerArithmetic::DividerMap dividerMap;
+        ListDividerMap dividerMap;
         listContentModifier_->SetDividerMap(std::move(dividerMap));
         return;
     }
@@ -103,7 +108,7 @@ void ListPaintMethod::UpdateDividerList(const DividerInfo& dividerInfo)
     bool lastIsItemGroup = false;
     bool isFirstItem = (itemPosition_.begin()->first == 0);
     std::map<int32_t, int32_t> lastLineIndex;
-    ListDividerArithmetic::DividerMap dividerMap;
+    ListDividerMap dividerMap;
     bool nextIsPressed = false;
     for (const auto& child : itemPosition_) {
         auto nextId = child.first - lanes;
@@ -200,9 +205,6 @@ void ListPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
 
 void ListPaintMethod::UpdateFadingGradient(const RefPtr<RenderContext>& listRenderContext)
 {
-    if (Negative(percentFading_)) {
-        return;
-    }
     CHECK_NULL_VOID(listRenderContext);
     CHECK_NULL_VOID(overlayRenderContext_);
     NG::Gradient gradient;
