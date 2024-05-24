@@ -338,11 +338,22 @@ napi_value JSOffscreenCanvas::onTransferToImageBitmap(napi_env env)
         return nullptr;
     }
     auto jsImage = (JSRenderImage*)nativeObj;
+#ifdef PIXEL_MAP_SUPPORTED
+    auto pixelMap = offscreenCanvasPattern_->TransferToImageBitmap();
+    if (pixelMap == nullptr) {
+        return nullptr;
+    }
+    jsImage->SetPixelMap(pixelMap);
+#else
+    auto imageData = offscreenCanvasPattern_->GetImageData(0, 0, width_, height_);
+    if (imageData == nullptr) {
+        return nullptr;
+    }
+    jsImage->SetImageData(imageData);
+#endif
     jsImage->SetUnit(GetUnit());
     jsImage->SetWidth(GetWidth());
     jsImage->SetHeight(GetHeight());
-    auto pixelMap = offscreenCanvasPattern_->TransferToImageBitmap();
-    jsImage->SetPixelMap(pixelMap);
     return renderImage;
 }
 

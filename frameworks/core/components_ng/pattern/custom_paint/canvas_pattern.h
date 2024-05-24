@@ -104,7 +104,11 @@ public:
     std::unique_ptr<Ace::ImageData> GetImageData(double left, double top, double width, double height);
     void GetImageData(const std::shared_ptr<Ace::ImageData>& imageData);
     void PutImageData(const Ace::ImageData& imageData);
-    void TransferFromImageBitmap(const RefPtr<OffscreenCanvasPattern>& offscreenCanvasPattern);
+#ifdef PIXEL_MAP_SUPPORTED
+    void TransferFromImageBitmap(const RefPtr<PixelMap>& pixelMap);
+#else
+    void TransferFromImageBitmap(const std::unique_ptr<Ace::ImageData>& imageData);
+#endif
     void CloseImageBitmap(const std::string& src);
 
     void UpdateFillColor(const Color& color);

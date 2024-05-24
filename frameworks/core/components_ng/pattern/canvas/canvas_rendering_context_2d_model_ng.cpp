@@ -578,15 +578,25 @@ void CanvasRenderingContext2DModelNG::GetHeight(RefPtr<AceType>& canvasPattern, 
     height = pattern_->GetHeight();
 }
 
-void CanvasRenderingContext2DModelNG::SetTransferFromImageBitmap(
-    RefPtr<AceType>& canvasPattern, RefPtr<AceType> offscreenCPattern)
+#ifdef PIXEL_MAP_SUPPORTED
+void CanvasRenderingContext2DModelNG::TransferFromImageBitmap(
+    RefPtr<AceType>& canvasPattern, const RefPtr<AceType>& pixelMap)
 {
     auto customPaintPattern = AceType::DynamicCast<CanvasPattern>(canvasPattern);
     CHECK_NULL_VOID(customPaintPattern);
-    auto offscreenCanvasPattern = AceType::DynamicCast<OffscreenCanvasPattern>(offscreenCPattern);
-    CHECK_NULL_VOID(offscreenCanvasPattern);
-    customPaintPattern->TransferFromImageBitmap(offscreenCanvasPattern);
+    auto imagePixelMap = AceType::DynamicCast<PixelMap>(pixelMap);
+    CHECK_NULL_VOID(imagePixelMap);
+    customPaintPattern->TransferFromImageBitmap(imagePixelMap);
 }
+#else
+void CanvasRenderingContext2DModelNG::TransferFromImageBitmap(
+    RefPtr<AceType>& canvasPattern, const std::unique_ptr<Ace::ImageData>& imageData)
+{
+    auto customPaintPattern = AceType::DynamicCast<CanvasPattern>(canvasPattern);
+    CHECK_NULL_VOID(customPaintPattern);
+    customPaintPattern->TransferFromImageBitmap(imageData);
+}
+#endif
 
 void CanvasRenderingContext2DModelNG::StartImageAnalyzer(
     RefPtr<AceType>& canvasPattern, void* config, onAnalyzedCallback& onAnalyzed)
