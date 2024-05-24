@@ -957,8 +957,22 @@ void EventManager::MouseTest(
         std::vector<NG::RectF> rect;
         frameNode->CheckSecurityComponentStatus(rect);
     }
-    frameNode->TouchTest(point, point, point, touchRestrict, testResult, event.GetPointerId(event.id));
 
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (event.action == MouseAction::MOVE && event.button != MouseButton::NONE_BUTTON) {
+            testResult = touchTestResults_[event.id];
+        } else {
+            frameNode->TouchTest(point, point, point, touchRestrict, testResult, event.GetPointerId(event.id));
+        }
+    } else {
+        frameNode->TouchTest(point, point, point, touchRestrict, testResult, event.GetPointerId(event.id));
+    }
+    UpdateHoverNode(event, testResult);
+    LogPrintMouseTest();
+}
+
+void EventManager::UpdateHoverNode(const MouseEvent& event, const TouchTestResult& testResult)
+{
     currMouseTestResults_.clear();
     HoverTestResult hoverTestResult;
     WeakPtr<NG::FrameNode> hoverNode = nullptr;
@@ -992,7 +1006,6 @@ void EventManager::MouseTest(
     }
     lastHoverNode_ = currHoverNode_;
     currHoverNode_ = hoverNode;
-    LogPrintMouseTest();
 }
 
 bool EventManager::DispatchMouseEventNG(const MouseEvent& event)

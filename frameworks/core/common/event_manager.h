@@ -120,6 +120,7 @@ public:
 
     void LogPrintMouseTest();
     void MouseTest(const MouseEvent& event, const RefPtr<NG::FrameNode>& frameNode, TouchRestrict& touchRestrict);
+    void UpdateHoverNode(const MouseEvent& event, const TouchTestResult& testResult);
     bool DispatchMouseEventNG(const MouseEvent& event);
     void DispatchMouseHoverAnimationNG(const MouseEvent& event);
     bool DispatchMouseHoverEventNG(const MouseEvent& event);
