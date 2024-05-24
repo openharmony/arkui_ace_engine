@@ -29,6 +29,12 @@
 #include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace {
+
+namespace {
+constexpr int32_t GRID_COUNT = 2;
+constexpr int32_t MAX_LINES = 6;
+}
+
 class AgingAdapationDialogTheme : public virtual Theme {
     DECLARE_ACE_TYPE(AgingAdapationDialogTheme, Theme);
 
@@ -66,8 +72,8 @@ public:
             theme->textPropertyLeft_ = dialogPattern->GetAttr<Dimension>("text_property_left", 0.0_vp);
             theme->textPropertyBottom_ = dialogPattern->GetAttr<Dimension>("text_property_bottom", 0.0_vp);
             theme->textPropertyRight_ = dialogPattern->GetAttr<Dimension>("text_property_right", 0.0_vp);
-            theme->gridCount_ = dialogPattern->GetAttr<int>("dialog_font_primary", 0);
-            theme->maxLines_ = dialogPattern->GetAttr<int>("dialog_font_primary", 0);
+            theme->gridCount_ = GRID_COUNT;
+            theme->maxLines_ = MAX_LINES;
 
             return theme;
         }
@@ -167,8 +173,8 @@ private:
     Dimension textPropertyRight_;
     Color dialogIconColor_;
     Color dialogFontColor_;
-    int32_t gridCount_ = 2;
-    int32_t maxLines_ = 6;
+    int32_t gridCount_;
+    int32_t maxLines_;
 };
 
 } // namespace OHOS::Ace
