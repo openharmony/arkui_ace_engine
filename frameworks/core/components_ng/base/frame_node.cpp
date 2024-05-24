@@ -69,6 +69,7 @@ constexpr int32_t SIZE_CHANGE_DUMP_SIZE = 5;
 constexpr double MIN_WIDTH = 5.0;
 constexpr double MIN_HEIGHT = 5.0;
 constexpr double MIN_OPACITY = 0.1;
+constexpr uint64_t MATRIX_CACHE_TIME_THRESHOLD = 15000000000;
 /* suggestOpIncByte_s status mask, to indicate different aspects of node status
  * related with suggestion OPINC improvements.
  * for internal use; subject to change.
@@ -4111,10 +4112,17 @@ bool FrameNode::IsContextTransparent()
 
 Matrix4& FrameNode::GetOrRefreshRevertMatrixFromCache(bool forceRefresh)
 {
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, localRevertMatrix_);
+    auto nanoTimestamp = pipeline->GetVsyncTime();
+    auto rect = renderContext_->GetPaintRectWithoutTransform();
     // the caller is trying to refresh cache forcedly or the cache is invalid
-    if (forceRefresh || !isLocalRevertMatrixAvailable_) {
+    if (!isLocalRevertMatrixAvailable_ || forceRefresh || prePaintRect_ != rect ||
+        getCacheNanoTime_ + MATRIX_CACHE_TIME_THRESHOLD < nanoTimestamp) {
         localRevertMatrix_ = renderContext_->GetRevertMatrix();
         isLocalRevertMatrixAvailable_ = true;
+        getCacheNanoTime_ = nanoTimestamp;
+        prePaintRect_ = rect;
         return localRevertMatrix_;
     }
 
