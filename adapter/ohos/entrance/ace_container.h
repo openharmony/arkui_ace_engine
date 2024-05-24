@@ -618,6 +618,7 @@ private:
     void RegisterStopDragCallback(int32_t pointerId, StopDragCallback&& stopDragCallback);
     void SetFontScaleAndWeightScale(const ParsedConfig& parsedConfig);
     void ReleaseResourceAdapter();
+    void fillAutoFillViewData(const RefPtr<NG::FrameNode> &node, RefPtr<ViewDataWrap> &viewDataWrap);
 
     int32_t instanceId_ = 0;
     AceView* aceView_ = nullptr;

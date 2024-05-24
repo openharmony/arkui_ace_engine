@@ -5904,16 +5904,7 @@ void TextFieldPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap)
     info->SetDepth(host->GetDepth());
     info->SetAutoFillType(autoFillType);
     info->SetTag(host->GetTag());
-    if (!autoFillUserName_.empty()) {
-        viewDataWrap->SetUserSelected(true);
-        info->SetValue(autoFillUserName_);
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "autoFillUserName_ : %{private}s", autoFillUserName_.c_str());
-        autoFillUserName_ = "";
-    } else if (!autoFillNewPassword_.empty()) {
-        info->SetValue(autoFillNewPassword_);
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "autoFillNewPassword_ : %{private}s", autoFillNewPassword_.c_str());
-        autoFillNewPassword_ = "";
-    } else if (autoFillOtherAccount_) {
+    if (autoFillOtherAccount_) {
         viewDataWrap->SetOtherAccount(true);
         info->SetValue(contentController_->GetTextValue());
         autoFillOtherAccount_ = false;

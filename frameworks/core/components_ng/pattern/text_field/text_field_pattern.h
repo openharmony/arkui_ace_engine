@@ -1199,6 +1199,17 @@ public:
     {
         autoFillUserName_ = userName;
     }
+    
+    std::string GetAutoFillUserName()
+    {
+        return autoFillUserName_;
+    }
+
+    std::string GetAutoFillNewPassword()
+    {
+        return autoFillNewPassword_;
+    }
+
     void SetAutoFillNewPassword(const std::string& newPassword)
     {
         autoFillNewPassword_ = newPassword;
