@@ -2462,9 +2462,13 @@ void TextFieldPattern::OnModifyDone()
 
     auto textWidth = static_cast<int32_t>(contentController_->GetWideText().length());
     if (SelectOverlayIsOn()) {
-        needToRefreshSelectOverlay_ = true;
+        needToRefreshSelectOverlay_ = textWidth > 0;
         UpdateSelection(std::clamp(selectController_->GetStartIndex(), 0, textWidth),
             std::clamp(selectController_->GetEndIndex(), 0, textWidth));
+        if (textWidth == 0) {
+            CloseSelectOverlay();
+            StartTwinkling();
+        }
     } else {
         needToRefreshSelectOverlay_ = false;
     }
