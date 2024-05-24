@@ -342,7 +342,18 @@ void ListItemPattern::InitSwiperAction(bool axisChanged)
             }
             pattern->HandleDragEnd(info);
         };
-        GestureEventNoParameter actionCancelTask;
+
+        auto actionCancelTask = [weak]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto listPattern = pattern->GetListFrameNode()->GetPattern<ListPattern>();
+            CHECK_NULL_VOID(listPattern);
+            if (!listPattern->IsCurrentSwiperItem(weak)) {
+                return;
+            }
+            GestureEvent info;
+            pattern->HandleDragEnd(info);
+        };
         panEvent_ = MakeRefPtr<PanEvent>(std::move(actionStartTask), std::move(actionUpdateTask),
             std::move(actionEndTask), std::move(actionCancelTask));
         isPanInit = true;
