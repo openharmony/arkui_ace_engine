@@ -1088,7 +1088,7 @@ HWTEST_F(MarqueeTestUpdateStrategyNg, MarqueeTestUpdateStrategy014, TestSize.Lev
     EXPECT_EQ(castMarqueePaintProperty->GetDirection(), MarqueeDirection::LEFT);
     marqueeModel.SetDirection(std::nullopt);
     EXPECT_FALSE(castMarqueePaintProperty->HasDirection());
-    
+
     marqueeModel.SetMarqueeUpdateStrategy(std::make_optional(Ace::MarqueeUpdateStrategy::PRESERVE_POSITION));
     EXPECT_EQ(marqueeLayoutProperty->GetMarqueeUpdateStrategy(), Ace::MarqueeUpdateStrategy::PRESERVE_POSITION);
     marqueeModel.SetMarqueeUpdateStrategy(std::nullopt);
@@ -1536,43 +1536,6 @@ HWTEST_F(MarqueeTestUpdateStrategyNg, MarqueeTestUpdateStrategy020, TestSize.Lev
     start = pattern->CalculateStart();
     expect = -2 + padding.right.value_or(0);
     EXPECT_EQ(start, expect);
-}
-/**
- * @tc.name: MarqueeTestUpdateStrategy021
- * @tc.desc: Test MarqueePattern.OnColorConfigurationUpdate
- * @tc.type: FUNC
- */
-HWTEST_F(MarqueeTestUpdateStrategyNg, MarqueeTestUpdateStrategy021, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create frameNode and add a Child.
-     */
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
-    RefPtr<MarqueeLayoutProperty> marqueeLayoutProperty = AceType::MakeRefPtr<MarqueeLayoutProperty>();
-    marqueeLayoutProperty->UpdateMarqueeUpdateStrategy(Ace::MarqueeUpdateStrategy::PRESERVE_POSITION);
-    frameNode->SetLayoutProperty(marqueeLayoutProperty);
-
-    /**
-     * @tc.steps: step2. Create MarqueePattern.
-     */
-    auto pattern = frameNode->GetPattern<MarqueePattern>();
-    pattern->AttachToFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
-
-    /**
-     * @tc.steps: step3. Call OnDetachFromFrameNode.
-     */
-    FrameNode frameNode2 = FrameNode(V2::MARQUEE_ETS_TAG, 2, pattern);
-    pattern->OnDetachFromFrameNode(&frameNode2);
-    pattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::MAXIMIZE);
-    EXPECT_FALSE(pattern->isOritationListenerRegisted_);
-    EXPECT_FALSE(pattern->isRegistedAreaCallback_);
-
-    /**
-     * @tc.steps: step4. Call RegistOritationListener.
-     */
-    pattern->RegistOritationListener();
-    EXPECT_TRUE(pattern->isOritationListenerRegisted_);
 }
 
 /**

@@ -1483,6 +1483,11 @@ bool RichEditorPattern::GetCaretVisible() const
     return caretVisible_;
 }
 
+void RichEditorPattern::OnWindowHide()
+{
+    ScrollablePattern::OnWindowHide();
+}
+
 void RichEditorPattern::SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle)
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetUpdateSpanStyle");
