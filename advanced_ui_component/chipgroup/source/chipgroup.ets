@@ -18,6 +18,7 @@ import { Chip, ChipSize, SymbolOptions } from '@ohos.arkui.advanced.Chip';
 interface ChipGroupTheme {
   itemStyle: ChipGroupStyleTheme;
   chipGroupSpace: ChipGroupSpaceOptions;
+  chipGroupPadding?: ChipGroupPaddingOptions
 }
 
 const noop = (selectedIndexes: Array<number>) => {
@@ -34,6 +35,7 @@ const defaultTheme: ChipGroupTheme = {
     selectedFillColor: $r('sys.color.ohos_id_color_text_primary_contrary'),
   },
   chipGroupSpace: { itemSpace: 8, startSpace: 16, endSpace: 16 },
+  chipGroupPadding: { top: 14, bottom: 14 }
 }
 
 const iconGroupSuffixTheme: IconGroupSuffixTheme = {
@@ -51,6 +53,11 @@ const iconGroupSuffixTheme: IconGroupSuffixTheme = {
 interface IconOptions {
   src: ResourceStr;
   size?: SizeOptions;
+}
+
+interface ChipGroupPaddingOptions {
+  top: Length;
+  bottom: Length;
 }
 
 interface ChipGroupStyleTheme {
@@ -232,6 +239,7 @@ export struct ChipGroup {
   public onChange: Callback<Array<number>> = noop;
   private scroller: Scroller = new Scroller();
   @State isReachEnd: boolean = this.scroller.isAtEnd();
+  @Prop chipGroupPadding: ChipGroupPaddingOptions = defaultTheme.chipGroupPadding;
 
   onMultipleChange() {
     this.selectedIndexes = [0];
@@ -356,7 +364,7 @@ export struct ChipGroup {
     return this.multiple ?? false;
   }
 
-  private getChipGroupItemSpace(): string | number {
+  private getChipGroupItemSpace() {
     return parseDimension(
       this.getUIContext(),
       this.chipGroupSpace.itemSpace,
@@ -395,6 +403,24 @@ export struct ChipGroup {
         return (element == itemIndex);
       })
     }
+  }
+
+  private getPaddingTop() {
+    return parseDimension(
+      this.getUIContext(),
+      this.chipGroupPadding.top,
+      isValidDimensionNoPercentageString,
+      defaultTheme.chipGroupPadding.top
+    );
+  }
+
+  private getPaddingBottom() {
+    return parseDimension(
+      this.getUIContext(),
+      this.chipGroupPadding.bottom,
+      isValidDimensionNoPercentageString,
+      defaultTheme.chipGroupPadding.bottom
+    );
   }
 
   build() {
@@ -485,6 +511,6 @@ export struct ChipGroup {
     }
     .align(Alignment.End)
     .width("100%")
-    .height(64)
+    .padding({ top: this.getPaddingTop(), bottom: this.getPaddingBottom() })
   }
 }
