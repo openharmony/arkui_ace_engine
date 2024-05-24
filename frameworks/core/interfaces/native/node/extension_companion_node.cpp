@@ -202,6 +202,16 @@ void ExtensionCompanionNode::OnOverlayDraw(DrawingContext& context)
     }
 }
 
+bool ExtensionCompanionNode::HasCustomerMeasure() const
+{
+    return (flags_ & ArkUIAPINodeFlags::CUSTOM_MEASURE) != 0;
+}
+
+bool ExtensionCompanionNode::HasCustomerLayout() const
+{
+    return (flags_ & ArkUIAPINodeFlags::CUSTOM_LAYOUT) != 0;
+}
+
 bool ExtensionCompanionNode::NeedRender() const
 {
     ArkUI_Uint32 mask = ArkUIAPINodeFlags::CUSTOM_OVERLAY_DRAW | ArkUIAPINodeFlags::CUSTOM_FOREGROUND_DRAW |

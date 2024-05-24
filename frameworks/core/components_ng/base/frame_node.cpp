@@ -594,6 +594,18 @@ void FrameNode::DumpSafeAreaInfo()
                                     .append(std::to_string(manager->IsFullScreen())));
 }
 
+void FrameNode::DumpExtensionHandlerInfo()
+{
+    if (!extensionHandler_) {
+        return;
+    }
+    DumpLog::GetInstance().AddDesc(
+        std::string("ExtensionHandler: HasCustomerMeasure: ")
+        .append(extensionHandler_->HasCustomerMeasure() ? "true" : "false")
+        .append(", HasCustomerLayout: ")
+        .append(extensionHandler_->HasCustomerLayout() ? "true" : "false"));
+}
+
 void FrameNode::DumpCommonInfo()
 {
     DumpLog::GetInstance().AddDesc(std::string("FrameRect: ").append(geometryNode_->GetFrameRect().ToString()));
@@ -634,6 +646,11 @@ void FrameNode::DumpCommonInfo()
         DumpLog::GetInstance().AddDesc(
             std::string("Margin: ").append(layoutProperty_->GetMarginProperty()->ToString().c_str()));
     }
+    if (layoutProperty_->GetLayoutRect()) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("LayoutRect: ").append(layoutProperty_->GetLayoutRect().value().ToString().c_str()));
+    }
+    DumpExtensionHandlerInfo();
     DumpSafeAreaInfo();
     if (layoutProperty_->GetCalcLayoutConstraint()) {
         DumpLog::GetInstance().AddDesc(std::string("User defined constraint: ")
