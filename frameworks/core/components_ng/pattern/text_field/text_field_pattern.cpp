@@ -3529,7 +3529,7 @@ void TextFieldPattern::InsertValueOperation(const SourceAndValueInfo& info)
     selectController_->UpdateCaretIndex(caretStart + caretMoveLength);
     UpdateObscure(insertValue, hasInsertValue);
     if (isIME) {
-        AfterIMEInsertValue(insertValue);
+        AfterIMEInsertValue(contentController_->GetInsertValue());
     }
     TwinklingByFocus();
 }

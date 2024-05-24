@@ -81,6 +81,11 @@ public:
         content_ = "";
     }
 
+    std::string GetInsertValue()
+    {
+        return insertValue_;
+    }
+
 private:
     void FormatIndex(int32_t& startIndex, int32_t& endIndex);
     void FilterTextInputStyle(bool& textChanged, std::string& result);
@@ -92,6 +97,7 @@ private:
     static bool FilterWithAscii(std::string& result);
     static bool FilterWithDecimal(std::string& result);
 
+    std::string insertValue_;
     std::string content_;
     WeakPtr<Pattern> pattern_;
 };
