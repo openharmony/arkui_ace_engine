@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 
+#include "base/log/dump_log.h"
 #include "core/components/list/list_item_theme.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_item_group_paint_method.h"
@@ -59,6 +60,21 @@ void ListItemGroupPattern::SetListItemGroupDefaultAttributes(const RefPtr<FrameN
     layoutProperty->UpdatePadding(itemGroupPadding);
 
     renderContext->UpdateBorderRadius(listItemGroupTheme->GetItemGroupDefaultBorderRadius());
+}
+
+void ListItemGroupPattern::DumpAdvanceInfo()
+{
+    DumpLog::GetInstance().AddDesc("itemStartIndex:" + std::to_string(itemStartIndex_));
+    DumpLog::GetInstance().AddDesc("itemTotalCount:" + std::to_string(itemTotalCount_));
+    DumpLog::GetInstance().AddDesc("itemDisplayEndIndex:" + std::to_string(itemDisplayEndIndex_));
+    DumpLog::GetInstance().AddDesc("itemDisplayStartIndex:" + std::to_string(itemDisplayStartIndex_));
+    DumpLog::GetInstance().AddDesc("headerMainSize:" + std::to_string(headerMainSize_));
+    DumpLog::GetInstance().AddDesc("footerMainSize:" + std::to_string(footerMainSize_));
+    DumpLog::GetInstance().AddDesc("spaceWidth:" + std::to_string(spaceWidth_));
+    DumpLog::GetInstance().AddDesc("lanes:" + std::to_string(lanes_));
+    DumpLog::GetInstance().AddDesc("laneGutter:" + std::to_string(laneGutter_));
+    DumpLog::GetInstance().AddDesc("startHeaderPos:" + std::to_string(startHeaderPos_));
+    DumpLog::GetInstance().AddDesc("endFooterPos:" + std::to_string(endFooterPos_));
 }
 
 RefPtr<LayoutAlgorithm> ListItemGroupPattern::CreateLayoutAlgorithm()

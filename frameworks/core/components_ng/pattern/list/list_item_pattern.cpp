@@ -17,6 +17,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/size_t.h"
+#include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_property.h"
@@ -1021,6 +1022,55 @@ void ListItemPattern::InitDisableEvent()
 bool ListItemPattern::GetLayouted() const
 {
     return isLayouted_;
+}
+
+void ListItemPattern::DumpAdvanceInfo()
+{
+    DumpLog::GetInstance().AddDesc("indexInList:" + std::to_string(indexInList_));
+    DumpLog::GetInstance().AddDesc("indexInListItemGroup:" + std::to_string(indexInListItemGroup_));
+    DumpLog::GetInstance().AddDesc("swiperAction.startNodeIndex:" + std::to_string(startNodeIndex_));
+    DumpLog::GetInstance().AddDesc("swiperAction.endNodeIndex:" + std::to_string(endNodeIndex_));
+    DumpLog::GetInstance().AddDesc("swiperAction.childNodeIndex:" + std::to_string(childNodeIndex_));
+    DumpLog::GetInstance().AddDesc("curOffset:" + std::to_string(curOffset_));
+    DumpLog::GetInstance().AddDesc("startNodeSize:" + std::to_string(startNodeSize_));
+    DumpLog::GetInstance().AddDesc("endNodeSize:" + std::to_string(endNodeSize_));
+    DumpLog::GetInstance().AddDesc("startDeleteAreaDistance:" + std::to_string(startDeleteAreaDistance_));
+    DumpLog::GetInstance().AddDesc("endDeleteAreaDistance:" + std::to_string(endDeleteAreaDistance_));
+    switch (swipeActionState_) {
+        case SwipeActionState::COLLAPSED:
+            DumpLog::GetInstance().AddDesc("SwipeActionState::COLLAPSED");
+            break;
+        case SwipeActionState::EXPANDED:
+            DumpLog::GetInstance().AddDesc("SwipeActionState::EXPANDED");
+            break;
+        case SwipeActionState::ACTIONING:
+            DumpLog::GetInstance().AddDesc("SwipeActionState::ACTIONING");
+            break;
+    }
+    hasStartDeleteArea_ ? DumpLog::GetInstance().AddDesc("hasStartDeleteArea:true")
+                     : DumpLog::GetInstance().AddDesc("hasStartDeleteArea:false");
+    hasEndDeleteArea_ ? DumpLog::GetInstance().AddDesc("hasEndDeleteArea:true")
+                     : DumpLog::GetInstance().AddDesc("hasEndDeleteArea:false");
+    inStartDeleteArea_ ? DumpLog::GetInstance().AddDesc("inStartDeleteArea:true")
+                     : DumpLog::GetInstance().AddDesc("inStartDeleteArea:false");
+    inEndDeleteArea_ ? DumpLog::GetInstance().AddDesc("inEndDeleteArea:true")
+                     : DumpLog::GetInstance().AddDesc("inEndDeleteArea:false");
+    selectable_ ? DumpLog::GetInstance().AddDesc("selectable:true")
+                : DumpLog::GetInstance().AddDesc("selectable:false");
+    isSelected_ ? DumpLog::GetInstance().AddDesc("isSelected:true")
+                : DumpLog::GetInstance().AddDesc("isSelected:false");
+    isHover_ ? DumpLog::GetInstance().AddDesc("isHover:true")
+                : DumpLog::GetInstance().AddDesc("isHover:false");
+    isPressed_ ? DumpLog::GetInstance().AddDesc("isPressed:true")
+                : DumpLog::GetInstance().AddDesc("isPressed:false");
+    isLayouted_ ? DumpLog::GetInstance().AddDesc("isLayouted:true")
+                : DumpLog::GetInstance().AddDesc("isLayouted:false");
+    if (enableOpacity_.has_value()) {
+        enableOpacity_.value() ? DumpLog::GetInstance().AddDesc("enableOpacity:true")
+                            : DumpLog::GetInstance().AddDesc("enableOpacity:false");
+    } else {
+        DumpLog::GetInstance().AddDesc("enableOpacity:null");
+    }
 }
 
 float ListItemPattern::GetEstimateHeight(float estimateHeight, Axis axis) const

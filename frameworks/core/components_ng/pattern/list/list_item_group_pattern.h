@@ -60,6 +60,7 @@ public:
     {}
     ~ListItemGroupPattern() override = default;
 
+    void DumpAdvanceInfo() override;
     bool IsAtomicNode() const override
     {
         return false;
