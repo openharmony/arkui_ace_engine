@@ -3584,7 +3584,7 @@ void OverlayManager::PlaySheetTransition(
     option.SetFillMode(FillMode::FORWARDS);
     auto context = sheetNode->GetRenderContext();
     CHECK_NULL_VOID(context);
-    context->UpdateRenderGroup(true, true, true);
+    context->UpdateRenderGroup(true, false, true);
     TAG_LOGD(AceLogTag::ACE_SHEET, "UpdateRenderGroup start");
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
@@ -3617,7 +3617,7 @@ void OverlayManager::PlaySheetTransition(
                 CHECK_NULL_VOID(sheetNode);
                 auto context = sheetNode->GetRenderContext();
                 CHECK_NULL_VOID(context);
-                context->UpdateRenderGroup(false, true, true);
+                context->UpdateRenderGroup(false, false, true);
                 TAG_LOGD(AceLogTag::ACE_SHEET, "UpdateRenderGroup finished");
                 auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();
                 if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
