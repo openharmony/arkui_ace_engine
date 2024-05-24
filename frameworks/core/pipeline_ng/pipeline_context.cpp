@@ -1739,8 +1739,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         }
 
         SizeF rootSize { static_cast<float>(context->rootWidth_), static_cast<float>(context->rootHeight_) };
-        float keyboardOffset = context->safeAreaManager_->GetKeyboardOffset();
-        float positionYWithOffset = positionY - keyboardOffset;
+        float positionYWithOffset = positionY;
         if (rootSize.Height() - positionY - height < 0) {
             height = rootSize.Height() - positionY;
         }
