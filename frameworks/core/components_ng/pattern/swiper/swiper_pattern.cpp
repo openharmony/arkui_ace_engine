@@ -567,6 +567,7 @@ void SwiperPattern::InitSurfaceChangedCallback()
                 auto currentIndex =
                     swiper->targetIndex_.has_value() ? swiper->targetIndex_.value() : swiper->currentIndex_;
 
+                swiper->needFireCustomAnimationEvent_ = swiper->translateAnimationIsRunning_;
                 swiper->StopPropertyTranslateAnimation(swiper->isFinishAnimation_);
                 swiper->StopTranslateAnimation();
                 swiper->StopSpringAnimation();
@@ -889,6 +890,12 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         if (NeedAutoPlay() && isUserFinish_) {
             PostTranslateTask(delayTime);
         }
+
+        if (SupportSwiperCustomAnimation() && needFireCustomAnimationEvent_) {
+            itemPositionInAnimation_ = itemPosition_;
+            FireSwiperCustomAnimationEvent();
+            itemPositionInAnimation_.clear();
+        }
     } else if (targetIndex_) {
         auto targetIndexValue = IsLoop() ? targetIndex_.value() : GetLoopIndex(targetIndex_.value());
         auto iter = itemPosition_.find(targetIndexValue);
@@ -959,6 +966,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     crossMatchChild_ = swiperLayoutAlgorithm->IsCrossMatchChild();
     oldIndex_ = currentIndex_;
     oldChildrenSize_ = RealTotalCount();
+    needFireCustomAnimationEvent_ = true;
 
     if (windowSizeChangeReason_ == WindowSizeChangeReason::ROTATION) {
         StartAutoPlay();
@@ -1541,6 +1549,7 @@ void SwiperPattern::ChangeIndex(int32_t index, bool useAnimation)
     if (useAnimation) {
         SwipeTo(targetIndex);
     } else {
+        needFireCustomAnimationEvent_ = translateAnimationIsRunning_;
         SwipeToWithoutAnimation(targetIndex);
     }
 }

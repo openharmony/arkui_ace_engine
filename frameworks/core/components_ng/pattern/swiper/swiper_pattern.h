@@ -1084,6 +1084,8 @@ private:
     bool hasCachedCapture_ = false;
     bool isCaptureReverse_ = false;
     OffsetF captureFinalOffset_;
+
+    bool needFireCustomAnimationEvent_ = true;
 };
 } // namespace OHOS::Ace::NG
 
