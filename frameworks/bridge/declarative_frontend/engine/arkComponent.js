@@ -14103,7 +14103,7 @@ class ArkButtonComponent extends ArkComponent {
       return;
     }
     this.needRebuild = false;
-    this.applyContent = modifier.applyContent()
+    this.applyContent = modifier.applyContent();
     if (this.builder !== this.applyContent) {
       this.needRebuild = true;
     }
