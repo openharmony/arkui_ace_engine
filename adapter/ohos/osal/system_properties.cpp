@@ -38,6 +38,7 @@
 namespace OHOS::Ace {
 namespace {
 constexpr char PROPERTY_DEVICE_TYPE[] = "const.product.devicetype";
+constexpr char PROPERTY_NEED_AVOID_WINDOW[] = "const.window.need_avoid_window";
 constexpr char PROPERTY_DEVICE_TYPE_DEFAULT[] = "default";
 constexpr char PROPERTY_DEVICE_TYPE_TV[] = "tv";
 constexpr char PROPERTY_DEVICE_TYPE_TABLET[] = "tablet";
@@ -336,6 +337,7 @@ ACE_WEAK_SYM int32_t SystemProperties::devicePhysicalWidth_ = 0;
 ACE_WEAK_SYM int32_t SystemProperties::devicePhysicalHeight_ = 0;
 ACE_WEAK_SYM double SystemProperties::resolution_ = 1.0;
 ACE_WEAK_SYM DeviceType SystemProperties::deviceType_ { DeviceType::UNKNOWN };
+ACE_WEAK_SYM bool SystemProperties::needAvoidWindow_ { false };
 ACE_WEAK_SYM DeviceOrientation SystemProperties::orientation_ { DeviceOrientation::PORTRAIT };
 std::string SystemProperties::brand_ = INVALID_PARAM;
 std::string SystemProperties::manufacturer_ = INVALID_PARAM;
@@ -450,6 +452,11 @@ ACE_WEAK_SYM DeviceType SystemProperties::GetDeviceType()
     return deviceType_;
 }
 
+ACE_WEAK_SYM bool SystemProperties::GetNeedAvoidWindow()
+{
+    return needAvoidWindow_;
+}
+
 void SystemProperties::InitDeviceTypeBySystemProperty()
 {
     if (deviceType_ != DeviceType::UNKNOWN) {
@@ -492,6 +499,7 @@ void SystemProperties::InitDeviceInfo(
     apiVersion_ = std::to_string(::GetSdkApiVersion());
     releaseType_ = ::GetOsReleaseType();
     paramDeviceType_ = ::GetDeviceType();
+    needAvoidWindow_ = system::GetBoolParameter(PROPERTY_NEED_AVOID_WINDOW, false);
     debugEnabled_ = IsDebugEnabled();
     svgTraceEnable_ = IsSvgTraceEnabled();
     layoutTraceEnable_ = IsLayoutTraceEnabled() && developerModeOn_;

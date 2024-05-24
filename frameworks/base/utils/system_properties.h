@@ -76,6 +76,11 @@ public:
     static DeviceType GetDeviceType();
 
     /*
+     * Get if current device need avoid window.
+     */
+    static bool GetNeedAvoidWindow();
+
+    /*
      * check SystemCapability.
      */
     static bool IsSyscapExist(const char* cap);
@@ -524,6 +529,7 @@ private:
     static int32_t devicePhysicalHeight_;
     static double resolution_; // density of the default display
     static DeviceType deviceType_;
+    static bool needAvoidWindow_;
     static DeviceOrientation orientation_;
     static std::string brand_;
     static std::string manufacturer_;
