@@ -164,6 +164,7 @@ void MovingPhotoPattern::InitEvent()
 
 void MovingPhotoPattern::HandleLongPress(GestureEvent& info)
 {
+    isFastKeyUp_ = false;
     if (currentPlayStatus_ == PlaybackStatus::STARTED || !isPrepared_ || isPlayByController_) {
         return;
     }
@@ -172,6 +173,9 @@ void MovingPhotoPattern::HandleLongPress(GestureEvent& info)
 
 void MovingPhotoPattern::HandleTouchEvent(TouchEventInfo& info)
 {
+    if (currentPlayStatus_ == PlaybackStatus::ERROR){
+        ResetMediaPlayer();
+    }
     if (!isPrepared_ || isPlayByController_) {
         return;
     }
@@ -650,6 +654,7 @@ void MovingPhotoPattern::StartPlayback()
         return;
     }
     isPlayByController_ = true;
+    isFastKeyUp_ = false;
     Start();
 }
 
@@ -675,7 +680,7 @@ void MovingPhotoPattern::StartAnimation()
     animationOption.SetDuration(ANIMATION_DURATION_400);
     animationOption.SetCurve(Curves::FRICTION);
     animationOption.SetOnFinishEvent([this]() {
-        if (currentPlayStatus_ == PlaybackStatus::PAUSED || currentPlayStatus_ == PlaybackStatus::STOPPED) {
+        if (currentPlayStatus_ == PlaybackStatus::PAUSED || currentPlayStatus_ == PlaybackStatus::STOPPED || currentPlayStatus_ == PlaybackStatus::STARTED) {
             return;
         }
         HideImageNode();
@@ -689,6 +694,7 @@ void MovingPhotoPattern::StartAnimation()
 
 void MovingPhotoPattern::StopPlayback()
 {
+    isFastKeyUp_ = false;
     if (currentPlayStatus_ != PlaybackStatus::STARTED || !isPrepared_) {
         return;
     }
@@ -873,7 +879,7 @@ void MovingPhotoPattern::OnVisibleChange(bool isVisible)
 {
     CHECK_NULL_VOID(mediaPlayer_);
     if (!isVisible) {
-        OnWindowHide();
+        StopPlayback();
     }
 }
 
