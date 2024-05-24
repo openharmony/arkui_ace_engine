@@ -23,6 +23,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
 #include "core/components_ng/pattern/security_component/security_component_theme.h"
@@ -172,6 +173,8 @@ void SecurityComponentModelNG::SetDefaultIconStyle(const RefPtr<FrameNode>& imag
     iconProp->UpdateImageSourceInfo(imageSourceInfo);
     iconProp->UpdateUserDefinedIdealSize(
         CalcSize(NG::CalcLength(secCompTheme->GetIconSize()), NG::CalcLength(secCompTheme->GetIconSize())));
+    // default follow text direction
+    ImageModelNG::SetMatchTextDirection(Referenced::RawPtr(imageNode), true);
 }
 
 void SecurityComponentModelNG::SetDefaultBackgroundButton(const RefPtr<FrameNode>& buttonNode,
