@@ -459,7 +459,7 @@ public:
         return recoverEnd_;
     }
 
-    void OnAreaChangedInner() override;
+    void OnHandleAreaChanged() override;
     void RemoveAreaChangeInner();
 
     void ResetDragOption() override

@@ -1313,6 +1313,7 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle, bool
         return;
     }
     selectOverlay_->ProcessSelectAllOverlay({ .menuIsShow = showMenu, .animation = true });
+    CaretAvoidSoftKeyboard();
 }
 
 void TextFieldPattern::HandleOnCopy(bool isUsingExternalKeyboard)
@@ -2779,6 +2780,7 @@ void TextFieldPattern::UpdateCaretPositionWithClamp(const int32_t& pos)
 void TextFieldPattern::ProcessOverlay(const OverlayRequest& request)
 {
     selectOverlay_->ProcessOverlay(request);
+    CaretAvoidSoftKeyboard();
 }
 
 void TextFieldPattern::DelayProcessOverlay(const OverlayRequest& request)
@@ -4283,13 +4285,17 @@ void TextFieldPattern::OnValueChanged(bool needFireChangeEvent, bool needFireSel
 
 void TextFieldPattern::OnAreaChangedInner()
 {
+    RequestKeyboardOnFocus();
+}
+
+void TextFieldPattern::OnHandleAreaChanged()
+{
     auto parentGlobalOffset = GetPaintRectGlobalOffset();
     if (parentGlobalOffset != parentGlobalOffset_) {
         parentGlobalOffset_ = parentGlobalOffset;
         UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
         HandleParentGlobalOffsetChange();
     }
-    RequestKeyboardOnFocus();
 }
 
 void TextFieldPattern::HandleParentGlobalOffsetChange()
@@ -6636,12 +6642,6 @@ void TextFieldPattern::CleanNodeResponseKeyEvent()
     }
     host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-}
-
-void TextFieldPattern::OnVirtualKeyboardAreaChanged()
-{
-    CHECK_NULL_VOID(SelectOverlayIsOn());
-    selectController_->CalculateHandleOffset();
 }
 
 void TextFieldPattern::RegisterWindowSizeCallback()
