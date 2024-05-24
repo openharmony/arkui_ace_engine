@@ -82,16 +82,18 @@ public:
     }
     bool ShowUIExtensionMenu(const AISpan& aiSpan, NG::RectF aiRect, const RefPtr<NG::FrameNode>& targetNode);
     void ResponseBestMatchItem(const AISpan& aiSpan);
+    void StartAbilityByType(const std::string& type, AAFwk::WantParams& wantParams);
 
 private:
     friend class NG::TextPattern;
     friend class NG::RichEditorPattern;
 
     std::function<void(const AAFwk::WantParams&)> GetOnReceive(
-        const RefPtr<NG::FrameNode>& uiExtNode, NG::RectF aiRect, const RefPtr<NG::FrameNode>& targetNode);
+        NG::RectF aiRect, const RefPtr<NG::FrameNode>& targetNode);
     std::function<void()> GetDetectDelayTask(const std::map<int32_t, AISpan>& aiSpanMap);
     void SetWantParamaters(const AISpan& aiSpan, AAFwk::Want& want);
 
+    RefPtr<NG::FrameNode> uiExtNode_;
     WeakPtr<NG::FrameNode> frameNode_;
     bool aiDetectInitialized_ = false;
     bool hasClickedAISpan_ = false;

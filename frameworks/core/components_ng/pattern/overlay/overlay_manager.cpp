@@ -4696,10 +4696,16 @@ SizeF OverlayManager::CaculateMenuSize(
 
     auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_RETURN(menuLayoutProperty, SizeF());
-    const auto& padding = menuLayoutProperty->CreatePaddingAndBorder();
+    auto horInterval = static_cast<float>(selectTheme->GetMenuIconPadding().ConvertToPx()) -
+                       static_cast<float>(selectTheme->GetOutPadding().ConvertToPx());
+    const auto& menuItemPadding = menuLayoutProperty->CreatePaddingAndBorderWithDefault(horInterval, 0.0f, 0.0f, 0.0f);
     auto middleSpace = static_cast<float>(selectTheme->GetIconContentPadding().ConvertToPx());
-    float contentWidth = static_cast<float>(measureSize.Width()) + padding.Width() + middleSpace;
+    float contentWidth = static_cast<float>(measureSize.Width()) + menuItemPadding.Width() + middleSpace;
 
+    PaddingProperty menuPadding;
+    menuPadding.SetEdges(CalcLength(selectTheme->GetOutPadding()));
+    menuLayoutProperty->UpdatePadding(menuPadding);
+    const auto& padding = menuLayoutProperty->CreatePaddingAndBorder();
     auto childConstraint = menuLayoutProperty->CreateChildConstraint();
     auto columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
     CHECK_NULL_RETURN(columnInfo, SizeF());
@@ -4708,9 +4714,10 @@ SizeF OverlayManager::CaculateMenuSize(
     auto minWidth = static_cast<float>(columnInfo->GetWidth()) - padding.Width();
     childConstraint.minSize.SetWidth(minWidth);
     auto idealWidth = std::max(contentWidth, childConstraint.minSize.Width());
-    auto idealHeight = groupHeight * (menuSize - 1) +
-        menuItemHeight + static_cast<float>(selectTheme->GetOutPadding().ConvertToPx()) * 2;
-    return SizeF(idealWidth, idealHeight);
+    auto idealHeight = groupHeight * (menuSize - 1) + menuItemHeight;
+    auto contentSize = SizeF(idealWidth, idealHeight);
+    AddPaddingToSize(padding, contentSize);
+    return contentSize;
 }
 
 bool OverlayManager::ShowUIExtensionMenu(const RefPtr<NG::FrameNode>& uiExtNode, const NG::RectF& aiRect,
@@ -4748,7 +4755,7 @@ bool OverlayManager::ShowUIExtensionMenu(const RefPtr<NG::FrameNode>& uiExtNode,
     return true;
 }
 
-void OverlayManager::CloseUIExtensionMenu(const std::function<void(const std::string&)>& onClickMenu, int32_t targetId)
+void OverlayManager::CloseUIExtensionMenu(int32_t targetId)
 {
     bool isShown = SubwindowManager::GetInstance()->GetShown();
     if (isShown) {
