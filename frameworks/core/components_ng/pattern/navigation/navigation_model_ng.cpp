@@ -502,6 +502,7 @@ void BuildSymbolToolbarMoreItemNode(const RefPtr<BarItemNode>& barItemNode)
     symbolProperty->UpdateSymbolColorList({ theme->GetToolbarIconColor() });
     symbolNode->MarkModifyDone();
     barItemNode->SetIconNode(symbolNode);
+    barItemNode->SetIsMoreItemNode(true);
     barItemNode->AddChild(symbolNode);
 }
 
