@@ -61,11 +61,12 @@ const VERSION_TWELVE: number = 50000012
 @CustomDialog
 export struct TipsDialog {
   controller: CustomDialogController;
-  imageRes: Resource | ResourceStr | PixelMap | null = null;
+  imageRes: ResourceStr | PixelMap | null = null;
   @State imageSize?: SizeOptions = { width: DEFAULT_IMAGE_SIZE, height: DEFAULT_IMAGE_SIZE };
   title?: ResourceStr | null = null;
   content?: ResourceStr | null = null;
   checkAction?: (isChecked: boolean) => void;
+  onCheckedChange?: Callback<boolean>;
   checkTips?: ResourceStr | null = null;
   @State isChecked?: boolean = false;
   primaryButton?: ButtonOptions | null = null;
@@ -121,6 +122,9 @@ export struct TipsDialog {
           this.isChecked = checked;
           if (this.checkAction) {
             this.checkAction(checked);
+          }
+          if (this.onCheckedChange) {
+            this.onCheckedChange(checked);
           }
         })
         .margin({ right: $r('sys.float.padding_level4') })
@@ -447,7 +451,7 @@ export struct ConfirmDialog {
   @State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   @State buttonFontColorWithTheme: ResourceColor = $r('sys.color.font_emphasize');
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
-  checkAction?: Callback<boolean>;
+  onCheckedChange?: Callback<boolean>;
   contentScroller: Scroller = new Scroller();
   buttons?: ButtonOptions[] | undefined = undefined;
   marginOffset: number = 0;
@@ -501,8 +505,8 @@ export struct ConfirmDialog {
           Checkbox({ name: 'checkbox', group: 'checkboxGroup' }).select(this.isChecked)
             .onChange((checked: boolean) => {
               this.isChecked = checked;
-              if (this.checkAction) {
-                this.checkAction(this.isChecked);
+              if (this.onCheckedChange) {
+                this.onCheckedChange(this.isChecked);
               }
             })
             .hitTestBehavior(HitTestMode.Block)
