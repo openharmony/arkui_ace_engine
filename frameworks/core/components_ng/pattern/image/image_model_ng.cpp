@@ -768,5 +768,27 @@ void ImageModelNG::SetImageAnalyzerConfig(FrameNode* frameNode, void* config)
     CHECK_NULL_VOID(imagePattern);
     imagePattern->SetImageAnalyzerConfig(config);
 }
+
+void ImageModelNG::ResetImageSrc(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ImageSourceInfo sourceInfo("");
+    sourceInfo.SetIsFromReset(true);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, sourceInfo, frameNode);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetImage();
+}
+
+void ImageModelNG::ResetImageAlt(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ImageSourceInfo sourceInfo("");
+    sourceInfo.SetIsFromReset(true);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, Alt, sourceInfo, frameNode);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetAltImage();
+}
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_CPP

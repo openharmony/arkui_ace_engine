@@ -1768,6 +1768,7 @@ struct ArkUIImageModifier {
     void (*analyzerConfig)(ArkUINodeHandle node, void* config);
     void (*setDrawingColorFilter)(ArkUINodeHandle node, void* colorFilter);
     void* (*getDrawingColorFilter)(ArkUINodeHandle node);
+    void (*resetImageSrc)(ArkUINodeHandle node);
 };
 
 struct ArkUIColumnModifier {
