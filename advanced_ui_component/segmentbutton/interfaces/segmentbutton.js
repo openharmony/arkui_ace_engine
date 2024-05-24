@@ -31,7 +31,7 @@ if (!("finalizeConstruction" in ViewPU.prototype)) {
 }
 const curves = globalThis.requireNativeModule("ohos.curves");
 const KeyCode = globalThis.requireNapi("multimodalInput.keyCode").KeyCode;
-const util = globalThis.requireNativeModule("@ohos.util");
+const util = globalThis.requireNapi("util");
 
 const MIN_ITEM_COUNT = 2;
 const MAX_ITEM_COUNT = 5;
