@@ -2628,6 +2628,10 @@ void WebPattern::RegisterSelectOverlayEvent(SelectOverlayInfo& selectInfo)
         webPattern->SetCurrentStartHandleDragging(isFirst);
         webPattern->SetSelectOverlayDragging(true);
     };
+    selectInfo.checkIsTouchInHostArea =
+    [weak = AceType::WeakClaim(this)](const PointF& touchPoint) -> bool {
+        return true;
+    };
 }
 
 RectF WebPattern::ComputeMouseClippedSelectionBounds(int32_t x, int32_t y, int32_t w, int32_t h)
