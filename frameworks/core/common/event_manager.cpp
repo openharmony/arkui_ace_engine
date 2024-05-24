@@ -543,6 +543,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
     if (point.type == TouchType::PULL_MOVE || point.pullType == TouchType::PULL_MOVE) {
         isDragging_ = false;
         point.type = TouchType::CANCEL;
+        point.pullType = TouchType::PULL_MOVE;
     }
     if (point.type == TouchType::PULL_UP || point.type == TouchType::UP) {
         isDragging_ = false;
@@ -595,6 +596,11 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
     // the event, each recognizer needs to filter the extra events by itself.
     if (dispatchSuccess) {
         if (Container::IsCurrentUseNewPipeline()) {
+            if (point.type == TouchType::CANCEL && point.pullType == TouchType::PULL_MOVE) {
+                CleanRecognizersForDragBegin(point);
+                lastEventTime_ = point.time;
+                return true;
+            }
             // Need update here: onTouch/Recognizer need update
             bool hasFailRecognizer = false;
             bool allDone = false;
@@ -632,6 +638,20 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
 
     lastEventTime_ = point.time;
     return true;
+}
+
+void EventManager::CleanRecognizersForDragBegin(TouchEvent& touchEvent)
+{
+    // send cancel to all recognizer
+    for (const auto& iter : touchTestResults_) {
+        touchEvent.id = iter.first;
+        DispatchTouchEventToTouchTestResult(touchEvent, iter.second, true);
+        refereeNG_->CleanGestureScope(touchEvent.id);
+        referee_->CleanGestureScope(touchEvent.id);
+    }
+    touchTestResults_.clear();
+    refereeNG_->CleanRedundanceScope();
+    return;
 }
 
 void EventManager::DispatchTouchEventToTouchTestResult(TouchEvent touchEvent,

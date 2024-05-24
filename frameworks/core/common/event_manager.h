@@ -278,6 +278,7 @@ private:
     void LogTouchTestResultRecognizers(const TouchTestResult& result, int32_t touchEventId);
     void DispatchTouchEventToTouchTestResult(TouchEvent touchEvent, TouchTestResult touchTestResult,
         bool sendOnTouch);
+    void CleanRecognizersForDragBegin(TouchEvent& touchEvent);
     bool innerEventWin_ = false;
     std::unordered_map<size_t, MouseTestResult> mouseTestResults_;
     MouseTestResult currMouseTestResults_;
