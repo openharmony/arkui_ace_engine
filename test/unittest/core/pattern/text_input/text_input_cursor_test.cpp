@@ -1264,21 +1264,19 @@ HWTEST_F(TextInputCursorTest, CheckPreviewTextValidate001, TestSize.Level1)
     EXPECT_EQ(pattern_->GetCaretIndex(), static_cast<int>(DEFAULT_TEXT.size()));
 
     /**
-     * @tc.expected: call CheckPreviewTextValidate and check return false
+     * @tc.expected: call CheckPreviewTextValidate and check return true
+     */
+    EXPECT_TRUE(pattern_->CheckPreviewTextValidate({PREVIEW_THR}));
+
+    /**
+     * @tc.steps:call invalid CheckPreviewTextValidate
+     * @tc.expected: check return false
      */
     EXPECT_FALSE(pattern_->CheckPreviewTextValidate({PREVIEW_BAD_DATA}));
-    EXPECT_FALSE(pattern_->CheckPreviewTextValidate({PREVIEW_THR}));
 
     /**
      * @tc.steps:Set select and call CheckPreviewTextValidate
      * @tc.expected: check return false
-     */
-    EXPECT_FALSE(pattern_->CheckPreviewTextValidate({PREVIEW_BAD_DATA}));
-    EXPECT_FALSE(pattern_->CheckPreviewTextValidate({PREVIEW_THR}));
-
-    /**
-     * @tc.steps:Set caretPosition and call CheckPreviewTextValidate
-     * @tc.expected: check return true
      */
     auto controller = pattern_->GetTextSelectController();
     controller->UpdateCaretIndex(5);

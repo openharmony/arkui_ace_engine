@@ -3755,6 +3755,7 @@ void TextFieldPattern::OnCursorMoveDone(TextAffinity textAffinity, std::optional
     } else {
         tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
+    UpdateCaretInfoToController();
 }
 
 int32_t TextFieldPattern::GetWordLength(int32_t originCaretPosition, int32_t directionMove)
@@ -7128,13 +7129,6 @@ bool TextFieldPattern::CheckPreviewTextValidate(PreviewTextInfo info) const
     auto end = info.range.end;
     if (start != end && (start == PREVIEW_TEXT_RANGE_DEFAULT || end == PREVIEW_TEXT_RANGE_DEFAULT)) {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "range is not [-1,-1] or legal range");
-        return false;
-    }
-
-    // unsupported insert preview text when caretIndex outside of range
-    auto caretIndex = selectController_->GetCaretIndex();
-    if (start != PREVIEW_TEXT_RANGE_DEFAULT && (start > caretIndex || end < caretIndex)) {
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "unsupported insert preview text when caretIndex outside of range");
         return false;
     }
 
