@@ -1785,7 +1785,7 @@ ScrollResult SheetPresentationPattern::HandleScroll(float scrollOffset, int32_t 
             return HandleScrollWithSheet(scrollOffset);
         }
         if (isSheetPosChanged_) {
-            HandleDragEnd(SHEET_VELOCITY_THRESHOLD);
+            HandleDragEnd(scrollOffset > 0 ? SHEET_VELOCITY_THRESHOLD : -SHEET_VELOCITY_THRESHOLD);
             isSheetPosChanged_ = false;
         }
     } else if (state == NestedState::CHILD_OVER_SCROLL) {
