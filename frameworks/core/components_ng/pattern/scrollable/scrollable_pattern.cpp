@@ -1515,9 +1515,10 @@ float ScrollablePattern::GetOffsetWithLimit(float offset) const
         auto totalOffset = GetTotalOffset();
         return std::min(totalOffset, offset);
     } else if (Negative(offset)) {
-        auto hostSize = GetHostFrameSize();
-        CHECK_NULL_RETURN(hostSize.has_value(), true);
-        auto remainHeight = GetTotalHeight() - GetTotalOffset() - hostSize->MainSize(axis_);
+        auto frameNode = GetHost();
+        CHECK_NULL_RETURN(frameNode, true);
+        auto hostSize = frameNode->GetGeometryNode()->GetFrameSize();
+        auto remainHeight = GetTotalHeight() - GetTotalOffset() - hostSize.MainSize(axis_);
         return std::max(offset, -remainHeight);
     }
     return 0;
@@ -1527,9 +1528,11 @@ void ScrollablePattern::LimitMouseEndOffset()
 {
     float limitedMainOffset = -1.0f;
     float limitedCrossOffset = -1.0f;
-    auto hostSize = GetHostFrameSize();
-    auto mainSize = hostSize->MainSize(axis_);
-    auto crossSize = hostSize->CrossSize(axis_);
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto hostSize = frameNode->GetGeometryNode()->GetFrameSize();
+    auto mainSize = hostSize.MainSize(axis_);
+    auto crossSize = hostSize.CrossSize(axis_);
     auto mainOffset = mouseEndOffset_.GetMainOffset(axis_);
     auto crossOffset = mouseEndOffset_.GetCrossOffset(axis_);
     if (LessNotEqual(mainOffset, 0.0f)) {
