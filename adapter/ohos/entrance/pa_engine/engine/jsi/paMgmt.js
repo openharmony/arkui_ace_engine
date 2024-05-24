@@ -36,4 +36,4 @@ function $app_define$(page, packageName, parseContent) {
 }
 function $app_bootstrap$() {};
 
-console.info("PA Mgmt init success");
+console.info('PA Mgmt init success');

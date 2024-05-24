@@ -112,7 +112,7 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
 
   // get 'read through` from the ObservedProperty
   public get(): C {
-    stateMgmtProfiler.begin("SynchedPropertyTwoWayPU.get");
+    stateMgmtProfiler.begin('SynchedPropertyTwoWayPU.get');
     stateMgmtConsole.propertyAccess(`${this.debugInfo()}: get`)
     this.recordPropertyDependentUpdate();
     const result = this.getUnmonitored();
@@ -129,7 +129,7 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
 
   // set 'writes through` to the ObservedProperty
   public set(newValue: C): void {
-    stateMgmtProfiler.begin("SynchedPropertyTwoWayPU.set");
+    stateMgmtProfiler.begin('SynchedPropertyTwoWayPU.set');
     if (this.getUnmonitored() === newValue) {
       stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}IP, '${this.info() || 'unknown'}']: set with unchanged value  - nothing to do.`);
       stateMgmtProfiler.end();

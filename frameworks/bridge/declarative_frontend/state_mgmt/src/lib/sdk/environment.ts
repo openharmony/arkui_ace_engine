@@ -123,22 +123,22 @@ class Environment {
     }
     let tmp;
     switch (key) {
-      case "accessibilityEnabled":
+      case 'accessibilityEnabled':
         tmp = Environment.envBackend_ .getAccessibilityEnabled();
         break;
-      case "colorMode":
+      case 'colorMode':
         tmp = Environment.envBackend_ .getColorMode();
         break;
       case 'fontScale':
         tmp = Environment.envBackend_ .getFontScale();
         break;
-      case "fontWeightScale":
+      case 'fontWeightScale':
         tmp = Environment.envBackend_ .getFontWeightScale().toFixed(2);
         break;
-      case "layoutDirection":
+      case 'layoutDirection':
         tmp = Environment.envBackend_ .getLayoutDirection();
         break;
-      case "languageCode":
+      case 'languageCode':
         tmp = Environment.envBackend_ .getLanguageCode();
         break;
       default:

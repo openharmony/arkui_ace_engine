@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-const __qrcode__ = requireInternal("arkui.qrcode");
+const __qrcode__ = requireInternal('arkui.qrcode');
 class QRCode extends JSViewAbstract {
     static create(value) {
         __qrcode__.create(value);

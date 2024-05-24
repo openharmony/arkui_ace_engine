@@ -45,7 +45,7 @@ class BaseNode extends __JSBaseNode__ {
     if (uiContext === undefined) {
       throw Error('Node constructor error, param uiContext error');
     } else {
-      if (!(typeof uiContext === "object") || !("instanceId_" in uiContext)) {
+      if (!(typeof uiContext === 'object') || !('instanceId_' in uiContext)) {
         throw Error(
           'Node constructor error, param uiContext is invalid'
         );

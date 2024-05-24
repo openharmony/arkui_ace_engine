@@ -826,7 +826,7 @@ abstract class ViewPU extends PUV2ViewBase
         this.updateStateVars(params);
         this.aboutToReuse(params);
       }
-    }, "aboutToReuse", this.constructor.name);
+    }, 'aboutToReuse', this.constructor.name);
 
     for (const stateLinkPropVar of this.ownObservedPropertiesStore_) {
       const changedElmtIds = stateLinkPropVar.moveElmtIdsForDelayedUpdate(true);

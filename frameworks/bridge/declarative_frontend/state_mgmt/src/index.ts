@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-stateMgmtConsole.info("ACE State Management component is initiaizing ...")
+stateMgmtConsole.info('ACE State Management component is initiaizing ...')
 
 PersistentStorage.configureBackend(new Storage());
 

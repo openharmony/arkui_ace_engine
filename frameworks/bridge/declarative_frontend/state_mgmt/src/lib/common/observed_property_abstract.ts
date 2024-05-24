@@ -118,7 +118,7 @@ abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T>
 
   // FU code path callback
   protected notifyHasChanged(newValue: T) {
-    stateMgmtProfiler.begin("ObservedPropertyAbstract.notifyHasChanged");
+    stateMgmtProfiler.begin('ObservedPropertyAbstract.notifyHasChanged');
     stateMgmtConsole.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || 'unknown'}']: notifyHasChanged, notifying.`);
     this.subscribers_.forEach((subscribedId) => {
       let subscriber: IPropertySubscriber = SubscriberManager.Find(subscribedId);
@@ -138,7 +138,7 @@ abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T>
   }
 
   protected notifyPropertyRead() {
-    stateMgmtProfiler.begin("ObservedPropertyAbstract.notifyPropertyRead");
+    stateMgmtProfiler.begin('ObservedPropertyAbstract.notifyPropertyRead');
     stateMgmtConsole.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || 'unknown'}']: propertyRead.`);
     this.subscribers_.forEach((subscribedId) => {
       var subscriber: IPropertySubscriber = SubscriberManager.Find(subscribedId)

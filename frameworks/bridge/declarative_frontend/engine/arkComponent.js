@@ -3858,13 +3858,13 @@ const isTruthyString = (val) => typeof val === 'string' && val.trim() !== '';
 
 var CommonGestureType;
 (function (CommonGestureType) {
-    CommonGestureType[CommonGestureType["TAP_GESTURE"] = 0] = "TAP_GESTURE";
-    CommonGestureType[CommonGestureType["LONG_PRESS_GESTURE"] = 1] = "LONG_PRESS_GESTURE";
-    CommonGestureType[CommonGestureType["PAN_GESTURE"] = 2] = "PAN_GESTURE";
-    CommonGestureType[CommonGestureType["SWIPE_GESTURE"] = 3] = "SWIPE_GESTURE";
-    CommonGestureType[CommonGestureType["PINCH_GESTURE"] = 4] = "PINCH_GESTURE";
-    CommonGestureType[CommonGestureType["ROTATION_GESTURE"] = 5] = "ROTATION_GESTURE";
-    CommonGestureType[CommonGestureType["GESTURE_GROUP"] = 6] = "GESTURE_GROUP";
+    CommonGestureType[CommonGestureType['TAP_GESTURE'] = 0] = 'TAP_GESTURE';
+    CommonGestureType[CommonGestureType['LONG_PRESS_GESTURE'] = 1] = 'LONG_PRESS_GESTURE';
+    CommonGestureType[CommonGestureType['PAN_GESTURE'] = 2] = 'PAN_GESTURE';
+    CommonGestureType[CommonGestureType['SWIPE_GESTURE'] = 3] = 'SWIPE_GESTURE';
+    CommonGestureType[CommonGestureType['PINCH_GESTURE'] = 4] = 'PINCH_GESTURE';
+    CommonGestureType[CommonGestureType['ROTATION_GESTURE'] = 5] = 'ROTATION_GESTURE';
+    CommonGestureType[CommonGestureType['GESTURE_GROUP'] = 6] = 'GESTURE_GROUP';
 })(CommonGestureType || (CommonGestureType = {}));
 
 class GestureHandler {

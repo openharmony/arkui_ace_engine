@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-const fs = require("fs");
-var peg = require("pegjs");
+const fs = require('fs');
+var peg = require('pegjs');
 
 function usageAndExit() {
     console.error(`
@@ -36,9 +36,9 @@ Original file is overwritten.
 // load parser sources and compile them
 // returns the parser object
 function makeParser() {
-    let pegjsSources = "";
+    let pegjsSources = '';
     try {
-        pegjsSources = fs.readFileSync("disableProfiler.pegjs") + "\n";
+        pegjsSources = fs.readFileSync('disableProfiler.pegjs') + '\n';
     } catch (err) {
         console.error("While trying to read: 'disableProfiler.pegjs': " + err);
         process.exit(-1);
@@ -50,12 +50,12 @@ function makeParser() {
     try {
         parser = peg.generate(pegjsSources,
             {
-                "allowedStartRules": [
-                    "program"
+                'allowedStartRules': [
+                    'program'
                 ]
             });
     } catch (err) {
-        console.error("Failed to compile parser. Error: " + err);
+        console.error('Failed to compile parser. Error: ' + err);
         process.exit(-1);
     }
     return parser;
@@ -63,9 +63,9 @@ function makeParser() {
 
 // load the specified source file and return the buffer
 function loadFile(fileName) {
-    let content = "";
+    let content = '';
     try {
-        content = fs.readFileSync(fileName) + "\n";
+        content = fs.readFileSync(fileName) + '\n';
     } catch (err) {
         console.error(`While trying to read source file ${fileName}: ${err}`);
         process.exit(-1);
