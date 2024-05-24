@@ -31,6 +31,7 @@ let __decorate = (this && this.__decorate) || function (q18, r18, s18, t18) {
 if (!('finalizeConstruction' in ViewPU.prototype)) {
   Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => { });
 }
+const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const curves = requireNativeModule('ohos.curves');
 const measure = requireNapi('measure');
 const TEXT_HOT_AREA_WIDTH = 8;
@@ -42,6 +43,7 @@ const ARROW_ANIMATION_DURATION = 200;
 const ANIMATION_DURATION_250 = 250;
 const ANIMATION_DURATION_100 = 100;
 const FILTER_TOP_PADDING = 8;
+const FILTER_BAR_MARGIN = 8
 const SEPARATOR_HEIGHT = 16;
 const SEPARATOR_WIDTH = 1;
 const FLOAT_OPACITY = 0.95;
@@ -349,8 +351,8 @@ class ListFilterRow extends ViewPU {
               style: BorderStyle.Solid
             });
             ListItem.padding({
-              left: TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH,
-              right: TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH,
+              start: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH),
+              end: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH),
             });
             ViewStackProcessor.visualState('normal');
             ListItem.border({
@@ -363,7 +365,10 @@ class ListFilterRow extends ViewPU {
               },
               width: 0
             });
-            ListItem.padding({ left: TEXT_HOT_AREA_WIDTH, right: TEXT_HOT_AREA_WIDTH });
+            ListItem.padding({
+              start: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH),
+              end: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH)
+            });
             ViewStackProcessor.visualState();
             ListItem.backgroundColor(this.isBackgroundHoverRow[p15] ? this.backgroundColorRow[p15] : TRANS_COLOR);
             ListItem.onHover((l16) => {
@@ -411,7 +416,7 @@ class ListFilterRow extends ViewPU {
                 });
               }
             });
-            ListItem.margin({ left: p15 === 0 ? -TEXT_HOT_AREA_WIDTH : 0 });
+            ListItem.margin({ start: LengthMetrics.vp(p15 === 0 ? -TEXT_HOT_AREA_WIDTH : 0) });
             ListItem.tabIndex(p15 === 0 ? this.rowIndex : -1);
           };
           const u15 = (y15, z15) => {
@@ -862,21 +867,21 @@ class MultiFilterRow extends ViewPU {
       Row.width(PERCENT_100);
       Row.alignItems(VerticalAlign.Top);
       Row.padding({
-        left: {
+        start: LengthMetrics.resource({
           'id': -1,
           'type': 10002,
           params: ['sys.float.ohos_id_max_padding_start'],
           'bundleName': '__harDefaultBundleName__',
           'moduleName': '__harDefaultModuleName__',
-        },
-        right: {
+        }),
+        end: LengthMetrics.resource({
           'id': -1,
           'type': 10002,
           params: ['sys.float.ohos_id_max_padding_end'],
           'bundleName': '__harDefaultBundleName__',
           'moduleName': '__harDefaultModuleName__',
-        },
-      });
+        })
+    });
       if (!f13) {
         Row.pop();
       }
@@ -900,7 +905,7 @@ class MultiFilterRow extends ViewPU {
               textContent: (v12 = this.filterRow) === null || v12 === void 0 ? void 0 : v12.options[0].toString(),
               fontSize: FILTER_FONT_SIZE
             })) + (TEXT_HOT_AREA_WIDTH * 2));
-            Text.margin({ left: -TEXT_HOT_AREA_WIDTH });
+            Text.margin({ start: LengthMetrics.vp(-TEXT_HOT_AREA_WIDTH) });
             Text.fontSize({
               'id': -1,
               'type': 10002,
@@ -980,8 +985,8 @@ class MultiFilterRow extends ViewPU {
               style: BorderStyle.Solid,
             });
             Text.padding({
-              left: TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH,
-              right: TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH,
+              start: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH),
+              end: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH),
             });
             ViewStackProcessor.visualState('normal');
             Text.border({
@@ -994,7 +999,10 @@ class MultiFilterRow extends ViewPU {
               },
               width: 0,
             });
-            Text.padding({ left: TEXT_HOT_AREA_WIDTH, right: TEXT_HOT_AREA_WIDTH });
+            Text.padding({
+              start: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH),
+              end: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH)
+            });
             ViewStackProcessor.visualState();
             Text.tabIndex(this.rowIndex);
             if (!t12) {
@@ -1020,13 +1028,13 @@ class MultiFilterRow extends ViewPU {
       Row.create();
       Row.width(PERCENT_100);
       Row.padding({
-        right: {
+        end: LengthMetrics.resource({
           'id': -1,
           'type': 10002,
           params: ['sys.float.ohos_id_max_padding_end'],
           'bundleName': '__harDefaultBundleName__',
           'moduleName': '__harDefaultModuleName__',
-        }
+        })
       });
       Row.onAreaChange((h12, i12) => {
         this.filterColumnWidth = vp2px(parseInt(i12.width.toString(), 0));
@@ -1168,8 +1176,8 @@ class MultiFilterRow extends ViewPU {
                   style: BorderStyle.Solid,
                 });
                 Text.padding({
-                  left: TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH,
-                  right: TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH,
+                  start: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH),
+                  end: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH),
                 });
                 ViewStackProcessor.visualState('normal');
                 Text.border({
@@ -1182,7 +1190,10 @@ class MultiFilterRow extends ViewPU {
                   },
                   width: 0,
                 });
-                Text.padding({ left: TEXT_HOT_AREA_WIDTH, right: TEXT_HOT_AREA_WIDTH });
+                Text.padding({
+                  start: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH),
+                  end: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH)
+                });
                 ViewStackProcessor.visualState();
                 Text.tabIndex(-1);
                 if (!t11) {
@@ -2023,7 +2034,7 @@ export class Filter extends ViewPU {
             const w5 = (m6, n6) => {
               ListItem.create(x5, true);
               ListItem.height(PERCENT_100);
-              ListItem.margin({ left: -TEXT_HOT_AREA_WIDTH });
+              ListItem.margin({ start: LengthMetrics.vp(-TEXT_HOT_AREA_WIDTH) });
             };
             const x5 = (b6, c6) => {
               v5(b6, c6);
@@ -2053,15 +2064,18 @@ export class Filter extends ViewPU {
                   'bundleName': '__harDefaultBundleName__',
                   'moduleName': '__harDefaultModuleName__',
                 });
-                Text.margin({ left: TEXT_HOT_AREA_WIDTH, right: TEXT_HOT_AREA_WIDTH });
+                Text.margin({
+                  start: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH),
+                  end: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH)
+                });
                 Text.padding({
-                  left: {
+                  start: LengthMetrics.resource({
                     'id': -1,
                     'type': 10002,
                     params: ['sys.float.ohos_id_max_padding_start'],
                     'bundleName': '__harDefaultBundleName__',
                     'moduleName': '__harDefaultModuleName__',
-                  }
+                  })
                 });
                 if (!j6) {
                   Text.pop();
@@ -2180,8 +2194,8 @@ export class Filter extends ViewPU {
                     style: BorderStyle.Solid,
                   });
                   ListItem.padding({
-                    left: TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH,
-                    right: TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH,
+                    start: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH),
+                    end: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH),
                   });
                   ViewStackProcessor.visualState('normal');
                   ListItem.border({
@@ -2194,7 +2208,10 @@ export class Filter extends ViewPU {
                     },
                     width: 0,
                   });
-                  ListItem.padding({ left: TEXT_HOT_AREA_WIDTH, right: TEXT_HOT_AREA_WIDTH });
+                  ListItem.padding({
+                    start: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH),
+                    end: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH)
+                  });
                   ViewStackProcessor.visualState();
                   ListItem.onClick(() => {
                     this.additionItemClick(w4);
@@ -2438,7 +2455,7 @@ export class Filter extends ViewPU {
       Row.create();
       Row.width(PERCENT_100);
       Row.height(this.floatFilterBarHeight);
-      Row.padding({ left: FOCUS_BORDER_WIDTH, right: FOCUS_BORDER_WIDTH });
+      Row.padding({ start: LengthMetrics.vp(FOCUS_BORDER_WIDTH), end: LengthMetrics.vp(FOCUS_BORDER_WIDTH) });
       Row.backgroundColor({
         'id': -1,
         'type': 10001,
@@ -2587,7 +2604,7 @@ export class Filter extends ViewPU {
       ViewStackProcessor.StartGetAccessRecordingFor(x1);
       Row.create();
       Row.height(LIST_ROW_HEIGHT);
-      Row.margin({ left: 8 });
+      Row.margin({ start: LengthMetrics.vp(FILTER_BAR_MARGIN) });
       Row.focusable(true);
       if (!y1) {
         Row.pop();
