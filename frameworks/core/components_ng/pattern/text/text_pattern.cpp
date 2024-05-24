@@ -2616,29 +2616,23 @@ void TextPattern::AddChildSpanItem(const RefPtr<UINode>& child)
         }
     } else if (child->GetTag() == V2::IMAGE_ETS_TAG) {
         auto imageSpanNode = DynamicCast<ImageSpanNode>(child);
-        if (imageSpanNode) {
-            spans_.emplace_back(imageSpanNode->GetSpanItem());
-            spans_.back()->imageNodeId = imageSpanNode->GetId();
-            return;
-        }
-        auto imageNode = DynamicCast<FrameNode>(child);
-        if (imageNode) {
-            auto imageSpanItem = MakeRefPtr<ImageSpanItem>();
-            imageSpanItem->imageNodeId = imageNode->GetId();
-            imageSpanItem->UpdatePlaceholderBackgroundStyle(imageNode);
-            auto focus_hub = imageNode->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(imageSpanNode);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto imageSpanItem = imageSpanNode->GetSpanItem();
+        if (host->GetTag() != V2::RICH_EDITOR_ETS_TAG) {
+            auto focus_hub = imageSpanNode->GetOrCreateFocusHub();
             CHECK_NULL_VOID(focus_hub);
             auto clickCall = focus_hub->GetOnClickCallback();
             if (clickCall) {
                 imageSpanItem->SetOnClickEvent(std::move(clickCall));
             }
-            spans_.emplace_back(imageSpanItem);
-            auto gesture = imageNode->GetOrCreateGestureEventHub();
+            auto gesture = imageSpanNode->GetOrCreateGestureEventHub();
             CHECK_NULL_VOID(gesture);
             gesture->SetHitTestMode(HitTestMode::HTMNONE);
-
-            return;
         }
+        spans_.emplace_back(imageSpanItem);
+        spans_.back()->imageNodeId = imageSpanNode->GetId();
     } else if (child->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG) {
         auto placeholderSpanNode = DynamicCast<PlaceholderSpanNode>(child);
         if (placeholderSpanNode) {

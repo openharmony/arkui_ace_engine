@@ -27,8 +27,7 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT ImageModelNG : public OHOS::Ace::ImageModel {
 public:
-    void Create(const std::string &src, RefPtr<PixelMap> &pixMap, const std::string &bundleName,
-        const std::string &moduleName, bool isUriPureNumber = false) override;
+    void Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMap>& pixMap) override;
     void CreateAnimation(const std::vector<ImageProperties>& imageList, int32_t duration, int32_t iteration) override;
     bool GetIsAnimation() override;
     void SetAlt(const ImageSourceInfo &src) override;
