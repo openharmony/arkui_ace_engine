@@ -78,6 +78,7 @@ void JSCheckboxGroup::JSBind(BindingTarget globalObj)
     JSClass<JSCheckboxGroup>::StaticMethod("selectedColor", &JSCheckboxGroup::SelectedColor);
     JSClass<JSCheckboxGroup>::StaticMethod("unselectedColor", &JSCheckboxGroup::UnSelectedColor);
     JSClass<JSCheckboxGroup>::StaticMethod("mark", &JSCheckboxGroup::Mark);
+    JSClass<JSCheckboxGroup>::StaticMethod("responseRegion", &JSCheckboxGroup::JsResponseRegion);
     JSClass<JSCheckboxGroup>::StaticMethod("size", &JSCheckboxGroup::JsSize);
     JSClass<JSCheckboxGroup>::StaticMethod("padding", &JSCheckboxGroup::JsPadding);
     JSClass<JSCheckboxGroup>::StaticMethod("checkboxShape", &JSCheckboxGroup::SetCheckboxGroupStyle);
