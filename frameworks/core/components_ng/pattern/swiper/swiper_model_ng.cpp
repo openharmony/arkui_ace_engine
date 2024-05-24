@@ -247,6 +247,15 @@ void SwiperModelNG::SetIndicatorStyle(const SwiperParameters& swiperParameters)
     pattern->SetSwiperParameters(swiperParameters);
 };
 
+void SwiperModelNG::SetArcDotIndicatorStyle(const SwiperArcDotParameters& swiperArcDotParameters)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSwiperArcDotParameters(swiperArcDotParameters);
+}
+
 void SwiperModelNG::SetDotIndicatorStyle(const SwiperParameters& swiperParameters)
 {
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -588,6 +597,14 @@ void SwiperModelNG::SetDotIndicatorStyle(FrameNode* frameNode, const SwiperParam
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSwiperParameters(swiperParameters);
+}
+
+void SwiperModelNG::SetArcDotIndicatorStyle(FrameNode* frameNode, const SwiperArcDotParameters& swiperArcDotParameters)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSwiperArcDotParameters(swiperArcDotParameters);
 }
 
 void SwiperModelNG::SetEnabled(FrameNode* frameNode, bool enabled)
