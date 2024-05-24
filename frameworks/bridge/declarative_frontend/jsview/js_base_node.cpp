@@ -48,8 +48,9 @@
 namespace OHOS::Ace::Framework {
 namespace {
 const std::unordered_set<std::string> EXPORT_TEXTURE_SUPPORT_TYPES = { V2::JS_VIEW_ETS_TAG, V2::COMMON_VIEW_ETS_TAG };
-const int32_t BUILD_MAX_PARAM_NUM = 3;
 constexpr uint32_t INFO_LENGTH_LIMIT = 2;
+constexpr uint32_t BUILD_PARAM_INDEX_TWO = 2;
+constexpr uint32_t BUILD_PARAM_INDEX_THREE = 3;
 } // namespace
 
 void JSBaseNode::BuildNode(const JSCallbackInfo& info)
@@ -83,8 +84,8 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
         newNode->SetBuilderFunc(std::move(lazyBuilderFunc));
     }
 
-    if (newNode && (infoLen >= BUILD_MAX_PARAM_NUM)) {
-        auto updateTsNodeBuilder = info[BUILD_MAX_PARAM_NUM - 1];
+    if (newNode && (infoLen >= BUILD_PARAM_INDEX_TWO + 1)) {
+        auto updateTsNodeBuilder = info[BUILD_PARAM_INDEX_TWO];
         EcmaVM* vm = info.GetVm();
         auto updateTsFunc = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(updateTsNodeBuilder));
         auto updateNodeFunc = [updateTsFunc, vm](int32_t instanceId, RefPtr<NG::UINode>& node) mutable {
@@ -94,6 +95,16 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
             updateTsFunc->ExecuteJS(2, param);
         };
         newNode->SetUpdateNodeFunc(std::move(updateNodeFunc));
+    }
+
+    if (newNode && (infoLen >= BUILD_PARAM_INDEX_THREE + 1)) {
+        auto updateTsNodeConfig = info[BUILD_PARAM_INDEX_THREE];
+        EcmaVM* vm = info.GetVm();
+        auto updateTsConfig = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(updateTsNodeConfig));
+        auto updateNodeConfig = [updateTsConfig, vm]() mutable {
+            updateTsConfig->ExecuteJS();
+        };
+        newNode->SetUpdateNodeConfig(std::move(updateNodeConfig));
     }
 
     // If the node is a UINode, amount it to a BuilderProxyNode if needProxy.

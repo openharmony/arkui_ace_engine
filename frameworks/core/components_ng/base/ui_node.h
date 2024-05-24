@@ -674,6 +674,16 @@ public:
     {
         return updateNodeFunc_;
     }
+
+    void SetUpdateNodeConfig(std::function<void()>&& updateNodeConfig)
+    {
+        updateNodeConfig_ = updateNodeConfig;
+    }
+
+    std::function<void()> GetUpdateNodeConfig()
+    {
+        return updateNodeConfig_;
+    }
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -773,6 +783,7 @@ private:
     std::function<void(int32_t)> updateJSInstanceCallback_;
     std::function<void()> lazyBuilderFunc_;
     std::function<void(int32_t, RefPtr<UINode>&)> updateNodeFunc_;
+    std::function<void()> updateNodeConfig_;
 
     std::string debugLine_;
     std::string viewId_;

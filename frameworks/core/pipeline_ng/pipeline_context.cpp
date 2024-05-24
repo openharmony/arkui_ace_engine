@@ -2985,12 +2985,17 @@ void PipelineContext::FlushReload(const ConfigurationChange& configurationChange
     const int32_t duration = 400;
     option.SetDuration(duration);
     option.SetCurve(Curves::FRICTION);
-    AnimationUtils::Animate(option, [weak = WeakClaim(this), configurationChange]() {
+    AnimationUtils::Animate(option, [weak = WeakClaim(this), configurationChange,
+        weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager_))]() {
         auto pipeline = weak.Upgrade();
         CHECK_NULL_VOID(pipeline);
         if (configurationChange.IsNeedUpdate()) {
             auto rootNode = pipeline->GetRootElement();
             rootNode->UpdateConfigurationUpdate(configurationChange);
+            auto overlay = weakOverlayManager.Upgrade();
+            if (overlay) {
+                overlay->ReloadBuilderNodeConfig();
+            }
         }
         CHECK_NULL_VOID(pipeline->stageManager_);
         pipeline->SetIsReloading(true);

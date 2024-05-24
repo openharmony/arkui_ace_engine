@@ -1905,7 +1905,31 @@ RefPtr<UINode> OverlayManager::RebuildCustomBuilder(RefPtr<UINode>& contentNode)
     if (updateNodeFunc) {
         updateNodeFunc(currentId, customNode);
     }
+    auto updateNodeConfig = contentNode->GetUpdateNodeConfig();
+    if (updateNodeConfig) {
+        customNode->SetUpdateNodeConfig(std::move(updateNodeConfig));
+    }
     return customNode;
+}
+
+void OverlayManager::ReloadBuilderNodeConfig()
+{
+    if (dialogMap_.empty()) {
+        return;
+    }
+    auto iter = dialogMap_.begin();
+    while (iter != dialogMap_.end()) {
+        auto dialogNode = (*iter).second;
+        if (dialogNode) {
+            auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+            CHECK_NULL_VOID(dialogPattern);
+            auto customNode = dialogPattern->GetCustomNode();
+            if (customNode && customNode->GetUpdateNodeConfig()) {
+                customNode->GetUpdateNodeConfig()();
+            }
+        }
+        iter++;
+    }
 }
 
 void OverlayManager::OpenCustomDialog(const DialogProperties& dialogProps, std::function<void(int32_t)> &&callback)
