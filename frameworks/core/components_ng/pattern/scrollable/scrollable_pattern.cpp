@@ -1851,11 +1851,10 @@ ScrollResult ScrollablePattern::HandleScroll(float offset, int32_t source, Neste
 
 bool ScrollablePattern::HandleScrollVelocity(float velocity)
 {
-    // if edgeEffect is None and scrollable try to over scroll when it is at the boundary,
+    // if scrollable try to over scroll when it is at the boundary,
     // scrollable does not start fling animation.
     auto edgeEffect = GetEdgeEffect();
-    auto needFlingAtEdge = !(edgeEffect == EdgeEffect::NONE &&
-                             ((IsAtTop() && Positive(velocity)) || (IsAtBottom() && Negative(velocity))));
+    auto needFlingAtEdge = !(((IsAtTop() && Positive(velocity)) || (IsAtBottom() && Negative(velocity))));
     auto isOutOfBoundary = OutBoundaryCallback();
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
