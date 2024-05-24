@@ -45,6 +45,10 @@ void GridItemLayoutProperty::ResetGridLayoutInfoAndMeasure() const
 void GridItemLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     LayoutProperty::ToJsonValue(json, filter);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     json->PutExtAttr("rowStart", std::to_string(propRowStart_.value_or(0)).c_str(), filter);
     json->PutExtAttr("rowEnd", std::to_string(propRowEnd_.value_or(0)).c_str(), filter);
     json->PutExtAttr("columnStart", std::to_string(propColumnStart_.value_or(0)).c_str(), filter);

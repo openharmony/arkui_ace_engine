@@ -66,6 +66,10 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         LayoutProperty::ToJsonValue(json, filter);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("Bottom", GetBottom()->ToString().c_str(), filter);
         json->PutExtAttr("ToastShowMode",
             GetShowModeValue(ToastShowMode::DEFAULT) == ToastShowMode::DEFAULT ? "DEFAULT" : "TOP_MOST", filter);

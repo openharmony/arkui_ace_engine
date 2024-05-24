@@ -1210,6 +1210,10 @@ void GridPattern::ScrollBy(float offset)
 void GridPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     ScrollablePattern::ToJsonValue(json, filter);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     json->PutExtAttr("multiSelectable", multiSelectable_ ? "true" : "false", filter);
     json->PutExtAttr("supportAnimation", supportAnimation_ ? "true" : "false", filter);
 }

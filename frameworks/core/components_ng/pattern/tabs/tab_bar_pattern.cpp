@@ -2516,6 +2516,10 @@ void TabBarPattern::OnRestoreInfo(const std::string& restoreInfo)
 void TabBarPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     Pattern::ToJsonValue(json, filter);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto selectedModes = JsonUtil::CreateArray(true);
     for (const auto& selectedMode : selectedModes_) {
         auto mode = JsonUtil::Create(true);

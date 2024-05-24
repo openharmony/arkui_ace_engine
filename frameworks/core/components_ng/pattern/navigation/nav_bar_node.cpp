@@ -144,13 +144,17 @@ std::string NavBarNode::GetBarItemsString(bool isMenu) const
 
 void NavBarNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    auto layoutProperty = GetLayoutProperty<NavBarLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->ToJsonValue(json, filter);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     json->PutExtAttr("title", GetTitleString().c_str(), filter);
     json->PutExtAttr("subtitle", GetSubtitleString().c_str(), filter);
     json->PutExtAttr("menus", GetBarItemsString(true).c_str(), filter);
     json->PutExtAttr("toolBar", GetBarItemsString(false).c_str(), filter);
-    auto layoutProperty = GetLayoutProperty<NavBarLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->ToJsonValue(json, filter);
 }
 
 } // namespace OHOS::Ace::NG

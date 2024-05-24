@@ -50,6 +50,10 @@ public:
         CHECK_NULL_VOID(pipeline);
         auto patternLockTheme = pipeline->GetTheme<V2::PatternLockTheme>();
         CHECK_NULL_VOID(patternLockTheme);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("sideLength",
             GetSideLength().value_or(patternLockTheme->GetSideLength()).ToString().c_str(), filter);
     }

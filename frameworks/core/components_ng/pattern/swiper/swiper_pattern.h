@@ -110,6 +110,10 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         Pattern::ToJsonValue(json, filter);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("currentIndex", currentIndex_, filter);
         json->PutExtAttr("currentOffset", currentOffset_, filter);
         json->PutExtAttr("uiCastJumpIndex", uiCastJumpIndex_.value_or(-1), filter);

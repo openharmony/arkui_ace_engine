@@ -78,6 +78,10 @@ public:
         auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
         json->PutFixedAttr("src", textLayoutProperty->GetContent().value_or("").c_str(), filter, FIXED_ATTR_SRC);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("allowScale", propAllowScale_.value_or(false) ? "true" : "false", filter);
         json->PutExtAttr("fontSize", propFontSize_.value_or(10.0_vp).ToString().c_str(), filter);
         json->PutExtAttr("fontColor", propFontColor_.value_or(textLayoutProperty->GetTextColor().

@@ -113,6 +113,10 @@ void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     ACE_PROPERTY_TO_JSON_VALUE(propClip_, ClipProperty);
     ACE_PROPERTY_TO_JSON_VALUE(GetBackBlurStyle(), BlurStyleOption);
     ACE_PROPERTY_TO_JSON_VALUE(GetBackgroundEffect(), EffectOption);
+    if (filter.IsFastFilter()) {
+        ObscuredToJsonValue(json, filter);
+        return;
+    }
     if (propTransformMatrix_.has_value()) {
         auto jsonValue = JsonUtil::Create(true);
         jsonValue->Put("type", "matrix");
@@ -162,6 +166,10 @@ void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
 
 void RenderContext::ObscuredToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto jsonObscuredArray = JsonUtil::CreateArray(true);
     std::vector<ObscuredReasons> obscuredReasons = propObscured_.value_or(std::vector<ObscuredReasons>());
     for (size_t i = 0; i < obscuredReasons.size(); i++) {

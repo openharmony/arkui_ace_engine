@@ -45,11 +45,15 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
+        LayoutProperty::ToJsonValue(json, filter);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<SliderTheme>();
         CHECK_NULL_VOID(theme);
-        LayoutProperty::ToJsonValue(json, filter);
         json->PutExtAttr("trackThickness",
             GetThickness()
                 .value_or(GetSliderModeValue(SliderModel::SliderMode::OUTSET) == SliderModel::SliderMode::OUTSET

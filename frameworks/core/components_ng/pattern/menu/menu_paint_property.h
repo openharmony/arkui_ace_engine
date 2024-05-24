@@ -94,6 +94,10 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         PaintProperty::ToJsonValue(json, filter);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("enableArrow", V2::ConvertBoolToString(GetEnableArrow().value_or(false)).c_str(), filter);
         json->PutExtAttr("arrowOffset",
             GetArrowOffset().value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str(), filter);

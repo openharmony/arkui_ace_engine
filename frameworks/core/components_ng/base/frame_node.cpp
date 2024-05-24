@@ -793,6 +793,17 @@ void FrameNode::FocusToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
     bool focusOnTouch = false;
     int32_t tabIndex = 0;
     auto focusHub = GetFocusHub();
+    if (filter.IsFastFilter()) {
+        if (filter.CheckFixedAttr(FIXED_ATTR_FOCUSABLE)) {
+            if (focusHub) {
+                focusable = focusHub->IsFocusable();
+                focused = focusHub->IsCurrentFocus();
+            }
+            json->Put("focusable", focusable);
+            json->Put("focused", focused);
+        }
+        return;
+    }
     if (focusHub) {
         enabled = focusHub->IsEnabled();
         focusable = focusHub->IsFocusable();
@@ -814,6 +825,10 @@ void FrameNode::FocusToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
 void FrameNode::MouseToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     std::string hoverEffect = "HoverEffect.Auto";
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto inputEventHub = GetOrCreateInputEventHub();
     if (inputEventHub) {
         hoverEffect = inputEventHub->GetHoverEffectStr();
@@ -826,6 +841,10 @@ void FrameNode::TouchToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
     bool touchable = true;
     bool monopolizeEvents = false;
     std::string hitTestMode = "HitTestMode.Default";
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto gestureEventHub = GetOrCreateGestureEventHub();
     std::vector<DimensionRect> responseRegion;
     std::vector<DimensionRect> mouseResponseRegion;
@@ -856,6 +875,10 @@ void FrameNode::GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json, const 
 {
     bool hasIdealWidth = false;
     bool hasIdealHeight = false;
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     if (layoutProperty_ && layoutProperty_->GetCalcLayoutConstraint()) {
         auto selfIdealSize = layoutProperty_->GetCalcLayoutConstraint()->selfIdealSize;
         hasIdealWidth = selfIdealSize.has_value() && selfIdealSize.value().Width().has_value();

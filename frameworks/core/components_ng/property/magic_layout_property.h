@@ -32,6 +32,10 @@ struct MagicItemProperty {
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("layoutWeight", propLayoutWeight.value_or(0), filter);
         auto context = PipelineBase::GetCurrentContext();
         // add version protection, null as default start from API 10 or higher

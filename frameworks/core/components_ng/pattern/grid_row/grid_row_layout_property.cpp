@@ -23,6 +23,10 @@ using OHOS::Ace::V2::GridContainerUtils;
 void GridRowLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     LayoutProperty::ToJsonValue(json, filter);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto sizeType = GetSizeTypeValue(V2::GridSizeType::UNDEFINED);
     std::string str;
 
