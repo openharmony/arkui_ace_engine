@@ -416,7 +416,7 @@ private:
     bool hasReleasedSurface_ = false;
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
     bool isEnableAnalyzer_ = false;
-    Rotation rotation_ = Rotation::ROTATION_0;
+    uint32_t rotation_ = 0;
 #ifdef OHOS_PLATFORM
     int64_t startIncreaseTime_ = 0;
     OH_NativeXComponent_TouchEvent lastTouchInfo_;

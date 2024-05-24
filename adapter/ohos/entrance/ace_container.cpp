@@ -25,6 +25,7 @@
 #include "ability_context.h"
 #include "ability_info.h"
 #include "auto_fill_manager.h"
+#include "display_info.h"
 #include "js_native_api.h"
 #include "pointer_event.h"
 #include "scene_board_judgement.h"
@@ -2437,6 +2438,9 @@ RefPtr<DisplayInfo> AceContainer::GetDisplayInfo()
     auto displayManager = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     CHECK_NULL_RETURN(displayManager, nullptr);
     auto dmRotation = displayManager->GetRotation();
+    auto displayInfo = displayManager->GetDisplayInfo();
+    CHECK_NULL_RETURN(displayInfo, nullptr);
+    auto deviceRotation = displayInfo->GetDefaultDeviceRotationOffset();
     auto isFoldable = Rosen::DisplayManager::GetInstance().IsFoldable();
     auto dmFoldStatus = Rosen::DisplayManager::GetInstance().GetFoldStatus();
     std::vector<Rect> rects;
@@ -2455,6 +2459,7 @@ RefPtr<DisplayInfo> AceContainer::GetDisplayInfo()
     displayInfo_->SetIsFoldable(isFoldable);
     displayInfo_->SetFoldStatus(static_cast<FoldStatus>(static_cast<uint32_t>(dmFoldStatus)));
     displayInfo_->SetRotation(static_cast<Rotation>(static_cast<uint32_t>(dmRotation)));
+    displayInfo_->SetDeviceRotation(deviceRotation);
     displayInfo_->SetCurrentFoldCreaseRegion(rects);
     return displayInfo_;
 }
