@@ -581,6 +581,8 @@ enum ArkUINodeType {
     ARKUI_GRID_COL,
     ARKUI_SELECT,
     ARKUI_IMAGE_ANIMATOR,
+    ARKUI_CIRCLE,
+    ARKUI_TAB_CONTENT
 };
 
 enum ArkUIEventCategory {
