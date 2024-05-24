@@ -524,7 +524,6 @@ public:
     void GetBuilderInitHeight();
     void ChangeSheetPage(float height);
     void DumpAdvanceInfo() override;
-    float GetTitleHeight();
 
     // Nestable Scroll
     Axis GetAxis() const override
