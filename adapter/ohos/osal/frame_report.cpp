@@ -27,7 +27,7 @@
 namespace OHOS::Ace {
 namespace {
 #if (defined(__aarch64__) || defined(__x86_64__))
-const std::string FRAME_AWARE_SO_PATH = "/system/lib64/platformsdk/libframe_ui_intf.z.so";
+const std::string FRAME_AWARE_SO_PATH = "/system/lib64/libframe_ui_intf.z.so";
 #else
 const std::string FRAME_AWARE_SO_PATH = "/system/lib/platformsdk/libframe_ui_intf.z.so";
 #endif
