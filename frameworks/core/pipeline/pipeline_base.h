@@ -920,7 +920,9 @@ public:
         gsVsyncCallback_ = std::move(callback);
     }
 
-    virtual void FlushUITasks() = 0;
+    virtual void FlushUITasks(bool triggeredByImplicitAnimation = false) = 0;
+
+    virtual void FlushAfterLayoutCallbackInImplicitAnimationTask() {}
 
     virtual void FlushPipelineImmediately() = 0;
 

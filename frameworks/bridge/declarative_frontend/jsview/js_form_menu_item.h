@@ -23,11 +23,11 @@ namespace OHOS::Ace::Framework {
 class JSFormMenuItem : public JSMenuItem {
 public:
     static void JSBind(BindingTarget globalObj);
-    static void JsOnAppear(const JSCallbackInfo& info);
-    static void JsOnClick(const JSCallbackInfo& info);
+    static void JsOnRegClick(const JSCallbackInfo& info);
     static void OnClickParameterCheck(const JSCallbackInfo& info, bool& retFlag);
 private:
-    static void RequestPublishFormWithSnapshot(JSRef<JSVal> wantValue, RefPtr<JsFunction> jsCBFunc);
+    static void RequestPublishFormWithSnapshot(JSRef<JSVal> wantValue,
+        const std::string& formBindingDataStr, RefPtr<JsFunction> jsCBFunc);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_FORM_MENU_ITEM_H

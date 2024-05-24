@@ -963,10 +963,10 @@ void JSTextPicker::SetDisappearTextStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
+    JSTextPickerTheme::ObtainTextStyle(textStyle);
     if (info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle);
     }
-    JSTextPickerTheme::ObtainTextStyle(textStyle);
     TextPickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
 }
 
@@ -975,10 +975,10 @@ void JSTextPicker::SetTextStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
+    JSTextPickerTheme::ObtainTextStyle(textStyle);
     if (info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle);
     }
-    JSTextPickerTheme::ObtainTextStyle(textStyle);
     TextPickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
 }
 
@@ -987,10 +987,10 @@ void JSTextPicker::SetSelectedTextStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
+    JSTextPickerTheme::ObtainSelectedTextStyle(textStyle);
     if (info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle);
     }
-    JSTextPickerTheme::ObtainSelectedTextStyle(textStyle);
     TextPickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
 }
 

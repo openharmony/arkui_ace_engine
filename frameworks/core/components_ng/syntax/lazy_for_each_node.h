@@ -148,6 +148,14 @@ public:
         return builder_;
     }
 
+    void RegisterBuilderListener() {
+        CHECK_NULL_VOID(builder_);
+        if (!isRegisterListener_) {
+            builder_->RegisterDataChangeListener(Claim(this));
+            isRegisterListener_ = true;
+        }
+    }
+
     void SetOnMove(std::function<void(int32_t, int32_t)>&& onMove);
     void MoveData(int32_t from, int32_t to) override;
     void FireOnMove(int32_t from, int32_t to) override;
@@ -159,21 +167,13 @@ private:
     void OnAttachToMainTree(bool recursive) override
     {
         UINode::OnAttachToMainTree(recursive);
-        CHECK_NULL_VOID(builder_);
-        if (!isRegisterListener_) {
-            builder_->RegisterDataChangeListener(Claim(this));
-            isRegisterListener_ = true;
-        }
+        RegisterBuilderListener();
     }
 
     void OnOffscreenProcess(bool recursive) override
     {
         UINode::OnOffscreenProcess(recursive);
-        CHECK_NULL_VOID(builder_);
-        if (!isRegisterListener_) {
-            builder_->RegisterDataChangeListener(Claim(this));
-            isRegisterListener_ = true;
-        }
+        RegisterBuilderListener();
     }
 
     void OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList) override

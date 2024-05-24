@@ -253,13 +253,15 @@ RefPtr<UINode> ViewStackProcessor::GetNewUINode()
     return Finish();
 }
 
-ScopedViewStackProcessor::ScopedViewStackProcessor()
+ScopedViewStackProcessor::ScopedViewStackProcessor(int32_t containerId)
 {
     std::swap(instance_, ViewStackProcessor::instance);
+    ViewStackProcessor::GetInstance()->SetRebuildContainerId(containerId);
 }
 
 ScopedViewStackProcessor::~ScopedViewStackProcessor()
 {
+    ViewStackProcessor::GetInstance()->SetRebuildContainerId(OHOS::Ace::INSTANCE_ID_UNDEFINED);
     std::swap(instance_, ViewStackProcessor::instance);
 }
 } // namespace OHOS::Ace::NG

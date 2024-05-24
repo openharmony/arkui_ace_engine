@@ -35,38 +35,44 @@ public:
         T target;
     };
 
-    void UpdateConfig(const T& config, const RefPtr<Container>& container, std::function<void()> &&task,
-        const std::string& taskName)
+    void UpdateConfigSync(const T& config, std::function<void()> &&task)
     {
-        auto cancelableTask = CancelableCallback<void()>([config, task, weakMgr = WeakClaim(this)] () {
-            task();
-            auto configManager = weakMgr.Upgrade();
-            CHECK_NULL_VOID(configManager);
-            configManager->OnUpdateTaskDone(config);
-        });
+        task();
+
+        // Update current state
+        std::lock_guard<std::mutex> taskLock(updateTaskMutex_);
+        currentTask_.updateTask.Cancel();
+        currentTask_.target = config;
+    }
+
+    void UpdateConfig(const T& config, std::function<void()> &&task, const RefPtr<Container>& container,
+        const std::string& taskName, TaskExecutor::TaskType type = TaskExecutor::TaskType::PLATFORM)
+    {
+        CancelableCallback<void()> cancelableTask(std::move(task));
 
         std::lock_guard<std::mutex> taskLock(updateTaskMutex_);
-        if (config == currentConfig_ || config == currentTask_.target) {
+        if (config == currentTask_.target) {
+            // If config is same as current/next state, return directely.
             return;
         } else {
             // Try to cancel useless task.
             CancelUselessTaskLocked();
             // Post new task.
-            PostUpdateConfigTaskLocked(config, container, std::move(cancelableTask), taskName);
+            PostUpdateConfigTaskLocked(config, std::move(cancelableTask), container, taskName, type);
         }
     }
 
 private:
-    void PostUpdateConfigTaskLocked(const T& config, const RefPtr<Container>& container,
-        CancelableCallback<void()> &&task, const std::string& taskName)
+    void PostUpdateConfigTaskLocked(const T& config, CancelableCallback<void()> &&task,
+        const RefPtr<Container>& container, const std::string& taskName, TaskExecutor::TaskType type)
     {
         currentTask_ = {
-            .target = config,
             .updateTask = std::move(task),
+            .target = config,
         };
         auto taskExecutor = container->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(currentTask_.updateTask, TaskExecutor::TaskType::PLATFORM, taskName);
+        taskExecutor->PostTask(currentTask_.updateTask, type, taskName);
     }
 
     void CancelUselessTaskLocked()
@@ -74,15 +80,7 @@ private:
         currentTask_.updateTask.Cancel();
     }
 
-    void OnUpdateTaskDone(const T& config)
-    {
-        std::lock_guard<std::mutex> tasksLock(updateTaskMutex_);
-        currentConfig_ = config;
-    }
-
     std::mutex updateTaskMutex_;
-
-    T currentConfig_;
 
     UpdateTask currentTask_;
 };

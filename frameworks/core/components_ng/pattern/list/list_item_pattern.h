@@ -105,6 +105,7 @@ public:
     V2::SwipeEdgeEffect GetEdgeEffect();
     void MarkDirtyNode();
     void UpdatePostion(float delta);
+    void DumpAdvanceInfo() override;
 
     bool HasStartNode() const
     {

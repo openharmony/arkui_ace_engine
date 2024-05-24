@@ -469,7 +469,7 @@ bool ListPattern::UpdateStartListItemIndex()
         startArea = startGroupInfo.area;
         startItemIndexInGroup = startGroupInfo.indexInGroup;
     }
-    startInfo_ = {startIndex_, startArea, startItemIndexInGroup};
+    startInfo_ = { startIndex_, startArea, startItemIndexInGroup };
     return startFlagChanged;
 }
 
@@ -490,7 +490,7 @@ bool ListPattern::UpdateEndListItemIndex()
         endArea = endGroupInfo.area;
         endItemIndexInGroup = endGroupInfo.indexInGroup;
     }
-    endInfo_ = {endIndex_, endArea, endItemIndexInGroup};
+    endInfo_ = { endIndex_, endArea, endItemIndexInGroup };
     return endFlagChanged;
 }
 
@@ -554,6 +554,7 @@ void ListPattern::ProcessEvent(
             GreatOrEqual(startMainPos_, contentStartOffset_);
         if (scrollUpToStart || scrollDownToStart) {
             onReachStart();
+            AddEventsFiredInfo(ScrollableEventType::ON_REACH_START);
         }
     }
     auto onReachEnd = listEventHub->GetOnReachEnd();
@@ -565,6 +566,7 @@ void ListPattern::ProcessEvent(
         bool scrollDownToEnd = Negative(prevEndOffset) && NonNegative(endOffset);
         if (scrollUpToEnd || (scrollDownToEnd && GetScrollSource() != SCROLL_FROM_NONE)) {
             onReachEnd();
+            AddEventsFiredInfo(ScrollableEventType::ON_REACH_END);
         }
     }
 
@@ -912,7 +914,6 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
         }
         return false;
     }
-    UpdateFrameSizeToWeb();
     SetScrollSource(source);
     FireAndCleanScrollingListener();
     auto lastDelta = currentDelta_;
@@ -1545,8 +1546,8 @@ bool ListPattern::GetListItemAnimatePos(float startPos, float endPos, ScrollAlig
     return true;
 }
 
-bool ListPattern::GetListItemGroupAnimatePosWithoutIndexInGroup(int32_t index, float startPos, float endPos,
-    ScrollAlign align, float& targetPos)
+bool ListPattern::GetListItemGroupAnimatePosWithoutIndexInGroup(
+    int32_t index, float startPos, float endPos, ScrollAlign align, float& targetPos)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -1597,8 +1598,8 @@ bool ListPattern::GetListItemGroupAnimatePosWithoutIndexInGroup(int32_t index, f
     return true;
 }
 
-bool ListPattern::GetListItemGroupAnimatePosWithIndexInGroup(int32_t index, int32_t indexInGroup, float startPos,
-    ScrollAlign align, float& targetPos)
+bool ListPattern::GetListItemGroupAnimatePosWithIndexInGroup(
+    int32_t index, int32_t indexInGroup, float startPos, ScrollAlign align, float& targetPos)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -1619,8 +1620,8 @@ bool ListPattern::GetListItemGroupAnimatePosWithIndexInGroup(int32_t index, int3
     auto padding = groupWrapper->GetGeometryNode()->GetPadding()->top;
     float paddingBeforeContent = padding ? padding.value() : 0.0f;
     if (align == ScrollAlign::CENTER) {
-        targetPos = paddingBeforeContent + startPos +
-            (it->second.startPos + it->second.endPos) / 2.0f - contentMainSize_ / 2.0f;
+        targetPos = paddingBeforeContent + startPos + (it->second.startPos + it->second.endPos) / 2.0f -
+                    contentMainSize_ / 2.0f;
     } else {
         float itemStartPos = paddingBeforeContent + startPos + it->second.startPos;
         float itemEndPos = paddingBeforeContent + startPos + it->second.endPos;
@@ -1731,7 +1732,7 @@ void ListPattern::HandleScrollBarOutBoundary()
         if (startIndex_ == 0 && Positive(startMainPos_ + itemHeight / 2.0f - contentMainSize_ / 2.0f)) {
             overScroll = startMainPos_ + itemHeight / 2.0f - contentMainSize_ / 2.0f;
         } else if ((endIndex_ == maxListItemIndex_) &&
-                LessNotEqual(endMainPos_ - itemHeight / 2.0f, contentMainSize_ / 2.0f)) {
+                   LessNotEqual(endMainPos_ - itemHeight / 2.0f, contentMainSize_ / 2.0f)) {
             overScroll = endMainPos_ - itemHeight / 2.0f - contentMainSize_ / 2.0f;
         }
     }
@@ -1789,8 +1790,8 @@ void ListPattern::CalculateCurrentOffset(float delta)
     if (itemPosition_.empty()) {
         return;
     }
-    posMap_->UpdatePosMapStart(delta, currentOffset_, spaceWidth_,
-        itemPosition_.begin()->first, itemPosition_.begin()->second.startPos);
+    posMap_->UpdatePosMapStart(
+        delta, currentOffset_, spaceWidth_, itemPosition_.begin()->first, itemPosition_.begin()->second.startPos);
     for (auto& [index, pos] : itemPosition_) {
         float height = pos.endPos - pos.startPos;
         posMap_->UpdatePos(index, { currentOffset_ + pos.startPos, height });
@@ -2299,6 +2300,7 @@ void ListPattern::OnRestoreInfo(const std::string& restoreInfo)
 
 void ListPattern::DumpAdvanceInfo()
 {
+    ScrollablePattern::DumpAdvanceInfo();
     DumpLog::GetInstance().AddDesc("maxListItemIndex:" + std::to_string(maxListItemIndex_));
     DumpLog::GetInstance().AddDesc("startIndex:" + std::to_string(startIndex_));
     DumpLog::GetInstance().AddDesc("endIndex:" + std::to_string(endIndex_));
@@ -2339,8 +2341,6 @@ void ListPattern::DumpAdvanceInfo()
         DumpLog::GetInstance().AddDesc("predictSnapEndPos:null");
     }
     // DumpLog::GetInstance().AddDesc("scrollAlign:%{public}d", scrollAlign_);
-    isScrollable_ ? DumpLog::GetInstance().AddDesc("isScrollable:true")
-                : DumpLog::GetInstance().AddDesc("isScrollable:false");
     paintStateFlag_ ? DumpLog::GetInstance().AddDesc("paintStateFlag:true")
                     : DumpLog::GetInstance().AddDesc("paintStateFlag:false");
     isFramePaintStateValid_ ? DumpLog::GetInstance().AddDesc("isFramePaintStateValid:true")
@@ -2404,28 +2404,13 @@ std::vector<RefPtr<FrameNode>> ListPattern::GetVisibleSelectedItems()
     return children;
 }
 
-void ListPattern::registerSlideUpdateListener(const std::shared_ptr<ISlideUpdateCallback>& listener)
-{
-    listenerVector_.emplace_back(listener);
-}
-
-void ListPattern::UpdateFrameSizeToWeb()
-{
-    for (auto listenerItem : listenerVector_) {
-        if (listenerItem) {
-            listenerItem->OnSlideUpdate();
-        }
-    }
-}
-
 RefPtr<ListChildrenMainSize> ListPattern::GetOrCreateListChildrenMainSize()
 {
     if (childrenSize_) {
         return childrenSize_;
     }
     childrenSize_ = AceType::MakeRefPtr<ListChildrenMainSize>();
-    auto callback =
-        [weakPattern = WeakClaim(this)](std::tuple<int32_t, int32_t, int32_t> change, ListChangeFlag flag) {
+    auto callback = [weakPattern = WeakClaim(this)](std::tuple<int32_t, int32_t, int32_t> change, ListChangeFlag flag) {
         auto pattern = weakPattern.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto context = PipelineContext::GetCurrentContext();
@@ -2448,5 +2433,20 @@ void ListPattern::OnChildrenSizeChanged(std::tuple<int32_t, int32_t, int32_t> ch
     }
     posMap_->MarkDirty(flag);
     MarkDirtyNodeSelf();
+}
+
+void ListPattern::SetListChildrenMainSize(float defaultSize, const std::vector<float>& mainSize)
+{
+    childrenSize_ = AceType::MakeRefPtr<ListChildrenMainSize>(mainSize, defaultSize);
+    OnChildrenSizeChanged({ -1, -1, -1 }, LIST_UPDATE_CHILD_SIZE);
+}
+
+void ListPattern::ResetChildrenSize()
+{
+    if (childrenSize_) {
+        childrenSize_ = nullptr;
+        MarkDirtyNodeSelf();
+        OnChildrenSizeChanged({ -1, -1, -1 }, LIST_UPDATE_CHILD_SIZE);
+    }
 }
 } // namespace OHOS::Ace::NG

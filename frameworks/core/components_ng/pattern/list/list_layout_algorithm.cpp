@@ -487,7 +487,7 @@ bool ListLayoutAlgorithm::JudgeInOfScreenScrollAutoType(const RefPtr<LayoutWrapp
     CHECK_NULL_RETURN(groupNode, true);
     auto groupPattern = groupNode->GetPattern<ListItemGroupPattern>();
     CHECK_NULL_RETURN(groupPattern, true);
-    
+
     float headerMainSize = 0.0f;
     float footerMainSize = 0.0f;
     if (stickyStyle == V2::StickyStyle::BOTH || stickyStyle == V2::StickyStyle::HEADER) {
@@ -1335,6 +1335,10 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             wrapper->Layout();
         } else {
             SyncGeometry(wrapper);
+        }
+        auto frameNode = AceType::DynamicCast<FrameNode>(wrapper);
+        if (frameNode) {
+            frameNode->MarkAndCheckNewOpIncNode();
         }
     }
     auto cacheCount = listLayoutProperty->GetCachedCountValue(1);

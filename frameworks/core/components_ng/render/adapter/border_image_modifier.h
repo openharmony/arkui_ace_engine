@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace::NG {
 
-class BorderImageModifier : public Rosen::RSForegroundStyleModifier {
+class BorderImageModifier : public Rosen::RSOverlayStyleModifier {
 public:
     BorderImageModifier() = default;
     ~BorderImageModifier() override = default;

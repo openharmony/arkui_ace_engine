@@ -86,6 +86,13 @@ enum WebOverlayType { INSERT_OVERLAY, SELECTION_OVERLAY, INVALID_OVERLAY };
 #endif
 } // namespace
 
+enum class WebInfoType : int32_t {
+    TYPE_MOBILE,
+    TYPE_TABLET,
+    TYPE_2IN1,
+    TYPE_UNKNOWN
+};
+
 class WebPattern : public NestableScrollContainer, public TextBase {
     DECLARE_ACE_TYPE(WebPattern, NestableScrollContainer, TextBase);
 
@@ -120,8 +127,6 @@ public:
 
     bool NeedSoftKeyboard() const override;
 
-    void UpdateSlideOffset(bool isNeedReset = false) override;
-
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<WebEventHub>();
@@ -131,6 +136,7 @@ public:
     {
         return MakeRefPtr<WebAccessibilityProperty>();
     }
+
 
     void OnModifyDone() override;
 
@@ -510,11 +516,14 @@ public:
     void SetAccessibilityState(bool state);
     void UpdateFocusedAccessibilityId(int64_t accessibilityId = -1);
     void OnTooltip(const std::string& tooltip);
+    bool IsDefaultFocusNodeExist();
     bool IsRootNeedExportTexture();
     std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);
-    void Backward();
+    bool Backward();
     void OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMenuOption);
     void CloseKeyboard();
+    WebInfoType GetWebInfoType();
+    void RequestFocus();
 
 private:
     friend class WebContextSelectOverlay;
@@ -527,9 +536,13 @@ private:
     void UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard);
     void UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, double keyboard, double oldWebHeight);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void BeforeSyncGeometryProperties(const DirtySwapConfig& config) override;
 
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnAttachToMainTree() override;
+    void OnDetachFromMainTree() override;
+
     void OnWindowShow() override;
     void OnWindowHide() override;
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
@@ -723,6 +736,7 @@ private:
     void ShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
     void RegisterVisibleAreaChangeCallback();
     bool CheckSafeAreaIsExpand();
+    bool CheckSafeAreaKeyBoard();
     void SelectCancel() const;
     std::string GetSelectInfo() const;
     void UpdateRunQuickMenuSelectInfo(SelectOverlayInfo& selectInfo,
@@ -731,6 +745,7 @@ private:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> beginTouchHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endTouchHandle);
     double GetNewScale(double& scale) const;
+    void UpdateSlideOffset(bool isNeedReset = false);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -767,6 +782,7 @@ private:
     Size drawSize_;
     Size rootLayerChangeSize_;
     Size drawSizeCache_;
+    Size areaChangeSize_;
     bool isNeedReDrawRect_ = false;
     bool needUpdateWeb_ = true;
     bool isFocus_ = false;
@@ -822,6 +838,7 @@ private:
     std::optional<ScriptItems> onDocumentStartScriptItems_;
     std::optional<ScriptItems> onDocumentEndScriptItems_;
     bool isOfflineMode_ = false;
+    bool isAttachedToMainTree_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
     bool accessibilityState_ = false;
     RefPtr<WebAccessibilityNode> webAccessibilityNode_;
@@ -832,12 +849,12 @@ private:
     RefPtr<PinchGesture> pinchGesture_ = nullptr;
     std::queue<TouchEventInfo> touchEventQueue_;
     std::vector<NG::MenuOptionsParam> menuOptionParam_ {};
-    bool embedNeedKeyboard_ = false;
     double startPinchScale_ = -1.0;
     double preScale_ = -1.0;
     double pageScale_ = 1.0;
     int32_t pinchIndex_ = 0;
     bool zoomOutSwitch_ = false;
+    bool isTouchUpEvent_ = false;
     int32_t zoomStatus_ = 0;
     int32_t zoomErrorCount_ = 0;
 };

@@ -22,7 +22,6 @@
 #include "frameworks/bridge/common/dom/dom_node.h"
 
 namespace OHOS::Ace::Framework {
-
 class DOMImage final : public DOMNode {
     DECLARE_ACE_TYPE(DOMImage, DOMNode);
 

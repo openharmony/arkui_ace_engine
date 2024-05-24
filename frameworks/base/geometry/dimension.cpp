@@ -135,6 +135,29 @@ double Dimension::ConvertToPx() const
     return 0.0;
 }
 
+double Dimension::ConvertToFp() const
+{
+    if (unit_ == DimensionUnit::FP) {
+        return value_;
+    }
+
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(pipeline, 0.0);
+    if (unit_ == DimensionUnit::NONE) {
+        return value_ / pipeline->GetDipScale() / pipeline->GetFontScale();
+    }
+    if (unit_ == DimensionUnit::PX) {
+        return value_ / pipeline->GetDipScale() / pipeline->GetFontScale();
+    }
+    if (unit_ == DimensionUnit::VP) {
+        return value_ / pipeline->GetFontScale();
+    }
+    if (unit_ == DimensionUnit::LPX) {
+        return value_ * pipeline->GetLogicScale() / pipeline->GetDipScale() / pipeline->GetFontScale();
+    }
+    return 0.0;
+}
+
 double Dimension::ConvertToPxWithSize(double size) const
 {
     if (unit_ == DimensionUnit::PERCENT) {

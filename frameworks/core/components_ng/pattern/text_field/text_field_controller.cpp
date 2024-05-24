@@ -57,7 +57,7 @@ NG::OffsetF TextFieldController::GetCaretPosition()
 {
     auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     if (textFieldPattern) {
-        return textFieldPattern->GetCaretOffset();
+        return textFieldPattern->GetCaretRect().GetOffset();
     }
     if (getCaretPosition_) {
         return getCaretPosition_();

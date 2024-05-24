@@ -158,7 +158,7 @@ void ScrollBarOverlayModifier::StartBarAnimation(HoverAnimationType hoverAnimati
         StartHoverAnimation(fgRect, hoverAnimationType);
         StartAdaptAnimation(fgRect, needAdaptAnimation);
     }
-    if (opacityAnimationType != OpacityAnimationType::NONE) {
+    if (opacityAnimationType != OpacityAnimationType::NONE && isScrollable_) {
         StartOpacityAnimation(opacityAnimationType);
     }
 }

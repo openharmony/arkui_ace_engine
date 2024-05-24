@@ -425,10 +425,11 @@ void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& men
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
+    auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
     if (!manager->GetHasFilter() && !manager->GetIsOnAnimation()) {
         bool isBindOverlayValue = targetNode->GetLayoutProperty()->GetIsBindOverlayValue(false);
-        CHECK_NULL_VOID(isBindOverlayValue && (SystemProperties::GetDeviceType() == DeviceType::PHONE ||
-                                                  SystemProperties::GetDeviceType() == DeviceType::TABLET));
+        CHECK_NULL_VOID(isBindOverlayValue && menuTheme->GetHasFilter());
         // insert columnNode to rootNode
         auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -502,6 +503,22 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
         }
         if (!optionNode) {
             continue;
+        }
+        auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+        CHECK_NULL_RETURN(pipeline, nullptr);
+        auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+        CHECK_NULL_RETURN(menuTheme, nullptr);
+        auto fontScale = pipeline->GetFontScale();
+        if (NearEqual(fontScale, menuTheme->GetBigFontSizeScale()) ||
+            NearEqual(fontScale, menuTheme->GetLargeFontSizeScale()) ||
+            NearEqual(fontScale, menuTheme->GetMaxFontSizeScale())) {
+            auto optionPattern = optionNode->GetPattern<OptionPattern>();
+            CHECK_NULL_RETURN(optionPattern, nullptr);
+            auto textNode = AceType::DynamicCast<FrameNode>(optionPattern->GetTextNode());
+            CHECK_NULL_RETURN(textNode, nullptr);
+            auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_RETURN(textLayoutProperty, nullptr);
+            textLayoutProperty->UpdateMaxLines(menuTheme->GetTextMaxLines());
         }
         menuPattern->AddOptionNode(optionNode);
         auto menuWeak = AceType::WeakClaim(AceType::RawPtr(menuNode));
@@ -633,7 +650,7 @@ RefPtr<FrameNode> MenuView::Create(
     CHECK_NULL_RETURN(menuProperty, nullptr);
     menuProperty->UpdateShowInSubWindow(false);
     for (size_t i = 0; i < params.size(); ++i) {
-        auto optionNode = OptionView::CreateSelectOption(params[i].first, params[i].second, i);
+        auto optionNode = OptionView::CreateSelectOption(params[i], i);
         auto optionPattern = optionNode->GetPattern<OptionPattern>();
         CHECK_NULL_RETURN(optionPattern, nullptr);
         optionPattern->SetIsSelectOption(true);

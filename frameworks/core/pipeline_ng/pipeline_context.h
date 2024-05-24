@@ -257,7 +257,7 @@ public:
 
     void AddPredictTask(PredictTask&& task);
 
-    void AddAfterLayoutTask(std::function<void()>&& task);
+    void AddAfterLayoutTask(std::function<void()>&& task, bool isFlushInImplicitAnimationTask = false);
 
     void AddPersistAfterLayoutTask(std::function<void()>&& task);
 
@@ -419,7 +419,9 @@ public:
     void FlushModifier() override;
     void FlushMessages() override;
 
-    void FlushUITasks() override;
+    void FlushUITasks(bool triggeredByImplicitAnimation = false) override;
+
+    void FlushAfterLayoutCallbackInImplicitAnimationTask() override;
 
     bool IsLayouting() const override
     {

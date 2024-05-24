@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -94,9 +94,9 @@ void SetTextPickerSelectedIndex(ArkUINodeHandle node, ArkUI_Uint32* values, ArkU
 
     if (TextPickerModelNG::IsSingle(frameNode)) {
         NodeModifier::SetSelectedIndexSingle(frameNode, values, size);
-    } else {
-        NodeModifier::SetSelectedIndexMulti(frameNode, values, size);
+        return;
     }
+    NodeModifier::SetSelectedIndexMulti(frameNode, values, size);
 }
 
 void ResetTextPickerSelectedIndex(ArkUINodeHandle node)
@@ -107,9 +107,9 @@ void ResetTextPickerSelectedIndex(ArkUINodeHandle node)
     selectedValues.emplace_back(0);
     if (TextPickerModelNG::IsSingle(frameNode)) {
         NodeModifier::SetSelectedIndexSingle(frameNode, selectedValues.data(), selectedValues.size());
-    } else {
-        NodeModifier::SetSelectedIndexMulti(frameNode, selectedValues.data(), selectedValues.size());
+        return;
     }
+    NodeModifier::SetSelectedIndexMulti(frameNode, selectedValues.data(), selectedValues.size());
 }
 
 void SetTextPickerTextStyle(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo, ArkUI_Int32 styleVal)
@@ -479,9 +479,9 @@ void SetSelectedIndexSingle(FrameNode* frameNode, uint32_t* selectedValues, cons
     TextPickerModelNG::GetSingleRange(frameNode, rangeResult);
     if (selectedValues[0] >= rangeResult.size()) {
         TextPickerModelNG::SetSelected(frameNode, 0);
-    } else {
-        TextPickerModelNG::SetSelected(frameNode, selectedValues[0]);
+        return;
     }
+    TextPickerModelNG::SetSelected(frameNode, selectedValues[0]);
 }
 
 void SetSelectedIndexMultiInternal(FrameNode* frameNode, uint32_t count,
@@ -489,15 +489,15 @@ void SetSelectedIndexMultiInternal(FrameNode* frameNode, uint32_t count,
 {
     if (!TextPickerModelNG::IsCascade(frameNode)) {
         NodeModifier::SetSelectedInternal(count, options, selectedValues);
-    } else {
-        TextPickerModelNG::SetHasSelectAttr(frameNode, true);
-        NodeModifier::ProcessCascadeSelected(options, 0, selectedValues);
-        uint32_t maxCount = TextPickerModelNG::GetMaxCount(frameNode);
-        if (selectedValues.size() < maxCount) {
-            auto differ = maxCount - selectedValues.size();
-            for (uint32_t i = 0; i < differ; i++) {
-                selectedValues.emplace_back(0);
-            }
+        return;
+    }
+    TextPickerModelNG::SetHasSelectAttr(frameNode, true);
+    NodeModifier::ProcessCascadeSelected(options, 0, selectedValues);
+    uint32_t maxCount = TextPickerModelNG::GetMaxCount(frameNode);
+    if (selectedValues.size() < maxCount) {
+        auto differ = maxCount - selectedValues.size();
+        for (uint32_t i = 0; i < differ; i++) {
+            selectedValues.emplace_back(0);
         }
     }
 }
@@ -513,17 +513,17 @@ void SetSelectedIndexSingleInternal(const std::vector<NG::TextCascadePickerOptio
         for (uint32_t i = 1; i < count; i++) {
             selectedValues.emplace_back(0);
         }
-    } else {
-        for (uint32_t i = 0; i < count; i++) {
-            selectedValues.emplace_back(0);
-        }
+        return;
+    }
+    for (uint32_t i = 0; i < count; i++) {
+        selectedValues.emplace_back(0);
     }
 }
 
 void SetSelectedInternal(
     uint32_t count, std::vector<NG::TextCascadePickerOptions>& options, std::vector<uint32_t>& selectedValues)
 {
-    for (uint32_t i = 0; i < count; i++) {
+    for (uint32_t i = 0; i < count; ++i) {
         uint32_t val = selectedValues.size() > 0 ? selectedValues.size() - 1 : 0;
         if (i > val) {
             selectedValues.emplace_back(0);
@@ -570,7 +570,7 @@ void ProcessCascadeSelected(
     if (selectedValues[index] >= rangeResultValue.size()) {
         selectedValues[index] = 0;
     }
-    if (selectedValues[index] <= options.size() - 1 && options[selectedValues[index]].children.size() > 0) {
+    if ((selectedValues[index] <= options.size() - 1) && (options[selectedValues[index]].children.size() > 0)) {
         ProcessCascadeSelected(options[selectedValues[index]].children, index + 1, selectedValues);
     }
 }

@@ -168,20 +168,7 @@ public:
 
     void GetGlobalOffset(Offset& offset);
 
-    RectF GetTextContentRect() const override
-    {
-        auto textRect = contentRect_;
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, textRect);
-        auto renderContext = host->GetRenderContext();
-        CHECK_NULL_RETURN(renderContext, textRect);
-        CHECK_NULL_RETURN(pManager_, textRect);
-        if (!renderContext->GetClipEdge().value_or(false) &&
-            LessNotEqual(textRect.Width(), pManager_->GetLongestLine())) {
-            textRect.SetWidth(pManager_->GetLongestLine());
-        }
-        return textRect;
-    }
+    RectF GetTextContentRect(bool isActualText = false) const override;
 
     float GetBaselineOffset() const
     {
@@ -654,6 +641,13 @@ protected:
     bool CalculateClickedSpanPosition(const PointF& textOffset);
     void HiddenMenu();
     std::shared_ptr<SelectionMenuParams> GetMenuParams(TextSpanType type, TextResponseType responseType);
+    void InitKeyEvent();
+    bool HandleKeyEvent(const KeyEvent& keyEvent);
+    void HandleOnSelect(KeyCode code);
+    void HandleSelectionUp(int32_t start, int32_t end);
+    void HandleSelectionDown(int32_t start, int32_t end);
+    void HandleSelection(int32_t start, int32_t end);
+    float GetTextHeight();
 
     virtual bool CanStartAITask()
     {
@@ -682,6 +676,7 @@ protected:
     bool focusInitialized_ = false;
     bool hoverInitialized_ = false;
     bool isSpanStringMode_ = false;
+    bool keyEventInitialized_ = false;
 
     RefPtr<FrameNode> dragNode_;
     RefPtr<LongPressEvent> longPressEvent_;

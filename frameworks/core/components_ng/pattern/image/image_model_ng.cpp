@@ -669,6 +669,15 @@ std::vector<float> ImageModelNG::GetColorFilter(FrameNode* frameNode)
     return paintProperty->GetImagePaintStyle()->GetColorFilter().value_or(DEFAULT_COLOR_FILTER);
 }
 
+RefPtr<DrawingColorFilter> ImageModelNG::GetDrawingColorFilter(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(paintProperty, nullptr);
+    CHECK_NULL_RETURN(paintProperty->GetImagePaintStyle(), nullptr);
+    return paintProperty->GetImagePaintStyle()->GetDrawingColorFilter().value_or(nullptr);
+}
+
 bool ImageModelNG::GetAutoResize(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, true);
@@ -758,6 +767,28 @@ void ImageModelNG::SetImageAnalyzerConfig(FrameNode* frameNode, void* config)
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(imagePattern);
     imagePattern->SetImageAnalyzerConfig(config);
+}
+
+void ImageModelNG::ResetImageSrc(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ImageSourceInfo sourceInfo("");
+    sourceInfo.SetIsFromReset(true);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, sourceInfo, frameNode);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetImage();
+}
+
+void ImageModelNG::ResetImageAlt(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ImageSourceInfo sourceInfo("");
+    sourceInfo.SetIsFromReset(true);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, Alt, sourceInfo, frameNode);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetAltImage();
 }
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_CPP

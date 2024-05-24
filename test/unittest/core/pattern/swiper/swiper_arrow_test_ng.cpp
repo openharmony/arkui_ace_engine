@@ -603,4 +603,144 @@ HWTEST_F(SwiperArrowTestNg, MouseEvent005, TestSize.Level1)
     HandleMouseEvent(inRegionPoint);
     EXPECT_TRUE(VerifyArrowVisible(false, false));
 }
+
+/**
+ * @tc.name: Arrow001
+ * @tc.desc: Test arrow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, Arrow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Show default value arrow
+     * @tc.expected: check properties
+     */
+    SwiperArrowParameters swiperArrowParameters;
+    swiperArrowParameters.isShowBackground = false;
+    swiperArrowParameters.isSidebarMiddle = false;
+    swiperArrowParameters.backgroundSize = Dimension(24.f);
+    swiperArrowParameters.backgroundColor = Color::FromString("#00000000");
+    swiperArrowParameters.arrowSize = Dimension(18.f);
+    swiperArrowParameters.arrowColor = Color::FromString("#182431");
+
+    /**
+     * @tc.steps: step2. HORIZONTAL and isShowIndicatorArrow
+     * @tc.expected: check arrow rect
+     */
+    CreateWithItem([=](SwiperModelNG model) {
+        model.SetDisplayArrow(true); // show arrow
+        model.SetHoverShow(false);
+        model.SetArrowStyle(swiperArrowParameters);
+    });
+    auto leftArrowLayoutProperty = leftArrowNode_->GetLayoutProperty<SwiperArrowLayoutProperty>();
+    EXPECT_FALSE(leftArrowLayoutProperty->GetIsShowBackgroundValue());
+    EXPECT_FALSE(leftArrowLayoutProperty->GetIsSidebarMiddleValue());
+    EXPECT_EQ(leftArrowLayoutProperty->GetBackgroundSizeValue(), Dimension(24.f));
+    EXPECT_EQ(leftArrowLayoutProperty->GetBackgroundColorValue(), Color::FromString("#00000000"));
+    EXPECT_EQ(leftArrowLayoutProperty->GetArrowSizeValue(), Dimension(18.f));
+    EXPECT_EQ(leftArrowLayoutProperty->GetArrowColorValue(), Color::FromString("#182431"));
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 5), RectF(165.f, 772.01f, 24.f, 24.f)));
+}
+
+/**
+ * @tc.name: Arrow002
+ * @tc.desc: Test arrow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, Arrow002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Show set value arrow
+     * @tc.expected: check properties
+     */
+    SwiperArrowParameters swiperArrowParameters;
+    swiperArrowParameters.isShowBackground = true;
+    swiperArrowParameters.isSidebarMiddle = true;
+    swiperArrowParameters.backgroundSize = Dimension(32.f);
+    swiperArrowParameters.backgroundColor = Color::FromString("#19182431");
+    swiperArrowParameters.arrowSize = Dimension(24.f);
+    swiperArrowParameters.arrowColor = Color::GREEN;
+    
+    /**
+     * @tc.steps: step2. HORIZONTAL and !isShowIndicatorArrow
+     * @tc.expected: check arrow rect
+     */
+    CreateWithItem([=](SwiperModelNG model) {
+        model.SetDisplayArrow(true); // show arrow
+        model.SetHoverShow(false);
+        model.SetArrowStyle(swiperArrowParameters);
+    });
+    auto leftArrowLayoutProperty = rightArrowNode_->GetLayoutProperty<SwiperArrowLayoutProperty>();
+    EXPECT_TRUE(leftArrowLayoutProperty->GetIsShowBackgroundValue());
+    EXPECT_TRUE(leftArrowLayoutProperty->GetIsSidebarMiddleValue());
+    EXPECT_EQ(leftArrowLayoutProperty->GetBackgroundSizeValue(), Dimension(32.f));
+    EXPECT_EQ(leftArrowLayoutProperty->GetBackgroundColorValue(), Color::FromString("#19182431"));
+    EXPECT_EQ(leftArrowLayoutProperty->GetArrowSizeValue(), Dimension(24.f));
+    EXPECT_EQ(leftArrowLayoutProperty->GetArrowColorValue(), Color::GREEN);
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 6), RectF(440.f, 384.f, 32.f, 32.f)));
+}
+
+/**
+ * @tc.name: Arrow003
+ * @tc.desc: Test arrow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, Arrow003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Show set value arrow
+     * @tc.expected: check properties
+     */
+    SwiperArrowParameters swiperArrowParameters;
+    swiperArrowParameters.isShowBackground = true;
+    swiperArrowParameters.isSidebarMiddle = false;
+    swiperArrowParameters.backgroundSize = Dimension(32.f);
+    swiperArrowParameters.backgroundColor = Color::FromString("#19182431");
+    swiperArrowParameters.arrowSize = Dimension(24.f);
+    swiperArrowParameters.arrowColor = Color::GREEN;
+    
+    /**
+     * @tc.steps: step2. VERTICAL and isShowIndicatorArrow
+     * @tc.expected: check arrow rect
+     */
+    CreateWithItem([=](SwiperModelNG model) {
+        model.SetDirection(Axis::VERTICAL);
+        model.SetDisplayArrow(true); // show arrow
+        model.SetHoverShow(false);
+        model.SetArrowStyle(swiperArrowParameters);
+    });
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 5), RectF(448.01f, 317.f, 32.f, 32.f)));
+}
+
+/**
+ * @tc.name: Arrow004
+ * @tc.desc: Test arrow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, Arrow004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Show set value arrow
+     * @tc.expected: check properties
+     */
+    SwiperArrowParameters swiperArrowParameters;
+    swiperArrowParameters.isShowBackground = true;
+    swiperArrowParameters.isSidebarMiddle = true;
+    swiperArrowParameters.backgroundSize = Dimension(32.f);
+    swiperArrowParameters.backgroundColor = Color::FromString("#19182431");
+    swiperArrowParameters.arrowSize = Dimension(24.f);
+    swiperArrowParameters.arrowColor = Color::GREEN;
+    
+    /**
+     * @tc.steps: step2. VERTICAL and !isShowIndicatorArrow
+     * @tc.expected: check arrow rect
+     */
+    CreateWithItem([=](SwiperModelNG model) {
+        model.SetDirection(Axis::VERTICAL);
+        model.SetDisplayArrow(true); // show arrow
+        model.SetHoverShow(false);
+        model.SetArrowStyle(swiperArrowParameters);
+    });
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 6), RectF(224.f, 760.f, 32.f, 32.f)));
+}
 } // namespace OHOS::Ace::NG

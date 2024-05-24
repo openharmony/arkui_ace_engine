@@ -121,6 +121,10 @@ public:
             theme->lineColor_ = pattern->GetAttr<Color>("line_color", theme->lineColor_);
             theme->spinnerColor_ = pattern->GetAttr<Color>("select_icon_color", theme->spinnerColor_);
             theme->disabledSpinnerColor_ = theme->spinnerColor_.BlendOpacity(theme->disabledFontColorAlpha_);
+            theme->spinnerSymbolColor_ = pattern->GetAttr<Color>("select_symbol_color", theme->spinnerSymbolColor_);
+            theme->disabledSpinnerSymbolColor_ =
+                theme->spinnerSymbolColor_.BlendOpacity(theme->disabledFontColorAlpha_);
+            theme->spinnerSource_ = themeConstants->GetSymbolByName("sys.symbol.arrowtriangle_down_fill");
             theme->selectBorderRadius_ = pattern->GetAttr<Dimension>("border_radius", theme->selectBorderRadius_);
             theme->menuBorderRadius_ = pattern->GetAttr<Dimension>("menu_border_radius", theme->menuBorderRadius_);
             theme->innerBorderRadius_ = pattern->GetAttr<Dimension>("inner_border_radius", theme->innerBorderRadius_);
@@ -331,6 +335,9 @@ public:
         theme->normalTextDisableColor_ = normalTextDisableColor_;
         theme->spinnerColor_ = spinnerColor_;
         theme->disabledSpinnerColor_ = disabledSpinnerColor_;
+        theme->spinnerSymbolColor_ = spinnerSymbolColor_;
+        theme->disabledSpinnerSymbolColor_ = disabledSpinnerSymbolColor_;
+        theme->spinnerSource_ = spinnerSource_;
         theme->backgroundColor_ = backgroundColor_;
         theme->backgroundColorButton_ = backgroundColorButton_;
         theme->disabledBackgroundColor_ = disabledBackgroundColor_;
@@ -770,6 +777,21 @@ public:
         return disabledSpinnerColor_;
     }
 
+    const Color& GetSpinnerSymbolColor() const
+    {
+        return spinnerSymbolColor_;
+    }
+
+    const Color& GetDisabledSpinnerSymbolColor() const
+    {
+        return disabledSpinnerSymbolColor_;
+    }
+
+    const uint32_t& GetSpinnerSource() const
+    {
+        return spinnerSource_;
+    }
+
     const Color& GetMenuIconColor() const
     {
         return menuIconColor_;
@@ -1065,6 +1087,9 @@ private:
     Color lineColor_ = Color(0x33000000);
     Color spinnerColor_ = Color(0xE5182431);
     Color disabledSpinnerColor_;
+    Color spinnerSymbolColor_ = Color(0xff182431);
+    Color disabledSpinnerSymbolColor_;
+    uint32_t spinnerSource_ = 983615;
     Color menuIconColor_ = Color(0x99182431);
     Color menuFontColor_;
     Color disabledMenuFontColor_;

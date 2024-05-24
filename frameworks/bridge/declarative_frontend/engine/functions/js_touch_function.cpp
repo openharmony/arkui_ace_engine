@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_touch_function.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 #include "base/log/log.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
@@ -84,6 +85,9 @@ JSRef<JSObject> JsTouchFunction::CreateJSEventInfo(TouchEventInfo& info)
         "stopPropagation", JSRef<JSFunc>::New<FunctionCallback>(JsStopPropagation));
     eventObj->SetPropertyObject(
         "getHistoricalPoints", JSRef<JSFunc>::New<FunctionCallback>(JsGetHistoricalPoints));
+    eventObj->SetPropertyObject(
+        "getModifierKeyState",
+        JSRef<JSFunc>::New<FunctionCallback>(NG::ArkTSUtils::JsGetModifierKeyState));
     eventObj->SetPropertyObject("preventDefault", JSRef<JSFunc>::New<FunctionCallback>(JsPreventDefault));
     eventObj->Wrap<TouchEventInfo>(&info);
     return eventObj;

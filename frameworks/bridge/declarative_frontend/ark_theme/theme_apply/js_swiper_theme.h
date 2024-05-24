@@ -27,6 +27,11 @@ class JSSwiperTheme : public JSSwiper {
 public:
     static void ApplyThemeInConstructor()
     {
+        auto themeColors = JSThemeUtils::GetThemeColors();
+        if (!themeColors) {
+            // no need to apply custom theme colors
+            return;
+        }
         JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
         JSRef<JSObject> obj = objectTemplate->NewInstance();
         SwiperParameters swiperParameters = JSSwiper::GetDotIndicatorInfo(obj);
