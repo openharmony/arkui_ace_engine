@@ -1263,10 +1263,10 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
     JSRef<JSVal> fontSize = styleObject->GetProperty("fontSize");
     CalcDimension size;
     if (!fontSize->IsNull() && JSContainerBase::ParseJsDimensionFpNG(fontSize, size, false) &&
-        !size.IsNonPositive() && size.Unit() != DimensionUnit::PERCENT) {
+        !FontSizeRangeIsNegative(size) && size.Unit() != DimensionUnit::PERCENT) {
         updateSpanStyle.updateFontSize = size;
         style.SetFontSize(size);
-    } else if (size.IsNonPositive() || size.Unit() == DimensionUnit::PERCENT) {
+    } else if (FontSizeRangeIsNegative(size) || size.Unit() == DimensionUnit::PERCENT) {
         auto theme = JSContainerBase::GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
         size = theme->GetTextStyle().GetFontSize();
@@ -2033,6 +2033,14 @@ void JSRichEditorBaseController::SetTypingStyle(const JSCallbackInfo& info)
     controller->SetTypingStyle(typingStyle_, textStyle);
 }
 
+bool JSRichEditorBaseController::FontSizeRangeIsNegative(const CalcDimension& size)
+{
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        return size.IsNegative();
+    }
+    return size.IsNonPositive();
+}
+
 void JSRichEditorBaseController::ParseJsTextStyle(
     const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
 {
@@ -2047,10 +2055,10 @@ void JSRichEditorBaseController::ParseJsTextStyle(
     JSRef<JSVal> fontSize = styleObject->GetProperty("fontSize");
     CalcDimension size;
     if (!fontSize->IsNull() && JSContainerBase::ParseJsDimensionFpNG(fontSize, size) &&
-        !size.IsNonPositive() && size.Unit() != DimensionUnit::PERCENT) {
+        !FontSizeRangeIsNegative(size) && size.Unit() != DimensionUnit::PERCENT) {
         updateSpanStyle.updateFontSize = size;
         style.SetFontSize(size);
-    } else if (size.IsNonPositive() || size.Unit() == DimensionUnit::PERCENT) {
+    } else if (FontSizeRangeIsNegative(size) || size.Unit() == DimensionUnit::PERCENT) {
         auto theme = JSContainerBase::GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
         size = theme->GetTextStyle().GetFontSize();
