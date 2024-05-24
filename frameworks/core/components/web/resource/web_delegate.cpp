@@ -6538,6 +6538,14 @@ std::vector<int8_t> WebDelegate::GetWordSelection(const std::string& text, int8_
     return webPattern->GetWordSelection(text, offset);
 }
 
+void WebDelegate::NotifyForNextTouchMoveEvent()
+{
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        nweb_->NotifyForNextTouchMoveEvent();
+    }
+}
+
 void WebDelegate::OnRenderProcessNotResponding(
     const std::string& jsStack, int pid, OHOS::NWeb::RenderProcessNotRespondingReason reason)
 {

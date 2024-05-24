@@ -59,6 +59,7 @@
 #include "core/common/ace_engine_ext.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/common/udmf/unified_data.h"
+#include "core/components_ng/pattern/web/touch_event_listener.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -2198,6 +2199,13 @@ void WebPattern::OnModifyDone()
         PostTaskToUI(std::move(task), "ArkUIWebInitSlideUpdateListener");
     }
 
+    auto touchMoveListenerTask = [weak = AceType::WeakClaim(this)]() {
+        auto webPattern = weak.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->InitTouchEventListener();
+    };
+    PostTaskToUI(std::move(touchMoveListenerTask), "ArkUIWebInitTouchEventListener");
+
     auto embedEnabledTask = [weak = AceType::WeakClaim(this)]() {
         auto webPattern = weak.Upgrade();
         CHECK_NULL_VOID(webPattern);
@@ -3248,6 +3256,27 @@ void WebPattern::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMe
     TAG_LOGI(AceLogTag::ACE_WEB, "OnSelectPopupMenu offset:(%{public}f, %{public}f)", offset.GetX(), offset.GetY());
     selectPopupMenuShowing_ = true;
     overlayManager->ShowMenu(id, offset, menu);
+}
+
+void WebPattern::NotifyForNextTouchMoveEvent()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::NotifyForNextTouchMoveEvent");
+    CHECK_NULL_VOID(delegate_);
+    delegate_->NotifyForNextTouchMoveEvent();
+}
+
+void WebPattern::InitTouchEventListener()
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::InitTouchEventListener");
+    std::shared_ptr<TouchEventListener> listener = std::make_shared<TouchEventListener>();
+    listener->SetPatternToListener(AceType::WeakClaim(this));
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+
+    context->RegisterTouchEventListener(listener);
 }
 
 void WebPattern::OnDateTimeChooserPopup(std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser> chooser,

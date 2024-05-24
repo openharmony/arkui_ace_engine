@@ -271,6 +271,8 @@ public:
         return true;
     }
 
+    virtual void NotifyForNextTouchMoveEvent() {}
+
     // TODO: for temp use, need to delete this.
     virtual bool OnDirtyLayoutWrapperSwap(
         const RefPtr<LayoutWrapper>& /*dirty*/, bool /*skipMeasure*/, bool /*skipLayout*/)
