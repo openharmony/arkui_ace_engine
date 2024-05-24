@@ -1291,7 +1291,8 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
 void PipelineContext::StartWindowMaximizeAnimation(
     int32_t width, int32_t height, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
-    LOGI("Root node start RECOVER/MAXIMIZE animation, width = %{public}d, height = %{public}d", width, height);
+    TAG_LOGI(AceLogTag::ACE_ANIMATION,
+        "Root node start RECOVER/MAXIMIZE animation, width = %{public}d, height = %{public}d", width, height);
 #ifdef ENABLE_ROSEN_BACKEND
     if (rsTransaction) {
         FlushMessages();
@@ -1328,7 +1329,8 @@ void PipelineContext::StartWindowMaximizeAnimation(
 void PipelineContext::StartFullToMultWindowAnimation(int32_t width, int32_t height, WindowSizeChangeReason type,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
-    LOGI("Root node start multiple window animation, type = %{public}d, width = %{public}d, height = %{public}d", type,
+    TAG_LOGI(AceLogTag::ACE_ANIMATION,
+        "Root node start multiple window animation, type = %{public}d, width = %{public}d, height = %{public}d", type,
         width, height);
 #ifdef ENABLE_ROSEN_BACKEND
     if (rsTransaction) {

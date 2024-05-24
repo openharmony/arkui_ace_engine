@@ -42,7 +42,7 @@ float Animator::scale_ = 1.0f;
 void Animator::SetDurationScale(float scale)
 {
     if (scale < 0.0f) {
-        LOGE("Invalid scale value: %{public}f", scale);
+        TAG_LOGI(AceLogTag::ACE_ANIMATION, "Invalid scale value: %{public}f, keep same", scale);
         return;
     }
     scale_ = scale;
@@ -91,10 +91,7 @@ void Animator::AttachScheduler(const WeakPtr<PipelineBase>& context)
 {
     auto&& callback = [weak = AceType::WeakClaim(this)](uint64_t duration) {
         auto controller = weak.Upgrade();
-        if (!controller) {
-            LOGE("controller is nullptr, skip frame callback.");
-            return;
-        }
+        CHECK_NULL_VOID(controller);
         controller->OnFrame(duration);
     };
     scheduler_ = SchedulerBuilder::Build(callback, context);
@@ -147,7 +144,6 @@ void Animator::AddProxyController(const RefPtr<Animator>& proxy)
 {
     CHECK_RUN_ON(UI);
     if (!proxy) {
-        LOGE("Add Proxy Controller failed. controller is null.");
         return;
     }
     if (RawPtr(proxy) != this) {
@@ -203,7 +199,7 @@ void Animator::SetDuration(int32_t duration)
 {
     CHECK_RUN_ON(UI);
     if (duration < 0) {
-        LOGE("invalid duration time, keep the old. id: %{public}d", controllerId_);
+        TAG_LOGI(AceLogTag::ACE_ANIMATION, "invalid duration time, keep the old. id: %{public}d", controllerId_);
         return;
     }
     if ((status_ == Status::RUNNING || status_ == Status::PAUSED) && duration != 0) {
@@ -223,7 +219,7 @@ bool Animator::SetIteration(int32_t iteration)
         return true;
     }
     if ((iteration < 0) && (iteration != ANIMATION_REPEAT_INFINITE)) {
-        LOGE("invalid iteration: %{public}d. id: %{public}d", iteration, controllerId_);
+        TAG_LOGI(AceLogTag::ACE_ANIMATION, "invalid iteration: %{public}d. id: %{public}d", iteration, controllerId_);
         return false;
     }
     // if status is not idle, finish current animation and init animation
@@ -330,11 +326,10 @@ bool Animator::GetInitAnimationDirection()
 void Animator::UpdatePlayedTime(int32_t playedTime, bool checkReverse)
 {
     if (playedTime < 0 || playedTime > duration_) {
-        LOGE("UpdatePlayedTime failed. Invalid playedTime:%{public}d", playedTime);
         return;
     }
     if (startDelay_ != 0 || motion_) {
-        LOGE("Unsupported UpdatePlayedTime when startDelay or motion");
+        // Unsupported UpdatePlayedTime when startDelay or motion
         return;
     }
     if (!checkReverse) {
@@ -358,11 +353,13 @@ void Animator::TriggerFrame(int32_t playedTime, bool checkReverse)
 {
     CHECK_RUN_ON(UI);
     if (playedTime < 0 || playedTime > duration_) {
-        LOGE("TriggerFrame failed. Invalid playedTime:%{public}d", playedTime);
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "TriggerFrame failed. Invalid playedTime:%{public}d, id:%{public}d",
+            playedTime, controllerId_);
         return;
     }
     if (startDelay_ != 0 || motion_) {
-        LOGE("Unsupported TriggerFrame when startDelay or motion");
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "Unsupported TriggerFrame when startDelay or motion, id:%{public}d",
+            controllerId_);
         return;
     }
     UpdatePlayedTime(playedTime, checkReverse);
@@ -375,7 +372,7 @@ void Animator::PlayMotion(const RefPtr<Motion>& motion)
 {
     CHECK_RUN_ON(UI);
     if (!motion) {
-        LOGE("PlayMotion failed, motion is null.");
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "PlayMotion failed, motion is null. id:%{public}d", controllerId_);
         return;
     }
     interpolators_.clear();
@@ -436,7 +433,7 @@ void Animator::Pause()
         return;
     }
     if (status_ == Status::PAUSED) {
-        LOGW("Already paused, do not need pause again. id: %{public}d", controllerId_);
+        TAG_LOGI(AceLogTag::ACE_ANIMATION, "Already paused, do not need pause again. id: %{public}d", controllerId_);
         return;
     }
     if (status_ == Status::IDLE) {
@@ -463,7 +460,7 @@ void Animator::Resume()
         return;
     }
     if (status_ == Status::RUNNING) {
-        LOGW("Already running, do not need resume again. id: %{public}d", controllerId_);
+        TAG_LOGI(AceLogTag::ACE_ANIMATION, "Already running, do not need resume again. id: %{public}d", controllerId_);
         return;
     }
     if (scheduler_ && !scheduler_->IsActive()) {
@@ -546,11 +543,10 @@ void Animator::Cancel()
         return;
     }
     if (status_ == Status::IDLE) {
-        LOGW("Already in idle, do not need cancel again. id: %{public}d", controllerId_);
+        TAG_LOGI(AceLogTag::ACE_ANIMATION, "Already in idle, do not need cancel again. id: %{public}d", controllerId_);
         return;
     }
     status_ = Status::IDLE;
-    TAG_LOGD(AceLogTag::ACE_ANIMATION, "animation cancel. id: %{public}d", controllerId_);
     elapsedTime_ = 0;
     repeatTimesLeft_ = repeatTimes_;
     UpdateScaledTime();
@@ -579,13 +575,14 @@ int32_t Animator::GetId() const
 void Animator::OnFrame(int64_t duration)
 {
     CHECK_RUN_ON(UI);
-    ACE_SCOPED_TRACE_FLAG(iteration_ == ANIMATION_REPEAT_INFINITE, "onFrame %s, iteration -1", animatorName_.c_str());
+    ACE_SCOPED_TRACE_FLAG(iteration_ == ANIMATION_REPEAT_INFINITE, "onFrame %s, iteration -1, id %d",
+        animatorName_.c_str(), controllerId_);
     // notify child first
     for (auto& controller : proxyControllers_) {
         controller->OnFrame(duration);
     }
     if (elapsedTime_ > 0 && duration > INT64_MAX - elapsedTime_) {
-        LOGW("duration is too big, skip it. id:%{public}d", controllerId_);
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "duration is too big, skip it. id:%{public}d", controllerId_);
         return;
     }
     elapsedTime_ += duration;
@@ -785,7 +782,8 @@ bool Animator::StartAsync()
     }
 
     if (!IsSupportedRunningAsynchronously()) {
-        LOGW("not support running asynchronously, controller id: %{public}d", controllerId_);
+        TAG_LOGW(
+            AceLogTag::ACE_ANIMATION, "not support running asynchronously, controller id: %{public}d", controllerId_);
         return false;
     }
     if (scheduler_) {
@@ -816,10 +814,7 @@ bool Animator::StartInnerAsync()
     auto stopCallback = [weak = AceType::WeakClaim(this), id = Container::CurrentIdSafely()]() -> void {
         ContainerScope scope(id);
         auto controller = weak.Upgrade();
-        if (controller == nullptr) {
-            LOGE("notify stop failed, controller is null");
-            return;
-        }
+        CHECK_NULL_VOID(controller);
         controller->StopInnerAsync();
     };
 
@@ -862,7 +857,8 @@ bool Animator::UpdateRepeatTimesLeftAndCheckFinished(int32_t playedLoops)
     // get the remaining repeatTimesLeft_
     repeatTimesLeft_ -= playedLoops;
     if (playedLoops > 1) {
-        LOGW("too long time between neighbor vsync, elapsed loop count: %{public}d. id: %{public}d", playedLoops,
+        TAG_LOGW(AceLogTag::ACE_ANIMATION,
+            "too long time between neighbor vsync, elapsed loop count: %{public}d. id: %{public}d", playedLoops,
             controllerId_);
     }
     if (repeatTimesLeft_ < 0) {
@@ -881,7 +877,7 @@ void Animator::ToggleDirection()
     }
     if (repeatTimes_ == ANIMATION_REPEAT_INFINITE) {
         elapsedTime_ = (scaledStartDelay_ + scaledDuration_ - elapsedTime_) + scaledStartDelay_;
-        LOGI("duration is infinite, can not reverse time related params. id: %{public}d", controllerId_);
+        // duration is infinite, can not reverse time related params.
         return;
     }
     repeatTimesLeft_ = repeatTimes_ - repeatTimesLeft_;

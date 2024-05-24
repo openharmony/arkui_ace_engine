@@ -253,6 +253,14 @@ void SlideTransitionEffect(const SlideEffect& effect, const RectF& rect, Transla
     }
 }
 
+template<typename ModifierName, typename T>
+T GetAnimatablePropertyStagingValue(std::shared_ptr<ModifierName>& modifier)
+{
+    CHECK_NULL_RETURN(modifier, {});
+    auto property = std::static_pointer_cast<Rosen::RSAnimatableProperty<T>>(modifier->GetProperty());
+    CHECK_NULL_RETURN(property, {});
+    return property->GetStagingValue();
+}
 } // namespace
 
 float RosenRenderContext::ConvertDimensionToScaleBySize(const Dimension& dimension, float size)
@@ -1461,6 +1469,14 @@ Rosen::ParticleParaType<float> RosenRenderContext::ConvertParticleDefaultFloatOp
 void RosenRenderContext::OnOpacityUpdate(double opacity)
 {
     CHECK_NULL_VOID(rsNode_);
+    if (AnimationUtils::IsImplicitAnimationOpen() && GetHost()) {
+        auto preOpacity = rsNode_->GetStagingProperties().GetAlpha();
+        if (!NearEqual(preOpacity, opacity)) {
+            auto host = GetHost();
+            ACE_SCOPED_TRACE("opacity from %f to %f, id:%d, tag:%s", rsNode_->GetStagingProperties().GetAlpha(),
+                opacity, host->GetId(), host->GetTag().c_str());
+        }
+    }
     rsNode_->SetAlpha(opacity);
     RequestNextFrame();
 }
@@ -1620,6 +1636,15 @@ void RosenRenderContext::OnTransformScaleUpdate(const VectorF& scale)
     CHECK_NULL_VOID(rsNode_);
     auto curScale = rsNode_->GetStagingProperties().GetScale();
     hasScales_ = !NearEqual(curScale, Vector2f(1.0f, 1.0f)) && !NearEqual(scale, VectorF(1.0f, 1.0f));
+    if (AnimationUtils::IsImplicitAnimationOpen() && scaleXYUserModifier_ && GetHost()) {
+        auto preScale =
+            GetAnimatablePropertyStagingValue<Rosen::RSScaleModifier, Rosen::Vector2f>(scaleXYUserModifier_);
+        if (!(NearEqual(preScale[0], scale.x) && NearEqual(preScale[1], scale.y))) {
+            auto host = GetHost();
+            ACE_SCOPED_TRACE("scale from (%f, %f) to (%f, %f), id:%d, tag:%s", preScale[0], preScale[1], scale.x,
+                scale.y, host->GetId(), host->GetTag().c_str());
+        }
+    }
     SetAnimatableProperty<Rosen::RSScaleModifier, Rosen::Vector2f>(scaleXYUserModifier_, { scale.x, scale.y });
     NotifyHostTransformUpdated();
     RequestNextFrame();
@@ -1650,6 +1675,15 @@ void RosenRenderContext::OnTransformTranslateUpdate(const TranslateOptions& tran
 {
     CHECK_NULL_VOID(rsNode_);
     auto translateVec = MarshallTranslate(translate);
+    if (AnimationUtils::IsImplicitAnimationOpen() && translateXYUserModifier_ && GetHost()) {
+        auto preTranslate =
+            GetAnimatablePropertyStagingValue<Rosen::RSTranslateModifier, Rosen::Vector2f>(translateXYUserModifier_);
+        if (!(NearEqual(preTranslate[0], translateVec.x) && NearEqual(preTranslate[1], translateVec.y))) {
+            auto host = GetHost();
+            ACE_SCOPED_TRACE("translate from (%f, %f) to (%f, %f), id:%d, tag:%s", preTranslate[0], preTranslate[1],
+                translateVec.x, translateVec.y, host->GetId(), host->GetTag().c_str());
+        }
+    }
     SetAnimatableProperty<Rosen::RSTranslateModifier, Rosen::Vector2f>(
         translateXYUserModifier_, { translateVec.x, translateVec.y });
     SetAnimatableProperty<Rosen::RSTranslateZModifier, float>(translateZUserModifier_, translateVec.z);
@@ -3161,6 +3195,14 @@ void RosenRenderContext::SetPositionToRSNode()
         return;
     }
     paintRect_ = rect;
+    if (AnimationUtils::IsImplicitAnimationOpen()) {
+        auto preBounds = rsNode_->GetStagingProperties().GetBounds();
+        if (!NearEqual(preBounds[0], rect.GetX()) || !NearEqual(preBounds[1], rect.GetY())) {
+            ACE_SCOPED_TRACE("SetPosition, bounds from (%f, %f, %f, %f) to (%f, %f, %f, %f), id:%d, tag:%s",
+                preBounds[0], preBounds[1], preBounds[2], preBounds[3], rect.GetX(), rect.GetY(), rect.Width(),
+                rect.Height(), frameNode->GetId(), frameNode->GetTag().c_str());
+        }
+    }
     rsNode_->SetBounds(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
     if (useContentRectForRSFrame_) {
         SetContentRectToFrame(rect);
