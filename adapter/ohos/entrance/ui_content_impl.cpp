@@ -119,11 +119,13 @@ Rosen::Rect ConvertToRSRect(NG::RectF& rect)
 
 bool IsNeedAvoidWindowMode(OHOS::Rosen::Window* rsWindow)
 {
-    return (rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING ||
-               rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-               rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
-           (SystemProperties::GetDeviceType() == DeviceType::PHONE ||
-               SystemProperties::GetDeviceType() == DeviceType::TABLET);
+    if (!SystemProperties::GetNeedAvoidWindow()) {
+        return false;
+    }
+
+    auto mode = rsWindow->GetMode();
+    return mode == Rosen::WindowMode::WINDOW_MODE_FLOATING || mode == Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+            mode == Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
 }
 } // namespace
 
