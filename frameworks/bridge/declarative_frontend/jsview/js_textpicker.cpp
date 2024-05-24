@@ -207,7 +207,9 @@ void JSTextPicker::JSBind(BindingTarget globalObj)
     JSClass<JSTextPicker>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSTextPicker>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSTextPicker>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSTextPicker>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSTextPicker>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSTextPicker>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSTextPicker>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTextPicker>::InheritAndBind<JSViewAbstract>(globalObj);
 }
@@ -961,6 +963,7 @@ void JSTextPicker::SetDisappearTextStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
+    JSTextPickerTheme::ObtainTextStyle(textStyle);
     if (info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle);
     }
@@ -972,6 +975,7 @@ void JSTextPicker::SetTextStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
+    JSTextPickerTheme::ObtainTextStyle(textStyle);
     if (info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle);
     }
@@ -983,6 +987,7 @@ void JSTextPicker::SetSelectedTextStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
+    JSTextPickerTheme::ObtainSelectedTextStyle(textStyle);
     if (info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle);
     }

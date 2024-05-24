@@ -22,6 +22,8 @@ namespace OHOS::Ace::Framework {
 class BadgeModelImpl : public OHOS::Ace::BadgeModel {
 public:
     void Create(BadgeParameters& badgeParameters) override;
+    void SetIsDefault(bool isDefaultFontSize, bool isDefaultBadgeSize) override {};
+
 private:
     void SetPositionForBadge(BadgeParameters& badgeParameters);
 };

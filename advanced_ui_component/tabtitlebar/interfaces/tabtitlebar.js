@@ -448,7 +448,9 @@ class CollapsibleMenuSection extends ViewPU {
   }
   aboutToAppear() {
     this.menuItems.forEach(((e, t) => {
-      e.isEnabled && -1 == this.firstFocusableIndex && t > CollapsibleMenuSection.maxCountOfVisibleItems - 2 && (this.firstFocusableIndex = 1e3 * this.index + t + 1)
+      e.isEnabled && -1 == this.firstFocusableIndex &&
+        t > CollapsibleMenuSection.maxCountOfVisibleItems - 2 &&
+        (this.firstFocusableIndex = 1e3 * this.index + t + 1)
     }))
   }
   initialRender() {
@@ -877,7 +879,8 @@ class TabContentItem extends ViewPU {
           Context.animation({
             duration: 300
           });
-          Row.width(this.getImageLayoutWidth() * this.getImageScaleFactor() + TabContentItem.paddingLeft + TabContentItem.paddingRight);
+          Row.width(this.getImageLayoutWidth() * this.getImageScaleFactor() +
+            TabContentItem.paddingLeft + TabContentItem.paddingRight);
           Row.constraintSize({
             minWidth: TabContentItem.imageHotZoneWidth,
             minHeight: TabContentItem.imageHotZoneWidth
@@ -922,11 +925,13 @@ class TabContentItem extends ViewPU {
             if (this.onImageComplete) {
               this.imageWidth = px2vp(e === null || e === void 0 ? void 0 : e.width);
               this.imageHeight = px2vp(e === null || e === void 0 ? void 0 : e.height);
-              this.onImageComplete(px2vp(e === null || e === void 0 ? void 0 : e.componentWidth) + TabContentItem.paddingLeft + TabContentItem.paddingRight)
+              this.onImageComplete(px2vp(e === null || e === void 0 ? void 0 : e.componentWidth) +
+                TabContentItem.paddingLeft + TabContentItem.paddingRight)
             }
           }));
           Image.onError((e => {
-            this.onImageComplete && this.onImageComplete(px2vp(e.componentWidth) + TabContentItem.paddingLeft + TabContentItem.paddingRight)
+            this.onImageComplete && this.onImageComplete(px2vp(e.componentWidth) +
+              TabContentItem.paddingLeft + TabContentItem.paddingRight)
           }));
           t || Image.pop();
           ViewStackProcessor.StopGetAccessRecording()

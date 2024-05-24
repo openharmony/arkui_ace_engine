@@ -22,6 +22,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/base/symbol_modifier.h"
 #include "core/components_ng/pattern/menu/menu_accessibility_property.h"
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
@@ -40,9 +41,16 @@ namespace OHOS::Ace::NG {
 struct SelectProperties {
     std::string value;
     std::string icon;
+    RefPtr<SymbolModifier> symbolModifier;
     int index;
     bool selected = false;
     bool selectEnable = true;
+};
+
+struct MenuItemInfo {
+    OffsetF originOffset = OffsetF();
+    OffsetF endOffset = OffsetF();
+    bool isFindTargetId = false;
 };
 
 class MenuPattern : public Pattern, public FocusView {
@@ -320,6 +328,16 @@ public:
         isExtensionMenuShow_ = true;
     }
 
+    void SetHasDisappearAnimation(bool hasAnimation)
+    {
+        hasAnimation_ = hasAnimation;
+    }
+
+    bool HasDisappearAnimation() const
+    {
+        return hasAnimation_;
+    }
+
     void SetSubMenuShow()
     {
         isSubMenuShow_ = true;
@@ -398,8 +416,9 @@ public:
         selectProperties_.clear();
         for (size_t i = 0; i < params.size(); i++) {
             SelectProperties selectProperty;
-            selectProperty.value = params[i].first;
-            selectProperty.icon = params[i].second;
+            selectProperty.value = params[i].text;
+            selectProperty.icon = params[i].icon;
+            selectProperty.symbolModifier = params[i].symbolModifier;
             selectProperty.index = static_cast<int>(i);
             if (i < list.size()) {
                 selectProperty.selected = list[i].selected;
@@ -450,6 +469,10 @@ private:
     void ShowPreviewMenuAnimation();
     void ShowMenuAppearAnimation();
     void ShowStackExpandMenu();
+    std::pair<OffsetF, OffsetF> GetMenuOffset(const RefPtr<FrameNode>& outterMenu,
+        bool isNeedRestoreNodeId = false) const;
+    MenuItemInfo GetInnerMenuOffset(const RefPtr<UINode>& child, bool isNeedRestoreNodeId) const;
+    MenuItemInfo GetMenuItemInfo(const RefPtr<UINode>& child, bool isNeedRestoreNodeId) const;
     void ShowArrowRotateAnimation() const;
     RefPtr<FrameNode> GetImageNode(const RefPtr<FrameNode>& host) const;
 
@@ -479,6 +502,7 @@ private:
     bool isExtensionMenuShow_ = false;
     bool isSubMenuShow_ = false;
     bool isMenuShow_ = false;
+    bool hasAnimation_ = true;
 
     OffsetF originOffset_;
     OffsetF endOffset_;

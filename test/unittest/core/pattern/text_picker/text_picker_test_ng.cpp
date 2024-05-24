@@ -5137,10 +5137,17 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetGradientHeight001, TestSize.Level
     frameNode->MarkModifyDone();
     auto textPickerLayoutProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(textPickerLayoutProperty, nullptr);
+
+    /**
+     * @tc.step: step1. create textpicker pattern.
+     */
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     ASSERT_NE(textPickerPattern, nullptr);
 
-    auto height = Dimension(10.0f, DimensionUnit::VP);
+    auto height = Dimension(0.0f, DimensionUnit::PX);
+    /**
+     * @tc.step: step2. Set paramaters to GradientHeight.
+     */
     TextPickerModelNG::GetInstance()->SetGradientHeight(height);
     ASSERT_TRUE(textPickerLayoutProperty->HasGradientHeight());
     EXPECT_EQ(height, textPickerLayoutProperty->GetGradientHeightValue());
@@ -5160,10 +5167,17 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetGradientHeight002, TestSize.Level
     frameNode->MarkModifyDone();
     auto textPickerLayoutProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(textPickerLayoutProperty, nullptr);
+
+    /**
+     * @tc.step: step1. create textpicker pattern.
+     */
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     ASSERT_NE(textPickerPattern, nullptr);
 
-    auto height = Dimension(10.0f, DimensionUnit::PERCENT);
+    auto height = Dimension(1.0f, DimensionUnit::PX);
+    /**
+     * @tc.step: step2. Set paramaters to GradientHeight.
+     */
     TextPickerModelNG::GetInstance()->SetGradientHeight(height);
     ASSERT_TRUE(textPickerLayoutProperty->HasGradientHeight());
     EXPECT_EQ(height, textPickerLayoutProperty->GetGradientHeightValue());
@@ -5981,7 +5995,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest015, TestSize.Level1)
     const std::vector<uint32_t> indexs = { 0, 1, 2 };
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     std::string result = textPickerPattern->GetSelectedObjectMulti(values, indexs, 2);
-    std::string expectResult = "{\"value\":[\"111\",\"123\",\"134\"],\"index\":[\"0\",\"1\",\"2\"],\"status\":2}";
+    std::string expectResult = "{\"value\":[\"111\",\"123\",\"134\"],\"index\":[0,1,2],\"status\":2}";
     EXPECT_EQ(result, expectResult);
 }
 

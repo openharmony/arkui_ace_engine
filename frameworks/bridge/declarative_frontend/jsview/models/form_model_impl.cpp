@@ -16,14 +16,10 @@
 
 #include "want.h"
 
-#include "adapter/ohos/entrance/form_utils_impl.h"
-#include "base/utils/utils.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/common/container_scope.h"
 #include "core/components/form/form_component.h"
 #include "core/components/form/resource/form_request_data.h"
 #include "core/event/ace_event_handler.h"
-#include "frameworks/base/json/json_util.h"
 
 namespace OHOS::Ace::Framework {
 void FormModelImpl::Create(const RequestFormInfo& info)
@@ -123,7 +119,8 @@ void FormModelImpl::SetObscured(const std::vector<ObscuredReasons>& reasons)
     LOGE("Not support SetObscured in old pipeline");
 }
 
-int32_t FormModelImpl::RequestPublishFormWithSnapshot(const AAFwk::Want& want, int64_t& formId)
+int32_t FormModelImpl::RequestPublishFormWithSnapshot(const AAFwk::Want& want,
+    const std::string& formBindingDataStr, int64_t& formId)
 {
     LOGE("Not support RequestPublishFormWithSnapshot in old pipeline");
     return 0;

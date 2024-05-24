@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -150,7 +150,7 @@ public:
         needCallChildrenUpdate_ = needCallChildrenUpdate;
     }
 
-    void SetParent(const WeakPtr<UINode>& parent)
+    virtual void SetParent(const WeakPtr<UINode>& parent)
     {
         parent_ = parent;
     }
@@ -577,6 +577,7 @@ public:
 
     virtual void PaintDebugBoundaryTreeAll(bool flag);
     static void DFSAllChild(const RefPtr<UINode>& root, std::vector<RefPtr<UINode>>& res);
+    static void GetBestBreakPoint(RefPtr<UINode>& breakPointChild, RefPtr<UINode>& breakPointParent);
 
     void AddFlag(uint32_t flag)
     {
@@ -638,6 +639,51 @@ public:
         }
     }
 
+    virtual void SetOnNodeDestroyCallback(std::function<void(int32_t)>&& destroyCallback)
+    {
+        destroyCallback_ = std::move(destroyCallback);
+    }
+
+    virtual bool HasOnNodeDestroyCallback()
+    {
+        return destroyCallback_ != nullptr;
+    }
+
+    virtual void FireOnNodeDestroyCallback()
+    {
+        CHECK_NULL_VOID(destroyCallback_);
+        destroyCallback_(GetId());
+    }
+
+    void SetBuilderFunc(std::function<void()>&& lazyBuilderFunc)
+    {
+        lazyBuilderFunc_ = lazyBuilderFunc;
+    }
+
+    std::function<void()> GetBuilderFunc() const
+    {
+        return lazyBuilderFunc_;
+    }
+
+    void SetUpdateNodeFunc(std::function<void(int32_t, RefPtr<UINode>&)>&& updateNodeFunc)
+    {
+        updateNodeFunc_ = updateNodeFunc;
+    }
+
+    std::function<void(int32_t, RefPtr<UINode>&)> GetUpdateNodeFunc()
+    {
+        return updateNodeFunc_;
+    }
+
+    void SetUpdateNodeConfig(std::function<void()>&& updateNodeConfig)
+    {
+        updateNodeConfig_ = updateNodeConfig;
+    }
+
+    std::function<void()> GetUpdateNodeConfig()
+    {
+        return updateNodeConfig_;
+    }
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -680,6 +726,7 @@ protected:
 
     virtual bool RemoveImmediately() const;
     void ResetParent();
+    static void RemoveFromParentCleanly(const RefPtr<UINode>& child, const RefPtr<UINode>& parent);
 
     // update visible change signal to children
     void UpdateChildrenVisible(bool isVisible) const;
@@ -734,11 +781,14 @@ private:
 
     std::list<std::function<void()>> attachToMainTreeTasks_;
     std::function<void(int32_t)> updateJSInstanceCallback_;
+    std::function<void()> lazyBuilderFunc_;
+    std::function<void(int32_t, RefPtr<UINode>&)> updateNodeFunc_;
+    std::function<void()> updateNodeConfig_;
 
     std::string debugLine_;
     std::string viewId_;
     void* externalData_ = nullptr;
-
+    std::function<void(int32_t)> destroyCallback_;
     friend class RosenRenderContext;
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
 };

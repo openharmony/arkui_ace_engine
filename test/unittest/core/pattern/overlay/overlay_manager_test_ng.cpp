@@ -797,7 +797,7 @@ HWTEST_F(OverlayManagerTestNg, GetSheetMask001, TestSize.Level1)
     EXPECT_EQ(sheetNode->GetTag(), V2::SHEET_PAGE_TAG);
     maskNode = overlayManager->GetSheetMask(sheetNode);
     EXPECT_FALSE(maskNode == nullptr);
-    EXPECT_EQ(maskNode->GetTag(), V2::SHEET_MASK_TAG);
+    EXPECT_EQ(maskNode->GetTag(), V2::SHEET_WRAPPER_TAG);
     EXPECT_EQ(maskNode->GetRenderContext()->GetBackgroundColorValue(), Color::BLUE);
 
     /**
@@ -1927,10 +1927,10 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern7, TestSize.Level1)
      * @tc.steps: step2. create sheetNode, get sheetPattern.
      */
     SheetStyle sheetStyle;
-    bool isShow = true;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
     CreateSheetBuilder();
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+    overlayManager->OnBindSheet(true, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
@@ -1941,13 +1941,12 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern7, TestSize.Level1)
      * @tc.steps: step3. test without setting enableOutsideInteractive.
      * @tc.expected: The backplanes are not interactive by default, maskNode should be visible.
      */
-    topSheetPattern->UpdateInteractive();
     EXPECT_FALSE(sheetStyle.interactive);
     auto maskNode = overlayManager->GetSheetMask(topSheetNode);
     ASSERT_NE(maskNode, nullptr);
-    auto maskLatoutProperty = maskNode->GetLayoutProperty();
-    ASSERT_NE(maskLatoutProperty, nullptr);
-    EXPECT_NE(maskLatoutProperty->GetVisibility(), VisibleType::INVISIBLE);
+    auto maskRenderContext = maskNode->GetRenderContext();
+    ASSERT_NE(maskRenderContext, nullptr);
+    EXPECT_NE(maskRenderContext->GetBackgroundColor(), Color::TRANSPARENT);
 
     /**
      * @tc.steps: step4. test set enableOutsideInteractive true.
@@ -1957,10 +1956,8 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern7, TestSize.Level1)
     ASSERT_NE(sheetLayoutProperty, nullptr);
     sheetStyle.interactive = true;
     sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
-    topSheetPattern->UpdateInteractive();
-    maskNode = overlayManager->GetSheetMask(topSheetNode);
-    maskLatoutProperty = maskNode->GetLayoutProperty<LayoutProperty>();
-    EXPECT_EQ(maskLatoutProperty->GetVisibility(), VisibleType::INVISIBLE);
+    overlayManager->InitSheetMask(maskNode, topSheetNode, sheetStyle);
+    EXPECT_EQ(maskRenderContext->GetBackgroundColor(), Color::TRANSPARENT);
 
     /**
      * @tc.steps: step5. test set enableOutsideInteractive false.
@@ -1968,10 +1965,8 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern7, TestSize.Level1)
      */
     sheetStyle.interactive = false;
     sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
-    topSheetPattern->UpdateInteractive();
-    maskNode = overlayManager->GetSheetMask(topSheetNode);
-    maskLatoutProperty = maskNode->GetLayoutProperty();
-    EXPECT_NE(maskLatoutProperty->GetVisibility(), VisibleType::INVISIBLE);
+    overlayManager->InitSheetMask(maskNode, topSheetNode, sheetStyle);
+    EXPECT_NE(maskRenderContext->GetBackgroundColor(), Color::TRANSPARENT);
 }
 
 /**
@@ -2346,6 +2341,57 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern13, TestSize.Level1)
     topSheetPattern->UpdateSheetSpringBack(springBackFunc2);
     topSheetPattern->HandleDragEnd(2000);
     EXPECT_TRUE(isDismiss);
+}
+
+/**
+ * @tc.name: SheetPresentationPattern13
+ * @tc.desc: Test onWidthDidChange and onTypeDidChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern14, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create sheetNode, get sheetPattern.
+     */
+    SheetStyle sheetStyle;
+    bool isShow = true;
+    CreateSheetBuilder();
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+        nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(topSheetNode, nullptr);
+    auto topSheetPattern = topSheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(topSheetPattern, nullptr);
+    auto sheetLayoutAlgorithm =
+    AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(topSheetPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(sheetLayoutAlgorithm, nullptr);
+
+    auto typeVal = float(SheetType::SHEET_BOTTOM);
+    auto onTypeDidChangeFunc = [&typeVal](float type) { typeVal = type; };
+    topSheetPattern->UpdateOnTypeDidChange(onTypeDidChangeFunc);
+    topSheetPattern->FireOnTypeDidChange();
+
+    auto maxSize = SizeF(10.0f, 10.0f);
+    sheetLayoutAlgorithm->sheetType_ = SHEET_CENTER;
+    auto widthVal = sheetLayoutAlgorithm->GetWidthByScreenSizeType(maxSize);
+    auto onWidthDidChangeFunc = [&widthVal](float width) { widthVal = width; };
+    topSheetPattern->UpdateOnWidthDidChange(onWidthDidChangeFunc);
+    topSheetPattern->FireOnWidthDidChange(topSheetNode);
+    EXPECT_EQ(widthVal, SHEET_LANDSCAPE_WIDTH.ConvertToPx());
 }
 
 /**

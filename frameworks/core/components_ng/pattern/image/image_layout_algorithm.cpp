@@ -99,7 +99,7 @@ std::optional<SizeF> ImageLayoutAlgorithm::MeasureContent(
         //          the fitOriginSize is only useful in case 2.1.
         auto sizeSet = contentConstraint.selfIdealSize.ConvertToSizeT();
         size.SetSizeT(sizeSet);
-        uint8_t sizeSetStatus = Negative(sizeSet.Width()) << 1 | Negative(sizeSet.Height());
+        uint8_t sizeSetStatus = (Negative(sizeSet.Width()) << 1) | Negative(sizeSet.Height());
         switch (sizeSetStatus) {
             case 0b01: // width is positive and height is negative
                 size.SetHeight(sizeSet.Width() / aspectRatio);
@@ -126,6 +126,7 @@ void ImageLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
 void ImageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
+    CHECK_NULL_VOID(layoutWrapper);
     if (IsImageAnimationLayout(layoutWrapper)) {
         PerformImageAnimationLayout(layoutWrapper);
         for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
@@ -139,6 +140,7 @@ void ImageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 void ImageLayoutAlgorithm::PerformImageAnimationLayout(LayoutWrapper* layoutWrapper)
 {
     // update child position.
+    CHECK_NULL_VOID(layoutWrapper);
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
@@ -151,6 +153,9 @@ void ImageLayoutAlgorithm::PerformImageAnimationLayout(LayoutWrapper* layoutWrap
     }
     // Update child position.
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        if (!child) {
+            continue;
+        }
         SizeF childSize = child->GetGeometryNode()->GetMarginFrameSize();
         auto translate = Alignment::GetAlignPosition(size, childSize, align);
         if (!child->GetHostNode() || child->GetHostNode()->GetTag() != V2::IMAGE_ETS_TAG) {

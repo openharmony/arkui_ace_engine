@@ -506,6 +506,292 @@ void ResetSearchCaretPosition(ArkUINodeHandle node)
     SearchModelNG::SetCaretPosition(frameNode, DEFAULT_CARET_POSITION);
 }
 
+void SetSearchMaxLength(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetMaxLength(frameNode, value);
+}
+
+void ResetSearchMaxLength(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::ResetMaxLength(frameNode);
+}
+
+void SetSearchType(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetType(frameNode, CastToTextInputType(value));
+}
+
+void ResetSearchType(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetType(frameNode, Ace::TextInputType::TEXT);
+}
+
+void SetSearchOnEditChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onEditChange = reinterpret_cast<std::function<void(bool)>*>(callback);
+        SearchModelNG::SetOnEditChange(frameNode, std::move(*onEditChange));
+    } else {
+        SearchModelNG::SetOnEditChange(frameNode, nullptr);
+    }
+}
+
+void ResetSearchOnEditChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetOnEditChange(frameNode, nullptr);
+}
+
+void SetSearchOnSubmitWithEvent(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onSubmit = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
+        SearchModelNG::SetOnSubmit(frameNode, std::move(*onSubmit));
+    } else {
+        SearchModelNG::SetOnSubmit(frameNode, nullptr);
+    }
+}
+
+void ResetSearchOnSubmitWithEvent(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetOnSubmit(frameNode, nullptr);
+}
+
+void SetSearchOnCopy(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onCopy = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
+        SearchModelNG::SetOnCopy(frameNode, std::move(*onCopy));
+    } else {
+        SearchModelNG::SetOnCopy(frameNode, nullptr);
+    }
+}
+
+void ResetSearchOnCopy(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetOnCopy(frameNode, nullptr);
+}
+
+void SetSearchOnCut(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onCut = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
+        SearchModelNG::SetOnCut(frameNode, std::move(*onCut));
+    } else {
+        SearchModelNG::SetOnCut(frameNode, nullptr);
+    }
+}
+
+void ResetSearchOnCut(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetOnCut(frameNode, nullptr);
+}
+
+void SetSearchOnPaste(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onPasteWithEvent = reinterpret_cast<std::function<void(
+                const std::string&, NG::TextCommonEvent&)>*>(callback);
+        SearchModelNG::SetOnPasteWithEvent(frameNode, std::move(*onPasteWithEvent));
+    } else {
+        SearchModelNG::SetOnPasteWithEvent(frameNode, nullptr);
+    }
+}
+
+void ResetSearchOnPaste(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetOnPasteWithEvent(frameNode, nullptr);
+}
+
+void SetSearchOnChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onSubmit = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
+        SearchModelNG::SetOnChange(frameNode, std::move(*onSubmit));
+    } else {
+        SearchModelNG::SetOnChange(frameNode, nullptr);
+    }
+}
+
+void ResetSearchOnChange(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetOnChange(frameNode, nullptr);
+}
+
+void SetSearchOnTextSelectionChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onChange = reinterpret_cast<std::function<void(int32_t, int32_t)>*>(callback);
+        SearchModelNG::SetOnTextSelectionChange(frameNode, std::move(*onChange));
+    } else {
+        SearchModelNG::SetOnTextSelectionChange(frameNode, nullptr);
+    }
+}
+
+void ResetSearchOnTextSelectionChange(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetOnTextSelectionChange(frameNode, nullptr);
+}
+
+void SetSearchOnContentScroll(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onScroll = reinterpret_cast<std::function<void(float, float)>*>(callback);
+        SearchModelNG::SetOnContentScroll(frameNode, std::move(*onScroll));
+    } else {
+        SearchModelNG::SetOnContentScroll(frameNode, nullptr);
+    }
+}
+
+void ResetSearchOnContentScroll(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetOnContentScroll(frameNode, nullptr);
+}
+
+void SetSearchShowCounterOptions(
+    ArkUINodeHandle node, ArkUI_Bool open, ArkUI_Int32 thresholdPercentage, ArkUI_Bool highlightBorder)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetShowCounter(frameNode, open);
+    SearchModelNG::SetCounterType(frameNode, thresholdPercentage);
+    SearchModelNG::SetShowCounterBorder(frameNode, highlightBorder);
+}
+
+void ResetSearchShowCounterOptions(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetShowCounter(frameNode, false);
+    SearchModelNG::SetCounterType(frameNode, -1);
+    SearchModelNG::SetShowCounterBorder(frameNode, true);
+}
+
+ArkUINodeHandle GetSearchController(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto controller = SearchModelNG::GetSearchController(frameNode);
+    CHECK_NULL_RETURN(controller, nullptr);
+    auto nodecontroller = reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(controller));
+    return nodecontroller;
+}
+
+void SetSearchOnWillInsert(ArkUINodeHandle node, ArkUI_Int64 callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onWillInsert = reinterpret_cast<std::function<bool(const InsertValueInfo&)>*>(callback);
+        SearchModelNG::SetOnWillInsertValueEvent(frameNode, std::move(*onWillInsert));
+    } else {
+        SearchModelNG::SetOnWillInsertValueEvent(frameNode, nullptr);
+    }
+}
+
+void ResetSearchOnWillInsert(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetOnWillInsertValueEvent(frameNode, nullptr);
+}
+
+void SetSearchOnDidInsert(ArkUINodeHandle node, ArkUI_Int64 callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onDidInsert = reinterpret_cast<std::function<void(const InsertValueInfo&)>*>(callback);
+        SearchModelNG::SetOnDidInsertValueEvent(frameNode, std::move(*onDidInsert));
+    } else {
+        SearchModelNG::SetOnDidInsertValueEvent(frameNode, nullptr);
+    }
+}
+
+void ResetSearchOnDidInsert(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetOnDidInsertValueEvent(frameNode, nullptr);
+}
+
+void SetSearchOnWillDelete(ArkUINodeHandle node, ArkUI_Int64 callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onWillDelete = reinterpret_cast<std::function<bool(const DeleteValueInfo&)>*>(callback);
+        SearchModelNG::SetOnWillDeleteEvent(frameNode, std::move(*onWillDelete));
+    } else {
+        SearchModelNG::SetOnWillDeleteEvent(frameNode, nullptr);
+    }
+}
+
+void ResetSearchOnWillDelete(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetOnWillDeleteEvent(frameNode, nullptr);
+}
+
+void SetSearchOnDidDelete(ArkUINodeHandle node, ArkUI_Int64 callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onDidDelete = reinterpret_cast<std::function<void(const DeleteValueInfo&)>*>(callback);
+        SearchModelNG::SetOnDidDeleteEvent(frameNode, std::move(*onDidDelete));
+    } else {
+        SearchModelNG::SetOnDidDeleteEvent(frameNode, nullptr);
+    }
+}
+
+void ResetSearchOnDidDelete(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetOnDidDeleteEvent(frameNode, nullptr);
+}
+
 namespace NodeModifier {
 const ArkUISearchModifier* GetSearchModifier()
 {
@@ -522,7 +808,18 @@ const ArkUISearchModifier* GetSearchModifier()
         ResetSearchAdaptMinFontSize, SetSearchAdaptMaxFontSize, ResetSearchAdaptMaxFontSize,
         SetSearchSelectedBackgroundColor, ResetSearchSelectedBackgroundColor, SetSearchTextIndent,
         ResetSearchTextIndent, SetSearchValue, ResetSearchValue, SetSearchPlaceholder, ResetSearchPlaceholder,
-        SetSearchIcon, ResetSearchIcon, SetSearchCaretPosition, ResetSearchCaretPosition };
+        SetSearchIcon, ResetSearchIcon, SetSearchCaretPosition, ResetSearchCaretPosition,
+        SetSearchMaxLength, ResetSearchMaxLength, SetSearchType, ResetSearchType,
+        SetSearchOnEditChange, ResetSearchOnEditChange, SetSearchOnSubmitWithEvent, ResetSearchOnSubmitWithEvent,
+        SetSearchOnCopy, ResetSearchOnCopy, SetSearchOnCut, ResetSearchOnCut,
+        SetSearchOnPaste, ResetSearchOnPaste, SetSearchOnChange, ResetSearchOnChange,
+        SetSearchOnTextSelectionChange, ResetSearchOnTextSelectionChange,
+        SetSearchOnContentScroll, ResetSearchOnContentScroll,
+        SetSearchShowCounterOptions, ResetSearchShowCounterOptions, GetSearchController,
+        SetSearchOnWillInsert, ResetSearchOnWillInsert,
+        SetSearchOnDidInsert, ResetSearchOnDidInsert,
+        SetSearchOnWillDelete, ResetSearchOnWillDelete,
+        SetSearchOnDidDelete, ResetSearchOnDidDelete };
     return &modifier;
 }
 

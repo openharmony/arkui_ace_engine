@@ -191,13 +191,43 @@ void RadioPattern::InitFocusEvent()
 void RadioPattern::HandleFocusEvent()
 {
     CHECK_NULL_VOID(radioModifier_);
-    radioModifier_->SetIsFocused(true);
+    AddIsFocusActiveUpdateEvent();
+    OnIsFocusActiveUpdate(true);
 }
 
 void RadioPattern::HandleBlurEvent()
 {
     CHECK_NULL_VOID(radioModifier_);
-    radioModifier_->SetIsFocused(false);
+    RemoveIsFocusActiveUpdateEvent();
+    OnIsFocusActiveUpdate(false);
+}
+
+void RadioPattern::AddIsFocusActiveUpdateEvent()
+{
+    if (!isFocusActiveUpdateEvent_) {
+        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusAcitve) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnIsFocusActiveUpdate(isFocusAcitve);
+        };
+    }
+
+    auto pipline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipline);
+    pipline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
+}
+
+void RadioPattern::RemoveIsFocusActiveUpdateEvent()
+{
+    auto pipline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipline);
+    pipline->RemoveIsFocusActiveUpdateEvent(GetHost());
+}
+
+void RadioPattern::OnIsFocusActiveUpdate(bool isFocusAcitve)
+{
+    CHECK_NULL_VOID(radioModifier_);
+    radioModifier_->SetIsFocused(isFocusAcitve);
 }
 
 void RadioPattern::ImageNodeCreate()

@@ -381,7 +381,7 @@ void JSText::SetLineSpacing(const JSCallbackInfo& info)
 {
     CalcDimension value;
     JSRef<JSVal> args = info[0];
-    if (!ParseLengthMetricsToDimension(args, value)) {
+    if (!ParseLengthMetricsToPositiveDimension(args, value)) {
         value.Reset();
     }
     if (value.IsNegative()) {
@@ -480,6 +480,11 @@ void JSText::SetBaselineOffset(const JSCallbackInfo& info)
 void JSText::SetDecoration(const JSCallbackInfo& info)
 {
     auto tmpInfo = info[0];
+    if (tmpInfo->IsUndefined()) {
+        TextModel::GetInstance()->SetTextDecoration(TextDecoration::NONE);
+        info.ReturnSelf();
+        return;
+    }
     if (!tmpInfo->IsObject()) {
         info.ReturnSelf();
         return;
@@ -886,9 +891,6 @@ void JSText::SetFontFeature(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    if (!info[0]->IsString()) {
-        return;
-    }
 
     std::string fontFeatureSettings = info[0]->ToString();
     TextModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
@@ -934,7 +936,9 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("copyOption", &JSText::SetCopyOption);
     JSClass<JSText>::StaticMethod("onClick", &JSText::JsOnClick);
     JSClass<JSText>::StaticMethod("onCopy", &JSText::SetOnCopy);
+    JSClass<JSText>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSText>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSText>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSText>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSText>::StaticMethod("onDragStart", &JSText::JsOnDragStart);
     JSClass<JSText>::StaticMethod("onDragEnter", &JSText::JsOnDragEnter);

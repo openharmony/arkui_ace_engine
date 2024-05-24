@@ -77,6 +77,7 @@ public:
         paintMethod->SetCurrentIndex(swiperPattern->GetLoopIndex(swiperPattern->GetCurrentFirstIndex()));
         paintMethod->SetCurrentIndexActual(swiperPattern->GetLoopIndex(swiperPattern->GetCurrentIndex()));
         paintMethod->SetNextValidIndex(swiperPattern->GetNextValidIndex());
+        paintMethod->SetHorizontalAndRightToLeft(swiperLayoutProperty->GetNonAutoLayoutDirection());
         paintMethod->SetItemCount(swiperPattern->RealTotalCount());
         paintMethod->SetDisplayCount(swiperLayoutProperty->GetDisplayCount().value_or(1));
         paintMethod->SetGestureState(swiperPattern->GetGestureState());
@@ -199,6 +200,9 @@ private:
     void InitFocusEvent();
     void HandleFocusEvent();
     void HandleBlurEvent();
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
+    void OnIsFocusActiveUpdate(bool isFocusAcitve);
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -214,6 +218,7 @@ private:
     bool focusEventInitialized_ = false;
 
     std::optional<int32_t> mouseClickIndex_ = std::nullopt;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
     RefPtr<DotIndicatorModifier> dotIndicatorModifier_;
     SwiperIndicatorType swiperIndicatorType_ = SwiperIndicatorType::DOT;
     ACE_DISALLOW_COPY_AND_MOVE(SwiperIndicatorPattern);

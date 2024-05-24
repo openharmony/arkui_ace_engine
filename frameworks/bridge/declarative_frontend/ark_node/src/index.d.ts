@@ -52,13 +52,19 @@ declare interface Size {
 declare enum XComponentType {
   SURFACE = 0,
   COMPONENT,
-  TEXTURE
+  TEXTURE,
+  PLATFORM_VIEW = 999
 }
+
+declare interface XComponentController { }
 
 declare abstract class ViewPU {
   id__(): number;
   aboutToUpdate?: (updateParams: Object) => void;
   updateStateVars(params: {}): void;
+  aboutToReuseInternal(param?: Object): void;
+  aboutToRecycleInternal(): void;
+  updateDirtyElements(): void;
 }
 
 /**
@@ -114,7 +120,10 @@ declare class ArkComponent {
   constructor(nativePtr: NodePtr, classType?: ModifierType);
   setNodePtr(noed: NodePtr);
   initialize(...args: Object[]);
+  allowChildCount?(): number;
+  allowChildTypes?(): string[];
 }
+declare class ArkTextInputComponent extends ArkComponent {}
 
 declare class ArkTextComponent extends ArkComponent {}
 
@@ -138,9 +147,19 @@ declare class ArkSwiperComponent extends ArkComponent {}
 
 declare class ArkProgressComponent extends ArkComponent {}
 
+declare class ArkScrollComponent extends ArkComponent {}
+
+declare class ArkRelativeContainerComponent extends ArkComponent {}
+
 declare class ArkListComponent extends ArkComponent {}
 
 declare class ArkListItemComponent extends ArkComponent {}
+
+declare class ArkDividerComponent extends ArkComponent {}
+
+declare class ArkLoadingProgressComponent extends ArkComponent {}
+
+declare class ArkSearchComponent extends ArkComponent {}
 
 declare class UICommonEvent {
   private _nodePtr: NodePtr;

@@ -215,7 +215,11 @@ static void ParseAnimatorOption(napi_env env, napi_callback_info info, std::shar
     ParseDouble(env, beginNapi, begin);
     ParseDouble(env, endNapi, end);
     option->duration = std::max(duration, 0);
-    option->delay = std::max(delay, 0);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        option->delay = delay;
+    } else {
+        option->delay = std::max(delay, 0);
+    }
     option->iterations = iterations >= -1 ? iterations : 1;
     option->begin = begin;
     option->end = end;

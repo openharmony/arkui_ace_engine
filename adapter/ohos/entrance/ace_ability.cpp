@@ -418,9 +418,10 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
             if (rsUiDirector) {
                 rsUiDirector->SetUITaskRunner(
                     [taskExecutor = Platform::AceContainer::GetContainer(id)->GetTaskExecutor(), id](
-                        const std::function<void()>& task) {
+                        const std::function<void()>& task, uint32_t delay) {
                         ContainerScope scope(id);
-                        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIRenderServiceTask");
+                        taskExecutor->PostDelayedTask(
+                            task, TaskExecutor::TaskType::UI, delay, "ArkUIRenderServiceTask", PriorityType::HIGH);
                     }, id);
                 if (context != nullptr) {
                     context->SetRSUIDirector(rsUiDirector);
@@ -688,13 +689,10 @@ void AceAbility::OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::Window
             Rect(Offset(rect.posX_, rect.posY_), Size(rect.width_, rect.height_)));
         pipelineContext->SetIsLayoutFullScreen(
             Ability::GetWindow()->GetMode() == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
-                auto isNeedAvoidWindowMode =
-                        (Ability::GetWindow()->GetMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING ||
-                         Ability::GetWindow()->GetMode() == Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-                         Ability::GetWindow()->GetMode()
-                         == Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
-                        (SystemProperties::GetDeviceType() == DeviceType::PHONE ||
-                         SystemProperties::GetDeviceType() == DeviceType::TABLET);
+        auto isNeedAvoidWindowMode = SystemProperties::GetNeedAvoidWindow() &&
+            (Ability::GetWindow()->GetMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING ||
+            Ability::GetWindow()->GetMode() == Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+            Ability::GetWindow()->GetMode() == Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
         pipelineContext->SetIsNeedAvoidWindow(isNeedAvoidWindowMode);
     }
     auto taskExecutor = container->GetTaskExecutor();

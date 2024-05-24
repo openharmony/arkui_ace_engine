@@ -217,7 +217,8 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         } else {
             tabBarNode->ReplaceChild(oldColumnNode, columnNode);
         }
-        tabBarPattern->AddTabBarItemType(tabContentId, true);
+        tabBarPattern->AddTabBarItemType(columnNode->GetId(), true);
+        tabBarPattern->AddTabBarItemClickEvent(columnNode);
         tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         return;
     }
@@ -234,9 +235,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         auto id = tabContentPattern->GetId();
         columnNode->UpdateInspectorId(id);
     } else {
-        auto deviceType = SystemProperties::GetDeviceType();
-        auto tabBarItemPadding = deviceType == DeviceType::PHONE ? tabTheme->GetSubTabHorizontalPadding()
-                                                                 : tabTheme->GetSubtabLandscapeHorizontalPadding();
+        auto tabBarItemPadding = tabTheme->GetSubTabItemPadding();
         layoutProperty->UpdatePadding({ CalcLength(tabBarItemPadding), CalcLength(tabBarItemPadding),
             CalcLength(tabBarItemPadding), CalcLength(tabBarItemPadding) });
     }
@@ -412,7 +411,8 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     textNode->MarkModifyDone();
     textNode->MarkDirtyNode();
     iconNode->MarkModifyDone();
-    tabBarPattern->AddTabBarItemType(tabContentId, false);
+    tabBarPattern->AddTabBarItemType(columnNode->GetId(), false);
+    tabBarPattern->AddTabBarItemClickEvent(columnNode);
     tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
@@ -427,17 +427,18 @@ void TabContentModelNG::RemoveTabBarItem(const RefPtr<TabContentNode>& tabConten
     auto tabBarItemNode = ElementRegister::GetInstance()->GetUINodeById(tabBarItemId);
     CHECK_NULL_VOID(tabBarItemNode);
     auto tabBarNode = tabBarItemNode->GetParent();
-    tabBarNode->RemoveChild(tabBarItemNode);
     CHECK_NULL_VOID(tabBarNode);
+    auto tabBarFrameNode = AceType::DynamicCast<FrameNode>(tabBarNode);
+    CHECK_NULL_VOID(tabBarFrameNode);
+    auto tabBarPattern = tabBarFrameNode->GetPattern<TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    tabBarPattern->RemoveTabBarItemClickEvent(tabBarNode->GetId());
+    tabBarNode->RemoveChild(tabBarItemNode);
     tabContentNode->ResetTabBarItemId();
 
     auto tabsNode = FindTabsNode(tabContentNode);
     CHECK_NULL_VOID(tabsNode);
     tabsNode->RemoveBuilderByContentId(tabContentNode->GetId());
-    auto tabBar = tabsNode->GetTabBar();
-    CHECK_NULL_VOID(tabBar);
-    auto tabBarFrameNode = AceType::DynamicCast<FrameNode>(tabBar);
-    CHECK_NULL_VOID(tabBarFrameNode);
     tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 

@@ -47,6 +47,7 @@
 #include "core/interfaces/native/node/node_textpicker_modifier.h"
 #include "core/interfaces/native/node/node_timepicker_modifier.h"
 #include "core/interfaces/native/node/node_toggle_modifier.h"
+#include "core/interfaces/native/node/image_animator_modifier.h"
 #include "core/interfaces/native/node/util_modifier.h"
 #include "core/interfaces/native/node/grid_modifier.h"
 #include "core/interfaces/native/node/alphabet_indexer_modifier.h"
@@ -265,6 +266,8 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     nullptr,
     NodeModifier::SetOnFocus,
     NodeModifier::SetOnTouchIntercept,
+    NodeModifier::SetOnAttach,
+    NodeModifier::SetOnDetach,
 };
 
 const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
@@ -310,6 +313,7 @@ const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
 const ComponentAsyncEventHandler refreshNodeAsyncEventHandlers[] = {
     NodeModifier::SetRefreshOnStateChange,
     NodeModifier::SetOnRefreshing,
+    NodeModifier::SetRefreshOnOffsetChange,
 };
 
 const ComponentAsyncEventHandler TOGGLE_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -352,6 +356,7 @@ const ComponentAsyncEventHandler SWIPER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetSwiperAnimationStart,
     NodeModifier::SetSwiperAnimationEnd,
     NodeModifier::SetSwiperGestureSwipe,
+    NodeModifier::SetSwiperOnContentDidScroll,
 };
 
 const ComponentAsyncEventHandler CANVAS_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -410,6 +415,14 @@ const ComponentAsyncEventHandler RADIO_NODE_ASYNC_EVENT_HANDLERS[] = {
 
 const ComponentAsyncEventHandler SELECT_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnSelectSelect,
+};
+
+const ComponentAsyncEventHandler IMAGE_ANIMATOR_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetImageAnimatorOnStart,
+    NodeModifier::SetImageAnimatorOnPause,
+    NodeModifier::SetImageAnimatorOnRepeat,
+    NodeModifier::SetImageAnimatorOnCancel,
+    NodeModifier::SetImageAnimatorOnFinish,
 };
 
 /* clang-format on */
@@ -621,6 +634,15 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
                 return;
             }
             eventHandle = SELECT_NODE_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_IMAGE_ANIMATOR: {
+            // imageAnimator event type.
+            if (subKind >= sizeof(IMAGE_ANIMATOR_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = IMAGE_ANIMATOR_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         default: {

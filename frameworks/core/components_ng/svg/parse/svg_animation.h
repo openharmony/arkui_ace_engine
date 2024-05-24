@@ -18,7 +18,7 @@
 
 #include "base/utils/noncopyable.h"
 #include "core/animation/svg_animate.h"
-#include "frameworks/core/components/declaration/svg/svg_animate_declaration.h"
+#include "frameworks/core/components_ng/svg/parse/svg_attributes_parser.h"
 #include "frameworks/core/components_ng/svg/parse/svg_node.h"
 
 namespace OHOS::Ace::NG {

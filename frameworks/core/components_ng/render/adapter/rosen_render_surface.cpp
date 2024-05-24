@@ -42,20 +42,20 @@ const int32_t SIZE_LIMIT = 7999;
 const int32_t PERMITTED_DIFFERENCE = 100;
 const int32_t FAILED_LIMIT = 3;
 
-GraphicTransformType ConvertRotation(Rotation rotation)
+GraphicTransformType ConvertRotation(uint32_t rotation)
 {
     GraphicTransformType transform = GraphicTransformType::GRAPHIC_ROTATE_BUTT;
     switch (rotation) {
-        case Rotation::ROTATION_0:
+        case 0:
             transform = GraphicTransformType::GRAPHIC_ROTATE_NONE;
             break;
-        case Rotation::ROTATION_90:
+        case 90:
             transform = GraphicTransformType::GRAPHIC_ROTATE_90;
             break;
-        case Rotation::ROTATION_180:
+        case 180:
             transform = GraphicTransformType::GRAPHIC_ROTATE_180;
             break;
-        case Rotation::ROTATION_270:
+        case 270:
             transform = GraphicTransformType::GRAPHIC_ROTATE_270;
             break;
         default:
@@ -229,9 +229,9 @@ void RosenRenderSurface::SetExtSurfaceCallback(const RefPtr<ExtSurfaceCallbackIn
     extSurfaceCallbackInterface_ = extSurfaceCallback;
 }
 
-void RosenRenderSurface::SetTransformHint(Rotation dmRotation)
+void RosenRenderSurface::SetTransformHint(uint32_t rotation)
 {
-    auto transform = ConvertRotation(dmRotation);
+    auto transform = ConvertRotation(rotation);
     CHECK_NULL_VOID(producerSurface_);
     producerSurface_->SetTransformHint(transform);
 }
@@ -393,9 +393,12 @@ void RosenRenderSurface::PostRenderOnlyTaskToUI()
     CHECK_NULL_VOID(container);
     auto context = container->GetPipelineContext();
     CHECK_NULL_VOID(context);
-    auto taskExecutor = context->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostSyncTask(task, TaskExecutor::TaskType::UI, "ArkUIMarkNeedRenderOnly");
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    if (uiTaskExecutor.IsRunOnCurrentThread()) {
+        task();
+    } else {
+        uiTaskExecutor.PostTask(task, "ArkUIMarkNeedRenderOnly");
+    }
 }
 
 void RosenRenderSurface::ConsumeXComponentBuffer()
@@ -432,11 +435,23 @@ void RosenRenderSurface::ConsumeXComponentBuffer()
 #endif
 }
 
-void RosenRenderSurface::releaseSurfaceBuffers()
+void RosenRenderSurface::ReleaseSurfaceBuffers()
 {
 #ifdef OHOS_PLATFORM
     CHECK_NULL_VOID(producerSurface_);
     producerSurface_->CleanCache();
+    CHECK_NULL_VOID(consumerSurface_);
+    {
+        std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
+        while (availableBuffers_.size() > 1) {
+            auto surfaceNode = availableBuffers_.front();
+            availableBuffers_.pop();
+            if (surfaceNode) {
+                consumerSurface_->ReleaseBuffer(surfaceNode->buffer_, SyncFence::INVALID_FENCE);
+            }
+        }
+    }
+    consumerSurface_->CleanCache();
 #endif
 }
 

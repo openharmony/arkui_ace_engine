@@ -79,7 +79,6 @@ void ParseAndSetWidth(const JSCallbackInfo& info, WidthType widthType)
     auto isValid = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)
                        ? JSViewAbstract::ParseJsDimensionVpNG(info[0], value)
                        : JSViewAbstract::ParseJsDimensionVp(info[0], value);
-
     if (!isValid) {
         switch (widthType) {
             case WidthType::SIDEBAR_WIDTH:
@@ -115,9 +114,21 @@ void JSSideBar::Create(const JSCallbackInfo& info)
     SideBarContainerModel::GetInstance()->SetSideBarContainerType(style);
 }
 
-void JSSideBar::SetShowControlButton(bool isShow)
+void JSSideBar::SetShowControlButton(const JSCallbackInfo& info)
 {
-    SideBarContainerModel::GetInstance()->SetShowControlButton(isShow);
+    if (info.Length() < 1) {
+        return;
+    }
+    if (info[0]->IsNull() || info[0]->IsUndefined()) {
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            // showControlButton set default true when input illegal value
+            SideBarContainerModel::GetInstance()->SetShowControlButton(true);
+        }
+        return;
+    }
+    if (info[0]->IsBoolean()) {
+        SideBarContainerModel::GetInstance()->SetShowControlButton(info[0]->ToBoolean());
+    }
 }
 
 void JSSideBar::JsSideBarPosition(const JSCallbackInfo& info)
@@ -125,13 +136,17 @@ void JSSideBar::JsSideBarPosition(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    SideBarPosition sideBarPosition = SideBarPosition::START;
-    if (info[0]->IsNumber()) {
-        sideBarPosition = static_cast<SideBarPosition>(info[0]->ToNumber<int>());
-    } else {
+    if (info[0]->IsNull() || info[0]->IsUndefined()) {
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            // sideBarPosition set default START when input illegal value
+            SideBarContainerModel::GetInstance()->SetSideBarPosition(SideBarPosition::START);
+        }
         return;
     }
-    SideBarContainerModel::GetInstance()->SetSideBarPosition(sideBarPosition);
+    if (info[0]->IsNumber() && info[0]->ToNumber<int32_t>() >= 0 && info[0]->ToNumber<int32_t>() <= 1) {
+        SideBarContainerModel::GetInstance()->SetSideBarPosition(
+            static_cast<SideBarPosition>(info[0]->ToNumber<int32_t>()));
+    }
 }
 
 void JSSideBar::JSBind(BindingTarget globalObj)
@@ -160,7 +175,9 @@ void JSSideBar::JSBind(BindingTarget globalObj)
     JSClass<JSSideBar>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSSideBar>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSSideBar>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSSideBar>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSSideBar>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSSideBar>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSSideBar>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSSideBar>::InheritAndBind<JSContainerBase>(globalObj);
 }
@@ -268,17 +285,34 @@ void JSSideBar::JsControlButton(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-
-    if (!info[0]->IsNull() && info[0]->IsObject()) {
+    if (info[0]->IsNull() || info[0]->IsUndefined()) {
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            // controlButton icon set default style and position when input illegal value
+            SideBarContainerModel::GetInstance()->SetControlButtonWidth(DEFAULT_CONTROL_BUTTON_WIDTH);
+            SideBarContainerModel::GetInstance()->SetControlButtonHeight(DEFAULT_CONTROL_BUTTON_HEIGHT);
+            SideBarContainerModel::GetInstance()->ResetControlButtonLeft();
+            SideBarContainerModel::GetInstance()->SetControlButtonTop(DEFAULT_CONTROL_BUTTON_TOP);
+            SideBarContainerModel::GetInstance()->ResetControlButtonIconInfo();
+        }
+        return;
+    }
+    if (info[0]->IsObject()) {
         JSRef<JSObject> value = JSRef<JSObject>::Cast(info[0]);
-        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TEN)) {
             ParseControlButtonOG(value);
         } else {
             ParseControlButtonNG(value);
         }
 
         JSRef<JSVal> icons = value->GetProperty("icons");
-        if (!icons->IsNull() && icons->IsObject()) {
+        if (icons->IsNull() || icons->IsUndefined()) {
+            if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                // controlButton icon set default style when input illegal value
+                SideBarContainerModel::GetInstance()->ResetControlButtonIconInfo();
+            }
+            return;
+        }
+        if (icons->IsObject()) {
             JSRef<JSObject> iconsVal = JSRef<JSObject>::Cast(icons);
             JSRef<JSVal> showIcon = iconsVal->GetProperty("shown");
             JSRef<JSVal> switchingIcon = iconsVal->GetProperty("switching");
@@ -295,12 +329,15 @@ void JSSideBar::JsDivider(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-
-    if (info[0]->IsNull()) {
-        SideBarContainerModel::GetInstance()->SetDividerStrokeWidth(0.0_vp);
+    if (info[0]->IsNull() || info[0]->IsUndefined()) {
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            // sideBar divider set default width when input illegal value
+            SideBarContainerModel::GetInstance()->SetDividerStrokeWidth(DEFAULT_DIVIDER_STROKE_WIDTH);
+        } else if (info[0]->IsNull()) {
+            SideBarContainerModel::GetInstance()->SetDividerStrokeWidth(0.0_vp);
+        }
         return;
     }
-
     if (info[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
 

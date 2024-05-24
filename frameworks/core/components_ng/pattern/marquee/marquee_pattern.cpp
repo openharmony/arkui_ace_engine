@@ -154,11 +154,17 @@ void MarqueePattern::PlayMarqueeAnimation(float start, int32_t playCount, bool n
     if (GreatNotEqual(step, textWidth)) {
         step = DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx();
     }
-    auto end = CalculateEnd();
-    lastAnimationParam_.lastEnd = end;
-    lastAnimationParam_.lastStart = CalculateStart();
-    auto duration = static_cast<int32_t>(std::abs(end - start) * DEFAULT_MARQUEE_SCROLL_DELAY);
-    lastAnimationParam_.lastDistance = std::abs(end - start);
+    bool isFirstStart = start == GetTextOffset() ? true : false;
+    float calculateEnd = CalculateEnd();
+    float calculateStart = CalculateStart();
+    auto direction = GetLayoutProperty<MarqueeLayoutProperty>()->GetNonAutoLayoutDirection();
+    bool isRtl = direction == TextDirection::RTL ? true : false;
+    if (isRtl) std::swap(calculateEnd, calculateStart);
+    lastAnimationParam_.lastEnd = calculateEnd;
+    lastAnimationParam_.lastStart = calculateStart;
+    if (isFirstStart) calculateStart = start;
+    auto duration = static_cast<int32_t>(std::abs(calculateEnd - calculateStart) * DEFAULT_MARQUEE_SCROLL_DELAY);
+    lastAnimationParam_.lastDistance = std::abs(calculateEnd - calculateStart);
     lastAnimationParam_.lastStep = 1.0f;
     if (GreatNotEqual(step, 0.0)) {
         duration = static_cast<int32_t>(duration / step);
@@ -168,20 +174,16 @@ void MarqueePattern::PlayMarqueeAnimation(float start, int32_t playCount, bool n
     AnimationOption option;
     option.SetCurve(Curves::LINEAR);
     option.SetDuration(duration);
-    if (needSecondPlay) {
-        option.SetIteration(1);
-    } else {
-        option.SetIteration(playCount);
-    }
+    needSecondPlay ? option.SetIteration(1) : option.SetIteration(playCount);
     TAG_LOGD(AceLogTag::ACE_MARQUEE,
         "Play Marquee Animation, marqueeNodeId is %{public}d, textNodeId is %{public}d, textWidth is %{public}f, "
         "duration is %{public}d.",
         host->GetId(), textNode->GetId(), textWidth, duration);
-    SetTextOffset(start);
     auto paintProperty = host->GetPaintProperty<MarqueePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    lastAnimationParam_.lastDirection = paintProperty->GetDirection().value_or(MarqueeDirection::LEFT);
-    ActionAnimation(option, end, playCount, needSecondPlay);
+    lastAnimationParam_.lastDirection = isRtl ? MarqueeDirection::RIGHT : MarqueeDirection::LEFT;
+    SetTextOffset(calculateStart);
+    ActionAnimation(option, calculateEnd, playCount, needSecondPlay);
 }
 
 void MarqueePattern::ActionAnimation(AnimationOption& option, float end, int32_t playCount, bool needSecondPlay)

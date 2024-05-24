@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,9 @@
 #include "core/interfaces/native/node/node_list_modifier.h"
 
 #include <cstdint>
+
+#include "interfaces/native/node/list_option.h"
+#include "interfaces/native/node/node_model.h"
 
 #include "base/error/error_code.h"
 #include "base/geometry/dimension.h"
@@ -566,6 +569,34 @@ void ResetInitialIndex(ArkUINodeHandle node)
     ListModelNG::SetInitialIndex(frameNode, 0);
 }
 
+void SetListChildrenMainSize(ArkUINodeHandle node, ArkUIListChildrenMainSize option)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetListChildrenMainSize(frameNode, option->defaultMainSize, option->mainSize);
+}
+
+void ResetListChildrenMainSize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::ResetListChildrenMainSize(frameNode);
+}
+
+void SetListCloseAllSwipeActions(ArkUINodeHandle node, void* userData, void (onFinish) (void* userData))
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<ScrollControllerBase> scrollControllerBase = ListModelNG::GetOrCreateController(frameNode);
+    if (onFinish) {
+        auto onEvent = [userData, onFinish]() {
+            onFinish(userData);
+        };
+        scrollControllerBase->CloseAllSwipeActions(std::move(onEvent));
+    } else {
+        scrollControllerBase->CloseAllSwipeActions(nullptr);
+    }
+}
 } // namespace
 
 namespace NodeModifier {
@@ -582,7 +613,8 @@ const ArkUIListModifier* GetListModifier()
         SetScrollSnapAlign, ResetScrollSnapAlign, SetContentStartOffset, ResetContentStartOffset, SetContentEndOffset,
         ResetContentEndOffset, ListSetDivider, ListResetDivider, SetChainAnimationOptions, ResetChainAnimationOptions,
         GetListSpace, SetListSpace, ResetListSpace, SetFadingEdge, ResetFadingEdge, SetNodeAdapter, ResetNodeAdapter,
-        GetNodeAdapter, GetCachedCount, SetScrollToIndex, SetScrollBy, SetInitialIndex, ResetInitialIndex };
+        GetNodeAdapter, GetCachedCount, SetScrollToIndex, SetScrollBy, SetInitialIndex, ResetInitialIndex,
+        SetListChildrenMainSize, ResetListChildrenMainSize, SetListCloseAllSwipeActions };
     return &modifier;
 }
 
@@ -662,14 +694,17 @@ void SetOnListWillScroll(ArkUINodeHandle node, void* extraParam)
                             ScrollSource source) -> ScrollFrameResult {
         ScrollFrameResult scrollRes { .offset = offset };
         ArkUINodeEvent event;
+        bool usePx = NodeModel::UsePXUnit(reinterpret_cast<ArkUI_Node*>(extraParam));
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_WATER_FLOW_WILL_SCROLL;
-        event.componentAsyncEvent.data[0].f32 = static_cast<float>(offset.Value());
+        event.componentAsyncEvent.data[0].f32 =
+            usePx ? static_cast<float>(offset.ConvertToPx()) : static_cast<float>(offset.Value());
         event.componentAsyncEvent.data[1].i32 = static_cast<int>(state);
         event.componentAsyncEvent.data[2].i32 = static_cast<int>(source);
         SendArkUIAsyncEvent(&event);
-        scrollRes.offset = Dimension(event.componentAsyncEvent.data[0].f32, DimensionUnit::VP);
+        scrollRes.offset =
+            Dimension(event.componentAsyncEvent.data[0].f32, usePx ? DimensionUnit::PX : DimensionUnit::VP);
         return scrollRes;
     };
     ScrollableModelNG::SetOnWillScroll(frameNode, std::move(onWillScroll));
@@ -684,8 +719,10 @@ void SetOnListDidScroll(ArkUINodeHandle node, void* extraParam)
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        bool usePx = NodeModel::UsePXUnit(reinterpret_cast<ArkUI_Node*>(extraParam));
         event.componentAsyncEvent.subKind = ON_LIST_DID_SCROLL;
-        event.componentAsyncEvent.data[0].f32 = static_cast<float>(offset.Value());
+        event.componentAsyncEvent.data[0].f32 =
+            usePx ? static_cast<float>(offset.ConvertToPx()) : static_cast<float>(offset.Value());
         event.componentAsyncEvent.data[1].i32 = static_cast<int32_t>(state);
         SendArkUIAsyncEvent(&event);
     };

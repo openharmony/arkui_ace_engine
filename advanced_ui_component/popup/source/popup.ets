@@ -188,6 +188,7 @@ export struct PopupComponent {
   @State closeButtonBackgroundColor: ResourceColor = $r('sys.color.ohos_id_color_background_transparent');
   @State firstButtonBackgroundColor: ResourceColor = $r('sys.color.ohos_id_color_background_transparent');
   @State secondButtonBackgroundColor: ResourceColor = $r('sys.color.ohos_id_color_background_transparent');
+  @State closeButtonFillColorWithTheme: ResourceColor = $r('sys.color.icon_secondary');
   private listener = mediaquery.matchMediaSync('(orientation: landscape)')
 
   private getIconWidth(): Dimension {
@@ -256,7 +257,7 @@ export struct PopupComponent {
   }
 
   private getCloseButtonFillColor(): ResourceColor {
-    return this.theme.closeButton.fillColor
+    return this.closeButtonFillColorWithTheme;
   }
 
   private getCloseButtonHoverColor(): ResourceColor {
@@ -305,8 +306,7 @@ export struct PopupComponent {
     let padding: Padding
     if (this.title.text !== '' && this.title.text !== void (0)) {
       padding = { left: this.theme.button.margin.left as number / 2 }
-    }
-    else {
+    } else {
       padding = { left: this.theme.button.margin.left as number / 2, right: this.theme.closeButton.margin.right }
     }
     return padding
@@ -403,7 +403,7 @@ export struct PopupComponent {
     this.theme.button.fontColor = theme.colors.fontEmphasize;
     this.theme.message.fontColor = theme.colors.fontSecondary;
     this.theme.message.plainFontColor = theme.colors.fontPrimary;
-    this.theme.closeButton.fillColor = theme.colors.iconSecondary;
+    this.closeButtonFillColorWithTheme = theme.colors.iconSecondary;
   }
 
   aboutToAppear() {
@@ -429,7 +429,8 @@ export struct PopupComponent {
     scrollMaxHeight -= this.theme.windows.padding.top as number
     scrollMaxHeight -= (this.theme.button.textMargin.bottom as number / 2)
     scrollMaxHeight -= this.theme.title.margin.bottom as number
-    scrollMaxHeight -= (this.theme.windows.padding.bottom as number - (this.theme.button.textMargin.bottom as number / 2))
+    scrollMaxHeight -= (this.theme.windows.padding.bottom as number -
+      (this.theme.button.textMargin.bottom as number / 2))
     if (Math.floor(this.textHeight) > Math.floor(scrollMaxHeight + 1)) {
       return scrollMaxHeight
     } else {
@@ -510,8 +511,7 @@ export struct PopupComponent {
               .onHover((isHover: boolean) => {
                 if (isHover) {
                   this.closeButtonBackgroundColor = this.getCloseButtonHoverColor()
-                }
-                else {
+                } else {
                   this.closeButtonBackgroundColor = this.getCloseButtonBackgroundColor()
                 }
               })

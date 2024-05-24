@@ -1220,6 +1220,11 @@ HWTEST_F(RichEditorTestNg, RichEditorDelete002, TestSize.Level1)
     richEditorPattern->caretPosition_ = richEditorPattern->GetTextContentLength();
     richEditorPattern->DeleteBackward(1);
     EXPECT_EQ(richEditorNode_->GetChildren().size(), 0);
+    ClearSpan();
+    AddSpan(INIT_VALUE_1);
+    richEditorPattern->caretPosition_ = richEditorPattern->GetTextContentLength();
+    richEditorPattern->DeleteBackward(6);
+    EXPECT_EQ(richEditorNode_->GetChildren().size(), 0);
 }
 
 /**
@@ -5600,7 +5605,7 @@ HWTEST_F(RichEditorTestNg, ChangeTextCallbackTest001, TestSize.Level1)
      * @tc.steps: step2. change text with InsertValue When callback return false
      * @tc.expected: return value is valid
      */
-    richEditorPattern->InsertValue(INIT_VALUE_1);
+    richEditorPattern->InsertValue(INIT_VALUE_1, true);
     EXPECT_EQ(isWillCalled, true);
     EXPECT_EQ(isDidCalled, false);
     EXPECT_EQ(originalCount, 0);
@@ -5787,7 +5792,7 @@ HWTEST_F(RichEditorTestNg, ChangeTextCallbackTest004, TestSize.Level1)
      * @tc.steps: step2. change text with InsertValue
      * @tc.expected: return value is valid
      */
-    richEditorPattern->InsertValue(INIT_VALUE_1);
+    richEditorPattern->InsertValue(INIT_VALUE_1, true);
     EXPECT_EQ(isWillCalled, true);
     EXPECT_EQ(isDidCalled, true);
     EXPECT_EQ(originalCount, 0);
@@ -5803,7 +5808,7 @@ HWTEST_F(RichEditorTestNg, ChangeTextCallbackTest004, TestSize.Level1)
     originalCount = 0;
     replacedCount = 0;
     afterCount = 0;
-    richEditorPattern->InsertValue("test\nvalue");
+    richEditorPattern->InsertValue("test\nvalue", true);
     EXPECT_EQ(isWillCalled, true);
     EXPECT_EQ(isDidCalled, true);
     EXPECT_EQ(originalCount, 0);
@@ -5900,7 +5905,7 @@ HWTEST_F(RichEditorTestNg, ChangeTextCallbackTest006, TestSize.Level1)
      * @tc.steps: step2. change text with HandleOnDragDropTextOperation
      * @tc.expected: return value is valid
      */
-    richEditorPattern->InsertValue(INIT_VALUE_1);
+    richEditorPattern->InsertValue(INIT_VALUE_1, true);
     isWillCalled = false;
     isDidCalled = false;
     originalCount = 0;
@@ -5960,7 +5965,7 @@ HWTEST_F(RichEditorTestNg, ChangeTextCallbackTest007, TestSize.Level1)
      * @tc.steps: step2. change text with HandleOnUndoAction
      * @tc.expected: return value is valid
      */
-    richEditorPattern->InsertValue(INIT_VALUE_1);
+    richEditorPattern->InsertValue(INIT_VALUE_1, true);
     isWillCalled = false;
     isDidCalled = false;
     richEditorPattern->HandleOnUndoAction();
@@ -6106,7 +6111,7 @@ HWTEST_F(RichEditorTestNg, ChangeTextCallbackTest010, TestSize.Level1)
 
     richEditorPattern->AddTextSpan(TEXT_SPAN_OPTIONS_1); // content = hello1
     richEditorPattern->textSelector_.Update(1, 5); // select h[ello]1
-    richEditorPattern->InsertValue(INIT_VALUE_1);
+    richEditorPattern->InsertValue(INIT_VALUE_1, true);
 
     // check onWill rangeBefore
     EXPECT_EQ(onWillRangeBefore.start, 1);
@@ -6156,7 +6161,7 @@ HWTEST_F(RichEditorTestNg, ChangeTextCallbackTest011, TestSize.Level1)
     // content = hello1hello1hello1
 
     richEditorPattern->textSelector_.Update(1, 17); // select h[ello1hello1hello]1
-    richEditorPattern->InsertValue(INIT_VALUE_1);
+    richEditorPattern->InsertValue(INIT_VALUE_1, true);
 
     // check onWill rangeBefore
     EXPECT_EQ(onWillRangeBefore.start, 1);
@@ -6601,7 +6606,7 @@ HWTEST_F(RichEditorTestNg, FinishTextPreview002, TestSize.Level1)
     /**
      * @tc.steps: step2.  test insertValue when previewTextInputting
      */
-    richEditorPattern->InsertValue(PREVIEW_TEXT_VALUE1);
+    richEditorPattern->InsertValue(PREVIEW_TEXT_VALUE1), true);
     EXPECT_EQ(richEditorPattern->spans_.size(), 1);
     auto it = richEditorPattern->spans_.begin();
     EXPECT_EQ((*it)->content, PREVIEW_TEXT_VALUE1);
@@ -6862,7 +6867,7 @@ HWTEST_F(RichEditorTestNg, RichEditorKeyBoardShortCuts202, TestSize.Level1)
     richEditorPattern->textSelector_.Update(4, 20);
     EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 4);
     richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_B);
-    EXPECT_EQ(richEditorController->updateSpanStyle_.updateFontWeight, Ace::FontWeight::BOLD);
+    EXPECT_EQ(richEditorPattern->GetUpdateSpanStyle().updateFontWeight, Ace::FontWeight::BOLD);
 }
 
 /**
@@ -6896,7 +6901,7 @@ HWTEST_F(RichEditorTestNg, RichEditorKeyBoardShortCuts203, TestSize.Level1)
     richEditorPattern->textSelector_.Update(4, 20);
     EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 20);
     richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_I);
-    EXPECT_EQ(richEditorController->updateSpanStyle_.updateItalicFontStyle, OHOS::Ace::FontStyle::ITALIC);
+    EXPECT_EQ(richEditorPattern->GetUpdateSpanStyle().updateItalicFontStyle, OHOS::Ace::FontStyle::ITALIC);
 }
 
 /**
@@ -6929,7 +6934,7 @@ HWTEST_F(RichEditorTestNg, RichEditorKeyBoardShortCuts204, TestSize.Level1)
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->textSelector_.Update(4, 20);
     richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_U);
-    EXPECT_EQ(richEditorController->updateSpanStyle_.updateTextDecoration, TextDecoration::UNDERLINE);
+    EXPECT_EQ(richEditorPattern->GetUpdateSpanStyle().updateTextDecoration, TextDecoration::UNDERLINE);
 }
 
 /**
@@ -6963,5 +6968,92 @@ HWTEST_F(RichEditorTestNg, onDraw001, TestSize.Level1)
 
     //Verify the insertion state symbol magnifying glass
     OnDrawVerify(SelectSpanType::TYPESYMBOLSPAN, INIT_VALUE_1, symbolSpanOptions, localOffset);
+}
+
+/**
+ * @tc.name: StyledString001
+ * @tc.desc: Test the styledString with image.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, StyledString001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create styledString with image
+     */
+    ImageSpanSize size { .width = 50.0_vp, .height = 50.0_vp };
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(2.0_vp);
+    MarginProperty margins;
+    margins.SetEdges(CalcLength(10.0));
+    PaddingProperty paddings;
+    paddings.SetEdges(CalcLength(5.0));
+    ImageSpanAttribute attr { .size = size,
+        .paddingProp = paddings,
+        .marginProp = margins,
+        .borderRadius = borderRadius,
+        .objectFit = ImageFit::COVER,
+        .verticalAlign = VerticalAlign::BOTTOM };
+    ImageSpanOptions imageOption { .image = "src/icon-1.png", .imageAttribute = attr };
+    auto mutableStr = AceType::MakeRefPtr<MutableSpanString>(imageOption);
+    /**
+     * @tc.steps: step2. get richEditor pattern
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    /**
+     * @tc.steps: step3. set styledString
+     */
+    richEditorPattern->SetStyledString(mutableStr);
+    EXPECT_EQ(static_cast<int32_t>(richEditorNode_->GetChildren().size()), 1);
+    auto child = richEditorPattern->GetChildByIndex(0);
+    auto imageNode = AceType::DynamicCast<ImageSpanNode>(child);
+    ASSERT_NE(imageNode, nullptr);
+    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    EXPECT_EQ(imageLayoutProperty->calcLayoutConstraint_->selfIdealSize, size.GetSize());
+    EXPECT_EQ(imageLayoutProperty->GetVerticalAlignValue(), VerticalAlign::BOTTOM);
+    EXPECT_EQ(imageLayoutProperty->GetImageFitValue(), ImageFit::COVER);
+    auto&& padding = imageLayoutProperty->GetPaddingProperty();
+    ASSERT_NE(padding, nullptr);
+    EXPECT_EQ(padding->ToString(), paddings.ToString());
+    auto imageRenderCtx = imageNode->GetRenderContext();
+    ASSERT_NE(imageRenderCtx, nullptr);
+    EXPECT_EQ(imageRenderCtx->GetBorderRadius(), borderRadius);
+}
+
+/**
+ * @tc.name: StyledString002
+ * @tc.desc: Test the styledString with image and text.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, StyledString002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create styledString with image and text
+     */
+    ImageSpanOptions imageOption;
+    auto mutableStr = AceType::MakeRefPtr<MutableSpanString>(imageOption);
+    mutableStr->InsertString(0, "text");
+    /**
+     * @tc.steps: step2. get richEditor pattern
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    /**
+     * @tc.steps: step3. set styledString
+     */
+    richEditorPattern->SetStyledString(mutableStr);
+    EXPECT_EQ(richEditorNode_->GetChildren().size(), 1);
+    EXPECT_EQ(richEditorPattern->spans_.size(), 2);
+    /**
+     * @tc.steps: step5. insert other image
+     */
+    auto imageSpan = AceType::MakeRefPtr<SpanString>(imageOption);
+    mutableStr->AppendSpanString(imageSpan);
+    richEditorPattern->SetStyledString(mutableStr);
+    EXPECT_EQ(richEditorNode_->GetChildren().size(), 2);
+    EXPECT_EQ(richEditorPattern->spans_.size(), 3);
 }
 } // namespace OHOS::Ace::NG

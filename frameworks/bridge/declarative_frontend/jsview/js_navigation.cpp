@@ -142,8 +142,8 @@ void JSNavigation::ParseBarItems(
         }
 
         auto itemSymbolIconObject = itemObject->GetProperty("symbolIcon");
-        if (!itemSymbolIconObject->IsUndefined()) {
-            std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol;
+        if (itemSymbolIconObject->IsObject()) {
+            std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
             SetSymbolOptionApply(info, iconSymbol, itemSymbolIconObject);
             toolBarItem.iconSymbol = iconSymbol;
         }
@@ -181,8 +181,8 @@ void JSNavigation::ParseSymbolAndIcon(const JSCallbackInfo& info, NG::BarItem& t
     std::string icon;
     std::string activeIcon;
     auto itemSymbolIconObject = itemObject->GetProperty("symbolIcon");
-    if (!itemSymbolIconObject->IsUndefined()) {
-        std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol;
+    if (itemSymbolIconObject->IsObject()) {
+        std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
         SetSymbolOptionApply(info, iconSymbol, itemSymbolIconObject);
         toolBarItem.iconSymbol = iconSymbol;
     }
@@ -192,8 +192,8 @@ void JSNavigation::ParseSymbolAndIcon(const JSCallbackInfo& info, NG::BarItem& t
     }
 
     auto itemActiveSymbolIconObject = itemObject->GetProperty("activeSymbolIcon");
-    if (!itemActiveSymbolIconObject->IsUndefined()) {
-        std::function<void(WeakPtr<NG::FrameNode>)> activeSymbol;
+    if (itemActiveSymbolIconObject->IsObject()) {
+        std::function<void(WeakPtr<NG::FrameNode>)> activeSymbol = nullptr;
         SetSymbolOptionApply(info, activeSymbol, itemActiveSymbolIconObject);
         toolBarItem.activeIconSymbol = activeSymbol;
     }
@@ -265,11 +265,13 @@ void JSNavigation::Create(const JSCallbackInfo& info)
         if (!info[0]->IsObject()) {
             return;
         }
-        newObj = JSRef<JSObject>::Cast(info[0]);
-        auto value = newObj->GetProperty("type");
-        if (value->ToString() != "NavPathStack") {
+        // instance of NavPathStack
+        JSValueWrapper valueWrapper = info[0].Get().GetLocalHandle();
+        if (!JSNavPathStack::CheckIsValid(valueWrapper)) {
+            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "current stack is not navPathStack");
             return;
         }
+        newObj = JSRef<JSObject>::Cast(info[0]);
     }
 
     NavigationModel::GetInstance()->Create();
@@ -329,7 +331,9 @@ void JSNavigation::JSBind(BindingTarget globalObj)
     JSClass<JSNavigation>::StaticMethod("backButtonIcon", &JSNavigation::SetBackButtonIcon);
     JSClass<JSNavigation>::StaticMethod("onNavBarStateChange", &JSNavigation::SetOnNavBarStateChange);
     JSClass<JSNavigation>::StaticMethod("navDestination", &JSNavigation::SetNavDestination);
+    JSClass<JSNavigation>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSNavigation>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSNavigation>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSNavigation>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSNavigation>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSNavigation>::StaticMethod("customNavContentTransition", &JSNavigation::SetCustomNavContentTransition);
@@ -440,26 +444,31 @@ void JSNavigation::SetBackButtonIcon(const JSCallbackInfo& info)
     }
     std::string src;
     auto noPixMap = ParseJsMedia(info[0], src);
-
+    auto isValidImage = false;
     RefPtr<PixelMap> pixMap = nullptr;
 #if defined(PIXEL_MAP_SUPPORTED)
     if (!noPixMap) {
         pixMap = CreatePixelMapFromNapiValue(info[0]);
     }
 #endif
+    if (noPixMap || pixMap != nullptr) {
+        isValidImage = true;
+    }
     std::vector<std::string> nameList;
+    NG::ImageOption imageOption;
     std::string bundleName;
     std::string moduleName;
     GetJsMediaBundleInfo(info[0], bundleName, moduleName);
     nameList.emplace_back(bundleName);
     nameList.emplace_back(moduleName);
-
-    std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol;
-    if (src.empty() && pixMap == nullptr) {
+    imageOption.noPixMap = noPixMap;
+    imageOption.isValidImage = isValidImage;
+    std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
+    auto isSymbol = info[0]->IsObject() && src.empty() && pixMap == nullptr;
+    if (isSymbol) {
         SetSymbolOptionApply(info, iconSymbol, info[0]);
     }
-
-    NavigationModel::GetInstance()->SetBackButtonIcon(iconSymbol, src, noPixMap, pixMap, nameList);
+    NavigationModel::GetInstance()->SetBackButtonIcon(iconSymbol, src, imageOption, pixMap, nameList);
 }
 
 void JSNavigation::SetHideBackButton(bool hide)

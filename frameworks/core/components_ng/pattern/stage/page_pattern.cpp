@@ -416,6 +416,7 @@ bool PagePattern::AvoidKeyboard() const
 bool PagePattern::RemoveOverlay()
 {
     CHECK_NULL_RETURN(overlayManager_, false);
+    CHECK_NULL_RETURN(!overlayManager_->IsModalEmpty(), false);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto taskExecutor = pipeline->GetTaskExecutor();

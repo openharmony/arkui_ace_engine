@@ -139,6 +139,11 @@ void PanRecognizer::OnAccepted()
     ReportSlideOn();
     SendCallbackMsg(onActionStart_);
     SendCallbackMsg(onActionUpdate_);
+    // if gesture is blocked by double click, recognizer will receive up before onAccepted
+    // in this case, recognizer need to send onActionEnd when onAccepted
+    if (isTouchEventFinished_) {
+        SendCallbackMsg(onActionEnd_);
+    }
 }
 
 void PanRecognizer::OnRejected()
@@ -179,6 +184,7 @@ void PanRecognizer::UpdateAxisPointInVelocityTracker(const AxisEvent& event, boo
 
 void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
+    isTouchEventFinished_ = false;
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
@@ -231,6 +237,7 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 {
+    isTouchEventFinished_ = false;
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
@@ -319,11 +326,13 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     // Clear All fingers' velocity when fingersId is empty.
     if (fingersId_.empty()) {
         panVelocity_.ResetAll();
+        isTouchEventFinished_ = true;
     }
 }
 
 void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 {
+    isTouchEventFinished_ = false;
     TAG_LOGI(AceLogTag::ACE_GESTURE, "InputTracking id:%{public}d, pan recognizer receives axis end event",
         event.touchEventId);
     // if axisEvent received rotateEvent, no need to active Pan recognizer.
@@ -351,6 +360,7 @@ void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 
 void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
+    isTouchEventFinished_ = false;
     if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
         return;
     }
@@ -415,6 +425,7 @@ void PanRecognizer::OnFlushTouchEventsEnd()
 
 void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 {
+    isTouchEventFinished_ = false;
     if (fingers_ != AXIS_PAN_FINGERS || event.isRotationEvent) {
         return;
     }
@@ -506,6 +517,7 @@ void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 
 void PanRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
 {
+    isTouchEventFinished_ = false;
     TAG_LOGI(AceLogTag::ACE_GESTURE, "InputTracking id:%{public}d, pan recognizer receives axis cancel event",
         event.touchEventId);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
@@ -602,6 +614,8 @@ Offset PanRecognizer::GetRawGlobalLocation(int32_t postEventNodeId)
             rawLastPoint, GetAttachedNode(), false, isPostEventResult_, postEventNodeId);
         return Offset(rawLastPoint.GetX(), rawLastPoint.GetY());
     }
+    NGGestureRecognizer::Transform(
+        localPoint, GetAttachedNode(), false, isPostEventResult_, postEventNodeId);
     return Offset(localPoint.GetX(), localPoint.GetY());
 }
 
@@ -663,6 +677,7 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
             info.SetTiltY(lastTouchEvent_.tiltY.value());
         }
         info.SetPointerEvent(lastPointEvent_);
+        info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         callbackFunction(info);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -294,6 +294,11 @@ public:
         nodeId_ = nodeId;
     }
 
+    void SetNodeTag(const std::string& nodeTag)
+    {
+        nodeTag_ = nodeTag;
+    }
+
     void ProcessScrollOverCallback(double velocity);
 
     void SetSlipFactor(double SlipFactor);
@@ -425,6 +430,11 @@ public:
         maxFlingVelocity_ = max * density;
     }
 
+    double GetMaxFlingVelocity() const
+    {
+        return maxFlingVelocity_;
+    }
+
     void StopFrictionAnimation();
     void StopSpringAnimation();
     void StopSnapAnimation();
@@ -432,6 +442,12 @@ public:
     RefPtr<NodeAnimatablePropertyFloat> GetFrictionProperty();
     RefPtr<NodeAnimatablePropertyFloat> GetSpringProperty();
     RefPtr<NodeAnimatablePropertyFloat> GetSnapProperty();
+
+    Axis GetPanDirection() const
+    {
+        CHECK_NULL_RETURN(panRecognizerNG_, Axis::NONE);
+        return panRecognizerNG_->GetAxisDirection();
+    }
 
 private:
     bool UpdateScrollPosition(double offset, int32_t source) const;
@@ -487,7 +503,10 @@ private:
     bool needCenterFix_ = false;
     bool isDragUpdateStop_ = false;
     bool isFadingAway_ = false;
+    // The accessibilityId of UINode
     int32_t nodeId_ = 0;
+    // The tag of UINode
+    std::string nodeTag_ = "Scrollable";
     double slipFactor_ = 0.0;
     static std::optional<double> sFriction_;
     static std::optional<double> sVelocityScale_;

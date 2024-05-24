@@ -115,6 +115,15 @@ public:
     {
         return localColorMode_;
     }
+    bool IsFromReset()
+    {
+        return isFromReset_;
+    }
+    void SetIsFromReset(bool isFromReset)
+    {
+        isFromReset_ = isFromReset;
+    }
+    const std::string GetColorModeToString();
 
 private:
     SrcType ResolveSrcType() const;
@@ -134,6 +143,7 @@ private:
     bool needCache_ = true;
     bool isConfigurationChange_ = false;
     bool isUriPureNumber_ = false;
+    bool isFromReset_ = false;
     [[deprecated("in NG")]]
     std::optional<Color> fillColor_;
 

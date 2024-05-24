@@ -125,6 +125,7 @@ public:
             theme->focusBoxGlow_ = static_cast<bool>(buttonPattern->GetAttr<double>("button_focus_effect_type", 0.0));
             theme->defaultLightIlliminated_ =
                 static_cast<uint32_t>(buttonPattern->GetAttr<double>("button_default_light_illiminated", 0.0));
+            theme->normalBackgroundFocus_ = buttonPattern->GetAttr<Color>("normal_button_focus_bgcolor", Color());
             ParseSubStylePattern(buttonPattern, theme);
         }
 
@@ -415,7 +416,7 @@ public:
     {
         auto roleResult = textColorByRoleMap_.find(buttonRole);
         auto result = focusTextColorMap_.find(buttonStyle);
-        if (roleResult == textColorByRoleMap_.end() && result == focusTextColorMap_.end()) {
+        if (roleResult == textColorByRoleMap_.end() || result == focusTextColorMap_.end()) {
             return normalTextColor_;
         }
         if (buttonRole == ButtonRole::ERROR) {
@@ -483,6 +484,10 @@ public:
     {
         return focusBoxGlow_;
     }
+    const Color& GetNormalBackgroundFocus() const
+    {
+        return normalBackgroundFocus_;
+    }
 
 protected:
     ButtonTheme() = default;
@@ -508,6 +513,7 @@ private:
     Color borderColorSmall_;
     Color textBackgroundFocus_;
     Color focusBorderColor_;
+    Color normalBackgroundFocus_;
     TextStyle textStyle_;
     Edge padding_;
     Edge minCircleButtonPadding_;

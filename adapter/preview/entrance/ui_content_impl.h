@@ -60,13 +60,12 @@ public:
     void Destroy() override;
     void OnNewWant(const OHOS::AAFwk::Want& want) override {}
 
-    // distribute
-    
+    // restore
     UIContentErrorCode Restore(OHOS::Rosen::Window* window, const std::string& contentInfo,
-        napi_value storage) override {
+        napi_value storage, ContentInfoType type) override {
         return UIContentErrorCode::NO_ERRORS;
     }
-    std::string GetContentInfo() const override;
+    std::string GetContentInfo(ContentInfoType type) const override;
     void DestroyUIDirector() override;
 
     // UI content event process
@@ -182,6 +181,8 @@ private:
     // ITouchOutsideListener is used for touching out of hot areas of window.
     OHOS::sptr<OHOS::Rosen::ITouchOutsideListener> touchOutsideListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::IWindowDragListener> dragWindowListener_ = nullptr;
+    OHOS::sptr<OHOS::Rosen::IAvoidAreaChangedListener> avoidAreaChangedListener_ = nullptr;
+    OHOS::sptr<OHOS::Rosen::IIgnoreViewSafeAreaListener> ignoreViewSafeAreaListener_ = nullptr;
     // ArkTS Form
     bool isFormRender_ = false;
 };

@@ -179,7 +179,6 @@ protected:
         const auto firstOffset = colorStops_.front().offset;
         const auto lastOffset = colorStops_.back().offset;
         const float span = std::min(std::max(lastOffset - firstOffset, 0.0f), std::numeric_limits<float>::max());
-
         if (NearZero(span)) {
             return;
         }

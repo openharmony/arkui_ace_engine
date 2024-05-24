@@ -21,23 +21,8 @@ namespace {} // namespace
 
 class GridScrollerTestNg : public GridTestNg {
 public:
-    void CreateWithNoProxy(const std::function<void(GridModelNG)>& callback = nullptr);
     AssertionResult ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, float expectOffset);
 };
-
-void GridScrollerTestNg::CreateWithNoProxy(const std::function<void(GridModelNG)>& callback)
-{
-    GridModelNG model;
-    RefPtr<ScrollControllerBase> positionController = model.CreatePositionController();
-    model.Create(positionController, nullptr);
-    ViewAbstract::SetWidth(CalcLength(GRID_WIDTH));
-    ViewAbstract::SetHeight(CalcLength(GRID_HEIGHT));
-    if (callback) {
-        callback(model);
-    }
-    GetInstance();
-    FlushLayoutTask(frameNode_);
-}
 
 AssertionResult GridScrollerTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, float expectOffset)
 {
@@ -67,10 +52,10 @@ HWTEST_F(GridScrollerTestNg, ScrollToIndex001, TestSize.Level1)
      * @tc.cases: Grid at top, ScrollTo index:0, text each ScrollAlign
      * @tc.expected: Each test grid does not scroll
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     EXPECT_TRUE(pattern_->IsAtTop());
     int32_t index = 0;
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, 0.f));
@@ -90,10 +75,10 @@ HWTEST_F(GridScrollerTestNg, ScrollToIndex002, TestSize.Level1)
      * @tc.cases: Grid at top, ScrollTo index:4, index:4 item is in the view, text each ScrollAlign
      * @tc.expected: Each test scroll the correct distance
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateFixedItem(15);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(15);
+    CreateDone(frameNode_);
     int32_t index = 4;
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, ITEM_HEIGHT * 2));
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, ITEM_HEIGHT * 0.5));
@@ -112,10 +97,10 @@ HWTEST_F(GridScrollerTestNg, ScrollToIndex003, TestSize.Level1)
      * @tc.cases: Grid at top, ScrollTo index:8, index:8 item is below the view, text each ScrollAlign
      * @tc.expected: Each test scroll the correct distance
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateFixedItem(20);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(20);
+    CreateDone(frameNode_);
     int32_t index = 8;
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, ITEM_HEIGHT * 4));
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, ITEM_HEIGHT * 2.5));
@@ -134,10 +119,10 @@ HWTEST_F(GridScrollerTestNg, ScrollToIndex004, TestSize.Level1)
      * @tc.cases: Grid at top, ScrollTo index:LAST_ITEM, index:LAST_ITEM item is below the view, text each ScrollAlign
      * @tc.expected: Each test scroll the correct distance
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateFixedItem(20);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(20);
+    CreateDone(frameNode_);
     int32_t index = LAST_ITEM;
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, ITEM_HEIGHT * 6));
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, ITEM_HEIGHT * 6));
@@ -157,10 +142,10 @@ HWTEST_F(GridScrollerTestNg, ScrollToIndex005, TestSize.Level1)
      *            text each ScrollAlign
      * @tc.expected: Each test scroll the correct distance
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateFixedItem(20);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(20);
+    CreateDone(frameNode_);
     pattern_->ScrollTo(ITEM_HEIGHT * 4);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT * 4);
@@ -185,10 +170,10 @@ HWTEST_F(GridScrollerTestNg, ScrollToIndex006, TestSize.Level1)
      * @tc.cases: Grid at bottom, ScrollTo index:LAST_ITEM, index:LAST_ITEM item is in the view, text each ScrollAlign
      * @tc.expected: Each test scroll the correct distance
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateFixedItem(20);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(20);
+    CreateDone(frameNode_);
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT * 6);
@@ -211,10 +196,10 @@ HWTEST_F(GridScrollerTestNg, ScrollToIndex007, TestSize.Level1)
      * @tc.cases: ScrollTo invalid index:-2, text each ScrollAlign
      * @tc.expected: Each test scroll the correct distance
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateFixedItem(12);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(12);
+    CreateDone(frameNode_);
     int32_t index = -2;
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, 0));
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, 0));
@@ -229,10 +214,10 @@ HWTEST_F(GridScrollerTestNg, ScrollToIndex007, TestSize.Level1)
  */
 HWTEST_F(GridScrollerTestNg, ScrollToIndex008, TestSize.Level1)
 {
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateFixedItem(16);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(16);
+    CreateDone(frameNode_);
     /**
      * @tc.steps: step1. Call ScrollToIndex()
      * @tc.expected: pattern_->targetIndex.value() is 15.
@@ -254,12 +239,12 @@ HWTEST_F(GridScrollerTestNg, ScrollToIndex009, TestSize.Level1)
      * @tc.cases: Set gap, ScrollTo index:8, text each ScrollAlign
      * @tc.expected: Each test scroll the correct distance
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        model.SetColumnsGap(Dimension(COL_GAP));
-        model.SetRowsGap(Dimension(ROW_GAP));
-        CreateFixedItem(20);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetColumnsGap(Dimension(COL_GAP));
+    model.SetRowsGap(Dimension(ROW_GAP));
+    CreateFixedItems(20);
+    CreateDone(frameNode_);
     int32_t index = 8;
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, ITEM_HEIGHT * 4 + ROW_GAP * 4));
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, ITEM_HEIGHT * 2.5 + ROW_GAP * 4));
@@ -280,13 +265,13 @@ HWTEST_F(GridScrollerTestNg, ScrollToIndex010, TestSize.Level1)
      */
     GridLayoutOptions option;
     option.irregularIndexes = { 6, 1, 3, 4, 5, 0 };
-    Create([option](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        model.SetLayoutOptions(option);
-        model.SetColumnsGap(Dimension(COL_GAP));
-        model.SetRowsGap(Dimension(ROW_GAP));
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetLayoutOptions(option);
+    model.SetColumnsGap(Dimension(COL_GAP));
+    model.SetRowsGap(Dimension(ROW_GAP));
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     int32_t index = 5;
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, ITEM_HEIGHT * 4 + ROW_GAP * 7));
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, ITEM_HEIGHT * 3.5 + ROW_GAP * 5));
@@ -316,13 +301,13 @@ HWTEST_F(GridScrollerTestNg, DISABLED_ScrollToIndex011, TestSize.Level1)
         return GridItemSize { 1, 4 };
     };
     option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
-    Create([option](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        model.SetLayoutOptions(option);
-        model.SetColumnsGap(Dimension(COL_GAP));
-        model.SetRowsGap(Dimension(ROW_GAP));
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetLayoutOptions(option);
+    model.SetColumnsGap(Dimension(COL_GAP));
+    model.SetRowsGap(Dimension(ROW_GAP));
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     int32_t index = 5;
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, ITEM_HEIGHT * 4 + ROW_GAP * 3));
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, ITEM_HEIGHT * 5.5 + ROW_GAP * 4));
@@ -341,11 +326,11 @@ HWTEST_F(GridScrollerTestNg, ScrollToIndex012, TestSize.Level1)
      * @tc.cases: Set BIG_ROW_GAP, ScrollTo index:10, text ScrollAlign::AUTO
      * @tc.expected: Each test scroll the correct distance
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        model.SetRowsGap(Dimension(BIG_ROW_GAP));
-        CreateFixedItem(15);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetRowsGap(Dimension(BIG_ROW_GAP));
+    CreateFixedItems(15);
+    CreateDone(frameNode_);
     int32_t index = 5;
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, ITEM_HEIGHT * 3 + BIG_ROW_GAP * 2 - GRID_HEIGHT));
     /**
@@ -369,11 +354,11 @@ HWTEST_F(GridScrollerTestNg, ScrollToIndex013, TestSize.Level1)
      * @tc.cases: Set BIG_ROW_GAP, ScrollTo index:11, text each ScrollAlign::CENTER
      * @tc.expected: Each test scroll the correct distance
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        model.SetRowsGap(Dimension(BIG_ROW_GAP));
-        CreateFixedItem(15);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetRowsGap(Dimension(BIG_ROW_GAP));
+    CreateFixedItems(15);
+    CreateDone(frameNode_);
     int32_t index = 5;
     auto enddPosition = ITEM_HEIGHT * 3 + BIG_ROW_GAP * 2 - GRID_HEIGHT;
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, enddPosition + (GRID_HEIGHT - ITEM_HEIGHT) / 2));
@@ -390,11 +375,11 @@ HWTEST_F(GridScrollerTestNg, ScrollToIndex014, TestSize.Level1)
      * @tc.cases: Set MEDIUM_ROW_GAP and scroll to specified position, ScrollTo index:12, text each ScrollAlign::AUTO
      * @tc.expected: Each test scroll the correct distance
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        model.SetRowsGap(Dimension(MEDIUM_ROW_GAP));
-        CreateFixedItem(15);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetRowsGap(Dimension(MEDIUM_ROW_GAP));
+    CreateFixedItems(15);
+    CreateDone(frameNode_);
     auto position = ITEM_HEIGHT + 5 * COL_GAP;
     pattern_->ScrollTo(position);
     FlushLayoutTask(frameNode_);
@@ -413,10 +398,10 @@ HWTEST_F(GridScrollerTestNg, ScrollTo001, TestSize.Level1)
      * @tc.cases: UnScrollable grid
      * @tc.expected: Unroll
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr");
-        CreateFixedItem(4);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr");
+    CreateFixedItems(4);
+    CreateDone(frameNode_);
     pattern_->ScrollTo(ITEM_HEIGHT);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
 }
@@ -432,10 +417,10 @@ HWTEST_F(GridScrollerTestNg, ScrollTo002, TestSize.Level1)
      * @tc.cases: Scrollable grid
      * @tc.expected: Rolled
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr");
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     pattern_->ScrollTo(ITEM_HEIGHT);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, -ITEM_HEIGHT);
 }
@@ -451,10 +436,10 @@ HWTEST_F(GridScrollerTestNg, ScrollTo003, TestSize.Level1)
      * @tc.cases: Scrollable grid, scroll position greater than GRID_HEIGHT
      * @tc.expected: Rolled
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr");
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     pattern_->ScrollTo(ITEM_HEIGHT * 5);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, -ITEM_HEIGHT * 5);
 }
@@ -470,11 +455,11 @@ HWTEST_F(GridScrollerTestNg, ScrollTo004, TestSize.Level1)
      * @tc.cases: When isConfigScrollable_ is false
      * @tc.expected: Can not roll
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr");
-        model.SetRowsTemplate("1fr");
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr");
+    model.SetRowsTemplate("1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     EXPECT_FALSE(pattern_->isConfigScrollable_);
 
     pattern_->ScrollTo(ITEM_HEIGHT * 5);
@@ -492,10 +477,10 @@ HWTEST_F(GridScrollerTestNg, AnimateTo001, TestSize.Level1)
      * @tc.cases: UnScrollable grid
      * @tc.expected: Unroll
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr");
-        CreateFixedItem(4);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr");
+    CreateFixedItems(4);
+    CreateDone(frameNode_);
     pattern_->AnimateTo(ITEM_HEIGHT, 200.f, Curves::LINEAR, true);
     float endValue = pattern_->GetFinalPosition();
     pattern_->UpdateCurrentOffset(pattern_->GetTotalOffset() - endValue, SCROLL_FROM_ANIMATION_CONTROLLER);
@@ -514,10 +499,10 @@ HWTEST_F(GridScrollerTestNg, AnimateTo002, TestSize.Level1)
      * @tc.expected: Rolled
      */
     // smooth is true
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr");
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     pattern_->AnimateTo(ITEM_HEIGHT, 200.f, Curves::LINEAR, true);
     float endValue = pattern_->GetFinalPosition();
     pattern_->UpdateCurrentOffset(pattern_->GetTotalOffset() - endValue, SCROLL_FROM_ANIMATION_CONTROLLER);
@@ -536,10 +521,10 @@ HWTEST_F(GridScrollerTestNg, AnimateTo003, TestSize.Level1)
      * @tc.expected: Rolled
      */
     // smooth is true
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr");
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     pattern_->AnimateTo(ITEM_HEIGHT * 9, 200.f, Curves::LINEAR, true);
     float endValue = pattern_->GetFinalPosition();
     pattern_->UpdateCurrentOffset(pattern_->GetTotalOffset() - endValue, SCROLL_FROM_ANIMATION_CONTROLLER);
@@ -559,12 +544,12 @@ HWTEST_F(GridScrollerTestNg, AnimateTo004, TestSize.Level1)
      */
     bool isTrigger = false;
     auto onScrollStart = [&isTrigger]() { isTrigger = true; };
-    Create([=](GridModelNG model) {
-        model.SetColumnsTemplate("1fr");
-        model.SetOnScrollStart(onScrollStart);
-        model.SetScrollBarMode(DisplayMode::ON);
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr");
+    model.SetOnScrollStart(onScrollStart);
+    model.SetScrollBarMode(DisplayMode::ON);
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     pattern_->AnimateTo(ITEM_HEIGHT, 200.f, Curves::LINEAR, true);
     EXPECT_TRUE(isTrigger);
 
@@ -593,11 +578,11 @@ HWTEST_F(GridScrollerTestNg, AnimateTo005, TestSize.Level1)
      * @tc.cases: When isConfigScrollable_ is false
      * @tc.expected: Can not roll
      */
-    Create([=](GridModelNG model) {
-        model.SetColumnsTemplate("1fr");
-        model.SetRowsTemplate("1fr");
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr");
+    model.SetRowsTemplate("1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     EXPECT_FALSE(pattern_->isConfigScrollable_);
 
     pattern_->AnimateTo(ITEM_HEIGHT, 200.f, Curves::LINEAR, true);
@@ -617,7 +602,9 @@ HWTEST_F(GridScrollerTestNg, PositionController001, TestSize.Level1)
      * @tc.steps: step1. Unscrollable
      * @tc.expected: jumpIndex_ not change
      */
-    Create([](GridModelNG model) { CreateFixedItem(14); });
+    GridModelNG model = CreateGrid();
+    CreateFixedItems(14);
+    CreateDone(frameNode_);
     EXPECT_FALSE(pattern_->isConfigScrollable_);
     auto controller = pattern_->positionController_;
     controller->JumpTo(1, false, ScrollAlign::START, 3);
@@ -628,10 +615,11 @@ HWTEST_F(GridScrollerTestNg, PositionController001, TestSize.Level1)
      * @tc.steps: step2. Test JumpTo func.
      * @tc.expected: Verify return value.
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateFixedItem(10);
-    });
+    ClearOldNodes();
+    model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     controller = pattern_->positionController_;
     controller->JumpTo(1, false, ScrollAlign::START, 3);
     FlushLayoutTask(frameNode_);
@@ -643,10 +631,11 @@ HWTEST_F(GridScrollerTestNg, PositionController001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
 
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateFixedItem(10);
-    });
+    ClearOldNodes();
+    model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     controller = pattern_->positionController_;
     controller->JumpTo(1, false, ScrollAlign::CENTER, 3);
     FlushLayoutTask(frameNode_);
@@ -658,10 +647,11 @@ HWTEST_F(GridScrollerTestNg, PositionController001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, -100.f);
 
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateFixedItem(10);
-    });
+    ClearOldNodes();
+    model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     controller = pattern_->positionController_;
     controller->JumpTo(1, false, ScrollAlign::END, 3);
     FlushLayoutTask(frameNode_);
@@ -673,10 +663,11 @@ HWTEST_F(GridScrollerTestNg, PositionController001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
 
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateFixedItem(10);
-    });
+    ClearOldNodes();
+    model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     controller = pattern_->positionController_;
     controller->JumpTo(1, false, ScrollAlign::AUTO, 3);
     FlushLayoutTask(frameNode_);
@@ -688,10 +679,11 @@ HWTEST_F(GridScrollerTestNg, PositionController001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
 
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateFixedItem(10);
-    });
+    ClearOldNodes();
+    model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     controller = pattern_->positionController_;
     controller->JumpTo(1, false, ScrollAlign::NONE, 3);
     FlushLayoutTask(frameNode_);
@@ -715,10 +707,10 @@ HWTEST_F(GridScrollerTestNg, PositionController002, TestSize.Level1)
      * @tc.steps: step2. Test AnimateTo func.
      * @tc.expected: Verify return value.
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     auto controller = pattern_->positionController_;
     controller->AnimateTo(Dimension(100.f, DimensionUnit::PX), 200.f, Curves::LINEAR, false);
     ASSERT_NE(pattern_->curveAnimation_, nullptr);
@@ -782,10 +774,10 @@ HWTEST_F(GridScrollerTestNg, PositionController003, TestSize.Level1)
     /**
      * @tc.steps: step1. Change Grid width to 300.
      */
-    Create([](GridModelNG model) {
-        model.SetRowsTemplate("1fr 1fr");
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetRowsTemplate("1fr 1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     FlushLayoutTask(frameNode_);
 
     /**
@@ -831,10 +823,10 @@ HWTEST_F(GridScrollerTestNg, PositionController004, TestSize.Level1)
      * @tc.steps: step1. Supplement ScrollPage, GetCurrentOffset branch,
      * has no condition that axis_ is Axis::NONE.
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     pattern_->SetAxis(Axis::NONE);
     auto controller = pattern_->positionController_;
     controller->ScrollPage(true, false);
@@ -853,11 +845,11 @@ HWTEST_F(GridScrollerTestNg, PositionController005, TestSize.Level1)
      * @tc.cases: When isConfigScrollable_ is false
      * @tc.expected: Can not roll
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        model.SetRowsTemplate("1fr 1fr");
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetRowsTemplate("1fr 1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     EXPECT_FALSE(pattern_->isConfigScrollable_);
 
     auto controller = pattern_->positionController_;
@@ -877,10 +869,10 @@ constexpr int32_t TIME_CHANGED_COUNTS = 20;
  */
 HWTEST_F(GridScrollerTestNg, PositionController006, TestSize.Level1)
 {
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     auto controller = pattern_->positionController_;
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_LEFT, SCROLL_FIXED_VELOCITY);
     EXPECT_FALSE(pattern_->fixedVelocityMotion_);
@@ -908,6 +900,367 @@ HWTEST_F(GridScrollerTestNg, PositionController006, TestSize.Level1)
     EXPECT_TRUE(pattern_->IsAtTop());
 }
 
+namespace {
+constexpr float SCROLL_FIXED_VELOCITY_007 = 100.f;
+constexpr float OFFSET_TIME_007 = 100.f;
+constexpr int32_t TIME_CHANGED_COUNTS_007 = 20;
+} // namespace
+/**
+ * @tc.name: PositionController007
+ * @tc.desc: Test positionController func in VERTICAL Grid
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, PositionController007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Grid Item
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step2. Scroll to the left edge
+     * expected: Fixed Verify is is 0.
+     */
+    auto controller = pattern_->positionController_;
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_LEFT, SCROLL_FIXED_VELOCITY_007);
+    EXPECT_FALSE(pattern_->fixedVelocityMotion_);
+
+    /**
+     * @tc.steps: step3. Scroll to the right edge
+     * expected: Fixed Verify is is 0.
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_RIGHT, SCROLL_FIXED_VELOCITY_007);
+    EXPECT_FALSE(pattern_->fixedVelocityMotion_);
+
+    /**
+     * @tc.steps: step4. Scroll to the bottom edge
+     * expected: 1.Fixed Verify is is non-zero.
+     *           2.The current Velocity is equal to the set fixed velocity
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, SCROLL_FIXED_VELOCITY_007);
+    EXPECT_TRUE(pattern_->fixedVelocityMotion_);
+    EXPECT_EQ(pattern_->fixedVelocityMotion_->GetCurrentVelocity(), -SCROLL_FIXED_VELOCITY_007);
+
+    /**
+     * @tc.steps: step5. 1. Set offset time
+     *                   2. Set changed count
+     *                   3. Flush layout
+     * expected: Scroll to the bottom edge
+     */
+    int32_t offsetTime = OFFSET_TIME_007;
+    for (int i = 0; i < TIME_CHANGED_COUNTS_007; i++) {
+        pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
+        offsetTime = offsetTime + OFFSET_TIME_007;
+        FlushLayoutTask(frameNode_);
+    }
+    EXPECT_TRUE(pattern_->IsAtBottom());
+
+    /**
+     * @tc.steps: step6. Scroll to the top edge
+     * expected: 1.Fixed Verify is is non-zero.
+     *           2.The current Velocity is equal to the set fixed velocity
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, SCROLL_FIXED_VELOCITY_007);
+    EXPECT_TRUE(pattern_->fixedVelocityMotion_);
+    EXPECT_EQ(pattern_->fixedVelocityMotion_->GetCurrentVelocity(), SCROLL_FIXED_VELOCITY_007);
+
+    /**
+     * @tc.steps: step7. 1. Set offset time
+     *                   2. Set changed count
+     *                   3. Flush layout
+     * expected: Scroll to the top edge
+     */
+    offsetTime = OFFSET_TIME_007;
+    for (int i = 0; i < TIME_CHANGED_COUNTS_007; i++) {
+        pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
+        offsetTime = offsetTime + OFFSET_TIME_007;
+        FlushLayoutTask(frameNode_);
+    }
+    EXPECT_TRUE(pattern_->IsAtTop());
+
+    /**
+     * @tc.steps: step8. Test GetScrollDirection func.
+     * @tc.expected: The scrolling direction is landscape
+     */
+    EXPECT_EQ(controller->GetScrollDirection(), Axis::VERTICAL);
+}
+
+namespace {
+constexpr float SCROLL_FIXED_VELOCITY_008 = 300.f;
+constexpr float OFFSET_TIME_008 = 100.f;
+constexpr int32_t TIME_CHANGED_COUNTS_008 = 20;
+} // namespace
+/**
+ * @tc.name: PositionController008
+ * @tc.desc: Test positionController func with AnimateTo
+ */
+HWTEST_F(GridScrollerTestNg, PositionController008, TestSize.Level1)
+{
+    bool isTrigger = false;
+    /**
+     * @tc.steps: step1. Create Grid Item
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step2. Scroll to the left edge
+     * expected: Fixed Verify is is 0.
+     */
+    auto controller = pattern_->positionController_;
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_LEFT, SCROLL_FIXED_VELOCITY_008);
+    EXPECT_FALSE(pattern_->fixedVelocityMotion_);
+
+    /**
+     * @tc.steps: step3. Scroll to the right edge
+     * expected: Fixed Verify is is 0.
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_RIGHT, SCROLL_FIXED_VELOCITY_008);
+    EXPECT_FALSE(pattern_->fixedVelocityMotion_);
+
+    /**
+     * @tc.steps: step4. Scroll to the bottom edge
+     * expected: 1.Fixed Verify is is non-zero.
+     *           2.The current Velocity is equal to the set fixed velocity
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, SCROLL_FIXED_VELOCITY_008);
+    EXPECT_TRUE(pattern_->fixedVelocityMotion_);
+    EXPECT_EQ(pattern_->fixedVelocityMotion_->GetCurrentVelocity(), -SCROLL_FIXED_VELOCITY_008);
+
+    /**
+     * @tc.steps: step5. 1. Set offset time
+     *                   2. Set changed count
+     *                   3. Flush layout
+     * expected: Scroll to the bottom edge
+     */
+    int32_t offsetTime = OFFSET_TIME_008;
+    for (int i = 0; i < TIME_CHANGED_COUNTS_008; i++) {
+        pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
+        offsetTime = offsetTime + OFFSET_TIME_008;
+        FlushLayoutTask(frameNode_);
+    }
+    EXPECT_TRUE(pattern_->IsAtBottom());
+
+    /**
+     * @tc.steps: step6. Scroll to the top edge
+     * expected: 1.Fixed Verify is is non-zero.
+     *           2.The current Velocity is equal to the set fixed velocity
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, SCROLL_FIXED_VELOCITY_008);
+    EXPECT_TRUE(pattern_->fixedVelocityMotion_);
+    EXPECT_EQ(pattern_->fixedVelocityMotion_->GetCurrentVelocity(), SCROLL_FIXED_VELOCITY_008);
+
+    /**
+     * @tc.steps: step7. 1. Set offset time
+     *                   2. Set changed count
+     *                   3. Flush layout
+     * expected: Scroll to the top edge
+     */
+    offsetTime = OFFSET_TIME_008;
+    for (int i = 0; i < TIME_CHANGED_COUNTS_008; i++) {
+        pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
+        offsetTime = offsetTime + OFFSET_TIME_008;
+        FlushLayoutTask(frameNode_);
+    }
+    EXPECT_TRUE(pattern_->IsAtTop());
+
+    /**
+     * @tc.steps: step8. When Animation is running, call AnimateTo
+     * @tc.expected: onScrollStart event will not be triggered
+     */
+    isTrigger = false;             // reset val
+    pattern_->scrollAbort_ = true; // set running
+    pattern_->AnimateTo(ITEM_HEIGHT * 2, 200.f, Curves::LINEAR, true);
+    EXPECT_FALSE(isTrigger);
+}
+
+namespace {
+constexpr float SCROLL_FIXED_VELOCITY_009 = 400.f;
+constexpr float OFFSET_TIME_009 = 100.f;
+constexpr int32_t TIME_CHANGED_COUNTS_009 = 20;
+} // namespace
+/**
+ * @tc.name: PositionController009
+ * @tc.desc: Test positionController with AnimateTo
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, PositionController009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Grid Item
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step2. Scroll to the left edge
+     * expected: Fixed Verify is is 0.
+     */
+    auto controller = pattern_->positionController_;
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_LEFT, SCROLL_FIXED_VELOCITY_009);
+    EXPECT_FALSE(pattern_->fixedVelocityMotion_);
+
+    /**
+     * @tc.steps: step3. Scroll to the right edge
+     * expected: Fixed Verify is is 0.
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_RIGHT, SCROLL_FIXED_VELOCITY_009);
+    EXPECT_FALSE(pattern_->fixedVelocityMotion_);
+    
+    /**
+     * @tc.steps: step4. Scroll to the bottom edge
+     * expected: 1.Fixed Verify is is non-zero.
+     *           2.The current Velocity is equal to the set fixed velocity
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, SCROLL_FIXED_VELOCITY_009);
+    EXPECT_TRUE(pattern_->fixedVelocityMotion_);
+    EXPECT_EQ(pattern_->fixedVelocityMotion_->GetCurrentVelocity(), -SCROLL_FIXED_VELOCITY_009);
+
+    /**
+     * @tc.steps: step5. 1. Set offset time
+     *                   2. Set changed count
+     *                   3. Flush layout
+     * expected: Scroll to the bottom edge
+     */
+    int32_t offsetTime = OFFSET_TIME_009;
+    for (int i = 0; i < TIME_CHANGED_COUNTS_009; i++) {
+        pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
+        offsetTime = offsetTime + OFFSET_TIME_009;
+        FlushLayoutTask(frameNode_);
+    }
+    EXPECT_TRUE(pattern_->IsAtBottom());
+
+    /**
+     * @tc.steps: step6. Scroll to the top edge
+     * expected: 1.Fixed Verify is is non-zero.
+     *           2.The current Velocity is equal to the set fixed velocity
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, SCROLL_FIXED_VELOCITY_009);
+    EXPECT_TRUE(pattern_->fixedVelocityMotion_);
+    EXPECT_EQ(pattern_->fixedVelocityMotion_->GetCurrentVelocity(), SCROLL_FIXED_VELOCITY_009);
+
+    /**
+     * @tc.steps: step7. 1. Set offset time
+     *                   2. Set changed count
+     *                   3. Flush layout
+     * expected: Scroll to the top edge
+     */
+    offsetTime = OFFSET_TIME_009;
+    for (int i = 0; i < TIME_CHANGED_COUNTS_009; i++) {
+        pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
+        offsetTime = offsetTime + OFFSET_TIME_009;
+        FlushLayoutTask(frameNode_);
+    }
+    EXPECT_TRUE(pattern_->IsAtTop());
+
+    /**
+     * @tc.steps: step8. Test AnimateTo function
+     * @tc.expected: pattern_->isAnimationStop_ is false
+     */
+    pattern_->AnimateTo(1.5, 1.f, Curves::LINEAR, false);
+    EXPECT_FALSE(pattern_->isAnimationStop_);
+}
+
+namespace {
+constexpr float SCROLL_FIXED_VELOCITY_010 = 500.f;
+constexpr float OFFSET_TIME_010 = 100.f;
+constexpr int32_t TIME_CHANGED_COUNTS_010 = 20;
+} // namespace
+/**
+ * @tc.name: PositionController010
+ * @tc.desc: Test positionController func with ScrollToIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, PositionController010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Grid Item
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step2. Scroll to the left edge
+     * expected: Fixed Verify is is 0.
+     */
+    auto controller = pattern_->positionController_;
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_LEFT, SCROLL_FIXED_VELOCITY_010);
+    EXPECT_FALSE(pattern_->fixedVelocityMotion_);
+
+    /**
+     * @tc.steps: step3. Scroll to the right edge
+     * expected: Fixed Verify is is 0.
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_RIGHT, SCROLL_FIXED_VELOCITY_010);
+    EXPECT_FALSE(pattern_->fixedVelocityMotion_);
+    
+    /**
+     * @tc.steps: step4. Scroll to the bottom edge
+     * expected: 1.Fixed Verify is is non-zero.
+     *           2.The current Velocity is equal to the set fixed velocity
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, SCROLL_FIXED_VELOCITY_010);
+    EXPECT_TRUE(pattern_->fixedVelocityMotion_);
+    EXPECT_EQ(pattern_->fixedVelocityMotion_->GetCurrentVelocity(), -SCROLL_FIXED_VELOCITY_010);
+
+    /**
+     * @tc.steps: step5. 1. Set offset time
+     *                   2. Set changed count
+     *                   3. Flush layout
+     * expected: Scroll to the bottom edge
+     */
+    int32_t offsetTime = OFFSET_TIME_010;
+    for (int i = 0; i < TIME_CHANGED_COUNTS_010; i++) {
+        pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
+        offsetTime = offsetTime + OFFSET_TIME_010;
+        FlushLayoutTask(frameNode_);
+    }
+    EXPECT_TRUE(pattern_->IsAtBottom());
+
+    /**
+     * @tc.steps: step6. Scroll to the top edge
+     * expected: 1.Fixed Verify is is non-zero.
+     *           2.The current Velocity is equal to the set fixed velocity
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, SCROLL_FIXED_VELOCITY_010);
+    EXPECT_TRUE(pattern_->fixedVelocityMotion_);
+    EXPECT_EQ(pattern_->fixedVelocityMotion_->GetCurrentVelocity(), SCROLL_FIXED_VELOCITY_010);
+        
+    /**
+     * @tc.steps: step7. 1. Set offset time
+     *                   2. Set changed count
+     *                   3. Flush layout
+     * expected: Scroll to the top edge
+     */
+    offsetTime = OFFSET_TIME_010;
+    for (int i = 0; i < TIME_CHANGED_COUNTS_010; i++) {
+        pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
+        offsetTime = offsetTime + OFFSET_TIME_010;
+        FlushLayoutTask(frameNode_);
+    }
+    EXPECT_TRUE(pattern_->IsAtTop());
+
+    /**
+     * @tc.steps: step7. Set scroll index
+     * expected: finalPosition_ is is 0.
+     */
+    int32_t targetIndex = 0;
+    ScrollAlign align = ScrollAlign::START;
+    targetIndex = 0;
+    pattern_->ScrollToIndex(targetIndex, true, align);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->finalPosition_, 0.0f);
+}
+
 /**
  * @tc.name: ScrollToFocusNodeIndex001
  * @tc.desc: Test ScrollToFocusNodeIndex
@@ -915,10 +1268,10 @@ HWTEST_F(GridScrollerTestNg, PositionController006, TestSize.Level1)
  */
 HWTEST_F(GridScrollerTestNg, ScrollToFocusNodeIndex001, TestSize.Level1)
 {
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFocusableGridItems(10, ITEM_WIDTH, ITEM_HEIGHT);
+    CreateDone(frameNode_);
 
     /**
      * @tc.steps: step1. Focus node outside the viewport
@@ -948,10 +1301,10 @@ HWTEST_F(GridScrollerTestNg, ScrollToFocusNodeIndex001, TestSize.Level1)
  */
 HWTEST_F(GridScrollerTestNg, ScrollToNode001, TestSize.Level1)
 {
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
 
     /**
      * @tc.steps: step1. Focus node outside the viewport
@@ -971,10 +1324,10 @@ HWTEST_F(GridScrollerTestNg, ScrollToNode001, TestSize.Level1)
  */
 HWTEST_F(GridScrollerTestNg, GetOverScrollOffset001, TestSize.Level1)
 {
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
 
     OverScrollOffset offset = pattern_->GetOverScrollOffset(ITEM_HEIGHT);
     OverScrollOffset expectOffset = { ITEM_HEIGHT, 0 };
@@ -1038,10 +1391,10 @@ HWTEST_F(GridScrollerTestNg, GetOverScrollOffset001, TestSize.Level1)
  */
 HWTEST_F(GridScrollerTestNg, GetOverScrollOffset002, TestSize.Level1)
 {
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateFixedItem(8);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(8);
+    CreateDone(frameNode_);
 
     OverScrollOffset offset = pattern_->GetOverScrollOffset(ITEM_HEIGHT);
     OverScrollOffset expectOffset = { ITEM_HEIGHT, 0 };
@@ -1108,10 +1461,10 @@ HWTEST_F(GridScrollerTestNg, UpdateCurrentOffset001, TestSize.Level1)
     /**
      * @tc.cases: Test SCROLL_FROM_UPDATE
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     UpdateCurrentOffset(-100.f, SCROLL_FROM_UPDATE);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, -100.f);
     UpdateCurrentOffset(100.f, SCROLL_FROM_UPDATE);
@@ -1130,10 +1483,10 @@ HWTEST_F(GridScrollerTestNg, UpdateCurrentOffset002, TestSize.Level1)
     /**
      * @tc.cases: Test SCROLL_FROM_BAR
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     UpdateCurrentOffset(-100.f, SCROLL_FROM_BAR);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, -100.f);
     UpdateCurrentOffset(100.f, SCROLL_FROM_BAR);
@@ -1152,10 +1505,10 @@ HWTEST_F(GridScrollerTestNg, UpdateCurrentOffset003, TestSize.Level1)
     /**
      * @tc.cases: Test SCROLL_FROM_UPDATE and EdgeEffect::FADE
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     pattern_->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::FADE);
     UpdateCurrentOffset(-100.f, SCROLL_FROM_UPDATE);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, -100.f);
@@ -1176,11 +1529,11 @@ HWTEST_F(GridScrollerTestNg, UpdateCurrentOffset004, TestSize.Level1)
      * @tc.cases: When isConfigScrollable_ is false
      * @tc.expected: Can not roll
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        model.SetRowsTemplate("1fr 1fr");
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetRowsTemplate("1fr 1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
     EXPECT_FALSE(pattern_->isConfigScrollable_);
 
     UpdateCurrentOffset(-100.f, SCROLL_FROM_UPDATE);
@@ -1194,10 +1547,10 @@ HWTEST_F(GridScrollerTestNg, UpdateCurrentOffset004, TestSize.Level1)
  */
 HWTEST_F(GridScrollerTestNg, ScrollBy001, TestSize.Level1)
 {
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateFixedItem(10);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
 
     /**
      * @tc.steps: step1. ScrollBy information function call
@@ -1231,10 +1584,10 @@ HWTEST_F(GridScrollerTestNg, ScrollBy001, TestSize.Level1)
  */
 HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos001, TestSize.Level1)
 {
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateItem(20, ITEM_WIDTH, NULL_VALUE, GridItemStyle::NONE);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateGridItems(20, ITEM_WIDTH, NULL_VALUE, GridItemStyle::NONE);
+    CreateDone(frameNode_);
 
     int32_t targetIndex = 15;
     ScrollAlign align = ScrollAlign::START;
@@ -1250,10 +1603,10 @@ HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos001, TestSize.Level1)
  */
 HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos002, TestSize.Level1)
 {
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateItem(20, ITEM_WIDTH, NULL_VALUE, GridItemStyle::NONE);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateGridItems(20, ITEM_WIDTH, NULL_VALUE, GridItemStyle::NONE);
+    CreateDone(frameNode_);
 
     int32_t targetIndex = 15;
     ScrollAlign align = ScrollAlign::CENTER;
@@ -1270,10 +1623,10 @@ HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos002, TestSize.Level1)
  */
 HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos003, TestSize.Level1)
 {
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateItem(20, ITEM_WIDTH, NULL_VALUE, GridItemStyle::NONE);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateGridItems(20, ITEM_WIDTH, NULL_VALUE, GridItemStyle::NONE);
+    CreateDone(frameNode_);
 
     int32_t targetIndex = 15;
     ScrollAlign align = ScrollAlign::END;
@@ -1290,10 +1643,10 @@ HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos003, TestSize.Level1)
  */
 HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos004, TestSize.Level1)
 {
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateFixedItem(20);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(20);
+    CreateDone(frameNode_);
 
     pattern_->ScrollToIndex(10, true, ScrollAlign::AUTO);
     AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
@@ -1321,10 +1674,10 @@ HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos004, TestSize.Level1)
  */
 HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos005, TestSize.Level1)
 {
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateItem(20, ITEM_WIDTH, NULL_VALUE, GridItemStyle::NONE);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateGridItems(20, ITEM_WIDTH, NULL_VALUE, GridItemStyle::NONE);
+    CreateDone(frameNode_);
 
     int32_t targetIndex = 10;
     ScrollAlign align = ScrollAlign::AUTO;
@@ -1352,10 +1705,10 @@ HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos005, TestSize.Level1)
  */
 HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos006, TestSize.Level1)
 {
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr");
-        CreateFixedItem(1);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    CreateFixedItems(1);
+    CreateDone(frameNode_);
 
     int32_t targetIndex = 0;
     ScrollAlign align = ScrollAlign::START;
@@ -1372,10 +1725,10 @@ HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos006, TestSize.Level1)
  */
 HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos007, TestSize.Level1)
 {
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateItem(20, ITEM_WIDTH, NULL_VALUE, GridItemStyle::NONE);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateGridItems(20, ITEM_WIDTH, NULL_VALUE, GridItemStyle::NONE);
+    CreateDone(frameNode_);
 
     int32_t targetIndex = 10;
     ScrollAlign align = ScrollAlign::AUTO;
@@ -1403,11 +1756,11 @@ const decltype(GridLayoutInfo::lineHeightMap_) cmp = { { 0, ITEM_HEIGHT }, { 1, 
  */
 HWTEST_F(GridScrollerTestNg, GetEndOffset000, TestSize.Level1)
 {
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        model.SetLayoutOptions({});
-        CreateFixedItem(20, GridItemStyle::NONE);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions({});
+    CreateFixedItems(20, GridItemStyle::NONE);
+    CreateDone(frameNode_);
 
     int32_t targetIndex = 19;
     ScrollAlign align = ScrollAlign::AUTO;
@@ -1454,10 +1807,10 @@ HWTEST_F(GridScrollerTestNg, GetEndOffset000, TestSize.Level1)
  */
 HWTEST_F(GridScrollerTestNg, GetEndOffset001, TestSize.Level1)
 {
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateFixedItem(20, GridItemStyle::NONE);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(20, GridItemStyle::NONE);
+    CreateDone(frameNode_);
 
     int32_t targetIndex = 19;
     ScrollAlign align = ScrollAlign::AUTO;

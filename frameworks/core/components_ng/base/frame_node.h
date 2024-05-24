@@ -433,16 +433,6 @@ public:
 
     void MarkNeedRenderOnly();
 
-    void SetOnAttachFunc(std::function<void(int32_t)>&& attachFunc)
-    {
-        attachFunc_ = std::move(attachFunc);
-    }
-
-    void SetOnDetachFunc(std::function<void(int32_t)>&& detachFunc)
-    {
-        detachFunc_ = std::move(detachFunc);
-    }
-
     void OnDetachFromMainTree(bool recursive) override;
     void OnAttachToMainTree(bool recursive) override;
     void OnAttachToBuilderNode(NodeStatus nodeStatus) override;
@@ -790,7 +780,9 @@ public:
     void SetExtensionHandler(const RefPtr<ExtensionHandler>& handler)
     {
         extensionHandler_ = handler;
-        extensionHandler_->AttachFrameNode(this);
+        if (extensionHandler_) {
+            extensionHandler_->AttachFrameNode(this);
+        }
     }
 
     void NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType);
@@ -846,19 +838,53 @@ public:
     void AttachContext(PipelineContext* context, bool recursive = false) override;
     void DetachContext(bool recursive = false) override;
 
+    void SetExposureProcessor(const RefPtr<Recorder::ExposureProcessor>& processor);
+
     void SetGeometryTransitionInRecursive(bool isGeometryTransitionIn) override
     {
         SetSkipSyncGeometryNode();
         UINode::SetGeometryTransitionInRecursive(isGeometryTransitionIn);
     }
+    static std::pair<float, float> ContextPositionConvertToPX(
+        const RefPtr<RenderContext>& context, const SizeF& percentReference);
+
+    // Notified by render context when any transform attributes updated,
+    // this flag will be used to refresh the transform matrix cache if it's dirty
+    void NotifyTransformInfoChanged()
+    {
+        isLocalRevertMatrixAvailable_ = false;
+    }
+
+    // this method will check the cache state and return the cached revert matrix preferentially,
+    // but the caller can pass in true to forcible refresh the cache
+    Matrix4& GetOrRefreshRevertMatrixFromCache(bool forceRefresh = false);
+
+    // apply the matrix to the given point specified by dst
+    static void MapPointTo(PointF& dst, Matrix4& matrix);
+    void SetSuggestOpIncMarked(bool flag);
+    bool GetSuggestOpIncMarked();
+    void SetCanSuggestOpInc(bool flag);
+    bool GetCanSuggestOpInc();
+    void SetApplicationRenderGroupMarked(bool flag);
+    bool GetApplicationRenderGroupMarked();
+    void SetSuggestOpIncActivatedOnce();
+    bool GetSuggestOpIncActivatedOnce();
+    bool MarkSuggestOpIncGroup(bool suggest, bool calc);
+    void SetOpIncGroupCheckedThrough(bool flag);
+    bool GetOpIncGroupCheckedThrough();
+    void SetOpIncCheckedOnce();
+    bool GetOpIncCheckedOnce();
+    void MarkAndCheckNewOpIncNode();
+    ChildrenListWithGuard GetAllChildren();
+    OPINC_TYPE_E FindSuggestOpIncNode(std::string& path, const SizeF& boundary, int32_t depth);
 
 protected:
     void DumpInfo() override;
 
 private:
+    OPINC_TYPE_E IsOpIncValidNode(const SizeF& boundary, int32_t childNumber = 0);
+    static int GetValidLeafChildNumber(const RefPtr<FrameNode>& host, int32_t thresh);
     void MarkNeedRender(bool isRenderBoundary);
-    std::pair<float, float> ContextPositionConvertToPX(
-        const RefPtr<RenderContext>& context, const SizeF& percentReference) const;
     bool IsNeedRequestParentMeasure() const;
     void UpdateLayoutPropertyFlag() override;
     void ForceUpdateLayoutPropertyFlag(PropertyChangeFlag propertyChangeFlag) override;
@@ -894,6 +920,7 @@ private:
     void DumpOverlayInfo();
     void DumpCommonInfo();
     void DumpSafeAreaInfo();
+    void DumpExtensionHandlerInfo();
     void DumpAdvanceInfo() override;
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) override;
     void DumpOnSizeChangeInfo();
@@ -923,7 +950,7 @@ private:
 
     int32_t GetNodeExpectedRate();
 
-    void RecordExposureIfNeed(const std::string& inspectorId);
+    void RecordExposureInner();
 
     OffsetF CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp);
 
@@ -976,9 +1003,6 @@ private:
     std::unique_ptr<FrameProxy> frameProxy_;
     WeakPtr<TargetComponent> targetComponent_;
 
-    std::function<void(int32_t)> attachFunc_;
-    std::function<void(int32_t)> detachFunc_;
-
     bool needSyncRenderTree_ = false;
 
     bool isPropertyDiffMarked_ = false;
@@ -1009,9 +1033,16 @@ private:
     bool userSet_ = false;
     bool customerSet_ = false;
     bool isWindowBoundary_ = false;
+    uint8_t suggestOpIncByte_ = 0;
+    uint64_t getCacheNanoTime_ = 0;
+    RectF prePaintRect_;
 
     std::map<std::string, RefPtr<NodeAnimatablePropertyBase>> nodeAnimatablePropertyMap_;
     Matrix4 localMat_ = Matrix4::CreateIdentity();
+    // this is just used for the hit test process of event handling, do not used for other purpose
+    Matrix4 localRevertMatrix_ = Matrix4::CreateIdentity();
+    // control the localMat_ and localRevertMatrix_ available or not, set to false when any transform info is set
+    bool isLocalRevertMatrixAvailable_ = false;
 
     bool isRestoreInfoUsed_ = false;
     bool checkboxFlag_ = false;

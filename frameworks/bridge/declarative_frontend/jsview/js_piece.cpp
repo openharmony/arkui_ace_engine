@@ -84,7 +84,9 @@ void JSPiece::JSBind(BindingTarget globalObj)
     JSClass<JSPiece>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSPiece>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSPiece>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSPiece>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSPiece>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSPiece>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSPiece>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSPiece>::InheritAndBind<JSViewAbstract>(globalObj);
 }

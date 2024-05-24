@@ -143,6 +143,10 @@ public:
         nextValidIndex_ = nextValidIndex;
     }
 
+    void SetHorizontalAndRightToLeft(TextDirection textDirection)
+    {
+        isHorizontalAndRightToLeft_ = axis_ == Axis::HORIZONTAL && textDirection == TextDirection::RTL;
+    }
 private:
     struct StarAndEndPointCenter {
         float startLongPointLeftCenterX = 0.0f;
@@ -191,6 +195,7 @@ private:
     TouchBottomTypeLoop touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
     PointAnimationStage pointAnimationStage_ = PointAnimationStage::STATE_SHRINKT_TO_BLACK_POINT;
     float touchBottomRate_ = 0.0f;
+    bool isHorizontalAndRightToLeft_ = false;
     bool isLoop_ = true;
     bool isHover_ = false;
     bool isPressed_ = false;

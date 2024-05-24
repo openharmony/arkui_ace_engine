@@ -387,6 +387,22 @@ public:
         }
     }
 
+    bool IsLayoutCallBackFuncExist(const std::string& componentId) const
+    {
+        if (layoutEvents_.find(componentId) != layoutEvents_.end()) {
+            return true;
+        }
+        return false;
+    }
+
+    bool IsDrawCallBackFuncExist(const std::string& componentId) const
+    {
+        if (drawEvents_.find(componentId) != drawEvents_.end()) {
+            return true;
+        }
+        return false;
+    }
+
     virtual void RunNativeEngineLoop();
 
     virtual void SetPluginBundleName(const std::string& pluginBundleName) {}

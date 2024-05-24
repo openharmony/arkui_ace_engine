@@ -1232,6 +1232,18 @@ class ArkTextBackGroundStyle {
   }
 }
 
+class ArkScrollOffsetOptions {
+  xOffset: Dimension;
+  yOffset: Dimension;
+  constructor() {
+    this.xOffset = undefined;
+    this.yOffset = undefined;
+  }
+  isEqual(another: ArkScrollOffsetOptions): boolean {
+    return this.xOffset === another.xOffset && this.yOffset === another.yOffset;
+  }
+}
+
 class ArkWaterFlowEdgeEffect {
   value: EdgeEffect;
   options?: EdgeEffectOptions | undefined;
@@ -1283,5 +1295,31 @@ class ArkPositionType {
     } else {
       return false;
     }
+  }
+}
+
+class ArkSelection {
+  selectionStart: number;
+  selectionEnd: number;
+  constructor() {
+    this.selectionStart = undefined;
+    this.selectionEnd = undefined;
+  }
+  isEqual(another: ArkSelection): boolean {
+    return this.selectionStart === another.selectionStart &&
+      this.selectionEnd === another.selectionEnd;
+  }
+}
+
+class TextDataDetectorConfig {
+  types: TextDataDetectorType;
+  onDetectResultUpdate: (result: string) => void;
+  constructor() {
+    this.types = undefined;
+    this.onDetectResultUpdate = undefined;
+  }
+  isEqual(another: TextDataDetectorConfig): boolean {
+    return (this.types === another.types) &&
+      (this.onDetectResultUpdate === another.onDetectResultUpdate);
   }
 }

@@ -31,6 +31,10 @@ public:
     void ResetNextLabel() override;
     static void SetNextLabel(FrameNode* frameNode, const std::string& rightLabel);
     static void ResetNextLabel(FrameNode* frameNode);
+    static void SetPrevLabel(FrameNode* frameNode, const std::string& leftLabel);
+    static void ResetPrevLabel(FrameNode* frameNode);
+    static void SetStatus(FrameNode* frameNode, const std::string& labelStatus);
+    static void ResetStatus(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

@@ -22,6 +22,26 @@
 #include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
+
+bool ListItemLayoutAlgorithm::IsRTLAndVertical(LayoutWrapper* layoutWrapper) const
+{
+    auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
+    if (layoutDirection == TextDirection::RTL && axis_ == Axis::VERTICAL) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+float ListItemLayoutAlgorithm::SetReverseValue(LayoutWrapper* layoutWrapper, float offset)
+{
+    if (IsRTLAndVertical(layoutWrapper)) {
+        return -offset;
+    } else {
+        return offset;
+    }
+}
+
 void ListItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     layoutWrapper->RemoveAllChildInRenderTree();
@@ -39,7 +59,6 @@ void ListItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         curOffset_ = 0.0f;
         return;
     }
-
     if (Positive(curOffset_) && startNodeIndex_ >= 0) {
         auto startLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
         if (!NearZero(startNodeSize_) && curOffset_ > startNodeSize_) {
@@ -84,13 +103,13 @@ void ListItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
         align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
     }
-
     // Update child position.
     if (Positive(curOffset_) && startNodeIndex_ >= 0) {
         auto child = layoutWrapper->GetOrCreateChildByIndex(startNodeIndex_);
         CHECK_NULL_VOID(child);
         auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
-        float crossOffset = curOffset_ - childSize.CrossSize(axis_);
+        float crossOffset = IsRTLAndVertical(layoutWrapper) ?
+            (size.CrossSize(axis_) - curOffset_) : (curOffset_ - childSize.CrossSize(axis_));
         float mainOffset = (size.MainSize(axis_) - childSize.MainSize(axis_)) / 2;
         OffsetF offset = axis_ == Axis::VERTICAL ? OffsetF(crossOffset, mainOffset) : OffsetF(mainOffset, crossOffset);
         child->GetGeometryNode()->SetMarginFrameOffset(paddingOffset + offset);
@@ -99,7 +118,8 @@ void ListItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto child = layoutWrapper->GetOrCreateChildByIndex(endNodeIndex_);
         CHECK_NULL_VOID(child);
         auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
-        float crossOffset = size.CrossSize(axis_) + curOffset_;
+        float crossOffset = IsRTLAndVertical(layoutWrapper) ?
+            (-curOffset_ - childSize.CrossSize(axis_)) : (size.CrossSize(axis_) + curOffset_);
         float mainOffset = (size.MainSize(axis_) - childSize.MainSize(axis_)) / 2;
         OffsetF offset = axis_ == Axis::VERTICAL ? OffsetF(crossOffset, mainOffset) : OffsetF(mainOffset, crossOffset);
         child->GetGeometryNode()->SetMarginFrameOffset(paddingOffset + offset);
@@ -109,11 +129,11 @@ void ListItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (child) {
         auto translate =
             Alignment::GetAlignPosition(size, child->GetGeometryNode()->GetMarginFrameSize(), align) + paddingOffset;
-        OffsetF offset = axis_ == Axis::VERTICAL ? OffsetF(curOffset_, 0.0f) : OffsetF(0.0f, curOffset_);
+        OffsetF offset = axis_ == Axis::VERTICAL ? OffsetF(SetReverseValue(layoutWrapper, curOffset_), 0.0f) :
+            OffsetF(0.0f, curOffset_);
         child->GetGeometryNode()->SetMarginFrameOffset(translate + offset);
         child->Layout();
     }
-
     // Update content position.
     const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
     if (content) {

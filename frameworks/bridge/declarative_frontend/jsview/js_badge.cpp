@@ -110,6 +110,9 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
         JSRef<JSVal> borderWidthValue = value->GetProperty("borderWidth");
         JSRef<JSVal> fontWeightValue = value->GetProperty("fontWeight");
 
+        bool isDefaultFontSize = true;
+        bool isDefaultBadgeSize = true;
+
         Color colorVal;
         if (ParseJsColor(colorValue, colorVal)) {
             badgeParameters.badgeTextColor = colorVal;
@@ -123,6 +126,7 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
         if (ParseJsDimensionNG(fontSizeValue, fontSize, DimensionUnit::FP)) {
             if (fontSize.IsNonNegative() && fontSize.Unit() != DimensionUnit::PERCENT) {
                 badgeParameters.badgeFontSize = fontSize;
+                isDefaultFontSize = false;
             } else {
                 badgeParameters.badgeFontSize = badgeTheme->GetBadgeFontSize();
             }
@@ -136,6 +140,7 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
         if (ParseJsDimensionNG(badgeSizeValue, badgeSize, DimensionUnit::FP)) {
             if (badgeSize.IsNonNegative() && badgeSize.Unit() != DimensionUnit::PERCENT) {
                 badgeParameters.badgeCircleSize = badgeSize;
+                isDefaultBadgeSize = false;
             } else {
                 badgeParameters.badgeCircleSize = badgeTheme->GetBadgeCircleSize();
             }
@@ -143,6 +148,7 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
             badgeParameters.badgeCircleSize = badgeTheme->GetBadgeCircleSize();
         }
 
+        BadgeModel::GetInstance()->SetIsDefault(isDefaultFontSize, isDefaultBadgeSize);
         Color color;
         if (ParseJsColor(badgeColorValue, color)) {
             badgeParameters.badgeColor = color;
@@ -202,7 +208,9 @@ void JSBadge::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSBadge>::StaticMethod("create", &JSBadge::Create, opt);
     JSClass<JSBadge>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSBadge>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSBadge>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSBadge>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSBadge>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
 
     JSClass<JSBadge>::InheritAndBind<JSContainerBase>(globalObj);

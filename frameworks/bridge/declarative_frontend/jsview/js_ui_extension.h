@@ -30,6 +30,7 @@ public:
     static void OnRelease(const JSCallbackInfo& info);
     static void OnResult(const JSCallbackInfo& info);
     static void OnError(const JSCallbackInfo& info);
+    static void OnTerminated(const JSCallbackInfo& info);
 };
 
 enum class RegisterType {

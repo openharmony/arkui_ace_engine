@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -76,15 +76,15 @@ void WaterFlowLayoutAlgorithm::InitialItemsCrossSize(
     }
 
     // cross count changed by auto-fill and cross size change
-    if (!layoutInfo_.items_[0].empty() && crossLens.size() != layoutInfo_.items_[0].size()) {
-        layoutInfo_.Reset();
+    if (!layoutInfo_->items_[0].empty() && crossLens.size() != layoutInfo_->items_[0].size()) {
+        layoutInfo_->Reset();
     }
 
     int32_t index = 0;
     for (const auto& len : crossLens) {
         itemsCrossSize_.try_emplace(index, len);
         itemsCrossPosition_.try_emplace(index, ComputeCrossPosition(index));
-        layoutInfo_.items_[0].try_emplace(index, std::map<int32_t, std::pair<float, float>>());
+        layoutInfo_->items_[0].try_emplace(index, std::map<int32_t, std::pair<float, float>>());
         ++index;
     }
 }
@@ -110,59 +110,59 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     int32_t updateIdx = layoutWrapper->GetHostNode()->GetChildrenUpdated();
     if (updateIdx != -1) {
-        layoutInfo_.Reset(updateIdx);
+        layoutInfo_->Reset(updateIdx);
         layoutWrapper->GetHostNode()->ChildrenUpdatedFrom(-1);
     }
 
-    layoutInfo_.childrenCount_ = layoutWrapper->GetTotalChildCount();
+    layoutInfo_->childrenCount_ = layoutWrapper->GetTotalChildCount();
 
-    InitialItemsCrossSize(layoutProperty, idealSize, layoutInfo_.childrenCount_);
+    InitialItemsCrossSize(layoutProperty, idealSize, layoutInfo_->childrenCount_);
     mainSize_ = GetMainAxisSize(idealSize, axis);
-    if (layoutInfo_.jumpIndex_ >= 0 && layoutInfo_.jumpIndex_ < layoutInfo_.childrenCount_) {
-        auto crossIndex = layoutInfo_.GetCrossIndex(layoutInfo_.jumpIndex_);
+    if (layoutInfo_->jumpIndex_ >= 0 && layoutInfo_->jumpIndex_ < layoutInfo_->childrenCount_) {
+        auto crossIndex = layoutInfo_->GetCrossIndex(layoutInfo_->jumpIndex_);
         if (crossIndex == -1) {
             // jump to out of cache
         } else {
-            layoutInfo_.JumpTo(layoutInfo_.items_[0][crossIndex][layoutInfo_.jumpIndex_]);
+            layoutInfo_->JumpTo(layoutInfo_->items_[0][crossIndex][layoutInfo_->jumpIndex_]);
         }
     } else {
-        layoutInfo_.jumpIndex_ = EMPTY_JUMP_INDEX;
+        layoutInfo_->jumpIndex_ = EMPTY_JUMP_INDEX;
     }
 
     FillViewport(mainSize_, layoutWrapper);
-    if (layoutInfo_.targetIndex_.has_value()) {
+    if (layoutInfo_->targetIndex_.has_value()) {
         MeasureForAnimation(layoutWrapper);
     }
-    if (layoutInfo_.jumpIndex_ != EMPTY_JUMP_INDEX) {
-        layoutInfo_.JumpTo({ footerMainStartPos_, footerMainSize_ });
+    if (layoutInfo_->jumpIndex_ != EMPTY_JUMP_INDEX) {
+        layoutInfo_->JumpTo({ footerMainStartPos_, footerMainSize_ });
     }
     if (matchChildren) {
-        mainSize_ = layoutInfo_.GetMaxMainHeight() + footerMainSize_;
+        mainSize_ = layoutInfo_->GetMaxMainHeight() + footerMainSize_;
         idealSize.SetMainSize(mainSize_, axis_);
         AddPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);
         layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
     }
-    layoutInfo_.lastMainSize_ = mainSize_;
+    layoutInfo_->lastMainSize_ = mainSize_;
 
     layoutWrapper->SetCacheCount(layoutProperty->GetCachedCountValue(1));
 }
 
 void WaterFlowLayoutAlgorithm::MeasureForAnimation(LayoutWrapper* layoutWrapper)
 {
-    if (layoutInfo_.targetIndex_.value() > layoutInfo_.childrenCount_) {
-        layoutInfo_.targetIndex_.reset();
+    if (layoutInfo_->targetIndex_.value() > layoutInfo_->childrenCount_) {
+        layoutInfo_->targetIndex_.reset();
         return;
     }
     auto layoutProperty = AceType::DynamicCast<WaterFlowLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    auto currentIndex = layoutInfo_.endIndex_;
+    auto currentIndex = layoutInfo_->endIndex_;
     auto position = GetItemPosition(currentIndex);
-    if (layoutInfo_.targetIndex_.value() == LAST_ITEM) {
-        layoutInfo_.targetIndex_ = layoutInfo_.childrenCount_ - 1;
+    if (layoutInfo_->targetIndex_.value() == LAST_ITEM) {
+        layoutInfo_->targetIndex_ = layoutInfo_->childrenCount_ - 1;
     }
-    while (layoutInfo_.targetIndex_.has_value() && (layoutInfo_.endIndex_ < layoutInfo_.targetIndex_.value())) {
+    while (layoutInfo_->targetIndex_.has_value() && (layoutInfo_->endIndex_ < layoutInfo_->targetIndex_.value())) {
         auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(GetChildIndexWithFooter(currentIndex));
         if (!itemWrapper) {
-            layoutInfo_.targetIndex_.reset();
+            layoutInfo_->targetIndex_.reset();
             break;
         }
         auto itemCrossPosition = itemsCrossPosition_.find(position.crossIndex);
@@ -173,19 +173,19 @@ void WaterFlowLayoutAlgorithm::MeasureForAnimation(LayoutWrapper* layoutWrapper)
             { itemCrossPosition->second, mainSize_, axis_ }, layoutProperty, itemWrapper));
         auto itemSize = itemWrapper->GetGeometryNode()->GetMarginFrameSize();
         auto itemHeight = GetMainAxisSize(itemSize, axis_);
-        auto item = layoutInfo_.items_[0][position.crossIndex].find(currentIndex);
-        if (item == layoutInfo_.items_[0][position.crossIndex].end()) {
-            layoutInfo_.items_[0][position.crossIndex][currentIndex] =
+        auto item = layoutInfo_->items_[0][position.crossIndex].find(currentIndex);
+        if (item == layoutInfo_->items_[0][position.crossIndex].end()) {
+            layoutInfo_->items_[0][position.crossIndex][currentIndex] =
                 std::make_pair(position.startMainPos, itemHeight);
         } else {
             if (item->second.second != itemHeight) {
                 item->second.second = itemHeight;
-                layoutInfo_.ClearCacheAfterIndex(currentIndex);
+                layoutInfo_->ClearCacheAfterIndex(currentIndex);
                 TAG_LOGD(AceLogTag::ACE_WATERFLOW, "item size changed");
             }
         }
-        if (layoutInfo_.targetIndex_.value() == currentIndex) {
-            layoutInfo_.targetIndex_.reset();
+        if (layoutInfo_->targetIndex_.value() == currentIndex) {
+            layoutInfo_->targetIndex_.reset();
         }
         currentIndex++;
         position = GetItemPosition(currentIndex);
@@ -205,14 +205,14 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     MinusPaddingToSize(padding, size);
     auto childFrameOffset = OffsetF(padding.left.value_or(0.0f), padding.top.value_or(0.0f));
     auto layoutProperty = AceType::DynamicCast<WaterFlowLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    layoutInfo_.UpdateStartIndex();
-    auto firstIndex = layoutInfo_.endIndex_;
+    layoutInfo_->UpdateStartIndex();
+    auto firstIndex = layoutInfo_->endIndex_;
     auto crossSize = size.CrossSize(axis_);
     auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
     auto isRtl = (layoutDirection == TextDirection::RTL) && (axis_ == Axis::VERTICAL);
-    for (const auto& mainPositions : layoutInfo_.items_[0]) {
+    for (const auto& mainPositions : layoutInfo_->items_[0]) {
         for (const auto& item : mainPositions.second) {
-            if (item.first < layoutInfo_.startIndex_ || item.first > layoutInfo_.endIndex_) {
+            if (item.first < layoutInfo_->startIndex_ || item.first > layoutInfo_->endIndex_) {
                 continue;
             }
             auto itemCrossPosition = itemsCrossPosition_.find(mainPositions.first);
@@ -221,7 +221,7 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             }
             auto currentOffset = childFrameOffset;
             auto crossOffset = itemCrossPosition->second;
-            auto mainOffset = item.second.first + layoutInfo_.currentOffset_;
+            auto mainOffset = item.second.first + layoutInfo_->currentOffset_;
             if (isRtl) {
                 crossOffset = crossSize - crossOffset - itemsCrossSize_.at(mainPositions.first);
             }
@@ -240,25 +240,29 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             wrapper->GetGeometryNode()->SetMarginFrameOffset(currentOffset);
             wrapper->Layout();
             // recode restore info
-            if (item.first == layoutInfo_.startIndex_) {
-                layoutInfo_.storedOffset_ = mainOffset;
+            if (item.first == layoutInfo_->startIndex_) {
+                layoutInfo_->storedOffset_ = mainOffset;
             }
 
             if (NonNegative(mainOffset + item.second.second)) {
                 firstIndex = std::min(firstIndex, item.first);
             }
+            auto frameNode = AceType::DynamicCast<FrameNode>(wrapper);
+            if (frameNode) {
+                frameNode->MarkAndCheckNewOpIncNode();
+            }
         }
     }
-    layoutInfo_.firstIndex_ = firstIndex;
+    layoutInfo_->firstIndex_ = firstIndex;
     LayoutFooter(layoutWrapper, childFrameOffset, layoutProperty->IsReverse());
 }
 
 void WaterFlowLayoutAlgorithm::LayoutFooter(LayoutWrapper* layoutWrapper, const OffsetF& childFrameOffset, bool reverse)
 {
-    if (layoutInfo_.itemEnd_ && layoutInfo_.footerIndex_ >= 0) {
-        auto footer = layoutWrapper->GetOrCreateChildByIndex(layoutInfo_.footerIndex_);
+    if (layoutInfo_->itemEnd_ && layoutInfo_->footerIndex_ >= 0) {
+        auto footer = layoutWrapper->GetOrCreateChildByIndex(layoutInfo_->footerIndex_);
         auto footerOffset = childFrameOffset;
-        auto mainOffset = layoutInfo_.GetMaxMainHeight() + layoutInfo_.currentOffset_;
+        auto mainOffset = layoutInfo_->GetMaxMainHeight() + layoutInfo_->currentOffset_;
         if (reverse) {
             mainOffset = mainSize_ - footerMainSize_ - mainOffset;
         }
@@ -270,35 +274,37 @@ void WaterFlowLayoutAlgorithm::LayoutFooter(LayoutWrapper* layoutWrapper, const 
 
 FlowItemPosition WaterFlowLayoutAlgorithm::GetItemPosition(int32_t index)
 {
-    auto crossIndex = layoutInfo_.GetCrossIndex(index);
+    auto crossIndex = layoutInfo_->GetCrossIndex(index);
     // already in layoutInfo
     if (crossIndex != -1) {
-        return { crossIndex, layoutInfo_.GetStartMainPos(crossIndex, index) };
+        return { crossIndex, layoutInfo_->GetStartMainPos(crossIndex, index) };
     }
-    auto itemIndex = layoutInfo_.GetCrossIndexForNextItem(layoutInfo_.GetSegment(index));
+    auto itemIndex = layoutInfo_->GetCrossIndexForNextItem(layoutInfo_->GetSegment(index));
     if (itemIndex.lastItemIndex < 0) {
         return { itemIndex.crossIndex, 0.0f };
     }
-    auto mainHeight = layoutInfo_.GetMainHeight(itemIndex.crossIndex, itemIndex.lastItemIndex);
+    auto mainHeight = layoutInfo_->GetMainHeight(itemIndex.crossIndex, itemIndex.lastItemIndex);
     return { itemIndex.crossIndex, mainHeight + mainGap_ };
 }
 
 void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layoutWrapper)
 {
-    if (layoutInfo_.currentOffset_ >= 0) {
+    if (layoutInfo_->currentOffset_ >= 0) {
         if (!canOverScroll_) {
-            layoutInfo_.currentOffset_ = 0;
+            layoutInfo_->currentOffset_ = 0;
         }
-        layoutInfo_.itemStart_ = true;
+        layoutInfo_->itemStart_ = true;
     } else {
-        layoutInfo_.itemStart_ = false;
+        layoutInfo_->itemStart_ = false;
     }
-    layoutInfo_.UpdateStartIndex();
+
+    layoutInfo_->UpdateStartIndex();
     auto layoutProperty = AceType::DynamicCast<WaterFlowLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    auto currentIndex = layoutInfo_.startIndex_;
+    auto currentIndex = layoutInfo_->startIndex_;
     auto position = GetItemPosition(currentIndex);
     bool fill = false;
-    while (LessNotEqual(position.startMainPos + layoutInfo_.currentOffset_, mainSize) || layoutInfo_.jumpIndex_ >= 0) {
+    while (
+        LessNotEqual(position.startMainPos + layoutInfo_->currentOffset_, mainSize) || layoutInfo_->jumpIndex_ >= 0) {
         auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(GetChildIndexWithFooter(currentIndex));
         if (!itemWrapper) {
             break;
@@ -311,88 +317,80 @@ void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layou
             { itemCrossSize->second, mainSize_, axis_ }, layoutProperty, itemWrapper));
         auto itemSize = itemWrapper->GetGeometryNode()->GetMarginFrameSize();
         auto itemHeight = GetMainAxisSize(itemSize, axis_);
-        auto item = layoutInfo_.items_[0][position.crossIndex].find(currentIndex);
-        if (item == layoutInfo_.items_[0][position.crossIndex].end()) {
-            layoutInfo_.items_[0][position.crossIndex][currentIndex] =
+        auto item = layoutInfo_->items_[0][position.crossIndex].find(currentIndex);
+        if (item == layoutInfo_->items_[0][position.crossIndex].end()) {
+            layoutInfo_->items_[0][position.crossIndex][currentIndex] =
                 std::make_pair(position.startMainPos, itemHeight);
         } else {
             if (item->second.second != itemHeight) {
+                TAG_LOGI(AceLogTag::ACE_WATERFLOW,
+                    "item size change. currentIdx:%{public}d,cacheHeight:%{public}f,itemHeight:%{public}f",
+                    currentIndex, item->second.second, itemHeight);
                 item->second.second = itemHeight;
-                layoutInfo_.ClearCacheAfterIndex(currentIndex);
+                layoutInfo_->ClearCacheAfterIndex(currentIndex);
             }
         }
-        if (layoutInfo_.jumpIndex_ == currentIndex) {
-            layoutInfo_.currentOffset_ =
-                layoutInfo_.JumpToTargetAlign(layoutInfo_.items_[0][position.crossIndex][currentIndex]);
-            layoutInfo_.currentOffset_ += layoutInfo_.restoreOffset_;
+        if (layoutInfo_->jumpIndex_ == currentIndex) {
+            layoutInfo_->currentOffset_ =
+                layoutInfo_->JumpToTargetAlign(layoutInfo_->items_[0][position.crossIndex][currentIndex]);
+            layoutInfo_->currentOffset_ += layoutInfo_->restoreOffset_;
             // restoreOffSet only be used once
-            layoutInfo_.restoreOffset_ = 0.0f;
-            layoutInfo_.align_ = ScrollAlign::START;
-            layoutInfo_.jumpIndex_ = EMPTY_JUMP_INDEX;
-            layoutInfo_.itemStart_ = false;
+            layoutInfo_->restoreOffset_ = 0.0f;
+            layoutInfo_->align_ = ScrollAlign::START;
+            layoutInfo_->jumpIndex_ = EMPTY_JUMP_INDEX;
+            layoutInfo_->itemStart_ = false;
         }
         position = GetItemPosition(++currentIndex);
         fill = true;
     }
-    layoutInfo_.endIndex_ = !fill ? currentIndex : currentIndex - 1;
+    layoutInfo_->endIndex_ = !fill ? currentIndex : currentIndex - 1;
 
-    layoutInfo_.itemEnd_ = GetChildIndexWithFooter(currentIndex) == layoutInfo_.childrenCount_;
-    if (layoutInfo_.itemEnd_) {
+    layoutInfo_->itemEnd_ = GetChildIndexWithFooter(currentIndex) == layoutInfo_->childrenCount_;
+    if (layoutInfo_->itemEnd_) {
         ModifyCurrentOffsetWhenReachEnd(mainSize, layoutWrapper);
     } else {
-        layoutInfo_.offsetEnd_ = false;
+        layoutInfo_->offsetEnd_ = false;
     }
 }
 
 void WaterFlowLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, LayoutWrapper* layoutWrapper)
 {
-    auto maxItemHeight = layoutInfo_.GetMaxMainHeight();
-    if (layoutInfo_.footerIndex_ >= 0) {
+    auto maxItemHeight = layoutInfo_->GetMaxMainHeight();
+    if (layoutInfo_->footerIndex_ >= 0) {
         footerMainStartPos_ = maxItemHeight;
-        footerMainSize_ = MeasureFooter(layoutWrapper);
+        footerMainSize_ = WaterFlowLayoutUtils::MeasureFooter(layoutWrapper, axis_);
         maxItemHeight += footerMainSize_;
     }
-    layoutInfo_.maxHeight_ = maxItemHeight;
+    layoutInfo_->maxHeight_ = maxItemHeight;
 
     if (mainSize >= maxItemHeight) {
         if (!canOverScroll_) {
-            layoutInfo_.currentOffset_ = 0;
+            layoutInfo_->currentOffset_ = 0;
         }
-        layoutInfo_.offsetEnd_ = true;
-        layoutInfo_.itemStart_ = true;
+        layoutInfo_->offsetEnd_ = true;
+        layoutInfo_->itemStart_ = true;
         return;
     }
 
-    if (layoutInfo_.currentOffset_ + maxItemHeight <= mainSize) {
-        layoutInfo_.offsetEnd_ = true;
+    if (layoutInfo_->currentOffset_ + maxItemHeight <= mainSize) {
+        layoutInfo_->offsetEnd_ = true;
         if (!canOverScroll_) {
-            layoutInfo_.currentOffset_ = mainSize - maxItemHeight;
+            layoutInfo_->currentOffset_ = mainSize - maxItemHeight;
         }
 
-        auto oldStart = layoutInfo_.startIndex_;
-        layoutInfo_.UpdateStartIndex();
+        auto oldStart = layoutInfo_->startIndex_;
+        layoutInfo_->UpdateStartIndex();
         // lazyforeach
-        for (auto i = oldStart; i >= layoutInfo_.startIndex_; i--) {
+        for (auto i = oldStart; i >= layoutInfo_->startIndex_; i--) {
             auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(GetChildIndexWithFooter(i));
             CHECK_NULL_VOID(itemWrapper);
             auto layoutProperty = AceType::DynamicCast<WaterFlowLayoutProperty>(layoutWrapper->GetLayoutProperty());
-            float crossSize = itemsCrossSize_.at(layoutInfo_.GetCrossIndex(i));
+            float crossSize = itemsCrossSize_.at(layoutInfo_->GetCrossIndex(i));
             itemWrapper->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
                 { crossSize, mainSize_, axis_ }, layoutProperty, itemWrapper));
         }
     } else {
-        layoutInfo_.offsetEnd_ = false;
+        layoutInfo_->offsetEnd_ = false;
     }
-}
-
-float WaterFlowLayoutAlgorithm::MeasureFooter(LayoutWrapper* layoutWrapper)
-{
-    auto footer = layoutWrapper->GetOrCreateChildByIndex(layoutInfo_.footerIndex_);
-    auto layoutProperty = layoutWrapper->GetLayoutProperty();
-    auto footerConstraint = layoutProperty->CreateChildConstraint();
-    footer->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
-    footer->Measure(footerConstraint);
-    auto itemSize = footer->GetGeometryNode()->GetMarginFrameSize();
-    return GetMainAxisSize(itemSize, axis_);
 }
 } // namespace OHOS::Ace::NG

@@ -410,6 +410,11 @@ public:
         dragEventActuator_->SetCustomDragEvent(dragEvent);
     }
 
+    bool HasDragEvent() const
+    {
+        return dragEventActuator_ && dragEventActuator_->HasDragEvent();
+    }
+
     // the return value means prevents event bubbling.
     bool ProcessTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint,
@@ -639,9 +644,9 @@ public:
     void SetDragGatherPixelMaps(const GestureEvent& info);
     void SetMouseDragGatherPixelMaps();
     void SetNotMouseDragGatherPixelMaps();
+    void FireCustomerOnDragEnd(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub);
 #if defined(PIXEL_MAP_SUPPORTED)
-    static void PrintBuilderNode(
-        const RefPtr<UINode>& customNode, bool& hasImageNode, std::list<RefPtr<FrameNode>>& imageNodes);
+    static void PrintBuilderNode(const RefPtr<UINode>& customNode);
     static void PrintIfImageNode(
         const RefPtr<UINode>& builderNode, int32_t depth, bool& hasImageNode, std::list<RefPtr<FrameNode>>& imageNodes);
     static void CheckImageDecode(std::list<RefPtr<FrameNode>>& imageNodes);

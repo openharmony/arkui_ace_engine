@@ -159,7 +159,7 @@ public:
         }
     }
 
-    std::string GetDynamicModeString(DynamicRangeMode dynamicMode)
+    std::string GetDynamicModeString(DynamicRangeMode dynamicMode) const
     {
         switch (dynamicMode) {
             case DynamicRangeMode::HIGH:
@@ -239,7 +239,8 @@ public:
     {
         images_.clear();
     }
-
+    void ResetImage();
+    void ResetAltImage();
     void ResetImageProperties();
 
     void ResetImageAndAlt();
@@ -427,7 +428,7 @@ private:
     void SetObscured();
 
     CopyOptions copyOption_ = CopyOptions::None;
-    ImageInterpolation interpolation_ = ImageInterpolation::NONE;
+    ImageInterpolation interpolation_ = ImageInterpolation::LOW;
 
     RefPtr<ImageLoadingContext> loadingCtx_;
     RefPtr<CanvasImage> image_;

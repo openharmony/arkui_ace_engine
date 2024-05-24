@@ -618,7 +618,8 @@ public:
         return nextValidIndex_;
     }
     void UpdateNextValidIndex();
-
+    void CheckMarkForIndicatorBoundary();
+    bool IsHorizontalAndRightToLeft() const;
     void FireWillHideEvent(int32_t willHideIndex) const;
     void FireWillShowEvent(int32_t willShowIndex) const;
     void SetOnHiddenChangeForParent();
@@ -740,6 +741,7 @@ private:
     bool IsOutOfHotRegion(const PointF& dragPoint) const;
     void SaveDotIndicatorProperty(const RefPtr<FrameNode>& indicatorNode);
     void SaveDigitIndicatorProperty(const RefPtr<FrameNode>& indicatorNode);
+    void UpdatePaintProperty(const RefPtr<FrameNode>& indicatorNode);
     void PostTranslateTask(uint32_t delayTime);
     void RegisterVisibleAreaChange();
     bool NeedAutoPlay() const;
@@ -754,6 +756,7 @@ private:
     void CheckAndSetArrowHoverState(const PointF& mousePoint);
     RectF GetArrowFrameRect(const int32_t index) const;
     float GetCustomPropertyOffset() const;
+    float GetCustomPropertyTargetOffset() const;
     void UpdateAnimationProperty(float velocity);
     void TriggerAnimationEndOnForceStop();
     void TriggerAnimationEndOnSwipeToLeft();

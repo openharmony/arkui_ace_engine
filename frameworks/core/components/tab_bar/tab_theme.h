@@ -58,6 +58,7 @@ public:
                 theme->subTabHorizontalPadding_ = pattern->GetAttr<Dimension>("subtab_horizontal_padding", 0.0_vp);
                 theme->subTabTopPadding_ = pattern->GetAttr<Dimension>("subtab_top_padding", 0.0_vp);
                 theme->subTabBottomPadding_ = pattern->GetAttr<Dimension>("subtab_bottom_padding", 0.0_vp);
+                theme->subTabItemPadding_ = pattern->GetAttr<Dimension>("subtab_item_padding", 0.0_vp);
                 theme->subTabBarHoverColor_ = pattern->GetAttr<Color>("subtab_hover_color", Color::WHITE);
                 theme->subTabBarPressedColor_ = pattern->GetAttr<Color>("subtab_press_color", Color::WHITE);
                 theme->subtabTextDefaultFontSize_ =
@@ -85,41 +86,48 @@ public:
                     pattern->GetAttr<double>("sub_tab_bar_hover_to_press_duration", 0.0);
                 theme->tabContentAnimationDuration_ =
                     pattern->GetAttr<double>("tab_content_animation_duration", 0.0);
-                theme->tabBarDefaultHeight_ = pattern->GetAttr<Dimension>("tab_bar_default_height", 0.0_vp);
-                theme->bottomTabBarDefaultHeight_ =
-                    pattern->GetAttr<Dimension>("bottom_tab_bar_default_height", 0.0_vp);
-                theme->tabBarDefaultWidth_ = pattern->GetAttr<Dimension>("tab_bar_default_width", 0.0_vp);
-                theme->subTabBarMinWidth_ = pattern->GetAttr<Dimension>("sub_tab_bar_min_width", 0.0_vp);
-                theme->dividerColor_ = pattern->GetAttr<Color>("divider_color", Color::BLACK);
-                theme->tabBarShadowMargin_ = pattern->GetAttr<Dimension>("tab_bar_shadow_margin", 0.0_vp);
-                theme->tabBarGradientWidth_ = pattern->GetAttr<Dimension>("tab_bar_gradient_width", 0.0_vp);
-                theme->colorBottomTabSubBg_ = pattern->GetAttr<Color>("color_bottom_tab_sub_bg", Color::WHITE);
-                theme->colorBottomTabSubBgBlur_ = pattern->GetAttr<Color>("color_bottom_tab_sub_bg_blur", Color::WHITE);
-                theme->tabBarColumnGutter_ = pattern->GetAttr<Dimension>("tab_bar_column_gutter", 0.0_vp);
-                theme->tabBarColumnMargin_ = pattern->GetAttr<Dimension>("tab_bar_column_margin", 0.0_vp);
-                theme->horizontalBottomTabMinWidth_ =
-                    pattern->GetAttr<Dimension>("horizontal_bottom_tab_min_width", 0.0_vp);
 
-                theme->labelPadding_ = pattern->GetAttr<Dimension>("label_padding", 8.0_vp);
-                theme->padding_ = pattern->GetAttr<Dimension>("tab_padding", 16.0_vp);
-                theme->gradientWidth_ = pattern->GetAttr<Dimension>("tab_gradient_width", 24.0_vp);
-                theme->defaultHeight_ = pattern->GetAttr<Dimension>("tab_default_height", 56.0_vp);
-                theme->defaultWidth_ = pattern->GetAttr<Dimension>("tab_default_width", 200.0_px);
-                theme->defaultItemHeight_ = pattern->GetAttr<Dimension>("tab_default_item_height", 200.0_px);
-                theme->activeIndicatorWidth_ = pattern->GetAttr<Dimension>("active_indicator_width", 2.0_vp);
-                theme->activeIndicatorMinWidth_ = pattern->GetAttr<Dimension>("active_indicator_min_width", 32.0_vp);
-                theme->activeIndicatorPadding_ = pattern->GetAttr<Dimension>("active_indicator_padding", 3.0_vp);
-                theme->focusIndicatorHorizontalPadding_ =
-                    pattern->GetAttr<Dimension>("focus_indicator_horizontal_padding", 0.0_vp);
-                theme->focusIndicatorVerticalPadding_ =
-                    pattern->GetAttr<Dimension>("focus_indicator_vertical_padding", 0.0_vp);
-                theme->dialog_radius_level10_ = pattern->GetAttr<Dimension>("dialog_radius_level10", 20.0_vp);
-                theme->dialog_iconColor_ = pattern->GetAttr<Color>("dialog_icon_primary", Color(0xff182431));
-                theme->dialog_fontColor_ = pattern->GetAttr<Color>("dialog_font_primary", Color(0xff182431));
+                ParseAttribute(theme, pattern);
             } else {
                 LOGW("find pattern of tab fail");
             }
             return theme;
+        }
+
+    private:
+        void ParseAttribute(const RefPtr<TabTheme>& theme, const RefPtr<ThemeStyle>& pattern) const
+        {
+            theme->tabBarDefaultHeight_ = pattern->GetAttr<Dimension>("tab_bar_default_height", 0.0_vp);
+            theme->bottomTabBarDefaultHeight_ =
+                pattern->GetAttr<Dimension>("bottom_tab_bar_default_height", 0.0_vp);
+            theme->tabBarDefaultWidth_ = pattern->GetAttr<Dimension>("tab_bar_default_width", 0.0_vp);
+            theme->subTabBarMinWidth_ = pattern->GetAttr<Dimension>("sub_tab_bar_min_width", 0.0_vp);
+            theme->dividerColor_ = pattern->GetAttr<Color>("divider_color", Color::BLACK);
+            theme->tabBarShadowMargin_ = pattern->GetAttr<Dimension>("tab_bar_shadow_margin", 0.0_vp);
+            theme->tabBarGradientWidth_ = pattern->GetAttr<Dimension>("tab_bar_gradient_width", 0.0_vp);
+            theme->colorBottomTabSubBg_ = pattern->GetAttr<Color>("color_bottom_tab_sub_bg", Color::WHITE);
+            theme->colorBottomTabSubBgBlur_ = pattern->GetAttr<Color>("color_bottom_tab_sub_bg_blur", Color::WHITE);
+            theme->tabBarColumnGutter_ = pattern->GetAttr<Dimension>("tab_bar_column_gutter", 0.0_vp);
+            theme->tabBarColumnMargin_ = pattern->GetAttr<Dimension>("tab_bar_column_margin", 0.0_vp);
+            theme->horizontalBottomTabMinWidth_ =
+                pattern->GetAttr<Dimension>("horizontal_bottom_tab_min_width", 0.0_vp);
+
+            theme->labelPadding_ = pattern->GetAttr<Dimension>("label_padding", 8.0_vp);
+            theme->padding_ = pattern->GetAttr<Dimension>("tab_padding", 16.0_vp);
+            theme->gradientWidth_ = pattern->GetAttr<Dimension>("tab_gradient_width", 24.0_vp);
+            theme->defaultHeight_ = pattern->GetAttr<Dimension>("tab_default_height", 56.0_vp);
+            theme->defaultWidth_ = pattern->GetAttr<Dimension>("tab_default_width", 200.0_px);
+            theme->defaultItemHeight_ = pattern->GetAttr<Dimension>("tab_default_item_height", 200.0_px);
+            theme->activeIndicatorWidth_ = pattern->GetAttr<Dimension>("active_indicator_width", 2.0_vp);
+            theme->activeIndicatorMinWidth_ = pattern->GetAttr<Dimension>("active_indicator_min_width", 32.0_vp);
+            theme->activeIndicatorPadding_ = pattern->GetAttr<Dimension>("active_indicator_padding", 3.0_vp);
+            theme->focusIndicatorHorizontalPadding_ =
+                pattern->GetAttr<Dimension>("focus_indicator_horizontal_padding", 0.0_vp);
+            theme->focusIndicatorVerticalPadding_ =
+                pattern->GetAttr<Dimension>("focus_indicator_vertical_padding", 0.0_vp);
+            theme->dialog_radius_level10_ = pattern->GetAttr<Dimension>("dialog_radius_level10", 20.0_vp);
+            theme->dialog_iconColor_ = pattern->GetAttr<Color>("dialog_icon_primary", Color(0xff182431));
+            theme->dialog_fontColor_ = pattern->GetAttr<Color>("dialog_font_primary", Color(0xff182431));
         }
     };
 
@@ -223,6 +231,11 @@ public:
     const Dimension& GetSubTabHorizontalPadding() const
     {
         return subTabHorizontalPadding_;
+    }
+
+    const Dimension& GetSubTabItemPadding() const
+    {
+        return subTabItemPadding_;
     }
 
     const Dimension& GetSubTabTopPadding() const
@@ -432,6 +445,7 @@ private:
     Dimension subTabHorizontalPadding_;
     Dimension subTabTopPadding_;
     Dimension subTabBottomPadding_;
+    Dimension subTabItemPadding_;
     Color subTabBarHoverColor_;
     Color subTabBarPressedColor_;
     Dimension subtabTextDefaultFontSize_;

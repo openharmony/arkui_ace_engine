@@ -390,6 +390,14 @@ void SwiperModelNG::SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidSc
     pattern->SetOnContentDidScroll(std::move(onContentDidScroll));
 }
 
+void SwiperModelNG::SetOnContentDidScroll(FrameNode* frameNode, ContentDidScrollEvent&& onContentDidScroll)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnContentDidScroll(std::move(onContentDidScroll));
+}
+
 void SwiperModelNG::SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin, bool ignoreBlank)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMargin, nextMargin, frameNode);
@@ -648,7 +656,7 @@ int SwiperModelNG::GetIndex(FrameNode* frameNode)
 
 Axis SwiperModelNG::GetDirection(FrameNode* frameNode)
 {
-    Axis value = Axis::VERTICAL;
+    Axis value = Axis::HORIZONTAL;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(SwiperLayoutProperty, Direction, value, frameNode, value);
     return value;
 }
@@ -781,6 +789,19 @@ int32_t SwiperModelNG::GetIndicatorType(FrameNode* frameNode)
     SwiperIndicatorType value = SwiperIndicatorType::DOT;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(SwiperLayoutProperty, IndicatorType, value, frameNode, value);
     return static_cast<int32_t>(value);
+
+}
+
+RefPtr<SwiperController> SwiperModelNG::GetOrCreateSwiperController(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    if (!pattern->GetSwiperController()) {
+        auto controller = AceType::MakeRefPtr<SwiperController>();
+        pattern->SetSwiperController(controller);
+    }
+    return pattern->GetSwiperController();
 }
 
 RefPtr<SwiperController> SwiperModelNG::GetSwiperController(FrameNode* frameNode)

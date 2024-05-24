@@ -170,22 +170,31 @@ void JSNavDestination::SetBackButtonIcon(const JSCallbackInfo& info)
     auto noPixMap = ParseJsMedia(info[0], src);
 
     RefPtr<PixelMap> pixMap = nullptr;
+    auto isValidImage = false;
 #if defined(PIXEL_MAP_SUPPORTED)
     if (!noPixMap) {
         pixMap = CreatePixelMapFromNapiValue(info[0]);
     }
 #endif
+    if (noPixMap || pixMap != nullptr) {
+        isValidImage = true;
+    }
     std::vector<std::string> nameList;
+    NG::ImageOption imageOption;
     std::string bundleName;
     std::string moduleName;
     GetJsMediaBundleInfo(info[0], bundleName, moduleName);
     nameList.emplace_back(bundleName);
     nameList.emplace_back(moduleName);
-    std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol;
-    if (src.empty() && pixMap == nullptr) {
+    imageOption.noPixMap = noPixMap;
+    imageOption.isValidImage = isValidImage;
+    std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
+    auto isSymbol = info[0]->IsObject() && src.empty() && pixMap == nullptr;
+    if (isSymbol) {
         SetSymbolOptionApply(info, iconSymbol, info[0]);
     }
-    NavDestinationModel::GetInstance()->SetBackButtonIcon(iconSymbol, src, noPixMap, pixMap, nameList);
+
+    NavDestinationModel::GetInstance()->SetBackButtonIcon(iconSymbol, src, imageOption, pixMap, nameList);
 }
 
 void JSNavDestination::SetOnShown(const JSCallbackInfo& info)
@@ -424,7 +433,9 @@ void JSNavDestination::JSBind(BindingTarget globalObj)
     JSClass<JSNavDestination>::StaticMethod("onHidden", &JSNavDestination::SetOnHidden);
     JSClass<JSNavDestination>::StaticMethod("onBackPressed", &JSNavDestination::SetOnBackPressed);
     JSClass<JSNavDestination>::StaticMethod("onReady", &JSNavDestination::SetOnReady);
+    JSClass<JSNavDestination>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSNavDestination>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSNavDestination>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSNavDestination>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSNavDestination>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSNavDestination>::StaticMethod("id", &JSViewAbstract::JsId);

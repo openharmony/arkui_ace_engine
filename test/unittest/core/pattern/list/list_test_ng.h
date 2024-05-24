@@ -108,7 +108,6 @@ public:
     static void TearDownTestSuite();
     void SetUp() override;
     void TearDown() override;
-    void ClearOldList();
     void GetList();
     ListModelNG CreateList();
     ListItemModelNG CreateListItem(V2::ListItemStyle listItemStyle = V2::ListItemStyle::NONE);
@@ -116,7 +115,6 @@ public:
     ListItemGroupModelNG CreateListItemGroup(V2::ListItemGroupStyle listItemGroupStyle = V2::ListItemGroupStyle::NONE);
     void CreateListItemGroups(
         int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle = V2::ListItemGroupStyle::NONE);
-    void CreateDone();
 
     void CreateItemWithSize(int32_t itemNumber, SizeT<Dimension> itemSize);
     void CreateGroupChildrenMainSize(int32_t groupNumber);
@@ -151,10 +149,11 @@ public:
         const RefPtr<FrameNode>& frameNode, int32_t viewItemNumber, int32_t lanes, float space, float startOffset);
     AssertionResult IsEqualTotalOffset(float expectOffset);
     AssertionResult ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, float expectOffset);
-    AssertionResult ScrollToItemInGroup(
+    AssertionResult JumpToItemInGroup(
         int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align, float expectOffset);
     std::vector<RefPtr<FrameNode>> GetALLItem();
     int32_t findFocusNodeIndex(RefPtr<FocusHub>& focusNode);
+    void ScrollTo(float position);
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<ListPattern> pattern_;

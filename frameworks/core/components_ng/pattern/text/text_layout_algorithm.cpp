@@ -18,6 +18,7 @@
 #include <limits>
 
 #include "base/geometry/dimension.h"
+#include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
@@ -111,6 +112,7 @@ void TextLayoutAlgorithm::OnReset() {}
 std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
+    ACE_TEXT_SCOPED_TRACE("TextLayoutAlgorithm::MeasureContent");
     TextStyle textStyle;
     ConstructTextStyles(contentConstraint, layoutWrapper, textStyle);
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -293,9 +295,16 @@ bool TextLayoutAlgorithm::CreateParagraph(
     if (pattern->IsSensitiveEnalbe()) {
         UpdateSensitiveContent(content);
     }
+    auto useExternalParagraph = pattern->GetExternalParagraph() && !pattern->NeedShowAIDetect();
+    auto externalParagraphStyle = pattern->GetExternalParagraphStyle();
     // default paragraph style
     auto paraStyle = GetParagraphStyle(textStyle, content, layoutWrapper);
-    if ((Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && spans_.empty()) || isSpanStringMode_) {
+    if (pattern->GetExternalParagraph()) {
+        if (!useExternalParagraph && externalParagraphStyle) {
+            paraStyle = externalParagraphStyle.value();
+        }
+    }
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) || isSpanStringMode_) {
         paraStyle.fontSize = textStyle.GetFontSize().ConvertToPx();
     }
     paraStyle.leadingMarginAlign = Alignment::CENTER;
@@ -304,7 +313,7 @@ bool TextLayoutAlgorithm::CreateParagraph(
     if (frameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
         return UpdateSymbolTextStyle(textStyle, paraStyle, layoutWrapper, frameNode);
     }
-    if (spans_.empty()) {
+    if (spans_.empty() || useExternalParagraph) {
         // only use for text.
         return UpdateSingleParagraph(layoutWrapper, paraStyle, textStyle, content, maxWidth);
     } else {
@@ -371,6 +380,7 @@ void TextLayoutAlgorithm::CreateParagraphDrag(
 bool TextLayoutAlgorithm::CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool needLayout)
 {
+    ACE_TEXT_SCOPED_TRACE("CreateParagraphAndLayout");
     auto maxSize = MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(contentConstraint);
     if (!CreateParagraph(textStyle, content, layoutWrapper, maxSize.Width())) {
         return false;
@@ -394,6 +404,7 @@ OffsetF TextLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper)
 bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::string& content,
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
+    ACE_TEXT_SCOPED_TRACE("TextLayoutAlgorithm::AdaptMinTextSize");
     double maxFontSize = 0.0;
     double minFontSize = 0.0;
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -446,13 +457,22 @@ float TextLayoutAlgorithm::GetBaselineOffset() const
 bool TextLayoutAlgorithm::UpdateSingleParagraph(LayoutWrapper* layoutWrapper, ParagraphStyle paraStyle,
     const TextStyle& textStyle, const std::string& content, double maxWidth)
 {
+    ACE_TEXT_SCOPED_TRACE("TextLayoutAlgorithm::UpdateSingleParagraph");
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, false);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, false);
-    auto && paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
+    auto externalParagraph = pattern->GetExternalParagraph();
+    RefPtr<Paragraph> paragraph;
+    if (externalParagraph) {
+        paragraph = Paragraph::Create(externalParagraph.value());
+    } else {
+        paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
+    }
     CHECK_NULL_RETURN(paragraph, false);
-    paragraph->PushStyle(textStyle);
+    auto textStyleTmp = textStyle;
+    textStyleTmp.ResetTextBaseline();
+    paragraph->PushStyle(textStyleTmp);
     if (pattern->NeedShowAIDetect()) {
         UpdateParagraphForAISpan(textStyle, layoutWrapper, paragraph);
     } else {

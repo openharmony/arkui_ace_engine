@@ -156,9 +156,9 @@ struct ComposeTitleBar {
       this.titleMaxWidth -= ComposeTitleBar.leftPadding
       this.titleMaxWidth -= ImageMenuItem.imageHotZoneWidth
       if (this.item !== undefined) {
-        this.titleMaxWidth -= ComposeTitleBar.portraitImageLeftPadding
-          + ComposeTitleBar.portraitImageSize
-          + ComposeTitleBar.portraitImageRightPadding
+        this.titleMaxWidth -= ComposeTitleBar.portraitImageLeftPadding +
+          ComposeTitleBar.portraitImageSize +
+          ComposeTitleBar.portraitImageRightPadding
       }
       this.titleMaxWidth -= ComposeTitleBar.rightPadding
     })

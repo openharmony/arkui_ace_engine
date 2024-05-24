@@ -14,6 +14,7 @@
         "src/circle_modifier.ts",
         "src/column_modifier.ts",
         "src/column_split_modifier.ts",
+        "src/component3d_modifier.ts",
         "src/counter_modifier.ts",
         "src/data_panel_modifier.ts",
         "src/date_picker_modifier.ts",
@@ -79,7 +80,8 @@
         "src/toggle_modifier.ts",
         "src/video_modifier.ts",
         "src/water_flow_modifier.ts",
-        "src/symbol_glyph_modifier.ts"
+        "src/symbol_glyph_modifier.ts",
+        "src/symbol_span_modifier.ts"
     ],
     "compilerOptions": {
         "module": "none",

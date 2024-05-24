@@ -304,18 +304,17 @@ void RefreshPattern::InitChildNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    auto accessibilityLevel = accessibilityProperty->GetAccessibilityLevel();
     if (isCustomBuilderExist_) {
         if (progressChild_) {
             if (HasLoadingText()) {
                 CHECK_NULL_VOID(columnNode_);
-                host->RemoveChild(loadingTextNode_);
-                loadingTextNode_ = nullptr;
-                host->RemoveChild(progressChild_);
-                progressChild_ = nullptr;
-                auto host = GetHost();
-                CHECK_NULL_VOID(host);
                 host->RemoveChild(columnNode_);
                 columnNode_ = nullptr;
+                progressChild_ = nullptr;
+                loadingTextNode_ = nullptr;
             } else {
                 host->RemoveChild(progressChild_);
                 progressChild_ = nullptr;
@@ -331,15 +330,22 @@ void RefreshPattern::InitChildNode()
         } else {
             UpdateLoadingProgress();
         }
+    } else {
+        auto progressAccessibilityProperty = progressChild_->GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_VOID(progressAccessibilityProperty);
+        progressAccessibilityProperty->SetAccessibilityLevel(accessibilityLevel);
     }
 
-    if (HasLoadingText()) {
+    if (HasLoadingText() && loadingTextNode_) {
         auto loadingTextLayoutProperty = loadingTextNode_->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(loadingTextLayoutProperty);
         auto layoutProperty = host->GetLayoutProperty<RefreshLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
         loadingTextLayoutProperty->UpdateContent(layoutProperty->GetLoadingTextValue());
         loadingTextNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        auto textAccessibilityProperty = loadingTextNode_->GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_VOID(textAccessibilityProperty);
+        textAccessibilityProperty->SetAccessibilityLevel(accessibilityLevel);
     }
 
     OnColorConfigurationUpdate();
@@ -770,6 +776,7 @@ void RefreshPattern::SpeedTriggerAnimation(float speed)
     } else if (NearZero(targetOffset)) {
         SwitchToFinish();
     }
+    FireOnOffsetChange(targetOffset);
     ResetAnimation();
     AnimationOption option;
     auto curve = AceType::MakeRefPtr<InterpolatingSpring>(dealSpeed, 1.0f, 228.0f, 30.0f);
@@ -820,6 +827,7 @@ void RefreshPattern::SpeedAnimationFinish()
 
 void RefreshPattern::QuickFirstChildAppear()
 {
+    FireOnOffsetChange(static_cast<float>(refreshOffset_.ConvertToPx()));
     isSourceFromAnimation_ = false;
     UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, GetFollowRatio());
     ResetAnimation();
@@ -832,6 +840,7 @@ void RefreshPattern::QuickFirstChildAppear()
 
 void RefreshPattern::QuickFirstChildDisappear()
 {
+    FireOnOffsetChange(0.0f);
     ResetAnimation();
     AnimationOption option;
     option.SetCurve(DEFAULT_CURVE);
@@ -1144,6 +1153,7 @@ ScrollResult RefreshPattern::HandleScroll(float offset, int32_t source, NestedSt
 
 void RefreshPattern::OnScrollStartRecursive(float position, float velocity)
 {
+    SetIsNestedInterrupt(false);
     if (!GetIsFixedNestedScrollMode()) {
         SetParentScrollable();
     }
@@ -1168,7 +1178,7 @@ bool RefreshPattern::HandleScrollVelocity(float velocity)
             return true;
         }
     }
-    if (Positive(scrollOffset_)) {
+    if (Positive(scrollOffset_) || Positive(velocity)) {
         HandleDragEnd(velocity);
         result = true;
     } else if (parent && ((Negative(velocity) && nestedScroll.forward == NestedScrollMode::SELF_FIRST) ||
@@ -1183,9 +1193,10 @@ void RefreshPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
     HandleDragEnd(velocity.value_or(0.f));
     auto parent = GetNestedScrollParent();
     auto nestedScroll = GetNestedScroll();
-    if (parent && nestedScroll.NeedParent()) {
+    if (parent && (nestedScroll.NeedParent() || GetIsNestedInterrupt())) {
         parent->OnScrollEndRecursive(velocity);
     }
+    SetIsNestedInterrupt(false);
 }
 
 void RefreshPattern::DumpInfo()

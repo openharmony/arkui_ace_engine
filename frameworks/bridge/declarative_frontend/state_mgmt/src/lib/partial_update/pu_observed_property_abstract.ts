@@ -23,7 +23,7 @@ abstract class ObservedPropertyAbstractPU<T> extends ObservedPropertyAbstract<T>
 implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber, IMultiPropertiesReadSubscriber
 // these interfaces implementations are all empty functions, overwrite FU base class implementations.
 {
-  static readonly DelayedNotifyChangesEnum=class  {
+  static readonly DelayedNotifyChangesEnum = class {
     static readonly do_not_delay = 0;
     static readonly delay_none_pending = 1;
     static readonly delay_notification_pending = 2;
@@ -48,7 +48,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     Object.defineProperty(this, 'owningView_', {writable: true, enumerable: false, value: undefined});
     Object.defineProperty(this, 'subscriberRefs_',
       {writable: true, enumerable: false, value: new Set<IPropertySubscriber>()});
-    if(subscriber) {
+    if (subscriber) {
       if (subscriber instanceof ViewPU) {
         this.owningView_ = subscriber;
       } else {
@@ -135,7 +135,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
       let item = queue.shift();
       seen.add(item);
 
-      if (item != this) {
+      if (item !== this) {
         result += `${sepa}${item.debugInfoOwningView()}`;
       }
       result += `${sepaDiff}${item.debugInfoDependentElmtIds(dumpDependantElements)}`; // new dependent elements
@@ -172,6 +172,38 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
       : false;
   }
 
+  public dumpSyncPeers(): ObservedPropertyInfo[] {
+    let res: ObservedPropertyInfo[] = [];
+    this.subscriberRefs_.forEach((subscriber: IPropertySubscriber) => {
+      if ('debugInfo' in subscriber) {
+        const observedProp = subscriber as ObservedPropertyAbstractPU<any>;
+        let syncPeer: ObservedPropertyInfo = {
+          decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(),
+          value: typeof observedProp.getUnmonitored() !== 'object' ? observedProp.getUnmonitored() : ObservedObject.GetRawObject(observedProp.getUnmonitored()),
+          dependentElementIds: observedProp.debugInfoDependentElmtIds(),
+          owningView: { componentName: observedProp.owningView_?.constructor.name, id: observedProp.owningView_?.id__() }
+        };
+        res.push(syncPeer);
+      }
+    });
+    return res;
+  }
+
+  protected onDumpProfiler(): void {
+    let res: DumpInfo = new DumpInfo();
+    let observedPropertyInfo: ObservedPropertyInfo = {
+      decorator: this.debugInfoDecorator(), propertyName: this.info(), id: this.id__(),
+      value: typeof this.getUnmonitored() !== 'object' ? this.getUnmonitored() : ObservedObject.GetRawObject(this.getUnmonitored()),
+      dependentElementIds: this.debugInfoDependentElmtIds(),
+      owningView: { componentName: this.owningView_?.constructor.name, id: this.owningView_?.id__() }, syncPeers: this.dumpSyncPeers()
+    };
+    res.viewInfo = { componentName: this.owningView_?.constructor.name, id: this.owningView_?.id__() };
+    res.observedPropertiesInfo.push(observedPropertyInfo);
+    if (this.owningView_) {
+      this.owningView_.sendStateInfo(JSON.stringify(res));
+    }
+  }
+
   /*
     Virtualized version of the subscription mechanism - add subscriber
     Overrides implementation in ObservedPropertyAbstract<T>
@@ -206,7 +238,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
    * feature is only used for @StorageLink/Prop, @LocalStorageLink/Prop
    */
   public enableDelayedNotification() : void {
-  if (this.delayedNotification_ != ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_notification_pending) {
+  if (this.delayedNotification_ !== ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_notification_pending) {
       stateMgmtConsole.debug(`${this.constructor.name}: enableDelayedNotification.`);
       this.delayedNotification_ = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_none_pending;
     }
@@ -246,9 +278,16 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     stateMgmtProfiler.begin('ObservedPropertyAbstractPU.notifyPropertyHasChangedPU');
     stateMgmtConsole.debug(`${this.debugInfo()}: notifyPropertyHasChangedPU.`);
     if (this.owningView_) {
-      if (this.delayedNotification_ == ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay) {
+      if (this.delayedNotification_ === ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay) {
         // send viewPropertyHasChanged right away
         this.owningView_.viewPropertyHasChanged(this.info_, this.dependentElmtIdsByProperty_.getAllPropertyDependencies());
+
+        // send changed observed property to profiler
+        // only will be true when enable profiler
+        if (stateMgmtDFX.enableProfiler_) {
+          stateMgmtConsole.warn(`notifyPropertyHasChangedPU in profiler mode`);
+          this.onDumpProfiler();
+        }
       } else {
         // mark this @StorageLink/Prop or @LocalStorageLink/Prop variable has having changed and notification of viewPropertyHasChanged delivery pending
         this.delayedNotification_ = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_notification_pending;
@@ -258,7 +297,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
       if (subscriber) {
         if ('syncPeerHasChanged' in subscriber) {
           (subscriber as unknown as PeerChangeEventReceiverPU<T>).syncPeerHasChanged(this);
-        } else  {
+        } else {
           stateMgmtConsole.warn(`${this.debugInfo()}: notifyPropertyHasChangedPU: unknown subscriber ID 'subscribedId' error!`);
         }
       }
@@ -275,6 +314,12 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
       if (this.delayedNotification_ == ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay) {
         // send viewPropertyHasChanged right away
         this.owningView_.viewPropertyHasChanged(this.info_, this.dependentElmtIdsByProperty_.getTrackedObjectPropertyDependencies(changedPropertyName, 'notifyTrackedObjectPropertyHasChanged'));
+        // send changed observed property to profiler
+        // only will be true when enable profiler
+        if (stateMgmtDFX.enableProfiler_) {
+          stateMgmtConsole.warn(`notifyPropertyHasChangedPU in profiler mode`);
+          this.onDumpProfiler();
+        }
       } else {
         // mark this @StorageLink/Prop or @LocalStorageLink/Prop variable has having changed and notification of viewPropertyHasChanged delivery pending
         this.delayedNotification_ = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_notification_pending;
@@ -422,11 +467,11 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
    */
   protected recordPropertyDependentUpdate() : void {
     const elmtId = this.getRenderingElmtId();
-    if (elmtId == UINodeRegisterProxy.notRecordingDependencies) {
+    if (elmtId === UINodeRegisterProxy.notRecordingDependencies) {
       // not access recording 
       return;
     }
-    if (elmtId == UINodeRegisterProxy.monitorIllegalV2V3StateAccess) {
+    if (elmtId === UINodeRegisterProxy.monitorIllegalV2V3StateAccess) {
       const error = `${this.debugInfo()}: recordPropertyDependentUpdate trying to use V2 state to init/update child V3 @Component. Application error`;
       stateMgmtConsole.applicationError(error);
       throw new TypeError(error);
@@ -566,11 +611,13 @@ class PropertyDependencies {
     return dependentElmtIds;
   }
 
-  public dumpInfoDependencies(owningView: ViewPU|undefined = undefined, dumpDependantElements): string {
+  public dumpInfoDependencies(owningView: ViewPU | undefined = undefined, dumpDependantElements): string {
     const formatElmtId = owningView ? (elmtId => owningView.debugInfoElmtId(elmtId)) : (elmtId => elmtId);
     let result = `dependencies: variable assignment (or object prop change in compat mode) affects elmtIds: ${Array.from(this.propertyDependencies_).map(formatElmtId).join(', ')}`;
     const arr = Array.from(this.propertyDependencies_).map(formatElmtId);
-    if (dumpDependantElements) return (arr.length > 1 ? arr.join(', ') : arr[0]);
+    if (dumpDependantElements) {
+      return (arr.length > 1 ? arr.join(', ') : arr[0]);
+    }
     this.trackedObjectPropertyDependencies_.forEach((propertyElmtId, propertyName) => {
       result += `  property '@Track ${propertyName}' change affects elmtIds: ${Array.from(propertyElmtId).map(formatElmtId).join(', ')}`;
     });

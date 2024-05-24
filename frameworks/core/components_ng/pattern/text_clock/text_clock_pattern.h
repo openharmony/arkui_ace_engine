@@ -108,6 +108,7 @@ private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void DumpInfo() override;
     void InitTextClockController();
 
     void InitUpdateTimeTextCallBack();
@@ -115,7 +116,7 @@ private:
     void RequestUpdateForNextSecond();
     void FireChangeEvent() const;
     std::string GetCurrentFormatDateTime();
-    std::string ParseDateTime(const std::string& dateTimeValue, int32_t week);
+    std::string ParseDateTime(const std::string& dateTimeValue, int32_t week, int32_t month);
     void RegistVisibleAreaChangeCallback();
     void OnVisibleAreaChange(bool visible);
     static void UpdateTextLayoutProperty(
@@ -127,6 +128,7 @@ private:
     static std::string Abstract(const std::string& strSource, const bool& abstractItem);
     static int32_t GetDigitNumber(const std::string& strSource);
     static std::string GetWeek(const bool& isShortType, const int32_t& week);
+    static std::string GetMonth(int32_t month);
     std::string SpliceDateTime(const std::vector<std::string>& curDateTime);
     static std::string CheckDateTimeElement(const std::vector<std::string>& curDateTime, const char& element,
         const int32_t& elementIndex, const bool& oneElement);

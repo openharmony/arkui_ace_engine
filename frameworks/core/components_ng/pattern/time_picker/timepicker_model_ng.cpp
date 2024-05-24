@@ -104,7 +104,9 @@ void TimePickerModelNG::CreateTimePicker(RefPtr<PickerTheme> pickerTheme, bool h
         auto layoutProperty = stackMinuteNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
         layoutProperty->UpdateLayoutWeight(1);
-        stackMinuteNode->MountToParent(timePickerNode);
+        auto language = AceApplicationInfo::GetInstance().GetLanguage();
+        language == "ug" ? stackMinuteNode->MountToParent(timePickerNode, 0)
+                            : stackMinuteNode->MountToParent(timePickerNode);
         minuteColumnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
     }
     timePickerRowPattern->SetHasSecond(hasSecond);
@@ -435,6 +437,7 @@ void TimePickerModelNG::SetSelectedTime(FrameNode* frameNode, const PickerTime& 
 {
     CHECK_NULL_VOID(frameNode);
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerRowPattern);
     timePickerRowPattern->SetSelectedTime(value);
 }
 

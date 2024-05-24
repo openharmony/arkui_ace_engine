@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
+
 const REFLECT_MAX_COUNT = 3;
 const IMAGE_SIZE_WIDTH_HEIGHT = 24;
 const TEXT_MIN_SIZE = 9;
@@ -260,9 +262,11 @@ export class ToolBar extends ViewPU {
   MoreTabBuilder(g2, h2 = null) {
     this.observeComponentCreation2((p2, q2) => {
       Column.create();
+      Column.bindMenu(ObservedObject.GetRawObject(this.menuContent),
+        { placement: Placement.TopRight, offset: { x: -12, y : -10 } });
       Column.width('100%');
       Column.height('100%');
-      Column.padding({ left: 4, right: 4 });
+      Column.padding({ start: LengthMetrics.vp(4), end: LengthMetrics.vp(4) });
       Column.borderRadius({ id: -1, type: 10002, params: ['sys.float.ohos_id_corner_radius_clicked'],
         bundleName: '', moduleName: '' });
     }, Column);
@@ -273,7 +277,6 @@ export class ToolBar extends ViewPU {
       Image.fillColor(ObservedObject.GetRawObject(this.iconPrimaryColor));
       Image.margin({ top: 8, bottom: 2 });
       Image.objectFit(ImageFit.Contain);
-      Image.bindMenu(ObservedObject.GetRawObject(this.menuContent), { offset: { x: 5, y: -10 } });
     }, Image);
     this.observeComponentCreation2((l2, m2) => {
       Text.create(this.moreText);
@@ -293,7 +296,7 @@ export class ToolBar extends ViewPU {
       Column.height('100%');
       Column.focusable(!(this.toolBarList[r1]?.state === 2));
       Column.focusOnTouch(!(this.toolBarList[r1]?.state === 2));
-      Column.padding({ left: 4, right: 4 });
+      Column.padding({ start: LengthMetrics.vp(4), end: LengthMetrics.vp(4) });
       Column.borderRadius({
         id: -1, type: 10002,
         params: ['sys.float.ohos_id_corner_radius_clicked'],
@@ -302,9 +305,9 @@ export class ToolBar extends ViewPU {
       Column.onClick(() => {
         let f2 = this.toolBarList[r1];
         if (f2.state === ItemState.ACTIVATE) {
-          if (this.activateIndex === r1)
+          if (this.activateIndex === r1) {
             this.activateIndex = -1;
-          else {
+          } else {
             this.activateIndex = r1;
           }
         }
@@ -407,7 +410,10 @@ export class ToolBar extends ViewPU {
       Tabs.onChange((j1) => {
       });
       Tabs.width('100%');
-      Tabs.padding({ left: this.toolBarList.length < 5 ? 24 : 0, right: this.toolBarList.length < 5 ? 24 : 0 });
+      Tabs.padding({
+        start: LengthMetrics.vp(this.toolBarList.length < 5 ? 24 : 0),
+        end: LengthMetrics.vp(this.toolBarList.length < 5 ? 24 : 0)
+      });
       Tabs.backgroundColor({
         id: -1, type: 10001,
         params: ['sys.color.ohos_id_color_toolbar_bg'],

@@ -832,6 +832,47 @@ HWTEST_F(TextFieldUXTest, SelectTextShowMenu001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SelectTextByForward
+ * @tc.desc: Test show menu after SetTextSelection()
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, SelectTextByForward, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and get focus
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. Set menuPolicy to be MenuPolicy::SHOW and isForward is true
+     */
+    SelectionOptions options;
+    options.menuPolicy = MenuPolicy::SHOW;
+    pattern_->SetSelectionFlag(0, DEFAULT_TEXT.length(), options, true);
+
+    /**
+     * @tc.steps: step3. Test menu open or close
+     * @tc.expected: text menu is open
+     */
+    auto ret = pattern_->selectOverlay_->IsCurrentMenuVisibile();
+    EXPECT_TRUE(ret);
+
+    /**
+     * @tc.steps: step4. Set menuPolicy to be MenuPolicy::HIDE and isForward is false
+     */
+    options.menuPolicy = MenuPolicy::HIDE;
+    pattern_->SetSelectionFlag(0, DEFAULT_TEXT.length(), options, false);
+
+    /**
+     * @tc.steps: step5. Test menu open or close
+     * @tc.expected: text menu is close
+     */
+    ret = pattern_->selectOverlay_->IsCurrentMenuVisibile();
+    EXPECT_FALSE(ret);
+}
+
+/**
  * @tc.name: OnBackPressed001
  * @tc.desc: Test OnBackPressed
  * @tc.type: FUNC

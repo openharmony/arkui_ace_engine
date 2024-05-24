@@ -47,7 +47,6 @@ void TextFieldModelNG::CreateNode(
     CHECK_NULL_VOID(textFieldLayoutProperty);
     auto textfieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textfieldPaintProperty);
-    textfieldPaintProperty->ResetUserProperties();
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     pattern->SetModifyDoneStatus(false);
     pattern->ResetContextAttr();
@@ -651,6 +650,7 @@ void TextFieldModelNG::SetBackgroundColor(const Color& color, bool tmp)
 
 void TextFieldModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& color)
 {
+    CHECK_NULL_VOID(frameNode);
     NG::ViewAbstract::SetBackgroundColor(frameNode, color);
     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, color, frameNode);
 }
@@ -747,14 +747,8 @@ void TextFieldModelNG::SetCustomKeyboard(const std::function<void()>&& buildFunc
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     if (pattern) {
+        pattern->SetCustomKeyboard(std::move(buildFunc));
         pattern->SetCustomKeyboardOption(supportAvoidance);
-        // create customKeyboard node
-        if (buildFunc) {
-            NG::ScopedViewStackProcessor builderViewStackProcessor;
-            buildFunc();
-            auto customKeyboard = NG::ViewStackProcessor::GetInstance()->Finish();
-            pattern->SetCustomKeyboard(customKeyboard);
-        }
     }
 }
 
@@ -877,6 +871,10 @@ void TextFieldModelNG::SetBackBorder()
     if (renderContext->HasBorderWidth()) {
         ACE_UPDATE_PAINT_PROPERTY(
             TextFieldPaintProperty, BorderWidthFlagByUser, renderContext->GetBorderWidth().value());
+    }
+    if (renderContext->HasBorderStyle()) {
+        ACE_UPDATE_PAINT_PROPERTY(
+            TextFieldPaintProperty, BorderStyleFlagByUser, renderContext->GetBorderStyle().value());
     }
 }
 
@@ -1648,7 +1646,7 @@ void TextFieldModelNG::SetCustomKeyboard(FrameNode* frameNode, FrameNode* custom
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     if (pattern) {
-        pattern->SetCustomKeyboard(AceType::Claim<UINode>(customKeyboard));
+        pattern->SetCustomKeyboardWithNode(AceType::Claim<UINode>(customKeyboard));
         pattern->SetCustomKeyboardOption(supportAvoidance);
     }
 }
@@ -1749,6 +1747,34 @@ Dimension TextFieldModelNG::GetAdaptMinFontSize(FrameNode* frameNode)
     return value;
 }
 
+void TextFieldModelNG::SetOnWillInsertValueEvent(std::function<bool(const InsertValueInfo&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillInsertValueEvent(std::move(func));
+}
+
+void TextFieldModelNG::SetOnDidInsertValueEvent(std::function<void(const InsertValueInfo&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidInsertValueEvent(std::move(func));
+}
+
+void TextFieldModelNG::SetOnWillDeleteEvent(std::function<bool(const DeleteValueInfo&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillDeleteEvent(std::move(func));
+}
+
+void TextFieldModelNG::SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidDeleteEvent(std::move(func));
+}
+
 Dimension TextFieldModelNG::GetAdaptMaxFontSize(FrameNode* frameNode)
 {
     Dimension value;
@@ -1828,6 +1854,101 @@ void TextFieldModelNG::ResetNumberOfLines(FrameNode* frameNode)
     if (textFieldLayoutProperty) {
         textFieldLayoutProperty->ResetNumberOfLines();
     }
+}
+
+void TextFieldModelNG::SetBorderWidth(FrameNode* frameNode, NG::BorderWidthProperty borderWidth)
+{
+    CHECK_NULL_VOID(frameNode);
+    NG::ViewAbstract::SetBorderWidth(frameNode, borderWidth);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BorderWidthFlagByUser, borderWidth, frameNode);
+}
+
+void TextFieldModelNG::SetBorderRadius(FrameNode* frameNode, NG::BorderRadiusProperty borderRadius)
+{
+    CHECK_NULL_VOID(frameNode);
+    NG::ViewAbstract::SetBorderRadius(frameNode, borderRadius);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BorderRadiusFlagByUser, borderRadius, frameNode);
+}
+
+void TextFieldModelNG::SetBorderColor(FrameNode* frameNode, NG::BorderColorProperty borderColors)
+{
+    CHECK_NULL_VOID(frameNode);
+    NG::ViewAbstract::SetBorderColor(frameNode, borderColors);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BorderColorFlagByUser, borderColors, frameNode);
+}
+
+void TextFieldModelNG::SetBorderStyle(FrameNode* frameNode, NG::BorderStyleProperty borderStyles)
+{
+    CHECK_NULL_VOID(frameNode);
+    NG::ViewAbstract::SetBorderStyle(frameNode, borderStyles);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BorderStyleFlagByUser, borderStyles, frameNode);
+}
+
+void TextFieldModelNG::SetMargin(FrameNode* frameNode, NG::PaddingProperty& margin)
+{
+    CHECK_NULL_VOID(frameNode);
+    MarginProperty userMargin;
+    userMargin.top = margin.top;
+    userMargin.bottom = margin.bottom;
+    userMargin.left = margin.left;
+    userMargin.right = margin.right;
+    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, MarginByUser, userMargin, frameNode);
+}
+
+PaddingProperty TextFieldModelNG::GetMargin(FrameNode* frameNode)
+{
+    CalcLength defaultDimen = CalcLength(0, DimensionUnit::VP);
+    NG::PaddingProperty margins;
+    margins.top = std::optional<CalcLength>(defaultDimen);
+    margins.right = std::optional<CalcLength>(defaultDimen);
+    margins.bottom = std::optional<CalcLength>(defaultDimen);
+    margins.left = std::optional<CalcLength>(defaultDimen);
+    auto textfieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_RETURN(textfieldPaintProperty, margins);
+    if (textfieldPaintProperty->HasMarginByUser()) {
+        const auto& property = textfieldPaintProperty->GetMarginByUserValue();
+        margins.top = std::optional<CalcLength>(property.top);
+        margins.right = std::optional<CalcLength>(property.right);
+        margins.bottom = std::optional<CalcLength>(property.bottom);
+        margins.left = std::optional<CalcLength>(property.left);
+    }
+    return margins;
+}
+
+void TextFieldModelNG::SetOnWillInsertValueEvent(FrameNode* frameNode,
+    std::function<bool(const InsertValueInfo&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillInsertValueEvent(std::move(func));
+}
+
+void TextFieldModelNG::SetOnDidInsertValueEvent(FrameNode* frameNode,
+    std::function<void(const InsertValueInfo&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidInsertValueEvent(std::move(func));
+}
+
+void TextFieldModelNG::SetOnWillDeleteEvent(FrameNode* frameNode,
+    std::function<bool(const DeleteValueInfo&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillDeleteEvent(std::move(func));
+}
+
+void TextFieldModelNG::SetOnDidDeleteEvent(FrameNode* frameNode,
+    std::function<void(const DeleteValueInfo&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidDeleteEvent(std::move(func));
 }
 
 } // namespace OHOS::Ace::NG

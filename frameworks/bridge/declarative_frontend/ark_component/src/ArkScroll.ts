@@ -214,10 +214,62 @@ class ScrollClipModifier extends ModifierWithKey<boolean | object> {
   }
 }
 
+class ScrollInitialOffsetModifier extends ModifierWithKey<ArkScrollOffsetOptions> {
+  static identity: Symbol = Symbol('initialOffset');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().scroll.resetInitialOffset(node);
+    } else {
+      getUINativeModule().scroll.setInitialOffset(node, this.value.xOffset, this.value.yOffset);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !((this.stageValue.xOffset === this.value.xOffset) &&
+    (this.stageValue.yOffset === this.value.yOffset));
+  }
+}
+
+class ScrollFlingSpeedLimitModifier extends ModifierWithKey<number> {
+  static identity: symbol = Symbol('flingSpeedLimit');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().scroll.resetFlingSpeedLimit(node);
+    } else {
+      getUINativeModule().scroll.setFlingSpeedLimit(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class ScrollInitializeModifier extends ModifierWithKey<Scroller> {
+  constructor(value: Scroller) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('scrollInitialize');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().scroll.resetScrollInitialize(node);
+    } else {
+      getUINativeModule().scroll.setScrollInitialize(node, this.value);
+    }
+  }
+}
 
 class ArkScrollComponent extends ArkComponent implements ScrollAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
+  }
+  initialize(value: Object[]): ScrollAttribute {
+    if (value[0] !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, ScrollInitializeModifier.identity, ScrollInitializeModifier, value[0]);
+    }
+    return this;
+  }
+  allowChildCount(): number {
+    return 1;
   }
   scrollable(value: ScrollDirection): this {
     modifierWithKey(this._modifiersWithKeys, ScrollScrollableModifier.identity, ScrollScrollableModifier, value);
@@ -310,6 +362,23 @@ class ArkScrollComponent extends ArkComponent implements ScrollAttribute {
   }
   clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this {
     modifierWithKey(this._modifiersWithKeys, ScrollClipModifier.identity, ScrollClipModifier, value);
+    return this;
+  }
+  initialOffset(value: OffsetOptions): ScrollAttribute {
+    let options = new ArkScrollOffsetOptions();
+    if (value) {
+      if (value.xOffset) {
+        options.xOffset = value.xOffset;
+      }
+      if (value.yOffset) {
+        options.yOffset = value.yOffset;
+      }
+      modifierWithKey(this._modifiersWithKeys, ScrollInitialOffsetModifier.identity, ScrollInitialOffsetModifier, options);
+    }
+    return this;
+  }
+  flingSpeedLimit(value: number): this {
+    modifierWithKey(this._modifiersWithKeys, ScrollFlingSpeedLimitModifier.identity, ScrollFlingSpeedLimitModifier, value);
     return this;
   }
 }

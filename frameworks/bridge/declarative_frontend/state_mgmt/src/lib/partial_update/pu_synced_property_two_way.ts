@@ -67,7 +67,7 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
     }
 
     if (this.getUnmonitored() === newValue) {
-      stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value - ignoring.`);
+      stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}IP, '${this.info() || 'unknown'}']: set with unchanged value - ignoring.`);
       return;
     }
 
@@ -88,7 +88,7 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
    * @param eventSource 
    */
   public syncPeerHasChanged(eventSource: ObservedPropertyAbstractPU<C>): void {
-    stateMgmtProfiler.begin("SynchedPropertyTwoWayPU.syncPeerHasChanged");
+    stateMgmtProfiler.begin('SynchedPropertyTwoWayPU.syncPeerHasChanged');
     if (!this.changeNotificationIsOngoing_) {
       stateMgmtConsole.debug(`${this.debugInfo()}: syncPeerHasChanged: from peer '${eventSource && eventSource.debugInfo && eventSource.debugInfo()}' .`)
       this.notifyPropertyHasChangedPU();
@@ -97,7 +97,7 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
   }
 
   public syncPeerTrackedPropertyHasChanged(eventSource: ObservedPropertyAbstractPU<C>, changedTrackedObjectPropertyName: string): void {
-    stateMgmtProfiler.begin("SynchedPropertyTwoWayPU.syncPeerTrackedPropertyHasChanged");
+    stateMgmtProfiler.begin('SynchedPropertyTwoWayPU.syncPeerTrackedPropertyHasChanged');
     if (!this.changeNotificationIsOngoing_) {
       stateMgmtConsole.debug(`${this.debugInfo()}: syncPeerTrackedPropertyHasChanged: from peer '${eventSource && eventSource.debugInfo && eventSource.debugInfo()}', changed property '${changedTrackedObjectPropertyName}'.`);
       this.notifyTrackedObjectPropertyHasChanged(changedTrackedObjectPropertyName);
@@ -131,7 +131,7 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
   public set(newValue: C): void {
     stateMgmtProfiler.begin("SynchedPropertyTwoWayPU.set");
     if (this.getUnmonitored() === newValue) {
-      stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value  - nothing to do.`);
+      stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}IP, '${this.info() || 'unknown'}']: set with unchanged value  - nothing to do.`);
       stateMgmtProfiler.end();
       return;
     }
@@ -151,7 +151,7 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
 
 
   protected onOptimisedObjectPropertyRead(readObservedObject: C, readPropertyName: string, isTracked: boolean): void {
-    stateMgmtProfiler.begin("SynchedPropertyTwoWayPU.onOptimisedObjectPropertyRead");
+    stateMgmtProfiler.begin('SynchedPropertyTwoWayPU.onOptimisedObjectPropertyRead');
     const renderingElmtId = this.getRenderingElmtId();
     if (renderingElmtId >= 0) {
       if (!isTracked) {

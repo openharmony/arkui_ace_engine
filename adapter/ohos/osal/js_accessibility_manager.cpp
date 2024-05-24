@@ -1121,7 +1121,11 @@ static void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, Ac
     auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
 
-    nodeInfo.SetContent(accessibilityProperty->GetGroupText());
+    if (accessibilityProperty->HasUserTextValue()) {
+        nodeInfo.SetContent(accessibilityProperty->GetUserTextValue());
+    } else {
+        nodeInfo.SetContent(accessibilityProperty->GetGroupText());
+    }
     nodeInfo.SetAccessibilityText(accessibilityProperty->GetAccessibilityText());
     if (accessibilityProperty->HasRange()) {
         RangeInfo rangeInfo = ConvertAccessibilityValue(accessibilityProperty->GetAccessibilityValue());
@@ -1131,15 +1135,38 @@ static void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, Ac
     nodeInfo.SetTextType(accessibilityProperty->GetTextType());
     nodeInfo.SetTextLengthLimit(accessibilityProperty->GetTextLengthLimit());
     nodeInfo.SetOffset(accessibilityProperty->GetScrollOffSet());
-    nodeInfo.SetChecked(accessibilityProperty->IsChecked());
-    nodeInfo.SetSelected(accessibilityProperty->IsSelected());
+    if (accessibilityProperty->HasUserDisabled()) {
+        nodeInfo.SetEnabled(!accessibilityProperty->IsUserDisabled());
+    }
+    if (accessibilityProperty->HasUserCheckedType()) {
+        nodeInfo.SetChecked(accessibilityProperty->GetUserCheckedType());
+    } else {
+        nodeInfo.SetChecked(accessibilityProperty->IsChecked());
+    }
+    if (accessibilityProperty->HasUserSelected()) {
+        nodeInfo.SetSelected(accessibilityProperty->IsUserSelected());
+    } else {
+        nodeInfo.SetSelected(accessibilityProperty->IsSelected());
+    }
     nodeInfo.SetPassword(accessibilityProperty->IsPassword());
     nodeInfo.SetPluraLineSupported(accessibilityProperty->IsMultiLine());
     nodeInfo.SetHinting(accessibilityProperty->IsHint());
     nodeInfo.SetDescriptionInfo(accessibilityProperty->GetAccessibilityDescription());
-    nodeInfo.SetCurrentIndex(accessibilityProperty->GetCurrentIndex());
-    nodeInfo.SetBeginIndex(accessibilityProperty->GetBeginIndex());
-    nodeInfo.SetEndIndex(accessibilityProperty->GetEndIndex());
+    if (accessibilityProperty->HasUserCurrentValue()) {
+        nodeInfo.SetCurrentIndex(accessibilityProperty->GetUserCurrentValue());
+    } else {
+        nodeInfo.SetCurrentIndex(accessibilityProperty->GetCurrentIndex());
+    }
+    if (accessibilityProperty->HasUserMinValue()) {
+        nodeInfo.SetBeginIndex(accessibilityProperty->GetUserMinValue());
+    } else {
+        nodeInfo.SetBeginIndex(accessibilityProperty->GetBeginIndex());
+    }
+    if (accessibilityProperty->HasUserMaxValue()) {
+        nodeInfo.SetEndIndex(accessibilityProperty->GetUserMaxValue());
+    } else {
+        nodeInfo.SetEndIndex(accessibilityProperty->GetEndIndex());
+    }
     auto tag = node->GetTag();
     if (tag == V2::TOAST_ETS_TAG || tag == V2::POPUP_ETS_TAG || tag == V2::DIALOG_ETS_TAG ||
         tag == V2::ACTION_SHEET_DIALOG_ETS_TAG || tag == V2::ALERT_DIALOG_ETS_TAG || tag == V2::MENU_ETS_TAG ||
@@ -2315,6 +2342,7 @@ void JsAccessibilityManager::DumpTreeNG(bool useWindowId, uint32_t windowId, int
     auto pipeline = GetPipelineByWindowId(windowId);
     if (pipeline == nullptr) {
         DumpLog::GetInstance().Print("Error: pipeline is not found!");
+        return;
     }
     auto rootNode = pipeline->GetRootElement();
     CHECK_NULL_VOID(rootNode);
@@ -3577,6 +3605,12 @@ bool JsAccessibilityManager::ExecuteActionNG(int64_t elementId,
 #endif
     ContainerScope instance(ngPipeline->GetInstanceId());
     auto frameNode = GetFramenodeByAccessibilityId(ngPipeline->GetRootElement(), elementId);
+
+    if (!frameNode && elementId == lastElementId_) {
+        frameNode = lastFrameNode_.Upgrade();
+    }
+
+
     CHECK_NULL_RETURN(frameNode, result);
 
 #ifdef WEB_SUPPORTED
@@ -3620,10 +3654,12 @@ bool JsAccessibilityManager::ConvertActionTypeToBoolen(ActionType action, RefPtr
             break;
         }
         case ActionType::ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS: {
+            SaveLast(elementId, frameNode);
             result = ActAccessibilityFocus(elementId, frameNode, context, currentFocusNodeId_, false);
             break;
         }
         case ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS: {
+            SaveLast(elementId, frameNode);
             result = ActAccessibilityFocus(elementId, frameNode, context, currentFocusNodeId_, true);
             break;
         }
@@ -3756,6 +3792,14 @@ void JsAccessibilityManager::DeregisterInteractionOperation()
     auto instance = AccessibilitySystemAbilityClient::GetInstance();
     CHECK_NULL_VOID(instance);
     Register(false);
+    if (currentFocusNodeId_ != -1 && lastElementId_ != -1) {
+        auto focusNode = lastFrameNode_.Upgrade();
+        if (focusNode != nullptr && focusNode->GetTag() != V2::WEB_CORE_TAG) {
+            focusNode->GetRenderContext()->UpdateAccessibilityFocus(false);
+        }
+    }
+    lastFrameNode_.Reset();
+    lastElementId_ = -1;
     currentFocusNodeId_ = -1;
     instance->DeregisterElementOperator(windowId);
     RefPtr<PipelineBase> context;

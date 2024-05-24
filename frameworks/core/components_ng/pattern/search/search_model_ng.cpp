@@ -77,10 +77,11 @@ RefPtr<SearchNode> SearchModelNG::CreateSearchNode(int32_t nodeId, const std::op
     auto frameNode =
         GetOrCreateSearchNode(V2::SEARCH_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SearchPattern>(); });
 
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    pattern->SetSearchNode(frameNode);
+
     bool hasTextFieldNode = frameNode->HasTextFieldNode();
-    bool hasImageNode = frameNode->HasImageNode();
     bool hasButtonNode = frameNode->HasButtonNode();
-    bool hasCancelImageNode = frameNode->HasCancelImageNode();
     bool hasCancelButtonNode = frameNode->HasCancelButtonNode();
 
     CreateTextField(frameNode, placeholder, value, hasTextFieldNode);
@@ -89,8 +90,9 @@ RefPtr<SearchNode> SearchModelNG::CreateSearchNode(int32_t nodeId, const std::op
     if (icon.has_value()) {
         src = icon.value();
     }
-    CreateImage(frameNode, src, hasImageNode);
-    CreateCancelImage(frameNode, hasCancelImageNode);
+    pattern->InitIconColorSize();
+    pattern->CreateSearchIcon(src);
+    pattern->CreateCancelIcon();
     CreateCancelButton(frameNode, hasCancelButtonNode);
     CreateButton(frameNode, hasButtonNode);
 
@@ -101,8 +103,7 @@ RefPtr<SearchNode> SearchModelNG::CreateSearchNode(int32_t nodeId, const std::op
     BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
     renderContext->UpdateBorderRadius(borderRadius);
 
-    auto pattern = frameNode->GetPattern<SearchPattern>();
-
+    auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
     auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     pattern->SetSearchController(textFieldPattern->GetTextFieldController());
@@ -170,192 +171,55 @@ void SearchModelNG::SetSearchButton(const std::string& text)
 
 void SearchModelNG::SetSearchIconSize(const Dimension& value)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
-    CHECK_NULL_VOID(imageFrameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto searchTheme = pipeline->GetTheme<SearchTheme>();
-    CHECK_NULL_VOID(searchTheme);
-
-    auto imageRenderContext = imageFrameNode->GetRenderContext();
-    CHECK_NULL_VOID(imageRenderContext);
-    auto imageOriginHeight = searchTheme->GetIconHeight().ConvertToPx();
-    double imageScale = 0.0;
-    if (!NearZero(imageOriginHeight)) {
-        imageScale = value.ConvertToPx() / imageOriginHeight;
-    }
-    imageRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
-
-    imageFrameNode->MarkModifyDone();
-    imageFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSearchIconSize(value);
     ACE_UPDATE_LAYOUT_PROPERTY(SearchLayoutProperty, SearchIconUDSize, value);
 }
 
 void SearchModelNG::SetSearchIconColor(const Color& color)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
-    CHECK_NULL_VOID(imageFrameNode);
-    auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(imageLayoutProperty);
-    auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value();
-    if (imageSourceInfo.IsSvg()) {
-        imageSourceInfo.SetFillColor(color);
-        imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-
-        auto imageRenderProperty = imageFrameNode->GetPaintProperty<ImageRenderProperty>();
-        CHECK_NULL_VOID(imageRenderProperty);
-        imageRenderProperty->UpdateSvgFillColor(color);
-
-        imageFrameNode->MarkModifyDone();
-        imageFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    }
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSearchIconColor(color);
 }
 
 void SearchModelNG::SetSearchSrcPath(
     const std::string& src, const std::string& bundleName, const std::string& moduleName)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
-    CHECK_NULL_VOID(imageFrameNode);
-    auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(imageLayoutProperty);
-    auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value();
-    if (src.empty()) {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        imageSourceInfo.SetResourceId(InternalResource::ResourceId::SEARCH_SVG);
-        auto iconPath = pipeline->GetTheme<IconTheme>()->GetIconPath(InternalResource::ResourceId::SEARCH_SVG);
-        auto color = pipeline->GetTheme<SearchTheme>()->GetSearchIconColor();
-        imageSourceInfo.SetSrc(iconPath, color);
-    } else {
-        imageSourceInfo.SetSrc(src);
-    }
-    imageSourceInfo.SetBundleName(bundleName);
-    imageSourceInfo.SetModuleName(moduleName);
-    imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-    imageFrameNode->MarkModifyDone();
-    imageFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSearchSrcPath(src, bundleName, moduleName);
 }
 
 void SearchModelNG::SetRightIconSrcPath(const std::string& src)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
-    CHECK_NULL_VOID(imageFrameNode);
-    auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(imageLayoutProperty);
-    auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value();
-
-    if (src.empty()) {
-        imageSourceInfo.SetResourceId(InternalResource::ResourceId::CLOSE_SVG);
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto iconPath = pipeline->GetTheme<IconTheme>()->GetIconPath(InternalResource::ResourceId::CLOSE_SVG);
-        auto color = pipeline->GetTheme<SearchTheme>()->GetSearchIconColor();
-        imageSourceInfo.SetSrc(iconPath, color);
-    } else {
-        imageSourceInfo.SetSrc(src);
-    }
-    imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-    imageFrameNode->MarkModifyDone();
-    imageFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetRightIconSrcPath(src);
 }
 
 void SearchModelNG::SetCancelButtonStyle(CancelButtonStyle style)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto buttonHost = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_BUTTON_INDEX));
-    CHECK_NULL_VOID(buttonHost);
-    auto imageHost = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
-    CHECK_NULL_VOID(imageHost);
-    auto textHost = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
-    CHECK_NULL_VOID(textHost);
-
-    auto cancelButtonRenderContext = buttonHost->GetRenderContext();
-    CHECK_NULL_VOID(cancelButtonRenderContext);
-    auto cancelImageRenderContext = imageHost->GetRenderContext();
-    CHECK_NULL_VOID(cancelImageRenderContext);
-    auto textLayoutProperty = textHost->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    auto cancelButtonEvent = buttonHost->GetEventHub<ButtonEventHub>();
-    CHECK_NULL_VOID(cancelButtonEvent);
-    auto imageEvent = imageHost->GetEventHub<ImageEventHub>();
-    CHECK_NULL_VOID(imageEvent);
-
-    if ((style == CancelButtonStyle::CONSTANT) ||
-        ((style == CancelButtonStyle::INPUT) && textLayoutProperty->HasValue() &&
-            !textLayoutProperty->GetValue()->empty())) {
-        cancelButtonRenderContext->UpdateOpacity(1.0);
-        cancelImageRenderContext->UpdateOpacity(1.0);
-        cancelButtonEvent->SetEnabled(true);
-        imageEvent->SetEnabled(true);
-    } else {
-        cancelButtonRenderContext->UpdateOpacity(0.0);
-        cancelImageRenderContext->UpdateOpacity(0.0);
-        cancelButtonEvent->SetEnabled(false);
-        imageEvent->SetEnabled(false);
-    }
-    buttonHost->MarkModifyDone();
-    imageHost->MarkModifyDone();
-    buttonHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    imageHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCancelButtonStyle(style);
     ACE_UPDATE_LAYOUT_PROPERTY(SearchLayoutProperty, CancelButtonStyle, style);
 }
 
 void SearchModelNG::SetCancelIconSize(const Dimension& value)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
-    CHECK_NULL_VOID(imageFrameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto searchTheme = pipeline->GetTheme<SearchTheme>();
-    CHECK_NULL_VOID(searchTheme);
-    auto imageRenderContext = imageFrameNode->GetRenderContext();
-    CHECK_NULL_VOID(imageRenderContext);
-
-    auto imageOriginHeight = searchTheme->GetIconHeight().ConvertToPx();
-    double imageScale = 0.0;
-    if (!NearZero(imageOriginHeight)) {
-        imageScale = value.ConvertToPx() / imageOriginHeight;
-    }
-    imageRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
-
-    imageFrameNode->MarkModifyDone();
-    imageFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCancelIconSize(value);
     ACE_UPDATE_LAYOUT_PROPERTY(SearchLayoutProperty, CancelButtonUDSize, value);
 }
 
 void SearchModelNG::SetCancelIconColor(const Color& color)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
-    CHECK_NULL_VOID(imageFrameNode);
-    auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(imageLayoutProperty);
-    auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value();
-    if (imageSourceInfo.IsSvg()) {
-        imageSourceInfo.SetFillColor(color);
-        imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-
-        auto imageRenderProperty = imageFrameNode->GetPaintProperty<ImageRenderProperty>();
-        CHECK_NULL_VOID(imageRenderProperty);
-        imageRenderProperty->UpdateSvgFillColor(color);
-        imageFrameNode->MarkModifyDone();
-        imageFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    }
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCancelIconColor(color);
 }
 
 void SearchModelNG::SetSearchButtonFontSize(const Dimension& value)
@@ -696,6 +560,42 @@ void SearchModelNG::SetOnPasteWithEvent(std::function<void(const std::string&, N
     eventHub->SetOnPasteWithEvent(std::move(searchPasteFunc));
 }
 
+void SearchModelNG::SetOnWillInsertValueEvent(std::function<bool(const InsertValueInfo&)>&& func)
+{
+    auto searchTextField = GetSearchTextFieldFrameNode();
+    CHECK_NULL_VOID(searchTextField);
+    auto eventHub = searchTextField->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillInsertValueEvent(std::move(func));
+}
+
+void SearchModelNG::SetOnDidInsertValueEvent(std::function<void(const InsertValueInfo&)>&& func)
+{
+    auto searchTextField = GetSearchTextFieldFrameNode();
+    CHECK_NULL_VOID(searchTextField);
+    auto eventHub = searchTextField->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidInsertValueEvent(std::move(func));
+}
+
+void SearchModelNG::SetOnWillDeleteEvent(std::function<bool(const DeleteValueInfo&)>&& func)
+{
+    auto searchTextField = GetSearchTextFieldFrameNode();
+    CHECK_NULL_VOID(searchTextField);
+    auto eventHub = searchTextField->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillDeleteEvent(std::move(func));
+}
+
+void SearchModelNG::SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func)
+{
+    auto searchTextField = GetSearchTextFieldFrameNode();
+    CHECK_NULL_VOID(searchTextField);
+    auto eventHub = searchTextField->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidDeleteEvent(std::move(func));
+}
+
 void SearchModelNG::SetOnPaste(std::function<void(const std::string&)>&& func)
 {
     auto searchTextField = GetSearchTextFieldFrameNode();
@@ -723,14 +623,8 @@ void SearchModelNG::SetCustomKeyboard(const std::function<void()>&& buildFunc, b
     CHECK_NULL_VOID(textFieldChild);
     auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
     if (textFieldPattern) {
+        textFieldPattern->SetCustomKeyboard(std::move(buildFunc));
         textFieldPattern->SetCustomKeyboardOption(supportAvoidance);
-        // create customKeyboard node
-        if (buildFunc) {
-            NG::ScopedViewStackProcessor builderViewStackProcessor;
-            buildFunc();
-            auto customKeyboard = NG::ViewStackProcessor::GetInstance()->Finish();
-            textFieldPattern->SetCustomKeyboard(customKeyboard);
-        }
     }
 }
 
@@ -802,36 +696,6 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const 
     }
 }
 
-void SearchModelNG::CreateImage(const RefPtr<SearchNode>& parentNode, const std::string& src, bool hasImageNode)
-{
-    auto parentInspector = parentNode->GetInspectorIdValue("");
-    auto nodeId = parentNode->GetImageId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
-    ImageSourceInfo imageSourceInfo(src);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto searchTheme = pipeline->GetTheme<SearchTheme>();
-    CHECK_NULL_VOID(searchTheme);
-    if (src.empty()) {
-        imageSourceInfo.SetResourceId(InternalResource::ResourceId::SEARCH_SVG);
-        auto iconTheme = pipeline->GetTheme<IconTheme>();
-        CHECK_NULL_VOID(iconTheme);
-        auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::SEARCH_SVG);
-        imageSourceInfo.SetSrc(iconPath, searchTheme->GetSearchIconColor());
-    }
-    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
-    imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-    auto iconHeight = searchTheme->GetIconHeight();
-    CalcSize imageCalcSize((CalcLength(iconHeight)), CalcLength(iconHeight));
-    imageLayoutProperty->UpdateUserDefinedIdealSize(imageCalcSize);
-    frameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[IMAGE_INDEX] + parentInspector);
-    if (!hasImageNode) {
-        frameNode->MountToParent(parentNode);
-        frameNode->MarkModifyDone();
-    }
-}
-
 void SearchModelNG::RequestKeyboardOnFocus(bool needToRequest)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -841,43 +705,6 @@ void SearchModelNG::RequestKeyboardOnFocus(bool needToRequest)
     auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetNeedToRequestKeyboardOnFocus(needToRequest);
-}
-
-void SearchModelNG::CreateCancelImage(const RefPtr<SearchNode>& parentNode, bool hasCancelImageNode)
-{
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto nodeId = parentNode->GetCancelImageId();
-    ImageSourceInfo imageSourceInfo("");
-    imageSourceInfo.SetResourceId(InternalResource::ResourceId::CLOSE_SVG);
-    auto iconTheme = pipeline->GetTheme<IconTheme>();
-    CHECK_NULL_VOID(iconTheme);
-    auto searchTheme = pipeline->GetTheme<SearchTheme>();
-    CHECK_NULL_VOID(searchTheme);
-    auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::CLOSE_SVG);
-    imageSourceInfo.SetSrc(iconPath, searchTheme->GetSearchIconColor());
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
-    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
-    imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-    auto iconHeight = searchTheme->GetIconHeight();
-    CalcSize imageCalcSize((CalcLength(iconHeight)), CalcLength(iconHeight));
-    imageLayoutProperty->UpdateUserDefinedIdealSize(imageCalcSize);
-    auto parentInspector = parentNode->GetInspectorIdValue("");
-    frameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[CANCEL_IMAGE_INDEX] +
-        parentInspector);
-
-    auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
-    CHECK_NULL_VOID(imageRenderProperty);
-    imageRenderProperty->UpdateSvgFillColor(searchTheme->GetSearchIconColor());
-
-    if (!hasCancelImageNode) {
-        frameNode->MountToParent(parentNode);
-        auto cancelButtonEvent = frameNode->GetEventHub<ButtonEventHub>();
-        CHECK_NULL_VOID(cancelButtonEvent);
-        cancelButtonEvent->SetEnabled(false);
-        frameNode->MarkModifyDone();
-    }
 }
 
 void SearchModelNG::CreateButton(const RefPtr<SearchNode>& parentNode, bool hasButtonNode)
@@ -1093,28 +920,9 @@ void SearchModelNG::SetTextValue(FrameNode* frameNode, const std::optional<std::
 void SearchModelNG::SetIcon(FrameNode* frameNode, const std::optional<std::string>& icon)
 {
     CHECK_NULL_VOID(frameNode);
-    auto searchNode = AceType::Claim(AceType::DynamicCast<SearchNode>(frameNode));
-    if (!searchNode->HasImageNode()) {
-        return;
-    }
-
-    auto imageField = FrameNode::GetFrameNode(V2::IMAGE_ETS_TAG, searchNode->GetImageId());
-    CHECK_NULL_VOID(imageField);
-    auto src = icon.value_or("");
-    ImageSourceInfo imageSourceInfo(src);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto searchTheme = pipeline->GetTheme<SearchTheme>();
-    CHECK_NULL_VOID(searchTheme);
-    if (src.empty()) {
-        imageSourceInfo.SetResourceId(InternalResource::ResourceId::SEARCH_SVG);
-        auto iconTheme = pipeline->GetTheme<IconTheme>();
-        CHECK_NULL_VOID(iconTheme);
-        auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::SEARCH_SVG);
-        imageSourceInfo.SetSrc(iconPath, searchTheme->GetSearchIconColor());
-    }
-    auto imageLayoutProperty = imageField->GetLayoutProperty<ImageLayoutProperty>();
-    imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>(frameNode);
+    CHECK_NULL_VOID(pattern);
+    pattern->CreateSearchIcon(icon.value_or(""));
 }
 
 void SearchModelNG::SetPlaceholder(FrameNode* frameNode, const std::optional<std::string>& placeholder)
@@ -1180,70 +988,26 @@ void SearchModelNG::SetPlaceholderFont(FrameNode* frameNode, const Font& font)
 void SearchModelNG::SetSearchIconSize(FrameNode* frameNode, const Dimension& value)
 {
     CHECK_NULL_VOID(frameNode);
-    auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
-    CHECK_NULL_VOID(imageFrameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto searchTheme = pipeline->GetTheme<SearchTheme>();
-    CHECK_NULL_VOID(searchTheme);
-
-    auto imageRenderContext = imageFrameNode->GetRenderContext();
-    CHECK_NULL_VOID(imageRenderContext);
-    auto imageOriginHeight = searchTheme->GetIconHeight().ConvertToPx();
-    double imageScale = 0.0;
-    if (!NearZero(imageOriginHeight)) {
-        imageScale = value.ConvertToPx() / imageOriginHeight;
-    }
-    imageRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
-
-    imageFrameNode->MarkModifyDone();
-    imageFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>(frameNode);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSearchIconSize(value);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, SearchIconUDSize, value, frameNode);
 }
 
 void SearchModelNG::SetSearchSrcPath(FrameNode* frameNode, const std::string& src)
 {
     CHECK_NULL_VOID(frameNode);
-    auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
-    CHECK_NULL_VOID(imageFrameNode);
-    auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(imageLayoutProperty);
-    auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value();
-    if (src.empty()) {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        imageSourceInfo.SetResourceId(InternalResource::ResourceId::SEARCH_SVG);
-        auto iconPath = pipeline->GetTheme<IconTheme>()->GetIconPath(InternalResource::ResourceId::SEARCH_SVG);
-        auto color = pipeline->GetTheme<SearchTheme>()->GetSearchIconColor();
-        imageSourceInfo.SetSrc(iconPath, color);
-    } else {
-        imageSourceInfo.SetSrc(src);
-    }
-    imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-    imageFrameNode->MarkModifyDone();
-    imageFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>(frameNode);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSearchSrcPath(src, "", "");
 }
 
 void SearchModelNG::SetSearchIconColor(FrameNode* frameNode, const Color& color)
 {
     CHECK_NULL_VOID(frameNode);
-    auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
-    CHECK_NULL_VOID(imageFrameNode);
-    auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(imageLayoutProperty);
-    auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value();
-    if (imageSourceInfo.IsSvg()) {
-        imageSourceInfo.SetFillColor(color);
-        imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-
-        auto imageRenderProperty = imageFrameNode->GetPaintProperty<ImageRenderProperty>();
-        CHECK_NULL_VOID(imageRenderProperty);
-        imageRenderProperty->UpdateSvgFillColor(color);
-
-        imageFrameNode->MarkModifyDone();
-        imageFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    }
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>(frameNode);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSearchIconColor(color);
 }
 
 void SearchModelNG::SetSearchButton(FrameNode* frameNode, const std::string& text)
@@ -1406,112 +1170,35 @@ void SearchModelNG::SetTextAlign(FrameNode* frameNode, const TextAlign& textAlig
 void SearchModelNG::SetCancelButtonStyle(FrameNode* frameNode, CancelButtonStyle style)
 {
     CHECK_NULL_VOID(frameNode);
-    auto buttonHost = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_BUTTON_INDEX));
-    CHECK_NULL_VOID(buttonHost);
-    auto imageHost = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
-    CHECK_NULL_VOID(imageHost);
-    auto textHost = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
-    CHECK_NULL_VOID(textHost);
-
-    auto cancelButtonRenderContext = buttonHost->GetRenderContext();
-    CHECK_NULL_VOID(cancelButtonRenderContext);
-    auto cancelImageRenderContext = imageHost->GetRenderContext();
-    CHECK_NULL_VOID(cancelImageRenderContext);
-    auto textLayoutProperty = textHost->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    auto cancelButtonEvent = buttonHost->GetEventHub<ButtonEventHub>();
-    CHECK_NULL_VOID(cancelButtonEvent);
-    auto imageEvent = imageHost->GetEventHub<ImageEventHub>();
-    CHECK_NULL_VOID(imageEvent);
-
-    if ((style == CancelButtonStyle::CONSTANT) ||
-        ((style == CancelButtonStyle::INPUT) && textLayoutProperty->HasValue() &&
-            !textLayoutProperty->GetValue()->empty())) {
-        cancelButtonRenderContext->UpdateOpacity(1.0);
-        cancelImageRenderContext->UpdateOpacity(1.0);
-        cancelButtonEvent->SetEnabled(true);
-        imageEvent->SetEnabled(true);
-    } else {
-        cancelButtonRenderContext->UpdateOpacity(0.0);
-        cancelImageRenderContext->UpdateOpacity(0.0);
-        cancelButtonEvent->SetEnabled(false);
-        imageEvent->SetEnabled(false);
-    }
-    buttonHost->MarkModifyDone();
-    imageHost->MarkModifyDone();
-    buttonHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    imageHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>(frameNode);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCancelButtonStyle(style);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, CancelButtonStyle, style, frameNode);
 }
 
 void SearchModelNG::SetCancelIconSize(FrameNode* frameNode, const Dimension& value)
 {
     CHECK_NULL_VOID(frameNode);
-    auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
-    CHECK_NULL_VOID(imageFrameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto searchTheme = pipeline->GetTheme<SearchTheme>();
-    CHECK_NULL_VOID(searchTheme);
-    auto imageRenderContext = imageFrameNode->GetRenderContext();
-    CHECK_NULL_VOID(imageRenderContext);
-
-    auto imageOriginHeight = searchTheme->GetIconHeight().ConvertToPx();
-    double imageScale = 0.0;
-    if (!NearZero(imageOriginHeight)) {
-        imageScale = value.ConvertToPx() / imageOriginHeight;
-    }
-    imageRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
-
-    imageFrameNode->MarkModifyDone();
-    imageFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>(frameNode);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCancelIconSize(value);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, CancelButtonUDSize, value, frameNode);
 }
 
 void SearchModelNG::SetCancelIconColor(FrameNode* frameNode, const Color& color)
 {
     CHECK_NULL_VOID(frameNode);
-    auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
-    CHECK_NULL_VOID(imageFrameNode);
-    auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(imageLayoutProperty);
-    auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value();
-    if (imageSourceInfo.IsSvg()) {
-        imageSourceInfo.SetFillColor(color);
-        imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-
-        auto imageRenderProperty = imageFrameNode->GetPaintProperty<ImageRenderProperty>();
-        CHECK_NULL_VOID(imageRenderProperty);
-        imageRenderProperty->UpdateSvgFillColor(color);
-        imageFrameNode->MarkModifyDone();
-        imageFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    }
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>(frameNode);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCancelIconColor(color);
 }
 
 void SearchModelNG::SetRightIconSrcPath(FrameNode* frameNode, const std::string& src)
 {
     CHECK_NULL_VOID(frameNode);
-    auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
-    CHECK_NULL_VOID(imageFrameNode);
-    auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(imageLayoutProperty);
-    auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value();
-
-    if (src.empty()) {
-        imageSourceInfo.SetResourceId(InternalResource::ResourceId::CLOSE_SVG);
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto iconPath = pipeline->GetTheme<IconTheme>()->GetIconPath(InternalResource::ResourceId::CLOSE_SVG);
-        auto color = pipeline->GetTheme<SearchTheme>()->GetSearchIconColor();
-        imageSourceInfo.SetSrc(iconPath, color);
-    } else {
-        imageSourceInfo.SetSrc(src);
-    }
-    imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-    imageFrameNode->MarkModifyDone();
-    imageFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>(frameNode);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetRightIconSrcPath(src);
 }
 
 void SearchModelNG::SetSearchEnterKeyType(FrameNode* frameNode, TextInputAction value)
@@ -1803,5 +1490,150 @@ void SearchModelNG::SetOnPasteWithEvent(FrameNode* frameNode,
         }
     };
     eventHub->SetOnPasteWithEvent(std::move(searchPasteFunc));
+}
+
+void SearchModelNG::SetMaxLength(FrameNode* frameNode, uint32_t value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdateMaxLength(value);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchModelNG::ResetMaxLength(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->ResetMaxLength();
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchModelNG::SetType(FrameNode* frameNode, TextInputType value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldHost = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldHost);
+    auto layoutProperty = textFieldHost->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->HasTextInputType() && layoutProperty->GetTextInputTypeValue() != value) {
+        layoutProperty->UpdateTypeChanged(true);
+    }
+    layoutProperty->UpdateTextInputType(value);
+    textFieldHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchModelNG::SetOnEditChange(FrameNode* frameNode, std::function<void(bool)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(textFieldEventHub);
+    textFieldEventHub->SetOnEditChanged(std::move(func));
+}
+
+void SearchModelNG::SetOnTextSelectionChange(FrameNode* frameNode, std::function<void(int32_t, int32_t)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(textFieldEventHub);
+    textFieldEventHub->SetOnSelectionChange(std::move(func));
+}
+
+void SearchModelNG::SetOnContentScroll(FrameNode* frameNode, std::function<void(float, float)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(textFieldEventHub);
+    textFieldEventHub->SetOnScrollChangeEvent(std::move(func));
+}
+
+void SearchModelNG::SetShowCounter(FrameNode* frameNode, bool value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCounterState(false);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowCounter, value, textFieldChild);
+}
+
+void SearchModelNG::SetCounterType(FrameNode* frameNode, int32_t value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto layoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SetCounter, value, textFieldChild);
+}
+
+void SearchModelNG::SetShowCounterBorder(FrameNode* frameNode, bool value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCounterState(false);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowHighlightBorder, value, textFieldChild);
+}
+
+RefPtr<TextFieldControllerBase> SearchModelNG::GetSearchController(FrameNode* frameNode)
+{
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetSearchController();
+}
+
+void SearchModelNG::SetOnWillInsertValueEvent(FrameNode* frameNode, std::function<bool(const InsertValueInfo&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto searchTextField = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(searchTextField);
+    auto eventHub = searchTextField->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillInsertValueEvent(std::move(func));
+}
+
+void SearchModelNG::SetOnDidInsertValueEvent(FrameNode* frameNode, std::function<void(const InsertValueInfo&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto searchTextField = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(searchTextField);
+    auto eventHub = searchTextField->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidInsertValueEvent(std::move(func));
+}
+
+void SearchModelNG::SetOnWillDeleteEvent(FrameNode* frameNode, std::function<bool(const DeleteValueInfo&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto searchTextField = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(searchTextField);
+    auto eventHub = searchTextField->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillDeleteEvent(std::move(func));
+}
+
+void SearchModelNG::SetOnDidDeleteEvent(FrameNode* frameNode, std::function<void(const DeleteValueInfo&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto searchTextField = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(searchTextField);
+    auto eventHub = searchTextField->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidDeleteEvent(std::move(func));
 }
 } // namespace OHOS::Ace::NG

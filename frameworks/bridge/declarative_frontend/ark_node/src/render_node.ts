@@ -157,6 +157,10 @@ class LengthMetrics {
   static lpx(value: number) {
       return new LengthMetrics(value, LengthUnit.LPX);
   }
+  static resource(res: Resource) {
+    let length:Array<number> = getUINativeModule().nativeUtils.resoureToLengthMetrics(res);
+    return new LengthMetrics(length[0], length[1]);
+  }
 }
 
 declare interface Resource {}
@@ -381,6 +385,7 @@ class RenderNode {
   private shapeMaskValue: ShapeMask;
   private _nativeRef: NativeStrongRef;
   private _frameNode: WeakRef<FrameNode>;
+  private lengthMetricsUnitValue: LengthMetricsUnit;
 
   constructor(type: string) {
     this.nodePtr = null;
@@ -403,6 +408,7 @@ class RenderNode {
       0, 0, 1, 0,
       0, 0, 0, 1];
     this.translationValue = { x: 0, y: 0 };
+    this.lengthMetricsUnitValue = LengthMetricsUnit.DEFAULT;
     if (type === 'BuilderRootFrameNode' || type === 'CustomFrameNode') {
       return;
     }
@@ -448,7 +454,7 @@ class RenderNode {
       this.frameValue.x = this.checkUndefinedOrNullWithDefaultValue<number>(position.x, 0);
       this.frameValue.y = this.checkUndefinedOrNullWithDefaultValue<number>(position.y, 0);
     }
-    getUINativeModule().common.setPosition(this.nodePtr, false, this.frameValue.x, this.frameValue.y);
+    getUINativeModule().renderNode.setPosition(this.nodePtr, this.frameValue.x, this.frameValue.y, this.lengthMetricsUnitValue);
   }
   set rotation(rotation: Vector3) {
     if (rotation === undefined || rotation === null) {
@@ -458,7 +464,7 @@ class RenderNode {
       this.rotationValue.y = this.checkUndefinedOrNullWithDefaultValue<number>(rotation.y, 0);
       this.rotationValue.z = this.checkUndefinedOrNullWithDefaultValue<number>(rotation.z, 0);
     }
-    getUINativeModule().renderNode.setRotation(this.nodePtr, this.rotationValue.x, this.rotationValue.y, this.rotationValue.z);
+    getUINativeModule().renderNode.setRotation(this.nodePtr, this.rotationValue.x, this.rotationValue.y, this.rotationValue.z, this.lengthMetricsUnitValue);
   }
   set scale(scale: Vector2) {
     if (scale === undefined || scale === null) {
@@ -480,7 +486,7 @@ class RenderNode {
       this.shadowOffsetValue.x = this.checkUndefinedOrNullWithDefaultValue<number>(offset.x, 0);
       this.shadowOffsetValue.y = this.checkUndefinedOrNullWithDefaultValue<number>(offset.y, 0);
     }
-    getUINativeModule().renderNode.setShadowOffset(this.nodePtr, this.shadowOffsetValue.x, this.shadowOffsetValue.y);
+    getUINativeModule().renderNode.setShadowOffset(this.nodePtr, this.shadowOffsetValue.x, this.shadowOffsetValue.y, this.lengthMetricsUnitValue);
   }
   set shadowAlpha(alpha: number) {
     this.shadowAlphaValue = this.checkUndefinedOrNullWithDefaultValue<number>(alpha, 0);
@@ -502,7 +508,7 @@ class RenderNode {
       this.frameValue.width = this.checkUndefinedOrNullWithDefaultValue<number>(size.width, 0);
       this.frameValue.height = this.checkUndefinedOrNullWithDefaultValue<number>(size.height, 0);
     }
-      getUINativeModule().renderNode.setSize(this.nodePtr, this.frameValue.width, this.frameValue.height);
+      getUINativeModule().renderNode.setSize(this.nodePtr, this.frameValue.width, this.frameValue.height, this.lengthMetricsUnitValue);
   }
   set transform(transform: Transform) {
     if (transform === undefined || transform === null) {
@@ -531,6 +537,12 @@ class RenderNode {
       this.translationValue.y = this.checkUndefinedOrNullWithDefaultValue<number>(translation.y, 0);
     }
     getUINativeModule().renderNode.setTranslate(this.nodePtr, this.translationValue.x, this.translationValue.y, 0);
+  }
+  set lengthMetricsUnit(unit: LengthMetricsUnit) {
+    if (unit === undefined || unit == null) {
+      this.lengthMetricsUnit = LengthMetricsUnit.DEFAULT;
+    }
+    this.lengthMetricsUnit = unit;
   }
   get backgroundColor(): number {
     return this.backgroundColorValue;
@@ -580,6 +592,9 @@ class RenderNode {
   get translation(): Vector2 {
     return this.translationValue;
   }
+  get lengthMetricsUnit() {
+    return this.lengthMetricsUnit;
+}
   checkUndefinedOrNullWithDefaultValue<T>(arg: T, defaultValue: T): T {
     if (arg === undefined || arg === null) {
       return defaultValue;
@@ -725,7 +740,7 @@ class RenderNode {
     } else {
       this.borderWidthValue = width;
     }
-    getUINativeModule().renderNode.setBorderWidth(this.nodePtr, this.borderWidthValue.left, this.borderWidthValue.top, this.borderWidthValue.right, this.borderWidthValue.bottom);
+    getUINativeModule().renderNode.setBorderWidth(this.nodePtr, this.borderWidthValue.left, this.borderWidthValue.top, this.borderWidthValue.right, this.borderWidthValue.bottom, this.lengthMetricsUnitValue);
   }
   get borderWidth(): EdgeWidths {
     return this.borderWidthValue;
@@ -747,7 +762,7 @@ class RenderNode {
     } else {
       this.borderRadiusValue = radius;
     }
-    getUINativeModule().renderNode.setBorderRadius(this.nodePtr, this.borderRadiusValue.topLeft, this.borderRadiusValue.topRight, this.borderRadiusValue.bottomLeft, this.borderRadiusValue.bottomRight);
+    getUINativeModule().renderNode.setBorderRadius(this.nodePtr, this.borderRadiusValue.topLeft, this.borderRadiusValue.topRight, this.borderRadiusValue.bottomLeft, this.borderRadiusValue.bottomRight, this.lengthMetricsUnitValue);
   }
   get borderRadius(): BorderRadiuses {
     return this.borderRadiusValue;

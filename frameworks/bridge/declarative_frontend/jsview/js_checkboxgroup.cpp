@@ -85,7 +85,9 @@ void JSCheckboxGroup::JSBind(BindingTarget globalObj)
     JSClass<JSCheckboxGroup>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSCheckboxGroup>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSCheckboxGroup>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSCheckboxGroup>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSCheckboxGroup>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSCheckboxGroup>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSCheckboxGroup>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSCheckboxGroup>::InheritAndBind<JSViewAbstract>(globalObj);
 }
@@ -232,13 +234,12 @@ void JSCheckboxGroup::Mark(const JSCallbackInfo& info)
 
     auto markObj = JSRef<JSObject>::Cast(info[0]);
     auto strokeColorValue = markObj->GetProperty("strokeColor");
-    Color strokeColor;
     auto theme = GetTheme<CheckboxTheme>();
+    Color strokeColor = theme->GetPointColor();
     if (!ParseJsColor(strokeColorValue, strokeColor)) {
-        strokeColor = theme->GetPointColor();
+        JSCheckBoxGroupTheme::ObtainCheckMarkColor(strokeColor);
     }
     CheckBoxGroupModel::GetInstance()->SetCheckMarkColor(strokeColor);
-
     auto sizeValue = markObj->GetProperty("size");
     CalcDimension size;
     if ((ParseJsDimensionVp(sizeValue, size)) && (size.Unit() != DimensionUnit::PERCENT) &&

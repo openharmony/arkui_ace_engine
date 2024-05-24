@@ -119,11 +119,13 @@ Rosen::Rect ConvertToRSRect(NG::RectF& rect)
 
 bool IsNeedAvoidWindowMode(OHOS::Rosen::Window* rsWindow)
 {
-    return (rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING ||
-               rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-               rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
-           (SystemProperties::GetDeviceType() == DeviceType::PHONE ||
-               SystemProperties::GetDeviceType() == DeviceType::TABLET);
+    if (!SystemProperties::GetNeedAvoidWindow()) {
+        return false;
+    }
+
+    auto mode = rsWindow->GetMode();
+    return mode == Rosen::WindowMode::WINDOW_MODE_FLOATING || mode == Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+            mode == Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
 }
 } // namespace
 
@@ -268,6 +270,12 @@ public:
                     SetUIExtensionImeShow(keyboardRect, pipeline);
                 }
                 if (uiExtMgr && uiExtMgr->NotifyOccupiedAreaChangeInfo(info)) {
+                    taskExecutor->PostTask(
+                        [context] {
+                            CHECK_NULL_VOID(context);
+                            context->OnVirtualKeyboardAreaChange(Rect());
+                        },
+                        TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaChange");
                     return;
                 }
             }
@@ -688,15 +696,16 @@ void UIContentImpl::InitializeDynamic(
 void UIContentImpl::Initialize(
     OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowId)
 {
-    if (window) {
-        CommonInitialize(window, url, storage);
-        AddWatchSystemParameter();
+    if (window == nullptr) {
+        LOGE("UIExtensionAbility [%{public}s][%{public}s][%{public}d][%{public}s] initialize ui instance failed, the"
+             "window is invalid", bundleName_.c_str(), moduleName_.c_str(), instanceId_, startUrl_.c_str());
+        return;
     }
-    if (focusWindowId != 0) {
-        LOGI("[%{public}s][%{public}s][%{public}d]: UIExtension host window id:%{public}u", bundleName_.c_str(),
-            moduleName_.c_str(), instanceId_, focusWindowId);
-        Platform::AceContainer::GetContainer(instanceId_)->SetFocusWindowId(focusWindowId);
+    auto errorCode = CommonInitialize(window, url, storage, focusWindowId);
+    if (errorCode != UIContentErrorCode::NO_ERRORS) {
+        return;
     }
+    AddWatchSystemParameter();
 
     LOGI("[%{public}s][%{public}s][%{public}d]: UIExtension startUrl = %{public}s",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, startUrl_.c_str());
@@ -728,7 +737,7 @@ napi_value UIContentImpl::GetUINapiContext()
 }
 
 UIContentErrorCode UIContentImpl::Restore(
-    OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage)
+    OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, ContentInfoType type)
 {
     auto errorCode = UIContentErrorCode::NO_ERRORS;
     errorCode = CommonInitialize(window, contentInfo, storage);
@@ -743,7 +752,7 @@ UIContentErrorCode UIContentImpl::Restore(
     return Platform::AceContainer::RunPage(instanceId_, startUrl_, "");
 }
 
-std::string UIContentImpl::GetContentInfo() const
+std::string UIContentImpl::GetContentInfo(ContentInfoType type) const
 {
     LOGI("[%{public}s][%{public}s][%{public}d]: UIContent GetContentInfo", bundleName_.c_str(), moduleName_.c_str(),
         instanceId_);
@@ -999,6 +1008,10 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
         container->SetToken(token);
     }
 
+    if (appInfo) {
+        container->SetApiTargetVersion(appInfo->apiTargetVersion);
+    }
+
     // Mark the relationship between windowId and containerId, it is 1:1
     if (window) {
         SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
@@ -1181,7 +1194,7 @@ void UIContentImpl::SetFontScaleAndWeightScale(const RefPtr<Platform::AceContain
 }
 
 UIContentErrorCode UIContentImpl::CommonInitialize(
-    OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage)
+    OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, uint32_t focusWindowId)
 {
     ACE_FUNCTION_TRACE();
     auto errorCode = UIContentErrorCode::NO_ERRORS;
@@ -1503,6 +1516,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     container->SetBundleName(hapModuleInfo->bundleName);
     container->SetModuleName(hapModuleInfo->moduleName);
     container->SetIsModule(hapModuleInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE);
+    container->SetApiTargetVersion(apiTargetVersion);
 
     // for atomic service
     container->SetInstallationFree(hapModuleInfo && hapModuleInfo->installationFree);
@@ -1550,9 +1564,11 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             if (rsUiDirector) {
                 ACE_SCOPED_TRACE("OHOS::Rosen::RSUIDirector::Create()");
                 rsUiDirector->SetUITaskRunner(
-                    [taskExecutor = container->GetTaskExecutor(), id](const std::function<void()>& task) {
+                    [taskExecutor = container->GetTaskExecutor(), id](
+                        const std::function<void()>& task, uint32_t delay) {
                         ContainerScope scope(id);
-                        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIRenderServiceTask");
+                        taskExecutor->PostDelayedTask(
+                            task, TaskExecutor::TaskType::UI, delay, "ArkUIRenderServiceTask", PriorityType::HIGH);
                     }, id);
                 auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
                 if (context != nullptr) {
@@ -1571,6 +1587,10 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     errorCode = Platform::AceContainer::SetViewNew(aceView, density, 0, 0, window_);
     CHECK_ERROR_CODE_RETURN(errorCode);
 #endif
+    // set focus window id for ui extension after pipeline context created.
+    if (focusWindowId != 0) {
+        container->SetFocusWindowId(focusWindowId);
+    }
 
     // after frontend initialize
     if (window_->IsFocused()) {
@@ -1662,7 +1682,7 @@ void UIContentImpl::InitializeDisplayAvailableRect(const RefPtr<Platform::AceCon
     auto defaultDisplay = DMManager.GetDefaultDisplay();
     if (pipeline && defaultDisplay) {
         Rosen::DMError ret = defaultDisplay->GetAvailableArea(availableArea);
-        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+        TAG_LOGI(AceLogTag::ACE_WINDOW,
             "DisplayAvailableRect info: %{public}d, %{public}d, %{public}d, %{public}d", availableArea.posX_,
             availableArea.posX_, availableArea.width_, availableArea.height_);
         if (ret == Rosen::DMError::DM_OK) {
@@ -1960,6 +1980,8 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
             parsedConfig.direction = config->GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DIRECTION);
             parsedConfig.densitydpi = config->GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DENSITYDPI);
             parsedConfig.themeTag = config->GetItem("ohos.application.theme");
+            parsedConfig.colorModeIsSetByApp =
+                config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP);
             // EtsCard Font followSytem disable
             if (formFontUseDefault) {
                 LOGW("[%{public}s] UIContentImpl: UpdateConfiguration use default", bundleName.c_str());
@@ -1983,7 +2005,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
         moduleName_.c_str(), instanceId_, config.ToString().c_str());
     SystemProperties::SetDeviceOrientation(config.Orientation());
     TAG_LOGI(
-        AceLogTag::ACE_WINDOW_SCENE, "Update orientation to : %{public}d", static_cast<uint32_t>(config.Orientation()));
+        AceLogTag::ACE_WINDOW, "Update orientation to : %{public}d", static_cast<uint32_t>(config.Orientation()));
     ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -2004,7 +2026,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
         if (pipelineContext) {
             pipelineContext->SetDisplayWindowRectInfo(
                 Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
-            TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "Update displayAvailableRect to : %{public}s",
+            TAG_LOGI(AceLogTag::ACE_WINDOW, "Update displayAvailableRect to : %{public}s",
                 pipelineContext->GetDisplayWindowRectInfo().ToString().c_str());
             if (rsWindow) {
                 pipelineContext->SetIsLayoutFullScreen(
@@ -2026,12 +2048,17 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
         SubwindowManager::GetInstance()->ClearToastInSubwindow();
         if (pipelineContext) {
             pipelineContext->CheckAndUpdateKeyboardInset();
+            pipelineContext->ChangeDarkModeBrightness(true);
         }
     };
-    if (container->IsUseStageModel() && reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION) {
-        task();
+
+    AceViewportConfig aceViewportConfig(modifyConfig, reason, rsTransaction);
+    if ((container->IsUseStageModel() && (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION ||
+                                             reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC)) ||
+        taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::PLATFORM)) {
+        viewportConfigMgr_->UpdateConfigSync(aceViewportConfig, std::move(task));
     } else {
-        taskExecutor->PostTask(task, TaskExecutor::TaskType::PLATFORM, "ArkUIUpdateViewportConfig");
+        viewportConfigMgr_->UpdateConfig(aceViewportConfig, std::move(task), container, "ArkUIUpdateViewportConfig");
     }
 }
 
@@ -2212,25 +2239,26 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
             context, abilityInfo, std::make_unique<ContentEventCallback>([] {
                 // Sub-window ,just return.
                 LOGI("Content event callback");
-            }),
-            false, true, true);
+            }), false, true, true);
 #else
         if (Container::IsCurrentUseNewPipeline()) {
             container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS,
                 context, abilityInfo, std::make_unique<ContentEventCallback>([] {
                     // Sub-window ,just return.
                     LOGI("Content event callback");
-                }),
-                false, true, true);
+                }), false, true, true);
         } else {
             container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS,
                 context, abilityInfo, std::make_unique<ContentEventCallback>([] {
                     // Sub-window ,just return.
                     LOGI("Content event callback");
-                }),
-                false, true);
+                }), false, true);
         }
 #endif
+    }
+    if (context && context->GetApplicationInfo()) {
+        auto appInfo = context->GetApplicationInfo();
+        container->SetApiTargetVersion(appInfo->apiTargetVersion);
     }
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
     AceEngine::Get().AddContainer(instanceId_, container);
@@ -2901,6 +2929,7 @@ void UIContentImpl::UpdateCustomPopupUIExtension(const CustomPopupUIExtensionCon
             auto record = popupUIExtensionRecords_.find(targetId);
             int32_t uiExtNodeId = (record != popupUIExtensionRecords_.end()) ? record->second : 0;
             auto uiExtNode = NG::FrameNode::GetFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, uiExtNodeId);
+            CHECK_NULL_VOID(uiExtNode);
             if (config.targetSize.has_value()) {
                 auto layoutProperty = uiExtNode->GetLayoutProperty();
                 CHECK_NULL_VOID(layoutProperty);
@@ -2911,6 +2940,7 @@ void UIContentImpl::UpdateCustomPopupUIExtension(const CustomPopupUIExtensionCon
                 layoutProperty->UpdateUserDefinedIdealSize(NG::CalcSize(width, height));
             }
             auto popupParam = CreateCustomPopupParam(true, config);
+            popupParam->SetIsCaretMode(false);
             auto popupConfig = customPopupConfigMap_.find(targetId);
             if (popupConfig != customPopupConfigMap_.end()) {
                 auto createConfig = popupConfig->second;

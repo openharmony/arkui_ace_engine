@@ -50,6 +50,7 @@ constexpr int32_t DEFAULT_MIN_CHILDREN_SIZE = 3;
 constexpr int32_t DIVIDER_HOT_ZONE_HORIZONTAL_PADDING_NUM = 2;
 constexpr float RATIO_NEGATIVE = -1.0f;
 constexpr float RATIO_ZERO = 0.0f;
+constexpr float DEFAULT_SIDE_BAR_MASK_OPACITY = 0.6f;
 constexpr Dimension DEFAULT_DRAG_REGION = 20.0_vp;
 constexpr int32_t SIDEBAR_DURATION = 500;
 const RefPtr<CubicCurve> SIDEBAR_CURVE = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.2f, 0.1f, 1.0f);
@@ -983,10 +984,15 @@ void SideBarContainerPattern::AddDividerHotZoneRect(const RefPtr<SideBarContaine
 
 void SideBarContainerPattern::HandleDragStart()
 {
-    if (sideBarStatus_ != SideBarStatus::SHOW) {
+    if (!isDividerDraggable_ || sideBarStatus_ != SideBarStatus::SHOW) {
         return;
     }
-
+    isInDividerDrag_ = true;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto windowId = pipeline->GetWindowId();
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    mouseStyle->SetPointerStyle(static_cast<int32_t>(windowId), MouseFormat::RESIZE_LEFT_RIGHT);
     preSidebarWidth_ = realSideBarWidth_;
 }
 
@@ -1053,10 +1059,15 @@ void SideBarContainerPattern::HandleDragUpdate(float xOffset)
 
 void SideBarContainerPattern::HandleDragEnd()
 {
-    if (sideBarStatus_ != SideBarStatus::SHOW) {
+    if (!isDividerDraggable_ || sideBarStatus_ != SideBarStatus::SHOW) {
         return;
     }
-
+    isInDividerDrag_ = false;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto windowId = pipeline->GetWindowId();
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    mouseStyle->SetPointerStyle(static_cast<int32_t>(windowId), MouseFormat::DEFAULT);
     preSidebarWidth_ = realSideBarWidth_;
 }
 
@@ -1077,6 +1088,9 @@ void SideBarContainerPattern::InitDividerMouseEvent(const RefPtr<InputEventHub>&
 
 void SideBarContainerPattern::OnHover(bool isHover)
 {
+    if (isInDividerDrag_) {
+        return;
+    }
     TAG_LOGD(AceLogTag::ACE_SIDEBAR, "sideBarContainer onHover");
     auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -1084,8 +1098,10 @@ void SideBarContainerPattern::OnHover(bool isHover)
     auto minSideBarWidth = layoutProperty->GetMinSideBarWidthValue(DEFAULT_MIN_SIDE_BAR_WIDTH);
     auto maxSideBarWidth = layoutProperty->GetMaxSideBarWidthValue(DEFAULT_MAX_SIDE_BAR_WIDTH);
     if (Negative(dividerStrokeWidth.Value()) || GreatOrEqual(minSideBarWidth.Value(), maxSideBarWidth.Value())) {
+        isDividerDraggable_ = false;
         return;
     }
+    isDividerDraggable_ = true;
 
     MouseFormat format = isHover ? MouseFormat::RESIZE_LEFT_RIGHT : MouseFormat::DEFAULT;
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -1165,19 +1181,27 @@ Dimension SideBarContainerPattern::ConvertPxToPercent(float value) const
 
 void SideBarContainerPattern::WindowFocus(bool isFocus)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    isWindowFocus_ = isFocus;
+    SetSideBarMask(isFocus);
+}
+
+void SideBarContainerPattern::OnColorConfigurationUpdate()
+{
+    SetSideBarMask(isWindowFocus_);
+}
+
+void SideBarContainerPattern::SetSideBarMask(bool isWindowFocus) const
+{
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto sideBarTheme = context->GetTheme<SideBarTheme>();
     CHECK_NULL_VOID(sideBarTheme);
-
     auto sideBarNode = GetSideBarNodeOrFirstChild();
     CHECK_NULL_VOID(sideBarNode);
 
-    Color maskColor = sideBarTheme->GetSideBarUnfocusColor();
+    Color maskColor = sideBarTheme->GetSideBarUnfocusColor().BlendOpacity(DEFAULT_SIDE_BAR_MASK_OPACITY);
     auto maskProperty = AceType::MakeRefPtr<ProgressMaskProperty>();
-    maskProperty->SetColor((isFocus || !sideBarNode->IsVisible())?Color::TRANSPARENT:maskColor);
+    maskProperty->SetColor((!isWindowFocus && sideBarNode->IsVisible()) ? maskColor : Color::TRANSPARENT);
 
     auto sideBarRenderContext = sideBarNode->GetRenderContext();
     CHECK_NULL_VOID(sideBarRenderContext);
