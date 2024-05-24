@@ -86,8 +86,10 @@ bool ContentController::ReplaceSelectedValue(int32_t startIndex, int32_t endInde
                StringUtils::ToString(wideText.substr(endIndex, static_cast<int32_t>(wideText.length()) - endIndex));
     auto len = content_.length();
     FilterValue();
+    insertValue_ = tmp;
     if (value.length() == 1 && content_.length() < len) {
         content_ = str;
+        insertValue_ = "";
     }
     return !tmp.empty();
 }
