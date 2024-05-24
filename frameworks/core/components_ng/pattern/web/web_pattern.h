@@ -301,7 +301,9 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true };
+        FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::FORCE_NONE };
+        focusPattern.SetIsFocusActiveWhenFocused(true);
+        return focusPattern;
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override
