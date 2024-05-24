@@ -25,6 +25,7 @@
 #include "core/common/manager_interface.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
+#include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/navigation_model_data.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
@@ -145,9 +146,8 @@ void NavigationPattern::OnAttachToFrameNode()
         pipelineContext->AddWindowFocusChangedCallback(host->GetId());
     }
 
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
-            .edges = SAFE_AREA_EDGE_ALL };
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_ALL, .edges = SAFE_AREA_EDGE_ALL };
         host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
     }
 }

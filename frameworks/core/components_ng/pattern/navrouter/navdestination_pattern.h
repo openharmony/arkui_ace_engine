@@ -182,7 +182,7 @@ public:
     {
         navigationNode_ = AceType::WeakClaim(RawPtr(navigationNode));
     }
-    
+
     void OnDetachFromMainTree() override
     {
         auto weak = AceType::WeakClaim(this);
@@ -229,6 +229,17 @@ public:
     }
 
     void OnLanguageConfigurationUpdate() override;
+    void SetKeyboardOffset(float keyboardOffset)
+    {
+        keyboardOffset_ = keyboardOffset;
+    }
+
+    float GetKeyboardOffset()
+    {
+        return keyboardOffset_;
+    }
+
+    bool NeedIgnoreKeyboard();
 
 private:
     void UpdateNameIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
@@ -247,6 +258,7 @@ private:
     bool isRightToLeft_ = false;
     uint64_t navDestinationId_ = 0;
     void OnAttachToFrameNode() override;
+    float keyboardOffset_ = 0.0f;
 };
 
 } // namespace OHOS::Ace::NG

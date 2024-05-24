@@ -268,4 +268,15 @@ bool NavDestinationPattern::OverlayOnBackPressed()
     CHECK_EQUAL_RETURN(overlayManager_->IsModalEmpty(), true,  false);
     return overlayManager_->RemoveOverlay(true);
 }
+
+bool NavDestinationPattern::NeedIgnoreKeyboard()
+{
+    auto layoutProperty = GetLayoutProperty<NavDestinationLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto& opts = layoutProperty->GetSafeAreaExpandOpts();
+    if (opts && (opts->type & SAFE_AREA_TYPE_KEYBOARD)) {
+        return true;
+    }
+    return false;
+}
 } // namespace OHOS::Ace::NG

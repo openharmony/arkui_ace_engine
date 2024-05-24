@@ -19,6 +19,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
@@ -78,28 +79,28 @@ RefPtr<FrameNode> TextFieldManagerNG::FindScrollableOfFocusedTextField(const Ref
     return {};
 }
 
-void TextFieldManagerNG::ScrollToSafeAreaHelper(
+bool TextFieldManagerNG::ScrollToSafeAreaHelper(
     const SafeAreaInsets::Inset& bottomInset, bool isShowKeyboard)
 {
     auto node = onFocusTextField_.Upgrade();
-    CHECK_NULL_VOID(node);
+    CHECK_NULL_RETURN(node, false);
     auto frameNode = node->GetHost();
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, false);
     auto textBase = DynamicCast<TextBase>(node);
-    CHECK_NULL_VOID(textBase);
+    CHECK_NULL_RETURN(textBase, false);
     textBase->OnVirtualKeyboardAreaChanged();
 
     auto scrollableNode = FindScrollableOfFocusedTextField(frameNode);
-    CHECK_NULL_VOID(scrollableNode);
+    CHECK_NULL_RETURN(scrollableNode, false);
     auto scrollPattern = scrollableNode->GetPattern<ScrollablePattern>();
-    CHECK_NULL_VOID(scrollPattern && scrollPattern->IsScrollToSafeAreaHelper());
+    CHECK_NULL_RETURN(scrollPattern && scrollPattern->IsScrollToSafeAreaHelper(), false);
     if (scrollPattern->GetAxis() == Axis::HORIZONTAL) {
-        return;
+        return false;
     }
 
     auto scrollableRect = scrollableNode->GetTransformRectRelativeToWindow();
     if (isShowKeyboard) {
-        CHECK_NULL_VOID(scrollableRect.Top() < bottomInset.start);
+        CHECK_NULL_RETURN(scrollableRect.Top() < bottomInset.start, false);
     }
 
     auto caretRect = textBase->GetCaretRect() + frameNode->GetOffsetRelativeToWindow();
@@ -108,20 +109,20 @@ void TextFieldManagerNG::ScrollToSafeAreaHelper(
     if (isShowKeyboard) {
         if (diffTop <= 0 &&
             LessNotEqual(bottomInset.start, (caretRect.Bottom() + RESERVE_BOTTOM_HEIGHT.ConvertToPx()))) {
-            return;
+            return false;
         }
     }
 
     // caret above scroll's content region
     if (diffTop < 0) {
         scrollPattern->ScrollTo(scrollPattern->GetTotalOffset() + diffTop);
-        return;
+        return true;
     }
 
     // caret inner scroll's content region
     if (isShowKeyboard) {
         if (LessNotEqual((caretRect.Bottom() + RESERVE_BOTTOM_HEIGHT.ConvertToPx()), bottomInset.start)) {
-            return;
+            return false;
         }
     }
 
@@ -136,24 +137,26 @@ void TextFieldManagerNG::ScrollToSafeAreaHelper(
     } else {
         diffBot = scrollableRect.Bottom() - caretRect.Bottom() - RESERVE_BOTTOM_HEIGHT.ConvertToPx();
     }
-    CHECK_NULL_VOID(diffBot < 0);
+    CHECK_NULL_RETURN(diffBot < 0, false);
     scrollPattern->ScrollTo(scrollPattern->GetTotalOffset() - diffBot);
+    return true;
 }
 
-void TextFieldManagerNG::ScrollTextFieldToSafeArea()
+bool TextFieldManagerNG::ScrollTextFieldToSafeArea()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_RETURN(pipeline, false);
     auto keyboardInset = pipeline->GetSafeAreaManager()->GetKeyboardInset();
     bool isShowKeyboard = keyboardInset.IsValid();
     if (isShowKeyboard) {
         auto bottomInset = pipeline->GetSafeArea().bottom_.Combine(keyboardInset);
-        CHECK_NULL_VOID(bottomInset.IsValid());
-        ScrollToSafeAreaHelper(bottomInset, isShowKeyboard);
+        CHECK_NULL_RETURN(bottomInset.IsValid(), false);
+        return ScrollToSafeAreaHelper(bottomInset, isShowKeyboard);
     } else if (pipeline->GetSafeAreaManager()->KeyboardSafeAreaEnabled()) {
         // hide keyboard only scroll when keyboard avoid mode is resize
-        ScrollToSafeAreaHelper({0, 0}, isShowKeyboard);
+        return ScrollToSafeAreaHelper({0, 0}, isShowKeyboard);
     }
+    return false;
 }
 
 void TextFieldManagerNG::SetHeight(float height)
@@ -180,5 +183,74 @@ void TextFieldManagerNG::ProcessNavKeyboard()
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Nav notNeedSoftKeyboard.");
         FocusHub::NavCloseKeyboard();
     }
+}
+
+void TextFieldManagerNG::AvoidKeyboard()
+{
+    if (!ScrollTextFieldToSafeArea()) {
+        NavContentToSafeAreaHelper();
+    }
+}
+
+void TextFieldManagerNG::NavContentToSafeAreaHelper()
+{
+    auto node = onFocusTextField_.Upgrade();
+    if (!node) {
+        auto navNode = weakNavNode_.Upgrade();
+        if (!navNode) {
+            // if navNode is nullptr means TextField's parent
+            // dont't have navBar or navDestination
+            return;
+        }
+        SetNavContentKeyboardOffset(navNode);
+        return;
+    }
+    auto frameNode = node->GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto navNode = FindNavNode(frameNode);
+    if (!navNode) {
+        return;
+    }
+    weakNavNode_ = navNode;
+    SetNavContentKeyboardOffset(navNode);
+}
+
+RefPtr<FrameNode> TextFieldManagerNG::FindNavNode(const RefPtr<FrameNode>& textField)
+{
+    CHECK_NULL_RETURN(textField, nullptr);
+    auto parent = textField->GetAncestorNodeOfFrame();
+    RefPtr<FrameNode> ret = nullptr;
+    while (parent) {
+        if (parent->GetHostTag() == V2::NAVDESTINATION_VIEW_ETS_TAG ||
+            parent->GetHostTag() == V2::NAVBAR_ETS_TAG) {
+                ret = parent;
+                break;
+            }
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+    return ret;
+}
+
+void TextFieldManagerNG::SetNavContentKeyboardOffset(RefPtr<FrameNode> navNode)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetSafeAreaManager();
+    auto keyboardOffset =  manager ? manager->GetKeyboardOffset() : 0.0f;
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(navNode);
+    if (navDestinationNode) {
+        auto pattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+        if (pattern) {
+            pattern->SetKeyboardOffset(keyboardOffset);
+        }
+    }
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navNode);
+    if (navBarNode) {
+        auto pattern = navBarNode->GetPattern<NavBarPattern>();
+        if (pattern) {
+            pattern->SetKeyboardOffset(keyboardOffset);
+        }
+    }
+    navNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 } // namespace OHOS::Ace::NG
