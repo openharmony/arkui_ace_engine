@@ -1221,6 +1221,78 @@
     },
     {
         "first_introduced": "12",
+        "name": "OH_ArkUI_AccessibilityState_Create"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AccessibilityState_Dispose"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AccessibilityState_SetDisabled"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AccessibilityState_IsDisabled"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AccessibilityState_SetSelected"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AccessibilityState_IsSelected"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AccessibilityState_SetCheckedState"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AccessibilityState_GetCheckedState"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AccessibilityValue_Create"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AccessibilityValue_Dispose"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AccessibilityValue_SetMin"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AccessibilityValue_GetMin"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AccessibilityValue_SetMax"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AccessibilityValue_GetMax"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AccessibilityValue_SetCurrent"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AccessibilityValue_GetCurrent"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AccessibilityValue_SetText"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AccessibilityValue_GetText"
+    },
+    {
+        "first_introduced": "12",
         "name": "OH_ArkUI_NodeUtils_GetLayoutSize"
     },
     {

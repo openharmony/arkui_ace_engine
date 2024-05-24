@@ -1529,6 +1529,63 @@ typedef enum {
     NODE_BORDER_RADIUS_PERCENT,
 
     /**
+     * @brief Accessible ID, which can be obtained as required through APIs.
+     *
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32：Accessible ID。\n
+     *
+     */
+    NODE_ACCESSIBILITY_ID = 87,
+
+    /**
+     * @brief Define accessible actions, which can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].u32：accessible action types，and uses the {@link ArkUI_AccessibilityActionType} enumeration value.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].u32：accessible action types，and uses the {@link ArkUI_AccessibilityActionType} enumeration value.\n
+     *
+     */
+    NODE_ACCESSIBILITY_ACTIONS = 88,
+
+    /**
+     * @brief Define accessible role, which can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].u32：accessible role type，and uses the {@link ArkUI_NodeType} enumeration value.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].u32：accessible role type，and uses the {@link ArkUI_NodeType} enumeration value.\n
+     *
+     */
+    NODE_ACCESSIBILITY_ROLE = 89,
+
+    /**
+     * @brief Define accessible state, which can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object：the parameter type is {@link ArkUI_AccessibilityState}.\n
+     * \n
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object：the parameter type is {@link ArkUI_AccessibilityState}.\n
+     *
+     */
+    NODE_ACCESSIBILITY_STATE = 90,
+
+    /**
+     * @brief Define accessible value, which can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object：the parameter type is {@link ArkUI_AccessibilityValue}.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object：the parameter type is {@link ArkUI_AccessibilityValue}.\n
+     *
+     */
+    NODE_ACCESSIBILITY_VALUE = 91,
+
+    /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n

@@ -1121,7 +1121,11 @@ static void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, Ac
     auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
 
-    nodeInfo.SetContent(accessibilityProperty->GetGroupText());
+    if (accessibilityProperty->HasUserTextValue()) {
+        nodeInfo.SetContent(accessibilityProperty->GetUserTextValue());
+    } else {
+        nodeInfo.SetContent(accessibilityProperty->GetGroupText());
+    }
     nodeInfo.SetAccessibilityText(accessibilityProperty->GetAccessibilityText());
     if (accessibilityProperty->HasRange()) {
         RangeInfo rangeInfo = ConvertAccessibilityValue(accessibilityProperty->GetAccessibilityValue());
@@ -1131,15 +1135,38 @@ static void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, Ac
     nodeInfo.SetTextType(accessibilityProperty->GetTextType());
     nodeInfo.SetTextLengthLimit(accessibilityProperty->GetTextLengthLimit());
     nodeInfo.SetOffset(accessibilityProperty->GetScrollOffSet());
-    nodeInfo.SetChecked(accessibilityProperty->IsChecked());
-    nodeInfo.SetSelected(accessibilityProperty->IsSelected());
+    if (accessibilityProperty->HasUserDisabled()) {
+        nodeInfo.SetEnabled(!accessibilityProperty->IsUserDisabled());
+    }
+    if (accessibilityProperty->HasUserCheckedType()) {
+        nodeInfo.SetChecked(accessibilityProperty->GetUserCheckedType());
+    } else {
+        nodeInfo.SetChecked(accessibilityProperty->IsChecked());
+    }
+    if (accessibilityProperty->HasUserSelected()) {
+        nodeInfo.SetSelected(accessibilityProperty->IsUserSelected());
+    } else {
+        nodeInfo.SetSelected(accessibilityProperty->IsSelected());
+    }
     nodeInfo.SetPassword(accessibilityProperty->IsPassword());
     nodeInfo.SetPluraLineSupported(accessibilityProperty->IsMultiLine());
     nodeInfo.SetHinting(accessibilityProperty->IsHint());
     nodeInfo.SetDescriptionInfo(accessibilityProperty->GetAccessibilityDescription());
-    nodeInfo.SetCurrentIndex(accessibilityProperty->GetCurrentIndex());
-    nodeInfo.SetBeginIndex(accessibilityProperty->GetBeginIndex());
-    nodeInfo.SetEndIndex(accessibilityProperty->GetEndIndex());
+    if (accessibilityProperty->HasUserCurrentValue()) {
+        nodeInfo.SetCurrentIndex(accessibilityProperty->GetUserCurrentValue());
+    } else {
+        nodeInfo.SetCurrentIndex(accessibilityProperty->GetCurrentIndex());
+    }
+    if (accessibilityProperty->HasUserMinValue()) {
+        nodeInfo.SetBeginIndex(accessibilityProperty->GetUserMinValue());
+    } else {
+        nodeInfo.SetBeginIndex(accessibilityProperty->GetBeginIndex());
+    }
+    if (accessibilityProperty->HasUserMaxValue()) {
+        nodeInfo.SetEndIndex(accessibilityProperty->GetUserMaxValue());
+    } else {
+        nodeInfo.SetEndIndex(accessibilityProperty->GetEndIndex());
+    }
     auto tag = node->GetTag();
     if (tag == V2::TOAST_ETS_TAG || tag == V2::POPUP_ETS_TAG || tag == V2::DIALOG_ETS_TAG ||
         tag == V2::ACTION_SHEET_DIALOG_ETS_TAG || tag == V2::ALERT_DIALOG_ETS_TAG || tag == V2::MENU_ETS_TAG ||
