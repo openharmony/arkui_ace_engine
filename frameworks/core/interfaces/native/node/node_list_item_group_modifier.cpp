@@ -73,10 +73,20 @@ void ListItemGroupSetFooter(ArkUINodeHandle node, ArkUINodeHandle footer)
     ListItemGroupModelNG::SetFooter(frameNode, footerNode);
 }
 
-void SetListItemGroupChildrenMainSize(ArkUINodeHandle node, ArkUIListChildrenMainSize option)
+void SetListItemGroupChildrenMainSize(ArkUINodeHandle node, ArkUIListChildrenMainSize option, int32_t unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    for (int i = 0; i < option->mainSize.size(); i++) {
+        if (option->mainSize[i] > 0) {
+            option->mainSize[i] =
+                Dimension(option->mainSize[i], static_cast<OHOS::Ace::DimensionUnit>(unit)).ConvertToPx();
+        }
+    }
+    if (option->defaultMainSize > 0) {
+        option->defaultMainSize =
+            Dimension(option->defaultMainSize, static_cast<OHOS::Ace::DimensionUnit>(unit)).ConvertToPx();
+    }
     ListItemGroupModelNG::SetListChildrenMainSize(frameNode, option->defaultMainSize, option->mainSize);
 }
 

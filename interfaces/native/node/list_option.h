@@ -26,17 +26,22 @@ struct ArkUI_ListItemSwipeActionItem {
     void* node;
 
     float actionAreaDistance;
-    void (*onAction)();
-    void (*onEnterActionArea)();
-    void (*onExitActionArea)();
-    void (*onStateChange)(ArkUI_Int32 swipeActionState);
+    void* onAction;
+    void* onActionUserData;
+    void* onEnterActionArea;
+    void* onEnterActionAreaUserData;
+    void* onExitActionArea;
+    void* onExitActionAreaUserData;
+    void* onStateChange;
+    void* onStateChangeUserData;
 };
 
 struct ArkUI_ListItemSwipeActionOption {
     ArkUI_ListItemSwipeActionItem* start;
     ArkUI_ListItemSwipeActionItem* end;
     ArkUI_Int32 edgeEffect;
-    void (*onOffsetChange)(ArkUI_Int32 offset);
+    void* onOffsetChange;
+    void* userData;
 };
 
 struct ArkUI_ListChildrenMainSize {

@@ -5372,8 +5372,9 @@ int32_t SetListChildrenMainSize(ArkUI_NodeHandle node, const ArkUI_AttributeItem
     CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(item->object, ERROR_CODE_PARAM_INVALID);
     auto* listChildrenMainSize = reinterpret_cast<ArkUIListChildrenMainSize>(item->object);
+    int32_t unit = GetDefaultUnit(node, UNIT_VP);
     GetFullImpl()->getNodeModifiers()->getListModifier()->setListChildrenMainSize(
-        node->uiNodeHandle, listChildrenMainSize);
+        node->uiNodeHandle, listChildrenMainSize, unit);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -7051,8 +7052,9 @@ int32_t SetListItemGroupChildrenMainSize(ArkUI_NodeHandle node, const ArkUI_Attr
     CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(item->object, ERROR_CODE_PARAM_INVALID);
     auto* listChildrenMainSize = reinterpret_cast<ArkUIListChildrenMainSize>(item->object);
+    int32_t unit = GetDefaultUnit(node, UNIT_VP);
     GetFullImpl()->getNodeModifiers()->getListItemGroupModifier()->setListItemGroupChildrenMainSize(
-        node->uiNodeHandle, listChildrenMainSize);
+        node->uiNodeHandle, listChildrenMainSize, unit);
     return ERROR_CODE_NO_ERROR;
 }
 
