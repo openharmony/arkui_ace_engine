@@ -3123,6 +3123,9 @@ std::vector<NG::OptionParam> ParseBindOptionParam(const JSCallbackInfo& info, si
     std::vector<NG::OptionParam> params(paramArray->Length());
     // parse paramArray
     for (size_t i = 0; i < paramArray->Length(); ++i) {
+        if (!paramArray->GetValueAt(i)->IsObject()) {
+            return std::vector<NG::OptionParam>();
+        }
         auto indexObject = JSRef<JSObject>::Cast(paramArray->GetValueAt(i));
         JSViewAbstract::ParseJsString(indexObject->GetProperty("value"), params[i].value);
         auto actionFunc = indexObject->GetProperty("action");
@@ -3341,6 +3344,9 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
 
 void ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam, size_t optionIndex)
 {
+    if (!info[optionIndex]->IsObject()) {
+        return;
+    }
     auto menuOptions = JSRef<JSObject>::Cast(info[optionIndex]);
     JSViewAbstract::ParseJsString(menuOptions->GetProperty("title"), menuParam.title);
     ParseMenuParam(info, menuOptions, menuParam);
@@ -4933,6 +4939,9 @@ bool JSViewAbstract::ParseLengthMetricsToPositiveDimension(const JSRef<JSVal>& j
 
 bool JSViewAbstract::ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& result)
 {
+    if (!jsValue->IsObject()) {
+        return false;
+    }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     CompleteResourceObject(jsObj);
     if (jsObj->IsEmpty()) {
@@ -6249,6 +6258,9 @@ void JSViewAbstract::JsLinearGradient(const JSCallbackInfo& info)
 
 void JSViewAbstract::NewJsLinearGradient(const JSCallbackInfo& info, NG::Gradient& newGradient)
 {
+    if (!info[0]->IsObject()) {
+        return;
+    }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
     newGradient.CreateGradientWithType(NG::GradientType::LINEAR);
     // angle

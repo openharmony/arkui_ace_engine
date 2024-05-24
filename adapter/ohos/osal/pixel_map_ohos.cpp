@@ -275,6 +275,8 @@ void PixelMapOhos::SavePixelMapToFile(const std::string& dst) const
                            "_rowStride" + std::to_string(rowStride) + "_byteCount" + std::to_string(totalSize) + dst +
                            ".dat";
     auto path = ImageFileCache::GetInstance().ConstructCacheFilePath(filename);
+    char realPath[PATH_MAX] = { 0x00 };
+    CHECK_NULL_VOID(realpath(path.c_str(), realPath));
     std::ofstream outFile(path, std::fstream::out);
     if (!outFile.is_open()) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "write error, path=%{public}s", path.c_str());
