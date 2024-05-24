@@ -2564,17 +2564,22 @@ bool TextFieldPattern::FireOnTextChangeEvent()
     layoutProperty->UpdateValue(contentController_->GetTextValue());
     host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, contentController_->GetTextValue());
     AutoFillValueChanged();
-    if (!GetIsPreviewText()) {
-        eventHub->FireOnChange(contentController_->GetTextValue());
-    }
+    bool fireFlag = !GetIsPreviewText();
     auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(context, false);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
     taskExecutor->PostTask(
-        [weak = WeakClaim(this)] {
+        [weak = WeakClaim(this), fireFlag] {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
+            if (fireFlag) {
+                auto host = pattern->GetHost();
+                CHECK_NULL_VOID(host);
+                auto eventHub = host->GetEventHub<TextFieldEventHub>();
+                CHECK_NULL_VOID(eventHub);
+                eventHub->FireOnChange(pattern->GetTextContentController()->GetTextValue());
+            }
             if (!pattern->HasFocus()) {
                 return;
             }
