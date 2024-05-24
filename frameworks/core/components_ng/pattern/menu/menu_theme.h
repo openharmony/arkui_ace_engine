@@ -85,7 +85,7 @@ public:
             theme->innerBorderRadius_ = pattern->GetAttr<Dimension>("menu_inner_border_radius", 0.0_vp);
             theme->innerBorderColor_ = pattern->GetAttr<Color>("menu_inner_border_color", Color::TRANSPARENT);
             theme->borderWidth_ = pattern->GetAttr<Dimension>("menu_border_width", 0.0_vp);
-            theme->borderColor_ = pattern->GetAttr<Color>("menu_border_color", Color::TRANSPARENT);
+            theme->borderColor_ = pattern->GetAttr<Color>("menu_border_color", Color::BLACK);
             theme->filterAnimationDuration_ = 250;
             theme->previewAnimationDuration_ = 300;
             theme->previewBeforeAnimationScale_ = 0.95f;

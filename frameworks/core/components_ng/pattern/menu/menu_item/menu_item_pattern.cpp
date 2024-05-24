@@ -205,9 +205,9 @@ void MenuItemPattern::OnModifyDone()
         auto theme = pipeline->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(theme);
         MarginProperty margin;
-        auto defaultMargin = CalcLength(Dimension(0.0_vp));
+        auto horizontalMargin = CalcLength(theme->GetMenuItemLeftRightMargin());
         auto verticalMargin = CalcLength(theme->GetMenuItemTopBottomMargin());
-        margin.SetEdges(defaultMargin, defaultMargin, verticalMargin, verticalMargin);
+        margin.SetEdges(horizontalMargin, horizontalMargin, verticalMargin, verticalMargin);
         layoutProp->UpdateMargin(margin);
     }
 }
