@@ -368,10 +368,6 @@ void SelectContentOverlayManager::CreateAndMountNode(const RefPtr<FrameNode>& ov
 
 const RefPtr<FrameNode> SelectContentOverlayManager::GetSelectOverlayRoot()
 {
-    auto realRootNode = realRootNodeWeak_.Upgrade();
-    if (realRootNode) {
-        return realRootNode;
-    }
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_RETURN(shareOverlayInfo_, rootNode);
     auto container = Container::Current();
@@ -379,7 +375,6 @@ const RefPtr<FrameNode> SelectContentOverlayManager::GetSelectOverlayRoot()
         auto root = FindWindowScene(shareOverlayInfo_->callerFrameNode.Upgrade());
         rootNode = DynamicCast<FrameNode>(root);
     }
-    realRootNodeWeak_ = rootNode;
     return rootNode;
 }
 
