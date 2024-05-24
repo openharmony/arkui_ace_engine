@@ -52,6 +52,8 @@ std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const OffsetF offsetF, co
     NGGestureRecognizer::Transform(transformPoint, node);
     item.SetWindowX(static_cast<int32_t>(transformPoint.GetX()));
     item.SetWindowY(static_cast<int32_t>(transformPoint.GetY()));
+    item.SetWindowXPos(transformPoint.GetX());
+    item.SetWindowYPos(transformPoint.GetY());
     item.SetDisplayX(static_cast<int32_t>(point.screenX));
     item.SetDisplayY(static_cast<int32_t>(point.screenY));
     item.SetPointerId(point.id);
