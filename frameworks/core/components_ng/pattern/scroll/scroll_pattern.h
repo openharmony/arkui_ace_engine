@@ -154,7 +154,7 @@ public:
     bool UpdateCurrentOffset(float offset, int32_t source) override;
     void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth) override;
 
-    void CheckScrollToEdge(float oldScrollableDistance, float newScrollableDistance);
+    void CheckScrollToEdge();
 
     ScrollEdgeType GetScrollEdgeType() const override
     {
@@ -327,6 +327,27 @@ public:
         return !isInitialized_ && initialOffset_.has_value();
     }
 
+    void AddScrollMeasureInfo(const std::optional<LayoutConstraintF>& parentConstraint,
+        const std::optional<LayoutConstraintF>& childConstraint, const SizeF& selfSize, const SizeF& childSize);
+
+    void AddScrollLayoutInfo();
+
+    void GetScrollSnapAlignDumpInfo();
+
+    void GetScrollPagingStatusDumpInfo();
+
+    void DumpAdvanceInfo() override;
+
+    SizeF GetViewSize() const
+    {
+        return viewSize_;
+    }
+
+    SizeF GetViewPortExtent() const
+    {
+        return viewPortExtent_;
+    }
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     bool OnScrollSnapCallback(double targetOffset, double velocity) override;
@@ -343,8 +364,8 @@ private:
     bool ReachStart() const;
     bool ReachEnd() const;
     bool IsScrollOutOnEdge(float delta) const;
-    void HandleCrashTop() const;
-    void HandleCrashBottom() const;
+    void HandleCrashTop();
+    void HandleCrashBottom();
     bool IsEnablePagingValid()
     {
         return enablePagingStatus_ == ScrollPagingStatus::VALID && GetScrollSnapAlign() == ScrollSnapAlign::NONE;
@@ -398,6 +419,10 @@ private:
 
     //scrollToEdge
     ScrollEdgeType scrollEdgeType_ = ScrollEdgeType::SCROLL_NONE;
+
+    // dump info
+    std::list<ScrollLayoutInfo> scrollLayoutInfos_;
+    std::list<ScrollMeasureInfo> scrollMeasureInfos_;
 };
 
 } // namespace OHOS::Ace::NG

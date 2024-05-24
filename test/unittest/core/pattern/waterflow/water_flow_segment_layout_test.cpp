@@ -58,8 +58,8 @@ void WaterFlowSegmentTest::SetUpConfig1()
         false);
 
     LayoutConstraintF constraint { .maxSize = { 480.0f, 800.0f }, .percentReference = { 480.0f, 800.0f } };
-    layoutProperty_->layoutConstraint_ = constraint;
-    layoutProperty_->contentConstraint_ = constraint;
+    layoutProperty_->UpdateLayoutConstraint(constraint);
+    layoutProperty_->UpdateContentConstraint();
 }
 
 void WaterFlowSegmentTest::SetUpConfig2()
@@ -77,8 +77,8 @@ void WaterFlowSegmentTest::SetUpConfig2()
         false);
 
     LayoutConstraintF constraint { .maxSize = { 480.0f, 800.0f }, .percentReference = { 480.0f, 800.0f } };
-    layoutProperty_->layoutConstraint_ = constraint;
-    layoutProperty_->contentConstraint_ = constraint;
+    layoutProperty_->UpdateLayoutConstraint(constraint);
+    layoutProperty_->UpdateContentConstraint();
 }
 
 void WaterFlowSegmentTest::SetUpConfig5()
@@ -91,8 +91,8 @@ void WaterFlowSegmentTest::SetUpConfig5()
         },
         false);
     LayoutConstraintF constraint { .maxSize = { 400.0f, 600.0f }, .percentReference = { 400.0f, 600.0f } };
-    layoutProperty_->layoutConstraint_ = constraint;
-    layoutProperty_->contentConstraint_ = constraint;
+    layoutProperty_->UpdateLayoutConstraint(constraint);
+    layoutProperty_->UpdateContentConstraint();
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_5);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
@@ -164,8 +164,8 @@ HWTEST_F(WaterFlowSegmentTest, MeasureOnOffset001, TestSize.Level1)
         false);
 
     LayoutConstraintF constraint { .maxSize = { 480.0f, 800.0f }, .percentReference = { 480.0f, 800.0f } };
-    layoutProperty_->layoutConstraint_ = constraint;
-    layoutProperty_->contentConstraint_ = constraint;
+    layoutProperty_->UpdateLayoutConstraint(constraint);
+    layoutProperty_->UpdateContentConstraint();
 
     auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(AceType::MakeRefPtr<WaterFlowLayoutInfo>());
     auto& info = algo->info_;
@@ -837,8 +837,8 @@ HWTEST_F(WaterFlowSegmentTest, Segmented001, TestSize.Level1)
     secObj->ChangeData(0, 0, SECTION_4);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     LayoutConstraintF constraint { .maxSize = { 400.0f, 600.0f }, .percentReference = { 400.0f, 600.0f } };
-    layoutProperty_->layoutConstraint_ = constraint;
-    layoutProperty_->contentConstraint_ = constraint;
+    layoutProperty_->UpdateLayoutConstraint(constraint);
+    layoutProperty_->UpdateContentConstraint();
 
     auto algo =
         AceType::MakeRefPtr<WaterFlowSegmentedLayout>(AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_));
@@ -887,8 +887,8 @@ HWTEST_F(WaterFlowSegmentTest, Segmented005, TestSize.Level1)
     secObj->ChangeData(0, 0, SECTION_4);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     LayoutConstraintF constraint { .maxSize = { 400.0f, 600.0f }, .percentReference = { 400.0f, 600.0f } };
-    layoutProperty_->layoutConstraint_ = constraint;
-    layoutProperty_->contentConstraint_ = constraint;
+    layoutProperty_->UpdateLayoutConstraint(constraint);
+    layoutProperty_->UpdateContentConstraint();
 
     auto algo =
         AceType::MakeRefPtr<WaterFlowSegmentedLayout>(AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_));
@@ -1233,8 +1233,8 @@ HWTEST_F(WaterFlowSegmentTest, ChildrenCount001, TestSize.Level1)
     secObj->ChangeData(0, 0, SECTION_5);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     LayoutConstraintF constraint { .maxSize = { 400.0f, 600.0f }, .percentReference = { 400.0f, 600.0f } };
-    layoutProperty_->layoutConstraint_ = constraint;
-    layoutProperty_->contentConstraint_ = constraint;
+    layoutProperty_->UpdateLayoutConstraint(constraint);
+    layoutProperty_->UpdateContentConstraint();
 
     auto algo =
         AceType::MakeRefPtr<WaterFlowSegmentedLayout>(AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_));
@@ -1282,8 +1282,8 @@ HWTEST_F(WaterFlowSegmentTest, ChildrenCount002, TestSize.Level1)
     secObj->ChangeData(0, 0, SECTION_5);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     LayoutConstraintF constraint { .maxSize = { 400.0f, 600.0f }, .percentReference = { 400.0f, 600.0f } };
-    layoutProperty_->layoutConstraint_ = constraint;
-    layoutProperty_->contentConstraint_ = constraint;
+    layoutProperty_->UpdateLayoutConstraint(constraint);
+    layoutProperty_->UpdateContentConstraint();
 
     auto algo =
         AceType::MakeRefPtr<WaterFlowSegmentedLayout>(AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_));
