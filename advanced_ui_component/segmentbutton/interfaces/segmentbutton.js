@@ -31,6 +31,7 @@ if (!("finalizeConstruction" in ViewPU.prototype)) {
 }
 const curves = globalThis.requireNativeModule("ohos.curves");
 const KeyCode = globalThis.requireNapi("multimodalInput.keyCode").KeyCode;
+const util = globalThis.requireNativeModule("@ohos.util");
 
 const MIN_ITEM_COUNT = 2;
 const MAX_ITEM_COUNT = 5;
@@ -727,6 +728,7 @@ class SegmentButtonItem extends ViewPU {
         this.__options = new SynchedPropertyNesedObjectPU(f12.options, this, "options");
         this.__property = new SynchedPropertyNesedObjectPU(f12.property, this, "property");
         this.__index = new SynchedPropertySimpleOneWayPU(f12.index, this, "index");
+        this.groupId = "";
         this.setInitiallyProvidedValue(f12);
         this.finalizeConstruction();
     }
@@ -735,6 +737,9 @@ class SegmentButtonItem extends ViewPU {
         this.__itemOptions.set(d12.itemOptions);
         this.__options.set(d12.options);
         this.__property.set(d12.property);
+        if (d12.groupId !== undefined) {
+            this.groupId = d12.groupId;
+        }
     }
 
     updateStateVars(c12) {
@@ -803,6 +808,7 @@ class SegmentButtonItem extends ViewPU {
     initialRender() {
         this.observeComponentCreation2((w11, x11) => {
             Column.create({ space: 2 });
+            Column.focusScopePriority(this.groupId, Math.min(...this.selectedIndexes) === this.index ? FocusPriority.PREVIOUS : FocusPriority.AUTO);
             Column.justifyContent(FlexAlign.Center);
             Column.padding(this.options.buttonPadding ?? ((this.options.type === 'capsule' && this.options.showText && this.options.showIcon) ?
                 { top: 6, right: 8, bottom: 6, left: 8 } : { top: 4, right: 8, bottom: 4, left: 8 }));
@@ -1009,6 +1015,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
             length: MAX_ITEM_COUNT
         }, (h10, i10) => 0), this, "buttonHeight");
         this.buttonItemsRealHeight = Array.from({ length: MAX_ITEM_COUNT }, (f10, g10) => 0);
+        this.groupId = util.generateRandomUUID(true);
         this.setInitiallyProvidedValue(v9);
         this.declareWatch("optionsArray", this.onOptionsArrayChange);
         this.declareWatch("options", this.onOptionsChange);
@@ -1033,6 +1040,9 @@ class SegmentButtonItemArrayComponent extends ViewPU {
         }
         if (t9.buttonItemsRealHeight !== undefined) {
             this.buttonItemsRealHeight = t9.buttonItemsRealHeight;
+        }
+        if (t9.groupId !== undefined) {
+            this.groupId = t9.groupId;
         }
     }
 
@@ -1354,6 +1364,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((u7, v7) => {
                         Row.create({ space: 1 });
+                        Row.focusScopeId(this.groupId, true);
                         Row.padding(this.options.componentPadding);
                         Row.onSizeChange((x7, y7) => {
                             this.componentSize = { width: y7.width, height: y7.height };
@@ -1381,8 +1392,8 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                                                     height: this.buttonItemsSize[w5].height
                                                 };
                                                 if (t7.width) {
-                                                    this.buttonItemsPosition[x5] = {
-                                                        x: Number.parseFloat(this.options.componentPadding.toString()) + (Number.parseFloat(t7.width.toString()) + 1) * x5,
+                                                    this.buttonItemsPosition[w5] = {
+                                                        x: Number.parseFloat(this.options.componentPadding.toString()) + (Number.parseFloat(t7.width.toString()) + 1) * w5,
                                                         y: Number.parseFloat(this.options.componentPadding.toString())
                                                     };
                                                 }
@@ -1465,7 +1476,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                                                     }, undefined, u6, () => {
                                                     }, {
                                                         page: "segmentbutton/src/main/ets/components/mainpage/MainPage.ets",
-                                                        line: 678,
+                                                        line: 682,
                                                         col: 15
                                                     });
                                                     ViewPU.create(w6);
@@ -1509,11 +1520,12 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                                                         index: w5,
                                                         itemOptions: x5,
                                                         options: this.options,
-                                                        property: this.buttonItemProperty[w5]
+                                                        property: this.buttonItemProperty[w5],
+                                                        groupId: this.groupId
                                                     }, undefined, g6, () => {
                                                     }, {
                                                         page: "segmentbutton/src/main/ets/components/mainpage/MainPage.ets",
-                                                        line: 683,
+                                                        line: 687,
                                                         col: 15
                                                     });
                                                     ViewPU.create(i6);
@@ -1524,7 +1536,8 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                                                             index: w5,
                                                             itemOptions: x5,
                                                             options: this.options,
-                                                            property: this.buttonItemProperty[w5]
+                                                            property: this.buttonItemProperty[w5],
+                                                            groupId: this.groupId
                                                         };
                                                     };
                                                     i6.paramsGenerator_ = j6;
@@ -2094,7 +2107,7 @@ export class SegmentButton extends ViewPU {
                                             }, undefined, b2, () => {
                                             }, {
                                                 page: "segmentbutton/src/main/ets/components/mainpage/MainPage.ets",
-                                                line: 923,
+                                                line: 929,
                                                 col: 11
                                             });
                                             ViewPU.create(d2);
@@ -2152,7 +2165,7 @@ export class SegmentButton extends ViewPU {
                                             }, undefined, l1, () => {
                                             }, {
                                                 page: "segmentbutton/src/main/ets/components/mainpage/MainPage.ets",
-                                                line: 936,
+                                                line: 942,
                                                 col: 13
                                             });
                                             ViewPU.create(n1);
@@ -2187,7 +2200,7 @@ export class SegmentButton extends ViewPU {
                                             }, undefined, d1, () => {
                                             }, {
                                                 page: "segmentbutton/src/main/ets/components/mainpage/MainPage.ets",
-                                                line: 942,
+                                                line: 948,
                                                 col: 13
                                             });
                                             ViewPU.create(f1);
@@ -2223,7 +2236,7 @@ export class SegmentButton extends ViewPU {
                                 }, undefined, t, () => {
                                 }, {
                                     page: "segmentbutton/src/main/ets/components/mainpage/MainPage.ets",
-                                    line: 955,
+                                    line: 961,
                                     col: 9
                                 });
                                 ViewPU.create(v);

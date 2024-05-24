@@ -14,6 +14,7 @@
  */
 import curves from '@ohos.curves'
 import { KeyCode } from '@ohos.multimodalInput.keyCode'
+import util from '@ohos.util';
 
 const MIN_ITEM_COUNT = 2
 const MAX_ITEM_COUNT = 5
@@ -433,6 +434,7 @@ struct SegmentButtonItem {
   @ObjectLink options: SegmentButtonOptions;
   @ObjectLink property: ItemProperty
   @Prop index: number
+  private groupId: string = ""
 
   build() {
     Column({ space: 2 }) {
@@ -470,6 +472,7 @@ struct SegmentButtonItem {
           }))
       }
     }
+    .focusScopePriority(this.groupId, Math.min(...this.selectedIndexes) === this.index ? FocusPriority.PREVIOUS : FocusPriority.AUTO)
     .justifyContent(FlexAlign.Center)
     .padding(this.options.buttonPadding ?? ((this.options.type === 'capsule' && this.options.showText && this.options.showIcon) ?
       { top: 6, right: 8, bottom: 6, left: 8 } : { top: 4, right: 8, bottom: 4, left: 8 }))
@@ -519,6 +522,7 @@ struct SegmentButtonItemArrayComponent {
   @State buttonWidth: number[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => 0)
   @State buttonHeight: number[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => 0)
   private buttonItemsRealHeight: number[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => 0)
+  private groupId: string = util.generateRandomUUID(true)
 
   onButtonItemsSizeChange() {
     this.buttonItemsSize.forEach((value, index) => {
@@ -686,7 +690,8 @@ struct SegmentButtonItemArrayComponent {
                 index: index,
                 itemOptions: item,
                 options: this.options,
-                property: this.buttonItemProperty[index]
+                property: this.buttonItemProperty[index],
+                groupId: this.groupId
               })
                 .onSizeChange((_, newValue) => {
                   // Calculate height of items
@@ -775,6 +780,7 @@ struct SegmentButtonItemArrayComponent {
           }
         })
       }
+      .focusScopeId(this.groupId, true)
       .padding(this.options.componentPadding)
       .onSizeChange((_, newValue) => {
         this.componentSize = { width: newValue.width, height: newValue.height }
