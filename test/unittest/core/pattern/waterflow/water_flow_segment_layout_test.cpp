@@ -16,7 +16,7 @@
 #include "test/unittest/core/pattern/waterflow/water_flow_test_ng.h"
 
 #include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_info.h"
+#include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 
@@ -25,7 +25,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/pattern/waterflow/water_flow_item_node.h"
-#include "core/components_ng/pattern/waterflow/water_flow_segmented_layout.h"
+#include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_segmented_layout.h"
 
 namespace OHOS::Ace::NG {
 class WaterFlowSegmentTest : public WaterFlowTestNg {

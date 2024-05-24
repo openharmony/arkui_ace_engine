@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "frameworks/core/components_ng/pattern/waterflow/water_flow_layout_utils.h"
+#include "frameworks/core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
 
 #include "base/utils/string_utils.h"
 #include "core/components_ng/layout/layout_wrapper.h"

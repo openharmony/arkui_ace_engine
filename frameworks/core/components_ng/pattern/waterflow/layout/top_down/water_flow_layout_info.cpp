@@ -13,11 +13,10 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/waterflow/water_flow_layout_info.h"
+#include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
 
 #include <algorithm>
 
-#include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -25,16 +24,6 @@
 constexpr float HALF = 0.5f;
 
 namespace OHOS::Ace::NG {
-RefPtr<WaterFlowLayoutInfoBase> WaterFlowLayoutInfoBase::Create(WaterFlowLayoutMode mode)
-{
-    switch (mode) {
-        case WaterFlowLayoutMode::SLIDING_WINDOW:
-            return MakeRefPtr<WaterFlowLayoutInfoSW>();
-        default:
-            return MakeRefPtr<WaterFlowLayoutInfo>();
-    }
-}
-
 int32_t WaterFlowLayoutInfo::GetCrossIndex(int32_t itemIndex) const
 {
     if (static_cast<size_t>(itemIndex) < itemInfos_.size()) {
@@ -352,25 +341,6 @@ bool WaterFlowLayoutInfo::ReachEnd(float prevOffset) const
     auto scrollDownToReachEnd = GreatNotEqual(prevOffset, minOffset) && LessOrEqual(currentOffset_, minOffset);
     auto scrollUpToReachEnd = LessNotEqual(prevOffset, minOffset) && GreatOrEqual(currentOffset_, minOffset);
     return scrollDownToReachEnd || scrollUpToReachEnd;
-}
-
-int32_t WaterFlowLayoutInfo::GetSegment(int32_t itemIdx) const
-{
-    if (segmentTails_.empty() || itemIdx < 0) {
-        return 0;
-    }
-    auto cache = segmentCache_.find(itemIdx);
-    if (cache != segmentCache_.end()) {
-        return cache->second;
-    }
-
-    auto it = std::lower_bound(segmentTails_.begin(), segmentTails_.end(), itemIdx);
-    if (it == segmentTails_.end()) {
-        return static_cast<int32_t>(segmentTails_.size()) - 1;
-    }
-    int32_t idx = it - segmentTails_.begin();
-    segmentCache_[itemIdx] = idx;
-    return idx;
 }
 
 int32_t WaterFlowLayoutInfo::FastSolveStartIndex() const
