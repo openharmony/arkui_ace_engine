@@ -28,7 +28,6 @@ constexpr Dimension MAGNIFIER_HEIGHT = 48.0_vp;
 constexpr Dimension MAGNIFIER_OFFSET_Y = 4.0_vp;
 constexpr Dimension PIXEL_MAP_IMAGE_OFFSET = 4.0_vp;
 constexpr Dimension MAGNIFIER_BOUNDRY_WIDTH = 1.0_vp;
-constexpr Dimension DEFAULT_STATUS_BAR_HEIGHT = 48.0_vp;
 } // namespace
 
 // constructor
@@ -122,9 +121,6 @@ bool MagnifierPainter::GetMagnifierRect(
         textBoxesLeft = textDragBasePattern->GetTextBoxes()[0].Left();
     }
     startY = cursorOffsetY - magnifierHeight - magnifierOffsetY;
-    if ((textDragBasePattern->GetParentGlobalOffset().GetY() + startY) < DEFAULT_STATUS_BAR_HEIGHT.ConvertToPx()) {
-        startY = cursorOffsetY + textDragBasePattern->GetLineHeight() + magnifierHeight + magnifierOffsetY;
-    }
     startX = localOffsetX - magnifierWidth / 2.0f;
     if (((textBasePattern->GetCaretIndex() == textBasePattern->GetContentWideTextLength()
         && localOffsetX >= cursorOffsetX) || (textBasePattern->GetCaretIndex() == 0 && localOffsetX <= cursorOffsetX))
