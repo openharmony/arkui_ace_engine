@@ -290,13 +290,13 @@ ArkUI_Float32 GetRowsGap(ArkUINodeHandle node)
     return WaterFlowModelNG::GetRowsGap(frameNode);
 }
 
-void GetWaterFlowNestedScroll(ArkUINodeHandle node, ArkUI_Int32* values)
+void GetWaterFlowNestedScroll(ArkUINodeHandle node, ArkUI_Int32 (*values)[2])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NestedScrollOptions options = WaterFlowModelNG::GetNestedScroll(frameNode);
-    values[0] = static_cast<ArkUI_Int32>(options.forward);
-    values[1] = static_cast<ArkUI_Int32>(options.backward);
+    (*values)[0] = static_cast<ArkUI_Int32>(options.forward);
+    (*values)[1] = static_cast<ArkUI_Int32>(options.backward);
 }
 
 ArkUI_Int32 SetNodeAdapter(ArkUINodeHandle node, ArkUINodeAdapterHandle handle)
@@ -408,12 +408,12 @@ ArkUI_Uint32 GetWaterFlowScrollBarColor(ArkUINodeHandle node)
     return WaterFlowModelNG::GetScrollBarColor(frameNode);
 }
 
-ArkUI_Int32 GetEdgeEffect(ArkUINodeHandle node, ArkUI_Int32* values)
+ArkUI_Int32 GetEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 (*values)[2])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
-    values[INDEX_0] = WaterFlowModelNG::GetEdgeEffect(frameNode);
-    values[INDEX_1] = WaterFlowModelNG::GetEdgeEffectAlways(frameNode);
+    (*values)[INDEX_0] = WaterFlowModelNG::GetEdgeEffect(frameNode);
+    (*values)[INDEX_1] = WaterFlowModelNG::GetEdgeEffectAlways(frameNode);
     return INDEX_2;
 }
 

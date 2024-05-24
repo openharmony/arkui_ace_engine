@@ -809,7 +809,7 @@ void SetTextDataDetectorConfig(ArkUINodeHandle node, ArkUI_Uint32* values, ArkUI
     TextModelNG::SetTextDetectConfig(frameNode, textTypes);
 }
 
-ArkUI_Int32 GetTextDataDetectorConfig(ArkUINodeHandle node, ArkUI_Int32* values)
+ArkUI_Int32 GetTextDataDetectorConfig(ArkUINodeHandle node, ArkUI_Int32 (*values)[32])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, 0);
@@ -818,7 +818,7 @@ ArkUI_Int32 GetTextDataDetectorConfig(ArkUINodeHandle node, ArkUI_Int32* values)
     StringUtils::StringSplitter(typeString, ',', types);
     for (int i = 0; i < types.size(); i++) {
         auto ret = std::find(TEXT_DETECT_TYPES.begin(), TEXT_DETECT_TYPES.end(), types[i]);
-        values[i] = ret != TEXT_DETECT_TYPES.end() ? ret - TEXT_DETECT_TYPES.begin() : -1;
+        (*values)[i] = ret != TEXT_DETECT_TYPES.end() ? ret - TEXT_DETECT_TYPES.begin() : -1;
     }
     return types.size();
 }
