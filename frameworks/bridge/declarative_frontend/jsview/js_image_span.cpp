@@ -36,7 +36,7 @@ void JSImageSpan::Create(const JSCallbackInfo& info)
     if (info.Length() != 1) {
         return;
     }
-    JSImage::Create(info);
+    JSImage::CreateImage(info, true);
     NG::ImageSpanView::Create();
 }
 
