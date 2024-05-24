@@ -2336,9 +2336,9 @@ void RosenDecorationPainter::SetBorderStyle(
         if (borderEdge.GetBorderStyle() == BorderStyle::DOTTED) {
             SkPath dotPath;
             if (NearZero(spaceBetweenDot)) {
-                spaceBetweenDot = width * 2.0;
+                spaceBetweenDot = width * 2.0; // 2.0: Double factor.
             }
-            dotPath.addCircle(0.0f, 0.0f, SkDoubleToScalar(width / 2.0));
+            dotPath.addCircle(0.0f, 0.0f, SkDoubleToScalar(width / 2.0)); // 2.0: Average factor.
             paint.setPathEffect(
                 SkPath1DPathEffect::Make(dotPath, spaceBetweenDot, 0.0, SkPath1DPathEffect::kRotate_Style));
         } else if (borderEdge.GetBorderStyle() == BorderStyle::DASHED) {
@@ -2377,9 +2377,9 @@ void RosenDecorationPainter::SetBorderStyle(
         if (borderEdge.GetBorderStyle() == BorderStyle::DOTTED) {
             RSPath dotPath;
             if (NearZero(spaceBetweenDot)) {
-                spaceBetweenDot = width * 2.0;
+                spaceBetweenDot = width * 2.0; // 2.0: Double factor.
             }
-            dotPath.AddCircle(0.0f, 0.0f, static_cast<RSScalar>(width / 2.0));
+            dotPath.AddCircle(0.0f, 0.0f, static_cast<RSScalar>(width / 2.0)); // 2.0: Average factor.
             pen.SetPathEffect(
                 RSPathEffect::CreatePathDashEffect(dotPath, spaceBetweenDot, 0.0, RSPathDashStyle::ROTATE));
         } else if (borderEdge.GetBorderStyle() == BorderStyle::DASHED) {
