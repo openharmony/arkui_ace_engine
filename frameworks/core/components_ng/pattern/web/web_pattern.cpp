@@ -1513,7 +1513,11 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
     drawSize_ = drawSize;
     drawSizeCache_ = drawSize_;
     auto offset = Offset(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
-    delegate_->SetBoundsOrResize(drawSize_, offset);
+    if (!CheckSafeAreaIsExpand()) {
+        delegate_->SetBoundsOrResize(drawSize_, offset);
+    } else {
+        TAG_LOGD(AceLogTag::ACE_WEB, "OnDirtyLayoutWrapperSwap safeArea is set, no need setbounds");
+    }
     if (isOfflineMode_) {
         TAG_LOGE(AceLogTag::ACE_WEB,
             "OnDirtyLayoutWrapperSwap; WebPattern is Offline Mode, WebId:%{public}d", GetWebId());
@@ -1543,22 +1547,27 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
 void WebPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
 {
     if (!CheckSafeAreaIsExpand()) {
-        TAG_LOGI(AceLogTag::ACE_WEB, "Not set safeArea, return.");
+        TAG_LOGD(AceLogTag::ACE_WEB, "Not set safeArea, return.");
         return;
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    auto drawSize = Size(geometryNode->GetFrameRect().Width(), geometryNode->GetFrameRect().Height());
+
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+ 
+    auto rect = renderContext->GetPaintRectWithoutTransform();
+    auto size = Size(rect.Width(), rect.Height());
     if (renderContextForSurface_) {
         auto localposition = geometryNode->GetContentOffset();
         renderContextForSurface_->SetBounds(
-            localposition.GetX(), localposition.GetY(), drawSize.Width(), drawSize.Height());
+            localposition.GetX(), localposition.GetY(), size.Width(), size.Height());
         TAG_LOGD(AceLogTag::ACE_WEB,
             "Before sync geometry properties set bounds, X:%{public}f, Y:%{public}f, width:%{public}f, "
             "height:%{public}f",
-            localposition.GetX(), localposition.GetY(), drawSize.Width(), drawSize.Height());
+            localposition.GetX(), localposition.GetY(), size.Width(), size.Height());
     }
 }
 
@@ -1595,14 +1604,17 @@ void WebPattern::OnAreaChangedInner()
 
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     auto geometryNode = frameNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    auto size = Size(geometryNode->GetFrameRect().Width(), geometryNode->GetFrameRect().Height());
+    auto rect = renderContext->GetPaintRectWithoutTransform();
+    auto size = Size(rect.Width(), rect.Height());
 
     delegate_->OnAreaChange({ resizeOffset.GetX(), resizeOffset.GetY(), size.Width(), size.Height() });
     if (CheckSafeAreaIsExpand() &&
         ((size.Width() != areaChangeSize_.Width()) || (size.Height() != areaChangeSize_.Height()))) {
-        TAG_LOGI(AceLogTag::ACE_WEB, "OnAreaChangedInner setbounds: height:%{public}f, offsetY:%{public}f",
+        TAG_LOGD(AceLogTag::ACE_WEB, "OnAreaChangedInner setbounds: height:%{public}f, offsetY:%{public}f",
             size.Height(), resizeOffset.GetY());
         areaChangeSize_ = size;
         drawSize_ = size;
