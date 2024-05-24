@@ -108,6 +108,7 @@ private:
     void RegistOritationListener();
     float GetTextOffset();
     float GetTextNodeWidth();
+    float GetTextStart();
     double GetScrollAmount();
     void ActionAnimation(AnimationOption& option, float end, int32_t playCount, bool needSecondPlay);
     bool IsRunMarquee();
