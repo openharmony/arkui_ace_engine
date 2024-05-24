@@ -349,13 +349,15 @@ void NavigationPattern::CheckTopNavPathChange(
     const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
     const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath)
 {
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
     auto replaceValue = navigationStack_->GetReplaceValue();
     if (preTopNavPath == newTopNavPath && replaceValue != 1) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "page is not change. don't transition");
         if (currentProxy_) {
             currentProxy_->SetIsSuccess(false);
         }
-
+        hostNode->FireHideNodeChange(NavDestinationLifecycle::ON_WILL_HIDE);
         NotifyDialogChange(NavDestinationLifecycle::ON_WILL_SHOW, true, true);
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
@@ -389,8 +391,6 @@ void NavigationPattern::CheckTopNavPathChange(
         const int32_t replaceAnimation = 2;
         navigationStack_->UpdateReplaceValue(replaceAnimation);
     }
-    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
-    CHECK_NULL_VOID(hostNode);
     auto contentNode = hostNode->GetContentNode();
     CHECK_NULL_VOID(contentNode);
     auto context = PipelineContext::GetCurrentContext();
@@ -1884,13 +1884,18 @@ void NavigationPattern::FireShowAndHideLifecycle(const RefPtr<NavDestinationGrou
     if (preDestination) {
         auto lastStandardIndex = hostNode->GetLastStandardIndex();
         if (isPopPage || lastStandardIndex > preDestination->GetIndex()) {
+            // fire preTop Destination lifecycle
             NotifyDestinationLifecycle(preDestination, NavDestinationLifecycle::ON_HIDE, true);
         }
     }
+    // fire remove navDestination and invisible navDestination lifecycle for pop or clear
     hostNode->FireHideNodeChange(NavDestinationLifecycle::ON_HIDE);
     if (isPopPage) {
+        // fire removed preDestination lifecycle for pop many times or clear
         NotifyDestinationLifecycle(preDestination, NavDestinationLifecycle::ON_WILL_DISAPPEAR, true);
     }
+    // fire removed navDestination lifecycle
+    hostNode->FireHideNodeChange(NavDestinationLifecycle::ON_WILL_DISAPPEAR);
     if (!isAnimated) {
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
