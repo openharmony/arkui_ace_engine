@@ -681,6 +681,9 @@ void SelectOverlayNode::MoreAnimation()
     AnimationUtils::Animate(
         extensionOption, [extensionContext, selectMenuInnerContext, id = Container::CurrentId(), shadowTheme]() {
             ContainerScope scope(id);
+            if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+                extensionContext->UpdateOpacity(1.0);
+            }
             extensionContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
             auto colorMode = SystemProperties::GetColorMode();
             extensionContext->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultMD, colorMode));
@@ -760,6 +763,9 @@ void SelectOverlayNode::BackAnimation()
     AnimationUtils::Animate(
         extensionOption, [extensionContext, selectMenuInnerContext, id = Container::CurrentId()]() {
         ContainerScope scope(id);
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            extensionContext->UpdateOpacity(0.0);
+        }
         extensionContext->UpdateTransformTranslate({ 0.0f, MORE_MENU_TRANSLATE.ConvertToPx(), 0.0f });
         selectMenuInnerContext->UpdateOpacity(1.0);
     });
@@ -901,8 +907,11 @@ void SelectOverlayNode::AddExtensionMenuOptions(const std::vector<MenuOptionsPar
 
         extensionMenu_->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
         extensionMenuStatus_ = FrameNodeStatus::GONE;
-
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            extensionMenuContext->UpdateOpacity(0.0);
+        }
         extensionMenuContext->UpdateTransformTranslate({ 0.0f, MORE_MENU_TRANSLATE.ConvertToPx(), 0.0f });
+        extensionMenu_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         extensionMenu_->MarkModifyDone();
         menuPattern->SetSelectOverlayExtensionMenuShow();
     }
