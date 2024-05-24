@@ -94,15 +94,18 @@ bool LayoutWrapper::AvoidKeyboard(bool isFocusOnPage)
         auto renderContext = GetHostNode()->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);
         auto safeArea = manager->GetSafeArea();
-        auto x = GetGeometryNode()->GetFrameOffset().GetX();
+        auto geometryNode = GetGeometryNode();
+        auto x = geometryNode->GetFrameOffset().GetX();
         if (manager->IsAtomicService()) {
-            auto usingRect = RectF(OffsetF(x, manager->GetKeyboardOffset()), GetGeometryNode()->GetFrameSize());
+            auto usingRect = RectF(OffsetF(x, manager->GetKeyboardOffset()), geometryNode->GetFrameSize());
             renderContext->UpdatePaintRect(usingRect);
+            geometryNode->SetSelfAdjust(usingRect - geometryNode->GetFrameRect());
             return true;
         }
         auto usingRect =
-            RectF(OffsetF(x, safeArea.top_.Length() + manager->GetKeyboardOffset()), GetGeometryNode()->GetFrameSize());
+            RectF(OffsetF(x, safeArea.top_.Length() + manager->GetKeyboardOffset()), geometryNode->GetFrameSize());
         renderContext->UpdatePaintRect(usingRect);
+        geometryNode->SetSelfAdjust(usingRect - geometryNode->GetFrameRect());
         return true;
     }
     return false;
