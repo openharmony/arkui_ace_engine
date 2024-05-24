@@ -142,6 +142,9 @@ public:
             return;
         }
         makeFunc_ = std::move(makeFunc);
+        if (sliderContentModifier_) {
+            sliderContentModifier_->SetUseContentModifier(true);
+        }
     }
 
     bool UseContentModifier()
