@@ -569,10 +569,20 @@ void ResetInitialIndex(ArkUINodeHandle node)
     ListModelNG::SetInitialIndex(frameNode, 0);
 }
 
-void SetListChildrenMainSize(ArkUINodeHandle node, ArkUIListChildrenMainSize option)
+void SetListChildrenMainSize(ArkUINodeHandle node, ArkUIListChildrenMainSize option, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    for (int i = 0; i < option->mainSize.size(); i++) {
+        if (option->mainSize[i] > 0) {
+            option->mainSize[i] =
+                Dimension(option->mainSize[i], static_cast<OHOS::Ace::DimensionUnit>(unit)).ConvertToPx();
+        }
+    }
+    if (option->defaultMainSize > 0) {
+        option->defaultMainSize =
+            Dimension(option->defaultMainSize, static_cast<OHOS::Ace::DimensionUnit>(unit)).ConvertToPx();
+    }
     ListModelNG::SetListChildrenMainSize(frameNode, option->defaultMainSize, option->mainSize);
 }
 
