@@ -905,8 +905,6 @@ float ListPattern::GetEndOverScrollOffset(float offset) const
 
 bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
 {
-    CHECK_NULL_RETURN(!itemPosition_.empty(), false);
-
     // check edgeEffect is not springEffect
     if (!jumpIndex_.has_value() && !targetIndex_.has_value() && !HandleEdgeEffect(offset, source, GetContentSize())) {
         if (IsOutOfBoundary(false)) {
@@ -924,7 +922,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
     if (!NearZero(offset)) {
         MarkDirtyNodeSelf();
     }
-    if (!IsOutOfBoundary() || !isScrollable_) {
+    if (itemPosition_.empty() || !IsOutOfBoundary() || !isScrollable_) {
         auto userOffset = FireOnWillScroll(currentDelta_ - lastDelta);
         currentDelta_ = lastDelta + userOffset;
         return true;
