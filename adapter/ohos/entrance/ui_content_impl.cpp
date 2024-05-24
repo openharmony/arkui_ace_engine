@@ -2502,6 +2502,7 @@ void UIContentImpl::SetIsFocusActive(bool isFocusActive)
         [container, isFocusActive]() {
             auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
             CHECK_NULL_VOID(pipelineContext);
+            ContainerScope scope(container->GetInstanceId());
             pipelineContext->SetIsFocusActive(isFocusActive);
         },
         TaskExecutor::TaskType::UI, "ArkUISetIsFocusActive");

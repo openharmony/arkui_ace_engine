@@ -626,9 +626,10 @@ void AceContainer::OnActive(int32_t instanceId)
     if (front && !container->IsSubContainer()) {
         WeakPtr<Frontend> weakFrontend = front;
         taskExecutor->PostTask(
-            [weakFrontend]() {
+            [weakFrontend, instanceId]() {
                 auto frontend = weakFrontend.Upgrade();
                 if (frontend) {
+                    ContainerScope scope(instanceId);
                     frontend->UpdateState(Frontend::State::ON_ACTIVE);
                     frontend->OnActive();
                 }
@@ -643,6 +644,7 @@ void AceContainer::OnActive(int32_t instanceId)
                 LOGE("pipeline context is null, OnActive failed.");
                 return;
             }
+            ContainerScope scope(container->GetInstanceId());
             pipelineContext->WindowFocus(true);
         },
         TaskExecutor::TaskType::UI, "ArkUIWindowFocus");
@@ -660,9 +662,10 @@ void AceContainer::OnInactive(int32_t instanceId)
     if (front && !container->IsSubContainer()) {
         WeakPtr<Frontend> weakFrontend = front;
         taskExecutor->PostTask(
-            [weakFrontend]() {
+            [weakFrontend, instanceId]() {
                 auto frontend = weakFrontend.Upgrade();
                 if (frontend) {
+                    ContainerScope scope(instanceId);
                     frontend->UpdateState(Frontend::State::ON_INACTIVE);
                     frontend->OnInactive();
                 }
@@ -677,6 +680,7 @@ void AceContainer::OnInactive(int32_t instanceId)
                 LOGE("pipeline context is null, OnInactive failed.");
                 return;
             }
+            ContainerScope scope(container->GetInstanceId());
             pipelineContext->WindowFocus(false);
             if (container->IsScenceBoardWindow()) {
                 JankFrameReport::GetInstance().FlushRecord();
@@ -851,7 +855,8 @@ void AceContainer::InitializeCallback()
         ContainerScope scope(id);
         bool result = false;
         context->GetTaskExecutor()->PostSyncTask(
-            [context, event, &result]() {
+            [context, event, &result, id]() {
+                ContainerScope scope(id);
                 result = context->OnKeyEvent(event);
             },
             TaskExecutor::TaskType::UI, "ArkUIAceContainerKeyEvent");

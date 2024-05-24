@@ -658,7 +658,8 @@ bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
 
     bool isBypassInner = keyEvent.IsKey({ KeyCode::KEY_TAB }) && pipeline && pipeline->IsTabJustTriggerOnKeyEvent();
     auto retInternal = false;
-    if (GetFrameName() == V2::UI_EXTENSION_COMPONENT_ETS_TAG || GetFrameName() == V2::EMBEDDED_COMPONENT_ETS_TAG) {
+    if (GetFrameName() == V2::UI_EXTENSION_COMPONENT_ETS_TAG || GetFrameName() == V2::EMBEDDED_COMPONENT_ETS_TAG ||
+        GetFrameName() == V2::ISOLATED_COMPONENT_ETS_TAG) {
         isBypassInner = false;
     }
     if (!isBypassInner && !onKeyEventsInternal_.empty()) {
@@ -760,43 +761,8 @@ bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
             return RequestNextFocus(FocusStep::LEFT, GetRect());
         case KeyCode::TV_CONTROL_RIGHT:
             return RequestNextFocus(FocusStep::RIGHT, GetRect());
-        case KeyCode::KEY_TAB: {
-            auto frameNode = GetFrameNode();
-            CHECK_NULL_RETURN(frameNode, false);
-            auto* context = frameNode->GetContext();
-            CHECK_NULL_RETURN(context, false);
-            auto curFocusView = FocusView::GetCurrentFocusView();
-            auto entryFocusView = curFocusView ? curFocusView->GetEntryFocusView() : nullptr;
-            auto entryFocusViewHub = entryFocusView ? entryFocusView->GetFocusHub() : nullptr;
-            auto focusParent = GetParentFocusHub();
-            bool isCurrentHandledByFocusView =
-                (entryFocusViewHub && entryFocusViewHub == this) || !focusParent || !focusParent->IsCurrentFocus();
-            bool ret = false;
-            if (keyEvent.pressedCodes.size() == 1) {
-                context->SetIsFocusingByTab(true);
-                ret = RequestNextFocus(FocusStep::TAB, GetRect());
-                if (!ret && isCurrentHandledByFocusView) {
-                    if (context->IsFocusWindowIdSetted()) {
-                        FocusToHeadOrTailChild(true);
-                        return false;
-                    }
-                    ret = FocusToHeadOrTailChild(true);
-                }
-                context->SetIsFocusingByTab(false);
-            } else if (keyEvent.IsShiftWith(KeyCode::KEY_TAB)) {
-                context->SetIsFocusingByTab(true);
-                ret = RequestNextFocus(FocusStep::SHIFT_TAB, GetRect());
-                if (!ret && isCurrentHandledByFocusView) {
-                    if (context->IsFocusWindowIdSetted()) {
-                        FocusToHeadOrTailChild(false);
-                        return false;
-                    }
-                    ret = FocusToHeadOrTailChild(false);
-                }
-                context->SetIsFocusingByTab(false);
-            }
-            return ret;
-        }
+        case KeyCode::KEY_TAB:
+            return RequestNextFocusOfKeyTab(keyEvent);
         case KeyCode::KEY_MOVE_HOME:
             return RequestNextFocus(FocusStep::LEFT_END, GetRect()) || RequestNextFocus(FocusStep::UP_END, GetRect());
         case KeyCode::KEY_MOVE_END:
@@ -805,6 +771,49 @@ bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
         default:
             return false;
     }
+}
+
+bool FocusHub::RequestNextFocusOfKeyTab(const KeyEvent& keyEvent)
+{
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto* context = frameNode->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto curFocusView = FocusView::GetCurrentFocusView();
+    auto entryFocusView = curFocusView ? curFocusView->GetEntryFocusView() : nullptr;
+    auto entryFocusViewHub = entryFocusView ? entryFocusView->GetFocusHub() : nullptr;
+    auto focusParent = GetParentFocusHub();
+    bool isCurrentHandledByFocusView =
+        (entryFocusViewHub && entryFocusViewHub == this) || !focusParent || !focusParent->IsCurrentFocus();
+    bool ret = false;
+    if (keyEvent.pressedCodes.size() == 1) {
+        context->SetIsFocusingByTab(true);
+        ret = RequestNextFocus(FocusStep::TAB, GetRect());
+        if (!ret && isCurrentHandledByFocusView) {
+            auto container = Container::GetContainer(context->GetInstanceId());
+            auto isDynamicRender = container == nullptr ? false : container->IsDynamicRender();
+            if (context->IsFocusWindowIdSetted() || isDynamicRender) {
+                FocusToHeadOrTailChild(true);
+                return false;
+            }
+            ret = FocusToHeadOrTailChild(true);
+        }
+        context->SetIsFocusingByTab(false);
+    } else if (keyEvent.IsShiftWith(KeyCode::KEY_TAB)) {
+        context->SetIsFocusingByTab(true);
+        ret = RequestNextFocus(FocusStep::SHIFT_TAB, GetRect());
+        if (!ret && isCurrentHandledByFocusView) {
+            auto container = Container::GetContainer(context->GetInstanceId());
+            auto isDynamicRender = container == nullptr ? false : container->IsDynamicRender();
+            if (context->IsFocusWindowIdSetted() || isDynamicRender) {
+                FocusToHeadOrTailChild(false);
+                return false;
+            }
+            ret = FocusToHeadOrTailChild(false);
+        }
+        context->SetIsFocusingByTab(false);
+    }
+    return ret;
 }
 
 void FocusHub::RequestFocus() const
@@ -1127,11 +1136,15 @@ void FocusHub::OnBlur()
     } else if (focusType_ == FocusType::SCOPE) {
         OnBlurScope();
     }
-    BlurFocusView();
     auto frameNode = GetFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto* pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
+    auto container = Container::GetContainer(frameNode->GetInstanceId());
+    auto isDynamicRender = container == nullptr ? false : container->IsDynamicRender();
+    if (!isDynamicRender) {
+        BlurFocusView();
+    }
     if (blurReason_ != BlurReason::WINDOW_BLUR) {
         pipeline->SetNeedSoftKeyboard(false);
     } else {

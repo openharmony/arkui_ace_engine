@@ -189,29 +189,14 @@ bool TaskExecutorImpl::OnPostTask(
         }
     };
 
-    TaskExecutor::Task wrappedTask;
-    if (taskWrapper_ != nullptr) {
-        switch (type) {
-            case TaskType::PLATFORM:
-            case TaskType::UI:
-            case TaskType::JS:
-                LOGD("wrap npi task, currentId = %{public}d", currentId);
-                wrappedTask =
-                    WrapTaskWithCustomWrapper(std::move(task), currentId, std::move(traceIdFunc));
-                break;
-            case TaskType::IO:
-            case TaskType::GPU:
-            case TaskType::BACKGROUND:
-                wrappedTask = currentId >= 0 ? WrapTaskWithContainer(std::move(task), currentId, std::move(traceIdFunc))
-                                             : std::move(task);
-                break;
-            default:
-                return false;
-        }
-    } else {
-        wrappedTask = currentId >= 0 ? WrapTaskWithContainer(std::move(task), currentId, std::move(traceIdFunc))
-                                     : std::move(task);
+    if (taskWrapper_ != nullptr && (type == TaskType::PLATFORM || type == TaskType::UI || type == TaskType::JS)) {
+        TaskExecutor::Task wrappedTask = WrapTaskWithCustomWrapper(std::move(task), currentId, std::move(traceIdFunc));
+        taskWrapper_->Call(std::move(wrappedTask));
+        return true;
     }
+
+    TaskExecutor::Task wrappedTask =
+        currentId >= 0 ? WrapTaskWithContainer(std::move(task), currentId, std::move(traceIdFunc)) : std::move(task);
 
     switch (type) {
         case TaskType::PLATFORM:

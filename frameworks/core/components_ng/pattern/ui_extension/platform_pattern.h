@@ -84,11 +84,11 @@ public:
     int32_t GetNodeId();
 
 protected:
-    virtual void DispatchPointerEvent(
-        const std::shared_ptr<MMI::PointerEvent>& pointerEvent) {}
-    virtual void DispatchKeyEvent(const KeyEvent& event) {}
+    virtual void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) {}
     virtual void DispatchFocusActiveEvent(bool isFocusActive) {}
-    virtual bool DispatchKeyEventSync(const KeyEvent& event) { return false; }
+    virtual bool HandleKeyEvent(const KeyEvent& event);
+    virtual void HandleFocusEvent();
+    virtual void HandleBlurEvent();
 
     AceLogTag tag_ = AceLogTag::ACE_DEFAULT_DOMAIN;
     int32_t platformId_ = -1;
@@ -107,9 +107,6 @@ private:
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
     void InitHoverEvent(const RefPtr<InputEventHub>& inputHub);
-    bool HandleKeyEvent(const KeyEvent& event);
-    void HandleFocusEvent();
-    void HandleBlurEvent();
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleMouseEvent(const MouseInfo& info);
     void HandleHoverEvent(bool isHover);

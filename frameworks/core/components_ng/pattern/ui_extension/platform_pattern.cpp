@@ -100,6 +100,7 @@ void PlatformPattern::InitKeyEvent(const RefPtr<FocusHub>& focusHub)
             pattern->DispatchFocusActiveEvent(false);
         }
     });
+
     focusHub->SetOnPaintFocusStateInternal([weak = WeakClaim(this)]() -> bool {
         auto pattern = weak.Upgrade();
         if (pattern) {
@@ -174,7 +175,7 @@ void PlatformPattern::InitHoverEvent(const RefPtr<InputEventHub>& inputHub)
 
 bool PlatformPattern::HandleKeyEvent(const KeyEvent& event)
 {
-    return DispatchKeyEventSync(event);
+    return false;
 }
 
 void PlatformPattern::HandleFocusEvent()
