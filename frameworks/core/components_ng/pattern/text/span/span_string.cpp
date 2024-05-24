@@ -771,4 +771,71 @@ bool SpanString::IsSpecialNode(RefPtr<SpanBase> span)
     }
     return true;
 }
+
+void SpanString::ClearSpans()
+{
+    spans_.clear();
+}
+
+void SpanString::AppendSpanItem(const RefPtr<NG::SpanItem>& spanItem)
+{
+    spans_.emplace_back(spanItem);
+}
+
+bool SpanString::EncodeTlv(std::vector<uint8_t>& buff)
+{
+    TLVUtil::WriteUint8(buff, TLV_SPAN_STRING_SPANS);
+    TLVUtil::WriteInt32(buff, spans_.size());
+    for (auto it = spans_.begin(); it != spans_.end(); ++it) {
+        auto spanItem = (*it);
+        if (spanItem->spanItemType == NG::SpanItemType::CustomSpan) {
+            auto placeHolderSpan = AceType::MakeRefPtr<NG::SpanItem>();
+            placeHolderSpan->content = " ";
+            placeHolderSpan->interval = spanItem->interval;
+            placeHolderSpan->EncodeTlv(buff);
+            continue;
+        }
+        TLVUtil::WriteInt32(buff, static_cast<int32_t>(spanItem->spanItemType));
+        spanItem->EncodeTlv(buff);
+    }
+    TLVUtil::WriteUint8(buff, TLV_SPAN_STRING_CONTENT);
+    TLVUtil::WriteString(buff, text_);
+    TLVUtil::WriteUint8(buff, TLV_END);
+    return true;
+}
+
+SpanString* SpanString::DecodeTlv(std::vector<uint8_t>& buff)
+{
+    int32_t cursor = 0;
+    SpanString* spanStr = new SpanString("");
+    if (spanStr == nullptr) {
+        return nullptr;
+    }
+    spanStr->ClearSpans();
+    for (uint8_t tag = TLVUtil::ReadUint8(buff, cursor); tag != TLV_END; tag = TLVUtil::ReadUint8(buff, cursor)) {
+        switch (tag) {
+            case TLV_SPAN_STRING_CONTENT: {
+                spanStr->SetString(TLVUtil::ReadString(buff, cursor));
+                break;
+            }
+            case TLV_SPAN_STRING_SPANS: {
+                int32_t spanLength = TLVUtil::ReadInt32(buff, cursor);
+                for (auto i = 0; i < spanLength; i++) {
+                    auto spanItemType = TLVUtil::ReadInt32(buff, cursor);
+                    if (spanItemType == static_cast<int32_t>(NG::SpanItemType::IMAGE)) {
+                        auto imageSpanItem = NG::ImageSpanItem::DecodeTlv(buff, cursor);
+                        spanStr->AppendSpanItem(imageSpanItem);
+                    } else {
+                        auto spanItem = NG::SpanItem::DecodeTlv(buff, cursor);
+                        spanStr->AppendSpanItem(spanItem);
+                    }
+                }
+                break;
+            }
+            default:
+                break;
+        }
+    }
+    return spanStr;
+}
 } // namespace OHOS::Ace

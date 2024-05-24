@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "base/memory/referenced.h"
+#include "core/components_ng/pattern/text/span/tlv_util.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
 #include "core/components_ng/pattern/text/text_model.h"
 
@@ -54,7 +55,10 @@ public:
     void RemoveSpan(int32_t start, int32_t length, SpanType key);
     bool CheckRange(int32_t start, int32_t length, bool allowLengthZero = false) const;
     void BindWithSpans(const std::vector<RefPtr<SpanBase>>& spans);
-
+    bool EncodeTlv(std::vector<uint8_t>& buff);
+    static SpanString* DecodeTlv(std::vector<uint8_t>& buff);
+    void ClearSpans();
+    void AppendSpanItem(const RefPtr<NG::SpanItem>& spanItem);
 protected:
     RefPtr<SpanBase> GetSpan(int32_t start, int32_t length, SpanType spanType) const;
     std::list<RefPtr<SpanBase>> GetSubSpanList(
