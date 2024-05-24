@@ -111,6 +111,7 @@ public:
     void IsEditing(const JSCallbackInfo& args);
     void StopEditing();
     void SetSelection(const JSCallbackInfo& args);
+    bool FontSizeRangeIsNegative(const CalcDimension& size);
 
     void SetInstanceId(int32_t id)
     {
