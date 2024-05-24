@@ -5823,10 +5823,9 @@ void RichEditorPattern::HandleSurfacePositionChanged(int32_t posX, int32_t posY)
 
 void RichEditorPattern::DumpInfo()
 {
+    auto& dumpLog = DumpLog::GetInstance();
     if (customKeyboardBuilder_) {
-        DumpLog::GetInstance().AddDesc(std::string("CustomKeyboard: true")
-                                           .append(", Attached: ")
-                                           .append(std::to_string(isCustomKeyboardAttached_)));
+        dumpLog.AddDesc(std::string("CustomKeyboard, Attached: ").append(std::to_string(isCustomKeyboardAttached_)));
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -5834,12 +5833,13 @@ void RichEditorPattern::DumpInfo()
     CHECK_NULL_VOID(context);
     auto richEditorTheme = context->GetTheme<RichEditorTheme>();
     CHECK_NULL_VOID(richEditorTheme);
-    DumpLog::GetInstance().AddDesc(std::string("caret offset: ").append(GetCaretRect().GetOffset().ToString()));
-    DumpLog::GetInstance().AddDesc(
-        std::string("caret height: ")
+    dumpLog.AddDesc(std::string("caret offset: ").append(GetCaretRect().GetOffset().ToString()));
+    dumpLog.AddDesc(std::string("caret height: ")
             .append(std::to_string(NearZero(GetCaretRect().Height())
                                        ? richEditorTheme->GetDefaultCaretHeight().ConvertToPx()
                                        : GetCaretRect().Height())));
+    dumpLog.AddDesc(std::string("text rect: ").append(richTextRect_.ToString()));
+    dumpLog.AddDesc(std::string("content rect: ").append(contentRect_.ToString()));
 }
 
 bool RichEditorPattern::HasFocus() const
