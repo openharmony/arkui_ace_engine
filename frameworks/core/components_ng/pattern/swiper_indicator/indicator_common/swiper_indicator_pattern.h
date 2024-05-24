@@ -77,6 +77,7 @@ public:
         paintMethod->SetCurrentIndex(swiperPattern->GetLoopIndex(swiperPattern->GetCurrentFirstIndex()));
         paintMethod->SetCurrentIndexActual(swiperPattern->GetLoopIndex(swiperPattern->GetCurrentIndex()));
         paintMethod->SetNextValidIndex(swiperPattern->GetNextValidIndex());
+        paintMethod->SetHorizontalAndRightToLeft(swiperLayoutProperty->GetNonAutoLayoutDirection());
         paintMethod->SetItemCount(swiperPattern->RealTotalCount());
         paintMethod->SetDisplayCount(swiperLayoutProperty->GetDisplayCount().value_or(1));
         paintMethod->SetGestureState(swiperPattern->GetGestureState());
