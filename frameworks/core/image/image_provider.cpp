@@ -44,6 +44,15 @@ namespace {
 // If a picture is a wide color gamut picture, its area value will be larger than this threshold.
 constexpr double SRGB_GAMUT_AREA = 0.104149;
 
+struct RSDataWrapper {
+    std::shared_ptr<RSData> data;
+};
+
+inline void RSDataWrapperReleaseProc(const void*, void* context)
+{
+    RSDataWrapper* wrapper = reinterpret_cast<RSDataWrapper*>(context);
+    delete wrapper;
+}
 } // namespace
 
 std::mutex ImageProvider::loadingImageMutex_;
@@ -667,7 +676,9 @@ std::shared_ptr<RSImage> ImageProvider::ApplySizeToDrawingImage(
                     if (!data) {
                         return;
                     }
-                    auto skData = SkData::MakeWithoutCopy(data->GetData(), data->GetSize());
+                    RSDataWrapper* wrapper = new RSDataWrapper{data};
+                    auto skData = SkData::MakeWithProc(data->GetData(), data->GetSize(),
+                        RSDataWrapperReleaseProc, wrapper);
                     if (!skData) {
                         LOGI("encode cache image into cache file failed.");
                         return;
