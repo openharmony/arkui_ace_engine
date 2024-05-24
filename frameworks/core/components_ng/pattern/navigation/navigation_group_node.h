@@ -174,6 +174,8 @@ public:
 
     float CheckLanguageDirection();
 
+    void RemoveDialogDestination();
+
 private:
     bool UpdateNavDestinationVisibility(const RefPtr<NavDestinationGroupNode>& navDestination,
         const RefPtr<UINode>& remainChild, int32_t index, size_t destinationSize);
@@ -186,10 +188,14 @@ private:
     void GetCurTitleBarNode(RefPtr<TitleBarNode>& curTitleBarNode, const RefPtr<FrameNode>& curNode,
         bool isNavBar);
 
+    void DealRemoveDestination(const RefPtr<NavDestinationGroupNode>& destination);
+
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;
     RefPtr<UINode> dividerNode_;
-    std::vector<RefPtr<NavDestinationGroupNode>> hideNodes_; // dialog destination hide pages.
+    // dialog hideNodes, if is true, nodes need remove
+    std::vector<std::pair<RefPtr<NavDestinationGroupNode>, bool>> hideNodes_;
+    std::vector<RefPtr<NavDestinationGroupNode>> showNodes_;
     int32_t lastStandardIndex_ = -1;
     bool isOnAnimation_ { false };
     bool isModeChange_ { false };

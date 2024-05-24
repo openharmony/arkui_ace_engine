@@ -182,11 +182,30 @@ public:
     {
         navigationNode_ = AceType::WeakClaim(RawPtr(navigationNode));
     }
-    
+
     void OnDetachFromMainTree() override
     {
         auto weak = AceType::WeakClaim(this);
         UIObserverHandler::GetInstance().NotifyNavigationStateChange(weak, NavDestinationState::ON_DISAPPEAR);
+    }
+
+    bool OverlayOnBackPressed();
+
+    void CreateOverlayManager(bool isShow)
+    {
+        if (!overlayManager_ && isShow) {
+            overlayManager_ = MakeRefPtr<OverlayManager>(GetHost());
+        }
+    }
+
+    const RefPtr<OverlayManager>& GetOverlayManager()
+    {
+        return overlayManager_;
+    }
+
+    void DeleteOverlayManager()
+    {
+        overlayManager_.Reset();
     }
 
     void SetNavigationId(const std::string& id)
@@ -210,6 +229,17 @@ public:
     }
 
     void OnLanguageConfigurationUpdate() override;
+    void SetKeyboardOffset(float keyboardOffset)
+    {
+        keyboardOffset_ = keyboardOffset;
+    }
+
+    float GetKeyboardOffset()
+    {
+        return keyboardOffset_;
+    }
+
+    bool NeedIgnoreKeyboard();
 
 private:
     void UpdateNameIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
@@ -222,11 +252,13 @@ private:
     RefPtr<NavDestinationContext> navDestinationContext_;
     RefPtr<UINode> customNode_;
     WeakPtr<UINode> navigationNode_;
+    RefPtr<OverlayManager> overlayManager_;
     bool isOnShow_ = false;
     bool isUserDefinedBgColor_ = false;
     bool isRightToLeft_ = false;
     uint64_t navDestinationId_ = 0;
     void OnAttachToFrameNode() override;
+    float keyboardOffset_ = 0.0f;
 };
 
 } // namespace OHOS::Ace::NG

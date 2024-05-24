@@ -25,6 +25,7 @@
 #include "ability_context.h"
 #include "ability_info.h"
 #include "auto_fill_manager.h"
+#include "display_info.h"
 #include "js_native_api.h"
 #include "pointer_event.h"
 #include "scene_board_judgement.h"
@@ -2221,6 +2222,11 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
             CheckAndSetFontFamily();
         }
     }
+    if (!parsedConfig.colorModeIsSetByApp.empty()) {
+        resConfig.SetColorModeIsSetByApp(true);
+    } else {
+        resConfig.SetColorModeIsSetByApp(false);
+    }
     SetFontScaleAndWeightScale(parsedConfig);
     SetResourceConfiguration(resConfig);
     themeManager->UpdateConfig(resConfig);
@@ -2237,6 +2243,16 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     OHOS::Ace::PluginManager::GetInstance().UpdateConfigurationInPlugin(resConfig, taskExecutor_);
 #endif
     NotifyConfigurationChange(!parsedConfig.deviceAccess.empty(), configurationChange);
+    NotifyConfigToSubContainers(parsedConfig, configuration);
+}
+
+void AceContainer::NotifyConfigToSubContainers(const ParsedConfig& parsedConfig, const std::string& configuration)
+{
+    for (auto& item : configurationChangedCallbacks_) {
+        if (item.second) {
+            item.second(parsedConfig, configuration);
+        }
+    }
 }
 
 void AceContainer::NotifyConfigurationChange(
@@ -2422,6 +2438,9 @@ RefPtr<DisplayInfo> AceContainer::GetDisplayInfo()
     auto displayManager = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     CHECK_NULL_RETURN(displayManager, nullptr);
     auto dmRotation = displayManager->GetRotation();
+    auto displayInfo = displayManager->GetDisplayInfo();
+    CHECK_NULL_RETURN(displayInfo, nullptr);
+    auto deviceRotation = displayInfo->GetDefaultDeviceRotationOffset();
     auto isFoldable = Rosen::DisplayManager::GetInstance().IsFoldable();
     auto dmFoldStatus = Rosen::DisplayManager::GetInstance().GetFoldStatus();
     std::vector<Rect> rects;
@@ -2440,6 +2459,7 @@ RefPtr<DisplayInfo> AceContainer::GetDisplayInfo()
     displayInfo_->SetIsFoldable(isFoldable);
     displayInfo_->SetFoldStatus(static_cast<FoldStatus>(static_cast<uint32_t>(dmFoldStatus)));
     displayInfo_->SetRotation(static_cast<Rotation>(static_cast<uint32_t>(dmRotation)));
+    displayInfo_->SetDeviceRotation(deviceRotation);
     displayInfo_->SetCurrentFoldCreaseRegion(rects);
     return displayInfo_;
 }

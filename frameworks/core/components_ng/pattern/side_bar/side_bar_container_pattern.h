@@ -155,6 +155,7 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
+    void OnColorConfigurationUpdate() override;
     void UpdateAnimDir();
     void DoAnimation();
     void CreateAnimation();
@@ -192,6 +193,7 @@ private:
     void UpdateDividerShadow() const;
     void SetSideBarActive(bool isActive, bool onlyJsActive) const;
     void OnLanguageConfigurationUpdate() override;
+    void SetSideBarMask(bool isWindowFocus) const;
 
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<ClickEvent> controlButtonClickEvent_;
@@ -217,6 +219,7 @@ private:
     bool isRightToLeft_ = false;
     bool isInDividerDrag_ = false;
     bool isDividerDraggable_ = true;
+    bool isWindowFocus_ = true;
 
     Dimension realSideBarWidth_ = -1.0_vp;
     Dimension preSidebarWidth_;
@@ -233,6 +236,16 @@ private:
     Dimension controlImageHeight_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SideBarContainerPattern);
+
+    RefPtr<LongPressEvent> longPressEvent_;
+    GestureEventFunc longPressActionEnd_;
+    RefPtr<FrameNode> dialogNode_;
+    ImageSourceInfo imageInfo_;
+    void InitLongPressEvent(const RefPtr<FrameNode>& buttonNode);
+    void HandleLongPressEvent();
+    void HandleLongPressActionEnd();
+    void ShowDialogWithNode();
+    bool isDialogShow_ = false;
 };
 
 } // namespace OHOS::Ace::NG

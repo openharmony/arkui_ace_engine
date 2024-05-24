@@ -518,4 +518,18 @@ uint32_t ResourceAdapterImpl::GetSymbolById(uint32_t resId) const
     resourceManager_->GetSymbolById(resId, result);
     return result;
 }
+
+uint32_t ResourceAdapterImpl::GetSymbolByName(const char* resName) const
+{
+    uint32_t result = 0;
+    auto actualResName = GetActualResourceName(resName);
+    if (resourceManager_) {
+        auto state = resourceManager_->GetSymbolByName(actualResName.c_str(), result);
+        if (state != Global::Resource::SUCCESS) {
+            TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get symbol by name error, name=%{public}s, errorCode=%{public}d",
+                resName, state);
+        }
+    }
+    return result;
+}
 } // namespace OHOS::Ace

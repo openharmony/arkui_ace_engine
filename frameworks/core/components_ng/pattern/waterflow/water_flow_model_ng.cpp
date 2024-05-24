@@ -90,6 +90,13 @@ void WaterFlowModelNG::SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr
     waterFlow->SetScrollBarProxy(AceType::DynamicCast<ScrollBarProxy>(proxy));
 }
 
+void WaterFlowModelNG::SetLayoutMode(WaterFlowLayoutMode mode)
+{
+    auto waterFlow = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WaterFlowPattern>();
+    CHECK_NULL_VOID(waterFlow);
+    waterFlow->SetLayoutMode(mode);
+}
+
 void WaterFlowModelNG::SetColumnsTemplate(const std::string& value)
 {
     if (value.empty()) {

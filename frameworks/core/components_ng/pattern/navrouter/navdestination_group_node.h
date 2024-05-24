@@ -145,6 +145,16 @@ public:
         return isAnimated_;
     }
 
+    void SetCanReused(bool canReused)
+    {
+        canReused_ = canReused;
+    }
+
+    bool GetCanReused() const
+    {
+        return canReused_;
+    }
+
 private:
     RefPtr<UINode> titleBarNode_;
     RefPtr<UINode> contentNode_;
@@ -155,6 +165,7 @@ private:
     NavDestinationMode mode_ = NavDestinationMode::STANDARD;
     bool isCacheNode_ = false;
     bool isAnimated_ = false;
+    bool canReused_ = true;
 };
 
 } // namespace OHOS::Ace::NG

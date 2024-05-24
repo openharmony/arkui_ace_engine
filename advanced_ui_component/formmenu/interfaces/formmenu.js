@@ -28,7 +28,7 @@ async function querySnapshotAsync(want, componentId) {
     const imagePackageApi = image.createImagePacker();
     const packOpts = {
       format: 'image/jpeg',
-      quality: 100,
+      quality: 50,
     };
     let packPixmap = await componentSnapshot.get(componentId);
     let arrayBuffer = await imagePackageApi.packing(packPixmap, packOpts);
@@ -36,11 +36,12 @@ async function querySnapshotAsync(want, componentId) {
     let uint8Arr = new Uint8Array(arrayBuffer);
     let pixelStr = base64Helper.encodeToStringSync(uint8Arr);
     !want.parameters && (want.parameters = {});
-    want.parameters['ohos.extra.param.key.add_form_to_host_width'] = compInfo.size.width;
-    want.parameters['ohos.extra.param.key.add_form_to_host_height'] = compInfo.size.height;
-    want.parameters['ohos.extra.param.key.add_form_to_host_screenx'] = compInfo.screenOffset.x;
-    want.parameters['ohos.extra.param.key.add_form_to_host_screeny'] = compInfo.screenOffset.y;
+    want.parameters['ohos.extra.param.key.add_form_to_host_width'] = compInfo.size.width.toFixed(2);
+    want.parameters['ohos.extra.param.key.add_form_to_host_height'] = compInfo.size.height.toFixed(2);
+    want.parameters['ohos.extra.param.key.add_form_to_host_screenx'] = compInfo.screenOffset.x.toFixed(2);
+    want.parameters['ohos.extra.param.key.add_form_to_host_screeny'] = compInfo.screenOffset.y.toFixed(2);
     want.parameters['ohos.extra.param.key.add_form_to_host_snapshot'] = pixelStr;
+    hilog.info(0x3900, tag, 'pixelStr length:' + pixelStr.length);
   } catch (err) {
     hilog.error(0x3900, tag, 'get pixelmap string error:' + err);
   }
@@ -90,7 +91,7 @@ export function AddFormMenuItem(want, componentId, options, parent = null) {
         'moduleName': ''
       }
     });
-    FormMenuItem.onClick(() => { }, want, componentId, options?.formBindingData, options?.callback);
+    FormMenuItem.onRegClick(want, componentId, options?.formBindingData?.data, options?.callback);
   }, FormMenuItem);
   FormMenuItem.pop();
 }

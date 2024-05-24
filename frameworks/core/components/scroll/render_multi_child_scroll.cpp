@@ -925,7 +925,6 @@ double RenderMultiChildScroll::GetFixPositionOnWatch(double destination, double 
                 LOGW("get render list item is null");
                 continue;
             }
-
             double start = listBase->GetItemPosition(index);
             double end = start + listBase->GetMainSize(item->GetLayoutSize());
             if (start < centerPosition && end > centerPosition) {

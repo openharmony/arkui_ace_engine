@@ -28,7 +28,7 @@
 
 namespace OHOS::Ace {
 
-constexpr int32_t AI_TEXT_MAX_LENGTH = 300;
+constexpr int32_t AI_TEXT_MAX_LENGTH = 500;
 constexpr int32_t AI_TEXT_GAP = 100;
 constexpr int32_t AI_DELAY_TIME = 100;
 const std::pair<std::string, std::string> UI_EXTENSION_TYPE = { "ability.want.params.uiExtensionType", "sys/commonUI" };
@@ -148,6 +148,7 @@ void DataDetectorAdapter::SetTextDetectTypes(const std::string& types)
     }
     if (newTypesSet != textDetectTypesSet_) {
         textDetectTypesSet_ = newTypesSet;
+        typeChanged_ = true;
         aiDetectInitialized_ = false;
         auto host = GetHost();
         CHECK_NULL_VOID(host);
@@ -283,30 +284,78 @@ void DataDetectorAdapter::ParseAIJson(
     }
 }
 
+std::function<void()> DataDetectorAdapter::GetDetectDelayTask(const std::map<int32_t, AISpan>& aiSpanMap)
+{
+    return [aiSpanMap, weak = WeakClaim(this)]() {
+        auto dataDetectorAdapter = weak.Upgrade();
+        CHECK_NULL_VOID(dataDetectorAdapter);
+        if (dataDetectorAdapter->textForAI_.empty()) {
+            return;
+        }
+
+        size_t detectTextIdx = 0;
+        auto aiSpanMapIt = aiSpanMap.begin();
+        int32_t startPos = 0;
+        bool hasSame = false;
+        auto wTextForAI = StringUtils::ToWstring(dataDetectorAdapter->textForAI_);
+        auto wTextForAILength = static_cast<int32_t>(wTextForAI.length());
+        do {
+            std::string detectText = StringUtils::ToString(
+                wTextForAI.substr(startPos, std::min(AI_TEXT_MAX_LENGTH, wTextForAILength - startPos)));
+            bool isSameDetectText = detectTextIdx < dataDetectorAdapter->detectTexts.size() &&
+                                    detectText == dataDetectorAdapter->detectTexts[detectTextIdx];
+            while (!aiSpanMap.empty() && aiSpanMapIt != aiSpanMap.end() &&
+                   aiSpanMapIt->first < startPos + AI_TEXT_MAX_LENGTH - AI_TEXT_GAP) {
+                auto aiContent = aiSpanMapIt->second.content;
+                auto wAIContent = StringUtils::ToWstring(aiContent);
+                if (isSameDetectText ||
+                    aiContent == StringUtils::ToString(wTextForAI.substr(aiSpanMapIt->first, wAIContent.length()))) {
+                    dataDetectorAdapter->aiSpanMap_[aiSpanMapIt->first] = aiSpanMapIt->second;
+                    hasSame = true;
+                }
+                ++aiSpanMapIt;
+            }
+            if (!isSameDetectText) {
+                dataDetectorAdapter->InitTextDetect(startPos, detectText);
+                if (detectTextIdx < dataDetectorAdapter->detectTexts.size()) {
+                    dataDetectorAdapter->detectTexts[detectTextIdx] = detectText;
+                } else {
+                    dataDetectorAdapter->detectTexts.emplace_back(detectText);
+                }
+            }
+            ++detectTextIdx;
+            startPos += AI_TEXT_MAX_LENGTH - AI_TEXT_GAP;
+        } while (startPos + AI_TEXT_GAP < wTextForAILength);
+        if (hasSame) {
+            auto host = dataDetectorAdapter->GetHost();
+            CHECK_NULL_VOID(host);
+            host->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+        }
+    };
+}
+
 void DataDetectorAdapter::StartAITask()
 {
+    if (textForAI_.empty() || (!typeChanged_ && lastTextForAI_ == textForAI_)) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+        return;
+    }
+    std::map<int32_t, AISpan> aiSpanMapCopy;
+    if (!typeChanged_) {
+        aiSpanMapCopy = aiSpanMap_;
+    }
     aiSpanMap_.clear();
+    typeChanged_ = false;
+    lastTextForAI_ = textForAI_;
     startDetectorTimeStamp_ = std::chrono::high_resolution_clock::now();
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     aiDetectDelayTask_.Cancel();
-    aiDetectDelayTask_.Reset([weak = WeakClaim(this)]() {
-        auto dataDetectorAdapter = weak.Upgrade();
-        CHECK_NULL_VOID(dataDetectorAdapter);
-        if (dataDetectorAdapter->textForAI_.empty()) {
-            return;
-        }
-        int32_t startPos = 0;
-        auto wTextForAI = StringUtils::ToWstring(dataDetectorAdapter->textForAI_);
-        auto wTextForAILength = static_cast<int32_t>(wTextForAI.length());
-        while (startPos < wTextForAILength) {
-            std::string detectText = StringUtils::ToString(wTextForAI.substr(startPos, AI_TEXT_MAX_LENGTH));
-            dataDetectorAdapter->InitTextDetect(startPos, detectText);
-            startPos += AI_TEXT_MAX_LENGTH - AI_TEXT_GAP;
-        }
-    });
+    aiDetectDelayTask_.Reset(GetDetectDelayTask(aiSpanMapCopy));
     taskExecutor->PostDelayedTask(
         aiDetectDelayTask_, TaskExecutor::TaskType::UI, AI_DELAY_TIME, "ArkUITextStartAIDetect");
 }

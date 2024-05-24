@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -655,6 +655,35 @@ public:
         destroyCallback_(GetId());
     }
 
+    void SetBuilderFunc(std::function<void()>&& lazyBuilderFunc)
+    {
+        lazyBuilderFunc_ = lazyBuilderFunc;
+    }
+
+    std::function<void()> GetBuilderFunc() const
+    {
+        return lazyBuilderFunc_;
+    }
+
+    void SetUpdateNodeFunc(std::function<void(int32_t, RefPtr<UINode>&)>&& updateNodeFunc)
+    {
+        updateNodeFunc_ = updateNodeFunc;
+    }
+
+    std::function<void(int32_t, RefPtr<UINode>&)> GetUpdateNodeFunc()
+    {
+        return updateNodeFunc_;
+    }
+
+    void SetUpdateNodeConfig(std::function<void()>&& updateNodeConfig)
+    {
+        updateNodeConfig_ = updateNodeConfig;
+    }
+
+    std::function<void()> GetUpdateNodeConfig()
+    {
+        return updateNodeConfig_;
+    }
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -752,6 +781,9 @@ private:
 
     std::list<std::function<void()>> attachToMainTreeTasks_;
     std::function<void(int32_t)> updateJSInstanceCallback_;
+    std::function<void()> lazyBuilderFunc_;
+    std::function<void(int32_t, RefPtr<UINode>&)> updateNodeFunc_;
+    std::function<void()> updateNodeConfig_;
 
     std::string debugLine_;
     std::string viewId_;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -643,7 +643,11 @@ void SlidingPanelPattern::AnimateTo(float targetLocation, PanelMode mode)
             panel->invisibleFlag_ = true;
             panelNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
-        AceAsyncTraceEnd(0, TRAILING_ANIMATION);
+        auto host = panel->GetHost();
+        CHECK_NULL_VOID(host);
+        AceAsyncTraceEnd(
+            0, (TRAILING_ANIMATION + std::to_string(host->GetAccessibilityId()) + std::string(" ") + host->GetTag())
+                .c_str());
         panel->OnAnimationStop();
         panel->preAnimateFlag_ = false;
     });
@@ -679,8 +683,12 @@ void SlidingPanelPattern::AppendBlankHeightAnimation(float targetLocation, Panel
             }
             auto currentOffset = (end - start) * value + start;
             auto lastOffset = panel->GetLastOffset();
+            auto host = panel->GetHost();
+            CHECK_NULL_VOID(host);
             if (NearEqual(currentOffset, lastOffset, 1.0)) {
-                AceAsyncTraceBegin(0, TRAILING_ANIMATION);
+                AceAsyncTraceBegin(0, (TRAILING_ANIMATION + std::to_string(host->GetAccessibilityId()) +
+                                          std::string(" ") + host->GetTag())
+                                          .c_str());
             }
             panel->SetLastOffset(currentOffset);
             panel->UpdateCurrentOffsetOnAnimate(currentOffset);

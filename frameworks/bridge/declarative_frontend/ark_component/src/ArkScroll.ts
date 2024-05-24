@@ -268,6 +268,9 @@ class ArkScrollComponent extends ArkComponent implements ScrollAttribute {
     }
     return this;
   }
+  allowChildCount(): number {
+    return 1;
+  }
   scrollable(value: ScrollDirection): this {
     modifierWithKey(this._modifiersWithKeys, ScrollScrollableModifier.identity, ScrollScrollableModifier, value);
     return this;

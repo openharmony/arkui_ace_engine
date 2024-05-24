@@ -47,7 +47,6 @@ void TextFieldModelNG::CreateNode(
     CHECK_NULL_VOID(textFieldLayoutProperty);
     auto textfieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textfieldPaintProperty);
-    textfieldPaintProperty->ResetUserProperties();
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     pattern->SetModifyDoneStatus(false);
     pattern->ResetContextAttr();
@@ -82,7 +81,7 @@ void TextFieldModelNG::CreateNode(
     caretStyle.caretWidth = textFieldTheme->GetCursorWidth();
     SetCaretStyle(caretStyle);
     AddDragFrameNodeToManager();
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "text field create node");
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "text field create node, id = %{public}d", nodeId);
     if (frameNode->IsFirstBuilding()) {
         auto draggable = pipeline->GetDraggable<TextFieldTheme>();
         SetDraggable(draggable);
@@ -1748,6 +1747,34 @@ Dimension TextFieldModelNG::GetAdaptMinFontSize(FrameNode* frameNode)
     return value;
 }
 
+void TextFieldModelNG::SetOnWillInsertValueEvent(std::function<bool(const InsertValueInfo&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillInsertValueEvent(std::move(func));
+}
+
+void TextFieldModelNG::SetOnDidInsertValueEvent(std::function<void(const InsertValueInfo&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidInsertValueEvent(std::move(func));
+}
+
+void TextFieldModelNG::SetOnWillDeleteEvent(std::function<bool(const DeleteValueInfo&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillDeleteEvent(std::move(func));
+}
+
+void TextFieldModelNG::SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidDeleteEvent(std::move(func));
+}
+
 Dimension TextFieldModelNG::GetAdaptMaxFontSize(FrameNode* frameNode)
 {
     Dimension value;
@@ -1768,7 +1795,7 @@ uint32_t TextFieldModelNG::GetMaxLines(FrameNode* frameNode)
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, MaxLines, value, frameNode, value);
     return value;
 }
-    
+
 void TextFieldModelNG::SetPadding(FrameNode* frameNode, NG::PaddingProperty& newPadding)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1886,6 +1913,42 @@ PaddingProperty TextFieldModelNG::GetMargin(FrameNode* frameNode)
         margins.left = std::optional<CalcLength>(property.left);
     }
     return margins;
+}
+
+void TextFieldModelNG::SetOnWillInsertValueEvent(FrameNode* frameNode,
+    std::function<bool(const InsertValueInfo&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillInsertValueEvent(std::move(func));
+}
+
+void TextFieldModelNG::SetOnDidInsertValueEvent(FrameNode* frameNode,
+    std::function<void(const InsertValueInfo&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidInsertValueEvent(std::move(func));
+}
+
+void TextFieldModelNG::SetOnWillDeleteEvent(FrameNode* frameNode,
+    std::function<bool(const DeleteValueInfo&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillDeleteEvent(std::move(func));
+}
+
+void TextFieldModelNG::SetOnDidDeleteEvent(FrameNode* frameNode,
+    std::function<void(const DeleteValueInfo&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidDeleteEvent(std::move(func));
 }
 
 } // namespace OHOS::Ace::NG

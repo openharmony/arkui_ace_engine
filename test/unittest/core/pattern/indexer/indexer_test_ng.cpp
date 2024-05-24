@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
 #include "core/components_ng/pattern/indexer/indexer_theme.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
+#include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -58,6 +59,10 @@ std::vector<std::string> GetPopupData(int32_t)
 std::vector<std::string> GetMorePopupData(int32_t)
 {
     return { "白", "别", "吧", "不", "被" };
+}
+std::vector<std::string> GetMorePopupData2(int32_t)
+{
+    return { "白", "别", "吧", "不", "被", "包", "毕" };
 }
 } // namespace
 
@@ -86,7 +91,7 @@ public:
 
 void IndexerTestNg::SetUpTestSuite()
 {
-    MockPipelineContext::SetUp();
+    TestNG::SetUpTestSuite();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     PipelineContext::GetCurrentContext()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<IndexerTheme>()));
@@ -94,7 +99,7 @@ void IndexerTestNg::SetUpTestSuite()
 
 void IndexerTestNg::TearDownTestSuite()
 {
-    MockPipelineContext::TearDown();
+    TestNG::TearDownTestSuite();
 }
 
 void IndexerTestNg::SetUp() {}
@@ -599,6 +604,120 @@ HWTEST_F(IndexerTestNg, IndexerPattern003, TestSize.Level1)
     touchEventInfo = CreateTouchEventInfo(TouchType::UP, Offset());
     touchCallback(touchEventInfo);
     EXPECT_EQ(textLayoutProperty->GetTextColor().value(), Color(0x00000000));
+}
+
+/**
+ * @tc.name: IndexerPattern004
+ * @tc.desc: Test indexer pattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerPattern004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create indexer when apiTargetVersion is PlatformVersion::VERSION_TWELVE
+     * @tc.expected: BorderRadiusValue is Dimension(INDEXER_DEFAULT_RADIUS, DimensionUnit::VP)
+     */
+    int32_t apiTargetVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    Create([](IndexerModelNG model) { model.SetUsingPopup(true); });
+    auto indexerRenderContext = frameNode_->GetRenderContext();
+    auto indexerRadius = Dimension(INDEXER_DEFAULT_RADIUS, DimensionUnit::VP);
+    BorderRadiusProperty expectValue = { indexerRadius, indexerRadius, indexerRadius, indexerRadius };
+    EXPECT_TRUE(indexerRenderContext->HasBorderRadius());
+    EXPECT_EQ(indexerRenderContext->GetBorderRadiusValue(expectValue), expectValue);
+
+    /**
+     * @tc.steps: step2. UpdateIndexerBorderRadius
+     * @tc.expected: indexerRenderContext BorderRadiusValue is Dimension(16)
+     */
+    paintProperty_->UpdateIndexerBorderRadius(Dimension(16));
+    pattern_->OnChildHover(1, true);
+    FlushLayoutTask(frameNode_);
+    expectValue = { Dimension(16), Dimension(16), Dimension(16), Dimension(16) };
+    EXPECT_TRUE(indexerRenderContext->HasBorderRadius());
+    EXPECT_EQ(indexerRenderContext->GetBorderRadiusValue(expectValue), expectValue);
+    auto radius = Dimension(BUBBLE_RADIUS, DimensionUnit::VP);
+    auto columnRenderContext = pattern_->popupNode_->GetRenderContext();
+    expectValue = { radius, radius, radius, radius };
+    EXPECT_TRUE(columnRenderContext->HasBorderRadius());
+    EXPECT_EQ(columnRenderContext->GetBorderRadiusValue(expectValue), expectValue);
+    BlurStyleOption styleOption;
+    styleOption.blurStyle = BlurStyle::COMPONENT_REGULAR;
+    EXPECT_EQ(columnRenderContext->GetBackBlurStyle().value(), styleOption);
+
+    /**
+     * @tc.steps: step3. UpdatePopupBorderRadius
+     * @tc.expected: columnRenderContext BorderRadiusValue is Dimension(28)
+     */
+    styleOption.blurStyle = BlurStyle::REGULAR;
+    paintProperty_->UpdatePopupBorderRadius(Dimension(28));
+    paintProperty_->UpdatePopupBackgroundBlurStyle(styleOption);
+    pattern_->OnChildHover(2, true);
+    FlushLayoutTask(frameNode_);
+    expectValue = { Dimension(28), Dimension(28), Dimension(28), Dimension(28) };
+    EXPECT_TRUE(columnRenderContext->HasBorderRadius());
+    EXPECT_EQ(columnRenderContext->GetBorderRadiusValue(expectValue), expectValue);
+    EXPECT_EQ(columnRenderContext->GetBackBlurStyle().value(), styleOption);
+    Container::Current()->SetApiTargetVersion(apiTargetVersion);
+}
+
+/**
+ * @tc.name: IndexerPattern005
+ * @tc.desc: Test indexer pattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerPattern005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create indexer when apiTargetVersion is PlatformVersion::VERSION_TWELVE
+     * @tc.expected: Colors.size is 3
+     */
+    int32_t apiTargetVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    Create([](IndexerModelNG model) {
+        model.SetUsingPopup(true);
+        model.SetOnRequestPopupData(GetMorePopupData2);
+    });
+    pattern_->MoveIndexByOffset(Offset(0, 0));
+    FlushLayoutTask(frameNode_);
+    auto listNode = AceType::DynamicCast<FrameNode>(pattern_->popupNode_->GetLastChild()->GetFirstChild());
+    auto listPattern = listNode->GetPattern<ListPattern>();
+    auto listEventHub = listNode->GetEventHub<ListEventHub>();
+    auto onScrollCallback = listEventHub->GetOnScroll();
+    auto stackNode = AceType::DynamicCast<FrameNode>(pattern_->popupNode_->GetLastChild());
+    auto stackRenderContext = stackNode->GetRenderContext();
+    EXPECT_EQ(stackRenderContext->GetLinearGradientValue(Gradient()).GetColors().size(), 3);
+
+    /**
+     * @tc.steps: step2. list at top
+     * @tc.expected: Colors.size is 3
+     */
+
+    EXPECT_TRUE(listPattern->IsAtTop());
+    onScrollCallback(Dimension(0), ScrollState::SCROLL);
+    EXPECT_EQ(stackRenderContext->GetLinearGradientValue(Gradient()).GetColors().size(), 3);
+
+    /**
+     * @tc.steps: step3. list scroll to 20
+     * @tc.expected: Colors.size is 4
+     */
+    listPattern->ScrollTo(20);
+    FlushLayoutTask(listNode);
+    EXPECT_FALSE(listPattern->IsAtTop());
+    EXPECT_FALSE(listPattern->IsAtBottom());
+    onScrollCallback(Dimension(0), ScrollState::SCROLL);
+    EXPECT_EQ(stackRenderContext->GetLinearGradientValue(Gradient()).GetColors().size(), 4);
+
+    /**
+     * @tc.steps: step4. list scroll to bottom
+     * @tc.expected: Colors.size is 3
+     */
+    listPattern->ScrollTo(100);
+    FlushLayoutTask(listNode);
+    EXPECT_TRUE(listPattern->IsAtBottom());
+    onScrollCallback(Dimension(0), ScrollState::SCROLL);
+    EXPECT_EQ(stackRenderContext->GetLinearGradientValue(Gradient()).GetColors().size(), 3);
+    Container::Current()->SetApiTargetVersion(apiTargetVersion);
 }
 
 /**

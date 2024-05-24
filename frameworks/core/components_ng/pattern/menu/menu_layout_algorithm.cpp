@@ -366,13 +366,12 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     InitWrapperRect(props, menuPattern);
     InitializeParam();
     placement_ = props->GetMenuPlacement().value_or(Placement::BOTTOM_LEFT);
-    if ((menuPattern->IsSelectOverlayExtensionMenu() || menuPattern->IsSubMenu()) &&
-        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (menuPattern->IsSubMenu() && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         placement_ = props->GetMenuPlacement().value_or(Placement::BOTTOM_RIGHT);
     }
     dumpInfo_.originPlacement = PlacementUtils::ConvertPlacementToString(placement_);
     ModifyPositionToWrapper(layoutWrapper, position_);
-    if (!menuPattern->IsSelectOverlayExtensionMenu() && menuPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
+    if (menuPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
         ModifyPreviewMenuPlacement(layoutWrapper);
     }
     InitSpace(props, menuPattern);
@@ -455,7 +454,7 @@ void MenuLayoutAlgorithm::InitWrapperRect(
         }
     }
 
-    if (!menuPattern->IsSelectOverlayExtensionMenu() && menuPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
+    if (menuPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
         //  come from ModifyPreviewMenuPlacement
         if (NearEqual(wrapperIdealSize.Height(), windowGlobalRect.Height())) {
             wrapperRect_.SetRect(0, top, windowGlobalRect.Width(), windowGlobalRect.Height() - top - bottom);
@@ -467,39 +466,32 @@ void MenuLayoutAlgorithm::InitWrapperRect(
 
 void MenuLayoutAlgorithm::InitSpace(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern)
 {
-    auto constraint = props->GetLayoutConstraint();
     auto targetSize = props->GetTargetSizeValue(SizeF());
-    if (menuPattern->IsSelectOverlayExtensionMenu()) {
-        topSpace_ = 0.0f;
-        bottomSpace_ = constraint->maxSize.Height() - position_.GetY();
-        leftSpace_ = Infinity<float>();
-    } else {
-        if (props->GetMenuPlacement().has_value()) {
-            auto targetSecurity = targetSecurity_;
-            topSpace_ = std::max(0.0, targetOffset_.GetY() - targetSecurity - paddingTop_ - wrapperRect_.Top());
-            bottomSpace_ = std::max(0.0,
-                wrapperRect_.Bottom() - targetOffset_.GetY() - targetSize_.Height() - targetSecurity - paddingBottom_);
-            if (NearZero(topSpace_) && NearZero(bottomSpace_)) {
-                bottomSpace_ = wrapperRect_.Bottom() - position_.GetY() - paddingTop_;
-            }
-            leftSpace_ = std::max(0.0, wrapperRect_.Left() + targetOffset_.GetX() - paddingStart_ - targetSecurity);
-            rightSpace_ = std::max(
-                0.0, wrapperRect_.Right() - targetSize_.Width() - targetSecurity - paddingStart_ - paddingEnd_);
-            if (NearZero(leftSpace_) && NearZero(rightSpace_)) {
-                leftSpace_ = position_.GetX();
-                rightSpace_ = wrapperRect_.Right() - leftSpace_;
-            }
-        } else {
-            if (hierarchicalParameters_ || !Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-                topSpace_ = position_.GetY() - targetSize.Height() - paddingTop_ - wrapperRect_.Top();
-                bottomSpace_ = wrapperRect_.Bottom() - position_.GetY() - paddingBottom_;
-            } else {
-                topSpace_ = position_.GetY() - wrapperRect_.Top() - paddingTop_;
-                bottomSpace_ = wrapperRect_.Bottom() - position_.GetY() - paddingTop_;
-            }
-            leftSpace_ = position_.GetX() - paddingStart_;
-            rightSpace_ = wrapperRect_.Right() - leftSpace_ - paddingEnd_;
+    if (props->GetMenuPlacement().has_value()) {
+        auto targetSecurity = targetSecurity_;
+        topSpace_ = std::max(0.0, targetOffset_.GetY() - targetSecurity - paddingTop_ - wrapperRect_.Top());
+        bottomSpace_ = std::max(0.0,
+            wrapperRect_.Bottom() - targetOffset_.GetY() - targetSize_.Height() - targetSecurity - paddingBottom_);
+        if (NearZero(topSpace_) && NearZero(bottomSpace_)) {
+            bottomSpace_ = wrapperRect_.Bottom() - position_.GetY() - paddingTop_;
         }
+        leftSpace_ = std::max(0.0, wrapperRect_.Left() + targetOffset_.GetX() - paddingStart_ - targetSecurity);
+        rightSpace_ = std::max(
+            0.0, wrapperRect_.Right() - targetSize_.Width() - targetSecurity - paddingStart_ - paddingEnd_);
+        if (NearZero(leftSpace_) && NearZero(rightSpace_)) {
+            leftSpace_ = position_.GetX();
+            rightSpace_ = wrapperRect_.Right() - leftSpace_;
+        }
+    } else {
+        if (hierarchicalParameters_ || !Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            topSpace_ = position_.GetY() - targetSize.Height() - paddingTop_ - wrapperRect_.Top();
+            bottomSpace_ = wrapperRect_.Bottom() - position_.GetY() - paddingBottom_;
+        } else {
+            topSpace_ = position_.GetY() - wrapperRect_.Top() - paddingTop_;
+            bottomSpace_ = wrapperRect_.Bottom() - position_.GetY() - paddingTop_;
+        }
+        leftSpace_ = position_.GetX() - paddingStart_;
+        rightSpace_ = wrapperRect_.Right() - leftSpace_ - paddingEnd_;
     }
 }
 
@@ -513,16 +505,12 @@ void MenuLayoutAlgorithm::InitializePadding(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
-    if (!menuPattern->IsSelectOverlayExtensionMenu()) {
-        margin_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
-        optionPadding_ = margin_;
-        paddingStart_ = static_cast<float>(theme->GetDefaultPaddingStart().ConvertToPx());
-        paddingEnd_ = static_cast<float>(theme->GetDefaultPaddingEnd().ConvertToPx());
-        paddingTop_ = static_cast<float>(theme->GetDefaultPaddingTop().ConvertToPx());
-        paddingBottom_ = static_cast<float>(theme->GetDefaultPaddingBottomFixed().ConvertToPx());
-    } else {
-        optionPadding_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
-    }
+    margin_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+    optionPadding_ = margin_;
+    paddingStart_ = static_cast<float>(theme->GetDefaultPaddingStart().ConvertToPx());
+    paddingEnd_ = static_cast<float>(theme->GetDefaultPaddingEnd().ConvertToPx());
+    paddingTop_ = static_cast<float>(theme->GetDefaultPaddingTop().ConvertToPx());
+    paddingBottom_ = static_cast<float>(theme->GetDefaultPaddingBottomFixed().ConvertToPx());
 }
 
 void MenuLayoutAlgorithm::InitializePaddingAPI12(LayoutWrapper* layoutWrapper)
@@ -536,18 +524,14 @@ void MenuLayoutAlgorithm::InitializePaddingAPI12(LayoutWrapper* layoutWrapper)
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
 
-    if (!menuPattern->IsSelectOverlayExtensionMenu()) {
-        margin_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
-        optionPadding_ = margin_;
-        if (!hierarchicalParameters_) {
-            paddingStart_ = static_cast<float>(theme->GetMenuLargeMargin().ConvertToPx());
-            paddingEnd_ = static_cast<float>(theme->GetMenuLargeMargin().ConvertToPx());
-        } else {
-            paddingStart_ = static_cast<float>(theme->GetMenuMediumMargin().ConvertToPx());
-            paddingEnd_ = static_cast<float>(theme->GetMenuMediumMargin().ConvertToPx());
-        }
+    margin_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+    optionPadding_ = margin_;
+    if (!hierarchicalParameters_) {
+        paddingStart_ = static_cast<float>(theme->GetMenuLargeMargin().ConvertToPx());
+        paddingEnd_ = static_cast<float>(theme->GetMenuLargeMargin().ConvertToPx());
     } else {
-        optionPadding_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+        paddingStart_ = static_cast<float>(theme->GetMenuMediumMargin().ConvertToPx());
+        paddingEnd_ = static_cast<float>(theme->GetMenuMediumMargin().ConvertToPx());
     }
 }
 
@@ -582,11 +566,13 @@ void MenuLayoutAlgorithm::ModifyPositionToWrapper(LayoutWrapper* layoutWrapper, 
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     auto windowManager = pipelineContext->GetWindowManager();
-    auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
-                            windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+    auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL;
     if (isContainerModal) {
-        wrapperOffset = OffsetF(static_cast<float>((CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx()),
-            static_cast<float>((pipelineContext->GetCustomTitleHeight() + CONTAINER_BORDER_WIDTH).ConvertToPx()));
+        wrapperOffset = OffsetF(0.0f, static_cast<float>(pipelineContext->GetCustomTitleHeight().ConvertToPx()));
+        if (windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+            wrapperOffset += OffsetF(static_cast<float>((CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx()),
+                static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()));
+        }
         position -= wrapperOffset;
     }
 }
@@ -1295,7 +1281,7 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (menuPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
         LayoutPreviewMenu(layoutWrapper);
     }
-    if (!menuPattern->IsSelectOverlayExtensionMenu() && !menuPattern->IsSelectOverlayCustomMenu()) {
+    if (!menuPattern->IsSelectOverlayCustomMenu()) {
         auto geometryNode = layoutWrapper->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         auto size = geometryNode->GetMarginFrameSize();
@@ -1681,11 +1667,7 @@ void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, La
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    if (menuPattern && menuPattern->IsSelectOverlayExtensionMenu()) {
-        columnInfo->GetParent()->BuildColumnWidth();
-    } else {
-        columnInfo->GetParent()->BuildColumnWidth(wrapperSize_.Width());
-    }
+    columnInfo->GetParent()->BuildColumnWidth(wrapperSize_.Width());
     auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(menuLayoutProperty);
     // set max width
@@ -1756,12 +1738,6 @@ void MenuLayoutAlgorithm::UpdateConstraintBaseOnOptions(LayoutWrapper* layoutWra
         optionWrapper->Measure(optionConstraint);
         auto childSize = optionWrapper->GetGeometryNode()->GetMarginFrameSize();
         maxChildrenWidth = std::max(maxChildrenWidth, childSize.Width());
-    }
-    if (menuPattern->IsSelectOverlayExtensionMenu()) {
-        maxChildrenWidth = std::min(maxChildrenWidth, optionConstraint.maxSize.Width());
-        UpdateOptionConstraint(optionsLayoutWrapper, maxChildrenWidth);
-        constraint.minSize.SetWidth(maxChildrenWidth);
-        return;
     }
     UpdateOptionConstraint(optionsLayoutWrapper, maxChildrenWidth);
     constraint.minSize.SetWidth(maxChildrenWidth + optionPadding_ * 2.0f);

@@ -170,10 +170,10 @@ void RosenSvgPainter::SetGradientStyle(SkPaint& skPaint, const FillState& fillSt
 
         return center == focal
                    ? skPaint.setShader(SkGradientShader::MakeRadial(center, info.r, &colors[0], &pos[0],
-                         gradientColors.size(), static_cast<SkTileMode>(gradient->GetSpreadMethod()), 0, nullptr))
+                        gradientColors.size(), static_cast<SkTileMode>(gradient->GetSpreadMethod()), 0, nullptr))
                    : skPaint.setShader(
-                         SkGradientShader::MakeTwoPointConical(focal, 0, center, info.r, &colors[0], &pos[0],
-                             gradientColors.size(), static_cast<SkTileMode>(gradient->GetSpreadMethod()), 0, nullptr));
+                        SkGradientShader::MakeTwoPointConical(focal, 0, center, info.r, &colors[0], &pos[0],
+                            gradientColors.size(), static_cast<SkTileMode>(gradient->GetSpreadMethod()), 0, nullptr));
     }
 }
 #else

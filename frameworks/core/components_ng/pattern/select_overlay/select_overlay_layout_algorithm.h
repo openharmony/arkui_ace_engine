@@ -61,6 +61,11 @@ public:
         return hasExtensionMenu_;
     }
 
+    bool GetHideMoreOrBack() const
+    {
+        return hideMoreOrBack_;
+    }
+
 private:
     OffsetF ComputeSelectMenuPosition(LayoutWrapper* layoutWrapper);
     OffsetF ComputeExtensionMenuPosition(LayoutWrapper* layoutWrapper, const OffsetF& offset);
@@ -69,9 +74,10 @@ private:
     void AdjustMenuTooFarAway(OffsetF& menuOffset, const RectF& menuRect);
     void AdjustMenuInRootRect(OffsetF& menuOffset, const SizeF& menuSize, const SizeF& rootSize);
     OffsetF CalculateCustomMenuByMouseOffset(LayoutWrapper* layoutWrapper);
-    void CalculateCustomMenuLayoutConstraint(LayoutWrapper* layoutWrapper, LayoutConstraintF& layoutConstraint);
-    bool IsTextAreaSelectAll();
     OffsetF NewMenuAvoidStrategy(float menuWidth, float menuHeight);
+    void CalculateCustomMenuLayoutConstraint(LayoutWrapper* layoutWrapper, LayoutConstraintF& layoutConstraint);
+    void CheckHideBackOrMoreButton(const RefPtr<LayoutWrapper>& extensionMenu, const RefPtr<LayoutWrapper>& button);
+    bool IsTextAreaSelectAll();
 
     std::shared_ptr<SelectOverlayInfo> info_;
 
@@ -79,6 +85,7 @@ private:
     std::optional<float> menuWidth_;
     std::optional<float> menuHeight_;
     bool hasExtensionMenu_ = false;
+    bool hideMoreOrBack_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayLayoutAlgorithm);
 };

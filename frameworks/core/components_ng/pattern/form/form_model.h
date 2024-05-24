@@ -40,7 +40,8 @@ public:
     virtual void SetVisible(VisibleType visible) = 0;
     virtual void SetVisibility(VisibleType visible) = 0;
     virtual void SetObscured(const std::vector<ObscuredReasons>& reasons) = 0;
-    virtual int32_t RequestPublishFormWithSnapshot(const AAFwk::Want& want, int64_t& formId) = 0;
+    virtual int32_t RequestPublishFormWithSnapshot(const AAFwk::Want& want,
+        const std::string& formBindingDataStr, int64_t& formId) = 0;
 
 private:
     static std::unique_ptr<FormModel> instance_;

@@ -16,8 +16,8 @@
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "bridge/declarative_frontend/jsview/js_symbol_modifier.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/select/select_model_ng.h"
 
 namespace OHOS::Ace::NG {
 const int32_t SIZE_OF_TWO = 2;
@@ -717,6 +717,22 @@ ArkUINativeModuleValue SelectBridge::ResetSize(ArkUIRuntimeCallInfo* runtimeCall
     return panda::JSValueRef::Undefined(vm);
 }
 
+Local<panda::ObjectRef> SelectBridge::ConstructSelect(EcmaVM* vm, FrameNode* frameNode, MenuItemConfiguration& config)
+{
+    RefPtr<Framework::JSSymbolGlyphModifier> selectSymbol =
+        AceType::DynamicCast<Framework::JSSymbolGlyphModifier>(config.symbolModifier_);
+    const char* keysOfSelect[] = { "value", "icon", "symbolIcon", "selected", "index", "triggerSelect",
+        "frameNodeId_"};
+    Local<JSValueRef> valuesOfSelect[] = { panda::StringRef::NewFromUtf8(vm, config.value_.c_str()),
+        panda::StringRef::NewFromUtf8(vm, config.icon_.c_str()),
+        selectSymbol->symbol_->GetLocalHandle(),
+        panda::BooleanRef::New(vm, config.selected_),
+        panda::NumberRef::New(vm, config.index_),
+        panda::FunctionRef::New(vm, JsSelectChangeCallback),
+        panda::NumberRef::New(vm, frameNode->GetId())};
+    return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keysOfSelect), keysOfSelect, valuesOfSelect);
+}
+
 ArkUINativeModuleValue SelectBridge::SetContentModifierBuilder(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -735,15 +751,7 @@ ArkUINativeModuleValue SelectBridge::SetContentModifierBuilder(ArkUIRuntimeCallI
             ContainerScope scope(containerId);
             auto context = ArkTSUtils::GetContext(vm);
             CHECK_EQUAL_RETURN(context->IsUndefined(), true, nullptr);
-            const char* keysOfSelect[] = { "value", "icon", "selected", "index", "triggerSelect", "frameNodeId_"};
-            Local<JSValueRef> valuesOfSelect[] = { panda::StringRef::NewFromUtf8(vm, config.value_.c_str()),
-                panda::StringRef::NewFromUtf8(vm, config.icon_.c_str()),
-                panda::BooleanRef::New(vm, config.selected_),
-                panda::NumberRef::New(vm, config.index_),
-                panda::FunctionRef::New(vm, JsSelectChangeCallback),
-                panda::NumberRef::New(vm, frameNode->GetId())};
-            auto select = panda::ObjectRef::NewWithNamedProperties(vm,
-                ArraySize(keysOfSelect), keysOfSelect, valuesOfSelect);
+            auto select = ConstructSelect(vm, frameNode, config);
             select->SetNativePointerFieldCount(vm, 1);
             select->SetNativePointerField(vm, 0, static_cast<void*>(frameNode));
             panda::Local<panda::JSValueRef> params[] = { context, select };
@@ -764,6 +772,56 @@ ArkUINativeModuleValue SelectBridge::SetContentModifierBuilder(ArkUIRuntimeCallI
             CHECK_NULL_RETURN(frameNode, nullptr);
             return AceType::Claim(frameNode);
         });
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SelectBridge::SetMenuBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    Color color;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
+        return ResetMenuBackgroundColor(runtimeCallInfo);
+    }
+    GetArkUINodeModifiers()->getSelectModifier()->setMenuBgColor(nativeNode, color.GetValue());
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SelectBridge::ResetMenuBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSelectModifier()->resetMenuBgColor(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SelectBridge::SetMenuBackgroundBlurStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> styleArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    if (styleArg->IsUndefined() || !styleArg->IsNumber()) {
+        return ResetMenuBackgroundBlurStyle(runtimeCallInfo);
+    }
+    int32_t styleVal = styleArg->Int32Value(vm);
+    GetArkUINodeModifiers()->getSelectModifier()->setMenuBgBlurStyle(nativeNode, styleVal);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SelectBridge::ResetMenuBackgroundBlurStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSelectModifier()->resetMenuBgBlurStyle(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

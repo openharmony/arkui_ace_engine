@@ -48,6 +48,8 @@
 #include "core/common/container.h"
 #include "core/common/font_manager.h"
 #include "core/common/layout_inspector.h"
+#include "core/common/stylus/stylus_detector_mgr.h"
+#include "core/common/stylus/stylus_detector_default.h"
 #include "core/common/text_field_manager.h"
 #include "core/common/thread_checker.h"
 #include "core/common/window.h"
@@ -610,7 +612,7 @@ void PipelineContext::FlushOnceVsyncTask()
 void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 {
     CHECK_RUN_ON(UI);
-    ACE_FUNCTION_TRACE();
+    ACE_FUNCTION_TRACE_COMMERCIAL();
     window_->Lock();
     auto recvTime = GetSysTimestamp();
     static const std::string abilityName = AceApplicationInfo::GetInstance().GetProcessName().empty()
@@ -780,10 +782,17 @@ void PipelineContext::FlushMessages()
     window_->FlushTasks();
 }
 
-void PipelineContext::FlushUITasks()
+void PipelineContext::FlushUITasks(bool triggeredByImplicitAnimation)
 {
     window_->Lock();
-    taskScheduler_->FlushTask();
+    taskScheduler_->FlushTask(triggeredByImplicitAnimation);
+    window_->Unlock();
+}
+
+void PipelineContext::FlushAfterLayoutCallbackInImplicitAnimationTask()
+{
+    window_->Lock();
+    taskScheduler_->FlushAfterLayoutCallbackInImplicitAnimationTask();
     window_->Unlock();
 }
 
@@ -1282,7 +1291,8 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
 void PipelineContext::StartWindowMaximizeAnimation(
     int32_t width, int32_t height, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
-    LOGI("Root node start RECOVER/MAXIMIZE animation, width = %{public}d, height = %{public}d", width, height);
+    TAG_LOGI(AceLogTag::ACE_ANIMATION,
+        "Root node start RECOVER/MAXIMIZE animation, width = %{public}d, height = %{public}d", width, height);
 #ifdef ENABLE_ROSEN_BACKEND
     if (rsTransaction) {
         FlushMessages();
@@ -1319,7 +1329,8 @@ void PipelineContext::StartWindowMaximizeAnimation(
 void PipelineContext::StartFullToMultWindowAnimation(int32_t width, int32_t height, WindowSizeChangeReason type,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
-    LOGI("Root node start multiple window animation, type = %{public}d, width = %{public}d, height = %{public}d", type,
+    TAG_LOGI(AceLogTag::ACE_ANIMATION,
+        "Root node start multiple window animation, type = %{public}d, width = %{public}d, height = %{public}d", type,
         width, height);
 #ifdef ENABLE_ROSEN_BACKEND
     if (rsTransaction) {
@@ -1486,11 +1497,15 @@ PipelineBase::SafeAreaInsets PipelineContext::GetSafeAreaWithoutProcess() const
 void PipelineContext::SyncSafeArea(bool onKeyboard)
 {
     CHECK_NULL_VOID(stageManager_);
-    auto page = stageManager_->GetLastPageWithTransition();
-    if (page) {
-        page->MarkDirtyNode(onKeyboard && !safeAreaManager_->KeyboardSafeAreaEnabled() ? PROPERTY_UPDATE_LAYOUT
+    auto lastPage = stageManager_->GetLastPageWithTransition();
+    auto prevPage = stageManager_->GetPrevPageWithTransition();
+    if (lastPage) {
+        lastPage->MarkDirtyNode(onKeyboard && !safeAreaManager_->KeyboardSafeAreaEnabled() ? PROPERTY_UPDATE_LAYOUT
                                                                                        : PROPERTY_UPDATE_MEASURE);
-        page->GetPattern<PagePattern>()->MarkDirtyOverlay();
+        lastPage->GetPattern<PagePattern>()->MarkDirtyOverlay();
+    }
+    if (prevPage) {
+        prevPage->GetPattern<PagePattern>()->MarkDirtyOverlay();
     }
     SubwindowManager::GetInstance()->MarkDirtyDialogSafeArea();
     if (overlayManager_) {
@@ -1629,7 +1644,7 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
         FlushUITasks();
 
         CHECK_NULL_VOID(manager);
-        manager->ScrollTextFieldToSafeArea();
+        manager->AvoidKeyboard();
         FlushUITasks();
     };
     FlushUITasks();
@@ -1682,7 +1697,7 @@ void PipelineContext::OriginalAvoidanceLogic(
         FlushUITasks();
 
         CHECK_NULL_VOID(manager);
-        manager->ScrollTextFieldToSafeArea();
+        manager->AvoidKeyboard();
         FlushUITasks();
     };
     FlushUITasks();
@@ -1726,8 +1741,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         }
 
         SizeF rootSize { static_cast<float>(context->rootWidth_), static_cast<float>(context->rootHeight_) };
-        float keyboardOffset = context->safeAreaManager_->GetKeyboardOffset();
-        float positionYWithOffset = positionY - keyboardOffset;
+        float positionYWithOffset = positionY;
         if (rootSize.Height() - positionY - height < 0) {
             height = rootSize.Height() - positionY;
         }
@@ -1756,7 +1770,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         // layout immediately
         context->FlushUITasks();
 
-        manager->ScrollTextFieldToSafeArea();
+        manager->AvoidKeyboard();
         context->FlushUITasks();
     };
     FlushUITasks();
@@ -1971,6 +1985,10 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         touchRestrict.sourceType = point.sourceType;
         touchRestrict.touchEvent = point;
         touchRestrict.inputEventType = InputEventType::TOUCH_SCREEN;
+        if (StylusDetectorMgr::GetInstance()->IsNeedInterceptedTouchEvent(scalePoint)) {
+            return;
+        }
+
         eventManager_->TouchTest(scalePoint, node, touchRestrict, GetPluginEventOffset(), viewScale_, isSubPipe);
         if (!touchRestrict.childTouchTestList.empty()) {
             scalePoint.childTouchTestList = touchRestrict.childTouchTestList;
@@ -2337,6 +2355,8 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         if (overlayManager_) {
             overlayManager_->DumpOverlayInfo();
         }
+    } else if (params[0] == "--stylus") {
+        StylusDetectorDefault::GetInstance()->ExecuteCommand(params);
     }
     return true;
 }
@@ -2681,6 +2701,8 @@ MouseEvent ConvertAxisToMouse(const AxisEvent& event)
     result.sourceType = event.sourceType;
     result.sourceTool = event.sourceTool;
     result.pointerEvent = event.pointerEvent;
+    result.screenX = event.screenX;
+    result.screenY = event.screenY;
     return result;
 }
 
@@ -2964,12 +2986,17 @@ void PipelineContext::FlushReload(const ConfigurationChange& configurationChange
     const int32_t duration = 400;
     option.SetDuration(duration);
     option.SetCurve(Curves::FRICTION);
-    AnimationUtils::Animate(option, [weak = WeakClaim(this), configurationChange]() {
+    AnimationUtils::Animate(option, [weak = WeakClaim(this), configurationChange,
+        weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager_))]() {
         auto pipeline = weak.Upgrade();
         CHECK_NULL_VOID(pipeline);
         if (configurationChange.IsNeedUpdate()) {
             auto rootNode = pipeline->GetRootElement();
             rootNode->UpdateConfigurationUpdate(configurationChange);
+            auto overlay = weakOverlayManager.Upgrade();
+            if (overlay) {
+                overlay->ReloadBuilderNodeConfig();
+            }
         }
         CHECK_NULL_VOID(pipeline->stageManager_);
         pipeline->SetIsReloading(true);
@@ -3226,9 +3253,9 @@ void PipelineContext::Finish(bool /* autoFinish */) const
     }
 }
 
-void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task)
+void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task, bool isFlushInImplicitAnimationTask)
 {
-    taskScheduler_->AddAfterLayoutTask(std::move(task));
+    taskScheduler_->AddAfterLayoutTask(std::move(task), isFlushInImplicitAnimationTask);
 }
 
 void PipelineContext::AddPersistAfterLayoutTask(std::function<void()>&& task)

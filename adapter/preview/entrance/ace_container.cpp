@@ -978,6 +978,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceViewPreview* vi
         pipelineContext_->SetAppLabelId(labelId_);
     }
     pipelineContext_->OnShow();
+    pipelineContext_->WindowFocus(true);
     InitializeCallback();
 
     auto cardFrontend = AceType::DynamicCast<FormFrontendDeclarative>(frontend_);

@@ -221,7 +221,7 @@ bool SkiaImage::DrawWithRecordingCanvas(RSCanvas& canvas, const BorderRadiusArra
         GetCompressWidth(), GetCompressHeight());
     auto data = GetCompressData();
 
-    // TODO:Haw to set SamplingOptions?
+    // Haw to set SamplingOptions?
     recordingCanvas->DrawImageWithParm(GetImage(), std::move(data), rsImageInfo, options, paint);
     return true;
 #else // !ENABLE_ROSEN_BACKEND

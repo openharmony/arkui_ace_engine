@@ -106,6 +106,10 @@ constexpr uint32_t DESTRUCT_DELAY_MILLISECONDS = 1000;
 
 constexpr uint32_t NO_NATIVE_FINGER_TYPE = 100;
 const std::string DEFAULT_NATIVE_EMBED_ID = "0";
+const std::string WEB_INFO_PC = "8";
+const std::string WEB_INFO_TABLET = "4";
+const std::string WEB_INFO_PHONE = "2";
+const std::string WEB_INFO_DEFAULT = "1";
 
 const std::vector<std::string> CANONICALENCODINGNAMES = {
     "Big5",         "EUC-JP",       "EUC-KR",       "GB18030",
@@ -1312,13 +1316,13 @@ void WebDelegate::SetPortMessageCallback(std::string& port, std::function<void(c
     }
 }
 
-bool WebDelegate::RequestFocus()
+bool WebDelegate::RequestFocus(OHOS::NWeb::NWebFocusSource source)
 {
     auto context = context_.Upgrade();
     CHECK_NULL_RETURN(context, false);
     bool result = false;
     context->GetTaskExecutor()->PostSyncTask(
-        [weak = WeakClaim(this), &result]() {
+        [weak = WeakClaim(this), &result, source]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
 
@@ -1329,6 +1333,12 @@ bool WebDelegate::RequestFocus()
                 CHECK_NULL_VOID(eventHub);
                 auto focusHub = eventHub->GetOrCreateFocusHub();
                 CHECK_NULL_VOID(focusHub);
+                if (source == OHOS::NWeb::NWebFocusSource::FOCUS_SOURCE_NAVIGATION &&
+                    webPattern->IsDefaultFocusNodeExist() && !focusHub->IsDefaultFocus()) {
+                    TAG_LOGI(AceLogTag::ACE_WEB, "there are other default focusNodes, web don't focus on navigation");
+                    result = false;
+                    return;
+                }
 
                 result = focusHub->RequestFocusImmediately(true);
                 return;
@@ -6165,11 +6175,9 @@ void WebDelegate::OnNativeEmbedLifecycleChange(std::shared_ptr<OHOS::NWeb::NWebN
 void WebDelegate::OnNativeEmbedGestureEvent(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedTouchEvent> event)
 {
     if (event->GetId() == NO_NATIVE_FINGER_TYPE) {
-        if (!NeedSoftKeyboard() && event->GetType() == OHOS::NWeb::TouchType::DOWN) {
-            auto webPattern = webPattern_.Upgrade();
-            CHECK_NULL_VOID(webPattern);
-            webPattern->CloseKeyboard();
-        }
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->RequestFocus();
         return;
     }
     auto context = context_.Upgrade();
@@ -6194,7 +6202,7 @@ void WebDelegate::OnNativeEmbedGestureEvent(std::shared_ptr<OHOS::NWeb::NWebNati
                 if (!param->GetEventResult() && type == OHOS::NWeb::TouchType::DOWN) {
                     auto webPattern = delegate->webPattern_.Upgrade();
                     CHECK_NULL_VOID(webPattern);
-                    webPattern->CloseKeyboard();
+                    webPattern->RequestFocus();
                 }
             }
         },
@@ -6698,4 +6706,23 @@ void WebDelegate::OnSafeInsetsChange()
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebSafeInsetsChange");
 }
 
+NG::WebInfoType WebDelegate::GetWebInfoType()
+{
+    std::string factoryLevel = NWebAdapterHelper::Instance()
+        .ParsePerfConfig("factoryConfig", "factoryLevel");
+    if (factoryLevel.empty()) {
+        NWebAdapterHelper::Instance().ReadConfigIfNeeded();
+        factoryLevel = NWebAdapterHelper::Instance().
+            ParsePerfConfig("factoryConfig", "factoryLevel");
+    }
+    TAG_LOGD(AceLogTag::ACE_WEB, "read config factoryLevel: %{public}s ", factoryLevel.c_str());
+    if (factoryLevel == WEB_INFO_PHONE || factoryLevel == WEB_INFO_DEFAULT) {
+        return NG::WebInfoType::TYPE_MOBILE;
+    } else if (factoryLevel == WEB_INFO_TABLET) {
+        return NG::WebInfoType::TYPE_TABLET;
+    } else if (factoryLevel == WEB_INFO_PC) {
+        return NG::WebInfoType::TYPE_2IN1;
+    }
+    return NG::WebInfoType::TYPE_UNKNOWN;
+}
 } // namespace OHOS::Ace

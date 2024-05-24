@@ -791,8 +791,8 @@ void SetTransform(ArkUINodeHandle node, const ArkUI_Float32* matrix, ArkUI_Int32
     }
     NG::ViewAbstract::SetTransformMatrix(
         frameNode, Matrix4(matrix[NUM_0], matrix[NUM_4], matrix[NUM_8], matrix[NUM_12], matrix[NUM_1], matrix[NUM_5],
-                       matrix[NUM_9], matrix[NUM_13], matrix[NUM_2], matrix[NUM_6], matrix[NUM_10], matrix[NUM_14],
-                       matrix[NUM_3], matrix[NUM_7], matrix[NUM_11], matrix[NUM_15]));
+            matrix[NUM_9], matrix[NUM_13], matrix[NUM_2], matrix[NUM_6], matrix[NUM_10], matrix[NUM_14],
+                matrix[NUM_3], matrix[NUM_7], matrix[NUM_11], matrix[NUM_15]));
 }
 
 void ResetTransform(ArkUINodeHandle node)
@@ -808,8 +808,8 @@ void ResetTransform(ArkUINodeHandle node)
     }
     NG::ViewAbstract::SetTransformMatrix(
         frameNode, Matrix4(matrix[NUM_0], matrix[NUM_4], matrix[NUM_8], matrix[NUM_12], matrix[NUM_1], matrix[NUM_5],
-                       matrix[NUM_9], matrix[NUM_13], matrix[NUM_2], matrix[NUM_6], matrix[NUM_10], matrix[NUM_14],
-                       matrix[NUM_3], matrix[NUM_7], matrix[NUM_11], matrix[NUM_15]));
+            matrix[NUM_9], matrix[NUM_13], matrix[NUM_2], matrix[NUM_6], matrix[NUM_10], matrix[NUM_14],
+                matrix[NUM_3], matrix[NUM_7], matrix[NUM_11], matrix[NUM_15]));
 }
 
 void SetBorderColor(
@@ -853,7 +853,7 @@ void ResetPosition(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetPosition(frameNode, { 0.0_vp, 0.0_vp });
+    ViewAbstract::ResetPosition(frameNode);
 }
 
 bool ParseEdges(OHOS::Ace::EdgesParam& edges, const ArkUIStringAndFloat* options)
@@ -1890,7 +1890,7 @@ void SetBackgroundImageSize(ArkUINodeHandle node, ArkUI_Float32 valueWidth, ArkU
     ViewAbstract::SetBackgroundImageSize(frameNode, bgImgSize);
 }
 
-ArkUIImageSizeType GetBackgroundImageSize(ArkUINodeHandle node)
+ArkUIImageSizeType GetBackgroundImageSize(ArkUINodeHandle node, ArkUI_Int32 unit)
 {
     ArkUIImageSizeType imageSizeType = { 0, 0, 0, 0 };
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1899,9 +1899,10 @@ ArkUIImageSizeType GetBackgroundImageSize(ArkUINodeHandle node)
     CHECK_NULL_RETURN(renderContext, imageSizeType);
     CHECK_NULL_RETURN(renderContext->GetBackground(), imageSizeType);
     auto imageSize = renderContext->GetBackground()->GetBackgroundImageSize();
+    double density = unit == static_cast<ArkUI_Int32>(DimensionUnit::PX) ? 1 : PipelineBase::GetCurrentDensity();
     CHECK_NULL_RETURN(imageSize, imageSizeType);
-    imageSizeType.xValue = imageSize->GetSizeValueX();
-    imageSizeType.yValue = imageSize->GetSizeValueY();
+    imageSizeType.xValue = imageSize->GetSizeValueX() / density;
+    imageSizeType.yValue = imageSize->GetSizeValueY() / density;
     imageSizeType.xType = static_cast<int32_t>(imageSize->GetSizeTypeX());
     imageSizeType.yType = static_cast<int32_t>(imageSize->GetSizeTypeY());
     return imageSizeType;
@@ -3008,7 +3009,7 @@ void ResetFlexGrow(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetFlexGrow(static_cast<float>(0.0));
+    ViewAbstract::SetFlexGrow(frameNode, static_cast<float>(0.0));
 }
 
 void SetFlexShrink(ArkUINodeHandle node, ArkUI_Float32 value)
@@ -5292,6 +5293,119 @@ void SetSystemBarEffect(ArkUINodeHandle node, ArkUI_Bool enable)
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetSystemBarEffect(frameNode, enable);
 }
+
+ArkUI_Int32 GetAccessibilityID(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    ArkUI_Int32 value = frameNode->GetAccessibilityId();
+    return value;
+}
+
+void SetAccessibilityState(ArkUINodeHandle node, const ArkUIAccessibilityState& state)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    if (state.isDisabled.isSet) {
+        accessibilityProperty->SetUserDisabled(state.isDisabled.value);
+    }
+    if (state.isSelected.isSet) {
+        accessibilityProperty->SetUserSelected(state.isSelected.value);
+    }
+    if (state.checkedType.isSet) {
+        accessibilityProperty->SetUserCheckedType(state.checkedType.value);
+    }
+}
+
+void GetAccessibilityState(ArkUINodeHandle node, ArkUIAccessibilityState& state)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    state.isDisabled.isSet = accessibilityProperty->HasUserDisabled();
+    state.isDisabled.value = accessibilityProperty->IsUserDisabled();
+    state.isSelected.isSet = accessibilityProperty->HasUserSelected();
+    state.isSelected.value = accessibilityProperty->IsUserSelected();
+    state.checkedType.isSet = accessibilityProperty->HasUserCheckedType();
+    state.checkedType.value = accessibilityProperty->GetUserCheckedType();
+}
+
+void ResetAccessibilityState(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    if (accessibilityProperty->HasUserDisabled()) {
+        accessibilityProperty->SetUserDisabled(false);
+    }
+    if (accessibilityProperty->HasUserSelected()) {
+        accessibilityProperty->SetUserSelected(false); 
+    }
+    if (accessibilityProperty->HasUserCheckedType()) {
+        accessibilityProperty->SetUserCheckedType(0);
+    }
+}
+
+void SetAccessibilityValue(ArkUINodeHandle node, const ArkUIAccessibilityValue& value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    if (value.min.isSet) {
+        accessibilityProperty->SetUserMinValue(value.min.value);
+    }
+    if (value.max.isSet) {
+        accessibilityProperty->SetUserMaxValue(value.max.value);
+    }
+    if (value.current.isSet) {
+        accessibilityProperty->SetUserCurrentValue(value.current.value);
+    }
+    if (value.text.isSet) {
+        accessibilityProperty->SetUserTextValue(value.text.value);
+    }
+}
+
+void GetAccessibilityValue(ArkUINodeHandle node, ArkUIAccessibilityValue& value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    value.min.isSet = accessibilityProperty->HasUserMinValue();
+    value.min.value = accessibilityProperty->GetUserMinValue();
+    value.max.isSet = accessibilityProperty->HasUserMaxValue();
+    value.max.value = accessibilityProperty->GetUserMaxValue();
+    value.current.isSet = accessibilityProperty->HasUserCurrentValue();
+    value.current.value = accessibilityProperty->GetUserCurrentValue();
+    value.text.isSet = accessibilityProperty->HasUserTextValue();
+    g_strValue = accessibilityProperty->GetUserTextValue();
+    value.text.value = g_strValue.c_str();
+}
+
+void ResetAccessibilityValue(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    if (accessibilityProperty->HasUserMinValue()) {
+        accessibilityProperty->SetUserMinValue(-1);
+    }
+    if (accessibilityProperty->HasUserMaxValue()) {
+        accessibilityProperty->SetUserMaxValue(-1);
+    }
+    if (accessibilityProperty->HasUserCurrentValue()) {
+        accessibilityProperty->SetUserCurrentValue(-1);
+    }
+    if (accessibilityProperty->HasUserTextValue()) {
+        accessibilityProperty->SetUserTextValue("");
+    }
+}
 } // namespace
 
 namespace NodeModifier {
@@ -5360,7 +5474,9 @@ const ArkUICommonModifier* GetCommonModifier()
         SetOnVisibleAreaChange, GetGeometryTransition, SetChainStyle, GetChainStyle, ResetChainStyle,
         SetBias, GetBias, ResetBias, GetColorBlend, GetForegroundBlurStyle,
         ResetVisibleAreaChange, ResetAreaChange, SetBackgroundImagePixelMap, SetLayoutRect, GetLayoutRect,
-        ResetLayoutRect, GetFocusOnTouch, SetSystemBarEffect };
+        ResetLayoutRect, GetFocusOnTouch, SetSystemBarEffect, GetAccessibilityID,
+        SetAccessibilityState, GetAccessibilityState, ResetAccessibilityState,
+        SetAccessibilityValue, GetAccessibilityValue, ResetAccessibilityValue };
 
     return &modifier;
 }

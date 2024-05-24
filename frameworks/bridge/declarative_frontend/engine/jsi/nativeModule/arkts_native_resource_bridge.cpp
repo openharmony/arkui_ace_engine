@@ -89,4 +89,12 @@ ArkUINativeModuleValue ResourceBridge::GetColorValue(ArkUIRuntimeCallInfo* runti
     }
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue ResourceBridge::ClearCache(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    ResourceManager::GetInstance().Reset();
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

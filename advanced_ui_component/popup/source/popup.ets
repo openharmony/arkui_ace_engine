@@ -306,8 +306,7 @@ export struct PopupComponent {
     let padding: Padding
     if (this.title.text !== '' && this.title.text !== void (0)) {
       padding = { left: this.theme.button.margin.left as number / 2 }
-    }
-    else {
+    } else {
       padding = { left: this.theme.button.margin.left as number / 2, right: this.theme.closeButton.margin.right }
     }
     return padding
@@ -430,7 +429,8 @@ export struct PopupComponent {
     scrollMaxHeight -= this.theme.windows.padding.top as number
     scrollMaxHeight -= (this.theme.button.textMargin.bottom as number / 2)
     scrollMaxHeight -= this.theme.title.margin.bottom as number
-    scrollMaxHeight -= (this.theme.windows.padding.bottom as number - (this.theme.button.textMargin.bottom as number / 2))
+    scrollMaxHeight -= (this.theme.windows.padding.bottom as number -
+      (this.theme.button.textMargin.bottom as number / 2))
     if (Math.floor(this.textHeight) > Math.floor(scrollMaxHeight + 1)) {
       return scrollMaxHeight
     } else {
@@ -511,8 +511,7 @@ export struct PopupComponent {
               .onHover((isHover: boolean) => {
                 if (isHover) {
                   this.closeButtonBackgroundColor = this.getCloseButtonHoverColor()
-                }
-                else {
+                } else {
                   this.closeButtonBackgroundColor = this.getCloseButtonBackgroundColor()
                 }
               })

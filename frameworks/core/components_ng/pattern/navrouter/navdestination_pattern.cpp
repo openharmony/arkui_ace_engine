@@ -82,7 +82,7 @@ void NavDestinationPattern::OnModifyDone()
     titleBarRenderContext->UpdateZIndex(DEFAULT_TITLEBAR_ZINDEX);
     auto&& opts = hostNode->GetLayoutProperty()->GetSafeAreaExpandOpts();
     auto navDestinationContentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
-    if (opts && opts->Expansive() && navDestinationContentNode) {
+    if (opts && navDestinationContentNode) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION,
             "Navdestination SafArea expand as %{public}s", opts->ToString().c_str());
             navDestinationContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
@@ -178,7 +178,7 @@ void NavDestinationPattern::UpdateTitlebarVisibility(RefPtr<NavDestinationGroupN
         titleBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
         titleBarNode->SetJSViewActive(true);
         auto&& opts = navDestinationLayoutProperty->GetSafeAreaExpandOpts();
-        if (opts && opts->Expansive()) {
+        if (opts) {
             titleBarLayoutProperty->UpdateSafeAreaExpandOpts(*opts);
         }
     }
@@ -260,5 +260,23 @@ void NavDestinationPattern::OnAttachToFrameNode()
 void NavDestinationPattern::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc(std::string("name: ").append(name_));
+}
+
+bool NavDestinationPattern::OverlayOnBackPressed()
+{
+    CHECK_NULL_RETURN(overlayManager_, false);
+    CHECK_EQUAL_RETURN(overlayManager_->IsModalEmpty(), true,  false);
+    return overlayManager_->RemoveOverlay(true);
+}
+
+bool NavDestinationPattern::NeedIgnoreKeyboard()
+{
+    auto layoutProperty = GetLayoutProperty<NavDestinationLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto& opts = layoutProperty->GetSafeAreaExpandOpts();
+    if (opts && (opts->type & SAFE_AREA_TYPE_KEYBOARD)) {
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

@@ -480,6 +480,11 @@ void JSText::SetBaselineOffset(const JSCallbackInfo& info)
 void JSText::SetDecoration(const JSCallbackInfo& info)
 {
     auto tmpInfo = info[0];
+    if (tmpInfo->IsUndefined()) {
+        TextModel::GetInstance()->SetTextDecoration(TextDecoration::NONE);
+        info.ReturnSelf();
+        return;
+    }
     if (!tmpInfo->IsObject()) {
         info.ReturnSelf();
         return;

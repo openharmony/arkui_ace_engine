@@ -335,7 +335,7 @@ void XComponentPattern::RegisterPlatformViewEvent()
                 return;
             }
             xComponentPattern->OnTextureRefresh(nativeWindow);
-        });
+            }, "ArkUIXComponentPatternTextureRefreshEvent");
     };
     platformView_->RegisterTextureEvent(textureRefreshEvent);
 
@@ -346,7 +346,7 @@ void XComponentPattern::RegisterPlatformViewEvent()
             auto host = xComponentPattern->GetHost();
             CHECK_NULL_VOID(host);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        });
+            }, "ArkUIXComponentPatternPlatformViewReadyEvent");
     };
     platformView_->RegisterPlatformViewReadyEvent(platformViewReadyEvent);
 }
@@ -448,7 +448,7 @@ void XComponentPattern::OnModifyDone()
         CHECK_NULL_VOID(xComponentPattern);
         xComponentPattern->RegisterPlatformViewEvent();
         xComponentPattern->PrepareSurface();
-    });
+        }, "ArkUIXComponentPatternOnModifyDone");
 #endif
 }
 
@@ -604,10 +604,13 @@ void XComponentPattern::SetRotation()
     auto displayInfo = container->GetDisplayInfo();
     CHECK_NULL_VOID(displayInfo);
     auto dmRotation = displayInfo->GetRotation();
-    if (rotation_ != dmRotation) {
-        rotation_ = dmRotation;
+    auto deviceRotation = displayInfo->GetDeviceRotation();
+    uint32_t newRotation = deviceRotation + 90 * static_cast<uint32_t>(dmRotation);
+    newRotation = newRotation % 360;
+    if (rotation_ != newRotation) {
+        rotation_ = newRotation;
         CHECK_NULL_VOID(renderSurface_);
-        renderSurface_->SetTransformHint(dmRotation);
+        renderSurface_->SetTransformHint(newRotation);
     }
 }
 
