@@ -424,6 +424,9 @@ ArkUI_Int32 GetTextPickerSelectedSize(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, 0);
+    if (TextPickerModelNG::IsSingle(frameNode)) {
+        return 1;
+    }
     return TextPickerModelNG::GetSelectedSize(frameNode);
 }
 

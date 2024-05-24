@@ -1629,8 +1629,8 @@ int32_t SetBorderStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     auto* fullImpl = GetFullImpl();
     int styles[ALLOW_SIZE_4] = { 0, 0, 0, 0 };
     if (item->size == 1) {
-        if (item->value[0].f32 < ArkUI_BorderStyle::ARKUI_BORDER_STYLE_SOLID ||
-            item->value[0].f32 > ArkUI_BorderStyle::ARKUI_BORDER_STYLE_DOTTED) {
+        if (item->value[0].i32 < ArkUI_BorderStyle::ARKUI_BORDER_STYLE_SOLID ||
+            item->value[0].i32 > ArkUI_BorderStyle::ARKUI_BORDER_STYLE_DOTTED) {
             return ERROR_CODE_PARAM_INVALID;
         }
         for (int i = 0; i < ALLOW_SIZE_4; ++i) {
@@ -1638,8 +1638,8 @@ int32_t SetBorderStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         }
     } else if (item->size == ALLOW_SIZE_4) {
         for (int i = 0; i < ALLOW_SIZE_4; ++i) {
-            if (item->value[i].f32 < ArkUI_BorderStyle::ARKUI_BORDER_STYLE_SOLID ||
-                item->value[i].f32 > ArkUI_BorderStyle::ARKUI_BORDER_STYLE_DOTTED) {
+            if (item->value[i].i32 < ArkUI_BorderStyle::ARKUI_BORDER_STYLE_SOLID ||
+                item->value[i].i32 > ArkUI_BorderStyle::ARKUI_BORDER_STYLE_DOTTED) {
                 return ERROR_CODE_PARAM_INVALID;
             } else {
                 styles[i] = item->value[i].i32;
@@ -9855,7 +9855,8 @@ const ArkUI_AttributeItem* GetBackgroundImageSize(ArkUI_NodeHandle node)
 {
     auto fullImpl = GetFullImpl();
     auto backGroundImageSize =
-        fullImpl->getNodeModifiers()->getCommonModifier()->getBackgroundImageSize(node->uiNodeHandle);
+        fullImpl->getNodeModifiers()->getCommonModifier()->getBackgroundImageSize(
+            node->uiNodeHandle, GetDefaultUnit(node, UNIT_VP));
     g_numberValues[BACKGROUND_IMAGE_WIDTH_INDEX].f32 = backGroundImageSize.xValue;
     g_numberValues[BACKGROUND_IMAGE_HEIGHT_INDEX].f32 = backGroundImageSize.yValue;
     g_attributeItem.size = REQUIRED_TWO_PARAM;

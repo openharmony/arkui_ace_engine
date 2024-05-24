@@ -1390,7 +1390,7 @@ struct ArkUICommonModifier {
     ArkUIAnchorType (*getMarkAnchor)(ArkUINodeHandle node);
     void (*getAlignRules)(ArkUINodeHandle node, ArkUI_CharPtr* anchors, ArkUI_Int32* direction, ArkUI_Int32 length);
     ArkUIBlurStyleOptionType (*getBackgroundBlurStyle)(ArkUINodeHandle node);
-    ArkUIImageSizeType (*getBackgroundImageSize)(ArkUINodeHandle node);
+    ArkUIImageSizeType (*getBackgroundImageSize)(ArkUINodeHandle node, ArkUI_Int32 unit);
     ArkUI_Int32 (*getBackgroundImageSizeWithStyle)(ArkUINodeHandle node);
     void (*setOutlineWidthFloat)(ArkUINodeHandle node, ArkUI_Float32 left, ArkUI_Float32 top,
         ArkUI_Float32 right, ArkUI_Float32 bottom);

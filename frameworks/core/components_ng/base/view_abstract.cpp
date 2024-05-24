@@ -2573,8 +2573,8 @@ void ViewAbstract::SetPositionEdges(FrameNode* frameNode, const EdgesParam& valu
 
 void ViewAbstract::ResetPosition(FrameNode* frameNode)
 {
-    ACE_RESET_RENDER_CONTEXT(RenderContext, Position);
-    ACE_RESET_RENDER_CONTEXT(RenderContext, PositionEdges);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, Position, frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, PositionEdges, frameNode);
     CHECK_NULL_VOID(frameNode);
     auto parentNode = frameNode->GetAncestorNodeOfFrame();
     CHECK_NULL_VOID(parentNode);
