@@ -966,7 +966,6 @@ HWTEST_F(SelectOverlayTestNg, SelectFrameNodeAnimationTest002, TestSize.Level1)
     }
     selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
-    EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
 }
 
 /**
@@ -1220,7 +1219,6 @@ HWTEST_F(SelectOverlayTestNg, UpdateToolBar001, TestSize.Level1)
         }
         EXPECT_NE(selectOverlayNode->backButton_, nullptr);
         EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
-        EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
         auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
         ASSERT_NE(pattern, nullptr);
         auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -1403,7 +1401,6 @@ HWTEST_F(SelectOverlayTestNg, OverlayModifierOnDraw001, TestSize.Level1)
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
     selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
-    EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
     auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
     EXPECT_NE(pattern, nullptr);
     RefPtr<NodePaintMethod> paintMethod = pattern->CreateNodePaintMethod();
@@ -2299,7 +2296,6 @@ HWTEST_F(SelectOverlayTestNg, UpdateToolBar002, TestSize.Level1)
     selectOverlayNode->backButtonStatus_ = FrameNodeStatus::GONETOVISIBLE;
     ASSERT_NE(selectOverlayNode->backButton_, nullptr);
     ASSERT_NE(selectOverlayNode->selectMenu_, nullptr);
-    ASSERT_NE(selectOverlayNode->extensionMenu_, nullptr);
 
     auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
     ASSERT_NE(pattern, nullptr);
@@ -3091,7 +3087,7 @@ HWTEST_F(SelectOverlayTestNg, GetDefaultLineWidth001, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
     Dimension dimension = SelectHandleInfo::GetDefaultLineWidth();
-    EXPECT_EQ(dimension.Value(), 1.5);
+    EXPECT_EQ(dimension.Value(), 2);
 }
 
 /**

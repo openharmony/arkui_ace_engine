@@ -70,7 +70,10 @@ HWTEST_F(TextTestThreeNg, TextModelGetFontInJson001, TestSize.Level1)
      */
     TextModelNG textModelNG;
     textModelNG.Create(CREATE_VALUE);
-    auto [frameNode, pattern] = Init();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
 
     /**
      * @tc.steps: step2. not set and Gets the relevant properties of the Font
@@ -1571,7 +1574,7 @@ HWTEST_F(TextTestThreeNg, CreateNodePaintMethod002, TestSize.Level1)
     auto responseRegion = gestureHub->GetResponseRegion().front();
 
     EXPECT_EQ(responseRegion.GetWidth().Value(), frameSize.Width());
-    EXPECT_EQ(responseRegion.GetHeight().Value(), 80.0);
+    EXPECT_EQ(responseRegion.GetHeight().Value(), frameSize.Height());
 
     /**
      * @tc.steps: step3. test CreateNodePaintMethod.

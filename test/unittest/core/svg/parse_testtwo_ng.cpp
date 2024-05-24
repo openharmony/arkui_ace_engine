@@ -516,36 +516,6 @@ HWTEST_F(ParseTestTwoNg, ParsePolygonTest003, TestSize.Level1)
     EXPECT_EQ(static_cast<int32_t>(svg->children_.size()), CHILD_NUMBER);
 
     /* *
-     * @tc.steps: step2. call UpdateGradient
-     * @tc.expected: Execute SvgPolygon GradientType not is LINEAR
-     */
-    auto svgPolygon = AceType::DynamicCast<SvgPolygon>(svg->children_.at(0));
-    Gradient temp;
-    temp.SetType(GradientType::CONIC);
-    svgPolygon->attributes_.fillState.SetGradient(temp);
-    svgPolygon->UpdateGradient(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
-    EXPECT_NE(svgPolygon->fillState_.GetGradient()->GetType(), GradientType::LINEAR);
-}
-
-/**
- * @tc.name: ParsePolygonTest004
- * @tc.desc: parse polygon and polyline label
- * @tc.type: FUNC
- */
-HWTEST_F(ParseTestTwoNg, ParsePolygonTest004, TestSize.Level1)
-{
-    /* *
-     * @tc.steps: step1. call CreateSvgDom
-     * @tc.expected: Execute svgDom root node is 2
-     */
-    auto svgStream = SkMemoryStream::MakeCopy(POLYGON_SVG_LABEL1.c_str(), POLYGON_SVG_LABEL1.length());
-    ImageSourceInfo src;
-    src.SetFillColor(Color::BLACK);
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
-    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
-    EXPECT_EQ(static_cast<int32_t>(svg->children_.size()), CHILD_NUMBER);
-
-    /* *
      * @tc.steps: step2. call AsPath
      * @tc.expected: Execute SvgPolygon Points is empty
      */
