@@ -1284,19 +1284,18 @@ void TextPattern::HandleSelectionDown(int32_t start, int32_t end)
 {
     auto line = pManager_->GetLineCount();
     if (line == 1) {
-        HandleSelection(start, GetWideText().length());
+        HandleSelection(start, GetTextLength());
         return;
     }
     CaretMetricsF secondHandleMetrics;
-    CalcCaretMetricsByPosition(
-        static_cast<int32_t>(GetWideText().length()), secondHandleMetrics, TextAffinity::UPSTREAM);
+    CalcCaretMetricsByPosition(GetTextLength(), secondHandleMetrics, TextAffinity::UPSTREAM);
     auto lastIndexOffsetY = secondHandleMetrics.offset.GetY();
     CalcCaretMetricsByPosition(textSelector_.destinationOffset, secondHandleMetrics, TextAffinity::UPSTREAM);
     auto secondOffsetX = secondHandleMetrics.offset.GetX();
     auto secondOffsetY = secondHandleMetrics.offset.GetY();
     float height = GetTextHeight();
     if (secondOffsetY + height > lastIndexOffsetY) {
-        end = GetWideText().length();
+        end = GetTextLength();
     } else {
         Offset offset = { secondOffsetX, secondOffsetY + height + height * 0.5 };
         end = GetHandleIndex(offset);
@@ -1306,8 +1305,7 @@ void TextPattern::HandleSelectionDown(int32_t start, int32_t end)
 
 void TextPattern::HandleSelection(int32_t start, int32_t end)
 {
-    if (start < 0 || start > static_cast<int32_t>(GetWideText().length()) ||
-        end < 0 || end > static_cast<int32_t>(GetWideText().length())) {
+    if (start < 0 || start > GetTextLength() || end < 0 || end > GetTextLength()) {
         return;
     }
     HandleSelectionChange(start, end);
@@ -1324,6 +1322,14 @@ float TextPattern::GetTextHeight()
         return pManager_->GetHeight() / pManager_->GetLineCount();
     }
     return 0.0;
+}
+
+int32_t TextPattern::GetTextLength()
+{
+    if (!spans_.empty()) {
+        return static_cast<int32_t>(GetWideText().length()) + placeholderCount_;
+    }
+    return static_cast<int32_t>(GetWideText().length());
 }
 
 bool TextPattern::IsDraggable(const Offset& offset)
