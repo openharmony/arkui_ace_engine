@@ -53,6 +53,7 @@ struct WebEvent : Event {
     EventMarker renderProcessNotRespondingId;
     EventMarker renderProcessRespondingId;
     EventMarker viewportFitChangedId;
+    EventMarker adsBlockedEventId;
 };
 
 struct WebMethod : Method {
@@ -391,6 +392,18 @@ public:
     {
         auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
         return event.viewportFitChangedId;
+    }
+
+    void SetAdsBlockedEventId(const EventMarker& adsBlockedEventId)
+    {
+        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+        event.adsBlockedEventId = adsBlockedEventId;
+    }
+
+    const EventMarker& GetAdsBlockedEventId() const
+    {
+        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.geolocationShowEventId;
     }
 
 protected:
