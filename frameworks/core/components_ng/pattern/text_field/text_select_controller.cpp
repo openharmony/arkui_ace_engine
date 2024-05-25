@@ -45,7 +45,7 @@ void TextSelectController::UpdateCaretIndex(int32_t index)
     secondHandleInfo_.index = newIndex;
 }
 
-RectF TextSelectController::CalculateEmptyValueCaretRect() const
+RectF TextSelectController::CalculateEmptyValueCaretRect()
 {
     RectF rect;
     auto pattern = pattern_.Upgrade();
@@ -67,7 +67,13 @@ RectF TextSelectController::CalculateEmptyValueCaretRect() const
             rect.SetLeft(contentRect_.GetX());
             break;
         case TextAlign::CENTER:
-            rect.SetLeft(static_cast<float>(contentRect_.GetX()) + contentRect_.Width() / 2.0f);
+            if (layoutProperty->GetPlaceholderValue("").empty() || !paragraph_) {
+                rect.SetLeft(static_cast<float>(contentRect_.GetX()) + contentRect_.Width() / 2.0f);
+            } else {
+                CaretMetricsF caretMetrics;
+                CalcCaretMetricsByPosition(0, caretMetrics, TextAffinity::DOWNSTREAM);
+                rect.SetLeft(caretMetrics.offset.GetX());
+            }
             break;
         case TextAlign::END:
             rect.SetLeft(static_cast<float>(contentRect_.GetX()) + contentRect_.Width() -

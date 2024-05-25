@@ -203,7 +203,7 @@ public:
     static int32_t GetGraphemeClusterLength(const std::wstring& text, int32_t extend, bool checkPrev = false);
     void CalculateHandleOffset();
     std::vector<RectF> GetSelectedRects() const;
-    RectF CalculateEmptyValueCaretRect() const;
+    RectF CalculateEmptyValueCaretRect();
     std::string ToString() const;
     int32_t ConvertTouchOffsetToPosition(const Offset& localOffset, bool isSelectionPos = false);
 
