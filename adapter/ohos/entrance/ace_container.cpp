@@ -1243,7 +1243,7 @@ bool AceContainer::ChangeType(AbilityBase::ViewData& viewData)
     return viewDataWrapOhos->GetPlaceHolderValue(viewData);
 }
 
-void AceContainer::fillAutoFillViewData(const RefPtr<NG::FrameNode> &node, RefPtr<ViewDataWrap> &viewDataWrap)
+void AceContainer::FillAutoFillViewData(const RefPtr<NG::FrameNode> &node, RefPtr<ViewDataWrap> &viewDataWrap)
 {
     CHECK_NULL_VOID(node);
     CHECK_NULL_VOID(viewDataWrap);
@@ -1289,7 +1289,7 @@ bool AceContainer::RequestAutoFill(
     CHECK_NULL_RETURN(viewDataWrap, false);
     auto autoFillContainerNode = node->GetFirstAutoFillContainerNode();
     uiContentImpl->DumpViewData(autoFillContainerNode, viewDataWrap, true);
-    fillAutoFillViewData(node, viewDataWrap);
+    FillAutoFillViewData(node, viewDataWrap);
     auto callback = std::make_shared<FillRequestCallback>(pipelineContext, node, autoFillType);
     auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
     CHECK_NULL_RETURN(viewDataWrapOhos, false);

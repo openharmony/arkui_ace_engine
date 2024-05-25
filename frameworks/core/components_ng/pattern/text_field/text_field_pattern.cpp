@@ -2021,6 +2021,7 @@ void TextFieldPattern::DoProcessAutoFill()
     auto isSuccess = ProcessAutoFill(isPopup);
     if (!isPopup && isSuccess) {
         needToRequestKeyboardInner_ = false;
+        closeKeyboard(true, false);
     } else if (RequestKeyboard(false, true, true)) {
         NotifyOnEditChanged(true);
     }
@@ -5956,7 +5957,7 @@ void TextFieldPattern::NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWra
     }
 }
 
-bool TextFieldPattern::ParseJsonValue(const std::unique_ptr<JsonValue>& jsonObject,
+bool TextFieldPattern::ParseFillContentJsonValue(const std::unique_ptr<JsonValue>& jsonObject,
     std::unordered_map<std::string, std::variant<std::string, bool, int32_t>>& map)
 {
     bool ret = false;
@@ -5968,8 +5969,7 @@ bool TextFieldPattern::ParseJsonValue(const std::unique_ptr<JsonValue>& jsonObje
     auto child = jsonObject->GetChild();
 
     while (child && child->IsValid()) {
-        if (!child->IsObject() && child->IsString())
-        {
+        if (!child->IsObject() && child->IsString()) {
             std::string strKey = child->GetKey();
             std::string strVal = child->GetString();
             if (strKey.empty()) {
@@ -6007,8 +6007,7 @@ void TextFieldPattern::NotifyFillRequestFailed(int32_t errCode, const std::strin
         if (jsonObject == nullptr) {
             break;
         }
-
-        if (!ParseJsonValue(jsonObject, userNamesOrPassWordMap)) {
+        if (!ParseFillContentJsonValue(jsonObject, userNamesOrPassWordMap)) {
             break;
         }
         MiscServices::InputMethodController::GetInstance()->SendPrivateCommand(userNamesOrPassWordMap);
