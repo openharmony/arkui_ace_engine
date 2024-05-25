@@ -15,7 +15,7 @@
 #include "test/unittest/core/pattern/waterflow/water_flow_test_ng.h"
 
 #include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_info.h"
+#include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
 
 namespace OHOS::Ace::NG {
 /**

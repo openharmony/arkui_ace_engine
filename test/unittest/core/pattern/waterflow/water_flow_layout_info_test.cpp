@@ -22,7 +22,7 @@
 #include "test/unittest/core/pattern/test_ng.h"
 #include "test/unittest/core/pattern/waterflow/water_flow_item_maps.h"
 
-#include "core/components_ng/pattern/waterflow/water_flow_layout_info.h"
+#include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
 #undef private
 #undef protected
 

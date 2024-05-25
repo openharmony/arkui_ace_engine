@@ -15,7 +15,7 @@
 #include "test/unittest/core/pattern/waterflow/water_flow_item_maps.h"
 #include "test/unittest/core/pattern/waterflow/water_flow_test_ng.h"
 
-#include "core/components_ng/pattern/waterflow/water_flow_layout_info.h"
+#include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
 #include "core/components_ng/property/calc_length.h"
 
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
