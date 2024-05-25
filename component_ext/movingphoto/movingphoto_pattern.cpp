@@ -173,7 +173,7 @@ void MovingPhotoPattern::HandleLongPress(GestureEvent& info)
 
 void MovingPhotoPattern::HandleTouchEvent(TouchEventInfo& info)
 {
-    if (currentPlayStatus_ == PlaybackStatus::ERROR){
+    if (currentPlayStatus_ == PlaybackStatus::ERROR) {
         ResetMediaPlayer();
     }
     if (!isPrepared_ || isPlayByController_) {
@@ -680,11 +680,12 @@ void MovingPhotoPattern::StartAnimation()
     animationOption.SetDuration(ANIMATION_DURATION_400);
     animationOption.SetCurve(Curves::FRICTION);
     animationOption.SetOnFinishEvent([this]() {
-        if (currentPlayStatus_ == PlaybackStatus::PAUSED || currentPlayStatus_ == PlaybackStatus::STOPPED || currentPlayStatus_ == PlaybackStatus::STARTED) {
+        if (currentPlayStatus_ == PlaybackStatus::PAUSED || currentPlayStatus_ == PlaybackStatus::STOPPED || !StartAnimationFlag_) {
             return;
         }
         HideImageNode();
     });
+    StartAnimationFlag_ = true;
     AnimationUtils::Animate(animationOption, [imageCtx = imageRsContext, videoCtx = videoRsContext]() {
             imageCtx->UpdateOpacity(0.0);
             imageCtx->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
@@ -705,6 +706,7 @@ void MovingPhotoPattern::StopPlayback()
 
 void MovingPhotoPattern::StopAnimation()
 {
+    StartAnimationFlag_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto movingPhoto = AceType::DynamicCast<MovingPhotoNode>(host);
