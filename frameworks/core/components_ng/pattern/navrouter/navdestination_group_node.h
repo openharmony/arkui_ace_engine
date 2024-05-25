@@ -155,6 +155,13 @@ public:
         return canReused_;
     }
 
+    void SetNavDestinationPageInfo(std::string& moduleName, std::string& pagePath);
+
+    const std::string& GetNavDestinationPageInfo() const
+    {
+        return navDestinationPageInfo_;
+    }
+
 private:
     RefPtr<UINode> titleBarNode_;
     RefPtr<UINode> contentNode_;
@@ -166,6 +173,7 @@ private:
     bool isCacheNode_ = false;
     bool isAnimated_ = false;
     bool canReused_ = true;
+    std::string navDestinationPageInfo_;
 };
 
 } // namespace OHOS::Ace::NG

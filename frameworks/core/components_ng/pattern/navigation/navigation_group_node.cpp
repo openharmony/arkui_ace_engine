@@ -397,10 +397,25 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
     bool isNavBar)
 {
     CHECK_NULL_VOID(preNode);
+    std::string prePageInfo;
+    std::string targetPageInfo;
 
     auto preNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
     CHECK_NULL_VOID(preNavDestination);
     preNavDestination->SetTransitionType(PageTransitionType::EXIT_POP);
+    prePageInfo = preNavDestination->GetNavDestinationPageInfo();
+    if (!curNode) {
+        targetPageInfo = navigationPageInfo_;
+    } else if (isNavBar) {
+        auto curNavigationNode = AceType::DynamicCast<NavigationGroupNode>(curNode);
+        CHECK_NULL_VOID(curNavigationNode);
+        targetPageInfo = curNavigationNode->GetNavigationPageInfo();
+    } else {
+        auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
+        CHECK_NULL_VOID(curNavDestination);
+        targetPageInfo = curNavDestination->GetNavDestinationPageInfo();
+    }
+    ACE_SCOPED_TRACE("Navigation Page from %s to %s", prePageInfo.c_str(), targetPageInfo.c_str());
 
     /* obtain preTitle, preBackIcon and preFrameSize of preNavDestination */
     auto preTitleNode = AceType::DynamicCast<TitleBarNode>(preNavDestination->GetTitleBarNode());
@@ -549,22 +564,30 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
 {
     CHECK_NULL_VOID(preNode);
     CHECK_NULL_VOID(curNode);
+    std::string prePageInfo;
+    std::string targetPageInfo;
 
     RefPtr<FrameNode> preTitleNode;
     if (isNavBar) {
         auto navBarNode = AceType::DynamicCast<NavBarNode>(preNode);
         navBarNode->SetTransitionType(PageTransitionType::EXIT_PUSH);
+        auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(navBarNode->GetParent());
+        CHECK_NULL_VOID(navigationNode);
+        prePageInfo = navigationNode->GetNavigationPageInfo();
         preTitleNode = navBarNode ? AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode()) : nullptr;
     } else {
         auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
         navDestination->SetTransitionType(PageTransitionType::EXIT_PUSH);
+        prePageInfo = navDestination->GetNavDestinationPageInfo();
         preTitleNode = navDestination ? AceType::DynamicCast<TitleBarNode>(navDestination->GetTitleBarNode()) : nullptr;
     }
-    CHECK_NULL_VOID(preTitleNode);
+    CHECK_NULL_VOID(preTitleNode); 
 
     auto mode = GetNavigationMode();
     auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
     CHECK_NULL_VOID(curNavDestination);
+    targetPageInfo = curNavDestination->GetNavDestinationPageInfo();
+    ACE_SCOPED_TRACE("Navigation Page from %s to %s", prePageInfo.c_str(), targetPageInfo.c_str());
     curNavDestination->SetTransitionType(PageTransitionType::ENTER_PUSH);
     auto curTitleNode = AceType::DynamicCast<TitleBarNode>(curNavDestination->GetTitleBarNode());
     CHECK_NULL_VOID(curTitleNode);

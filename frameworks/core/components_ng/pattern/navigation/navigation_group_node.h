@@ -176,6 +176,16 @@ public:
 
     void RemoveDialogDestination();
 
+    void SetNavigationPageInfo(std::string& moduleName, std::string& pagePath)
+    {
+        navigationPageInfo_ = "moduleName: " + moduleName + ", pagePath: " + pagePath;
+    }
+
+    const std::string& GetNavigationPageInfo() const
+    {
+        return navigationPageInfo_;
+    }
+
 private:
     bool UpdateNavDestinationVisibility(const RefPtr<NavDestinationGroupNode>& navDestination,
         const RefPtr<UINode>& remainChild, int32_t index, size_t destinationSize);
@@ -203,6 +213,7 @@ private:
     std::string curId_;
     std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
     std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;
+    std::string navigationPageInfo_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_GROUP_NODE_H

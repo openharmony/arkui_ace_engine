@@ -54,6 +54,7 @@ public:
     void SetBackgroundColor(const Color& color, bool isVaild = true) override;
     void SetIgnoreLayoutSafeArea(const SafeAreaExpandOpts& opts) override;
     static void SetIgnoreLayoutSafeArea(FrameNode* frameNode, const SafeAreaExpandOpts& opts);
+    void SetNavDestinationPageInfo(std::string moduleName, std::string pagePath) override;
 
 private:
     void CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);

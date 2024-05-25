@@ -85,7 +85,8 @@ void PageRouterManager::LoadOhmUrl(const RouterPageInfo& target)
 void PageRouterManager::RunPage(const std::string& url, const std::string& params)
 {
     PerfMonitor::GetPerfMonitor()->SetAppStartStatus();
-    ACE_SCOPED_TRACE("PageRouterManager::RunPage");
+    auto pagePath = Framework::JsiDeclarativeEngine::GetPagePath(url);
+    ACE_SCOPED_TRACE("PageRouterManager::RunPage, Router Main Page: %s", pagePath.c_str());
     CHECK_RUN_ON(JS);
     RouterPageInfo info { url, params };
 #if !defined(PREVIEW)
@@ -1149,7 +1150,23 @@ void PageRouterManager::BackToIndexCheckAlert(int32_t index, const std::string& 
 
 void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, bool needHideLast, bool needTransition)
 {
-    ACE_SCOPED_TRACE("PageRouterManager::LoadPage");
+    do {
+        if (pageRouterStack_.empty()) {
+            break;
+        }
+        auto targetPagePath = Framework::JsiDeclarativeEngine::GetPagePath(target.url);
+        auto pageNode = pageRouterStack_.back().Upgrade();
+        CHECK_NULL_BREAK(pageNode);
+        auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+        CHECK_NULL_BREAK(pagePattern);
+        auto currentUrl = pagePattern->GetPageUrl();
+        if (currentUrl.empty()) {
+            break;
+        }
+        auto currentPagePath = Framework::JsiDeclarativeEngine::GetPagePath(currentUrl);
+        ACE_SCOPED_TRACE("PageRouterManager::LoadPage, Router Page from %s to %s", currentPagePath.c_str(), targetPagePath.c_str());
+    } while (false);
+    
     CHECK_RUN_ON(JS);
     LOGI("Page router manager is loading page[%{public}d]: %{public}s.", pageId, target.url.c_str());
     auto entryPageInfo = AceType::MakeRefPtr<EntryPageInfo>(pageId, target.url, target.path, target.params);

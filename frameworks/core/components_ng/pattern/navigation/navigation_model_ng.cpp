@@ -1542,6 +1542,14 @@ void NavigationModelNG::SetNavigationStack()
     }
 }
 
+void NavigationModelNG::SetNavigationGroupNodeInfo(std::string moduleName, std::string pagePath)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    navigationGroupNode->SetNavigationPageInfo(moduleName, pagePath);
+}
+
 void NavigationModelNG::SetNavigationStackProvided(bool provided)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

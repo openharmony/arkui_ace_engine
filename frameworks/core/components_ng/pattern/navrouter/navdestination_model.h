@@ -52,6 +52,7 @@ public:
     virtual void SetMenuItems(std::vector<NG::BarItem>&& menuItems) {};
     virtual void SetCustomMenu(const RefPtr<AceType>& customNode) = 0;
     virtual void SetBackgroundColor(const Color& color, bool isVaild = true) = 0;
+    virtual void SetNavDestinationPageInfo(std::string moduleName, std::string pagePath)    {};
     virtual RefPtr<AceType> CreateEmpty()
     {
         return nullptr;
