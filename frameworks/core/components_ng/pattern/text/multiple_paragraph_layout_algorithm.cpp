@@ -187,6 +187,9 @@ void MultipleParagraphLayoutAlgorithm::GetSpanParagraphStyle(
     if (lineStyle->HasLeadingMargin()) {
         pStyle.leadingMargin = lineStyle->GetLeadingMarginValue();
     }
+    if (lineStyle->HasLineHeight()) {
+        pStyle.lineHeight = lineStyle->GetLineHeightValue();
+    }
 }
 
 void MultipleParagraphLayoutAlgorithm::FontRegisterCallback(
