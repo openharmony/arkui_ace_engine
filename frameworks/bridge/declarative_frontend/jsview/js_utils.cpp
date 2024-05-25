@@ -140,18 +140,6 @@ const std::shared_ptr<Rosen::RSNode> CreateRSNodeFromNapiValue(JSRef<JSVal> obj)
     return *nodePtr;
 }
 
-const Rosen::VisualEffect* CreateRSEffectFromNapiValue(JSRef<JSVal> obj)
-{
-    auto visualEffectPtr = static_cast<Rosen::VisualEffect*>(UnwrapNapiValue(obj));
-    return visualEffectPtr;
-}
-
-const Rosen::Filter* CreateRSFilterFromNapiValue(JSRef<JSVal> obj)
-{
-    auto filterPtr = static_cast<Rosen::Filter*>(UnwrapNapiValue(obj));
-    return filterPtr;
-}
-
 RefPtr<OHOS::Ace::WantWrap> CreateWantWrapFromNapiValue(JSRef<JSVal> obj)
 {
     if (!obj->IsObject()) {
@@ -173,6 +161,18 @@ RefPtr<OHOS::Ace::WantWrap> CreateWantWrapFromNapiValue(JSRef<JSVal> obj)
     return WantWrap::CreateWantWrap(reinterpret_cast<napi_env>(nativeEngine), nativeValue);
 }
 #endif
+
+const Rosen::VisualEffect* CreateRSEffectFromNapiValue(JSRef<JSVal> obj)
+{
+    auto visualEffectPtr = static_cast<Rosen::VisualEffect*>(UnwrapNapiValue(obj));
+    return visualEffectPtr;
+}
+
+const Rosen::Filter* CreateRSFilterFromNapiValue(JSRef<JSVal> obj)
+{
+    auto filterPtr = static_cast<Rosen::Filter*>(UnwrapNapiValue(obj));
+    return filterPtr;
+}
 
 RefPtr<DrawingColorFilter> CreateDrawingColorFilter(JSRef<JSVal> obj)
 {
