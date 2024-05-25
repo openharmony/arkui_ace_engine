@@ -107,6 +107,7 @@ public:
     JSRef<JSVal> GetParamByIndex(int32_t index) const;
     int32_t GetJsIndexFromNativeIndex(int32_t index) override;
     void MoveIndexToTop(int32_t index) override;
+    void UpdatePathInfoIfNeeded(RefPtr<NG::UINode>& uiNode, int32_t index) override;
 
 protected:
     JSRef<JSObject> dataSourceObj_;
@@ -134,6 +135,9 @@ private:
     void SaveNodeToPreBuildList(const std::string& name, const JSRef<JSVal>& param, RefPtr<NG::UINode>& node);
     RefPtr<NG::UINode> GetNodeFromPreBuildList(const std::string& name, const JSRef<JSVal>& param);
     bool CheckAndGetInterceptionFunc(const std::string& name, JSRef<JSFunc>& func);
+
+    bool GetNeedUpdatePathInfo(int32_t index);
+    void SetNeedUpdatePathInfo(int32_t index, bool need);
 
 private:
     std::vector<NavPathInfoUINode> preBuildNodeList_;

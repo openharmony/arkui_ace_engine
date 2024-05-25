@@ -178,6 +178,8 @@ public:
         navigationNode_ = navigationNode;
     }
 
+    virtual void UpdatePathInfoIfNeeded(RefPtr<UINode>& uiNode, int32_t index) {}
+
 protected:
     void MoveToTop(const std::string& name, const RefPtr<UINode>& navDestinationNode);
     void AddForDefault(const std::string& name, const RefPtr<UINode>& navDestinationNode,
