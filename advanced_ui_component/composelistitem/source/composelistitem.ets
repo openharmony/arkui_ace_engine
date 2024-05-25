@@ -575,11 +575,7 @@ struct OperateItemStruct {
       }
     }
     .hitTestBehavior(HitTestMode.Block)
-    .labelStyle({
-      maxLines: TEXT_MAX_LINE
-    })
     .backgroundColor(Color.Transparent)
-    .height(TEXT_ARROW_HEIGHT)
     .borderRadius($r('sys.float.corner_radius_level8'))
     .onFocus(() => {
       this.parentCanFocus = false
