@@ -1295,8 +1295,12 @@ void JSTimePicker::Create(const JSCallbackInfo& info)
     CreateTimePicker(info, paramObject);
 }
 
-void JSTimePicker::Loop(bool isLoop)
+void JSTimePicker::Loop(const JSCallbackInfo& info)
 {
+    bool isLoop = true;
+    if (info[0]->IsBoolean()) {
+        isLoop = info[0]->ToBoolean();
+    }
     TimePickerModel::GetInstance()->SetWheelModeEnabled(isLoop);
 }
 
