@@ -2539,18 +2539,24 @@ bool RichEditorPattern::CloseKeyboard(bool forceClose)
     return false;
 }
 
-void RichEditorPattern::HandleDraggableFlag(bool isInterceptEvent)
+void RichEditorPattern::HandleDraggableFlag(bool isTouchSelectArea)
 {
     auto gestureHub = GetGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    if (isInterceptEvent || copyOption_ == CopyOptions::None) {
+    // SpanString do not support drag
+    if (isSpanStringMode_) {
         gestureHub->SetIsTextDraggable(false);
         return;
     }
-    dragBoxes_ = GetTextBoxes();
-    // prevent long press event from being triggered when dragging
-    bool isContentDraggalbe = JudgeContentDraggable();
-    gestureHub->SetIsTextDraggable(isContentDraggalbe);
+    if (copyOption_ != CopyOptions::None && isTouchSelectArea) {
+        bool isContentDraggalbe = JudgeContentDraggable();
+        if (isContentDraggalbe) {
+            dragBoxes_ = GetTextBoxes();
+        }
+        gestureHub->SetIsTextDraggable(isContentDraggalbe);
+    } else {
+        gestureHub->SetIsTextDraggable(false);
+    }
 }
 
 bool RichEditorPattern::JudgeContentDraggable()
@@ -2663,8 +2669,9 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
     }
-    bool isInterceptEvent = BetweenSelectedPosition(info.GetGlobalLocation());
-    HandleDraggableFlag(isInterceptEvent);
+    bool isTouchSelectArea = BetweenSelection(info.GetGlobalLocation());
+    HandleDraggableFlag(isTouchSelectArea);
+    bool isInterceptEvent = isTouchSelectArea;
     // check current is mouse long press
     isInterceptEvent |= (isMousePressed_ && caretUpdateType_== CaretUpdateType::LONG_PRESSED);
 
@@ -5783,7 +5790,7 @@ void RichEditorPattern::ResetSelection()
     }
 }
 
-bool RichEditorPattern::BetweenSelectedPosition(const Offset& globalOffset)
+bool RichEditorPattern::BetweenSelection(const Offset& globalOffset)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -5805,6 +5812,11 @@ bool RichEditorPattern::BetweenSelectedPosition(const Offset& globalOffset)
         }
     }
     return false;
+}
+
+bool RichEditorPattern::BetweenSelectedPosition(const Offset& globalOffset)
+{
+    return copyOption_ != CopyOptions::None && BetweenSelection(globalOffset);
 }
 
 void RichEditorPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight)
@@ -7189,6 +7201,7 @@ void RichEditorPattern::HandleOnDragDropTextOperation(const std::string& insertV
         }
     } else {
         HandleOnDragInsertValue(insertValue);
+        caretPosition_ += strLength;
     }
     AfterChangeText(changeValue);
 }
