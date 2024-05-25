@@ -176,6 +176,7 @@ void JSNavPathStack::SetNativeNavPathStack(JSRef<JSObject> jsStack, JSRef<JSObje
 
 void JSNavPathStack::OnPushDestination(const JSCallbackInfo& info)
 {
+    ContainerScope scope(containerCurrentId_);
     auto engine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_VOID(engine);
     NativeEngine* nativeEngine = engine->GetNativeEngine();
@@ -197,7 +198,6 @@ void JSNavPathStack::OnPushDestination(const JSCallbackInfo& info)
         return;
     }
 
-    ContainerScope scope(containerCurrentId_);
     auto context = PipelineContext::GetCurrentContext();
     if (context == nullptr) {
         ProcessPromiseCallback(asyncContext, ERROR_CODE_INTERNAL_ERROR);
