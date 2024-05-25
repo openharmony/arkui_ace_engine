@@ -891,13 +891,13 @@ void SideBarContainerPattern::UpdateControlButtonIcon()
         default:
             break;
     }
-    imageInfo_ = imgSourceInfo.value();
 
     if (!imgSourceInfo.has_value()) {
         imgSourceInfo = std::make_optional<ImageSourceInfo>();
         imgSourceInfo->SetResourceId(InternalResource::ResourceId::SIDE_BAR);
         imgSourceInfo->SetFillColor(controlButtonColor);
     }
+    imageInfo_ = imgSourceInfo.value();
     imageLayoutProperty->UpdateImageSourceInfo(imgSourceInfo.value());
     imgFrameNode->MarkModifyDone();
 }
