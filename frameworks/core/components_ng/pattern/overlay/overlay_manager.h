@@ -497,6 +497,16 @@ public:
         }
     }
 
+    bool IsMenuShow() const
+    {
+        return isMenuShow_;
+    }
+
+    void SetIsMenuShow(bool isMenuShow)
+    {
+        isMenuShow_ = isMenuShow;
+    }
+
 private:
     void PopToast(int32_t targetId);
 
@@ -655,6 +665,7 @@ private:
     bool hasGatherNode_ {false};
     WeakPtr<FrameNode> gatherNodeWeak_;
     std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo_;
+    bool isMenuShow_ = false;
 };
 } // namespace OHOS::Ace::NG
 

@@ -669,6 +669,7 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
     preMovePoint_ = Point(0, 0);
     hasNotifiedTransformation_ = false;
     badgeNumber_ = -1;
+    isDragWithContextMenu_ = false;
     auto container = Container::Current();
     if (container && container->IsScenceBoardWindow()) {
         if (IsDragged() && IsWindowConsumed()) {
@@ -1504,9 +1505,29 @@ Offset DragDropManager::CalcDragMoveOffset(
     return newOffset;
 }
 
+bool DragDropManager::UpdateDragMovePositionFinished(
+    bool needDoDragMoveAnimate, bool isMenuShow, const Offset& newOffset, int32_t containerId)
+{
+    if (!isDragWithContextMenu_) {
+        return false;
+    }
+
+    CHECK_NULL_RETURN(info_.imageNode, false);
+    auto renderContext = info_.imageNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    if (!needDoDragMoveAnimate) {
+        renderContext->UpdateTransformTranslate({ newOffset.GetX(), newOffset.GetY(), 0.0f });
+        if (!isMenuShow) {
+            TransDragWindowToDragFwk(containerId);
+        }
+        return true;
+    }
+    return false;
+}
 void DragDropManager::DoDragMoveAnimate(const PointerEvent& pointerEvent)
 {
-    if (!IsNeedDoDragMoveAnimate(pointerEvent)) {
+    bool needDoDragMoveAnimate = IsNeedDoDragMoveAnimate(pointerEvent);
+    if (!needDoDragMoveAnimate && !isDragWithContextMenu_) {
         return;
     }
     isPullMoveReceivedForCurrentDrag_ = true;
@@ -1519,6 +1540,11 @@ void DragDropManager::DoDragMoveAnimate(const PointerEvent& pointerEvent)
     auto x = pointerEvent.GetPoint().GetX();
     auto y = pointerEvent.GetPoint().GetY();
     Offset newOffset = CalcDragMoveOffset(PRESERVE_HEIGHT, x, y, info_);
+    bool isMenuShow = overlayManager->IsMenuShow();
+    if (UpdateDragMovePositionFinished(needDoDragMoveAnimate, isMenuShow, newOffset, containerId) ||
+        !needDoDragMoveAnimate) {
+        return;
+    }
     auto distance = CalcDragPreviewDistanceWithPoint(PRESERVE_HEIGHT, x, y, info_);
     auto gatherNodeCenter = info_.imageNode->GetPaintRectCenter();
     auto maxDistance = CalcGatherNodeMaxDistanceWithPoint(overlayManager,
@@ -1529,9 +1555,10 @@ void DragDropManager::DoDragMoveAnimate(const PointerEvent& pointerEvent)
     constexpr int32_t animateDuration = 30;
     option.SetCurve(curve);
     option.SetDuration(animateDuration);
-    option.SetOnFinishEvent([distance, weakManager = WeakClaim(this), containerId]() {
+    bool dragWithContextMenu = isDragWithContextMenu_;
+    option.SetOnFinishEvent([distance, weakManager = WeakClaim(this), containerId, dragWithContextMenu, isMenuShow]() {
         constexpr decltype(distance) MAX_DIS = 5.0;
-        if (distance < MAX_DIS) {
+        if (distance < MAX_DIS && (!dragWithContextMenu || !isMenuShow)) {
             auto dragDropManager = weakManager.Upgrade();
             if (dragDropManager) {
                 dragDropManager->TransDragWindowToDragFwk(containerId);
@@ -1554,6 +1581,9 @@ void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager>& overlay
 {
     CHECK_NULL_VOID(overlayManager);
     if (!(GetDragPreviewInfo(overlayManager, info_)) || !IsNeedDisplayInSubwindow()) {
+        if (isDragWithContextMenu_) {
+            isDragFwkShow_ = false;
+        }
         return;
     }
     CHECK_NULL_VOID(info_.imageNode);
