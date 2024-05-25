@@ -143,6 +143,10 @@ template("declarative_js_engine_ark") {
 
     configs = [ "$ace_root:ace_config" ]
 
+    if (ace_engine_feature_enable_point_light) {
+      defines += [ "POINT_LIGHT_ENABLE" ]
+    }
+
     sources = [
       "js_converter.cpp",
       "jsi_declarative_engine.cpp",

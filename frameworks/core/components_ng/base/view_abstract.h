@@ -389,6 +389,13 @@ public:
     static void SetLightIlluminated(uint32_t value);
     static void SetIlluminatedBorderWidth(const Dimension& value);
     static void SetBloom(float value);
+    static void SetLightPosition(FrameNode* frameNode,
+        const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ);
+    static void SetLightIntensity(FrameNode* frameNode, float value);
+    static void SetLightColor(FrameNode* frameNode, const Color& value);
+    static void SetLightIlluminated(FrameNode* frameNode, uint32_t value);
+    static void SetIlluminatedBorderWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetBloom(FrameNode* frameNode, float value);
 
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
     static void SetWidth(FrameNode* frameNode, const CalcLength& width);

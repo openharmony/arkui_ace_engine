@@ -2798,6 +2798,43 @@ void ViewAbstract::SetBloom(const float value)
     ACE_UPDATE_RENDER_CONTEXT(Bloom, value);
 }
 
+void ViewAbstract::SetLightPosition(FrameNode* frameNode, const CalcDimension& positionX,
+    const CalcDimension& positionY, const CalcDimension& positionZ)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(LightPosition, TranslateOptions(positionX, positionY, positionZ), frameNode);
+}
+
+void ViewAbstract::SetLightIntensity(FrameNode* frameNode, const float value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(LightIntensity, value, frameNode);
+}
+
+void ViewAbstract::SetLightColor(FrameNode* frameNode, const Color& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(LightColor, value, frameNode);
+}
+
+void ViewAbstract::SetLightIlluminated(FrameNode* frameNode, const uint32_t value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(LightIlluminated, value, frameNode);
+}
+
+void ViewAbstract::SetIlluminatedBorderWidth(FrameNode* frameNode, const Dimension& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(IlluminatedBorderWidth, value, frameNode);
+}
+
+void ViewAbstract::SetBloom(FrameNode* frameNode, const float value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(Bloom, value, frameNode);
+}
+
 void ViewAbstract::SetMotionPath(FrameNode* frameNode, const MotionPathOption& motionPath)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(MotionPath, motionPath, frameNode);

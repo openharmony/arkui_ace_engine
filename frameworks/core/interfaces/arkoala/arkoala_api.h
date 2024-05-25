@@ -1289,6 +1289,19 @@ struct ArkUICommonModifier {
     void (*setKeyBoardShortCut)(
         ArkUINodeHandle node, ArkUI_CharPtr value, const ArkUI_Int32* keysIntArray, ArkUI_Int32 length);
     void (*resetKeyBoardShortCut)(ArkUINodeHandle node);
+    void (*setPointLightPosition)(ArkUINodeHandle node, const struct ArkUISizeType* positionX,
+        const struct ArkUISizeType* positionY, const struct ArkUISizeType* positionZ);
+    void (*resetPointLightPosition)(ArkUINodeHandle node);
+    void (*setPointLightIntensity)(ArkUINodeHandle node, ArkUI_Float32 intensity);
+    void (*resetPointLightIntensity)(ArkUINodeHandle node);
+    void (*setPointLightColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*resetPointLightColor)(ArkUINodeHandle node);
+    void (*setPointLightIlluminated)(
+        ArkUINodeHandle node, ArkUI_Uint32 illuminated, const struct ArkUISizeType* illuminatedBorderWidth);
+    void (*resetPointLightIlluminated)(ArkUINodeHandle node);
+    void (*setPointLightBloom)(
+        ArkUINodeHandle node, ArkUI_Float32 bloom, ArkUI_Float32 bloomRadius, ArkUI_Uint32 bloomColor);
+    void (*resetPointLightBloom)(ArkUINodeHandle node);
     void (*setClip)(ArkUINodeHandle node, ArkUI_Int32 isClip);
     void (*setClipShape)(ArkUINodeHandle node, ArkUI_CharPtr type, const ArkUI_Float32* attribute, ArkUI_Int32 length);
     void (*setClipPath)(

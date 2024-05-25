@@ -3659,6 +3659,120 @@ void ResetKeyBoardShortCut(ArkUINodeHandle node)
     ViewAbstractModelNG::SetKeyboardShortcut(frameNode, "", std::vector<OHOS::Ace::ModifierKey>(), nullptr);
 }
 
+void SetPointLightPosition(ArkUINodeHandle node, const struct ArkUISizeType* positionX,
+    const struct ArkUISizeType* positionY, const struct ArkUISizeType* positionZ)
+{
+#ifdef POINT_LIGHT_ENABLE
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(positionX);
+    CHECK_NULL_VOID(positionY);
+    CHECK_NULL_VOID(positionZ);
+    CalcDimension lightPositionX(positionX->value, static_cast<DimensionUnit>(positionX->unit));
+    CalcDimension lightPositionY(positionY->value, static_cast<DimensionUnit>(positionY->unit));
+    CalcDimension lightPositionZ(positionZ->value, static_cast<DimensionUnit>(positionZ->unit));
+    ViewAbstract::SetLightPosition(frameNode, lightPositionX, lightPositionY, lightPositionZ);
+#endif
+}
+
+void ResetPointLightPosition(ArkUINodeHandle node)
+{
+#ifdef POINT_LIGHT_ENABLE
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension lightPositionX(0.0f, DimensionUnit::VP);
+    CalcDimension lightPositionY(0.0f, DimensionUnit::VP);
+    CalcDimension lightPositionZ(0.0f, DimensionUnit::VP);
+    ViewAbstract::SetLightPosition(frameNode, lightPositionX, lightPositionY, lightPositionZ);
+#endif
+}
+
+void SetPointLightIntensity(ArkUINodeHandle node, ArkUI_Float32 intensity)
+{
+#ifdef POINT_LIGHT_ENABLE
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetLightIntensity(frameNode, static_cast<float>(intensity));
+#endif
+}
+
+void ResetPointLightIntensity(ArkUINodeHandle node)
+{
+#ifdef POINT_LIGHT_ENABLE
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetLightIntensity(frameNode, 0.0f);
+#endif
+}
+
+void SetPointLightColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+{
+#ifdef POINT_LIGHT_ENABLE
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color colorValue(color);
+    ViewAbstract::SetLightColor(frameNode, colorValue);
+#endif
+}
+
+void ResetPointLightColor(ArkUINodeHandle node)
+{
+#ifdef POINT_LIGHT_ENABLE
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetLightColor(frameNode, Color::WHITE);
+#endif
+}
+
+void SetPointLightIlluminated(
+    ArkUINodeHandle node, ArkUI_Uint32 illuminated, const struct ArkUISizeType* illuminatedBorderWidth)
+{
+#ifdef POINT_LIGHT_ENABLE
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetLightIlluminated(frameNode, static_cast<uint32_t>(illuminated));
+    Dimension borderWidthValue(illuminatedBorderWidth->value, static_cast<DimensionUnit>(illuminatedBorderWidth->unit));
+    ViewAbstract::SetIlluminatedBorderWidth(frameNode, borderWidthValue);
+#endif
+}
+
+void ResetPointLightIlluminated(ArkUINodeHandle node)
+{
+#ifdef POINT_LIGHT_ENABLE
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetLightIlluminated(frameNode, 0);
+    Dimension borderWidthValue(0.0f, DimensionUnit::VP);
+    ViewAbstract::SetIlluminatedBorderWidth(frameNode, borderWidthValue);
+#endif
+}
+
+void SetPointLightBloom(ArkUINodeHandle node, ArkUI_Float32 bloom, ArkUI_Float32 bloomRadius, ArkUI_Uint32 bloomColor)
+{
+#ifdef POINT_LIGHT_ENABLE
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetBloom(frameNode, static_cast<float>(bloom));
+    Shadow shadow;
+    shadow.SetBlurRadius(bloom * static_cast<float>(bloomRadius));
+    Color bloomColorValue(bloomColor);
+    shadow.SetColor(bloomColorValue);
+    ViewAbstract::SetBackShadow(frameNode, shadow);
+#endif
+}
+
+void ResetPointLightBloom(ArkUINodeHandle node)
+{
+#ifdef POINT_LIGHT_ENABLE
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetBloom(frameNode, 0.0f);
+    Shadow shadow;
+    shadow.SetBlurRadius(0);
+    ViewAbstract::SetBackShadow(frameNode, shadow);
+#endif
+}
+
 void SetClip(ArkUINodeHandle node, ArkUI_Int32 isClip)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -5338,6 +5452,9 @@ const ArkUICommonModifier* GetCommonModifier()
         SetMouseResponseRegion, ResetMouseResponseRegion, SetEnabled, ResetEnabled, SetUseShadowBatching,
         ResetUseShadowBatching, SetDraggable, ResetDraggable, SetAccessibilityGroup, ResetAccessibilityGroup,
         SetHoverEffect, ResetHoverEffect, SetClickEffect, ResetClickEffect, SetKeyBoardShortCut, ResetKeyBoardShortCut,
+        SetPointLightPosition, ResetPointLightPosition, SetPointLightIntensity, ResetPointLightIntensity,
+        SetPointLightColor, ResetPointLightColor, SetPointLightIlluminated, ResetPointLightIlluminated,
+        SetPointLightBloom, ResetPointLightBloom,
         SetClip, SetClipShape, SetClipPath, ResetClip, SetTransitionCenter, SetOpacityTransition, SetRotateTransition,
         SetScaleTransition, SetTranslateTransition, SetMaskShape, SetMaskPath, SetProgressMask, SetBlendMode,
         ResetBlendMode, SetMonopolizeEvents, ResetMonopolizeEvents, SetConstraintSize, ResetConstraintSize,
