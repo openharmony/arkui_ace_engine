@@ -195,6 +195,22 @@ void WaterFlowPattern::TriggerModifyDone()
     OnModifyDone();
 }
 
+namespace {
+// check if layout is misaligned after a scroll event
+bool CheckMisalignment(const RefPtr<WaterFlowLayoutInfoBase>& info)
+{
+    if (info->Mode() != WaterFlowLayoutMode::SLIDING_WINDOW) {
+        return false;
+    }
+    auto infoSW = AceType::DynamicCast<WaterFlowLayoutInfoSW>(info);
+    if (infoSW->IsMisaligned()) {
+        info->Reset();
+        return true;
+    }
+    return false;
+}
+} // namespace
+
 bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipMeasure && config.skipLayout) {
@@ -249,6 +265,9 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
 
     isInitialized_ = true;
 
+    if (layoutInfo_->startIndex_ == 0 && CheckMisalignment(layoutInfo_)) {
+        MarkDirtyNodeSelf();
+    }
     return NeedRender();
 }
 
@@ -538,22 +557,6 @@ void WaterFlowPattern::MarkDirtyNodeSelf()
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
-
-namespace {
-// check if layout is misaligned after a scroll event
-void CheckMisalignment(const RefPtr<WaterFlowLayoutInfoBase>& info)
-{
-    if (info->Mode() != WaterFlowLayoutMode::SLIDING_WINDOW) {
-        return;
-    }
-    auto infoSW = AceType::DynamicCast<WaterFlowLayoutInfoSW>(info);
-    if (infoSW->IsMisaligned()) {
-        infoSW->ResetBeforeJump(0.0f);
-        info->jumpIndex_ = 0;
-        info->align_ = ScrollAlign::START;
-    }
-}
-} // namespace
 
 void WaterFlowPattern::OnScrollEndCallback()
 {

@@ -22,11 +22,19 @@
 namespace OHOS::Ace::NG {
 void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, float mainGap)
 {
+    if (lanes_.empty()) {
+        return;
+    }
     startIndex_ = StartIndex();
     endIndex_ = EndIndex();
-    if (startIndex_ <= endIndex_) {
-        storedOffset_ = lanes_[idxToLane_.at(startIndex_)].startPos;
+    if (startIndex_ > endIndex_) {
+        return;
     }
+    if (!idxToLane_.count(startIndex_) || lanes_.size() <= idxToLane_.at(startIndex_)) {
+        return;
+    }
+    storedOffset_ = lanes_[idxToLane_.at(startIndex_)].startPos;
+
     delta_ = 0.0f;
     lastMainSize_ = mainSize;
     mainGap_ = mainGap;
@@ -361,12 +369,11 @@ bool WaterFlowLayoutInfoSW::IsMisaligned() const
     if (lanes_.empty()) {
         return false;
     }
-    if (!itemStart_ || !NearZero(StartPos())) {
+    if (StartIndex() > 0) {
         return false;
     }
-    bool laneNotAligned = std::any_of(lanes_.begin(), lanes_.end(), [](const auto& lane) {
-        return !NearZero(lane.startPos);
-    });
+    bool laneNotAligned = std::any_of(
+        lanes_.begin(), lanes_.end(), [this](const auto& lane) { return !NearEqual(lane.startPos, StartPos()); });
     return laneNotAligned || lanes_[0].items_.front().idx != 0;
 }
 } // namespace OHOS::Ace::NG
