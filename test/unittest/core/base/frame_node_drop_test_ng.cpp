@@ -54,6 +54,10 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 const InspectorFilter filter;
+const std::string NODE_TAG_ONE("111");
+const std::string NODE_TAG_A("aaa");
+const std::string NODE_TAG_SPOT("...");
+const std::string NODE_TAG_EMPTY("");
 } // namespace
 class FrameNodeDropTestNg : public testing::Test {
 public:
@@ -102,14 +106,14 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg001, TestSize.Level1)
      * @tc.expected: frameNode is not null.
      */
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>("", frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG_EMPTY, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
 
     /**
      * @tc.steps: step2. construct a allowDropSet.
      * @tc.expected: allowDropSet is not null.
      */
-    std::set<std::string> allowDropSet = { "" };
+    std::set<std::string> allowDropSet = { NODE_TAG_EMPTY };
 
     /**
      * @tc.steps: step3. Set an allowDrop in the frameNode and then get an allowDrop.
@@ -139,14 +143,14 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg002, TestSize.Level1)
      * @tc.expected: frameNode is not null.
      */
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>("111", frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG_ONE, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
 
     /**
      * @tc.steps: step2. construct a allowDropSet.
      * @tc.expected: allowDropSet is not null.
      */
-    std::set<std::string> allowDropSet = { "111" };
+    std::set<std::string> allowDropSet = { NODE_TAG_ONE };
 
     /**
      * @tc.steps: step3. Set an allowDrop in the frameNode and then get an allowDrop.
@@ -176,14 +180,14 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg003, TestSize.Level1)
      * @tc.expected: frameNode is not null.
      */
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>("...", frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG_SPOT, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
 
     /**
      * @tc.steps: step2. construct a allowDropSet.
      * @tc.expected: allowDropSet is not null.
      */
-    std::set<std::string> allowDropSet = { "..." };
+    std::set<std::string> allowDropSet = { NODE_TAG_SPOT };
 
     /**
      * @tc.steps: step3. Set an allowDrop in the frameNode and then get an allowDrop.
@@ -213,14 +217,14 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg004, TestSize.Level1)
      * @tc.expected: frameNode is not null.
      */
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>("aaa", frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG_A, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
 
     /**
      * @tc.steps: step2. construct a allowDropSet.
      * @tc.expected: allowDropSet is not null.
      */
-    std::set<std::string> allowDropSet = { "aaa" };
+    std::set<std::string> allowDropSet = { NODE_TAG_A };
 
     /**
      * @tc.steps: step3. Set an allowDrop in the frameNode and then get an allowDrop.
@@ -286,14 +290,14 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg006, TestSize.Level1)
      * @tc.expected: frameNode is not null.
      */
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>("", frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG_EMPTY, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
 
     /**
      * @tc.steps: step2. construct a allowDropSet.
      * @tc.expected: allowDropSet is not null.
      */
-    std::set<std::string> allowDropSet = { "" };
+    std::set<std::string> allowDropSet = { NODE_TAG_EMPTY };
 
     /**
      * @tc.steps: step3. Set an allowDrop in the frameNode and then get an allowDrop.
@@ -326,14 +330,14 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg007, TestSize.Level1)
      * @tc.expected: frameNode is not null.
      */
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>("111", frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG_ONE, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
 
     /**
      * @tc.steps: step2. construct a allowDropSet.
      * @tc.expected: allowDropSet is not null.
      */
-    std::set<std::string> allowDropSet = { "111" };
+    std::set<std::string> allowDropSet = { NODE_TAG_ONE };
 
     /**
      * @tc.steps: step3. Set an allowDrop in the frameNode and then get an allowDrop.
@@ -366,14 +370,14 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg008, TestSize.Level1)
      * @tc.expected: frameNode is not null.
      */
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>("...", frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG_SPOT, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
 
     /**
      * @tc.steps: step2. construct a allowDropSet.
      * @tc.expected: allowDropSet is not null.
      */
-    std::set<std::string> allowDropSet = { "..." };
+    std::set<std::string> allowDropSet = { NODE_TAG_SPOT };
 
     /**
      * @tc.steps: step3. Set an allowDrop in the frameNode and then get an allowDrop.
@@ -406,14 +410,14 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg009, TestSize.Level1)
      * @tc.expected: frameNode is not null.
      */
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>("aaa", frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG_A, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
 
     /**
      * @tc.steps: step2. construct a allowDropSet.
      * @tc.expected: allowDropSet is not null.
      */
-    std::set<std::string> allowDropSet = { "aaa" };
+    std::set<std::string> allowDropSet = { NODE_TAG_A };
 
     /**
      * @tc.steps: step3. Set an allowDrop in the frameNode and then get an allowDrop.
@@ -485,14 +489,14 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg011, TestSize.Level1)
      * @tc.expected: frameNode is not null.
      */
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>("", frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG_EMPTY, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
 
     /**
      * @tc.steps: step2. construct a allowDropSet.
      * @tc.expected: allowDropSet is not null.
      */
-    std::set<std::string> allowDropSet = { "" };
+    std::set<std::string> allowDropSet = { NODE_TAG_EMPTY };
 
     /**
      * @tc.steps: step3. Set an allowDrop in the frameNode and then get an allowDrop.
@@ -525,14 +529,14 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg012, TestSize.Level1)
      * @tc.expected: frameNode is not null.
      */
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>("111", frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG_ONE, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
 
     /**
      * @tc.steps: step2. construct a allowDropSet.
      * @tc.expected: allowDropSet is not null.
      */
-    std::set<std::string> allowDropSet = { "111" };
+    std::set<std::string> allowDropSet = { NODE_TAG_ONE };
 
     /**
      * @tc.steps: step3. Set an allowDrop in the frameNode and then get an allowDrop.
@@ -565,14 +569,14 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg013, TestSize.Level1)
      * @tc.expected: frameNode is not null.
      */
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>("...", frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG_SPOT, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
 
     /**
      * @tc.steps: step2. construct a allowDropSet.
      * @tc.expected: allowDropSet is not null.
      */
-    std::set<std::string> allowDropSet = { "..." };
+    std::set<std::string> allowDropSet = { NODE_TAG_SPOT };
 
     /**
      * @tc.steps: step3. Set an allowDrop in the frameNode and then get an allowDrop.
@@ -605,14 +609,14 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg014, TestSize.Level1)
      * @tc.expected: frameNode is not null.
      */
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>("aaa", frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG_A, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
 
     /**
      * @tc.steps: step2. construct a allowDropSet.
      * @tc.expected: allowDropSet is not null.
      */
-    std::set<std::string> allowDropSet = { "aaa" };
+    std::set<std::string> allowDropSet = { NODE_TAG_A };
 
     /**
      * @tc.steps: step3. Set an allowDrop in the frameNode and then get an allowDrop.
