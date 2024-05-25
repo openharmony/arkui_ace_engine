@@ -965,8 +965,6 @@ void FocusHub::SwitchFocus(const RefPtr<FocusHub>& focusNode)
         TAG_LOGW(AceLogTag::ACE_FOCUS, "SwitchFocus: parent focus node is not a scope!");
         return;
     }
-    std::list<RefPtr<FocusHub>> focusNodes;
-    GetChildrenFocusHub(focusNodes);
 
     auto focusNodeNeedBlur = lastWeakFocusNode_.Upgrade();
     lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(focusNode));
@@ -1058,8 +1056,6 @@ bool FocusHub::TryRequestFocus(const RefPtr<FocusHub>& focusNode, const RectF& r
 
 bool FocusHub::CalculatePosition()
 {
-    std::list<RefPtr<FocusHub>> focusNodes;
-    GetChildrenFocusHub(focusNodes);
     auto lastFocusNode = lastWeakFocusNode_.Upgrade();
     CHECK_NULL_RETURN(lastFocusNode, false);
 
@@ -1342,8 +1338,6 @@ void FocusHub::OnFocusScope(bool currentHasFocused)
 
 void FocusHub::OnBlurScope()
 {
-    std::list<RefPtr<FocusHub>> focusNodes;
-    GetChildrenFocusHub(focusNodes);
     OnBlurNode();
     auto lastFocusNode = lastWeakFocusNode_.Upgrade();
     if (lastFocusNode) {
@@ -1543,8 +1537,6 @@ void FocusHub::ClearFocusState(bool isNeedStateStyles)
 void FocusHub::ClearAllFocusState()
 {
     ClearFocusState();
-    std::list<RefPtr<FocusHub>> focusNodes;
-    GetChildrenFocusHub(focusNodes);
     auto lastFocusNode = lastWeakFocusNode_.Upgrade();
     if (lastFocusNode) {
         lastFocusNode->ClearAllFocusState();
@@ -1560,8 +1552,6 @@ bool FocusHub::IsNeedPaintFocusState()
         (focusDepend_ == FocusDependence::SELF || focusType_ == FocusType::NODE)) {
         return focusStyleType_ != FocusStyleType::NONE || HasFocusStateStyle();
     }
-    std::list<RefPtr<FocusHub>> focusNodes;
-    GetChildrenFocusHub(focusNodes);
     auto lastFocusNode = GetLastWeakFocusNode().Upgrade();
     while (lastFocusNode) {
         if (!lastFocusNode->IsCurrentFocus() || !lastFocusNode->IsFocusableNode()) {
@@ -1570,8 +1560,6 @@ bool FocusHub::IsNeedPaintFocusState()
         if (lastFocusNode->GetFocusStyleType() != FocusStyleType::NONE || lastFocusNode->HasFocusStateStyle()) {
             return false;
         }
-        focusNodes.clear();
-        lastFocusNode->GetChildrenFocusHub(focusNodes);
         lastFocusNode = lastFocusNode->GetLastWeakFocusNode().Upgrade();
     }
     return focusStyleType_ != FocusStyleType::NONE || HasFocusStateStyle();
