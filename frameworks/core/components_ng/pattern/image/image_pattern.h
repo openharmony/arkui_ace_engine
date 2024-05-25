@@ -159,7 +159,7 @@ public:
         }
     }
 
-    std::string GetDynamicModeString(DynamicRangeMode dynamicMode)
+    std::string GetDynamicModeString(DynamicRangeMode dynamicMode) const
     {
         switch (dynamicMode) {
             case DynamicRangeMode::HIGH:

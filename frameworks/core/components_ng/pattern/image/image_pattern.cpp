@@ -1165,6 +1165,13 @@ void ImagePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspector
     CHECK_NULL_VOID(host);
     json->PutExtAttr("draggable", host->IsDraggable() ? "true" : "false", filter);
     json->PutExtAttr("enableAnalyzer", isEnableAnalyzer_ ? "true" : "false", filter);
+    auto renderProp = GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(renderProp);
+    DynamicRangeMode dynamicMode = DynamicRangeMode::STANDARD;
+    if (renderProp->HasDynamicMode()) {
+        dynamicMode = renderProp->GetDynamicMode().value_or(DynamicRangeMode::STANDARD);
+    }
+    json->PutExtAttr("dynamicRangeMode", GetDynamicModeString(dynamicMode).c_str(), filter);
 }
 
 void ImagePattern::UpdateFillColorIfForegroundColor()
@@ -1325,6 +1332,7 @@ void ImagePattern::OnLanguageConfigurationUpdate()
     if (src.GetSrcType() == SrcType::RESOURCE) {
         loadingCtx_.Reset();
     }
+    OnConfigurationUpdate();
 }
 
 void ImagePattern::OnColorConfigurationUpdate()
