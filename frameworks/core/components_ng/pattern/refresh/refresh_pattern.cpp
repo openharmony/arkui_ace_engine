@@ -207,10 +207,9 @@ void RefreshPattern::InitProgressNode()
     if (layoutProperty->HasProgressColor()) {
         progressPaintProperty->UpdateColor(layoutProperty->GetProgressColorValue());
     }
+    host->AddChild(progressChild_, -1);
     if (HasLoadingText()) {
         InitProgressColumn();
-    } else {
-        host->AddChild(progressChild_, -1);
     }
     progressChild_->MarkDirtyNode();
 }
@@ -245,7 +244,6 @@ void RefreshPattern::InitProgressColumn()
     CHECK_NULL_VOID(host);
     columnNode_ = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    columnNode_->AddChild(progressChild_);
     loadingTextNode_ = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto loadingTextLayoutProperty = loadingTextNode_->GetLayoutProperty<TextLayoutProperty>();
@@ -261,11 +259,15 @@ void RefreshPattern::InitProgressColumn()
     CHECK_NULL_VOID(theme);
     loadingTextLayoutProperty->UpdateTextColor(theme->GetTextStyle().GetTextColor());
     loadingTextLayoutProperty->UpdateFontSize(theme->GetTextStyle().GetFontSize());
-
+    
+    PaddingProperty textpadding;
+    textpadding.top = CalcLength(TRIGGER_LOADING_DISTANCE.ConvertToPx() +LOADING_TEXT_TOP_MARGIN.ConvertToPx());
+    auto prop = columnNode_->GetLayoutProperty<LinearLayoutProperty>();
+    prop->UpdatePadding(textpadding);
     UpdateLoadingTextOpacity(0.0f);
 
     columnNode_->AddChild(loadingTextNode_, -1);
-    host->AddChild(columnNode_, -1);
+    host->AddChild(columnNode_);
 }
 
 void RefreshPattern::OnColorConfigurationUpdate()
@@ -313,12 +315,10 @@ void RefreshPattern::InitChildNode()
                 CHECK_NULL_VOID(columnNode_);
                 host->RemoveChild(columnNode_);
                 columnNode_ = nullptr;
-                progressChild_ = nullptr;
                 loadingTextNode_ = nullptr;
-            } else {
-                host->RemoveChild(progressChild_);
-                progressChild_ = nullptr;
             }
+            host->RemoveChild(progressChild_);
+            progressChild_ = nullptr;
         }
     } else if (!progressChild_) {
         InitProgressNode();
