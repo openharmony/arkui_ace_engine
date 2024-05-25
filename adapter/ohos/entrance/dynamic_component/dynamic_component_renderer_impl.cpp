@@ -15,7 +15,10 @@
 
 #include "dynamic_component_renderer_impl.h"
 
+#include <iterator>
 #include <memory>
+
+#include "accessibility_element_info.h"
 
 #include "interfaces/inner_api/ace/ui_content.h"
 #include "native_engine/native_engine.h"
@@ -39,6 +42,30 @@ constexpr int32_t WORKER_ERROR = 10002;
 constexpr char PARAM_NAME_RESTRICTED_WORKER_ERROR[] = "restrictedWorkerError";
 constexpr char PARAM_MSG_RESTRICTED_WORKER_ERROR[] = "Run not in restricted worker thread";
 }
+
+void ApplyAccessibilityElementInfoOffset(Accessibility::AccessibilityElementInfo& output, const OffsetF& offset)
+{
+    auto& rect = output.GetRectInScreen();
+    Accessibility::Rect bounds;
+    bounds.SetLeftTopScreenPostion(rect.GetLeftTopXScreenPostion() + offset.GetX(),
+        rect.GetLeftTopYScreenPostion() + offset.GetY());
+    bounds.SetRightBottomScreenPostion(rect.GetRightBottomXScreenPostion() + offset.GetX(),
+        rect.GetRightBottomYScreenPostion() + offset.GetY());
+    output.SetRectInScreen(bounds);
+}
+
+void ApplyAccessibilityElementInfoOffset(std::list<Accessibility::AccessibilityElementInfo>& output, size_t index,
+    const OffsetF& offset)
+{
+    auto iterator = output.begin();
+    if (index > 0) {
+        std::advance(iterator, index);
+    }
+    for (; iterator != output.end(); ++iterator) {
+        ApplyAccessibilityElementInfoOffset(*iterator, offset);
+    }
+}
+
 DynamicComponentRendererImpl::DynamicComponentRendererImpl(
     const RefPtr<FrameNode>& host, const std::string& hapPath,
     const std::string& abcPath, const std::string& entryPoint, void* runtime)
@@ -349,11 +376,6 @@ void DynamicComponentRendererImpl::UpdateViewportConfig(const ViewportConfig& co
         auto uiContent = renderer->uiContent_;
         CHECK_NULL_VOID(uiContent);
         ContainerScope scope(uiContent->GetInstanceId());
-        auto width = vpConfig.Width();
-        auto height = vpConfig.Height();
-        uiContent->SetFormWidth(width);
-        uiContent->SetFormHeight(height);
-        uiContent->OnFormSurfaceChange(width, height);
         uiContent->UpdateViewportConfig(vpConfig, reason, rsTransaction);
     };
     bool contentReady = false;
@@ -384,6 +406,70 @@ void DynamicComponentRendererImpl::DestroyContent()
             uiContent->Destroy();
         },
         TaskExecutor::TaskType::UI, "ArkUIDynamicComponentDestroy");
+}
+
+void DynamicComponentRendererImpl::SearchElementInfoByAccessibilityId(int64_t elementId, int32_t mode,
+    int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
+{
+    CHECK_NULL_VOID(uiContent_);
+    auto size = output.size();
+    uiContent_->SearchElementInfoByAccessibilityId(elementId, mode, baseParent, output);
+    if (output.size() > size) {
+        auto host = host_.Upgrade();
+        CHECK_NULL_VOID(host);
+        auto offset = host->GetTransformRectRelativeToWindow().GetOffset();
+        ApplyAccessibilityElementInfoOffset(output, size, offset);
+    }
+}
+
+void DynamicComponentRendererImpl::SearchElementInfosByText(int64_t elementId, const std::string& text,
+    int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
+{
+    CHECK_NULL_VOID(uiContent_);
+    auto size = output.size();
+    uiContent_->SearchElementInfosByText(elementId, text, baseParent, output);
+    if (output.size() > size) {
+        auto host = host_.Upgrade();
+        CHECK_NULL_VOID(host);
+        auto offset = host->GetTransformRectRelativeToWindow().GetOffset();
+        ApplyAccessibilityElementInfoOffset(output, size, offset);
+    }
+}
+
+void DynamicComponentRendererImpl::FindFocusedElementInfo(int64_t elementId, int32_t focusType, int64_t baseParent,
+    Accessibility::AccessibilityElementInfo& output)
+{
+    CHECK_NULL_VOID(uiContent_);
+    uiContent_->FindFocusedElementInfo(elementId, focusType, baseParent, output);
+    auto host = host_.Upgrade();
+    CHECK_NULL_VOID(host);
+    auto offset = host->GetTransformRectRelativeToWindow().GetOffset();
+    ApplyAccessibilityElementInfoOffset(output, offset);
+}
+
+void DynamicComponentRendererImpl::FocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
+    Accessibility::AccessibilityElementInfo& output)
+{
+    CHECK_NULL_VOID(uiContent_);
+    uiContent_->FocusMoveSearch(elementId, direction, baseParent, output);
+    auto host = host_.Upgrade();
+    CHECK_NULL_VOID(host);
+    auto offset = host->GetTransformRectRelativeToWindow().GetOffset();
+    ApplyAccessibilityElementInfoOffset(output, offset);
+}
+
+bool DynamicComponentRendererImpl::NotifyExecuteAction(int64_t elementId, const std::map<std::string,
+    std::string>& actionArguments, int32_t action, int64_t offset)
+{
+    CHECK_NULL_RETURN(uiContent_, false);
+    return uiContent_->NotifyExecuteAction(elementId, actionArguments, action, offset);
+}
+
+void DynamicComponentRendererImpl::TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
+    int32_t eventType, int64_t timeMs)
+{
+    CHECK_NULL_VOID(uiContent_);
+    uiContent_->HandleAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
 }
 
 RefPtr<TaskExecutor> DynamicComponentRendererImpl::GetTaskExecutor()

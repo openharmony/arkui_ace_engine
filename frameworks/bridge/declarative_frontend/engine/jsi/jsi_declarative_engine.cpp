@@ -271,6 +271,8 @@ thread_local bool isUnique_ = false;
 
 thread_local bool isWorker_ = false;
 
+thread_local bool isDynamicModulePreloaded_ = false;
+
 JsiDeclarativeEngineInstance::~JsiDeclarativeEngineInstance()
 {
     CHECK_RUN_ON(JS);
@@ -368,7 +370,8 @@ void JsiDeclarativeEngineInstance::InitJsObject()
         }
     } else {
         auto container = Container::Current();
-        if (container && container->IsDynamicRender()) {
+        if (container && container->IsDynamicRender() && !isDynamicModulePreloaded_) {
+            isDynamicModulePreloaded_ = true;
             LOGD("init ace module for dynamic component");
             auto vm = std::static_pointer_cast<ArkJSRuntime>(runtime_)->GetEcmaVm();
             LocalScope scope(vm);
