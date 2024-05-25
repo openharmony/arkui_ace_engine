@@ -843,7 +843,7 @@ void CustomPaintPaintMethod::Path2DFill()
         UpdatePaintShader(nullptr, &brush, state_.fillState.GetGradient());
     }
     if (state_.fillState.GetPatternValue().IsValid() && state_.fillState.GetPaintStyle() == PaintStyle::ImagePattern) {
-        UpdatePaintShader(state_.fillState.GetPattern(), nullptr, &brush);
+        UpdatePaintShader(state_.fillState.GetPatternValue(), nullptr, &brush);
     }
     if (state_.globalState.HasGlobalAlpha()) {
         if (state_.fillState.GetPaintStyle() == OHOS::Ace::PaintStyle::Color) {
@@ -1282,6 +1282,7 @@ void CustomPaintPaintMethod::Save()
 void CustomPaintPaintMethod::Restore()
 {
     if (rsCanvas_->GetSaveCount() > DEFAULT_SAVE_COUNT && !saveStates_.empty()) {
+        state_ = saveStates_.back();
         saveStates_.pop_back();
         rsCanvas_->Restore();
     }
