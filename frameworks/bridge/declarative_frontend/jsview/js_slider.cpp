@@ -389,11 +389,8 @@ void JSSlider::SetSliderInteractionMode(const JSCallbackInfo& info)
     }
 
     if (!info[0]->IsNull() && info[0]->IsNumber()) {
-        auto mode = static_cast<SliderInteraction>(info[0]->ToNumber<int32_t>());
-        auto sliderInteractionMode = mode == SliderInteraction::SLIDE_ONLY
-                                         ? SliderModel::SliderInteraction::SLIDE_ONLY
-                                         : SliderModel::SliderInteraction::SLIDE_AND_CLICK;
-        SliderModel::GetInstance()->SetSliderInteractionMode(sliderInteractionMode);
+        auto mode = static_cast<SliderModel::SliderInteraction>(info[0]->ToNumber<int32_t>());
+        SliderModel::GetInstance()->SetSliderInteractionMode(mode);
     } else {
         SliderModel::GetInstance()->ResetSliderInteractionMode();
     }
