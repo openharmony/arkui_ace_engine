@@ -483,10 +483,22 @@ void ToggleButtonPattern::OnClick()
     CHECK_NULL_VOID(buttonEventHub);
     buttonEventHub->UpdateChangeEvent(!isLastSelected);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    HandleOnOffStatus();
+    if (isFocus_) {
+        if (isOn_.value()) {
+            HandleOnOffStyle(false, true);
+        } else {
+            HandleOnOffStyle(true, true);
+        }
+    } else {
+        if (isOn_.value()) {
+            HandleOnOffStyle(false, false);
+        } else {
+            HandleOnOffStyle(true, false);
+        }
+    }
 }
 
-void ToggleButtonPattern::HandleOnOffStatus()
+void ToggleButtonPattern::HandleOnOffStyle(bool isOnToOff, bool isFocus)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -496,24 +508,6 @@ void ToggleButtonPattern::HandleOnOffStatus()
     CHECK_NULL_VOID(pipeline);
     auto toggleTheme = pipeline->GetTheme<ToggleTheme>();
     CHECK_NULL_VOID(toggleTheme);
-    if (isFocus_) {
-        if (isOn_.value()) {
-            HandleOnOffStyle(renderContext, toggleTheme, false, true);
-        } else {
-            HandleOnOffStyle(renderContext, toggleTheme, true, true);
-        }
-    } else {
-        if (isOn_.value()) {
-            HandleOnOffStyle(renderContext, toggleTheme, false, false);
-        } else {
-            HandleOnOffStyle(renderContext, toggleTheme, true, false);
-        }
-    }
-}
-
-void ToggleButtonPattern::HandleOnOffStyle(RefPtr<RenderContext> const& renderContext,
-    RefPtr<ToggleTheme>& toggleTheme, bool isOnToOff, bool isFocus)
-{
     auto && graphics = renderContext->GetOrCreateGraphics();
     CHECK_NULL_VOID(graphics);
     if (isFocus) {
