@@ -801,7 +801,7 @@ bool TxtParagraph::HandleCaretWhenEmpty(CaretMetricsF& result)
     result.height = paragrah->GetHeight();
     auto lineHeight = paraStyle_.lineHeight;
     if (lineHeight.IsValid()) {
-        result.offset.SetY(std::max(lineHeight.ConvertToPx() - result.height, 0.0f));
+        result.offset.SetY(std::max(lineHeight.ConvertToPx() - result.height, 0.0));
     }
     if (paraStyle_.align != TextAlign::START) {
         HandleTextAlign(result, paraStyle_.align);
