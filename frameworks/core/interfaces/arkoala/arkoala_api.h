@@ -2498,7 +2498,7 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaLineBreakStrategy)(ArkUINodeHandle node);
     void (*setTextAreaOnSubmitWithEvent)(ArkUINodeHandle node, void* callback);
     void (*resetTextAreaOnSubmitWithEvent)(ArkUINodeHandle node);
-    void (*setTextAreaContentType)(ArkUINodeHandle node, ArkUI_Uint32 contentType);
+    void (*setTextAreaContentType)(ArkUINodeHandle node, ArkUI_Int32 contentType);
     void (*resetTextAreaContentType)(ArkUINodeHandle node);
     void (*setTextAreaEnableAutoFill)(ArkUINodeHandle node, ArkUI_Uint32 enableAutoFill);
     void (*resetTextAreaEnableAutoFill)(ArkUINodeHandle node);
