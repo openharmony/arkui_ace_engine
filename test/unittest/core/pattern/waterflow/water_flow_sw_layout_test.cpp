@@ -318,12 +318,14 @@ HWTEST_F(WaterFlowSWTest, Misaligned001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
 
     UpdateCurrentOffset(Infinity<float>());
-    EXPECT_TRUE(info_->IsMisaligned());
+    EXPECT_EQ(info_->startIndex_, 0);
     EXPECT_EQ(GetChildY(frameNode_, 1), 100.0f);
     EXPECT_EQ(GetChildX(frameNode_, 1), 240.0f);
-    pattern_->OnScrollEndCallback();
+    EXPECT_EQ(info_->jumpIndex_, 0);
     FlushLayoutTask(frameNode_);
     EXPECT_FALSE(info_->IsMisaligned());
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 0.0f);
     EXPECT_EQ(info_->lanes_[0].startPos, 0.0f);
     EXPECT_EQ(info_->lanes_[0].items_.front().idx, 0);
 }
@@ -350,7 +352,7 @@ HWTEST_F(WaterFlowSWTest, PositionController100, TestSize.Level1)
     pattern_->AnimateTo(1.5, 1.f, Curves::LINEAR, false, false);
     EXPECT_TRUE(pattern_->isAnimationStop_);
 
-	/**
+    /**
      * @tc.steps: step8. test event
      * @tc.expected: return the scroll event is ture.
      */
@@ -366,7 +368,7 @@ HWTEST_F(WaterFlowSWTest, PositionController100, TestSize.Level1)
         result.offset = offset;
         return result;
     };
-	
+
     eventHub_->SetOnWillScroll(std::move(onWillScroll));
     pattern_->ScrollTo(ITEM_HEIGHT * 5);
     EXPECT_FALSE(isOnWillScrollCallBack);
