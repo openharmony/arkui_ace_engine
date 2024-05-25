@@ -46,6 +46,7 @@ constexpr uint32_t COUNTER_TEXT_MAXLINE = 1;
 constexpr int32_t DEFAULT_MODE = -1;
 constexpr int32_t SHOW_COUNTER_PERCENT = 100;
 constexpr double TEXT_DECORATION_DISABLED_COLOR_ALPHA = 0.2;
+constexpr Dimension INLINE_MIN_WITH = 16.0_vp;
 } // namespace
 void TextFieldLayoutAlgorithm::ConstructTextStyles(
     const RefPtr<FrameNode>& frameNode, TextStyle& textStyle, std::string& textContent, bool& showPlaceHolder)
@@ -168,7 +169,8 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::InlineMeasureContent(const Layout
     GetInlineMeasureItem(contentConstraint, layoutWrapper, inlineIdealHeight);
     auto contentHeight = GreatNotEqual(paragraph_->GetLongestLine(), 0.0)
         ? paragraph_->GetHeight() : std::max(preferredHeight_, paragraph_->GetHeight());
-
+    auto minWidth = INLINE_MIN_WITH.ConvertToPx();
+    contentWidth = GreatNotEqual(contentWidth, minWidth) ? contentWidth : minWidth;
     return SizeF(contentWidth, std::min(inlineIdealHeight, contentHeight));
 }
 
