@@ -371,8 +371,8 @@ class ContentItemStruct extends ViewPU {
     }
     initialRender() {
         this.observeComponentCreation2((i9, j9) => {
-            Row.create({ space: this.itemSpace ?? STACK_PADDING });
-            Row.margin({ end: LengthMetrics.vp(this.itemSpace ?? STACK_PADDING) });
+            Row.create({ space: this.itemSpace ?? DEFAULT_ITEM_SPACE_WIDTH });
+            Row.margin({ end: LengthMetrics.vp(this.itemSpace ?? DEFAULT_ITEM_SPACE_WIDTH) });
             Row.constraintSize({ minWidth: this.leftWidth });
             Row.flexShrink(1);
         }, Row);
@@ -1351,8 +1351,8 @@ export class ComposeListItem extends ViewPU {
         this.observeComponentCreation2((z1, a2) => {
             Stack.create();
             Stack.padding({
-                start: this.composeItemPadding === null ? LengthMetrics.vp(STACK_PADDING) : this.composeItemPadding?.start,
-                end: this.composeItemPadding === null ? LengthMetrics.vp(STACK_PADDING) : this.composeItemPadding?.end
+                start: this.composeItemPadding?.start === null ? LengthMetrics.vp(STACK_PADDING) : this.composeItemPadding?.start,
+                end: this.composeItemPadding?.end === null ? LengthMetrics.vp(STACK_PADDING) : this.composeItemPadding?.end
             });
         }, Stack);
         this.observeComponentCreation2((r1, s1) => {

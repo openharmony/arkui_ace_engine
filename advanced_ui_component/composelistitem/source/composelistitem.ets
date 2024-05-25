@@ -217,11 +217,11 @@ struct ContentItemStruct {
   }
 
   build() {
-    Row({ space: this.itemSpace ?? STACK_PADDING }) {
+    Row({ space: this.itemSpace ?? DEFAULT_ITEM_SPACE_WIDTH }) {
       this.createIcon()
       this.createText()
     }
-    .margin({ end: LengthMetrics.vp(this.itemSpace ?? STACK_PADDING) })
+    .margin({ end: LengthMetrics.vp(this.itemSpace ?? DEFAULT_ITEM_SPACE_WIDTH) })
     .constraintSize({ minWidth: this.leftWidth })
     .flexShrink(1)
   }
@@ -828,8 +828,8 @@ export struct ComposeListItem {
       })
     }
     .padding({
-      start: this.composeItemPadding === null ? LengthMetrics.vp(STACK_PADDING) : this.composeItemPadding?.start,
-      end: this.composeItemPadding === null ? LengthMetrics.vp(STACK_PADDING) : this.composeItemPadding?.end
+      start: this.composeItemPadding?.start === null ? LengthMetrics.vp(STACK_PADDING) : this.composeItemPadding?.start,
+      end: this.composeItemPadding?.end === null ? LengthMetrics.vp(STACK_PADDING) : this.composeItemPadding?.end
     })
   }
 }
