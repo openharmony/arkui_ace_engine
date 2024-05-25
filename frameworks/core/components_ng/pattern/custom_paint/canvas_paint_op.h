@@ -485,13 +485,23 @@ struct DrawPixelMapOp final : Op {
     void Draw(CanvasPaintMethod* method) const;
 };
 
+#ifdef PIXEL_MAP_SUPPORTED
 struct TransferFromImageBitmapOp final : Op {
     static constexpr auto kType = Type::TransferFromImageBitmapOp;
-    explicit TransferFromImageBitmapOp(const RefPtr<OffscreenCanvasPattern>& offscreenCanvas)
-        : offscreenCanvas(offscreenCanvas) {}
-    const RefPtr<OffscreenCanvasPattern> offscreenCanvas;
+    explicit TransferFromImageBitmapOp(const RefPtr<PixelMap>& pixelMap)
+        : pixelMap(pixelMap) {}
+    RefPtr<PixelMap> pixelMap;
     void Draw(CanvasPaintMethod* method) const;
 };
+#else
+struct TransferFromImageBitmapOp final : Op {
+    static constexpr auto kType = Type::TransferFromImageBitmapOp;
+    explicit TransferFromImageBitmapOp(const std::unique_ptr<Ace::ImageData>& imageData)
+        : imageData(std::make_unique<Ace::ImageData>(*imageData)) {}
+    std::unique_ptr<Ace::ImageData> imageData;
+    void Draw(CanvasPaintMethod* method) const;
+};
+#endif
 
 struct StrokeTextOp final : Op {
     static constexpr auto kType = Type::StrokeTextOp;
