@@ -3354,19 +3354,19 @@ void ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam, 
     ParseMenuParam(info, menuOptions, menuParam);
 }
 
-void ParseAnimationScaleArray(const JSRef<JSArray>& scaleArray, NG::MenuParam& menuParam)
+void ParseAnimationScaleArray(const JSRef<JSArray>& scaleArray, MenuPreviewAnimationOptions& options)
 {
     constexpr int scaleArraySize = 2;
     if (scaleArray->Length() == scaleArraySize) {
         auto scalePropertyFrom = scaleArray->GetValueAt(0);
         if (scalePropertyFrom->IsNumber()) {
             auto scaleFrom = scalePropertyFrom->ToNumber<float>();
-            menuParam.previewAnimationOptions.scaleFrom = LessOrEqual(scaleFrom, 0.0) ? -1.0f : scaleFrom;
+            options.scaleFrom = LessOrEqual(scaleFrom, 0.0) ? -1.0f : scaleFrom;
         }
         auto scalePropertyTo = scaleArray->GetValueAt(1);
         if (scalePropertyTo->IsNumber()) {
             auto scaleTo = scalePropertyTo->ToNumber<float>();
-            menuParam.previewAnimationOptions.scaleTo = LessOrEqual(scaleTo, 0.0) ? -1.0f : scaleTo;
+            options.scaleTo = LessOrEqual(scaleTo, 0.0) ? -1.0f : scaleTo;
         }
     }
 }
@@ -3383,7 +3383,7 @@ void ParseContentPreviewAnimationOptionsParam(const JSCallbackInfo& info, const 
         auto scaleProperty = animationOptionsObj->GetProperty("scale");
         if (!scaleProperty->IsEmpty() && scaleProperty->IsArray()) {
             JSRef<JSArray> scaleArray = JSRef<JSArray>::Cast(scaleProperty);
-            ParseAnimationScaleArray(scaleArray, menuParam);
+            ParseAnimationScaleArray(scaleArray, menuParam.previewAnimationOptions);
         }
         auto previewTransition = animationOptionsObj->GetProperty("transition");
         menuParam.hasPreviewTransitionEffect = false;
@@ -3391,6 +3391,18 @@ void ParseContentPreviewAnimationOptionsParam(const JSCallbackInfo& info, const 
             auto obj = JSRef<JSObject>::Cast(previewTransition);
             menuParam.hasPreviewTransitionEffect = true;
             menuParam.previewTransition = ParseChainedTransition(obj, info.GetExecutionContext());
+        }
+        if (menuParam.previewMode != MenuPreviewMode::CUSTOM) {
+            return;
+        }
+        auto hoverScaleProperty = animationOptionsObj->GetProperty("hoverScale");
+        menuParam.isShowHoverImage = false;
+        menuParam.hoverImageAnimationOptions.scaleFrom = -1.0f;
+        menuParam.hoverImageAnimationOptions.scaleTo = -1.0f;
+        if (!hoverScaleProperty->IsEmpty() && hoverScaleProperty->IsArray()) {
+            JSRef<JSArray> hoverScaleArray = JSRef<JSArray>::Cast(hoverScaleProperty);
+            ParseAnimationScaleArray(hoverScaleArray, menuParam.hoverImageAnimationOptions);
+            menuParam.isShowHoverImage = true;
         }
     }
 }

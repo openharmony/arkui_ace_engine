@@ -1185,6 +1185,7 @@ void DragEventActuator::HidePixelMap(bool startDrag, double x, double y, bool sh
         manager->RemovePreviewBadgeNode();
         manager->RemoveGatherNodeWithAnimation();
     }
+
     if (showAnimation) {
         manager->RemovePixelMapAnimation(startDrag, x, y);
     } else {

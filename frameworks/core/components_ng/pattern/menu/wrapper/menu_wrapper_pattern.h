@@ -127,6 +127,23 @@ public:
         CHECK_NULL_RETURN(host, nullptr);
         auto preview = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
         CHECK_NULL_RETURN(preview, nullptr);
+        auto hoverImageCustomPreview = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(2));
+        CHECK_NULL_RETURN(hoverImageCustomPreview, preview);
+        if (hoverImageCustomPreview->GetTag() == V2::MENU_PREVIEW_ETS_TAG) {
+            return hoverImageCustomPreview;
+        }
+        return preview;
+    }
+
+    RefPtr<FrameNode> GetHoverImagePreview() const
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+        auto preview = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
+        CHECK_NULL_RETURN(preview, nullptr);
+        if (preview->GetTag() != V2::IMAGE_ETS_TAG) {
+            return nullptr;
+        }
         return preview;
     }
 
@@ -137,6 +154,10 @@ public:
         CHECK_NULL_RETURN(host, nullptr);
         auto badgeNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(2));
         CHECK_NULL_RETURN(badgeNode, nullptr);
+        if (badgeNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG) {
+            auto badgeNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(3));
+            CHECK_NULL_RETURN(badgeNode, nullptr);
+        }
         if (badgeNode->GetTag() != V2::TEXT_ETS_TAG) {
             return nullptr;
         }
@@ -154,6 +175,16 @@ public:
     void SetFirstShow()
     {
         isFirstShow_ = true;
+    }
+
+    void SetIsShowHoverImage(bool isShow)
+    {
+        isShowHoverImage_ = isShow;
+    }
+
+    bool GetIsShowHoverImage()
+    {
+        return isShowHoverImage_;
     }
 
     void RegisterMenuCallback(const RefPtr<FrameNode>& menuWrapperNode, const MenuParam& menuParam);
@@ -361,6 +392,7 @@ private:
     Placement menuPlacement_ = Placement::NONE;
     bool isFirstShow_ = true;
     bool isShowInSubWindow_ = true;
+    bool isShowHoverImage_ = false;
     MenuStatus menuStatus_ = MenuStatus::INIT;
     bool hasTransitionEffect_ = false;
     bool hasPreviewTransitionEffect_ = false;

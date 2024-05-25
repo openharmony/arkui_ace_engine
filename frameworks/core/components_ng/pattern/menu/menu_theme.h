@@ -28,6 +28,11 @@ constexpr uint8_t GRADIENT_END_GRADIENT = 255;
 constexpr uint32_t DEFAULT_BACKGROUND_COLOR = 0xFFFFFFF;
 constexpr uint32_t MENU_MIN_GRID_COUNTS = 2;
 constexpr uint32_t MENU_MAX_GRID_COUNTS = 6;
+constexpr int32_t HOVER_IMAGE_OPACITY_CHANGE_DURATION = 150;
+constexpr int32_t HOVER_IMAGE_DELAY_DURATION = 800;
+constexpr int32_t HOVER_IMAGE_CUSTOM_PREVIEW_SCALE_DURATION = 650;
+constexpr int32_t HOVER_IMAGE_PREVIEW_DISAPPEAR_DURATION = 450;
+constexpr int32_t HOVER_IMAGE_DISAPPEAR_DURATION = 650;
 constexpr double OUTBORDER_RADIUS = 19.75; // Default value of outBorderRadius
 constexpr float MENU_BIG_FONT_SIZE_SCALE = 1.75f;
 constexpr float MENU_LARGE_FONT_SIZE_SCALE_ = 2.0f;
@@ -88,6 +93,11 @@ public:
             theme->borderColor_ = pattern->GetAttr<Color>("menu_border_color", Color::TRANSPARENT);
             theme->filterAnimationDuration_ = 250;
             theme->previewAnimationDuration_ = 300;
+            theme->hoverImageSwitchToPreviewOpacityDuration_ = HOVER_IMAGE_OPACITY_CHANGE_DURATION;
+            theme->hoverImageDelayDuration_ = HOVER_IMAGE_DELAY_DURATION;
+            theme->hoverImageCustomPreviewScaleDuration_ = HOVER_IMAGE_CUSTOM_PREVIEW_SCALE_DURATION;
+            theme->hoverImagePreviewDisappearDuration_ = HOVER_IMAGE_PREVIEW_DISAPPEAR_DURATION;
+            theme->hoverImageDisappearDuration_ = HOVER_IMAGE_DISAPPEAR_DURATION;
             theme->previewBeforeAnimationScale_ = 0.95f;
             theme->previewAfterAnimationScale_ = 1.1f;
             theme->menuAnimationScale_ = 0.4f;
@@ -125,6 +135,31 @@ public:
     int32_t GetPreviewAnimationDuration() const
     {
         return previewAnimationDuration_;
+    }
+
+    int32_t GetHoverImageSwitchToPreviewOpacityDuration() const
+    {
+        return hoverImageSwitchToPreviewOpacityDuration_;
+    }
+
+    int32_t GetHoverImageDelayDuration() const
+    {
+        return hoverImageDelayDuration_;
+    }
+
+    int32_t GetHoverImageCustomPreviewScaleDuration() const
+    {
+        return hoverImageCustomPreviewScaleDuration_;
+    }
+
+    int32_t GetHoverImagePreviewDisAppearDuration() const
+    {
+        return hoverImagePreviewDisappearDuration_;
+    }
+
+    int32_t GetHoverImageDisAppearDuration() const
+    {
+        return hoverImageDisappearDuration_;
     }
 
     float GetPreviewBeforeAnimationScale() const
@@ -298,6 +333,11 @@ protected:
 private:
     int32_t filterAnimationDuration_ = 0;
     int32_t previewAnimationDuration_ = 0;
+    int32_t hoverImageSwitchToPreviewOpacityDuration_ = 0;
+    int32_t hoverImageDelayDuration_ = 0;
+    int32_t hoverImageCustomPreviewScaleDuration_ = 0;
+    int32_t hoverImagePreviewDisappearDuration_ = 0;
+    int32_t hoverImageDisappearDuration_ = 0;
     float previewBeforeAnimationScale_ = 1.0f;
     float previewAfterAnimationScale_ = 1.0f;
     float menuAnimationScale_ = 1.0f;

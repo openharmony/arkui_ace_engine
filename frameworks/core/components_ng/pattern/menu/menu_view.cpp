@@ -53,6 +53,7 @@ namespace OHOS::Ace::NG {
 
 namespace {
 constexpr float PAN_MAX_VELOCITY = 2000.0f;
+constexpr float HALF_DIVIDER_VALUE = 2.0f;
 
 void SetSelfAndChildDraggableFalse(const RefPtr<UINode>& customNode)
 {
@@ -70,10 +71,46 @@ void SetSelfAndChildDraggableFalse(const RefPtr<UINode>& customNode)
     }
 }
 
+void MountTextNode(const RefPtr<FrameNode>& wrapperNode, const RefPtr<UINode>& previewCustomNode = nullptr)
+{
+    CHECK_NULL_VOID(previewCustomNode);
+    auto pipeline = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(manager);
+    auto gatherNode = manager->GetGatherNode();
+    CHECK_NULL_VOID(gatherNode);
+    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    CHECK_NULL_VOID(textNode);
+    textNode->MountToParent(wrapperNode);
+    textNode->MarkModifyDone();
+}
+
+void CustomPreviewNodeProc(const RefPtr<FrameNode>& previewNode, const MenuParam& menuParam,
+    const RefPtr<UINode>& previewCustomNode = nullptr)
+{
+    CHECK_NULL_VOID(previewCustomNode);
+    CHECK_NULL_VOID(previewNode);
+    auto previewPattern = previewNode->GetPattern<MenuPreviewPattern>();
+    CHECK_NULL_VOID(previewPattern);
+    previewPattern->SetHasPreviewTransitionEffect(menuParam.hasPreviewTransitionEffect);
+    auto layoutProperty = previewNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
+    previewNode->AddChild(previewCustomNode);
+
+    CHECK_NULL_VOID(menuParam.isShowHoverImage);
+    previewNode->Measure(layoutProperty->GetLayoutConstraint());
+    auto previewSize = previewNode->GetGeometryNode()->GetFrameSize();
+    previewPattern->SetIsShowHoverImage(true);
+    previewPattern->SetCustomPreviewWidth(previewSize.Width());
+    previewPattern->SetCustomPreviewHeight(previewSize.Height());
+}
+
 // create menuWrapper and menu node, update menu props
 std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, const std::string& targetTag = "",
-    MenuType type = MenuType::MENU, const bool hasPreviewTransitionEffect = false,
-    const RefPtr<UINode>& previewCustomNode = nullptr)
+    MenuType type = MenuType::MENU)
 {
     // use wrapper to detect click events outside menu
     auto wrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
@@ -92,32 +129,6 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, con
     }
 
     menuNode->MountToParent(wrapperNode);
-    if (previewCustomNode) {
-        // create previewNode
-        auto previewNode = FrameNode::CreateFrameNode(V2::MENU_PREVIEW_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuPreviewPattern>());
-        CHECK_NULL_RETURN(previewNode, std::make_pair(wrapperNode, menuNode));
-        auto previewPattern = previewNode->GetPattern<MenuPreviewPattern>();
-        previewPattern->SetHasPreviewTransitionEffect(hasPreviewTransitionEffect);
-        auto layoutProperty = previewNode->GetLayoutProperty();
-        layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
-        previewNode->AddChild(previewCustomNode);
-        previewNode->MountToParent(wrapperNode);
-        previewNode->MarkModifyDone();
-        SetSelfAndChildDraggableFalse(previewCustomNode);
-        
-        auto pipeline = PipelineContext::GetMainPipelineContext();
-        CHECK_NULL_RETURN(pipeline, std::make_pair(wrapperNode, menuNode));
-        auto manager = pipeline->GetOverlayManager();
-        CHECK_NULL_RETURN(manager, std::make_pair(wrapperNode, menuNode));
-        auto gatherNode = manager->GetGatherNode();
-        CHECK_NULL_RETURN(gatherNode, std::make_pair(wrapperNode, menuNode));
-        auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
-        CHECK_NULL_RETURN(textNode, std::make_pair(wrapperNode, menuNode));
-        textNode->MountToParent(wrapperNode);
-        textNode->MarkModifyDone();
-    }
 
     return { wrapperNode, menuNode };
 }
@@ -269,12 +280,85 @@ void ShowBorderRadiusAndShadowAnimation(const RefPtr<MenuTheme>& menuTheme, cons
         option.GetOnFinishEvent());
 }
 
-void ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& menuNode)
+void SetHoverImageFinishEvent(const RefPtr<RenderContext>& imageContext, const RefPtr<MenuTheme>& menuTheme,
+    bool isShow, bool isScaleNearEqual = true)
 {
-    auto menuPattern = GetMenuPattern(menuNode);
+    CHECK_NULL_VOID(isShow);
+    CHECK_NULL_VOID(imageContext && menuTheme);
+    // hover image disappear opacity animation
+    AnimationOption option;
+    if (isScaleNearEqual) {
+        option.SetDuration(menuTheme->GetPreviewAnimationDuration());
+        option.SetCurve(Curves::SHARP);
+        option.SetDelay(menuTheme->GetHoverImageDelayDuration());
+    } else {
+        option.SetDuration(menuTheme->GetHoverImageSwitchToPreviewOpacityDuration());
+        option.SetCurve(Curves::FRICTION);
+    }
+    imageContext->UpdateOpacity(1.0);
+    AnimationUtils::Animate(
+        option, [imageContext]() {
+            if (imageContext) {
+                imageContext->UpdateOpacity(0.0);
+            }
+        },
+        option.GetOnFinishEvent());
+}
+
+void ShowPixelMapScaleAnimationProc(const RefPtr<MenuTheme>& menuTheme, const RefPtr<RenderContext>& imageContext,
+    const RefPtr<MenuPattern>& menuPattern, const MenuParam& menuParam)
+{
+    auto scaleBefore = menuParam.isShowHoverImage ? menuParam.hoverImageAnimationOptions.scaleFrom :
+        menuPattern->GetPreviewBeforeAnimationScale();
+    auto scaleAfter = menuParam.isShowHoverImage ? menuParam.hoverImageAnimationOptions.scaleTo :
+        menuPattern->GetPreviewAfterAnimationScale();
+    DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_STARTED);
+    auto previewBeforeAnimationScale =
+        LessNotEqual(scaleBefore, 0.0) ? menuTheme->GetPreviewBeforeAnimationScale() : scaleBefore;
+    auto previewAfterAnimationScale =
+        LessNotEqual(scaleAfter, 0.0) ? menuTheme->GetPreviewAfterAnimationScale() : scaleAfter;
+
+    imageContext->UpdateTransformScale(VectorF(previewBeforeAnimationScale, previewBeforeAnimationScale));
+
+    AnimationOption scaleOption = AnimationOption();
+    if (menuParam.isShowHoverImage) {
+        scaleOption.SetDuration(menuTheme->GetHoverImageDelayDuration());
+        scaleOption.SetCurve(Curves::SHARP);
+    } else {
+        auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(
+            menuTheme->GetSpringMotionResponse(), menuTheme->GetSpringMotionDampingFraction());
+        scaleOption.SetCurve(motion);
+    }
+
+    // when the scaling start and end sizes are the same, the end callback method should not be relied on
+    bool isScaleNearEqual = NearEqual(previewBeforeAnimationScale, previewAfterAnimationScale);
+    if (isScaleNearEqual) {
+        SetHoverImageFinishEvent(imageContext, menuTheme, menuParam.isShowHoverImage);
+        scaleOption.SetOnFinishEvent([]() {
+            DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_FINISHED);
+            });
+    } else {
+        scaleOption.SetOnFinishEvent(
+            [imageContext, menuTheme, isShow = menuParam.isShowHoverImage, isScaleNearEqual]() {
+                DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_FINISHED);
+                SetHoverImageFinishEvent(imageContext, menuTheme, isShow, isScaleNearEqual);
+            });
+    }
+    AnimationUtils::Animate(
+        scaleOption,
+        [imageContext, previewAfterAnimationScale]() {
+            if (imageContext) {
+                imageContext->UpdateTransformScale(VectorF(previewAfterAnimationScale, previewAfterAnimationScale));
+            }
+        },
+        scaleOption.GetOnFinishEvent());
+}
+
+void ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& wrapperNode,
+    const RefPtr<FrameNode>& previewNode, const MenuParam& menuParam)
+{
+    auto menuPattern = GetMenuPattern(wrapperNode);
     CHECK_NULL_VOID(menuPattern);
-    auto scaleBefore = menuPattern->GetPreviewBeforeAnimationScale();
-    auto scaleAfter = menuPattern->GetPreviewAfterAnimationScale();
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
     imageContext->SetClipToBounds(true);
@@ -282,34 +366,13 @@ void ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode, const RefPtr<Fram
     CHECK_NULL_VOID(pipeline);
     auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
-    auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+    auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     if (menuWrapperPattern->HasPreviewTransitionEffect()) {
         auto layoutProperty = imageNode->GetLayoutProperty();
         layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
     } else {
-        DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_STARTED);
-        auto previewBeforeAnimationScale =
-            LessNotEqual(scaleBefore, 0.0) ? menuTheme->GetPreviewBeforeAnimationScale() : scaleBefore;
-        auto previewAfterAnimationScale =
-            LessNotEqual(scaleAfter, 0.0) ? menuTheme->GetPreviewAfterAnimationScale() : scaleAfter;
-
-        imageContext->UpdateTransformScale(VectorF(previewBeforeAnimationScale, previewBeforeAnimationScale));
-
-        AnimationOption scaleOption = AnimationOption();
-        auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(
-            menuTheme->GetSpringMotionResponse(), menuTheme->GetSpringMotionDampingFraction());
-        scaleOption.SetCurve(motion);
-        scaleOption.SetOnFinishEvent(
-            []() { DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_FINISHED); });
-        AnimationUtils::Animate(
-            scaleOption,
-            [imageContext, previewAfterAnimationScale]() {
-                if (imageContext) {
-                    imageContext->UpdateTransformScale(VectorF(previewAfterAnimationScale, previewAfterAnimationScale));
-                }
-            },
-            scaleOption.GetOnFinishEvent());
+        ShowPixelMapScaleAnimationProc(menuTheme, imageContext, menuPattern, menuParam);
     }
 
     ShowBorderRadiusAndShadowAnimation(menuTheme, imageContext);
@@ -367,7 +430,50 @@ void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub, const RefPtr<FrameN
     gestureHub->AddPanEvent(panEvent, panDirection, 1, DEFAULT_PAN_DISTANCE);
 }
 
-void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& menuNode)
+float GetHoverImageCustomPreviewBaseScaleInfo(const MenuParam& menuParam, int32_t width, int32_t height,
+    float previewWidth, float previewHeight)
+{
+    float scaleRet = 1.0f;
+    CHECK_NULL_RETURN(menuParam.isShowHoverImage, scaleRet);
+    if (previewWidth - width < previewHeight - height) {
+        CHECK_EQUAL_RETURN(previewWidth, 0, scaleRet);
+        scaleRet = width / previewWidth;
+    } else {
+        CHECK_EQUAL_RETURN(previewHeight, 0, scaleRet);
+        scaleRet = height / previewHeight;
+    }
+    return scaleRet;
+}
+
+void SetHoverImageCustomPreviewInfo(const RefPtr<FrameNode>& previewNode, const MenuParam& menuParam,
+    int32_t width, int32_t height)
+{
+    CHECK_NULL_VOID(previewNode);
+    auto previewPattern = previewNode->GetPattern<MenuPreviewPattern>();
+    CHECK_NULL_VOID(previewPattern);
+    auto previewWidth = previewPattern->GetCustomPreviewWidth();
+    auto previewHeight = previewPattern->GetCustomPreviewHeight();
+    auto scale = GetHoverImageCustomPreviewBaseScaleInfo(menuParam, width, height, previewWidth, previewHeight);
+    CHECK_NULL_VOID(scale);
+    auto hoverImageScaleTo = menuParam.hoverImageAnimationOptions.scaleTo;
+    hoverImageScaleTo = LessOrEqual(hoverImageScaleTo, 0.0) ? hoverImageScaleTo : 1.0f;
+    auto previewScaleFrom = LessOrEqual(menuParam.previewAnimationOptions.scaleFrom, 0.0) ? scale * hoverImageScaleTo :
+        menuParam.previewAnimationOptions.scaleFrom;
+    previewPattern->SetCustomPreviewScaleFrom(previewScaleFrom);
+
+    auto previewScaleTo = menuParam.previewAnimationOptions.scaleTo;
+    CHECK_NULL_VOID(previewScaleTo);
+    previewPattern->SetCustomPreviewScaleTo(previewScaleTo);
+    previewPattern->SetHoverImageDisAppearScaleTo(previewScaleTo / scale);
+
+    auto previewPositionXDist = (previewWidth - width) / HALF_DIVIDER_VALUE;
+    auto previewPositionYDist = (previewHeight - height) / HALF_DIVIDER_VALUE;
+    previewPattern->SetCustomPreviewPositionXDist(previewPositionXDist);
+    previewPattern->SetCustomPreviewPositionYDist(previewPositionYDist);
+}
+
+void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapperNode,
+    const RefPtr<FrameNode>& previewNode, const MenuParam& menuParam)
 {
     CHECK_NULL_VOID(target);
     auto eventHub = target->GetEventHub<NG::EventHub>();
@@ -378,6 +484,8 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& menuN
     CHECK_NULL_VOID(pixelMap);
     auto width = pixelMap->GetWidth();
     auto height = pixelMap->GetHeight();
+    SetHoverImageCustomPreviewInfo(previewNode, menuParam, width, height);
+
     auto imageOffset = GetFloatImageOffset(target);
     auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
@@ -393,17 +501,19 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& menuN
     CHECK_NULL_VOID(hub);
     auto imageGestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(imageGestureHub);
-    InitPanEvent(imageGestureHub, menuNode);
+    InitPanEvent(imageGestureHub, wrapperNode);
 
-    ShowGatherAnimation(target, menuNode);
+    if (!menuParam.isShowHoverImage) {
+        ShowGatherAnimation(target, wrapperNode);
+    }
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
     imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(imageOffset.GetX()), Dimension(imageOffset.GetY())));
     imageNode->MarkModifyDone();
-    imageNode->MountToParent(menuNode);
-    auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+    imageNode->MountToParent(wrapperNode);
+    auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
-    ShowPixelMapAnimation(imageNode, menuNode);
+    ShowPixelMapAnimation(imageNode, wrapperNode, previewNode, menuParam);
 }
 
 void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& menuWrapperNode)
@@ -568,22 +678,50 @@ void SetPreviewTransitionEffect(const RefPtr<FrameNode> &menuWrapperNode, const 
     pattern->SetHasPreviewTransitionEffect(menuParam.hasPreviewTransitionEffect);
 }
 
+void SetPreviewScaleAndHoverImageScale(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
+{
+    auto pattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetPreviewMode(menuParam.previewMode);
+    pattern->SetPreviewBeforeAnimationScale(menuParam.previewAnimationOptions.scaleFrom);
+    pattern->SetPreviewAfterAnimationScale(menuParam.previewAnimationOptions.scaleTo);
+    pattern->SetIsShowHoverImage(menuParam.isShowHoverImage);
+    pattern->SetHoverImageBeforeAnimationScale(menuParam.hoverImageAnimationOptions.scaleFrom);
+    pattern->SetHoverImageAfterAnimationScale(menuParam.hoverImageAnimationOptions.scaleTo);
+}
+
+void SetCustomPreviewOpacityWhenHoverImage(const RefPtr<FrameNode>& menuWrapperNode, const MenuParam& menuParam)
+{
+    CHECK_NULL_VOID(menuParam.isShowHoverImage);
+    CHECK_NULL_VOID(menuWrapperNode);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    menuWrapperPattern->SetIsShowHoverImage(menuParam.isShowHoverImage);
+    auto preview = menuWrapperPattern->GetPreview();
+    CHECK_NULL_VOID(preview);
+    auto previewRenderContext = preview->GetRenderContext();
+    CHECK_NULL_VOID(previewRenderContext);
+    previewRenderContext->UpdateOpacity(0.0);
+}
+
 // create menu with custom node from a builder
 RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t targetId, const std::string& targetTag,
     const MenuParam& menuParam, bool withWrapper, const RefPtr<UINode>& previewCustomNode)
 {
     auto type = menuParam.type;
-    auto [wrapperNode, menuNode] = CreateMenu(targetId, targetTag, type, menuParam.hasPreviewTransitionEffect,
-        previewCustomNode);
+    auto [wrapperNode, menuNode] = CreateMenu(targetId, targetTag, type);
+    // create previewNode
+    auto previewNode = FrameNode::CreateFrameNode(V2::MENU_PREVIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuPreviewPattern>());
+    CHECK_NULL_RETURN(previewNode, nullptr);
+    CustomPreviewNodeProc(previewNode, menuParam, previewCustomNode);
+    MountTextNode(wrapperNode, previewCustomNode);
+
     UpdateMenuBackgroundStyle(menuNode, menuParam);
     SetPreviewTransitionEffect(wrapperNode, menuParam);
     SetHasCustomRadius(wrapperNode, menuNode, menuParam);
-    auto pattern = menuNode->GetPattern<MenuPattern>();
-    if (pattern) {
-        pattern->SetPreviewMode(menuParam.previewMode);
-        pattern->SetPreviewBeforeAnimationScale(menuParam.previewAnimationOptions.scaleFrom);
-        pattern->SetPreviewAfterAnimationScale(menuParam.previewAnimationOptions.scaleTo);
-    }
+
+    SetPreviewScaleAndHoverImageScale(menuNode, menuParam);
     // put custom node in a scroll to limit its height
     auto scroll = CreateMenuScroll(customNode);
     CHECK_NULL_RETURN(scroll, nullptr);
@@ -612,8 +750,14 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     if (type == MenuType::CONTEXT_MENU && menuParam.previewMode != MenuPreviewMode::NONE) {
         auto targetNode = FrameNode::GetFrameNode(targetTag, targetId);
         SetFilter(targetNode, wrapperNode);
-        if (menuParam.previewMode == MenuPreviewMode::IMAGE) {
-            SetPixelMap(targetNode, wrapperNode);
+        if (menuParam.previewMode == MenuPreviewMode::IMAGE || menuParam.isShowHoverImage) {
+            SetPixelMap(targetNode, wrapperNode, previewNode, menuParam);
+        }
+        if (menuParam.previewMode == MenuPreviewMode::CUSTOM) {
+            previewNode->MountToParent(wrapperNode);
+            previewNode->MarkModifyDone();
+            SetSelfAndChildDraggableFalse(previewCustomNode);
+            SetCustomPreviewOpacityWhenHoverImage(wrapperNode, menuParam);
         }
     }
     return wrapperNode;

@@ -139,10 +139,72 @@ RefPtr<FrameNode> GetLastPage()
     return pageNode;
 }
 
-void ShowPreviewDisappearAnimation(const RefPtr<MenuWrapperPattern>& menuWrapperPattern)
+void ShowPreviewBgDisappearAnimationProc(const RefPtr<RenderContext>& previewRenderContext,
+    const RefPtr<MenuTheme>& menuTheme)
+{
+    auto shadow = previewRenderContext->GetBackShadow();
+    if (!shadow.has_value()) {
+        shadow = Shadow::CreateShadow(ShadowStyle::None);
+    }
+    previewRenderContext->UpdateBackShadow(shadow.value());
+    auto disappearDuration = menuTheme->GetDisappearDuration();
+    AnimationOption previewOption;
+    previewOption.SetCurve(Curves::SHARP);
+    previewOption.SetDuration(disappearDuration);
+    AnimationUtils::Animate(previewOption, [previewRenderContext, shadow]() mutable {
+        CHECK_NULL_VOID(previewRenderContext);
+        auto color = shadow->GetColor();
+        auto newColor = Color::FromARGB(1, color.GetRed(), color.GetGreen(), color.GetBlue());
+        shadow->SetColor(newColor);
+        previewRenderContext->UpdateBackShadow(shadow.value());
+        BorderRadiusProperty borderRadius;
+        borderRadius.SetRadius(0.0_vp);
+        previewRenderContext->UpdateBorderRadius(borderRadius);
+    });
+}
+
+bool ShowHoverImagePreviewDisappearAnimation(const RefPtr<MenuTheme>& menuTheme,
+    const RefPtr<MenuPattern>& menuPattern, RefPtr<FrameNode>& previewChild)
+{
+    CHECK_NULL_RETURN(menuPattern, false);
+    CHECK_NULL_RETURN(menuPattern->GetIsShowHoverImage(), false);
+
+    CHECK_NULL_RETURN(previewChild, false);
+    auto previewRenderContext = previewChild->GetRenderContext();
+    CHECK_NULL_RETURN(previewRenderContext, false);
+
+    auto duration = menuTheme->GetHoverImageDisAppearDuration();
+    if (previewChild->GetTag() == V2::MENU_PREVIEW_ETS_TAG) {
+        auto previewPattern = previewChild->GetPattern<MenuPreviewPattern>();
+        CHECK_NULL_RETURN(previewPattern, false);
+        // reverse scale
+        auto disappearScaleFrom = previewPattern->GetCustomPreviewScaleTo();
+        auto disappearScaleTo = previewPattern->GetCustomPreviewScaleFrom();
+        duration = menuTheme->GetHoverImagePreviewDisAppearDuration();
+        previewPattern->ShowHoverImagePreviewDisAppearAnimation(previewRenderContext,
+            disappearScaleFrom, disappearScaleTo, duration);
+        // not proc next
+        return false;
+    }
+
+    // hover image update opacity
+    previewRenderContext->UpdateOpacity(0.0);
+    AnimationOption option;
+    option.SetDuration(duration);
+    option.SetCurve(Curves::FRICTION);
+    AnimationUtils::Animate(
+        option, [previewRenderContext]() {
+            CHECK_NULL_VOID(previewRenderContext);
+            previewRenderContext->UpdateOpacity(1.0);
+        },
+        option.GetOnFinishEvent());
+    return true;
+}
+
+void ShowPreviewDisappearAnimationProc(const RefPtr<MenuWrapperPattern>& menuWrapperPattern,
+    RefPtr<FrameNode>& previewChild, float xDist = 0.0f, float yDist = 0.0f)
 {
     CHECK_NULL_VOID(menuWrapperPattern);
-    auto previewChild = menuWrapperPattern->GetPreview();
     CHECK_NULL_VOID(previewChild);
     auto previewRenderContext = previewChild->GetRenderContext();
     CHECK_NULL_VOID(previewRenderContext);
@@ -162,13 +224,16 @@ void ShowPreviewDisappearAnimation(const RefPtr<MenuWrapperPattern>& menuWrapper
     CHECK_NULL_VOID(pipelineContext);
     auto menuTheme = pipelineContext->GetTheme<MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
+    CHECK_NULL_VOID(ShowHoverImagePreviewDisappearAnimation(menuTheme, menuPattern, previewChild));
+
     auto springMotionResponse = menuTheme->GetPreviewDisappearSpringMotionResponse();
     auto springMotionDampingFraction = menuTheme->GetPreviewDisappearSpringMotionDampingFraction();
     AnimationOption scaleOption;
     auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(springMotionResponse, springMotionDampingFraction);
     scaleOption.SetCurve(motion);
     float previewScale = 1.0f;
-    if (menuPattern->GetPreviewMode() == MenuPreviewMode::IMAGE) {
+    if (menuPattern->GetPreviewMode() == MenuPreviewMode::IMAGE ||
+        (menuPattern->GetIsShowHoverImage() && previewChild->GetTag() == V2::IMAGE_ETS_TAG)) {
         auto previewGeometryNode = previewChild->GetGeometryNode();
         CHECK_NULL_VOID(previewGeometryNode);
         auto preivewSize = previewGeometryNode->GetFrameSize();
@@ -176,34 +241,33 @@ void ShowPreviewDisappearAnimation(const RefPtr<MenuWrapperPattern>& menuWrapper
             previewScale = menuPattern->GetTargetSize().Width() / preivewSize.Width();
         }
     }
-    AnimationUtils::Animate(scaleOption, [previewRenderContext, previewPosition, previewScale]() {
-        if (previewRenderContext) {
-            previewRenderContext->UpdateTransformScale(VectorF(previewScale, previewScale));
-            previewRenderContext->UpdatePosition(
-                OffsetT<Dimension>(Dimension(previewPosition.GetX()), Dimension(previewPosition.GetY())));
-        }
-    });
 
-    auto shadow = previewRenderContext->GetBackShadow();
-    if (!shadow.has_value()) {
-        shadow = Shadow::CreateShadow(ShadowStyle::None);
-    }
-    previewRenderContext->UpdateBackShadow(shadow.value());
-    auto disappearDuration = menuTheme->GetDisappearDuration();
-    AnimationOption previewOption;
-    previewOption.SetCurve(Curves::SHARP);
-    previewOption.SetDuration(disappearDuration);
-    AnimationUtils::Animate(previewOption, [previewRenderContext, shadow]() mutable {
-        if (previewRenderContext) {
-            auto color = shadow->GetColor();
-            auto newColor = Color::FromARGB(1, color.GetRed(), color.GetGreen(), color.GetBlue());
-            shadow->SetColor(newColor);
-            previewRenderContext->UpdateBackShadow(shadow.value());
-            BorderRadiusProperty borderRadius;
-            borderRadius.SetRadius(0.0_vp);
-            previewRenderContext->UpdateBorderRadius(borderRadius);
-        }
+    auto xPosition = previewPosition.GetX() + xDist;
+    auto yPosition = previewPosition.GetY() + yDist;
+    AnimationUtils::Animate(scaleOption, [previewRenderContext, xPosition, yPosition, previewScale]() {
+        CHECK_NULL_VOID(previewRenderContext);
+        previewRenderContext->UpdateTransformScale(VectorF(previewScale, previewScale));
+        previewRenderContext->UpdatePosition(
+            OffsetT<Dimension>(Dimension(xPosition), Dimension(yPosition)));
     });
+    ShowPreviewBgDisappearAnimationProc(previewRenderContext, menuTheme);
+}
+
+void ShowPreviewDisappearAnimation(const RefPtr<MenuWrapperPattern>& menuWrapperPattern)
+{
+    CHECK_NULL_VOID(menuWrapperPattern);
+    auto previewChild = menuWrapperPattern->GetPreview();
+    CHECK_NULL_VOID(previewChild);
+    ShowPreviewDisappearAnimationProc(menuWrapperPattern, previewChild);
+
+    CHECK_NULL_VOID(menuWrapperPattern->GetIsShowHoverImage());
+    auto hoverImagePreview = menuWrapperPattern->GetHoverImagePreview();
+    CHECK_NULL_VOID(hoverImagePreview);
+    auto previewPattern = previewChild->GetPattern<MenuPreviewPattern>();
+    CHECK_NULL_VOID(previewPattern);
+    auto xDist = previewPattern->GetCustomPreviewPositionXDist();
+    auto yDist = previewPattern->GetCustomPreviewPositionYDist();
+    ShowPreviewDisappearAnimationProc(menuWrapperPattern, hoverImagePreview, xDist, yDist);
 }
 
 void UpdateContextMenuDisappearPositionAnimation(const RefPtr<FrameNode>& menu, const NG::OffsetF& offset)
@@ -232,10 +296,9 @@ void UpdateContextMenuDisappearPositionAnimation(const RefPtr<FrameNode>& menu, 
     auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(springMotionResponse, springMotionDampingFraction);
     positionOption.SetCurve(motion);
     AnimationUtils::Animate(positionOption, [menuRenderContext, menuPosition]() {
-        if (menuRenderContext) {
-            menuRenderContext->UpdatePosition(
-                OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
-        }
+        CHECK_NULL_VOID(menuRenderContext);
+        menuRenderContext->UpdatePosition(
+            OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
     });
 }
 
@@ -265,10 +328,9 @@ void ShowContextMenuDisappearAnimation(
     auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(springMotionResponse, springMotionDampingFraction);
     positionOption.SetCurve(motion);
     AnimationUtils::Animate(positionOption, [menuRenderContext, menuPosition]() {
-        if (menuRenderContext) {
-            menuRenderContext->UpdatePosition(
-                OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
-        }
+        CHECK_NULL_VOID(menuRenderContext);
+        menuRenderContext->UpdatePosition(
+            OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
     });
 
     auto disappearDuration = menuTheme->GetDisappearDuration();
@@ -277,9 +339,8 @@ void ShowContextMenuDisappearAnimation(
     scaleOption.SetCurve(Curves::FAST_OUT_LINEAR_IN);
     scaleOption.SetDuration(disappearDuration);
     AnimationUtils::Animate(scaleOption, [menuRenderContext, menuAnimationScale]() {
-        if (menuRenderContext) {
-            menuRenderContext->UpdateTransformScale({ menuAnimationScale, menuAnimationScale });
-        }
+        CHECK_NULL_VOID(menuRenderContext);
+        menuRenderContext->UpdateTransformScale({ menuAnimationScale, menuAnimationScale });
     });
 
     option.SetDuration(disappearDuration);
@@ -287,9 +348,8 @@ void ShowContextMenuDisappearAnimation(
     AnimationUtils::Animate(
         option,
         [menuRenderContext]() {
-            if (menuRenderContext) {
-                menuRenderContext->UpdateOpacity(0.0);
-            }
+            CHECK_NULL_VOID(menuRenderContext);
+            menuRenderContext->UpdateOpacity(0.0);
         },
         option.GetOnFinishEvent());
 }
