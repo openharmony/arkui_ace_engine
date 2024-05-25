@@ -373,4 +373,39 @@ HWTEST_F(WaterFlowSWTest, PositionController100, TestSize.Level1)
     pattern_->ScrollTo(ITEM_HEIGHT * 5);
     EXPECT_FALSE(isOnWillScrollCallBack);
 }
+
+/**
+ * @tc.name: ScrollToEdge002
+ * @tc.desc: ScrollToEdge and check overScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, ScrollToEdge002, TestSize.Level1)
+{
+    Create([](WaterFlowModelNG model) {
+        model.SetFooter(GetDefaultHeaderBuilder());
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        model.SetRowsGap(Dimension(5.0f));
+        CreateRandomItem(100);
+    });
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushLayoutTask(frameNode_);
+    auto info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->endIndex_, 99);
+    EXPECT_EQ(GetChildOffset(frameNode_, info->footerIndex_), OffsetF(0.0f, 750.0f));
+    EXPECT_EQ(info_->EndPos(), 750.0f);
+    EXPECT_FALSE(info->OutOfBounds());
+    EXPECT_EQ(info->GetOverScrolledDelta(20.0f).end, 0.0f);
+    EXPECT_EQ(info->GetOverScrolledDelta(-10.0f).end, -10.0f);
+
+    UpdateCurrentOffset(30.0f);
+    EXPECT_EQ(info->GetOverScrolledDelta(-20.0f).end, 0.0f);
+    EXPECT_EQ(info->GetOverScrolledDelta(20.0f).end, 0.0f);
+
+    UpdateCurrentOffset(20.0f);
+    EXPECT_EQ(info->GetOverScrolledDelta(-20.0f).end, 0.0f);
+    EXPECT_EQ(info->GetOverScrolledDelta(20.0f).end, 0.0f);
+
+    UpdateCurrentOffset(5.0f);
+    EXPECT_FALSE(info->itemEnd_);
+}
 } // namespace OHOS::Ace::NG

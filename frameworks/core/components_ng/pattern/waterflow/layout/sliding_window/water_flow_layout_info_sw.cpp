@@ -42,12 +42,17 @@ void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, float mainGap)
     endPos_ = EndPos();
 
     itemStart_ = (startIndex_ == 0 && NonNegative(startPos_)) || GreatOrEqual(startPos_, mainSize);
-    itemEnd_ = endIndex_ == itemCnt - 1 || (itemCnt > 0 && NonPositive(endPos_));
+    itemEnd_ = endIndex_ == itemCnt - 1;
+    if (footerIndex_ == 0) {
+        itemEnd_ &= LessOrEqual(endPos_, mainSize);
+    }
+    itemEnd_ |= itemCnt > 0 && NonPositive(endPos_); // extreme overScroll case
+    offsetEnd_ = itemEnd_ && LessOrEqual(endPos_ + footerHeight_, mainSize);
+    maxHeight_ = std::max(endPos_ - startPos_ + footerHeight_, maxHeight_);
+
     if (!itemEnd_) {
         footerHeight_ = 0.0f;
     }
-    offsetEnd_ = itemEnd_ && LessOrEqual(endPos_ + footerHeight_, mainSize);
-    maxHeight_ = std::max(endPos_ - startPos_ + footerHeight_, maxHeight_);
 
     synced_ = true;
 }
@@ -93,9 +98,9 @@ bool WaterFlowLayoutInfoSW::OutOfBounds() const
     if (itemStart_ && Positive(lanes_[0].startPos)) {
         return true;
     }
-    if (itemEnd_) {
+    if (offsetEnd_) {
         return std::all_of(lanes_.begin(), lanes_.end(),
-            [mainSize = lastMainSize_](const Lane& lane) { return LessNotEqual(lane.endPos, mainSize); });
+            [this](const Lane& lane) { return LessNotEqual(lane.endPos + footerHeight_, lastMainSize_); });
     }
     return false;
 }
@@ -122,7 +127,7 @@ OverScrollOffset WaterFlowLayoutInfoSW::GetOverScrolledDelta(float delta) const
         return res;
     }
     float disToBot = EndPos() + footerHeight_ - lastMainSize_;
-    if (!itemEnd_) {
+    if (!offsetEnd_) {
         res.end = std::min(0.0f, disToBot + delta);
     } else if (Negative(delta)) {
         res.end = delta;

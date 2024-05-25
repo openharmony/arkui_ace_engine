@@ -82,14 +82,10 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
                 continue;
             }
             auto childNode = child->GetGeometryNode();
-            bool vertical = axis_ == Axis::VERTICAL;
-            auto offset = vertical ? OffsetF { crossPos, mainPos } : OffsetF { mainPos, crossPos };
-            if (reverse) {
-                if (vertical) {
-                    offset.SetY(mainLen_ - item.mainSize - mainPos);
-                } else {
-                    offset.SetX(mainLen_ - item.mainSize - mainPos);
-                }
+            auto offset =
+                reverse ? OffsetF { crossPos, mainLen_ - item.mainSize - mainPos } : OffsetF { crossPos, mainPos };
+            if (axis_ != Axis::VERTICAL) {
+                offset = OffsetF { offset.GetY(), offset.GetX() };
             }
             childNode->SetMarginFrameOffset(offset + paddingOffset);
 
@@ -514,12 +510,11 @@ float WaterFlowLayoutSW::MeasureChild(const RefPtr<WaterFlowLayoutProperty>& pro
 
 void WaterFlowLayoutSW::LayoutFooter(const OffsetF& paddingOffset, bool reverse)
 {
-    float endPos = info_->EndPos();
-    if (info_->footerIndex_ != 0 || GreatOrEqual(endPos, mainLen_)) {
+    float mainPos = info_->EndPos();
+    if (info_->footerIndex_ != 0 || GreatOrEqual(mainPos, mainLen_)) {
         return;
     }
     auto footer = wrapper_->GetOrCreateChildByIndex(0);
-    float mainPos = endPos + mainGap_;
     if (reverse) {
         mainPos = mainLen_ - info_->footerHeight_ - mainPos;
     }

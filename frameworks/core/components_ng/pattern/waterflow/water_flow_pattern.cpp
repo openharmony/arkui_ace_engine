@@ -199,11 +199,7 @@ namespace {
 // check if layout is misaligned after a scroll event
 bool CheckMisalignment(const RefPtr<WaterFlowLayoutInfoBase>& info)
 {
-    if (info->Mode() != WaterFlowLayoutMode::SLIDING_WINDOW) {
-        return false;
-    }
-    auto infoSW = AceType::DynamicCast<WaterFlowLayoutInfoSW>(info);
-    if (infoSW->IsMisaligned()) {
+    if (info->IsMisaligned()) {
         info->Reset();
         return true;
     }
@@ -211,22 +207,16 @@ bool CheckMisalignment(const RefPtr<WaterFlowLayoutInfoBase>& info)
 }
 } // namespace
 
-bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+void WaterFlowPattern::TriggerPostLayoutEvents()
 {
-    if (config.skipMeasure && config.skipLayout) {
-        return false;
-    }
-    auto layoutAlgorithmWrapper = dirty->GetLayoutAlgorithm();
-    CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
-    auto layoutAlgorithm = DynamicCast<WaterFlowLayoutBase>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN(layoutAlgorithm, false);
     auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
+    CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<WaterFlowEventHub>();
-    CHECK_NULL_RETURN(eventHub, false);
-    auto onScroll = eventHub->GetOnScroll();
+    CHECK_NULL_VOID(eventHub);
     float delta = layoutInfo_->GetDelta(prevOffset_);
     PrintOffsetLog(AceLogTag::ACE_WATERFLOW, host->GetId(), delta);
+
+    auto onScroll = eventHub->GetOnScroll();
     if (onScroll) {
         FireOnScroll(delta, onScroll);
     }
@@ -251,6 +241,14 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         onReachEnd();
     }
     OnScrollStop(eventHub->GetOnScrollStop());
+}
+
+bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+{
+    if (config.skipMeasure && config.skipLayout) {
+        return false;
+    }
+    TriggerPostLayoutEvents();
 
     if (targetIndex_.has_value()) {
         ScrollToTargetIndex(targetIndex_.value());
@@ -265,7 +263,7 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
 
     isInitialized_ = true;
 
-    if (layoutInfo_->startIndex_ == 0 && CheckMisalignment(layoutInfo_)) {
+    if (layoutInfo_->itemStart_ && CheckMisalignment(layoutInfo_)) {
         MarkDirtyNodeSelf();
     }
     return NeedRender();

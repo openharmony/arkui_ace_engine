@@ -123,6 +123,15 @@ public:
     // for compatibility
     virtual void UpdateStartIndex() {};
 
+    /**
+     * @brief Check if the layout is misaligned.
+     *
+     * If we jump and scroll back to top, the staring items might not be aligned with the top boundary.
+     * @return true if 1. any lane misaligned with top boundary.
+     *                 2. the first item is not in the first lane.
+     */
+    virtual bool IsMisaligned() const = 0;
+
     virtual void InitSegments(const std::vector<WaterFlowSections::Section>& sections, int32_t start) {}
     /**
      * @brief Get the Segment index of a FlowItem
@@ -133,7 +142,12 @@ public:
     int32_t GetSegment(int32_t itemIdx) const;
 
     bool itemStart_ = false;
-    bool itemEnd_ = false;   // last item is partially in viewport
+
+    /**
+     * @brief last item is partially in viewport.
+     * With footer, footer should be considered the last item.
+     */
+    bool itemEnd_ = false;
     bool offsetEnd_ = false; // last item's bottom is in viewport
 
     Axis axis_ = Axis::VERTICAL;

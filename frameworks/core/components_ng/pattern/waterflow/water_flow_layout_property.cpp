@@ -101,7 +101,8 @@ inline bool UseSegmentedLayout(const RefPtr<FrameNode>& host)
     return SystemProperties::WaterFlowUseSegmentedLayout() || (pattern && pattern->GetSections());
 }
 
-inline bool SWLayout(const RefPtr<FrameNode>& host) {
+inline bool SWLayout(const RefPtr<FrameNode>& host)
+{
     CHECK_NULL_RETURN(host, false);
     auto pattern = host->GetPattern<WaterFlowPattern>();
     return pattern && pattern->GetLayoutMode() == WaterFlowLayoutMode::SLIDING_WINDOW;

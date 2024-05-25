@@ -14,6 +14,7 @@
  */
 
 #include <cstdint>
+#include <cstdlib>
 #include <map>
 #include <memory>
 
@@ -137,6 +138,17 @@ void WaterFlowTestNg::CreateItem(int32_t number)
         } else {
             ViewAbstract::SetHeight(CalcLength(Dimension(BIG_ITEM_HEIGHT)));
         }
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+}
+
+void WaterFlowTestNg::CreateRandomItem(int32_t number)
+{
+    for (int32_t i = 0; i < number; i++) {
+        WaterFlowItemModelNG waterFlowItemModel;
+        waterFlowItemModel.Create();
+        ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
+        ViewAbstract::SetHeight(CalcLength(std::rand() % 200 + 50.0f));
         ViewStackProcessor::GetInstance()->Pop();
     }
 }
