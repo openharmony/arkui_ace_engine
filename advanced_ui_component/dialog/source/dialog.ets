@@ -1338,3 +1338,50 @@ export struct LoadingDialog {
     this.theme.colors.iconSecondary : $r('sys.color.icon_secondary');
   }
 }
+
+@Component
+export struct PopupDialog {
+  @Link show: boolean;
+  @Prop popup: PopupDialogOptions;
+  @BuilderParam targetBuilder: Callback<void>;
+
+  build() {
+    Column() {
+      this.targetBuilder();
+    }
+    .onClick(() => {
+      this.show = !this.show;
+    })
+    .bindPopup(this.show, {
+      builder: this.popup?.builder,
+      placement: this.popup?.placement ?? Placement.Bottom,
+      popupColor: this.popup?.popupColor,
+      enableArrow: this.popup?.enableArrow ?? true,
+      autoCancel: this.popup?.autoCancel,
+      onStateChange: this.popup?.onStateChange ?? ((e) => {
+        if (!e.isVisible) {
+          this.show = false
+        }
+      }),
+      arrowOffset: this.popup?.arrowOffset,
+      showInSubWindow: this.popup?.showInSubWindow,
+      mask: this.popup?.mask,
+      targetSpace: this.popup?.targetSpace,
+      offset: this.popup?.offset,
+      width: this.popup?.width,
+      arrowPointPosition: this.popup?.arrowPointPosition,
+      arrowWidth: this.popup?.arrowWidth,
+      arrowHeight: this.popup?.arrowHeight,
+      radius: this.popup?.radius ?? $r('sys.float.corner_radius_level16'),
+      shadow: this.popup?.shadow ?? ShadowStyle.OUTER_DEFAULT_MD,
+      backgroundBlurStyle: this.popup?.backgroundBlurStyle ?? BlurStyle.COMPONENT_ULTRA_THICK,
+      focusable: this.popup?.focusable,
+      transition: this.popup?.transition,
+      onWillDismiss: this.popup?.onWillDismiss
+    })
+  }
+}
+
+export declare interface PopupDialogOptions extends CustomPopupOptions {
+}
+

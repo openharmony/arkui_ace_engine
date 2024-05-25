@@ -3170,4 +3170,104 @@ export class LoadingDialog extends ViewPU {
     }
 }
 
-export default { TipsDialog, ConfirmDialog, SelectDialog, AlertDialog, LoadingDialog, CustomContentDialog };
+export class PopupDialog extends ViewPU {
+  constructor(k, l, m, n = -1, o = undefined, p) {
+    super(k, m, n, p);
+    if (typeof o === "function") {
+      this.paramsGenerator_ = o;
+    }
+    this.__show = new SynchedPropertySimpleTwoWayPU(l.show, this, "show");
+    this.__popup = new SynchedPropertyObjectOneWayPU(l.popup, this, "popup");
+    this.targetBuilder = undefined;
+    this.setInitiallyProvidedValue(l);
+    this.finalizeConstruction();
+  }
+
+  setInitiallyProvidedValue(j) {
+    if (j.targetBuilder !== undefined) {
+      this.targetBuilder = j.targetBuilder;
+    }
+  }
+
+  updateStateVars(i) {
+    this.__popup.reset(i.popup);
+  }
+
+  purgeVariableDependenciesOnElmtId(h) {
+    this.__show.purgeDependencyOnElmtId(h);
+    this.__popup.purgeDependencyOnElmtId(h);
+  }
+
+  aboutToBeDeleted() {
+    this.__show.aboutToBeDeleted();
+    this.__popup.aboutToBeDeleted();
+    SubscriberManager.Get().delete(this.id__());
+    this.aboutToBeDeletedInternal();
+  }
+
+  get show() {
+    return this.__show.get();
+  }
+
+  set show(g) {
+    this.__show.set(g);
+  }
+
+  get popup() {
+    return this.__popup.get();
+  }
+
+  set popup(f) {
+    this.__popup.set(f);
+  }
+
+  initialRender() {
+    this.observeComponentCreation2((b, c) => {
+      Column.create();
+      Column.onClick(() => {
+        this.show = !this.show;
+      });
+      Column.bindPopup(this.show, {
+        builder: this.popup?.builder,
+        placement: this.popup?.placement ?? Placement.Bottom,
+        popupColor: this.popup?.popupColor,
+        enableArrow: this.popup?.enableArrow ?? true,
+        autoCancel: this.popup?.autoCancel,
+        onStateChange: this.popup?.onStateChange ?? ((e) => {
+          if (!e.isVisible) {
+            this.show = false;
+          }
+        }),
+        arrowOffset: this.popup?.arrowOffset,
+        showInSubWindow: this.popup?.showInSubWindow,
+        mask: this.popup?.mask,
+        targetSpace: this.popup?.targetSpace,
+        offset: this.popup?.offset,
+        width: this.popup?.width,
+        arrowPointPosition: this.popup?.arrowPointPosition,
+        arrowWidth: this.popup?.arrowWidth,
+        arrowHeight: this.popup?.arrowHeight,
+        radius: this.popup?.radius ?? {
+          "id": -1,
+          "type": 10002,
+          params: ['sys.float.corner_radius_level16'],
+          "bundleName": "__harDefaultBundleName__",
+          "moduleName": "__harDefaultModuleName__"
+        },
+        shadow: this.popup?.shadow ?? ShadowStyle.OUTER_DEFAULT_MD,
+        backgroundBlurStyle: this.popup?.backgroundBlurStyle ?? BlurStyle.COMPONENT_ULTRA_THICK,
+        focusable: this.popup?.focusable,
+        transition: this.popup?.transition,
+        onWillDismiss: this.popup?.onWillDismiss
+      });
+    }, Column);
+    this.targetBuilder.bind(this)(this);
+    Column.pop();
+  }
+
+  rerender() {
+    this.updateDirtyElements();
+  }
+}
+
+export default { TipsDialog, ConfirmDialog, SelectDialog, AlertDialog, LoadingDialog, CustomContentDialog, PopupDialog };
