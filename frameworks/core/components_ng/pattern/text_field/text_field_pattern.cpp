@@ -2021,7 +2021,7 @@ void TextFieldPattern::DoProcessAutoFill()
     auto isSuccess = ProcessAutoFill(isPopup);
     if (!isPopup && isSuccess) {
         needToRequestKeyboardInner_ = false;
-        closeKeyboard(true, false);
+        CloseKeyboard(true, false);
     } else if (RequestKeyboard(false, true, true)) {
         NotifyOnEditChanged(true);
     }
