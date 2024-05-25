@@ -632,6 +632,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     ProcessDelayTasks();
     DispatchDisplaySync(nanoTimestamp);
     FlushAnimation(nanoTimestamp);
+    FlushFrameCallback(nanoTimestamp);
     SetVsyncTime(nanoTimestamp);
     bool hasRunningAnimation = window_->FlushAnimation(nanoTimestamp);
     FlushTouchEvents();
@@ -3793,5 +3794,15 @@ void PipelineContext::CheckAndLogLastReceivedAxisEventInfo(int32_t eventId, Axis
 void PipelineContext::CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, AxisAction action)
 {
     eventManager_->CheckAndLogLastConsumedAxisEventInfo(eventId, action);
+}
+
+void PipelineContext::FlushFrameCallback(uint64_t nanoTimestamp)
+{
+    if (!frameCallbackFuncs_.empty()) {
+        decltype(frameCallbackFuncs_) tasks(std::move(frameCallbackFuncs_));
+        for (const auto& frameCallbackFunc : tasks) {
+            frameCallbackFunc(nanoTimestamp);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG
