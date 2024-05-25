@@ -162,6 +162,9 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void CheckScrollable();
     bool IsOutOfBoundary(bool useCurrentDelta = true) override;
+
+    void TriggerPostLayoutEvents();
+
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     SizeF GetContentSize() const;
     void MarkDirtyNodeSelf();

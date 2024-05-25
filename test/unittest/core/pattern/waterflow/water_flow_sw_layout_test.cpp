@@ -242,18 +242,16 @@ HWTEST_F(WaterFlowSWTest, OverScroll001, TestSize.Level1)
     pattern_->SetAnimateCanOverScroll(true);
     UpdateCurrentOffset(30000.0f);
     const float startPos = info_->StartPos();
-    EXPECT_TRUE(info_->startIndex_ > info_->endIndex_);
     EXPECT_GT(info_->StartPos(), 2000.0f);
-    EXPECT_TRUE(info_->lanes_[0].items_.empty());
-    EXPECT_TRUE(info_->lanes_[1].items_.empty());
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->endIndex_, 0);
 
     info_->delta_ = -50.0f;
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info_->StartPos(), startPos - 50.0f);
-    EXPECT_TRUE(info_->startIndex_ > info_->endIndex_);
-    EXPECT_TRUE(info_->lanes_[0].items_.empty());
-    EXPECT_TRUE(info_->lanes_[1].items_.empty());
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->endIndex_, 0);
 
     UpdateCurrentOffset(-35000.0f);
     EXPECT_EQ(info_->startIndex_, 11);
@@ -280,25 +278,82 @@ HWTEST_F(WaterFlowSWTest, OverScroll002, TestSize.Level1)
     FlushLayoutTask(frameNode_);
 
     UpdateCurrentOffset(-30000.0f);
-    EXPECT_TRUE(info_->startIndex_ > info_->endIndex_);
-    EXPECT_TRUE(info_->lanes_[0].items_.empty());
-    EXPECT_TRUE(info_->lanes_[1].items_.empty());
     const float endPos = info_->EndPos();
     EXPECT_LT(info_->EndPos(), -2000.0f);
+    EXPECT_EQ(info_->startIndex_, 49);
+    EXPECT_EQ(info_->endIndex_, 49);
 
     info_->delta_ = 30.0f;
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info_->EndPos(), endPos + 30.0f);
-    EXPECT_TRUE(info_->startIndex_ > info_->endIndex_);
-    EXPECT_TRUE(info_->lanes_[0].items_.empty());
-    EXPECT_TRUE(info_->lanes_[1].items_.empty());
+    EXPECT_EQ(info_->startIndex_, 49);
+    EXPECT_EQ(info_->endIndex_, 49);
+
+    info_->delta_ = -30.0f;
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->EndPos(), endPos);
+    EXPECT_EQ(info_->startIndex_, 49);
+    EXPECT_EQ(info_->endIndex_, 49);
 
     UpdateCurrentOffset(35000.0f);
     EXPECT_EQ(info_->startIndex_, 28);
     EXPECT_EQ(info_->endIndex_, 41);
     EXPECT_LT(info_->StartPos(), 0.0f);
     EXPECT_GT(info_->EndPos(), 800.0f);
+}
+
+/**
+ * @tc.name: OverScroll003
+ * @tc.desc: Test overScroll past limits incrementally
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, OverScroll003, TestSize.Level1)
+{
+    Create([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetEdgeEffect(EdgeEffect::SPRING, true);
+        CreateRandomItem(50);
+    });
+    pattern_->SetAnimateCanOverScroll(true);
+    for (int i = 1; i <= 10; ++i) {
+        info_->delta_ = 100.0f;
+        frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        FlushLayoutTask(frameNode_);
+        EXPECT_EQ(info_->StartPos(), 100.0f * i);
+        EXPECT_TRUE(info_->itemStart_);
+    }
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->endIndex_, 0);
+    EXPECT_EQ(info_->TopFinalPos(), -1000.0f);
+}
+
+/**
+ * @tc.name: OverScroll004
+ * @tc.desc: Test overScroll past limits incrementally
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, OverScroll004, TestSize.Level1)
+{
+    Create([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetEdgeEffect(EdgeEffect::SPRING, true);
+        CreateRandomItem(50);
+    });
+    pattern_->SetAnimateCanOverScroll(true);
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushLayoutTask(frameNode_);
+    for (int i = 1; i <= 10; ++i) {
+        info_->delta_ = -100.0f;
+        frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        FlushLayoutTask(frameNode_);
+        EXPECT_EQ(info_->EndPos(), -100.0f * i + WATERFLOW_HEIGHT);
+        EXPECT_TRUE(info_->offsetEnd_);
+    }
+    EXPECT_EQ(info_->startIndex_, 49);
+    EXPECT_EQ(info_->endIndex_, 49);
+    EXPECT_EQ(info_->BottomFinalPos(WATERFLOW_HEIGHT), 1000.0f);
 }
 
 /**
@@ -318,13 +373,94 @@ HWTEST_F(WaterFlowSWTest, Misaligned001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
 
     UpdateCurrentOffset(Infinity<float>());
-    EXPECT_TRUE(info_->IsMisaligned());
+    EXPECT_EQ(info_->startIndex_, 0);
     EXPECT_EQ(GetChildY(frameNode_, 1), 100.0f);
     EXPECT_EQ(GetChildX(frameNode_, 1), 240.0f);
-    pattern_->OnScrollEndCallback();
+    EXPECT_EQ(info_->jumpIndex_, 0);
     FlushLayoutTask(frameNode_);
     EXPECT_FALSE(info_->IsMisaligned());
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 0.0f);
     EXPECT_EQ(info_->lanes_[0].startPos, 0.0f);
     EXPECT_EQ(info_->lanes_[0].items_.front().idx, 0);
+}
+
+/**
+ * @tc.name: PositionController100
+ * @tc.desc: Test PositionController AnimateTo and ScrollTo, should be disabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, PositionController100, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List Item
+     */
+    Create([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        CreateItem(TOTAL_LINE_NUMBER * 2);
+    });
+    auto controller = pattern_->positionController_;
+    /**
+     * @tc.steps: step8. Test AnimateTo function
+     * @tc.expected: pattern_->isAnimationStop_ is false
+     */
+    pattern_->AnimateTo(1.5, 1.f, Curves::LINEAR, false, false);
+    EXPECT_TRUE(pattern_->isAnimationStop_);
+
+    /**
+     * @tc.steps: step8. test event
+     * @tc.expected: return the scroll event is ture.
+     */
+    bool isOnWillScrollCallBack = false;
+    Dimension willScrollOffset;
+    ScrollState willScrollState;
+    auto onWillScroll = [&willScrollOffset, &willScrollState, &isOnWillScrollCallBack](
+                            Dimension offset, ScrollState state, ScrollSource source) {
+        willScrollOffset = offset;
+        willScrollState = state;
+        isOnWillScrollCallBack = true;
+        ScrollFrameResult result;
+        result.offset = offset;
+        return result;
+    };
+
+    eventHub_->SetOnWillScroll(std::move(onWillScroll));
+    pattern_->ScrollTo(ITEM_HEIGHT * 5);
+    EXPECT_FALSE(isOnWillScrollCallBack);
+}
+
+/**
+ * @tc.name: ScrollToEdge002
+ * @tc.desc: ScrollToEdge and check overScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, ScrollToEdge002, TestSize.Level1)
+{
+    Create([](WaterFlowModelNG model) {
+        model.SetFooter(GetDefaultHeaderBuilder());
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        model.SetRowsGap(Dimension(5.0f));
+        CreateRandomItem(100);
+    });
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushLayoutTask(frameNode_);
+    auto info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->endIndex_, 99);
+    EXPECT_EQ(GetChildOffset(frameNode_, info->footerIndex_), OffsetF(0.0f, 750.0f));
+    EXPECT_EQ(info_->EndPos(), 750.0f);
+    EXPECT_FALSE(info->OutOfBounds());
+    EXPECT_EQ(info->GetOverScrolledDelta(20.0f).end, 0.0f);
+    EXPECT_EQ(info->GetOverScrolledDelta(-10.0f).end, -10.0f);
+
+    UpdateCurrentOffset(30.0f);
+    EXPECT_EQ(info->GetOverScrolledDelta(-20.0f).end, 0.0f);
+    EXPECT_EQ(info->GetOverScrolledDelta(20.0f).end, 0.0f);
+
+    UpdateCurrentOffset(20.0f);
+    EXPECT_EQ(info->GetOverScrolledDelta(-20.0f).end, 0.0f);
+    EXPECT_EQ(info->GetOverScrolledDelta(20.0f).end, 0.0f);
+
+    UpdateCurrentOffset(5.0f);
+    EXPECT_FALSE(info->itemEnd_);
 }
 } // namespace OHOS::Ace::NG

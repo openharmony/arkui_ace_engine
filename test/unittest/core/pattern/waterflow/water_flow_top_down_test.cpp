@@ -435,4 +435,48 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest012, TestSize.Level1)
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(ITEM_HEIGHT), { 100, 100 }));
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(3 * ITEM_HEIGHT), { 300, 300 }));
 }
+
+/**
+ * @tc.name: PositionController100
+ * @tc.desc: Test PositionController AnimateTo and ScrollTo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, PositionController100, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List Item
+     */
+    Create([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        CreateItem(TOTAL_LINE_NUMBER * 2);
+    });
+    auto controller = pattern_->positionController_;
+    /**
+     * @tc.steps: step8. Test AnimateTo function
+     * @tc.expected: pattern_->isAnimationStop_ is false
+     */
+    pattern_->AnimateTo(1.5, 1.f, Curves::LINEAR, false, false);
+    EXPECT_FALSE(pattern_->isAnimationStop_);
+
+	/**
+     * @tc.steps: step8. test event
+     * @tc.expected: return the scroll event is ture.
+     */
+    bool isOnWillScrollCallBack = false;
+    Dimension willScrollOffset;
+    ScrollState willScrollState;
+    auto onWillScroll = [&willScrollOffset, &willScrollState, &isOnWillScrollCallBack](
+                            Dimension offset, ScrollState state, ScrollSource source) {
+        willScrollOffset = offset;
+        willScrollState = state;
+        isOnWillScrollCallBack = true;
+        ScrollFrameResult result;
+        result.offset = offset;
+        return result;
+    };
+	
+    eventHub_->SetOnWillScroll(std::move(onWillScroll));
+    pattern_->ScrollTo(ITEM_HEIGHT * 5);
+    EXPECT_TRUE(isOnWillScrollCallBack);
+}
 } // namespace OHOS::Ace::NG

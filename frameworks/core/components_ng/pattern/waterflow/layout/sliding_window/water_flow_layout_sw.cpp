@@ -23,8 +23,8 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
+#include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/templates_parser.h"
 
@@ -72,7 +72,7 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
     float crossPos = rtl ? selfCrossLen + mainGap_ : 0.0f;
     for (size_t i = 0; i < info_->lanes_.size(); ++i) {
         if (rtl) {
-            crossPos -= itemCrossSize_[i] + mainGap_;
+            crossPos -= itemCrossSize_[i] + crossGap_;
         }
         auto& lane = info_->lanes_[i];
         float mainPos = lane.startPos;
@@ -82,10 +82,11 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
                 continue;
             }
             auto childNode = child->GetGeometryNode();
-            if (reverse) {
-                mainPos = mainLen_ - item.mainSize - mainPos;
+            auto offset =
+                reverse ? OffsetF { crossPos, mainLen_ - item.mainSize - mainPos } : OffsetF { crossPos, mainPos };
+            if (axis_ != Axis::VERTICAL) {
+                offset = OffsetF { offset.GetY(), offset.GetX() };
             }
-            auto offset = axis_ == Axis::VERTICAL ? OffsetF { crossPos, mainPos } : OffsetF { mainPos, crossPos };
             childNode->SetMarginFrameOffset(offset + paddingOffset);
 
             if (child->CheckNeedForceMeasureAndLayout()) {
@@ -96,7 +97,7 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
             mainPos += item.mainSize + mainGap_;
         }
         if (!rtl) {
-            crossPos += itemCrossSize_[i] + mainGap_;
+            crossPos += itemCrossSize_[i] + crossGap_;
         }
     }
 
@@ -125,6 +126,9 @@ void WaterFlowLayoutSW::Init(const SizeF& frameSize)
         cross = ParseTemplateArgs(WaterFlowLayoutUtils::PreParseArgs(columnsTemplate), crossSize, crossGap_, itemCnt_);
     } else {
         cross = ParseTemplateArgs(WaterFlowLayoutUtils::PreParseArgs(rowsTemplate), crossSize, crossGap_, itemCnt_);
+    }
+    if (cross.first.empty()) {
+        cross.first = { crossSize };
     }
     if (cross.second) {
         crossGap_ = 0.0f;
@@ -347,7 +351,7 @@ void WaterFlowLayoutSW::RecoverFront(float viewportBound, int32_t& idx, int32_t 
 void WaterFlowLayoutSW::ClearBack(float bound)
 {
     int32_t startIdx = info_->StartIndex();
-    for (int32_t i = info_->EndIndex(); i >= startIdx; --i) {
+    for (int32_t i = info_->EndIndex(); i > startIdx; --i) {
         size_t laneIdx = info_->idxToLane_.at(i);
         auto& lane = info_->lanes_[laneIdx];
         float itemStartPos = lane.endPos - lane.items_.back().mainSize;
@@ -362,7 +366,7 @@ void WaterFlowLayoutSW::ClearBack(float bound)
 void WaterFlowLayoutSW::ClearFront()
 {
     int32_t endIdx = info_->EndIndex();
-    for (int32_t i = info_->StartIndex(); i <= endIdx; ++i) {
+    for (int32_t i = info_->StartIndex(); i < endIdx; ++i) {
         size_t laneIdx = info_->idxToLane_.at(i);
         auto& lane = info_->lanes_[laneIdx];
         float itemEndPos = lane.startPos + lane.items_.front().mainSize;
@@ -488,7 +492,7 @@ void WaterFlowLayoutSW::AdjustOverScroll()
         ApplyDelta(-minStart);
     } else if (info_->EndIndex() == itemCnt_ - 1 && LessNotEqual(maxEnd, mainLen_)) {
         float delta = mainLen_ - maxEnd;
-        if (startIdx == 0)  {
+        if (startIdx == 0) {
             delta = std::min(-minStart, delta);
         }
         ApplyDelta(delta);
@@ -506,12 +510,11 @@ float WaterFlowLayoutSW::MeasureChild(const RefPtr<WaterFlowLayoutProperty>& pro
 
 void WaterFlowLayoutSW::LayoutFooter(const OffsetF& paddingOffset, bool reverse)
 {
-    float endPos = info_->EndPos();
-    if (info_->footerIndex_ != 0 || GreatOrEqual(endPos, mainLen_)) {
+    float mainPos = info_->EndPos();
+    if (info_->footerIndex_ != 0 || GreatOrEqual(mainPos, mainLen_)) {
         return;
     }
     auto footer = wrapper_->GetOrCreateChildByIndex(0);
-    float mainPos = endPos + mainGap_;
     if (reverse) {
         mainPos = mainLen_ - info_->footerHeight_ - mainPos;
     }
