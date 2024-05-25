@@ -244,6 +244,21 @@ RefPtr<FrameNode> TextBases::CreateTextParagraph(const std::string& createValue,
 
 void TextBases::SetContentModifier(TextContentModifier& textContentModifier)
 {
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto frameNode = layoutWrapper->GetHostNode();
+    auto pipeline = frameNode->GetContextRefPtr();
+    TextStyle textStyle = CreateTextStyleUsingTheme(
+        textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
+
     textContentModifier.SetFontWeight(Ace::FontWeight::W200);
     textContentModifier.SetTextColor(TEXT_COLOR_VALUE);
     textContentModifier.SetTextDecorationColor(TEXT_COLOR_VALUE);
@@ -254,7 +269,7 @@ void TextBases::SetContentModifier(TextContentModifier& textContentModifier)
     textShadow.SetOffsetX(ADAPT_OFFSETX_VALUE);
     textShadow.SetOffsetY(ADAPT_OFFSETY_VALUE);
     textContentModifier.SetTextShadow({ textShadow });
-    textContentModifier.SetFontSize(ADAPT_FONT_SIZE_VALUE);
+    textContentModifier.SetFontSize(ADAPT_FONT_SIZE_VALUE, textStyle);
     textContentModifier.SetBaselineOffset(BASELINE_OFFSET_VALUE);
     OffsetF paintOffset;
     textContentModifier.SetPrintOffset(paintOffset);

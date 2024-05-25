@@ -240,6 +240,17 @@ void TextLayoutAlgorithm::ResetAiSpanTextStyle(const RefPtr<FrameNode>& frameNod
     aiSpanTextStyle.SetTextDecorationStyle(TextDecorationStyle::SOLID);
 }
 
+float TextLayoutAlgorithm::GetFontScaleValue(TextStyle& textStyle)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, 0.0f);
+    float fontSacleValue = pipeline->GetFontScale();
+    if (textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
+        fontSacleValue = std::clamp(fontSacleValue, textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
+    }
+    return fontSacleValue;
+}
+
 void TextLayoutAlgorithm::GrayDisplayAISpan(const DragSpanPosition& dragSpanPosition, const std::wstring wTextForAI,
     const TextStyle& textStyle, bool isDragging, const RefPtr<Paragraph>& paragraph)
 {
@@ -408,11 +419,12 @@ bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::stri
     double minFontSize = 0.0;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
-    if (!textStyle.GetAdaptMaxFontSize().NormalizeToPx(pipeline->GetDipScale(), pipeline->GetFontScale(),
+    float fontSacleValue = GetFontScaleValue(textStyle);
+    if (!textStyle.GetAdaptMaxFontSize().NormalizeToPx(pipeline->GetDipScale(), fontSacleValue,
             pipeline->GetLogicScale(), contentConstraint.maxSize.Height(), maxFontSize)) {
         return false;
     }
-    if (!textStyle.GetAdaptMinFontSize().NormalizeToPx(pipeline->GetDipScale(), pipeline->GetFontScale(),
+    if (!textStyle.GetAdaptMinFontSize().NormalizeToPx(pipeline->GetDipScale(), fontSacleValue,
             pipeline->GetLogicScale(), contentConstraint.maxSize.Height(), minFontSize)) {
         return false;
     }
@@ -429,7 +441,7 @@ bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::stri
         step = textStyle.GetAdaptFontSizeStep();
     }
     double stepSize = 0.0;
-    if (!step.NormalizeToPx(pipeline->GetDipScale(), pipeline->GetFontScale(), pipeline->GetLogicScale(),
+    if (!step.NormalizeToPx(pipeline->GetDipScale(), fontSacleValue, pipeline->GetLogicScale(),
             contentConstraint.maxSize.Height(), stepSize)) {
         return false;
     }
@@ -553,24 +565,23 @@ bool TextLayoutAlgorithm::BuildParagraphAdaptUseLayoutConstraint(TextStyle& text
     auto height = static_cast<float>(paragraph->GetHeight());
     double minTextSizeHeight = 0.0;
     textStyle.GetAdaptMinFontSize().NormalizeToPx(
-        pipeline->GetDipScale(), pipeline->GetFontScale(), pipeline->GetLogicScale(), height, minTextSizeHeight);
+        pipeline->GetDipScale(), GetFontScaleValue(textStyle), pipeline->GetLogicScale(), height, minTextSizeHeight);
     if (LessOrEqual(minTextSizeHeight, 0.0)) {
-        textStyle.GetFontSize().NormalizeToPx(
-            pipeline->GetDipScale(), pipeline->GetFontScale(), pipeline->GetLogicScale(), height, minTextSizeHeight);
+        textStyle.GetFontSize().NormalizeToPx(pipeline->GetDipScale(), GetFontScaleValue(textStyle),
+            pipeline->GetLogicScale(), height, minTextSizeHeight);
     }
     if (textStyle.GetMaxLines() == UINT32_MAX) {
         double baselineOffset = 0.0;
-        textStyle.GetBaselineOffset().NormalizeToPx(pipeline->GetDipScale(), pipeline->GetFontScale(),
+        textStyle.GetBaselineOffset().NormalizeToPx(pipeline->GetDipScale(), GetFontScaleValue(textStyle),
             pipeline->GetLogicScale(), contentConstraint.maxSize.Height(), baselineOffset);
         double lineHeight = minTextSizeHeight;
         if (textStyle.HasHeightOverride()) {
-            textStyle.GetLineHeight().NormalizeToPx(pipeline->GetDipScale(), pipeline->GetFontScale(),
+            textStyle.GetLineHeight().NormalizeToPx(pipeline->GetDipScale(), GetFontScaleValue(textStyle),
                 pipeline->GetLogicScale(), minTextSizeHeight, lineHeight);
         }
         uint32_t maxLines = (contentConstraint.maxSize.Height() - baselineOffset - minTextSizeHeight) / (lineHeight);
         textStyle.SetMaxLines(maxLines);
         textStyle.DisableAdaptTextSize();
-
         if (!BuildParagraph(textStyle, layoutProperty, contentConstraint, layoutWrapper)) {
             return false;
         }

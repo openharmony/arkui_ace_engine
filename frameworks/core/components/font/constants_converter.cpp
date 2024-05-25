@@ -654,8 +654,10 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     if (pipelineContext) {
         txtStyle.fontSize = pipelineContext->NormalizeToPx(textStyle.GetFontSize());
         if (textStyle.IsAllowScale() && textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
+            float fontScale = std::clamp(
+                pipelineContext->GetFontScale(), textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
             txtStyle.fontSize =
-                pipelineContext->NormalizeToPx(textStyle.GetFontSize() * pipelineContext->GetFontScale());
+                pipelineContext->NormalizeToPx(textStyle.GetFontSize() * fontScale);
         }
     } else {
         txtStyle.fontSize = textStyle.GetFontSize().Value();

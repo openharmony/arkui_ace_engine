@@ -111,11 +111,15 @@ bool TextAdaptFontSizer::GetAdaptMaxMinFontSize(const TextStyle& textStyle, doub
 {
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
-    if (!textStyle.GetAdaptMaxFontSize().NormalizeToPx(pipeline->GetDipScale(), pipeline->GetFontScale(),
+    float fontSacleValue = pipeline->GetFontScale();
+    if (textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
+        fontSacleValue = std::clamp(fontSacleValue, textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
+    }
+    if (!textStyle.GetAdaptMaxFontSize().NormalizeToPx(pipeline->GetDipScale(), fontSacleValue,
         pipeline->GetLogicScale(), contentConstraint.maxSize.Height(), maxFontSize)) {
         return false;
     }
-    if (!textStyle.GetAdaptMinFontSize().NormalizeToPx(pipeline->GetDipScale(), pipeline->GetFontScale(),
+    if (!textStyle.GetAdaptMinFontSize().NormalizeToPx(pipeline->GetDipScale(), fontSacleValue,
         pipeline->GetLogicScale(), contentConstraint.maxSize.Height(), minFontSize)) {
         return false;
     }
@@ -127,12 +131,16 @@ bool TextAdaptFontSizer::GetAdaptFontSizeStep(const TextStyle& textStyle, double
 {
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
+    float fontSacleValue = pipeline->GetFontScale();
+    if (textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
+        fontSacleValue = std::clamp(fontSacleValue, textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
+    }
     Dimension step = stepUnit;
     if (GreatNotEqual(textStyle.GetAdaptFontSizeStep().Value(), 0.0)) {
         step = textStyle.GetAdaptFontSizeStep();
     }
     stepSize = 0.0;
-    if (!step.NormalizeToPx(pipeline->GetDipScale(), pipeline->GetFontScale(),
+    if (!step.NormalizeToPx(pipeline->GetDipScale(), fontSacleValue,
         pipeline->GetLogicScale(), contentConstraint.maxSize.Height(), stepSize)) {
         return false;
     }
