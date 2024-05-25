@@ -250,6 +250,11 @@ void JSImage::OnFinish(const JSCallbackInfo& info)
 
 void JSImage::Create(const JSCallbackInfo& info)
 {
+    CreateImage(info);
+}
+
+void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
+{
     if (info.Length() < 1) {
         return;
     }
@@ -300,8 +305,13 @@ void JSImage::Create(const JSCallbackInfo& info)
         }
 #endif
     }
-
-    ImageModel::GetInstance()->Create(src, pixmap, bundleName, moduleName, (resId == -1));
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = src;
+    imageInfoConfig.bundleName = bundleName;
+    imageInfoConfig.moduleName = moduleName;
+    imageInfoConfig.isUriPureNumber = (resId == -1);
+    imageInfoConfig.isImageSpan = isImageSpan;
+    ImageModel::GetInstance()->Create(imageInfoConfig, pixmap);
 }
 
 bool JSImage::IsDrawable(const JSRef<JSVal>& jsValue)

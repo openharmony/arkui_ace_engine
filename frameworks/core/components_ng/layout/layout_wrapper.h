@@ -146,7 +146,7 @@ public:
 
     virtual void BuildLazyItem() {}
 
-    bool IsContraintNoChanged() const
+    bool IsConstraintNoChanged() const
     {
         return isConstraintNotChanged_;
     }
@@ -179,7 +179,7 @@ public:
     }
 
     RectF GetFrameRectWithoutSafeArea() const;
-    RectF GetFrameRectWithSafeArea() const;
+    RectF GetFrameRectWithSafeArea(bool checkPosition = false) const;
 
 protected:
     void CreateRootConstraint();

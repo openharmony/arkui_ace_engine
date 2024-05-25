@@ -69,8 +69,6 @@ constexpr int32_t MIN_TURN_PAGE_VELOCITY = 1200;
 constexpr int32_t NEW_MIN_TURN_PAGE_VELOCITY = 780;
 constexpr Dimension INDICATOR_BORDER_RADIUS = 16.0_vp;
 
-constexpr Dimension SWIPER_MARGIN = 16.0_vp;
-constexpr Dimension SWIPER_GUTTER = 16.0_vp;
 constexpr float PX_EPSILON = 0.01f;
 constexpr float FADE_DURATION = 500.0f;
 constexpr float SPRING_DURATION = 600.0f;
@@ -84,6 +82,10 @@ const std::string INDICATOR_PROPERTY_NAME = "indicator";
 const std::string TRANSLATE_PROPERTY_NAME = "translate";
 constexpr int32_t SWIPER_HALF = 2;
 constexpr int32_t CAPTURE_COUNT = 2;
+constexpr uint8_t CAPTURE_PIXEL_ROUND_VALUE = static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_START) |
+                                              static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_TOP) |
+                                              static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_END) |
+                                              static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
 // TODO define as common method
 float CalculateFriction(float gamma)
 {
@@ -177,6 +179,36 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     return swiperLayoutAlgorithm;
 }
 
+std::string SwiperPattern::GetArcDotIndicatorStyle() const
+{
+    auto swiperParameters = GetSwiperArcDotParameters();
+    CHECK_NULL_RETURN(swiperParameters, "");
+    auto jsonValue = JsonUtil::Create(true);
+    auto pipelineContext = GetHost()->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, "");
+    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_RETURN(swiperIndicatorTheme, "");
+
+    static const char* ARC_DIRECTION[] = { "ArcDirection.THREE_CLOCK_DIRECTION", "ArcDirection.SIX_CLOCK_DIRECTION",
+        "ArcDirection.NINE_CLOCK_DIRECTION" };
+    jsonValue->Put("arcDirection", ARC_DIRECTION[static_cast<int32_t>(swiperParameters->arcDirection.value_or(
+        SwiperArcDirection::SIX_CLOCK_DIRECTION))]);
+    jsonValue->Put("itemColor",
+        swiperParameters->itemColor.value_or(swiperIndicatorTheme->GetArcItemColor()).ColorToString().c_str());
+    jsonValue->Put("selectedItemColor",
+        swiperParameters->selectedItemColor.value_or(swiperIndicatorTheme->GetArcSelectedItemColor())
+            .ColorToString()
+            .c_str());
+    jsonValue->Put("containerColor",
+        swiperParameters->containerColor.value_or(swiperIndicatorTheme->GetArcContainerColor())
+            .ColorToString()
+            .c_str());
+    jsonValue->Put("maskColor",
+        GradientToJson(swiperParameters->maskColor.value_or(swiperIndicatorTheme->GetArcMaskColor())).c_str());
+
+    return jsonValue->ToString();
+}
+
 void SwiperPattern::OnIndexChange()
 {
     auto totalCount = RealTotalCount();
@@ -261,11 +293,17 @@ void SwiperPattern::InitCapture()
                           static_cast<uint32_t>(HasRightButtonNode()) + 1;
         auto leftCaptureNode = FrameNode::GetOrCreateFrameNode(
             V2::SWIPER_LEFT_CAPTURE_ETS_TAG, GetLeftCaptureId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+        auto imageLayoutProperty = leftCaptureNode->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
+        imageLayoutProperty->UpdatePixelRound(CAPTURE_PIXEL_ROUND_VALUE);
         leftCaptureNode->MarkModifyDone();
         host->AddChild(leftCaptureNode, -number);
 
         auto rightCaptureNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_RIGHT_CAPTURE_ETS_TAG, GetRightCaptureId(),
             []() { return AceType::MakeRefPtr<ImagePattern>(); });
+        imageLayoutProperty = rightCaptureNode->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
+        imageLayoutProperty->UpdatePixelRound(CAPTURE_PIXEL_ROUND_VALUE);
         rightCaptureNode->MarkModifyDone();
         host->AddChild(rightCaptureNode, -number);
     }
@@ -446,9 +484,9 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         StopSpringAnimation();
         if (usePropertyAnimation_) {
             StopPropertyTranslateAnimation(false, true);
-            currentDelta_ = 0.0f;
             StopIndicatorAnimation();
         }
+        currentDelta_ = 0.0f;
     }
     if (mainSizeIsMeasured_ && isNeedResetPrevMarginAndNextMargin_) {
         layoutProperty->UpdatePrevMarginWithoutMeasure(0.0_px);
@@ -552,7 +590,7 @@ void SwiperPattern::InitSurfaceChangedCallback()
         auto callbackId = pipeline->RegisterSurfaceChangedCallback(
             [weak = WeakClaim(this)](int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight,
                 WindowSizeChangeReason type) {
-                if (type == WindowSizeChangeReason::UNDEFINED) {
+                if (type == WindowSizeChangeReason::UNDEFINED && newWidth == prevWidth && newHeight == prevHeight) {
                     return;
                 }
                 auto swiper = weak.Upgrade();
@@ -560,7 +598,7 @@ void SwiperPattern::InitSurfaceChangedCallback()
                     return;
                 }
 
-                if (type == WindowSizeChangeReason::ROTATION) {
+                if (type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::UNDEFINED) {
                     swiper->windowSizeChangeReason_ = type;
                     swiper->StopAutoPlay();
                 }
@@ -1783,6 +1821,8 @@ void SwiperPattern::InitIndicator()
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::DOT) == SwiperIndicatorType::DOT) {
         SaveDotIndicatorProperty(indicatorNode);
+    } else if (layoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::DOT) == SwiperIndicatorType::ARC_DOT) {
+        SaveCircleDotIndicatorProperty(indicatorNode);
     } else {
         SaveDigitIndicatorProperty(indicatorNode);
     }
@@ -2200,7 +2240,11 @@ bool SwiperPattern::FadeOverScroll(float offset)
 
 bool SwiperPattern::IsHorizontalAndRightToLeft() const
 {
-    return GetDirection() == Axis::HORIZONTAL && AceApplicationInfo::GetInstance().IsRightToLeft();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    CHECK_NULL_RETURN(host->GetLayoutProperty(), false);
+    return GetDirection() == Axis::HORIZONTAL &&
+        host->GetLayoutProperty()->GetNonAutoLayoutDirection() == TextDirection::RTL;
 }
 
 void SwiperPattern::HandleTouchBottomLoop()
@@ -2573,6 +2617,7 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
     }
     if (pipeline) {
         pipeline->FlushUITasks();
+        pipeline->FlushMessages();
     }
 
     isDragging_ = false;
@@ -3105,7 +3150,11 @@ void SwiperPattern::PlayTranslateAnimation(
     host->CreateAnimatablePropertyFloat(TRANSLATE_PROPERTY_NAME, 0, [weak](float value) {
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
-        swiper->UpdateCurrentOffset(static_cast<float>(value - swiper->currentOffset_));
+        if (swiper->IsHorizontalAndRightToLeft()) {
+            swiper->UpdateCurrentOffset(-static_cast<float>(value - swiper->currentOffset_));
+        } else {
+            swiper->UpdateCurrentOffset(static_cast<float>(value - swiper->currentOffset_));
+        }
     });
 
     AnimationOption option;
@@ -3671,6 +3720,23 @@ std::shared_ptr<SwiperParameters> SwiperPattern::GetSwiperParameters() const
     return swiperParameters_;
 }
 
+std::shared_ptr<SwiperArcDotParameters> SwiperPattern::GetSwiperArcDotParameters() const
+{
+    if (swiperArcDotParameters_ == nullptr) {
+        swiperArcDotParameters_ = std::make_shared<SwiperArcDotParameters>();
+        auto pipelineContext = GetHost()->GetContext();
+        CHECK_NULL_RETURN(pipelineContext, swiperArcDotParameters_);
+        auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+        
+        swiperArcDotParameters_->arcDirection = SwiperArcDirection::SIX_CLOCK_DIRECTION;
+        swiperArcDotParameters_->itemColor = swiperIndicatorTheme->GetArcItemColor();
+        swiperArcDotParameters_->selectedItemColor = swiperIndicatorTheme->GetArcSelectedItemColor();
+        swiperArcDotParameters_->containerColor = swiperIndicatorTheme->GetArcContainerColor();
+        swiperArcDotParameters_->maskColor = swiperIndicatorTheme->GetArcMaskColor();
+    }
+    return swiperArcDotParameters_;
+}
+
 std::shared_ptr<SwiperDigitalParameters> SwiperPattern::GetSwiperDigitalParameters() const
 {
     if (swiperDigitalParameters_ == nullptr) {
@@ -3794,12 +3860,6 @@ void SwiperPattern::SaveDotIndicatorProperty(const RefPtr<FrameNode>& indicatorN
     CHECK_NULL_VOID(indicatorPattern);
     auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto paintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
-    CHECK_NULL_VOID(swiperIndicatorTheme);
     auto swiperParameters = GetSwiperParameters();
     CHECK_NULL_VOID(swiperParameters);
     layoutProperty->ResetIndicatorLayoutStyle();
@@ -3815,7 +3875,10 @@ void SwiperPattern::SaveDotIndicatorProperty(const RefPtr<FrameNode>& indicatorN
     if (swiperParameters->dimBottom.has_value()) {
         layoutProperty->UpdateBottom(swiperParameters->dimBottom.value());
     }
-    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(host->GetLayoutProperty());
+    bool isRtl = host->GetLayoutProperty()->GetNonAutoLayoutDirection() == TextDirection::RTL;
     if (swiperParameters->dimStart.has_value()) {
         auto dimValue = swiperParameters->dimStart.value();
         isRtl ? layoutProperty->UpdateRight(dimValue) : layoutProperty->UpdateLeft(dimValue);
@@ -3824,6 +3887,21 @@ void SwiperPattern::SaveDotIndicatorProperty(const RefPtr<FrameNode>& indicatorN
         auto dimValue = swiperParameters->dimEnd.value();
         isRtl ? layoutProperty->UpdateLeft(dimValue) : layoutProperty->UpdateRight(dimValue);
     }
+
+    UpdatePaintProperty(indicatorNode);
+}
+
+void SwiperPattern::UpdatePaintProperty(const RefPtr<FrameNode>& indicatorNode)
+{
+    CHECK_NULL_VOID(indicatorNode);
+    auto paintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(swiperIndicatorTheme);
+    auto swiperParameters = GetSwiperParameters();
+    CHECK_NULL_VOID(swiperParameters);
     paintProperty->UpdateItemWidth(swiperParameters->itemWidth.value_or(swiperIndicatorTheme->GetSize()));
     paintProperty->UpdateItemHeight(swiperParameters->itemHeight.value_or(swiperIndicatorTheme->GetSize()));
     paintProperty->UpdateSelectedItemWidth(
@@ -3836,6 +3914,34 @@ void SwiperPattern::SaveDotIndicatorProperty(const RefPtr<FrameNode>& indicatorN
         swiperParameters->selectedColorVal.value_or(swiperIndicatorTheme->GetSelectedColor()));
     paintProperty->UpdateIsCustomSize(IsCustomSize_);
 
+    MarkDirtyNodeSelf();
+    indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void SwiperPattern::SaveCircleDotIndicatorProperty(const RefPtr<FrameNode>& indicatorNode)
+{
+    CHECK_NULL_VOID(indicatorNode);
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    CHECK_NULL_VOID(indicatorPattern);
+    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto paintProperty = indicatorNode->GetPaintProperty<CircleDotIndicatorPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto pipelineContext = GetHost()->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(swiperIndicatorTheme);
+    auto swiperParameters = GetSwiperArcDotParameters();
+    CHECK_NULL_VOID(swiperParameters);
+    layoutProperty->ResetIndicatorLayoutStyle();
+    paintProperty->UpdateArcDirection(swiperParameters->arcDirection.value_or(SwiperArcDirection::SIX_CLOCK_DIRECTION));
+    paintProperty->UpdateColor(swiperParameters->itemColor.value_or(swiperIndicatorTheme->GetArcItemColor()));
+    paintProperty->UpdateSelectedColor(
+        swiperParameters->selectedItemColor.value_or(swiperIndicatorTheme->GetArcSelectedItemColor()));
+    paintProperty->UpdateContainerColor(
+        swiperParameters->containerColor.value_or(swiperIndicatorTheme->GetArcContainerColor()));
+    paintProperty->UpdateMaskColor(
+        swiperParameters->maskColor.value_or(swiperIndicatorTheme->GetArcMaskColor()));
     MarkDirtyNodeSelf();
     indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
@@ -4851,6 +4957,10 @@ void SwiperPattern::DumpAdvanceInfo()
             }
             case SwiperIndicatorType::DIGIT: {
                 DumpLog::GetInstance().AddDesc("SwiperIndicatorType:DIGIT");
+                break;
+            }
+            case SwiperIndicatorType::ARC_DOT: {
+                DumpLog::GetInstance().AddDesc("SwiperIndicatorType:ARC_DOT");
                 break;
             }
             default: {

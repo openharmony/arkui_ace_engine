@@ -14,6 +14,8 @@
  */
 #include "core/interfaces/native/node/node_list_item_group_modifier.h"
 
+#include "interfaces/native/node/list_option.h"
+
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/frame_node.h"
@@ -26,8 +28,8 @@ constexpr int CALL_ARG_1 = 1;
 constexpr int CALL_ARG_2 = 2;
 constexpr int32_t DEFAULT_GROUP_DIVIDER_VALUES_COUNT = 3;
 
-void ListItemGroupSetDivider(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
-    const ArkUI_Int32* units, ArkUI_Int32 length)
+void ListItemGroupSetDivider(
+    ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -71,14 +73,37 @@ void ListItemGroupSetFooter(ArkUINodeHandle node, ArkUINodeHandle footer)
     ListItemGroupModelNG::SetFooter(frameNode, footerNode);
 }
 
+void SetListItemGroupChildrenMainSize(ArkUINodeHandle node, ArkUIListChildrenMainSize option, int32_t unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    for (int i = 0; i < option->mainSize.size(); i++) {
+        if (option->mainSize[i] > 0) {
+            option->mainSize[i] =
+                Dimension(option->mainSize[i], static_cast<OHOS::Ace::DimensionUnit>(unit)).ConvertToPx();
+        }
+    }
+    if (option->defaultMainSize > 0) {
+        option->defaultMainSize =
+            Dimension(option->defaultMainSize, static_cast<OHOS::Ace::DimensionUnit>(unit)).ConvertToPx();
+    }
+    ListItemGroupModelNG::SetListChildrenMainSize(frameNode, option->defaultMainSize, option->mainSize);
+}
+
+void ResetListItemGroupChildrenMainSize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListItemGroupModelNG::ResetListChildrenMainSize(frameNode);
+}
+
 namespace NodeModifier {
 const ArkUIListItemGroupModifier* GetListItemGroupModifier()
 {
-    static const ArkUIListItemGroupModifier modifier = {
-        ListItemGroupSetDivider, ListItemGroupResetDivider, ListItemGroupSetHeader,
-        ListItemGroupSetFooter
-    };
+    static const ArkUIListItemGroupModifier modifier = { ListItemGroupSetDivider, ListItemGroupResetDivider,
+        ListItemGroupSetHeader, ListItemGroupSetFooter, SetListItemGroupChildrenMainSize,
+        ResetListItemGroupChildrenMainSize };
     return &modifier;
 }
-}
+} // namespace NodeModifier
 } // namespace OHOS::Ace::NG

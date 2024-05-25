@@ -122,6 +122,7 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
+    void DumpInfo() override;
     void InitTouchEvent();
     void RemoveTouchEvent();
     void OnPress(const TouchEventInfo& info);

@@ -502,6 +502,7 @@ void BuildSymbolToolbarMoreItemNode(const RefPtr<BarItemNode>& barItemNode)
     symbolProperty->UpdateSymbolColorList({ theme->GetToolbarIconColor() });
     symbolNode->MarkModifyDone();
     barItemNode->SetIconNode(symbolNode);
+    barItemNode->SetIsMoreItemNode(true);
     barItemNode->AddChild(symbolNode);
 }
 
@@ -520,11 +521,11 @@ void BuildImageToolbarMoreItemNode(const RefPtr<BarItemNode>& barItemNode)
     CHECK_NULL_VOID(navigationGroupNode);
     auto hub = navigationGroupNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
-    auto renderContext = barItemNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
     auto info = ImageSourceInfo("");
     info.SetResourceId(theme->GetMoreResourceId());
     if (!hub->IsEnabled()) {
+        auto renderContext = barItemNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
         renderContext->UpdateOpacity(theme->GetToolbarItemDisabledAlpha());
     } else {
         info.SetFillColor(theme->GetToolbarIconColor());
@@ -1909,6 +1910,17 @@ void NavigationModelNG::SetToolbarOptions(NavigationToolbarOptions&& opt)
 void NavigationModelNG::SetIgnoreLayoutSafeArea(const SafeAreaExpandOpts& opts)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+    CHECK_NULL_VOID(navBarLayoutProperty);
+    navBarLayoutProperty->UpdateIgnoreLayoutSafeArea(opts);
+}
+
+void NavigationModelNG::SetIgnoreLayoutSafeArea(FrameNode* frameNode, const SafeAreaExpandOpts& opts)
+{
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());

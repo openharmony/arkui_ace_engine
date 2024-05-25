@@ -504,6 +504,22 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
         if (!optionNode) {
             continue;
         }
+        auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+        CHECK_NULL_RETURN(pipeline, nullptr);
+        auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+        CHECK_NULL_RETURN(menuTheme, nullptr);
+        auto fontScale = pipeline->GetFontScale();
+        if (NearEqual(fontScale, menuTheme->GetBigFontSizeScale()) ||
+            NearEqual(fontScale, menuTheme->GetLargeFontSizeScale()) ||
+            NearEqual(fontScale, menuTheme->GetMaxFontSizeScale())) {
+            auto optionPattern = optionNode->GetPattern<OptionPattern>();
+            CHECK_NULL_RETURN(optionPattern, nullptr);
+            auto textNode = AceType::DynamicCast<FrameNode>(optionPattern->GetTextNode());
+            CHECK_NULL_RETURN(textNode, nullptr);
+            auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_RETURN(textLayoutProperty, nullptr);
+            textLayoutProperty->UpdateMaxLines(menuTheme->GetTextMaxLines());
+        }
         menuPattern->AddOptionNode(optionNode);
         auto menuWeak = AceType::WeakClaim(AceType::RawPtr(menuNode));
         auto eventHub = optionNode->GetEventHub<EventHub>();

@@ -94,15 +94,18 @@ bool LayoutWrapper::AvoidKeyboard(bool isFocusOnPage)
         auto renderContext = GetHostNode()->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);
         auto safeArea = manager->GetSafeArea();
-        auto x = GetGeometryNode()->GetFrameOffset().GetX();
+        auto geometryNode = GetGeometryNode();
+        auto x = geometryNode->GetFrameOffset().GetX();
         if (manager->IsAtomicService()) {
-            auto usingRect = RectF(OffsetF(x, manager->GetKeyboardOffset()), GetGeometryNode()->GetFrameSize());
+            auto usingRect = RectF(OffsetF(x, manager->GetKeyboardOffset()), geometryNode->GetFrameSize());
             renderContext->UpdatePaintRect(usingRect);
+            geometryNode->SetSelfAdjust(usingRect - geometryNode->GetFrameRect());
             return true;
         }
         auto usingRect =
-            RectF(OffsetF(x, safeArea.top_.Length() + manager->GetKeyboardOffset()), GetGeometryNode()->GetFrameSize());
+            RectF(OffsetF(x, safeArea.top_.Length() + manager->GetKeyboardOffset()), geometryNode->GetFrameSize());
         renderContext->UpdatePaintRect(usingRect);
+        geometryNode->SetSelfAdjust(usingRect - geometryNode->GetFrameRect());
         return true;
     }
     return false;
@@ -164,10 +167,27 @@ RectF LayoutWrapper::GetFrameRectWithoutSafeArea() const
     return geometryNode->GetFrameRect();
 }
 
-RectF LayoutWrapper::GetFrameRectWithSafeArea() const
+RectF LayoutWrapper::GetFrameRectWithSafeArea(bool checkPosition) const
 {
     auto geometryNode = GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, RectF());
+    RectF rect {};
+    auto host = GetHostNode();
+    CHECK_NULL_RETURN(host, rect);
+    auto renderContext = host->GetRenderContext();
+    if (checkPosition && renderContext && renderContext->GetPositionProperty() &&
+        renderContext->GetPositionProperty()->HasPosition()) {
+        auto layoutProp = host->GetLayoutProperty();
+        CHECK_NULL_RETURN(layoutProp, rect);
+        auto layoutConstraint = layoutProp->GetLayoutConstraint();
+        CHECK_NULL_RETURN(layoutConstraint.has_value(), rect);
+        auto renderPosition = FrameNode::ContextPositionConvertToPX(
+            renderContext, layoutConstraint.value().percentReference);
+        auto size = (geometryNode->GetSelfAdjust() + geometryNode->GetFrameRect()).GetSize();
+        rect = RectF(OffsetF(static_cast<float>(renderPosition.first),
+            static_cast<float>(renderPosition.second)), size);
+        return rect;
+    }
     return geometryNode->GetSelfAdjust() + geometryNode->GetFrameRect();
 }
 

@@ -47,6 +47,12 @@ struct SelectProperties {
     bool selectEnable = true;
 };
 
+struct MenuItemInfo {
+    OffsetF originOffset = OffsetF();
+    OffsetF endOffset = OffsetF();
+    bool isFindTargetId = false;
+};
+
 class MenuPattern : public Pattern, public FocusView {
     DECLARE_ACE_TYPE(MenuPattern, Pattern, FocusView);
 
@@ -322,6 +328,16 @@ public:
         isExtensionMenuShow_ = true;
     }
 
+    void SetHasDisappearAnimation(bool hasAnimation)
+    {
+        hasAnimation_ = hasAnimation;
+    }
+
+    bool HasDisappearAnimation() const
+    {
+        return hasAnimation_;
+    }
+
     void SetSubMenuShow()
     {
         isSubMenuShow_ = true;
@@ -421,6 +437,7 @@ public:
 
     BorderRadiusProperty CalcIdealBorderRadius(const BorderRadiusProperty& borderRadius, const SizeF& menuSize);
 
+    void OnItemPressed(const RefPtr<FrameNode>& parent, int32_t index, bool press);
 protected:
     void UpdateMenuItemChildren(RefPtr<FrameNode>& host);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
@@ -453,6 +470,10 @@ private:
     void ShowPreviewMenuAnimation();
     void ShowMenuAppearAnimation();
     void ShowStackExpandMenu();
+    std::pair<OffsetF, OffsetF> GetMenuOffset(const RefPtr<FrameNode>& outterMenu,
+        bool isNeedRestoreNodeId = false) const;
+    MenuItemInfo GetInnerMenuOffset(const RefPtr<UINode>& child, bool isNeedRestoreNodeId) const;
+    MenuItemInfo GetMenuItemInfo(const RefPtr<UINode>& child, bool isNeedRestoreNodeId) const;
     void ShowArrowRotateAnimation() const;
     RefPtr<FrameNode> GetImageNode(const RefPtr<FrameNode>& host) const;
 
@@ -482,6 +503,7 @@ private:
     bool isExtensionMenuShow_ = false;
     bool isSubMenuShow_ = false;
     bool isMenuShow_ = false;
+    bool hasAnimation_ = true;
 
     OffsetF originOffset_;
     OffsetF endOffset_;

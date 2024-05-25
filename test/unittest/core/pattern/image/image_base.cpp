@@ -56,7 +56,11 @@ RefPtr<FrameNode> ImageBases::CreatePixelMapAnimator(int32_t number)
 RefPtr<FrameNode> ImageBases::CreateImageNode(const std::string& src, const std::string& alt, RefPtr<PixelMap> pixMap)
 {
     ImageModelNG image;
-    image.Create(src, pixMap, BUNDLE_NAME, MODULE_NAME);
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = src;
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
     image.SetAlt(ImageSourceInfo { alt });
     auto onError = [](const LoadImageFailEvent& info) {};
     image.SetOnError(std::move(onError));
@@ -70,7 +74,11 @@ RefPtr<FrameNode> ImageBases::CreateImageNodeWithDefaultProp(
     const std::string& src, const std::string& alt, RefPtr<PixelMap> pixMap)
 {
     ImageModelNG image;
-    image.Create(src, pixMap, BUNDLE_NAME, MODULE_NAME);
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = src;
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
     image.SetAlt(ImageSourceInfo { alt });
     image.SetImageFill(SVG_FILL_COLOR_DEFAULT);
     image.SetImageFit(IMAGE_FIT_DEFAULT);
@@ -91,7 +99,11 @@ RefPtr<FrameNode> ImageBases::CreateSyncImageNode()
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
-    image.Create(PNG_IMAGE, pixMap, BUNDLE_NAME, MODULE_NAME);
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = PNG_IMAGE;
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
     image.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     image.SetSyncMode(true);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -102,7 +114,11 @@ RefPtr<FrameNode> ImageBases::CreateSyncWebImageNode()
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
-    image.Create(WEB_IMAGE, pixMap, BUNDLE_NAME, MODULE_NAME);
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = WEB_IMAGE;
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
     image.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     image.SetSyncMode(true);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());

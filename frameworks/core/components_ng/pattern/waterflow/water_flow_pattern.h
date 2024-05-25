@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,8 +20,8 @@
 #include "core/components_ng/pattern/waterflow/water_flow_accessibility_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_content_modifier.h"
 #include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_algorithm_base.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_info_base.h"
+#include "core/components_ng/pattern/waterflow/layout/water_flow_layout_algorithm_base.h"
+#include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 
@@ -150,6 +150,8 @@ public:
     void OnSectionChanged(int32_t start);
 
     void OnSectionChangedNow(int32_t start);
+
+    void DumpAdvanceInfo() override;
 
 private:
     DisplayMode GetDefaultScrollBarDisplayMode() const override

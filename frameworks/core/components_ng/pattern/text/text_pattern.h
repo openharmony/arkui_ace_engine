@@ -73,7 +73,7 @@ public:
         pManager_ = AceType::MakeRefPtr<ParagraphManager>();
     }
 
-    ~TextPattern() override = default;
+    ~TextPattern() override;
 
     SelectionInfo GetSpansInfo(int32_t start, int32_t end, GetSpansMethod method);
     std::list<ResultObject> GetSpansInfoInStyledString(int32_t start, int32_t end);
@@ -127,6 +127,10 @@ public:
 
     void OnModifyDone() override;
 
+    void OnWindowHide() override;
+
+    void OnWindowShow() override;
+
     void PreCreateLayoutWrapper();
 
     void BeforeCreateLayoutWrapper() override;
@@ -168,20 +172,7 @@ public:
 
     void GetGlobalOffset(Offset& offset);
 
-    RectF GetTextContentRect() const override
-    {
-        auto textRect = contentRect_;
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, textRect);
-        auto renderContext = host->GetRenderContext();
-        CHECK_NULL_RETURN(renderContext, textRect);
-        CHECK_NULL_RETURN(pManager_, textRect);
-        if (!renderContext->GetClipEdge().value_or(false) &&
-            LessNotEqual(textRect.Width(), pManager_->GetLongestLine())) {
-            textRect.SetWidth(pManager_->GetLongestLine());
-        }
-        return textRect;
-    }
+    RectF GetTextContentRect(bool isActualText = false) const override;
 
     float GetBaselineOffset() const
     {
@@ -468,7 +459,7 @@ public:
         return recoverEnd_;
     }
 
-    void OnAreaChangedInner() override;
+    void OnHandleAreaChanged() override;
     void RemoveAreaChangeInner();
 
     void ResetDragOption() override
@@ -661,6 +652,7 @@ protected:
     void HandleSelectionDown(int32_t start, int32_t end);
     void HandleSelection(int32_t start, int32_t end);
     float GetTextHeight();
+    int32_t GetTextLength();
 
     virtual bool CanStartAITask()
     {

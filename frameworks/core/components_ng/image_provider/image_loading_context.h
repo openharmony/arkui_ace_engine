@@ -30,7 +30,7 @@ using PendingMakeCanvasImageTask = std::function<void()>;
 // [ImageLoadingContext] do two things:
 // 1. Provide interfaces for who owns it, notify it's owner when loading events come.
 // 2. Drive [ImageObject] to load and make [CanvasImage].
-class ImageLoadingContext : public AceType {
+class ACE_FORCE_EXPORT ImageLoadingContext : public AceType {
     DECLARE_ACE_TYPE(ImageLoadingContext, AceType);
 
 public:

@@ -1211,9 +1211,12 @@ void JSTextField::SetShowError(const JSCallbackInfo& info)
 {
     auto jsValue = info[0];
     if (Container::IsCurrentUseNewPipeline()) {
+        bool isVisible = false;
         std::string errorText;
-        ParseJsString(jsValue, errorText);
-        TextFieldModel::GetInstance()->SetShowError(errorText, !jsValue->IsUndefined());
+        if (ParseJsString(jsValue, errorText)) {
+            isVisible = true;
+        }
+        TextFieldModel::GetInstance()->SetShowError(errorText, isVisible);
     }
 }
 
@@ -1341,10 +1344,7 @@ void JSTextField::SetCustomKeyboard(const JSCallbackInfo& info)
         return;
     }
     auto jsValue = info[0];
-    if (!jsValue->IsObject()) {
-        return;
-    }
-    if (jsValue->IsUndefined() || jsValue->IsNull()) {
+    if (jsValue->IsUndefined() || jsValue->IsNull() || !jsValue->IsObject()) {
         TextFieldModel::GetInstance()->SetCustomKeyboard(nullptr);
         return;
     }

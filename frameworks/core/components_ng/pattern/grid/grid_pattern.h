@@ -168,8 +168,6 @@ public:
     OverScrollOffset GetOverScrollOffset(double delta) const override;
     void GetEndOverScrollIrregular(OverScrollOffset& offset, float delta) const;
 
-    bool OutBoundaryCallback() override;
-
     void ScrollPage(bool reverse, bool smooth = false) override;
 
     bool UpdateStartIndex(int32_t index);
@@ -238,6 +236,11 @@ public:
     bool IsPredictOutOfRange(int32_t index) const;
 
     bool IsReverse() const override;
+
+    Axis GetAxis() const override
+    {
+        return gridLayoutInfo_.axis_;
+    }
 
 private:
     /**

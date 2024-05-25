@@ -361,7 +361,7 @@ private:
     void PrepareSurface();
     void RegisterPlatformViewEvent();
     void PlatformViewDispatchTouchEvent(const TouchLocationInfo& changedPoint);
-    void UpdatePlatformViewLayout();
+    void UpdatePlatformViewLayoutIfNeeded();
 #endif
 #endif
 
@@ -381,6 +381,8 @@ private:
     RefPtr<RenderContext> renderContextForPlatformView_;
     WeakPtr<RenderContext> renderContextForPlatformViewWeakPtr_;
     RefPtr<PlatformViewInterface> platformView_;
+    SizeF lastDrawSize_;
+    OffsetF lastOffset_;
 #endif
 
     std::shared_ptr<OH_NativeXComponent> nativeXComponent_;
@@ -416,7 +418,7 @@ private:
     bool hasReleasedSurface_ = false;
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
     bool isEnableAnalyzer_ = false;
-    Rotation rotation_ = Rotation::ROTATION_0;
+    uint32_t rotation_ = 0;
 #ifdef OHOS_PLATFORM
     int64_t startIncreaseTime_ = 0;
     OH_NativeXComponent_TouchEvent lastTouchInfo_;

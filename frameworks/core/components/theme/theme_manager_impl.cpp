@@ -16,6 +16,7 @@
 #include "core/components/theme/theme_manager_impl.h"
 #include "shadow_theme.h"
 
+#include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/components/badge/badge_theme.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/calendar/calendar_theme.h"
@@ -151,6 +152,7 @@ const std::unordered_map<ThemeType, RefPtr<Theme>(*)(const RefPtr<ThemeConstants
     { NG::LinearLayoutTheme::TypeId(), &ThemeBuildFunc<NG::LinearLayoutTheme::Builder> },
     { NG::StackTheme::TypeId(), &ThemeBuildFunc<NG::StackTheme::Builder> },
     { NG::ContainerModalTheme::TypeId(), &ThemeBuildFunc<NG::ContainerModalTheme::Builder> },
+    { AgingAdapationDialogTheme::TypeId(), &ThemeBuildFunc<AgingAdapationDialogTheme::Builder> },
 };
 } // namespace
 

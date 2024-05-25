@@ -670,7 +670,8 @@ void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
             auto webPattern = frameNode->GetPattern<WebPattern>();
             CHECK_NULL_VOID(webPattern);
             bool isWebmageDrag = webPattern->IsImageDrag();
-            CHECK_NULL_VOID(isWebmageDrag && SystemProperties::GetDeviceType() == DeviceType::PHONE);
+            WebInfoType type = webPattern->GetWebInfoType();
+            CHECK_NULL_VOID(isWebmageDrag && type == WebInfoType::TYPE_MOBILE);
 #endif
         } else {
             bool isBindOverlayValue = frameNode->GetLayoutProperty()->GetIsBindOverlayValue(false);
@@ -1022,7 +1023,7 @@ void DragEventActuator::UpdatePreviewOptionFromModifier(const RefPtr<FrameNode>&
     auto opacity = imageContext->GetOpacity();
 
     OptionsAfterApplied options;
-    if (opacity.has_value() && (opacity.value())<= MAX_OPACITY && (opacity.value()) > MIN_OPACITY) {
+    if (opacity.has_value() && (opacity.value()) <= MAX_OPACITY && (opacity.value()) > MIN_OPACITY) {
         options.opacity = opacity.value();
     } else {
         options.opacity = DEFAULT_OPACITY;

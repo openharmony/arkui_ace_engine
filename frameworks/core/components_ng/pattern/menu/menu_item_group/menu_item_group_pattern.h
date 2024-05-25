@@ -88,12 +88,15 @@ public:
 
     // Travel children to update items icon info
     void UpdateMenuItemIconInfo();
+    void OnExtItemPressed(bool press, bool beforeGroup);
+    void OnIntItemPressed(int32_t index, bool press);
 
 protected:
     void OnMountToParentDone() override;
 
 private:
     void ModifyFontSize();
+    void ModifyDivider();
 
     int32_t headerIndex_ = -1;
     int32_t footerIndex_ = -1;

@@ -1397,6 +1397,13 @@ HWTEST_F(NavigationPatternTestNg, NavigationToolbarConfigurationTest003, TestSiz
     bar.icon = "icon";
     bar.action = []() {};
     bar.activeIcon = "activeIcon";
+    auto onApply = [](WeakPtr<NG::FrameNode> frameNode) {
+        auto node = frameNode.Upgrade();
+        EXPECT_NE(node, nullptr);
+    };
+    std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = onApply;
+    bar.activeIconSymbol = iconSymbol;
+    bar.iconSymbol = iconSymbol;
     bar.status = NG::NavToolbarItemStatus::ACTIVE;
     std::vector<NG::BarItem> toolBarItems;
     toolBarItems.push_back(bar);
@@ -1443,6 +1450,8 @@ HWTEST_F(NavigationPatternTestNg, NavigationToolbarConfigurationTest003, TestSiz
     auto barItemPattern = barItemNode->GetPattern<BarItemPattern>();
     EXPECT_EQ(barItemPattern->GetToolbarItemStatus(), NavToolbarItemStatus::ACTIVE);
     EXPECT_EQ(barItemPattern->GetCurrentIconStatus(), ToolbarIconStatus::ACTIVE);
+    EXPECT_NE(barItemPattern->GetActiveIconSymbol(), nullptr);
+    EXPECT_NE(barItemPattern->GetInitialIconSymbol(), nullptr);
 }
 
 /**
@@ -1958,5 +1967,38 @@ HWTEST_F(NavigationPatternTestNg, NavigationSetSymbolMenusTest001, TestSize.Leve
 
     auto navBarItem = navBarMenus.front();
     ASSERT_NE(navBarItem.iconSymbol, nullptr);
+}
+
+/**
+ * @tc.name: NavigationPatternTest_017
+ * @tc.desc: Test OnLanguageConfigurationUpdate function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_017, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation =
+        AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    /**
+     * @tc.steps: step1. set to RightToLeft mode, call OnLanguageConfigurationUpdate, then get current isRightToLeft_.
+     * @tc.expected: check whether the pattern->isRightToLeft_ is correct.
+     */
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    navigationPattern->OnLanguageConfigurationUpdate();
+    EXPECT_EQ(navigationPattern->isRightToLeft_, true);
+
+    /**
+     * @tc.steps: step2. set to LeftToRight mode, call OnLanguageConfigurationUpdate, then get current isRightToLeft_.
+     * @tc.expected: check whether the pattern->isRightToLeft_ is correct.
+     */
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+    navigationPattern->OnLanguageConfigurationUpdate();
+    EXPECT_EQ(navigationPattern->isRightToLeft_, false);
 }
 } // namespace OHOS::Ace::NG

@@ -21,9 +21,8 @@
 #include <optional>
 #include <sstream>
 
-#include "core/components/scroll/scroll_controller_base.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_algorithm_base.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_info_base.h"
+#include "core/components_ng/pattern/waterflow/layout/water_flow_layout_algorithm_base.h"
+#include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 #include "core/components_ng/property/measure_property.h"
 
@@ -115,14 +114,6 @@ public:
     void JumpTo(const std::pair<float, float>& item);
 
     /**
-     * @brief Get the Segment index of a FlowItem
-     *
-     * @param itemIdx
-     * @return segment index.
-     */
-    int32_t GetSegment(int32_t itemIdx) const;
-
-    /**
      * @brief Init data structures based on new WaterFlow Sections.
      *
      * @param sections vector of Sections info.
@@ -207,17 +198,11 @@ public:
      */
     std::vector<std::pair<float, int32_t>> endPosArray_;
 
-    // Stores the tail item index of each segment.
-    std::vector<int32_t> segmentTails_;
-
     // margin of each segment
     std::vector<PaddingPropertyF> margins_;
 
     // Stores the start position of each segment.
     std::vector<float> segmentStartPos_ = { 0.0f };
-
-    // K: item index; V: corresponding segment index
-    mutable std::unordered_map<int32_t, int32_t> segmentCache_;
 
     void PrintWaterFlowItems() const;
 };

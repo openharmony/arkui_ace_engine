@@ -197,6 +197,7 @@ bool TaskExecutorImpl::OnPostTask(
 
     TaskExecutor::Task wrappedTask =
         currentId >= 0 ? WrapTaskWithContainer(std::move(task), currentId, std::move(traceIdFunc)) : std::move(task);
+
     switch (type) {
         case TaskType::PLATFORM:
             return PostTaskToTaskRunner(platformRunner_, std::move(wrappedTask), delayTime, name);

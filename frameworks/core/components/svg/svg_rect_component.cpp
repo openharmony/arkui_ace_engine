@@ -92,7 +92,6 @@ void SvgRectComponent::SetY(const Dimension& y)
 void SvgRectComponent::SetRx(const Dimension& rx)
 {
     declaration_->SetRx(rx);
-
 }
 
 void SvgRectComponent::SetRy(const Dimension& ry)

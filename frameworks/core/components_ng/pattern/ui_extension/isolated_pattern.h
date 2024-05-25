@@ -72,13 +72,17 @@ public:
     void FireOnErrorCallbackOnUI(
         int32_t code, const std::string& name, const std::string& msg);
 
-protected:
-    virtual void DispatchPointerEvent(
-        const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
-    virtual void DispatchKeyEvent(const KeyEvent& event) override;
-
 private:
     void InitializeRender(void* runtime);
+
+    void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
+    void DispatchFocusActiveEvent(bool isFocusActive) override;
+    bool HandleKeyEvent(const KeyEvent& event) override;
+    void HandleFocusEvent() override;
+    void HandleBlurEvent() override;
+
+    void OnAttachToFrameNode() override;
+
     int32_t ApplyIsolatedId();
 
     RefPtr<DynamicComponentRenderer> dynamicComponentRenderer_;

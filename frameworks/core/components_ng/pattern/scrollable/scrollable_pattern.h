@@ -119,7 +119,7 @@ public:
     virtual bool IsAtBottom() const = 0;
     virtual bool OutBoundaryCallback()
     {
-        return IsAtTop() || IsAtBottom();
+        return IsOutOfBoundary();
     }
 
     virtual bool IsOutOfBoundary(bool useCurrentDelta = true)
@@ -252,7 +252,6 @@ public:
     }
 
     void GetParentNavigation();
-    void GetParentModalSheet();
 
     /**
      * @brief Return the portion of delta that's in overScroll range.
@@ -292,6 +291,14 @@ public:
     }
 
     void SetMaxFlingVelocity(double max);
+
+    double GetMaxFlingVelocity() const
+    {
+        CHECK_NULL_RETURN(scrollableEvent_, 0.0);
+        auto scrollable = scrollableEvent_->GetScrollable();
+        CHECK_NULL_RETURN(scrollable, 0.0);
+        return scrollable->GetMaxFlingVelocity();
+    }
 
     virtual void StopAnimate();
     bool AnimateRunning() const
@@ -340,8 +347,13 @@ public:
         float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll = false);
     bool CanOverScroll(int32_t source)
     {
-        return (IsScrollableSpringEffect() && source != SCROLL_FROM_AXIS && source != SCROLL_FROM_BAR &&
-                IsScrollable() && (!ScrollableIdle() || animateOverScroll_ || animateCanOverScroll_));
+        auto canOverScroll = (IsScrollableSpringEffect() && source != SCROLL_FROM_AXIS && source != SCROLL_FROM_BAR &&
+                              IsScrollable() && (!ScrollableIdle() || animateOverScroll_ || animateCanOverScroll_));
+        if (canOverScroll != lastCanOverScroll_) {
+            lastCanOverScroll_ = canOverScroll;
+            AddScrollableFrameInfo(source);
+        }
+        return canOverScroll;
     }
     void MarkSelectedItems();
     bool ShouldSelectScrollBeStopped();
@@ -368,6 +380,12 @@ public:
             }
             StopScrollBarAnimatorByProxy();
             StartScrollBarAnimatorByProxy();
+        }
+        if (scrollSource == SCROLL_FROM_NONE) {
+            if (lastScrollSource_ != scrollSource_) {
+                AddScrollableFrameInfo(scrollSource_);
+            }
+            lastScrollSource_ = scrollSource_;
         }
         scrollSource_ = scrollSource;
     }
@@ -546,6 +564,28 @@ public:
 
     void CheckRestartSpring(bool sizeDiminished);
 
+    Axis GetScrollablePanDirection()
+    {
+        CHECK_NULL_RETURN(scrollableEvent_, Axis::NONE);
+        auto scrollable = scrollableEvent_->GetScrollable();
+        CHECK_NULL_RETURN(scrollable, Axis::NONE);
+        return scrollable->GetPanDirection();
+    }
+
+    void AddEventsFiredInfo(ScrollableEventType eventType);
+
+    void AddScrollableFrameInfo(int32_t scrollSource);
+
+    void GetEdgeEffectDumpInfo();
+
+    void GetAxisDumpInfo();
+
+    void GetPanDirectionDumpInfo();
+    
+    void GetPaintPropertyDumpInfo();
+
+    void DumpAdvanceInfo() override;
+
     void HandleMoveEventInComp(const PointF& point);
     void HandleLeaveHotzoneEvent();
     void SetHotZoneScrollCallback(std::function<void(void)>&& func)
@@ -721,7 +761,6 @@ private:
     RefreshCoordinationMode CoordinateWithRefresh(double& offset, int32_t source, bool isAtTop);
     bool CoordinateWithNavigation(double& offset, int32_t source, bool isAtTop);
     void NotifyFRCSceneInfo(const std::string& scene, double velocity, SceneStatus sceneStatus);
-    ModalSheetCoordinationMode CoordinateWithSheet(double& offset, int32_t source, bool isAtTop);
     bool NeedCoordinateScrollWithNavigation(double offset, int32_t source, const OverScrollOffset& overOffsets);
 
     Axis axis_ = Axis::VERTICAL;
@@ -730,6 +769,7 @@ private:
     RefPtr<ScrollEdgeEffect> scrollEffect_;
     RefPtr<RefreshCoordination> refreshCoordination_;
     int32_t scrollSource_ = SCROLL_FROM_NONE;
+    int32_t lastScrollSource_ = SCROLL_FROM_NONE;
     // scrollBar
     RefPtr<ScrollBar> scrollBar_;
     RefPtr<NG::ScrollBarProxy> scrollBarProxy_;
@@ -738,7 +778,6 @@ private:
     float estimatedHeight_ = 0.0f;
     bool isReactInParentMovement_ = false;
     bool isRefreshInReactive_ = false; // true if Refresh component is ready to receive scroll offset.
-    bool isSheetInReactive_ = false;
     bool isCoordEventNeedSpring_ = true;
     double scrollBarOutBoundaryExtent_ = 0.0;
     double friction_ = 0.0;
@@ -764,7 +803,6 @@ private:
     RefPtr<PanEvent> boxSelectPanEvent_;
 
     RefPtr<NavBarPattern> navBarPattern_;
-    RefPtr<SheetPresentationPattern> sheetPattern_;
     std::vector<RefPtr<ScrollingListener>> scrollingListener_;
 
     EdgeEffect edgeEffect_ = EdgeEffect::NONE;
@@ -795,6 +833,11 @@ private:
     void AddHotZoneSenceInterface(SceneStatus scene);
     RefPtr<InputEvent> mouseEvent_;
     bool isMousePressed_ = false;
+    bool lastCanOverScroll_ = false;
+
+    // dump info
+    std::list<ScrollableEventsFiredInfo> eventsFiredInfos_;
+    std::list<ScrollableFrameInfo> scrollableFrameInfos_;
 };
 } // namespace OHOS::Ace::NG
 

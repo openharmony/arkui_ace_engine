@@ -155,6 +155,15 @@ public:
     }
     OffsetF GetShowMenuOffset(const RefPtr<BarItemNode> barItemNode, RefPtr<FrameNode> menuNode);
 
+    void SetKeyboardOffset(float keyboardOffset)
+    {
+        keyboardOffset_ = keyboardOffset;
+    }
+    float GetKeyboardOffset()
+    {
+        return keyboardOffset_;
+    }
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
@@ -180,6 +189,7 @@ private:
     bool isTitleMenuNodeShowing_ = false;
     NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
     int32_t maxMenuNums_ = -1;
+    float keyboardOffset_ = 0.0f;
 };
 
 } // namespace OHOS::Ace::NG

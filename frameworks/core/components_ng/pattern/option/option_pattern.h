@@ -74,6 +74,11 @@ public:
         text_ = text;
     }
 
+    RefPtr<FrameNode> GetTextNode() const
+    {
+        return text_;
+    }
+
     void SetIconNode(const RefPtr<FrameNode>& icon)
     {
         icon_ = icon;

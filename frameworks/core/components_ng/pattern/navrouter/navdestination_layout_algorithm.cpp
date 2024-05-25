@@ -88,7 +88,7 @@ NavSafeArea CheckIgnoreLayoutSafeArea(LayoutWrapper* layoutWrapper,
     NavSafeArea safeArea;
     auto opts = navDestinationLayoutProperty->GetIgnoreLayoutSafeAreaValue({.type = SAFE_AREA_TYPE_NONE,
         .edges = SAFE_AREA_TYPE_NONE});
-    
+
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, safeArea);
     auto inset = pipeline->GetSafeArea();
@@ -203,9 +203,17 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationGrou
     auto contentWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(contentWrapper);
     auto geometryNode = contentWrapper->GetGeometryNode();
-    auto contentOffset = OffsetT<float>(0.0f, 0.0f);
+    auto pattern = hostNode->GetPattern<NavDestinationPattern>();
+    float keyboardOffset = 0.0f;
+    if (pattern) {
+        keyboardOffset = pattern->GetKeyboardOffset();
+        if (pattern->NeedIgnoreKeyboard()) {
+            keyboardOffset = 0.0f;
+        }
+    }
+    auto contentOffset = OffsetF(0.0f, keyboardOffset);
     if (!navDestinationLayoutProperty->GetHideTitleBar().value_or(false)) {
-        contentOffset = OffsetT<float>(0.0f, titlebarHeight);
+        contentOffset += OffsetF(0.0f, titlebarHeight);
     }
     const auto& padding = navDestinationLayoutProperty->CreatePaddingAndBorder();
     contentOffset.AddX(padding.left.value_or(0.0f));

@@ -519,6 +519,7 @@ public:
         }
     }
     void DumpOverlayInfo() const;
+    void ReloadBuilderNodeConfig();
 
 private:
     void PopToast(int32_t targetId);

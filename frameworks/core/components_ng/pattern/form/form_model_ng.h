@@ -49,7 +49,8 @@ public:
     static void SetDimension(FrameNode* frameNode, int32_t value);
     static void SetModuleName(FrameNode* frameNode, const std::string& value);
     static void SetSize(FrameNode* frameNode, const Dimension& width, const Dimension& height);
-    int32_t RequestPublishFormWithSnapshot(const AAFwk::Want& want, int64_t& formId) override;
+    int32_t RequestPublishFormWithSnapshot(const AAFwk::Want& want,
+        const std::string& formBindingDataStr, int64_t& formId) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_FORM_MODEL_NG_H

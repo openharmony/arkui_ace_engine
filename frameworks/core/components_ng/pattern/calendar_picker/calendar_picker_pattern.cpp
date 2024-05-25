@@ -64,7 +64,7 @@ void CalendarPickerPattern::OnModifyDone()
 void CalendarPickerPattern::InitDateIndex()
 {
     std::vector<std::string> outOrder;
-    bool result = Localization::GetInstance()->GetDateColumnFormatOrder(outOrder);
+    bool result = Localization::GetInstance()->GetDateOrder(outOrder);
     if (!result || outOrder.size() < DATE_NODE_COUNT) {
         yearIndex_ = YEAR_INDEX;
         monthIndex_ = MONTH_INDEX;

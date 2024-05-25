@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/text/text_styles.h"
+#include "core/components_ng/pattern/text/span/tlv_util.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/utils.h"
@@ -276,6 +277,9 @@ public:
     std::string GetSpanContent();
     uint32_t GetSymbolUnicode();
     std::string SymbolColorToString();
+
+    virtual bool EncodeTlv(std::vector<uint8_t>& buff);
+    static RefPtr<SpanItem> DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor);
 
 private:
     std::optional<TextStyle> textStyle_;
@@ -604,6 +608,9 @@ public:
     ResultObject GetSpanResultObject(int32_t start, int32_t end) override;
     RefPtr<SpanItem> GetSameStyleSpanItem() const override;
     ACE_DISALLOW_COPY_AND_MOVE(ImageSpanItem);
+
+    bool EncodeTlv(std::vector<uint8_t>& buff) override;
+    static RefPtr<ImageSpanItem> DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor);
 
     ImageSpanOptions options;
 };

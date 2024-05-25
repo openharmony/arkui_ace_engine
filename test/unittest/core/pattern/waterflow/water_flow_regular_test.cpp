@@ -73,4 +73,42 @@ HWTEST_F(WaterFlowTestNg, ScrollToEdge001, TestSize.Level1)
     EXPECT_EQ(GetChildOffset(frameNode_, info->footerIndex_), OffsetF(0.0f, 750.0f));
     // scrolled to footer
 }
+
+/**
+ * @tc.name: Constraint001
+ * @tc.desc: Test Layout when the layoutConstraint changes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Constraint001, TestSize.Level1)
+{
+    Create([](WaterFlowModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(400.0f));
+        ViewAbstract::SetHeight(CalcLength(600.f));
+        model.SetColumnsTemplate("1fr 1fr");
+        CreateItem(60);
+    });
+
+    auto& info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 8);
+    EXPECT_EQ(GetChildWidth(frameNode_, 0), 200.0f);
+
+    layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(500.0f), CalcLength(Dimension(600.0f))));
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildWidth(frameNode_, 4), 250.0f);
+
+    layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(200.0f), CalcLength(Dimension(700.0f))));
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildWidth(frameNode_, 4), 100.0f);
+    EXPECT_EQ(info->endIndex_, 9);
+
+    UpdateCurrentOffset(-220.0f);
+    EXPECT_EQ(info->storedOffset_, -20.0f);
+    EXPECT_EQ(info->startIndex_, 3);
+    layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(600.0f), CalcLength(Dimension(700.0f))));
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildWidth(frameNode_, 4), 300.0f);
+    EXPECT_EQ(info->storedOffset_, -20.0f);
+    EXPECT_EQ(info->startIndex_, 3);
+}
 } // namespace OHOS::Ace::NG

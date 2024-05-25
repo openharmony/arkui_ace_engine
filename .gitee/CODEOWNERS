@@ -168,6 +168,7 @@ frameworks/core/components_ng/pattern/ui_extension/  @lushi1202 @keerecles @Zhan
 frameworks/core/components_ng/pattern/video/  @sunbees
 frameworks/core/components_ng/pattern/view_context/  @hehongyang9
 frameworks/core/components_ng/pattern/waterflow/  @zcdqs
+frameworks/core/components_ng/pattern/waterflow/layout/sliding_window/  @zhoutianer
 frameworks/core/components_ng/pattern/web/  @LongLie
 frameworks/core/components_ng/pattern/window_scene/  @liuchao92
 frameworks/core/components_ng/pattern/xcomponent/  @sunbees
@@ -328,6 +329,9 @@ advanced_ui_component/tabtitlebar/ @hanyujia1
 advanced_ui_component/toolbar/ @hanyujia1
 advanced_ui_component/treeview/ @hanyujia1
 advanced_ui_component/splitlayout/ @hanyujia1
+advanced_ui_component/atomicservicenavigation @giteewzp
+advanced_ui_component/atomicservicetabs @giteewzp
+advanced_ui_component/interstitialdialogaction @giteewzp
 
 [Build configs]
 build/ @sunfei2021

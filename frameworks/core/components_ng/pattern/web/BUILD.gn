@@ -56,7 +56,6 @@ build_component_ng("web_pattern_ng") {
     ]
 
     configs = [ ":ohos_web_config" ]
-    configs += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:render_service_client_config" ]
     external_deps = [
       "ability_runtime:app_manager",
       "app_file_service:fileuri_native",

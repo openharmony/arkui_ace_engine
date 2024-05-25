@@ -61,6 +61,12 @@ public:
         const RefPtr<BarItemNode>& barItemNode, const BarItem& barItem, bool isButtonEnabled);
     static void BuildMoreIemNode(const RefPtr<BarItemNode>& barItemNode, bool isButtonEnabled);
     static uint32_t GetOrInitMaxMenuNums(RefPtr<NavigationBarTheme>& theme, RefPtr<TitleBarNode> titleBarNode);
+    static void HandleLongPress(const WeakPtr<FrameNode>& buttonNode, const BarItem& menuItem, bool isMoreButton);
+    static void HandleLongPressActionEnd(const WeakPtr<FrameNode>& buttonNode);
+
+private:
+    static void InitTitleBarButtonLongPressEvent(const RefPtr<FrameNode>& buttonNode,
+        bool isMoreButton, const BarItem& menuItem);
 };
 
 } // namespace OHOS::Ace::NG

@@ -1483,6 +1483,11 @@ bool RichEditorPattern::GetCaretVisible() const
     return caretVisible_;
 }
 
+void RichEditorPattern::OnWindowHide()
+{
+    ScrollablePattern::OnWindowHide();
+}
+
 void RichEditorPattern::SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle)
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetUpdateSpanStyle");
@@ -1760,6 +1765,24 @@ void RichEditorPattern::GetSelectSpansPositionInfo(
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    std::find_if(spans_.begin(), spans_.end(), [&start](const RefPtr<SpanItem>& spanItem) {
+        if ((spanItem->rangeStart <= start) && (start < spanItem->position)) {
+            if (spanItem->spanItemType == NG::SpanItemType::NORMAL) {
+                return true;
+            }
+            start += StringUtils::ToWstring(spanItem->content).length();
+        }
+        return false;
+    });
+    std::find_if(spans_.rbegin(), spans_.rend(), [&end](const RefPtr<SpanItem>& spanItem) {
+        if ((spanItem->rangeStart < end) && (end <= spanItem->position)) {
+            if (spanItem->spanItemType == NG::SpanItemType::NORMAL) {
+                return true;
+            }
+            end = spanItem->rangeStart;
+        }
+        return false;
+    });
     startPositionSpanInfo = GetSpanPositionInfo(start);
     startPositionSpanInfo.spanIndex_ =
         std::clamp(startPositionSpanInfo.spanIndex_, 0, static_cast<int32_t>(host->GetChildren().size()) - 1);
@@ -3183,6 +3206,12 @@ std::optional<MiscServices::TextConfig> RichEditorPattern::GetMiscTextConfig()
     auto offset = KEYBOARD_AVOID_OFFSET.ConvertToPx();
     auto caretTop = caretOffset.GetY() + windowRect.Top() + parentGlobalOffset_.GetY();
     height = caretTop + caretHeight + offset - positionY;
+
+    auto manager = pipeline->GetSafeAreaManager();
+    if (manager) {
+        auto keyboardOffset = manager->GetKeyboardOffset();
+        positionY -= keyboardOffset;
+    }
 
     MiscServices::CursorInfo cursorInfo { .left = caretOffset.GetX() + windowRect.Left() + parentGlobalOffset_.GetX(),
         .top = caretTop,
@@ -5794,10 +5823,9 @@ void RichEditorPattern::HandleSurfacePositionChanged(int32_t posX, int32_t posY)
 
 void RichEditorPattern::DumpInfo()
 {
+    auto& dumpLog = DumpLog::GetInstance();
     if (customKeyboardBuilder_) {
-        DumpLog::GetInstance().AddDesc(std::string("CustomKeyboard: true")
-                                           .append(", Attached: ")
-                                           .append(std::to_string(isCustomKeyboardAttached_)));
+        dumpLog.AddDesc(std::string("CustomKeyboard, Attached: ").append(std::to_string(isCustomKeyboardAttached_)));
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -5805,12 +5833,13 @@ void RichEditorPattern::DumpInfo()
     CHECK_NULL_VOID(context);
     auto richEditorTheme = context->GetTheme<RichEditorTheme>();
     CHECK_NULL_VOID(richEditorTheme);
-    DumpLog::GetInstance().AddDesc(std::string("caret offset: ").append(GetCaretRect().GetOffset().ToString()));
-    DumpLog::GetInstance().AddDesc(
-        std::string("caret height: ")
+    dumpLog.AddDesc(std::string("caret offset: ").append(GetCaretRect().GetOffset().ToString()));
+    dumpLog.AddDesc(std::string("caret height: ")
             .append(std::to_string(NearZero(GetCaretRect().Height())
                                        ? richEditorTheme->GetDefaultCaretHeight().ConvertToPx()
                                        : GetCaretRect().Height())));
+    dumpLog.AddDesc(std::string("text rect: ").append(richTextRect_.ToString()));
+    dumpLog.AddDesc(std::string("content rect: ").append(contentRect_.ToString()));
 }
 
 bool RichEditorPattern::HasFocus() const
@@ -7989,9 +8018,13 @@ bool RichEditorPattern::CursorMoveLineEnd()
 
 void RichEditorPattern::HandleSelectFontStyle(KeyCode code)
 {
+    if (textSelector_.SelectNothing()) {
+        return;
+    }
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     UpdateSelectSpanStyle(textSelector_.GetTextStart(), textSelector_.GetTextEnd(), code);
-    StartTwinkling();
+    StopTwinkling();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 

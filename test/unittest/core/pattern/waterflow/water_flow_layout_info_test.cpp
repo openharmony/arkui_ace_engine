@@ -22,7 +22,7 @@
 #include "test/unittest/core/pattern/test_ng.h"
 #include "test/unittest/core/pattern/waterflow/water_flow_item_maps.h"
 
-#include "core/components_ng/pattern/waterflow/water_flow_layout_info.h"
+#include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
 #undef private
 #undef protected
 
@@ -272,7 +272,7 @@ HWTEST_F(WaterFlowLayoutInfoTest, InitSegments001, TestSize.Level1)
     auto mod = SECTION_7;
     mod.push_back(ADD_SECTION_6[0]);
     info.InitSegments(mod, 2);
-    EXPECT_EQ(info.items_.size(), 4);
+    EXPECT_EQ(info.items_.size(), 5);
     EXPECT_EQ(info.items_[1].size(), 2);
 }
 } // namespace OHOS::Ace::NG

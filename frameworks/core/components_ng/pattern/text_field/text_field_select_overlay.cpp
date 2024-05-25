@@ -58,6 +58,8 @@ bool TextFieldSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
     UpdatePattern(request);
     CHECK_NULL_RETURN(!pattern->IsTransparent(), false);
     pattern->ShowSelect();
+    SetScrollableParentCallback();
+    SetkeyBoardChangeCallback();
     return true;
 }
 
@@ -109,6 +111,8 @@ void TextFieldSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason
             pattern->OnBackPressed();
         }
     }
+    ResetScrollableParentCallback();
+    RemoveKeyboardChangeCallback();
 }
 
 void TextFieldSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType)

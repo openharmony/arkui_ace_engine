@@ -86,6 +86,13 @@ enum WebOverlayType { INSERT_OVERLAY, SELECTION_OVERLAY, INVALID_OVERLAY };
 #endif
 } // namespace
 
+enum class WebInfoType : int32_t {
+    TYPE_MOBILE,
+    TYPE_TABLET,
+    TYPE_2IN1,
+    TYPE_UNKNOWN
+};
+
 class WebPattern : public NestableScrollContainer, public TextBase {
     DECLARE_ACE_TYPE(WebPattern, NestableScrollContainer, TextBase);
 
@@ -515,6 +522,7 @@ public:
     bool Backward();
     void OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMenuOption);
     void CloseKeyboard();
+    WebInfoType GetWebInfoType();
     void RequestFocus();
 
 private:
@@ -532,6 +540,9 @@ private:
 
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnAttachToMainTree() override;
+    void OnDetachFromMainTree() override;
+
     void OnWindowShow() override;
     void OnWindowHide() override;
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
@@ -827,6 +838,7 @@ private:
     std::optional<ScriptItems> onDocumentStartScriptItems_;
     std::optional<ScriptItems> onDocumentEndScriptItems_;
     bool isOfflineMode_ = false;
+    bool isAttachedToMainTree_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
     bool accessibilityState_ = false;
     RefPtr<WebAccessibilityNode> webAccessibilityNode_;

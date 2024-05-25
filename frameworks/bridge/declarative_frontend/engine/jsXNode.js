@@ -173,7 +173,7 @@ class JSBuilderNode extends BaseNode {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this.params_ = params;
         this.updateFuncByElmtId.clear();
-        this.nodePtr_ = super.create(builder.builder, this.params_, this.updateNodeFromNative);
+        this.nodePtr_ = super.create(builder.builder, this.params_, this.updateNodeFromNative, this.updateConfiguration);
         this._nativeRef = getUINativeModule().nativeUtils.createNativeStrongRef(this.nodePtr_);
         if (this.frameNode_ === undefined || this.frameNode_ === null) {
             this.frameNode_ = new BuilderRootFrameNode(this.uiContext_);
@@ -188,6 +188,16 @@ class JSBuilderNode extends BaseNode {
         this.updateStart();
         this.purgeDeletedElmtIds();
         this.params_ = param;
+        Array.from(this.updateFuncByElmtId.keys()).sort((a, b) => {
+            return (a < b) ? -1 : (a > b) ? 1 : 0;
+        }).forEach(elmtId => this.UpdateElement(elmtId));
+        this.updateEnd();
+        __JSScopeUtil__.restoreInstanceId();
+    }
+    updateConfiguration() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.updateStart();
+        this.purgeDeletedElmtIds();
         Array.from(this.updateFuncByElmtId.keys()).sort((a, b) => {
             return (a < b) ? -1 : (a > b) ? 1 : 0;
         }).forEach(elmtId => this.UpdateElement(elmtId));
@@ -1317,6 +1327,10 @@ class LengthMetrics {
     static lpx(value) {
         return new LengthMetrics(value, LengthUnit.LPX);
     }
+    static resource(res) {
+        let length = getUINativeModule().nativeUtils.resoureToLengthMetrics(res);
+        return new LengthMetrics(length[0], length[1]);
+    }
 }
 const MAX_CHANNEL_VALUE = 0xFF;
 const MAX_ALPHA_VALUE = 1;
@@ -1338,6 +1352,9 @@ class ColorMetrics {
         const green = (value >> 8) & 0x000000FF;
         const blue = value & 0x000000FF;
         const alpha = (value >> 24) & 0x000000FF;
+        if (alpha === 0) {
+            return new ColorMetrics(red, green, blue);
+        }
         return new ColorMetrics(red, green, blue, alpha);
     }
     static rgba(red, green, blue, alpha = MAX_ALPHA_VALUE) {
@@ -1516,6 +1533,7 @@ class RenderNode {
             0, 0, 1, 0,
             0, 0, 0, 1];
         this.translationValue = { x: 0, y: 0 };
+        this.lengthMetricsUnitValue = LengthMetricsUnit.DEFAULT;
         if (type === 'BuilderRootFrameNode' || type === 'CustomFrameNode') {
             return;
         }
@@ -1563,7 +1581,7 @@ class RenderNode {
             this.frameValue.x = this.checkUndefinedOrNullWithDefaultValue(position.x, 0);
             this.frameValue.y = this.checkUndefinedOrNullWithDefaultValue(position.y, 0);
         }
-        getUINativeModule().common.setPosition(this.nodePtr, false, this.frameValue.x, this.frameValue.y);
+        getUINativeModule().renderNode.setPosition(this.nodePtr, this.frameValue.x, this.frameValue.y, this.lengthMetricsUnitValue);
     }
     set rotation(rotation) {
         if (rotation === undefined || rotation === null) {
@@ -1574,7 +1592,7 @@ class RenderNode {
             this.rotationValue.y = this.checkUndefinedOrNullWithDefaultValue(rotation.y, 0);
             this.rotationValue.z = this.checkUndefinedOrNullWithDefaultValue(rotation.z, 0);
         }
-        getUINativeModule().renderNode.setRotation(this.nodePtr, this.rotationValue.x, this.rotationValue.y, this.rotationValue.z);
+        getUINativeModule().renderNode.setRotation(this.nodePtr, this.rotationValue.x, this.rotationValue.y, this.rotationValue.z, this.lengthMetricsUnitValue);
     }
     set scale(scale) {
         if (scale === undefined || scale === null) {
@@ -1598,7 +1616,7 @@ class RenderNode {
             this.shadowOffsetValue.x = this.checkUndefinedOrNullWithDefaultValue(offset.x, 0);
             this.shadowOffsetValue.y = this.checkUndefinedOrNullWithDefaultValue(offset.y, 0);
         }
-        getUINativeModule().renderNode.setShadowOffset(this.nodePtr, this.shadowOffsetValue.x, this.shadowOffsetValue.y);
+        getUINativeModule().renderNode.setShadowOffset(this.nodePtr, this.shadowOffsetValue.x, this.shadowOffsetValue.y, this.lengthMetricsUnitValue);
     }
     set shadowAlpha(alpha) {
         this.shadowAlphaValue = this.checkUndefinedOrNullWithDefaultValue(alpha, 0);
@@ -1621,7 +1639,7 @@ class RenderNode {
             this.frameValue.width = this.checkUndefinedOrNullWithDefaultValue(size.width, 0);
             this.frameValue.height = this.checkUndefinedOrNullWithDefaultValue(size.height, 0);
         }
-        getUINativeModule().renderNode.setSize(this.nodePtr, this.frameValue.width, this.frameValue.height);
+        getUINativeModule().renderNode.setSize(this.nodePtr, this.frameValue.width, this.frameValue.height, this.lengthMetricsUnitValue);
     }
     set transform(transform) {
         if (transform === undefined || transform === null) {
@@ -1653,6 +1671,13 @@ class RenderNode {
             this.translationValue.y = this.checkUndefinedOrNullWithDefaultValue(translation.y, 0);
         }
         getUINativeModule().renderNode.setTranslate(this.nodePtr, this.translationValue.x, this.translationValue.y, 0);
+    }
+    set lengthMetricsUnit(unit) {
+        if (unit === undefined || unit == null) {
+            this.lengthMetricsUnitValue = LengthMetricsUnit.DEFAULT;
+        } else {
+            this.lengthMetricsUnitValue = unit;
+        }
     }
     get backgroundColor() {
         return this.backgroundColorValue;
@@ -1701,6 +1726,9 @@ class RenderNode {
     }
     get translation() {
         return this.translationValue;
+    }
+    get lengthMetricsUnit() {
+        return this.lengthMetricsUnitValue;
     }
     checkUndefinedOrNullWithDefaultValue(arg, defaultValue) {
         if (arg === undefined || arg === null) {
@@ -1848,7 +1876,7 @@ class RenderNode {
         else {
             this.borderWidthValue = width;
         }
-        getUINativeModule().renderNode.setBorderWidth(this.nodePtr, this.borderWidthValue.left, this.borderWidthValue.top, this.borderWidthValue.right, this.borderWidthValue.bottom);
+        getUINativeModule().renderNode.setBorderWidth(this.nodePtr, this.borderWidthValue.left, this.borderWidthValue.top, this.borderWidthValue.right, this.borderWidthValue.bottom, this.lengthMetricsUnitValue);
     }
     get borderWidth() {
         return this.borderWidthValue;
@@ -1872,7 +1900,7 @@ class RenderNode {
         else {
             this.borderRadiusValue = radius;
         }
-        getUINativeModule().renderNode.setBorderRadius(this.nodePtr, this.borderRadiusValue.topLeft, this.borderRadiusValue.topRight, this.borderRadiusValue.bottomLeft, this.borderRadiusValue.bottomRight);
+        getUINativeModule().renderNode.setBorderRadius(this.nodePtr, this.borderRadiusValue.topLeft, this.borderRadiusValue.topRight, this.borderRadiusValue.bottomLeft, this.borderRadiusValue.bottomRight, this.lengthMetricsUnitValue);
     }
     get borderRadius() {
         return this.borderRadiusValue;

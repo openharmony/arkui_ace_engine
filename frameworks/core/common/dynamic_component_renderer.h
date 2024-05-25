@@ -52,7 +52,9 @@ public:
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) = 0;
 
     virtual void TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) = 0;
-    virtual void TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) = 0;
+    virtual bool TransferKeyEvent(const KeyEvent& event) = 0;
+    virtual void TransferFocusState(bool isFocus) = 0;
+    virtual void TransferFocusActiveEvent(bool isFocus) = 0;
 
     virtual void SearchElementInfoByAccessibilityId(int64_t elementId, int32_t mode, int64_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& output) = 0;

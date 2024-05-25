@@ -119,11 +119,13 @@ Rosen::Rect ConvertToRSRect(NG::RectF& rect)
 
 bool IsNeedAvoidWindowMode(OHOS::Rosen::Window* rsWindow)
 {
-    return (rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING ||
-               rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-               rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
-           (SystemProperties::GetDeviceType() == DeviceType::PHONE ||
-               SystemProperties::GetDeviceType() == DeviceType::TABLET);
+    if (!SystemProperties::GetNeedAvoidWindow()) {
+        return false;
+    }
+
+    auto mode = rsWindow->GetMode();
+    return mode == Rosen::WindowMode::WINDOW_MODE_FLOATING || mode == Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+            mode == Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
 }
 } // namespace
 
@@ -268,6 +270,12 @@ public:
                     SetUIExtensionImeShow(keyboardRect, pipeline);
                 }
                 if (uiExtMgr && uiExtMgr->NotifyOccupiedAreaChangeInfo(info)) {
+                    taskExecutor->PostTask(
+                        [context] {
+                            CHECK_NULL_VOID(context);
+                            context->OnVirtualKeyboardAreaChange(Rect());
+                        },
+                        TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaChange");
                     return;
                 }
             }
@@ -1469,9 +1477,6 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     CHECK_NULL_RETURN(container, UIContentErrorCode::NULL_POINTER);
     container->SetWindowName(window_->GetWindowName());
     container->SetWindowId(window_->GetWindowId());
-    if (focusWindowId != 0) {
-        container->SetFocusWindowId(focusWindowId);
-    }
     auto token = context->GetToken();
     container->SetToken(token);
     container->SetParentToken(parentToken_);
@@ -1582,6 +1587,10 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     errorCode = Platform::AceContainer::SetViewNew(aceView, density, 0, 0, window_);
     CHECK_ERROR_CODE_RETURN(errorCode);
 #endif
+    // set focus window id for ui extension after pipeline context created.
+    if (focusWindowId != 0) {
+        container->SetFocusWindowId(focusWindowId);
+    }
 
     // after frontend initialize
     if (window_->IsFocused()) {
@@ -1971,6 +1980,8 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
             parsedConfig.direction = config->GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DIRECTION);
             parsedConfig.densitydpi = config->GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DENSITYDPI);
             parsedConfig.themeTag = config->GetItem("ohos.application.theme");
+            parsedConfig.colorModeIsSetByApp =
+                config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP);
             // EtsCard Font followSytem disable
             if (formFontUseDefault) {
                 LOGW("[%{public}s] UIContentImpl: UpdateConfiguration use default", bundleName.c_str());
@@ -2040,12 +2051,14 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
             pipelineContext->ChangeDarkModeBrightness(true);
         }
     };
+
+    AceViewportConfig aceViewportConfig(modifyConfig, reason, rsTransaction);
     if ((container->IsUseStageModel() && (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION ||
                                              reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC)) ||
         taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::PLATFORM)) {
-        task();
+        viewportConfigMgr_->UpdateConfigSync(aceViewportConfig, std::move(task));
     } else {
-        taskExecutor->PostTask(task, TaskExecutor::TaskType::PLATFORM, "ArkUIUpdateViewportConfig");
+        viewportConfigMgr_->UpdateConfig(aceViewportConfig, std::move(task), container, "ArkUIUpdateViewportConfig");
     }
 }
 
@@ -2226,25 +2239,26 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
             context, abilityInfo, std::make_unique<ContentEventCallback>([] {
                 // Sub-window ,just return.
                 LOGI("Content event callback");
-            }),
-            false, true, true);
+            }), false, true, true);
 #else
         if (Container::IsCurrentUseNewPipeline()) {
             container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS,
                 context, abilityInfo, std::make_unique<ContentEventCallback>([] {
                     // Sub-window ,just return.
                     LOGI("Content event callback");
-                }),
-                false, true, true);
+                }), false, true, true);
         } else {
             container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS,
                 context, abilityInfo, std::make_unique<ContentEventCallback>([] {
                     // Sub-window ,just return.
                     LOGI("Content event callback");
-                }),
-                false, true);
+                }), false, true);
         }
 #endif
+    }
+    if (context && context->GetApplicationInfo()) {
+        auto appInfo = context->GetApplicationInfo();
+        container->SetApiTargetVersion(appInfo->apiTargetVersion);
     }
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
     AceEngine::Get().AddContainer(instanceId_, container);
@@ -2488,6 +2502,7 @@ void UIContentImpl::SetIsFocusActive(bool isFocusActive)
         [container, isFocusActive]() {
             auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
             CHECK_NULL_VOID(pipelineContext);
+            ContainerScope scope(container->GetInstanceId());
             pipelineContext->SetIsFocusActive(isFocusActive);
         },
         TaskExecutor::TaskType::UI, "ArkUISetIsFocusActive");

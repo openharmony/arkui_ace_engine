@@ -58,6 +58,8 @@ public:
 
     void StartTextRace(const MarqueeOption& option);
     void StopTextRace();
+    void ResumeAnimation();
+    void PauseAnimation();
     void SetIsFocused(const bool& isFocused);
     void SetIsHovered(const bool& isHovered);
 

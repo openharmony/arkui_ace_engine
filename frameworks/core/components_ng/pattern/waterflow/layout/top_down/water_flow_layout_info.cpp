@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,11 +13,10 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/waterflow/water_flow_layout_info.h"
+#include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
 
 #include <algorithm>
 
-#include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -25,16 +24,6 @@
 constexpr float HALF = 0.5f;
 
 namespace OHOS::Ace::NG {
-RefPtr<WaterFlowLayoutInfoBase> WaterFlowLayoutInfoBase::Create(WaterFlowLayoutMode mode)
-{
-    switch (mode) {
-        case WaterFlowLayoutMode::SLIDING_WINDOW:
-            return nullptr;
-        default:
-            return MakeRefPtr<WaterFlowLayoutInfo>();
-    }
-}
-
 int32_t WaterFlowLayoutInfo::GetCrossIndex(int32_t itemIndex) const
 {
     if (static_cast<size_t>(itemIndex) < itemInfos_.size()) {
@@ -274,6 +263,7 @@ void WaterFlowLayoutInfo::Reset()
 
 void WaterFlowLayoutInfo::Reset(int32_t resetFrom)
 {
+    TAG_LOGI(AceLogTag::ACE_WATERFLOW, "reset. updateIdx:%{public}d,endIndex:%{public}d", resetFrom, endIndex_);
     if (resetFrom > endIndex_) {
         return;
     }
@@ -354,25 +344,6 @@ bool WaterFlowLayoutInfo::ReachEnd(float prevOffset) const
     return scrollDownToReachEnd || scrollUpToReachEnd;
 }
 
-int32_t WaterFlowLayoutInfo::GetSegment(int32_t itemIdx) const
-{
-    if (segmentTails_.empty()) {
-        return 0;
-    }
-    auto cache = segmentCache_.find(itemIdx);
-    if (cache != segmentCache_.end()) {
-        return cache->second;
-    }
-
-    auto it = std::lower_bound(segmentTails_.begin(), segmentTails_.end(), itemIdx);
-    if (it == segmentTails_.end()) {
-        return static_cast<int32_t>(segmentTails_.size()) - 1;
-    }
-    int32_t idx = it - segmentTails_.begin();
-    segmentCache_[itemIdx] = idx;
-    return idx;
-}
-
 int32_t WaterFlowLayoutInfo::FastSolveStartIndex() const
 {
     auto it = std::upper_bound(endPosArray_.begin(), endPosArray_.end(), -currentOffset_,
@@ -417,12 +388,15 @@ void WaterFlowLayoutInfo::RecordItem(int32_t idx, const FlowItemPosition& pos, f
 
 void WaterFlowLayoutInfo::SetNextSegmentStartPos(int32_t itemIdx)
 {
-    size_t segment = static_cast<size_t>(GetSegment(itemIdx));
+    auto segment = static_cast<size_t>(GetSegment(itemIdx));
     if (segmentStartPos_.size() > segment + 1) {
         return;
     }
+    if (segmentStartPos_.size() <= segment || margins_.size() <= segment + 1) {
+        return;
+    }
 
-    float nextStartPos = endPosArray_.back().first;
+    float nextStartPos = endPosArray_.empty() ? segmentStartPos_[segment] : endPosArray_.back().first;
     while (segment < segmentTails_.size() - 1 && itemIdx == segmentTails_[segment]) {
         // use while loop to skip empty segments
         if (axis_ == Axis::VERTICAL) {
@@ -507,7 +481,7 @@ void WaterFlowLayoutInfo::InitMargins(
         ResetSegmentStartPos();
     }
     int32_t lastItem = static_cast<int32_t>(itemInfos_.size()) - 1;
-    if (GetSegment(lastItem) >= segmentTails_.size()) {
+    if (GetSegment(lastItem) >= static_cast<int32_t>(segmentTails_.size())) {
         TAG_LOGW(AceLogTag::ACE_WATERFLOW, "Section data not initialized before layout");
         return;
     }

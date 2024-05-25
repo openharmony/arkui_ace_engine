@@ -20,6 +20,7 @@
 
 #include "interfaces/inner_api/ace/ui_content.h"
 
+#include "adapter/ohos/entrance/ace_container.h"
 #include "base/memory/ace_type.h"
 #include "base/thread/task_executor.h"
 #include "core/common/dynamic_component_renderer.h"
@@ -42,7 +43,9 @@ public:
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) override;
 
     void TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
-    void TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
+    bool TransferKeyEvent(const KeyEvent& event) override;
+    void TransferFocusState(bool isFocus) override;
+    void TransferFocusActiveEvent(bool isFocus) override;
     void Dump(RendererDumpInfo &rendererDumpInfo) override;
     void RegisterErrorEventHandler();
     void FireOnErrorCallback(int32_t code, const std::string& name, const std::string& msg);
@@ -67,6 +70,8 @@ private:
 
     void AttachRenderContext();
     void RegisterSizeChangedCallback();
+    void RegisterConfigChangedCallback();
+    void UnRegisterConfigChangedCallback();
 
     bool contentReady_ = false;
     std::function<void()> contentReadyCallback_;

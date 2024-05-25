@@ -32,6 +32,13 @@
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
 namespace OHOS::Ace {
+struct ImageInfoConfig {
+    std::string src;
+    std::string bundleName;
+    std::string moduleName;
+    bool isUriPureNumber = false;
+    bool isImageSpan = false;
+};
 class ImageModel {
 public:
     static ImageModel *GetInstance();
@@ -47,8 +54,7 @@ public:
     virtual void SetOnComplete(std::function<void(const LoadImageSuccessEvent &info)> &&callback) = 0;
     virtual void SetOnError(std::function<void(const LoadImageFailEvent &info)> &&callback) = 0;
     virtual void SetSvgAnimatorFinishEvent(std::function<void()> &&callback) = 0;
-    virtual void Create(const std::string &src, RefPtr<PixelMap> &pixmap, const std::string &bundleName,
-        const std::string &moduleName, bool isUriPureNumber = false) = 0;
+    virtual void Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMap>& pixMap) = 0;
     virtual void CreateAnimation(const std::vector<ImageProperties>& imageList,
         int32_t duration, int32_t iteration) = 0;
     virtual void SetImageSourceSize(const std::pair<Dimension, Dimension> &size) = 0;

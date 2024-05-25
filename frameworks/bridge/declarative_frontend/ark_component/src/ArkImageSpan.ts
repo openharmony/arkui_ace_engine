@@ -102,6 +102,32 @@ class ImageSpanAltModifier extends ModifierWithKey<PixelMap> {
     }
   }
 }
+class ImageSpanOnCompleteModifier extends ModifierWithKey<(event?: {width: number; height: number; componentWidth: number; componentHeight: number; loadingStatus: number; contentWidth: number; contentHeight: number; contentOffsetX: number; contentOffsetY: number;}) => void> {
+  constructor(value: (event?: {width: number; height: number; componentWidth: number; componentHeight: number; loadingStatus: number; contentWidth: number; contentHeight: number; contentOffsetX: number; contentOffsetY: number;}) => void) {
+    super(value);
+  }
+  static identity = Symbol('imageSpanOnComplete');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().imageSpan.resetOnComplete(node);
+    } else {
+      getUINativeModule().imageSpan.setOnComplete(node, this.value);
+    }
+  }
+}
+class ImageSpanOnErrorModifier extends ModifierWithKey<(result: {componentWidth: number; componentHeight: number; message: string}) => void> {
+  constructor(value: (event: {componentWidth: number; componentHeight: number; message: string}) => void) {
+    super(value);
+  }
+  static identity = Symbol('imageSpanOnError');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().imageSpan.resetOnError(node);
+    } else {
+      getUINativeModule().imageSpan.setOnError(node, this.value);
+    }
+  }
+}
 class ArkImageSpanComponent extends ArkComponent implements ImageSpanAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -124,6 +150,30 @@ class ArkImageSpanComponent extends ArkComponent implements ImageSpanAttribute {
   }
   alt(value: PixelMap): ImageSpanAttribute {
     modifierWithKey(this._modifiersWithKeys, ImageSpanAltModifier.identity, ImageSpanAltModifier, value);
+    return this;
+  }
+  onComplete(
+    callback: (result: {
+      width: number;
+      height: number;
+      componentWidth: number;
+      componentHeight: number;
+      loadingStatus: number;
+      contentWidth: number;
+      contentHeight: number;
+      contentOffsetX: number;
+      contentOffsetY: number;
+    }) => void,
+  ): ImageSpanAttribute {
+    modifierWithKey(this._modifiersWithKeys, ImageSpanOnCompleteModifier.identity, ImageSpanOnCompleteModifier, callback);
+    return this;
+  }
+  onError(callback: (error: {
+    componentWidth: number;
+    componentHeight: number;
+    message: string
+  }) => void): ImageSpanAttribute {
+    modifierWithKey(this._modifiersWithKeys, ImageSpanOnErrorModifier.identity, ImageSpanOnErrorModifier, callback);
     return this;
   }
 }

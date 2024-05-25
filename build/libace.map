@@ -135,6 +135,7 @@
       OHOS::Ace::NG::FlexLayoutAlgorithm::*;
       OHOS::Ace::NG::FrameNode::*;
       OHOS::Ace::NG::GestureEventHub::*;
+      OHOS::Ace::NG::ImageLoadingContext::*;
       OHOS::Ace::NG::ImagePattern::*;
       OHOS::Ace::NG::LayoutProperty::*;
       OHOS::Ace::NG::LayoutWrapper::*;

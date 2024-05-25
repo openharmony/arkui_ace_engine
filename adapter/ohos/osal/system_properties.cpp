@@ -38,6 +38,7 @@
 namespace OHOS::Ace {
 namespace {
 constexpr char PROPERTY_DEVICE_TYPE[] = "const.product.devicetype";
+constexpr char PROPERTY_NEED_AVOID_WINDOW[] = "const.window.need_avoid_window";
 constexpr char PROPERTY_DEVICE_TYPE_DEFAULT[] = "default";
 constexpr char PROPERTY_DEVICE_TYPE_TV[] = "tv";
 constexpr char PROPERTY_DEVICE_TYPE_TABLET[] = "tablet";
@@ -99,11 +100,6 @@ bool IsDownloadByNetworkDisabled()
     return system::GetParameter(ENABLE_DOWNLOAD_BY_NETSTACK_KEY, "true") == "true";
 }
 
-bool IsTraceEnabled()
-{
-    return (system::GetParameter("persist.ace.trace.enabled", "1") == "1");
-}
-
 bool IsSvgTraceEnabled()
 {
     return (system::GetParameter("persist.ace.trace.svg.enabled", "0") == "1");
@@ -112,6 +108,11 @@ bool IsSvgTraceEnabled()
 bool IsLayoutTraceEnabled()
 {
     return (system::GetParameter("persist.ace.trace.layout.enabled", "false") == "true");
+}
+
+bool IsTextTraceEnabled()
+{
+    return (system::GetParameter("persist.ace.trace.text.enabled", "false") == "true");
 }
 
 bool IsTraceInputEventEnabled()
@@ -319,7 +320,6 @@ std::pair<float, float> GetPercent()
     return percent;
 }
 
-bool SystemProperties::traceEnabled_ = IsTraceEnabled();
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::developerModeOn_ = IsDeveloperModeOn();
 bool SystemProperties::layoutTraceEnable_ = IsLayoutTraceEnabled() && developerModeOn_;
@@ -327,6 +327,7 @@ bool SystemProperties::traceInputEventEnable_ = IsTraceInputEventEnabled() && de
 bool SystemProperties::stateManagerEnable_ = IsStateManagerEnable();
 bool SystemProperties::buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
 bool SystemProperties::syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
+bool SystemProperties::textTraceEnable_ = IsTextTraceEnabled();
 bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
 bool SystemProperties::isRound_ = false;
 bool SystemProperties::isDeviceAccess_ = false;
@@ -336,6 +337,7 @@ ACE_WEAK_SYM int32_t SystemProperties::devicePhysicalWidth_ = 0;
 ACE_WEAK_SYM int32_t SystemProperties::devicePhysicalHeight_ = 0;
 ACE_WEAK_SYM double SystemProperties::resolution_ = 1.0;
 ACE_WEAK_SYM DeviceType SystemProperties::deviceType_ { DeviceType::UNKNOWN };
+ACE_WEAK_SYM bool SystemProperties::needAvoidWindow_ { false };
 ACE_WEAK_SYM DeviceOrientation SystemProperties::orientation_ { DeviceOrientation::PORTRAIT };
 std::string SystemProperties::brand_ = INVALID_PARAM;
 std::string SystemProperties::manufacturer_ = INVALID_PARAM;
@@ -450,6 +452,11 @@ ACE_WEAK_SYM DeviceType SystemProperties::GetDeviceType()
     return deviceType_;
 }
 
+ACE_WEAK_SYM bool SystemProperties::GetNeedAvoidWindow()
+{
+    return needAvoidWindow_;
+}
+
 void SystemProperties::InitDeviceTypeBySystemProperty()
 {
     if (deviceType_ != DeviceType::UNKNOWN) {
@@ -492,8 +499,8 @@ void SystemProperties::InitDeviceInfo(
     apiVersion_ = std::to_string(::GetSdkApiVersion());
     releaseType_ = ::GetOsReleaseType();
     paramDeviceType_ = ::GetDeviceType();
+    needAvoidWindow_ = system::GetBoolParameter(PROPERTY_NEED_AVOID_WINDOW, false);
     debugEnabled_ = IsDebugEnabled();
-    traceEnabled_ = IsTraceEnabled();
     svgTraceEnable_ = IsSvgTraceEnabled();
     layoutTraceEnable_ = IsLayoutTraceEnabled() && developerModeOn_;
     traceInputEventEnable_ = IsTraceInputEventEnabled() && developerModeOn_;
