@@ -32,10 +32,12 @@ class ACE_EXPORT SelectOverlayPaintMethod : public NodePaintMethod {
 public:
     SelectOverlayPaintMethod(const RefPtr<SelectOverlayModifier>& selectOverlayModifier,
         const RefPtr<SelectOverlayContentModifier>& selectOverlayContentModifier, SelectOverlayInfo info,
-        const OffsetF& offset, bool hasExtensionMenu, bool hasShowAnimation, bool isCreated, bool isHiddenHandle)
+        const OffsetF& offset, float selectMenuHeight, bool hasExtensionMenu, bool hasShowAnimation, bool isCreated,
+        bool isHiddenHandle)
         : selectOverlayModifier_(selectOverlayModifier), selectOverlayContentModifier_(selectOverlayContentModifier),
-          info_(std::move(info)), defaultMenuEndOffset_(offset), hasExtensionMenu_(hasExtensionMenu),
-          hasShowAnimation_(hasShowAnimation), isCreated_(isCreated), isHiddenHandle_(isHiddenHandle)
+          info_(std::move(info)), defaultMenuEndOffset_(offset), selectMenuHeight_(selectMenuHeight),
+          hasExtensionMenu_(hasExtensionMenu), hasShowAnimation_(hasShowAnimation), isCreated_(isCreated),
+          isHiddenHandle_(isHiddenHandle)
     {}
     ~SelectOverlayPaintMethod() override = default;
 
@@ -73,6 +75,8 @@ private:
     SelectOverlayInfo info_;
 
     OffsetF defaultMenuEndOffset_;
+
+    float selectMenuHeight_ = 0.0f;
 
     bool hasExtensionMenu_ = false;
 
