@@ -733,6 +733,16 @@ export struct ComposeListItem {
     }
   }
 
+  getComposeItemLeftPadding(): LengthMetrics {
+    return this.composeItemPadding?.start !== undefined ?
+      this.composeItemPadding?.start : LengthMetrics.vp(STACK_PADDING)
+  }
+
+  getComposeItemRightPadding(): LengthMetrics {
+    return this.composeItemPadding?.end !== undefined ?
+      this.composeItemPadding?.end : LengthMetrics.vp(STACK_PADDING)
+  }
+
   build() {
     Stack() {
       Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center}) {
@@ -828,8 +838,8 @@ export struct ComposeListItem {
       })
     }
     .padding({
-      start: this.composeItemPadding?.start !== undefined ? this.composeItemPadding?.start : LengthMetrics.vp(STACK_PADDING),
-      end: this.composeItemPadding?.end !== undefined ? this.composeItemPadding?.end : LengthMetrics.vp(STACK_PADDING)
+      start: this.getComposeItemLeftPadding(),
+      end: this.getComposeItemRightPadding()
     })
   }
 }

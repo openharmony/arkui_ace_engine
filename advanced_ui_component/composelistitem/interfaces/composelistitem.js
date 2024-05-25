@@ -1347,12 +1347,20 @@ export class ComposeListItem extends ViewPU {
             return RIGHT_PART_WIDTH;
         }
     }
+    getComposeItemLeftPadding() {
+        return this.composeItemPadding?.start !== undefined ?
+            this.composeItemPadding?.start : LengthMetrics.vp(STACK_PADDING);
+    }
+    getComposeItemRightPadding() {
+        return this.composeItemPadding?.end !== undefined ?
+            this.composeItemPadding?.end : LengthMetrics.vp(STACK_PADDING);
+    }
     initialRender() {
         this.observeComponentCreation2((z1, a2) => {
             Stack.create();
             Stack.padding({
-                start: this.composeItemPadding?.start !== undefined ? this.composeItemPadding?.start : LengthMetrics.vp(STACK_PADDING),
-                end: this.composeItemPadding?.end !== undefined ? this.composeItemPadding?.end : LengthMetrics.vp(STACK_PADDING)
+                start: this.getComposeItemLeftPadding(),
+                end: this.getComposeItemRightPadding()
             });
         }, Stack);
         this.observeComponentCreation2((r1, s1) => {
@@ -1406,7 +1414,7 @@ export class ComposeListItem extends ViewPU {
                     {
                         this.observeComponentCreation2((l1, m1) => {
                             if (m1) {
-                                let n1 = new ContentItemStruct(this, {}, undefined, l1, () => { }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 740, col: 11 });
+                                let n1 = new ContentItemStruct(this, {}, undefined, l1, () => { }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 750, col: 11 });
                                 ViewPU.create(n1);
                                 let o1 = () => {
                                     return {};
@@ -1445,7 +1453,7 @@ export class ComposeListItem extends ViewPU {
                                     descriptionTextModifier: this.contentItem.descriptionTextModifier,
                                     leftWidth: this.calculatedLeftWidth(),
                                     contentItemPadding: this.composeItemPadding
-                                }, undefined, a1, () => { }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 743, col: 11 });
+                                }, undefined, a1, () => { }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 753, col: 11 });
                                 ViewPU.create(c1);
                                 let d1 = () => {
                                     return {
@@ -1511,7 +1519,7 @@ export class ComposeListItem extends ViewPU {
                                     parentCanHover: this.__canHover,
                                     rightWidth: this.calculatedRightWidth(),
                                     isParentCanTouch: this.__isCanTouch
-                                }, undefined, l, () => { }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 758, col: 11 });
+                                }, undefined, l, () => { }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 768, col: 11 });
                                 ViewPU.create(n);
                                 let o = () => {
                                     return {
