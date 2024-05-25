@@ -692,7 +692,7 @@ HWTEST_F(ImageTestNg, ImageCreator001, TestSize.Level1)
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = "";
+    imageInfoConfig.src = std::make_shared<std::string>("");
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
     image.Create(imageInfoConfig, pixMap);
@@ -711,7 +711,7 @@ HWTEST_F(ImageTestNg, ImageCreator002, TestSize.Level1)
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = "";
+    imageInfoConfig.src = std::make_shared<std::string>("");
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
     image.Create(imageInfoConfig, pixMap);
@@ -740,7 +740,7 @@ HWTEST_F(ImageTestNg, ImageCreator003, TestSize.Level1)
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = IMAGE_SRC_URL;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
     image.Create(imageInfoConfig, pixMap);
@@ -794,7 +794,7 @@ HWTEST_F(ImageTestNg, ImageEventTest001, TestSize.Level1)
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = IMAGE_SRC_URL;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
     image.Create(imageInfoConfig, pixMap);
@@ -826,7 +826,7 @@ HWTEST_F(ImageTestNg, ImageEventTest002, TestSize.Level1)
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = IMAGE_SRC_URL;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
     image.Create(imageInfoConfig, pixMap);
@@ -855,7 +855,7 @@ HWTEST_F(ImageTestNg, ImageSvgTest001, TestSize.Level1)
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = IMAGE_SRC_URL;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
     image.Create(imageInfoConfig, pixMap);
@@ -890,7 +890,7 @@ HWTEST_F(ImageTestNg, ImageColorFilterTest001, TestSize.Level1)
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = IMAGE_SRC_URL;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
     image.Create(imageInfoConfig, pixMap);

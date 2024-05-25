@@ -36,6 +36,11 @@ public:
         InternalResource::ResourceId resourceId = InternalResource::ResourceId::NO_ID,
         const RefPtr<PixelMap>& pixmap = nullptr);
 
+    ImageSourceInfo(const std::shared_ptr<std::string> &imageSrc, std::string bundleName, std::string moduleName,
+        Dimension width = Dimension(-1), Dimension height = Dimension(-1),
+        InternalResource::ResourceId resourceId = InternalResource::ResourceId::NO_ID,
+        const RefPtr<PixelMap>& pixmap = nullptr);
+
     explicit ImageSourceInfo(std::string imageSrc, Dimension width = Dimension(-1), Dimension height = Dimension(-1),
         InternalResource::ResourceId resourceId = InternalResource::ResourceId::NO_ID,
         const RefPtr<PixelMap>& pixmap = nullptr)
@@ -130,6 +135,7 @@ private:
     void GenerateCacheKey();
 
     std::string src_;
+    std::shared_ptr<std::string> srcRef_ = nullptr;
     std::string cacheKey_;
     // Interim programme
     std::string bundleName_;

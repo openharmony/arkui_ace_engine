@@ -120,7 +120,8 @@ void ImageModelImpl::SetSvgAnimatorFinishEvent(std::function<void()>&& callback)
 
 void ImageModelImpl::Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMap>& pixmap)
 {
-    RefPtr<ImageComponent> image = AceType::MakeRefPtr<OHOS::Ace::ImageComponent>(imageInfoConfig.src);
+    RefPtr<ImageComponent> image =
+        AceType::MakeRefPtr<OHOS::Ace::ImageComponent>(imageInfoConfig.src ? *imageInfoConfig.src : "");
     image->SetBundleInfo(imageInfoConfig.bundleName, imageInfoConfig.moduleName);
     ViewStackProcessor::GetInstance()->ClaimElementId(image);
     image->SetUseSkiaSvg(false);

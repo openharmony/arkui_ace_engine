@@ -21,6 +21,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/image/image_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/image/image_source_info.h"
 #ifndef ACE_UNITTEST
 #include "core/components_ng/base/view_abstract.h"
 #endif
@@ -35,8 +36,19 @@
 namespace OHOS::Ace::NG {
 namespace {
 const std::vector<float> DEFAULT_COLOR_FILTER = { 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0 };
-ImageSourceInfo CreateSourceInfo(const std::string &src, RefPtr<PixelMap> &pixmap, const std::string &bundleName,
-    const std::string &moduleName)
+ImageSourceInfo CreateSourceInfo(const std::shared_ptr<std::string>& src, RefPtr<PixelMap>& pixmap,
+    const std::string& bundleName, const std::string& moduleName)
+{
+#if defined(PIXEL_MAP_SUPPORTED)
+    if (pixmap) {
+        return ImageSourceInfo(pixmap);
+    }
+#endif
+    return { src, bundleName, moduleName };
+}
+
+ImageSourceInfo CreateSourceInfo(
+    const std::string& src, RefPtr<PixelMap>& pixmap, const std::string& bundleName, const std::string& moduleName)
 {
 #if defined(PIXEL_MAP_SUPPORTED)
     if (pixmap) {
@@ -51,7 +63,8 @@ void ImageModelNG::Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMa
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d] [src:%s]", V2::IMAGE_ETS_TAG, nodeId, imageInfoConfig.src.c_str());
+    const std::string& src = imageInfoConfig.src ? *imageInfoConfig.src : "";
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d] [src:%s]", V2::IMAGE_ETS_TAG, nodeId, src.c_str());
     RefPtr<FrameNode> frameNode;
     if (imageInfoConfig.isImageSpan) {
         frameNode = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG,
@@ -63,7 +76,7 @@ void ImageModelNG::Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMa
     stack->Push(frameNode);
     auto pattern = GetImagePattern();
     CHECK_NULL_VOID(pattern);
-    if (imageInfoConfig.src.empty() && !pixMap && pattern->GetIsAnimation()) {
+    if (src.empty() && !pixMap && pattern->GetIsAnimation()) {
         pattern->SetSrcUndefined(true);
         return;
     }
@@ -112,7 +125,7 @@ void ImageModelNG::SetInitialSrc(FrameNode *frameNode, const std::string &src, c
 
 void ImageModelNG::SetInitialPixelMap(FrameNode* frameNode, RefPtr<PixelMap>& pixMap)
 {
-    auto srcInfo = CreateSourceInfo("", pixMap, "", "");
+    auto srcInfo = ImageSourceInfo(pixMap);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo, frameNode);
 }
 

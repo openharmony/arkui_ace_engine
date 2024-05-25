@@ -579,6 +579,10 @@ std::shared_ptr<RSData> Base64ImageLoader::LoadImageData(
         TAG_LOGW(AceLogTag::ACE_IMAGE, "error base64 image code!");
         return nullptr;
     }
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "base64 size=%{public}d, src=%{public}s", (int)base64Code.size(),
+            imageSourceInfo.ToString().c_str());
+    }
     return resData;
 }
 
