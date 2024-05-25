@@ -1916,19 +1916,13 @@ void IndexerPattern::DumpInfo()
     auto layoutProperty = GetLayoutProperty<IndexerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     DumpLog::GetInstance().AddDesc(
-        std::string("AlignStyle: ")
-            .append(std::to_string(static_cast<int32_t>(layoutProperty->GetAlignStyleValue(AlignStyle::END)))));
+        "AlignStyle: ", static_cast<int32_t>(layoutProperty->GetAlignStyleValue(AlignStyle::END)));
     auto offset = layoutProperty->GetPopupHorizontalSpace();
-    DumpLog::GetInstance().AddDesc(
-        std::string("Offset: ").append(offset.has_value() ? offset.value().ToString() : "undefined"));
-    DumpLog::GetInstance().AddDesc(
-        std::string("PopupPositionX: ")
-            .append(layoutProperty->GetPopupPositionXValue(Dimension(NG::BUBBLE_POSITION_X, DimensionUnit::VP))
-                        .ToString()));
-    DumpLog::GetInstance().AddDesc(
-        std::string("PopupPositionY: ")
-            .append(layoutProperty->GetPopupPositionYValue(Dimension(NG::BUBBLE_POSITION_Y, DimensionUnit::VP))
-                        .ToString()));
-    DumpLog::GetInstance().AddDesc(std::string("AutoCollapse: ").append(std::to_string(autoCollapse_)));
+    DumpLog::GetInstance().AddDesc("Offset: ", offset.has_value() ? offset.value().ToString() : "undefined");
+    DumpLog::GetInstance().AddDesc("PopupPositionX: ",
+        layoutProperty->GetPopupPositionXValue(Dimension(NG::BUBBLE_POSITION_X, DimensionUnit::VP)).ToString());
+    DumpLog::GetInstance().AddDesc("PopupPositionY: ",
+        layoutProperty->GetPopupPositionYValue(Dimension(NG::BUBBLE_POSITION_Y, DimensionUnit::VP)).ToString());
+    DumpLog::GetInstance().AddDesc("AutoCollapse: ", autoCollapse_ ? "true" : "false");
 }
 } // namespace OHOS::Ace::NG
