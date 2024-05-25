@@ -1526,13 +1526,10 @@ void SearchPattern::CreateSearchIcon(const std::string& src)
 void SearchPattern::CreateCancelIcon()
 {
     CHECK_NULL_VOID(GetSearchNode());
-    if (GetSearchNode()->HasCancelIconNodeCreated()) {
-        return;
-    }
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        CreateOrUpdateSymbol(CANCEL_IMAGE_INDEX, true);
+        CreateOrUpdateSymbol(CANCEL_IMAGE_INDEX, !GetSearchNode()->HasCancelIconNodeCreated());
     } else {
-        CreateOrUpdateImage(CANCEL_IMAGE_INDEX, "", true, "", "");
+        CreateOrUpdateImage(CANCEL_IMAGE_INDEX, "", !GetSearchNode()->HasCancelIconNodeCreated(), "", "");
     }
     GetSearchNode()->UpdateHasCancelIconNodeCreated(true);
 }
