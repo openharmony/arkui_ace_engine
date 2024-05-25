@@ -1140,11 +1140,6 @@ void FocusHub::OnBlur()
     CHECK_NULL_VOID(frameNode);
     auto* pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto container = Container::GetContainer(frameNode->GetInstanceId());
-    auto isDynamicRender = container == nullptr ? false : container->IsDynamicRender();
-    if (!isDynamicRender) {
-        BlurFocusView();
-    }
     if (blurReason_ != BlurReason::WINDOW_BLUR) {
         pipeline->SetNeedSoftKeyboard(false);
     } else {
@@ -2252,7 +2247,12 @@ bool FocusHub::UpdateFocusView()
     auto frameNode = GetFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
     auto focusView = frameNode->GetPattern<FocusView>();
-    CHECK_NULL_RETURN(focusView, false);
+    if (!focusView) {
+        auto focusManager = GetFocusManager();
+        CHECK_NULL_RETURN(focusManager, false);
+        focusManager->FlushFocusView();
+        return true;
+    }
     auto focusedChild = lastWeakFocusNode_.Upgrade();
     while (focusedChild) {
         auto focusedChildFrame = focusedChild->GetFrameNode();
@@ -2274,19 +2274,6 @@ bool FocusHub::UpdateFocusView()
             focusView->SetIsViewRootScopeFocused(false);
         }
         focusView->FocusViewShow(true);
-    }
-    return true;
-}
-
-bool FocusHub::BlurFocusView()
-{
-    auto frameNode = GetFrameNode();
-    CHECK_NULL_RETURN(frameNode, false);
-    auto focusView = frameNode->GetPattern<FocusView>();
-    CHECK_NULL_RETURN(focusView, false);
-    auto curFocusView = FocusView::GetCurrentFocusView();
-    if (focusView->IsFocusViewLegal() && focusView == curFocusView) {
-        focusView->FocusViewHide();
     }
     return true;
 }

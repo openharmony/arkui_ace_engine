@@ -1060,7 +1060,6 @@ private:
     RefPtr<FocusHub> GetNearestNodeByProjectArea(const std::list<RefPtr<FocusHub>>& allNodes, FocusStep step);
 
     bool UpdateFocusView();
-    bool BlurFocusView();
 
     bool IsFocusAbleChildOf(const RefPtr<FocusHub>& parentFocusHub);
     WeakPtr<FocusHub> GetChildPriorfocusNode(const std::string& focusScopeId);
