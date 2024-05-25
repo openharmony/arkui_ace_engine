@@ -312,6 +312,14 @@ public:
 
     void SetOnProgressCallback(std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& onProgress);
 
+    SizeF GetRawImageSize()
+    {
+        if (!loadingCtx_) {
+            return SizeF(-1.0, -1.0);
+        }
+        return loadingCtx_->GetImageSize();
+    }
+
 protected:
     void RegisterWindowStateChangedCallback();
     void UnregisterWindowStateChangedCallback();
