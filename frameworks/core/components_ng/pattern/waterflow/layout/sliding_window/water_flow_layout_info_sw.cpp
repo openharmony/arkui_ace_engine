@@ -41,12 +41,11 @@ void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, float mainGap)
     startPos_ = StartPos();
     endPos_ = EndPos();
 
-    itemStart_ = (startIndex_ == 0 && NonNegative(startPos_)) || GreatOrEqual(startPos_, mainSize);
+    itemStart_ = startIndex_ == 0 && NonNegative(startPos_);
     itemEnd_ = endIndex_ == itemCnt - 1;
     if (footerIndex_ == 0) {
         itemEnd_ &= LessOrEqual(endPos_, mainSize);
     }
-    itemEnd_ |= itemCnt > 0 && NonPositive(endPos_); // extreme overScroll case
     offsetEnd_ = itemEnd_ && LessOrEqual(endPos_ + footerHeight_, mainSize);
     maxHeight_ = std::max(endPos_ - startPos_ + footerHeight_, maxHeight_);
 
