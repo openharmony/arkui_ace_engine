@@ -325,9 +325,11 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hostN
     auto contentWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(contentWrapper);
     auto geometryNode = contentWrapper->GetGeometryNode();
-    auto contentOffset = OffsetF(0.0f, 0.0f);
+    auto pattern = hostNode->GetPattern<NavBarPattern>();
+    float keyboardOffset = pattern ? pattern->GetKeyboardOffset() : 0.0f;
+    auto contentOffset = OffsetF(0.0f, keyboardOffset);
     if (!navBarLayoutProperty->GetHideTitleBar().value_or(false)) {
-        contentOffset = OffsetF(geometryNode->GetFrameOffset().GetX(), titlebarHeight);
+        contentOffset += OffsetF(geometryNode->GetFrameOffset().GetX(), titlebarHeight);
     }
     auto safeArea = CheckIgnoreLayoutSafeArea(layoutWrapper, hostNode, navBarLayoutProperty);
     auto offsetY = contentOffset.GetY();
@@ -476,7 +478,7 @@ void NavBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (edgeTopOverLayCondition || edgeBottomOverLayCondition) {
         Measure(layoutWrapper);
     }
-    
+
     float titlebarHeight = LayoutTitleBar(layoutWrapper, hostNode, navBarLayoutProperty);
     auto resetTitleBarHeight = TransferTitleBarHeight(hostNode, titlebarHeight);
     LayoutContent(layoutWrapper, hostNode, navBarLayoutProperty, resetTitleBarHeight);

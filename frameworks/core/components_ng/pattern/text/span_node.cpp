@@ -433,6 +433,8 @@ void SpanItem::UpdateTextStyle(const std::string& content, const RefPtr<Paragrap
         UpdateContentTextStyle(content, builder, textStyle);
     } else {
         if (content.empty()) {
+            builder->PushStyle(textStyle);
+            builder->PopStyle();
             return;
         }
         auto displayContent = StringUtils::Str8ToStr16(content);
@@ -473,14 +475,13 @@ void SpanItem::UpdateTextStyle(const std::string& content, const RefPtr<Paragrap
 void SpanItem::UpdateContentTextStyle(
     const std::string& content, const RefPtr<Paragraph>& builder, const TextStyle& textStyle)
 {
-    if (content.empty()) {
-        return;
-    }
-    auto displayText = content;
-    auto textCase = textStyle.GetTextCase();
-    StringUtils::TransformStrCase(displayText, static_cast<int32_t>(textCase));
     builder->PushStyle(textStyle);
-    builder->AddText(StringUtils::Str8ToStr16(displayText));
+    if (!content.empty()) {
+        auto displayText = content;
+        auto textCase = textStyle.GetTextCase();
+        StringUtils::TransformStrCase(displayText, static_cast<int32_t>(textCase));
+        builder->AddText(StringUtils::Str8ToStr16(displayText));
+    }
     builder->PopStyle();
 }
 
@@ -644,6 +645,145 @@ RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem() const
     return sameSpan;
 }
 
+
+#define WRITE_TEXT_STYLE_TLV(group, name, tag, type)                   \
+    do {                                                               \
+        if ((group)->Has##name()) {                                    \
+            TLVUtil::WriteUint8(buff, (tag));                          \
+            TLVUtil::Write##type(buff, (group)->prop##name.value());   \
+        }                                                              \
+    } while (false)
+
+#define READ_TEXT_STYLE_TLV(group, func, tag, type)                         \
+    case tag: {                                                             \
+        sameSpan->group->func(TLVUtil::Read##type(buff, cursor));           \
+        break;                                                              \
+    }
+
+bool SpanItem::EncodeTlv(std::vector<uint8_t>& buff)
+{
+    TLVUtil::WriteUint8(buff, TLV_SPANITEM_TAG);
+    TLVUtil::WriteInt32(buff, interval.first);
+    TLVUtil::WriteInt32(buff, interval.second);
+    TLVUtil::WriteString(buff, content);
+    // encode fontStyle
+    WRITE_TEXT_STYLE_TLV(fontStyle, FontSize, TLV_SPAN_FONT_STYLE_FONTSIZE, Dimension);
+    WRITE_TEXT_STYLE_TLV(fontStyle, TextColor, TLV_SPAN_FONT_STYLE_TEXTCOLOR, Color);
+    WRITE_TEXT_STYLE_TLV(fontStyle, TextShadow, TLV_SPAN_FONT_STYLE_TEXTSHADOW, TextShadows);
+    WRITE_TEXT_STYLE_TLV(fontStyle, ItalicFontStyle, TLV_SPAN_FONT_STYLE_ITALICFONTSTYLE, FontStyle);
+    WRITE_TEXT_STYLE_TLV(fontStyle, FontWeight, TLV_SPAN_FONT_STYLE_FONTWEIGHT, FontWeight);
+    WRITE_TEXT_STYLE_TLV(fontStyle, FontFamily, TLV_SPAN_FONT_STYLE_FONTFAMILY, FontFamily);
+    WRITE_TEXT_STYLE_TLV(fontStyle, FontFeature, TLV_SPAN_FONT_STYLE_FONTFEATURE, FontFeature);
+    WRITE_TEXT_STYLE_TLV(fontStyle, TextDecoration, TLV_SPAN_FONT_STYLE_TEXTDECORATION, TextDecoration);
+    WRITE_TEXT_STYLE_TLV(fontStyle, TextDecorationColor, TLV_SPAN_FONT_STYLE_TEXTDECORATIONCOLOR, Color);
+    WRITE_TEXT_STYLE_TLV(fontStyle, TextDecorationStyle, TLV_SPAN_FONT_STYLE_TEXTDECORATIONSTYLE, TextDecorationStyle);
+    WRITE_TEXT_STYLE_TLV(fontStyle, TextCase, TLV_SPAN_FONT_STYLE_TEXTCASE, TextCase);
+    WRITE_TEXT_STYLE_TLV(fontStyle, AdaptMinFontSize, TLV_SPAN_FONT_STYLE_ADPATMINFONTSIZE, Dimension);
+    WRITE_TEXT_STYLE_TLV(fontStyle, AdaptMaxFontSize, TLV_SPAN_FONT_STYLE_ADPATMAXFONTSIZE, Dimension);
+    WRITE_TEXT_STYLE_TLV(fontStyle, LetterSpacing, TLV_SPAN_FONT_STYLE_LETTERSPACING, Dimension);
+
+    WRITE_TEXT_STYLE_TLV(textLineStyle, LineHeight, TLV_SPAN_TEXT_LINE_STYLE_LINEHEIGHT, Dimension);
+    WRITE_TEXT_STYLE_TLV(textLineStyle, LineSpacing, TLV_SPAN_TEXT_LINE_STYLE_LINESPACING, Dimension);
+    WRITE_TEXT_STYLE_TLV(textLineStyle, TextBaseline, TLV_SPAN_TEXT_LINE_STYLE_TEXTBASELINE, TextBaseline);
+    WRITE_TEXT_STYLE_TLV(textLineStyle, BaselineOffset, TLV_SPAN_TEXT_LINE_STYLE_BASELINEOFFSET, Dimension);
+    WRITE_TEXT_STYLE_TLV(textLineStyle, TextOverflow, TLV_SPAN_TEXT_LINE_STYLE_TEXTOVERFLOW, TextOverflow);
+    WRITE_TEXT_STYLE_TLV(textLineStyle, TextAlign, TLV_SPAN_TEXT_LINE_STYLE_TEXTALIGN, TextAlign);
+    WRITE_TEXT_STYLE_TLV(textLineStyle, MaxLength, TLV_SPAN_TEXT_LINE_STYLE_MAXLENGTH, Int32);
+    WRITE_TEXT_STYLE_TLV(textLineStyle, MaxLines, TLV_SPAN_TEXT_LINE_STYLE_MAXLINES, Int32);
+    WRITE_TEXT_STYLE_TLV(textLineStyle, HeightAdaptivePolicy,
+        TLV_SPAN_TEXT_LINE_STYLE_HEIGHTADAPTIVEPOLICY, TextHeightAdaptivePolicy);
+    WRITE_TEXT_STYLE_TLV(textLineStyle, TextIndent, TLV_SPAN_TEXT_LINE_STYLE_TEXTINDENT, Dimension);
+    WRITE_TEXT_STYLE_TLV(textLineStyle, LeadingMargin, TLV_SPAN_TEXT_LINE_STYLE_LEADINGMARGIN, LeadingMargin);
+    WRITE_TEXT_STYLE_TLV(textLineStyle, WordBreak, TLV_SPAN_TEXT_LINE_STYLE_WORDBREAK, WordBreak);
+    WRITE_TEXT_STYLE_TLV(textLineStyle, LineBreakStrategy,
+        TLV_SPAN_TEXT_LINE_STYLE_LINEBREAKSTRATEGY, LineBreakStrategy);
+    WRITE_TEXT_STYLE_TLV(textLineStyle, EllipsisMode, TLV_SPAN_TEXT_LINE_STYLE_ELLIPSISMODE, EllipsisMode);
+    if (backgroundStyle.has_value()) {
+        if (backgroundStyle->backgroundColor.has_value()) {
+            TLVUtil::WriteUint8(buff, TLV_SPAN_BACKGROUND_BACKGROUNDCOLOR);
+            TLVUtil::WriteColor(buff, backgroundStyle->backgroundColor.value());
+        }
+        if (backgroundStyle->backgroundRadius.has_value()) {
+            TLVUtil::WriteUint8(buff, TLV_SPAN_BACKGROUND_BACKGROUNDRADIUS);
+            TLVUtil::WriteBorderRadiusProperty(buff, backgroundStyle->backgroundRadius.value());
+        }
+        TLVUtil::WriteUint8(buff, TLV_SPAN_BACKGROUND_GROUPID);
+        TLVUtil::WriteInt32(buff, backgroundStyle->groupId);
+    }
+    TLVUtil::WriteUint8(buff, TLV_SPANITEM_END_TAG);
+    return true;
+};
+
+RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor)
+{
+    auto sameSpan = MakeRefPtr<SpanItem>();
+    if (TLVUtil::ReadUint8(buff, cursor) != TLV_SPANITEM_TAG) {
+        return sameSpan;
+    }
+
+    int32_t start = TLVUtil::ReadInt32(buff, cursor);
+    int32_t end = TLVUtil::ReadInt32(buff, cursor);
+    sameSpan->interval = {start, end};
+    sameSpan->content = TLVUtil::ReadString(buff, cursor);
+
+    for (uint8_t tag = TLVUtil::ReadUint8(buff, cursor);
+        tag != TLV_SPANITEM_END_TAG; tag = TLVUtil::ReadUint8(buff, cursor)) {
+        switch (tag) {
+            READ_TEXT_STYLE_TLV(fontStyle, UpdateFontSize, TLV_SPAN_FONT_STYLE_FONTSIZE, Dimension);
+            READ_TEXT_STYLE_TLV(fontStyle, UpdateTextColor, TLV_SPAN_FONT_STYLE_TEXTCOLOR, Color);
+            READ_TEXT_STYLE_TLV(fontStyle, UpdateTextShadow, TLV_SPAN_FONT_STYLE_TEXTSHADOW, TextShadows);
+            READ_TEXT_STYLE_TLV(fontStyle, UpdateItalicFontStyle, TLV_SPAN_FONT_STYLE_ITALICFONTSTYLE, FontStyle);
+            READ_TEXT_STYLE_TLV(fontStyle, UpdateFontWeight, TLV_SPAN_FONT_STYLE_FONTWEIGHT, FontWeight);
+            READ_TEXT_STYLE_TLV(fontStyle, UpdateFontFamily, TLV_SPAN_FONT_STYLE_FONTFAMILY, FontFamily);
+            READ_TEXT_STYLE_TLV(fontStyle, UpdateFontFeature, TLV_SPAN_FONT_STYLE_FONTFEATURE, FontFeature);
+            READ_TEXT_STYLE_TLV(fontStyle, UpdateTextDecoration, TLV_SPAN_FONT_STYLE_TEXTDECORATION, TextDecoration);
+            READ_TEXT_STYLE_TLV(fontStyle, UpdateTextDecorationColor, TLV_SPAN_FONT_STYLE_TEXTDECORATIONCOLOR, Color);
+            READ_TEXT_STYLE_TLV(fontStyle, UpdateTextDecorationStyle,
+                TLV_SPAN_FONT_STYLE_TEXTDECORATIONSTYLE, TextDecorationStyle);
+            READ_TEXT_STYLE_TLV(fontStyle, UpdateTextCase, TLV_SPAN_FONT_STYLE_TEXTCASE, TextCase);
+            READ_TEXT_STYLE_TLV(fontStyle, UpdateAdaptMinFontSize, TLV_SPAN_FONT_STYLE_ADPATMINFONTSIZE, Dimension);
+            READ_TEXT_STYLE_TLV(fontStyle, UpdateAdaptMaxFontSize, TLV_SPAN_FONT_STYLE_ADPATMAXFONTSIZE, Dimension);
+            READ_TEXT_STYLE_TLV(fontStyle, UpdateLetterSpacing, TLV_SPAN_FONT_STYLE_LETTERSPACING, Dimension);
+
+            READ_TEXT_STYLE_TLV(textLineStyle, UpdateLineHeight, TLV_SPAN_TEXT_LINE_STYLE_LINEHEIGHT, Dimension);
+            READ_TEXT_STYLE_TLV(textLineStyle, UpdateLineSpacing, TLV_SPAN_TEXT_LINE_STYLE_LINESPACING, Dimension);
+            READ_TEXT_STYLE_TLV(textLineStyle, UpdateTextBaseline, TLV_SPAN_TEXT_LINE_STYLE_TEXTBASELINE, TextBaseline);
+            READ_TEXT_STYLE_TLV(textLineStyle, UpdateBaselineOffset,
+                TLV_SPAN_TEXT_LINE_STYLE_BASELINEOFFSET, Dimension);
+            READ_TEXT_STYLE_TLV(textLineStyle, UpdateTextOverflow, TLV_SPAN_TEXT_LINE_STYLE_TEXTOVERFLOW, TextOverflow);
+            READ_TEXT_STYLE_TLV(textLineStyle, UpdateTextAlign, TLV_SPAN_TEXT_LINE_STYLE_TEXTALIGN, TextAlign);
+            READ_TEXT_STYLE_TLV(textLineStyle, UpdateMaxLength, TLV_SPAN_TEXT_LINE_STYLE_MAXLENGTH, Int32);
+            READ_TEXT_STYLE_TLV(textLineStyle, UpdateMaxLines, TLV_SPAN_TEXT_LINE_STYLE_MAXLINES, Int32);
+            READ_TEXT_STYLE_TLV(textLineStyle, UpdateHeightAdaptivePolicy,
+                TLV_SPAN_TEXT_LINE_STYLE_HEIGHTADAPTIVEPOLICY, TextHeightAdaptivePolicy);
+            READ_TEXT_STYLE_TLV(textLineStyle, UpdateTextIndent, TLV_SPAN_TEXT_LINE_STYLE_TEXTINDENT, Dimension);
+            READ_TEXT_STYLE_TLV(textLineStyle, UpdateLeadingMargin,
+                TLV_SPAN_TEXT_LINE_STYLE_LEADINGMARGIN, LeadingMargin);
+            READ_TEXT_STYLE_TLV(textLineStyle, UpdateWordBreak, TLV_SPAN_TEXT_LINE_STYLE_WORDBREAK, WordBreak);
+            READ_TEXT_STYLE_TLV(textLineStyle, UpdateLineBreakStrategy,
+                TLV_SPAN_TEXT_LINE_STYLE_LINEBREAKSTRATEGY, LineBreakStrategy);
+            READ_TEXT_STYLE_TLV(textLineStyle, UpdateEllipsisMode, TLV_SPAN_TEXT_LINE_STYLE_ELLIPSISMODE, EllipsisMode);
+
+            case TLV_SPAN_BACKGROUND_BACKGROUNDCOLOR: {
+                sameSpan->backgroundStyle->backgroundColor = TLVUtil::ReadColor(buff, cursor);
+                break;
+            }
+            case TLV_SPAN_BACKGROUND_BACKGROUNDRADIUS: {
+                sameSpan->backgroundStyle->backgroundRadius = TLVUtil::ReadBorderRadiusProperty(buff, cursor);
+                break;
+            }
+            case TLV_SPAN_BACKGROUND_GROUPID: {
+                sameSpan->backgroundStyle->groupId = TLVUtil::ReadInt32(buff, cursor);
+                break;
+            }
+            default:
+                break;
+        }
+    }
+
+    return sameSpan;
+}
+
 std::string SpanItem::SymbolColorToString()
 {
     auto colors = fontStyle->GetSymbolColorList();
@@ -669,6 +809,87 @@ std::optional<std::pair<int32_t, int32_t>> SpanItem::GetIntersectionInterval(std
     int32_t start = std::max(this->interval.first, interval.first);
     int32_t end = std::min(this->interval.second, interval.second);
     return std::make_optional<std::pair<int32_t, int32_t>>(std::make_pair(start, end));
+}
+
+bool ImageSpanItem::EncodeTlv(std::vector<uint8_t>& buff)
+{
+    TLVUtil::WriteUint8(buff, TLV_IMAGESPANITEM_TAG);
+    TLVUtil::WriteInt32(buff, interval.first);
+    TLVUtil::WriteInt32(buff, interval.second);
+    TLVUtil::WriteString(buff, content);
+    if (options.offset.has_value()) {
+        TLVUtil::WriteUint8(buff, TLV_IMAGESPANOPTION_OFFSET_TAG);
+        TLVUtil::WriteInt32(buff, options.offset.value());
+    }
+    if (options.image.has_value()) {
+        TLVUtil::WriteUint8(buff, TLV_IMAGESPANOPTION_IMAGE_TAG);
+        TLVUtil::WriteString(buff, options.image.value());
+    }
+    if (options.bundleName.has_value()) {
+        TLVUtil::WriteUint8(buff, TLV_IMAGESPANOPTION_BUNDLENAME_TAG);
+        TLVUtil::WriteString(buff, options.bundleName.value());
+    }
+    if (options.bundleName.has_value()) {
+        TLVUtil::WriteUint8(buff, TLV_IMAGESPANOPTION_MODULENAME_TAG);
+        TLVUtil::WriteString(buff, options.moduleName.value());
+    }
+    if (options.imagePixelMap.has_value()) {
+        TLVUtil::WriteUint8(buff, TLV_IMAGESPANOPTION_IMAGEPIXELMAP_TAG);
+        TLVUtil::WritePixelMap(buff, options.imagePixelMap.value());
+    }
+    if (options.imageAttribute.has_value()) {
+        TLVUtil::WriteUint8(buff, TLV_IMAGESPANOPTION_IMAGEATTRIBUTE_TAG);
+        TLVUtil::WriteImageSpanAttribute(buff, options.imageAttribute.value());
+    }
+    TLVUtil::WriteUint8(buff, TLV_SPANITEM_END_TAG);
+    return true;
+}
+
+RefPtr<ImageSpanItem> ImageSpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor)
+{
+    auto sameSpan = MakeRefPtr<ImageSpanItem>();
+
+    if (TLVUtil::ReadUint8(buff, cursor) != TLV_IMAGESPANITEM_TAG) {
+        return sameSpan;
+    }
+
+    int32_t start = TLVUtil::ReadInt32(buff, cursor);
+    int32_t end = TLVUtil::ReadInt32(buff, cursor);
+    sameSpan->interval = {start, end};
+    sameSpan->content = TLVUtil::ReadString(buff, cursor);
+
+    for (uint8_t tag = TLVUtil::ReadUint8(buff, cursor);
+        tag != TLV_SPANITEM_END_TAG; tag = TLVUtil::ReadUint8(buff, cursor)) {
+        switch (tag) {
+            case TLV_IMAGESPANOPTION_OFFSET_TAG: {
+                sameSpan->options.offset = TLVUtil::ReadInt32(buff, cursor);
+                break;
+            }
+            case TLV_IMAGESPANOPTION_IMAGE_TAG: {
+                sameSpan->options.image = TLVUtil::ReadString(buff, cursor);
+                break;
+            }
+            case TLV_IMAGESPANOPTION_BUNDLENAME_TAG: {
+                sameSpan->options.bundleName = TLVUtil::ReadString(buff, cursor);
+                break;
+            }
+            case TLV_IMAGESPANOPTION_MODULENAME_TAG: {
+                sameSpan->options.moduleName = TLVUtil::ReadString(buff, cursor);
+                break;
+            }
+            case TLV_IMAGESPANOPTION_IMAGEPIXELMAP_TAG: {
+                sameSpan->options.imagePixelMap = TLVUtil::ReadPixelMap(buff, cursor);
+                break;
+            }
+            case TLV_IMAGESPANOPTION_IMAGEATTRIBUTE_TAG: {
+                sameSpan->options.imageAttribute = TLVUtil::ReadImageSpanAttribute(buff, cursor);
+                break;
+            }
+            default:
+                break;
+        }
+    }
+    return sameSpan;
 }
 
 int32_t ImageSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */, const RefPtr<Paragraph>& builder,
@@ -705,6 +926,7 @@ int32_t ImageSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */,
     // ImageSpan should ignore decoration styles
     textStyle.SetTextDecoration(TextDecoration::NONE);
     textStyle.SetTextBackgroundStyle(backgroundStyle);
+    textStyle.SetFontSize(placeholderStyle.paragraphFontSize);
     builder->PushStyle(textStyle);
     int32_t index = builder->AddPlaceholder(run);
     run_ = run;

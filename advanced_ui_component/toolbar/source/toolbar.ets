@@ -70,12 +70,12 @@ export struct ToolBar {
         .fillColor(this.iconPrimaryColor)
         .margin({ top: 8, bottom: 2 })
         .objectFit(ImageFit.Contain)
-        .bindMenu(this.menuContent, { offset: { x: 5, y : -10 } })
       Text(this.moreText)
         .fontColor(this.fontPrimaryColor)
         .fontSize($r('sys.float.ohos_id_text_size_caption'))
         .fontWeight(FontWeight.Medium)
     }.width('100%').height('100%')
+    .bindMenu(this.menuContent, { placement: Placement.TopRight, offset: { x: -12, y : -10 } })
     .padding({ start: LengthMetrics.vp(4), end: LengthMetrics.vp(4) })
     .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
   }
@@ -110,9 +110,9 @@ export struct ToolBar {
     .onClick(() => {
       let toolbar = this.toolBarList[index];
       if (toolbar.state === ItemState.ACTIVATE) {
-        if (this.activateIndex === index)
+        if (this.activateIndex === index) {
           this.activateIndex = -1;
-        else {
+        } else {
           this.activateIndex = index;
         }
       }

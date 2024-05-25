@@ -59,6 +59,7 @@ config("ace_unittest_config") {
   ]
 
   cflags_cc = [
+    "-Wno-unused-private-field",
     "-Wno-thread-safety-attributes",
     "-Wno-thread-safety-analysis",
     "-Wno-non-c-typedef-for-linkage",
@@ -323,6 +324,7 @@ ohos_source_set("ace_base") {
     "$ace_root/frameworks/base/json/uobject.cpp",
     "$ace_root/frameworks/base/log/dump_log.cpp",
     "$ace_root/frameworks/base/memory/memory_monitor.cpp",
+    "$ace_root/frameworks/base/resource/data_provider_manager.cpp",
     "$ace_root/frameworks/base/subwindow/subwindow_manager.cpp",
     "$ace_root/frameworks/base/utils/base_id.cpp",
     "$ace_root/frameworks/base/utils/date_util.cpp",
@@ -378,6 +380,7 @@ ohos_source_set("ace_core_extra") {
     "$ace_root/frameworks/base/thread/background_task_executor.cpp",
     "$ace_root/frameworks/core/accessibility/accessibility_node.cpp",
     "$ace_root/frameworks/core/accessibility/accessibility_utils.cpp",
+    "$ace_root/frameworks/core/common/agingadapation/aging_adapation_dialog_util.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/common/event_dump.cpp",
     "$ace_root/frameworks/core/common/event_manager.cpp",
@@ -481,6 +484,8 @@ ohos_source_set("ace_components_mock") {
     "$ace_root/test/mock/core/common/mock_layout_inspector.cpp",
     "$ace_root/test/mock/core/common/mock_motion_path_evaluator.cpp",
     "$ace_root/test/mock/core/common/mock_raw_recognizer.cpp",
+    "$ace_root/test/mock/core/common/mock_stylus_detector_default.cpp",
+    "$ace_root/test/mock/core/common/mock_stylus_detector_mgr.cpp",
     "$ace_root/test/mock/core/common/mock_theme_constants.cpp",
     "$ace_root/test/mock/core/common/mock_theme_utils.cpp",
     "$ace_root/test/mock/core/common/mock_udmf.cpp",
@@ -520,6 +525,10 @@ ohos_source_set("ace_components_mock") {
 ohos_source_set("ace_components_pattern") {
   testonly = true
   sources = [
+    "$ace_root/component_ext/movingphoto/movingphoto_layout_algorithm.cpp",
+    "$ace_root/component_ext/movingphoto/movingphoto_model_ng.cpp",
+    "$ace_root/component_ext/movingphoto/movingphoto_node.cpp",
+    "$ace_root/component_ext/movingphoto/movingphoto_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/action_sheet/action_sheet_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/animator/animator_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/app_bar/app_bar_view.cpp",
@@ -711,6 +720,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/menu/menu_item/menu_item_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/menu_item/menu_item_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/menu_item/menu_item_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/menu/menu_item/menu_item_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/menu_item/menu_item_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/menu_item_group/menu_item_group_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/menu_item_group/menu_item_group_layout_algorithm.cpp",
@@ -960,6 +970,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/text/span/mutable_span_string.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/span/span_object.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/span/span_string.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/text/span/tlv_util.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/span_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/span_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/symbol_span_model_ng.cpp",
@@ -1041,6 +1052,8 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/video/video_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/video/video_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/view_context/view_context_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_sw.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/waterflow/water_flow_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/waterflow/water_flow_content_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/waterflow/water_flow_item_model_ng.cpp",

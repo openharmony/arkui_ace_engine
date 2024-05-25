@@ -34,8 +34,23 @@ class ACE_EXPORT TabContentPattern : public Pattern {
 public:
     explicit TabContentPattern(const RefPtr<ShallowBuilder>& shallowBuilder)
         : shallowBuilder_(shallowBuilder), tabBarParam_(std::string(""), std::string(""), nullptr)
-    {}
+    {
+        if (shallowBuilder_) {
+            shallowBuilder_->MarkIsExecuteDeepRenderDone(true);
+        }
+    }
     ~TabContentPattern() override = default;
+
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override
+    {
+        if (shallowBuilder_ && !shallowBuilder_->IsExecuteDeepRenderDone()) {
+            auto host = GetHost();
+            CHECK_NULL_RETURN(host, false);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            return true;
+        }
+        return false;
+    }
 
     bool IsAtomicNode() const override
     {
@@ -65,6 +80,22 @@ public:
         if (shallowBuilder_ && !shallowBuilder_->IsExecuteDeepRenderDone()) {
             shallowBuilder_->ExecuteDeepRender();
             shallowBuilder_.Reset();
+        } else if (shallowBuilder_ && shallowBuilder_->IsExecuteDeepRenderDone()) {
+            auto pipeline = PipelineContext::GetCurrentContextSafely();
+            if (!pipeline) {
+                shallowBuilder_->MarkIsExecuteDeepRenderDone(false);
+                return;
+            }
+
+            pipeline->AddAfterRenderTask([weak = WeakClaim(this), shallowBuilder = shallowBuilder_]() {
+                CHECK_NULL_VOID(shallowBuilder);
+                shallowBuilder->MarkIsExecuteDeepRenderDone(false);
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                auto host = pattern->GetHost();
+                CHECK_NULL_VOID(host);
+                host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            });
         }
     }
 

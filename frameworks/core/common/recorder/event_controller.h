@@ -48,6 +48,7 @@ private:
     EventController() = default;
     ~EventController() = default;
     void NotifyConfigChange();
+    void ApplyNewestConfig() const;
 
     std::shared_mutex cacheLock_;
     std::vector<UIEventClient> clientList_;

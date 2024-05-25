@@ -255,6 +255,8 @@ public:
         return avoidKeyboardOffset_;
     }
 
+    virtual void OnHandleAreaChanged() {}
+
 protected:
     TextSelector textSelector_;
     bool showSelect_ = true;

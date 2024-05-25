@@ -83,8 +83,6 @@ RefPtr<UINode> GetInspectorByKey(const RefPtr<FrameNode>& root, const std::strin
             elements.push(child);
         }
     }
-    LOGW("Internal error! Can'nt find a component that id or key are %{public}s from rootNode[%{public}d]",
-        key.c_str(), root->GetId());
     return nullptr;
 }
 

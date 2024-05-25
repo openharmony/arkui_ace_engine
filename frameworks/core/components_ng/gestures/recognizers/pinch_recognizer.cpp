@@ -352,6 +352,9 @@ double PinchRecognizer::ComputeAverageDeviation()
 
 Offset PinchRecognizer::ComputePinchCenter()
 {
+    if (touchPoints_.empty()) {
+        return Offset();
+    }
     double sumOfX = 0.0;
     double sumOfY = 0.0;
     for (auto& id : activeFingers_) {
@@ -363,7 +366,7 @@ Offset PinchRecognizer::ComputePinchCenter()
 
     PointF localPoint(focalX, focalY);
     NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
-        isPostEventResult_, touchPoints_[0].postEventNodeId);
+        isPostEventResult_, touchPoints_[touchPoints_.begin()->first].postEventNodeId);
     Offset pinchCenter = Offset(localPoint.GetX(), localPoint.GetY());
 
     return pinchCenter;
@@ -402,6 +405,7 @@ void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
             info.SetSourceTool(lastTouchEvent_.sourceTool);
         }
         info.SetPointerEvent(lastPointEvent_);
+        info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         callbackFunction(info);

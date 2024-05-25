@@ -17,15 +17,19 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SELECT_SELECT_MODEL_NG_H
 
 #include "core/components_ng/base/common_configuration.h"
+#include "core/components_ng/base/symbol_modifier.h"
 #include "core/components_ng/pattern/select/select_model.h"
 
 namespace OHOS::Ace::NG {
 class MenuItemConfiguration : public CommonConfiguration {
     public:
-        MenuItemConfiguration(const std::string& value, const std::string& icon, int index, bool selected, bool enabled)
-            : CommonConfiguration(enabled), value_(value), icon_(icon), index_(index), selected_(selected) {}
+        MenuItemConfiguration(const std::string& value, const std::string& icon,
+            RefPtr<SymbolModifier> symbolModifier, int index, bool selected, bool enabled)
+            : CommonConfiguration(enabled), value_(value), icon_(icon), symbolModifier_(symbolModifier),
+              index_(index), selected_(selected) {}
         std::string value_;
         std::string icon_;
+        RefPtr<SymbolModifier> symbolModifier_;
         int index_;
         bool selected_;
 };

@@ -363,6 +363,8 @@ protected:
     virtual RSCanvas* GetRawPtrOfRSCanvas() = 0;
     virtual void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas,
         const RSBrush* brush = nullptr, const RSPen* pen = nullptr, RSSaveLayerOps* slo = nullptr) = 0;
+    virtual void PaintImageShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas,
+        const RSBrush* brush = nullptr, const RSPen* pen = nullptr, RSSaveLayerOps* slo = nullptr) = 0;
     double GetAlignOffset(TextAlign align, std::unique_ptr<RSParagraph>& paragraph);
     RSTextAlign GetEffectiveAlign(RSTextAlign align, RSTextDirection direction) const;
 #ifndef ACE_UNITTEST

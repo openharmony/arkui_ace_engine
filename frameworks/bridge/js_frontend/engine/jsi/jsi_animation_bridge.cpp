@@ -216,10 +216,12 @@ void AddListenerForEventCallback(const WeakPtr<JsiAnimationBridge>& bridgeWeak, 
             return;
         }
         auto jsTaskExecutor = delegate->GetAnimationJsTask();
-        jsTaskExecutor.PostTask([bridgeWeak, weakRuntime, page]() mutable {
-            LOGI("call animation onfinish event");
-            CallAnimationFinishJs(bridgeWeak, weakRuntime.lock(), page);
-        }, "ArkUIAnimationStopEvent");
+        jsTaskExecutor.PostTask(
+            [bridgeWeak, weakRuntime, page]() mutable {
+                LOGI("call animation onfinish event");
+                CallAnimationFinishJs(bridgeWeak, weakRuntime.lock(), page);
+            },
+            "ArkUIAnimationStopEvent");
     });
     animator->AddIdleListener([weakRuntime, bridgeWeak, page] {
         auto delegate = GetFrontendDelegate(weakRuntime);
@@ -228,10 +230,12 @@ void AddListenerForEventCallback(const WeakPtr<JsiAnimationBridge>& bridgeWeak, 
             return;
         }
         auto jsTaskExecutor = delegate->GetAnimationJsTask();
-        jsTaskExecutor.PostTask([bridgeWeak, weakRuntime, page]() mutable {
-            LOGI("call animation oncancel event");
-            CallAnimationCancelJs(bridgeWeak, weakRuntime.lock(), page);
-        }, "ArkUIAnimationCancelEvent");
+        jsTaskExecutor.PostTask(
+            [bridgeWeak, weakRuntime, page]() mutable {
+                LOGI("call animation oncancel event");
+                CallAnimationCancelJs(bridgeWeak, weakRuntime.lock(), page);
+            },
+            "ArkUIAnimationCancelEvent");
     });
 }
 
@@ -477,9 +481,11 @@ void JsiAnimationBridge::SetPlayStateCallbacksWithListenerId(RefPtr<Animator>& a
             return;
         }
         auto jsTaskExecutor = delegate->GetAnimationJsTask();
-        jsTaskExecutor.PostTask([weakRuntime, bridgeWeak]() mutable {
-            JsUpdatePlayState(weakRuntime.lock(), bridgeWeak, DOM_ANIMATION_PLAY_STATE_FINISHED);
-        }, "ArkUIAnimationUpdateFinishState");
+        jsTaskExecutor.PostTask(
+            [weakRuntime, bridgeWeak]() mutable {
+                JsUpdatePlayState(weakRuntime.lock(), bridgeWeak, DOM_ANIMATION_PLAY_STATE_FINISHED);
+            },
+            "ArkUIAnimationUpdateFinishState");
     });
     animator->RemoveIdleListener(idleListenerId_);
     idleListenerId_ = animator->AddIdleListener([bridgeWeak, weakRuntime] {
@@ -489,9 +495,11 @@ void JsiAnimationBridge::SetPlayStateCallbacksWithListenerId(RefPtr<Animator>& a
             return;
         }
         auto jsTaskExecutor = delegate->GetAnimationJsTask();
-        jsTaskExecutor.PostTask([weakRuntime, bridgeWeak]() mutable {
-            JsUpdatePlayState(weakRuntime.lock(), bridgeWeak, DOM_ANIMATION_PLAY_STATE_IDLE);
-        }, "ArkUIAnimationUpdateIdleState");
+        jsTaskExecutor.PostTask(
+            [weakRuntime, bridgeWeak]() mutable {
+                JsUpdatePlayState(weakRuntime.lock(), bridgeWeak, DOM_ANIMATION_PLAY_STATE_IDLE);
+            },
+            "ArkUIAnimationUpdateIdleState");
     });
 }
 
@@ -513,8 +521,9 @@ void JsiAnimationBridge::SetPlayStateCallbacks(RefPtr<Animator>& animator)
         }
         auto jsTaskExecutor = delegate->GetAnimationJsTask();
         jsTaskExecutor.PostTask([weakRuntime, bridgeWeak]() mutable {
-            JsUpdatePlayState(weakRuntime.lock(), bridgeWeak, DOM_ANIMATION_PLAY_STATE_PAUSED);
-        }, "ArkUIAnimationUpdatePauseState");
+                JsUpdatePlayState(weakRuntime.lock(), bridgeWeak, DOM_ANIMATION_PLAY_STATE_PAUSED);
+            },
+            "ArkUIAnimationUpdatePauseState");
     });
     animator->ClearStartListeners();
     animator->AddStartListener([bridgeWeak, weakRuntime] {
@@ -525,8 +534,9 @@ void JsiAnimationBridge::SetPlayStateCallbacks(RefPtr<Animator>& animator)
         }
         auto jsTaskExecutor = delegate->GetAnimationJsTask();
         jsTaskExecutor.PostTask([weakRuntime, bridgeWeak]() mutable {
-            JsUpdatePlayState(weakRuntime.lock(), bridgeWeak, DOM_ANIMATION_PLAY_STATE_RUNNING);
-        }, "ArkUIAnimationUpdateStartState");
+                JsUpdatePlayState(weakRuntime.lock(), bridgeWeak, DOM_ANIMATION_PLAY_STATE_RUNNING);
+            },
+            "ArkUIAnimationUpdateStartState");
     });
     animator->ClearResumeListeners();
     animator->AddResumeListener([bridgeWeak, weakRuntime] {
@@ -537,8 +547,9 @@ void JsiAnimationBridge::SetPlayStateCallbacks(RefPtr<Animator>& animator)
         }
         auto jsTaskExecutor = delegate->GetAnimationJsTask();
         jsTaskExecutor.PostTask([weakRuntime, bridgeWeak]() mutable {
-            JsUpdatePlayState(weakRuntime.lock(), bridgeWeak, DOM_ANIMATION_PLAY_STATE_RUNNING);
-        }, "ArkUIAnimationUpdateResumeState");
+                JsUpdatePlayState(weakRuntime.lock(), bridgeWeak, DOM_ANIMATION_PLAY_STATE_RUNNING);
+            },
+            "ArkUIAnimationUpdateResumeState");
     });
 }
 
@@ -644,12 +655,14 @@ void JsiAnimationBridgeTaskCreate::AnimationBridgeTaskFunc(const RefPtr<JsAcePag
     auto jsTaskExecutor = delegate->GetAnimationJsTask();
     if (bridgeFree) {
         auto weakBridge = AceType::WeakClaim(AceType::RawPtr(bridgeFree));
-        jsTaskExecutor.PostTask([weakBridge]() mutable {
-            auto bridgeFree = weakBridge.Upgrade();
-            if (bridgeFree != nullptr) {
-                bridgeFree.Reset();
-            }
-        }, "ArkUIAnimationBridgeRelease");
+        jsTaskExecutor.PostTask(
+            [weakBridge]() mutable {
+                auto bridgeFree = weakBridge.Upgrade();
+                if (bridgeFree != nullptr) {
+                    bridgeFree.Reset();
+                }
+            },
+            "ArkUIAnimationBridgeRelease");
     }
     bridge_->JsCreateAnimation(page, param_);
     page->AddAnimationBridge(nodeId, bridge_);

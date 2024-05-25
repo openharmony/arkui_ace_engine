@@ -31,6 +31,7 @@ public:
 
     virtual RefPtr<TextClockController> Create() = 0;
     virtual void SetFormat(const std::string& format) = 0;
+    virtual void IsDefaultFormat(bool isDefaultFormat) {};
     virtual void SetHoursWest(float hoursWest) = 0;
     virtual void SetOnDateChange(std::function<void(const std::string)>&& onChange) = 0;
     virtual void SetFontSize(const Dimension& value) = 0;

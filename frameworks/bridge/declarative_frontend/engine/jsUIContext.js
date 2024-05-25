@@ -493,6 +493,10 @@ class UIContext {
         __JSScopeUtil__.restoreInstanceId();
         return windowName
     }
+
+    clearResourceManagerCache() {
+        getUINativeModule().resource.clearCache();
+    }
 }
 
 class FocusController {

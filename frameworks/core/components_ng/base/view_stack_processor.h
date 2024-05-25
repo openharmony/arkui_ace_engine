@@ -22,6 +22,8 @@
 #include <vector>
 
 #include "base/memory/referenced.h"
+#include "core/common/container.h"
+#include "core/common/container_scope.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
@@ -350,6 +352,10 @@ public:
     {
         accountGetAccessToNodeId_ = elmtId;
         reservedNodeId_ = elmtId;
+        if (containerId_ != OHOS::Ace::INSTANCE_ID_UNDEFINED) {
+            restoreInstanceId_ = Container::CurrentId();
+            ContainerScope::UpdateCurrent(containerId_);
+        }
     }
 
     int32_t ClaimNodeId()
@@ -377,6 +383,10 @@ public:
      */
     void StopGetAccessRecording()
     {
+        if (restoreInstanceId_ != OHOS::Ace::INSTANCE_ID_UNDEFINED) {
+            ContainerScope::UpdateCurrent(restoreInstanceId_);
+            restoreInstanceId_ = OHOS::Ace::INSTANCE_ID_UNDEFINED;
+        }
         accountGetAccessToNodeId_ = ElementRegister::UndefinedElementId;
         reservedNodeId_ = ElementRegister::UndefinedElementId;
     }
@@ -448,6 +458,10 @@ public:
         return isExportTexture_;
     }
 
+    void SetRebuildContainerId(int32_t containerId)
+    {
+        containerId_ = containerId;
+    }
 private:
     ViewStackProcessor();
 
@@ -475,6 +489,8 @@ private:
     std::optional<UIState> visualState_ = std::nullopt;
     bool isBuilderNode_ = false;
     bool isExportTexture_ = false;
+    int32_t containerId_ = OHOS::Ace::INSTANCE_ID_UNDEFINED;
+    int32_t restoreInstanceId_ = OHOS::Ace::INSTANCE_ID_UNDEFINED;
 
     // elmtId reserved for next component creation
     ElementIdType reservedNodeId_ = ElementRegister::UndefinedElementId;
@@ -489,7 +505,7 @@ private:
 
 class ACE_EXPORT ScopedViewStackProcessor final {
 public:
-    ScopedViewStackProcessor();
+    ScopedViewStackProcessor(int32_t containerId = OHOS::Ace::INSTANCE_ID_UNDEFINED);
     ~ScopedViewStackProcessor();
 
 private:

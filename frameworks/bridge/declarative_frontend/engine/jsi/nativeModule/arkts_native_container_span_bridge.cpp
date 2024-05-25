@@ -17,7 +17,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
-namespace{ 
+namespace {
 constexpr int BORDER_RADIUS_START_INDEX = 2; // Border Radius args start index
 } // namespace
 

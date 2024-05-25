@@ -31,22 +31,29 @@ public:
             // no need to apply custom theme colors
             return;
         }
-
-        if (style == ProgressStyle::Ring || style == ProgressStyle::ScaleRing) {
+        if (style != ProgressStyle::Capsule) {
             ProgressModel::GetInstance()->SetBackgroundColor(themeColors->CompBackgroundTertiary());
-        } else if (style == ProgressStyle::Capsule) {
+        }
+        if (style == ProgressStyle::Capsule) {
+            NG::GradientColor endSideColor;
+            NG::GradientColor beginSideColor;
+            OHOS::Ace::NG::Gradient gradient;
+            endSideColor.SetLinearColor(LinearColor(themeColors->CompEmphasizeSecondary()));
+            endSideColor.SetDimension(Dimension(0.0f));
+            beginSideColor.SetLinearColor(LinearColor(themeColors->CompEmphasizeSecondary()));
+            beginSideColor.SetDimension(Dimension(1.0f));
+            gradient.AddColor(endSideColor);
+            gradient.AddColor(beginSideColor);
+            ProgressModel::GetInstance()->SetGradientColor(gradient);
+            ProgressModel::GetInstance()->SetColor(themeColors->CompEmphasizeSecondary());
             // normal
             ViewStackModel::GetInstance()->SetVisualState(VisualState::NORMAL);
-            ProgressModel::GetInstance()->SetBackgroundColor(themeColors->CompBackgroundTertiary());
-            auto borderColor = themeColors->BackgroundEmphasize();
+            auto borderColor = themeColors->CompEmphasizeSecondary();
             ViewAbstractModel::GetInstance()->SetBorderColor(borderColor, borderColor, borderColor, borderColor);
             ViewAbstractModel::GetInstance()->SetColorBlend(Color::BLACK); // default for restore color after pressed
             // clear state
             ViewStackModel::GetInstance()->ClearVisualState();
         } else if (style == ProgressStyle::Linear || style == ProgressStyle::Eclipse) {
-            ProgressModel::GetInstance()->SetBackgroundColor(themeColors->CompBackgroundSecondary());
-        }
-        if (style != ProgressStyle::Ring && style != ProgressStyle::ScaleRing) {
             NG::GradientColor endSideColor;
             NG::GradientColor beginSideColor;
             OHOS::Ace::NG::Gradient gradient;

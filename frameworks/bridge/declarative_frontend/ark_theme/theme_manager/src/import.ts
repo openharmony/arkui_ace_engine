@@ -18,7 +18,7 @@
 // instead reference to both common.d.ts and units.d.ts
 declare type Resource = import('../../../../../../../../../out/sdk/ohos-sdk/windows/ets/api/global/resource').Resource;
 declare type Length = string | number | Resource;
-declare type Dimension =  Resource;
+declare type Dimension = Resource;
 declare type ResourceColor = Color | number | string | Resource;
 declare enum ThemeColorMode {
     SYSTEM,
@@ -27,10 +27,10 @@ declare enum ThemeColorMode {
 }
 
 // for bind with native level and State Management
-declare function getUINativeModule(): any
+declare function getUINativeModule(): object | undefined;
 declare class ViewStackProcessor {
-    static GetElmtIdToAccountFor(): number
-    static visualState(state?: string): void
+    static GetElmtIdToAccountFor(): number;
+    static visualState(state?: string): void;
 }
 declare interface ViewPuInternal {
     parent_: ViewPuInternal
@@ -367,10 +367,10 @@ declare interface CustomTypography {
 }
 
 declare class BrandColors {
-    primary: ResourceColor | undefined
-    secondary: ResourceColor | undefined
-    tertiary: ResourceColor | undefined
-    fourth: ResourceColor | undefined
-    fifth: ResourceColor | undefined
-    sixth: ResourceColor | undefined
+    primary: ResourceColor | undefined;
+    secondary: ResourceColor | undefined;
+    tertiary: ResourceColor | undefined;
+    fourth: ResourceColor | undefined;
+    fifth: ResourceColor | undefined;
+    sixth: ResourceColor | undefined;
 }

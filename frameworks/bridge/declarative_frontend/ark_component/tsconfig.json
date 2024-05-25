@@ -98,6 +98,7 @@
         "src/ArkRemoteWindow.ts",
         "src/ArkSymbolGlyph.ts",
         "src/ArkSymbolSpan.ts",
+        "src/ArkComponent3D.ts",
         "src/ArkContainerSpan.ts"
     ],
     "compilerOptions": {

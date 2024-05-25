@@ -59,8 +59,8 @@ export struct TabTitleBar {
   private static instanceCount = 0
 
   private menuSectionWidth = 0
-  private tabOffsets = Array<number>()
-  private imageWidths = Array<number>()
+  private tabOffsets: Array<number> = [];
+  private imageWidths: Array<number> = [];
 
   private scroller: Scroller = new Scroller()
   private swiperController: SwiperController = new SwiperController()
@@ -237,8 +237,9 @@ struct CollapsibleMenuSection {
 
   aboutToAppear() {
     this.menuItems.forEach((item, index) => {
-      if (item.isEnabled && this.firstFocusableIndex == -1 && index > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
-        this.firstFocusableIndex = this.index * 1000 + index + 1
+      if (item.isEnabled && this.firstFocusableIndex == -1 &&
+        index > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
+          this.firstFocusableIndex = this.index * 1000 + index + 1
       }
     })
   }
@@ -463,19 +464,19 @@ struct TabContentItem {
                   }
                   this.imageWidth = px2vp(event?.width);
                   this.imageHeight = px2vp(event?.height);
-                  this.onImageComplete(px2vp(event?.componentWidth)
-                    + TabContentItem.paddingLeft + TabContentItem.paddingRight);
+                  this.onImageComplete(px2vp(event?.componentWidth) +
+                    TabContentItem.paddingLeft + TabContentItem.paddingRight);
                 })
                 .onError((event) => {
                   if (!this.onImageComplete) {
                     return
                   }
-                  this.onImageComplete(px2vp(event.componentWidth)
-                    + TabContentItem.paddingLeft + TabContentItem.paddingRight)
+                  this.onImageComplete(px2vp(event.componentWidth) +
+                    TabContentItem.paddingLeft + TabContentItem.paddingRight)
                 })
             }
-            .width(this.getImageLayoutWidth() * this.getImageScaleFactor()
-              + TabContentItem.paddingLeft + TabContentItem.paddingRight)
+            .width(this.getImageLayoutWidth() * this.getImageScaleFactor() +
+              TabContentItem.paddingLeft + TabContentItem.paddingRight)
             .constraintSize({
               minWidth: TabContentItem.imageHotZoneWidth,
               minHeight: TabContentItem.imageHotZoneWidth

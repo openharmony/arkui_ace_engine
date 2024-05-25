@@ -1598,8 +1598,8 @@ void ArkTSUtils::ParseOuterBorderRadius(
     PushOuterBorderDimensionVector(bottomRightOptional, values);
 }
 
-void ArkTSUtils::ParseOuterBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<ArkUI_Float32>& values,
-    std::vector<ArkUI_Int32>& units, int32_t argsIndex)
+void ArkTSUtils::ParseOuterBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo,
+    EcmaVM* vm, std::vector<ArkUI_Float32>& values, std::vector<ArkUI_Int32>& units, int32_t argsIndex)
 {
     Local<JSValueRef> topLeftArgs = runtimeCallInfo->GetCallArgRef(argsIndex);
     Local<JSValueRef> topRightArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_1);
@@ -1696,4 +1696,94 @@ ArkUISizeType ArkTSUtils::ParseJsToArkUISize(const EcmaVM *vm, const Local<JSVal
     }
     return size;
 }
+
+bool ArkTSUtils::CheckKeysPressed(
+    const EcmaVM* vm, const std::vector<KeyCode>& pressedKeyCodes, std::vector<std::string>& checkKeyCodes)
+{
+    auto hasKeyCode = [pressedKeyCodes](const KeyCode& keyCode) -> bool {
+        auto it = std::find(pressedKeyCodes.begin(), pressedKeyCodes.end(), keyCode);
+        return it != pressedKeyCodes.end();
+    };
+    for (auto& checkKeyCode : checkKeyCodes) {
+        if (checkKeyCode == "ctrl") {
+            if (!hasKeyCode(KeyCode::KEY_CTRL_LEFT) && !hasKeyCode(KeyCode::KEY_CTRL_RIGHT)) {
+                return false;
+            }
+        } else if (checkKeyCode == "shift") {
+            if (!hasKeyCode(KeyCode::KEY_SHIFT_LEFT) && !hasKeyCode(KeyCode::KEY_SHIFT_RIGHT)) {
+                return false;
+            }
+        } else if (checkKeyCode == "alt") {
+            if (!hasKeyCode(KeyCode::KEY_ALT_LEFT) && !hasKeyCode(KeyCode::KEY_ALT_RIGHT)) {
+                return false;
+            }
+        } else if (checkKeyCode == "fn") {
+            if (!hasKeyCode(KeyCode::KEY_FN)) {
+                return false;
+            }
+        } else {
+            ThrowError(vm, "indicate the keys are illegal", ERROR_CODE_PARAM_INVALID);
+            return false;
+        }
+    }
+    return true;
+}
+
+void ArkTSUtils::ThrowError(const EcmaVM* vm, const std::string& msg, int32_t code)
+{
+    auto errorVal = panda::Exception::Error(vm, panda::StringRef::NewFromUtf8(vm, msg.c_str()));
+    auto codeVal = panda::Exception::Error(vm, panda::StringRef::NewFromUtf8(vm, std::to_string(code).c_str()));
+    Local<panda::StringRef> codeKey = panda::StringRef::NewFromUtf8(vm, "code");
+    Local<panda::ObjectRef> errorObj(errorVal);
+    errorObj->Set(vm, codeKey, codeVal);
+    panda::JSNApi::ThrowException(vm, errorObj);
+}
+
+Local<JSValueRef> ArkTSUtils::GetModifierKeyState(
+    ArkUIRuntimeCallInfo* info, const std::vector<KeyCode>& pressedKeyCodes)
+{
+    auto vm = info->GetVM();
+    auto param = info->GetCallArgRef(0);
+    if (!param->IsArray(vm)) {
+        ThrowError(vm, "indicate the keys are illegal", ERROR_CODE_PARAM_INVALID);
+        return JSValueRef::Undefined(vm);
+    }
+    std::vector<std::string> checkKeyCodes;
+    std::vector<std::string> validKeyCodes = { "ctrl", "shift", "alt", "fn" };
+    auto paramArray = panda::Local<panda::ArrayRef>(param);
+    auto length = paramArray->Length(vm);
+    for (size_t i = 0; i < length; i++) {
+        auto value = panda::ArrayRef::GetValueAt(vm, paramArray, i);
+        auto code = value->ToString(vm)->ToString();
+        std::transform(code.begin(), code.end(), code.begin(), [](char& c) { return std::tolower(c); });
+        auto it = std::find(validKeyCodes.begin(), validKeyCodes.end(), code.c_str());
+        if (it == validKeyCodes.end()) {
+            ThrowError(vm, "indicate the keys are illegal", ERROR_CODE_PARAM_INVALID);
+            return JSValueRef::Undefined(info->GetVM());
+        } else {
+            checkKeyCodes.emplace_back(code);
+        }
+    }
+    if (checkKeyCodes.empty()) {
+        ThrowError(vm, "indicate the keys are illegal", ERROR_CODE_PARAM_INVALID);
+        return JSValueRef::Undefined(vm);
+    }
+    if (ArkTSUtils::CheckKeysPressed(vm, pressedKeyCodes, checkKeyCodes)) {
+        return panda::BooleanRef::New(vm, true);
+    } else {
+        return panda::BooleanRef::New(vm, false);
+    }
+}
+
+Local<JSValueRef> ArkTSUtils::JsGetModifierKeyState(ArkUIRuntimeCallInfo* info)
+{
+    Local<JSValueRef> thisObj = info->GetThisRef();
+    auto eventInfo = static_cast<BaseEventInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
+    if (!eventInfo) {
+        return JSValueRef::Undefined(info->GetVM());
+    }
+    auto pressedKeyCodes = eventInfo->GetPressedKeyCodes();
+    return ArkTSUtils::GetModifierKeyState(info, pressedKeyCodes);
+}
+
 } // namespace OHOS::Ace::NG

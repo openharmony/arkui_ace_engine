@@ -85,6 +85,8 @@
 #include "core/interfaces/native/node/scroller_modifier.h"
 #include "core/interfaces/native/node/search_modifier.h"
 #include "core/interfaces/native/node/select_modifier.h"
+#include "core/interfaces/native/node/swiper_controller_modifier.h"
+#include "core/interfaces/native/node/rich_editor_modifier.h"
 #include "core/interfaces/native/node/shape_modifier.h"
 #include "core/interfaces/native/node/side_bar_container_modifier.h"
 #include "core/interfaces/native/node/stepper_item_modifier.h"
@@ -99,6 +101,10 @@
 #include "core/interfaces/native/node/video_modifier.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
 #include "core/interfaces/native/node/node_container_span_modifier.h"
+
+#ifdef MODEL_COMPONENT_SUPPORTED
+#include "core/interfaces/native/node/node_component3d_modifier.h"
+#endif
 
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/interfaces/native/node/plugin_modifier.h"
@@ -214,7 +220,7 @@ const ArkUINodeModifiers impl = {
     NodeModifier::GetScrollerModifier,
     nullptr, // TabContentModifier
     nullptr, // TabsControllerModifier
-    nullptr, // SwiperControllerModifier
+    NodeModifier::GetSwiperControllerModifier,
     NodeModifier::GetGestureModifier, // GestureModifier
     nullptr, // BadgeModifier
     nullptr, // WebModifier
@@ -232,9 +238,15 @@ const ArkUINodeModifiers impl = {
     NodeModifier::GetNodeContentModifier,
     NodeModifier::GetSymbolGlyphModifier,
     NodeModifier::GetSymbolSpanModifier,
+
+#ifdef MODEL_COMPONENT_SUPPORTED
+    NodeModifier::GetComponent3DModifier,
+#else
+    nullptr,
+#endif
+
     NodeModifier::GetContainerSpanModifier,
 };
-
 } // namespace
 
 } // namespace OHOS::Ace::NG

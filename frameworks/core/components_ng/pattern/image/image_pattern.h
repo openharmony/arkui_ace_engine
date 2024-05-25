@@ -159,7 +159,7 @@ public:
         }
     }
 
-    std::string GetDynamicModeString(DynamicRangeMode dynamicMode)
+    std::string GetDynamicModeString(DynamicRangeMode dynamicMode) const
     {
         switch (dynamicMode) {
             case DynamicRangeMode::HIGH:
@@ -239,7 +239,8 @@ public:
     {
         images_.clear();
     }
-
+    void ResetImage();
+    void ResetAltImage();
     void ResetImageProperties();
 
     void ResetImageAndAlt();

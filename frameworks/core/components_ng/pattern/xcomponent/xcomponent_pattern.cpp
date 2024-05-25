@@ -313,6 +313,7 @@ void XComponentPattern::OnTextureRefresh(void* surface)
     auto renderContextForPlatformView = renderContextForPlatformViewWeakPtr_.Upgrade();
     CHECK_NULL_VOID(renderContextForPlatformView);
     renderContextForPlatformView->MarkNewFrameAvailable(surface);
+    UpdatePlatformViewLayoutIfNeeded();
 }
 
 void XComponentPattern::RegisterPlatformViewEvent()
@@ -335,7 +336,7 @@ void XComponentPattern::RegisterPlatformViewEvent()
                 return;
             }
             xComponentPattern->OnTextureRefresh(nativeWindow);
-        });
+            }, "ArkUIXComponentPatternTextureRefreshEvent");
     };
     platformView_->RegisterTextureEvent(textureRefreshEvent);
 
@@ -346,7 +347,7 @@ void XComponentPattern::RegisterPlatformViewEvent()
             auto host = xComponentPattern->GetHost();
             CHECK_NULL_VOID(host);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        });
+            }, "ArkUIXComponentPatternPlatformViewReadyEvent");
     };
     platformView_->RegisterPlatformViewReadyEvent(platformViewReadyEvent);
 }
@@ -439,16 +440,18 @@ void XComponentPattern::OnModifyDone()
         handlingSurfaceRenderContext_->UpdateBackgroundColor(Color::TRANSPARENT);
     }
 #ifdef PLATFORM_VIEW_SUPPORTED
-    ContainerScope scope(GetHostInstanceId());
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-    platformTask.PostTask([weak = WeakClaim(this)] {
-        auto xComponentPattern = weak.Upgrade();
-        CHECK_NULL_VOID(xComponentPattern);
-        xComponentPattern->RegisterPlatformViewEvent();
-        xComponentPattern->PrepareSurface();
-    });
+    if (type_ == XComponentType::PLATFORM_VIEW) {
+        ContainerScope scope(GetHostInstanceId());
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
+        platformTask.PostTask([weak = WeakClaim(this)] {
+            auto xComponentPattern = weak.Upgrade();
+            CHECK_NULL_VOID(xComponentPattern);
+            xComponentPattern->RegisterPlatformViewEvent();
+            xComponentPattern->PrepareSurface();
+            }, "ArkUIXComponentPatternOnModifyDone");
+    }
 #endif
 }
 
@@ -604,10 +607,13 @@ void XComponentPattern::SetRotation()
     auto displayInfo = container->GetDisplayInfo();
     CHECK_NULL_VOID(displayInfo);
     auto dmRotation = displayInfo->GetRotation();
-    if (rotation_ != dmRotation) {
-        rotation_ = dmRotation;
+    auto deviceRotation = displayInfo->GetDeviceRotation();
+    uint32_t newRotation = deviceRotation + 90 * static_cast<uint32_t>(dmRotation);
+    newRotation = newRotation % 360;
+    if (rotation_ != newRotation) {
+        rotation_ = newRotation;
         CHECK_NULL_VOID(renderSurface_);
-        renderSurface_->SetTransformHint(dmRotation);
+        renderSurface_->SetTransformHint(newRotation);
     }
 }
 
@@ -656,7 +662,7 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
     }
 #ifdef PLATFORM_VIEW_SUPPORTED
     if (type_ == XComponentType::PLATFORM_VIEW) {
-        UpdatePlatformViewLayout();
+        UpdatePlatformViewLayoutIfNeeded();
     }
 #endif
     host->MarkNeedSyncRenderTree();
@@ -666,20 +672,25 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
 }
 
 #ifdef PLATFORM_VIEW_SUPPORTED
-void XComponentPattern::UpdatePlatformViewLayout()
+void XComponentPattern::UpdatePlatformViewLayoutIfNeeded()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto transformRelativeOffset = host->GetTransformRelativeOffset();
-    platformView_->UpdatePlatformViewLayout(drawSize_, localPosition_ + transformRelativeOffset);
-    if (renderContextForPlatformView_) {
-        renderContextForPlatformView_->SetBounds(localPosition_.GetX(), localPosition_.GetY(),
-            drawSize_.Width(), drawSize_.Height());
-    }
-    if (SystemProperties::GetExtSurfaceEnabled()) {
-        renderSurface_->SetExtSurfaceBounds(transformRelativeOffset.GetX() + localPosition_.GetX(),
-            transformRelativeOffset.GetY() + localPosition_.GetY(), drawSize_.Width(),
-            drawSize_.Height());
+    OffsetF offset = localPosition_ + transformRelativeOffset;
+    if (lastDrawSize_ != drawSize_ || lastOffset_ != offset) {
+        platformView_->UpdatePlatformViewLayout(drawSize_, offset);
+        if (renderContextForPlatformView_) {
+            renderContextForPlatformView_->SetBounds(localPosition_.GetX(), localPosition_.GetY(),
+                drawSize_.Width(), drawSize_.Height());
+        }
+        if (SystemProperties::GetExtSurfaceEnabled()) {
+            renderSurface_->SetExtSurfaceBounds(transformRelativeOffset.GetX() + localPosition_.GetX(),
+                transformRelativeOffset.GetY() + localPosition_.GetY(), drawSize_.Width(),
+                drawSize_.Height());
+        }
+        lastDrawSize_ = drawSize_;
+        lastOffset_ = offset;
     }
 }
 #endif
@@ -1063,6 +1074,10 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
 #ifdef PLATFORM_VIEW_SUPPORTED
 void XComponentPattern::PlatformViewDispatchTouchEvent(const TouchLocationInfo& changedPoint)
 {
+    if (type_ != XComponentType::PLATFORM_VIEW) {
+        return;
+    }
+    CHECK_NULL_VOID(platformView_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto transformRelativeOffset = host->GetTransformRelativeOffset();

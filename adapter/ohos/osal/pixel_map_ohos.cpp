@@ -101,6 +101,21 @@ RefPtr<PixelMap> PixelMap::CopyPixelMap(const RefPtr<PixelMap>& pixelMap)
     return AceType::MakeRefPtr<PixelMapOhos>(newPixelMap);
 }
 
+RefPtr<PixelMap> PixelMap::DecodeTlv(std::vector<uint8_t>& buff)
+{
+    Media::PixelMap* pixelMapRelease = OHOS::Media::PixelMap::DecodeTlv(buff);
+    CHECK_NULL_RETURN(pixelMapRelease, nullptr);
+    std::shared_ptr<Media::PixelMap> newPixelMap(pixelMapRelease);
+    CHECK_NULL_RETURN(newPixelMap, nullptr);
+    return AceType::MakeRefPtr<PixelMapOhos>(newPixelMap);
+}
+
+bool PixelMapOhos::EncodeTlv(std::vector<uint8_t>& buff)
+{
+    CHECK_NULL_RETURN(pixmap_, false);
+    return pixmap_->EncodeTlv(buff);
+}
+
 RefPtr<PixelMap> PixelMap::GetFromDrawable(void* ptr)
 {
     CHECK_NULL_RETURN(ptr, nullptr);

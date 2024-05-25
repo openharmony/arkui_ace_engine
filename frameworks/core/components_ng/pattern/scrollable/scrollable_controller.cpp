@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,10 @@ void ScrollableController::JumpTo(int32_t index, bool smooth, ScrollAlign align,
     if (align == ScrollAlign::NONE) {
         align = pattern->GetDefaultScrollAlign();
     }
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    ACE_SCOPED_TRACE("ScrollToIndex, index:%d, smooth:%u, align:%d, id:%d, tag:%s", index, smooth, align,
+        static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
     pattern->ScrollToIndex(index, smooth, align);
 }
 
@@ -34,13 +38,21 @@ bool ScrollableController::AnimateTo(
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_RETURN(pattern, false);
+    auto host = pattern->GetHost();
+    CHECK_NULL_RETURN(host, false);
     if (pattern->GetAxis() != Axis::NONE) {
         if (position.Unit() == DimensionUnit::PERCENT) {
             return false;
         }
         if (Positive(duration) || smooth) {
+            ACE_SCOPED_TRACE(
+                "ScrollTo with animation, position:%f, duration:%f, smooth:%u, canOverScroll:%u, id:%d, tag:%s",
+                position.ConvertToPx(), duration, smooth, canOverScroll,
+                static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
             pattern->AnimateTo(position.ConvertToPx(), duration, curve, smooth, canOverScroll);
         } else {
+            ACE_SCOPED_TRACE("ScrollTo without animation, position:%f, id:%d, tag:%s", position.ConvertToPx(),
+                static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
             pattern->ScrollTo(position.ConvertToPx());
         }
         return true;
@@ -74,6 +86,10 @@ void ScrollableController::ScrollBy(double pixelX, double pixelY, bool /* smooth
     CHECK_NULL_VOID(pattern);
     pattern->StopAnimate();
     auto offset = pattern->GetAxis() == Axis::VERTICAL ? pixelY : pixelX;
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    ACE_SCOPED_TRACE("ScrollBy, offset:%f, id:%d, tag:%s", static_cast<float>(-offset),
+        static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
     pattern->UpdateCurrentOffset(static_cast<float>(-offset), SCROLL_FROM_JUMP);
 }
 
@@ -101,6 +117,10 @@ void ScrollableController::Fling(double flingVelocity)
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    ACE_SCOPED_TRACE("Fling, flingVelocity:%f, id:%d, tag:%s", static_cast<float>(flingVelocity),
+        static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
     pattern->Fling(flingVelocity);
 }
 
@@ -111,12 +131,18 @@ void ScrollableController::ScrollPage(bool reverse, bool smooth)
     if (pattern->GetAxis() == Axis::NONE) {
         return;
     }
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
     auto offset = reverse ? pattern->GetMainContentSize() : -pattern->GetMainContentSize();
     if (smooth) {
         auto position = pattern->GetTotalOffset() - offset;
+        ACE_SCOPED_TRACE("ScrollPage with animation, position:%f, id:%d, tag:%s", position,
+            static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
         pattern->AnimateTo(position, -1, nullptr, true);
     } else {
         pattern->StopAnimate();
+        ACE_SCOPED_TRACE("ScrollPage without animation, offset:%f, id:%d, tag:%s", offset,
+            static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
         pattern->UpdateCurrentOffset(offset, SCROLL_FROM_JUMP);
     }
 }

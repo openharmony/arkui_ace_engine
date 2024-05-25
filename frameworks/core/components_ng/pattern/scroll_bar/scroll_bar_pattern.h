@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -285,6 +285,27 @@ public:
         return false;
     }
 
+    void AddScrollBarLayoutInfo();
+
+    void GetAxisDumpInfo();
+
+    void GetDisplayModeDumpInfo();
+
+    void GetPanDirectionDumpInfo();
+
+    void DumpAdvanceInfo() override;
+
+    void SetScrollEnabled(bool enabled)
+    {
+        CHECK_NULL_VOID(scrollableEvent_);
+        scrollableEvent_->SetEnabled(enabled);
+        if (!enabled) {
+            scrollableEvent_->SetAxis(Axis::NONE);
+        } else {
+            scrollableEvent_->SetAxis(axis_);
+        }
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -337,6 +358,9 @@ private:
     bool scrollingUp_ = false;
     bool scrollingDown_ = false;
     bool isReverse_ = false;
+
+    // dump info
+    std::list<OuterScrollBarLayoutInfo> outerScrollBarLayoutInfos_;
 };
 
 } // namespace OHOS::Ace::NG

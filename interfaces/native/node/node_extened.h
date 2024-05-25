@@ -95,6 +95,11 @@ struct ArkUI_OptionalUint {
     uint32_t value;
 };
 
+struct ArkUI_OptionalCharPtr {
+    int32_t isSet;
+    const char* value;
+};
+
 struct ArkUI_SwiperIndicator {
     ArkUI_SwiperIndicatorType type;
     ArkUI_OptionalFloat dimLeft;
@@ -118,6 +123,19 @@ struct ArkUI_DrawableDescriptor {
     std::shared_ptr<OHOS::Ace::Napi::AnimatedDrawableDescriptor> animatedDrawableDescriptor;
     std::shared_ptr<OHOS::Ace::Napi::LayeredDrawableDescriptor> layeredDrawableDescriptor;
     std::shared_ptr<ArkUI_Resource> resource;
+};
+
+struct ArkUI_AccessibilityState {
+    ArkUI_OptionalInt isDisabled;
+    ArkUI_OptionalInt isSelected;
+    ArkUI_OptionalInt checkedType;
+};
+
+struct ArkUI_AccessibilityValue {
+    ArkUI_OptionalInt min;
+    ArkUI_OptionalInt max;
+    ArkUI_OptionalInt current;
+    ArkUI_OptionalCharPtr text;
 };
 
 #ifdef __cplusplus

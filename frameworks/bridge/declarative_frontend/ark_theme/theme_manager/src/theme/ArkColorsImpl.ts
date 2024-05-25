@@ -76,8 +76,12 @@ class ArkColorsImpl implements Colors {
         colors: CustomColors = {},
         baselineColors: Colors
     ) {
-        this.brand = colors?.brand ?? baselineColors.brand
-        const brandColors: BrandColors = ArkColorsImpl.makeBrandColors(colors?.brand)
+        const customAttribute = this as any;
+        for(let attribute in colors) {
+            customAttribute[attribute] = colors[attribute];
+        }
+        this.brand = colors?.brand ?? baselineColors.brand;
+        const brandColors: BrandColors = ArkColorsImpl.makeBrandColors(colors?.brand);
 
         this.warning = colors?.warning ?? baselineColors.warning;
         this.alert = colors?.alert ?? baselineColors.alert;

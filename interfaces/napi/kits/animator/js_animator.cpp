@@ -267,7 +267,7 @@ static napi_value JSReset(napi_env env, napi_callback_info info)
         NapiThrow(env, "Internal error. Animator is null in AnimatorResult.", ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
-    TAG_LOGI(AceLogTag::ACE_ANIMATION, "JsAnimator: JSReset, id:%{public}d ", animator->GetId());
+    TAG_LOGI(AceLogTag::ACE_ANIMATION, "ohos.animator reset, id:%{public}d", animator->GetId());
     animator->ClearInterpolators();
     animator->ResetIsReverse();
     animatorResult->ApplyOption();
@@ -327,23 +327,25 @@ static napi_value JSPlay(napi_env env, napi_callback_info info)
     }
     auto animatorResult = GetAnimatorResult(env, info);
     if (!animatorResult) {
-        TAG_LOGW(AceLogTag::ACE_ANIMATION, "JsAnimator: cannot find animator result when call play");
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "ohos.animator: cannot find animator result when call play");
         return nullptr;
     }
     auto animator = animatorResult->GetAnimator();
     if (!animator) {
-        TAG_LOGW(AceLogTag::ACE_ANIMATION, "JsAnimator: no animator is created when call play");
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "ohos.animator: no animator is created when call play");
         return nullptr;
     }
     if (!animator->HasScheduler()) {
         auto result = animator->AttachSchedulerOnContainer();
         if (!result) {
             TAG_LOGW(AceLogTag::ACE_ANIMATION,
-                "JsAnimator: play failed, animator is not bound to specific context, id:%{public}d", animator->GetId());
+                "ohos.animator: play failed, animator is not bound to specific context, use uiContext.createAnimator "
+                "instead, id:%{public}d",
+                animator->GetId());
             return nullptr;
         }
     }
-    TAG_LOGI(AceLogTag::ACE_ANIMATION, "JsAnimator: JsPlay, id:%{public}d, %{public}s",
+    TAG_LOGI(AceLogTag::ACE_ANIMATION, "ohos.animator play, id:%{public}d, %{public}s",
         animator->GetId(), animatorResult->GetAnimatorOption()->ToString().c_str());
     if (animatorResult->GetMotion()) {
         animator->PlayMotion(animatorResult->GetMotion());
@@ -362,7 +364,7 @@ static napi_value JSFinish(napi_env env, napi_callback_info info)
     if (!animator) {
         return nullptr;
     }
-    TAG_LOGI(AceLogTag::ACE_ANIMATION, "JsAnimator: JSFinish, id:%{public}d ", animator->GetId());
+    TAG_LOGI(AceLogTag::ACE_ANIMATION, "ohos.animator finish, id:%{public}d", animator->GetId());
     animator->Finish();
     napi_value result = nullptr;
     napi_get_null(env, &result);
@@ -375,7 +377,7 @@ static napi_value JSPause(napi_env env, napi_callback_info info)
     if (!animator) {
         return nullptr;
     }
-    TAG_LOGI(AceLogTag::ACE_ANIMATION, "JsAnimator: JSPause, id:%{public}d ", animator->GetId());
+    TAG_LOGI(AceLogTag::ACE_ANIMATION, "ohos.animator pause, id:%{public}d", animator->GetId());
     animator->Pause();
     napi_value result;
     napi_get_null(env, &result);
@@ -388,7 +390,7 @@ static napi_value JSCancel(napi_env env, napi_callback_info info)
     if (!animator) {
         return nullptr;
     }
-    TAG_LOGI(AceLogTag::ACE_ANIMATION, "JsAnimator: JSCancel, id:%{public}d ", animator->GetId());
+    TAG_LOGI(AceLogTag::ACE_ANIMATION, "ohos.animator cancel, id:%{public}d", animator->GetId());
     animator->Cancel();
     napi_value result;
     napi_get_null(env, &result);
@@ -399,27 +401,29 @@ static napi_value JSReverse(napi_env env, napi_callback_info info)
 {
     auto animatorResult = GetAnimatorResult(env, info);
     if (!animatorResult) {
-        TAG_LOGW(AceLogTag::ACE_ANIMATION, "JsAnimator: cannot find animator result when call reverse");
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "ohos.animator: cannot find animator result when call reverse");
         return nullptr;
     }
     if (animatorResult->GetMotion()) {
-        TAG_LOGW(AceLogTag::ACE_ANIMATION, "JsAnimator: interpolatingSpringCurve, cannot reverse");
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "ohos.animator: interpolatingSpringCurve, cannot reverse");
         return nullptr;
     }
     auto animator = animatorResult->GetAnimator();
     if (!animator) {
-        TAG_LOGW(AceLogTag::ACE_ANIMATION, "JsAnimator: no animator is created when call reverse");
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "ohos.animator: no animator is created when call reverse");
         return nullptr;
     }
-    TAG_LOGI(AceLogTag::ACE_ANIMATION, "JsAnimator: JSReverse, id:%{public}d", animator->GetId());
     if (!animator->HasScheduler()) {
         auto result = animator->AttachSchedulerOnContainer();
         if (!result) {
-            TAG_LOGW(AceLogTag::ACE_ANIMATION, "JsAnimator: reverse failed, animator is not bound to specific context");
+            TAG_LOGW(AceLogTag::ACE_ANIMATION,
+                "ohos.animator: reverse failed, animator is not bound to specific context, use "
+                "uiContext.createAnimator instead, id:%{public}d",
+                animator->GetId());
             return nullptr;
         }
     }
-    TAG_LOGI(AceLogTag::ACE_ANIMATION, "JsAnimator: JSReverse, id:%{public}d ", animator->GetId());
+    TAG_LOGI(AceLogTag::ACE_ANIMATION, "ohos.animator reverse, id:%{public}d", animator->GetId());
     animator->Reverse();
     napi_value result;
     napi_get_null(env, &result);
@@ -477,22 +481,25 @@ static napi_value JSSetExpectedFrameRateRange(napi_env env, napi_callback_info i
 {
     auto animatorResult = GetAnimatorResult(env, info);
     if (!animatorResult) {
-        TAG_LOGW(AceLogTag::ACE_ANIMATION, "JsAnimator: cannot find animator when call SetExpectedFrameRateRange");
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "ohos.animator: cannot find animator when call SetExpectedFrameRateRange");
         return nullptr;
     }
     auto animator = animatorResult->GetAnimator();
     if (!animator) {
-        TAG_LOGW(AceLogTag::ACE_ANIMATION, "JsAnimator: no animator is created when call SetExpectedFrameRateRange");
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "ohos.animator: no animator is created when call SetExpectedFrameRateRange");
         return nullptr;
     }
-    TAG_LOGI(AceLogTag::ACE_ANIMATION, "JsAnimator: JSSetExpectedFrameRateRange, id:%{public}d", animator->GetId());
     if (!animator->HasScheduler()) {
         auto result = animator->AttachSchedulerOnContainer();
         if (!result) {
-            TAG_LOGW(AceLogTag::ACE_ANIMATION, "JsAnimator: SetExpectedFrameRateRange failed");
+            TAG_LOGW(AceLogTag::ACE_ANIMATION,
+                "ohos.animator: SetExpectedFrameRateRange failed because animator is not bound to specific context, "
+                "use uiContext.createAnimator instead, id:%{public}d",
+                animator->GetId());
             return nullptr;
         }
     }
+    TAG_LOGI(AceLogTag::ACE_ANIMATION, "ohos.animator setExpectedFrameRateRange, id:%{public}d", animator->GetId());
     FrameRateRange frameRateRange;
     ParseExpectedFrameRateRange(env, info, frameRateRange);
     animator->SetExpectedFrameRateRange(frameRateRange);
@@ -602,7 +609,7 @@ static napi_value SetOnfinish(napi_env env, napi_callback_info info)
     napi_create_reference(env, onfinish, 1, &onfinishRef);
     animatorResult->SetOnfinishRef(onfinishRef);
     animator->ClearStopListeners();
-    animator->AddStopListener([env, onfinishRef] {
+    animator->AddStopListener([env, onfinishRef, id = animator->GetId()] {
         napi_handle_scope scope = nullptr;
         napi_open_handle_scope(env, &scope);
         if (scope == nullptr) {
@@ -615,6 +622,7 @@ static napi_value SetOnfinish(napi_env env, napi_callback_info info)
             napi_close_handle_scope(env, scope);
             return;
         }
+        TAG_LOGI(AceLogTag::ACE_ANIMATION, "ohos.animator call finish callback, id:%{public}d", id);
         napi_call_function(env, NULL, onfinish, 0, NULL, &ret);
         napi_close_handle_scope(env, scope);
     });
@@ -831,7 +839,8 @@ void AnimatorResult::Destroy(napi_env env)
     if (animator_) {
         if (!animator_->IsStopped()) {
             animator_->Stop();
-            LOGI("Animator force stopping done, id:%{public}d", animator_->GetId());
+            TAG_LOGI(AceLogTag::ACE_ANIMATION, "ohos.animator force stopping done when destroying, id:%{public}d",
+                animator_->GetId());
         }
     }
     if (onframe_ != nullptr) {

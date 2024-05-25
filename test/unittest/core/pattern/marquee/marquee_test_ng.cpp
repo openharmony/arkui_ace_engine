@@ -1500,40 +1500,6 @@ HWTEST_F(MarqueeTestNg, MarqueeTest020, TestSize.Level1)
     expect = -2 + padding.right.value_or(0);
     EXPECT_EQ(start, expect);
 }
-/**
- * @tc.name: MarqueeTest021
- * @tc.desc: Test MarqueePattern.OnColorConfigurationUpdate
- * @tc.type: FUNC
- */
-HWTEST_F(MarqueeTestNg, MarqueeTest021, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create frameNode and add a Child.
-     */
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
-
-    /**
-     * @tc.steps: step2. Create MarqueePattern.
-     */
-    auto pattern = frameNode->GetPattern<MarqueePattern>();
-    pattern->AttachToFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
-
-    /**
-     * @tc.steps: step3. Call OnDetachFromFrameNode.
-     */
-    FrameNode frameNode2 = FrameNode(V2::MARQUEE_ETS_TAG, 2, pattern);
-    pattern->OnDetachFromFrameNode(&frameNode2);
-    pattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::MAXIMIZE);
-    EXPECT_FALSE(pattern->isOritationListenerRegisted_);
-    EXPECT_FALSE(pattern->isRegistedAreaCallback_);
-
-    /**
-     * @tc.steps: step4. Call RegistOritationListener.
-     */
-    pattern->RegistOritationListener();
-    EXPECT_TRUE(pattern->isOritationListenerRegisted_);
-}
 
 /**
  * @tc.name: MarqueeTest022

@@ -76,13 +76,6 @@ template("ace_ohos_standard_source_set") {
       "//third_party/icu/icu4c:icu_config",
     ]
 
-    if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
-      configs += [
-        "//foundation/graphic/graphic_2d/rosen/modules/render_service_base:export_config",
-        "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:render_service_client_config",
-      ]
-    }
-
     include_dirs = [
       "$ability_runtime_inner_api_path/runtime/include/",
       "$ability_runtime_napi_path/featureAbility",
@@ -137,6 +130,10 @@ template("ace_ohos_standard_source_set") {
       "window_manager:scene_session",
       "window_manager:screen_session_manager_client",
     ]
+
+    if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
+      external_deps += [ "graphic_2d:librender_service_base" ]
+    }
 
     if (form_fwk_enable) {
       external_deps += [

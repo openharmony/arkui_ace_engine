@@ -1023,6 +1023,16 @@ class SymbolSpanModifier extends ArkSymbolSpanComponent {
   }
 }
 
+class Component3DModifier extends ArkComponent3DComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    this._modifiersWithKeys = new ModifierMap();
+  }
+  applyNormalAttribute(instance) {
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier(instance, this);
+  }
+}
 
 class ContainerSpanModifier extends ArkContainerSpanComponent {
   constructor(nativePtr, classType) {
@@ -1044,4 +1054,4 @@ export default { CommonModifier, AlphabetIndexerModifier, BlankModifier, ButtonM
   ScrollModifier, SearchModifier, SelectModifier, ShapeModifier, SideBarContainerModifier, SliderModifier, SpanModifier, StackModifier, StepperItemModifier,
   SwiperModifier, TabsModifier, TextAreaModifier, TextModifier, TextClockModifier, TextInputModifier, TextPickerModifier, TextTimerModifier, TimePickerModifier,
   ToggleModifier, VideoModifier, WaterFlowModifier, FlexModifier, PluginComponentModifier, RefreshModifier, TabContentModifier, ModifierUtils, AttributeUpdater,
-  ParticleModifier, SymbolGlyphModifier, SymbolSpanModifier, ContainerSpanModifier };
+  ParticleModifier, SymbolGlyphModifier, SymbolSpanModifier, Component3DModifier, ContainerSpanModifier };

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,6 +48,9 @@
 namespace OHOS::Ace::Framework {
 namespace {
 const std::unordered_set<std::string> EXPORT_TEXTURE_SUPPORT_TYPES = { V2::JS_VIEW_ETS_TAG, V2::COMMON_VIEW_ETS_TAG };
+constexpr uint32_t INFO_LENGTH_LIMIT = 2;
+constexpr uint32_t BUILD_PARAM_INDEX_TWO = 2;
+constexpr uint32_t BUILD_PARAM_INDEX_THREE = 3;
 } // namespace
 
 void JSBaseNode::BuildNode(const JSCallbackInfo& info)
@@ -55,17 +58,55 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
     auto builder = info[0];
     CHECK_NULL_VOID(builder->IsFunction());
     auto buildFunc = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(builder));
-    NG::ScopedViewStackProcessor builderViewStackProcessor;
-    NG::ViewStackProcessor::GetInstance()->SetIsBuilderNode(true);
-    NG::ViewStackProcessor::GetInstance()->SetIsExportTexture(renderType_ == NodeRenderType::RENDER_TYPE_TEXTURE);
-    if (info.Length() >= 2 && info[1]->IsObject()) {
-        JSRef<JSVal> param = info[1];
-        buildFunc->ExecuteJS(1, &param);
-    } else {
-        buildFunc->ExecuteJS();
+
+    auto infoLen = info.Length();
+    JSRef<JSVal> param;
+    if (infoLen >= INFO_LENGTH_LIMIT && (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
+        || (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE) && info[1]->IsObject()))) {
+        param = info[1];
     }
+
+    auto lazyBuilderFunc = [buildFunc, param, renderType = renderType_]() mutable {
+        NG::ViewStackProcessor::GetInstance()->SetIsBuilderNode(true);
+        NG::ViewStackProcessor::GetInstance()->SetIsExportTexture(renderType == NodeRenderType::RENDER_TYPE_TEXTURE);
+        if (!param->IsEmpty()) {
+            buildFunc->ExecuteJS(1, &param);
+        } else {
+            buildFunc->ExecuteJS();
+        }
+    };
+
+    NG::ScopedViewStackProcessor builderViewStackProcessor;
+    lazyBuilderFunc();
     auto parent = viewNode_ ? viewNode_->GetParent() : nullptr;
     auto newNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    if (newNode) {
+        newNode->SetBuilderFunc(std::move(lazyBuilderFunc));
+    }
+
+    if (newNode && (infoLen >= BUILD_PARAM_INDEX_TWO + 1)) {
+        auto updateTsNodeBuilder = info[BUILD_PARAM_INDEX_TWO];
+        EcmaVM* vm = info.GetVm();
+        auto updateTsFunc = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(updateTsNodeBuilder));
+        auto updateNodeFunc = [updateTsFunc, vm](int32_t instanceId, RefPtr<NG::UINode>& node) mutable {
+            JSRef<JSVal> param[2];
+            param[0] = JSRef<JSVal>::Make(ToJSValue(instanceId));
+            param[1] = JSRef<JSVal>::Make(panda::NativePointerRef::New(vm, AceType::RawPtr(node)));
+            updateTsFunc->ExecuteJS(2, param);
+        };
+        newNode->SetUpdateNodeFunc(std::move(updateNodeFunc));
+    }
+
+    if (newNode && (infoLen >= BUILD_PARAM_INDEX_THREE + 1)) {
+        auto updateTsNodeConfig = info[BUILD_PARAM_INDEX_THREE];
+        EcmaVM* vm = info.GetVm();
+        auto updateTsConfig = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(updateTsNodeConfig));
+        auto updateNodeConfig = [updateTsConfig, vm]() mutable {
+            updateTsConfig->ExecuteJS();
+        };
+        newNode->SetUpdateNodeConfig(std::move(updateNodeConfig));
+    }
+
     // If the node is a UINode, amount it to a BuilderProxyNode if needProxy.
     auto flag = AceType::InstanceOf<NG::FrameNode>(newNode);
     auto isSupportExportTexture = newNode ? EXPORT_TEXTURE_SUPPORT_TYPES.count(newNode->GetTag()) > 0 : false;
@@ -120,7 +161,8 @@ void JSBaseNode::Create(const JSCallbackInfo& info)
     if (info.Length() >= 1 && !info[0]->IsFunction()) {
         return;
     }
-    if ((info.Length() >= 2 && !(info[1]->IsObject() || info[1]->IsUndefined() || info[1]->IsNull()))) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE) && info.Length() >= INFO_LENGTH_LIMIT
+        && !(info[1]->IsObject() || info[1]->IsUndefined() || info[1]->IsNull())) {
         return;
     }
     BuildNode(info);

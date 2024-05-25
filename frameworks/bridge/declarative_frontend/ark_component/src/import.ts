@@ -34,6 +34,7 @@
 /// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/common.d.ts" />
 /// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/common_ts_ets_api.d.ts" />
 /// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/container_span.d.ts" />
+/// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/component3d.d.ts" />
 /// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/context_menu.d.ts" />
 /// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/counter.d.ts" />
 /// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/custom_dialog_controller.d.ts" />

@@ -35,4 +35,8 @@ std::function<void(const AAFwk::WantParams&)> DataDetectorAdapter::GetOnReceive(
 {
     return [](const AAFwk::WantParams& wantParams) {};
 }
+std::function<void()> GetDetectDelayTask(const std::map<int32_t, AISpan>& aiSpanMap)
+{
+    return []() {};
+}
 } // namespace OHOS::Ace

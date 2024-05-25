@@ -232,6 +232,7 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     reuseId(id: string): this;
     renderFit(fitMode: RenderFit): this;
     attributeModifier(modifier: AttributeModifier<CommonAttribute>): this;
+    systemBarEffect(): this;
 }
 declare class ArkBlankComponent extends ArkComponent implements CommonMethod<BlankAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1013,6 +1014,7 @@ declare class ArkNavDestinationComponent extends ArkComponent implements NavDest
     onShown(callback: () => void): this;
     onHidden(callback: () => void): this;
     onBackPressed(callback: () => boolean): this;
+    ignoreLayoutSafeArea(types?: SafeAreaType[], edges?: SafeAreaEdge[]): this;
 }
 declare class ArkCounterComponent extends ArkComponent implements CounterAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1073,6 +1075,7 @@ declare class ArkNavigationComponent extends ArkComponent implements NavigationA
     onNavBarStateChange(callback: (isVisible: boolean) => void): NavigationAttribute;
     onNavigationModeChange(callback: (mode: NavigationMode) => void): NavigationAttribute;
     navDestination(builder: (name: string, param: unknown) => void): NavigationAttribute;
+    ignoreLayoutSafeArea(types?: SafeAreaType[], edges?: SafeAreaEdge[]): NavigationAttribute;
 }
 declare class ArkNavRouterComponent extends ArkComponent implements NavRouterAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1975,6 +1978,17 @@ declare class ArkSymbolSpanComponent extends ArkComponent implements SymbolSpanA
 declare class ArkParticleComponent extends ArkComponent implements ParticleAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
     emitter(fields: Array<EmitterProperty>): ParticleAttribute;
+}
+
+declare class ArkComponent3DComponent extends ArkComponent implements Component3DAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    environment(uri: Resource): Component3DAttribute;
+    customRender(uri: Resource, selfRenderUpdate: boolean): Component3DAttribute;
+    shader(uri: Resource): Component3DAttribute;
+    shaderImageTexture(uri: Resource): Component3DAttribute;
+    shaderInputBuffer(buffer: Array<number>): Component3DAttribute;
+    renderWidth(value: Dimension): Component3DAttribute;
+    renderHeight(value: Dimension): Component3DAttribute;
 }
 
 declare class ArkContainerSpanComponent extends ArkComponent implements ContainerSpanAttribute {

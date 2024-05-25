@@ -111,9 +111,10 @@ const std::function<float(int32_t)> GET_MAIN_SIZE_FUNC = [](int32_t idx) {
 const std::vector<WaterFlowSections::Section> SECTION_4 = {
     WaterFlowSections::Section { .itemsCount = 20, .onGetItemMainSizeByIndex = GET_MAIN_SIZE_FUNC, .crossCount = 3 },
     WaterFlowSections::Section { .itemsCount = 10, .onGetItemMainSizeByIndex = GET_MAIN_SIZE_FUNC, .crossCount = 5 },
+    WaterFlowSections::Section { .itemsCount = 0, .onGetItemMainSizeByIndex = GET_MAIN_SIZE_FUNC, .crossCount = 2 },
     WaterFlowSections::Section { .itemsCount = 30, .onGetItemMainSizeByIndex = GET_MAIN_SIZE_FUNC },
 };
-const std::vector<int32_t> SEGMENT_TAILS_4 = { 19, 29, 59 };
+const std::vector<int32_t> SEGMENT_TAILS_4 = { 19, 29, 29, 59 };
 
 const PaddingProperty MARGIN_1 = {
     .bottom = CalcLength(5.0_vp),
@@ -130,6 +131,7 @@ const std::vector<WaterFlowSections::Section> SECTION_5 = {
         .onGetItemMainSizeByIndex = GET_MAIN_SIZE_FUNC,
         .crossCount = 5,
         .margin = MARGIN_1 },
+    WaterFlowSections::Section { .itemsCount = 0, .onGetItemMainSizeByIndex = GET_MAIN_SIZE_FUNC, .crossCount = 1 },
     WaterFlowSections::Section { .itemsCount = 30,
         .onGetItemMainSizeByIndex = GET_MAIN_SIZE_FUNC,
         .rowsGap = 1.0_px,
@@ -139,13 +141,13 @@ const std::vector<WaterFlowSections::Section> SECTION_5 = {
         .crossCount = 2,
         .rowsGap = 2.0_px },
 };
-const std::vector<int32_t> SEGMENT_TAILS_5 = { 4, 9, 39, 59 };
+const std::vector<int32_t> SEGMENT_TAILS_5 = { 4, 9, 9, 39, 59 };
 
-const std::vector<float> CROSS_GAP_5 = { 0.0f, 0.0f, 2.0f, 0.0f };
-const std::vector<float> MAIN_GAP_5 = { 5.0f, 0.0f, 1.0f, 2.0f };
+const std::vector<float> CROSS_GAP_5 = { 0.0f, 0.0f, 0.0f, 2.0f, 0.0f };
+const std::vector<float> MAIN_GAP_5 = { 5.0f, 0.0f, 0.0f, 1.0f, 2.0f };
 // assuming WaterFlow width = 400.0f
 const std::vector<std::vector<float>> ITEM_CROSS_SIZE_5 = { { 400.0f / 3, 400.0f / 3, 400.0f / 3 },
-    { 79.4f, 79.4f, 79.4f, 79.4f, 79.4f }, { 400.0f }, { 200.0f, 200.0f } };
+    { 79.4f, 79.4f, 79.4f, 79.4f, 79.4f }, { 400.0f }, { 400.0f }, { 200.0f, 200.0f } };
 
 const std::vector<WaterFlowSections::Section> ADD_SECTION_6 = {
     WaterFlowSections::Section { .itemsCount = 10,
@@ -170,6 +172,10 @@ const std::vector<WaterFlowSections::Section> SECTION_7 = {
         .onGetItemMainSizeByIndex = GET_MAIN_SIZE_2,
         .crossCount = 2,
         .columnsGap = 5.0_vp },
+    WaterFlowSections::Section { .itemsCount = 0,
+        .onGetItemMainSizeByIndex = GET_MAIN_SIZE_FUNC,
+        .crossCount = 5,
+        .margin = MARGIN_2 },
     WaterFlowSections::Section { .itemsCount = 30,
         .onGetItemMainSizeByIndex = GET_MAIN_SIZE_2,
         .rowsGap = 2.0_px,

@@ -42,20 +42,20 @@ const int32_t SIZE_LIMIT = 7999;
 const int32_t PERMITTED_DIFFERENCE = 100;
 const int32_t FAILED_LIMIT = 3;
 
-GraphicTransformType ConvertRotation(Rotation rotation)
+GraphicTransformType ConvertRotation(uint32_t rotation)
 {
     GraphicTransformType transform = GraphicTransformType::GRAPHIC_ROTATE_BUTT;
     switch (rotation) {
-        case Rotation::ROTATION_0:
+        case 0:
             transform = GraphicTransformType::GRAPHIC_ROTATE_NONE;
             break;
-        case Rotation::ROTATION_90:
+        case 90:
             transform = GraphicTransformType::GRAPHIC_ROTATE_90;
             break;
-        case Rotation::ROTATION_180:
+        case 180:
             transform = GraphicTransformType::GRAPHIC_ROTATE_180;
             break;
-        case Rotation::ROTATION_270:
+        case 270:
             transform = GraphicTransformType::GRAPHIC_ROTATE_270;
             break;
         default:
@@ -229,9 +229,9 @@ void RosenRenderSurface::SetExtSurfaceCallback(const RefPtr<ExtSurfaceCallbackIn
     extSurfaceCallbackInterface_ = extSurfaceCallback;
 }
 
-void RosenRenderSurface::SetTransformHint(Rotation dmRotation)
+void RosenRenderSurface::SetTransformHint(uint32_t rotation)
 {
-    auto transform = ConvertRotation(dmRotation);
+    auto transform = ConvertRotation(rotation);
     CHECK_NULL_VOID(producerSurface_);
     producerSurface_->SetTransformHint(transform);
 }

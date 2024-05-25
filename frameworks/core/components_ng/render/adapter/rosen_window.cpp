@@ -49,9 +49,9 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
     : rsWindow_(window), taskExecutor_(taskExecutor), id_(id)
 {
     vsyncCallback_ = std::make_shared<OHOS::Rosen::VsyncCallback>();
-    vsyncCallback_->onCallback = [weakTask = taskExecutor_, id = id_](int64_t timeStampNanos) {
+    vsyncCallback_->onCallback = [weakTask = taskExecutor_, id = id_](int64_t timeStampNanos, int64_t frameCount) {
         auto taskExecutor = weakTask.Upgrade();
-        auto onVsync = [id, timeStampNanos] {
+        auto onVsync = [id, timeStampNanos, frameCount] {
             ArkUIPerfMonitor::GetInstance().StartPerf();
             if (FrameReport::GetInstance().GetEnable()) {
                 FrameReport::GetInstance().FlushBegin();
@@ -63,7 +63,7 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
             auto window = container->GetWindow();
             CHECK_NULL_VOID(window);
             int64_t refreshPeriod = window->GetVSyncPeriod();
-            window->OnVsync(static_cast<uint64_t>(timeStampNanos), 0);
+            window->OnVsync(static_cast<uint64_t>(timeStampNanos), static_cast<uint64_t>(frameCount));
             auto pipeline = container->GetPipelineContext();
             CHECK_NULL_VOID(pipeline);
             pipeline->OnIdle(timeStampNanos + refreshPeriod);

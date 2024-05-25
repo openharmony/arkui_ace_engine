@@ -88,7 +88,7 @@ NavSafeArea CheckIgnoreLayoutSafeArea(LayoutWrapper* layoutWrapper,
     NavSafeArea safeArea;
     auto opts = navDestinationLayoutProperty->GetIgnoreLayoutSafeAreaValue({.type = SAFE_AREA_TYPE_NONE,
         .edges = SAFE_AREA_TYPE_NONE});
-    
+
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, safeArea);
     auto inset = pipeline->GetSafeArea();
@@ -203,9 +203,17 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationGrou
     auto contentWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(contentWrapper);
     auto geometryNode = contentWrapper->GetGeometryNode();
-    auto contentOffset = OffsetT<float>(0.0f, 0.0f);
+    auto pattern = hostNode->GetPattern<NavDestinationPattern>();
+    float keyboardOffset = 0.0f;
+    if (pattern) {
+        keyboardOffset = pattern->GetKeyboardOffset();
+        if (pattern->NeedIgnoreKeyboard()) {
+            keyboardOffset = 0.0f;
+        }
+    }
+    auto contentOffset = OffsetF(0.0f, keyboardOffset);
     if (!navDestinationLayoutProperty->GetHideTitleBar().value_or(false)) {
-        contentOffset = OffsetT<float>(0.0f, titlebarHeight);
+        contentOffset += OffsetF(0.0f, titlebarHeight);
     }
     const auto& padding = navDestinationLayoutProperty->CreatePaddingAndBorder();
     contentOffset.AddX(padding.left.value_or(0.0f));
@@ -222,6 +230,29 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationGrou
 
     geometryNode->SetMarginFrameOffset(contentOffset);
     contentWrapper->Layout();
+}
+
+void MeasureSheet(const RefPtr<NavDestinationGroupNode>& hostNode,
+    const LayoutConstraintF& constraint)
+{
+    auto children = hostNode->GetAllChildrenWithBuild();
+    const auto& sheetWrapper = children.back();
+    CHECK_NULL_VOID(sheetWrapper);
+    if (sheetWrapper->GetHostNode()->GetTag() != V2::SHEET_WRAPPER_TAG) {
+        return;
+    }
+    sheetWrapper->Measure(constraint);
+}
+
+void LayoutSheet(const RefPtr<NavDestinationGroupNode>& hostNode)
+{
+    auto children = hostNode->GetAllChildrenWithBuild();
+    const auto& sheetWrapper = children.back();
+    CHECK_NULL_VOID(sheetWrapper);
+    if (sheetWrapper->GetHostNode()->GetTag() != V2::SHEET_WRAPPER_TAG) {
+        return;
+    }
+    sheetWrapper->Layout();
 }
 
 float TransferTitleBarHeight(const RefPtr<NavDestinationGroupNode>& hostNode, float titleBarHeight)
@@ -274,6 +305,7 @@ void NavDestinationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         size.AddHeight(padding.top.value_or(0.0f) + padding.bottom.value_or(0.0f));
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
+    MeasureSheet(hostNode, navDestinationLayoutProperty->CreateChildConstraint());
 }
 
 void NavDestinationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -304,6 +336,7 @@ void NavDestinationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             "Navdestination id is %d{public}, frameRect is %{public}s",
             hostNode->GetId(), geometryNode->GetFrameRect().ToString().c_str());
     }
+    LayoutSheet(hostNode);
 }
 
 } // namespace OHOS::Ace::NG

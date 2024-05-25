@@ -150,6 +150,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     auto tabBarPattern = tabBarFrameNode->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);
     tabBarPattern->SetTabBarStyle(tabBarParam.GetTabBarStyle());
+    tabBarPattern->AddTabBarItemClickEvent(columnNode);
     auto selectedMode = tabContentPattern->GetSelectedMode();
     auto indicatorStyle = tabContentPattern->GetIndicatorStyle();
     auto boardStyle = tabContentPattern->GetBoardStyle();
@@ -218,7 +219,6 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
             tabBarNode->ReplaceChild(oldColumnNode, columnNode);
         }
         tabBarPattern->AddTabBarItemType(columnNode->GetId(), true);
-        tabBarPattern->AddTabBarItemClickEvent(columnNode);
         tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         return;
     }
@@ -412,7 +412,6 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     textNode->MarkDirtyNode();
     iconNode->MarkModifyDone();
     tabBarPattern->AddTabBarItemType(columnNode->GetId(), false);
-    tabBarPattern->AddTabBarItemClickEvent(columnNode);
     tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 

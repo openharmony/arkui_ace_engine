@@ -124,7 +124,9 @@ LoadFailNotifyTask ImagePattern::CreateLoadFailCallback()
                 currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
-        pattern->OnImageLoadFail(errorMsg);
+        if (!currentSourceInfo.IsFromReset()) {
+            pattern->OnImageLoadFail(errorMsg);
+        }
     };
 }
 
@@ -1169,6 +1171,13 @@ void ImagePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspector
     CHECK_NULL_VOID(host);
     json->PutExtAttr("draggable", host->IsDraggable() ? "true" : "false", filter);
     json->PutExtAttr("enableAnalyzer", isEnableAnalyzer_ ? "true" : "false", filter);
+    auto renderProp = GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(renderProp);
+    DynamicRangeMode dynamicMode = DynamicRangeMode::STANDARD;
+    if (renderProp->HasDynamicMode()) {
+        dynamicMode = renderProp->GetDynamicMode().value_or(DynamicRangeMode::STANDARD);
+    }
+    json->PutExtAttr("dynamicRangeMode", GetDynamicModeString(dynamicMode).c_str(), filter);
 }
 
 void ImagePattern::UpdateFillColorIfForegroundColor()
@@ -1329,6 +1338,7 @@ void ImagePattern::OnLanguageConfigurationUpdate()
     if (src.GetSrcType() == SrcType::RESOURCE) {
         loadingCtx_.Reset();
     }
+    OnConfigurationUpdate();
 }
 
 void ImagePattern::OnColorConfigurationUpdate()
@@ -1922,6 +1932,34 @@ void ImagePattern::ResetImageProperties()
 {
     SetCopyOption(CopyOptions::None);
     OnImageModifyDone();
+}
+
+void ImagePattern::ResetImage()
+{
+    image_ = nullptr;
+    imageQuality_ = AIImageQuality::NONE;
+    isImageQualityChange_ = false;
+    loadingCtx_.Reset();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!altImage_) {
+        auto rsRenderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(rsRenderContext);
+        rsRenderContext->ClearDrawCommands();
+    }
+}
+
+void ImagePattern::ResetAltImage()
+{
+    altImage_ = nullptr;
+    altLoadingCtx_.Reset();
+    if (!image_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto rsRenderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(rsRenderContext);
+        rsRenderContext->ClearDrawCommands();
+    }
 }
 
 void ImagePattern::ResetImageAndAlt()
