@@ -253,6 +253,8 @@ struct OperateItemStruct {
   @Link parentFrontColor: ResourceColor;
   @Link isParentCanTouch: boolean
   private rowSpace: number = DEFAULT_ROW_SPACE
+  static RIGHT_ITEM_OFFSET_LEVEL1 = 0;
+  static RIGHT_ITEM_OFFSET_LEVEL2 = -4;
 
   onWillApplyTheme(theme: Theme): void {
     this.secondaryTextColor = theme.colors.fontSecondary;
@@ -332,6 +334,7 @@ struct OperateItemStruct {
         .fillColor($r('sys.color.icon_primary'))
         .draggable(false)
     }
+    .margin({ end: LengthMetrics.vp(OperateItemStruct.RIGHT_ITEM_OFFSET_LEVEL2) })
     .hitTestBehavior(HitTestMode.Block)
     .backgroundColor(Color.Transparent)
     .height(OPERATEITEM_ICON_CLICKABLE_SIZE)
@@ -439,7 +442,7 @@ struct OperateItemStruct {
   @Builder
   createRadio(radio: OperateCheck) {
     Radio({ value: '', group: '' })
-      .margin({ right: $r('sys.float.padding_level0') })
+      .margin({ end: LengthMetrics.vp(OperateItemStruct.RIGHT_ITEM_OFFSET_LEVEL1) })
       .checked(this.radioState)
       .onChange(radio.onChange)
       .height(OPERATEITEM_ICONLIKE_SIZE)
@@ -477,7 +480,7 @@ struct OperateItemStruct {
   @Builder
   createCheckBox(checkBox: OperateCheck) {
     Checkbox()
-      .margin({ right: $r('sys.float.padding_level0') })
+      .margin({ end: LengthMetrics.vp(OperateItemStruct.RIGHT_ITEM_OFFSET_LEVEL1) })
       .select(this.checkBoxState)
       .onChange(checkBox.onChange)
       .height(OPERATEITEM_ICONLIKE_SIZE)
@@ -522,7 +525,6 @@ struct OperateItemStruct {
         })
         .hitTestBehavior(HitTestMode.Block)
     }
-    .margin({ right: -2 })
     .height(OPERATEITEM_ICON_CLICKABLE_SIZE)
     .width(OPERATEITEM_ICON_CLICKABLE_SIZE)
     .justifyContent(FlexAlign.Center)

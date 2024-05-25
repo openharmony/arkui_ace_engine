@@ -664,6 +664,7 @@ class OperateItemStruct extends ViewPU {
     createIcon(f7, g7 = null) {
         this.observeComponentCreation2((l7, m7) => {
             Button.createWithChild({ type: ButtonType.Normal });
+            Button.margin({ end: LengthMetrics.vp(OperateItemStruct.RIGHT_ITEM_OFFSET_LEVEL2) });
             Button.hitTestBehavior(HitTestMode.Block);
             Button.backgroundColor(Color.Transparent);
             Button.height(OPERATEITEM_ICON_CLICKABLE_SIZE);
@@ -783,7 +784,7 @@ class OperateItemStruct extends ViewPU {
     createRadio(u5, v5 = null) {
         this.observeComponentCreation2((x5, y5) => {
             Radio.create({ value: '', group: '' });
-            Radio.margin({ right: { "id": -1, "type": 10002, params: ['sys.float.padding_level0'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } });
+            Radio.margin({ end: LengthMetrics.vp(OperateItemStruct.RIGHT_ITEM_OFFSET_LEVEL1) });
             Radio.checked(this.radioState);
             Radio.onChange(u5.onChange);
             Radio.height(OPERATEITEM_ICONLIKE_SIZE);
@@ -821,7 +822,7 @@ class OperateItemStruct extends ViewPU {
     createCheckBox(j5, k5 = null) {
         this.observeComponentCreation2((m5, n5) => {
             Checkbox.create();
-            Checkbox.margin({ right: { "id": -1, "type": 10002, params: ['sys.float.padding_level0'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } });
+            Checkbox.margin({ end: LengthMetrics.vp(OperateItemStruct.RIGHT_ITEM_OFFSET_LEVEL1) });
             Checkbox.select(this.checkBoxState);
             Checkbox.onChange(j5.onChange);
             Checkbox.height(OPERATEITEM_ICONLIKE_SIZE);
@@ -860,7 +861,6 @@ class OperateItemStruct extends ViewPU {
     createSwitch(v4, w4 = null) {
         this.observeComponentCreation2((c5, d5) => {
             Row.create();
-            Row.margin({ right: -2 });
             Row.height(OPERATEITEM_ICON_CLICKABLE_SIZE);
             Row.width(OPERATEITEM_ICON_CLICKABLE_SIZE);
             Row.justifyContent(FlexAlign.Center);
@@ -1051,6 +1051,8 @@ class OperateItemStruct extends ViewPU {
         this.updateDirtyElements();
     }
 }
+OperateItemStruct.RIGHT_ITEM_OFFSET_LEVEL1 = 0;
+OperateItemStruct.RIGHT_ITEM_OFFSET_LEVEL2 = -4;
 export class ComposeListItem extends ViewPU {
     constructor(y2, z2, a3, b3 = -1, c3 = undefined, d3) {
         super(y2, a3, b3, d3);
@@ -1408,7 +1410,7 @@ export class ComposeListItem extends ViewPU {
                     {
                         this.observeComponentCreation2((l1, m1) => {
                             if (m1) {
-                                let n1 = new ContentItemStruct(this, {}, undefined, l1, () => { }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 741, col: 11 });
+                                let n1 = new ContentItemStruct(this, {}, undefined, l1, () => { }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 744, col: 11 });
                                 ViewPU.create(n1);
                                 let o1 = () => {
                                     return {};
@@ -1447,7 +1449,7 @@ export class ComposeListItem extends ViewPU {
                                     descriptionTextModifier: this.contentItem.descriptionTextModifier,
                                     leftWidth: this.calculatedLeftWidth(),
                                     contentItemPadding: this.composeItemPadding
-                                }, undefined, a1, () => { }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 744, col: 11 });
+                                }, undefined, a1, () => { }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 747, col: 11 });
                                 ViewPU.create(c1);
                                 let d1 = () => {
                                     return {
@@ -1513,7 +1515,7 @@ export class ComposeListItem extends ViewPU {
                                     parentCanHover: this.__canHover,
                                     rightWidth: this.calculatedRightWidth(),
                                     isParentCanTouch: this.__isCanTouch
-                                }, undefined, l, () => { }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 759, col: 11 });
+                                }, undefined, l, () => { }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 762, col: 11 });
                                 ViewPU.create(n);
                                 let o = () => {
                                     return {
