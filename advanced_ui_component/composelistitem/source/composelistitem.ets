@@ -720,7 +720,8 @@ export struct ComposeListItem {
   }
 
   calculatedRightWidth(): string {
-    let rightPaddingWidth = this.composeItemPadding?.end !== undefined ? this.composeItemPadding?.end?.value : STACK_PADDING
+    let rightPaddingWidth =
+      this.composeItemPadding?.end !== undefined ? this.composeItemPadding?.end?.value : STACK_PADDING
     if (this.operateItem === null || JSON.stringify(this.operateItem) === '{}') {
       return RIGHT_CONTENT_NULL_RIGHTWIDTH
     } else if (this.operateItem != null && this.operateItem.text == null) {
