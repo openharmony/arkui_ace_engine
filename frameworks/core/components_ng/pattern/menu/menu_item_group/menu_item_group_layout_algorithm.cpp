@@ -39,8 +39,6 @@ void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
-    groupDividerPadding_ = static_cast<float>(theme->GetDividerPaddingVertical().ConvertToPx()) * 2 +
-                           static_cast<float>(theme->GetDefaultDividerWidth().ConvertToPx());
 
     const auto& props = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(props);
@@ -60,7 +58,6 @@ void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     SizeF menuItemGroupSize;
     menuItemGroupSize.SetWidth(maxChildrenWidth);
     float totalHeight = 0.0f;
-
     auto minItemHeight = static_cast<float>(theme->GetOptionMinHeight().ConvertToPx());
 
     // measure header

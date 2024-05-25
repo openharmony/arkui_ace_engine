@@ -437,6 +437,7 @@ public:
 
     BorderRadiusProperty CalcIdealBorderRadius(const BorderRadiusProperty& borderRadius, const SizeF& menuSize);
 
+    void OnItemPressed(const RefPtr<FrameNode>& parent, int32_t index, bool press);
 protected:
     void UpdateMenuItemChildren(RefPtr<FrameNode>& host);
     void SetMenuAttribute(RefPtr<FrameNode>& host);

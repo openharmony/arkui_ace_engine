@@ -4001,6 +4001,95 @@ HWTEST_F(MenuTestNg, MenuItemViewTestNgSetFontStyle001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MenuItemPaintMethod001
+ * @tc.desc: Test MenuItem GetOverlayDrawFunction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuItemPaintMethod001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare paint method object.
+     */
+    RefPtr<MenuItemPaintProperty> paintProp = AceType::MakeRefPtr<MenuItemPaintProperty>();
+    RefPtr<MenuItemPaintMethod> paintMethod = AceType::MakeRefPtr<MenuItemPaintMethod>();
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
+    /**
+     * @tc.steps: step2. update paint property and execute GetOverlayDrawFunction.
+     * @tc.expected:  return value are as expected.
+     */
+    WeakPtr<RenderContext> renderContext;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
+    auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
+    EXPECT_NE(result, nullptr);
+    result(canvas);
+    delete paintWrapper;
+    paintWrapper = nullptr;
+    paintProp->UpdateDividerColor(Color::RED);
+    paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
+    result = paintMethod->GetOverlayDrawFunction(paintWrapper);
+    EXPECT_NE(result, nullptr);
+    result(canvas);
+    delete paintWrapper;
+    paintWrapper = nullptr;
+    paintProp->UpdateNeedDivider(true);
+    paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
+    result = paintMethod->GetOverlayDrawFunction(paintWrapper);
+    EXPECT_NE(result, nullptr);
+    result(canvas);
+    delete paintWrapper;
+    paintWrapper = nullptr;
+}
+
+/**
+ * @tc.name: MenuItemPaintMethod002
+ * @tc.desc: Test MenuItem GetOverlayDrawFunction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuItemPaintMethod002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare paint method object.
+     */
+    RefPtr<MenuItemPaintProperty> paintProp = AceType::MakeRefPtr<MenuItemPaintProperty>();
+    RefPtr<MenuItemPaintMethod> paintMethod = AceType::MakeRefPtr<MenuItemPaintMethod>();
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
+    /**
+     * @tc.steps: step2. update paint property and execute GetOverlayDrawFunction.
+     * @tc.expected:  return value are as expected.
+     */
+    WeakPtr<RenderContext> renderContext;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
+    auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
+    EXPECT_NE(result, nullptr);
+    result(canvas);
+    delete paintWrapper;
+    paintWrapper = nullptr;
+    paintProp->UpdatePress(false);
+    paintProp->UpdateHover(false);
+    paintProp->UpdateNeedDivider(true);
+    paintProp->UpdateDividerColor(Color::RED);
+    paintProp->UpdateStrokeWidth(Dimension(1.0f, DimensionUnit::PX));
+    paintProp->UpdateStartMargin(Dimension(1.0f, DimensionUnit::PX));
+    paintProp->UpdateEndMargin(Dimension(1.0f, DimensionUnit::PX));
+    paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
+    result = paintMethod->GetOverlayDrawFunction(paintWrapper);
+    EXPECT_NE(result, nullptr);
+    result(canvas);
+    delete paintWrapper;
+    paintWrapper = nullptr;
+}
+
+/**
  * @tc.name: MenuLayoutAlgorithmTestNg001
  * @tc.desc: Verify HorizontalLayout.
  * @tc.type: FUNC
@@ -6631,6 +6720,51 @@ HWTEST_F(MenuTestNg, MenuItemGroupPaintMethod001, TestSize.Level1)
     delete paintWrapper;
     paintWrapper = nullptr;
     paintProp->UpdateNeedFooterPadding(true);
+    paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
+    result = paintMethod->GetOverlayDrawFunction(paintWrapper);
+    EXPECT_NE(result, nullptr);
+    result(canvas);
+    delete paintWrapper;
+    paintWrapper = nullptr;
+}
+
+/**
+ * @tc.name: MenuItemGroupPaintMethod002
+ * @tc.desc: Test MenuItem GetOverlayDrawFunction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuItemGroupPaintMethod002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare paint method object.
+     */
+    RefPtr<MenuItemGroupPaintProperty> paintProp = AceType::MakeRefPtr<MenuItemGroupPaintProperty>();
+    RefPtr<MenuItemGroupPaintMethod> paintMethod = AceType::MakeRefPtr<MenuItemGroupPaintMethod>();
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
+    /**
+     * @tc.steps: step2. update paint property and execute GetOverlayDrawFunction.
+     * @tc.expected:  return value are as expected.
+     */
+    WeakPtr<RenderContext> renderContext;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
+    auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
+    EXPECT_NE(result, nullptr);
+    result(canvas);
+    delete paintWrapper;
+    paintWrapper = nullptr;
+    paintProp->UpdateNeedHeaderPadding(true);
+    paintProp->UpdateNeedFooterPadding(true);
+    paintProp->UpdateNeedHeaderDivider(true);
+    paintProp->UpdateNeedFooterDivider(true);
+    paintProp->UpdateDividerColor(Color::RED);
+    paintProp->UpdateStrokeWidth(Dimension(1.0f, DimensionUnit::PX));
+    paintProp->UpdateStartMargin(Dimension(1.0f, DimensionUnit::PX));
+    paintProp->UpdateEndMargin(Dimension(1.0f, DimensionUnit::PX));
     paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
     result = paintMethod->GetOverlayDrawFunction(paintWrapper);
     EXPECT_NE(result, nullptr);
