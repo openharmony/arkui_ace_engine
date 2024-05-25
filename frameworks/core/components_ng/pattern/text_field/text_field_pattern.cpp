@@ -2067,6 +2067,7 @@ void TextFieldPattern::DoProcessAutoFill()
     auto isSuccess = ProcessAutoFill(isPopup);
     if (!isPopup && isSuccess) {
         needToRequestKeyboardInner_ = false;
+        CloseKeyboard(true, false);
     } else if (RequestKeyboard(false, true, true)) {
         NotifyOnEditChanged(true);
     }
@@ -2176,6 +2177,10 @@ bool TextFieldPattern::ProcessAutoFill(bool& isPopup, bool isFromKeyBoard, bool 
     CHECK_NULL_RETURN(host, false);
     auto autoFillType = GetAutoFillType();
     auto container = Container::Current();
+    if (container == nullptr) {
+        TAG_LOGW(AceLogTag::ACE_AUTO_FILL, "Get current container is nullptr.");
+        container = Container::GetActive();
+    }
     CHECK_NULL_RETURN(container, false);
     SetAutoFillTriggeredStateByType(autoFillType);
     SetFillRequestFinish(false);
@@ -5976,23 +5981,12 @@ void TextFieldPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap)
     info->SetDepth(host->GetDepth());
     info->SetAutoFillType(autoFillType);
     info->SetTag(host->GetTag());
-    if (!autoFillUserName_.empty()) {
-        viewDataWrap->SetUserSelected(true);
-        info->SetValue(autoFillUserName_);
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "autoFillUserName_ : %{private}s", autoFillUserName_.c_str());
-        autoFillUserName_ = "";
-    } else if (!autoFillNewPassword_.empty()) {
-        info->SetValue(autoFillNewPassword_);
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "autoFillNewPassword_ : %{private}s", autoFillNewPassword_.c_str());
-        autoFillNewPassword_ = "";
-    } else if (autoFillOtherAccount_) {
+    if (autoFillOtherAccount_) {
         viewDataWrap->SetOtherAccount(true);
         info->SetValue(contentController_->GetTextValue());
         autoFillOtherAccount_ = false;
     } else {
         info->SetValue(contentController_->GetTextValue());
-        viewDataWrap->SetUserSelected(false);
-        viewDataWrap->SetOtherAccount(false);
     }
     info->SetPlaceholder(GetPlaceHolder());
     info->SetPasswordRules(layoutProperty->GetPasswordRulesValue(""));
@@ -6039,6 +6033,36 @@ void TextFieldPattern::NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWra
     }
 }
 
+bool TextFieldPattern::ParseFillContentJsonValue(const std::unique_ptr<JsonValue>& jsonObject,
+    std::unordered_map<std::string, std::variant<std::string, bool, int32_t>>& map)
+{
+    bool ret = false;
+
+    if (!jsonObject->IsValid() || jsonObject->IsArray() || !jsonObject->IsObject()) {
+        TAG_LOGE(AceLogTag::ACE_AUTO_FILL, "fillContent format is not right");
+        return ret;
+    }
+    auto child = jsonObject->GetChild();
+
+    while (child && child->IsValid()) {
+        if (!child->IsObject() && child->IsString()) {
+            std::string strKey = child->GetKey();
+            std::string strVal = child->GetString();
+            if (strKey.empty()) {
+                continue;
+            }
+            if (map.size() < 5) {
+                map.insert(std::pair<std::string, std::variant<std::string, bool, int32_t> >(strKey, strVal));
+            } else {
+                TAG_LOGE(AceLogTag::ACE_AUTO_FILL, "fillContent is more than 5");
+                break;
+            }
+        }
+        child = child->GetNext();
+    }
+    return true;
+}
+
 void TextFieldPattern::NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent)
 {
     TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "errCode:%{public}d", errCode);
@@ -6046,6 +6070,11 @@ void TextFieldPattern::NotifyFillRequestFailed(int32_t errCode, const std::strin
     if (errCode == AUTO_FILL_FAILED) {
         return;
     }
+
+    if (RequestKeyboard(false, true, true)) {
+        NotifyOnEditChanged(true);
+    }
+
 #if defined(ENABLE_STANDARD_INPUT)
     TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "fillContent is : %{private}s", fillContent.c_str());
     std::unordered_map<std::string, MiscServices::PrivateDataValue> userNamesOrPassWordMap;
@@ -6054,14 +6083,7 @@ void TextFieldPattern::NotifyFillRequestFailed(int32_t errCode, const std::strin
         if (jsonObject == nullptr) {
             break;
         }
-        if (jsonObject->Contains("userName")) {
-            userNamesOrPassWordMap.insert(std::pair<std::string, MiscServices::PrivateDataValue>(
-                AUTO_FILL_PARAMS_USERNAME, jsonObject->GetString("userName")));
-        } else if (jsonObject->Contains("newPassword")) {
-            userNamesOrPassWordMap.insert(std::pair<std::string, MiscServices::PrivateDataValue>(
-                AUTO_FILL_PARAMS_NEWPASSWORD, jsonObject->GetString("newPassword")));
-        } else {
-            TAG_LOGE(AceLogTag::ACE_AUTO_FILL, "fillContent is empty");
+        if (!ParseFillContentJsonValue(jsonObject, userNamesOrPassWordMap)) {
             break;
         }
         MiscServices::InputMethodController::GetInstance()->SendPrivateCommand(userNamesOrPassWordMap);
@@ -6082,9 +6104,6 @@ void TextFieldPattern::NotifyFillRequestFailed(int32_t errCode, const std::strin
         break;
     }
 #endif
-    if (RequestKeyboard(false, true, true)) {
-        NotifyOnEditChanged(true);
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);

@@ -79,6 +79,7 @@
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_manager_impl.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/render/adapter/form_render_window.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "core/event/axis_event.h"
@@ -1248,6 +1249,36 @@ bool AceContainer::ChangeType(AbilityBase::ViewData& viewData)
     return viewDataWrapOhos->GetPlaceHolderValue(viewData);
 }
 
+void AceContainer::FillAutoFillViewData(const RefPtr<NG::FrameNode> &node, RefPtr<ViewDataWrap> &viewDataWrap)
+{
+    CHECK_NULL_VOID(node);
+    CHECK_NULL_VOID(viewDataWrap);
+    auto nodeInfoWraps = viewDataWrap->GetPageNodeInfoWraps();
+    auto pattern = node->GetPattern<NG::TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto autoFillUserName = pattern->GetAutoFillUserName();
+    auto autoFillNewPassword = pattern->GetAutoFillNewPassword();
+    if (!autoFillUserName.empty()) {
+        for (auto nodeInfoWrap : nodeInfoWraps) {
+            if (nodeInfoWrap && nodeInfoWrap->GetAutoFillType() == AceAutoFillType::ACE_USER_NAME) {
+                nodeInfoWrap->SetValue(autoFillUserName);
+                viewDataWrap->SetUserSelected(true);
+                pattern->SetAutoFillUserName("");
+                break;
+            }
+        }
+    }
+    if (!autoFillNewPassword.empty()) {
+        for (auto nodeInfoWrap : nodeInfoWraps) {
+            if (nodeInfoWrap && nodeInfoWrap->GetAutoFillType() == AceAutoFillType::ACE_NEW_PASSWORD) {
+                nodeInfoWrap->SetValue(autoFillNewPassword);
+                pattern->SetAutoFillNewPassword("");
+                break;
+            }
+        }
+    }
+}
+
 bool AceContainer::RequestAutoFill(
     const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool& isPopup, bool isNewPassWord)
 {
@@ -1264,7 +1295,7 @@ bool AceContainer::RequestAutoFill(
     CHECK_NULL_RETURN(viewDataWrap, false);
     auto autoFillContainerNode = node->GetFirstAutoFillContainerNode();
     uiContentImpl->DumpViewData(autoFillContainerNode, viewDataWrap, true);
-
+    FillAutoFillViewData(node, viewDataWrap);
     auto callback = std::make_shared<FillRequestCallback>(pipelineContext, node, autoFillType);
     auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
     CHECK_NULL_RETURN(viewDataWrapOhos, false);
