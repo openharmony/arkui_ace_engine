@@ -401,8 +401,9 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
 
     auto preFrameSize = preNode->GetGeometryNode()->GetFrameSize();
     RefPtr<TitleBarNode> curTitleBarNode;
-    GetCurTitleBarNode(curTitleBarNode, curNode, isNavBar);
-    CHECK_NULL_VOID(curTitleBarNode);
+    if (!GetCurTitleBarNode(curTitleBarNode, curNode, isNavBar)) {
+        return;
+    }
 
     /* create animation finish callback */
     CleanPopAnimations();
@@ -1031,22 +1032,24 @@ float NavigationGroupNode::CheckLanguageDirection()
         return 1.0f;
     }
 }
-void NavigationGroupNode::GetCurTitleBarNode(
+bool NavigationGroupNode::GetCurTitleBarNode(
     RefPtr<TitleBarNode>& curTitleBarNode, const RefPtr<FrameNode>& curNode, bool isNavBar)
 {
     if (curNode) {
         if (isNavBar) {
             auto navBarNode = AceType::DynamicCast<NavBarNode>(curNode);
-            CHECK_NULL_VOID(navBarNode);
+            CHECK_NULL_RETURN(navBarNode, false);
             navBarNode->SetTransitionType(PageTransitionType::ENTER_POP);
             curTitleBarNode = navBarNode ? AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode()) : nullptr;
         } else {
             auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
-            CHECK_NULL_VOID(curNavDestination);
+            CHECK_NULL_RETURN(curNavDestination, false);
             curNavDestination->SetTransitionType(PageTransitionType::ENTER_POP);
             curTitleBarNode =
                 curNavDestination ? AceType::DynamicCast<TitleBarNode>(curNavDestination->GetTitleBarNode()) : nullptr;
         }
+        CHECK_NULL_RETURN(curTitleBarNode, false);
     }
+    return true;
 }
 } // namespace OHOS::Ace::NG
