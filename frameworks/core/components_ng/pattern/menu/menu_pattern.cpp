@@ -1060,8 +1060,7 @@ void MenuPattern::ShowMenuAppearAnimation()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (isMenuShow_ &&
-        (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) || IsSelectOverlayExtensionMenu()) &&
+    if (isMenuShow_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
         previewMode_ == MenuPreviewMode::NONE) {
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
@@ -1080,13 +1079,14 @@ void MenuPattern::ShowMenuAppearAnimation()
 
         AnimationOption option = AnimationOption();
         option.SetCurve(MENU_ANIMATION_CURVE);
-        AnimationUtils::Animate(option, [renderContext, menuPosition]() {
-            if (renderContext) {
+        AnimationUtils::Animate(option, [this, renderContext, menuPosition]() {
+            CHECK_NULL_VOID(renderContext);
+            if (IsSelectOverlayExtensionMenu()) {
                 renderContext->UpdatePosition(
                     OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
-                renderContext->UpdateOpacity(1.0f);
-                renderContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
             }
+            renderContext->UpdateOpacity(1.0f);
+            renderContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
         });
         isExtensionMenuShow_ = false;
     }
@@ -1287,6 +1287,9 @@ void MenuPattern::ShowStackExpandDisappearAnimation(const RefPtr<FrameNode>& men
 
 void MenuPattern::ShowMenuDisappearAnimation()
 {
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto menuContext = host->GetRenderContext();
