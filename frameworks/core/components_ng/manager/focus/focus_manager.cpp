@@ -98,6 +98,28 @@ void FocusManager::FocusViewClose(const RefPtr<FocusView>& focusView)
     }
 }
 
+void FocusManager::FlushFocusView()
+{
+    auto lastFocusView = lastFocusView_.Upgrade();
+    auto lastFocusViewHub = lastFocusView ? lastFocusView->GetFocusHub() : nullptr;
+    if (lastFocusViewHub && lastFocusViewHub->IsCurrentFocus()) {
+        return;
+    }
+    RefPtr<FocusView> currFocusView = nullptr;
+    for (const auto& weakView : focusViewStack_) {
+        auto view = weakView.Upgrade();
+        auto viewHub = view ? view->GetFocusHub() : nullptr;
+        if (!viewHub || !viewHub->IsCurrentFocus()) {
+            continue;
+        }
+        if (currFocusView && currFocusView->IsChildFocusViewOf(view)) {
+            continue;
+        }
+        currFocusView = view;
+    }
+    lastFocusView_ = currFocusView ? AceType::WeakClaim(AceType::RawPtr(currFocusView)) : nullptr;
+}
+
 void FocusManager::GetFocusViewMap(FocusViewMap& focusViewMap)
 {
     for (const auto& focusViewWeak : focusViewStack_) {

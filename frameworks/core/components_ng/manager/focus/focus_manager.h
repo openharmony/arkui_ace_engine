@@ -42,6 +42,8 @@ public:
     void FocusViewHide(const RefPtr<FocusView>& focusView);
     void FocusViewClose(const RefPtr<FocusView>& focusView);
 
+    void FlushFocusView();
+
     void DumpFocusManager();
 
     WeakPtr<FocusView> GetLastFocusView() const
