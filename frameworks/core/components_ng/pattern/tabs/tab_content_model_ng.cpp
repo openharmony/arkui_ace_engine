@@ -87,6 +87,25 @@ void TabContentModelNG::Create()
     ACE_UPDATE_LAYOUT_PROPERTY(TabContentLayoutProperty, Text, tabTheme->GetDefaultTabBarName());
 }
 
+RefPtr<FrameNode> TabContentModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = TabContentNode::GetOrCreateTabContentNode(
+        V2::TAB_CONTENT_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabContentPattern>(nullptr); });
+    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_RETURN(tabTheme, nullptr);
+    auto layout = frameNode->GetLayoutProperty<TabContentLayoutProperty>();
+    CHECK_NULL_RETURN(layout, nullptr);
+    auto text = tabTheme->GetDefaultTabBarName();
+    layout->UpdateText(text);
+    layout->UpdateIcon("");
+    auto pattern = frameNode->GetPattern<TabContentPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    pattern->SetTabBar(text, "", std::nullopt, nullptr);
+    return frameNode;
+}
+
 void TabContentModelNG::Pop()
 {
     auto tabContent = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
@@ -598,5 +617,21 @@ void TabContentModelNG::SetCustomStyleNode(const RefPtr<FrameNode>& customStyleN
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetCustomStyleNode(customStyleNode);
+}
+
+void TabContentModelNG::SetTabBarBuilder(FrameNode* node, TabBarBuilderFunc&& builder)
+{
+    CHECK_NULL_VOID(node);
+    auto frameNodePattern = node->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetTabBar("", "", std::nullopt, std::move(builder));
+}
+
+void TabContentModelNG::SetTabBarLabel(FrameNode* node, const std::string& label)
+{
+    CHECK_NULL_VOID(node);
+    auto frameNodePattern = node->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetTabBar(label, "", std::nullopt, nullptr);
 }
 } // namespace OHOS::Ace::NG

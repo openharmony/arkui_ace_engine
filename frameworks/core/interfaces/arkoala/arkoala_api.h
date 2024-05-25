@@ -29,7 +29,7 @@ extern "C" {
 #define ARKUI_FULL_API_VERSION 103
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 103
+#define ARKUI_NODE_API_VERSION 104
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 7
@@ -581,6 +581,8 @@ enum ArkUINodeType {
     ARKUI_GRID_COL,
     ARKUI_SELECT,
     ARKUI_IMAGE_ANIMATOR,
+    ARKUI_CIRCLE,
+    ARKUI_TAB_CONTENT
 };
 
 enum ArkUIEventCategory {
