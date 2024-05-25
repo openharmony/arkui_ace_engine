@@ -102,6 +102,10 @@ const std::map<Accessibility::ActionType, std::function<bool(const Accessibility
         [](const AccessibilityActionParam& param) { return param.accessibilityProperty->ActActionCut(); } },
     { ActionType::ACCESSIBILITY_ACTION_PASTE,
         [](const AccessibilityActionParam& param) { return param.accessibilityProperty->ActActionPaste(); } },
+    { ActionType::ACCESSIBILITY_ACTION_CLICK,
+        [](const AccessibilityActionParam& param) { return param.accessibilityProperty->ActActionClick(); } },
+    { ActionType::ACCESSIBILITY_ACTION_LONG_CLICK,
+        [](const AccessibilityActionParam& param) { return param.accessibilityProperty->ActActionLongClick(); } },
     { ActionType::ACCESSIBILITY_ACTION_SELECT,
         [](const AccessibilityActionParam& param) { return param.accessibilityProperty->ActActionSelect(); } },
     { ActionType::ACCESSIBILITY_ACTION_CLEAR_SELECTION,
@@ -1120,6 +1124,9 @@ static void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, Ac
     CHECK_NULL_VOID(node);
     auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
+    if (accessibilityProperty->HasAccessibilityRole()) {
+        nodeInfo.SetComponentType(accessibilityProperty->GetAccessibilityRole());
+    }
 
     if (accessibilityProperty->HasUserTextValue()) {
         nodeInfo.SetContent(accessibilityProperty->GetUserTextValue());

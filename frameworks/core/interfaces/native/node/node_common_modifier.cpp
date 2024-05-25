@@ -5406,6 +5406,56 @@ void ResetAccessibilityValue(ArkUINodeHandle node)
         accessibilityProperty->SetUserTextValue("");
     }
 }
+
+void SetAccessibilityActions(ArkUINodeHandle node, ArkUI_Uint32 actions)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    accessibilityProperty->SetAccessibilityActions(actions);
+}
+
+void ResetAccessibilityActions(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    accessibilityProperty->ResetAccessibilityActions();
+}
+
+ArkUI_Uint32 GetAccessibilityActions(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    return accessibilityProperty->GetAccessibilityActions();
+}
+
+void SetAccessibilityRole(ArkUINodeHandle node, ArkUI_CharPtr role)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    accessibilityProperty->SetAccessibilityRole(std::string(role));
+}
+
+void ResetAccessibilityRole(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    accessibilityProperty->ResetAccessibilityRole();
+}
+
+ArkUI_CharPtr GetAccessibilityRole(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    g_strValue = accessibilityProperty->GetAccessibilityRole();
+    return g_strValue.c_str();
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -5476,7 +5526,9 @@ const ArkUICommonModifier* GetCommonModifier()
         ResetVisibleAreaChange, ResetAreaChange, SetBackgroundImagePixelMap, SetLayoutRect, GetLayoutRect,
         ResetLayoutRect, GetFocusOnTouch, SetSystemBarEffect, GetAccessibilityID,
         SetAccessibilityState, GetAccessibilityState, ResetAccessibilityState,
-        SetAccessibilityValue, GetAccessibilityValue, ResetAccessibilityValue };
+        SetAccessibilityValue, GetAccessibilityValue, ResetAccessibilityValue,
+        SetAccessibilityActions, ResetAccessibilityActions, GetAccessibilityActions,
+        SetAccessibilityRole, ResetAccessibilityRole, GetAccessibilityRole };
 
     return &modifier;
 }
@@ -5908,5 +5960,24 @@ void SetOnMouse(ArkUINodeHandle node, void* extraParam)
     };
     ViewAbstract::SetOnMouse(frameNode, onEvent);
 }
+
+void SetOnAccessibilityActions(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onEvent = [nodeId, extraParam](uint32_t actionType) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_ACCESSIBILITY_ACTIONS;
+        event.componentAsyncEvent.data[0].u32 = actionType;
+        SendArkUIAsyncEvent(&event);
+    };
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    accessibilityProperty->SetActions(onEvent);
+}
+
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

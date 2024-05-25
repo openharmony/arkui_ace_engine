@@ -615,6 +615,7 @@ enum ArkUIEventSubKind {
     ON_TOUCH_INTERCEPT = 12,
     ON_ATTACH,
     ON_DETACH,
+    ON_ACCESSIBILITY_ACTIONS,
     ON_DETECT_RESULT_UPDATE = ARKUI_MAX_EVENT_NUM * ARKUI_TEXT,
     ON_IMAGE_COMPLETE = ARKUI_MAX_EVENT_NUM * ARKUI_IMAGE,
     ON_IMAGE_ERROR,
@@ -1466,6 +1467,12 @@ struct ArkUICommonModifier {
     void (*setAccessibilityValue)(ArkUINodeHandle node, const ArkUIAccessibilityValue& value);
     void (*getAccessibilityValue)(ArkUINodeHandle node, ArkUIAccessibilityValue& value);
     void (*resetAccessibilityValue)(ArkUINodeHandle node);
+    void (*setAccessibilityActions)(ArkUINodeHandle node, ArkUI_Uint32 actions);
+    void (*resetAccessibilityActions)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getAccessibilityActions)(ArkUINodeHandle node);
+    void (*setAccessibilityRole)(ArkUINodeHandle node, ArkUI_CharPtr role);
+    void (*resetAccessibilityRole)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getAccessibilityRole)(ArkUINodeHandle node);
 };
 
 struct ArkUICommonShapeModifier {

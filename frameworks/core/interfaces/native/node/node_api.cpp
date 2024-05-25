@@ -268,6 +268,7 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnTouchIntercept,
     NodeModifier::SetOnAttach,
     NodeModifier::SetOnDetach,
+    NodeModifier::SetOnAccessibilityActions,
 };
 
 const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
