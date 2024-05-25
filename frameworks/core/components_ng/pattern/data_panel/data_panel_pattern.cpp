@@ -43,6 +43,10 @@ RefPtr<NodePaintMethod> DataPanelPattern::CreateNodePaintMethod()
     CHECK_NULL_RETURN(host, paintMethod);
     auto paintProperty = host->GetPaintProperty<DataPanelPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, paintMethod);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, paintMethod);
+    auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+    dataPanelModifier_->SetIsRtl(layoutDirection == TextDirection::RTL);
     auto geometryNode = host->GetGeometryNode();
     auto frameSize = geometryNode->GetFrameSize();
     DataPanelShadow shadowOption;
