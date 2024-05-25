@@ -145,6 +145,15 @@ void FrontendDelegate::SetRequestFocusCallback(
     focusManager->SetRequestFocusCallback(callback);
 }
 
+void FrontendDelegate::ResetRequestFocusCallback()
+{
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto focusManager = pipeline->GetOrCreateFocusManager();
+    CHECK_NULL_VOID(focusManager);
+    focusManager->ResetRequestFocusCallback();
+}
+
 template<typename T>
 bool FrontendDelegate::GetResourceData(const std::string& fileUri, T& content, std::string& ami)
 {
