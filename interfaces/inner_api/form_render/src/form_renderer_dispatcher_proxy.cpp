@@ -151,5 +151,81 @@ void FormRendererDispatcherProxy::SetObscured(bool isObscured)
         HILOG_ERROR("failed to SendRequest: %{public}d", error);
     }
 }
+
+void FormRendererDispatcherProxy::OnAccessibilityChildTreeRegister(
+    uint32_t windowId, int32_t treeId, int64_t accessibilityId)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("failed to write interface token");
+        return;
+    }
+    if (!data.WriteUint32(windowId)) {
+        HILOG_ERROR("write windowId fail, action error");
+        return;
+    }
+    if (!data.WriteInt32(treeId)) {
+        HILOG_ERROR("write treeId fail, action error");
+        return;
+    }
+    if (!data.WriteInt64(accessibilityId)) {
+        HILOG_ERROR("write accessibilityId fail, action error");
+        return;
+    }
+
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    int error = Remote()->SendRequest(
+        static_cast<uint32_t>(IFormRendererDispatcher::Message::ACCESSIBILITY_CHILD_TREE_REGISTER),
+        data, reply, option);
+    if (error != ERR_OK) {
+        HILOG_ERROR("failed to SendRequest: %{public}d", error);
+    }
+}
+
+void FormRendererDispatcherProxy::OnAccessibilityChildTreeDeregister()
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("failed to write interface token");
+        return;
+    }
+
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    int error = Remote()->SendRequest(
+        static_cast<uint32_t>(IFormRendererDispatcher::Message::ACCESSIBILITY_CHILD_TREE_DEREGISTER),
+        data, reply, option);
+    if (error != ERR_OK) {
+        HILOG_ERROR("failed to SendRequest: %{public}d", error);
+    }
+}
+
+void FormRendererDispatcherProxy::OnAccessibilityDumpChildInfo(
+    const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("failed to write interface token");
+        return;
+    }
+    if (!data.WriteStringVector(params)) {
+        HILOG_ERROR("failed to write params");
+        return;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int error = Remote()->SendRequest(
+        static_cast<uint32_t>(IFormRendererDispatcher::Message::ACCESSIBILITY_DUMP_CHILD_INFO),
+        data, reply, option);
+    if (error != ERR_OK) {
+        HILOG_ERROR("failed to SendRequest: %{public}d", error);
+        return;
+    }
+    if (!reply.ReadStringVector(&info)) {
+        HILOG_ERROR("%{public}s, Read reply info failed.", __func__);
+    }
+}
 } // namespace Ace
 } // namespace OHOS

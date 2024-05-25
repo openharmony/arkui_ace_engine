@@ -379,11 +379,11 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         auto modifierOnApply = tabBarParam.GetSymbol().value().onApply;
         if (myIndex == indicator) {
             tabBarPattern->SetImageColorOnIndex(indicator);
-            symbolProperty->UpdateSymbolColorList({tabTheme->GetBottomTabIconOn()});
+            symbolProperty->UpdateSymbolColorList({tabTheme->GetBottomTabSymbolOn()});
             if (modifierOnApply != nullptr && isFirstCreate) {
                 modifierOnApply(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconNode)), "normal");
                 UpdateDefaultSymbol(tabTheme, symbolProperty);
-                symbolProperty->UpdateSymbolColorList({tabTheme->GetBottomTabIconOn()});
+                symbolProperty->UpdateSymbolColorList({tabTheme->GetBottomTabSymbolOn()});
             }
             if (modifierOnApply != nullptr && tabBarParam.GetSymbol().value().selectedFlag) {
                 modifierOnApply(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconNode)),

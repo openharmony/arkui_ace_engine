@@ -771,7 +771,9 @@ void TabBarPattern::OnModifyDone()
         auto theme = pipelineContext->GetTheme<TabTheme>();
         CHECK_NULL_VOID(theme);
         auto defaultBlurStyle = static_cast<BlurStyle>(theme->GetBottomTabBackgroundBlurStyle());
-        tabBarPaintProperty->UpdateTabBarBlurStyle(defaultBlurStyle);
+        if (defaultBlurStyle != BlurStyle::NO_MATERIAL) {
+            tabBarPaintProperty->UpdateTabBarBlurStyle(defaultBlurStyle);
+        }
     }
     auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -1881,7 +1883,7 @@ void TabBarPattern::UpdateSymbolStats(int32_t index, int32_t preIndex)
         CHECK_NULL_VOID(symbolLayoutProperty);
         TabContentModelNG::UpdateDefaultSymbol(tabTheme, symbolLayoutProperty);
         if (i == 0) {
-            symbolLayoutProperty->UpdateSymbolColorList({tabTheme->GetBottomTabIconOn()});
+            symbolLayoutProperty->UpdateSymbolColorList({tabTheme->GetBottomTabSymbolOn()});
             auto modifierOnApply = symbolArray_[indexes[i]].onApply;
             UpdateSymbolApply(symbolNode, symbolLayoutProperty, indexes[i], "selected");
             if (preIndex != -1) {

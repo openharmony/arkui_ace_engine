@@ -1135,16 +1135,22 @@ abstract class ViewPU extends PUV2ViewBase
         const prop: any = Reflect.get(this, varName);
         if ('debugInfoDecorator' in prop) {
           const observedProp: ObservedPropertyAbstractPU<any> = prop as ObservedPropertyAbstractPU<any>;
-          let observedPropertyInfo: ObservedPropertyInfo = {
+          let observedPropertyInfo: ObservedPropertyInfo<any> = {
             decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(),
-            value: typeof observedProp.getUnmonitored() !== 'object' ? observedProp.getUnmonitored() : ObservedObject.GetRawObject(observedProp.getUnmonitored()),
-            dependentElementIds: observedProp.debugInfoDependentElmtIds(),
+            value: observedProp.getRawObjectValue(),
+            dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() == 'object'? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()): false),
             owningView: { componentName: this.constructor.name, id: this.id__() }, syncPeers: observedProp.dumpSyncPeers()
           };
           res.observedPropertiesInfo.push(observedPropertyInfo);
         }
       });
-    return JSON.stringify(res);
+      let resInfo: string = '';
+      try {
+        resInfo = JSON.stringify(res);
+      } catch (error) {
+        stateMgmtConsole.applicationError(`${this.debugInfo__()} has error in getInspector: ${(error as Error).message}`);
+      }
+    return resInfo;
   }
 
 

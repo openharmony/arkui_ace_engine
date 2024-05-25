@@ -20,8 +20,8 @@
 #include <deque>
 #include <vector>
 
-#include "core/components_ng/pattern/waterflow/water_flow_layout_algorithm_base.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_info_base.h"
+#include "core/components_ng/pattern/waterflow/layout/water_flow_layout_algorithm_base.h"
+#include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
 
 namespace OHOS::Ace::NG {
 

@@ -1182,8 +1182,8 @@ void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp)
                     *lastFrameRect_, *lastParentOffsetToWindow_, currFrameRect, currParentOffsetToWindow);
             }
             if (eventHub_->HasOnAreaChanged()) {
-                eventHub_->FireOnAreaChanged(*lastFrameRect_, *lastParentOffsetToWindow_, GetFrameRectWithSafeArea(),
-                    GetParentGlobalOffsetWithSafeArea(true, true));
+                eventHub_->FireOnAreaChanged(*lastFrameRect_, *lastParentOffsetToWindow_,
+                    GetFrameRectWithSafeArea(true), GetParentGlobalOffsetWithSafeArea(true, true));
             }
             *lastFrameRect_ = currFrameRect;
             *lastParentOffsetToWindow_ = currParentOffsetToWindow;
@@ -4025,6 +4025,7 @@ void FrameNode::ChangeSensitiveStyle(bool isSensitive)
 void FrameNode::AttachContext(PipelineContext* context, bool recursive)
 {
     UINode::AttachContext(context, recursive);
+    eventHub_->OnAttachContext(context);
     pattern_->OnAttachContext(context);
 }
 
@@ -4032,6 +4033,7 @@ void FrameNode::DetachContext(bool recursive)
 {
     CHECK_NULL_VOID(context_);
     pattern_->OnDetachContext(context_);
+    eventHub_->OnDetachContext(context_);
     UINode::DetachContext(recursive);
 }
 

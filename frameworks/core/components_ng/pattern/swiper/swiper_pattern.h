@@ -119,10 +119,13 @@ public:
         }
 
         auto indicatorType = GetIndicatorType();
+        const char* indicator = "indicator";
         if (indicatorType == SwiperIndicatorType::DOT) {
-            json->PutExtAttr("indicator", GetDotIndicatorStyle().c_str(), filter);
+            json->PutExtAttr(indicator, GetDotIndicatorStyle().c_str(), filter);
+        } else if (indicatorType == SwiperIndicatorType::ARC_DOT) {
+            json->PutExtAttr(indicator, GetArcDotIndicatorStyle().c_str(), filter);
         } else {
-            json->PutExtAttr("indicator", GetDigitIndicatorStyle().c_str(), filter);
+            json->PutExtAttr(indicator, GetDigitIndicatorStyle().c_str(), filter);
         }
     }
 
@@ -200,6 +203,21 @@ public:
             V2::ConvertWrapFontWeightToStirng(swiperDigitalParameters_->selectedFontWeight.value_or(FontWeight::NORMAL))
                 .c_str());
         return jsonValue->ToString();
+    }
+
+    std::string GetArcDotIndicatorStyle() const;
+
+    std::string GradientToJson(Gradient colors) const
+    {
+        auto jsonArray = JsonUtil::CreateArray(true);
+        for (size_t index = 0; index < colors.GetColors().size(); ++index) {
+            auto gradientColor = colors.GetColors()[index];
+            auto gradientColorJson = JsonUtil::Create(true);
+            gradientColorJson->Put("color", gradientColor.GetLinearColor().ToColor().ColorToString().c_str());
+            gradientColorJson->Put("offset", std::to_string(gradientColor.GetDimension().Value()).c_str());
+            jsonArray->Put(std::to_string(index).c_str(), gradientColorJson);
+        }
+        return jsonArray->ToString();
     }
 
     int32_t GetCurrentShownIndex() const
@@ -378,6 +396,11 @@ public:
         swiperDigitalParameters_ = std::make_shared<SwiperDigitalParameters>(swiperDigitalParameters);
     }
 
+    void SetSwiperArcDotParameters(const SwiperArcDotParameters& swiperArcDotParameters)
+    {
+        swiperArcDotParameters_ = std::make_shared<SwiperArcDotParameters>(swiperArcDotParameters);
+    }
+
     void ShowNext();
     void ShowPrevious();
     void SwipeTo(int32_t index);
@@ -521,6 +544,7 @@ public:
     }
 
     std::shared_ptr<SwiperParameters> GetSwiperParameters() const;
+    std::shared_ptr<SwiperArcDotParameters> GetSwiperArcDotParameters() const;
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters() const;
 
     void ArrowHover(bool hoverFlag);
@@ -740,6 +764,7 @@ private:
     void OnIndexChange();
     bool IsOutOfHotRegion(const PointF& dragPoint) const;
     void SaveDotIndicatorProperty(const RefPtr<FrameNode>& indicatorNode);
+    void SaveCircleDotIndicatorProperty(const RefPtr<FrameNode>& indicatorNode);
     void SaveDigitIndicatorProperty(const RefPtr<FrameNode>& indicatorNode);
     void UpdatePaintProperty(const RefPtr<FrameNode>& indicatorNode);
     void PostTranslateTask(uint32_t delayTime);
@@ -1010,6 +1035,7 @@ private:
 
     mutable std::shared_ptr<SwiperParameters> swiperParameters_;
     mutable std::shared_ptr<SwiperDigitalParameters> swiperDigitalParameters_;
+    mutable std::shared_ptr<SwiperArcDotParameters> swiperArcDotParameters_;
 
     WeakPtr<FrameNode> lastWeakShowNode_;
 
@@ -1086,6 +1112,8 @@ private:
     bool isCaptureReverse_ = false;
     OffsetF captureFinalOffset_;
     bool isInAutoPlay_ = false;
+
+    bool needFireCustomAnimationEvent_ = true;
 };
 } // namespace OHOS::Ace::NG
 

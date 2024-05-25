@@ -102,7 +102,7 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
         config.resizableSlice_ = renderProps->GetImageResizableSliceValue({});
     }
     auto pipelineCtx = PipelineBase::GetCurrentContext();
-    bool isRightToLeft = pipelineCtx && pipelineCtx->IsRightToLeft();
+    bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     config.flipHorizontally_ = isRightToLeft && renderProps->GetMatchTextDirection().value_or(false);
     config.colorFilter_.Reset();
     auto colorFilterMatrix = renderProps->GetColorFilter();

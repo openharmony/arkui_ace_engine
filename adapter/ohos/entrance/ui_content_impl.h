@@ -156,6 +156,12 @@ public:
 
     void SetFormBackgroundColor(const std::string& color) override;
 
+    void RegisterAccessibilityChildTree(
+        uint32_t parentWindowId, int32_t parentTreeId, int64_t parentElementId) override;
+    void SetAccessibilityGetParentRectHandler(std::function<void(int32_t&, int32_t&)>&& callback) override;
+    void DeregisterAccessibilityChildTree() override;
+    void AccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
+
     void SetFontScaleFollowSystem(const bool fontScaleFollowSystem) override;
 
     SerializeableObjectArray DumpUITree() override

@@ -73,6 +73,76 @@ std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const OffsetF offsetF, co
     pointerEvent->SetPointerId(point.id);
     return pointerEvent;
 }
+
+class FormAccessibilityChildTreeCallback : public AccessibilityChildTreeCallback {
+public:
+    explicit FormAccessibilityChildTreeCallback(const WeakPtr<FormNode> &weakFormNode)
+        : AccessibilityChildTreeCallback(), weakFormNode_(weakFormNode)
+    {}
+
+    ~FormAccessibilityChildTreeCallback() override = default;
+
+    bool OnRegister(uint32_t windowId, int32_t treeId) override
+    {
+        auto formNode = weakFormNode_.Upgrade();
+        if (formNode == nullptr) {
+            return false;
+        }
+        if (isReg_) {
+            return true;
+        }
+        formNode->OnAccessibilityChildTreeRegister(windowId, treeId);
+        isReg_ = true;
+        return true;
+    }
+
+    bool OnDeregister() override
+    {
+        auto formNode = weakFormNode_.Upgrade();
+        if (formNode == nullptr) {
+            return false;
+        }
+        if (!isReg_) {
+            return true;
+        }
+        formNode->OnAccessibilityChildTreeDeregister();
+        isReg_ = false;
+        return true;
+    }
+
+    bool OnSetChildTree(int32_t childWindowId, int32_t childTreeId) override
+    {
+        auto formNode = weakFormNode_.Upgrade();
+        if (formNode == nullptr) {
+            return false;
+        }
+        formNode->OnSetAccessibilityChildTree(childWindowId, childTreeId);
+        return true;
+    }
+
+    bool OnDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override
+    {
+        auto formNode = weakFormNode_.Upgrade();
+        if (formNode == nullptr) {
+            return false;
+        }
+        formNode->OnAccessibilityDumpChildInfo(params, info);
+        return true;
+    }
+
+private:
+    bool isReg_ = false;
+    WeakPtr<FormNode> weakFormNode_;
+};
+}
+
+FormNode::~FormNode()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto accessibilityManager = pipeline->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->DeregisterAccessibilityChildTreeCallback(GetAccessibilityId());
 }
 
 HitTestResult FormNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
@@ -163,6 +233,7 @@ RefPtr<FormNode> FormNode::GetOrCreateFormNode(
     auto pattern = patternCreator ? patternCreator() : AceType::MakeRefPtr<Pattern>();
     formNode = AceType::MakeRefPtr<FormNode>(tag, nodeId, pattern, false);
     formNode->InitializePatternAndContext();
+    formNode->InitializeFormAccessibility();
     ElementRegister::GetInstance()->AddUINode(formNode);
     return formNode;
 }
@@ -172,5 +243,64 @@ void FormNode::OnDetachFromMainTree(bool recursive)
     auto eventHub = GetEventHub<FormEventHub>();
     eventHub->FireOnCache();
     FrameNode::OnDetachFromMainTree(recursive);
+}
+
+void FormNode::InitializeFormAccessibility()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto accessibilityManager = pipeline->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityChildTreeCallback_ = std::make_shared<FormAccessibilityChildTreeCallback>(WeakClaim(this));
+    accessibilityManager->RegisterAccessibilityChildTreeCallback(GetAccessibilityId(), accessibilityChildTreeCallback_);
+
+}
+
+void FormNode::NotifyAccessibilityChildTreeRegister()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto accessibilityManager = pipeline->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    if (accessibilityManager->IsRegister()) {
+        accessibilityChildTreeCallback_->OnRegister(pipeline->GetWindowId(), 0);
+    }
+}
+
+void FormNode::OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId)
+{
+    auto accessibilityId = GetAccessibilityId();
+    auto pattern = GetPattern<FormPattern>();
+    if (pattern == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "pattern is null");
+        return;
+    }
+    pattern->OnAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
+}
+
+void FormNode::OnAccessibilityChildTreeDeregister()
+{
+    auto pattern = GetPattern<FormPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->OnAccessibilityChildTreeDeregister();
+}
+
+void FormNode::OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId)
+{
+    auto accessibilityProperty = GetAccessibilityProperty<AccessibilityProperty>();
+    if (accessibilityProperty != nullptr) {
+        accessibilityProperty->SetChildWindowId(childWindowId);
+        accessibilityProperty->SetChildTreeId(childTreeId);
+    }
+}
+
+void FormNode::OnAccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    auto pattern = GetPattern<FormPattern>();
+    if (pattern == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "pattern is null");
+        return;
+    }
+    pattern->OnAccessibilityDumpChildInfo(params, info);
 }
 } // namespace OHOS::Ace::NG

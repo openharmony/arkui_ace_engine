@@ -221,7 +221,7 @@ class SubscriberManager {
   public dumpSubscriberInfo(): void {
     stateMgmtConsole.debug('Dump of SubscriberManager +++ (sart)');
     for (let [id, subscriber] of this.subscriberById_) {
-      stateMgmtConsole.debug(`Id: ${id} -> ${subscriber.info ? subscriber['info']() : 'unknown'}`);
+      stateMgmtConsole.debug(`Id: ${id} -> ${subscriber['info'] ? subscriber['info']() : 'unknown'}`);
     }
     stateMgmtConsole.debug('Dump of SubscriberManager +++ (end)');
   }

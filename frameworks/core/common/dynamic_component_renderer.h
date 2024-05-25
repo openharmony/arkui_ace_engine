@@ -56,6 +56,19 @@ public:
     virtual void TransferFocusState(bool isFocus) = 0;
     virtual void TransferFocusActiveEvent(bool isFocus) = 0;
 
+    virtual void SearchElementInfoByAccessibilityId(int64_t elementId, int32_t mode, int64_t baseParent,
+        std::list<Accessibility::AccessibilityElementInfo>& output) = 0;
+    virtual void SearchElementInfosByText(int64_t elementId, const std::string& text, int64_t baseParent,
+        std::list<Accessibility::AccessibilityElementInfo>& output) = 0;
+    virtual void FindFocusedElementInfo(int64_t elementId, int32_t focusType, int64_t baseParent,
+        Accessibility::AccessibilityElementInfo& output) = 0;
+    virtual void FocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
+        Accessibility::AccessibilityElementInfo& output) = 0;
+    virtual bool NotifyExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, int64_t offset) = 0;
+    virtual void TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType, int32_t eventType,
+        int64_t timeMs) = 0;
+
     virtual void Dump(RendererDumpInfo &rendererDumpInfo) {}
 
 private:

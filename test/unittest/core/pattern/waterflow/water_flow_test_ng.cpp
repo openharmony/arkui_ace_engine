@@ -23,7 +23,7 @@
 #include "test/mock/core/rosen/mock_canvas.h"
 
 #include "core/components/scroll/scroll_controller_base.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_info.h"
+#include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
 #include "core/components_ng/property/property.h"
 
 #define protected public
