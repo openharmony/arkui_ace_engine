@@ -876,7 +876,9 @@ void SheetPresentationPattern::UpdateFontScaleStatus()
         CHECK_NULL_VOID(layoutProps);
         auto titleLayoutProps = titleColumnNode->GetLayoutProperty<LinearLayoutProperty>();
         CHECK_NULL_VOID(titleLayoutProps);
-        if (GreatNotEqual(pipeline->GetFontScale(), SHEET_NORMAL_SCALE)) {
+        auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+        CHECK_NULL_VOID(sheetTheme);
+        if (GreatNotEqual(pipeline->GetFontScale(), sheetTheme->GetSheetNormalScale())) {
             layoutProps->ClearUserDefinedIdealSize(false, true);
             titleLayoutProps->ClearUserDefinedIdealSize(false, true);
         } else if (sheetStyle.isTitleBuilder.has_value()) {
