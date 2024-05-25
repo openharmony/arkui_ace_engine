@@ -100,6 +100,7 @@ declare class ModifierJS {
   ParticleModifier(nativePtr: KNode, classType: ModifierType): void;
   SymbolGlyphModifier(nativePtr: KNode, classType: ModifierType): void;
   SymbolSpanModifier(nativePtr: KNode, classType: ModifierType): void;
+  ContainerSpanModifier(nativePtr: KNode, classType: ModifierType): void;
 }
 
 declare class aceConsole {

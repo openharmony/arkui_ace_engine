@@ -98,6 +98,7 @@
 #include "core/interfaces/native/node/text_timer_modifier.h"
 #include "core/interfaces/native/node/video_modifier.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
+#include "core/interfaces/native/node/node_container_span_modifier.h"
 
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/interfaces/native/node/plugin_modifier.h"
@@ -231,6 +232,7 @@ const ArkUINodeModifiers impl = {
     NodeModifier::GetNodeContentModifier,
     NodeModifier::GetSymbolGlyphModifier,
     NodeModifier::GetSymbolSpanModifier,
+    NodeModifier::GetContainerSpanModifier,
 };
 
 } // namespace

@@ -77,6 +77,7 @@ public:
     void CreateContainSpan() override;
     void SetTextBackgroundStyle(const TextBackgroundStyle& style) override;
     static void SetTextBackgroundStyle(UINode* uiNode, const TextBackgroundStyle& style);
+    static void SetTextBackgroundStyleByBaseSpan(UINode* uiNode, const TextBackgroundStyle& style);
     static TextBackgroundStyle GetSpanTextBackgroundStyle(UINode* uiNode);
     static void SetTextShadow(UINode* uiNode, const std::vector<Shadow>& value);
     static std::vector<Shadow> GetTextShadow(UINode* uiNode);

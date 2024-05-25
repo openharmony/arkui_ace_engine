@@ -1976,3 +1976,8 @@ declare class ArkParticleComponent extends ArkComponent implements ParticleAttri
     constructor(nativePtr: KNode, classType?: ModifierType);
     emitter(fields: Array<EmitterProperty>): ParticleAttribute;
 }
+
+declare class ArkContainerSpanComponent extends ArkComponent implements ContainerSpanAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    textBackgroundStyle(value: TextBackgroundStyle): ContainerSpanAttribute;
+}

@@ -97,7 +97,8 @@
         "src/ArkEffectComponent.ts",
         "src/ArkRemoteWindow.ts",
         "src/ArkSymbolGlyph.ts",
-        "src/ArkSymbolSpan.ts"
+        "src/ArkSymbolSpan.ts",
+        "src/ArkContainerSpan.ts"
     ],
     "compilerOptions": {
         "module": "none",

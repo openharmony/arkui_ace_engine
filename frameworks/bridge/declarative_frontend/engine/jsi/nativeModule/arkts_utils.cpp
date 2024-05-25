@@ -1598,6 +1598,30 @@ void ArkTSUtils::ParseOuterBorderRadius(
     PushOuterBorderDimensionVector(bottomRightOptional, values);
 }
 
+void ArkTSUtils::ParseOuterBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<ArkUI_Float32>& values,
+    std::vector<ArkUI_Int32>& units, int32_t argsIndex)
+{
+    Local<JSValueRef> topLeftArgs = runtimeCallInfo->GetCallArgRef(argsIndex);
+    Local<JSValueRef> topRightArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_1);
+    Local<JSValueRef> bottomLeftArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_2);
+    Local<JSValueRef> bottomRightArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_3);
+
+    std::optional<CalcDimension> topLeftOptional;
+    std::optional<CalcDimension> topRightOptional;
+    std::optional<CalcDimension> bottomLeftOptional;
+    std::optional<CalcDimension> bottomRightOptional;
+
+    ParseOuterBorder(vm, topLeftArgs, topLeftOptional);
+    ParseOuterBorder(vm, topRightArgs, topRightOptional);
+    ParseOuterBorder(vm, bottomLeftArgs, bottomLeftOptional);
+    ParseOuterBorder(vm, bottomRightArgs, bottomRightOptional);
+
+    PushOuterBorderDimensionVector(topLeftOptional, values, units);
+    PushOuterBorderDimensionVector(topRightOptional, values, units);
+    PushOuterBorderDimensionVector(bottomLeftOptional, values, units);
+    PushOuterBorderDimensionVector(bottomRightOptional, values, units);
+}
+
 void ArkTSUtils::PushOuterBorderStyleVector(const std::optional<BorderStyle>& value, std::vector<uint32_t> &options)
 {
     options.push_back(static_cast<uint32_t>(value.has_value()));
