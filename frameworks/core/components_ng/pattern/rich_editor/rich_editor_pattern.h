@@ -433,6 +433,7 @@ public:
     RefPtr<GestureEventHub> GetGestureEventHub();
     float GetSelectedMaxWidth();
     void AfterAddImage(RichEditorChangeValue& changeValue);
+    void OnWindowHide() override;
     bool BeforeAddImage(RichEditorChangeValue& changeValue, const ImageSpanOptions& options, int32_t insertIndex);
 
     bool IsUsingMouse() const
@@ -712,10 +713,17 @@ public:
     bool AdjustSelectorForEmoji(int32_t& index, HandleType handleType, SelectorAdjustPolicy policy);
     void UpdateSelector(int32_t start, int32_t end);
     std::list<RefPtr<SpanItem>>::iterator GetSpanIter(int32_t index);
+    
+    void DumpAdvanceInfo() override {}
 
     void SetContentChange(bool onChange)
     {
         contentChange_ = onChange;
+    }
+
+    RectF GetTextContentRect(bool isActualText = false) const override
+    {
+        return contentRect_;
     }
 
 protected:

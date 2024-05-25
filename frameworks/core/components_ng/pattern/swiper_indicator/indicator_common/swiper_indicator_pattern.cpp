@@ -457,7 +457,7 @@ void SwiperIndicatorPattern::GetMouseClickIndex()
     PointF hoverPoint = axis == Axis::HORIZONTAL ? hoverPoint_ : PointF(hoverPoint_.GetY(), hoverPoint_.GetX());
     int start = currentIndex >= 0 ? loopCount * itemCount : -(loopCount + 1) * itemCount;
     int end = currentIndex >= 0 ? (loopCount + 1) * itemCount : -loopCount * itemCount;
-    if (axis == Axis::HORIZONTAL && AceApplicationInfo::GetInstance().IsRightToLeft()) {
+    if (swiperPattern->IsHorizontalAndRightToLeft()) {
         end = currentIndex >= 0 ? loopCount * itemCount - 1 : -(loopCount + 1) * itemCount - 1;
         start = currentIndex >= 0 ? (loopCount + 1) * itemCount - 1 : -loopCount * itemCount - 1;
     }
@@ -535,6 +535,8 @@ void SwiperIndicatorPattern::UpdateTextContentSub(const RefPtr<SwiperIndicatorLa
     CHECK_NULL_VOID(swiperPattern);
     auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(swiperLayoutProperty);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto currentIndex = swiperPattern->GetCurrentFirstIndex() + 1;
     if (currentIndex > swiperPattern->RealTotalCount()) {
         currentIndex = 1;
@@ -544,7 +546,7 @@ void SwiperIndicatorPattern::UpdateTextContentSub(const RefPtr<SwiperIndicatorLa
             currentIndex = 1;
         }
     }
-    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    bool isRtl = swiperLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     std::string firstContent = isRtl ? std::to_string(swiperPattern->RealTotalCount()) : std::to_string(currentIndex);
     std::string lastContent = isRtl ? std::to_string(currentIndex) + "\\" :
         "/" + std::to_string(swiperPattern->RealTotalCount());
@@ -658,6 +660,8 @@ bool SwiperIndicatorPattern::CheckIsTouchBottom(const TouchLocationInfo& info)
     CHECK_NULL_RETURN(swiperNode, false);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_RETURN(swiperPattern, false);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
     auto currentIndex = swiperPattern->GetCurrentIndex();
     auto childrenSize = swiperPattern->RealTotalCount();
 
@@ -678,7 +682,7 @@ bool SwiperIndicatorPattern::CheckIsTouchBottom(const TouchLocationInfo& info)
     TouchBottomType touchBottomType = TouchBottomType::NONE;
 
     if (currentIndex <= 0) {
-        if (swiperPattern->GetDirection() == Axis::HORIZONTAL && AceApplicationInfo::GetInstance().IsRightToLeft()) {
+        if (swiperPattern->IsHorizontalAndRightToLeft()) {
             if (Positive(touchOffset)) {
                 touchBottomType = TouchBottomType::END;
             }
@@ -690,7 +694,7 @@ bool SwiperIndicatorPattern::CheckIsTouchBottom(const TouchLocationInfo& info)
     }
 
     if (currentIndex >= childrenSize - displayCount) {
-        if (swiperPattern->GetDirection() == Axis::HORIZONTAL && AceApplicationInfo::GetInstance().IsRightToLeft()) {
+        if (swiperPattern->IsHorizontalAndRightToLeft()) {
             if (NonPositive(touchOffset)) {
                 touchBottomType = TouchBottomType::START;
             }
@@ -701,8 +705,6 @@ bool SwiperIndicatorPattern::CheckIsTouchBottom(const TouchLocationInfo& info)
         }
     }
     touchBottomType_ = touchBottomType;
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 
     return touchBottomType == TouchBottomType::NONE ? false : true;
@@ -766,7 +768,7 @@ void SwiperIndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
     if (LessNotEqual(std::abs(turnPageRateOffset), INDICATOR_DRAG_MIN_DISTANCE.ConvertToPx())) {
         return;
     }
-    if (swiperPattern->GetDirection() == Axis::HORIZONTAL && AceApplicationInfo::GetInstance().IsRightToLeft()) {
+    if (swiperPattern->IsHorizontalAndRightToLeft()) {
         turnPageRateOffset = -turnPageRateOffset;
     }
     auto turnPageRate = -(turnPageRateOffset / INDICATOR_DRAG_MAX_DISTANCE.ConvertToPx());

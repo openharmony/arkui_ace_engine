@@ -83,6 +83,24 @@ constexpr Dimension MIN_DIAMETER = 1.5_vp;
 constexpr Dimension MIN_ARROWHEAD_DIAMETER = 2.0_vp;
 constexpr Dimension ANIMATION_TEXT_OFFSET = 12.0_vp;
 
+void SetResponseRegion(RefPtr<FrameNode>& node)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_VOID(textOverlayTheme);
+    auto gestureHub = node->GetOrCreateGestureEventHub();
+    std::vector<DimensionRect> vector;
+    auto menuPadding = textOverlayTheme->GetMenuPadding();
+    auto buttonHeight = textOverlayTheme->GetMenuButtonHeight();
+    auto top = menuPadding.Top();
+    auto responseHeight = top.Value() + menuPadding.Bottom().Value() + buttonHeight.Value();
+    vector.emplace_back(
+        DimensionRect(Dimension(1, DimensionUnit::PERCENT), Dimension(responseHeight, DimensionUnit::VP),
+            DimensionOffset(Dimension(0), Dimension(-top.Value(), top.Unit()))));
+    gestureHub->SetResponseRegion(vector);
+}
+
 float MeasureTextWidth(const TextStyle& textStyle, const std::string& text)
 {
 #ifdef ENABLE_ROSEN_BACKEND
@@ -149,6 +167,7 @@ RefPtr<FrameNode> BuildPasteButton(const std::function<void()>& callback, int32_
         CHECK_NULL_RETURN(buttonEventHub, pasteButton);
         buttonEventHub->SetEnabled(false);
     }
+    SetResponseRegion(pasteButton);
     pasteButton->MarkModifyDone();
     return pasteButton;
 }
@@ -219,6 +238,7 @@ RefPtr<FrameNode> BuildButton(const std::string& data, const std::function<void(
         CHECK_NULL_RETURN(buttonEventHub, button);
         buttonEventHub->SetEnabled(false);
     }
+    SetResponseRegion(button);
     button->MarkModifyDone();
     return button;
 }
@@ -279,6 +299,7 @@ RefPtr<FrameNode> BuildButton(
         overlayManager->DestroySelectOverlay(overlayId);
         overlayManager->CloseSelectContentOverlay(overlayId, CloseReason::CLOSE_REASON_TOOL_BAR, false);
     });
+    SetResponseRegion(button);
     button->MarkModifyDone();
     return button;
 }

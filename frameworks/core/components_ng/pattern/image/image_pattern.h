@@ -159,7 +159,7 @@ public:
         }
     }
 
-    std::string GetDynamicModeString(DynamicRangeMode dynamicMode)
+    std::string GetDynamicModeString(DynamicRangeMode dynamicMode) const
     {
         switch (dynamicMode) {
             case DynamicRangeMode::HIGH:
@@ -239,7 +239,8 @@ public:
     {
         images_.clear();
     }
-
+    void ResetImage();
+    void ResetAltImage();
     void ResetImageProperties();
 
     void ResetImageAndAlt();
@@ -310,6 +311,14 @@ public:
     }
 
     void SetOnProgressCallback(std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& onProgress);
+
+    SizeF GetRawImageSize()
+    {
+        if (!loadingCtx_) {
+            return SizeF(-1.0, -1.0);
+        }
+        return loadingCtx_->GetImageSize();
+    }
 
 protected:
     void RegisterWindowStateChangedCallback();

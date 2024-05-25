@@ -361,6 +361,10 @@ globalThis.WithTheme.pop = function () {
 class ArkColorsImpl {
     constructor(colors = {}, baselineColors) {
         var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31, _32, _33, _34, _35;
+        const customAttribute = this;
+        for(let attribute in colors) {
+            customAttribute[attribute] = colors[attribute];
+        }
         this.brand = (_a = colors === null || colors === void 0 ? void 0 : colors.brand) !== null && _a !== void 0 ? _a : baselineColors.brand;
         const brandColors = ArkColorsImpl.makeBrandColors(colors === null || colors === void 0 ? void 0 : colors.brand);
         this.warning = (_b = colors === null || colors === void 0 ? void 0 : colors.warning) !== null && _b !== void 0 ? _b : baselineColors.warning;

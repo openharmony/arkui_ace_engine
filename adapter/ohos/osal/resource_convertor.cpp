@@ -101,6 +101,7 @@ std::shared_ptr<Global::Resource::ResConfig> ConvertConfigToGlobal(const Resourc
     newResCfg->SetScreenDensity(config.GetDensity());
     newResCfg->SetColorMode(ConvertColorModeToGlobal(config.GetColorMode()));
     newResCfg->SetInputDevice(ConvertInputDevice(config.GetDeviceAccess()));
+    newResCfg->SetAppColorMode(config.GetColorModeIsSetByApp());
     return newResCfg;
 }
 

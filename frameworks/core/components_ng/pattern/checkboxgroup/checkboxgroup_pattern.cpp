@@ -331,15 +331,10 @@ void CheckBoxGroupPattern::InitPreGroup()
     groupManager->AddCheckBoxGroup(group, host);
     auto paintProperty = host->GetPaintProperty<CheckBoxGroupPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (paintProperty->HasCheckBoxGroupSelect() && paintProperty->GetCheckBoxGroupSelectValue()) {
-        auto selectAll = paintProperty->GetCheckBoxGroupSelectValue();
-        if (selectAll) {
-            paintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::ALL);
-        }
-        if (selectAll || (!selectAll && !isFirstCreated_)) {
-            UpdateUIStatus(selectAll);
-        }
-        initSelected_ = selectAll;
+    if (paintProperty->GetCheckBoxGroupSelect().value_or(false)) {
+        paintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::ALL);
+        UpdateUIStatus(true);
+        initSelected_ = true;
     }
     isFirstCreated_ = false;
     SetPreGroup(group);
@@ -638,9 +633,11 @@ void CheckBoxGroupPattern::OnAttachToMainTree()
         }
         parent = parent->GetParent();
     }
-    currentNavId_ = "";
-    groupManager->SetLastNavId(std::nullopt);
-    UpdateState();
+    if (!currentNavId_.value_or("").empty()) {
+        currentNavId_ = "";
+        groupManager->SetLastNavId(std::nullopt);
+        UpdateState();
+    }
 }
 
 std::string CheckBoxGroupPattern::GetGroupNameWithNavId()

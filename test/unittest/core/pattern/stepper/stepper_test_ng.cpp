@@ -1282,4 +1282,132 @@ HWTEST_F(StepperTestNg, StepperAlgorithmTest005, TestSize.Level1)
     EXPECT_EQ(leftButtonHeight, 0);
 }
 
+/**
+ * @tc.name: StepperPattrenOnLanguageConfigurationUpdate001
+ * @tc.desc: Test OnLanguageConfigurationUpdate of stepper.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StepperTestNg, StepperPattrenOnLanguageConfigurationUpdate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode, pattern.
+     */
+    auto frameNode = StepperNode::GetOrCreateStepperNode(STEPPER_ITEM_TAG,
+        ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<StepperPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto stepperPattern = frameNode->GetPattern<StepperPattern>();
+    ASSERT_NE(stepperPattern, nullptr);
+    auto swiperNode = FrameNode::GetOrCreateFrameNode(
+        SWIPER_NODE_TAG, frameNode->GetSwiperId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    ASSERT_NE(swiperNode, nullptr);
+    StepperItemModelNG().Create();
+    auto stepperItemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(stepperItemNode, nullptr);
+    frameNode->AddChild(swiperNode);
+    swiperNode->AddChild(stepperItemNode);
+    auto hostNode = AceType::DynamicCast<StepperNode>(stepperPattern->GetHost());
+    ASSERT_NE(hostNode, nullptr);
+    stepperPattern->isRightToLeft_ = false;
+
+    stepperPattern->CreateLeftButtonNode();
+    stepperPattern->CreateArrowRightButtonNode(INDEX, false);
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    stepperPattern->OnLanguageConfigurationUpdate();
+
+    auto leftImageLayoutProperty = stepperPattern->leftImage_->GetLayoutProperty<ImageLayoutProperty>();
+    auto rightImageLayoutProperty = stepperPattern->rightImage_->GetLayoutProperty<ImageLayoutProperty>();
+    auto leftimageSourceInfo = leftImageLayoutProperty->GetImageSourceInfo();
+    auto rightimageSourceInfo = rightImageLayoutProperty->GetImageSourceInfo();
+    EXPECT_EQ(leftimageSourceInfo->GetResourceId(), InternalResource::ResourceId::STEPPER_NEXT_ARROW);
+    EXPECT_EQ(rightimageSourceInfo->GetResourceId(), InternalResource::ResourceId::STEPPER_BACK_ARROW);
+
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+    stepperPattern->OnLanguageConfigurationUpdate();
+    leftImageLayoutProperty = stepperPattern->leftImage_->GetLayoutProperty<ImageLayoutProperty>();
+    rightImageLayoutProperty = stepperPattern->rightImage_->GetLayoutProperty<ImageLayoutProperty>();
+    leftimageSourceInfo = leftImageLayoutProperty->GetImageSourceInfo();
+    rightimageSourceInfo = rightImageLayoutProperty->GetImageSourceInfo();
+    EXPECT_EQ(leftimageSourceInfo->GetResourceId(), InternalResource::ResourceId::STEPPER_BACK_ARROW);
+    EXPECT_EQ(rightimageSourceInfo->GetResourceId(), InternalResource::ResourceId::STEPPER_NEXT_ARROW);
+}
+
+/**
+ * @tc.name: StepperAlgorithmTest006
+ * @tc.desc: Test StepperAlgorithmLayout.LayoutRightButton And LayoutLeftButton of stepper.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StepperTestNg, StepperAlgorithmTest006, TestSize.Level1)
+{
+    StepperModelNG().Create(INDEX);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto stepperPattern = frameNode->GetPattern<StepperPattern>();
+    ASSERT_NE(stepperPattern, nullptr);
+    auto stepperFrameNode = AceType::DynamicCast<StepperNode>(stepperPattern->GetHost());
+    ASSERT_NE(stepperFrameNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        stepperFrameNode, AceType::MakeRefPtr<GeometryNode>(), stepperFrameNode->GetLayoutProperty());
+    auto stepperLayoutAlgorithm = stepperPattern->CreateLayoutAlgorithm();
+    ASSERT_NE(stepperLayoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(stepperLayoutAlgorithm));
+
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = SizeF(RK356_WIDTH, RK356_HEIGHT);
+    parentLayoutConstraint.percentReference = SizeF(RK356_WIDTH, RK356_HEIGHT);
+
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+
+    auto swiperNode = FrameNode::GetOrCreateFrameNode(
+        SWIPER_NODE_TAG, stepperFrameNode->GetSwiperId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    RefPtr<LayoutWrapperNode> swiperLayoutWrapper =
+        CreateChildLayoutWrapper(layoutWrapper, stepperFrameNode, swiperNode);
+
+    auto leftButtonNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, stepperFrameNode->GetLeftButtonId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    RefPtr<LayoutWrapperNode> leftButtonLayoutWrapper =
+        CreateChildLayoutWrapper(layoutWrapper, stepperFrameNode, leftButtonNode);
+
+    auto rightButtonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, stepperFrameNode->GetRightButtonId(),
+        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    RefPtr<LayoutWrapperNode> rightButtonLayoutWrapper =
+        CreateChildLayoutWrapper(layoutWrapper, stepperFrameNode, rightButtonNode);
+
+    auto rowNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto rowNode = FrameNode::GetOrCreateFrameNode(
+        V2::ROW_ETS_TAG, rowNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    RefPtr<LayoutWrapperNode> rowLayoutWrapper =
+        CreateChildLayoutWrapper(leftButtonLayoutWrapper, leftButtonNode, rowNode);
+    rightButtonNode->AddChild(rowNode);
+    rightButtonLayoutWrapper->AppendChild(rowLayoutWrapper);
+
+    auto rightTextNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    RefPtr<LayoutWrapperNode> rightTextLayoutWrapper =
+        CreateChildLayoutWrapper(rowLayoutWrapper, rowNode, rightTextNode);
+
+    auto leftTextNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    RefPtr<LayoutWrapperNode> leftTextLayoutWrapper = CreateChildLayoutWrapper(rowLayoutWrapper, rowNode, leftTextNode);
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+    stepperLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    stepperLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+
+    auto hostNode = AceType::DynamicCast<StepperNode>(layoutWrapper->GetHostNode());
+    CHECK_NULL_VOID(hostNode);
+    CHECK_NULL_VOID(hostNode->HasRightButtonNode());
+    auto Rightindex = hostNode->GetChildIndexById(hostNode->GetRightButtonId());
+    auto rightButtonWrapper = layoutWrapper->GetOrCreateChildByIndex(Rightindex);
+    CHECK_NULL_VOID(hostNode->HasLeftButtonNode());
+    auto leftindex = hostNode->GetChildIndexById(hostNode->GetLeftButtonId());
+    auto leftButtonWrapper = layoutWrapper->GetOrCreateChildByIndex(leftindex);
+    auto rightButtonOffsetOld = rightButtonWrapper->GetGeometryNode()->GetMarginFrameOffset();
+    auto leftButtonOffsetOld = leftButtonWrapper->GetGeometryNode()->GetMarginFrameOffset();
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    stepperLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    ASSERT_NE(rightButtonOffsetOld,
+        layoutWrapper->GetOrCreateChildByIndex(Rightindex)->GetGeometryNode()->GetMarginFrameOffset());
+    ASSERT_NE(leftButtonOffsetOld,
+        layoutWrapper->GetOrCreateChildByIndex(leftindex)->GetGeometryNode()->GetMarginFrameOffset());
+}
 } // namespace OHOS::Ace::NG

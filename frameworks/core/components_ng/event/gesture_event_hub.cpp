@@ -857,12 +857,11 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         }
     } else {
         if (pixelMap_ == nullptr) {
+            FireCustomerOnDragEnd(pipeline, eventHub);
             TAG_LOGW(AceLogTag::ACE_DRAG, "Thumbnail pixelMap is empty.");
             return;
         }
-        if (pixelMap == nullptr) {
-            pixelMap = pixelMap_;
-        }
+        pixelMap = pixelMap_;
     }
     SetDragGatherPixelMaps(info);
     auto dragPreviewOptions = frameNode->GetDragPreviewOption();
@@ -1744,6 +1743,29 @@ void GestureEventHub::ClearModifierGesture()
     backupModifierGestures_.clear();
     recreateGesture_ = true;
     OnModifyDone();
+}
+
+void GestureEventHub::FireCustomerOnDragEnd(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub)
+{
+    auto eventHub = hub.Upgrade();
+    CHECK_NULL_VOID(eventHub);
+    auto pipeline = AceType::DynamicCast<PipelineContext>(context);
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    CHECK_NULL_VOID(dragEvent);
+    dragEvent->SetResult(DragRet::DRAG_FAIL);
+    dragEvent->SetDragBehavior(DragBehavior::UNKNOWN);
+    dragDropManager->SetIsDragged(false);
+    dragDropManager->ResetDragging();
+    dragDropManager->SetDraggingPointer(-1);
+    dragDropManager->SetDraggingPressedState(false);
+    dragDropManager->ResetDragPreviewInfo();
+    eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_END, dragEvent);
+    if (eventHub->HasOnDragEnd()) {
+        (eventHub->GetOnDragEnd())(dragEvent);
+    }
 }
 
 #if defined(PIXEL_MAP_SUPPORTED)

@@ -1209,7 +1209,7 @@ HWTEST_F(NavigationTestNg, NavDestinationDialogTest001, TestSize.Level1)
     pattern->OnModifyDone();
     pattern->MarkNeedSyncWithJsStack();
     pattern->SyncWithJsStackIfNeeded();
-    navigationNode->hideNodes_.emplace_back(navDestination);
+    navigationNode->hideNodes_.emplace_back(std::make_pair(navDestination, false));
     PipelineContext::GetCurrentContext()->FlushBuildFinishCallbacks();
     EXPECT_EQ(layoutPropertyB->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::INVISIBLE);
     EXPECT_EQ(destinationProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::INVISIBLE);

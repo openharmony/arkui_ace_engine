@@ -29,6 +29,10 @@ constexpr uint32_t DEFAULT_BACKGROUND_COLOR = 0xFFFFFFF;
 constexpr uint32_t MENU_MIN_GRID_COUNTS = 2;
 constexpr uint32_t MENU_MAX_GRID_COUNTS = 6;
 constexpr double OUTBORDER_RADIUS = 19.75; // Default value of outBorderRadius
+constexpr float MENU_BIG_FONT_SIZE_SCALE = 1.75f;
+constexpr float MENU_LARGE_FONT_SIZE_SCALE_ = 2.0f;
+constexpr float MENU_MAX_FONT_SIZE_SCALE = 3.2f;
+constexpr int32_t MENU_TEXT_MAX_LINES = std::numeric_limits<int32_t>::max();
 
 /**
  * MenuTheme defines styles of menu item. MenuTheme should be built
@@ -99,6 +103,10 @@ public:
             theme->previewMenuScaleNumber_ = 0.95f;
             std::string hasFilter = pattern->GetAttr<std::string>("menu_has_filter", "true");
             theme->hasFilter_ = (hasFilter == "true");
+            theme->bigFontSizeScale_ = MENU_BIG_FONT_SIZE_SCALE;
+            theme->largeFontSizeScale_ = MENU_LARGE_FONT_SIZE_SCALE_;
+            theme->maxFontSizeScale_ = MENU_MAX_FONT_SIZE_SCALE;
+            theme->textMaxLines_ = MENU_TEXT_MAX_LINES;
         }
     };
 
@@ -264,6 +272,26 @@ public:
         return hasFilter_;
     }
 
+    float GetBigFontSizeScale() const
+    {
+        return bigFontSizeScale_;
+    }
+
+    float GetLargeFontSizeScale() const
+    {
+        return largeFontSizeScale_;
+    }
+
+    float GetMaxFontSizeScale() const
+    {
+        return maxFontSizeScale_;
+    }
+
+    int32_t GetTextMaxLines() const
+    {
+        return textMaxLines_;
+    }
+
 protected:
     MenuTheme() = default;
 
@@ -300,6 +328,10 @@ private:
     Dimension borderWidth_;
     uint32_t symbolId_;
     bool hasFilter_ = true;
+    float bigFontSizeScale_ = 1.75f;
+    float largeFontSizeScale_ = 2.0f;
+    float maxFontSizeScale_ = 3.2f;
+    int32_t textMaxLines_ = std::numeric_limits<int32_t>::max();
 };
 
 } // namespace OHOS::Ace::NG

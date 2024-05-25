@@ -421,4 +421,109 @@ bool AccessibilityProperty::HasAction() const
         IsEditable() ||
         IsDeletable();
 }
+
+void AccessibilityProperty::SetUserDisabled(const bool& isDisabled)
+{
+    isDisabled_ = isDisabled;
+}
+
+bool AccessibilityProperty::HasUserDisabled()
+{
+    return isDisabled_.has_value();
+}
+
+bool AccessibilityProperty::IsUserDisabled()
+{
+    return isDisabled_.value_or(false);
+}
+
+void AccessibilityProperty::SetUserSelected(const bool& isSelected)
+{
+    isSelected_ = isSelected;
+}
+
+bool AccessibilityProperty::HasUserSelected()
+{
+    return isSelected_.has_value();
+}
+
+bool AccessibilityProperty::IsUserSelected()
+{
+    return isSelected_.value_or(false);
+}
+
+void AccessibilityProperty::SetUserCheckedType(const int32_t& checkedType)
+{
+    checkedType_ = checkedType;
+}
+
+bool AccessibilityProperty::HasUserCheckedType()
+{
+    return checkedType_.has_value();
+}
+
+int32_t AccessibilityProperty::GetUserCheckedType()
+{
+    return checkedType_.value_or(0);
+}
+
+void AccessibilityProperty::SetUserMinValue(const int32_t& minValue)
+{
+    minValue_ = minValue;
+}
+
+bool AccessibilityProperty::HasUserMinValue()
+{
+    return minValue_.has_value();
+}
+
+int32_t AccessibilityProperty::GetUserMinValue()
+{
+    return minValue_.value_or(-1);
+}
+
+void AccessibilityProperty::SetUserMaxValue(const int32_t& maxValue)
+{
+    maxValue_ = maxValue;
+}
+
+bool AccessibilityProperty::HasUserMaxValue()
+{
+    return maxValue_.has_value();
+}
+
+int32_t AccessibilityProperty::GetUserMaxValue()
+{
+    return maxValue_.value_or(-1);
+}
+
+void AccessibilityProperty::SetUserCurrentValue(const int32_t& currentValue)
+{
+    currentValue_ = currentValue;
+}
+
+bool AccessibilityProperty::HasUserCurrentValue()
+{
+    return currentValue_.has_value();
+}
+
+int32_t AccessibilityProperty::GetUserCurrentValue()
+{
+    return currentValue_.value_or(-1);
+}
+
+void AccessibilityProperty::SetUserTextValue(const std::string& textValue)
+{
+    textValue_ = textValue;
+}
+
+bool AccessibilityProperty::HasUserTextValue()
+{
+    return textValue_.has_value();
+}
+
+std::string AccessibilityProperty::GetUserTextValue()
+{
+    return textValue_.value_or("");
+}
 } // namespace OHOS::Ace::NG

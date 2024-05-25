@@ -32,7 +32,7 @@ public:
         return 1;
     }
 
-    int32_t RequestPublishFormEvent(const AAFwk::Want& want, int64_t& formId)
+    int32_t RequestPublishFormEvent(const AAFwk::Want& want, const std::string& formBindingDataStr, int64_t& formId)
     {
         return 1;
     }

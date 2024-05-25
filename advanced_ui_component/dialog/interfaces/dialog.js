@@ -69,6 +69,7 @@ export class TipsDialog extends ViewPU {
         this.title = null;
         this.content = null;
         this.checkAction = undefined;
+        this.onCheckedChange = undefined;
         this.checkTips = null;
         this.__isChecked = new ObservedPropertySimplePU(false, this, 'isChecked');
         this.primaryButton = null;
@@ -110,6 +111,9 @@ export class TipsDialog extends ViewPU {
         }
         if (o20.checkAction !== undefined) {
             this.checkAction = o20.checkAction;
+        }
+        if (o20.onCheckedChange !== undefined) {
+            this.onCheckedChange = o20.onCheckedChange;
         }
         if (o20.checkTips !== undefined) {
             this.checkTips = o20.checkTips;
@@ -239,7 +243,7 @@ export class TipsDialog extends ViewPU {
                         buttons: this.buttons,
                         theme: this.theme,
                     }, undefined, z19, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 85, col: 5 });
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 86, col: 5 });
                     ViewPU.create(b20);
                     let c20 = () => {
                         return {
@@ -332,6 +336,9 @@ export class TipsDialog extends ViewPU {
                 this.isChecked = b19;
                 if (this.checkAction) {
                     this.checkAction(b19);
+                }
+                if (this.onCheckedChange) {
+                    this.onCheckedChange(b19);
                 }
             });
             Checkbox.margin({
@@ -634,7 +641,7 @@ export class SelectDialog extends ViewPU {
                     },
                     buttons: this.buttons,
                 }, undefined, -1, () => {
-                }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 289, col: 14 });
+                }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 293, col: 14 });
                 p16.setController(this.controller);
                 ViewPU.create(p16);
                 let q16 = () => {
@@ -984,7 +991,7 @@ export class SelectDialog extends ViewPU {
                         contentAreaPadding: this.contentPadding,
                         theme: this.theme,
                     }, undefined, i13, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 384, col: 5 });
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 388, col: 5 });
                     ViewPU.create(k13);
                     let l13 = () => {
                         return {
@@ -1126,7 +1133,7 @@ export class ConfirmDialog extends ViewPU {
             'moduleName': '__harDefaultModuleName__'
         }, this, 'buttonFontColorWithTheme');
         this.theme = new CustomThemeImpl({});
-        this.checkAction = undefined;
+        this.onCheckedChange = undefined;
         this.contentScroller = new Scroller();
         this.buttons = undefined;
         this.marginOffset = 0;
@@ -1181,8 +1188,8 @@ export class ConfirmDialog extends ViewPU {
         if (w12.theme !== undefined) {
             this.theme = w12.theme;
         }
-        if (w12.checkAction !== undefined) {
-            this.checkAction = w12.checkAction;
+        if (w12.onCheckedChange !== undefined) {
+            this.onCheckedChange = w12.onCheckedChange;
         }
         if (w12.contentScroller !== undefined) {
             this.contentScroller = w12.contentScroller;
@@ -1376,8 +1383,8 @@ export class ConfirmDialog extends ViewPU {
             Checkbox.select(this.isChecked);
             Checkbox.onChange((n11) => {
                 this.isChecked = n11;
-                if (this.checkAction) {
-                    this.checkAction(this.isChecked);
+                if (this.onCheckedChange) {
+                    this.onCheckedChange(this.isChecked);
                 }
             });
             Checkbox.hitTestBehavior(HitTestMode.Block);
@@ -1424,7 +1431,7 @@ export class ConfirmDialog extends ViewPU {
                         buttons: this.buttons,
                         theme: this.theme,
                     }, undefined, u10, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 534, col: 5 });
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 538, col: 5 });
                     ViewPU.create(w10);
                     let x10 = () => {
                         return {
@@ -1602,7 +1609,7 @@ export class AlertDialog extends ViewPU {
                         buttons: this.buttons,
                         theme: this.theme,
                     }, undefined, b10, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 590, col: 5 });
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 594, col: 5 });
                     ViewPU.create(d10);
                     let e10 = () => {
                         return {
@@ -1817,7 +1824,7 @@ export class CustomContentDialog extends ViewPU {
                         buttons: this.buttons,
                         theme: this.theme,
                     }, undefined, r8, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 694, col: 5 });
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 698, col: 5 });
                     ViewPU.create(t8);
                     let u8 = () => {
                         return {
@@ -2827,7 +2834,7 @@ export class CustomDialogComponent extends ViewPU {
                         contentAreaPadding: this.contentAreaPadding,
                         theme: this.theme,
                     }, undefined, g2, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 1137, col: 9 });
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 1141, col: 9 });
                     ViewPU.create(i2);
                     let j2 = () => {
                         return {
@@ -3082,7 +3089,7 @@ export class LoadingDialog extends ViewPU {
                         },
                         theme: this.theme,
                     }, undefined, p, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 1297, col: 7 });
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 1301, col: 7 });
                     ViewPU.create(r);
                     let s = () => {
                         return {
@@ -3163,4 +3170,104 @@ export class LoadingDialog extends ViewPU {
     }
 }
 
-export default { TipsDialog, ConfirmDialog, SelectDialog, AlertDialog, LoadingDialog, CustomContentDialog };
+export class PopupDialog extends ViewPU {
+  constructor(k, l, m, n = -1, o = undefined, p) {
+    super(k, m, n, p);
+    if (typeof o === "function") {
+      this.paramsGenerator_ = o;
+    }
+    this.__show = new SynchedPropertySimpleTwoWayPU(l.show, this, "show");
+    this.__popup = new SynchedPropertyObjectOneWayPU(l.popup, this, "popup");
+    this.targetBuilder = undefined;
+    this.setInitiallyProvidedValue(l);
+    this.finalizeConstruction();
+  }
+
+  setInitiallyProvidedValue(j) {
+    if (j.targetBuilder !== undefined) {
+      this.targetBuilder = j.targetBuilder;
+    }
+  }
+
+  updateStateVars(i) {
+    this.__popup.reset(i.popup);
+  }
+
+  purgeVariableDependenciesOnElmtId(h) {
+    this.__show.purgeDependencyOnElmtId(h);
+    this.__popup.purgeDependencyOnElmtId(h);
+  }
+
+  aboutToBeDeleted() {
+    this.__show.aboutToBeDeleted();
+    this.__popup.aboutToBeDeleted();
+    SubscriberManager.Get().delete(this.id__());
+    this.aboutToBeDeletedInternal();
+  }
+
+  get show() {
+    return this.__show.get();
+  }
+
+  set show(g) {
+    this.__show.set(g);
+  }
+
+  get popup() {
+    return this.__popup.get();
+  }
+
+  set popup(f) {
+    this.__popup.set(f);
+  }
+
+  initialRender() {
+    this.observeComponentCreation2((b, c) => {
+      Column.create();
+      Column.onClick(() => {
+        this.show = !this.show;
+      });
+      Column.bindPopup(this.show, {
+        builder: this.popup?.builder,
+        placement: this.popup?.placement ?? Placement.Bottom,
+        popupColor: this.popup?.popupColor,
+        enableArrow: this.popup?.enableArrow ?? true,
+        autoCancel: this.popup?.autoCancel,
+        onStateChange: this.popup?.onStateChange ?? ((e) => {
+          if (!e.isVisible) {
+            this.show = false;
+          }
+        }),
+        arrowOffset: this.popup?.arrowOffset,
+        showInSubWindow: this.popup?.showInSubWindow,
+        mask: this.popup?.mask,
+        targetSpace: this.popup?.targetSpace,
+        offset: this.popup?.offset,
+        width: this.popup?.width,
+        arrowPointPosition: this.popup?.arrowPointPosition,
+        arrowWidth: this.popup?.arrowWidth,
+        arrowHeight: this.popup?.arrowHeight,
+        radius: this.popup?.radius ?? {
+          "id": -1,
+          "type": 10002,
+          params: ['sys.float.corner_radius_level16'],
+          "bundleName": "__harDefaultBundleName__",
+          "moduleName": "__harDefaultModuleName__"
+        },
+        shadow: this.popup?.shadow ?? ShadowStyle.OUTER_DEFAULT_MD,
+        backgroundBlurStyle: this.popup?.backgroundBlurStyle ?? BlurStyle.COMPONENT_ULTRA_THICK,
+        focusable: this.popup?.focusable,
+        transition: this.popup?.transition,
+        onWillDismiss: this.popup?.onWillDismiss
+      });
+    }, Column);
+    this.targetBuilder.bind(this)(this);
+    Column.pop();
+  }
+
+  rerender() {
+    this.updateDirtyElements();
+  }
+}
+
+export default { TipsDialog, ConfirmDialog, SelectDialog, AlertDialog, LoadingDialog, CustomContentDialog, PopupDialog };

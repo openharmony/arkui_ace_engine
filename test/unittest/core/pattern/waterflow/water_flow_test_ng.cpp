@@ -23,7 +23,7 @@
 #include "test/mock/core/rosen/mock_canvas.h"
 
 #include "core/components/scroll/scroll_controller_base.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_info.h"
+#include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
 #include "core/components_ng/property/property.h"
 
 #define protected public
@@ -31,7 +31,6 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/waterflow/water_flow_test_ng.h"
-#include "water_flow_item_maps.h"
 
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
@@ -732,34 +731,6 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest011, TestSize.Level1)
 }
 
 /**
- * @tc.name: WaterFlowTest012
- * @tc.desc: Test GetOverScrollOffset
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowTestNg, WaterFlowTest012, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create waterFlow that is less than one screen
-     * @tc.expected: itemStart_ = true  itemEnd_ = true.
-     */
-    Create([](WaterFlowModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateItem(TOTAL_LINE_NUMBER);
-    });
-    EXPECT_TRUE(pattern_->layoutInfo_->itemStart_);
-    EXPECT_TRUE(pattern_->layoutInfo_->itemEnd_);
-    EXPECT_TRUE(pattern_->layoutInfo_->offsetEnd_);
-    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
-    if (info) {
-        EXPECT_EQ(info->maxHeight_, 500);
-    }
-    EXPECT_EQ(pattern_->layoutInfo_->lastMainSize_, 800);
-
-    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(ITEM_HEIGHT), { 100, 100 }));
-    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(3 * ITEM_HEIGHT), { 300, 300 }));
-}
-
-/**
  * @tc.name: WaterFlowTest013
  * @tc.desc: Test direction
  * @tc.type: FUNC
@@ -782,6 +753,471 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest013, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(0, 0, WATERFLOW_WIDTH / 2, ITEM_HEIGHT)));
     EXPECT_TRUE(IsEqual(pattern_->GetItemRect(1), Rect(WATERFLOW_WIDTH / 2, 0, WATERFLOW_WIDTH / 2, BIG_ITEM_HEIGHT)));
+}
+
+namespace {
+constexpr float SCROLL_FIXED_VELOCITY_005 = 400.f;
+constexpr float OFFSET_TIME_005 = 100.f;
+constexpr int32_t TIME_CHANGED_COUNTS_005 = 20;
+} // namespace
+/**
+ * @tc.name: PositionController005
+ * @tc.desc: Test PositionController ScrollBy
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, PositionController005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List Item
+     */
+    Create([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        CreateItem(TOTAL_LINE_NUMBER * 2);
+    });
+    auto controller = pattern_->positionController_;
+    
+    /**
+     * @tc.steps: step2. Scroll to the left edge
+     * expected: Return fixed verify
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_LEFT, SCROLL_FIXED_VELOCITY_005);
+    EXPECT_FALSE(pattern_->fixedVelocityMotion_);
+
+    /**
+     * @tc.steps: step3. Scroll to the right edge
+     * expected: Return fixed verify
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_RIGHT, SCROLL_FIXED_VELOCITY_005);
+    EXPECT_FALSE(pattern_->fixedVelocityMotion_);
+
+    /**
+     * @tc.steps: step4. Scroll to the bottom edge
+     * expected: 1.Return fixed verify
+     * expected: 2.The current Velocity is equal to the set fixed velocity
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, SCROLL_FIXED_VELOCITY_005);
+    EXPECT_TRUE(pattern_->fixedVelocityMotion_);
+    EXPECT_EQ(pattern_->fixedVelocityMotion_->GetCurrentVelocity(), -SCROLL_FIXED_VELOCITY_005);
+
+    /**
+     * @tc.steps: step5. 1. Set offset time
+     *                   2. Set changed count
+     *                   3. Flush layout
+     * expected: Scroll to the bottom edge
+     */
+    int32_t offsetTime = OFFSET_TIME_005;
+    for (int i = 0; i < TIME_CHANGED_COUNTS_005; i++) {
+        pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
+        offsetTime = offsetTime + OFFSET_TIME_005;
+        FlushLayoutTask(frameNode_);
+    }
+    EXPECT_TRUE(pattern_->IsAtBottom());
+
+    /**
+     * @tc.steps: step6. Scroll to the top edge
+     * expected: 1.Fixed Verify is is non-zero.
+     *           2.The current Velocity is equal to the set fixed velocity
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, SCROLL_FIXED_VELOCITY_005);
+    EXPECT_TRUE(pattern_->fixedVelocityMotion_);
+    EXPECT_EQ(pattern_->fixedVelocityMotion_->GetCurrentVelocity(), SCROLL_FIXED_VELOCITY_005);
+
+    /**
+     * @tc.steps: step7. 1. Set offset time
+     *                   2. Set changed count
+     *                   3. Flush layout
+     * expected: Scroll to the top edge
+     */
+    offsetTime = OFFSET_TIME_005;
+    for (int i = 0; i < TIME_CHANGED_COUNTS_005; i++) {
+        pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
+        offsetTime = offsetTime + OFFSET_TIME_005;
+        FlushLayoutTask(frameNode_);
+    }
+    EXPECT_TRUE(pattern_->IsAtTop());
+
+	/**
+     * @tc.steps: step8. Test ScrollBy
+     */
+    controller->ScrollBy(0, ITEM_HEIGHT, true);
+    EXPECT_TRUE(IsEqualTotalOffset(ITEM_HEIGHT));
+    EXPECT_EQ(controller->GetCurrentOffset().GetY(), ITEM_HEIGHT);
+}
+
+namespace {
+constexpr float SCROLL_FIXED_VELOCITY_006 = 300.f;
+constexpr float OFFSET_TIME_006 = 200.f;
+constexpr int32_t TIME_CHANGED_COUNTS_006 = 30;
+} // namespace
+/**
+ * @tc.name: PositionController006
+ * @tc.desc: Test PositionController AnimateTo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, PositionController006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List Item
+     */
+    Create([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        CreateItem(TOTAL_LINE_NUMBER * 2);
+    });
+    auto controller = pattern_->positionController_;
+    
+    /**
+     * @tc.steps: step2. Scroll to the left edge
+     * expected: Return fixed verify
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_LEFT, SCROLL_FIXED_VELOCITY_006);
+    EXPECT_FALSE(pattern_->fixedVelocityMotion_);
+
+    /**
+     * @tc.steps: step3. Scroll to the right edge
+     * expected: Return fixed verify
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_RIGHT, SCROLL_FIXED_VELOCITY_006);
+    EXPECT_FALSE(pattern_->fixedVelocityMotion_);
+
+    /**
+     * @tc.steps: step4. Scroll to the bottom edge
+     * expected: 1.Return fixed verify
+     * expected: 2.The current Velocity is equal to the set fixed velocity
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, SCROLL_FIXED_VELOCITY_006);
+    EXPECT_TRUE(pattern_->fixedVelocityMotion_);
+    EXPECT_EQ(pattern_->fixedVelocityMotion_->GetCurrentVelocity(), -SCROLL_FIXED_VELOCITY_006);
+
+    /**
+     * @tc.steps: step5. 1. Set offset time
+     *                   2. Set changed count
+     *                   3. Flush layout
+     * expected: Scroll to the bottom edge
+     */
+    int32_t offsetTime = OFFSET_TIME_006;
+    for (int i = 0; i < TIME_CHANGED_COUNTS_006; i++) {
+        pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
+        offsetTime = offsetTime + OFFSET_TIME_006;
+        FlushLayoutTask(frameNode_);
+    }
+    EXPECT_TRUE(pattern_->IsAtBottom());
+
+    /**
+     * @tc.steps: step6. Scroll to the top edge
+     * expected: 1.Fixed Verify is is non-zero.
+     *           2.The current Velocity is equal to the set fixed velocity
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, SCROLL_FIXED_VELOCITY_006);
+    EXPECT_TRUE(pattern_->fixedVelocityMotion_);
+    EXPECT_EQ(pattern_->fixedVelocityMotion_->GetCurrentVelocity(), SCROLL_FIXED_VELOCITY_006);
+
+    /**
+     * @tc.steps: step7. 1. Set offset time
+     *                   2. Set changed count
+     *                   3. Flush layout
+     * expected: Scroll to the top edge
+     */
+    offsetTime = OFFSET_TIME_006;
+    for (int i = 0; i < TIME_CHANGED_COUNTS_006; i++) {
+        pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
+        offsetTime = offsetTime + OFFSET_TIME_006;
+        FlushLayoutTask(frameNode_);
+    }
+    EXPECT_TRUE(pattern_->IsAtTop());
+
+    /**
+     * @tc.steps: step8. Test AnimateTo function
+     * @tc.expected: pattern_->isAnimationStop_ is false
+     */
+    pattern_->AnimateTo(1.5, 1.f, Curves::LINEAR, false, false);
+    EXPECT_FALSE(pattern_->isAnimationStop_);
+}
+
+namespace {
+constexpr float SCROLL_FIXED_VELOCITY_007 = 400.f;
+constexpr float OFFSET_TIME_007 = 300.f;
+constexpr int32_t TIME_CHANGED_COUNTS_007 = 40;
+} // namespace
+/**
+ * @tc.name: PositionController007
+ * @tc.desc: Test PositionController ScrollPage
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, PositionController007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List Item
+     */
+    Create([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        CreateItem(TOTAL_LINE_NUMBER * 2);
+    });
+    auto controller = pattern_->positionController_;
+    
+    /**
+     * @tc.steps: step2. Scroll to the left edge
+     * expected: Return fixed verify
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_LEFT, SCROLL_FIXED_VELOCITY_007);
+    EXPECT_FALSE(pattern_->fixedVelocityMotion_);
+
+    /**
+     * @tc.steps: step3. Scroll to the right edge
+     * expected: Return fixed verify
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_RIGHT, SCROLL_FIXED_VELOCITY_007);
+    EXPECT_FALSE(pattern_->fixedVelocityMotion_);
+
+    /**
+     * @tc.steps: step4. Scroll to the bottom edge
+     * expected: 1.Return fixed verify
+     * expected: 2.The current Velocity is equal to the set fixed velocity
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, SCROLL_FIXED_VELOCITY_007);
+    EXPECT_TRUE(pattern_->fixedVelocityMotion_);
+    EXPECT_EQ(pattern_->fixedVelocityMotion_->GetCurrentVelocity(), -SCROLL_FIXED_VELOCITY_007);
+
+    /**
+     * @tc.steps: step5. 1. Set offset time
+     *                   2. Set changed count
+     *                   3. Flush layout
+     * expected: Scroll to the bottom edge
+     */
+    int32_t offsetTime = OFFSET_TIME_007;
+    for (int i = 0; i < TIME_CHANGED_COUNTS_007; i++) {
+        pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
+        offsetTime = offsetTime + OFFSET_TIME_007;
+        FlushLayoutTask(frameNode_);
+    }
+    EXPECT_TRUE(pattern_->IsAtBottom());
+
+    /**
+     * @tc.steps: step6. Scroll to the top edge
+     * expected: 1.Fixed Verify is is non-zero.
+     *           2.The current Velocity is equal to the set fixed velocity
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, SCROLL_FIXED_VELOCITY_007);
+    EXPECT_TRUE(pattern_->fixedVelocityMotion_);
+    EXPECT_EQ(pattern_->fixedVelocityMotion_->GetCurrentVelocity(), SCROLL_FIXED_VELOCITY_007);
+
+    /**
+     * @tc.steps: step7. 1. Set offset time
+     *                   2. Set changed count
+     *                   3. Flush layout
+     * expected: Scroll to the top edge
+     */
+    offsetTime = OFFSET_TIME_007;
+    for (int i = 0; i < TIME_CHANGED_COUNTS_007; i++) {
+        pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
+        offsetTime = offsetTime + OFFSET_TIME_007;
+        FlushLayoutTask(frameNode_);
+    }
+    EXPECT_TRUE(pattern_->IsAtTop());
+
+    /**
+     * @tc.steps: step8. test function.
+     * @tc.expected: function ScrollPage is called.
+     */
+    pattern_->SetAxis(Axis::VERTICAL);
+    controller->ScrollPage(false, false);
+    EXPECT_TRUE(IsEqualTotalOffset(WATERFLOW_HEIGHT));
+    EXPECT_EQ(controller->GetCurrentOffset().GetY(), WATERFLOW_HEIGHT);
+    EXPECT_EQ(accessibilityProperty_->GetScrollOffSet(), pattern_->GetTotalOffset());
+    EXPECT_TRUE(controller->IsAtEnd());
+}
+
+namespace {
+constexpr float SCROLL_FIXED_VELOCITY_008 = 500.f;
+constexpr float OFFSET_TIME_008 = 100.f;
+constexpr int32_t TIME_CHANGED_COUNTS_008 = 50;
+} // namespace
+/**
+ * @tc.name: PositionController008
+ * @tc.desc: Test PositionController ActActionScrollForward
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, PositionController008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List Item
+     */
+    Create([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        CreateItem(TOTAL_LINE_NUMBER * 2);
+    });
+    auto controller = pattern_->positionController_;
+    
+    /**
+     * @tc.steps: step2. Scroll to the left edge
+     * expected: Return fixed verify
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_LEFT, SCROLL_FIXED_VELOCITY_008);
+    EXPECT_FALSE(pattern_->fixedVelocityMotion_);
+
+    /**
+     * @tc.steps: step3. Scroll to the right edge
+     * expected: Return fixed verify
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_RIGHT, SCROLL_FIXED_VELOCITY_008);
+    EXPECT_FALSE(pattern_->fixedVelocityMotion_);
+
+    /**
+     * @tc.steps: step4. Scroll to the bottom edge
+     * expected: 1.Return fixed verify
+     * expected: 2.The current Velocity is equal to the set fixed velocity
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, SCROLL_FIXED_VELOCITY_008);
+    EXPECT_TRUE(pattern_->fixedVelocityMotion_);
+    EXPECT_EQ(pattern_->fixedVelocityMotion_->GetCurrentVelocity(), -SCROLL_FIXED_VELOCITY_008);
+
+    /**
+     * @tc.steps: step5. 1. Set offset time
+     *                   2. Set changed count
+     *                   3. Flush layout
+     * expected: Scroll to the bottom edge
+     */
+    int32_t offsetTime = OFFSET_TIME_008;
+    for (int i = 0; i < TIME_CHANGED_COUNTS_008; i++) {
+        pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
+        offsetTime = offsetTime + OFFSET_TIME_008;
+        FlushLayoutTask(frameNode_);
+    }
+    EXPECT_TRUE(pattern_->IsAtBottom());
+
+    /**
+     * @tc.steps: step6. Scroll to the top edge
+     * expected: 1.Fixed Verify is is non-zero.
+     *           2.The current Velocity is equal to the set fixed velocity
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, SCROLL_FIXED_VELOCITY_008);
+    EXPECT_TRUE(pattern_->fixedVelocityMotion_);
+    EXPECT_EQ(pattern_->fixedVelocityMotion_->GetCurrentVelocity(), SCROLL_FIXED_VELOCITY_008);
+
+    /**
+     * @tc.steps: step7. 1. Set offset time
+     *                   2. Set changed count
+     *                   3. Flush layout
+     * expected: Scroll to the top edge
+     */
+    offsetTime = OFFSET_TIME_008;
+    for (int i = 0; i < TIME_CHANGED_COUNTS_008; i++) {
+        pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
+        offsetTime = offsetTime + OFFSET_TIME_008;
+        FlushLayoutTask(frameNode_);
+    }
+    EXPECT_TRUE(pattern_->IsAtTop());
+
+    /**
+     * @tc.steps: step8. Scroll forward and scroll backward
+     * @tc.expected: Will trigger ScrollPage func
+     */
+    accessibilityProperty_->ActActionScrollForward();
+    EXPECT_TRUE(IsEqualTotalOffset(WATERFLOW_HEIGHT));
+    accessibilityProperty_->ActActionScrollBackward();
+    EXPECT_TRUE(IsEqualTotalOffset(0));
+}
+
+namespace {
+constexpr float SCROLL_FIXED_VELOCITY_009 = 600.f;
+constexpr float OFFSET_TIME_009 = 200.f;
+constexpr int32_t TIME_CHANGED_COUNTS_009 = 60;
+} // namespace
+/**
+ * @tc.name: PositionController009
+ * @tc.desc: Test PositionController event
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, PositionController009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List Item
+     */
+    Create([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        CreateItem(TOTAL_LINE_NUMBER * 2);
+    });
+    auto controller = pattern_->positionController_;
+    
+    /**
+     * @tc.steps: step2. Scroll to the left edge
+     * expected: Return fixed verify
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_LEFT, SCROLL_FIXED_VELOCITY_009);
+    EXPECT_FALSE(pattern_->fixedVelocityMotion_);
+
+    /**
+     * @tc.steps: step3. Scroll to the right edge
+     * expected: Return fixed verify
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_RIGHT, SCROLL_FIXED_VELOCITY_009);
+    EXPECT_FALSE(pattern_->fixedVelocityMotion_);
+
+    /**
+     * @tc.steps: step4. Scroll to the bottom edge
+     * expected: 1.Return fixed verify
+     * expected: 2.The current Velocity is equal to the set fixed velocity
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, SCROLL_FIXED_VELOCITY_009);
+    EXPECT_TRUE(pattern_->fixedVelocityMotion_);
+    EXPECT_EQ(pattern_->fixedVelocityMotion_->GetCurrentVelocity(), -SCROLL_FIXED_VELOCITY_009);
+
+    /**
+     * @tc.steps: step5. 1. Set offset time
+     *                   2. Set changed count
+     *                   3. Flush layout
+     * expected: Scroll to the bottom edge
+     */
+    int32_t offsetTime = OFFSET_TIME_009;
+    for (int i = 0; i < TIME_CHANGED_COUNTS_009; i++) {
+        pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
+        offsetTime = offsetTime + OFFSET_TIME_009;
+        FlushLayoutTask(frameNode_);
+    }
+    EXPECT_TRUE(pattern_->IsAtBottom());
+
+    /**
+     * @tc.steps: step6. Scroll to the top edge
+     * expected: 1.Fixed Verify is is non-zero.
+     *           2.The current Velocity is equal to the set fixed velocity
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, SCROLL_FIXED_VELOCITY_009);
+    EXPECT_TRUE(pattern_->fixedVelocityMotion_);
+    EXPECT_EQ(pattern_->fixedVelocityMotion_->GetCurrentVelocity(), SCROLL_FIXED_VELOCITY_009);
+
+    /**
+     * @tc.steps: step7. 1. Set offset time
+     *                   2. Set changed count
+     *                   3. Flush layout
+     * expected: Scroll to the top edge
+     */
+    offsetTime = OFFSET_TIME_009;
+    for (int i = 0; i < TIME_CHANGED_COUNTS_009; i++) {
+        pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
+        offsetTime = offsetTime + OFFSET_TIME_009;
+        FlushLayoutTask(frameNode_);
+    }
+    EXPECT_TRUE(pattern_->IsAtTop());
+
+	/**
+     * @tc.steps: step8. test event
+     * @tc.expected: return the scroll event is ture.
+     */
+    bool isOnWillScrollCallBack = false;
+    Dimension willScrollOffset;
+    ScrollState willScrollState;
+    auto onWillScroll = [&willScrollOffset, &willScrollState, &isOnWillScrollCallBack](
+                            Dimension offset, ScrollState state, ScrollSource source) {
+        willScrollOffset = offset;
+        willScrollState = state;
+        isOnWillScrollCallBack = true;
+        ScrollFrameResult result;
+        result.offset = offset;
+        return result;
+    };
+	
+    eventHub_->SetOnWillScroll(std::move(onWillScroll));
+    pattern_->ScrollTo(ITEM_HEIGHT * 5);
+    EXPECT_TRUE(isOnWillScrollCallBack);
 }
 
 /**
@@ -1057,45 +1493,6 @@ HWTEST_F(WaterFlowTestNg, Callback002, TestSize.Level1)
 }
 
 /**
- * @tc.name: WaterFlowLayoutInfoTest001
- * @tc.desc: Test functions in WaterFlowLayoutInfo.
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest001, TestSize.Level1)
-{
-    Create([](WaterFlowModelNG model) {
-        model.SetRowsTemplate("1fr 1fr");
-        model.SetRowsGap(Dimension(5));
-        for (int32_t i = 0; i < TOTAL_LINE_NUMBER; i++) {
-            WaterFlowItemModelNG waterFlowItemModel;
-            waterFlowItemModel.Create();
-            ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
-            ViewAbstract::SetHeight(CalcLength(Dimension(ITEM_HEIGHT)));
-            ViewStackProcessor::GetInstance()->Pop();
-        }
-    });
-
-    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
-    /**
-     * @tc.steps: Test IsAllCrossReachEnd function
-     * @tc.expected: step1. Check whether the return value is correct.
-     */
-    auto reached = info->IsAllCrossReachEnd(ITEM_HEIGHT);
-    EXPECT_TRUE(reached);
-    reached = info->IsAllCrossReachEnd(WATERFLOW_HEIGHT);
-    EXPECT_TRUE(reached);
-
-    /**
-     * @tc.steps: Test GetEndIndexByOffset function
-     * @tc.expected: step2. Check whether the return value is correct.
-     */
-    auto offset = info->GetEndIndexByOffset(0);
-    EXPECT_EQ(0, offset);
-    offset = info->GetEndIndexByOffset(-100.f);
-    EXPECT_EQ(1, offset);
-}
-
-/**
  * @tc.name: WaterFlowSetFriction001
  * @tc.desc: Test SetFriction. friction shouled be more than 0.0,if out of range,should be default value.
  * @tc.type: FUNC
@@ -1247,115 +1644,6 @@ HWTEST_F(WaterFlowTestNg, WaterFlowPattern_OnDirtyLayoutWrapperSwap001, TestSize
 }
 
 /**
- * @tc.name: WaterFlowLayoutInfoTest002
- * @tc.desc: Test functions in WaterFlowLayoutInfo.
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest002, TestSize.Level1)
-{
-    CreateWithItem([](WaterFlowModelNG model) {});
-
-    /**
-     * @tc.steps: Test GetStartMainPos and GetMainHeight
-     * @tc.expected: step2. Check whether the return value is correct.
-     */
-    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
-    int32_t crossIndex = info->items_[0].rbegin()->first;
-    int32_t itemIndex = info->items_[0].rbegin()->second.rbegin()->first;
-    EXPECT_EQ(info->GetStartMainPos(crossIndex + 1, itemIndex), 0.0f);
-    EXPECT_EQ(info->GetMainHeight(crossIndex + 1, itemIndex), 0.0f);
-
-    EXPECT_EQ(info->GetStartMainPos(crossIndex, itemIndex + 1), 0.0f);
-    EXPECT_EQ(info->GetMainHeight(crossIndex, itemIndex + 1), 0.0f);
-}
-
-/**
- * @tc.name: WaterFlowLayoutInfoTest003
- * @tc.desc: Test functions in WaterFlowLayoutInfo.
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest003, TestSize.Level1)
-{
-    CreateWithItem([](WaterFlowModelNG model) {});
-
-    /**
-     * @tc.steps: Test GetMainCount function
-     * @tc.expected: step2. Check whether the size is correct.
-     */
-    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
-
-    std::size_t waterFlowItemsSize = info->items_[0].size();
-    int32_t mainCount = info->GetMainCount();
-
-    int32_t index = info->items_[0].rbegin()->first;
-    info->items_[0][index + 1] = std::map<int32_t, std::pair<float, float>>();
-    EXPECT_EQ(info->items_[0].size(), waterFlowItemsSize + 1);
-    EXPECT_EQ(info->GetMainCount(), mainCount);
-
-    auto lastItem = info->items_[0].begin()->second.rbegin();
-    float mainSize = lastItem->second.first + lastItem->second.second - 1.0f;
-    EXPECT_FALSE(info->IsAllCrossReachEnd(mainSize));
-
-    info->ClearCacheAfterIndex(index + 1);
-    EXPECT_EQ(info->items_[0].size(), waterFlowItemsSize + 1);
-}
-
-/**
- * @tc.name: WaterFlowLayoutInfoTest004
- * @tc.desc: Test Reset functions in WaterFlowLayoutInfo.
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest004, TestSize.Level1)
-{
-    CreateWithItem([](WaterFlowModelNG model) {});
-
-    /**
-     * @tc.steps: Test Reset function
-     * @tc.expected: step2. Check whether the endIndex_ is correct.
-     */
-    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
-
-    int32_t resetFrom = pattern_->layoutInfo_->endIndex_;
-    info->Reset(resetFrom + 1);
-    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, resetFrom);
-
-    info->Reset(resetFrom - 1);
-    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, resetFrom);
-}
-
-/**
- * @tc.name: WaterFlowLayoutInfoTest005
- * @tc.desc: Test functions in WaterFlowLayoutInfo.
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest005, TestSize.Level1)
-{
-    CreateWithItem([](WaterFlowModelNG model) {});
-
-    /**
-     * @tc.steps: Test GetMaxMainHeight function
-     * @tc.expected: step2. Check whether the return value is correct.
-     */
-    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
-
-    float maxMainHeight = info->GetMaxMainHeight();
-    int32_t crossIndex = info->items_[0].rbegin()->first;
-    info->items_[0][crossIndex + 1][0] = std::pair<float, float>(1.0f, maxMainHeight);
-    info->itemInfos_.clear();
-    info->endPosArray_.clear();
-    EXPECT_EQ(info->GetMaxMainHeight(), maxMainHeight + 1.0f);
-
-    /**
-     * @tc.steps: Test GetCrossIndexForNextItem function
-     * @tc.expected: step3. Check whether the return value is correct.
-     */
-    info->items_[0][crossIndex + 1][1] = std::pair<float, float>(0.0f, 0.0f);
-    FlowItemIndex position = info->GetCrossIndexForNextItem(0);
-    EXPECT_EQ(position.crossIndex, crossIndex + 1);
-    EXPECT_EQ(position.lastItemIndex, 1);
-}
-
-/**
  * @tc.name: WaterFlowGetItemRectTest001
  * @tc.desc: Test WaterFlow GetItemRect function.
  * @tc.type: FUNC
@@ -1410,51 +1698,5 @@ HWTEST_F(WaterFlowTestNg, MeasureForAnimation001, TestSize.Level1)
      */
     auto crossIndex = pattern_->layoutInfo_->GetCrossIndex(10);
     EXPECT_FALSE(IsEqual(crossIndex, -1));
-}
-
-/**
- * @tc.name: ResetSections001
- * @tc.desc: Layout WaterFlow and then reset to old layout
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowTestNg, ResetSections001, TestSize.Level1)
-{
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(60);
-        },
-        false);
-    auto secObj = pattern_->GetOrCreateWaterFlowSections();
-    secObj->ChangeData(0, 0, SECTION_5);
-    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
-    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
-
-    UpdateCurrentOffset(-205.0f);
-    EXPECT_EQ(info->Offset(), -205.0f);
-    EXPECT_EQ(info->startIndex_, 3);
-    EXPECT_EQ(info->endIndex_, 11);
-
-    // fallback to layout without sections
-    pattern_->ResetSections();
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(info->Offset(), -205.0f);
-    EXPECT_EQ(info->startIndex_, 1);
-    EXPECT_EQ(info->endIndex_, 5);
-    EXPECT_EQ(info->GetCrossCount(), 1);
-    if (SystemProperties::WaterFlowUseSegmentedLayout()) {
-        EXPECT_EQ(info->segmentTails_.size(), 1);
-        EXPECT_EQ(info->margins_.size(), 1);
-    } else {
-        EXPECT_TRUE(info->segmentTails_.empty());
-        EXPECT_TRUE(info->margins_.empty());
-    }
-
-    UpdateCurrentOffset(250.0f);
-    EXPECT_EQ(info->Offset(), 0.0f);
-    EXPECT_EQ(info->startIndex_, 0);
-    EXPECT_EQ(info->endIndex_, 3);
 }
 } // namespace OHOS::Ace::NG

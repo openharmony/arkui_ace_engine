@@ -119,7 +119,6 @@ public:
 
     bool IsRowReverse() const
     {
-        // TODO: not consider rightToLeft
         return direction_ == FlexDirection::ROW_REVERSE;
     }
 
@@ -149,17 +148,13 @@ public:
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
     bool IsOutOfBoundary(bool useCurrentDelta = true) override;
-    bool OutBoundaryCallback() override
-    {
-        return IsOutOfBoundary();
-    }
     OverScrollOffset GetOverScrollOffset(double delta) const override;
 
     void OnAnimateStop() override;
     bool UpdateCurrentOffset(float offset, int32_t source) override;
     void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth) override;
 
-    void CheckScrollToEdge(float oldScrollableDistance, float newScrollableDistance);
+    void CheckScrollToEdge();
 
     ScrollEdgeType GetScrollEdgeType() const override
     {
@@ -311,8 +306,8 @@ public:
 
     bool IsScrollSnap() override
     {
-        return (!snapOffsets_.empty() && GetScrollSnapAlign() != ScrollSnapAlign::NONE)
-            || enablePagingStatus_ == ScrollPagingStatus::VALID;
+        return !snapOffsets_.empty() &&
+               (GetScrollSnapAlign() != ScrollSnapAlign::NONE || enablePagingStatus_ == ScrollPagingStatus::VALID);
     }
 
     void TriggerModifyDone();
@@ -332,7 +327,30 @@ public:
         return !isInitialized_ && initialOffset_.has_value();
     }
 
+    void AddScrollMeasureInfo(const std::optional<LayoutConstraintF>& parentConstraint,
+        const std::optional<LayoutConstraintF>& childConstraint, const SizeF& selfSize, const SizeF& childSize);
+
+    void AddScrollLayoutInfo();
+
+    void GetScrollSnapAlignDumpInfo();
+
+    void GetScrollPagingStatusDumpInfo();
+
+    void DumpAdvanceInfo() override;
+
+    SizeF GetViewSize() const
+    {
+        return viewSize_;
+    }
+
+    SizeF GetViewPortExtent() const
+    {
+        return viewPortExtent_;
+    }
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+
+    bool OnScrollSnapCallback(double targetOffset, double velocity) override;
 
 protected:
     void DoJump(float position, int32_t source = SCROLL_FROM_JUMP);
@@ -346,8 +364,8 @@ private:
     bool ReachStart() const;
     bool ReachEnd() const;
     bool IsScrollOutOnEdge(float delta) const;
-    void HandleCrashTop() const;
-    void HandleCrashBottom() const;
+    void HandleCrashTop();
+    void HandleCrashBottom();
     bool IsEnablePagingValid()
     {
         return enablePagingStatus_ == ScrollPagingStatus::VALID && GetScrollSnapAlign() == ScrollSnapAlign::NONE;
@@ -364,7 +382,7 @@ private:
     void UpdateScrollBarOffset() override;
     void SetAccessibilityAction();
     bool SetScrollProperties(const RefPtr<LayoutWrapper>& dirty);
-    void ScrollSnapTrigger();
+    bool ScrollSnapTrigger();
     void CheckScrollable();
     OffsetF GetOffsetToScroll(const RefPtr<FrameNode>& childFrame) const;
 
@@ -401,6 +419,10 @@ private:
 
     //scrollToEdge
     ScrollEdgeType scrollEdgeType_ = ScrollEdgeType::SCROLL_NONE;
+
+    // dump info
+    std::list<ScrollLayoutInfo> scrollLayoutInfos_;
+    std::list<ScrollMeasureInfo> scrollMeasureInfos_;
 };
 
 } // namespace OHOS::Ace::NG

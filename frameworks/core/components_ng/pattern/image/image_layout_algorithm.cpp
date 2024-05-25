@@ -99,7 +99,7 @@ std::optional<SizeF> ImageLayoutAlgorithm::MeasureContent(
         //          the fitOriginSize is only useful in case 2.1.
         auto sizeSet = contentConstraint.selfIdealSize.ConvertToSizeT();
         size.SetSizeT(sizeSet);
-        uint8_t sizeSetStatus = Negative(sizeSet.Width()) << 1 | Negative(sizeSet.Height());
+        uint8_t sizeSetStatus = (Negative(sizeSet.Width()) << 1) | Negative(sizeSet.Height());
         switch (sizeSetStatus) {
             case 0b01: // width is positive and height is negative
                 size.SetHeight(sizeSet.Width() / aspectRatio);

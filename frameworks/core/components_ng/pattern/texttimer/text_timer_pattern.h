@@ -91,6 +91,8 @@ public:
         return contentModifierNode_ != nullptr;
     }
 
+    void DumpInfo() override;
+
 private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;

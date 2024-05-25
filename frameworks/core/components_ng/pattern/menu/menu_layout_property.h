@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/select/select_pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/utils.h"
+#include "core/components_v2/list/list_properties.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
@@ -70,6 +71,8 @@ public:
         value->propMenuWidth_ = CloneMenuWidth();
         value->propShowInSubWindow_ = CloneShowInSubWindow();
         value->propExpandingMode_ = CloneExpandingMode();
+        value->propItemDivider_ = CloneItemDivider();
+        value->propItemGroupDivider_ = CloneItemGroupDivider();
         return value;
     }
 
@@ -88,6 +91,8 @@ public:
         ResetMenuWidth();
         ResetShowInSubWindow();
         ResetExpandingMode();
+        ResetItemDivider();
+        ResetItemGroupDivider();
     }
 
     // if is a rect in target frameNode
@@ -98,6 +103,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TargetSize, NG::SizeF, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BorderRadius, NG::BorderRadiusProperty, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MenuWidth, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ItemDivider, V2::ItemDivider, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ItemGroupDivider, V2::ItemDivider, PROPERTY_UPDATE_MEASURE);
 
     // offset to cursor
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PositionOffset, NG::OffsetF, PROPERTY_UPDATE_LAYOUT);
@@ -125,7 +132,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ExpandingMode, SubMenuExpandingMode, PROPERTY_UPDATE_MEASURE)
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
-
+    void BindToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void DividerToJsonValue(std::unique_ptr<JsonValue>& json) const;
     ACE_DISALLOW_COPY_AND_MOVE(MenuLayoutProperty);
 };
 } // namespace OHOS::Ace::NG

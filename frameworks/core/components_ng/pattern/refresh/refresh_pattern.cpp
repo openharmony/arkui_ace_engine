@@ -776,6 +776,7 @@ void RefreshPattern::SpeedTriggerAnimation(float speed)
     } else if (NearZero(targetOffset)) {
         SwitchToFinish();
     }
+    FireOnOffsetChange(targetOffset);
     ResetAnimation();
     AnimationOption option;
     auto curve = AceType::MakeRefPtr<InterpolatingSpring>(dealSpeed, 1.0f, 228.0f, 30.0f);
@@ -826,6 +827,7 @@ void RefreshPattern::SpeedAnimationFinish()
 
 void RefreshPattern::QuickFirstChildAppear()
 {
+    FireOnOffsetChange(static_cast<float>(refreshOffset_.ConvertToPx()));
     isSourceFromAnimation_ = false;
     UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, GetFollowRatio());
     ResetAnimation();
@@ -838,6 +840,7 @@ void RefreshPattern::QuickFirstChildAppear()
 
 void RefreshPattern::QuickFirstChildDisappear()
 {
+    FireOnOffsetChange(0.0f);
     ResetAnimation();
     AnimationOption option;
     option.SetCurve(DEFAULT_CURVE);

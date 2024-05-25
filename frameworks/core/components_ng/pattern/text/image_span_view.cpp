@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
 void ImageSpanView::SetObjectFit(ImageFit value)
@@ -82,6 +83,16 @@ void ImageSpanView::SetPlaceHolderStyle(FrameNode* frameNode, TextBackgroundStyl
 void ImageSpanView::Create()
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, HasPlaceHolderStyle, false);
+    const auto& frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    const auto& layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    const auto& src = layoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
+    if (src.IsPixmap()) {
+        const auto& pattern = frameNode->GetPattern<ImagePattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetSyncLoad(true);
+    }
 }
 
 RefPtr<FrameNode> ImageSpanView::CreateFrameNode(int32_t nodeId)
@@ -128,4 +139,20 @@ TextBackgroundStyle ImageSpanView::GetSpanTextBackgroundStyle(FrameNode* frameNo
     return layoutProperty->GetPlaceHolderStyle().value_or(backgroundStyle);
 }
 
+void ImageSpanView::SetOnComplete(
+    FrameNode* frameNode, std::function<void(const LoadImageSuccessEvent& info)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnComplete(std::move(callback));
+}
+
+void ImageSpanView::SetOnError(FrameNode* frameNode, std::function<void(const LoadImageFailEvent& info)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnError(std::move(callback));
+}
 } // namespace OHOS::Ace::NG

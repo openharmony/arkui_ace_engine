@@ -17,6 +17,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
+#include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
@@ -38,6 +39,8 @@ constexpr float UNIT_CONVERT = 1000.0f;   // 1s convert to 1000ms
 constexpr Dimension SELECT_SCROLL_MIN_WIDTH = 64.0_vp;
 constexpr int32_t COLUMN_NUM = 2;
 constexpr float SCROLL_PAGING_SPEED_THRESHOLD = 1200.0f;
+constexpr int32_t SCROLL_LAYOUT_INFO_COUNT = 30;
+constexpr int32_t SCROLL_MEASURE_INFO_COUNT = 30;
 
 float CalculateOffsetByFriction(float extentOffset, float delta, float friction)
 {
@@ -102,12 +105,14 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (onReachStart) {
         if (ReachStart()) {
             onReachStart();
+            AddEventsFiredInfo(ScrollableEventType::ON_REACH_START);
         }
     }
     auto onReachEnd = eventHub->GetOnReachEnd();
     if (onReachEnd) {
         if (ReachEnd()) {
             onReachEnd();
+            AddEventsFiredInfo(ScrollableEventType::ON_REACH_END);
         }
     }
     OnScrollStop(eventHub->GetOnScrollStop());
@@ -133,7 +138,11 @@ bool ScrollPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty)
     currentOffset_ = layoutAlgorithm->GetCurrentOffset();
     auto oldScrollableDistance = scrollableDistance_;
     scrollableDistance_ = layoutAlgorithm->GetScrollableDistance();
-    CheckScrollToEdge(oldScrollableDistance, scrollableDistance_);
+    if (!NearEqual(oldScrollableDistance, scrollableDistance_)) {
+        CheckScrollToEdge();
+        AddScrollLayoutInfo();
+    }
+    
     if (LessNotEqual(scrollableDistance_, oldScrollableDistance)) {
         CheckRestartSpring(true);
     }
@@ -156,23 +165,25 @@ bool ScrollPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty)
     return true;
 }
 
-void ScrollPattern::ScrollSnapTrigger()
+bool ScrollPattern::ScrollSnapTrigger()
 {
     auto scrollBar = GetScrollBar();
     auto scrollBarProxy = GetScrollBarProxy();
     if (scrollBar && scrollBar->IsPressed()) {
-        return;
+        return false;
     }
     if (scrollBarProxy && scrollBarProxy->IsScrollSnapTrigger()) {
-        return;
+        return false;
     }
     if (ScrollableIdle() && !AnimateRunning()) {
         auto predictSnapOffset = CalePredictSnapOffset(0.0);
         if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
             StartScrollSnapMotion(predictSnapOffset.value(), 0.0f);
             FireOnScrollStart();
+            return true;
         }
     }
+    return false;
 }
 
 void ScrollPattern::CheckScrollable()
@@ -455,7 +466,7 @@ bool ScrollPattern::ReachEnd() const
     return (scrollUpToReachEnd || scrollDownToReachEnd);
 }
 
-void ScrollPattern::HandleCrashTop() const
+void ScrollPattern::HandleCrashTop()
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -466,12 +477,14 @@ void ScrollPattern::HandleCrashTop() const
     // not consider async call
     if (GetAxis() == Axis::HORIZONTAL) {
         onScrollEdge(ScrollEdge::LEFT);
+        AddEventsFiredInfo(ScrollableEventType::ON_SCROLL_EDGE);
         return;
     }
     onScrollEdge(ScrollEdge::TOP);
+    AddEventsFiredInfo(ScrollableEventType::ON_SCROLL_EDGE);
 }
 
-void ScrollPattern::HandleCrashBottom() const
+void ScrollPattern::HandleCrashBottom()
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -481,9 +494,11 @@ void ScrollPattern::HandleCrashBottom() const
     CHECK_NULL_VOID(onScrollEdge);
     if (GetAxis() == Axis::HORIZONTAL) {
         onScrollEdge(ScrollEdge::RIGHT);
+        AddEventsFiredInfo(ScrollableEventType::ON_SCROLL_EDGE);
         return;
     }
     onScrollEdge(ScrollEdge::BOTTOM);
+    AddEventsFiredInfo(ScrollableEventType::ON_SCROLL_EDGE);
 }
 
 bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
@@ -533,13 +548,17 @@ void ScrollPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
     }
     float distance = scrollEdgeType == ScrollEdgeType::SCROLL_TOP ? -currentOffset_ :
         (-scrollableDistance_ - currentOffset_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    ACE_SCOPED_TRACE("Scroll ScrollToEdge scrollEdgeType:%zu, offset:%f, id:%d", scrollEdgeType, distance,
+        static_cast<int32_t>(host->GetAccessibilityId()));
     ScrollBy(distance, distance, smooth);
     scrollEdgeType_ = scrollEdgeType;
 }
 
-void ScrollPattern::CheckScrollToEdge(float oldScrollableDistance, float newScrollableDistance)
+void ScrollPattern::CheckScrollToEdge()
 {
-    if (!NearEqual(oldScrollableDistance, newScrollableDistance) && scrollEdgeType_ != ScrollEdgeType::SCROLL_NONE) {
+    if (scrollEdgeType_ != ScrollEdgeType::SCROLL_NONE) {
         ScrollToEdge(scrollEdgeType_, true);
     }
 }
@@ -560,7 +579,11 @@ void ScrollPattern::ScrollBy(float pixelX, float pixelY, bool smooth, const std:
 
 void ScrollPattern::ScrollPage(bool reverse, bool smooth)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     float distance = reverse ? viewPortLength_ : -viewPortLength_;
+    ACE_SCOPED_TRACE(
+        "Scroll ScrollPage distance:%f, id:%d", distance, static_cast<int32_t>(host->GetAccessibilityId()));
     ScrollBy(distance, distance, smooth);
 }
 
@@ -1038,6 +1061,124 @@ void ScrollPattern::TriggerModifyDone()
     OnModifyDone();
 }
 
+void ScrollPattern::AddScrollMeasureInfo(const std::optional<LayoutConstraintF>& parentConstraint,
+    const std::optional<LayoutConstraintF>& childConstraint, const SizeF& selfSize, const SizeF& childSize)
+{
+    if (scrollMeasureInfos_.size() >= SCROLL_MEASURE_INFO_COUNT) {
+        scrollMeasureInfos_.pop_front();
+    }
+    scrollMeasureInfos_.push_back(ScrollMeasureInfo({
+        .changedTime_ = GetSysTimestamp(),
+        .parentConstraint_ = parentConstraint,
+        .childConstraint_ = childConstraint,
+        .selfSize_ = selfSize,
+        .childSize_ = childSize,
+    }));
+}
+
+void ScrollPattern::AddScrollLayoutInfo()
+{
+    if (scrollLayoutInfos_.size() >= SCROLL_LAYOUT_INFO_COUNT) {
+        scrollLayoutInfos_.pop_front();
+    }
+    scrollLayoutInfos_.push_back(ScrollLayoutInfo({
+        .changedTime_ = GetSysTimestamp(),
+        .scrollableDistance_ = scrollableDistance_,
+        .scrollSize_ = viewSize_,
+        .viewPort_ = viewPort_,
+        .childSize_ = viewPortExtent_,
+    }));
+}
+
+void ScrollPattern::GetScrollSnapAlignDumpInfo()
+{
+    switch (GetScrollSnapAlign()) {
+        case ScrollSnapAlign::NONE: {
+            DumpLog::GetInstance().AddDesc("snapAlign: ScrollSnapAlign::NONE");
+            break;
+        }
+        case ScrollSnapAlign::START: {
+            DumpLog::GetInstance().AddDesc("snapAlign: ScrollSnapAlign::START");
+            break;
+        }
+        case ScrollSnapAlign::CENTER: {
+            DumpLog::GetInstance().AddDesc("snapAlign: ScrollSnapAlign::CENTER");
+            break;
+        }
+        case ScrollSnapAlign::END: {
+            DumpLog::GetInstance().AddDesc("snapAlign: ScrollSnapAlign::END");
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+void ScrollPattern::GetScrollPagingStatusDumpInfo()
+{
+    switch (enablePagingStatus_) {
+        case ScrollPagingStatus::NONE: {
+            DumpLog::GetInstance().AddDesc("enablePaging: ScrollPagingStatus::NONE");
+            break;
+        }
+        case ScrollPagingStatus::INVALID: {
+            DumpLog::GetInstance().AddDesc("enablePaging: ScrollPagingStatus::INVALID");
+            break;
+        }
+        case ScrollPagingStatus::VALID: {
+            DumpLog::GetInstance().AddDesc("enablePaging: ScrollPagingStatus::VALID");
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+void ScrollPattern::DumpAdvanceInfo()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(hub);
+    ScrollablePattern::DumpAdvanceInfo();
+    DumpLog::GetInstance().AddDesc(std::string("currentOffset: ").append(std::to_string(currentOffset_)));
+    GetScrollSnapAlignDumpInfo();
+    auto snapPaginationStr = std::string("snapPagination: [");
+    auto iter = snapPaginations_.begin();
+    for (; iter != snapPaginations_.end(); ++iter) {
+        snapPaginationStr = snapPaginationStr.append((*iter).ToString()).append(" ");
+    }
+    DumpLog::GetInstance().AddDesc(snapPaginationStr.append("]"));
+    enableSnapToSide_.first ? DumpLog::GetInstance().AddDesc("enableSnapToStart: true")
+                            : DumpLog::GetInstance().AddDesc("enableSnapToStart: false");
+    enableSnapToSide_.second ? DumpLog::GetInstance().AddDesc("enableSnapToEnd: true")
+                             : DumpLog::GetInstance().AddDesc("enableSnapToEnd: false");
+    GetScrollPagingStatusDumpInfo();
+    auto snapOffsetsStr = std::string("snapOffsets: [");
+    for (const auto& iter : snapPaginations_) {
+        snapOffsetsStr = snapOffsetsStr.append(iter.ToString()).append(" ");
+    }
+    DumpLog::GetInstance().AddDesc(snapOffsetsStr.append("]"));
+    initialOffset_.has_value() ? DumpLog::GetInstance().AddDesc(std::string("initialOffset: ")
+        .append(initialOffset_->GetMainOffset(GetAxis()).ToString()))
+        : DumpLog::GetInstance().AddDesc("initialOffset: None");
+    auto onScrollEdge = hub->GetScrollEdgeEvent();
+    onScrollEdge ? DumpLog::GetInstance().AddDesc("hasOnScrollEdge: true")
+                 : DumpLog::GetInstance().AddDesc("hasOnScrollEdge: false");
+    DumpLog::GetInstance().AddDesc("==========================scrollLayoutInfos==========================");
+    for (const auto& info : scrollLayoutInfos_) {
+        DumpLog::GetInstance().AddDesc(info.ToString());
+    }
+    DumpLog::GetInstance().AddDesc("==========================scrollLayoutInfos==========================");
+    DumpLog::GetInstance().AddDesc("==========================scrollMeasureInfos==========================");
+    for (const auto& info : scrollMeasureInfos_) {
+        DumpLog::GetInstance().AddDesc(info.ToString());
+    }
+    DumpLog::GetInstance().AddDesc("==========================scrollMeasureInfos==========================");
+}
+
 void ScrollPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     ScrollablePattern::ToJsonValue(json, filter);
@@ -1045,5 +1186,10 @@ void ScrollPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     initialOffset->Put("xOffset", GetInitialOffset().GetX().ToString().c_str());
     initialOffset->Put("yOffset", GetInitialOffset().GetY().ToString().c_str());
     json->PutExtAttr("initialOffset", initialOffset, filter);
+}
+
+bool ScrollPattern::OnScrollSnapCallback(double targetOffset, double velocity)
+{
+    return ScrollSnapTrigger();
 }
 } // namespace OHOS::Ace::NG

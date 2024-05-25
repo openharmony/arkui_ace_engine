@@ -3919,7 +3919,7 @@ void JSViewAbstract::ParseBorderImageDimension(
         return;
     }
     JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-    if (object->HasProperty(START_PROPERTY) || object->HasProperty(END_PROPERTY)) {
+    if (CheckLengthMetrics(object)) {
         LocalizedCalcDimension localizedCalcDimension;
         ParseBorderImageLengthMetrics(object, localizedCalcDimension);
         auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
@@ -4106,7 +4106,7 @@ void JSViewAbstract::ParseBorderImageSlice(const JSRef<JSVal>& args, RefPtr<Bord
         return;
     }
     JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-    if (object->HasProperty(START_PROPERTY) || object->HasProperty(END_PROPERTY)) {
+    if (CheckLengthMetrics(object)) {
         LocalizedCalcDimension localizedCalcDimension;
         ParseBorderImageLengthMetrics(object, localizedCalcDimension);
         if (localizedCalcDimension.top.has_value()) {
@@ -9661,6 +9661,11 @@ std::function<void(NG::DrawingContext& context)> JSViewAbstract::GetDrawCallback
         sizeObj->SetProperty<float>("height", PipelineBase::Px2VpWithCurrentDensity(context.height));
         sizeObj->SetProperty<float>("width", PipelineBase::Px2VpWithCurrentDensity(context.width));
         contextObj->SetPropertyObject("size", sizeObj);
+
+        JSRef<JSObject> sizeInPxObj = objectTemplate->NewInstance();
+        sizeInPxObj->SetProperty<float>("height", context.height);
+        sizeInPxObj->SetProperty<float>("width", context.height);
+        contextObj->SetPropertyObject("sizeInPixel", sizeInPxObj);
 
         auto engine = EngineHelper::GetCurrentEngine();
         CHECK_NULL_VOID(engine);

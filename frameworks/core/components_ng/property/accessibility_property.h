@@ -481,6 +481,34 @@ public:
     */
     static bool IsAccessibilityFocusableDebug(const RefPtr<FrameNode>& node, std::unique_ptr<JsonValue>& info);
 
+    void SetUserDisabled(const bool& isDisabled);
+    bool HasUserDisabled();
+    bool IsUserDisabled();
+
+    void SetUserSelected(const bool& isSelected);
+    bool HasUserSelected();
+    bool IsUserSelected();
+
+    void SetUserCheckedType(const int32_t& checkedType);
+    bool HasUserCheckedType();
+    int32_t GetUserCheckedType();
+
+    void SetUserMinValue(const int32_t& minValue);
+    bool HasUserMinValue();
+    int32_t GetUserMinValue();
+
+    void SetUserMaxValue(const int32_t& maxValue);
+    bool HasUserMaxValue();
+    int32_t GetUserMaxValue();
+
+    void SetUserCurrentValue(const int32_t& currentValue);
+    bool HasUserCurrentValue();
+    int32_t GetUserCurrentValue();
+
+    void SetUserTextValue(const std::string& textValue);
+    bool HasUserTextValue();
+    std::string GetUserTextValue();
+
 private:
     // node should be not-null
     static bool HoverTestRecursive(
@@ -530,6 +558,15 @@ protected:
     std::optional<std::string> accessibilityLevel_;
     std::optional<std::string> textTypeHint_;
     ACE_DISALLOW_COPY_AND_MOVE(AccessibilityProperty);
+
+    std::optional<bool> isDisabled_;
+    std::optional<bool> isSelected_;
+    std::optional<int32_t> checkedType_;
+
+    std::optional<int32_t> minValue_;
+    std::optional<int32_t> maxValue_;
+    std::optional<int32_t> currentValue_;
+    std::optional<std::string> textValue_;
 };
 } // namespace OHOS::Ace::NG
 

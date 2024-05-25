@@ -15,4 +15,182 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_LAYOUT_INFO_SW_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_LAYOUT_INFO_SW_H
+
+#include <algorithm>
+#include <deque>
+#include <vector>
+
+#include "core/components_ng/pattern/waterflow/layout/water_flow_layout_algorithm_base.h"
+#include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
+
+namespace OHOS::Ace::NG {
+
+/**
+ * @brief Layout Data structure for Sliding Window version of WaterFlowLayout
+ */
+class WaterFlowLayoutInfoSW : public WaterFlowLayoutInfoBase {
+    DECLARE_ACE_TYPE(WaterFlowLayoutInfoSW, WaterFlowLayoutInfoBase);
+
+public:
+    WaterFlowLayoutMode Mode() const override
+    {
+        return WaterFlowLayoutMode::SLIDING_WINDOW;
+    }
+
+    float Offset() const override
+    {
+        return totalOffset_;
+    }
+    int32_t FirstIdx() const override
+    {
+        return startIndex_;
+    }
+
+    void UpdateOffset(float delta) override
+    {
+        delta_ = delta;
+        synced_ = false;
+    }
+
+    int32_t GetCrossIndex(int32_t itemIndex) const override;
+
+    OverScrollOffset GetOverScrolledDelta(float delta) const override;
+
+    float CalcOverScroll(float mainSize, float delta) const override;
+
+    bool ReachStart(float prevPos, bool firstLayout) const override;
+
+    bool ReachEnd(float prevPos) const override;
+
+    bool OutOfBounds() const override;
+
+    float GetContentHeight() const override;
+
+    float CalcTargetPosition(int32_t idx, int32_t crossIdx) const override;
+
+    float GetDelta(float prevPos) const override
+    {
+        return prevPos - totalOffset_;
+    }
+
+    int32_t GetMainCount() const override;
+    int32_t GetCrossCount() const override
+    {
+        return lanes_.size();
+    }
+
+    float CurrentPos() const override
+    {
+        return 0.0f;
+    }
+    float TopFinalPos() const override;
+    float BottomFinalPos(float viewHeight) const override;
+
+    void Reset() override;
+
+    /**
+     * @brief reset layout data before performing a jump.
+     *
+     * @param laneBasePos base value for lane's start&end position.
+     */
+    void ResetBeforeJump(float laneBasePos);
+
+    void BeginUpdate()
+    {
+        synced_ = false;
+    }
+    /**
+     * @brief synchronize data after update is completed.
+     *
+     * @param itemCnt number of FlowItems.
+     * @param mainSize main-axis length of the viewport.
+     * @param mainGap main-axis gap between items.
+     */
+    void Sync(int32_t itemCnt, float mainSize, float mainGap);
+
+    /**
+     * @brief Calculates distance from the item's top edge to the top of the viewport.
+     *
+     * @param item index
+     * @return positive result when item's top edge is below viewport.
+     */
+    float DistanceToTop(int32_t item, float mainGap) const;
+
+    /**
+     * @brief Calculates distance from the item's bottom edge to the bottom of the viewport.
+     *
+     * @param item index
+     * @param mainSize of the viewport
+     * @return positive result when item's bottom edge is above viewport.
+     */
+    float DistanceToBottom(int32_t item, float mainSize, float mainGap) const;
+
+    /**
+     * @brief Check if the layout is misaligned.
+     *
+     * If we jump and scroll back to top, the staring items might not be aligned with the top boundary.
+     * @return true if 1. any lane misaligned with top boundary.
+     *                 2. the first item is not in the first lane.
+     */
+    bool IsMisaligned() const;
+
+    int32_t StartIndex() const;
+    int32_t EndIndex() const;
+    inline bool ItemInView(int32_t idx) const
+    {
+        return !lanes_.empty() && idx >= StartIndex() && idx <= EndIndex();
+    }
+    /**
+     * @param idx of the item.
+     * @return true the item is approximately within 1 full-viewport distance.
+     */
+    bool ItemCloseToView(int32_t idx) const;
+
+    /**
+     * @return maximum end position of items in lanes_.
+     */
+    float EndPos() const;
+    /**
+     * @return minimum start position of items in lanes_.
+     */
+    float StartPos() const;
+
+    void ClearDataFrom(int32_t idx, float mainGap);
+
+    struct Lane;
+    std::vector<Lane> lanes_;
+    // mapping of all items previously or currently in lanes_.
+    std::unordered_map<int32_t, size_t> idxToLane_;
+
+    float delta_ = 0.0f;
+    float totalOffset_ = 0.0f; // record total offset when continuously scrolling. Reset when jumped
+    float mainGap_ = 0.0f;     // update this at the end of a layout
+
+    // maximum content height encountered so far, mainly for comparing content and viewport height
+    float maxHeight_ = 0.0f;
+    float footerHeight_ = 0.0f;
+
+private:
+    /* cache */
+    float startPos_ = 0.0f;
+    float endPos_ = 0.0f;
+
+    bool synced_ = false;
+
+    struct ItemInfo;
+};
+
+struct WaterFlowLayoutInfoSW::ItemInfo {
+    int32_t idx = -1;
+    float mainSize = 0.0f;
+};
+
+struct WaterFlowLayoutInfoSW::Lane {
+    std::string ToString() const;
+
+    float startPos = 0.0f;
+    float endPos = 0.0f;
+    std::deque<ItemInfo> items_;
+};
+} // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_LAYOUT_INFO_SW_H

@@ -20,6 +20,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_v2/inspector/utils.h"
@@ -327,7 +328,7 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
 {
     auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textPattern);
-    ACE_SCOPED_TRACE("Text::onDraw");
+    ACE_SCOPED_TRACE("Text paint offset=[%f,%f]", paintOffset_.GetX(), paintOffset_.GetY());
     bool ifPaintObscuration = std::any_of(obscuredReasons_.begin(), obscuredReasons_.end(),
         [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
     auto pManager = textPattern->GetParagraphManager();
@@ -882,6 +883,28 @@ void TextContentModifier::StopTextRace()
         UpdateImageNodeVisible(VisibleType::VISIBLE);
     }
     PauseTextRace();
+}
+
+void TextContentModifier::ResumeAnimation()
+{
+    if (textRacing_) {
+        return;
+    }
+    if (raceAnimation_) {
+        AnimationUtils::ResumeAnimation(raceAnimation_);
+    }
+    textRacing_ = true;
+}
+
+void TextContentModifier::PauseAnimation()
+{
+    if (!textRacing_) {
+        return;
+    }
+    if (raceAnimation_) {
+        AnimationUtils::PauseAnimation(raceAnimation_);
+    }
+    textRacing_ = false;
 }
 
 void TextContentModifier::ResumeTextRace(bool bounce)

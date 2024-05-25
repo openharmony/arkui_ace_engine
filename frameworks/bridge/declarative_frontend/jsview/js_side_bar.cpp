@@ -79,7 +79,6 @@ void ParseAndSetWidth(const JSCallbackInfo& info, WidthType widthType)
     auto isValid = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)
                        ? JSViewAbstract::ParseJsDimensionVpNG(info[0], value)
                        : JSViewAbstract::ParseJsDimensionVp(info[0], value);
-
     if (!isValid) {
         switch (widthType) {
             case WidthType::SIDEBAR_WIDTH:

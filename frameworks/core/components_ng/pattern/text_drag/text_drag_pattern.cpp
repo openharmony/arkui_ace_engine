@@ -93,7 +93,7 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& patter
     auto dragPattern = dragNode->GetPattern<TextDragPattern>();
     float textStartX = pattern->GetTextRect().GetX();
     float textStartY = pattern->IsTextArea() ? pattern->GetTextRect().GetY() : pattern->GetTextContentRect().GetY();
-    auto contentRect = pattern->GetTextContentRect();
+    auto contentRect = pattern->GetTextContentRect(true);
     float bothOffset = TEXT_DRAG_OFFSET.ConvertToPx() * CONSTANT_HALF;
     auto boxes = pattern->GetTextBoxes();
     CHECK_NULL_RETURN(!boxes.empty(), {});

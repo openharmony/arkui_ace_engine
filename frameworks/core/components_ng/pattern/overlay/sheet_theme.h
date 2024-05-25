@@ -24,6 +24,8 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension SHEET_BLANK_MINI_HEIGHT = 8.0_vp;
 constexpr Dimension SHEET_BLANK_FLOATING_STATUS_BAR = 32.0_vp;
+constexpr Dimension SHEET_SPLIT_AI_BAR = 24.0_vp;
+constexpr Dimension SHEET_SPLIT_STATUS_BAR = 24.0_vp;
 constexpr Dimension SHEET_OPERATION_AREA_PADDING = 8.0_vp;
 constexpr Dimension SHEET_OPERATION_AREA_HEIGHT = 56.0_vp;
 constexpr Dimension SHEET_OPERATION_AREA_HEIGHT_DOUBLE = 72.0_vp;
@@ -46,13 +48,12 @@ constexpr Dimension SHEET_ARROW_HEIGHT = 8.0_vp;
 constexpr Dimension SHEET_TARGET_SPACE = 8.0_vp;
 constexpr Dimension SHEET_DEVICE_WIDTH_BREAKPOINT = 600.0_vp;
 constexpr Dimension SHEET_PC_DEVICE_WIDTH_BREAKPOINT = 840.0_vp;
-constexpr Dimension SHEET_DOUBLE_TITLE_TOP_PADDING = 15.0_vp;
+constexpr Dimension SHEET_DOUBLE_TITLE_TOP_PADDING = 16.0_vp;
 constexpr Dimension SHEET_DOUBLE_TITLE_BOTTON_PADDING = 8.0_vp;
 constexpr Dimension SHEET_TITLE_AERA_MARGIN = -8.0_vp;
 constexpr float SHEET_NORMAL_SCALE = 1.0f;
 constexpr float SHEET_MAX_SCALE = 1.75f;
 constexpr int32_t SHEET_TITLE_MAX_LINES = 1;
-constexpr int32_t SHEET_AGING_MAX_LINES = 10;
 } // namespace
 class SheetTheme : public virtual Theme {
     DECLARE_ACE_TYPE(SheetTheme, Theme);

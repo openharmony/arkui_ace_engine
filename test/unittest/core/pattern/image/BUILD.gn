@@ -18,6 +18,7 @@ ace_unittest("image_test_ng") {
   sources = [
     "image_base.cpp",
     "image_test_ng.cpp",
+    "image_testthree_ng.cpp",
     "image_testtwo_ng.cpp",
   ]
 }

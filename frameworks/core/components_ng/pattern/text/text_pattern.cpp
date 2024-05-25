@@ -83,6 +83,25 @@ GradientColor CreateTextGradientColor(float percent, Color color)
     return gredient;
 }
 
+TextPattern::~TextPattern()
+{
+    // node destruct, need to stop text race animation
+    CHECK_NULL_VOID(contentMod_);
+    contentMod_->StopTextRace();
+}
+
+void TextPattern::OnWindowHide()
+{
+    CHECK_NULL_VOID(contentMod_);
+    contentMod_->PauseAnimation();
+}
+
+void TextPattern::OnWindowShow()
+{
+    CHECK_NULL_VOID(contentMod_);
+    contentMod_->ResumeAnimation();
+}
+
 void TextPattern::OnAttachToFrameNode()
 {
     auto pipeline = PipelineContext::GetCurrentContextSafely();
@@ -104,6 +123,7 @@ void TextPattern::OnAttachToFrameNode()
     }
     InitSurfaceChangedCallback();
     InitSurfacePositionChangedCallback();
+    pipeline->AddWindowStateChangedCallback(host->GetId());
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateTextAlign(TextAlign::START);
@@ -130,6 +150,7 @@ void TextPattern::OnDetachFromFrameNode(FrameNode* node)
         fontManager->RemoveVariationNodeNG(frameNode);
     }
     pipeline->RemoveOnAreaChangeNode(node->GetId());
+    pipeline->RemoveWindowStateChangedCallback(node->GetId());
 }
 
 void TextPattern::CloseSelectOverlay()
@@ -1284,19 +1305,18 @@ void TextPattern::HandleSelectionDown(int32_t start, int32_t end)
 {
     auto line = pManager_->GetLineCount();
     if (line == 1) {
-        HandleSelection(start, GetWideText().length());
+        HandleSelection(start, GetTextLength());
         return;
     }
     CaretMetricsF secondHandleMetrics;
-    CalcCaretMetricsByPosition(
-        static_cast<int32_t>(GetWideText().length()), secondHandleMetrics, TextAffinity::UPSTREAM);
+    CalcCaretMetricsByPosition(GetTextLength(), secondHandleMetrics, TextAffinity::UPSTREAM);
     auto lastIndexOffsetY = secondHandleMetrics.offset.GetY();
     CalcCaretMetricsByPosition(textSelector_.destinationOffset, secondHandleMetrics, TextAffinity::UPSTREAM);
     auto secondOffsetX = secondHandleMetrics.offset.GetX();
     auto secondOffsetY = secondHandleMetrics.offset.GetY();
     float height = GetTextHeight();
     if (secondOffsetY + height > lastIndexOffsetY) {
-        end = GetWideText().length();
+        end = GetTextLength();
     } else {
         Offset offset = { secondOffsetX, secondOffsetY + height + height * 0.5 };
         end = GetHandleIndex(offset);
@@ -1306,8 +1326,7 @@ void TextPattern::HandleSelectionDown(int32_t start, int32_t end)
 
 void TextPattern::HandleSelection(int32_t start, int32_t end)
 {
-    if (start < 0 || start > static_cast<int32_t>(GetWideText().length()) ||
-        end < 0 || end > static_cast<int32_t>(GetWideText().length())) {
+    if (start < 0 || start > GetTextLength() || end < 0 || end > GetTextLength()) {
         return;
     }
     HandleSelectionChange(start, end);
@@ -1324,6 +1343,14 @@ float TextPattern::GetTextHeight()
         return pManager_->GetHeight() / pManager_->GetLineCount();
     }
     return 0.0;
+}
+
+int32_t TextPattern::GetTextLength()
+{
+    if (!spans_.empty()) {
+        return static_cast<int32_t>(GetWideText().length()) + placeholderCount_;
+    }
+    return static_cast<int32_t>(GetWideText().length());
 }
 
 bool TextPattern::IsDraggable(const Offset& offset)
@@ -2595,29 +2622,23 @@ void TextPattern::AddChildSpanItem(const RefPtr<UINode>& child)
         }
     } else if (child->GetTag() == V2::IMAGE_ETS_TAG) {
         auto imageSpanNode = DynamicCast<ImageSpanNode>(child);
-        if (imageSpanNode) {
-            spans_.emplace_back(imageSpanNode->GetSpanItem());
-            spans_.back()->imageNodeId = imageSpanNode->GetId();
-            return;
-        }
-        auto imageNode = DynamicCast<FrameNode>(child);
-        if (imageNode) {
-            auto imageSpanItem = MakeRefPtr<ImageSpanItem>();
-            imageSpanItem->imageNodeId = imageNode->GetId();
-            imageSpanItem->UpdatePlaceholderBackgroundStyle(imageNode);
-            auto focus_hub = imageNode->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(imageSpanNode);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto imageSpanItem = imageSpanNode->GetSpanItem();
+        if (host->GetTag() != V2::RICH_EDITOR_ETS_TAG) {
+            auto focus_hub = imageSpanNode->GetOrCreateFocusHub();
             CHECK_NULL_VOID(focus_hub);
             auto clickCall = focus_hub->GetOnClickCallback();
             if (clickCall) {
                 imageSpanItem->SetOnClickEvent(std::move(clickCall));
             }
-            spans_.emplace_back(imageSpanItem);
-            auto gesture = imageNode->GetOrCreateGestureEventHub();
+            auto gesture = imageSpanNode->GetOrCreateGestureEventHub();
             CHECK_NULL_VOID(gesture);
             gesture->SetHitTestMode(HitTestMode::HTMNONE);
-
-            return;
         }
+        spans_.emplace_back(imageSpanItem);
+        spans_.back()->imageNodeId = imageSpanNode->GetId();
     } else if (child->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG) {
         auto placeholderSpanNode = DynamicCast<PlaceholderSpanNode>(child);
         if (placeholderSpanNode) {
@@ -2971,7 +2992,7 @@ int32_t TextPattern::GetHandleIndex(const Offset& offset) const
     return pManager_->GetGlyphIndexByCoordinate(offset);
 }
 
-void TextPattern::OnAreaChangedInner()
+void TextPattern::OnHandleAreaChanged()
 {
     if (selectOverlay_->SelectOverlayIsOn()) {
         auto parentGlobalOffset = GetParentGlobalOffset();
@@ -3373,5 +3394,24 @@ void TextPattern::SetExternalSpanItem(const std::list<RefPtr<SpanItem>>& spans)
     auto layoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateContent(textForDisplay_);
+}
+
+RectF TextPattern::GetTextContentRect(bool isActualText) const
+{
+    auto textRect = contentRect_;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, textRect);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, textRect);
+    CHECK_NULL_RETURN(pManager_, textRect);
+    if (!renderContext->GetClipEdge().value_or(false) &&
+        LessNotEqual(textRect.Width(), pManager_->GetLongestLine())) {
+        textRect.SetWidth(pManager_->GetLongestLine());
+    }
+    if (isActualText && !renderContext->GetClipEdge().value_or(false) &&
+        LessNotEqual(textRect.Height(), pManager_->GetHeight())) {
+        textRect.SetHeight(pManager_->GetHeight());
+    }
+    return textRect;
 }
 } // namespace OHOS::Ace::NG

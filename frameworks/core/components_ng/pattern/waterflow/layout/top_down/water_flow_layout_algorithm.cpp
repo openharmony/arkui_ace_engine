@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,14 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/waterflow/water_flow_layout_algorithm.h"
+#include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_algorithm.h"
 
 #include "base/geometry/axis.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/grid/grid_utils.h"
-#include "core/components_ng/pattern/waterflow/water_flow_item_layout_property.h"
+#include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
+#include "core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_utils.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/templates_parser.h"
 
@@ -323,6 +322,9 @@ void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layou
                 std::make_pair(position.startMainPos, itemHeight);
         } else {
             if (item->second.second != itemHeight) {
+                TAG_LOGI(AceLogTag::ACE_WATERFLOW,
+                    "item size change. currentIdx:%{public}d,cacheHeight:%{public}f,itemHeight:%{public}f",
+                    currentIndex, item->second.second, itemHeight);
                 item->second.second = itemHeight;
                 layoutInfo_->ClearCacheAfterIndex(currentIndex);
             }

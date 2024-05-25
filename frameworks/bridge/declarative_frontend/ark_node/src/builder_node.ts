@@ -147,7 +147,7 @@ class JSBuilderNode extends BaseNode {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     this.params_ = params;
     this.updateFuncByElmtId.clear();
-    this.nodePtr_ = super.create(builder.builder, this.params_, this.updateNodeFromNative);
+    this.nodePtr_ = super.create(builder.builder, this.params_, this.updateNodeFromNative, this.updateConfiguration);
     this._nativeRef = getUINativeModule().nativeUtils.createNativeStrongRef(this.nodePtr_);
     if (this.frameNode_ === undefined || this.frameNode_ === null) {
       this.frameNode_ = new BuilderRootFrameNode(this.uiContext_);
@@ -162,6 +162,16 @@ class JSBuilderNode extends BaseNode {
     this.updateStart();
     this.purgeDeletedElmtIds();
     this.params_ = param;
+    Array.from(this.updateFuncByElmtId.keys()).sort((a: number, b: number): number => {
+      return (a < b) ? -1 : (a > b) ? 1 : 0;
+    }).forEach(elmtId => this.UpdateElement(elmtId));
+    this.updateEnd();
+    __JSScopeUtil__.restoreInstanceId();
+  }
+  private updateConfiguration() {
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    this.updateStart();
+    this.purgeDeletedElmtIds();
     Array.from(this.updateFuncByElmtId.keys()).sort((a: number, b: number): number => {
       return (a < b) ? -1 : (a > b) ? 1 : 0;
     }).forEach(elmtId => this.UpdateElement(elmtId));

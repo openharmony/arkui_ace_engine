@@ -152,7 +152,8 @@ bool GridLayoutInfo::IsOutOfEnd() const
 {
     auto atOrOutofStart = reachStart_ && NonNegative(currentOffset_);
     auto endPos = currentOffset_ + totalHeightOfItemsInView_;
-    return !atOrOutofStart && (endIndex_ == childrenCount_ - 1) && LessNotEqual(endPos, lastMainSize_);
+    return !atOrOutofStart && (endIndex_ == childrenCount_ - 1) &&
+           LessNotEqual(endPos, lastMainSize_ - contentEndPadding_);
 }
 
 float GridLayoutInfo::GetCurrentOffsetOfRegularGrid(float mainGap) const

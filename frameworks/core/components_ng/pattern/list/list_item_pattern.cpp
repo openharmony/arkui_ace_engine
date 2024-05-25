@@ -17,6 +17,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/size_t.h"
+#include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_property.h"
@@ -35,6 +36,7 @@ constexpr float SWIPER_TH = 0.25f;
 constexpr float NEW_SWIPER_TH = 0.5f;
 constexpr float SWIPER_SPEED_TH = 1500.f;
 constexpr float SWIPE_RATIO = 0.6f;
+constexpr float NEW_SWIPE_RATIO = 1.848f;
 constexpr float SWIPE_SPRING_MASS = 1.f;
 constexpr float SWIPE_SPRING_STIFFNESS = 228.f;
 constexpr float SWIPE_SPRING_DAMPING = 30.f;
@@ -228,16 +230,6 @@ void ListItemPattern::SetSwiperItemForList()
     auto listPattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(listPattern);
     listPattern->SetSwiperItem(AceType::WeakClaim(this));
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        auto scrollableEvent = listPattern->GetScrollableEvent();
-        CHECK_NULL_VOID(scrollableEvent);
-        auto clickJudgeCallback = [weak = WeakClaim(this)](const PointF& localPoint) -> bool {
-            auto item = weak.Upgrade();
-            CHECK_NULL_RETURN(item, false);
-            return item->ClickJudge(localPoint);
-        };
-        scrollableEvent->SetClickJudgeCallback(clickJudgeCallback);
-    }
 }
 
 void ListItemPattern::SetOffsetChangeCallBack(OnOffsetChangeFunc&& offsetChangeCallback)
@@ -352,7 +344,18 @@ void ListItemPattern::InitSwiperAction(bool axisChanged)
             }
             pattern->HandleDragEnd(info);
         };
-        GestureEventNoParameter actionCancelTask;
+
+        auto actionCancelTask = [weak]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto listPattern = pattern->GetListFrameNode()->GetPattern<ListPattern>();
+            CHECK_NULL_VOID(listPattern);
+            if (!listPattern->IsCurrentSwiperItem(weak)) {
+                return;
+            }
+            GestureEvent info;
+            pattern->HandleDragEnd(info);
+        };
         panEvent_ = MakeRefPtr<PanEvent>(std::move(actionStartTask), std::move(actionUpdateTask),
             std::move(actionEndTask), std::move(actionCancelTask));
         isPanInit = true;
@@ -400,6 +403,10 @@ float ListItemPattern::CalculateFriction(float gamma)
     float ratio = SWIPE_RATIO;
     if (GreatOrEqual(gamma, 1.0)) {
         gamma = 1.0f;
+    }
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        ratio = NEW_SWIPE_RATIO;
+        return exp(-ratio * gamma);
     }
     float result = ratio * std::pow(1.0 - gamma, SQUARE);
     if (!std::isnan(result) && LessNotEqual(result, 1.0f)) {
@@ -668,14 +675,23 @@ void ListItemPattern::FireSwipeActionStateChange(SwipeActionState newState)
     swipeActionState_ = newState;
     bool isStart = GreatNotEqual(curOffset_, 0.0);
     listItemEventHub->FireStateChangeEvent(newState, isStart);
+    auto frameNode = GetListFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto listPattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(listPattern);
+    auto scrollableEvent = listPattern->GetScrollableEvent();
+    CHECK_NULL_VOID(scrollableEvent);
     if (newState == SwipeActionState::COLLAPSED) {
-        auto frameNode = GetListFrameNode();
-        CHECK_NULL_VOID(frameNode);
-        auto listPattern = frameNode->GetPattern<ListPattern>();
-        CHECK_NULL_VOID(listPattern);
-        auto scrollableEvent = listPattern->GetScrollableEvent();
-        CHECK_NULL_VOID(scrollableEvent);
+        TAG_LOGI(AceLogTag::ACE_LIST, "RemoveClickJudgeCallback");
         scrollableEvent->SetClickJudgeCallback(nullptr);
+    } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto clickJudgeCallback = [weak = WeakClaim(this)](const PointF& localPoint) -> bool {
+            auto item = weak.Upgrade();
+            CHECK_NULL_RETURN(item, false);
+            return item->ClickJudge(localPoint);
+        };
+        TAG_LOGI(AceLogTag::ACE_LIST, "AddClickJudgeCallback");
+        scrollableEvent->SetClickJudgeCallback(clickJudgeCallback);
     }
 }
 
@@ -957,7 +973,7 @@ void ListItemPattern::InitPressEvent()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto touchType = info.GetTouches().front().GetTouchType();
-        if (touchType == TouchType::DOWN || touchType == TouchType::UP) {
+        if (touchType == TouchType::DOWN || touchType == TouchType::UP || touchType == TouchType::CANCEL) {
             pattern->HandlePressEvent(touchType == TouchType::DOWN, pattern->GetHost());
         }
     };
@@ -1011,6 +1027,55 @@ void ListItemPattern::InitDisableEvent()
 bool ListItemPattern::GetLayouted() const
 {
     return isLayouted_;
+}
+
+void ListItemPattern::DumpAdvanceInfo()
+{
+    DumpLog::GetInstance().AddDesc("indexInList:" + std::to_string(indexInList_));
+    DumpLog::GetInstance().AddDesc("indexInListItemGroup:" + std::to_string(indexInListItemGroup_));
+    DumpLog::GetInstance().AddDesc("swiperAction.startNodeIndex:" + std::to_string(startNodeIndex_));
+    DumpLog::GetInstance().AddDesc("swiperAction.endNodeIndex:" + std::to_string(endNodeIndex_));
+    DumpLog::GetInstance().AddDesc("swiperAction.childNodeIndex:" + std::to_string(childNodeIndex_));
+    DumpLog::GetInstance().AddDesc("curOffset:" + std::to_string(curOffset_));
+    DumpLog::GetInstance().AddDesc("startNodeSize:" + std::to_string(startNodeSize_));
+    DumpLog::GetInstance().AddDesc("endNodeSize:" + std::to_string(endNodeSize_));
+    DumpLog::GetInstance().AddDesc("startDeleteAreaDistance:" + std::to_string(startDeleteAreaDistance_));
+    DumpLog::GetInstance().AddDesc("endDeleteAreaDistance:" + std::to_string(endDeleteAreaDistance_));
+    switch (swipeActionState_) {
+        case SwipeActionState::COLLAPSED:
+            DumpLog::GetInstance().AddDesc("SwipeActionState::COLLAPSED");
+            break;
+        case SwipeActionState::EXPANDED:
+            DumpLog::GetInstance().AddDesc("SwipeActionState::EXPANDED");
+            break;
+        case SwipeActionState::ACTIONING:
+            DumpLog::GetInstance().AddDesc("SwipeActionState::ACTIONING");
+            break;
+    }
+    hasStartDeleteArea_ ? DumpLog::GetInstance().AddDesc("hasStartDeleteArea:true")
+                     : DumpLog::GetInstance().AddDesc("hasStartDeleteArea:false");
+    hasEndDeleteArea_ ? DumpLog::GetInstance().AddDesc("hasEndDeleteArea:true")
+                     : DumpLog::GetInstance().AddDesc("hasEndDeleteArea:false");
+    inStartDeleteArea_ ? DumpLog::GetInstance().AddDesc("inStartDeleteArea:true")
+                     : DumpLog::GetInstance().AddDesc("inStartDeleteArea:false");
+    inEndDeleteArea_ ? DumpLog::GetInstance().AddDesc("inEndDeleteArea:true")
+                     : DumpLog::GetInstance().AddDesc("inEndDeleteArea:false");
+    selectable_ ? DumpLog::GetInstance().AddDesc("selectable:true")
+                : DumpLog::GetInstance().AddDesc("selectable:false");
+    isSelected_ ? DumpLog::GetInstance().AddDesc("isSelected:true")
+                : DumpLog::GetInstance().AddDesc("isSelected:false");
+    isHover_ ? DumpLog::GetInstance().AddDesc("isHover:true")
+                : DumpLog::GetInstance().AddDesc("isHover:false");
+    isPressed_ ? DumpLog::GetInstance().AddDesc("isPressed:true")
+                : DumpLog::GetInstance().AddDesc("isPressed:false");
+    isLayouted_ ? DumpLog::GetInstance().AddDesc("isLayouted:true")
+                : DumpLog::GetInstance().AddDesc("isLayouted:false");
+    if (enableOpacity_.has_value()) {
+        enableOpacity_.value() ? DumpLog::GetInstance().AddDesc("enableOpacity:true")
+                            : DumpLog::GetInstance().AddDesc("enableOpacity:false");
+    } else {
+        DumpLog::GetInstance().AddDesc("enableOpacity:null");
+    }
 }
 
 float ListItemPattern::GetEstimateHeight(float estimateHeight, Axis axis) const

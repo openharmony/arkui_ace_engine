@@ -523,6 +523,29 @@ HWTEST_F(GridLayoutInfoTest, ClearMatrixToEnd001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OutOfEnd001
+ * @tc.desc: Test GridLayoutInfo::OutOfEnd with content end padding (safeArea)
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, OutOfEnd001, TestSize.Level1)
+{
+    GridLayoutInfo info;
+
+    info.childrenCount_ = 5;
+    info.endIndex_ = 4;
+    info.currentOffset_ = -50.0f;
+    info.totalHeightOfItemsInView_ = 500.0f;
+    info.lastMainSize_ = 400.0f;
+    EXPECT_FALSE(info.IsOutOfEnd());
+
+    info.totalHeightOfItemsInView_ = 400.0f;
+    EXPECT_TRUE(info.IsOutOfEnd());
+
+    info.contentEndPadding_ = 200.0f;
+    EXPECT_FALSE(info.IsOutOfEnd());
+}
+
+/**
  * @tc.name: FindStartLineInMatrix001
  * @tc.desc: Test GridLayoutInfo::FindStartLineInMatrix
  * @tc.type: FUNC

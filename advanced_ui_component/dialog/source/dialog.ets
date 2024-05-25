@@ -61,11 +61,12 @@ const VERSION_TWELVE: number = 50000012
 @CustomDialog
 export struct TipsDialog {
   controller: CustomDialogController;
-  imageRes: Resource | ResourceStr | PixelMap | null = null;
+  imageRes: ResourceStr | PixelMap | null = null;
   @State imageSize?: SizeOptions = { width: DEFAULT_IMAGE_SIZE, height: DEFAULT_IMAGE_SIZE };
   title?: ResourceStr | null = null;
   content?: ResourceStr | null = null;
   checkAction?: (isChecked: boolean) => void;
+  onCheckedChange?: Callback<boolean>;
   checkTips?: ResourceStr | null = null;
   @State isChecked?: boolean = false;
   primaryButton?: ButtonOptions | null = null;
@@ -121,6 +122,9 @@ export struct TipsDialog {
           this.isChecked = checked;
           if (this.checkAction) {
             this.checkAction(checked);
+          }
+          if (this.onCheckedChange) {
+            this.onCheckedChange(checked);
           }
         })
         .margin({ right: $r('sys.float.padding_level4') })
@@ -447,7 +451,7 @@ export struct ConfirmDialog {
   @State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   @State buttonFontColorWithTheme: ResourceColor = $r('sys.color.font_emphasize');
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
-  checkAction?: Callback<boolean>;
+  onCheckedChange?: Callback<boolean>;
   contentScroller: Scroller = new Scroller();
   buttons?: ButtonOptions[] | undefined = undefined;
   marginOffset: number = 0;
@@ -501,8 +505,8 @@ export struct ConfirmDialog {
           Checkbox({ name: 'checkbox', group: 'checkboxGroup' }).select(this.isChecked)
             .onChange((checked: boolean) => {
               this.isChecked = checked;
-              if (this.checkAction) {
-                this.checkAction(this.isChecked);
+              if (this.onCheckedChange) {
+                this.onCheckedChange(this.isChecked);
               }
             })
             .hitTestBehavior(HitTestMode.Block)
@@ -1334,3 +1338,50 @@ export struct LoadingDialog {
     this.theme.colors.iconSecondary : $r('sys.color.icon_secondary');
   }
 }
+
+@Component
+export struct PopupDialog {
+  @Link show: boolean;
+  @Prop popup: PopupDialogOptions;
+  @BuilderParam targetBuilder: Callback<void>;
+
+  build() {
+    Column() {
+      this.targetBuilder();
+    }
+    .onClick(() => {
+      this.show = !this.show;
+    })
+    .bindPopup(this.show, {
+      builder: this.popup?.builder,
+      placement: this.popup?.placement ?? Placement.Bottom,
+      popupColor: this.popup?.popupColor,
+      enableArrow: this.popup?.enableArrow ?? true,
+      autoCancel: this.popup?.autoCancel,
+      onStateChange: this.popup?.onStateChange ?? ((e) => {
+        if (!e.isVisible) {
+          this.show = false
+        }
+      }),
+      arrowOffset: this.popup?.arrowOffset,
+      showInSubWindow: this.popup?.showInSubWindow,
+      mask: this.popup?.mask,
+      targetSpace: this.popup?.targetSpace,
+      offset: this.popup?.offset,
+      width: this.popup?.width,
+      arrowPointPosition: this.popup?.arrowPointPosition,
+      arrowWidth: this.popup?.arrowWidth,
+      arrowHeight: this.popup?.arrowHeight,
+      radius: this.popup?.radius ?? $r('sys.float.corner_radius_level16'),
+      shadow: this.popup?.shadow ?? ShadowStyle.OUTER_DEFAULT_MD,
+      backgroundBlurStyle: this.popup?.backgroundBlurStyle ?? BlurStyle.COMPONENT_ULTRA_THICK,
+      focusable: this.popup?.focusable,
+      transition: this.popup?.transition,
+      onWillDismiss: this.popup?.onWillDismiss
+    })
+  }
+}
+
+export declare interface PopupDialogOptions extends CustomPopupOptions {
+}
+

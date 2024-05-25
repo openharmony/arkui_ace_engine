@@ -36,7 +36,6 @@ public:
     bool CheckHandleVisible(const RectF& paintRect) override;
     bool CheckAndAdjustHandle(RectF& paintRect);
     void OnResetTextSelection() override;
-    void AfterCloseOverlay() override;
 
     // override SelectOverlayHolder
     std::optional<SelectHandleInfo> GetFirstHandleInfo() override;
@@ -59,8 +58,6 @@ protected:
     bool selectTextUseTopHandle = false;
 
 private:
-    void RemoveAreaChangeInner();
-
     ACE_DISALLOW_COPY_AND_MOVE(TextSelectOverlay);
 };
 

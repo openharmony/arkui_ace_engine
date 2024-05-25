@@ -17,6 +17,8 @@
 
 #include <atomic>
 
+#include "core/common/agingadapation/aging_adapation_dialog_theme.h"
+#include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/common/container.h"
 #include "base/log/dump_log.h"
 #include "core/components/theme/app_theme.h"
@@ -92,6 +94,7 @@ void NavDestinationPattern::OnModifyDone()
     UpdateNameIfNeeded(hostNode);
     UpdateBackgroundColorIfNeeded(hostNode);
     UpdateTitlebarVisibility(hostNode);
+    InitBackButtonLongPressEvent(hostNode);
 }
 
 void NavDestinationPattern::OnLanguageConfigurationUpdate()
@@ -267,5 +270,103 @@ bool NavDestinationPattern::OverlayOnBackPressed()
     CHECK_NULL_RETURN(overlayManager_, false);
     CHECK_EQUAL_RETURN(overlayManager_->IsModalEmpty(), true,  false);
     return overlayManager_->RemoveOverlay(true);
+}
+
+bool NavDestinationPattern::NeedIgnoreKeyboard()
+{
+    auto layoutProperty = GetLayoutProperty<NavDestinationLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto& opts = layoutProperty->GetSafeAreaExpandOpts();
+    if (opts && (opts->type & SAFE_AREA_TYPE_KEYBOARD)) {
+        return true;
+    }
+    return false;
+}
+
+void NavDestinationPattern::InitBackButtonLongPressEvent(RefPtr<NavDestinationGroupNode>& hostNode)
+{
+    CHECK_NULL_VOID(hostNode);
+    auto titleBarUINode = hostNode->GetTitleBarNode();
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(titleBarUINode);
+    CHECK_NULL_VOID(titleBarNode);
+
+    auto backButtonUINode = titleBarNode->GetBackButton();
+    auto backButtonNode = AceType::DynamicCast<FrameNode>(backButtonUINode);
+    CHECK_NULL_VOID(backButtonNode);
+
+    auto gestureHub = backButtonNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    if (longPressEvent_) {
+        gestureHub->SetLongPressEvent(longPressEvent_);
+        return;
+    }
+    auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleLongPress();
+    };
+    longPressEvent_ = MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
+    gestureHub->SetLongPressEvent(longPressEvent_);
+
+    auto longPressRecognizer = gestureHub->GetLongPressRecognizer();
+    CHECK_NULL_VOID(longPressRecognizer);
+
+    auto longPressEndCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleLongPressActionEnd();
+    };
+    longPressRecognizer->SetOnActionEnd(longPressEndCallback);
+}
+
+void NavDestinationPattern::HandleLongPress()
+{
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto dialogTheme = context->GetTheme<AgingAdapationDialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
+    float scale = context->GetFontScale();
+    if (LessNotEqual(scale, dialogTheme->GetBigFontSizeScale())) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+            "The current system font scale is %{public}f; dialogTheme font scale is %{public}f", scale,
+            dialogTheme->GetBigFontSizeScale());
+        return;
+    }
+    auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto titleBarUINode = hostNode->GetTitleBarNode();
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(titleBarUINode);
+    CHECK_NULL_VOID(titleBarNode);
+    auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
+    CHECK_NULL_VOID(backButtonNode);
+    auto accessibilityProperty = backButtonNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    auto message = accessibilityProperty->GetAccessibilityText();
+    if (dialogNode_ != nullptr) {
+        // clear the last dialog
+        HandleLongPressActionEnd();
+    }
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TEN)) {
+        auto theme = NavigationGetTheme();
+        CHECK_NULL_VOID(theme);
+        dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(message,
+            SymbolSourceInfo(theme->GetBackSymbolId()));
+    } else {
+        auto backButtonImageLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(backButtonImageLayoutProperty);
+        ImageSourceInfo imageSourceInfo = backButtonImageLayoutProperty->GetImageSourceInfoValue();
+        dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(message, imageSourceInfo);
+    }
+}
+
+void NavDestinationPattern::HandleLongPressActionEnd()
+{
+    CHECK_NULL_VOID(dialogNode_);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->CloseDialog(dialogNode_);
+    dialogNode_ = nullptr;
 }
 } // namespace OHOS::Ace::NG

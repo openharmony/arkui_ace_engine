@@ -121,9 +121,16 @@ public:
     virtual void Reset() = 0;
 
     // for compatibility
-    virtual void InitSegments(const std::vector<WaterFlowSections::Section>& sections, int32_t start) {}
-    // for compatibility
     virtual void UpdateStartIndex() {};
+
+    virtual void InitSegments(const std::vector<WaterFlowSections::Section>& sections, int32_t start) {}
+    /**
+     * @brief Get the Segment index of a FlowItem
+     *
+     * @param itemIdx
+     * @return segment index.
+     */
+    int32_t GetSegment(int32_t itemIdx) const;
 
     bool itemStart_ = false;
     bool itemEnd_ = false;   // last item is partially in viewport
@@ -144,6 +151,11 @@ public:
     // store offset for distributed migration
     float storedOffset_ = 0.0f;
     float restoreOffset_ = 0.0f;
+
+    // Stores the tail item index of each segment.
+    std::vector<int32_t> segmentTails_;
+    // K: item index; V: corresponding segment index
+    mutable std::unordered_map<int32_t, int32_t> segmentCache_;
 
     ACE_DISALLOW_COPY_AND_MOVE(WaterFlowLayoutInfoBase);
 };

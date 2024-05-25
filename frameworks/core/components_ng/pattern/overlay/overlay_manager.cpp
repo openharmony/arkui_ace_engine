@@ -125,7 +125,6 @@ const RefPtr<Curve> HIDE_CUSTOM_KEYBOARD_ANIMATION_CURVE =
 
 const RefPtr<InterpolatingSpring> MENU_ANIMATION_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 228.0f, 22.0f);
-constexpr Dimension ORIGINAL_BLUR_RADIUS = 20.0_px;
 constexpr double MENU_ORIGINAL_SCALE = 0.6f;
 constexpr int32_t DUMP_LOG_DEPTH_1 = 1;
 constexpr int32_t DUMP_LOG_DEPTH_2 = 2;
@@ -295,7 +294,7 @@ void ShowContextMenuDisappearAnimation(
         option.GetOnFinishEvent());
 }
 
-void ShowMenuDisappearAnimation(AnimationOption& option, const RefPtr<MenuWrapperPattern>& menuWrapperPattern)
+void FireMenuDisappear(AnimationOption& option, const RefPtr<MenuWrapperPattern>& menuWrapperPattern)
 {
     CHECK_NULL_VOID(menuWrapperPattern);
     auto menuNode = menuWrapperPattern->GetMenu();
@@ -311,7 +310,6 @@ void ShowMenuDisappearAnimation(AnimationOption& option, const RefPtr<MenuWrappe
             menuRenderContext->UpdatePosition(
                 OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
             menuRenderContext->UpdateTransformScale(VectorF(MENU_ORIGINAL_SCALE, MENU_ORIGINAL_SCALE));
-            menuRenderContext->UpdateFrontBlurRadius(ORIGINAL_BLUR_RADIUS);
             menuRenderContext->UpdateOpacity(0.0f);
         }
     }, option.GetOnFinishEvent());
@@ -842,6 +840,11 @@ void OverlayManager::ShowMenuClearAnimation(const RefPtr<FrameNode>& menu, Anima
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     auto menuAnimationOffset = menuWrapperPattern->GetAnimationOffset();
+    auto outterMenu = menuWrapperPattern->GetMenu();
+    CHECK_NULL_VOID(outterMenu);
+    auto outterMenuPattern = outterMenu->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(outterMenuPattern);
+    bool isShow = outterMenuPattern->HasDisappearAnimation();
     if (menuWrapperPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
         if (!showPreviewAnimation) {
             CleanPreviewInSubWindow();
@@ -849,8 +852,8 @@ void OverlayManager::ShowMenuClearAnimation(const RefPtr<FrameNode>& menu, Anima
             ShowPreviewDisappearAnimation(menuWrapperPattern);
         }
         ShowContextMenuDisappearAnimation(option, menuWrapperPattern, startDrag);
-    } else if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        ShowMenuDisappearAnimation(option, menuWrapperPattern);
+    } else if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && isShow) {
+        FireMenuDisappear(option, menuWrapperPattern);
     } else {
         AnimationUtils::Animate(
             option,
@@ -1902,7 +1905,31 @@ RefPtr<UINode> OverlayManager::RebuildCustomBuilder(RefPtr<UINode>& contentNode)
     if (updateNodeFunc) {
         updateNodeFunc(currentId, customNode);
     }
+    auto updateNodeConfig = contentNode->GetUpdateNodeConfig();
+    if (updateNodeConfig) {
+        customNode->SetUpdateNodeConfig(std::move(updateNodeConfig));
+    }
     return customNode;
+}
+
+void OverlayManager::ReloadBuilderNodeConfig()
+{
+    if (dialogMap_.empty()) {
+        return;
+    }
+    auto iter = dialogMap_.begin();
+    while (iter != dialogMap_.end()) {
+        auto dialogNode = (*iter).second;
+        if (dialogNode) {
+            auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+            CHECK_NULL_VOID(dialogPattern);
+            auto customNode = dialogPattern->GetCustomNode();
+            if (customNode && customNode->GetUpdateNodeConfig()) {
+                customNode->GetUpdateNodeConfig()();
+            }
+        }
+        iter++;
+    }
 }
 
 void OverlayManager::OpenCustomDialog(const DialogProperties& dialogProps, std::function<void(int32_t)> &&callback)
@@ -3419,6 +3446,18 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
     } else {
         PlaySheetTransition(sheetNode, true);
     }
+
+    auto pageNode = AceType::DynamicCast<FrameNode>(maskNode->GetParent());
+    CHECK_NULL_VOID(pageNode);
+    //when sheet shows in page
+    if (pageNode->GetTag() == V2::PAGE_ETS_TAG) {
+        //set focus on sheet when page has more than one child
+        auto focusView = pageNode->GetPattern<FocusView>();
+        CHECK_NULL_VOID(focusView);
+        auto focusHub = sheetNode->GetFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusView->SetViewRootScope(focusHub);
+    }
 }
 
 void OverlayManager::InitSheetMask(
@@ -3706,7 +3745,6 @@ void OverlayManager::PlaySheetTransition(
                 pattern->FireOnDetentsDidChange(overlay->sheetHeight_);
                 pattern->FireOnHeightDidChange(overlay->sheetHeight_);
             });
-        sheetParent->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMDEFAULT);
         AnimationUtils::Animate(
             option,
             [context, offset]() {
@@ -3808,7 +3846,6 @@ void OverlayManager::PlaySheetMaskTransition(RefPtr<FrameNode> maskNode, bool is
     auto context = maskNode->GetRenderContext();
     CHECK_NULL_VOID(context);
     if (isTransitionIn) {
-        maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMDEFAULT);
         context->OpacityAnimation(option, 0.0, 1.0);
     } else {
         if (sheetMaskClickEvent_) {

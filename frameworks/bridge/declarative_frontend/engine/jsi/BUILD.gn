@@ -127,6 +127,17 @@ if (!is_arkui_x) {
   }
 }
 
+abc_sources = [ "stateMgmt" ]
+
+foreach(item, abc_sources) {
+  ohos_prebuilt_etc("copy_" + item + "_abc") {
+    source = base_output_path + "/" + item + ".abc"
+    deps = [ ":gen_" + item + "_abc" ]
+    part_name = ace_engine_part
+    module_install_dir = "etc/abc/framework"
+  }
+}
+
 template("declarative_js_engine_ark") {
   forward_variables_from(invoker, "*")
   platform = invoker.platform
@@ -380,6 +391,10 @@ template("declarative_js_engine_ark") {
       ":gen_obj_src_abc_enum_style",
       ":gen_obj_src_abc_proxyclass",
     ]
+
+    foreach(item, abc_sources) {
+      deps += [ ":copy_" + item + "_abc" ]
+    }
   }
 }
 

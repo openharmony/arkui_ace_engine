@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/log/dump_log.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
 
 #include "core/components_ng/pattern/loading_progress/loading_progress_layout_algorithm.h"
@@ -130,6 +131,11 @@ void LoadingProgressPattern::OnWindowShow()
 {
     isShow_ = true;
     StartAnimation();
+}
+
+void LoadingProgressPattern::DumpInfo()
+{
+    DumpLog::GetInstance().AddDesc(std::string("IsInVisibleArea: ").append(isVisibleArea_ ? "true" : "false"));
 }
 
 void LoadingProgressPattern::FireBuilder()

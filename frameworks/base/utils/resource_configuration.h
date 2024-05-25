@@ -97,6 +97,16 @@ public:
 
     bool UpdateFromJsonString(const std::string jsonStr, uint32_t& updateFlags);
 
+    void SetColorModeIsSetByApp(bool colorModeIsSetByApp)
+    {
+        colorModeIsSetByApp_ = colorModeIsSetByApp;
+    }
+
+    bool GetColorModeIsSetByApp() const
+    {
+        return colorModeIsSetByApp_;
+    }
+
 private:
     bool ParseJsonColorMode(const std::unique_ptr<JsonValue>& jsonConfig, uint32_t& updateFlags);
     bool ParseJsonFontRatio(const std::unique_ptr<JsonValue>& jsonConfig, uint32_t& updateFlags);
@@ -108,6 +118,7 @@ private:
     double fontRatio_ = 1.0;
     bool isDeviceAccess_ = false;
     ColorMode colorMode_ = ColorMode::LIGHT;
+    bool colorModeIsSetByApp_ = false;
 };
 
 class ResourceInfo {
