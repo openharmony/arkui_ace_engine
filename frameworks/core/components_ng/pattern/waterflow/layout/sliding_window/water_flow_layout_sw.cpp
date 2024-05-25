@@ -23,8 +23,8 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
+#include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/templates_parser.h"
 
@@ -82,10 +82,15 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
                 continue;
             }
             auto childNode = child->GetGeometryNode();
+            bool vertical = axis_ == Axis::VERTICAL;
+            auto offset = vertical ? OffsetF { crossPos, mainPos } : OffsetF { mainPos, crossPos };
             if (reverse) {
-                mainPos = mainLen_ - item.mainSize - mainPos;
+                if (vertical) {
+                    offset.SetY(mainLen_ - item.mainSize - mainPos);
+                } else {
+                    offset.SetX(mainLen_ - item.mainSize - mainPos);
+                }
             }
-            auto offset = axis_ == Axis::VERTICAL ? OffsetF { crossPos, mainPos } : OffsetF { mainPos, crossPos };
             childNode->SetMarginFrameOffset(offset + paddingOffset);
 
             if (child->CheckNeedForceMeasureAndLayout()) {
@@ -125,6 +130,9 @@ void WaterFlowLayoutSW::Init(const SizeF& frameSize)
         cross = ParseTemplateArgs(WaterFlowLayoutUtils::PreParseArgs(columnsTemplate), crossSize, crossGap_, itemCnt_);
     } else {
         cross = ParseTemplateArgs(WaterFlowLayoutUtils::PreParseArgs(rowsTemplate), crossSize, crossGap_, itemCnt_);
+    }
+    if (cross.first.empty()) {
+        cross.first = { crossSize };
     }
     if (cross.second) {
         crossGap_ = 0.0f;
@@ -488,7 +496,7 @@ void WaterFlowLayoutSW::AdjustOverScroll()
         ApplyDelta(-minStart);
     } else if (info_->EndIndex() == itemCnt_ - 1 && LessNotEqual(maxEnd, mainLen_)) {
         float delta = mainLen_ - maxEnd;
-        if (startIdx == 0)  {
+        if (startIdx == 0) {
             delta = std::min(-minStart, delta);
         }
         ApplyDelta(delta);
