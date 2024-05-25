@@ -862,6 +862,19 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintSpaceTest001, TestSize.Level1)
 
     LinearData linearData;
     dataPanelModifier.PaintSpace(rsCanvas, linearData, SPACEWIDTH);
+    
+    /**
+     * @tc.case: layout direction rtl
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+    DataPanelModifier dataPanelModifierRtl;
+    dataPanelModifierRtl.PaintSpace(rsCanvas, linearData, SPACEWIDTH);
+    EXPECT_CALL(rsCanvas, Translate(_, _)).WillOnce(Return());
+    EXPECT_CALL(rsCanvas, Scale(_, _)).WillOnce(Return());
 }
 
 /**
@@ -895,6 +908,19 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentTest001, TestSize.Level1)
     gradientColorEnd.SetDimension(Dimension(1.0));
     linerData.segmentColor = gradient;
     dataPanelModifier.PaintColorSegment(rsCanvas, linerData);
+    
+    /**
+     * @tc.case: layout direction rtl
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+    DataPanelModifier dataPanelModifierRtl;
+    dataPanelModifierRtl.PaintColorSegment(rsCanvas, linerData);
+    EXPECT_CALL(rsCanvas, Translate(_, _)).WillOnce(Return());
+    EXPECT_CALL(rsCanvas, Scale(_, _)).WillOnce(Return());
 }
 
 /**
@@ -1206,6 +1232,19 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentFilterMaskTest001, TestSize.
     segmentLinearData.isEndData = true;
     dataPanelModifier.PaintColorSegmentFilterMask(rsCanvas, segmentLinearData);
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+
+    /**
+     * @tc.case: case. layout direction rtl
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+    DataPanelModifier dataPanelModifierRtl;
+    dataPanelModifierRtl.PaintColorSegmentFilterMask(rsCanvas, segmentLinearData);
+    EXPECT_CALL(rsCanvas, Translate(_, _)).WillOnce(Return());
+    EXPECT_CALL(rsCanvas, Scale(_, _)).WillOnce(Return());
 }
 
 /**
