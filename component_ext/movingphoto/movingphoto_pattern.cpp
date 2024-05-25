@@ -680,12 +680,13 @@ void MovingPhotoPattern::StartAnimation()
     animationOption.SetDuration(ANIMATION_DURATION_400);
     animationOption.SetCurve(Curves::FRICTION);
     animationOption.SetOnFinishEvent([this]() {
-        if (currentPlayStatus_ == PlaybackStatus::PAUSED || currentPlayStatus_ == PlaybackStatus::STOPPED || !StartAnimationFlag_) {
+        if (currentPlayStatus_ == PlaybackStatus::PAUSED || currentPlayStatus_ == PlaybackStatus::STOPPED 
+                                                         || !startAnimationFlag_) {
             return;
         }
         HideImageNode();
     });
-    StartAnimationFlag_ = true;
+    startAnimationFlag_ = true;
     AnimationUtils::Animate(animationOption, [imageCtx = imageRsContext, videoCtx = videoRsContext]() {
             imageCtx->UpdateOpacity(0.0);
             imageCtx->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
@@ -706,7 +707,7 @@ void MovingPhotoPattern::StopPlayback()
 
 void MovingPhotoPattern::StopAnimation()
 {
-    StartAnimationFlag_ = false;
+    startAnimationFlag_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto movingPhoto = AceType::DynamicCast<MovingPhotoNode>(host);

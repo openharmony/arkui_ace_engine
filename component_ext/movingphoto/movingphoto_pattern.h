@@ -155,7 +155,7 @@ private:
 
     int32_t fd_ = -1;
     std::string uri_ = "";
-    bool StartAnimationFlag_ = false;
+    bool startAnimationFlag_ = false;
     bool isPrepared_ = false;
     bool isMuted_ = false;
     bool isPlayByController_ = false;
