@@ -1351,8 +1351,8 @@ export class ComposeListItem extends ViewPU {
         this.observeComponentCreation2((z1, a2) => {
             Stack.create();
             Stack.padding({
-                start: this.composeItemPadding?.start === null ? LengthMetrics.vp(STACK_PADDING) : this.composeItemPadding?.start,
-                end: this.composeItemPadding?.end === null ? LengthMetrics.vp(STACK_PADDING) : this.composeItemPadding?.end
+                start: this.composeItemPadding?.start !== undefined ? this.composeItemPadding?.start : LengthMetrics.vp(STACK_PADDING),
+                end: this.composeItemPadding?.end !== undefined ? this.composeItemPadding?.end : LengthMetrics.vp(STACK_PADDING)
             });
         }, Stack);
         this.observeComponentCreation2((r1, s1) => {
