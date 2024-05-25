@@ -2854,10 +2854,15 @@ void TextFieldPattern::InitEditingValueText(std::string content)
 
 void TextFieldPattern::InitValueText(std::string content)
 {
+    auto initContent = content;
+    if (GetIsPreviewText()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Init when has previewText");
+        initContent = contentController_->GetTextValue();
+    }
     if (HasInputOperation() && content != "") {
         return;
     }
-    contentController_->SetTextValueOnly(std::move(content));
+    contentController_->SetTextValueOnly(std::move(initContent));
     selectController_->UpdateCaretIndex(GetWideText().length());
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
