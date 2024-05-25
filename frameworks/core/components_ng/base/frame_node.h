@@ -842,7 +842,6 @@ public:
 
     void SetGeometryTransitionInRecursive(bool isGeometryTransitionIn) override
     {
-        SetSkipSyncGeometryNode();
         UINode::SetGeometryTransitionInRecursive(isGeometryTransitionIn);
     }
     static std::pair<float, float> ContextPositionConvertToPX(
