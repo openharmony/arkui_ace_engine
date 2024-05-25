@@ -282,6 +282,13 @@ void NavigationPattern::UpdateNavPathList()
             TAG_LOGD(AceLogTag::ACE_NAVIGATION, "find in list, navigation stack reserve node, "
                 "old index: %{public}d, index: %{public}d, name: %{public}s.",
                 index, static_cast<int32_t>(i), pathName.c_str());
+            /**
+             * If we call the function pushPath/pushDestination with singleton mode(
+             * LaunchMode == MOVE_TO_TOP_SINGLETON/POP_TO_SINGLETON), and the top NavDestination of stack
+             * is the NavDestination which we need to push(NavDestination's name == NavPathInfo's name), 
+             * then wee need to update the NavDestination's parameters.
+             */
+            navigationStack_->UpdatePathInfoIfNeeded(uiNode, static_cast<int32_t>(i));
             auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(
                 NavigationGroupNode::GetNavDestinationNode(uiNode));
             if (navDestinationGroupNode && navDestinationGroupNode->GetCanReused()) {
