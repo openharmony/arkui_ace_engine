@@ -131,6 +131,8 @@ public:
     }
 
     void AttachHost(const WeakPtr<FrameNode>& host);
+    void OnAttachContext(PipelineContext *context);
+    void OnDetachContext(PipelineContext *context);
 
     RefPtr<FrameNode> GetFrameNode() const;
 
@@ -575,6 +577,15 @@ public:
         } else {
             visibleAreaInnerRatios_.clear();
             visibleAreaInnerCallback_.callback = nullptr;
+        }
+    }
+
+    bool HasVisibleAreaCallback(bool isUser)
+    {
+        if (isUser) {
+            return static_cast<bool>(visibleAreaUserCallback_.callback);
+        } else {
+            return static_cast<bool>(visibleAreaInnerCallback_.callback);
         }
     }
 

@@ -4025,6 +4025,7 @@ void FrameNode::ChangeSensitiveStyle(bool isSensitive)
 void FrameNode::AttachContext(PipelineContext* context, bool recursive)
 {
     UINode::AttachContext(context, recursive);
+    eventHub_->OnAttachContext(context);
     pattern_->OnAttachContext(context);
 }
 
@@ -4032,6 +4033,7 @@ void FrameNode::DetachContext(bool recursive)
 {
     CHECK_NULL_VOID(context_);
     pattern_->OnDetachContext(context_);
+    eventHub_->OnDetachContext(context_);
     UINode::DetachContext(recursive);
 }
 
