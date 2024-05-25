@@ -45,7 +45,7 @@ constexpr char PARAM_MSG_RESTRICTED_WORKER_ERROR[] = "Run not in restricted work
 
 void ApplyAccessibilityElementInfoOffset(Accessibility::AccessibilityElementInfo& output, const OffsetF& offset)
 {
-    auto &rect = output.GetRectInScreen();
+    auto& rect = output.GetRectInScreen();
     Accessibility::Rect bounds;
     bounds.SetLeftTopScreenPostion(rect.GetLeftTopXScreenPostion() + offset.GetX(),
         rect.GetLeftTopYScreenPostion() + offset.GetY());
