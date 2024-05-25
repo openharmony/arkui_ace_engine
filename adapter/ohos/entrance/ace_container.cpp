@@ -1250,18 +1250,25 @@ void AceContainer::fillAutoFillViewData(const RefPtr<NG::FrameNode> &node, RefPt
     auto nodeInfoWraps = viewDataWrap->GetPageNodeInfoWraps();
     auto pattern = node->GetPattern<NG::TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
-    for (auto nodeInfoWrap : nodeInfoWraps) {
-        if (nodeInfoWrap && nodeInfoWrap->GetAutoFillType() == AceAutoFillType::ACE_USER_NAME) {
-            nodeInfoWrap->SetValue(pattern->GetAutoFillUserName());
-            pattern->SetAutoFillUserName("");
-            break;
+    auto autoFillUserName = pattern->GetAutoFillUserName();
+    auto autoFillNewPassword = pattern->GetAutoFillNewPassword();
+    if (!autoFillUserName.empty()) {
+        for (auto nodeInfoWrap : nodeInfoWraps) {
+            if (nodeInfoWrap && nodeInfoWrap->GetAutoFillType() == AceAutoFillType::ACE_USER_NAME) {
+                nodeInfoWrap->SetValue(autoFillUserName);
+                viewDataWrap->SetUserSelected(true);
+                pattern->SetAutoFillUserName("");
+                break;
+            }
         }
     }
-    for (auto nodeInfoWrap : nodeInfoWraps) {
-        if (nodeInfoWrap && nodeInfoWrap->GetAutoFillType() == AceAutoFillType::ACE_NEW_PASSWORD) {
-            nodeInfoWrap->SetValue(pattern->GetAutoFillNewPassword());
-            pattern->SetAutoFillNewPassword("");
-            break;
+    if (!autoFillNewPassword.empty()) {
+        for (auto nodeInfoWrap : nodeInfoWraps) {
+            if (nodeInfoWrap && nodeInfoWrap->GetAutoFillType() == AceAutoFillType::ACE_NEW_PASSWORD) {
+                nodeInfoWrap->SetValue(autoFillNewPassword);
+                pattern->SetAutoFillNewPassword("");
+                break;
+            }
         }
     }
 }
