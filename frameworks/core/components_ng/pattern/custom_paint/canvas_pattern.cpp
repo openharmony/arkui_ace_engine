@@ -487,16 +487,16 @@ void CanvasPattern::TransferFromImageBitmap(const RefPtr<PixelMap>& pixelMap)
 #endif
 }
 #else
-void CanvasPattern::TransferFromImageBitmap(const std::unique_ptr<Ace::ImageData>& imageData)
+void CanvasPattern::TransferFromImageBitmap(const Ace::ImageData& imageData)
 {
 #ifndef ACE_UNITTEST
 #ifndef USE_FAST_TASKPOOL
-    auto task = [pixelMap](CanvasPaintMethod& paintMethod) {
-        paintMethod.TransferFromImageBitmap(imageData);
+    auto task = [imageData](CanvasPaintMethod& paintMethod) {
+        paintMethod.PutImageData(imageData);
     };
     paintMethod_->PushTask(task);
 #else
-    paintMethod_->PushTask<TransferFromImageBitmapOp>(imageData);
+    paintMethod_->PushTask<PutImageDataOp>(imageData);
 #endif
 #endif
 }

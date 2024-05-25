@@ -594,7 +594,8 @@ void CanvasRenderingContext2DModelNG::TransferFromImageBitmap(
 {
     auto customPaintPattern = AceType::DynamicCast<CanvasPattern>(canvasPattern);
     CHECK_NULL_VOID(customPaintPattern);
-    customPaintPattern->TransferFromImageBitmap(imageData);
+    CHECK_NULL_VOID(imageData);
+    customPaintPattern->TransferFromImageBitmap(*imageData);
 }
 #endif
 
