@@ -1085,6 +1085,7 @@ private:
     bool hasCachedCapture_ = false;
     bool isCaptureReverse_ = false;
     OffsetF captureFinalOffset_;
+    bool isInAutoPlay_ = false;
 };
 } // namespace OHOS::Ace::NG
 

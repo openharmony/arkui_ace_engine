@@ -367,6 +367,7 @@ void SwiperPattern::OnModifyDone()
         StartAutoPlay();
     } else {
         translateTask_.Cancel();
+        isInAutoPlay_ = false;
     }
 
     SetAccessibilityAction();
@@ -2032,6 +2033,7 @@ bool SwiperPattern::OnKeyEvent(const KeyEvent& event)
 void SwiperPattern::StopAutoPlay()
 {
     if (IsAutoPlay()) {
+        isInAutoPlay_ = false;
         translateTask_.Cancel();
     }
 }
@@ -2848,7 +2850,12 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
 #ifdef OHOS_PLATFORM
-        ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+        if (!swiper->isInAutoPlay_) {
+            ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+        } else {
+            ResSchedReport::GetInstance().ResSchedDataReport("auto_play_off");
+        }
+        
 #endif
         if (!swiper->hasTabsAncestor_) {
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_SWIPER_FLING, true);
@@ -2881,7 +2888,12 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
         auto swiperPattern = swiper.Upgrade();
         CHECK_NULL_VOID(swiperPattern);
 #ifdef OHOS_PLATFORM
-        ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+        if (!swiperPattern->isInAutoPlay_) {
+            ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+        } else {
+            ResSchedReport::GetInstance().ResSchedDataReport("auto_play_on");
+        }
+        
 #endif
         if (!swiperPattern->hasTabsAncestor_) {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_SWIPER_FLING, PerfActionType::FIRST_MOVE, "");
@@ -3929,6 +3941,7 @@ void SwiperPattern::PostTranslateTask(uint32_t delayTime)
     translateTask_.Reset([weak, delayTime] {
         auto swiper = weak.Upgrade();
         if (swiper) {
+            swiper->isInAutoPlay_ = true;
             auto childrenSize = swiper->TotalCount();
             auto displayCount = swiper->GetDisplayCount();
             if (childrenSize <= 0 || displayCount <= 0 || swiper->itemPosition_.empty()) {
@@ -3968,6 +3981,7 @@ void SwiperPattern::RegisterVisibleAreaChange()
         swiperPattern->isVisibleArea_ = visible;
         if (!visible) {
             swiperPattern->translateTask_.Cancel();
+            swiperPattern->isInAutoPlay_ = false;
             return;
         }
 
