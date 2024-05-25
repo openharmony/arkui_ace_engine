@@ -733,12 +733,12 @@ export struct ComposeListItem {
     }
   }
 
-  getComposeItemLeftPadding(): LengthMetrics {
+  getComposeItemLeftPadding(): LengthMetrics{
     return this.composeItemPadding?.start !== undefined ?
       this.composeItemPadding?.start : LengthMetrics.vp(STACK_PADDING)
   }
 
-  getComposeItemRightPadding(): LengthMetrics {
+  getComposeItemRightPadding(): LengthMetrics{
     return this.composeItemPadding?.end !== undefined ?
       this.composeItemPadding?.end : LengthMetrics.vp(STACK_PADDING)
   }
