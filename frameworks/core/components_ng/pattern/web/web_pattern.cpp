@@ -3055,6 +3055,33 @@ void WebPattern::OnTooltip(const std::string& tooltip)
     ShowTooltip(tooltip, tooltipTimestamp);
 }
 
+void WebPattern::AttachCustomKeyboard()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebCustomKeyboard AttachCustomKeyboard enter");
+    CHECK_NULL_VOID(customKeyboardBuilder_);
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->SetCustomKeyboardOption(true);
+    overlayManager->BindKeyboard(customKeyboardBuilder_, frameNode->GetId());
+    keyboardOverlay_ = overlayManager;
+    keyboardOverlay_->AvoidCustomKeyboard(frameNode->GetId(), 0);
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebCustomKeyboard AttachCustomKeyboard end");
+}
+
+void WebPattern::CloseCustomKeyboard()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebCustomKeyboard CloseCustomKeyboard enter");
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(keyboardOverlay_);
+    keyboardOverlay_->CloseKeyboard(frameNode->GetId());
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebCustomKeyboard CloseCustomKeyboard end");
+}
+
 void WebPattern::HandleShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp)
 {
     if (tooltipTimestamp_ != tooltipTimestamp) {
