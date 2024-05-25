@@ -96,19 +96,29 @@ RefPtr<LayoutProperty> WaterFlowLayoutProperty::Clone() const
 namespace {
 inline bool UseSegmentedLayout(const RefPtr<FrameNode>& host)
 {
-    return SystemProperties::WaterFlowUseSegmentedLayout() || host->GetPattern<WaterFlowPattern>()->GetSections();
+    CHECK_NULL_RETURN(host, false);
+    auto pattern = host->GetPattern<WaterFlowPattern>();
+    return SystemProperties::WaterFlowUseSegmentedLayout() || (pattern && pattern->GetSections());
+}
+
+inline bool SWLayout(const RefPtr<FrameNode>& host) {
+    CHECK_NULL_RETURN(host, false);
+    auto pattern = host->GetPattern<WaterFlowPattern>();
+    return pattern && pattern->GetLayoutMode() == WaterFlowLayoutMode::SLIDING_WINDOW;
 }
 } // namespace
 
 void WaterFlowLayoutProperty::OnRowsGapUpdate(Dimension /* rowsGap */) const
 {
-    if (GetAxis() == Axis::VERTICAL || UseSegmentedLayout(GetHost())) {
+    auto host = GetHost();
+    if (GetAxis() == Axis::VERTICAL || UseSegmentedLayout(host) || SWLayout(host)) {
         ResetWaterflowLayoutInfoAndMeasure();
     }
 }
 void WaterFlowLayoutProperty::OnColumnsGapUpdate(Dimension /* columnsGap */) const
 {
-    if (GetAxis() == Axis::HORIZONTAL || UseSegmentedLayout(GetHost())) {
+    auto host = GetHost();
+    if (GetAxis() == Axis::HORIZONTAL || UseSegmentedLayout(host) || SWLayout(host)) {
         ResetWaterflowLayoutInfoAndMeasure();
     }
 }

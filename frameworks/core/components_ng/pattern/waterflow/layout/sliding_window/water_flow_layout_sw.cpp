@@ -72,7 +72,7 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
     float crossPos = rtl ? selfCrossLen + mainGap_ : 0.0f;
     for (size_t i = 0; i < info_->lanes_.size(); ++i) {
         if (rtl) {
-            crossPos -= itemCrossSize_[i] + mainGap_;
+            crossPos -= itemCrossSize_[i] + crossGap_;
         }
         auto& lane = info_->lanes_[i];
         float mainPos = lane.startPos;
@@ -96,7 +96,7 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
             mainPos += item.mainSize + mainGap_;
         }
         if (!rtl) {
-            crossPos += itemCrossSize_[i] + mainGap_;
+            crossPos += itemCrossSize_[i] + crossGap_;
         }
     }
 

@@ -351,7 +351,20 @@ HWTEST_F(WaterFlowTestNg, Property008, TestSize.Level1)
         model.SetRowsGap(Dimension(-5));
         model.SetColumnsGap(Dimension(-10));
     });
-    EXPECT_FALSE(false);
+
+    EXPECT_EQ(GetChildWidth(frameNode_, 0), WATERFLOW_WIDTH / 2.0f);
+    EXPECT_EQ(GetChildWidth(frameNode_, 1), WATERFLOW_WIDTH / 2.0f);
+
+    layoutProperty_->UpdateColumnsGap(Dimension(5.0f));
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildWidth(frameNode_, 0), (WATERFLOW_WIDTH - 5.0f) / 2.0f);
+    EXPECT_EQ(GetChildWidth(frameNode_, 1), (WATERFLOW_WIDTH - 5.0f) / 2.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 1), WATERFLOW_WIDTH / 2.0f + 2.5f);
+    layoutProperty_->UpdateColumnsGap(Dimension(10.0f));
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildWidth(frameNode_, 0), (WATERFLOW_WIDTH - 10.0f) / 2.0f);
+    EXPECT_EQ(GetChildWidth(frameNode_, 1), (WATERFLOW_WIDTH - 10.0f) / 2.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 1), WATERFLOW_WIDTH / 2.0f + 5.0f);
 }
 
 /**
@@ -924,13 +937,6 @@ HWTEST_F(WaterFlowTestNg, PositionController006, TestSize.Level1)
         FlushLayoutTask(frameNode_);
     }
     EXPECT_TRUE(pattern_->IsAtTop());
-
-    /**
-     * @tc.steps: step8. Test AnimateTo function
-     * @tc.expected: pattern_->isAnimationStop_ is false
-     */
-    pattern_->AnimateTo(1.5, 1.f, Curves::LINEAR, false, false);
-    EXPECT_FALSE(pattern_->isAnimationStop_);
 }
 
 namespace {
@@ -1197,27 +1203,6 @@ HWTEST_F(WaterFlowTestNg, PositionController009, TestSize.Level1)
         FlushLayoutTask(frameNode_);
     }
     EXPECT_TRUE(pattern_->IsAtTop());
-
-	/**
-     * @tc.steps: step8. test event
-     * @tc.expected: return the scroll event is ture.
-     */
-    bool isOnWillScrollCallBack = false;
-    Dimension willScrollOffset;
-    ScrollState willScrollState;
-    auto onWillScroll = [&willScrollOffset, &willScrollState, &isOnWillScrollCallBack](
-                            Dimension offset, ScrollState state, ScrollSource source) {
-        willScrollOffset = offset;
-        willScrollState = state;
-        isOnWillScrollCallBack = true;
-        ScrollFrameResult result;
-        result.offset = offset;
-        return result;
-    };
-	
-    eventHub_->SetOnWillScroll(std::move(onWillScroll));
-    pattern_->ScrollTo(ITEM_HEIGHT * 5);
-    EXPECT_TRUE(isOnWillScrollCallBack);
 }
 
 /**
