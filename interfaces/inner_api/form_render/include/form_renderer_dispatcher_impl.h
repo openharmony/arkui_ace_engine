@@ -54,6 +54,9 @@ public:
 
     void DispatchSurfaceChangeEvent(float width, float height, float borderWidth = 0.0) override;
     void SetObscured(bool isObscured) override;
+    void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId) override;
+    void OnAccessibilityChildTreeDeregister() override;
+    void OnAccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
 private:
     std::weak_ptr<UIContent> uiContent_;
     std::weak_ptr<FormRenderer> formRenderer_;

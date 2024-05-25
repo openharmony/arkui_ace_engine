@@ -52,6 +52,7 @@ public:
     using OnFormUpdateCallback =
         std::function<void(int64_t, const std::string&, const std::map<std::string, sptr<AppExecFwk::FormAshmem>>&)>;
     using OnFormLinkInfoUpdateCallback = std::function<void(const std::vector<std::string>&)>;
+    using OnGetRectRelativeToWindowCallback = std::function<void(int32_t&, int32_t&)>;
     using OnFormErrorCallback = std::function<void(const std::string&, const std::string&)>;
     using OnFormUninstallCallback = std::function<void(int64_t)>;
     using OnFormSurfaceNodeCallback = std::function<void(const std::shared_ptr<Rosen::RSSurfaceNode>&, bool, bool)>;
@@ -97,6 +98,7 @@ public:
     void AddFormSurfaceChangeCallback(OnFormSurfaceChangeCallback&& callback);
     void AddFormSurfaceDetachCallback(OnFormSurfaceDetachCallback&& callback);
     void AddFormLinkInfoUpdateCallback(OnFormLinkInfoUpdateCallback&& callback);
+    void AddGetRectRelativeToWindowCallback(OnGetRectRelativeToWindowCallback && callback);
     void AddActionEventHandle(const ActionEventHandle& callback);
     void AddUnTrustFormCallback(const UnTrustFormCallback& callback);
     void AddSnapshotCallback(SnapshotCallback&& callback);
@@ -109,8 +111,12 @@ public:
     void RegisterRenderDelegateEvent();
     void OnFormError(const std::string& code, const std::string& msg);
     void OnFormLinkInfoUpdate(const std::vector<std::string>& formLinkInfos);
+    void OnGetRectRelativeToWindow(int32_t &top, int32_t &left);
     void ReleaseRenderer();
     void SetObscured(bool isObscured);
+    void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId);
+    void OnAccessibilityChildTreeDeregister();
+    void OnAccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info);
 #ifdef OHOS_STANDARD_SYSTEM
     void ProcessFormUpdate(const AppExecFwk::FormJsInfo& formJsInfo);
     void ProcessFormUninstall(const int64_t formId);
@@ -149,6 +155,7 @@ private:
     OnFormAcquiredCallback onFormAcquiredCallback_;
     OnFormUpdateCallback onFormUpdateCallback_;
     OnFormLinkInfoUpdateCallback onFormLinkInfoUpdateCallback_;
+    OnGetRectRelativeToWindowCallback onGetRectRelativeToWindowCallback_;
     OnFormErrorCallback onFormErrorCallback_;
     OnFormUninstallCallback onFormUninstallCallback_;
     OnFormSurfaceNodeCallback onFormSurfaceNodeCallback_;

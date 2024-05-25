@@ -319,6 +319,36 @@ void FormPattern::HandleOnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
     needSnapshotAgain_ = false;
 }
 
+void FormPattern::OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId)
+{
+    TAG_LOGD(AceLogTag::ACE_FORM, "call, treeId: %{public}d, id: %{public}" PRId64, treeId, accessibilityId);
+    if (formManagerBridge_ == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "formManagerBridge_ is null");
+        return;
+    }
+    formManagerBridge_->OnAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
+}
+
+void FormPattern::OnAccessibilityChildTreeDeregister()
+{
+    TAG_LOGD(AceLogTag::ACE_FORM, "call.");
+    if (formManagerBridge_ == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "formManagerBridge_ is null");
+        return;
+    }
+    formManagerBridge_->OnAccessibilityChildTreeDeregister();
+}
+
+void FormPattern::OnAccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    TAG_LOGD(AceLogTag::ACE_FORM, "call.");
+    if (formManagerBridge_ == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "formManagerBridge_ is null");
+        return;
+    }
+    formManagerBridge_->OnAccessibilityDumpChildInfo(params, info);
+}
+
 void FormPattern::UpdateStaticCard()
 {
     // 1. Use imageNode to display pixelMap
@@ -1030,6 +1060,25 @@ void FormPattern::InitFormManagerDelegate()
             CHECK_NULL_VOID(formPattern);
             formPattern->SetFormLinkInfos(infos);
         });
+
+    formManagerBridge_->AddGetRectRelativeToWindowCallback(
+        [weak = WeakClaim(this), instanceID](int32_t &top, int32_t &left) {
+            ContainerScope scope(instanceID);
+            auto formPattern = weak.Upgrade();
+            CHECK_NULL_VOID(formPattern);
+            formPattern->GetRectRelativeToWindow(top, left);
+        });
+}
+
+void FormPattern::GetRectRelativeToWindow(int32_t &top, int32_t &left)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto rect = host->GetTransformRectRelativeToWindow();
+    top = rect.Top();
+    left = rect.Left();
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "elementId: %{public}" PRId64 ", top: %{public}d, left: %{public}d",
+        host->GetAccessibilityId(), top, left);
 }
 
 void FormPattern::ProcDeleteImageNode(bool isRecover)
@@ -1098,6 +1147,10 @@ void FormPattern::FireFormSurfaceNodeCallback(
     parent->RebuildRenderContextTree();
     renderContext->RequestNextFrame();
     OnLoadEvent();
+
+    auto formNode = DynamicCast<FormNode>(host);
+    CHECK_NULL_VOID(formNode);
+    formNode->NotifyAccessibilityChildTreeRegister();
 }
 
 void FormPattern::DelayDeleteImageNode()
