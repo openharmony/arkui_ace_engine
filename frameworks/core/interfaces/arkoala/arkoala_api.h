@@ -2845,6 +2845,10 @@ struct ArkUIImageSpanModifier {
     void (*getImageSpanTextBackgroundStyle)(ArkUINodeHandle node, ArkUITextBackgroundStyleOptions* options);
     void (*setImageSpanBaselineOffset)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetImageSpanBaselineOffset)(ArkUINodeHandle node);
+    void (*setImageSpanOnComplete)(ArkUINodeHandle node, void* callback);
+    void (*resetImageSpanOnComplete)(ArkUINodeHandle node);
+    void (*setImageSpanOnError)(ArkUINodeHandle node, void* callback);
+    void (*resetImageSpanOnError)(ArkUINodeHandle node);
 };
 
 struct ArkUIMenuModifier {

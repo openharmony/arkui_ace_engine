@@ -6636,6 +6636,34 @@ class ImageSpanAltModifier extends ModifierWithKey {
   }
 }
 ImageSpanAltModifier.identity = Symbol('imagespanAlt');
+class ImageSpanOnCompleteModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().imageSpan.resetOnComplete(node);
+    }
+    else {
+      getUINativeModule().imageSpan.setOnComplete(node, this.value);
+    }
+  }
+}
+ImageSpanOnCompleteModifier.identity = Symbol('imageSpanOnComplete');
+class ImageSpanOnErrorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().imageSpan.resetOnError(node);
+    }
+    else {
+      getUINativeModule().imageSpan.setOnError(node, this.value);
+    }
+  }
+}
+ImageSpanOnErrorModifier.identity = Symbol('imageSpanOnError');
 class ArkImageSpanComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -6658,6 +6686,14 @@ class ArkImageSpanComponent extends ArkComponent {
   }
   alt(value) {
     modifierWithKey(this._modifiersWithKeys, ImageSpanAltModifier.identity, ImageSpanAltModifier, value);
+    return this;
+  }
+  onComplete(callback) {
+    modifierWithKey(this._modifiersWithKeys, ImageSpanOnCompleteModifier.identity, ImageSpanOnCompleteModifier, callback);
+    return this;
+  }
+  onError(callback) {
+    modifierWithKey(this._modifiersWithKeys, ImageSpanOnErrorModifier.identity, ImageSpanOnErrorModifier, callback);
     return this;
   }
 }
