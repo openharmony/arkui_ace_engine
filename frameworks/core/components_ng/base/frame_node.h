@@ -191,19 +191,21 @@ public:
 
     void SetVisibleAreaUserCallback(const std::vector<double>& ratios, const VisibleCallbackInfo& callback)
     {
-        eventHub_->SetVisibleAreaRatios(ratios, true);
-        eventHub_->SetVisibleAreaCallback(callback, true);
+        eventHub_->SetVisibleAreaRatiosAndCallback(callback, ratios, true);
     }
 
-    void CleanVisibleAreaUserCallback()
+    void CleanVisibleAreaUserCallback(bool isApproximate = false)
     {
-        eventHub_->CleanVisibleAreaCallback(true);
+        if (isApproximate) {
+            eventHub_->CleanVisibleAreaCallback(true, isApproximate);
+        } else {
+            eventHub_->CleanVisibleAreaCallback(true, false);
+        }
     }
 
     void SetVisibleAreaInnerCallback(const std::vector<double>& ratios, const VisibleCallbackInfo& callback)
     {
-        eventHub_->SetVisibleAreaRatios(ratios, false);
-        eventHub_->SetVisibleAreaCallback(callback, false);
+        eventHub_->SetVisibleAreaRatiosAndCallback(callback, ratios, false);
     }
 
     void CleanVisibleAreaInnerCallback()
@@ -933,7 +935,10 @@ private:
     bool OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config);
 
     void ProcessAllVisibleCallback(const std::vector<double>& visibleAreaUserRatios,
-        VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio, double lastVisibleRatio);
+        VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio,
+        double lastVisibleRatio, bool isThrottled = false);
+    void ProcessThrottledVisibleCallback(double currentRatio = -1.0f);
+    void ThrottledVisibleTask(double currentRatio);
 
     void OnPixelRoundFinish(const SizeF& pixelGridRoundSize);
 
@@ -1021,6 +1026,10 @@ private:
 
     double lastVisibleRatio_ = 0.0;
     double lastVisibleCallbackRatio_ = 0.0;
+    double lastThrottledVisibleRatio_ = 0.0;
+    double lastThrottledVisibleCbRatio_ = 0.0;
+    int64_t lastThrottledTriggerTime_ = 0;
+    bool throttledCallbackOnTheWay_ = false;
 
     // internal node such as Text in Button CreateWithLabel
     // should not seen by preview inspector or accessibility

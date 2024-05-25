@@ -590,6 +590,9 @@ public:
     static void SetJSFrameNodeOnMouse(FrameNode* frameNode, OnMouseEventFunc&& onMouseEventFunc);
     static void SetJSFrameNodeOnSizeChange(
         FrameNode* frameNode, std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged);
+    static void SetJSFrameNodeOnVisibleAreaApproximateChange(FrameNode* frameNode,
+        const std::function<void(bool, double)>&& jsCallback, const std::vector<double>& ratioList,
+        uint32_t expectedUpdateInterval = 1000);
     static void ClearJSFrameNodeOnClick(FrameNode* frameNode);
     static void ClearJSFrameNodeOnTouch(FrameNode* frameNode);
     static void ClearJSFrameNodeOnAppear(FrameNode* frameNode);
@@ -600,6 +603,7 @@ public:
     static void ClearJSFrameNodeOnHover(FrameNode* frameNode);
     static void ClearJSFrameNodeOnMouse(FrameNode* frameNode);
     static void ClearJSFrameNodeOnSizeChange(FrameNode* frameNode);
+    static void ClearJSFrameNodeOnVisibleAreaApproximateChange(FrameNode* frameNode);
 
     static float GetFlexGrow(FrameNode* frameNode);
     static float GetFlexShrink(FrameNode* frameNode);
