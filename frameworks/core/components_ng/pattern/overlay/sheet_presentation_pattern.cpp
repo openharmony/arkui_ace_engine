@@ -72,14 +72,13 @@ void SheetPresentationPattern::OnModifyDone()
         scale_ = pipeline->GetFontScale();
         auto sheetTheme = pipeline->GetTheme<SheetTheme>();
         CHECK_NULL_VOID(sheetTheme);
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-            BlurStyle blurStyle = static_cast<BlurStyle>(sheetTheme->GetSheetBackgroundBlurStyle());
-            if (blurStyle != BlurStyle::NO_MATERIAL) {
-                BlurStyleOption options;
-                options.blurStyle = blurStyle;
-                renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-                renderContext->UpdateBackBlurStyle(options);
-            }
+        BlurStyle blurStyle = static_cast<BlurStyle>(sheetTheme->GetSheetBackgroundBlurStyle());
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
+            && blurStyle != BlurStyle::NO_MATERIAL) {
+            BlurStyleOption options;
+            options.blurStyle = blurStyle;
+            renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+            renderContext->UpdateBackBlurStyle(options);
         } else {
             renderContext->UpdateBackgroundColor(sheetTheme->GetSheetBackgoundColor());
         }
