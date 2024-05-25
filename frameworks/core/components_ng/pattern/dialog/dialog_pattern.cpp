@@ -344,16 +344,7 @@ void DialogPattern::BuildChild(const DialogProperties& props)
     // append customNode
     auto customNode = customNode_.Upgrade();
     if (customNode) {
-        // wrap custom node to set background color and round corner
-        auto contentWrapper = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
-        CHECK_NULL_VOID(contentWrapper);
-        if (!props.customStyle) {
-            UpdateContentRenderContext(contentWrapper, props);
-        }
-        customNode->MountToParent(contentWrapper);
-        auto dialog = GetHost();
-        contentWrapper->MountToParent(dialog);
+        BuildCustomChild(props, customNode);
         return;
     }
 
@@ -420,6 +411,34 @@ void DialogPattern::BuildChild(const DialogProperties& props)
 
     auto dialog = GetHost();
     contentColumn->MountToParent(dialog);
+}
+
+void DialogPattern::BuildCustomChild(const DialogProperties& props, const RefPtr<UINode>& customNode)
+{
+    auto contentWrapper = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    CHECK_NULL_VOID(contentWrapper);
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (!props.customStyle) {
+            UpdateContentRenderContext(contentWrapper, props);
+        }
+        customNode->MountToParent(contentWrapper);
+        auto dialog = GetHost();
+        contentWrapper->MountToParent(dialog);
+    } else {
+        auto scroll = FrameNode::CreateFrameNode(
+            V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
+        CHECK_NULL_VOID(contentWrapper);
+        if (!props.customStyle) {
+            UpdateContentRenderContext(scroll, props);
+        }
+        customNode->MountToParent(contentWrapper);
+        contentWrapper->MountToParent(scroll);
+        auto dialog = GetHost();
+        scroll->MountToParent(dialog);
+        scroll->MarkModifyDone();
+        dialog->MarkModifyDone();
+    }
 }
 
 RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogProperties)
