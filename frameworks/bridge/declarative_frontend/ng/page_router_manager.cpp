@@ -1514,9 +1514,15 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
     auto stageNode = stageManager->GetStageNode();
     auto popNode = stageNode->GetChildren().back();
     int8_t popIndex = static_cast<int8_t>(stageNode->GetChildren().size() - 1);
-    auto lastIter = pageRouterStack_.begin();
-    if (popIndex >= 0) {
+    do {
+        if (popIndex < 0) {
+            break;
+        }
+        auto lastIter = pageRouterStack_.begin();
         std::advance(lastIter, popIndex);
+        if (lastIter == pageRouterStack_.end()) {
+            break;
+        }
         lastIter = pageRouterStack_.erase(lastIter);
         for (auto iter = lastIter; iter != pageRouterStack_.end(); iter++, popIndex++) {
             auto pageNode = iter->Upgrade();
@@ -1526,7 +1532,7 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
             auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
             pagePattern->GetPageInfo()->SetPageIndex(popIndex);
         }
-    }
+    } while (0);
     bool findPage = false;
     if (info.routerMode == RouterMode::SINGLE) {
         auto pageInfo = FindPageInStack(info.url);
@@ -1539,7 +1545,8 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
     if (!findPage) {
         LoadPage(GenerateNextPageId(), info, true, false);
     }
-    if (popIndex < 0 || popNode == stageNode->GetChildren().back()) {
+    if (popIndex < 0 || popNode == stageNode->GetChildren().back() ||
+        stageNode->GetChildIndex(popNode) != popIndex) {
         return;
     }
     auto iter = pageRouterStack_.begin();
