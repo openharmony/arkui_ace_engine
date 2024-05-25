@@ -621,7 +621,7 @@ class TypedFrameNode<T extends ArkComponent> extends FrameNode {
         if (nodeType === childType) {
           isValid = true;
         }
-      })
+      });
       return isValid;
     }
     return true;
