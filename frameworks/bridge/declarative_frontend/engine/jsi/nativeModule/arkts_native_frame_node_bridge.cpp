@@ -276,11 +276,11 @@ void FrameNodeBridge::FireMeasureCallback(EcmaVM* vm, JsWeak<panda::CopyableGlob
     };
 
     const char* keysOfSize[] = { "height", "width" };
-    Local<JSValueRef> valuesOfMaxSize[] = { panda::NumberRef::New(
-                                                vm, replaceInfinityFunc(layoutConstraint.maxSize.Height())),
+    Local<JSValueRef> valuesOfMaxSize[] = {
+        panda::NumberRef::New(vm, replaceInfinityFunc(layoutConstraint.maxSize.Height())),
         panda::NumberRef::New(vm, replaceInfinityFunc(layoutConstraint.maxSize.Width())) };
-    Local<JSValueRef> valuesOfMinSize[] = { panda::NumberRef::New(
-                                                vm, replaceInfinityFunc(layoutConstraint.minSize.Height())),
+    Local<JSValueRef> valuesOfMinSize[] = {
+        panda::NumberRef::New(vm, replaceInfinityFunc(layoutConstraint.minSize.Height())),
         panda::NumberRef::New(vm, replaceInfinityFunc(layoutConstraint.minSize.Width())) };
     Local<JSValueRef> valuesOfPercentReference[] = {
         panda::NumberRef::New(vm, replaceInfinityFunc(layoutConstraint.percentReference.Height())),
