@@ -3187,7 +3187,8 @@ void GetAlignRules(ArkUINodeHandle node, ArkUI_CharPtr* anchors, ArkUI_Int32* di
 
     std::size_t index = 0;
     for (const AlignDirection alignDirection : { AlignDirection::LEFT, AlignDirection::MIDDLE, AlignDirection::RIGHT,
-             AlignDirection::TOP, AlignDirection::CENTER, AlignDirection::BOTTOM }) {
+         AlignDirection::TOP, AlignDirection::CENTER, AlignDirection::BOTTOM, AlignDirection::START,
+         AlignDirection::END }) {
         if (index >= length) {
             return;
         }
@@ -3198,6 +3199,8 @@ void GetAlignRules(ArkUINodeHandle node, ArkUI_CharPtr* anchors, ArkUI_Int32* di
                 case AlignDirection::LEFT:
                 case AlignDirection::RIGHT:
                 case AlignDirection::CENTER:
+                case AlignDirection::START:
+                case AlignDirection::END:
                     direction[index] = static_cast<ArkUI_Int32>(it->second.horizontal) - 1;
                     break;
                 case AlignDirection::TOP:

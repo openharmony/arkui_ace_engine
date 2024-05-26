@@ -26,6 +26,7 @@ namespace OHOS::Ace {
 
 std::unique_ptr<RelativeContainerModel> RelativeContainerModel::instance_ = nullptr;
 std::mutex RelativeContainerModel::mutex_;
+constexpr int32_t LOCALIZED_BARRIER_DIRECTION_START = 4;
 
 RelativeContainerModel* RelativeContainerModel::GetInstance()
 {
@@ -83,6 +84,7 @@ void JSRelativeContainer::ParseBarrierInfo(const JSRef<JSVal>& args, BarrierInfo
     JSRef<JSObject> barrierInfoObj = JSRef<JSObject>::Cast(args);
     JSRef<JSVal> idVal = barrierInfoObj->GetProperty("id");
     JSRef<JSVal> directionVal = barrierInfoObj->GetProperty("direction");
+    JSRef<JSVal> localizedDirectionVal = barrierInfoObj->GetProperty("localizedDirection");
     JSRef<JSVal> referencedIdVal = barrierInfoObj->GetProperty("referencedId");
 
     if (idVal->IsString()) {
@@ -92,6 +94,13 @@ void JSRelativeContainer::ParseBarrierInfo(const JSRef<JSVal>& args, BarrierInfo
     if (directionVal->IsNumber()) {
         auto direction = directionVal->ToNumber<int32_t>();
         barrierInfoItem.direction = static_cast<BarrierDirection>(direction);
+    } else if (localizedDirectionVal->IsNumber()) {
+        auto direction = localizedDirectionVal->ToNumber<int32_t>();
+        if (direction > static_cast<int32_t>(BarrierDirection::RIGHT)) {
+            barrierInfoItem.direction = static_cast<BarrierDirection>(direction);
+        } else {
+            barrierInfoItem.direction = static_cast<BarrierDirection>(direction + LOCALIZED_BARRIER_DIRECTION_START);
+        }
     }
 
     if (referencedIdVal->IsArray()) {

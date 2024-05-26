@@ -8332,7 +8332,7 @@ void JSViewAbstract::JsAlignRules(const JSCallbackInfo& info)
     if (valueObj->IsEmpty()) {
         return;
     }
-    const char* keys[] = { "left", "middle", "right", "top", "center", "bottom", "bias" };
+    const char* keys[] = { "left", "middle", "right", "top", "center", "bottom", "bias", "start", "end" };
     std::map<AlignDirection, AlignRule> alignRules;
     BiasPair biasPair(DEFAULT_BIAS, DEFAULT_BIAS);
     for (uint32_t i = 0; i < sizeof(keys) / sizeof(const char*); i++) {
@@ -8349,6 +8349,10 @@ void JSViewAbstract::JsAlignRules(const JSCallbackInfo& info)
             }
             if (i < VERTICAL_DIRECTION_RANGE) {
                 alignRules[static_cast<AlignDirection>(i)] = alignRule;
+            } else if (i == HORIZONTAL_DIRECTION_START_INDEX) {
+                alignRules[AlignDirection::LEFT] = alignRule;
+            } else if (i == HORIZONTAL_DIRECTION_END_INDEX) {
+                alignRules[AlignDirection::RIGHT] = alignRule;
             }
             auto biasX = val->GetProperty("horizontal");
             if (biasX->IsNumber()) {
