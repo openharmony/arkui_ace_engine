@@ -6224,7 +6224,6 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternTest008, TestSize.Level1)
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     ASSERT_NE(theme, nullptr);
     theme->showOptionCount_ = 5;
-    ScrollDirection dir = ScrollDirection::UP;
     textPickerColumnPattern->algorithmOffset_.clear();
     TextPickerOptionProperty prop;
     prop.height = 2.0f;
@@ -6235,7 +6234,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternTest008, TestSize.Level1)
     textPickerColumnPattern->optionProperties_.emplace_back(prop);
     textPickerColumnPattern->optionProperties_.emplace_back(prop);
     textPickerColumnPattern->optionProperties_.emplace_back(prop);
-    textPickerColumnPattern->CalcAlgorithmOffset(dir, DISTANCE);
+    textPickerColumnPattern->CalcAlgorithmOffset(DISTANCE);
     EXPECT_EQ(textPickerColumnPattern->algorithmOffset_.size() - BUFFER_NODE_NUMBER, 5);
 }
 
