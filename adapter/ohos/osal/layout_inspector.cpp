@@ -240,13 +240,12 @@ void LayoutInspector::GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t 
         auto uft16Len = MUtf8ToUtf16Size(buf8,uft8Len);
 
         std::shared_ptr<uint16_t[]> buf16(new uint16_t[uft16Len]);
-        auto resultLen = ConvertRegionUtf8ToUtf16(buf8, buf16.get(), utf8Len, utf16Len, 0);
+        auto resultLen = ConvertRegionUtf8ToUtf16(buf8, buf16.get(), uft8Len, uft16Len, 0);
         if(resultLen != uft16Len){
             LOGE("ConvertRegionUtf8ToUtf16 error");
             return;
         }
-        size_t reLen = DebuggerConvertRegionUtf16ToUtf8(buf16.get(), buf8, uft16Len, utf8Len, 0,false,false);
-        return;
+        DebuggerConvertRegionUtf16ToUtf8(buf16.get(), buf8, uft16Len, uft8Len, 0,false,false);
     }
     debuggerFunc(treeJsonStr);
     auto jsonTree = JsonUtil::ParseJsonString(treeJsonStr);
