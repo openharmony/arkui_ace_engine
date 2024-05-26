@@ -16,8 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_UTF_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_UTF_H
 
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 #include <utility>
 
 namespace OHOS::Ace {
@@ -74,7 +74,6 @@ constexpr size_t CONST_4 = 4;
 constexpr size_t CONST_6 = 6;
 constexpr size_t CONST_12 = 12;
 
-
 constexpr uint16_t DECODE_LEAD_LOW = 0xD800;
 constexpr uint16_t DECODE_LEAD_HIGH = 0xDBFF;
 constexpr uint16_t DECODE_TRAIL_LOW = 0xDC00;
@@ -92,43 +91,43 @@ constexpr uint16_t UTF8_2B_MAX = 0x7ff;
 constexpr uint8_t UTF8_2B_FIRST = 0xc0;
 constexpr uint8_t UTF8_2B_SECOND = 0x80;
 constexpr uint8_t UTF8_2B_THIRD = 0x3f;
-constexpr uint8_t UTF8_2B_FIRST_MIN = 0xc2;  // the minimum for 2 bytes is 128, which is 0xc280
+constexpr uint8_t UTF8_2B_FIRST_MIN = 0xc2; // the minimum for 2 bytes is 128, which is 0xc280
 
 constexpr uint16_t UTF8_3B_MAX = 0xffff;
 constexpr uint8_t UTF8_3B_FIRST = 0xe0;
 constexpr uint8_t UTF8_3B_SECOND = 0x80;
 constexpr uint8_t UTF8_3B_THIRD = 0x80;
-constexpr uint8_t UTF8_3B_SECOND_MIN = 0xa0;  // the minimum for 3 bytes is 2048, which is 0xe0a080
+constexpr uint8_t UTF8_3B_SECOND_MIN = 0xa0; // the minimum for 3 bytes is 2048, which is 0xe0a080
 
 constexpr uint8_t UTF8_4B_FIRST = 0xf0;
-constexpr uint8_t UTF8_4B_SECOND_MIN = 0x90;  // the minimum for 4 bytes is 65536, which is 0xf0908080
+constexpr uint8_t UTF8_4B_SECOND_MIN = 0x90; // the minimum for 4 bytes is 65536, which is 0xf0908080
 
 constexpr uint8_t byteMask = 0xbf;
 constexpr uint8_t byteMark = 0x80;
 
-
 enum UtfLength : uint8_t { ONE = 1, TWO = 2, THREE = 3, FOUR = 4 };
 
-const unsigned char firstByteMark[7] = {0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC};
+const unsigned char FIRST_BYTE_MARK[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC };
 
-std::pair<uint32_t, size_t> ConvertMUtf8ToUtf16Pair(const uint8_t *data, size_t max_bytes = 4);
+std::pair<uint32_t, size_t> ConvertMUtf8ToUtf16Pair(const uint8_t* data, size_t max_bytes = 4);
 
-size_t MUtf8ToUtf16Size(const uint8_t *mutf8, size_t mutf8_len);
+size_t MUtf8ToUtf16Size(const uint8_t* mutf8, size_t mutf8_len);
 
-size_t ConvertRegionUtf8ToUtf16(const uint8_t *utf8In, uint16_t *utf16Out, size_t utf8Len, size_t utf16Len,
-                                size_t start);
+size_t ConvertRegionUtf8ToUtf16(
+    const uint8_t* utf8In, uint16_t* utf16Out, size_t utf8Len, size_t utf16Len, size_t start);
 
-size_t DebuggerConvertRegionUtf16ToUtf8(const uint16_t *utf16In, uint8_t *utf8Out, size_t utf16Len, size_t utf8Len,
-                                        size_t start, bool modify = true, bool isWriteBuffer = false);
+size_t DebuggerConvertRegionUtf16ToUtf8(const uint16_t* utf16In, uint8_t* utf8Out, size_t utf16Len, size_t utf8Len,
+    size_t start, bool modify = true, bool isWriteBuffer = false);
 
+void DebuggerStr(std::string& str);
 
-static inline std::pair<uint16_t, uint16_t> SplitUtf16Pair(uint32_t pair)
+inline std::pair<uint16_t, uint16_t> SplitUtf16Pair(uint32_t pair)
 {
     constexpr size_t P1_MASK = 0xffff;
     constexpr size_t P2_SHIFT = 16;
-    return {pair >> P2_SHIFT, pair & P1_MASK};
+    return { pair >> P2_SHIFT, pair & P1_MASK };
 }
 
-}
+} // namespace OHOS::Ace
 
 #endif

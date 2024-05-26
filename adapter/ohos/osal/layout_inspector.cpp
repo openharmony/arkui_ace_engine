@@ -234,20 +234,7 @@ void LayoutInspector::GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t 
         treeJsonStr = V2::Inspector::GetInspectorTree(pipelineContext, true);
     }
 #endif
-    auto debuggerFunc =[](std::string& str){
-        uint8_t* buf8 = (uint8_t*)str.c_str();
-        size_t uft8Len = str.size();
-        auto uft16Len = MUtf8ToUtf16Size(buf8,uft8Len);
-
-        std::shared_ptr<uint16_t[]> buf16(new uint16_t[uft16Len]);
-        auto resultLen = ConvertRegionUtf8ToUtf16(buf8, buf16.get(), uft8Len, uft16Len, 0);
-        if(resultLen != uft16Len){
-            LOGE("ConvertRegionUtf8ToUtf16 error");
-            return;
-        }
-        DebuggerConvertRegionUtf16ToUtf8(buf16.get(), buf8, uft16Len, uft8Len, 0,false,false);
-    }
-    debuggerFunc(treeJsonStr);
+    DebuggerStr(treeJsonStr);
     auto jsonTree = JsonUtil::ParseJsonString(treeJsonStr);
     jsonTree->Put("VsyncID", (int32_t)pipeline->GetFrameCount());
     jsonTree->Put("ProcessID", getpid());
