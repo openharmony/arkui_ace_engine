@@ -183,6 +183,8 @@ void DatePickerTestNg::SetUp()
             return AceType::MakeRefPtr<DialogTheme>();
         } else if (type == PickerTheme::TypeId()) {
             return MockThemeDefault::GetPickerTheme();
+        } else if (type == ButtonTheme::TypeId()) {
+            return AceType::MakeRefPtr<ButtonTheme>();
         } else {
             return nullptr;
         }
