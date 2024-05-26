@@ -4190,6 +4190,33 @@ void ViewAbstract::ClearJSFrameNodeOnSizeChange(FrameNode* frameNode)
     eventHub->ClearJSFrameNodeOnSizeChange();
 }
 
+void ViewAbstract::SetJSFrameNodeOnVisibleAreaApproximateChange(FrameNode* frameNode,
+    const std::function<void(bool, double)>&& jsCallback, const std::vector<double>& ratioList,
+    uint32_t interval)
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->CleanVisibleAreaUserCallback(true);
+
+    constexpr uint32_t minInterval = 100; // 100ms
+    if (interval < minInterval) {
+        interval = minInterval;
+    }
+    VisibleCallbackInfo callback;
+    callback.callback = std::move(jsCallback);
+    callback.isCurrentVisible = false;
+    callback.period = interval;
+    pipeline->AddVisibleAreaChangeNode(frameNode->GetId());
+    frameNode->SetVisibleAreaUserCallback(ratioList, callback);
+}
+
+void ViewAbstract::ClearJSFrameNodeOnVisibleAreaApproximateChange(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->CleanVisibleAreaUserCallback(true);
+}
+
 void ViewAbstract::SetOnGestureJudgeBegin(FrameNode* frameNode, GestureJudgeFunc&& gestureJudgeFunc)
 {
     CHECK_NULL_VOID(frameNode);

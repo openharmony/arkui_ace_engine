@@ -96,6 +96,7 @@ struct VisibleCallbackInfo {
     VisibleRatioCallback callback;
     double visibleRatio = 1.0;
     bool isCurrentVisible = false;
+    uint32_t period = 0;
 };
 
 using OnRouterChangeCallback = bool (*)(const std::string currentRouterPath);
