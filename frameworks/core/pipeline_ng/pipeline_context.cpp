@@ -1824,7 +1824,7 @@ bool PipelineContext::OnBackPressed()
         },
         TaskExecutor::TaskType::UI, "ArkUIBackPressedRemoveOverlay");
     if (hasOverlay) {
-        LOGI("popup consumed backpressed event");
+        LOGI("Overlay consumed backpressed event");
         return true;
     }
 

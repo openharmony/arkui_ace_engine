@@ -1001,6 +1001,7 @@ void OverlayManager::OpenToastAnimation(const RefPtr<FrameNode>& toastNode, int3
 
 void OverlayManager::PopToast(int32_t toastId)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "pop toast enter");
     AnimationOption option;
     auto curve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
     option.SetCurve(curve);
@@ -1387,7 +1388,7 @@ void OverlayManager::ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& custo
 
 void OverlayManager::RemoveIndexerPopupById(int32_t targetId)
 {
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "remove indexer popup byid enter");
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "remove indexer popup by id enter");
     if (customPopupMap_.empty()) {
         return;
     }

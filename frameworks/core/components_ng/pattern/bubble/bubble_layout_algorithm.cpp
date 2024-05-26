@@ -1067,6 +1067,8 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(bool showInSubWindow)
     auto pipelineContext = GetMainPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     targetOffset_ = targetNode->GetPaintRectOffset();
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "popup targetOffset_: %{public}s, targetSize_: %{public}s",
+        targetOffset_.ToString().c_str(), targetSize_.ToString().c_str());
     // Show in SubWindow
     if (showInSubWindow) {
         auto displayWindowOffset = OffsetF(pipelineContext->GetDisplayWindowRectInfo().GetOffset().GetX(),

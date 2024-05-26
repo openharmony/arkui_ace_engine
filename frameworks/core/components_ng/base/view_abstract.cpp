@@ -1527,7 +1527,7 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam>& param, const RefPtr<Frame
     } else {
         // Invisable
         if (!isShow) {
-            TAG_LOGW(AceLogTag::ACE_DIALOG, "get isShow failed");
+            TAG_LOGW(AceLogTag::ACE_DIALOG, "Popup is already hidden");
             return;
         }
         popupInfo.markNeedUpdate = true;
