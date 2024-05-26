@@ -288,6 +288,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         fingersId_.erase(event.id);
     }
     globalPoint_ = Point(event.x, event.y);
+    touchPoints_[event.id] = event;
     lastTouchEvent_ = event;
     time_ = event.time;
 
@@ -341,6 +342,8 @@ void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
     }
     globalPoint_ = Point(event.x, event.y);
 
+    touchPoints_[event.id] = TouchEvent();
+    UpdateTouchPointWithAxisEvent(event);
     UpdateAxisPointInVelocityTracker(event, true);
     lastAxisEvent_ = event;
     time_ = event.time;
