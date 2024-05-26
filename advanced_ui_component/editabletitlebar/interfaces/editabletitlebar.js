@@ -861,7 +861,7 @@ class ImageMenuItem extends ViewPU {
             Image.fillColor(this.editableTitleBarTheme.iconColor);
             Image.focusable(this.item.isEnabled);
             Image.enabled(this.item.isEnabled);
-            Image.matchTextDirection(this.item.value == PUBLIC_BACK ? true : false)
+            Image.matchTextDirection(this.item.value === PUBLIC_BACK ? true : false);
         }, Image);
         Button.pop();
     }

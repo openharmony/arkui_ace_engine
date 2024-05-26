@@ -429,7 +429,7 @@ struct ImageMenuItem {
         .fillColor(this.editableTitleBarTheme.iconColor)
         .focusable(this.item.isEnabled)
         .enabled(this.item.isEnabled)
-        .matchTextDirection(this.item.value == PUBLIC_BACK ? true : false)
+        .matchTextDirection(this.item.value === PUBLIC_BACK ? true : false)
     }
     .backgroundButtonStyle()
     .borderRadius($r('sys.float.titlebar_icon_background_shape'))

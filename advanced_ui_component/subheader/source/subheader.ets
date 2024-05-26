@@ -104,18 +104,18 @@ class SubHeaderTheme {
 @Styles
 function commonContentPadding() {
   .padding({
-    right: $r('sys.float.padding_level0'),
-    top: $r('sys.float.padding_level4'),
-    bottom: $r('sys.float.padding_level4'),
+    end: LengthMetrics.resource($r('sys.float.padding_level0')),
+    top: LengthMetrics.resource($r('sys.float.padding_level4')),
+    bottom: LengthMetrics.resource($r('sys.float.padding_level4')),
   })
 }
 
 @Styles
 function commonListPadding() {
   .padding({
-    right: $r('sys.float.padding_level6'),
-    top: $r('sys.float.padding_level4'),
-    bottom: $r('sys.float.padding_level4'),
+    end: LengthMetrics.resource($r('sys.float.padding_level6')),
+    top: LengthMetrics.resource($r('sys.float.padding_level4')),
+    bottom: LengthMetrics.resource($r('sys.float.padding_level4')),
   })
 }
 
@@ -347,14 +347,14 @@ export struct SubHeader {
           .fontWeight($$.iconOptions?.symbolicIconOption?.fontWeight)
           .renderingStrategy($$.iconOptions?.symbolicIconOption?.renderingStrategy)
           .effectStrategy($$.iconOptions?.symbolicIconOption?.effectStrategy)
-          .margin({ right: $r('sys.float.padding_level4') })
+          .margin({ end: LengthMetrics.resource($r('sys.float.padding_level4')) })
           .flexShrink(0)
       } else {
         Image($$.iconOptions?.icon)
           .fillColor(this.subHeaderTheme.leftIconColor)
           .width(LEFT_ICON_SIZE)
           .height(LEFT_ICON_SIZE)
-          .margin({ right: $r('sys.float.padding_level4') })
+          .margin({ end: LengthMetrics.resource($r('sys.float.padding_level4')) })
           .draggable(false)
           .flexShrink(0)
       }
@@ -487,10 +487,10 @@ export struct SubHeader {
               .focusable(true)
           }
           .padding({
-            left: $r('sys.float.padding_level1'),
-            right: $r('sys.float.padding_level1'),
-            top: $r('sys.float.padding_level2'),
-            bottom: $r('sys.float.padding_level2')
+            start: LengthMetrics.resource($r('sys.float.padding_level1')),
+            end: LengthMetrics.resource($r('sys.float.padding_level1')),
+            top: LengthMetrics.resource($r('sys.float.padding_level2')),
+            bottom: LengthMetrics.resource($r('sys.float.padding_level2'))
           })
           .margin({
             bottom: $r('sys.float.padding_level2'),
@@ -566,8 +566,8 @@ export struct SubHeader {
               })
               .margin({
                 end: this.getTextArrowMarginRight(),
-                top: $r('sys.float.padding_level4'),
-                bottom: $r('sys.float.padding_level4'),
+                top: LengthMetrics.resource($r('sys.float.padding_level4')),
+                bottom: LengthMetrics.resource($r('sys.float.padding_level4')),
               })
           }
         }
@@ -597,6 +597,7 @@ export struct SubHeader {
             .height(ARROW_ICON_HEIGHT)
             .focusable(true)
             .draggable(false)
+            .matchTextDirection(true)
         }
         .justifyContent(FlexAlign.End)
         .height(this.textArrowStyleHeight)
