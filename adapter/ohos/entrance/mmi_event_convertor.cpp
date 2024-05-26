@@ -237,9 +237,7 @@ void GetMouseEventAction(int32_t action, MouseEvent& events, bool isScenceBoardW
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_DOWN:
             events.action = MouseAction::PRESS;
-            if (isScenceBoardWindow) {
-                events.pullAction = MouseAction::PULL_DOWN;
-            }
+            events.pullAction = MouseAction::PULL_DOWN;
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE:
             events.action = MouseAction::MOVE;
@@ -247,9 +245,7 @@ void GetMouseEventAction(int32_t action, MouseEvent& events, bool isScenceBoardW
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP:
             events.action = MouseAction::RELEASE;
-            if (isScenceBoardWindow) {
-                events.pullAction = MouseAction::PULL_UP;
-            }
+            events.pullAction = MouseAction::PULL_UP;
             break;
         default:
             events.action = MouseAction::NONE;
