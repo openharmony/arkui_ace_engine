@@ -41,6 +41,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "dm/display_manager.h"
 #include "foundation/ability/ability_runtime/frameworks/native/runtime/connect_server_manager.h"
+#include "foundation/arkui/ace_engine/frameworks/base/utils/utf.h"
 
 namespace OHOS::Ace {
 
@@ -233,6 +234,21 @@ void LayoutInspector::GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t 
         treeJsonStr = V2::Inspector::GetInspectorTree(pipelineContext, true);
     }
 #endif
+    auto debuggerFunc =[](std::string& str){
+        uint8_t* buf8 = (uint8_t*)str.c_str();
+        size_t uft8Len = str.size();
+        auto uft16Len = MUtf8ToUtf16Size(buf8,uft8Len);
+
+        std::shared_ptr<uint16_t[]> buf16(new uint16_t[uft16Len]);
+        auto resultLen = ConvertRegionUtf8ToUtf16(buf8, buf16.get(), utf8Len, utf16Len, 0);
+        if(resultLen != uft16Len){
+            LOGE("ConvertRegionUtf8ToUtf16 error");
+            return;
+        }
+        size_t reLen = DebuggerConvertRegionUtf16ToUtf8(buf16.get(), buf8, uft16Len, utf8Len, 0,false,false);
+        return;
+    }
+    debuggerFunc(treeJsonStr);
     auto jsonTree = JsonUtil::ParseJsonString(treeJsonStr);
     jsonTree->Put("VsyncID", (int32_t)pipeline->GetFrameCount());
     jsonTree->Put("ProcessID", getpid());
