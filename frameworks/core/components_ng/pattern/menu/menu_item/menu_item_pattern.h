@@ -254,8 +254,12 @@ private:
     void HandleFocusEvent();
     void HandleBlurEvent();
 
-    void UpdateSymbolNode(RefPtr<FrameNode>& selectIcon_);
-    void UpdateImageNode(RefPtr<FrameNode>& selectIcon_);
+    void UpdateSymbolNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>& selectIcon_);
+    void UpdateImageNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>& selectIcon_);
+    void UpdateSymbolIcon(RefPtr<FrameNode>& row, RefPtr<FrameNode>& iconNode, ImageSourceInfo& iconSrc,
+        std::function<void(WeakPtr<NG::FrameNode>)>& symbol, bool isStart);
+    void UpdateImageIcon(RefPtr<FrameNode>& row, RefPtr<FrameNode>& iconNode, ImageSourceInfo& iconSrc,
+        std::function<void(WeakPtr<NG::FrameNode>)>& symbol, bool isStart);
 
     std::list<TouchRegion> hoverRegions_;
 

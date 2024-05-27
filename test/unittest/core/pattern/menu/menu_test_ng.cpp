@@ -2595,7 +2595,8 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgAddSelectIcon002, TestSize.Level1)
         .WillOnce(Return(AceType::MakeRefPtr<TextTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<MenuTheme>()));
+        .WillOnce(Return(AceType::MakeRefPtr<MenuTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<ShadowTheme>()));
     // call AddSelectIcon
     itemPattern->OnModifyDone();
 
