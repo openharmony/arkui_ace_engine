@@ -540,6 +540,7 @@ public:
         selectionMenuMap_.clear();
     }
     void DumpInfo() override;
+    void MouseDoubleClickParagraphEnd(int32_t& index);
     void InitSelection(const Offset& pos);
     bool HasFocus() const;
     void OnColorConfigurationUpdate() override;
