@@ -1186,13 +1186,14 @@ HWTEST_F(TextFieldModifyTest, DumpViewDataPageNode001, TestSize.Level1)
     /**
      * @tc.steps: step2. Create PageNodeInfoWrap ptr.
      */
+    auto viewData = ViewDataWrap::CreateViewDataWrap();
     auto info = PageNodeInfoWrap::CreatePageNodeInfoWrap();
     auto autoFillType = AceAutoFillType::ACE_UNSPECIFIED;
 
     /**
      * @tc.steps: step3. call DumpViewDataPageNode.
      */
-    pattern_->NotifyFillRequestSuccess(info, autoFillType);
+    pattern_->NotifyFillRequestSuccess(viewData, info, autoFillType);
 }
 
 /**

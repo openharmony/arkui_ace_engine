@@ -2258,7 +2258,7 @@ void PipelineContext::NotifyFillRequestSuccess(AceAutoFillType autoFillType, Ref
             TAG_LOGW(AceLogTag::ACE_AUTO_FILL, "frameNode is not found, id=%{public}d", item->GetId());
             continue;
         }
-        frameNode->NotifyFillRequestSuccess(item, autoFillType);
+        frameNode->NotifyFillRequestSuccess(viewDataWrap, item, autoFillType);
     }
 }
 
