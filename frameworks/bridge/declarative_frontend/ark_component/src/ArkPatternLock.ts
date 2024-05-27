@@ -150,54 +150,20 @@ class PatternLockAutoResetModifier extends ModifierWithKey<boolean> {
   }
 }
 
-class PatternLockActiveCircleColorModifier extends ModifierWithKey<ResourceColor> {
-  constructor(value: ResourceColor) {
+class PatternLockActivateCircleStyleModifier extends ModifierWithKey<CircleStyleOptions> {
+  constructor(value: CircleStyleOptions) {
     super(value);
   }
-  static identity: Symbol = Symbol('patternLockActiveCircleColor');
+  static identity: Symbol = Symbol('patternLockActivateCircleStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().patternLock.resetActiveCircleColor(node);
+      getUINativeModule().patternLock.resetActivateCircleStyle(node);
     } else {
-      getUINativeModule().patternLock.setActiveCircleColor(node, this.value!);
+      getUINativeModule().patternLock.setActivateCircleStyle(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-
-class PatternLockActiveCircleRadiusModifier extends ModifierWithKey<Length> {
-  constructor(value: Length) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('patternLockActiveCircleRadius');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().patternLock.resetActiveCircleRadius(node);
-    } else {
-      getUINativeModule().patternLock.setActiveCircleRadius(node, this.value!);
-    }
-  }
-  checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-
-class PatternLockEnableWaveEffectModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('patternLockEnableWaveEffect');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().patternLock.resetEnableWaveEffect(node);
-    } else {
-      getUINativeModule().patternLock.setEnableWaveEffect(node, this.value!);
-    }
-  }
-  checkObjectDiff(): boolean {
-    return this.stageValue !== this.value;
   }
 }
 
@@ -245,19 +211,9 @@ class ArkPatternLockComponent extends ArkComponent implements PatternLockAttribu
       PatternLockAutoResetModifier, value);
     return this;
   }
-  activeCircleColor(value: ResourceColor): PatternLockAttribute {
-    modifierWithKey(this._modifiersWithKeys, PatternLockActiveCircleColorModifier.identity,
-      PatternLockActiveCircleColorModifier, value);
-    return this;
-  }
-  activeCircleRadius(value: Length): PatternLockAttribute {
-    modifierWithKey(this._modifiersWithKeys, PatternLockActiveCircleRadiusModifier.identity,
-      PatternLockActiveCircleRadiusModifier, value);
-    return this;
-  }
-  enableWaveEffect(value: boolean): PatternLockAttribute {
-    modifierWithKey(this._modifiersWithKeys, PatternLockEnableWaveEffectModifier.identity,
-      PatternLockEnableWaveEffectModifier, value);
+  activateCircleStyle(value: CircleStyleOptions): PatternLockAttribute {
+    modifierWithKey(this._modifiersWithKeys, PatternLockActivateCircleStyleModifier.identity,
+      PatternLockActivateCircleStyleModifier, value);
     return this;
   }
   onPatternComplete(callback: (input: Array<number>) => void): PatternLockAttribute {

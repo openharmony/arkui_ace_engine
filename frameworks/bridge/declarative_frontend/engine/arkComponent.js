@@ -6809,57 +6809,23 @@ class PatternLockAutoResetModifier extends ModifierWithKey {
   }
 }
 PatternLockAutoResetModifier.identity = Symbol('patternlockautoreset');
-class PatternLockActiveCircleColorModifier extends ModifierWithKey {
+class PatternLockActivateCircleStyleModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      getUINativeModule().patternLock.resetActiveCircleColor(node);
+      getUINativeModule().patternLock.resetActivateCircleStyle(node);
     }
     else {
-      getUINativeModule().patternLock.setActiveCircleColor(node, this.value);
+      getUINativeModule().patternLock.setActivateCircleStyle(node, this.value);
     }
   }
   checkObjectDiff() {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
-PatternLockActiveCircleColorModifier.identity = Symbol('patternLockActiveCircleColor');
-class PatternLockActiveCircleRadiusModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().patternLock.resetActiveCircleRadius(node);
-    }
-    else {
-      getUINativeModule().patternLock.setActiveCircleRadius(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-PatternLockActiveCircleRadiusModifier.identity = Symbol('patternLockActiveCircleRadius');
-class PatternLockEnableWaveEffectModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().patternLock.resetEnableWaveEffect(node);
-    }
-    else {
-      getUINativeModule().patternLock.setEnableWaveEffect(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return this.stageValue !== this.value;
-  }
-}
-PatternLockEnableWaveEffectModifier.identity = Symbol('patternLockEnableWaveEffect');
+PatternLockActivateCircleStyleModifier.identity = Symbol('patternLockActivateCircleStyle');
 class ArkPatternLockComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -6894,6 +6860,10 @@ class ArkPatternLockComponent extends ArkComponent {
   }
   autoReset(value) {
     modifierWithKey(this._modifiersWithKeys, PatternLockAutoResetModifier.identity, PatternLockAutoResetModifier, value);
+    return this;
+  }
+  activateCircleStyle(value) {
+    modifierWithKey(this._modifiersWithKeys, PatternLockActivateCircleStyleModifier.identity, PatternLockActivateCircleStyleModifier, value);
     return this;
   }
   onPatternComplete(callback) {
