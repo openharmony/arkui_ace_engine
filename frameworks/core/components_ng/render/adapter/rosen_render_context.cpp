@@ -505,6 +505,8 @@ void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition
             }
             sandBoxCount_ = 0;
             CHECK_NULL_VOID(!host->IsRemoving());
+        } else {
+            sandBoxCount_ = 0;
         }
         rsNode_->SetSandBox(std::nullopt);
     }
