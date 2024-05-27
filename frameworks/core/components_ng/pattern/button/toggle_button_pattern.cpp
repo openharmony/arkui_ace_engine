@@ -484,17 +484,9 @@ void ToggleButtonPattern::OnClick()
     buttonEventHub->UpdateChangeEvent(!isLastSelected);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     if (isFocus_) {
-        if (isOn_.value()) {
-            HandleOnOffStyle(false, true);
-        } else {
-            HandleOnOffStyle(true, true);
-        }
+        isOn_.value() ? HandleOnOffStyle(false, true) : HandleOnOffStyle(true, true);
     } else {
-        if (isOn_.value()) {
-            HandleOnOffStyle(false, false);
-        } else {
-            HandleOnOffStyle(true, false);
-        }
+        isOn_.value() ? HandleOnOffStyle(false, false) :  HandleOnOffStyle(true, false);
     }
 }
 
