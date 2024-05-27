@@ -3746,6 +3746,22 @@ void JSViewAbstract::JsBorder(const JSCallbackInfo& info)
     info.ReturnSelf();
 }
 
+bool IsBorderWidthObjUndefined(const JSRef<JSVal>& args)
+{
+    if (!args->IsObject()) {
+        return false;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args);
+    if (!obj->HasProperty(LEFT_PROPERTY) || !obj->HasProperty(RIGHT_PROPERTY)) {
+        return false;
+    }
+    
+    if (!obj->IsUndefined()) {
+        return false;
+    }
+    return true;
+}
+    
 void JSViewAbstract::JsBorderWidth(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
@@ -3754,6 +3770,12 @@ void JSViewAbstract::JsBorderWidth(const JSCallbackInfo& info)
         ViewAbstractModel::GetInstance()->SetBorderWidth({});
         return;
     }
+    
+    if (IsBorderWidthObjUndefined(info[0])) {
+        ViewAbstractModel::GetInstance()->SetBorderWidth({});
+        return;
+    }
+    
     ParseBorderWidth(info[0]);
 }
 
