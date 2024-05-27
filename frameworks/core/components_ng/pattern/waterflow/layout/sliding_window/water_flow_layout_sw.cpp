@@ -105,7 +105,9 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
     }
 
     wrapper->SetActiveChildRange(nodeIdx(info_->startIndex_), nodeIdx(info_->endIndex_));
-    LayoutFooter(paddingOffset, reverse);
+    if (info_->itemEnd_) {
+        LayoutFooter(paddingOffset, reverse);
+    }
 }
 
 void WaterFlowLayoutSW::Init(const SizeF& frameSize)

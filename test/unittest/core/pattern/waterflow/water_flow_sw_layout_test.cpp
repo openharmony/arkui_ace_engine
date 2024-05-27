@@ -54,6 +54,29 @@ HWTEST_F(WaterFlowSWTest, Regular001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ScrollToEdge003
+ * @tc.desc: Test ScrollToEdge func and layout footer
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, ScrollToEdge003, TestSize.Level1)
+{
+    Create([](WaterFlowModelNG model) {
+        model.SetFooter(GetDefaultHeaderBuilder());
+        model.SetColumnsTemplate("1fr");
+        model.SetRowsGap(Dimension(5.0f));
+        CreateRandomItem(100);
+    });
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushLayoutTask(frameNode_);
+    auto info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->endIndex_, 99);
+    EXPECT_EQ(GetChildRect(frameNode_, 100).Bottom(), 750.0f);
+    EXPECT_EQ(GetChildOffset(frameNode_, info->footerIndex_), OffsetF(0.0f, 750.0f));
+    UpdateCurrentOffset(50.0f + GetChildRect(frameNode_, 100).Height() + 1.0f);
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 0)->IsActive());
+}
+
+/**
  * @tc.name: Reset001
  * @tc.desc: waterFlow children update
  * @tc.type: FUNC
