@@ -106,7 +106,9 @@ napi_value JSRenderImage::Constructor(napi_env env, napi_callback_info info)
     auto wrapper = new (std::nothrow) JSRenderImage();
     wrapper->SetInstanceId(OHOS::Ace::Container::CurrentId());
     if (argc <= 0) {
-        DELETE_RETURN_NULL(wrapper);
+        napi_coerce_to_native_binding_object(env, thisVar, DetachImageBitmap, AttachImageBitmap, wrapper, nullptr);
+        napi_wrap(env, thisVar, wrapper, Finalizer, nullptr, nullptr);
+        return thisVar;
     }
     napi_value argv[2] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -132,7 +134,7 @@ napi_value JSRenderImage::Constructor(napi_env env, napi_callback_info info)
         wrapper->LoadImage(textString);
     } else {
 #ifdef PIXEL_MAP_SUPPORTED
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
             auto pixelMap = GetPixelMap(env, argv[0]);
             if (!pixelMap) {
                 DELETE_RETURN_NULL(wrapper);
