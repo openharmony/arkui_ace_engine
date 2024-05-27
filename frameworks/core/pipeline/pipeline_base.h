@@ -1063,6 +1063,16 @@ public:
         return halfLeading_;
     }
 
+    void SetSupportPreviewText(bool changeSupported)
+    {
+        hasSupportedPreviewText_ = !changeSupported;
+    }
+
+    bool GetSupportPreviewText() const
+    {
+        return hasSupportedPreviewText_;
+    }
+
     void SetUseCutout(bool useCutout)
     {
         useCutout_ = useCutout;
@@ -1356,6 +1366,7 @@ private:
     int64_t formAnimationStartTime_ = 0;
     bool isFormAnimation_ = false;
     bool halfLeading_ = false;
+    bool hasSupportedPreviewText_ = true;
     bool useCutout_ = false;
     uint64_t vsyncTime_ = 0;
 
