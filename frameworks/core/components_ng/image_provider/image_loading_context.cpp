@@ -281,6 +281,7 @@ void ImageLoadingContext::DownloadImageSuccess(const std::string& imageData)
 {
     TAG_LOGI(AceLogTag::ACE_IMAGE, "Download image successfully, srcInfo = %{public}s, ImageData length=%{public}zu",
         GetSrc().ToString().c_str(), imageData.size());
+    ACE_LAYOUT_SCOPED_TRACE("DownloadImageSuccess[src:%s]", GetSrc().ToString().c_str());
     auto data = ImageData::MakeFromDataWithCopy(imageData.data(), imageData.size());
     if (!Positive(imageData.size())) {
         FailCallback("The length of imageData from netStack is not positive");

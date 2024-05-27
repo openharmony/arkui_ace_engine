@@ -426,7 +426,7 @@ HWTEST_F(ImageTestTwoNg, ImageSetDraggable0001, TestSize.Level1)
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = IMAGE_SRC_URL;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
     image.Create(imageInfoConfig, pixMap);
@@ -440,7 +440,7 @@ HWTEST_F(ImageTestTwoNg, ImageSetDraggable0002, TestSize.Level1)
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = IMAGE_SRC_URL;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
     image.Create(imageInfoConfig, pixMap);
@@ -1110,7 +1110,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0011, TestSize.Level1)
     //切换Image数据源
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = PNG_IMAGE;
+    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
     imageModelNG.Create(imageInfoConfig, pixMap);
@@ -1162,7 +1162,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0012, TestSize.Level1)
     //切换Image数据源
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = PNG_IMAGE;
+    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
     imageModelNG.Create(imageInfoConfig, pixMap);
@@ -1214,7 +1214,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0013, TestSize.Level1)
     //切换Image数据源
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = PNG_IMAGE;
+    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
     imageModelNG.Create(imageInfoConfig, pixMap);
@@ -1266,7 +1266,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0014, TestSize.Level1)
     //切换Image数据源
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = PNG_IMAGE;
+    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
     imageModelNG.Create(imageInfoConfig, pixMap);
@@ -1318,7 +1318,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0015, TestSize.Level1)
     //切换Image数据源
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = PNG_IMAGE;
+    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
     imageModelNG.Create(imageInfoConfig, pixMap);
@@ -1370,7 +1370,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0016, TestSize.Level1)
     //切换Image数据源
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = PNG_IMAGE;
+    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
     imageModelNG.Create(imageInfoConfig, pixMap);
@@ -1422,7 +1422,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0017, TestSize.Level1)
     //切换Image数据源
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = PNG_IMAGE;
+    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
     imageModelNG.Create(imageInfoConfig, pixMap);
@@ -1474,7 +1474,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0018, TestSize.Level1)
     //切换Image数据源
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = PNG_IMAGE;
+    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
     imageModelNG.Create(imageInfoConfig, pixMap);
@@ -1526,7 +1526,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0019, TestSize.Level1)
     //切换Image数据源
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = PNG_IMAGE;
+    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
     imageModelNG.Create(imageInfoConfig, pixMap);
@@ -1578,7 +1578,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0020, TestSize.Level1)
     //切换Image数据源
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = PNG_IMAGE;
+    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
     imageModelNG.Create(imageInfoConfig, pixMap);
@@ -1606,7 +1606,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0021, TestSize.Level1)
     ImageModelNG imageModelNG;
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = PNG_IMAGE;
+    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
     imageModelNG.Create(imageInfoConfig, pixMap);
@@ -1660,7 +1660,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0022, TestSize.Level1)
     ImageModelNG imageModelNG;
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = PNG_IMAGE;
+    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
     imageModelNG.Create(imageInfoConfig, pixMap);
@@ -1712,7 +1712,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0023, TestSize.Level1)
     ImageModelNG imageModelNG;
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = PNG_IMAGE;
+    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
     imageModelNG.Create(imageInfoConfig, pixMap);

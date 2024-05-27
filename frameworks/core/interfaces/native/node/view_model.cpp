@@ -101,6 +101,7 @@ void* createImageSpanNode(ArkUI_Int32 nodeId)
     imageSpanNode->IncRefCount();
     return AceType::RawPtr(imageSpanNode);
 }
+
 void* createImageNode(ArkUI_Int32 nodeId)
 {
     RefPtr<PixelMap> pixmap = nullptr;

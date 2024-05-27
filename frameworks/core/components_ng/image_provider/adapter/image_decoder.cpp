@@ -114,10 +114,10 @@ RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(AIImageQuality imageQuality)
     auto width = std::lround(desiredSize_.Width());
     auto height = std::lround(desiredSize_.Height());
     std::pair<int32_t, int32_t> sourceSize = source->GetImageSize();
-    ACE_SCOPED_TRACE("CreateImagePixelMap %s, sourceSize: [ %d, %d ], targetSize: [ %d, %d ]",
-        obj_->GetSourceInfo().ToString().c_str(), sourceSize.first, sourceSize.second,
-        static_cast<int32_t>(width),
-        static_cast<int32_t>(height));
+    auto src = obj_->GetSourceInfo();
+    auto srcStr = src.GetSrcType() == SrcType::BASE64 ? src.GetKey() : src.ToString();
+    ACE_SCOPED_TRACE("CreateImagePixelMap %s, sourceSize: [ %d, %d ], targetSize: [ %d, %d ]", srcStr.c_str(),
+        sourceSize.first, sourceSize.second, static_cast<int32_t>(width), static_cast<int32_t>(height));
     auto pixmap = source->CreatePixelMap({ width, height }, imageQuality);
 
     CHECK_NULL_RETURN(pixmap, nullptr);
