@@ -61,6 +61,7 @@
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_lanes_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
+#include "core/components_ng/pattern/list/list_item_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
@@ -149,10 +150,11 @@ public:
         const RefPtr<FrameNode>& frameNode, int32_t viewItemNumber, int32_t lanes, float space, float startOffset);
     AssertionResult IsEqualTotalOffset(float expectOffset);
     AssertionResult ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, float expectOffset);
-    AssertionResult ScrollToItemInGroup(
+    AssertionResult JumpToItemInGroup(
         int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align, float expectOffset);
     std::vector<RefPtr<FrameNode>> GetALLItem();
     int32_t findFocusNodeIndex(RefPtr<FocusHub>& focusNode);
+    void ScrollTo(float position);
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<ListPattern> pattern_;

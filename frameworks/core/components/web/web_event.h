@@ -159,6 +159,12 @@ public:
     virtual void HandleResponseStatus(bool isReady) = 0;
 };
 
+struct WebKeyboardOption {
+    bool isSystemKeyboard_ = true;
+    int32_t enterKeyTpye_ = -1;
+    std::function<void()> customKeyboardBuilder_ = nullptr;
+};
+
 class ACE_EXPORT WebResponse : public AceType {
     DECLARE_ACE_TYPE(WebResponse, AceType)
 
@@ -728,6 +734,20 @@ public:
     virtual void CancelLoad() = 0;
 };
 
+class ACE_EXPORT WebCustomKeyboardHandler : public AceType {
+    DECLARE_ACE_TYPE(WebCustomKeyboardHandler, AceType)
+
+public:
+    WebCustomKeyboardHandler() = default;
+    ~WebCustomKeyboardHandler() = default;
+
+    virtual void InsertText(const std::string &text) = 0;
+    virtual void DeleteForward(int32_t length) = 0;
+    virtual void DeleteBackward(int32_t length) = 0;
+    virtual void SendFunctionKey(int32_t key) = 0;
+    virtual void Close() = 0;
+};
+
 class ACE_EXPORT LoadWebPageStartEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(LoadWebPageStartEvent, BaseEventInfo);
 
@@ -921,6 +941,32 @@ public:
 
 private:
     RefPtr<WebRequest> request_;
+};
+
+class ACE_EXPORT InterceptKeyboardEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(InterceptKeyboardEvent, BaseEventInfo);
+
+public:
+    explicit InterceptKeyboardEvent(const RefPtr<WebCustomKeyboardHandler>& customKeyboardHandler,
+        const std::map<std::string, std::string> attributes) :
+        BaseEventInfo("InterceptKeyboardEvent"),
+        customKeyboardHandler_(customKeyboardHandler),
+        attributes_(attributes) {}
+    ~InterceptKeyboardEvent() = default;
+
+    const RefPtr<WebCustomKeyboardHandler>& GetCustomKeyboardHandler() const
+    {
+        return customKeyboardHandler_;
+    }
+
+    const std::map<std::string, std::string>& GetAttributesMap() const
+    {
+        return attributes_;
+    }
+
+private:
+    RefPtr<WebCustomKeyboardHandler> customKeyboardHandler_;
+    std::map<std::string, std::string> attributes_;
 };
 
 class ACE_EXPORT WebAppLinkEvent : public BaseEventInfo {

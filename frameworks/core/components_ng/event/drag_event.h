@@ -76,12 +76,23 @@ public:
         actionLongPress_ = std::move(actionLongPress);
     }
 
+    const std::vector<KeyCode>& GetPressedKeyCodes() const
+    {
+        return pressedKeyCodes_;
+    }
+
+    void SetPressedKeyCodes(const std::vector<KeyCode>& pressedKeyCodes)
+    {
+        pressedKeyCodes_ = pressedKeyCodes;
+    }
+
 private:
     GestureEventFunc actionStart_;
     GestureEventFunc actionUpdate_;
     GestureEventFunc actionEnd_;
     GestureEventNoParameter actionCancel_;
     GestureEventFunc actionLongPress_;
+    std::vector<KeyCode> pressedKeyCodes_;
 };
 
 class ACE_EXPORT DragEventActuator : public GestureEventActuator {
@@ -105,6 +116,11 @@ public:
             customCallback_.Reset();
         }
         customCallback_ = dragEvent;
+    }
+
+    bool HasDragEvent() const
+    {
+        return static_cast<bool>(userCallback_);
     }
 
     void ClearDragEvent()
@@ -187,6 +203,16 @@ public:
     bool IsDragUserReject() const
     {
         return isDragUserReject_;
+    }
+
+    void SetIsDefaultOnDragStartExecuted(bool defaultOnDragStartExecuted)
+    {
+        defaultOnDragStartExecuted_ = defaultOnDragStartExecuted;
+    }
+
+    bool IsDefaultOnDragStartExecuted() const
+    {
+        return defaultOnDragStartExecuted_;
     }
 
     void CopyDragEvent(const RefPtr<DragEventActuator>& dragEventActuator);
@@ -272,6 +298,7 @@ private:
     bool isOnBeforeLiftingAnimation = false;
 
     bool isDragUserReject_ = false;
+    bool defaultOnDragStartExecuted_ = false;
 
     PanDirection direction_;
     int32_t fingers_ = 1;

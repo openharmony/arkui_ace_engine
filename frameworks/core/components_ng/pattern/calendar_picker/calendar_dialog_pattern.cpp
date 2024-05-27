@@ -136,7 +136,7 @@ void CalendarDialogPattern::UpdateOptionsButtonColor()
             bool acceptNotUpdateBGColor =
                 buttonIndex == OPTION_ACCEPT_BUTTON_INDEX && !updateColorFlags[ACCEPT_BUTTON_BACKGROUND_COLOR_INDEX];
             if (!(cancelNotUpdateBGColor || acceptNotUpdateBGColor)) {
-                auto defaultBGColor = SystemProperties::GetDeviceType() == DeviceType::PHONE
+                auto defaultBGColor = calendarTheme->GetIsButtonTransparent()
                                           ? Color::TRANSPARENT
                                           : calendarTheme->GetDialogButtonBackgroundColor();
                 button->GetRenderContext()->UpdateBackgroundColor(defaultBGColor);

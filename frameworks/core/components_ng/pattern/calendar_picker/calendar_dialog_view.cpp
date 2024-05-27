@@ -417,8 +417,32 @@ RefPtr<FrameNode> CalendarDialogView::CreateButtonNode(bool isConfirm, const std
     textLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
     textNode->MountToParent(buttonNode);
 
+    UpdateButtonLayoutProperty(buttonNode, isConfirm, buttonInfos, pipeline);
+    auto buttonEventHub = buttonNode->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_RETURN(buttonEventHub, nullptr);
+    buttonEventHub->SetStateEffect(true);
+
+    auto buttonRenderContext = buttonNode->GetRenderContext();
+    auto defaultBGColor =
+        calendarTheme->GetIsButtonTransparent() ? Color::TRANSPARENT : calendarTheme->GetDialogButtonBackgroundColor();
+    buttonRenderContext->UpdateBackgroundColor(defaultBGColor);
     auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(buttonLayoutProperty, nullptr);
+    auto index = isConfirm ? ACCEPT_BUTTON_INDEX : CANCEL_BUTTON_INDEX;
+    UpdateButtonStyles(buttonInfos, index, buttonLayoutProperty, buttonRenderContext);
+    UpdateButtonDefaultFocus(buttonInfos, buttonNode, isConfirm);
+    buttonNode->MarkModifyDone();
+    return buttonNode;
+}
+
+void CalendarDialogView::UpdateButtonLayoutProperty(const RefPtr<FrameNode>& buttonNode, bool isConfirm,
+    const std::vector<ButtonInfo>& buttonInfos, const RefPtr<PipelineContext>& pipeline)
+{
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    auto calendarTheme = pipeline->GetTheme<CalendarTheme>();
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonLayoutProperty);
     auto index = isConfirm ? ACCEPT_BUTTON_INDEX : CANCEL_BUTTON_INDEX;
     if (index < buttonInfos.size() &&
         (buttonInfos[index].role.has_value() || buttonInfos[index].buttonStyle.has_value() ||
@@ -431,22 +455,13 @@ RefPtr<FrameNode> CalendarDialogView::CreateButtonNode(bool isConfirm, const std
     buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     buttonLayoutProperty->UpdateType(ButtonType::CAPSULE);
     buttonLayoutProperty->UpdateFlexShrink(1.0);
-    buttonLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(pickerTheme->GetButtonWidth()), CalcLength(calendarTheme->GetCalendarActionRowHeight())));
-
-    auto buttonEventHub = buttonNode->GetEventHub<ButtonEventHub>();
-    CHECK_NULL_RETURN(buttonEventHub, nullptr);
-    buttonEventHub->SetStateEffect(true);
-
-    auto buttonRenderContext = buttonNode->GetRenderContext();
-    auto defaultBGColor = SystemProperties::GetDeviceType() == DeviceType::PHONE
-                              ? Color::TRANSPARENT
-                              : calendarTheme->GetDialogButtonBackgroundColor();
-    buttonRenderContext->UpdateBackgroundColor(defaultBGColor);
-    UpdateButtonStyles(buttonInfos, index, buttonLayoutProperty, buttonRenderContext);
-    UpdateButtonDefaultFocus(buttonInfos, buttonNode, isConfirm);
-    buttonNode->MarkModifyDone();
-    return buttonNode;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        buttonLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(calendarTheme->GetCalendarActionRowHeight())));
+    } else {
+        buttonLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(
+            CalcLength(pickerTheme->GetButtonWidth()), CalcLength(calendarTheme->GetCalendarActionRowHeight())));
+    }
 }
 
 void CalendarDialogView::UpdateButtonStyles(const std::vector<ButtonInfo>& buttonInfos, size_t index,
@@ -572,13 +587,27 @@ RefPtr<FrameNode> CalendarDialogView::CreateDividerNode()
     dividerLayoutProperty->UpdateVertical(true);
     auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
     CHECK_NULL_RETURN(dividerRenderProperty, nullptr);
-    dividerRenderProperty->UpdateDividerColor(SystemProperties::GetDeviceType() == DeviceType::PHONE ?
-        theme->GetDialogDividerColor() : Color::TRANSPARENT);
+    dividerRenderProperty->UpdateDividerColor(
+        theme->GetIsDividerTransparent() ? Color::TRANSPARENT : theme->GetDialogDividerColor());
 
     dividerNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(dialogTheme->GetDividerWidth()), CalcLength(theme->GetEntryArrowWidth())));
 
     dividerNode->MarkModifyDone();
+
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto dividerWrapper = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(false));
+        CHECK_NULL_RETURN(dividerWrapper, nullptr);
+        auto layoutProps = dividerWrapper->GetLayoutProperty<LinearLayoutProperty>();
+        CHECK_NULL_RETURN(layoutProps, nullptr);
+        layoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_AROUND);
+        layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+        layoutProps->UpdateUserDefinedIdealSize(CalcSize(
+            CalcLength(dialogTheme->GetActionsPadding().Bottom()), CalcLength(theme->GetCalendarActionRowHeight())));
+        dividerNode->MountToParent(dividerWrapper);
+        return dividerWrapper;
+    }
     return dividerNode;
 }
 
@@ -590,21 +619,9 @@ RefPtr<FrameNode> CalendarDialogView::CreateOptionsNode(
     auto contentRow = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     CHECK_NULL_RETURN(contentRow, nullptr);
-    auto layoutProps = contentRow->GetLayoutProperty<LinearLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProps, nullptr);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
-    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
-    CHECK_NULL_RETURN(theme, nullptr);
-    layoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_BETWEEN);
-    layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    MarginProperty margin;
-    margin.top = CalcLength(theme->GetCalendarActionRowTopPadding() - CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT);
-    margin.left = CalcLength(theme->GetCalendarActionRowBottomLeftRightPadding());
-    margin.right = CalcLength(theme->GetCalendarActionRowBottomLeftRightPadding());
-    margin.bottom = CalcLength(theme->GetCalendarTitleRowTopPadding() + CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT);
-    layoutProps->UpdateMargin(margin);
-    layoutProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(theme->GetCalendarActionRowHeight())));
+    UpdateOptionLayoutProps(contentRow, pipelineContext);
 
     auto cancelIter = dialogCancelEvent.find("cancelId");
     DialogGestureEvent cancelEvent = nullptr;
@@ -638,6 +655,28 @@ RefPtr<FrameNode> CalendarDialogView::CreateOptionsNode(
     }
     contentRow->AddChild(CreateDividerNode(), 1);
     return contentRow;
+}
+
+void CalendarDialogView::UpdateOptionLayoutProps(
+    const RefPtr<FrameNode>& contentRow, const RefPtr<PipelineContext>& pipelineContext)
+{
+    auto layoutProps = contentRow->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(layoutProps);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(theme);
+    layoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_BETWEEN);
+    layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+    MarginProperty margin;
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        margin.top = CalcLength(theme->GetCalendarActionRowTopPadding() - CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT);
+    } else {
+        margin.top = CalcLength(theme->GetCalendarActionRowTopPadding() + CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT);
+    }
+    margin.left = CalcLength(theme->GetCalendarActionRowBottomLeftRightPadding());
+    margin.right = CalcLength(theme->GetCalendarActionRowBottomLeftRightPadding());
+    margin.bottom = CalcLength(theme->GetCalendarTitleRowTopPadding() + CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT);
+    layoutProps->UpdateMargin(margin);
+    layoutProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(theme->GetCalendarActionRowHeight())));
 }
 
 void CalendarDialogView::SetCalendarPaintProperties(const CalendarSettingData& settingData)

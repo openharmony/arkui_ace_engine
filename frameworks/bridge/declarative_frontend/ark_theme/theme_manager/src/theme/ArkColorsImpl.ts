@@ -76,7 +76,13 @@ class ArkColorsImpl implements Colors {
         colors: CustomColors = {},
         baselineColors: Colors
     ) {
+        const customAttribute = this as any;
+        for(let attribute in colors) {
+            customAttribute[attribute] = colors[attribute];
+        }
         this.brand = colors?.brand ?? baselineColors.brand;
+        const brandColors: BrandColors = ArkColorsImpl.makeBrandColors(colors?.brand);
+
         this.warning = colors?.warning ?? baselineColors.warning;
         this.alert = colors?.alert ?? baselineColors.alert;
         this.confirm = colors?.confirm ?? baselineColors.confirm;
@@ -85,7 +91,7 @@ class ArkColorsImpl implements Colors {
         this.fontSecondary = colors?.fontSecondary ?? baselineColors.fontSecondary;
         this.fontTertiary = colors?.fontTertiary ?? baselineColors.fontTertiary;
         this.fontFourth = colors?.fontFourth ?? baselineColors.fontFourth;
-        this.fontEmphasize = colors?.fontEmphasize ?? baselineColors.fontEmphasize;
+        this.fontEmphasize = colors?.fontEmphasize ?? brandColors.primary ?? baselineColors.fontEmphasize;
 
         this.fontOnPrimary = colors?.fontOnPrimary ?? baselineColors.fontOnPrimary;
         this.fontOnSecondary = colors?.fontOnSecondary ?? baselineColors.fontOnSecondary;
@@ -96,8 +102,8 @@ class ArkColorsImpl implements Colors {
         this.iconSecondary = colors?.iconSecondary ?? baselineColors.iconSecondary;
         this.iconTertiary = colors?.iconTertiary ?? baselineColors.iconTertiary;
         this.iconFourth = colors?.iconFourth ?? baselineColors.iconFourth;
-        this.iconEmphasize = colors?.iconEmphasize ?? baselineColors.iconEmphasize;
-        this.iconSubEmphasize = colors?.iconSubEmphasize ?? baselineColors.iconSubEmphasize;
+        this.iconEmphasize = colors?.iconEmphasize ?? brandColors.primary ?? baselineColors.iconEmphasize;
+        this.iconSubEmphasize = colors?.iconSubEmphasize ?? brandColors.tertiary ?? baselineColors.iconSubEmphasize;
 
         this.iconOnPrimary = colors?.iconOnPrimary ?? baselineColors.iconOnPrimary;
         this.iconOnSecondary = colors?.iconOnSecondary ?? baselineColors.iconOnSecondary;
@@ -108,7 +114,7 @@ class ArkColorsImpl implements Colors {
         this.backgroundSecondary = colors?.backgroundSecondary ?? baselineColors.backgroundSecondary;
         this.backgroundTertiary = colors?.backgroundTertiary ?? baselineColors.backgroundTertiary;
         this.backgroundFourth = colors?.backgroundFourth ?? baselineColors.backgroundFourth;
-        this.backgroundEmphasize = colors?.backgroundEmphasize ?? baselineColors.backgroundEmphasize;
+        this.backgroundEmphasize = colors?.backgroundEmphasize ?? brandColors.primary ?? baselineColors.backgroundEmphasize;
 
         this.compForegroundPrimary = colors?.compForegroundPrimary ?? baselineColors.compForegroundPrimary;
         this.compBackgroundPrimary = colors?.compBackgroundPrimary ?? baselineColors.compBackgroundPrimary;
@@ -117,10 +123,10 @@ class ArkColorsImpl implements Colors {
         this.compBackgroundGray = colors?.compBackgroundGray ?? baselineColors.compBackgroundGray;
         this.compBackgroundSecondary = colors?.compBackgroundSecondary ?? baselineColors.compBackgroundSecondary;
         this.compBackgroundTertiary = colors?.compBackgroundTertiary ?? baselineColors.compBackgroundTertiary;
-        this.compBackgroundEmphasize = colors?.compBackgroundEmphasize ?? baselineColors.compBackgroundEmphasize;
+        this.compBackgroundEmphasize = colors?.compBackgroundEmphasize ?? brandColors.primary ?? baselineColors.compBackgroundEmphasize;
         this.compBackgroundNeutral = colors?.compBackgroundNeutral ?? baselineColors.compBackgroundNeutral;
-        this.compEmphasizeSecondary = colors?.compEmphasizeSecondary ?? baselineColors.compEmphasizeSecondary;
-        this.compEmphasizeTertiary = colors?.compEmphasizeTertiary ?? baselineColors.compEmphasizeTertiary;
+        this.compEmphasizeSecondary = colors?.compEmphasizeSecondary ?? brandColors.fourth ?? baselineColors.compEmphasizeSecondary;
+        this.compEmphasizeTertiary = colors?.compEmphasizeTertiary ?? brandColors.fifth ?? baselineColors.compEmphasizeTertiary;
         this.compDivider = colors?.compDivider ?? baselineColors.compDivider;
         this.compCommonContrary = colors?.compCommonContrary ?? baselineColors.compCommonContrary;
         this.compBackgroundFocus = colors?.compBackgroundFocus ?? baselineColors.compBackgroundFocus;
@@ -130,9 +136,58 @@ class ArkColorsImpl implements Colors {
 
         this.interactiveHover = colors?.interactiveHover ?? baselineColors.interactiveHover;
         this.interactivePressed = colors?.interactivePressed ?? baselineColors.interactivePressed;
-        this.interactiveFocus = colors?.interactiveFocus ?? baselineColors.interactiveFocus;
-        this.interactiveActive = colors?.interactiveActive ?? baselineColors.interactiveActive;
+        this.interactiveFocus = colors?.interactiveFocus ?? brandColors.primary ?? baselineColors.interactiveFocus;
+        this.interactiveActive = colors?.interactiveActive ?? brandColors.primary ?? baselineColors.interactiveActive;
         this.interactiveSelect = colors?.interactiveSelect ?? baselineColors.interactiveSelect;
         this.interactiveClick = colors?.interactiveClick ?? baselineColors.interactiveClick;
+    }
+    static makeBrandColors(brandColor: ResourceColor | undefined) : BrandColors {
+        const result: BrandColors = {
+            primary: undefined,
+            secondary: undefined,
+            tertiary: undefined,
+            fourth: undefined,
+            fifth: undefined,
+            sixth: undefined
+        }
+        if (brandColor) {
+            if (brandColor instanceof Object) {
+                result.primary = brandColor
+                result.secondary = ArkColorsImpl.makeResourceWithOpacity(brandColor as Resource, 0.6)
+                result.tertiary = ArkColorsImpl.makeResourceWithOpacity(brandColor as Resource, 0.4)
+                result.fourth = ArkColorsImpl.makeResourceWithOpacity(brandColor as Resource, 0.2)
+                result.fifth = ArkColorsImpl.makeResourceWithOpacity(brandColor as Resource, 0.1)
+                result.sixth = ArkColorsImpl.makeResourceWithOpacity(brandColor as Resource, 0.05)
+            } else {
+                const argbColor = getUINativeModule().resource.getColorValue(brandColor)
+                result.primary = argbColor
+                result.secondary = ArkColorsImpl.blendOpacity(argbColor, 0.6)
+                result.tertiary = ArkColorsImpl.blendOpacity(argbColor, 0.4)
+                result.fourth = ArkColorsImpl.blendOpacity(argbColor, 0.2)
+                result.fifth = ArkColorsImpl.blendOpacity(argbColor, 0.1)
+                result.sixth = ArkColorsImpl.blendOpacity(argbColor, 0.05)
+            }
+        }
+        return result
+    }
+
+    static makeResourceWithOpacity(resourceColor: Resource, opacityRatio: number) : any {
+        return {
+            "id": resourceColor.id,
+            "type": resourceColor.type,
+            "params": [...resourceColor.params],
+            "bundleName": resourceColor.bundleName,
+            "moduleName": resourceColor.moduleName,
+            "opacityRatio": opacityRatio
+        };
+    }
+
+    static blendOpacity(argbColor: number, opacityRatio: number): number {
+        if (opacityRatio < 0 || opacityRatio > 1.0) {
+            return argbColor
+        }
+        const alpha = (argbColor >> 24) & 0xFF
+        const outAlpha = (alpha * opacityRatio) & 0xFF
+        return ((argbColor & 0x00FFFFFF) | (outAlpha & 0xFF) << 24) >>> 0
     }
 }

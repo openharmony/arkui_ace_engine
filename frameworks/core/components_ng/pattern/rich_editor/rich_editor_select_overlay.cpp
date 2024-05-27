@@ -28,6 +28,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float BOX_EPSILON = 0.5f;
+constexpr float DOUBLE = 2.0f;
 }
 
 bool RichEditorSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
@@ -88,6 +89,10 @@ bool RichEditorSelectOverlay::CheckHandleVisible(const RectF& paintRect)
     }
     PointF bottomPoint = { paintRect.Left(), paintRect.Bottom() - BOX_EPSILON };
     PointF topPoint = { paintRect.Left(), paintRect.Top() + BOX_EPSILON };
+    visibleContentRect.SetLeft(visibleContentRect.GetX() - BOX_EPSILON);
+    visibleContentRect.SetWidth(visibleContentRect.Width() + DOUBLE * BOX_EPSILON);
+    visibleContentRect.SetTop(visibleContentRect.GetY() - BOX_EPSILON);
+    visibleContentRect.SetHeight(visibleContentRect.Height() + DOUBLE * BOX_EPSILON);
     if (IsSingleHandle()) {
         return visibleContentRect.IsInRegion(bottomPoint);
     }
@@ -136,10 +141,12 @@ void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst
     auto contentRect = pattern->GetContentRect();
     auto caretRect = pattern->GetCaretRect();
     float x = std::clamp(localOffset.GetX(), contentRect.Left(), contentRect.Right() - caretRect.Width());
-    float y = std::clamp(localOffset.GetY(), contentRect.Top(), contentRect.Bottom() - caretRect.Height());
-    localOffset = OffsetF(x, y);
-
-    auto magnifierLocalOffset = localOffset;
+    float y = localOffset.GetY();
+    if (!isFirst) {
+        y = y + handleRect.Height() - caretRect.Height();
+    }
+    y = std::clamp(y, contentRect.Top(), contentRect.Bottom() - caretRect.Height());
+    auto magnifierLocalOffset = OffsetF(x, y);
     GetLocalPointWithTransform(magnifierLocalOffset); // do affine transformation
     pattern->magnifierController_->SetLocalOffset(magnifierLocalOffset);
 

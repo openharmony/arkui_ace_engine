@@ -61,7 +61,7 @@ struct MenuParam {
     std::function<void()> aboutToDisappear;
     std::optional<bool> enableArrow;
     std::optional<Dimension> arrowOffset;
-    bool isShowInSubWindow = false;
+    bool isShowInSubWindow = true;
     bool hasTransitionEffect = false;
     RefPtr<NG::ChainedTransitionEffect> transition;
     bool hasPreviewTransitionEffect = false;
@@ -69,6 +69,8 @@ struct MenuParam {
     MenuType type = MenuType::MENU;
     MenuPreviewMode previewMode = MenuPreviewMode::NONE;
     MenuPreviewAnimationOptions previewAnimationOptions;
+    bool isShowHoverImage = false;
+    MenuPreviewAnimationOptions hoverImageAnimationOptions;
     std::optional<EffectOption> backgroundEffectOption;
     std::optional<Color> backgroundColor;
     std::optional<int32_t> backgroundBlurStyle;

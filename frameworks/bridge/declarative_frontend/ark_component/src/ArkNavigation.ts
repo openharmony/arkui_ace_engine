@@ -22,6 +22,9 @@ const MIN_NAV_BAR_WIDTH_DEFAULT = '240vp';
 const MAX_NAV_BAR_WIDTH_DEFAULT = '40%';
 const NAVIGATION_TITLE_MODE_DEFAULT = 0;
 const DEFAULT_UNIT = 'vp';
+const NAV_SAFE_AREA_TYPE_LIMIT = 3;
+const NAV_SAFE_AREA_EDGE_LIMIT = 4;
+const NAV_SAFE_AREA_LOWER_LIMIT = 0;
 
 class ArkNavigationComponent extends ArkComponent implements NavigationAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
@@ -99,6 +102,47 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
   }
   navDestination(builder: (name: string, param: unknown) => void): NavigationAttribute {
     throw new Error('Method not implemented.');
+  }
+  ignoreLayoutSafeArea(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): NavigationAttribute {
+    let opts = new ArkSafeAreaExpandOpts();
+    if (types && types.length > 0) {
+      let safeAreaType: string | number = '';
+      for (let param of types) {
+        if (!isNumber(param) || param >= NAV_SAFE_AREA_TYPE_LIMIT || param < NAV_SAFE_AREA_LOWER_LIMIT) {
+          safeAreaType = undefined;
+          break;
+        }
+        if (safeAreaType) {
+          safeAreaType += '|';
+          safeAreaType += param.toString();
+        } else {
+          safeAreaType += param.toString();
+        }
+      }
+      opts.type = safeAreaType;
+    }
+    if (edges && edges.length > 0) {
+      let safeAreaEdge: string | number = '';
+      for (let param of edges) {
+        if (!isNumber(param) || param >= NAV_SAFE_AREA_EDGE_LIMIT || param < NAV_SAFE_AREA_LOWER_LIMIT) {
+          safeAreaEdge = undefined;
+          break;
+        }
+        if (safeAreaEdge) {
+          safeAreaEdge += '|';
+          safeAreaEdge += param.toString();
+        } else {
+          safeAreaEdge += param.toString();
+        }
+      }
+      opts.edges = safeAreaEdge;
+    }
+    if (opts.type === undefined && opts.edges === undefined) {
+      modifierWithKey(this._modifiersWithKeys, IgnoreNavLayoutSafeAreaModifier.identity, IgnoreNavLayoutSafeAreaModifier, undefined);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, IgnoreNavLayoutSafeAreaModifier.identity, IgnoreNavLayoutSafeAreaModifier, opts);
+    }
+    return this;
   }
 }
 
@@ -293,6 +337,24 @@ class HideNavBarModifier extends ModifierWithKey<boolean> {
     } else {
       getUINativeModule().navigation.setHideNavBar(node, this.value);
     }
+  }
+}
+
+class IgnoreNavLayoutSafeAreaModifier extends ModifierWithKey<ArkSafeAreaExpandOpts | undefined> {
+  constructor(value: ArkSafeAreaExpandOpts | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('ignoreLayoutSafeArea');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().navigation.resetIgnoreLayoutSafeArea(node);
+    } else {
+      getUINativeModule().navigation.setIgnoreLayoutSafeArea(node, this.value.type, this.value.edges);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.type, this.value.type) ||
+      !isBaseOrResourceEqual(this.stageValue.edges, this.value.edges);
   }
 }
 

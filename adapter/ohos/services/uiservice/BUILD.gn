@@ -64,6 +64,7 @@ template("uiservice_static") {
     ]
     external_deps = [
       "ability_base:want",
+      "access_token:libtokenid_sdk",
       "c_utils:utils",
       "eventhandler:libeventhandler",
       "hilog:libhilog",
@@ -98,6 +99,12 @@ foreach(item, ace_platforms) {
 }
 
 ohos_shared_library("uiservice") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  branch_protector_ret = "pac_ret"
   deps = [ ":uiservice_static_ohos" ]
   part_name = ace_engine_part
   subsystem_name = ace_engine_subsystem

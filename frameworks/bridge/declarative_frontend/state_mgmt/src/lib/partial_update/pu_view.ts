@@ -33,8 +33,7 @@ abstract class ViewPU extends PUV2ViewBase
 
   private paramsGenerator_: () => Object;
 
-  private watchedProps: Map<string, (propName: string) => void>
-    = new Map<string, (propName: string) => void>();
+  private watchedProps: Map<string, (propName: string) => void> = new Map<string, (propName: string) => void>();
 
   private recycleManager_: RecycleManager = undefined;
 
@@ -83,14 +82,14 @@ abstract class ViewPU extends PUV2ViewBase
         }
       });
 
-    if (this.isViewV3 == true) {
-      if (usesStateMgmtVersion == 2) {
+    if (this.isViewV3 === true) {
+      if (usesStateMgmtVersion === 2) {
         const error = `${this.debugInfo__()}: mixed use of stateMgmt V2 and V3 variable decorators. Application error!`;
         stateMgmtConsole.applicationError(error);
         throw new Error(error);
       }
     }
-    stateMgmtConsole.debug(`${this.debugInfo__()}: uses stateMgmt version ${this.isViewV3 == true ? 3 : 2}`);
+    stateMgmtConsole.debug(`${this.debugInfo__()}: uses stateMgmt version ${this.isViewV3 === true ? 3 : 2}`);
   }
 
   public get localStorage_(): LocalStorage {
@@ -248,6 +247,11 @@ abstract class ViewPU extends PUV2ViewBase
     this.localStoragebackStore_ = undefined;
   }
 
+  protected purgeVariableDependenciesOnElmtIdOwnFunc(elmtId: number): void {
+    this.ownObservedPropertiesStore_.forEach((stateVar: ObservedPropertyAbstractPU<any>) => {
+      stateVar.purgeDependencyOnElmtId(elmtId);
+    });
+  }
   protected debugInfoStateVars(): string {
     let result: string = `|--${this.constructor.name}[${this.id__()}]`;
     Object.getOwnPropertyNames(this)
@@ -347,7 +351,7 @@ abstract class ViewPU extends PUV2ViewBase
 
   public UpdateElement(elmtId: number): void {
     stateMgmtProfiler.begin('ViewPU.UpdateElement');
-    if (elmtId == this.id__()) {
+    if (elmtId === this.id__()) {
       // do not attempt to update itself.
       // a @Prop can add a dependency of the ViewPU onto itself. Ignore it.
       stateMgmtProfiler.end();
@@ -460,7 +464,7 @@ abstract class ViewPU extends PUV2ViewBase
       stateMgmtConsole.debug(`   ... unchanged full list of elmtIds that need re-render [${this.debugInfoElmtIds(Array.from(this.dirtDescendantElementIds_))}].`);
     }
 
-    let cb = this.watchedProps.get(varName)
+    let cb = this.watchedProps.get(varName);
     if (cb && typeof cb === 'function') {
       stateMgmtConsole.debug(`   ... calling @Watch function`);
       cb.call(this, varName);
@@ -536,7 +540,7 @@ abstract class ViewPU extends PUV2ViewBase
     if (this.dirtDescendantElementIds_.size) {
       this.markNeedUpdate();
     }
-    aceTrace.end()
+    aceTrace.end();
     stateMgmtProfiler.end();
   }
 
@@ -830,7 +834,7 @@ abstract class ViewPU extends PUV2ViewBase
     }, "aboutToReuse", this.constructor.name);
 
     for (const stateLinkPropVar of this.ownObservedPropertiesStore_) {
-      const changedElmtIds =  stateLinkPropVar.moveElmtIdsForDelayedUpdate(true);
+      const changedElmtIds = stateLinkPropVar.moveElmtIdsForDelayedUpdate(true);
       if (changedElmtIds) {
         if (changedElmtIds.size && !this.isFirstRender()) {
           for (const elmtId of changedElmtIds) {
@@ -925,7 +929,7 @@ abstract class ViewPU extends PUV2ViewBase
         ? undefined
         : new SynchedPropertyTwoWayPU<T>(source, this, viewVariableName)
     ) as ObservedPropertyAbstractPU<T>;
-    appStorageLink.setDecoratorInfo('@StorageLink');
+    appStorageLink?.setDecoratorInfo('@StorageLink');
     return appStorageLink;
   }
 
@@ -935,7 +939,7 @@ abstract class ViewPU extends PUV2ViewBase
         ? undefined
         : new SynchedPropertyOneWayPU<T>(source, this, viewVariableName)
     ) as ObservedPropertyAbstractPU<T>;
-    appStorageProp.setDecoratorInfo('@StorageProp');
+    appStorageProp?.setDecoratorInfo('@StorageProp');
     return appStorageProp;
   }
 
@@ -946,7 +950,7 @@ abstract class ViewPU extends PUV2ViewBase
         ? undefined
         : new SynchedPropertyTwoWayPU<T>(source, this, viewVariableName)
     ) as ObservedPropertyAbstractPU<T>;
-    localStorageLink.setDecoratorInfo('@LocalStorageLink');
+    localStorageLink?.setDecoratorInfo('@LocalStorageLink');
     return localStorageLink;
   }
 
@@ -957,7 +961,7 @@ abstract class ViewPU extends PUV2ViewBase
         ? undefined
         : new SynchedPropertyObjectOneWayPU<T>(source, this, viewVariableName)
     ) as ObservedPropertyAbstractPU<T>;
-    localStorageProp.setDecoratorInfo('@LocalStorageProp');
+    localStorageProp?.setDecoratorInfo('@LocalStorageProp');
     return localStorageProp;
   }
 
@@ -1116,6 +1120,41 @@ abstract class ViewPU extends PUV2ViewBase
     return retVaL;
   }
 
+
+
+  /**
+    * onDumpInspetor is invoked by native side to create Inspector tree including state variables
+    * @returns dump info
+    */
+  protected onDumpInspetor(): string {
+    let res: DumpInfo = new DumpInfo();
+    res.viewInfo = { componentName: this.constructor.name, id: this.id__() };
+    Object.getOwnPropertyNames(this)
+      .filter((varName: string) => varName.startsWith('__') && !varName.startsWith(ObserveV2.OB_PREFIX))
+      .forEach((varName) => {
+        const prop: any = Reflect.get(this, varName);
+        if ('debugInfoDecorator' in prop) {
+          const observedProp: ObservedPropertyAbstractPU<any> = prop as ObservedPropertyAbstractPU<any>;
+          let observedPropertyInfo: ObservedPropertyInfo<any> = {
+            decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(),
+            value: observedProp.getRawObjectValue(),
+            dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() == 'object'? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()): false),
+            owningView: { componentName: this.constructor.name, id: this.id__() }, syncPeers: observedProp.dumpSyncPeers()
+          };
+          res.observedPropertiesInfo.push(observedPropertyInfo);
+        }
+      });
+      let resInfo: string = '';
+      try {
+        resInfo = JSON.stringify(res);
+      } catch (error) {
+        stateMgmtConsole.applicationError(`${this.debugInfo__()} has error in getInspector: ${(error as Error).message}`);
+      }
+    return resInfo;
+  }
+
+
+
   /**
    * on first render create a new Instance of Repeat
    * on re-render connect to existing instance
@@ -1125,15 +1164,15 @@ abstract class ViewPU extends PUV2ViewBase
   public __mkRepeatAPI: <I>(arr: Array<I>) => RepeatAPI<I> = <I>(arr: Array<I>): RepeatAPI<I> => {
     // factory is for future extensions, currently always return the same
     const elmtId = this.getCurrentlyRenderedElmtId();
-    let repeat = this.elmtId2Repeat_.get(elmtId) as __RepeatPU<I>
+    let repeat = this.elmtId2Repeat_.get(elmtId) as __RepeatPU<I>;
     if (!repeat) {
         repeat = new __RepeatPU<I>(this, arr);
         this.elmtId2Repeat_.set(elmtId, repeat);
     } else {
-        repeat.updateArr(arr)
+        repeat.updateArr(arr);
     }
 
     return repeat;
   }
-}  // class ViewPU
+} // class ViewPU
 

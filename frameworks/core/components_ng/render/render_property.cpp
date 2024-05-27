@@ -78,6 +78,10 @@ std::string BasicShapeTypeToString(BasicShapeType type)
 
 void RenderPositionProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     ACE_OFFSET_API_TEN_TO_JSON(Position);
     json->PutExtAttr("position", jsonPosition, filter);
 
@@ -100,6 +104,10 @@ void RenderPositionProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const
 
 void GraphicsProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     json->PutExtAttr("grayscale", propFrontGrayScale.has_value() ? propFrontGrayScale->Value() : 0.0, filter);
     json->PutExtAttr("brightness", propFrontBrightness.has_value() ? propFrontBrightness->Value() : 1.0, filter);
     json->PutExtAttr("saturate", propFrontSaturate.has_value() ? propFrontSaturate->Value() : 1.0, filter);
@@ -158,6 +166,10 @@ void GraphicsProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
 
 void BackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     std::string backgroundImage = "NONE";
     if (propBackgroundImage.has_value()) {
         backgroundImage = propBackgroundImage->GetSrc() + ", " +
@@ -183,6 +195,10 @@ void BackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
 
 void CustomBackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     std::string backgroundPixelMap = "NONE";
     if (propBackgroundPixelMap.has_value()) {
         backgroundPixelMap = std::to_string(propBackgroundPixelMap.value()->GetWidth()) + ", " +
@@ -194,6 +210,10 @@ void CustomBackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, con
 
 void ForegroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     json->PutExtAttr("blur", (propBlurRadius.value_or(Dimension(0))).ConvertToPx(), filter);
     auto jsonOption = JsonUtil::Create(true);
     jsonOption->Put("radius", std::to_string(propForegroundEffect.value_or(0.0f)).c_str());
@@ -211,6 +231,10 @@ void ForegroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
 
 void ClipProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     if (propClipShape.has_value()) {
         auto jsonClip = JsonUtil::Create(true);
         auto shape = propClipShape.value();
@@ -236,6 +260,10 @@ void ClipProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspector
 
 void GradientProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     if (propLinearGradient.has_value()) {
         json->PutExtAttr("linearGradient", propLinearGradient->LinearGradientToJson(), filter);
     } else {
@@ -260,6 +288,10 @@ void TransformProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     const double halfDimension = 50.0;
     auto center = propTransformCenter.value_or(DimensionOffset(
         Dimension(halfDimension, DimensionUnit::PERCENT), Dimension(halfDimension, DimensionUnit::PERCENT)));
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     if (propTransformRotate.has_value()) {
         auto jsonValue = JsonUtil::Create(true);
         jsonValue->Put("x", std::to_string(propTransformRotate->x).c_str());
@@ -303,6 +335,10 @@ void TransformProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
 
 void BorderProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto jsonBorder = JsonUtil::Create(true);
     propBorderStyle.value_or(BorderStyleProperty()).ToJsonValue(json, jsonBorder, filter);
     propBorderColor.value_or(BorderColorProperty()).ToJsonValue(json, jsonBorder, filter);
@@ -314,6 +350,10 @@ void BorderProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
 
 void OuterBorderProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto jsonOutline = JsonUtil::Create(true);
     propOuterBorderStyle.value_or(BorderStyleProperty()).ToJsonValue(json, jsonOutline, filter, true);
     propOuterBorderColor.value_or(BorderColorProperty()).ToJsonValue(json, jsonOutline, filter, true);
@@ -324,6 +364,10 @@ void OuterBorderProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const In
 
 void PointLightProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto jsonLightIntensity = JsonUtil::Create(true);
     jsonLightIntensity->Put("lightIntensity", propLightIntensity.has_value() ? propLightIntensity.value() : 0.0);
     json->PutExtAttr("pointLight", jsonLightIntensity, filter);

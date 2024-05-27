@@ -21,9 +21,7 @@
 
 namespace OHOS::Ace {
 namespace {
-
 const size_t MAX_STRING_SIZE = 512;
-
 }
 
 bool AceTraceBeginWithArgv(const char* format, va_list args)
@@ -33,6 +31,16 @@ bool AceTraceBeginWithArgv(const char* format, va_list args)
         return false;
     }
     AceTraceBegin(name);
+    return true;
+}
+
+bool AceTraceBeginWithArgvCommercial(const char* format, va_list args)
+{
+    char name[MAX_STRING_SIZE] = { 0 };
+    if (vsnprintf_s(name, sizeof(name), sizeof(name) - 1, format, args) < 0) {
+        return false;
+    }
+    AceTraceBeginCommercial(name);
     return true;
 }
 
@@ -57,26 +65,39 @@ void AceCountTraceWidthArgs(int32_t count, const char* format, ...)
     AceCountTrace(name, count);
 }
 
-AceScopedTrace::AceScopedTrace(const char* format, ...) : traceEnabled_(AceTraceEnabled())
+AceScopedTrace::AceScopedTrace(const char* format, ...)
 {
-    if (traceEnabled_) {
-        va_list args;
-        va_start(args, format);
-        traceEnabled_ = AceTraceBeginWithArgv(format, args);
-        va_end(args);
-    }
+    va_list args;
+    va_start(args, format);
+    strValid_ = AceTraceBeginWithArgv(format, args);
+    va_end(args);
 }
 
 AceScopedTrace::~AceScopedTrace()
 {
-    if (traceEnabled_) {
+    if (strValid_) {
         AceTraceEnd();
+    }
+}
+
+AceScopedTraceCommercial::AceScopedTraceCommercial(const char* format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    strValid_ = AceTraceBeginWithArgvCommercial(format, args);
+    va_end(args);
+}
+
+AceScopedTraceCommercial::~AceScopedTraceCommercial()
+{
+    if (strValid_) {
+        AceTraceEndCommercial();
     }
 }
 
 AceScopedTraceFlag::AceScopedTraceFlag(bool flag, const char* format, ...)
 {
-    if (flag && AceTraceEnabled()) {
+    if (flag) {
         va_list args;
         va_start(args, format);
         flagTraceEnabled_ = AceTraceBeginWithArgv(format, args);
@@ -112,15 +133,13 @@ std::string ACE_EXPORT AceAsyncTraceBeginWithArgs(int32_t taskId, char* format, 
 
 std::atomic<std::int32_t> AceAsyncScopedTrace::id_ = 0;
 
-AceAsyncScopedTrace::AceAsyncScopedTrace(const char* format, ...) : asyncTraceEnabled_(AceTraceEnabled())
+AceAsyncScopedTrace::AceAsyncScopedTrace(const char* format, ...)
 {
     taskId_ = id_++;
-    if (asyncTraceEnabled_) {
-        va_list args;
-        va_start(args, format);
-        name_ = AceAsyncTraceBeginWithArgv(taskId_, format, args);
-        va_end(args);
-    }
+    va_list args;
+    va_start(args, format);
+    name_ = AceAsyncTraceBeginWithArgv(taskId_, format, args);
+    va_end(args);
 }
 
 AceAsyncScopedTrace::~AceAsyncScopedTrace()

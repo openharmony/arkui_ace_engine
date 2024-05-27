@@ -77,19 +77,22 @@ private:
     void ProcessMaskRect(std::optional<DimensionRect> maskRect, const RefPtr<FrameNode>& dialog, bool isMask = false);
     void SetSubWindowHotarea(
         const RefPtr<DialogLayoutProperty>& dialogProp, SizeF childSize, SizeF selfSize, int32_t frameNodeId);
+    std::optional<DimensionRect> GetMaskRect(const RefPtr<FrameNode>& dialog);
 
     void UpdateTouchRegion();
 
     double GetPaddingBottom() const;
 
     OffsetF AdjustChildPosition(
-        OffsetF& topLeftPoint, const OffsetF& dialogOffset, const SizeF& childSize, bool needAvoidKeyboard) const;
+        OffsetF& topLeftPoint, const OffsetF& dialogOffset, const SizeF& childSize, bool needAvoidKeyboard);
 
     SizeF UpdateHeightWithSafeArea(SizeF size);
     void UpdateSafeArea();
     void UpdateChildLayoutConstraint(const RefPtr<DialogLayoutProperty>& dialogProp,
         LayoutConstraintF& childLayoutConstraint, RefPtr<LayoutWrapper>& childLayoutWrapper);
     void ClipUIExtensionSubWindowContent(const RefPtr<FrameNode>& dialog, bool isClip);
+    void AdjustHeightForKeyboard(
+        LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& child, const SizeF& childSize);
     
     RectF touchRegion_;
     OffsetF topLeftPoint_;
@@ -107,6 +110,9 @@ private:
     double expandDisplayValidHeight_ = 0.0;
     bool isUIExtensionSubWindow_ = false;
     RectF hostWindowRect_;
+
+    SizeF dialogChildSize_;
+    bool resizeFlag_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(DialogLayoutAlgorithm);
 };

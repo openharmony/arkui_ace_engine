@@ -279,23 +279,21 @@ void JSCheckbox::SetCheckboxStyle(int32_t checkBoxStyle)
 }
 void JSCheckbox::Mark(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        return;
-    }
-
+    auto theme = GetTheme<CheckboxTheme>();
     if (!info[0]->IsObject()) {
+        CheckBoxModel::GetInstance()->SetCheckMarkColor(theme->GetPointColor());
+        CheckBoxModel::GetInstance()->SetCheckMarkSize(Dimension(CHECK_BOX_MARK_SIZE_INVALID_VALUE));
+        CheckBoxModel::GetInstance()->SetCheckMarkWidth(theme->GetCheckStroke());
         return;
     }
 
     auto markObj = JSRef<JSObject>::Cast(info[0]);
     auto strokeColorValue = markObj->GetProperty("strokeColor");
-    Color strokeColor;
-    auto theme = GetTheme<CheckboxTheme>();
+    Color strokeColor = theme->GetPointColor();
     if (!ParseJsColor(strokeColorValue, strokeColor)) {
-        strokeColor = theme->GetPointColor();
+        JSCheckBoxTheme::ObtainCheckMarkColor(strokeColor);
     }
     CheckBoxModel::GetInstance()->SetCheckMarkColor(strokeColor);
-
     auto sizeValue = markObj->GetProperty("size");
     CalcDimension size;
     if ((ParseJsDimensionVp(sizeValue, size)) && (size.Unit() != DimensionUnit::PERCENT) && (size.ConvertToVp() >= 0)) {

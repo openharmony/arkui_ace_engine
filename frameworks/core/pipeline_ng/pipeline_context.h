@@ -58,6 +58,7 @@
 namespace OHOS::Ace::NG {
 
 using VsyncCallbackFun = std::function<void()>;
+using FrameCallbackFunc = std::function<void(uint64_t nanoTimestamp)>;
 
 class ACE_FORCE_EXPORT PipelineContext : public PipelineBase {
     DECLARE_ACE_TYPE(NG::PipelineContext, PipelineBase);
@@ -195,6 +196,9 @@ public:
 
     void HandleOnAreaChangeEvent(uint64_t nanoTimestamp);
 
+    // Just register notification, no need to update callback.
+    void AddVisibleAreaChangeNode(const int32_t nodeId);
+
     void AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node,
         const std::vector<double>& ratio, const VisibleRatioCallback& callback, bool isUserCallback = true);
     void RemoveVisibleAreaChangeNode(int32_t nodeId);
@@ -257,7 +261,7 @@ public:
 
     void AddPredictTask(PredictTask&& task);
 
-    void AddAfterLayoutTask(std::function<void()>&& task);
+    void AddAfterLayoutTask(std::function<void()>&& task, bool isFlushInImplicitAnimationTask = false);
 
     void AddPersistAfterLayoutTask(std::function<void()>&& task);
 
@@ -419,7 +423,9 @@ public:
     void FlushModifier() override;
     void FlushMessages() override;
 
-    void FlushUITasks() override;
+    void FlushUITasks(bool triggeredByImplicitAnimation = false) override;
+
+    void FlushAfterLayoutCallbackInImplicitAnimationTask() override;
 
     bool IsLayouting() const override
     {
@@ -736,6 +742,14 @@ public:
 
     void CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, AxisAction action) override;
 
+    void AddFrameCallback(FrameCallbackFunc&& frameCallbackFunc)
+    {
+        frameCallbackFuncs_.emplace_back(std::move(frameCallbackFunc));
+        RequestFrame();
+    }
+
+    void FlushFrameCallback(uint64_t nanoTimestamp);
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -962,6 +976,8 @@ private:
     bool isShowTitle_ = false;
     bool lastAnimationStatus_ = true;
     bool isDoKeyboardAvoidAnimate_ = true;
+
+    std::list<FrameCallbackFunc> frameCallbackFuncs_;
 };
 } // namespace OHOS::Ace::NG
 

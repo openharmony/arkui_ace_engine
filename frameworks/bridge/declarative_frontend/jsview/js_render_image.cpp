@@ -22,6 +22,11 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "frameworks/core/common/container.h"
 
+#ifdef PIXEL_MAP_SUPPORTED
+#include "pixel_map.h"
+#include "pixel_map_napi.h"
+#endif
+
 namespace OHOS::Ace::Framework {
 
 void BindNativeFunction(napi_env env, napi_value object, const char* name, napi_callback func)
@@ -77,19 +82,20 @@ napi_value AttachImageBitmap(napi_env env, void* value, void*)
     napi_define_properties(env, imageBitmap, sizeof(desc) / sizeof(*desc), desc);
 
     napi_coerce_to_native_binding_object(env, imageBitmap, DetachImageBitmap, AttachImageBitmap, value, nullptr);
-    napi_wrap(
-        env, imageBitmap, value,
-        [](napi_env env, void* data, void* hint) {
-            LOGD("Finalizer for image bitmap is called");
-            auto wrapper = reinterpret_cast<JSRenderImage*>(data);
-            delete wrapper;
-            wrapper = nullptr;
-        },
-        nullptr, nullptr);
+    napi_wrap(env, imageBitmap, value, JSRenderImage::Finalizer, nullptr, nullptr);
     return imageBitmap;
 }
 
 JSRenderImage::JSRenderImage() {}
+
+void JSRenderImage::Finalizer(napi_env env, void* data, void* hint)
+{
+    auto wrapper = reinterpret_cast<JSRenderImage*>(data);
+    if (wrapper) {
+        delete wrapper;
+        wrapper = nullptr;
+    }
+}
 
 napi_value JSRenderImage::Constructor(napi_env env, napi_callback_info info)
 {
@@ -99,54 +105,76 @@ napi_value JSRenderImage::Constructor(napi_env env, napi_callback_info info)
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, nullptr, &thisVar, nullptr));
     auto wrapper = new (std::nothrow) JSRenderImage();
     wrapper->SetInstanceId(OHOS::Ace::Container::CurrentId());
-    if (argc > 0) {
-        napi_value argv[2] = { nullptr };
-        napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-        if (argc == 2) {
-            int32_t unit = 0;
-            napi_get_value_int32(env, argv[1], &unit);
-            if (static_cast<CanvasUnit>(unit) == CanvasUnit::PX) {
-                wrapper->SetUnit(CanvasUnit::PX);
-            }
+    if (argc <= 0) {
+        napi_coerce_to_native_binding_object(env, thisVar, DetachImageBitmap, AttachImageBitmap, wrapper, nullptr);
+        napi_wrap(env, thisVar, wrapper, Finalizer, nullptr, nullptr);
+        return thisVar;
+    }
+    napi_value argv[2] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc == 2) { // 2: args count
+        int32_t unit = 0;
+        napi_get_value_int32(env, argv[1], &unit);
+        if (static_cast<CanvasUnit>(unit) == CanvasUnit::PX) {
+            wrapper->SetUnit(CanvasUnit::PX);
         }
-        size_t textLen = 0;
-        std::string textString = "";
-        napi_get_value_string_utf8(env, argv[0], nullptr, 0, &textLen);
-        std::unique_ptr<char[]> text = std::make_unique<char[]>(textLen + 1);
-        napi_get_value_string_utf8(env, argv[0], text.get(), textLen + 1, &textLen);
-        textString = text.get();
+    }
+    size_t textLen = 0;
+    auto status = napi_get_value_string_utf8(env, argv[0], nullptr, 0, &textLen);
+    if (status == napi_ok) {
         auto context = PipelineBase::GetCurrentContext();
         if (!context) {
-            LOGW("Invalid context.");
-            delete wrapper;
-            wrapper = nullptr;
-            return nullptr;
+            DELETE_RETURN_NULL(wrapper);
         }
-        if (context->IsFormRender()) {
-            SrcType srcType = ImageSourceInfo::ResolveURIType(textString);
-            bool notSupport =
-                (srcType == SrcType::NETWORK || srcType == SrcType::FILE || srcType == SrcType::DATA_ABILITY);
-            if (notSupport) {
-                LOGE("Not supported src : %{public}s when form render", textString.c_str());
-                delete wrapper;
-                wrapper = nullptr;
-                return nullptr;
-            }
+        std::string textString = GetSrcString(env, argv[0], textLen);
+        if (context->IsFormRender() && NotFormSupport(textString)) {
+            LOGE("Not supported src : %{public}s when form render", textString.c_str());
+            DELETE_RETURN_NULL(wrapper);
         }
         wrapper->LoadImage(textString);
+    } else {
+#ifdef PIXEL_MAP_SUPPORTED
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            auto pixelMap = GetPixelMap(env, argv[0]);
+            if (!pixelMap) {
+                DELETE_RETURN_NULL(wrapper);
+            }
+            wrapper->LoadImage(pixelMap);
+        }
+#endif
     }
     napi_coerce_to_native_binding_object(env, thisVar, DetachImageBitmap, AttachImageBitmap, wrapper, nullptr);
-    napi_wrap(
-        env, thisVar, wrapper,
-        [](napi_env env, void* data, void* hint) {
-            LOGD("Finalizer for image bitmap is called");
-            auto wrapper = reinterpret_cast<JSRenderImage*>(data);
-            delete wrapper;
-            wrapper = nullptr;
-        },
-        nullptr, nullptr);
+    napi_wrap(env, thisVar, wrapper, Finalizer, nullptr, nullptr);
     return thisVar;
 }
+
+bool JSRenderImage::NotFormSupport(const std::string& textString)
+{
+    SrcType srcType = ImageSourceInfo::ResolveURIType(textString);
+    return (srcType == SrcType::NETWORK || srcType == SrcType::FILE || srcType == SrcType::DATA_ABILITY);
+}
+
+std::string JSRenderImage::GetSrcString(napi_env env, napi_value value, size_t textLen)
+{
+    std::unique_ptr<char[]> text = std::make_unique<char[]>(textLen + 1);
+    auto status = napi_get_value_string_utf8(env, value, text.get(), textLen + 1, &textLen);
+    if ((status == napi_ok) && (text != nullptr)) {
+        return text.get();
+    }
+    return "";
+}
+
+#ifdef PIXEL_MAP_SUPPORTED
+RefPtr<PixelMap> JSRenderImage::GetPixelMap(napi_env env, napi_value value)
+{
+    Media::PixelMapNapi* napiPixelMap = nullptr;
+    auto status = napi_unwrap(env, value, reinterpret_cast<void**>(&napiPixelMap));
+    if ((status != napi_ok) || (napiPixelMap == nullptr)) {
+        return nullptr;
+    }
+    return PixelMap::CreatePixelMap(napiPixelMap->GetPixelMap());
+}
+#endif
 
 napi_value JSRenderImage::InitImageBitmap(napi_env env)
 {
@@ -294,6 +322,13 @@ void JSRenderImage::LoadImage(const std::string& src)
 {
     src_ = src;
     auto sourceInfo = ImageSourceInfo(src);
+    sourceInfo_ = sourceInfo;
+    LoadImage(sourceInfo);
+}
+
+void JSRenderImage::LoadImage(const RefPtr<PixelMap>& pixmap)
+{
+    auto sourceInfo = ImageSourceInfo(pixmap);
     sourceInfo_ = sourceInfo;
     LoadImage(sourceInfo);
 }

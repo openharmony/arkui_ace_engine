@@ -23,6 +23,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
+#include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/text_event_hub.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text/text_styles.h"
@@ -966,11 +967,64 @@ void TextModelNG::SetTextContentWithStyledString(FrameNode* frameNode, ArkUI_Sty
     CHECK_NULL_VOID(frameNode);
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
-    if (value) {
-        textPattern->SetTextContentParagraph(value->paragraph);
+    std::list<RefPtr<SpanItem>> spanItems;
+    if (!value) {
+        textPattern->SetExternalParagraph(nullptr);
+        textPattern->SetExternalSpanItem(spanItems);
+        textPattern->SetExternalParagraphStyle(std::nullopt);
     } else {
-        textPattern->SetTextContentParagraph(nullptr);
+        textPattern->SetExternalParagraph(value->paragraph);
+#ifdef USE_GRAPHIC_TEXT_GINE
+        auto position = 0;
+        for (const auto& item : value->items) {
+            auto spanItem = SpanModelNG::CreateSpanItem(item);
+            if (spanItem) {
+                auto wSpanContent = StringUtils::ToWstring(spanItem->content);
+                auto intervalStart = position;
+                position += wSpanContent.length();
+                auto intervalEnd = position;
+                spanItem->interval = { intervalStart, intervalEnd };
+                spanItems.emplace_back(spanItem);
+            }
+        }
+        textPattern->SetExternalSpanItem(spanItems);
+        textPattern->SetExternalParagraphStyle(SpanModelNG::CreateParagraphStyle(value));
+#endif
     }
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void TextModelNG::SetTextSelection(FrameNode* frameNode, int32_t startIndex, int32_t endIndex)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetTextSelection(startIndex, endIndex);
+}
+
+void TextModelNG::SetTextDetectConfig(FrameNode* frameNode, const std::string& value,
+    std::function<void(const std::string&)>&& onResult)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetTextDetectTypes(value);
+    textPattern->SetOnResult(std::move(onResult));
+}
+
+void TextModelNG::SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnCopy(std::move(func));
+}
+
+void TextModelNG::SetOnTextSelectionChange(FrameNode* frameNode, std::function<void(int32_t, int32_t)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSelectionChange(std::move(func));
 }
 } // namespace OHOS::Ace::NG

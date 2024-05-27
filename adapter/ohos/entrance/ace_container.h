@@ -66,12 +66,16 @@ struct ParsedConfig {
     std::string themeTag;
     std::string fontScale;
     std::string fontWeightScale;
+    std::string colorModeIsSetByApp;
     bool IsValid() const
     {
         return !(colorMode.empty() && deviceAccess.empty() && languageTag.empty() && direction.empty() &&
-                 densitydpi.empty() && themeTag.empty() && fontScale.empty() && fontWeightScale.empty());
+                 densitydpi.empty() && themeTag.empty() && fontScale.empty() && fontWeightScale.empty() &&
+                 colorModeIsSetByApp.empty());
     }
 };
+
+using ConfigurationChangedCallback = std::function<void(const ParsedConfig& config, const std::string& configuration)>;
 
 class ACE_FORCE_EXPORT AceContainer : public Container, public JsMessageDispatcher {
     DECLARE_ACE_TYPE(AceContainer, Container, JsMessageDispatcher);
@@ -481,6 +485,17 @@ public:
 
     void NotifyConfigurationChange(
         bool needReloadTransition, const ConfigurationChange& configurationChange = { false, false }) override;
+
+    void AddOnConfigurationChange(int32_t instanceId, ConfigurationChangedCallback &&callback)
+    {
+        configurationChangedCallbacks_.emplace(instanceId, std::move(callback));
+    }
+
+    void RemoveOnConfigurationChange(int32_t instanceId)
+    {
+        configurationChangedCallbacks_.erase(instanceId_);
+    }
+
     void HotReload() override;
 
     bool IsUseStageModel() const override
@@ -618,6 +633,9 @@ private:
     void RegisterStopDragCallback(int32_t pointerId, StopDragCallback&& stopDragCallback);
     void SetFontScaleAndWeightScale(const ParsedConfig& parsedConfig);
     void ReleaseResourceAdapter();
+    void FillAutoFillViewData(const RefPtr<NG::FrameNode> &node, RefPtr<ViewDataWrap> &viewDataWrap);
+
+    void NotifyConfigToSubContainers(const ParsedConfig& parsedConfig, const std::string& configuration);
 
     int32_t instanceId_ = 0;
     AceView* aceView_ = nullptr;
@@ -658,6 +676,10 @@ private:
     bool isUIExtensionAbilityHost_ = false;
 
     DeviceOrientation orientation_ = DeviceOrientation::ORIENTATION_UNDEFINED;
+
+    // for other AceContainer subscribe configuration from host AceContaier
+    // key is instanceId, value is callback function
+    std::unordered_map<int32_t, ConfigurationChangedCallback> configurationChangedCallbacks_;
 
     std::unordered_set<std::string> resAdapterRecord_;
 

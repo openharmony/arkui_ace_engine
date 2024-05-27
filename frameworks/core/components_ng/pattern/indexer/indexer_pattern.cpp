@@ -1021,6 +1021,7 @@ void IndexerPattern::UpdateBubbleLetterStackAndLetterTextView()
     CHECK_NULL_VOID(letterLayoutProperty);
     letterLayoutProperty->UpdateContent(arrayValue_[childPressIndex_ >= 0 ? childPressIndex_ : selected_].first);
     auto popupTextFont = layoutProperty->GetPopupFont().value_or(indexerTheme->GetPopupTextStyle());
+    letterLayoutProperty->UpdateMaxLines(1);
     letterLayoutProperty->UpdateFontSize(popupTextFont.GetFontSize());
     letterLayoutProperty->UpdateFontWeight(popupTextFont.GetFontWeight());
     letterLayoutProperty->UpdateFontFamily(popupTextFont.GetFontFamilies());
@@ -1339,9 +1340,7 @@ void IndexerPattern::UpdateBubbleListItem(
         textLayoutProperty->UpdateContent(currentListData.at(i));
         textLayoutProperty->UpdateFontSize(popupItemTextFontSize);
         textLayoutProperty->UpdateFontWeight(popupItemTextFontWeight);
-        if (autoCollapse_) textLayoutProperty->UpdateMaxLines(1);
-        textLayoutProperty->UpdateTextOverflow(autoCollapse_ ? TextOverflow::ELLIPSIS : TextOverflow::NONE);
-        textLayoutProperty->UpdateEllipsisMode(EllipsisMode::TAIL);
+        textLayoutProperty->UpdateMaxLines(1);
         textLayoutProperty->UpdateTextColor(i == popupClickedIndex_ ?
             popupSelectedTextColor : popupUnselectedTextColor);
         textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
@@ -1917,18 +1916,13 @@ void IndexerPattern::DumpInfo()
     auto layoutProperty = GetLayoutProperty<IndexerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     DumpLog::GetInstance().AddDesc(
-        std::string("AlignStyle: ")
-            .append(std::to_string(static_cast<int32_t>(layoutProperty->GetAlignStyleValue(AlignStyle::END)))));
+        "AlignStyle: ", static_cast<int32_t>(layoutProperty->GetAlignStyleValue(AlignStyle::END)));
     auto offset = layoutProperty->GetPopupHorizontalSpace();
-    DumpLog::GetInstance().AddDesc(
-        std::string("Offset: ").append(offset.has_value() ? offset.value().ToString() : "undefined"));
-    DumpLog::GetInstance().AddDesc(
-        std::string("PopupPositionX: ")
-            .append(layoutProperty->GetPopupPositionXValue(Dimension(NG::BUBBLE_POSITION_X, DimensionUnit::VP))
-                        .ToString()));
-    DumpLog::GetInstance().AddDesc(
-        std::string("PopupPositionY: ")
-            .append(layoutProperty->GetPopupPositionYValue(Dimension(NG::BUBBLE_POSITION_Y, DimensionUnit::VP))
-                        .ToString()));
+    DumpLog::GetInstance().AddDesc("Offset: ", offset.has_value() ? offset.value().ToString() : "undefined");
+    DumpLog::GetInstance().AddDesc("PopupPositionX: ",
+        layoutProperty->GetPopupPositionXValue(Dimension(NG::BUBBLE_POSITION_X, DimensionUnit::VP)).ToString());
+    DumpLog::GetInstance().AddDesc("PopupPositionY: ",
+        layoutProperty->GetPopupPositionYValue(Dimension(NG::BUBBLE_POSITION_Y, DimensionUnit::VP)).ToString());
+    DumpLog::GetInstance().AddDesc("AutoCollapse: ", autoCollapse_ ? "true" : "false");
 }
 } // namespace OHOS::Ace::NG

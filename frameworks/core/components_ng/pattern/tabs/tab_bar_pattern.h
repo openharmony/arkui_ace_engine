@@ -428,13 +428,19 @@ public:
     bool ContentWillChange(int32_t comingIndex);
     bool ContentWillChange(int32_t currentIndex, int32_t comingIndex);
 
+    void AddTabBarItemClickEvent(const RefPtr<FrameNode>& tabBarItem);
+
+    void RemoveTabBarItemClickEvent(int32_t tabBarId)
+    {
+        clickEvents_.erase(tabBarId);
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     void InitSurfaceChangedCallback();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
-    void InitClick(const RefPtr<GestureEventHub>& gestureHub);
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitScrollable(const RefPtr<GestureEventHub>& gestureHub);
@@ -454,7 +460,7 @@ private:
     void ShowDialogWithNode(int32_t index);
     void CloseDialog();
     void InitLongPressAndDragEvent();
-    void HandleClick(const GestureEvent& info);
+    void HandleClick(const GestureEvent& info, int32_t index);
     void ClickTo(const RefPtr<FrameNode>& host, int32_t index);
     void HandleTouchEvent(const TouchLocationInfo& info);
     void HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& layoutProperty, int32_t index);
@@ -512,8 +518,12 @@ private:
     void UpdatePaintIndicator(int32_t indicator, bool needMarkDirty);
     bool IsNeedUpdateFontWeight(int32_t index);
     std::pair<float, float> GetOverScrollInfo(const SizeF& size);
-
-    RefPtr<ClickEvent> clickEvent_;
+    void RemoveTabBarEventCallback();
+    void AddTabBarEventCallback();
+    void AddMaskItemClickEvent();
+    void TabBarSuitAging();
+    void SetMarginVP(MarginProperty& marginLeftOrRight, MarginProperty& marginTopOrBottom);
+    std::map<int32_t, RefPtr<ClickEvent>> clickEvents_;
     RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<ScrollableEvent> scrollableEvent_;
@@ -582,6 +592,8 @@ private:
     std::optional<WindowSizeChangeReason> windowSizeChangeReason_;
     std::pair<double, double> prevRootSize_;
     ACE_DISALLOW_COPY_AND_MOVE(TabBarPattern);
+    MarginProperty marginLeftOrRight_;
+    MarginProperty marginTopOrBottom_;
 };
 } // namespace OHOS::Ace::NG
 

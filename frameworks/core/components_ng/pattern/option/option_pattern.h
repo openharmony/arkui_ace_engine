@@ -74,6 +74,11 @@ public:
         text_ = text;
     }
 
+    RefPtr<FrameNode> GetTextNode() const
+    {
+        return text_;
+    }
+
     void SetIconNode(const RefPtr<FrameNode>& icon)
     {
         icon_ = icon;
@@ -147,7 +152,8 @@ public:
     void PlayBgColorAnimation(bool isHoverChange = true);
 
     void UpdateText(const std::string& content);
-    void UpdateIcon(const std::string& src);
+    
+    void UpdateIcon(const std::string& src, const std::function<void(WeakPtr<NG::FrameNode>)> symbolIcon);
 
     void SetMenu(const WeakPtr<FrameNode>& menuWeak)
     {

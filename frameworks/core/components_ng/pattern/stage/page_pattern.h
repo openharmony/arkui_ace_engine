@@ -184,6 +184,11 @@ public:
         return overlayManager_;
     }
 
+    void DeleteOverlayManager()
+    {
+        overlayManager_.Reset();
+    }
+
     bool RemoveOverlay();
     void MarkDirtyOverlay();
 
@@ -196,6 +201,7 @@ private:
     void OnAttachToFrameNode() override;
     void BeforeCreateLayoutWrapper() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& config) override;
+    void BeforeSyncGeometryProperties(const DirtySwapConfig& config) override;
     void FirePageTransitionFinish();
 
     void OnAttachToMainTree() override;

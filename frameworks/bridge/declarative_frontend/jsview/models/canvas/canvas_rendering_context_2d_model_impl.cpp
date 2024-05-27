@@ -29,7 +29,6 @@
 #endif
 
 namespace OHOS::Ace::Framework {
-
 void CanvasRenderingContext2DModelImpl::SetPattern(RefPtr<AceType> pattern)
 {
     pattern_ = AceType::DynamicCast<CanvasTaskPool>(pattern);
@@ -495,7 +494,6 @@ void CanvasRenderingContext2DModelImpl::GetImageDataModel(const ImageSize& image
     auto finalHeight = static_cast<uint32_t>(std::abs(imageSize.height));
     auto finalWidth = static_cast<uint32_t>(std::abs(imageSize.width));
     std::unique_ptr<Ace::ImageData> data = GetImageData(imageSize);
-
     if (data != nullptr) {
         for (uint32_t idx = 0; idx < finalHeight * finalWidth; ++idx) {
             buffer[4 * idx] = data->data[idx].GetRed();

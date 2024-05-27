@@ -149,6 +149,7 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
     });
     pipelineContext->CloseImplicitAnimation();
     pipelineContext->SetSyncAnimationOption(AnimationOption());
+    pipelineContext->FlushAfterLayoutCallbackInImplicitAnimationTask();
     if (immediately) {
         pipelineContext->FlushModifier();
         pipelineContext->FlushMessages();
@@ -452,6 +453,10 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
 #endif
     if (!scopedDelegate) {
         // this case usually means there is no foreground container, need to figure out the reason.
+        const char* funcName = immediately ? "animateToImmediately" : "animateTo";
+        TAG_LOGW(AceLogTag::ACE_ANIMATION,
+            "can not find current context, %{public}s failed, please use uiContext.%{public}s to specify the context",
+            funcName, funcName);
         return;
     }
     if (info.Length() < 2) {

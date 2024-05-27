@@ -368,10 +368,6 @@ void SelectContentOverlayManager::CreateAndMountNode(const RefPtr<FrameNode>& ov
 
 const RefPtr<FrameNode> SelectContentOverlayManager::GetSelectOverlayRoot()
 {
-    auto realRootNode = realRootNodeWeak_.Upgrade();
-    if (realRootNode) {
-        return realRootNode;
-    }
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_RETURN(shareOverlayInfo_, rootNode);
     auto container = Container::Current();
@@ -379,7 +375,6 @@ const RefPtr<FrameNode> SelectContentOverlayManager::GetSelectOverlayRoot()
         auto root = FindWindowScene(shareOverlayInfo_->callerFrameNode.Upgrade());
         rootNode = DynamicCast<FrameNode>(root);
     }
-    realRootNodeWeak_ = rootNode;
     return rootNode;
 }
 
@@ -411,15 +406,17 @@ void SelectContentOverlayManager::CloseInternal(int32_t id, bool animation, Clos
     CHECK_NULL_VOID(selectOverlayHolder_->GetOwnerId() == id);
     auto overlay = selectOverlayNode_.Upgrade();
     CHECK_NULL_VOID(overlay);
-    auto pattern = GetSelectOverlayPattern(selectOverlayNode_);
-    CHECK_NULL_VOID(pattern);
     auto node = DynamicCast<SelectOverlayNode>(overlay);
     auto callback = selectOverlayHolder_->GetCallback();
     auto menuType = shareOverlayInfo_->menuInfo.menuType;
-    auto info = AceType::MakeRefPtr<OverlayInfo>();
-    info->isSingleHandle = shareOverlayInfo_->isSingleHandle;
-    info->isShowMenu = shareOverlayInfo_->menuInfo.menuIsShow;
-    info->isHiddenHandle = pattern->IsHiddenHandle();
+    auto pattern = GetSelectOverlayPattern(selectOverlayNode_);
+    RefPtr<OverlayInfo> info = nullptr;
+    if (pattern) {
+        info = AceType::MakeRefPtr<OverlayInfo>();
+        info->isSingleHandle = shareOverlayInfo_->isSingleHandle;
+        info->isShowMenu = shareOverlayInfo_->menuInfo.menuIsShow;
+        info->isHiddenHandle = pattern->IsHiddenHandle();
+    }
     if (node && animation) {
         ClearAllStatus();
         node->HideSelectOverlay([weakOverlay = WeakClaim(AceType::RawPtr(overlay)), managerWeak = WeakClaim(this)]() {

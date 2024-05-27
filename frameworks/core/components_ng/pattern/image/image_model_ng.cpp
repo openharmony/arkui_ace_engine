@@ -21,20 +21,34 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/image/image_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/image/image_source_info.h"
 #ifndef ACE_UNITTEST
 #include "core/components_ng/base/view_abstract.h"
 #endif
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "interfaces/native/node/resource.h"
+#include "core/components_ng/pattern/text/span_node.h"
+
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 const std::vector<float> DEFAULT_COLOR_FILTER = { 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0 };
-ImageSourceInfo CreateSourceInfo(const std::string &src, RefPtr<PixelMap> &pixmap, const std::string &bundleName,
-    const std::string &moduleName)
+ImageSourceInfo CreateSourceInfo(const std::shared_ptr<std::string>& src, RefPtr<PixelMap>& pixmap,
+    const std::string& bundleName, const std::string& moduleName)
+{
+#if defined(PIXEL_MAP_SUPPORTED)
+    if (pixmap) {
+        return ImageSourceInfo(pixmap);
+    }
+#endif
+    return { src, bundleName, moduleName };
+}
+
+ImageSourceInfo CreateSourceInfo(
+    const std::string& src, RefPtr<PixelMap>& pixmap, const std::string& bundleName, const std::string& moduleName)
 {
 #if defined(PIXEL_MAP_SUPPORTED)
     if (pixmap) {
@@ -45,14 +59,20 @@ ImageSourceInfo CreateSourceInfo(const std::string &src, RefPtr<PixelMap> &pixma
 }
 } // namespace
 
-void ImageModelNG::Create(const std::string &src, RefPtr<PixelMap> &pixMap, const std::string &bundleName,
-    const std::string &moduleName, bool isUriPureNumber)
+void ImageModelNG::Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMap>& pixMap)
 {
-    auto *stack = ViewStackProcessor::GetInstance();
+    auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    const std::string& src = imageInfoConfig.src ? *imageInfoConfig.src : "";
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d] [src:%s]", V2::IMAGE_ETS_TAG, nodeId, src.c_str());
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, nodeId,
-        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    RefPtr<FrameNode> frameNode;
+    if (imageInfoConfig.isImageSpan) {
+        frameNode = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    } else {
+        frameNode = FrameNode::GetOrCreateFrameNode(
+            V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    }
     stack->Push(frameNode);
     auto pattern = GetImagePattern();
     CHECK_NULL_VOID(pattern);
@@ -62,17 +82,20 @@ void ImageModelNG::Create(const std::string &src, RefPtr<PixelMap> &pixMap, cons
     }
 
     // set draggable for framenode
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto draggable = pipeline->GetDraggable<ImageTheme>();
-    if (draggable && !frameNode->IsDraggable()) {
-        auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-        CHECK_NULL_VOID(gestureHub);
-        gestureHub->InitDragDropEvent();
+    if (!imageInfoConfig.isImageSpan) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto draggable = pipeline->GetDraggable<ImageTheme>();
+        if (draggable && !frameNode->IsDraggable()) {
+            auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+            CHECK_NULL_VOID(gestureHub);
+            gestureHub->InitDragDropEvent();
+        }
+        frameNode->SetDraggable(true);
     }
-    frameNode->SetDraggable(draggable);
-    auto srcInfo = CreateSourceInfo(src, pixMap, bundleName, moduleName);
-    srcInfo.SetIsUriPureNumber(isUriPureNumber);
+    auto srcInfo =
+        CreateSourceInfo(imageInfoConfig.src, pixMap, imageInfoConfig.bundleName, imageInfoConfig.moduleName);
+    srcInfo.SetIsUriPureNumber(imageInfoConfig.isUriPureNumber);
 
     if (pattern->GetImageType() != ImagePattern::ImageType::BASE) {
         if (pattern->GetHasSizeChanged()) {
@@ -102,7 +125,7 @@ void ImageModelNG::SetInitialSrc(FrameNode *frameNode, const std::string &src, c
 
 void ImageModelNG::SetInitialPixelMap(FrameNode* frameNode, RefPtr<PixelMap>& pixMap)
 {
-    auto srcInfo = CreateSourceInfo("", pixMap, "", "");
+    auto srcInfo = ImageSourceInfo(pixMap);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo, frameNode);
 }
 
@@ -669,6 +692,15 @@ std::vector<float> ImageModelNG::GetColorFilter(FrameNode* frameNode)
     return paintProperty->GetImagePaintStyle()->GetColorFilter().value_or(DEFAULT_COLOR_FILTER);
 }
 
+RefPtr<DrawingColorFilter> ImageModelNG::GetDrawingColorFilter(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(paintProperty, nullptr);
+    CHECK_NULL_RETURN(paintProperty->GetImagePaintStyle(), nullptr);
+    return paintProperty->GetImagePaintStyle()->GetDrawingColorFilter().value_or(nullptr);
+}
+
 bool ImageModelNG::GetAutoResize(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, true);
@@ -758,6 +790,28 @@ void ImageModelNG::SetImageAnalyzerConfig(FrameNode* frameNode, void* config)
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(imagePattern);
     imagePattern->SetImageAnalyzerConfig(config);
+}
+
+void ImageModelNG::ResetImageSrc(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ImageSourceInfo sourceInfo("");
+    sourceInfo.SetIsFromReset(true);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, sourceInfo, frameNode);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetImage();
+}
+
+void ImageModelNG::ResetImageAlt(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ImageSourceInfo sourceInfo("");
+    sourceInfo.SetIsFromReset(true);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, Alt, sourceInfo, frameNode);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetAltImage();
 }
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_CPP

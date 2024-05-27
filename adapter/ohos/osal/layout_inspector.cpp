@@ -185,6 +185,10 @@ void LayoutInspector::CreateLayoutInfo(int32_t containerId)
 {
     auto container = Container::GetFoucsed();
     CHECK_NULL_VOID(container);
+    if (container->IsDynamicRender()) {
+        container = Container::CurrentSafely();
+        CHECK_NULL_VOID(container);
+    }
     containerId = container->GetInstanceId();
     ContainerScope socpe(containerId);
     auto context = PipelineContext::GetCurrentContext();

@@ -270,8 +270,6 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
         BorderWidthProperty borderWidth;
         Dimension width = dialogTheme_->GetBackgroudBorderWidth();
         borderWidth.SetBorderWidth(width);
-        auto layoutProps = contentNode->GetLayoutProperty<LinearLayoutProperty>();
-        layoutProps->UpdateBorderWidth(borderWidth);
         contentRenderContext->UpdateBorderWidth(borderWidth);
     }
     if (props.borderStyle.has_value()) {
@@ -331,12 +329,11 @@ RefPtr<FrameNode> DialogPattern::CreateDialogScroll(const DialogProperties& dial
     props->UpdateAxis(Axis::VERTICAL);
     props->UpdateAlignment(Alignment::CENTER_LEFT);
     // If title not exist, set scroll align center so that text align center.
-    if ((dialogProps.title.empty() && dialogProps.subtitle.empty()) ||
-        SystemProperties::GetDeviceType() == DeviceType::WATCH) {
-        props->UpdateAlignSelf(FlexAlign::CENTER);
-    } else {
-        props->UpdateAlignSelf(FlexAlign::FLEX_START);
+    auto scrollFlexAlign = dialogTheme_->GetScrollFlexAlign();
+    if ((dialogProps.title.empty() && dialogProps.subtitle.empty())) {
+        scrollFlexAlign = FlexAlign::CENTER;
     }
+    props->UpdateAlignSelf(scrollFlexAlign);
     return scroll;
 }
 
@@ -345,16 +342,7 @@ void DialogPattern::BuildChild(const DialogProperties& props)
     // append customNode
     auto customNode = customNode_.Upgrade();
     if (customNode) {
-        // wrap custom node to set background color and round corner
-        auto contentWrapper = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
-        CHECK_NULL_VOID(contentWrapper);
-        if (!props.customStyle) {
-            UpdateContentRenderContext(contentWrapper, props);
-        }
-        customNode->MountToParent(contentWrapper);
-        auto dialog = GetHost();
-        contentWrapper->MountToParent(dialog);
+        BuildCustomChild(props, customNode);
         return;
     }
 
@@ -391,12 +379,8 @@ void DialogPattern::BuildChild(const DialogProperties& props)
     auto columnProp = AceType::DynamicCast<LinearLayoutProperty>(contentColumn->GetLayoutProperty());
     CHECK_NULL_VOID(columnProp);
     // content is full screen in Watch mode
-    auto deviceType = SystemProperties::GetDeviceType();
-    if (deviceType == DeviceType::WATCH) {
-        columnProp->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    } else {
-        columnProp->UpdateMeasureType(MeasureType::MATCH_CONTENT);
-    }
+    auto measureType = dialogTheme_->GetColumnMeasureType();
+    columnProp->UpdateMeasureType(measureType);
 
     // build ActionSheet child
     if (props.type == DialogType::ACTION_SHEET && !props.sheetsInfo.empty()) {
@@ -425,6 +409,34 @@ void DialogPattern::BuildChild(const DialogProperties& props)
 
     auto dialog = GetHost();
     contentColumn->MountToParent(dialog);
+}
+
+void DialogPattern::BuildCustomChild(const DialogProperties& props, const RefPtr<UINode>& customNode)
+{
+    auto contentWrapper = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    CHECK_NULL_VOID(contentWrapper);
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (!props.customStyle) {
+            UpdateContentRenderContext(contentWrapper, props);
+        }
+        customNode->MountToParent(contentWrapper);
+        auto dialog = GetHost();
+        contentWrapper->MountToParent(dialog);
+    } else {
+        auto scroll = FrameNode::CreateFrameNode(
+            V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
+        CHECK_NULL_VOID(contentWrapper);
+        if (!props.customStyle) {
+            UpdateContentRenderContext(scroll, props);
+        }
+        customNode->MountToParent(contentWrapper);
+        contentWrapper->MountToParent(scroll);
+        auto dialog = GetHost();
+        scroll->MountToParent(dialog);
+        scroll->MarkModifyDone();
+        dialog->MarkModifyDone();
+    }
 }
 
 RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogProperties)
@@ -1069,6 +1081,10 @@ void DialogPattern::HandleFocusEvent()
 // XTS inspector
 void DialogPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (host->GetTag() == V2::ALERT_DIALOG_ETS_TAG || host->GetTag() == V2::ACTION_SHEET_DIALOG_ETS_TAG) {

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/log/dump_log.h"
 #include "core/components_ng/pattern/progress/progress_pattern.h"
 
 #include "core/components/progress/progress_theme.h"
@@ -102,6 +103,12 @@ void ProgressPattern::CalculateStrokeWidth(const SizeF& contentSize)
 
 void ProgressPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        ToJsonValueForRingStyleOptions(json, filter);
+        ToJsonValueForLinearStyleOptions(json, filter);
+        return;
+    }
     auto layoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto paintProperty = GetPaintProperty<ProgressPaintProperty>();
@@ -261,6 +268,15 @@ void ProgressPattern::OnModifyDone()
     }
 }
 
+void ProgressPattern::DumpInfo()
+{
+    auto paintProperty = GetPaintProperty<ProgressPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    DumpLog::GetInstance().AddDesc(
+        std::string("EnableSmoothEffect: ")
+            .append(paintProperty->GetEnableSmoothEffectValue(true) ? "true" : "false"));
+}
+
 void ProgressPattern::OnVisibleChange(bool isVisible)
 {
     auto host = GetHost();
@@ -272,6 +288,10 @@ void ProgressPattern::OnVisibleChange(bool isVisible)
 void ProgressPattern::ToJsonValueForRingStyleOptions(std::unique_ptr<JsonValue>& json,
     const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto layoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
     auto paintProperty = GetPaintProperty<ProgressPaintProperty>();
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -289,6 +309,10 @@ void ProgressPattern::ToJsonValueForRingStyleOptions(std::unique_ptr<JsonValue>&
 void ProgressPattern::ToJsonValueForLinearStyleOptions(
     std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto layoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
     auto paintProperty = GetPaintProperty<ProgressPaintProperty>();
     auto pipeline = PipelineBase::GetCurrentContext();

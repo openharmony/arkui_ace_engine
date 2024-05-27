@@ -120,6 +120,7 @@ struct ParagraphStyle {
     TextOverflow textOverflow = TextOverflow::CLIP;
     std::optional<LeadingMargin> leadingMargin;
     double fontSize = 14.0;
+    Dimension lineHeight;
     Dimension indent;
     Alignment leadingMarginAlign = Alignment::TOP_CENTER;
 

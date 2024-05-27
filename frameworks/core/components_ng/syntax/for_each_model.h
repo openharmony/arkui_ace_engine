@@ -42,7 +42,7 @@ public:
 
     // classic / full update code path
     virtual void Create(const std::string& compilerGenId, const ForEachFunc& ForEachFunc) = 0;
-    
+
     // Only implemented by ForEachModelNG
     virtual void Create() = 0;
 

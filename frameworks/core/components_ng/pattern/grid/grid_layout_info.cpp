@@ -152,7 +152,8 @@ bool GridLayoutInfo::IsOutOfEnd() const
 {
     auto atOrOutofStart = reachStart_ && NonNegative(currentOffset_);
     auto endPos = currentOffset_ + totalHeightOfItemsInView_;
-    return !atOrOutofStart && (endIndex_ == childrenCount_ - 1) && LessNotEqual(endPos, lastMainSize_);
+    return !atOrOutofStart && (endIndex_ == childrenCount_ - 1) &&
+           LessNotEqual(endPos, lastMainSize_ - contentEndPadding_);
 }
 
 float GridLayoutInfo::GetCurrentOffsetOfRegularGrid(float mainGap) const
@@ -506,6 +507,58 @@ float GridLayoutInfo::GetTotalHeightFromZeroIndex(int32_t targetLineIndex, float
     return targetPos;
 }
 
+ScrollAlign GridLayoutInfo::TransformAutoScrollAlign(
+    int32_t itemIdx, int32_t height, float mainSize, float mainGap) const
+{
+    if (itemIdx >= startIndex_ && itemIdx <= endIndex_) {
+        auto [line, _] = FindItemInRange(itemIdx);
+        float topPos = GetItemTopPos(line, mainGap);
+        float botPos = GetItemBottomPos(line, height, mainGap);
+        if (NonPositive(topPos) && GreatOrEqual(botPos, mainSize)) {
+            // item occupies the whole viewport
+            return ScrollAlign::NONE;
+        }
+        // scrollAlign start / end if the item is not fully in viewport
+        if (Negative(topPos)) {
+            return ScrollAlign::START;
+        }
+        if (GreatNotEqual(botPos, mainSize)) {
+            return ScrollAlign::END;
+        }
+        return ScrollAlign::NONE;
+    }
+    if (itemIdx > endIndex_) {
+        return ScrollAlign::END;
+    }
+    return ScrollAlign::START;
+}
+
+float GridLayoutInfo::GetAnimatePosIrregular(int32_t targetIdx, int32_t height, ScrollAlign align, float mainGap) const
+{
+    auto it = FindInMatrix(targetIdx);
+    if (it == gridMatrix_.end()) {
+        return -1.0f;
+    }
+    if (align == ScrollAlign::AUTO) {
+        align = TransformAutoScrollAlign(targetIdx, height, lastMainSize_, mainGap);
+    }
+    switch (align) {
+        case ScrollAlign::START:
+            return GetTotalHeightFromZeroIndex(it->first, mainGap);
+        case ScrollAlign::CENTER: {
+            auto [center, offset] = FindItemCenter(it->first, height, mainGap);
+            float res = GetTotalHeightFromZeroIndex(center, mainGap) + offset - lastMainSize_ / 2.0f;
+            return std::max(res, 0.0f);
+        }
+        case ScrollAlign::END: {
+            float res = GetTotalHeightFromZeroIndex(it->first + height, mainGap) - mainGap - lastMainSize_;
+            return std::max(res, 0.0f);
+        }
+        default:
+            return -1.0f;
+    }
+}
+
 // Based on the index from zero and align, gets the position to scroll to
 bool GridLayoutInfo::GetGridItemAnimatePos(const GridLayoutInfo& currentGridLayoutInfo, int32_t targetIndex,
     ScrollAlign align, float mainGap, float& targetPos)
@@ -744,6 +797,9 @@ float GridLayoutInfo::GetTotalHeightOfItemsInView(float mainGap, bool regular) c
     if (!regular) {
         it = SkipLinesAboveView(mainGap).first;
     }
+    if (it == lineHeightMap_.end()) {
+        return -mainGap;
+    }
     auto endIt = lineHeightMap_.find(endMainLineIndex_ + 1);
     for (; it != endIt; ++it) {
         len += it->second + mainGap;
@@ -814,9 +870,13 @@ float GridLayoutInfo::GetHeightInRange(int32_t startLine, int32_t endLine, float
     if (endLine <= startLine) {
         return 0.0f;
     }
-    float totalHeight = 0.0f;
     auto endIt = lineHeightMap_.find(endLine);
-    for (auto it = lineHeightMap_.find(startLine); it != endIt; ++it) {
+    auto it = lineHeightMap_.find(startLine);
+    if (it == lineHeightMap_.end()) {
+        return 0.0f;
+    }
+    float totalHeight = 0.0f;
+    for (; it != lineHeightMap_.end() && it != endIt; ++it) {
         totalHeight += it->second + mainGap;
     }
     return totalHeight;

@@ -119,7 +119,10 @@ void LayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
     magicItemProperty_.ToJsonValue(json, filter);
     ACE_PROPERTY_TO_JSON_VALUE(flexItemProperty_, FlexItemProperty);
     ACE_PROPERTY_TO_JSON_VALUE(gridProperty_, GridProperty);
-
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     if (padding_) {
         json->PutExtAttr("padding", padding_->ToJsonString().c_str(), filter);
     } else {
@@ -263,7 +266,6 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
 {
     layoutConstraint_ = parentConstraint;
     if (margin_) {
-        // TODO: add margin is negative case.
         marginResult_.reset();
         auto margin = CreateMargin();
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -376,7 +378,6 @@ void LayoutProperty::CheckAspectRatio()
     if (selfWidth) {
         layoutConstraint_->selfIdealSize.SetWidth(selfWidth);
     }
-    // TODO: after measure done, need to check AspectRatio again.
 }
 
 void LayoutProperty::BuildGridProperty(const RefPtr<FrameNode>& host)

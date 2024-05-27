@@ -39,6 +39,8 @@
 #include <cstdint>
 #include <stdint.h>
 
+#include "drawable_descriptor.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -173,6 +175,20 @@ typedef struct ArkUI_SwiperIndicator ArkUI_SwiperIndicator;
  * @since 12
  */
 typedef struct ArkUI_StyledString ArkUI_StyledString;
+
+/**
+ * @brief Defines image animator frame infomation.
+ *
+ * @since 12
+*/
+typedef struct ArkUI_ImageAnimatorFrameInfo ArkUI_ImageAnimatorFrameInfo;
+
+/**
+ * @brief Define the ChildrenMainSize class information for a List.
+ *
+ * @since 12
+*/
+typedef struct ArkUI_ListChildrenMainSize ArkUI_ListChildrenMainSize;
 
 /**
  * @brief Provides the number types of ArkUI in the native code.
@@ -525,6 +541,51 @@ typedef struct {
     /** Size of the interconnected data array. */
     int32_t size;
 } ARKUI_TextPickerCascadeRangeContent;
+
+/**
+ * @brief 定义无障碍复选框状态类型枚举值。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 复选框未被选中。*/
+    ARKUI_ACCESSIBILITY_UNCHECKED = 0,
+    /** 复选框被选中。*/
+    ARKUI_ACCESSIBILITY_CHECKED,
+} ArkUI_AccessibilityCheckedState;
+
+
+/**
+ * @brief Define accessible action types.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** click action. */
+    ARKUI_ACCESSIBILITY_ACTION_CLICK = 1 << 0,
+    /** long click action. */
+    ARKUI_ACCESSIBILITY_ACTION_LONG_CLICK = 1 << 1,
+    /** cut action. */
+    ARKUI_ACCESSIBILITY_ACTION_CUT = 1 << 2,
+    /** copy action. */
+    ARKUI_ACCESSIBILITY_ACTION_COPY = 1 << 3,
+    /** paste action. */
+    ARKUI_ACCESSIBILITY_ACTION_PASTE = 1 << 4,
+} ArkUI_AccessibilityActionType;
+
+/**
+ * @brief 定义组件无障碍状态。
+ *
+ * @since 12
+ */
+typedef struct ArkUI_AccessibilityState ArkUI_AccessibilityState;
+
+/**
+ * @brief 定义组件无障碍信息值。
+ *
+ * @since 12
+ */
+typedef struct ArkUI_AccessibilityValue ArkUI_AccessibilityValue;
 
 /**
  * @brief Enumerates the effects used at the edges of the component when the boundary of the
@@ -1792,6 +1853,60 @@ typedef enum {
 } ArkUI_ListItemSwipeEdgeEffect;
 
 /**
+ * @brief 定义帧动画的播放状态。
+ *
+ * @since 12
+*/
+typedef enum {
+    /** 动画初始状态。 */
+    ARKUI_ANIMATION_STATUS_INITIAL,
+    /** 动画处于播放状态。*/
+    ARKUI_ANIMATION_STATUS_RUNNING,
+    /** 动画处于暂停状态。*/
+    ARKUI_ANIMATION_STATUS_PAUSED,
+    /** 动画处于停止状态。*/
+    ARKUI_ANIMATION_STATUS_STOPPED,
+} ArkUI_AnimationStatus;
+
+/**
+ * @brief 定义帧动画组件在动画开始前和结束后的状态。
+ *
+ * @since 12
+*/
+typedef enum {
+    /** 动画未执行时不会将任何样式应用于目标，动画播放完成之后恢复初始默认状态。*/
+    ARKUI_ANIMATION_FILL_MODE_NONE,
+    /** 目标将保留动画执行期间最后一个关键帧的状态。*/
+    ARKUI_ANIMATION_FILL_MODE_FORWARDS,
+    /** 动画将在应用于目标时立即应用第一个关键帧中定义的值，并在delay期间保留此值。*/
+    ARKUI_ANIMATION_FILL_MODE_BACKWARDS,
+    /** 动画将遵循Forwards和Backwards的规则，从而在两个方向上扩展动画属性。*/
+    ARKUI_ANIMATION_FILL_MODE_BOTH,
+} ArkUI_AnimationFillMode;
+
+/**
+ * @brief 定义错误码枚举值。
+ *
+ * @since 12
+*/
+typedef enum {
+    /** 无错误。*/
+    ARKUI_ERROR_CODE_NO_ERROR = 0,
+    /** 参数错误。*/
+    ARKUI_ERROR_CODE_PARAM_INVALID = 401,
+    /** 组件不支持特点的属性或者事件。*/
+    ARKUI_ERROR_CODE_ATTRIBUTE_OR_EVENT_NOT_SUPPORTED = 106102,
+    /** 对应的操作不支持ArkTS创建的节点。*/
+    ARKUI_ERROR_CODE_NOT_SUPPROTED_FOR_ARKTS_NODE = 106103,
+    /** 懒加载适配器未绑定到组件上。*/
+    ARKUI_ERROR_CODE_NODE_ADAPTER_NONE_HOST = 106104,
+    /** 适配器已存在。*/
+    ARKUI_ERROR_CODE_NODE_ADAPTER_EXIST_IN_HOST = 106105,
+    /** 对应节点已存在子节点，无法添加适配器。*/
+    ARKUI_ERROR_CODE_NODE_ADAPTER_CHILD_NODE_EXIST = 106106,
+} ArkUI_ErrorCode;
+
+/**
 * @brief Creates a size constraint.
 *
 * @since 12
@@ -2096,6 +2211,19 @@ ArkUI_Margin OH_ArkUI_WaterFlowSectionOption_GetMargin(ArkUI_WaterFlowSectionOpt
 */
 void OH_ArkUI_WaterFlowSectionOption_RegisterGetItemMainSizeCallbackByIndex(ArkUI_WaterFlowSectionOption* option,
     int32_t index, float(*callback)(int32_t itemIndex));
+
+/**
+* @brief 通过FlowItem分组配置信息根据flowItemIndex获取指定Item的主轴大小。
+*
+* @param option FlowItem分组配置信息。
+* @param index FlowItem索引值。
+* @param userData FlowItem自定义数据。
+* @param callback 根据index获取指定Item的主轴大小。
+* @since 12
+*/
+void OH_ArkUI_WaterFlowSectionOption_RegisterGetItemMainSizeCallbackByIndexWithUserData(
+    ArkUI_WaterFlowSectionOption* option, int32_t index, void* userData,
+    float (*callback)(int32_t itemIndex, void* userData));
 
 /**
  * @brief Create auxiliary line information in the RelativeContaine container.
@@ -2778,6 +2906,17 @@ float OH_ArkUI_ListItemSwipeActionItem_GetActionAreaDistance(ArkUI_ListItemSwipe
 void OH_ArkUI_ListItemSwipeActionItem_SetOnEnterActionArea(ArkUI_ListItemSwipeActionItem* item, void (*callback)());
 
 /**
+ * @brief Set the event triggered when a sliding entry enters the deletion area.
+ *
+ * @param option List Item SwipeActionItem instance.
+ * @param userData User defined data.
+ * @param callback Callback Events.
+ * @since 12
+ */
+void OH_ArkUI_ListItemSwipeActionItem_SetOnEnterActionAreaWithUserData(ArkUI_ListItemSwipeActionItem* item,
+    void* userData, void (*callback)(void* userData));
+
+/**
 * @brief Set the event to be called when a component enters the long-range deletion area and deletes a ListItem.
 *
 * @param item List Item SwipeActionItem instance.
@@ -2785,6 +2924,17 @@ void OH_ArkUI_ListItemSwipeActionItem_SetOnEnterActionArea(ArkUI_ListItemSwipeAc
 * @since 12
 */
 void OH_ArkUI_ListItemSwipeActionItem_SetOnAction(ArkUI_ListItemSwipeActionItem* item, void (*callback)());
+
+/**
+ * @brief Set the event triggered when a component enters the long-range deletion area and deletes a ListItem.
+ *
+ * @param option List Item SwipeActionItem instance.
+ * @param userData User defined data.
+ * @param callback Callback Events.
+ * @since 12
+ */
+void OH_ArkUI_ListItemSwipeActionItem_SetOnActionWithUserData(ArkUI_ListItemSwipeActionItem* item,
+    void* userData, void (*callback)(void* userData));
 
 /**
 * @brief Set the event to be called when a sliding entry exits the deletion area.
@@ -2796,6 +2946,17 @@ void OH_ArkUI_ListItemSwipeActionItem_SetOnAction(ArkUI_ListItemSwipeActionItem*
 void OH_ArkUI_ListItemSwipeActionItem_SetOnExitActionArea(ArkUI_ListItemSwipeActionItem* item, void (*callback)());
 
 /**
+ * @brief Set the event triggered when a sliding entry exits the deletion area.
+ *
+ * @param option List Item SwipeActionItem instance.
+ * @param userData User defined data.
+ * @param callback Callback Events.
+ * @since 12
+ */
+void OH_ArkUI_ListItemSwipeActionItem_SetOnExitActionAreaWithUserData(ArkUI_ListItemSwipeActionItem* item,
+    void* userData, void (*callback)(void* userData));
+
+/**
 * @brief Set the event triggered when the sliding state of a list item changes.
 *
 * @param item List Item SwipeActionItem instance.
@@ -2805,6 +2966,18 @@ void OH_ArkUI_ListItemSwipeActionItem_SetOnExitActionArea(ArkUI_ListItemSwipeAct
 */
 void OH_ArkUI_ListItemSwipeActionItem_SetOnStateChange(
     ArkUI_ListItemSwipeActionItem* item, void (*callback)(ArkUI_ListItemSwipeActionState swipeActionState));
+
+/**
+ * @brief Set the event triggered when the sliding state of a list item changes.
+ *
+ * @param option List Item SwipeActionItem instance.
+ * @param userData User defined data.
+ * @param callback Callback Events.
+ *        swipeActionState The changed state.
+ * @since 12
+ */
+void OH_ArkUI_ListItemSwipeActionItem_SetOnStateChangeWithUserData(ArkUI_ListItemSwipeActionItem* item,
+    void* userData, void (*callback)(ArkUI_ListItemSwipeActionState swipeActionState, void* userData));
 
 /**
  * @brief Create a configuration item for the ListitemSwipeActionOption interface settings.
@@ -2873,6 +3046,393 @@ int32_t OH_ArkUI_ListItemSwipeActionOption_GetEdgeEffect(ArkUI_ListItemSwipeActi
 */
 void OH_ArkUI_ListItemSwipeActionOption_SetOnOffsetChange(
     ArkUI_ListItemSwipeActionOption* option, void (*callback)(float offset));
+
+/**
+ * @brief Set the event triggered when the sliding operation offset changes.
+ *
+ * @param option List Item SwipeActionItem instance.
+ * @param userData User defined data.
+ * @param callback Callback Events.
+ *        offset Slide offset.
+ * @since 12
+ */
+void OH_ArkUI_ListItemSwipeActionOption_SetOnOffsetChangeWithUserData(ArkUI_ListItemSwipeActionOption* option,
+    void* userData, void (*callback)(float offset, void* userData));
+
+/**
+ * @brief 使用图片路径创建帧图片信息，图片格式为svg，png和jpg。
+ *
+ * @param src 图片路径。
+ * @return 帧图片对象指针。
+ * @since 12
+*/
+ArkUI_ImageAnimatorFrameInfo* OH_ArkUI_ImageAnimatorFrameInfo_CreateFromString(char* src);
+
+/**
+ * @brief 使用 DrawableDescriptor 对象创建帧图片信息，图片格式为Resource和PixelMap。
+ *
+ * @param drawable 使用Resource或PixelMap创建的ArkUI_DrawableDescriptor对象指针。
+ * @return 帧图片对象指针。
+ * @since 12
+*/
+ArkUI_ImageAnimatorFrameInfo* OH_ArkUI_ImageAnimatorFrameInfo_CreateFromDrawableDescriptor(
+    ArkUI_DrawableDescriptor* drawable);
+
+/**
+ * @brief 销毁帧图片对象指针。
+ *
+ * @param imageInfo 帧图片对象指针。
+ * @since 12
+*/
+void OH_ArkUI_ImageAnimatorFrameInfo_Dispose(ArkUI_ImageAnimatorFrameInfo* imageInfo);
+
+/**
+ * @brief 设置图片宽度。
+ *
+ * @param imageInfo 帧图片对象指针。
+ * @param width 图片宽度，单位为PX。
+ * @since 12
+*/
+void OH_ArkUI_ImageAnimatorFrameInfo_SetWidth(ArkUI_ImageAnimatorFrameInfo* imageInfo, int32_t width);
+
+/**
+ * @brief 获取图片宽度。
+ *
+ * @param imageInfo 帧图片对象指针。
+ * @return 图片宽度，单位为PX，imageInfo为空指针时返回0。
+ * @since 12
+*/
+int32_t OH_ArkUI_ImageAnimatorFrameInfo_GetWidth(ArkUI_ImageAnimatorFrameInfo* imageInfo);
+
+/**
+ * @brief 设置图片高度。
+ *
+ * @param imageInfo 帧图片对象指针。
+ * @param height 图片高度，单位为PX。
+ * @since 12
+*/
+void OH_ArkUI_ImageAnimatorFrameInfo_SetHeight(ArkUI_ImageAnimatorFrameInfo* imageInfo, int32_t height);
+
+/**
+ * @brief 获取图片高度。
+ *
+ * @param imageInfo 帧图片对象指针。
+ * @return 图片高度，单位为PX，imageInfo为空指针时返回0。
+ * @since 12
+*/
+int32_t OH_ArkUI_ImageAnimatorFrameInfo_GetHeight(ArkUI_ImageAnimatorFrameInfo* imageInfo);
+
+/**
+ * @brief 设置图片相对于组件左上角的纵向坐标。
+ *
+ * @param imageInfo 帧图片对象指针。
+ * @param top 图片相对于组件左上角的纵向坐标，单位为PX。
+ * @since 12
+*/
+void OH_ArkUI_ImageAnimatorFrameInfo_SetTop(ArkUI_ImageAnimatorFrameInfo* imageInfo, int32_t top);
+
+/**
+ * @brief 获取图片相对于组件左上角的纵向坐标。
+ *
+ * @param imageInfo 帧图片对象指针。
+ * @return 图片相对于组件左上角的纵向坐标，单位为PX，imageInfo为空指针时返回0。
+ * @since 12
+*/
+int32_t OH_ArkUI_ImageAnimatorFrameInfo_GetTop(ArkUI_ImageAnimatorFrameInfo* imageInfo);
+
+/**
+ * @brief 设置图片相对于组件左上角的横向坐标。
+ *
+ * @param imageInfo 帧图片对象指针。
+ * @param left 图片相对于组件左上角的横向坐标，单位为PX。
+ * @since 12
+*/
+void OH_ArkUI_ImageAnimatorFrameInfo_SetLeft(ArkUI_ImageAnimatorFrameInfo* imageInfo, int32_t left);
+
+/**
+ * @brief 获取图片相对于组件左上角的横向坐标。
+ *
+ * @param imageInfo 帧图片对象指针。
+ * @return 图片相对于组件左上角的横向坐标，单位为PX，imageInfo为空指针时返回0。
+ * @since 12
+*/
+int32_t OH_ArkUI_ImageAnimatorFrameInfo_GetLeft(ArkUI_ImageAnimatorFrameInfo* imageInfo);
+
+/**
+ * @brief 设置图片的播放时长。
+ *
+ * @param imageInfo 帧图片对象指针。
+ * @param duration 图片的播放时长，单位为毫秒。
+ * @since 12
+*/
+void OH_ArkUI_ImageAnimatorFrameInfo_SetDuration(ArkUI_ImageAnimatorFrameInfo* imageInfo, int32_t duration);
+
+/**
+ * @brief 获取图片的播放时长。
+ *
+ * @param imageInfo 帧图片对象指针。
+ * @return 图片的播放时长，单位为毫秒，imageInfo为空指针时返回0。
+ * @since 12
+*/
+int32_t OH_ArkUI_ImageAnimatorFrameInfo_GetDuration(ArkUI_ImageAnimatorFrameInfo* imageInfo);
+
+/**
+ * @brief Create accessibility state.
+ *
+ * @return accessibility state object. If the object returns a null pointer,
+ *         it indicates a creation failure, and the reason for the failure may be that the address space is full.
+ * @since 12
+*/
+ArkUI_AccessibilityState* OH_ArkUI_AccessibilityState_Create();
+
+/**
+* @brief Dispose accessibility state.
+*
+* @param state accessibility state object.
+* @since 12
+*/
+void OH_ArkUI_AccessibilityState_Dispose(ArkUI_AccessibilityState* state);
+
+/**
+ * @brief Set accessibility state disabled.
+ *
+ * @param state accessibility state object.
+ * @param isDisabled accessibility state disabled， Value 1 indicates disabled and 0 indicates enbled.
+ * @since 12
+*/
+void OH_ArkUI_AccessibilityState_SetDisabled(ArkUI_AccessibilityState* state, int32_t isDisabled);
+
+/**
+ * @brief Get accessibility state disabled.
+ *
+ * @param state accessibility state object.
+ * @return accessibility state disabled， Value 1 indicates disabled and 0 indicates enbled. The default value is 0.
+ *         If the function parameter is abnormal, return the default value.
+ * @since 12
+*/
+int32_t OH_ArkUI_AccessibilityState_IsDisabled(ArkUI_AccessibilityState* state);
+
+/**
+ * @brief Set accessibility state selected.
+ *
+ * @param state accessibility state object.
+ * @param isSelected accessibility state selected， Value 1 indicates selected， and 0 indicates not selected.
+ *        The default value is 0.
+ * @since 12
+*/
+void OH_ArkUI_AccessibilityState_SetSelected(ArkUI_AccessibilityState* state, int32_t isSelected);
+
+/**
+ * @brief Get accessibility state selected.
+ *
+ * @param state accessibility state object.
+ * @return accessibility state selected， Value 1 indicates selected， and 0 indicates not selected.
+ *         The default value is 0.
+ *         If the function parameter is abnormal, return the default value.
+ * @since 12
+*/
+int32_t OH_ArkUI_AccessibilityState_IsSelected(ArkUI_AccessibilityState* state);
+
+/**
+ * @brief Set accessibility checked state.
+ *
+ * @param state accessibility state object.
+ * @param checkedState checked state，and uses the {@link ArkUI_AccessibilityCheckedState} enumeration value,
+ *        The default value is ARKUI_ACCESSIBILITY_UNCHECKED.
+ * @since 12
+*/
+void OH_ArkUI_AccessibilityState_SetCheckedState(ArkUI_AccessibilityState* state, int32_t checkedState);
+
+/**
+ * @brief Get accessibility checked state.
+ *
+ * @param state accessibility state object.
+ * @return checked state，and uses the {@link ArkUI_AccessibilityCheckedState} enumeration value,
+ *         The default value is ARKUI_ACCESSIBILITY_UNCHECKED.
+ *         If the function parameter is abnormal, return the default value.
+ * @since 12
+*/
+int32_t OH_ArkUI_AccessibilityState_GetCheckedState(ArkUI_AccessibilityState* state);
+
+/**
+ * @brief Create accessibility value.
+ *
+ * @return accessibility value object. If the object returns a null pointer,
+ *         it indicates a creation failure, and the reason for the failure may be that the address space is full.
+ * @since 12
+*/
+ArkUI_AccessibilityValue* OH_ArkUI_AccessibilityValue_Create();
+
+/**
+* @brief Dispose accessibility value.
+*
+* @param state accessibility value object.
+* @since 12
+*/
+void OH_ArkUI_AccessibilityValue_Dispose(ArkUI_AccessibilityValue* value);
+
+/**
+ * @brief Set accessibility minimum value.
+ *
+ * @param value accessibility value object.
+ * @param min minimum value based on range components, The default value is -1。
+ * @since 12
+*/
+void OH_ArkUI_AccessibilityValue_SetMin(ArkUI_AccessibilityValue* value, int32_t min);
+
+/**
+ * @brief Get accessibility minimum value.
+ *
+ * @param value accessibility value object.
+ * @return minimum value based on range components, The default value is -1。
+ *         If the function parameter is abnormal, return -1.
+ * @since 12
+*/
+int32_t OH_ArkUI_AccessibilityValue_GetMin(ArkUI_AccessibilityValue* value);
+
+/**
+ * @brief Set accessibility minimum value.
+ *
+ * @param value accessibility value object.
+ * @param max maximum value based on range components, The default value is -1。
+ * @since 12
+*/
+void OH_ArkUI_AccessibilityValue_SetMax(ArkUI_AccessibilityValue* value, int32_t max);
+
+/**
+ * @brief Get accessibility minimum value.
+ *
+ * @param value accessibility value object.
+ * @return maximum value based on range components, The default value is -1。
+ *         If the function parameter is abnormal, return -1.
+ * @since 12
+*/
+int32_t OH_ArkUI_AccessibilityValue_GetMax(ArkUI_AccessibilityValue* value);
+
+/**
+ * @brief Set accessibility current value.
+ *
+ * @param value accessibility value object.
+ * @param current value based on range components, The default value is -1。
+ * @since 12
+*/
+void OH_ArkUI_AccessibilityValue_SetCurrent(ArkUI_AccessibilityValue* value, int32_t current);
+
+/**
+ * @brief Get accessibility current value.
+ *
+ * @param value accessibility value object.
+ * @return current value based on range components, The default value is -1。
+ *         If the function parameter is abnormal, return -1.
+ * @since 12
+*/
+int32_t OH_ArkUI_AccessibilityValue_GetCurrent(ArkUI_AccessibilityValue* value);
+
+/**
+ * @brief Set accessibility text value.
+ *
+ * @param value accessibility value object.
+ * @param text The textual description information of the component, which defaults to an empty string。
+ * @since 12
+*/
+void OH_ArkUI_AccessibilityValue_SetText(ArkUI_AccessibilityValue* value, const char* text);
+
+/**
+ * @brief Get accessibility text value。
+ *
+ * @param value accessibility value object.
+ * @return The textual description information of the component, which defaults to an empty string;
+ *         If the function parameter is abnormal, return null.
+ * @since 12
+*/
+const char* OH_ArkUI_AccessibilityValue_GetText(ArkUI_AccessibilityValue* value);
+/**
+ * @brief Create configuration items for the ListChildrenMainSize interface settings.
+ *
+ * @return ListChildrenMainSize configuration item instance.If the object returns a null pointer,
+ *         it indicates a creation failure, and the reason for the failure may be that the address space is full.
+ * @since 12
+*/
+ArkUI_ListChildrenMainSize* OH_ArkUI_ListChildrenMainSizeOption_Create();
+
+/**
+* @brief Destroy the ListChildrenMainSize instance.
+*
+* @param option The ListChildrenMainSize instance to be destroyed.
+* @since 12
+*/
+void OH_ArkUI_ListChildrenMainSizeOption_Dispose(ArkUI_ListChildrenMainSize* option);
+
+/**
+ * @brief Set the default size of ChildrenMainSizeOption for the List component.
+ *
+ * @param option ListChildrenMainSize instance.
+ * @param defaultMainSize The default size of the ListItem under the List, measured in vp.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 12
+*/
+int32_t OH_ArkUI_ListChildrenMainSizeOption_SetDefaultMainSize(ArkUI_ListChildrenMainSize* option,
+    float defaultMainSize);
+
+/**
+ * @brief Get the default size of ChildrenMainSizeOption for the List component.
+ *
+ * @param option ListChildrenMainSize instance.
+ * @return The default size of the ListItem under the List is 0, measured in vp.
+ *         When the option is a null pointer, it returns -1.
+ * @since 12
+*/
+float OH_ArkUI_ListChildrenMainSizeOption_GetDefaultMainSize(ArkUI_ListChildrenMainSize* option);
+
+/**
+ * @brief Reset the array size of ChildrenMainSizeOption for the List component.
+ *
+ * @param option ListChildrenMainSize instance.
+ * @param totalSize Array size.
+ * @since 12
+*/
+void OH_ArkUI_ListChildrenMainSizeOption_Resize(ArkUI_ListChildrenMainSize* option, int32_t totalSize);
+
+/**
+ * @brief Resize the ChildrenMainSizeOption array operation on the List component.
+ *
+ * @param option ListChildrenMainSize instance.
+ * @param index To modify the starting position of the MainSize array.
+ * @param deleteCount The number of MainSize arrays to be deleted starting from index.
+ * @param addCount The number of MainSize arrays to be added starting from index.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 12
+*/
+int32_t OH_ArkUI_ListChildrenMainSizeOption_Splice(ArkUI_ListChildrenMainSize* option, int32_t index,
+    int32_t deleteCount, int32_t addCount);
+
+/**
+ * @brief Update the value of the ChildrenMainSizeOption array in the List component.
+ *
+ * @param option ListChildrenMainSize instance.
+ * @param index To modify the starting position of the MainSize array.
+ * @param mainSize The actual modified value.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 12
+*/
+int32_t OH_ArkUI_ListChildrenMainSizeOption_UpdateSize(ArkUI_ListChildrenMainSize* option,
+    int32_t index, float mainSize);
+
+/**
+ * @brief Get the value of the ChildrenMainSizeOption array for the List component.
+ *
+ * @param option ListChildrenMainSize instance.
+ * @param index The index position of the value to be obtained.
+ * @return The value of the specific position of the array. If the function parameter is abnormal, return -1.
+ * @since 12
+*/
+float OH_ArkUI_ListChildrenMainSizeOption_GetMainSize(ArkUI_ListChildrenMainSize* option, int32_t index);
 #ifdef __cplusplus
 };
 #endif

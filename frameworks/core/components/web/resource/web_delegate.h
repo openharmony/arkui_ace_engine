@@ -37,6 +37,7 @@
 #include "core/components/web/web_component.h"
 #include "core/components/web/web_event.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
+#include "core/components_ng/pattern/web/web_pattern.h"
 #include "nweb_accessibility_node_info.h"
 #include "surface_delegate.h"
 #ifdef OHOS_STANDARD_SYSTEM
@@ -120,6 +121,52 @@ public:
 private:
     std::shared_ptr<OHOS::NWeb::NWebFullScreenExitHandler> handler_;
     WeakPtr<WebDelegate> webDelegate_;
+};
+
+class WebCustomKeyboardHandlerOhos : public WebCustomKeyboardHandler {
+    DECLARE_ACE_TYPE(WebCustomKeyboardHandlerOhos, WebCustomKeyboardHandler)
+
+public:
+    WebCustomKeyboardHandlerOhos(std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler) :
+    keyboardHandler_(keyboardHandler) {}
+
+    void InsertText(const std::string &text) override
+    {
+        if (keyboardHandler_) {
+            keyboardHandler_->InsertText(text);
+        }
+    }
+
+    void DeleteForward(int32_t length) override
+    {
+        if (keyboardHandler_) {
+            keyboardHandler_->DeleteForward(length);
+        }
+    }
+
+    void DeleteBackward(int32_t length) override
+    {
+        if (keyboardHandler_) {
+            keyboardHandler_->DeleteBackward(length);
+        }
+    }
+
+    void SendFunctionKey(int32_t key) override
+    {
+        if (keyboardHandler_) {
+            keyboardHandler_->SendFunctionKey(key);
+        }
+    }
+
+    void Close() override
+    {
+        if (keyboardHandler_) {
+            keyboardHandler_->Close();
+        }
+    }
+
+private:
+    std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler_;
 };
 
 class AuthResultOhos : public AuthResult {
@@ -814,7 +861,7 @@ public:
     void OnNativeEmbedLifecycleChange(std::shared_ptr<NWeb::NWebNativeEmbedDataInfo> dataInfo);
     void OnNativeEmbedGestureEvent(std::shared_ptr<NWeb::NWebNativeEmbedTouchEvent> event);
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
-    bool RequestFocus();
+    bool RequestFocus(OHOS::NWeb::NWebFocusSource source = OHOS::NWeb::NWebFocusSource::FOCUS_SOURCE_DEFAULT);
     void SetDrawSize(const Size& drawSize);
     void SetEnhanceSurfaceFlag(const bool& isEnhanceSurface);
     EGLConfig GLGetConfig(int version, EGLDisplay eglDisplay);
@@ -877,18 +924,29 @@ public:
     std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);
     // Backward
     void Backward();
+    bool AccessBackward();
     bool OnOpenAppLink(const std::string& url, std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback);
 
     void OnRenderProcessNotResponding(
         const std::string& jsStack, int pid, OHOS::NWeb::RenderProcessNotRespondingReason reason);
     void OnRenderProcessResponding();
     std::string GetSelectInfo() const;
+    Offset GetPosition(const std::string& embedId);
 
     void OnOnlineRenderToForeground();
 
     void OnViewportFitChange(OHOS::NWeb::ViewportFit viewportFit);
     void OnAreaChange(const OHOS::Ace::Rect& area);
     void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type);
+    NG::WebInfoType GetWebInfoType();
+    void OnInterceptKeyboardAttach(
+        const std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler,
+        const std::map<std::string, std::string> &attributes, bool &useSystemKeyboard, int32_t &enterKeyType);
+
+    void OnCustomKeyboardAttach();
+
+    void OnCustomKeyboardClose();
+
 
 private:
     void InitWebEvent();
@@ -945,7 +1003,6 @@ private:
     void ClearClientAuthenticationCache();
     bool AccessStep(int32_t step);
     void BackOrForward(int32_t step);
-    bool AccessBackward();
     bool AccessForward();
 
     void SearchAllAsync(const std::string& searchStr);
@@ -1034,6 +1091,7 @@ private:
     EventCallbackV2 onRenderProcessNotRespondingV2_;
     EventCallbackV2 onRenderProcessRespondingV2_;
     EventCallbackV2 onViewportFitChangedV2_;
+    std::function<WebKeyboardOption(const std::shared_ptr<BaseEventInfo>&)> onInterceptKeyboardAttachV2_;
 
     int32_t renderMode_;
     int32_t layoutMode_;

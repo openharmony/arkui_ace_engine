@@ -58,27 +58,16 @@ void CheckBoxGroupPattern::OnModifyDone()
     CHECK_NULL_VOID(checkBoxTheme);
     auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    PaddingProperty padding;
-    padding.left = CalcLength(checkBoxTheme->GetDefaultPaddingSize());
-    padding.right = CalcLength(checkBoxTheme->GetDefaultPaddingSize());
-    padding.top = CalcLength(checkBoxTheme->GetDefaultPaddingSize());
-    padding.bottom = CalcLength(checkBoxTheme->GetDefaultPaddingSize());
-    auto& setPadding = layoutProperty->GetPaddingProperty();
-    if (setPadding) {
-        if (setPadding->left.has_value()) {
-            padding.left = setPadding->left;
-        }
-        if (setPadding->right.has_value()) {
-            padding.right = setPadding->right;
-        }
-        if (setPadding->top.has_value()) {
-            padding.top = setPadding->top;
-        }
-        if (setPadding->bottom.has_value()) {
-            padding.bottom = setPadding->bottom;
-        }
+    if (!layoutProperty->GetMarginProperty()) {
+        MarginProperty margin;
+        margin.left = CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value());
+        margin.right = CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value());
+        margin.top = CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value());
+        margin.bottom = CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value());
+        layoutProperty->UpdateMargin(margin);
     }
-    layoutProperty->UpdatePadding(padding);
+    hotZoneHorizontalPadding_ = checkBoxTheme->GetHotZoneHorizontalPadding();
+    hotZoneVerticalPadding_ = checkBoxTheme->GetHotZoneVerticalPadding();
     InitClickEvent();
     InitTouchEvent();
     InitMouseEvent();
@@ -342,15 +331,10 @@ void CheckBoxGroupPattern::InitPreGroup()
     groupManager->AddCheckBoxGroup(group, host);
     auto paintProperty = host->GetPaintProperty<CheckBoxGroupPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (paintProperty->HasCheckBoxGroupSelect() && paintProperty->GetCheckBoxGroupSelectValue()) {
-        auto selectAll = paintProperty->GetCheckBoxGroupSelectValue();
-        if (selectAll) {
-            paintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::ALL);
-        }
-        if (selectAll || (!selectAll && !isFirstCreated_)) {
-            UpdateUIStatus(selectAll);
-        }
-        initSelected_ = selectAll;
+    if (paintProperty->GetCheckBoxGroupSelect().value_or(false)) {
+        paintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::ALL);
+        UpdateUIStatus(true);
+        initSelected_ = true;
     }
     isFirstCreated_ = false;
     SetPreGroup(group);
@@ -529,6 +513,25 @@ FocusPattern CheckBoxGroupPattern::GetFocusPattern() const
     return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParam };
 }
 
+// Set the default hot zone for the component.
+void CheckBoxGroupPattern::AddHotZoneRect()
+{
+    hotZoneOffset_.SetX(offset_.GetX() - hotZoneHorizontalPadding_.ConvertToPx());
+    hotZoneOffset_.SetY(offset_.GetY() - hotZoneVerticalPadding_.ConvertToPx());
+    hotZoneSize_.SetWidth(size_.Width() + 2 * hotZoneHorizontalPadding_.ConvertToPx());
+    hotZoneSize_.SetHeight(size_.Height() + 2 * hotZoneVerticalPadding_.ConvertToPx());
+    DimensionRect hotZoneRegion;
+    hotZoneRegion.SetSize(DimensionSize(Dimension(hotZoneSize_.Width()), Dimension(hotZoneSize_.Height())));
+    hotZoneRegion.SetOffset(DimensionOffset(Dimension(hotZoneOffset_.GetX()), Dimension(hotZoneOffset_.GetY())));
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    std::vector<DimensionRect> hotZoneRegions;
+    hotZoneRegions.emplace_back(hotZoneRegion);
+    gestureHub->SetResponseRegion(hotZoneRegions);
+}
+
 void CheckBoxGroupPattern::RemoveLastHotZoneRect() const
 {
     auto host = GetHost();
@@ -630,9 +633,11 @@ void CheckBoxGroupPattern::OnAttachToMainTree()
         }
         parent = parent->GetParent();
     }
-    currentNavId_ = "";
-    groupManager->SetLastNavId(std::nullopt);
-    UpdateState();
+    if (!currentNavId_.value_or("").empty()) {
+        currentNavId_ = "";
+        groupManager->SetLastNavId(std::nullopt);
+        UpdateState();
+    }
 }
 
 std::string CheckBoxGroupPattern::GetGroupNameWithNavId()

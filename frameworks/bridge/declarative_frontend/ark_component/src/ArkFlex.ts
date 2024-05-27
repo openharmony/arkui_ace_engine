@@ -24,8 +24,8 @@ class FlexInitializeModifier extends ModifierWithKey<FlexParam> {
       getUINativeModule().flex.resetFlexInitialize(node);
     } else {
       getUINativeModule().flex.setFlexInitialize(node, this.value.direction, this.value.wrap,
-        this.value.justifyContent, this.value.alignItems, this.value.alignContent);
-    }
+        this.value.justifyContent, this.value.alignItems, this.value.alignContent, this.value?.space?.main,
+        this.value?.space?.cross);
   }
 }
 interface FlexParam {
@@ -34,20 +34,61 @@ interface FlexParam {
   justifyContent?: FlexAlign;
   alignItems?: ItemAlign;
   alignContent?: FlexAlign;
+  space?: FlexSpaceOptions;
 }
 class ArkFlexComponent extends ArkComponent implements FlexAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
   pointLight(value: PointLightStyle): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, FlexPointLightModifier.identity, FlexPointLightModifier, value);
+    return this;
   }
   initialize(value: Object[]): FlexAttribute {
     if (value[0] !== undefined) {
       modifierWithKey(this._modifiersWithKeys, FlexInitializeModifier.identity,
         FlexInitializeModifier, (value[0] as FlexParam));
+      }
     }
-    return this;
+}
+
+class FlexPointLightModifier extends ModifierWithKey<PointLightStyle> {
+  constructor(value: PointLightStyle) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('flexPointLight');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetPointLightStyle(node);
+    } else {
+      let positionX: Dimension | undefined;
+      let positionY: Dimension | undefined;
+      let positionZ: Dimension | undefined;
+      let intensity: number | undefined;
+      let color: ResourceColor | undefined;
+      let illuminated: number | undefined;
+      let bloom: number | undefined;
+      if (!isUndefined(this.value.lightSource) && this.value.lightSource != null) {
+        positionX = this.value.lightSource.positionX;
+        positionY = this.value.lightSource.positionY;
+        positionZ = this.value.lightSource.positionZ;
+        intensity = this.value.lightSource.intensity;
+        color = this.value.lightSource.color;
+      }
+      illuminated = this.value.illuminated;
+      bloom = this.value.bloom;
+      getUINativeModule().common.setPointLightStyle(node, positionX, positionY, positionZ, intensity, color,
+        illuminated, bloom);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.lightSource?.positionX, this.value.lightSource?.positionX) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.positionY, this.value.lightSource?.positionY) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.positionZ, this.value.lightSource?.positionZ) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.intensity, this.value.lightSource?.intensity) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.color, this.value.lightSource?.color) ||
+    !isBaseOrResourceEqual(this.stageValue.illuminated, this.value.illuminated) ||
+    !isBaseOrResourceEqual(this.stageValue.bloom, this.value.bloom);
   }
 }
 

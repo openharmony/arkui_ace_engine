@@ -26,7 +26,9 @@ class ExposureProcessor : public AceType {
     DECLARE_ACE_TYPE(ExposureProcessor, AceType)
 
 public:
-    explicit ExposureProcessor(const std::string& pageUrl, const std::string& inspectorId);
+    ExposureProcessor(const std::string& pageUrl, const std::string& inspectorId);
+    ExposureProcessor(const std::string& pageUrl, const std::string& inspectorId, double ratio, int duration);
+    explicit ExposureProcessor(const RefPtr<ExposureProcessor>& processor);
     ~ExposureProcessor() = default;
 
     bool IsNeedRecord() const;
@@ -35,12 +37,36 @@ public:
 
     void OnVisibleChange(bool isVisible, const std::string& param = "");
 
+    void SetContainerId(int32_t id)
+    {
+        containerId_ = id;
+    }
+
+    int32_t GetContainerId() const
+    {
+        return containerId_;
+    }
+
+    void SetListenState(bool state)
+    {
+        isListening_ = state;
+    }
+
+    bool isListening() const
+    {
+        return isListening_;
+    }
+
 private:
     ExposureCfg cfg_ = { "", 0.0, 0 };
     int64_t startTime_ = -1;
 
+    int32_t containerId_ = -1;
+
     std::string pageUrl_;
     std::string navDstName_;
+
+    bool isListening_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ExposureProcessor);
 };

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/render/adapter/txt_paragraph.h"
 
+#include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
 #include "core/components/font/constants_converter.h"
 #include "core/components_ng/base/ui_node.h"
@@ -51,6 +52,7 @@ bool TxtParagraph::IsValid()
 
 void TxtParagraph::CreateBuilder()
 {
+    ACE_TEXT_SCOPED_TRACE("TxtParagraph::CreateBuilder");
     CHECK_NULL_VOID(!hasExternalParagraph_);
     placeholderPosition_.clear();
 #ifndef USE_GRAPHIC_TEXT_GINE
@@ -93,6 +95,7 @@ void TxtParagraph::CreateBuilder()
 
 void TxtParagraph::PushStyle(const TextStyle& style)
 {
+    ACE_TEXT_SCOPED_TRACE("TxtParagraph::PushStyle");
     CHECK_NULL_VOID(!hasExternalParagraph_);
     if (!builder_) {
         CreateBuilder();
@@ -110,6 +113,7 @@ void TxtParagraph::PushStyle(const TextStyle& style)
 
 void TxtParagraph::PopStyle()
 {
+    ACE_TEXT_SCOPED_TRACE("TxtParagraph::PopStyle");
     CHECK_NULL_VOID(!hasExternalParagraph_ && builder_);
 #ifndef USE_GRAPHIC_TEXT_GINE
     builder_->Pop();
@@ -120,6 +124,7 @@ void TxtParagraph::PopStyle()
 
 void TxtParagraph::AddText(const std::u16string& text)
 {
+    ACE_TEXT_SCOPED_TRACE("TxtParagraph::AddText");
     if (!builder_) {
         CreateBuilder();
     }
@@ -134,6 +139,7 @@ void TxtParagraph::AddText(const std::u16string& text)
 
 void TxtParagraph::AddSymbol(const std::uint32_t& symbolId)
 {
+    ACE_TEXT_SCOPED_TRACE("TxtParagraph::AddSymbol");
     CHECK_NULL_VOID(!hasExternalParagraph_);
     if (!builder_) {
         CreateBuilder();
@@ -144,6 +150,7 @@ void TxtParagraph::AddSymbol(const std::uint32_t& symbolId)
 
 int32_t TxtParagraph::AddPlaceholder(const PlaceholderRun& span)
 {
+    ACE_TEXT_SCOPED_TRACE("TxtParagraph::AddPlaceholder");
     CHECK_NULL_RETURN(!hasExternalParagraph_, 0);
     if (!builder_) {
         CreateBuilder();
@@ -166,6 +173,7 @@ int32_t TxtParagraph::AddPlaceholder(const PlaceholderRun& span)
 
 void TxtParagraph::Build()
 {
+    ACE_TEXT_SCOPED_TRACE("TxtParagraph::Build");
     CHECK_NULL_VOID(!hasExternalParagraph_ && builder_);
 #ifndef USE_GRAPHIC_TEXT_GINE
     paragraph_ = builder_->Build();
@@ -195,6 +203,7 @@ void TxtParagraph::Reset()
 
 void TxtParagraph::Layout(float width)
 {
+    ACE_TEXT_SCOPED_TRACE("TxtParagraph::Layout");
     CHECK_NULL_VOID(!hasExternalParagraph_ && paragraph_);
     paragraph_->Layout(width);
 }
@@ -301,6 +310,7 @@ float TxtParagraph::GetCharacterWidth(int32_t index)
 
 void TxtParagraph::Paint(RSCanvas& canvas, float x, float y)
 {
+    ACE_TEXT_SCOPED_TRACE("TxtParagraph::Paint");
     auto paragrah = GetParagraph();
     CHECK_NULL_VOID(paragrah);
 #ifndef USE_ROSEN_DRAWING
@@ -789,6 +799,10 @@ bool TxtParagraph::HandleCaretWhenEmpty(CaretMetricsF& result)
 
     result.offset.Reset();
     result.height = paragrah->GetHeight();
+    auto lineHeight = paraStyle_.lineHeight;
+    if (lineHeight.IsValid()) {
+        result.offset.SetY(std::max(lineHeight.ConvertToPx() - result.height, 0.0));
+    }
     if (paraStyle_.align != TextAlign::START) {
         HandleTextAlign(result, paraStyle_.align);
     } else if (paraStyle_.leadingMargin) {

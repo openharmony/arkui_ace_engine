@@ -109,126 +109,126 @@ public:
 
     void SetFillColor(const Color& color)
     {
-        fillState_.SetColor(color);
-        fillState_.SetTextColor(color);
+        state_.fillState.SetColor(color);
+        state_.fillState.SetTextColor(color);
     }
 
     void SetFillPattern(const Ace::Pattern& pattern)
     {
-        fillState_.SetPattern(pattern);
+        state_.fillState.SetPattern(pattern);
     }
 
     void SetFillPatternNG(const std::weak_ptr<Ace::Pattern>& pattern)
     {
-        fillState_.SetPatternNG(pattern);
+        state_.fillState.SetPatternNG(pattern);
     }
 
     void SetFillGradient(const Ace::Gradient& gradient)
     {
-        fillState_.SetGradient(gradient);
+        state_.fillState.SetGradient(gradient);
     }
 
     void SetAlpha(double alpha)
     {
-        globalState_.SetAlpha(alpha);
+        state_.globalState.SetAlpha(alpha);
     }
 
     void SetCompositeType(CompositeOperation operation)
     {
-        globalState_.SetType(operation);
+        state_.globalState.SetType(operation);
     }
 
     // direction is also available in strokeText
     void SetTextDirection(TextDirection direction)
     {
-        fillState_.SetOffTextDirection(direction);
+        state_.fillState.SetOffTextDirection(direction);
     }
 
     void SetStrokeColor(const Color& color)
     {
-        strokeState_.SetColor(color);
+        state_.strokeState.SetColor(color);
     }
 
     void SetStrokePatternNG(const std::weak_ptr<Ace::Pattern>& pattern)
     {
-        strokeState_.SetPatternNG(pattern);
+        state_.strokeState.SetPatternNG(pattern);
     }
 
     void SetStrokePattern(const Ace::Pattern& pattern)
     {
-        strokeState_.SetPattern(pattern);
+        state_.strokeState.SetPattern(pattern);
     }
 
     void SetStrokeGradient(const Ace::Gradient& gradient)
     {
-        strokeState_.SetGradient(gradient);
+        state_.strokeState.SetGradient(gradient);
     }
 
     void SetLineCap(LineCapStyle style)
     {
-        strokeState_.SetLineCap(style);
+        state_.strokeState.SetLineCap(style);
     }
 
     void SetLineDashOffset(double offset)
     {
-        strokeState_.SetLineDashOffset(offset);
+        state_.strokeState.SetLineDashOffset(offset);
     }
 
     void SetLineJoin(LineJoinStyle style)
     {
-        strokeState_.SetLineJoin(style);
+        state_.strokeState.SetLineJoin(style);
     }
 
     void SetLineWidth(double width)
     {
-        strokeState_.SetLineWidth(width);
+        state_.strokeState.SetLineWidth(width);
     }
 
     void SetMiterLimit(double limit)
     {
-        strokeState_.SetMiterLimit(limit);
+        state_.strokeState.SetMiterLimit(limit);
     }
 
     LineDashParam GetLineDash() const
     {
-        return strokeState_.GetLineDash();
+        return state_.strokeState.GetLineDash();
     }
 
     void SetLineDash(const std::vector<double>& segments)
     {
-        strokeState_.SetLineDash(segments);
+        state_.strokeState.SetLineDash(segments);
     }
 
     void SetTextAlign(TextAlign align)
     {
-        fillState_.SetTextAlign(align);
-        strokeState_.SetTextAlign(align);
+        state_.fillState.SetTextAlign(align);
+        state_.strokeState.SetTextAlign(align);
     }
 
     void SetTextBaseline(TextBaseline baseline)
     {
-        fillState_.SetTextBaseline(baseline);
-        strokeState_.SetTextBaseline(baseline);
+        state_.fillState.SetTextBaseline(baseline);
+        state_.strokeState.SetTextBaseline(baseline);
     }
 
     void SetShadowColor(const Color& color)
     {
-        shadow_.SetColor(color);
+        state_.shadow.SetColor(color);
     }
 
     void SetShadowBlur(double blur)
     {
-        shadow_.SetBlurRadius(blur);
+        state_.shadow.SetBlurRadius(blur);
     }
 
     void SetShadowOffsetX(double x)
     {
-        shadow_.SetOffsetX(x);
+        state_.shadow.SetOffsetX(x);
     }
 
     void SetShadowOffsetY(double y)
     {
-        shadow_.SetOffsetY(y);
+        state_.shadow.SetOffsetY(y);
     }
 
     void SetSmoothingEnabled(bool enabled)
@@ -243,49 +243,26 @@ public:
 
     void SetFontSize(const Dimension& size)
     {
-        fillState_.SetFontSize(size);
-        strokeState_.SetFontSize(size);
+        state_.fillState.SetFontSize(size);
+        state_.strokeState.SetFontSize(size);
     }
 
     void SetFontStyle(OHOS::Ace::FontStyle style)
     {
-        fillState_.SetFontStyle(style);
-        strokeState_.SetFontStyle(style);
+        state_.fillState.SetFontStyle(style);
+        state_.strokeState.SetFontStyle(style);
     }
 
     void SetFontWeight(FontWeight weight)
     {
-        fillState_.SetFontWeight(weight);
-        strokeState_.SetFontWeight(weight);
+        state_.fillState.SetFontWeight(weight);
+        state_.strokeState.SetFontWeight(weight);
     }
 
     void SetFontFamilies(const std::vector<std::string>& fontFamilies)
     {
-        fillState_.SetFontFamilies(fontFamilies);
-        strokeState_.SetFontFamilies(fontFamilies);
-    }
-
-    void SaveStates()
-    {
-        PaintHolder holder;
-        holder.shadow = shadow_;
-        holder.fillState = fillState_;
-        holder.globalState = globalState_;
-        holder.strokeState = strokeState_;
-        saveStates_.push(holder);
-    }
-
-    void RestoreStates()
-    {
-        if (saveStates_.empty()) {
-            return;
-        }
-        auto saveState = saveStates_.top();
-        shadow_ = saveState.shadow;
-        fillState_ = saveState.fillState;
-        strokeState_ = saveState.strokeState;
-        globalState_ = saveState.globalState;
-        saveStates_.pop();
+        state_.fillState.SetFontFamilies(fontFamilies);
+        state_.strokeState.SetFontFamilies(fontFamilies);
     }
 
     void FlushPipelineImmediately()
@@ -385,7 +362,9 @@ protected:
     void DrawSvgImage(const Ace::CanvasImage& canvasImage);
     virtual RSCanvas* GetRawPtrOfRSCanvas() = 0;
     virtual void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas,
-        const RSBrush* brush, const RSPen* pen) = 0;
+        const RSBrush* brush = nullptr, const RSPen* pen = nullptr, RSSaveLayerOps* slo = nullptr) = 0;
+    virtual void PaintImageShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas,
+        const RSBrush* brush = nullptr, const RSPen* pen = nullptr, RSSaveLayerOps* slo = nullptr) = 0;
     double GetAlignOffset(TextAlign align, std::unique_ptr<RSParagraph>& paragraph);
     RSTextAlign GetEffectiveAlign(RSTextAlign align, RSTextDirection direction) const;
 #ifndef ACE_UNITTEST
@@ -395,21 +374,15 @@ protected:
     void ResetStates();
     void DrawImageInternal(const Ace::CanvasImage& canvasImage, const std::shared_ptr<RSImage>& image);
 
-    PaintState fillState_;
-    StrokePaintState strokeState_;
-
-    // save alpha and compositeType in GlobalPaintState
-    GlobalPaintState globalState_;
-
     // PaintHolder includes fillState, strokeState, globalState and shadow for save
-    std::stack<PaintHolder> saveStates_;
-    std::stack<RSMatrix> matrixStates_;
+    PaintHolder state_;
+    std::vector<PaintHolder> saveStates_;
     RSMatrix matrix_;
+    std::vector<RSMatrix> matrixStates_;
 
     bool smoothingEnabled_ = true;
     std::string smoothingQuality_ = "low";
     bool antiAlias_ = false;
-    Shadow shadow_;
     std::function<void(RSCanvas*, double, double)> canvasCallback_ = nullptr;
     std::unique_ptr<RSParagraph> paragraph_;
 

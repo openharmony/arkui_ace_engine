@@ -52,6 +52,7 @@ public:
     }
 
     void UpdateScrollBar();
+    void SetShowUnderlineWidth();
 
 private:
     void UpdateTextStyleToModifier(

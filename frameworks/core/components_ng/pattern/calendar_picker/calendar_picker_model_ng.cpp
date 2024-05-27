@@ -53,9 +53,10 @@ RefPtr<FrameNode> CalendarPickerModelNG::CreateFrameNode(int32_t nodeId)
 void CalendarPickerModelNG::LayoutPicker(const RefPtr<CalendarPickerPattern>& pickerPattern,
     RefPtr<FrameNode>& pickerNode, const CalendarSettingData& settingData, const RefPtr<CalendarTheme>& theme)
 {
+    auto textDirection = pickerNode->GetLayoutProperty()->GetNonAutoLayoutDirection();
     if (!pickerPattern->HasContentNode()) {
-        auto contentNode =
-            CalendarPickerModelNG::CreateCalendarNodeChild(pickerPattern->GetContentId(), settingData, theme);
+        auto contentNode = CalendarPickerModelNG::CreateCalendarNodeChild(
+            pickerPattern->GetContentId(), settingData, theme, textDirection);
         CHECK_NULL_VOID(contentNode);
         contentNode->MountToParent(pickerNode);
     } else {
@@ -65,18 +66,19 @@ void CalendarPickerModelNG::LayoutPicker(const RefPtr<CalendarPickerPattern>& pi
     CHECK_NULL_VOID(flexNode);
     flexNode->MountToParent(pickerNode);
     if (!pickerPattern->HasAddNode()) {
-        auto addNode = CalendarPickerModelNG::CreateButtonChild(pickerPattern->GetAddId(), true, theme);
+        auto addNode = CalendarPickerModelNG::CreateButtonChild(pickerPattern->GetAddId(), true, theme, textDirection);
         CHECK_NULL_VOID(addNode);
         addNode->MountToParent(flexNode, 0, true);
     }
     if (!pickerPattern->HasSubNode()) {
-        auto subNode = CalendarPickerModelNG::CreateButtonChild(pickerPattern->GetSubId(), false, theme);
+        auto subNode = CalendarPickerModelNG::CreateButtonChild(pickerPattern->GetSubId(), false, theme, textDirection);
         CHECK_NULL_VOID(subNode);
         subNode->MountToParent(flexNode, 1, true);
     }
 }
 
-RefPtr<FrameNode> CalendarPickerModelNG::CreateButtonChild(int32_t id, bool isAdd, const RefPtr<CalendarTheme>& theme)
+RefPtr<FrameNode> CalendarPickerModelNG::CreateButtonChild(
+    int32_t id, bool isAdd, const RefPtr<CalendarTheme>& theme, TextDirection textDirection)
 {
     auto buttonNode =
         FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, id, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
@@ -96,11 +98,20 @@ RefPtr<FrameNode> CalendarPickerModelNG::CreateButtonChild(int32_t id, bool isAd
         CalcSize(CalcLength(theme->GetEntryButtonWidth()), std::nullopt));
     buttonNode->GetLayoutProperty()->UpdateLayoutWeight(1);
     BorderWidthProperty borderWidth;
+    auto isRtl = textDirection == TextDirection::RTL;
     if (isAdd) {
-        borderWidth.leftDimen = theme->GetEntryBorderWidth();
+        if (isRtl) {
+            borderWidth.rightDimen = theme->GetEntryBorderWidth();
+        } else {
+            borderWidth.leftDimen = theme->GetEntryBorderWidth();
+        }
         borderWidth.bottomDimen = theme->GetEntryBorderWidth() / 2;
     } else {
-        borderWidth.leftDimen = theme->GetEntryBorderWidth();
+        if (isRtl) {
+            borderWidth.rightDimen = theme->GetEntryBorderWidth();
+        } else {
+            borderWidth.leftDimen = theme->GetEntryBorderWidth();
+        }
         borderWidth.topDimen = theme->GetEntryBorderWidth() / 2;
     }
     buttonNode->GetLayoutProperty()->UpdateBorderWidth(borderWidth);
@@ -152,8 +163,8 @@ RefPtr<FrameNode> CalendarPickerModelNG::CreateButtonFlexChild(int32_t buttonFle
     return flexNode;
 }
 
-RefPtr<FrameNode> CalendarPickerModelNG::CreateCalendarNodeChild(
-    int32_t contentId, const CalendarSettingData& settingData, const RefPtr<CalendarTheme>& theme)
+RefPtr<FrameNode> CalendarPickerModelNG::CreateCalendarNodeChild(int32_t contentId,
+    const CalendarSettingData& settingData, const RefPtr<CalendarTheme>& theme, TextDirection textDirection)
 {
     auto contentNode = FrameNode::GetOrCreateFrameNode(
         V2::ROW_ETS_TAG, contentId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
@@ -178,7 +189,11 @@ RefPtr<FrameNode> CalendarPickerModelNG::CreateCalendarNodeChild(
     padding.right = CalcLength(theme->GetEntryDateLeftRightMargin());
     padding.bottom = CalcLength(theme->GetEntryDateTopBottomMargin());
     linearLayoutProperty->UpdatePadding(padding);
-	
+
+    if (textDirection == TextDirection::RTL) {
+        linearLayoutProperty->UpdateLayoutDirection(TextDirection::LTR);
+    }
+
     CreateDateNode(contentId, settingData);
     contentNode->MarkModifyDone();
     return contentNode;
@@ -189,36 +204,8 @@ void CalendarPickerModelNG::CreateDateNode(int32_t contentId, const CalendarSett
     auto contentNode = FrameNode::GetOrCreateFrameNode(
         V2::ROW_ETS_TAG, contentId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
     CHECK_NULL_VOID(contentNode);
-    PickerDate date = settingData.selectedDate;
-    std::vector<std::string> outOrder;
-    bool result = Localization::GetInstance()->GetDateColumnFormatOrder(outOrder);
-    std::map<std::size_t, std::string> order;
-    if (!result || outOrder.size() < DATE_NODE_COUNT) {
-        yearNodeIndex_ = YEAR_NODE_INDEX;
-        monthNodeIndex_ = MONTH_NODE_INDEX;
-        dayNodeIndex_ = DAY_NODE_INDEX;
-        auto num = 0;
-        order[num++] = std::to_string(date.GetYear());
-        order[num++] = (date.GetMonth() < ONE_DIGIT_BOUNDARY ? "0" : "") + std::to_string(date.GetMonth());
-        order[num] = (date.GetDay() < ONE_DIGIT_BOUNDARY ? "0" : "") + std::to_string(date.GetDay());
-    } else {
-        int32_t index = 0;
-        for (size_t i = 0; i < outOrder.size(); ++i) {
-            if (outOrder[i] == "year") {
-                yearNodeIndex_ = i + index;
-                order[i] = std::to_string(date.GetYear());
-            }
-            if (outOrder[i] == "month") {
-                monthNodeIndex_ = i + index;
-                order[i] = (date.GetMonth() < ONE_DIGIT_BOUNDARY ? "0" : "") + std::to_string(date.GetMonth());
-            }
-            if (outOrder[i] == "day") {
-                dayNodeIndex_ = i + index;
-                order[i] = (date.GetDay() < ONE_DIGIT_BOUNDARY ? "0" : "") + std::to_string(date.GetDay());
-            }
-            index++;
-        }
-    }
+    std::map<std::size_t, std::string> order = GetDateNodeOrder(settingData);
+
     auto firstDateNode = CreateDateTextNode(order[0]);
     CHECK_NULL_VOID(firstDateNode);
     firstDateNode->MountToParent(contentNode);
@@ -534,5 +521,41 @@ void CalendarPickerModelNG::SetOnChangeWithNode(FrameNode* frameNode, SelectedCh
     auto eventHub = frameNode->GetEventHub<CalendarPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChangeEvent(std::move(onChange));
+}
+
+std::map<std::size_t, std::string> CalendarPickerModelNG::GetDateNodeOrder(const CalendarSettingData& settingData)
+{
+    PickerDate date = settingData.selectedDate;
+    std::vector<std::string> outOrder;
+    bool result = Localization::GetInstance()->GetDateOrder(outOrder);
+    std::map<std::size_t, std::string> order;
+    if (!result || outOrder.size() < DATE_NODE_COUNT) {
+        yearNodeIndex_ = YEAR_NODE_INDEX;
+        monthNodeIndex_ = MONTH_NODE_INDEX;
+        dayNodeIndex_ = DAY_NODE_INDEX;
+        auto num = 0;
+        order[num++] = std::to_string(date.GetYear());
+        order[num++] = (date.GetMonth() < ONE_DIGIT_BOUNDARY ? "0" : "") + std::to_string(date.GetMonth());
+        order[num] = (date.GetDay() < ONE_DIGIT_BOUNDARY ? "0" : "") + std::to_string(date.GetDay());
+    } else {
+        int32_t index = 0;
+        for (size_t i = 0; i < outOrder.size(); ++i) {
+            if (outOrder[i] == "year") {
+                yearNodeIndex_ = i + index;
+                order[i] = std::to_string(date.GetYear());
+            }
+            if (outOrder[i] == "month") {
+                monthNodeIndex_ = i + index;
+                order[i] = (date.GetMonth() < ONE_DIGIT_BOUNDARY ? "0" : "") + std::to_string(date.GetMonth());
+            }
+            if (outOrder[i] == "day") {
+                dayNodeIndex_ = i + index;
+                order[i] = (date.GetDay() < ONE_DIGIT_BOUNDARY ? "0" : "") + std::to_string(date.GetDay());
+            }
+            index++;
+        }
+    }
+
+    return order;
 }
 } // namespace OHOS::Ace::NG

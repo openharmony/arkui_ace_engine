@@ -105,7 +105,7 @@ bool IsSpanItemSame(std::list<RefPtr<NG::SpanItem>> src, std::list<RefPtr<NG::Sp
         auto otherIt = other.front();
         if (it->interval.first != otherIt->interval.first ||
             it->interval.second != otherIt->interval.second ||
-            it->content != otherIt->content ) {
+            it->content != otherIt->content) {
             return false;
         }
         src.pop_front();
@@ -127,8 +127,8 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvert000, TestSize.Level1)
 
     spanString3->AddSpan(AceType::MakeRefPtr<BaselineOffsetSpan>(Dimension(4), 0, 2));
     spanString3->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(5), 5, 8));
-    spanString3->AddSpan(
-        AceType::MakeRefPtr<DecorationSpan>(TextDecoration::LINE_THROUGH, Color::BLUE, TextDecorationStyle::WAVY, 0, 1));
+    spanString3->AddSpan(AceType::MakeRefPtr<DecorationSpan>(TextDecoration::LINE_THROUGH,
+        Color::BLUE, TextDecorationStyle::WAVY, 0, 1));
 
     SpanParagraphStyle spanParagraphStyle;
     spanParagraphStyle.align = TextAlign::END;
@@ -155,7 +155,6 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvert000, TestSize.Level1)
 
     vector<Shadow> textShadows { textShadow, textShadow1 };
     spanString3->AddSpan(AceType::MakeRefPtr<TextShadowSpan>(textShadows, 3, 6));
-
 
     mutableStr->InsertSpanString(1, spanString3);
 
@@ -192,7 +191,6 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvert000, TestSize.Level1)
     std::cout << "spanTohtml:" << dstHtml << std::endl;
     EXPECT_EQ(out, dstHtml);
     EXPECT_EQ(IsSpanItemSame(dstSpan->GetSpanItems(), mutableStr->GetSpanItems()), true);
-
 }
 
 HWTEST_F(HtmlConvertTestNg, HtmlConvert001, TestSize.Level1)
@@ -227,29 +225,6 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvert001, TestSize.Level1)
     EXPECT_EQ(out, dstHtml);
 
     PrintSpanItem(dstSpan->GetSpanItems());
-    // auto firstSpans = dstSpan->GetSpans(5, 2);
-    // EXPECT_EQ(firstSpans.size(), 1);
-    // auto firstFontSpan = AceType::DynamicCast<FontSpan>(firstSpans[0]);
-    // EXPECT_NE(firstFontSpan, nullptr);
-    // EXPECT_EQ(firstFontSpan->GetStartIndex(), 5);
-    // EXPECT_EQ(firstFontSpan->GetEndIndex(), 7);
-    // EXPECT_EQ(firstFontSpan->GetFont().GetFontColor(), "");
-
-    // auto secondString = dstSpan->GetSpans(0, 3);
-    // EXPECT_EQ(secondString.size(), 1);
-    // auto secondFontSpan = AceType::DynamicCast<FontSpan>(secondString[0]);
-    // EXPECT_NE(secondFontSpan, nullptr);
-    // EXPECT_EQ(secondFontSpan->GetStartIndex(), 0);
-    // EXPECT_EQ(secondFontSpan->GetEndIndex(), 3);
-    // EXPECT_EQ(secondFontSpan->GetFont().GetFontColor(), OHOS::Ace::Color::BLUE.ColorToString());
-
-    // auto thirdString3 = dstSpan->GetSpans(3, 1);
-    // EXPECT_EQ(thirdString3.size(), 1);
-    // auto thirdFontSpan = AceType::DynamicCast<FontSpan>(thirdString3[0]);
-    // EXPECT_NE(thirdFontSpan, nullptr);
-    // EXPECT_EQ(thirdFontSpan->GetStartIndex(), 3);
-    // EXPECT_EQ(thirdFontSpan->GetEndIndex(), 4);
-    // EXPECT_EQ(thirdFontSpan->GetFont().GetFontColor(), OHOS::Ace::Color::GRAY.ColorToString());
 }
 
 HWTEST_F(HtmlConvertTestNg, HtmlConvert002, TestSize.Level1)
@@ -279,7 +254,6 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvert002, TestSize.Level1)
     auto dstSpan = toSpan.ToSpanString(out);
     EXPECT_NE(dstSpan, nullptr);
     EXPECT_EQ(IsSpanItemSame(dstSpan->GetSpanItems(), imageSpan->GetSpanItems()), true);
-    // EXPECT_TRUE(dstSpan->IsEqualToSpanString(imageSpan));
 
     auto dstHtml = convert.ToHtml(*dstSpan);
     std::cout << "second:" << dstHtml << std::endl;
@@ -317,7 +291,6 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvert003, TestSize.Level1)
     HtmlToSpan toSpan1;
     auto dstSpan1 = toSpan1.ToSpanString(dstHtml);
     EXPECT_EQ(IsSpanItemSame(dstSpan->GetSpanItems(), dstSpan1->GetSpanItems()), true);
-    // EXPECT_TRUE(dstSpan->IsEqualToSpanString(dstSpan1));
     auto secondHtml = convert.ToHtml(*dstSpan1);
     std::cout << "second:" << secondHtml << std::endl;
     EXPECT_EQ(secondHtml, dstHtml);
@@ -337,27 +310,70 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvert004, TestSize.Level1)
     auto dstSpan = toSpan.ToSpanString(multiHtml);
     EXPECT_NE(dstSpan, nullptr);
 
-    PrintSpanItem(dstSpan->GetSpanItems());
-
-    std::cout << "dst span size:" << dstSpan->GetSpanItems().size() << std::endl;
-
     SpanToHtml convert;
     auto dstHtml = convert.ToHtml(*dstSpan);
-    std::cout << "second:" << dstHtml << std::endl;
+    std::cout << "first convert:" << dstHtml << std::endl;
     HtmlToSpan toSpan1;
     auto dstSpan1 = toSpan1.ToSpanString(dstHtml);
     EXPECT_EQ(IsSpanItemSame(dstSpan->GetSpanItems(), dstSpan1->GetSpanItems()), true);
     auto secondHtml = convert.ToHtml(*dstSpan1);
-    std::cout << "second:" << secondHtml << std::endl;
+    std::cout << "second convert:" << secondHtml << std::endl;
     EXPECT_EQ(secondHtml, dstHtml);
 }
 
-HWTEST_F(HtmlConvertTestNg, HtmlConvert005, TestSize.Level1)
+HWTEST_F(HtmlConvertTestNg, SpanString005, TestSize.Level1)
+{
+    auto spanString = AceType::MakeRefPtr<SpanString>("01234中文56789");
+    std::vector<uint8_t> buff;
+    spanString->EncodeTlv(buff);
+    EXPECT_EQ(buff.size() > 0, true);
+    SpanToHtml toHtml;
+    auto htmlFromU8 = toHtml.ToHtml(buff);
+    auto htmlFromSpan = toHtml.ToHtml(*spanString);
+    EXPECT_EQ(htmlFromU8, htmlFromSpan);
+    
+    HtmlToSpan toSpan;
+    auto spanFromHtml = toSpan.ToSpanString(htmlFromU8);
+    EXPECT_EQ(IsSpanItemSame(spanFromHtml->GetSpanItems(), spanString->GetSpanItems()), true);
+
+    SpanToHtml toHtml1;
+    auto hmtlString = toHtml1.ToHtml(*spanFromHtml);
+    EXPECT_EQ(hmtlString, htmlFromSpan);
+    std::cout << "html:" << hmtlString << std::endl;
+}
+
+HWTEST_F(HtmlConvertTestNg, HtmlConvert006, TestSize.Level1)
+{
+    auto spanString = AceType::MakeRefPtr<SpanString>("0123456789");
+    spanString->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont1, 0, 3));
+    spanString->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont2, 3, 5));
+    spanString->AddSpan(AceType::MakeRefPtr<FontSpan>(testEmptyFont, 5, 8));
+    spanString->AddSpan(AceType::MakeRefPtr<BaselineOffsetSpan>(Dimension(4), 0, 2));
+    spanString->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(5), 5, 8));
+    spanString->AddSpan(
+        AceType::MakeRefPtr<DecorationSpan>(TextDecoration::LINE_THROUGH, Color::BLUE, TextDecorationStyle::WAVY, 0, 1));
+
+    SpanToHtml convert;
+    auto out = convert.ToHtml(*spanString);
+    std::cout << out << std::endl;
+
+    HtmlToSpan toSpan;
+    auto dstSpan = toSpan.ToSpanString(out);
+    EXPECT_EQ(IsSpanItemSame(dstSpan->GetSpanItems(), spanString->GetSpanItems()), true);
+
+    auto dstHtml = convert.ToHtml(*dstSpan);
+    std::cout << "spanTohtml:" << dstHtml << std::endl;
+    EXPECT_EQ(out, dstHtml);
+}
+
+HtmlConvert g_convert;
+HWTEST_F(HtmlConvertTestNg, HtmlConvert007, TestSize.Level1)
 {
     const std::string multiHtml = "<html>"
                                   "<body>"
                                   "<p>我是正常的</p>"
                                   "<p style=\"COLOR:red;\">我是红色的</p>"
+                                  "<img src=\"http://www.runoob.com/wp-content/uploads/2016/04/trolltunga.jpg\" width=\"50.00vp\" height=\"50.00vp\"  style=\"vertical-align: bottom;object-fit: cover;margin: 10.00px;border-top-left-radius: 2.00vp;border-top-right-radius: 2.00vp;border-bottom-right-radius: 2.00vp;border-bottom-left-radius: 2.00vp;padding: 5.00px;\">"
                                   "<p style=\"color:blue;font-size:50px;color:red;\">我是蓝色的<strong style=\"color:blue; font-size:100px;\">这段文字很重要！</strong><del>蓝色</del></p>"
                                   "<p style=\"font-size:50px;\">我是50号字体</p>"
                                   "</body>"
@@ -367,17 +383,18 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvert005, TestSize.Level1)
     EXPECT_NE(dstSpan, nullptr);
 
     std::vector<uint8_t> spanString;
-    dstSpan->DecodeTlv(spanString);
-    HtmlConvert convert;
-    auto dstHtml = convert.SpanStringToHtml(spanString);
-    std::cout << "second:" << dstHtml << std::endl;
+    dstSpan->EncodeTlv(spanString);
+
+    std::cout << "span tlv len:" << spanString.size() << std::endl;
+
+    auto dstHtml = g_convert.SpanStringToHtml(spanString);
+    std::cout << "html content:" << dstHtml << std::endl;
     HtmlToSpan toSpan1;
     auto dstSpan1 = toSpan1.ToSpanString(dstHtml);
     EXPECT_EQ(IsSpanItemSame(dstSpan->GetSpanItems(), dstSpan1->GetSpanItems()), true);
     SpanToHtml toHtml;
     auto secondHtml = toHtml.ToHtml(*dstSpan1);
-    std::cout << "second:" << secondHtml << std::endl;
+    std::cout << "content:" << secondHtml << std::endl;
     EXPECT_EQ(secondHtml, dstHtml);
 }
-
 } // namespace OHOS::Ace::NG

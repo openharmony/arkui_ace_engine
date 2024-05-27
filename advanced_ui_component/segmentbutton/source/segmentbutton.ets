@@ -14,6 +14,7 @@
  */
 import curves from '@ohos.curves'
 import { KeyCode } from '@ohos.multimodalInput.keyCode'
+import util from '@ohos.util';
 
 const MIN_ITEM_COUNT = 2
 const MAX_ITEM_COUNT = 5
@@ -433,13 +434,14 @@ struct SegmentButtonItem {
   @ObjectLink options: SegmentButtonOptions;
   @ObjectLink property: ItemProperty
   @Prop index: number
+  private groupId: string = ""
 
   build() {
     Column({ space: 2 }) {
       if (this.options.showIcon) {
         Image(this.property.isSelected ? this.itemOptions.selectedIcon : this.itemOptions.icon)
           .size(this.options.imageSize ?? { width: 24, height: 24 })
-          .focusable(this.index == 0)
+          .focusable(!this.options.showText)
           .draggable(false)
           .fillColor(this.property.isSelected ? (this.options.selectedFontColor ?? SegmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR) :
             (this.options.fontColor ?? SegmentButtonTheme.FONT_COLOR))
@@ -454,7 +456,7 @@ struct SegmentButtonItem {
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .maxLines(1)
           .textAlign(TextAlign.Center)
-          .focusable(this.index == 0 && !this.options.showIcon)
+          .focusable(true)
           .padding(this.options.textPadding ?? 0)
           .gesture(TapGesture().onAction(() => {
             this.focusIndex = -1
@@ -470,6 +472,7 @@ struct SegmentButtonItem {
           }))
       }
     }
+    .focusScopePriority(this.groupId, Math.min(...this.selectedIndexes) === this.index ? FocusPriority.PREVIOUS : FocusPriority.AUTO)
     .justifyContent(FlexAlign.Center)
     .padding(this.options.buttonPadding ?? ((this.options.type === 'capsule' && this.options.showText && this.options.showIcon) ?
       { top: 6, right: 8, bottom: 6, left: 8 } : { top: 4, right: 8, bottom: 4, left: 8 }))
@@ -519,6 +522,7 @@ struct SegmentButtonItemArrayComponent {
   @State buttonWidth: number[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => 0)
   @State buttonHeight: number[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => 0)
   private buttonItemsRealHeight: number[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => 0)
+  private groupId: string = util.generateRandomUUID(true)
 
   onButtonItemsSizeChange() {
     this.buttonItemsSize.forEach((value, index) => {
@@ -616,21 +620,19 @@ struct SegmentButtonItemArrayComponent {
   @Builder
   focusStack(index: number) {
     Stack() {
-      if (index === this.focusIndex) {
-        Stack()
-          .borderRadius({
-            topLeft: this.options.type === 'capsule' && this.buttonItemsSelected[this.focusIndex] ? this.buttonBorderRadius[index].topLeft as number + 4 : this.buttonBorderRadius[index].topLeft,
-            topRight: this.options.type === 'capsule' && this.buttonItemsSelected[this.focusIndex] ? this.buttonBorderRadius[index].topRight as number + 4 : this.buttonBorderRadius[index].topRight,
-            bottomLeft: this.options.type === 'capsule' && this.buttonItemsSelected[this.focusIndex] ? this.buttonBorderRadius[index].bottomLeft as number + 4 : this.buttonBorderRadius[index].bottomLeft,
-            bottomRight: this.options.type === 'capsule' && this.buttonItemsSelected[this.focusIndex] ? this.buttonBorderRadius[index].bottomRight as number + 4 : this.buttonBorderRadius[index].bottomRight
-          })
-          .size({
-            width: this.options.type === 'capsule' && this.buttonItemsSelected[this.focusIndex] ? this.buttonWidth[index] + 8 : this.buttonWidth[index],
-            height: this.options.type === 'capsule' && this.buttonItemsSelected[this.focusIndex] ? this.buttonHeight[index] + 8 : this.buttonHeight[index]
-          })
-          .borderColor(SegmentButtonTheme.FOCUS_BORDER_COLOR)
-          .borderWidth(2)
-      }
+      Stack()
+        .borderRadius({
+          topLeft: this.options.type === 'capsule' && this.buttonItemsSelected[this.focusIndex] ? this.buttonBorderRadius[index].topLeft as number + 4 : this.buttonBorderRadius[index].topLeft,
+          topRight: this.options.type === 'capsule' && this.buttonItemsSelected[this.focusIndex] ? this.buttonBorderRadius[index].topRight as number + 4 : this.buttonBorderRadius[index].topRight,
+          bottomLeft: this.options.type === 'capsule' && this.buttonItemsSelected[this.focusIndex] ? this.buttonBorderRadius[index].bottomLeft as number + 4 : this.buttonBorderRadius[index].bottomLeft,
+          bottomRight: this.options.type === 'capsule' && this.buttonItemsSelected[this.focusIndex] ? this.buttonBorderRadius[index].bottomRight as number + 4 : this.buttonBorderRadius[index].bottomRight
+        })
+        .size({
+          width: this.options.type === 'capsule' && this.buttonItemsSelected[this.focusIndex] ? this.buttonWidth[index] + 8 : this.buttonWidth[index],
+          height: this.options.type === 'capsule' && this.buttonItemsSelected[this.focusIndex] ? this.buttonHeight[index] + 8 : this.buttonHeight[index]
+        })
+        .borderColor(SegmentButtonTheme.FOCUS_BORDER_COLOR)
+        .borderWidth(2)
     }
     .size({ width: 1, height: 1 })
     .align(Alignment.Center)
@@ -688,7 +690,8 @@ struct SegmentButtonItemArrayComponent {
                 index: index,
                 itemOptions: item,
                 options: this.options,
-                property: this.buttonItemProperty[index]
+                property: this.buttonItemProperty[index],
+                groupId: this.groupId
               })
                 .onSizeChange((_, newValue) => {
                   // Calculate height of items
@@ -711,13 +714,23 @@ struct SegmentButtonItemArrayComponent {
               //measure position
               if (newValue.width) {
                 this.buttonItemsPosition[index] = {
-                  x: Number.parseInt(this.options.componentPadding.toString()) + (Number.parseInt(newValue.width.toString()) + 1) * index,
-                  y: Number.parseInt(this.options.componentPadding.toString())
+                  x: Number.parseFloat(this.options.componentPadding.toString()) + (Number.parseFloat(newValue.width.toString()) + 1) * index,
+                  y: Number.parseFloat(this.options.componentPadding.toString())
                 }
               }
             })
-            .overlay(this.focusStack(index), {
-              align: Alignment.Center
+            .stateStyles({
+              normal: {
+                .overlay(undefined)
+              },
+              focused: {
+                .overlay(this.focusStack(index), {
+                  align: Alignment.Center
+                })
+              }
+            })
+            .onFocus(() => {
+              this.focusIndex = index
             })
             .onTouch((event: TouchEvent) => {
               if (event.source !== SourceType.TouchScreen) {
@@ -767,6 +780,7 @@ struct SegmentButtonItemArrayComponent {
           }
         })
       }
+      .focusScopeId(this.groupId, true)
       .padding(this.options.componentPadding)
       .onSizeChange((_, newValue) => {
         this.componentSize = { width: newValue.width, height: newValue.height }
@@ -951,20 +965,6 @@ export struct SegmentButton {
         })
       }
     }
-    .onFocus(() => {
-      if (this.options === void 0) {
-        return
-      }
-      if (this.selectedIndexes === void 0 || this.selectedIndexes.length === 0) {
-        this.focusIndex = 0
-        return
-      }
-      if (this.options.type === 'tab' || !(this.options.multiply ?? false)) {
-        this.focusIndex = this.selectedIndexes[0]
-      } else {
-        this.focusIndex = Math.min(...this.selectedIndexes)
-      }
-    })
     .onBlur(() => {
       this.focusIndex = -1
     })
@@ -973,14 +973,6 @@ export struct SegmentButton {
         return
       }
       if (event.type === KeyType.Down) {
-        if ((event.keyCode === KeyCode.KEYCODE_DPAD_DOWN || event.keyCode === KeyCode.KEYCODE_DPAD_RIGHT) && this.focusIndex < (Math.min(this.options.buttons.length, this.buttonItemsSize.length) - 1)) {
-          // Move to next
-          this.focusIndex = this.focusIndex + 1
-        }
-        if ((event.keyCode === KeyCode.KEYCODE_DPAD_UP || event.keyCode === KeyCode.KEYCODE_DPAD_LEFT) && this.focusIndex > 0) {
-          // Move to previous
-          this.focusIndex = this.focusIndex - 1
-        }
         if (event.keyCode === KeyCode.KEYCODE_SPACE || event.keyCode === KeyCode.KEYCODE_ENTER || event.keyCode === KeyCode.KEYCODE_NUMPAD_ENTER) {
           if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
             if (this.selectedIndexes.indexOf(this.focusIndex) === -1) {

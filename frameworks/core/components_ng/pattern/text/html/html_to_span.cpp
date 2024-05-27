@@ -27,8 +27,6 @@
 #include "base/memory/referenced.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
-#include "bridge/common/dom/dom_type.h"
-#include "bridge/common/utils/utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/common/properties/text_style_parser.h"
@@ -210,12 +208,10 @@ void HtmlToSpan::InitFont(const std::string &key,
         return;
     }
 
-    std::cout << " init font key:" << key  << " value:"<< value << std::endl;
     if (key == "color") {
         font->fontColor = Color::FromString(value);
     } else if (key == "font-size") {
         font->fontSize = Dimension::FromString(value);
-        std::cout << "init font key:" << key  << " value:"<< value << "spanstring:" << font->fontSize->ToString() << std::endl;
     } else if (key == "font-weight") {
         font->fontWeight = StringUtils::StringToFontWeight(value);
     } else if (key == "font-style") {
@@ -223,7 +219,6 @@ void HtmlToSpan::InitFont(const std::string &key,
     } else if (key == "font-family") {
         font->fontFamilies = ParseFontFamily(value);
     } else if (key == "font-variant") { // not support
-        
     }
 }
 
@@ -236,7 +231,8 @@ bool HtmlToSpan::IsFontAttr(const std::string &key)
 }
 
 
-void HtmlToSpan::InitParagrap(const std::string &key, const std::string &value, const std::string &index, StyleValues& values)
+void HtmlToSpan::InitParagrap(const std::string &key, const std::string &value,
+    const std::string &index, StyleValues& values)
 {
     auto [ret, styleValue] = GetStyleValue<SpanParagraphStyle>(index, values);
     if (!ret) {
@@ -257,7 +253,6 @@ void HtmlToSpan::InitParagrap(const std::string &key, const std::string &value, 
     } else if (IsTextIndentAttr(key)) {
         style->textIndent = Dimension::FromString(value);
     } else {
-        std::cout << "ToParagraphStyle not support key:" << key << " value:" << value << std::endl;
     }
 }
 
@@ -318,28 +313,30 @@ bool HtmlToSpan::IsDecorationAttr(const std::string &key)
 }
 
 template <class T>
-void HtmlToSpan::InitDimension(const std::string &key, const std::string &value, const std::string &index, StyleValues& values)
+void HtmlToSpan::InitDimension(const std::string &key, const std::string &value,
+    const std::string &index, StyleValues& values)
 {
     auto [ret, styleValue] = GetStyleValue<T>(index, values);
     if (!ret) {
         return;
     }
-    T * obj = Get<T>(styleValue);
+    T* obj = Get<T>(styleValue);
     if (obj == nullptr) {
         return;
     }
     obj->dimension = Dimension::FromString(value);
 }
 
-bool HtmlToSpan::IsWordSpacingAttr(const std::string &key)
+bool HtmlToSpan::IsLetterSpacingAttr(const std::string &key)
 {
-    if (key.compare(0, strlen("word-spacing"), "word-spacing") == 0) {
+    if (key.compare(0, strlen("letter-spacing"), "letter-spacing") == 0) {
         return true;
     }
     return false;
 }
 
-void HtmlToSpan::InitTextShadow(const std::string &key, const std::string &value, const std::string &index, StyleValues& values)
+void HtmlToSpan::InitTextShadow(const std::string &key, const std::string &value,
+    const std::string &index, StyleValues& values)
 {
     auto [ret, styleValue] = GetStyleValue<std::vector<Shadow>>(index, values);
     if (!ret) {
@@ -628,7 +625,7 @@ void HtmlToSpan::MakeImageSpanOptions(const std::string &key, const std::string 
         HandleImagePixelMap(value, options);
     } else if (key == "style") {
         Styles styleMap = ParseStyleAttr(value);
-       HandleImgSpanOption(styleMap, options);
+        HandleImgSpanOption(styleMap, options);
     }
 }
 
@@ -687,7 +684,7 @@ TextOverflow HtmlToSpan::StringToTextOverflow(const std::string &value)
     if (value == "ellipsis") {
         return TextOverflow::ELLIPSIS;
     }
-    if (value == "XXXXX") { // TODO:明确使用那个标签
+    if (value == "XXXXX") { // 明确使用那个标签
         return TextOverflow::MARQUEE;
     }
     return TextOverflow::NONE;
@@ -739,7 +736,6 @@ void HtmlToSpan::ToParagraphSpan(xmlNodePtr node, size_t len, size_t& pos)
     info.end = pos + len;
     xmlAttrPtr curNode = node->properties;
     if (curNode == nullptr) {
-        std::cout << "addspan no style span :" << " name:"<< node->name << " start:" << info.start << " end:"<< info.end << std::endl;
         SpanParagraphStyle style;
         info.values.emplace_back(style);
     } else {
@@ -747,7 +743,6 @@ void HtmlToSpan::ToParagraphSpan(xmlNodePtr node, size_t len, size_t& pos)
             auto styles = ToTextSpanStyle(curNode);
             for (auto [key, value] : styles) {
                 info.values.emplace_back(value);
-                std::cout << "addspan Paragraph span :" << key << " name:"<< node->name  << " start:" << info.start << " end:"<< info.end << std::endl;
             }
         }
     }
@@ -769,8 +764,8 @@ std::map<std::string, HtmlToSpan::StyleValue> HtmlToSpan::ToTextSpanStyle(xmlAtt
             InitFont(key, value, "font", styleValues);
         } else if (IsDecorationAttr(key)) {
             InitDecoration(key, value, "decoration", styleValues);
-        } else if (IsWordSpacingAttr(key)) {
-            InitDimension<LetterSpacingSpanParam>(key, value, "wordSpacing", styleValues);
+        } else if (IsLetterSpacingAttr(key)) {
+            InitDimension<LetterSpacingSpanParam>(key, value, "letterSpacing", styleValues);
         } else if (IsTextShadowAttr(key)) {
             InitTextShadow(key, value, "shadow", styleValues);
         } else if (IsTextIndentAttr(key)) {
@@ -780,8 +775,6 @@ std::map<std::string, HtmlToSpan::StyleValue> HtmlToSpan::ToTextSpanStyle(xmlAtt
         } else if (IsParagraphAttr(key)) {
             InitParagrap(key, value, "paragrap", styleValues);
         }
-
-        std::cout << "addspan text style :" << key << " name:"<< curNode->name << " value:" << value << std::endl;
     }
 
     return styleValues;
@@ -790,7 +783,7 @@ std::map<std::string, HtmlToSpan::StyleValue> HtmlToSpan::ToTextSpanStyle(xmlAtt
 void HtmlToSpan::ToTextSpan(xmlNodePtr node, size_t len, size_t& pos)
 {
     SpanInfo info;
-    info.type = HtmlType::TextSpan;
+    info.type = HtmlType::Text;
     info.start = pos;
     info.end = pos + len;
     xmlAttrPtr curNode = node->properties;
@@ -798,7 +791,6 @@ void HtmlToSpan::ToTextSpan(xmlNodePtr node, size_t len, size_t& pos)
         auto styles = ToTextSpanStyle(curNode);
         for (auto [key, value] : styles) {
             info.values.emplace_back(value);
-            std::cout << "addspan text span :" << key << " name:"<< node->name << " start:" << info.start << " end:"<< info.end << std::endl;
         }
     }
     spanInfos_.emplace_back(std::move(info));
@@ -846,7 +838,7 @@ bool HasElementNode(xmlNodePtr node)
         result = HasElementNode(curNode->children);
     }
 
-   return result;
+    return result;
 }
 
 void HtmlToSpan::ToSpan(xmlNodePtr curNode, size_t &pos, std::string &allContent, size_t paragraphEndPos)
@@ -855,7 +847,6 @@ void HtmlToSpan::ToSpan(xmlNodePtr curNode, size_t &pos, std::string &allContent
     size_t contentLen = 0;
     size_t curNodeLen = 0;
     auto content = xmlNodeGetContent(curNode);
-    std::cout << "element in:" << content << " name " << curNode->name << " pos:" << pos << std::endl;
     if (content != nullptr) {
         contentLen = StringUtils::ToWstring(reinterpret_cast<const char *>(content)).length();
         contentStr = reinterpret_cast<const char *>(content);
@@ -866,7 +857,6 @@ void HtmlToSpan::ToSpan(xmlNodePtr curNode, size_t &pos, std::string &allContent
             std::string curNodeContent = reinterpret_cast<const char *>(curNode->children->content);
             allContent += curNodeContent;
             curNodeLen = StringUtils::ToWstring(curNodeContent).length();
-            std::cout << "child in:" << curNodeContent << " name " << curNode->name << " pos:" << pos <<" len:"<< curNodeLen << std::endl;
         }
     }
 
@@ -892,15 +882,13 @@ void HtmlToSpan::ToSpan(xmlNodePtr curNode, size_t &pos, std::string &allContent
         ToTextSpan(curNode, contentLen, pos);
     } else if (nameStr != "html" && nameStr != "body" && nameStr != "div") {
         ToDefalutSpan(curNode,  contentLen, pos);
-        std::cout << "no properties in:" << content << " name " << curNode->name << std::endl; 
     }
 
     if (nameStr != "html" && nameStr != "body" && nameStr != "div") {
         pos += curNodeLen;
     }
 
-    std::cout << "befor child content: " << content << " name:" << curNode->name << " pos:" << pos << std::endl;
-    ParaseHtmlToSpanInfo(curNode->children, pos,allContent, curPos);
+    ParaseHtmlToSpanInfo(curNode->children, pos, allContent, curPos);
 }
 
 void HtmlToSpan::ParaseHtmlToSpanInfo(xmlNodePtr node, size_t& pos, std::string &allContent, size_t paragraphPos)
@@ -916,61 +904,13 @@ void HtmlToSpan::ParaseHtmlToSpanInfo(xmlNodePtr node, size_t& pos, std::string 
 void HtmlToSpan::PrintSpanInfos()
 {
     for (auto &info : spanInfos_) {
-        std::cout << "span type " << (int)info.type << " start:"<< info.start << " end:" << info.end  << " styple:" << info.values.size() << std::endl;
+        std::cout << "span type " << (int)info.type << " start:"<< info.start << " end:" << info.end
+            << " styple:" << info.values.size() << std::endl;
     }
 }
-
-void PrintSpanItem(std::list<RefPtr<NG::SpanItem>> items)
-{   
-    for (auto &item : items) {
-        std::cout << "zkc span start:" << item->interval.first << " end:" << item->interval.second << " content:" << item->content << std::endl;
-        auto &font =  *item->fontStyle;
-        if (font.GetFontSize().has_value()) {
-            std::cout << "zkc span font:" << font.GetFontSize().value().ToString() << item->content << std::endl;
-        }
-    }
-}
-
-void HtmlToSpan::PrintSpan(size_t index, const SpanInfo& info, StyleValue& value)
-{   
-    if (index == static_cast<uint32_t>(StyleIndex::STYLE_FONT)) {
-        auto style = Get<Font>(&value);
-        if (style->GetFontSize().has_value()) {
-            std::cout << "font " << " size:" << style->GetFontSize().value().ToString() << std::endl;
-        }
-        return;
-    }
-
-    if (index == static_cast<uint32_t>(StyleIndex::STYLE_DECORATION)) {
-        return ;
-    }
-
-    if (index == static_cast<uint32_t>(StyleIndex::STYLE_BASELINE)) {
-        return ;
-    }
-
-    if (index == static_cast<uint32_t>(StyleIndex::STYLE_LETTERSPACE)) {
-        return ;
-    }
-
-    if (index == static_cast<uint32_t>(StyleIndex::STYLE_LINEHEIGHT)) {
-        return;
-    }
-
-    if (index == static_cast<uint32_t>(StyleIndex::STYLE_SHADOWS)) {
-        return ;
-    }
-
-    if (index == static_cast<uint32_t>(StyleIndex::STYLE_PARAGRAPH)) {
-        std::cout << "make Paragraph:" << info.start << info.end << std::endl;
-        return;
-    }
-}
-
 
 RefPtr<SpanBase> HtmlToSpan::CreateSpan(size_t index, const SpanInfo& info, StyleValue& value)
 {
-    PrintSpan(index, info, value);
     if (index == static_cast<uint32_t>(StyleIndex::STYLE_FONT)) {
         return MakeSpan<Font, FontSpan>(info, value);
     }
@@ -996,7 +936,6 @@ RefPtr<SpanBase> HtmlToSpan::CreateSpan(size_t index, const SpanInfo& info, Styl
     }
 
     if (index == static_cast<uint32_t>(StyleIndex::STYLE_PARAGRAPH)) {
-        std::cout << "make Paragraph:"  << info.start << info.end << std::endl;
         return MakeSpan<SpanParagraphStyle, ParagraphStyleSpan>(info, value);
     }
 
@@ -1045,12 +984,7 @@ void HtmlToSpan::AddSpans(const SpanInfo& info, RefPtr<MutableSpanString> mutabl
             span = CreateSpan(index, info, value);
         }
         if (span != nullptr) {
-            std::cout << "Add Span:"<< span->ToString() << " start:" << info.start << " end:"<< info.end << std::endl;
             mutableSpan->AddSpan(span);
-            //PrintSpanItem(mutableSpan->GetSpanItems());
-            //std::cout << "after add Span:" << info.content  << span->ToString() << std::endl;
-        } else {
-            std::cout << "Add Span null :"  << std::endl;
         }
     }
 }
@@ -1064,33 +998,22 @@ void HtmlToSpan::AddImageSpans(const SpanInfo& info, RefPtr<MutableSpanString> m
         }
         auto span = AceType::MakeRefPtr<MutableSpanString>(*style);
         mutableSpan->InsertSpanString(info.start, span);
-        // PrintSpanItem(mutableSpan->GetSpanItems());
-        std::cout << "imag:" << mutableSpan->GetSpansMap().size() << std::endl;
     }
 }
 
 RefPtr<MutableSpanString> HtmlToSpan::GenerateSpans(const std::string & allContent)
 {
-    std::cout << "GenerateSpans:" << std::endl;
     auto mutableSpan = AceType::MakeRefPtr<MutableSpanString>(allContent);
-    size_t paragraphEndPos = 0;
     RefPtr<MutableSpanString> span;
     for (auto &info: spanInfos_) {
-  
         if (info.type == HtmlType::ParagraphStyle) {
             AddSpans(info, mutableSpan);
-            std::cout << "Paragraph:"  << std::endl;
         } else if (info.type == HtmlType::Image) {
             AddImageSpans(info, mutableSpan);
         } else {
-            std::cout << " add text or default content:"   << " start:" << info.start << " end:"<< info.end << " paragraph:"<< paragraphEndPos << std::endl;
             AddSpans(info, mutableSpan);
-            std::cout << "spantext:"  << mutableSpan->GetSpansMap().size() << std::endl;
-        }  
+        }
     }
-
-    std::cout << "GenerateSpans finish:" << std::endl;
-    PrintSpanItem(mutableSpan->GetSpanItems());
     return mutableSpan;
 }
 
@@ -1114,8 +1037,6 @@ RefPtr<MutableSpanString> HtmlToSpan::ToSpanString(const std::string &html)
     size_t pos = 0;
     std::string content;
     ParaseHtmlToSpanInfo(root, pos, content, 0);
-    std::cout << "content " << content << std::endl;
-
     PrintSpanInfos();
     return GenerateSpans(content);
 }

@@ -62,6 +62,7 @@ using RSColorSpace = Rosen::Drawing::ColorSpace;
 using RSPicture = Rosen::Drawing::Picture;
 using RSBitmapFormat = Rosen::Drawing::BitmapFormat;
 using RSImageFilter = Rosen::Drawing::ImageFilter;
+using RSRecordingPath = Rosen::Drawing::Path;
 } // namespace OHOS::Ace
 #else
 #include "core/components_ng/render/drawing_mock.h"

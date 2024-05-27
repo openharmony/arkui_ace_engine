@@ -269,6 +269,33 @@ int32_t FormRendererDelegateProxy::OnFormLinkInfoUpdate(const std::vector<std::s
     return reply.ReadInt32();
 }
 
+int32_t FormRendererDelegateProxy::OnGetRectRelativeToWindow(int32_t &top, int32_t &left)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("failed to write interface token");
+        return ERR_INVALID_VALUE;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int error = Remote()->SendRequest(
+        static_cast<uint32_t>(IFormRendererDelegate::Message::ON_GET_RECT_RELATIVE_TO_WINDOW), data, reply, option);
+    if (error != NO_ERROR) {
+        HILOG_ERROR("failed to SendRequest: %{public}d", error);
+        return error;
+    }
+
+    int32_t errCode = reply.ReadInt32();
+    if (errCode != ERR_OK) {
+        HILOG_ERROR("return errCode: %{public}d", errCode);
+        return errCode;
+    }
+    reply.ReadInt32(top);
+    reply.ReadInt32(left);
+    return ERR_OK;
+}
+
 bool FormRendererDelegateProxy::WriteInterfaceToken(MessageParcel& data)
 {
     if (!data.WriteInterfaceToken(FormRendererDelegateProxy::GetDescriptor())) {

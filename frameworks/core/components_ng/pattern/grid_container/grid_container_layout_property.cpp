@@ -52,7 +52,10 @@ void GridContainerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, 
     if (!HasContainerInfo()) {
         return;
     }
-
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto info = GetContainerInfoValue();
     const std::string sizeTypeStrs[] { "SizeType.Auto", "SizeType.XS", "SizeType.SM", "SizeType.MD", "SizeType.LG",
         "SizeType.XL" };

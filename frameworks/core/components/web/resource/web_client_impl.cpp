@@ -165,6 +165,20 @@ bool WebClientImpl::OnFocus()
     CHECK_NULL_RETURN(delegate, false);
     bool isFocused = delegate->RequestFocus();
     delegate->OnRequestFocus();
+
+    delegate->SetToken();
+    return isFocused;
+}
+
+bool WebClientImpl::OnFocus(OHOS::NWeb::NWebFocusSource source)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_RETURN(delegate, false);
+    bool isFocused = delegate->RequestFocus(source);
+    delegate->OnRequestFocus();
+
+    delegate->SetToken();
     return isFocused;
 }
 
@@ -1065,6 +1079,41 @@ void WebClientImpl::OnRenderProcessResponding()
         return;
     }
     delegate->OnRenderProcessResponding();
+}
+
+void WebClientImpl::OnInterceptKeyboardAttach(
+    const std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler,
+    const std::map<std::string, std::string> &attributes, bool &useSystemKeyboard, int32_t &enterKeyType)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebCustomKeyboard OnInterceptKeyboardAttach override enter");
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnInterceptKeyboardAttach(keyboardHandler, attributes, useSystemKeyboard, enterKeyType);
+}
+
+void WebClientImpl::OnCustomKeyboardAttach()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebCustomKeyboard OnCustomKeyboardAttach override enter");
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnCustomKeyboardAttach();
+}
+
+void WebClientImpl::OnCustomKeyboardClose()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebCustomKeyboard OnCustomKeyboardClose override enter");
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnCustomKeyboardClose();
 }
 
 void WebClientImpl::OnShowAutofillPopup(

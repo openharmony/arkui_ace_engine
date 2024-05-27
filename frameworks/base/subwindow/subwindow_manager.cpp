@@ -25,6 +25,7 @@
 #include "base/memory/ace_type.h"
 #include "core/common/ace_page.h"
 #include "core/common/container.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
 
@@ -210,7 +211,10 @@ void SubwindowManager::ShowMenuNG(const RefPtr<NG::FrameNode>& menuNode, const N
     const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show menu ng enter");
-    auto containerId = Container::CurrentId();
+    CHECK_NULL_VOID(targetNode);
+    auto pipelineContext = targetNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto containerId = pipelineContext->GetInstanceId();
     auto subwindow = GetSubwindow(containerId);
     if (!subwindow) {
         subwindow = Subwindow::CreateSubwindow(containerId);
@@ -224,7 +228,10 @@ void SubwindowManager::ShowMenuNG(std::function<void()>&& buildFunc, std::functi
     const NG::MenuParam& menuParam, const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show menu ng enter");
-    auto containerId = Container::CurrentId();
+    CHECK_NULL_VOID(targetNode);
+    auto pipelineContext = targetNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto containerId = pipelineContext->GetInstanceId();
     auto subwindow = GetSubwindow(containerId);
     if (!subwindow) {
         subwindow = Subwindow::CreateSubwindow(containerId);
@@ -303,10 +310,15 @@ void SubwindowManager::ClearPopupInSubwindow(int32_t instanceId)
     }
 }
 
-void SubwindowManager::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo)
+void SubwindowManager::ShowPopupNG(const RefPtr<NG::FrameNode>& targetNode, const NG::PopupInfo& popupInfo,
+    const std::function<void(int32_t)>&& onWillDismiss, bool interactiveDismiss)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show popup ng enter");
-    auto containerId = Container::CurrentId();
+    CHECK_NULL_VOID(targetNode);
+    auto pipelineContext = targetNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto containerId = pipelineContext->GetInstanceId();
+
     auto manager = SubwindowManager::GetInstance();
     CHECK_NULL_VOID(manager);
     auto subwindow = manager->GetSubwindow(containerId);
@@ -315,7 +327,7 @@ void SubwindowManager::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupI
         subwindow->InitContainer();
         manager->AddSubwindow(containerId, subwindow);
     }
-    subwindow->ShowPopupNG(targetId, popupInfo);
+    subwindow->ShowPopupNG(targetNode->GetId(), popupInfo, std::move(onWillDismiss), interactiveDismiss);
 }
 
 void SubwindowManager::HidePopupNG(int32_t targetId, int32_t instanceId)

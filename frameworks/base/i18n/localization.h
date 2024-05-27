@@ -112,6 +112,8 @@ public:
 
     bool GetDateColumnFormatOrder(std::vector<std::string>& outOrder);
 
+    bool GetDateOrder(std::vector<std::string>& outOrder);
+
     bool IsAmPmHour()
     {
         bool isAmPm = false;

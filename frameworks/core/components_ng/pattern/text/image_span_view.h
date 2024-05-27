@@ -22,6 +22,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/frame_node.h"
+#include "frameworks/core/components/image/image_event.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ImageSpanView {
@@ -40,6 +41,8 @@ public:
     static VerticalAlign GetVerticalAlign(FrameNode* frameNode);
     static void SetPlaceHolderStyle(FrameNode* frameNode, TextBackgroundStyle& style);
     static TextBackgroundStyle GetSpanTextBackgroundStyle(FrameNode* frameNode);
+    static void SetOnComplete(FrameNode* frameNode, std::function<void(const LoadImageSuccessEvent& info)>&& callback);
+    static void SetOnError(FrameNode* frameNode, std::function<void(const LoadImageFailEvent& info)>&& callback);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_SPAN_VIEW_H

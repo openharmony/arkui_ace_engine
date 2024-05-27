@@ -27,9 +27,9 @@ extern "C" ACE_FORCE_EXPORT int OHOS_ACE_ConvertHmtlToSpanString(std::vector<uin
 }
 
 using namespace OHOS::Ace::NG;
-#define TO_HMTL_STYLE_FROMAT(key, value) (key) + std::string(": ") + (value) + (";")
+#define TO_HMTL_STYLE_FROMAT(key, value) ((key) + std::string(": ") + (value) + (";"))
 
-#define TO_HMTL_ATTRIBUTE_FROMAT(key, value) (key) + std::string("=") + ("\"") + (value) + ("\" ")
+#define TO_HMTL_ATTRIBUTE_FROMAT(key, value) ((key) + std::string("=") + ("\"") + (value) + ("\" "))
 
 std::string SpanToHtml::FontStyleToHtml(const std::optional<Ace::FontStyle>& value)
 {
@@ -410,6 +410,7 @@ std::string SpanToHtml::LeadingMarginToHtml(const OHOS::Ace::NG::TextLineStyle &
 std::string SpanToHtml::ParagraphStyleToHtml(const OHOS::Ace::NG::TextLineStyle &textLineStyle)
 {
     auto details = ToHtml(textLineStyle.GetTextAlign());
+    details += ToHtml("line-height", textLineStyle.GetLineHeight());
     details += ToHtml("text-indent", textLineStyle.GetBaselineOffset());
     details += ToHtml(textLineStyle.GetWordBreak());
     details += ToHtml(textLineStyle.GetTextOverflow());

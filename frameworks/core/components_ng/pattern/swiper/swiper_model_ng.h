@@ -29,7 +29,7 @@
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT SwiperModelNG : public OHOS::Ace::SwiperModel {
+class ACE_FORCE_EXPORT SwiperModelNG : public OHOS::Ace::SwiperModel {
 public:
     RefPtr<SwiperController> Create() override;
     void SetDirection(Axis axis) override;
@@ -64,6 +64,7 @@ public:
     void SetMainSwiperSizeHeight() override;
     void SetIndicatorStyle(const SwiperParameters& swiperParameters) override;
     void SetDotIndicatorStyle(const SwiperParameters& swiperParameters) override;
+    void SetArcDotIndicatorStyle(const SwiperArcDotParameters& swiperArcDotParameters) override;
     void SetDigitIndicatorStyle(const SwiperDigitalParameters& swiperDigitalParameters) override;
     void SetPreviousMargin(const Dimension& prevMargin, bool ignoreBlank) override;
     void SetNextMargin(const Dimension& nextMargi, bool ignoreBlankn) override;
@@ -103,6 +104,7 @@ public:
     static void SetIndicatorIsBoolean(FrameNode* frameNode, bool isBoolean);
     static void SetDigitIndicatorStyle(FrameNode* frameNode, const SwiperDigitalParameters& swiperDigitalParameters);
     static void SetDotIndicatorStyle(FrameNode* frameNode, const SwiperParameters& swiperParameters);
+    static void SetArcDotIndicatorStyle(FrameNode* frameNode, const SwiperArcDotParameters& swiperArcDotParameters);
     static void SetIndicatorType(FrameNode* frameNode, SwiperIndicatorType indicatorType);
     static void SetIsIndicatorCustomSize(FrameNode* frameNode, bool isCustomSize);
     static void SetEnabled(FrameNode* frameNode, bool enabled);
@@ -135,6 +137,7 @@ public:
     static int32_t GetIndicatorType(FrameNode* frameNode);
     static RefPtr<SwiperController> GetSwiperController(FrameNode* frameNode);
     static void SetOnContentDidScroll(FrameNode* frameNode, ContentDidScrollEvent&& onContentDidScroll);
+    static RefPtr<SwiperController> GetOrCreateSwiperController(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

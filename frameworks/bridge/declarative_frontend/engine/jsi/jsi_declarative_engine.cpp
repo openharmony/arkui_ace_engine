@@ -23,6 +23,7 @@
 
 #include "dfx_jsnapi.h"
 
+#include "base/thread/task_executor.h"
 #include "base/utils/utils.h"
 #ifdef WINDOWS_PLATFORM
 #include <algorithm>
@@ -174,9 +175,17 @@ inline bool PreloadJsEnums(const shared_ptr<JsRuntime>& runtime)
 
 inline bool PreloadStateManagement(const shared_ptr<JsRuntime>& runtime)
 {
-    uint8_t* codeStart = (uint8_t*)_binary_stateMgmt_abc_start;
-    int32_t codeLength = _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start;
-    return runtime->EvaluateJsCode(codeStart, codeLength);
+#ifdef STATE_MGMT_USE_AOT
+    auto container = Container::Current();
+    if (container && container->IsDynamicRender()) {
+        return runtime->EvaluateJsCode(
+            (uint8_t*)_binary_stateMgmt_abc_start, _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start);
+    }
+    return runtime->ExecuteJsBin("/etc/abc/framework/stateMgmt.abc");
+#else
+    return runtime->EvaluateJsCode(
+        (uint8_t*)_binary_stateMgmt_abc_start, _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start);
+#endif
 }
 
 inline bool PreloadArkComponent(const shared_ptr<JsRuntime>& runtime)
@@ -265,6 +274,8 @@ thread_local bool isUnique_ = false;
 // ArkTsCard end
 
 thread_local bool isWorker_ = false;
+
+thread_local bool isDynamicModulePreloaded_ = false;
 
 JsiDeclarativeEngineInstance::~JsiDeclarativeEngineInstance()
 {
@@ -363,7 +374,8 @@ void JsiDeclarativeEngineInstance::InitJsObject()
         }
     } else {
         auto container = Container::Current();
-        if (container && container->IsDynamicRender()) {
+        if (container && container->IsDynamicRender() && !isDynamicModulePreloaded_) {
+            isDynamicModulePreloaded_ = true;
             LOGD("init ace module for dynamic component");
             auto vm = std::static_pointer_cast<ArkJSRuntime>(runtime_)->GetEcmaVm();
             LocalScope scope(vm);
@@ -2316,6 +2328,41 @@ panda::Global<panda::ObjectRef> JsiDeclarativeEngine::GetNavigationBuilder(std::
         return panda::Global<panda::ObjectRef>();
     }
     return targetBuilder->second;
+}
+
+void JsiDeclarativeEngine::JsStateProfilerResgiter()
+{
+    CHECK_NULL_VOID(runtime_);
+    auto engine = reinterpret_cast<NativeEngine*>(runtime_);
+    CHECK_NULL_VOID(engine);
+    auto vm = engine->GetEcmaVm();
+    CHECK_NULL_VOID(vm);
+    auto globalObj = JSNApi::GetGlobalObject(vm);
+    const auto globalObject = JSRef<JSObject>::Make(globalObj);
+
+    const JSRef<JSVal> setProfilerStatus = globalObject->GetProperty("setProfilerStatus");
+    if (!setProfilerStatus->IsFunction()) {
+        return;
+    }
+
+    const auto globalFunc = JSRef<JSFunc>::Cast(setProfilerStatus);
+    std::function<void(bool)> callback = [globalFunc, globalObject, instanceId = instanceId_](
+                                             bool enableStateProfiler) {
+        ContainerScope scope(instanceId);
+
+        const std::function<void()> task = [globalFunc, globalObject, enableStateProfiler]() {
+            auto isInStateProfiler = JSRef<JSVal>::Make(ToJSValue(enableStateProfiler));
+            globalFunc->Call(globalObject, 1, &isInStateProfiler);
+        };
+
+        auto executor = Container::CurrentTaskExecutor();
+        CHECK_NULL_VOID(executor);
+        executor->PostSyncTask(task, TaskExecutor::TaskType::UI, "setProfilerStatus");
+    };
+
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetStateProfilerStatusCallback(std::move(callback));
 }
 
 // ArkTsCard start

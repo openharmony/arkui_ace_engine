@@ -299,7 +299,8 @@ class SelectionMenuComponent extends ViewPU {
                 if (null == n ? void 0 : n.textStyle) {
                     let e = n;
                     let i = e.textStyle;
-                    let s = pasteboard.createRecord(pasteboard.MIMETYPE_TEXT_PLAIN, e.value.substring(e.offsetInSpan[0], e.offsetInSpan[1]));
+                    let s = pasteboard.createRecord(pasteboard.MIMETYPE_TEXT_PLAIN,
+                            e.value.substring(e.offsetInSpan[0], e.offsetInSpan[1]));
                     let a = o.getProperty();
                     let l = {
                         color: i.fontColor,
@@ -369,7 +370,10 @@ class SelectionMenuComponent extends ViewPU {
     }
 
     measureButtonWidth() {
-        return this.editorMenuOptions && this.editorMenuOptions.length < 5 ? (this.theme.defaultMenuWidth - 2 * this.theme.expandedOptionPadding - 2 * this.theme.editorOptionMargin * this.editorMenuOptions.length) / this.editorMenuOptions.length : this.theme.buttonSize
+        return this.editorMenuOptions && this.editorMenuOptions.length < 5 ?
+            (this.theme.defaultMenuWidth - 2 * this.theme.expandedOptionPadding - 2 *
+                this.theme.editorOptionMargin * this.editorMenuOptions.length) / this.editorMenuOptions.length :
+                    this.theme.buttonSize;
     }
 
     IconPanel(e = null) {
@@ -444,7 +448,8 @@ class SelectionMenuComponent extends ViewPU {
         }), Column);
         this.observeComponentCreation2(((e, t) => {
             If.create();
-            -1 === this.showCustomerIndex && (this.controller || this.expandedMenuOptions && this.expandedMenuOptions.length > 0) ? this.ifElseBranchUpdateFunction(0, (() => {
+            -1 === this.showCustomerIndex && (this.controller || this.expandedMenuOptions && this.expandedMenuOptions.length > 0) ?
+                this.ifElseBranchUpdateFunction(0, (() => {
                 this.observeComponentCreation2(((e, t) => {
                     Menu.create();
                     Menu.onVisibleAreaChange([0, 1], (() => {

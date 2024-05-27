@@ -73,12 +73,17 @@ bool PagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper,
             firstBuildCallback_ = nullptr;
         }
     }
-    if (dynamicPageSizeCallback_) {
-        auto node = wrapper->GetGeometryNode();
-        CHECK_NULL_RETURN(node, false);
-        dynamicPageSizeCallback_(node->GetFrameSize());
-    }
     return false;
+}
+
+void PagePattern::BeforeSyncGeometryProperties(const DirtySwapConfig& /* config */)
+{
+    CHECK_NULL_VOID(dynamicPageSizeCallback_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto node = host->GetGeometryNode();
+    CHECK_NULL_VOID(node);
+    dynamicPageSizeCallback_(node->GetFrameSize());
 }
 
 bool PagePattern::TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish)
@@ -416,6 +421,7 @@ bool PagePattern::AvoidKeyboard() const
 bool PagePattern::RemoveOverlay()
 {
     CHECK_NULL_RETURN(overlayManager_, false);
+    CHECK_NULL_RETURN(!overlayManager_->IsModalEmpty(), false);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto taskExecutor = pipeline->GetTaskExecutor();

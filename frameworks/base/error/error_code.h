@@ -52,6 +52,12 @@ constexpr int32_t ERROR_CODE_UIEXTENSION_LIFECYCLE_TIMEOUT = 100015;
 constexpr int32_t ERROR_CODE_UIEXTENSION_EVENT_TIMEOUT = 100016;
 // The component not supported prevent function.
 constexpr int32_t ERROR_CODE_COMPONENT_NOT_SUPPORTED_PREVENT_FUNCTION = 100017;
+// The uiextension ability foreground failed.
+constexpr int32_t ERROR_CODE_UIEXTENSION_FOREGROUND_FAILED = 100018;
+// The uiextension ability background failed.
+constexpr int32_t ERROR_CODE_UIEXTENSION_BACKGROUND_FAILED = 100019;
+// The uiextension ability destruction failed.
+constexpr int32_t ERROR_CODE_UIEXTENSION_DESTRUCTION_FAILED = 100020;
 
 // C-API errors
 constexpr int32_t ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND = 106101;

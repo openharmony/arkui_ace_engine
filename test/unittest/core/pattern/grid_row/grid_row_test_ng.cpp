@@ -317,6 +317,215 @@ HWTEST_F(GridRowTestNg, Algorithm006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Algorithm007
+ * @tc.desc: Test GridRow layout algorithm with text direction = Reverse,
+ *           System parameter is left to right.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowTestNg, Algorithm007, TestSize.Level1)
+{
+    auto pipeLine = PipelineBase::GetCurrentContext();
+    auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
+    // Set RowReverse
+    layoutProperty->UpdateDirection(V2::GridRowDirection::RowReverse);
+    // Set LTR
+    pipeLine->SetIsRightToLeft(false);
+
+    // get row direction
+    auto direction = layoutProperty->GetDirection();
+    EXPECT_EQ(direction, V2::GridRowDirection::RowReverse);
+    auto isRTL = pipeLine->IsRightToLeft();
+    EXPECT_EQ(isRTL, false);
+
+    auto layoutWrapper = CreateLayoutWrapperAndLayout(true);
+    auto frameRect = layoutWrapper->GetOrCreateChildByIndex(0)->GetGeometryNode()->GetFrameRect();
+    auto columnWidth = frameRect.Width();
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetX(), DEFAULT_GRID_ROW_WIDTH - DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetY(), DEFAULT_HEIGHT);
+    frameRect = layoutWrapper->GetOrCreateChildByIndex(1)->GetGeometryNode()->GetFrameRect();
+    EXPECT_EQ(frameRect.GetX(), (DEFAULT_COLUMNS - 1) * DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetY(), 0);
+}
+
+/**
+ * @tc.name: Algorithm008
+ * @tc.desc: Test GridRow layout algorithm with text direction = Row,
+ *           System parameter is right to left.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowTestNg, Algorithm008, TestSize.Level1)
+{
+    auto pipeLine = PipelineBase::GetCurrentContext();
+    auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
+
+    // Set Row
+    layoutProperty->UpdateDirection(V2::GridRowDirection::Row);
+    // Set RTL
+    pipeLine->SetIsRightToLeft(true);
+
+    // get row direction
+    auto direction = layoutProperty->GetDirection();
+    EXPECT_EQ(direction, V2::GridRowDirection::Row);
+    auto isRTL = pipeLine->IsRightToLeft();
+    EXPECT_EQ(isRTL, true);
+
+    auto layoutWrapper = CreateLayoutWrapperAndLayout(true);
+    auto frameRect = layoutWrapper->GetOrCreateChildByIndex(0)->GetGeometryNode()->GetFrameRect();
+    auto columnWidth = frameRect.Width();
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetX(), DEFAULT_GRID_ROW_WIDTH - (DEFAULT_OFFSET + 1) * DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetY(), DEFAULT_HEIGHT);
+    frameRect = layoutWrapper->GetOrCreateChildByIndex(1)->GetGeometryNode()->GetFrameRect();
+    EXPECT_EQ(frameRect.GetX(), 0);
+    EXPECT_EQ(frameRect.GetY(), 0);
+}
+
+/**
+ * @tc.name: Algorithm009
+ * @tc.desc: Test GridRow layout algorithm with text direction = Reverse,
+ *           Layout direction is auto, System parameter is left to right.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowTestNg, Algorithm009, TestSize.Level1)
+{
+    auto pipeLine = PipelineBase::GetCurrentContext();
+    auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
+    // Set RowReverse
+    layoutProperty->UpdateDirection(V2::GridRowDirection::RowReverse);
+    // Set LTR
+    pipeLine->SetIsRightToLeft(false);
+    // Set Layout direction
+    layoutProperty->UpdateLayoutDirection(TextDirection::AUTO);
+
+    // get row direction
+    auto direction = layoutProperty->GetDirection();
+    EXPECT_EQ(direction, V2::GridRowDirection::RowReverse);
+    auto textDirection = layoutProperty->GetLayoutDirection();
+    EXPECT_EQ(textDirection, TextDirection::AUTO);
+    auto isRTL = pipeLine->IsRightToLeft();
+    EXPECT_EQ(isRTL, false);
+
+    auto layoutWrapper = CreateLayoutWrapperAndLayout(true);
+    auto frameRect = layoutWrapper->GetOrCreateChildByIndex(0)->GetGeometryNode()->GetFrameRect();
+    auto columnWidth = frameRect.Width();
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetX(), (DEFAULT_COLUMNS - 1) * DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetY(), DEFAULT_HEIGHT);
+    frameRect = layoutWrapper->GetOrCreateChildByIndex(1)->GetGeometryNode()->GetFrameRect();
+    EXPECT_EQ(frameRect.GetX(), (DEFAULT_COLUMNS - 1) * DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetY(), 0);
+}
+
+/**
+ * @tc.name: Algorithm010
+ * @tc.desc: Test GridRow layout algorithm with text direction = Row,
+ *           Layout direction is auto, System parameter is right to left.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowTestNg, Algorithm010, TestSize.Level1)
+{
+    auto pipeLine = PipelineBase::GetCurrentContext();
+    auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
+    // Set Row
+    layoutProperty->UpdateDirection(V2::GridRowDirection::Row);
+    // Set RTL
+    pipeLine->SetIsRightToLeft(true);
+    // Set Layout direction
+    layoutProperty->UpdateLayoutDirection(TextDirection::AUTO);
+
+    // get row direction
+    auto direction = layoutProperty->GetDirection();
+    EXPECT_EQ(direction, V2::GridRowDirection::Row);
+    auto textDirection = layoutProperty->GetLayoutDirection();
+    EXPECT_EQ(textDirection, TextDirection::AUTO);
+    auto isRTL = pipeLine->IsRightToLeft();
+    EXPECT_EQ(isRTL, true);
+
+    auto layoutWrapper = CreateLayoutWrapperAndLayout(true);
+    auto frameRect = layoutWrapper->GetOrCreateChildByIndex(0)->GetGeometryNode()->GetFrameRect();
+    auto columnWidth = frameRect.Width();
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetX(), DEFAULT_GRID_ROW_WIDTH - (DEFAULT_OFFSET + 1) * DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetY(), DEFAULT_HEIGHT);
+    frameRect = layoutWrapper->GetOrCreateChildByIndex(1)->GetGeometryNode()->GetFrameRect();
+    EXPECT_EQ(frameRect.GetX(), 0);
+    EXPECT_EQ(frameRect.GetY(), 0);
+}
+
+/**
+ * @tc.name: Algorithm011
+ * @tc.desc: Test GridRow layout algorithm with text direction = Row,
+ *           Layout direction is auto, System parameter is left to right.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowTestNg, Algorithm011, TestSize.Level1)
+{
+    auto pipeLine = PipelineBase::GetCurrentContext();
+    auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
+    // Set Row
+    layoutProperty->UpdateDirection(V2::GridRowDirection::Row);
+    // Set LTR
+    pipeLine->SetIsRightToLeft(false);
+    // Set Layout direction
+    layoutProperty->UpdateLayoutDirection(TextDirection::AUTO);
+
+    // get row direction
+    auto direction = layoutProperty->GetDirection();
+    EXPECT_EQ(direction, V2::GridRowDirection::Row);
+    auto textDirection = layoutProperty->GetLayoutDirection();
+    EXPECT_EQ(textDirection, TextDirection::AUTO);
+    auto isRTL = pipeLine->IsRightToLeft();
+    EXPECT_EQ(isRTL, false);
+
+    auto layoutWrapper = CreateLayoutWrapperAndLayout(true);
+    auto frameRect = layoutWrapper->GetOrCreateChildByIndex(0)->GetGeometryNode()->GetFrameRect();
+    auto columnWidth = frameRect.Width();
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetX(), 0);
+    EXPECT_EQ(frameRect.GetY(), DEFAULT_HEIGHT);
+    frameRect = layoutWrapper->GetOrCreateChildByIndex(1)->GetGeometryNode()->GetFrameRect();
+    EXPECT_EQ(frameRect.GetX(), 0);
+    EXPECT_EQ(frameRect.GetY(), 0);
+}
+
+/**
+ * @tc.name: Algorithm012
+ * @tc.desc: Test GridRow layout algorithm with text direction = RowReverse,
+ *           Layout direction is auto, System parameter is right to left.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowTestNg, Algorithm012, TestSize.Level1)
+{
+    auto pipeLine = PipelineBase::GetCurrentContext();
+    auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
+    // Set RowReverse
+    layoutProperty->UpdateDirection(V2::GridRowDirection::RowReverse);
+    // Set RTL
+    pipeLine->SetIsRightToLeft(true);
+    // Set Layout direction
+    layoutProperty->UpdateLayoutDirection(TextDirection::AUTO);
+
+    // get row direction
+    auto direction = layoutProperty->GetDirection();
+    EXPECT_EQ(direction, V2::GridRowDirection::RowReverse);
+    auto textDirection = layoutProperty->GetLayoutDirection();
+    EXPECT_EQ(textDirection, TextDirection::AUTO);
+    auto isRTL = pipeLine->IsRightToLeft();
+    EXPECT_EQ(isRTL, true);
+
+    auto layoutWrapper = CreateLayoutWrapperAndLayout(true);
+    auto frameRect = layoutWrapper->GetOrCreateChildByIndex(0)->GetGeometryNode()->GetFrameRect();
+    auto columnWidth = frameRect.Width();
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetX(), DEFAULT_GRID_ROW_WIDTH - DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetY(), DEFAULT_HEIGHT);
+    frameRect = layoutWrapper->GetOrCreateChildByIndex(1)->GetGeometryNode()->GetFrameRect();
+    EXPECT_EQ(frameRect.GetX(), DEFAULT_GRID_ROW_WIDTH - DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetY(), 0);
+}
+
+/**
  * @tc.name: ItemAlign001
  * @tc.desc: Test GridRow layout algorithm with default ItemAlign.
  * @tc.type: FUNC

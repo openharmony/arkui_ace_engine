@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
 #include <cstdint>
+#include <memory>
 #include <vector>
 #include "base/utils/utils.h"
 
@@ -54,15 +55,15 @@ namespace {
 namespace OHOS::Ace {
 
 namespace {
-ImageSourceInfo CreateSourceInfo(const std::string &src, RefPtr<PixelMap> &pixmap, const std::string &bundleName,
-    const std::string &moduleName)
+ImageSourceInfo CreateSourceInfo(const std::shared_ptr<std::string>& srcRef, RefPtr<PixelMap>& pixmap,
+    const std::string& bundleName, const std::string& moduleName)
 {
 #if defined(PIXEL_MAP_SUPPORTED)
     if (pixmap) {
         return ImageSourceInfo(pixmap);
     }
 #endif
-    return { src, bundleName, moduleName };
+    return { srcRef, bundleName, moduleName };
 }
 } // namespace
 
@@ -158,7 +159,8 @@ void JSImage::SetAlt(const JSCallbackInfo& args)
         pixmap = CreatePixelMapFromNapiValue(args[0]);
 #endif
     }
-    auto srcInfo = CreateSourceInfo(src, pixmap, bundleName, moduleName);
+    auto srcRef = std::make_shared<std::string>(src);
+    auto srcInfo = CreateSourceInfo(srcRef, pixmap, bundleName, moduleName);
     srcInfo.SetIsUriPureNumber((resId == -1));
     ImageModel::GetInstance()->SetAlt(srcInfo);
 }
@@ -250,6 +252,11 @@ void JSImage::OnFinish(const JSCallbackInfo& info)
 
 void JSImage::Create(const JSCallbackInfo& info)
 {
+    CreateImage(info);
+}
+
+void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
+{
     if (info.Length() < 1) {
         return;
     }
@@ -300,8 +307,10 @@ void JSImage::Create(const JSCallbackInfo& info)
         }
 #endif
     }
-
-    ImageModel::GetInstance()->Create(src, pixmap, bundleName, moduleName, (resId == -1));
+    ImageInfoConfig imageInfoConfig(
+        std::make_shared<std::string>(src), bundleName, moduleName, (resId == -1), isImageSpan
+    );
+    ImageModel::GetInstance()->Create(imageInfoConfig, pixmap);
 }
 
 bool JSImage::IsDrawable(const JSRef<JSVal>& jsValue)

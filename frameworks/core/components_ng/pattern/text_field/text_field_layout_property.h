@@ -88,8 +88,12 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         LayoutProperty::ToJsonValue(json, filter);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("showPasswordIcon", propShowPasswordIcon_.value_or(true), filter);
-        json->Put("showPassword", propShowPasswordText_.value_or(false));
+        json->PutExtAttr("showPassword", propShowPasswordText_.value_or(false), filter);
         json->PutExtAttr("errorText", propErrorText_.value_or("").c_str(), filter);
         json->PutExtAttr("showErrorText", propShowErrorText_.value_or(false), filter);
         json->PutExtAttr("showCounter", propShowCounter_.value_or(false), filter);
@@ -125,8 +129,7 @@ public:
             V2::ConvertWrapWordBreakToString(GetWordBreak().value_or(WordBreak::BREAK_WORD)).c_str(), filter);
         json->PutExtAttr("textOverflow",
             V2::ConvertWrapTextOverflowToString(GetTextOverflow().value_or(TextOverflow::CLIP)).c_str(), filter);
-        json->PutExtAttr("textIndent",
-            std::to_string(static_cast<int32_t>(GetTextIndent().value_or(0.0_vp).Value())).c_str(), filter);
+        json->PutExtAttr("textIndent", GetTextIndent().value_or(0.0_vp).ToString().c_str(), filter);
     }
 
     ACE_DEFINE_PROPERTY_GROUP(FontStyle, FontStyle);

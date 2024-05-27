@@ -26,6 +26,32 @@ void EventHub::AttachHost(const WeakPtr<FrameNode>& host)
     host_ = host;
 }
 
+void EventHub::OnAttachContext(PipelineContext *context)
+{
+    auto host = host_.Upgrade();
+    CHECK_NULL_VOID(host);
+    if (HasOnAreaChanged() || HasInnerOnAreaChanged()) {
+        context->AddOnAreaChangeNode(host->GetId());
+    }
+
+    if (HasVisibleAreaCallback(true) || HasVisibleAreaCallback(false)) {
+        context->AddVisibleAreaChangeNode(host->GetId());
+    }
+}
+
+void EventHub::OnDetachContext(PipelineContext *context)
+{
+    auto host = host_.Upgrade();
+    CHECK_NULL_VOID(host);
+    if (HasOnAreaChanged() || HasInnerOnAreaChanged()) {
+        context->RemoveOnAreaChangeNode(host->GetId());
+    }
+
+    if (HasVisibleAreaCallback(true) || HasVisibleAreaCallback(false)) {
+        context->RemoveVisibleAreaChangeNode(host->GetId());
+    }
+}
+
 RefPtr<FrameNode> EventHub::GetFrameNode() const
 {
     return host_.Upgrade();
@@ -316,6 +342,11 @@ void EventHub::ClearJSFrameNodeOnSizeChange()
 bool EventHub::HasOnSizeChanged() const
 {
     return static_cast<bool>(onSizeChanged_) || static_cast<bool>(onJsFrameNodeSizeChanged_);
+}
+
+bool EventHub::HasImmediatelyVisibleCallback()
+{
+    return visibleAreaUserCallback_.callback || visibleAreaInnerCallback_.callback;
 }
 
 void EventHub::ClearOnAreaChangedInnerCallbacks()

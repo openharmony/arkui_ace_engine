@@ -255,7 +255,8 @@ private:
     void UpdateListItemConstraint(const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
     void LayoutListItem(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize);
     void LayoutListItemAll(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, float startPos);
-    void LayoutHeaderFooter(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize);
+    void LayoutHeaderFooterRTL(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize);
+    void LayoutHeaderFooterLTR(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize);
     void UpdateZIndex(const RefPtr<LayoutWrapper>& layoutWrapper);
     void LayoutIndex(const RefPtr<LayoutWrapper>& wrapper, const OffsetF& paddingOffset,
         float crossSize, float startPos);
@@ -290,7 +291,7 @@ private:
     void MeasureHeaderFooter(LayoutWrapper* layoutWrapper);
     void SetActiveChildRange(LayoutWrapper* layoutWrapper);
     float UpdateReferencePos(RefPtr<LayoutProperty> layoutProperty, bool forwardLayout, float referencePos);
-    bool NeedMeasureItem();
+    bool NeedMeasureItem(LayoutWrapper* layoutWrapper);
     static void SetListItemIndex(const LayoutWrapper* groupLayoutWrapper,
         const RefPtr<LayoutWrapper>& itemLayoutWrapper, int32_t indexInGroup);
     bool IsCardStyleForListItemGroup(const LayoutWrapper* groupLayoutWrapper);

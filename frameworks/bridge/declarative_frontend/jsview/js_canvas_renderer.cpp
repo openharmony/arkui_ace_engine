@@ -372,7 +372,8 @@ RefPtr<CanvasPath2D> JSCanvasRenderer::JsMakePath2D(const JSCallbackInfo& info)
             JSViewAbstract::ParseJsString(info[0], capStr);
             return AceType::MakeRefPtr<CanvasPath2D>(capStr);
         }
-        if (info[0]->IsObject()) {
+
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && info[0]->IsObject()) {
             auto* jsPath2d = info.UnwrapArg<JSPath2D>(0);
             CHECK_NULL_RETURN(jsPath2d, AceType::MakeRefPtr<CanvasPath2D>());
             auto canvasPath2D = jsPath2d->GetCanvasPath2d();
@@ -982,7 +983,7 @@ void JSCanvasRenderer::JsSetShadowOffsetY(const JSCallbackInfo& info)
 {
     double offsetY = 0.0;
     if (info.GetDoubleArg(0, offsetY)) {
-        renderingContext2DModel_->SetShadowOffsetX(offsetY * GetDensity());
+        renderingContext2DModel_->SetShadowOffsetY(offsetY * GetDensity());
     }
 }
 
@@ -1488,7 +1489,7 @@ Dimension JSCanvasRenderer::GetDimensionValue(const std::string& str)
         return Dimension(dimension.Value());
     }
     if (dimension.Unit() == DimensionUnit::VP) {
-        return Dimension(dimension.Value() * SystemProperties::GetResolution());
+        return Dimension(dimension.Value() * GetDensity());
     }
     return Dimension(0.0);
 }

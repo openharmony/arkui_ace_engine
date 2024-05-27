@@ -34,7 +34,7 @@ std::shared_ptr<Localization> Localization::GetInstance()
     return instance;
 }
 
-bool Localization::GetDateColumnFormatOrder(std::vector<std::string>& outOrder)
+bool Localization::GetDateOrder(std::vector<std::string>& outOrder)
 {
     outOrder.clear();
     return false;

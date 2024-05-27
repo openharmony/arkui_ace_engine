@@ -201,6 +201,9 @@ class MeasureUtils {
     }
 }
 
+class FrameCallback {
+}
+
 class UIContext {
     /**
      * Construct new instance of UIContext.
@@ -492,6 +495,22 @@ class UIContext {
         const windowName = getUINativeModule().common.getWindowName();
         __JSScopeUtil__.restoreInstanceId();
         return windowName
+    }
+
+    clearResourceManagerCache() {
+        getUINativeModule().resource.clearCache();
+    }
+
+    postFrameCallback(frameCallback) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        getUINativeModule().common.postFrameCallback(frameCallback, 0);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    postDelayedFrameCallback(frameCallback, delayMillis) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        getUINativeModule().common.postFrameCallback(frameCallback, delayMillis);
+        __JSScopeUtil__.restoreInstanceId();
     }
 }
 
@@ -942,7 +961,7 @@ function __checkRegexValid__(pattern) {
 }
 
 export default { Font, MediaQuery, UIInspector, DragController, UIObserver, MeasureUtils, UIContext,
-    FocusController, ComponentUtils, Router, PromptAction, AtomicServiceBar, OverlayManager };
+    FocusController, ComponentUtils, Router, PromptAction, AtomicServiceBar, OverlayManager, FrameCallback };
 
 globalThis.__getUIContext__ = __getUIContext__;
 globalThis.__getFrameNodeByNodeId__ = __getFrameNodeByNodeId__;

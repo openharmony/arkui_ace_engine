@@ -23,6 +23,7 @@
 #include "base/log/ace_trace.h"
 #include "base/utils/system_properties.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -64,8 +65,8 @@ void MovingPhotoPattern::OnAttachToFrameNode()
     static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, "MediaPlayerSurface",
                                                  RenderContext::PatternType::VIDEO };
     renderContextForMediaPlayer_->InitContext(false, param);
-    renderContext->UpdateBackgroundColor(Color::BLACK);
-    renderContextForMediaPlayer_->UpdateBackgroundColor(Color::BLACK);
+    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    renderContextForMediaPlayer_->UpdateBackgroundColor(Color::TRANSPARENT);
     renderContext->SetClipToBounds(true);
 
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -164,6 +165,7 @@ void MovingPhotoPattern::InitEvent()
 
 void MovingPhotoPattern::HandleLongPress(GestureEvent& info)
 {
+    isFastKeyUp_ = false;
     if (currentPlayStatus_ == PlaybackStatus::STARTED || !isPrepared_ || isPlayByController_) {
         return;
     }
@@ -172,6 +174,9 @@ void MovingPhotoPattern::HandleLongPress(GestureEvent& info)
 
 void MovingPhotoPattern::HandleTouchEvent(TouchEventInfo& info)
 {
+    if (currentPlayStatus_ == PlaybackStatus::ERROR) {
+        ResetMediaPlayer();
+    }
     if (!isPrepared_ || isPlayByController_) {
         return;
     }
@@ -202,10 +207,6 @@ void MovingPhotoPattern::UpdateImageNode()
     CHECK_NULL_VOID(image);
     auto layoutProperty = GetLayoutProperty<MovingPhotoLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (!layoutProperty->HasMovingPhotoUri() || layoutProperty->GetMovingPhotoUri().value() == uri_) {
-        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MovingPhoto is null or has not changed.");
-        return;
-    }
     if (!layoutProperty->HasImageSourceInfo()) {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "image info is null.");
         auto posterLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
@@ -478,18 +479,20 @@ bool MovingPhotoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     return false;
 }
 
-SizeF MovingPhotoPattern::CalculateFitContain(const SizeF& videoSize, const SizeF& layoutSize)
+SizeF MovingPhotoPattern::CalculateFitContain(const SizeF& rawSize, const SizeF& layoutSize)
 {
-    double layoutRatio = NearZero(layoutSize.Height()) ? 0.0 : layoutSize.Width() / layoutSize.Height();
-    double sourceRatio = NearZero(videoSize.Height()) ? layoutRatio : videoSize.Width() / videoSize.Height();
-
-    if (NearZero(layoutRatio) || NearZero(sourceRatio)) {
+    if (NearZero(rawSize.Height()) || NearZero(rawSize.Width()) || NearZero(layoutSize.Height())) {
         return layoutSize;
     }
+    double sourceRatio = rawSize.Width() / rawSize.Height();
+    double layoutRatio = layoutSize.Width() / layoutSize.Height();
     if (sourceRatio < layoutRatio) {
-        return { static_cast<float>(sourceRatio) * layoutSize.Height(), layoutSize.Height() };
+        float ratio = layoutSize.Height() / rawSize.Height();
+        return { rawSize.Width() * ratio, layoutSize.Height() };
+    } else {
+        float ratio = layoutSize.Width() / rawSize.Width();
+        return { layoutSize.Width(), rawSize.Height() * ratio };
     }
-    return { layoutSize.Width(), static_cast<float>(layoutSize.Width() / sourceRatio) };
 }
 
 SizeF MovingPhotoPattern::CalculateFitFill(const SizeF& layoutSize)
@@ -497,31 +500,64 @@ SizeF MovingPhotoPattern::CalculateFitFill(const SizeF& layoutSize)
     return layoutSize;
 }
 
-SizeF MovingPhotoPattern::CalculateFitCover(const SizeF& videoSize, const SizeF& layoutSize)
+SizeF MovingPhotoPattern::CalculateFitCover(const SizeF& rawSize, const SizeF& layoutSize)
 {
-    double layoutRatio = NearZero(layoutSize.Height()) ? 0.0 : layoutSize.Width() / layoutSize.Height();
-    double sourceRatio = NearZero(videoSize.Height()) ? layoutRatio : videoSize.Width() / videoSize.Height();
-
-    if (NearZero(layoutRatio) || NearZero(sourceRatio)) {
+    if (NearZero(rawSize.Height()) || NearZero(rawSize.Width()) || NearZero(layoutSize.Height())) {
         return layoutSize;
     }
+    double sourceRatio = rawSize.Width() / rawSize.Height();
+    double layoutRatio = layoutSize.Width() / layoutSize.Height();
+    float ratio = 1.0;
     if (sourceRatio < layoutRatio) {
-        return { layoutSize.Width(), static_cast<float>(layoutSize.Width() / sourceRatio) };
+        ratio = static_cast<float>(layoutSize.Width() / rawSize.Width());
+    } else {
+        ratio = static_cast<float>(layoutSize.Height() / rawSize.Height());
     }
-    return { static_cast<float>(layoutSize.Height() * sourceRatio), layoutSize.Height() };
+    return { rawSize.Width() * ratio, rawSize.Height() * ratio};
 }
 
-SizeF MovingPhotoPattern::CalculateFitNone(const SizeF& videoSize)
+SizeF MovingPhotoPattern::CalculateFitNone(const SizeF& rawSize)
 {
-    return videoSize;
+    return rawSize;
 }
 
-SizeF MovingPhotoPattern::CalculateFitScaleDown(const SizeF& videoSize, const SizeF& layoutSize)
+SizeF MovingPhotoPattern::CalculateFitScaleDown(const SizeF& rawSize, const SizeF& layoutSize)
 {
-    if (layoutSize.Width() > videoSize.Width()) {
-        return CalculateFitNone(videoSize);
+    if ((rawSize.Width() <= layoutSize.Width()) && (rawSize.Height() <= layoutSize.Height())) {
+        return CalculateFitNone(rawSize);
+    } else {
+        return CalculateFitContain(rawSize, layoutSize);
     }
-    return CalculateFitContain(videoSize, layoutSize);
+}
+
+SizeF MovingPhotoPattern::CalculateFitAuto(const SizeF& rawSize, const SizeF& layoutSize)
+{
+    if (NearZero(rawSize.Width()) || NearZero(rawSize.Height())) {
+        return layoutSize;
+    }
+    if ((rawSize.Width() <= layoutSize.Width()) && (rawSize.Height() <= layoutSize.Height())) {
+        double widthRatio = layoutSize.Width() / rawSize.Width();
+        double heightRatio = layoutSize.Height() / rawSize.Height();
+        float ratio = static_cast<float>(std::min(widthRatio, heightRatio));
+        return { rawSize.Width() * ratio, rawSize.Height() * ratio };
+    } else if ((rawSize.Width() > layoutSize.Width()) && (rawSize.Height() <= layoutSize.Height())) {
+        return CalculateFitContain(rawSize, layoutSize);
+    } else {
+        return CalculateFitCover(rawSize, layoutSize);
+    }
+}
+
+SizeF MovingPhotoPattern::GetRawImageSize()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, SizeF(-1, -1));
+    auto movingPhoto = AceType::DynamicCast<MovingPhotoNode>(host);
+    CHECK_NULL_RETURN(movingPhoto, SizeF(-1, -1));
+    auto image = AceType::DynamicCast<FrameNode>(movingPhoto->GetImage());
+    CHECK_NULL_RETURN(image, SizeF(-1, -1));
+    auto imagePattern = image->GetPattern<ImagePattern>();
+    CHECK_NULL_RETURN(image, SizeF(-1, -1));
+    return imagePattern->GetRawImageSize();
 }
 
 SizeF MovingPhotoPattern::MeasureContentLayout(const SizeF& layoutSize, const RefPtr<MovingPhotoLayoutProperty>& layoutProperty)
@@ -530,27 +566,27 @@ SizeF MovingPhotoPattern::MeasureContentLayout(const SizeF& layoutSize, const Re
         return layoutSize;
     }
 
-    auto videoSize = layoutProperty->GetVideoSizeValue(SizeF(0, 0));
+    auto rawImageSize = GetRawImageSize();
     auto imageFit = layoutProperty->GetObjectFitValue(ImageFit::COVER);
     SizeF contentSize = { 0.0, 0.0 };
     switch (imageFit) {
         case ImageFit::CONTAIN:
-            contentSize = CalculateFitContain(videoSize, layoutSize);
+            contentSize = CalculateFitContain(rawImageSize, layoutSize);
             break;
         case ImageFit::FILL:
             contentSize = CalculateFitFill(layoutSize);
             break;
         case ImageFit::COVER:
-            contentSize = CalculateFitCover(videoSize, layoutSize);
+            contentSize = CalculateFitCover(rawImageSize, layoutSize);
             break;
         case ImageFit::NONE:
-            contentSize = CalculateFitNone(videoSize);
+            contentSize = CalculateFitNone(rawImageSize);
             break;
         case ImageFit::SCALE_DOWN:
-            contentSize = CalculateFitScaleDown(videoSize, layoutSize);
+            contentSize = CalculateFitScaleDown(rawImageSize, layoutSize);
             break;
         default:
-            contentSize = CalculateFitContain(videoSize, layoutSize);
+            contentSize = CalculateFitAuto(rawImageSize, layoutSize);
     }
 
     return contentSize;
@@ -654,6 +690,7 @@ void MovingPhotoPattern::StartPlayback()
         return;
     }
     isPlayByController_ = true;
+    isFastKeyUp_ = false;
     Start();
 }
 
@@ -679,11 +716,13 @@ void MovingPhotoPattern::StartAnimation()
     animationOption.SetDuration(ANIMATION_DURATION_400);
     animationOption.SetCurve(Curves::FRICTION);
     animationOption.SetOnFinishEvent([this]() {
-        if (currentPlayStatus_ == PlaybackStatus::PAUSED || currentPlayStatus_ == PlaybackStatus::STOPPED) {
+        if (currentPlayStatus_ == PlaybackStatus::PAUSED || currentPlayStatus_ == PlaybackStatus::STOPPED
+                                                         || !startAnimationFlag_) {
             return;
         }
         HideImageNode();
     });
+    startAnimationFlag_ = true;
     AnimationUtils::Animate(animationOption, [imageCtx = imageRsContext, videoCtx = videoRsContext]() {
             imageCtx->UpdateOpacity(0.0);
             imageCtx->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
@@ -693,6 +732,7 @@ void MovingPhotoPattern::StartAnimation()
 
 void MovingPhotoPattern::StopPlayback()
 {
+    isFastKeyUp_ = false;
     if (currentPlayStatus_ != PlaybackStatus::STARTED || !isPrepared_) {
         return;
     }
@@ -703,6 +743,7 @@ void MovingPhotoPattern::StopPlayback()
 
 void MovingPhotoPattern::StopAnimation()
 {
+    startAnimationFlag_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto movingPhoto = AceType::DynamicCast<MovingPhotoNode>(host);
@@ -877,7 +918,7 @@ void MovingPhotoPattern::OnVisibleChange(bool isVisible)
 {
     CHECK_NULL_VOID(mediaPlayer_);
     if (!isVisible) {
-        OnWindowHide();
+        StopPlayback();
     }
 }
 

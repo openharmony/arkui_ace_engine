@@ -223,7 +223,7 @@ void SetSelectColor(ArkUINodeHandle node, uint32_t color)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    SliderModelNG::SetSelectColor(frameNode, Color(color));
+    SliderModelNG::SetSelectColor(frameNode, SliderModelNG::CreateSolidGradient(Color(color)), true);
 }
 
 void ResetSelectColor(ArkUINodeHandle node)
@@ -234,7 +234,8 @@ void ResetSelectColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(theme);
-    SliderModelNG::SetSelectColor(frameNode, theme->GetTrackSelectedColor());
+    SliderModelNG::SetSelectColor(
+        frameNode, SliderModelNG::CreateSolidGradient(theme->GetTrackSelectedColor()), true);
 }
 
 void SetShowSteps(ArkUINodeHandle node, int showSteps)
@@ -472,6 +473,49 @@ void ResetSliderValidSlideRange(ArkUINodeHandle node)
     SliderModelNG::ResetValidSlideRange(frameNode);
 }
 
+void SetSelectedBorderRadius(ArkUINodeHandle node, float value, int unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Dimension radius = Dimension(static_cast<double>(value), static_cast<OHOS::Ace::DimensionUnit>(unit));
+    SliderModelNG::SetSelectedBorderRadius(frameNode, radius);
+}
+
+void ResetSelectedBorderRadius(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SliderModelNG::ResetSelectedBorderRadius(frameNode);
+}
+
+void SetInteractionMode(ArkUINodeHandle node, int value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SliderModelNG::SetSliderInteractionMode(frameNode, static_cast<SliderModel::SliderInteraction>(value));
+}
+
+void ResetInteractionMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SliderModelNG::ResetSliderInteractionMode(frameNode);
+}
+
+void SetMinResponsiveDistance(ArkUINodeHandle node, float value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SliderModelNG::SetMinResponsiveDistance(frameNode, value);
+}
+
+void ResetMinResponsiveDistance(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SliderModelNG::ResetMinResponsiveDistance(frameNode);
+}
+
 ArkUI_Uint32 GetBlockColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -484,14 +528,15 @@ ArkUI_Uint32 GetTrackBackgroundColor(ArkUINodeHandle node)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
     NG::Gradient gradient = SliderModelNG::GetTrackBackgroundColor(frameNode);
-    return gradient.GetColors().at(0).GetColor().GetValue();
+    return gradient.GetColors().at(0).GetLinearColor().ToColor().GetValue();
 }
 
 ArkUI_Uint32 GetSelectColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
-    return SliderModelNG::GetSelectColor(frameNode).GetValue();
+    NG::Gradient gradient = SliderModelNG::GetSelectColor(frameNode);
+    return gradient.GetColors().at(0).GetColor().GetValue();
 }
 
 ArkUI_Bool GetShowSteps(ArkUINodeHandle node)
@@ -668,6 +713,12 @@ const ArkUISliderModifier* GetSliderModifier()
         SliderModifier::ResetSliderBlockType,
         SliderModifier::SetSliderValidSlideRange,
         SliderModifier::ResetSliderValidSlideRange,
+        SliderModifier::SetSelectedBorderRadius,
+        SliderModifier::ResetSelectedBorderRadius,
+        SliderModifier::SetInteractionMode,
+        SliderModifier::ResetInteractionMode,
+        SliderModifier::SetMinResponsiveDistance,
+        SliderModifier::ResetMinResponsiveDistance,
         SliderModifier::GetBlockColor,
         SliderModifier::GetTrackBackgroundColor,
         SliderModifier::GetSelectColor,

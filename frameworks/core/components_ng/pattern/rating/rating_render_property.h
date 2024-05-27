@@ -51,6 +51,10 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("rating", std::to_string(propRatingScore_.value_or(0.0)).c_str(), filter);
         constexpr double DEFAULT_STEP_SIZE = 0.5;
         json->PutExtAttr("stepSize", std::to_string(propStepSize_.value_or(DEFAULT_STEP_SIZE)).c_str(), filter);

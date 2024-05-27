@@ -237,6 +237,7 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 {
+    isTouchEventFinished_ = false;
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
@@ -287,6 +288,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         fingersId_.erase(event.id);
     }
     globalPoint_ = Point(event.x, event.y);
+    touchPoints_[event.id] = event;
     lastTouchEvent_ = event;
     time_ = event.time;
 
@@ -331,6 +333,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
 void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 {
+    isTouchEventFinished_ = false;
     TAG_LOGI(AceLogTag::ACE_GESTURE, "InputTracking id:%{public}d, pan recognizer receives axis end event",
         event.touchEventId);
     // if axisEvent received rotateEvent, no need to active Pan recognizer.
@@ -339,6 +342,8 @@ void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
     }
     globalPoint_ = Point(event.x, event.y);
 
+    touchPoints_[event.id] = TouchEvent();
+    UpdateTouchPointWithAxisEvent(event);
     UpdateAxisPointInVelocityTracker(event, true);
     lastAxisEvent_ = event;
     time_ = event.time;
@@ -423,6 +428,7 @@ void PanRecognizer::OnFlushTouchEventsEnd()
 
 void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 {
+    isTouchEventFinished_ = false;
     if (fingers_ != AXIS_PAN_FINGERS || event.isRotationEvent) {
         return;
     }
@@ -514,6 +520,7 @@ void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 
 void PanRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
 {
+    isTouchEventFinished_ = false;
     TAG_LOGI(AceLogTag::ACE_GESTURE, "InputTracking id:%{public}d, pan recognizer receives axis cancel event",
         event.touchEventId);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
@@ -673,6 +680,7 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
             info.SetTiltY(lastTouchEvent_.tiltY.value());
         }
         info.SetPointerEvent(lastPointEvent_);
+        info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         callbackFunction(info);

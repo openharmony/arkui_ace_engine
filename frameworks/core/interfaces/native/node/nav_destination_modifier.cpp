@@ -16,10 +16,13 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
 #include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
+constexpr int32_t DEFAULT_SAFE_AREA_TYPE = 0b1;
+constexpr int32_t DEFAULT_SAFE_AREA_EDGE = 0b1111;
 void SetHideTitleBar(ArkUINodeHandle node, ArkUI_Bool hideTitle)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -34,10 +37,71 @@ void ResetHideTitleBar(ArkUINodeHandle node)
     NavDestinationModelNG::SetHideTitleBar(frameNode, false);
 }
 
+void SetNavDestinationMode(ArkUINodeHandle node, int32_t value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetNavDestinationMode(frameNode, static_cast<NG::NavDestinationMode>(value));
+}
+
+void ResetNavDestinationMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetNavDestinationMode(frameNode, NG::NavDestinationMode::STANDARD);
+}
+
+void SetIgnoreLayoutSafeArea(ArkUINodeHandle node, const char* typeStr, const char* edgesStr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::SafeAreaExpandOpts opts { .type = NG::SAFE_AREA_TYPE_SYSTEM, .edges = NG::SAFE_AREA_EDGE_ALL };
+    uint32_t safeAreaType = NG::SAFE_AREA_TYPE_NONE;
+    uint32_t safeAreaEdge = NG::SAFE_AREA_EDGE_NONE;
+    std::string safeAreaTypeStr = std::string(typeStr);
+    std::string safeAreaEdgeStr = std::string(edgesStr);
+    std::string delimiter = "|";
+    size_t pos = 0;
+    std::string type;
+    std::string edges;
+    while ((pos = safeAreaTypeStr.find(delimiter)) != std::string::npos) {
+        type = safeAreaTypeStr.substr(0, pos);
+        safeAreaType |= (1 << StringUtils::StringToUint(type));
+        safeAreaTypeStr.erase(0, pos + delimiter.length());
+    }
+    safeAreaType |= (1 << StringUtils::StringToUint(safeAreaTypeStr));
+    pos = 0;
+    while ((pos = safeAreaEdgeStr.find(delimiter)) != std::string::npos) {
+        edges = safeAreaEdgeStr.substr(0, pos);
+        safeAreaEdge |= (1 << StringUtils::StringToUint(edges));
+        safeAreaEdgeStr.erase(0, pos + delimiter.length());
+    }
+    safeAreaEdge |= (1 << StringUtils::StringToUint(safeAreaEdgeStr));
+    opts.type = safeAreaType;
+    opts.edges = safeAreaEdge;
+    NavDestinationModelNG::SetIgnoreLayoutSafeArea(frameNode, opts);
+}
+
+void ResetIgnoreLayoutSafeArea(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::SafeAreaExpandOpts opts;
+    opts.type = DEFAULT_SAFE_AREA_TYPE;
+    opts.edges = DEFAULT_SAFE_AREA_EDGE;
+    NavDestinationModelNG::SetIgnoreLayoutSafeArea(frameNode, opts);
+}
 namespace NodeModifier {
 const ArkUINavDestinationModifier* GetNavDestinationModifier()
 {
-    static const ArkUINavDestinationModifier modifier = { SetHideTitleBar, ResetHideTitleBar };
+    static const ArkUINavDestinationModifier modifier = {
+        SetHideTitleBar,
+        ResetHideTitleBar,
+        SetNavDestinationMode,
+        ResetNavDestinationMode,
+        SetIgnoreLayoutSafeArea,
+        ResetIgnoreLayoutSafeArea
+    };
 
     return &modifier;
 }

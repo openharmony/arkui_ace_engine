@@ -20,6 +20,7 @@
 #include <sys/time.h>
 
 #include "base/i18n/localization.h"
+#include "base/log/dump_log.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
@@ -38,7 +39,8 @@ constexpr int32_t MILLISECONDS_OF_SECOND = 1000;
 constexpr int32_t TOTAL_SECONDS_OF_MINUTE = 60;
 constexpr bool ON_TIME_CHANGE = true;
 const std::string DEFAULT_FORMAT = "aa hh:mm:ss";
-const std::string FORM_FORMAT = "hm";
+const std::string DEFAULT_FORMAT_24HOUR = "HH:mm:ss";
+const std::string FORM_FORMAT = "hh:mm";
 constexpr char TEXTCLOCK_WEEK[] = "textclock.week";
 constexpr char TEXTCLOCK_YEAR[] = "textclock.year";
 constexpr char TEXTCLOCK_MONTH[] = "textclock.month";
@@ -168,6 +170,9 @@ void TextClockPattern::InitTextClockController()
 
 void TextClockPattern::OnVisibleChange(bool isVisible)
 {
+    TAG_LOGI(AceLogTag::ACE_TEXT_CLOCK,
+        "Clock is %{public}s and clock %{public}s running",
+        isVisible ? "visible" : "invisible", isVisible ? "starts" : "stops");
     if (isVisible && !isSetVisible_) {
         isSetVisible_ = isVisible;
         UpdateTimeText();
@@ -179,6 +184,9 @@ void TextClockPattern::OnVisibleChange(bool isVisible)
 
 void TextClockPattern::OnVisibleAreaChange(bool visible)
 {
+    TAG_LOGI(AceLogTag::ACE_TEXT_CLOCK,
+        "Clock is %{public}s the visible area and clock %{public}s running",
+        visible ? "in" : "out of", visible ? "starts" : "stops");
     if (visible && !isInVisibleArea_) {
         isInVisibleArea_ = visible;
         UpdateTimeText();
@@ -288,6 +296,8 @@ void TextClockPattern::RequestUpdateForNextSecond()
 
 std::string TextClockPattern::GetCurrentFormatDateTime()
 {
+    auto textClockLayoutProperty = GetLayoutProperty<TextClockLayoutProperty>();
+    CHECK_NULL_RETURN(textClockLayoutProperty, "");
     time_t current = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     auto* timeZoneTime = std::localtime(&current);
     if (!std::isnan(hourWest_)) {
@@ -302,7 +312,8 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
     dateTime.hour = timeZoneTime->tm_hour;
     dateTime.minute = timeZoneTime->tm_min;
     dateTime.second = timeZoneTime->tm_sec;
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) && !isForm_) {
+    if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) ||
+            textClockLayoutProperty->GetIsDefaultFormatValue(false)) && !isForm_) {
         return Localization::GetInstance()->FormatDateTime(dateTime, GetFormat());
     }
     dateTime.week = timeZoneTime->tm_wday; // 0-6
@@ -319,12 +330,13 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
     dateTimeFormat += "mmss";
     dateTimeFormat += "SSS";
     std::string dateTimeValue = Localization::GetInstance()->FormatDateTime(dateTime, dateTimeFormat);
-    std::string outputDateTime = ParseDateTime(dateTimeValue, timeZoneTime->tm_wday);
+    std::string outputDateTime = ParseDateTime(dateTimeValue, timeZoneTime->tm_wday, timeZoneTime->tm_mon);
     return outputDateTime;
 }
 
-std::string TextClockPattern::ParseDateTime(const std::string& dateTimeValue, int32_t week)
+std::string TextClockPattern::ParseDateTime(const std::string& dateTimeValue, int32_t week, int32_t month)
 {
+    std::string language = Localization::GetInstance()->GetLanguage();
     // parse data time
     std::string tempdateTimeValue = dateTimeValue;
     std::string strAmPm = GetAmPm(tempdateTimeValue);
@@ -338,6 +350,12 @@ std::string TextClockPattern::ParseDateTime(const std::string& dateTimeValue, in
     // parse week
     curDateTime[(int32_t)(TextClockElementIndex::CUR_WEEK_INDEX)] = GetWeek(false, week);
     curDateTime[(int32_t)(TextClockElementIndex::CUR_SHORT_WEEK_INDEX)] = GetWeek(true, week);
+    // parse month
+    if (strcmp(language.c_str(), "zh") != 0) {
+        auto strMonth = GetMonth(month);
+        curDateTime[(int32_t)(TextClockElementIndex::CUR_MONTH_INDEX)] = strMonth;
+        curDateTime[(int32_t)(TextClockElementIndex::CUR_SHORT_MONTH_INDEX)] = strMonth;
+    }
     // splice date time
     std::string outputDateTime = SpliceDateTime(curDateTime);
     if ((curDateTime[(int32_t)(TextClockElementIndex::CUR_YEAR_INDEX)] == "1900") || (outputDateTime == "")) {
@@ -368,9 +386,6 @@ std::string TextClockPattern::ParseDateTime(const std::string& dateTimeValue, in
 void TextClockPattern::ParseInputFormat(bool& is24H)
 {
     std::string inputFormat = GetFormat();
-    if (inputFormat == FORM_FORMAT && isForm_) {
-        inputFormat = "h:m";
-    }
     std::vector<std::string> formatSplitter;
     auto i = 0;
     auto j = 0;
@@ -471,17 +486,12 @@ std::string TextClockPattern::GetAmPm(const std::string& dateTimeValue)
     std::string language = Localization::GetInstance()->GetLanguage();
     std::string curAmPm = "";
     if (dateTimeValue != "") {
-        if ((strcmp(language.c_str(), "zh") == 0)) {
-            // getChinese
-            auto space = dateTimeValue.find(" ");
-            auto colon = dateTimeValue.find(":");
-            if ((space != std::string::npos) && (colon != std::string::npos) && (space < colon)) {
-                auto letterNum = GetDigitNumber(dateTimeValue.substr(space, colon - space));
-                curAmPm = dateTimeValue.substr(space + 1, colon - letterNum - space - 1);
+        std::vector<std::string> amPmStrings = Localization::GetInstance()->GetAmPmStrings();
+        for (std::string amPmString : amPmStrings) {
+            if (dateTimeValue.find(amPmString) != std::string::npos) {
+                curAmPm = amPmString;
+                break;
             }
-        } else {
-            // getLetter
-            curAmPm += Abstract(dateTimeValue, true);
         }
     }
     return curAmPm;
@@ -612,6 +622,16 @@ std::string TextClockPattern::GetWeek(const bool& isShortType, const int32_t& we
     return curWeek;
 }
 
+std::string TextClockPattern::GetMonth(int32_t month)
+{
+    std::vector<std::string> months = Localization::GetInstance()->GetMonths(true);
+    std::string curMonth = "";
+    if (month < (int32_t)months.size()) {
+        curMonth = months[month];
+    }
+    return curMonth;
+}
+
 std::string TextClockPattern::SpliceDateTime(const std::vector<std::string>& curDateTime)
 {
     std::string format = "";
@@ -676,6 +696,8 @@ std::string TextClockPattern::GetFormat() const
             return FORM_FORMAT;
         }
         return result;
+    } else if (textClockLayoutProperty->GetIsDefaultFormatValue(false)) {
+        return is24H_ ? DEFAULT_FORMAT_24HOUR : DEFAULT_FORMAT;
     }
     CHECK_NULL_RETURN(textClockLayoutProperty, DEFAULT_FORMAT);
     return textClockLayoutProperty->GetFormat().value_or(DEFAULT_FORMAT);
@@ -705,6 +727,7 @@ RefPtr<FrameNode> TextClockPattern::GetTextNode()
 
 void TextClockPattern::OnTimeChange()
 {
+    TAG_LOGI(AceLogTag::ACE_TEXT_CLOCK, "Time is changed and clock updates");
     is24H_ = SystemProperties::Is24HourClock();
     UpdateTimeText(ON_TIME_CHANGE);
 }
@@ -750,5 +773,14 @@ RefPtr<FrameNode> TextClockPattern::BuildContentModifierNode()
     auto enabled = eventHub->IsEnabled();
     TextClockConfiguration textClockConfiguration(timeZoneOffset, started, timeValue, enabled);
     return (makeFunc_.value())(textClockConfiguration);
+}
+
+void TextClockPattern::DumpInfo()
+{
+    DumpLog::GetInstance().AddDesc("format: ", GetFormat());
+    DumpLog::GetInstance().AddDesc("hourWest: ", hourWest_);
+    DumpLog::GetInstance().AddDesc("is24H: ", is24H_ ? "true" : "false");
+    DumpLog::GetInstance().AddDesc("isInVisibleArea: ", isInVisibleArea_ ? "true" : "false");
+    DumpLog::GetInstance().AddDesc("isStart: ", isStart_ ? "true" : "false");
 }
 } // namespace OHOS::Ace::NG

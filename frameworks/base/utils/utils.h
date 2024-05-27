@@ -126,6 +126,10 @@ constexpr T Infinity()
     return static_cast<const T>(1000000.0);
 }
 
+namespace {
+constexpr float INF_APPROACH = Infinity<float>() * 0.5f;
+}
+
 inline bool NearEqual(const double left, const double right, const double epsilon)
 {
     return (std::abs(left - right) <= epsilon);
@@ -248,7 +252,7 @@ inline bool InRegion(double lowerBound, double upperBound, double destNum)
 
 inline bool GreaterOrEqualToInfinity(float num)
 {
-    return GreatOrEqual(num, Infinity<float>() / 2.0f);
+    return GreatOrEqual(num, INF_APPROACH);
 }
 
 inline uint64_t GetMilliseconds()

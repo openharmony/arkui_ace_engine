@@ -31,8 +31,24 @@
 #include "core/components_ng/pattern/render_node/render_node_properties.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/render/render_context.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+enum class LengthMetricsUnit : int32_t { DEFAULT = 0, PX };
+
+DimensionUnit ConvertLengthMetricsUnitToDimensionUnit(int32_t unitValue, DimensionUnit defaultUnit)
+{
+    auto lengthMetricsUnit = static_cast<LengthMetricsUnit>(unitValue);
+    switch (lengthMetricsUnit) {
+        case LengthMetricsUnit::PX:
+            return DimensionUnit::PX;
+        default:
+            return defaultUnit;
+    }
+    return defaultUnit;
+}
+} // namespace
 constexpr int TOP_LEFT_X_VALUE = 0;
 constexpr int TOP_LEFT_Y_VALUE = 1;
 constexpr int TOP_RIGHT_X_VALUE = 2;
@@ -99,14 +115,16 @@ void SetClipToFrame(ArkUINodeHandle node, ArkUI_Bool useClip)
     renderContext->RequestNextFrame();
 }
 
-void SetRotation(ArkUINodeHandle node, ArkUI_Float32 rotationX, ArkUI_Float32 rotationY, ArkUI_Float32 rotationZ)
+void SetRotation(ArkUINodeHandle node, ArkUI_Float32 rotationX, ArkUI_Float32 rotationY, ArkUI_Float32 rotationZ,
+    ArkUI_Int32 unitValue)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     auto renderContext = GetRenderContext(currentNode);
     CHECK_NULL_VOID(renderContext);
-    Dimension first = Dimension(rotationX, DimensionUnit::VP);
-    Dimension second = Dimension(rotationY, DimensionUnit::VP);
-    Dimension third = Dimension(rotationZ, DimensionUnit::VP);
+    DimensionUnit unit = ConvertLengthMetricsUnitToDimensionUnit(unitValue, DimensionUnit::VP);
+    Dimension first = Dimension(rotationX, unit);
+    Dimension second = Dimension(rotationY, unit);
+    Dimension third = Dimension(rotationZ, unit);
     renderContext->SetRotation(first.ConvertToPx(), second.ConvertToPx(), third.ConvertToPx());
     renderContext->RequestNextFrame();
 }
@@ -120,13 +138,14 @@ void SetShadowColor(ArkUINodeHandle node, uint32_t color)
     renderContext->RequestNextFrame();
 }
 
-void SetShadowOffset(ArkUINodeHandle node, ArkUI_Float32 offsetX, ArkUI_Float32 offsetY)
+void SetShadowOffset(ArkUINodeHandle node, ArkUI_Float32 offsetX, ArkUI_Float32 offsetY, ArkUI_Int32 unitValue)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     auto renderContext = GetRenderContext(currentNode);
     CHECK_NULL_VOID(renderContext);
-    Dimension first = Dimension(offsetX, DimensionUnit::VP);
-    Dimension second = Dimension(offsetY, DimensionUnit::VP);
+    DimensionUnit unit = ConvertLengthMetricsUnitToDimensionUnit(unitValue, DimensionUnit::VP);
+    Dimension first = Dimension(offsetX, unit);
+    Dimension second = Dimension(offsetY, unit);
     renderContext->SetShadowOffset(first.ConvertToPx(), second.ConvertToPx());
     renderContext->RequestNextFrame();
 }
@@ -209,7 +228,7 @@ void SetFrame(
     renderContext->RequestNextFrame();
 }
 
-void SetSize(ArkUINodeHandle node, ArkUI_Float32 width, ArkUI_Float32 height)
+void SetSize(ArkUINodeHandle node, ArkUI_Float32 width, ArkUI_Float32 height, ArkUI_Int32 unitValue)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
@@ -217,9 +236,28 @@ void SetSize(ArkUINodeHandle node, ArkUI_Float32 width, ArkUI_Float32 height)
     CHECK_NULL_VOID(frameNode->GetTag() != "BuilderProxyNode");
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
+    DimensionUnit unit = ConvertLengthMetricsUnitToDimensionUnit(unitValue, DimensionUnit::VP);
     layoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(width, DimensionUnit::VP), CalcLength(height, DimensionUnit::VP)));
+        CalcSize(CalcLength(width, unit), CalcLength(height, unit)));
     frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+}
+
+void SetPosition(ArkUINodeHandle node, ArkUI_Float32 xAxis, ArkUI_Float32 yAxis, ArkUI_Int32 unitValue)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(frameNode->GetTag() != "BuilderProxyNode");
+    const auto& renderContext = GetRenderContext(currentNode);
+    CHECK_NULL_VOID(renderContext);
+    renderContext->ResetPosition();
+
+    DimensionUnit unit = ConvertLengthMetricsUnitToDimensionUnit(unitValue, DimensionUnit::VP);
+    Dimension x = Dimension(xAxis, unit);
+    Dimension y = Dimension(yAxis, unit);
+    OffsetT<Dimension> value(x, y);
+    renderContext->UpdatePosition(value);
+    renderContext->RequestNextFrame();
 }
 
 void SetOpacity(ArkUINodeHandle node, ArkUI_Float32 opacity)
@@ -256,7 +294,7 @@ void SetBorderStyle(ArkUINodeHandle node, ArkUI_Int32 left, ArkUI_Int32 top, Ark
 }
 
 void SetBorderWidth(ArkUINodeHandle node, ArkUI_Float32 left, ArkUI_Float32 top, ArkUI_Float32 right,
-    ArkUI_Float32 bottom)
+    ArkUI_Float32 bottom, ArkUI_Int32 unitValue)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(currentNode);
@@ -264,12 +302,12 @@ void SetBorderWidth(ArkUINodeHandle node, ArkUI_Float32 left, ArkUI_Float32 top,
     CHECK_NULL_VOID(renderContext);
     auto* frameNode = reinterpret_cast<FrameNode*>(currentNode);
     auto layoutProperty = frameNode->GetLayoutProperty<LayoutProperty>();
-
+    DimensionUnit unit = ConvertLengthMetricsUnitToDimensionUnit(unitValue, DimensionUnit::VP);
     BorderWidthProperty borderWidthProperty {
-        .leftDimen = Dimension(left, DimensionUnit::VP),
-        .topDimen = Dimension(top, DimensionUnit::VP),
-        .rightDimen = Dimension(right, DimensionUnit::VP),
-        .bottomDimen = Dimension(bottom, DimensionUnit::VP),
+        .leftDimen = Dimension(left, unit),
+        .topDimen = Dimension(top, unit),
+        .rightDimen = Dimension(right, unit),
+        .bottomDimen = Dimension(bottom, unit),
         .multiValued = true
     };
     renderContext->UpdateBorderWidth(borderWidthProperty);
@@ -293,17 +331,17 @@ void SetBorderColor(ArkUINodeHandle node, uint32_t left, uint32_t top, uint32_t 
     renderContext->UpdateBorderColor(borderColorProperty);
 }
 
-void SetBorderRadius(ArkUINodeHandle node,
-    ArkUI_Float32 topLeft, ArkUI_Float32 topRight, ArkUI_Float32 bottomLeft, ArkUI_Float32 bottomRight)
+void SetBorderRadius(ArkUINodeHandle node, ArkUI_Float32 topLeft, ArkUI_Float32 topRight, ArkUI_Float32 bottomLeft,
+    ArkUI_Float32 bottomRight, ArkUI_Int32 unitValue)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(currentNode);
     auto renderContext = GetRenderContext(currentNode);
     CHECK_NULL_VOID(renderContext);
-
-    BorderRadiusProperty borderRadiusProperty(Dimension(topLeft, DimensionUnit::VP),
-        Dimension(topRight, DimensionUnit::VP), Dimension(bottomRight, DimensionUnit::VP),
-        Dimension(bottomLeft, DimensionUnit::VP));
+    DimensionUnit unit = ConvertLengthMetricsUnitToDimensionUnit(unitValue, DimensionUnit::VP);
+    BorderRadiusProperty borderRadiusProperty(Dimension(topLeft, unit),
+        Dimension(topRight, unit), Dimension(bottomRight, unit),
+        Dimension(bottomLeft, unit));
     renderContext->UpdateBorderRadius(borderRadiusProperty);
 }
 
@@ -408,7 +446,7 @@ const ArkUIRenderNodeModifier* GetRenderNodeModifier()
         SetClipToFrame, SetRotation, SetShadowColor, SetShadowOffset, SetShadowAlpha, SetShadowElevation,
         SetShadowRadius, Invalidate, SetScale, SetRenderNodeBackgroundColor, SetPivot, SetFrame, SetSize, SetOpacity,
         SetTranslate, SetBorderStyle, SetBorderWidth, SetBorderColor, SetBorderRadius, SetRectMask, SetCircleMask,
-        SetRoundRectMask, SetOvalMask, SetCommandPathMask };
+        SetRoundRectMask, SetOvalMask, SetCommandPathMask, SetPosition };
 
     return &modifier;
 }

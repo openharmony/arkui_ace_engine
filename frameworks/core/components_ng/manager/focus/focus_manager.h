@@ -42,6 +42,8 @@ public:
     void FocusViewHide(const RefPtr<FocusView>& focusView);
     void FocusViewClose(const RefPtr<FocusView>& focusView);
 
+    void FlushFocusView();
+
     void DumpFocusManager();
 
     WeakPtr<FocusView> GetLastFocusView() const
@@ -57,6 +59,11 @@ public:
     void SetRequestFocusCallback(const RequestFocusCallback& callback)
     {
         requestCallback_ = std::move(callback);
+    }
+
+    void ResetRequestFocusCallback()
+    {
+        requestCallback_ = nullptr;
     }
 
     void TriggerRequestFocusCallback(NG::RequestFocusResult result)

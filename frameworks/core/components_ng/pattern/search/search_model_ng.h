@@ -55,6 +55,10 @@ public:
     void SetOnScroll(std::function<void(float, float)>&& func) override;
     void SetOnCopy(std::function<void(const std::string&)>&& func) override;
     void SetOnCut(std::function<void(const std::string&)>&& func) override;
+    void SetOnWillInsertValueEvent(std::function<bool(const InsertValueInfo&)>&& func) override;
+    void SetOnDidInsertValueEvent(std::function<void(const InsertValueInfo&)>&& func) override;
+    void SetOnWillDeleteEvent(std::function<bool(const DeleteValueInfo&)>&& func) override;
+    void SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func) override;
     void SetOnPaste(std::function<void(const std::string&)>&& func) override;
     void SetOnPasteWithEvent(std::function<void(const std::string&, NG::TextCommonEvent&)>&& func) override;
     void SetOnChangeEvent(std::function<void(const std::string&)>&& onChangeEvent) override;
@@ -133,13 +137,17 @@ public:
     static void SetShowCounter(FrameNode* frameNode, bool value);
     static void SetCounterType(FrameNode* frameNode, int32_t value);
     static void SetShowCounterBorder(FrameNode* frameNode, bool value);
+    static RefPtr<TextFieldControllerBase> GetSearchController(FrameNode* frameNode);
+    static void SetOnWillInsertValueEvent(FrameNode* frameNode, std::function<bool(const InsertValueInfo&)>&& func);
+    static void SetOnDidInsertValueEvent(FrameNode* frameNode, std::function<void(const InsertValueInfo&)>&& func);
+    static void SetOnWillDeleteEvent(FrameNode* frameNode, std::function<bool(const DeleteValueInfo&)>&& func);
+    static void SetOnDidDeleteEvent(FrameNode* frameNode, std::function<void(const DeleteValueInfo&)>&& func);
+
 private:
     static RefPtr<SearchNode> CreateSearchNode(int32_t nodeId, const std::optional<std::string>& value,
         const std::optional<std::string>& placeholder, const std::optional<std::string>& icon);
     static void CreateTextField(const RefPtr<SearchNode>& parentNode,
         const std::optional<std::string>& placeholder, const std::optional<std::string>& value, bool hasTextFieldNode);
-    static void CreateImage(const RefPtr<SearchNode>& parentNode, const std::string& src, bool hasImageNode);
-    static void CreateCancelImage(const RefPtr<SearchNode>& parentNode, bool hasCancelImageNode);
     static void CreateButton(const RefPtr<SearchNode>& parentNode, bool hasButtonNode);
     static void CreateCancelButton(const RefPtr<SearchNode>& parentNode, bool hasCancelButtonNode);
     static RefPtr<SearchNode> GetOrCreateSearchNode(

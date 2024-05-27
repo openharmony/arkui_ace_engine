@@ -87,6 +87,25 @@ void TabContentModelNG::Create()
     ACE_UPDATE_LAYOUT_PROPERTY(TabContentLayoutProperty, Text, tabTheme->GetDefaultTabBarName());
 }
 
+RefPtr<FrameNode> TabContentModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = TabContentNode::GetOrCreateTabContentNode(
+        V2::TAB_CONTENT_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabContentPattern>(nullptr); });
+    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_RETURN(tabTheme, nullptr);
+    auto layout = frameNode->GetLayoutProperty<TabContentLayoutProperty>();
+    CHECK_NULL_RETURN(layout, nullptr);
+    auto text = tabTheme->GetDefaultTabBarName();
+    layout->UpdateText(text);
+    layout->UpdateIcon("");
+    auto pattern = frameNode->GetPattern<TabContentPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    pattern->SetTabBar(text, "", std::nullopt, nullptr);
+    return frameNode;
+}
+
 void TabContentModelNG::Pop()
 {
     auto tabContent = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
@@ -150,6 +169,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     auto tabBarPattern = tabBarFrameNode->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);
     tabBarPattern->SetTabBarStyle(tabBarParam.GetTabBarStyle());
+    tabBarPattern->AddTabBarItemClickEvent(columnNode);
     auto selectedMode = tabContentPattern->GetSelectedMode();
     auto indicatorStyle = tabContentPattern->GetIndicatorStyle();
     auto boardStyle = tabContentPattern->GetBoardStyle();
@@ -359,11 +379,11 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         auto modifierOnApply = tabBarParam.GetSymbol().value().onApply;
         if (myIndex == indicator) {
             tabBarPattern->SetImageColorOnIndex(indicator);
-            symbolProperty->UpdateSymbolColorList({tabTheme->GetBottomTabIconOn()});
+            symbolProperty->UpdateSymbolColorList({tabTheme->GetBottomTabSymbolOn()});
             if (modifierOnApply != nullptr && isFirstCreate) {
                 modifierOnApply(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconNode)), "normal");
                 UpdateDefaultSymbol(tabTheme, symbolProperty);
-                symbolProperty->UpdateSymbolColorList({tabTheme->GetBottomTabIconOn()});
+                symbolProperty->UpdateSymbolColorList({tabTheme->GetBottomTabSymbolOn()});
             }
             if (modifierOnApply != nullptr && tabBarParam.GetSymbol().value().selectedFlag) {
                 modifierOnApply(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconNode)),
@@ -425,17 +445,18 @@ void TabContentModelNG::RemoveTabBarItem(const RefPtr<TabContentNode>& tabConten
     auto tabBarItemNode = ElementRegister::GetInstance()->GetUINodeById(tabBarItemId);
     CHECK_NULL_VOID(tabBarItemNode);
     auto tabBarNode = tabBarItemNode->GetParent();
-    tabBarNode->RemoveChild(tabBarItemNode);
     CHECK_NULL_VOID(tabBarNode);
+    auto tabBarFrameNode = AceType::DynamicCast<FrameNode>(tabBarNode);
+    CHECK_NULL_VOID(tabBarFrameNode);
+    auto tabBarPattern = tabBarFrameNode->GetPattern<TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    tabBarPattern->RemoveTabBarItemClickEvent(tabBarNode->GetId());
+    tabBarNode->RemoveChild(tabBarItemNode);
     tabContentNode->ResetTabBarItemId();
 
     auto tabsNode = FindTabsNode(tabContentNode);
     CHECK_NULL_VOID(tabsNode);
     tabsNode->RemoveBuilderByContentId(tabContentNode->GetId());
-    auto tabBar = tabsNode->GetTabBar();
-    CHECK_NULL_VOID(tabBar);
-    auto tabBarFrameNode = AceType::DynamicCast<FrameNode>(tabBar);
-    CHECK_NULL_VOID(tabBarFrameNode);
     tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
@@ -596,5 +617,21 @@ void TabContentModelNG::SetCustomStyleNode(const RefPtr<FrameNode>& customStyleN
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetCustomStyleNode(customStyleNode);
+}
+
+void TabContentModelNG::SetTabBarBuilder(FrameNode* node, TabBarBuilderFunc&& builder)
+{
+    CHECK_NULL_VOID(node);
+    auto frameNodePattern = node->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetTabBar("", "", std::nullopt, std::move(builder));
+}
+
+void TabContentModelNG::SetTabBarLabel(FrameNode* node, const std::string& label)
+{
+    CHECK_NULL_VOID(node);
+    auto frameNodePattern = node->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetTabBar(label, "", std::nullopt, nullptr);
 }
 } // namespace OHOS::Ace::NG

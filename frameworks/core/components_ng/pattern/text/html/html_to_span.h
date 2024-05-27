@@ -37,8 +37,6 @@
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text/text_styles.h"
-#include "frameworks/bridge/common/dom/dom_video.h"
-#include "frameworks/bridge/common/utils/utils.h"
 #include "libxml/HTMLparser.h"
 #include "libxml/HTMLtree.h"
 #include "libxml/parser.h"
@@ -72,8 +70,8 @@ public:
     public:
         Dimension dimension;
     };
-    using StyleValue = std::variant<std::monostate, Font, DecorationSpanParam, BaseLineSpanParam, LetterSpacingSpanParam,
-        LineHeightSpanSparam, std::vector<Shadow>, ImageSpanOptions, SpanParagraphStyle>;
+    using StyleValue = std::variant<std::monostate, Font, DecorationSpanParam, BaseLineSpanParam,
+        LetterSpacingSpanParam, LineHeightSpanSparam, std::vector<Shadow>, ImageSpanOptions, SpanParagraphStyle>;
     enum class StyleIndex {
         STYLE_NULL = 0,
         STYLE_FONT,
@@ -91,7 +89,7 @@ private:
     enum class HtmlType {
         ParagraphStyle = 0,
         Image,
-        TextSpan,
+        Text,
         Default,
     };
 
@@ -106,15 +104,19 @@ private:
     T* Get(StyleValue *styleValue) const;
     Styles ParseStyleAttr(const std::string &style);
     bool IsParagraphAttr(const std::string &key);
-    void InitParagrap(const std::string &key, const std::string &value, const std::string &index, StyleValues& values);
+    void InitParagrap(const std::string &key, const std::string &value,
+        const std::string &index, StyleValues& values);
     void InitFont(const std::string &key, const std::string &value, const std::string &index, StyleValues& values);
     bool IsFontAttr(const std::string &key);
-    void InitDecoration(const std::string &key, const std::string &value, const std::string &index, StyleValues& values);
+    void InitDecoration(const std::string &key, const std::string &value,
+        const std::string &index, StyleValues& values);
     bool IsDecorationAttr(const std::string &key);
     template <class T>
-    void InitDimension(const std::string &key, const std::string &value, const std::string &index, StyleValues& values);
-    bool IsWordSpacingAttr(const std::string &key);
-    void InitTextShadow(const std::string &key, const std::string &value, const std::string &index, StyleValues& values);
+    void InitDimension(const std::string &key, const std::string &value,
+        const std::string &index, StyleValues& values);
+    bool IsLetterSpacingAttr(const std::string &key);
+    void InitTextShadow(const std::string &key, const std::string &value,
+        const std::string &index, StyleValues& values);
     bool IsTextShadowAttr(const std::string &key);
     TextAlign StringToTextAlign(const std::string &value);
     bool IsTextAlign(const std::string &key);
@@ -151,7 +153,6 @@ private:
     void ParaseHtmlToSpanInfo(xmlNodePtr node, size_t& pos, std::string &allContent, size_t paragraphPos);
     void ToSpan(xmlNodePtr curNode, size_t &pos, std::string &allContent, size_t paragraphPos);
     void PrintSpanInfos();
-    void PrintSpan(size_t index, const SpanInfo& info, StyleValue& value);
 
     RefPtr<SpanBase> CreateSpan(size_t index, const SpanInfo& info, StyleValue& value);
     template<class T, class P>

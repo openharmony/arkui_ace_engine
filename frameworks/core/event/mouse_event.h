@@ -102,8 +102,8 @@ struct MouseEvent final {
     std::shared_ptr<MMI::PointerEvent> pointerEvent;
     int32_t touchEventId = 0;
     int32_t originalId = 0;
+    std::vector<KeyCode> pressedKeyCodes_;
     bool isInjected = false;
-    std::vector<KeyCode> pressedCodes;
 
     Offset GetOffset() const
     {
@@ -156,6 +156,7 @@ struct MouseEvent final {
             .sourceTool = sourceTool,
             .pointerEvent = pointerEvent,
             .originalId = originalId,
+            .pressedKeyCodes_ = pressedKeyCodes_,
             .isInjected = isInjected
         };
     }
@@ -210,6 +211,7 @@ struct MouseEvent final {
             .SetOriginalId(GetId())
             .SetIsInjected(isInjected);
         event.pointers.emplace_back(std::move(point));
+        event.pressedKeyCodes_ = pressedKeyCodes_;
         return event;
     }
 
@@ -236,6 +238,7 @@ struct MouseEvent final {
             .sourceTool = sourceTool,
             .pointerEvent = pointerEvent,
             .originalId = originalId,
+            .pressedKeyCodes_ = pressedKeyCodes_,
             .isInjected = isInjected
         };
     }
@@ -266,6 +269,16 @@ public:
     MouseAction GetAction() const
     {
         return action_;
+    }
+
+    void SetPullAction(MouseAction pullAction)
+    {
+        pullAction_ = pullAction;
+    }
+
+    MouseAction GetPullAction() const
+    {
+        return pullAction_;
     }
 
     MouseInfo& SetGlobalLocation(const Offset& globalLocation)
@@ -312,6 +325,7 @@ private:
     std::shared_ptr<MMI::PointerEvent> pointerEvent_;
     MouseButton button_ = MouseButton::NONE_BUTTON;
     MouseAction action_ = MouseAction::NONE;
+    MouseAction pullAction_ = MouseAction::NONE;
     // global position at which the touch point contacts the screen.
     Offset globalLocation_;
     // Different from global location, The local location refers to the location of the contact point relative to the
@@ -355,6 +369,7 @@ public:
         info.SetPointerEvent(event.pointerEvent);
         info.SetButton(event.button);
         info.SetAction(event.action);
+        info.SetPullAction(event.pullAction);
         info.SetGlobalLocation(event.GetOffset());
         Offset localLocation = Offset(
             event.GetOffset().GetX() - coordinateOffset_.GetX(), event.GetOffset().GetY() - coordinateOffset_.GetY());
@@ -366,6 +381,7 @@ public:
         info.SetSourceDevice(event.sourceType);
         info.SetSourceTool(event.sourceTool);
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
+        info.SetPressedKeyCodes(event.pressedKeyCodes_);
         onMouseCallback_(info);
         return info.IsStopPropagation();
     }

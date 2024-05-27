@@ -134,13 +134,9 @@ public:
         return {};
     }
 
-    std::string GetEntryFocusViewName() override
+    bool IsEntryFocusView() override
     {
-        /*
-        |-> Navigation (root focus view)
-          |-> NavBar
-        */
-        return V2::NAVIGATION_VIEW_ETS_TAG;
+        return false;
     }
 
     int32_t GetMaxMenuNum() const
@@ -156,6 +152,16 @@ public:
     bool NeedCoordWithScroll()
     {
         return titleMode_ == NavigationTitleMode::FREE;
+    }
+    OffsetF GetShowMenuOffset(const RefPtr<BarItemNode> barItemNode, RefPtr<FrameNode> menuNode);
+
+    void SetKeyboardOffset(float keyboardOffset)
+    {
+        keyboardOffset_ = keyboardOffset;
+    }
+    float GetKeyboardOffset()
+    {
+        return keyboardOffset_;
     }
 
 protected:
@@ -183,6 +189,7 @@ private:
     bool isTitleMenuNodeShowing_ = false;
     NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
     int32_t maxMenuNums_ = -1;
+    float keyboardOffset_ = 0.0f;
 };
 
 } // namespace OHOS::Ace::NG

@@ -750,7 +750,7 @@ bool JSNavigationStack::LoadDestinationByBuilder(const std::string& name, const 
     auto builderObj = JSRef<JSObject>::Cast(navDestBuilderFunc_);
     const int32_t number = builderObj->GetProperty("length")->ToNumber<int32_t>();
     JSRef<JSVal> params[number];
-    if (number > 1) {
+    if (number >= 1) {
         params[0] = JSRef<JSVal>::Make(ToJSValue(name));
     }
     if (number >= ARGC_COUNT_TWO) {
@@ -801,7 +801,7 @@ int32_t JSNavigationStack::LoadDestination(const std::string& name, const JSRef<
     auto builderObj = JSRef<JSObject>::Cast(builderProp);
     const int32_t number = builderObj->GetProperty("length")->ToNumber<int32_t>();
     JSRef<JSVal> params[number];
-    if (number > 1) {
+    if (number >= 1) {
         params[0] = JSRef<JSVal>::Make(ToJSValue(name));
     }
     if (number >= ARGC_COUNT_TWO) {
@@ -838,5 +838,72 @@ void JSNavigationStack::MoveIndexToTop(int32_t index)
     auto func = JSRef<JSFunc>::Cast(dataSourceObj_->GetProperty("moveIndexToTop"));
     JSRef<JSVal> param = JSRef<JSVal>::Make(ToJSValue(index));
     func->Call(dataSourceObj_, 1, &param);
+}
+
+void JSNavigationStack::UpdatePathInfoIfNeeded(RefPtr<NG::UINode>& uiNode, int32_t index)
+{
+    bool needUpdate = GetNeedUpdatePathInfo(index);
+    if (!needUpdate) {
+        return;
+    }
+    SetNeedUpdatePathInfo(index, false);
+    RefPtr<NG::NavDestinationGroupNode> desNode;
+    if (!GetNavDestinationNodeInUINode(uiNode, desNode)) {
+        return;
+    }
+    auto pattern = AceType::DynamicCast<NG::NavDestinationPattern>(desNode->GetPattern());
+    if (!pattern) {
+        return;
+    }
+
+    auto name = GetNameByIndex(index);
+    auto param = GetParamByIndex(index);
+    auto onPop = GetOnPopByIndex(index);
+    auto pathInfo = AceType::MakeRefPtr<JSNavPathInfo>(name, param, onPop);
+    pattern->SetNavPathInfo(pathInfo);
+}
+
+bool JSNavigationStack::GetNeedUpdatePathInfo(int32_t index)
+{
+    if (dataSourceObj_->IsEmpty()) {
+        return false;
+    }
+    auto pathArray = JSRef<JSArray>::Cast(dataSourceObj_->GetProperty("pathArray"));
+    if (pathArray->IsEmpty()) {
+        return false;
+    }
+    int32_t len = static_cast<int32_t>(pathArray->Length());
+    if (index < 0 || index >= len) {
+        return false;
+    }
+    auto path = JSRef<JSObject>::Cast(pathArray->GetValueAt(index));
+    if (path->IsEmpty()) {
+        return false;
+    }
+    auto needUpdate = path->GetProperty("needUpdate");
+    if (!needUpdate->IsBoolean()) {
+        return false;
+    }
+    return needUpdate->ToBoolean();
+}
+
+void JSNavigationStack::SetNeedUpdatePathInfo(int32_t index, bool need)
+{
+    if (dataSourceObj_->IsEmpty()) {
+        return;
+    }
+    auto pathArray = JSRef<JSArray>::Cast(dataSourceObj_->GetProperty("pathArray"));
+    if (pathArray->IsEmpty()) {
+        return;
+    }
+    int32_t len = static_cast<int32_t>(pathArray->Length());
+    if (index < 0 || index >= len) {
+        return;
+    }
+    auto path = JSRef<JSObject>::Cast(pathArray->GetValueAt(index));
+    if (path->IsEmpty()) {
+        return;
+    }
+    path->SetProperty<bool>("needUpdate", need);
 }
 } // namespace OHOS::Ace::Framework

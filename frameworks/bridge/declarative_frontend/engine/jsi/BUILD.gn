@@ -127,6 +127,17 @@ if (!is_arkui_x) {
   }
 }
 
+abc_sources = [ "stateMgmt" ]
+
+foreach(item, abc_sources) {
+  ohos_prebuilt_etc("copy_" + item + "_abc") {
+    source = base_output_path + "/" + item + ".abc"
+    deps = [ ":gen_" + item + "_abc" ]
+    part_name = ace_engine_part
+    module_install_dir = "etc/abc/framework"
+  }
+}
+
 template("declarative_js_engine_ark") {
   forward_variables_from(invoker, "*")
   platform = invoker.platform
@@ -142,6 +153,10 @@ template("declarative_js_engine_ark") {
     }
 
     configs = [ "$ace_root:ace_config" ]
+
+    if (ace_engine_feature_enable_point_light) {
+      defines += [ "POINT_LIGHT_ENABLE" ]
+    }
 
     sources = [
       "js_converter.cpp",
@@ -226,6 +241,7 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_stepper_item_bridge.cpp",
       "nativeModule/arkts_native_swiper_bridge.cpp",
       "nativeModule/arkts_native_symbol_glyph_bridge.cpp",
+      "nativeModule/arkts_native_symbol_span_bridge.cpp",
       "nativeModule/arkts_native_tabcontent_bridge.cpp",
       "nativeModule/arkts_native_tabs_bridge.cpp",
       "nativeModule/arkts_native_text_area_bridge.cpp",
@@ -262,6 +278,12 @@ template("declarative_js_engine_ark") {
           "graphic_2d:librender_service_client",
         ]
       }
+    }
+
+    if (defined(config.model_component_support) &&
+        config.model_component_support) {
+      sources += [ "nativeModule/arkts_native_component3d_bridge.cpp" ]
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/model:ace_core_components_model_pattern_ng_$platform" ]
     }
 
     if (defined(config.form_components_support) &&
@@ -373,6 +395,10 @@ template("declarative_js_engine_ark") {
       ":gen_obj_src_abc_enum_style",
       ":gen_obj_src_abc_proxyclass",
     ]
+
+    foreach(item, abc_sources) {
+      deps += [ ":copy_" + item + "_abc" ]
+    }
   }
 }
 

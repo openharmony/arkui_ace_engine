@@ -17,6 +17,7 @@
 #include <cstdint>
 
 #include "base/utils/utils.h"
+#include "base/image/drawing_color_filter.h"
 #include "core/common/card_scope.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/image/image_component.h"
@@ -26,6 +27,8 @@
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/pipeline/base/element_register.h"
 #include "frameworks/core/components/common/layout/constants.h"
+
+#include "effect/color_filter.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -398,7 +401,9 @@ const char* GetAlt(ArkUINodeHandle node)
 
 void ResetAlt(ArkUINodeHandle node)
 {
-    return;
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::ResetImageAlt(frameNode);
 }
 
 void SetImageInterpolation(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -456,6 +461,28 @@ void ResetColorFilter(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetColorFilterMatrix(frameNode, DEFAULT_COLOR_FILTER);
+}
+
+void SetDrawingColorFilter(ArkUINodeHandle node, void* colorFilter)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto filter = reinterpret_cast<OHOS::Rosen::Drawing::ColorFilter*>(colorFilter);
+    auto filterPtr = std::make_shared<OHOS::Rosen::Drawing::ColorFilter>(*filter);
+    auto drawingColorFilter = DrawingColorFilter::CreateDrawingColorFilterFromNative(static_cast<void*>(&filterPtr));
+    ImageModelNG::SetDrawingColorFilter(frameNode, drawingColorFilter);
+}
+
+void* GetDrawingColorFilter(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto drawingColorFilter = ImageModelNG::GetDrawingColorFilter(frameNode);
+    CHECK_NULL_RETURN(drawingColorFilter, nullptr);
+    auto filterSptr = reinterpret_cast<std::shared_ptr<OHOS::Rosen::Drawing::ColorFilter>*>(
+        drawingColorFilter->GetDrawingColorFilterSptrAddr());
+    CHECK_NULL_RETURN(filterSptr, nullptr);
+    return (*filterSptr).get();
 }
 
 void SetImageSyncLoad(ArkUINodeHandle node, ArkUI_Bool syncLoadValue)
@@ -566,7 +593,7 @@ void SetImageOpacity(ArkUINodeHandle node, ArkUI_Float32 opacity)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if ((LessNotEqual(opacity, 0.0)) || opacity > 1) {
-        opacity = 1.0f;
+        opacity = 0.0f;
     }
     ViewAbstract::SetOpacity(frameNode, opacity);
 }
@@ -575,7 +602,7 @@ void ResetImageOpacity(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetOpacity(frameNode, 1.0f);
+    ViewAbstract::SetOpacity(frameNode, 0.0f);
 }
 
 void SetEdgeAntialiasing(ArkUINodeHandle node, ArkUI_Float32 edgeAntialiasing)
@@ -728,6 +755,13 @@ void AnalyzerConfig(ArkUINodeHandle node, void* config)
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetImageAnalyzerConfig(frameNode, config);
 }
+
+void ResetImageSrc(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::ResetImageSrc(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -746,7 +780,7 @@ const ArkUIImageModifier* GetImageModifier()
         ResetEnhancedImageQuality, GetImageSrc, GetAutoResize, GetObjectRepeat, GetObjectFit,
         GetImageInterpolation, GetColorFilter, GetAlt, GetImageDraggable, GetRenderMode, SetImageResizable,
         GetImageResizable, GetFitOriginalSize, GetFillColor, SetPixelMap, SetPixelMapArray, SetResourceSrc,
-        EnableAnalyzer, AnalyzerConfig };
+        EnableAnalyzer, AnalyzerConfig, SetDrawingColorFilter, GetDrawingColorFilter, ResetImageSrc };
     return &modifier;
 }
 

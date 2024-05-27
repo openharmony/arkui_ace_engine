@@ -344,6 +344,7 @@ void JSUIExtension::JSBind(BindingTarget globalObj)
     JSClass<JSUIExtension>::StaticMethod("onRelease", &JSUIExtension::OnRelease);
     JSClass<JSUIExtension>::StaticMethod("onResult", &JSUIExtension::OnResult);
     JSClass<JSUIExtension>::StaticMethod("onError", &JSUIExtension::OnError);
+    JSClass<JSUIExtension>::StaticMethod("onTerminated", &JSUIExtension::OnTerminated);
     JSClass<JSUIExtension>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -526,5 +527,39 @@ void JSUIExtension::OnError(const JSCallbackInfo& info)
             func->ExecuteJS(1, &returnValue);
         };
     UIExtensionModel::GetInstance()->SetOnError(std::move(onError));
+}
+
+void JSUIExtension::OnTerminated(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto instanceId = ContainerScope::CurrentId();
+    auto onTerminated = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
+                            int32_t code, const RefPtr<WantWrap>& wantWrap) {
+        ContainerScope scope(instanceId);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("EmbeddedComponent.onTerminated");
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
+        auto engine = EngineHelper::GetCurrentEngine();
+        CHECK_NULL_VOID(engine);
+        NativeEngine* nativeEngine = engine->GetNativeEngine();
+        CHECK_NULL_VOID(nativeEngine);
+        JSRef<JSObject> obj = JSRef<JSObject>::New();
+        obj->SetProperty<int32_t>("code", code);
+        if (wantWrap) {
+            auto nativeWant =
+                WantWrap::ConvertToNativeValue(wantWrap->GetWant(), reinterpret_cast<napi_env>(nativeEngine));
+            auto wantJSVal = JsConverter::ConvertNapiValueToJsVal(nativeWant);
+            obj->SetPropertyObject("want", wantJSVal);
+        }
+        auto returnValue = JSRef<JSVal>::Cast(obj);
+        func->ExecuteJS(1, &returnValue);
+    };
+    UIExtensionModel::GetInstance()->SetOnTerminated(std::move(onTerminated));
 }
 } // namespace OHOS::Ace::Framework

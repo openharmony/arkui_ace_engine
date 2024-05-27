@@ -705,7 +705,12 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
         double fontSize = txtStyle.fontSize;
         double lineHeight = textStyle.GetLineHeight().Value();
         if (pipelineContext) {
-            lineHeight = pipelineContext->NormalizeToPx(textStyle.GetLineHeight());
+            if (textStyle.GetLineHeight().Unit() == DimensionUnit::FP) {
+                lineHeight = pipelineContext->NormalizeToPx(
+                    textStyle.GetLineHeight() * pipelineContext->GetFontScale());
+            } else {
+                lineHeight = pipelineContext->NormalizeToPx(textStyle.GetLineHeight());
+            }
         }
         lineHeightOnly = textStyle.HasHeightOverride();
         if (!NearEqual(lineHeight, fontSize) && (lineHeight > 0.0) && (!NearZero(fontSize))) {

@@ -207,10 +207,10 @@ void RefreshPattern::InitProgressNode()
     if (layoutProperty->HasProgressColor()) {
         progressPaintProperty->UpdateColor(layoutProperty->GetProgressColorValue());
     }
+    layoutProperty->UpdateAlignment(Alignment::TOP_CENTER);
+    host->AddChild(progressChild_, -1);
     if (HasLoadingText()) {
         InitProgressColumn();
-    } else {
-        host->AddChild(progressChild_, -1);
     }
     progressChild_->MarkDirtyNode();
 }
@@ -245,7 +245,6 @@ void RefreshPattern::InitProgressColumn()
     CHECK_NULL_VOID(host);
     columnNode_ = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    columnNode_->AddChild(progressChild_);
     loadingTextNode_ = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto loadingTextLayoutProperty = loadingTextNode_->GetLayoutProperty<TextLayoutProperty>();
@@ -261,11 +260,15 @@ void RefreshPattern::InitProgressColumn()
     CHECK_NULL_VOID(theme);
     loadingTextLayoutProperty->UpdateTextColor(theme->GetTextStyle().GetTextColor());
     loadingTextLayoutProperty->UpdateFontSize(theme->GetTextStyle().GetFontSize());
-
+    
+    PaddingProperty textpadding;
+    textpadding.top = CalcLength(TRIGGER_LOADING_DISTANCE.ConvertToPx() + LOADING_TEXT_TOP_MARGIN.ConvertToPx());
+    auto prop = columnNode_->GetLayoutProperty<LinearLayoutProperty>();
+    prop->UpdatePadding(textpadding);
     UpdateLoadingTextOpacity(0.0f);
 
     columnNode_->AddChild(loadingTextNode_, -1);
-    host->AddChild(columnNode_, -1);
+    host->AddChild(columnNode_);
 }
 
 void RefreshPattern::OnColorConfigurationUpdate()
@@ -304,22 +307,19 @@ void RefreshPattern::InitChildNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    auto accessibilityLevel = accessibilityProperty->GetAccessibilityLevel();
     if (isCustomBuilderExist_) {
         if (progressChild_) {
             if (HasLoadingText()) {
                 CHECK_NULL_VOID(columnNode_);
-                host->RemoveChild(loadingTextNode_);
-                loadingTextNode_ = nullptr;
-                host->RemoveChild(progressChild_);
-                progressChild_ = nullptr;
-                auto host = GetHost();
-                CHECK_NULL_VOID(host);
                 host->RemoveChild(columnNode_);
                 columnNode_ = nullptr;
-            } else {
-                host->RemoveChild(progressChild_);
-                progressChild_ = nullptr;
+                loadingTextNode_ = nullptr;
             }
+            host->RemoveChild(progressChild_);
+            progressChild_ = nullptr;
         }
     } else if (!progressChild_) {
         InitProgressNode();
@@ -331,15 +331,22 @@ void RefreshPattern::InitChildNode()
         } else {
             UpdateLoadingProgress();
         }
+    } else {
+        auto progressAccessibilityProperty = progressChild_->GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_VOID(progressAccessibilityProperty);
+        progressAccessibilityProperty->SetAccessibilityLevel(accessibilityLevel);
     }
 
-    if (HasLoadingText()) {
+    if (HasLoadingText() && loadingTextNode_) {
         auto loadingTextLayoutProperty = loadingTextNode_->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(loadingTextLayoutProperty);
         auto layoutProperty = host->GetLayoutProperty<RefreshLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
         loadingTextLayoutProperty->UpdateContent(layoutProperty->GetLoadingTextValue());
         loadingTextNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        auto textAccessibilityProperty = loadingTextNode_->GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_VOID(textAccessibilityProperty);
+        textAccessibilityProperty->SetAccessibilityLevel(accessibilityLevel);
     }
 
     OnColorConfigurationUpdate();
@@ -770,6 +777,7 @@ void RefreshPattern::SpeedTriggerAnimation(float speed)
     } else if (NearZero(targetOffset)) {
         SwitchToFinish();
     }
+    FireOnOffsetChange(targetOffset);
     ResetAnimation();
     AnimationOption option;
     auto curve = AceType::MakeRefPtr<InterpolatingSpring>(dealSpeed, 1.0f, 228.0f, 30.0f);
@@ -820,6 +828,7 @@ void RefreshPattern::SpeedAnimationFinish()
 
 void RefreshPattern::QuickFirstChildAppear()
 {
+    FireOnOffsetChange(static_cast<float>(refreshOffset_.ConvertToPx()));
     isSourceFromAnimation_ = false;
     UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, GetFollowRatio());
     ResetAnimation();
@@ -832,6 +841,7 @@ void RefreshPattern::QuickFirstChildAppear()
 
 void RefreshPattern::QuickFirstChildDisappear()
 {
+    FireOnOffsetChange(0.0f);
     ResetAnimation();
     AnimationOption option;
     option.SetCurve(DEFAULT_CURVE);
@@ -1144,6 +1154,7 @@ ScrollResult RefreshPattern::HandleScroll(float offset, int32_t source, NestedSt
 
 void RefreshPattern::OnScrollStartRecursive(float position, float velocity)
 {
+    SetIsNestedInterrupt(false);
     if (!GetIsFixedNestedScrollMode()) {
         SetParentScrollable();
     }
@@ -1183,9 +1194,10 @@ void RefreshPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
     HandleDragEnd(velocity.value_or(0.f));
     auto parent = GetNestedScrollParent();
     auto nestedScroll = GetNestedScroll();
-    if (parent && nestedScroll.NeedParent()) {
+    if (parent && (nestedScroll.NeedParent() || GetIsNestedInterrupt())) {
         parent->OnScrollEndRecursive(velocity);
     }
+    SetIsNestedInterrupt(false);
 }
 
 void RefreshPattern::DumpInfo()

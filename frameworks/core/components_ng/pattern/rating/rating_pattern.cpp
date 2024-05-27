@@ -531,7 +531,7 @@ bool RatingPattern::OnKeyEvent(const KeyEvent& event)
     double ratingScore = focusRatingScore_;
     auto ratingLayoutProperty = GetLayoutProperty<RatingLayoutProperty>();
     double starNum = ratingLayoutProperty->GetStarsValue(themeStarNum_);
-    bool reverse = ratingLayoutProperty->GetLayoutDirection() == TextDirection::RTL;
+    bool reverse = ratingLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     const double stepSize = ratingRenderProperty->GetStepSizeValue(themeStepSize_);
     if (event.code == KeyCode::KEY_DPAD_LEFT) {
         ratingScore = reverse ? fmin(ratingScore + stepSize, starNum) : fmax(ratingScore - stepSize, 0.0);
@@ -798,6 +798,10 @@ void RatingPattern::OnModifyDone()
 // XTS inspector code
 void RatingPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto ratingLayoutProperty = GetLayoutProperty<RatingLayoutProperty>();
     if (isForegroundImageInfoFromTheme_) {
         json->PutExtAttr("foregroundImageSourceInfo", ImageSourceInfo("").ToString().c_str(), filter);

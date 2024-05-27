@@ -41,7 +41,8 @@ std::set<std::string> g_textCategory;
 bool ShouldCreateNewComponent(const std::string& oldType, const std::string& newType)
 {
     if (g_textCategory.empty()) {
-        g_textCategory = std::set<std::string>({ INPUT_TYPE_TEXT, INPUT_TYPE_EMAIL, INPUT_TYPE_DATE, INPUT_TYPE_TIME,
+        g_textCategory = std::set<std::string>({
+            INPUT_TYPE_TEXT, INPUT_TYPE_EMAIL, INPUT_TYPE_DATE, INPUT_TYPE_TIME,
             INPUT_TYPE_NUMBER, INPUT_TYPE_PASSWORD });
     }
     return g_textCategory.find(oldType) == g_textCategory.end() || g_textCategory.find(newType) == g_textCategory.end();

@@ -202,6 +202,9 @@ std::string BackgroundImageSize::ToString() const
     if (widthType == BackgroundImageSizeType::AUTO) {
         return "ImageSize.Auto";
     }
+    if (widthType == BackgroundImageSizeType::FILL) {
+        return "ImageSize.FILL";
+    }
     auto jsonValue = JsonUtil::Create(true);
     Dimension width = Dimension((GetSizeValueX()), DimensionUnit::PX);
     Dimension height = Dimension((GetSizeValueY()), DimensionUnit::PX);

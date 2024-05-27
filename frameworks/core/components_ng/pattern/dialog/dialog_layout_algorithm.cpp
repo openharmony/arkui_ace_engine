@@ -47,7 +47,6 @@ namespace OHOS::Ace::NG {
 namespace {
 
 // Using UX spec: Constrain max height within 4/5 of screen height.
-// TODO: move these values to theme.
 constexpr double DIALOG_HEIGHT_RATIO_FOR_LANDSCAPE = 0.9;
 constexpr double DIALOG_HEIGHT_RATIO_FOR_CAR = 0.95;
 constexpr double DIALOG_MAX_HEIGHT_RATIO = 0.9;
@@ -336,7 +335,7 @@ void DialogLayoutAlgorithm::ComputeInnerLayoutParam(LayoutConstraintF& innerLayo
     CHECK_EQUAL_VOID(ComputeInnerLayoutSizeParam(innerLayout, dialogProp), true);
     auto maxSize = innerLayout.maxSize;
     // Set different layout param for different devices
-    // TODO: need to use theme json to replace this function.
+    // need to use theme json to replace this function.
     // get grid size type based on the screen where the dialog locate
     auto gridSizeType = ScreenSystemManager::GetInstance().GetSize(maxSize.Width());
     RefPtr<GridColumnInfo> columnInfo;
@@ -400,31 +399,31 @@ int32_t DialogLayoutAlgorithm::GetDeviceColumns(GridSizeType type, DeviceType de
     int32_t deviceColumns;
     if (deviceType == DeviceType::WATCH) {
         if (type == GridSizeType::SM) {
-            deviceColumns = 3;
+            deviceColumns = 3; // 3: the number of deviceColumns
         } else if (type == GridSizeType::MD) {
-            deviceColumns = 4;
+            deviceColumns = 4; // 4: the number of deviceColumns
         } else {
-            deviceColumns = 5;
+            deviceColumns = 5; // 5: the number of deviceColumns
         }
     } else if (deviceType == DeviceType::PHONE) {
         if (type == GridSizeType::SM) {
-            deviceColumns = 4;
+            deviceColumns = 4; // 4: the number of deviceColumns
         } else if (type == GridSizeType::MD) {
-            deviceColumns = 5;
+            deviceColumns = 5; // 5: the number of deviceColumns
         } else {
-            deviceColumns = 6;
+            deviceColumns = 6; // 6: the number of deviceColumns
         }
     } else if (deviceType == DeviceType::CAR) {
         if (type == GridSizeType::SM) {
-            deviceColumns = 4;
+            deviceColumns = 4; // 4: the number of deviceColumns
         } else if (type == GridSizeType::MD) {
-            deviceColumns = 6;
+            deviceColumns = 6; // 6: the number of deviceColumns
         } else {
-            deviceColumns = 8;
+            deviceColumns = 8; // 8: the number of deviceColumns
         }
     } else if (deviceType == DeviceType::TABLET && type == GridSizeType::MD &&
                Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        deviceColumns = 5;
+        deviceColumns = 5; // 5: the number of deviceColumns
     } else {
         deviceColumns = GetDeviceColumn(type);
     }
@@ -488,6 +487,19 @@ void DialogLayoutAlgorithm::ProcessMaskRect(
     gestureHub->SetResponseRegion(mouseResponseRegion);
 }
 
+std::optional<DimensionRect> DialogLayoutAlgorithm::GetMaskRect(const RefPtr<FrameNode>& dialog)
+{
+    std::optional<DimensionRect> maskRect;
+    auto dialogPattern = dialog->GetPattern<DialogPattern>();
+    CHECK_NULL_RETURN(dialogPattern, maskRect);
+    maskRect = dialogPattern->GetDialogProperties().maskRect;
+    if (isUIExtensionSubWindow_ && hostWindowRect_.GetSize().IsPositive()) {
+        auto offset = DimensionOffset(Dimension(hostWindowRect_.GetX()), Dimension(hostWindowRect_.GetY()));
+        maskRect = DimensionRect(Dimension(hostWindowRect_.Width()), Dimension(hostWindowRect_.Height()), offset);
+    }
+    return maskRect;
+}
+
 void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     subWindowId_ = SubwindowManager::GetInstance()->GetDialogSubWindowId();
@@ -508,15 +520,12 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto dialogPattern = frameNode->GetPattern<DialogPattern>();
     CHECK_NULL_VOID(dialogPattern);
     if (isModal_ && dialogPattern->GetDialogProperties().maskRect.has_value()) {
-        std::optional<DimensionRect> maskRect = dialogPattern->GetDialogProperties().maskRect;
-        if (isUIExtensionSubWindow_ && hostWindowRect_.GetSize().IsPositive()) {
-            auto offset = DimensionOffset(Dimension(hostWindowRect_.GetX()), Dimension(hostWindowRect_.GetY()));
-            maskRect = DimensionRect(Dimension(hostWindowRect_.Width()), Dimension(hostWindowRect_.Height()), offset);
-        }
+        std::optional<DimensionRect> maskRect = GetMaskRect(frameNode);
         ProcessMaskRect(maskRect, frameNode, true);
     }
     auto child = children.front();
     auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
+    dialogChildSize_ = childSize;
     // is PcDevice MultipleDialog Offset to the bottom right
     if (dialogTheme->GetMultipleDialogDisplay() != "stack" && !dialogProp->GetIsModal().value_or(true) &&
         dialogProp->GetShowInSubWindowValue(false)) {
@@ -536,8 +545,30 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             frameNode);
     }
     child->GetGeometryNode()->SetMarginFrameOffset(topLeftPoint_);
+    AdjustHeightForKeyboard(layoutWrapper, child, childSize);
     child->Layout();
     SetSubWindowHotarea(dialogProp, childSize, selfSize, frameNode->GetId());
+}
+
+void DialogLayoutAlgorithm::AdjustHeightForKeyboard(
+    LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& child, const SizeF& childSize)
+{
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE) || !child || !resizeFlag_) {
+        return;
+    }
+    auto childConstraint =
+        CreateDialogChildConstraint(layoutWrapper, dialogChildSize_.Height(), dialogChildSize_.Width());
+    child->Measure(childConstraint);
+    if (child->GetHostTag() == V2::SCROLL_ETS_TAG) {
+        for (const auto& grandson : child->GetAllChildrenWithBuild()) {
+            CHECK_NULL_VOID(grandson);
+            if (grandson->GetHostTag() == V2::COLUMN_ETS_TAG) {
+                auto grandsonConstraint =
+                    CreateDialogChildConstraint(layoutWrapper, childSize.Height(), childSize.Width());
+                grandson->Measure(grandsonConstraint);
+            }
+        }
+    }
 }
 
 void DialogLayoutAlgorithm::SetSubWindowHotarea(
@@ -742,7 +773,7 @@ bool DialogLayoutAlgorithm::SetAlignmentSwitchLessThanAPITwelve(const SizeF& max
 
 void DialogLayoutAlgorithm::UpdateTouchRegion()
 {
-    // TODO: update touch region is not completed.
+    //update touch region is not completed.
 }
 
 double DialogLayoutAlgorithm::GetPaddingBottom() const
@@ -756,7 +787,7 @@ double DialogLayoutAlgorithm::GetPaddingBottom() const
 }
 
 OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
-    OffsetF& topLeftPoint, const OffsetF& dialogOffset, const SizeF& childSize, bool needAvoidKeyboard) const
+    OffsetF& topLeftPoint, const OffsetF& dialogOffset, const SizeF& childSize, bool needAvoidKeyboard)
 {
     auto container = Container::Current();
     auto currentId = Container::CurrentId();
@@ -780,6 +811,12 @@ OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
     auto paddingBottom = static_cast<float>(GetPaddingBottom());
     if (needAvoidKeyboard && keyboardInsert.Length() > 0 && childBottom > (keyboardInsert.start - paddingBottom)) {
         childOffset.SetY(childOffset.GetY() - (childBottom - (keyboardInsert.start - paddingBottom)));
+    }
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && childOffset.GetY() < 0) {
+        resizeFlag_ = true;
+        dialogChildSize_ = childSize;
+        dialogChildSize_.MinusHeight(-childOffset.GetY());
+        childOffset.SetY(0.0);
     }
     return childOffset;
 }

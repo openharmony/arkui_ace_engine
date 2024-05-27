@@ -180,7 +180,7 @@ class CheckBoxShapeModifier extends ModifierWithKey<CheckBoxShape> {
     super(value);
   }
   static identity: Symbol = Symbol('checkboxShape');
-  applyPeer(node: KNode, reset: boolean) {
+  applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().checkbox.resetCheckboxShape(node);
     } else {
@@ -188,7 +188,7 @@ class CheckBoxShapeModifier extends ModifierWithKey<CheckBoxShape> {
     }
   }
 
-  checkObjectDiff() {
+  checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }

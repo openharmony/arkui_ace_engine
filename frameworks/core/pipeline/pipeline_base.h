@@ -920,7 +920,9 @@ public:
         gsVsyncCallback_ = std::move(callback);
     }
 
-    virtual void FlushUITasks() = 0;
+    virtual void FlushUITasks(bool triggeredByImplicitAnimation = false) = 0;
+
+    virtual void FlushAfterLayoutCallbackInImplicitAnimationTask() {}
 
     virtual void FlushPipelineImmediately() = 0;
 
@@ -940,6 +942,11 @@ public:
     void SetKeyboardAnimationConfig(const KeyboardAnimationConfig& config)
     {
         keyboardAnimationConfig_ = config;
+    }
+
+    KeyboardAnimationConfig GetKeyboardAnimationConfig() const
+    {
+        return keyboardAnimationConfig_;
     }
 
     void SetNextFrameLayoutCallback(std::function<void()>&& callback)
@@ -1164,6 +1171,14 @@ public:
     void SetStateProfilerStatus(bool stateProfilerStatus)
     {
         stateProfilerStatus_ = stateProfilerStatus;
+        if (jsStateProfilerStatusCallback_) {
+            jsStateProfilerStatusCallback_(stateProfilerStatus);
+        }
+    }
+
+    void SetStateProfilerStatusCallback(std::function<void(bool)>&& callback)
+    {
+        jsStateProfilerStatusCallback_ = callback;
     }
 
     bool GetStateProfilerStatus() const
@@ -1356,6 +1371,7 @@ private:
     std::shared_ptr<Rosen::RSTransaction> rsTransaction_;
     uint32_t frameCount_ = 0;
     bool stateProfilerStatus_ = false;
+    std::function<void(bool)> jsStateProfilerStatusCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };

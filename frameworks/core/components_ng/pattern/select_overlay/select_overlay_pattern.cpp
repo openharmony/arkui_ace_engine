@@ -570,7 +570,8 @@ bool SelectOverlayPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     defaultMenuEndOffset_ = selectOverlayLayoutAlgorithm->GetDefaultMenuEndOffset();
     menuWidth_ = selectOverlayLayoutAlgorithm->GetMenuWidth();
     menuHeight_ = selectOverlayLayoutAlgorithm->GetMenuHeight();
-    hasExtensionMenu_ = selectOverlayLayoutAlgorithm->GetHasExtensionMenu();
+    hasExtensionMenu_ =
+        selectOverlayLayoutAlgorithm->GetHasExtensionMenu() && !selectOverlayLayoutAlgorithm->GetHideMoreOrBack();
     if (IsCustomMenu()) {
         MenuWrapperPattern::CheckAndShowAnimation();
     }
@@ -647,5 +648,16 @@ void SelectOverlayPattern::UpdateSelectArea(const RectF& selectArea)
 void SelectOverlayPattern::SetIsNewAvoid(bool isNewAvoid)
 {
     info_->isNewAvoid = isNewAvoid;
+}
+
+void SelectOverlayPattern::SetSelectMenuHeight()
+{
+    auto host = DynamicCast<SelectOverlayNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    auto selectMenu = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(selectMenu);
+    auto geometryNode = selectMenu->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    selectMenuHeight_ = geometryNode->GetFrameSize().Height();
 }
 } // namespace OHOS::Ace::NG

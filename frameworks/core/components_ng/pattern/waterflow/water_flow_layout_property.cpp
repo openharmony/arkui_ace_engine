@@ -37,6 +37,10 @@ void WaterFlowLayoutProperty::ResetWaterflowLayoutInfoAndMeasure() const
 void WaterFlowLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     LayoutProperty::ToJsonValue(json, filter);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     json->PutExtAttr("columnsTemplate", propColumnsTemplate_.value_or("").c_str(), filter);
     json->PutExtAttr("rowsTemplate", propRowsTemplate_.value_or("").c_str(), filter);
     json->PutExtAttr("columnsGap", propColumnsGap_.value_or(0.0_vp).ToString().c_str(), filter);
@@ -96,19 +100,30 @@ RefPtr<LayoutProperty> WaterFlowLayoutProperty::Clone() const
 namespace {
 inline bool UseSegmentedLayout(const RefPtr<FrameNode>& host)
 {
-    return SystemProperties::WaterFlowUseSegmentedLayout() || host->GetPattern<WaterFlowPattern>()->GetSections();
+    CHECK_NULL_RETURN(host, false);
+    auto pattern = host->GetPattern<WaterFlowPattern>();
+    return SystemProperties::WaterFlowUseSegmentedLayout() || (pattern && pattern->GetSections());
+}
+
+inline bool SWLayout(const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_RETURN(host, false);
+    auto pattern = host->GetPattern<WaterFlowPattern>();
+    return pattern && pattern->GetLayoutMode() == WaterFlowLayoutMode::SLIDING_WINDOW;
 }
 } // namespace
 
 void WaterFlowLayoutProperty::OnRowsGapUpdate(Dimension /* rowsGap */) const
 {
-    if (GetAxis() == Axis::VERTICAL || UseSegmentedLayout(GetHost())) {
+    auto host = GetHost();
+    if (GetAxis() == Axis::VERTICAL || UseSegmentedLayout(host) || SWLayout(host)) {
         ResetWaterflowLayoutInfoAndMeasure();
     }
 }
 void WaterFlowLayoutProperty::OnColumnsGapUpdate(Dimension /* columnsGap */) const
 {
-    if (GetAxis() == Axis::HORIZONTAL || UseSegmentedLayout(GetHost())) {
+    auto host = GetHost();
+    if (GetAxis() == Axis::HORIZONTAL || UseSegmentedLayout(host) || SWLayout(host)) {
         ResetWaterflowLayoutInfoAndMeasure();
     }
 }

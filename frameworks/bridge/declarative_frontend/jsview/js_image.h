@@ -29,6 +29,7 @@ JSRef<JSVal> LoadImageFailEventToJSValue(const LoadImageFailEvent& eventInfo);
 class JSImage : public JSViewAbstract, public JSInteractableView {
 public:
     static void Create(const JSCallbackInfo& info);
+    static void CreateImage(const JSCallbackInfo& info, bool isImageSpan = false);
     static void CreateImageAnimation(std::vector<RefPtr<PixelMap>>& pixelMaps,
         int32_t duration, int32_t iterations);
     static void HandleLoadImageSuccess(const BaseEventInfo& param);

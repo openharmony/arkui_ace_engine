@@ -28,8 +28,10 @@ namespace OHOS::Ace::NG {
 void MenuItemGroupPattern::OnMountToParentDone()
 {
     ModifyFontSize();
+    ModifyDivider();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    bool needDivider = false;
     const auto& children = host->GetChildren();
     for (const auto& child : children) {
         if (child->GetTag() == V2::MENU_ITEM_ETS_TAG) {
@@ -38,6 +40,8 @@ void MenuItemGroupPattern::OnMountToParentDone()
             auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
             CHECK_NULL_VOID(itemPattern);
             itemPattern->UpdateTextNodes();
+            itemPattern->UpdateNeedDivider(needDivider);
+            needDivider = true;
         }
     }
 }
@@ -136,6 +140,70 @@ void MenuItemGroupPattern::UpdateMenuItemIconInfo()
         }
         for (const auto& child : currentNode->GetChildren()) {
             nodes.emplace(child);
+        }
+    }
+}
+
+void MenuItemGroupPattern::ModifyDivider()
+{
+    auto menu = GetMenu();
+    CHECK_NULL_VOID(menu);
+    auto menuProperty = menu->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuProperty);
+
+    auto divider = menuProperty->GetItemGroupDivider();
+    if (divider.has_value()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto paintProperty = host->GetPaintProperty<MenuItemGroupPaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        paintProperty->UpdateStrokeWidth(divider->strokeWidth);
+        paintProperty->UpdateStartMargin(divider->startMargin);
+        paintProperty->UpdateEndMargin(divider->endMargin);
+        paintProperty->UpdateDividerColor(divider->color);
+        paintProperty->UpdateNeedHeaderDivider(true);
+        paintProperty->UpdateNeedFooterDivider(true);
+    }
+}
+
+void MenuItemGroupPattern::OnExtItemPressed(bool press, bool beforeGroup)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<MenuItemGroupPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (beforeGroup) {
+        paintProperty->UpdateNeedHeaderDivider(!press);
+    } else {
+        paintProperty->UpdateNeedFooterDivider(!press);
+    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void MenuItemGroupPattern::OnIntItemPressed(int32_t index, bool press)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto children = host->GetChildren();
+    auto parent = host->GetParent();
+    CHECK_NULL_VOID(parent);
+    auto currentIndex = parent->GetChildIndex(host);
+    if (index == itemStartIndex_ && headerContent_ == nullptr) {
+        OnExtItemPressed(press, true); // beforeGroup=true just to hide header divider
+        auto prevNode = parent->GetChildAtIndex(currentIndex - 1);
+        if (prevNode != nullptr && prevNode->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
+            auto pattern = DynamicCast<FrameNode>(prevNode)->GetPattern<MenuItemGroupPattern>();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnExtItemPressed(press, false); // hide common divider for 2 group if another group before
+        }
+    }
+    if (index == (children.size() -1) && footerContent_ == nullptr) {
+        OnExtItemPressed(press, false); // beforeGroup=false just to hide footer divider
+        auto nextNode = parent->GetChildAtIndex(currentIndex + 1);
+        if (nextNode != nullptr && nextNode->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
+            auto pattern = DynamicCast<FrameNode>(nextNode)->GetPattern<MenuItemGroupPattern>();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnExtItemPressed(press, true); // hide common divider for 2 group if another group after
         }
     }
 }

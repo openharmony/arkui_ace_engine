@@ -26,6 +26,10 @@ struct IsolatedInfo {
     std::string entryPoint;
 };
 
+struct IsolatedDumpInfo {
+    int64_t createLimitedWorkerTime;
+};
+
 class IsolatedPattern : public PlatformPattern {
     DECLARE_ACE_TYPE(IsolatedPattern, PlatformPattern);
 
@@ -53,18 +57,38 @@ public:
         onSizeChanged_ = std::move(callback);
     }
 
-protected:
-    virtual void DispatchPointerEvent(
-        const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
-    virtual void DispatchKeyEvent(const KeyEvent& event) override;
+    virtual void SearchExtensionElementInfoByAccessibilityId(int64_t elementId, int32_t mode, int64_t baseParent,
+        std::list<Accessibility::AccessibilityElementInfo>& output) override;
+    virtual void SearchElementInfosByText(int64_t elementId, const std::string& text, int64_t baseParent,
+        std::list<Accessibility::AccessibilityElementInfo>& output) override;
+    virtual void FindFocusedElementInfo(int64_t elementId, int32_t focusType, int64_t baseParent,
+        Accessibility::AccessibilityElementInfo& output) override;
+    virtual void FocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
+        Accessibility::AccessibilityElementInfo& output) override;
+    virtual bool TransferExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, int64_t offset) override;
+
+    void DumpInfo() override;
+    void FireOnErrorCallbackOnUI(
+        int32_t code, const std::string& name, const std::string& msg);
 
 private:
     void InitializeRender(void* runtime);
+
+    void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
+    void DispatchFocusActiveEvent(bool isFocusActive) override;
+    bool HandleKeyEvent(const KeyEvent& event) override;
+    void HandleFocusEvent() override;
+    void HandleBlurEvent() override;
+
+    void OnAttachToFrameNode() override;
+
     int32_t ApplyIsolatedId();
 
     RefPtr<DynamicComponentRenderer> dynamicComponentRenderer_;
     std::function<void(int32_t, int32_t)> onSizeChanged_;
     IsolatedInfo curIsolatedInfo_;
+    IsolatedDumpInfo isolatedDumpInfo_;
 
     static int32_t isolatedIdGenerator_; // only run on JS thread, and do not require mutex
     ACE_DISALLOW_COPY_AND_MOVE(IsolatedPattern);

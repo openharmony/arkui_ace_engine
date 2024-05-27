@@ -53,8 +53,10 @@ ohos_shared_library("ace_ndk") {
     "node/dialog_model.cpp",
     "node/drawable_descriptor.cpp",
     "node/event_converter.cpp",
+    "node/frame_information.cpp",
     "node/gesture_impl.cpp",
     "node/list_option.cpp",
+    "node/native_drawable_descriptor.cpp",
     "node/native_impl.cpp",
     "node/native_node_extented.cpp",
     "node/native_node_napi.cpp",
@@ -63,6 +65,7 @@ ohos_shared_library("ace_ndk") {
     "node/node_extened.cpp",
     "node/node_model.cpp",
     "node/node_node_relative_container.cpp",
+    "node/node_utils.cpp",
     "node/style_modifier.cpp",
     "node/waterflow_section_option.cpp",
   ]

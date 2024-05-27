@@ -42,6 +42,7 @@ constexpr int32_t CANCEL_BUTTON_INDEX = 3;
 constexpr int32_t BUTTON_INDEX = 4;
 constexpr int32_t MULTIPLE_2 = 2;
 constexpr float MAX_SEARCH_BUTTON_RATE = 0.4f;
+constexpr float AGING_MIN_SCALE = 1.75f;
 } // namespace
 
 bool SearchLayoutAlgorithm::IsFixedHeightMode(LayoutWrapper* layoutWrapper)
@@ -70,13 +71,12 @@ void SearchLayoutAlgorithm::CancelImageMeasure(LayoutWrapper* layoutWrapper)
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto imageConstraint = imageLayoutProperty->GetLayoutConstraint();
     auto searchHeight = CalcSearchHeight(constraint.value(), layoutWrapper);
-    auto defaultImageHeight =
-        imageConstraint->selfIdealSize.Height().value_or(searchTheme->GetIconSize().ConvertToPx());
+    auto defaultImageHeight = static_cast<float>(searchTheme->GetIconSize().ConvertToPx());
     auto iconStretchSize = (NearZero(defaultImageHeight) || !imageConstraint->maxSize.IsPositive()) &&
                            !layoutProperty->HasCancelButtonUDSize();
-    auto imageHeight =
-        std::min(iconStretchSize ? static_cast<float>(searchTheme->GetIconSize().ConvertToPx()) : defaultImageHeight,
-            static_cast<float>(searchHeight));
+    auto imageHeight = static_cast<float>(std::min(layoutProperty->HasCancelButtonUDSize() ?
+        layoutProperty->GetCancelButtonUDSizeValue().ConvertToPx() : defaultImageHeight,
+        searchHeight));
     CalcSize imageCalcSize;
     if (iconStretchSize) {
         imageCalcSize.SetWidth(CalcLength(imageHeight));
@@ -166,7 +166,9 @@ void SearchLayoutAlgorithm::TextFieldMeasure(LayoutWrapper* layoutWrapper)
     auto textFieldHeight = CalcSearchHeight(constraint.value(), layoutWrapper);
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     childLayoutConstraint.selfIdealSize.SetWidth(textFieldWidth);
-    SetTextFieldLayoutConstraintHeight(childLayoutConstraint, textFieldHeight, layoutWrapper);
+    if (LessNotEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
+        SetTextFieldLayoutConstraintHeight(childLayoutConstraint, textFieldHeight, layoutWrapper);
+    }
     textFieldWrapper->Measure(childLayoutConstraint);
     textFieldSizeMeasure_ = textFieldGeometryNode->GetFrameSize();
 }

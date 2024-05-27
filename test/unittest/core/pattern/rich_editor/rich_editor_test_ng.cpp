@@ -5605,7 +5605,7 @@ HWTEST_F(RichEditorTestNg, ChangeTextCallbackTest001, TestSize.Level1)
      * @tc.steps: step2. change text with InsertValue When callback return false
      * @tc.expected: return value is valid
      */
-    richEditorPattern->InsertValue(INIT_VALUE_1);
+    richEditorPattern->InsertValue(INIT_VALUE_1, true);
     EXPECT_EQ(isWillCalled, true);
     EXPECT_EQ(isDidCalled, false);
     EXPECT_EQ(originalCount, 0);
@@ -5792,7 +5792,7 @@ HWTEST_F(RichEditorTestNg, ChangeTextCallbackTest004, TestSize.Level1)
      * @tc.steps: step2. change text with InsertValue
      * @tc.expected: return value is valid
      */
-    richEditorPattern->InsertValue(INIT_VALUE_1);
+    richEditorPattern->InsertValue(INIT_VALUE_1, true);
     EXPECT_EQ(isWillCalled, true);
     EXPECT_EQ(isDidCalled, true);
     EXPECT_EQ(originalCount, 0);
@@ -5808,7 +5808,7 @@ HWTEST_F(RichEditorTestNg, ChangeTextCallbackTest004, TestSize.Level1)
     originalCount = 0;
     replacedCount = 0;
     afterCount = 0;
-    richEditorPattern->InsertValue("test\nvalue");
+    richEditorPattern->InsertValue("test\nvalue", true);
     EXPECT_EQ(isWillCalled, true);
     EXPECT_EQ(isDidCalled, true);
     EXPECT_EQ(originalCount, 0);
@@ -5905,7 +5905,7 @@ HWTEST_F(RichEditorTestNg, ChangeTextCallbackTest006, TestSize.Level1)
      * @tc.steps: step2. change text with HandleOnDragDropTextOperation
      * @tc.expected: return value is valid
      */
-    richEditorPattern->InsertValue(INIT_VALUE_1);
+    richEditorPattern->InsertValue(INIT_VALUE_1, true);
     isWillCalled = false;
     isDidCalled = false;
     originalCount = 0;
@@ -5965,7 +5965,7 @@ HWTEST_F(RichEditorTestNg, ChangeTextCallbackTest007, TestSize.Level1)
      * @tc.steps: step2. change text with HandleOnUndoAction
      * @tc.expected: return value is valid
      */
-    richEditorPattern->InsertValue(INIT_VALUE_1);
+    richEditorPattern->InsertValue(INIT_VALUE_1, true);
     isWillCalled = false;
     isDidCalled = false;
     richEditorPattern->HandleOnUndoAction();
@@ -6111,7 +6111,7 @@ HWTEST_F(RichEditorTestNg, ChangeTextCallbackTest010, TestSize.Level1)
 
     richEditorPattern->AddTextSpan(TEXT_SPAN_OPTIONS_1); // content = hello1
     richEditorPattern->textSelector_.Update(1, 5); // select h[ello]1
-    richEditorPattern->InsertValue(INIT_VALUE_1);
+    richEditorPattern->InsertValue(INIT_VALUE_1, true);
 
     // check onWill rangeBefore
     EXPECT_EQ(onWillRangeBefore.start, 1);
@@ -6161,7 +6161,7 @@ HWTEST_F(RichEditorTestNg, ChangeTextCallbackTest011, TestSize.Level1)
     // content = hello1hello1hello1
 
     richEditorPattern->textSelector_.Update(1, 17); // select h[ello1hello1hello]1
-    richEditorPattern->InsertValue(INIT_VALUE_1);
+    richEditorPattern->InsertValue(INIT_VALUE_1, true);
 
     // check onWill rangeBefore
     EXPECT_EQ(onWillRangeBefore.start, 1);
@@ -6606,7 +6606,7 @@ HWTEST_F(RichEditorTestNg, FinishTextPreview002, TestSize.Level1)
     /**
      * @tc.steps: step2.  test insertValue when previewTextInputting
      */
-    richEditorPattern->InsertValue(PREVIEW_TEXT_VALUE1);
+    richEditorPattern->InsertValue(PREVIEW_TEXT_VALUE1), true);
     EXPECT_EQ(richEditorPattern->spans_.size(), 1);
     auto it = richEditorPattern->spans_.begin();
     EXPECT_EQ((*it)->content, PREVIEW_TEXT_VALUE1);
@@ -6867,7 +6867,7 @@ HWTEST_F(RichEditorTestNg, RichEditorKeyBoardShortCuts202, TestSize.Level1)
     richEditorPattern->textSelector_.Update(4, 20);
     EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 4);
     richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_B);
-    EXPECT_EQ(richEditorController->updateSpanStyle_.updateFontWeight, Ace::FontWeight::BOLD);
+    EXPECT_EQ(richEditorPattern->GetUpdateSpanStyle().updateFontWeight, Ace::FontWeight::BOLD);
 }
 
 /**
@@ -6901,7 +6901,7 @@ HWTEST_F(RichEditorTestNg, RichEditorKeyBoardShortCuts203, TestSize.Level1)
     richEditorPattern->textSelector_.Update(4, 20);
     EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 20);
     richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_I);
-    EXPECT_EQ(richEditorController->updateSpanStyle_.updateItalicFontStyle, OHOS::Ace::FontStyle::ITALIC);
+    EXPECT_EQ(richEditorPattern->GetUpdateSpanStyle().updateItalicFontStyle, OHOS::Ace::FontStyle::ITALIC);
 }
 
 /**
@@ -6934,7 +6934,7 @@ HWTEST_F(RichEditorTestNg, RichEditorKeyBoardShortCuts204, TestSize.Level1)
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->textSelector_.Update(4, 20);
     richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_U);
-    EXPECT_EQ(richEditorController->updateSpanStyle_.updateTextDecoration, TextDecoration::UNDERLINE);
+    EXPECT_EQ(richEditorPattern->GetUpdateSpanStyle().updateTextDecoration, TextDecoration::UNDERLINE);
 }
 
 /**

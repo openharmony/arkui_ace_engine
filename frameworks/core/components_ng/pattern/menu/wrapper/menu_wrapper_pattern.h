@@ -109,6 +109,7 @@ public:
     }
 
     void HideSubMenu();
+    RefPtr<FrameNode> MenuFocusViewShow();
     void HideStackExpandMenu(const RefPtr<UINode>& subMenu);
 
     RefPtr<FrameNode> GetMenu() const
@@ -126,6 +127,23 @@ public:
         CHECK_NULL_RETURN(host, nullptr);
         auto preview = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
         CHECK_NULL_RETURN(preview, nullptr);
+        auto hoverImageCustomPreview = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(2));
+        CHECK_NULL_RETURN(hoverImageCustomPreview, preview);
+        if (hoverImageCustomPreview->GetTag() == V2::MENU_PREVIEW_ETS_TAG) {
+            return hoverImageCustomPreview;
+        }
+        return preview;
+    }
+
+    RefPtr<FrameNode> GetHoverImagePreview() const
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+        auto preview = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
+        CHECK_NULL_RETURN(preview, nullptr);
+        if (preview->GetTag() != V2::IMAGE_ETS_TAG) {
+            return nullptr;
+        }
         return preview;
     }
 
@@ -136,6 +154,10 @@ public:
         CHECK_NULL_RETURN(host, nullptr);
         auto badgeNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(2));
         CHECK_NULL_RETURN(badgeNode, nullptr);
+        if (badgeNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG) {
+            auto badgeNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(3));
+            CHECK_NULL_RETURN(badgeNode, nullptr);
+        }
         if (badgeNode->GetTag() != V2::TEXT_ETS_TAG) {
             return nullptr;
         }
@@ -153,6 +175,16 @@ public:
     void SetFirstShow()
     {
         isFirstShow_ = true;
+    }
+
+    void SetIsShowHoverImage(bool isShow)
+    {
+        isShowHoverImage_ = isShow;
+    }
+
+    bool GetIsShowHoverImage()
+    {
+        return isShowHoverImage_;
     }
 
     void RegisterMenuCallback(const RefPtr<FrameNode>& menuWrapperNode, const MenuParam& menuParam);
@@ -284,6 +316,7 @@ public:
         dumpInfo_.targetNode = dumpInfo.targetNode;
         dumpInfo_.targetOffset = dumpInfo.targetOffset;
         dumpInfo_.targetSize = dumpInfo.targetSize;
+        dumpInfo_.wrapperRect = dumpInfo.wrapperRect;
         dumpInfo_.previewBeginScale = dumpInfo.previewBeginScale;
         dumpInfo_.previewEndScale = dumpInfo.previewEndScale;
         dumpInfo_.top = dumpInfo.top;
@@ -304,6 +337,20 @@ public:
         hasCustomRadius_ = hasCustomRadius;
     }
 
+    RefPtr<FrameNode> GetLastTouchItem()
+    {
+        return lastTouchItem_;
+    }
+
+    void SetLastTouchItem(const RefPtr<FrameNode>& lastTouchItem)
+    {
+        lastTouchItem_ = lastTouchItem;
+    }
+
+    RefPtr<FrameNode> GetMenuChild(const RefPtr<UINode>& node);
+    RefPtr<FrameNode> GetShowedSubMenu();
+    bool IsSelectOverlayCustomMenu(const RefPtr<FrameNode>& menu) const;
+
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
     void CheckAndShowAnimation();
@@ -317,7 +364,6 @@ private:
     {
         return false;
     }
-    bool IsSelectOverlayCustomMenu(const RefPtr<FrameNode>& menu) const;
     void OnModifyDone() override;
     void InitFocusEvent();
     void OnAttachToFrameNode() override;
@@ -325,6 +371,9 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper);
     void StartShowAnimation();
+    void HandleInteraction(const TouchEventInfo& info);
+    RectF GetMenuZone(RefPtr<UINode>& innerMenuNode);
+    RefPtr<FrameNode> FindTouchedMenuItem(const RefPtr<UINode>& menuNode, const OffsetF& position);
 
     void HideMenu(const RefPtr<FrameNode>& menu);
 
@@ -334,6 +383,8 @@ private:
     std::function<void()> aboutToDisappearCallback_ = nullptr;
     std::function<void(const std::string&)> onStateChangeCallback_ = nullptr;
     RefPtr<TouchEventImpl> onTouch_;
+    RefPtr<FrameNode> lastTouchItem_ = nullptr;
+    RefPtr<FrameNode> currentTouchItem_ = nullptr;
     // menuId in OverlayManager's map
     int32_t targetId_ = -1;
 
@@ -341,6 +392,7 @@ private:
     Placement menuPlacement_ = Placement::NONE;
     bool isFirstShow_ = true;
     bool isShowInSubWindow_ = true;
+    bool isShowHoverImage_ = false;
     MenuStatus menuStatus_ = MenuStatus::INIT;
     bool hasTransitionEffect_ = false;
     bool hasPreviewTransitionEffect_ = false;

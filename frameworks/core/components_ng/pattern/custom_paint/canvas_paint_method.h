@@ -52,6 +52,19 @@ public:
 
 #ifndef USE_FAST_TASKPOOL
     void PushTask(const TaskFunc& task);
+#else
+    template <typename T, typename... Args>
+    void PushTask(Args&&... args)
+    {
+        CHECK_NULL_VOID(fastTaskPool_);
+        fastTaskPool_->Push<T>(0, std::forward<Args>(args)...);
+        if (needMarkDirty_) {
+            needMarkDirty_ = false;
+            auto host = frameNode_.Upgrade();
+            CHECK_NULL_VOID(host);
+            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
+    }
 #endif
     bool HasTask() const;
     void FlushTask();
@@ -77,7 +90,9 @@ public:
     std::unique_ptr<Ace::ImageData> GetImageData(
         RefPtr<RenderContext> renderContext, double left, double top, double width, double height);
     void GetImageData(const RefPtr<RenderContext>& renderContext, const std::shared_ptr<Ace::ImageData>& imageData);
-    void TransferFromImageBitmap(const RefPtr<OffscreenCanvasPattern>& offscreenCanvas);
+#ifdef PIXEL_MAP_SUPPORTED
+    void TransferFromImageBitmap(const RefPtr<PixelMap>& pixelMap);
+#endif
     std::string ToDataURL(RefPtr<RenderContext> renderContext, const std::string& args);
     bool DrawBitmap(RefPtr<RenderContext> renderContext, RSBitmap& currentBitmap);
     std::string GetJsonData(const std::string& path);
@@ -99,7 +114,9 @@ private:
     bool UpdateParagraph(const std::string& text, bool isStroke, bool hasShadow = false);
     void UpdateTextStyleForeground(bool isStroke, RSTextStyle& txtStyle, bool hasShadow);
     void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas, const RSBrush* brush = nullptr,
-        const RSPen* pen = nullptr) override;
+        const RSPen* pen = nullptr, RSSaveLayerOps* slo = nullptr) override;
+    void PaintImageShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas, const RSBrush* brush = nullptr,
+        const RSPen* pen = nullptr, RSSaveLayerOps* slo = nullptr) override;
     void Path2DRect(const PathArgs& args) override;
     RSCanvas* GetRawPtrOfRSCanvas() override
     {
@@ -107,7 +124,6 @@ private:
     }
 #ifndef USE_FAST_TASKPOOL
     std::list<TaskFunc> tasks_;
-    bool needMarkDirty_ = true;
 #else
     friend class CanvasPattern;
     std::unique_ptr<CanvasPaintOp> fastTaskPool_ = std::make_unique<CanvasPaintOp>();
@@ -118,6 +134,7 @@ private:
 #endif
     OnModifierUpdateFunc onModifierUpdate_;
     WeakPtr<FrameNode> frameNode_;
+    bool needMarkDirty_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(CanvasPaintMethod);
 };

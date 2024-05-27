@@ -179,6 +179,10 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             childIdeaSize.SetWidth(itemWidths_[index]);
             childLayoutConstraint.selfIdealSize = OptionalSizeF(childIdeaSize);
         }
+        auto iconWrapper = childWrapper->GetOrCreateChildByIndex(0);
+        if (iconWrapper && iconWrapper->GetHostNode() && iconWrapper->GetHostNode()->GetTag() == V2::SYMBOL_ETS_TAG) {
+            childWrapper->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+        }
         childWrapper->Measure(childLayoutConstraint);
         if (layoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::FIXED) {
             // In fixed mode, large paddings may overwhelm the constraint after measure
@@ -849,6 +853,8 @@ void TabBarLayoutAlgorithm::LayoutMask(LayoutWrapper* layoutWrapper, const std::
                                    : layoutProperty->GetUnselectedMask().value_or(-1));
         if (currentMask < 0) {
             currentWrapper->GetGeometryNode()->SetFrameSize(SizeF());
+            currentWrapper->Layout();
+            currentWrapper->SetActive(false);
         } else {
             auto offset = currentWrapper->GetGeometryNode()->GetMarginFrameOffset();
             currentWrapper->GetGeometryNode()->SetMarginFrameOffset(offset + childOffsetDelta[currentMask]);
@@ -859,8 +865,9 @@ void TabBarLayoutAlgorithm::LayoutMask(LayoutWrapper* layoutWrapper, const std::
             auto imageRenderContext = imageNode->GetRenderContext();
             CHECK_NULL_VOID(imageRenderContext);
             imageRenderContext->SetVisible(true);
+            currentWrapper->Layout();
+            currentWrapper->SetActive(true);
         }
-        currentWrapper->Layout();
     }
 }
 

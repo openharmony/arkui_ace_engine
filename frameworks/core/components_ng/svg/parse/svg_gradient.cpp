@@ -60,44 +60,14 @@ void SvgGradient::SetAttr(const std::string& name, const std::string& value)
             [](const std::string& val, SvgGradientAttribute& attr) {
                 attr.gradient.GetRadialGradient().fRadialCenterY = SvgAttributesParser::ParseDimension(val);
             } },
-        { DOM_SVG_SRC_GRADIENT_TRANSFORM,
-            [](const std::string& val, SvgGradientAttribute& attr) {
-                attr.gradient.SetGradientTransform(val);
-            } },
-        { SVG_GRADIENT_TRANSFORM,
-            [](const std::string& val, SvgGradientAttribute& attr) {
-                attr.gradient.SetGradientTransform(val);
-            } },
+        { DOM_SVG_SRC_GRADIENT_TRANSFORM, SetGradientTransform }, { SVG_GRADIENT_TRANSFORM, SetGradientTransform },
         { SVG_R,
             [](const std::string& val, SvgGradientAttribute& attr) {
                 auto r = SvgAttributesParser::ParseDimension(val);
                 attr.gradient.GetRadialGradient().radialHorizontalSize = r;
                 attr.gradient.GetRadialGradient().radialVerticalSize = r;
             } },
-        { DOM_SVG_SRC_SPREAD_METHOD,
-            [](const std::string& val, SvgGradientAttribute& attr) {
-                if (val == "pad") {
-                    attr.gradient.SetSpreadMethod(SpreadMethod::PAD);
-                }
-                if (val == "reflect") {
-                    attr.gradient.SetSpreadMethod(SpreadMethod::REFLECT);
-                }
-                if (val == "repeat") {
-                    attr.gradient.SetSpreadMethod(SpreadMethod::REPEAT);
-                }
-            } },
-        { SVG_SPREAD_METHOD,
-            [](const std::string& val, SvgGradientAttribute& attr) {
-                if (val == "pad") {
-                    attr.gradient.SetSpreadMethod(SpreadMethod::PAD);
-                }
-                if (val == "reflect") {
-                    attr.gradient.SetSpreadMethod(SpreadMethod::REFLECT);
-                }
-                if (val == "repeat") {
-                    attr.gradient.SetSpreadMethod(SpreadMethod::REPEAT);
-                }
-            } },
+        { DOM_SVG_SRC_SPREAD_METHOD, SetSpreadMethod }, { SVG_SPREAD_METHOD, SetSpreadMethod },
         { SVG_X1,
             [](const std::string& val, SvgGradientAttribute& attr) {
                 attr.gradient.GetLinearGradient().x1 = SvgAttributesParser::ParseDimension(val);
@@ -118,6 +88,24 @@ void SvgGradient::SetAttr(const std::string& name, const std::string& value)
     auto attrIter = BinarySearchFindIndex(GRADIENT_ATTRS, ArraySize(GRADIENT_ATTRS), name.c_str());
     if (attrIter != -1) {
         GRADIENT_ATTRS[attrIter].value(value, gradientAttr_);
+    }
+}
+
+void SvgGradient::SetGradientTransform(const std::string& val, SvgGradientAttribute& attr)
+{
+    attr.gradient.SetGradientTransform(val);
+}
+
+void SvgGradient::SetSpreadMethod(const std::string& val, SvgGradientAttribute& attr)
+{
+    if (val == "pad") {
+        attr.gradient.SetSpreadMethod(SpreadMethod::PAD);
+    }
+    if (val == "reflect") {
+        attr.gradient.SetSpreadMethod(SpreadMethod::REFLECT);
+    }
+    if (val == "repeat") {
+        attr.gradient.SetSpreadMethod(SpreadMethod::REPEAT);
     }
 }
 

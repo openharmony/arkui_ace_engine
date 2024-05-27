@@ -110,4 +110,3 @@ int32_t OH_ArkUI_DrawableDescriptor_GetAnimationIteration(ArkUI_DrawableDescript
 #ifdef __cplusplus
 };
 #endif
-

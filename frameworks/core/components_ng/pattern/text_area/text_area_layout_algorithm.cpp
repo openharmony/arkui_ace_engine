@@ -149,7 +149,7 @@ void TextAreaLayoutAlgorithm::ConstraintHeight(LayoutWrapper* layoutWrapper, Opt
     const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         frameSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
-    } else {
+    } else if (!layoutWrapper->GetLayoutProperty()->GetLayoutRect()) {
         auto finalSize = UpdateOptionSizeByCalcLayoutConstraint(frameSize,
             layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint(),
             layoutWrapper->GetLayoutProperty()->GetLayoutConstraint()->percentReference);

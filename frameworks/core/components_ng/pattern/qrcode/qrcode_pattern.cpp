@@ -21,6 +21,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
+#include "base/log/dump_log.h"
 #include "core/components_ng/pattern/qrcode/qrcode_paint_property.h"
 
 namespace OHOS::Ace::NG {
@@ -58,6 +59,20 @@ void QRCodePattern::OnModifyDone()
     } else {
         layoutProperty->UpdateAlignment(Alignment::CENTER);
     }
+}
+
+void QRCodePattern::DumpInfo()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<QRCodePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    DumpLog::GetInstance().AddDesc(
+        std::string("Color: ").append(paintProperty->GetColorValue(Color::TRANSPARENT).ColorToString()));
+    DumpLog::GetInstance().AddDesc(
+        std::string("ContentOpacity: ").append(std::to_string(paintProperty->GetOpacityValue(1.0f))));
+    DumpLog::GetInstance().AddDesc(
+        std::string("ContentString: ").append(paintProperty->GetValueValue(" ")));
 }
 
 FocusPattern QRCodePattern::GetFocusPattern() const

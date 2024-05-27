@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_MODEL_H
 
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace {
 class MenuModel {
@@ -37,7 +38,8 @@ public:
         const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
         const std::optional<Dimension>& radiusBottomRight);
     virtual void SetExpandingMode(const NG::SubMenuExpandingMode& expandingMode) {};
-
+    virtual void SetItemDivider(const V2::ItemDivider& divider) = 0;
+    virtual void SetItemGroupDivider(const V2::ItemDivider& divider) = 0;
 private:
     static std::unique_ptr<MenuModel> instance_;
     static std::mutex mutex_;

@@ -472,6 +472,76 @@ HWTEST_F(TextInputUpdateTestNg, AdjustTextInReasonableArea, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AdjustTextInReasonableArea002
+ * @tc.desc: test AdjustTextInReasonableArea002
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, AdjustTextInReasonableArea002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps:set textRect
+     */
+    RectF textRect = RectF(5.0f, 5.0f, 800.0f, 60.0f);
+    pattern_->SetTextRect(textRect);
+    std::cout<<pattern_->textRect_.GetY()<<", "<<pattern_->contentRect_.GetY()<<std::endl;
+    pattern_->AdjustTextInReasonableArea();
+    EXPECT_EQ(pattern_->GetTextRect().GetOffset(), OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: ProcessOverlayAfterLayout
+ * @tc.desc: Test function ProcessOverlayAfterLayout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, ProcessOverlayAfterLayout, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    pattern_->ProcessOverlayAfterLayout(true);
+    GetFocus();
+    pattern_->HandleSetSelection(5, 10, true);
+    pattern_->needToRefreshSelectOverlay_ = true;
+    pattern_->ProcessOverlayAfterLayout(false);
+    EXPECT_FALSE(pattern_->needToRefreshSelectOverlay_);
+}
+
+/**
+ * @tc.name: OnDragStart
+ * @tc.desc: Test function OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, OnDragStart, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. callback the InitDragDrop in OnModifyDone.
+     * @tc.expected: Check if return true.
+     */
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+
+    /**
+     * @tc.steps: step3. mock drag start.
+     */
+    auto gestureHub = pattern_->
+        GetHost()->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
+    gestureHub->SetIsTextDraggable(true);
+    pattern_->OnDragStart().operator()(dragEvent, "");
+    EXPECT_FALSE(pattern_->showSelect_);
+}
+
+/**
  * @tc.name: HandleTouchUp
  * @tc.desc: test HandleTouchUp
  * @tc.type: FUNC
@@ -505,5 +575,237 @@ HWTEST_F(TextInputUpdateTestNg, HandleTouchUp, TestSize.Level1)
     frameNode_->UpdateInspectorId("123");
     pattern_->OnAfterModifyDone();
     EXPECT_FALSE(pattern_->isMousePressed_);
+}
+
+/**
+ * @tc.name: ChangeTextCallbackTest001
+ * @tc.desc: test for callback SetOnWillInsertValueEvent/SetOnDidInsertValueEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and focusHub
+     */
+    CreateTextField();
+    GetFocus();
+    int32_t offset = 0;
+    std::string value = "";
+
+    auto onWillChange = [&offset, &value](const InsertValueInfo& info) {
+        offset = info.insertOffset;
+        value = info.insertValue;
+        return true;
+    };
+    eventHub_->SetOnWillInsertValueEvent(std::move(onWillChange));
+
+    int32_t didOffset = 0;
+    std::string didValue = "";
+    auto onDidChange = [&didOffset, &didValue](const InsertValueInfo& info) {
+        didOffset = info.insertOffset;
+        didValue = info.insertValue;
+    };
+    eventHub_->SetOnDidInsertValueEvent(std::move(onDidChange));
+
+    /**
+     * @tc.steps: step2. change text with HandleOnUndoAction
+     * @tc.expected: return value is valid
+     */
+    SourceAndValueInfo info;
+    info.insertValue = "2";
+    info.isIME = true;
+    pattern_->InsertValueOperation(info);
+    EXPECT_EQ(offset, 0);
+    EXPECT_EQ(value, "2");
+    EXPECT_EQ(didOffset, 1);
+    EXPECT_EQ(didValue, "2");
+}
+
+/**
+ * @tc.name: ChangeTextCallbackTest002
+ * @tc.desc: test for callback SetOnWillDeleteEvent/SetOnDidDeleteEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and focusHub
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetMaxLength(1000023); });
+    GetFocus();
+    TextDeleteDirection direction = TextDeleteDirection::BACKWARD;
+    int32_t offset = 0;
+    std::string value = "";
+
+    auto onWillChange = [&offset, &value, &direction](const DeleteValueInfo& info) {
+        offset = info.deleteOffset;
+        value = info.deleteValue;
+        direction = info.direction;
+        return true;
+    };
+    eventHub_->SetOnWillDeleteEvent(std::move(onWillChange));
+
+    TextDeleteDirection didDirection = TextDeleteDirection::BACKWARD;
+    int32_t didOffset = 0;
+    std::string didValue = "";
+    auto onDidChange = [&didOffset, &didValue, &didDirection](const DeleteValueInfo& info) {
+        didOffset = info.deleteOffset;
+        didValue = info.deleteValue;
+        didDirection = info.direction;
+    };
+    eventHub_->SetOnDidDeleteEvent(std::move(onDidChange));
+
+    /**
+     * @tc.steps: step2. change text with HandleOnUndoAction
+     * @tc.expected: return value is valid
+     */
+    pattern_->SetCaretPosition(1);
+    pattern_->DeleteBackwardOperation(1);
+    EXPECT_EQ(direction, TextDeleteDirection::BACKWARD);
+    EXPECT_EQ(offset, 1);
+    EXPECT_EQ(value, "a");
+    EXPECT_EQ(didDirection, TextDeleteDirection::BACKWARD);
+    EXPECT_EQ(didOffset, 0);
+    EXPECT_EQ(didValue, "a");
+}
+
+/**
+ * @tc.name: ChangeTextCallbackTest003
+ * @tc.desc: test for callback SetOnWillInsertValueEvent/SetOnDidInsertValueEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and focusHub
+     */
+    CreateTextField();
+    GetFocus();
+    int32_t offset = 0;
+    std::string value = "";
+
+    auto onWillChange = [&offset, &value](const InsertValueInfo& info) {
+        offset = info.insertOffset;
+        value = info.insertValue;
+        return false;
+    };
+    eventHub_->SetOnWillInsertValueEvent(std::move(onWillChange));
+
+    int32_t didOffset = -1;
+    std::string didValue = "";
+    auto onDidChange = [&didOffset, &didValue](const InsertValueInfo& info) {
+        didOffset = info.insertOffset;
+        didValue = info.insertValue;
+    };
+    eventHub_->SetOnDidInsertValueEvent(std::move(onDidChange));
+
+    /**
+     * @tc.steps: step2. change text with HandleOnUndoAction
+     * @tc.expected: return value is valid
+     */
+    SourceAndValueInfo info;
+    info.insertValue = "2";
+    info.isIME = true;
+    pattern_->InsertValueOperation(info);
+    EXPECT_EQ(offset, 0);
+    EXPECT_EQ(value, "2");
+    EXPECT_EQ(didOffset, -1);
+    EXPECT_EQ(didValue, "");
+}
+
+/**
+ * @tc.name: ChangeTextCallbackTest04
+ * @tc.desc: test for callback SetOnWillDeleteEvent/SetOnDidDeleteEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and focusHub
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetMaxLength(1000023); });
+    GetFocus();
+    TextDeleteDirection direction = TextDeleteDirection::BACKWARD;
+    int32_t offset = 0;
+    std::string value = "";
+
+    auto onWillChange = [&offset, &value, &direction](const DeleteValueInfo& info) {
+        offset = info.deleteOffset;
+        value = info.deleteValue;
+        direction = info.direction;
+        return false;
+    };
+    eventHub_->SetOnWillDeleteEvent(std::move(onWillChange));
+
+    TextDeleteDirection didDirection = TextDeleteDirection::BACKWARD;
+    int32_t didOffset = 0;
+    std::string didValue = "";
+    auto onDidChange = [&didOffset, &didValue, &didDirection](const DeleteValueInfo& info) {
+        didOffset = info.deleteOffset;
+        didValue = info.deleteValue;
+        didDirection = info.direction;
+    };
+    eventHub_->SetOnDidDeleteEvent(std::move(onDidChange));
+
+    /**
+     * @tc.steps: step2. change text with HandleOnUndoAction
+     * @tc.expected: return value is valid
+     */
+    pattern_->SetCaretPosition(1);
+    pattern_->DeleteBackwardOperation(1);
+    EXPECT_EQ(direction, TextDeleteDirection::BACKWARD);
+    EXPECT_EQ(offset, 1);
+    EXPECT_EQ(value, "a");
+    EXPECT_EQ(didDirection, TextDeleteDirection::BACKWARD);
+    EXPECT_EQ(didOffset, 0);
+    EXPECT_EQ(didValue, "");
+}
+
+/**
+ * @tc.name: ChangeTextCallbackTest005
+ * @tc.desc: test for callback SetOnWillDeleteEvent/SetOnDidDeleteEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and focusHub
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetMaxLength(1000023); });
+    GetFocus();
+    TextDeleteDirection direction = TextDeleteDirection::BACKWARD;
+    int32_t offset = 0;
+    std::string value = "";
+
+    auto onWillChange = [&offset, &value, &direction](const DeleteValueInfo& info) {
+        offset = info.deleteOffset;
+        value = info.deleteValue;
+        direction = info.direction;
+        return true;
+    };
+    eventHub_->SetOnWillDeleteEvent(std::move(onWillChange));
+
+    TextDeleteDirection didDirection = TextDeleteDirection::BACKWARD;
+    int32_t didOffset = 0;
+    std::string didValue = "";
+    auto onDidChange = [&didOffset, &didValue, &didDirection](const DeleteValueInfo& info) {
+        didOffset = info.deleteOffset;
+        didValue = info.deleteValue;
+        didDirection = info.direction;
+    };
+    eventHub_->SetOnDidDeleteEvent(std::move(onDidChange));
+
+    /**
+     * @tc.steps: step2. change text with HandleOnUndoAction
+     * @tc.expected: return value is valid
+     */
+    pattern_->SetCaretPosition(1);
+    pattern_->DeleteForwardOperation(1);
+    EXPECT_EQ(direction, TextDeleteDirection::FORWARD);
+    EXPECT_EQ(offset, 1);
+    EXPECT_EQ(value, "b");
+    EXPECT_EQ(didDirection, TextDeleteDirection::FORWARD);
+    EXPECT_EQ(didOffset, 1);
+    EXPECT_EQ(didValue, "b");
 }
 } // namespace OHOS::Ace::NG

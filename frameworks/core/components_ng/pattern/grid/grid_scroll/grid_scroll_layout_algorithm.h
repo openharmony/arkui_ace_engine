@@ -176,7 +176,7 @@ private:
     virtual void UpdateMainLineOnReload(int32_t startIdx);
 
     // get [resetFromStart,resetFromUpdate]
-    std::pair<bool, bool> GetResetMode(int32_t updateIdx);
+    std::pair<bool, bool> GetResetMode(LayoutWrapper* layoutWrapper, int32_t updateIdx);
 
     void CheckReset(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
 

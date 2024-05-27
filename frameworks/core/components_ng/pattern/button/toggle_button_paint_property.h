@@ -49,6 +49,10 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("type", "ToggleType.Button", filter);
         json->PutExtAttr("isOn", propIsOn_.value_or(false) ? "true" : "false", filter);
         json->PutExtAttr("selectedColor", propSelectedColor_.value_or(Color()).ColorToString().c_str(), filter);

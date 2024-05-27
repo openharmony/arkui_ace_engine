@@ -770,11 +770,11 @@ HWTEST_F(GridIrregularLayoutTest, JumpCenter001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GridIrregularLayout::TargetPosCenter001
- * @tc.desc: Test calculate target position with align center
+ * @tc.name: GridIrregularLayout::TargetPos001
+ * @tc.desc: Test calculate target position
  * @tc.type: FUNC
  */
-HWTEST_F(GridIrregularLayoutTest, TargetPosCenter001, TestSize.Level1)
+HWTEST_F(GridIrregularLayoutTest, TargetPos001, TestSize.Level1)
 {
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr 1fr");
@@ -790,6 +790,54 @@ HWTEST_F(GridIrregularLayoutTest, TargetPosCenter001, TestSize.Level1)
     pattern_->ScrollToIndex(2, true, ScrollAlign::CENTER);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->finalPosition_, 817.5f);
+
+    UpdateCurrentOffset(-400.0f);
+
+    pattern_->ScrollToIndex(1, true, ScrollAlign::CENTER);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->finalPosition_, 0.0f);
+
+    pattern_->ScrollToIndex(0, true, ScrollAlign::CENTER);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->finalPosition_, 0.0f);
+
+    UpdateCurrentOffset(-200.0f);
+
+    pattern_->ScrollToIndex(6, true, ScrollAlign::END);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->finalPosition_, 415.0f);
+
+    pattern_->ScrollToIndex(2, true, ScrollAlign::END);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->finalPosition_, 1330.0f);
+}
+
+/**
+ * @tc.name: GridIrregularLayout::TargetPos002
+ * @tc.desc: Test calculate target position
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, TargetPos002, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(GetOptionDemo10());
+    model.SetEdgeEffect(EdgeEffect::NONE, true);
+        CreateFixedHeightItems(3, 300.0f);
+        CreateFixedHeightItems(1, 600.0f);
+        CreateFixedHeightItems(1, 300.0f);
+        CreateFixedHeightItems(1, 600.0f);
+        CreateFixedHeightItems(1, 300.0f);
+    CreateDone(frameNode_);
+
+
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->gridLayoutInfo_.startMainLineIndex_, 1);
+
+    pattern_->ScrollToIndex(0, true, ScrollAlign::CENTER);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->finalPosition_, 0.0f);
 }
 
 /**
@@ -1143,107 +1191,6 @@ HWTEST_F(GridIrregularLayoutTest, TrySkipping001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GridIrregularLayout::TransformAutoScrollAlign001
- * @tc.desc: Test IrregularLayout::TransformAutoScrollAlign
- * @tc.type: FUNC
- */
-HWTEST_F(GridIrregularLayoutTest, TransformAutoScrollAlign001, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr 1fr");
-    model.SetLayoutOptions(GetOptionDemo8());
-    CreateDone(frameNode_);
-
-    auto algo = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
-    algo->wrapper_ = AceType::RawPtr(frameNode_);
-
-    auto& info = algo->gridLayoutInfo_;
-    info.lineHeightMap_ = { { 0, 50.0f }, { 1, 300.0f }, { 2, 30.0f }, { 3, 50.0f }, { 4, 80.0f } };
-    info.gridMatrix_ = MATRIX_DEMO_8;
-    algo->mainGap_ = 5.0f;
-
-    info.jumpIndex_ = 2;
-    info.startMainLineIndex_ = 0;
-    info.endMainLineIndex_ = 4;
-    info.startIndex_ = 0;
-    info.endIndex_ = 6;
-    EXPECT_EQ(algo->TransformAutoScrollAlign(500.0f), ScrollAlign::NONE);
-
-    info.jumpIndex_ = 0;
-    info.startMainLineIndex_ = 3;
-    info.endMainLineIndex_ = 4;
-    info.startIndex_ = 3;
-    info.endIndex_ = 6;
-    info.currentOffset_ = -10.0f;
-    EXPECT_EQ(algo->TransformAutoScrollAlign(100.0f), ScrollAlign::START);
-
-    info.jumpIndex_ = 2;
-    info.startMainLineIndex_ = 1;
-    info.endMainLineIndex_ = 2;
-    info.startIndex_ = 2;
-    info.endIndex_ = 2;
-    info.currentOffset_ = -25.0f;
-    EXPECT_EQ(algo->TransformAutoScrollAlign(310.0f), ScrollAlign::NONE);
-}
-
-/**
- * @tc.name: GridIrregularLayout::TransformAutoScrollAlign002
- * @tc.desc: Test IrregularLayout::TransformAutoScrollAlign
- * @tc.type: FUNC
- */
-HWTEST_F(GridIrregularLayoutTest, TransformAutoScrollAlign002, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr 1fr");
-    model.SetLayoutOptions(GetOptionDemo8());
-    CreateDone(frameNode_);
-
-    auto algo = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
-    algo->wrapper_ = AceType::RawPtr(frameNode_);
-
-    auto& info = algo->gridLayoutInfo_;
-    info.lineHeightMap_ = { { 0, 50.0f }, { 1, 300.0f }, { 2, 30.0f }, { 3, 50.0f }, { 4, 80.0f } };
-    info.gridMatrix_ = MATRIX_DEMO_8;
-    algo->mainGap_ = 5.0f;
-
-    // line 3 now matches with the end of the viewport, should endMainlineIndex_ be updated to 3?
-    info.currentOffset_ = -30.0f;
-    info.endMainLineIndex_ = 3;
-    info.endIndex_ = 5;
-    EXPECT_EQ(algo->TransformAutoScrollAlign(310.0f), ScrollAlign::START);
-    info.currentOffset_ = -31.0f;
-    EXPECT_EQ(algo->TransformAutoScrollAlign(310.0f), ScrollAlign::START);
-
-    info.jumpIndex_ = 0;
-    info.startMainLineIndex_ = 3;
-    info.endMainLineIndex_ = 4;
-    info.startIndex_ = 3;
-    info.endIndex_ = 6;
-    EXPECT_EQ(algo->TransformAutoScrollAlign(100.0f), ScrollAlign::START);
-
-    info.jumpIndex_ = 4;
-    info.startMainLineIndex_ = 1;
-    info.endMainLineIndex_ = 4;
-    info.startIndex_ = 2;
-    info.endIndex_ = 6;
-
-    info.currentOffset_ = -379.0f;
-    algo->mainGap_ = 50.0f;
-    EXPECT_EQ(algo->TransformAutoScrollAlign(152.0f), ScrollAlign::NONE);
-
-    algo->mainGap_ = 5.0f;
-    // emulate init
-    info.lineHeightMap_.clear();
-    info.gridMatrix_.clear();
-    info.jumpIndex_ = 3;
-    info.startMainLineIndex_ = 0;
-    info.endMainLineIndex_ = 0;
-    info.startIndex_ = 0;
-    info.endIndex_ = -1;
-    EXPECT_EQ(algo->TransformAutoScrollAlign(300.0f), ScrollAlign::END);
-}
-
-/**
  * @tc.name: GridIrregularLayout::Integrated001
  * @tc.desc: Test full layout process
  * @tc.type: FUNC
@@ -1319,6 +1266,64 @@ HWTEST_F(GridIrregularLayoutTest, Integrated002, TestSize.Level1)
     EXPECT_EQ(info.startMainLineIndex_, 0);
     EXPECT_EQ(info.endMainLineIndex_, 2);
     EXPECT_TRUE(info.reachStart_);
+}
+
+/**
+ * @tc.name: GridIrregularLayout::Integrated003
+ * @tc.desc: Test large offset
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, Integrated003, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr 1fr");
+    model.SetLayoutOptions(GetOptionDemo14());
+    model.SetColumnsGap(Dimension { 5.0f });
+    for (int i = 0; i < 500; ++i) {
+        CreateGridItems(1, -2, rand() % 1000);
+    }
+    CreateDone(frameNode_);
+
+    bool pos = true;
+    for (int i = 0; i < 100; ++i) {
+        float offset = 1000.0f + (rand() % 9000);
+        if (!pos) {
+            offset = -offset;
+        }
+        pos = !pos;
+        UpdateCurrentOffset(offset);
+    }
+    const auto& info = pattern_->gridLayoutInfo_;
+    EXPECT_TRUE(info.endMainLineIndex_ >= info.startMainLineIndex_);
+    EXPECT_TRUE(info.startIndex_ <= info.endIndex_);
+
+    layoutProperty_->UpdateColumnsTemplate("1fr 1fr 1fr 1fr");
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    for (int i = 0; i < 100; ++i) {
+        float offset = 1000.0f + (rand() % 9000);
+        if (!pos) {
+            offset = -offset;
+        }
+        pos = !pos;
+        UpdateCurrentOffset(offset);
+    }
+    EXPECT_TRUE(info.endMainLineIndex_ >= info.startMainLineIndex_);
+    EXPECT_TRUE(info.startIndex_ <= info.endIndex_);
+
+    layoutProperty_->UpdateColumnsTemplate("1fr 1fr 1fr");
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    for (int i = 0; i < 100; ++i) {
+        float offset = 1000.0f + (rand() % 9000);
+        if (!pos) {
+            offset = -offset;
+        }
+        pos = !pos;
+        UpdateCurrentOffset(offset);
+    }
+    EXPECT_TRUE(info.endMainLineIndex_ >= info.startMainLineIndex_);
+    EXPECT_TRUE(info.startIndex_ <= info.endIndex_);
 }
 
 /**

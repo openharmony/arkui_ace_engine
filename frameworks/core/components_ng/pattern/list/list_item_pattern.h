@@ -105,6 +105,7 @@ public:
     V2::SwipeEdgeEffect GetEdgeEffect();
     void MarkDirtyNode();
     void UpdatePostion(float delta);
+    void DumpAdvanceInfo() override;
 
     bool HasStartNode() const
     {
@@ -253,6 +254,8 @@ private:
         startNodeSize_ = 0.0f;
         endNodeSize_ = 0.0f;
     }
+    bool IsRTLAndVertical() const;
+    float SetReverseValue(float offset);
 
     RefPtr<ShallowBuilder> shallowBuilder_;
     V2::ListItemStyle listItemStyle_ = V2::ListItemStyle::NONE;

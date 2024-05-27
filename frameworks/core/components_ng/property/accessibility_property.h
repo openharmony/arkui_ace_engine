@@ -379,6 +379,16 @@ public:
         accessibilityGroup_ = accessibilityGroup;
     }
 
+    void SetChildTreeId(int32_t childTreeId)
+    {
+        childTreeId_ = childTreeId;
+    }
+
+    void SetChildWindowId(int32_t childWindowId)
+    {
+        childWindowId_ = childWindowId;
+    }
+
     void SetAccessibilityText(const std::string& text)
     {
         accessibilityText_ = text;
@@ -397,6 +407,16 @@ public:
     bool IsAccessibilityGroup() const
     {
         return accessibilityGroup_;
+    }
+
+    int32_t GetChildTreeId() const
+    {
+        return childTreeId_;
+    }
+
+    int32_t GetChildWindowId() const
+    {
+        return childWindowId_;
     }
 
     void SaveAccessibilityVirtualNode(const RefPtr<UINode>& node)
@@ -481,6 +501,34 @@ public:
     */
     static bool IsAccessibilityFocusableDebug(const RefPtr<FrameNode>& node, std::unique_ptr<JsonValue>& info);
 
+    void SetUserDisabled(const bool& isDisabled);
+    bool HasUserDisabled();
+    bool IsUserDisabled();
+
+    void SetUserSelected(const bool& isSelected);
+    bool HasUserSelected();
+    bool IsUserSelected();
+
+    void SetUserCheckedType(const int32_t& checkedType);
+    bool HasUserCheckedType();
+    int32_t GetUserCheckedType();
+
+    void SetUserMinValue(const int32_t& minValue);
+    bool HasUserMinValue();
+    int32_t GetUserMinValue();
+
+    void SetUserMaxValue(const int32_t& maxValue);
+    bool HasUserMaxValue();
+    int32_t GetUserMaxValue();
+
+    void SetUserCurrentValue(const int32_t& currentValue);
+    bool HasUserCurrentValue();
+    int32_t GetUserCurrentValue();
+
+    void SetUserTextValue(const std::string& textValue);
+    bool HasUserTextValue();
+    std::string GetUserTextValue();
+
 private:
     // node should be not-null
     static bool HoverTestRecursive(
@@ -524,12 +572,23 @@ protected:
     ActionSetCursorIndexImpl actionSetCursorIndexImpl_;
     ActionGetCursorIndexImpl actionGetCursorIndexImpl_;
     bool accessibilityGroup_ = false;
+    int32_t childTreeId_ = -1;
+    int32_t childWindowId_ = 0;
     RefPtr<UINode> accessibilityVirtualNode_;
     std::optional<std::string> accessibilityText_;
     std::optional<std::string> accessibilityDescription_;
     std::optional<std::string> accessibilityLevel_;
     std::optional<std::string> textTypeHint_;
     ACE_DISALLOW_COPY_AND_MOVE(AccessibilityProperty);
+
+    std::optional<bool> isDisabled_;
+    std::optional<bool> isSelected_;
+    std::optional<int32_t> checkedType_;
+
+    std::optional<int32_t> minValue_;
+    std::optional<int32_t> maxValue_;
+    std::optional<int32_t> currentValue_;
+    std::optional<std::string> textValue_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -145,6 +145,7 @@ public:
                             std::shared_ptr<NWeb::NWebFileSelectorParams> params) override;
 
     bool OnFocus() override;
+    bool OnFocus(OHOS::NWeb::NWebFocusSource source) override;
     void OnResourceLoadError(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error) override;
     void OnHttpError(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
@@ -255,6 +256,15 @@ public:
     void OnRenderProcessResponding() override;
 
     void OnViewportFitChange(NWeb::ViewportFit viewportFit) override;
+    
+    void OnInterceptKeyboardAttach(
+        const std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler,
+        const std::map<std::string, std::string> &attributes, bool &useSystemKeyboard, int32_t &enterKeyType) override;
+
+    void OnCustomKeyboardAttach() override;
+
+    void OnCustomKeyboardClose() override;
+
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;

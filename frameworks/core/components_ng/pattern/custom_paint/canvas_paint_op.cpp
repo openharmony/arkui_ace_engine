@@ -15,78 +15,354 @@
 
 #include "core/components_ng/pattern/custom_paint/canvas_paint_op.h"
 
+#include "core/components_ng/image_provider/svg_dom_base.h"
 #include "core/components_ng/pattern/custom_paint/canvas_paint_method.h"
+#include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
 
 namespace OHOS::Ace::NG {
+void SaveOp::Draw(CanvasPaintMethod* method) const
+{
+    method->Save();
+}
 
-#define X(T) T,
-enum class Type : uint8_t {
-#include "canvas_paint_ops.in"
-};
-#undef X
+void RestoreOp::Draw(CanvasPaintMethod* method) const
+{
+    method->Restore();
+}
 
-struct Op {
-    uint32_t type : 8;
-    uint32_t skip : 24;
-};
-static_assert(sizeof(Op) == 4, "size of canvas op shoule be 4");
+void FillRectOp::Draw(CanvasPaintMethod* method) const
+{
+    method->FillRect(rect);
+}
 
-struct SaveOp final : Op {
-    static constexpr auto kType = Type::SaveOp;
-    void Draw(CanvasPaintMethod* method) const { method->Save(); }
-};
+void FillTextOp::Draw(CanvasPaintMethod* method) const
+{
+    method->FillText(text, x, y, maxWidth);
+}
 
-struct RestoreOp final : Op {
-    static constexpr auto kType = Type::RestoreOp;
-    void Draw(CanvasPaintMethod* method) const { method->Restore(); }
-};
+void BezierCurveToOp::Draw(CanvasPaintMethod* method) const
+{
+    method->BezierCurveTo(param);
+}
 
-struct FillRectOp final : Op {
-    static constexpr auto kType = Type::FillRectOp;
-    explicit FillRectOp(const Rect& rect): rect(std::move(rect)) {}
-    Rect rect;
-    void Draw(CanvasPaintMethod* method) const { method->Restore(); }
-};
+void SetTransformOp::Draw(CanvasPaintMethod* method) const
+{
+    method->SetTransform(param);
+}
 
-struct FillTextOp final : Op {
-    static constexpr auto kType = Type::FillTextOp;
-    FillTextOp(const std::string& text, double x, double y, std::optional<double> maxWidth)
-        : text(std::move(text)), x(x), y(y), maxWidth(maxWidth) {}
-    std::string text;
-    double x, y;
-    std::optional<double> maxWidth;
-    void Draw(CanvasPaintMethod* method) const
-    {
-        method->FillText(text, x, y, maxWidth);
-    }
-};
+void SetFillColorOp::Draw(CanvasPaintMethod* method) const
+{
+    method->SetFillColor(color);
+}
 
-struct BezierCurveToOp final : Op {
-    static constexpr auto kType = Type::BezierCurveToOp;
-    explicit BezierCurveToOp(const BezierCurveParam& param): param(param) {}
-    BezierCurveParam param;
-    void Draw(CanvasPaintMethod* method) const { method->BezierCurveTo(param); }
-};
+void SetFillGradientOp::Draw(CanvasPaintMethod* method) const
+{
+    method->SetFillGradient(gradient);
+}
 
-typedef void (*DrawFn)(const void*, CanvasPaintMethod* method);
-typedef void (*VoidFn)(const void*);
+void SetFillPatternNGOp::Draw(CanvasPaintMethod* method) const
+{
+    method->SetFillPatternNG(pattern);
+}
 
-#define X(T)                                                                                   \
-    [](const void* op, CanvasPaintMethod* method) {                                            \
-        ((const T*)op)->Draw(method);                                                          \
-    },
-static const DrawFn DRAW_FNS[] = {
-    #include "./canvas_paint_ops.in"
-};
-#undef X
+void SetAlphaOp::Draw(CanvasPaintMethod* method) const
+{
+    method->SetAlpha(alpha);
+}
 
-#define X(T)                                                                                    \
-    !std::is_trivially_destructible<T>::value ? [](const void* op) { ((const T*)op)->~T(); }    \
-                                                : (VoidFn) nullptr,
-static const VoidFn DTOR_FBS[] = {
-    #include "./canvas_paint_ops.in"
-};
-#undef X
+void SetFillRuleForPathOp::Draw(CanvasPaintMethod* method) const
+{
+    method->SetFillRuleForPath(rule);
+}
+
+void SetFillRuleForPath2DOp::Draw(CanvasPaintMethod* method) const
+{
+    method->SetFillRuleForPath2D(rule);
+}
+
+void FillOp::Draw(CanvasPaintMethod* method) const
+{
+    method->Fill();
+}
+
+void Fill2DOp::Draw(CanvasPaintMethod* method) const
+{
+    method->Fill(path);
+}
+
+void MoveToOp::Draw(CanvasPaintMethod* method) const
+{
+    method->MoveTo(x, y);
+}
+
+void BeginPathOp::Draw(CanvasPaintMethod* method) const
+{
+    method->BeginPath();
+}
+
+void SetFilterParamOp::Draw(CanvasPaintMethod* method) const
+{
+    method->SetFilterParam(filterStr);
+}
+
+void ClosePathOp::Draw(CanvasPaintMethod* method) const
+{
+    method->ClosePath();
+}
+
+void ClearRectOp::Draw(CanvasPaintMethod* method) const
+{
+    method->ClearRect(rect);
+}
+
+void SetStrokeColorOp::Draw(CanvasPaintMethod* method) const
+{
+    method->SetStrokeColor(color);
+}
+
+void SetStrokeGradientOp::Draw(CanvasPaintMethod* method) const
+{
+    method->SetStrokeGradient(gradient);
+}
+
+void SetStrokePatternNGOp::Draw(CanvasPaintMethod* method) const
+{
+    method->SetStrokePatternNG(pattern);
+}
+
+void LineToOp::Draw(CanvasPaintMethod* method) const
+{
+    method->LineTo(x, y);
+}
+
+void SetLineJoinOp::Draw(CanvasPaintMethod* method) const
+{
+    method->SetLineJoin(style);
+}
+
+void SetLineCapOp::Draw(CanvasPaintMethod* method) const
+{
+    method->SetLineCap(style);
+}
+
+void SetLineWidthOp::Draw(CanvasPaintMethod* method) const
+{
+    method->SetLineWidth(width);
+}
+
+void SetMiterLimitOp::Draw(CanvasPaintMethod* method) const
+{
+    method->SetMiterLimit(limit);
+}
+
+void StrokeOp::Draw(CanvasPaintMethod* method) const
+{
+    method->Stroke();
+}
+
+void Stroke2DOp::Draw(CanvasPaintMethod* method) const
+{
+    method->Stroke(path);
+}
+
+void SetCompositeTypeOp::Draw(CanvasPaintMethod* method) const
+{
+    method->SetCompositeType(operation);
+}
+
+void ClipOp::Draw(CanvasPaintMethod* method) const
+{
+    method->Clip();
+}
+
+void Clip2DOp::Draw(CanvasPaintMethod* method) const
+{
+    method->Clip(path);
+}
+
+void StrokeRectOp::Draw(CanvasPaintMethod* method) const
+{
+    method->StrokeRect(rect);
+}
+
+void ArcOp::Draw(CanvasPaintMethod* method) const
+{
+    method->Arc(param);
+}
+
+void ArcToOp::Draw(CanvasPaintMethod* method) const
+{
+    method->ArcTo(param);
+}
+
+void AddRectOp::Draw(CanvasPaintMethod* method) const
+{
+    method->AddRect(rect);
+}
+
+void EllipseOp::Draw(CanvasPaintMethod* method) const
+{
+    method->Ellipse(param);
+}
+
+void QuadraticCurveToOp::Draw(CanvasPaintMethod* method) const
+{
+    method->QuadraticCurveTo(param);
+}
+
+void PutImageDataOp::Draw(CanvasPaintMethod* method) const
+{
+    method->PutImageData(imageData);
+}
+
+void ScaleOp::Draw(CanvasPaintMethod* method) const
+{
+    method->Scale(x, y);
+}
+
+void RotateOp::Draw(CanvasPaintMethod* method) const
+{
+    method->Rotate(angle);
+}
+
+void TransformOp::Draw(CanvasPaintMethod* method) const
+{
+    method->Transform(param);
+}
+
+void TranslateOp::Draw(CanvasPaintMethod* method) const
+{
+    method->Translate(x, y);
+}
+
+void SaveLayerOp::Draw(CanvasPaintMethod* method) const
+{
+    method->SaveLayer();
+}
+
+void RestoreLayerOp::Draw(CanvasPaintMethod* method) const
+{
+    method->RestoreLayer();
+}
+
+void SetAntiAliasOp::Draw(CanvasPaintMethod* method) const
+{
+    method->SetAntiAlias(isEnabled);
+}
+
+void SetTextDirectionOp::Draw(CanvasPaintMethod* method) const
+{
+    method->SetTextDirection(direction);
+}
+
+void SetLineDashOffsetOp::Draw(CanvasPaintMethod* method) const
+{
+    method->SetLineDashOffset(offset);
+}
+
+void SetLineDashOp::Draw(CanvasPaintMethod* method) const
+{
+    method->SetLineDash(segments);
+}
+
+void SetTextAlignOp::Draw(CanvasPaintMethod* method) const
+{
+    method->SetTextAlign(align);
+}
+
+void SetTextBaselineOp::Draw(CanvasPaintMethod* method) const
+{
+    method->SetTextBaseline(baseline);
+}
+
+void SetShadowColorOp::Draw(CanvasPaintMethod* method) const
+{
+    method->SetShadowColor(color);
+}
+
+void SetShadowBlurOp::Draw(CanvasPaintMethod* method) const
+{
+    method->SetShadowBlur(blur);
+}
+
+void SetShadowOffsetXOp::Draw(CanvasPaintMethod* method) const
+{
+    method->SetShadowOffsetX(x);
+}
+
+void SetShadowOffsetYOp::Draw(CanvasPaintMethod* method) const
+{
+    method->SetShadowOffsetY(y);
+}
+
+void SetSmoothingEnabledOp::Draw(CanvasPaintMethod* method) const
+{
+    method->SetSmoothingEnabled(enabled);
+}
+
+void SetSmoothingQualityOp::Draw(CanvasPaintMethod* method) const
+{
+    method->SetSmoothingQuality(quality);
+}
+
+void SetFontSizeOp::Draw(CanvasPaintMethod* method) const
+{
+    method->SetFontSize(size);
+}
+
+void SetFontStyleOp::Draw(CanvasPaintMethod* method) const
+{
+    method->SetFontStyle(style);
+}
+
+void SetFontWeightOp::Draw(CanvasPaintMethod* method) const
+{
+    method->SetFontWeight(weight);
+}
+
+void SetFontFamiliesOp::Draw(CanvasPaintMethod* method) const
+{
+    method->SetFontFamilies(fontFamilies);
+}
+
+void DrawSvgImageOp::Draw(CanvasPaintMethod* method) const
+{
+    method->DrawSvgImage(svgDom, canvasImage, imageFit);
+}
+
+void DrawImageOp::Draw(CanvasPaintMethod* method) const
+{
+    method->DrawImage(canvasImage, width, height);
+}
+
+void DrawPixelMapOp::Draw(CanvasPaintMethod* method) const
+{
+    method->DrawPixelMap(pixelMap, canvasImage);
+}
+
+#ifdef PIXEL_MAP_SUPPORTED
+void TransferFromImageBitmapOp::Draw(CanvasPaintMethod* method) const
+{
+    method->TransferFromImageBitmap(pixelMap);
+}
+#endif
+
+void StrokeTextOp::Draw(CanvasPaintMethod* method) const
+{
+    method->StrokeText(text, x, y, maxWidth);
+}
+
+void ResetCanvasOp::Draw(CanvasPaintMethod* method) const
+{
+    method->Reset();
+}
+
+void ResetTransformOp::Draw(CanvasPaintMethod* method) const
+{
+    method->ResetTransform();
+}
+
+void SetInvalidateOp::Draw(CanvasPaintMethod* method) const {}
 
 void CanvasPaintOp::Draw(CanvasPaintMethod* method) const
 {
@@ -97,52 +373,6 @@ void CanvasPaintOp::Reset()
 {
     Map(DTOR_FBS);
     fUsed = 0;
-}
-
-void CanvasPaintOp::Save()
-{
-    Push<SaveOp>(0);
-}
-void CanvasPaintOp::Restore()
-{
-    Push<RestoreOp>(0);
-}
-
-void CanvasPaintOp::FillText(const std::string& text, double x, double y, std::optional<double>& maxWidth)
-{
-    Push<FillTextOp>(0, text, x, y, maxWidth);
-}
-
-void CanvasPaintOp::FillRect(const Rect& rect)
-{
-    Push<FillRectOp>(0, rect);
-}
-
-void CanvasPaintOp::BezierCurveTo(const BezierCurveParam& param)
-{
-    Push<BezierCurveToOp>(0, param);
-}
-
-template <typename T, typename... Args>
-void* CanvasPaintOp::Push(size_t pod, Args&&... args)
-{
-    size_t skip = AlignPtr(sizeof(T) + pod);
-    ACE_DCHECK(skip < (1 << SKIPSIZE));
-    if (fUsed + skip > fReserved) {
-        static_assert(IsPow2(PAGESIZE), "This math needs updating for non-pow2.");
-        fReserved = (fUsed + skip + PAGESIZE) & ~(PAGESIZE - 1);
-        fBytes.realloc(fReserved);
-        if (!fBytes.get()) {
-            TAG_LOGE(AceLogTag::ACE_CANVAS_COMPONENT, "realloc failed");
-        }
-    }
-    ACE_DCHECK(fUsed + skip <= fReserved);
-    auto op = (T*)(fBytes.get() + fUsed);
-    fUsed += skip;
-    new (op) T{std::forward<Args>(args)...};
-    op->type = (uint32_t)T::kType;
-    op->skip = skip;
-    return op + 1;
 }
 
 template <typename Fn, typename... Args>

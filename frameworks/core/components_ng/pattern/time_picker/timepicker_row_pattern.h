@@ -394,6 +394,10 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("selected", selectedTime_.ToString(false, false).c_str(), filter);
     }
 
@@ -451,6 +455,8 @@ private:
     RefPtr<FrameNode> GetSecondNode(std::list<RefPtr<UINode>>::iterator& iter);
     void UpdateAllChildNodeForUg();
     void UpdateNodePositionForUg();
+    void MountSecondNode(const RefPtr<FrameNode>& stackSecondNode);
+    void RemoveSecondNode();
 
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;

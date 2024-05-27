@@ -630,9 +630,15 @@ JSRef<JSVal> JSRichEditor::CreateJsAboutToDelet(const NG::RichEditorDeleteValue&
     AboutToDeletObj->SetProperty<int32_t>(
         "direction", static_cast<int32_t>(deleteValue.GetRichEditorDeleteDirection()));
     AboutToDeletObj->SetProperty<int32_t>("length", deleteValue.GetLength());
+    AboutToDeletObj->SetPropertyObject("richEditorDeleteSpans", CreateJSDeleteSpans(deleteValue));
+    return JSRef<JSVal>::Cast(AboutToDeletObj);
+}
+
+JSRef<JSArray> JSRichEditor::CreateJSDeleteSpans(const NG::RichEditorDeleteValue& deleteValue)
+{
     JSRef<JSArray> richEditorDeleteSpans = JSRef<JSArray>::New();
-    auto list = deleteValue.GetRichEditorDeleteSpans();
     int32_t index = 0;
+    auto list = deleteValue.GetRichEditorDeleteSpans();
     for (const auto& it : list) {
         JSRef<JSObject> spanResultObj = JSRef<JSObject>::New();
         JSRef<JSObject> spanPositionObj = JSRef<JSObject>::New();
@@ -665,13 +671,19 @@ JSRef<JSVal> JSRichEditor::CreateJsAboutToDelet(const NG::RichEditorDeleteValue&
                 spanResultObj->SetPropertyObject("imageStyle", imageStyleObj);
                 break;
             }
+            case NG::SpanResultType::SYMBOL: {
+                spanResultObj->SetProperty<std::string>("value", it.GetValueString());
+                spanResultObj->SetPropertyObject(
+                    "symbolSpanStyle", CreateJSSymbolSpanStyleResult(it.GetSymbolSpanStyle()));
+                spanResultObj->SetPropertyObject("valueResource", CreateJSValueResource(it.GetValueResource()));
+                break;
+            }
             default:
                 break;
         }
         richEditorDeleteSpans->SetValueAt(index++, spanResultObj);
     }
-    AboutToDeletObj->SetPropertyObject("richEditorDeleteSpans", richEditorDeleteSpans);
-    return JSRef<JSVal>::Cast(AboutToDeletObj);
+    return richEditorDeleteSpans;
 }
 
 void JSRichEditor::SetChangeTextSpans(
@@ -1251,10 +1263,10 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
     JSRef<JSVal> fontSize = styleObject->GetProperty("fontSize");
     CalcDimension size;
     if (!fontSize->IsNull() && JSContainerBase::ParseJsDimensionFpNG(fontSize, size, false) &&
-        !size.IsNonPositive() && size.Unit() != DimensionUnit::PERCENT) {
+        !FontSizeRangeIsNegative(size) && size.Unit() != DimensionUnit::PERCENT) {
         updateSpanStyle.updateFontSize = size;
         style.SetFontSize(size);
-    } else if (size.IsNonPositive() || size.Unit() == DimensionUnit::PERCENT) {
+    } else if (FontSizeRangeIsNegative(size) || size.Unit() == DimensionUnit::PERCENT) {
         auto theme = JSContainerBase::GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
         size = theme->GetTextStyle().GetFontSize();
@@ -2021,6 +2033,14 @@ void JSRichEditorBaseController::SetTypingStyle(const JSCallbackInfo& info)
     controller->SetTypingStyle(typingStyle_, textStyle);
 }
 
+bool JSRichEditorBaseController::FontSizeRangeIsNegative(const CalcDimension& size)
+{
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        return size.IsNegative();
+    }
+    return size.IsNonPositive();
+}
+
 void JSRichEditorBaseController::ParseJsTextStyle(
     const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
 {
@@ -2035,10 +2055,10 @@ void JSRichEditorBaseController::ParseJsTextStyle(
     JSRef<JSVal> fontSize = styleObject->GetProperty("fontSize");
     CalcDimension size;
     if (!fontSize->IsNull() && JSContainerBase::ParseJsDimensionFpNG(fontSize, size) &&
-        !size.IsNonPositive() && size.Unit() != DimensionUnit::PERCENT) {
+        !FontSizeRangeIsNegative(size) && size.Unit() != DimensionUnit::PERCENT) {
         updateSpanStyle.updateFontSize = size;
         style.SetFontSize(size);
-    } else if (size.IsNonPositive() || size.Unit() == DimensionUnit::PERCENT) {
+    } else if (FontSizeRangeIsNegative(size) || size.Unit() == DimensionUnit::PERCENT) {
         auto theme = JSContainerBase::GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
         size = theme->GetTextStyle().GetFontSize();
