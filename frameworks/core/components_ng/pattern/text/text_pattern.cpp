@@ -3220,7 +3220,7 @@ ResultObject TextPattern::GetBuilderResultObject(RefPtr<UINode> uiNode, int32_t 
 {
     int32_t itemLength = 1;
     ResultObject resultObject;
-    resultObject.isDraggable = false;
+    resultObject.isDraggable = true;
     if (!DynamicCast<FrameNode>(uiNode) || !GetSpanItemByIndex(index)) {
         return resultObject;
     }

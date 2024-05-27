@@ -38,6 +38,7 @@ constexpr uint32_t DEFAULT_AMBIENT_COLOR = 0X0A000000;
 constexpr float DEFAULT_SHADOW_COLOR = 0x33000000;
 constexpr float DEFAULT_LIGHT_RADIUS = 800.0f;
 constexpr float DEFAULT_ELEVATION = 120.0f;
+constexpr float CONSTANT_DOUBLE = 2.0f;
 
 void RichEditorDragOverlayModifier::onDraw(DrawingContext& context)
 {
@@ -90,40 +91,85 @@ void RichEditorDragOverlayModifier::PaintImage(DrawingContext& context)
 {
     auto pattern = DynamicCast<RichEditorDragPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(pattern);
-    auto& canvas = context.canvas;
     size_t index = 0;
     auto imageChildren = pattern->GetImageChildren();
     auto rectsForPlaceholders = pattern->GetRectsForPlaceholders();
     for (const auto& child : imageChildren) {
         auto rect = rectsForPlaceholders.at(index);
         auto offset = OffsetF(rect.Left(), rect.Top()) + pattern->GetTextRect().GetOffset();
-        auto imageChild = DynamicCast<ImagePattern>(child->GetPattern());
-        if (imageChild) {
-            auto geometryNode = child->GetGeometryNode();
-            auto canvasImage = imageChild->GetCanvasImage();
-            auto layoutProperty = imageChild->GetLayoutProperty<ImageLayoutProperty>();
-            if (!geometryNode || !canvasImage || !layoutProperty) {
-                continue;
-            }
-            auto pixelMapImage = DynamicCast<PixelMapImage>(canvasImage);
-            if (!pixelMapImage) {
-                continue;
-            }
-            const auto& marginProperty = layoutProperty->GetMarginProperty();
-            float marginTop = 0.0f;
-            float marginLeft = 0.0f;
-            if (marginProperty) {
-                marginLeft =
-                    marginProperty->left.has_value() ? marginProperty->left->GetDimension().ConvertToPx() : 0.0f;
-                marginTop = marginProperty->top.has_value() ? marginProperty->top->GetDimension().ConvertToPx() : 0.0f;
-            }
-            auto frameSize = geometryNode->GetFrameSize();
-            RectF imageRect(
-                offset.GetX() + marginLeft, offset.GetY() + marginTop, frameSize.Width(), frameSize.Height());
-            pixelMapImage->DrawRect(canvas, ToRSRect(imageRect));
+        auto pattern = child->GetPattern();
+        auto imagePattern = DynamicCast<ImagePattern>(pattern);
+        if (imagePattern) {
+            PaintImageNode(context, child, imagePattern, offset);
+        } else {
+            PaintFrameNode(context, child, pattern, offset);
         }
         ++index;
     }
+}
+
+void RichEditorDragOverlayModifier::PaintImageNode(DrawingContext& context, RefPtr<FrameNode> imageNode,
+    RefPtr<ImagePattern> pattern, OffsetF offset)
+{
+    auto& canvas = context.canvas;
+    auto geometryNode = imageNode->GetGeometryNode();
+    auto canvasImage = pattern->GetCanvasImage();
+    auto layoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(geometryNode && canvasImage && layoutProperty);
+    auto pixelMapImage = DynamicCast<PixelMapImage>(canvasImage);
+    CHECK_NULL_VOID(pixelMapImage);
+    float marginTop = 0.0f;
+    float marginLeft = 0.0f;
+    const auto& marginProperty = layoutProperty->GetMarginProperty();
+    if (marginProperty) {
+        marginLeft =
+            marginProperty->left.has_value() ? marginProperty->left->GetDimension().ConvertToPx() : 0.0f;
+        marginTop = marginProperty->top.has_value() ? marginProperty->top->GetDimension().ConvertToPx() : 0.0f;
+    }
+    auto frameSize = geometryNode->GetFrameSize();
+    float posX = offset.GetX() + marginLeft;
+    float posY = offset.GetY() + marginTop;
+    RectF clipRect(posX, posY, frameSize.Width(), frameSize.Height());
+    canvas.Save();
+    canvas.ClipRect(ToRSRect(clipRect), RSClipOp::INTERSECT, true);
+    float pixelMapWidth = pixelMapImage->GetWidth();
+    float pixelMapHeight = pixelMapImage->GetHeight();
+    float finalWidth = frameSize.Width();
+    float finalHeight = frameSize.Height();
+    if (LessNotEqual(pixelMapWidth, pixelMapHeight)) {
+        finalHeight = NearZero(pixelMapWidth) ? finalHeight : frameSize.Width() / pixelMapWidth * pixelMapHeight;
+        posY = offset.GetY() + marginTop - (finalHeight - frameSize.Height()) / CONSTANT_DOUBLE;
+    } else {
+        finalWidth = NearZero(pixelMapHeight) ? finalWidth : frameSize.Height() / pixelMapHeight * pixelMapWidth;
+        posX = offset.GetX() + marginLeft -  (finalWidth - frameSize.Width()) / CONSTANT_DOUBLE;
+    }
+    RectF imageRect(posX, posY, finalWidth, finalHeight);
+    pixelMapImage->DrawRect(canvas, ToRSRect(imageRect));
+    canvas.Restore();
+}
+
+void RichEditorDragOverlayModifier::PaintFrameNode(DrawingContext& context, RefPtr<FrameNode> imageNode,
+    RefPtr<Pattern> pattern, OffsetF offset)
+{
+    auto& canvas = context.canvas;
+    auto pixelMap = imageNode->GetRenderContext()->GetThumbnailPixelMap();
+    CHECK_NULL_VOID(pixelMap);
+    auto canvasImage = CanvasImage::Create(pixelMap);
+    auto layoutProperty = pattern->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_VOID(canvasImage && layoutProperty);
+    auto pixelMapImage = DynamicCast<PixelMapImage>(canvasImage);
+    CHECK_NULL_VOID(pixelMapImage);
+    float marginTop = 0.0f;
+    float marginLeft = 0.0f;
+    const auto& marginProperty = layoutProperty->GetMarginProperty();
+    if (marginProperty) {
+        marginLeft =
+            marginProperty->left.has_value() ? marginProperty->left->GetDimension().ConvertToPx() : 0.0f;
+        marginTop = marginProperty->top.has_value() ? marginProperty->top->GetDimension().ConvertToPx() : 0.0f;
+    }
+    RectF imageRect(
+        offset.GetX() + marginLeft, offset.GetY() + marginTop, pixelMap->GetWidth(), pixelMap->GetHeight());
+    pixelMapImage->DrawRect(canvas, ToRSRect(imageRect));
 }
 
 void RichEditorDragOverlayModifier::PaintBackground(const RSPath& path, RSCanvas& canvas,
@@ -188,7 +234,7 @@ void RichEditorDragOverlayModifier::PaintHandle(RSCanvas& canvas, const RectF& h
     if (NearZero(handleOpacity_->Get()) || NearZero(handleRect.Width())) {
         return;
     }
-    auto rectTopX = (handleRect.Right() - handleRect.Left()) / 2.0f + startX;
+    auto rectTopX = (handleRect.Right() - handleRect.Left()) / CONSTANT_DOUBLE + startX;
     auto centerOffset = OffsetF(rectTopX, 0.0);
     OffsetF startPoint(0.0, 0.0);
     OffsetF endPoint(0.0, 0.0);
