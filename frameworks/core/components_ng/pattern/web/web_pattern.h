@@ -537,6 +537,7 @@ public:
     }
     void AttachCustomKeyboard();
     void CloseCustomKeyboard();
+    void KeyboardReDispatch(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event, bool isUsed);
 
 private:
     friend class WebContextSelectOverlay;
@@ -759,6 +760,8 @@ private:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endTouchHandle);
     double GetNewScale(double& scale) const;
     void UpdateSlideOffset(bool isNeedReset = false);
+    void ClearKeyEventBeforeUp(
+        const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -862,6 +865,7 @@ private:
     RefPtr<PinchGesture> pinchGesture_ = nullptr;
     std::queue<TouchEventInfo> touchEventQueue_;
     std::vector<NG::MenuOptionsParam> menuOptionParam_ {};
+    std::list<KeyEvent> webKeyEvent_ {};
     double startPinchScale_ = -1.0;
     double preScale_ = -1.0;
     double pageScale_ = 1.0;

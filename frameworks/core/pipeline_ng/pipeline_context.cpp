@@ -2463,9 +2463,30 @@ bool PipelineContext::TriggerKeyEventDispatch(const KeyEvent& event)
         return eventManager_->DispatchKeyEventNG(event, curEntryFocusViewFrame);
     }
 
+    if (!IsSkipShortcutAndFocusMove() && DispatchTabKey(event, curFocusView)) {
+        return true;
+    }
+    return eventManager_->DispatchKeyEventNG(event, curEntryFocusViewFrame);
+}
+
+bool PipelineContext::IsSkipShortcutAndFocusMove()
+{
+    // Web component will NOT dispatch shortcut during the first event dispatch process.
+    // Web component will NOT trigger focus move during the third event dispatch process.
+    auto focusHub = focusManager_ ? focusManager_->GetCurrentFocus() : nullptr;
+    RefPtr<FrameNode> curFrameNode = focusHub ? focusHub->GetFrameNode() : nullptr;
+    return EventManager::IsSkipEventNode(curFrameNode);
+}
+
+bool PipelineContext::DispatchTabKey(const KeyEvent& event, const RefPtr<FocusView>& curFocusView)
+{
+    CHECK_NULL_RETURN(curFocusView, false);
+    auto curEntryFocusView = curFocusView ? curFocusView->GetEntryFocusView() : nullptr;
+    auto curEntryFocusViewFrame = curEntryFocusView ? curEntryFocusView->GetFrameNode() : nullptr;
     auto isKeyTabDown = event.action == KeyAction::DOWN && event.IsKey({ KeyCode::KEY_TAB });
     auto isViewRootScopeFocused = curFocusView ? curFocusView->GetIsViewRootScopeFocused() : true;
     isTabJustTriggerOnKeyEvent_ = false;
+
     if (isKeyTabDown && isViewRootScopeFocused && curFocusView) {
         // Current focused on the view root scope. Tab key used to extend focus.
         // If return true. This tab key will just trigger onKeyEvent process.
@@ -2479,7 +2500,28 @@ bool PipelineContext::TriggerKeyEventDispatch(const KeyEvent& event)
     if (eventManager_->DispatchTabIndexEventNG(event, curEntryFocusViewFrame)) {
         return true;
     }
-    return eventManager_->DispatchKeyEventNG(event, curEntryFocusViewFrame);
+    return false;
+}
+
+void PipelineContext::ReDispatch(KeyEvent& keyEvent)
+{
+    CHECK_NULL_VOID(eventManager_);
+    TAG_LOGD(AceLogTag::ACE_WEB, "Web ReDispach key event: code:%{public}d/action:%{public}d.", keyEvent.code,
+        keyEvent.action);
+    // Set keyEvent coming from Redispatch
+    keyEvent.isRedispatch = true;
+
+    if (eventManager_->DispatchKeyboardShortcut(keyEvent)) {
+        return;
+    }
+
+    auto curFocusView = focusManager_ ? focusManager_->GetLastFocusView().Upgrade() : nullptr;
+    auto curEntryFocusView = curFocusView ? curFocusView->GetEntryFocusView() : nullptr;
+    auto curEntryFocusViewFrame = curEntryFocusView ? curEntryFocusView->GetFrameNode() : nullptr;
+    if (DispatchTabKey(keyEvent, curFocusView)) {
+        return;
+    }
+    eventManager_->DispatchKeyEventNG(keyEvent, curEntryFocusViewFrame);
 }
 
 bool PipelineContext::OnKeyEvent(const KeyEvent& event)
@@ -2492,7 +2534,9 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
         if (TriggerKeyEventDispatch(event)) {
             return true;
         }
-        return eventManager_->DispatchKeyboardShortcut(event);
+        if (!IsSkipShortcutAndFocusMove()) {
+            return eventManager_->DispatchKeyboardShortcut(event);
+        }
     }
 
     // process drag cancel

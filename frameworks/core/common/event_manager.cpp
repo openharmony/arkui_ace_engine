@@ -1222,6 +1222,13 @@ bool EventManager::DispatchRotationEvent(
     }
 }
 
+bool EventManager::IsSkipEventNode(const RefPtr<NG::FrameNode>& focusNode)
+{
+    CHECK_NULL_RETURN(focusNode, false);
+    auto curFrameName = focusNode ? focusNode->GetTag() : "NULL";
+    return curFrameName == V2::WEB_ETS_TAG;
+}
+
 void EventManager::AddKeyboardShortcutNode(const WeakPtr<NG::FrameNode>& node)
 {
     auto frameNode = node.Upgrade();

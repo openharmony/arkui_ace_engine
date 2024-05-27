@@ -139,6 +139,9 @@ public:
     // if return false, then this event needs platform to handle it.
     bool OnKeyEvent(const KeyEvent& event) override;
 
+    // ReDispatch KeyEvent from Web process.
+    void ReDispatch(KeyEvent& keyEvent);
+
     // Called by view when mouse event received.
     void OnMouseEvent(const MouseEvent& event) override;
 
@@ -817,6 +820,10 @@ private:
     void InspectDrew();
 
     bool TriggerKeyEventDispatch(const KeyEvent& event);
+
+    bool DispatchTabKey(const KeyEvent& event, const RefPtr<FocusView>& curFocusView);
+
+    bool IsSkipShortcutAndFocusMove();
 
     void FlushBuildFinishCallbacks();
 
