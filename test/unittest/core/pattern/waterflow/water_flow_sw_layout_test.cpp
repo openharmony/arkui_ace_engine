@@ -372,16 +372,21 @@ HWTEST_F(WaterFlowSWTest, Misaligned001, TestSize.Level1)
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     FlushLayoutTask(frameNode_);
 
-    UpdateCurrentOffset(Infinity<float>());
-    EXPECT_EQ(info_->startIndex_, 0);
-    EXPECT_EQ(GetChildY(frameNode_, 1), 100.0f);
-    EXPECT_EQ(GetChildX(frameNode_, 1), 240.0f);
-    EXPECT_EQ(info_->jumpIndex_, 0);
+    pattern_->ScrollToIndex(2, true, ScrollAlign::START);
     FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->finalPosition_, -2800.0f);
+    UpdateCurrentOffset(2800.0f + 101.0f);
+    // should mark misaligned
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->jumpIndex_, 0);
+    EXPECT_EQ(info_->delta_, -49.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 1), -49.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 240.0f);
+    UpdateCurrentOffset(2.0f);
+    EXPECT_EQ(GetChildRect(frameNode_, 1).Bottom(), 53.0f);
     EXPECT_FALSE(info_->IsMisaligned());
-    EXPECT_EQ(GetChildY(frameNode_, 1), 0.0f);
     EXPECT_EQ(GetChildX(frameNode_, 1), 0.0f);
-    EXPECT_EQ(info_->lanes_[0].startPos, 0.0f);
+    EXPECT_EQ(info_->lanes_[0].startPos, -47.0f);
     EXPECT_EQ(info_->lanes_[0].items_.front().idx, 0);
 }
 

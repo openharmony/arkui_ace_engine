@@ -263,7 +263,7 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
 
     isInitialized_ = true;
 
-    if (layoutInfo_->itemStart_ && CheckMisalignment(layoutInfo_)) {
+    if (layoutInfo_->startIndex_ == 0 && CheckMisalignment(layoutInfo_)) {
         MarkDirtyNodeSelf();
     }
     return NeedRender();

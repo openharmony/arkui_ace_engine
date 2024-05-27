@@ -48,7 +48,7 @@ public:
 
     void UpdateOffset(float delta) override
     {
-        delta_ = delta;
+        delta_ += delta;
         synced_ = false;
     }
 
