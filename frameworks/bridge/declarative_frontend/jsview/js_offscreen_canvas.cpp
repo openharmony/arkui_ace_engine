@@ -338,6 +338,7 @@ napi_value JSOffscreenCanvas::onTransferToImageBitmap(napi_env env)
         return nullptr;
     }
     auto jsImage = (JSRenderImage*)nativeObj;
+    CHECK_NULL_RETURN(jsImage, nullptr);
 #ifdef PIXEL_MAP_SUPPORTED
     auto pixelMap = offscreenCanvasPattern_->TransferToImageBitmap();
     if (pixelMap == nullptr) {
