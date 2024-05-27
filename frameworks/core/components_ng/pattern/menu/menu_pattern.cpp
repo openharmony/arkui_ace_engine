@@ -304,7 +304,9 @@ void MenuPattern::FireBuilder()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->RemoveChild(builderNode_.Upgrade());
-    CHECK_NULL_VOID(makeFunc_.has_value());
+    if (!makeFunc_.has_value()) {
+        return;
+    }
     auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto scroll = CreateMenuScroll(column);
@@ -312,8 +314,10 @@ void MenuPattern::FireBuilder()
     builderNode_ = scroll;
     for (size_t i = 0; i < selectProperties_.size(); i++) {
         auto contentModifierNode = BuildContentModifierNode(i);
-        contentModifierNode->MarkModifyDone();
-        contentModifierNode->MountToParent(column);
+        if (contentModifierNode) {
+            contentModifierNode->MarkModifyDone();
+            contentModifierNode->MountToParent(column);
+        }
     }
     auto scrollPattern = scroll->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(scrollPattern);
@@ -326,7 +330,9 @@ void MenuPattern::FireBuilder()
 
 RefPtr<FrameNode> MenuPattern::BuildContentModifierNode(int index)
 {
-    CHECK_NULL_RETURN(makeFunc_, nullptr);
+    if (!makeFunc_.has_value()) {
+        return nullptr;
+    }
     auto property = selectProperties_[index];
     MenuItemConfiguration menuItemConfiguration(property.value, property.icon, property.symbolModifier,
         index, property.selected, property.selectEnable);
