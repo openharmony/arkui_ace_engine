@@ -406,6 +406,11 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SmoothDragResizeEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SelectionMenuOptions, WebMenuOptionsParam);
 
+    bool IsFocus() const
+    {
+        return isFocus_;
+    }
+
     void RequestFullScreen();
     void ExitFullScreen();
     bool IsFullScreen() const

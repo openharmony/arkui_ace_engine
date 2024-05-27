@@ -1329,6 +1329,10 @@ bool WebDelegate::RequestFocus(OHOS::NWeb::NWebFocusSource source)
             if (Container::IsCurrentUseNewPipeline()) {
                 auto webPattern = delegate->webPattern_.Upgrade();
                 CHECK_NULL_VOID(webPattern);
+                if (webPattern->IsFocus()) {
+                    result = true;
+                    return;
+                }
                 auto eventHub = webPattern->GetWebEventHub();
                 CHECK_NULL_VOID(eventHub);
                 auto focusHub = eventHub->GetOrCreateFocusHub();
@@ -5495,11 +5499,11 @@ void WebDelegate::OnMouseEvent(int32_t x, int32_t y, const MouseButton button, c
     }
 }
 
-void WebDelegate::OnFocus()
+void WebDelegate::OnFocus(const OHOS::NWeb::FocusReason& reason)
 {
     ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
-        nweb_->OnFocus(OHOS::NWeb::FocusReason::EVENT_REQUEST);
+        nweb_->OnFocus(reason);
     }
 }
 
