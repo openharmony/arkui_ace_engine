@@ -2617,13 +2617,13 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
         return;
     }
 
+    UpdateAnimationProperty(static_cast<float>(dragVelocity));
     // nested and reached end, need to pass velocity to parent scrollable
     auto parent = GetNestedScrollParent();
     if (!IsLoop() && parent && NearZero(GetDistanceToEdge())) {
         parent->HandleScrollVelocity(dragVelocity);
         StartAutoPlay();
     } else {
-        UpdateAnimationProperty(static_cast<float>(dragVelocity));
         NotifyParentScrollEnd();
     }
     if (pipeline) {
