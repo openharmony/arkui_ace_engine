@@ -274,8 +274,23 @@ float RosenRenderContext::ConvertDimensionToScaleBySize(const Dimension& dimensi
 RosenRenderContext::~RosenRenderContext()
 {
     StopRecordingIfNeeded();
+    DetachModifiers();
+}
+
+void RosenRenderContext::DetachModifiers()
+{
+    CHECK_NULL_VOID(rsNode_ && rsNode_->GetType() == Rosen::RSUINodeType::SURFACE_NODE);
     if (transitionEffect_) {
         transitionEffect_->Detach(this);
+    }
+    if (translateXYUserModifier_) {
+        rsNode_->RemoveModifier(translateXYUserModifier_);
+    }
+    if (translateZUserModifier_) {
+        rsNode_->RemoveModifier(translateZUserModifier_);
+    }
+    if (scaleXYUserModifier_) {
+        rsNode_->RemoveModifier(scaleXYUserModifier_);
     }
 }
 
