@@ -129,8 +129,7 @@ void WindowPattern::OnAttachToFrameNode()
     }
 
     if (state == Rosen::SessionState::STATE_BACKGROUND && session_->GetScenePersistence() &&
-        (session_->GetScenePersistence()->IsSnapshotExisted() ||
-        session_->GetScenePersistence()->IsSavingSnapshot())) {
+        session_->GetScenePersistence()->HasSnapshot()) {
         CreateSnapshotNode();
         AddChild(host, snapshotNode_, snapshotNodeName_);
         return;
@@ -203,11 +202,11 @@ void WindowPattern::CreateSnapshotNode(std::optional<std::shared_ptr<Media::Pixe
     imagePaintProperty->UpdateImageInterpolation(ImageInterpolation::MEDIUM);
     snapshotNode_->SetHitTestMode(HitTestMode::HTMNONE);
 
-    auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
     if (snapshot) {
         auto pixelMap = PixelMap::CreatePixelMap(&snapshot.value());
         imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
     } else {
+        auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
         snapshotNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
         ImageSourceInfo sourceInfo;
         if (session_->GetScenePersistence()->IsSavingSnapshot()) {
@@ -216,24 +215,37 @@ void WindowPattern::CreateSnapshotNode(std::optional<std::shared_ptr<Media::Pixe
             auto pixelMap = PixelMap::CreatePixelMap(&snapshotPixelMap);
             sourceInfo = ImageSourceInfo(pixelMap);
         } else {
-            sourceInfo = ImageSourceInfo("file://" + session_->GetScenePersistence()->GetSnapshotFilePathFromAce());
+            sourceInfo = ImageSourceInfo("file://" + session_->GetScenePersistence()->GetSnapshotFilePath());
         }
         imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
-        if (!Rosen::ScenePersistence::IsAstcEnabled()) {
-            auto pipelineContext = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipelineContext);
-            auto imageCache = pipelineContext->GetImageCache();
-            CHECK_NULL_VOID(imageCache);
-            auto snapshotSize = session_->GetScenePersistence()->GetSnapshotSize();
-            imageCache->ClearCacheImage(
-                ImageUtils::GenerateImageKey(sourceInfo, SizeF(snapshotSize.first, snapshotSize.second)));
-            imageCache->ClearCacheImage(
-                ImageUtils::GenerateImageKey(sourceInfo, SizeF(snapshotSize.second, snapshotSize.first)));
-            imageCache->ClearCacheImage(sourceInfo.GetKey());
-        }
+        ClearImageCache(sourceInfo);
+        auto eventHub = snapshotNode_->GetEventHub<ImageEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->SetOnComplete([weakThis = WeakClaim(this)](const LoadImageSuccessEvent& info) {
+            auto self = weakThis.Upgrade();
+            CHECK_NULL_VOID(self && self->snapshotNode_);
+            self->snapshotNode_->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
+            self->snapshotNode_->MarkNeedRenderOnly();
+        });
     }
     imageLayoutProperty->UpdateImageFit(ImageFit::COVER_TOP_LEFT);
     snapshotNode_->MarkModifyDone();
+}
+
+void WindowPattern::ClearImageCache(const ImageSourceInfo& sourceInfo)
+{
+    if (!Rosen::ScenePersistence::IsAstcEnabled()) {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto imageCache = pipelineContext->GetImageCache();
+        CHECK_NULL_VOID(imageCache);
+        auto snapshotSize = session_->GetScenePersistence()->GetSnapshotSize();
+        imageCache->ClearCacheImage(
+            ImageUtils::GenerateImageKey(sourceInfo, SizeF(snapshotSize.first, snapshotSize.second)));
+        imageCache->ClearCacheImage(
+            ImageUtils::GenerateImageKey(sourceInfo, SizeF(snapshotSize.second, snapshotSize.first)));
+        imageCache->ClearCacheImage(sourceInfo.GetKey());
+    }
 }
 
 void WindowPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
