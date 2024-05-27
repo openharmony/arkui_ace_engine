@@ -78,13 +78,13 @@ bool CanvasPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(canvasEventHub, false);
 
     if ((isCanvasInit_ == true) && (config.frameSizeChange || config.contentSizeChange)) {
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)) {
             isCanvasInit_ = !pixelGridRoundSizeChange;
         } else {
             isCanvasInit_ = false;
         }
     } else if ((isCanvasInit_ == true) && (config.frameOffsetChange || config.contentOffsetChange)) {
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)) {
             isCanvasInit_ = true;
         } else {
             isCanvasInit_ = false;
@@ -1162,7 +1162,7 @@ void CanvasPattern::ReleaseImageAnalyzer()
 
 void CanvasPattern::DumpAdvanceInfo()
 {
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)) {
         DumpLog::GetInstance().AddDesc(
             std::string("PixelGridRoundSize: ")
                 .append(dirtyPixelGridRoundSize_.ToString())

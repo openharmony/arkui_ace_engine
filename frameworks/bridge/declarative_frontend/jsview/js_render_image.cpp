@@ -132,7 +132,7 @@ napi_value JSRenderImage::Constructor(napi_env env, napi_callback_info info)
         wrapper->LoadImage(textString);
     } else {
 #ifdef PIXEL_MAP_SUPPORTED
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
             auto pixelMap = GetPixelMap(env, argv[0]);
             if (!pixelMap) {
                 DELETE_RETURN_NULL(wrapper);
