@@ -194,6 +194,8 @@ private:
     // to cancel MakeCanvasImage task
     std::string canvasKey_;
 
+    bool firstLoadImage_ = true;
+
     // if another makeCanvasImage task arrives and current state cannot handle makeCanvasImage command,
     // save the least recent makeCanvasImage task and trigger it when the previous makeCanvasImage task end
     // and state becomes MAKE_CANVAS_IMAGE_SUCCESS
