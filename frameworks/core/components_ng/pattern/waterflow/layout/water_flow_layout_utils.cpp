@@ -71,7 +71,7 @@ LayoutConstraintF WaterFlowLayoutUtils::CreateChildConstraint(
     itemConstraint.maxSize.SetMainSize(Infinity<float>(), params.axis);
     itemConstraint.percentReference = itemIdealSize;
 
-    CHECK_NULL_RETURN(props->HasItemLayoutConstraint(), itemConstraint);
+    CHECK_NULL_RETURN(props->HasItemLayoutConstraint() && !params.haveUserDefSize, itemConstraint);
 
     OptionalSizeF childMinSize;
     OptionalSizeF childMaxSize;
