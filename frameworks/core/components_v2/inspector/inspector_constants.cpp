@@ -542,9 +542,9 @@ const char MODEL_COMPONENT_TAG[] = "Component3DComponent";
 const char MODEL_ETS_TAG[] = "Component3D";
 
 // window scene
-ACE_EXPORT extern const char ROOT_SCENE_ETS_TAG[] = "RootScene";
-ACE_EXPORT extern const char SCREEN_ETS_TAG[] = "Screen";
-ACE_EXPORT extern const char WINDOW_SCENE_ETS_TAG[] = "WindowScene";
+ACE_EXPORT const char ROOT_SCENE_ETS_TAG[] = "RootScene";
+ACE_EXPORT const char SCREEN_ETS_TAG[] = "Screen";
+ACE_EXPORT const char WINDOW_SCENE_ETS_TAG[] = "WindowScene";
 
 // ui_extension_component
 const char UI_EXTENSION_COMPONENT_TAG[] = "UIExtensionComponent";

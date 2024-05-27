@@ -29,6 +29,6 @@
     };                                                                                        \
                                                                                               \
     template<typename ToCheck>                                                                \
-    static inline constexpr const bool has_##method = internal_has_##method<ToCheck>::value;
+    static inline constexpr const bool has_##method = internal_has_##method<ToCheck>::value
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_UTILS_CLASS_UTILS_H

@@ -23,10 +23,10 @@
 extern "C" {
 #endif
 
-const struct ArkUINodeModifiers* GetArkUINodeModifiers();
+const struct ArkUINodeModifiers* GetArkUINodeModifiers(void);
 
 // use internal, not for export.
-const struct ArkUIFullNodeAPI* GetArkUIFullNodeAPI();
+const struct ArkUIFullNodeAPI* GetArkUIFullNodeAPI(void);
 void SendArkUIAsyncEvent(struct ArkUINodeEvent* event);
 void SendArkUIAsyncCustomEvent(struct ArkUICustomNodeEvent* event);
 #ifdef __cplusplus
