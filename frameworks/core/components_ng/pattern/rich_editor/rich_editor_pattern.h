@@ -939,6 +939,8 @@ private:
     void OnTextInputActionUpdate(TextInputAction value);
     void CloseSystemMenu();
     void SetAccessibilityAction();
+    bool BeforeGestureAndClickOperate(GestureEvent& info, bool isDoubleClick);
+    void HandleTripleClickEvent(OHOS::Ace::GestureEvent& info);
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
@@ -1036,6 +1038,7 @@ private:
     float lastFontScale_ = -1;
     bool isCaretInContentArea_ = false;
     OffsetF movingHandleOffset_;
+    bool mouseClickRelease_ = false;
 };
 } // namespace OHOS::Ace::NG
 
