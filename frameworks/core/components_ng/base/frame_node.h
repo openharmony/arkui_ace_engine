@@ -851,14 +851,14 @@ public:
         SetSkipSyncGeometryNode();
         UINode::SetGeometryTransitionInRecursive(isGeometryTransitionIn);
     }
+    static std::pair<float, float> ContextPositionConvertToPX(
+        const RefPtr<RenderContext>& context, const SizeF& percentReference);
 
 protected:
     void DumpInfo() override;
 
 private:
     void MarkNeedRender(bool isRenderBoundary);
-    std::pair<float, float> ContextPositionConvertToPX(
-        const RefPtr<RenderContext>& context, const SizeF& percentReference) const;
     bool IsNeedRequestParentMeasure() const;
     void UpdateLayoutPropertyFlag() override;
     void ForceUpdateLayoutPropertyFlag(PropertyChangeFlag propertyChangeFlag) override;

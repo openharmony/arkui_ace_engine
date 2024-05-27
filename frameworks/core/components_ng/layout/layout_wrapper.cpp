@@ -142,21 +142,60 @@ bool LayoutWrapper::CheckValidSafeArea()
     return safeArea.IsValid();
 }
 
-OffsetF LayoutWrapper::GetParentGlobalPaintRectOffset() const
+OffsetF LayoutWrapper::GetParentGlobalOffsetWithSafeArea(bool checkBoundary, bool checkPosition) const
 {
     OffsetF offset {};
     auto host = GetHostNode();
     CHECK_NULL_RETURN(host, offset);
-    auto parent = host->GetAncestorNodeOfFrame();
+    auto parent = host->GetAncestorNodeOfFrame(checkBoundary);
     while (parent) {
         auto parentRenderContext = parent->GetRenderContext();
-        if (!parentRenderContext) {
-            break;
+        if (checkPosition && parentRenderContext && parentRenderContext->GetPositionProperty() &&
+            parentRenderContext->GetPositionProperty()->HasPosition()) {
+            auto parentLayoutProp = parent->GetLayoutProperty();
+            CHECK_NULL_RETURN(parentLayoutProp, offset);
+            auto parentLayoutConstraint = parentLayoutProp->GetLayoutConstraint();
+            CHECK_NULL_RETURN(parentLayoutConstraint.has_value(), offset);
+            auto renderPosition = FrameNode::ContextPositionConvertToPX(
+                parentRenderContext, parentLayoutConstraint.value().percentReference);
+            offset += OffsetF(static_cast<float>(renderPosition.first), static_cast<float>(renderPosition.second));
+        } else {
+            offset += parent->GetFrameRectWithSafeArea().GetOffset();
         }
-        offset += parentRenderContext->GetPaintRectWithoutTransform().GetOffset();
-        parent = parent->GetAncestorNodeOfFrame();
+        parent = parent->GetAncestorNodeOfFrame(checkBoundary);
     }
     return offset;
+}
+
+RectF LayoutWrapper::GetFrameRectWithoutSafeArea() const
+{
+    auto geometryNode = GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, RectF());
+    return geometryNode->GetFrameRect();
+}
+
+RectF LayoutWrapper::GetFrameRectWithSafeArea(bool checkPosition) const
+{
+    auto geometryNode = GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, RectF());
+    RectF rect {};
+    auto host = GetHostNode();
+    CHECK_NULL_RETURN(host, rect);
+    auto renderContext = host->GetRenderContext();
+    if (checkPosition && renderContext && renderContext->GetPositionProperty() &&
+        renderContext->GetPositionProperty()->HasPosition()) {
+        auto layoutProp = host->GetLayoutProperty();
+        CHECK_NULL_RETURN(layoutProp, rect);
+        auto layoutConstraint = layoutProp->GetLayoutConstraint();
+        CHECK_NULL_RETURN(layoutConstraint.has_value(), rect);
+        auto renderPosition = FrameNode::ContextPositionConvertToPX(
+            renderContext, layoutConstraint.value().percentReference);
+        auto size = (geometryNode->GetSelfAdjust() + geometryNode->GetFrameRect()).GetSize();
+        rect = RectF(OffsetF(static_cast<float>(renderPosition.first),
+            static_cast<float>(renderPosition.second)), size);
+        return rect;
+    }
+    return geometryNode->GetSelfAdjust() + geometryNode->GetFrameRect();
 }
 
 void LayoutWrapper::ExpandSafeArea(bool isFocusOnPage)
@@ -175,29 +214,31 @@ void LayoutWrapper::ExpandSafeArea(bool isFocusOnPage)
         CHECK_NULL_VOID(renderContext);
         auto geometryNode = GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
-        auto adjustedRect = geometryNode->GetPixelGridRoundRect();
+        auto adjustedRect = geometryNode->GetFrameRect();
         if (safeAreaManager->IsSafeAreaValid()) {
             adjustedRect += geometryNode->GetParentAdjust();
         }
-        renderContext->UpdatePaintRect(adjustedRect);
+        geometryNode->SetSelfAdjust(adjustedRect - geometryNode->GetFrameRect());
+        renderContext->UpdatePaintRect(
+            adjustedRect + geometryNode->GetPixelGridRoundRect() - geometryNode->GetFrameRect());
         return;
     }
     CHECK_NULL_VOID(selfExpansive);
+    auto geometryNode = GetGeometryNode();
     OffsetF keyboardAdjust;
     if ((opts->edges & SAFE_AREA_EDGE_BOTTOM) && (opts->type & SAFE_AREA_TYPE_KEYBOARD) && isFocusOnPage) {
         keyboardAdjust = ExpandIntoKeyboard();
     }
 
     // get frame in global offset
-    auto parentGlobalOffset = GetParentGlobalPaintRectOffset();
-    auto geometryNode = GetGeometryNode();
+    auto parentGlobalOffset = GetParentGlobalOffsetWithSafeArea();
     auto parentAdjust = geometryNode->GetParentAdjust();
     if (!safeAreaManager->IsSafeAreaValid()) {
         parentAdjust = RectF();
     }
     auto frame = geometryNode->GetPixelGridRoundRect() + parentGlobalOffset + keyboardAdjust + parentAdjust.GetOffset();
     auto originGlobal = frame;
-    
+
     auto safeArea = pipeline->GetSafeAreaManager()->GetCombinedSafeArea(*opts);
     if ((opts->edges & SAFE_AREA_EDGE_START) && safeArea.left_.IsOverlapped(frame.Left())) {
         frame.SetWidth(frame.Width() + frame.Left() - safeArea.left_.start);
@@ -229,10 +270,9 @@ void LayoutWrapper::ExpandSafeArea(bool isFocusOnPage)
     // restore to local offset
     auto diff = originGlobal.GetOffset() - frame.GetOffset();
     frame -= parentGlobalOffset;
-    if (!diff.NonOffset()) {
-        // children's position should remain the same.
-        AdjustChildren(diff);
-    }
+    // since adjustment is not accumulated and we did not track previous diff, diff need to be updated
+    AdjustChildren(diff);
+
     auto selfAdjust = frame - geometryNode->GetFrameRect();
     geometryNode->SetSelfAdjust(selfAdjust);
     auto parent = host->GetAncestorNodeOfFrame();
@@ -241,7 +281,7 @@ void LayoutWrapper::ExpandSafeArea(bool isFocusOnPage)
     }
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdatePaintRect(frame);
+    renderContext->UpdatePaintRect(frame + geometryNode->GetPixelGridRoundRect() - geometryNode->GetFrameRect());
 }
 
 void LayoutWrapper::AdjustChildren(const OffsetF& offset)
