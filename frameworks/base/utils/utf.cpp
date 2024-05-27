@@ -15,10 +15,9 @@
 
 #include "utf.h"
 
-#include <cstddef>
-#include <cstring>
 #include <limits>
 #include <tuple>
+#include <memory>
 
 namespace OHOS::Ace {
 
@@ -40,6 +39,23 @@ namespace OHOS::Ace {
  * Convert mutf8 sequence to utf16 pair and return pair: [utf16 code point, mutf8 size].
  * In case of invalid sequence return first byte of it.
  */
+
+size_t MUtf8ToUtf16Size(const uint8_t *mutf8, size_t mutf8_len)
+{
+    size_t pos = 0;
+    size_t res = 0;
+    while (pos != mutf8_len) {
+        auto [pair, nbytes] = ConvertMUtf8ToUtf16Pair(mutf8, mutf8_len - pos);
+        if (nbytes == 0) {
+            nbytes = 1;
+        }
+        res += pair > MAX_U16 ? CONST_2 : 1;
+        mutf8 += nbytes;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        pos += nbytes;
+    }
+    return res;
+}
+
 std::pair<uint32_t, size_t> ConvertMUtf8ToUtf16Pair(const uint8_t* data, size_t max_bytes)
 {
     uint8_t d0 = *data;
@@ -79,7 +95,7 @@ std::pair<uint32_t, size_t> ConvertMUtf8ToUtf16Pair(const uint8_t* data, size_t 
     return { pair, CONST_4 };
 }
 
-size_t ConvertRegionMUtf8ToUtf16(
+size_t ConvertRegionUtf8ToUtf16(
     const uint8_t* mutf8_in, uint16_t* utf16_out, size_t mutf8_len, size_t utf16_len, size_t start)
 {
     size_t in_pos = 0;
@@ -203,19 +219,18 @@ size_t DebuggerConvertRegionUtf16ToUtf8(const uint16_t* utf16In, uint8_t* utf8Ou
     return utf8Pos;
 }
 
-void DebuggerStr(std::string& str)
+void ConvertIllegalStr(std::string& str)
 {
     uint8_t* buf8 = (uint8_t*)str.c_str();
-    size_t uft8Len = str.size();
-    auto uft16Len = MUtf8ToUtf16Size(buf8, uft8Len);
+    size_t utf8Len = str.size();
+    auto utf16Len = MUtf8ToUtf16Size(buf8, utf8Len);
 
-    std::shared_ptr<uint16_t[]> buf16(new uint16_t[uft16Len]);
-    auto resultLen = ConvertRegionUtf8ToUtf16(buf8, buf16.get(), uft8Len, uft16Len, 0);
-    if (resultLen != uft16Len) {
-        LOGE("ConvertRegionUtf8ToUtf16 error");
+    std::unique_ptr<uint16_t[]> buf16 = std::make_unique<uint16_t[]>(utf16Len);
+    auto resultLen = ConvertRegionUtf8ToUtf16(buf8, buf16.get(), utf8Len, utf16Len, 0);
+    if (resultLen != utf16Len) {
         return;
     }
-    DebuggerConvertRegionUtf16ToUtf8(buf16.get(), buf8, uft16Len, uft8Len, 0, false, false);
+    DebuggerConvertRegionUtf16ToUtf8(buf16.get(), buf8, utf16Len, utf8Len, 0, false, false);
 }
 
 } // namespace OHOS::Ace

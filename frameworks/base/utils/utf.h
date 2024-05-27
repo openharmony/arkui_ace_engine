@@ -19,6 +19,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <utility>
+#include <string>
 
 namespace OHOS::Ace {
 
@@ -119,7 +120,7 @@ size_t ConvertRegionUtf8ToUtf16(
 size_t DebuggerConvertRegionUtf16ToUtf8(const uint16_t* utf16In, uint8_t* utf8Out, size_t utf16Len, size_t utf8Len,
     size_t start, bool modify = true, bool isWriteBuffer = false);
 
-void DebuggerStr(std::string& str);
+void ConvertIllegalStr(std::string& str);
 
 inline std::pair<uint16_t, uint16_t> SplitUtf16Pair(uint32_t pair)
 {

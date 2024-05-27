@@ -234,7 +234,7 @@ void LayoutInspector::GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t 
         treeJsonStr = V2::Inspector::GetInspectorTree(pipelineContext, true);
     }
 #endif
-    DebuggerStr(treeJsonStr);
+    ConvertIllegalStr(treeJsonStr);
     auto jsonTree = JsonUtil::ParseJsonString(treeJsonStr);
     jsonTree->Put("VsyncID", (int32_t)pipeline->GetFrameCount());
     jsonTree->Put("ProcessID", getpid());
