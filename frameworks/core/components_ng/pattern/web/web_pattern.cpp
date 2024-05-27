@@ -197,7 +197,7 @@ constexpr int32_t PINCH_INDEX_ONE = 1;
 constexpr int32_t STATUS_ZOOMIN = 1;
 constexpr int32_t STATUS_ZOOMOUT = 2;
 constexpr int32_t ZOOM_ERROR_COUNT_MAX = 5;
-constexpr double ZOOMIN_SMOOTH_SCALE = 0.97;
+constexpr double ZOOMIN_SMOOTH_SCALE = 0.99;
 
 WebPattern::WebPattern() = default;
 
