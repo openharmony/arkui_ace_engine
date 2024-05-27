@@ -1057,7 +1057,7 @@ export class ComposeListItem extends ViewPU {
         }
         this.__contentItem = new SynchedPropertyObjectOneWayPU(z2.contentItem, this, "contentItem");
         this.__operateItem = new SynchedPropertyObjectOneWayPU(z2.operateItem, this, "operateItem");
-        this.__itemSpace = new ObservedPropertyObjectPU(null, this, "itemSpace");
+        this.__itemSpace = new ObservedPropertySimplePU(DEFAULT_ITEM_SPACE_WIDTH, this, "itemSpace");
         this.__composeItemPadding = new ObservedPropertyObjectPU(null, this, "composeItemPadding");
         this.__frontColor = new ObservedPropertyObjectPU(Color.Transparent.toString(), this, "frontColor");
         this.__borderSize = new ObservedPropertySimplePU(0, this, "borderSize");
@@ -1367,7 +1367,7 @@ export class ComposeListItem extends ViewPU {
             Flex.create({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center });
             Flex.constraintSize({ minHeight: this.itemHeight });
             Flex.focusable(true);
-            Flex.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Flex.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.corner_radius_level8'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
             Flex.backgroundColor(ObservedObject.GetRawObject(this.frontColor));
             Flex.onFocus(() => {
                 this.canFocus = true;
@@ -1394,14 +1394,14 @@ export class ComposeListItem extends ViewPU {
             });
             ViewStackProcessor.visualState("focused");
             Flex.border({
-                radius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                radius: { "id": -1, "type": 10002, params: ['sys.float.corner_radius_level8'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
                 width: ITEM_BORDER_SHOWN,
                 color: this.focusOutlineColor,
                 style: BorderStyle.Solid
             });
             ViewStackProcessor.visualState("normal");
             Flex.border({
-                radius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                radius: { "id": -1, "type": 10002, params: ['sys.float.corner_radius_level8'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
                 width: ITEM_BORDER_SHOWN,
                 color: Color.Transparent
             });
@@ -1452,7 +1452,8 @@ export class ComposeListItem extends ViewPU {
                                     secondaryTextModifier: this.contentItem.secondaryTextModifier,
                                     descriptionTextModifier: this.contentItem.descriptionTextModifier,
                                     leftWidth: this.calculatedLeftWidth(),
-                                    contentItemPadding: this.composeItemPadding
+                                    contentItemPadding: this.composeItemPadding,
+                                    itemSpace: this.itemSpace
                                 }, undefined, a1, () => { }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 753, col: 11 });
                                 ViewPU.create(c1);
                                 let d1 = () => {
@@ -1467,7 +1468,8 @@ export class ComposeListItem extends ViewPU {
                                         secondaryTextModifier: this.contentItem.secondaryTextModifier,
                                         descriptionTextModifier: this.contentItem.descriptionTextModifier,
                                         leftWidth: this.calculatedLeftWidth(),
-                                        contentItemPadding: this.composeItemPadding
+                                        contentItemPadding: this.composeItemPadding,
+                                        itemSpace: this.itemSpace
                                     };
                                 };
                                 c1.paramsGenerator_ = d1;
@@ -1519,7 +1521,7 @@ export class ComposeListItem extends ViewPU {
                                     parentCanHover: this.__canHover,
                                     rightWidth: this.calculatedRightWidth(),
                                     isParentCanTouch: this.__isCanTouch
-                                }, undefined, l, () => { }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 768, col: 11 });
+                                }, undefined, l, () => { }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 769, col: 11 });
                                 ViewPU.create(n);
                                 let o = () => {
                                     return {

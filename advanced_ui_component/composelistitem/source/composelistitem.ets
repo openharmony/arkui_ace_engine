@@ -647,7 +647,7 @@ struct OperateItemStruct {
 export struct ComposeListItem {
   @Prop contentItem: ContentItem | null = null;
   @Prop operateItem: OperateItem | null = null;
-  @State itemSpace: number | null = null;
+  @State itemSpace: number = DEFAULT_ITEM_SPACE_WIDTH;
   @State composeItemPadding: LocalizedPadding | null = null;
   @State frontColor: ResourceColor = Color.Transparent.toString();
   @State borderSize: number = 0;
@@ -761,7 +761,8 @@ export struct ComposeListItem {
             secondaryTextModifier: this.contentItem.secondaryTextModifier,
             descriptionTextModifier: this.contentItem.descriptionTextModifier,
             leftWidth: this.calculatedLeftWidth(),
-            contentItemPadding: this.composeItemPadding
+            contentItemPadding: this.composeItemPadding,
+			itemSpace: this.itemSpace
           })
         }
         if (this.operateItem !== null) {
@@ -794,7 +795,7 @@ export struct ComposeListItem {
       }
       .constraintSize({ minHeight: this.itemHeight})
       .focusable(true)
-      .borderRadius($r('sys.float.ohos_id_corner_radius_default_m'))
+      .borderRadius($r('sys.float.corner_radius_level8'))
       .backgroundColor(this.frontColor)
       .onFocus(() => {
         this.canFocus = true
@@ -822,7 +823,7 @@ export struct ComposeListItem {
       .stateStyles({
         focused: {
           .border({
-            radius: $r('sys.float.ohos_id_corner_radius_default_m'),
+            radius: $r('sys.float.corner_radius_level8'),
             width: ITEM_BORDER_SHOWN,
             color: this.focusOutlineColor,
             style: BorderStyle.Solid
@@ -830,7 +831,7 @@ export struct ComposeListItem {
         },
         normal: {
           .border({
-            radius: $r('sys.float.ohos_id_corner_radius_default_m'),
+            radius: $r('sys.float.corner_radius_level8'),
             width: ITEM_BORDER_SHOWN,
             color: Color.Transparent
           })
