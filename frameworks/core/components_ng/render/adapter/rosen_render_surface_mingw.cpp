@@ -73,7 +73,7 @@ void RosenRenderSurface::SetExtSurfaceCallback(const RefPtr<ExtSurfaceCallbackIn
 {
 }
 
-void RosenRenderSurface::SetTransformHint(uint32_t rotation)
+void RosenRenderSurface::SetTransformHint(Rotation dmRotation)
 {
 }
 

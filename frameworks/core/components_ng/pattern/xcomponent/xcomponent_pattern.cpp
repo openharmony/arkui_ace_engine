@@ -607,13 +607,10 @@ void XComponentPattern::SetRotation()
     auto displayInfo = container->GetDisplayInfo();
     CHECK_NULL_VOID(displayInfo);
     auto dmRotation = displayInfo->GetRotation();
-    auto deviceRotation = displayInfo->GetDeviceRotation();
-    uint32_t newRotation = deviceRotation + 90 * static_cast<uint32_t>(dmRotation);
-    newRotation = newRotation % 360;
-    if (rotation_ != newRotation) {
-        rotation_ = newRotation;
+    if (rotation_ != dmRotation) {
+        rotation_ = dmRotation;
         CHECK_NULL_VOID(renderSurface_);
-        renderSurface_->SetTransformHint(newRotation);
+        renderSurface_->SetTransformHint(dmRotation);
     }
 }
 
