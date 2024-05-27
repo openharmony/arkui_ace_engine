@@ -524,6 +524,12 @@ public:
     void CloseKeyboard();
     WebInfoType GetWebInfoType();
     void RequestFocus();
+    void SetCustomKeyboardBuilder(std::function<void()> customKeyboardBuilder)
+    {
+        customKeyboardBuilder_ = customKeyboardBuilder;
+    }
+    void AttachCustomKeyboard();
+    void CloseCustomKeyboard();
 
 private:
     friend class WebContextSelectOverlay;
@@ -857,6 +863,8 @@ private:
     bool isTouchUpEvent_ = false;
     int32_t zoomStatus_ = 0;
     int32_t zoomErrorCount_ = 0;
+    RefPtr<OverlayManager> keyboardOverlay_;
+    std::function<void()> customKeyboardBuilder_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 

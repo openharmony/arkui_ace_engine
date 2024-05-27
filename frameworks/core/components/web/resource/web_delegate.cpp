@@ -1832,6 +1832,8 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
         onViewportFitChangedV2_ = useNewPipe ? eventHub->GetOnViewportFitChangedEvent()
                                        : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                            webCom->GetViewportFitChangedId(), oldContext);
+        onInterceptKeyboardAttachV2_ = useNewPipe ? eventHub->GetOnInterceptKeyboardAttachEvent()
+                                                  : nullptr;
     }
     return true;
 }
@@ -6650,6 +6652,49 @@ void WebDelegate::OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHO
     if (changed) {
         OnSafeInsetsChange();
     }
+}
+
+void WebDelegate::OnInterceptKeyboardAttach(
+    const std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler,
+    const std::map<std::string, std::string> &attributes, bool &useSystemKeyboard, int32_t &enterKeyType)
+{
+    CHECK_NULL_VOID(onInterceptKeyboardAttachV2_);
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    WebKeyboardOption keyboardOpt;
+    std::function<void()> buildFunc = nullptr;
+    context->GetTaskExecutor()->PostSyncTask(
+        [weak = WeakClaim(this), &keyboardHandler, &attributes, &keyboardOpt]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto onInterceptKeyboardAttachV2_ = delegate->onInterceptKeyboardAttachV2_;
+            if (onInterceptKeyboardAttachV2_) {
+                auto param = AceType::MakeRefPtr<WebCustomKeyboardHandlerOhos>(keyboardHandler);
+                keyboardOpt = onInterceptKeyboardAttachV2_(std::make_shared<InterceptKeyboardEvent>(param, attributes));
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebHandleInterceptKeyboardAttach");
+
+    useSystemKeyboard = keyboardOpt.isSystemKeyboard_;
+    enterKeyType = keyboardOpt.enterKeyTpye_;
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->SetCustomKeyboardBuilder(keyboardOpt.customKeyboardBuilder_);
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebCustomKeyboard OnInterceptKeyboardAttach sync task end");
+}
+
+void WebDelegate::OnCustomKeyboardAttach()
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->AttachCustomKeyboard();
+}
+
+void WebDelegate::OnCustomKeyboardClose()
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->CloseCustomKeyboard();
 }
 
 void WebDelegate::OnSafeInsetsChange()

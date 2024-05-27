@@ -123,6 +123,52 @@ private:
     WeakPtr<WebDelegate> webDelegate_;
 };
 
+class WebCustomKeyboardHandlerOhos : public WebCustomKeyboardHandler {
+    DECLARE_ACE_TYPE(WebCustomKeyboardHandlerOhos, WebCustomKeyboardHandler)
+
+public:
+    WebCustomKeyboardHandlerOhos(std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler) :
+    keyboardHandler_(keyboardHandler) {}
+
+    void InsertText(const std::string &text) override
+    {
+        if (keyboardHandler_) {
+            keyboardHandler_->InsertText(text);
+        }
+    }
+
+    void DeleteForward(int32_t length) override
+    {
+        if (keyboardHandler_) {
+            keyboardHandler_->DeleteForward(length);
+        }
+    }
+
+    void DeleteBackward(int32_t length) override
+    {
+        if (keyboardHandler_) {
+            keyboardHandler_->DeleteBackward(length);
+        }
+    }
+
+    void SendFunctionKey(int32_t key) override
+    {
+        if (keyboardHandler_) {
+            keyboardHandler_->SendFunctionKey(key);
+        }
+    }
+
+    void Close() override
+    {
+        if (keyboardHandler_) {
+            keyboardHandler_->Close();
+        }
+    }
+
+private:
+    std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler_;
+};
+
 class AuthResultOhos : public AuthResult {
     DECLARE_ACE_TYPE(AuthResultOhos, AuthResult)
 
@@ -893,6 +939,14 @@ public:
     void OnAreaChange(const OHOS::Ace::Rect& area);
     void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type);
     NG::WebInfoType GetWebInfoType();
+    void OnInterceptKeyboardAttach(
+        const std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler,
+        const std::map<std::string, std::string> &attributes, bool &useSystemKeyboard, int32_t &enterKeyType);
+
+    void OnCustomKeyboardAttach();
+
+    void OnCustomKeyboardClose();
+
 
 private:
     void InitWebEvent();
@@ -1037,6 +1091,7 @@ private:
     EventCallbackV2 onRenderProcessNotRespondingV2_;
     EventCallbackV2 onRenderProcessRespondingV2_;
     EventCallbackV2 onViewportFitChangedV2_;
+    std::function<WebKeyboardOption(const std::shared_ptr<BaseEventInfo>&)> onInterceptKeyboardAttachV2_;
 
     int32_t renderMode_;
     int32_t layoutMode_;
