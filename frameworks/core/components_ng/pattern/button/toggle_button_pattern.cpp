@@ -486,7 +486,7 @@ void ToggleButtonPattern::OnClick()
     if (isFocus_) {
         isOn_.value() ? HandleOnOffStyle(false, true) : HandleOnOffStyle(true, true);
     } else {
-        isOn_.value() ? HandleOnOffStyle(false, false) :  HandleOnOffStyle(true, false);
+        isOn_.value() ? HandleOnOffStyle(false, false) : HandleOnOffStyle(true, false);
     }
 }
 
