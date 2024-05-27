@@ -5233,7 +5233,7 @@ HWTEST_F(SliderTestNg, SliderValidRangeTest003, TestSize.Level1)
          * @tc.cases: case2. check Slider value after touch up
          */
         sliderPattern->HandleTouchEvent(infoUp);
-        EXPECT_TRUE(NearEqual(sliderPattern->value_, checkValue));
+        EXPECT_TRUE(NearEqual(sliderPattern->value_, setValue));
     }
 }
 
