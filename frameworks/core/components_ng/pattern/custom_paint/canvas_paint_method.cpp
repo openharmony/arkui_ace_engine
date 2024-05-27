@@ -429,12 +429,6 @@ void CanvasPaintMethod::TransferFromImageBitmap(const RefPtr<PixelMap>& pixelMap
     canvasImage.flag = 0;
     DrawPixelMapWithoutGlobalState(pixelMap, canvasImage);
 }
-#else
-void CanvasPaintMethod::TransferFromImageBitmap(const std::unique_ptr<Ace::ImageData>& imageData)
-{
-    CHECK_NULL_VOID(imageData);
-    PutImageData(*imageData);
-}
 #endif
 
 void CanvasPaintMethod::FillText(const std::string& text, double x, double y, std::optional<double> maxWidth)

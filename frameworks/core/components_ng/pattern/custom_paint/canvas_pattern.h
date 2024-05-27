@@ -107,7 +107,7 @@ public:
 #ifdef PIXEL_MAP_SUPPORTED
     void TransferFromImageBitmap(const RefPtr<PixelMap>& pixelMap);
 #else
-    void TransferFromImageBitmap(const std::unique_ptr<Ace::ImageData>& imageData);
+    void TransferFromImageBitmap(const Ace::ImageData& imageData);
 #endif
     void CloseImageBitmap(const std::string& src);
 

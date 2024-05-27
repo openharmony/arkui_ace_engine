@@ -33,7 +33,7 @@ preview_support = true
 model_component_support = false
 window_scene_support = false
 build_for_preview = true
-use_fast_taskpool = true
+use_fast_taskpool = false
 
 # js engine common configs
 js_pa_support = false
