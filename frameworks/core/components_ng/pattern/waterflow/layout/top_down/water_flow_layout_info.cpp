@@ -338,6 +338,9 @@ bool WaterFlowLayoutInfo::ReachStart(float prevOffset, bool firstLayout) const
 
 bool WaterFlowLayoutInfo::ReachEnd(float prevOffset) const
 {
+    if (!offsetEnd_) {
+        return false;
+    }
     float minOffset = lastMainSize_ - maxHeight_;
     auto scrollDownToReachEnd = GreatNotEqual(prevOffset, minOffset) && LessOrEqual(currentOffset_, minOffset);
     auto scrollUpToReachEnd = LessNotEqual(prevOffset, minOffset) && GreatOrEqual(currentOffset_, minOffset);
