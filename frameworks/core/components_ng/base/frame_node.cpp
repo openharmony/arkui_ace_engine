@@ -420,11 +420,13 @@ private:
     bool needResetChild_ = false;
 }; // namespace OHOS::Ace::NG
 
-FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
+FrameNode::FrameNode(
+    const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot, bool isLayoutNode)
     : UINode(tag, nodeId, isRoot), LayoutWrapper(WeakClaim(this)), pattern_(pattern)
 {
+    isLayoutNode_ = isLayoutNode;
     frameProxy_ = std::make_unique<FrameProxy>(this);
-    renderContext_->InitContext(IsRootNode(), pattern_->GetContextParam());
+    renderContext_->InitContext(IsRootNode(), pattern_->GetContextParam(), isLayoutNode);
     paintProperty_ = pattern->CreatePaintProperty();
     layoutProperty_ = pattern->CreateLayoutProperty();
     eventHub_ = pattern->CreateEventHub();
@@ -495,6 +497,18 @@ RefPtr<FrameNode> FrameNode::GetOrCreateFrameNode(
     return CreateFrameNode(tag, nodeId, pattern);
 }
 
+RefPtr<FrameNode> FrameNode::GetOrCreateCommonNode(const std::string& tag, int32_t nodeId, bool isLayoutNode,
+    const std::function<RefPtr<Pattern>(void)>& patternCreator)
+{
+    auto commonNode = GetFrameNode(tag, nodeId);
+    if (commonNode) {
+        commonNode->isLayoutNode_ = isLayoutNode;
+        return commonNode;
+    }
+    auto pattern = patternCreator ? patternCreator() : MakeRefPtr<Pattern>();
+    return CreateCommonNode(tag, nodeId, isLayoutNode, pattern);
+}
+
 RefPtr<FrameNode> FrameNode::GetFrameNode(const std::string& tag, int32_t nodeId)
 {
     auto frameNode = ElementRegister::GetInstance()->GetSpecificItemById<FrameNode>(nodeId);
@@ -517,6 +531,47 @@ RefPtr<FrameNode> FrameNode::CreateFrameNode(
     ElementRegister::GetInstance()->AddUINode(frameNode);
     frameNode->InitializePatternAndContext();
     return frameNode;
+}
+
+RefPtr<FrameNode> FrameNode::CreateCommonNode(
+    const std::string& tag, int32_t nodeId, bool isLayoutNode, const RefPtr<Pattern>& pattern, bool isRoot)
+{
+    auto frameNode = MakeRefPtr<FrameNode>(tag, nodeId, pattern, isRoot, isLayoutNode);
+    ElementRegister::GetInstance()->AddUINode(frameNode);
+    frameNode->InitializePatternAndContext();
+    return frameNode;
+}
+
+bool FrameNode::GetIsLayoutNode()
+{
+    return isLayoutNode_;
+}
+
+bool FrameNode::GetIsFind()
+{
+    return isFind_;
+}
+
+void FrameNode::SetIsFind(bool isFind)
+{
+    isFind_ = isFind;
+}
+
+void FrameNode::GetOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& children)
+{
+    GenerateOneDepthVisibleFrameWithTransition(children);
+    if (overlayNode_) {
+        children.emplace_back(overlayNode_);
+    }
+}
+
+void FrameNode::GetOneDepthVisibleFrameWithOffset(std::list<RefPtr<FrameNode>>& children, OffsetF& offset)
+{
+    offset += GetGeometryNode()->GetFrameOffset();
+    GenerateOneDepthVisibleFrameWithOffset(children, offset);
+    if (overlayNode_) {
+        children.emplace_back(overlayNode_);
+    }
 }
 
 bool FrameNode::IsSupportDrawModifier()
@@ -1845,6 +1900,13 @@ bool FrameNode::IsNeedRequestParentMeasure() const
 
 void FrameNode::OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList)
 {
+    if (isLayoutNode_) {
+        UINode::GenerateOneDepthVisibleFrame(visibleList);
+        if (overlayNode_) {
+            visibleList.emplace_back(overlayNode_);
+        }
+        return;
+    }
     if (isActive_ && IsVisible()) {
         visibleList.emplace_back(Claim(this));
     }
@@ -1857,6 +1919,36 @@ void FrameNode::OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList
 
 void FrameNode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList)
 {
+    if (isLayoutNode_) {
+        UINode::GenerateOneDepthVisibleFrameWithTransition(visibleList);
+        if (overlayNode_) {
+            visibleList.emplace_back(overlayNode_);
+        }
+        return;
+    }
+
+    auto context = GetRenderContext();
+    CHECK_NULL_VOID(context);
+    // skip if 1.not active or 2.not visible and has no transition out animation.
+    if (!isActive_ || (!IsVisible() && !context->HasTransitionOutAnimation())) {
+        return;
+    }
+    visibleList.emplace_back(Claim(this));
+}
+
+void FrameNode::OnGenerateOneDepthVisibleFrameWithOffset(
+    std::list<RefPtr<FrameNode>>& visibleList, OffsetF& offset)
+{
+    if (isLayoutNode_) {
+        isFind_ = true;
+        offset += GetGeometryNode()->GetFrameOffset();
+        UINode::GenerateOneDepthVisibleFrameWithOffset(visibleList, offset);
+        if (overlayNode_) {
+            visibleList.emplace_back(overlayNode_);
+        }
+        return;
+    }
+
     auto context = GetRenderContext();
     CHECK_NULL_VOID(context);
     // skip if 1.not active or 2.not visible and has no transition out animation.
@@ -3259,6 +3351,10 @@ bool FrameNode::SelfOrParentExpansive()
 
 bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
 {
+    auto context = GetContext();
+    if (isLayoutNode_ && context) {
+        context->AddLayoutNode(Claim(this));
+    }
     isLayoutComplete_ = true;
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
     bool hasTransition = geometryTransition != nullptr && geometryTransition->IsRunning(WeakClaim(this));
@@ -3381,7 +3477,9 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
     UpdateFocusState();
 
     // rebuild child render node.
-    RebuildRenderContextTree();
+    if (!isLayoutNode_) {
+        RebuildRenderContextTree();
+    }
 
     /* Adjust components' position which have been set grid properties */
     AdjustGridOffset();

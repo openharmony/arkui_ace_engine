@@ -754,6 +754,33 @@ void UINode::GenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNo
     }
 }
 
+void UINode::GenerateOneDepthVisibleFrameWithOffset(
+    std::list<RefPtr<FrameNode>>& visibleList, OffsetF& offset)
+{
+    if (disappearingChildren_.empty()) {
+        // normal child
+        for (const auto& child : GetChildren()) {
+            child->OnGenerateOneDepthVisibleFrameWithOffset(visibleList, offset);
+        }
+        return;
+    }
+    // generate the merged list of children_ and disappearingChildren_
+    auto allChildren = GetChildren();
+    for (auto iter = disappearingChildren_.rbegin(); iter != disappearingChildren_.rend(); ++iter) {
+        auto& [disappearingChild, index] = *iter;
+        if (index >= allChildren.size()) {
+            allChildren.emplace_back(disappearingChild);
+        } else {
+            auto insertIter = allChildren.begin();
+            std::advance(insertIter, index);
+            allChildren.insert(insertIter, disappearingChild);
+        }
+    }
+    for (const auto& child : allChildren) {
+        child->OnGenerateOneDepthVisibleFrameWithOffset(visibleList, offset);
+    }
+}
+
 void UINode::GenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& visibleList)
 {
     for (const auto& child : GetChildren()) {
@@ -1065,6 +1092,12 @@ bool UINode::RemoveDisappearingChild(const RefPtr<UINode>& child)
 void UINode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList)
 {
     GenerateOneDepthVisibleFrameWithTransition(visibleList);
+}
+
+void UINode::OnGenerateOneDepthVisibleFrameWithOffset(
+    std::list<RefPtr<FrameNode>>& visibleList, OffsetF& offset)
+{
+    GenerateOneDepthVisibleFrameWithOffset(visibleList, offset);
 }
 
 bool UINode::RemoveImmediately() const

@@ -100,6 +100,28 @@ void ComponentSnapshot::Get(const std::string& componentId, JsCallback&& callbac
             componentId.c_str());
         return;
     }
+
+    if (node->GetIsLayoutNode()) {
+        std::list<RefPtr<FrameNode>> children;
+        node->GetOneDepthVisibleFrame(children);
+        if (children.empty()) {
+            return;
+        }
+
+        auto rsNode = GetRsNode(children.front());
+        if (!rsNode) {
+            callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
+            TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+                "RsNode is null from FrameNode(id=%{public}s)",
+                componentId.c_str());
+            return;
+        }
+        auto& rsInterface = Rosen::RSInterfaces::GetInstance();
+        rsInterface.TakeSurfaceCaptureForUI(
+            rsNode, std::make_shared<CustomizedCallback>(std::move(callback), nullptr));
+        return;
+    }
+
     auto rsNode = GetRsNode(node);
     if (!rsNode) {
         callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);

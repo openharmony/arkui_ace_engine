@@ -39,7 +39,7 @@ public:
 HWTEST_F(CommonViewTestNg, CommonViewTest001, TestSize.Level1)
 {
     CommonViewModelNG view;
-    view.Create();
+    view.Create(false);
     auto blankNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_FALSE(blankNode == nullptr);
     EXPECT_EQ(blankNode->GetTag(), V2::COMMON_VIEW_ETS_TAG);
