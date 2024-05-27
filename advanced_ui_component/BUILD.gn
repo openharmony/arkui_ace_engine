@@ -13,6 +13,7 @@
 
 group("advanced_ui_component") {
   deps = [
+    "atomicservicenavigation/interfaces:atomicservicenavigation",
     "chip/interfaces:chip",
     "chipgroup/interfaces:chipgroup",
     "composelistitem/interfaces:composelistitem",
