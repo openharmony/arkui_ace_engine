@@ -9151,4 +9151,134 @@ HWTEST_F(MenuTestNg, MenuWrapperPatternTestNg011, TestSize.Level1)
     (*menuItemPattern->longPressEvent_)(gestureEvent);
     ASSERT_FALSE(menuItemPattern->isSubMenuShowed_);
 }
+
+/**
+ * @tc.name: MenuViewTestNgTextMaxLines001
+ * @tc.desc: Verify MenuView's MaxLines.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuViewTestNgTextMaxLines001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set font scale to 1.75.
+     */
+    auto context = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->fontScale_ = 1.75f;
+
+    /**
+     * @tc.steps: step2. create menu and initialize.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextTheme::TypeId()) {
+            return AceType::MakeRefPtr<TextTheme>();
+        } else if (type == IconTheme::TypeId()) {
+            return AceType::MakeRefPtr<IconTheme>();
+        } else if (type == SelectTheme::TypeId()) {
+            return AceType::MakeRefPtr<SelectTheme>();
+        } else {
+            return AceType::MakeRefPtr<MenuTheme>();
+        }
+    });
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    InitMenuTestNg();
+    InitMenuItemTestNg();
+    std::vector<OptionParam> optionParams;
+    optionParams.emplace_back("MenuItem", "", nullptr);
+    MenuParam menuParam;
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), TARGET_ID, "", TYPE, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->OnModifyDone();
+
+    /**
+     * @tc.steps: step2. get textLayoutProperty and verify maxLines setting.
+     * @tc.expected: MenuView's maxLines == MenuTheme's maxLines
+     */
+    auto column = menuPattern->GetMenuColumn();
+    ASSERT_NE(column, nullptr);
+    auto children = column->GetChildren();
+    ASSERT_EQ(children.size(), 1);
+    auto optionNode = AceType::DynamicCast<FrameNode>(column->GetChildAtIndex(0));
+    ASSERT_NE(optionNode, nullptr);
+    auto optionPattern = optionNode->GetPattern<OptionPattern>();
+    ASSERT_NE(optionPattern, nullptr);
+    auto textNode = AceType::DynamicCast<FrameNode>(optionPattern->GetTextNode());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(textLayoutProperty->GetMaxLines().value(), menuTheme->GetTextMaxLines());
+}
+
+/**
+ * @tc.name: MenuItemTestNgTextMaxLines001
+ * @tc.desc: Verify MenuItem's MaxLines.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuItemTestNgTextMaxLines001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set font scale to 1.75.
+     */
+    auto context = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->fontScale_ = 1.75f;
+
+    /**
+     * @tc.steps: step2. create menu and initialize.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextTheme::TypeId()) {
+            return AceType::MakeRefPtr<TextTheme>();
+        } else if (type == IconTheme::TypeId()) {
+            return AceType::MakeRefPtr<IconTheme>();
+        } else if (type == SelectTheme::TypeId()) {
+            return AceType::MakeRefPtr<SelectTheme>();
+        } else {
+            return AceType::MakeRefPtr<MenuTheme>();
+        }
+    });
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    InitMenuTestNg();
+    InitMenuItemTestNg();
+    MenuModelNG menuModelInstance;
+    MenuItemModelNG menuItemModelInstance;
+    menuModelInstance.Create();
+    menuModelInstance.SetFontStyle(Ace::FontStyle::ITALIC);
+    MenuItemProperties itemOption;
+    itemOption.content = "content";
+    itemOption.labelInfo = "label";
+    menuItemModelInstance.Create(itemOption);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+    auto menuItemLayoutProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(menuItemLayoutProperty, nullptr);
+    itemPattern->OnModifyDone();
+
+    /**
+     * @tc.steps: step2. get textLayoutProperty and verify maxLines setting.
+     * @tc.expected: MenuItem's maxLines == MenuTheme's maxLines
+     */
+    auto contentNode = itemPattern->GetContentNode();
+    ASSERT_NE(contentNode, nullptr);
+    auto textLayoutProperty = contentNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(textLayoutProperty->GetMaxLines().value(), menuTheme->GetTextMaxLines());
+}
 } // namespace OHOS::Ace::NG
