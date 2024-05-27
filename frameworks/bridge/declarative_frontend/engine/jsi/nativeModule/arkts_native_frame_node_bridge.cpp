@@ -1412,7 +1412,7 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnVisibleAreaApproximateChange(ArkUIR
     if (intervalArg->IsUndefined() || !intervalArg->IsNumber()) {
         return panda::JSValueRef::Undefined(vm);
     }
-    uint32_t intervalMs = static_cast<uint32_t>(intervalArg->ToNumber(vm)->Value());
+    int32_t intervalMs = static_cast<int32_t>(intervalArg->ToNumber(vm)->Value());
     NG::ViewAbstract::SetJSFrameNodeOnVisibleAreaApproximateChange(
         frameNode, std::move(onVisibleAreaApproximateChange), ratioVec, intervalMs);
     return panda::JSValueRef::Undefined(vm);
