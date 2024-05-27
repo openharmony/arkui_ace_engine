@@ -961,6 +961,8 @@ RefPtr<SpanItem> ImageSpanItem::GetSameStyleSpanItem() const
 {
     auto sameSpan = MakeRefPtr<ImageSpanItem>();
     sameSpan->SetImageSpanOptions(options);
+    sameSpan->onClick = onClick;
+    sameSpan->onLongPress = onLongPress;
     return sameSpan;
 }
 
@@ -1016,6 +1018,8 @@ RefPtr<SpanItem> CustomSpanItem::GetSameStyleSpanItem() const
     auto sameSpan = MakeRefPtr<CustomSpanItem>();
     sameSpan->onMeasure = onMeasure;
     sameSpan->onDraw = onDraw;
+    sameSpan->onClick = onClick;
+    sameSpan->onLongPress = onLongPress;
     return sameSpan;
 }
 
