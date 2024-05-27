@@ -54,6 +54,29 @@ HWTEST_F(WaterFlowSWTest, Regular001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ScrollToEdge003
+ * @tc.desc: Test ScrollToEdge func and layout footer
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, ScrollToEdge003, TestSize.Level1)
+{
+    Create([](WaterFlowModelNG model) {
+        model.SetFooter(GetDefaultHeaderBuilder());
+        model.SetColumnsTemplate("1fr");
+        model.SetRowsGap(Dimension(5.0f));
+        CreateRandomItem(100);
+    });
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushLayoutTask(frameNode_);
+    auto info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->endIndex_, 99);
+    EXPECT_EQ(GetChildRect(frameNode_, 100).Bottom(), 750.0f);
+    EXPECT_EQ(GetChildOffset(frameNode_, info->footerIndex_), OffsetF(0.0f, 750.0f));
+    UpdateCurrentOffset(50.0f + GetChildRect(frameNode_, 100).Height() + 1.0f);
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 0)->IsActive());
+}
+
+/**
  * @tc.name: Reset001
  * @tc.desc: waterFlow children update
  * @tc.type: FUNC
@@ -71,7 +94,7 @@ HWTEST_F(WaterFlowSWTest, Reset001, TestSize.Level1)
     for (int i = 0; i < 5; i++) {
         frameNode_->RemoveChildAtIndex(6);
     }
-    frameNode_->ChildrenUpdatedFrom(6);
+    frameNode_->ChildrenUpdatedFrom(5); // footer not included in LazyForEach / ForEach
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info_->startIndex_, 0);
@@ -101,14 +124,25 @@ HWTEST_F(WaterFlowSWTest, Reset002, TestSize.Level1)
     for (int i = 0; i < 5; i++) {
         frameNode_->RemoveChildAtIndex(6);
     }
-    frameNode_->ChildrenUpdatedFrom(6);
+    frameNode_->ChildrenUpdatedFrom(5); // footer not included in LazyForEach / ForEach
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info_->startIndex_, 95);
     EXPECT_EQ(info_->endIndex_, 104);
+    EXPECT_TRUE(info_->idxToLane_.find(1) == info_->idxToLane_.end());
     EXPECT_TRUE(info_->offsetEnd_);
     EXPECT_EQ(GetChildY(frameNode_, 95), -150.0f);
     EXPECT_EQ(GetChildY(frameNode_, 0), 750.0f);
+
+    // delete start index
+    frameNode_->RemoveChildAtIndex(96);
+    frameNode_->ChildrenUpdatedFrom(95); // footer not included in LazyForEach / ForEach
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 95);
+    EXPECT_EQ(info_->endIndex_, 103);
+    EXPECT_TRUE(info_->offsetEnd_);
+    EXPECT_EQ(GetChildY(frameNode_, 95), -150.0f);
 }
 
 /**
@@ -372,16 +406,21 @@ HWTEST_F(WaterFlowSWTest, Misaligned001, TestSize.Level1)
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     FlushLayoutTask(frameNode_);
 
-    UpdateCurrentOffset(Infinity<float>());
-    EXPECT_EQ(info_->startIndex_, 0);
-    EXPECT_EQ(GetChildY(frameNode_, 1), 100.0f);
-    EXPECT_EQ(GetChildX(frameNode_, 1), 240.0f);
-    EXPECT_EQ(info_->jumpIndex_, 0);
+    pattern_->ScrollToIndex(2, true, ScrollAlign::START);
     FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->finalPosition_, -2800.0f);
+    UpdateCurrentOffset(2800.0f + 101.0f);
+    // should mark misaligned
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->jumpIndex_, 0);
+    EXPECT_EQ(info_->delta_, -49.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 1), -49.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 240.0f);
+    UpdateCurrentOffset(2.0f);
+    EXPECT_EQ(GetChildRect(frameNode_, 1).Bottom(), 53.0f);
     EXPECT_FALSE(info_->IsMisaligned());
-    EXPECT_EQ(GetChildY(frameNode_, 1), 0.0f);
     EXPECT_EQ(GetChildX(frameNode_, 1), 0.0f);
-    EXPECT_EQ(info_->lanes_[0].startPos, 0.0f);
+    EXPECT_EQ(info_->lanes_[0].startPos, -47.0f);
     EXPECT_EQ(info_->lanes_[0].items_.front().idx, 0);
 }
 

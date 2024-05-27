@@ -39,6 +39,9 @@ void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
     auto [size, matchChildren] = WaterFlowLayoutUtils::PreMeasureSelf(wrapper_, axis_);
     Init(size);
     CheckReset();
+    if (info_->lanes_.empty()) {
+        info_->lanes_.resize(itemCrossSize_.size());
+    }
 
     if (info_->jumpIndex_ != EMPTY_JUMP_INDEX) {
         MeasureOnJump(info_->jumpIndex_, info_->align_);
@@ -102,7 +105,9 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
     }
 
     wrapper->SetActiveChildRange(nodeIdx(info_->startIndex_), nodeIdx(info_->endIndex_));
-    LayoutFooter(paddingOffset, reverse);
+    if (info_->itemEnd_) {
+        LayoutFooter(paddingOffset, reverse);
+    }
 }
 
 void WaterFlowLayoutSW::Init(const SizeF& frameSize)
@@ -134,9 +139,6 @@ void WaterFlowLayoutSW::Init(const SizeF& frameSize)
         crossGap_ = 0.0f;
     }
 
-    if (info_->lanes_.empty()) {
-        info_->lanes_.resize(cross.first.size());
-    }
     for (const auto& len : cross.first) {
         itemCrossSize_.push_back(static_cast<float>(len));
     }
@@ -148,34 +150,25 @@ void WaterFlowLayoutSW::Init(const SizeF& frameSize)
 void WaterFlowLayoutSW::CheckReset()
 {
     int32_t updateIdx = wrapper_->GetHostNode()->GetChildrenUpdated();
-    if (CheckChildrenUpdate(updateIdx)) {
+    if (updateIdx > -1) {
+        if (updateIdx <= info_->startIndex_) {
+            info_->Reset();
+        } else {
+            info_->ClearDataFrom(updateIdx, mainGap_);
+        }
+        wrapper_->GetHostNode()->ChildrenUpdatedFrom(-1);
         return;
     }
+
+    if (wrapper_->GetLayoutProperty()->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST) {
+        info_->Reset();
+        return;
+    }
+
     if (!wrapper_->IsConstraintNoChanged()) {
         info_->Reset();
-        info_->lanes_.resize(itemCrossSize_.size());
         return;
     }
-}
-
-bool WaterFlowLayoutSW::CheckChildrenUpdate(int32_t updateIdx)
-{
-    if (updateIdx == -1) {
-        return false;
-    }
-    if (info_->footerIndex_ == 0 && updateIdx == 0) {
-        // footer updated, no need to reset or clear cache
-        return false;
-    }
-    // convert children node index to item index
-    updateIdx -= (info_->footerIndex_ + 1);
-    info_->ClearDataFrom(updateIdx, mainGap_);
-    if (updateIdx <= info_->startIndex_) {
-        info_->jumpIndex_ = std::min(info_->startIndex_, itemCnt_ - 1);
-        info_->align_ = ScrollAlign::START;
-    }
-    wrapper_->GetHostNode()->ChildrenUpdatedFrom(-1);
-    return true;
 }
 
 void WaterFlowLayoutSW::MeasureOnOffset(float delta)
