@@ -238,9 +238,9 @@ void XComponentPattern::InitializeRenderContext()
 #ifdef RENDER_EXTRACT_SUPPORTED
     auto contextType = type_ == XComponentType::TEXTURE ?
         RenderContext::ContextType::HARDWARE_TEXTURE : RenderContext::ContextType::HARDWARE_SURFACE;
-    static RenderContext::ContextParam param = { contextType, id_ + "Surface" };
+    RenderContext::ContextParam param = { contextType, id_ + "Surface" };
 #else
-    static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, id_ + "Surface" };
+    RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, id_ + "Surface" };
 #endif
 
     renderContextForSurface_->InitContext(false, param);
