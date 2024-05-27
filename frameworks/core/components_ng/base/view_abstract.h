@@ -592,7 +592,7 @@ public:
         FrameNode* frameNode, std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged);
     static void SetJSFrameNodeOnVisibleAreaApproximateChange(FrameNode* frameNode,
         const std::function<void(bool, double)>&& jsCallback, const std::vector<double>& ratioList,
-        uint32_t expectedUpdateInterval = 1000);
+        int32_t expectedUpdateInterval = 1000);
     static void ClearJSFrameNodeOnClick(FrameNode* frameNode);
     static void ClearJSFrameNodeOnTouch(FrameNode* frameNode);
     static void ClearJSFrameNodeOnAppear(FrameNode* frameNode);

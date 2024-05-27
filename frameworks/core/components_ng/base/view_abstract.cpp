@@ -4192,7 +4192,7 @@ void ViewAbstract::ClearJSFrameNodeOnSizeChange(FrameNode* frameNode)
 
 void ViewAbstract::SetJSFrameNodeOnVisibleAreaApproximateChange(FrameNode* frameNode,
     const std::function<void(bool, double)>&& jsCallback, const std::vector<double>& ratioList,
-    uint32_t interval)
+    int32_t interval)
 {
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
@@ -4206,7 +4206,7 @@ void ViewAbstract::SetJSFrameNodeOnVisibleAreaApproximateChange(FrameNode* frame
     VisibleCallbackInfo callback;
     callback.callback = std::move(jsCallback);
     callback.isCurrentVisible = false;
-    callback.period = interval;
+    callback.period = static_cast<uint32_t>(interval);
     pipeline->AddVisibleAreaChangeNode(frameNode->GetId());
     frameNode->SetVisibleAreaUserCallback(ratioList, callback);
 }
