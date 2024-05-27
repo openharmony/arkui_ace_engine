@@ -5836,7 +5836,7 @@ void WebDelegate::SetSurface(const sptr<Surface>& surface)
     CHECK_NULL_VOID(rosenRenderContext);
     rsNode_ = rosenRenderContext->GetRSNode();
     CHECK_NULL_VOID(rsNode_);
-    surfaceNodeId_ = rsNode_->GetId();
+    surfaceNodeId_ = rsNode_->GetId() + 1;
 }
 #endif
 
