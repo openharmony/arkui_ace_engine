@@ -36,6 +36,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
+#include "core/components_ng/pattern/text/span/mutable_span_string.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_accessibility_property.h"
 #include "core/components_ng/pattern/text/text_base.h"
@@ -676,6 +677,7 @@ protected:
     bool focusInitialized_ = false;
     bool hoverInitialized_ = false;
     bool isSpanStringMode_ = false;
+    RefPtr<MutableSpanString> spanString = MakeRefPtr<MutableSpanString>("");
     bool keyEventInitialized_ = false;
 
     RefPtr<FrameNode> dragNode_;

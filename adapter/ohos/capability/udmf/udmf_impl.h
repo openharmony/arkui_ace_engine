@@ -57,6 +57,9 @@ public:
     std::vector<std::string> GetPlainTextRecords(const RefPtr<UnifiedData>& unifiedData) override;
     int32_t GetVideoRecordUri(const RefPtr<UnifiedData>& unifiedData, std::string& uri) override;
     std::pair<int32_t, std::string> GetErrorInfo(int32_t errorCode) override;
+    void AddSpanStringRecord(
+        const RefPtr<UnifiedData>& unifiedData, std::vector<uint8_t>& data) override;
+    std::vector<uint8_t> GetSpanStringRecord(const RefPtr<UnifiedData>& unifiedData) override;
 };
 
 class UnifiedDataImpl : public UnifiedData {

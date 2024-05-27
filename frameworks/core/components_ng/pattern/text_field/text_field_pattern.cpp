@@ -57,6 +57,7 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/components_ng/pattern/text_field/text_content_type.h"
@@ -1748,20 +1749,26 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
         }
         auto data = event->GetData();
         CHECK_NULL_VOID(data);
-        auto records = UdmfClient::GetInstance()->GetPlainTextRecords(data);
         std::string str;
-        if (records.empty()) {
-            std::string linkUrl;
-            std::string linkTitle;
-            UdmfClient::GetInstance()->GetLinkRecord(data, linkUrl, linkTitle);
-            if (!linkTitle.empty()) {
-                str += linkTitle;
-            } else if (!linkUrl.empty()) {
-                str += linkUrl;
+        auto arr = UdmfClient::GetInstance()->GetSpanStringRecord(data);
+        if (arr.size() > 0) {
+            auto spanStr = SpanString::DecodeTlv(arr);
+            str += spanStr->GetString();
+        } else {
+            auto records = UdmfClient::GetInstance()->GetPlainTextRecords(data);
+            if (records.empty()) {
+                std::string linkUrl;
+                std::string linkTitle;
+                UdmfClient::GetInstance()->GetLinkRecord(data, linkUrl, linkTitle);
+                if (!linkTitle.empty()) {
+                    str += linkTitle;
+                } else if (!linkUrl.empty()) {
+                    str += linkUrl;
+                }
             }
-        }
-        for (const auto& record : records) {
-            str += record;
+            for (const auto& record : records) {
+                str += record;
+            }
         }
         pattern->dragRecipientStatus_ = DragStatus::NONE;
         if (str.empty()) {

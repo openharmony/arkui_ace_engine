@@ -499,6 +499,12 @@ std::string TextPattern::GetSelectedText(int32_t start, int32_t end) const
             tag = span->position == -1 ? tag + 1 : span->position;
             continue;
         }
+        if (isSpanStringMode_ && (span->spanItemType == SpanItemType::CustomSpan
+            || span->spanItemType == SpanItemType::IMAGE)) {
+            value += " ";
+            tag = span->position == -1 ? tag + 1 : span->position;
+            continue;
+        }
         if (span->position - 1 >= start && span->placeholderIndex == -1 && span->position != -1) {
             auto wideString = StringUtils::ToWstring(span->GetSpanContent());
             auto max = std::min(span->position, end);
@@ -1449,8 +1455,15 @@ void TextPattern::AddUdmfData(const RefPtr<Ace::DragEvent>& event)
             }
         }
     };
-    for (const auto& resultObj : finalResult) {
-        resultProcessor(resultObj);
+    if (isSpanStringMode_) {
+        std::vector<uint8_t> arr;
+        auto dragSpanString = spanString->GetSubSpanString(recoverStart_, recoverEnd_ - recoverStart_);
+        dragSpanString->EncodeTlv(arr);
+        UdmfClient::GetInstance()->AddSpanStringRecord(unifiedData, arr);
+    } else {
+        for (const auto& resultObj : finalResult) {
+            resultProcessor(resultObj);
+        }
     }
     event->SetData(unifiedData);
 }
@@ -3255,6 +3268,8 @@ void TextPattern::SetStyledString(const RefPtr<SpanString>& value)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     ProcessSpanString();
+    auto length = spanString->GetLength();
+    spanString->ReplaceSpanString(0, length, value);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
