@@ -677,6 +677,10 @@ public:
         return true;
     }
 
+    void PlayScrollBarAppearAnimation();
+
+    void ScheduleDisappearDelayTask();
+
     bool IsAtTop() const override
     {
         return contentRect_.GetY() == textRect_.GetY();
