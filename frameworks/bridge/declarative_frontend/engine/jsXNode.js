@@ -1419,7 +1419,7 @@ class ColorMetrics {
         }
         else {
             const error = new Error("Parameter error. The type of input color parameter is not ResourceColor.");
-            error.code = ERROR_CODE_RESOURCE_GET_FAILED;
+            error.code = ERROR_CODE_COLOR_PARAMETER_INCORRECT;
             throw error;
         }
     }
