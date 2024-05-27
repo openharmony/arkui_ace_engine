@@ -521,7 +521,8 @@ private:
     void RemoveTabBarEventCallback();
     void AddTabBarEventCallback();
     void AddMaskItemClickEvent();
-
+    void TabBarSuitAging();
+    void SetMarginVP(MarginProperty& marginLeftOrRight, MarginProperty& marginTopOrBottom);
     std::map<int32_t, RefPtr<ClickEvent>> clickEvents_;
     RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -591,6 +592,8 @@ private:
     std::optional<WindowSizeChangeReason> windowSizeChangeReason_;
     std::pair<double, double> prevRootSize_;
     ACE_DISALLOW_COPY_AND_MOVE(TabBarPattern);
+    MarginProperty marginLeftOrRight_;
+    MarginProperty marginTopOrBottom_;
 };
 } // namespace OHOS::Ace::NG
 
