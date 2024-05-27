@@ -610,9 +610,9 @@ bool MenuPattern::HideStackExpandMenu(const OffsetF& position) const
     CHECK_NULL_RETURN(wrapper, false);
     auto outterMenu = wrapper->GetFirstChild();
     CHECK_NULL_RETURN(outterMenu, false);
-    auto scroll = outterMenu->GetFirstChild();
-    CHECK_NULL_RETURN(scroll, false);
-    auto innerMenu = AceType::DynamicCast<FrameNode>(scroll->GetFirstChild());
+    auto menuWrapperPattern = wrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_RETURN(menuWrapperPattern, false);
+    auto innerMenu = menuWrapperPattern->GetMenuChild(outterMenu);
     CHECK_NULL_RETURN(innerMenu, false);
     auto innerMenuPattern = AceType::DynamicCast<MenuPattern>(innerMenu->GetPattern());
     CHECK_NULL_RETURN(innerMenuPattern, false);
@@ -623,7 +623,7 @@ bool MenuPattern::HideStackExpandMenu(const OffsetF& position) const
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
         auto hostZone = host->GetPaintRectOffset();
-        scroll = host->GetFirstChild();
+        auto scroll = host->GetFirstChild();
         CHECK_NULL_RETURN(scroll, false);
         auto column = scroll->GetFirstChild();
         CHECK_NULL_RETURN(column, false);

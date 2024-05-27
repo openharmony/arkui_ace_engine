@@ -637,9 +637,9 @@ void MenuItemPattern::CloseMenu()
     auto outterMenu = menuWrapper->GetFirstChild();
     CHECK_NULL_VOID(outterMenu);
     if (IsSubMenu()) {
-        auto scroll = outterMenu->GetFirstChild();
-        CHECK_NULL_VOID(scroll);
-        auto innerMenu = AceType::DynamicCast<FrameNode>(scroll->GetFirstChild());
+        auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(menuWrapperPattern);
+        auto innerMenu = menuWrapperPattern->GetMenuChild(outterMenu);
         CHECK_NULL_VOID(innerMenu);
         auto innerMenuPattern = AceType::DynamicCast<MenuPattern>(innerMenu->GetPattern());
         CHECK_NULL_VOID(innerMenuPattern);
