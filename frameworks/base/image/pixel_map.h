@@ -134,7 +134,7 @@ enum class AceAntiAliasingOption : int32_t {
     HIGH = 3,
 };
 
-class ACE_EXPORT PixelMap : public AceType {
+class ACE_FORCE_EXPORT PixelMap : public AceType {
     DECLARE_ACE_TYPE(PixelMap, AceType)
 
 public:

@@ -253,7 +253,7 @@ protected:
     std::function<void(void)> stopEditing_;
 };
 
-class ACE_EXPORT TextFieldModel {
+class ACE_FORCE_EXPORT TextFieldModel {
 public:
     static TextFieldModel* GetInstance();
     virtual ~TextFieldModel() = default;

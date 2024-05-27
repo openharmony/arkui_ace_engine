@@ -25,7 +25,7 @@
 #include "frameworks/core/components/image/image_event.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT ImageSpanView {
+class ACE_FORCE_EXPORT ImageSpanView {
 public:
     static void SetObjectFit(ImageFit value);
     static void SetVerticalAlign(VerticalAlign verticalAlign);

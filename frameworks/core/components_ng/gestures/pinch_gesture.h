@@ -27,7 +27,7 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT PinchGesture : public Gesture {
+class ACE_FORCE_EXPORT PinchGesture : public Gesture {
     DECLARE_ACE_TYPE(PinchGesture, Gesture);
 
 public:

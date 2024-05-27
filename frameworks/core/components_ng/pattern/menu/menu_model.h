@@ -20,7 +20,7 @@
 #include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace {
-class MenuModel {
+class ACE_FORCE_EXPORT MenuModel {
 public:
     static MenuModel* GetInstance();
     virtual ~MenuModel() = default;

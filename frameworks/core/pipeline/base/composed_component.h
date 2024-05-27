@@ -27,7 +27,7 @@ namespace OHOS::Ace {
 using ComposeId = std::string;
 
 // A component can compose others components.
-class ACE_EXPORT ComposedComponent : public BaseComposedComponent, public SingleChild {
+class ACE_FORCE_EXPORT ComposedComponent : public BaseComposedComponent, public SingleChild {
     DECLARE_ACE_TYPE(ComposedComponent, BaseComposedComponent, SingleChild);
 
 public:

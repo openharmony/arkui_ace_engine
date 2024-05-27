@@ -21,7 +21,7 @@
 #include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace {
-class ACE_EXPORT LoadingProgressModel {
+class ACE_FORCE_EXPORT LoadingProgressModel {
 public:
     static LoadingProgressModel* GetInstance();
     virtual ~ LoadingProgressModel() = default;

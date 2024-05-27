@@ -45,7 +45,7 @@ public:
     virtual void SetStyledString(const RefPtr<SpanStringBase>& value) = 0;
 };
 
-class ACE_EXPORT TextModel {
+class ACE_FORCE_EXPORT TextModel {
 public:
     static TextModel* GetInstance();
     virtual ~TextModel() = default;

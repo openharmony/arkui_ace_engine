@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT SwipeGesture : public Gesture {
+class ACE_FORCE_EXPORT SwipeGesture : public Gesture {
     DECLARE_ACE_TYPE(SwipeGesture, Gesture);
 
 public:

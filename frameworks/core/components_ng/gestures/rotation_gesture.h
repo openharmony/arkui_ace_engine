@@ -27,7 +27,7 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT RotationGesture : public Gesture {
+class ACE_FORCE_EXPORT RotationGesture : public Gesture {
     DECLARE_ACE_TYPE(RotationGesture, Gesture);
 
 public:

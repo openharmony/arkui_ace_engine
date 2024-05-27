@@ -49,7 +49,7 @@ struct SelectParam {
     RefPtr<SymbolModifier> symbolModifier = nullptr;
 };
 
-class SelectModel {
+class ACE_FORCE_EXPORT SelectModel {
 public:
     static SelectModel* GetInstance();
     virtual ~SelectModel() = default;

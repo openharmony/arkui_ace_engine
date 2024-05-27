@@ -179,7 +179,7 @@ inline void StringSplitter(const std::string& source, char delimiter, std::vecto
 
 } // namespace StringUtils
 
-class ACE_EXPORT LinearColor {
+class ACE_FORCE_EXPORT LinearColor {
 public:
     LinearColor() = default;
     explicit LinearColor(uint32_t argb)

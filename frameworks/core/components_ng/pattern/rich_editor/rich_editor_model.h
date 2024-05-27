@@ -282,7 +282,7 @@ public:
     virtual void SetOnDidChange(std::function<void(const NG::StyledStringChangeValue&)> && func) = 0;
 };
 
-class ACE_EXPORT RichEditorModel {
+class ACE_FORCE_EXPORT RichEditorModel {
 public:
     static RichEditorModel* GetInstance();
     virtual ~RichEditorModel() = default;
