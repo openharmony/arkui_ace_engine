@@ -61,6 +61,11 @@ public:
         requestCallback_ = std::move(callback);
     }
 
+    void ResetRequestFocusCallback()
+    {
+        requestCallback_ = nullptr;
+    }
+
     void TriggerRequestFocusCallback(NG::RequestFocusResult result)
     {
         if (requestCallback_) {
