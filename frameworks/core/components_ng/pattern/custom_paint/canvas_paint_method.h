@@ -92,8 +92,6 @@ public:
     void GetImageData(const RefPtr<RenderContext>& renderContext, const std::shared_ptr<Ace::ImageData>& imageData);
 #ifdef PIXEL_MAP_SUPPORTED
     void TransferFromImageBitmap(const RefPtr<PixelMap>& pixelMap);
-#else
-    void TransferFromImageBitmap(const std::unique_ptr<Ace::ImageData>& imageData);
 #endif
     std::string ToDataURL(RefPtr<RenderContext> renderContext, const std::string& args);
     bool DrawBitmap(RefPtr<RenderContext> renderContext, RSBitmap& currentBitmap);

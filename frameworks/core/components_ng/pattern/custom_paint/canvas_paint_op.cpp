@@ -345,11 +345,6 @@ void TransferFromImageBitmapOp::Draw(CanvasPaintMethod* method) const
 {
     method->TransferFromImageBitmap(pixelMap);
 }
-#else
-void TransferFromImageBitmapOp::Draw(CanvasPaintMethod* method) const
-{
-    method->TransferFromImageBitmap(imageData);
-}
 #endif
 
 void StrokeTextOp::Draw(CanvasPaintMethod* method) const
