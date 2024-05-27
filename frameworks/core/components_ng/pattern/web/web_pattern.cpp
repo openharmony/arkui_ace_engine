@@ -221,6 +221,7 @@ WebPattern::WebPattern(const std::string& webSrc,
 WebPattern::~WebPattern()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "NWEB ~WebPattern start");
+    UnInitTouchEventListener();
     if (delegate_) {
         TAG_LOGD(AceLogTag::ACE_WEB, "NWEB ~WebPattern delegate_ start SetAudioMuted");
         delegate_->SetAudioMuted(true);
@@ -3277,6 +3278,18 @@ void WebPattern::InitTouchEventListener()
     CHECK_NULL_VOID(context);
 
     context->RegisterTouchEventListener(listener);
+}
+
+void WebPattern::UnInitTouchEventListener()
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::UnInitTouchEventListener");
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+
+    context->UnRegisterTouchEventListener(AceType::WeakClaim(this));
 }
 
 void WebPattern::OnDateTimeChooserPopup(std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser> chooser,

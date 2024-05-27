@@ -3689,7 +3689,22 @@ void PipelineContext::FlushFrameCallback(uint64_t nanoTimestamp)
 
 void PipelineContext::RegisterTouchEventListener(const std::shared_ptr<ITouchEventCallback>& listener)
 {
+    if (!listener) {
+        return;
+    }
     listenerVector_.emplace_back(listener);
+}
+
+void PipelineContext::UnRegisterTouchEventListener(WeakPtr<NG::Pattern> pattern)
+{
+    for (auto iter = listenerVector_.begin(); iter != listenerVector_.end();) {
+        auto rawPtr = (*iter)->GetPatternFromListener().GetRawPtr();
+        if (!rawPtr || rawPtr == pattern.GetRawPtr()) {
+            iter = listenerVector_.erase(iter);
+        } else {
+            iter++;
+        }
+    }
 }
 
 void PipelineContext::RegisterFocusCallback()

@@ -30,6 +30,8 @@ public:
         pattern_ = pattern;
     }
 
+    WeakPtr<NG::Pattern> GetPatternFromListener() override;
+
     void OnTouchEvent() override;
 private:
     WeakPtr<NG::Pattern> pattern_;

@@ -739,6 +739,7 @@ public:
     void FlushFrameCallback(uint64_t nanoTimestamp);
 
     void RegisterTouchEventListener(const std::shared_ptr<ITouchEventCallback>& listener);
+    void UnRegisterTouchEventListener(WeakPtr<NG::Pattern> pattern);
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);

@@ -24,6 +24,7 @@ public:
     ITouchEventCallback() {};
     virtual ~ITouchEventCallback() {};
     virtual void OnTouchEvent() = 0;
+    virtual WeakPtr<NG::Pattern> GetPatternFromListener() = 0;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_I_TOUCH_EVENT_CALLBACK_H

@@ -28,4 +28,9 @@ void TouchEventListener::OnTouchEvent()
     CHECK_NULL_VOID(pattern);
     pattern->NotifyForNextTouchMoveEvent();
 }
+
+WeakPtr<NG::Pattern> TouchEventListener::GetPatternFromListener()
+{
+    return pattern_;
+}
 } // namespace OHOS::Ace::NG
