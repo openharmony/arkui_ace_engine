@@ -546,6 +546,46 @@ class ImageAnalyzerConfigModifier extends ModifierWithKey<object> {
   }
 }
 
+class ImagePointLightModifier extends ModifierWithKey<PointLightStyle> {
+  constructor(value: PointLightStyle) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('imagePointLight');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetPointLightStyle(node);
+    } else {
+      let positionX: Dimension | undefined;
+      let positionY: Dimension | undefined;
+      let positionZ: Dimension | undefined;
+      let intensity: number | undefined;
+      let color: ResourceColor | undefined;
+      let illuminated: number | undefined;
+      let bloom: number | undefined;
+      if (!isUndefined(this.value.lightSource) && this.value.lightSource != null) {
+        positionX = this.value.lightSource.positionX;
+        positionY = this.value.lightSource.positionY;
+        positionZ = this.value.lightSource.positionZ;
+        intensity = this.value.lightSource.intensity;
+        color = this.value.lightSource.color;
+      }
+      illuminated = this.value.illuminated;
+      bloom = this.value.bloom;
+      getUINativeModule().common.setPointLightStyle(node, positionX, positionY, positionZ, intensity, color,
+        illuminated, bloom);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.lightSource?.positionX, this.value.lightSource?.positionX) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.positionY, this.value.lightSource?.positionY) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.positionZ, this.value.lightSource?.positionZ) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.intensity, this.value.lightSource?.intensity) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.color, this.value.lightSource?.color) ||
+    !isBaseOrResourceEqual(this.stageValue.illuminated, this.value.illuminated) ||
+    !isBaseOrResourceEqual(this.stageValue.bloom, this.value.bloom);
+  }
+}
+
 class ArkImageComponent extends ArkComponent implements ImageAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -575,6 +615,10 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
   }
   fitOriginalSize(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, ImageFitOriginalSizeModifier.identity, ImageFitOriginalSizeModifier, value);
+    return this;
+  }
+  pointLight(value: PointLightStyle): this {
+    modifierWithKey(this._modifiersWithKeys, ImagePointLightModifier.identity, ImagePointLightModifier, value);
     return this;
   }
   fillColor(value: ResourceColor): this {

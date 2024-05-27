@@ -87,6 +87,9 @@ constexpr int32_t DEFAULT_ROTATION_FINGER = 2;
 constexpr int32_t DEFAULT_MAX_ROTATION_FINGER = 5;
 constexpr double DEFAULT_ROTATION_ANGLE = 1.0;
 constexpr double DEFAULT_MAX_ROTATION_ANGLE = 360.0;
+const std::string BLOOM_RADIUS_SYS_RES_NAME = "sys.float.ohos_id_point_light_bloom_radius";
+const std::string BLOOM_COLOR_SYS_RES_NAME = "sys.color.ohos_id_point_light_bloom_color";
+const std::string ILLUMINATED_BORDER_WIDTH_SYS_RES_NAME = "sys.float.ohos_id_point_light_illuminated_border_width";
 
 BorderStyle ConvertBorderStyle(int32_t value)
 {
@@ -5211,6 +5214,132 @@ ArkUINativeModuleValue CommonBridge::ResetKeyBoardShortCut(ArkUIRuntimeCallInfo*
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getCommonModifier()->resetKeyBoardShortCut(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+RefPtr<ResourceWrapper> CreateResourceWrapper()
+{
+    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
+    RefPtr<ThemeConstants> themeConstants = nullptr;
+    if (SystemProperties::GetResourceDecoupling()) {
+        resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter();
+        if (!resourceAdapter) {
+            return nullptr;
+        }
+    } else {
+        themeConstants = JSViewAbstract::GetThemeConstants();
+        if (!themeConstants) {
+            return nullptr;
+        }
+    }
+    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
+    return resourceWrapper;
+}
+
+bool ParseLightPosition(ArkUIRuntimeCallInfo *runtimeCallInfo, EcmaVM* vm, ArkUISizeType& dimPosX,
+    ArkUISizeType& dimPosY, ArkUISizeType& dimPosZ)
+{
+    Local<JSValueRef> positionXArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> positionYArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> positionZArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    CalcDimension dimPositionX;
+    CalcDimension dimPositionY;
+    CalcDimension dimPositionZ;
+    bool xSuccess = ArkTSUtils::ParseJsDimensionVp(vm, positionXArg, dimPositionX, false);
+    bool ySuccess = ArkTSUtils::ParseJsDimensionVp(vm, positionYArg, dimPositionY, false);
+    bool zSuccess = ArkTSUtils::ParseJsDimensionVp(vm, positionZArg, dimPositionZ, false);
+    if (!(xSuccess && ySuccess && zSuccess)) {
+        return false;
+    }
+    dimPosX.value = dimPositionX.Value();
+    dimPosX.unit = static_cast<int8_t>(dimPositionX.Unit());
+    dimPosY.value = dimPositionY.Value();
+    dimPosY.unit = static_cast<int8_t>(dimPositionY.Unit());
+    dimPosZ.value = dimPositionZ.Value();
+    dimPosZ.unit = static_cast<int8_t>(dimPositionZ.Unit());
+    return true;
+}
+
+void ParseLightSource(ArkUIRuntimeCallInfo *runtimeCallInfo, EcmaVM* vm, ArkUINodeHandle& nativeNode)
+{
+    struct ArkUISizeType dimPosX = { 0.0, 0 };
+    struct ArkUISizeType dimPosY = { 0.0, 0 };
+    struct ArkUISizeType dimPosZ = { 0.0, 0 };
+    bool success = ParseLightPosition(runtimeCallInfo, vm, dimPosX, dimPosY, dimPosZ);
+    if (success) {
+        GetArkUINodeModifiers()->getCommonModifier()->setPointLightPosition(nativeNode, &dimPosX, &dimPosY, &dimPosZ);
+    } else {
+        GetArkUINodeModifiers()->getCommonModifier()->resetPointLightPosition(nativeNode);
+    }
+
+    Local<JSValueRef> intensityArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+    if (intensityArg->IsNumber()) {
+        auto intensityValue = static_cast<ArkUI_Float32>((intensityArg->ToNumber(vm)->Value()));
+        GetArkUINodeModifiers()->getCommonModifier()->setPointLightIntensity(nativeNode, intensityValue);
+    } else {
+        GetArkUINodeModifiers()->getCommonModifier()->resetPointLightIntensity(nativeNode);
+    }
+
+    Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(NUM_5);
+    Color colorValue;
+    if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, colorValue)) {
+        GetArkUINodeModifiers()->getCommonModifier()->setPointLightColor(nativeNode, colorValue.GetValue());
+    } else {
+        GetArkUINodeModifiers()->getCommonModifier()->resetPointLightColor(nativeNode);
+    }
+}
+
+ArkUINativeModuleValue CommonBridge::SetPointLightStyle(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+#ifdef POINT_LIGHT_ENABLE
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    ParseLightSource(runtimeCallInfo, vm, nativeNode);
+
+    auto resourceWrapper = CreateResourceWrapper();
+    Local<JSValueRef> illuminatedArg = runtimeCallInfo->GetCallArgRef(NUM_6);
+    if (illuminatedArg->IsNumber() || !resourceWrapper) {
+        auto illuminatedValue = static_cast<ArkUI_Uint32>(illuminatedArg->ToNumber(vm)->Value());
+        Dimension illuminatedBorderWidth = resourceWrapper->GetDimensionByName(ILLUMINATED_BORDER_WIDTH_SYS_RES_NAME);
+        struct ArkUISizeType illuminatedBorderWidthValue = { 0.0, 0 };
+        illuminatedBorderWidthValue.value = illuminatedBorderWidth.Value();
+        illuminatedBorderWidthValue.unit = static_cast<int8_t>(illuminatedBorderWidth.Unit());
+        GetArkUINodeModifiers()->getCommonModifier()->setPointLightIlluminated(
+            nativeNode, illuminatedValue, &illuminatedBorderWidthValue);
+    } else {
+        GetArkUINodeModifiers()->getCommonModifier()->resetPointLightIlluminated(nativeNode);
+    }
+
+    Local<JSValueRef> bloomArg = runtimeCallInfo->GetCallArgRef(NUM_7);
+    if (bloomArg->IsNumber() || !resourceWrapper) {
+        auto bloomValue = static_cast<ArkUI_Float32>(bloomArg->ToNumber(vm)->Value());
+        double bloomRadius = resourceWrapper->GetDoubleByName(BLOOM_RADIUS_SYS_RES_NAME);
+        Color bloomColor = resourceWrapper->GetColorByName(BLOOM_COLOR_SYS_RES_NAME);
+        GetArkUINodeModifiers()->getCommonModifier()->setPointLightBloom(nativeNode, bloomValue,
+            static_cast<ArkUI_Float32>(bloomRadius), static_cast<ArkUI_Uint32>(bloomColor.GetValue()));
+    } else {
+        GetArkUINodeModifiers()->getCommonModifier()->resetPointLightBloom(nativeNode);
+    }
+#endif
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetPointLightStyle(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+#ifdef POINT_LIGHT_ENABLE
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonModifier()->resetPointLightPosition(nativeNode);
+    GetArkUINodeModifiers()->getCommonModifier()->resetPointLightIntensity(nativeNode);
+    GetArkUINodeModifiers()->getCommonModifier()->resetPointLightColor(nativeNode);
+    GetArkUINodeModifiers()->getCommonModifier()->resetPointLightIlluminated(nativeNode);
+    GetArkUINodeModifiers()->getCommonModifier()->resetPointLightBloom(nativeNode);
+#endif
     return panda::JSValueRef::Undefined(vm);
 }
 

@@ -24,6 +24,10 @@ template("ace_core_interfaces_native_node") {
     defines += invoker.defines
     configs = [ "$ace_root:ace_config" ]
 
+    if (ace_engine_feature_enable_point_light) {
+      defines += [ "POINT_LIGHT_ENABLE" ]
+    }
+
     # add common source file needed by all product platform here
     sources = [
       "node/alphabet_indexer_modifier.cpp",

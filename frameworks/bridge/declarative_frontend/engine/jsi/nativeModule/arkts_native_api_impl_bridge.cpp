@@ -251,6 +251,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetPosition));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPosition"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetPosition));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPointLightStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetPointLightStyle));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPointLightStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetPointLightStyle));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBorderStyle"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetBorderStyle));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBorderStyle"),
