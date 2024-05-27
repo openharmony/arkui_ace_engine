@@ -53,6 +53,10 @@ struct FlexItemProperty {
     {
         static const char* ITEM_ALIGN[] = { "ItemAlign.Auto", "ItemAlign.Start", "ItemAlign.Center", "ItemAlign.End",
             "ItemAlign.Stretch", "ItemAlign.Baseline" };
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("flexBasis",
             propFlexBasis.has_value() ? propFlexBasis.value().ToString().c_str() : "auto", filter);
         json->PutExtAttr("flexGrow", round(static_cast<double>(propFlexGrow.value_or(0.0)) * 100) / 100, filter);

@@ -1162,6 +1162,10 @@ void ImagePattern::HandleCopy()
 
 void ImagePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     static const char* COPY_OPTIONS[] = { "CopyOptions.None", "CopyOptions.InApp", "CopyOptions.Local",
         "CopyOptions.Distributed" };
     json->PutExtAttr("copyOption", COPY_OPTIONS[static_cast<int32_t>(copyOption_)], filter);

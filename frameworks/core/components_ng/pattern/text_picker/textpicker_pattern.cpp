@@ -808,6 +808,10 @@ std::string TextPickerPattern::GetSelectedObject(bool isColumnChange, int32_t st
 
 void TextPickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     if (!range_.empty()) {
         json->PutExtAttr("range", GetRangeStr().c_str(), filter);
     } else {

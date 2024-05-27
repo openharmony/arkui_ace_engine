@@ -6940,6 +6940,10 @@ bool RichEditorPattern::NeedShowAIDetect()
 
 void RichEditorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     json->PutExtAttr("enableDataDetector", textDetectEnable_ ? "true" : "false", filter);
     auto jsonValue = JsonUtil::Create(true);
     jsonValue->Put("types", "");

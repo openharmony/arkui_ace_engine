@@ -54,6 +54,19 @@ bool InspectorFilter::CheckFilterAttr(const FixedAttrBit fixedAttrBit, const cha
     return false;
 }
 
+bool InspectorFilter::IsFastFilter() const
+{
+    /* no filter attr set */
+    if (FilterEmpty()) {
+        return false;
+    }
+    /* no extend attr set */
+    if (!filterExt.empty()) {
+        return false;
+    }
+    return true;
+}
+
 void InspectorFilter::AddFilterAttr(const std::string& attr)
 {
     const static std::map<std::string, FixedAttrBit> FIXED_ATTR_MAP = {

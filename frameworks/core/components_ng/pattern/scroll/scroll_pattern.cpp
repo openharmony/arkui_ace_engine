@@ -1182,6 +1182,10 @@ void ScrollPattern::DumpAdvanceInfo()
 void ScrollPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     ScrollablePattern::ToJsonValue(json, filter);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto initialOffset = JsonUtil::Create(true);
     initialOffset->Put("xOffset", GetInitialOffset().GetX().ToString().c_str());
     initialOffset->Put("yOffset", GetInitialOffset().GetY().ToString().c_str());

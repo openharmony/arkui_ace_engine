@@ -55,6 +55,10 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         PaintProperty::ToJsonValue(json, filter);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         RefPtr<QrcodeTheme> qrCodeTheme = pipeline->GetTheme<QrcodeTheme>();

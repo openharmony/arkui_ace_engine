@@ -5704,6 +5704,10 @@ bool TextFieldPattern::IsUnspecifiedOrTextType() const
 
 void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     json->PutExtAttr("placeholder", GetPlaceHolder().c_str(), filter);
     json->PutExtAttr("text", contentController_->GetTextValue().c_str(), filter);
     json->PutExtAttr("fontSize", GetFontSize().c_str(), filter);
@@ -5719,9 +5723,8 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
     json->PutExtAttr("placeholderColor", GetPlaceholderColor().c_str(), filter);
     json->PutExtAttr("placeholderFont", GetPlaceholderFont().c_str(), filter);
     json->PutExtAttr("enterKeyType", TextInputActionToString().c_str(), filter);
-    auto maxLength = GetMaxLength();
-    json->PutExtAttr("maxLength",
-        GreatOrEqual(maxLength, Infinity<uint32_t>()) ? "INF" : std::to_string(maxLength).c_str(), filter);
+    json->PutExtAttr("maxLength", GreatOrEqual(GetMaxLength(),
+        Infinity<uint32_t>()) ? "INF" : std::to_string(GetMaxLength()).c_str(), filter);
     json->PutExtAttr("inputFilter", GetInputFilter().c_str(), filter);
     json->PutExtAttr("copyOption", GetCopyOptionString().c_str(), filter);
     json->PutExtAttr("style", GetInputStyleString().c_str(), filter);
@@ -5731,9 +5734,8 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
     jsonValue->Put("offIconSrc", GetHideResultImageSrc().c_str());
     json->PutExtAttr("passwordIcon", jsonValue->ToString().c_str(), filter);
     json->PutExtAttr("showError", GetErrorTextState() ? GetErrorTextString().c_str() : "undefined", filter);
-    auto maxLines = GetMaxLines();
-    json->PutExtAttr("maxLines",
-        GreatOrEqual(maxLines, Infinity<uint32_t>()) ? "INF" : std::to_string(maxLines).c_str(), filter);
+    json->PutExtAttr("maxLines", GreatOrEqual(GetMaxLines(),
+        Infinity<uint32_t>()) ? "INF" : std::to_string(GetMaxLines()).c_str(), filter);
     json->PutExtAttr("barState", GetBarStateString().c_str(), filter);
     json->PutExtAttr("caretPosition", std::to_string(GetCaretIndex()).c_str(), filter);
     
@@ -5756,10 +5758,8 @@ void TextFieldPattern::ToJsonValueForOption(std::unique_ptr<JsonValue>& json, co
     auto jsonShowCounter = JsonUtil::Create(true);
     jsonShowCounter->Put("value", layoutProperty->GetShowCounterValue(false));
     auto jsonShowCounterOptions = JsonUtil::Create(true);
-    auto counterType = layoutProperty->GetSetCounterValue(DEFAULT_MODE);
-    auto showBorder = layoutProperty->GetShowHighlightBorderValue(true);
-    jsonShowCounterOptions->Put("thresholdPercentage", counterType);
-    jsonShowCounterOptions->Put("highlightBorder", showBorder);
+    jsonShowCounterOptions->Put("thresholdPercentage", layoutProperty->GetSetCounterValue(DEFAULT_MODE));
+    jsonShowCounterOptions->Put("highlightBorder", layoutProperty->GetShowHighlightBorderValue(true));
     jsonShowCounter->Put("options", jsonShowCounterOptions);
     json->PutExtAttr("showCounter", jsonShowCounter, filter);
 }

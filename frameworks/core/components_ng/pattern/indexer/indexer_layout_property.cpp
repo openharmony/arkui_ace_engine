@@ -30,6 +30,10 @@ const std::string DEFAULT_FAMILY = "HarmonyOS Sans";
 void IndexerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     LayoutProperty::ToJsonValue(json, filter);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     json->PutExtAttr("selected", std::to_string(propSelected_.value_or(0)).c_str(), filter);
     json->PutExtAttr("color", propColor_.value_or(Color::WHITE).ColorToString().c_str(), filter);
     json->PutExtAttr("selectedColor", propSelectedColor_.value_or(Color::WHITE).ColorToString().c_str(), filter);
@@ -57,12 +61,9 @@ void IndexerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
     auto fontFamily = std::vector<std::string>();
     fontFamily.emplace_back(DEFAULT_FAMILY);
     defaultFont.SetFontFamilies(fontFamily);
-    auto fontJsonObject = ToJsonObjectValue(propFont_.value_or(defaultFont));
-    json->PutExtAttr("font", fontJsonObject, filter);
-    auto selectFontJsonObject = ToJsonObjectValue(propSelectedFont_.value_or(defaultFont));
-    json->PutExtAttr("selectFont", selectFontJsonObject, filter);
-    auto popupFontJsonObject = ToJsonObjectValue(propPopupFont_.value_or(defaultFont));
-    json->PutExtAttr("popupFont", popupFontJsonObject, filter);
+    json->PutExtAttr("font", ToJsonObjectValue(propFont_.value_or(defaultFont)), filter);
+    json->PutExtAttr("selectFont", ToJsonObjectValue(propSelectedFont_.value_or(defaultFont)), filter);
+    json->PutExtAttr("popupFont", ToJsonObjectValue(propPopupFont_.value_or(defaultFont)), filter);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
