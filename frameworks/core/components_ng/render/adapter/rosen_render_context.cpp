@@ -769,7 +769,7 @@ void RosenRenderContext::PaintBackground()
 #endif
     } else {
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-            rsNode_->SetBgImage(std::make_shared<Rosen::RSImage>());
+            rsNode_->SetBgImage(nullptr);
         }
         return;
     }
