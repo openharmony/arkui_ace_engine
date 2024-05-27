@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
+#include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/templates_parser.h"
 
@@ -38,9 +39,8 @@ void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
 
     auto [size, matchChildren] = WaterFlowLayoutUtils::PreMeasureSelf(wrapper_, axis_);
     Init(size);
-    CheckReset();
-    if (info_->lanes_.empty()) {
-        info_->lanes_.resize(itemCrossSize_.size());
+    if (info_->segmentTails_.empty() || info_->segmentTails_.back() != itemCnt_ - 1) {
+        return;
     }
 
     if (info_->jumpIndex_ != EMPTY_JUMP_INDEX) {
@@ -60,7 +60,10 @@ void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
 
 void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
 {
-    if (info_->lanes_.empty()) {
+    if (info_->sections_.empty()) {
+        return;
+    }
+    if (info_->segmentTails_.empty() || info_->segmentTails_.back() != itemCnt_ - 1) {
         return;
     }
 
@@ -72,36 +75,8 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
     bool rtl = props->GetNonAutoLayoutDirection() == TextDirection::RTL && axis_ == Axis::VERTICAL;
     float selfCrossLen = wrapper->GetGeometryNode()->GetContentSize().CrossSize(axis_);
 
-    float crossPos = rtl ? selfCrossLen + mainGap_ : 0.0f;
-    for (size_t i = 0; i < info_->lanes_.size(); ++i) {
-        if (rtl) {
-            crossPos -= itemCrossSize_[i] + crossGap_;
-        }
-        auto& lane = info_->lanes_[i];
-        float mainPos = lane.startPos;
-        for (auto& item : lane.items_) {
-            auto child = wrapper->GetOrCreateChildByIndex(nodeIdx(item.idx));
-            if (!child) {
-                continue;
-            }
-            auto childNode = child->GetGeometryNode();
-            auto offset =
-                reverse ? OffsetF { crossPos, mainLen_ - item.mainSize - mainPos } : OffsetF { crossPos, mainPos };
-            if (axis_ != Axis::VERTICAL) {
-                offset = OffsetF { offset.GetY(), offset.GetX() };
-            }
-            childNode->SetMarginFrameOffset(offset + paddingOffset);
-
-            if (child->CheckNeedForceMeasureAndLayout()) {
-                child->Layout();
-            } else {
-                child->GetHostNode()->ForceSyncGeometryNode();
-            }
-            mainPos += item.mainSize + mainGap_;
-        }
-        if (!rtl) {
-            crossPos += itemCrossSize_[i] + crossGap_;
-        }
+    for (size_t idx = 0; idx < info_->sections_.size(); ++idx) {
+        LayoutSection(idx, paddingOffset, selfCrossLen, reverse, rtl);
     }
 
     auto cachedCount = props->GetCachedCountValue(1);
@@ -117,8 +92,22 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
 
 void WaterFlowLayoutSW::Init(const SizeF& frameSize)
 {
+    sections_ = wrapper_->GetHostNode()->GetPattern<WaterFlowPattern>()->GetSections();
+    if (sections_) {
+        SectionInit(frameSize);
+    } else {
+        SingleInit(frameSize);
+    }
+    CheckReset();
+    InitLanes();
+}
+
+void WaterFlowLayoutSW::SingleInit(const SizeF& frameSize)
+{
     // omit footer from children count
     itemCnt_ = wrapper_->GetTotalChildCount() - info_->footerIndex_ - 1;
+    info_->segmentTails_ = { itemCnt_ - 1 };
+    info_->margins_.resize(1);
 
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
     auto scale = props->GetLayoutConstraint()->scaleProperty;
@@ -142,11 +131,12 @@ void WaterFlowLayoutSW::Init(const SizeF& frameSize)
     }
     crossGap_ = cross.second;
 
+    itemCrossSize_.resize(1);
     for (const auto& len : cross.first) {
-        itemCrossSize_.push_back(static_cast<float>(len));
+        itemCrossSize_[0].push_back(static_cast<float>(len));
     }
     if (itemCrossSize_.empty()) {
-        itemCrossSize_.push_back(crossSize);
+        itemCrossSize_[0].push_back(crossSize);
     }
 }
 
@@ -189,9 +179,11 @@ void WaterFlowLayoutSW::MeasureOnOffset(float delta)
 void WaterFlowLayoutSW::ApplyDelta(float delta)
 {
     info_->totalOffset_ += delta;
-    for (auto& lane : info_->lanes_) {
-        lane.startPos += delta;
-        lane.endPos += delta;
+    for (auto& section : info_->sections_) {
+        for (auto& lane : section) {
+            lane.startPos += delta;
+            lane.endPos += delta;
+        }
     }
 
     if (Positive(delta)) {
@@ -214,22 +206,69 @@ void WaterFlowLayoutSW::MeasureToTarget(int32_t targetIdx)
     }
 }
 
+namespace {
 // [lane start/end position, lane index]
 using lanePos = std::pair<float, size_t>;
-void WaterFlowLayoutSW::FillBack(float viewportBound, int32_t idx, int32_t maxChildIdx)
-{
-    idx = std::max(idx, 0);
-    maxChildIdx = std::min(maxChildIdx, itemCnt_ - 1);
-    if (info_->idxToLane_.count(idx)) {
-        RecoverBack(viewportBound, idx, maxChildIdx);
+
+// max heap but with smaller laneIdx at the top
+struct MaxHeapCmp {
+    bool operator()(const lanePos& left, const lanePos& right)
+    {
+        if (NearEqual(left.first, right.first)) {
+            return left.second > right.second;
+        }
+        return LessNotEqual(left.first, right.first);
     }
-    std::priority_queue<lanePos, std::vector<lanePos>, std::greater<>> q;
-    for (size_t i = 0; i < info_->lanes_.size(); ++i) {
-        float endPos = info_->lanes_[i].endPos + (info_->lanes_[i].items_.empty() ? 0.0f : mainGap_);
+};
+
+using StartPosQ = std::priority_queue<lanePos, std::vector<lanePos>, MaxHeapCmp>;
+using EndPosQ = std::priority_queue<lanePos, std::vector<lanePos>, std::greater<>>;
+
+using Lanes = std::vector<WaterFlowLayoutInfoSW::Lane>;
+
+void PrepareStartPosQueue(StartPosQ& q, Lanes& lanes, float mainGap, float viewportBound)
+{
+    for (size_t i = 0; i < lanes.size(); ++i) {
+        float endPos = lanes[i].endPos + (lanes[i].items_.empty() ? 0.0f : mainGap);
         if (LessNotEqual(endPos, viewportBound)) {
             q.push({ endPos, i });
         }
     }
+}
+
+void PrepareEndPosQueue(EndPosQ& q, Lanes& lanes, float mainGap, float viewportBound)
+{
+    for (size_t i = 0; i < lanes.size(); ++i) {
+        float endPos = lanes[i].endPos + (lanes[i].items_.empty() ? 0.0f : mainGap);
+        if (LessNotEqual(endPos, viewportBound)) {
+            q.push({ endPos, i });
+        }
+    }
+}
+} // namespace
+
+void WaterFlowLayoutSW::FillBack(float viewportBound, int32_t idx, int32_t maxChildIdx)
+{
+    idx = std::max(idx, 0);
+    maxChildIdx = std::min(maxChildIdx, itemCnt_ - 1);
+    info_->PrepareSection(idx, true);
+    while (!FillBackSection(viewportBound, idx, maxChildIdx)) {
+        if (idx > maxChildIdx) {
+            break;
+        }
+        info_->PrepareSection(idx, true);
+    }
+}
+
+bool WaterFlowLayoutSW::FillBackSection(float viewportBound, int32_t& idx, int32_t maxChildIdx)
+{
+    int32_t section = info_->GetSegment(idx);
+    maxChildIdx = std::min(maxChildIdx, info_->segmentTails_[section]);
+    if (info_->idxToLane_.count(idx)) {
+        RecoverBack(viewportBound, idx, maxChildIdx);
+    }
+    EndPosQ q;
+    PrepareEndPosQueue(q, info_->sections_[info_->GetSegment(idx)], mainGap_, viewportBound);
 
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
     while (!q.empty() && idx <= maxChildIdx) {
@@ -241,34 +280,31 @@ void WaterFlowLayoutSW::FillBack(float viewportBound, int32_t idx, int32_t maxCh
             q.push({ endPos, laneIdx });
         }
     }
+    return q.empty();
 }
 
-namespace {
-// max heap but with smaller laneIdx at the top
-struct MaxHeapCmp {
-    bool operator()(const lanePos& left, const lanePos& right)
-    {
-        if (NearEqual(left.first, right.first)) {
-            return left.second > right.second;
-        }
-        return LessNotEqual(left.first, right.first);
-    }
-};
-} // namespace
 void WaterFlowLayoutSW::FillFront(float viewportBound, int32_t idx, int32_t minChildIdx)
 {
     idx = std::min(itemCnt_ - 1, idx);
     minChildIdx = std::max(minChildIdx, 0);
+    info_->PrepareSection(idx, false);
+    while (!FillBackSection(viewportBound, idx, minChildIdx)) {
+        if (idx < minChildIdx) {
+            break;
+        }
+        info_->PrepareSection(idx, false);
+    }
+}
+
+bool WaterFlowLayoutSW::FillFrontSection(float viewportBound, int32_t& idx, int32_t minChildIdx)
+{
+    int32_t secIdx = info_->GetSegment(idx);
+    minChildIdx = std::max(minChildIdx, secIdx > 0 ? info_->segmentTails_[secIdx - 1] + 1 : 0);
     if (info_->idxToLane_.count(idx)) {
         RecoverFront(viewportBound, idx, minChildIdx);
     }
-    std::priority_queue<lanePos, std::vector<lanePos>, MaxHeapCmp> q;
-    for (size_t i = 0; i < info_->lanes_.size(); ++i) {
-        float startPos = info_->lanes_[i].startPos - (info_->lanes_[i].items_.empty() ? 0.0f : mainGap_);
-        if (GreatNotEqual(startPos, viewportBound)) {
-            q.push({ startPos, i });
-        }
-    }
+    StartPosQ q;
+    PrepareStartPosQueue(q, info_->sections_[secIdx], mainGap_, viewportBound);
 
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
     while (!q.empty() && idx >= minChildIdx) {
@@ -280,12 +316,13 @@ void WaterFlowLayoutSW::FillFront(float viewportBound, int32_t idx, int32_t minC
             q.push({ startPos, laneIdx });
         }
     }
+    return q.empty();
 }
 
 float WaterFlowLayoutSW::FillBackHelper(const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, size_t laneIdx)
 {
     float mainLen = MeasureChild(props, idx, laneIdx);
-    auto& lane = info_->lanes_[laneIdx];
+    auto& lane = info_->sections_[info_->GetSegment(idx)][laneIdx];
     lane.endPos += mainGap_ + mainLen;
     if (lane.items_.empty()) {
         lane.endPos -= mainGap_;
@@ -297,7 +334,7 @@ float WaterFlowLayoutSW::FillBackHelper(const RefPtr<WaterFlowLayoutProperty>& p
 float WaterFlowLayoutSW::FillFrontHelper(const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, size_t laneIdx)
 {
     float mainLen = MeasureChild(props, idx, laneIdx);
-    auto& lane = info_->lanes_[laneIdx];
+    auto& lane = info_->sections_[info_->GetSegment(idx)][laneIdx];
     lane.startPos -= mainGap_ + mainLen;
     if (lane.items_.empty()) {
         lane.startPos += mainGap_;
@@ -309,8 +346,10 @@ float WaterFlowLayoutSW::FillFrontHelper(const RefPtr<WaterFlowLayoutProperty>& 
 void WaterFlowLayoutSW::RecoverBack(float viewportBound, int32_t& idx, int32_t maxChildIdx)
 {
     std::unordered_set<size_t> lanes;
-    for (size_t i = 0; i < info_->lanes_.size(); ++i) {
-        float endPos = info_->lanes_[i].endPos + (info_->lanes_[i].items_.empty() ? 0.0f : mainGap_);
+    int32_t secIdx = info_->GetSegment(idx);
+    for (size_t i = 0; i < info_->sections_[secIdx].size(); ++i) {
+        float endPos =
+            info_->sections_[secIdx][i].endPos + (info_->sections_[secIdx][i].items_.empty() ? 0.0f : mainGap_);
         if (LessNotEqual(endPos, viewportBound)) {
             lanes.insert(i);
         }
@@ -329,8 +368,10 @@ void WaterFlowLayoutSW::RecoverBack(float viewportBound, int32_t& idx, int32_t m
 void WaterFlowLayoutSW::RecoverFront(float viewportBound, int32_t& idx, int32_t minChildIdx)
 {
     std::unordered_set<size_t> lanes;
-    for (size_t i = 0; i < info_->lanes_.size(); ++i) {
-        float startPos = info_->lanes_[i].startPos - (info_->lanes_[i].items_.empty() ? 0.0f : mainGap_);
+    int32_t secIdx = info_->GetSegment(idx);
+    for (size_t i = 0; i < info_->sections_[secIdx].size(); ++i) {
+        float startPos =
+            info_->sections_[secIdx][i].startPos - (info_->sections_[secIdx][i].items_.empty() ? 0.0f : mainGap_);
         if (GreatNotEqual(startPos, viewportBound)) {
             lanes.insert(i);
         }
@@ -350,7 +391,7 @@ void WaterFlowLayoutSW::ClearBack(float bound)
     int32_t startIdx = info_->StartIndex();
     for (int32_t i = info_->EndIndex(); i > startIdx; --i) {
         size_t laneIdx = info_->idxToLane_.at(i);
-        auto& lane = info_->lanes_[laneIdx];
+        auto& lane = info_->sections_[info_->GetSegment(i)][laneIdx];
         float itemStartPos = lane.endPos - lane.items_.back().mainSize;
         if (LessNotEqual(itemStartPos, bound)) {
             break;
@@ -368,7 +409,7 @@ void WaterFlowLayoutSW::ClearFront()
     int32_t endIdx = info_->EndIndex();
     for (int32_t i = info_->StartIndex(); i < endIdx; ++i) {
         size_t laneIdx = info_->idxToLane_.at(i);
-        auto& lane = info_->lanes_[laneIdx];
+        auto& lane = info_->sections_[info_->GetSegment(i)][laneIdx];
         float itemEndPos = lane.startPos + lane.items_.front().mainSize;
         if (Positive(itemEndPos)) {
             break;
@@ -449,7 +490,7 @@ void WaterFlowLayoutSW::Jump(int32_t jumpIdx, ScrollAlign align, bool noSkip)
             } else {
                 info_->ResetBeforeJump(mainLen_ / 2.0f);
                 info_->idxToLane_ = { { jumpIdx, 0 } };
-                auto& lane = info_->lanes_[0];
+                auto& lane = info_->sections_[info_->GetSegment(jumpIdx)][0];
                 float itemH = MeasureChild(props, jumpIdx, 0);
                 lane.startPos = (mainLen_ - itemH) / 2.0f;
                 lane.endPos = (mainLen_ + itemH) / 2.0f;
@@ -476,7 +517,7 @@ void WaterFlowLayoutSW::Jump(int32_t jumpIdx, ScrollAlign align, bool noSkip)
 
 void WaterFlowLayoutSW::AdjustOverScroll()
 {
-    if (info_->lanes_.empty()) {
+    if (info_->sections_.empty()) {
         return;
     }
     float maxEnd = info_->EndPos();
@@ -506,9 +547,45 @@ float WaterFlowLayoutSW::MeasureChild(const RefPtr<WaterFlowLayoutProperty>& pro
 {
     auto child = wrapper_->GetOrCreateChildByIndex(nodeIdx(idx));
     CHECK_NULL_RETURN(child, 0.0f);
-    child->Measure(
-        WaterFlowLayoutUtils::CreateChildConstraint({ itemCrossSize_[lane], mainLen_, axis_ }, props, child));
+    child->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
+        { itemCrossSize_[info_->GetSegment(idx)][lane], mainLen_, axis_ }, props, child));
     return child->GetGeometryNode()->GetMarginFrameSize().MainSize(info_->axis_);
+}
+
+void WaterFlowLayoutSW::LayoutSection(
+    size_t idx, const OffsetF& paddingOffset, float selfCrossLen, bool reverse, bool rtl)
+{
+    float crossPos = rtl ? selfCrossLen + mainGap_ : 0.0f;
+    for (size_t i = 0; i < info_->sections_[idx].size(); ++i) {
+        if (rtl) {
+            crossPos -= itemCrossSize_[idx][i] + crossGap_;
+        }
+        auto& lane = info_->sections_[idx][i];
+        float mainPos = lane.startPos;
+        for (auto& item : lane.items_) {
+            auto child = wrapper_->GetOrCreateChildByIndex(nodeIdx(item.idx));
+            if (!child) {
+                continue;
+            }
+            auto childNode = child->GetGeometryNode();
+            auto offset =
+                reverse ? OffsetF { crossPos, mainLen_ - item.mainSize - mainPos } : OffsetF { crossPos, mainPos };
+            if (axis_ != Axis::VERTICAL) {
+                offset = OffsetF { offset.GetY(), offset.GetX() };
+            }
+            childNode->SetMarginFrameOffset(offset + paddingOffset);
+
+            if (child->CheckNeedForceMeasureAndLayout()) {
+                child->Layout();
+            } else {
+                child->GetHostNode()->ForceSyncGeometryNode();
+            }
+            mainPos += item.mainSize + mainGap_;
+        }
+        if (!rtl) {
+            crossPos += itemCrossSize_[idx][i] + crossGap_;
+        }
+    }
 }
 
 void WaterFlowLayoutSW::LayoutFooter(const OffsetF& paddingOffset, bool reverse)
@@ -538,5 +615,13 @@ void WaterFlowLayoutSW::PostMeasureSelf(float selfCrossLen)
 inline int32_t WaterFlowLayoutSW::nodeIdx(int32_t idx) const
 {
     return idx + info_->footerIndex_ + 1;
+}
+void WaterFlowLayoutSW::InitLanes()
+{
+    for (size_t i = 0; i < itemCrossSize_.size(); ++i) {
+        if (info_->sections_[i].empty()) {
+            info_->sections_[i].resize(itemCrossSize_[i].size());
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -24,7 +24,6 @@
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_algorithm_base.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_sections.h"
-#include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace::NG {
 struct FlowItemIndex {
@@ -203,9 +202,6 @@ public:
      * Only add to this map when a new endPos is greater than the last one in array.
      */
     std::vector<std::pair<float, int32_t>> endPosArray_;
-
-    // margin of each segment
-    std::vector<PaddingPropertyF> margins_;
 
     // Stores the start position of each segment.
     std::vector<float> segmentStartPos_ = { 0.0f };

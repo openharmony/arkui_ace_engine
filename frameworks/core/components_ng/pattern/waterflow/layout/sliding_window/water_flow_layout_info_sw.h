@@ -26,7 +26,7 @@
 namespace OHOS::Ace::NG {
 
 /**
- * @brief Layout Data structure for Sliding Window version of WaterFlowLayout
+ * @brief Layout data structure for Sliding Window version of WaterFlowLayout
  */
 class WaterFlowLayoutInfoSW : public WaterFlowLayoutInfoBase {
     DECLARE_ACE_TYPE(WaterFlowLayoutInfoSW, WaterFlowLayoutInfoBase);
@@ -76,7 +76,10 @@ public:
     int32_t GetMainCount() const override;
     int32_t GetCrossCount() const override
     {
-        return lanes_.size();
+        if (sections_.empty()) {
+            return 0;
+        }
+        return sections_[0].size();
     }
 
     float CurrentPos() const override
@@ -89,6 +92,8 @@ public:
     void Reset() override;
 
     bool IsMisaligned() const override;
+
+    void InitSegments(const std::vector<WaterFlowSections::Section>& sections, int32_t start) override;
 
     /**
      * @brief reset layout data before performing a jump.
@@ -131,7 +136,7 @@ public:
     int32_t EndIndex() const;
     inline bool ItemInView(int32_t idx) const
     {
-        return !lanes_.empty() && idx >= StartIndex() && idx <= EndIndex();
+        return !sections_.empty() && idx >= StartIndex() && idx <= EndIndex();
     }
     /**
      * @param idx of the item.
@@ -150,8 +155,16 @@ public:
 
     void ClearDataFrom(int32_t idx, float mainGap);
 
+    /**
+     * @brief prepare lanes in the current section.
+     *
+     * @param idx current item index
+     * @param forward true if preparing in the forward direction (prevIdx < curIdx).
+     */
+    void PrepareSection(int32_t idx, bool forward);
+
     struct Lane;
-    std::vector<Lane> lanes_;
+    std::vector<std::vector<Lane>> sections_; // lanes in sections
     // mapping of all items previously or currently in lanes_.
     std::unordered_map<int32_t, size_t> idxToLane_;
 

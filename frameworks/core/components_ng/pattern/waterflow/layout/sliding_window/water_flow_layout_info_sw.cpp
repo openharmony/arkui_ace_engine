@@ -22,7 +22,7 @@
 namespace OHOS::Ace::NG {
 void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, float mainGap)
 {
-    if (lanes_.empty()) {
+    if (sections_.empty()) {
         return;
     }
     startIndex_ = StartIndex();
@@ -30,10 +30,10 @@ void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, float mainGap)
     if (startIndex_ > endIndex_) {
         return;
     }
-    if (!idxToLane_.count(startIndex_) || lanes_.size() <= idxToLane_.at(startIndex_)) {
+    if (!idxToLane_.count(startIndex_) || sections_[GetSegment(startIndex_)].size() <= idxToLane_.at(startIndex_)) {
         return;
     }
-    storedOffset_ = lanes_[idxToLane_.at(startIndex_)].startPos;
+    storedOffset_ = sections_[GetSegment(startIndex_)][idxToLane_.at(startIndex_)].startPos;
 
     delta_ = 0.0f;
     lastMainSize_ = mainSize;
@@ -61,7 +61,7 @@ float WaterFlowLayoutInfoSW::DistanceToTop(int32_t itemIdx, float mainGap) const
     if (!ItemInView(itemIdx)) {
         return 0.0f;
     }
-    const auto& lane = lanes_[idxToLane_.at(itemIdx)];
+    const auto& lane = sections_[GetSegment(itemIdx)][idxToLane_.at(itemIdx)];
     float dist = lane.startPos;
     for (const auto& item : lane.items_) {
         if (item.idx == itemIdx) {
@@ -77,7 +77,7 @@ float WaterFlowLayoutInfoSW::DistanceToBottom(int32_t itemIdx, float mainSize, f
     if (!ItemInView(itemIdx)) {
         return 0.0f;
     }
-    const auto& lane = lanes_[idxToLane_.at(itemIdx)];
+    const auto& lane = sections_[GetSegment(itemIdx)][idxToLane_.at(itemIdx)];
     float dist = mainSize - lane.endPos;
     for (auto item = lane.items_.rbegin(); item != lane.items_.rend(); ++item) {
         if (item->idx == itemIdx) {
@@ -90,15 +90,15 @@ float WaterFlowLayoutInfoSW::DistanceToBottom(int32_t itemIdx, float mainSize, f
 
 bool WaterFlowLayoutInfoSW::OutOfBounds() const
 {
-    if (lanes_.empty()) {
+    if (sections_.empty()) {
         return false;
     }
     // checking first lane is enough because re-align automatically happens when reaching start
-    if (itemStart_ && Positive(lanes_[0].startPos)) {
+    if (itemStart_ && Positive(sections_[0][0].startPos)) {
         return true;
     }
     if (offsetEnd_) {
-        return std::all_of(lanes_.begin(), lanes_.end(),
+        return std::all_of(sections_.back().begin(), sections_.back().end(),
             [this](const Lane& lane) { return LessNotEqual(lane.endPos + footerHeight_, lastMainSize_); });
     }
     return false;
@@ -107,7 +107,7 @@ bool WaterFlowLayoutInfoSW::OutOfBounds() const
 OverScrollOffset WaterFlowLayoutInfoSW::GetOverScrolledDelta(float delta) const
 {
     OverScrollOffset res {};
-    if (lanes_.empty()) {
+    if (sections_.empty()) {
         return res;
     }
 
@@ -138,7 +138,7 @@ OverScrollOffset WaterFlowLayoutInfoSW::GetOverScrolledDelta(float delta) const
 
 float WaterFlowLayoutInfoSW::CalcOverScroll(float mainSize, float delta) const
 {
-    if (lanes_.empty()) {
+    if (sections_.empty()) {
         return 0.0f;
     }
     float res = 0.0f;
@@ -156,23 +156,36 @@ float WaterFlowLayoutInfoSW::EndPos() const
     if (synced_) {
         return endPos_;
     }
-    return std::max_element(lanes_.begin(), lanes_.end(), [](const Lane& left, const Lane& right) {
-        return LessNotEqual(left.endPos, right.endPos);
-    })->endPos;
+    for (auto it = sections_.rbegin(); it != sections_.rend(); ++it) {
+        if (std::all_of(it->begin(), it->end(), [](const auto& lane) { return lane.items_.empty(); })) {
+            continue;
+        }
+        return std::max_element(it->begin(), it->end(), [](const Lane& left, const Lane& right) {
+            return LessNotEqual(left.endPos, right.endPos);
+        })->endPos;
+    }
+    return 0.0f;
 }
+
 float WaterFlowLayoutInfoSW::StartPos() const
 {
     if (synced_) {
         return startPos_;
     }
-    return std::min_element(lanes_.begin(), lanes_.end(), [](const Lane& left, const Lane& right) {
-        return LessNotEqual(left.startPos, right.startPos);
-    })->startPos;
+    for (const auto& section : sections_) {
+        if (std::all_of(section.begin(), section.end(), [](const auto& lane) { return lane.items_.empty(); })) {
+            continue;
+        }
+        return std::min_element(section.begin(), section.end(), [](const Lane& left, const Lane& right) {
+            return LessNotEqual(left.startPos, right.startPos);
+        })->startPos;
+    }
+    return 0.0f;
 }
 
 bool WaterFlowLayoutInfoSW::ReachStart(float prevPos, bool firstLayout) const
 {
-    if (!itemStart_ || lanes_.empty()) {
+    if (!itemStart_ || sections_.empty()) {
         return false;
     }
     return firstLayout || Negative(prevPos);
@@ -180,7 +193,7 @@ bool WaterFlowLayoutInfoSW::ReachStart(float prevPos, bool firstLayout) const
 
 bool WaterFlowLayoutInfoSW::ReachEnd(float prevPos) const
 {
-    if (!offsetEnd_ || lanes_.empty()) {
+    if (!offsetEnd_ || sections_.empty()) {
         return false;
     }
     float prevEndPos = EndPos() - (totalOffset_ - prevPos);
@@ -195,12 +208,19 @@ float WaterFlowLayoutInfoSW::GetContentHeight() const
 
 int32_t WaterFlowLayoutInfoSW::GetMainCount() const
 {
-    if (lanes_.empty()) {
+    if (sections_.empty()) {
         return 0;
     }
-    return static_cast<int32_t>(std::max_element(lanes_.begin(), lanes_.end(), [](const Lane& left, const Lane& right) {
-        return left.items_.size() < right.items_.size();
-    })->items_.size());
+    for (const auto& section : sections_) {
+        if (std::all_of(section.begin(), section.end(), [](const auto& lane) { return lane.items_.empty(); })) {
+            continue;
+        }
+        return static_cast<int32_t>(
+            std::max_element(section.begin(), section.end(), [](const Lane& left, const Lane& right) {
+                return left.items_.size() < right.items_.size();
+            })->items_.size());
+    }
+    return 0;
 }
 
 float WaterFlowLayoutInfoSW::CalcTargetPosition(int32_t idx, int32_t /* crossIdx */) const
@@ -208,7 +228,7 @@ float WaterFlowLayoutInfoSW::CalcTargetPosition(int32_t idx, int32_t /* crossIdx
     if (!ItemInView(idx)) {
         return Infinity<float>();
     }
-    const auto& lane = lanes_[idxToLane_.at(idx)];
+    const auto& lane = sections_[GetSegment(idx)][idxToLane_.at(idx)];
     float pos = 0.0f; // main-axis position of the item's top edge relative to viewport top. Positive if below viewport
     float itemSize = 0.0f;
     if (idx < endIndex_) {
@@ -251,7 +271,9 @@ void WaterFlowLayoutInfoSW::Reset()
     jumpIndex_ = startIndex_;
     align_ = ScrollAlign::START;
     delta_ = DistanceToTop(startIndex_, mainGap_);
-    lanes_.clear();
+    for (auto& section : sections_) {
+        section.clear();
+    }
     idxToLane_.clear();
     maxHeight_ = 0.0f;
     synced_ = false;
@@ -263,11 +285,17 @@ int32_t WaterFlowLayoutInfoSW::EndIndex() const
         return endIndex_;
     }
     int32_t maxIdx = -1;
-    for (const auto& lane : lanes_) {
-        if (lane.items_.empty()) {
+    for (auto it = sections_.rbegin(); it != sections_.rend(); ++it) {
+        if (std::all_of(it->begin(), it->end(), [](const auto& lane) { return lane.item_.empty(); })) {
             continue;
         }
-        maxIdx = std::max(maxIdx, lane.items_.back().idx);
+        for (const auto& lane : *it) {
+            if (lane.items_.empty()) {
+                continue;
+            }
+            maxIdx = std::max(maxIdx, lane.items_.back().idx);
+        }
+        break;
     }
     return maxIdx;
 }
@@ -278,11 +306,18 @@ int32_t WaterFlowLayoutInfoSW::StartIndex() const
         return startIndex_;
     }
     auto minIdx = Infinity<int32_t>();
-    for (const auto& lane : lanes_) {
-        if (lane.items_.empty()) {
+    for (const auto& section : sections_) {
+        if (std::all_of(section.begin(), section.end(), [](const auto& lane) { return lane.item_.empty(); })) {
             continue;
         }
-        minIdx = std::min(minIdx, lane.items_.front().idx);
+
+        for (const auto& lane : section) {
+            if (lane.items_.empty()) {
+                continue;
+            }
+            minIdx = std::min(minIdx, lane.items_.front().idx);
+        }
+        break;
     }
     return minIdx;
 }
@@ -297,11 +332,13 @@ int32_t WaterFlowLayoutInfoSW::GetCrossIndex(int32_t itemIndex) const
 
 void WaterFlowLayoutInfoSW::ResetBeforeJump(float laneBasePos)
 {
-    std::for_each(lanes_.begin(), lanes_.end(), [&laneBasePos](auto& lane) {
-        lane.items_.clear();
-        lane.startPos = laneBasePos;
-        lane.endPos = laneBasePos;
-    });
+    for (auto& section : sections_) {
+        std::for_each(section.begin(), section.end(), [&laneBasePos](auto& lane) {
+            lane.items_.clear();
+            lane.startPos = laneBasePos;
+            lane.endPos = laneBasePos;
+        });
+    }
     totalOffset_ = 0.0f;
     maxHeight_ = 0.0f;
     idxToLane_.clear();
@@ -326,12 +363,15 @@ std::string WaterFlowLayoutInfoSW::Lane::ToString() const
 
 bool WaterFlowLayoutInfoSW::ItemCloseToView(int32_t idx) const
 {
-    if (lanes_.empty() ||
-        std::all_of(lanes_.begin(), lanes_.end(), [](const Lane& lane) { return lane.items_.empty(); })) {
+    if (sections_.empty() ||
+        std::all_of(sections_.begin(), sections_.end(), [](const auto& lanes) { return lanes.empty(); })) {
         return false;
     }
     int32_t startIdx = StartIndex();
     int32_t endIdx = EndIndex();
+    if (endIdx > startIdx) {
+        return false;
+    }
     using std::abs, std::min;
     return min(abs(idx - endIdx), abs(idx - startIdx)) < endIdx - startIdx + 1;
 }
@@ -345,14 +385,16 @@ void WaterFlowLayoutInfoSW::ClearDataFrom(int32_t idx, float mainGap)
             ++it; // Move to the next element
         }
     }
-    for (auto& lane : lanes_) {
-        while (!lane.items_.empty()) {
-            if (lane.items_.back().idx >= idx) {
-                lane.endPos -= lane.items_.back().mainSize + mainGap;
-                lane.items_.pop_back();
-            } else {
-                lane.endPos = std::max(lane.endPos, lane.startPos);
-                break;
+    for (int32_t i = GetSegment(idx); i < sections_.size(); ++i) {
+        for (auto& lane : sections_[i]) {
+            while (!lane.items_.empty()) {
+                if (lane.items_.back().idx >= idx) {
+                    lane.endPos -= lane.items_.back().mainSize + mainGap;
+                    lane.items_.pop_back();
+                } else {
+                    lane.endPos = std::max(lane.endPos, lane.startPos);
+                    break;
+                }
             }
         }
     }
@@ -370,14 +412,59 @@ float WaterFlowLayoutInfoSW::BottomFinalPos(float viewHeight) const
 
 bool WaterFlowLayoutInfoSW::IsMisaligned() const
 {
-    if (lanes_.empty()) {
+    if (sections_.empty()) {
         return false;
     }
     if (StartIndex() > 0) {
         return false;
     }
-    bool laneNotAligned = std::any_of(
-        lanes_.begin(), lanes_.end(), [this](const auto& lane) { return !NearEqual(lane.startPos, StartPos()); });
-    return laneNotAligned || lanes_[0].items_.front().idx != 0;
+    bool laneNotAligned = std::any_of(sections_[0].begin(), sections_[0].end(),
+        [this](const auto& lane) { return !NearEqual(lane.startPos, StartPos()); });
+    return laneNotAligned || sections_[0][0].items_.front().idx != 0;
+}
+
+void WaterFlowLayoutInfoSW::InitSegments(const std::vector<WaterFlowSections::Section>& sections, int32_t /* start */)
+{
+    size_t n = sections.size();
+    if (n == 0) {
+        return;
+    }
+    segmentCache_.clear();
+    segmentTails_ = { sections[0].itemsCount - 1 };
+    for (size_t i = 1; i < n; ++i) {
+        segmentTails_.push_back(segmentTails_[i - 1] + sections[i].itemsCount);
+    }
+}
+
+void WaterFlowLayoutInfoSW::PrepareSection(int32_t idx, bool forward)
+{
+    int32_t prevSeg = GetSegment(forward ? idx - 1 : idx + 1);
+    int32_t curSeg = GetSegment(idx);
+    if (prevSeg == curSeg) {
+        return;
+    }
+    if (prevSeg < curSeg) {
+        for (int32_t i = prevSeg + 1; i <= idx; ++i) {
+            float pos = std::max_element(
+                sections_[i - 1].begin(), sections_[i - 1].end(), [](const Lane& left, const Lane& right) {
+                    return LessNotEqual(left.endPos, right.endPos);
+                })->endPos;
+            pos += axis_ == Axis::VERTICAL ? margins_[i - 1].bottom.value_or(0.0f) + margins_[i].top.value_or(0.0f)
+                                           : margins_[i - 1].right.value_or(0.0f) + margins_[i].left.value_or(0.0f);
+            std::for_each(sections_[i].begin(), sections_[i].end(),
+                [pos](auto& section) { section.startPos = section.endPos = pos; });
+        }
+    } else {
+        for (int32_t i = prevSeg - 1; i >= idx; --i) {
+            float pos = std::min_element(
+                sections_[i + 1].begin(), sections_[i + 1].end(), [](const Lane& left, const Lane& right) {
+                    return LessNotEqual(left.startPos, right.startPos);
+                })->startPos;
+            pos -= axis_ == Axis::VERTICAL ? margins_[i + 1].top.value_or(0.0f) + margins_[i].bottom.value_or(0.0f)
+                                           : margins_[i + 1].left.value_or(0.0f) + margins_[i].right.value_or(0.0f);
+            std::for_each(sections_[i].begin(), sections_[i].end(),
+                [pos](auto& section) { section.startPos = section.endPos = pos; });
+        }
+    }
 }
 } // namespace OHOS::Ace::NG
