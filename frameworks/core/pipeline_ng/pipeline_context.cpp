@@ -233,6 +233,10 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
             dirty->GetId(), dirty->GetParent() ? dirty->GetParent()->GetId() : 0);
         ACE_BUILD_TRACE_END()
     }
+    if (!dirty->IsOnMainTree() && predictNode_) {
+        predictNode_->AddPredictLayoutNode(dirty);
+        return;
+    }
     taskScheduler_->AddDirtyLayoutNode(dirty);
     ForceLayoutForImplicitAnimation();
 #ifdef UICAST_COMPONENT_SUPPORTED

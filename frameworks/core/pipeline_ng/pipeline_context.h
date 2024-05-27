@@ -750,6 +750,15 @@ public:
 
     void FlushFrameCallback(uint64_t nanoTimestamp);
 
+    void SetPredictNode(const RefPtr<FrameNode>& node)
+    {
+        predictNode_ = node;
+    }
+
+    void ResetPredictNode()
+    {
+        predictNode_.Reset();
+    }
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -963,6 +972,8 @@ private:
     std::unordered_map<int32_t, uint64_t> lastDispatchTime_;
     std::vector<Ace::RectF> overlayNodePositions_;
     std::function<void(std::vector<Ace::RectF>)> overlayNodePositionUpdateCallback_;
+
+    RefPtr<FrameNode> predictNode_;
 
     VsyncCallbackFun vsyncListener_;
     VsyncCallbackFun onceVsyncListener_;
