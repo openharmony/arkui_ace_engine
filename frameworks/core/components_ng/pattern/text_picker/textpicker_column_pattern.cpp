@@ -1514,8 +1514,9 @@ void TextPickerColumnPattern::OnAroundButtonClick(RefPtr<EventParam> param)
     }
     int32_t middleIndex = GetShowOptionCount() / HALF_NUMBER;
     int32_t step = param->itemIndex - middleIndex;
-    auto overFirst = currentIndex_ == 0 && step < 0;
-    auto overLast = currentIndex_ == (GetOptionCount() ? GetOptionCount() - 1 : 0) && step > 0;
+    auto overFirst = static_cast<int32_t>(currentIndex_) + step < 0 && step < 0;
+    auto overLast =
+        static_cast<int32_t>(currentIndex_) + step > (GetOptionCount() ? GetOptionCount() - 1 : 0) && step > 0;
     if (NotLoopOptions() && (overscroller_.IsOverScroll() || overFirst || overLast)) {
         return;
     }
