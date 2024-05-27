@@ -195,6 +195,7 @@ void SubwindowOhos::InitContainer()
         subPipelineContextNG->SetParentPipeline(parentContainer->GetPipelineContext());
         subPipelineContextNG->SetupSubRootElement();
         subPipelineContextNG->SetMinPlatformVersion(parentPipeline->GetMinPlatformVersion());
+        subPipelineContextNG->SetKeyboardAnimationConfig(parentPipeline->GetKeyboardAnimationConfig());
         return;
     }
     auto subPipelineContext =
@@ -203,6 +204,7 @@ void SubwindowOhos::InitContainer()
     subPipelineContext->SetParentPipeline(parentContainer->GetPipelineContext());
     subPipelineContext->SetupSubRootElement();
     subPipelineContext->SetMinPlatformVersion(parentPipeline->GetMinPlatformVersion());
+    subPipelineContext->SetKeyboardAnimationConfig(parentPipeline->GetKeyboardAnimationConfig());
 #endif
 }
 

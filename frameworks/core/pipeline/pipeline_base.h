@@ -944,6 +944,11 @@ public:
         keyboardAnimationConfig_ = config;
     }
 
+    KeyboardAnimationConfig GetKeyboardAnimationConfig() const
+    {
+        return keyboardAnimationConfig_;
+    }
+
     void SetNextFrameLayoutCallback(std::function<void()>&& callback)
     {
         nextFrameLayoutCallback_ = std::move(callback);

@@ -109,7 +109,10 @@ public:
         if (dialogProperties_.type == DialogType::ALERT_DIALOG || dialogProperties_.type == DialogType::ACTION_SHEET) {
             return { 0 };
         }
-        return { 0, 0 };
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            return { 0, 0 };
+        }
+        return { 0, 0, 0 };
     }
 
     void BuildChild(const DialogProperties& dialogProperties);
@@ -268,6 +271,7 @@ private:
     // set render context properties of content frame
     void UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode, const DialogProperties& props);
     void UpdateBgBlurStyle(const RefPtr<RenderContext>& contentRenderContext, const DialogProperties& props);
+    void BuildCustomChild(const DialogProperties& props, const RefPtr<UINode>& customNode);
     RefPtr<FrameNode> BuildMainTitle(const DialogProperties& dialogProperties);
     void CreateTitleRowNode(const DialogProperties& dialogProperties, PaddingProperty& titlePadding);
     RefPtr<FrameNode> BuildSubTitle(const DialogProperties& dialogProperties);
