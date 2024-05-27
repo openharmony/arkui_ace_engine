@@ -27,7 +27,6 @@
 #include "base/log/dump_log.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
-#include "core/components_ng/pattern/container_modal/container_modal_theme.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 
 using namespace testing;
@@ -78,12 +77,6 @@ void PipelineContextTestNg::SetUpTestSuite()
     context_->SetEventManager(AceType::MakeRefPtr<EventManager>());
     MockContainer::SetUp();
     MockContainer::Current()->pipelineContext_ = context_;
-
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    context_->SetThemeManager(themeManager);
-    auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(nullptr);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ContainerModalTheme>()));
-    EXPECT_CALL(*themeManager, GetThemeConstants()).WillRepeatedly(Return(themeConstants));
 }
 
 void PipelineContextTestNg::TearDownTestSuite()
@@ -1650,12 +1643,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg040, TestSize.Level1)
      * @tc.steps1: initialize root node and containerModal node.
      * @tc.expected: root node and containerModal node are not null.
      */
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    context_->SetThemeManager(themeManager);
-    auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(nullptr);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ContainerModalTheme>()));
-    EXPECT_CALL(*themeManager, GetThemeConstants()).WillRepeatedly(Return(themeConstants));
-
     ASSERT_NE(context_, nullptr);
     context_->SetWindowModal(WindowModal::CONTAINER_MODAL);
     ASSERT_NE(context_->window_, nullptr);
