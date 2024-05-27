@@ -71,7 +71,7 @@ HWTEST_F(WaterFlowSWTest, Reset001, TestSize.Level1)
     for (int i = 0; i < 5; i++) {
         frameNode_->RemoveChildAtIndex(6);
     }
-    frameNode_->ChildrenUpdatedFrom(6);
+    frameNode_->ChildrenUpdatedFrom(5); // footer not included in LazyForEach / ForEach
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info_->startIndex_, 0);
@@ -101,14 +101,25 @@ HWTEST_F(WaterFlowSWTest, Reset002, TestSize.Level1)
     for (int i = 0; i < 5; i++) {
         frameNode_->RemoveChildAtIndex(6);
     }
-    frameNode_->ChildrenUpdatedFrom(6);
+    frameNode_->ChildrenUpdatedFrom(5); // footer not included in LazyForEach / ForEach
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info_->startIndex_, 95);
     EXPECT_EQ(info_->endIndex_, 104);
+    EXPECT_TRUE(info_->idxToLane_.find(1) == info_->idxToLane_.end());
     EXPECT_TRUE(info_->offsetEnd_);
     EXPECT_EQ(GetChildY(frameNode_, 95), -150.0f);
     EXPECT_EQ(GetChildY(frameNode_, 0), 750.0f);
+
+    // delete start index
+    frameNode_->RemoveChildAtIndex(96);
+    frameNode_->ChildrenUpdatedFrom(95); // footer not included in LazyForEach / ForEach
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 95);
+    EXPECT_EQ(info_->endIndex_, 103);
+    EXPECT_TRUE(info_->offsetEnd_);
+    EXPECT_EQ(GetChildY(frameNode_, 95), -150.0f);
 }
 
 /**
