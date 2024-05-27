@@ -107,8 +107,10 @@ ohos_source_set("ace_unittest_trace") {
     "$ace_root/adapter/ohos/osal/ace_trace.cpp",
     "$ace_root/frameworks/base/log/ace_trace.cpp",
   ]
-  deps = [ "//third_party/bounds_checking_function:libsec_static" ]
-  external_deps = [ "hitrace:hitrace_meter" ]
+  external_deps = [
+    "bounds_checking_function:libsec_static",
+    "hitrace:hitrace_meter",
+  ]
   configs = [ ":ace_unittest_config" ]
 }
 
@@ -1081,9 +1083,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/test/mock/core/pattern/mock_web_pattern.cpp",
   ]
 
-  deps = [
-    "$ace_root/frameworks/core/components/theme:build_theme_code",
-    "//third_party/bounds_checking_function:libsec_static",
-  ]
+  deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+  external_deps = [ "bounds_checking_function:libsec_static" ]
   configs = [ ":ace_unittest_config" ]
 }

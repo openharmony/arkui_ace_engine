@@ -93,7 +93,6 @@ template("ace_ohos_standard_source_set") {
     deps += [
       "$ace_root/adapter/ohos/capability:ace_capability_ohos",
       "$ace_root/interfaces/inner_api/ace:ace_uicontent",
-      "//third_party/zlib:shared_libz",
     ]
 
     external_deps = [
@@ -129,6 +128,7 @@ template("ace_ohos_standard_source_set") {
       "window_manager:libwsutils",
       "window_manager:scene_session",
       "window_manager:screen_session_manager_client",
+      "zlib:shared_libz",
     ]
 
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {

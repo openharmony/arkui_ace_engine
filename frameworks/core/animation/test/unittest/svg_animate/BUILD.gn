@@ -213,7 +213,6 @@ ohos_unittest("SvgAnimateTest") {
 
   deps = [
     "$ace_root/frameworks/core/components/theme:build_theme_code",
-    "$cjson_root:cjson",
     "//third_party/googletest:gtest_main",
   ]
 
@@ -228,7 +227,10 @@ ohos_unittest("SvgAnimateTest") {
         [ "//base/global/resource_management/frameworks/resmgr:global_resmgr" ]
   }
 
-  external_deps += [ "c_utils:utils" ]
+  external_deps += [
+    "cJSON:cjson",
+    "c_utils:utils",
+  ]
 
   part_name = ace_engine_part
 }
