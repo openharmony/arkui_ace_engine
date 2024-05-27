@@ -268,6 +268,7 @@ struct SelectOverlayInfo {
 
     bool isHandleLineShow = true;
     std::string selectText;
+    bool isSingleLine = false;
 
     std::string ToString() const
     {
