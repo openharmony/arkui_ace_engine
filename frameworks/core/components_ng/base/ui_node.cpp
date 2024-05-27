@@ -573,12 +573,6 @@ void UINode::OnDetachFromMainTree(bool) {}
 void UINode::OnAttachToMainTree(bool)
 {
     useOffscreenProcess_ = false;
-    decltype(attachToMainTreeTasks_) tasks(std::move(attachToMainTreeTasks_));
-    for (const auto& task : tasks) {
-        if (task) {
-            task();
-        }
-    }
 }
 
 bool UINode::IsAutoFillContainerNode()
