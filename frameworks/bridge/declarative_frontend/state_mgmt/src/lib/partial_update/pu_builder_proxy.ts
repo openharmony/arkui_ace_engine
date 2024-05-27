@@ -53,7 +53,7 @@ function makeBuilderParameterProxy(builderName: string, source: Object): Object 
                 throw Error(`@Builder '${builderName}': '${prop1}' used but not a function parameter error!`);
             }
             const value = target[prop1];
-            if (typeof value !== "function") {
+            if (typeof value !== 'function') {
                 stateMgmtConsole.debug(`      - no fun`);
                 return value;
             }

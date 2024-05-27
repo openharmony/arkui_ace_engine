@@ -59,8 +59,8 @@ public:
         if (filter.IsFastFilter()) {
             return;
         }
-        json->PutExtAttr("step", std::to_string(propScrollAmount_.value_or(
-            DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx())).c_str(), filter);
+        json->PutExtAttr("step",
+            std::to_string(propScrollAmount_.value_or(DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx())).c_str(), filter);
         json->PutExtAttr("loop", std::to_string(propLoop_.value_or(-1)).c_str(), filter);
         json->PutExtAttr("start", propPlayerStatus_.value_or(true) ? "true" : "false", filter);
         json->PutExtAttr("fromStart",

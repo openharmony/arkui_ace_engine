@@ -324,7 +324,7 @@ bool TextLayoutAlgorithm::CreateParagraph(
 bool TextLayoutAlgorithm::UpdateSymbolTextStyle(const TextStyle& textStyle, const ParagraphStyle& paraStyle,
     LayoutWrapper* layoutWrapper, RefPtr<FrameNode>& frameNode)
 {
-    auto && paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
+    auto &&paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
     CHECK_NULL_RETURN(paragraph, false);
     auto layoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, false);

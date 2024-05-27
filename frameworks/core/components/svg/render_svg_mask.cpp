@@ -76,9 +76,8 @@ bool RenderSvgMask::PrepareSelfAnimation(const RefPtr<SvgAnimate>& svgAnimate)
     if (!GetProperty(svgAnimate->GetAttributeName(), originalValue)) {
         return false;
     }
-    std::function<void(double)> callback;
-    callback = [weak = AceType::WeakClaim(this), attributeName = svgAnimate->GetAttributeName()](
-            double value) {
+    std::function<void(double)> callback = [weak = AceType::WeakClaim(this),
+                                               attributeName = svgAnimate->GetAttributeName()](double value) {
         auto mask = weak.Upgrade();
         if (!mask) {
             LOGE("svg mask is null");

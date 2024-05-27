@@ -321,7 +321,6 @@ public:
         bottom_ = AnimatableDimension(bottom);
     }
 
-
     Size GetLayoutSize() const
     {
         return Size(left_.Value() + right_.Value(), top_.Value() + bottom_.Value());

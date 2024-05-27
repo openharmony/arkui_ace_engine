@@ -400,7 +400,6 @@ void RenderSlidingPanel::HandleDragUpdate(const Offset& currentPoint)
         return;
     }
     double targetBlankHeight = dragStartBlankHeight_ + currentPoint.GetY() - dragStartPoint_.GetY();
-
     if (targetBlankHeight < minBlankHeight_) {
         targetBlankHeight = minBlankHeight_;
     }

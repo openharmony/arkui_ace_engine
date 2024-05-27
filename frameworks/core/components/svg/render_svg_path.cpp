@@ -63,8 +63,7 @@ bool RenderSvgPath::PrepareSelfAnimation(const RefPtr<SvgAnimate>& component)
     component->Copy(svgAnimate);
     paths_.clear();
     PrepareWeightAnimate(svgAnimate, paths_, d_, isBy_);
-    std::function<void(double)> callback;
-    callback = [weak = AceType::WeakClaim(this)](double value) {
+    std::function<void(double)> callback = [weak = AceType::WeakClaim(this)](double value) {
         auto svgPath = weak.Upgrade();
         if (!svgPath) {
             LOGE("svgPath is null");

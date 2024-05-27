@@ -98,7 +98,6 @@ void RenderTip::AdaptChildPadding(const Size& childSize, const Size& selfSize)
         padding_.SetTop(Dimension(paddingTopBottom, DimensionUnit::PX));
         padding_.SetBottom(Dimension(paddingTopBottom, DimensionUnit::PX));
     }
-
 }
 
 } // namespace OHOS::Ace

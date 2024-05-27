@@ -137,19 +137,19 @@ protected:
 
 private:
     Color backgroundColor_;
-    
+
     // HoverEffect parameters
     float hoverScaleStart_ = 1.0f;
-    float hoverScaleEnd_ = 1.05f;                               // HoverEffect.Scale change from scale rate 1 to 1.05
+    float hoverScaleEnd_ = 1.05f; // HoverEffect.Scale change from scale rate 1 to 1.05
     Color hoverHighlightStart_ = Color::TRANSPARENT;
-    Color hoverHighlightEnd_ = Color::FromRGBO(0, 0, 0, 0.05);  // HoverEffect.HighLight change transparency from 100% to 5%
-    int32_t hoverDuration_ = 250;                               // HoverEffect animation duration
+    Color hoverHighlightEnd_ =
+        Color::FromRGBO(0, 0, 0, 0.05); // HoverEffect.HighLight change transparency from 100% to 5%
+    int32_t hoverDuration_ = 250;       // HoverEffect animation duration
 
     // Focus State parameters
-    // TODO: these parameters need put in theme.csv
-    Color focusColor_ = Color(0xFF007DFF);                      // General focus state color
-    Dimension focusWidthVp_ = 2.0_vp;                           // General focus border width
-    Dimension focusOutPaddingVp_ = 2.0_vp;                      // General distance between focus border and component border
+    Color focusColor_ = Color(0xFF007DFF); // General focus state color
+    Dimension focusWidthVp_ = 2.0_vp;      // General focus border width
+    Dimension focusOutPaddingVp_ = 2.0_vp; // General distance between focus border and component border
 };
 
 } // namespace OHOS::Ace

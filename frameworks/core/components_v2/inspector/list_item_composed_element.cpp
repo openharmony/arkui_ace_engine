@@ -91,7 +91,7 @@ std::string ListItemComposedElement::GetEditable() const
     return "false";
 }
 
-int32_t ListItemComposedElement::GetZIndex() const 
+int32_t ListItemComposedElement::GetZIndex() const
 {
     auto node = GetInspectorNode(ListItemElement::TypeId(), true);
     if (!node) {
@@ -122,7 +122,7 @@ void ListItemComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Com
     auto child = GetInspectorComposedElement();
     if (!child) {
         return;
-    }                                                                                
+    }
     auto parentElement = child->GetElementParent().Upgrade();
     if (!parentElement) {
         return;
