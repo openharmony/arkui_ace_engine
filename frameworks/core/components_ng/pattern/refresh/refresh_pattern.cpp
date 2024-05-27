@@ -207,6 +207,7 @@ void RefreshPattern::InitProgressNode()
     if (layoutProperty->HasProgressColor()) {
         progressPaintProperty->UpdateColor(layoutProperty->GetProgressColorValue());
     }
+    layoutProperty->UpdateAlignment(Alignment::TOP_CENTER);
     host->AddChild(progressChild_, -1);
     if (HasLoadingText()) {
         InitProgressColumn();
