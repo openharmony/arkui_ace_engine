@@ -127,7 +127,7 @@ public:
 
     void SetExtSurfaceCallback(const RefPtr<ExtSurfaceCallbackInterface>& extSurfaceCallback) override;
 
-    void SetTransformHint(uint32_t rotation) override;
+    void SetTransformHint(Rotation dmRotation) override;
 
     void DumpInfo() override;
 

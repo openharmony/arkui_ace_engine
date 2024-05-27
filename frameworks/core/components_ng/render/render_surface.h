@@ -87,7 +87,7 @@ public:
 
     virtual void SetExtSurfaceCallback(const RefPtr<ExtSurfaceCallbackInterface>& extSurfaceCallback) {}
 
-    virtual void SetTransformHint(uint32_t rotation) {}
+    virtual void SetTransformHint(Rotation dmRotation) {}
 
     virtual void DumpInfo() {}
 
