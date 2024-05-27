@@ -822,6 +822,7 @@ public:
     void HandleClickEvent(GestureEvent& info);
     bool CheckClickLocation(GestureEvent& info);
     void HandleDoubleClickEvent(GestureEvent& info);
+    void HandleTripleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info);
 
     void HandleSelectionUp();
@@ -1658,6 +1659,7 @@ private:
     int32_t previewTextStart_ = -1;
     int32_t previewTextEnd_ = -1;
     bool showKeyBoardOnFocus_ = true;
+    int32_t clickTimes_ = -1;
 };
 } // namespace OHOS::Ace::NG
 
