@@ -3174,6 +3174,7 @@ struct ArkUIImageAnimatorModifier {
     ArkUI_Bool (*getFixedSize)(ArkUINodeHandle node);
     ArkUI_Int32 (*getFillMode)(ArkUINodeHandle node);
     ArkUI_Int32 (*getIteration)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getImagesSize)(ArkUINodeHandle node);
 };
 
 struct ArkUISideBarContainerModifier {

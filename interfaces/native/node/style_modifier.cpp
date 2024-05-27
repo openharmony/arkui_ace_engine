@@ -581,10 +581,7 @@ bool ParseImages(const ArkUI_AttributeItem* item, ArkUIImageFrameInfo* imageInfo
         imageInfos[i].unit = GetDefaultUnit(node, UNIT_PX);
         imageInfos[i].duration = images[i]->duration.value_or(0);
     }
-    auto imagesPtr = std::make_shared<ArkUI_ImageFrameStruct>();
-    imagesPtr->size = item->size;
-    imagesPtr->imageInfos = images;
-    node->imageFrameInfos = &imagesPtr;
+    node->imageFrameInfos = images;
     return true;
 }
 
@@ -11533,12 +11530,13 @@ void ResetImageAnimatorSrc(ArkUI_NodeHandle node)
 
 const ArkUI_AttributeItem* GetImageAnimatorSrc(ArkUI_NodeHandle node)
 {
-    auto imageInfos = reinterpret_cast<std::shared_ptr<ArkUI_ImageFrameStruct>*>(node->imageFrameInfos);
-    if (!imageInfos) {
+    if (!node->imageFrameInfos) {
         g_attributeItem.size = 0;
     } else {
-        g_attributeItem.size = (*imageInfos)->size;
-        g_attributeItem.object = (*imageInfos)->imageInfos;
+        auto* fullImpl = GetFullImpl();
+        g_attributeItem.size = fullImpl->getNodeModifiers()->getImageAnimatorModifier()->getImagesSize(
+            node->uiNodeHandle);
+        g_attributeItem.object = reinterpret_cast<ArkUI_ImageAnimatorFrameInfo**>(node->imageFrameInfos);
     }
     return &g_attributeItem;
 }

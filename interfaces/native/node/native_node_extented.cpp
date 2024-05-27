@@ -220,14 +220,14 @@ void OH_ArkUI_SwiperIndicator_Dispose(ArkUI_SwiperIndicator* indicator)
     delete indicator;
 }
 
-void OH_ArkUI_SwiperIndicator_SetLeftPosition(ArkUI_SwiperIndicator* indicator, float value)
+void OH_ArkUI_SwiperIndicator_SetStartPosition(ArkUI_SwiperIndicator* indicator, float value)
 {
     CHECK_NULL_VOID(indicator);
     indicator->dimLeft.isSet = 1;
     indicator->dimLeft.value = value;
 }
 
-float OH_ArkUI_SwiperIndicator_GetLeftPosition(ArkUI_SwiperIndicator* indicator)
+float OH_ArkUI_SwiperIndicator_GetStartPosition(ArkUI_SwiperIndicator* indicator)
 {
     CHECK_NULL_RETURN(indicator, 0.0f);
     return indicator->dimLeft.value;
@@ -246,14 +246,14 @@ float OH_ArkUI_SwiperIndicator_GetTopPosition(ArkUI_SwiperIndicator* indicator)
     return indicator->dimTop.value;
 }
 
-void OH_ArkUI_SwiperIndicator_SetRightPosition(ArkUI_SwiperIndicator* indicator, float value)
+void OH_ArkUI_SwiperIndicator_SetEndPosition(ArkUI_SwiperIndicator* indicator, float value)
 {
     CHECK_NULL_VOID(indicator);
     indicator->dimRight.isSet = 1;
     indicator->dimRight.value = value;
 }
 
-float OH_ArkUI_SwiperIndicator_GetRightPosition(ArkUI_SwiperIndicator* indicator)
+float OH_ArkUI_SwiperIndicator_GetEndPosition(ArkUI_SwiperIndicator* indicator)
 {
     CHECK_NULL_RETURN(indicator, 0.0f);
     return indicator->dimRight.value;
