@@ -219,7 +219,7 @@ void JSOffscreenRenderingContext::JsTransferToImageBitmap(const JSCallbackInfo& 
         return;
     }
     auto jsImage = (JSRenderImage*)nativeObj;
-
+    CHECK_NULL_VOID(jsImage);
     auto offscreenCanvasPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(GetOffscreenPattern(id));
     CHECK_NULL_VOID(offscreenCanvasPattern);
 #ifdef PIXEL_MAP_SUPPORTED
