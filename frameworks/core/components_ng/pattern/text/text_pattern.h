@@ -408,11 +408,6 @@ public:
     void SetTextSelection(int32_t selectionStart, int32_t selectionEnd);
     void SetFadeout(const bool& left, const bool& right, const float& gradientPercent);
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-    static RSTypographyProperties::TextBox ConvertRect(const Rect& rect);
-#else
-    static RSTextRect ConvertRect(const Rect& rect);
-#endif
     // Deprecated: Use the TextSelectOverlay::OnHandleMove() instead.
     // It is currently used by RichEditorPattern.
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle) override;

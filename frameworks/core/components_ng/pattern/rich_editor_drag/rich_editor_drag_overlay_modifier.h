@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/text_drag/text_drag_overlay_modifier.h"
 
 namespace OHOS::Ace::NG {
+class TextDragPattern;
 enum class DragAnimType { FLOATING, FLOATING_CANCEL, DEFAULT };
 class RichEditorDragOverlayModifier : public TextDragOverlayModifier {
     DECLARE_ACE_TYPE(RichEditorDragOverlayModifier, TextDragOverlayModifier);
