@@ -175,6 +175,9 @@ OverScrollOffset WaterFlowLayoutInfo::GetOverScrolledDelta(float delta) const
     }
     if (itemEnd_) {
         auto endPos = currentOffset_ + maxHeight_;
+        if (GreatNotEqual(lastMainSize_, currentOffset_ + maxHeight_)) {
+            endPos = currentOffset_ + lastMainSize_;
+        }
         auto newEndPos = endPos + delta;
         if (endPos < lastMainSize_ && newEndPos < lastMainSize_) {
             offset.end = delta;
