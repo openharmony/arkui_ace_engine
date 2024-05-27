@@ -42,7 +42,7 @@ void SetScrollToIndex(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Bool smooth
 {
     auto* scrollController = reinterpret_cast<NG::ScrollableController*>(node);
     CHECK_NULL_VOID(scrollController);
-    scrollController->JumpTo(index, smooth, static_cast<ScrollAlign>(align), 0);
+    scrollController->ScrollToIndex(index, smooth, static_cast<ScrollAlign>(align));
 }
 
 void ScrollBy(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32* units)

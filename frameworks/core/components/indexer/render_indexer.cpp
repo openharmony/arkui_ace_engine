@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -557,7 +557,7 @@ void RenderIndexer::MoveList(int32_t index)
     int32_t indexToJump = circleMode_ ? index : index + 1;
     lastHeadIndex_ = indexToJump;
     LOGI("[indexer] MoveList Jump to index[%{public}d], indexToJump[%{public}d]", index, indexToJump);
-    controller_->JumpTo(indexToJump, false, ScrollAlign::START, SCROLL_FROM_INDEXER);
+    controller_->ScrollToIndex(indexToJump, false, ScrollAlign::START);
 }
 
 RefPtr<RenderIndexerItem> RenderIndexer::GetSpecificItem(int32_t index)

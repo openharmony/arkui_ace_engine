@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,7 +50,7 @@ public:
     static double CalculateFriction(double gamma);
     static double CalculateOffsetByFriction(double extentOffset, double delta, double friction);
 
-    virtual void JumpToIndex(int32_t index, int32_t source = SCROLL_FROM_JUMP);
+    virtual void JumpToIndex(int32_t index);
     virtual void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth);
     virtual bool ScrollPage(bool reverse, bool smooth, const std::function<void()>& onFinish = nullptr);
     virtual void JumpToPosition(double position, int32_t source = SCROLL_FROM_JUMP);
