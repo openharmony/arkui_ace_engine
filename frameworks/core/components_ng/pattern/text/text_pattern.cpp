@@ -83,25 +83,6 @@ GradientColor CreateTextGradientColor(float percent, Color color)
     return gredient;
 }
 
-TextPattern::~TextPattern()
-{
-    // node destruct, need to stop text race animation
-    CHECK_NULL_VOID(contentMod_);
-    contentMod_->StopTextRace();
-}
-
-void TextPattern::OnWindowHide()
-{
-    CHECK_NULL_VOID(contentMod_);
-    contentMod_->PauseAnimation();
-}
-
-void TextPattern::OnWindowShow()
-{
-    CHECK_NULL_VOID(contentMod_);
-    contentMod_->ResumeAnimation();
-}
-
 void TextPattern::OnAttachToFrameNode()
 {
     auto pipeline = PipelineContext::GetCurrentContextSafely();
@@ -123,7 +104,6 @@ void TextPattern::OnAttachToFrameNode()
     }
     InitSurfaceChangedCallback();
     InitSurfacePositionChangedCallback();
-    pipeline->AddWindowStateChangedCallback(host->GetId());
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateTextAlign(TextAlign::START);
@@ -150,7 +130,6 @@ void TextPattern::OnDetachFromFrameNode(FrameNode* node)
         fontManager->RemoveVariationNodeNG(frameNode);
     }
     pipeline->RemoveOnAreaChangeNode(node->GetId());
-    pipeline->RemoveWindowStateChangedCallback(node->GetId());
 }
 
 void TextPattern::CloseSelectOverlay()

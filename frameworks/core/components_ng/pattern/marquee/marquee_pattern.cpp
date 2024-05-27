@@ -58,44 +58,6 @@ void MarqueePattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetUsingContentRectForRenderFrame(true);
     host->GetRenderContext()->SetClipToFrame(true);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->AddWindowSizeChangeCallback(host->GetId());
-    pipeline->AddWindowStateChangedCallback(host->GetId());
-}
-
-void MarqueePattern::OnDetachFromFrameNode(FrameNode* frameNode)
-{
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
-    pipeline->RemoveWindowStateChangedCallback(frameNode->GetId());
-}
-
-MarqueePattern::~MarqueePattern()
-{
-    CHECK_NULL_VOID(animation_);
-    AnimationUtils::StopAnimation(animation_);
-}
-
-void MarqueePattern::OnWindowHide()
-{
-    if (!playStatus_) {
-        return;
-    }
-    CHECK_NULL_VOID(animation_);
-    playStatus_ = false;
-    AnimationUtils::PauseAnimation(animation_);
-}
-
-void MarqueePattern::OnWindowShow()
-{
-    if (playStatus_) {
-        return;
-    }
-    CHECK_NULL_VOID(animation_);
-    playStatus_ = true;
-    AnimationUtils::ResumeAnimation(animation_);
 }
 
 bool MarqueePattern::OnDirtyLayoutWrapperSwap(
@@ -140,7 +102,6 @@ void MarqueePattern::OnModifyDone()
     }
     textLayoutProperty->UpdateTextColor(layoutProperty->GetFontColor().value_or(theme->GetTextStyle().GetTextColor()));
     textChild->MarkModifyDone();
-    textChild->GetRenderContext()->SetClipToFrame(true);
     if (CheckMeasureFlag(layoutProperty->GetPropertyChangeFlag()) ||
         CheckLayoutFlag(layoutProperty->GetPropertyChangeFlag())) {
         measureChanged_ = true;
@@ -153,6 +114,7 @@ void MarqueePattern::OnModifyDone()
         StopMarqueeAnimation(playStatus);
     }
     StoreProperties();
+    RegistOritationListener();
 }
 
 void MarqueePattern::StartMarqueeAnimation()
@@ -428,11 +390,9 @@ void MarqueePattern::ChangeAnimationPlayStatus()
             StartMarqueeAnimation();
             return;
         }
-        playStatus_ = true;
         AnimationUtils::ResumeAnimation(animation_);
     } else {
         CHECK_NULL_VOID(animation_);
-        playStatus_ = false;
         AnimationUtils::PauseAnimation(animation_);
     }
 }
@@ -542,6 +502,29 @@ void MarqueePattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSi
     }
     lastWindowHeight_ = height;
     lastWindowWidth_ = width;
+}
+
+void MarqueePattern::RegistOritationListener()
+{
+    if (isOritationListenerRegisted_) {
+        return;
+    }
+    isOritationListenerRegisted_ = true;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddWindowSizeChangeCallback(host->GetId());
+}
+
+void MarqueePattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
+    pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
+    isOritationListenerRegisted_ = false;
+    isRegistedAreaCallback_ = false;
 }
 
 void MarqueePattern::OnColorConfigurationUpdate()
