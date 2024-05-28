@@ -106,6 +106,29 @@ constexpr uint8_t UTF8_4B_SECOND_MIN = 0x90; // the minimum for 4 bytes is 65536
 constexpr uint8_t byteMask = 0xbf;
 constexpr uint8_t byteMark = 0x80;
 
+enum UTF8BytePatterns {
+    UTF8_TWO_BYTE_MASK = 0xE0,
+    UTF8_TWO_BYTE_PATTERN = 0xC0,
+    UTF8_THREE_BYTE_MASK = 0xF0,
+    UTF8_THREE_BYTE_PATTERN = 0xE0,
+    UTF8_FOUR_BYTE_MASK = 0xF8,
+    UTF8_FOUR_BYTE_PATTERN = 0xF0,
+    UTF8_MULTIBYTE_FOLLOWER = 0x80,
+    UTF8_HIGH_BIT = 0x80
+};
+
+enum UTF16LEPatterns {
+    UTF16LE_BOM_FF = 0xFF,
+    UTF16LE_BOM_FE = 0xFE,
+    UTF16LE_ZERO_BYTE = 0x00
+};
+
+enum UTF8ByteSkips {
+    SKIP_ONE_BYTE = 1,
+    SKIP_TWO_BYTES = 2,
+    SKIP_THREE_BYTES = 3
+};
+
 enum UtfLength : uint8_t { ONE = 1, TWO = 2, THREE = 3, FOUR = 4 };
 
 const unsigned char FIRST_BYTE_MARK[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC };
@@ -118,11 +141,11 @@ size_t ConvertRegionUtf8ToUtf16(
     const uint8_t* utf8In, uint16_t* utf16Out, size_t utf8Len, size_t utf16Len, size_t start);
 
 size_t DebuggerConvertRegionUtf16ToUtf8(const uint16_t* utf16In, uint8_t* utf8Out, size_t utf16Len, size_t utf8Len,
-    size_t start, bool modify = true, bool isWriteBuffer = false);
+    size_t start);
 
 void ConvertIllegalStr(std::string& str);
 
-bool IsValidUTF8(const std::string& data);
+bool IsUTF8(std::string& data);
 
 inline std::pair<uint16_t, uint16_t> SplitUtf16Pair(uint32_t pair)
 {

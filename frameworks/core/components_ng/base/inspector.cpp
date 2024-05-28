@@ -330,7 +330,6 @@ void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS
         jsonNode->Put(INSPECTOR_COMPONENT_TYPE, "build-in");
     }
     auto node = AceType::DynamicCast<FrameNode>(parent);
-
     if (node) {
         RectF rect;
         isActive = isActive && node->IsActive();
@@ -340,23 +339,19 @@ void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS
         jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
         jsonNode->Put(INSPECTOR_DEBUGLINE, node->GetDebugLine().c_str());
     }
-
     auto jsonObject = JsonUtil::Create(true);
-
     parent->ToJsonValue(jsonObject, filter);
     jsonNode->PutRef(INSPECTOR_ATTRS, std::move(jsonObject));
     std::vector<RefPtr<NG::UINode>> children;
     for (const auto& item : parent->GetChildren()) {
         GetFrameNodeChildren(item, children, pageId);
     }
-
     if (node) {
         auto overlayNode = node->GetOverlayNode();
         if (overlayNode != nullptr) {
             GetFrameNodeChildren(overlayNode, children, pageId);
         }
     }
-
     if (depth) {
         auto jsonChildrenArray = JsonUtil::CreateArray(true);
         for (auto uiNode : children) {
@@ -368,7 +363,7 @@ void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS
     }
     std::string jsonChildStr = jsonNode->ToString();
     ConvertIllegalStr(jsonChildStr);
-    auto jsonChild =JsonUtil::ParseJsonString(jsonChildStr);
+    auto jsonChild = JsonUtil::ParseJsonString(jsonChildStr);
     jsonNodeArray->PutRef(std::move(jsonChild));
 }
 #endif

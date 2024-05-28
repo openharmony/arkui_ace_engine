@@ -39,6 +39,7 @@ namespace OHOS::Ace {
  * Convert mutf8 sequence to utf16 pair and return pair: [utf16 code point, mutf8 size].
  * In case of invalid sequence return first byte of it.
  */
+
 size_t MUtf8ToUtf16Size(const uint8_t* mutf8, size_t mutf8Len)
 {
     size_t pos = 0;
@@ -192,7 +193,7 @@ uint32_t HandleAndDecodeInvalidUTF16(uint16_t const* utf16, size_t len, size_t* 
 }
 
 size_t DebuggerConvertRegionUtf16ToUtf8(const uint16_t* utf16In, uint8_t* utf8Out, size_t utf16Len, size_t utf8Len,
-    size_t start, bool modify, bool isWriteBuffer)
+    size_t start)
 {
     if (utf16In == nullptr || utf8Out == nullptr || utf8Len == 0) {
         return 0;
@@ -202,15 +203,6 @@ size_t DebuggerConvertRegionUtf16ToUtf8(const uint16_t* utf16In, uint8_t* utf8Ou
     for (size_t i = start; i < end; ++i) {
         uint32_t codePoint = HandleAndDecodeInvalidUTF16(utf16In, end, &i);
         if (codePoint == 0) {
-            if (isWriteBuffer) {
-                utf8Out[utf8Pos++] = 0x00U;
-                continue;
-            }
-            if (modify) {
-                // special case for \u0000 ==> C080 - 1100'0000 1000'0000
-                utf8Out[utf8Pos++] = UTF8_2B_FIRST;
-                utf8Out[utf8Pos++] = UTF8_2B_SECOND;
-            }
             continue;
         }
         utf8Pos += EncodeUTF8(codePoint, utf8Out, utf8Len, utf8Pos);
@@ -218,7 +210,7 @@ size_t DebuggerConvertRegionUtf16ToUtf8(const uint16_t* utf16In, uint8_t* utf8Ou
     return utf8Pos;
 }
 
-bool IsValidUTF8(const std::string& data)
+bool IsUTF8(std::string& data)
 {
     if (data.empty()) {
         return false;
@@ -231,31 +223,36 @@ bool IsValidUTF8(const std::string& data)
         unsigned char c = data[i];
 
         // Check for UTF-16LE byte order mark (BOM)
-        if (i == 0 && data.size() >= 2 && data[1] == 0 && (c == 0xFF || c == 0xFE)) {
+        if (i == 0 && data.size() >= 2 && data[1] == UTF16LE_ZERO_BYTE &&
+            (c == UTF16LE_BOM_FF || c == UTF16LE_BOM_FE)) {
             return false;
         }
 
         // Check for zero bytes, which are common in UTF-16LE
-        if (c == 0) {
+        if (c == UTF16LE_ZERO_BYTE) {
             hasZeroByte = true;
         }
 
         // Check for multi-byte UTF-8 sequences
-        if ((c & 0x80) != 0) { // High bit is set, indicating a non-ASCII character
-            if ((c & 0xE0) == 0xC0 && i + 1 < data.size() && (data[i + 1] & 0xC0) == 0x80) {
+        if ((c & UTF8_HIGH_BIT) != 0) { // High bit is set, indicating a non-ASCII character
+            if ((c & UTF8_TWO_BYTE_MASK) == UTF8_TWO_BYTE_PATTERN && i + 1 < data.size() &&
+                (data[i + 1] & UTF8_HIGH_BIT) == UTF8_MULTIBYTE_FOLLOWER) {
                 // Two-byte UTF-8 character
                 hasMultiByteUTF8 = true;
-                i += 1; // Skip the next byte
-            } else if ((c & 0xF0) == 0xE0 && i + 2 < data.size() && (data[i + 1] & 0xC0) == 0x80 &&
-                       (data[i + 2] & 0xC0) == 0x80) {
+                i += SKIP_ONE_BYTE; // Skip the next byte
+            } else if ((c & UTF8_THREE_BYTE_MASK) == UTF8_THREE_BYTE_PATTERN && i + 2 < data.size() &&
+                       (data[i + 1] & UTF8_HIGH_BIT) == UTF8_MULTIBYTE_FOLLOWER &&
+                       (data[i + 2] & UTF8_HIGH_BIT) == UTF8_MULTIBYTE_FOLLOWER) {
                 // Three-byte UTF-8 character
                 hasMultiByteUTF8 = true;
-                i += 2; // Skip the next two bytes
-            } else if ((c & 0xF8) == 0xF0 && i + 3 < data.size() && (data[i + 1] & 0xC0) == 0x80 &&
-                       (data[i + 2] & 0xC0) == 0x80 && (data[i + 3] & 0xC0) == 0x80) {
+                i += SKIP_TWO_BYTES; // Skip the next two bytes
+            } else if ((c & UTF8_FOUR_BYTE_MASK) == UTF8_FOUR_BYTE_PATTERN && i + 3 < data.size() &&
+                       (data[i + 1] & UTF8_HIGH_BIT) == UTF8_MULTIBYTE_FOLLOWER &&
+                       (data[i + 2] & UTF8_HIGH_BIT) == UTF8_MULTIBYTE_FOLLOWER &&
+                       (data[i + 3] & UTF8_HIGH_BIT) == UTF8_MULTIBYTE_FOLLOWER) {
                 // Four-byte UTF-8 character
                 hasMultiByteUTF8 = true;
-                i += 3; // Skip the next three bytes
+                i += SKIP_THREE_BYTES; // Skip the next three bytes
             }
         }
     }
@@ -274,16 +271,15 @@ bool IsValidUTF8(const std::string& data)
 
 void ConvertIllegalStr(std::string& str)
 {
-    if (IsValidUTF8(str)) {
+    if (IsUTF8(str)) {
         uint8_t* buf8 = (uint8_t*)str.c_str();
         size_t utf8Len = str.size();
         auto utf16Len = MUtf8ToUtf16Size(buf8, utf8Len);
         std::unique_ptr<uint16_t[]> buf16 = std::make_unique<uint16_t[]>(utf16Len);
         auto resultLen = ConvertRegionUtf8ToUtf16(buf8, buf16.get(), utf8Len, utf16Len, 0);
-        if (resultLen != utf16Len) {
-            return;
+        if (resultLen == utf16Len) {
+            DebuggerConvertRegionUtf16ToUtf8(buf16.get(), buf8, utf16Len, utf8Len, 0);
         }
-        DebuggerConvertRegionUtf16ToUtf8(buf16.get(), buf8, utf16Len, utf8Len, 0, false, false);
     }
 }
 
