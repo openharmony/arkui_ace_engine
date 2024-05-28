@@ -251,7 +251,7 @@ struct OperateItemStruct {
   @Link parentCanHover: boolean
   @Link parentIsActive: boolean
   @Link parentFrontColor: ResourceColor;
-  @Link isParentCanTouch: boolean
+  @Link isParentCanTouch: boolean;
   private rowSpace: number = DEFAULT_ROW_SPACE
   static RIGHT_ITEM_OFFSET_LEVEL1 = 0;
   static RIGHT_ITEM_OFFSET_LEVEL2 = -4;
@@ -365,7 +365,7 @@ struct OperateItemStruct {
       }
     })
     .onAppear(()=>{
-      this.isParentCanTouch = true
+      this.isParentCanTouch = true;
     })
     .onClick((icon.action))
   }
@@ -378,7 +378,7 @@ struct OperateItemStruct {
       .draggable(false)
       .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
       .onAppear(()=>{
-        this.isParentCanTouch = true
+        this.isParentCanTouch = true;
       })
   }
 
@@ -391,7 +391,7 @@ struct OperateItemStruct {
       .draggable(false)
       .flexShrink(1)
       .onAppear(()=>{
-        this.isParentCanTouch = true
+        this.isParentCanTouch = true;
       })
   }
 
@@ -434,7 +434,7 @@ struct OperateItemStruct {
       }
     })
     .onAppear(()=>{
-      this.isParentCanTouch = true
+      this.isParentCanTouch = true;
     })
     .onClick(icon.action)
   }
@@ -473,7 +473,7 @@ struct OperateItemStruct {
         }
       })
       .onAppear(()=>{
-        this.isParentCanTouch = true
+        this.isParentCanTouch = true;
       })
   }
 
@@ -511,7 +511,7 @@ struct OperateItemStruct {
         }
       })
       .onAppear(()=>{
-        this.isParentCanTouch = true
+        this.isParentCanTouch = true;
       })
   }
 
@@ -602,7 +602,7 @@ struct OperateItemStruct {
       }
     })
     .onAppear(()=>{
-      this.isParentCanTouch = true
+      this.isParentCanTouch = true;
     })
     .onClick(icon.action)
   }
@@ -661,7 +661,7 @@ export struct ComposeListItem {
   @State touchDownColor: ResourceColor = '#1a000000';
   @State activedColor: ResourceColor = '#1a0a59f7';
   @State focusOutlineColor: ResourceColor = $r('sys.color.ohos_id_color_focused_outline');
-  @State isCanTouch: boolean = false
+  @State isCanTouch: boolean = false;
 
   onWillApplyTheme(theme: Theme): void {
     this.hoveringColor = theme.colors.interactiveHover;
@@ -719,7 +719,7 @@ export struct ComposeListItem {
 
   calculatedRightWidth(): string {
     let rightPaddingWidth =
-      this.composeItemPadding?.end !== undefined ? this.composeItemPadding?.end?.value : STACK_PADDING
+      this.composeItemPadding?.end !== undefined ? this.composeItemPadding?.end?.value : STACK_PADDING;
     if (this.operateItem === null || JSON.stringify(this.operateItem) === '{}') {
       return RIGHT_CONTENT_NULL_RIGHTWIDTH;
     } else if (this.operateItem !== null && this.operateItem.text === null) {
