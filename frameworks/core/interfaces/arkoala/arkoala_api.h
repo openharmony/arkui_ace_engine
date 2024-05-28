@@ -1067,6 +1067,21 @@ struct ArkUIAccessibilityValue {
     ArkUIOptionalCharPtr text;
 };
 
+struct ArkUIDragPreViewOptions {
+    ArkUI_Int32 mode;
+    ArkUI_Int32 modeArrayLength;
+    ArkUI_Int32 badgeNumber;
+    ArkUI_Int32* modeArray;
+    ArkUI_Bool isModeArray;
+    ArkUI_Bool isShowBadge;
+    ArkUI_Bool isBadgeNumber;
+};
+
+struct ArkUIDragInteractionOptions {
+    ArkUI_Bool isMultiSelectionEnabled;
+    ArkUI_Bool defaultAnimationBeforeLifting;
+};
+
 struct ArkUICommonModifier {
     void (*setBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetBackgroundColor)(ArkUINodeHandle node);
@@ -1293,7 +1308,8 @@ struct ArkUICommonModifier {
         ArkUI_Int32 posRGBValuesSize, const ArkUI_Float32* negRGBValues, ArkUI_Int32 negRGBValuesSize,
         ArkUI_Float32 fraction);
     void (*resetForegroundBrightness)(ArkUINodeHandle node);
-    void (*setDragPreviewOptions)(ArkUINodeHandle node, ArkUI_Int32 dragPreviewMode);
+    void (*setDragPreviewOptions)(ArkUINodeHandle node, ArkUIDragPreViewOptions dragPreviewOptions,
+        ArkUIDragInteractionOptions dragInteractionOptions);
     void (*resetDragPreviewOptions)(ArkUINodeHandle node);
     void (*setMouseResponseRegion)(
         ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length);

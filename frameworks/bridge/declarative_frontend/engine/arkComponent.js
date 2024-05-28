@@ -2288,11 +2288,15 @@ class DragPreviewOptionsModifier extends ModifierWithKey {
       getUINativeModule().common.resetDragPreviewOptions(node);
     }
     else {
-      getUINativeModule().common.setDragPreviewOptions(node, this.value.mode);
+      getUINativeModule().common.setDragPreviewOptions(node, this.value.mode, this.value.numberBadge,
+        this.value.isMultiSelectionEnabled, this.value.defaultAnimationBeforeLifting);
     }
   }
   checkObjectDiff() {
-    return !(this.value.mode === this.stageValue.mode);
+    return !(this.value.mode === this.stageValue.mode
+      && this.value.numberBadge === this.stageValue.numberBadge
+      && this.value.isMultiSelectionEnabled === this.stageValue.isMultiSelectionEnabled
+      && this.value.defaultAnimationBeforeLifting === this.stageValue.defaultAnimationBeforeLifting);
   }
 }
 DragPreviewOptionsModifier.identity = Symbol('dragPreviewOptions');
@@ -2939,8 +2943,22 @@ class ArkComponent {
     modifierWithKey(this._modifiersWithKeys, ForegroundBrightnessModifier.identity, ForegroundBrightnessModifier, params);
      return this;
   }
-  dragPreviewOptions(value) {
-    modifierWithKey(this._modifiersWithKeys, DragPreviewOptionsModifier.identity, DragPreviewOptionsModifier, value);
+  dragPreviewOptions(value, options) {
+    if (isUndefined(value)) {
+      modifierWithKey(this._modifiersWithKeys, DragPreviewOptionsModifier.identity, DragPreviewOptionsModifier, undefined);
+      return this;
+    }
+    let arkDragPreviewOptions = new ArkDragPreviewOptions();
+    if (typeof value === 'object') {
+      arkDragPreviewOptions.mode = value.mode;
+      arkDragPreviewOptions.numberBadge = value.numberBadge;
+    }
+    if (typeof options === 'object') {
+      arkDragPreviewOptions.isMultiSelectionEnabled = options.isMultiSelectionEnabled;
+      arkDragPreviewOptions.defaultAnimationBeforeLifting = options.defaultAnimationBeforeLifting;
+    }
+    modifierWithKey(this._modifiersWithKeys, DragPreviewOptionsModifier.identity,
+      DragPreviewOptionsModifier, arkDragPreviewOptions);
     return this;
   }
   responseRegion(value) {
@@ -3637,6 +3655,9 @@ class ArkComponent {
   onDragEnd(event) {
     throw new Error('Method not implemented.');
   }
+  onPreDrag(event) {
+    throw new Error('Method not implemented.');
+  }
   allowDrop(value) {
     modifierWithKey(this._modifiersWithKeys, AllowDropModifier.identity, AllowDropModifier, value);
     return this;
@@ -3649,6 +3670,9 @@ class ArkComponent {
       modifierWithKey(this._modifiersWithKeys, DraggableModifier.identity, DraggableModifier, undefined);
     }
     return this;
+  }
+  dragPreview(value) {
+    throw new Error('Method not implemented.');
   }
   overlay(value, options) {
     if (typeof value === 'undefined') {
@@ -14257,6 +14281,25 @@ const FontWeightMap = {
   800: '800',
   900: '900',
 };
+
+class ArkDragPreviewOptions {
+  constructor() {
+    this.mode = undefined;
+    this.numberBadge = undefined;
+    this.isMultiSelectionEnabled = undefined;
+    this.defaultAnimationBeforeLifting = undefined;
+  }
+
+  isEqual(another) {
+    return (
+      this.mode === another.mode &&
+      this.numberBadge === another.numberBadge &&
+      this.isMultiSelectionEnabled === another.isMultiSelectionEnabled &&
+      this.defaultAnimationBeforeLifting === another.defaultAnimationBeforeLifting
+    );
+  }
+}
+
 class ArkButtonComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
