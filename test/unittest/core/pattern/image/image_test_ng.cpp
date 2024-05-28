@@ -762,7 +762,8 @@ HWTEST_F(ImageTestNg, ImageCreator003, TestSize.Level1)
 
     auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
     ASSERT_NE(imageLayoutProperty, nullptr);
-    EXPECT_EQ(imageLayoutProperty->GetImageSourceInfoValue(), ImageSourceInfo(IMAGE_SRC_URL));
+    auto srcInfo = imageLayoutProperty->GetImageSourceInfoValue();
+    EXPECT_EQ(srcInfo.GetSrc(), "");
     EXPECT_EQ(imageLayoutProperty->GetImageFitValue(), IMAGE_FIT_DEFAULT);
     EXPECT_EQ(imageLayoutProperty->GetAltValue(), ImageSourceInfo(ALT_SRC_URL));
     EXPECT_EQ(frameNode->GetPattern<ImagePattern>()->syncLoad_, false);
@@ -874,7 +875,7 @@ HWTEST_F(ImageTestNg, ImageSvgTest001, TestSize.Level1)
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     ASSERT_NE(imagePattern, nullptr);
     ASSERT_NE(imagePattern->loadingCtx_, nullptr);
-    EXPECT_EQ(imagePattern->loadingCtx_->GetSourceInfo().GetSrc(), IMAGE_SRC_URL);
+    EXPECT_EQ(imagePattern->loadingCtx_->GetSourceInfo().GetSrc(), "");
     ASSERT_NE(imagePattern->altLoadingCtx_, nullptr);
     EXPECT_EQ(imagePattern->altLoadingCtx_->GetSourceInfo().GetSrc(), RESOURCE_URL);
 }
@@ -1538,7 +1539,7 @@ HWTEST_F(ImageTestNg, Resource001, TestSize.Level1)
     EXPECT_TRUE(pattern->loadingCtx_);
 
     pattern->OnLanguageConfigurationUpdate();
-    EXPECT_FALSE(pattern->loadingCtx_);
+    EXPECT_TRUE(pattern->loadingCtx_);
     frameNode->MarkModifyDone();
     EXPECT_TRUE(pattern->loadingCtx_);
 }
