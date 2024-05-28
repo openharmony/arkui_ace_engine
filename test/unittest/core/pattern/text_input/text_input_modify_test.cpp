@@ -1348,6 +1348,34 @@ HWTEST_F(TextFieldModifyTest, RequestKeyboard002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RequestKeyboard003
+ * @tc.desc: Test the result after request custom keyboard.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, RequestKeyboard003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. CloseKeyboard.
+     */
+    pattern_->SetShowKeyBoardOnFocus(true);
+    EXPECT_TRUE(pattern_->showKeyBoardOnFocus_);
+    pattern_->SetShowKeyBoardOnFocus(false);
+    EXPECT_FALSE(pattern_->showKeyBoardOnFocus_);
+
+    /**
+     * @tc.steps: step3. set RequestKeyboard.
+     */
+    pattern_->SetShowKeyBoardOnFocus(true);
+    EXPECT_TRUE(pattern_->showKeyBoardOnFocus_);
+}
+
+/**
  * @tc.name: DumpViewDataPageNode001
  * @tc.desc: Test the result after dump viewData pageNode.
  * @tc.type: FUNC
