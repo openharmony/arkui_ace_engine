@@ -579,11 +579,14 @@ void WebPattern::HandleScaleGestureChange(const GestureEvent& event)
 
     double centerX = event.GetPinchCenter().GetX();
     double centerY = event.GetPinchCenter().GetY();
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto offset = frameNode->GetOffsetRelativeToWindow();
     TAG_LOGD(AceLogTag::ACE_WEB,
         "HandleScaleGestureChange curScale:%{public}f pageScale: %{public}f newScale: %{public}f centerX: "
-        "%{public}f centerY: %{public}f",
-        curScale, scale, newScale, centerX, centerY);
-    delegate_->ScaleGestureChange(newScale, centerX, centerY);
+        "%{public}f centerY: %{public}f offset X: %{public}f offset Y: %{public}f",
+        curScale, scale, newScale, centerX, centerY, offset.GetX(), offset.GetY());
+    delegate_->ScaleGestureChange(newScale, centerX - offset.GetX(), centerY - offset.GetY());
 
     preScale_ = curScale;
     pageScale_ = scale;
