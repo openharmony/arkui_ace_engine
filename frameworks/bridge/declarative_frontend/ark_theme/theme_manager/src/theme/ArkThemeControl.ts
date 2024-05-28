@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 /// <reference path="../../../export/ark_theme_scope_manager.d.ts" />
-type CustomTheme = any;
+type CustomTheme = Object;
 
 class ThemeControl {
     /**
