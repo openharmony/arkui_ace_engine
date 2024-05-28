@@ -178,6 +178,26 @@ public:
         ViewAbstract::SetDisallowDropForcedly(isDisallowDropForcedly);
     }
 
+    void SetVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect) override
+    {
+        ViewAbstract::SetVisualEffect(visualEffect);
+    }
+
+    void SetBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter) override
+    {
+        ViewAbstract::SetBackgroundFilter(backgroundFilter);
+    }
+
+    void SetForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter) override
+    {
+        ViewAbstract::SetForegroundFilter(foregroundFilter);
+    }
+
+    void SetCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) override
+    {
+        ViewAbstract::SetCompositingFilter(compositingFilter);
+    }
+
     void SetPadding(const CalcDimension& value) override
     {
         if (value.Unit() == DimensionUnit::CALC) {
