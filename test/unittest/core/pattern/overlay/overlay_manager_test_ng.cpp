@@ -2395,6 +2395,82 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern14, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SheetPresentationPattern15
+ * @tc.desc: Test height and detents when sheet is bottomLandsapce.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern15, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create sheetNode, get sheetPattern.
+     */
+    SheetStyle sheetStyle;
+    bool isShow = true;
+    CreateSheetBuilder();
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,  nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(topSheetNode, nullptr);
+    auto topSheetPattern = topSheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(topSheetPattern, nullptr);
+
+    /**
+     * @tc.steps: step3. test sheetThemeType_ = auto, sheetStyle.sheetType = bottomLandspace, set pageHeight = 500.
+     */
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    topSheetPattern->sheetThemeType_ = "auto";
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOMLANDSPACE;
+    topSheetPattern->pageHeight_ = 500;
+
+    /**
+     * @tc.steps: step4. test sheetStyle.detents.sheetMode has value, sheetMode = MEDIUM.
+     */
+    SheetHeight detent;
+    detent.sheetMode = SheetMode::MEDIUM;
+    sheetStyle.detents.emplace_back(detent);
+    overlayManager->sheetHeight_ = 0;
+    overlayManager->ComputeSheetOffset(sheetStyle, topSheetNode);
+    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 300));
+    sheetStyle.detents.clear();
+
+    /**
+     * @tc.steps: step5. test sheetStyle.detents.height has value, height unit is %.
+     */
+    sheetStyle.detents.clear();
+    detent.sheetMode = std::nullopt;
+    Dimension detentHeight { 0.5, DimensionUnit::PERCENT };
+    detent.height = detentHeight;
+    sheetStyle.detents.emplace_back(detent);
+    overlayManager->sheetHeight_ = 0;
+    overlayManager->ComputeSheetOffset(sheetStyle, topSheetNode);
+    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 234));
+
+    /**
+     * @tc.steps: step6. test sheetStyle.detents.height has value, height unit is vp, setHeight > maxHeight.
+     */
+    sheetStyle.detents.clear();
+    detent.height->unit_ = DimensionUnit::VP;
+    detent.height->value_ = 1500;
+    sheetStyle.detents.emplace_back(detent);
+    overlayManager->sheetHeight_ = 0;
+    overlayManager->ComputeSheetOffset(sheetStyle, topSheetNode);
+    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 460));
+}
+
+/**
  * @tc.name: TestSheetPage001
  * @tc.desc: Test CreateSheetPage.
  * @tc.type: FUNC
