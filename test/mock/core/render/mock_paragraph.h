@@ -85,6 +85,11 @@ public:
     {
         return TextLineMetrics();
     }
+    
+    bool GetLineMetricsByCoordinate(const Offset& offset, LineMetrics& lineMetrics) override
+    {
+        return true;
+    }
 
     static RefPtr<MockParagraph> GetOrCreateMockParagraph();
     static void TearDown();

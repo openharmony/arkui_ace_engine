@@ -150,6 +150,7 @@ public:
     LineMetrics GetLineMetricsByRectF(RectF& rect) override;
     TextLineMetrics GetLineMetrics(size_t lineNumber) override;
     void SetRunMetrics(RunMetrics& runMetrics, const OHOS::Rosen::RunMetrics& runMetricsRes);
+    bool GetLineMetricsByCoordinate(const Offset& offset, LineMetrics& lineMetrics) override;
 
 private:
     void CreateBuilder();

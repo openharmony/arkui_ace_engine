@@ -209,6 +209,7 @@ public:
     std::string ToString() const;
     int32_t ConvertTouchOffsetToPosition(const Offset& localOffset, bool isSelectionPos = false);
     void GetSubParagraphByOffset(int32_t pos, int32_t &start, int32_t &end);
+    bool IsTouchAtLineEnd(const Offset& localOffset);
 
 private:
     constexpr static uint32_t SECONDS_TO_MILLISECONDS = 1000;
