@@ -81,7 +81,7 @@ void TextFieldModelNG::CreateNode(
     caretStyle.caretWidth = textFieldTheme->GetCursorWidth();
     SetCaretStyle(caretStyle);
     AddDragFrameNodeToManager();
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "text field create node, id = %{public}d", nodeId);
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "text field create node");
     if (frameNode->IsFirstBuilding()) {
         auto draggable = pipeline->GetDraggable<TextFieldTheme>();
         SetDraggable(draggable);
@@ -1795,7 +1795,7 @@ uint32_t TextFieldModelNG::GetMaxLines(FrameNode* frameNode)
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, MaxLines, value, frameNode, value);
     return value;
 }
-
+    
 void TextFieldModelNG::SetPadding(FrameNode* frameNode, NG::PaddingProperty& newPadding)
 {
     CHECK_NULL_VOID(frameNode);

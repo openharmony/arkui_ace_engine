@@ -73,7 +73,7 @@ public:
         pManager_ = AceType::MakeRefPtr<ParagraphManager>();
     }
 
-    ~TextPattern() override;
+    ~TextPattern() override = default;
 
     SelectionInfo GetSpansInfo(int32_t start, int32_t end, GetSpansMethod method);
     std::list<ResultObject> GetSpansInfoInStyledString(int32_t start, int32_t end);
@@ -126,10 +126,6 @@ public:
     }
 
     void OnModifyDone() override;
-
-    void OnWindowHide() override;
-
-    void OnWindowShow() override;
 
     void PreCreateLayoutWrapper();
 
