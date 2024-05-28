@@ -2006,3 +2006,8 @@ declare class ArkComponent3DComponent extends ArkComponent implements Component3
     renderWidth(value: Dimension): Component3DAttribute;
     renderHeight(value: Dimension): Component3DAttribute;
 }
+
+declare class ArkContainerSpanComponent extends ArkComponent implements ContainerSpanAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    textBackgroundStyle(value: TextBackgroundStyle): ContainerSpanAttribute;
+}

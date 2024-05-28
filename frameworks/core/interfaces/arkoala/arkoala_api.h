@@ -26,7 +26,7 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 103
+#define ARKUI_FULL_API_VERSION 104
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
 #define ARKUI_NODE_API_VERSION 104
@@ -4024,6 +4024,13 @@ struct ArkUIRelativeContainerModifier {
     void (*resetGuideline)(ArkUINodeHandle node);
     void (*resetBarrier)(ArkUINodeHandle node);
 };
+
+struct ArkUIContainerSpanModifier {
+    void (*setContainerSpanTextBackgroundStyle)(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
+        const ArkUI_Int32* units, ArkUI_Int32 length);
+    void (*resetContainerSpanTextBackgroundStyle)(ArkUINodeHandle node);
+};
+
 /**
  * An API to control an implementation. When making changes modifying binary
  * layout, i.e. adding new events - increase ARKUI_API_VERSION above for binary
@@ -4132,6 +4139,7 @@ struct ArkUINodeModifiers {
     const ArkUISymbolGlyphModifier* (*getSymbolGlyphModifier)();
     const ArkUISymbolSpanModifier* (*getSymbolSpanModifier)();
     const ArkUIComponent3DModifier* (*getComponent3DModifier)();
+    const ArkUIContainerSpanModifier* (*getContainerSpanModifier)();
 };
 
 // same as inner defines in property.h

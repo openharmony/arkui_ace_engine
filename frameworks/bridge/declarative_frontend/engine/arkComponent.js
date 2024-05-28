@@ -26589,3 +26589,55 @@ if (globalThis.Component3D !== undefined) {
     });
   };
 }
+
+class ContainerSpanTextBackgroundStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().containerSpan.resetTextBackgroundStyle(node);
+    } else {
+      let textBackgroundStyle = new ArkTextBackGroundStyle();
+      if (!textBackgroundStyle.convertTextBackGroundStyleOptions(this.value)) {
+        getUINativeModule().containerSpan.resetTextBackgroundStyle(node);
+      } else {
+        getUINativeModule().containerSpan.setTextBackgroundStyle(node,textBackgroundStyle.color,
+          textBackgroundStyle.radius.topLeft,
+          textBackgroundStyle.radius.topRight,
+          textBackgroundStyle.radius.bottomLeft,
+          textBackgroundStyle.radius.bottomRight);
+      }
+    }
+  }
+  checkObjectDiff() {
+    let textBackgroundStyle = new ArkTextBackGroundStyle();
+    let stageTextBackGroundStyle = new ArkTextBackGroundStyle();
+    if (!textBackgroundStyle.convertTextBackGroundStyleOptions(this.value) || !stageTextBackGroundStyle.convertTextBackGroundStyleOptions(this.stageValue)) {
+      return false;
+    } else {
+      return textBackgroundStyle.checkObjectDiff(stageTextBackGroundStyle);
+    }
+  }
+}
+ContainerSpanTextBackgroundStyleModifier.identity = Symbol('containerSpanTextBackgroundStyle');
+/// <reference path='./import.ts' />
+class ArkContainerSpanComponent extends ArkComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+  }
+  textBackgroundStyle(value) {
+    modifierWithKey(this._modifiersWithKeys, ContainerSpanTextBackgroundStyleModifier.identity, ContainerSpanTextBackgroundStyleModifier, value);
+    return this;
+  }
+}
+// @ts-ignore
+if (globalThis.ContainerSpan !== undefined) {
+  globalThis.ContainerSpan.attributeModifier = function (modifier) {
+    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+      return new ArkContainerSpanComponent(nativePtr);
+    }, (nativePtr, classType, modifierJS) => {
+      return new modifierJS.ContainerSpanModifier(nativePtr, classType);
+    });
+  };
+}
