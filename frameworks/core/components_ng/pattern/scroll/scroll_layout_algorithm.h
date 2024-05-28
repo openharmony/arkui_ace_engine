@@ -76,6 +76,8 @@ public:
 
     void Layout(LayoutWrapper* layoutWrapper) override;
 
+    void SetInitialOffset(LayoutWrapper* layoutWrapper, Axis axis, const SizeF& selfSize);
+
 private:
     float currentOffset_ = 0.0f;
     float scrollableDistance_ = 0.0f;
