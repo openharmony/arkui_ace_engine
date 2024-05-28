@@ -123,10 +123,10 @@ enum UTF16LEPatterns {
     UTF16LE_ZERO_BYTE = 0x00
 };
 
-enum UTF8ByteSkips {
-    SKIP_ONE_BYTE = 1,
-    SKIP_TWO_BYTES = 2,
-    SKIP_THREE_BYTES = 3
+enum INDEX {
+    INDEX_ONE = 1,
+    INDEX_TWO = 2,
+    INDEX_THREE = 3
 };
 
 enum UtfLength : uint8_t { ONE = 1, TWO = 2, THREE = 3, FOUR = 4 };

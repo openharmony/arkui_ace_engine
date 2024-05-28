@@ -140,13 +140,13 @@ bool IsUTF16LowSurrogate(uint16_t ch)
 size_t UTF8Length(uint32_t codePoint)
 {
     if (codePoint <= UTF8_1B_MAX) {
-        return UtfLength::ONE;
+        return UtfLength::INDEX_ONE;
     }
     if (codePoint <= UTF8_2B_MAX) {
-        return UtfLength::TWO;
+        return UtfLength::INDEX_TWO;
     }
     if (codePoint <= UTF8_3B_MAX) {
-        return UtfLength::THREE;
+        return UtfLength::INDEX_THREE;
     }
     return UtfLength::FOUR;
 }
@@ -223,7 +223,7 @@ bool IsUTF8(std::string& data)
         unsigned char c = data[i];
 
         // Check for UTF-16LE byte order mark (BOM)
-        if (i == 0 && data.size() >= 2 && data[1] == UTF16LE_ZERO_BYTE &&
+        if (i == 0 && data.size() >= INDEX_TWO && data[INDEX_ONE] == UTF16LE_ZERO_BYTE &&
             (c == UTF16LE_BOM_FF || c == UTF16LE_BOM_FE)) {
             return false;
         }
@@ -235,24 +235,24 @@ bool IsUTF8(std::string& data)
 
         // Check for multi-byte UTF-8 sequences
         if ((c & UTF8_HIGH_BIT) != 0) { // High bit is set, indicating a non-ASCII character
-            if ((c & UTF8_TWO_BYTE_MASK) == UTF8_TWO_BYTE_PATTERN && i + 1 < data.size() &&
-                (data[i + 1] & UTF8_HIGH_BIT) == UTF8_MULTIBYTE_FOLLOWER) {
+            if ((c & UTF8_TWO_BYTE_MASK) == UTF8_TWO_BYTE_PATTERN && i + INDEX_ONE < data.size() &&
+                (data[i + INDEX_ONE ] & UTF8_HIGH_BIT) == UTF8_MULTIBYTE_FOLLOWER) {
                 // Two-byte UTF-8 character
                 hasMultiByteUTF8 = true;
-                i += SKIP_ONE_BYTE; // Skip the next byte
-            } else if ((c & UTF8_THREE_BYTE_MASK) == UTF8_THREE_BYTE_PATTERN && i + 2 < data.size() &&
-                       (data[i + 1] & UTF8_HIGH_BIT) == UTF8_MULTIBYTE_FOLLOWER &&
-                       (data[i + 2] & UTF8_HIGH_BIT) == UTF8_MULTIBYTE_FOLLOWER) {
+                i += INDEX_ONE; // Skip the next byte
+            } else if ((c & UTF8_THREE_BYTE_MASK) == UTF8_THREE_BYTE_PATTERN && i + INDEX_TWO < data.size() &&
+                       (data[i + INDEX_ONE] & UTF8_HIGH_BIT) == UTF8_MULTIBYTE_FOLLOWER &&
+                       (data[i + INDEX_TWO] & UTF8_HIGH_BIT) == UTF8_MULTIBYTE_FOLLOWER) {
                 // Three-byte UTF-8 character
                 hasMultiByteUTF8 = true;
-                i += SKIP_TWO_BYTES; // Skip the next two bytes
-            } else if ((c & UTF8_FOUR_BYTE_MASK) == UTF8_FOUR_BYTE_PATTERN && i + 3 < data.size() &&
-                       (data[i + 1] & UTF8_HIGH_BIT) == UTF8_MULTIBYTE_FOLLOWER &&
-                       (data[i + 2] & UTF8_HIGH_BIT) == UTF8_MULTIBYTE_FOLLOWER &&
-                       (data[i + 3] & UTF8_HIGH_BIT) == UTF8_MULTIBYTE_FOLLOWER) {
+                i += INDEX_TWO; // Skip the next two bytes
+            } else if ((c & UTF8_FOUR_BYTE_MASK) == UTF8_FOUR_BYTE_PATTERN && i + INDEX_THREE < data.size() &&
+                       (data[i + INDEX_ONE] & UTF8_HIGH_BIT) == UTF8_MULTIBYTE_FOLLOWER &&
+                       (data[i + INDEX_TWO] & UTF8_HIGH_BIT) == UTF8_MULTIBYTE_FOLLOWER &&
+                       (data[i + INDEX_THREE] & UTF8_HIGH_BIT) == UTF8_MULTIBYTE_FOLLOWER) {
                 // Four-byte UTF-8 character
                 hasMultiByteUTF8 = true;
-                i += SKIP_THREE_BYTES; // Skip the next three bytes
+                i += INDEX_THREE; // Skip the next three bytes
             }
         }
     }
