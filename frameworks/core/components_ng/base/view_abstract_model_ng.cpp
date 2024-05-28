@@ -435,6 +435,7 @@ RefPtr<PipelineContext> ViewAbstractModelNG::GetSheetContext(NG::SheetStyle& she
 {
     RefPtr<PipelineContext> context;
     if (sheetStyle.instanceId.has_value()) {
+        TAG_LOGD(AceLogTag::ACE_SHEET, "Sheet uiContext id is: %{public}d", sheetStyle.instanceId.value());
         auto container = AceEngine::Get().GetContainer(sheetStyle.instanceId.value());
         CHECK_NULL_RETURN(container, nullptr);
         auto contextBase = container->GetPipelineContext();
