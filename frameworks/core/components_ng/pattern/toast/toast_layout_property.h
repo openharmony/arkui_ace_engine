@@ -25,6 +25,7 @@ namespace OHOS::Ace::NG {
 enum class ToastShowMode {
     DEFAULT = 0,
     TOP_MOST = 1,
+    SYSTEM_TOP_MOST = 2,
 };
 struct ToastInfo {
     std::string message;

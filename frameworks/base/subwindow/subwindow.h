@@ -112,6 +112,16 @@ public:
         return isAboveApps_;
     }
 
+    void SetIsSystemTopMost(bool isSystemTopMost)
+    {
+        isSystemTopMost_ = isSystemTopMost;
+    }
+
+    bool IsSystemTopMost() const
+    {
+        return isSystemTopMost_;
+    }
+
     virtual void ClearToast() = 0;
     virtual void ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
         const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset) = 0;
@@ -136,6 +146,7 @@ private:
     int32_t subwindowId_ = 0;
     int32_t uiExtensionHostWindowId_ = 0;
     bool isAboveApps_ = false;
+    bool isSystemTopMost_ = false;
 };
 
 } // namespace OHOS::Ace
