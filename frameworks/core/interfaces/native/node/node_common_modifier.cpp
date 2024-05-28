@@ -57,6 +57,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr VisibleType DEFAULT_VISIBILITY = static_cast<VisibleType>(0);
 constexpr float MAX_ANGLE = 360.0f;
+constexpr float DEFAULT_ANGLE = 180.0f;
 constexpr double PERCENT_100 = 100.0;
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
@@ -4971,12 +4972,12 @@ ArkUI_Int32 GetRadialGradient(
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     auto gradient = ViewAbstract::GetRadialGradient(frameNode);
     auto radialGradient = gradient.GetRadialGradient();
-
+    CHECK_NULL_RETURN(radialGradient, ERROR_INT_CODE);
     values[NUM_0] = radialGradient->radialCenterX->GetNativeValue(static_cast<DimensionUnit>(unit));
     values[NUM_1] = radialGradient->radialCenterY->GetNativeValue(static_cast<DimensionUnit>(unit));
-    values[NUM_2] = gradient.GetInnerRadius();
+    values[NUM_2] =
+        gradient.GetRadialGradient()->radialHorizontalSize->GetNativeValue(static_cast<DimensionUnit>(unit));
     values[NUM_3] = gradient.GetRepeat();
-
     std::vector<GradientColor> gradientColors = gradient.GetColors();
     //0 start index
     int index = 0;
@@ -5118,7 +5119,7 @@ ArkUI_Int32 GetLinearGradient(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI
     auto gradient = ViewAbstract::GetLinearGradient(frameNode);
     auto angle = gradient.GetLinearGradient()->angle;
     //0 angle
-    values[0] = angle.has_value() ? angle.value().Value() : 0.0f;
+    values[0] = angle.has_value() ? angle.value().Value() : DEFAULT_ANGLE;
     //1 Direction
     values[1] = static_cast<int32_t>(convertToLinearGradientDirection(gradient.GetLinearGradient()));
     //2 Repeat

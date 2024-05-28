@@ -3668,7 +3668,7 @@ NG::Gradient ViewAbstract::GetRadialGradient(FrameNode* frameNode)
     value.CreateGradientWithType(NG::GradientType::RADIAL);
     const auto& target = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(target, value);
-    return target->GetSweepGradientValue(value);
+    return target->GetRadialGradientValue(value);
 }
 
 RefPtr<BasicShape> ViewAbstract::GetMask(FrameNode* frameNode)
@@ -3851,7 +3851,7 @@ Dimension ViewAbstract::GetSepia(FrameNode* frameNode)
 
 Dimension ViewAbstract::GetContrast(FrameNode* frameNode)
 {
-    Dimension value;
+    Dimension value(1.0f);
     auto target = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(target, value);
     return target->GetFrontContrastValue(value);
