@@ -140,13 +140,13 @@ bool IsUTF16LowSurrogate(uint16_t ch)
 size_t UTF8Length(uint32_t codePoint)
 {
     if (codePoint <= UTF8_1B_MAX) {
-        return UtfLength::INDEX_ONE;
+        return UtfLength::ONE;
     }
     if (codePoint <= UTF8_2B_MAX) {
-        return UtfLength::INDEX_TWO;
+        return UtfLength::TWO;
     }
     if (codePoint <= UTF8_3B_MAX) {
-        return UtfLength::INDEX_THREE;
+        return UtfLength::THREE;
     }
     return UtfLength::FOUR;
 }
