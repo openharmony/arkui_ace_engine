@@ -66,7 +66,7 @@ constexpr float PIXELMAP_DRAG_SCALE_MULTIPLE = 1.05f;
 constexpr int32_t PIXELMAP_ANIMATION_TIME = 800;
 constexpr float SCALE_NUMBER = 0.95f;
 constexpr int32_t FILTER_TIMES = 250;
-constexpr int32_t PRE_DRAG_TIMER_DEADLINE = 50;
+constexpr int32_t PRE_DRAG_TIMER_DEADLINE = 50; // 50ms
 constexpr int32_t PIXELMAP_ANIMATION_DURATION = 300;
 constexpr float SPRING_RESPONSE = 0.416f;
 constexpr float SPRING_DAMPING_FRACTION = 0.73f;
@@ -149,11 +149,11 @@ bool DragEventActuator::IsGlobalStatusSuitableForDragging()
     CHECK_NULL_RETURN(pipeline, false);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_RETURN(dragDropManager, false);
-    if (dragDropManager->IsDragging() || dragDropManager->IsMsdpDragging()) {
+    if (dragDropManager->IsDragging() || dragDropManager->IsMSDPDragging()) {
         TAG_LOGI(AceLogTag::ACE_DRAG,
             "No need to collect drag gestures result, dragging is %{public}d,"
             "MSDP dragging is %{public}d",
-            dragDropManager->IsDragging(), dragDropManager->IsMsdpDragging());
+            dragDropManager->IsDragging(), dragDropManager->IsMSDPDragging());
         return false;
     }
 
@@ -206,10 +206,10 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         CHECK_NULL_VOID(pipeline);
         auto dragDropManager = pipeline->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
-        if (dragDropManager->IsDragging() || dragDropManager->IsMsdpDragging()) {
+        if (dragDropManager->IsDragging() || dragDropManager->IsMSDPDragging()) {
             TAG_LOGI(AceLogTag::ACE_DRAG,
                 "It's already dragging now, dragging is %{public}d, MSDP dragging is %{public}d",
-                dragDropManager->IsDragging(), dragDropManager->IsMsdpDragging());
+                dragDropManager->IsDragging(), dragDropManager->IsMSDPDragging());
             return;
         }
         dragDropManager->SetHasGatherNode(false);
@@ -1262,7 +1262,7 @@ void DragEventActuator::ExecutePreDragAction(const PreDragStatus preDragStatus, 
     CHECK_NULL_VOID(mainPipeline);
     auto dragDropManager = mainPipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
-    if (dragDropManager->IsDragging() || dragDropManager->IsMsdpDragging()) {
+    if (dragDropManager->IsDragging() || dragDropManager->IsMSDPDragging()) {
         return;
     }
     RefPtr<EventHub> eventHub;

@@ -222,7 +222,7 @@ void EventHub::FireCustomerOnDragFunc(DragFuncType dragFuncType, const RefPtr<OH
 void EventHub::FireOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
 {
     if (SystemProperties::GetDebugEnabled()) {
-        LOGI("DragDropManager fire onDragEnter");
+        TAG_LOGI(AceLogTag::ACE_DRAG, "DragDropManager fire onDragEnter");
     }
     if (onDragEnter_) {
         // callback may be overwritten in its invoke so we copy it first
@@ -234,7 +234,7 @@ void EventHub::FireOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info, const s
 void EventHub::FireOnDragLeave(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
 {
     if (SystemProperties::GetDebugEnabled()) {
-        LOGI("DragDropManager fire onDragLeave");
+        TAG_LOGI(AceLogTag::ACE_DRAG, "DragDropManager fire onDragLeave");
     }
     if (onDragLeave_) {
         // callback may be overwritten in its invoke so we copy it first
@@ -246,7 +246,7 @@ void EventHub::FireOnDragLeave(const RefPtr<OHOS::Ace::DragEvent>& info, const s
 void EventHub::FireOnDragMove(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
 {
     if (SystemProperties::GetDebugEnabled()) {
-        LOGI("DragDropManager fire onDragMove");
+        TAG_LOGI(AceLogTag::ACE_DRAG, "DragDropManager fire onDragMove");
     }
     if (onDragMove_) {
         // callback may be overwritten in its invoke so we copy it first
@@ -258,7 +258,7 @@ void EventHub::FireOnDragMove(const RefPtr<OHOS::Ace::DragEvent>& info, const st
 void EventHub::FireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
 {
     if (SystemProperties::GetDebugEnabled()) {
-        LOGI("DragDropManager fire onDrop");
+        TAG_LOGI(AceLogTag::ACE_DRAG, "DragDropManager fire onDrop");
     }
     if (onDrop_) {
         // callback may be overwritten in its invoke so we copy it first

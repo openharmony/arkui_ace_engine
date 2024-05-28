@@ -2616,7 +2616,7 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
     // process drag cancel
     if (event.code == KeyCode::KEY_ESCAPE) {
         auto manager = GetDragDropManager();
-        if (manager && manager->IsMsdpDragging()) {
+        if (manager && manager->IsMSDPDragging()) {
             manager->SetIsDragCancel(true);
             manager->OnDragEnd(PointerEvent(0, 0), "");
             manager->SetIsDragCancel(false);
@@ -3536,7 +3536,7 @@ bool PipelineContext::IsDragging() const
         return false;
     }
     bool isDragging = dragDropManager_->IsDragging();
-    isDragging = (isDragging || dragDropManager_->IsMsdpDragging());
+    isDragging = (isDragging || dragDropManager_->IsMSDPDragging());
     return isDragging;
 }
 

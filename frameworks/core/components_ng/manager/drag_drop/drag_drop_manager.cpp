@@ -1413,7 +1413,7 @@ void DragDropManager::ClearExtraInfo()
     extraInfo_.clear();
 }
 
-bool DragDropManager::IsMsdpDragging() const
+bool DragDropManager::IsMSDPDragging() const
 {
     DragState dragState;
     InteractionInterface::GetInstance()->GetDragState(dragState);
