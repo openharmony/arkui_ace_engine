@@ -706,7 +706,7 @@ export struct ComposeListItem {
     let leftPaddingWidth = this.composeItemPadding?.start?.value ?? STACK_PADDING;
     if (this.operateItem === null || JSON.stringify(this.operateItem) === '{}') {
       return `calc(100% - ${leftPaddingWidth}vp)`;
-    } else if (this.operateItem !== null && this.operateItem.button === null && this.operateItem.text === null) {
+    } else if (this.operateItem !== null && this.operateItem.button === undefined && this.operateItem.text === undefined) {
       if (this.operateItem.subIcon !== null) {
         return `calc(100% - ${leftPaddingWidth}vp - 40vp - 26vp)`;
       } else {
@@ -722,7 +722,7 @@ export struct ComposeListItem {
       this.composeItemPadding?.end !== undefined ? this.composeItemPadding?.end?.value : STACK_PADDING;
     if (this.operateItem === null || JSON.stringify(this.operateItem) === '{}') {
       return RIGHT_CONTENT_NULL_RIGHTWIDTH;
-    } else if (this.operateItem !== null && this.operateItem.text === null) {
+    } else if (this.operateItem !== null && this.operateItem.text === undefined) {
       if (this.operateItem.subIcon !== null) {
         return `calc(${RIGHT_ONLY_ARROW_WIDTH} + ${RIGHT_ONLY_ARROW_WIDTH} + ${rightPaddingWidth}vp)`;
       } else {
@@ -785,6 +785,7 @@ export struct ComposeListItem {
             rightWidth: this.calculatedRightWidth(),
             isParentCanTouch: this.isCanTouch
           })
+            .align(Alignment.End)
             .onFocus(() => {
               this.canFocus = false;
             })

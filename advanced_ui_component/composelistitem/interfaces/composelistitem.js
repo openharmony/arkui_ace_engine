@@ -1326,7 +1326,7 @@ export class ComposeListItem extends ViewPU {
         if (this.operateItem === null || JSON.stringify(this.operateItem) === '{}') {
             return `calc(100% - ${c2}vp)`;
         }
-        else if (this.operateItem !== null && this.operateItem.button === null && this.operateItem.text === null) {
+        else if (this.operateItem !== null && this.operateItem.button === undefined && this.operateItem.text === undefined) {
             if (this.operateItem.subIcon !== null) {
                 return `calc(100% - ${c2}vp - 40vp - 26vp)`;
             }
@@ -1343,7 +1343,7 @@ export class ComposeListItem extends ViewPU {
         if (this.operateItem === null || JSON.stringify(this.operateItem) === '{}') {
             return RIGHT_CONTENT_NULL_RIGHTWIDTH;
         }
-        else if (this.operateItem !== null && this.operateItem.text === null) {
+        else if (this.operateItem !== null && this.operateItem.text === undefined) {
             if (this.operateItem.subIcon !== null) {
                 return `calc(${RIGHT_ONLY_ARROW_WIDTH} + ${RIGHT_ONLY_ARROW_WIDTH} + ${b2}vp)`;
             }
@@ -1508,6 +1508,7 @@ export class ComposeListItem extends ViewPU {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((r, s) => {
                         __Common__.create();
+                        __Common__.align(Alignment.End);
                         __Common__.onFocus(() => {
                             this.canFocus = false;
                         });
