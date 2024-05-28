@@ -1140,4 +1140,44 @@ void WebClientImpl::OnViewportFitChange(OHOS::NWeb::ViewportFit viewportFit)
     CHECK_NULL_VOID(delegate);
     delegate->OnViewportFitChange(viewportFit);
 }
+
+void WebClientImpl::CreateOverlay(void* data,
+                                  size_t len,
+                                  int width,
+                                  int height,
+                                  int offsetX,
+                                  int offsetY,
+                                  int rectWidth,
+                                  int rectHeight,
+                                  int pointX,
+                                  int pointY)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->CreateOverlay(data,
+                            len,
+                            width,
+                            height,
+                            offsetX,
+                            offsetY,
+                            rectWidth,
+                            rectHeight,
+                            pointX,
+                            pointY);
+}
+
+void WebClientImpl::OnOverlayStateChanged(int offsetX,
+                                          int offsetY,
+                                          int rectWidth,
+                                          int rectHeight)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnOverlayStateChanged(offsetX,
+                                    offsetY,
+                                    rectWidth,
+                                    rectHeight);
+}
 } // namespace OHOS::Ace

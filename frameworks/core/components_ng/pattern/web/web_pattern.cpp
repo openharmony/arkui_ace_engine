@@ -232,6 +232,9 @@ WebPattern::~WebPattern()
         TAG_LOGD(AceLogTag::ACE_WEB, "NWEB ~WebPattern isActive_ start OnInActive");
         OnInActive();
     }
+    if (imageAnalyzerManager_) {
+        imageAnalyzerManager_->ReleaseImageAnalyzer();
+    }
 }
 
 void WebPattern::ShowContextSelectOverlay(const RectF& firstHandle, const RectF& secondHandle,
@@ -2350,6 +2353,9 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
             touchOverlayInfo_.push_back(touchPoint);
         }
         delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
+        if (overlayCreating_) {
+            imageAnalyzerManager_->UpdateOverlayTouchInfo(touchPoint.x, touchPoint.y, TouchType::DOWN);
+        }
     }
     if (!touchInfos.empty() && !GetNativeEmbedModeEnabledValue(false)) {
         WebRequestFocus();
@@ -2374,6 +2380,10 @@ void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
             DelTouchOverlayInfoByTouchId(touchPoint.id);
         }
         delegate_->HandleTouchUp(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
+        if (overlayCreating_) {
+            imageAnalyzerManager_->UpdateOverlayTouchInfo(touchPoint.x, touchPoint.y, TouchType::UP);
+            overlayCreating_ = false;
+        }
     }
 }
 
@@ -2418,9 +2428,14 @@ void WebPattern::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
         std::shared_ptr<OHOS::NWeb::NWebTouchPointInfo> touch_point_info =
             std::make_shared<NWebTouchPointInfoImpl>(touchPoint.id, touchPoint.x, touchPoint.y);
         touch_point_infos.emplace_back(touch_point_info);
+        if (overlayCreating_) {
+            imageAnalyzerManager_->UpdateOverlayTouchInfo(touchPoint.x, touchPoint.y, TouchType::MOVE);
+        }
     }
 
-    delegate_->HandleTouchMove(touch_point_infos, fromOverlay);
+    if (!overlayCreating_) {
+        delegate_->HandleTouchMove(touch_point_infos, fromOverlay);
+    }
 }
 
 void WebPattern::HandleTouchCancel(const TouchEventInfo& info)
@@ -2430,6 +2445,10 @@ void WebPattern::HandleTouchCancel(const TouchEventInfo& info)
     }
     CHECK_NULL_VOID(delegate_);
     delegate_->HandleTouchCancel();
+    if (overlayCreating_) {
+        imageAnalyzerManager_->UpdateOverlayTouchInfo(0, 0, TouchType::CANCEL);
+        overlayCreating_ = false;
+    }
 }
 
 bool WebPattern::ParseTouchInfo(const TouchEventInfo& info, std::list<TouchInfo>& touchInfos)
@@ -3922,6 +3941,13 @@ void WebPattern::OnScrollState(bool scrollState)
     scrollState_ = scrollState;
     if (!scrollState) {
         OnScrollEndRecursive(std::nullopt);
+    } else if (imageAnalyzerManager_) {
+        imageAnalyzerManager_->UpdateOverlayStatus(
+            false,
+            0,
+            0,
+            0,
+            0);
     }
 }
 
@@ -4576,6 +4602,83 @@ WebInfoType WebPattern::GetWebInfoType()
 void WebPattern::RequestFocus()
 {
     WebRequestFocus();
+}
+
+void WebPattern::OnRebuildFrame()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    CHECK_NULL_VOID(renderContextForSurface_);
+    renderContext->AddChild(renderContextForSurface_, 0);
+}
+
+void WebPattern::CreateOverlay(const RefPtr<OHOS::Ace::PixelMap> pixelMap,
+                               int offsetX,
+                               int offsetY,
+                               int rectWidth,
+                               int rectHeight,
+                               int pointX,
+                               int pointY)
+{
+    if (!imageAnalyzerManager_) {
+        imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(
+            GetHost(),
+            ImageAnalyzerHolder::WEB);
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "CreateOverlay, offsetX=%{public}d, offsetY=%{public}d, width=%{public}d, height=%{public}d",
+        offsetX,
+        offsetY,
+        rectWidth,
+        rectHeight);
+    imageAnalyzerManager_->UpdatePressOverlay(
+        pixelMap,
+        offsetX,
+        offsetY,
+        rectWidth,
+        rectHeight,
+        pointX,
+        pointY,
+        std::bind(&WebPattern::OnTextSelected, this));
+}
+
+void WebPattern::OnOverlayStateChanged(int offsetX,
+                                       int offsetY,
+                                       int rectWidth,
+                                       int rectHeight)
+{
+    if (imageAnalyzerManager_) {
+        TAG_LOGI(AceLogTag::ACE_WEB,
+            "OnOverlayStateChanged, offsetX=%{public}d, offsetY=%{public}d, width=%{public}d, height=%{public}d",
+            offsetX,
+            offsetY,
+            rectWidth,
+            rectHeight);
+        imageAnalyzerManager_->UpdateOverlayStatus(
+            true,
+            offsetX,
+            offsetY,
+            rectWidth,
+            rectHeight);
+    }
+}
+
+void WebPattern::OnTextSelected()
+{
+    imageAnalyzerManager_->DestroyAnalyzerOverlay();
+    imageAnalyzerManager_->CreateAnalyzerOverlay(nullptr);
+    CHECK_NULL_VOID(delegate_);
+    delegate_->OnTextSelected();
+    overlayCreating_ = true;
+}
+
+void WebPattern::DestroyAnalyzerOverlay()
+{
+    if (imageAnalyzerManager_) {
+        imageAnalyzerManager_->DestroyAnalyzerOverlay();
+    }
 }
 
 } // namespace OHOS::Ace::NG

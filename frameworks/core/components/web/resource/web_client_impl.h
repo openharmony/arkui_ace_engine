@@ -256,6 +256,22 @@ public:
     void OnRenderProcessResponding() override;
 
     void OnViewportFitChange(NWeb::ViewportFit viewportFit) override;
+
+    void CreateOverlay(void* data,
+                       size_t len,
+                       int width,
+                       int height,
+                       int offsetX,
+                       int offsetY,
+                       int rectWidth,
+                       int rectHeight,
+                       int pointX,
+                       int pointY) override;
+
+    void OnOverlayStateChanged(int offsetX,
+                               int offsetY,
+                               int rectWidth,
+                               int rectHeight) override;
     
     void OnInterceptKeyboardAttach(
         const std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler,

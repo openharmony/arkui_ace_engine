@@ -4290,6 +4290,9 @@ void WebDelegate::OnPageStarted(const std::string& param)
             delegate->RecordWebEvent(Recorder::EventType::WEB_PAGE_BEGIN, param);
         },
         TaskExecutor::TaskType::JS, "ArkUIWebPageStarted");
+    auto pattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->DestroyAnalyzerOverlay();
 }
 
 void WebDelegate::OnPageFinished(const std::string& param)
@@ -6753,6 +6756,55 @@ void WebDelegate::OnSafeInsetsChange()
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebSafeInsetsChange");
+}
+
+void WebDelegate::CreateOverlay(void* data,
+                                size_t len,
+                                int width,
+                                int height,
+                                int offsetX,
+                                int offsetY,
+                                int rectWidth,
+                                int rectHeight,
+                                int pointX,
+                                int pointY)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->CreateOverlay(
+        PixelMap::ConvertSkImageToPixmap(
+            static_cast<const uint32_t*>(data),
+            len,
+            width,
+            height),
+        offsetX,
+        offsetY,
+        rectWidth,
+        rectHeight,
+        pointX,
+        pointY);
+}
+
+void WebDelegate::OnOverlayStateChanged(int offsetX,
+                                        int offsetY,
+                                        int rectWidth,
+                                        int rectHeight)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnOverlayStateChanged(offsetX,
+                                      offsetY,
+                                      rectWidth,
+                                      rectHeight);
+}
+
+void WebDelegate::OnTextSelected()
+{
+    auto delegate = WeakClaim(this).Upgrade();
+    CHECK_NULL_VOID(delegate);
+    if (delegate->nweb_) {
+        return delegate->nweb_->OnTextSelected();
+    }
 }
 
 NG::WebInfoType WebDelegate::GetWebInfoType()
