@@ -1058,11 +1058,11 @@ struct ArkUICommonModifier {
     void (*resetSaturate)(ArkUINodeHandle node);
     void (*setColorBlend)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetColorBlend)(ArkUINodeHandle node);
-    void (*setGrayscale)(ArkUINodeHandle node, ArkUI_Float32 grayScale);
+    void (*setGrayscale)(ArkUINodeHandle node, ArkUI_Float64 grayScale);
     void (*resetGrayscale)(ArkUINodeHandle node);
-    void (*setContrast)(ArkUINodeHandle node, ArkUI_Float32 contrast);
+    void (*setContrast)(ArkUINodeHandle node, ArkUI_Float64 contrast);
     void (*resetContrast)(ArkUINodeHandle node);
-    void (*setBrightness)(ArkUINodeHandle node, ArkUI_Float32 brightness);
+    void (*setBrightness)(ArkUINodeHandle node, ArkUI_Float64 brightness);
     void (*resetBrightness)(ArkUINodeHandle node);
     void (*setBlur)(
         ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize);
@@ -1123,7 +1123,7 @@ struct ArkUICommonModifier {
     void (*resetPixelStretchEffect)(ArkUINodeHandle node);
     void (*setLightUpEffect)(ArkUINodeHandle node, ArkUI_Float32 radio);
     void (*resetLightUpEffect)(ArkUINodeHandle node);
-    void (*setSphericalEffect)(ArkUINodeHandle node, ArkUI_Float32 radio);
+    void (*setSphericalEffect)(ArkUINodeHandle node, ArkUI_Float64 radio);
     void (*resetSphericalEffect)(ArkUINodeHandle node);
     void (*setRenderGroup)(ArkUINodeHandle node, ArkUI_Bool isRenderGroup);
     void (*resetRenderGroup)(ArkUINodeHandle node);
