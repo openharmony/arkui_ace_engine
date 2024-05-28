@@ -70,7 +70,13 @@ void JSMenu::Font(const JSCallbackInfo& info)
 {
     CalcDimension fontSize;
     std::string weight;
-    if (info.Length() < 1 || !info[0]->IsObject()) {
+    if (!info[0]->IsObject()) {
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            MenuModel::GetInstance()->SetFontSize(CalcDimension());
+            MenuModel::GetInstance()->SetFontWeight(FontWeight::NORMAL);
+            MenuModel::GetInstance()->SetFontStyle(FontStyle::NORMAL);
+            MenuModel::GetInstance()->ResetFontFamily();
+        }
         return;
     } else {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
@@ -82,7 +88,6 @@ void JSMenu::Font(const JSCallbackInfo& info)
                 fontSize = CalcDimension();
             }
         }
-
         auto jsWeight = obj->GetProperty("weight");
         if (!jsWeight->IsNull()) {
             if (jsWeight->IsNumber()) {
@@ -91,7 +96,6 @@ void JSMenu::Font(const JSCallbackInfo& info)
                 ParseJsString(jsWeight, weight);
             }
         }
-
         auto jsStyle = obj->GetProperty("style");
         if (!jsStyle->IsNull()) {
             if (jsStyle->IsNumber()) {
@@ -102,7 +106,6 @@ void JSMenu::Font(const JSCallbackInfo& info)
                 MenuModel::GetInstance()->SetFontStyle(ConvertStrToFontStyle(style));
             }
         }
-
         auto jsFamily = obj->GetProperty("family");
         if (!jsFamily->IsNull() && jsFamily->IsString()) {
             auto familyVal = jsFamily->ToString();
