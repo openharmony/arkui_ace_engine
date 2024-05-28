@@ -86,4 +86,14 @@ void GeometryNode::SetSelfAdjust(RectF selfAdjust)
 {
     selfAdjust_ = selfAdjust;
 }
+
+RectF GeometryNode::GetFrameRectWithoutSafeArea() const
+{
+    return frame_.rect_;
+}
+
+RectF GeometryNode::GetFrameRectWithSafeArea() const
+{
+    return selfAdjust_ + parentAdjust_ + frame_.rect_;
+}
 } // namespace OHOS::Ace::NG

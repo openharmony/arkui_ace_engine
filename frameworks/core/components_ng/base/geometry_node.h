@@ -55,40 +55,30 @@ public:
 
     RefPtr<GeometryNode> Clone() const;
 
-    SizeF GetMarginFrameSize(bool withSafeArea = false) const
+    SizeF GetMarginFrameSize() const
     {
         // TODO: add margin in negative.
         auto size = frame_.rect_.GetSize();
-        if (withSafeArea) {
-            size += selfAdjust_.GetSize();
-        }
         if (margin_) {
             AddPaddingToSize(*margin_, size);
         }
         return size;
     }
 
-    OffsetF GetMarginFrameOffset(bool withSafeArea = false) const
+    OffsetF GetMarginFrameOffset() const
     {
         // TODO: add margin in negative.
         auto offset = frame_.rect_.GetOffset();
-        if (withSafeArea) {
-            offset += selfAdjust_.GetOffset();
-        }
         if (margin_) {
             offset -= OffsetF(margin_->left.value_or(0), margin_->top.value_or(0));
         }
         return offset;
     }
 
-    RectF GetMarginFrameRect(bool withSafeArea = false) const
+    RectF GetMarginFrameRect() const
     {
         auto offset = frame_.rect_.GetOffset();
         auto size = frame_.rect_.GetSize();
-        if (withSafeArea) {
-            offset += selfAdjust_.GetOffset();
-            size += selfAdjust_.GetSize();
-        }
         if (margin_) {
             offset -= OffsetF(margin_->left.value_or(0), margin_->top.value_or(0));
             AddPaddingToSize(*margin_, size);
@@ -105,31 +95,19 @@ public:
         frame_.rect_.SetOffset(translate + offset);
     }
 
-    RectF GetFrameRect(bool withSafeArea = false) const
+    const RectF& GetFrameRect() const
     {
-        auto result = frame_.rect_;
-        if (withSafeArea) {
-            result += selfAdjust_;
-        }
-        return result;
+        return frame_.rect_;
     }
 
-    SizeF GetFrameSize(bool withSafeArea = false) const
+    SizeF GetFrameSize() const
     {
-        auto result = frame_.rect_.GetSize();
-        if (withSafeArea) {
-            result += selfAdjust_.GetSize();
-        }
-        return result;
+        return frame_.rect_.GetSize();
     }
 
-    OffsetF GetFrameOffset(bool withSafeArea = false) const
+    OffsetF GetFrameOffset() const
     {
-        auto result = frame_.rect_.GetOffset();
-        if (withSafeArea) {
-            result += selfAdjust_.GetOffset();
-        }
-        return result;
+        return frame_.rect_.GetOffset();
     }
 
     void SetFrameOffset(const OffsetF& offset)
@@ -170,36 +148,27 @@ public:
         frame_.rect_.SetTop(offset);
     }
 
-    SizeF GetPaddingSize(bool withSafeArea = false) const
+    SizeF GetPaddingSize() const
     {
         auto size = frame_.rect_.GetSize();
-        if (withSafeArea) {
-            size += selfAdjust_.GetSize();
-        }
         if (padding_) {
             MinusPaddingToSize(*padding_, size);
         }
         return size;
     }
 
-    OffsetF GetPaddingOffset(bool withSafeArea = false) const
+    OffsetF GetPaddingOffset() const
     {
         auto offset = frame_.rect_.GetOffset();
-        if (withSafeArea) {
-            offset += selfAdjust_.GetOffset();
-        }
         if (padding_) {
             offset += OffsetF(padding_->left.value_or(0), padding_->top.value_or(0));
         }
         return offset;
     }
 
-    RectF GetPaddingRect(bool withSafeArea = false) const
+    RectF GetPaddingRect() const
     {
         auto rect = frame_.rect_;
-        if (withSafeArea) {
-            rect += selfAdjust_;
-        }
         if (padding_) {
             auto size = rect.GetSize();
             MinusPaddingToSize(*padding_, size);

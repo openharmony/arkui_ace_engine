@@ -119,7 +119,7 @@ public:
         return false;
     }
 
-    OffsetF GetParentGlobalOffsetWithSafeArea(bool checkBoundary = false, bool checkPosition = false) const;
+    OffsetF GetParentGlobalPaintRectOffset() const;
 
     virtual bool SkipMeasureContent() const;
 
@@ -179,9 +179,6 @@ public:
     {
         needSkipSyncGeometryNode_ = needSkip;
     }
-
-    RectF GetFrameRectWithoutSafeArea() const;
-    RectF GetFrameRectWithSafeArea(bool checkPosition = false) const;
 
 protected:
     void CreateRootConstraint();
