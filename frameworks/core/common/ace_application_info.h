@@ -211,7 +211,11 @@ public:
 
     bool IsUseNewPipeline()
     {
+#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
         return useNewPipeline_.value_or(AceForwardCompatibility::IsUseNG());
+#else
+        return false;
+#endif
     }
 
     void SetIsUseNewPipeline(bool useNewPipeline)

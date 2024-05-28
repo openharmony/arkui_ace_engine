@@ -84,7 +84,11 @@
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline/pipeline_context.h"
 #ifdef WEB_SUPPORTED
+#if !defined(CROSS_PLATFORM)
 #include "core/components_ng/pattern/web/web_pattern.h"
+#else
+#include "core/components_ng/pattern/web/cross_platform/web_pattern.h"
+#endif
 #endif
 
 namespace OHOS::Ace::NG {
@@ -2451,6 +2455,7 @@ int32_t OverlayManager::ExceptComponent(const RefPtr<NG::UINode>& rootNode, RefP
 int32_t OverlayManager::WebBackward(RefPtr<NG::FrameNode>& overlay)
 {
 #ifdef WEB_SUPPORTED
+#if !defined(CROSS_PLATFORM)
     RefPtr<NG::FrameNode> webNode;
     FindWebNode(overlay, webNode);
     if (webNode && InstanceOf<WebPattern>(webNode->GetPattern())) {
@@ -2459,6 +2464,7 @@ int32_t OverlayManager::WebBackward(RefPtr<NG::FrameNode>& overlay)
         webPattern->Backward();
         return OVERLAY_REMOVE;
     }
+#endif
 #endif
     return OVERLAY_NOTHING;
 }

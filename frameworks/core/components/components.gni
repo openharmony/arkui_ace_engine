@@ -62,6 +62,7 @@ template("build_component") {
       deps += [
         "$ace_root/frameworks/core/components/theme:build_theme_code",
         "$skia_root_new:skia_$platform",
+        # "//base/web/webview:webview_prepare",
       ]
 
       if (defined(invoker.public_configs)) {
