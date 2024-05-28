@@ -15,7 +15,7 @@
 
 import { Theme } from '@ohos.arkui.theme';
 import { LengthMetrics } from '@ohos.arkui.node';
-import { TextModifier, ImageModifier} from '@ohos.arkui.modifier';
+import { TextModifier, ImageModifier } from '@ohos.arkui.modifier';
 
 export enum IconType {
   BADGE = 1,
