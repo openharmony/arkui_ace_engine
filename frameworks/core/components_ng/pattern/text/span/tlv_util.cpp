@@ -246,7 +246,14 @@ NG::BorderRadiusProperty TLVUtil::ReadBorderRadiusProperty(std::vector<uint8_t>&
 void TLVUtil::WritePixelMap(std::vector<uint8_t>& buff, RefPtr<Ace::PixelMap>& pixelMap)
 {
     WriteUint8(buff, TLV_PIXEL_MAP_TAG);
-    pixelMap->EncodeTlv(buff);
+    std::vector<uint8_t> tmpPixel;
+    if (pixelMap) {
+        pixelMap->EncodeTlv(tmpPixel);
+        WriteInt32(buff, static_cast<int32_t>(tmpPixel.size()));
+        buff.insert(buff.end(), tmpPixel.begin(), tmpPixel.end());
+    } else {
+        WriteInt32(buff, 0);
+    }
 }
 
 RefPtr<Ace::PixelMap> TLVUtil::ReadPixelMap(std::vector<uint8_t>& buff, int32_t& cursor)
@@ -254,7 +261,13 @@ RefPtr<Ace::PixelMap> TLVUtil::ReadPixelMap(std::vector<uint8_t>& buff, int32_t&
     if (ReadUint8(buff, cursor) != TLV_PIXEL_MAP_TAG) {
         return nullptr;
     }
-    RefPtr<Ace::PixelMap> p = Ace::PixelMap::DecodeTlv(buff);
+    auto pixelMapLength = ReadInt32(buff, cursor);
+    if (pixelMapLength == 0) {
+        return nullptr;
+    }
+    std::vector<uint8_t> pixelMapSubVec(buff.begin() + cursor, buff.begin() + cursor + pixelMapLength);
+    RefPtr<Ace::PixelMap> p = Ace::PixelMap::DecodeTlv(pixelMapSubVec);
+    cursor += pixelMapLength;
     return p;
 }
 
