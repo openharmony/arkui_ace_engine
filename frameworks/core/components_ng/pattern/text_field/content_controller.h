@@ -39,6 +39,7 @@ public:
     std::string GetValueAfterIndex(int32_t index);
     void erase(int32_t startIndex, int32_t length);
     int32_t Delete(int32_t startIndex, int32_t length, bool isBackward);
+    int32_t GetDeleteLength(int32_t startIndex, int32_t length, bool isBackward);
     bool IsIndexBeforeOrInEmoji(int32_t index);
     void FilterValue();
     void FilterValueType(std::string& value);
