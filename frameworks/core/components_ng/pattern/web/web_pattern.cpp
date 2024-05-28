@@ -4354,8 +4354,11 @@ void WebPattern::SetTouchEventInfo(const TouchEvent& touchEvent,
         while (!touchEventQueue_.empty()) {
             if (touchEventQueue_.front().GetChangedTouches().front().GetFingerId() == touchEvent.id) {
                 tempTouchInfo = touchEventQueue_.front();
+                touchEventQueue_.pop();
+                break;
+            } else {
+                touchEventQueue_.pop();
             }
-            touchEventQueue_.pop();
         }
     }
     auto pos = delegate_->GetPosition(embedId);
