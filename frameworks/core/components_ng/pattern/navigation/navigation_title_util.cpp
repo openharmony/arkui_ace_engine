@@ -451,30 +451,7 @@ void NavigationTitleUtil::HandleLongPress(
             dialogTheme->GetBigFontSizeScale());
         return;
     }
-    auto accessibilityProperty = targetNode->GetAccessibilityProperty<AccessibilityProperty>();
-    CHECK_NULL_VOID(accessibilityProperty);
-    ImageSourceInfo imageSourceInfo;
-    std::string message;
-    RefPtr<FrameNode> dialogNode;
-    if (isMoreButton) {
-        auto theme = NavigationGetTheme();
-        CHECK_NULL_VOID(theme);
-        message = Localization::GetInstance()->GetEntryLetters("common.more");
-        if (message.empty()) {
-            message = accessibilityProperty->GetAccessibilityText();
-        }
-        dialogNode = AgingAdapationDialogUtil::ShowLongPressDialog(message, SymbolSourceInfo(theme->GetMoreSymbolId()));
-    } else {
-        if (menuItem.text.has_value() && !menuItem.text.value().empty()) {
-            message = menuItem.text.value();
-        } else {
-            message = accessibilityProperty->GetAccessibilityText();
-        }
-        if (menuItem.icon.has_value() && !menuItem.icon.value().empty()) {
-            imageSourceInfo = ImageSourceInfo(menuItem.icon.value());
-        }
-        dialogNode = AgingAdapationDialogUtil::ShowLongPressDialog(message, imageSourceInfo);
-    }
+    auto dialogNode = CreatePopupDialogNode(targetNode, menuItem, isMoreButton);
     CHECK_NULL_VOID(dialogNode);
     auto navigationMenuNode = targetNode->GetParentFrameNode();
     CHECK_NULL_VOID(navigationMenuNode);
@@ -529,5 +506,41 @@ void NavigationTitleUtil::InitTitleBarButtonLongPressEvent(
         NavigationTitleUtil::HandleLongPressActionEnd(weakTargetNode);
     };
     longPressRecognizer->SetOnActionEnd(longPressEndCallback);
+}
+
+RefPtr<FrameNode> NavigationTitleUtil::CreatePopupDialogNode(
+    const RefPtr<FrameNode> targetNode, const BarItem& menuItem, bool isMoreButton)
+{
+    auto accessibilityProperty = targetNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, nullptr);
+    ImageSourceInfo imageSourceInfo;
+    std::string message;
+    RefPtr<FrameNode> dialogNode;
+    if (isMoreButton) {
+        auto theme = NavigationGetTheme();
+        CHECK_NULL_RETURN(theme, nullptr);
+        message = Localization::GetInstance()->GetEntryLetters("common.more");
+        if (message.empty()) {
+            message = accessibilityProperty->GetAccessibilityText();
+        }
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            dialogNode =
+                AgingAdapationDialogUtil::ShowLongPressDialog(message, SymbolSourceInfo(theme->GetMoreSymbolId()));
+            return dialogNode;
+        }
+        imageSourceInfo.SetResourceId(theme->GetMoreResourceId());
+        dialogNode = AgingAdapationDialogUtil::ShowLongPressDialog(message, imageSourceInfo);
+        return dialogNode;
+    }
+    if (menuItem.text.has_value() && !menuItem.text.value().empty()) {
+        message = menuItem.text.value();
+    } else {
+        message = accessibilityProperty->GetAccessibilityText();
+    }
+    if (menuItem.icon.has_value() && !menuItem.icon.value().empty()) {
+        imageSourceInfo = ImageSourceInfo(menuItem.icon.value());
+    }
+    dialogNode = AgingAdapationDialogUtil::ShowLongPressDialog(message, imageSourceInfo);
+    return dialogNode;
 }
 } // namespace OHOS::Ace::NG
