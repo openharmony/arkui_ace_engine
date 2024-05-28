@@ -133,7 +133,8 @@ void JSLayoutManager::GetGlyphPositionAtCoordinate(const JSCallbackInfo& args)
     auto value = layoutInfoInterface->GetGlyphPositionAtCoordinate(coordinateX, coordinateY);
     auto positionWithAffinityObj = JSRef<JSObject>::New();
     positionWithAffinityObj->SetPropertyObject("position", JSRef<JSVal>::Make(ToJSValue(value.position_)));
-    positionWithAffinityObj->SetPropertyObject("affinity", JSRef<JSVal>::Make(ToJSValue(value.affinity_)));
+    auto affinity = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(value.affinity_)));
+    positionWithAffinityObj->SetPropertyObject("affinity", affinity);
     args.SetReturnValue(JSRef<JSVal>::Cast(positionWithAffinityObj));
 }
 

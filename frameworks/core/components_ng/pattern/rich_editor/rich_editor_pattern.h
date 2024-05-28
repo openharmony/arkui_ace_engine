@@ -31,6 +31,7 @@
 #include "core/common/ime/text_input_proxy.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/common/ime/text_selection.h"
+#include "core/components/common/properties/text_layout_info.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_accessibility_property.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_content_modifier.h"
@@ -47,11 +48,10 @@
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/select_overlay/magnifier.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
+#include "core/components_ng/pattern/text/layout_info_interface.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "frameworks/core/components/common/properties/text_layout_info.h"
-#include "frameworks/core/components_ng/pattern/text/layout_info_interface.h"
 
 #if not defined(ACE_UNITTEST)
 #if defined(ENABLE_STANDARD_INPUT)

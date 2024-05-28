@@ -863,8 +863,9 @@ void JSText::BindSelectionMenu(const JSCallbackInfo& info)
     NG::SelectMenuParam menuParam;
     if (info.Length() > resquiredParameterCount) {
         JSRef<JSVal> argsMenuOptions = info[resquiredParameterCount];
-        if (argsMenuOptions->IsObject())
+        if (argsMenuOptions->IsObject()) {
             ParseMenuParam(info, argsMenuOptions, menuParam);
+        }
     }
 
     TextModel::GetInstance()->BindSelectionMenu(testSpanType, responseType, buildFunc, menuParam);
