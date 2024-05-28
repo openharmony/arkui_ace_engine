@@ -2937,14 +2937,14 @@ void PipelineContext::SetAppIcon(const RefPtr<PixelMap>& icon)
     containerPattern->SetAppIcon(icon);
 }
 
-void PipelineContext::FlushReload(const ConfigurationChange& configurationChange)
+void PipelineContext::FlushReload(const ConfigurationChange& configurationChange, bool fullUpdate)
 {
     AnimationOption option;
     const int32_t duration = 400;
     option.SetDuration(duration);
     option.SetCurve(Curves::FRICTION);
     AnimationUtils::Animate(option, [weak = WeakClaim(this), configurationChange,
-        weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager_))]() {
+        weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager_)), fullUpdate]() {
         auto pipeline = weak.Upgrade();
         CHECK_NULL_VOID(pipeline);
         if (configurationChange.IsNeedUpdate()) {
@@ -2955,11 +2955,13 @@ void PipelineContext::FlushReload(const ConfigurationChange& configurationChange
                 overlay->ReloadBuilderNodeConfig();
             }
         }
-        CHECK_NULL_VOID(pipeline->stageManager_);
-        pipeline->SetIsReloading(true);
-        pipeline->stageManager_->ReloadStage();
-        pipeline->SetIsReloading(false);
-        pipeline->FlushUITasks();
+        if (fullUpdate) {
+            CHECK_NULL_VOID(pipeline->stageManager_);
+            pipeline->SetIsReloading(true);
+            pipeline->stageManager_->ReloadStage();
+            pipeline->SetIsReloading(false);
+            pipeline->FlushUITasks();
+        }
     });
 }
 
