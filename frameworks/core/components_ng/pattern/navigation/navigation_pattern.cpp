@@ -272,7 +272,7 @@ void NavigationPattern::UpdateNavPathList()
         auto pathName = pathNames[i];
         auto index = static_cast<int32_t>(indexes[i]);
         RefPtr<UINode> uiNode = nullptr;
-        if ((i == (navigationStack_->Size() - 1)) && addByNavRouter_) {
+        if ((i == static_cast<uint32_t>(navigationStack_->Size() - 1)) && addByNavRouter_) {
             addByNavRouter_ = false;
             uiNode = navigationStack_->Get();
         } else {
@@ -1702,7 +1702,7 @@ void NavigationPattern::UpdateIsAnimation(const std::optional<std::pair<std::str
         auto preDestination = AceType::DynamicCast<NavDestinationGroupNode>(
             NavigationGroupNode::GetNavDestinationNode(preTopNavPath->second));
         if (preDestination) {
-            isDialog |= preDestination->GetNavDestinationMode() == NavDestinationMode::DIALOG;
+            isDialog = isDialog || (preDestination->GetNavDestinationMode() == NavDestinationMode::DIALOG);
         }
     }
     auto topNode = navigationStack_->Get();
@@ -1710,7 +1710,7 @@ void NavigationPattern::UpdateIsAnimation(const std::optional<std::pair<std::str
         auto newTopDestination = AceType::DynamicCast<NavDestinationGroupNode>(
             NavigationGroupNode::GetNavDestinationNode(topNode));
         if (newTopDestination) {
-            isDialog |= newTopDestination->GetNavDestinationMode() == NavDestinationMode::DIALOG;
+            isDialog = isDialog || (newTopDestination->GetNavDestinationMode() == NavDestinationMode::DIALOG);
         }
     }
     if (!isDialog) {

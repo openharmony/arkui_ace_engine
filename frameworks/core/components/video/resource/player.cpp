@@ -270,15 +270,17 @@ void Player::SetTickActive(bool isActive)
     }
 
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-    uiTaskExecutor.PostSyncTask([this, isActive] {
-        if (scheduler_) {
-            if (isActive) {
-                scheduler_->Start();
-            } else {
-                scheduler_->Stop();
+    uiTaskExecutor.PostSyncTask(
+        [this, isActive] {
+            if (scheduler_) {
+                if (isActive) {
+                    scheduler_->Start();
+                } else {
+                    scheduler_->Stop();
+                }
             }
-        }
-    }, "ArkUIVideoSetTickActive");
+        },
+        "ArkUIVideoSetTickActive");
 }
 
 void Player::OnTick(uint64_t timeStamp)
@@ -433,12 +435,14 @@ void Player::AddPreparedListener(PreparedListener&& listener)
     }
 
     auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::PLATFORM);
-    platformTaskExecutor.PostTask([weak = WeakClaim(this), listener = std::move(listener)]() mutable {
-        auto player = weak.Upgrade();
-        if (player) {
-            player->OnAddPreparedListener(std::move(listener));
-        }
-    }, "ArkUIVideoAddPreparedListener");
+    platformTaskExecutor.PostTask(
+        [weak = WeakClaim(this), listener = std::move(listener)]() mutable {
+            auto player = weak.Upgrade();
+            if (player) {
+                player->OnAddPreparedListener(std::move(listener));
+            }
+        },
+        "ArkUIVideoAddPreparedListener");
 }
 
 void Player::OnAddPreparedListener(PreparedListener&& listener)
@@ -458,12 +462,14 @@ void Player::AddPlayStatusListener(PlayStatusListener&& listener)
     }
 
     auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::PLATFORM);
-    platformTaskExecutor.PostTask([weak = WeakClaim(this), listener = std::move(listener)]() mutable {
-        auto player = weak.Upgrade();
-        if (player) {
-            player->OnAddPlayStatusListener(std::move(listener));
-        }
-    }, "ArkUIVideoAddPlayStatusListener");
+    platformTaskExecutor.PostTask(
+        [weak = WeakClaim(this), listener = std::move(listener)]() mutable {
+            auto player = weak.Upgrade();
+            if (player) {
+                player->OnAddPlayStatusListener(std::move(listener));
+            }
+        },
+        "ArkUIVideoAddPlayStatusListener");
 }
 
 void Player::OnAddPlayStatusListener(PlayStatusListener&& listener)
@@ -480,12 +486,14 @@ void Player::AddCurrentPosListener(CurrentPosListener&& listener)
     }
 
     auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::PLATFORM);
-    platformTaskExecutor.PostTask([weak = WeakClaim(this), listener = std::move(listener)]() mutable {
-        auto player = weak.Upgrade();
-        if (player) {
-            player->OnAddCurrentPosListener(std::move(listener));
-        }
-    }, "ArkUIVideoAddCurrentPosListener");
+    platformTaskExecutor.PostTask(
+        [weak = WeakClaim(this), listener = std::move(listener)]() mutable {
+            auto player = weak.Upgrade();
+            if (player) {
+                player->OnAddCurrentPosListener(std::move(listener));
+            }
+        },
+        "ArkUIVideoAddCurrentPosListener");
 }
 
 void Player::OnAddCurrentPosListener(CurrentPosListener&& listener)
@@ -502,12 +510,14 @@ void Player::AddCompletionListener(CompletionListener&& listener)
     }
 
     auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::PLATFORM);
-    platformTaskExecutor.PostTask([weak = WeakClaim(this), listener = std::move(listener)]() mutable {
-        auto player = weak.Upgrade();
-        if (player) {
-            player->OnAddCompletionListener(std::move(listener));
-        }
-    }, "ArkUIVideoAddCompletionListener");
+    platformTaskExecutor.PostTask(
+        [weak = WeakClaim(this), listener = std::move(listener)]() mutable {
+            auto player = weak.Upgrade();
+            if (player) {
+                player->OnAddCompletionListener(std::move(listener));
+            }
+        },
+        "ArkUIVideoAddCompletionListener");
 }
 
 void Player::OnAddCompletionListener(CompletionListener&& listener)
@@ -525,12 +535,14 @@ void Player::PopListener()
     }
 
     auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::PLATFORM);
-    platformTaskExecutor.PostTask([weak = WeakClaim(this)] {
-        auto player = weak.Upgrade();
-        if (player) {
-            player->OnPopListener();
-        }
-    }, "ArkUIVideoPopListener");
+    platformTaskExecutor.PostTask(
+        [weak = WeakClaim(this)] {
+            auto player = weak.Upgrade();
+            if (player) {
+                player->OnPopListener();
+            }
+        },
+        "ArkUIVideoPopListener");
 }
 
 void Player::AddRefreshRenderListener(RefreshRenderListener&& listener)
@@ -606,12 +618,14 @@ void Player::Release(const std::function<void(bool)>& onRelease)
     if (platformTaskExecutor.IsRunOnCurrentThread()) {
         UnregisterEvent();
     } else {
-        platformTaskExecutor.PostTask([weak = WeakClaim(this)] {
-            auto player = weak.Upgrade();
-            if (player) {
-                player->UnregisterEvent();
-            }
-        }, "ArkUIVideoUnregisterEvent");
+        platformTaskExecutor.PostTask(
+            [weak = WeakClaim(this)] {
+                auto player = weak.Upgrade();
+                if (player) {
+                    player->UnregisterEvent();
+                }
+            },
+            "ArkUIVideoUnregisterEvent");
     }
 
     Resource::Release(onRelease);
