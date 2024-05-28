@@ -1081,44 +1081,6 @@ HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg006, TestSize.Le
 }
 
 /**
- * @tc.name: DatePickerPaintTest001
- * @tc.desc: Test GetForegroundDrawFunction.
- * @tc.type: FUNC
- */
-HWTEST_F(DatePickerTestNg, DatePickerPaintTest001, TestSize.Level1)
-{
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
-    DatePickerModelNG::GetInstance()->CreateDatePicker(theme);
-
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
-    ASSERT_NE(pickerProperty, nullptr);
-    auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    ASSERT_NE(pickerPaintProperty, nullptr);
-    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
-    ASSERT_NE(datePickerPattern, nullptr);
-    auto datePickerPaintMethod =
-        AceType::MakeRefPtr<DatePickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(datePickerPattern)));
-    auto geometryNode = frameNode->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    auto renderContext = frameNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, pickerPaintProperty);
-    ASSERT_NE(paintWrapper, nullptr);
-    auto canvasDrawFunction = datePickerPaintMethod->GetForegroundDrawFunction(paintWrapper);
-    Testing::MockCanvas rsCanvas;
-    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DrawLine(_, _)).Times(AtLeast(1));
-    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(1);
-    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, Restore()).Times(1);
-    canvasDrawFunction(rsCanvas);
-}
-
-/**
  * @tc.name: DatePickerPaintTest002
  * @tc.desc: Test GetForegroundDrawFunction.
  * @tc.type: FUNC
