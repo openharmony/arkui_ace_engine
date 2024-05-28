@@ -713,7 +713,9 @@ uint32_t TextModelNG::GetMaxLines(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, defaultMaxLines);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, defaultMaxLines);
-    return layoutProperty->GetTextLineStyle()->GetMaxLines().value_or(defaultMaxLines);
+    auto textLineStyle = layoutProperty->GetTextLineStyle();
+    CHECK_NULL_RETURN(textLineStyle, defaultMaxLines);
+    return textLineStyle->GetMaxLines().value_or(defaultMaxLines);
 }
 
 TextAlign TextModelNG::GetTextAlign(FrameNode* frameNode)
