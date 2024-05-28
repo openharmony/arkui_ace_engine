@@ -1408,6 +1408,7 @@ void WebPattern::HandleFocusEvent()
     if (needOnFocus_) {
         delegate_->OnFocus();
     } else {
+        delegate_->OnFocus(OHOS::NWeb::FocusReason::FOCUS_DEFAULT);
         needOnFocus_ = true;
     }
 }
