@@ -30,6 +30,7 @@
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
 #include "bridge/declarative_frontend/jsview/js_image.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/jsview/js_layout_manager.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_textfield.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
@@ -41,6 +42,7 @@
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_base_controller.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
@@ -1750,6 +1752,7 @@ void JSRichEditorController::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditorController>::CustomMethod("deleteSpans", &JSRichEditorController::DeleteSpans);
     JSClass<JSRichEditorController>::CustomMethod("setSelection", &JSRichEditorController::SetSelection);
     JSClass<JSRichEditorController>::CustomMethod("getSelection", &JSRichEditorController::GetSelection);
+    JSClass<JSRichEditorController>::CustomMethod("getLayoutManager", &JSRichEditorController::GetLayoutManager);
     JSClass<JSRichEditorController>::CustomMethod("isEditing", &JSRichEditorController::IsEditing);
     JSClass<JSRichEditorController>::Method("stopEditing", &JSRichEditorController::StopEditing);
     JSClass<JSRichEditorController>::Method("closeSelectionMenu", &JSRichEditorController::CloseSelectionMenu);
@@ -2300,6 +2303,20 @@ void JSRichEditorBaseController::SetSelection(const JSCallbackInfo& args)
     controller->SetSelection(selectionStart, selectionEnd, options);
 }
 
+void JSRichEditorBaseController::GetLayoutManager(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
+    JSRef<JSObject> obj = JSClass<JSLayoutManager>::NewInstance();
+    auto jsLayoutManager = Referenced::Claim(obj->Unwrap<JSLayoutManager>());
+    CHECK_NULL_VOID(jsLayoutManager);
+    jsLayoutManager->IncRefCount();
+    auto controller = controllerWeak_.Upgrade();
+    CHECK_NULL_VOID(controller);
+    auto layoutInfoInterface = controller->GetLayoutInfoInterface();
+    jsLayoutManager->SetLayoutInfoInterface(layoutInfoInterface);
+    args.SetReturnValue(obj);
+}
+
 void JSRichEditorBaseController::ParseJsSelectionOptions(
     const JSCallbackInfo& args, std::optional<SelectionOptions>& options)
 {
@@ -2468,6 +2485,8 @@ void JSRichEditorStyledStringController::JSBind(BindingTarget globalObj)
         "getStyledString", &JSRichEditorStyledStringController::GetStyledString);
     JSClass<JSRichEditorStyledStringController>::CustomMethod(
         "onContentChanged", &JSRichEditorStyledStringController::OnContentChanged);
+    JSClass<JSRichEditorStyledStringController>::CustomMethod(
+        "getLayoutManager", &JSRichEditorStyledStringController::GetLayoutManager);
     JSClass<JSRichEditorStyledStringController>::Method(
         "stopEditing", &JSRichEditorStyledStringController::StopEditing);
     JSClass<JSRichEditorStyledStringController>::Method(

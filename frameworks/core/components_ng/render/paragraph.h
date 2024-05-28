@@ -26,6 +26,7 @@
 #include "core/components_ng/render/font_collection.h"
 #include "core/components_v2/inspector/utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/common/properties/text_layout_info.h"
 
 namespace OHOS::Ace::NG {
 class LeadingMarginSize {
@@ -183,6 +184,16 @@ struct CaretMetricsF {
     }
 };
 
+struct PositionWithAffinity {
+    PositionWithAffinity(size_t pos, TextAffinity affinity)
+    {
+        position_ = pos;
+        affinity_ = affinity;
+    }
+    size_t position_;
+    TextAffinity affinity_;
+};
+
 // Paragraph is interface for drawing text and text paragraph.
 class Paragraph : public virtual AceType {
     DECLARE_ACE_TYPE(NG::Paragraph, AceType)
@@ -215,6 +226,11 @@ public:
     virtual float GetAlphabeticBaseline() = 0;
     virtual float GetCharacterWidth(int32_t index) = 0;
     virtual int32_t GetGlyphIndexByCoordinate(const Offset& offset, bool isSelectionPos = false) = 0;
+    virtual PositionWithAffinity GetGlyphPositionAtCoordinate(const Offset& offset)
+    {
+        PositionWithAffinity finalResult(0, TextAffinity::UPSTREAM);
+        return finalResult;
+    }
     virtual void GetRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects) = 0;
     virtual void GetRectsForPlaceholders(std::vector<RectF>& selectedRects) = 0;
     virtual bool ComputeOffsetForCaretDownstream(
@@ -237,6 +253,7 @@ public:
 #endif
     virtual void SetParagraphId(uint32_t id) = 0;
     virtual LineMetrics GetLineMetricsByRectF(RectF& rect) = 0;
+    virtual TextLineMetrics GetLineMetrics(size_t lineNumber) = 0;
 };
 } // namespace OHOS::Ace::NG
 

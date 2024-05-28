@@ -81,6 +81,11 @@ public:
         return lineMetrics;
     }
 
+    TextLineMetrics GetLineMetrics(size_t lineNumber) override
+    {
+        return TextLineMetrics();
+    }
+
     static RefPtr<MockParagraph> GetOrCreateMockParagraph();
     static void TearDown();
 

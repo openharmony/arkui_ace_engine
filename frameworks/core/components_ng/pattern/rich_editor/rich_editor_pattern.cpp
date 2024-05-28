@@ -2906,6 +2906,12 @@ std::list<RefPtr<SpanItem>>::iterator RichEditorPattern::GetSpanIter(int32_t ind
     });
 }
 
+PositionWithAffinity RichEditorPattern::GetGlyphPositionAtCoordinate(int32_t x, int32_t y)
+{
+    Offset offset(x, y);
+    return paragraphs_.GetGlyphPositionAtCoordinate(ConvertTouchOffsetToTextOffset(offset));
+}
+
 void RichEditorPattern::InitDragDropEvent()
 {
     auto host = GetHost();
@@ -6145,6 +6151,21 @@ float RichEditorPattern::GetLineHeight() const
     auto selectedRects = paragraphs_.GetRects(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     CHECK_NULL_RETURN(selectedRects.size(), 0.0f);
     return selectedRects.front().Height();
+}
+
+size_t RichEditorPattern::GetLineCount() const
+{
+    return paragraphs_.GetLineCount();
+}
+
+TextLineMetrics RichEditorPattern::GetLineMetrics(int32_t lineNumber)
+{
+    if (lineNumber < 0 || lineNumber > GetLineCount()) {
+        TAG_LOGE(AceLogTag::ACE_RICH_TEXT,
+                "GetLineMetrics failed, lineNumber not between 0 and max lines:%{public}d", lineNumber);
+        return TextLineMetrics();
+    }
+    return paragraphs_.GetLineMetrics(lineNumber);
 }
 
 float RichEditorPattern::GetLetterSpacing() const
