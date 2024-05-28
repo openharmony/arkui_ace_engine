@@ -1757,6 +1757,43 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg057, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SideBarPatternTestNg058
+ * @tc.desc: Test SideBar InitLongPressEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg058, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto context = PipelineBase::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto sideBarTheme = context->GetTheme<SideBarTheme>();
+    ASSERT_NE(sideBarTheme, nullptr);
+    auto buttonNode = pattern->CreateControlButton(sideBarTheme);
+    ASSERT_NE(buttonNode, nullptr);
+
+    pattern->InitLongPressEvent(buttonNode);
+    EXPECT_NE(pattern->longPressEvent_, nullptr);
+    EXPECT_NE(pattern->longPressActionEnd_, nullptr);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg059
+ * @tc.desc: Test SideBar HandleLongPressActionEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg059, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->HandleLongPressActionEnd();
+    EXPECT_EQ(pattern->dialogNode_, nullptr);
+    EXPECT_FALSE(pattern->isDialogShow_);
+}
+
+/**
  * @tc.name: SideBarContainerPaintMethodNg001
  * @tc.desc: Test SideBarContainerPaintMethod ClipPadding
  * @tc.type: FUNC
