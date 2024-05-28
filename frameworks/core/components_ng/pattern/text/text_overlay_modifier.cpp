@@ -82,9 +82,7 @@ void TextOverlayModifier::SetSelectedColor(uint32_t selectedColor)
 
 void TextOverlayModifier::SetSelectedRects(const std::vector<RectF>& selectedRects)
 {
-    if (changeSelectedRects_ && IsSelectedRectsChanged(selectedRects)) {
-        changeSelectedRects_->Set(!changeSelectedRects_->Get());
-    }
+    changeSelectedRects_->Set(!changeSelectedRects_->Get());
     selectedRects_ = selectedRects;
 }
 
