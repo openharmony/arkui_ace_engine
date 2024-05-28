@@ -27,6 +27,7 @@
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_scroll_notifier.h"
 #include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
+#include "core/components_ng/pattern/scroll/scroll_event_hub.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
@@ -2764,27 +2765,34 @@ void ScrollablePattern::GetPaintPropertyDumpInfo()
     }
 }
 
-void ScrollablePattern::DumpAdvanceInfo()
+void ScrollablePattern::GetEventDumpInfo()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(hub);
-    GetEdgeEffectDumpInfo();
-    edgeEffectAlwaysEnabled_ ? DumpLog::GetInstance().AddDesc("edgeEffectAlwaysEnabled: true")
-                             : DumpLog::GetInstance().AddDesc("edgeEffectAlwaysEnabled: false");
     auto onScrollStart = hub->GetOnScrollStart();
     onScrollStart ? DumpLog::GetInstance().AddDesc("hasOnScrollStart: true")
                   : DumpLog::GetInstance().AddDesc("hasOnScrollStart: false");
     auto onScrollStop = hub->GetOnScrollStop();
     onScrollStop ? DumpLog::GetInstance().AddDesc("hasOnScrollStop: true")
                  : DumpLog::GetInstance().AddDesc("hasOnScrollStop: false");
-    auto onWillScroll = hub->GetOnWillScroll();
-    onWillScroll ? DumpLog::GetInstance().AddDesc("hasOnWillScroll: true")
-                 : DumpLog::GetInstance().AddDesc("hasOnWillScroll: false");
-    auto onDidScroll = hub->GetOnDidScroll();
-    onDidScroll ? DumpLog::GetInstance().AddDesc("hasOnDidScroll: true")
-                : DumpLog::GetInstance().AddDesc("hasOnDidScroll: false");
+    auto scrollHub = host->GetEventHub<ScrollEventHub>();
+    if (scrollHub) {
+        auto onWillScroll = scrollHub->GetOnWillScrollEvent();
+        onWillScroll ? DumpLog::GetInstance().AddDesc("hasOnWillScroll: true")
+                     : DumpLog::GetInstance().AddDesc("hasOnWillScroll: false");
+        auto onDidScroll = scrollHub->GetOnDidScrollEvent();
+        onDidScroll ? DumpLog::GetInstance().AddDesc("hasOnDidScroll: true")
+                    : DumpLog::GetInstance().AddDesc("hasOnDidScroll: false");
+    } else {
+        auto onWillScroll = hub->GetOnWillScroll();
+        onWillScroll ? DumpLog::GetInstance().AddDesc("hasOnWillScroll: true")
+                     : DumpLog::GetInstance().AddDesc("hasOnWillScroll: false");
+        auto onDidScroll = hub->GetOnDidScroll();
+        onDidScroll ? DumpLog::GetInstance().AddDesc("hasOnDidScroll: true")
+                    : DumpLog::GetInstance().AddDesc("hasOnDidScroll: false");
+    }
     auto onScrollFrameBegin = hub->GetOnScrollFrameBegin();
     onScrollFrameBegin ? DumpLog::GetInstance().AddDesc("hasOnScrollFrameBegin: true")
                        : DumpLog::GetInstance().AddDesc("hasOnScrollFrameBegin: false");
@@ -2794,8 +2802,16 @@ void ScrollablePattern::DumpAdvanceInfo()
     auto onReachEnd = hub->GetOnReachEnd();
     onReachEnd ? DumpLog::GetInstance().AddDesc("hasOnReachEnd: true")
                : DumpLog::GetInstance().AddDesc("hasOnReachEnd: false");
+}
+
+void ScrollablePattern::DumpAdvanceInfo()
+{
+    GetEdgeEffectDumpInfo();
+    edgeEffectAlwaysEnabled_ ? DumpLog::GetInstance().AddDesc("edgeEffectAlwaysEnabled: true")
+                             : DumpLog::GetInstance().AddDesc("edgeEffectAlwaysEnabled: false");
     IsScrollable() ? DumpLog::GetInstance().AddDesc("isScrollable: true")
                    : DumpLog::GetInstance().AddDesc("isScrollable: false");
+    GetEventDumpInfo();
     DumpLog::GetInstance().AddDesc(GetNestedScroll().ToString().c_str());
     GetIsSearchRefresh() ? DumpLog::GetInstance().AddDesc(std::string("isSearchRefresh: true"))
                          : DumpLog::GetInstance().AddDesc(std::string("isSearchRefresh: false"));
