@@ -6011,6 +6011,8 @@ class ViewPU extends PUV2ViewBase {
         this.watchedProps = new Map();
         this.recycleManager_ = undefined;
         this.hasBeenRecycled_ = false;
+        this.delayRecycleNodeRerender = false;
+        this.delayRecycleNodeRerenderDeep = false;
         // @Provide'd variables by this class and its ancestors
         this.providedVars_ = new Map();
         // Set of dependent elmtIds that need partial update
@@ -6332,6 +6334,16 @@ class ViewPU extends PUV2ViewBase {
         }
         
         
+    }
+
+    delayCompleteRerender(deep = false) {
+        this.delayRecycleNodeRerender = true;
+        this.delayRecycleNodeRerenderDeep = deep;
+    }
+
+    flushDelayCompleteRerender() {
+        this.forceCompleteRerender(this.delayRecycleNodeRerenderDeep);
+        this.delayRecycleNodeRerender = false;
     }
     /**
      * force a complete rerender / update on specific node by executing update function.
@@ -6718,7 +6730,11 @@ class ViewPU extends PUV2ViewBase {
                 }
             }
         }
-        this.updateDirtyElements();
+        if (!this.delayRecycleNodeRerender) {
+            this.updateDirtyElements();
+        } else {
+            this.flushDelayCompleteRerender();
+        }
         this.childrenWeakrefMap_.forEach((weakRefChild) => {
             const child = weakRefChild.deref();
             if (child) {
