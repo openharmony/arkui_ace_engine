@@ -33,7 +33,7 @@ public:
 
     ~MultiFingersRecognizer() override = default;
 
-    void UpdateFingerListInfo();
+    virtual void UpdateFingerListInfo();
 
     bool CheckTouchId(int32_t touchId) override
     {
