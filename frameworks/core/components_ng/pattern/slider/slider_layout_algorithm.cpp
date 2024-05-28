@@ -187,7 +187,6 @@ void SliderLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pattern);
     if (pattern->UseContentModifier()) {
         BoxLayoutAlgorithm::Layout(layoutWrapper);
-        host->GetGeometryNode()->Reset();
         return;
     }
     PerformLayout(layoutWrapper);
