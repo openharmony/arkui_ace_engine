@@ -287,6 +287,8 @@ public:
     void UpdateNavSafeArea(const SafeAreaInsets& navSafeArea) override;
     void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) override;
 
+    float GetPageAvoidOffset() override;
+
     void CheckAndUpdateKeyboardInset() override;
 
     void UpdateSizeChangeReason(
