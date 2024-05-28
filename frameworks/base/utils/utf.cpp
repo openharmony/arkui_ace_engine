@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +16,8 @@
 #include "utf.h"
 
 #include <limits>
-#include <tuple>
 #include <memory>
+#include <tuple>
 
 namespace OHOS::Ace {
 
@@ -39,31 +39,30 @@ namespace OHOS::Ace {
  * Convert mutf8 sequence to utf16 pair and return pair: [utf16 code point, mutf8 size].
  * In case of invalid sequence return first byte of it.
  */
-
-size_t MUtf8ToUtf16Size(const uint8_t *mutf8, size_t mutf8_len)
+size_t MUtf8ToUtf16Size(const uint8_t* mutf8, size_t mutf8Len)
 {
     size_t pos = 0;
     size_t res = 0;
-    while (pos != mutf8_len) {
-        auto [pair, nbytes] = ConvertMUtf8ToUtf16Pair(mutf8, mutf8_len - pos);
+    while (pos != mutf8Len) {
+        auto [pair, nbytes] = ConvertMUtf8ToUtf16Pair(mutf8, mutf8Len - pos);
         if (nbytes == 0) {
             nbytes = 1;
         }
         res += pair > MAX_U16 ? CONST_2 : 1;
-        mutf8 += nbytes;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        mutf8 += nbytes; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         pos += nbytes;
     }
     return res;
 }
 
-std::pair<uint32_t, size_t> ConvertMUtf8ToUtf16Pair(const uint8_t* data, size_t max_bytes)
+std::pair<uint32_t, size_t> ConvertMUtf8ToUtf16Pair(const uint8_t* data, size_t maxBytes)
 {
     uint8_t d0 = *data;
     if ((d0 & MASK1) == 0) {
         return { d0, 1 };
     }
 
-    if (max_bytes < CONST_2) {
+    if (maxBytes < CONST_2) {
         return { d0, 1 };
     }
     uint8_t d1 = *(data + 1);
@@ -71,7 +70,7 @@ std::pair<uint32_t, size_t> ConvertMUtf8ToUtf16Pair(const uint8_t* data, size_t 
         return { ((d0 & MASK_5BIT) << DATA_WIDTH) | (d1 & MASK_6BIT), 2 };
     }
 
-    if (max_bytes < CONST_3) {
+    if (maxBytes < CONST_3) {
         return { d0, 1 };
     }
     uint8_t d2 = *(data + CONST_2);
@@ -80,51 +79,51 @@ std::pair<uint32_t, size_t> ConvertMUtf8ToUtf16Pair(const uint8_t* data, size_t 
             CONST_3 };
     }
 
-    if (max_bytes < CONST_4) {
+    if (maxBytes < CONST_4) {
         return { d0, 1 };
     }
     uint8_t d3 = *(data + CONST_3);
-    uint32_t code_point = ((d0 & MASK_4BIT) << (DATA_WIDTH * CONST_3)) | ((d1 & MASK_6BIT) << (DATA_WIDTH * CONST_2)) |
-                          ((d2 & MASK_6BIT) << DATA_WIDTH) | (d3 & MASK_6BIT);
+    uint32_t codePoint = ((d0 & MASK_4BIT) << (DATA_WIDTH * CONST_3)) | ((d1 & MASK_6BIT) << (DATA_WIDTH * CONST_2)) |
+                         ((d2 & MASK_6BIT) << DATA_WIDTH) | (d3 & MASK_6BIT);
 
     uint32_t pair = 0;
-    pair |= ((code_point >> (PAIR_ELEMENT_WIDTH - DATA_WIDTH)) + U16_LEAD) & MASK_16BIT;
+    pair |= ((codePoint >> (PAIR_ELEMENT_WIDTH - DATA_WIDTH)) + U16_LEAD) & MASK_16BIT;
     pair <<= PAIR_ELEMENT_WIDTH;
-    pair |= (code_point & MASK_10BIT) + U16_TAIL;
+    pair |= (codePoint & MASK_10BIT) + U16_TAIL;
 
     return { pair, CONST_4 };
 }
 
 size_t ConvertRegionUtf8ToUtf16(
-    const uint8_t* mutf8_in, uint16_t* utf16_out, size_t mutf8_len, size_t utf16_len, size_t start)
+    const uint8_t* mutf8In, uint16_t* utf16Out, size_t mutf8Len, size_t utf16Len, size_t start)
 {
-    size_t in_pos = 0;
-    size_t out_pos = 0;
-    while (in_pos < mutf8_len) {
-        auto [pair, nbytes] = ConvertMUtf8ToUtf16Pair(mutf8_in, mutf8_len - in_pos);
+    size_t inPos = 0;
+    size_t outPos = 0;
+    while (inPos < mutf8Len) {
+        auto [pair, nbytes] = ConvertMUtf8ToUtf16Pair(mutf8In, mutf8Len - inPos);
         auto [p_hi, p_lo] = SplitUtf16Pair(pair);
 
-        mutf8_in += nbytes; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        in_pos += nbytes;
+        mutf8In += nbytes; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        inPos += nbytes;
         if (start > 0) {
             start -= nbytes;
             continue;
         }
 
         if (p_hi != 0) {
-            if (out_pos++ >= utf16_len - 1) { // check for place for two uint16
-                --out_pos;
+            if (outPos++ >= utf16Len - 1) { // check for place for two uint16
+                --outPos;
                 break;
             }
-            *utf16_out++ = p_hi; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            *utf16Out++ = p_hi; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         }
-        if (out_pos++ >= utf16_len) {
-            --out_pos;
+        if (outPos++ >= utf16Len) {
+            --outPos;
             break;
         }
-        *utf16_out++ = p_lo; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        *utf16Out++ = p_lo; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     }
-    return out_pos;
+    return outPos;
 }
 
 bool IsUTF16HighSurrogate(uint16_t ch)
@@ -137,33 +136,33 @@ bool IsUTF16LowSurrogate(uint16_t ch)
     return DECODE_TRAIL_LOW <= ch && ch <= DECODE_TRAIL_HIGH;
 }
 
-size_t UTF8Length(uint32_t codepoint)
+size_t UTF8Length(uint32_t codePoint)
 {
-    if (codepoint <= UTF8_1B_MAX) {
+    if (codePoint <= UTF8_1B_MAX) {
         return UtfLength::ONE;
     }
-    if (codepoint <= UTF8_2B_MAX) {
+    if (codePoint <= UTF8_2B_MAX) {
         return UtfLength::TWO;
     }
-    if (codepoint <= UTF8_3B_MAX) {
+    if (codePoint <= UTF8_3B_MAX) {
         return UtfLength::THREE;
     }
     return UtfLength::FOUR;
 }
 
 // Methods for encode unicode to unicode
-size_t EncodeUTF8(uint32_t codepoint, uint8_t* utf8, size_t len, size_t index)
+size_t EncodeUTF8(uint32_t codePoint, uint8_t* utf8, size_t len, size_t index)
 {
-    size_t size = UTF8Length(codepoint);
+    size_t size = UTF8Length(codePoint);
     if (index + size > len) {
         return 0;
     }
     for (size_t j = size - 1; j > 0; j--) {
-        uint8_t cont = ((codepoint | byteMark) & byteMask);
+        uint8_t cont = ((codePoint | byteMark) & byteMask);
         utf8[index + j] = cont;
-        codepoint >>= UTF8_OFFSET;
+        codePoint >>= UTF8_OFFSET;
     }
-    utf8[index] = codepoint | FIRST_BYTE_MARK[size];
+    utf8[index] = codePoint | FIRST_BYTE_MARK[size];
     return size;
 }
 
@@ -201,8 +200,8 @@ size_t DebuggerConvertRegionUtf16ToUtf8(const uint16_t* utf16In, uint8_t* utf8Ou
     size_t utf8Pos = 0;
     size_t end = start + utf16Len;
     for (size_t i = start; i < end; ++i) {
-        uint32_t codepoint = HandleAndDecodeInvalidUTF16(utf16In, end, &i);
-        if (codepoint == 0) {
+        uint32_t codePoint = HandleAndDecodeInvalidUTF16(utf16In, end, &i);
+        if (codePoint == 0) {
             if (isWriteBuffer) {
                 utf8Out[utf8Pos++] = 0x00U;
                 continue;
@@ -214,23 +213,78 @@ size_t DebuggerConvertRegionUtf16ToUtf8(const uint16_t* utf16In, uint8_t* utf8Ou
             }
             continue;
         }
-        utf8Pos += EncodeUTF8(codepoint, utf8Out, utf8Len, utf8Pos);
+        utf8Pos += EncodeUTF8(codePoint, utf8Out, utf8Len, utf8Pos);
     }
     return utf8Pos;
 }
 
+bool IsValidUTF8(const std::string& data)
+{
+    if (data.empty()) {
+        return false;
+    }
+
+    bool hasZeroByte = false;
+    bool hasMultiByteUTF8 = false;
+
+    for (size_t i = 0; i < data.size(); ++i) {
+        unsigned char c = data[i];
+
+        // Check for UTF-16LE byte order mark (BOM)
+        if (i == 0 && data.size() >= 2 && data[1] == 0 && (c == 0xFF || c == 0xFE)) {
+            return false;
+        }
+
+        // Check for zero bytes, which are common in UTF-16LE
+        if (c == 0) {
+            hasZeroByte = true;
+        }
+
+        // Check for multi-byte UTF-8 sequences
+        if ((c & 0x80) != 0) { // High bit is set, indicating a non-ASCII character
+            if ((c & 0xE0) == 0xC0 && i + 1 < data.size() && (data[i + 1] & 0xC0) == 0x80) {
+                // Two-byte UTF-8 character
+                hasMultiByteUTF8 = true;
+                i += 1; // Skip the next byte
+            } else if ((c & 0xF0) == 0xE0 && i + 2 < data.size() && (data[i + 1] & 0xC0) == 0x80 &&
+                       (data[i + 2] & 0xC0) == 0x80) {
+                // Three-byte UTF-8 character
+                hasMultiByteUTF8 = true;
+                i += 2; // Skip the next two bytes
+            } else if ((c & 0xF8) == 0xF0 && i + 3 < data.size() && (data[i + 1] & 0xC0) == 0x80 &&
+                       (data[i + 2] & 0xC0) == 0x80 && (data[i + 3] & 0xC0) == 0x80) {
+                // Four-byte UTF-8 character
+                hasMultiByteUTF8 = true;
+                i += 3; // Skip the next three bytes
+            }
+        }
+    }
+
+    if (hasZeroByte && !hasMultiByteUTF8) {
+        // If we found zero bytes and no multi-byte UTF-8 sequences, it's likely UTF-16LE
+        return false;
+    } else if (hasMultiByteUTF8) {
+        // If we found multi-byte UTF-8 sequences, it's likely UTF-8
+        return true;
+    } else {
+        // If all characters are ASCII, it's either pure ASCII or we don't have enough data to determine the encoding
+        return false;
+    }
+}
+
 void ConvertIllegalStr(std::string& str)
 {
-    uint8_t* buf8 = (uint8_t*)str.c_str();
-    size_t utf8Len = str.size();
-    auto utf16Len = MUtf8ToUtf16Size(buf8, utf8Len);
-
-    std::unique_ptr<uint16_t[]> buf16 = std::make_unique<uint16_t[]>(utf16Len);
-    auto resultLen = ConvertRegionUtf8ToUtf16(buf8, buf16.get(), utf8Len, utf16Len, 0);
-    if (resultLen != utf16Len) {
-        return;
+    if (IsValidUTF8(str)) {
+        uint8_t* buf8 = (uint8_t*)str.c_str();
+        size_t utf8Len = str.size();
+        auto utf16Len = MUtf8ToUtf16Size(buf8, utf8Len);
+        std::unique_ptr<uint16_t[]> buf16 = std::make_unique<uint16_t[]>(utf16Len);
+        auto resultLen = ConvertRegionUtf8ToUtf16(buf8, buf16.get(), utf8Len, utf16Len, 0);
+        if (resultLen != utf16Len) {
+            return;
+        }
+        DebuggerConvertRegionUtf16ToUtf8(buf16.get(), buf8, utf16Len, utf8Len, 0, false, false);
     }
-    DebuggerConvertRegionUtf16ToUtf8(buf16.get(), buf8, utf16Len, utf8Len, 0, false, false);
 }
 
 } // namespace OHOS::Ace

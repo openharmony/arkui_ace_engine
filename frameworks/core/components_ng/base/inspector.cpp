@@ -32,6 +32,7 @@
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/memory/type_info_base.h"
+#include "foundation/arkui/ace_engine/frameworks/base/utils/utf.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -365,7 +366,10 @@ void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS
             jsonNode->PutRef(INSPECTOR_CHILDREN, std::move(jsonChildrenArray));
         }
     }
-    jsonNodeArray->PutRef(std::move(jsonNode));
+    std::string jsonChildStr = jsonNode->ToString();
+    ConvertIllegalStr(jsonChildStr);
+    auto jsonChild =JsonUtil::ParseJsonString(jsonChildStr);
+    jsonNodeArray->PutRef(std::move(jsonChild));
 }
 #endif
 

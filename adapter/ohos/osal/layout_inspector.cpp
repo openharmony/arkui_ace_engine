@@ -41,7 +41,6 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "dm/display_manager.h"
 #include "foundation/ability/ability_runtime/frameworks/native/runtime/connect_server_manager.h"
-#include "foundation/arkui/ace_engine/frameworks/base/utils/utf.h"
 
 namespace OHOS::Ace {
 
@@ -234,7 +233,6 @@ void LayoutInspector::GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t 
         treeJsonStr = V2::Inspector::GetInspectorTree(pipelineContext, true);
     }
 #endif
-    ConvertIllegalStr(treeJsonStr);
     auto jsonTree = JsonUtil::ParseJsonString(treeJsonStr);
     jsonTree->Put("VsyncID", (int32_t)pipeline->GetFrameCount());
     jsonTree->Put("ProcessID", getpid());

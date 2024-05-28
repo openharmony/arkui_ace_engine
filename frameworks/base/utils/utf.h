@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -110,9 +110,9 @@ enum UtfLength : uint8_t { ONE = 1, TWO = 2, THREE = 3, FOUR = 4 };
 
 const unsigned char FIRST_BYTE_MARK[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC };
 
-std::pair<uint32_t, size_t> ConvertMUtf8ToUtf16Pair(const uint8_t* data, size_t max_bytes = 4);
+std::pair<uint32_t, size_t> ConvertMUtf8ToUtf16Pair(const uint8_t* data, size_t maxBytes = 4);
 
-size_t MUtf8ToUtf16Size(const uint8_t* mutf8, size_t mutf8_len);
+size_t MUtf8ToUtf16Size(const uint8_t* mutf8, size_t mutf8Len);
 
 size_t ConvertRegionUtf8ToUtf16(
     const uint8_t* utf8In, uint16_t* utf16Out, size_t utf8Len, size_t utf16Len, size_t start);
@@ -121,6 +121,8 @@ size_t DebuggerConvertRegionUtf16ToUtf8(const uint16_t* utf16In, uint8_t* utf8Ou
     size_t start, bool modify = true, bool isWriteBuffer = false);
 
 void ConvertIllegalStr(std::string& str);
+
+bool IsValidUTF8(const std::string& data);
 
 inline std::pair<uint16_t, uint16_t> SplitUtf16Pair(uint32_t pair)
 {
