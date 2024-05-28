@@ -52,8 +52,8 @@ bool TaskRunnerAdapterImpl::RunsTasksOnCurrentThread()
 AppExecFwk::EventQueue::Priority TaskRunnerAdapterImpl::ConvertPriority(PriorityType priorityType)
 {
     switch (priorityType) {
-        case PriorityType::VIP:
-            return AppExecFwk::EventQueue::Priority::VIP;
+        // case PriorityType::VIP:
+        //     return AppExecFwk::EventQueue::Priority::VIP;
         case PriorityType::IMMEDIATE:
             return AppExecFwk::EventQueue::Priority::IMMEDIATE;
         case PriorityType::HIGH:
