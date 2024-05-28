@@ -887,6 +887,7 @@ export struct ChipComponent {
       .padding(this.getChipNodePadding())
       .constraintSize(this.getChipConstraintWidth())
     }
+    .type(ButtonType.Normal)
     .clip(false)
     .backgroundColor(this.getChipNodeBackGroundColor())
     .borderRadius(this.getChipNodeRadius())
