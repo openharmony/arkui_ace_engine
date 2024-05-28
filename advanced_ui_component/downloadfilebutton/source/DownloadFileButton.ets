@@ -93,8 +93,8 @@ export struct DownloadFileButton {
       $r('sys.media.ohos_save_button_line') :
       $r('sys.media.ohos_save_button_filled')
     )
-    .size({ width: this.styleOptions.iconSize, height: this.styleOptions.iconSize })
-    .fillColor(this.styleOptions.iconColor)
+      .size({ width: this.styleOptions.iconSize, height: this.styleOptions.iconSize })
+      .fillColor(this.styleOptions.iconColor)
   }
 
   @Builder
@@ -104,19 +104,19 @@ export struct DownloadFileButton {
       $r('sys.string.ohos_id_text_save_button_description_download') :
       this.getTextContent(this.contentOptions.text)
     )
-    .fontSize(this.styleOptions.fontSize)
-    .fontColor(this.styleOptions.fontColor)
-    .fontStyle(this.styleOptions.fontStyle)
-    .fontWeight(this.styleOptions.fontWeight)
-    .fontFamily(this.styleOptions.fontFamily)
-    .margin({
-      top: this.styleOptions.layoutDirection === DownloadLayoutDirection.VERTICAL ?
-      this.styleOptions.textIconSpace :
-      MARGIN_DEFAULT,
-      left: this.styleOptions.layoutDirection === DownloadLayoutDirection.HORIZONTAL ?
-      this.styleOptions.textIconSpace :
-      MARGIN_DEFAULT
-    })
+      .fontSize(this.styleOptions.fontSize)
+      .fontColor(this.styleOptions.fontColor)
+      .fontStyle(this.styleOptions.fontStyle)
+      .fontWeight(this.styleOptions.fontWeight)
+      .fontFamily(this.styleOptions.fontFamily)
+      .margin({
+        top: this.styleOptions.layoutDirection === DownloadLayoutDirection.VERTICAL ?
+        this.styleOptions.textIconSpace :
+          MARGIN_DEFAULT,
+        left: this.styleOptions.layoutDirection === DownloadLayoutDirection.HORIZONTAL ?
+        this.styleOptions.textIconSpace :
+          MARGIN_DEFAULT
+      })
   }
 
   build() {
