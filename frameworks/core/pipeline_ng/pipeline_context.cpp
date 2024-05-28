@@ -1498,6 +1498,11 @@ PipelineBase::SafeAreaInsets PipelineContext::GetSafeAreaWithoutProcess() const
     return safeAreaManager_->GetSafeAreaWithoutProcess();
 }
 
+float PipelineContext::GetPageAvoidOffset()
+{
+    return safeAreaManager_->GetKeyboardOffset();
+}
+
 void PipelineContext::SyncSafeArea(bool onKeyboard)
 {
     CHECK_NULL_VOID(stageManager_);
