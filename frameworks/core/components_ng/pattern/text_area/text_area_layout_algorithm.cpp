@@ -58,7 +58,7 @@ std::optional<SizeF> TextAreaLayoutAlgorithm::MeasureContent(
 
     // Create paragraph.
     auto textFieldContentConstraint = CalculateContentMaxSizeWithCalculateConstraint(contentConstraint, layoutWrapper);
-    if (textStyle.GetAdaptTextSize()) {
+    if (IsNeedAdaptFontSize(textStyle, textFieldLayoutProperty, textFieldContentConstraint)) {
         if (!AddAdaptFontSizeAndAnimations(textStyle, textFieldLayoutProperty, textFieldContentConstraint,
             layoutWrapper)) {
             return std::nullopt;

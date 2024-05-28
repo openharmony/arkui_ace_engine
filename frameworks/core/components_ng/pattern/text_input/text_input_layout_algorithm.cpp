@@ -40,7 +40,7 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
     // Create paragraph.
     auto disableTextAlign = !pattern->IsTextArea() && !showPlaceHolder_ && !isInlineStyle;
     auto textFieldContentConstraint = CalculateContentMaxSizeWithCalculateConstraint(contentConstraint, layoutWrapper);
-    if (textStyle.GetAdaptTextSize()) {
+    if (IsNeedAdaptFontSize(textStyle, textFieldLayoutProperty, textFieldContentConstraint)) {
         if (!AddAdaptFontSizeAndAnimations(textStyle, textFieldLayoutProperty,
             BuildLayoutConstraintWithoutResponseArea(textFieldContentConstraint, layoutWrapper), layoutWrapper)) {
             return std::nullopt;
