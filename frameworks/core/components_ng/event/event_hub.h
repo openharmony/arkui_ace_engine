@@ -574,6 +574,7 @@ public:
             *ratioInfo = radios;
         } else {
             visibleAreaInnerCallback_ = callback;
+            visibleAreaInnerRatios_ = radios;
         }
     }
 
@@ -650,8 +651,8 @@ private:
     std::vector<KeyboardShortcut> keyboardShortcut_;
 
     std::vector<double> visibleAreaUserRatios_;
-    std::vector<double> visibleAreaInnerRatios_;
     VisibleCallbackInfo visibleAreaUserCallback_;
+    std::vector<double> visibleAreaInnerRatios_;
     VisibleCallbackInfo visibleAreaInnerCallback_;
     std::vector<double> throttledVisibleAreaRatios_;
     VisibleCallbackInfo throttledVisibleAreaCallback_;
