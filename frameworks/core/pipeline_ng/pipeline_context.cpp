@@ -818,30 +818,29 @@ void PipelineContext::FlushFocus()
     if (!focusNode || focusNode->GetFocusType() != FocusType::NODE) {
         dirtyFocusNode_.Reset();
     } else {
-        auto focusNodeHub = focusNode->GetFocusHub();
-        if (focusNodeHub && !focusNodeHub->RequestFocusImmediately()) {
-            TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on node: %{public}s/%{public}d return false",
-                focusNode->GetTag().c_str(), focusNode->GetId());
-        }
-        dirtyFocusNode_.Reset();
-        dirtyFocusScope_.Reset();
-        dirtyRequestFocusNode_.Reset();
+        FlushFocusWithNode(focusNode, false);
         return;
     }
     auto focusScope = dirtyFocusScope_.Upgrade();
     if (!focusScope || focusScope->GetFocusType() != FocusType::SCOPE) {
         dirtyFocusScope_.Reset();
     } else {
-        auto focusScopeHub = focusScope->GetFocusHub();
-        if (focusScopeHub && !focusScopeHub->RequestFocusImmediately()) {
-            TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on scope: %{public}s/%{public}d return false",
-                focusScope->GetTag().c_str(), focusScope->GetId());
-        }
-        dirtyFocusNode_.Reset();
-        dirtyFocusScope_.Reset();
-        dirtyRequestFocusNode_.Reset();
+        FlushFocusWithNode(focusNode, true);
         return;
     }
+}
+
+void PipelineContext::FlushFocusWithNode(RefPtr<FrameNode> focusNode, bool isScope)
+{
+    auto focusNodeHub = focusNode->GetFocusHub();
+    if (focusNodeHub && !focusNodeHub->RequestFocusImmediately()) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on %{public}s: %{public}s/%{public}d return false",  
+            isScope ? "scope" : "node", focusNode->GetTag().c_str(), focusNode->GetId());
+    }
+    dirtyFocusNode_.Reset();
+    dirtyFocusScope_.Reset();
+    dirtyRequestFocusNode_.Reset();
+    focusManager_->WindowFocusMoveEnd();
 }
 
 void PipelineContext::FlushRequestFocus()
@@ -2864,8 +2863,14 @@ void PipelineContext::WindowFocus(bool isFocus)
         NotifyPopupDismiss();
     } else {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Window id: %{public}d get focus.", windowId_);
+        if (focusManager_) {
+            focusManager_->WindowFocusMoveStart();
+            focusManager_->FocusSwitchingStart(focusManager_->GetCurrentFocus());
+        } else {
+            TAG_LOGI(AceLogTag::ACE_FOCUS, "focusManager is null.");
+        }
         isWindowHasFocused_ = true;
-        auto curFocusView = focusManager_ ? focusManager_->GetLastFocusView().Upgrade() : nullptr;
+        auto curFocusView = focusManager_->GetLastFocusView().Upgrade();
         auto curFocusViewHub = curFocusView ? curFocusView->GetFocusHub() : nullptr;
         if (!curFocusViewHub) {
             TAG_LOGW(AceLogTag::ACE_FOCUS, "Current focus view can not found!");

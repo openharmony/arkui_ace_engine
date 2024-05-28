@@ -255,7 +255,7 @@ bool FocusHub::RequestFocusImmediately(bool isJudgeRootTree)
     if (onPreFocusCallback_) {
         onPreFocusCallback_();
     }
-
+    FocusManager::FocusGuard guard(focusManager->GetCurrentFocus());
     auto parent = GetParentFocusHub();
     if (parent) {
         if (focusManager) {
@@ -297,6 +297,7 @@ void FocusHub::LostFocusToViewRoot()
     curFocusView->SetIsViewRootScopeFocused(true);
     auto focusedChild = viewRootScope->lastWeakFocusNode_.Upgrade();
     CHECK_NULL_VOID(focusedChild);
+    FocusManager::FocusGuard guard(viewRootScope);
     focusedChild->LostFocus();
 }
 
@@ -333,6 +334,7 @@ void FocusHub::RemoveSelf(BlurReason reason)
     if (parent && parent != screenFocusHub && !focusView) {
         parent->RemoveChild(AceType::Claim(this), reason);
     } else {
+        FocusManager::FocusGuard guard(parent);
         LostFocus(reason);
     }
     RemoveFocusScopeIdAndPriority();
@@ -360,6 +362,7 @@ void FocusHub::RemoveChild(const RefPtr<FocusHub>& focusNode, BlurReason reason)
                 RemoveSelf(reason);
             }
         }
+        FocusManager::FocusGuard guard(Claim(this));
         focusNode->LostFocus(reason);
     } else {
         if (itLastFocusNode != focusNodes.end() && (*itLastFocusNode) == focusNode) {
@@ -602,6 +605,8 @@ void FocusHub::RefreshFocus()
         }
         parent = parent->GetParentFocusHub();
     }
+
+    FocusManager::FocusGuard guard(parent->GetParentFocusHub());
     parent->LostFocus();
     parent->RequestFocusImmediately();
 }
@@ -974,6 +979,7 @@ void FocusHub::SwitchFocus(const RefPtr<FocusHub>& focusNode)
         focusNodeNeedBlur ? focusNodeNeedBlur->GetFrameId() : -1, focusNode->GetFrameName().c_str(),
         focusNode->GetFrameId());
     if (IsCurrentFocus()) {
+        GetFocusManager()->UpdateCurrentFocus(Claim(this));
         if (focusNodeNeedBlur && focusNodeNeedBlur != focusNode) {
             focusNodeNeedBlur->LostFocus();
         }
@@ -1217,6 +1223,10 @@ void FocusHub::OnFocusNode()
     auto focusManager = pipeline->GetOrCreateFocusManager();
     CHECK_NULL_VOID(focusManager);
     focusManager->PaintFocusState();
+    focusManager->UpdateCurrentFocus(Claim(this));
+    if (focusType_ == FocusType::NODE) {
+        focusManager->FocusSwitchingEnd();
+    }
 
     auto frameNode = GetFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -1292,6 +1302,7 @@ void FocusHub::OnFocusScope(bool currentHasFocused)
     if (focusDepend_ == FocusDependence::SELF) {
         lastWeakFocusNode_ = nullptr;
         OnFocusNode();
+        GetFocusManager()->FocusSwitchingEnd();
         return;
     }
 
@@ -1305,6 +1316,7 @@ void FocusHub::OnFocusScope(bool currentHasFocused)
     if (focusDepend_ == FocusDependence::AUTO && !isAnyChildFocusable) {
         lastWeakFocusNode_ = nullptr;
         OnFocusNode();
+        GetFocusManager()->FocusSwitchingEnd();
         return;
     }
 

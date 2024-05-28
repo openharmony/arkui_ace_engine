@@ -265,4 +265,104 @@ std::optional<std::list<WeakPtr<FocusHub>>*> FocusManager::GetFocusScopePriority
     }
     return std::nullopt;
 }
+
+void FocusManager::UpdateCurrentFocus(const RefPtr<FocusHub>& current)
+{
+    if (isSwitchingFocus_.value_or(false)) {
+        switchingFocus_ = current;
+    }
+}
+
+RefPtr<FocusHub> FocusManager::GetCurrentFocus()
+{
+    return currentFocus_.Upgrade();
+}
+
+int32_t FocusManager::AddFocusListener(FocusChangeCallback&& callback)
+{
+    // max callbacks count: INT32_MAX - 1
+    if (listeners_.size() == std::numeric_limits<int32_t>::max() - 1) {
+        return -1;
+    }
+    int32_t handler = nextListenerHdl_;
+    listeners_.emplace(handler, std::move(callback));
+
+    do {
+        nextListenerHdl_ = (nextListenerHdl_ == std::numeric_limits<int32_t>::max()) ? 0 : ++nextListenerHdl_;
+    } while (listeners_.count(nextListenerHdl_) != 0);
+    return handler;
+}
+
+void FocusManager::RemoveFocusListener(int32_t handler)
+{
+    listeners_.erase(handler);
+}
+
+RefPtr<FocusManager> FocusManager::GetFocusManager(RefPtr<FrameNode>& node)
+{
+    auto context = node->GetContextRefPtr();
+    CHECK_NULL_RETURN(context, nullptr);
+    auto focusManager = context->GetFocusManager();
+    return focusManager;
+}
+
+void FocusManager::FocusSwitchingStart(const RefPtr<FocusHub>& focusHub)
+{
+    isSwitchingFocus_ = true;
+    switchingFocus_ = focusHub;
+}
+
+void FocusManager::FocusSwitchingEnd()
+{
+    // While switching window, focus may move by steps.(WindowFocus/FlushFocus)
+    // Merge all steps together as a single movement.
+    if (!isSwitchingFocus_.value_or(false)) {
+        return;
+    }
+    if (!isSwitchingWindow_) {
+        for (auto& [_, cb] : listeners_) {
+            cb(currentFocus_, switchingFocus_);
+        }
+        currentFocus_ = switchingFocus_;
+        isSwitchingFocus_.reset();
+    } else {
+        isSwitchingFocus_ = false;
+    }
+}
+
+void FocusManager::WindowFocusMoveStart()
+{
+    isSwitchingWindow_ = true;
+}
+
+void FocusManager::WindowFocusMoveEnd()
+{
+    isSwitchingWindow_ = false;
+    if (!isSwitchingFocus_.value_or(true)) {
+        for (auto& [_, cb] : listeners_) {
+            cb(currentFocus_, switchingFocus_);
+        }
+        currentFocus_ = switchingFocus_;
+        isSwitchingFocus_.reset();
+    }
+}
+
+FocusManager::FocusGuard::FocusGuard(const RefPtr<FocusHub>& focusHub)
+{
+    CHECK_NULL_VOID(focusHub);
+    auto mng = focusHub->GetFocusManager();
+    CHECK_NULL_VOID(mng);
+    if (mng->isSwitchingFocus_.value_or(false)) {
+        return;
+    }
+    mng->FocusSwitchingStart(focusHub);
+    focusMng_ = mng;
+}
+
+FocusManager::FocusGuard::~FocusGuard()
+{
+    if (focusMng_) {
+        focusMng_->FocusSwitchingEnd();
+    }
+}
 } // namespace OHOS::Ace::NG
