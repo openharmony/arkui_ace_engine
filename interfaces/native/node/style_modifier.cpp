@@ -4676,7 +4676,7 @@ void ResetScrollFriction(ArkUI_NodeHandle node)
 
 const ArkUI_AttributeItem* GetScrollScrollSnap(ArkUI_NodeHandle node)
 {
-    ArkUI_Int32 values[32];
+    ArkUI_Float32 values[32];
     auto size = GetFullImpl()->getNodeModifiers()->getScrollModifier()->getScrollScrollSnap(node->uiNodeHandle, values);
 
     //size index
@@ -4684,7 +4684,7 @@ const ArkUI_AttributeItem* GetScrollScrollSnap(ArkUI_NodeHandle node)
     g_numberValues[NUM_1].i32 = values[NUM_1];
     g_numberValues[NUM_2].i32 = values[NUM_2];
     for (auto i = NUM_3; i < size; i++) {
-        g_numberValues[i].i32 = values[i];
+        g_numberValues[i].f32 = values[i];
     }
     g_attributeItem.size = size;
     return &g_attributeItem;
@@ -5145,7 +5145,8 @@ void ResetScrollEdge(ArkUI_NodeHandle node)
 const ArkUI_AttributeItem* GetScrollEnablePaging(ArkUI_NodeHandle node)
 {
     auto value = GetFullImpl()->getNodeModifiers()->getScrollModifier()->getScrollEnablePaging(node->uiNodeHandle);
-    g_numberValues[0].i32 = value;
+    //ScrollPagingStatus::VALID is true and VALID value is 2, others is false
+    g_numberValues[0].i32 = value == NUM_2 ? true : false;
     return &g_attributeItem;
 }
 
