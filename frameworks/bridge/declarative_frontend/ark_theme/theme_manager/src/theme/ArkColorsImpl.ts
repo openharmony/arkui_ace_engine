@@ -76,7 +76,7 @@ class ArkColorsImpl implements Colors {
         colors: CustomColors = {},
         baselineColors: Colors
     ) {
-        const customAttribute = this as any;
+        const customAttribute = this as Object;
         for(let attribute in colors) {
             customAttribute[attribute] = colors[attribute];
         }
@@ -149,45 +149,45 @@ class ArkColorsImpl implements Colors {
             fourth: undefined,
             fifth: undefined,
             sixth: undefined
-        }
+        };
         if (brandColor) {
             if (brandColor instanceof Object) {
-                result.primary = brandColor
-                result.secondary = ArkColorsImpl.makeResourceWithOpacity(brandColor as Resource, 0.6)
-                result.tertiary = ArkColorsImpl.makeResourceWithOpacity(brandColor as Resource, 0.4)
-                result.fourth = ArkColorsImpl.makeResourceWithOpacity(brandColor as Resource, 0.2)
-                result.fifth = ArkColorsImpl.makeResourceWithOpacity(brandColor as Resource, 0.1)
-                result.sixth = ArkColorsImpl.makeResourceWithOpacity(brandColor as Resource, 0.05)
+                result.primary = brandColor;
+                result.secondary = ArkColorsImpl.makeResourceWithOpacity(brandColor as Resource, 0.6);
+                result.tertiary = ArkColorsImpl.makeResourceWithOpacity(brandColor as Resource, 0.4);
+                result.fourth = ArkColorsImpl.makeResourceWithOpacity(brandColor as Resource, 0.2);
+                result.fifth = ArkColorsImpl.makeResourceWithOpacity(brandColor as Resource, 0.1);
+                result.sixth = ArkColorsImpl.makeResourceWithOpacity(brandColor as Resource, 0.05);
             } else {
-                const argbColor = getUINativeModule().resource.getColorValue(brandColor)
-                result.primary = argbColor
-                result.secondary = ArkColorsImpl.blendOpacity(argbColor, 0.6)
-                result.tertiary = ArkColorsImpl.blendOpacity(argbColor, 0.4)
-                result.fourth = ArkColorsImpl.blendOpacity(argbColor, 0.2)
-                result.fifth = ArkColorsImpl.blendOpacity(argbColor, 0.1)
-                result.sixth = ArkColorsImpl.blendOpacity(argbColor, 0.05)
+                const argbColor = getUINativeModule().resource.getColorValue(brandColor);
+                result.primary = argbColor;
+                result.secondary = ArkColorsImpl.blendOpacity(argbColor, 0.6);
+                result.tertiary = ArkColorsImpl.blendOpacity(argbColor, 0.4);
+                result.fourth = ArkColorsImpl.blendOpacity(argbColor, 0.2);
+                result.fifth = ArkColorsImpl.blendOpacity(argbColor, 0.1);
+                result.sixth = ArkColorsImpl.blendOpacity(argbColor, 0.05);
             }
         }
-        return result
+        return result;
     }
 
     static makeResourceWithOpacity(resourceColor: Resource, opacityRatio: number) : any {
         return {
-            "id": resourceColor.id,
-            "type": resourceColor.type,
-            "params": [...resourceColor.params],
-            "bundleName": resourceColor.bundleName,
-            "moduleName": resourceColor.moduleName,
-            "opacityRatio": opacityRatio
+            'id': resourceColor.id,
+            'type': resourceColor.type,
+            'params': [...resourceColor.params],
+            'bundleName': resourceColor.bundleName,
+            'moduleName': resourceColor.moduleName,
+            'opacityRatio': opacityRatio
         };
     }
 
     static blendOpacity(argbColor: number, opacityRatio: number): number {
         if (opacityRatio < 0 || opacityRatio > 1.0) {
-            return argbColor
+            return argbColor;
         }
-        const alpha = (argbColor >> 24) & 0xFF
-        const outAlpha = (alpha * opacityRatio) & 0xFF
-        return ((argbColor & 0x00FFFFFF) | (outAlpha & 0xFF) << 24) >>> 0
+        const alpha = (argbColor >> 24) & 0xFF;
+        const outAlpha = (alpha * opacityRatio) & 0xFF;
+        return ((argbColor & 0x00FFFFFF) | (outAlpha & 0xFF) << 24) >>> 0;
     }
 }
