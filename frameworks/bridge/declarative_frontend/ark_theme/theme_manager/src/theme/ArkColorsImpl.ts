@@ -152,12 +152,12 @@ class ArkColorsImpl implements Colors {
         };
         if (brandColor) {
             if (brandColor instanceof Object) {
-                result.primary = brandColor;
-                result.secondary = ArkColorsImpl.makeResourceWithOpacity(brandColor as Resource, 0.6);
-                result.tertiary = ArkColorsImpl.makeResourceWithOpacity(brandColor as Resource, 0.4);
-                result.fourth = ArkColorsImpl.makeResourceWithOpacity(brandColor as Resource, 0.2);
-                result.fifth = ArkColorsImpl.makeResourceWithOpacity(brandColor as Resource, 0.1);
-                result.sixth = ArkColorsImpl.makeResourceWithOpacity(brandColor as Resource, 0.05);
+                result.primary = brandColor as Resource;
+                result.secondary = ArkColorsImpl.makeResourceWithOpacity(brandColor as Resource, 0.6) as Resource;
+                result.tertiary = ArkColorsImpl.makeResourceWithOpacity(brandColor as Resource, 0.4) as Resource;
+                result.fourth = ArkColorsImpl.makeResourceWithOpacity(brandColor as Resource, 0.2) as Resource;
+                result.fifth = ArkColorsImpl.makeResourceWithOpacity(brandColor as Resource, 0.1) as Resource;
+                result.sixth = ArkColorsImpl.makeResourceWithOpacity(brandColor as Resource, 0.05) as Resource;
             } else {
                 const argbColor = getUINativeModule().resource.getColorValue(brandColor);
                 result.primary = argbColor;
@@ -171,7 +171,7 @@ class ArkColorsImpl implements Colors {
         return result;
     }
 
-    static makeResourceWithOpacity(resourceColor: Resource, opacityRatio: number) : any {
+    static makeResourceWithOpacity(resourceColor: Resource, opacityRatio: number) : Object {
         return {
             'id': resourceColor.id,
             'type': resourceColor.type,
