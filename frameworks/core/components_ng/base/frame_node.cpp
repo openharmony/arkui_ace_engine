@@ -595,6 +595,16 @@ void FrameNode::DumpSafeAreaInfo()
                                     .append(std::to_string(manager->IsFullScreen())));
 }
 
+void FrameNode::DumpAlignRulesInfo()
+{
+    auto& flexItemProperties = layoutProperty_->GetFlexItemProperty();
+    CHECK_NULL_VOID(flexItemProperties);
+    auto rulesToString = flexItemProperties->AlignRulesToString();
+    CHECK_NULL_VOID(!rulesToString.empty());
+    DumpLog::GetInstance().AddDesc(std::string("AlignRules: ")
+                                    .append(rulesToString));
+}
+
 void FrameNode::DumpExtensionHandlerInfo()
 {
     if (!extensionHandler_) {
@@ -667,6 +677,7 @@ void FrameNode::DumpCommonInfo()
                 .append(layoutProperty_->GetContentLayoutConstraint().has_value() ?
                             layoutProperty_->GetContentLayoutConstraint().value().ToString() : "NA"));
     }
+    DumpAlignRulesInfo();
     DumpDragInfo();
     DumpOverlayInfo();
     if (frameProxy_->Dump().compare("totalCount is 0") != 0) {
