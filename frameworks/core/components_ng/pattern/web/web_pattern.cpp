@@ -48,6 +48,7 @@
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/pattern/web/touch_event_listener.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
@@ -59,7 +60,6 @@
 #include "core/common/ace_engine_ext.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/common/udmf/unified_data.h"
-#include "core/components_ng/pattern/web/touch_event_listener.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1564,7 +1564,7 @@ void WebPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
 
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
- 
+
     auto rect = renderContext->GetPaintRectWithoutTransform();
     auto size = Size(rect.Width(), rect.Height());
     if (renderContextForSurface_) {
@@ -4358,7 +4358,7 @@ void WebPattern::UpdateFocusedAccessibilityId(int64_t accessibilityId)
         renderContext->UpdateAccessibilityFocus(false);
         return;
     }
-    
+
     renderContext->UpdateAccessibilityFocusRect(rect);
     renderContext->UpdateAccessibilityFocus(true);
 }
