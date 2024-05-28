@@ -285,7 +285,7 @@ void NavigationPattern::UpdateNavPathList()
             /**
              * If we call the function pushPath/pushDestination with singleton mode(
              * LaunchMode == MOVE_TO_TOP_SINGLETON/POP_TO_SINGLETON), and the top NavDestination of stack
-             * is the NavDestination which we need to push(NavDestination's name == NavPathInfo's name), 
+             * is the NavDestination which we need to push(NavDestination's name == NavPathInfo's name),
              * then wee need to update the NavDestination's parameters.
              */
             navigationStack_->UpdatePathInfoIfNeeded(uiNode, static_cast<int32_t>(i));
@@ -1467,8 +1467,6 @@ NavigationTransition NavigationPattern::ExecuteTransition(const RefPtr<NavDestin
     auto replaceValue = navigationStack_->GetReplaceValue();
     if (replaceValue != 0) {
         operation = NavigationOperation::REPLACE;
-        // recover replace tag
-        navigationStack_->UpdateReplaceValue(0);
     } else if (!preTopDestination) {
         preInfo.index = -1;
         operation = NavigationOperation::PUSH;
