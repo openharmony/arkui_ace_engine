@@ -131,12 +131,12 @@ struct ContentItemStruct {
   @State primaryTextColor: ResourceColor = $r('sys.color.font_primary');
   @State secondaryTextColor: ResourceColor = $r('sys.color.font_secondary');
   @State descriptionColor: ResourceColor = $r('sys.color.font_tertiary');
-  @State iconImageModifier: ImageModifier | null = null;
-  @State primaryTextModifier: TextModifier | null = null;
-  @State secondaryTextModifier: TextModifier | null = null;
-  @State descriptionTextModifier: TextModifier | null = null;
-  @State contentItemPadding: LocalizedPadding | null = {start: LengthMetrics.vp(12)};
-  @State itemSpace: number = DEFAULT_ITEM_SPACE_WIDTH;
+  @Prop iconImageModifier: ImageModifier | null = null;
+  @Prop primaryTextModifier: TextModifier | null = null;
+  @Prop secondaryTextModifier: TextModifier | null = null;
+  @Prop descriptionTextModifier: TextModifier | null = null;
+  @Prop contentItemPadding: LocalizedPadding | null = null;
+  @Prop itemSpace: number = DEFAULT_ITEM_SPACE_WIDTH;
 
   onWillApplyTheme(theme: Theme): void {
     this.primaryTextColor = theme.colors.fontPrimary;
@@ -162,7 +162,7 @@ struct ContentItemStruct {
           .focusable(true)
           .draggable(false)
           .fillColor($r('sys.color.icon_primary'))
-          .attributeModifier(this.iconImageModifier)
+          .attributeModifier(this.iconImageModifier);
       } else {
         Image(this.icon)
           .objectFit(ImageFit.Contain)
@@ -176,7 +176,7 @@ struct ContentItemStruct {
           .focusable(true)
           .draggable(false)
           .fillColor($r('sys.color.icon_primary'))
-          .attributeModifier(this.iconImageModifier)
+          .attributeModifier(this.iconImageModifier);
       }
     }
   }
@@ -190,14 +190,14 @@ struct ContentItemStruct {
         .fontWeight(FontWeight.Medium)
         .focusable(true)
         .draggable(false)
-        .attributeModifier(this.primaryTextModifier)
+        .attributeModifier(this.primaryTextModifier);
       if (this.secondaryText != null) {
         Text(this.secondaryText)
           .fontSize($r('sys.float.ohos_id_text_size_body2'))
           .fontColor(this.secondaryTextColor)
           .focusable(true)
           .draggable(false)
-          .attributeModifier(this.secondaryTextModifier)
+          .attributeModifier(this.secondaryTextModifier);
       }
       if (this.description != null) {
         Text(this.description)
@@ -205,7 +205,7 @@ struct ContentItemStruct {
           .fontColor(this.descriptionColor)
           .focusable(true)
           .draggable(false)
-          .attributeModifier(this.descriptionTextModifier)
+          .attributeModifier(this.descriptionTextModifier);
       }
     }
     .flexShrink(1)
@@ -639,7 +639,7 @@ struct OperateItemStruct {
     }
     .flexShrink(1)
     .justifyContent(FlexAlign.End)
-    .constraintSize({ minWidth: this.rightWidth })
+    .constraintSize({ minWidth: this.rightWidth });
   }
 }
 
@@ -647,8 +647,8 @@ struct OperateItemStruct {
 export struct ComposeListItem {
   @Prop contentItem: ContentItem | null = null;
   @Prop operateItem: OperateItem | null = null;
-  @State itemSpace: number = DEFAULT_ITEM_SPACE_WIDTH;
-  @State composeItemPadding: LocalizedPadding | null = null;
+  @Prop itemSpace: number = DEFAULT_ITEM_SPACE_WIDTH;
+  @Prop composeItemPadding: LocalizedPadding | null = null;
   @State frontColor: ResourceColor = Color.Transparent.toString();
   @State borderSize: number = 0;
   @State canFocus: boolean = false
@@ -705,15 +705,15 @@ export struct ComposeListItem {
   calculatedLeftWidth(): string {
     let leftPaddingWidth = this.composeItemPadding?.start?.value ?? STACK_PADDING;
     if (this.operateItem === null || JSON.stringify(this.operateItem) === '{}') {
-      return `calc(100% - ${leftPaddingWidth}vp)`
-    } else if (this.operateItem != null && this.operateItem.button == null && this.operateItem.text == null) {
-      if (this.operateItem.subIcon != null) {
-        return `calc(100% - ${leftPaddingWidth}vp - 40vp - 26vp)`
+      return `calc(100% - ${leftPaddingWidth}vp)`;
+    } else if (this.operateItem !== null && this.operateItem.button === null && this.operateItem.text === null) {
+      if (this.operateItem.subIcon !== null) {
+        return `calc(100% - ${leftPaddingWidth}vp - 40vp - 26vp)`;
       } else {
-        return `calc(100% - ${leftPaddingWidth}vp - 40vp)`
+        return `calc(100% - ${leftPaddingWidth}vp - 40vp)`;
       }
     } else {
-      return `calc(66% - ${leftPaddingWidth}vp)`
+      return `calc(66% - ${leftPaddingWidth}vp)`;
     }
   }
 
@@ -721,33 +721,33 @@ export struct ComposeListItem {
     let rightPaddingWidth =
       this.composeItemPadding?.end !== undefined ? this.composeItemPadding?.end?.value : STACK_PADDING
     if (this.operateItem === null || JSON.stringify(this.operateItem) === '{}') {
-      return RIGHT_CONTENT_NULL_RIGHTWIDTH
-    } else if (this.operateItem != null && this.operateItem.text == null) {
-      if (this.operateItem.subIcon != null) {
-        return `calc(${RIGHT_ONLY_ARROW_WIDTH} + ${RIGHT_ONLY_ARROW_WIDTH} + ${rightPaddingWidth}vp)`
+      return RIGHT_CONTENT_NULL_RIGHTWIDTH;
+    } else if (this.operateItem !== null && this.operateItem.text === null) {
+      if (this.operateItem.subIcon !== null) {
+        return `calc(${RIGHT_ONLY_ARROW_WIDTH} + ${RIGHT_ONLY_ARROW_WIDTH} + ${rightPaddingWidth}vp)`;
       } else {
-        return `calc(${RIGHT_ONLY_ARROW_WIDTH} + ${rightPaddingWidth}vp)`
+        return `calc(${RIGHT_ONLY_ARROW_WIDTH} + ${rightPaddingWidth}vp)`;
       }
     } else {
-      return RIGHT_PART_WIDTH
+      return RIGHT_PART_WIDTH;
     }
   }
 
   getComposeItemLeftPadding(): LengthMetrics{
     return this.composeItemPadding?.start !== undefined ?
-      this.composeItemPadding?.start : LengthMetrics.vp(STACK_PADDING)
+      this.composeItemPadding?.start : LengthMetrics.vp(STACK_PADDING);
   }
 
   getComposeItemRightPadding(): LengthMetrics{
     return this.composeItemPadding?.end !== undefined ?
-      this.composeItemPadding?.end : LengthMetrics.vp(STACK_PADDING)
+      this.composeItemPadding?.end : LengthMetrics.vp(STACK_PADDING);
   }
 
   build() {
     Stack() {
-      Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center}) {
+      Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center }) {
         if (this.contentItem === null) {
-          ContentItemStruct({})
+          ContentItemStruct({});
         }
         if (this.contentItem !== null) {
           ContentItemStruct({
@@ -762,8 +762,8 @@ export struct ComposeListItem {
             descriptionTextModifier: this.contentItem.descriptionTextModifier,
             leftWidth: this.calculatedLeftWidth(),
             contentItemPadding: this.composeItemPadding,
-			itemSpace: this.itemSpace
-          })
+            itemSpace: this.itemSpace
+          });
         }
         if (this.operateItem !== null) {
           OperateItemStruct({
@@ -786,14 +786,14 @@ export struct ComposeListItem {
             isParentCanTouch: this.isCanTouch
           })
             .onFocus(() => {
-              this.canFocus = false
+              this.canFocus = false;
             })
             .onBlur(() => {
-              this.canFocus = true
-            })
+              this.canFocus = true;
+            });
         }
       }
-      .constraintSize({ minHeight: this.itemHeight})
+      .constraintSize({ minHeight: this.itemHeight })
       .focusable(true)
       .borderRadius($r('sys.float.corner_radius_level8'))
       .backgroundColor(this.frontColor)
@@ -841,6 +841,6 @@ export struct ComposeListItem {
     .padding({
       start: this.getComposeItemLeftPadding(),
       end: this.getComposeItemRightPadding()
-    })
+    });
   }
 }

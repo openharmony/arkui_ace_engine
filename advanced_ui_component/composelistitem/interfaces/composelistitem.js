@@ -96,12 +96,12 @@ class ContentItemStruct extends ViewPU {
         this.__primaryTextColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "primaryTextColor");
         this.__secondaryTextColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.font_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "secondaryTextColor");
         this.__descriptionColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.font_tertiary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "descriptionColor");
-        this.__iconImageModifier = new ObservedPropertyObjectPU(null, this, "iconImageModifier");
-        this.__primaryTextModifier = new ObservedPropertyObjectPU(null, this, "primaryTextModifier");
-        this.__secondaryTextModifier = new ObservedPropertyObjectPU(null, this, "secondaryTextModifier");
-        this.__descriptionTextModifier = new ObservedPropertyObjectPU(null, this, "descriptionTextModifier");
-        this.__contentItemPadding = new ObservedPropertyObjectPU({ start: LengthMetrics.vp(12) }, this, "contentItemPadding");
-        this.__itemSpace = new ObservedPropertySimplePU(DEFAULT_ITEM_SPACE_WIDTH, this, "itemSpace");
+        this.__iconImageModifier = new SynchedPropertyObjectOneWayPU(n11.iconImageModifier, this, "iconImageModifier");
+        this.__primaryTextModifier = new SynchedPropertyObjectOneWayPU(n11.primaryTextModifier, this, "primaryTextModifier");
+        this.__secondaryTextModifier = new SynchedPropertyObjectOneWayPU(n11.secondaryTextModifier, this, "secondaryTextModifier");
+        this.__descriptionTextModifier = new SynchedPropertyObjectOneWayPU(n11.descriptionTextModifier, this, "descriptionTextModifier");
+        this.__contentItemPadding = new SynchedPropertyObjectOneWayPU(n11.contentItemPadding, this, "contentItemPadding");
+        this.__itemSpace = new SynchedPropertySimpleOneWayPU(n11.itemSpace, this, "itemSpace");
         this.setInitiallyProvidedValue(n11);
         this.finalizeConstruction();
     }
@@ -136,26 +136,32 @@ class ContentItemStruct extends ViewPU {
         if (l11.descriptionColor !== undefined) {
             this.descriptionColor = l11.descriptionColor;
         }
-        if (l11.iconImageModifier !== undefined) {
-            this.iconImageModifier = l11.iconImageModifier;
+        if (l11.iconImageModifier === undefined) {
+            this.__iconImageModifier.set(null);
         }
-        if (l11.primaryTextModifier !== undefined) {
-            this.primaryTextModifier = l11.primaryTextModifier;
+        if (l11.primaryTextModifier === undefined) {
+            this.__primaryTextModifier.set(null);
         }
-        if (l11.secondaryTextModifier !== undefined) {
-            this.secondaryTextModifier = l11.secondaryTextModifier;
+        if (l11.secondaryTextModifier === undefined) {
+            this.__secondaryTextModifier.set(null);
         }
-        if (l11.descriptionTextModifier !== undefined) {
-            this.descriptionTextModifier = l11.descriptionTextModifier;
+        if (l11.descriptionTextModifier === undefined) {
+            this.__descriptionTextModifier.set(null);
         }
-        if (l11.contentItemPadding !== undefined) {
-            this.contentItemPadding = l11.contentItemPadding;
+        if (l11.contentItemPadding === undefined) {
+            this.__contentItemPadding.set(null);
         }
-        if (l11.itemSpace !== undefined) {
-            this.itemSpace = l11.itemSpace;
+        if (l11.itemSpace === undefined) {
+            this.__itemSpace.set(DEFAULT_ITEM_SPACE_WIDTH);
         }
     }
     updateStateVars(k11) {
+        this.__iconImageModifier.reset(k11.iconImageModifier);
+        this.__primaryTextModifier.reset(k11.primaryTextModifier);
+        this.__secondaryTextModifier.reset(k11.secondaryTextModifier);
+        this.__descriptionTextModifier.reset(k11.descriptionTextModifier);
+        this.__contentItemPadding.reset(k11.contentItemPadding);
+        this.__itemSpace.reset(k11.itemSpace);
     }
     purgeVariableDependenciesOnElmtId(j11) {
         this.__leftWidth.purgeDependencyOnElmtId(j11);
@@ -1057,8 +1063,8 @@ export class ComposeListItem extends ViewPU {
         }
         this.__contentItem = new SynchedPropertyObjectOneWayPU(z2.contentItem, this, "contentItem");
         this.__operateItem = new SynchedPropertyObjectOneWayPU(z2.operateItem, this, "operateItem");
-        this.__itemSpace = new ObservedPropertySimplePU(DEFAULT_ITEM_SPACE_WIDTH, this, "itemSpace");
-        this.__composeItemPadding = new ObservedPropertyObjectPU(null, this, "composeItemPadding");
+        this.__itemSpace = new SynchedPropertySimpleOneWayPU(z2.itemSpace, this, "itemSpace");
+        this.__composeItemPadding = new SynchedPropertyObjectOneWayPU(z2.composeItemPadding, this, "composeItemPadding");
         this.__frontColor = new ObservedPropertyObjectPU(Color.Transparent.toString(), this, "frontColor");
         this.__borderSize = new ObservedPropertySimplePU(0, this, "borderSize");
         this.__canFocus = new ObservedPropertySimplePU(false, this, "canFocus");
@@ -1082,11 +1088,11 @@ export class ComposeListItem extends ViewPU {
         if (x2.operateItem === undefined) {
             this.__operateItem.set(null);
         }
-        if (x2.itemSpace !== undefined) {
-            this.itemSpace = x2.itemSpace;
+        if (x2.itemSpace === undefined) {
+            this.__itemSpace.set(DEFAULT_ITEM_SPACE_WIDTH);
         }
-        if (x2.composeItemPadding !== undefined) {
-            this.composeItemPadding = x2.composeItemPadding;
+        if (x2.composeItemPadding === undefined) {
+            this.__composeItemPadding.set(null);
         }
         if (x2.frontColor !== undefined) {
             this.frontColor = x2.frontColor;
@@ -1131,6 +1137,8 @@ export class ComposeListItem extends ViewPU {
     updateStateVars(w2) {
         this.__contentItem.reset(w2.contentItem);
         this.__operateItem.reset(w2.operateItem);
+        this.__itemSpace.reset(w2.itemSpace);
+        this.__composeItemPadding.reset(w2.composeItemPadding);
     }
     purgeVariableDependenciesOnElmtId(v2) {
         this.__contentItem.purgeDependencyOnElmtId(v2);
@@ -1318,8 +1326,8 @@ export class ComposeListItem extends ViewPU {
         if (this.operateItem === null || JSON.stringify(this.operateItem) === '{}') {
             return `calc(100% - ${c2}vp)`;
         }
-        else if (this.operateItem != null && this.operateItem.button == null && this.operateItem.text == null) {
-            if (this.operateItem.subIcon != null) {
+        else if (this.operateItem !== null && this.operateItem.button === null && this.operateItem.text === null) {
+            if (this.operateItem.subIcon !== null) {
                 return `calc(100% - ${c2}vp - 40vp - 26vp)`;
             }
             else {
@@ -1335,8 +1343,8 @@ export class ComposeListItem extends ViewPU {
         if (this.operateItem === null || JSON.stringify(this.operateItem) === '{}') {
             return RIGHT_CONTENT_NULL_RIGHTWIDTH;
         }
-        else if (this.operateItem != null && this.operateItem.text == null) {
-            if (this.operateItem.subIcon != null) {
+        else if (this.operateItem !== null && this.operateItem.text === null) {
+            if (this.operateItem.subIcon !== null) {
                 return `calc(${RIGHT_ONLY_ARROW_WIDTH} + ${RIGHT_ONLY_ARROW_WIDTH} + ${b2}vp)`;
             }
             else {
@@ -1475,7 +1483,14 @@ export class ComposeListItem extends ViewPU {
                                 c1.paramsGenerator_ = d1;
                             }
                             else {
-                                this.updateStateVarsOfChildByElmtId(a1, {});
+                                this.updateStateVarsOfChildByElmtId(a1, {
+                                    iconImageModifier: this.contentItem.iconImageModifier,
+                                    primaryTextModifier: this.contentItem.primaryTextModifier,
+                                    secondaryTextModifier: this.contentItem.secondaryTextModifier,
+                                    descriptionTextModifier: this.contentItem.descriptionTextModifier,
+                                    contentItemPadding: this.composeItemPadding,
+                                    itemSpace: this.itemSpace
+                                });
                             }
                         }, { name: "ContentItemStruct" });
                     }
