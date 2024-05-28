@@ -3890,7 +3890,7 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         if (extraInfo) {
             this.extraInfo_ = extraInfo;
         }
-        if (parent && parent instanceof PUV2ViewBase) {
+        if (parent) {
             // this View is not a top-level View
             this.setCardId(parent.getCardId());
             // Call below will set this parent_ to parent as well
