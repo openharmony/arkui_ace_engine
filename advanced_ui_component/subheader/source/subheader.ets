@@ -219,20 +219,20 @@ export struct SubHeader {
     children.forEach((child) => {
       if (!this.contentMargin) {
         let width: number = Number(constraint.maxWidth);
-        if (width < Util.DEFAULT_BREAKPOINT_S) {
+        if (width < Util.BREAKPOINT_S) {
           this.subHeaderMargin = {
-            start: LengthMetrics.vp(Util.DEFAULT_LEVEL8),
-            end: LengthMetrics.vp(Util.DEFAULT_LEVEL8)
+            start: LengthMetrics.resource($r('sys.float.padding_level8')),
+            end: LengthMetrics.resource($r('sys.float.padding_level8'))
           }
-        } else if (width < Util.DEFAULT_BREAKPOINT_M) {
+        } else if (width < Util.BREAKPOINT_M) {
           this.subHeaderMargin = {
-            start: LengthMetrics.vp(Util.DEFAULT_LEVEL12),
-            end: LengthMetrics.vp(Util.DEFAULT_LEVEL12)
+            start: LengthMetrics.resource($r('sys.float.padding_level12')),
+            end: LengthMetrics.resource($r('sys.float.padding_level12'))
           }
         } else {
           this.subHeaderMargin = {
-            start: LengthMetrics.vp(Util.DEFAULT_LEVEL16),
-            end: LengthMetrics.vp(Util.DEFAULT_LEVEL16)
+            start: LengthMetrics.resource($r('sys.float.padding_level16')),
+            end: LengthMetrics.resource($r('sys.float.padding_level16')),
           }
         }
       }
@@ -268,9 +268,9 @@ export struct SubHeader {
 
   private getTextArrowPaddingLeft(): LengthMetrics {
     if (this.operationItem && this.operationItem.length > 0 && this.operationItem[0].value) {
-      return LengthMetrics.vp(Util.DEFAULT_LEVEL1);
+      return LengthMetrics.resource($r('sys.float.padding_level1'));
     }
-    return LengthMetrics.vp(Util.DEFAULT_VALUE);
+    return LengthMetrics.resource($r('sys.float.padding_level0'));
   }
 
   private getTextArrowMarginRight(): LengthMetrics {
@@ -288,8 +288,8 @@ export struct SubHeader {
     if (!this.titleBuilder && ((this.secondaryTitle && this.icon) ||
       (!this.primaryTitle && this.secondaryTitle))) {
       padding = {
-        start: LengthMetrics.vp(Util.DEFAULT_LEVEL6),
-        end: LengthMetrics.vp(Util.DEFAULT_LEVEL6),
+        start: LengthMetrics.resource($r('sys.float.padding_level6')),
+        end: LengthMetrics.resource($r('sys.float.padding_level6'))
       }
     }
     return padding;
@@ -546,7 +546,7 @@ export struct SubHeader {
       .focusable(true)
     }
     .margin({
-      start: LengthMetrics.vp(Util.DEFAULT_LEVEL4),
+      start: LengthMetrics.resource($r('sys.float.padding_level4'))
     })
     .justifyContent(FlexAlign.End)
   }
@@ -566,8 +566,6 @@ export struct SubHeader {
               })
               .margin({
                 end: this.getTextArrowMarginRight(),
-                top: LengthMetrics.resource($r('sys.float.padding_level4')),
-                bottom: LengthMetrics.resource($r('sys.float.padding_level4')),
               })
           }
         }
@@ -583,7 +581,10 @@ export struct SubHeader {
           this.textArrowFocus = false;
         })
         .padding({
-          start: this.getTextArrowPaddingLeft()
+          start: this.getTextArrowPaddingLeft(),
+          top: LengthMetrics.resource($r('sys.float.padding_level2')),
+          bottom: LengthMetrics.resource($r('sys.float.padding_level2')),
+
         })
         .onAreaChange((oldValue: Area, newValue: Area) => {
           this.textArrowStyleWidth = Number(newValue.width);
@@ -651,7 +652,8 @@ export struct SubHeader {
     .focusable(true)
     .justifyContent(FlexAlign.End)
     .margin({
-      start: LengthMetrics.vp(Util.DEFAULT_LEVEL4),
+      start: LengthMetrics.resource($r('sys.float.padding_level4')),
+      bottom: LengthMetrics.resource($r('sys.float.padding_level2')),
     })
   }
 
@@ -683,7 +685,7 @@ export struct SubHeader {
               }
             })
               .margin({
-                start: LengthMetrics.vp(Util.DEFAULT_LEVEL4)
+                start: LengthMetrics.resource($r('sys.float.padding_level4'))
               })
           } else {
             // 最大支持3个ICON,此场景不支持
@@ -694,7 +696,7 @@ export struct SubHeader {
     .justifyContent(FlexAlign.End)
     .focusable(true)
     .margin({
-      start: LengthMetrics.vp(Util.DEFAULT_LEVEL4)
+      start: LengthMetrics.resource($r('sys.float.padding_level4'))
     })
   }
 
@@ -712,7 +714,7 @@ export struct SubHeader {
       bottom: $r('sys.float.padding_level2'),
     })
     .margin({
-      start: LengthMetrics.vp(Util.DEFAULT_LEVEL4),
+      start: LengthMetrics.resource($r('sys.float.padding_level4'))
     })
   }
 
@@ -823,15 +825,15 @@ struct SingleIconStyle {
 }
 
 class Util {
-  public static readonly DEFAULT_VALUE: number = 0;
-  public static readonly DEFAULT_LEVEL1: number = this.getNumberByResource('padding_level1');
-  public static readonly DEFAULT_LEVEL4: number = this.getNumberByResource('padding_level4');
-  public static readonly DEFAULT_LEVEL6: number = this.getNumberByResource('padding_level6');
-  public static readonly DEFAULT_LEVEL8: number = this.getNumberByResource('padding_level8');
-  public static readonly DEFAULT_LEVEL12: number = this.getNumberByResource('padding_level12');
-  public static readonly DEFAULT_LEVEL16: number = this.getNumberByResource('padding_level16');
-  public static readonly DEFAULT_BREAKPOINT_S: number = this.getNumberByResource('breakpoint_horizontal_s');
-  public static readonly DEFAULT_BREAKPOINT_M: number = this.getNumberByResource('breakpoint_horizontal_m');
+  private static readonly DEFAULT_VALUE: number = 0;
+  private static readonly DEFAULT_BREAKPOINT_S: number = 600;
+  private static readonly DEFAULT_BREAKPOINT_M: number = 840;
+  private static readonly CALCULATE_BREAKPOINT_S: number = this.getNumberByResource('breakpoint_horizontal_s');
+  private static readonly CALCULATE_BREAKPOINT_M: number = this.getNumberByResource('breakpoint_horizontal_m');
+  public static readonly BREAKPOINT_S: number =
+    this.CALCULATE_BREAKPOINT_S === this.DEFAULT_VALUE ? this.DEFAULT_BREAKPOINT_S : this.CALCULATE_BREAKPOINT_S;
+  public static readonly BREAKPOINT_M: number =
+    this.CALCULATE_BREAKPOINT_M === this.DEFAULT_VALUE ? this.DEFAULT_BREAKPOINT_M : this.CALCULATE_BREAKPOINT_M;
 
   /**
    * 是否symbol资源
