@@ -52,6 +52,7 @@ TextFieldOverlayModifier::TextFieldOverlayModifier(
     showPreviewText_ = AceType::MakeRefPtr<PropertyBool>(false);
     changePreviewTextRects_ = AceType::MakeRefPtr<PropertyBool>(false);
     previewTextDecorationColor_ = AceType::MakeRefPtr<PropertyColor>(Color());
+    previewTextStyle_ = PreviewTextStyle::NORMAL;
 
     AttachProperty(cursorColor_);
     AttachProperty(cursorWidth_);
@@ -270,7 +271,7 @@ void TextFieldOverlayModifier::PaintScrollBar(DrawingContext& context)
 
 void TextFieldOverlayModifier::PaintPreviewTextDecoration(DrawingContext& context) const
 {
-    if (previewTextStyle != PreviewTextStyle::UNDERLINE ||
+    if (previewTextStyle_ != PreviewTextStyle::UNDERLINE ||
         (!showPreviewText_->Get() && !needPaintPreviewText)) {
         return;
     }
@@ -417,6 +418,6 @@ void TextFieldOverlayModifier::SetPreviewTextDecorationColor(const Color& value)
 }
 void TextFieldOverlayModifier::SetPreviewTextStyle(PreviewTextStyle style)
 {
-    previewTextStyle = style;
+    previewTextStyle_ = style;
 }
 } // namespace OHOS::Ace::NG

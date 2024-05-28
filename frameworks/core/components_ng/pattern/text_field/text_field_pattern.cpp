@@ -3416,7 +3416,7 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
         .height = selectController_->GetCaretRect().Height() };
     MiscServices::InputAttribute inputAttribute = { .inputPattern = (int32_t)keyboard_,
         .enterKeyType = (int32_t)GetTextInputActionValue(GetDefaultTextInputAction()),
-        .isTextPreviewSupported = hasSupportedPreviewText };
+        .isTextPreviewSupported = hasSupportedPreviewText_ };
     MiscServices::TextConfig textConfig = { .inputAttribute = inputAttribute,
         .cursorInfo = cursorInfo,
         .range = { .start = selectController_->GetStartIndex(), .end = selectController_->GetEndIndex() },
@@ -7122,7 +7122,7 @@ void TextFieldPattern::SetPreviewTextOperation(PreviewTextInfo info)
     }
 
     UpdatePreviewIndex(start, newCaretPosition);
-    hasPreviewText = true;
+    hasPreviewText_ = true;
     cursorVisible_ = true;
     StartTwinkling();
 }
@@ -7137,7 +7137,7 @@ void TextFieldPattern::FinishTextPreview()
 
 void TextFieldPattern::FinishTextPreviewOperation()
 {
-    if (!hasPreviewText) {
+    if (!hasPreviewText_) {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "input state now is not at previewing text");
         return;
     }
@@ -7146,7 +7146,7 @@ void TextFieldPattern::FinishTextPreviewOperation()
     cursorVisible_ = true;
     StartTwinkling();
 
-    hasPreviewText = false;
+    hasPreviewText_ = false;
     previewTextStart_ = PREVIEW_TEXT_RANGE_DEFAULT;
     previewTextEnd_ = PREVIEW_TEXT_RANGE_DEFAULT;
     auto host = GetHost();
