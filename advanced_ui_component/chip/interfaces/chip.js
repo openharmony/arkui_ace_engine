@@ -1237,6 +1237,7 @@ export class ChipComponent extends ViewPU {
     chipBuilder(f = null) {
         this.observeComponentCreation2((z1, a2) => {
             Button.createWithChild();
+            Button.type(ButtonType.Normal);
             Button.clip(false);
             Button.backgroundColor(this.getChipNodeBackGroundColor());
             Button.borderRadius(this.getChipNodeRadius());
