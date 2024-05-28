@@ -162,8 +162,9 @@ void WaterFlowSegmentedLayout::Init(const SizeF& frameSize)
             auto constraint = wrapper_->GetLayoutProperty()->GetLayoutConstraint();
             postJumpOffset_ = PrepareJump(info_);
             info_->InitMargins(sections, constraint->scaleProperty, constraint->percentReference.Width());
+            info_->PrepareSegmentStartPos();
         }
-        SegmentInit(sections, frameSize);
+        SegmentInit(sections, info_->margins_, frameSize);
     } else {
         RegularInit(frameSize);
         if (info_->footerIndex_ >= 0) {
@@ -189,8 +190,8 @@ void WaterFlowSegmentedLayout::Init(const SizeF& frameSize)
     }
 }
 
-void WaterFlowSegmentedLayout::SegmentInit(
-    const std::vector<WaterFlowSections::Section>& options, const SizeF& frameSize)
+void WaterFlowSegmentLayoutBase::SegmentInit(const std::vector<WaterFlowSections::Section>& options,
+    const std::vector<PaddingPropertyF>& margins, const SizeF& frameSize)
 {
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
     auto scale = props->GetLayoutConstraint()->scaleProperty;
@@ -207,7 +208,7 @@ void WaterFlowSegmentedLayout::SegmentInit(
             std::swap(crossGaps_[i], mainGaps_[i]);
         }
 
-        const auto& margin = info_->margins_[i];
+        const auto& margin = margins[i];
         float crossSize = frameSize.CrossSize(axis_) - (axis_ == Axis::VERTICAL ? margin.Width() : margin.Height());
         int32_t crossCnt = options[i].crossCount.value_or(1);
         itemsCrossSize_[i].resize(crossCnt);

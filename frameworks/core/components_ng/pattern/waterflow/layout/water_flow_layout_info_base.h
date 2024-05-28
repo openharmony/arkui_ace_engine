@@ -155,8 +155,16 @@ public:
         return idx + footerIndex_ + 1;
     }
 
-    bool itemStart_ = false;
+    /**
+     * @brief Initialize margin of each section, along with segmentStartPos_, which depends on margin_.
+     *
+     * @param sections vector of Sections info.
+     * @param scale for calculating margins in PX.
+     * @param percentWidth for calculating margins in PX.
+     */
+    void InitMargins(const std::vector<WaterFlowSections::Section>& sections, const ScaleProperty& scale, float percentWidth);
 
+    bool itemStart_ = false;
     /**
      * @brief last item is partially in viewport.
      * With footer, footer should be considered the last item.

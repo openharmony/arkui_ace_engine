@@ -126,15 +126,8 @@ public:
      */
     void InitSegments(const std::vector<WaterFlowSections::Section>& sections, int32_t start) override;
 
-    /**
-     * @brief Initialize margin of each section, along with segmentStartPos_, which depends on margin_.
-     *
-     * @param sections vector of Sections info.
-     * @param scale for calculating margins in PX.
-     * @param percentWidth for calculating margins in PX.
-     */
-    void InitMargins(
-        const std::vector<WaterFlowSections::Section>& sections, const ScaleProperty& scale, float percentWidth);
+    // set up startPos of next segment after initializing margins_
+    void PrepareSegmentStartPos();
 
     void ResetSegmentStartPos();
 

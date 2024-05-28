@@ -17,9 +17,7 @@
 
 #include <algorithm>
 
-#include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/measure_utils.h"
 
 constexpr float HALF = 0.5f;
 
@@ -470,19 +468,8 @@ void WaterFlowLayoutInfo::InitSegments(const std::vector<WaterFlowSections::Sect
     }
 }
 
-void WaterFlowLayoutInfo::InitMargins(
-    const std::vector<WaterFlowSections::Section>& sections, const ScaleProperty& scale, float percentWidth)
+void WaterFlowLayoutInfo::PrepareSegmentStartPos()
 {
-    size_t n = sections.size();
-    if (n == 0) {
-        return;
-    }
-    margins_.resize(n);
-    for (size_t i = 0; i < n; ++i) {
-        if (sections[i].margin) {
-            margins_[i] = ConvertToMarginPropertyF(*sections[i].margin, scale, percentWidth);
-        }
-    }
     if (segmentStartPos_.size() <= 1) {
         ResetSegmentStartPos();
     }

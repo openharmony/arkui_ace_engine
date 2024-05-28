@@ -113,7 +113,7 @@ public:
      * @param mainSize main-axis length of the viewport.
      * @param mainGap main-axis gap between items.
      */
-    void Sync(int32_t itemCnt, float mainSize, float mainGap);
+    void Sync(int32_t itemCnt, float mainSize, const std::vector<float>& mainGap);
 
     /**
      * @brief Calculates distance from the item's top edge to the top of the viewport.
@@ -153,7 +153,16 @@ public:
      */
     float StartPos() const;
 
-    void ClearDataFrom(int32_t idx, float mainGap);
+    void ClearDataFrom(int32_t idx, const std::vector<float>& mainGap);
+
+    inline float TopMargin() const
+    {
+        return (axis_ == Axis::VERTICAL ? margins_.front().top : margins_.front().left).value_or(0.0f);
+    }
+    inline float BotMargin() const
+    {
+        return (axis_ == Axis::VERTICAL ? margins_.front().top : margins_.front().left).value_or(0.0f);
+    }
 
     /**
      * @brief prepare lanes in the current section.
@@ -169,8 +178,8 @@ public:
     std::unordered_map<int32_t, size_t> idxToLane_;
 
     float delta_ = 0.0f;
-    float totalOffset_ = 0.0f; // record total offset when continuously scrolling. Reset when jumped
-    float mainGap_ = 0.0f;     // update this at the end of a layout
+    float totalOffset_ = 0.0f;   // record total offset when continuously scrolling. Reset when jumped
+    std::vector<float> mainGap_; // update this at the end of a layout
 
     // maximum content height encountered so far, mainly for comparing content and viewport height
     float maxHeight_ = 0.0f;

@@ -19,12 +19,13 @@
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.h"
+#include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_segmented_layout.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT WaterFlowLayoutSW : public WaterFlowLayoutBase {
-    DECLARE_ACE_TYPE(WaterFlowLayoutSW, WaterFlowLayoutBase);
+class ACE_EXPORT WaterFlowLayoutSW : public WaterFlowSegmentLayoutBase {
+    DECLARE_ACE_TYPE(WaterFlowLayoutSW, WaterFlowSegmentLayoutBase);
 
 public:
     explicit WaterFlowLayoutSW(const RefPtr<WaterFlowLayoutInfoSW>& info) : info_(info) {}
@@ -39,7 +40,6 @@ public:
 private:
     void Init(const SizeF& frameSize);
     void SingleInit(const SizeF& frameSize);
-    void SectionInit(const SizeF& frameSize);
     void CheckReset();
     // do it after CheckReset because reset would clear lanes.
     void InitLanes();
@@ -149,16 +149,11 @@ private:
     // convert FlowItem's index to children node index.
     inline int32_t nodeIdx(int32_t idx) const;
 
-    LayoutWrapper* wrapper_ {};
     RefPtr<WaterFlowLayoutInfoSW> info_;
     RefPtr<WaterFlowSections> sections_;
 
     int32_t itemCnt_ = 0;
-    Axis axis_ {};
-    std::vector<std::vector<float>> itemCrossSize_;
     float mainLen_ = 0.0f;
-    float mainGap_ = 0.0f;
-    float crossGap_ = 0.0f;
 
     bool overScroll_ = true;
 };

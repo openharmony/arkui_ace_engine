@@ -21,8 +21,33 @@
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 
 namespace OHOS::Ace::NG {
-class WaterFlowSegmentedLayout : public WaterFlowLayoutBase {
-    DECLARE_ACE_TYPE(WaterFlowSegmentedLayout, WaterFlowLayoutBase);
+// inherited by SegmentedLayout and SWLayout
+class WaterFlowSegmentLayoutBase : public WaterFlowLayoutBase {
+    DECLARE_ACE_TYPE(WaterFlowSegmentLayoutBase, WaterFlowLayoutBase);
+
+protected:
+    /**
+     * @brief init member variables for segmented WaterFlow with section info.
+     *
+     * @param options vector of SectionInfo
+     * @param margins of each section.
+     * @param frameSize of WaterFlow.
+     */
+    void SegmentInit(const std::vector<WaterFlowSections::Section>& options,
+        const std::vector<PaddingPropertyF>& margins, const SizeF& frameSize);
+
+    LayoutWrapper* wrapper_ {};
+    Axis axis_ = Axis::VERTICAL;
+    // [segmentIdx, [crossIdx, item's width]]
+    std::vector<std::vector<float>> itemsCrossSize_;
+
+    // rowGap and columnGap for each segment
+    std::vector<float> crossGaps_;
+    std::vector<float> mainGaps_;
+};
+
+class WaterFlowSegmentedLayout : public WaterFlowSegmentLayoutBase {
+    DECLARE_ACE_TYPE(WaterFlowSegmentedLayout, WaterFlowSegmentLayoutBase);
 
 public:
     explicit WaterFlowSegmentedLayout(const RefPtr<WaterFlowLayoutInfo>& layoutInfo) : info_(layoutInfo) {}
@@ -44,14 +69,6 @@ private:
      * @param frameSize of WaterFlow component.
      */
     void Init(const SizeF& frameSize);
-
-    /**
-     * @brief init member variables for segmented WaterFlow with section info.
-     *
-     * @param options vector of SectionInfo
-     * @param frameSize of WaterFlow.
-     */
-    void SegmentInit(const std::vector<WaterFlowSections::Section>& options, const SizeF& frameSize);
 
     /**
      * @brief init regular WaterFlow with a single segment.
@@ -128,16 +145,7 @@ private:
      */
     float SolveJumpOffset(const WaterFlowLayoutInfo::ItemInfo& item) const;
 
-    LayoutWrapper* wrapper_ {};
     RefPtr<WaterFlowSections> sections_;
-
-    // [segmentIdx, [crossIdx, item's width]]
-    std::vector<std::vector<float>> itemsCrossSize_;
-    Axis axis_ = Axis::VERTICAL;
-
-    // rowGap and columnGap for each segment
-    std::vector<float> crossGaps_;
-    std::vector<float> mainGaps_;
 
     // WaterFlow node's main-axis length
     float mainSize_ = 0.0f;

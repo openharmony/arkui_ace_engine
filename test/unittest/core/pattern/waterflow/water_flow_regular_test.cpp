@@ -32,8 +32,10 @@ HWTEST_F(WaterFlowTestNg, OffsetEnd001, TestSize.Level1)
         model.SetRowsGap(Dimension(5.0f));
         CreateItem(30);
     });
-    pattern_->ScrollToIndex(29, false, ScrollAlign::END);
     auto info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 10);
+    pattern_->ScrollToIndex(29, false, ScrollAlign::END);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info->endIndex_, 29);
     EXPECT_EQ(GetChildY(frameNode_, 30), 600.0f);

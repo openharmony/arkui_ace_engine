@@ -41,14 +41,14 @@ HWTEST_F(WaterFlowSWTest, Regular001, TestSize.Level1)
         model.SetColumnsTemplate("1fr 1fr 1fr");
     });
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(info_->lanes_[0].items_.size(), 2);
-    EXPECT_EQ(info_->lanes_[0].items_.back().idx, 3);
-    EXPECT_EQ(info_->lanes_[0].items_.back().mainSize, 200.0f);
-    EXPECT_EQ(info_->lanes_[0].endPos, 300.0f);
-    EXPECT_EQ(info_->lanes_[1].items_.back().idx, 1);
-    EXPECT_EQ(info_->lanes_[1].endPos, 200.0f);
-    EXPECT_EQ(info_->lanes_[2].endPos, 200.0f);
-    EXPECT_EQ(info_->lanes_[2].items_.back().idx, 4);
+    EXPECT_EQ(info_->sections_[0][0].items_.size(), 2);
+    EXPECT_EQ(info_->sections_[0][0].items_.back().idx, 3);
+    EXPECT_EQ(info_->sections_[0][0].items_.back().mainSize, 200.0f);
+    EXPECT_EQ(info_->sections_[0][0].endPos, 300.0f);
+    EXPECT_EQ(info_->sections_[0][1].items_.back().idx, 1);
+    EXPECT_EQ(info_->sections_[0][1].endPos, 200.0f);
+    EXPECT_EQ(info_->sections_[0][2].endPos, 200.0f);
+    EXPECT_EQ(info_->sections_[0][2].items_.back().idx, 4);
     EXPECT_EQ(info_->startIndex_, 0);
     EXPECT_EQ(info_->endIndex_, 4);
 }
@@ -162,16 +162,16 @@ HWTEST_F(WaterFlowSWTest, Jump001, TestSize.Level1)
     EXPECT_EQ(info_->startIndex_, 5);
     EXPECT_EQ(info_->endIndex_, 9);
     EXPECT_EQ(info_->idxToLane_.at(8), 2);
-    EXPECT_EQ(info_->lanes_[0].endPos, 200.0f);
-    EXPECT_EQ(info_->lanes_[1].startPos, -100.0f);
-    EXPECT_EQ(info_->lanes_[1].endPos, 300.0f);
-    EXPECT_EQ(info_->lanes_[2].endPos, 100.0f);
-    EXPECT_EQ(info_->lanes_[0].items_.size(), 1);
-    EXPECT_EQ(info_->lanes_[0].items_.front().idx, 7);
-    EXPECT_EQ(info_->lanes_[1].items_.size(), 2);
-    EXPECT_EQ(info_->lanes_[1].items_.front().idx, 5);
-    EXPECT_EQ(info_->lanes_[1].items_.back().idx, 9);
-    EXPECT_EQ(info_->lanes_[2].items_.size(), 2);
+    EXPECT_EQ(info_->sections_[0][0].endPos, 200.0f);
+    EXPECT_EQ(info_->sections_[0][1].startPos, -100.0f);
+    EXPECT_EQ(info_->sections_[0][1].endPos, 300.0f);
+    EXPECT_EQ(info_->sections_[0][2].endPos, 100.0f);
+    EXPECT_EQ(info_->sections_[0][0].items_.size(), 1);
+    EXPECT_EQ(info_->sections_[0][0].items_.front().idx, 7);
+    EXPECT_EQ(info_->sections_[0][1].items_.size(), 2);
+    EXPECT_EQ(info_->sections_[0][1].items_.front().idx, 5);
+    EXPECT_EQ(info_->sections_[0][1].items_.back().idx, 9);
+    EXPECT_EQ(info_->sections_[0][2].items_.size(), 2);
     EXPECT_TRUE(info_->itemEnd_);
     EXPECT_FALSE(info_->offsetEnd_);
     EXPECT_EQ(info_->startIndex_, 5);
@@ -464,8 +464,8 @@ HWTEST_F(WaterFlowSWTest, Misaligned001, TestSize.Level1)
     EXPECT_EQ(GetChildRect(frameNode_, 1).Bottom(), 53.0f);
     EXPECT_FALSE(info_->IsMisaligned());
     EXPECT_EQ(GetChildX(frameNode_, 1), 0.0f);
-    EXPECT_EQ(info_->lanes_[0].startPos, -47.0f);
-    EXPECT_EQ(info_->lanes_[0].items_.front().idx, 0);
+    EXPECT_EQ(info_->sections_[0][0].startPos, -47.0f);
+    EXPECT_EQ(info_->sections_[0][0].items_.front().idx, 0);
 }
 
 /**
