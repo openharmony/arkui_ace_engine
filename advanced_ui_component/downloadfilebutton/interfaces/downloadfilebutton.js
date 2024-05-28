@@ -19,27 +19,27 @@ if (!("finalizeConstruction" in ViewPU.prototype)) {
 }
 
 export var DownloadIconStyle;
-(function (p2) {
-    p2[p2["FULL_FILLED"] = 0] = "FULL_FILLED";
-    p2[p2["LINES"] = 1] = "LINES";
+(function (b2) {
+    b2[b2["FULL_FILLED"] = 0] = "FULL_FILLED";
+    b2[b2["LINES"] = 1] = "LINES";
 })(DownloadIconStyle || (DownloadIconStyle = {}));
 
 export var DownloadDescription;
-(function (o2) {
-    o2[o2["DOWNLOAD"] = 0] = "DOWNLOAD";
-    o2[o2["DOWNLOAD_FILE"] = 1] = "DOWNLOAD_FILE";
-    o2[o2["SAVE"] = 2] = "SAVE";
-    o2[o2["SAVE_IMAGE"] = 3] = "SAVE_IMAGE";
-    o2[o2["SAVE_FILE"] = 4] = "SAVE_FILE";
-    o2[o2["DOWNLOAD_AND_SHARE"] = 5] = "DOWNLOAD_AND_SHARE";
-    o2[o2["RECEIVE"] = 6] = "RECEIVE";
-    o2[o2["CONTINUE_TO_RECEIVE"] = 7] = "CONTINUE_TO_RECEIVE";
+(function (a2) {
+    a2[a2["DOWNLOAD"] = 0] = "DOWNLOAD";
+    a2[a2["DOWNLOAD_FILE"] = 1] = "DOWNLOAD_FILE";
+    a2[a2["SAVE"] = 2] = "SAVE";
+    a2[a2["SAVE_IMAGE"] = 3] = "SAVE_IMAGE";
+    a2[a2["SAVE_FILE"] = 4] = "SAVE_FILE";
+    a2[a2["DOWNLOAD_AND_SHARE"] = 5] = "DOWNLOAD_AND_SHARE";
+    a2[a2["RECEIVE"] = 6] = "RECEIVE";
+    a2[a2["CONTINUE_TO_RECEIVE"] = 7] = "CONTINUE_TO_RECEIVE";
 })(DownloadDescription || (DownloadDescription = {}));
 
 export var DownloadLayoutDirection;
-(function (n2) {
-    n2[n2["HORIZONTAL"] = 0] = "HORIZONTAL";
-    n2[n2["VERTICAL"] = 1] = "VERTICAL";
+(function (z1) {
+    z1[z1["HORIZONTAL"] = 0] = "HORIZONTAL";
+    z1[z1["VERTICAL"] = 1] = "VERTICAL";
 })(DownloadLayoutDirection || (DownloadLayoutDirection = {}));
 const downloadDescriptionResourceMap = new Map([
     [DownloadDescription.DOWNLOAD, {
@@ -102,12 +102,14 @@ const downloadDescriptionResourceMap = new Map([
 const MARGIN_DEFAULT = '0vp';
 
 export class DownloadFileButton extends ViewPU {
-    constructor(h2, i2, j2, k2 = -1, l2 = undefined, m2) {
-        super(h2, j2, k2, m2);
-        if (typeof l2 === "function") {
-            this.paramsGenerator_ = l2;
+    constructor(t1, u1, v1, w1 = -1, x1 = undefined, y1) {
+        super(t1, v1, w1, y1);
+        if (typeof x1 === "function") {
+            this.paramsGenerator_ = x1;
         }
-        this.__contentOptions = new ObservedPropertyObjectPU({}, this, "contentOptions");
+        this.__contentOptions =
+            new ObservedPropertyObjectPU({ icon: DownloadIconStyle.FULL_FILLED, text: DownloadDescription.DOWNLOAD },
+                this, "contentOptions");
         this.__styleOptions = new ObservedPropertyObjectPU({
             iconSize: '16vp',
             layoutDirection: DownloadLayoutDirection.HORIZONTAL,
@@ -119,25 +121,25 @@ export class DownloadFileButton extends ViewPU {
             iconColor: '#ffffffff',
             textIconSpace: '4vp'
         }, this, "styleOptions");
-        this.setInitiallyProvidedValue(i2);
+        this.setInitiallyProvidedValue(u1);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(g2) {
-        if (g2.contentOptions !== undefined) {
-            this.contentOptions = g2.contentOptions;
+    setInitiallyProvidedValue(s1) {
+        if (s1.contentOptions !== undefined) {
+            this.contentOptions = s1.contentOptions;
         }
-        if (g2.styleOptions !== undefined) {
-            this.styleOptions = g2.styleOptions;
+        if (s1.styleOptions !== undefined) {
+            this.styleOptions = s1.styleOptions;
         }
     }
 
-    updateStateVars(f2) {
+    updateStateVars(r1) {
     }
 
-    purgeVariableDependenciesOnElmtId(e2) {
-        this.__contentOptions.purgeDependencyOnElmtId(e2);
-        this.__styleOptions.purgeDependencyOnElmtId(e2);
+    purgeVariableDependenciesOnElmtId(q1) {
+        this.__contentOptions.purgeDependencyOnElmtId(q1);
+        this.__styleOptions.purgeDependencyOnElmtId(q1);
     }
 
     aboutToBeDeleted() {
@@ -151,46 +153,45 @@ export class DownloadFileButton extends ViewPU {
         return this.__contentOptions.get();
     }
 
-    set contentOptions(d2) {
-        this.__contentOptions.set(d2);
+    set contentOptions(p1) {
+        this.__contentOptions.set(p1);
     }
 
     get styleOptions() {
         return this.__styleOptions.get();
     }
 
-    set styleOptions(c2) {
-        this.__styleOptions.set(c2);
+    set styleOptions(o1) {
+        this.__styleOptions.set(o1);
     }
 
-    getTextContent(b2) {
-        return downloadDescriptionResourceMap.get(b2);
+    getTextContent(n1) {
+        return downloadDescriptionResourceMap.get(n1);
     }
 
-    downloadImage(x1 = null) {
-        this.observeComponentCreation2((z1, a2) => {
-            Image.create(this.contentOptions.icon === DownloadIconStyle.LINES
-                ? {
-                    "id": -1,
-                    "type": 20000,
-                    params: ['sys.media.ohos_save_button_line'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
-                } : {
-                    "id": -1,
-                    "type": 20000,
-                    params: ['sys.media.ohos_save_button_filled'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
-                });
+    downloadImage(j1 = null) {
+        this.observeComponentCreation2((l1, m1) => {
+            Image.create(this.contentOptions.icon === DownloadIconStyle.LINES ? {
+                "id": -1,
+                "type": 20000,
+                params: ['sys.media.ohos_save_button_line'],
+                "bundleName": "__harDefaultBundleName__",
+                "moduleName": "__harDefaultModuleName__"
+            } : {
+                "id": -1,
+                "type": 20000,
+                params: ['sys.media.ohos_save_button_filled'],
+                "bundleName": "__harDefaultBundleName__",
+                "moduleName": "__harDefaultModuleName__"
+            });
             Image.size({ width: this.styleOptions.iconSize, height: this.styleOptions.iconSize });
             Image.fillColor(this.styleOptions.iconColor);
         }, Image);
     }
 
-    downloadText(t1 = null) {
-        this.observeComponentCreation2((v1, w1) => {
-            Text.create(!this.contentOptions.text || !downloadDescriptionResourceMap.get(this.contentOptions.text) ? {
+    downloadText(f1 = null) {
+        this.observeComponentCreation2((h1, i1) => {
+            Text.create(!this.contentOptions.text || !this.getTextContent(this.contentOptions.text) ? {
                 "id": -1,
                 "type": 10003,
                 params: ['sys.string.ohos_id_text_save_button_description_download'],
@@ -216,106 +217,73 @@ export class DownloadFileButton extends ViewPU {
     }
 
     initialRender() {
-        this.observeComponentCreation2((r1, s1) => {
-            Row.create();
-        }, Row);
-        this.observeComponentCreation2((c, d) => {
+        this.observeComponentCreation2((b, c) => {
             If.create();
-            if (this.contentOptions.text === undefined && this.contentOptions.icon === undefined) {
+            if (this.styleOptions.layoutDirection === DownloadLayoutDirection.HORIZONTAL) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((k1, l1) => {
+                    this.observeComponentCreation2((d1, e1) => {
+                        Row.create();
+                    }, Row);
+                    this.observeComponentCreation2((z, a1) => {
                         If.create();
-                        if (this.styleOptions.layoutDirection === DownloadLayoutDirection.HORIZONTAL) {
+                        if (this.contentOptions.icon) {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.downloadImage.bind(this)();
-                                this.downloadText.bind(this)();
                             });
                         } else {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((o1, p1) => {
-                                    Column.create();
-                                }, Column);
-                                this.downloadImage.bind(this)();
-                                this.downloadText.bind(this)();
-                                Column.pop();
                             });
                         }
                     }, If);
                     If.pop();
+                    this.observeComponentCreation2((v, w) => {
+                        If.create();
+                        if (this.contentOptions.text) {
+                            this.ifElseBranchUpdateFunction(0, () => {
+                                this.downloadText.bind(this)();
+                            });
+                        } else {
+                            this.ifElseBranchUpdateFunction(1, () => {
+                            });
+                        }
+                    }, If);
+                    If.pop();
+                    Row.pop();
                 });
             } else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((g, h) => {
+                    this.observeComponentCreation2((p, q) => {
+                        Column.create();
+                    }, Column);
+                    this.observeComponentCreation2((l, m) => {
                         If.create();
-                        if (this.styleOptions.layoutDirection === DownloadLayoutDirection.HORIZONTAL) {
+                        if (this.contentOptions.icon) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((e1, f1) => {
-                                    If.create();
-                                    if (this.contentOptions.icon !== undefined) {
-                                        this.ifElseBranchUpdateFunction(0, () => {
-                                            this.downloadImage.bind(this)();
-                                        });
-                                    } else {
-                                        this.ifElseBranchUpdateFunction(1, () => {
-                                        });
-                                    }
-                                }, If);
-                                If.pop();
-                                this.observeComponentCreation2((a1, b1) => {
-                                    If.create();
-                                    if (this.contentOptions.text !== undefined) {
-                                        this.ifElseBranchUpdateFunction(0, () => {
-                                            this.downloadText.bind(this)();
-                                        });
-                                    } else {
-                                        this.ifElseBranchUpdateFunction(1, () => {
-                                        });
-                                    }
-                                }, If);
-                                If.pop();
-                            });
-                        } else if (this.styleOptions.layoutDirection === DownloadLayoutDirection.VERTICAL) {
-                            this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((v, w) => {
-                                    Column.create();
-                                }, Column);
-                                this.observeComponentCreation2((r, s) => {
-                                    If.create();
-                                    if (this.contentOptions.icon !== undefined) {
-                                        this.ifElseBranchUpdateFunction(0, () => {
-                                            this.downloadImage.bind(this)();
-                                        });
-                                    } else {
-                                        this.ifElseBranchUpdateFunction(1, () => {
-                                        });
-                                    }
-                                }, If);
-                                If.pop();
-                                this.observeComponentCreation2((n, o) => {
-                                    If.create();
-                                    if (this.contentOptions.text !== undefined) {
-                                        this.ifElseBranchUpdateFunction(0, () => {
-                                            this.downloadText.bind(this)();
-                                        });
-                                    } else {
-                                        this.ifElseBranchUpdateFunction(1, () => {
-                                        });
-                                    }
-                                }, If);
-                                If.pop();
-                                Column.pop();
+                                this.downloadImage.bind(this)();
                             });
                         } else {
-                            this.ifElseBranchUpdateFunction(2, () => {
+                            this.ifElseBranchUpdateFunction(1, () => {
                             });
                         }
                     }, If);
                     If.pop();
+                    this.observeComponentCreation2((h, i) => {
+                        If.create();
+                        if (this.contentOptions.text) {
+                            this.ifElseBranchUpdateFunction(0, () => {
+                                this.downloadText.bind(this)();
+                            });
+                        } else {
+                            this.ifElseBranchUpdateFunction(1, () => {
+                            });
+                        }
+                    }, If);
+                    If.pop();
+                    Column.pop();
                 });
             }
         }, If);
         If.pop();
-        Row.pop();
     }
 
     rerender() {

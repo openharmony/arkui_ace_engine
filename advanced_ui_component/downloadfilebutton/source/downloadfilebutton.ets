@@ -14,19 +14,19 @@
  */
 
 export enum DownloadIconStyle {
-  FULL_FILLED = 0,
-  LINES = 1
+  FULL_FILLED = 1,
+  LINES = 2
 }
 
 export enum DownloadDescription {
-  DOWNLOAD = 0,
-  DOWNLOAD_FILE = 1,
-  SAVE = 2,
-  SAVE_IMAGE = 3,
-  SAVE_FILE = 4,
-  DOWNLOAD_AND_SHARE = 5,
-  RECEIVE = 6,
-  CONTINUE_TO_RECEIVE = 7
+  DOWNLOAD = 1,
+  DOWNLOAD_FILE = 2,
+  SAVE = 3,
+  SAVE_IMAGE = 4,
+  SAVE_FILE = 5,
+  DOWNLOAD_AND_SHARE = 6,
+  RECEIVE = 7,
+  CONTINUE_TO_RECEIVE = 8
 }
 
 export enum DownloadLayoutDirection {
@@ -66,7 +66,10 @@ const MARGIN_DEFAULT = '0vp';
 
 @Component
 export struct DownloadFileButton {
-  @State contentOptions: DownloadContentOptions = {};
+  @State contentOptions: DownloadContentOptions = {
+    icon: DownloadIconStyle.FULL_FILLED,
+    text: DownloadDescription.DOWNLOAD
+  };
   @State styleOptions: DownloadStyleOptions = {
     iconSize: '16vp',
     layoutDirection: DownloadLayoutDirection.HORIZONTAL,
@@ -85,60 +88,54 @@ export struct DownloadFileButton {
 
   @Builder
   downloadImage() {
-    Image(this.contentOptions.icon === DownloadIconStyle.LINES
-      ? $r('sys.media.ohos_save_button_line') : $r('sys.media.ohos_save_button_filled'))
-      .size({ width: this.styleOptions.iconSize, height: this.styleOptions.iconSize })
-      .fillColor(this.styleOptions.iconColor)
+    Image(
+      this.contentOptions.icon === DownloadIconStyle.LINES ?
+      $r('sys.media.ohos_save_button_line') :
+      $r('sys.media.ohos_save_button_filled')
+    )
+    .size({ width: this.styleOptions.iconSize, height: this.styleOptions.iconSize })
+    .fillColor(this.styleOptions.iconColor)
   }
 
   @Builder
   downloadText() {
-    Text(!this.contentOptions.text || !downloadDescriptionResourceMap.get(this.contentOptions.text) ?
-    $r('sys.string.ohos_id_text_save_button_description_download') :
-    this.getTextContent(this.contentOptions.text))
-      .fontSize(this.styleOptions.fontSize)
-      .fontColor(this.styleOptions.fontColor)
-      .fontStyle(this.styleOptions.fontStyle)
-      .fontWeight(this.styleOptions.fontWeight)
-      .fontFamily(this.styleOptions.fontFamily)
-      .margin({
-        top: this.styleOptions.layoutDirection === DownloadLayoutDirection.VERTICAL ? this.styleOptions.textIconSpace :
-          MARGIN_DEFAULT,
-        left: this.styleOptions.layoutDirection === DownloadLayoutDirection.HORIZONTAL ?
-        this.styleOptions.textIconSpace :
-          MARGIN_DEFAULT
-      })
+    Text(
+      !this.contentOptions.text || !this.getTextContent(this.contentOptions.text) ?
+      $r('sys.string.ohos_id_text_save_button_description_download') :
+      this.getTextContent(this.contentOptions.text)
+    )
+    .fontSize(this.styleOptions.fontSize)
+    .fontColor(this.styleOptions.fontColor)
+    .fontStyle(this.styleOptions.fontStyle)
+    .fontWeight(this.styleOptions.fontWeight)
+    .fontFamily(this.styleOptions.fontFamily)
+    .margin({
+      top: this.styleOptions.layoutDirection === DownloadLayoutDirection.VERTICAL ?
+      this.styleOptions.textIconSpace :
+      MARGIN_DEFAULT,
+      left: this.styleOptions.layoutDirection === DownloadLayoutDirection.HORIZONTAL ?
+      this.styleOptions.textIconSpace :
+      MARGIN_DEFAULT
+    })
   }
 
   build() {
-    Row() {
-      if (this.contentOptions.text === undefined && this.contentOptions.icon === undefined) {
-        if (this.styleOptions.layoutDirection === DownloadLayoutDirection.HORIZONTAL) {
-          this.downloadImage();
-          this.downloadText();
-        } else {
-          Column() {
-            this.downloadImage();
-            this.downloadText();
-          }
+    if (this.styleOptions.layoutDirection === DownloadLayoutDirection.HORIZONTAL) {
+      Row() {
+        if (this.contentOptions.icon) {
+          this.downloadImage()
         }
-      } else {
-        if (this.styleOptions.layoutDirection === DownloadLayoutDirection.HORIZONTAL) {
-          if (this.contentOptions.icon !== undefined) {
-            this.downloadImage();
-          }
-          if (this.contentOptions.text !== undefined) {
-            this.downloadText();
-          }
-        } else if (this.styleOptions.layoutDirection === DownloadLayoutDirection.VERTICAL) {
-          Column() {
-            if (this.contentOptions.icon !== undefined) {
-              this.downloadImage();
-            }
-            if (this.contentOptions.text !== undefined) {
-              this.downloadText();
-            }
-          }
+        if (this.contentOptions.text) {
+          this.downloadText()
+        }
+      }
+    } else {
+      Column() {
+        if (this.contentOptions.icon) {
+          this.downloadImage()
+        }
+        if (this.contentOptions.text) {
+          this.downloadText()
         }
       }
     }
