@@ -952,6 +952,7 @@ public:
     void SetTextInputFlag(bool isTextInput)
     {
         isTextInput_ = isTextInput;
+        SetTextFadeoutCapacity(isTextInput_);
     }
 
     void SetSingleLineHeight(float height)
@@ -1251,6 +1252,15 @@ public:
     bool GetCustomKeyboardOption()
     {
         return keyboardAvoidance_;
+    }
+
+    void SetTextFadeoutCapacity(bool enabled)
+    {
+        haveTextFadeoutCapacity_ = enabled;
+    }
+    bool GetTextFadeoutCapacity()
+    {
+        return haveTextFadeoutCapacity_;
     }
 
     void SetShowKeyBoardOnFocus(bool value);
@@ -1649,6 +1659,8 @@ private:
     bool textInputBlurOnSubmit_ = true;
     bool textAreaBlurOnSubmit_ = false;
     bool isDetachFromMainTree_ = false;
+
+    bool haveTextFadeoutCapacity_ = false;
 
     bool isFocusBGColorSet_ = false;
     bool isFocusTextColorSet_ = false;
