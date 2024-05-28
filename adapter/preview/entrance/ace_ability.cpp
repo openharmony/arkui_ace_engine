@@ -234,6 +234,7 @@ AceAbility::AceAbility(const AceRunArgs& runArgs) : runArgs_(runArgs)
     container->SetResourceConfiguration(config);
     container->SetBundleName(bundleName_);
     container->SetModuleName(moduleName_);
+    container->SetApiTargetVersion(AceApplicationInfo::GetInstance().GetApiTargetVersion());
     InitializeClipboard();
 }
 
