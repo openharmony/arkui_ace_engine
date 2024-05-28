@@ -610,7 +610,8 @@ void PipelineContext::FlushOnceVsyncTask()
 void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 {
     CHECK_RUN_ON(UI);
-    ACE_FUNCTION_TRACE_COMMERCIAL();
+    ACE_SCOPED_TRACE_COMMERCIAL(
+        "UIVsyncTask[timestamp:%" PRIu64"][visyncID:%" PRIu64"]", nanoTimestamp, static_cast<uint64_t>(frameCount));
     window_->Lock();
     auto recvTime = GetSysTimestamp();
     static const std::string abilityName = AceApplicationInfo::GetInstance().GetProcessName().empty()
