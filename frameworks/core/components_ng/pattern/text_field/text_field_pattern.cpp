@@ -2625,8 +2625,6 @@ bool TextFieldPattern::FireOnTextChangeEvent()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto eventHub = host->GetEventHub<TextFieldEventHub>();
-    CHECK_NULL_RETURN(eventHub, false);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     auto cleanNodeStyle = layoutProperty->GetCleanNodeStyle().value_or(CleanNodeStyle::INPUT);
@@ -2642,7 +2640,6 @@ bool TextFieldPattern::FireOnTextChangeEvent()
     if (textCache == contentController_->GetTextValue()) {
         return false;
     }
-    layoutProperty->UpdateValue(contentController_->GetTextValue());
     host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, contentController_->GetTextValue());
     AutoFillValueChanged();
     bool fireFlag = !GetIsPreviewText();
@@ -2659,6 +2656,9 @@ bool TextFieldPattern::FireOnTextChangeEvent()
                 CHECK_NULL_VOID(host);
                 auto eventHub = host->GetEventHub<TextFieldEventHub>();
                 CHECK_NULL_VOID(eventHub);
+                auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+                CHECK_NULL_VOID(layoutProperty);
+                layoutProperty->UpdateValue(pattern->GetTextContentController()->GetTextValue());
                 eventHub->FireOnChange(pattern->GetTextContentController()->GetTextValue());
             }
             if (!pattern->HasFocus()) {
