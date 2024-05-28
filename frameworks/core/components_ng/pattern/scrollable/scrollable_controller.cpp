@@ -18,7 +18,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
-void ScrollableController::JumpTo(int32_t index, bool smooth, ScrollAlign align, int32_t /* source */)
+void ScrollableController::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID(pattern);
