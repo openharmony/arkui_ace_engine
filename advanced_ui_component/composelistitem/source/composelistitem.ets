@@ -706,7 +706,9 @@ export struct ComposeListItem {
     let leftPaddingWidth = this.composeItemPadding?.start?.value ?? STACK_PADDING;
     if (this.operateItem === null || JSON.stringify(this.operateItem) === '{}') {
       return `calc(100% - ${leftPaddingWidth}vp)`;
-    } else if (this.operateItem !== null && this.operateItem.button === undefined && this.operateItem.text === undefined) {
+    } else if (this.operateItem !== null &&
+      this.operateItem.button === undefined &&
+      this.operateItem.text === undefined) {
       if (this.operateItem.subIcon !== null) {
         return `calc(100% - ${leftPaddingWidth}vp - 40vp - 26vp)`;
       } else {
