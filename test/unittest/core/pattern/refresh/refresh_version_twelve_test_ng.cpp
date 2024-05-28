@@ -23,6 +23,8 @@ constexpr Dimension ZERO_OFFSET = 0.0_vp;
 constexpr Dimension MINUS_OFFSET = -1.0_vp;
 constexpr Dimension DRAG_OFFSET = 640.0_vp;
 constexpr Dimension OVERDRAG_OFFSET = 32.0_vp;
+constexpr Dimension DRAG_NE_OFFSET = -640.0_vp;
+constexpr Dimension ONE_OFFSET = 1.0_vp;
 
 class RefreshVersionTwelveTestNg : public RefreshTestNg {
 public:
@@ -346,6 +348,1065 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrPullToRefresh05, TestSize.Level1)
      */
     pattern_->HandleDragUpdate(-(TRIGGER_LOADING_DISTANCE).ConvertToPx() / pattern_->CalculatePullDownRatio());
     EXPECT_EQ(Dimension(offset, DimensionUnit::VP), TRIGGER_REFRESH_DISTANCE - TRIGGER_LOADING_DISTANCE);
+}
+
+/**
+ * @tc.name: AttrRefreshOffset06
+ * @tc.desc: Test attr RefreshOffset UpdatePullToRefresh
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset06, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    bool isRefreshTrigger = false;
+    RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
+    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
+    auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
+    Create([onRefreshing, onStateChange](RefreshModelNG model) {
+        model.SetOnStateChange(std::move(onStateChange));
+    });
+
+    /**
+     * @tc.steps: step1. refreshOffset_: -> 32vp
+     * @tc.expected: refreshOffset_: -> 32vp
+     */
+    layoutProperty_->UpdateRefreshOffset(OVERDRAG_OFFSET);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(pattern_->refreshOffset_, OVERDRAG_OFFSET);
+
+    /**
+     * @tc.steps: step2. HandleDragStart
+     * @tc.expected: scrollOffset_ default is 0.f, refreshStatus_ default is 0.f INACTIVE
+     */
+    pattern_->HandleDragStart();
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
+
+    /**
+     * @tc.steps: step3. HandleDragUpdate, the delta greater than OVERDRAG_OFFSET
+     * @tc.expected: scrollOffset_ is 32.f(Plus previous delta),
+     *               onStateChange event triggered and refreshStatus is OVER_DRAG
+     */
+    pattern_->HandleDragUpdate((OVERDRAG_OFFSET).ConvertToPx()
+                               / pattern_->CalculatePullDownRatio());
+    EXPECT_EQ(refreshStatus, RefreshStatus::OVER_DRAG);
+    layoutProperty_->UpdatePullToRefresh(false);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->pullToRefresh_, false);
+}
+
+/**
+ * @tc.name: AttrRefreshOffset07
+ * @tc.desc: Test attr RefreshOffset UpdatePullToRefresh
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset07, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    bool isRefreshTrigger = false;
+    RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
+    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
+    auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
+    Create([onRefreshing, onStateChange](RefreshModelNG model) {
+        model.SetOnStateChange(std::move(onStateChange));
+    });
+
+    /**
+     * @tc.steps: step1. refreshOffset_: -> -640vp
+     * @tc.expected: refreshOffset_: -> 64vp
+     */
+    layoutProperty_->UpdateRefreshOffset(DRAG_NE_OFFSET);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(pattern_->refreshOffset_, TRIGGER_REFRESH_DISTANCE);
+
+    /**
+     * @tc.steps: step2. HandleDragStart
+     * @tc.expected: scrollOffset_ default is 0.f, refreshStatus_ default is 0.f INACTIVE
+     */
+    pattern_->HandleDragStart();
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+
+    /**
+     * @tc.steps: step3. UpdatePullToRefresh, the delta greater than OVERDRAG_OFFSET
+     * @tc.expected: EXPECT is OFFSET_VALUE
+     *               FlushLayoutTask
+     */
+    layoutProperty_->UpdatePullToRefresh(false);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->pullToRefresh_, false);
+}
+
+/**
+ * @tc.name: AttrRefreshOffset08
+ * @tc.desc: Test attr RefreshOffset UpdatePullToRefresh
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset08, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    bool isRefreshTrigger = false;
+    RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
+    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
+    auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
+    Create([onRefreshing, onStateChange](RefreshModelNG model) {
+        model.SetOnStateChange(std::move(onStateChange));
+    });
+
+    /**
+     * @tc.steps: step1. refreshOffset_: -> 640vp
+     * @tc.expected: refreshOffset_: -> 640vp
+     */
+    layoutProperty_->UpdateRefreshOffset(DRAG_OFFSET);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(pattern_->refreshOffset_, DRAG_OFFSET);
+    /**
+     * @tc.steps: step2. HandleDragStart
+     * @tc.expected: scrollOffset_ default is 0.f, refreshStatus_ default is 0.f INACTIVE
+     */
+    pattern_->HandleDragStart();
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+
+    /**
+     * @tc.steps: step3. UpdatePullToRefresh, the delta greater than OVERDRAG_OFFSET
+     * @tc.expected: EXPECT is OFFSET_VALUE
+     *               FlushLayoutTask
+     */
+    layoutProperty_->UpdatePullToRefresh(false);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->pullToRefresh_, false);
+}
+
+/**
+ * @tc.name: AttrRefreshOffset09
+ * @tc.desc: Test attr RefreshOffset UpdatePullToRefresh
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset09, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    bool isRefreshTrigger = false;
+    RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
+    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
+    auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
+    Create([onRefreshing, onStateChange](RefreshModelNG model) {
+        model.SetOnStateChange(std::move(onStateChange));
+    });
+
+    /**
+     * @tc.steps: step1. refreshOffset_: -> 64vp
+     * @tc.expected: refreshOffset_: -> 64vp
+     */
+    layoutProperty_->UpdateRefreshOffset(TRIGGER_REFRESH_DISTANCE);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(pattern_->refreshOffset_, TRIGGER_REFRESH_DISTANCE);
+
+    /**
+     * @tc.steps: step2. HandleDragStart
+     * @tc.expected: scrollOffset_ default is 0.f, refreshStatus_ default is 0.f INACTIVE
+     */
+    pattern_->HandleDragStart();
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+
+    /**
+     * @tc.steps: step3. UpdatePullToRefresh, the delta greater than OVERDRAG_OFFSET
+     * @tc.expected: EXPECT is OFFSET_VALUE
+     *               FlushLayoutTask
+     */
+
+    layoutProperty_->UpdatePullToRefresh(false);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->pullToRefresh_, false);
+}
+
+/**
+ * @tc.name: AttrRefreshOffset10
+ * @tc.desc: Test attr RefreshOffset UpdatePullToRefresh
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset10, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    bool isRefreshTrigger = false;
+    RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
+    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
+    auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
+    Create([onRefreshing, onStateChange](RefreshModelNG model) {
+        model.SetOnStateChange(std::move(onStateChange));
+    });
+
+    /**
+     * @tc.steps: step1. refreshOffset_: -> 32vp
+     * @tc.expected: refreshOffset_: -> 32vp
+     */
+    layoutProperty_->UpdateRefreshOffset(OVERDRAG_OFFSET);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(pattern_->refreshOffset_, OVERDRAG_OFFSET);
+
+    /**
+     * @tc.steps: step2. HandleDragStart
+     * @tc.expected: scrollOffset_ default is 0.f, refreshStatus_ default is 0.f INACTIVE
+     */
+    pattern_->HandleDragStart();
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+
+    /**
+     * @tc.steps: step3. UpdatePullToRefresh, the delta greater than OVERDRAG_OFFSET
+     * @tc.expected: EXPECT is OFFSET_VALUE
+     *               FlushLayoutTask
+     */
+    layoutProperty_->UpdatePullToRefresh(false);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->pullToRefresh_, false);
+}
+
+/**
+ * @tc.name: AttrRefreshOffset11
+ * @tc.desc: Test attr RefreshOffset UpdatePullToRefresh
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset11, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    bool isRefreshTrigger = false;
+    RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
+    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
+    auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
+    Create([onRefreshing, onStateChange](RefreshModelNG model) {
+        model.SetOnStateChange(std::move(onStateChange));
+    });
+
+    /**
+     * @tc.steps: step1. refreshOffset_: -> 0vp
+     * @tc.expected: refreshOffset_: -> 64vp
+     */
+    layoutProperty_->UpdateRefreshOffset(ZERO_OFFSET);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(pattern_->refreshOffset_, TRIGGER_REFRESH_DISTANCE);
+
+    /**
+     * @tc.steps: step2. HandleDragStart
+     * @tc.expected: scrollOffset_ default is 0.f, refreshStatus_ default is 0.f INACTIVE
+     */
+    pattern_->HandleDragStart();
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+
+    /**
+     * @tc.steps: step3. UpdatePullToRefresh, the delta greater than OVERDRAG_OFFSET
+     * @tc.expected: EXPECT is OFFSET_VALUE
+     *               FlushLayoutTask
+     */
+    layoutProperty_->UpdatePullToRefresh(false);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->pullToRefresh_, false);
+}
+
+/**
+ * @tc.name: AttrRefreshOffset12
+ * @tc.desc: Test attr RefreshOffset UpdatePullToRefresh
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset12, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    bool isRefreshTrigger = false;
+    RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
+    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
+    auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
+    Create([onRefreshing, onStateChange](RefreshModelNG model) {
+        model.SetOnStateChange(std::move(onStateChange));
+    });
+
+    /**
+     * @tc.steps: step1. refreshOffset_: -> -1vp
+     * @tc.expected: refreshOffset_: -> 64vp
+     */
+    layoutProperty_->UpdateRefreshOffset(MINUS_OFFSET);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(pattern_->refreshOffset_, TRIGGER_REFRESH_DISTANCE);
+
+    /**
+     * @tc.steps: step2. HandleDragStart
+     * @tc.expected: scrollOffset_ default is 0.f, refreshStatus_ default is 0.f INACTIVE
+     */
+    pattern_->HandleDragStart();
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+
+    /**
+     * @tc.steps: step3. UpdatePullToRefresh, the delta greater than OVERDRAG_OFFSET
+     * @tc.expected: EXPECT is OFFSET_VALUE
+     *               FlushLayoutTask
+     */
+    layoutProperty_->UpdatePullToRefresh(false);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->pullToRefresh_, false);
+}
+
+/**
+ * @tc.name: AttrRefreshOffset13
+ * @tc.desc: Test attr RefreshOffset UpdatePullToRefresh
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset13, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    bool isRefreshTrigger = false;
+    RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
+    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
+    auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
+    Create([onRefreshing, onStateChange](RefreshModelNG model) {
+        model.SetOnStateChange(std::move(onStateChange));
+    });
+
+    /**
+     * @tc.steps: step1. refreshOffset_: -> 1vp
+     * @tc.expected: refreshOffset_: -> 1vp
+     */
+    layoutProperty_->UpdateRefreshOffset(ONE_OFFSET);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(pattern_->refreshOffset_, ONE_OFFSET);
+
+    /**
+     * @tc.steps: step2. HandleDragStart
+     * @tc.expected: scrollOffset_ default is 0.f, refreshStatus_ default is 0.f INACTIVE
+     */
+    pattern_->HandleDragStart();
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+
+    /**
+     * @tc.steps: step3. UpdatePullToRefresh, the delta greater than OVERDRAG_OFFSET
+     * @tc.expected: EXPECT is OFFSET_VALUE
+     *               FlushLayoutTask
+     */
+    layoutProperty_->UpdatePullToRefresh(false);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->pullToRefresh_, false);
+}
+
+/**
+ * @tc.name: AttrRefreshOffset14
+ * @tc.desc: Test attr RefreshOffset UpdatePullToRefresh
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset14, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    bool isRefreshTrigger = false;
+    RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
+    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
+    auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
+    Create([onRefreshing, onStateChange](RefreshModelNG model) {
+        model.SetOnStateChange(std::move(onStateChange));
+    });
+
+    /**
+     * @tc.steps: step1. refreshOffset_: -> 10vp
+     * @tc.expected: refreshOffset_: -> 10vp
+     */
+    layoutProperty_->UpdateRefreshOffset(TEN_OFFSET);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(pattern_->refreshOffset_, TEN_OFFSET);
+    /**
+     * @tc.steps: step2. HandleDragStart
+     * @tc.expected: scrollOffset_ default is 0.f, refreshStatus_ default is 0.f INACTIVE
+     */
+    pattern_->HandleDragStart();
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+
+    /**
+     * @tc.steps: step3. UpdatePullToRefresh, the delta greater than OVERDRAG_OFFSET
+     * @tc.expected: EXPECT is OFFSET_VALUE
+     *               FlushLayoutTask
+     */
+    layoutProperty_->UpdatePullToRefresh(false);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->pullToRefresh_, false);
+}
+
+/**
+ * @tc.name: AttrRefreshOffset15
+ * @tc.desc: Test attr RefreshOffset UpdatePullToRefresh
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset15, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    bool isRefreshTrigger = false;
+    RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
+    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
+    auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
+    Create([onRefreshing, onStateChange](RefreshModelNG model) {
+        model.SetOnStateChange(std::move(onStateChange));
+    });
+
+    /**
+     * @tc.steps: step1. refreshOffset_: -> -640vp
+     * @tc.expected: refreshOffset_: -> 64vp
+     */
+    layoutProperty_->UpdateRefreshOffset(DRAG_NE_OFFSET);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(pattern_->refreshOffset_, TRIGGER_REFRESH_DISTANCE);
+
+    /**
+     * @tc.steps: step2. HandleDragStart
+     * @tc.expected: scrollOffset_ default is 0.f, refreshStatus_ default is 0.f INACTIVE
+     */
+    pattern_->HandleDragStart();
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+
+    /**
+     * @tc.steps: step3. UpdatePullToRefresh, the delta greater than OVERDRAG_OFFSET
+     * @tc.expected: EXPECT is OFFSET_VALUE
+     *               FlushLayoutTask
+     */
+    layoutProperty_->UpdatePullToRefresh(true);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->pullToRefresh_, true);
+}
+
+/**
+ * @tc.name: AttrRefreshOffset16
+ * @tc.desc: Test attr RefreshOffset UpdatePullToRefresh
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset16, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    bool isRefreshTrigger = false;
+    RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
+    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
+    auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
+    Create([onRefreshing, onStateChange](RefreshModelNG model) {
+        model.SetOnStateChange(std::move(onStateChange));
+    });
+
+    /**
+     * @tc.steps: step1. refreshOffset_: -> 640vp
+     * @tc.expected: refreshOffset_: -> 640vp
+     */
+    layoutProperty_->UpdateRefreshOffset(DRAG_OFFSET);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(pattern_->refreshOffset_, DRAG_OFFSET);
+
+    /**
+     * @tc.steps: step2. HandleDragStart
+     * @tc.expected: scrollOffset_ default is 0.f, refreshStatus_ default is 0.f INACTIVE
+     */
+    pattern_->HandleDragStart();
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+
+    /**
+     * @tc.steps: step3. UpdatePullToRefresh, the delta greater than OVERDRAG_OFFSET
+     * @tc.expected: EXPECT is OFFSET_VALUE
+     *               FlushLayoutTask
+     */
+    layoutProperty_->UpdatePullToRefresh(true);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->pullToRefresh_, true);
+}
+
+/**
+ * @tc.name: AttrRefreshOffset17
+ * @tc.desc: Test attr RefreshOffset UpdatePullToRefresh
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset17, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    bool isRefreshTrigger = false;
+    RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
+    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
+    auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
+    Create([onRefreshing, onStateChange](RefreshModelNG model) {
+        model.SetOnStateChange(std::move(onStateChange));
+    });
+
+    /**
+     * @tc.steps: step1. refreshOffset_: -> 64vp
+     * @tc.expected: refreshOffset_: -> 64vp
+     */
+    layoutProperty_->UpdateRefreshOffset(TRIGGER_REFRESH_DISTANCE);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(pattern_->refreshOffset_, TRIGGER_REFRESH_DISTANCE);
+
+    /**
+     * @tc.steps: step2. HandleDragStart
+     * @tc.expected: scrollOffset_ default is 0.f, refreshStatus_ default is 0.f INACTIVE
+     */
+    pattern_->HandleDragStart();
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+
+    /**
+     * @tc.steps: step3. UpdatePullToRefresh, the delta greater than OVERDRAG_OFFSET
+     * @tc.expected: EXPECT is OFFSET_VALUE
+     *               FlushLayoutTask
+     */
+    layoutProperty_->UpdatePullToRefresh(true);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->pullToRefresh_, true);
+}
+
+/**
+ * @tc.name: AttrRefreshOffset18
+ * @tc.desc: Test attr RefreshOffset UpdatePullToRefresh
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset18, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    bool isRefreshTrigger = false;
+    RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
+    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
+    auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
+    Create([onRefreshing, onStateChange](RefreshModelNG model) {
+        model.SetOnStateChange(std::move(onStateChange));
+    });
+
+    /**
+     * @tc.steps: step1. refreshOffset_: -> 32vp
+     * @tc.expected: refreshOffset_: -> 32vp
+     */
+    layoutProperty_->UpdateRefreshOffset(OVERDRAG_OFFSET);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(pattern_->refreshOffset_, OVERDRAG_OFFSET);
+
+    /**
+     * @tc.steps: step2. HandleDragStart
+     * @tc.expected: scrollOffset_ default is 0.f, refreshStatus_ default is 0.f INACTIVE
+     */
+    pattern_->HandleDragStart();
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+
+    /**
+     * @tc.steps: step3. UpdatePullToRefresh, the delta greater than OVERDRAG_OFFSET
+     * @tc.expected: EXPECT is OFFSET_VALUE
+     *               FlushLayoutTask
+     */
+    layoutProperty_->UpdatePullToRefresh(true);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->pullToRefresh_, true);
+}
+
+/**
+ * @tc.name: AttrRefreshOffset19
+ * @tc.desc: Test attr RefreshOffset UpdatePullToRefresh
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset19, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    bool isRefreshTrigger = false;
+    RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
+    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
+    auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
+    Create([onRefreshing, onStateChange](RefreshModelNG model) {
+        model.SetOnStateChange(std::move(onStateChange));
+    });
+
+    /**
+     * @tc.steps: step1. refreshOffset_: -> 0vp
+     * @tc.expected: refreshOffset_: -> 64vp
+     */
+    layoutProperty_->UpdateRefreshOffset(ZERO_OFFSET);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(pattern_->refreshOffset_, TRIGGER_REFRESH_DISTANCE);
+
+    /**
+     * @tc.steps: step2. HandleDragStart
+     * @tc.expected: scrollOffset_ default is 0.f, refreshStatus_ default is 0.f INACTIVE
+     */
+    pattern_->HandleDragStart();
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+
+    /**
+     * @tc.steps: step3. UpdatePullToRefresh, the delta greater than OVERDRAG_OFFSET
+     * @tc.expected: EXPECT is OFFSET_VALUE
+     *               FlushLayoutTask
+     */
+    layoutProperty_->UpdatePullToRefresh(true);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->pullToRefresh_, true);
+}
+
+/**
+ * @tc.name: AttrRefreshOffset20
+ * @tc.desc: Test attr RefreshOffset UpdatePullToRefresh
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset20, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    bool isRefreshTrigger = false;
+    RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
+    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
+    auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
+    Create([onRefreshing, onStateChange](RefreshModelNG model) {
+        model.SetOnStateChange(std::move(onStateChange));
+    });
+
+    /**
+     * @tc.steps: step1. refreshOffset_: -> -1vp
+     * @tc.expected: refreshOffset_: -> -1vp
+     */
+    layoutProperty_->UpdateRefreshOffset(MINUS_OFFSET);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(pattern_->refreshOffset_, TRIGGER_REFRESH_DISTANCE);
+
+    /**
+     * @tc.steps: step2. HandleDragStart
+     * @tc.expected: scrollOffset_ default is 0.f, refreshStatus_ default is 0.f INACTIVE
+     */
+    pattern_->HandleDragStart();
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+
+    /**
+     * @tc.steps: step3. UpdatePullToRefresh, the delta greater than OVERDRAG_OFFSET
+     * @tc.expected: EXPECT is OFFSET_VALUE
+     *               FlushLayoutTask
+     */
+    layoutProperty_->UpdatePullToRefresh(true);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->pullToRefresh_, true);
+}
+
+/**
+ * @tc.name: AttrRefreshOffset21
+ * @tc.desc: Test attr RefreshOffset UpdatePullToRefresh
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset21, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    bool isRefreshTrigger = false;
+    RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
+    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
+    auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
+    Create([onRefreshing, onStateChange](RefreshModelNG model) {
+        model.SetOnStateChange(std::move(onStateChange));
+    });
+
+    /**
+     * @tc.steps: step1. refreshOffset_: -> 1vp
+     * @tc.expected: refreshOffset_: -> 1vp
+     */
+    layoutProperty_->UpdateRefreshOffset(ONE_OFFSET);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(pattern_->refreshOffset_, ONE_OFFSET);
+
+    /**
+     * @tc.steps: step2. HandleDragStart
+     * @tc.expected: scrollOffset_ default is 0.f, refreshStatus_ default is 0.f INACTIVE
+     */
+    pattern_->HandleDragStart();
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+
+    /**
+     * @tc.steps: step3. UpdatePullToRefresh, the delta greater than OVERDRAG_OFFSET
+     * @tc.expected: EXPECT is OFFSET_VALUE
+     *               FlushLayoutTask
+     */
+    layoutProperty_->UpdatePullToRefresh(true);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->pullToRefresh_, true);
+}
+
+/**
+ * @tc.name: AttrRefreshOffset22
+ * @tc.desc: Test attr RefreshOffset UpdatePullToRefresh
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset22, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    bool isRefreshTrigger = false;
+    RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
+    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
+    auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
+    Create([onRefreshing, onStateChange](RefreshModelNG model) {
+        model.SetOnStateChange(std::move(onStateChange));
+    });
+
+    /**
+     * @tc.steps: step1. refreshOffset_: -> 10vp
+     * @tc.expected: refreshOffset_: -> 10vp
+     */
+    layoutProperty_->UpdateRefreshOffset(TEN_OFFSET);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(pattern_->refreshOffset_, TEN_OFFSET);
+
+    /**
+     * @tc.steps: step2. HandleDragStart
+     * @tc.expected: scrollOffset_ default is 0.f, refreshStatus_ default is 0.f INACTIVE
+     */
+    pattern_->HandleDragStart();
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+
+    /**
+     * @tc.steps: step3. UpdatePullToRefresh, the delta greater than OVERDRAG_OFFSET
+     * @tc.expected: EXPECT is OFFSET_VALUE
+     *               FlushLayoutTask
+     */
+    layoutProperty_->UpdatePullToRefresh(true);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->pullToRefresh_, true);
+}
+
+/**
+ * @tc.name: AttrRefreshOffset23
+ * @tc.desc: Test attr RefreshOffset UpdatePullToRefresh
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset23, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    bool isRefreshTrigger = false;
+    RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
+    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
+    auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
+    Create([onRefreshing, onStateChange](RefreshModelNG model) {
+        model.SetOnStateChange(std::move(onStateChange));
+    });
+
+    /**
+     * @tc.steps: step1. refreshOffset_: -> -640vp
+     * @tc.expected: refreshOffset_: -> 64vp
+     */
+    layoutProperty_->UpdateRefreshOffset(DRAG_NE_OFFSET);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(pattern_->refreshOffset_, TRIGGER_REFRESH_DISTANCE);
+
+    /**
+     * @tc.steps: step2. HandleDragStart
+     * @tc.expected: scrollOffset_ default is 0.f, refreshStatus_ default is 0.f INACTIVE
+     */
+    pattern_->HandleDragStart();
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+
+    /**
+     * @tc.steps: step3. UpdatePullToRefresh, the delta greater than OVERDRAG_OFFSET
+     * @tc.expected: EXPECT is OFFSET_VALUE
+     *               FlushLayoutTask
+     */
+    layoutProperty_->UpdatePullToRefresh(0);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->pullToRefresh_, 0);
+}
+
+/**
+ * @tc.name: AttrRefreshOffset24
+ * @tc.desc: Test attr RefreshOffset UpdatePullToRefresh
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset24, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    bool isRefreshTrigger = false;
+    RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
+    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
+    auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
+    Create([onRefreshing, onStateChange](RefreshModelNG model) {
+        model.SetOnStateChange(std::move(onStateChange));
+    });
+
+    /**
+     * @tc.steps: step1. refreshOffset_: -> 640vp
+     * @tc.expected: refreshOffset_: -> 640vp
+     */
+    layoutProperty_->UpdateRefreshOffset(DRAG_OFFSET);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(pattern_->refreshOffset_, DRAG_OFFSET);
+
+    /**
+     * @tc.steps: step2. HandleDragStart
+     * @tc.expected: scrollOffset_ default is 0.f, refreshStatus_ default is 0.f INACTIVE
+     */
+    pattern_->HandleDragStart();
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+
+    /**
+     * @tc.steps: step3. UpdatePullToRefresh, the delta greater than OVERDRAG_OFFSET
+     * @tc.expected: EXPECT is OFFSET_VALUE
+     *               FlushLayoutTask
+     */
+    layoutProperty_->UpdatePullToRefresh(0);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->pullToRefresh_, 0);
+}
+
+/**
+ * @tc.name: AttrRefreshOffset25
+ * @tc.desc: Test attr RefreshOffset UpdatePullToRefresh
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset25, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    bool isRefreshTrigger = false;
+    RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
+    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
+    auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
+    Create([onRefreshing, onStateChange](RefreshModelNG model) {
+        model.SetOnStateChange(std::move(onStateChange));
+    });
+
+    /**
+     * @tc.steps: step1. refreshOffset_: -> 64vp
+     * @tc.expected: refreshOffset_: -> 64vp
+     */
+    layoutProperty_->UpdateRefreshOffset(TRIGGER_REFRESH_DISTANCE);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(pattern_->refreshOffset_, TRIGGER_REFRESH_DISTANCE);
+
+    /**
+     * @tc.steps: step2. HandleDragStart
+     * @tc.expected: scrollOffset_ default is 0.f, refreshStatus_ default is 0.f INACTIVE
+     */
+    pattern_->HandleDragStart();
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+
+    /**
+     * @tc.steps: step3. UpdatePullToRefresh, the delta greater than OVERDRAG_OFFSET
+     * @tc.expected: EXPECT is OFFSET_VALUE
+     *               FlushLayoutTask
+     */
+    layoutProperty_->UpdatePullToRefresh(0);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->pullToRefresh_, 0);
+}
+
+/**
+ * @tc.name: AttrRefreshOffset26
+ * @tc.desc: Test attr RefreshOffset UpdatePullToRefresh
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset26, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    bool isRefreshTrigger = false;
+    RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
+    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
+    auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
+    Create([onRefreshing, onStateChange](RefreshModelNG model) {
+        model.SetOnStateChange(std::move(onStateChange));
+    });
+
+    /**
+     * @tc.steps: step1. refreshOffset_: -> 32vp
+     * @tc.expected: refreshOffset_: -> 32vp
+     */
+    layoutProperty_->UpdateRefreshOffset(OVERDRAG_OFFSET);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(pattern_->refreshOffset_, OVERDRAG_OFFSET);
+
+    /**
+     * @tc.steps: step2. HandleDragStart
+     * @tc.expected: scrollOffset_ default is 0.f, refreshStatus_ default is 0.f INACTIVE
+     */
+    pattern_->HandleDragStart();
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+
+    /**
+     * @tc.steps: step3. UpdatePullToRefresh, the delta greater than OVERDRAG_OFFSET
+     * @tc.expected: EXPECT is OFFSET_VALUE
+     *               FlushLayoutTask
+     */
+    layoutProperty_->UpdatePullToRefresh(0);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->pullToRefresh_, 0);
+}
+
+/**
+ * @tc.name: AttrRefreshOffset27
+ * @tc.desc: Test attr RefreshOffset UpdatePullToRefresh
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset27, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    bool isRefreshTrigger = false;
+    RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
+    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
+    auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
+    Create([onRefreshing, onStateChange](RefreshModelNG model) {
+        model.SetOnStateChange(std::move(onStateChange));
+    });
+
+    /**
+     * @tc.steps: step1. refreshOffset_: -> 0vp
+     * @tc.expected: refreshOffset_: -> 64vp
+     */
+    layoutProperty_->UpdateRefreshOffset(ZERO_OFFSET);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(pattern_->refreshOffset_, TRIGGER_REFRESH_DISTANCE);
+
+    /**
+     * @tc.steps: step2. HandleDragStart
+     * @tc.expected: scrollOffset_ default is 0.f, refreshStatus_ default is 0.f INACTIVE
+     */
+    pattern_->HandleDragStart();
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+
+    /**
+     * @tc.steps: step3. UpdatePullToRefresh, the delta greater than OVERDRAG_OFFSET
+     * @tc.expected: EXPECT is OFFSET_VALUE
+     *               FlushLayoutTask
+     */
+    layoutProperty_->UpdatePullToRefresh(0);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->pullToRefresh_, 0);
+}
+
+/**
+ * @tc.name: AttrRefreshOffset28
+ * @tc.desc: Test attr RefreshOffset UpdatePullToRefresh
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset28, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    bool isRefreshTrigger = false;
+    RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
+    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
+    auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
+    Create([onRefreshing, onStateChange](RefreshModelNG model) {
+        model.SetOnStateChange(std::move(onStateChange));
+    });
+
+    /**
+     * @tc.steps: step1. refreshOffset_: -> -1vp
+     * @tc.expected: refreshOffset_: -> 64vp
+     */
+    layoutProperty_->UpdateRefreshOffset(MINUS_OFFSET);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(pattern_->refreshOffset_, TRIGGER_REFRESH_DISTANCE);
+
+    /**
+     * @tc.steps: step2. HandleDragStart
+     * @tc.expected: scrollOffset_ default is 0.f, refreshStatus_ default is 0.f INACTIVE
+     */
+    pattern_->HandleDragStart();
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+
+    /**
+     * @tc.steps: step3. UpdatePullToRefresh, the delta greater than OVERDRAG_OFFSET
+     * @tc.expected: EXPECT is OFFSET_VALUE
+     *               FlushLayoutTask
+     */
+    layoutProperty_->UpdatePullToRefresh(0);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->pullToRefresh_, 0);
+}
+
+/**
+ * @tc.name: AttrRefreshOffset29
+ * @tc.desc: Test attr RefreshOffset UpdatePullToRefresh
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset29, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    bool isRefreshTrigger = false;
+    RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
+    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
+    auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
+    Create([onRefreshing, onStateChange](RefreshModelNG model) {
+        model.SetOnStateChange(std::move(onStateChange));
+    });
+
+    /**
+     * @tc.steps: step1. refreshOffset_: -> 1vp
+     * @tc.expected: refreshOffset_: -> 1vp
+     */
+    layoutProperty_->UpdateRefreshOffset(ONE_OFFSET);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(pattern_->refreshOffset_, ONE_OFFSET);
+
+    /**
+     * @tc.steps: step2. HandleDragStart
+     * @tc.expected: scrollOffset_ default is 0.f, refreshStatus_ default is 0.f INACTIVE
+     */
+    pattern_->HandleDragStart();
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+
+    /**
+     * @tc.steps: step3. UpdatePullToRefresh, the delta greater than OVERDRAG_OFFSET
+     * @tc.expected: EXPECT is OFFSET_VALUE
+     *               FlushLayoutTask
+     */
+    layoutProperty_->UpdatePullToRefresh(0);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->pullToRefresh_, 0);
 }
 
 /**
