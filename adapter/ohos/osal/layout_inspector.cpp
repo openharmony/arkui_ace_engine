@@ -238,21 +238,6 @@ void LayoutInspector::GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t 
     jsonTree->Put("ProcessID", getpid());
     jsonTree->Put("WindowID", (int32_t)pipeline->GetWindowId());
     treeJsonStr = jsonTree->ToString();
-    if (SystemProperties::GetDebugEnabled()) {
-        auto vsyncId = jsonTree->GetValue("VsyncID");
-        auto processId = jsonTree->GetValue("ProcessID");
-        auto windowId = jsonTree->GetValue("WindowID");
-        auto content = jsonTree->GetValue("content");
-        auto children = content->GetValue("$children");
-        auto child = children->GetArrayItem(0);
-        auto type = child->GetValue("type");
-        TAG_LOGD(AceLogTag::ACE_STATE_MGMT,
-            "Json tree info : [type:%{public}s, vsyncId:%{public}d, processId:%{public}d, windowId:%{public}d]",
-            type->ToString().c_str(),
-            vsyncId->GetInt(),
-            processId->GetInt(),
-            windowId->GetInt());
-    }
 }
 
 void LayoutInspector::GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonValue>& message)
