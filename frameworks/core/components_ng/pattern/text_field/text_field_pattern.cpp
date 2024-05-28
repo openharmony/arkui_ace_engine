@@ -511,9 +511,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     CheckScrollable();
     UpdateScrollBarOffset();
     if (config.frameSizeChange) {
-        if (GetScrollBar() != nullptr) {
-            GetScrollBar()->ScheduleDisappearDelayTask();
-        }
+        ScheduleDisappearDelayTask();
     }
     return true;
 }
@@ -525,6 +523,10 @@ void TextFieldPattern::HandleContentSizeChange(const RectF& textRect)
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    if (!NearEqual(textRect.Height(), textRect_.Height())) {
+        PlayScrollBarAppearAnimation();
+        ScheduleDisappearDelayTask();
+    }
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (eventHub->GetOnContentSizeChange()) {
@@ -689,10 +691,7 @@ bool TextFieldPattern::OffsetInContentRegion(const Offset& offset)
 
 void TextFieldPattern::OnScrollEndCallback()
 {
-    auto scrollBar = GetScrollBar();
-    if (scrollBar) {
-        scrollBar->ScheduleDisappearDelayTask();
-    }
+    ScheduleDisappearDelayTask();
     auto selectArea = selectOverlay_->GetSelectArea();
     if (!IsUsingMouse() && SelectOverlayIsOn() &&
         !(Negative(selectArea.Width()) || Negative(selectArea.Height()))) {
@@ -1884,10 +1883,7 @@ void TextFieldPattern::InitDragDropCallBack()
     auto onDragEnd = [weakPtr = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event) {
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto scrollBar = pattern->GetScrollBar();
-        if (scrollBar) {
-            scrollBar->ScheduleDisappearDelayTask();
-        }
+        pattern->ScheduleDisappearDelayTask();
         ContainerScope scope(pattern->GetHostInstanceId());
         if (pattern->dragStatus_ == DragStatus::DRAGGING && !pattern->isDetachFromMainTree_) {
             pattern->dragStatus_ = DragStatus::NONE;
@@ -5269,23 +5265,33 @@ void TextFieldPattern::UpdateScrollBarOffset()
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void TextFieldPattern::PlayScrollBarAppearAnimation()
+{
+    auto scrollBar = GetScrollBar();
+    if (scrollBar) {
+        scrollBar->PlayScrollBarAppearAnimation();
+    }
+}
+
+void TextFieldPattern::ScheduleDisappearDelayTask()
+{
+    auto scrollBar = GetScrollBar();
+    if (scrollBar) {
+        scrollBar->ScheduleDisappearDelayTask();
+    }
+}
+
 bool TextFieldPattern::OnScrollCallback(float offset, int32_t source)
 {
     if (source == SCROLL_FROM_START) {
-        auto scrollBar = GetScrollBar();
-        if (scrollBar) {
-            scrollBar->PlayScrollBarAppearAnimation();
-        }
+        PlayScrollBarAppearAnimation();
         selectOverlay_->HideMenu();
         return true;
     }
     if (IsReachedBoundary(offset)) {
         return false;
     }
-    auto scrollBar = GetScrollBar();
-    if (scrollBar) {
-        scrollBar->PlayScrollBarAppearAnimation();
-    }
+    PlayScrollBarAppearAnimation();
     OnTextInputScroll(offset);
     OnTextAreaScroll(offset);
     return true;

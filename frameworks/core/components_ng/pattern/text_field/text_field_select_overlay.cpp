@@ -412,13 +412,14 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     } else {
         auto position = GetCaretPositionOnHandleMove(localOffset);
         if (isFirst) {
-            selectController->MoveFirstHandleToContentRect(position);
+            selectController->MoveFirstHandleToContentRect(position, false);
             UpdateSecondHandleOffset();
         } else {
             selectController->MoveSecondHandleToContentRect(position);
             UpdateFirstHandleOffset();
         }
     }
+    pattern->PlayScrollBarAppearAnimation();
     auto tmpHost = pattern->GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -453,6 +454,7 @@ void TextFieldSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
         overlayManager->MarkInfoChange(DIRTY_SECOND_HANDLE);
     }
     overlayManager->ShowOptionMenu();
+    pattern->ScheduleDisappearDelayTask();
     auto tmpHost = pattern->GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
