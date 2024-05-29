@@ -398,6 +398,11 @@ void NavigationPattern::CheckTopNavPathChange(
     CHECK_NULL_VOID(contentNode);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
+    // close the text selection menu before transition.
+    auto selectOverlayManager = context->GetSelectOverlayManager();
+    if (selectOverlayManager) {
+        selectOverlayManager->ResetSelectionAndDestroySelectOverlay();
+    }
     // fire onHidden and lostFocus event
     RefPtr<NavDestinationGroupNode> preTopNavDestination;
     int32_t lastPreIndex = -1;
