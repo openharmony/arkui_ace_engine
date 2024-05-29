@@ -1252,7 +1252,7 @@ void PipelineContext::OnFoldDisplayModeChange(FoldDisplayMode foldDisplayMode)
     }
 }
 
-void PipelineContext::OnTransformHintChange(uint32_t transform)
+void PipelineContext::OnTransformHintChanged(uint32_t transform)
 {
     for (auto&& [id, callback] : transformHintChangedCallbackMap_) {
         if (callback) {
