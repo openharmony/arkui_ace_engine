@@ -5374,16 +5374,15 @@ void WebDelegate::OnDataResubmitted(std::shared_ptr<OHOS::NWeb::NWebDataResubmis
 
 void WebDelegate::OnNavigationEntryCommitted(std::shared_ptr<OHOS::NWeb::NWebLoadCommittedDetails> details)
 {
-    auto pattern = webPattern_.Upgrade();
-    if (pattern) {
-        pattern->DestroyAnalyzerOverlay();
-    }
     if (onNavigationEntryCommittedV2_) {
         NavigationType type = static_cast<NavigationType>(details->GetNavigationType());
         onNavigationEntryCommittedV2_(std::make_shared<NavigationEntryCommittedEvent>(details->GetURL(),
             type, details->IsMainFrame(), details->IsSameDocument(),
             details->DidReplaceEntry()));
     }
+    auto pattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->DestroyAnalyzerOverlay();
 }
 
 void WebDelegate::OnFaviconReceived(const void* data, size_t width, size_t height, OHOS::NWeb::ImageColorType colorType,
