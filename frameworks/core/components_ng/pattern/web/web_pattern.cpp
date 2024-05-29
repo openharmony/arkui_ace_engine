@@ -221,7 +221,7 @@ WebPattern::WebPattern(const std::string& webSrc,
 WebPattern::~WebPattern()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "NWEB ~WebPattern start");
-    UnInitTouchEventListener();
+    UninitTouchEventListener();
     if (delegate_) {
         TAG_LOGD(AceLogTag::ACE_WEB, "NWEB ~WebPattern delegate_ start SetAudioMuted");
         delegate_->SetAudioMuted(true);
@@ -3259,11 +3259,11 @@ void WebPattern::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMe
     overlayManager->ShowMenu(id, offset, menu);
 }
 
-void WebPattern::NotifyForNextTouchMoveEvent()
+void WebPattern::NotifyForNextTouchEvent()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::NotifyForNextTouchMoveEvent");
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::NotifyForNextTouchEvent");
     CHECK_NULL_VOID(delegate_);
-    delegate_->NotifyForNextTouchMoveEvent();
+    delegate_->NotifyForNextTouchEvent();
 }
 
 void WebPattern::InitTouchEventListener()
@@ -3280,16 +3280,16 @@ void WebPattern::InitTouchEventListener()
     context->RegisterTouchEventListener(listener);
 }
 
-void WebPattern::UnInitTouchEventListener()
+void WebPattern::UninitTouchEventListener()
 {
-    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::UnInitTouchEventListener");
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::UninitTouchEventListener");
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
 
-    context->UnRegisterTouchEventListener(AceType::WeakClaim(this));
+    context->UnregisterTouchEventListener(AceType::WeakClaim(this));
 }
 
 void WebPattern::OnDateTimeChooserPopup(std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser> chooser,

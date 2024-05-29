@@ -26,7 +26,7 @@ void TouchEventListener::OnTouchEvent()
 {
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
-    pattern->NotifyForNextTouchMoveEvent();
+    pattern->NotifyForNextTouchEvent();
 }
 
 WeakPtr<NG::Pattern> TouchEventListener::GetPatternFromListener()

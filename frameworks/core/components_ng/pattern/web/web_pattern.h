@@ -528,7 +528,7 @@ public:
     std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);
     bool Backward();
     void OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMenuOption);
-    void NotifyForNextTouchMoveEvent() override;
+    void NotifyForNextTouchEvent() override;
     void CloseKeyboard();
     WebInfoType GetWebInfoType();
     void RequestFocus();
@@ -666,7 +666,7 @@ private:
     void HandleOnDragLeave(int32_t x, int32_t y);
     void HandleOnDragEnd(int32_t x, int32_t y);
     void InitTouchEventListener();
-    void UnInitTouchEventListener();
+    void UninitTouchEventListener();
     void DragDropSelectionMenu();
     void OnDragFileNameStart(const RefPtr<UnifiedData>& aceUnifiedData, const std::string& fileName);
     int32_t dropX_ = 0;

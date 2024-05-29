@@ -934,7 +934,7 @@ public:
     Offset GetPosition(const std::string& embedId);
 
     void OnOnlineRenderToForeground();
-    void NotifyForNextTouchMoveEvent();
+    void NotifyForNextTouchEvent();
 
     void OnViewportFitChange(OHOS::NWeb::ViewportFit viewportFit);
     void OnAreaChange(const OHOS::Ace::Rect& area);

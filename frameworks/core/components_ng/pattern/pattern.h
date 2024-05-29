@@ -271,7 +271,7 @@ public:
         return true;
     }
 
-    virtual void NotifyForNextTouchMoveEvent() {}
+    virtual void NotifyForNextTouchEvent() {}
 
     // TODO: for temp use, need to delete this.
     virtual bool OnDirtyLayoutWrapperSwap(

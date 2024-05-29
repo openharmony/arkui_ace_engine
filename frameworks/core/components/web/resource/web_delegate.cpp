@@ -6538,11 +6538,11 @@ std::vector<int8_t> WebDelegate::GetWordSelection(const std::string& text, int8_
     return webPattern->GetWordSelection(text, offset);
 }
 
-void WebDelegate::NotifyForNextTouchMoveEvent()
+void WebDelegate::NotifyForNextTouchEvent()
 {
     ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
-        nweb_->NotifyForNextTouchMoveEvent();
+        nweb_->NotifyForNextTouchEvent();
     }
 }
 
