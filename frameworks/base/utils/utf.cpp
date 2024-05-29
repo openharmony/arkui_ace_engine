@@ -101,7 +101,7 @@ size_t ConvertRegionUtf8ToUtf16(
     size_t outPos = 0;
     while (inPos < mutf8Len) {
         auto [pair, nbytes] = ConvertMUtf8ToUtf16Pair(mutf8In, mutf8Len - inPos);
-        auto [p_hi, p_lo] = SplitUtf16Pair(pair);
+        auto [pHi, pLo] = SplitUtf16Pair(pair);
 
         mutf8In += nbytes; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         inPos += nbytes;
@@ -110,18 +110,18 @@ size_t ConvertRegionUtf8ToUtf16(
             continue;
         }
 
-        if (p_hi != 0) {
+        if (pHi != 0) {
             if (outPos++ >= utf16Len - 1) { // check for place for two uint16
                 --outPos;
                 break;
             }
-            *utf16Out++ = p_hi; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            *utf16Out++ = pHi; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         }
         if (outPos++ >= utf16Len) {
             --outPos;
             break;
         }
-        *utf16Out++ = p_lo; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        *utf16Out++ = pLo; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     }
     return outPos;
 }
