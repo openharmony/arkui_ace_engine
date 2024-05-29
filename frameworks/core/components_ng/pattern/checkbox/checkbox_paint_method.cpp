@@ -66,6 +66,7 @@ CheckBoxModifier::CheckBoxModifier(
     offset_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF());
     size_ = AceType::MakeRefPtr<AnimatablePropertySizeF>(SizeF());
     enabled_ = AceType::MakeRefPtr<PropertyBool>(true);
+    hasBuilder_ = AceType::MakeRefPtr<PropertyBool>(false);
     useContentModifier_ = AceType::MakeRefPtr<PropertyBool>(false);
     checkBoxShape_ = AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(CheckBoxStyle::CIRCULAR_STYLE));
 
@@ -81,6 +82,7 @@ CheckBoxModifier::CheckBoxModifier(
     AttachProperty(offset_);
     AttachProperty(size_);
     AttachProperty(enabled_);
+    AttachProperty(hasBuilder_);
     AttachProperty(checkBoxShape_);
 }
 
@@ -154,7 +156,7 @@ void CheckBoxModifier::PaintCheckBox(RSCanvas& canvas, const OffsetF& paintOffse
     // draw check
     pen.SetColor(ToRSColor(animatableCheckColor_->Get()));
     shadowPen.SetColor(ToRSColor(animatableShadowColor_->Get()));
-    if (!hasBuilder_) {
+    if (!hasBuilder_->Get()) {
         DrawCheck(canvas, paintOffset, pen, shadowPen, contentSize);
     }
 }
