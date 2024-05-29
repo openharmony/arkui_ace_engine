@@ -1227,7 +1227,7 @@ ArkUI_Uint32 GetColorBlend(ArkUINodeHandle node)
     return ViewAbstract::GetColorBlend(frameNode).GetValue();
 }
 
-void SetGrayscale(ArkUINodeHandle node, ArkUI_Float32 grayScale)
+void SetGrayscale(ArkUINodeHandle node, ArkUI_Float64 grayScale)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1249,7 +1249,7 @@ void ResetGrayscale(ArkUINodeHandle node)
     ViewAbstract::SetGrayScale(frameNode, value);
 }
 
-void SetContrast(ArkUINodeHandle node, ArkUI_Float32 contrast)
+void SetContrast(ArkUINodeHandle node, ArkUI_Float64 contrast)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1268,7 +1268,7 @@ void ResetContrast(ArkUINodeHandle node)
     ViewAbstract::SetContrast(frameNode, value);
 }
 
-void SetBrightness(ArkUINodeHandle node, ArkUI_Float32 brightness)
+void SetBrightness(ArkUINodeHandle node, ArkUI_Float64 brightness)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2404,11 +2404,11 @@ void ResetLightUpEffect(ArkUINodeHandle node)
     ViewAbstract::SetLightUpEffect(frameNode, 1.0);
 }
 
-void SetSphericalEffect(ArkUINodeHandle node, ArkUI_Float32 radio)
+void SetSphericalEffect(ArkUINodeHandle node, ArkUI_Float64 radio)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    radio = std::clamp(radio, 0.0f, 1.0f);
+    radio = std::clamp(radio, 0.0, 1.0);
     ViewAbstract::SetSphericalEffect(frameNode, radio);
 }
 
