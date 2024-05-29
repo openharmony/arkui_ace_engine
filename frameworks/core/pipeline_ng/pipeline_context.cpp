@@ -2193,6 +2193,7 @@ void PipelineContext::OnSurfaceDensityChanged(double density)
     }
     if (isDensityChanged_) {
         UIObserverHandler::GetInstance().NotifyDensityChange(density_);
+        PipelineBase::OnSurfaceDensityChanged(density);
     }
 }
 
