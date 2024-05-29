@@ -77,24 +77,20 @@
                 "app_file_service",
                 "ets_utils",
                 "bounds_checking_function",
-                "libxml2",
-                "ffrt"
-            ],
-            "third_party": [
-                "json",
-                "skia",
-                "flutter",
-                "zlib",
-                "bounds_checking_function",
-                "curl",
+		"libxml2",
+                "ffrt",
+                "icu",
                 "cJSON",
+                "curl",
                 "css-what",
                 "jsframework",
                 "opencl-headers",
-                "libuv",
-                "egl",
                 "opengles",
-                "icu"
+                "zlib"
+            ],
+            "third_party": [
+                "skia",
+                "libuv"
             ]
         },
         "build": {

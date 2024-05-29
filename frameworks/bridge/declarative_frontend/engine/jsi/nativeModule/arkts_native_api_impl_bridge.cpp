@@ -103,6 +103,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_timer_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_refresh_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_container_span_bridge.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_plugin_bridge.h"
 #endif
@@ -1704,18 +1705,11 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::SetPatternLockSelectedColor));
     patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectedColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetPatternLockSelectedColor));
-    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setActiveCircleColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::SetPatternLockActiveCircleColor));
-    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetActiveCircleColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetPatternLockActiveCircleColor));
-    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setActiveCircleRadius"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::SetPatternLockActiveCircleRadius));
-    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetActiveCircleRadius"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetPatternLockActiveCircleRadius));
-    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableWaveEffect"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::SetEnableWaveEffect));
-    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableWaveEffect"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetEnableWaveEffect));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setActivateCircleStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::SetPatternLockActivateCircleStyle));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetActivateCircleStyle"),
+        panda::FunctionRef::New(
+            const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetPatternLockActivateCircleStyle));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "patternLock"), patternLock);
 
     auto columnSplit = panda::ObjectRef::New(vm);
@@ -2131,6 +2125,13 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Component3DBridge::ResetShaderInputBuffer));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "component3D"), component3D);
 #endif
+
+    auto containerSpan = panda::ObjectRef::New(vm);
+    containerSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextBackgroundStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ContainerSpanBridge::SetTextBackgroundStyle));
+    containerSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextBackgroundStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ContainerSpanBridge::ResetTextBackgroundStyle));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "containerSpan"), containerSpan);
 
     RegisterButtonAttributes(object, vm);
     RegisterToggleAttributes(object, vm);

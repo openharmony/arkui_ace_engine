@@ -31,6 +31,7 @@
 #include "core/common/ime/text_input_proxy.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/common/ime/text_selection.h"
+#include "core/components/common/properties/text_layout_info.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_accessibility_property.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_content_modifier.h"
@@ -47,6 +48,7 @@
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/select_overlay/magnifier.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
+#include "core/components_ng/pattern/text/layout_info_interface.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -546,6 +548,8 @@ public:
     void OnColorConfigurationUpdate() override;
     bool IsDisabled() const;
     float GetLineHeight() const override;
+    size_t GetLineCount() const override;
+    TextLineMetrics GetLineMetrics(int32_t lineNumber) override;
     float GetLetterSpacing() const;
     std::vector<RectF> GetTextBoxes() override;
     bool OnBackPressed() override;
@@ -723,6 +727,7 @@ public:
         contentChange_ = onChange;
     }
 
+    PositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y) override;
     RectF GetTextContentRect(bool isActualText = false) const override
     {
         return contentRect_;

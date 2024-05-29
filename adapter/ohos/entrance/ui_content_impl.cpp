@@ -802,7 +802,10 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
     float density = 1.0f;
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     if (defaultDisplay) {
-        density = defaultDisplay->GetVirtualPixelRatio();
+        auto displayInfo = defaultDisplay->GetDisplayInfo();
+        if (displayInfo) {
+            density = displayInfo->GetDensityInCurResolution();
+        }
         deviceWidth = defaultDisplay->GetWidth();
         deviceHeight = defaultDisplay->GetHeight();
         TAG_LOGI(AceLogTag::ACE_FORM,
@@ -1196,16 +1199,17 @@ void UIContentImpl::SetFontScaleAndWeightScale(const RefPtr<Platform::AceContain
 UIContentErrorCode UIContentImpl::CommonInitialize(
     OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, uint32_t focusWindowId)
 {
-    ACE_FUNCTION_TRACE();
     auto errorCode = UIContentErrorCode::NO_ERRORS;
     window_ = window;
     CHECK_NULL_RETURN(window_, UIContentErrorCode::NULL_WINDOW);
+    auto windowName = window->GetWindowName();
+    ACE_SCOPED_TRACE_COMMERCIAL("UI Initialize:%s", windowName.c_str());
     startUrl_ = contentInfo;
-    if (StringUtils::StartWith(window->GetWindowName(), SUBWINDOW_TOAST_DIALOG_PREFIX)) {
+    if (StringUtils::StartWith(windowName, SUBWINDOW_TOAST_DIALOG_PREFIX)) {
         InitializeSubWindow(window_, true);
         return errorCode;
     }
-    if (StringUtils::StartWith(window->GetWindowName(), SUBWINDOW_PREFIX)) {
+    if (StringUtils::StartWith(windowName, SUBWINDOW_PREFIX)) {
         InitializeSubWindow(window_);
         return errorCode;
     }
@@ -1604,6 +1608,10 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     bool halfLeading = std::any_of(metaData.begin(), metaData.end(),
         [](const auto& metaDataItem) { return metaDataItem.name == "half_leading" && metaDataItem.value == "true"; });
     pipeline->SetHalfLeading(halfLeading);
+    bool changePreviewTextSupported = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
+            return metaDataItem.name == "can_preview_text" && metaDataItem.value == "false";
+        });
+    pipeline->SetSupportPreviewText(changePreviewTextSupported);
     // Use metadata to control whether the cutout safeArea takes effect.
     bool useCutout = std::any_of(metaData.begin(), metaData.end(),
         [](const auto& metaDataItem) { return metaDataItem.name == "avoid_cutout" && metaDataItem.value == "true"; });
@@ -1644,8 +1652,6 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         if (!abilityContext->GetTempDir().empty()) {
             container->SetTempDir(abilityContext->GetTempDir());
         }
-    } else {
-        LOGI("UIContentImpl::OnStart abilityContext is null");
     }
 
     LayoutInspector::SetCallback(instanceId_);

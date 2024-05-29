@@ -285,6 +285,10 @@ export struct SelectDialog {
   radioContent: Array<SheetInfo> = [];
   buttons?: ButtonOptions[] = [];
   contentPadding ?: Padding;
+  isFocus:boolean = false;
+  currentFocusIndex?: number = -1;
+  radioHeight:number = 0;
+  itemHeight:number = 0;
   @BuilderParam contentBuilder: () => void = this.buildContent;
   @State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   @State dividerColorWithTheme: ResourceColor = $r('sys.color.comp_divider');
@@ -348,11 +352,16 @@ export struct SelectDialog {
                       .hitTestBehavior(HitTestMode.None)
                       .id(String(index))
                       .onFocus(() => {
+                        this.isFocus = true;
+                        this.currentFocusIndex = index;
                         if (index == FIRST_ITEM_INDEX) {
                           this.contentScroller.scrollEdge(Edge.Top);
                         } else if (index == this.radioContent.length - 1) {
                           this.contentScroller.scrollEdge(Edge.Bottom);
                         }
+                      })
+                      .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
+                        this.radioHeight = Number(newValue.height)
                       })
                   }.constraintSize({ minHeight: LIST_MIN_HEIGHT }).clip(false)
                   .padding({ top: $r('sys.float.padding_level4'), bottom: $r('sys.float.padding_level4') })
@@ -371,6 +380,9 @@ export struct SelectDialog {
                 }
               }.paddingStyle()
             }
+            .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
+              this.itemHeight = Number(newValue.height)
+            })
           })
         }.width('100%').clip(false)
         .onFocus(() => {
@@ -382,6 +394,25 @@ export struct SelectDialog {
         .defaultFocus(this.buttons?.length == 0 ? true : false)
       }
     }.scrollBar(BarState.Auto)
+    .onDidScroll((xOffset: number, yOffset: number) => {
+      let scrollHeight: number = (this.itemHeight - this.radioHeight) / 2
+      if (this.isFocus) {
+        if (this.currentFocusIndex === this.radioContent.length - 1) {
+          this.contentScroller.scrollEdge(Edge.Bottom);
+          this.currentFocusIndex = -1;
+        } else if (this.currentFocusIndex === FIRST_ITEM_INDEX) {
+          this.contentScroller.scrollEdge(Edge.Top);
+          this.currentFocusIndex = -1;
+        } else {
+          if (yOffset > 0) {
+            this.contentScroller.scrollBy(0, scrollHeight)
+          } else if (yOffset < 0) {
+            this.contentScroller.scrollBy(0, 0 - scrollHeight)
+          }
+        }
+        this.isFocus = false;
+      }
+    })
   }
 
   build() {
@@ -1160,11 +1191,6 @@ export struct CustomDialogComponent {
       }
       this.dialogWidth = newValue.width;
       this.updateCustomStyle();
-      if (this.screenWidth > getNumberByResource('alert_container_max_width')) {
-        this.columnModifier.customStyle = newValue.width > getNumberByResource('alert_container_max_width');
-      } else {
-        this.columnModifier.customStyle = newValue.width >= this.screenWidth;
-      }
       this.isFirstInit = false;
     })
   }
@@ -1384,4 +1410,3 @@ export struct PopupDialog {
 
 export declare interface PopupDialogOptions extends CustomPopupOptions {
 }
-

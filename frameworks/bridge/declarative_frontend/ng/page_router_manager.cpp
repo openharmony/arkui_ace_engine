@@ -49,10 +49,8 @@ constexpr int32_t BUNDLE_START_POS = 8;
 constexpr int32_t INVALID_PAGE_INDEX = -1;
 constexpr int32_t MAX_ROUTER_STACK_SIZE = 32;
 constexpr int32_t JS_FILE_EXTENSION_LENGTH = 3;
-constexpr char ETS_PATH[] = "/src/main/ets/";
-constexpr char DEBUG_PATH[] = "entry/build/default/cache/default/default@CompileArkTS/esmodule/debug/";
+constexpr char DEBUG_PATH[] = "entry|entry|1.0.0|src/main/ets/";
 constexpr char TS_SUFFIX[] = ".ts";
-constexpr char ETS_SUFFIX[] = ".ets";
 
 void ExitToDesktop()
 {
@@ -85,7 +83,6 @@ void PageRouterManager::LoadOhmUrl(const RouterPageInfo& target)
 void PageRouterManager::RunPage(const std::string& url, const std::string& params)
 {
     PerfMonitor::GetPerfMonitor()->SetAppStartStatus();
-    ACE_SCOPED_TRACE("PageRouterManager::RunPage");
     CHECK_RUN_ON(JS);
     RouterPageInfo info { url, params };
 #if !defined(PREVIEW)
@@ -135,7 +132,6 @@ void PageRouterManager::RunPage(const std::string& url, const std::string& param
 
 void PageRouterManager::RunPage(const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params)
 {
-    ACE_SCOPED_TRACE("PageRouterManager::RunPage");
     CHECK_RUN_ON(JS);
     RouterPageInfo info;
     info.content = content;
@@ -750,14 +746,8 @@ RefPtr<Framework::RevSourceMap> PageRouterManager::GetCurrentPageSourceMap(const
     if (container->IsUseStageModel()) {
         auto pagePath = entryPageInfo->GetPagePath();
         auto moduleName = container->GetModuleName();
-        std::string judgePath = "";
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            judgePath = DEBUG_PATH + moduleName + ETS_PATH +
-                        pagePath.substr(0, pagePath.size() - JS_FILE_EXTENSION_LENGTH) + TS_SUFFIX;
-        } else {
-            judgePath = moduleName + ETS_PATH +
-                        pagePath.substr(0, pagePath.size() - JS_FILE_EXTENSION_LENGTH) + ETS_SUFFIX;
-        }
+        std::string judgePath = DEBUG_PATH +
+            pagePath.substr(0, pagePath.size() - JS_FILE_EXTENSION_LENGTH) + TS_SUFFIX;
         if (Framework::GetAssetContentImpl(assetManager, "sourceMaps.map", jsSourceMap)) {
             auto jsonPages = JsonUtil::ParseJsonString(jsSourceMap);
             auto jsonPage = jsonPages->GetValue(judgePath)->ToString();
@@ -1149,7 +1139,7 @@ void PageRouterManager::BackToIndexCheckAlert(int32_t index, const std::string& 
 
 void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, bool needHideLast, bool needTransition)
 {
-    ACE_SCOPED_TRACE("PageRouterManager::LoadPage");
+    ACE_SCOPED_TRACE_COMMERCIAL("load page: %s(id:%d)", target.url.c_str(), pageId);
     CHECK_RUN_ON(JS);
     LOGI("Page router manager is loading page[%{public}d]: %{public}s.", pageId, target.url.c_str());
     auto entryPageInfo = AceType::MakeRefPtr<EntryPageInfo>(pageId, target.url, target.path, target.params);

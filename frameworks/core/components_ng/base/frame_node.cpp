@@ -595,6 +595,16 @@ void FrameNode::DumpSafeAreaInfo()
                                     .append(std::to_string(manager->IsFullScreen())));
 }
 
+void FrameNode::DumpAlignRulesInfo()
+{
+    auto& flexItemProperties = layoutProperty_->GetFlexItemProperty();
+    CHECK_NULL_VOID(flexItemProperties);
+    auto rulesToString = flexItemProperties->AlignRulesToString();
+    CHECK_NULL_VOID(!rulesToString.empty());
+    DumpLog::GetInstance().AddDesc(std::string("AlignRules: ")
+                                    .append(rulesToString));
+}
+
 void FrameNode::DumpExtensionHandlerInfo()
 {
     if (!extensionHandler_) {
@@ -667,6 +677,7 @@ void FrameNode::DumpCommonInfo()
                 .append(layoutProperty_->GetContentLayoutConstraint().has_value() ?
                             layoutProperty_->GetContentLayoutConstraint().value().ToString() : "NA"));
     }
+    DumpAlignRulesInfo();
     DumpDragInfo();
     DumpOverlayInfo();
     if (frameProxy_->Dump().compare("totalCount is 0") != 0) {
@@ -1197,7 +1208,15 @@ void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp)
     }
     if ((eventHub_->HasOnAreaChanged() || eventHub_->HasInnerOnAreaChanged()) && lastFrameRect_ &&
         lastParentOffsetToWindow_) {
-        auto currFrameRect = GetRectWithRender();
+        auto currFrameRect = geometryNode_->GetFrameRect();
+        if (renderContext_ && renderContext_->GetPositionProperty()) {
+            if (renderContext_->GetPositionProperty()->HasPosition()) {
+                auto renderPosition = ContextPositionConvertToPX(
+                    renderContext_, layoutProperty_->GetLayoutConstraint()->percentReference);
+                currFrameRect.SetOffset(
+                    { static_cast<float>(renderPosition.first), static_cast<float>(renderPosition.second) });
+            }
+        }
         auto currParentOffsetToWindow = CalculateOffsetRelativeToWindow(nanoTimestamp) - currFrameRect.GetOffset();
         if (currFrameRect != *lastFrameRect_ || currParentOffsetToWindow != *lastParentOffsetToWindow_) {
             if (eventHub_->HasInnerOnAreaChanged()) {
@@ -1864,10 +1883,11 @@ RefPtr<FrameNode> FrameNode::GetFirstAutoFillContainerNode()
     return AceType::DynamicCast<FrameNode>(parent);
 }
 
-void FrameNode::NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType)
+void FrameNode::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
+    RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType)
 {
     if (pattern_) {
-        pattern_->NotifyFillRequestSuccess(nodeWrap, autoFillType);
+        pattern_->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, autoFillType);
     }
 }
 

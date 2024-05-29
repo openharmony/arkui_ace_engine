@@ -32,6 +32,7 @@ template("ace_osal_ohos_source_set") {
       external_deps = [
         "hilog:libhilog",
         "hitrace:hitrace_meter",
+        "imf:inputmethod_client",
         "init:libbeget_proxy",
         "init:libbegetutil",
       ]
@@ -71,6 +72,7 @@ template("ace_osal_ohos_source_set") {
       "image_analyzer_loader.cpp",
       "image_analyzer_manager.cpp",
       "image_analyzer_mgr.cpp",
+      "input_method_manager_ohos.cpp",
       "layout_inspector.cpp",
       "log_wrapper.cpp",
       "modal_ui_extension_impl.cpp",

@@ -260,6 +260,7 @@ void WaterFlowLayoutAlgorithm::LayoutFooter(LayoutWrapper* layoutWrapper, const 
 {
     if (layoutInfo_->itemEnd_ && layoutInfo_->footerIndex_ >= 0) {
         auto footer = layoutWrapper->GetOrCreateChildByIndex(layoutInfo_->footerIndex_);
+        CHECK_NULL_VOID(footer);
         auto footerOffset = childFrameOffset;
         auto mainOffset = layoutInfo_->GetMaxMainHeight() + layoutInfo_->currentOffset_;
         if (reverse) {

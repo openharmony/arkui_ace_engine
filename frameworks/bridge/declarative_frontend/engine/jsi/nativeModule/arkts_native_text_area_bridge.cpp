@@ -39,7 +39,7 @@ constexpr int PARAM_ARR_LENGTH_1 = 1;
 constexpr int PARAM_ARR_LENGTH_2 = 2;
 constexpr uint32_t KEY_BOARD_FOCUS_DEFAULT = 1;
 constexpr uint32_t ILLEGAL_VALUE = 0;
-constexpr uint32_t DEFAULT_MODE = -1;
+constexpr int32_t DEFAULT_MODE = -1;
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
 const int32_t MINI_VALID_VALUE = 1;
 const int32_t MAX_VALID_VALUE = 100;
@@ -1475,7 +1475,7 @@ ArkUINativeModuleValue TextAreaBridge::SetContentType(ArkUIRuntimeCallInfo *runt
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     if (secondArg->IsNumber()) {
-        uint32_t value = secondArg->Uint32Value(vm);
+        uint32_t value = secondArg->Int32Value(vm);
         GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaContentType(nativeNode, value);
     } else {
         GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaContentType(nativeNode);

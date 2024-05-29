@@ -1073,6 +1073,41 @@ HWTEST_F(TextFieldModifyTest, CreateNodePaintMethod004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnScrollEndMenuVisibile001
+ * @tc.desc: Test textfield On Scroll End Menu Visibile.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, OnScrollEndMenuVisibile001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text field.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. call OnScrollEndCallback
+     * tc.expected: step2. Check if the Menu Visibile.
+    */
+    pattern_->selectOverlay_->SetUsingMouse(false);
+    auto selectArea = pattern_->selectOverlay_->GetSelectArea();
+
+    pattern_->SetSelectionFlag(0.0f, 10.0f);
+    selectArea.SetWidth(8.0f);
+    selectArea.SetHeight(2.0f);
+    pattern_->OnScrollEndCallback();
+    EXPECT_TRUE(pattern_->selectOverlay_->IsCurrentMenuVisibile());
+
+    /**
+     * @tc.steps: step2. call CloseSelectOverlay
+     * tc.expected: step2. Check if the Menu Visibile.
+    */
+    pattern_->CloseSelectOverlay(true);
+    pattern_->OnScrollEndCallback();
+    EXPECT_FALSE(pattern_->selectOverlay_->IsCurrentMenuVisibile());
+}
+
+/**
  * @tc.name: UpdateCaretPositionOnHandleMove001
  * @tc.desc: Test the caret position after handle move done in textarea.
  * @tc.type: FUNC
@@ -1366,13 +1401,14 @@ HWTEST_F(TextFieldModifyTest, DumpViewDataPageNode001, TestSize.Level1)
     /**
      * @tc.steps: step2. Create PageNodeInfoWrap ptr.
      */
+    auto viewData = ViewDataWrap::CreateViewDataWrap();
     auto info = PageNodeInfoWrap::CreatePageNodeInfoWrap();
     auto autoFillType = AceAutoFillType::ACE_UNSPECIFIED;
 
     /**
      * @tc.steps: step3. call DumpViewDataPageNode.
      */
-    pattern_->NotifyFillRequestSuccess(info, autoFillType);
+    pattern_->NotifyFillRequestSuccess(viewData, info, autoFillType);
 }
 
 /**

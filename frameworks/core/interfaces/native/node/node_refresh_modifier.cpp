@@ -99,7 +99,7 @@ void ResetPullDownRatio(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    std::optional<float> ratioValue = 0.0;
+    std::optional<float> ratioValue = std::nullopt;
     RefreshModelNG::SetPullDownRatio(frameNode, ratioValue);
 }
 

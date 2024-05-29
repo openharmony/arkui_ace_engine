@@ -166,10 +166,7 @@ public:
         return false;
     }
 
-    void OnLanguageConfigurationUpdate() override
-    {
-        InitTitle();
-    }
+    void OnLanguageConfigurationUpdate() override;
 
     void InitColumnTouchTestFunc();
 
@@ -225,6 +222,7 @@ private:
     void InitContainerEvent();
     void InitLayoutProperty();
     void InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRow);
+    void InitButtonsLayoutProperty();
 
     std::string appLabel_;
     RefPtr<PanEvent> panEvent_ = nullptr;

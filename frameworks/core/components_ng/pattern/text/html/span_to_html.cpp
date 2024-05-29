@@ -14,12 +14,22 @@
  */
 
 #include "span_to_html.h"
+
 #include <cstdint>
 #include <string>
+#include <sys/stat.h>
+#include <unistd.h>
+
+#include "base/image/file_uri_helper.h"
+#include "base/image/image_packer.h"
 #include "base/utils/macros.h"
 
 namespace OHOS::Ace {
-extern "C" ACE_FORCE_EXPORT int OHOS_ACE_ConvertHmtlToSpanString(std::vector<uint8_t> &span, std::string& html)
+const constexpr char* CONVERT_PNG_FORMAT = "image/png";
+const constexpr char* DEFAULT_SUFFIX = ".png";
+const mode_t CHOWN_RW_UG = 0660;
+const constexpr char* TEMP_PASTED_DATA_ROOT_PATH = "data/storage/el2/base/temp/pastedata";
+extern "C" ACE_FORCE_EXPORT int OHOS_ACE_ConvertHmtlToSpanString(std::vector<uint8_t>& span, std::string& html)
 {
     SpanToHtml convert;
     html = convert.ToHtml(span);
@@ -27,19 +37,15 @@ extern "C" ACE_FORCE_EXPORT int OHOS_ACE_ConvertHmtlToSpanString(std::vector<uin
 }
 
 using namespace OHOS::Ace::NG;
-#define TO_HMTL_STYLE_FROMAT(key, value) ((key) + std::string(": ") + (value) + (";"))
-
-#define TO_HMTL_ATTRIBUTE_FROMAT(key, value) ((key) + std::string("=") + ("\"") + (value) + ("\" "))
-
 std::string SpanToHtml::FontStyleToHtml(const std::optional<Ace::FontStyle>& value)
 {
-    return TO_HMTL_STYLE_FROMAT("font-style",
-        value.value_or(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL ? "normal" : "italic");
+    return ToHtmlStyleFormat(
+        "font-style", value.value_or(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL ? "normal" : "italic");
 }
 
 std::string SpanToHtml::FontSizeToHtml(const std::optional<Dimension>& value)
 {
-    return TO_HMTL_STYLE_FROMAT("font-size", GetFontSizeInJson(value));
+    return ToHtmlStyleFormat("font-size", GetFontSizeInJson(value));
 }
 
 std::string SpanToHtml::FontWeightToHtml(const std::optional<FontWeight>& value)
@@ -63,17 +69,32 @@ std::string SpanToHtml::FontWeightToHtml(const std::optional<FontWeight>& value)
     };
 
     auto index = BinarySearchFindIndex(table, ArraySize(table), value.value_or(FontWeight::NORMAL));
-    return TO_HMTL_STYLE_FROMAT("font-weight", index < 0 ? "normal" : table[index].value);
+    return ToHtmlStyleFormat("font-weight", index < 0 ? "normal" : table[index].value);
+}
+
+void SpanToHtml::ToHtmlColor(std::string& color)
+{
+    if (color.length() < 3) {
+        return;
+    }
+    // argb -> rgda
+    char second = color[1];
+    char third = color[2];
+    color.erase(1, 2);
+    color.push_back(second);
+    color.push_back(third);
 }
 
 std::string SpanToHtml::ColorToHtml(const std::optional<Color>& value)
 {
-    return TO_HMTL_STYLE_FROMAT("color", value.value_or(Color::BLACK).ColorToString());
+    auto color = value.value_or(Color::BLACK).ColorToString();
+    ToHtmlColor(color);
+    return ToHtmlStyleFormat("color", color);
 }
 
 std::string SpanToHtml::FontFamilyToHtml(const std::optional<std::vector<std::string>>& value)
 {
-    return TO_HMTL_STYLE_FROMAT("font-family", GetFontFamilyInJson(value));
+    return ToHtmlStyleFormat("font-family", GetFontFamilyInJson(value));
 }
 
 std::string SpanToHtml::TextDecorationToHtml(TextDecoration decoration)
@@ -83,7 +104,7 @@ std::string SpanToHtml::TextDecorationToHtml(TextDecoration decoration)
         { TextDecoration::UNDERLINE, "underline" },
         { TextDecoration::OVERLINE, "overline" },
         { TextDecoration::LINE_THROUGH, "line-through" },
-        { TextDecoration::INHERIT, "inherit"},
+        { TextDecoration::INHERIT, "inherit" },
     };
 
     auto index = BinarySearchFindIndex(decorationTable, ArraySize(decorationTable), decoration);
@@ -91,7 +112,7 @@ std::string SpanToHtml::TextDecorationToHtml(TextDecoration decoration)
         return "";
     }
 
-    return TO_HMTL_STYLE_FROMAT("text-decoration-line", decorationTable[index].value);
+    return ToHtmlStyleFormat("text-decoration-line", decorationTable[index].value);
 }
 
 std::string SpanToHtml::TextDecorationStyleToHtml(TextDecorationStyle decorationStyle)
@@ -109,23 +130,23 @@ std::string SpanToHtml::TextDecorationStyleToHtml(TextDecorationStyle decoration
         return "";
     }
 
-    return TO_HMTL_STYLE_FROMAT("text-decoration-style", table[index].value);
+    return ToHtmlStyleFormat("text-decoration-style", table[index].value);
 }
 
-std::string SpanToHtml::ToHtml(const std::string &key, const std::optional<Dimension> &space)
+std::string SpanToHtml::ToHtml(const std::string& key, const std::optional<Dimension>& space)
 {
     if (!space) {
         return "";
     }
-    auto &letterSpace = *space;
+    auto& letterSpace = *space;
     if (!letterSpace.IsValid()) {
         return "";
     }
 
-    return TO_HMTL_STYLE_FROMAT(key, letterSpace.ToString());
+    return ToHtmlStyleFormat(key, letterSpace.ToString());
 }
 
-std::string SpanToHtml::DeclarationToHtml(const NG::FontStyle &fontStyle)
+std::string SpanToHtml::DeclarationToHtml(const NG::FontStyle& fontStyle)
 {
     auto type = fontStyle.GetTextDecoration().value_or(TextDecoration::NONE);
     if (type == TextDecoration::NONE) {
@@ -134,7 +155,7 @@ std::string SpanToHtml::DeclarationToHtml(const NG::FontStyle &fontStyle)
     std::string html;
     auto color = fontStyle.GetTextDecorationColor();
     if (color) {
-        html += TO_HMTL_STYLE_FROMAT("text-decoration-color", color->ColorToString());
+        html += ToHtmlStyleFormat("text-decoration-color", color->ColorToString());
     }
     html += TextDecorationToHtml(type);
     auto style = fontStyle.GetTextDecorationStyle();
@@ -145,7 +166,7 @@ std::string SpanToHtml::DeclarationToHtml(const NG::FontStyle &fontStyle)
     return html;
 }
 
-std::string SpanToHtml::ToHtml(const std::optional<std::vector<Shadow>> &shadows)
+std::string SpanToHtml::ToHtml(const std::optional<std::vector<Shadow>>& shadows)
 {
     if (!shadows.has_value()) {
         return "";
@@ -162,31 +183,30 @@ std::string SpanToHtml::ToHtml(const std::optional<std::vector<Shadow>> &shadows
         }
 
         style += Dimension(shadow.GetOffset().GetX()).ToString() + " " +
-        Dimension(shadow.GetOffset().GetY()).ToString() + " " +
-        Dimension(shadow.GetBlurRadius()).ToString() + " " +
-        shadow.GetColor().ColorToString() + ",";
+                 Dimension(shadow.GetOffset().GetY()).ToString() + " " + Dimension(shadow.GetBlurRadius()).ToString() +
+                 " " + shadow.GetColor().ColorToString() + ",";
     }
     style.pop_back();
 
-    return TO_HMTL_STYLE_FROMAT("text-shadow", style);
+    return ToHtmlStyleFormat("text-shadow", style);
 }
 
-std::string SpanToHtml::ToHtml(const std::string &key, const std::optional<CalcDimension>& dimesion)
+std::string SpanToHtml::ToHtml(const std::string& key, const std::optional<CalcDimension>& dimesion)
 {
     if (!dimesion) {
         return "";
     }
 
-    return TO_HMTL_STYLE_FROMAT(key, dimesion->ToString());
+    return ToHtmlStyleFormat(key, dimesion->ToString());
 }
 
-std::string SpanToHtml::ToHtmlAttribute(const std::string &key, const std::optional<CalcDimension>& dimesion)
+std::string SpanToHtml::ToHtmlAttribute(const std::string& key, const std::optional<CalcDimension>& dimesion)
 {
     if (!dimesion) {
         return "";
     }
 
-    return TO_HMTL_ATTRIBUTE_FROMAT(key, dimesion->ToString());
+    return ToHtmlAttributeFormat(key, dimesion->ToString());
 }
 
 std::string SpanToHtml::ToHtml(const std::optional<ImageSpanSize>& size)
@@ -218,7 +238,7 @@ std::string SpanToHtml::ToHtml(const std::optional<VerticalAlign>& verticalAlign
         return "";
     }
 
-    return TO_HMTL_STYLE_FROMAT("vertical-align", table[iter].value);
+    return ToHtmlStyleFormat("vertical-align", table[iter].value);
 }
 
 std::string SpanToHtml::ToHtml(const std::optional<ImageFit>& objectFit)
@@ -242,29 +262,28 @@ std::string SpanToHtml::ToHtml(const std::optional<ImageFit>& objectFit)
         return "";
     }
 
-    return TO_HMTL_STYLE_FROMAT("object-fit", table[index].value);
+    return ToHtmlStyleFormat("object-fit", table[index].value);
 }
 
-std::string SpanToHtml::ToHtml(const std::string &key, const std::optional<OHOS::Ace::NG::MarginProperty>& prop)
+std::string SpanToHtml::ToHtml(const std::string& key, const std::optional<OHOS::Ace::NG::MarginProperty>& prop)
 {
     if (!prop) {
         return "";
     }
 
-    if (prop->top == prop->right && prop->right == prop->bottom
-        && prop->bottom == prop->left) {
+    if (prop->top == prop->right && prop->right == prop->bottom && prop->bottom == prop->left) {
         if (!prop->top) {
             return "";
         }
-        return TO_HMTL_STYLE_FROMAT(key, prop->top->ToString());
+        return ToHtmlStyleFormat(key, prop->top->ToString());
     }
 
     auto padding = prop->top.has_value() ? prop->top->ToString() : "0";
     padding += " " + (prop->right.has_value() ? prop->right->ToString() : "0");
     padding += " " + (prop->bottom.has_value() ? prop->bottom->ToString() : "0");
     padding += " " + (prop->left.has_value() ? prop->left->ToString() : "0");
-    
-    return TO_HMTL_STYLE_FROMAT(key, padding);
+
+    return ToHtmlStyleFormat(key, padding);
 }
 
 std::string SpanToHtml::ToHtml(const std::optional<OHOS::Ace::NG::BorderRadiusProperty>& borderRadius)
@@ -275,19 +294,85 @@ std::string SpanToHtml::ToHtml(const std::optional<OHOS::Ace::NG::BorderRadiusPr
 
     std::string radius;
     if (borderRadius->radiusTopLeft) {
-        radius += TO_HMTL_STYLE_FROMAT("border-top-left-radius", borderRadius->radiusTopLeft->ToString());
+        radius += ToHtmlStyleFormat("border-top-left-radius", borderRadius->radiusTopLeft->ToString());
     }
     if (borderRadius->radiusTopRight) {
-        radius += TO_HMTL_STYLE_FROMAT("border-top-right-radius", borderRadius->radiusTopRight->ToString());
+        radius += ToHtmlStyleFormat("border-top-right-radius", borderRadius->radiusTopRight->ToString());
     }
     if (borderRadius->radiusBottomRight) {
-        radius += TO_HMTL_STYLE_FROMAT("border-bottom-right-radius", borderRadius->radiusBottomRight->ToString());
+        radius += ToHtmlStyleFormat("border-bottom-right-radius", borderRadius->radiusBottomRight->ToString());
     }
     if (borderRadius->radiusBottomLeft) {
-        radius += TO_HMTL_STYLE_FROMAT("border-bottom-left-radius", borderRadius->radiusBottomLeft->ToString());
+        radius += ToHtmlStyleFormat("border-bottom-left-radius", borderRadius->radiusBottomLeft->ToString());
     }
 
     return radius;
+}
+
+bool SpanToHtml::CreateDirectory(const std::string& path)
+{
+    if (access(path.c_str(), F_OK) == 0) {
+        return true;
+    }
+
+    std::string::size_type index = 0;
+    do {
+        std::string subPath;
+        index = path.find('/', index + 1);
+        if (index == std::string::npos) {
+            subPath = path;
+        } else {
+            subPath = path.substr(0, index);
+        }
+
+        if (access(subPath.c_str(), F_OK) != 0) {
+            if (mkdir(subPath.c_str(), (S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH)) != 0) {
+                return false;
+            }
+        }
+    } while (index != std::string::npos);
+
+    if (access(path.c_str(), F_OK) == 0) {
+        return true;
+    }
+
+    return false;
+}
+
+int SpanToHtml::WriteLocalFile(RefPtr<PixelMap> pixelMap, std::string& filePath, std::string& fileUri)
+{
+    std::string fileName;
+    auto pos = filePath.rfind("/");
+    if (pos == std::string::npos) {
+        fileName = filePath;
+    } else {
+        fileName = filePath.substr(pos + 1);
+    }
+
+    if (fileName.empty()) {
+        int64_t now =
+            std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
+                .count();
+        fileName = std::to_string(now) + DEFAULT_SUFFIX;
+    }
+
+    CreateDirectory(TEMP_PASTED_DATA_ROOT_PATH);
+    std::string localPath = TEMP_PASTED_DATA_ROOT_PATH + std::string("/") + fileName;
+    RefPtr<ImagePacker> imagePacker = ImagePacker::Create();
+    PackOption option;
+    option.format = CONVERT_PNG_FORMAT;
+    imagePacker->StartPacking(localPath, option);
+    imagePacker->AddImage(*pixelMap);
+    int64_t packedSize = 0;
+    if (imagePacker->FinalizePacking(packedSize)) {
+        return -1;
+    }
+
+    if (chmod(localPath.c_str(), CHOWN_RW_UG) != 0) {
+    }
+
+    fileUri = "file:///" + localPath;
+    return 0;
 }
 
 std::string SpanToHtml::ImageToHtml(RefPtr<NG::SpanItem> item)
@@ -298,11 +383,18 @@ std::string SpanToHtml::ImageToHtml(RefPtr<NG::SpanItem> item)
     }
 
     auto options = image->options;
-    if (!options.image) {
+    if (!options.image || !options.imagePixelMap) {
         return "";
     }
 
-    std::string imgHtml = "<img src=\"" + *options.image + "\" ";
+    auto pixelMap = options.imagePixelMap.value();
+    if (pixelMap == nullptr) {
+        return "";
+    }
+
+    std::string urlName;
+    WriteLocalFile(pixelMap, *options.image, urlName);
+    std::string imgHtml = "<img src=\"" + urlName + "\" ";
     imgHtml += ToHtml(options.imageAttribute->size);
     if (options.imageAttribute) {
         imgHtml += " style=\"";
@@ -318,7 +410,7 @@ std::string SpanToHtml::ImageToHtml(RefPtr<NG::SpanItem> item)
     return imgHtml;
 }
 
-std::string SpanToHtml::NormalStyleToHtml(const NG::FontStyle &fontStyle)
+std::string SpanToHtml::NormalStyleToHtml(const NG::FontStyle& fontStyle)
 {
     std::string style = FontSizeToHtml(fontStyle.GetFontSize());
     style += FontStyleToHtml(fontStyle.GetItalicFontStyle());
@@ -334,7 +426,7 @@ std::string SpanToHtml::NormalStyleToHtml(const NG::FontStyle &fontStyle)
     return "style=\"" + style + "\"";
 }
 
-std::string SpanToHtml::ToHtml(const std::optional<OHOS::Ace::TextAlign> &object)
+std::string SpanToHtml::ToHtml(const std::optional<OHOS::Ace::TextAlign>& object)
 {
     if (!object.has_value()) {
         return "";
@@ -351,16 +443,16 @@ std::string SpanToHtml::ToHtml(const std::optional<OHOS::Ace::TextAlign> &object
         return "";
     }
 
-    return TO_HMTL_STYLE_FROMAT("text-align", table[index].value);
+    return ToHtmlStyleFormat("text-align", table[index].value);
 }
 
-std::string SpanToHtml::ToHtml(const std::optional<OHOS::Ace::WordBreak> &object)
+std::string SpanToHtml::ToHtml(const std::optional<OHOS::Ace::WordBreak>& object)
 {
     if (!object.has_value()) {
         return "";
     }
 
-    // 缺少一个 keep-all
+    // no keep_all
     static const LinearEnumMapNode<WordBreak, std::string> table[] = {
         { WordBreak::NORMAL, "normal" },
         { WordBreak::BREAK_ALL, "break_all" },
@@ -371,10 +463,10 @@ std::string SpanToHtml::ToHtml(const std::optional<OHOS::Ace::WordBreak> &object
         return "";
     }
 
-    return TO_HMTL_STYLE_FROMAT("word-break", table[index].value);
+    return ToHtmlStyleFormat("word-break", table[index].value);
 }
 
-std::string SpanToHtml::ToHtml(const std::optional<OHOS::Ace::TextOverflow> &object)
+std::string SpanToHtml::ToHtml(const std::optional<OHOS::Ace::TextOverflow>& object)
 {
     if (!object.has_value()) {
         return "";
@@ -390,10 +482,10 @@ std::string SpanToHtml::ToHtml(const std::optional<OHOS::Ace::TextOverflow> &obj
         return "";
     }
 
-    return TO_HMTL_STYLE_FROMAT("text-overflow", table[index].value);
+    return ToHtmlStyleFormat("text-overflow", table[index].value);
 }
 
-std::string SpanToHtml::LeadingMarginToHtml(const OHOS::Ace::NG::TextLineStyle &style)
+std::string SpanToHtml::LeadingMarginToHtml(const OHOS::Ace::NG::TextLineStyle& style)
 {
     auto object = style.GetLeadingMargin();
     if (!object) {
@@ -407,7 +499,7 @@ std::string SpanToHtml::LeadingMarginToHtml(const OHOS::Ace::NG::TextLineStyle &
     return "";
 }
 
-std::string SpanToHtml::ParagraphStyleToHtml(const OHOS::Ace::NG::TextLineStyle &textLineStyle)
+std::string SpanToHtml::ParagraphStyleToHtml(const OHOS::Ace::NG::TextLineStyle& textLineStyle)
 {
     auto details = ToHtml(textLineStyle.GetTextAlign());
     details += ToHtml("line-height", textLineStyle.GetLineHeight());
@@ -426,7 +518,7 @@ std::string SpanToHtml::ToHtml(const SpanString& spanString)
     bool newLine = true;
     size_t paragrapStart = 0;
     std::string out = "<div >";
-    for (const auto &item : items) {
+    for (const auto& item : items) {
         auto paragraphStyle = ParagraphStyleToHtml(*item->textLineStyle);
         if (newLine && !paragraphStyle.empty()) {
             out += "<p " + paragraphStyle + ">";
@@ -436,7 +528,7 @@ std::string SpanToHtml::ToHtml(const SpanString& spanString)
             if (paragrapStart == 0) {
                 paragrapStart = out.length();
             }
-            out +="<span " + NormalStyleToHtml(*item->fontStyle) + ">";
+            out += "<span " + NormalStyleToHtml(*item->fontStyle) + ">";
             auto content = item->GetSpanContent();
             auto wContent = StringUtils::ToWstring(content);
             if (wContent.back() == L'\n') {
@@ -445,7 +537,7 @@ std::string SpanToHtml::ToHtml(const SpanString& spanString)
                     paragrapStart = 0;
                 }
                 content.pop_back();
-                out +=  content + "</span>";
+                out += content + "</span>";
                 out += "</p>";
                 newLine = true;
             } else {
@@ -464,9 +556,9 @@ std::string SpanToHtml::ToHtml(const SpanString& spanString)
     return out;
 }
 
-std::string SpanToHtml::ToHtml(std::vector<uint8_t> &values)
+std::string SpanToHtml::ToHtml(std::vector<uint8_t>& values)
 {
     auto spanString = SpanString::DecodeTlv(values);
     return ToHtml(*spanString);
 }
-}
+} // namespace OHOS::Ace

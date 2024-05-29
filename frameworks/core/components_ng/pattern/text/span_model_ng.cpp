@@ -301,6 +301,13 @@ void SpanModelNG::SetTextBackgroundStyle(UINode* uiNode, const TextBackgroundSty
     spanNode->SetTextBackgroundStyle(style);
 }
 
+void SpanModelNG::SetTextBackgroundStyleByBaseSpan(UINode* uiNode, const TextBackgroundStyle& style)
+{
+    auto spanNode = AceType::DynamicCast<BaseSpan>(uiNode);
+    CHECK_NULL_VOID(spanNode);
+    spanNode->SetTextBackgroundStyle(style);
+}
+
 std::string SpanModelNG::GetContent(UINode* uiNode)
 {
     auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);

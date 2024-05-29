@@ -37,29 +37,27 @@ public:
     WindowSceneHelper() = default;
     ~WindowSceneHelper() override = default;
 
-    static RefPtr<UINode> FindWindowScene(RefPtr<FrameNode> targetNode);
+    static RefPtr<UINode> FindWindowScene(const RefPtr<FrameNode>& targetNode);
 
-    static bool IsWindowScene(RefPtr<FrameNode> focusedFrameNode);
+    static bool IsWindowScene(const RefPtr<FrameNode>& focusedFrameNode);
 
-    static int32_t GetFocusSystemWindowId(RefPtr<FrameNode> focusedFrameNode);
+    static int32_t GetFocusSystemWindowId(const RefPtr<FrameNode>& focusedFrameNode);
 
-    static int32_t GetWindowIdForWindowScene(RefPtr<FrameNode> windowSceneNode);
+    static int32_t GetWindowIdForWindowScene(const RefPtr<FrameNode>& windowSceneNode);
 
-    static bool IsFocusWindowSceneCloseKeyboard(RefPtr<FrameNode> focusedFrameNode);
+    static bool IsFocusWindowSceneCloseKeyboard(const RefPtr<FrameNode>& focusedFrameNode);
 
-    static void IsWindowSceneCloseKeyboard(RefPtr<FrameNode> frameNode);
+    static void IsWindowSceneCloseKeyboard(const RefPtr<FrameNode>& frameNode);
 
-    static void IsCloseKeyboard(RefPtr<FrameNode> frameNode);
+    static void IsCloseKeyboard(const RefPtr<FrameNode>& frameNode);
 
     static void InjectPointerEvent(const std::string& targetNodeName,
         const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent);
 
-    static void InjectPointerEvent(RefPtr<FrameNode> node,
+    static void InjectPointerEvent(const RefPtr<FrameNode>& node,
         const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent);
 
     static bool InjectKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent, bool isPreIme = false);
-
-    static bool GetNeedKeyboardOnFocusFlag(const RefPtr<FrameNode> frameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_SCENE_HELPER_H

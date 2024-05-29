@@ -412,11 +412,7 @@ class NodeAdapter {
         this.count_ = 0;
         this.nativeRef_ = getUINativeModule().nodeAdapter.createAdapter();
         this.nativePtr_ = this.nativeRef_.getNativeHandle();
-        getUINativeModule().nodeAdapter.setCallbacks(this.nativePtr_, this, this.onAttachToNodePtr,
-            this.onDetachFromNodePtr, this.onGetChildId !== undefined ? this.onGetChildId : undefined,
-            this.onCreateNewChild !== undefined ? this.onCreateNewNodePtr : undefined,
-            this.onDisposeChild !== undefined ? this.onDisposeNodePtr : undefined,
-            this.onUpdateChild !== undefined ? this.onUpdateNodePtr : undefined);
+        getUINativeModule().nodeAdapter.setCallbacks(this.nativePtr_, this, this.onAttachToNodePtr, this.onDetachFromNodePtr, this.onGetChildId !== undefined ? this.onGetChildId : undefined, this.onCreateNewChild !== undefined ? this.onCreateNewNodePtr : undefined, this.onDisposeChild !== undefined ? this.onDisposeNodePtr : undefined, this.onUpdateChild !== undefined ? this.onUpdateNodePtr : undefined);
     }
     dispose() {
         let hostNode = this.attachedNodeRef_.deref();
@@ -799,6 +795,18 @@ class FrameNode {
         if (!flag) {
             throw { message: 'The FrameNode is not modifiable.', code: 100021 };
         }
+        else {
+            content.setAttachedParent(new WeakRef(this));
+        }
+    }
+    removeComponentContent(content) {
+        if (content === undefined || content === null || content.getNodePtr() === null || content.getNodePtr() == undefined) {
+            return;
+        }
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        getUINativeModule().frameNode.removeChild(this.nodePtr_, content.getNodePtr());
+        content.setAttachedParent(undefined);
+        __JSScopeUtil__.restoreInstanceId();
     }
     insertChildAfter(child, sibling) {
         if (child === undefined || child === null) {
@@ -843,7 +851,7 @@ class FrameNode {
             return null;
         }
         if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-            var frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
             return frameNode === undefined ? null : frameNode;
         }
         return this.convertToFrameNode(result.nodePtr, result.nodeId);
@@ -855,7 +863,7 @@ class FrameNode {
             return null;
         }
         if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-            var frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
             return frameNode === undefined ? null : frameNode;
         }
         return this.convertToFrameNode(result.nodePtr, result.nodeId);
@@ -867,7 +875,7 @@ class FrameNode {
             return null;
         }
         if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-            var frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
             return frameNode === undefined ? null : frameNode;
         }
         return this.convertToFrameNode(result.nodePtr, result.nodeId);
@@ -879,7 +887,7 @@ class FrameNode {
             return null;
         }
         if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-            var frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
             return frameNode === undefined ? null : frameNode;
         }
         return this.convertToFrameNode(result.nodePtr, result.nodeId);
@@ -891,7 +899,7 @@ class FrameNode {
             return null;
         }
         if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-            var frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
             return frameNode === undefined ? null : frameNode;
         }
         return this.convertToFrameNode(result.nodePtr, result.nodeId);
@@ -1004,8 +1012,7 @@ class FrameNode {
         const minSize = constraint.minSize;
         const maxSize = constraint.maxSize;
         const percentReference = constraint.percentReference;
-        getUINativeModule().frameNode.measureNode(this.getNodePtr(), minSize.width, minSize.height, maxSize.width,
-            maxSize.height, percentReference.width, percentReference.height);
+        getUINativeModule().frameNode.measureNode(this.getNodePtr(), minSize.width, minSize.height, maxSize.width, maxSize.height, percentReference.width, percentReference.height);
     }
     layout(position) {
         getUINativeModule().frameNode.layoutNode(this.getNodePtr(), position.x, position.y);
@@ -1419,7 +1426,7 @@ class ColorMetrics {
         }
         else {
             const error = new Error("Parameter error. The type of input color parameter is not ResourceColor.");
-            error.code = ERROR_CODE_RESOURCE_GET_FAILED;
+            error.code = ERROR_CODE_COLOR_PARAMETER_INCORRECT;
             throw error;
         }
     }
@@ -2064,7 +2071,13 @@ class ComponentContent extends Content {
     getFrameNode() {
         return this.builderNode_.getFrameNodeWithoutCheck();
     }
+    setAttachedParent(parent) {
+        this.parentWeak_ = parent;
+    }
     getNodePtr() {
+        if (this.attachNodeRef_ !== undefined) {
+            return this.attachNodeRef_.getNativeHandle();
+        }
         return this.builderNode_.getNodePtr();
     }
     reuse(param) {
@@ -2072,6 +2085,20 @@ class ComponentContent extends Content {
     }
     recycle() {
         this.builderNode_.recycle();
+    }
+    dispose() {
+        this.detachFromParent();
+        this.attachNodeRef_.dispose();
+        this.builderNode_.dispose();
+    }
+    detachFromParent() {
+        if (this.parentWeak_ === undefined) {
+            return;
+        }
+        let parent = this.parentWeak_.deref();
+        if (parent !== undefined) {
+            parent.removeComponentContent(this);
+        }
     }
     getNodeWithoutProxy() {
         const node = this.getNodePtr();

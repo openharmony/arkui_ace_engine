@@ -380,7 +380,7 @@ TextMetrics OffscreenCanvasPaintMethod::MeasureTextMetrics(const std::string& te
 void OffscreenCanvasPaintMethod::PaintText(
     const std::string& text, double x, double y, std::optional<double> maxWidth, bool isStroke, bool hasShadow)
 {
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)) {
         paragraph_->Layout(FLT_MAX);
     } else {
         paragraph_->Layout(width_);
@@ -545,7 +545,7 @@ void OffscreenCanvasPaintMethod::PaintShadow(const RSPath& path, const Shadow& s
 {
 #ifndef ACE_UNITTEST
     CHECK_NULL_VOID(rsCanvas_);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) && slo != nullptr) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && slo != nullptr) {
         rsCanvas_->SaveLayer(*slo);
         RosenDecorationPainter::PaintShadow(path, shadow, canvas, brush, pen);
         rsCanvas_->Restore();
@@ -560,7 +560,7 @@ void OffscreenCanvasPaintMethod::PaintImageShadow(const RSPath& path, const Shad
 {
 #ifndef ACE_UNITTEST
     CHECK_NULL_VOID(rsCanvas_);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) && slo != nullptr) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && slo != nullptr) {
         RosenDecorationPainter::PaintShadow(path, shadow, canvas, brush, pen);
         rsCanvas_->Restore();
         rsCanvas_->SaveLayer(*slo);

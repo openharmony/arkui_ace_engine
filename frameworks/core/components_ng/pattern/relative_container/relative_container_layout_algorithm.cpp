@@ -32,8 +32,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t HORIZONTAL_DIRECTION_RANGE = 3;
-constexpr int32_t VERTICAL_DIRECTION_RANGE = 6;
 constexpr float DEFAULT_BIAS = 0.5f;
 constexpr float HALF_MULTIPLY = 0.5f;
 const std::string CONCAT_ID_PREFIX = "@concat";

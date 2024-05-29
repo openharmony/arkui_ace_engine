@@ -677,6 +677,10 @@ public:
         return true;
     }
 
+    void PlayScrollBarAppearAnimation();
+
+    void ScheduleDisappearDelayTask();
+
     bool IsAtTop() const override
     {
         return contentRect_.GetY() == textRect_.GetY();
@@ -1050,7 +1054,8 @@ public:
     void DumpInfo() override;
     void DumpAdvanceInfo() override;
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) override;
-    void NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) override;
+    void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
+        RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) override;
     void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "") override;
     bool CheckAutoSave() override;
     void OnColorConfigurationUpdate() override;
@@ -1222,7 +1227,7 @@ public:
 
     bool GetIsPreviewText() const
     {
-        return hasPreviewText;
+        return hasPreviewText_;
     }
 
     const Color& GetPreviewDecorationColor() const
@@ -1257,6 +1262,11 @@ public:
     bool GetShowKeyBoardOnFocus()
     {
         return showKeyBoardOnFocus_;
+    }
+
+    void SetSupportPreviewText(bool isSupported)
+    {
+        hasSupportedPreviewText_ = isSupported;
     }
 
 protected:
@@ -1465,12 +1475,12 @@ private:
 
     int32_t GetPreviewTextStart() const
     {
-        return hasPreviewText ? previewTextStart_ : selectController_->GetCaretIndex();
+        return hasPreviewText_ ? previewTextStart_ : selectController_->GetCaretIndex();
     }
 
     int32_t GetPreviewTextEnd() const
     {
-        return hasPreviewText ? previewTextEnd_ : selectController_->GetCaretIndex();
+        return hasPreviewText_ ? previewTextEnd_ : selectController_->GetCaretIndex();
     }
 
     bool CheckPreviewTextValidate(PreviewTextInfo info) const;
@@ -1653,8 +1663,8 @@ private:
     bool isFocusBGColorSet_ = false;
     bool isFocusTextColorSet_ = false;
     Dimension previewUnderlineWidth_ = 2.0_vp;
-    bool hasSupportedPreviewText = true;
-    bool hasPreviewText = false;
+    bool hasSupportedPreviewText_ = true;
+    bool hasPreviewText_ = false;
     std::queue<PreviewTextInfo> previewTextOperation;
     int32_t previewTextStart_ = -1;
     int32_t previewTextEnd_ = -1;

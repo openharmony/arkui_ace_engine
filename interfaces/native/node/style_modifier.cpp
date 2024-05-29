@@ -109,6 +109,8 @@ constexpr int32_t BLUR_STYLE_INDEX = 0;
 constexpr int32_t COLOR_MODE_INDEX = 1;
 constexpr int32_t ADAPTIVE_COLOR_INDEX = 2;
 constexpr int32_t SCALE_INDEX = 3;
+constexpr int32_t GRAY_SCALE_START = 4;
+constexpr int32_t GRAY_SCALE_END = 5;
 constexpr int32_t DECORATION_COLOR_INDEX = 1;
 constexpr int32_t DECORATION_STYLE_INDEX = 2;
 constexpr int32_t PROGRESS_TYPE_LINEAR = 1;
@@ -1115,6 +1117,9 @@ int32_t SetBrightness(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (actualSize < 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
+    if (LessNotEqual(item->value[0].f32, 0.0f) || GreatNotEqual(item->value[0].f32, 2.0f)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto fullImpl = GetFullImpl();
     auto brightness = item->value[NUM_0].f32;
     fullImpl->getNodeModifiers()->getCommonModifier()->setBrightness(node->uiNodeHandle, brightness);
@@ -1253,7 +1258,7 @@ const ArkUI_AttributeItem* GetLinearGradient(ArkUI_NodeHandle node)
     static float gradientStops[NUM_10];
     for (int i = 0; i < resultValue; i++) {
         gradientColors[i] = colors[i];
-        gradientStops[i] = stops[i];
+        gradientStops[i] = stops[i] / 100.0f; //百分比转换为小数
     }
     colorStop.colors = gradientColors;
     colorStop.stops = gradientStops;
@@ -1302,7 +1307,7 @@ int32_t SetOpacity(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (item->size == 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    if (LessNotEqual(item->value[0].f32, 0.0f)) {
+    if (LessNotEqual(item->value[0].f32, 0.0f) || GreatNotEqual(item->value[0].f32, 1.0f)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     // already check in entry point.
@@ -1587,7 +1592,7 @@ int32_t SetBorderColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     if (node->type == ARKUI_NODE_TEXT_INPUT || node->type == ARKUI_NODE_TEXT_AREA) {
         fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaBorderColor(
-            node->uiNodeHandle, colors[NUM_3], colors[NUM_1], colors[NUM_0], colors[NUM_2]);
+            node->uiNodeHandle, colors[NUM_0], colors[NUM_1], colors[NUM_2], colors[NUM_3]);
     } else {
         fullImpl->getNodeModifiers()->getCommonModifier()->setBorderColor(
             node->uiNodeHandle, colors[NUM_0], colors[NUM_1], colors[NUM_2], colors[NUM_3]);
@@ -1761,6 +1766,9 @@ int32_t SetClipShape(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     auto* fullImpl = GetFullImpl();
     if (item->value[0].i32 == ArkUI_ClipType::ARKUI_CLIP_TYPE_PATH) {
+        if (item->string == nullptr) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
         ArkUI_Float32 pathAttributes[NUM_2];
         if (LessNotEqual(item->value[NUM_1].f32, 0.0f) || LessNotEqual(item->value[NUM_2].f32, 0.0f)) {
             return ERROR_CODE_PARAM_INVALID;
@@ -1768,7 +1776,6 @@ int32_t SetClipShape(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
             pathAttributes[NUM_0] = item->value[NUM_1].f32;
             pathAttributes[NUM_1] = item->value[NUM_2].f32;
         }
-
         fullImpl->getNodeModifiers()->getCommonModifier()->setClipPath(
             node->uiNodeHandle, "path", pathAttributes, item->string);
     } else {
@@ -1796,20 +1803,28 @@ const ArkUI_AttributeItem* GetClipShape(ArkUI_NodeHandle node)
 {
     ArkUIClipShapeOptions options;
     GetFullImpl()->getNodeModifiers()->getCommonModifier()->getClipShape(node->uiNodeHandle, &options);
-    g_numberValues[NUM_0].i32 = options.type;
-    if (g_numberValues[NUM_0].i32 == ArkUI_ClipType::ARKUI_CLIP_TYPE_RECTANGLE) {
+    int type = options.type;
+    if (type == static_cast<ArkUI_Int32>(BasicShapeType::RECT)) {
+        g_numberValues[NUM_0].i32 = static_cast<ArkUI_Int32>(ArkUI_ClipType::ARKUI_CLIP_TYPE_RECTANGLE);
         g_numberValues[NUM_1].f32 = options.width;
         g_numberValues[NUM_2].f32 = options.height;
         g_numberValues[NUM_3].f32 = options.radiusWidth;
         g_numberValues[NUM_4].f32 = options.radiusHeight;
-    } else if (g_numberValues[NUM_0].i32 == ArkUI_ClipType::ARKUI_CLIP_TYPE_CIRCLE ||
-               g_numberValues[NUM_0].i32 == ArkUI_ClipType::ARKUI_CLIP_TYPE_ELLIPSE) {
+    } else if (type == static_cast<ArkUI_Int32>(BasicShapeType::CIRCLE)) {
+        g_numberValues[NUM_0].i32 = static_cast<ArkUI_Int32>(ArkUI_ClipType::ARKUI_CLIP_TYPE_CIRCLE);
         g_numberValues[NUM_1].f32 = options.width;
         g_numberValues[NUM_2].f32 = options.height;
-    } else {
+    } else if (type == static_cast<ArkUI_Int32>(BasicShapeType::ELLIPSE)) {
+        g_numberValues[NUM_0].i32 = static_cast<ArkUI_Int32>(ArkUI_ClipType::ARKUI_CLIP_TYPE_ELLIPSE);
+        g_numberValues[NUM_1].f32 = options.width;
+        g_numberValues[NUM_2].f32 = options.height;
+    } else if (type == static_cast<ArkUI_Int32>(BasicShapeType::PATH)) {
+        g_numberValues[NUM_0].i32 = static_cast<ArkUI_Int32>(ArkUI_ClipType::ARKUI_CLIP_TYPE_PATH);
         g_numberValues[NUM_1].f32 = options.width;
         g_numberValues[NUM_2].f32 = options.height;
         g_attributeItem.string = options.commands;
+    } else {
+        return nullptr;
     }
     return &g_attributeItem;
 }
@@ -2382,7 +2397,7 @@ const ArkUI_AttributeItem* GetSweepGradient(ArkUI_NodeHandle node)
     static float gradientStops[NUM_10];
     for (int i = 0; i < resultValue; i++) {
         gradientColors[i] = colors[i];
-        gradientStops[i] = stops[i];
+        gradientStops[i] = stops[i] / 100.0f; //百分比转换为小数
     }
     colorStop.colors = gradientColors;
     colorStop.stops = gradientStops;
@@ -2481,7 +2496,7 @@ const ArkUI_AttributeItem* GetRadialGradient(ArkUI_NodeHandle node)
     static float gradientStops[NUM_10];
     for (int i = 0; i < resultValue; i++) {
         gradientColors[i] = colors[i];
-        gradientStops[i] = stops[i];
+        gradientStops[i] = stops[i] / 100.0f; //百分比转换为小数
     }
     colorStop.colors = gradientColors;
     colorStop.stops = gradientStops;
@@ -2513,6 +2528,9 @@ int32_t SetMask(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         fullImpl->getNodeModifiers()->getCommonModifier()->setMaskPath(
             node->uiNodeHandle, "path", fill, stroke, strokeWidth, pathAttributes, item->string);
     } else if (item->value[0].i32 == ArkUI_MaskType::ARKUI_MASK_TYPE_PROGRESS) {
+        if (item->size != NUM_4) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
         ArkUI_Float32 progressAttributes[NUM_2];
         if (LessNotEqual(item->value[NUM_1].f32, 0.0f) || LessNotEqual(item->value[NUM_2].f32, 0.0f)) {
             return ERROR_CODE_PARAM_INVALID;
@@ -2523,6 +2541,13 @@ int32_t SetMask(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         fullImpl->getNodeModifiers()->getCommonModifier()->setProgressMask(
             node->uiNodeHandle, progressAttributes, color);
     } else {
+        if (item->value[NUM_3].i32 == ArkUI_MaskType::ARKUI_MASK_TYPE_RECTANGLE && item->size != NUM_8) {
+            return ERROR_CODE_PARAM_INVALID;
+        } else if ((item->value[NUM_3].i32 == ArkUI_MaskType::ARKUI_MASK_TYPE_ELLIPSE ||
+                       item->value[NUM_3].i32 == ArkUI_MaskType::ARKUI_MASK_TYPE_CIRCLE) &&
+                   item->size != NUM_4) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
         int fill = item->size > NUM_0 ? item->value[0].u32 : DEFAULT_FIll_COLOR;
         int stroke = item->size > NUM_1 ? item->value[NUM_1].u32 : DEFAULT_FIll_COLOR;
         float strokeWidth = item->size > NUM_2 ? item->value[NUM_2].f32 : NUM_0;
@@ -4673,7 +4698,7 @@ void ResetScrollFriction(ArkUI_NodeHandle node)
 
 const ArkUI_AttributeItem* GetScrollScrollSnap(ArkUI_NodeHandle node)
 {
-    ArkUI_Int32 values[32];
+    ArkUI_Float32 values[32];
     auto size = GetFullImpl()->getNodeModifiers()->getScrollModifier()->getScrollScrollSnap(node->uiNodeHandle, values);
 
     //size index
@@ -4681,7 +4706,7 @@ const ArkUI_AttributeItem* GetScrollScrollSnap(ArkUI_NodeHandle node)
     g_numberValues[NUM_1].i32 = values[NUM_1];
     g_numberValues[NUM_2].i32 = values[NUM_2];
     for (auto i = NUM_3; i < size; i++) {
-        g_numberValues[i].i32 = values[i];
+        g_numberValues[i].f32 = values[i];
     }
     g_attributeItem.size = size;
     return &g_attributeItem;
@@ -5142,7 +5167,8 @@ void ResetScrollEdge(ArkUI_NodeHandle node)
 const ArkUI_AttributeItem* GetScrollEnablePaging(ArkUI_NodeHandle node)
 {
     auto value = GetFullImpl()->getNodeModifiers()->getScrollModifier()->getScrollEnablePaging(node->uiNodeHandle);
-    g_numberValues[0].i32 = value;
+    //ScrollPagingStatus::VALID is true and VALID value is 2, others is false
+    g_numberValues[0].i32 = value == NUM_2 ? true : false;
     return &g_attributeItem;
 }
 
@@ -5344,7 +5370,7 @@ const ArkUI_AttributeItem* GetListCachedCount(ArkUI_NodeHandle node)
 int32_t SetListAlignListItem(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
-    if (item->size != 1 || CheckAttributeIsListItemAlign(item->value[0].i32)) {
+    if (item->size != 1 || !CheckAttributeIsListItemAlign(item->value[0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     GetFullImpl()->getNodeModifiers()->getListModifier()->setAlignListItem(node->uiNodeHandle, item->value[0].i32);
@@ -6575,7 +6601,7 @@ int32_t SetSwiperShowDisplayArrow(ArkUI_NodeHandle node, const ArkUI_AttributeIt
     if (item->size == 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    if (item->value[0].i32 < NUM_0 || item->value[0].i32 > NUM_1) {
+    if (!InRegion(NUM_0, NUM_2, item->value[NUM_0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
@@ -8064,11 +8090,31 @@ int32_t SetBackgroundBlurStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
     if (SCALE_INDEX < actualSize) {
         scale = item->value[SCALE_INDEX].f32;
     }
+    uint32_t grayScaleStart = 0;
+    if (GRAY_SCALE_START < actualSize) {
+        if (GreatOrEqual(item->value[GRAY_SCALE_START].f32, 0.0f)) {
+            grayScaleStart = static_cast<uint32_t>(item->value[GRAY_SCALE_START].f32);
+        } else {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+    }
+    uint32_t grayScaleEnd = 0;
+    if (GRAY_SCALE_END < actualSize) {
+        if (GreatOrEqual(item->value[GRAY_SCALE_END].f32, 0.0f)
+            && GreatOrEqual(item->value[GRAY_SCALE_END].f32, item->value[GRAY_SCALE_START].f32)) {
+            grayScaleEnd = static_cast<uint32_t>(item->value[GRAY_SCALE_END].f32);
+        } else {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+    }
     BlurOption blurOption;
     int32_t intArray[NUM_3];
     intArray[NUM_0] = blurStyle;
     intArray[NUM_1] = colorMode;
     intArray[NUM_2] = adaptiveColor;
+    std::vector<float> greyVector(NUM_2);
+    greyVector[NUM_0] = grayScaleStart;
+    greyVector[NUM_1] = grayScaleEnd;
     fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundBlurStyle(
         node->uiNodeHandle, intArray, scale, blurOption.grayscale.data(), blurOption.grayscale.size());
     return ERROR_CODE_NO_ERROR;

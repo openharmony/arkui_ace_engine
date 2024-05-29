@@ -499,6 +499,19 @@ void ImageModelNG::SetAutoResize(FrameNode *frameNode, bool autoResize)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, AutoResize, autoResize, frameNode);
 }
 
+void ImageModelNG::ResetAutoResize(FrameNode *frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_VOID(container);
+    auto autoResize = true;
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
+        !container->IsScenceBoardWindow()) {
+        autoResize = false;
+    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, AutoResize, autoResize, frameNode);
+}
+
 void ImageModelNG::SetResizableSlice(const ImageResizableSlice& slice)
 {
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageResizableSlice, slice);
@@ -566,6 +579,19 @@ void ImageModelNG::SetImageInterpolation(FrameNode *frameNode, ImageInterpolatio
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetImageInterpolation(interpolation);
+}
+
+void ImageModelNG::ResetImageInterpolation(FrameNode *frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_VOID(container);
+    auto interpolationDefault = ImageInterpolation::NONE;
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
+        !container->IsScenceBoardWindow()) {
+        interpolationDefault = ImageInterpolation::LOW;
+    }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageInterpolation, interpolationDefault, frameNode);
 }
 
 void ImageModelNG::SetColorFilterMatrix(FrameNode *frameNode, const std::vector<float> &matrix)

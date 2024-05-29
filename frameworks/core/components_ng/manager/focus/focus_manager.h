@@ -30,11 +30,22 @@ class PipelineContext;
 using FocusViewMap = std::unordered_map<int32_t, std::pair<WeakPtr<FocusView>, std::list<WeakPtr<FocusView>>>>;
 using RequestFocusCallback = std::function<void(NG::RequestFocusResult result)>;
 using FocusHubScopeMap = std::unordered_map<std::string, std::pair<WeakPtr<FocusHub>, std::list<WeakPtr<FocusHub>>>>;
+using FocusChangeCallback = std::function<void(const WeakPtr<FocusHub>& last, const RefPtr<FocusHub>& current)>;
 
 class FocusManager : public virtual AceType {
     DECLARE_ACE_TYPE(FocusManager, AceType);
 
 public:
+    class FocusGuard {
+    public:
+        explicit FocusGuard(const RefPtr<FocusHub>& focushub);
+        FocusGuard() = delete;
+        ~FocusGuard();
+    private:
+        RefPtr<FocusManager> focusMng_;
+    };
+    friend FocusGuard;
+
     explicit FocusManager(const WeakPtr<PipelineContext>& pipeline) : pipeline_(pipeline) {}
     ~FocusManager() override = default;
 
@@ -101,6 +112,17 @@ public:
     void RemoveScopePriorityNode(const std::string& focusScopeId, const RefPtr<FocusHub>& priorFocusHub);
     std::optional<std::list<WeakPtr<FocusHub>>*> GetFocusScopePriorityList(const std::string& focusScopeId);
 
+    void UpdateCurrentFocus(const RefPtr<FocusHub>& current);
+    RefPtr<FocusHub> GetCurrentFocus();
+    int32_t AddFocusListener(FocusChangeCallback&& callback);
+    void RemoveFocusListener(int32_t id);
+    void FocusSwitchingStart(const RefPtr<FocusHub>& focusHub);
+    void FocusSwitchingEnd();
+    void WindowFocusMoveStart();
+    void WindowFocusMoveEnd();
+
+    static RefPtr<FocusManager> GetFocusManager(RefPtr<FrameNode>& node);
+
 private:
     void GetFocusViewMap(FocusViewMap& focusViewMap);
 
@@ -111,8 +133,15 @@ private:
     RequestFocusCallback requestCallback_;
 
     WeakPtr<FocusHub> lastFocusStateNode_;
+    WeakPtr<FocusHub> currentFocus_;
     bool isNeedTriggerScroll_ = false;
     FocusHubScopeMap focusHubScopeMap_;
+
+    std::map<int32_t, FocusChangeCallback> listeners_;
+    int32_t nextListenerHdl_ = -1;
+    std::optional<bool> isSwitchingFocus_;
+    bool isSwitchingWindow_ = false;
+    RefPtr<FocusHub> switchingFocus_;
 
     ACE_DISALLOW_COPY_AND_MOVE(FocusManager);
 };

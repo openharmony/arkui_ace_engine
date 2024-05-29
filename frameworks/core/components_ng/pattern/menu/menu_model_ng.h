@@ -27,6 +27,7 @@ public:
     void SetFontStyle(Ace::FontStyle style) override;
     void SetFontColor(const std::optional<Color>& color) override;
     void SetFontFamily(const std::vector<std::string> &families) override;
+    void ResetFontFamily() override;
     void SetWidth(const Dimension& width) override;
     void SetBorderRadius(const Dimension& radius) override;
     void ResetBorderRadius() override;

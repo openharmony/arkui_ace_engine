@@ -22,6 +22,7 @@
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "core/common/container.h"
+#include "core/common/ime/input_method_manager.h"
 #include "core/common/manager_interface.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
@@ -285,7 +286,7 @@ void NavigationPattern::UpdateNavPathList()
             /**
              * If we call the function pushPath/pushDestination with singleton mode(
              * LaunchMode == MOVE_TO_TOP_SINGLETON/POP_TO_SINGLETON), and the top NavDestination of stack
-             * is the NavDestination which we need to push(NavDestination's name == NavPathInfo's name), 
+             * is the NavDestination which we need to push(NavDestination's name == NavPathInfo's name),
              * then wee need to update the NavDestination's parameters.
              */
             navigationStack_->UpdatePathInfoIfNeeded(uiNode, static_cast<int32_t>(i));
@@ -383,12 +384,7 @@ void NavigationPattern::CheckTopNavPathChange(
 
     // close keyboard
 #if defined(ENABLE_STANDARD_INPUT)
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto textfieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
-    if (textfieldManager) {
-        textfieldManager->ProcessNavKeyboard();
-    }
+    InputMethodManager::GetInstance()->CloseKeyboard();
 #endif
 
     isChanged_ = true;
@@ -1467,8 +1463,6 @@ NavigationTransition NavigationPattern::ExecuteTransition(const RefPtr<NavDestin
     auto replaceValue = navigationStack_->GetReplaceValue();
     if (replaceValue != 0) {
         operation = NavigationOperation::REPLACE;
-        // recover replace tag
-        navigationStack_->UpdateReplaceValue(0);
     } else if (!preTopDestination) {
         preInfo.index = -1;
         operation = NavigationOperation::PUSH;

@@ -2288,11 +2288,15 @@ class DragPreviewOptionsModifier extends ModifierWithKey {
       getUINativeModule().common.resetDragPreviewOptions(node);
     }
     else {
-      getUINativeModule().common.setDragPreviewOptions(node, this.value.mode);
+      getUINativeModule().common.setDragPreviewOptions(node, this.value.mode, this.value.numberBadge,
+        this.value.isMultiSelectionEnabled, this.value.defaultAnimationBeforeLifting);
     }
   }
   checkObjectDiff() {
-    return !(this.value.mode === this.stageValue.mode);
+    return !(this.value.mode === this.stageValue.mode
+      && this.value.numberBadge === this.stageValue.numberBadge
+      && this.value.isMultiSelectionEnabled === this.stageValue.isMultiSelectionEnabled
+      && this.value.defaultAnimationBeforeLifting === this.stageValue.defaultAnimationBeforeLifting);
   }
 }
 DragPreviewOptionsModifier.identity = Symbol('dragPreviewOptions');
@@ -2939,8 +2943,22 @@ class ArkComponent {
     modifierWithKey(this._modifiersWithKeys, ForegroundBrightnessModifier.identity, ForegroundBrightnessModifier, params);
      return this;
   }
-  dragPreviewOptions(value) {
-    modifierWithKey(this._modifiersWithKeys, DragPreviewOptionsModifier.identity, DragPreviewOptionsModifier, value);
+  dragPreviewOptions(value, options) {
+    if (isUndefined(value)) {
+      modifierWithKey(this._modifiersWithKeys, DragPreviewOptionsModifier.identity, DragPreviewOptionsModifier, undefined);
+      return this;
+    }
+    let arkDragPreviewOptions = new ArkDragPreviewOptions();
+    if (typeof value === 'object') {
+      arkDragPreviewOptions.mode = value.mode;
+      arkDragPreviewOptions.numberBadge = value.numberBadge;
+    }
+    if (typeof options === 'object') {
+      arkDragPreviewOptions.isMultiSelectionEnabled = options.isMultiSelectionEnabled;
+      arkDragPreviewOptions.defaultAnimationBeforeLifting = options.defaultAnimationBeforeLifting;
+    }
+    modifierWithKey(this._modifiersWithKeys, DragPreviewOptionsModifier.identity,
+      DragPreviewOptionsModifier, arkDragPreviewOptions);
     return this;
   }
   responseRegion(value) {
@@ -3637,6 +3655,9 @@ class ArkComponent {
   onDragEnd(event) {
     throw new Error('Method not implemented.');
   }
+  onPreDrag(event) {
+    throw new Error('Method not implemented.');
+  }
   allowDrop(value) {
     modifierWithKey(this._modifiersWithKeys, AllowDropModifier.identity, AllowDropModifier, value);
     return this;
@@ -3649,6 +3670,9 @@ class ArkComponent {
       modifierWithKey(this._modifiersWithKeys, DraggableModifier.identity, DraggableModifier, undefined);
     }
     return this;
+  }
+  dragPreview(value) {
+    throw new Error('Method not implemented.');
   }
   overlay(value, options) {
     if (typeof value === 'undefined') {
@@ -3844,6 +3868,7 @@ class ArkComponent {
   }
   systemBarEffect() {
     modifierWithKey(this._modifiersWithKeys, SystemBarEffectModifier.identity, SystemBarEffectModifier, null);
+    return this;
   }
 }
 const isNull = (val) => typeof val === 'object' && val === null;
@@ -6974,57 +6999,23 @@ class PatternLockAutoResetModifier extends ModifierWithKey {
   }
 }
 PatternLockAutoResetModifier.identity = Symbol('patternlockautoreset');
-class PatternLockActiveCircleColorModifier extends ModifierWithKey {
+class PatternLockActivateCircleStyleModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      getUINativeModule().patternLock.resetActiveCircleColor(node);
+      getUINativeModule().patternLock.resetActivateCircleStyle(node);
     }
     else {
-      getUINativeModule().patternLock.setActiveCircleColor(node, this.value);
+      getUINativeModule().patternLock.setActivateCircleStyle(node, this.value);
     }
   }
   checkObjectDiff() {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
-PatternLockActiveCircleColorModifier.identity = Symbol('patternLockActiveCircleColor');
-class PatternLockActiveCircleRadiusModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().patternLock.resetActiveCircleRadius(node);
-    }
-    else {
-      getUINativeModule().patternLock.setActiveCircleRadius(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-PatternLockActiveCircleRadiusModifier.identity = Symbol('patternLockActiveCircleRadius');
-class PatternLockEnableWaveEffectModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().patternLock.resetEnableWaveEffect(node);
-    }
-    else {
-      getUINativeModule().patternLock.setEnableWaveEffect(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return this.stageValue !== this.value;
-  }
-}
-PatternLockEnableWaveEffectModifier.identity = Symbol('patternLockEnableWaveEffect');
+PatternLockActivateCircleStyleModifier.identity = Symbol('patternLockActivateCircleStyle');
 class ArkPatternLockComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -7059,6 +7050,10 @@ class ArkPatternLockComponent extends ArkComponent {
   }
   autoReset(value) {
     modifierWithKey(this._modifiersWithKeys, PatternLockAutoResetModifier.identity, PatternLockAutoResetModifier, value);
+    return this;
+  }
+  activateCircleStyle(value) {
+    modifierWithKey(this._modifiersWithKeys, PatternLockActivateCircleStyleModifier.identity, PatternLockActivateCircleStyleModifier, value);
     return this;
   }
   onPatternComplete(callback) {
@@ -14287,6 +14282,25 @@ const FontWeightMap = {
   800: '800',
   900: '900',
 };
+
+class ArkDragPreviewOptions {
+  constructor() {
+    this.mode = undefined;
+    this.numberBadge = undefined;
+    this.isMultiSelectionEnabled = undefined;
+    this.defaultAnimationBeforeLifting = undefined;
+  }
+
+  isEqual(another) {
+    return (
+      this.mode === another.mode &&
+      this.numberBadge === another.numberBadge &&
+      this.isMultiSelectionEnabled === another.isMultiSelectionEnabled &&
+      this.defaultAnimationBeforeLifting === another.defaultAnimationBeforeLifting
+    );
+  }
+}
+
 class ArkButtonComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -26141,7 +26155,7 @@ class ParticleEmitterModifier extends ModifierWithKey {
         let emitRateValue = 5;
         if (isNumber(data.emitRate)) {
           dataArray.push(1);
-          if (data.emitRate > 0) {
+          if (data.emitRate >= 0) {
             emitRateValue = data.emitRate;
           }
           dataArray.push(emitRateValue);
@@ -26377,9 +26391,7 @@ class SystemBarEffectModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().common.setSystemBarEffect(node, true);
-    }
+    getUINativeModule().common.setSystemBarEffect(node, true);
   }
 }
 SystemBarEffectModifier.identity = Symbol('systemBarEffect');
@@ -26616,6 +26628,58 @@ if (globalThis.Component3D !== undefined) {
       return new ArkComponent3DComponent(nativePtr);
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.Component3DModifier(nativePtr, classType);
+    });
+  };
+}
+
+class ContainerSpanTextBackgroundStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().containerSpan.resetTextBackgroundStyle(node);
+    } else {
+      let textBackgroundStyle = new ArkTextBackGroundStyle();
+      if (!textBackgroundStyle.convertTextBackGroundStyleOptions(this.value)) {
+        getUINativeModule().containerSpan.resetTextBackgroundStyle(node);
+      } else {
+        getUINativeModule().containerSpan.setTextBackgroundStyle(node,textBackgroundStyle.color,
+          textBackgroundStyle.radius.topLeft,
+          textBackgroundStyle.radius.topRight,
+          textBackgroundStyle.radius.bottomLeft,
+          textBackgroundStyle.radius.bottomRight);
+      }
+    }
+  }
+  checkObjectDiff() {
+    let textBackgroundStyle = new ArkTextBackGroundStyle();
+    let stageTextBackGroundStyle = new ArkTextBackGroundStyle();
+    if (!textBackgroundStyle.convertTextBackGroundStyleOptions(this.value) || !stageTextBackGroundStyle.convertTextBackGroundStyleOptions(this.stageValue)) {
+      return false;
+    } else {
+      return textBackgroundStyle.checkObjectDiff(stageTextBackGroundStyle);
+    }
+  }
+}
+ContainerSpanTextBackgroundStyleModifier.identity = Symbol('containerSpanTextBackgroundStyle');
+/// <reference path='./import.ts' />
+class ArkContainerSpanComponent extends ArkComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+  }
+  textBackgroundStyle(value) {
+    modifierWithKey(this._modifiersWithKeys, ContainerSpanTextBackgroundStyleModifier.identity, ContainerSpanTextBackgroundStyleModifier, value);
+    return this;
+  }
+}
+// @ts-ignore
+if (globalThis.ContainerSpan !== undefined) {
+  globalThis.ContainerSpan.attributeModifier = function (modifier) {
+    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+      return new ArkContainerSpanComponent(nativePtr);
+    }, (nativePtr, classType, modifierJS) => {
+      return new modifierJS.ContainerSpanModifier(nativePtr, classType);
     });
   };
 }

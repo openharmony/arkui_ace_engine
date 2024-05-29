@@ -55,6 +55,7 @@ constexpr Dimension FULLSCREEN = 100.0_pct;
 constexpr Dimension MULTIPLE_DIALOG_OFFSET_X = 48.0_vp;
 constexpr Dimension MULTIPLE_DIALOG_OFFSET_Y = 48.0_vp;
 constexpr Dimension SUBWINDOW_DIALOG_DEFAULT_WIDTH = 400.0_vp;
+constexpr Dimension AVOID_LIMIT_PADDING = 8.0_vp;
 constexpr double EXPAND_DISPLAY_WINDOW_HEIGHT_RATIO = 0.67;
 constexpr double EXPAND_DISPLAY_DIALOG_HEIGHT_RATIO = 0.9;
 constexpr double HALF = 2.0;
@@ -810,13 +811,16 @@ OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
     auto childBottom = childOffset.GetY() + childSize.Height();
     auto paddingBottom = static_cast<float>(GetPaddingBottom());
     if (needAvoidKeyboard && keyboardInsert.Length() > 0 && childBottom > (keyboardInsert.start - paddingBottom)) {
+        auto limitPos = std::min(childOffset.GetY(),
+            static_cast<float>(safeAreaInsets_.top_.Length() + AVOID_LIMIT_PADDING.ConvertToPx()));
         childOffset.SetY(childOffset.GetY() - (childBottom - (keyboardInsert.start - paddingBottom)));
-    }
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && childOffset.GetY() < 0) {
-        resizeFlag_ = true;
-        dialogChildSize_ = childSize;
-        dialogChildSize_.MinusHeight(-childOffset.GetY());
-        childOffset.SetY(0.0);
+
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && childOffset.GetY() < limitPos) {
+            resizeFlag_ = true;
+            dialogChildSize_ = childSize;
+            dialogChildSize_.MinusHeight(limitPos - childOffset.GetY());
+            childOffset.SetY(limitPos);
+        }
     }
     return childOffset;
 }

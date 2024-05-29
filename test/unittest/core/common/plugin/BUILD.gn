@@ -28,10 +28,10 @@ ohos_unittest("plugin_manager_test") {
   deps = [
     "$ace_root/frameworks/base:ace_memory_monitor_ohos",
     "$ace_root/test/unittest:ace_unittest_log",
-    "$cjson_root:cjson_static",
     "//third_party/googletest:gmock_main",
   ]
   external_deps = [
+    "cJSON:cjson",
     "c_utils:utils",
     "hilog:libhilog",
   ]

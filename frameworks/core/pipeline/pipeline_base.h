@@ -1068,6 +1068,16 @@ public:
         return halfLeading_;
     }
 
+    void SetSupportPreviewText(bool changeSupported)
+    {
+        hasSupportedPreviewText_ = !changeSupported;
+    }
+
+    bool GetSupportPreviewText() const
+    {
+        return hasSupportedPreviewText_;
+    }
+
     void SetUseCutout(bool useCutout)
     {
         useCutout_ = useCutout;
@@ -1202,6 +1212,11 @@ public:
     virtual void CheckAndLogLastReceivedAxisEventInfo(int32_t eventId, AxisAction action) {}
 
     virtual void CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, AxisAction action) {}
+
+    virtual float GetPageAvoidOffset()
+    {
+        return 0.0f;
+    }
 
 protected:
     virtual bool MaybeRelease() override;
@@ -1361,6 +1376,7 @@ private:
     int64_t formAnimationStartTime_ = 0;
     bool isFormAnimation_ = false;
     bool halfLeading_ = false;
+    bool hasSupportedPreviewText_ = true;
     bool useCutout_ = false;
     uint64_t vsyncTime_ = 0;
 

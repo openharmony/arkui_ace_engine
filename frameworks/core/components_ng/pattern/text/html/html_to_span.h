@@ -87,10 +87,10 @@ public:
 private:
 
     enum class HtmlType {
-        ParagraphStyle = 0,
-        Image,
-        Text,
-        Default,
+        PARAGRAPH = 0,
+        IMAGE,
+        TEXT,
+        DEFAULT,
     };
 
     struct SpanInfo {
@@ -129,6 +129,8 @@ private:
     bool IsPaddingAttr(const std::string &key);
     bool IsMarginAttr(const std::string &key);
     bool IsBorderAttr(const std::string &key);
+    bool IsDecorationLine(const std::string &key);
+    bool IsDecorationStyle(const std::string &key);
     void SetPaddingOption(const std::string &key, const std::string &value, ImageSpanOptions &options);
     void SetMarginOption(const std::string &key, const std::string &value, ImageSpanOptions &options);
     void SetBorderOption(const std::string &key, const std::string &value, ImageSpanOptions &options);
@@ -139,6 +141,8 @@ private:
     void HandleImagePixelMap(const std::string &src, ImageSpanOptions &option);
     void HandleImageSize(const std::string &key, const std::string &value, ImageSpanOptions &options);
     void MakeImageSpanOptions(const std::string &key, const std::string &value, ImageSpanOptions &imgOpt);
+
+    Color ToSpanColor(const std::string &color);
 
     void ToDefalutSpan(xmlNodePtr node, size_t len, size_t& pos);
     std::map<std::string, HtmlToSpan::StyleValue> ToTextSpanStyle(xmlAttrPtr curNode);
@@ -153,6 +157,8 @@ private:
     void ParaseHtmlToSpanInfo(xmlNodePtr node, size_t& pos, std::string &allContent, size_t paragraphPos);
     void ToSpan(xmlNodePtr curNode, size_t &pos, std::string &allContent, size_t paragraphPos);
     void PrintSpanInfos();
+    void PrintSpan(size_t index, const SpanInfo& info, StyleValue& value);
+    bool IsValidNode(const std::string& name);
 
     RefPtr<SpanBase> CreateSpan(size_t index, const SpanInfo& info, StyleValue& value);
     template<class T, class P>

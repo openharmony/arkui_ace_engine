@@ -499,6 +499,12 @@ std::string TextPattern::GetSelectedText(int32_t start, int32_t end) const
             tag = span->position == -1 ? tag + 1 : span->position;
             continue;
         }
+        if (isSpanStringMode_ && (span->spanItemType == SpanItemType::CustomSpan
+            || span->spanItemType == SpanItemType::IMAGE)) {
+            value += " ";
+            tag = span->position == -1 ? tag + 1 : span->position;
+            continue;
+        }
         if (span->position - 1 >= start && span->placeholderIndex == -1 && span->position != -1) {
             auto wideString = StringUtils::ToWstring(span->GetSpanContent());
             auto max = std::min(span->position, end);
@@ -561,7 +567,8 @@ void TextPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
             auto renderContext = textPattern->GetRenderContext();
             CHECK_NULL_VOID(renderContext);
             auto obscuredReasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
-            bool ifHaveObscured = std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
+            bool ifHaveObscured = textPattern->GetSpanItemChildren().empty() &&
+                std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
                 [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
             auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(textLayoutProperty);
@@ -1449,8 +1456,15 @@ void TextPattern::AddUdmfData(const RefPtr<Ace::DragEvent>& event)
             }
         }
     };
-    for (const auto& resultObj : finalResult) {
-        resultProcessor(resultObj);
+    if (isSpanStringMode_) {
+        std::vector<uint8_t> arr;
+        auto dragSpanString = spanString->GetSubSpanString(recoverStart_, recoverEnd_ - recoverStart_);
+        dragSpanString->EncodeTlv(arr);
+        UdmfClient::GetInstance()->AddSpanStringRecord(unifiedData, arr);
+    } else {
+        for (const auto& resultObj : finalResult) {
+            resultProcessor(resultObj);
+        }
     }
     event->SetData(unifiedData);
 }
@@ -3255,6 +3269,8 @@ void TextPattern::SetStyledString(const RefPtr<SpanString>& value)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     ProcessSpanString();
+    auto length = spanString->GetLength();
+    spanString->ReplaceSpanString(0, length, value);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -3417,5 +3433,41 @@ RectF TextPattern::GetTextContentRect(bool isActualText) const
         textRect.SetHeight(pManager_->GetHeight());
     }
     return textRect;
+}
+
+size_t TextPattern::GetLineCount() const
+{
+    CHECK_NULL_RETURN(pManager_, 0);
+    return pManager_->GetLineCount();
+}
+
+bool TextPattern::DidExceedMaxLines() const
+{
+    CHECK_NULL_RETURN(pManager_, false);
+    return pManager_->DidExceedMaxLines();
+}
+
+TextLineMetrics TextPattern::GetLineMetrics(int32_t lineNumber)
+{
+    if (lineNumber < 0 || lineNumber > GetLineCount()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT, "GetLineMetrics failed, lineNumber not between 0 and max lines:%{public}d",
+            lineNumber);
+        return TextLineMetrics();
+    }
+    return pManager_->GetLineMetrics(lineNumber);
+}
+
+Offset TextPattern::ConvertLocalOffsetToParagraphOffset(const Offset& offset)
+{
+    RectF textContentRect = contentRect_;
+    textContentRect.SetTop(contentRect_.GetY() - std::min(baselineOffset_, 0.0f));
+    Offset paragraphOffset = { offset.GetX() - textContentRect.GetX(), offset.GetY() - textContentRect.GetY() };
+    return paragraphOffset;
+}
+
+PositionWithAffinity TextPattern::GetGlyphPositionAtCoordinate(int32_t x, int32_t y)
+{
+    Offset offset(x, y);
+    return pManager_->GetGlyphPositionAtCoordinate(ConvertLocalOffsetToParagraphOffset(offset));
 }
 } // namespace OHOS::Ace::NG

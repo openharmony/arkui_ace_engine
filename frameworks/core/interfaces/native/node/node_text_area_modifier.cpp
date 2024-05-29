@@ -1146,7 +1146,7 @@ void ResetTextAreaOnSubmitWithEvent(ArkUINodeHandle node)
     TextFieldModelNG::SetOnSubmit(frameNode, nullptr);
 }
 
-void SetTextAreaContentType(ArkUINodeHandle node, ArkUI_Uint32 contentType)
+void SetTextAreaContentType(ArkUINodeHandle node, ArkUI_Int32 contentType)
 {
     auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

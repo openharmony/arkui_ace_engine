@@ -787,7 +787,8 @@ public:
         }
     }
 
-    void NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType);
+    void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
+        RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType);
     void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "");
 
     int32_t GetUiExtensionId();
@@ -921,6 +922,7 @@ private:
     void DumpOverlayInfo();
     void DumpCommonInfo();
     void DumpSafeAreaInfo();
+    void DumpAlignRulesInfo();
     void DumpExtensionHandlerInfo();
     void DumpAdvanceInfo() override;
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) override;

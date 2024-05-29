@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,13 +19,13 @@
 
 namespace OHOS::Ace::V2 {
 
-void ListPositionController::JumpTo(int32_t index, bool /* smooth */, ScrollAlign /* align */, int32_t source)
+void ListPositionController::ScrollToIndex(int32_t index, bool /* smooth */, ScrollAlign /* align */)
 {
     auto list = AceType::DynamicCast<V2::RenderList>(scroll_.Upgrade());
     if (!list) {
         return;
     }
-    list->JumpToIndex(index, source);
+    list->JumpToIndex(index);
 }
 
 bool ListPositionController::AnimateTo(

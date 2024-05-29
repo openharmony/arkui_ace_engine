@@ -296,10 +296,7 @@ void NavDestinationPattern::InitBackButtonLongPressEvent(RefPtr<NavDestinationGr
 
     auto gestureHub = backButtonNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    if (longPressEvent_) {
-        gestureHub->SetLongPressEvent(longPressEvent_);
-        return;
-    }
+
     auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -346,17 +343,27 @@ void NavDestinationPattern::HandleLongPress()
         // clear the last dialog
         HandleLongPressActionEnd();
     }
+
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TEN)) {
-        auto theme = NavigationGetTheme();
-        CHECK_NULL_VOID(theme);
-        dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(message,
-            SymbolSourceInfo(theme->GetBackSymbolId()));
-    } else {
-        auto backButtonImageLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
-        CHECK_NULL_VOID(backButtonImageLayoutProperty);
-        ImageSourceInfo imageSourceInfo = backButtonImageLayoutProperty->GetImageSourceInfoValue();
+        auto backButtonIconNode = AceType::DynamicCast<FrameNode>(backButtonNode->GetFirstChild());
+        CHECK_NULL_VOID(backButtonIconNode);
+        if (backButtonIconNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+            auto symbolProperty = backButtonIconNode->GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_VOID(symbolProperty);
+            dialogNode_ =
+                AgingAdapationDialogUtil::ShowLongPressDialog(message, symbolProperty->GetSymbolSourceInfoValue());
+            return ;
+        }
+        auto imageProperty = backButtonIconNode->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageProperty);
+        ImageSourceInfo imageSourceInfo = imageProperty->GetImageSourceInfoValue();
         dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(message, imageSourceInfo);
+        return ;
     }
+    auto backButtonImageLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(backButtonImageLayoutProperty);
+    ImageSourceInfo imageSourceInfo = backButtonImageLayoutProperty->GetImageSourceInfoValue();
+    dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(message, imageSourceInfo);
 }
 
 void NavDestinationPattern::HandleLongPressActionEnd()

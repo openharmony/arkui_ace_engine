@@ -168,6 +168,7 @@ void RichEditorPattern::ProcessStyledString()
     textForDisplay_.clear();
     dataDetectorAdapter_->textForAI_.clear();
     host->Clean();
+    RemoveEmptySpanItems();
     for (const auto& span : spans_) {
         auto imageSpan = DynamicCast<ImageSpanItem>(span);
         if (imageSpan) {
@@ -270,7 +271,7 @@ void RichEditorPattern::InsertValueInStyledString(const std::string& insertValue
     }
     isTextChange_ = true;
     moveDirection_ = MoveDirection::FORWARD;
-    moveLength_ = StringUtils::ToWstring(insertValue).length();
+    moveLength_ += StringUtils::ToWstring(insertValue).length();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -359,8 +360,7 @@ void RichEditorPattern::DeleteBackwardInStyledString(int32_t length)
         StartTwinkling();
     }
     isTextChange_ = true;
-    moveDirection_ = MoveDirection::BACKWARD;
-    moveLength_ = length;
+    SetCaretPosition(caretPosition_ - length);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -1419,26 +1419,24 @@ bool RichEditorPattern::SetCaretPosition(int32_t pos, bool needNotifyImf)
 {
     auto correctPos = std::clamp(pos, 0, GetTextContentLength());
     ResetLastClickOffset();
-    if (pos == correctPos) {
-        FireOnSelectionChange(correctPos);
-        if (caretPosition_ != correctPos) {
-            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "caret:%{public}d->%{public}d", caretPosition_, correctPos);
-            if (caretChangeListener_) {
-                caretChangeListener_(correctPos);
-            }
-        }
+    CHECK_NULL_RETURN((pos == correctPos), false);
+    if (caretPosition_ != correctPos) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "caret:%{public}d->%{public}d", caretPosition_, correctPos);
         caretPosition_ = correctPos;
-        if (needNotifyImf) {
-            UpdateCaretInfoToController();
+        FireOnSelectionChange(caretPosition_);
+        if (caretChangeListener_) {
+            caretChangeListener_(caretPosition_);
         }
-        return true;
     }
-    return false;
+    if (needNotifyImf) {
+        UpdateCaretInfoToController();
+    }
+    return true;
 }
 
 void RichEditorPattern::FireOnSelectionChange(const int32_t caretPosition)
 {
-    if (!textSelector_.SelectNothing() || caretPosition == caretPosition_ || !caretTwinkling_) {
+    if (!textSelector_.SelectNothing() || !caretTwinkling_) {
         return;
     }
     FireOnSelectionChange(caretPosition, caretPosition);
@@ -2904,6 +2902,12 @@ std::list<RefPtr<SpanItem>>::iterator RichEditorPattern::GetSpanIter(int32_t ind
     return std::find_if(spans_.begin(), spans_.end(), [index](const RefPtr<SpanItem>& spanItem) {
         return spanItem->rangeStart <= index && index < spanItem->position;
     });
+}
+
+PositionWithAffinity RichEditorPattern::GetGlyphPositionAtCoordinate(int32_t x, int32_t y)
+{
+    Offset offset(x, y);
+    return paragraphs_.GetGlyphPositionAtCoordinate(ConvertTouchOffsetToTextOffset(offset));
 }
 
 void RichEditorPattern::InitDragDropEvent()
@@ -6145,6 +6149,21 @@ float RichEditorPattern::GetLineHeight() const
     auto selectedRects = paragraphs_.GetRects(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     CHECK_NULL_RETURN(selectedRects.size(), 0.0f);
     return selectedRects.front().Height();
+}
+
+size_t RichEditorPattern::GetLineCount() const
+{
+    return paragraphs_.GetLineCount();
+}
+
+TextLineMetrics RichEditorPattern::GetLineMetrics(int32_t lineNumber)
+{
+    if (lineNumber < 0 || lineNumber > GetLineCount()) {
+        TAG_LOGE(AceLogTag::ACE_RICH_TEXT,
+                "GetLineMetrics failed, lineNumber not between 0 and max lines:%{public}d", lineNumber);
+        return TextLineMetrics();
+    }
+    return paragraphs_.GetLineMetrics(lineNumber);
 }
 
 float RichEditorPattern::GetLetterSpacing() const

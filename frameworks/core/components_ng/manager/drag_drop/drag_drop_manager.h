@@ -132,7 +132,7 @@ public:
     RefPtr<DragDropProxy> CreateFrameworkDragDropProxy();
     void UpdatePixelMapPosition(int32_t globalX, int32_t globalY);
     void HideDragPreviewOverlay();
-    bool IsMsdpDragging() const;
+    bool IsMSDPDragging() const;
     void UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const Point& point);
     void UpdateNotifyDragEvent(
         RefPtr<NotifyDragEvent>& notifyEvent, const Point& point, const DragEventType dragEventType);
@@ -393,11 +393,23 @@ public:
         isTouchGatherAnimationPlaying_ = isTouchGatherAnimationPlaying;
     }
 
+    bool IsDragWithContextMenu() const
+    {
+        return isDragWithContextMenu_;
+    }
+
+    void SetIsDragWithContextMenu(bool isDragWithContextMenu)
+    {
+        isDragWithContextMenu_ = isDragWithContextMenu;
+    }
+
 private:
     double CalcDragPreviewDistanceWithPoint(
         const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
     Offset CalcDragMoveOffset(
         const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
+    bool UpdateDragMovePositionFinished(
+        bool needDoDragMoveAnimate, bool isMenuShow, const Offset& newOffset, int32_t containerId);
     bool GetDragPreviewInfo(
         const OHOS::Ace::RefPtr<OHOS::Ace::NG::OverlayManager>& overlayManager, DragPreviewInfo& dragPreviewInfo);
     bool IsNeedDoDragMoveAnimate(const PointerEvent& pointerEvent);
@@ -480,6 +492,7 @@ private:
     bool isShowBadgeAnimation_ = true;
     bool eventStrictReportingEnabled_ = false;
     int32_t badgeNumber_ = -1;
+    bool isDragWithContextMenu_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
 };

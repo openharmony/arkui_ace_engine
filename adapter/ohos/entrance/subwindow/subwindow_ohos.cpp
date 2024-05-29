@@ -95,6 +95,8 @@ void SubwindowOhos::InitContainer()
         auto windowType = parentWindow->GetType();
         if (parentContainer->IsScenceBoardWindow() || windowType == Rosen::WindowType::WINDOW_TYPE_DESKTOP) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
+        } else if (IsSystemTopMost()) {
+            windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_TOAST);
         } else if (GetAboveApps()) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_TOAST);
         } else if (windowType == Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION) {
@@ -968,7 +970,9 @@ bool SubwindowOhos::InitToastDialogWindow(int32_t width, int32_t height, int32_t
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "init toast dialog window enter");
     OHOS::sptr<OHOS::Rosen::WindowOption> windowOption = new OHOS::Rosen::WindowOption();
     if (isToast) {
-        windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_TOAST);
+        auto windowType =
+            IsSystemTopMost() ? Rosen::WindowType::WINDOW_TYPE_SYSTEM_TOAST : Rosen::WindowType::WINDOW_TYPE_TOAST;
+        windowOption->SetWindowType(windowType);
     } else {
         windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     }
@@ -1070,7 +1074,7 @@ void SubwindowOhos::ShowToastForAbility(const std::string& message, int32_t dura
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show toast for ability enter, containerId : %{public}d", childContainerId_);
     SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
-    SetIsToastWindow(showMode == NG::ToastShowMode::TOP_MOST);
+    SetIsToastWindow(showMode == NG::ToastShowMode::TOP_MOST || showMode == NG::ToastShowMode::SYSTEM_TOP_MOST);
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     if (!aceContainer) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "get container failed, child containerId : %{public}d", childContainerId_);
@@ -1086,7 +1090,8 @@ void SubwindowOhos::ShowToastForAbility(const std::string& message, int32_t dura
     ContainerScope scope(childContainerId_);
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
     CHECK_NULL_VOID(parentContainer);
-    if (parentContainer->IsScenceBoardWindow() || showMode == NG::ToastShowMode::TOP_MOST) {
+    if (parentContainer->IsScenceBoardWindow() || showMode == NG::ToastShowMode::TOP_MOST ||
+        showMode == NG::ToastShowMode::SYSTEM_TOP_MOST) {
         ShowWindow(false);
         ResizeWindow();
         window_->SetTouchable(false);

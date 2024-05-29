@@ -70,6 +70,7 @@ void TextFieldModelNG::CreateNode(
     pattern->InitSurfacePositionChangedCallback();
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
+    pattern->SetSupportPreviewText(pipeline->GetSupportPreviewText());
     auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
     auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();

@@ -457,8 +457,6 @@ build_component_ng("pattern_ng") {
     "tabs/tabs_node.cpp",
     "tabs/tabs_pattern.cpp",
     "text/base_text_select_overlay.cpp",
-    "text/html/html_to_span.cpp",
-    "text/html/span_to_html.cpp",
     "text/image_span_view.cpp",
     "text/multiple_paragraph_layout_algorithm.cpp",
     "text/span/mutable_span_string.cpp",
@@ -550,7 +548,7 @@ build_component_ng("pattern_ng") {
     "waterflow/water_flow_sections.cpp",
   ]
 
-  external_deps = [ "libxml2:libxml2" ]
+  external_deps = []
   deps = [ "container_modal/interfaces:customtitle" ]
 
   if (defined(vendor_configs.ace_engine_advanced)) {
@@ -559,8 +557,13 @@ build_component_ng("pattern_ng") {
   }
 
   if (is_ohos_standard_system) {
+    sources += [
+      "text/html/html_to_span.cpp",
+      "text/html/span_to_html.cpp",
+    ]
     external_deps += [
       "graphic_2d:librender_service_client",
+      "libxml2:libxml2",
       "napi:ace_napi",
     ]
   } else if (is_arkui_x) {

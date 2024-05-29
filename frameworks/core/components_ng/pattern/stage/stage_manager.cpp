@@ -27,6 +27,7 @@
 #include "base/utils/utils.h"
 #include "core/animation/page_transition_common.h"
 #include "core/common/container.h"
+#include "core/common/ime/input_method_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
@@ -168,7 +169,7 @@ void StageManager::PageChangeCloseKeyboard()
         }
         if (!container->IsScenceBoardWindow()) {
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Container not ScenceBoardWindow.");
-            FocusHub::PushPageCloseKeyboard();
+            InputMethodManager::GetInstance()->CloseKeyboard();
         }
     }
 #endif

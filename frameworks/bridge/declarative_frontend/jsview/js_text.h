@@ -116,6 +116,7 @@ public:
     void CloseSelectionMenu();
 
     void SetStyledString(const JSCallbackInfo& info);
+    void GetLayoutManager(const JSCallbackInfo& args);
 private:
     WeakPtr<TextControllerBase> controllerWeak_;
     ACE_DISALLOW_COPY_AND_MOVE(JSTextController);

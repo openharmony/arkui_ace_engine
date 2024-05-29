@@ -1545,7 +1545,7 @@ class MapInfo {
         return new Map(obj.keyToValue.map((item) => [item.key, item.value]));
     }
 }
-MapInfo.replacer = Symbol('_____map_replacer__');
+MapInfo.replacer = '_____map_replacer__';
 /**
  * SetInfo
  *
@@ -1575,7 +1575,7 @@ class SetInfo {
         return new Set(obj.values);
     }
 }
-SetInfo.replacer = Symbol('_____set_replacer__');
+SetInfo.replacer = '_____set_replacer__';
 /**
  * DateInfo
  *
@@ -1604,7 +1604,7 @@ class DateInfo {
         return new Date(obj.date);
     }
 }
-DateInfo.replacer = Symbol('_____date_replacer__');
+DateInfo.replacer = '_____date_replacer__';
 /**
  * PersistentStorage
  *
@@ -3890,7 +3890,7 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         if (extraInfo) {
             this.extraInfo_ = extraInfo;
         }
-        if (parent && parent instanceof PUV2ViewBase) {
+        if (parent) {
             // this View is not a top-level View
             this.setCardId(parent.getCardId());
             // Call below will set this parent_ to parent as well
@@ -4535,13 +4535,13 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         }
         let rawObject = ObservedObject.GetRawObject(wrappedValue);
         if (rawObject instanceof Map) {
-            return MapInfo.toObject(rawObject);
+            return MapInfo.toObject(rawObject).keyToValue;
         }
         else if (rawObject instanceof Set) {
-            return SetInfo.toObject(rawObject);
+            return SetInfo.toObject(rawObject).values;
         }
         else if (rawObject instanceof Date) {
-            return DateInfo.toObject(rawObject);
+            return DateInfo.toObject(rawObject).date;
         }
         return rawObject;
     }
@@ -6011,6 +6011,8 @@ class ViewPU extends PUV2ViewBase {
         this.watchedProps = new Map();
         this.recycleManager_ = undefined;
         this.hasBeenRecycled_ = false;
+        this.delayRecycleNodeRerender = false;
+        this.delayRecycleNodeRerenderDeep = false;
         // @Provide'd variables by this class and its ancestors
         this.providedVars_ = new Map();
         // Set of dependent elmtIds that need partial update
@@ -6332,6 +6334,16 @@ class ViewPU extends PUV2ViewBase {
         }
         
         
+    }
+
+    delayCompleteRerender(deep = false) {
+        this.delayRecycleNodeRerender = true;
+        this.delayRecycleNodeRerenderDeep = deep;
+    }
+
+    flushDelayCompleteRerender() {
+        this.forceCompleteRerender(this.delayRecycleNodeRerenderDeep);
+        this.delayRecycleNodeRerender = false;
     }
     /**
      * force a complete rerender / update on specific node by executing update function.
@@ -6718,7 +6730,11 @@ class ViewPU extends PUV2ViewBase {
                 }
             }
         }
-        this.updateDirtyElements();
+        if (!this.delayRecycleNodeRerender) {
+            this.updateDirtyElements();
+        } else {
+            this.flushDelayCompleteRerender();
+        }
         this.childrenWeakrefMap_.forEach((weakRefChild) => {
             const child = weakRefChild.deref();
             if (child) {

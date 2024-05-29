@@ -69,6 +69,7 @@ template("ace_core_interfaces_native_node") {
       "node/node_checkbox_modifier.cpp",
       "node/node_common_modifier.cpp",
       "node/node_container_modifier.cpp",
+      "node/node_container_span_modifier.cpp",
       "node/node_content_modifier.cpp",
       "node/node_date_picker_modifier.cpp",
       "node/node_gesture_modifier.cpp",

@@ -728,4 +728,24 @@ const TimeStamp& TextSelectController::GetLastClickTime()
     CHECK_NULL_RETURN(textField, lastAiPosTimeStamp_);
     return textField->GetLastClickTime();
 }
+
+bool TextSelectController::IsTouchAtLineEnd(const Offset& localOffset)
+{
+    CHECK_NULL_RETURN(paragraph_ && !contentController_->IsEmpty(), false);
+    auto index = ConvertTouchOffsetToPosition(localOffset);
+    if (index == static_cast<int32_t>(contentController_->GetWideText().length())) {
+        return true;
+    }
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, false);
+    auto textFiled = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_RETURN(textFiled, false);
+    auto textRect = textFiled->GetTextRect();
+    auto offset = localOffset - Offset(textRect.GetX(), textRect.GetY());
+    LineMetrics lineMetrics;
+    if (paragraph_->GetLineMetricsByCoordinate(offset, lineMetrics)) {
+        return GreatNotEqual(offset.GetX(), lineMetrics.x + lineMetrics.width);
+    }
+    return false;
+}
 } // namespace OHOS::Ace::NG

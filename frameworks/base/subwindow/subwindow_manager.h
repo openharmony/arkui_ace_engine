@@ -128,10 +128,20 @@ public:
     bool GetShown();
     void ResizeWindowForFoldStatus(int32_t parentContainerId);
     void MarkDirtyDialogSafeArea();
+    void HideSystemTopMostWindow();
+    RefPtr<Subwindow> GetSystemToastWindow()
+    {
+        return systemToastWindow_;
+    }
+    void SetSystemToastWindow(RefPtr<Subwindow> systemToastWindow)
+    {
+        systemToastWindow_ = systemToastWindow;
+    }
 
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow(bool isDialog = false);
-
+    RefPtr<Subwindow> GetOrCreateSystemSubWindow();
+    RefPtr<Subwindow> GetOrCreateToastWindow(int32_t containerId, const NG::ToastShowMode& showMode);
     static std::mutex instanceMutex_;
     static std::shared_ptr<SubwindowManager> instance_;
 
@@ -155,6 +165,7 @@ private:
     SubwindowMap dialogSubwindowMap_;
     std::mutex currentDialogSubwindowMutex_;
     RefPtr<Subwindow> currentDialogSubwindow_;
+    RefPtr<Subwindow> systemToastWindow_;
 };
 
 } // namespace OHOS::Ace

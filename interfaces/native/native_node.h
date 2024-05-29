@@ -6766,8 +6766,8 @@ typedef void (*ArkUI_NodeContentCallback)(ArkUI_NodeContentEvent* event);
  * @brief Register a callback for this <b>ArkUI_NodeContentHandle</b> instance.
  *
  * @param handle Indicates the <b>ArkUI_NodeContentHandle</b> instance.
- * @param callback Indicates the callback of <b>ArkUI_NodeContentHandle</b> 
- * @return Returns the status code 
+ * @param callback Indicates the callback of <b>ArkUI_NodeContentHandle</b>
+ * @return Returns the status code
  * @since 12
  */
 int32_t OH_ArkUI_NodeContent_RegisterCallback(ArkUI_NodeContentHandle handle, ArkUI_NodeContentCallback callback);

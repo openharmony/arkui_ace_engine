@@ -86,12 +86,10 @@ if (is_arkui_x) {
       "js_drawable_descriptor.cpp",
     ]
 
-    deps = [
-      "$cjson_root:cjson",
-      "$skia_root_new:skia_ohos",
-    ]
+    deps = [ "$skia_root_new:skia_ohos" ]
     defines = []
     external_deps = [
+      "cJSON:cjson",
       "graphic_2d:librender_service_client",
       "hilog:libhilog",
       "napi:ace_napi",

@@ -32,6 +32,7 @@
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/common/ai/data_detector_mgr.h"
+#include "core/common/ime/input_method_manager.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/picker/picker_data.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
@@ -579,11 +580,14 @@ void WebPattern::HandleScaleGestureChange(const GestureEvent& event)
 
     double centerX = event.GetPinchCenter().GetX();
     double centerY = event.GetPinchCenter().GetY();
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto offset = frameNode->GetOffsetRelativeToWindow();
     TAG_LOGD(AceLogTag::ACE_WEB,
         "HandleScaleGestureChange curScale:%{public}f pageScale: %{public}f newScale: %{public}f centerX: "
-        "%{public}f centerY: %{public}f",
-        curScale, scale, newScale, centerX, centerY);
-    delegate_->ScaleGestureChange(newScale, centerX, centerY);
+        "%{public}f centerY: %{public}f offset X: %{public}f offset Y: %{public}f",
+        curScale, scale, newScale, centerX, centerY, offset.GetX(), offset.GetY());
+    delegate_->ScaleGestureChange(newScale, centerX - offset.GetX(), centerY - offset.GetY());
 
     preScale_ = curScale;
     pageScale_ = scale;
@@ -1408,6 +1412,7 @@ void WebPattern::HandleFocusEvent()
     if (needOnFocus_) {
         delegate_->OnFocus();
     } else {
+        delegate_->OnFocus(OHOS::NWeb::FocusReason::FOCUS_DEFAULT);
         needOnFocus_ = true;
     }
 }
@@ -4350,8 +4355,11 @@ void WebPattern::SetTouchEventInfo(const TouchEvent& touchEvent,
         while (!touchEventQueue_.empty()) {
             if (touchEventQueue_.front().GetChangedTouches().front().GetFingerId() == touchEvent.id) {
                 tempTouchInfo = touchEventQueue_.front();
+                touchEventQueue_.pop();
+                break;
+            } else {
+                touchEventQueue_.pop();
             }
-            touchEventQueue_.pop();
         }
     }
     auto pos = delegate_->GetPosition(embedId);
@@ -4550,13 +4558,7 @@ void WebPattern::OnHideAutofillPopup()
 
 void WebPattern::CloseKeyboard()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<WebEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto focusHub = eventHub->GetOrCreateFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    focusHub->CloseKeyboard();
+    InputMethodManager::GetInstance()->CloseKeyboard();
 }
 
 WebInfoType WebPattern::GetWebInfoType()

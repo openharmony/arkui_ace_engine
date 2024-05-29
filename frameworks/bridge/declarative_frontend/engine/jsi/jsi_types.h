@@ -60,7 +60,7 @@ public:
     }
 
     template<class... Args>
-    static JsiType<T> New(Args&&... args);
+    static JsiType<T> New(Args &&... args);
 
     void SetWeakCallback(void *ref, panda::WeakRefClearCallBack callback);
     const panda::CopyableGlobal<T>& GetHandle() const;
