@@ -2550,6 +2550,7 @@ void RosenRenderContext::OnBackgroundPixelMapUpdate(const RefPtr<PixelMap>& pixe
     auto nodeHeight = node->GetGeometryNode()->GetFrameSize().Height();
     backgroundModifier_->SetInitialNodeSize(nodeWidth, nodeHeight);
     backgroundModifier_->SetPixelMap(pixelMap);
+    backgroundModifier_->SetHostNode(node);
     backgroundModifier_->Modify();
     RequestNextFrame();
 }
