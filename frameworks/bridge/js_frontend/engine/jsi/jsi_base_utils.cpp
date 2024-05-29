@@ -538,8 +538,10 @@ std::string JsiBaseUtils::GetSourceInfo(const std::string& line, const std::stri
     std::string sourceInfo;
     MappingInfo mapInfo;
     if (isAppPage) {
+        CHECK_NULL_RETURN(appMap, "");
         mapInfo = appMap->Find(StringToInt(line) - offSet, StringToInt(column));
     } else {
+        CHECK_NULL_RETURN(pageMap, "");
         mapInfo = pageMap->Find(StringToInt(line) - offSet, StringToInt(column));
     }
     if (mapInfo.row == 0 || mapInfo.col == 0) {
