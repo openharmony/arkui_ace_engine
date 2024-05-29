@@ -692,7 +692,6 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const 
         CHECK_NULL_VOID(pattern);
         pattern->SetTextFieldNode(frameNode);
         frameNode->MountToParent(parentNode);
-        frameNode->MarkModifyDone();
     }
 }
 
