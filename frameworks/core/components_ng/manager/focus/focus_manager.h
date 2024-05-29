@@ -46,7 +46,7 @@ public:
     };
     friend FocusGuard;
 
-    explicit FocusManager(const WeakPtr<PipelineContext>& pipeline) : pipeline_(pipeline) {}
+    explicit FocusManager(const RefPtr<PipelineContext>& pipeline);
     ~FocusManager() override = default;
 
     void FocusViewShow(const RefPtr<FocusView>& focusView, bool isTriggerByStep = false);
