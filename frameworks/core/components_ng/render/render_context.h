@@ -298,6 +298,7 @@ public:
     virtual void ResetBackBlurStyle() {}
     virtual void ClipWithRect(const RectF& rectF) {}
     virtual void ClipWithRRect(const RectF& rectF, const RadiusF& radiusF) {}
+    virtual void RemoveClipWithRRect() {}
 
     // visual
     virtual void UpdateVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect) {}
