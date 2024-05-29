@@ -74,15 +74,6 @@ const Dimension TEST_STROKEWIDTH_MAX = 1000.0_vp;
 const Dimension TEST_STARTMARGIN_MAX = 1000.0_vp;
 const Dimension TEST_ENDMARGIN_MAX = 2000.0_vp;
 const Dimension TEST_STROKEWIDTH_10 = 10.0_vp;
-const Dimension TEST_STROKEWIDTH_20 = 20.0_vp;
-const Dimension TEST_STROKEWIDTH_NEGATIVE_10 = -10.0_vp;
-const Dimension TEST_STARTMARGIN_NEGATIVE_20 = -20.0_vp;
-const Dimension TEST_ENDMARGIN_NEGATIVE_30 = -30.0_vp;
-const Dimension TEST_NEEDLINE_STROKEWIDTH_MAX = 1000.0_vp;
-const Dimension TEST_NEEDLINE_STARTMARGIN_MAX = 2000.0_vp;
-const Dimension TEST_NEEDLINE_ENDMARGIN_MAX = 3000.0_vp;
-const Dimension TEST_NEEDLINE_STROKEWIDTH_VALUE_20 = 20.0_vp;
-const Dimension TEST_NEEDLINE_STROKEWIDTH_VALUE_10 = 10.0_vp;
 const Dimension TEST_NEEDLINE_ITEM_VALUE_0 = 0.0_vp;
 const float START_MARGIN_DEFAULT = 3.0f;
 const float END_MARGIN_DEFAULT = 4.0f;
@@ -97,18 +88,10 @@ const float DIVIDER_LENGTH_NEGATIVE = -4.0f;
 const float DIVIDER_MARGIN_NEGATIVE = -6.0f;
 const float DIVIDER_HEIGHT_NEGATIVE = -1.0f;
 const float DIVIDER_HEIGHT_NEGATIVE_1 = 1.0f;
-const float START_MARGIN_MAX = 3000;
-const float END_MARGIN_MAX = 5000;
-const float DIVIDER_WIDTH_MAX = 2000;
-const float DIVIDER_LENGTH_MAX = 4000;
-const float DIVIDER_MARGIN_MAX = 2000;
-const float DIVIDER_HEIGHT_MAX = 5000;
 const float EXCEPT_VALUE = 1.0f;
-const float TEST_NEEDLINE_INFO_VALUE_0 = 0.0;
 const double TEST_DIVIDERHEIGHT_DEFAULT = 10.0;
 const double TEST_DIVIDERHEIGHT_NEGATIVE = -20.0;
 const double TEST_DIVIDERHEIGHT_MAX = 1000.0;
-const double DIVIDERWIDTH_VALUE = 1.0;
 } // namespace
 
 class TextPickerDividerTestNg : public testing::Test {
@@ -446,6 +429,165 @@ HWTEST_F(TextPickerDividerTestNg, TextPickerSetDivider005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextPickerSetDivider006
+ * @tc.desc: Test SetDivider
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerDividerTestNg, TextPickerSetDivider006, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create textpicker framenode and textPickerLayoutProperty.
+     */
+    auto theme6 = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme6, TEXT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto textPickerLayoutProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(textPickerLayoutProperty, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test method setDivider
+     * @tc.expected: divider is set as expected
+     */
+    ItemDivider divider6;
+    divider6.color = Color::BLACK;
+    divider6.strokeWidth = TEST_NEEDLINE_ITEM_VALUE_0;
+    divider6.startMargin = TEST_NEEDLINE_ITEM_VALUE_0;
+    divider6.endMargin = TEST_NEEDLINE_ITEM_VALUE_0;
+    TextPickerModelNG::GetInstance()->SetDivider(divider6);
+
+    auto itemDivider6 = textPickerLayoutProperty->GetDivider();
+    EXPECT_EQ(itemDivider6->color, divider6.color);
+    EXPECT_EQ(itemDivider6->strokeWidth, divider6.strokeWidth);
+    EXPECT_EQ(itemDivider6->startMargin, divider6.startMargin);
+    EXPECT_EQ(itemDivider6->endMargin, divider6.endMargin);
+    DestroyTextPickerTestNgObject();
+}
+
+/**
+ * @tc.name: TextPickerSetDivider007
+ * @tc.desc: Test SetDivider
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerDividerTestNg, TextPickerSetDivider007, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create textpicker framenode and textPickerLayoutProperty.
+     */
+    auto theme7 = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme7, TEXT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto textPickerLayoutProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(textPickerLayoutProperty, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test method setDivider
+     * @tc.expected: divider is set as expected
+     */
+    ItemDivider divider7;
+    divider7.color = Color::BLACK;
+    divider7.strokeWidth = TEST_STROKEWIDTH_MAX;
+    divider7.startMargin = TEST_STARTMARGIN_MAX;
+    divider7.endMargin = TEST_ENDMARGIN_MAX;
+    divider7.isRtl = true;
+    TextPickerModelNG::GetInstance()->SetDivider(divider7);
+
+    auto itemDivider7 = textPickerLayoutProperty->GetDivider();
+    EXPECT_EQ(itemDivider7->color, divider7.color);
+    EXPECT_EQ(itemDivider7->strokeWidth, divider7.strokeWidth);
+    EXPECT_EQ(itemDivider7->startMargin, divider7.startMargin);
+    EXPECT_EQ(itemDivider7->endMargin, divider7.endMargin);
+    DestroyTextPickerTestNgObject();
+}
+
+/**
+ * @tc.name: TextPickerSetDivider008
+ * @tc.desc: Test SetDivider
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerDividerTestNg, TextPickerSetDivider008, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create textpicker framenode and textPickerLayoutProperty.
+     */
+    auto theme8 = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme8, TEXT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto textPickerLayoutProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(textPickerLayoutProperty, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test method setDivider
+     * @tc.expected: divider is set as expected
+     */
+    ItemDivider divider8;
+    divider8.color = Color::GREEN;
+    divider8.strokeWidth = TEST_STROKEWIDTH_NEGATIVE;
+    divider8.startMargin = TEST_STARTMARGIN_NEGATIVE;
+    divider8.endMargin = TEST_ENDMARGIN_NEGATIVE;
+    divider8.isRtl = true;
+    TextPickerModelNG::GetInstance()->SetDivider(divider8);
+    auto itemDivider8 = textPickerLayoutProperty->GetDivider();
+
+    EXPECT_EQ(itemDivider8->color, divider8.color);
+    EXPECT_EQ(itemDivider8->strokeWidth, divider8.strokeWidth);
+    EXPECT_EQ(itemDivider8->startMargin, divider8.startMargin);
+    EXPECT_EQ(itemDivider8->endMargin, divider8.endMargin);
+    DestroyTextPickerTestNgObject();
+}
+
+/**
+ * @tc.name: TextPickerSetDivider009
+ * @tc.desc: Test SetDivider
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerDividerTestNg, TextPickerSetDivider009, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create textpicker framenode and textPickerLayoutProperty.
+     */
+    auto theme9 = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme9, TEXT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto textPickerLayoutProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(textPickerLayoutProperty, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test method setDivider
+     * @tc.expected: divider is set as expected
+     */
+    ItemDivider divider9;
+    divider9.color = Color::RED;
+    divider9.strokeWidth = TEST_STROKEWIDTH_DEFAULT;
+    divider9.startMargin = TEST_STARTMARGIN_DEFAULT;
+    divider9.endMargin = TEST_ENDMARGIN_DEFAULT;
+    divider9.isRtl = true;
+    TextPickerModelNG::GetInstance()->SetDivider(divider9);
+
+    auto itemDivider9 = textPickerLayoutProperty->GetDivider();
+    EXPECT_EQ(itemDivider9->color, divider9.color);
+    EXPECT_EQ(itemDivider9->strokeWidth, divider9.strokeWidth);
+    EXPECT_EQ(itemDivider9->startMargin, divider9.startMargin);
+    EXPECT_EQ(itemDivider9->endMargin, divider9.endMargin);
+    DestroyTextPickerTestNgObject();
+}
+
+/**
  * @tc.name: SetStrokeWidth001
  * @tc.desc: Test SetStrokeWidth.
  * @tc.type: FUNC
@@ -731,796 +873,302 @@ HWTEST_F(TextPickerDividerTestNg, SetStrokeWidth005, TestSize.Level1)
 }
 
 /**
- * @tc.name: NeedPaintDividerLines001
- * @tc.desc: Test NeedPaintDividerLines.
+ * @tc.name: SetStrokeWidth006
+ * @tc.desc: Test SetStrokeWidth.
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerDividerTestNg, NeedPaintDividerLines001, TestSize.Level1)
+HWTEST_F(TextPickerDividerTestNg, SetStrokeWidth006, TestSize.Level1)
 {
     /**
      * @tc.step: step1. get TextPickerPaintMethod RefPtr.
      */
-    auto themePick1 = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
-    TextPickerModelNG::GetInstance()->Create(themePick1, TEXT);
-    themePick1->gradientHeight_ = Dimension(10.0);
+    auto theme = MockPipelineContext::GetCurrentContext()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
     ASSERT_NE(pickerPaintProperty, nullptr);
+    auto textPickerLayoutProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(textPickerLayoutProperty, nullptr);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     ASSERT_NE(textPickerPattern, nullptr);
     auto textPickerPaintMethod =
         AceType::MakeRefPtr<TextPickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(textPickerPattern)));
     ASSERT_NE(textPickerPaintMethod, nullptr);
-    ItemDivider itemDivider;
-    itemDivider.strokeWidth = TEST_STROKEWIDTH_10;
-    
-    /**
-     * @tc.steps: step2. set the dividerInfo
-     * @tc.expected: strokeWidth is equal to value was set
-     */
-    DividerInfo dividerInfo;
-    double dividerHeight = TEST_DIVIDERHEIGHT_DEFAULT;
-    dividerInfo.startMargin = START_MARGIN_DEFAULT;
-    dividerInfo.endMargin = END_MARGIN_DEFAULT;
-    dividerInfo.dividerWidth = DIVIDER_WIDTH_DEFAULT;
-    dividerInfo.dividerLength = DIVIDER_LENGTH_DEFAULT;
-    dividerInfo.dividerMargin = DIVIDER_MARGIN_DEFAULT;
-    dividerInfo.dividerHeight = DIVIDER_HEIGHT_DEFAULT;
-    dividerInfo.dividerColor = Color::RED;
-    RectF contentRect;
-    contentRect.SetWidth(10.0);
-
-    auto result = textPickerPaintMethod->SetStrokeWidth(itemDivider, dividerHeight, dividerInfo);
-    EXPECT_TRUE(result);
-    
-    /**
-     * @tc.steps: step3. set dividerInfo
-     * @tc.expected: NeedPaintDividerLines the result is true
-     */
-    auto temp = textPickerPaintMethod->NeedPaintDividerLines(contentRect, itemDivider, dividerHeight, dividerInfo);
-    EXPECT_TRUE(temp);
-    DestroyTextPickerTestNgObject();
-}
-
-/**
- * @tc.name: NeedPaintDividerLines002
- * @tc.desc: Test NeedPaintDividerLines.
- * @tc.type: FUNC
- */
-HWTEST_F(TextPickerDividerTestNg, NeedPaintDividerLines002, TestSize.Level1)
-{
-    /**
-     * @tc.step: step1. get TextPickerPaintMethod RefPtr.
-     */
-    auto themePick2 = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
-    TextPickerModelNG::GetInstance()->Create(themePick2, TEXT);
-    themePick2->gradientHeight_ = Dimension(10.0);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    ASSERT_NE(pickerPaintProperty, nullptr);
-    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
-    ASSERT_NE(textPickerPattern, nullptr);
-    auto textPickerPaintMethod =
-        AceType::MakeRefPtr<TextPickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(textPickerPattern)));
-    ASSERT_NE(textPickerPaintMethod, nullptr);
-    ItemDivider itemDivider2;
-    itemDivider2.strokeWidth = TEST_STROKEWIDTH_10;
-    double dividerHeight = TEST_DIVIDERHEIGHT_DEFAULT;
-    DividerInfo dividerInfo2;
 
     /**
-     * @tc.steps: step2. set the dividerInfo
-     * @tc.expected: strokeWidth  the result is true
+     * @tc.steps: step2. set dividerHeight value,
      */
-    dividerInfo2.startMargin = START_MARGIN_NEGATIVE;
-    dividerInfo2.endMargin = END_MARGIN_NEGATIVE;
-    dividerInfo2.dividerWidth = DIVIDER_WIDTH_NEGATIVE;
-    dividerInfo2.dividerLength = DIVIDER_LENGTH_NEGATIVE;
-    dividerInfo2.dividerMargin = DIVIDER_MARGIN_NEGATIVE;
-    dividerInfo2.dividerHeight = DIVIDER_HEIGHT_NEGATIVE;
-    dividerInfo2.dividerColor = Color::GREEN;
-    RectF contentRect;
-    contentRect.SetWidth(2.0);
-
-    auto temp = textPickerPaintMethod->SetStrokeWidth(itemDivider2, dividerHeight, dividerInfo2);
-    EXPECT_TRUE(temp);
-    
-    /**
-     * @tc.steps: step3. set stroke Width and get dividerInfo
-     * @tc.expected: NeedPaintDividerLines the result is true
-     */
-    auto result = textPickerPaintMethod->NeedPaintDividerLines(contentRect, itemDivider2, dividerHeight, dividerInfo2);
-    EXPECT_TRUE(result);
-    DestroyTextPickerTestNgObject();
-}
-
-/**
- * @tc.name: NeedPaintDividerLines003
- * @tc.desc: Test NeedPaintDividerLines.
- * @tc.type: FUNC
- */
-HWTEST_F(TextPickerDividerTestNg, NeedPaintDividerLines003, TestSize.Level1)
-{
-    /**
-     * @tc.step: step1. get TextPickerPaintMethod RefPtr.
-     */
-    auto themePick3 = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
-    TextPickerModelNG::GetInstance()->Create(themePick3, TEXT);
-    themePick3->gradientHeight_ = Dimension(10.0);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    ASSERT_NE(pickerPaintProperty, nullptr);
-    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
-    ASSERT_NE(textPickerPattern, nullptr);
-    auto textPickerPaintMethod =
-        AceType::MakeRefPtr<TextPickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(textPickerPattern)));
-    ASSERT_NE(textPickerPaintMethod, nullptr);
-    ItemDivider itemDivider3;
-    itemDivider3.strokeWidth = TEST_STROKEWIDTH_20;
     double dividerHeight = TEST_DIVIDERHEIGHT_DEFAULT;
 
     /**
-     * @tc.steps: step2. set the dividerInfo
-     * @tc.expected: strokeWidth the result is true
+     * @tc.steps: step3. set divier stroke width
      */
-    DividerInfo dividerInfo3;
-    dividerInfo3.startMargin = START_MARGIN_MAX;
-    dividerInfo3.endMargin = END_MARGIN_MAX;
-    dividerInfo3.dividerWidth = DIVIDER_WIDTH_MAX;
-    dividerInfo3.dividerLength = DIVIDER_LENGTH_MAX;
-    dividerInfo3.dividerMargin = DIVIDER_MARGIN_MAX;
-    dividerInfo3.dividerHeight = DIVIDER_HEIGHT_MAX;
-    dividerInfo3.dividerColor = Color::RED;
-    RectF contentRect;
-    contentRect.SetWidth(10.0);
-
-    auto temp = textPickerPaintMethod->SetStrokeWidth(itemDivider3, dividerHeight, dividerInfo3);
-    EXPECT_TRUE(temp);
+    ItemDivider itemDiv6;
+    itemDiv6.color = Color::RED;
+    itemDiv6.strokeWidth = TEST_STROKEWIDTH_NEGATIVE;
+    itemDiv6.startMargin = TEST_STARTMARGIN_NEGATIVE;
+    itemDiv6.endMargin = TEST_ENDMARGIN_NEGATIVE;
+    itemDiv6.isRtl = false;
     
     /**
-     * @tc.step: step3. set stroke Width and get dividerInfo
-     * @tc.expected: NeedPaintDividerLines the result is true
+     * @tc.steps: step4. set stroke Width and get dividerInfo
+     * @tc.expected: setStrokeWidth the result is true
      */
-    auto result = textPickerPaintMethod->NeedPaintDividerLines(contentRect, itemDivider3, dividerHeight, dividerInfo3);
-    EXPECT_TRUE(result);
-    DestroyTextPickerTestNgObject();
-}
+    DividerInfo divInfo6;
+    divInfo6.startMargin = START_MARGIN_DEFAULT;
+    divInfo6.endMargin = END_MARGIN_DEFAULT;
+    divInfo6.dividerWidth = DIVIDER_WIDTH_DEFAULT;
+    divInfo6.dividerLength = DIVIDER_LENGTH_DEFAULT;
+    divInfo6.dividerMargin = DIVIDER_MARGIN_DEFAULT;
+    divInfo6.dividerHeight = DIVIDER_HEIGHT_DEFAULT;
+    divInfo6.dividerColor = Color::GRAY;
 
-/**
- * @tc.name: NeedPaintDividerLines004
- * @tc.desc: Test NeedPaintDividerLines.
- * @tc.type: FUNC
- */
-HWTEST_F(TextPickerDividerTestNg, NeedPaintDividerLines004, TestSize.Level1)
-{
-    /**
-     * @tc.step: step1. get TextPickerPaintMethod RefPtr.
-     */
-    auto themePick4 = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
-    TextPickerModelNG::GetInstance()->Create(themePick4, TEXT);
-    themePick4->gradientHeight_ = Dimension(10.0);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    ASSERT_NE(pickerPaintProperty, nullptr);
-    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
-    ASSERT_NE(textPickerPattern, nullptr);
-    auto textPickerPaintMethod =
-        AceType::MakeRefPtr<TextPickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(textPickerPattern)));
-    ASSERT_NE(textPickerPaintMethod, nullptr);
-    ItemDivider itemDivider4;
-
-    /**
-     * @tc.steps: step2. set the itemDivider
-     * @tc.expected: strokeWidth the result is true
-     */
-    itemDivider4.strokeWidth = TEST_STROKEWIDTH_DEFAULT;
-    itemDivider4.startMargin = TEST_STARTMARGIN_DEFAULT;
-    itemDivider4.endMargin = TEST_ENDMARGIN_DEFAULT;
-    double dividerHeight = TEST_DIVIDERHEIGHT_DEFAULT;
-    DividerInfo dividerInfo4;
-    dividerInfo4.dividerColor = Color::RED;
-    RectF contentRect;
-
-    auto temp = textPickerPaintMethod->SetStrokeWidth(itemDivider4, dividerHeight, dividerInfo4);
-    EXPECT_TRUE(temp);
-    
-    /**
-     * @tc.step: step3. set stroke Width and get dividerInfo
-     * @tc.expected: NeedPaintDividerLines the result is true
-     */
-    auto result = textPickerPaintMethod->NeedPaintDividerLines(contentRect, itemDivider4, dividerHeight, dividerInfo4);
-    EXPECT_TRUE(result);
-    DestroyTextPickerTestNgObject();
-}
-
-/**
- * @tc.name: NeedPaintDividerLines005
- * @tc.desc: Test NeedPaintDividerLines.
- * @tc.type: FUNC
- */
-HWTEST_F(TextPickerDividerTestNg, NeedPaintDividerLines005, TestSize.Level1)
-{
-    /**
-     * @tc.step: step1. get TextPickerPaintMethod RefPtr.
-     */
-    auto themePick5 = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
-    TextPickerModelNG::GetInstance()->Create(themePick5, TEXT);
-    themePick5->gradientHeight_ = Dimension(10.0);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    ASSERT_NE(pickerPaintProperty, nullptr);
-    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
-    ASSERT_NE(textPickerPattern, nullptr);
-    auto textPickerPaintMethod =
-        AceType::MakeRefPtr<TextPickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(textPickerPattern)));
-    ASSERT_NE(textPickerPaintMethod, nullptr);
-    ItemDivider itemDivider5;
-
-    /**
-     * @tc.steps: step2. set the itemDivider
-     * @tc.expected: strokeWidth the result is false
-     */
-    itemDivider5.strokeWidth = TEST_STROKEWIDTH_NEGATIVE_10;
-    itemDivider5.startMargin = TEST_STARTMARGIN_NEGATIVE_20;
-    itemDivider5.endMargin = TEST_ENDMARGIN_NEGATIVE_30;
-    double dividerHeight = TEST_DIVIDERHEIGHT_DEFAULT;
-    DividerInfo dividerInfo5;
-    dividerInfo5.dividerWidth = DIVIDERWIDTH_VALUE;
-    dividerInfo5.dividerColor = Color::RED;
-    RectF contentRect;
-    contentRect.SetWidth(20.0);
-
-    auto temp = textPickerPaintMethod->SetStrokeWidth(itemDivider5, dividerHeight, dividerInfo5);
-    EXPECT_EQ(temp, false);
-    
-    /**
-     * @tc.step: step3. set stroke Width and get dividerInfo
-     * @tc.expected: NeedPaintDividerLines the result is false
-     */
-    auto result = textPickerPaintMethod->NeedPaintDividerLines(contentRect, itemDivider5, dividerHeight, dividerInfo5);
-    EXPECT_EQ(result, false);
-    DestroyTextPickerTestNgObject();
-}
-
-/**
- * @tc.name: NeedPaintDividerLines006
- * @tc.desc: Test NeedPaintDividerLines.
- * @tc.type: FUNC
- */
-HWTEST_F(TextPickerDividerTestNg, NeedPaintDividerLines006, TestSize.Level1)
-{
-    /**
-     * @tc.step: step1. get TextPickerPaintMethod RefPtr.
-     */
-    auto themePick6 = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
-    TextPickerModelNG::GetInstance()->Create(themePick6, TEXT);
-    themePick6->gradientHeight_ = Dimension(10.0);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    ASSERT_NE(pickerPaintProperty, nullptr);
-    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
-    ASSERT_NE(textPickerPattern, nullptr);
-    auto textPickerPaintMethod =
-        AceType::MakeRefPtr<TextPickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(textPickerPattern)));
-    ASSERT_NE(textPickerPaintMethod, nullptr);
-
-    /**
-     * @tc.steps: step2. set the itemDivider
-     * @tc.expected: strokeWidth the result is true
-     */
-    ItemDivider itemDivider6;
-    itemDivider6.strokeWidth = TEST_NEEDLINE_STROKEWIDTH_MAX;
-    itemDivider6.startMargin = TEST_NEEDLINE_STARTMARGIN_MAX;
-    itemDivider6.endMargin = TEST_NEEDLINE_ENDMARGIN_MAX;
-    double dividerHeight = 10;
-    DividerInfo dividerInfo6;
-    dividerInfo6.dividerColor = Color::GREEN;
-    RectF contentRect;
-
-    auto temp = textPickerPaintMethod->SetStrokeWidth(itemDivider6, dividerHeight, dividerInfo6);
-    EXPECT_TRUE(temp);
-    
-    /**
-     * @tc.step: step3. set stroke Width and get dividerInfo
-     * @tc.expected: NeedPaintDividerLines the result is true
-     */
-    auto result = textPickerPaintMethod->NeedPaintDividerLines(contentRect, itemDivider6, dividerHeight, dividerInfo6);
-    EXPECT_TRUE(result);
-    DestroyTextPickerTestNgObject();
-}
-
-/**
- * @tc.name: NeedPaintDividerLines007
- * @tc.desc: Test NeedPaintDividerLines.
- * @tc.type: FUNC
- */
-HWTEST_F(TextPickerDividerTestNg, NeedPaintDividerLines007, TestSize.Level1)
-{
-    /**
-     * @tc.step: step1. get TextPickerPaintMethod RefPtr.
-     */
-    auto themePick7 = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
-    TextPickerModelNG::GetInstance()->Create(themePick7, TEXT);
-    themePick7->gradientHeight_ = Dimension(10.0);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    ASSERT_NE(pickerPaintProperty, nullptr);
-    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
-    ASSERT_NE(textPickerPattern, nullptr);
-    auto textPickerPaintMethod =
-        AceType::MakeRefPtr<TextPickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(textPickerPattern)));
-    ASSERT_NE(textPickerPaintMethod, nullptr);
-    ItemDivider itemDivider7;
-    itemDivider7.strokeWidth = TEST_NEEDLINE_STROKEWIDTH_VALUE_20;
-    double dividerHeight = 1.0;
-    DividerInfo dividerInfo7;
-    dividerInfo7.dividerColor = Color::TRANSPARENT;
-    RectF contentRect;
-    contentRect.SetWidth(20.0);
-    itemDivider7.isRtl = true;
-
-    /**
-     * @tc.expected: SetStrokeWidth the result is true
-     */
-    auto temp = textPickerPaintMethod->SetStrokeWidth(itemDivider7, dividerHeight, dividerInfo7);
-    EXPECT_TRUE(temp);
-    
-    /**
-     * @tc.step: step2. set stroke Width and get dividerInfo
-     * @tc.expected: NeedPaintDividerLines the result is true
-     */
-    auto result = textPickerPaintMethod->NeedPaintDividerLines(contentRect, itemDivider7, dividerHeight, dividerInfo7);
-    EXPECT_TRUE(result);
-    DestroyTextPickerTestNgObject();
-}
-
-/**
- * @tc.name: NeedPaintDividerLines008
- * @tc.desc: Test NeedPaintDividerLines.
- * @tc.type: FUNC
- */
-HWTEST_F(TextPickerDividerTestNg, NeedPaintDividerLines008, TestSize.Level1)
-{
-    /**
-     * @tc.step: step1. get TextPickerPaintMethod RefPtr.
-     */
-    auto themePick8 = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
-    TextPickerModelNG::GetInstance()->Create(themePick8, TEXT);
-    themePick8->gradientHeight_ = Dimension(10.0);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    ASSERT_NE(pickerPaintProperty, nullptr);
-    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
-    ASSERT_NE(textPickerPattern, nullptr);
-    auto textPickerPaintMethod =
-        AceType::MakeRefPtr<TextPickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(textPickerPattern)));
-    ASSERT_NE(textPickerPaintMethod, nullptr);
-    ItemDivider itemDivider8;
-    itemDivider8.strokeWidth = 20.0_vp;
-    double dividerHeight = 5;
-    DividerInfo dividerInfo8;
-    dividerInfo8.dividerColor = Color::BLUE;
-    RectF contentRect;
-    contentRect.SetWidth(20.0);
-    itemDivider8.isRtl = false;
-
-    auto temp = textPickerPaintMethod->SetStrokeWidth(itemDivider8, dividerHeight, dividerInfo8);
-    EXPECT_TRUE(temp);
-    
-    /**
-     * @tc.step: step2. set stroke Width and get dividerInfo
-     * @tc.expected: NeedPaintDividerLines the result is true
-     */
-    auto result = textPickerPaintMethod->NeedPaintDividerLines(contentRect, itemDivider8, dividerHeight, dividerInfo8);
-    EXPECT_TRUE(result);
-    DestroyTextPickerTestNgObject();
-}
-
-/**
- * @tc.name: NeedPaintDividerLines009
- * @tc.desc: Test NeedPaintDividerLines.
- * @tc.type: FUNC
- */
-HWTEST_F(TextPickerDividerTestNg, NeedPaintDividerLines009, TestSize.Level1)
-{
-    /**
-     * @tc.step: step1. get TextPickerPaintMethod RefPtr.
-     */
-    auto themePick9 = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
-    TextPickerModelNG::GetInstance()->Create(themePick9, TEXT);
-    themePick9->gradientHeight_ = Dimension(10.0);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    ASSERT_NE(pickerPaintProperty, nullptr);
-    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
-    ASSERT_NE(textPickerPattern, nullptr);
-    auto textPickerPaintMethod =
-        AceType::MakeRefPtr<TextPickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(textPickerPattern)));
-    ASSERT_NE(textPickerPaintMethod, nullptr);
-    ItemDivider itemDivider9;
-    itemDivider9.strokeWidth = TEST_NEEDLINE_STROKEWIDTH_VALUE_10;
-    double dividerHeight = 0;
-    DividerInfo dividerInfo9;
-    dividerInfo9.dividerColor = Color::TRANSPARENT;
-    RectF contentRect;
-    contentRect.SetWidth(10.0);
-
-    auto temp = textPickerPaintMethod->SetStrokeWidth(itemDivider9, dividerHeight, dividerInfo9);
-    EXPECT_TRUE(temp);
-    
-    /**
-     * @tc.step: step2. set stroke Width and get dividerInfo
-     * @tc.expected: NeedPaintDividerLines the result is true
-     */
-    auto result = textPickerPaintMethod->NeedPaintDividerLines(contentRect, itemDivider9, dividerHeight, dividerInfo9);
-    EXPECT_TRUE(result);
-    DestroyTextPickerTestNgObject();
-}
-
-/**
- * @tc.name: NeedPaintDividerLines010
- * @tc.desc: Test NeedPaintDividerLines.
- * @tc.type: FUNC
- */
-HWTEST_F(TextPickerDividerTestNg, NeedPaintDividerLines0010, TestSize.Level1)
-{
-    /**
-     * @tc.step: step1. get TextPickerPaintMethod RefPtr.
-     */
-    auto themePick10 = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
-    TextPickerModelNG::GetInstance()->Create(themePick10, TEXT);
-    themePick10->gradientHeight_ = Dimension(10.0);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    ASSERT_NE(pickerPaintProperty, nullptr);
-    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
-    ASSERT_NE(textPickerPattern, nullptr);
-    auto textPickerPaintMethod =
-        AceType::MakeRefPtr<TextPickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(textPickerPattern)));
-    ASSERT_NE(textPickerPaintMethod, nullptr);
-    ItemDivider itemDivider10;
-    double dividerHeight = -30;
-    DividerInfo dividerInfo10;
-    dividerInfo10.dividerColor = Color::FOREGROUND;
-    RectF contentRect;
-    contentRect.SetWidth(10.0);
-
-    auto temp = textPickerPaintMethod->SetStrokeWidth(itemDivider10, dividerHeight, dividerInfo10);
-    EXPECT_TRUE(temp);
-    
-    /**
-     * @tc.step: step2. set stroke Width and get dividerInfo
-     * @tc.expected: NeedPaintDividerLines the result is true
-     */
-    auto result =
-        textPickerPaintMethod->NeedPaintDividerLines(contentRect, itemDivider10, dividerHeight, dividerInfo10);
-    EXPECT_TRUE(result);
-    DestroyTextPickerTestNgObject();
-}
-
-/**
- * @tc.name: NeedPaintDividerLines011
- * @tc.desc: Test NeedPaintDividerLines.
- * @tc.type: FUNC
- */
-HWTEST_F(TextPickerDividerTestNg, NeedPaintDividerLines011, TestSize.Level1)
-{
-    /**
-     * @tc.step: step1. get TextPickerPaintMethod RefPtr.
-     */
-    auto themePick11 = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
-    TextPickerModelNG::GetInstance()->Create(themePick11, TEXT);
-    themePick11->gradientHeight_ = Dimension(10.0);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    ASSERT_NE(pickerPaintProperty, nullptr);
-    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
-    ASSERT_NE(textPickerPattern, nullptr);
-    auto textPickerPaintMethod =
-        AceType::MakeRefPtr<TextPickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(textPickerPattern)));
-    ASSERT_NE(textPickerPaintMethod, nullptr);
-    ItemDivider itemDivider11;
-    double dividerHeight = 5000;
-    DividerInfo dividerInfo11;
-    dividerInfo11.dividerColor = Color::TRANSPARENT;
-    RectF contentRect;
-
-    auto temp = textPickerPaintMethod->SetStrokeWidth(itemDivider11, dividerHeight, dividerInfo11);
-    EXPECT_EQ(temp, false);
-    
-    /**
-     * @tc.step: step2. set stroke Width and get dividerInfo
-     * @tc.expected: NeedPaintDividerLines the result is false
-     */
-    auto result =
-        textPickerPaintMethod->NeedPaintDividerLines(contentRect, itemDivider11, dividerHeight, dividerInfo11);
-    EXPECT_EQ(result, false);
-    DestroyTextPickerTestNgObject();
-}
-
-/**
- * @tc.name: NeedPaintDividerLines012
- * @tc.desc: Test NeedPaintDividerLines.
- * @tc.type: FUNC
- */
-HWTEST_F(TextPickerDividerTestNg, NeedPaintDividerLines012, TestSize.Level1)
-{
-    /**
-     * @tc.step: step1. get TextPickerPaintMethod RefPtr.
-     */
-    auto themePick12 = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
-    TextPickerModelNG::GetInstance()->Create(themePick12, TEXT);
-    themePick12->gradientHeight_ = Dimension(10.0);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    ASSERT_NE(pickerPaintProperty, nullptr);
-    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
-    ASSERT_NE(textPickerPattern, nullptr);
-    auto textPickerPaintMethod =
-        AceType::MakeRefPtr<TextPickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(textPickerPattern)));
-    ASSERT_NE(textPickerPaintMethod, nullptr);
-    ItemDivider itemDivider12;
-    itemDivider12.strokeWidth = TEST_NEEDLINE_STROKEWIDTH_VALUE_20;
-    double dividerHeight = 10;
-    DividerInfo dividerInfo12;
-    dividerInfo12.dividerColor = Color::BLUE;
-    RectF contentRect;
-    contentRect.SetWidth(0);
-    contentRect.SetHeight(0);
-
-    auto temp = textPickerPaintMethod->SetStrokeWidth(itemDivider12, dividerHeight, dividerInfo12);
-    EXPECT_TRUE(temp);
-    
-    /**
-     * @tc.step: step2. set stroke Width and get dividerInfo
-     * @tc.expected: NeedPaintDividerLines the result is false
-     */
-    auto result =
-        textPickerPaintMethod->NeedPaintDividerLines(contentRect, itemDivider12, dividerHeight, dividerInfo12);
-    EXPECT_EQ(result, false);
-    DestroyTextPickerTestNgObject();
-}
-
-/**
- * @tc.name: NeedPaintDividerLines013
- * @tc.desc: Test NeedPaintDividerLines.
- * @tc.type: FUNC
- */
-HWTEST_F(TextPickerDividerTestNg, NeedPaintDividerLines013, TestSize.Level1)
-{
-    /**
-     * @tc.step: step1. get TextPickerPaintMethod RefPtr.
-     */
-    auto themePick13 = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
-    TextPickerModelNG::GetInstance()->Create(themePick13, TEXT);
-    themePick13->gradientHeight_ = Dimension(10.0);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-
-    auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    ASSERT_NE(pickerPaintProperty, nullptr);
-
-    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
-    ASSERT_NE(textPickerPattern, nullptr);
-
-    auto textPickerPaintMethod =
-        AceType::MakeRefPtr<TextPickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(textPickerPattern)));
-    ASSERT_NE(textPickerPaintMethod, nullptr);
-
-    ItemDivider itemDivider13;
-    itemDivider13.strokeWidth = TEST_NEEDLINE_STROKEWIDTH_VALUE_20;
-    double dividerHeight = 10;
-    DividerInfo dividerInfo13;
-    dividerInfo13.dividerColor = Color::WHITE;
-    RectF contentRect;
-    contentRect.SetWidth(5000);
-    contentRect.SetHeight(5000);
-    auto temp = textPickerPaintMethod->SetStrokeWidth(itemDivider13, dividerHeight, dividerInfo13);
-    EXPECT_TRUE(temp);
-    
-    /**
-     * @tc.step: step2. set stroke Width and get dividerInfo
-     * @tc.expected: NeedPaintDividerLines the result is true
-     */
-    auto result =
-        textPickerPaintMethod->NeedPaintDividerLines(contentRect, itemDivider13, dividerHeight, dividerInfo13);
-    EXPECT_TRUE(result);
-    DestroyTextPickerTestNgObject();
-}
-
-/**
- * @tc.name: NeedPaintDividerLines014
- * @tc.desc: Test NeedPaintDividerLines.
- * @tc.type: FUNC
- */
-HWTEST_F(TextPickerDividerTestNg, NeedPaintDividerLines014, TestSize.Level1)
-{
-    /**
-     * @tc.step: step1. get TextPickerPaintMethod RefPtr.
-     */
-    auto themePick14 = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
-    TextPickerModelNG::GetInstance()->Create(themePick14, TEXT);
-    themePick14->gradientHeight_ = Dimension(10.0);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-
-    auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    ASSERT_NE(pickerPaintProperty, nullptr);
-
-    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
-    ASSERT_NE(textPickerPattern, nullptr);
-
-    auto textPickerPaintMethod =
-        AceType::MakeRefPtr<TextPickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(textPickerPattern)));
-    ASSERT_NE(textPickerPaintMethod, nullptr);
-    ItemDivider itemDivider14;
-    itemDivider14.strokeWidth = TEST_NEEDLINE_STROKEWIDTH_VALUE_20;
-    double dividerHeight = 10;
-    DividerInfo dividerInfo14;
-    dividerInfo14.dividerColor = Color::GRAY;
-    RectF contentRect;
-    contentRect.SetWidth(-20);
-    contentRect.SetHeight(-30);
-    auto temp = textPickerPaintMethod->SetStrokeWidth(itemDivider14, dividerHeight, dividerInfo14);
-    EXPECT_TRUE(temp);
-
-    /**
-     * @tc.step: step2. set stroke Width and get dividerInfo
-     * @tc.expected: NeedPaintDividerLines the result is true
-     */
-    auto result =
-        textPickerPaintMethod->NeedPaintDividerLines(contentRect, itemDivider14, dividerHeight, dividerInfo14);
-    EXPECT_TRUE(result);
-    DestroyTextPickerTestNgObject();
-}
-
-/**
- * @tc.name: NeedPaintDividerLines015
- * @tc.desc: Test NeedPaintDividerLines.
- * @tc.type: FUNC
- */
-HWTEST_F(TextPickerDividerTestNg, NeedPaintDividerLines015, TestSize.Level1)
-{
-    /**
-     * @tc.step: step1. get TextPickerPaintMethod RefPtr.
-     */
-    auto themePick15 = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
-    TextPickerModelNG::GetInstance()->Create(themePick15, TEXT);
-    themePick15->gradientHeight_ = Dimension(10.0);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    ASSERT_NE(pickerPaintProperty, nullptr);
-    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
-    ASSERT_NE(textPickerPattern, nullptr);
-    auto textPickerPaintMethod =
-        AceType::MakeRefPtr<TextPickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(textPickerPattern)));
-    ASSERT_NE(textPickerPaintMethod, nullptr);
-    ItemDivider itemDivider15;
-    itemDivider15.strokeWidth = TEST_NEEDLINE_STROKEWIDTH_VALUE_20;
-    double dividerHeight = 10;
-    DividerInfo dividerInfo15;
-    dividerInfo15.dividerColor = Color::GRAY;
-    RectF contentRect;
-    contentRect.SetWidth(10);
-    itemDivider15.isRtl = true;
-
-    auto temp = textPickerPaintMethod->SetStrokeWidth(itemDivider15, dividerHeight, dividerInfo15);
-    EXPECT_TRUE(temp);
-    
-    /**
-     * @tc.step: step2. set stroke Width and get dividerInfo
-     * @tc.expected: NeedPaintDividerLines the result is true
-     */
-    auto result =
-        textPickerPaintMethod->NeedPaintDividerLines(contentRect, itemDivider15, dividerHeight, dividerInfo15);
-    EXPECT_TRUE(result);
-    DestroyTextPickerTestNgObject();
-}
-
-/**
- * @tc.name: NeedPaintDividerLines016
- * @tc.desc: Test NeedPaintDividerLines.
- * @tc.type: FUNC
- */
-HWTEST_F(TextPickerDividerTestNg, NeedPaintDividerLines016, TestSize.Level1)
-{
-    /**
-     * @tc.step: step1. get TextPickerPaintMethod RefPtr.
-     */
-    auto themePick16 = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
-    TextPickerModelNG::GetInstance()->Create(themePick16, TEXT);
-    themePick16->gradientHeight_ = Dimension(10.0);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    ASSERT_NE(pickerPaintProperty, nullptr);
-    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
-    ASSERT_NE(textPickerPattern, nullptr);
-    auto textPickerPaintMethod =
-        AceType::MakeRefPtr<TextPickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(textPickerPattern)));
-    ASSERT_NE(textPickerPaintMethod, nullptr);
-    ItemDivider itemDivider16;
-    itemDivider16.strokeWidth = TEST_NEEDLINE_STROKEWIDTH_VALUE_20;
-    double dividerHeight = 10;
-    DividerInfo dividerInfo16;
-    dividerInfo16.dividerColor = Color::RED;
-    RectF contentRect;
-    contentRect.SetWidth(20);
-    itemDivider16.isRtl = false;
-
-    auto temp = textPickerPaintMethod->SetStrokeWidth(itemDivider16, dividerHeight, dividerInfo16);
-    EXPECT_TRUE(temp);
-    
-    /**
-     * @tc.step: step2. set stroke Width and get dividerInfo
-     * @tc.expected: NeedPaintDividerLines the result is true
-     */
-    auto result =
-        textPickerPaintMethod->NeedPaintDividerLines(contentRect, itemDivider16, dividerHeight, dividerInfo16);
-    EXPECT_TRUE(result);
-    DestroyTextPickerTestNgObject();
-}
-
-HWTEST_F(TextPickerDividerTestNg, NeedPaintDividerLines017, TestSize.Level1)
-{
-    /**
-     * @tc.step: step1. get TextPickerPaintMethod RefPtr.
-     */
-    auto themePick17 = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
-    TextPickerModelNG::GetInstance()->Create(themePick17, TEXT);
-    themePick17->gradientHeight_ = Dimension(10.0);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-
-    auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    ASSERT_NE(pickerPaintProperty, nullptr);
-
-    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
-    ASSERT_NE(textPickerPattern, nullptr);
-
-    auto textPickerPaintMethod =
-        AceType::MakeRefPtr<TextPickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(textPickerPattern)));
-    ASSERT_NE(textPickerPaintMethod, nullptr);
-    ItemDivider itemDivider17;
-    itemDivider17.strokeWidth = TEST_NEEDLINE_ITEM_VALUE_0;
-    itemDivider17.startMargin = TEST_NEEDLINE_ITEM_VALUE_0;
-    itemDivider17.endMargin = TEST_NEEDLINE_ITEM_VALUE_0;
-    double dividerHeight = 0;
-    DividerInfo dividerInfo17;
-    dividerInfo17.startMargin = TEST_NEEDLINE_INFO_VALUE_0;
-    dividerInfo17.endMargin = TEST_NEEDLINE_INFO_VALUE_0;
-    dividerInfo17.dividerWidth = TEST_NEEDLINE_INFO_VALUE_0;
-    dividerInfo17.dividerLength = TEST_NEEDLINE_INFO_VALUE_0;
-    dividerInfo17.dividerMargin = TEST_NEEDLINE_INFO_VALUE_0;
-    dividerInfo17.dividerHeight = TEST_NEEDLINE_INFO_VALUE_0;
-    dividerInfo17.dividerColor = Color::GRAY;
-    RectF contentRect;
-    contentRect.SetWidth(0);
-    contentRect.SetHeight(0);
-    auto temp = textPickerPaintMethod->SetStrokeWidth(itemDivider17, dividerHeight, dividerInfo17);
-    EXPECT_FALSE(temp);
-    
-    /**
-     * @tc.step: step2. set stroke Width and set dividerInfo
-     * @tc.expected: NeedPaintDividerLines the result is false
-     */
-    auto result =
-        textPickerPaintMethod->NeedPaintDividerLines(contentRect, itemDivider17, dividerHeight, dividerInfo17);
+    auto result = textPickerPaintMethod->SetStrokeWidth(itemDiv6, dividerHeight, divInfo6);
     EXPECT_FALSE(result);
+
+    auto dviderThickness = theme->GetDividerThickness().ConvertToPx();
+    EXPECT_EQ(EXCEPT_VALUE, dviderThickness);
     DestroyTextPickerTestNgObject();
 }
 
+/**
+ * @tc.name: SetStrokeWidth007
+ * @tc.desc: Test SetStrokeWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerDividerTestNg, SetStrokeWidth007, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. get TextPickerPaintMethod RefPtr.
+     */
+    auto theme = MockPipelineContext::GetCurrentContext()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    ASSERT_NE(pickerPaintProperty, nullptr);
+    auto textPickerLayoutProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(textPickerLayoutProperty, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    auto textPickerPaintMethod =
+        AceType::MakeRefPtr<TextPickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(textPickerPattern)));
+    ASSERT_NE(textPickerPaintMethod, nullptr);
+
+    /**
+     * @tc.steps: step2. set dividerHeight value,
+     */
+    double dividerHeight = TEST_DIVIDERHEIGHT_DEFAULT;
+
+    /**
+     * @tc.steps: step3. set divier stroke width
+     */
+    ItemDivider itemDiv7;
+    itemDiv7.color = Color::RED;
+    itemDiv7.strokeWidth = TEST_STROKEWIDTH_DEFAULT;
+    itemDiv7.startMargin = TEST_STARTMARGIN_DEFAULT;
+    itemDiv7.endMargin = TEST_ENDMARGIN_DEFAULT;
+    itemDiv7.isRtl = false;
+    
+    /**
+     * @tc.steps: step4. set stroke Width and get dividerInfo
+     * @tc.expected: setStrokeWidth the result is true
+     */
+    DividerInfo divInfo7;
+    divInfo7.startMargin = START_MARGIN_NEGATIVE;
+    divInfo7.endMargin = END_MARGIN_NEGATIVE;
+    divInfo7.dividerWidth = DIVIDER_WIDTH_NEGATIVE;
+    divInfo7.dividerLength = DIVIDER_LENGTH_NEGATIVE;
+    divInfo7.dividerMargin = DIVIDER_MARGIN_NEGATIVE;
+    divInfo7.dividerHeight = DIVIDER_HEIGHT_NEGATIVE;
+    divInfo7.dividerColor = Color::GRAY;
+
+    auto result = textPickerPaintMethod->SetStrokeWidth(itemDiv7, dividerHeight, divInfo7);
+    EXPECT_TRUE(result);
+
+    auto dviderThickness = theme->GetDividerThickness().ConvertToPx();
+    EXPECT_EQ(EXCEPT_VALUE, dviderThickness);
+    DestroyTextPickerTestNgObject();
+}
+
+/**
+ * @tc.name: SetStrokeWidth008
+ * @tc.desc: Test SetStrokeWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerDividerTestNg, SetStrokeWidth008, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. get TextPickerPaintMethod RefPtr.
+     */
+    auto theme = MockPipelineContext::GetCurrentContext()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    ASSERT_NE(pickerPaintProperty, nullptr);
+    auto textPickerLayoutProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(textPickerLayoutProperty, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    auto textPickerPaintMethod =
+        AceType::MakeRefPtr<TextPickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(textPickerPattern)));
+    ASSERT_NE(textPickerPaintMethod, nullptr);
+
+    /**
+     * @tc.steps: step2. set dividerHeight value,
+     */
+    double dividerHeight = TEST_DIVIDERHEIGHT_DEFAULT;
+
+    /**
+     * @tc.steps: step3. set divier stroke width
+     */
+    ItemDivider itemDiv8;
+    itemDiv8.color = Color::RED;
+    itemDiv8.strokeWidth = TEST_STROKEWIDTH_NEGATIVE;
+    itemDiv8.startMargin = TEST_STARTMARGIN_NEGATIVE;
+    itemDiv8.endMargin = TEST_ENDMARGIN_NEGATIVE;
+    itemDiv8.isRtl = false;
+    
+    /**
+     * @tc.steps: step4. set stroke Width and get dividerInfo
+     * @tc.expected: setStrokeWidth the result is true
+     */
+    DividerInfo divInfo8;
+    divInfo8.startMargin = START_MARGIN_NEGATIVE;
+    divInfo8.endMargin = END_MARGIN_NEGATIVE;
+    divInfo8.dividerWidth = DIVIDER_WIDTH_NEGATIVE;
+    divInfo8.dividerLength = DIVIDER_LENGTH_NEGATIVE;
+    divInfo8.dividerMargin = DIVIDER_MARGIN_NEGATIVE;
+    divInfo8.dividerHeight = DIVIDER_HEIGHT_NEGATIVE;
+    divInfo8.dividerColor = Color::GRAY;
+
+    auto result = textPickerPaintMethod->SetStrokeWidth(itemDiv8, dividerHeight, divInfo8);
+    EXPECT_FALSE(result);
+
+    auto dviderThickness = theme->GetDividerThickness().ConvertToPx();
+    EXPECT_EQ(EXCEPT_VALUE, dviderThickness);
+    DestroyTextPickerTestNgObject();
+}
+
+/**
+ * @tc.name: SetStrokeWidth009
+ * @tc.desc: Test SetStrokeWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerDividerTestNg, SetStrokeWidth009, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. get TextPickerPaintMethod RefPtr.
+     */
+    auto theme = MockPipelineContext::GetCurrentContext()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    ASSERT_NE(pickerPaintProperty, nullptr);
+    auto textPickerLayoutProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(textPickerLayoutProperty, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    auto textPickerPaintMethod =
+        AceType::MakeRefPtr<TextPickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(textPickerPattern)));
+    ASSERT_NE(textPickerPaintMethod, nullptr);
+
+    /**
+     * @tc.steps: step2. set dividerHeight value,
+     */
+    double dividerHeight = TEST_DIVIDERHEIGHT_DEFAULT;
+
+    /**
+     * @tc.steps: step3. set divier stroke width
+     */
+    ItemDivider itemDiv9;
+    itemDiv9.color = Color::RED;
+    itemDiv9.strokeWidth = TEST_STROKEWIDTH_NEGATIVE;
+    itemDiv9.startMargin = TEST_STARTMARGIN_NEGATIVE;
+    itemDiv9.endMargin = TEST_ENDMARGIN_NEGATIVE;
+    itemDiv9.isRtl = true;
+    
+    /**
+     * @tc.steps: step4. set stroke Width and get dividerInfo
+     * @tc.expected: setStrokeWidth the result is true
+     */
+    DividerInfo divInfo9;
+    divInfo9.startMargin = START_MARGIN_DEFAULT;
+    divInfo9.endMargin = END_MARGIN_DEFAULT;
+    divInfo9.dividerWidth = DIVIDER_WIDTH_DEFAULT;
+    divInfo9.dividerLength = DIVIDER_LENGTH_DEFAULT;
+    divInfo9.dividerMargin = DIVIDER_MARGIN_DEFAULT;
+    divInfo9.dividerHeight = DIVIDER_HEIGHT_DEFAULT;
+    divInfo9.dividerColor = Color::GRAY;
+
+    auto result = textPickerPaintMethod->SetStrokeWidth(itemDiv9, dividerHeight, divInfo9);
+    EXPECT_FALSE(result);
+
+    auto dviderThickness = theme->GetDividerThickness().ConvertToPx();
+    EXPECT_EQ(EXCEPT_VALUE, dviderThickness);
+    DestroyTextPickerTestNgObject();
+}
+
+/**
+ * @tc.name: SetStrokeWidth010
+ * @tc.desc: Test SetStrokeWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerDividerTestNg, SetStrokeWidth010, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. get TextPickerPaintMethod RefPtr.
+     */
+    auto theme = MockPipelineContext::GetCurrentContext()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    ASSERT_NE(pickerPaintProperty, nullptr);
+    auto textPickerLayoutProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(textPickerLayoutProperty, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    auto textPickerPaintMethod =
+        AceType::MakeRefPtr<TextPickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(textPickerPattern)));
+    ASSERT_NE(textPickerPaintMethod, nullptr);
+
+    /**
+     * @tc.steps: step2. set dividerHeight value,
+     */
+    double dividerHeight = TEST_DIVIDERHEIGHT_DEFAULT;
+
+    /**
+     * @tc.steps: step3. set divier stroke width
+     */
+    ItemDivider itemDiv10;
+    itemDiv10.color = Color::RED;
+    itemDiv10.strokeWidth = TEST_STROKEWIDTH_NEGATIVE;
+    itemDiv10.startMargin = TEST_STARTMARGIN_NEGATIVE;
+    itemDiv10.endMargin = TEST_ENDMARGIN_NEGATIVE;
+    itemDiv10.isRtl = true;
+    
+    /**
+     * @tc.steps: step4. set stroke Width and get dividerInfo
+     * @tc.expected: setStrokeWidth the result is true
+     */
+    DividerInfo divInfo10;
+    divInfo10.startMargin = START_MARGIN_NEGATIVE;
+    divInfo10.endMargin = END_MARGIN_NEGATIVE;
+    divInfo10.dividerWidth = DIVIDER_WIDTH_NEGATIVE;
+    divInfo10.dividerLength = DIVIDER_LENGTH_NEGATIVE;
+    divInfo10.dividerMargin = DIVIDER_MARGIN_NEGATIVE;
+    divInfo10.dividerHeight = DIVIDER_HEIGHT_NEGATIVE;
+    divInfo10.dividerColor = Color::GRAY;
+
+    auto result = textPickerPaintMethod->SetStrokeWidth(itemDiv10, dividerHeight, divInfo10);
+    EXPECT_FALSE(result);
+
+    auto dviderThickness = theme->GetDividerThickness().ConvertToPx();
+    EXPECT_EQ(EXCEPT_VALUE, dviderThickness);
+    DestroyTextPickerTestNgObject();
+}
 } // namespace OHOS::Ace::NG
