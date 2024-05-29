@@ -21,6 +21,7 @@
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "base/utils/system_properties.h"
 #include "core/components_ng/image_provider/image_utils.h"
+#include "core/components_ng/pattern/blank/blank_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/window_scene/scene/window_event_process.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
@@ -130,8 +131,12 @@ void WindowPattern::OnAttachToFrameNode()
 
     if (state == Rosen::SessionState::STATE_BACKGROUND && session_->GetScenePersistence() &&
         session_->GetScenePersistence()->HasSnapshot()) {
+        if (!session_->GetShowRecent()) {
+            AddChild(host, contentNode_, contentNodeName_, 0);
+        }
         CreateSnapshotNode();
         AddChild(host, snapshotNode_, snapshotNodeName_);
+        attachToFrameNodeFlag_ = true;
         return;
     }
 
@@ -148,6 +153,18 @@ void WindowPattern::OnAttachToFrameNode()
         AddChild(host, startingNode_, startingNodeName_);
         surfaceNode->SetBufferAvailableCallback(callback_);
     }
+}
+
+void WindowPattern::CreateBlankNode()
+{
+    blankNode_ = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<BlankPattern>());
+    auto blankLayoutProperty = blankNode_->GetLayoutProperty<BlankLayoutProperty>();
+    blankLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    blankNode_->SetHitTestMode(HitTestMode::HTMNONE);
+    auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
+    blankNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
+    blankNode_->MarkModifyDone();
 }
 
 void WindowPattern::CreateContentNode()

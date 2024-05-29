@@ -62,6 +62,7 @@ protected:
         const std::string& nodeType, int32_t index = DEFAULT_NODE_SLOT);
     void RemoveChild(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& child,
         const std::string& nodeType);
+    void CreateBlankNode();
 
     virtual void OnActivation() {}
     virtual void OnConnect() {}
@@ -72,9 +73,13 @@ protected:
     RefPtr<FrameNode> startingNode_;
     RefPtr<FrameNode> contentNode_;
     RefPtr<FrameNode> snapshotNode_;
+    RefPtr<FrameNode> blankNode_;
     std::string startingNodeName_ = "startingNode";
     std::string contentNodeName_ = "contentNode";
     std::string snapshotNodeName_ = "snapshotNode";
+    std::string blankNodeName_ = "blankNode";
+    bool attachToFrameNodeFlag_ = false;
+    float contentOpacityEnd_ = 0.0f;
 
     sptr<Rosen::Session> session_;
     int32_t instanceId_ = Container::CurrentId();

@@ -45,6 +45,8 @@ protected:
     void OnConnect() override;
     void OnForeground() override;
     void OnDisconnect() override;
+    void OnBackground() override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
 private:
     std::shared_ptr<Rosen::RSSurfaceNode> CreateLeashWindowNode();
@@ -55,6 +57,8 @@ private:
     bool destroyed_ = false;
     OHOS::Rosen::WindowMode initWindowMode_;
     ACE_DISALLOW_COPY_AND_MOVE(WindowScene);
+    Rosen::WSRect oldWindowRect_ = {0, 0, 0, 0};
+    bool onceFlag_ = true;
 };
 } // namespace OHOS::Ace::NG
 
