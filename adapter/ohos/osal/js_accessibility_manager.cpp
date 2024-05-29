@@ -1372,10 +1372,12 @@ void JsAccessibilityManager::UpdateVirtualNodeChildAccessibilityElementInfo(
     nodeInfo.SetVisible(node->IsVisible());
     if (node->IsVisible()) {
         auto virtualNodeRect = node->GetTransformRectRelativeToWindow();
-        auto left = nodeParentInfo.GetRectInScreen().GetLeftTopXScreenPostion();
-        auto top = nodeParentInfo.GetRectInScreen().GetLeftTopYScreenPostion();
-        auto right = nodeParentInfo.GetRectInScreen().GetLeftTopXScreenPostion() + virtualNodeRect.Width();
-        auto bottom = nodeParentInfo.GetRectInScreen().GetLeftTopYScreenPostion() + virtualNodeRect.Height();
+        int32_t left = nodeParentInfo.GetRectInScreen().GetLeftTopXScreenPostion() + virtualNodeRect.GetX();
+        int32_t top = nodeParentInfo.GetRectInScreen().GetLeftTopYScreenPostion() + virtualNodeRect.GetY();
+        int32_t right = nodeParentInfo.GetRectInScreen().GetLeftTopXScreenPostion() + virtualNodeRect.GetX() +
+            virtualNodeRect.Width();
+        int32_t bottom = nodeParentInfo.GetRectInScreen().GetLeftTopYScreenPostion() + virtualNodeRect.GetY() +
+            virtualNodeRect.Height();
         Accessibility::Rect bounds { left, top, right, bottom };
         nodeInfo.SetRectInScreen(bounds);
     }
@@ -1421,15 +1423,15 @@ void JsAccessibilityManager::UpdateVirtualNodeAccessibilityElementInfo(
     if (node->IsVisible()) {
         auto virtualNodeRect = node->GetTransformRectRelativeToWindow();
         auto parentRect = parent->GetTransformRectRelativeToWindow();
-        auto left = parentRect.Left();
-        auto top = parentRect.Top();
-        auto right = parentRect.Left() + virtualNodeRect.Width();
+        auto left = parentRect.Left() + commonProperty.windowLeft;
+        auto top = parentRect.Top() + commonProperty.windowTop;
+        auto right = parentRect.Left() + virtualNodeRect.Width() + commonProperty.windowLeft;
         if (virtualNodeRect.Width() > (parentRect.Right() - parentRect.Left())) {
-            right = parentRect.Right();
+            right = parentRect.Right() + commonProperty.windowLeft;
         }
-        auto bottom = parentRect.Top() + virtualNodeRect.Height();
+        auto bottom = parentRect.Top() + virtualNodeRect.Height() + commonProperty.windowTop;
         if (virtualNodeRect.Height() > (parentRect.Bottom() - parentRect.Top())) {
-            bottom = parentRect.Bottom();
+            bottom = parentRect.Bottom() + commonProperty.windowTop;
         }
         Accessibility::Rect bounds { left, top, right, bottom };
         nodeInfo.SetRectInScreen(bounds);
@@ -1575,15 +1577,8 @@ void JsAccessibilityManager::UpdateVirtualNodeInfo(std::list<AccessibilityElemen
             nodeInfo, virtualInfo, ngPipeline);
         virtualInfo.SetParent(uiVirtualNode->GetAccessibilityId());
         nodeInfo.AddChild(frameNodeChild->GetAccessibilityId());
-        infos.push_back(virtualInfo);
-        auto virtualNodeRect = frameNodeChild->GetTransformRectRelativeToWindow();
-        auto left = nodeInfo.GetRectInScreen().GetLeftTopXScreenPostion();
-        auto top = nodeInfo.GetRectInScreen().GetLeftTopYScreenPostion() + virtualNodeRect.Height();
-        auto right = left + virtualNodeRect.Width();
-        auto bottom = top + virtualNodeRect.Height();
-        Accessibility::Rect bounds { left, top, right, bottom };
-        nodeInfo.SetRectInScreen(bounds);
         UpdateVirtualNodeInfo(infos, virtualInfo, item, commonProperty, ngPipeline);
+        infos.push_back(virtualInfo);
     }
 }
 
@@ -1664,11 +1659,11 @@ void JsAccessibilityManager::UpdateCacheInfoNG(std::list<AccessibilityElementInf
                     nodeInfo.RemoveChild(child);
                 }
                 nodeInfo.AddChild(virtualNode->GetAccessibilityId());
-                infos.push_back(virtualInfo);
                 auto uiParentNode = AceType::DynamicCast<NG::UINode>(frameNodeParent);
                 if (!uiVirtualNode->GetChildren().empty()) {
                     UpdateVirtualNodeInfo(infos, virtualInfo, uiVirtualNode, commonProperty, ngPipeline);
                 }
+                infos.push_back(virtualInfo);
                 infos.push_back(nodeInfo);
                 continue;
             }
@@ -3438,6 +3433,7 @@ void JsAccessibilityManager::JsInteractionOperation::ExecuteAction(const int64_t
     const std::map<std::string, std::string>& actionArguments, const int32_t requestId,
     AccessibilityElementOperatorCallback& callback)
 {
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "elementId: %{public}" PRId64 ", action: %{public}d", elementId, action);
     int64_t splitElementId = AccessibilityElementInfo::UNDEFINED_ACCESSIBILITY_ID;
     int32_t splitTreeId = AccessibilityElementInfo::UNDEFINED_TREE_ID;
     AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(elementId, splitElementId, splitTreeId);
