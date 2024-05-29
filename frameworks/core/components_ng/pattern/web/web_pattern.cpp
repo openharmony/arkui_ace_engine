@@ -32,6 +32,7 @@
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/common/ai/data_detector_mgr.h"
+#include "core/common/ai/image_analyzer_manager.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/picker/picker_data.h"
 #include "core/components/text_overlay/text_overlay_theme.h"

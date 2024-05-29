@@ -26,7 +26,6 @@
 #include "base/utils/utils.h"
 #include "base/geometry/axis.h"
 #include "base/web/webview/ohos_nweb/include/nweb_handler.h"
-#include "core/common/ai/image_analyzer_manager.h"
 #include "core/common/udmf/unified_data.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/dialog/dialog_theme.h"
@@ -53,6 +52,7 @@
 
 namespace OHOS::Ace {
 class WebDelegateObserver;
+class ImageAnalyzerManager;
 }
 
 namespace OHOS::Ace::NG {

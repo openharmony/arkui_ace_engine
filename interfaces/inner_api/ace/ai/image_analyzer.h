@@ -67,7 +67,7 @@ enum class Status {
     MENU_HIDE
 };
 
-struct TouchInfoAI {
+struct TouchInfo {
     TouchPoint touchPoint;
     TouchType touchType = TouchType::CANCEL;
 };
@@ -93,7 +93,7 @@ struct ImageAnalyzerInnerConfig {
     Status menuStatus = Status::MENU_SHOW;
     onTextSelectedCallback onTextSelected;
     void* pixelmapNapiVal = nullptr;
-    OHOS::Ace::TouchInfoAI touchInfo;
+    OHOS::Ace::TouchInfo touchInfo;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_INNERKITS_PROPERTIES_IMAGE_ANALYZER_H
