@@ -158,6 +158,7 @@ protected:
         const std::function<void(TextFieldModelNG&)>& callback = nullptr);
     static void ExpectCallParagraphMethods(ExpectParagraphParams params);
     void GetFocus();
+    RefPtr<TextFieldTheme> GetTheme();
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<TextFieldPattern> pattern_;
