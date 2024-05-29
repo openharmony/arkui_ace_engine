@@ -463,6 +463,11 @@ void SetHoverImageCustomPreviewInfo(const RefPtr<FrameNode>& previewNode, const 
 
     auto previewScaleTo = menuParam.previewAnimationOptions.scaleTo;
     CHECK_NULL_VOID(previewScaleTo);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    previewScaleTo = LessOrEqual(previewScaleTo, 0.0) ? menuTheme->GetPreviewAfterAnimationScale() : previewScaleTo;
     previewPattern->SetCustomPreviewScaleTo(previewScaleTo);
     previewPattern->SetHoverImageDisAppearScaleTo(previewScaleTo / scale);
 
@@ -715,7 +720,6 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuPreviewPattern>());
     CHECK_NULL_RETURN(previewNode, nullptr);
     CustomPreviewNodeProc(previewNode, menuParam, previewCustomNode);
-    MountTextNode(wrapperNode, previewCustomNode);
 
     UpdateMenuBackgroundStyle(menuNode, menuParam);
     SetPreviewTransitionEffect(wrapperNode, menuParam);
@@ -757,6 +761,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
             previewNode->MountToParent(wrapperNode);
             previewNode->MarkModifyDone();
             SetSelfAndChildDraggableFalse(previewCustomNode);
+            MountTextNode(wrapperNode, previewCustomNode);
             SetCustomPreviewOpacityWhenHoverImage(wrapperNode, menuParam);
         }
     }

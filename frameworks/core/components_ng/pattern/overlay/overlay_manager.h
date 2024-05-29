@@ -311,6 +311,8 @@ public:
     void RemoveFilterAnimation();
     void RemoveEventColumn();
     void UpdateContextMenuDisappearPosition(const NG::OffsetF& offset);
+    void ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::FrameNode>& dragPreviewNode,
+        const NG::OffsetF& offset);
 
     void ResetContextMenuDragHideFinished()
     {

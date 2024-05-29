@@ -275,6 +275,16 @@ void SubwindowManager::UpdateHideMenuOffsetNG(const NG::OffsetF& offset)
     }
 }
 
+void SubwindowManager::ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::FrameNode>& dragPreviewNode,
+    const NG::OffsetF& offset)
+{
+    CHECK_NULL_VOID(dragPreviewNode);
+    auto subwindow = GetCurrentWindow();
+    if (subwindow) {
+        subwindow->ContextMenuSwitchDragPreviewAnimationtNG(dragPreviewNode, offset);
+    }
+}
+
 void SubwindowManager::ClearMenuNG(int32_t instanceId, int32_t targetId, bool inWindow, bool showAnimation)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "clear menu ng enter");

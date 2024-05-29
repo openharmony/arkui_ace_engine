@@ -655,6 +655,18 @@ void SubwindowOhos::UpdateHideMenuOffsetNG(const NG::OffsetF& offset)
     overlay->UpdateContextMenuDisappearPosition(offset);
 }
 
+void SubwindowOhos::ContextMenuSwitchDragPreviewAnimationtNG(const RefPtr<NG::FrameNode>& dragPreviewNode,
+    const NG::OffsetF& offset)
+{
+    CHECK_NULL_VOID(dragPreviewNode);
+    ContainerScope scope(childContainerId_);
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto overlay = pipelineContext->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    overlay->ContextMenuSwitchDragPreviewAnimation(dragPreviewNode, offset);
+}
+
 void SubwindowOhos::ClearMenuNG(int32_t targetId, bool inWindow, bool showAnimation)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "clear menu ng enter");
