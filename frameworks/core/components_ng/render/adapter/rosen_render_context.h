@@ -599,6 +599,7 @@ private:
     std::shared_ptr<Rosen::RSNode> CreateHardwareTexture(
         const std::optional<ContextParam>& param, bool isTextureExportNode);
 #endif
+    void DetachModifiers();
 
     RefPtr<ImageLoadingContext> bgLoadingCtx_;
     RefPtr<CanvasImage> bgImage_;
