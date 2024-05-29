@@ -194,6 +194,7 @@ public:
     static void ReportFunctionTimeout(const std::string& functionName, int64_t time, int32_t threshold);
     static void ReportHoverStatusChange(int32_t foldStatus, int32_t time, bool isHoverMode,
         int32_t appRotation, int32_t windowMode);
+    static void ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName);
 
 private:
     static void SendEventInner(const EventInfo& eventInfo);
