@@ -48,6 +48,7 @@
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/pattern/web/touch_event_listener.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
@@ -220,6 +221,7 @@ WebPattern::WebPattern(const std::string& webSrc,
 WebPattern::~WebPattern()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "NWEB ~WebPattern start");
+    UninitTouchEventListener();
     if (delegate_) {
         TAG_LOGD(AceLogTag::ACE_WEB, "NWEB ~WebPattern delegate_ start SetAudioMuted");
         delegate_->SetAudioMuted(true);
@@ -1562,7 +1564,7 @@ void WebPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
 
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
- 
+
     auto rect = renderContext->GetPaintRectWithoutTransform();
     auto size = Size(rect.Width(), rect.Height());
     if (renderContextForSurface_) {
@@ -2197,6 +2199,13 @@ void WebPattern::OnModifyDone()
         };
         PostTaskToUI(std::move(task), "ArkUIWebInitSlideUpdateListener");
     }
+
+    auto touchMoveListenerTask = [weak = AceType::WeakClaim(this)]() {
+        auto webPattern = weak.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->InitTouchEventListener();
+    };
+    PostTaskToUI(std::move(touchMoveListenerTask), "ArkUIWebInitTouchEventListener");
 
     auto embedEnabledTask = [weak = AceType::WeakClaim(this)]() {
         auto webPattern = weak.Upgrade();
@@ -3248,6 +3257,35 @@ void WebPattern::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMe
     TAG_LOGI(AceLogTag::ACE_WEB, "OnSelectPopupMenu offset:(%{public}f, %{public}f)", offset.GetX(), offset.GetY());
     selectPopupMenuShowing_ = true;
     overlayManager->ShowMenu(id, offset, menu);
+}
+
+void WebPattern::NotifyForNextTouchEvent()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::NotifyForNextTouchEvent");
+    CHECK_NULL_VOID(delegate_);
+    delegate_->NotifyForNextTouchEvent();
+}
+
+void WebPattern::InitTouchEventListener()
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::InitTouchEventListener");
+    std::shared_ptr<TouchEventListener> listener = std::make_shared<TouchEventListener>();
+    listener->SetPatternToListener(AceType::WeakClaim(this));
+
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+
+    context->RegisterTouchEventListener(listener);
+}
+
+void WebPattern::UninitTouchEventListener()
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::UninitTouchEventListener");
+
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+
+    context->UnregisterTouchEventListener(AceType::WeakClaim(this));
 }
 
 void WebPattern::OnDateTimeChooserPopup(std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser> chooser,
@@ -4316,7 +4354,7 @@ void WebPattern::UpdateFocusedAccessibilityId(int64_t accessibilityId)
         renderContext->UpdateAccessibilityFocus(false);
         return;
     }
-    
+
     renderContext->UpdateAccessibilityFocusRect(rect);
     renderContext->UpdateAccessibilityFocus(true);
 }

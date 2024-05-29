@@ -54,6 +54,7 @@
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/components_ng/pattern/web/itouch_event_callback.h"
 
 namespace OHOS::Ace::NG {
 
@@ -737,6 +738,9 @@ public:
 
     void FlushFrameCallback(uint64_t nanoTimestamp);
 
+    void RegisterTouchEventListener(const std::shared_ptr<ITouchEventCallback>& listener);
+    void UnregisterTouchEventListener(WeakPtr<NG::Pattern> pattern);
+
     void SetPredictNode(const RefPtr<FrameNode>& node)
     {
         predictNode_ = node;
@@ -973,6 +977,7 @@ private:
 
     RefPtr<NavigationManager> navigationMgr_ = MakeRefPtr<NavigationManager>();
     std::atomic<int32_t> localColorMode_ = static_cast<int32_t>(ColorMode::COLOR_MODE_UNDEFINED);
+    std::vector<std::shared_ptr<ITouchEventCallback>> listenerVector_;
     bool customTitleSettedShow_ = true;
     bool isShowTitle_ = false;
     bool lastAnimationStatus_ = true;
