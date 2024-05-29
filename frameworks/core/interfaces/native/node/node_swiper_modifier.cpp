@@ -404,11 +404,13 @@ void SetIndicatorInteractive(ArkUINodeHandle node, ArkUI_Bool value)
 
 void ResetIndicatorInteractive(ArkUINodeHandle node) {}
 
-void SetSwiperNextMargin(ArkUINodeHandle node, ArkUI_Float32 nextMarginValue, ArkUI_Int32 nextMarginUnit)
+void SetSwiperNextMargin(
+    ArkUINodeHandle node, ArkUI_Float32 nextMarginValue, ArkUI_Int32 nextMarginUnit, ArkUI_Bool ignoreBlank)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    SwiperModelNG::SetNextMargin(frameNode, CalcDimension(nextMarginValue, (DimensionUnit)nextMarginUnit));
+    SwiperModelNG::SetNextMargin(
+        frameNode, CalcDimension(nextMarginValue, (DimensionUnit)nextMarginUnit), static_cast<bool>(ignoreBlank));
 }
 
 void ResetSwiperNextMargin(ArkUINodeHandle node)
@@ -419,11 +421,13 @@ void ResetSwiperNextMargin(ArkUINodeHandle node)
     SwiperModelNG::SetNextMargin(frameNode, value);
 }
 
-void SetSwiperPrevMargin(ArkUINodeHandle node, ArkUI_Float32 prevMarginValue, ArkUI_Int32 prevMarginUnit)
+void SetSwiperPrevMargin(
+    ArkUINodeHandle node, ArkUI_Float32 prevMarginValue, ArkUI_Int32 prevMarginUnit, ArkUI_Bool ignoreBlank)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    SwiperModelNG::SetPreviousMargin(frameNode, CalcDimension(prevMarginValue, (DimensionUnit)prevMarginUnit));
+    SwiperModelNG::SetPreviousMargin(
+        frameNode, CalcDimension(prevMarginValue, (DimensionUnit)prevMarginUnit), static_cast<bool>(ignoreBlank));
 }
 
 void ResetSwiperPrevMargin(ArkUINodeHandle node)
@@ -922,18 +926,26 @@ void SetSwiperToIndex(ArkUINodeHandle node, ArkUI_Int32* values)
     CHECK_NULL_VOID(frameNode);
     SwiperModelNG::SetSwiperToIndex(frameNode, values[0], values[1]);
 }
-ArkUI_Float32 GetSwiperPrevMargin(ArkUINodeHandle node, ArkUI_Int32 unit)
+void GetSwiperPrevMargin(ArkUINodeHandle node, ArkUI_Int32 unit, ArkUISwiperMarginOptions* options)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
-    return static_cast<ArkUI_Float32>(SwiperModelNG::GetPreviousMargin(frameNode, unit));
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(options);
+    SwiperMarginOptions marginOptions;
+    SwiperModelNG::GetPreviousMargin(frameNode, unit, &marginOptions);
+    options->margin = static_cast<ArkUI_Float32>(marginOptions.margin);
+    options->ignoreBlank = static_cast<ArkUI_Bool>(marginOptions.ignoreBlank);
 }
 
-ArkUI_Float32 GetSwiperNextMargin(ArkUINodeHandle node, ArkUI_Int32 unit)
+void GetSwiperNextMargin(ArkUINodeHandle node, ArkUI_Int32 unit, ArkUISwiperMarginOptions* options)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
-    return static_cast<ArkUI_Float32>(SwiperModelNG::GetNextMargin(frameNode, unit));
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(options);
+    SwiperMarginOptions marginOptions;
+    SwiperModelNG::GetNextMargin(frameNode, unit, &marginOptions);
+    options->margin = static_cast<ArkUI_Float32>(marginOptions.margin);
+    options->ignoreBlank = static_cast<ArkUI_Bool>(marginOptions.ignoreBlank);
 }
 
 void SetSwiperIndicatorStyle(ArkUINodeHandle node, ArkUISwiperIndicator* indicator)

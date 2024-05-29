@@ -6766,16 +6766,21 @@ int32_t SetSwiperToIndex(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 
 int32_t SetSwiperPrevMargin(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (item->size == 0) {
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < NUM_0) {
         return ERROR_CODE_PARAM_INVALID;
     }
     if (LessNotEqual(item->value[0].f32, 0.0f)) {
         return ERROR_CODE_PARAM_INVALID;
     }
+    ArkUI_Bool ignoreBlank = DEFAULT_FALSE;
+    if (actualSize > NUM_1 && (item->value[1].i32 == DEFAULT_TRUE || item->value[1].i32 == DEFAULT_FALSE)) {
+        ignoreBlank = item->value[1].i32;
+    }
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getSwiperModifier()->setSwiperPrevMargin(
-        node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_VP));
+        node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_VP), ignoreBlank);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -6791,25 +6796,31 @@ const ArkUI_AttributeItem* GetSwiperPrevMargin(ArkUI_NodeHandle node)
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
     int32_t unit = GetDefaultUnit(node, UNIT_VP);
-    ArkUI_Float32 value = fullImpl->getNodeModifiers()->getSwiperModifier()->getSwiperPrevMargin(
-        node->uiNodeHandle, unit);
-    g_numberValues[0].f32 = value;
-    g_attributeItem.size = REQUIRED_ONE_PARAM;
+    ArkUISwiperMarginOptions options;
+    fullImpl->getNodeModifiers()->getSwiperModifier()->getSwiperPrevMargin(node->uiNodeHandle, unit, &options);
+    g_numberValues[0].f32 = options.margin;
+    g_numberValues[1].i32 = options.ignoreBlank;
+    g_attributeItem.size = REQUIRED_TWO_PARAM;
     return &g_attributeItem;
 }
 
 int32_t SetSwiperNextMargin(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (item->size == 0) {
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < NUM_0) {
         return ERROR_CODE_PARAM_INVALID;
     }
     if (LessNotEqual(item->value[0].f32, 0.0f)) {
         return ERROR_CODE_PARAM_INVALID;
     }
+    ArkUI_Bool ignoreBlank = DEFAULT_FALSE;
+    if (actualSize > NUM_1 && (item->value[1].i32 == DEFAULT_TRUE || item->value[1].i32 == DEFAULT_FALSE)) {
+        ignoreBlank = item->value[1].i32;
+    }
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getSwiperModifier()->setSwiperNextMargin(
-        node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_VP));
+        node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_VP), ignoreBlank);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -6825,10 +6836,11 @@ const ArkUI_AttributeItem* GetSwiperNextMargin(ArkUI_NodeHandle node)
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
     int32_t unit = GetDefaultUnit(node, UNIT_VP);
-    ArkUI_Float32 value = fullImpl->getNodeModifiers()->getSwiperModifier()->getSwiperNextMargin(
-        node->uiNodeHandle, unit);
-    g_numberValues[0].f32 = value;
-    g_attributeItem.size = REQUIRED_ONE_PARAM;
+    ArkUISwiperMarginOptions options;
+    fullImpl->getNodeModifiers()->getSwiperModifier()->getSwiperNextMargin(node->uiNodeHandle, unit, &options);
+    g_numberValues[0].f32 = options.margin;
+    g_numberValues[1].i32 = options.ignoreBlank;
+    g_attributeItem.size = REQUIRED_TWO_PARAM;
     return &g_attributeItem;
 }
 
@@ -9181,6 +9193,7 @@ int32_t SetImageSrc(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (!drawableDescriptor) {
         return ERROR_CODE_PARAM_INVALID;
     }
+    node->drawableDescriptor = drawableDescriptor;
     if (!drawableDescriptor->drawableDescriptor && !drawableDescriptor->resource &&
         !drawableDescriptor->animatedDrawableDescriptor) {
         return ERROR_CODE_PARAM_INVALID;
@@ -10356,6 +10369,9 @@ const ArkUI_AttributeItem* GetImageSpanSrc(ArkUI_NodeHandle node)
     auto fullImpl = GetFullImpl();
     auto src = fullImpl->getNodeModifiers()->getImageModifier()->getImageSrc(node->uiNodeHandle);
     g_attributeItem.string = (src != nullptr ? src : EMPTY_STR.c_str());
+    if (node->drawableDescriptor) {
+        g_attributeItem.object = node->drawableDescriptor;
+    }
     return &g_attributeItem;
 }
 
@@ -10377,6 +10393,9 @@ const ArkUI_AttributeItem* GetImageSrc(ArkUI_NodeHandle node)
     auto fullImpl = GetFullImpl();
     auto src = fullImpl->getNodeModifiers()->getImageModifier()->getImageSrc(node->uiNodeHandle);
     g_attributeItem.string = (src != nullptr ? src : EMPTY_STR.c_str());
+    if (node->drawableDescriptor) {
+        g_attributeItem.object = node->drawableDescriptor;
+    }
     return &g_attributeItem;
 }
 
