@@ -86,7 +86,7 @@ void FontManager::SetAppCustomFont(const std::string& familyName)
     appCustomFont_ = familyName;
 }
 
-std::string FontManager::GetAppCustomFont() const
+const std::string& FontManager::GetAppCustomFont() const
 {
     return appCustomFont_;
 }

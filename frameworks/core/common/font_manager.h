@@ -118,7 +118,7 @@ public:
     bool IsDefaultFontChanged();
     bool IsUseAppCustomFont();
     void SetAppCustomFont(const std::string& familyName);
-    std::string GetAppCustomFont() const;
+    const std::string& GetAppCustomFont() const;
 
 protected:
     static float fontWeightScale_;
