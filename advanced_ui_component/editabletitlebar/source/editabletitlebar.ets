@@ -276,7 +276,6 @@ export struct EditableTitleBar {
       menuItems: this.menuItems,
       onSave: this.onSave,
       isSaveEnabled: this.isSaveIconRequired,
-      // isRightLayout: true,
     })
   }
 
@@ -320,7 +319,6 @@ struct EditableTitleBarMenuSection {
   menuItems: Array<EditableTitleBarMenuItem> | undefined = undefined;
   onSave?: () => void;
   isSaveEnabled: boolean = true;
-  // isRightLayout: boolean = false;
 
   build() {
     Column() {
@@ -333,7 +331,6 @@ struct EditableTitleBarMenuSection {
               ImageMenuItem({
                 item: item,
                 attribute: ItemType.Icon,
-                // isRightLayout: this.isRightLayout,
               })
             })
         }
@@ -345,7 +342,6 @@ struct EditableTitleBarMenuSection {
               action: () => this.onSave && this.onSave(),
             },
             attribute: ItemType.Icon,
-            // isRightLayout: this.isRightLayout,
           })
         }
       }
@@ -365,7 +361,6 @@ struct ImageMenuItem {
   callbackId: number | undefined = undefined;
   minFontSize: number = 1.75;
   maxFontSize: number = 3.25;
-  // isRightLayout: boolean = false;
   @State fontSize: number = 1;
   @State isOnFocus: boolean = false;
   @State isOnHover: boolean = false;
