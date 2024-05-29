@@ -39,7 +39,6 @@ namespace OHOS::Ace {
  * Convert mutf8 sequence to utf16 pair and return pair: [utf16 code point, mutf8 size].
  * In case of invalid sequence return first byte of it.
  */
-
 size_t MUtf8ToUtf16Size(const uint8_t* mutf8, size_t mutf8Len)
 {
     size_t pos = 0;
