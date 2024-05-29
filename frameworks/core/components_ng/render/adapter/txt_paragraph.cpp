@@ -940,6 +940,55 @@ void TxtParagraph::SetRunMetrics(RunMetrics& runMetrics, const OHOS::Rosen::RunM
     runMetrics.fontMetrics.fStrikeoutPosition = fontMetricsRes.fStrikeoutPosition;
 }
 
+bool TxtParagraph::GetLineMetricsByCoordinate(const Offset& offset, LineMetrics& lineMetrics)
+{
+#ifndef USE_GRAPHIC_TEXT_GINE
+    auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(GetParagraph());
+#else
+    auto* paragraphTxt = static_cast<OHOS::Rosen::Typography*>(GetParagraph());
+#endif
+    CHECK_NULL_RETURN(paragraphTxt, false);
+    auto lineCount = static_cast<int32_t>(GetLineCount());
+    if (lineCount <= 0) {
+        return false;
+    }
+    auto height = GetHeight();
+    if (height <= 0) {
+        return false;
+    }
+    auto averageLineHeight = height / lineCount;
+    auto lineNumber = std::clamp(static_cast<int32_t>(offset.GetY() / averageLineHeight), 0, lineCount - 1);
+    Rosen::LineMetrics resMetric;
+    auto ret = paragraphTxt->GetLineMetricsAt(lineNumber, &resMetric);
+    while (ret) {
+        if (GreatOrEqual(offset.GetY(), resMetric.y) && LessOrEqual(offset.GetY(), resMetric.y + resMetric.height)) {
+            break;
+        }
+        if (LessNotEqual(offset.GetY(), resMetric.y)) {
+            lineNumber--;
+            ret = paragraphTxt->GetLineMetricsAt(lineNumber, &resMetric);
+            continue;
+        }
+        if (GreatNotEqual(offset.GetY(), resMetric.y + resMetric.height)) {
+            lineNumber++;
+            ret = paragraphTxt->GetLineMetricsAt(lineNumber, &resMetric);
+            continue;
+        }
+        ret = false;
+    }
+    if (ret) {
+        lineMetrics.x = resMetric.x;
+        lineMetrics.y = resMetric.y;
+        lineMetrics.ascender = resMetric.ascender;
+        lineMetrics.width = resMetric.width;
+        lineMetrics.height = resMetric.height;
+        lineMetrics.descender = resMetric.descender;
+        lineMetrics.capHeight = resMetric.capHeight;
+        lineMetrics.xHeight = resMetric.xHeight;
+    }
+    return ret;
+}
+
 std::u16string TxtParagraph::GetParagraphText()
 {
     return text_;

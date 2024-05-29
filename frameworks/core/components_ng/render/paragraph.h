@@ -254,6 +254,7 @@ public:
     virtual void SetParagraphId(uint32_t id) = 0;
     virtual LineMetrics GetLineMetricsByRectF(RectF& rect) = 0;
     virtual TextLineMetrics GetLineMetrics(size_t lineNumber) = 0;
+    virtual bool GetLineMetricsByCoordinate(const Offset& offset, LineMetrics& lineMetrics) = 0;
 };
 } // namespace OHOS::Ace::NG
 

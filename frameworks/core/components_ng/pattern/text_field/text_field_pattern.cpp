@@ -2813,7 +2813,12 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     if (!focusHub->IsCurrentFocus()) {
         focusHub->RequestFocusImmediately();
     }
-    selectController_->UpdateSelectByOffset(ConvertGlobalToLocalOffset(info.GetGlobalLocation()));
+    auto localOffset = ConvertGlobalToLocalOffset(info.GetGlobalLocation());
+    if (selectController_->IsTouchAtLineEnd(localOffset)) {
+        selectController_->UpdateCaretInfoByOffset(localOffset);
+    } else {
+        selectController_->UpdateSelectByOffset(localOffset);
+    }
     if (IsSelected()) {
         StopTwinkling();
     }
