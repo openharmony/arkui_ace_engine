@@ -359,14 +359,6 @@ public:
         return focusStyleType_;
     }
 
-    static void CloseKeyboard();
-
-    static void IsCloseKeyboard(RefPtr<FrameNode> frameNode);
-
-    static void PushPageCloseKeyboard();
-
-    static void NavCloseKeyboard();
-
     BlurReason GetBlurReason() const
     {
         return blurReason_;

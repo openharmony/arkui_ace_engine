@@ -179,14 +179,6 @@ void TextFieldManagerNG::UpdateScrollableParentViewPort(const RefPtr<FrameNode>&
     scrollableNode->SetViewPort(scrollableRect);
 }
 
-void TextFieldManagerNG::ProcessNavKeyboard()
-{
-    if (imeShow_ || uiExtensionImeShow_) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Nav notNeedSoftKeyboard.");
-        FocusHub::NavCloseKeyboard();
-    }
-}
-
 void TextFieldManagerNG::AvoidKeyboard()
 {
     if (!ScrollTextFieldToSafeArea()) {
