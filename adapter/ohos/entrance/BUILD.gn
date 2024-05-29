@@ -65,6 +65,9 @@ template("ace_ohos_standard_source_set") {
 
       #Miscdevice Vibrator
       "$ace_root/adapter/ohos/entrance/vibrator/vibrator_impl.cpp",
+
+      # CJUtils
+      "$ace_root/adapter/ohos/entrance/cj_utils/cj_utils.cpp",
     ]
 
     if (target_cpu == "arm64") {

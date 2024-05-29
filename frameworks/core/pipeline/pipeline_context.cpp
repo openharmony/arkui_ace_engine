@@ -3346,7 +3346,9 @@ bool PipelineContext::GetIsDeclarative() const
 {
     RefPtr<Frontend> front = GetFrontend();
     if (front) {
-        return (front->GetType() == FrontendType::DECLARATIVE_JS || front->GetType() == FrontendType::JS_PLUGIN);
+        return (front->GetType() == FrontendType::DECLARATIVE_JS ||
+                front->GetType() == FrontendType::JS_PLUGIN ||
+                front->GetType() == FrontendType::DECLARATIVE_CJ);
     }
     return false;
 }

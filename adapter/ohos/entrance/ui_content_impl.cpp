@@ -46,6 +46,7 @@
 #include "adapter/ohos/entrance/ace_new_pipe_judgement.h"
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "adapter/ohos/entrance/capability_registry.h"
+#include "adapter/ohos/entrance/cj_utils/cj_utils.h"
 #include "adapter/ohos/entrance/dialog_container.h"
 #include "adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.h"
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
@@ -550,13 +551,18 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
 {
     CHECK_NULL_VOID(context);
     bundleName_ = context->GetBundleName();
-    auto hapModuleInfo = context->GetHapModuleInfo();
-    CHECK_NULL_VOID(hapModuleInfo);
-    moduleName_ = hapModuleInfo->name;
-    hapPath_ = hapModuleInfo->hapPath;
-    isBundle_ = (hapModuleInfo->compileMode == AppExecFwk::CompileMode::JS_BUNDLE);
-    SetConfiguration(context->GetConfiguration());
-    context_ = context->weak_from_this();
+    if (CJUtils::IsCJFrontendContext(context)) {
+        LOGD("UIContentImpl cj");
+        context_ = context->weak_from_this();
+    } else {
+        auto hapModuleInfo = context->GetHapModuleInfo();
+        CHECK_NULL_VOID(hapModuleInfo);
+        moduleName_ = hapModuleInfo->name;
+        hapPath_ = hapModuleInfo->hapPath;
+        isBundle_ = (hapModuleInfo->compileMode == AppExecFwk::CompileMode::JS_BUNDLE);
+        SetConfiguration(context->GetConfiguration());
+        context_ = context->weak_from_this();
+    }
 }
 
 UIContentImpl::UIContentImpl(OHOS::AppExecFwk::Ability* ability)
@@ -1462,7 +1468,8 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     PluginManager::GetInstance().SetAceAbility(nullptr, pluginUtils);
 #endif
     // create container
-    if (runtime_) {
+    auto isCJFrontend = CJUtils::IsCJFrontendContext(context.get());
+    if (runtime_ || isCJFrontend) {
         instanceId_ = Container::GenerateId<STAGE_CONTAINER>();
     } else {
         instanceId_ = Container::GenerateId<FA_SUBWINDOW_CONTAINER>();
@@ -1471,8 +1478,9 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     auto formUtils = std::make_shared<FormUtilsImpl>();
     FormManager::GetInstance().SetFormUtils(formUtils);
 #endif
+    auto frontendType =  isCJFrontend? FrontendType::DECLARATIVE_CJ : FrontendType::DECLARATIVE_JS;
     auto container =
-        AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS, context_, info,
+        AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, frontendType, context_, info,
             std::make_unique<ContentEventCallback>(
                 [window = window_] {
                     CHECK_NULL_VOID(window);
@@ -2264,6 +2272,8 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
 
     std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo;
     auto context = context_.lock();
+    bool isCJFrontend = CJUtils::IsCJFrontendContext(context.get());
+    auto frontendType = isCJFrontend ? FrontendType::DECLARATIVE_CJ : FrontendType::DECLARATIVE_JS;
     if (isDialog) {
         UErrorCode status = U_ZERO_ERROR;
         icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLanguage(), status);
@@ -2272,20 +2282,20 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
         UpdateDialogResourceConfiguration(container);
     } else {
 #ifdef NG_BUILD
-        container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS,
+        container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, frontendType,
             context, abilityInfo, std::make_unique<ContentEventCallback>([] {
                 // Sub-window ,just return.
                 LOGI("Content event callback");
             }), false, true, true);
 #else
         if (Container::IsCurrentUseNewPipeline()) {
-            container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS,
+            container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, frontendType,
                 context, abilityInfo, std::make_unique<ContentEventCallback>([] {
                     // Sub-window ,just return.
                     LOGI("Content event callback");
                 }), false, true, true);
         } else {
-            container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS,
+            container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, frontendType,
                 context, abilityInfo, std::make_unique<ContentEventCallback>([] {
                     // Sub-window ,just return.
                     LOGI("Content event callback");
