@@ -1825,7 +1825,7 @@ uint32_t UIContentImpl::GetBackgroundColor()
         },
         TaskExecutor::TaskType::UI, "ArkUIGetAppBackgroundColor");
 
-    LOGI("[%{public}s][%{public}s][%{public}d]: UIContentImpl GetBackgroundColor, value is %{public}u",
+    LOGD("[%{public}s][%{public}s][%{public}d]: UIContentImpl GetBackgroundColor, value is %{public}u",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, bgColor);
     return bgColor;
 }
