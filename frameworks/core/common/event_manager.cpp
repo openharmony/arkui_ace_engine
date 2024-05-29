@@ -524,11 +524,13 @@ void EventManager::CheckTouchEvent(TouchEvent touchEvent)
         } else {
             TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "EventManager receive DOWN event twice,"
                 " touchEvent id is %{public}d", touchEvent.id);
+            refereeNG_->ForceCleanGestureReferee();
         }
     } else if (touchEvent.type == TouchType::UP || touchEvent.type == TouchType::CANCEL) {
         if (touchEventFindResult == downFingerIds_.end()) {
             TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "EventManager receive UP/CANCEL event "
                 "without receive DOWN event, touchEvent id is %{public}d", touchEvent.id);
+            refereeNG_->ForceCleanGestureReferee();
         } else {
             downFingerIds_.erase(touchEvent.id);
         }
@@ -561,8 +563,8 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
         int64_t currentEventTime = static_cast<int64_t>(point.time.time_since_epoch().count());
         int64_t lastEventTime = static_cast<int64_t>(lastEventTime_.time_since_epoch().count());
         int64_t duration = static_cast<int64_t>((currentEventTime - lastEventTime) / TRANSLATE_NS_TO_MS);
-        if (duration >= EVENT_CLEAR_DURATION && !refereeNG_->CheckGestureRefereeState()) {
-            TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "GestureReferee check state fail, force clean gestureReferee.");
+        if (duration >= EVENT_CLEAR_DURATION && !refereeNG_->IsReady()) {
+            TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "GestureReferee is not ready, force clean gestureReferee.");
             std::list<std::pair<int32_t, std::string>> dumpList;
             eventTree_.Dump(dumpList, 0);
             for (auto& item : dumpList) {

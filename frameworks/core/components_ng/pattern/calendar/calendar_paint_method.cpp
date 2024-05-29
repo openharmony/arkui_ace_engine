@@ -179,9 +179,6 @@ void CalendarPaintMethod::DrawDates(RSCanvas& canvas, const Offset& offset)
         double y = row * (dayHeight_ + dailyRowSpace) + dayNumberStartY;
         for (uint32_t column = 0; column < totalWeek; column++) {
             const auto& day = calendarDays_[dateNumber++];
-            if (day.month.month != currentMonth_.month && isRtl) {
-                continue;
-            }
             double x = textDirection == TextDirection::LTR ? column * (dayWidth_ + colSpace_)
                                                             : (totalWeek - column - 1) * (dayWidth_ + colSpace_);
             auto dayOffset = Offset(x, y);

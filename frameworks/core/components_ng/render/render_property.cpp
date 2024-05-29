@@ -54,6 +54,28 @@ std::string BasicShapeTypeToString(BasicShapeType type)
     }
     return "";
 }
+
+std::string LinearGradientBlurDirection(GradientDirection direction)
+{
+        static const LinearEnumMapNode<GradientDirection, std::string> toStringMap[] = {
+        { GradientDirection::LEFT, "LEFT" },
+        { GradientDirection::TOP, "LEFT" },
+        { GradientDirection::RIGHT, "RIGHT" },
+        { GradientDirection::BOTTOM, "BOTTOM" },
+        { GradientDirection::LEFT_TOP, "LEFT_TOP" },
+        { GradientDirection::LEFT_BOTTOM, "LEFT_BOTTOM" },
+        { GradientDirection::RIGHT_TOP, "RIGHT_TOP" },
+        { GradientDirection::RIGHT_BOTTOM, "RIGHT_BOTTOM" },
+        { GradientDirection::NONE, "NONE" },
+        { GradientDirection::START_TO_END, "START_TO_END" },
+        { GradientDirection::END_TO_START, "END_TO_START" },
+    };
+    auto idx = BinarySearchFindIndex(toStringMap, ArraySize(toStringMap), direction);
+    if (idx >= 0) {
+        return toStringMap[idx].value;
+    }
+    return "";
+}
 } // namespace
 
 #define ACE_OFFSET_API_NINE_TO_JSON(name)                            \
@@ -161,6 +183,24 @@ void GraphicsProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
             jsonInvert->Put("thresholdRange", option.thresholdRange_);
             json->PutExtAttr("invert", jsonInvert, filter);
         }
+    }
+    if (propLinearGradientBlur.has_value()) {
+        auto jsonLinearGradientBlur = JsonUtil::Create(true);
+        std::string value = propLinearGradientBlur->blurRadius_.ToString();
+        jsonLinearGradientBlur->Put("value", value.c_str());
+        auto options = JsonUtil::Create(true);
+        std::string direction = LinearGradientBlurDirection(propLinearGradientBlur->direction_);
+        options->Put("direction", direction.c_str());
+        auto fractionStops = JsonUtil::CreateArray(true);
+        int size = static_cast<int>(propLinearGradientBlur->fractionStops_.size());
+        for (auto i = 0; i < size; i++) {
+            auto fraction = propLinearGradientBlur->fractionStops_[i];
+            std::string stop = std::to_string(fraction.first) + "," + std::to_string(fraction.second);
+            fractionStops->Put(std::to_string(i).c_str(), stop.c_str());
+        }
+        options->Put("fractionStops", fractionStops);
+        jsonLinearGradientBlur->Put("options", options);
+        json->Put("linearGradientBlur", jsonLinearGradientBlur);
     }
 }
 

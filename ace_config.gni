@@ -95,10 +95,6 @@ ability_runtime_services_path = "${ability_runtime_path}/services"
 accessibility_path = "//foundation/barrierfree/accessibility"
 app_framework_resource_path = "${app_framework_root}/resource_management"
 app_framework_window_path = "${app_framework_root}/window_manager"
-flutter_root = "//third_party/flutter"
-ace_flutter_engine_root = "$flutter_root/build"
-expat_root = "//third_party/expat"
-cjson_root = "//third_party/cJSON"
 jsoncpp_root = "//third_party/jsoncpp"
 ark_tools_root = "//prebuilts/ace-toolkit/ace-loader/panda"
 node_js_path = "//prebuilts/ace-toolkit/nodejs/current/bin/"
@@ -109,7 +105,10 @@ ark_ets_path = "//arkcompiler/ets_runtime"
 crossplatform_plugin_root = "//plugins"
 crossplatform_multimedia_root = "//foundation/multimedia"
 skia_root_new = "//third_party/skia"
-checking_function_root = "//third_party/bounds_checking_function"
+
+# arkui-x
+flutter_root = "//third_party/flutter"
+ace_flutter_engine_root = "$flutter_root/build"
 
 # Config toolchain
 windows_buildtool = "//build/toolchain/mingw:mingw_x86_64"

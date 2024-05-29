@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/// <reference path="../../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/enums.d.ts" />
-/// <reference path="../../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/with_theme.d.ts" />
+/// <reference path='../../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/enums.d.ts' />
+/// <reference path='../../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/with_theme.d.ts' />
 
 // instead reference to both common.d.ts and units.d.ts
 declare type Resource = import('../../../../../../../../../out/sdk/ohos-sdk/windows/ets/api/global/resource').Resource;
@@ -27,18 +27,18 @@ declare enum ThemeColorMode {
 }
 
 // for bind with native level and State Management
-declare function getUINativeModule(): object | undefined;
+declare function getUINativeModule(): any;
 declare class ViewStackProcessor {
     static GetElmtIdToAccountFor(): number;
     static visualState(state?: string): void;
 }
 declare interface ViewPuInternal {
-    parent_: ViewPuInternal
-    themeScope_: ArkThemeScope
-    id__(): number
-    onGlobalThemeChanged(): void
-    forceRerenderNode(elmtId: number): void
-    onWillApplyTheme(theme: Theme): void
+    parent_: ViewPuInternal;
+    themeScope_: ArkThemeScope;
+    id__(): number;
+    onGlobalThemeChanged(): void;
+    forceRerenderNode(elmtId: number): void;
+    onWillApplyTheme(theme: Theme): void;
 }
 
 declare class PUV2ViewBase {
@@ -46,10 +46,10 @@ declare class PUV2ViewBase {
 }
 
 // own public interfaces
-declare type Theme = import("../../../../../../../../../out/sdk/ohos-sdk/windows/ets/api/@ohos.arkui.theme").Theme
-declare type CustomTheme = import("../../../../../../../../../out/sdk/ohos-sdk/windows/ets/api/@ohos.arkui.theme").CustomTheme
-declare type Colors = import("../../../../../../../../../out/sdk/ohos-sdk/windows/ets/api/@ohos.arkui.theme").Colors
-declare type CustomColors = import("../../../../../../../../../out/sdk/ohos-sdk/windows/ets/api/@ohos.arkui.theme").CustomColors
+declare type Theme = import('../../../../../../../../../out/sdk/ohos-sdk/windows/ets/api/@ohos.arkui.theme').Theme;
+declare type CustomTheme = import('../../../../../../../../../out/sdk/ohos-sdk/windows/ets/api/@ohos.arkui.theme').CustomTheme;
+declare type Colors = import('../../../../../../../../../out/sdk/ohos-sdk/windows/ets/api/@ohos.arkui.theme').Colors;
+declare type CustomColors = import('../../../../../../../../../out/sdk/ohos-sdk/windows/ets/api/@ohos.arkui.theme').CustomColors;
 
 // hidden internal interfaces
 /**
@@ -284,86 +284,86 @@ declare interface Typography {
 }
 
 declare interface CustomThemeInternal extends CustomTheme {
-    shapes?: CustomShapes
-    typography?: CustomTypography
+    shapes?: CustomShapes;
+    typography?: CustomTypography;
 }
 declare interface CustomCornerRadius {
-    none?: Length
-    level1?: Length
-    level2?: Length
-    level3?: Length
-    level4?: Length
-    level5?: Length
-    level6?: Length
-    level7?: Length
-    level8?: Length
-    level9?: Length
-    level10?: Length
-    level11?: Length
-    level12?: Length
-    level16?: Length
+    none?: Length;
+    level1?: Length;
+    level2?: Length;
+    level3?: Length;
+    level4?: Length;
+    level5?: Length;
+    level6?: Length;
+    level7?: Length;
+    level8?: Length;
+    level9?: Length;
+    level10?: Length;
+    level11?: Length;
+    level12?: Length;
+    level16?: Length;
 }
 declare interface CustomPaddings {
-    level0?: Length
-    level1?: Length
-    level2?: Length
-    level3?: Length
-    level4?: Length
-    level5?: Length
-    level6?: Length
-    level7?: Length
-    level8?: Length
-    level9?: Length
-    level10?: Length
-    level11?: Length
-    level12?: Length
-    level16?: Length
-    level24?: Length
-    level32?: Length
-    level36?: Length
+    level0?: Length;
+    level1?: Length;
+    level2?: Length;
+    level3?: Length;
+    level4?: Length;
+    level5?: Length;
+    level6?: Length;
+    level7?: Length;
+    level8?: Length;
+    level9?: Length;
+    level10?: Length;
+    level11?: Length;
+    level12?: Length;
+    level16?: Length;
+    level24?: Length;
+    level32?: Length;
+    level36?: Length;
 }
 declare interface CustomBorders {
-    none?: Length
-    xs?: Length
-    s?: Length
-    m?: Length
-    l?: Length
-    xl?: Length
+    none?: Length;
+    xs?: Length;
+    s?: Length;
+    m?: Length;
+    l?: Length;
+    xl?: Length;
 }
 declare interface CustomOutlines {
-    none?: Dimension
-    xs?: Dimension
-    s?: Dimension
-    m?: Dimension
-    l?: Dimension
-    xl?: Dimension
+    none?: Dimension;
+    xs?: Dimension;
+    s?: Dimension;
+    m?: Dimension;
+    l?: Dimension;
+    xl?: Dimension;
 }
 declare interface CustomShapes {
-    cornerRadius?: CustomCornerRadius
-    paddings?: CustomPaddings
-    borders?: CustomBorders
-    outlines?: CustomOutlines
+    cornerRadius?: CustomCornerRadius;
+    paddings?: CustomPaddings;
+    borders?: CustomBorders;
+    outlines?: CustomOutlines;
 }
 declare interface CustomTypographyStyle {
-    weight?: FontWeight | number | string
-    size?: Length
+    weight?: FontWeight | number | string;
+    size?: Length;
 }
 declare interface CustomTypography {
-    displayLarge?: CustomTypographyStyle
-    displayMiddle?: CustomTypographyStyle
-    displaySmall?: CustomTypographyStyle
-    titleLarge?: CustomTypographyStyle
-    titleMiddle?: CustomTypographyStyle
-    titleSmall?: CustomTypographyStyle
-    subtitleLarge?: CustomTypographyStyle
-    subtitleMiddle?: CustomTypographyStyle
-    subtitleSmall?: CustomTypographyStyle
-    bodyLarge?: CustomTypographyStyle
-    bodyMiddle?: CustomTypographyStyle
-    bodySmall?: CustomTypographyStyle
-    captionLarge?: CustomTypographyStyle
-    captionMiddle?: CustomTypographyStyle
-    captionSmall?: CustomTypographyStyle
+    displayLarge?: CustomTypographyStyle;
+    displayMiddle?: CustomTypographyStyle;
+    displaySmall?: CustomTypographyStyle;
+    titleLarge?: CustomTypographyStyle;
+    titleMiddle?: CustomTypographyStyle;
+    titleSmall?: CustomTypographyStyle;
+    subtitleLarge?: CustomTypographyStyle;
+    subtitleMiddle?: CustomTypographyStyle;
+    subtitleSmall?: CustomTypographyStyle;
+    bodyLarge?: CustomTypographyStyle;
+    bodyMiddle?: CustomTypographyStyle;
+    bodySmall?: CustomTypographyStyle;
+    captionLarge?: CustomTypographyStyle;
+    captionMiddle?: CustomTypographyStyle;
+    captionSmall?: CustomTypographyStyle;
 }
 
 declare class BrandColors {

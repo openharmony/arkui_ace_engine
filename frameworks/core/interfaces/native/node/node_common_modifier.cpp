@@ -1228,7 +1228,7 @@ ArkUI_Uint32 GetColorBlend(ArkUINodeHandle node)
     return ViewAbstract::GetColorBlend(frameNode).GetValue();
 }
 
-void SetGrayscale(ArkUINodeHandle node, ArkUI_Float32 grayScale)
+void SetGrayscale(ArkUINodeHandle node, ArkUI_Float64 grayScale)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1250,7 +1250,7 @@ void ResetGrayscale(ArkUINodeHandle node)
     ViewAbstract::SetGrayScale(frameNode, value);
 }
 
-void SetContrast(ArkUINodeHandle node, ArkUI_Float32 contrast)
+void SetContrast(ArkUINodeHandle node, ArkUI_Float64 contrast)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1269,7 +1269,7 @@ void ResetContrast(ArkUINodeHandle node)
     ViewAbstract::SetContrast(frameNode, value);
 }
 
-void SetBrightness(ArkUINodeHandle node, ArkUI_Float32 brightness)
+void SetBrightness(ArkUINodeHandle node, ArkUI_Float64 brightness)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2212,6 +2212,7 @@ void ResetGeometryTransition(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetGeometryTransition(frameNode, "", false);
 }
 
 void SetOffset(ArkUINodeHandle node, const ArkUI_Float32* number, const ArkUI_Int32* unit)
@@ -2406,11 +2407,11 @@ void ResetLightUpEffect(ArkUINodeHandle node)
     ViewAbstract::SetLightUpEffect(frameNode, 1.0);
 }
 
-void SetSphericalEffect(ArkUINodeHandle node, ArkUI_Float32 radio)
+void SetSphericalEffect(ArkUINodeHandle node, ArkUI_Float64 radio)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    radio = std::clamp(radio, 0.0f, 1.0f);
+    radio = std::clamp(radio, 0.0, 1.0);
     ViewAbstract::SetSphericalEffect(frameNode, radio);
 }
 
@@ -3186,7 +3187,7 @@ void GetAlignRules(ArkUINodeHandle node, ArkUI_CharPtr* anchors, ArkUI_Int32* di
     CHECK_NULL_VOID(frameNode);
     auto alignRules = ViewAbstract::GetAlignRules(frameNode);
 
-    std::size_t index = 0;
+    ArkUI_Int32 index = 0;
     for (const AlignDirection alignDirection : { AlignDirection::LEFT, AlignDirection::MIDDLE, AlignDirection::RIGHT,
              AlignDirection::TOP, AlignDirection::CENTER, AlignDirection::BOTTOM }) {
         if (index >= length) {

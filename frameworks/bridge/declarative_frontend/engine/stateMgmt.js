@@ -1545,7 +1545,7 @@ class MapInfo {
         return new Map(obj.keyToValue.map((item) => [item.key, item.value]));
     }
 }
-MapInfo.replacer = Symbol('_____map_replacer__');
+MapInfo.replacer = '_____map_replacer__';
 /**
  * SetInfo
  *
@@ -1575,7 +1575,7 @@ class SetInfo {
         return new Set(obj.values);
     }
 }
-SetInfo.replacer = Symbol('_____set_replacer__');
+SetInfo.replacer = '_____set_replacer__';
 /**
  * DateInfo
  *
@@ -1604,7 +1604,7 @@ class DateInfo {
         return new Date(obj.date);
     }
 }
-DateInfo.replacer = Symbol('_____date_replacer__');
+DateInfo.replacer = '_____date_replacer__';
 /**
  * PersistentStorage
  *
@@ -4535,13 +4535,13 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         }
         let rawObject = ObservedObject.GetRawObject(wrappedValue);
         if (rawObject instanceof Map) {
-            return MapInfo.toObject(rawObject);
+            return MapInfo.toObject(rawObject).keyToValue;
         }
         else if (rawObject instanceof Set) {
-            return SetInfo.toObject(rawObject);
+            return SetInfo.toObject(rawObject).values;
         }
         else if (rawObject instanceof Date) {
-            return DateInfo.toObject(rawObject);
+            return DateInfo.toObject(rawObject).date;
         }
         return rawObject;
     }

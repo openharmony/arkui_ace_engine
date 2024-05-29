@@ -567,7 +567,8 @@ void TextPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
             auto renderContext = textPattern->GetRenderContext();
             CHECK_NULL_VOID(renderContext);
             auto obscuredReasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
-            bool ifHaveObscured = std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
+            bool ifHaveObscured = textPattern->GetSpanItemChildren().empty() &&
+                std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
                 [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
             auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(textLayoutProperty);

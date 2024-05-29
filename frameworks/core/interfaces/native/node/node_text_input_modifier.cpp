@@ -393,7 +393,7 @@ void SetTextInputContentType(ArkUINodeHandle node, ArkUI_Uint32 contentType)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    if (contentType < 0 || contentType > static_cast<ArkUI_Int32>(TextContentType::END)) {
+    if (contentType < 0 || contentType > static_cast<ArkUI_Uint32>(TextContentType::END)) {
         contentType = -1;
     }
     TextFieldModelNG::SetContentType(frameNode, static_cast<NG::TextContentType>(contentType));
@@ -812,7 +812,7 @@ void GetTextInputPlaceholderFont(ArkUINodeHandle node, ArkUITextFont* font)
     }
     if (!value.fontFamilies.empty()) {
         std::string families;
-        int index = 0;
+        uint32_t index = 0;
         for (auto& family : value.fontFamilies) {
             families += family;
             if (index != value.fontFamilies.size() - 1) {

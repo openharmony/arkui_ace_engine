@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -275,6 +275,22 @@ void ProgressPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc(
         std::string("EnableSmoothEffect: ")
             .append(paintProperty->GetEnableSmoothEffectValue(true) ? "true" : "false"));
+}
+
+void ProgressPattern::OnLanguageConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto progressLayoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
+    CHECK_NULL_VOID(progressLayoutProperty);
+    bool isRtl = progressLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    if (isRightToLeft_ == isRtl) {
+        return;
+    }
+    CHECK_NULL_VOID(progressModifier_);
+    progressModifier_->SetIsRightToLeft(isRtl);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    isRightToLeft_ = isRtl;
 }
 
 void ProgressPattern::OnVisibleChange(bool isVisible)

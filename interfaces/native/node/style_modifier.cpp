@@ -109,6 +109,8 @@ constexpr int32_t BLUR_STYLE_INDEX = 0;
 constexpr int32_t COLOR_MODE_INDEX = 1;
 constexpr int32_t ADAPTIVE_COLOR_INDEX = 2;
 constexpr int32_t SCALE_INDEX = 3;
+constexpr int32_t GRAY_SCALE_START = 4;
+constexpr int32_t GRAY_SCALE_END = 5;
 constexpr int32_t DECORATION_COLOR_INDEX = 1;
 constexpr int32_t DECORATION_STYLE_INDEX = 2;
 constexpr int32_t PROGRESS_TYPE_LINEAR = 1;
@@ -1590,7 +1592,7 @@ int32_t SetBorderColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     if (node->type == ARKUI_NODE_TEXT_INPUT || node->type == ARKUI_NODE_TEXT_AREA) {
         fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaBorderColor(
-            node->uiNodeHandle, colors[NUM_3], colors[NUM_1], colors[NUM_0], colors[NUM_2]);
+            node->uiNodeHandle, colors[NUM_0], colors[NUM_1], colors[NUM_2], colors[NUM_3]);
     } else {
         fullImpl->getNodeModifiers()->getCommonModifier()->setBorderColor(
             node->uiNodeHandle, colors[NUM_0], colors[NUM_1], colors[NUM_2], colors[NUM_3]);
@@ -4696,7 +4698,7 @@ void ResetScrollFriction(ArkUI_NodeHandle node)
 
 const ArkUI_AttributeItem* GetScrollScrollSnap(ArkUI_NodeHandle node)
 {
-    ArkUI_Int32 values[32];
+    ArkUI_Float32 values[32];
     auto size = GetFullImpl()->getNodeModifiers()->getScrollModifier()->getScrollScrollSnap(node->uiNodeHandle, values);
 
     //size index
@@ -4704,7 +4706,7 @@ const ArkUI_AttributeItem* GetScrollScrollSnap(ArkUI_NodeHandle node)
     g_numberValues[NUM_1].i32 = values[NUM_1];
     g_numberValues[NUM_2].i32 = values[NUM_2];
     for (auto i = NUM_3; i < size; i++) {
-        g_numberValues[i].i32 = values[i];
+        g_numberValues[i].f32 = values[i];
     }
     g_attributeItem.size = size;
     return &g_attributeItem;
@@ -5165,7 +5167,8 @@ void ResetScrollEdge(ArkUI_NodeHandle node)
 const ArkUI_AttributeItem* GetScrollEnablePaging(ArkUI_NodeHandle node)
 {
     auto value = GetFullImpl()->getNodeModifiers()->getScrollModifier()->getScrollEnablePaging(node->uiNodeHandle);
-    g_numberValues[0].i32 = value;
+    //ScrollPagingStatus::VALID is true and VALID value is 2, others is false
+    g_numberValues[0].i32 = value == NUM_2 ? true : false;
     return &g_attributeItem;
 }
 
@@ -5367,7 +5370,7 @@ const ArkUI_AttributeItem* GetListCachedCount(ArkUI_NodeHandle node)
 int32_t SetListAlignListItem(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
-    if (item->size != 1 || CheckAttributeIsListItemAlign(item->value[0].i32)) {
+    if (item->size != 1 || !CheckAttributeIsListItemAlign(item->value[0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     GetFullImpl()->getNodeModifiers()->getListModifier()->setAlignListItem(node->uiNodeHandle, item->value[0].i32);
@@ -8087,11 +8090,31 @@ int32_t SetBackgroundBlurStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
     if (SCALE_INDEX < actualSize) {
         scale = item->value[SCALE_INDEX].f32;
     }
+    uint32_t grayScaleStart = 0;
+    if (GRAY_SCALE_START < actualSize) {
+        if (GreatOrEqual(item->value[GRAY_SCALE_START].f32, 0.0f)) {
+            grayScaleStart = static_cast<uint32_t>(item->value[GRAY_SCALE_START].f32);
+        } else {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+    }
+    uint32_t grayScaleEnd = 0;
+    if (GRAY_SCALE_END < actualSize) {
+        if (GreatOrEqual(item->value[GRAY_SCALE_END].f32, 0.0f)
+            && GreatOrEqual(item->value[GRAY_SCALE_END].f32, item->value[GRAY_SCALE_START].f32)) {
+            grayScaleEnd = static_cast<uint32_t>(item->value[GRAY_SCALE_END].f32);
+        } else {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+    }
     BlurOption blurOption;
     int32_t intArray[NUM_3];
     intArray[NUM_0] = blurStyle;
     intArray[NUM_1] = colorMode;
     intArray[NUM_2] = adaptiveColor;
+    std::vector<float> greyVector(NUM_2);
+    greyVector[NUM_0] = grayScaleStart;
+    greyVector[NUM_1] = grayScaleEnd;
     fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundBlurStyle(
         node->uiNodeHandle, intArray, scale, blurOption.grayscale.data(), blurOption.grayscale.size());
     return ERROR_CODE_NO_ERROR;

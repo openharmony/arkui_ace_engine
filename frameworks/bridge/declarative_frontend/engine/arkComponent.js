@@ -3868,6 +3868,7 @@ class ArkComponent {
   }
   systemBarEffect() {
     modifierWithKey(this._modifiersWithKeys, SystemBarEffectModifier.identity, SystemBarEffectModifier, null);
+    return this;
   }
 }
 const isNull = (val) => typeof val === 'object' && val === null;
@@ -26154,7 +26155,7 @@ class ParticleEmitterModifier extends ModifierWithKey {
         let emitRateValue = 5;
         if (isNumber(data.emitRate)) {
           dataArray.push(1);
-          if (data.emitRate > 0) {
+          if (data.emitRate >= 0) {
             emitRateValue = data.emitRate;
           }
           dataArray.push(emitRateValue);
@@ -26390,9 +26391,7 @@ class SystemBarEffectModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().common.setSystemBarEffect(node, true);
-    }
+    getUINativeModule().common.setSystemBarEffect(node, true);
   }
 }
 SystemBarEffectModifier.identity = Symbol('systemBarEffect');

@@ -774,7 +774,7 @@ enum ArkUIGestureDirection {
     ArkUI_GESTURE_DIRECTION_RIGHT = 2,
     ArkUI_GESTURE_DIRECTION_HORIZONTAL = 3,
     ArkUI_GESTURE_DIRECTION_UP = 4,
-    ArkUI_GESTURE_DIRECTION_DOWN = 5,
+    ArkUI_GESTURE_DIRECTION_DOWN = 8,
     ArkUI_GESTURE_DIRECTION_VERTICAL = 12,
     ArkUI_GESTURE_DIRECTION_ALL = 15,
 };
@@ -1130,11 +1130,11 @@ struct ArkUICommonModifier {
     void (*resetSaturate)(ArkUINodeHandle node);
     void (*setColorBlend)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetColorBlend)(ArkUINodeHandle node);
-    void (*setGrayscale)(ArkUINodeHandle node, ArkUI_Float32 grayScale);
+    void (*setGrayscale)(ArkUINodeHandle node, ArkUI_Float64 grayScale);
     void (*resetGrayscale)(ArkUINodeHandle node);
-    void (*setContrast)(ArkUINodeHandle node, ArkUI_Float32 contrast);
+    void (*setContrast)(ArkUINodeHandle node, ArkUI_Float64 contrast);
     void (*resetContrast)(ArkUINodeHandle node);
-    void (*setBrightness)(ArkUINodeHandle node, ArkUI_Float32 brightness);
+    void (*setBrightness)(ArkUINodeHandle node, ArkUI_Float64 brightness);
     void (*resetBrightness)(ArkUINodeHandle node);
     void (*setBlur)(
         ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize);
@@ -1195,7 +1195,7 @@ struct ArkUICommonModifier {
     void (*resetPixelStretchEffect)(ArkUINodeHandle node);
     void (*setLightUpEffect)(ArkUINodeHandle node, ArkUI_Float32 radio);
     void (*resetLightUpEffect)(ArkUINodeHandle node);
-    void (*setSphericalEffect)(ArkUINodeHandle node, ArkUI_Float32 radio);
+    void (*setSphericalEffect)(ArkUINodeHandle node, ArkUI_Float64 radio);
     void (*resetSphericalEffect)(ArkUINodeHandle node);
     void (*setRenderGroup)(ArkUINodeHandle node, ArkUI_Bool isRenderGroup);
     void (*resetRenderGroup)(ArkUINodeHandle node);
@@ -2156,7 +2156,7 @@ struct ArkUIScrollModifier {
     ArkUI_Float32 (*getScrollFriction)(ArkUINodeHandle node);
     void (*setScrollFriction)(ArkUINodeHandle node, ArkUI_Float32 value);
     void (*resetScrollFriction)(ArkUINodeHandle node);
-    ArkUI_Int32 (*getScrollScrollSnap)(ArkUINodeHandle node, ArkUI_Int32* values);
+    ArkUI_Int32 (*getScrollScrollSnap)(ArkUINodeHandle node, ArkUI_Float32* values);
     void (*setScrollScrollSnap)(ArkUINodeHandle node, const ArkUI_Float32* paginationValue, ArkUI_Int32 paginationSize,
         const ArkUI_Int32* paginationParam, ArkUI_Int32 paramSize);
     void (*resetScrollScrollSnap)(ArkUINodeHandle node);
@@ -2567,8 +2567,8 @@ struct ArkUITextAreaModifier {
     void (*setTextAreaBorderWidth)(
         ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*resetTextAreaBorderWidth)(ArkUINodeHandle node);
-    void (*setTextAreaBorderColor)(ArkUINodeHandle node, ArkUI_Uint32 leftColorInt,
-        ArkUI_Uint32 rightColorInt, ArkUI_Uint32 topColorInt, ArkUI_Uint32 bottomColorInt);
+    void (*setTextAreaBorderColor)(ArkUINodeHandle node, ArkUI_Uint32 topColorInt,
+        ArkUI_Uint32 rightColorInt, ArkUI_Uint32 bottomColorInt, ArkUI_Uint32 leftColorInt);
     void (*resetTextAreaBorderColor)(ArkUINodeHandle node);
     void (*setTextAreaBorderStyle)(ArkUINodeHandle node, const ArkUI_Int32* styles, ArkUI_Int32 length);
     void (*resetTextAreaBorderStyle)(ArkUINodeHandle node);

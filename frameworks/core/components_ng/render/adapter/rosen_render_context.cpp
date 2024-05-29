@@ -145,6 +145,7 @@ constexpr uint32_t DRAW_REGION_OVERLAY_TEXT_MODIFIER_INDEX = 4;
 constexpr uint32_t DRAW_REGION_DEBUG_BOUNDARY_MODIFIER_INDEX = 5;
 const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
 const Color DEFAULT_MASK_COLOR = Color::FromARGB(0, 0, 0, 0);
+constexpr int32_t DELAY_TIME = 300;
 
 Rosen::Gravity GetRosenGravity(RenderFit renderFit)
 {
@@ -771,7 +772,7 @@ void RosenRenderContext::PaintBackground()
 #endif
     } else {
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-            rsNode_->SetBgImage(std::make_shared<Rosen::RSImage>());
+            rsNode_->SetBgImage(nullptr);
         }
         return;
     }
@@ -2550,6 +2551,7 @@ void RosenRenderContext::OnBackgroundPixelMapUpdate(const RefPtr<PixelMap>& pixe
     auto nodeHeight = node->GetGeometryNode()->GetFrameSize().Height();
     backgroundModifier_->SetInitialNodeSize(nodeWidth, nodeHeight);
     backgroundModifier_->SetPixelMap(pixelMap);
+    backgroundModifier_->SetHostNode(node);
     backgroundModifier_->Modify();
     RequestNextFrame();
 }
@@ -2576,7 +2578,7 @@ void RosenRenderContext::CreateBackgroundPixelMap(const RefPtr<FrameNode>& custo
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUICreateBackgroundPixelMap");
     };
-    NG::ComponentSnapshot::Create(customNode, std::move(callback), false);
+    NG::ComponentSnapshot::Create(customNode, std::move(callback), false, DELAY_TIME, false);
 }
 
 void RosenRenderContext::OnBorderImageUpdate(const RefPtr<BorderImage>& /*borderImage*/)

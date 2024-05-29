@@ -1230,85 +1230,6 @@ HWTEST_F(OverlayManagerTestNg, HandleScroll001, TestSize.Level1)
 
 /**
  * @tc.name: TestOnBindSheet
- * @tc.desc: Test SheetPresentationPattern::AvoidSafeArea().
- * @tc.type: FUNC
- */
-HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea1, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create sheet node and initialize sheet pattern.
-     */
-    auto sheetNode = FrameNode::CreateFrameNode(
-        V2::SHEET_PAGE_TAG, 1, AceType::MakeRefPtr<SheetPresentationPattern>(-1, V2::BUTTON_ETS_TAG, nullptr));
-    ASSERT_NE(sheetNode, nullptr);
-    auto dragBarNode = FrameNode::CreateFrameNode(
-        "SheetDragBar", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetDragBarPattern>());
-    ASSERT_NE(dragBarNode, nullptr);
-    auto scroll = FrameNode::CreateFrameNode(
-        V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
-    ASSERT_NE(scroll, nullptr);
-    dragBarNode->MountToParent(sheetNode);
-    scroll->MountToParent(sheetNode);
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    ASSERT_NE(sheetPattern, nullptr);
-    auto renderContext = sheetNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    auto safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
-    ASSERT_NE(safeAreaManager, nullptr);
-    auto geometryNode = sheetNode->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    geometryNode->SetFrameSize(SizeF(800, 2000));
-    MockPipelineContext::GetCurrent()->safeAreaManager_ = safeAreaManager;
-    MockPipelineContext::GetCurrent()->SetRootSize(800, 2000);
-    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
-    textFieldManager->SetHeight(20);
-    MockPipelineContext::GetCurrent()->SetTextFieldManager(textFieldManager);
-    SafeAreaInsets::Inset upKeyboard { 0, 200 };
-    sheetPattern->pageHeight_ = 2000;
-    sheetPattern->sheetHeight_ = 2000;
-    /**
-     * @tc.steps: step2. keyboard up, and sheet will goes to correct position.
-     * @tc.cases: case1. keyboard up, but sheet needs not up beacure hsafe is enough.
-     */
-    safeAreaManager->keyboardInset_ = upKeyboard;
-    textFieldManager->SetClickPosition(Offset(0, 1000));
-    sheetPattern->height_ = 1000;
-    sheetPattern->AvoidSafeArea();
-    EXPECT_EQ(sheetPattern->keyboardHeight_, 200);
-    /**
-     * @tc.cases: case2. keyboard up, sheet needs not up and does not reach LARGE.
-     */
-    sheetPattern->keyboardHeight_ = 0;
-    sheetPattern->height_ = 100;
-    textFieldManager->SetClickPosition(Offset(0, 3656));
-    sheetPattern->AvoidSafeArea();
-    EXPECT_EQ(static_cast<int>(renderContext->GetTransformTranslate()->y.ConvertToPx()),
-        2000 - sheetPattern->height_ -
-            (200 - (MockPipelineContext::GetCurrent()->GetRootHeight() - textFieldManager->GetClickPosition().GetY() -
-                       textFieldManager->GetHeight())));
-    /**
-     * @tc.cases: case3. sheet height = 1900 - 8vp, sheet goes up to LARGE and need to scroll.
-     */
-    sheetPattern->keyboardHeight_ = 0;
-    sheetPattern->height_ = 1950;
-    textFieldManager->SetClickPosition(Offset(0, 1900));
-    sheetPattern->AvoidSafeArea();
-    // LARGE : translate offset is 8vp, need to scroll with 20 + hsafe,
-    EXPECT_EQ(static_cast<int>(renderContext->GetTransformTranslate()->y.ConvertToPx()), 0);
-    EXPECT_FALSE(sheetPattern->isScrolling_);
-    /**
-     * @tc.cases: case4. softkeyboard is down.
-     */
-    SafeAreaInsets::Inset downKeyboard { 0, 0 };
-    safeAreaManager->keyboardInset_ = downKeyboard;
-    sheetPattern->AvoidSafeArea();
-    EXPECT_EQ(static_cast<int>(renderContext->GetTransformTranslate()->y.ConvertToPx()), 0);
-    EXPECT_EQ(sheetPattern->keyboardHeight_, 0);
-    EXPECT_FALSE(sheetPattern->isScrolling_);
-}
-
-/**
- * @tc.name: TestOnBindSheet
  * @tc.desc: Test SheetPresentationPattern::OnDirtyLayoutWrapperSwap() and root Rotates.
  * @tc.type: FUNC
  */
@@ -1415,7 +1336,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea3, TestSize.Level1)
      * @tc.cases: case1. keyboard up, but sheet needs not up beacure hsafe is enough.
      */
     safeAreaManager->keyboardInset_ = upKeyboard;
-    textFieldManager->SetClickPosition(Offset(0, 1000));
+    textFieldManager->SetClickPosition(Offset(500, 1000));
     sheetPattern->height_ = 1800;
     sheetPattern->AvoidSafeArea();
     EXPECT_EQ(sheetPattern->keyboardHeight_, 200);
@@ -1423,14 +1344,14 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea3, TestSize.Level1)
      * @tc.cases: case2. keyboard up, sheet needs not to go up.
      */
     sheetPattern->keyboardHeight_ = 0;
-    textFieldManager->SetClickPosition(Offset(0, 300));
+    textFieldManager->SetClickPosition(Offset(500, 300));
     sheetPattern->AvoidSafeArea();
     EXPECT_EQ(static_cast<int>(renderContext->GetTransformTranslate()->y.ConvertToPx()), 2000 - sheetPattern->height_);
     /**
      * @tc.cases: case3. sheet offset = 1800, sheet goes up with h and not goes up to LARGE.
      */
     sheetPattern->keyboardHeight_ = 0;
-    textFieldManager->SetClickPosition(Offset(0, 1900));
+    textFieldManager->SetClickPosition(Offset(500, 1900));
     sheetPattern->AvoidSafeArea();
     EXPECT_EQ(static_cast<int>(renderContext->GetTransformTranslate()->y.ConvertToPx()), 56);
     EXPECT_FALSE(sheetPattern->isScrolling_);
@@ -1439,7 +1360,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea3, TestSize.Level1)
      */
     sheetPattern->keyboardHeight_ = 0;
     sheetPattern->height_ = 1950;
-    textFieldManager->SetClickPosition(Offset(0, 1900));
+    textFieldManager->SetClickPosition(Offset(500, 1900));
     sheetPattern->AvoidSafeArea();
     EXPECT_EQ(static_cast<int>(renderContext->GetTransformTranslate()->y.ConvertToPx()), 8);
     EXPECT_EQ(sheetPattern->scrollHeight_, 102.0f);
@@ -2452,6 +2373,82 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern14, TestSize.Level1)
     topSheetPattern->UpdateOnWidthDidChange(onWidthDidChangeFunc);
     topSheetPattern->FireOnWidthDidChange(topSheetNode);
     EXPECT_EQ(widthVal, SHEET_LANDSCAPE_WIDTH.ConvertToPx());
+}
+
+/**
+ * @tc.name: SheetPresentationPattern15
+ * @tc.desc: Test height and detents when sheet is bottomLandsapce.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern15, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create sheetNode, get sheetPattern.
+     */
+    SheetStyle sheetStyle;
+    bool isShow = true;
+    CreateSheetBuilder();
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,  nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(topSheetNode, nullptr);
+    auto topSheetPattern = topSheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(topSheetPattern, nullptr);
+
+    /**
+     * @tc.steps: step3. test sheetThemeType_ = auto, sheetStyle.sheetType = bottomLandspace, set pageHeight = 500.
+     */
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    topSheetPattern->sheetThemeType_ = "auto";
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOMLANDSPACE;
+    topSheetPattern->pageHeight_ = 500;
+
+    /**
+     * @tc.steps: step4. test sheetStyle.detents.sheetMode has value, sheetMode = MEDIUM.
+     */
+    SheetHeight detent;
+    detent.sheetMode = SheetMode::MEDIUM;
+    sheetStyle.detents.emplace_back(detent);
+    overlayManager->sheetHeight_ = 0;
+    overlayManager->ComputeSheetOffset(sheetStyle, topSheetNode);
+    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 300));
+    sheetStyle.detents.clear();
+
+    /**
+     * @tc.steps: step5. test sheetStyle.detents.height has value, height unit is %.
+     */
+    sheetStyle.detents.clear();
+    detent.sheetMode = std::nullopt;
+    Dimension detentHeight { 0.5, DimensionUnit::PERCENT };
+    detent.height = detentHeight;
+    sheetStyle.detents.emplace_back(detent);
+    overlayManager->sheetHeight_ = 0;
+    overlayManager->ComputeSheetOffset(sheetStyle, topSheetNode);
+    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 234));
+
+    /**
+     * @tc.steps: step6. test sheetStyle.detents.height has value, height unit is vp, setHeight > maxHeight.
+     */
+    sheetStyle.detents.clear();
+    detent.height->unit_ = DimensionUnit::VP;
+    detent.height->value_ = 1500;
+    sheetStyle.detents.emplace_back(detent);
+    overlayManager->sheetHeight_ = 0;
+    overlayManager->ComputeSheetOffset(sheetStyle, topSheetNode);
+    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 460));
 }
 
 /**

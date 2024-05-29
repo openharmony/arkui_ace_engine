@@ -49,7 +49,7 @@ build_component("text_overlay_for_web") {
 
   external_deps = []
   if (is_ohos_standard_system) {
-    deps = [ "//third_party/openGLES:libGLES" ]
+    external_deps += [ "opengles:libGLES" ]
   }
 
   rosen_sources = [ "rosen_render_text_overlay.cpp" ]

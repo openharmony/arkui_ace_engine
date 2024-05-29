@@ -34,6 +34,7 @@ template("ace_base_source_set") {
       "resource:ace_resource",
     ]
     external_deps = []
+    include_dirs = []
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]
     }
@@ -77,7 +78,6 @@ template("ace_base_source_set") {
 
     if (platform != "windows") {
       # add secure c API
-      include_dirs = [ "//third_party/bounds_checking_function/include" ]
       if (is_arkui_x) {
         deps += [ "//third_party/bounds_checking_function:libsec_static" ]
       }
@@ -95,10 +95,10 @@ template("ace_base_source_set") {
       external_deps += [ "graphic_2d:librender_service_client" ]
     }
 
-    if (is_arkui_x || platform != "ohos") {
+    if (is_arkui_x) {
       deps += [ "//third_party/cJSON:cjson_static" ]
     } else {
-      deps += [ "//third_party/cJSON:cjson" ]
+      external_deps += [ "cJSON:cjson" ]
     }
 
     cflags_cc = []

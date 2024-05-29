@@ -842,7 +842,7 @@ void JSParticle::ParseEmitterProperty(
     auto emitRateProperty = paramObj->GetProperty("emitRate");
     if (emitRateProperty->IsNumber()) {
         auto emitRateValue = emitRateProperty->ToNumber<int32_t>();
-        emitterProperty.emitRate = emitRateValue > 0 ? emitRateValue : PARTICLE_DEFAULT_EMITTER_RATE;
+        emitterProperty.emitRate = emitRateValue >= 0 ? emitRateValue : PARTICLE_DEFAULT_EMITTER_RATE;
     }
     auto positionProperty = paramObj->GetProperty("position");
     if (positionProperty->IsObject()) {

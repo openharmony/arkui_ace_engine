@@ -237,6 +237,9 @@ void AddTextFireOnChange(RefPtr<PipelineContext>& context, TextFieldPattern* pat
         CHECK_NULL_VOID(host);
         auto eventHub = host->GetEventHub<TextFieldEventHub>();
         CHECK_NULL_VOID(eventHub);
+        auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdateValue(pattern->GetTextContentController()->GetTextValue());
         eventHub->FireOnChange(pattern->GetTextContentController()->GetTextValue());
     });
 }
@@ -480,8 +483,8 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         dragParagraph_ = paragraph_;
     }
     auto textRect = textFieldLayoutAlgorithm->GetTextRect();
-    if (!(needToRefreshSelectOverlay_ &&
-            (!NearEqual(paragraphWidth, paragraphWidth_) || !NearEqual(textRect.GetSize(), textRect_.GetSize())))) {
+    if (!needToRefreshSelectOverlay_ ||
+        (NearEqual(paragraphWidth, paragraphWidth_) && NearEqual(textRect.GetSize(), textRect_.GetSize()))) {
         needToRefreshSelectOverlay_ = false;
     }
     paragraphWidth_ = paragraphWidth;
@@ -2657,7 +2660,6 @@ bool TextFieldPattern::FireOnTextChangeEvent()
     if (textCache == contentController_->GetTextValue()) {
         return false;
     }
-    layoutProperty->UpdateValue(contentController_->GetTextValue());
     host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, contentController_->GetTextValue());
     AutoFillValueChanged();
     auto context = PipelineContext::GetCurrentContextSafely();
@@ -4535,7 +4537,8 @@ void TextFieldPattern::DeleteBackward(int32_t length)
 void TextFieldPattern::DeleteBackwardOperation(int32_t length)
 {
     int32_t idx = selectController_->GetCaretIndex();
-    auto value = contentController_->GetSelectedValue(idx - length, idx);
+    auto willDeleteLength = contentController_->GetDeleteLength(idx, length, true);
+    auto value = contentController_->GetSelectedValue(idx - willDeleteLength, idx);
     auto isDelete = BeforeIMEDeleteValue(value, TextDeleteDirection::BACKWARD, idx);
     CHECK_NULL_VOID(isDelete);
     UpdateEditingValueToRecord();
@@ -4551,7 +4554,8 @@ void TextFieldPattern::DeleteBackwardOperation(int32_t length)
 void TextFieldPattern::DeleteForwardOperation(int32_t length)
 {
     auto caretIndex = selectController_->GetCaretIndex();
-    auto value = contentController_->GetSelectedValue(caretIndex, caretIndex + length);
+    auto willDeleteLength = contentController_->GetDeleteLength(caretIndex, length, false);
+    auto value = contentController_->GetSelectedValue(caretIndex, caretIndex + willDeleteLength);
     auto isDelete = BeforeIMEDeleteValue(value, TextDeleteDirection::FORWARD, caretIndex);
     CHECK_NULL_VOID(isDelete);
     ResetObscureTickCountDown();

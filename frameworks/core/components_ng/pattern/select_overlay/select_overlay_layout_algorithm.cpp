@@ -490,8 +490,13 @@ OffsetF SelectOverlayLayoutAlgorithm::NewMenuAvoidStrategy(float menuWidth, floa
         auto offsetBetweenSelectArea = std::clamp(
             (double)(selectArea.Top() + selectArea.Bottom() - menuHeight) / 2.0f, (double)topArea, bottomLimitOffsetY);
         if (downHandle.isShow) {
-            offsetY = selectArea.Bottom() + menuSpacing;
-            if (offsetY > bottomLimitOffsetY) {
+            bool isOffsetYInBottom = false;
+            // The upper handle is not visible and not in a single row, or offsetY <= topArea
+            if ((!upHandle.isShow && !info_->isSingleLine) || (LessOrEqual(offsetY, topArea))) {
+                offsetY = selectArea.Bottom() + menuSpacing;
+                isOffsetYInBottom = true;
+            }
+            if (isOffsetYInBottom && (offsetY > bottomLimitOffsetY)) {
                 // 底部避让失败 -> 选区上方 > 选区中间
                 offsetY = !upHandle.isShow && LessNotEqual(topArea, offsetUponSelectArea) ? offsetUponSelectArea
                                                                                           : offsetBetweenSelectArea;

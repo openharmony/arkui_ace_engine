@@ -1191,11 +1191,6 @@ export struct CustomDialogComponent {
       }
       this.dialogWidth = newValue.width;
       this.updateCustomStyle();
-      if (this.screenWidth > getNumberByResource('alert_container_max_width')) {
-        this.columnModifier.customStyle = newValue.width > getNumberByResource('alert_container_max_width');
-      } else {
-        this.columnModifier.customStyle = newValue.width >= this.screenWidth;
-      }
       this.isFirstInit = false;
     })
   }
@@ -1415,4 +1410,3 @@ export struct PopupDialog {
 
 export declare interface PopupDialogOptions extends CustomPopupOptions {
 }
-

@@ -32,6 +32,7 @@
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/common/ai/data_detector_mgr.h"
+#include "core/common/ime/input_method_manager.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/picker/picker_data.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
@@ -4557,13 +4558,7 @@ void WebPattern::OnHideAutofillPopup()
 
 void WebPattern::CloseKeyboard()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<WebEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto focusHub = eventHub->GetOrCreateFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    focusHub->CloseKeyboard();
+    InputMethodManager::GetInstance()->CloseKeyboard();
 }
 
 WebInfoType WebPattern::GetWebInfoType()

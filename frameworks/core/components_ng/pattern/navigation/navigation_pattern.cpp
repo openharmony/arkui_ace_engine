@@ -22,6 +22,7 @@
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "core/common/container.h"
+#include "core/common/ime/input_method_manager.h"
 #include "core/common/manager_interface.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
@@ -383,12 +384,7 @@ void NavigationPattern::CheckTopNavPathChange(
 
     // close keyboard
 #if defined(ENABLE_STANDARD_INPUT)
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto textfieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
-    if (textfieldManager) {
-        textfieldManager->ProcessNavKeyboard();
-    }
+    InputMethodManager::GetInstance()->CloseKeyboard();
 #endif
 
     isChanged_ = true;
