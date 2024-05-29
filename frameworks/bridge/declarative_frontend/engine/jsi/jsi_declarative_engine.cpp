@@ -176,12 +176,7 @@ inline bool PreloadJsEnums(const shared_ptr<JsRuntime>& runtime)
 inline bool PreloadStateManagement(const shared_ptr<JsRuntime>& runtime)
 {
 #ifdef STATE_MGMT_USE_AOT
-    auto container = Container::Current();
-    if (container && container->IsDynamicRender()) {
-        return runtime->EvaluateJsCode(
-            (uint8_t*)_binary_stateMgmt_abc_start, _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start);
-    }
-    return runtime->ExecuteJsBin("/etc/abc/framework/stateMgmt.abc");
+    return runtime->ExecuteJsBinForAOT("/etc/abc/framework/stateMgmt.abc");
 #else
     return runtime->EvaluateJsCode(
         (uint8_t*)_binary_stateMgmt_abc_start, _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start);
