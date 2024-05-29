@@ -26,8 +26,8 @@
 #endif
 namespace OHOS::Ace::NG {
 
-void StaticImageObject::MakeCanvasImage(
-    const RefPtr<ImageLoadingContext>& ctx, const SizeF& targetSize, bool forceResize, bool syncLoad)
+void StaticImageObject::MakeCanvasImage(const RefPtr<ImageLoadingContext>& ctx, const SizeF& targetSize,
+    bool forceResize, bool syncLoad, bool loadInVipChannel)
 {
     RefPtr<CanvasImage> cachedImage;
     auto key = ImageUtils::GenerateImageKey(src_, targetSize);
@@ -47,6 +47,7 @@ void StaticImageObject::MakeCanvasImage(
     ImageProvider::MakeCanvasImage(Claim(this), ctx, targetSize, {
         .forceResize = forceResize,
         .sync = syncLoad,
+        .loadInVipChannel = loadInVipChannel,
         .dynamicMode = ctx->GetDynamicRangeMode(),
         .imageQuality = ctx->GetImageQuality()
     });
