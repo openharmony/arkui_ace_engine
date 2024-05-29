@@ -78,12 +78,12 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
-const NG::BorderWidthProperty BORDER_WIDTH_TEST = { 1.0_vp, 1.0_vp, 1.0_vp, 1.0_vp };
+const NG::BorderWidthProperty BORDER_WIDTH_TEST = { 1.0_vp, 1.0_vp, 1.0_vp, 0.0_vp };
 const NG::BorderStyleProperty BORDER_STYLE_TEST = {BorderStyle::SOLID,
     BorderStyle::SOLID, BorderStyle::SOLID, BorderStyle::SOLID};
 const NG::BorderColorProperty BORDER_COLOR_TEST = { Color::BLUE,
     Color::BLUE, Color::BLUE, Color::BLUE };
-const NG::BorderWidthProperty NEW_BORDER_WIDTH_TEST = { 10.0_vp, 15.0_vp, 5.0_vp, 10.0_vp };
+const NG::BorderWidthProperty NEW_BORDER_WIDTH_TEST = { 10.0_vp, 15.0_vp, 5.0_vp, 0.0_vp };
 const NG::BorderStyleProperty NEW_BORDER_STYLE_TEST = {BorderStyle::SOLID,
     BorderStyle::DASHED, BorderStyle::DOTTED, BorderStyle::NONE};
 const NG::BorderColorProperty NEW_BORDER_COLOR_TEST = { Color::RED,
