@@ -920,6 +920,7 @@ void PipelineContext::SetupRootElement()
     OnAreaChangedFunc onAreaChangedFunc = [weakOverlayManger = AceType::WeakClaim(AceType::RawPtr(overlayManager_))](
                                               const RectF& /* oldRect */, const OffsetF& /* oldOrigin */,
                                               const RectF& /* rect */, const OffsetF& /* origin */) {
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "start OnAreaChangedFunc");
         auto overlay = weakOverlayManger.Upgrade();
         CHECK_NULL_VOID(overlay);
         overlay->HideAllMenus();
