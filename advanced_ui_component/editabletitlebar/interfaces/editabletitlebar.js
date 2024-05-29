@@ -20,6 +20,11 @@ const hilog = requireNapi('hilog');
 const KeyCode = requireNapi('multimodalInput.keyCode').KeyCode;
 const resourceManager = requireNapi('resourceManager');
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
+const BusinessError = requireNapi('base');
+const common = requireNapi('app.ability.common');
+const EnvironmentCallback = requireNapi('app.ability.EnvironmentCallback');
+const window = requireNapi('window');
+
 export var EditableLeftIconType;
 (function (i10) {
     i10[i10["Back"] = 0] = "Back";
