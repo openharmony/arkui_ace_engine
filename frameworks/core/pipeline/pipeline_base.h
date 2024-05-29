@@ -231,6 +231,8 @@ public:
 
     virtual void OnSurfaceDensityChanged(double density) = 0;
 
+    virtual void OnTransformHintChanged(uint32_t transform) = 0;
+
     virtual void OnSystemBarHeightChanged(double statusBar, double navigationBar) = 0;
 
     virtual void OnSurfaceDestroyed() = 0;

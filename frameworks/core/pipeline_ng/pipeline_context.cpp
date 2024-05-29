@@ -1117,6 +1117,15 @@ void PipelineContext::OnFoldDisplayModeChange(FoldDisplayMode foldDisplayMode)
     }
 }
 
+void PipelineContext::OnTransformHintChanged(uint32_t transform)
+{
+    for (auto&& [id, callback] : transformHintChangedCallbackMap_) {
+        if (callback) {
+            callback(transform);
+        }
+    }
+}
+
 void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
