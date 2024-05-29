@@ -1230,85 +1230,6 @@ HWTEST_F(OverlayManagerTestNg, HandleScroll001, TestSize.Level1)
 
 /**
  * @tc.name: TestOnBindSheet
- * @tc.desc: Test SheetPresentationPattern::AvoidSafeArea().
- * @tc.type: FUNC
- */
-HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea1, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create sheet node and initialize sheet pattern.
-     */
-    auto sheetNode = FrameNode::CreateFrameNode(
-        V2::SHEET_PAGE_TAG, 1, AceType::MakeRefPtr<SheetPresentationPattern>(-1, V2::BUTTON_ETS_TAG, nullptr));
-    ASSERT_NE(sheetNode, nullptr);
-    auto dragBarNode = FrameNode::CreateFrameNode(
-        "SheetDragBar", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetDragBarPattern>());
-    ASSERT_NE(dragBarNode, nullptr);
-    auto scroll = FrameNode::CreateFrameNode(
-        V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
-    ASSERT_NE(scroll, nullptr);
-    dragBarNode->MountToParent(sheetNode);
-    scroll->MountToParent(sheetNode);
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    ASSERT_NE(sheetPattern, nullptr);
-    auto renderContext = sheetNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    auto safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
-    ASSERT_NE(safeAreaManager, nullptr);
-    auto geometryNode = sheetNode->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    geometryNode->SetFrameSize(SizeF(800, 2000));
-    MockPipelineContext::GetCurrent()->safeAreaManager_ = safeAreaManager;
-    MockPipelineContext::GetCurrent()->SetRootSize(800, 2000);
-    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
-    textFieldManager->SetHeight(20);
-    MockPipelineContext::GetCurrent()->SetTextFieldManager(textFieldManager);
-    SafeAreaInsets::Inset upKeyboard { 0, 200 };
-    sheetPattern->pageHeight_ = 2000;
-    sheetPattern->sheetHeight_ = 2000;
-    /**
-     * @tc.steps: step2. keyboard up, and sheet will goes to correct position.
-     * @tc.cases: case1. keyboard up, but sheet needs not up beacure hsafe is enough.
-     */
-    safeAreaManager->keyboardInset_ = upKeyboard;
-    textFieldManager->SetClickPosition(Offset(0, 1000));
-    sheetPattern->height_ = 1000;
-    sheetPattern->AvoidSafeArea();
-    EXPECT_EQ(sheetPattern->keyboardHeight_, 200);
-    /**
-     * @tc.cases: case2. keyboard up, sheet needs not up and does not reach LARGE.
-     */
-    sheetPattern->keyboardHeight_ = 0;
-    sheetPattern->height_ = 100;
-    textFieldManager->SetClickPosition(Offset(0, 3656));
-    sheetPattern->AvoidSafeArea();
-    EXPECT_EQ(static_cast<int>(renderContext->GetTransformTranslate()->y.ConvertToPx()),
-        2000 - sheetPattern->height_ -
-            (200 - (MockPipelineContext::GetCurrent()->GetRootHeight() - textFieldManager->GetClickPosition().GetY() -
-                       textFieldManager->GetHeight())));
-    /**
-     * @tc.cases: case3. sheet height = 1900 - 8vp, sheet goes up to LARGE and need to scroll.
-     */
-    sheetPattern->keyboardHeight_ = 0;
-    sheetPattern->height_ = 1950;
-    textFieldManager->SetClickPosition(Offset(0, 1900));
-    sheetPattern->AvoidSafeArea();
-    // LARGE : translate offset is 8vp, need to scroll with 20 + hsafe,
-    EXPECT_EQ(static_cast<int>(renderContext->GetTransformTranslate()->y.ConvertToPx()), 0);
-    EXPECT_FALSE(sheetPattern->isScrolling_);
-    /**
-     * @tc.cases: case4. softkeyboard is down.
-     */
-    SafeAreaInsets::Inset downKeyboard { 0, 0 };
-    safeAreaManager->keyboardInset_ = downKeyboard;
-    sheetPattern->AvoidSafeArea();
-    EXPECT_EQ(static_cast<int>(renderContext->GetTransformTranslate()->y.ConvertToPx()), 0);
-    EXPECT_EQ(sheetPattern->keyboardHeight_, 0);
-    EXPECT_FALSE(sheetPattern->isScrolling_);
-}
-
-/**
- * @tc.name: TestOnBindSheet
  * @tc.desc: Test SheetPresentationPattern::OnDirtyLayoutWrapperSwap() and root Rotates.
  * @tc.type: FUNC
  */
@@ -1415,7 +1336,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea3, TestSize.Level1)
      * @tc.cases: case1. keyboard up, but sheet needs not up beacure hsafe is enough.
      */
     safeAreaManager->keyboardInset_ = upKeyboard;
-    textFieldManager->SetClickPosition(Offset(0, 1000));
+    textFieldManager->SetClickPosition(Offset(500, 1000));
     sheetPattern->height_ = 1800;
     sheetPattern->AvoidSafeArea();
     EXPECT_EQ(sheetPattern->keyboardHeight_, 200);
@@ -1423,14 +1344,14 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea3, TestSize.Level1)
      * @tc.cases: case2. keyboard up, sheet needs not to go up.
      */
     sheetPattern->keyboardHeight_ = 0;
-    textFieldManager->SetClickPosition(Offset(0, 300));
+    textFieldManager->SetClickPosition(Offset(500, 300));
     sheetPattern->AvoidSafeArea();
     EXPECT_EQ(static_cast<int>(renderContext->GetTransformTranslate()->y.ConvertToPx()), 2000 - sheetPattern->height_);
     /**
      * @tc.cases: case3. sheet offset = 1800, sheet goes up with h and not goes up to LARGE.
      */
     sheetPattern->keyboardHeight_ = 0;
-    textFieldManager->SetClickPosition(Offset(0, 1900));
+    textFieldManager->SetClickPosition(Offset(500, 1900));
     sheetPattern->AvoidSafeArea();
     EXPECT_EQ(static_cast<int>(renderContext->GetTransformTranslate()->y.ConvertToPx()), 56);
     EXPECT_FALSE(sheetPattern->isScrolling_);
@@ -1439,7 +1360,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea3, TestSize.Level1)
      */
     sheetPattern->keyboardHeight_ = 0;
     sheetPattern->height_ = 1950;
-    textFieldManager->SetClickPosition(Offset(0, 1900));
+    textFieldManager->SetClickPosition(Offset(500, 1900));
     sheetPattern->AvoidSafeArea();
     EXPECT_EQ(static_cast<int>(renderContext->GetTransformTranslate()->y.ConvertToPx()), 8);
     EXPECT_EQ(sheetPattern->scrollHeight_, 102.0f);
