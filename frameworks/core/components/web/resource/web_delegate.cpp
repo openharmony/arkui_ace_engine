@@ -5374,6 +5374,10 @@ void WebDelegate::OnDataResubmitted(std::shared_ptr<OHOS::NWeb::NWebDataResubmis
 
 void WebDelegate::OnNavigationEntryCommitted(std::shared_ptr<OHOS::NWeb::NWebLoadCommittedDetails> details)
 {
+    auto pattern = webPattern_.Upgrade();
+    if (pattern) {
+        pattern->DestroyAnalyzerOverlay();
+    }
     if (onNavigationEntryCommittedV2_) {
         NavigationType type = static_cast<NavigationType>(details->GetNavigationType());
         onNavigationEntryCommittedV2_(std::make_shared<NavigationEntryCommittedEvent>(details->GetURL(),
