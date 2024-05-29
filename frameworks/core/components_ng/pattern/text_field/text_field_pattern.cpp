@@ -1998,7 +1998,7 @@ void TextFieldPattern::InitClickEvent()
     CHECK_NULL_VOID(tapSingleGesture);
     tapSingleGesture->SetOnActionId(clickSingleCallback);
     gestureGroup->AddGesture(tapSingleGesture);
-    gestureGroup->SetPriority(GesturePriority::High);
+    gestureGroup->SetPriority(GesturePriority::Parallel);
     gesture->AddGesture(gestureGroup);
     gesture->OnModifyDone();
     clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickSingleCallback));
