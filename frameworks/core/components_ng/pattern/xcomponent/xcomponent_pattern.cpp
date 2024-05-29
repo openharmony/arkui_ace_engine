@@ -377,6 +377,13 @@ void XComponentPattern::OnAttachToFrameNode()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(host->GetId());
+    auto callbackId = pipeline->RegisterTransformHintChangeCallback([weak = WeakClaim(this)](uint32_t transform) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->SetRotation(transform);
+        }
+    });
+    UpdateTransformHintChangedCallbackId(callbackId);
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EnableSelfRender();
     }
@@ -554,6 +561,9 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
+    if (HasTransformHintChangedCallbackId()) {
+        pipeline->UnregisterTransformHintChangedCallback(transformHintChangedCallbackId_.value_or(-1));
+    }
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().DisableSelfRender();
     }
@@ -600,18 +610,13 @@ void XComponentPattern::OnDetachContext(PipelineContext* context)
     context->RemoveWindowStateChangedCallback(host->GetId());
 }
 
-void XComponentPattern::SetRotation()
+void XComponentPattern::SetRotation(uint32_t rotation)
 {
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto displayInfo = container->GetDisplayInfo();
-    CHECK_NULL_VOID(displayInfo);
-    auto dmRotation = displayInfo->GetRotation();
-    if (rotation_ != dmRotation) {
-        rotation_ = dmRotation;
-        CHECK_NULL_VOID(renderSurface_);
-        renderSurface_->SetTransformHint(dmRotation);
+    if (type_ != XComponentType::SURFACE || isSurfaceLock_) {
+        return;
     }
+    CHECK_NULL_VOID(renderSurface_);
+    renderSurface_->SetTransformHint(rotation);
 }
 
 void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
@@ -663,9 +668,6 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
     }
 #endif
     host->MarkNeedSyncRenderTree();
-    if (type_ == XComponentType::SURFACE) {
-        AddAfterLayoutTaskForRotation();
-    }
 }
 
 #ifdef PLATFORM_VIEW_SUPPORTED
@@ -1459,17 +1461,6 @@ void XComponentPattern::AddAfterLayoutTaskForExportTexture()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->DoTextureExport();
-    });
-}
-
-void XComponentPattern::AddAfterLayoutTaskForRotation()
-{
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->SetRotation();
     });
 }
 

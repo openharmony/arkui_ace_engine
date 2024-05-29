@@ -272,6 +272,8 @@ public:
 
     void OnSurfaceDensityChanged(double density) override;
 
+    void OnTransformHintChanged(uint32_t transform) override {}
+
     void OnSystemBarHeightChanged(double statusBar, double navigationBar) override;
 
     void OnSurfaceDestroyed() override;

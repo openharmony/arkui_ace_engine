@@ -198,6 +198,8 @@ void PipelineContext::SetAppIcon(const RefPtr<PixelMap>& icon) {}
 
 void PipelineContext::OnSurfaceDensityChanged(double density) {}
 
+void PipelineContext::OnTransformHintChanged(uint32_t transform) {}
+
 void PipelineContext::SetRootRect(double width, double height, double offset) {}
 
 void PipelineContext::FlushBuild() {}
