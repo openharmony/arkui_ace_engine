@@ -198,7 +198,7 @@ struct ListFilterRow {
                 })
               }
             })
-            .margin({ start: LengthMetrics.vp(colIndex == 0 ? -TEXT_HOT_AREA_WIDTH : 0) })
+            .margin({ start: LengthMetrics.vp(colIndex === 0 ? -TEXT_HOT_AREA_WIDTH : 0) })
             .tabIndex(colIndex == 0 ? this.rowIndex : -1)
           })
         }
