@@ -161,7 +161,7 @@ public:
         return GetChildFrameNode(frameNode, index)->GetEventHub<T>();
     }
 
-    const RectF& GetChildRect(const RefPtr<FrameNode>& frameNode, int32_t index)
+    RectF GetChildRect(const RefPtr<FrameNode>& frameNode, int32_t index)
     {
         return GetChildFrameNode(frameNode, index)->GetGeometryNode()->GetFrameRect();
     }
