@@ -2212,6 +2212,7 @@ void ResetGeometryTransition(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetGeometryTransition(frameNode, "", false);
 }
 
 void SetOffset(ArkUINodeHandle node, const ArkUI_Float32* number, const ArkUI_Int32* unit)
@@ -3186,7 +3187,7 @@ void GetAlignRules(ArkUINodeHandle node, ArkUI_CharPtr* anchors, ArkUI_Int32* di
     CHECK_NULL_VOID(frameNode);
     auto alignRules = ViewAbstract::GetAlignRules(frameNode);
 
-    std::size_t index = 0;
+    ArkUI_Int32 index = 0;
     for (const AlignDirection alignDirection : { AlignDirection::LEFT, AlignDirection::MIDDLE, AlignDirection::RIGHT,
              AlignDirection::TOP, AlignDirection::CENTER, AlignDirection::BOTTOM }) {
         if (index >= length) {
@@ -3498,13 +3499,32 @@ void ParseDragPreviewMode(NG::DragPreviewOption& previewOption, int32_t modeValu
     isAuto = false;
 }
 
-void SetDragPreviewOptions(ArkUINodeHandle node, ArkUI_Int32 dragPreviewMode)
+void SetDragPreviewOptions(ArkUINodeHandle node, ArkUIDragPreViewOptions dragPreviewOptions,
+    ArkUIDragInteractionOptions dragInteractionOptions)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NG::DragPreviewOption option;
     bool isAuto = true;
-    ParseDragPreviewMode(option, dragPreviewMode, isAuto);
+    if (!dragPreviewOptions.isModeArray) {
+        ParseDragPreviewMode(option, dragPreviewOptions.mode, isAuto);
+    } else {
+        for (size_t i = 0; i < dragPreviewOptions.modeArrayLength; i++) {
+            ParseDragPreviewMode(option, dragPreviewOptions.modeArray[i], isAuto);
+            if (isAuto) {
+                break;
+            }
+        }
+    }
+
+    if (dragPreviewOptions.isBadgeNumber) {
+        option.badgeNumber = dragPreviewOptions.badgeNumber;
+    } else {
+        option.isShowBadge = dragPreviewOptions.isShowBadge;
+    }
+    option.isNumber = dragPreviewOptions.isBadgeNumber;
+    option.isMultiSelectionEnabled = dragInteractionOptions.isMultiSelectionEnabled;
+    option.defaultAnimationBeforeLifting = dragInteractionOptions.defaultAnimationBeforeLifting;
     ViewAbstract::SetDragPreviewOptions(frameNode, option);
 }
 

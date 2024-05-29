@@ -89,6 +89,7 @@
 #include "bridge/declarative_frontend/jsview/js_indexer.h"
 #include "bridge/declarative_frontend/jsview/js_isolated_component.h"
 #include "bridge/declarative_frontend/jsview/js_keyboard_avoid.h"
+#include "bridge/declarative_frontend/jsview/js_layout_manager.h"
 #include "bridge/declarative_frontend/jsview/js_lazy_foreach.h"
 #include "bridge/declarative_frontend/jsview/js_line.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
@@ -820,6 +821,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "RichEditor", JSRichEditor::JSBind },
     { "RichEditorController", JSRichEditorController::JSBind },
     { "RichEditorStyledStringController", JSRichEditorStyledStringController::JSBind },
+    { "LayoutManager", JSLayoutManager::JSBind },
     { "NodeContainer", JSNodeContainer::JSBind },
     { "__JSBaseNode__", JSBaseNode::JSBind },
     { "SymbolGlyph", JSSymbol::JSBind },
@@ -871,6 +873,7 @@ void RegisterAllModule(BindingTarget globalObj, void* nativeEngine)
 #endif
     JSRichEditorController::JSBind(globalObj);
     JSRichEditorStyledStringController::JSBind(globalObj);
+    JSLayoutManager::JSBind(globalObj);
     JSTextController::JSBind(globalObj);
     JSNodeContainer::JSBind(globalObj);
     JSBaseNode::JSBind(globalObj);
@@ -982,6 +985,7 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
     } else if ((*func).first == V2::RICH_EDITOR_ETS_TAG) {
         JSRichEditorController::JSBind(globalObj);
         JSRichEditorStyledStringController::JSBind(globalObj);
+        JSLayoutManager::JSBind(globalObj);
     } else if ((*func).first == V2::TEXT_ETS_TAG) {
         JSTextController::JSBind(globalObj);
     }

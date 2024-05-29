@@ -17,8 +17,8 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 ohos_shared_library("ace_network") {
   sources = [ "download_manager_impl.cpp" ]
   configs = [ "$ace_root:ace_config" ]
-  deps = [ "//third_party/curl:curl_shared" ]
   external_deps = [
+    "curl:curl_shared",
     "hilog:libhilog",
     "netmanager_base:net_conn_manager_if",
     "netmanager_base:net_conn_parcel",

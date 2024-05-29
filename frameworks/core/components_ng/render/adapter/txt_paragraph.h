@@ -26,6 +26,7 @@
 #endif
 
 #include "base/utils/noncopyable.h"
+#include "core/components/common/properties/text_layout_info.h"
 #include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
@@ -121,6 +122,7 @@ public:
 
     // interfaces for calculate the the specified paragraph position
     int32_t GetGlyphIndexByCoordinate(const Offset& offset, bool isSelectionPos = false) override;
+    PositionWithAffinity GetGlyphPositionAtCoordinate(const Offset& offset) override;
     void AdjustIndexForward(const Offset& offset, bool compareOffset, int32_t& index);
     void GetRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects) override;
     void GetRectsForPlaceholders(std::vector<RectF>& selectedRects) override;
@@ -146,6 +148,8 @@ public:
         }
     }
     LineMetrics GetLineMetricsByRectF(RectF& rect) override;
+    TextLineMetrics GetLineMetrics(size_t lineNumber) override;
+    void SetRunMetrics(RunMetrics& runMetrics, const OHOS::Rosen::RunMetrics& runMetricsRes);
 
 private:
     void CreateBuilder();

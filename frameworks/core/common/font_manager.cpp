@@ -164,7 +164,7 @@ bool FontManager::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
         fontInfo.family = systemFontDesc->fontFamily;
         fontInfo.subfamily = systemFontDesc->fontSubfamily;
         fontInfo.weight = static_cast<uint32_t>(systemFontDesc->weight);
-        fontInfo.width = systemFontDesc->width;
+        fontInfo.width = static_cast<uint32_t>(systemFontDesc->width);
         fontInfo.italic = systemFontDesc->italic;
         fontInfo.monoSpace = systemFontDesc->monoSpace;
         fontInfo.symbolic = systemFontDesc->symbolic;

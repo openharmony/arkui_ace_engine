@@ -130,6 +130,8 @@ private:
     void UpdateTitleArrowsColor();
     void UpdateOptionsButtonColor();
     void OnEnterKeyEvent(const KeyEvent& event);
+    void UpdateTitleArrowsImage();
+    void UpdateImage(const RefPtr<FrameNode>& buttonNode, const InternalResource::ResourceId& resourceId);
 
     RefPtr<FrameNode> GetCalendarFrameNode();
     RefPtr<CalendarPattern> GetCalendarPattern();

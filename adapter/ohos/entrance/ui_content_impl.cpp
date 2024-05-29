@@ -802,7 +802,10 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
     float density = 1.0f;
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     if (defaultDisplay) {
-        density = defaultDisplay->GetVirtualPixelRatio();
+        auto displayInfo = defaultDisplay->GetDisplayInfo();
+        if (displayInfo) {
+            density = displayInfo->GetDensityInCurResolution();
+        }
         deviceWidth = defaultDisplay->GetWidth();
         deviceHeight = defaultDisplay->GetHeight();
         TAG_LOGI(AceLogTag::ACE_FORM,

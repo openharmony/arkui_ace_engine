@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-declare type Theme = Object
-declare type CustomThemeInternal = Object
-declare type ViewPuInternal = Object
+declare type Theme = Object;
+declare type CustomThemeInternal = Object;
+declare type ViewPuInternal = Object;
 
 declare class ArkThemeScopeManager {
     static getInstance() : ArkThemeScopeManager;

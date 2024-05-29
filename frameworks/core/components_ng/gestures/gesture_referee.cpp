@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/gestures/gesture_referee.h"
+#include "recognizers/gesture_recognizer.h"
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -199,11 +200,11 @@ bool GestureScope::CheckRecognizerState()
     return false;
 }
 
-bool GestureScope::CheckGestureScopeState()
+bool GestureScope::IsReady()
 {
     for (const auto& weak : recognizers_) {
         auto recognizer = weak.Upgrade();
-        if (recognizer && recognizer->IsPending()) {
+        if (recognizer && recognizer->GetRefereeState() != RefereeState::READY) {
             return false;
         }
     }
@@ -326,10 +327,10 @@ void GestureReferee::CleanRedundanceScope()
     }
 }
 
-bool GestureReferee::CheckGestureRefereeState()
+bool GestureReferee::IsReady()
 {
     for (auto iter = gestureScopes_.begin(); iter != gestureScopes_.end(); iter++) {
-        if (!iter->second->CheckGestureScopeState()) {
+        if (!iter->second->IsReady()) {
             return false;
         }
     }
