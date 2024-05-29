@@ -925,6 +925,7 @@ void PipelineContext::SetupRootElement()
         overlay->HideAllMenus();
         SubwindowManager::GetInstance()->HideMenuNG(false);
         overlay->HideCustomPopups();
+        SubwindowManager::GetInstance()->ClearToastInSubwindow();
     };
     rootNode_->SetOnAreaChangeCallback(std::move(onAreaChangedFunc));
     AddOnAreaChangeNode(rootNode_->GetId());
