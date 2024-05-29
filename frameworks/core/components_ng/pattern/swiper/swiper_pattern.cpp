@@ -356,6 +356,15 @@ void SwiperPattern::UpdateTabBarIndicatorCurve()
     swiperController_->SetUpdateCubicCurveCallback(std::move(updateCubicCurveCallback));
 }
 
+bool SwiperPattern::NeedForceMeasure() const
+{
+    auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+
+    return ((layoutProperty->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE) == PROPERTY_UPDATE_MEASURE) ||
+           (isSwipeByGroup_.has_value() && isSwipeByGroup_.value() != IsSwipeByGroup());
+}
+
 void SwiperPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -375,11 +384,12 @@ void SwiperPattern::OnModifyDone()
     InitHoverMouseEvent();
     StopAndResetSpringAnimation();
     OnLoopChange();
-    auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    if ((layoutProperty->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE) == PROPERTY_UPDATE_MEASURE) {
+
+    if (NeedForceMeasure()) {
         ResetOnForceMeasure();
     }
+
+    isSwipeByGroup_ = IsSwipeByGroup();
 
     bool disableSwipe = IsDisableSwipe();
     UpdateSwiperPanEvent(disableSwipe);
