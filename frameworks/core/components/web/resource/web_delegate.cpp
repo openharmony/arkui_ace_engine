@@ -756,6 +756,7 @@ WebDelegate::~WebDelegate()
     }
     UnregisterSurfacePositionChangedCallback();
     UnregisterAvoidAreaChangeListener();
+    UnRegisterConfigObserver();
 }
 
 void WebDelegate::ReleasePlatformResource()
@@ -2861,6 +2862,7 @@ void WebDelegate::InitWebViewWithSurface()
             delegate->RegisterAvoidAreaChangeListener();
             delegate->nweb_->SetDrawMode(renderMode);
             delegate->nweb_->SetDrawMode(layoutMode);
+            delegate->RegisterConfigObserver();
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebInitWebViewWithSurface");
 }
@@ -3142,6 +3144,7 @@ void WebDelegate::UpdateCacheMode(const WebCacheMode& mode)
     if (!context) {
         return;
     }
+
     context->GetTaskExecutor()->PostTask(
         [weak = WeakClaim(this), mode]() {
             auto delegate = weak.Upgrade();
@@ -3170,6 +3173,8 @@ void WebDelegate::UpdateDarkMode(const WebDarkMode& mode)
     if (!context) {
         return;
     }
+
+    current_dark_mode_ = mode;
     context->GetTaskExecutor()->PostTask(
         [weak = WeakClaim(this), mode]() {
             auto delegate = weak.Upgrade();
@@ -3177,21 +3182,16 @@ void WebDelegate::UpdateDarkMode(const WebDarkMode& mode)
             CHECK_NULL_VOID(delegate->nweb_);
             std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
             CHECK_NULL_VOID(setting);
+
             if (mode == WebDarkMode::On) {
-                delegate->UnRegisterConfigObserver();
                 setting->PutDarkSchemeEnabled(true);
                 if (delegate->forceDarkMode_) {
                     setting->PutForceDarkModeEnabled(true);
                 }
-                return;
-            }
-            if (mode == WebDarkMode::Off) {
-                delegate->UnRegisterConfigObserver();
+            } else if (mode == WebDarkMode::Off) {
                 setting->PutDarkSchemeEnabled(false);
                 setting->PutForceDarkModeEnabled(false);
-                return;
-            }
-            if (mode == WebDarkMode::Auto) {
+            } else if (mode == WebDarkMode::Auto) {
                 delegate->UpdateDarkModeAuto(delegate, setting);
             }
         },
@@ -3218,7 +3218,6 @@ void WebDelegate::UpdateDarkModeAuto(RefPtr<WebDelegate> delegate, std::shared_p
         setting->PutDarkSchemeEnabled(false);
         setting->PutForceDarkModeEnabled(false);
     }
-    delegate->RegisterConfigObserver();
 }
 
 void WebDelegate::UpdateForceDarkAccess(const bool& access)
@@ -3572,7 +3571,7 @@ void WebDelegate::UpdateDefaultFixedFontSize(int32_t defaultFixedFontSize)
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateDefaultFixedFontSize");
 }
 
-void WebDelegate::OnConfigurationUpdated(const std::string& colorMode)
+void WebDelegate::OnConfigurationUpdated(const OHOS::AppExecFwk::Configuration& configuration)
 {
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
@@ -3580,23 +3579,37 @@ void WebDelegate::OnConfigurationUpdated(const std::string& colorMode)
     auto executor = context->GetTaskExecutor();
     CHECK_NULL_VOID(executor);
 
+    std::string colorMode = configuration.GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    std::string themeTag = configuration.GetItem(OHOS::AAFwk::GlobalConfigurationKey::THEME);
+    uint8_t themeFlags = static_cast<uint8_t>(OHOS::NWeb::SystemThemeFlags::NONE);
+    if (!themeTag.empty()) {
+        std::unique_ptr<JsonValue> json = JsonUtil::ParseJsonString(themeTag);
+        if (json->GetInt("fonts")) {
+            themeFlags |= static_cast<uint8_t>(OHOS::NWeb::SystemThemeFlags::THEME_FONT);
+            TAG_LOGI(AceLogTag::ACE_WEB, "OnConfigurationUpdated fonts:%{public}s", themeTag.c_str());
+        }
+    }
+
     executor->PostTask(
-        [weak = WeakClaim(this), colorMode]() {
+        [weak = WeakClaim(this), colorMode, themeFlags, dark_mode = current_dark_mode_]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             auto nweb = delegate->GetNweb();
             CHECK_NULL_VOID(nweb);
+
+            std::shared_ptr<NWebSystemConfigurationImpl> configuration =
+                    std::make_shared<NWebSystemConfigurationImpl>(themeFlags);
+            nweb->OnConfigurationUpdated(configuration);
+
             auto setting = nweb->GetPreference();
             CHECK_NULL_VOID(setting);
-
-            if (colorMode == "dark") {
+            bool auto_dark_mode = (dark_mode == WebDarkMode::Auto);
+            if (auto_dark_mode && colorMode == "dark") {
                 setting->PutDarkSchemeEnabled(true);
                 if (delegate->GetForceDarkMode()) {
                     setting->PutForceDarkModeEnabled(true);
                 }
-                return;
-            }
-            if (colorMode == "light") {
+            } else if (auto_dark_mode && colorMode == "light") {
                 setting->PutDarkSchemeEnabled(false);
                 setting->PutForceDarkModeEnabled(false);
             }
