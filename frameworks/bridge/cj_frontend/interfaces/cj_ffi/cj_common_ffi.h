@@ -271,14 +271,7 @@ struct AtCPackage {
 
 CJ_EXPORT void FfiOHOSAceFrameworkRegisterCJFuncs(AtCPackage cjFuncs);
 
-CJ_EXPORT void* FfiOHOSAceFrameworkGetAbilityPointer();
-
-CJ_EXPORT bool FfiOHOSAceFrameworkIsStageModel();
-
 CJ_EXPORT int64_t FfiGeneralSizeOfPointer();
-
-// CStruct 'RetDataXXX' is used for cj-ffi to pass different result
-CJ_EXPORT bool FfiOHOSAceFrameworkIsPartialUpdate();
 }
 
 namespace OHOS::Ace {
