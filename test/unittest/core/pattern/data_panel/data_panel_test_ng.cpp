@@ -852,12 +852,14 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintSpaceTest001, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataTheme));
 
     DataPanelModifier dataPanelModifier;
     Testing::MockCanvas rsCanvas;
-    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillOnce(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachBrush()).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Translate(_, _)).WillOnce(Return());
+    EXPECT_CALL(rsCanvas, Scale(_, _)).WillOnce(Return());
 
     LinearData linearData;
     dataPanelModifier.PaintSpace(rsCanvas, linearData, SPACEWIDTH);
@@ -865,15 +867,9 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintSpaceTest001, TestSize.Level1)
     /**
      * @tc.case: layout direction rtl
      */
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
-    EXPECT_NE(layoutProperty, nullptr);
-    layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
     DataPanelModifier dataPanelModifierRtl;
+    dataPanelModifierRtl.SetIsRtl(true);
     dataPanelModifierRtl.PaintSpace(rsCanvas, linearData, SPACEWIDTH);
-    EXPECT_CALL(rsCanvas, Translate(_, _)).WillOnce(Return());
-    EXPECT_CALL(rsCanvas, Scale(_, _)).WillOnce(Return());
 }
 
 /**
@@ -886,12 +882,14 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentTest001, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataTheme));
 
     DataPanelModifier dataPanelModifier;
     Testing::MockCanvas rsCanvas;
-    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillOnce(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachBrush()).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Translate(_, _)).WillOnce(Return());
+    EXPECT_CALL(rsCanvas, Scale(_, _)).WillOnce(Return());
     LinearData linerData;
     linerData.offset = OFFSET;
     linerData.segmentWidth = SEGMENTWIDTH;
@@ -911,15 +909,9 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentTest001, TestSize.Level1)
     /**
      * @tc.case: layout direction rtl
      */
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
-    EXPECT_NE(layoutProperty, nullptr);
-    layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
     DataPanelModifier dataPanelModifierRtl;
+    dataPanelModifierRtl.SetIsRtl(true);
     dataPanelModifierRtl.PaintColorSegment(rsCanvas, linerData);
-    EXPECT_CALL(rsCanvas, Translate(_, _)).WillOnce(Return());
-    EXPECT_CALL(rsCanvas, Scale(_, _)).WillOnce(Return());
 }
 
 /**
@@ -1201,6 +1193,8 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentFilterMaskTest001, TestSize.
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Translate(_, _)).WillOnce(Return());
+    EXPECT_CALL(rsCanvas, Scale(_, _)).WillOnce(Return());
     dataPanelModifier.SetMax(20.0f);
     std::vector<double> VALUES = { 0.0001f, 5.0f };
     dataPanelModifier.SetValues(VALUES);
@@ -1235,15 +1229,9 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentFilterMaskTest001, TestSize.
     /**
      * @tc.case: case. layout direction rtl
      */
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
-    EXPECT_NE(layoutProperty, nullptr);
-    layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
     DataPanelModifier dataPanelModifierRtl;
+    dataPanelModifierRtl.SetIsRtl(true);
     dataPanelModifierRtl.PaintColorSegmentFilterMask(rsCanvas, segmentLinearData);
-    EXPECT_CALL(rsCanvas, Translate(_, _)).WillOnce(Return());
-    EXPECT_CALL(rsCanvas, Scale(_, _)).WillOnce(Return());
 }
 
 /**
