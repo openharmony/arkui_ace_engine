@@ -3752,16 +3752,19 @@ bool IsBorderWidthObjUndefined(const JSRef<JSVal>& args)
         return false;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args);
-    if (!obj->HasProperty(LEFT_PROPERTY) || !obj->HasProperty(RIGHT_PROPERTY)) {
-        return false;
+    if (obj->IsUndefined()) {
+        return true;
+    }
+    if ((!obj->HasProperty(TOP_PROPERTY) || obj->GetProperty(TOP_PROPERTY)->IsUndefined()) &&
+        (!obj->HasProperty(RIGHT_PROPERTY) || obj->GetProperty(RIGHT_PROPERTY)->IsUndefined()) &&
+        (!obj->HasProperty(BOTTOM_PROPERTY) || obj->GetProperty(BOTTOM_PROPERTY)->IsUndefined()) &&
+        (!obj->HasProperty(LEFT_PROPERTY) || obj->GetProperty(LEFT_PROPERTY)->IsUndefined())) {
+        return true;
     }
     
-    if (!obj->IsUndefined()) {
-        return false;
-    }
-    return true;
+    return false;
 }
-    
+
 void JSViewAbstract::JsBorderWidth(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
