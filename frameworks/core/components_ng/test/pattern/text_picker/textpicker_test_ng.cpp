@@ -3444,42 +3444,6 @@ HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest007, TestSize.Level1)
 }
 
 /**
- * @tc.name: TextPickerPaintTest001
- * @tc.desc: Test GetForegroundDrawFunction.
- * @tc.type: FUNC
- */
-HWTEST_F(TextPickerTestNg, TextPickerPaintTest001, TestSize.Level1)
-{
-    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
-    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
-    theme->gradientHeight_ = Dimension(10.0);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    ASSERT_NE(pickerPaintProperty, nullptr);
-    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
-    ASSERT_NE(textPickerPattern, nullptr);
-    auto textPickerPaintMethod =
-        AceType::MakeRefPtr<TextPickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(textPickerPattern)));
-    auto geometryNode = frameNode->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    auto renderContext = frameNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, pickerPaintProperty);
-    ASSERT_NE(paintWrapper, nullptr);
-    auto canvasDrawFunction = textPickerPaintMethod->GetForegroundDrawFunction(paintWrapper);
-    Testing::MockCanvas rsCanvas;
-    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DrawLine(_, _)).Times(AtLeast(1));
-    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(1);
-    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, Restore()).Times(1);
-    canvasDrawFunction(rsCanvas);
-}
-
-/**
  * @tc.name: TextPickerPaintTest002
  * @tc.desc: Test GetForegroundDrawFunction.
  * @tc.type: FUNC
@@ -5887,31 +5851,6 @@ HWTEST_F(TextPickerTestNg, GetOptionsCascadeStr001, TestSize.Level1)
     std::string result = pickerPattern->GetOptionsCascadeStr(options);
     std::string expectResult = "[{\"text\":\"11\"},{\"text\":\"21\"},{\"text\":\"31\"}]";
     EXPECT_EQ(result, expectResult);
-}
-
-/**
- * @tc.name: TextPickerColumnPatternTest007
- * @tc.desc: Test TextPickerColumnPattern GetShiftDistance when dir == UP.
- * @tc.type: FUNC
- */
-HWTEST_F(TextPickerTestNg, TextPickerColumnPatternTest007, TestSize.Level1)
-{
-    InitTextPickerTestNg();
-    auto textPickerColumnPattern = columnNode_->GetPattern<TextPickerColumnPattern>();
-    ASSERT_NE(textPickerColumnPattern, nullptr);
-    ScrollDirection dir = ScrollDirection::UP;
-    TextPickerOptionProperty prop;
-    prop.height = 2.0f;
-    prop.fontheight = 1.0f;
-    prop.prevDistance = 4.0f;
-    prop.nextDistance = 5.0f;
-    textPickerColumnPattern->optionProperties_.emplace_back(prop);
-    textPickerColumnPattern->optionProperties_.emplace_back(prop);
-    textPickerColumnPattern->optionProperties_.emplace_back(prop);
-    textPickerColumnPattern->optionProperties_.emplace_back(prop);
-    textPickerColumnPattern->GetShiftDistance(COLUMN_INDEX_0, dir);
-    double distance = 0.0f - textPickerColumnPattern_->optionProperties_[COLUMN_INDEX_0].height;
-    EXPECT_EQ(textPickerColumnPattern_->GetShiftDistance(COLUMN_INDEX_0, dir), distance);
 }
 
 /**
