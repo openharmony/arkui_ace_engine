@@ -529,6 +529,7 @@ public:
     void ResetSelection();
     bool IsSelectAll();
     void HandleOnCopy();
+    void HandleOnCopySpanString();
     virtual void HandleOnSelectAll();
 
     OffsetF GetTextPaintOffset() const override

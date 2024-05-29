@@ -499,12 +499,6 @@ std::string TextPattern::GetSelectedText(int32_t start, int32_t end) const
             tag = span->position == -1 ? tag + 1 : span->position;
             continue;
         }
-        if (isSpanStringMode_ && (span->spanItemType == SpanItemType::CustomSpan
-            || span->spanItemType == SpanItemType::IMAGE)) {
-            value += " ";
-            tag = span->position == -1 ? tag + 1 : span->position;
-            continue;
-        }
         if (span->position - 1 >= start && span->placeholderIndex == -1 && span->position != -1) {
             auto wideString = StringUtils::ToWstring(span->GetSpanContent());
             auto max = std::min(span->position, end);
@@ -534,7 +528,11 @@ void TextPattern::HandleOnCopy()
         return;
     }
     if (copyOption_ != CopyOptions::None) {
-        clipboard_->SetData(value, copyOption_);
+        if (isSpanStringMode_) {
+            HandleOnCopySpanString();
+        } else {
+            clipboard_->SetData(value, copyOption_);
+        }
     }
     HiddenMenu();
     auto host = GetHost();
@@ -542,6 +540,17 @@ void TextPattern::HandleOnCopy()
     auto eventHub = host->GetEventHub<TextEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnCopy(value);
+}
+
+void TextPattern::HandleOnCopySpanString()
+{
+    RefPtr<PasteDataMix> pasteData = clipboard_->CreatePasteDataMix();
+    auto subSpanString = spanString->GetSubSpanString(textSelector_.GetTextStart(),
+        textSelector_.GetTextEnd() - textSelector_.GetTextStart());
+    std::vector<uint8_t> tlvData;
+    subSpanString->EncodeTlv(tlvData);
+    clipboard_->AddSpanStringRecord(pasteData, tlvData);
+    clipboard_->SetData(pasteData, copyOption_);
 }
 
 void TextPattern::HiddenMenu()
