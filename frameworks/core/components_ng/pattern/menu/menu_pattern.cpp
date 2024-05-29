@@ -636,6 +636,19 @@ bool MenuPattern::HideStackExpandMenu(const OffsetF& position) const
             HideStackMenu();
             return true;
         }
+    } else if (expandingMode == SubMenuExpandingMode::STACK) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto hostZone = host->GetPaintRectOffset();
+        auto clickAreaZone = host->GetGeometryNode()->GetFrameRect();
+        clickAreaZone.SetLeft(hostZone.GetX());
+        clickAreaZone.SetTop(hostZone.GetY());
+        if (clickAreaZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
+            auto wrapperPattern = wrapper->GetPattern<MenuWrapperPattern>();
+            CHECK_NULL_RETURN(wrapperPattern, false);
+            wrapperPattern->HideSubMenu();
+            return true;
+        }
     }
     return false;
 }
