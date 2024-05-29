@@ -467,6 +467,7 @@ private:
     void OnNodeNameUpdate(const std::string& id) override;
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 
+    void SyncAdditionalGeometryProperties(const RectF& paintRect);
     void NotifyTransitionInner(const SizeF& frameSize, bool isTransitionIn);
     void NotifyTransition(bool isTransitionIn);
     bool HasTransitionOutAnimation() const override

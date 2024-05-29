@@ -758,22 +758,11 @@ void JSParticle::AddDisturbance(std::vector<OHOS::Ace::ParticleDisturbance>& dat
 {
     float strength = paramObj->GetProperty("strength")->ToNumber<float>();
     int shape = paramObj->GetProperty("shape")->ToNumber<int>();
-    auto sizeJsValue = paramObj->GetProperty("size");
     int sizeXValue = 0;
     int sizeYValue = 0;
-    if (sizeJsValue->IsObject()) {
-        JSRef<JSObject> sizeJsObject = JSRef<JSObject>::Cast(sizeJsValue);
-        sizeXValue = sizeJsObject->GetProperty("width")->ToNumber<int>();
-        sizeYValue = sizeJsObject->GetProperty("height")->ToNumber<int>();
-    }
-    auto positionJsValue = paramObj->GetProperty("position");
     int positionXValue = 0;
     int positionYValue = 0;
-    if (positionJsValue->IsObject()) {
-        JSRef<JSObject> positionJsObject = JSRef<JSObject>::Cast(positionJsValue);
-        positionXValue = positionJsObject->GetProperty("x")->ToNumber<int>();
-        positionYValue = positionJsObject->GetProperty("y")->ToNumber<int>();
-    }
+    GetSizeAndPositionValues(paramObj, sizeXValue, sizeYValue, positionXValue, positionYValue);
     int feather = paramObj->GetProperty("feather")->ToNumber<int>();
     feather = std::clamp(feather, 0, 100);
     float noiseScale = 1.0f;
@@ -809,6 +798,24 @@ void JSParticle::AddDisturbance(std::vector<OHOS::Ace::ParticleDisturbance>& dat
     disturbanceField.noiseFrequency = noiseFrequency;
     disturbanceField.noiseAmplitude = noiseAmplitude;
     dataArray.push_back(disturbanceField);
+}
+
+void JSParticle::GetSizeAndPositionValues(
+    const JSRef<JSObject>& paramObj, int& sizeXValue, int& sizeYValue, int& positionXValue, int& positionYValue)
+{
+    JSRef<JSVal> sizeJsValue = paramObj->GetProperty("size");
+    if (sizeJsValue->IsObject()) {
+        JSRef<JSObject> sizeJsObject = JSRef<JSObject>::Cast(sizeJsValue);
+        sizeXValue = sizeJsObject->GetProperty("width")->ToNumber<int>();
+        sizeYValue = sizeJsObject->GetProperty("height")->ToNumber<int>();
+    }
+
+    JSRef<JSVal> positionJsValue = paramObj->GetProperty("position");
+    if (positionJsValue->IsObject()) {
+        JSRef<JSObject> positionJsObject = JSRef<JSObject>::Cast(positionJsValue);
+        positionXValue = positionJsObject->GetProperty("x")->ToNumber<int>();
+        positionYValue = positionJsObject->GetProperty("y")->ToNumber<int>();
+    }
 }
 
 void JSParticle::JsDisturbanceFields(const JSCallbackInfo& args)

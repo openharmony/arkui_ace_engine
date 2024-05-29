@@ -217,6 +217,12 @@ public:
                 childrenList.emplace_back(childFrameNode);
             }
         }
+        UpdateChildRenderContext(renderContext, childrenList);
+    }
+
+    void UpdateChildRenderContext(
+        const RefPtr<RenderContext>& renderContext, std::list<RefPtr<FrameNode>>& childrenList)
+    {
         bool isForegroundColor = renderContext->HasForegroundColor();
         for (auto child : childrenList) {
             auto childRenderContext = child->GetRenderContext();

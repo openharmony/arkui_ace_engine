@@ -117,7 +117,6 @@ JSRef<JSObject> JSCanvasRenderer::createGradientObj(Gradient* gradient)
     return pasteObj;
 }
 
-
 // createLinearGradient(x0: number, y0: number, x1: number, y1: number): CanvasGradient
 void JSCanvasRenderer::JsCreateLinearGradient(const JSCallbackInfo& info)
 {
