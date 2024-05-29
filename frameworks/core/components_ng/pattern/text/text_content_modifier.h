@@ -29,6 +29,16 @@
 #include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
+struct FadeoutInfo {
+    bool left = false;
+    bool right = false;
+    double gradient = 0;
+    bool IsFadeount()
+    {
+        return left || right;
+    }
+};
+
 class TextContentModifier : public ContentModifier {
     DECLARE_ACE_TYPE(TextContentModifier, ContentModifier)
 
@@ -141,7 +151,8 @@ private:
     void UpdateBaselineOffsetMeasureFlag(PropertyChangeFlag& flag);
 
     void DrawObscuration(DrawingContext& drawingContext);
-    void UpdateFadeout(const DrawingContext& drawingContext);
+    void DrawNormal(DrawingContext& drawingContext);
+    FadeoutInfo GetFadeoutInfo(DrawingContext& drawingContext);
 
     void ResetImageNodeList();
     void DrawImageNodeList(const float drawingContextWidth, const float paragraph1Offset, const float paragraph2Offset);
