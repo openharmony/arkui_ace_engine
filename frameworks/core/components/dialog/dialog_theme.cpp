@@ -44,6 +44,7 @@ void DialogTheme::Builder::ParsePattern(
         theme->backgroundColor_ = dialogPattern->GetAttr<Color>(PATTERN_BG_COLOR, Color(0xd9ffffff));
     }
     theme->text_align_content_ = dialogPattern->GetAttr<int>("text_align_content", 0);
+    theme->button_type_ = dialogPattern->GetAttr<int>("button_type", 0);
     theme->text_align_title_ = dialogPattern->GetAttr<int>("text_align_title", 0);
     theme->device_columns_dialog_ = dialogPattern->GetAttr<int>("device_columns_dialog", 0);
     theme->dividerLength_ = dialogPattern->GetAttr<Dimension>(DIALOG_DIVIDER_LENGTH, 24.0_vp);

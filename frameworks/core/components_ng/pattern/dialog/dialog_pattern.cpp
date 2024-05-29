@@ -91,6 +91,7 @@ constexpr Dimension ADAPT_TITLE_MIN_FONT_SIZE = 16.0_fp;
 constexpr Dimension ADAPT_SUBTITLE_MIN_FONT_SIZE = 12.0_fp;
 constexpr uint32_t ADAPT_TITLE_MAX_LINES = 2;
 constexpr int32_t TEXT_ALIGN_TITLE_CENTER = 1;
+constexpr int32_t BUTTON_TYPE_NORMAL = 1;
 
 std::string GetBoolStr(bool isTure)
 {
@@ -724,6 +725,9 @@ void DialogPattern::UpdateDialogButtonProperty(
 {
     // update button padding
     auto buttonProp = AceType::DynamicCast<ButtonLayoutProperty>(buttonNode->GetLayoutProperty());
+    if (dialogTheme_->GetButtonType() == BUTTON_TYPE_NORMAL) {
+        buttonProp->UpdateButtonStyle(ButtonStyleMode::NORMAL);
+    }
     PaddingProperty buttonPadding;
     buttonPadding.left = CalcLength(SHEET_LIST_PADDING);
     buttonPadding.right = CalcLength(SHEET_LIST_PADDING);
