@@ -361,7 +361,6 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
     PaintCustomSpan(drawingContext);
 
     RSBrush brush;
-    //brush.SetAntiAlias(true);
     std::vector<RSPoint> points = { RSPoint(0, 0.0f), RSPoint(contentRect.Width(), 0.0f) };
     std::vector<RSColorQuad> colors = { Color::TRANSPARENT.GetValue(), Color::WHITE.GetValue(), Color::WHITE.GetValue(),
         Color::TRANSPARENT.GetValue() };
@@ -443,7 +442,7 @@ void TextContentModifier::DrawNormal(DrawingContext& drawingContext)
     if (!textRacing_) {
         auto paintOffsetY = paintOffset_.GetY();
         auto paragraphs = pManager->GetParagraphs();
-        for (auto&& info : paragraphs) {
+        for (auto && info : paragraphs) {
             auto paragraph = info.paragraph;
             CHECK_NULL_VOID(paragraph);
             paragraph->Paint(canvas, paintOffset_.GetX(), paintOffsetY);
