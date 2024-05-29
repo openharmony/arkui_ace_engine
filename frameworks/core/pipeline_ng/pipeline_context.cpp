@@ -686,9 +686,10 @@ void PipelineContext::FlushFocus()
     if (!focusScope || focusScope->GetFocusType() != FocusType::SCOPE) {
         dirtyFocusScope_.Reset();
     } else {
-        FlushFocusWithNode(focusNode, true);
+        FlushFocusWithNode(focusScope, true);
         return;
     }
+    GetOrCreateFocusManager()->WindowFocusMoveEnd();
 }
 
 void PipelineContext::FlushFocusWithNode(RefPtr<FrameNode> focusNode, bool isScope)
@@ -701,7 +702,7 @@ void PipelineContext::FlushFocusWithNode(RefPtr<FrameNode> focusNode, bool isSco
     dirtyFocusNode_.Reset();
     dirtyFocusScope_.Reset();
     dirtyRequestFocusNode_.Reset();
-    focusManager_->WindowFocusMoveEnd();
+    GetOrCreateFocusManager()->WindowFocusMoveEnd();
 }
 
 void PipelineContext::FlushRequestFocus()
@@ -998,7 +999,7 @@ const RefPtr<FocusManager>& PipelineContext::GetFocusManager() const
 const RefPtr<FocusManager>& PipelineContext::GetOrCreateFocusManager()
 {
     if (!focusManager_) {
-        focusManager_ = MakeRefPtr<FocusManager>(AceType::WeakClaim(this));
+        focusManager_ = MakeRefPtr<FocusManager>(AceType::Claim(this));
         RegisterFocusCallback();
     }
     return focusManager_;
@@ -2729,15 +2730,11 @@ void PipelineContext::WindowFocus(bool isFocus)
         NotifyPopupDismiss();
     } else {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Window id: %{public}d get focus.", windowId_);
-        if (focusManager_) {
-            focusManager_->WindowFocusMoveStart();
-            focusManager_->FocusSwitchingStart(focusManager_->GetCurrentFocus());
-        } else {
-            TAG_LOGI(AceLogTag::ACE_FOCUS, "focusManager is null.");
-        }
+        GetOrCreateFocusManager()->WindowFocusMoveStart();
+        GetOrCreateFocusManager()->FocusSwitchingStart(focusManager_->GetCurrentFocus());
         isWindowHasFocused_ = true;
         InputMethodManager::GetInstance()->SetWindowFocus(true);
-        auto curFocusView = focusManager_->GetLastFocusView().Upgrade();
+        auto curFocusView = focusManager_ ? focusManager_->GetLastFocusView().Upgrade() : nullptr;
         auto curFocusViewHub = curFocusView ? curFocusView->GetFocusHub() : nullptr;
         if (!curFocusViewHub) {
             TAG_LOGW(AceLogTag::ACE_FOCUS, "Current focus view can not found!");
