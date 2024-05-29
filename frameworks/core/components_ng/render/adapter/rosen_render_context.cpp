@@ -5920,6 +5920,9 @@ void RosenRenderContext::SavePaintRect(bool isRound, uint8_t flag)
     const auto& geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     AdjustPaintRect();
+    if (!SystemProperties::GetPixelRoundEnable()) {
+        isRound = false;
+    }
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         if (isRound && flag == 0) {
             OnePixelRounding(); // call OnePixelRounding without param to improve performance

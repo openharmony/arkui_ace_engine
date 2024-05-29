@@ -622,6 +622,11 @@ bool SystemProperties::GetDebugPixelMapSaveEnabled()
     return system::GetBoolParameter("persist.ace.save.pixelmap.enabled", false);
 }
 
+bool SystemProperties::GetPixelRoundEnable()
+{
+    return system::GetBoolParameter("ace.debug.pixelround.enabled", true);
+}
+
 ACE_WEAK_SYM bool SystemProperties::GetIsUseMemoryMonitor()
 {
     static bool isUseMemoryMonitor = IsUseMemoryMonitor();

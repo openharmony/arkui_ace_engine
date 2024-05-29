@@ -232,6 +232,8 @@ public:
 
     static bool GetDebugPixelMapSaveEnabled();
 
+    static bool GetPixelRoundEnable();
+
     static bool GetRosenBackendEnabled()
     {
         return rosenBackendEnabled_;

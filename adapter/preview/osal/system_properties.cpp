@@ -243,6 +243,11 @@ bool SystemProperties::GetDebugPixelMapSaveEnabled()
     return false;
 }
 
+bool SystemProperties::GetPixelRoundEnable()
+{
+    return true;
+}
+
 bool SystemProperties::GetResourceDecoupling()
 {
     return true;
