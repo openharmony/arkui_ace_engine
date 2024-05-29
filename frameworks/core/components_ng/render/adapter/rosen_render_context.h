@@ -223,6 +223,7 @@ public:
     void SetTransitionInCallback(std::function<void()>&& callback) override;
     void ClipWithRect(const RectF& rectF) override;
     void ClipWithRRect(const RectF& rectF, const RadiusF& radiusF) override;
+    void RemoveClipWithRRect() override;
 
     bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) override;
     void MaskAnimation(const Color& initialBackgroundColor, const Color& backgroundColor);

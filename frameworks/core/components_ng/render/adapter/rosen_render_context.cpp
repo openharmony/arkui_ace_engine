@@ -4407,6 +4407,13 @@ void RosenRenderContext::ClipWithRRect(const RectF& rectF, const RadiusF& radius
     RequestNextFrame();
 }
 
+void RosenRenderContext::RemoveClipWithRRect()
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetClipRRect(nullptr);
+    RequestNextFrame();
+}
+
 void RosenRenderContext::OnClipShapeUpdate(const RefPtr<BasicShape>& basicShape)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -4806,8 +4813,6 @@ void RosenRenderContext::ResetSharedTranslate()
 void RosenRenderContext::ResetPageTransitionEffect()
 {
     UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
-    ClipWithRRect(RectF(0.0f, -GetStatusBarHeight(), REMOVE_CLIP_SIZE, REMOVE_CLIP_SIZE),
-        RadiusF(EdgeF(0.0f, 0.0f)));
     MaskAnimation(DEFAULT_MASK_COLOR, DEFAULT_MASK_COLOR);
 }
 
