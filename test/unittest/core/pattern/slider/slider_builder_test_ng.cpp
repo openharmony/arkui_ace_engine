@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/slider/slider_paint_property.h"
 #include "core/components_ng/pattern/slider/slider_pattern.h"
 #include "core/components_ng/pattern/slider/slider_style.h"
+#include "core/components_ng/pattern/slider/slider_content_modifier.h"
 #include "core/components_ng/render/drawing_mock.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -99,9 +100,6 @@ void SliderBuilderTestNg::SetSliderContentModifier(SliderContentModifier& slider
     sliderContentModifier.SetStepSize(SLIDER_CONTENT_MODIFIER_STEP_SIZE);
     sliderContentModifier.SetStepColor(TEST_COLOR);
     sliderContentModifier.SetStepRatio(SLIDER_CONTENT_MODIFIER_STEP_RATIO);
-    sliderContentModifier.SetBackgroundSize(POINTF_START, POINTF_END);
-    sliderContentModifier.SetSelectColor(TEST_COLOR);
-    sliderContentModifier.SetBlockColor(TEST_COLOR);
     SizeF blockSize;
     sliderContentModifier.SetBlockSize(blockSize);
 }
