@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/event/touch_event.h"
 
 namespace OHOS::Ace::NG {
 
@@ -940,7 +941,7 @@ void SearchPattern::InitButtonTouchEvent(RefPtr<TouchEventImpl>& touchEvent, int
         if (touchType == TouchType::DOWN) {
             pattern->OnButtonTouchDown(childId);
         }
-        if (touchType == TouchType::UP) {
+        if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
             pattern->OnButtonTouchUp(childId);
         }
     };
