@@ -574,22 +574,58 @@ export class SubHeader extends ViewPU {
     t10.forEach((x10) => {
       if (!this.contentMargin) {
         let y10 = Number(u10.maxWidth);
-        if (y10 < Util.DEFAULT_BREAKPOINT_S) {
+        if (y10 < Util.BREAKPOINT_S) {
           this.subHeaderMargin = {
-            start: LengthMetrics.vp(Util.DEFAULT_LEVEL8),
-            end: LengthMetrics.vp(Util.DEFAULT_LEVEL8)
+            start: LengthMetrics.resource({
+              "id": -1,
+              "type": 10002,
+              params: ['sys.float.padding_level8'],
+              "bundleName": "__harDefaultBundleName__",
+              "moduleName": "__harDefaultModuleName__"
+            }),
+            end: LengthMetrics.resource({
+              "id": -1,
+              "type": 10002,
+              params: ['sys.float.padding_level8'],
+              "bundleName": "__harDefaultBundleName__",
+              "moduleName": "__harDefaultModuleName__"
+            }),
           };
         }
-        else if (y10 < Util.DEFAULT_BREAKPOINT_M) {
+        else if (y10 < Util.BREAKPOINT_M) {
           this.subHeaderMargin = {
-            start: LengthMetrics.vp(Util.DEFAULT_LEVEL12),
-            end: LengthMetrics.vp(Util.DEFAULT_LEVEL12)
+            start: LengthMetrics.resource({
+              "id": -1,
+              "type": 10002,
+              params: ['sys.float.padding_level12'],
+              "bundleName": "__harDefaultBundleName__",
+              "moduleName": "__harDefaultModuleName__"
+            }),
+            end: LengthMetrics.resource({
+              "id": -1,
+              "type": 10002,
+              params: ['sys.float.padding_level12'],
+              "bundleName": "__harDefaultBundleName__",
+              "moduleName": "__harDefaultModuleName__"
+            }),
           };
         }
         else {
           this.subHeaderMargin = {
-            start: LengthMetrics.vp(Util.DEFAULT_LEVEL16),
-            end: LengthMetrics.vp(Util.DEFAULT_LEVEL16)
+            start: LengthMetrics.resource({
+              "id": -1,
+              "type": 10002,
+              params: ['sys.float.padding_level16'],
+              "bundleName": "__harDefaultBundleName__",
+              "moduleName": "__harDefaultModuleName__"
+            }),
+            end: LengthMetrics.resource({
+              "id": -1,
+              "type": 10002,
+              params: ['sys.float.padding_level16'],
+              "bundleName": "__harDefaultBundleName__",
+              "moduleName": "__harDefaultModuleName__"
+            }),
           };
         }
       }
@@ -627,9 +663,21 @@ export class SubHeader extends ViewPU {
 
   getTextArrowPaddingLeft() {
     if (this.operationItem && this.operationItem.length > 0 && this.operationItem[0].value) {
-      return LengthMetrics.vp(Util.DEFAULT_LEVEL1);
+      return LengthMetrics.resource({
+        "id": -1,
+        "type": 10002,
+        params: ['sys.float.padding_level1'],
+        "bundleName": "__harDefaultBundleName__",
+        "moduleName": "__harDefaultModuleName__"
+      });
     }
-    return LengthMetrics.vp(Util.DEFAULT_VALUE);
+    return LengthMetrics.resource({
+      "id": -1,
+      "type": 10002,
+      params: ['sys.float.padding_level0'],
+      "bundleName": "__harDefaultBundleName__",
+      "moduleName": "__harDefaultModuleName__"
+    });
   }
 
   getTextArrowMarginRight() {
@@ -647,8 +695,20 @@ export class SubHeader extends ViewPU {
     if (!this.titleBuilder && ((this.secondaryTitle && this.icon) ||
       (!this.primaryTitle && this.secondaryTitle))) {
       m10 = {
-        start: LengthMetrics.vp(Util.DEFAULT_LEVEL6),
-        end: LengthMetrics.vp(Util.DEFAULT_LEVEL6),
+        start: LengthMetrics.resource({
+          "id": -1,
+          "type": 10002,
+          params: ['sys.float.padding_level6'],
+          "bundleName": "__harDefaultBundleName__",
+          "moduleName": "__harDefaultModuleName__"
+        }),
+        end: LengthMetrics.resource({
+          "id": -1,
+          "type": 10002,
+          params: ['sys.float.padding_level6'],
+          "bundleName": "__harDefaultBundleName__",
+          "moduleName": "__harDefaultModuleName__"
+        })
       };
     }
     return m10;
@@ -1055,7 +1115,13 @@ export class SubHeader extends ViewPU {
     this.observeComponentCreation2((u6, v6) => {
       Row.create();
       Row.margin({
-        start: LengthMetrics.vp(Util.DEFAULT_LEVEL4),
+        start: LengthMetrics.resource({
+          "id": -1,
+          "type": 10002,
+          params: ['sys.float.padding_level4'],
+          "bundleName": "__harDefaultBundleName__",
+          "moduleName": "__harDefaultModuleName__"
+        })
       });
       Row.justifyContent(FlexAlign.End);
     }, Row);
@@ -1267,7 +1333,20 @@ export class SubHeader extends ViewPU {
       Row.focusable(true);
       Row.justifyContent(FlexAlign.End);
       Row.margin({
-        start: LengthMetrics.vp(Util.DEFAULT_LEVEL4),
+        start: LengthMetrics.resource({
+          "id": -1,
+          "type": 10002,
+          params: ['sys.float.padding_level4'],
+          "bundleName": "__harDefaultBundleName__",
+          "moduleName": "__harDefaultModuleName__"
+        }),
+        bottom: LengthMetrics.resource({
+          "id": -1,
+          "type": 10002,
+          params: ['sys.float.padding_level2'],
+          "bundleName": "__harDefaultBundleName__",
+          "moduleName": "__harDefaultModuleName__"
+        }),
       });
     }, Row);
     this.observeComponentCreation2((a5, b5) => {
@@ -1293,7 +1372,21 @@ export class SubHeader extends ViewPU {
         this.textArrowFocus = false;
       });
       Row.padding({
-        start: this.getTextArrowPaddingLeft()
+        start: this.getTextArrowPaddingLeft(),
+        top: LengthMetrics.resource({
+          "id": -1,
+          "type": 10002,
+          params: ['sys.float.padding_level2'],
+          "bundleName": "__harDefaultBundleName__",
+          "moduleName": "__harDefaultModuleName__"
+        }),
+        bottom: LengthMetrics.resource({
+          "id": -1,
+          "type": 10002,
+          params: ['sys.float.padding_level2'],
+          "bundleName": "__harDefaultBundleName__",
+          "moduleName": "__harDefaultModuleName__"
+        }),
       });
       Row.onAreaChange((y4, z4) => {
         this.textArrowStyleWidth = Number(z4.width);
@@ -1313,21 +1406,7 @@ export class SubHeader extends ViewPU {
               fontColor: this.subHeaderTheme.fontSecondaryColor,
             });
             Text.margin({
-              end: this.getTextArrowMarginRight(),
-              top: LengthMetrics.resource({
-                "id": -1,
-                "type": 10002,
-                params: ['sys.float.padding_level4'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
-              }),
-              bottom: LengthMetrics.resource({
-                "id": -1,
-                "type": 10002,
-                params: ['sys.float.padding_level4'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
-              }),
+              end: this.getTextArrowMarginRight(), 
             });
           }, Text);
           Text.pop();
@@ -1455,7 +1534,13 @@ export class SubHeader extends ViewPU {
       Row.justifyContent(FlexAlign.End);
       Row.focusable(true);
       Row.margin({
-        start: LengthMetrics.vp(Util.DEFAULT_LEVEL4)
+        start: LengthMetrics.resource({
+          "id": -1,
+          "type": 10002,
+          params: ['sys.float.padding_level4'],
+          "bundleName": "__harDefaultBundleName__",
+          "moduleName": "__harDefaultModuleName__"
+        })
       });
     }, Row);
     this.observeComponentCreation2((p2, q2) => {
@@ -1515,7 +1600,13 @@ export class SubHeader extends ViewPU {
                     this.observeComponentCreation2((o3, p3) => {
                       __Common__.create();
                       __Common__.margin({
-                        start: LengthMetrics.vp(Util.DEFAULT_LEVEL4)
+                        start: LengthMetrics.resource({
+                          "id": -1,
+                          "type": 10002,
+                          params: ['sys.float.padding_level4'],
+                          "bundleName": "__harDefaultBundleName__",
+                          "moduleName": "__harDefaultModuleName__"
+                        })
                       });
                     }, __Common__);
                     {
@@ -1601,7 +1692,13 @@ export class SubHeader extends ViewPU {
         },
       });
       Row.margin({
-        start: LengthMetrics.vp(Util.DEFAULT_LEVEL4),
+        start: LengthMetrics.resource({
+          "id": -1,
+          "type": 10002,
+          params: ['sys.float.padding_level4'],
+          "bundleName": "__harDefaultBundleName__",
+          "moduleName": "__harDefaultModuleName__"
+        })
       });
     }, Row);
     this.observeComponentCreation2((h2, i2) => {
@@ -1929,13 +2026,11 @@ class Util {
 
 _a = Util;
 Util.DEFAULT_VALUE = 0;
-Util.DEFAULT_LEVEL1 = _a.getNumberByResource('padding_level1');
-Util.DEFAULT_LEVEL4 = _a.getNumberByResource('padding_level4');
-Util.DEFAULT_LEVEL6 = _a.getNumberByResource('padding_level6');
-Util.DEFAULT_LEVEL8 = _a.getNumberByResource('padding_level8');
-Util.DEFAULT_LEVEL12 = _a.getNumberByResource('padding_level12');
-Util.DEFAULT_LEVEL16 = _a.getNumberByResource('padding_level16');
-Util.DEFAULT_BREAKPOINT_S = _a.getNumberByResource('breakpoint_horizontal_s');
-Util.DEFAULT_BREAKPOINT_M = _a.getNumberByResource('breakpoint_horizontal_m');
+Util.DEFAULT_BREAKPOINT_S = 600;
+Util.DEFAULT_BREAKPOINT_M = 840;
+Util.CALCULATE_BREAKPOINT_S = _a.getNumberByResource('breakpoint_horizontal_s');
+Util.CALCULATE_BREAKPOINT_M = _a.getNumberByResource('breakpoint_horizontal_m');
+Util.BREAKPOINT_S = _a.CALCULATE_BREAKPOINT_S === _a.DEFAULT_VALUE ? _a.DEFAULT_BREAKPOINT_S : _a.CALCULATE_BREAKPOINT_S;
+Util.BREAKPOINT_M = _a.CALCULATE_BREAKPOINT_M === _a.DEFAULT_VALUE ? _a.DEFAULT_BREAKPOINT_M : _a.CALCULATE_BREAKPOINT_M;
 
 export default { OperationType, SubHeader };
