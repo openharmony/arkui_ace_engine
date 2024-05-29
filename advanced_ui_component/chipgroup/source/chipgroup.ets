@@ -242,7 +242,7 @@ export struct ChipGroup {
   @Prop chipGroupPadding: ChipGroupPaddingOptions = defaultTheme.chipGroupPadding;
 
   onMultipleChange() {
-    this.selectedIndexes = [0];
+    this.selectedIndexes = this.getSelectedIndexes();
   }
 
   itemStyleOnChange() {

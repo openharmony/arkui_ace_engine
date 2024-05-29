@@ -151,7 +151,9 @@ export class IconGroupSuffix extends ViewPU {
     }
     getIconSize(v3) {
         if (v3 === undefined) {
-            return this.chipSize === ChipSize.SMALL ? iconGroupSuffixTheme.smallIconSize : iconGroupSuffixTheme.normalIconSize;
+            return this.chipSize === ChipSize.SMALL ?
+                iconGroupSuffixTheme.smallIconSize :
+                iconGroupSuffixTheme.normalIconSize;
         }
         let w3;
         if (this.chipSize === ChipSize.SMALL) {
@@ -361,7 +363,7 @@ export class ChipGroup extends ViewPU {
         this.__chipGroupPadding.set(f2);
     }
     onMultipleChange() {
-        this.selectedIndexes = [0]
+        this.selectedIndexes = this.getSelectedIndexes();
     }
     itemStyleOnChange() {
         this.chipSize = this.getChipSize();
