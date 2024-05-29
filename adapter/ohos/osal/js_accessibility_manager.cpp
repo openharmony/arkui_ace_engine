@@ -2224,6 +2224,7 @@ void JsAccessibilityManager::SendExtensionAccessibilityEvent(
 
 void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent)
 {
+    ACE_ACCESS_SCOPED_TRACE("SendAccessibilityAsyncEvent");
     auto context = GetPipelineContext().Upgrade();
     CHECK_NULL_VOID(context);
     int32_t windowId = static_cast<int32_t>(context->GetFocusWindowId());
