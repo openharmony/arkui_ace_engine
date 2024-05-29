@@ -32,6 +32,11 @@ public:
 #ifndef USE_ROSEN_DRAWING
     void Draw(Rosen::RSDrawingContext& context) const override
     {
+        auto host = host_.Upgrade();
+        CHECK_NULL_VOID(host);
+        auto curSize = host->GetGeometryNode()->GetFrameSize();
+        auto curWidth = curSize.Width();
+        auto curHeight = curSize.Height();
         CHECK_NULL_VOID(pixelMap_);
         std::shared_ptr<Media::PixelMap> mediaPixelMap = pixelMap_->GetPixelMapSharedPtr();
         CHECK_NULL_VOID(context.canvas);
@@ -45,22 +50,27 @@ public:
         NG::OffsetF offset1 = Alignment::GetAlignPosition(srcSize, desSize, align_);
         NG::OffsetF offset2 = Alignment::GetAlignPosition(desSize, srcSize, align_);
         SkRect srcSKRect = SkRect::MakeXYWH(offset1.GetX(), offset1.GetY(), srcSize.Width(), srcSize.Height());
-        SkRect desSKRect = SkRect::MakeXYWH(offset2.GetX() * context.width / initialNodeWidth_,
-            offset2.GetY() * context.height / initialNodeHeight_, srcSize.Width() * context.width / initialNodeWidth_,
-            srcSize.Height() * context.height / initialNodeHeight_);
+        SkRect desSKRect = SkRect::MakeXYWH(offset2.GetX() * curWidth / initialNodeWidth_,
+            offset2.GetY() * curHeight / initialNodeHeight_, srcSize.Width() * curWidth / initialNodeWidth_,
+            srcSize.Height() * curHeight / initialNodeHeight_);
         if (srcSize.Width() > desSize.Width()) {
             srcSKRect.fRight = offset1.GetX() + desSize.Width();
-            desSKRect.fRight = context.width;
+            desSKRect.fRight = curWidth;
         }
         if (srcSize.Height() > desSize.Height()) {
             srcSKRect.fBottom = offset1.GetY() + desSize.Height();
-            desSKRect.fBottom = context.height;
+            desSKRect.fBottom = curHeight;
         }
         recordingCanvas->DrawPixelMapRect(mediaPixelMap, srcSKRect, desSKRect, samplingOptions, &paint);
     }
 #else
     void Draw(Rosen::RSDrawingContext& context) const override
     {
+        auto host = host_.Upgrade();
+        CHECK_NULL_VOID(host);
+        auto curSize = host->GetGeometryNode()->GetFrameSize();
+        auto curWidth = curSize.Width();
+        auto curHeight = curSize.Height();
         CHECK_NULL_VOID(pixelMap_);
         std::shared_ptr<Media::PixelMap> mediaPixelMap = pixelMap_->GetPixelMapSharedPtr();
         CHECK_NULL_VOID(context.canvas);
@@ -74,18 +84,18 @@ public:
         NG::OffsetF offset2 = Alignment::GetAlignPosition(desSize, srcSize, align_);
         RSRect srcRSRect = RSRect(offset1.GetX(), offset1.GetY(), srcSize.Width() + offset1.GetX(),
             srcSize.Height() + offset1.GetY());
-        RSRect desRSRect = RSRect(offset2.GetX() * context.width / initialNodeWidth_,
-            offset2.GetY() * context.height / initialNodeHeight_,
-            srcSize.Width() * context.width / initialNodeWidth_ + offset2.GetX() * context.width / initialNodeWidth_,
-            srcSize.Height() * context.height / initialNodeHeight_ +
-            offset2.GetY() * context.height / initialNodeHeight_);
+        RSRect desRSRect = RSRect(offset2.GetX() * curWidth / initialNodeWidth_,
+            offset2.GetY() * curHeight / initialNodeHeight_,
+            srcSize.Width() * curWidth / initialNodeWidth_ + offset2.GetX() * curWidth / initialNodeWidth_,
+            srcSize.Height() * curHeight / initialNodeHeight_ +
+            offset2.GetY() * curHeight / initialNodeHeight_);
         if (srcSize.Width() > desSize.Width()) {
             srcRSRect.SetRight(offset1.GetX() + desSize.Width());
-            desRSRect.SetRight(context.width);
+            desRSRect.SetRight(curWidth);
         }
         if (srcSize.Height() > desSize.Height()) {
             srcRSRect.SetBottom(offset1.GetY() + desSize.Height());
-            desRSRect.SetBottom(context.height);
+            desRSRect.SetBottom(curHeight);
         }
         recordingCanvas.AttachBrush(brush);
         recordingCanvas.DrawPixelMapRect(mediaPixelMap, srcRSRect, desRSRect, samplingOptions);
@@ -120,12 +130,18 @@ public:
         }
     }
 
+    void SetHostNode(RefPtr<FrameNode> host)
+    {
+        host_ = host;
+    }
+
 private:
     RefPtr<PixelMap> pixelMap_;
     Alignment align_;
     float initialNodeWidth_ = 1.0f;
     float initialNodeHeight_ = 1.0f;
     std::shared_ptr<Rosen::RSProperty<bool>> flag_;
+    WeakPtr<FrameNode> host_;
 };
 } // namespace OHOS::Ace::NG
 
