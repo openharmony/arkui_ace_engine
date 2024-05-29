@@ -4019,6 +4019,7 @@ int32_t findCurveIndex(const RefPtr<Curve> curve)
 void ParseAnimationOptionToStruct(
     const std::shared_ptr<AnimationOption> animationOption, ArkUIAnimationOptionType& animationType)
 {
+    CHECK_NULL_VOID(animationOption);
     animationType.duration = animationOption->GetDuration();
     animationType.curve = findCurveIndex(animationOption->GetCurve());
     animationType.delay = animationOption->GetDelay();
