@@ -42,6 +42,7 @@ build_component_ng("web_pattern_ng") {
       "web_layout_algorithm.cpp",
       "web_model_ng.cpp",
     ]
+    deps = [ "//base/web/webview:webview_prepare" ]
   } else {
     sources = [
       "richtext_model_ng.cpp",
