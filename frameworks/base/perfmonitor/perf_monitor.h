@@ -58,6 +58,7 @@ struct BaseInfo {
     std::string processName {""};
     std::string abilityName {""};
     std::string pageUrl {""};
+    std::string pageName {""};
     std::string note {""};
 };
 
@@ -126,10 +127,13 @@ public:
     void ReportJankFrameApp(double jank);
     void SetPageUrl(const std::string& pageUrl);
     std::string GetPageUrl();
+    void SetPageName(const std::string& pageName);
+    std::string GetPageName();
     void SetAppForeground(bool isShow);
     void SetAppStartStatus();
     static PerfMonitor* GetPerfMonitor();
     static PerfMonitor* pMonitor;
+    void ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName);
 
 private:
     SceneRecord* GetRecord(const std::string& sceneId);

@@ -628,6 +628,9 @@ void NavigationPattern::NotifyPageShow(const std::string& pageName)
     auto pageUrlChecker = container->GetPageUrlChecker();
     CHECK_NULL_VOID(pageUrlChecker);
     pageUrlChecker->NotifyPageShow(pageName);
+    if (PerfMonitor::GetPerfMonitor() != nullptr) {
+        PerfMonitor::GetPerfMonitor()->SetPageName(pageName);
+    }
 }
 
 void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
