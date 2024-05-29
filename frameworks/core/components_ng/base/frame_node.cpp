@@ -536,6 +536,13 @@ void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
     node->isLayoutDirtyMarked_ = true;
     auto pipeline = PipelineContext::GetCurrentContext();
     node->CreateLayoutTask();
+    auto predictLayoutNode = std::move(node->predictLayoutNode_);
+    for (auto& node : predictLayoutNode) {
+        auto frameNode = node.Upgrade();
+        if (frameNode) {
+            frameNode->CreateLayoutTask();
+        }
+    }
     if (pipeline) {
         pipeline->FlushSyncGeometryNodeTasks();
     }
@@ -978,12 +985,19 @@ void FrameNode::OnAttachToMainTree(bool recursive)
         }
     }
     UINode::OnAttachToMainTree(recursive);
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto predictLayoutNode = std::move(predictLayoutNode_);
+    for (auto& node : predictLayoutNode) {
+        auto frameNode = node.Upgrade();
+        if (frameNode && frameNode->isLayoutDirtyMarked_) {
+            context->AddDirtyLayoutNode(frameNode);
+        }
+    }
 
     if (!hasPendingRequest_) {
         return;
     }
-    auto context = GetContext();
-    CHECK_NULL_VOID(context);
     context->RequestFrame();
     hasPendingRequest_ = false;
 }
