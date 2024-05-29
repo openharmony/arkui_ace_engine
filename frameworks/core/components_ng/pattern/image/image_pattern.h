@@ -96,6 +96,11 @@ public:
         return image_;
     }
 
+    const RefPtr<CanvasImage>& GetAltCanvasImage()
+    {
+        return altImage_;
+    }
+
     RefPtr<FrameNode> GetClientHost() const override
     {
         return GetHost();
