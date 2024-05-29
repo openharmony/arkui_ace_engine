@@ -228,6 +228,19 @@ std::string ConvertFontFamily(const std::vector<std::string>& fontFamily)
     return result;
 }
 
+void AddTextFireOnChange(RefPtr<PipelineContext>& context, TextFieldPattern* pattern)
+{
+    context->AddAfterLayoutTask([weak = AceType::WeakClaim(pattern)] {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto eventHub = host->GetEventHub<TextFieldEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->FireOnChange(pattern->GetTextContentController()->GetTextValue());
+    });
+}
+
 } // namespace
 
 void TextFieldPattern::OnAttachContext(PipelineContext* context)
@@ -2629,8 +2642,6 @@ bool TextFieldPattern::FireOnTextChangeEvent()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto eventHub = host->GetEventHub<TextFieldEventHub>();
-    CHECK_NULL_RETURN(eventHub, false);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     auto cleanNodeStyle = layoutProperty->GetCleanNodeStyle().value_or(CleanNodeStyle::INPUT);
@@ -2649,22 +2660,17 @@ bool TextFieldPattern::FireOnTextChangeEvent()
     layoutProperty->UpdateValue(contentController_->GetTextValue());
     host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, contentController_->GetTextValue());
     AutoFillValueChanged();
-    bool fireFlag = !GetIsPreviewText();
     auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(context, false);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
+    if (!GetIsPreviewText()) {
+        AddTextFireOnChange(context, this);
+    }
     taskExecutor->PostTask(
-        [weak = WeakClaim(this), fireFlag] {
+        [weak = WeakClaim(this)] {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            if (fireFlag) {
-                auto host = pattern->GetHost();
-                CHECK_NULL_VOID(host);
-                auto eventHub = host->GetEventHub<TextFieldEventHub>();
-                CHECK_NULL_VOID(eventHub);
-                eventHub->FireOnChange(pattern->GetTextContentController()->GetTextValue());
-            }
             if (!pattern->HasFocus()) {
                 return;
             }
