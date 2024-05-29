@@ -3187,7 +3187,7 @@ void GetAlignRules(ArkUINodeHandle node, ArkUI_CharPtr* anchors, ArkUI_Int32* di
     CHECK_NULL_VOID(frameNode);
     auto alignRules = ViewAbstract::GetAlignRules(frameNode);
 
-    std::size_t index = 0;
+    ArkUI_Int32 index = 0;
     for (const AlignDirection alignDirection : { AlignDirection::LEFT, AlignDirection::MIDDLE, AlignDirection::RIGHT,
              AlignDirection::TOP, AlignDirection::CENTER, AlignDirection::BOTTOM }) {
         if (index >= length) {

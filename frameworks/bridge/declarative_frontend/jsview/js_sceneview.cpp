@@ -206,6 +206,10 @@ bool ParseSceneOpt(const JSCallbackInfo& info, std::string& srcPath, std::shared
         return false;
     }
 
+    if (!info[0]->IsObject()) {
+        return false;
+    }
+
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
     auto type = jsObj->GetProperty("modelType");
     if (!type->IsNull()) {
@@ -249,7 +253,9 @@ void JSSceneView::Create(const JSCallbackInfo& info)
     bool isSceneApi = false;
 #endif
     if (length == 2) { // 2: info size
-        surfaceData = info[1]->ToNumber<int32_t>();
+        if (info[1]->IsNumber()) {
+            surfaceData = info[1]->ToNumber<int32_t>();
+        }
         ParseJsMedia(info[0], srcPath);
         GetJsMediaBundleInfo(info[0], bundleName, moduleName);
     } else if (length == 1) {

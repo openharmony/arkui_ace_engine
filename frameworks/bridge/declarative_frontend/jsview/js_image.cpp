@@ -351,11 +351,23 @@ void JSImage::JsImageResizable(const JSCallbackInfo& info)
         return;
     }
     auto sliceValue = resizableObject->GetProperty("slice");
+    if (!sliceValue->IsObject()) {
+        ImageModel::GetInstance()->SetResizableSlice(sliceResult);
+        return;
+    }
     JSRef<JSObject> sliceObj = JSRef<JSObject>::Cast(sliceValue);
     if (sliceObj->IsEmpty()) {
         ImageModel::GetInstance()->SetResizableSlice(sliceResult);
         return;
     }
+    UpdateSliceResult(sliceObj, sliceResult);
+
+    ImageModel::GetInstance()->SetResizableSlice(sliceResult);
+}
+
+void JSImage::UpdateSliceResult(const JSRef<JSObject>& sliceObj, ImageResizableSlice& sliceResult)
+{
+    // creatge a array has 4 elements for paresing sliceSize
     static std::array<std::string, 4> keys = { "left", "right", "top", "bottom" };
     for (uint32_t i = 0; i < keys.size(); i++) {
         auto sliceSize = sliceObj->GetProperty(keys.at(i).c_str());

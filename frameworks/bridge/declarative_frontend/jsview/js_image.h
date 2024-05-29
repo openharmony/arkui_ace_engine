@@ -75,6 +75,7 @@ public:
 protected:
     static void SetBorder(const Border& border);
     static void SetAutoResize(bool autoResize);
+    static void UpdateSliceResult(const JSRef<JSObject>& sliceObj, ImageResizableSlice& sliceResult);
 };
 
 class JSColorFilter : public AceType {
