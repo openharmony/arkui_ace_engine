@@ -2639,8 +2639,21 @@ void TextPattern::AddChildSpanItem(const RefPtr<UINode>& child)
             spans_.emplace_back(spanNode->GetSpanItem());
         }
     } else if (child->GetTag() == V2::IMAGE_ETS_TAG) {
-        auto imageSpanNode = DynamicCast<ImageSpanNode>(child);
-        CHECK_NULL_VOID(imageSpanNode);
+        AddImageToSpanItem(child);
+    } else if (child->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG) {
+        auto placeholderSpanNode = DynamicCast<PlaceholderSpanNode>(child);
+        if (placeholderSpanNode) {
+            auto placeholderSpan = placeholderSpanNode->GetSpanItem();
+            placeholderSpan->placeholderSpanNodeId = placeholderSpanNode->GetId();
+            spans_.emplace_back(placeholderSpan);
+        }
+    }
+}
+
+void TextPattern::AddImageToSpanItem(const RefPtr<UINode>& child)
+{
+    auto imageSpanNode = DynamicCast<ImageSpanNode>(child);
+    if (imageSpanNode) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto imageSpanItem = imageSpanNode->GetSpanItem();
@@ -2657,13 +2670,24 @@ void TextPattern::AddChildSpanItem(const RefPtr<UINode>& child)
         }
         spans_.emplace_back(imageSpanItem);
         spans_.back()->imageNodeId = imageSpanNode->GetId();
-    } else if (child->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG) {
-        auto placeholderSpanNode = DynamicCast<PlaceholderSpanNode>(child);
-        if (placeholderSpanNode) {
-            auto placeholderSpan = placeholderSpanNode->GetSpanItem();
-            placeholderSpan->placeholderSpanNodeId = placeholderSpanNode->GetId();
-            spans_.emplace_back(placeholderSpan);
+        return;
+    }
+    auto imageNode = DynamicCast<FrameNode>(child);
+    if (imageNode) {
+        auto imageSpanItem = MakeRefPtr<ImageSpanItem>();
+        imageSpanItem->imageNodeId = imageNode->GetId();
+        imageSpanItem->UpdatePlaceholderBackgroundStyle(imageNode);
+        auto focus_hub = imageNode->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(focus_hub);
+        auto clickCall = focus_hub->GetOnClickCallback();
+        if (clickCall) {
+            imageSpanItem->SetOnClickEvent(std::move(clickCall));
         }
+        spans_.emplace_back(imageSpanItem);
+        auto gesture = imageNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gesture);
+        gesture->SetHitTestMode(HitTestMode::HTMNONE);
+        return;
     }
 }
 

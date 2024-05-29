@@ -138,6 +138,7 @@ public:
     void BeforeCreateLayoutWrapper() override;
 
     void AddChildSpanItem(const RefPtr<UINode>& child);
+    void AddImageToSpanItem(const RefPtr<UINode>& child);
 
     FocusPattern GetFocusPattern() const override
     {
