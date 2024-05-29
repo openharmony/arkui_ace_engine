@@ -380,7 +380,7 @@ void ScrollablePattern::AddScrollEvent()
     scrollable->SetOverScrollCallback([weak = WeakClaim(this)](float velocity) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
-        return pattern->HandleOverScroll(!pattern->IsReverse() ? velocity : -velocity);
+        return pattern->HandleOverScroll(velocity);
     });
 
     scrollable->SetIsReverseCallback([weak = WeakClaim(this)]() {
@@ -1761,8 +1761,8 @@ ScrollResult ScrollablePattern::HandleScrollSelfOnly(float& offset, int32_t sour
     ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
     ExecuteScrollFrameBegin(offset, scrollState);
     auto remainOffset = allOffset - offset;
-    auto overOffsets = GetOverScrollOffset(!IsReverse() ? offset : -offset);
-    auto overOffset = (!IsReverse() ? offset > 0 : offset < 0) ? overOffsets.start : overOffsets.end;
+    auto overOffsets = GetOverScrollOffset(offset);
+    auto overOffset = (offset > 0) ? overOffsets.start : overOffsets.end;
     remainOffset += overOffset;
     if (NearZero(remainOffset)) {
         SetCanOverScroll(false);
@@ -1828,9 +1828,9 @@ ScrollResult ScrollablePattern::HandleScroll(float offset, int32_t source, Neste
     CHECK_NULL_RETURN(host, result);
     auto nestedScroll = GetNestedScroll();
     auto parent = GetNestedScrollParent();
-    auto overOffsets = GetOverScrollOffset(!IsReverse() ? offset : -offset);
+    auto overOffsets = GetOverScrollOffset(offset);
     auto initOffset = offset;
-    float backOverOffset = (!IsReverse() ? offset > 0 : offset < 0) ? overOffsets.end : overOffsets.start;
+    float backOverOffset = (offset > 0) ? overOffsets.end : overOffsets.start;
     if (NearZero(offset) || !NearZero(backOverOffset)) {
         ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
         ExecuteScrollFrameBegin(offset, scrollState);
