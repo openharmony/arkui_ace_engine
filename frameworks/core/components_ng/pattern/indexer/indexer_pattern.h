@@ -125,6 +125,7 @@ private:
     void InitCurrentInputEvent();
     void InitChildInputEvent(RefPtr<FrameNode>& itemNode, int32_t childIndex);
     void InitPopupInputEvent();
+    void InitPopupPanEvent();
     void InitOnKeyEvent();
     bool OnKeyEvent(const KeyEvent& event);
     void OnHover(bool isHover);
