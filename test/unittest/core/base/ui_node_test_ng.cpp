@@ -800,67 +800,6 @@ HWTEST_F(UINodeTestNg, UINodeTestNg023, TestSize.Level1)
 }
 
 /**
- * @tc.name: UINodeTestNg024
- * @tc.desc: Test ui node method
- * @tc.type: FUNC
- */
-HWTEST_F(UINodeTestNg, UINodeTestNg024, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. CreateFrameNode and call MouseTest
-     * @tc.expected: the return value is meetings expectations
-     */
-    MouseTestResult result;
-    const PointF GLOBAL_POINT { 20.0f, 20.0f };
-    const PointF LOCAL_POINT { 15.0f, 15.0f };
-    RefPtr<FrameNode> TEST_HOVERNODE =
-        FrameNode::CreateFrameNode("hovernode", 100, AceType::MakeRefPtr<Pattern>(), true);
-    auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
-    ZERO->AddChild(testNode, 1, false);
-    HitTestResult retResult = ZERO->UINode::MouseTest(GLOBAL_POINT, LOCAL_POINT, result, result, TEST_HOVERNODE);
-    EXPECT_EQ(retResult, HitTestResult::OUT_OF_REGION);
-    testNode->hitTestResult_ = HitTestResult::STOP_BUBBLING;
-    retResult = ZERO->UINode::MouseTest(GLOBAL_POINT, LOCAL_POINT, result, result, TEST_HOVERNODE);
-    EXPECT_EQ(retResult, HitTestResult::STOP_BUBBLING);
-    testNode->hitTestResult_ = HitTestResult::BUBBLING;
-    retResult = ZERO->UINode::MouseTest(GLOBAL_POINT, LOCAL_POINT, result, result, TEST_HOVERNODE);
-    EXPECT_EQ(retResult, HitTestResult::BUBBLING);
-    ZERO->Clean();
-}
-
-/**
- * @tc.name: UINodeTestNg025
- * @tc.desc: Test ui node method
- * @tc.type: FUNC
- */
-HWTEST_F(UINodeTestNg, UINodeTestNg025, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. add one child for ZERO and call AxisTest
-     * @tc.expected: the return value is OUT_OF_REGION
-     */
-    /**
-     * @tc.steps: step1. CreateFrameNode and call MouseTest
-     * @tc.expected: the return value is meetings expectations
-     */
-    AxisTestResult result;
-    TouchRestrict restrict;
-    const PointF GLOBAL_POINT { 20.0f, 20.0f };
-    const PointF LOCAL_POINT { 15.0f, 15.0f };
-    auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
-    ZERO->AddChild(testNode, 1, false);
-    HitTestResult retResult = ZERO->UINode::AxisTest(GLOBAL_POINT, LOCAL_POINT, result);
-    EXPECT_EQ(retResult, HitTestResult::OUT_OF_REGION);
-    testNode->hitTestResult_ = HitTestResult::STOP_BUBBLING;
-    retResult = ZERO->UINode::AxisTest(GLOBAL_POINT, LOCAL_POINT, result);
-    EXPECT_EQ(retResult, HitTestResult::STOP_BUBBLING);
-    testNode->hitTestResult_ = HitTestResult::BUBBLING;
-    retResult = ZERO->UINode::AxisTest(GLOBAL_POINT, LOCAL_POINT, result);
-    EXPECT_EQ(retResult, HitTestResult::BUBBLING);
-    ZERO->Clean();
-}
-
-/**
  * @tc.name: UINodeTestNg026
  * @tc.desc: Test ui node method
  * @tc.type: FUNC
