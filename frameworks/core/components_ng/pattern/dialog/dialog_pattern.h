@@ -39,6 +39,7 @@ enum class DialogContentNode {
     SUBTITLE,
     MESSAGE,
     SHEET,
+    BORDERWIDTH,
 };
 enum class DialogDismissReason {
     DIALOG_PRESS_BACK = 0,
