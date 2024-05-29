@@ -2810,9 +2810,7 @@ class SystemBarEffectModifier extends ModifierWithKey<null> {
   }
   static identity: Symbol = Symbol('systemBarEffect');
   applyPeer(node: KNode, reset: boolean): void {
-    if (!reset) {
-      getUINativeModule().common.setSystemBarEffect(node, true);
-    }
+    getUINativeModule().common.setSystemBarEffect(node, true);
   }
 }
 
@@ -4057,8 +4055,9 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  systemBarEffect(value:null):this {
+  systemBarEffect(): this {
     modifierWithKey(this._modifiersWithKeys, SystemBarEffectModifier.identity, SystemBarEffectModifier, null);
+    return this;
   }
 }
 
