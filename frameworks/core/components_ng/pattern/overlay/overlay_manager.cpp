@@ -36,6 +36,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
+#include "core/common/ime/input_method_manager.h"
 #include "core/common/interaction/interaction_interface.h"
 #include "core/common/modal_ui_extension.h"
 #include "core/common/recorder/event_recorder.h"
@@ -49,6 +50,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
@@ -685,6 +687,7 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
     CHECK_NULL_VOID(wrapperPattern);
     wrapperPattern->CallMenuAboutToAppearCallback();
     wrapperPattern->SetMenuStatus(MenuStatus::ON_SHOW_ANIMATION);
+    SetIsMenuShow(true);
     if (wrapperPattern->HasTransitionEffect()) {
         UpdateMenuVisibility(menu);
         auto renderContext = menu->GetRenderContext();
@@ -777,9 +780,11 @@ void OverlayManager::OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK,
         (menuPattern->GetTargetTag() != V2::SELECT_ETS_TAG)) {
         SubwindowManager::GetInstance()->ClearMenuNG(instanceId, menuWrapperPattern->GetTargetId());
         overlayManager->ResetContextMenuDragHideFinished();
+        overlayManager->SetIsMenuShow(false);
         return;
     }
     overlayManager->RemoveMenuNotInSubWindow(menuWK, rootWeak, weak);
+    overlayManager->SetIsMenuShow(false);
 }
 
 void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation, bool startDrag)
@@ -1027,10 +1032,16 @@ void OverlayManager::PopToast(int32_t toastId)
 
         auto container = Container::Current();
         CHECK_NULL_VOID(container);
-        if (container->IsDialogContainer() ||
-            (container->IsSubContainer() && rootNode->GetChildren().empty())) {
+        auto pattern = toastUnderPop->GetPattern<ToastPattern>();
+        CHECK_NULL_VOID(pattern);
+        auto toastInfo = pattern->GetToastInfo();
+        if (container->IsDialogContainer() || (container->IsSubContainer() && rootNode->GetChildren().empty())) {
             // hide window when toast show in subwindow.
-            SubwindowManager::GetInstance()->HideSubWindowNG();
+            if (toastInfo.showMode == NG::ToastShowMode::SYSTEM_TOP_MOST) {
+                SubwindowManager::GetInstance()->HideSystemTopMostWindow();
+            } else {
+                SubwindowManager::GetInstance()->HideSubWindowNG();
+            }
         }
     });
     auto toastIter = toastMap_.find(toastId);
@@ -3152,16 +3163,9 @@ void OverlayManager::FireModalPageShow()
 
 void OverlayManager::ModalPageLostFocus(const RefPtr<FrameNode>& node)
 {
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    if (container->IsUIExtensionWindow()) {
-        FocusHub::NavCloseKeyboard();
-    } else {
-        auto pipeline = PipelineContext::GetCurrentContextSafely();
-        CHECK_NULL_VOID(pipeline);
-        auto textfieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
-        CHECK_NULL_VOID(textfieldManager);
-        textfieldManager->ProcessNavKeyboard();
+    auto pattern = node->GetPattern<FocusView>();
+    if (pattern) {
+        pattern->LostViewFocus();
     }
 }
 

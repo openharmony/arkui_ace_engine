@@ -1726,7 +1726,7 @@ bool JsiDeclarativeEngine::ExecuteJsForFastPreview(const std::string& jsCode, co
 }
 
 void JsiDeclarativeEngine::SetHspBufferTrackerCallback(
-    std::function<bool(const std::string&, uint8_t**, size_t*)>&& callback)
+    std::function<bool(const std::string&, uint8_t**, size_t*, std::string&)>&& callback)
 {
     CHECK_NULL_VOID(engineInstance_);
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(engineInstance_->GetJsRuntime());

@@ -14,8 +14,8 @@
  */
 
 class ArkResourcesHelper {
-    static COLOR: number = 10001
-    static FLOAT: number = 10002
+    static COLOR: number = 10001;
+    static FLOAT: number = 10002;
 
     static $r(name: string, id?: number) {
         var splitted = name.split(".", 2);

@@ -22,6 +22,13 @@ void RichEditorBaseController::SetPattern(const WeakPtr<RichEditorPattern>& patt
     pattern_ = pattern;
 }
 
+WeakPtr<LayoutInfoInterface> RichEditorBaseController::GetLayoutInfoInterface()
+{
+    auto richEditorPattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(richEditorPattern, nullptr);
+    return richEditorPattern->GetLayoutInfoInterface();
+}
+
 int32_t RichEditorBaseController::GetCaretOffset()
 {
     int32_t position = -1;

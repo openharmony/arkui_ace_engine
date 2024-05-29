@@ -414,10 +414,10 @@ struct PaddingPropertyT {
             return "0.0";
         }
         auto jsonValue = JsonUtil::Create(true);
-        jsonValue->Put("top", top->ToString().c_str());
-        jsonValue->Put("right", right->ToString().c_str());
-        jsonValue->Put("bottom", bottom->ToString().c_str());
-        jsonValue->Put("left", left->ToString().c_str());
+        jsonValue->Put("top", top.has_value() ? top->ToString().c_str() : T{}.ToString().c_str());
+        jsonValue->Put("right", right.has_value() ? right->ToString().c_str() : T{}.ToString().c_str());
+        jsonValue->Put("bottom", bottom.has_value() ? bottom->ToString().c_str() : T{}.ToString().c_str());
+        jsonValue->Put("left", left.has_value() ? left->ToString().c_str() : T{}.ToString().c_str());
         return jsonValue->ToString();
     }
 

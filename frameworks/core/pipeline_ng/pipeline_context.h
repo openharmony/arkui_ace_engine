@@ -93,35 +93,20 @@ public:
 
     static float GetCurrentRootHeight();
 
-    // handle close keyboard
-    RefPtr<FrameNode> HandleFocusNode();
-    void IsCloseSCBKeyboard();
-    void IsSCBWindowKeyboard(RefPtr<FrameNode> curFrameNode);
-    void IsNotSCBWindowKeyboard(RefPtr<FrameNode> curFrameNode);
-    void SetNeedSoftKeyboard(std::optional<bool> flag)
-    {
-        needSoftKeyboard_ = flag;
-    }
-
     void SetupRootElement() override;
 
     void SetupSubRootElement();
 
     bool NeedSoftKeyboard() override;
 
-    void SetFocusNode(RefPtr<FrameNode> node)
-    {
-        focusNode_ = node;
-    }
-
-    RefPtr<FrameNode> GetFocusNode()
-    {
-        return focusNode_;
-    }
-
     void SetOnWindowFocused(const std::function<void()>& callback) override
     {
         focusOnNodeCallback_ = callback;
+    }
+
+    const std::function<void()>& GetWindowFocusCallback() const
+    {
+        return focusOnNodeCallback_;
     }
 
     const RefPtr<FrameNode>& GetRootElement() const
@@ -286,6 +271,8 @@ public:
     void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) override;
     void UpdateNavSafeArea(const SafeAreaInsets& navSafeArea) override;
     void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) override;
+
+    float GetPageAvoidOffset() override;
 
     void CheckAndUpdateKeyboardInset() override;
 
@@ -826,6 +813,8 @@ private:
     void UpdateFormLinkInfos();
 
     void FlushFrameRate();
+
+    void RegisterFocusCallback();
 
     template<typename T>
     struct NodeCompare {

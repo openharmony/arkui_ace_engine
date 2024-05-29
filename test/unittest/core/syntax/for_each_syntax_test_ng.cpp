@@ -33,6 +33,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 const std::string NODE_TAG("node");
+const std::string LIST_TAG("List");
 constexpr bool IS_ATOMIC_NODE = false;
 const std::list<std::string> ID_ARRAY = { "0" };
 const std::list<std::string> FOR_EACH_ARRAY = { "0", "1", "2", "3" };
@@ -55,6 +56,8 @@ void ForEachSyntaxTestNg::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
 }
+
+void SetOnMoveTestNg(int32_t a, int32_t b) {}
 
 /**
  * @tc.name: ForEachSyntaxCreateTest001
@@ -260,5 +263,405 @@ HWTEST_F(ForEachSyntaxTestNg, ForEachSyntaxUpdateTest007, TestSize.Level1)
     forEachNode->FlushUpdateAndMarkDirty();
     auto tempIds = forEachNode->GetTempIds();
     EXPECT_TRUE(tempIds.empty());
+}
+
+/**
+ * @tc.name: ForEachGetOrCreateRepeatNodeTest001
+ * @tc.desc: Create ForEach and update children.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForEachSyntaxTestNg, ForEachGetOrCreateRepeatNodeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set branch id which is same as before.
+     */
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    ForEachModelNG forEach;
+    forEach.Create();
+    std::list<std::string> ids = FOR_EACH_ARRAY;
+    forEach.SetNewIds(std::move(ids));
+    auto forEachNode = AceType::DynamicCast<ForEachNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(forEachNode != nullptr && forEachNode->GetTag() == V2::JS_FOR_EACH_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. CompareAndUpdateChildren when newIds and oldIds are same.
+     */
+    forEachNode->CreateTempItems();
+    std::list<std::string> ids2 = FOR_EACH_IDS;
+    forEachNode->SetIds(std::move(ids2));
+    forEachNode->context_ = AceType::RawPtr(context);
+    forEachNode->onMainTree_ = true;
+    auto node = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    forEachNode->SetParent(node);
+    auto childNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    forEachNode->children_ = { childNode };
+    forEachNode->CompareAndUpdateChildren();
+    forEachNode->FlushUpdateAndMarkDirty();
+    forEachNode->GetOrCreateRepeatNode(0);
+}
+
+/**
+ * @tc.name: ForEachCreateTempItemsTest001
+ * @tc.desc: Create ForEach and update children.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForEachSyntaxTestNg, ForEachCreateTempItemsTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set branch id which is same as before.
+     */
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    ForEachModelNG forEach;
+    forEach.Create();
+    std::list<std::string> ids = FOR_EACH_ARRAY;
+    forEach.SetNewIds(std::move(ids));
+    auto forEachNode = AceType::DynamicCast<ForEachNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(forEachNode != nullptr && forEachNode->GetTag() == V2::JS_FOR_EACH_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. CompareAndUpdateChildren when newIds and oldIds are same.
+     */
+    forEachNode->isThisRepeatNode_= true;
+    forEachNode->CreateTempItems();
+}
+
+/**
+ * @tc.name: ForEachCompareAndUpdateChildrenTest001
+ * @tc.desc: Create ForEach and update children.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForEachSyntaxTestNg, ForEachCompareAndUpdateChildrenTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set branch id which is same as before.
+     */
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    ForEachModelNG forEach;
+    forEach.Create();
+    std::list<std::string> ids = FOR_EACH_ARRAY;
+    forEach.SetNewIds(std::move(ids));
+    auto forEachNode = AceType::DynamicCast<ForEachNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(forEachNode != nullptr && forEachNode->GetTag() == V2::JS_FOR_EACH_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. CompareAndUpdateChildren when newIds and oldIds are same.
+     */
+    forEachNode->isThisRepeatNode_= true;
+    forEachNode->CompareAndUpdateChildren();
+
+    forEachNode->isThisRepeatNode_= false;
+    forEachNode->CreateTempItems();
+    std::list<std::string> ids2 = ID_ARRAY;
+    forEachNode->SetIds(std::move(ids2));
+    forEachNode->onMainTree_ = true;
+    auto node = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    forEachNode->SetParent(node);
+    forEachNode->children_ = { node };
+    forEachNode->CompareAndUpdateChildren();
+}
+
+/**
+ * @tc.name: ForEachFinishRepeatRenderTest001
+ * @tc.desc: Create ForEach and update children.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForEachSyntaxTestNg, ForEachFinishRepeatRenderTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set branch id which is same as before.
+     */
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    ForEachModelNG forEach;
+    forEach.Create();
+    std::list<std::string> ids = FOR_EACH_ARRAY;
+    forEach.SetNewIds(std::move(ids));
+    auto forEachNode = AceType::DynamicCast<ForEachNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(forEachNode != nullptr && forEachNode->GetTag() == V2::JS_FOR_EACH_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. CompareAndUpdateChildren when newIds and oldIds are same.
+     */
+    
+    for (auto iter = FOR_EACH_ARRAY.begin(); iter != FOR_EACH_ARRAY.end(); iter++) {
+        auto childFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+        forEachNode->AddChild(childFrameNode);
+    }
+    forEachNode->isThisRepeatNode_= true;
+    forEachNode->CreateTempItems();
+    std::list<std::string> ids2 = ID_ARRAY;
+    forEachNode->SetIds(std::move(ids2));
+    forEachNode->onMainTree_ = true;
+    auto node = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    forEachNode->SetParent(node);
+    forEachNode->children_ = { node };
+    forEachNode->CompareAndUpdateChildren();
+    forEachNode->FlushUpdateAndMarkDirty();
+    std::list<int32_t> arr;
+    arr.push_back(0);
+    arr.push_back(1);
+    arr.push_back(2);
+    arr.push_back(3);
+    arr.push_back(4);
+    forEachNode->FinishRepeatRender(arr);
+}
+
+/**
+ * @tc.name: ForEachMoveChildTest001
+ * @tc.desc: Create ForEach and update children.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForEachSyntaxTestNg, ForEachMoveChildTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set branch id which is same as before.
+     */
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    ForEachModelNG forEach;
+    forEach.Create();
+    std::list<std::string> ids = FOR_EACH_ARRAY;
+    forEach.SetNewIds(std::move(ids));
+    auto forEachNode = AceType::DynamicCast<ForEachNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(forEachNode != nullptr && forEachNode->GetTag() == V2::JS_FOR_EACH_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. CompareAndUpdateChildren when newIds and oldIds are same.
+     */
+    
+    for (auto iter = FOR_EACH_ARRAY.begin(); iter != FOR_EACH_ARRAY.end(); iter++) {
+        auto childFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+        forEachNode->AddChild(childFrameNode);
+    }
+    forEachNode->isThisRepeatNode_= true;
+    forEachNode->CreateTempItems();
+    std::list<std::string> ids2 = ID_ARRAY;
+    forEachNode->SetIds(std::move(ids2));
+    forEachNode->onMainTree_ = true;
+    auto node = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    forEachNode->SetParent(node);
+    forEachNode->children_ = { node };
+    forEachNode->CompareAndUpdateChildren();
+    forEachNode->FlushUpdateAndMarkDirty();
+    forEachNode->MoveChild(1);
+    forEachNode->MoveChild(4);
+}
+
+/**
+ * @tc.name: ForEachSetOnMoveTest001
+ * @tc.desc: Create ForEach and update children.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForEachSyntaxTestNg, ForEachSetOnMoveTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set branch id which is same as before.
+     */
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    ForEachModelNG forEach;
+    forEach.Create();
+    std::list<std::string> ids = FOR_EACH_ARRAY;
+    forEach.SetNewIds(std::move(ids));
+    auto forEachNode = AceType::DynamicCast<ForEachNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(forEachNode != nullptr && forEachNode->GetTag() == V2::JS_FOR_EACH_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. CompareAndUpdateChildren when newIds and oldIds are same.
+     */
+    
+    forEachNode->SetOnMove(SetOnMoveTestNg);
+    
+    for (auto iter = FOR_EACH_ARRAY.begin(); iter != FOR_EACH_ARRAY.end(); iter++) {
+        auto childFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+        forEachNode->AddChild(childFrameNode);
+    }
+    forEachNode->isThisRepeatNode_= true;
+    forEachNode->CreateTempItems();
+    std::list<std::string> ids2 = ID_ARRAY;
+    forEachNode->SetIds(std::move(ids2));
+    forEachNode->onMainTree_ = true;
+    auto node = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    forEachNode->SetParent(node);
+    forEachNode->children_ = { node };
+    forEachNode->CompareAndUpdateChildren();
+    forEachNode->FlushUpdateAndMarkDirty();
+    forEachNode->SetOnMove(SetOnMoveTestNg);
+    forEachNode->SetOnMove(nullptr);
+}
+
+/**
+ * @tc.name: ForEachMoveDataTest001
+ * @tc.desc: Create ForEach and update children.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForEachSyntaxTestNg, ForEachMoveDataTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set branch id which is same as before.
+     */
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    ForEachModelNG forEach;
+    forEach.Create();
+    std::list<std::string> ids = FOR_EACH_ARRAY;
+    forEach.SetNewIds(std::move(ids));
+    auto forEachNode = AceType::DynamicCast<ForEachNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(forEachNode != nullptr && forEachNode->GetTag() == V2::JS_FOR_EACH_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. CompareAndUpdateChildren when newIds and oldIds are same.
+     */
+    
+    for (auto iter = FOR_EACH_ARRAY.begin(); iter != FOR_EACH_ARRAY.end(); iter++) {
+        auto childFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+        forEachNode->AddChild(childFrameNode);
+    }
+    forEachNode->isThisRepeatNode_= true;
+    forEachNode->CreateTempItems();
+    std::list<std::string> ids2 = ID_ARRAY;
+    forEachNode->SetIds(std::move(ids2));
+    forEachNode->onMainTree_ = true;
+    auto node = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    forEachNode->SetParent(node);
+    forEachNode->children_ = { node };
+    forEachNode->CompareAndUpdateChildren();
+    forEachNode->FlushUpdateAndMarkDirty();
+    forEachNode->MoveData(0, 5);
+    forEachNode->MoveData(1, 1);
+}
+
+/**
+ * @tc.name: ForEachGetFrameNodeTest001
+ * @tc.desc: Create ForEach and update children.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForEachSyntaxTestNg, ForEachGetFrameNodeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set branch id which is same as before.
+     */
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    ForEachModelNG forEach;
+    forEach.Create();
+    std::list<std::string> ids = FOR_EACH_ARRAY;
+    forEach.SetNewIds(std::move(ids));
+    auto forEachNode = AceType::DynamicCast<ForEachNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(forEachNode != nullptr && forEachNode->GetTag() == V2::JS_FOR_EACH_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. CompareAndUpdateChildren when newIds and oldIds are same.
+     */
+   
+    forEachNode->GetFrameNode(1);
+}
+
+/**
+ * @tc.name: ForEachInitDragManagerTest001
+ * @tc.desc: Create ForEach and update children.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForEachSyntaxTestNg, ForEachInitDragManagerTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set branch id which is same as before.
+     */
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    ForEachModelNG forEach;
+    forEach.Create();
+    std::list<std::string> ids = FOR_EACH_ARRAY;
+    forEach.SetNewIds(std::move(ids));
+    auto forEachNode = AceType::DynamicCast<ForEachNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(forEachNode != nullptr && forEachNode->GetTag() == V2::JS_FOR_EACH_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. CompareAndUpdateChildren when newIds and oldIds are same.
+     */
+   
+    for (auto iter = FOR_EACH_ARRAY.begin(); iter != FOR_EACH_ARRAY.end(); iter++) {
+        auto childFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+        forEachNode->AddChild(childFrameNode);
+    }
+    forEachNode->isThisRepeatNode_= true;
+    forEachNode->CreateTempItems();
+    std::list<std::string> ids2 = ID_ARRAY;
+    forEachNode->SetIds(std::move(ids2));
+    forEachNode->onMainTree_ = true;
+    auto list_tag = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    forEachNode->SetParent(list_tag);
+    forEachNode->children_ = { list_tag };
+    forEachNode->CompareAndUpdateChildren();
+    forEachNode->FlushUpdateAndMarkDirty();
+    forEachNode->SetOnMove(SetOnMoveTestNg);
+    forEachNode->InitDragManager(list_tag);
+    
+    auto node_tag = AceType::MakeRefPtr<FrameNode>(LIST_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    forEachNode->SetParent(node_tag);
+    forEachNode->children_ = { node_tag };
+    forEachNode->CompareAndUpdateChildren();
+    forEachNode->FlushUpdateAndMarkDirty();
+    forEachNode->SetOnMove(SetOnMoveTestNg);
+    forEachNode->InitDragManager(node_tag);
+}
+
+/**
+ * @tc.name: ForEachInitAllChildrenDragManagerTest001
+ * @tc.desc: Create ForEach and update children.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForEachSyntaxTestNg, ForEachInitAllChildrenDragManagerTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set branch id which is same as before.
+     */
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    ForEachModelNG forEach;
+    forEach.Create();
+    std::list<std::string> ids = FOR_EACH_ARRAY;
+    forEach.SetNewIds(std::move(ids));
+    auto forEachNode = AceType::DynamicCast<ForEachNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(forEachNode != nullptr && forEachNode->GetTag() == V2::JS_FOR_EACH_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. CompareAndUpdateChildren when newIds and oldIds are same.
+     */
+   
+    for (auto iter = FOR_EACH_ARRAY.begin(); iter != FOR_EACH_ARRAY.end(); iter++) {
+        auto childFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+        forEachNode->AddChild(childFrameNode);
+    }
+    forEachNode->isThisRepeatNode_= true;
+    forEachNode->CreateTempItems();
+    std::list<std::string> ids2 = ID_ARRAY;
+    forEachNode->SetIds(std::move(ids2));
+    forEachNode->onMainTree_ = true;
+    auto childFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    auto list_tag = AceType::MakeRefPtr<FrameNode>(LIST_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    list_tag->AddChild(childFrameNode, DEFAULT_NODE_SLOT, true);
+    forEachNode->SetParent(list_tag);
+    forEachNode->children_ = { list_tag };
+    forEachNode->CompareAndUpdateChildren();
+    forEachNode->FlushUpdateAndMarkDirty();
+    forEachNode->SetOnMove(SetOnMoveTestNg);
+    forEachNode->InitAllChildrenDragManager(true);
+    
+    auto node_tag = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    forEachNode->SetParent(node_tag);
+    forEachNode->InitAllChildrenDragManager(true);
+
+    forEachNode->children_.clear();
+    auto list_tag1 = AceType::MakeRefPtr<FrameNode>(LIST_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    forEachNode->SetParent(list_tag1);
+    forEachNode->children_ = { list_tag1 };
+    forEachNode->CompareAndUpdateChildren();
+    forEachNode->FlushUpdateAndMarkDirty();
+    forEachNode->SetOnMove(SetOnMoveTestNg);
+    forEachNode->InitAllChildrenDragManager(true);
 }
 } // namespace OHOS::Ace::NG

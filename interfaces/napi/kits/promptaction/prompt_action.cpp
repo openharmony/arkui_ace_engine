@@ -229,7 +229,7 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
     if (valueType == napi_number) {
         int32_t num = -1;
         napi_get_value_int32(env, showModeNApi, &num);
-        if (num >= 0 && num <= static_cast<int32_t>(NG::ToastShowMode::TOP_MOST)) {
+        if (num >= 0 && num <= static_cast<int32_t>(NG::ToastShowMode::SYSTEM_TOP_MOST)) {
             showMode = static_cast<NG::ToastShowMode>(num);
         }
     }

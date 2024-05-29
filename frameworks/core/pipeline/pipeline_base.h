@@ -1213,6 +1213,11 @@ public:
 
     virtual void CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, AxisAction action) {}
 
+    virtual float GetPageAvoidOffset()
+    {
+        return 0.0f;
+    }
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()

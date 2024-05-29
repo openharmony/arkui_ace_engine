@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/// <reference path="../../../export/ark_theme_scope_manager.d.ts" />
-type CustomTheme = any;
+/// <reference path='../../../export/ark_theme_scope_manager.d.ts' />
+type CustomTheme = Object;
 
 class ThemeControl {
     /**

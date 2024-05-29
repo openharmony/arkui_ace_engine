@@ -879,7 +879,19 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     RefPtr<FrameNode> imageNode = nullptr;
     RefPtr<FrameNode> textNode = nullptr;
     RefPtr<OverlayManager> subWindowOverlayManager = nullptr;
-    if (IsNeedSwitchToSubWindow()) {
+    bool isMenuShow = false;
+    auto window = SubwindowManager::GetInstance()->ShowPreviewNG();
+    if (window) {
+        subWindowOverlayManager = window->GetOverlayManager();
+        CHECK_NULL_VOID(subWindowOverlayManager);
+        isMenuShow = subWindowOverlayManager->IsMenuShow();
+    }
+    if (isMenuShow) {
+        dragDropManager->SetIsDragWithContextMenu(true);
+    } else {
+        dragDropManager->SetIsDragWithContextMenu(false);
+    }
+    if (IsNeedSwitchToSubWindow() || isMenuShow) {
         imageNode = overlayManager->GetPixelMapContentNode();
         DragEventActuator::CreatePreviewNode(frameNode, imageNode);
         auto frameTag = frameNode->GetTag();
@@ -915,10 +927,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             recordsSize = childSize;
         }
         textNode = DragEventActuator::CreateBadgeTextNode(frameNode, childSize, previewScale, false);
-        auto window = SubwindowManager::GetInstance()->ShowPreviewNG();
         if (window) {
-            subWindowOverlayManager = window->GetOverlayManager();
-            CHECK_NULL_VOID(subWindowOverlayManager);
             isSwitchToSubWindow = true;
             overlayManager->RemovePixelMap();
             if (pixelMap_ != nullptr) {
@@ -1005,14 +1014,14 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     eventManager->SetIsDragging(true);
     if (info.GetInputEventType() != InputEventType::MOUSE_BUTTON && dragEventActuator_ != nullptr &&
         dragEventActuator_->GetIsNotInPreviewState()) {
-        if (!dragDropManager->IsNeedDisplayInSubwindow()) {
+        if (!dragDropManager->IsNeedDisplayInSubwindow() && !isMenuShow) {
             overlayManager->RemovePixelMap();
             overlayManager->RemovePreviewBadgeNode();
             overlayManager->RemoveGatherNode();
             pipeline->AddAfterRenderTask([]() { InteractionInterface::GetInstance()->SetDragWindowVisible(true); });
         }
     } else if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
-        if (!dragDropManager->IsNeedDisplayInSubwindow()) {
+        if (!dragDropManager->IsNeedDisplayInSubwindow() && !isMenuShow) {
             pipeline->AddDragWindowVisibleTask([]() {
                 InteractionInterface::GetInstance()->SetDragWindowVisible(true);
             });

@@ -2405,8 +2405,8 @@ class ForegroundBrightnessModifier extends ModifierWithKey<BrightnessOptions> {
   }
 }
 
-class DragPreviewOptionsModifier extends ModifierWithKey<DragPreviewOptions> {
-  constructor(value: DragPreviewOptions) {
+class DragPreviewOptionsModifier extends ModifierWithKey<ArkDragPreviewOptions> {
+  constructor(value: ArkDragPreviewOptions) {
     super(value);
   }
   static identity: Symbol = Symbol('dragPreviewOptions');
@@ -2414,12 +2414,16 @@ class DragPreviewOptionsModifier extends ModifierWithKey<DragPreviewOptions> {
     if (reset) {
       getUINativeModule().common.resetDragPreviewOptions(node);
     } else {
-      getUINativeModule().common.setDragPreviewOptions(node, this.value.mode);
+      getUINativeModule().common.setDragPreviewOptions(node, this.value.mode, this.value.numberBadge,
+        this.value.isMultiSelectionEnabled, this.value.defaultAnimationBeforeLifting);
     }
   }
 
   checkObjectDiff(): boolean {
-    return !(this.value.mode === this.stageValue.mode);
+    return !(this.value.mode === this.stageValue.mode
+      && this.value.numberBadge === this.stageValue.numberBadge
+      && this.value.isMultiSelectionEnabled === this.stageValue.isMultiSelectionEnabled
+      && this.value.defaultAnimationBeforeLifting === this.stageValue.defaultAnimationBeforeLifting);
   }
 }
 
@@ -2806,9 +2810,7 @@ class SystemBarEffectModifier extends ModifierWithKey<null> {
   }
   static identity: Symbol = Symbol('systemBarEffect');
   applyPeer(node: KNode, reset: boolean): void {
-    if (!reset) {
-      getUINativeModule().common.setSystemBarEffect(node, true);
-    }
+    getUINativeModule().common.setSystemBarEffect(node, true);
   }
 }
 
@@ -3023,9 +3025,23 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  dragPreviewOptions(value: DragPreviewOptions): this {
+  dragPreviewOptions(value: DragPreviewOptions, options?: DragInteractionOptions): this {
+    if (isUndefined(value)) {
+      modifierWithKey(this._modifiersWithKeys, DragPreviewOptionsModifier.identity,
+        DragPreviewOptionsModifier, undefined);
+      return this;
+    }
+    let arkDragPreviewOptions = new ArkDragPreviewOptions();
+    if (typeof value === 'object') {
+      arkDragPreviewOptions.mode = value.mode;
+      arkDragPreviewOptions.numberBadge = value.numberBadge;
+    }
+    if (typeof options === 'object') {
+      arkDragPreviewOptions.isMultiSelectionEnabled = options.isMultiSelectionEnabled;
+      arkDragPreviewOptions.defaultAnimationBeforeLifting = options.defaultAnimationBeforeLifting;
+    }
     modifierWithKey(this._modifiersWithKeys, DragPreviewOptionsModifier.identity,
-      DragPreviewOptionsModifier, value);
+      DragPreviewOptionsModifier, arkDragPreviewOptions);
     return this;
   }
 
@@ -3793,6 +3809,10 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     throw new Error('Method not implemented.');
   }
 
+  onPreDrag(event: (preDragStatus: PreDragStatus) => void): this {
+    throw new Error('Method not implemented.');
+  }
+
   allowDrop(value: Array<UniformDataType>): this {
     modifierWithKey(this._modifiersWithKeys, AllowDropModifier.identity, AllowDropModifier, value);
     return this;
@@ -3806,6 +3826,10 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
     }
     return this;
+  }
+
+  dragPreview(value: CustomBuilder | DragItemInfo | string): this {
+    throw new Error('Method not implemented.');
   }
 
   overlay(value: string | CustomBuilder, options?: { align?: Alignment; offset?: { x?: number; y?: number } }): this {
@@ -4031,8 +4055,9 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  systemBarEffect(value:null):this {
+  systemBarEffect(): this {
     modifierWithKey(this._modifiersWithKeys, SystemBarEffectModifier.identity, SystemBarEffectModifier, null);
+    return this;
   }
 }
 

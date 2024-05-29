@@ -24,10 +24,7 @@ config("scene_viewer_component_config") {
 }
 
 build_component("scene_viewer") {
-  configs = [
-    ":scene_viewer_component_config",
-    "//commonlibrary/c_utils/base:utils_config",
-  ]
+  configs = [ ":scene_viewer_component_config" ]
 
   sources = [
     "render_scene_viewer.cpp",

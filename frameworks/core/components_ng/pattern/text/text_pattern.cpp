@@ -567,7 +567,8 @@ void TextPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
             auto renderContext = textPattern->GetRenderContext();
             CHECK_NULL_VOID(renderContext);
             auto obscuredReasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
-            bool ifHaveObscured = std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
+            bool ifHaveObscured = textPattern->GetSpanItemChildren().empty() &&
+                std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
                 [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
             auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(textLayoutProperty);
@@ -3432,5 +3433,41 @@ RectF TextPattern::GetTextContentRect(bool isActualText) const
         textRect.SetHeight(pManager_->GetHeight());
     }
     return textRect;
+}
+
+size_t TextPattern::GetLineCount() const
+{
+    CHECK_NULL_RETURN(pManager_, 0);
+    return pManager_->GetLineCount();
+}
+
+bool TextPattern::DidExceedMaxLines() const
+{
+    CHECK_NULL_RETURN(pManager_, false);
+    return pManager_->DidExceedMaxLines();
+}
+
+TextLineMetrics TextPattern::GetLineMetrics(int32_t lineNumber)
+{
+    if (lineNumber < 0 || lineNumber > GetLineCount()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT, "GetLineMetrics failed, lineNumber not between 0 and max lines:%{public}d",
+            lineNumber);
+        return TextLineMetrics();
+    }
+    return pManager_->GetLineMetrics(lineNumber);
+}
+
+Offset TextPattern::ConvertLocalOffsetToParagraphOffset(const Offset& offset)
+{
+    RectF textContentRect = contentRect_;
+    textContentRect.SetTop(contentRect_.GetY() - std::min(baselineOffset_, 0.0f));
+    Offset paragraphOffset = { offset.GetX() - textContentRect.GetX(), offset.GetY() - textContentRect.GetY() };
+    return paragraphOffset;
+}
+
+PositionWithAffinity TextPattern::GetGlyphPositionAtCoordinate(int32_t x, int32_t y)
+{
+    Offset offset(x, y);
+    return pManager_->GetGlyphPositionAtCoordinate(ConvertLocalOffsetToParagraphOffset(offset));
 }
 } // namespace OHOS::Ace::NG

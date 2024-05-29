@@ -65,7 +65,7 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     backgroundBrightness(params: BackgroundBrightnessOptions): this;
     backgroundBrightnessInternal(params: BrightnessOptions): this;
     foregroundBrightness(params: BrightnessOptions): this;
-    dragPreviewOptions(value: DragPreviewOptions): this;
+    dragPreviewOptions(value: DragPreviewOptions, options?: DragInteractionOptions): this;
     responseRegion(value: Array<Rectangle> | Rectangle): this;
     mouseResponseRegion(value: Array<Rectangle> | Rectangle): this;
     size(value: SizeOptions): this;
@@ -175,8 +175,10 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     onDragLeave(event: (event?: DragEvent, extraParams?: string) => void): this;
     onDrop(event: (event?: DragEvent, extraParams?: string) => void): this;
     onDragEnd(event: (event: DragEvent, extraParams?: string) => void): this;
+    onPreDrag(event: (preDragStatus: PreDragStatus) => void): this;
     allowDrop(value: Array<UniformDataType>): this;
     draggable(value: boolean): this;
+    dragPreview(value: CustomBuilder | DragItemInfo | string): this;
     overlay(value: string | CustomBuilder, options?: {
         align?: Alignment;
         offset?: {
