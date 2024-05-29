@@ -85,6 +85,9 @@ ImageLoadingContext::ImageLoadingContext(const ImageSourceInfo& src, LoadNotifie
 ImageLoadingContext::~ImageLoadingContext()
 {
     // cancel background task
+    if (Downloadable()) {
+        RemoveDownloadTask(src_.GetSrc());
+    }
     if (!syncLoad_) {
         auto state = stateManager_->GetCurrentState();
         if (state == ImageLoadingState::DATA_LOADING) {
@@ -267,6 +270,11 @@ void ImageLoadingContext::PerformDownload()
         };
     }
     NetworkImageLoader::DownloadImage(std::move(downloadCallback), src_.GetSrc(), syncLoad_);
+}
+
+bool ImageLoadingContext::RemoveDownloadTask(const std::string& src)
+{
+    return DownloadManager::GetInstance()->RemoveDownloadTask(src);
 }
 
 void ImageLoadingContext::CacheDownloadedImage()
