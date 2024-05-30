@@ -345,8 +345,8 @@ void SelectOverlayLayoutAlgorithm::AdjustMenuInRootRect(
     CHECK_NULL_VOID(theme);
     // adjust x
     auto defaultPositionX = theme->GetDefaultMenuPositionX();
-    auto menuX = LessOrEqual(menuOffset.GetX(), 0.0f) ? defaultPositionX : menuOffset.GetX();
-    menuX = GreatOrEqual(menuX + menuSize.Width(), rootSize.Width())
+    auto menuX = LessOrEqual(menuOffset.GetX(), defaultPositionX) ? defaultPositionX : menuOffset.GetX();
+    menuX = GreatOrEqual(menuX + menuSize.Width(), rootSize.Width() - defaultPositionX)
                 ? rootSize.Width() - defaultPositionX - menuSize.Width()
                 : menuX;
     menuOffset.SetX(menuX);
