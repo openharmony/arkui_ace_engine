@@ -30,12 +30,12 @@
 
 namespace OHOS::Ace::NG {
 struct FadeoutInfo {
-    bool left = false;
-    bool right = false;
-    double gradient = 0;
+    bool isLeftFadeout = false;
+    bool isRightFadeout = false;
+    double fadeoutPercent = 0;
     bool IsFadeount()
     {
-        return left || right;
+        return isLeftFadeout || isRightFadeout;
     }
 };
 
@@ -152,6 +152,7 @@ private:
 
     void DrawObscuration(DrawingContext& drawingContext);
     void DrawNormal(DrawingContext& drawingContext);
+    void DrawFadeout(DrawingContext& drawingContext, const FadeoutInfo& info, const bool& isDrawNormal);
     FadeoutInfo GetFadeoutInfo(DrawingContext& drawingContext);
 
     void ResetImageNodeList();

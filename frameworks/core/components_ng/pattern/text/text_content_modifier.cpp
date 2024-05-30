@@ -336,42 +336,17 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
     CHECK_NULL_VOID(!pManager->GetParagraphs().empty());
 
     auto info = GetFadeoutInfo(drawingContext);
+    bool isDrawNormal = !ifPaintObscuration || ifHaveSpanItemChildren_;
     if (!info.IsFadeount()) {
-        if (!ifPaintObscuration || ifHaveSpanItemChildren_) {
+        if (isDrawNormal) {
             DrawNormal(drawingContext);
         } else {
             DrawObscuration(drawingContext);
         }
         PaintCustomSpan(drawingContext);
-        return;
-    }
-
-    RSCanvas& canvas = drawingContext.canvas;
-    auto contentRect = textPattern->GetTextContentRect();
-    RSRect clipInnerRect = RSRect(0, 0, contentRect.Width(), contentRect.Height());
-
-    RSSaveLayerOps slo(&clipInnerRect, nullptr);
-    canvas.SaveLayer(slo);
-
-    if (!ifPaintObscuration || ifHaveSpanItemChildren_) {
-        DrawNormal(drawingContext);
     } else {
-        DrawObscuration(drawingContext);
+        DrawFadeout(drawingContext, info, isDrawNormal);
     }
-    PaintCustomSpan(drawingContext);
-
-    RSBrush brush;
-    std::vector<RSPoint> points = { RSPoint(0, 0.0f), RSPoint(contentRect.Width(), 0.0f) };
-    std::vector<RSColorQuad> colors = { Color::TRANSPARENT.GetValue(), Color::WHITE.GetValue(), Color::WHITE.GetValue(),
-        Color::TRANSPARENT.GetValue() };
-    std::vector<RSScalar> pos = { 0.0f, info.left ? info.gradient : 0.0f, info.right ? (1 - info.gradient) : 1.0f,
-        1.0f };
-    brush.SetShaderEffect(
-        RSShaderEffect::CreateLinearGradient(points.at(0), points.at(1), colors, pos, RSTileMode::CLAMP));
-    brush.SetBlendMode(RSBlendMode::DST_IN);
-    canvas.AttachBrush(brush);
-    canvas.DrawRect(clipInnerRect);
-    canvas.Restore();
 }
 
 FadeoutInfo TextContentModifier::GetFadeoutInfo(DrawingContext& drawingContext)
@@ -394,9 +369,9 @@ FadeoutInfo TextContentModifier::GetFadeoutInfo(DrawingContext& drawingContext)
     bool isOverlength = pManager->GetTextWidth() > drawingContext.width;
 
     if (!marqueeOption_.start) {
-        info.left = false;
-        info.right = isOverlength;
-        info.gradient = isOverlength ? marqueeGradientPercent_ : 0;
+        info.isLeftFadeout = false;
+        info.isRightFadeout = isOverlength;
+        info.fadeoutPercent = isOverlength ? marqueeGradientPercent_ : 0;
         return info;
     }
 
@@ -412,17 +387,17 @@ FadeoutInfo TextContentModifier::GetFadeoutInfo(DrawingContext& drawingContext)
 
     float racePercent = GetTextRacePercent();
 
-    info.gradient = marqueeGradientPercent_;
+    info.fadeoutPercent = marqueeGradientPercent_;
     if (!textRacing_) {
-        info.left = false;
-        info.right = isOverlength;
+        info.isLeftFadeout = false;
+        info.isRightFadeout = isOverlength;
     } else {
         if (marqueeOption_.direction == MarqueeDirection::RIGHT) {
-            info.left = (racePercent > spacePercent) && !NearEqual(racePercent, RACE_MOVE_PERCENT_MAX);
-            info.right = !((racePercent > (drawPercent - spacePercent)) && (racePercent < drawPercent));
+            info.isLeftFadeout = (racePercent > spacePercent) && !NearEqual(racePercent, RACE_MOVE_PERCENT_MAX);
+            info.isRightFadeout = !((racePercent > (drawPercent - spacePercent)) && (racePercent < drawPercent));
         } else {
-            info.left = !NearEqual(racePercent, 0.0) && (racePercent < (RACE_MOVE_PERCENT_MAX - spacePercent));
-            info.right =
+            info.isLeftFadeout = !NearEqual(racePercent, 0.0) && (racePercent < (RACE_MOVE_PERCENT_MAX - spacePercent));
+            info.isRightFadeout =
                 !((racePercent > (textPercent - drawPercent)) && (racePercent < (RACE_MOVE_PERCENT_MAX - drawPercent)));
         }
     }
@@ -466,6 +441,39 @@ void TextContentModifier::DrawNormal(DrawingContext& drawingContext)
             PaintImage(drawingContext.canvas, paintOffset_.GetX() + paragraph2Offset, paintOffset_.GetY());
         }
     }
+}
+
+void TextContentModifier::DrawFadeout(DrawingContext& drawingContext, const FadeoutInfo& info, const bool& isDrawNormal)
+{
+    auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textPattern);
+
+    RSCanvas& canvas = drawingContext.canvas;
+    auto contentRect = textPattern->GetTextContentRect();
+    RSRect clipInnerRect = RSRect(0, 0, contentRect.Width(), contentRect.Height());
+
+    RSSaveLayerOps slo(&clipInnerRect, nullptr);
+    canvas.SaveLayer(slo);
+
+    if (isDrawNormal) {
+        DrawNormal(drawingContext);
+    } else {
+        DrawObscuration(drawingContext);
+    }
+    PaintCustomSpan(drawingContext);
+
+    RSBrush brush;
+    std::vector<RSPoint> points = { RSPoint(0, 0.0f), RSPoint(contentRect.Width(), 0.0f) };
+    std::vector<RSColorQuad> colors = { Color::TRANSPARENT.GetValue(), Color::WHITE.GetValue(), Color::WHITE.GetValue(),
+        Color::TRANSPARENT.GetValue() };
+    std::vector<RSScalar> pos = { 0.0f, info.isLeftFadeout ? info.fadeoutPercent : 0.0f,
+        info.isRightFadeout ? (1 - info.fadeoutPercent) : 1.0f, 1.0f };
+    brush.SetShaderEffect(
+        RSShaderEffect::CreateLinearGradient(points.at(0), points.at(1), colors, pos, RSTileMode::CLAMP));
+    brush.SetBlendMode(RSBlendMode::DST_IN);
+    canvas.AttachBrush(brush);
+    canvas.DrawRect(clipInnerRect);
+    canvas.Restore();
 }
 
 void TextContentModifier::DrawObscuration(DrawingContext& drawingContext)
@@ -1088,9 +1096,9 @@ void TextContentModifier::AddDefaultShadow()
     auto offsetX = MakeRefPtr<AnimatablePropertyFloat>(emptyShadow.GetOffset().GetX());
     auto offsetY = MakeRefPtr<AnimatablePropertyFloat>(emptyShadow.GetOffset().GetY());
     auto color = MakeRefPtr<AnimatablePropertyColor>(LinearColor(emptyShadow.GetColor()));
-        shadows_.emplace_back(ShadowProp {
-        .blurRadius = blurRadius, .offsetX = offsetX, .offsetY = offsetY, .color = color });
-            AttachProperty(blurRadius);
+    shadows_.emplace_back(
+        ShadowProp { .blurRadius = blurRadius, .offsetX = offsetX, .offsetY = offsetY, .color = color });
+    AttachProperty(blurRadius);
     AttachProperty(offsetX);
     AttachProperty(offsetY);
     AttachProperty(color);
