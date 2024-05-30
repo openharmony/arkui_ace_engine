@@ -160,6 +160,7 @@ public:
     bool GetIsBindOverlayValue(const RefPtr<DragEventActuator>& actuator);
     bool IsAllowedDrag();
     void SetTextPixelMap(const RefPtr<GestureEventHub>& gestureHub);
+    void RestartDragTask(const GestureEvent& info);
     static OffsetF GetFloatImageOffset(const RefPtr<FrameNode>& frameNode, const RefPtr<PixelMap>& pixelMap);
     PanDirection GetDirection() const
     {
