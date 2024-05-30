@@ -734,6 +734,11 @@ public:
         return contentRect_;
     }
 
+    bool IsMoveCaretAnywhere() const
+    {
+        return isMoveCaretAnywhere_;
+    }
+
 protected:
     bool CanStartAITask() override;
 
@@ -952,6 +957,9 @@ private:
     void SetAccessibilityAction();
     bool BeforeGestureAndClickOperate(GestureEvent& info, bool isDoubleClick);
     void HandleTripleClickEvent(OHOS::Ace::GestureEvent& info);
+    void UpdateSelectionByTouchMove(const Offset& offset);
+    void MoveCaretAnywhere(const Offset& touchOffset);
+    void ShowCaretNoTwinkling(const Offset& textOffset);
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
@@ -1050,6 +1058,8 @@ private:
     bool isCaretInContentArea_ = false;
     OffsetF movingHandleOffset_;
     bool mouseClickRelease_ = false;
+    int32_t initSelectStart_ = 0;
+    bool isMoveCaretAnywhere_ = false;
 };
 } // namespace OHOS::Ace::NG
 
