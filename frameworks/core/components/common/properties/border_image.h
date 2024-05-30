@@ -58,6 +58,54 @@ public:
         src_ = src;
     }
 
+    std::string SliceToString()
+    {
+        std::string str;
+        if (borderImageLeft_.GetBorderImageSlice() == borderImageRight_.GetBorderImageSlice() &&
+            borderImageRight_.GetBorderImageSlice() == borderImageTop_.GetBorderImageSlice() &&
+            borderImageTop_.GetBorderImageSlice() == borderImageBottom_.GetBorderImageSlice()) {
+            str.append(borderImageLeft_.GetBorderImageSlice().ToString());
+        } else {
+            str.append("left: [").append(borderImageLeft_.GetBorderImageSlice().ToString()).append("] ");
+            str.append("right: [").append(borderImageRight_.GetBorderImageSlice().ToString()).append("] ");
+            str.append("top: [").append(borderImageTop_.GetBorderImageSlice().ToString()).append("] ");
+            str.append("bottom: [").append(borderImageBottom_.GetBorderImageSlice().ToString()).append("]");
+        }
+        return str;
+    }
+
+    std::string OutsetToString()
+    {
+        std::string str;
+        if (borderImageLeft_.GetBorderImageOutset() == borderImageRight_.GetBorderImageOutset() &&
+            borderImageRight_.GetBorderImageOutset() == borderImageTop_.GetBorderImageOutset() &&
+            borderImageTop_.GetBorderImageOutset() == borderImageBottom_.GetBorderImageOutset()) {
+            str.append(borderImageLeft_.GetBorderImageOutset().ToString());
+        } else {
+            str.append("left: [").append(borderImageLeft_.GetBorderImageOutset().ToString()).append("] ");
+            str.append("right: [").append(borderImageRight_.GetBorderImageOutset().ToString()).append("] ");
+            str.append("top: [").append(borderImageTop_.GetBorderImageOutset().ToString()).append("] ");
+            str.append("bottom: [").append(borderImageBottom_.GetBorderImageOutset().ToString()).append("]");
+        }
+        return str;
+    }
+
+    std::string WidthToString()
+    {
+        std::string str;
+        if (borderImageLeft_.GetBorderImageWidth() == borderImageRight_.GetBorderImageWidth() &&
+            borderImageRight_.GetBorderImageWidth() == borderImageTop_.GetBorderImageWidth() &&
+            borderImageTop_.GetBorderImageWidth() == borderImageBottom_.GetBorderImageWidth()) {
+            str.append(borderImageLeft_.GetBorderImageWidth().ToString());
+        } else {
+            str.append("left: [").append(borderImageLeft_.GetBorderImageWidth().ToString()).append("] ");
+            str.append("right: [").append(borderImageRight_.GetBorderImageWidth().ToString()).append("] ");
+            str.append("top: [").append(borderImageTop_.GetBorderImageWidth().ToString()).append("] ");
+            str.append("bottom: [").append(borderImageBottom_.GetBorderImageWidth().ToString()).append("]");
+        }
+        return str;
+    }
+
     struct BorderImageOption {
         std::optional<Dimension> leftDimension;
         std::optional<Dimension> rightDimension;
