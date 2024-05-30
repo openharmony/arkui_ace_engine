@@ -2083,6 +2083,7 @@ void WebPattern::OnModifyDone()
             static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE,
                 "RosenWeb" };
             renderContextForSurface_->InitContext(false, param);
+            renderContextForSurface_->UpdateBackgroundColor(renderContext->GetBackgroundColor().value_or(Color::WHITE));
             renderSurface_->SetInstanceId(instanceId);
             renderSurface_->SetRenderContext(host->GetRenderContext());
             if (renderMode_ == RenderMode::SYNC_RENDER) {
