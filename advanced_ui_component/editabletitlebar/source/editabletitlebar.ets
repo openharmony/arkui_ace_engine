@@ -65,7 +65,7 @@ const MAX_SUB_TITLE_PERCENT = 0.35;
 const DEFAULT_BREAKPOINT_S = 600;
 const DEFAULT_BREAKPOINT_M = 840;
 const MIN_SUBTITLE_SIZE = '10.0vp';
-const TEXT_EDITABLE_DIALOG = '18.3vp';
+const TEXT_EDITABLE_DIALOG = '18.3fp';
 const IMAGE_SIZE = '64vp';
 const MAX_DIALOG = '256vp';
 const MIN_DIALOG = '216vp';
@@ -106,6 +106,7 @@ export struct EditableTitleBar {
     end: LengthMetrics.vp(0),
   }
   @State backActive: boolean = false;
+  @State fontSize: number = 1;
   public static readonly maxCountOfExtraItems = 3;
   public static readonly maxOtherCountOfExtraItems = 2;
   public static readonly commonZero = 0;
@@ -199,6 +200,7 @@ export struct EditableTitleBar {
           isEnabled: true,
           action: () => this.onCancel ? this.onCancel() : this.backActive = true,
         },
+        fontSize: this.fontSize,
         attribute: ItemType.LeftIcon,
       })
     } else {
@@ -208,6 +210,7 @@ export struct EditableTitleBar {
           isEnabled: true,
           action: () => this.onCancel && this.onCancel(),
         },
+        fontSize: this.fontSize,
         attribute: ItemType.LeftIcon,
       })
     }
@@ -276,11 +279,14 @@ export struct EditableTitleBar {
       menuItems: this.menuItems,
       onSave: this.onSave,
       isSaveEnabled: this.isSaveIconRequired,
+      fontSize: this.fontSize,
     })
   }
 
   onMeasureSize(selfLayoutInfo: GeometryInfo, children: Measurable[], constraint: ConstraintSizeOptions): SizeResult {
     let result: SizeResult = { width: selfLayoutInfo.width, height: selfLayoutInfo.height };
+    let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
+    this.fontSize = context.config?.fontSizeScale ?? 1;
     children.forEach((child) => {
       let width: number = Number(constraint.maxWidth);
       if (!this.contentMargin) {
@@ -319,6 +325,7 @@ struct EditableTitleBarMenuSection {
   menuItems: Array<EditableTitleBarMenuItem> | undefined = undefined;
   onSave?: () => void;
   isSaveEnabled: boolean = true;
+  @Prop fontSize: number = 1;
 
   build() {
     Column() {
@@ -331,6 +338,7 @@ struct EditableTitleBarMenuSection {
               ImageMenuItem({
                 item: item,
                 attribute: ItemType.Icon,
+                fontSize: this.fontSize,
               })
             })
         }
@@ -341,6 +349,7 @@ struct EditableTitleBarMenuSection {
               isEnabled: true,
               action: () => this.onSave && this.onSave(),
             },
+            fontSize: this.fontSize,
             attribute: ItemType.Icon,
           })
         }
@@ -361,11 +370,12 @@ struct ImageMenuItem {
   callbackId: number | undefined = undefined;
   minFontSize: number = 1.75;
   maxFontSize: number = 3.25;
-  @State fontSize: number = 1;
+  @Prop fontSize: number = 1;
   @State isOnFocus: boolean = false;
   @State isOnHover: boolean = false;
   @State isOnClick: boolean = false;
   @Consume editableTitleBarTheme: EditableTitleBarTheme;
+
   dialogController: CustomDialogController | null = new CustomDialogController({
     builder: EditableTitleBarDialog({
       cancel: () => {
@@ -374,6 +384,7 @@ struct ImageMenuItem {
       },
       itemEditableDialog: this.item,
       textEditableTitleBarDialog: this.item.label ? this.item.label : this.textDialog(),
+      fontSize: this.fontSize,
     }),
     maskColor: Color.Transparent,
     isModal: true,
@@ -456,7 +467,7 @@ struct ImageMenuItem {
         this.isOnClick = true;
       }
       if (event.type === TouchType.Up) {
-        if (Number(AppStorage.get<number>('fontSizeScale')) >= this.minFontSize) {
+        if (this.fontSize >= this.minFontSize) {
           this.dialogController?.close()
         }
         this.isOnClick = false;
@@ -467,7 +478,7 @@ struct ImageMenuItem {
         .onAction((event: GestureEvent) => {
           console.log('LongPressGesture success');
           if (event) {
-            if (Number(AppStorage.get<number>('fontSizeScale')) >= this.minFontSize) {
+            if (this.fontSize >= this.minFontSize) {
               this.dialogController?.open()
             }
           }
@@ -477,30 +488,6 @@ struct ImageMenuItem {
           this.item.isEnabled && this.item.action && this.item.action()
         })
     ))
-  }
-
-  private envCallback: EnvironmentCallback = {
-    onConfigurationUpdated(config) {
-      AppStorage.setOrCreate<number>('fontSizeScale', config.fontSizeScale);
-      hilog.error(0x3900, 'Ace', `fontSizeScale: ${Number(AppStorage.get<number>('fontSizeScale'))}`);
-    },
-    onMemoryLevel(level) {
-    }
-  }
-
-  async aboutToAppear(): Promise<void> {
-    let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
-    hilog.info(0x3900, 'Ace', `initConfig context.config fontSizeScale: ${JSON.stringify(context.config.fontSizeScale)}`);
-    if (context.config.fontSizeScale) {
-      AppStorage.setOrCreate('fontSizeScale', context.config.fontSizeScale);
-    }
-    this.callbackId = getContext().getApplicationContext().on('environment', this.envCallback);
-  }
-
-  aboutToDisappear(): void {
-    if (this.callbackId) {
-      getContext().getApplicationContext().off('environment', this.callbackId);
-    }
   }
 
   @Styles
@@ -605,7 +592,7 @@ struct EditableTitleBarDialog {
   minFontSize: number = 1.75;
   maxFontSize: number = 3.25;
   @StorageLink('mainWindow') mainWindow: Promise<window.Window> | undefined = undefined;
-  @State fontSize: number = 1;
+  @Prop fontSize: number = 1;
   @State maxLines: number = 1;
   @StorageProp('windowStandardHeight') windowStandardHeight: number = 0;
   cancel: () => void = () => {
@@ -655,20 +642,8 @@ struct EditableTitleBarDialog {
       .justifyContent(FlexAlign.Center)
     }
   }
-
-  private envCallback: EnvironmentCallback = {
-    onConfigurationUpdated(config) {
-      AppStorage.setOrCreate<number>('fontSizeScale', config.fontSizeScale);
-    },
-    onMemoryLevel(level) {
-    }
-  }
-
   async aboutToAppear(): Promise<void> {
     let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
-    if (context.config.fontSizeScale) {
-      AppStorage.setOrCreate<number>('fontSizeScale', context.config.fontSizeScale);
-    }
     this.mainWindowStage = context.windowStage.getMainWindowSync();
     let properties: window.WindowProperties = this.mainWindowStage.getWindowProperties();
     let rect = properties.windowRect;
@@ -676,13 +651,6 @@ struct EditableTitleBarDialog {
       this.maxLines = 6;
     } else {
       this.maxLines = 1;
-    }
-    this.callbackId = getContext().getApplicationContext().on('environment', this.envCallback);
-  }
-
-  aboutToDisappear(): void {
-    if (this.callbackId) {
-      getContext().getApplicationContext().off('environment', this.callbackId);
     }
   }
 }
