@@ -280,16 +280,16 @@ void TextContentModifier::PaintImage(RSCanvas& canvas, float x, float y)
                     marginProperty->left.has_value() ? marginProperty->left->GetDimension().ConvertToPx() : 0.0f;
                 marginTop = marginProperty->top.has_value() ? marginProperty->top->GetDimension().ConvertToPx() : 0.0f;
             }
+            auto canvasImage = imagePattern->GetCanvasImage();
+            if (!canvasImage) {
+                canvasImage = imagePattern->GetAltCanvasImage();
+            }
             auto geometryNode = imageChild->GetGeometryNode();
-            if (!geometryNode) {
+            if (!canvasImage || !geometryNode) {
                 continue;
             }
             RectF imageRect(rect.Left() + x + marginLeft, rect.Top() + y + marginTop,
                 geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height());
-            auto canvasImage = imagePattern->GetCanvasImage();
-            if (!canvasImage) {
-                continue;
-            }
             auto pixelMapImage = DynamicCast<PixelMapImage>(canvasImage);
             if (!pixelMapImage) {
                 continue;
@@ -887,23 +887,21 @@ void TextContentModifier::StopTextRace()
 
 void TextContentModifier::ResumeAnimation()
 {
+    CHECK_NULL_VOID(raceAnimation_);
     if (textRacing_) {
         return;
     }
-    if (raceAnimation_) {
-        AnimationUtils::ResumeAnimation(raceAnimation_);
-    }
+    AnimationUtils::ResumeAnimation(raceAnimation_);
     textRacing_ = true;
 }
 
 void TextContentModifier::PauseAnimation()
 {
+    CHECK_NULL_VOID(raceAnimation_);
     if (!textRacing_) {
         return;
     }
-    if (raceAnimation_) {
-        AnimationUtils::PauseAnimation(raceAnimation_);
-    }
+    AnimationUtils::PauseAnimation(raceAnimation_);
     textRacing_ = false;
 }
 

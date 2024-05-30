@@ -23,6 +23,7 @@ namespace OHOS::Ace::Platform {
 void ClipboardImpl::AddPixelMapRecord(const RefPtr<PasteDataMix>& pasteData, const RefPtr<PixelMap>& pixmap) {}
 void ClipboardImpl::AddImageRecord(const RefPtr<PasteDataMix>& pasteData, const std::string& uri) {}
 void ClipboardImpl::AddTextRecord(const RefPtr<PasteDataMix>& pasteData, const std::string& selectedStr) {}
+void ClipboardImpl::AddSpanStringRecord(const RefPtr<PasteDataMix>& pasteData, std::vector<uint8_t>& data) {}
 void ClipboardImpl::SetData(const RefPtr<PasteDataMix>& pasteData, CopyOptions copyOption) {}
 void ClipboardImpl::GetData(const std::function<void(const std::string&, bool isLastRecord)>& textCallback,
     const std::function<void(const RefPtr<PixelMap>&, bool isLastRecord)>& pixelMapCallback,

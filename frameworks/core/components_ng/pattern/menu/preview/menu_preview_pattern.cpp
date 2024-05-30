@@ -270,8 +270,12 @@ void MenuPreviewPattern::ShowHoverImagePreviewDisAppearAnimation(const RefPtr<Re
         option.GetOnFinishEvent());
 
     // custom preview update scale from final scale to hover image size
-    auto scaleBefore = LessNotEqual(scaleFrom, 0.0) ? 1.0f : scaleFrom;
-    auto scaleAfter = LessNotEqual(scaleTo, 0.0) ? 1.0f : scaleTo;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    auto scaleBefore = LessNotEqual(scaleFrom, 0.0) ? menuTheme->GetPreviewAfterAnimationScale() : scaleFrom;
+    auto scaleAfter = LessNotEqual(scaleTo, 0.0) ? menuTheme->GetPreviewBeforeAnimationScale() : scaleTo;
     context->UpdateTransformScale(VectorF(scaleBefore, scaleBefore));
 
     AnimationOption scaleOption = AnimationOption();

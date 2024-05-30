@@ -536,6 +536,13 @@ void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
     node->isLayoutDirtyMarked_ = true;
     auto pipeline = PipelineContext::GetCurrentContext();
     node->CreateLayoutTask();
+    auto predictLayoutNode = std::move(node->predictLayoutNode_);
+    for (auto& node : predictLayoutNode) {
+        auto frameNode = node.Upgrade();
+        if (frameNode) {
+            frameNode->CreateLayoutTask();
+        }
+    }
     if (pipeline) {
         pipeline->FlushSyncGeometryNodeTasks();
     }
@@ -978,12 +985,19 @@ void FrameNode::OnAttachToMainTree(bool recursive)
         }
     }
     UINode::OnAttachToMainTree(recursive);
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto predictLayoutNode = std::move(predictLayoutNode_);
+    for (auto& node : predictLayoutNode) {
+        auto frameNode = node.Upgrade();
+        if (frameNode && frameNode->isLayoutDirtyMarked_) {
+            context->AddDirtyLayoutNode(frameNode);
+        }
+    }
 
     if (!hasPendingRequest_) {
         return;
     }
-    auto context = GetContext();
-    CHECK_NULL_VOID(context);
     context->RequestFrame();
     hasPendingRequest_ = false;
 }
@@ -1208,7 +1222,15 @@ void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp)
     }
     if ((eventHub_->HasOnAreaChanged() || eventHub_->HasInnerOnAreaChanged()) && lastFrameRect_ &&
         lastParentOffsetToWindow_) {
-        auto currFrameRect = GetRectWithRender();
+        auto currFrameRect = geometryNode_->GetFrameRect();
+        if (renderContext_ && renderContext_->GetPositionProperty()) {
+            if (renderContext_->GetPositionProperty()->HasPosition()) {
+                auto renderPosition = ContextPositionConvertToPX(
+                    renderContext_, layoutProperty_->GetLayoutConstraint()->percentReference);
+                currFrameRect.SetOffset(
+                    { static_cast<float>(renderPosition.first), static_cast<float>(renderPosition.second) });
+            }
+        }
         auto currParentOffsetToWindow = CalculateOffsetRelativeToWindow(nanoTimestamp) - currFrameRect.GetOffset();
         if (currFrameRect != *lastFrameRect_ || currParentOffsetToWindow != *lastParentOffsetToWindow_) {
             if (eventHub_->HasInnerOnAreaChanged()) {
@@ -2637,9 +2659,10 @@ OffsetF FrameNode::GetPaintRectCenter(bool checkWindowBoundary) const
 {
     auto context = GetRenderContext();
     CHECK_NULL_RETURN(context, OffsetF());
-    auto trans = context->GetPaintRectWithTransform();
-    auto offset = trans.GetOffset();
-    auto center = offset + OffsetF(trans.Width() / 2.0f, trans.Height() / 2.0f);
+    auto paintRect = context->GetPaintRectWithoutTransform();
+    auto offset = paintRect.GetOffset();
+    PointF pointNode(offset.GetX() + paintRect.Width() / 2.0f, offset.GetY() + paintRect.Height() / 2.0f);
+    context->GetPointTransformRotate(pointNode);
     auto parent = GetAncestorNodeOfFrame();
     while (parent) {
         if (checkWindowBoundary && parent->IsWindowBoundary()) {
@@ -2647,15 +2670,13 @@ OffsetF FrameNode::GetPaintRectCenter(bool checkWindowBoundary) const
         }
         auto renderContext = parent->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, OffsetF());
-        auto scale = renderContext->GetTransformScale();
-        if (scale) {
-            center.SetX(center.GetX() * scale.value().x);
-            center.SetY(center.GetY() * scale.value().y);
-        }
-        center += renderContext->GetPaintRectWithTransform().GetOffset();
+        offset = renderContext->GetPaintRectWithoutTransform().GetOffset();
+        pointNode.SetX(offset.GetX() + pointNode.GetX());
+        pointNode.SetY(offset.GetY() + pointNode.GetY());
+        renderContext->GetPointTransformRotate(pointNode);
         parent = parent->GetAncestorNodeOfFrame();
     }
-    return center;
+    return OffsetF(pointNode.GetX(), pointNode.GetY());
 }
 
 OffsetF FrameNode::GetParentGlobalOffsetDuringLayout() const

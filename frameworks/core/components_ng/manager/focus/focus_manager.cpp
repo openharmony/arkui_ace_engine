@@ -25,6 +25,14 @@
 
 namespace OHOS::Ace::NG {
 
+FocusManager::FocusManager(const RefPtr<PipelineContext>& pipeline): pipeline_(pipeline)
+{
+    CHECK_NULL_VOID(pipeline);
+    auto rootElement = pipeline->GetRootElement();
+    CHECK_NULL_VOID(rootElement);
+    currentFocus_ = rootElement->GetFocusHub();
+}
+
 void FocusManager::FocusViewShow(const RefPtr<FocusView>& focusView, bool isTriggerByStep)
 {
     CHECK_NULL_VOID(focusView);

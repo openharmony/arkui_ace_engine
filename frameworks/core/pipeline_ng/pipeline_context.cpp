@@ -219,6 +219,10 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
             dirty->GetId(), dirty->GetParent() ? dirty->GetParent()->GetId() : 0);
         ACE_BUILD_TRACE_END()
     }
+    if (!dirty->IsOnMainTree() && predictNode_) {
+        predictNode_->AddPredictLayoutNode(dirty);
+        return;
+    }
     taskScheduler_->AddDirtyLayoutNode(dirty);
     ForceLayoutForImplicitAnimation();
 #ifdef UICAST_COMPONENT_SUPPORTED
@@ -686,9 +690,10 @@ void PipelineContext::FlushFocus()
     if (!focusScope || focusScope->GetFocusType() != FocusType::SCOPE) {
         dirtyFocusScope_.Reset();
     } else {
-        FlushFocusWithNode(focusNode, true);
+        FlushFocusWithNode(focusScope, true);
         return;
     }
+    GetOrCreateFocusManager()->WindowFocusMoveEnd();
 }
 
 void PipelineContext::FlushFocusWithNode(RefPtr<FrameNode> focusNode, bool isScope)
@@ -701,7 +706,7 @@ void PipelineContext::FlushFocusWithNode(RefPtr<FrameNode> focusNode, bool isSco
     dirtyFocusNode_.Reset();
     dirtyFocusScope_.Reset();
     dirtyRequestFocusNode_.Reset();
-    focusManager_->WindowFocusMoveEnd();
+    GetOrCreateFocusManager()->WindowFocusMoveEnd();
 }
 
 void PipelineContext::FlushRequestFocus()
@@ -920,11 +925,13 @@ void PipelineContext::SetupRootElement()
     OnAreaChangedFunc onAreaChangedFunc = [weakOverlayManger = AceType::WeakClaim(AceType::RawPtr(overlayManager_))](
                                               const RectF& /* oldRect */, const OffsetF& /* oldOrigin */,
                                               const RectF& /* rect */, const OffsetF& /* origin */) {
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "start OnAreaChangedFunc");
         auto overlay = weakOverlayManger.Upgrade();
         CHECK_NULL_VOID(overlay);
         overlay->HideAllMenus();
         SubwindowManager::GetInstance()->HideMenuNG(false);
         overlay->HideCustomPopups();
+        SubwindowManager::GetInstance()->ClearToastInSubwindow();
     };
     rootNode_->SetOnAreaChangeCallback(std::move(onAreaChangedFunc));
     AddOnAreaChangeNode(rootNode_->GetId());
@@ -998,7 +1005,7 @@ const RefPtr<FocusManager>& PipelineContext::GetFocusManager() const
 const RefPtr<FocusManager>& PipelineContext::GetOrCreateFocusManager()
 {
     if (!focusManager_) {
-        focusManager_ = MakeRefPtr<FocusManager>(AceType::WeakClaim(this));
+        focusManager_ = MakeRefPtr<FocusManager>(AceType::Claim(this));
         RegisterFocusCallback();
     }
     return focusManager_;
@@ -1109,6 +1116,15 @@ void PipelineContext::OnFoldDisplayModeChange(FoldDisplayMode foldDisplayMode)
     for (auto&& [id, callback] : foldDisplayModeChangedCallbackMap_) {
         if (callback) {
             callback(foldDisplayMode);
+        }
+    }
+}
+
+void PipelineContext::OnTransformHintChanged(uint32_t transform)
+{
+    for (auto&& [id, callback] : transformHintChangedCallbackMap_) {
+        if (callback) {
+            callback(transform);
         }
     }
 }
@@ -2729,15 +2745,11 @@ void PipelineContext::WindowFocus(bool isFocus)
         NotifyPopupDismiss();
     } else {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Window id: %{public}d get focus.", windowId_);
-        if (focusManager_) {
-            focusManager_->WindowFocusMoveStart();
-            focusManager_->FocusSwitchingStart(focusManager_->GetCurrentFocus());
-        } else {
-            TAG_LOGI(AceLogTag::ACE_FOCUS, "focusManager is null.");
-        }
+        GetOrCreateFocusManager()->WindowFocusMoveStart();
+        GetOrCreateFocusManager()->FocusSwitchingStart(focusManager_->GetCurrentFocus());
         isWindowHasFocused_ = true;
         InputMethodManager::GetInstance()->SetWindowFocus(true);
-        auto curFocusView = focusManager_->GetLastFocusView().Upgrade();
+        auto curFocusView = focusManager_ ? focusManager_->GetLastFocusView().Upgrade() : nullptr;
         auto curFocusViewHub = curFocusView ? curFocusView->GetFocusHub() : nullptr;
         if (!curFocusViewHub) {
             TAG_LOGW(AceLogTag::ACE_FOCUS, "Current focus view can not found!");

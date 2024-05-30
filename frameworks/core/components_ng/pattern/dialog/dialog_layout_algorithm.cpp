@@ -63,6 +63,8 @@ constexpr int32_t TEXT_ALIGN_CONTENT_CENTER = 1;
 constexpr int32_t DIALOG_DEVICE_COLUMN_TWO = 2;
 constexpr int32_t DIALOG_DEVICE_COLUMN_THREE = 3;
 constexpr int32_t DIALOG_DEVICE_COLUMN_FOUR = 4;
+constexpr double LANDSPACE_DIALOG_WIDTH_RATIO = 0.75;
+constexpr double DIALOG_HEIGHT_RATIO_FOR_AGING = 0.9;
 } // namespace
 
 void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -85,6 +87,10 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     gridCount_ = dialogProp->GetGridCount().value_or(-1);
     isShowInSubWindow_ = dialogProp->GetShowInSubWindowValue(false);
     isModal_ = dialogProp->GetIsModal().value_or(true);
+    isSuitableForElderly_ = dialogPattern->GetIsSuitableForAging();
+    if (dialogPattern->GetNeeedUpdateOrientation()) {
+        dialogPattern->UpdateDeviceOrientation(SystemProperties::GetDeviceOrientation());
+    }
     UpdateSafeArea();
     const auto& layoutConstraint = dialogProp->GetLayoutConstraint();
     const auto& parentIdealSize = layoutConstraint->parentIdealSize;
@@ -112,6 +118,10 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         UpdateChildLayoutConstraint(dialogProp, childLayoutConstraint, child);
     }
 
+    if (dialogPattern->GetIsSuitableForAging() &&
+        SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
+        childLayoutConstraint.maxSize.SetWidth(LANDSPACE_DIALOG_WIDTH_RATIO * pipeline->GetRootWidth());
+    }
     // childSize_ and childOffset_ is used in Layout.
     child->Measure(childLayoutConstraint);
 
@@ -335,6 +345,7 @@ void DialogLayoutAlgorithm::ComputeInnerLayoutParam(LayoutConstraintF& innerLayo
 {
     CHECK_EQUAL_VOID(ComputeInnerLayoutSizeParam(innerLayout, dialogProp), true);
     auto maxSize = innerLayout.maxSize;
+    auto maxHeight = maxSize.Height();
     // Set different layout param for different devices
     // need to use theme json to replace this function.
     // get grid size type based on the screen where the dialog locate
@@ -379,6 +390,17 @@ void DialogLayoutAlgorithm::ComputeInnerLayoutParam(LayoutConstraintF& innerLayo
                          EXPAND_DISPLAY_DIALOG_HEIGHT_RATIO;
         innerLayout.minSize = SizeF(SUBWINDOW_DIALOG_DEFAULT_WIDTH.ConvertToPx(), 0.0);
         innerLayout.maxSize = SizeF(SUBWINDOW_DIALOG_DEFAULT_WIDTH.ConvertToPx(), maxHeight);
+    }
+    if (isSuitableForElderly_) {
+        if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
+            innerLayout.minSize = SizeF(width, 0.0);
+            width = pipelineContext->GetRootWidth();
+            innerLayout.maxSize =
+                SizeF(width * LANDSPACE_DIALOG_WIDTH_RATIO, maxHeight * DIALOG_HEIGHT_RATIO_FOR_AGING);
+        } else {
+            innerLayout.minSize = SizeF(width, 0.0);
+            innerLayout.maxSize = SizeF(width, maxSize.Height() * DIALOG_HEIGHT_RATIO_FOR_AGING);
+        }
     }
     // update percentRef
     innerLayout.percentReference = innerLayout.maxSize;

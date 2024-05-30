@@ -2048,10 +2048,10 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
         auto aceView = static_cast<Platform::AceViewOhos*>(container->GetAceView());
         CHECK_NULL_VOID(aceView);
         Platform::AceViewOhos::SetViewportMetrics(aceView, config); // update density into pipeline
+        Platform::AceViewOhos::TransformHintChanged(aceView, config.TransformHint());
         Platform::AceViewOhos::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
             static_cast<WindowSizeChangeReason>(reason), rsTransaction);
         Platform::AceViewOhos::SurfacePositionChanged(aceView, config.Left(), config.Top());
-        SubwindowManager::GetInstance()->ClearToastInSubwindow();
         if (pipelineContext) {
             pipelineContext->CheckAndUpdateKeyboardInset();
             pipelineContext->ChangeDarkModeBrightness(true);
@@ -2224,6 +2224,20 @@ void UIContentImpl::DumpInfo(const std::vector<std::string>& params, std::vector
     }
 }
 
+void UIContentImpl::UpdateDialogResourceConfiguration(RefPtr<Container>& container)
+{
+    auto dialogContainer = AceType::DynamicCast<Platform::DialogContainer>(container);
+    if (dialogContainer) {
+        auto aceResCfg = dialogContainer->GetResourceConfiguration();
+        aceResCfg.SetOrientation(SystemProperties::GetDeviceOrientation());
+        aceResCfg.SetDensity(SystemProperties::GetResolution());
+        aceResCfg.SetDeviceType(SystemProperties::GetDeviceType());
+        aceResCfg.SetColorMode(SystemProperties::GetColorMode());
+        aceResCfg.SetDeviceAccess(SystemProperties::GetDeviceAccess());
+        dialogContainer->SetResourceConfiguration(aceResCfg);
+    }
+}
+
 void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog)
 {
     window_ = window;
@@ -2239,6 +2253,7 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
         icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLanguage(), status);
         AceApplicationInfo::GetInstance().SetLocale(locale.getLanguage(), locale.getCountry(), locale.getScript(), "");
         container = AceType::MakeRefPtr<Platform::DialogContainer>(instanceId_, FrontendType::DECLARATIVE_JS);
+        UpdateDialogResourceConfiguration(container);
     } else {
 #ifdef NG_BUILD
         container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS,
@@ -2262,9 +2277,14 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
         }
 #endif
     }
-    if (context && context->GetApplicationInfo()) {
-        auto appInfo = context->GetApplicationInfo();
-        container->SetApiTargetVersion(appInfo->apiTargetVersion);
+    if (context) {
+        if (context->GetApplicationInfo()) {
+            auto appInfo = context->GetApplicationInfo();
+            container->SetApiTargetVersion(appInfo->apiTargetVersion);
+        }
+
+        container->SetBundlePath(context->GetBundleCodeDir());
+        container->SetFilesDataPath(context->GetFilesDir());
     }
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
     AceEngine::Get().AddContainer(instanceId_, container);

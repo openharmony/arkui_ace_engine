@@ -143,17 +143,19 @@ void WebResource::CallResRegisterMethod(
     auto resRegister = context->GetPlatformResRegister();
     auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::PLATFORM);
     auto weakRes = AceType::WeakClaim(AceType::RawPtr(resRegister));
-    platformTaskExecutor.PostTask([method, param, weakRes, callback] {
-        auto resRegister = weakRes.Upgrade();
-        if (resRegister == nullptr) {
-            return;
-        }
-        std::string result;
-        resRegister->OnMethodCall(method, param, result);
-        if (callback) {
-            callback(result);
-        }
-    }, "ArkUIWebCallResRegisterMethod");
+    platformTaskExecutor.PostTask(
+        [method, param, weakRes, callback] {
+            auto resRegister = weakRes.Upgrade();
+            if (resRegister == nullptr) {
+                return;
+            }
+            std::string result;
+            resRegister->OnMethodCall(method, param, result);
+            if (callback) {
+                callback(result);
+            }
+        },
+        "ArkUIWebCallResRegisterMethod");
 }
 
 std::string WebResource::GetStringParam(const std::string& param, const std::string& name) const

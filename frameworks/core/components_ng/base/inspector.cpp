@@ -32,6 +32,7 @@
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/memory/type_info_base.h"
+#include "foundation/arkui/ace_engine/frameworks/base/utils/utf.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -330,7 +331,6 @@ void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS
         jsonNode->Put(INSPECTOR_COMPONENT_TYPE, "build-in");
     }
     auto node = AceType::DynamicCast<FrameNode>(parent);
-
     if (node) {
         RectF rect;
         isActive = isActive && node->IsActive();
@@ -340,23 +340,19 @@ void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS
         jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
         jsonNode->Put(INSPECTOR_DEBUGLINE, node->GetDebugLine().c_str());
     }
-
     auto jsonObject = JsonUtil::Create(true);
-
     parent->ToJsonValue(jsonObject, filter);
     jsonNode->PutRef(INSPECTOR_ATTRS, std::move(jsonObject));
     std::vector<RefPtr<NG::UINode>> children;
     for (const auto& item : parent->GetChildren()) {
         GetFrameNodeChildren(item, children, pageId, isLayoutInspector);
     }
-
     if (node) {
         auto overlayNode = node->GetOverlayNode();
         if (overlayNode != nullptr) {
             GetFrameNodeChildren(overlayNode, children, pageId, isLayoutInspector);
         }
     }
-
     if (depth) {
         auto jsonChildrenArray = JsonUtil::CreateArray(true);
         for (auto uiNode : children) {
@@ -366,7 +362,10 @@ void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS
             jsonNode->PutRef(INSPECTOR_CHILDREN, std::move(jsonChildrenArray));
         }
     }
-    jsonNodeArray->PutRef(std::move(jsonNode));
+    std::string jsonChildStr = jsonNode->ToString();
+    ConvertIllegalStr(jsonChildStr);
+    auto jsonChild = JsonUtil::ParseJsonString(jsonChildStr);
+    jsonNodeArray->PutRef(std::move(jsonChild));
 }
 #endif
 

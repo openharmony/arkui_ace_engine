@@ -228,6 +228,22 @@ std::string ConvertFontFamily(const std::vector<std::string>& fontFamily)
     return result;
 }
 
+void AddTextFireOnChange(RefPtr<PipelineContext>& context, TextFieldPattern* pattern)
+{
+    context->AddAfterLayoutTask([weak = AceType::WeakClaim(pattern)] {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto eventHub = host->GetEventHub<TextFieldEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdateValue(pattern->GetTextContentController()->GetTextValue());
+        eventHub->FireOnChange(pattern->GetTextContentController()->GetTextValue());
+    });
+}
+
 } // namespace
 
 void TextFieldPattern::OnAttachContext(PipelineContext* context)
@@ -2629,8 +2645,6 @@ bool TextFieldPattern::FireOnTextChangeEvent()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto eventHub = host->GetEventHub<TextFieldEventHub>();
-    CHECK_NULL_RETURN(eventHub, false);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     auto cleanNodeStyle = layoutProperty->GetCleanNodeStyle().value_or(CleanNodeStyle::INPUT);
@@ -2646,25 +2660,19 @@ bool TextFieldPattern::FireOnTextChangeEvent()
     if (textCache == contentController_->GetTextValue()) {
         return false;
     }
-    layoutProperty->UpdateValue(contentController_->GetTextValue());
     host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, contentController_->GetTextValue());
     AutoFillValueChanged();
-    bool fireFlag = !GetIsPreviewText();
     auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(context, false);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
+    if (!GetIsPreviewText()) {
+        AddTextFireOnChange(context, this);
+    }
     taskExecutor->PostTask(
-        [weak = WeakClaim(this), fireFlag] {
+        [weak = WeakClaim(this)] {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            if (fireFlag) {
-                auto host = pattern->GetHost();
-                CHECK_NULL_VOID(host);
-                auto eventHub = host->GetEventHub<TextFieldEventHub>();
-                CHECK_NULL_VOID(eventHub);
-                eventHub->FireOnChange(pattern->GetTextContentController()->GetTextValue());
-            }
             if (!pattern->HasFocus()) {
                 return;
             }
@@ -2813,7 +2821,12 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     if (!focusHub->IsCurrentFocus()) {
         focusHub->RequestFocusImmediately();
     }
-    selectController_->UpdateSelectByOffset(ConvertGlobalToLocalOffset(info.GetGlobalLocation()));
+    auto localOffset = ConvertGlobalToLocalOffset(info.GetGlobalLocation());
+    if (selectController_->IsTouchAtLineEnd(localOffset)) {
+        selectController_->UpdateCaretInfoByOffset(localOffset);
+    } else {
+        selectController_->UpdateSelectByOffset(localOffset);
+    }
     if (IsSelected()) {
         StopTwinkling();
     }
@@ -4529,7 +4542,8 @@ void TextFieldPattern::DeleteBackward(int32_t length)
 void TextFieldPattern::DeleteBackwardOperation(int32_t length)
 {
     int32_t idx = selectController_->GetCaretIndex();
-    auto value = contentController_->GetSelectedValue(idx - length, idx);
+    auto willDeleteLength = contentController_->GetDeleteLength(idx, length, true);
+    auto value = contentController_->GetSelectedValue(idx - willDeleteLength, idx);
     auto isDelete = BeforeIMEDeleteValue(value, TextDeleteDirection::BACKWARD, idx);
     CHECK_NULL_VOID(isDelete);
     UpdateEditingValueToRecord();
@@ -4545,7 +4559,8 @@ void TextFieldPattern::DeleteBackwardOperation(int32_t length)
 void TextFieldPattern::DeleteForwardOperation(int32_t length)
 {
     auto caretIndex = selectController_->GetCaretIndex();
-    auto value = contentController_->GetSelectedValue(caretIndex, caretIndex + length);
+    auto willDeleteLength = contentController_->GetDeleteLength(caretIndex, length, false);
+    auto value = contentController_->GetSelectedValue(caretIndex, caretIndex + willDeleteLength);
     auto isDelete = BeforeIMEDeleteValue(value, TextDeleteDirection::FORWARD, caretIndex);
     CHECK_NULL_VOID(isDelete);
     ResetObscureTickCountDown();
@@ -7023,7 +7038,8 @@ void TextFieldPattern::SetThemeAttr()
     CHECK_NULL_VOID(theme);
     SetThemeBorderAttr();
     if (!paintProperty->HasBackgroundColor()) {
-        auto backgroundColor = IsUnderlineMode() ? Color::TRANSPARENT : theme->GetBgColor();
+        auto backgroundColor = isFocusBGColorSet_ ? theme->GetFocusBgColor() : theme->GetBgColor();
+        backgroundColor = IsUnderlineMode() ? Color::TRANSPARENT : backgroundColor;
         renderContext->UpdateBackgroundColor(backgroundColor);
     } else {
         renderContext->UpdateBackgroundColor(paintProperty->GetBackgroundColorValue());
@@ -7050,7 +7066,8 @@ void TextFieldPattern::SetThemeAttr()
     }
 
     if (!paintProperty->HasTextColorFlagByUser()) {
-        layoutProperty->UpdateTextColor(theme->GetTextColor());
+        auto textColor = isFocusTextColorSet_ ? theme->GetFocusTextColor() : theme->GetTextColor();
+        layoutProperty->UpdateTextColor(textColor);
     } else {
         layoutProperty->UpdateTextColor(paintProperty->GetTextColorFlagByUserValue());
     }

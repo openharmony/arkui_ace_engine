@@ -23,7 +23,7 @@ ohos_source_set("ace_resource") {
   }
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
-  include_dirs = []
+  include_dirs = [ "//third_party/bounds_checking_function/include" ]
 
   # add resource file here
   sources = [
@@ -34,7 +34,6 @@ ohos_source_set("ace_resource") {
   ]
   if (current_os == "mac" || current_os == "mingw" || current_os == "ios" ||
       current_os == "linux" || current_os == "android") {
-    include_dirs += [ "//third_party/bounds_checking_function/include" ]
     deps = [ ":binary_resource_mac_and_windows" ]
     sources += [ "internal_resource_previewer.cpp" ]
   } else {

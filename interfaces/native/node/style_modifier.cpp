@@ -396,8 +396,8 @@ bool IsValidDate(uint32_t year, uint32_t month, uint32_t day)
     if (month < NUM_1 || month > NUM_12) {
         return false;
     }
-    int daysInMonth[] = { 31, IsLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-    if (day < NUM_1 || day > daysInMonth[month - 1]) {
+    uint32_t daysInMonth[] = { 31, IsLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    if (day < 1 || day > daysInMonth[month - 1]) {
         return false;
     }
     return true;
@@ -868,7 +868,7 @@ const ArkUI_AttributeItem* GetPadding(ArkUI_NodeHandle node)
     ArkUI_Float32 paddings[NUM_4];
     ArkUI_Int32 length = 0;
     ArkUI_Int32 unit = GetDefaultUnit(node, UNIT_VP);
-    fullImpl->getNodeModifiers()->getCommonModifier()->getPadding(node->uiNodeHandle, paddings, length, unit);
+    fullImpl->getNodeModifiers()->getCommonModifier()->getPadding(node->uiNodeHandle, &paddings, length, unit);
     g_numberValues[NUM_0].f32 = paddings[NUM_0];
     g_numberValues[NUM_1].f32 = paddings[NUM_1];
     g_numberValues[NUM_2].f32 = paddings[NUM_2];
@@ -986,7 +986,7 @@ const ArkUI_AttributeItem* GetMargin(ArkUI_NodeHandle node)
         fullImpl->getNodeModifiers()->getTextAreaModifier()->getTextAreaMargin(
             node->uiNodeHandle, margins, length, unit);
     } else {
-        fullImpl->getNodeModifiers()->getCommonModifier()->getMargin(node->uiNodeHandle, margins, length, unit);
+        fullImpl->getNodeModifiers()->getCommonModifier()->getMargin(node->uiNodeHandle, &margins, length, unit);
     }
     g_numberValues[NUM_0].f32 = margins[NUM_0];
     g_numberValues[NUM_1].f32 = margins[NUM_1];
@@ -1027,7 +1027,7 @@ const ArkUI_AttributeItem* GetTranslate(ArkUI_NodeHandle node)
     auto* fullImpl = GetFullImpl();
     ArkUI_Float32 translate[NUM_3];
     ArkUI_Int32 unit = GetDefaultUnit(node, UNIT_VP);
-    fullImpl->getNodeModifiers()->getCommonModifier()->getTranslate(node->uiNodeHandle, translate, unit);
+    fullImpl->getNodeModifiers()->getCommonModifier()->getTranslate(node->uiNodeHandle, &translate, unit);
     g_numberValues[NUM_0].f32 = translate[NUM_0];
     g_numberValues[NUM_1].f32 = translate[NUM_1];
     g_numberValues[NUM_2].f32 = translate[NUM_2];
@@ -1240,7 +1240,7 @@ const ArkUI_AttributeItem* GetLinearGradient(ArkUI_NodeHandle node)
     //default size 10
     ArkUI_Float32 stops[NUM_10];
     auto resultValue = GetFullImpl()->getNodeModifiers()->getCommonModifier()->getLinearGradient(
-        node->uiNodeHandle, values, colors, stops);
+        node->uiNodeHandle, &values, &colors, &stops);
     //angle
     g_numberValues[0].f32 = values[0];
     //direction
@@ -1383,7 +1383,7 @@ const ArkUI_AttributeItem* GetBorderWidth(ArkUI_NodeHandle node)
     auto* fullImpl = GetFullImpl();
     ArkUI_Float32 borderWidth[NUM_4];
     auto unit = GetDefaultUnit(node, UNIT_VP);
-    fullImpl->getNodeModifiers()->getCommonModifier()->getBorderWidth(node->uiNodeHandle, borderWidth, unit);
+    fullImpl->getNodeModifiers()->getCommonModifier()->getBorderWidth(node->uiNodeHandle, &borderWidth, unit);
     g_numberValues[NUM_0].f32 = borderWidth[NUM_0];
     g_numberValues[NUM_1].f32 = borderWidth[NUM_1];
     g_numberValues[NUM_2].f32 = borderWidth[NUM_2];
@@ -1450,7 +1450,7 @@ const ArkUI_AttributeItem* GetBorderRadius(ArkUI_NodeHandle node)
     auto* fullImpl = GetFullImpl();
     ArkUI_Float32 borderRadius[NUM_4];
     ArkUI_Int32 unit = GetDefaultUnit(node, UNIT_VP);
-    fullImpl->getNodeModifiers()->getCommonModifier()->getBorderRadius(node->uiNodeHandle, borderRadius, unit);
+    fullImpl->getNodeModifiers()->getCommonModifier()->getBorderRadius(node->uiNodeHandle, &borderRadius, unit);
     g_numberValues[NUM_0].f32 = borderRadius[NUM_0];
     g_numberValues[NUM_1].f32 = borderRadius[NUM_1];
     g_numberValues[NUM_2].f32 = borderRadius[NUM_2];
@@ -1505,7 +1505,7 @@ const ArkUI_AttributeItem* GetBorderWidthPercent(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
     ArkUI_Float32 borderWidth[NUM_4];
-    fullImpl->getNodeModifiers()->getCommonModifier()->getBorderWidth(node->uiNodeHandle, borderWidth, UNIT_PERCENT);
+    fullImpl->getNodeModifiers()->getCommonModifier()->getBorderWidth(node->uiNodeHandle, &borderWidth, UNIT_PERCENT);
     g_numberValues[NUM_0].f32 = borderWidth[NUM_0];
     g_numberValues[NUM_1].f32 = borderWidth[NUM_1];
     g_numberValues[NUM_2].f32 = borderWidth[NUM_2];
@@ -1563,7 +1563,7 @@ const ArkUI_AttributeItem* GetBorderRadiusPercent(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
     ArkUI_Float32 borderRadius[NUM_4];
-    fullImpl->getNodeModifiers()->getCommonModifier()->getBorderRadius(node->uiNodeHandle, borderRadius, UNIT_PERCENT);
+    fullImpl->getNodeModifiers()->getCommonModifier()->getBorderRadius(node->uiNodeHandle, &borderRadius, UNIT_PERCENT);
     g_numberValues[NUM_0].f32 = borderRadius[NUM_0];
     g_numberValues[NUM_1].f32 = borderRadius[NUM_1];
     g_numberValues[NUM_2].f32 = borderRadius[NUM_2];
@@ -1592,7 +1592,7 @@ int32_t SetBorderColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     if (node->type == ARKUI_NODE_TEXT_INPUT || node->type == ARKUI_NODE_TEXT_AREA) {
         fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaBorderColor(
-            node->uiNodeHandle, colors[NUM_3], colors[NUM_1], colors[NUM_0], colors[NUM_2]);
+            node->uiNodeHandle, colors[NUM_0], colors[NUM_1], colors[NUM_2], colors[NUM_3]);
     } else {
         fullImpl->getNodeModifiers()->getCommonModifier()->setBorderColor(
             node->uiNodeHandle, colors[NUM_0], colors[NUM_1], colors[NUM_2], colors[NUM_3]);
@@ -1614,7 +1614,7 @@ const ArkUI_AttributeItem* GetBorderColor(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
     ArkUI_Uint32 colors[NUM_4];
-    fullImpl->getNodeModifiers()->getCommonModifier()->getBorderColor(node->uiNodeHandle, colors);
+    fullImpl->getNodeModifiers()->getCommonModifier()->getBorderColor(node->uiNodeHandle, &colors);
     g_numberValues[NUM_0].u32 = colors[NUM_0];
     g_numberValues[NUM_1].u32 = colors[NUM_1];
     g_numberValues[NUM_2].u32 = colors[NUM_2];
@@ -1673,7 +1673,7 @@ const ArkUI_AttributeItem* GetBorderStyle(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
     ArkUI_Int32 styles[NUM_4];
-    fullImpl->getNodeModifiers()->getCommonModifier()->getBorderStyle(node->uiNodeHandle, styles);
+    fullImpl->getNodeModifiers()->getCommonModifier()->getBorderStyle(node->uiNodeHandle, &styles);
     g_numberValues[NUM_0].i32 = styles[NUM_0];
     g_numberValues[NUM_1].i32 = styles[NUM_1];
     g_numberValues[NUM_2].i32 = styles[NUM_2];
@@ -1777,7 +1777,7 @@ int32_t SetClipShape(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
             pathAttributes[NUM_1] = item->value[NUM_2].f32;
         }
         fullImpl->getNodeModifiers()->getCommonModifier()->setClipPath(
-            node->uiNodeHandle, "path", pathAttributes, item->string);
+            node->uiNodeHandle, "path", &pathAttributes, item->string);
     } else {
         ArkUI_Float32 attributes[item->size - NUM_1];
         for (int i = NUM_1; i < item->size; i++) {
@@ -1853,7 +1853,7 @@ void ResetTransform(ArkUI_NodeHandle node)
 const ArkUI_AttributeItem* GetTransform(ArkUI_NodeHandle node)
 {
     ArkUI_Float32 values[NUM_16];
-    GetFullImpl()->getNodeModifiers()->getCommonModifier()->getTransform(node->uiNodeHandle, values);
+    GetFullImpl()->getNodeModifiers()->getCommonModifier()->getTransform(node->uiNodeHandle, &values);
     for (int i = 0; i < NUM_16; i++) {
         g_numberValues[i].f32 = values[i];
     }
@@ -2182,7 +2182,7 @@ const ArkUI_AttributeItem* GetResponseRegion(ArkUI_NodeHandle node)
 {
     ArkUI_Float32 values[32];
     auto valueSize =
-        GetFullImpl()->getNodeModifiers()->getCommonModifier()->getResponseRegion(node->uiNodeHandle, values);
+        GetFullImpl()->getNodeModifiers()->getCommonModifier()->getResponseRegion(node->uiNodeHandle, &values);
     for (int i = 0; i < valueSize; i++) {
         g_numberValues[i].f32 = values[i];
     }
@@ -2373,7 +2373,7 @@ const ArkUI_AttributeItem* GetSweepGradient(ArkUI_NodeHandle node)
     ArkUI_Float32 stops[NUM_10];
     ArkUI_Int32 unit = GetDefaultUnit(node, UNIT_VP);
     auto resultValue = GetFullImpl()->getNodeModifiers()->getCommonModifier()->getSweepGradient(
-        node->uiNodeHandle, values, colors, stops, unit);
+        node->uiNodeHandle, &values, &colors, &stops, unit);
     //centerX
     g_numberValues[NUM_0].f32 = values[NUM_0];
     //centerY
@@ -2476,7 +2476,7 @@ const ArkUI_AttributeItem* GetRadialGradient(ArkUI_NodeHandle node)
 
     ArkUI_Int32 unit = GetDefaultUnit(node, UNIT_VP);
     auto resultValue = GetFullImpl()->getNodeModifiers()->getCommonModifier()->getRadialGradient(
-        node->uiNodeHandle, values, colors, stops, unit);
+        node->uiNodeHandle, &values, &colors, &stops, unit);
     //centerX
     g_numberValues[NUM_0].f32 = values[NUM_0];
     //centerY
@@ -2515,8 +2515,8 @@ int32_t SetMask(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         if (item->string == nullptr) {
             return ERROR_CODE_PARAM_INVALID;
         }
-        int fill = item->size > NUM_0 ? item->value[0].u32 : DEFAULT_FIll_COLOR;
-        int stroke = item->size > NUM_1 ? item->value[NUM_1].u32 : DEFAULT_FIll_COLOR;
+        auto fill = item->size > NUM_0 ? item->value[0].u32 : DEFAULT_FIll_COLOR;
+        auto stroke = item->size > NUM_1 ? item->value[NUM_1].u32 : DEFAULT_FIll_COLOR;
         float strokeWidth = item->size > NUM_2 ? item->value[NUM_2].f32 : NUM_0;
         ArkUI_Float32 pathAttributes[NUM_2];
         if (LessNotEqual(item->value[NUM_4].f32, 0.0f) || LessNotEqual(item->value[NUM_5].f32, 0.0f)) {
@@ -2548,11 +2548,12 @@ int32_t SetMask(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
                    item->size != NUM_4) {
             return ERROR_CODE_PARAM_INVALID;
         }
-        int fill = item->size > NUM_0 ? item->value[0].u32 : DEFAULT_FIll_COLOR;
-        int stroke = item->size > NUM_1 ? item->value[NUM_1].u32 : DEFAULT_FIll_COLOR;
+        auto fill = item->size > NUM_0 ? item->value[0].u32 : DEFAULT_FIll_COLOR;
+        auto stroke = item->size > NUM_1 ? item->value[NUM_1].u32 : DEFAULT_FIll_COLOR;
         float strokeWidth = item->size > NUM_2 ? item->value[NUM_2].f32 : NUM_0;
-        ArkUI_Float32 attributes[item->size - NUM_4];
-        for (int i = 0; i < item->size - NUM_4; i++) {
+        auto index = item->size - NUM_4 < 0 ? 0 : item->size - NUM_4;
+        ArkUI_Float32 attributes[index];
+        for (int i = 0; i < index; i++) {
             if (LessNotEqual(item->value[i + NUM_4].f32, 0.0f)) {
                 return ERROR_CODE_PARAM_INVALID;
             } else {
@@ -3073,7 +3074,7 @@ const ArkUI_AttributeItem* GetDisplayPriority(ArkUI_NodeHandle node)
     if (!modifier) {
         return nullptr;
     }
-    g_numberValues[0].u32 = modifier->getDisplayPriority(node->uiNodeHandle);
+    g_numberValues[0].u32 = static_cast<uint32_t>(modifier->getDisplayPriority(node->uiNodeHandle));
     g_attributeItem.size = REQUIRED_ONE_PARAM;
     return &g_attributeItem;
 }
@@ -3170,7 +3171,7 @@ const ArkUI_AttributeItem* GetChainMode(ArkUI_NodeHandle node)
 {
     //size = 2; direction and style
     ArkUI_Int32 values[ALLOW_SIZE_2];
-    GetFullImpl()->getNodeModifiers()->getCommonModifier()->getChainStyle(node->uiNodeHandle, values);
+    GetFullImpl()->getNodeModifiers()->getCommonModifier()->getChainStyle(node->uiNodeHandle, &values);
     //index 0 direction
     g_numberValues[0].i32 = values[0];
     //index 1 style
@@ -3262,7 +3263,7 @@ const ArkUI_AttributeItem* GetPaddingPercent(ArkUI_NodeHandle node)
     auto* fullImpl = GetFullImpl();
     ArkUI_Float32 paddings[NUM_4];
     ArkUI_Int32 length = 0;
-    fullImpl->getNodeModifiers()->getCommonModifier()->getPadding(node->uiNodeHandle, paddings, length, UNIT_PERCENT);
+    fullImpl->getNodeModifiers()->getCommonModifier()->getPadding(node->uiNodeHandle, &paddings, length, UNIT_PERCENT);
     g_numberValues[NUM_0].f32 = paddings[NUM_0];
     g_numberValues[NUM_1].f32 = paddings[NUM_1];
     g_numberValues[NUM_2].f32 = paddings[NUM_2];
@@ -3306,7 +3307,7 @@ const ArkUI_AttributeItem* GetMarginPercent(ArkUI_NodeHandle node)
     auto* fullImpl = GetFullImpl();
     ArkUI_Float32 margins[NUM_4];
     ArkUI_Int32 length = 0;
-    fullImpl->getNodeModifiers()->getCommonModifier()->getMargin(node->uiNodeHandle, margins, length, UNIT_PERCENT);
+    fullImpl->getNodeModifiers()->getCommonModifier()->getMargin(node->uiNodeHandle, &margins, length, UNIT_PERCENT);
     g_numberValues[NUM_0].f32 = margins[NUM_0];
     g_numberValues[NUM_1].f32 = margins[NUM_1];
     g_numberValues[NUM_3].f32 = margins[NUM_3];
@@ -3375,7 +3376,7 @@ const ArkUI_AttributeItem* GetOutlineColor(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
     ArkUI_Uint32 colors[NUM_4];
-    fullImpl->getNodeModifiers()->getCommonModifier()->getOutlineColor(node->uiNodeHandle, colors);
+    fullImpl->getNodeModifiers()->getCommonModifier()->getOutlineColor(node->uiNodeHandle, &colors);
     g_numberValues[NUM_0].u32 = colors[NUM_0];
     g_numberValues[NUM_1].u32 = colors[NUM_1];
     g_numberValues[NUM_2].u32 = colors[NUM_2];
@@ -3414,7 +3415,7 @@ const ArkUI_AttributeItem* GetSize(ArkUI_NodeHandle node)
     auto* fullImpl = GetFullImpl();
     ArkUI_Float32 size[NUM_2];
     fullImpl->getNodeModifiers()->getCommonModifier()->getSize(
-        node->uiNodeHandle, size, GetDefaultUnit(node, UNIT_VP));
+        node->uiNodeHandle, &size, GetDefaultUnit(node, UNIT_VP));
     g_numberValues[NUM_0].f32 = size[NUM_0];
     g_numberValues[NUM_1].f32 = size[NUM_1];
     return &g_attributeItem;
@@ -4236,7 +4237,7 @@ const ArkUI_AttributeItem* GetTextInputUnderlineColor(ArkUI_NodeHandle node)
 {
     ArkUI_Uint32 values[NUM_4];
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getTextInputModifier()->getTextInputUserUnderlineColor(node->uiNodeHandle, values);
+    fullImpl->getNodeModifiers()->getTextInputModifier()->getTextInputUserUnderlineColor(node->uiNodeHandle, &values);
     g_numberValues[NUM_0].u32 = values[NUM_0];
     g_numberValues[NUM_1].u32 = values[NUM_1];
     g_numberValues[NUM_2].u32 = values[NUM_2];
@@ -4301,8 +4302,10 @@ const ArkUI_AttributeItem* GetTextInputContentType(ArkUI_NodeHandle node)
     auto fullImpl = GetFullImpl();
     auto value = fullImpl->getNodeModifiers()->getTextInputModifier()->getTextInputContentType(
         node->uiNodeHandle);
-    if (value >= static_cast<uint32_t>(ARKUI_TEXTINPUT_CONTENT_TYPE_FORMAT_ADDRESS) + CONVERT_CONTENT_TYPE
-        && value <= static_cast<uint32_t>(ARKUI_TEXTINPUT_CONTENT_TYPE_FORMAT_ADDRESS) + CONVERT_CONTENT_TYPE) {
+    if (value >= static_cast<int32_t>(
+                     static_cast<uint32_t>(ARKUI_TEXTINPUT_CONTENT_TYPE_FORMAT_ADDRESS) + CONVERT_CONTENT_TYPE) &&
+        value <= static_cast<int32_t>(
+                     static_cast<uint32_t>(ARKUI_TEXTINPUT_CONTENT_TYPE_FORMAT_ADDRESS) + CONVERT_CONTENT_TYPE)) {
         value -= CONVERT_CONTENT_TYPE;
     }
     g_numberValues[0].i32 = value;
@@ -4384,7 +4387,7 @@ const ArkUI_AttributeItem* GetTextInputCaretOffset(ArkUI_NodeHandle node)
     g_numberValues[NUM_0].i32 = fullImpl->getNodeModifiers()->getTextInputModifier()->getTextInputCaretIndex(
         node->uiNodeHandle);
     ArkUI_Float32 values[NUM_2];
-    fullImpl->getNodeModifiers()->getTextInputModifier()->getTextInputCaretOffset(node->uiNodeHandle, values);
+    fullImpl->getNodeModifiers()->getTextInputModifier()->getTextInputCaretOffset(node->uiNodeHandle, &values);
     g_numberValues[NUM_1].f32 = values[NUM_0];
     g_numberValues[NUM_2].f32 = values[NUM_1];
     g_attributeItem.size = REQUIRED_TWO_PARAM;
@@ -4449,7 +4452,7 @@ const ArkUI_AttributeItem* GetTextInputContentRect(ArkUI_NodeHandle node)
 {
     ArkUI_Float32 values[NUM_4];
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getTextInputModifier()->getTextInputContentRect(node->uiNodeHandle, values);
+    fullImpl->getNodeModifiers()->getTextInputModifier()->getTextInputContentRect(node->uiNodeHandle, &values);
     g_numberValues[NUM_0].f32 = values[NUM_0];
     g_numberValues[NUM_1].f32 = values[NUM_1];
     g_numberValues[NUM_2].f32 = values[NUM_2];
@@ -4699,7 +4702,8 @@ void ResetScrollFriction(ArkUI_NodeHandle node)
 const ArkUI_AttributeItem* GetScrollScrollSnap(ArkUI_NodeHandle node)
 {
     ArkUI_Float32 values[32];
-    auto size = GetFullImpl()->getNodeModifiers()->getScrollModifier()->getScrollScrollSnap(node->uiNodeHandle, values);
+    auto size =
+        GetFullImpl()->getNodeModifiers()->getScrollModifier()->getScrollScrollSnap(node->uiNodeHandle, &values);
 
     //size index
     g_numberValues[NUM_0].i32 = values[NUM_0];
@@ -4932,21 +4936,21 @@ const ArkUI_AttributeItem* GetScrollEdgeEffect(ArkUI_NodeHandle node)
     ArkUI_Int32 values[2];
     if (node->type == ARKUI_NODE_LIST) {
         auto valueSize =
-            GetFullImpl()->getNodeModifiers()->getListModifier()->getListEdgeEffect(node->uiNodeHandle, values);
+            GetFullImpl()->getNodeModifiers()->getListModifier()->getListEdgeEffect(node->uiNodeHandle, &values);
         for (int i = 0; i < valueSize; i++) {
             g_numberValues[i].i32 = values[i];
         }
         g_attributeItem.size = valueSize;
     } else if (node->type == ARKUI_NODE_SCROLL) {
         auto valueSize =
-            GetFullImpl()->getNodeModifiers()->getScrollModifier()->getScrollEdgeEffect(node->uiNodeHandle, values);
+            GetFullImpl()->getNodeModifiers()->getScrollModifier()->getScrollEdgeEffect(node->uiNodeHandle, &values);
         for (int i = 0; i < valueSize; i++) {
             g_numberValues[i].i32 = values[i];
         }
         g_attributeItem.size = valueSize;
     } else if (node->type == ARKUI_NODE_WATER_FLOW) {
         auto valueSize =
-            GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->getEdgeEffect(node->uiNodeHandle, values);
+            GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->getEdgeEffect(node->uiNodeHandle, &values);
         for (int i = 0; i < valueSize; i++) {
             g_numberValues[i].i32 = values[i];
         }
@@ -5067,11 +5071,12 @@ const ArkUI_AttributeItem* GetScrollNestedScroll(ArkUI_NodeHandle node)
 {
     ArkUI_Int32 values[2];
     if (node->type == ARKUI_NODE_WATER_FLOW) {
-        GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->getWaterFlowNestedScroll(node->uiNodeHandle, values);
+        GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->getWaterFlowNestedScroll(
+            node->uiNodeHandle, &values);
     } else if (node->type == ARKUI_NODE_LIST) {
-        GetFullImpl()->getNodeModifiers()->getListModifier()->getListNestedScroll(node->uiNodeHandle, values);
+        GetFullImpl()->getNodeModifiers()->getListModifier()->getListNestedScroll(node->uiNodeHandle, &values);
     } else {
-        GetFullImpl()->getNodeModifiers()->getScrollModifier()->getScrollNestedScroll(node->uiNodeHandle, values);
+        GetFullImpl()->getNodeModifiers()->getScrollModifier()->getScrollNestedScroll(node->uiNodeHandle, &values);
     }
     //size index
     g_numberValues[0].i32 = values[0];
@@ -5118,14 +5123,14 @@ int32_t SetScrollTo(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (item->size > NUM_5) {
         values[NUM_7] = static_cast<ArkUI_Float32>(item->value[NUM_5].i32);
     }
-    fullImpl->getNodeModifiers()->getScrollModifier()->setScrollTo(node->uiNodeHandle, values);
+    fullImpl->getNodeModifiers()->getScrollModifier()->setScrollTo(node->uiNodeHandle, &values);
     return ERROR_CODE_NO_ERROR;
 }
 
 const ArkUI_AttributeItem* GetScrollOffset(ArkUI_NodeHandle node)
 {
     ArkUI_Float32 values[2];
-    GetFullImpl()->getNodeModifiers()->getScrollModifier()->getScrollOffset(node->uiNodeHandle, values);
+    GetFullImpl()->getNodeModifiers()->getScrollModifier()->getScrollOffset(node->uiNodeHandle, &values);
     //size index
     g_numberValues[0].f32 = values[0];
     g_numberValues[1].f32 = values[1];
@@ -6730,7 +6735,7 @@ int32_t SetSwiperNestedScroll(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
     values[0] = item->value[0].i32;
 
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getSwiperModifier()->setSwiperNestedScroll(node->uiNodeHandle, values);
+    fullImpl->getNodeModifiers()->getSwiperModifier()->setSwiperNestedScroll(node->uiNodeHandle, &values);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -6760,22 +6765,27 @@ int32_t SetSwiperToIndex(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         values[1] = item->value[1].i32;
     }
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getSwiperModifier()->setSwiperToIndex(node->uiNodeHandle, values);
+    fullImpl->getNodeModifiers()->getSwiperModifier()->setSwiperToIndex(node->uiNodeHandle, &values);
     return ERROR_CODE_NO_ERROR;
 }
 
 int32_t SetSwiperPrevMargin(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (item->size == 0) {
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < NUM_0) {
         return ERROR_CODE_PARAM_INVALID;
     }
     if (LessNotEqual(item->value[0].f32, 0.0f)) {
         return ERROR_CODE_PARAM_INVALID;
     }
+    ArkUI_Bool ignoreBlank = DEFAULT_FALSE;
+    if (actualSize > NUM_1 && (item->value[1].i32 == DEFAULT_TRUE || item->value[1].i32 == DEFAULT_FALSE)) {
+        ignoreBlank = item->value[1].i32;
+    }
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getSwiperModifier()->setSwiperPrevMargin(
-        node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_VP));
+        node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_VP), ignoreBlank);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -6791,25 +6801,31 @@ const ArkUI_AttributeItem* GetSwiperPrevMargin(ArkUI_NodeHandle node)
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
     int32_t unit = GetDefaultUnit(node, UNIT_VP);
-    ArkUI_Float32 value = fullImpl->getNodeModifiers()->getSwiperModifier()->getSwiperPrevMargin(
-        node->uiNodeHandle, unit);
-    g_numberValues[0].f32 = value;
-    g_attributeItem.size = REQUIRED_ONE_PARAM;
+    ArkUISwiperMarginOptions options;
+    fullImpl->getNodeModifiers()->getSwiperModifier()->getSwiperPrevMargin(node->uiNodeHandle, unit, &options);
+    g_numberValues[0].f32 = options.margin;
+    g_numberValues[1].i32 = options.ignoreBlank;
+    g_attributeItem.size = REQUIRED_TWO_PARAM;
     return &g_attributeItem;
 }
 
 int32_t SetSwiperNextMargin(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (item->size == 0) {
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < NUM_0) {
         return ERROR_CODE_PARAM_INVALID;
     }
     if (LessNotEqual(item->value[0].f32, 0.0f)) {
         return ERROR_CODE_PARAM_INVALID;
     }
+    ArkUI_Bool ignoreBlank = DEFAULT_FALSE;
+    if (actualSize > NUM_1 && (item->value[1].i32 == DEFAULT_TRUE || item->value[1].i32 == DEFAULT_FALSE)) {
+        ignoreBlank = item->value[1].i32;
+    }
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getSwiperModifier()->setSwiperNextMargin(
-        node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_VP));
+        node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_VP), ignoreBlank);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -6825,10 +6841,11 @@ const ArkUI_AttributeItem* GetSwiperNextMargin(ArkUI_NodeHandle node)
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
     int32_t unit = GetDefaultUnit(node, UNIT_VP);
-    ArkUI_Float32 value = fullImpl->getNodeModifiers()->getSwiperModifier()->getSwiperNextMargin(
-        node->uiNodeHandle, unit);
-    g_numberValues[0].f32 = value;
-    g_attributeItem.size = REQUIRED_ONE_PARAM;
+    ArkUISwiperMarginOptions options;
+    fullImpl->getNodeModifiers()->getSwiperModifier()->getSwiperNextMargin(node->uiNodeHandle, unit, &options);
+    g_numberValues[0].f32 = options.margin;
+    g_numberValues[1].i32 = options.ignoreBlank;
+    g_attributeItem.size = REQUIRED_TWO_PARAM;
     return &g_attributeItem;
 }
 
@@ -8116,7 +8133,7 @@ int32_t SetBackgroundBlurStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
     greyVector[NUM_0] = grayScaleStart;
     greyVector[NUM_1] = grayScaleEnd;
     fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundBlurStyle(
-        node->uiNodeHandle, intArray, scale, blurOption.grayscale.data(), blurOption.grayscale.size());
+        node->uiNodeHandle, &intArray, scale, blurOption.grayscale.data(), blurOption.grayscale.size());
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -8153,7 +8170,7 @@ int32_t SetForegroundBlurStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
     intArray[NUM_1] = colorMode;
     intArray[NUM_2] = adaptiveColor;
     fullImpl->getNodeModifiers()->getCommonModifier()->setForegroundBlurStyle(
-        node->uiNodeHandle, intArray, scale, blurOption.grayscale.data(), blurOption.grayscale.size());
+        node->uiNodeHandle, &intArray, scale, blurOption.grayscale.data(), blurOption.grayscale.size());
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -8432,7 +8449,7 @@ int32_t SetRotateTransition(ArkUI_NodeHandle node, const ArkUI_AttributeItem* it
         return ERROR_CODE_PARAM_INVALID;
     }
     std::array<float, ARRAY_SIZE> rotateArray;
-    for (int32_t i = 0; i < actualSize && i < rotateArray.size(); i++) {
+    for (int32_t i = 0; i < static_cast<uint32_t>(actualSize) && i < rotateArray.size(); i++) {
         rotateArray[i] = item->value[i].f32;
     }
     float angle = 0.0f;
@@ -8461,7 +8478,7 @@ int32_t SetScaleTransition(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
         return ERROR_CODE_PARAM_INVALID;
     }
     std::array<float, ARRAY_SIZE> scaleFloatArray;
-    for (size_t i = 0; i < actualSize && i < scaleFloatArray.size(); i++) {
+    for (size_t i = 0; i < static_cast<uint32_t>(actualSize) && i < scaleFloatArray.size(); i++) {
         scaleFloatArray[i] = item->value[i].f32;
     }
     ArkUIAnimationOptionType animationOption;
@@ -9004,7 +9021,7 @@ const ArkUI_AttributeItem* GetTextDataDetectorConfig(ArkUI_NodeHandle node)
     ArkUI_Int32 values[32];
     auto* fullImpl = GetFullImpl();
     auto size = fullImpl->getNodeModifiers()->getTextModifier()->getTextDataDetectorConfig(
-        node->uiNodeHandle, values);
+        node->uiNodeHandle, &values);
     for (auto i = 0; i < size; i++) {
         g_numberValues[i].i32 = values[i];
     }
@@ -9181,6 +9198,7 @@ int32_t SetImageSrc(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (!drawableDescriptor) {
         return ERROR_CODE_PARAM_INVALID;
     }
+    node->drawableDescriptor = drawableDescriptor;
     if (!drawableDescriptor->drawableDescriptor && !drawableDescriptor->resource &&
         !drawableDescriptor->animatedDrawableDescriptor) {
         return ERROR_CODE_PARAM_INVALID;
@@ -9261,7 +9279,7 @@ int32_t SetColorFilter(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         return ERROR_CODE_NO_ERROR;
     }
     std::vector<float> colorFloatArray;
-    for (size_t i = 0; i < actualSize && i < REQUIRED_TWENTY_PARAM; i++) {
+    for (size_t i = 0; i < static_cast<uint32_t>(actualSize) && i < REQUIRED_TWENTY_PARAM; i++) {
         colorFloatArray.emplace_back(item->value[i].f32);
     }
     fullImpl->getNodeModifiers()->getImageModifier()->setColorFilter(
@@ -10356,6 +10374,9 @@ const ArkUI_AttributeItem* GetImageSpanSrc(ArkUI_NodeHandle node)
     auto fullImpl = GetFullImpl();
     auto src = fullImpl->getNodeModifiers()->getImageModifier()->getImageSrc(node->uiNodeHandle);
     g_attributeItem.string = (src != nullptr ? src : EMPTY_STR.c_str());
+    if (node->drawableDescriptor) {
+        g_attributeItem.object = node->drawableDescriptor;
+    }
     return &g_attributeItem;
 }
 
@@ -10377,6 +10398,9 @@ const ArkUI_AttributeItem* GetImageSrc(ArkUI_NodeHandle node)
     auto fullImpl = GetFullImpl();
     auto src = fullImpl->getNodeModifiers()->getImageModifier()->getImageSrc(node->uiNodeHandle);
     g_attributeItem.string = (src != nullptr ? src : EMPTY_STR.c_str());
+    if (node->drawableDescriptor) {
+        g_attributeItem.object = node->drawableDescriptor;
+    }
     return &g_attributeItem;
 }
 
@@ -10711,7 +10735,7 @@ int32_t SetSliderBlockStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem* it
             }
 
             fullImpl->getNodeModifiers()->getSliderModifier()->setSliderBlockPath(
-                node->uiNodeHandle, "path", pathAttributes, item->string);
+                node->uiNodeHandle, "path", &pathAttributes, item->string);
         } else {
             ArkUI_Float32 attributes[item->size - NUM_2];
             for (int i = NUM_2; i < item->size; i++) {
@@ -10743,8 +10767,8 @@ const ArkUI_AttributeItem* GetSliderBlockStyle(ArkUI_NodeHandle node)
         }
         case NUM_2: {
             ArkUI_Float32 values[NUM_5];
-            auto pathCommands =
-                GetFullImpl()->getNodeModifiers()->getSliderModifier()->getSliderBlockShape(node->uiNodeHandle, values);
+            auto pathCommands = GetFullImpl()->getNodeModifiers()->getSliderModifier()->getSliderBlockShape(
+                node->uiNodeHandle, &values);
             //index 1 shapeType
             g_numberValues[1].i32 = values[0];
             //index 2 width

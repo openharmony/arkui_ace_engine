@@ -762,4 +762,29 @@ ArkUINativeModuleValue AlphabetIndexerBridge::ResetAutoCollapse(ArkUIRuntimeCall
     GetArkUINodeModifiers()->getAlphabetIndexerModifier()->resetAutoCollapse(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue AlphabetIndexerBridge::SetEnableHapticFeedback(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> hapticFeedbackArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    bool isHapticEnable = true;
+    if (hapticFeedbackArg->IsBoolean()) {
+        isHapticEnable = hapticFeedbackArg->ToBoolean(vm)->Value();
+    }
+    GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setEnableHapticFeedback(nativeNode, isHapticEnable);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue AlphabetIndexerBridge::ResetEnableHapticFeedback(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getAlphabetIndexerModifier()->resetEnableHapticFeedback(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

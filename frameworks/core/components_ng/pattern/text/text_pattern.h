@@ -138,6 +138,7 @@ public:
     void BeforeCreateLayoutWrapper() override;
 
     void AddChildSpanItem(const RefPtr<UINode>& child);
+    void AddImageToSpanItem(const RefPtr<UINode>& child);
 
     FocusPattern GetFocusPattern() const override
     {
@@ -528,6 +529,7 @@ public:
     void ResetSelection();
     bool IsSelectAll();
     void HandleOnCopy();
+    void HandleOnCopySpanString();
     virtual void HandleOnSelectAll();
 
     OffsetF GetTextPaintOffset() const override
@@ -802,7 +804,7 @@ private:
     RefPtr<DragWindow> dragWindow_;
     RefPtr<DragDropProxy> dragDropProxy_;
     std::optional<int32_t> surfaceChangedCallbackId_;
-    SourceTool lastDragTool_;
+    SourceTool lastDragTool_ = SourceTool::UNKNOWN;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
     int32_t dragRecordSize_ = -1;
     RefPtr<TextController> textController_;

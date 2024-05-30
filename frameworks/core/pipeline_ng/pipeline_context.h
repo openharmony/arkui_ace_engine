@@ -69,6 +69,7 @@ public:
     using SurfacePositionChangedCallbackMap = std::unordered_map<int32_t, std::function<void(int32_t, int32_t)>>;
     using FoldStatusChangedCallbackMap = std::unordered_map<int32_t, std::function<void(FoldStatus)>>;
     using FoldDisplayModeChangedCallbackMap = std::unordered_map<int32_t, std::function<void(FoldDisplayMode)>>;
+    using TransformHintChangedCallbackMap = std::unordered_map<int32_t, std::function<void(uint32_t)>>;
     using PredictTask = std::function<void(int64_t, bool)>;
     PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
         RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
@@ -487,6 +488,20 @@ public:
         surfacePositionChangedCallbackMap_.erase(callbackId);
     }
 
+    int32_t RegisterTransformHintChangeCallback(std::function<void(uint32_t)>&& callback)
+    {
+        if (callback) {
+            transformHintChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
+            return callbackId_;
+        }
+        return 0;
+    }
+
+    void UnregisterTransformHintChangedCallback(int32_t callbackId)
+    {
+        transformHintChangedCallbackMap_.erase(callbackId);
+    }
+
     void SetMouseStyleHoldNode(int32_t id)
     {
         if (mouseStyleNodeId_ == -1) {
@@ -603,6 +618,8 @@ public:
 
     void OnFoldStatusChange(FoldStatus foldStatus) override;
     void OnFoldDisplayModeChange(FoldDisplayMode foldDisplayMode) override;
+
+    void OnTransformHintChanged(uint32_t transform) override;
 
     // for frontend animation interface.
     void OpenFrontendAnimation(
@@ -737,6 +754,15 @@ public:
 
     void FlushFrameCallback(uint64_t nanoTimestamp);
 
+    void SetPredictNode(const RefPtr<FrameNode>& node)
+    {
+        predictNode_ = node;
+    }
+
+    void ResetPredictNode()
+    {
+        predictNode_.Reset();
+    }
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -878,6 +904,7 @@ private:
     SurfacePositionChangedCallbackMap surfacePositionChangedCallbackMap_;
     FoldStatusChangedCallbackMap foldStatusChangedCallbackMap_;
     FoldDisplayModeChangedCallbackMap foldDisplayModeChangedCallbackMap_;
+    TransformHintChangedCallbackMap transformHintChangedCallbackMap_;
 
     bool isOnAreaChangeNodesCacheVaild_ = false;
     std::vector<FrameNode*> onAreaChangeNodesCache_;
@@ -953,6 +980,8 @@ private:
     std::unordered_map<int32_t, uint64_t> lastDispatchTime_;
     std::vector<Ace::RectF> overlayNodePositions_;
     std::function<void(std::vector<Ace::RectF>)> overlayNodePositionUpdateCallback_;
+
+    RefPtr<FrameNode> predictNode_;
 
     VsyncCallbackFun vsyncListener_;
     VsyncCallbackFun onceVsyncListener_;

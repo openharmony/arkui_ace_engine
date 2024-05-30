@@ -31,6 +31,7 @@ public:
     virtual void SetFontStyle(Ace::FontStyle style);
     virtual void SetFontColor(const std::optional<Color>& color);
     virtual void SetFontFamily(const std::vector<std::string> &families);
+    virtual void ResetFontFamily() {};
     virtual void SetWidth(const Dimension& width);
     virtual void SetBorderRadius(const Dimension& radius);
     virtual void ResetBorderRadius() {};

@@ -86,7 +86,8 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (SystemProperties::GetGridCacheEnabled()) {
         FillCacheLineAtEnd(mainSize, crossSize, layoutWrapper);
         if (!predictBuildList_.empty()) {
-            PostIdleTask(layoutWrapper->GetHostNode(), { predictBuildList_, cachedChildConstraint_ });
+            PostIdleTask(layoutWrapper->GetHostNode(),
+                { predictBuildList_, cachedChildConstraint_, itemsCrossSize_, crossGap_ });
             predictBuildList_.clear();
         }
     }

@@ -68,7 +68,7 @@ void ImageModelNG::Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMa
     RefPtr<FrameNode> frameNode;
     if (imageInfoConfig.isImageSpan) {
         frameNode = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+            nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     } else {
         frameNode = FrameNode::GetOrCreateFrameNode(
             V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });

@@ -78,7 +78,7 @@ void GetTextPickerSelectedIndex(ArkUINodeHandle node, ArkUI_Uint32* values, ArkU
         values[0] = selectedValue;
     } else {
         auto selectedValue = TextPickerModelNG::getTextPickerSelecteds(frameNode);
-        if (size != selectedValue.size()) {
+        if (size != static_cast<int32_t>(selectedValue.size())) {
             return;
         }
         for (int i = 0; i < size; i++) {

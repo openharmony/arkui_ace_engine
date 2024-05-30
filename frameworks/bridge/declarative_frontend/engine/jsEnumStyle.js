@@ -318,6 +318,14 @@ var BarrierDirection;
   BarrierDirection[BarrierDirection["BOTTOM"] = 3] = "BOTTOM";
 })(BarrierDirection || (BarrierDirection = {}));
 
+var LocalizedBarrierDirection;
+(function (LocalizedBarrierDirection) {
+  LocalizedBarrierDirection[LocalizedBarrierDirection["START"] = 0] = "START";
+  LocalizedBarrierDirection[LocalizedBarrierDirection["END"] = 1] = "END";
+  LocalizedBarrierDirection[LocalizedBarrierDirection["TOP"] = 2] = "TOP";
+  LocalizedBarrierDirection[LocalizedBarrierDirection["BOTTOM"] = 3] = "BOTTOM";
+})(LocalizedBarrierDirection || (LocalizedBarrierDirection = {}));
+
 var BlendMode;
 (function (BlendMode) {
   BlendMode[BlendMode["NORMAL"] = 0] = "NORMAL";

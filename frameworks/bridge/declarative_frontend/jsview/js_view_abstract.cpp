@@ -3131,6 +3131,9 @@ std::vector<NG::OptionParam> ParseBindOptionParam(const JSCallbackInfo& info, si
     std::vector<NG::OptionParam> params(paramArray->Length());
     // parse paramArray
     for (size_t i = 0; i < paramArray->Length(); ++i) {
+        if (!paramArray->GetValueAt(i)->IsObject()) {
+            return std::vector<NG::OptionParam>();
+        }
         auto indexObject = JSRef<JSObject>::Cast(paramArray->GetValueAt(i));
         JSViewAbstract::ParseJsString(indexObject->GetProperty("value"), params[i].value);
         auto actionFunc = indexObject->GetProperty("action");
@@ -3349,6 +3352,9 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
 
 void ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam, size_t optionIndex)
 {
+    if (!info[optionIndex]->IsObject()) {
+        return;
+    }
     auto menuOptions = JSRef<JSObject>::Cast(info[optionIndex]);
     JSViewAbstract::ParseJsString(menuOptions->GetProperty("title"), menuParam.title);
     ParseMenuParam(info, menuOptions, menuParam);
@@ -3752,16 +3758,21 @@ bool IsBorderWidthObjUndefined(const JSRef<JSVal>& args)
         return false;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args);
-    if (!obj->HasProperty(LEFT_PROPERTY) || !obj->HasProperty(RIGHT_PROPERTY)) {
-        return false;
+    if (obj->IsUndefined()) {
+        return true;
+    }
+    if ((!obj->HasProperty(TOP_PROPERTY) || obj->GetProperty(TOP_PROPERTY)->IsUndefined()) &&
+        (!obj->HasProperty(RIGHT_PROPERTY) || obj->GetProperty(RIGHT_PROPERTY)->IsUndefined()) &&
+        (!obj->HasProperty(BOTTOM_PROPERTY) || obj->GetProperty(BOTTOM_PROPERTY)->IsUndefined()) &&
+        (!obj->HasProperty(LEFT_PROPERTY) || obj->GetProperty(LEFT_PROPERTY)->IsUndefined()) &&
+        (!obj->HasProperty(START_PROPERTY) || obj->GetProperty(START_PROPERTY)->IsUndefined()) &&
+        (!obj->HasProperty(END_PROPERTY) || obj->GetProperty(END_PROPERTY)->IsUndefined())) {
+        return true;
     }
     
-    if (!obj->IsUndefined()) {
-        return false;
-    }
-    return true;
+    return false;
 }
-    
+
 void JSViewAbstract::JsBorderWidth(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
@@ -4975,6 +4986,9 @@ bool JSViewAbstract::ParseLengthMetricsToPositiveDimension(const JSRef<JSVal>& j
 
 bool JSViewAbstract::ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& result)
 {
+    if (!jsValue->IsObject()) {
+        return false;
+    }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     CompleteResourceObject(jsObj);
     if (jsObj->IsEmpty()) {
@@ -6306,6 +6320,9 @@ void JSViewAbstract::JsLinearGradient(const JSCallbackInfo& info)
 
 void JSViewAbstract::NewJsLinearGradient(const JSCallbackInfo& info, NG::Gradient& newGradient)
 {
+    if (!info[0]->IsObject()) {
+        return;
+    }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
     newGradient.CreateGradientWithType(NG::GradientType::LINEAR);
     // angle
@@ -8359,7 +8376,7 @@ void JSViewAbstract::JsAlignRules(const JSCallbackInfo& info)
     if (valueObj->IsEmpty()) {
         return;
     }
-    const char* keys[] = { "left", "middle", "right", "top", "center", "bottom", "bias" };
+    const char* keys[] = { "left", "middle", "right", "top", "center", "bottom", "bias", "start", "end" };
     std::map<AlignDirection, AlignRule> alignRules;
     BiasPair biasPair(DEFAULT_BIAS, DEFAULT_BIAS);
     for (uint32_t i = 0; i < sizeof(keys) / sizeof(const char*); i++) {
@@ -8376,6 +8393,10 @@ void JSViewAbstract::JsAlignRules(const JSCallbackInfo& info)
             }
             if (i < VERTICAL_DIRECTION_RANGE) {
                 alignRules[static_cast<AlignDirection>(i)] = alignRule;
+            } else if (i == HORIZONTAL_DIRECTION_START_INDEX) {
+                alignRules[AlignDirection::LEFT] = alignRule;
+            } else if (i == HORIZONTAL_DIRECTION_END_INDEX) {
+                alignRules[AlignDirection::RIGHT] = alignRule;
             }
             auto biasX = val->GetProperty("horizontal");
             if (biasX->IsNumber()) {

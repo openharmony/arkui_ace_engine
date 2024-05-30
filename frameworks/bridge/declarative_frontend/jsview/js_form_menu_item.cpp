@@ -99,8 +99,8 @@ void JSFormMenuItem::JsOnRegClick(const JSCallbackInfo& info)
     
     std::string formBindingDataStr;
     JSViewAbstract::ParseJsString(info[NUM_DATA_3], formBindingDataStr);
-    if (!formBindingDataStr.empty()) {
-        TAG_LOGI(AceLogTag::ACE_FORM, "JsOnClick formBindingDataStr %{public}s", formBindingDataStr.c_str());
+    if (formBindingDataStr.empty()) {
+        TAG_LOGW(AceLogTag::ACE_FORM, "JsOnClick formBindingDataStr is empty");
     }
 
     RefPtr<JsFunction> jsCallBackFunc = nullptr;

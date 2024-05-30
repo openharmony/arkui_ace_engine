@@ -672,6 +672,16 @@ public:
         prevMarginIgnoreBlank_ = prevMarginIgnoreBlank;
     }
 
+    bool GetPrevMarginIgnoreBlank()
+    {
+        return prevMarginIgnoreBlank_;
+    }
+
+    bool GetNextMarginIgnoreBlank()
+    {
+        return nextMarginIgnoreBlank_;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
@@ -960,6 +970,7 @@ private:
     void CreateSpringProperty();
 
     std::optional<RefPtr<UINode>> FindLazyForEachNode(RefPtr<UINode> baseNode, bool isSelfNode = true) const;
+    bool NeedForceMeasure() const;
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -1118,6 +1129,7 @@ private:
     bool isInAutoPlay_ = false;
 
     bool needFireCustomAnimationEvent_ = true;
+    std::optional<bool> isSwipeByGroup_;
 };
 } // namespace OHOS::Ace::NG
 

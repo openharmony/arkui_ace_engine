@@ -122,10 +122,21 @@ public:
         measureFinish_ = true;
     }
 
+    bool GetLoadInVipChannel()
+    {
+        return loadInVipChannel_;
+    }
+
+    void SetLoadInVipChannel(bool loadInVipChannel)
+    {
+        loadInVipChannel_ = loadInVipChannel;
+    }
+
     void CallbackAfterMeasureIfNeed();
 
     void OnDataReadyOnCompleteCallBack();
     void SetOnProgressCallback(std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& onProgress);
+    bool RemoveDownloadTask(const std::string& src);
 
 private:
 #define DEFINE_SET_NOTIFY_TASK(loadResult)                                            \
@@ -173,6 +184,7 @@ private:
 
     bool autoResize_ = true;
     bool syncLoad_ = false;
+    bool loadInVipChannel_ = false;
 
     DynamicRangeMode dynamicMode_ = DynamicRangeMode::STANDARD;
     AIImageQuality imageQuality_ = AIImageQuality::NONE;

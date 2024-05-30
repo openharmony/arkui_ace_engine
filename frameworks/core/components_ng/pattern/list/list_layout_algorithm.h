@@ -355,6 +355,10 @@ public:
         posMap_ = posMap;
     }
 
+    int32_t GetSnapStartIndex();
+
+    int32_t GetSnapEndIndex();
+
 protected:
     virtual void UpdateListItemConstraint(
         Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);

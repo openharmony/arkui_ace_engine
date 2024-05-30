@@ -1484,4 +1484,213 @@ HWTEST_F(ProgressModifierTestNg, ProgressPaintMethod004, TestSize.Level1)
     EXPECT_FLOAT_EQ(progressPaintMethod.strokeWidth_, 4.f);
     delete paintWrapper;
 }
+
+/**
+ * @tc.name: ProgressModifierRTL001
+ * @tc.desc: Test RightToLeft PROGRESS_TYPE_LINEAR ProgressModifier.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressModifierTestNg, ProgressModifierRTL001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
+     * @tc.expected: step1. Check the ProgressModifier property value.
+     */
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
+
+    /**
+     * @tc.steps: step2. Set different properties, call function onDraw.
+     * @tc.expected: step2. Set the properties success.
+     */
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, CONTEXT_WIDTH, CONTEXT_HEIGHT };
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, ClipPath(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawRect(_)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Restore()).Times(AtLeast(1));
+
+    /**
+     * @tc.steps: step3. Set RightToLeft value for the horizontal linear progress.
+     * @tc.expected: step3. The sweeping animation is started.
+     */
+    float value = 50.0f;
+    SizeF ContentSize2(200.0f, 100.0f);
+    progressModifier->SetIsRightToLeft(true);
+    EXPECT_EQ(progressModifier->isRightToLeft_->Get(), true);
+    progressModifier->SetContentSize(ContentSize2);
+    progressModifier->SetVisible(true);
+    progressModifier->isSweeping_ = false;
+    progressModifier->SetProgressType(PROGRESS_TYPE_LINEAR);
+    progressModifier->SetValue(value);
+    progressModifier->onDraw(context);
+    EXPECT_EQ(progressModifier->progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_LINEAR));
+}
+
+/**
+ * @tc.name: ProgressModifierRTL002
+ * @tc.desc: Test RightToLeft PROGRESS_TYPE_RING ProgressModifier.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressModifierTestNg, ProgressModifierRTL002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
+     * @tc.expected: step1. Check the ProgressModifier property value.
+     */
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
+
+    /**
+     * @tc.steps: step2. Set different properties, call function onDraw.
+     * @tc.expected: step2. Set the properties success.
+     */
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, CONTEXT_WIDTH, CONTEXT_HEIGHT };
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, ClipPath(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawArc(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Rotate(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Restore()).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Scale(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Translate(_, _)).Times(AtLeast(1));
+
+    // Set RightToLeft SweepingDate_ = 200.
+    SizeF ContentSize(CONTEXT_WIDTH, CONTEXT_HEIGHT);
+    progressModifier->SetIsRightToLeft(true);
+    EXPECT_EQ(progressModifier->isRightToLeft_->Get(), true);
+    progressModifier->SetStrokeWidth(PROGRESS_STROKE_WIDTH);
+    progressModifier->SetPaintShadow(true);
+    progressModifier->SetMaxValue(PROGRESS_MODIFIER_VALUE);
+    EXPECT_EQ(progressModifier->maxValue_->Get(), PROGRESS_MODIFIER_VALUE);
+    progressModifier->SetValue(50.0f);
+    EXPECT_EQ(progressModifier->value_->Get(), 50.0f);
+    progressModifier->SetScaleWidth(PROGRESS_MODIFIER_VALUE);
+    EXPECT_EQ(progressModifier->scaleWidth_->Get(), PROGRESS_MODIFIER_VALUE);
+    progressModifier->isLoading_ = false;
+    progressModifier->sweepingDate_->Set(200.0f);
+    progressModifier->SetContentSize(ContentSize);
+    progressModifier->SetProgressType(PROGRESS_TYPE_RING);
+    progressModifier->onDraw(context);
+    EXPECT_EQ(progressModifier->progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_RING));
+}
+
+/**
+ * @tc.name: ProgressModifierRTL003
+ * @tc.desc: Test RightToLeft PROGRESS_TYPE_SCALE AND MOON ProgressModifier.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressModifierTestNg, ProgressModifierRTL003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
+     * @tc.expected: step1. Check the ProgressModifier property value.
+     */
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
+
+    /**
+     * @tc.steps: step2. Set different properties, call function onDraw.
+     * @tc.expected: step2. Set the properties success.
+     */
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, CONTEXT_WIDTH, CONTEXT_HEIGHT };
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawArc(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Restore()).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Scale(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Translate(_, _)).Times(AtLeast(1));
+
+    // set RightToLeft ProgressType SCALE
+    progressModifier->SetIsRightToLeft(true);
+    EXPECT_EQ(progressModifier->isRightToLeft_->Get(), true);
+    progressModifier->SetProgressType(PROGRESS_TYPE_SCALE);
+    progressModifier->onDraw(context);
+    EXPECT_EQ(progressModifier->progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_SCALE));
+
+    // set RightToLeft ProgressType SCALE SetScaleWidth 0
+    progressModifier->SetIsRightToLeft(true);
+    EXPECT_EQ(progressModifier->isRightToLeft_->Get(), true);
+    progressModifier->SetScaleWidth(0);
+    progressModifier->onDraw(context);
+    EXPECT_EQ(progressModifier->scaleWidth_->Get(), 0);
+
+    // set RightToLeft ProgressType MOON
+    progressModifier->SetIsRightToLeft(true);
+    EXPECT_EQ(progressModifier->isRightToLeft_->Get(), true);
+    progressModifier->SetStrokeWidth(PROGRESS_STROKE_WIDTH);
+    progressModifier->SetProgressType(PROGRESS_TYPE_MOON);
+    progressModifier->onDraw(context);
+    EXPECT_EQ(progressModifier->progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_MOON));
+    EXPECT_EQ(progressModifier->strokeWidth_->Get(), PROGRESS_STROKE_WIDTH);
+
+    // set RightToLeft ProgressType MOON(angle <=FLOAT_ZERO_FIVE)
+    progressModifier->SetIsRightToLeft(true);
+    EXPECT_EQ(progressModifier->isRightToLeft_->Get(), true);
+    progressModifier->SetMaxValue(PROGRESS_MODIFIER_MAX_VALUE);
+    progressModifier->onDraw(context);
+    EXPECT_EQ(progressModifier->maxValue_->Get(), PROGRESS_MODIFIER_MAX_VALUE);
+}
+
+/**
+ * @tc.name: ProgressModifierRTL004
+ * @tc.desc: Test RightToLeft PROGRESS_TYPE_CAPSULE ProgressModifier.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressModifierTestNg, ProgressModifierRTL004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
+     * @tc.expected: step1. Check the ProgressModifier property value.
+     */
+    auto modifier = AceType::MakeRefPtr<ProgressModifier>();
+
+    /**
+     * @tc.steps: step2. Set different properties, call function onDraw.
+     * @tc.expected: step2. Set the properties success.
+     */
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, CONTEXT_WIDTH, CONTEXT_HEIGHT };
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawRect(_)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, ClipPath(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Restore()).Times(AtLeast(1));
+
+    modifier->SetProgressType(PROGRESS_TYPE_CAPSULE);
+    modifier->SetIsRightToLeft(true);
+    EXPECT_EQ(modifier->isRightToLeft_->Get(), true);
+    std::vector<float> valueVector = { 0.f, 50.f, 100.f };
+    std::vector<SizeF> contentSizeVector = { SizeF(100.0f, 100.0f), SizeF(50.0f, 100.0f) };
+    for (auto i : contentSizeVector) {
+        modifier->SetContentSize(i);
+        for (auto it : valueVector) {
+            modifier->SetValue(it);
+            modifier->onDraw(context);
+            EXPECT_EQ(modifier->value_->Get(), it);
+            EXPECT_EQ(modifier->progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_CAPSULE));
+        }
+        EXPECT_EQ(modifier->contentSize_->Get(), i);
+    }
+}
 } // namespace OHOS::Ace::NG

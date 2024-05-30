@@ -28,7 +28,7 @@ const querySnapshotAsync = async (want: Want, componentId: string): Promise<void
     const imagePackageApi: image.ImagePacker = image.createImagePacker();
     const packOpts: image.PackingOption = {
       format: 'image/jpeg',
-      quality: 100,
+      quality: 50,
     };
     let packPixmap: image.PixelMap = await componentSnapshot.get(componentId);
     let arrayBuffer: ArrayBuffer = await imagePackageApi.packing(packPixmap, packOpts);
@@ -41,6 +41,7 @@ const querySnapshotAsync = async (want: Want, componentId: string): Promise<void
     want.parameters['ohos.extra.param.key.add_form_to_host_screenx'] = compInfo.screenOffset.x.toFixed(2);
     want.parameters['ohos.extra.param.key.add_form_to_host_screeny'] = compInfo.screenOffset.y.toFixed(2);
     want.parameters['ohos.extra.param.key.add_form_to_host_snapshot'] = pixelStr;
+    hilog.info(0x3900, tag, 'pixelStr length:' + pixelStr.length);
   } catch (err) {
     hilog.error(0x3900, tag, 'get pixelmap string error:' + err);
   }
@@ -56,7 +57,7 @@ AddFormMenuItem(want: Want, componentId: string, options?: AddFormOptions): void
   if (querySnapshot(want, componentId)) {
   }
   FormMenuItem(options?.style?.options ? options.style.options : {
-    startIcon: $r('sys.media.ohos_ic_public_add'),
+    startIcon: $r('sys.media.ic_form_menu_add'),
     content: $r('sys.string.ohos_add_form_to_desktop')
   })
   .onRegClick(want, componentId, options?.formBindingData?.data, options?.callback)

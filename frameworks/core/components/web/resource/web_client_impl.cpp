@@ -1179,5 +1179,13 @@ void WebClientImpl::OnOverlayStateChanged(int offsetX,
                                     offsetY,
                                     rectWidth,
                                     rectHeight);
+void WebClientImpl::OnAdsBlocked(const std::string& url, const std::vector<std::string>& adsBlocked)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnAdsBlocked(url, adsBlocked);
 }
 } // namespace OHOS::Ace

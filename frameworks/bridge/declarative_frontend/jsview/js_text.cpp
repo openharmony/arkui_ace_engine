@@ -976,9 +976,9 @@ void JSTextController::GetLayoutManager(const JSCallbackInfo& args)
     CHECK_NULL_VOID(jsLayoutManager);
     jsLayoutManager->IncRefCount();
     auto controller = controllerWeak_.Upgrade();
+    CHECK_NULL_VOID(controller);
     auto layoutInfoInterface = controller->GetLayoutInfoInterface();
-    auto textLayoutInfoInterface = layoutInfoInterface.Upgrade();
-    jsLayoutManager->SetLayoutInfoInterface(textLayoutInfoInterface);
+    jsLayoutManager->SetLayoutInfoInterface(layoutInfoInterface);
     args.SetReturnValue(obj);
 }
 

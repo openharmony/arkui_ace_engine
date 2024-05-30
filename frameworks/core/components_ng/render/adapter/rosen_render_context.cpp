@@ -145,6 +145,7 @@ constexpr uint32_t DRAW_REGION_OVERLAY_TEXT_MODIFIER_INDEX = 4;
 constexpr uint32_t DRAW_REGION_DEBUG_BOUNDARY_MODIFIER_INDEX = 5;
 const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
 const Color DEFAULT_MASK_COLOR = Color::FromARGB(0, 0, 0, 0);
+constexpr int32_t DELAY_TIME = 300;
 
 Rosen::Gravity GetRosenGravity(RenderFit renderFit)
 {
@@ -274,8 +275,23 @@ float RosenRenderContext::ConvertDimensionToScaleBySize(const Dimension& dimensi
 RosenRenderContext::~RosenRenderContext()
 {
     StopRecordingIfNeeded();
+    DetachModifiers();
+}
+
+void RosenRenderContext::DetachModifiers()
+{
+    CHECK_NULL_VOID(rsNode_ && rsNode_->GetType() == Rosen::RSUINodeType::SURFACE_NODE);
     if (transitionEffect_) {
         transitionEffect_->Detach(this);
+    }
+    if (translateXYUserModifier_) {
+        rsNode_->RemoveModifier(translateXYUserModifier_);
+    }
+    if (translateZUserModifier_) {
+        rsNode_->RemoveModifier(translateZUserModifier_);
+    }
+    if (scaleXYUserModifier_) {
+        rsNode_->RemoveModifier(scaleXYUserModifier_);
     }
 }
 
@@ -583,7 +599,11 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect, bool isS
     }
 
     SyncPartialRsProperties();
+    SyncAdditionalGeometryProperties(paintRect);
+}
 
+void RosenRenderContext::SyncAdditionalGeometryProperties(const RectF& paintRect)
+{
     if (propPointLight_ && propPointLight_->HasLightPosition()) {
         // if lightPosition unit is percent, it is related with frameSize
         OnLightPositionUpdate(propPointLight_->GetLightPositionValue());
@@ -1188,10 +1208,10 @@ Rosen::EmitterConfig RosenRenderContext::ConvertParticleEmitterOption(
     }
     auto rsPoint = pointOpt.has_value()
                        ? OHOS::Rosen::Vector2f(ConvertDimensionToPx(pointOpt.value().first, rect.Width()),
-                             ConvertDimensionToPx(pointOpt.value().second, rect.Height()))
+                           ConvertDimensionToPx(pointOpt.value().second, rect.Height()))
                        : OHOS::Rosen::Vector2f(0.0f, 0.0f);
     auto rsSize = sizeOpt.has_value() ? OHOS::Rosen::Vector2f(ConvertDimensionToPx(sizeOpt.value().first, rect.Width()),
-                                            ConvertDimensionToPx(sizeOpt.value().second, rect.Height()))
+        ConvertDimensionToPx(sizeOpt.value().second, rect.Height()))
                                       : OHOS::Rosen::Vector2f(rect.Width(), rect.Height());
     auto shapeInt = static_cast<int32_t>(shapeOpt.value_or(ParticleEmitterShape::RECTANGLE));
     auto lifeTimeRange = OHOS::Rosen::Range<int64_t>(
@@ -2066,7 +2086,6 @@ void RosenRenderContext::GetPointTransformRotate(PointF& point)
 void RosenRenderContext::GetPointWithTransform(PointF& point)
 {
     CHECK_NULL_VOID(rsNode_);
-    // TODO: add rotation and center support
     auto translate = rsNode_->GetStagingProperties().GetTranslate();
     auto skew = rsNode_->GetStagingProperties().GetSkew();
     auto scale = rsNode_->GetStagingProperties().GetScale();
@@ -2550,6 +2569,7 @@ void RosenRenderContext::OnBackgroundPixelMapUpdate(const RefPtr<PixelMap>& pixe
     auto nodeHeight = node->GetGeometryNode()->GetFrameSize().Height();
     backgroundModifier_->SetInitialNodeSize(nodeWidth, nodeHeight);
     backgroundModifier_->SetPixelMap(pixelMap);
+    backgroundModifier_->SetHostNode(node);
     backgroundModifier_->Modify();
     RequestNextFrame();
 }
@@ -2576,7 +2596,7 @@ void RosenRenderContext::CreateBackgroundPixelMap(const RefPtr<FrameNode>& custo
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUICreateBackgroundPixelMap");
     };
-    NG::ComponentSnapshot::Create(customNode, std::move(callback), false);
+    NG::ComponentSnapshot::Create(customNode, std::move(callback), false, DELAY_TIME, false);
 }
 
 void RosenRenderContext::OnBorderImageUpdate(const RefPtr<BorderImage>& /*borderImage*/)
@@ -2825,7 +2845,7 @@ OffsetF RosenRenderContext::GetRectOffsetWithPositionEdges(
 
     if (positionEdges.top.has_value()) {
         rectTop = ConvertToPx(parentPadding->top.value_or(CalcLength(Dimension(0))).GetDimension(),
-                      ScaleProperty::CreateScaleProperty(), parentHeightRef)
+            ScaleProperty::CreateScaleProperty(), parentHeightRef)
                       .value_or(0) +
                   ConvertToPx(margin->top.value_or(CalcLength(Dimension(0))).GetDimension(),
                       ScaleProperty::CreateScaleProperty(), heightPercentReference)
@@ -2835,7 +2855,7 @@ OffsetF RosenRenderContext::GetRectOffsetWithPositionEdges(
     }
     if (positionEdges.left.has_value()) {
         rectLeft = ConvertToPx(parentPadding->left.value_or(CalcLength(Dimension(0))).GetDimension(),
-                       ScaleProperty::CreateScaleProperty(), parentWidthRef)
+            ScaleProperty::CreateScaleProperty(), parentWidthRef)
                        .value_or(0) +
                    ConvertToPx(margin->left.value_or(CalcLength(Dimension(0))).GetDimension(),
                        ScaleProperty::CreateScaleProperty(), widthPercentReference)
@@ -4402,6 +4422,13 @@ void RosenRenderContext::ClipWithRRect(const RectF& rectF, const RadiusF& radius
     RequestNextFrame();
 }
 
+void RosenRenderContext::RemoveClipWithRRect()
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetClipRRect(nullptr);
+    RequestNextFrame();
+}
+
 void RosenRenderContext::OnClipShapeUpdate(const RefPtr<BasicShape>& basicShape)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -4801,8 +4828,6 @@ void RosenRenderContext::ResetSharedTranslate()
 void RosenRenderContext::ResetPageTransitionEffect()
 {
     UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
-    ClipWithRRect(RectF(0.0f, -GetStatusBarHeight(), REMOVE_CLIP_SIZE, REMOVE_CLIP_SIZE),
-        RadiusF(EdgeF(0.0f, 0.0f)));
     MaskAnimation(DEFAULT_MASK_COLOR, DEFAULT_MASK_COLOR);
 }
 
@@ -4907,7 +4932,6 @@ void RosenRenderContext::SetRSNode(const std::shared_ptr<RSNode>& externalNode)
     rsNode_ = externalNode;
     AddFrameNodeInfoToRsNode();
 
-    // TODO: need move property to new rs node.
     ResetTransform();
     ResetTransformMatrix();
 
@@ -5919,6 +5943,9 @@ void RosenRenderContext::SavePaintRect(bool isRound, uint8_t flag)
     const auto& geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     AdjustPaintRect();
+    if (!SystemProperties::GetPixelRoundEnable()) {
+        isRound = false;
+    }
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         if (isRound && flag == 0) {
             OnePixelRounding(); // call OnePixelRounding without param to improve performance

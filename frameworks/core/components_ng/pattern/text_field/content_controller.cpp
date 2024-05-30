@@ -345,6 +345,12 @@ int32_t ContentController::Delete(int32_t startIndex, int32_t length, bool isBac
     return TextEmojiProcessor::Delete(startIndex, length, content_, isBackward);
 }
 
+int32_t ContentController::GetDeleteLength(int32_t startIndex, int32_t length, bool isBackward)
+{
+    auto content = content_;
+    return TextEmojiProcessor::Delete(startIndex, length, content, isBackward);
+}
+
 bool ContentController::IsIndexBeforeOrInEmoji(int32_t index)
 {
     int32_t startIndex = index - EMOJI_RANGE_LEFT;

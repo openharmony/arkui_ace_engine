@@ -119,6 +119,21 @@ std::list<RefPtr<FocusHub>>::iterator FocusHub::FlushChildrenFocusHub(std::list<
     return std::find(focusNodes.begin(), focusNodes.end(), lastFocusNode);
 }
 
+std::list<RefPtr<FocusHub>>::iterator FocusHub::FlushCurrentChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes)
+{
+    focusNodes.clear();
+    auto frameNode = GetFrameNode();
+    if (frameNode) {
+        frameNode->GetCurrentChildrenFocusHub(focusNodes);
+    }
+
+    auto lastFocusNode = lastWeakFocusNode_.Upgrade();
+    if (!lastFocusNode) {
+        return focusNodes.end();
+    }
+    return std::find(focusNodes.begin(), focusNodes.end(), lastFocusNode);
+}
+
 bool FocusHub::HandleKeyEvent(const KeyEvent& keyEvent)
 {
     if (!IsCurrentFocus()) {
@@ -348,7 +363,7 @@ void FocusHub::RemoveChild(const RefPtr<FocusHub>& focusNode, BlurReason reason)
     }
 
     std::list<RefPtr<FocusHub>> focusNodes;
-    auto itLastFocusNode = FlushChildrenFocusHub(focusNodes);
+    auto itLastFocusNode = FlushCurrentChildrenFocusHub(focusNodes);
 
     if (focusNode->IsCurrentFocus()) {
         // Try to goto next focus, otherwise goto previous focus.
@@ -859,7 +874,8 @@ bool FocusHub::RequestNextFocus(FocusStep moveStep, const RectF& rect)
                 nextFocusHub->GetFrameName().c_str(), nextFocusHub->GetFrameId(), ret);
             return ret;
         }
-        if (!IsFocusStepTab(moveStep) && focusAlgorithm_.isVertical != IsFocusStepVertical(moveStep)) {
+        if (focusAlgorithm_.direction != ScopeFocusDirection::UNIVERSAL && !IsFocusStepTab(moveStep) &&
+            focusAlgorithm_.isVertical != IsFocusStepVertical(moveStep)) {
             TAG_LOGI(AceLogTag::ACE_FOCUS,
                 "Request next focus failed because direction of node(%{public}d) is different with step(%{public}d).",
                 focusAlgorithm_.isVertical, moveStep);
@@ -2225,6 +2241,10 @@ void FocusHub::SetFocusScopeId(const std::string& focusScopeId, bool isGroup)
     if (focusManager && !focusManager->AddFocusScope(focusScopeId, AceType::Claim(this))) {
         TAG_LOGW(AceLogTag::ACE_FOCUS, "node(%{public}s/%{public}d) focusScopeId exist.", GetFrameName().c_str(),
             GetFrameId());
+        bool isValidFocusScope = (isFocusScope_ && !focusScopeId_.empty());
+        if (isValidFocusScope) {
+            isGroup_ = isGroup;
+        }
         return;
     }
     focusScopeId_ = focusScopeId;

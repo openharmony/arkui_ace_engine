@@ -1529,6 +1529,7 @@ declare class ArkWebComponent extends ArkComponent implements WebAttribute {
     onViewportFitChanged(callback: (event: {
         viewportFit: ViewportFit;
     }) => void): this;
+    onAdsBlocked(callback: (details?: AdsBlockedDetails | undefined) => void): this;
 }
 declare class ArkXComponentComponent implements CommonMethod<XComponentAttribute> {
     _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;

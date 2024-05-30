@@ -100,7 +100,7 @@ public:
     ~RichEditorPattern() override;
 
     struct OperationRecord {
-        OperationRecord() : deleteCaretPostion(-1) {}
+        OperationRecord() : beforeCaretPosition(-1), afterCaretPosition(-1), deleteCaretPostion(-1) {}
         std::optional<std::string> addText;
         std::optional<std::string> deleteText;
         int32_t beforeCaretPosition;
@@ -341,6 +341,7 @@ public:
     bool CursorMoveEnd();
     int32_t CalcMoveUpPos(OffsetF& caretOffsetUp, OffsetF& caretOffsetDown);
     int32_t CalcLineBeginPosition();
+    float GetTextThemeFontSize();
     int32_t CalcLineEndPosition();
     bool CursorMoveLineEndPos(OffsetF& caretOffsetUp, OffsetF& caretOffsetDown, OffsetF& nextCaretOffset);
     bool CursorMoveLineBegin();
@@ -543,6 +544,7 @@ public:
     }
     void DumpInfo() override;
     void MouseDoubleClickParagraphEnd(int32_t& index);
+    void DoubleClickExcludeSymbol(int32_t& start, int32_t& end);
     void InitSelection(const Offset& pos);
     bool HasFocus() const;
     void OnColorConfigurationUpdate() override;
@@ -731,6 +733,11 @@ public:
     RectF GetTextContentRect(bool isActualText = false) const override
     {
         return contentRect_;
+    }
+
+    bool IsMoveCaretAnywhere() const
+    {
+        return isMoveCaretAnywhere_;
     }
 
 protected:
@@ -951,6 +958,9 @@ private:
     void SetAccessibilityAction();
     bool BeforeGestureAndClickOperate(GestureEvent& info, bool isDoubleClick);
     void HandleTripleClickEvent(OHOS::Ace::GestureEvent& info);
+    void UpdateSelectionByTouchMove(const Offset& offset);
+    void MoveCaretAnywhere(const Offset& touchOffset);
+    void ShowCaretNoTwinkling(const Offset& textOffset);
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
@@ -1049,6 +1059,8 @@ private:
     bool isCaretInContentArea_ = false;
     OffsetF movingHandleOffset_;
     bool mouseClickRelease_ = false;
+    int32_t initSelectStart_ = 0;
+    bool isMoveCaretAnywhere_ = false;
 };
 } // namespace OHOS::Ace::NG
 

@@ -73,6 +73,7 @@ template("ace_base_source_set") {
       "utils/string_expression.cpp",
       "utils/string_utils.cpp",
       "utils/time_util.cpp",
+      "utils/utf.cpp",
       "utils/utils.cpp",
     ]
 

@@ -65,6 +65,7 @@ void IndexerPattern::OnModifyDone()
     auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
+    enableHapticFeedback_ = layoutProperty->GetEnableHapticFeedback().value_or(true);
     auto itemCountChanged = false;
     bool autoCollapseModeChanged = true;
     if (!isNewHeightCalculated_) {
@@ -450,6 +451,17 @@ void IndexerPattern::InitPopupInputEvent()
     popupInputEventHub->AddOnHoverEvent(popupOnHoverEvent);
 }
 
+void IndexerPattern::InitPopupPanEvent()
+{
+    CHECK_NULL_VOID(popupNode_);
+    auto gestureHub = popupNode_->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    PanDirection panDirection;
+    panDirection.type = PanDirection::ALL;
+    auto panEvent = MakeRefPtr<PanEvent>(nullptr, nullptr, nullptr, nullptr);
+    gestureHub->AddPanEvent(panEvent, panDirection, 1, 0.0_vp);
+}
+
 void IndexerPattern::OnTouchDown(const TouchEventInfo& info)
 {
     if (itemCount_ <= 0) {
@@ -770,6 +782,11 @@ void IndexerPattern::ApplyIndexChanged(
     }
     if (selectChanged) {
         ShowBubble();
+#ifdef INDEXER_SUPPORT_VIBRATOR
+        if (enableHapticFeedback_) {
+            VibraFeedback();
+        }
+#endif
     }
 }
 
@@ -786,6 +803,7 @@ void IndexerPattern::ShowBubble()
         popupNode_ = CreatePopupNode();
         AddPopupTouchListener(popupNode_);
         InitPopupInputEvent();
+        InitPopupPanEvent();
         UpdatePopupOpacity(0.0f);
     }
     if (!layoutProperty->GetIsPopupValue(false)) {
@@ -1443,9 +1461,10 @@ void IndexerPattern::AddPopupTouchListener(RefPtr<FrameNode> popupNode)
     CHECK_NULL_VOID(popupNode);
     auto gesture = popupNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
-    auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+    auto touchCallback = [weak = WeakClaim(this)](TouchEventInfo& info) {
         auto indexerPattern = weak.Upgrade();
         CHECK_NULL_VOID(indexerPattern);
+        info.SetStopPropagation(true);
         auto touchType = info.GetTouches().front().GetTouchType();
         if (touchType == TouchType::DOWN) {
             indexerPattern->isTouch_ = true;
@@ -1924,5 +1943,6 @@ void IndexerPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("PopupPositionY: ",
         layoutProperty->GetPopupPositionYValue(Dimension(NG::BUBBLE_POSITION_Y, DimensionUnit::VP)).ToString());
     DumpLog::GetInstance().AddDesc("AutoCollapse: ", autoCollapse_ ? "true" : "false");
+    DumpLog::GetInstance().AddDesc(std::string("EnableHapticFeedback: ").append(std::to_string(enableHapticFeedback_)));
 }
 } // namespace OHOS::Ace::NG

@@ -64,6 +64,12 @@ public:
     {
         return true;
     }
+
+    ScopeFocusAlgorithm GetScopeFocusAlgorithm() override
+    {
+        return ScopeFocusAlgorithm(ScopeFocusDirection::UNIVERSAL, false, true,
+            ScopeType::OTHERS);
+    }
 };
 } // namespace OHOS::Ace::NG
 

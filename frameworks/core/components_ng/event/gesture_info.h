@@ -93,7 +93,7 @@ private:
     GestureTypeName type_ = GestureTypeName::UNKNOWN;
     InputEventType inputEventType_ = InputEventType::TOUCH_SCREEN;
     bool isSystemGesture_ = false;
-    void* userData_;
+    void* userData_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 

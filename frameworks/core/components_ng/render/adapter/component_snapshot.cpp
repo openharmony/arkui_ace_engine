@@ -113,7 +113,7 @@ void ComponentSnapshot::Get(const std::string& componentId, JsCallback&& callbac
 }
 
 void ComponentSnapshot::Create(
-    const RefPtr<AceType>& customNode, JsCallback&& callback, bool enableInspector, const int32_t delayTime)
+    const RefPtr<AceType>& customNode, JsCallback&& callback, bool enableInspector, const int32_t delayTime, bool flag)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -141,9 +141,10 @@ void ComponentSnapshot::Create(
     CHECK_NULL_VOID(pipeline);
     auto executor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(executor);
-    pipeline->FlushUITasks();
-    pipeline->FlushMessages();
-
+    if (flag) {
+        pipeline->FlushUITasks();
+        pipeline->FlushMessages();
+    }
     executor->PostDelayedTask(
         [callback, node, enableInspector]() mutable {
             auto rsNode = GetRsNode(node);

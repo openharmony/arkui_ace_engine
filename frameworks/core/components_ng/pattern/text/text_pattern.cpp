@@ -499,12 +499,6 @@ std::string TextPattern::GetSelectedText(int32_t start, int32_t end) const
             tag = span->position == -1 ? tag + 1 : span->position;
             continue;
         }
-        if (isSpanStringMode_ && (span->spanItemType == SpanItemType::CustomSpan
-            || span->spanItemType == SpanItemType::IMAGE)) {
-            value += " ";
-            tag = span->position == -1 ? tag + 1 : span->position;
-            continue;
-        }
         if (span->position - 1 >= start && span->placeholderIndex == -1 && span->position != -1) {
             auto wideString = StringUtils::ToWstring(span->GetSpanContent());
             auto max = std::min(span->position, end);
@@ -534,7 +528,11 @@ void TextPattern::HandleOnCopy()
         return;
     }
     if (copyOption_ != CopyOptions::None) {
-        clipboard_->SetData(value, copyOption_);
+        if (isSpanStringMode_) {
+            HandleOnCopySpanString();
+        } else {
+            clipboard_->SetData(value, copyOption_);
+        }
     }
     HiddenMenu();
     auto host = GetHost();
@@ -542,6 +540,17 @@ void TextPattern::HandleOnCopy()
     auto eventHub = host->GetEventHub<TextEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnCopy(value);
+}
+
+void TextPattern::HandleOnCopySpanString()
+{
+    RefPtr<PasteDataMix> pasteData = clipboard_->CreatePasteDataMix();
+    auto subSpanString = spanString->GetSubSpanString(textSelector_.GetTextStart(),
+        textSelector_.GetTextEnd() - textSelector_.GetTextStart());
+    std::vector<uint8_t> tlvData;
+    subSpanString->EncodeTlv(tlvData);
+    clipboard_->AddSpanStringRecord(pasteData, tlvData);
+    clipboard_->SetData(pasteData, copyOption_);
 }
 
 void TextPattern::HiddenMenu()
@@ -2639,8 +2648,21 @@ void TextPattern::AddChildSpanItem(const RefPtr<UINode>& child)
             spans_.emplace_back(spanNode->GetSpanItem());
         }
     } else if (child->GetTag() == V2::IMAGE_ETS_TAG) {
-        auto imageSpanNode = DynamicCast<ImageSpanNode>(child);
-        CHECK_NULL_VOID(imageSpanNode);
+        AddImageToSpanItem(child);
+    } else if (child->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG) {
+        auto placeholderSpanNode = DynamicCast<PlaceholderSpanNode>(child);
+        if (placeholderSpanNode) {
+            auto placeholderSpan = placeholderSpanNode->GetSpanItem();
+            placeholderSpan->placeholderSpanNodeId = placeholderSpanNode->GetId();
+            spans_.emplace_back(placeholderSpan);
+        }
+    }
+}
+
+void TextPattern::AddImageToSpanItem(const RefPtr<UINode>& child)
+{
+    auto imageSpanNode = DynamicCast<ImageSpanNode>(child);
+    if (imageSpanNode) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto imageSpanItem = imageSpanNode->GetSpanItem();
@@ -2657,13 +2679,24 @@ void TextPattern::AddChildSpanItem(const RefPtr<UINode>& child)
         }
         spans_.emplace_back(imageSpanItem);
         spans_.back()->imageNodeId = imageSpanNode->GetId();
-    } else if (child->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG) {
-        auto placeholderSpanNode = DynamicCast<PlaceholderSpanNode>(child);
-        if (placeholderSpanNode) {
-            auto placeholderSpan = placeholderSpanNode->GetSpanItem();
-            placeholderSpan->placeholderSpanNodeId = placeholderSpanNode->GetId();
-            spans_.emplace_back(placeholderSpan);
+        return;
+    }
+    auto imageNode = DynamicCast<FrameNode>(child);
+    if (imageNode) {
+        auto imageSpanItem = MakeRefPtr<ImageSpanItem>();
+        imageSpanItem->imageNodeId = imageNode->GetId();
+        imageSpanItem->UpdatePlaceholderBackgroundStyle(imageNode);
+        auto focus_hub = imageNode->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(focus_hub);
+        auto clickCall = focus_hub->GetOnClickCallback();
+        if (clickCall) {
+            imageSpanItem->SetOnClickEvent(std::move(clickCall));
         }
+        spans_.emplace_back(imageSpanItem);
+        auto gesture = imageNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gesture);
+        gesture->SetHitTestMode(HitTestMode::HTMNONE);
+        return;
     }
 }
 

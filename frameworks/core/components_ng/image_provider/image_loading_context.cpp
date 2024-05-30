@@ -85,6 +85,9 @@ ImageLoadingContext::ImageLoadingContext(const ImageSourceInfo& src, LoadNotifie
 ImageLoadingContext::~ImageLoadingContext()
 {
     // cancel background task
+    if (Downloadable()) {
+        RemoveDownloadTask(src_.GetSrc());
+    }
     if (!syncLoad_) {
         auto state = stateManager_->GetCurrentState();
         if (state == ImageLoadingState::DATA_LOADING) {
@@ -269,6 +272,11 @@ void ImageLoadingContext::PerformDownload()
     NetworkImageLoader::DownloadImage(std::move(downloadCallback), src_.GetSrc(), syncLoad_);
 }
 
+bool ImageLoadingContext::RemoveDownloadTask(const std::string& src)
+{
+    return DownloadManager::GetInstance()->RemoveDownloadTask(src);
+}
+
 void ImageLoadingContext::CacheDownloadedImage()
 {
     CHECK_NULL_VOID(Downloadable());
@@ -344,7 +352,7 @@ void ImageLoadingContext::OnMakeCanvasImage()
 
     // step4: [MakeCanvasImage] according to [targetSize]
     canvasKey_ = ImageUtils::GenerateImageKey(src_, targetSize);
-    imageObj_->MakeCanvasImage(Claim(this), targetSize, userDefinedSize.has_value(), syncLoad_);
+    imageObj_->MakeCanvasImage(Claim(this), targetSize, userDefinedSize.has_value(), syncLoad_, GetLoadInVipChannel());
 }
 
 void ImageLoadingContext::ResizableCalcDstSize()

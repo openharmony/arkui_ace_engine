@@ -25,14 +25,16 @@ namespace OHOS::Ace {
 std::vector<std::thread> g_threads;
 
 namespace NG {
-void ImageUtils::PostToUI(std::function<void()>&& task, const std::string& name, const int32_t containerId)
+void ImageUtils::PostToUI(
+    std::function<void()>&& task, const std::string& name, const int32_t containerId, PriorityType priorityType)
 {
     if (task) {
         task();
     }
 }
 
-void ImageUtils::PostToBg(std::function<void()>&& task, const std::string& name, const int32_t containerId)
+void ImageUtils::PostToBg(
+    std::function<void()>&& task, const std::string& name, const int32_t containerId, PriorityType priorityType)
 {
     // mock bg thread pool
     if (g_threads.size() > MAX_THREADS) {

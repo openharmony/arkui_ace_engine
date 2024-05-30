@@ -37,6 +37,7 @@ template("pa_backend") {
       "ability_base:zuri",
       "ability_runtime:abilitykit_native",
       "ability_runtime:appkit_native",
+      "ability_runtime:extensionkit_native",
       "bundle_framework:appexecfwk_core",
       "c_utils:utils",
       "eventhandler:libeventhandler",

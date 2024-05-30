@@ -217,6 +217,8 @@ private:
         return true;
     }
 
+    void NotifyPerfMonitorPageMsg(const std::string& pageUrl, const std::string& bundleName);
+
     RefPtr<PageInfo> pageInfo_;
     RefPtr<OverlayManager> overlayManager_;
 

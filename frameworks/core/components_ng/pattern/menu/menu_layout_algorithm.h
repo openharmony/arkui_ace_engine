@@ -172,6 +172,8 @@ private:
     void ModifyPreviewMenuPlacement(LayoutWrapper* layoutWrapper);
     void ModifyNormalPreviewMenuPlacement(LayoutWrapper* layoutWrapper);
     void ModifyNormalPreviewMenuPortraitPlacement(LayoutWrapper* layoutWrapper);
+    void GetPreviewNodeTotalSize(const RefPtr<LayoutWrapper>& child, const Rect& windowGlobalRect,
+        RefPtr<LayoutWrapper>& previewLayoutWrapper, SizeF& size, bool isShowHoverImage);
     SizeF GetPreviewNodeAndMenuNodeTotalSize(const RefPtr<FrameNode>& frameNode,
         RefPtr<LayoutWrapper>& previewLayoutWrapper, RefPtr<LayoutWrapper>& menuLayoutWrapper);
 

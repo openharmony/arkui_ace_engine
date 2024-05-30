@@ -807,8 +807,7 @@ void JSSwiper::SetCurve(const JSCallbackInfo& info)
 {
     RefPtr<Curve> curve = DEFAULT_CURVE;
     if (info[0]->IsString()) {
-        auto userSetCurve = CreateCurve(info[0]->ToString(), false);
-        curve = userSetCurve ? userSetCurve : curve;
+        curve = CreateCurve(info[0]->ToString());
     } else if (info[0]->IsObject()) {
         auto object = JSRef<JSObject>::Cast(info[0]);
         std::function<float(float)> customCallBack = nullptr;

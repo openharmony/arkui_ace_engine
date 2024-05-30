@@ -90,7 +90,7 @@ void JSCanvas::JSBind(BindingTarget globalObj)
 
 void JSCanvas::OnReady(const JSCallbackInfo& info)
 {
-    TAG_LOGD(AceLogTag::ACE_CANVAS, "Canvas onReady begins");
+    TAG_LOGI(AceLogTag::ACE_CANVAS, "Canvas onReady begins");
     if (info.Length() < 1 || !info[0]->IsFunction()) {
         return;
     }

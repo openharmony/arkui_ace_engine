@@ -37,7 +37,6 @@ void WebResource::Release(const std::function<void(bool)>& onRelease)
     if (id_ == WEB_INVALID_ID) {
         return;
     }
-    // TODO: add support for ng.
     auto context = context_.Upgrade();
     if (!context) {
         return;

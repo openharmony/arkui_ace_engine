@@ -77,9 +77,9 @@ export function AddFormMenuItem(want, componentId, options, parent = null) {
   this.observeComponentCreation2((elmtId, isInitialRender) => {
     FormMenuItem.create(options?.style?.options ? options.style.options : {
       startIcon: {
-        'id': 125830229,
+        'id': 125832775,
         'type': 20000,
-        params: ['sys.media.ohos_ic_public_add'],
+        params: ['sys.media.ic_form_menu_add'],
         'bundleName': '',
         'moduleName': ''
       },
