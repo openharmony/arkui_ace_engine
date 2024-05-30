@@ -21,6 +21,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_content_event_hub.h"
 #include "core/components_ng/pattern/tabs/tab_content_layout_property.h"
@@ -34,11 +35,7 @@ class ACE_EXPORT TabContentPattern : public Pattern {
 public:
     explicit TabContentPattern(const RefPtr<ShallowBuilder>& shallowBuilder)
         : shallowBuilder_(shallowBuilder), tabBarParam_(std::string(""), std::string(""), nullptr)
-    {
-        if (shallowBuilder_) {
-            shallowBuilder_->MarkIsExecuteDeepRenderDone(true);
-        }
-    }
+    {}
     ~TabContentPattern() override = default;
 
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override
@@ -75,8 +72,52 @@ public:
         FireWillShowEvent();
     }
 
+    void CheckTabAnimateMode()
+    {
+        if (!shallowBuilder_ || !firstTimeLayout_) {
+            return;
+        }
+
+        // Check whether current tabcontent belongs to tab component.
+        auto tabContentNode = GetHost();
+        CHECK_NULL_VOID(tabContentNode);
+        auto parentNode = tabContentNode->GetAncestorNodeOfFrame();
+        CHECK_NULL_VOID(parentNode);
+        if (parentNode->GetTag() != V2::SWIPER_ETS_TAG) {
+            return;
+        }
+        auto grandParentNode = parentNode->GetAncestorNodeOfFrame();
+        CHECK_NULL_VOID(grandParentNode);
+        if (grandParentNode->GetTag() != V2::TABS_ETS_TAG) {
+            return;
+        }
+
+        auto tabsPattern = grandParentNode->GetPattern<TabsPattern>();
+        CHECK_NULL_VOID(tabsPattern);
+        auto tabsLayoutProperty = grandParentNode->GetLayoutProperty<TabsLayoutProperty>();
+        CHECK_NULL_VOID(tabsLayoutProperty);
+        TabAnimateMode mode = tabsPattern->GetAnimateMode();
+        if (mode == TabAnimateMode::ACTION_FIRST
+            && !tabsLayoutProperty->GetHeightAutoValue(false)
+            && !tabsLayoutProperty->GetWidthAutoValue(false)) {
+            ACE_SCOPED_TRACE("TabContentMarkRenderDone");
+            /*
+             * Set render done only when tab's height&weight is not set to 'auto' and its animateMode
+             * is set to AnimateMode::ACTION_FIRST.
+             * Set render done before first layout, so to measure tabcontent and its children
+             * in two seperate frame.
+             */
+            shallowBuilder_->MarkIsExecuteDeepRenderDone(true);
+        }
+    }
+
     void BeforeCreateLayoutWrapper() override
     {
+        if (firstTimeLayout_) {
+            CheckTabAnimateMode();
+            firstTimeLayout_ = false;
+        }
+
         if (shallowBuilder_ && !shallowBuilder_->IsExecuteDeepRenderDone()) {
             shallowBuilder_->ExecuteDeepRender();
             shallowBuilder_.Reset();
@@ -290,7 +331,9 @@ private:
     BottomTabBarStyle bottomTabBarStyle_;
     RefPtr<FrameNode> customStyleNode_ = nullptr;
     TabBarSymbol symbol_;
-    
+
+    bool firstTimeLayout_ = true;
+
     ACE_DISALLOW_COPY_AND_MOVE(TabContentPattern);
 };
 

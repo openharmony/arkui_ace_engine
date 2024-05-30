@@ -48,6 +48,7 @@ public:
     void SetClipEdge(bool clipEdge) override {};
     void SetScrollableBarModeOptions(const ScrollableBarModeOptions& option) override {};
     void SetBarGridAlign(const BarGridColumnOptions& BarGridColumnOptions) override {};
+    void SetAnimateMode(TabAnimateMode mode) override {};
 
 private:
     RefPtr<TabTheme> GetTheme() const;

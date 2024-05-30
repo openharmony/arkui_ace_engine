@@ -1841,6 +1841,7 @@ declare class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     barWidth(value: Length): TabsAttribute;
     barHeight(value: Length): TabsAttribute;
     animationDuration(value: number): TabsAttribute;
+    animateMode(value: AnimateMode): TabsAttribute;
     onChange(event: (index: number) => void): TabsAttribute;
     onTabBarClick(event: (index: number) => void): TabsAttribute;
     fadingEdge(value: boolean): TabsAttribute;
