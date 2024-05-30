@@ -39,8 +39,8 @@ ArkUI_LayoutConstraint* OH_ArkUI_LayoutConstraint_Create()
 
 ArkUI_LayoutConstraint* OH_ArkUI_LayoutConstraint_Copy(const ArkUI_LayoutConstraint* constraint)
 {
-    ArkUI_LayoutConstraint* layoutConstraint = new ArkUI_LayoutConstraint { 0, 0, 0, 0, 0, 0 };
     CHECK_NULL_RETURN(constraint, nullptr);
+    ArkUI_LayoutConstraint* layoutConstraint = new ArkUI_LayoutConstraint { 0, 0, 0, 0, 0, 0 };
     layoutConstraint->minWidth = constraint->minWidth;
     layoutConstraint->maxWidth = constraint->maxWidth;
     layoutConstraint->minHeight = constraint->minHeight;
