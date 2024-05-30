@@ -62,7 +62,7 @@ private:
     void HandleFunctionKey(MiscServices::FunctionKey functionKey);
 
     WeakPtr<TextInputClient> pattern_;
-    int32_t patternInstanceId_;
+    int32_t patternInstanceId_ = -1;
 };
 
 } // namespace OHOS::Ace::NG
