@@ -2560,7 +2560,7 @@ void JsAccessibilityManager::DumpHandleEvent(const std::vector<std::string>& par
             jsAccessibilityManager->AccessibilityActionEvent(
                 op, paramsMap, node, AceType::DynamicCast<PipelineContext>(pipeline));
         },
-        TaskExecutor::TaskType::UI, "ArkUIAccessibilityAction");
+        TaskExecutor::TaskType::UI, "ArkUIAccessibilityActionEvent");
 }
 
 void JsAccessibilityManager::DumpProperty(const RefPtr<AccessibilityNode>& node)

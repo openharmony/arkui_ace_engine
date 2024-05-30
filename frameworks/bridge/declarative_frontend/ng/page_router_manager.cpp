@@ -147,7 +147,7 @@ void PageRouterManager::RunPage(const std::shared_ptr<std::vector<uint8_t>>& con
     CHECK_NULL_VOID(pageRouterManager);
     taskExecutor->PostTask(
         [pageRouterManager, info]() { pageRouterManager->LoadOhmUrl(info); },
-        TaskExecutor::TaskType::JS, "ArkUIPageRouterLoadOhmUrl");
+        TaskExecutor::TaskType::JS, "ArkUIPageRouterLoadOhmUrlContent");
 #endif
 }
 
@@ -909,7 +909,7 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
                                               int32_t errorCode, const std::string& errorMsg) {
             ContainerScope scope(instanceId);
             taskExecutor->PostTask([errorCallback, errorCode, errorMsg]() { errorCallback(errorMsg, errorCode); },
-                TaskExecutor::TaskType::JS, "ArkUIPageRouterErrorCallback");
+                TaskExecutor::TaskType::JS, "ArkUIPageRouterPushErrorCallback");
         };
 
         pageUrlChecker->LoadPageUrl(target.url, callback, silentInstallErrorCallBack);
@@ -1007,7 +1007,7 @@ void PageRouterManager::StartReplace(const RouterPageInfo& target)
                                               int32_t errorCode, const std::string& errorMsg) {
             ContainerScope scope(instanceId);
             taskExecutor->PostTask([errorCallback, errorCode, errorMsg]() { errorCallback(errorMsg, errorCode); },
-                TaskExecutor::TaskType::JS, "ArkUIPageRouterErrorCallback");
+                TaskExecutor::TaskType::JS, "ArkUIPageRouterReplaceErrorCallback");
         };
 
         pageUrlChecker->LoadPageUrl(target.url, callback, silentInstallErrorCallBack);

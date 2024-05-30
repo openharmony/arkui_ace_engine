@@ -595,7 +595,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                             CHECK_NULL_VOID(gestureHub);
                             gestureHub->SetPixelMap(customPixelMap);
                             gestureHub->SetDragPreviewPixelMap(customPixelMap);
-                        }, TaskExecutor::TaskType::UI, "ArkUIDragSetPixelMap");
+                        }, TaskExecutor::TaskType::UI, "ArkUIDragSetCustomPixelMap");
                     }
                 };
 

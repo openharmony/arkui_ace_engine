@@ -686,7 +686,7 @@ void AceContainer::OnInactive(int32_t instanceId)
                 JankFrameReport::GetInstance().FlushRecord();
             }
         },
-        TaskExecutor::TaskType::UI, "ArkUIWindowUnFocus");
+        TaskExecutor::TaskType::UI, "ArkUIWindowUnfocus");
 }
 
 void AceContainer::OnNewWant(int32_t instanceId, const std::string& data)

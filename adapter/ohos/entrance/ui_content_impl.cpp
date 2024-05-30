@@ -308,7 +308,7 @@ private:
                 [pipeline] {
                     CHECK_NULL_VOID(pipeline);
                     pipeline->SetUIExtensionImeShow(false);
-                }, TaskExecutor::TaskType::UI, "ArkUISetUIExtensionImeShow");
+                }, TaskExecutor::TaskType::UI, "ArkUISetUIExtensionImeHide");
         }
     }
     int32_t instanceId_ = -1;
@@ -487,7 +487,7 @@ public:
                 auto aceDisplayMode = static_cast<FoldDisplayMode>(static_cast<uint32_t>(displayMode));
                 context->OnFoldDisplayModeChanged(aceDisplayMode);
             },
-            TaskExecutor::TaskType::UI, "ArkUIFoldDisplayModeChanged");
+            TaskExecutor::TaskType::UI, "ArkUIDialogFoldDisplayModeChanged");
     }
 
 private:

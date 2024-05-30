@@ -668,7 +668,7 @@ void ScrollBar::ScheduleDisappearDelayTask()
             scrollBar->PlayScrollBarDisappearAnimation();
         });
         taskExecutor->PostDelayedTask(disappearDelayTask_, TaskExecutor::TaskType::UI, BAR_DISAPPRAE_DELAY_DURATION,
-            "ArkUIScrollBarDisappearAnimation");
+            "ArkUIScrollBarInnerDisappearAnimation");
     }
 }
 
@@ -736,7 +736,7 @@ void ScrollBar::ScheduleCaretLongPress()
             CHECK_NULL_VOID(pattern);
             pattern->HandleLongPress(true);
         },
-        TaskExecutor::TaskType::UI, LONG_PRESS_PAGE_INTERVAL_MS, "ArkUIScrollBarHandleLongPress");
+        TaskExecutor::TaskType::UI, LONG_PRESS_PAGE_INTERVAL_MS, "ArkUIScrollBarInnerHandleLongPress");
 }
 
 void ScrollBar::AddScrollBarLayoutInfo()

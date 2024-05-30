@@ -845,7 +845,7 @@ void DragDropManager::TryGetDataBackGround(
                         CHECK_NULL_VOID(dragDropManager);
                         dragDropManager->TryGetDataBackGround(dragFrameNode, pointerEvent, udKey, count + 1);
                     },
-                    TaskExecutor::TaskType::UI, MAX_RETRY_DURATION, "ArkUIDragDropGetDataBackground");
+                    TaskExecutor::TaskType::UI, MAX_RETRY_DURATION, "ArkUIDragDropRetryGetData");
             }
         },
         TaskExecutor::TaskType::BACKGROUND, "ArkUIDragDropGetDataBackground");
