@@ -70,7 +70,7 @@ using RsOrientation = Rosen::DisplayOrientation;
 
 bool IsOpIncEnabled()
 {
-    return (system::GetParameter(IS_OPINC_ENABLE, "0") == "2");
+    return (system::GetParameter(IS_OPINC_ENABLE, "2") == "2");
 }
 
 void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
