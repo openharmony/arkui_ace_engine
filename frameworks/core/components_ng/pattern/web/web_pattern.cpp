@@ -4629,6 +4629,11 @@ void WebPattern::CreateOverlay(const RefPtr<OHOS::Ace::PixelMap> pixelMap,
         offsetY,
         rectWidth,
         rectHeight);
+    auto callback = [weak = AceType::WeakClaim(this)]() {
+        auto webPattern = weak.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->OnTextSelected();
+    };
     imageAnalyzerManager_->UpdatePressOverlay(
         pixelMap,
         offsetX,
@@ -4637,7 +4642,7 @@ void WebPattern::CreateOverlay(const RefPtr<OHOS::Ace::PixelMap> pixelMap,
         rectHeight,
         pointX,
         pointY,
-        std::bind(&WebPattern::OnTextSelected, this));
+        std::move(callback));
 }
 
 void WebPattern::OnOverlayStateChanged(int offsetX,
