@@ -132,6 +132,16 @@ public:
         return interceptStatus_;
     }
 
+    void SetAnimateMode(TabAnimateMode mode)
+    {
+        animateMode_ = mode;
+    }
+
+    TabAnimateMode GetAnimateMode() const
+    {
+        return animateMode_;
+    }
+
     void HandleChildrenUpdated(const RefPtr<FrameNode>& swiperNode, const RefPtr<FrameNode>& tabBarNode);
 
     void HandleMaskAnimationByCreate(const RefPtr<FrameNode>& tabBarNode, const RefPtr<FrameNode>& swiperNode,
@@ -151,6 +161,7 @@ private:
     bool isDisableSwipe_ = false;
     bool isInit_ = true;
 
+    TabAnimateMode animateMode_ = TabAnimateMode::CONTENT_FIRST;
     ChangeEventPtr onChangeEvent_;
     ChangeEventPtr onTabBarClickEvent_;
     ChangeEventPtr onIndexChangeEvent_;

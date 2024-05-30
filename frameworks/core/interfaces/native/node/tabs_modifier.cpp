@@ -318,6 +318,20 @@ void ResetTabHeightAuto(ArkUINodeHandle node)
     TabsModelNG::SetHeightAuto(frameNode, false);
 }
 
+void SetAnimateMode(ArkUINodeHandle node, ArkUI_Uint32 mode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetAnimateMode(frameNode, static_cast<TabAnimateMode>(mode));
+}
+
+void ResetAnimateMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetAnimateMode(frameNode, TabAnimateMode::CONTENT_FIRST);
+}
+
 namespace NodeModifier {
 const ArkUITabsModifier* GetTabsModifier()
 {
@@ -358,6 +372,8 @@ const ArkUITabsModifier* GetTabsModifier()
         ResetTabWidthAuto,
         SetTabHeightAuto,
         ResetTabHeightAuto,
+        SetAnimateMode,
+        ResetAnimateMode,
     };
 
     return &modifier;
