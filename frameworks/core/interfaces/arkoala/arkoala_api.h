@@ -1502,6 +1502,10 @@ struct ArkUICommonModifier {
     void (*setAccessibilityValue)(ArkUINodeHandle node, const ArkUIAccessibilityValue& value);
     void (*getAccessibilityValue)(ArkUINodeHandle node, ArkUIAccessibilityValue& value);
     void (*resetAccessibilityValue)(ArkUINodeHandle node);
+    void (*setFocusScopeId)(ArkUINodeHandle node, ArkUI_CharPtr id, ArkUI_Bool isGroup);
+    void (*resetFocusScopeId)(ArkUINodeHandle node);
+    void (*setFocusScopePriority)(ArkUINodeHandle node, ArkUI_CharPtr scopeId, ArkUI_Int32 priority);
+    void (*resetFocusScopePriority)(ArkUINodeHandle node);
 };
 
 struct ArkUICommonShapeModifier {
