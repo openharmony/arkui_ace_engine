@@ -179,6 +179,9 @@ public:
 
     bool IsInRegion(const PointT<T>& point) const
     {
+        if (NearZero(width_) || NearZero(height_)) {
+            return false;
+        }
         return GreatOrEqual(point.GetX(), x_) && LessOrEqual(point.GetX(), x_ + width_) &&
                GreatOrEqual(point.GetY(), y_) && LessOrEqual(point.GetY(), y_ + height_);
     }
