@@ -285,6 +285,7 @@ void SwiperModelNG::SetMainSwiperSizeHeight() {}
 void SwiperModelNG::SetPreviousMargin(const Dimension& prevMargin, bool ignoreBlank)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, PrevMargin, prevMargin);
+    ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, PrevMarginIgnoreBlank, ignoreBlank);
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(swiperNode);
     auto pattern = swiperNode->GetPattern<SwiperPattern>();
@@ -295,6 +296,7 @@ void SwiperModelNG::SetPreviousMargin(const Dimension& prevMargin, bool ignoreBl
 void SwiperModelNG::SetNextMargin(const Dimension& nextMargin, bool ignoreBlank)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMargin, nextMargin);
+    ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMarginIgnoreBlank, ignoreBlank);
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(swiperNode);
     auto pattern = swiperNode->GetPattern<SwiperPattern>();
@@ -410,6 +412,7 @@ void SwiperModelNG::SetOnContentDidScroll(FrameNode* frameNode, ContentDidScroll
 void SwiperModelNG::SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin, bool ignoreBlank)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMargin, nextMargin, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMarginIgnoreBlank, ignoreBlank, frameNode);
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(swiperNode);
     auto pattern = swiperNode->GetPattern<SwiperPattern>();
@@ -420,6 +423,7 @@ void SwiperModelNG::SetNextMargin(FrameNode* frameNode, const Dimension& nextMar
 void SwiperModelNG::SetPreviousMargin(FrameNode* frameNode, const Dimension& prevMargin, bool ignoreBlank)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, PrevMargin, prevMargin, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, PrevMarginIgnoreBlank, ignoreBlank, frameNode);
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(swiperNode);
     auto pattern = swiperNode->GetPattern<SwiperPattern>();

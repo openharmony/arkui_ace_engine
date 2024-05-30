@@ -1025,7 +1025,7 @@ float SwiperPattern::IgnoreBlankOffset(bool isJump)
             if (targetIndexValue == 0 && prevMarginIgnoreBlank_) {
                 result += GetPrevMargin();
             }
-            if (targetIndexValue == (TotalCount() - GetDisplayCount()) && nextMarginIgnoreBlank_) {
+            if (targetIndexValue >= (TotalCount() - GetDisplayCount()) && nextMarginIgnoreBlank_) {
                 result -= GetNextMargin();
             }
         }
@@ -1037,7 +1037,7 @@ float SwiperPattern::IgnoreBlankOffset(bool isJump)
             if (targetIndexValue == 0 && prevMarginIgnoreBlank_) {
                 result += GetPrevMargin();
             }
-            if (targetIndexValue == (TotalCount() - GetDisplayCount()) && nextMarginIgnoreBlank_) {
+            if (targetIndexValue >= (TotalCount() - GetDisplayCount()) && nextMarginIgnoreBlank_) {
                 result -= GetNextMargin();
             }
         }
