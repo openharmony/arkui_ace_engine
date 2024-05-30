@@ -177,6 +177,11 @@ public:
 
     bool BetweenPreviewTextPosition(const Offset& globalOffset);
 
+    void SetSupportPreviewText(bool isTextPreviewSupported)
+    {
+        isTextPreviewSupported_ = isTextPreviewSupported;
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TextInputAction, TextInputAction)
     TextInputAction GetDefaultTextInputAction() const;
 
@@ -1054,6 +1059,7 @@ private:
     int32_t richEditorInstanceId_ = -1;
     bool contentChange_ = false;
     PreviewTextRecord previewTextRecord_;
+    bool isTextPreviewSupported_ = true;
     float lastFontScale_ = -1;
     bool isCaretInContentArea_ = false;
     OffsetF movingHandleOffset_;
