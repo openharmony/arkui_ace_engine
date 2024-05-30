@@ -15,7 +15,6 @@
 
 #include <functional>
 #include <optional>
-#include <securec.h>
 
 #include "gtest/gtest.h"
 
