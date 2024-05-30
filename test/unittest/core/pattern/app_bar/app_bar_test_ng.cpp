@@ -247,8 +247,8 @@ HWTEST_F(AppBarTestNg, TestUpdateIconColor008, TestSize.Level1)
     auto icon = pattern->GetMenuIcon();
     auto renderContext = icon->GetRenderContext();
 
-    pattern->UpdateIconColor(theme, icon);
-    EXPECT_EQ(renderContext->GetForegroundColorValue(Color::RED), theme->GetIconColor());
+    pattern->UpdateIconColor(theme, icon, true);
+    EXPECT_EQ(renderContext->GetForegroundColorValue(Color::RED), theme->GetIconColorLight());
 }
 
 /**
