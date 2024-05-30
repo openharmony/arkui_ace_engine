@@ -730,7 +730,8 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
             endMainPos = targetIsSameWithStartFlag_ ? endMainPos_ : currentStartPos + contentMainSize_;
             targetIndex_.reset();
         }
-    } while (LessNotEqual(currentEndPos, endMainPos + marginValue) || (targetIndex_ && currentIndex < targetIndex_.value()));
+    } while (LessNotEqual(currentEndPos, endMainPos + marginValue)
+        || (targetIndex_ && currentIndex < targetIndex_.value()));
 
     if (overScrollFeature_ && canOverScroll_) {
         return;
