@@ -2679,6 +2679,37 @@ class SharedTransitionModifier extends ModifierWithKey {
   }
 }
 SharedTransitionModifier.identity = Symbol('sharedTransition');
+
+class FocusScopeIdModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetFocusScopeId(node);
+    }
+    else {
+      getUINativeModule().common.setFocusScopeId(node, this.value.id, this.value.isGroup);
+    }
+  }
+}
+FocusScopeIdModifier.identity = Symbol('focusScopeId');
+
+class FocusScopePriorityModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetFocusScopePriority(node);
+    }
+    else {
+      getUINativeModule().common.setFocusScopePriority(node, this.value.scopeId, this.value.priority);
+    }
+  }
+}
+FocusScopePriorityModifier.identity = Symbol('focusScopePriority');
+
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 const isString = (val) => typeof val === 'string';
 const isNumber = (val) => typeof val === 'number';
@@ -3868,6 +3899,29 @@ class ArkComponent {
   }
   systemBarEffect() {
     modifierWithKey(this._modifiersWithKeys, SystemBarEffectModifier.identity, SystemBarEffectModifier, null);
+    return this;
+  }
+  focusScopeId(id, isGroup) {
+    let arkFocusScopeId = new ArkFocusScopeId();
+    if (isString(id)) {
+      arkFocusScopeId.id = id;
+    }
+    if (typeof isGroup === 'boolean') {
+      arkFocusScopeId.isGroup = isGroup;
+    }
+    modifierWithKey(this._modifiersWithKeys, FocusScopeIdModifier.identity, FocusScopeIdModifier, arkFocusScopeId);
+    return this;
+  }
+  focusScopePriority(scopeId, priority) {
+    let arkFocusScopePriority = new ArkFocusScopePriority();
+    if (isString(scopeId)) {
+      arkFocusScopePriority.scopeId = scopeId;
+    }
+    if (typeof priority === 'number') {
+      arkFocusScopePriority.priority = priority;
+    }
+    modifierWithKey(
+      this._modifiersWithKeys, FocusScopePriorityModifier.identity, FocusScopePriorityModifier, arkFocusScopePriority);
     return this;
   }
 }
@@ -14261,6 +14315,24 @@ class ArkSymbolEffect {
   isEqual(another) {
     return (this.symbolEffect === another.symbolEffect) &&
       (this.action === another.action);
+  }
+}
+class ArkFocusScopeId {
+  constructor() {
+    this.id = undefined;
+    this.isGroup = undefined;
+  }
+  isEqual(another) {
+    return (this.id === another.id) && (this.isGroup === another.isGroup);
+  }
+}
+class ArkFocusScopePriority {
+  constructor() {
+    this.scopeId = undefined;
+    this.priority = undefined;
+  }
+  isEqual(another) {
+    return (this.scopeId === another.scopeId) && (this.priority === another.priority);
   }
 }
 /// <reference path='./import.ts' />

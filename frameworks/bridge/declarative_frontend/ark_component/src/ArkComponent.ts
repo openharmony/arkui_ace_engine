@@ -2814,6 +2814,34 @@ class SystemBarEffectModifier extends ModifierWithKey<null> {
   }
 }
 
+class FocusScopeIdModifier extends ModifierWithKey<ArkFocusScopeId> {
+  constructor(value: ArkFocusScopeId) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('focusScopeId');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetFocusScopeId(node);
+    } else {
+      getUINativeModule().common.setFocusScopeId(node, this.value.id, this.value.isGroup);
+    }
+  }
+}
+
+class FocusScopePriorityModifier extends ModifierWithKey<ArkFocusScopePriority> {
+  constructor(value: ArkFocusScopePriority) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('focusScopePriority');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetFocusScopePriority(node);
+    } else {
+      getUINativeModule().common.setFocusScopePriority(node, this.value.scopeId, this.value.priority);
+    }
+  }
+}
+
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 type basicType = string | number | bigint | boolean | symbol | undefined | object | null;
 const isString = (val: basicType): boolean => typeof val === 'string';
@@ -4057,6 +4085,32 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   systemBarEffect(): this {
     modifierWithKey(this._modifiersWithKeys, SystemBarEffectModifier.identity, SystemBarEffectModifier, null);
+    return this;
+  }
+
+  focusScopeId(id: string, isGroup?: boolean): this {
+    let arkFocusScopeId = new ArkFocusScopeId();
+    if (isString(id)) {
+      arkFocusScopeId.id = id;
+    }
+    if (typeof isGroup === 'boolean') {
+      arkFocusScopeId.isGroup = isGroup;
+    }
+    modifierWithKey(
+      this._modifiersWithKeys, FocusScopeIdModifier.identity, FocusScopeIdModifier, arkFocusScopeId);
+    return this;
+  }
+
+  focusScopePriority(scopeId: string, priority?: number): this {
+    let arkFocusScopePriority = new ArkFocusScopePriority();
+    if (isString(scopeId)) {
+      arkFocusScopePriority.scopeId = scopeId;
+    }
+    if (typeof priority === 'number') {
+      arkFocusScopePriority.priority = priority;
+    }
+    modifierWithKey(
+      this._modifiersWithKeys, FocusScopePriorityModifier.identity, FocusScopePriorityModifier, arkFocusScopePriority);
     return this;
   }
 }

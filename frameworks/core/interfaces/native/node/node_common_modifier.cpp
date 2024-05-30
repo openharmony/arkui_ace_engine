@@ -5548,6 +5548,40 @@ void ResetAccessibilityValue(ArkUINodeHandle node)
         accessibilityProperty->SetUserTextValue("");
     }
 }
+
+void SetFocusScopeId(ArkUINodeHandle node, ArkUI_CharPtr id, ArkUI_Bool isGroup)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string idStr = id;
+    ViewAbstract::SetFocusScopeId(frameNode, idStr, isGroup);
+}
+
+void ResetFocusScopeId(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string id = "";
+    bool isGroup = false;
+    ViewAbstract::SetFocusScopeId(frameNode, id, isGroup);
+}
+
+void SetFocusScopePriority(ArkUINodeHandle node, ArkUI_CharPtr scopeId, ArkUI_Int32 priority)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string scopeIdStr = scopeId;
+    ViewAbstract::SetFocusScopePriority(frameNode, scopeIdStr, priority);
+}
+
+void ResetFocusScopePriority(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string scopeId = "";
+    int32_t priority = 0;
+    ViewAbstract::SetFocusScopePriority(frameNode, scopeId, priority);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -5621,7 +5655,8 @@ const ArkUICommonModifier* GetCommonModifier()
         ResetVisibleAreaChange, ResetAreaChange, SetBackgroundImagePixelMap, SetLayoutRect, GetLayoutRect,
         ResetLayoutRect, GetFocusOnTouch, SetSystemBarEffect, GetAccessibilityID,
         SetAccessibilityState, GetAccessibilityState, ResetAccessibilityState,
-        SetAccessibilityValue, GetAccessibilityValue, ResetAccessibilityValue };
+        SetAccessibilityValue, GetAccessibilityValue, ResetAccessibilityValue, SetFocusScopeId, ResetFocusScopeId,
+        SetFocusScopePriority, ResetFocusScopePriority };
 
     return &modifier;
 }

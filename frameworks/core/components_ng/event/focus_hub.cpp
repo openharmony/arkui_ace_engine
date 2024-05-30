@@ -2240,6 +2240,10 @@ void FocusHub::SetFocusScopeId(const std::string& focusScopeId, bool isGroup)
     if (focusManager && !focusManager->AddFocusScope(focusScopeId, AceType::Claim(this))) {
         TAG_LOGW(AceLogTag::ACE_FOCUS, "node(%{public}s/%{public}d) focusScopeId exist.", GetFrameName().c_str(),
             GetFrameId());
+        bool isValidFocusScope = (isFocusScope_ && !focusScopeId_.empty());
+        if (isValidFocusScope) {
+            isGroup_ = isGroup;
+        }
         return;
     }
     focusScopeId_ = focusScopeId;
