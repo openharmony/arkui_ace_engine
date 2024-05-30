@@ -80,7 +80,7 @@ public:
                 theme->navigationGroupColor_ = pattern->GetAttr<Color>("navigation_group_color", Color::TRANSPARENT);
                 auto navBarUnfocusEffectEnable = pattern->GetAttr<std::string>("section_unfocus_effect_enable", "0");
                 theme->navBarUnfocusEffectEnable_ = StringUtils::StringToInt(navBarUnfocusEffectEnable);
-                theme->navBarUnfocusColor_ = pattern->GetAttr<Color>("section_unfocus_color", Color::TRANSPARENT);
+                theme->navBarUnfocusColor_ = pattern->GetAttr<Color>("color_panel_bg", Color::TRANSPARENT);
                 theme->titlebarBackgroundBlurStyle_ = pattern->GetAttr<int>("titlebar_background_blur_style", 0);
                 theme->toolbarBackgroundBlurStyle_ = pattern->GetAttr<int>("toolbar_background_blur_style", 0);
             }
@@ -122,7 +122,7 @@ public:
             theme->navigationGroupColor_ = pattern->GetAttr<Color>("navigation_group_color", Color::TRANSPARENT);
             auto navBarUnfocusEffectEnable = pattern->GetAttr<std::string>("section_unfocus_effect_enable", "0");
             theme->navBarUnfocusEffectEnable_ = StringUtils::StringToInt(navBarUnfocusEffectEnable);
-            theme->navBarUnfocusColor_ = pattern->GetAttr<Color>("section_unfocus_color", Color::TRANSPARENT);
+            theme->navBarUnfocusColor_ = pattern->GetAttr<Color>("color_panel_bg", Color::TRANSPARENT);
             theme->backgroundBlurColor_ = pattern->GetAttr<Color>("background_blur_color", Color(0x19E6E6E6));
             theme->mainTitleFontColor_ = pattern->GetAttr<Color>("title_primary_color", Color(0xe5000000));
             theme->subTitleFontColor_ = pattern->GetAttr<Color>("title_subheader_color", Color(0x99000000));
