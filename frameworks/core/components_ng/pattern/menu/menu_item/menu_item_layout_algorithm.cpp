@@ -97,8 +97,8 @@ void MenuItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         verticalInteval = static_cast<float>(MENU_ITEM_VERTICAL_PADDING.ConvertToPx());
     }
-    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorderWithDefault(horInterval_,
-                          verticalInteval, 0.0f, 0.0f);
+    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorderWithDefault(horInterval_, 
+        verticalInteval, 0.0f, 0.0f);
 
     auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
     auto leftRow = layoutWrapper->GetOrCreateChildByIndex(0);
