@@ -887,23 +887,21 @@ void TextContentModifier::StopTextRace()
 
 void TextContentModifier::ResumeAnimation()
 {
+    CHECK_NULL_VOID(raceAnimation_);
     if (textRacing_) {
         return;
     }
-    if (raceAnimation_) {
-        AnimationUtils::ResumeAnimation(raceAnimation_);
-    }
+    AnimationUtils::ResumeAnimation(raceAnimation_);
     textRacing_ = true;
 }
 
 void TextContentModifier::PauseAnimation()
 {
+    CHECK_NULL_VOID(raceAnimation_);
     if (!textRacing_) {
         return;
     }
-    if (raceAnimation_) {
-        AnimationUtils::PauseAnimation(raceAnimation_);
-    }
+    AnimationUtils::PauseAnimation(raceAnimation_);
     textRacing_ = false;
 }
 
