@@ -721,7 +721,8 @@ private:
     // use property animation feature
     void PlayPropertyTranslateAnimation(
         float translate, int32_t nextIndex, float velocity = 0.0f, bool stopAutoPlay = false);
-    void StopPropertyTranslateAnimation(bool isFinishAnimation, bool isBeforeCreateLayoutWrapper = false);
+    void StopPropertyTranslateAnimation(bool isFinishAnimation,
+        bool isBeforeCreateLayoutWrapper = false, bool isInterrupt = false);
     void UpdateOffsetAfterPropertyAnimation(float offset);
     void OnPropertyTranslateAnimationFinish(const OffsetF& offset);
     void PlayIndicatorTranslateAnimation(float translate, std::optional<int32_t> nextIndex = std::nullopt);
@@ -740,7 +741,8 @@ private:
     float GetMainContentSize() const;
     void FireChangeEvent() const;
     void FireAnimationStartEvent(int32_t currentIndex, int32_t nextIndex, const AnimationCallbackInfo& info) const;
-    void FireAnimationEndEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const;
+    void FireAnimationEndEvent(int32_t currentIndex,
+        const AnimationCallbackInfo& info, bool isInterrupt = false) const;
     void FireGestureSwipeEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const;
     void FireSwiperCustomAnimationEvent();
     void FireContentDidScrollEvent();
@@ -774,7 +776,8 @@ private:
     void PostTranslateTask(uint32_t delayTime);
     void RegisterVisibleAreaChange();
     bool NeedAutoPlay() const;
-    void OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, bool isFinishAnimation, bool forceStop = false);
+    void OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay,
+        bool isFinishAnimation, bool forceStop = false, bool isInterrupt = false);
     bool IsShowArrow() const;
     void SaveArrowProperty(const RefPtr<FrameNode>& arrowNode);
     RefPtr<FocusHub> GetFocusHubChild(std::string childFrameName);
@@ -787,7 +790,7 @@ private:
     float GetCustomPropertyOffset() const;
     float GetCustomPropertyTargetOffset() const;
     void UpdateAnimationProperty(float velocity);
-    void TriggerAnimationEndOnForceStop();
+    void TriggerAnimationEndOnForceStop(bool isInterrupt);
     void TriggerAnimationEndOnSwipeToLeft();
     void TriggerAnimationEndOnSwipeToRight();
     void TriggerEventOnFinish(int32_t nextIndex);

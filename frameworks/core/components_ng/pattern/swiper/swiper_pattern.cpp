@@ -319,7 +319,7 @@ void SwiperPattern::InitCapture()
 
 void SwiperPattern::ResetOnForceMeasure()
 {
-    StopPropertyTranslateAnimation(isFinishAnimation_);
+    StopPropertyTranslateAnimation(isFinishAnimation_, false, true);
     StopTranslateAnimation();
     StopSpringAnimation();
     StopFadeAnimation();
@@ -1123,14 +1123,16 @@ void SwiperPattern::FireAnimationStartEvent(
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
 }
 
-void SwiperPattern::FireAnimationEndEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const
+void SwiperPattern::FireAnimationEndEvent(
+    int32_t currentIndex, const AnimationCallbackInfo& info, bool isInterrupt) const
 {
     if (currentIndex == -1) {
         return;
     }
     auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
-    swiperEventHub->FireAnimationEndEvent(currentIndex, info);
+    isInterrupt ? swiperEventHub->FireAnimationEndOnForceEvent(currentIndex, info)
+                : swiperEventHub->FireAnimationEndEvent(currentIndex, info);
 }
 
 void SwiperPattern::FireGestureSwipeEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const
@@ -3032,7 +3034,8 @@ void SwiperPattern::OnPropertyTranslateAnimationFinish(const OffsetF& offset)
     OnTranslateFinish(propertyAnimationIndex_, false, isFinishAnimation_);
 }
 
-void SwiperPattern::StopPropertyTranslateAnimation(bool isFinishAnimation, bool isBeforeCreateLayoutWrapper)
+void SwiperPattern::StopPropertyTranslateAnimation(
+    bool isFinishAnimation, bool isBeforeCreateLayoutWrapper, bool isInterrupt)
 {
     if (!usePropertyAnimation_) {
         return;
@@ -3078,7 +3081,7 @@ void SwiperPattern::StopPropertyTranslateAnimation(bool isFinishAnimation, bool 
     if (!isBeforeCreateLayoutWrapper) {
         UpdateOffsetAfterPropertyAnimation(currentOffset.GetMainOffset(GetDirection()));
     }
-    OnTranslateFinish(propertyAnimationIndex_, false, isFinishAnimation, true);
+    OnTranslateFinish(propertyAnimationIndex_, false, isFinishAnimation, true, isInterrupt);
 }
 
 RefPtr<Curve> SwiperPattern::GetCurveIncludeMotion()
@@ -4179,7 +4182,7 @@ void SwiperPattern::UpdateIndexOnSwipePageStop(int32_t pauseTargetIndex)
     }
 }
 
-void SwiperPattern::TriggerAnimationEndOnForceStop()
+void SwiperPattern::TriggerAnimationEndOnForceStop(bool isInterrupt)
 {
     auto pauseTargetIndex = pauseTargetIndex_.has_value() ? pauseTargetIndex_.value() : currentIndex_;
     if (currentIndex_ != pauseTargetIndex) {
@@ -4200,7 +4203,7 @@ void SwiperPattern::TriggerAnimationEndOnForceStop()
         info.currentOffset = GetCustomPropertyOffset() +
             Dimension(-currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
     }
-    FireAnimationEndEvent(GetLoopIndex(currentIndex_), info);
+    FireAnimationEndEvent(GetLoopIndex(currentIndex_), info, isInterrupt);
     UpdateItemRenderGroup(false);
 }
 
@@ -4346,10 +4349,11 @@ void SwiperPattern::UpdateItemRenderGroup(bool itemRenderGroup)
     }
 }
 
-void SwiperPattern::OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, bool isFinishAnimation, bool forceStop)
+void SwiperPattern::OnTranslateFinish(
+    int32_t nextIndex, bool restartAutoPlay, bool isFinishAnimation, bool forceStop, bool isInterrupt)
 {
     if (forceStop && !isFinishAnimation) {
-        TriggerAnimationEndOnForceStop();
+        TriggerAnimationEndOnForceStop(isInterrupt);
     } else {
         TriggerEventOnFinish(nextIndex);
     }
