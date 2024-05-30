@@ -1212,6 +1212,12 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     if (nativeEngine_ == nullptr) {
         nativeEngine_ = new ArkNativeEngine(vm, static_cast<void*>(this));
     }
+    EngineTask(sharedRuntime);
+    return result;
+}
+
+void JsiDeclarativeEngine::EngineTask(bool sharedRuntime)
+{
     engineInstance_->SetNativeEngine(nativeEngine_);
     engineInstance_->InitJsObject();
     if (!sharedRuntime) {
@@ -1222,8 +1228,6 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         RegisterWorker();
         engineInstance_->RegisterFaPlugin();
     }
-
-    return result;
 }
 
 void JsiDeclarativeEngine::SetPostTask(NativeEngine* nativeEngine)
@@ -1234,18 +1238,20 @@ void JsiDeclarativeEngine::SetPostTask(NativeEngine* nativeEngine)
         if (delegate == nullptr) {
             return;
         }
-        delegate->PostJsTask([weakEngine, needSync, id]() {
-            auto jsEngine = weakEngine.Upgrade();
-            if (jsEngine == nullptr) {
-                return;
-            }
-            auto nativeEngine = jsEngine->GetNativeEngine();
-            if (nativeEngine == nullptr) {
-                return;
-            }
-            ContainerScope scope(id);
-            nativeEngine->Loop(LOOP_NOWAIT, needSync);
-        }, "ArkUISetNativeEngineLoop");
+        delegate->PostJsTask(
+            [weakEngine, needSync, id]() {
+                auto jsEngine = weakEngine.Upgrade();
+                if (jsEngine == nullptr) {
+                    return;
+                }
+                auto nativeEngine = jsEngine->GetNativeEngine();
+                if (nativeEngine == nullptr) {
+                    return;
+                }
+                ContainerScope scope(id);
+                nativeEngine->Loop(LOOP_NOWAIT, needSync);
+            },
+            "ArkUISetNativeEngineLoop");
     };
     nativeEngine_->SetPostTask(postTask);
 }
@@ -1317,7 +1323,7 @@ void JsiDeclarativeEngine::RegisterOffWorkerFunc()
 void JsiDeclarativeEngine::RegisterAssetFunc()
 {
     auto weakDelegate = WeakPtr(engineInstance_->GetDelegate());
-    auto && assetFunc = [weakDelegate](const std::string& uri, uint8_t** buff, size_t* buffSize,
+    auto&& assetFunc = [weakDelegate](const std::string& uri, uint8_t** buff, size_t* buffSize,
         std::vector<uint8_t>& content, std::string& ami, bool& useSecureMem, bool isRestricted) {
         auto delegate = weakDelegate.Upgrade();
         if (delegate == nullptr) {
