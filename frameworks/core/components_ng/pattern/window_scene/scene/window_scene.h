@@ -58,7 +58,7 @@ private:
     OHOS::Rosen::WindowMode initWindowMode_;
     ACE_DISALLOW_COPY_AND_MOVE(WindowScene);
     Rosen::WSRect oldWindowRect_ = {0, 0, 0, 0};
-    bool onceFlag_ = true;
+    bool bufferAvailableCallbackFlag_ = true;
 };
 } // namespace OHOS::Ace::NG
 

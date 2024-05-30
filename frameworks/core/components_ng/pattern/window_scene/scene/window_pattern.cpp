@@ -157,6 +157,7 @@ void WindowPattern::OnAttachToFrameNode()
 
 void WindowPattern::CreateBlankNode()
 {
+    ACE_SCOPED_TRACE("WindowPattern::CreateBlankNode");
     blankNode_ = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<BlankPattern>());
     auto blankLayoutProperty = blankNode_->GetLayoutProperty<BlankLayoutProperty>();

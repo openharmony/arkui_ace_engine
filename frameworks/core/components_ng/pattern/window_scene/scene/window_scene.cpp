@@ -52,12 +52,12 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
     callback_ = [weakThis = WeakClaim(this), weakSession = wptr(session_)]() {
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
-        if (self->onceFlag_) {
+        if (self->bufferAvailableCallbackFlag_) {
             auto session = weakSession.promote();
             CHECK_NULL_VOID(session);
             session->SetBufferAvailable(true);
             self->BufferAvailableCallback();
-            self->onceFlag_ = false;
+            self->bufferAvailableCallbackFlag_ = false;
             Rosen::SceneSessionManager::GetInstance().NotifyCompleteFirstFrameDrawing(session->GetPersistentId());
         }
     };
@@ -233,6 +233,7 @@ void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
 
 void WindowScene::BufferAvailableCallback()
 {
+    ACE_SCOPED_TRACE("WindowScene::BufferAvailableCallback");
     auto uiTask = [weakThis = WeakClaim(this)]() {
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self && self->session_);
@@ -299,7 +300,6 @@ void WindowScene::BufferAvailableCallback()
 void WindowScene::OnActivation()
 {
     ACE_SCOPED_TRACE("WindowScene::OnActivation");
-    auto self = weakThis.Upgrade();
     CHECK_NULL_VOID(session_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -440,7 +440,7 @@ void WindowScene::OnDisconnect()
     pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneDisconnect", TaskExecutor::TaskType::UI);
 }
 
-void WindowScene::onBackground()
+void WindowScene::OnBackground()
 {
     oldWindowRect_ = session_->GetSessionRect();
     session_->SetOldRect(oldWindowRect_);
@@ -478,6 +478,6 @@ bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         surfaceNode->SetBufferAvailableCallback(callback_);
         surfaceNode->SetIsNotifyUIBufferAvailable(true);
     }
-    return fasle;
+    return false;
 }
 } // namespace OHOS::Ace::NG
