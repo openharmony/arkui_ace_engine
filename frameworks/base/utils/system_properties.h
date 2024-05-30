@@ -228,8 +228,6 @@ public:
 
     static int32_t GetSvgMode();
 
-    static bool GetImageFrameworkEnabled();
-
     static bool GetDebugPixelMapSaveEnabled();
 
     static bool GetRosenBackendEnabled()
@@ -327,6 +325,11 @@ public:
     static bool GetGpuUploadEnabled()
     {
         return gpuUploadEnabled_;
+    }
+
+    static bool GetImageFrameworkEnabled()
+    {
+        return imageFrameworkEnable_;
     }
 
     /*
@@ -568,6 +571,7 @@ private:
     static bool stateManagerEnable_;
     static bool acePerformanceMonitorEnable_;
     static bool faultInjectEnabled_;
+    static bool imageFrameworkEnable_;
     static std::pair<float, float> brightUpPercent_;
 };
 

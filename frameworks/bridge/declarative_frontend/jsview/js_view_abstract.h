@@ -502,16 +502,15 @@ public:
     template<typename T>
     static bool ParseJsInteger(const JSRef<JSVal>& jsValue, T& result)
     {
-        if (!jsValue->IsNumber() && !jsValue->IsObject()) {
-            LOGE("arg is not number or Object.");
-            return false;
-        }
-
         if (jsValue->IsNumber()) {
             result = jsValue->ToNumber<T>();
             return true;
         }
 
+        if (!jsValue->IsObject()) {
+            LOGE("arg is not number or Object.");
+            return false;
+        }
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
         int32_t resType = jsObj->GetPropertyValue<int32_t>("type", -1);
         if (resType == -1) {

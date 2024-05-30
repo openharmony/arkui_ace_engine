@@ -190,15 +190,16 @@ void JSInteractableView::JsOnClick(const JSCallbackInfo& info)
     if (!jsOnClickVal->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> weak = AceType::WeakClaim(frameNode);
     auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(jsOnClickVal));
-    auto onTap = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc, node = frameNode](GestureEvent& info) {
+    auto onTap = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc, node = weak](GestureEvent& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onClick");
         PipelineContext::SetCallBackNode(node);
         func->Execute(info);
     };
-    auto onClick = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc, node = frameNode](
+    auto onClick = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc, node = weak](
                        const ClickInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onClick");
@@ -207,7 +208,7 @@ void JSInteractableView::JsOnClick(const JSCallbackInfo& info)
     };
 
     ViewAbstractModel::GetInstance()->SetOnClick(std::move(onTap), std::move(onClick));
-    auto focusHub = NG::ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetFocusable(true, false);
 }
