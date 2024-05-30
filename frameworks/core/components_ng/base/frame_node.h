@@ -944,8 +944,9 @@ private:
     void ProcessAllVisibleCallback(const std::vector<double>& visibleAreaUserRatios,
         VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio,
         double lastVisibleRatio, bool isThrottled = false);
-    void ProcessThrottledVisibleCallback(double currentRatio = -1.0f);
-    void ThrottledVisibleTask(double currentRatio);
+    void ProcessThrottledVisibleCallback();
+    bool IsFrameDisappear();
+    void ThrottledVisibleTask();
 
     void OnPixelRoundFinish(const SizeF& pixelGridRoundSize);
 
