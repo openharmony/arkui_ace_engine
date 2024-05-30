@@ -63,7 +63,6 @@ public:
 
     bool UpdatePanelForVirtualKeyboard(double offsetY, double fullHeight);
     void SetHeight(float height);
-    void ProcessNavKeyboard();
 
     float GetHeight() const
     {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -109,7 +109,7 @@ public:
     double GetCurrentPosition() const;
     Axis GetScrollDirection() const override;
 
-    void JumpTo(int32_t index, bool smooth, ScrollAlign align, int32_t source) override;
+    void ScrollToIndex(int32_t index, bool smooth, ScrollAlign align) override;
     void JumpTo(double position);
     bool AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth,
         bool canOverScroll = false) override;

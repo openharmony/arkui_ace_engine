@@ -373,6 +373,7 @@ export class ToolBar extends ViewPU {
         this.menuContent[q1 - 4] = {
           value: this.toolBarList[q1].content,
           action: this.toolBarList[q1].action,
+          enabled: this.toolBarList[q1].state !== ItemState.DISABLE,
         };
       }
       else {

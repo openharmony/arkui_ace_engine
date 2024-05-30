@@ -40,7 +40,7 @@ public:
     virtual void SetNavigationStack(const RefPtr<NG::NavigationStack>& navigationStack) = 0;
     virtual void SetNavigationStackWithCreatorAndUpdater(std::function<RefPtr<NG::NavigationStack>()> creator,
         std::function<void(RefPtr<NG::NavigationStack>)> updater) {};
-    virtual void SetNavigationGroupNodeInfo(std::string moduleName, std::string pagePath)   {};
+    virtual void SetNavigationPathInfo(const std::string& moduleName, const std::string& pagePath) {};
     virtual void SetNavigationStackProvided(bool provided) = 0;
     virtual bool ParseCommonTitle(bool hasSubTitle, bool hasMainTitle, const std::string& subtitle,
         const std::string& title, bool ignoreMainTitle = false)

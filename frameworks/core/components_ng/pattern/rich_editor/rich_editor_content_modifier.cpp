@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_content_modifier.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
+#include "core/components_ng/render/drawing.h"
 #include "base/log/ace_trace.h"
 
 namespace OHOS::Ace::NG {

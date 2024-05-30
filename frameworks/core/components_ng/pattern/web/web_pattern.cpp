@@ -32,6 +32,7 @@
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/common/ai/data_detector_mgr.h"
+#include "core/common/ime/input_method_manager.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/picker/picker_data.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
@@ -197,7 +198,7 @@ constexpr int32_t PINCH_INDEX_ONE = 1;
 constexpr int32_t STATUS_ZOOMIN = 1;
 constexpr int32_t STATUS_ZOOMOUT = 2;
 constexpr int32_t ZOOM_ERROR_COUNT_MAX = 5;
-constexpr double ZOOMIN_SMOOTH_SCALE = 0.97;
+constexpr double ZOOMIN_SMOOTH_SCALE = 0.99;
 
 WebPattern::WebPattern() = default;
 
@@ -579,11 +580,14 @@ void WebPattern::HandleScaleGestureChange(const GestureEvent& event)
 
     double centerX = event.GetPinchCenter().GetX();
     double centerY = event.GetPinchCenter().GetY();
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto offset = frameNode->GetOffsetRelativeToWindow();
     TAG_LOGD(AceLogTag::ACE_WEB,
         "HandleScaleGestureChange curScale:%{public}f pageScale: %{public}f newScale: %{public}f centerX: "
-        "%{public}f centerY: %{public}f",
-        curScale, scale, newScale, centerX, centerY);
-    delegate_->ScaleGestureChange(newScale, centerX, centerY);
+        "%{public}f centerY: %{public}f offset X: %{public}f offset Y: %{public}f",
+        curScale, scale, newScale, centerX, centerY, offset.GetX(), offset.GetY());
+    delegate_->ScaleGestureChange(newScale, centerX - offset.GetX(), centerY - offset.GetY());
 
     preScale_ = curScale;
     pageScale_ = scale;
@@ -1408,6 +1412,7 @@ void WebPattern::HandleFocusEvent()
     if (needOnFocus_) {
         delegate_->OnFocus();
     } else {
+        delegate_->OnFocus(OHOS::NWeb::FocusReason::FOCUS_DEFAULT);
         needOnFocus_ = true;
     }
 }
@@ -1513,7 +1518,11 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
     drawSize_ = drawSize;
     drawSizeCache_ = drawSize_;
     auto offset = Offset(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
-    delegate_->SetBoundsOrResize(drawSize_, offset);
+    if (!CheckSafeAreaIsExpand()) {
+        delegate_->SetBoundsOrResize(drawSize_, offset);
+    } else {
+        TAG_LOGD(AceLogTag::ACE_WEB, "OnDirtyLayoutWrapperSwap safeArea is set, no need setbounds");
+    }
     if (isOfflineMode_) {
         TAG_LOGE(AceLogTag::ACE_WEB,
             "OnDirtyLayoutWrapperSwap; WebPattern is Offline Mode, WebId:%{public}d", GetWebId());
@@ -1543,22 +1552,27 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
 void WebPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
 {
     if (!CheckSafeAreaIsExpand()) {
-        TAG_LOGI(AceLogTag::ACE_WEB, "Not set safeArea, return.");
+        TAG_LOGD(AceLogTag::ACE_WEB, "Not set safeArea, return.");
         return;
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    auto drawSize = Size(geometryNode->GetFrameRect().Width(), geometryNode->GetFrameRect().Height());
+
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+ 
+    auto rect = renderContext->GetPaintRectWithoutTransform();
+    auto size = Size(rect.Width(), rect.Height());
     if (renderContextForSurface_) {
         auto localposition = geometryNode->GetContentOffset();
         renderContextForSurface_->SetBounds(
-            localposition.GetX(), localposition.GetY(), drawSize.Width(), drawSize.Height());
+            localposition.GetX(), localposition.GetY(), size.Width(), size.Height());
         TAG_LOGD(AceLogTag::ACE_WEB,
             "Before sync geometry properties set bounds, X:%{public}f, Y:%{public}f, width:%{public}f, "
             "height:%{public}f",
-            localposition.GetX(), localposition.GetY(), drawSize.Width(), drawSize.Height());
+            localposition.GetX(), localposition.GetY(), size.Width(), size.Height());
     }
 }
 
@@ -1595,14 +1609,17 @@ void WebPattern::OnAreaChangedInner()
 
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     auto geometryNode = frameNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    auto size = Size(geometryNode->GetFrameRect().Width(), geometryNode->GetFrameRect().Height());
+    auto rect = renderContext->GetPaintRectWithoutTransform();
+    auto size = Size(rect.Width(), rect.Height());
 
     delegate_->OnAreaChange({ resizeOffset.GetX(), resizeOffset.GetY(), size.Width(), size.Height() });
     if (CheckSafeAreaIsExpand() &&
         ((size.Width() != areaChangeSize_.Width()) || (size.Height() != areaChangeSize_.Height()))) {
-        TAG_LOGI(AceLogTag::ACE_WEB, "OnAreaChangedInner setbounds: height:%{public}f, offsetY:%{public}f",
+        TAG_LOGD(AceLogTag::ACE_WEB, "OnAreaChangedInner setbounds: height:%{public}f, offsetY:%{public}f",
             size.Height(), resizeOffset.GetY());
         areaChangeSize_ = size;
         drawSize_ = size;
@@ -3055,6 +3072,33 @@ void WebPattern::OnTooltip(const std::string& tooltip)
     ShowTooltip(tooltip, tooltipTimestamp);
 }
 
+void WebPattern::AttachCustomKeyboard()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebCustomKeyboard AttachCustomKeyboard enter");
+    CHECK_NULL_VOID(customKeyboardBuilder_);
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->SetCustomKeyboardOption(true);
+    overlayManager->BindKeyboard(customKeyboardBuilder_, frameNode->GetId());
+    keyboardOverlay_ = overlayManager;
+    keyboardOverlay_->AvoidCustomKeyboard(frameNode->GetId(), 0);
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebCustomKeyboard AttachCustomKeyboard end");
+}
+
+void WebPattern::CloseCustomKeyboard()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebCustomKeyboard CloseCustomKeyboard enter");
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(keyboardOverlay_);
+    keyboardOverlay_->CloseKeyboard(frameNode->GetId());
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebCustomKeyboard CloseCustomKeyboard end");
+}
+
 void WebPattern::HandleShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp)
 {
     if (tooltipTimestamp_ != tooltipTimestamp) {
@@ -4311,8 +4355,11 @@ void WebPattern::SetTouchEventInfo(const TouchEvent& touchEvent,
         while (!touchEventQueue_.empty()) {
             if (touchEventQueue_.front().GetChangedTouches().front().GetFingerId() == touchEvent.id) {
                 tempTouchInfo = touchEventQueue_.front();
+                touchEventQueue_.pop();
+                break;
+            } else {
+                touchEventQueue_.pop();
             }
-            touchEventQueue_.pop();
         }
     }
     auto pos = delegate_->GetPosition(embedId);
@@ -4511,13 +4558,7 @@ void WebPattern::OnHideAutofillPopup()
 
 void WebPattern::CloseKeyboard()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<WebEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto focusHub = eventHub->GetOrCreateFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    focusHub->CloseKeyboard();
+    InputMethodManager::GetInstance()->CloseKeyboard();
 }
 
 WebInfoType WebPattern::GetWebInfoType()

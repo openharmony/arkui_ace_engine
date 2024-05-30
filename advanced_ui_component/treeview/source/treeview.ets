@@ -14,6 +14,7 @@
  */
 
 import { Theme } from '@ohos.arkui.theme';
+import { LengthMetrics } from '@ohos.arkui.node';
 
 const IMAGE_NODE_HEIGHT: number = 24
 const IMAGE_NODE_WIDTH: number = 24
@@ -39,8 +40,6 @@ const COLOR_IMAGE_ROW: string = '#00000000'
 const COLOR_IMAGE_EDIT: string = '#FFFFFF'
 const SHADOW_COLOR: string = '#00001E'
 const GRAG_POP_UP_HEIGHT: string = '48'
-const LEFT_PADDING: string = '8vp'
-const RIGHT_PADDING: string = '8vp'
 const FLOOR_MIN_WIDTH: string = '128vp'
 const FLOOR_MAX_WIDTH: string = '208vp'
 const TEXT_MIN_WIDTH: string = '80vp'
@@ -200,15 +199,15 @@ interface textConstraintSize {
 }
 
 interface padding {
-  left: string;
-  right: string;
+  left: Resource;
+  right: Resource;
 }
 
 interface itemPadding {
-  left: string | Resource;
-  right: string | Resource;
-  top: string | Resource;
-  bottom: string | Resource;
+  left: Resource;
+  right: Resource;
+  top: Resource;
+  bottom: Resource;
 }
 
 interface shadow {
@@ -912,7 +911,8 @@ export struct TreeView {
     bottom: $r('sys.float.ohos_id_text_margin_vertical'),
   };
   private readonly textInputPadding: itemPadding =
-    { left: '0vp', right: '0vp', top: '0vp', bottom: '0vp' }
+    { left: $r('sys.float.padding_level0'), right: $r('sys.float.padding_level0'),
+      top: $r('sys.float.padding_level0'), bottom: $r('sys.float.padding_level0') }
 
   onWillApplyTheme(theme: Theme) {
     this.treeViewTheme.itemSelectedBgColor = theme.colors.interactiveSelect;
@@ -968,7 +968,7 @@ export struct TreeView {
             .opacity(this.listNodeDataSource.getDragPopupPara().imageOpacity)
         }
         .backgroundColor(COLOR_IMAGE_ROW)
-        .margin({ right: item.getNodeItem().imageNode?.itemRightMargin })
+        .margin({ end: getLengthMetricsByResourceOrNumber(item.getNodeItem().imageNode?.itemRightMargin) })
         .height(item.getNodeItem().imageNode?.itemHeight)
         .width(item.getNodeItem().imageNode?.itemWidth)
       }
@@ -998,9 +998,8 @@ export struct TreeView {
     .height(this.listNodeDataSource.getDragPopupPara().height)
     .backgroundColor(this.listNodeDataSource.getDragPopupPara().backgroundColor)
     .padding({
-      left: this.listNodeDataSource.getDragPopupPara().padding.left,
-      right: this.listNodeDataSource.getDragPopupPara().padding.right,
-    })
+      start: LengthMetrics.resource(this.listNodeDataSource.getDragPopupPara().padding.left),
+      end: LengthMetrics.resource(this.listNodeDataSource.getDragPopupPara().padding.right) })
     .shadow({
       radius: $r('sys.float.ohos_id_corner_radius_default_m'),
       color: SHADOW_COLOR,
@@ -1084,7 +1083,10 @@ export struct TreeView {
         }
         .width('100%')
         .height(itemInner.getListItemHeight())
-        .padding({ left: this.itemPadding.left, right: this.itemPadding.right })
+        .padding({
+          start: LengthMetrics.resource(this.itemPadding.left),
+          end: LengthMetrics.resource(this.itemPadding.right)
+        })
         .align(Alignment.Start)
         .onDragStart((event: DragEvent, extraParams: string) => {
           if (this.listNodeDataSource.getIsDrag() || this.listNodeDataSource.getIsInnerDrag() || this.isMultiPress) {
@@ -1898,7 +1900,7 @@ class ListNodeDataSource extends BasicDataSource {
       minWidth2: MIN_WIDTH,
       maxWidth2: MAX_WIDTH,
     },
-    padding: { left: LEFT_PADDING, right: RIGHT_PADDING },
+    padding: { left: $r('sys.float.padding_level4'), right: $r('sys.float.padding_level4') },
     backgroundColor: COLOR_IMAGE_EDIT,
     height: GRAG_POP_UP_HEIGHT,
     shadow: {
@@ -1918,7 +1920,7 @@ class ListNodeDataSource extends BasicDataSource {
     highLightFontColor: $r('sys.color.ohos_id_color_primary_contrary'),
     fontSize: $r('sys.float.ohos_id_text_size_body2'),
     fontWeight: FontWeight.Regular,
-    margin: { left: '4vp', right: '24' }
+    margin: { left: $r('sys.float.padding_level2'), right: $r('sys.float.padding_level12') }
   }
 
   public changeNodeColor(index: number, color: ResourceColor | undefined): void {
@@ -3087,10 +3089,13 @@ export struct TreeViewInner {
     left: $r('sys.float.ohos_id_card_margin_start'),
     right: $r('sys.float.ohos_id_card_margin_end'),
     top: $r('sys.float.ohos_id_text_margin_vertical'),
-    bottom: '0vp',
+    bottom: $r('sys.float.padding_level0'),
   };
-  private readonly textInputPadding: itemPadding =
-    { left: '0vp', right: '0vp', top: '0vp', bottom: '0vp' }
+  private readonly textInputPadding: itemPadding = {
+    left: $r('sys.float.padding_level0'),
+    right: $r('sys.float.padding_level0'),
+    top: $r('sys.float.padding_level0'),
+    bottom: $r('sys.float.padding_level0') }
 
   aboutToAppear(): void {
     if (this.item.getNodeItem().imageNode) {
@@ -3138,7 +3143,7 @@ export struct TreeViewInner {
               .color(this.listNodeDataSource.getFlagLine().flagLineColor)
               .visibility(this.listNodeDataSource.getVisibility(this.item))
               .lineCap(LineCapStyle.Round)
-              .margin({ left: this.item.getFlagLineLeftMargin() })
+              .margin({ start: LengthMetrics.vp(this.item.getFlagLineLeftMargin()) })
               .focusable(true)
             Row({}) {
               if (this.item.getNodeItem().imageNode) {
@@ -3155,7 +3160,9 @@ export struct TreeViewInner {
                 }
                 .focusable(true)
                 .backgroundColor(COLOR_IMAGE_ROW)
-                .margin({ right: this.item.getNodeItem().imageNode?.itemRightMargin })
+                .margin({
+                  end: getLengthMetricsByResourceOrNumber(this.item.getNodeItem().imageNode?.itemRightMargin)
+                })
                 .height(this.item.getNodeItem().imageNode?.itemHeight)
                 .width(this.item.getNodeItem().imageNode?.itemWidth)
               }
@@ -3166,7 +3173,10 @@ export struct TreeViewInner {
                     .fontSize(this.item.getNodeItem().mainTitleNode?.size)
                     .fontColor(this.item.getIsSelected() ?
                     this.treeViewTheme.primaryTitleActiveFontColor : this.treeViewTheme.primaryTitleFontColor)
-                    .margin({ right: this.item.getNodeItem().mainTitleNode?.itemRightMargin })
+                    .margin({
+                      end: getLengthMetricsByResourceOrNumber(this.item.getNodeItem()
+                        .mainTitleNode?.itemRightMargin)
+                    })
                     .textOverflow({ overflow: TextOverflow.Ellipsis })
                     .fontWeight(this.item.getNodeItem().mainTitleNode?.weight)
                     .focusable(true)
@@ -3183,8 +3193,10 @@ export struct TreeViewInner {
                       .enterKeyType(EnterKeyType.Done)
                       .focusable(true)
                       .padding({
-                        left: this.textInputPadding.left, right: this.textInputPadding.right,
-                        top: this.textInputPadding.top, bottom: this.textInputPadding.bottom,
+                        start: LengthMetrics.resource(this.textInputPadding.left),
+                        end: LengthMetrics.resource(this.textInputPadding.right),
+                        top: LengthMetrics.resource(this.textInputPadding.top),
+                        bottom: LengthMetrics.resource(this.textInputPadding.bottom),
                       })
                       .onChange((value: string) => {
                         let thisIndex: number = findCurrentNodeIndex(this.listNodeDataSource, this.item.getNodeCurrentNodeId());
@@ -3227,7 +3239,10 @@ export struct TreeViewInner {
                       })
                   }.backgroundColor(this.item.getNodeItem().inputText?.backgroundColor)
                   .borderRadius(this.item.getNodeItem().inputText?.borderRadius)
-                  .margin({ right: this.item.getNodeItem().inputText?.itemRightMargin })
+                  .margin({
+                    end: getLengthMetricsByResourceOrNumber(this.item.getNodeItem()
+                      .inputText?.itemRightMargin)
+                  })
                 }
                 Blank()
               }
@@ -3243,9 +3258,11 @@ export struct TreeViewInner {
                     .fontWeight(this.listNodeDataSource.getSubTitlePara().fontWeight)
                 }
                 .focusable(true)
-                .margin({ left: this.listNodeDataSource.getSubTitlePara().margin.left,
-                  right: this.item.getNodeItem().imageCollapse ?
-                    0 : this.listNodeDataSource.getSubTitlePara().margin.right })
+                .margin({
+                  start: LengthMetrics.resource(this.listNodeDataSource.getSubTitlePara().margin.left),
+                  end: this.item.getNodeItem().imageCollapse ?
+                  LengthMetrics.resource($r('sys.float.padding_level0')) : LengthMetrics.resource(this.listNodeDataSource.getSubTitlePara().margin.right)
+                })
               }
 
               if (this.item.getNodeItem().imageCollapse) {
@@ -3282,7 +3299,7 @@ export struct TreeViewInner {
                 })
             )
             .height(this.item.getNodeHeight())
-            .padding({ left: this.item.getNodeLeftPadding() })
+            .padding({ start: LengthMetrics.vp(this.item.getNodeLeftPadding()) })
             .bindContextMenu(this.builder, ResponseType.RightClick)
 
           }.focusable(true)
@@ -4132,5 +4149,21 @@ export class ListNodeUtils {
     } else {
       throw new Error('ListNodeUtils[addNode]: Parent node not found.');
     }
+  }
+}
+
+/**
+ * get LengthMetrics
+ *
+ * @param Resource | number type
+ * @returns LengthMetrics
+ */
+function getLengthMetricsByResourceOrNumber(resourceOrNumber: Resource | number): LengthMetrics {
+  if (!resourceOrNumber) {
+    return LengthMetrics.vp(0);
+  } else if (typeof resourceOrNumber === 'number') {
+    return LengthMetrics.vp(resourceOrNumber);
+  } else {
+    return LengthMetrics.resource(resourceOrNumber);
   }
 }

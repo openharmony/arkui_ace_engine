@@ -130,7 +130,7 @@ private:
                 continue;
             }
             auto it2 = another.find(child.first);
-            if (it2 == dividermap_.end() || !it2->second.isDelta) {
+            if (it2 == another.end() || !it2->second.isDelta) {
                 result.emplace(child.first, child.second);
                 continue;
             }

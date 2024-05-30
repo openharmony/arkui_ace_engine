@@ -37,7 +37,6 @@ namespace OHOS::Ace::NG {
 namespace {
 const std::vector<double> VALUES = { 1.0, 2.0, 3.0, 4.0 };
 constexpr double MAX = 200.0;
-const double MAX_DEFAULT = 100.0;
 const std::vector<double> LONG_VALUES = { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0 };
 constexpr size_t TYPE_CYCLE = 0;
 constexpr size_t TYPE_LINE = 1;
@@ -853,15 +852,24 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintSpaceTest001, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataTheme));
 
     DataPanelModifier dataPanelModifier;
     Testing::MockCanvas rsCanvas;
-    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillOnce(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachBrush()).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Translate(_, _)).WillOnce(Return());
+    EXPECT_CALL(rsCanvas, Scale(_, _)).WillOnce(Return());
 
     LinearData linearData;
     dataPanelModifier.PaintSpace(rsCanvas, linearData, SPACEWIDTH);
+    
+    /**
+     * @tc.case: layout direction rtl
+     */
+    DataPanelModifier dataPanelModifierRtl;
+    dataPanelModifierRtl.SetIsRtl(true);
+    dataPanelModifierRtl.PaintSpace(rsCanvas, linearData, SPACEWIDTH);
 }
 
 /**
@@ -874,12 +882,14 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentTest001, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataTheme));
 
     DataPanelModifier dataPanelModifier;
     Testing::MockCanvas rsCanvas;
-    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillOnce(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachBrush()).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Translate(_, _)).WillOnce(Return());
+    EXPECT_CALL(rsCanvas, Scale(_, _)).WillOnce(Return());
     LinearData linerData;
     linerData.offset = OFFSET;
     linerData.segmentWidth = SEGMENTWIDTH;
@@ -895,6 +905,13 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentTest001, TestSize.Level1)
     gradientColorEnd.SetDimension(Dimension(1.0));
     linerData.segmentColor = gradient;
     dataPanelModifier.PaintColorSegment(rsCanvas, linerData);
+    
+    /**
+     * @tc.case: layout direction rtl
+     */
+    DataPanelModifier dataPanelModifierRtl;
+    dataPanelModifierRtl.SetIsRtl(true);
+    dataPanelModifierRtl.PaintColorSegment(rsCanvas, linerData);
 }
 
 /**
@@ -1176,6 +1193,8 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentFilterMaskTest001, TestSize.
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Translate(_, _)).WillOnce(Return());
+    EXPECT_CALL(rsCanvas, Scale(_, _)).WillOnce(Return());
     dataPanelModifier.SetMax(20.0f);
     std::vector<double> VALUES = { 0.0001f, 5.0f };
     dataPanelModifier.SetValues(VALUES);
@@ -1206,6 +1225,13 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentFilterMaskTest001, TestSize.
     segmentLinearData.isEndData = true;
     dataPanelModifier.PaintColorSegmentFilterMask(rsCanvas, segmentLinearData);
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+
+    /**
+     * @tc.case: case. layout direction rtl
+     */
+    DataPanelModifier dataPanelModifierRtl;
+    dataPanelModifierRtl.SetIsRtl(true);
+    dataPanelModifierRtl.PaintColorSegmentFilterMask(rsCanvas, segmentLinearData);
 }
 
 /**
@@ -1464,95 +1490,5 @@ HWTEST_F(DataPanelTestNg, DataPanelLineTypeBorderRadiusTest002, TestSize.Level1)
     }
 
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
-}
-
-/**
- * @tc.name: DataPanelPatternTest013
- * @tc.desc: SetBuilderFunc and get value
- * @tc.type: FUNC
- */
-HWTEST_F(DataPanelTestNg, DataPanelPatternTest013, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Init DataPanel node
-     */
-    DataPanelModelNG dataPanelModelNG;
-    dataPanelModelNG.Create(VALUES, MAX, TYPE_CYCLE);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<DataPanelPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    auto node = [](DataPanelConfiguration config) -> RefPtr<FrameNode> {
-        EXPECT_EQ(VALUES, config.values_);
-        EXPECT_EQ(MAX, config.maxValue_);
-        return nullptr;
-    };
-
-    /**
-     * @tc.steps: step2. Set parameters to pattern builderFunc
-     */
-    pattern->SetBuilderFunc(node);
-    pattern->BuildContentModifierNode();
-}
-
-/**
- * @tc.name: DataPanelPatternTes个itt014
- * @tc.desc: SetBuilderFunc and get value
- * @tc.type: FUNC
- */
-HWTEST_F(DataPanelTestNg, DataPanelPatternTest014, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Init DataPanel node
-     */
-    DataPanelModelNG dataPanelModelNG;
-    dataPanelModelNG.Create(VALUES, MAX_DEFAULT, TYPE_CYCLE);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<DataPanelPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    auto node = [](DataPanelConfiguration config) -> RefPtr<FrameNode> {
-        EXPECT_EQ(VALUES, config.values_);
-        EXPECT_EQ(MAX_DEFAULT, config.maxValue_);
-        return nullptr;
-    };
-    /**
-     * @tc.steps: step2. Set parameters to pattern builderFunc
-     */
-    pattern->SetBuilderFunc(node);
-    pattern->BuildContentModifierNode();
-}
-
-/**
- * @tc.name: DataPanelPatternTest015
- * @tc.desc: SetBuilderFunc and get value
- * @tc.type: FUNC
- */
-HWTEST_F(DataPanelTestNg, DataPanelPatternTest015, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Init DataPanel node
-     */
-    DataPanelModelNG dataPanelModelNG;
-
-    dataPanelModelNG.Create(LONG_VALUES, MAX, TYPE_CYCLE);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<DataPanelPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    auto node = [](DataPanelConfiguration config) -> RefPtr<FrameNode> {
-        EXPECT_EQ(LONG_VALUES, config.values_);
-        EXPECT_EQ(MAX, config.maxValue_);
-        return nullptr;
-    };
-
-    /**
-     * @tc.steps: step2. Set parameters to pattern builderFunc
-     */
-    pattern->SetBuilderFunc(node);
-    pattern->BuildContentModifierNode();
 }
 } // namespace OHOS::Ace::NG

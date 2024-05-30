@@ -161,8 +161,6 @@ int32_t FrontendDelegateDeclarative::GetMinPlatformVersion()
 UIContentErrorCode FrontendDelegateDeclarative::RunPage(
     const std::string& url, const std::string& params, const std::string& profile, bool isNamedRouter)
 {
-    ACE_SCOPED_TRACE("FrontendDelegateDeclarative::RunPage");
-
     LOGI("FrontendDelegateDeclarative RunPage url=%{public}s", url.c_str());
     std::string jsonContent;
     if (GetAssetContent(MANIFEST_JSON, jsonContent)) {

@@ -431,7 +431,7 @@ HWTEST_F(TextFieldModifyTest, UpdateSecondHandleInfo002, TestSize.Level1)
      */
     pattern_->HandleSetSelection(5, 10, false);
     pattern_->selectOverlay_->UpdateSecondHandleOffset();
-    EXPECT_EQ(pattern_->selectOverlay_->GetSecondHandleInfo()->paintRect, RectF(0.0f, 0.0f, 1.5f, 0.0f));
+    EXPECT_EQ(pattern_->selectOverlay_->GetSecondHandleInfo()->paintRect.GetOffset(), OffsetF(0.0f, 0.0f));
 }
 
 /**
@@ -751,6 +751,186 @@ HWTEST_F(TextFieldModifyTest, DoCallback010, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DoCallback0011
+ * @tc.desc: Test function OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, DoCallback011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. callback the AccessibilityActions in OnModifyDone.
+     * @tc.expected: Check if return true.
+     */
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+    auto accessibilityProperty = frameNode_->GetAccessibilityProperty<AccessibilityProperty>();
+    accessibilityProperty->actionSetTextImpl_.operator()(DEFAULT_TEXT);
+    EXPECT_EQ(pattern_->GetTextValue(), DEFAULT_TEXT);
+
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+    int32_t start = 5;
+    int32_t end = 10;
+    accessibilityProperty->actionSetSelectionImpl_.operator()(start, end, false);
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, start);
+}
+
+/**
+ * @tc.name: DoCallback0012
+ * @tc.desc: Test function OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, DoCallback012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetCopyOption(CopyOptions::Local);
+        model.SetType(TextInputType::TEXT);
+    });
+
+    /**
+     * @tc.steps: step2. callback the AccessibilityActions in OnModifyDone.
+     * @tc.expected: Check if return true.
+     */
+    GetFocus();
+    auto accessibilityProperty = frameNode_->GetAccessibilityProperty<AccessibilityProperty>();
+    int32_t start = 5;
+    int32_t end = 10;
+    pattern_->SetSelectionFlag(start, end);
+    pattern_->SetAccessibilityAction();
+    accessibilityProperty->actionCopyImpl_.operator()();
+    accessibilityProperty->actionCutImpl_.operator()();
+    accessibilityProperty->actionPasteImpl_.operator()();
+    accessibilityProperty->actionClearSelectionImpl_.operator()();
+    EXPECT_EQ(pattern_->GetTextValue(), "abcdefghijfghijklmnopqrstuvwxyz");
+}
+
+/**
+ * @tc.name: DoCallback0013
+ * @tc.desc: Test function OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, DoCallback013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. callback the AccessibilityActions in OnModifyDone.
+     * @tc.expected: Check if return true.
+     */
+    auto accessibilityProperty = frameNode_->GetAccessibilityProperty<AccessibilityProperty>();
+    accessibilityProperty->actionSetCursorIndexImpl_.operator()(5);
+    EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 5);
+    auto index = accessibilityProperty->actionGetCursorIndexImpl_.operator()();
+    EXPECT_EQ(index, 5);
+}
+
+/**
+ * @tc.name: DoCallback0014
+ * @tc.desc: Test function OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, DoCallback014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. callback the AccessibilityActions in OnModifyDone.
+     * @tc.expected: Check if return true.
+     */
+    auto accessibilityProperty = frameNode_->GetAccessibilityProperty<AccessibilityProperty>();
+    accessibilityProperty->actionMoveTextImpl_.operator()(0, false);
+    EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 5);
+
+    pattern_->SetCaretPosition(5);
+    pattern_->SetAccessibilityAction();
+    accessibilityProperty->actionMoveTextImpl_.operator()(0, true);
+    EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 5);
+
+    pattern_->SetCaretPosition(5);
+    pattern_->SetAccessibilityAction();
+    accessibilityProperty->actionMoveTextImpl_.operator()(1, false);
+    EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 4);
+
+    pattern_->SetCaretPosition(5);
+    pattern_->SetAccessibilityAction();
+    accessibilityProperty->actionMoveTextImpl_.operator()(1, true);
+    EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 6);
+}
+
+/**
+ * @tc.name: DoCallback0015
+ * @tc.desc: Test function OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, DoCallback015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. callback the AccessibilityActions in OnModifyDone.
+     * @tc.expected: Check if return true.
+     */
+    auto accessibilityProperty = frameNode_->GetAccessibilityProperty<AccessibilityProperty>();
+    accessibilityProperty->actionScrollForwardImpl_.operator()();
+    pattern_->scrollable_ = true;
+    pattern_->SetAccessibilityScrollAction();
+    accessibilityProperty->actionScrollForwardImpl_.operator()();
+    EXPECT_EQ(pattern_->textRect_.y_, 2);
+
+    pattern_->scrollable_ = true;
+    pattern_->textRect_.y_ = 50;
+    pattern_->SetAccessibilityScrollAction();
+    accessibilityProperty->actionScrollForwardImpl_.operator()();
+    EXPECT_EQ(pattern_->textRect_.y_, 50);
+}
+
+/**
+ * @tc.name: DoCallback0015
+ * @tc.desc: Test function OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, DoCallback016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. callback the AccessibilityActions in OnModifyDone.
+     * @tc.expected: Check if return true.
+     */
+    auto accessibilityProperty = frameNode_->GetAccessibilityProperty<AccessibilityProperty>();
+    accessibilityProperty->actionScrollBackwardImpl_.operator()();
+    pattern_->scrollable_ = true;
+    pattern_->SetAccessibilityScrollAction();
+    accessibilityProperty->actionScrollBackwardImpl_.operator()();
+    EXPECT_EQ(pattern_->textRect_.y_, 2);
+    pattern_->textRect_.y_ = 52;
+    pattern_->scrollable_ = true;
+    pattern_->SetAccessibilityScrollAction();
+    accessibilityProperty->actionScrollBackwardImpl_.operator()();
+    EXPECT_EQ(pattern_->textRect_.y_, 52);
+}
+
+/**
  * @tc.name: MouseEvent001
  * @tc.desc: Test mouse event.
  * @tc.type: FUNC
@@ -893,6 +1073,41 @@ HWTEST_F(TextFieldModifyTest, CreateNodePaintMethod004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnScrollEndMenuVisibile001
+ * @tc.desc: Test textfield On Scroll End Menu Visibile.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, OnScrollEndMenuVisibile001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text field.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. call OnScrollEndCallback
+     * tc.expected: step2. Check if the Menu Visibile.
+    */
+    pattern_->selectOverlay_->SetUsingMouse(false);
+    auto selectArea = pattern_->selectOverlay_->GetSelectArea();
+
+    pattern_->SetSelectionFlag(0.0f, 10.0f);
+    selectArea.SetWidth(8.0f);
+    selectArea.SetHeight(2.0f);
+    pattern_->OnScrollEndCallback();
+    EXPECT_TRUE(pattern_->selectOverlay_->IsCurrentMenuVisibile());
+
+    /**
+     * @tc.steps: step2. call CloseSelectOverlay
+     * tc.expected: step2. Check if the Menu Visibile.
+    */
+    pattern_->CloseSelectOverlay(true);
+    pattern_->OnScrollEndCallback();
+    EXPECT_FALSE(pattern_->selectOverlay_->IsCurrentMenuVisibile());
+}
+
+/**
  * @tc.name: UpdateCaretPositionOnHandleMove001
  * @tc.desc: Test the caret position after handle move done in textarea.
  * @tc.type: FUNC
@@ -967,7 +1182,7 @@ HWTEST_F(TextFieldModifyTest, OnHandleMove001, TestSize.Level1)
     RectF handleRect;
     pattern_->selectOverlay_->OnHandleMove(handleRect, false);
     EXPECT_EQ(pattern_->selectController_->
-        firstHandleInfo_.rect, RectF(2.0f, 2.0f, 1.5f, 0.0f));
+        firstHandleInfo_.rect.GetOffset(), OffsetF(2.0f, 2.0f));
 }
 
 /**
@@ -1186,13 +1401,14 @@ HWTEST_F(TextFieldModifyTest, DumpViewDataPageNode001, TestSize.Level1)
     /**
      * @tc.steps: step2. Create PageNodeInfoWrap ptr.
      */
+    auto viewData = ViewDataWrap::CreateViewDataWrap();
     auto info = PageNodeInfoWrap::CreatePageNodeInfoWrap();
     auto autoFillType = AceAutoFillType::ACE_UNSPECIFIED;
 
     /**
      * @tc.steps: step3. call DumpViewDataPageNode.
      */
-    pattern_->NotifyFillRequestSuccess(info, autoFillType);
+    pattern_->NotifyFillRequestSuccess(viewData, info, autoFillType);
 }
 
 /**

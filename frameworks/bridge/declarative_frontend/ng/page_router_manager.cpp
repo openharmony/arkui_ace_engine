@@ -49,10 +49,8 @@ constexpr int32_t BUNDLE_START_POS = 8;
 constexpr int32_t INVALID_PAGE_INDEX = -1;
 constexpr int32_t MAX_ROUTER_STACK_SIZE = 32;
 constexpr int32_t JS_FILE_EXTENSION_LENGTH = 3;
-constexpr char ETS_PATH[] = "/src/main/ets/";
-constexpr char DEBUG_PATH[] = "entry/build/default/cache/default/default@CompileArkTS/esmodule/debug/";
+constexpr char DEBUG_PATH[] = "entry|entry|1.0.0|src/main/ets/";
 constexpr char TS_SUFFIX[] = ".ts";
-constexpr char ETS_SUFFIX[] = ".ets";
 
 void ExitToDesktop()
 {
@@ -86,7 +84,10 @@ void PageRouterManager::RunPage(const std::string& url, const std::string& param
 {
     PerfMonitor::GetPerfMonitor()->SetAppStartStatus();
     auto pagePath = Framework::JsiDeclarativeEngine::GetPagePath(url);
-    ACE_SCOPED_TRACE("PageRouterManager::RunPage, Router Main Page: %s", pagePath.c_str());
+    if (pagePath.empty()) {
+        pagePath = url;
+    }
+    ACE_SCOPED_TRACE_COMMERCIAL("PageRouterManager::RunPage, Router Main Page: %s", pagePath.c_str());
     CHECK_RUN_ON(JS);
     RouterPageInfo info { url, params };
 #if !defined(PREVIEW)
@@ -136,7 +137,6 @@ void PageRouterManager::RunPage(const std::string& url, const std::string& param
 
 void PageRouterManager::RunPage(const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params)
 {
-    ACE_SCOPED_TRACE("PageRouterManager::RunPage");
     CHECK_RUN_ON(JS);
     RouterPageInfo info;
     info.content = content;
@@ -158,6 +158,11 @@ void PageRouterManager::RunPage(const std::shared_ptr<std::vector<uint8_t>>& con
 
 void PageRouterManager::RunPageByNamedRouter(const std::string& name, const std::string& params)
 {
+    auto pagePath = Framework::JsiDeclarativeEngine::GetPagePath(name);
+    if (pagePath.empty()) {
+        pagePath = name;
+    }
+    ACE_SCOPED_TRACE_COMMERCIAL("PageRouterManager::RunPage, Router Main Page: %s", pagePath.c_str());
     RouterPageInfo info { name, params };
     info.isNamedRouterMode = true;
     RouterOptScope scope(this);
@@ -751,14 +756,8 @@ RefPtr<Framework::RevSourceMap> PageRouterManager::GetCurrentPageSourceMap(const
     if (container->IsUseStageModel()) {
         auto pagePath = entryPageInfo->GetPagePath();
         auto moduleName = container->GetModuleName();
-        std::string judgePath = "";
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            judgePath = DEBUG_PATH + moduleName + ETS_PATH +
-                        pagePath.substr(0, pagePath.size() - JS_FILE_EXTENSION_LENGTH) + TS_SUFFIX;
-        } else {
-            judgePath = moduleName + ETS_PATH +
-                        pagePath.substr(0, pagePath.size() - JS_FILE_EXTENSION_LENGTH) + ETS_SUFFIX;
-        }
+        std::string judgePath = DEBUG_PATH +
+            pagePath.substr(0, pagePath.size() - JS_FILE_EXTENSION_LENGTH) + TS_SUFFIX;
         if (Framework::GetAssetContentImpl(assetManager, "sourceMaps.map", jsSourceMap)) {
             auto jsonPages = JsonUtil::ParseJsonString(jsSourceMap);
             auto jsonPage = jsonPages->GetValue(judgePath)->ToString();
@@ -1150,23 +1149,7 @@ void PageRouterManager::BackToIndexCheckAlert(int32_t index, const std::string& 
 
 void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, bool needHideLast, bool needTransition)
 {
-    do {
-        if (pageRouterStack_.empty()) {
-            break;
-        }
-        auto targetPagePath = Framework::JsiDeclarativeEngine::GetPagePath(target.url);
-        auto pageNode = pageRouterStack_.back().Upgrade();
-        CHECK_NULL_BREAK(pageNode);
-        auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
-        CHECK_NULL_BREAK(pagePattern);
-        auto currentUrl = pagePattern->GetPageUrl();
-        if (currentUrl.empty()) {
-            break;
-        }
-        auto currentPagePath = Framework::JsiDeclarativeEngine::GetPagePath(currentUrl);
-        ACE_SCOPED_TRACE("PageRouterManager::LoadPage, Router Page from %s to %s", currentPagePath.c_str(), targetPagePath.c_str());
-    } while (false);
-    
+    ACE_SCOPED_TRACE_COMMERCIAL("load page: %s(id:%d)", target.url.c_str(), pageId);
     CHECK_RUN_ON(JS);
     LOGI("Page router manager is loading page[%{public}d]: %{public}s.", pageId, target.url.c_str());
     auto entryPageInfo = AceType::MakeRefPtr<EntryPageInfo>(pageId, target.url, target.path, target.params);
@@ -1531,9 +1514,15 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
     auto stageNode = stageManager->GetStageNode();
     auto popNode = stageNode->GetChildren().back();
     int8_t popIndex = static_cast<int8_t>(stageNode->GetChildren().size() - 1);
-    auto lastIter = pageRouterStack_.begin();
-    if (popIndex >= 0) {
+    do {
+        if (popIndex < 0) {
+            break;
+        }
+        auto lastIter = pageRouterStack_.begin();
         std::advance(lastIter, popIndex);
+        if (lastIter == pageRouterStack_.end()) {
+            break;
+        }
         lastIter = pageRouterStack_.erase(lastIter);
         for (auto iter = lastIter; iter != pageRouterStack_.end(); iter++, popIndex++) {
             auto pageNode = iter->Upgrade();
@@ -1543,7 +1532,7 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
             auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
             pagePattern->GetPageInfo()->SetPageIndex(popIndex);
         }
-    }
+    } while (0);
     bool findPage = false;
     if (info.routerMode == RouterMode::SINGLE) {
         auto pageInfo = FindPageInStack(info.url);
@@ -1556,7 +1545,8 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
     if (!findPage) {
         LoadPage(GenerateNextPageId(), info, true, false);
     }
-    if (popIndex < 0 || popNode == stageNode->GetChildren().back()) {
+    if (popIndex < 0 || popNode == stageNode->GetChildren().back() ||
+        stageNode->GetChildIndex(popNode) != popIndex) {
         return;
     }
     auto iter = pageRouterStack_.begin();

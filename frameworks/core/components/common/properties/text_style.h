@@ -601,6 +601,46 @@ public:
     {
         return ellipsisMode_;
     }
+    
+    void SetHeightScale(double heightScale)
+    {
+        heightScale_ = heightScale;
+    }
+ 
+    double GetHeightScale() const
+    {
+        return heightScale_;
+    }
+ 
+    void SetHeightOnly(bool heightOnly)
+    {
+        heightOnly_ = heightOnly;
+    }
+ 
+    bool GetHeightOnly() const
+    {
+        return heightOnly_;
+    }
+ 
+    void SetEllipsis(std::u16string ellipsis)
+    {
+        ellipsis_ = ellipsis;
+    }
+ 
+    std::u16string GetEllipsis() const
+    {
+        return ellipsis_;
+    }
+ 
+    void SetLocale(std::string locale)
+    {
+        locale_ = locale;
+    }
+ 
+    std::string GetLocale() const
+    {
+        return locale_;
+    }
 
     bool isSymbolGlyph_ = false;
 
@@ -755,6 +795,10 @@ private:
     std::optional<NG::SymbolEffectOptions> symbolEffectOptions_;
 
     std::optional<TextBackgroundStyle> textBackgroundStyle_;
+    double heightScale_ = 1.0;
+    bool heightOnly_ = false;
+    std::u16string ellipsis_;
+    std::string locale_;
 };
 
 namespace StringUtils {

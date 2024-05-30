@@ -34,11 +34,6 @@ struct ArkUI_ImageAnimatorFrameInfo {
     std::optional<int32_t> duration;
 };
 
-struct ArkUI_ImageFrameStruct {
-    ArkUI_ImageAnimatorFrameInfo** imageInfos;
-    int32_t size;
-};
-
 #ifdef __cplusplus
 };
 #endif

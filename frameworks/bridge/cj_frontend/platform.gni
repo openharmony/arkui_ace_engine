@@ -1,0 +1,73 @@
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//foundation/arkui/ace_engine/ace_config.gni")
+
+platform_config = {
+  is_ohos = true
+  common_defines = []
+  common_deps = []
+}
+
+if (current_os != "ohos") {
+  platform_config.is_ohos = false
+  platform_config.common_defines += [ "_NON_OHOS_" ]
+  if (current_os == "mingw") {
+    platform_config.common_deps +=
+        [ "$ace_root/adapter/preview/build:libace_engine_windows" ]
+    platform_config.common_defines += [
+      "WINDOWS_PLATFORM",
+      "PREVIEW",
+    ]
+  } else if (current_os == "linux") {
+    platform_config.common_deps +=
+        [ "$ace_root/adapter/preview/build:libace_engine_linux" ]
+    platform_config.common_defines += [ "PREVIEW" ]
+  } else {
+    assert(false && "platform not supported: ${current_os}")
+  }
+} else {
+  cfg = {
+    import("//foundation/arkui/ace_engine/adapter/ohos/build/config.gni")
+  }
+  platform_config.common_deps += [ "$ace_root/build:libace_compatible" ]
+  platform_config.common_defines += cfg.defines
+}
+
+cj_config = {
+  platform_name = ""
+  platform_target = ""
+  shared_lib_prefix = "so"
+  is_previewer = false
+  common_defines = []
+}
+
+if (current_os == "ohos") {
+  cj_config.platform_name = "ohos"
+  cj_config.shared_lib_prefix = "so"
+  cj_config.platform_target = "linux_ohos_aarch64_llvm"
+  cj_config.common_defines = [
+    "__DSU__",
+    "__OHOS__",
+  ]
+} else if (current_os == "linux") {
+  cj_config.platform_name = "linux"
+  cj_config.shared_lib_prefix = "so"
+  cj_config.platform_target = "linux_x86_64_llvm"
+} else if (current_os == "mingw") {
+  cj_config.platform_name = "windows"
+  cj_config.shared_lib_prefix = "dll"
+  cj_config.platform_target = "windows_x86_64_llvm"
+  cj_config.is_previewer = true
+  cj_config.common_defines = [ "__WINDOWS__" ]
+}

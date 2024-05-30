@@ -804,32 +804,20 @@ bool SpanString::EncodeTlv(std::vector<uint8_t>& buff)
     return true;
 }
 
-SpanString* SpanString::DecodeTlv(std::vector<uint8_t>& buff)
+RefPtr<SpanString> SpanString::DecodeTlv(std::vector<uint8_t>& buff)
 {
     int32_t cursor = 0;
-    SpanString* spanStr = new SpanString("");
-    if (spanStr == nullptr) {
-        return nullptr;
-    }
+    RefPtr<SpanString> spanStr = MakeRefPtr<SpanString>("");
     spanStr->ClearSpans();
     for (uint8_t tag = TLVUtil::ReadUint8(buff, cursor); tag != TLV_END; tag = TLVUtil::ReadUint8(buff, cursor)) {
         switch (tag) {
             case TLV_SPAN_STRING_CONTENT: {
-                spanStr->SetString(TLVUtil::ReadString(buff, cursor));
+                auto str = TLVUtil::ReadString(buff, cursor);
+                spanStr->SetString(str);
                 break;
             }
             case TLV_SPAN_STRING_SPANS: {
-                int32_t spanLength = TLVUtil::ReadInt32(buff, cursor);
-                for (auto i = 0; i < spanLength; i++) {
-                    auto spanItemType = TLVUtil::ReadInt32(buff, cursor);
-                    if (spanItemType == static_cast<int32_t>(NG::SpanItemType::IMAGE)) {
-                        auto imageSpanItem = NG::ImageSpanItem::DecodeTlv(buff, cursor);
-                        spanStr->AppendSpanItem(imageSpanItem);
-                    } else {
-                        auto spanItem = NG::SpanItem::DecodeTlv(buff, cursor);
-                        spanStr->AppendSpanItem(spanItem);
-                    }
-                }
+                DecodeSpanItemList(buff, cursor, spanStr);
                 break;
             }
             default:
@@ -837,5 +825,20 @@ SpanString* SpanString::DecodeTlv(std::vector<uint8_t>& buff)
         }
     }
     return spanStr;
+}
+
+void SpanString::DecodeSpanItemList(std::vector<uint8_t>& buff, int32_t& cursor, RefPtr<SpanString>& spanStr)
+{
+    int32_t spanLength = TLVUtil::ReadInt32(buff, cursor);
+    for (auto i = 0; i < spanLength; i++) {
+        auto spanItemType = TLVUtil::ReadInt32(buff, cursor);
+        if (spanItemType == static_cast<int32_t>(NG::SpanItemType::IMAGE)) {
+            auto imageSpanItem = NG::ImageSpanItem::DecodeTlv(buff, cursor);
+            spanStr->AppendSpanItem(imageSpanItem);
+        } else {
+            auto spanItem = NG::SpanItem::DecodeTlv(buff, cursor);
+            spanStr->AppendSpanItem(spanItem);
+        }
+    }
 }
 } // namespace OHOS::Ace

@@ -110,6 +110,10 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         Pattern::ToJsonValue(json, filter);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("currentIndex", currentIndex_, filter);
         json->PutExtAttr("currentOffset", currentOffset_, filter);
         json->PutExtAttr("uiCastJumpIndex", uiCastJumpIndex_.value_or(-1), filter);
@@ -956,6 +960,7 @@ private:
     void CreateSpringProperty();
 
     std::optional<RefPtr<UINode>> FindLazyForEachNode(RefPtr<UINode> baseNode, bool isSelfNode = true) const;
+    bool NeedForceMeasure() const;
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -1111,6 +1116,10 @@ private:
     bool hasCachedCapture_ = false;
     bool isCaptureReverse_ = false;
     OffsetF captureFinalOffset_;
+    bool isInAutoPlay_ = false;
+
+    bool needFireCustomAnimationEvent_ = true;
+    std::optional<bool> isSwipeByGroup_;
 };
 } // namespace OHOS::Ace::NG
 

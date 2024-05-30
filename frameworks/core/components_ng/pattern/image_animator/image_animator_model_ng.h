@@ -51,6 +51,7 @@ public:
     static bool IsFixedSize(FrameNode* frameNode);
     static int32_t GetFillMode(FrameNode* frameNode);
     static int32_t GetIteration(FrameNode* frameNode);
+    static int32_t GetImagesSize(FrameNode* frameNode);
     static void SetOnStart(FrameNode* frameNode, std::function<void()>&& onStart);
     static void SetOnPause(FrameNode* frameNode, std::function<void()>&& onPause);
     static void SetOnRepeat(FrameNode* frameNode, std::function<void()>&& onRepeat);

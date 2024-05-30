@@ -85,11 +85,7 @@ void JSPatternLock::JSBind(BindingTarget globalObj)
     JSClass<JSPatternLock>::StaticMethod("circleRadius", &JSPatternLock::SetCircleRadius, MethodOptions::NONE);
     JSClass<JSPatternLock>::StaticMethod("sideLength", &JSPatternLock::SetSideLength, MethodOptions::NONE);
     JSClass<JSPatternLock>::StaticMethod("autoReset", &JSPatternLock::SetAutoReset, MethodOptions::NONE);
-    JSClass<JSPatternLock>::StaticMethod(
-        "activeCircleColor", &JSPatternLock::SetActiveCircleColor, MethodOptions::NONE);
-    JSClass<JSPatternLock>::StaticMethod(
-        "activeCircleRadius", &JSPatternLock::SetActiveCircleRadius, MethodOptions::NONE);
-    JSClass<JSPatternLock>::StaticMethod("enableWaveEffect", &JSPatternLock::SetEnableWaveEffect, MethodOptions::NONE);
+    JSClass<JSPatternLock>::StaticMethod("activateCircleStyle", &JSPatternLock::SetActivateCircleStyle);
     JSClass<JSPatternLock>::StaticMethod("onDotConnect", &JSPatternLock::SetDotConnect);
     JSClass<JSPatternLock>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSPatternLock>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
@@ -263,29 +259,45 @@ void JSPatternLock::SetDotConnect(const JSCallbackInfo& args)
 
     PatternLockModel::GetInstance()->SetDotConnect(std::move(onDotConnect));
 }
-void JSPatternLock::SetActiveCircleColor(const JSCallbackInfo& info)
+void JSPatternLock::SetActiveCircleColor(const JSRef<JSVal>& info)
 {
     Color activeColor;
-    if (info.Length() < 1 || !ParseJsColor(info[0], activeColor)) {
+    if (!ParseJsColor(info, activeColor)) {
         activeColor = Color::TRANSPARENT;
     }
     PatternLockModel::GetInstance()->SetActiveCircleColor(activeColor);
 }
-void JSPatternLock::SetActiveCircleRadius(const JSCallbackInfo& info)
+void JSPatternLock::SetActiveCircleRadius(const JSRef<JSVal>& info)
 {
     CalcDimension radius;
-    if (info.Length() < 1 || !ParseJsDimensionVp(info[0], radius) || radius.IsNonPositive()) {
+    if (!ParseLengthMetricsToPositiveDimension(info, radius) || radius.IsNonPositive()) {
         radius = Dimension(0.0f, DimensionUnit::VP);
     }
     PatternLockModel::GetInstance()->SetActiveCircleRadius(radius);
 }
-void JSPatternLock::SetEnableWaveEffect(const JSCallbackInfo& info)
+void JSPatternLock::SetEnableWaveEffect(const JSRef<JSVal>& info)
 {
-    if (info.Length() < 1 || !info[0]->IsBoolean()) {
+    if (!info->IsBoolean()) {
         PatternLockModel::GetInstance()->SetEnableWaveEffect(true);
         return;
     }
-    PatternLockModel::GetInstance()->SetEnableWaveEffect(info[0]->ToBoolean());
+    PatternLockModel::GetInstance()->SetEnableWaveEffect(info->ToBoolean());
+}
+void JSPatternLock::SetActivateCircleStyle(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || info[0]->IsNull() || !info[0]->IsObject()) {
+        PatternLockModel::GetInstance()->SetActiveCircleColor(Color::TRANSPARENT);
+        PatternLockModel::GetInstance()->SetActiveCircleRadius(Dimension(0.0f, DimensionUnit::VP));
+        PatternLockModel::GetInstance()->SetEnableWaveEffect(true);
+        return;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> jsColor = paramObject->GetProperty("color");
+    JSRef<JSVal> jsRadius = paramObject->GetProperty("radius");
+    JSRef<JSVal> jsEnable = paramObject->GetProperty("enableWaveEffect");
+    SetActiveCircleColor(jsColor);
+    SetActiveCircleRadius(jsRadius);
+    SetEnableWaveEffect(jsEnable);
 }
 void JSPatternLockController::JSBind(BindingTarget globalObj)
 {

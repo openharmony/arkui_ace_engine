@@ -136,7 +136,7 @@ void PipelineContext::SetupRootElement()
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
     dragDropManager_ = MakeRefPtr<DragDropManager>();
-    focusManager_ = MakeRefPtr<FocusManager>(AceType::WeakClaim(this));
+    focusManager_ = MakeRefPtr<FocusManager>(AceType::Claim(this));
     sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(rootNode_);
 }
 
@@ -197,6 +197,8 @@ void PipelineContext::SetAppTitle(const std::string& title) {}
 void PipelineContext::SetAppIcon(const RefPtr<PixelMap>& icon) {}
 
 void PipelineContext::OnSurfaceDensityChanged(double density) {}
+
+void PipelineContext::OnTransformHintChanged(uint32_t transform) {}
 
 void PipelineContext::SetRootRect(double width, double height, double offset) {}
 
@@ -314,7 +316,7 @@ const RefPtr<FocusManager>& PipelineContext::GetFocusManager() const
 const RefPtr<FocusManager>& PipelineContext::GetOrCreateFocusManager()
 {
     if (!focusManager_) {
-        focusManager_ = MakeRefPtr<FocusManager>(AceType::WeakClaim(this));
+        focusManager_ = MakeRefPtr<FocusManager>(AceType::Claim(this));
     }
     return focusManager_;
 }
@@ -421,6 +423,8 @@ FrameInfo* PipelineContext::GetCurrentFrameInfo(uint64_t /* recvTime */, uint64_
 
 void PipelineContext::DumpPipelineInfo() const {}
 
+void PipelineContext::AddVisibleAreaChangeNode(int32_t nodeId) {}
+
 void PipelineContext::AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node, const std::vector<double>& ratio,
     const VisibleRatioCallback& callback, bool isUserCallback)
 {
@@ -483,6 +487,11 @@ SafeAreaInsets PipelineContext::GetSafeArea() const
 SafeAreaInsets PipelineContext::GetSafeAreaWithoutProcess() const
 {
     return SafeAreaInsets({}, { 0, 1 }, {}, {});
+}
+
+float PipelineContext::GetPageAvoidOffset()
+{
+    return 0.0f;
 }
 
 void PipelineContext::AddFontNodeNG(const WeakPtr<UINode>& node) {}

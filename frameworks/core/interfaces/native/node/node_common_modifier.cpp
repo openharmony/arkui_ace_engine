@@ -57,6 +57,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr VisibleType DEFAULT_VISIBILITY = static_cast<VisibleType>(0);
 constexpr float MAX_ANGLE = 360.0f;
+constexpr float DEFAULT_ANGLE = 180.0f;
 constexpr double PERCENT_100 = 100.0;
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
@@ -1227,7 +1228,7 @@ ArkUI_Uint32 GetColorBlend(ArkUINodeHandle node)
     return ViewAbstract::GetColorBlend(frameNode).GetValue();
 }
 
-void SetGrayscale(ArkUINodeHandle node, ArkUI_Float32 grayScale)
+void SetGrayscale(ArkUINodeHandle node, ArkUI_Float64 grayScale)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1249,7 +1250,7 @@ void ResetGrayscale(ArkUINodeHandle node)
     ViewAbstract::SetGrayScale(frameNode, value);
 }
 
-void SetContrast(ArkUINodeHandle node, ArkUI_Float32 contrast)
+void SetContrast(ArkUINodeHandle node, ArkUI_Float64 contrast)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1268,7 +1269,7 @@ void ResetContrast(ArkUINodeHandle node)
     ViewAbstract::SetContrast(frameNode, value);
 }
 
-void SetBrightness(ArkUINodeHandle node, ArkUI_Float32 brightness)
+void SetBrightness(ArkUINodeHandle node, ArkUI_Float64 brightness)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2211,6 +2212,7 @@ void ResetGeometryTransition(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetGeometryTransition(frameNode, "", false);
 }
 
 void SetOffset(ArkUINodeHandle node, const ArkUI_Float32* number, const ArkUI_Int32* unit)
@@ -2405,11 +2407,11 @@ void ResetLightUpEffect(ArkUINodeHandle node)
     ViewAbstract::SetLightUpEffect(frameNode, 1.0);
 }
 
-void SetSphericalEffect(ArkUINodeHandle node, ArkUI_Float32 radio)
+void SetSphericalEffect(ArkUINodeHandle node, ArkUI_Float64 radio)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    radio = std::clamp(radio, 0.0f, 1.0f);
+    radio = std::clamp(radio, 0.0, 1.0);
     ViewAbstract::SetSphericalEffect(frameNode, radio);
 }
 
@@ -3185,7 +3187,7 @@ void GetAlignRules(ArkUINodeHandle node, ArkUI_CharPtr* anchors, ArkUI_Int32* di
     CHECK_NULL_VOID(frameNode);
     auto alignRules = ViewAbstract::GetAlignRules(frameNode);
 
-    std::size_t index = 0;
+    ArkUI_Int32 index = 0;
     for (const AlignDirection alignDirection : { AlignDirection::LEFT, AlignDirection::MIDDLE, AlignDirection::RIGHT,
              AlignDirection::TOP, AlignDirection::CENTER, AlignDirection::BOTTOM }) {
         if (index >= length) {
@@ -3497,13 +3499,32 @@ void ParseDragPreviewMode(NG::DragPreviewOption& previewOption, int32_t modeValu
     isAuto = false;
 }
 
-void SetDragPreviewOptions(ArkUINodeHandle node, ArkUI_Int32 dragPreviewMode)
+void SetDragPreviewOptions(ArkUINodeHandle node, ArkUIDragPreViewOptions dragPreviewOptions,
+    ArkUIDragInteractionOptions dragInteractionOptions)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NG::DragPreviewOption option;
     bool isAuto = true;
-    ParseDragPreviewMode(option, dragPreviewMode, isAuto);
+    if (!dragPreviewOptions.isModeArray) {
+        ParseDragPreviewMode(option, dragPreviewOptions.mode, isAuto);
+    } else {
+        for (size_t i = 0; i < dragPreviewOptions.modeArrayLength; i++) {
+            ParseDragPreviewMode(option, dragPreviewOptions.modeArray[i], isAuto);
+            if (isAuto) {
+                break;
+            }
+        }
+    }
+
+    if (dragPreviewOptions.isBadgeNumber) {
+        option.badgeNumber = dragPreviewOptions.badgeNumber;
+    } else {
+        option.isShowBadge = dragPreviewOptions.isShowBadge;
+    }
+    option.isNumber = dragPreviewOptions.isBadgeNumber;
+    option.isMultiSelectionEnabled = dragInteractionOptions.isMultiSelectionEnabled;
+    option.defaultAnimationBeforeLifting = dragInteractionOptions.defaultAnimationBeforeLifting;
     ViewAbstract::SetDragPreviewOptions(frameNode, option);
 }
 
@@ -3658,6 +3679,120 @@ void ResetKeyBoardShortCut(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstractModelNG::SetKeyboardShortcut(frameNode, "", std::vector<OHOS::Ace::ModifierKey>(), nullptr);
+}
+
+void SetPointLightPosition(ArkUINodeHandle node, const struct ArkUISizeType* positionX,
+    const struct ArkUISizeType* positionY, const struct ArkUISizeType* positionZ)
+{
+#ifdef POINT_LIGHT_ENABLE
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(positionX);
+    CHECK_NULL_VOID(positionY);
+    CHECK_NULL_VOID(positionZ);
+    CalcDimension lightPositionX(positionX->value, static_cast<DimensionUnit>(positionX->unit));
+    CalcDimension lightPositionY(positionY->value, static_cast<DimensionUnit>(positionY->unit));
+    CalcDimension lightPositionZ(positionZ->value, static_cast<DimensionUnit>(positionZ->unit));
+    ViewAbstract::SetLightPosition(frameNode, lightPositionX, lightPositionY, lightPositionZ);
+#endif
+}
+
+void ResetPointLightPosition(ArkUINodeHandle node)
+{
+#ifdef POINT_LIGHT_ENABLE
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension lightPositionX(0.0f, DimensionUnit::VP);
+    CalcDimension lightPositionY(0.0f, DimensionUnit::VP);
+    CalcDimension lightPositionZ(0.0f, DimensionUnit::VP);
+    ViewAbstract::SetLightPosition(frameNode, lightPositionX, lightPositionY, lightPositionZ);
+#endif
+}
+
+void SetPointLightIntensity(ArkUINodeHandle node, ArkUI_Float32 intensity)
+{
+#ifdef POINT_LIGHT_ENABLE
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetLightIntensity(frameNode, static_cast<float>(intensity));
+#endif
+}
+
+void ResetPointLightIntensity(ArkUINodeHandle node)
+{
+#ifdef POINT_LIGHT_ENABLE
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetLightIntensity(frameNode, 0.0f);
+#endif
+}
+
+void SetPointLightColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+{
+#ifdef POINT_LIGHT_ENABLE
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color colorValue(color);
+    ViewAbstract::SetLightColor(frameNode, colorValue);
+#endif
+}
+
+void ResetPointLightColor(ArkUINodeHandle node)
+{
+#ifdef POINT_LIGHT_ENABLE
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetLightColor(frameNode, Color::WHITE);
+#endif
+}
+
+void SetPointLightIlluminated(
+    ArkUINodeHandle node, ArkUI_Uint32 illuminated, const struct ArkUISizeType* illuminatedBorderWidth)
+{
+#ifdef POINT_LIGHT_ENABLE
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetLightIlluminated(frameNode, static_cast<uint32_t>(illuminated));
+    Dimension borderWidthValue(illuminatedBorderWidth->value, static_cast<DimensionUnit>(illuminatedBorderWidth->unit));
+    ViewAbstract::SetIlluminatedBorderWidth(frameNode, borderWidthValue);
+#endif
+}
+
+void ResetPointLightIlluminated(ArkUINodeHandle node)
+{
+#ifdef POINT_LIGHT_ENABLE
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetLightIlluminated(frameNode, 0);
+    Dimension borderWidthValue(0.0f, DimensionUnit::VP);
+    ViewAbstract::SetIlluminatedBorderWidth(frameNode, borderWidthValue);
+#endif
+}
+
+void SetPointLightBloom(ArkUINodeHandle node, ArkUI_Float32 bloom, ArkUI_Float32 bloomRadius, ArkUI_Uint32 bloomColor)
+{
+#ifdef POINT_LIGHT_ENABLE
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetBloom(frameNode, static_cast<float>(bloom));
+    Shadow shadow;
+    shadow.SetBlurRadius(bloom * static_cast<float>(bloomRadius));
+    Color bloomColorValue(bloomColor);
+    shadow.SetColor(bloomColorValue);
+    ViewAbstract::SetBackShadow(frameNode, shadow);
+#endif
+}
+
+void ResetPointLightBloom(ArkUINodeHandle node)
+{
+#ifdef POINT_LIGHT_ENABLE
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetBloom(frameNode, 0.0f);
+    Shadow shadow;
+    shadow.SetBlurRadius(0);
+    ViewAbstract::SetBackShadow(frameNode, shadow);
+#endif
 }
 
 void SetClip(ArkUINodeHandle node, ArkUI_Int32 isClip)
@@ -3884,6 +4019,7 @@ int32_t findCurveIndex(const RefPtr<Curve> curve)
 void ParseAnimationOptionToStruct(
     const std::shared_ptr<AnimationOption> animationOption, ArkUIAnimationOptionType& animationType)
 {
+    CHECK_NULL_VOID(animationOption);
     animationType.duration = animationOption->GetDuration();
     animationType.curve = findCurveIndex(animationOption->GetCurve());
     animationType.delay = animationOption->GetDelay();
@@ -4857,12 +4993,12 @@ ArkUI_Int32 GetRadialGradient(
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     auto gradient = ViewAbstract::GetRadialGradient(frameNode);
     auto radialGradient = gradient.GetRadialGradient();
-
+    CHECK_NULL_RETURN(radialGradient, ERROR_INT_CODE);
     values[NUM_0] = radialGradient->radialCenterX->GetNativeValue(static_cast<DimensionUnit>(unit));
     values[NUM_1] = radialGradient->radialCenterY->GetNativeValue(static_cast<DimensionUnit>(unit));
-    values[NUM_2] = gradient.GetInnerRadius();
+    values[NUM_2] =
+        gradient.GetRadialGradient()->radialHorizontalSize->GetNativeValue(static_cast<DimensionUnit>(unit));
     values[NUM_3] = gradient.GetRepeat();
-
     std::vector<GradientColor> gradientColors = gradient.GetColors();
     //0 start index
     int index = 0;
@@ -5004,7 +5140,7 @@ ArkUI_Int32 GetLinearGradient(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI
     auto gradient = ViewAbstract::GetLinearGradient(frameNode);
     auto angle = gradient.GetLinearGradient()->angle;
     //0 angle
-    values[0] = angle.has_value() ? angle.value().Value() : 0.0f;
+    values[0] = angle.has_value() ? angle.value().Value() : DEFAULT_ANGLE;
     //1 Direction
     values[1] = static_cast<int32_t>(convertToLinearGradientDirection(gradient.GetLinearGradient()));
     //2 Repeat
@@ -5452,6 +5588,9 @@ const ArkUICommonModifier* GetCommonModifier()
         SetMouseResponseRegion, ResetMouseResponseRegion, SetEnabled, ResetEnabled, SetUseShadowBatching,
         ResetUseShadowBatching, SetDraggable, ResetDraggable, SetAccessibilityGroup, ResetAccessibilityGroup,
         SetHoverEffect, ResetHoverEffect, SetClickEffect, ResetClickEffect, SetKeyBoardShortCut, ResetKeyBoardShortCut,
+        SetPointLightPosition, ResetPointLightPosition, SetPointLightIntensity, ResetPointLightIntensity,
+        SetPointLightColor, ResetPointLightColor, SetPointLightIlluminated, ResetPointLightIlluminated,
+        SetPointLightBloom, ResetPointLightBloom,
         SetClip, SetClipShape, SetClipPath, ResetClip, SetTransitionCenter, SetOpacityTransition, SetRotateTransition,
         SetScaleTransition, SetTranslateTransition, SetMaskShape, SetMaskPath, SetProgressMask, SetBlendMode,
         ResetBlendMode, SetMonopolizeEvents, ResetMonopolizeEvents, SetConstraintSize, ResetConstraintSize,

@@ -90,11 +90,18 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
+        PaintProperty::ToJsonValue(json, filter);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            if (GetCustomContent().has_value()) {
+                json->PutFixedAttr("content", GetCustomContent().value().c_str(), filter, FIXED_ATTR_CONTENT);
+            }
+            return;
+        }
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<SliderTheme>();
         CHECK_NULL_VOID(theme);
-        PaintProperty::ToJsonValue(json, filter);
         auto jsonConstructor = JsonUtil::Create(true);
         jsonConstructor->Put("value", std::to_string(GetValue().value_or(0.0f)).c_str());
         jsonConstructor->Put("min", std::to_string(GetMin().value_or(0.0f)).c_str());

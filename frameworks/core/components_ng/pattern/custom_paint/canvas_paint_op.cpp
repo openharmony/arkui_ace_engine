@@ -340,10 +340,12 @@ void DrawPixelMapOp::Draw(CanvasPaintMethod* method) const
     method->DrawPixelMap(pixelMap, canvasImage);
 }
 
+#ifdef PIXEL_MAP_SUPPORTED
 void TransferFromImageBitmapOp::Draw(CanvasPaintMethod* method) const
 {
-    method->TransferFromImageBitmap(offscreenCanvas);
+    method->TransferFromImageBitmap(pixelMap);
 }
+#endif
 
 void StrokeTextOp::Draw(CanvasPaintMethod* method) const
 {

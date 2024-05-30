@@ -3354,19 +3354,19 @@ void ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam, 
     ParseMenuParam(info, menuOptions, menuParam);
 }
 
-void ParseAnimationScaleArray(const JSRef<JSArray>& scaleArray, NG::MenuParam& menuParam)
+void ParseAnimationScaleArray(const JSRef<JSArray>& scaleArray, MenuPreviewAnimationOptions& options)
 {
     constexpr int scaleArraySize = 2;
     if (scaleArray->Length() == scaleArraySize) {
         auto scalePropertyFrom = scaleArray->GetValueAt(0);
         if (scalePropertyFrom->IsNumber()) {
             auto scaleFrom = scalePropertyFrom->ToNumber<float>();
-            menuParam.previewAnimationOptions.scaleFrom = LessOrEqual(scaleFrom, 0.0) ? -1.0f : scaleFrom;
+            options.scaleFrom = LessOrEqual(scaleFrom, 0.0) ? -1.0f : scaleFrom;
         }
         auto scalePropertyTo = scaleArray->GetValueAt(1);
         if (scalePropertyTo->IsNumber()) {
             auto scaleTo = scalePropertyTo->ToNumber<float>();
-            menuParam.previewAnimationOptions.scaleTo = LessOrEqual(scaleTo, 0.0) ? -1.0f : scaleTo;
+            options.scaleTo = LessOrEqual(scaleTo, 0.0) ? -1.0f : scaleTo;
         }
     }
 }
@@ -3383,7 +3383,7 @@ void ParseContentPreviewAnimationOptionsParam(const JSCallbackInfo& info, const 
         auto scaleProperty = animationOptionsObj->GetProperty("scale");
         if (!scaleProperty->IsEmpty() && scaleProperty->IsArray()) {
             JSRef<JSArray> scaleArray = JSRef<JSArray>::Cast(scaleProperty);
-            ParseAnimationScaleArray(scaleArray, menuParam);
+            ParseAnimationScaleArray(scaleArray, menuParam.previewAnimationOptions);
         }
         auto previewTransition = animationOptionsObj->GetProperty("transition");
         menuParam.hasPreviewTransitionEffect = false;
@@ -3391,6 +3391,18 @@ void ParseContentPreviewAnimationOptionsParam(const JSCallbackInfo& info, const 
             auto obj = JSRef<JSObject>::Cast(previewTransition);
             menuParam.hasPreviewTransitionEffect = true;
             menuParam.previewTransition = ParseChainedTransition(obj, info.GetExecutionContext());
+        }
+        if (menuParam.previewMode != MenuPreviewMode::CUSTOM) {
+            return;
+        }
+        auto hoverScaleProperty = animationOptionsObj->GetProperty("hoverScale");
+        menuParam.isShowHoverImage = false;
+        menuParam.hoverImageAnimationOptions.scaleFrom = -1.0f;
+        menuParam.hoverImageAnimationOptions.scaleTo = -1.0f;
+        if (!hoverScaleProperty->IsEmpty() && hoverScaleProperty->IsArray()) {
+            JSRef<JSArray> hoverScaleArray = JSRef<JSArray>::Cast(hoverScaleProperty);
+            ParseAnimationScaleArray(hoverScaleArray, menuParam.hoverImageAnimationOptions);
+            menuParam.isShowHoverImage = true;
         }
     }
 }
@@ -3734,6 +3746,25 @@ void JSViewAbstract::JsBorder(const JSCallbackInfo& info)
     info.ReturnSelf();
 }
 
+bool IsBorderWidthObjUndefined(const JSRef<JSVal>& args)
+{
+    if (!args->IsObject()) {
+        return false;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args);
+    if (obj->IsUndefined()) {
+        return true;
+    }
+    if ((!obj->HasProperty(TOP_PROPERTY) || obj->GetProperty(TOP_PROPERTY)->IsUndefined()) &&
+        (!obj->HasProperty(RIGHT_PROPERTY) || obj->GetProperty(RIGHT_PROPERTY)->IsUndefined()) &&
+        (!obj->HasProperty(BOTTOM_PROPERTY) || obj->GetProperty(BOTTOM_PROPERTY)->IsUndefined()) &&
+        (!obj->HasProperty(LEFT_PROPERTY) || obj->GetProperty(LEFT_PROPERTY)->IsUndefined())) {
+        return true;
+    }
+    
+    return false;
+}
+
 void JSViewAbstract::JsBorderWidth(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
@@ -3742,6 +3773,12 @@ void JSViewAbstract::JsBorderWidth(const JSCallbackInfo& info)
         ViewAbstractModel::GetInstance()->SetBorderWidth({});
         return;
     }
+    
+    if (IsBorderWidthObjUndefined(info[0])) {
+        ViewAbstractModel::GetInstance()->SetBorderWidth({});
+        return;
+    }
+    
     ParseBorderWidth(info[0]);
 }
 
@@ -8148,6 +8185,11 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("focusScopeId", &JSViewAbstract::JsFocusScopeId);
     JSClass<JSViewAbstract>::StaticMethod("focusScopePriority", &JSViewAbstract::JsFocusScopePriority);
 
+    JSClass<JSViewAbstract>::StaticMethod("visualEffect", &JSViewAbstract::JsVisualEffect);
+    JSClass<JSViewAbstract>::StaticMethod("backgroundFilter", &JSViewAbstract::JsBackgroundFilter);
+    JSClass<JSViewAbstract>::StaticMethod("foregroundFilter", &JSViewAbstract::JsForegroundFilter);
+    JSClass<JSViewAbstract>::StaticMethod("compositingFilter", &JSViewAbstract::JsCompositingFilter);
+
     JSClass<JSViewAbstract>::Bind(globalObj);
 }
 
@@ -9887,6 +9929,42 @@ int32_t JSViewAbstract::ParseJsPropertyId(const JSRef<JSVal>& jsValue)
         }
     }
     return resId;
+}
+
+void JSViewAbstract::JsVisualEffect(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    auto visualEffect = CreateRSEffectFromNapiValue(info[0]);
+    ViewAbstractModel::GetInstance()->SetVisualEffect(visualEffect);
+}
+
+void JSViewAbstract::JsBackgroundFilter(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    auto backgroundFilter = CreateRSFilterFromNapiValue(info[0]);
+    ViewAbstractModel::GetInstance()->SetBackgroundFilter(backgroundFilter);
+}
+
+void JSViewAbstract::JsForegroundFilter(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    auto foregroundFilter = CreateRSFilterFromNapiValue(info[0]);
+    ViewAbstractModel::GetInstance()->SetForegroundFilter(foregroundFilter);
+}
+
+void JSViewAbstract::JsCompositingFilter(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    auto compositingFilter = CreateRSFilterFromNapiValue(info[0]);
+    ViewAbstractModel::GetInstance()->SetCompositingFilter(compositingFilter);
 }
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_ParseJsMedia(void* value, void* resource)

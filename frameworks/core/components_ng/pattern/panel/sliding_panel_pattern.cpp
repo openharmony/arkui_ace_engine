@@ -880,6 +880,10 @@ void SlidingPanelPattern::MarkDirtyNode(PropertyChangeFlag extraFlag)
 void SlidingPanelPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     Pattern::ToJsonValue(json, filter);
+     /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto layoutProperty = GetLayoutProperty<SlidingPanelLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     static const char* PANEL_TYPE[] = { "PanelType.Minibar", "PanelType.Foldable", "PanelType.Temporary" };

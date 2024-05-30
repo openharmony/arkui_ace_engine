@@ -129,8 +129,7 @@ void WindowPattern::OnAttachToFrameNode()
     }
 
     if (state == Rosen::SessionState::STATE_BACKGROUND && session_->GetScenePersistence() &&
-        (session_->GetScenePersistence()->IsSnapshotExisted() ||
-        session_->GetScenePersistence()->IsSavingSnapshot())) {
+        session_->GetScenePersistence()->HasSnapshot()) {
         CreateSnapshotNode();
         AddChild(host, snapshotNode_, snapshotNodeName_);
         return;
@@ -197,18 +196,17 @@ void WindowPattern::CreateSnapshotNode(std::optional<std::shared_ptr<Media::Pixe
     session_->SetNeedSnapshot(false);
     snapshotNode_ = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    snapshotNode_->GetPattern<ImagePattern>()->SetLoadInVipChannel(true);
     auto imageLayoutProperty = snapshotNode_->GetLayoutProperty<ImageLayoutProperty>();
     imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     auto imagePaintProperty = snapshotNode_->GetPaintProperty<ImageRenderProperty>();
     imagePaintProperty->UpdateImageInterpolation(ImageInterpolation::MEDIUM);
     snapshotNode_->SetHitTestMode(HitTestMode::HTMNONE);
 
-    auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
     if (snapshot) {
         auto pixelMap = PixelMap::CreatePixelMap(&snapshot.value());
         imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
     } else {
-        snapshotNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
         ImageSourceInfo sourceInfo;
         if (session_->GetScenePersistence()->IsSavingSnapshot()) {
             auto snapshotPixelMap = session_->GetSnapshotPixelMap();
@@ -216,24 +214,39 @@ void WindowPattern::CreateSnapshotNode(std::optional<std::shared_ptr<Media::Pixe
             auto pixelMap = PixelMap::CreatePixelMap(&snapshotPixelMap);
             sourceInfo = ImageSourceInfo(pixelMap);
         } else {
-            sourceInfo = ImageSourceInfo("file://" + session_->GetScenePersistence()->GetSnapshotFilePathFromAce());
+            sourceInfo = ImageSourceInfo("file://" + session_->GetScenePersistence()->GetSnapshotFilePath());
         }
         imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
-        if (!Rosen::ScenePersistence::IsAstcEnabled()) {
-            auto pipelineContext = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipelineContext);
-            auto imageCache = pipelineContext->GetImageCache();
-            CHECK_NULL_VOID(imageCache);
-            auto snapshotSize = session_->GetScenePersistence()->GetSnapshotSize();
-            imageCache->ClearCacheImage(
-                ImageUtils::GenerateImageKey(sourceInfo, SizeF(snapshotSize.first, snapshotSize.second)));
-            imageCache->ClearCacheImage(
-                ImageUtils::GenerateImageKey(sourceInfo, SizeF(snapshotSize.second, snapshotSize.first)));
-            imageCache->ClearCacheImage(sourceInfo.GetKey());
-        }
+        ClearImageCache(sourceInfo);
+        auto eventHub = snapshotNode_->GetEventHub<ImageEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->SetOnError([weakThis = WeakClaim(this)](const LoadImageFailEvent& info) {
+            auto self = weakThis.Upgrade();
+            CHECK_NULL_VOID(self && self->snapshotNode_);
+            TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "load snapshot failed: %{public}s", info.GetErrorMessage().c_str());
+            auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
+            self->snapshotNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
+            self->snapshotNode_->MarkNeedRenderOnly();
+        });
     }
     imageLayoutProperty->UpdateImageFit(ImageFit::COVER_TOP_LEFT);
     snapshotNode_->MarkModifyDone();
+}
+
+void WindowPattern::ClearImageCache(const ImageSourceInfo& sourceInfo)
+{
+    if (!Rosen::ScenePersistence::IsAstcEnabled()) {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto imageCache = pipelineContext->GetImageCache();
+        CHECK_NULL_VOID(imageCache);
+        auto snapshotSize = session_->GetScenePersistence()->GetSnapshotSize();
+        imageCache->ClearCacheImage(
+            ImageUtils::GenerateImageKey(sourceInfo, SizeF(snapshotSize.first, snapshotSize.second)));
+        imageCache->ClearCacheImage(
+            ImageUtils::GenerateImageKey(sourceInfo, SizeF(snapshotSize.second, snapshotSize.first)));
+        imageCache->ClearCacheImage(sourceInfo.GetKey());
+    }
 }
 
 void WindowPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)

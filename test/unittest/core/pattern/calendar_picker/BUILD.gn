@@ -15,5 +15,8 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("calendar_picker_test_ng") {
   type = "new"
-  sources = [ "calendar_picker_test_ng.cpp" ]
+  sources = [
+    "calendar_picker_test_ng.cpp",
+    "calendar_picker_test_update.cpp",
+  ]
 }

@@ -359,14 +359,6 @@ public:
         return focusStyleType_;
     }
 
-    static void CloseKeyboard();
-
-    static void IsCloseKeyboard(RefPtr<FrameNode> frameNode);
-
-    static void PushPageCloseKeyboard();
-
-    static void NavCloseKeyboard();
-
     BlurReason GetBlurReason() const
     {
         return blurReason_;
@@ -1060,7 +1052,6 @@ private:
     RefPtr<FocusHub> GetNearestNodeByProjectArea(const std::list<RefPtr<FocusHub>>& allNodes, FocusStep step);
 
     bool UpdateFocusView();
-    bool BlurFocusView();
 
     bool IsFocusAbleChildOf(const RefPtr<FocusHub>& parentFocusHub);
     WeakPtr<FocusHub> GetChildPriorfocusNode(const std::string& focusScopeId);

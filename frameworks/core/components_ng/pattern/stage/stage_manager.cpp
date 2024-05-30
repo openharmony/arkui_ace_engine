@@ -27,6 +27,7 @@
 #include "base/utils/utils.h"
 #include "core/animation/page_transition_common.h"
 #include "core/common/container.h"
+#include "core/common/ime/input_method_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
@@ -55,11 +56,9 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
     auto stageManager = context->GetStageManager();
     CHECK_NULL_VOID(stageManager);
     stageManager->SetStageInTrasition(true);
-    auto safeAreaInsets = context->GetSafeAreaWithoutProcess();
-    auto statusBarHeight = static_cast<float>(safeAreaInsets.top_.Length());
     if (transitionType == PageTransitionType::EXIT_PUSH || transitionType == PageTransitionType::EXIT_POP) {
         pagePattern->TriggerPageTransition(
-            transitionType, [weak = WeakPtr<FrameNode>(page), transitionType, statusBarHeight]() {
+            transitionType, [weak = WeakPtr<FrameNode>(page), transitionType]() {
                 auto context = PipelineContext::GetCurrentContext();
                 CHECK_NULL_VOID(context);
                 auto page = weak.Upgrade();
@@ -82,15 +81,13 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
                 auto stageManager = context->GetStageManager();
                 CHECK_NULL_VOID(stageManager);
                 stageManager->SetStageInTrasition(false);
-                constexpr float REMOVE_CLIP_SIZE = 10000.0f;
-                page->GetRenderContext()->ClipWithRRect(RectF(0.0f, -statusBarHeight, REMOVE_CLIP_SIZE,
-                    REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
+                page->GetRenderContext()->RemoveClipWithRRect();
             });
         return;
     }
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
     pagePattern->TriggerPageTransition(
-        transitionType, [weak = WeakPtr<FrameNode>(page), statusBarHeight]() {
+        transitionType, [weak = WeakPtr<FrameNode>(page)]() {
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
             auto page = weak.Upgrade();
             CHECK_NULL_VOID(page);
@@ -104,9 +101,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
             auto context = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(context);
             context->MarkNeedFlushMouseEvent();
-            constexpr float REMOVE_CLIP_SIZE = 10000.0f;
-            page->GetRenderContext()->ClipWithRRect(RectF(0.0f, -statusBarHeight, REMOVE_CLIP_SIZE,
-                REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
+            page->GetRenderContext()->RemoveClipWithRRect();
             auto stageManager = context->GetStageManager();
             CHECK_NULL_VOID(stageManager);
             stageManager->SetStageInTrasition(false);
@@ -116,6 +111,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
 
 void StageManager::StartTransition(const RefPtr<FrameNode>& srcPage, const RefPtr<FrameNode>& destPage, RouteType type)
 {
+    AddPageTransitionTrace(srcPage, destPage);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto sharedManager = pipeline->GetSharedOverlayManager();
@@ -168,7 +164,7 @@ void StageManager::PageChangeCloseKeyboard()
         }
         if (!container->IsScenceBoardWindow()) {
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Container not ScenceBoardWindow.");
-            FocusHub::PushPageCloseKeyboard();
+            InputMethodManager::GetInstance()->CloseKeyboard();
         }
     }
 #endif
@@ -537,5 +533,45 @@ RefPtr<FrameNode> StageManager::GetPrevPageWithTransition() const
         return DynamicCast<FrameNode>(srcPageNode_.Upgrade());
     }
     return DynamicCast<FrameNode>(children.front());
+}
+
+void StageManager::AddPageTransitionTrace(const RefPtr<FrameNode>& srcPage, const RefPtr<FrameNode>& destPage)
+{
+    CHECK_NULL_VOID(srcPage);
+    CHECK_NULL_VOID(destPage);
+    auto srcPattern = srcPage->GetPattern<NG::PagePattern>();
+    CHECK_NULL_VOID(srcPattern);
+    auto destPattern = destPage->GetPattern<NG::PagePattern>();
+    CHECK_NULL_VOID(destPattern);
+    auto srcUrl = srcPattern->GetPageUrl();
+    if (srcUrl.empty()) {
+        return;
+    }
+    auto srcPageInfo = srcPattern->GetPageInfo();
+    CHECK_NULL_VOID(srcPageInfo);
+    auto srcPagePath = srcPageInfo->GetPagePath();
+    if (srcPagePath.empty()) {
+        srcPagePath = srcUrl;
+    }
+    constexpr int32_t JS_FILE_EXTENSION_LENGTH = 3;
+    auto srcPos = srcPagePath.rfind(".js");
+    if (srcPos == srcPagePath.length() - JS_FILE_EXTENSION_LENGTH) {
+        srcPagePath = srcPagePath.substr(0, srcPos);
+    }
+    auto destUrl = destPattern->GetPageUrl();
+    if (destUrl.empty()) {
+        return;
+    }
+    auto destPageInfo = destPattern->GetPageInfo();
+    CHECK_NULL_VOID(destPageInfo);
+    auto destPagePath = destPageInfo->GetPagePath();
+    if (destPagePath.empty()) {
+        destPagePath = destUrl;
+    }
+    auto destPos = destPagePath.rfind(".js");
+    if (destPos == destPagePath.length() - JS_FILE_EXTENSION_LENGTH) {
+        destPagePath = destPagePath.substr(0, destPos);
+    }
+    ACE_SCOPED_TRACE_COMMERCIAL("Router Page from %s to %s", srcPagePath.c_str(), destPagePath.c_str());
 }
 } // namespace OHOS::Ace::NG

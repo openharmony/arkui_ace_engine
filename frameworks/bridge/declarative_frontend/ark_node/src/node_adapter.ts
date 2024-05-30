@@ -41,7 +41,7 @@ class NodeAdapter {
             this.onCreateNewChild !== undefined ? this.onCreateNewNodePtr : undefined,
             this.onDisposeChild !== undefined ? this.onDisposeNodePtr : undefined,
             this.onUpdateChild !== undefined ? this.onUpdateNodePtr : undefined
-        )
+        );
     }
 
     dispose(): void {
@@ -98,7 +98,7 @@ class NodeAdapter {
     }
 
     onAttachToNodePtr(target: NodeInfo): void {
-        let nodeId = target.nodeId
+        let nodeId = target.nodeId;
         if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
             let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
             if (frameNode === undefined) {

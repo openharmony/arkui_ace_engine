@@ -633,6 +633,7 @@ private:
     void RegisterStopDragCallback(int32_t pointerId, StopDragCallback&& stopDragCallback);
     void SetFontScaleAndWeightScale(const ParsedConfig& parsedConfig);
     void ReleaseResourceAdapter();
+    void FillAutoFillViewData(const RefPtr<NG::FrameNode> &node, RefPtr<ViewDataWrap> &viewDataWrap);
 
     void NotifyConfigToSubContainers(const ParsedConfig& parsedConfig, const std::string& configuration);
 

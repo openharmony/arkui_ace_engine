@@ -176,14 +176,18 @@ public:
 
     void RemoveDialogDestination();
 
-    void SetNavigationPageInfo(std::string& moduleName, std::string& pagePath)
+    void SetNavigationPathInfo(const std::string& moduleName, const std::string& pagePath)
     {
-        navigationPageInfo_ = "moduleName: " + moduleName + ", pagePath: " + pagePath;
+        navigationPathInfo_.clear();
+        navigationPathInfo_.append(NAVIGATION_MODULE_NAME);
+        navigationPathInfo_ += ": " + moduleName + ", ";
+        navigationPathInfo_.append(NAVIGATION_PAGE_PATH);
+        navigationPathInfo_ += ": " + pagePath;
     }
 
-    const std::string& GetNavigationPageInfo() const
+    const std::string& GetNavigationPathInfo() const
     {
-        return navigationPageInfo_;
+        return navigationPathInfo_;
     }
 
 private:
@@ -195,7 +199,7 @@ private:
     void RemoveRedundantNavDestination(RefPtr<FrameNode>& navigationContentNode,
         const RefPtr<UINode>& remainChild, size_t slot, bool& hasChanged);
     bool FindNavigationParent(const std::string& parentName);
-    void GetCurTitleBarNode(RefPtr<TitleBarNode>& curTitleBarNode, const RefPtr<FrameNode>& curNode,
+    bool GetCurTitleBarNode(RefPtr<TitleBarNode>& curTitleBarNode, const RefPtr<FrameNode>& curNode,
         bool isNavBar);
 
     void DealRemoveDestination(const RefPtr<NavDestinationGroupNode>& destination);
@@ -213,7 +217,7 @@ private:
     std::string curId_;
     std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
     std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;
-    std::string navigationPageInfo_;
+    std::string navigationPathInfo_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_GROUP_NODE_H

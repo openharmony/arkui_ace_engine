@@ -37,11 +37,9 @@ constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int RESIZEABLE_VEC_LENGTH = 12;
 constexpr CopyOptions DEFAULT_IMAGE_COPYOPTION = CopyOptions::None;
-constexpr bool DEFAULT_IMAGE_AUTORESIZE = true;
 constexpr bool DEFAULT_SYNC_LOAD_VALUE = false;
 constexpr ImageFit DEFAULT_OBJECT_FIT_VALUE = ImageFit::COVER;
 constexpr bool DEFAULT_FIT_ORIGINAL_SIZE = false;
-constexpr ImageInterpolation DEFAULT_IMAGE_INTERPOLATION = ImageInterpolation::NONE;
 constexpr bool DEFAULT_DRAGGABLE = false;
 constexpr ArkUI_Float32 DEFAULT_IMAGE_EDGE_ANTIALIASING = 0;
 constexpr ImageResizableSlice DEFAULT_IMAGE_SLICE;
@@ -215,7 +213,7 @@ void SetAutoResize(ArkUINodeHandle node, ArkUI_Bool autoResize)
 int32_t GetAutoResize(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, DEFAULT_IMAGE_AUTORESIZE);
+    CHECK_NULL_RETURN(frameNode, true);
     return ImageModelNG::GetAutoResize(frameNode);
 }
 
@@ -223,7 +221,7 @@ void ResetAutoResize(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelNG::SetAutoResize(frameNode, DEFAULT_IMAGE_AUTORESIZE);
+    ImageModelNG::ResetAutoResize(frameNode);
 }
 
 void SetObjectRepeat(ArkUINodeHandle node, ArkUI_Int32 imageRepeat)
@@ -429,7 +427,7 @@ void ResetImageInterpolation(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelNG::SetImageInterpolation(frameNode, DEFAULT_IMAGE_INTERPOLATION);
+    ImageModelNG::ResetImageInterpolation(frameNode);
 }
 
 void SetColorFilter(ArkUINodeHandle node, const ArkUI_Float32* array, int length)
@@ -478,8 +476,10 @@ void* GetDrawingColorFilter(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto drawingColorFilter = ImageModelNG::GetDrawingColorFilter(frameNode);
+    CHECK_NULL_RETURN(drawingColorFilter, nullptr);
     auto filterSptr = reinterpret_cast<std::shared_ptr<OHOS::Rosen::Drawing::ColorFilter>*>(
         drawingColorFilter->GetDrawingColorFilterSptrAddr());
+    CHECK_NULL_RETURN(filterSptr, nullptr);
     return (*filterSptr).get();
 }
 

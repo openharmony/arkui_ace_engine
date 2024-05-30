@@ -29,7 +29,8 @@ public:
     static void Get(const std::string& componentId, JsCallback&& callback);
     // add delay to ensure Rosen has finished rendering
     static void Create(
-        const RefPtr<AceType>& customNode, JsCallback&& callback, bool enableInspector, const int32_t delayTime = 300);
+        const RefPtr<AceType>& customNode, JsCallback&& callback, bool enableInspector, const int32_t delayTime = 300,
+        bool flag = true);
     static void GetNormalCapture(const RefPtr<FrameNode>& frameNode, NormalCallback&& callback);
 
 private:

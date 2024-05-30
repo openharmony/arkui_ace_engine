@@ -91,6 +91,7 @@ constexpr Dimension ADAPT_TITLE_MIN_FONT_SIZE = 16.0_fp;
 constexpr Dimension ADAPT_SUBTITLE_MIN_FONT_SIZE = 12.0_fp;
 constexpr uint32_t ADAPT_TITLE_MAX_LINES = 2;
 constexpr int32_t TEXT_ALIGN_TITLE_CENTER = 1;
+constexpr int32_t BUTTON_TYPE_NORMAL = 1;
 
 std::string GetBoolStr(bool isTure)
 {
@@ -270,8 +271,6 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
         BorderWidthProperty borderWidth;
         Dimension width = dialogTheme_->GetBackgroudBorderWidth();
         borderWidth.SetBorderWidth(width);
-        auto layoutProps = contentNode->GetLayoutProperty<LinearLayoutProperty>();
-        layoutProps->UpdateBorderWidth(borderWidth);
         contentRenderContext->UpdateBorderWidth(borderWidth);
     }
     if (props.borderStyle.has_value()) {
@@ -344,16 +343,7 @@ void DialogPattern::BuildChild(const DialogProperties& props)
     // append customNode
     auto customNode = customNode_.Upgrade();
     if (customNode) {
-        // wrap custom node to set background color and round corner
-        auto contentWrapper = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
-        CHECK_NULL_VOID(contentWrapper);
-        if (!props.customStyle) {
-            UpdateContentRenderContext(contentWrapper, props);
-        }
-        customNode->MountToParent(contentWrapper);
-        auto dialog = GetHost();
-        contentWrapper->MountToParent(dialog);
+        BuildCustomChild(props, customNode);
         return;
     }
 
@@ -420,6 +410,34 @@ void DialogPattern::BuildChild(const DialogProperties& props)
 
     auto dialog = GetHost();
     contentColumn->MountToParent(dialog);
+}
+
+void DialogPattern::BuildCustomChild(const DialogProperties& props, const RefPtr<UINode>& customNode)
+{
+    auto contentWrapper = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    CHECK_NULL_VOID(contentWrapper);
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (!props.customStyle) {
+            UpdateContentRenderContext(contentWrapper, props);
+        }
+        customNode->MountToParent(contentWrapper);
+        auto dialog = GetHost();
+        contentWrapper->MountToParent(dialog);
+    } else {
+        auto scroll = FrameNode::CreateFrameNode(
+            V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
+        CHECK_NULL_VOID(contentWrapper);
+        if (!props.customStyle) {
+            UpdateContentRenderContext(scroll, props);
+        }
+        customNode->MountToParent(contentWrapper);
+        contentWrapper->MountToParent(scroll);
+        auto dialog = GetHost();
+        scroll->MountToParent(dialog);
+        scroll->MarkModifyDone();
+        dialog->MarkModifyDone();
+    }
 }
 
 RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogProperties)
@@ -707,6 +725,9 @@ void DialogPattern::UpdateDialogButtonProperty(
 {
     // update button padding
     auto buttonProp = AceType::DynamicCast<ButtonLayoutProperty>(buttonNode->GetLayoutProperty());
+    if (dialogTheme_->GetButtonType() == BUTTON_TYPE_NORMAL) {
+        buttonProp->UpdateButtonStyle(ButtonStyleMode::NORMAL);
+    }
     PaddingProperty buttonPadding;
     buttonPadding.left = CalcLength(SHEET_LIST_PADDING);
     buttonPadding.right = CalcLength(SHEET_LIST_PADDING);
@@ -1064,6 +1085,10 @@ void DialogPattern::HandleFocusEvent()
 // XTS inspector
 void DialogPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (host->GetTag() == V2::ALERT_DIALOG_ETS_TAG || host->GetTag() == V2::ACTION_SHEET_DIALOG_ETS_TAG) {

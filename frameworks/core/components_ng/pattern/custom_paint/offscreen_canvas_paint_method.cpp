@@ -96,6 +96,31 @@ void OffscreenCanvasPaintMethod::InitBitmap()
     rsCanvas_->Bind(bitmap_);
 }
 
+RefPtr<PixelMap> OffscreenCanvasPaintMethod::TransferToImageBitmap()
+{
+#ifdef PIXEL_MAP_SUPPORTED
+    OHOS::Media::InitializationOptions options;
+    options.alphaType = OHOS::Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL;
+    options.pixelFormat = OHOS::Media::PixelFormat::RGBA_8888;
+    options.scaleMode = OHOS::Media::ScaleMode::CENTER_CROP;
+    options.size.width = width_;
+    options.size.height = height_;
+    options.editable = true;
+    auto pixelMap = Ace::PixelMap::Create(OHOS::Media::PixelMap::Create(options));
+    if (pixelMap) {
+        std::shared_ptr<Ace::ImageData> imageData = std::make_shared<Ace::ImageData>();
+        imageData->pixelMap = pixelMap;
+        imageData->dirtyX = 0.0f;
+        imageData->dirtyY = 0.0f;
+        imageData->dirtyWidth = width_;
+        imageData->dirtyHeight = height_;
+        GetImageData(imageData);
+        return pixelMap;
+    }
+#endif
+    return nullptr;
+}
+
 void OffscreenCanvasPaintMethod::Reset()
 {
     matrix_.Reset();
@@ -355,7 +380,7 @@ TextMetrics OffscreenCanvasPaintMethod::MeasureTextMetrics(const std::string& te
 void OffscreenCanvasPaintMethod::PaintText(
     const std::string& text, double x, double y, std::optional<double> maxWidth, bool isStroke, bool hasShadow)
 {
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)) {
         paragraph_->Layout(FLT_MAX);
     } else {
         paragraph_->Layout(width_);
@@ -520,7 +545,7 @@ void OffscreenCanvasPaintMethod::PaintShadow(const RSPath& path, const Shadow& s
 {
 #ifndef ACE_UNITTEST
     CHECK_NULL_VOID(rsCanvas_);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) && slo != nullptr) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && slo != nullptr) {
         rsCanvas_->SaveLayer(*slo);
         RosenDecorationPainter::PaintShadow(path, shadow, canvas, brush, pen);
         rsCanvas_->Restore();
@@ -535,7 +560,7 @@ void OffscreenCanvasPaintMethod::PaintImageShadow(const RSPath& path, const Shad
 {
 #ifndef ACE_UNITTEST
     CHECK_NULL_VOID(rsCanvas_);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) && slo != nullptr) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && slo != nullptr) {
         RosenDecorationPainter::PaintShadow(path, shadow, canvas, brush, pen);
         rsCanvas_->Restore();
         rsCanvas_->SaveLayer(*slo);

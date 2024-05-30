@@ -22,7 +22,6 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
-#include "core/components_ng/pattern/navigation/navigation_group_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -84,13 +83,7 @@ public:
         }
     }
 
-    void FireOnAppear() override
-    {
-        auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetFrameNode());
-        CHECK_NULL_VOID(navigationNode);
-        auto pagePath = navigationNode->GetNavigationPageInfo();
-        ACE_SCOPED_TRACE("Navigation Main Page: %s", pagePath.c_str());
-    }
+    void FireOnAppear() override;
 
 private:
     OnTitleModeChangeEvent onTitleModeChangeEvent_;

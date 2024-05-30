@@ -48,7 +48,7 @@ public:
 
     void UpdateOffset(float delta) override
     {
-        delta_ = delta;
+        delta_ += delta;
         synced_ = false;
     }
 
@@ -88,6 +88,8 @@ public:
 
     void Reset() override;
 
+    bool IsMisaligned() const override;
+
     /**
      * @brief reset layout data before performing a jump.
      *
@@ -124,15 +126,6 @@ public:
      * @return positive result when item's bottom edge is above viewport.
      */
     float DistanceToBottom(int32_t item, float mainSize, float mainGap) const;
-
-    /**
-     * @brief Check if the layout is misaligned.
-     *
-     * If we jump and scroll back to top, the staring items might not be aligned with the top boundary.
-     * @return true if 1. any lane misaligned with top boundary.
-     *                 2. the first item is not in the first lane.
-     */
-    bool IsMisaligned() const;
 
     int32_t StartIndex() const;
     int32_t EndIndex() const;

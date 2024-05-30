@@ -108,6 +108,12 @@ void AceViewOhos::SetViewportMetrics(AceViewOhos* view, const ViewportConfig& co
     view->NotifyDensityChanged(config.Density());
 }
 
+void AceViewOhos::TransformHintChanged(AceViewOhos* view, uint32_t transform)
+{
+    CHECK_NULL_VOID(view);
+    view->NotifyTransformHintChanged(transform);
+}
+
 void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     const RefPtr<OHOS::Ace::NG::FrameNode>& node, const std::function<void()>& callback, bool isInjected)
 {

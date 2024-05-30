@@ -1527,7 +1527,7 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam>& param, const RefPtr<Frame
     } else {
         // Invisable
         if (!isShow) {
-            TAG_LOGW(AceLogTag::ACE_DIALOG, "get isShow failed");
+            TAG_LOGW(AceLogTag::ACE_DIALOG, "Popup is already hidden");
             return;
         }
         popupInfo.markNeedUpdate = true;
@@ -2230,6 +2230,38 @@ void ViewAbstract::SetBorderImageGradient(const Gradient& gradient)
     ACE_UPDATE_RENDER_CONTEXT(BorderImageGradient, gradient);
 }
 
+void ViewAbstract::SetVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(VisualEffect, visualEffect);
+}
+
+void ViewAbstract::SetBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(BackgroundFilter, backgroundFilter);
+}
+
+void ViewAbstract::SetForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundFilter, foregroundFilter);
+}
+
+void ViewAbstract::SetCompositingFilter(const OHOS::Rosen::Filter* compositingFilter)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(CompositingFilter, compositingFilter);
+}
+
 void ViewAbstract::SetOverlay(const OverlayOptions& overlay)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -2795,6 +2827,43 @@ void ViewAbstract::SetBloom(const float value)
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(Bloom, value);
+}
+
+void ViewAbstract::SetLightPosition(FrameNode* frameNode, const CalcDimension& positionX,
+    const CalcDimension& positionY, const CalcDimension& positionZ)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(LightPosition, TranslateOptions(positionX, positionY, positionZ), frameNode);
+}
+
+void ViewAbstract::SetLightIntensity(FrameNode* frameNode, const float value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(LightIntensity, value, frameNode);
+}
+
+void ViewAbstract::SetLightColor(FrameNode* frameNode, const Color& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(LightColor, value, frameNode);
+}
+
+void ViewAbstract::SetLightIlluminated(FrameNode* frameNode, const uint32_t value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(LightIlluminated, value, frameNode);
+}
+
+void ViewAbstract::SetIlluminatedBorderWidth(FrameNode* frameNode, const Dimension& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(IlluminatedBorderWidth, value, frameNode);
+}
+
+void ViewAbstract::SetBloom(FrameNode* frameNode, const float value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(Bloom, value, frameNode);
 }
 
 void ViewAbstract::SetMotionPath(FrameNode* frameNode, const MotionPathOption& motionPath)
@@ -3599,7 +3668,7 @@ NG::Gradient ViewAbstract::GetRadialGradient(FrameNode* frameNode)
     value.CreateGradientWithType(NG::GradientType::RADIAL);
     const auto& target = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(target, value);
-    return target->GetSweepGradientValue(value);
+    return target->GetRadialGradientValue(value);
 }
 
 RefPtr<BasicShape> ViewAbstract::GetMask(FrameNode* frameNode)
@@ -3782,7 +3851,7 @@ Dimension ViewAbstract::GetSepia(FrameNode* frameNode)
 
 Dimension ViewAbstract::GetContrast(FrameNode* frameNode)
 {
-    Dimension value;
+    Dimension value(1.0f);
     auto target = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(target, value);
     return target->GetFrontContrastValue(value);
@@ -4188,6 +4257,33 @@ void ViewAbstract::ClearJSFrameNodeOnSizeChange(FrameNode* frameNode)
     auto eventHub = frameNode->GetEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearJSFrameNodeOnSizeChange();
+}
+
+void ViewAbstract::SetJSFrameNodeOnVisibleAreaApproximateChange(FrameNode* frameNode,
+    const std::function<void(bool, double)>&& jsCallback, const std::vector<double>& ratioList,
+    int32_t interval)
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->CleanVisibleAreaUserCallback(true);
+
+    constexpr uint32_t minInterval = 100; // 100ms
+    if (interval < minInterval) {
+        interval = minInterval;
+    }
+    VisibleCallbackInfo callback;
+    callback.callback = std::move(jsCallback);
+    callback.isCurrentVisible = false;
+    callback.period = static_cast<uint32_t>(interval);
+    pipeline->AddVisibleAreaChangeNode(frameNode->GetId());
+    frameNode->SetVisibleAreaUserCallback(ratioList, callback);
+}
+
+void ViewAbstract::ClearJSFrameNodeOnVisibleAreaApproximateChange(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->CleanVisibleAreaUserCallback(true);
 }
 
 void ViewAbstract::SetOnGestureJudgeBegin(FrameNode* frameNode, GestureJudgeFunc&& gestureJudgeFunc)

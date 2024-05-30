@@ -733,8 +733,8 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positio
     auto currentContainer = Container::Current();
     if (currentContainer && !currentContainer->IsSubContainer()) {
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentContainer->GetInstanceId());
-        if (subwindow && subwindow->GetShown() && subwindow->IsFocused()) {
-            // subwindow is shown, main window no need to handle the keyboard event
+        if (subwindow && subwindow->GetShown() && subwindow->IsFocused() && NearZero(GetPageAvoidOffset())) {
+            // subwindow is shown, main window doesn't lift,  no need to handle the keyboard event
             return;
         }
     }

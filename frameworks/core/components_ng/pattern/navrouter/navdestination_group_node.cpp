@@ -132,13 +132,4 @@ RefPtr<CustomNodeBase> NavDestinationGroupNode::GetNavDestinationCustomNode()
     return nullptr;
 }
 
-void NavDestinationGroupNode::SetNavDestinationPageInfo(std::string& moduleName, std::string& pagePath)
-{
-    auto pattern = AceType::DynamicCast<NavDestinationPattern>(GetPattern());
-    CHECK_NULL_VOID(pattern);
-    auto navDestinationName = pattern->GetName();
-    navDestinationPageInfo_ = "moduleName: " + moduleName + ", pagePath: " + pagePath +
-        ", navDestinationName: " + navDestinationName;
-}
-
 } // namespace OHOS::Ace::NG

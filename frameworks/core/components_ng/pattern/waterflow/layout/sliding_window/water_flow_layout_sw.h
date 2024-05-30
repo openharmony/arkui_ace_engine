@@ -39,7 +39,6 @@ public:
 private:
     void Init(const SizeF& frameSize);
     void CheckReset();
-    bool CheckChildrenUpdate(int32_t updateIdx);
 
     void MeasureOnOffset(float delta);
 

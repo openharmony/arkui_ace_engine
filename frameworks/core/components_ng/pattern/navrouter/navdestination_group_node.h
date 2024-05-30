@@ -155,11 +155,18 @@ public:
         return canReused_;
     }
 
-    void SetNavDestinationPageInfo(std::string& moduleName, std::string& pagePath);
-
-    const std::string& GetNavDestinationPageInfo() const
+    void SetNavDestinationPathInfo(const std::string& moduleName, const std::string& pagePath)
     {
-        return navDestinationPageInfo_;
+        navDestinationPathInfo_.clear();
+        navDestinationPathInfo_.append(NAVIGATION_MODULE_NAME);
+        navDestinationPathInfo_ += ": " + moduleName + ", ";
+        navDestinationPathInfo_.append(NAVIGATION_PAGE_PATH);
+        navDestinationPathInfo_ += ": " + pagePath;
+    }
+
+    const std::string& GetNavDestinationPathInfo() const
+    {
+        return navDestinationPathInfo_;
     }
 
 private:
@@ -173,7 +180,7 @@ private:
     bool isCacheNode_ = false;
     bool isAnimated_ = false;
     bool canReused_ = true;
-    std::string navDestinationPageInfo_;
+    std::string navDestinationPathInfo_;
 };
 
 } // namespace OHOS::Ace::NG

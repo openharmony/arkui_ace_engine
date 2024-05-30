@@ -28,32 +28,32 @@ enum FocusText {
 }
 
 export class CommonOptions {
-  focusable?: boolean;
-  step?: number;
-  onHoverIncrease?: (isHover: boolean) => void;
-  onHoverDecrease?: (isHover: boolean) => void;
+  public focusable?: boolean;
+  public step?: number;
+  public onHoverIncrease?: (isHover: boolean) => void;
+  public onHoverDecrease?: (isHover: boolean) => void;
 }
 
 export class InlineStyleOptions extends CommonOptions {
-  value?: number;
-  min?: number;
-  max?: number;
-  textWidth?: number;
-  onChange?: (value: number) => void;
+  public value?: number;
+  public min?: number;
+  public max?: number;
+  public textWidth?: number;
+  public onChange?: (value: number) => void;
 }
 
 export class NumberStyleOptions extends InlineStyleOptions {
-  label?: ResourceStr;
-  onFocusIncrease?: () => void;
-  onFocusDecrease?: () => void;
-  onBlurIncrease?: () => void;
-  onBlurDecrease?: () => void;
+  public label?: ResourceStr;
+  public onFocusIncrease?: () => void;
+  public onFocusDecrease?: () => void;
+  public onBlurIncrease?: () => void;
+  public onBlurDecrease?: () => void;
 }
 
-export class DateData{
-  year: number;
-  month: number;
-  day: number;
+export class DateData {
+  public year: number;
+  public month: number;
+  public day: number;
 
   constructor(year: number, month: number, day: number) {
     this.year = year;
@@ -72,121 +72,121 @@ export class DateData{
 }
 
 export class DateStyleOptions extends CommonOptions {
-  year?: number;
-  month?: number;
-  day?: number;
-  onDateChange?: (date: DateData) => void;
+  public year?: number;
+  public month?: number;
+  public day?: number;
+  public onDateChange?: (date: DateData) => void;
 }
 
 export class CounterOptions {
-  type: CounterType;
-  numberOptions?: NumberStyleOptions;
-  inlineOptions?: InlineStyleOptions;
-  dateOptions?: DateStyleOptions;
+  public type: CounterType;
+  public numberOptions?: NumberStyleOptions;
+  public inlineOptions?: InlineStyleOptions;
+  public dateOptions?: DateStyleOptions;
 }
 
 class CounterResource {
   // counter color
-  static readonly BUTTON_BACKGROUD_COLOR = $r('sys.color.ohos_id_color_button_normal');
-  static readonly BUTTON_ICON_COLOR = $r('sys.color.ohos_id_color_primary');
-  static readonly BUTTON_BORDER_FOCUSED_COLOR = $r('sys.color.ohos_id_color_focused_outline');
-  static readonly COUNTER_TEXT_COLOR = $r('sys.color.ohos_id_color_text_primary');
-  static readonly COUNTER_BORDER_COLOR = $r('sys.color.ohos_id_color_component_normal');
+  public static readonly BUTTON_BACKGROUD_COLOR = $r('sys.color.ohos_id_color_button_normal');
+  public static readonly BUTTON_ICON_COLOR = $r('sys.color.ohos_id_color_primary');
+  public static readonly BUTTON_BORDER_FOCUSED_COLOR = $r('sys.color.ohos_id_color_focused_outline');
+  public static readonly COUNTER_TEXT_COLOR = $r('sys.color.ohos_id_color_text_primary');
+  public static readonly COUNTER_BORDER_COLOR = $r('sys.color.ohos_id_color_component_normal');
   // button icon
-  static readonly BUTTON_ADD_ICON = $r("sys.media.ohos_ic_public_add");
-  static readonly BUTTON_SUB_ICON = $r("sys.media.ohos_ic_public_minus");
-  static readonly BUTTON_ARROW_UP = $r('sys.media.ohos_ic_public_arrow_up');
-  static readonly BUTTON_ARROW_DOWN = $r('sys.media.ohos_ic_public_arrow_down');
+  public static readonly BUTTON_ADD_ICON = $r("sys.media.ohos_ic_public_add");
+  public static readonly BUTTON_SUB_ICON = $r("sys.media.ohos_ic_public_minus");
+  public static readonly BUTTON_ARROW_UP = $r('sys.media.ohos_ic_public_arrow_up');
+  public static readonly BUTTON_ARROW_DOWN = $r('sys.media.ohos_ic_public_arrow_down');
 
   // counter size
-  static readonly BUTTON_BORDER_FOCUSED_WIDTH = '2vp';
-  static readonly BUTTON_BORDER_BLUR_WIDTH = '0vp';
-  static readonly COUNTER_BORDER_WIDTH = '1vp';
-  static readonly COUNTER_LIST_LABEL_SIZE = $r('sys.float.ohos_id_text_size_body1');
-  static readonly COUNTER_LIST_NUMBER_SIZE = $r('sys.float.ohos_id_text_size_body1');
-  static readonly COUNTER_COMPACT_LABEL_SIZE = $r('sys.float.ohos_id_text_size_body2');
-  static readonly COUNTER_NUMBER_SIZE = $r('sys.float.ohos_id_text_size_body1');
-  static readonly COUNTER_LIST_LEFT_PADDING = $r('sys.float.ohos_id_default_padding_start');
-  static readonly COUNTER_LIST_RIGHT_PADDING = $r('sys.float.ohos_id_default_padding_end');
-  static readonly COUNTER_LIST_HEIGHT = '48vp';
-  static readonly COUNTER_LIST_BUTTON_ICON_SIZE = '20vp';
-  static readonly COUNTER_LIST_BUTTON_SIZE = '32vp';
-  static readonly COUNTER_LIST_BUTTON_RADIUS = '16vp';
-  static readonly COUNTER_LIST_BUTTON_TEXT_DISTANCE = '8vp';
-  static readonly COUNTER_LIST_FOCUS_BORDER_SIZE = '30vp';
-  static readonly COUNTER_LIST_FOCUS_BORDER_RADIUS = '15vp';
-  static readonly COUNTER_LIST_BUTTON_HOT_SPOT_X = '-8vp';
-  static readonly COUNTER_LIST_BUTTON_HOT_SPOT_Y = '-8vp';
+  public static readonly BUTTON_BORDER_FOCUSED_WIDTH = '2vp';
+  public static readonly BUTTON_BORDER_BLUR_WIDTH = '0vp';
+  public static readonly COUNTER_BORDER_WIDTH = '1vp';
+  public static readonly COUNTER_LIST_LABEL_SIZE = $r('sys.float.ohos_id_text_size_body1');
+  public static readonly COUNTER_LIST_NUMBER_SIZE = $r('sys.float.ohos_id_text_size_body1');
+  public static readonly COUNTER_COMPACT_LABEL_SIZE = $r('sys.float.ohos_id_text_size_body2');
+  public static readonly COUNTER_NUMBER_SIZE = $r('sys.float.ohos_id_text_size_body1');
+  public static readonly COUNTER_LIST_LEFT_PADDING = $r('sys.float.ohos_id_default_padding_start');
+  public static readonly COUNTER_LIST_RIGHT_PADDING = $r('sys.float.ohos_id_default_padding_end');
+  public static readonly COUNTER_LIST_HEIGHT = '48vp';
+  public static readonly COUNTER_LIST_BUTTON_ICON_SIZE = '20vp';
+  public static readonly COUNTER_LIST_BUTTON_SIZE = '32vp';
+  public static readonly COUNTER_LIST_BUTTON_RADIUS = '16vp';
+  public static readonly COUNTER_LIST_BUTTON_TEXT_DISTANCE = '8vp';
+  public static readonly COUNTER_LIST_FOCUS_BORDER_SIZE = '30vp';
+  public static readonly COUNTER_LIST_FOCUS_BORDER_RADIUS = '15vp';
+  public static readonly COUNTER_LIST_BUTTON_HOT_SPOT_X = '-8vp';
+  public static readonly COUNTER_LIST_BUTTON_HOT_SPOT_Y = '-8vp';
 
-  static readonly COUNTER_COMPACT_BUTTON_ICON_SIZE = '16vp';
-  static readonly COUNTER_COMPACT_BUTTON_SIZE = '24vp';
-  static readonly COUNTER_COMPACT_BUTTON_RADIUS = '12vp';
-  static readonly COUNTER_COMPACT_BUTTON_TEXT_DISTANCE = '10vp';
-  static readonly COUNTER_COMPACT_CONTAINER_HEIGHT = '28vp';
-  static readonly COUNTER_COMPACT_CONTAINER_RADIUS = '14vp';
-  static readonly COUNTER_COMPACT_CONTAINER_LABEL_DISTANCE = '8vp';
-  static readonly COUNTER_COMPACT_FOCUS_BORDER_SIZE = '22vp';
-  static readonly COUNTER_COMPACT_FOCUS_BORDER_RADIUS = '11vp';
+  public static readonly COUNTER_COMPACT_BUTTON_ICON_SIZE = '16vp';
+  public static readonly COUNTER_COMPACT_BUTTON_SIZE = '24vp';
+  public static readonly COUNTER_COMPACT_BUTTON_RADIUS = '12vp';
+  public static readonly COUNTER_COMPACT_BUTTON_TEXT_DISTANCE = '10vp';
+  public static readonly COUNTER_COMPACT_CONTAINER_HEIGHT = '28vp';
+  public static readonly COUNTER_COMPACT_CONTAINER_RADIUS = '14vp';
+  public static readonly COUNTER_COMPACT_CONTAINER_LABEL_DISTANCE = '8vp';
+  public static readonly COUNTER_COMPACT_FOCUS_BORDER_SIZE = '22vp';
+  public static readonly COUNTER_COMPACT_FOCUS_BORDER_RADIUS = '11vp';
 
-  static readonly COUNTER_INLINE_BUTTON_ICON_WIDTH = '24vp';
-  static readonly COUNTER_INLINE_BUTTON_ICON_HEIGHT = '12vp';
-  static readonly COUNTER_INLINE_BUTTON_TEXT_DISTANCE = '12vp';
-  static readonly COUNTER_INLINE_CONTAINER_HEIGHT = '32vp';
-  static readonly COUNTER_INLINE_BUTTON_WIDTH = '32vp';
-  static readonly COUNTER_INLINE_BUTTON_HEIGHT = '16vp';
-  static readonly COUNTER_INLINE_RADIUS = '8vp';
-  static readonly COUNTER_INLINE_FOCUS_BORDER_WIDTH = '28vp';
-  static readonly COUNTER_INLINE_FOCUS_BORDER_HEIGHT = '13.5vp';
-  static readonly COUNTER_INLINE_DATE_TEXT_MARGIN = '12vp';
-  static readonly COUNTER_BUTTON_INITIAL_OPACITY = 1;
-  static readonly COUNTER_BUTTON_DISABLE_OPACITY = 0.4;
+  public static readonly COUNTER_INLINE_BUTTON_ICON_WIDTH = '24vp';
+  public static readonly COUNTER_INLINE_BUTTON_ICON_HEIGHT = '12vp';
+  public static readonly COUNTER_INLINE_BUTTON_TEXT_DISTANCE = '12vp';
+  public static readonly COUNTER_INLINE_CONTAINER_HEIGHT = '32vp';
+  public static readonly COUNTER_INLINE_BUTTON_WIDTH = '32vp';
+  public static readonly COUNTER_INLINE_BUTTON_HEIGHT = '16vp';
+  public static readonly COUNTER_INLINE_RADIUS = '8vp';
+  public static readonly COUNTER_INLINE_FOCUS_BORDER_WIDTH = '28vp';
+  public static readonly COUNTER_INLINE_FOCUS_BORDER_HEIGHT = '13.5vp';
+  public static readonly COUNTER_INLINE_DATE_TEXT_MARGIN = '12vp';
+  public static readonly COUNTER_BUTTON_INITIAL_OPACITY = 1;
+  public static readonly COUNTER_BUTTON_DISABLE_OPACITY = 0.4;
 }
 
 class CounterConstant {
-  static readonly COUNTER_MAX_YEAR = 5000;
-  static readonly COUNTER_MIN_YEAR = 1;
-  static readonly COUNTER_INITIAL_MONTH = 1;
-  static readonly COUNTER_INITIAL_DAY = 1;
-  static readonly COUNTER_INITIAL_STEP = 1;
+  public static readonly COUNTER_MAX_YEAR = 5000;
+  public static readonly COUNTER_MIN_YEAR = 1;
+  public static readonly COUNTER_INITIAL_MONTH = 1;
+  public static readonly COUNTER_INITIAL_DAY = 1;
+  public static readonly COUNTER_INITIAL_STEP = 1;
 
-  static readonly COUNTER_TEN_NUMBER = 10;
-  static readonly COUNTER_MIN_MONTH = 1;
-  static readonly COUNTER_MAX_MONTH = 12;
-  static readonly COUNTER_MIN_DAY = 1;
-  static readonly KEYCODE_DPAD_UP = 2012;
-  static readonly KEYCODE_DPAD_DOWN = 2013;
-  static readonly KEYCODE_DPAD_LEFT = 2014;
-  static readonly KEYCODE_DPAD_RIGHT = 2015;
-  static readonly KEYCODE_MOVE_HOME = 2081;
-  static readonly KEYCODE_MOVE_END = 2082;
-  static readonly KEYCODE_TAB = 2049;
-  static readonly KEYCODE_ESC = 2070;
-  static readonly COUNTER_MIN_VALUE = 0;
-  static readonly COUNTER_MAX_VALUE = 999;
-  static readonly JANUARY = 1;
-  static readonly FEBRUARY = 2;
-  static readonly MARCH = 3;
-  static readonly APRIL = 4;
-  static readonly MAY = 5;
-  static readonly JUNE = 6;
-  static readonly JULY = 7;
-  static readonly AUGUST = 8;
-  static readonly SEPTEMBER = 9;
-  static readonly OCTOBER = 10;
-  static readonly NOVEMBER = 11;
-  static readonly DECEMBER = 12;
-  static readonly BIG_MONTH_DAYS = 31;
-  static readonly SMALL_MONTH_DAYS = 30;
-  static readonly FEBRUARY_DAYS = 28;
-  static readonly AUSPICIOUS_FEBRUARY_DAYS = 29;
-  static readonly AUSPICIOUS_FOUR = 4;
-  static readonly AUSPICIOUS_HUNDRED = 100;
-  static readonly AUSPICIOUS_FOUR_HUNDRED = 400;
+  public static readonly COUNTER_TEN_NUMBER = 10;
+  public static readonly COUNTER_MIN_MONTH = 1;
+  public static readonly COUNTER_MAX_MONTH = 12;
+  public static readonly COUNTER_MIN_DAY = 1;
+  public static readonly KEYCODE_DPAD_UP = 2012;
+  public static readonly KEYCODE_DPAD_DOWN = 2013;
+  public static readonly KEYCODE_DPAD_LEFT = 2014;
+  public static readonly KEYCODE_DPAD_RIGHT = 2015;
+  public static readonly KEYCODE_MOVE_HOME = 2081;
+  public static readonly KEYCODE_MOVE_END = 2082;
+  public static readonly KEYCODE_TAB = 2049;
+  public static readonly KEYCODE_ESC = 2070;
+  public static readonly COUNTER_MIN_VALUE = 0;
+  public static readonly COUNTER_MAX_VALUE = 999;
+  public static readonly JANUARY = 1;
+  public static readonly FEBRUARY = 2;
+  public static readonly MARCH = 3;
+  public static readonly APRIL = 4;
+  public static readonly MAY = 5;
+  public static readonly JUNE = 6;
+  public static readonly JULY = 7;
+  public static readonly AUGUST = 8;
+  public static readonly SEPTEMBER = 9;
+  public static readonly OCTOBER = 10;
+  public static readonly NOVEMBER = 11;
+  public static readonly DECEMBER = 12;
+  public static readonly BIG_MONTH_DAYS = 31;
+  public static readonly SMALL_MONTH_DAYS = 30;
+  public static readonly FEBRUARY_DAYS = 28;
+  public static readonly AUSPICIOUS_FEBRUARY_DAYS = 29;
+  public static readonly AUSPICIOUS_FOUR = 4;
+  public static readonly AUSPICIOUS_HUNDRED = 100;
+  public static readonly AUSPICIOUS_FOUR_HUNDRED = 400;
 }
 
 @Component
 export struct CounterComponent {
-  @Prop  @Watch('onOptionsChange')  options: CounterOptions;
+  @Prop @Watch('onOptionsChange')  options: CounterOptions;
   @State type: number = -1;
   @State choverEffect: HoverEffect = HoverEffect.Auto;
   @State focusEnable: boolean = true;
@@ -226,7 +226,7 @@ export struct CounterComponent {
 
   private maxYear: number = CounterConstant.COUNTER_MAX_YEAR;
   private minYear: number = CounterConstant.COUNTER_MIN_YEAR;
-  private numberStrList: Array<string> = [ '00', '01', '02', '03', '04', '05', '06', '07', '08', '09'];
+  private numberStrList: Array<string> = ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09'];
   private onHoverIncrease?: (isHover: boolean) => void;
   private onHoverDecrease?: (isHover: boolean) => void;
   private onFocusIncrease?: () => void;
@@ -283,7 +283,7 @@ export struct CounterComponent {
     }
     if (this.numberStyleOptions.textWidth !== undefined) {
       this.textWidth = this.numberStyleOptions.textWidth;
-      if (this.textWidth  < 0) {
+      if (this.textWidth < 0) {
         this.textWidth = 0;
       }
       this.hasTextWidth = true;
@@ -547,7 +547,7 @@ export struct CounterComponent {
   }
 
   private getDayNumber(): number {
-    switch(this.month) {
+    switch (this.month) {
       case CounterConstant.JANUARY:
       case CounterConstant.MARCH:
       case CounterConstant.MAY:
@@ -828,7 +828,7 @@ export struct CounterComponent {
     if (this.inputValue == undefined) {
       this.inputValue = ''
     }
-    return this.hasInputText1? this.inputValue : this.value.toString();
+    return this.hasInputText1 ? this.inputValue : this.value.toString();
   }
 
   private getValueLength() {
@@ -1368,7 +1368,7 @@ export struct CounterComponent {
               })
               .onChange((value: string) => {
                 this.inputValue = value;
-                for(let i= 0; i < value.length; i++) {
+                for (let i = 0; i < value.length; i++) {
                   let c = value[i];
                   if (c === '+' || c === '*' || c === '#') {
                     this.value -= 1;
@@ -1383,7 +1383,7 @@ export struct CounterComponent {
                 }
 
                 this.hasInputText1 = true;
-                let c = value[value.length -1];
+                let c = value[value.length - 1];
                 if (value.length === this.getMaxLength()) {
                   this.inputValue = c;
                 }
@@ -1506,7 +1506,7 @@ export struct CounterComponent {
               })
               .onChange((value: string) => {
                 this.inputValue = value;
-                for(let i= 0; i < value.length; i++) {
+                for (let i= 0; i < value.length; i++) {
                   let c = value[i];
                   if (c === '+' || c === '*' || c === '#') {
                     this.value -= 1;
@@ -1646,7 +1646,7 @@ export struct CounterComponent {
             .focusable(false)
             .onFocus(()=>{
               this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
-              this.onFocusIncrease&& this.onFocusIncrease();
+              this.onFocusIncrease && this.onFocusIncrease();
             })
             .onBlur(()=>{
               this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
@@ -1743,10 +1743,10 @@ export struct CounterComponent {
             .copyOption(CopyOptions.None)
             .fontSize(CounterResource.COUNTER_NUMBER_SIZE)
             .fontWeight(FontWeight.Medium)
-            .fontColor(this.hasFocusText1? Color.White : CounterResource.COUNTER_TEXT_COLOR)
+            .fontColor(this.hasFocusText1 ? Color.White : CounterResource.COUNTER_TEXT_COLOR)
             .maxLength(5)
             .padding(0)
-            .backgroundColor(this.hasFocusText1? CounterResource.BUTTON_BORDER_FOCUSED_COLOR : Color.Transparent)
+            .backgroundColor(this.hasFocusText1 ? CounterResource.BUTTON_BORDER_FOCUSED_COLOR : Color.Transparent)
             .width('38vp')
             .height('20vp')
             .borderRadius(0)
@@ -1793,7 +1793,7 @@ export struct CounterComponent {
                 this.hasInputText1 = true;
               }
               this.inputYear = Number(value)
-              if(value.length === 5) {
+              if (value.length === 5) {
                 this.inputYear = this.inputYear % 10;
               }
 
@@ -1861,7 +1861,7 @@ export struct CounterComponent {
             .fontColor(CounterResource.COUNTER_TEXT_COLOR)
             .width('8vp')
           TextInput({
-              text: this.hasInputText2? this.inputMoon.toString() : this.convertNumberToString(this.month),
+              text: this.hasInputText2 ? this.inputMoon.toString() : this.convertNumberToString(this.month),
               controller: this.controller2
             })
             .type(InputType.Number)
@@ -1869,10 +1869,10 @@ export struct CounterComponent {
             .copyOption(CopyOptions.None)
             .fontSize(CounterResource.COUNTER_NUMBER_SIZE)
             .fontWeight(FontWeight.Medium)
-            .fontColor(this.hasFocusText2? Color.White : CounterResource.COUNTER_TEXT_COLOR)
+            .fontColor(this.hasFocusText2 ? Color.White : CounterResource.COUNTER_TEXT_COLOR)
             .maxLength(3)
             .padding(0)
-            .backgroundColor(this.hasFocusText2? CounterResource.BUTTON_BORDER_FOCUSED_COLOR : Color.Transparent)
+            .backgroundColor(this.hasFocusText2 ? CounterResource.BUTTON_BORDER_FOCUSED_COLOR : Color.Transparent)
             .width('19vp')
             .height('20vp')
             .borderRadius(0)
@@ -2000,7 +2000,7 @@ export struct CounterComponent {
             .fontColor(CounterResource.COUNTER_TEXT_COLOR)
             .width('8vp')
           TextInput({
-              text: this.hasInputText3? this.inputDay.toString(): this.convertNumberToString(this.day),
+              text: this.hasInputText3 ? this.inputDay.toString(): this.convertNumberToString(this.day),
               controller: this.controller3
             })
             .type(InputType.Number)
@@ -2008,10 +2008,10 @@ export struct CounterComponent {
             .copyOption(CopyOptions.None)
             .fontSize(CounterResource.COUNTER_NUMBER_SIZE)
             .fontWeight(FontWeight.Medium)
-            .fontColor(this.hasFocusText3? Color.White : CounterResource.COUNTER_TEXT_COLOR)
+            .fontColor(this.hasFocusText3 ? Color.White : CounterResource.COUNTER_TEXT_COLOR)
             .maxLength(3)
             .padding(0)
-            .backgroundColor(this.hasFocusText3? CounterResource.BUTTON_BORDER_FOCUSED_COLOR : Color.Transparent)
+            .backgroundColor(this.hasFocusText3 ? CounterResource.BUTTON_BORDER_FOCUSED_COLOR : Color.Transparent)
             .width('19vp')
             .height('20vp')
             .borderRadius(0)

@@ -605,6 +605,18 @@ RefPtr<Subwindow> SubwindowManager::GetOrCreateSubWindow(bool isDialog)
     return subwindow;
 }
 
+RefPtr<Subwindow> SubwindowManager::GetOrCreateSystemSubWindow()
+{
+    auto containerId = Container::CurrentId();
+    auto subwindow = GetSystemToastWindow();
+    if (!subwindow) {
+        subwindow = Subwindow::CreateSubwindow(containerId);
+        CHECK_NULL_RETURN(subwindow, nullptr);
+        SetSystemToastWindow(subwindow);
+    }
+    return subwindow;
+}
+
 void SubwindowManager::ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
     const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset)
 {
@@ -612,7 +624,8 @@ void SubwindowManager::ShowToast(const std::string& message, int32_t duration, c
     auto containerId = Container::CurrentId();
     // for pa service
     if (containerId >= MIN_PA_SERVICE_ID || containerId < 0) {
-        auto subwindow = GetOrCreateSubWindow();
+        auto subwindow =
+            showMode == NG::ToastShowMode::SYSTEM_TOP_MOST ? GetOrCreateSystemSubWindow() : GetOrCreateSubWindow();
         CHECK_NULL_VOID(subwindow);
         TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "before show toast");
         subwindow->ShowToast(message, duration, bottom, showMode, alignment, offset);
@@ -624,18 +637,32 @@ void SubwindowManager::ShowToast(const std::string& message, int32_t duration, c
             [containerId, message, duration, bottom, showMode, alignment, offset] {
                 auto manager = SubwindowManager::GetInstance();
                 CHECK_NULL_VOID(manager);
-                auto subwindow = manager->GetSubwindow(containerId);
-                if (!subwindow) {
-                    subwindow = Subwindow::CreateSubwindow(containerId);
-                    subwindow->SetAboveApps(showMode == NG::ToastShowMode::TOP_MOST);
-                    subwindow->InitContainer();
-                    manager->AddSubwindow(containerId, subwindow);
-                }
+                auto subwindow = manager->GetOrCreateToastWindow(containerId, showMode);
+                CHECK_NULL_VOID(subwindow);
                 TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "before show toast : %{public}d", containerId);
                 subwindow->ShowToast(message, duration, bottom, showMode, alignment, offset);
             },
             TaskExecutor::TaskType::PLATFORM, "ArkUISubwindowShowToast");
     }
+}
+
+RefPtr<Subwindow> SubwindowManager::GetOrCreateToastWindow(int32_t containerId, const NG::ToastShowMode& showMode)
+{
+    auto isSystemTopMost = (showMode == NG::ToastShowMode::SYSTEM_TOP_MOST);
+    auto subwindow = isSystemTopMost ? GetSystemToastWindow() : GetSubwindow(containerId);
+    if (!subwindow) {
+        subwindow = Subwindow::CreateSubwindow(containerId);
+        subwindow->SetIsSystemTopMost(isSystemTopMost);
+        subwindow->SetAboveApps(showMode == NG::ToastShowMode::TOP_MOST);
+        subwindow->InitContainer();
+        if (isSystemTopMost) {
+            SetSystemToastWindow(subwindow);
+        } else {
+            AddSubwindow(containerId, subwindow);
+        }
+    }
+
+    return subwindow;
 }
 
 void SubwindowManager::ClearToastInSubwindow()
@@ -880,5 +907,11 @@ void SubwindowManager::MarkDirtyDialogSafeArea()
     auto subwindow = manager->GetSubwindow(containerId);
     CHECK_NULL_VOID(subwindow);
     subwindow->MarkDirtyDialogSafeArea();
+}
+
+void SubwindowManager::HideSystemTopMostWindow()
+{
+    CHECK_NULL_VOID(systemToastWindow_);
+    systemToastWindow_->HideSubWindowNG();
 }
 } // namespace OHOS::Ace

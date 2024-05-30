@@ -777,9 +777,10 @@ RefPtr<FrameNode> TextClockPattern::BuildContentModifierNode()
 
 void TextClockPattern::DumpInfo()
 {
-    DumpLog::GetInstance().AddDesc(std::string("hourWest: ").append(std::to_string(hourWest_)));
-    DumpLog::GetInstance().AddDesc(std::string("is24H: ").append(std::to_string(is24H_)));
-    DumpLog::GetInstance().AddDesc(std::string("isInVisibleArea: ").append(std::to_string(isInVisibleArea_)));
-    DumpLog::GetInstance().AddDesc(std::string("isStart: ").append(std::to_string(isStart_)));
+    DumpLog::GetInstance().AddDesc("format: ", GetFormat());
+    DumpLog::GetInstance().AddDesc("hourWest: ", hourWest_);
+    DumpLog::GetInstance().AddDesc("is24H: ", is24H_ ? "true" : "false");
+    DumpLog::GetInstance().AddDesc("isInVisibleArea: ", isInVisibleArea_ ? "true" : "false");
+    DumpLog::GetInstance().AddDesc("isStart: ", isStart_ ? "true" : "false");
 }
 } // namespace OHOS::Ace::NG

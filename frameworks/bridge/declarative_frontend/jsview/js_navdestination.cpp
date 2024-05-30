@@ -80,7 +80,7 @@ void JSNavDestination::Create()
 
 void JSNavDestination::Create(const JSCallbackInfo& info)
 {
-    if (info.Length() <= 0 && !info[0]->IsFunction()) {
+    if (info.Length() <= 0) {
         NavDestinationModel::GetInstance()->Create();
         return;
     }
@@ -99,19 +99,21 @@ void JSNavDestination::Create(const JSCallbackInfo& info)
             ctx->SetNavPathInfo(navPathInfo);
             NavDestinationModel::GetInstance()->Create(std::move(builderFunc), std::move(ctx));
             return;
-        }
-        if (!info[0]->IsObject()) {
-            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "current input info is neither buildFunction or navDestination usefulInfo");
-        }
-        auto infoObj = JSRef<JSObject>::Cast(info[0]);
-        if (!infoObj->GetProperty("moduleName")->IsString() || !infoObj->GetProperty("pagePath")->IsString()) {
-            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "navDestination current pageInfo is invalid");
+        } else if (info[0]->IsObject()) {
+            auto infoObj = JSRef<JSObject>::Cast(info[0]);
+            if (!infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->IsString() ||
+                !infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->IsString()) {
+                TAG_LOGE(AceLogTag::ACE_NAVIGATION, "navDestination current pageInfo is invalid");
+                return;
+            }
+            moduleName = infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->ToString();
+            pagePath = infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->ToString();
+            NavDestinationModel::GetInstance()->Create();
+            NavDestinationModel::GetInstance()->SetNavDestinationPathInfo(moduleName, pagePath);
             return;
         }
-        moduleName = infoObj->GetProperty("moduleName")->ToString();
-        pagePath = infoObj->GetProperty("pagePath")->ToString();
-        NavDestinationModel::GetInstance()->Create();
-        NavDestinationModel::GetInstance()->SetNavDestinationPageInfo(moduleName, pagePath);
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION,
+            "current input info is neither buildFunction or navDestination usefulInfo");
         return;
     }
     if (!info[0]->IsFunction() || !info[1]->IsObject()) {
@@ -128,14 +130,15 @@ void JSNavDestination::Create(const JSCallbackInfo& info)
     ctx->SetNavPathInfo(navPathInfo);
     
     auto infoObj = JSRef<JSObject>::Cast(info[1]);
-    if (!infoObj->GetProperty("moduleName")->IsString() || !infoObj->GetProperty("pagePath")->IsString()) {
+    if (!infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->IsString() ||
+        !infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->IsString()) {
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "navDestination current pageInfo is invalid");
         return;
     }
-    moduleName = infoObj->GetProperty("moduleName")->ToString();
-    pagePath = infoObj->GetProperty("pagePath")->ToString();
+    moduleName = infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->ToString();
+    pagePath = infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->ToString();
     NavDestinationModel::GetInstance()->Create(std::move(builderFunc), std::move(ctx));
-    NavDestinationModel::GetInstance()->SetNavDestinationPageInfo(moduleName, pagePath);
+    NavDestinationModel::GetInstance()->SetNavDestinationPathInfo(moduleName, pagePath);
 }
 
 void JSNavDestination::SetHideTitleBar(bool hide)

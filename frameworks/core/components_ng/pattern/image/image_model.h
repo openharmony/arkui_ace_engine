@@ -33,11 +33,24 @@
 
 namespace OHOS::Ace {
 struct ImageInfoConfig {
-    std::string src;
+    std::shared_ptr<std::string> src;
     std::string bundleName;
     std::string moduleName;
     bool isUriPureNumber = false;
     bool isImageSpan = false;
+
+    ImageInfoConfig() {}
+
+    ImageInfoConfig(
+        const std::shared_ptr<std::string>& src_, const std::string& bundleName_, const std::string& moduleName_)
+        : src(src_), bundleName(bundleName_), moduleName(moduleName_)
+    {}
+
+    ImageInfoConfig(const std::shared_ptr<std::string>& src_, const std::string& bundleName_,
+        const std::string& moduleName_, bool isUriPureNumber_, bool isImageSpan_)
+        : src(src_), bundleName(bundleName_), moduleName(moduleName_), isUriPureNumber(isUriPureNumber_),
+          isImageSpan(isImageSpan_)
+    {}
 };
 class ImageModel {
 public:

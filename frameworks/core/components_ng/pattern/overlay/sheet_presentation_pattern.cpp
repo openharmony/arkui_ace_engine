@@ -72,14 +72,13 @@ void SheetPresentationPattern::OnModifyDone()
         scale_ = pipeline->GetFontScale();
         auto sheetTheme = pipeline->GetTheme<SheetTheme>();
         CHECK_NULL_VOID(sheetTheme);
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-            BlurStyle blurStyle = static_cast<BlurStyle>(sheetTheme->GetSheetBackgroundBlurStyle());
-            if (blurStyle != BlurStyle::NO_MATERIAL) {
-                BlurStyleOption options;
-                options.blurStyle = blurStyle;
-                renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-                renderContext->UpdateBackBlurStyle(options);
-            }
+        BlurStyle blurStyle = static_cast<BlurStyle>(sheetTheme->GetSheetBackgroundBlurStyle());
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
+            && blurStyle != BlurStyle::NO_MATERIAL) {
+            BlurStyleOption options;
+            options.blurStyle = blurStyle;
+            renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+            renderContext->UpdateBackBlurStyle(options);
         } else {
             renderContext->UpdateBackgroundColor(sheetTheme->GetSheetBackgoundColor());
         }
@@ -1797,7 +1796,7 @@ ScrollResult SheetPresentationPattern::HandleScroll(float scrollOffset, int32_t 
             return HandleScrollWithSheet(scrollOffset);
         }
         if (isSheetPosChanged_) {
-            HandleDragEnd(SHEET_VELOCITY_THRESHOLD);
+            HandleDragEnd(scrollOffset > 0 ? SHEET_VELOCITY_THRESHOLD : -SHEET_VELOCITY_THRESHOLD);
             isSheetPosChanged_ = false;
         }
     } else if (state == NestedState::CHILD_OVER_SCROLL) {

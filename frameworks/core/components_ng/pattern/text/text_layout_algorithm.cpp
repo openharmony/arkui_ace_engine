@@ -444,7 +444,11 @@ bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::stri
         if (!DidExceedMaxLines(maxSize)) {
             break;
         }
+        bool isEqual = maxFontSize == minFontSize;
         maxFontSize -= stepSize;
+        if (LessNotEqual(maxFontSize, minFontSize) && !isEqual) {
+            maxFontSize = minFontSize;
+        }
     }
     return true;
 }

@@ -217,14 +217,16 @@ void ButtonPattern::HandleFocusStyleTask(RefPtr<ButtonLayoutProperty> layoutProp
             textLayoutProperty->GetTextColor() == buttonTheme->GetTextColor(buttonStyle, buttonRole);
         if (focusTextColorModify_) {
             textLayoutProperty->UpdateTextColor(buttonTheme->GetFocusTextColor(buttonStyle, buttonRole));
-            textNode->MarkDirtyNode();
+            auto textRenderContext = textNode->GetRenderContext();
+            CHECK_NULL_VOID(textRenderContext);
+            textRenderContext->UpdateForegroundColor(buttonTheme->GetFocusTextColor(buttonStyle, buttonRole));
         }
     }
     isFocus_ = true;
     if (isTextFadeOut_) {
         textLayoutProperty->UpdateTextMarqueeStart(true);
-        textNode->MarkDirtyNode();
     }
+    textNode->MarkDirtyNode();
 }
 
 void ButtonPattern::HandleBlurStyleTask(RefPtr<ButtonLayoutProperty> layoutProperty,
@@ -251,7 +253,10 @@ void ButtonPattern::HandleBlurStyleTask(RefPtr<ButtonLayoutProperty> layoutPrope
     if (buttonStyle != ButtonStyleMode::EMPHASIZE && focusTextColorModify_) {
         focusTextColorModify_ = false;
         textLayoutProperty->UpdateTextColor(buttonTheme->GetTextColor(buttonStyle, buttonRole));
-        textNode->MarkDirtyNode();
+        auto textRenderContext = textNode->GetRenderContext();
+        CHECK_NULL_VOID(textRenderContext);
+        textRenderContext->UpdateForegroundColor(buttonTheme->GetTextColor(buttonStyle, buttonRole));
+        textNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
     isFocus_ = false;
     if (isTextFadeOut_) {

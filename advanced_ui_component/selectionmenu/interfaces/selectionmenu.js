@@ -373,7 +373,7 @@ class SelectionMenuComponent extends ViewPU {
         return this.editorMenuOptions && this.editorMenuOptions.length < 5 ?
             (this.theme.defaultMenuWidth - 2 * this.theme.expandedOptionPadding - 2 *
                 this.theme.editorOptionMargin * this.editorMenuOptions.length) / this.editorMenuOptions.length :
-                    this.theme.buttonSize
+                    this.theme.buttonSize;
     }
 
     IconPanel(e = null) {

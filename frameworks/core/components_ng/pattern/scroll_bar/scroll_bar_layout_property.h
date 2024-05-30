@@ -50,6 +50,10 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         LayoutProperty::ToJsonValue(json, filter);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         std::unordered_map<Axis, std::string> directionMap = {
             { Axis::VERTICAL, "ScrollBarDirection.Vertical" },
             { Axis::HORIZONTAL, "ScrollBarDirection.Horizontal" }

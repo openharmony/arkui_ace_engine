@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
 #include <cstdint>
+#include <memory>
 #include <vector>
 #include "base/utils/utils.h"
 
@@ -54,15 +55,15 @@ namespace {
 namespace OHOS::Ace {
 
 namespace {
-ImageSourceInfo CreateSourceInfo(const std::string &src, RefPtr<PixelMap> &pixmap, const std::string &bundleName,
-    const std::string &moduleName)
+ImageSourceInfo CreateSourceInfo(const std::shared_ptr<std::string>& srcRef, RefPtr<PixelMap>& pixmap,
+    const std::string& bundleName, const std::string& moduleName)
 {
 #if defined(PIXEL_MAP_SUPPORTED)
     if (pixmap) {
         return ImageSourceInfo(pixmap);
     }
 #endif
-    return { src, bundleName, moduleName };
+    return { srcRef, bundleName, moduleName };
 }
 } // namespace
 
@@ -158,7 +159,8 @@ void JSImage::SetAlt(const JSCallbackInfo& args)
         pixmap = CreatePixelMapFromNapiValue(args[0]);
 #endif
     }
-    auto srcInfo = CreateSourceInfo(src, pixmap, bundleName, moduleName);
+    auto srcRef = std::make_shared<std::string>(src);
+    auto srcInfo = CreateSourceInfo(srcRef, pixmap, bundleName, moduleName);
     srcInfo.SetIsUriPureNumber((resId == -1));
     ImageModel::GetInstance()->SetAlt(srcInfo);
 }
@@ -305,12 +307,9 @@ void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
         }
 #endif
     }
-    ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = src;
-    imageInfoConfig.bundleName = bundleName;
-    imageInfoConfig.moduleName = moduleName;
-    imageInfoConfig.isUriPureNumber = (resId == -1);
-    imageInfoConfig.isImageSpan = isImageSpan;
+    ImageInfoConfig imageInfoConfig(
+        std::make_shared<std::string>(src), bundleName, moduleName, (resId == -1), isImageSpan
+    );
     ImageModel::GetInstance()->Create(imageInfoConfig, pixmap);
 }
 
@@ -352,11 +351,23 @@ void JSImage::JsImageResizable(const JSCallbackInfo& info)
         return;
     }
     auto sliceValue = resizableObject->GetProperty("slice");
+    if (!sliceValue->IsObject()) {
+        ImageModel::GetInstance()->SetResizableSlice(sliceResult);
+        return;
+    }
     JSRef<JSObject> sliceObj = JSRef<JSObject>::Cast(sliceValue);
     if (sliceObj->IsEmpty()) {
         ImageModel::GetInstance()->SetResizableSlice(sliceResult);
         return;
     }
+    UpdateSliceResult(sliceObj, sliceResult);
+
+    ImageModel::GetInstance()->SetResizableSlice(sliceResult);
+}
+
+void JSImage::UpdateSliceResult(const JSRef<JSObject>& sliceObj, ImageResizableSlice& sliceResult)
+{
+    // creatge a array has 4 elements for paresing sliceSize
     static std::array<std::string, 4> keys = { "left", "right", "top", "bottom" };
     for (uint32_t i = 0; i < keys.size(); i++) {
         auto sliceSize = sliceObj->GetProperty(keys.at(i).c_str());

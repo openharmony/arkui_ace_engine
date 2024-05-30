@@ -104,6 +104,11 @@ void MenuModelNG::SetFontFamily(const std::vector<std::string>& families)
     ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, FontFamily, families);
 }
 
+void MenuModelNG::ResetFontFamily()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(MenuLayoutProperty, FontFamily, PROPERTY_UPDATE_MEASURE);
+}
+
 void MenuModelNG::SetExpandingMode(const SubMenuExpandingMode& expandingMode)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, ExpandingMode, expandingMode);

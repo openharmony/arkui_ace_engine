@@ -55,6 +55,7 @@ constexpr Dimension FULLSCREEN = 100.0_pct;
 constexpr Dimension MULTIPLE_DIALOG_OFFSET_X = 48.0_vp;
 constexpr Dimension MULTIPLE_DIALOG_OFFSET_Y = 48.0_vp;
 constexpr Dimension SUBWINDOW_DIALOG_DEFAULT_WIDTH = 400.0_vp;
+constexpr Dimension AVOID_LIMIT_PADDING = 8.0_vp;
 constexpr double EXPAND_DISPLAY_WINDOW_HEIGHT_RATIO = 0.67;
 constexpr double EXPAND_DISPLAY_DIALOG_HEIGHT_RATIO = 0.9;
 constexpr double HALF = 2.0;
@@ -487,6 +488,19 @@ void DialogLayoutAlgorithm::ProcessMaskRect(
     gestureHub->SetResponseRegion(mouseResponseRegion);
 }
 
+std::optional<DimensionRect> DialogLayoutAlgorithm::GetMaskRect(const RefPtr<FrameNode>& dialog)
+{
+    std::optional<DimensionRect> maskRect;
+    auto dialogPattern = dialog->GetPattern<DialogPattern>();
+    CHECK_NULL_RETURN(dialogPattern, maskRect);
+    maskRect = dialogPattern->GetDialogProperties().maskRect;
+    if (isUIExtensionSubWindow_ && hostWindowRect_.GetSize().IsPositive()) {
+        auto offset = DimensionOffset(Dimension(hostWindowRect_.GetX()), Dimension(hostWindowRect_.GetY()));
+        maskRect = DimensionRect(Dimension(hostWindowRect_.Width()), Dimension(hostWindowRect_.Height()), offset);
+    }
+    return maskRect;
+}
+
 void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     subWindowId_ = SubwindowManager::GetInstance()->GetDialogSubWindowId();
@@ -507,15 +521,12 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto dialogPattern = frameNode->GetPattern<DialogPattern>();
     CHECK_NULL_VOID(dialogPattern);
     if (isModal_ && dialogPattern->GetDialogProperties().maskRect.has_value()) {
-        std::optional<DimensionRect> maskRect = dialogPattern->GetDialogProperties().maskRect;
-        if (isUIExtensionSubWindow_ && hostWindowRect_.GetSize().IsPositive()) {
-            auto offset = DimensionOffset(Dimension(hostWindowRect_.GetX()), Dimension(hostWindowRect_.GetY()));
-            maskRect = DimensionRect(Dimension(hostWindowRect_.Width()), Dimension(hostWindowRect_.Height()), offset);
-        }
+        std::optional<DimensionRect> maskRect = GetMaskRect(frameNode);
         ProcessMaskRect(maskRect, frameNode, true);
     }
     auto child = children.front();
     auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
+    dialogChildSize_ = childSize;
     // is PcDevice MultipleDialog Offset to the bottom right
     if (dialogTheme->GetMultipleDialogDisplay() != "stack" && !dialogProp->GetIsModal().value_or(true) &&
         dialogProp->GetShowInSubWindowValue(false)) {
@@ -535,8 +546,30 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             frameNode);
     }
     child->GetGeometryNode()->SetMarginFrameOffset(topLeftPoint_);
+    AdjustHeightForKeyboard(layoutWrapper, child, childSize);
     child->Layout();
     SetSubWindowHotarea(dialogProp, childSize, selfSize, frameNode->GetId());
+}
+
+void DialogLayoutAlgorithm::AdjustHeightForKeyboard(
+    LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& child, const SizeF& childSize)
+{
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE) || !child || !resizeFlag_) {
+        return;
+    }
+    auto childConstraint =
+        CreateDialogChildConstraint(layoutWrapper, dialogChildSize_.Height(), dialogChildSize_.Width());
+    child->Measure(childConstraint);
+    if (child->GetHostTag() == V2::SCROLL_ETS_TAG) {
+        for (const auto& grandson : child->GetAllChildrenWithBuild()) {
+            CHECK_NULL_VOID(grandson);
+            if (grandson->GetHostTag() == V2::COLUMN_ETS_TAG) {
+                auto grandsonConstraint =
+                    CreateDialogChildConstraint(layoutWrapper, childSize.Height(), childSize.Width());
+                grandson->Measure(grandsonConstraint);
+            }
+        }
+    }
 }
 
 void DialogLayoutAlgorithm::SetSubWindowHotarea(
@@ -755,7 +788,7 @@ double DialogLayoutAlgorithm::GetPaddingBottom() const
 }
 
 OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
-    OffsetF& topLeftPoint, const OffsetF& dialogOffset, const SizeF& childSize, bool needAvoidKeyboard) const
+    OffsetF& topLeftPoint, const OffsetF& dialogOffset, const SizeF& childSize, bool needAvoidKeyboard)
 {
     auto container = Container::Current();
     auto currentId = Container::CurrentId();
@@ -778,7 +811,16 @@ OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
     auto childBottom = childOffset.GetY() + childSize.Height();
     auto paddingBottom = static_cast<float>(GetPaddingBottom());
     if (needAvoidKeyboard && keyboardInsert.Length() > 0 && childBottom > (keyboardInsert.start - paddingBottom)) {
+        auto limitPos = std::min(childOffset.GetY(),
+            static_cast<float>(safeAreaInsets_.top_.Length() + AVOID_LIMIT_PADDING.ConvertToPx()));
         childOffset.SetY(childOffset.GetY() - (childBottom - (keyboardInsert.start - paddingBottom)));
+
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && childOffset.GetY() < limitPos) {
+            resizeFlag_ = true;
+            dialogChildSize_ = childSize;
+            dialogChildSize_.MinusHeight(limitPos - childOffset.GetY());
+            childOffset.SetY(limitPos);
+        }
     }
     return childOffset;
 }

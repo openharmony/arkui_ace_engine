@@ -21,6 +21,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
@@ -621,7 +622,12 @@ bool ContainerModalPattern::GetContainerModalButtonsRect(RectF& containerModal, 
     }
 
     auto widthByPx = (TITLE_PADDING_START + TITLE_PADDING_END).ConvertToPx() + buttons.Width();
-    buttons.SetLeft(containerModal.Width() - widthByPx);
+    auto isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (isRtl) {
+        buttons.SetLeft(0);
+    } else {
+        buttons.SetLeft(containerModal.Width() - widthByPx);
+    }
     buttons.SetTop(0);
     buttons.SetWidth(widthByPx);
     buttons.SetHeight(titleHeight_.ConvertToPx());
@@ -712,6 +718,7 @@ void ContainerModalPattern::InitLayoutProperty()
 
     InitTitleRowLayoutProperty(GetCustomTitleRow());
     InitTitleRowLayoutProperty(GetFloatingTitleRow());
+    InitButtonsLayoutProperty();
 
     containerModal->MarkModifyDone();
 }
@@ -725,7 +732,10 @@ void ContainerModalPattern::InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRo
         CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(CONTAINER_TITLE_HEIGHT)));
     titleRowProperty->UpdateMainAxisAlign(FlexAlign::FLEX_START);
     titleRowProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
-    PaddingProperty padding { std::nullopt, GetControlButtonRowWidth(), std::nullopt, std::nullopt };
+    auto isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    PaddingProperty padding;
+    auto sidePadding = isRtl ? &padding.left : & padding.right;
+    *sidePadding = GetControlButtonRowWidth();
     titleRowProperty->UpdatePadding(padding);
 }
 
@@ -758,6 +768,37 @@ void ContainerModalPattern::InitColumnTouchTestFunc()
         return defaultRes;
     };
     eventHub->SetOnTouchTestFunc(func);
+}
+
+void ContainerModalPattern::InitButtonsLayoutProperty()
+{
+    auto buttonsRow = GetControlButtonRow();
+    CHECK_NULL_VOID(buttonsRow);
+    auto isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    auto buttons = buttonsRow->GetChildren();
+    for (uint64_t index = 0; index < buttons.size(); index++) {
+        auto space = (index == CLOSE_BUTTON_INDEX) ? TITLE_PADDING_END : TITLE_ELEMENT_MARGIN_HORIZONTAL;
+        MarginProperty margin;
+        if (isRtl) {
+            margin.left = CalcLength(space);
+            margin.right = CalcLength();
+        } else {
+            margin.left = CalcLength();
+            margin.right = CalcLength(space);
+        }
+        auto button = AceType::DynamicCast<FrameNode>(buttonsRow->GetChildAtIndex(index));
+        CHECK_NULL_VOID(button);
+        auto layoutProp = button->GetLayoutProperty<ButtonLayoutProperty>();
+        layoutProp->UpdateMargin(margin);
+        button->MarkModifyDone();
+        button->MarkDirtyNode();
+    }
+}
+
+void ContainerModalPattern::OnLanguageConfigurationUpdate()
+{
+    InitTitle();
+    InitLayoutProperty();
 }
 
 Dimension ContainerModalPattern::GetCustomTitleHeight()

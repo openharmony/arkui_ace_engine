@@ -756,6 +756,7 @@ WebDelegate::~WebDelegate()
     }
     UnregisterSurfacePositionChangedCallback();
     UnregisterAvoidAreaChangeListener();
+    UnRegisterConfigObserver();
 }
 
 void WebDelegate::ReleasePlatformResource()
@@ -1329,6 +1330,10 @@ bool WebDelegate::RequestFocus(OHOS::NWeb::NWebFocusSource source)
             if (Container::IsCurrentUseNewPipeline()) {
                 auto webPattern = delegate->webPattern_.Upgrade();
                 CHECK_NULL_VOID(webPattern);
+                if (webPattern->IsFocus()) {
+                    result = true;
+                    return;
+                }
                 auto eventHub = webPattern->GetWebEventHub();
                 CHECK_NULL_VOID(eventHub);
                 auto focusHub = eventHub->GetOrCreateFocusHub();
@@ -1832,6 +1837,8 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
         onViewportFitChangedV2_ = useNewPipe ? eventHub->GetOnViewportFitChangedEvent()
                                        : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                            webCom->GetViewportFitChangedId(), oldContext);
+        onInterceptKeyboardAttachV2_ = useNewPipe ? eventHub->GetOnInterceptKeyboardAttachEvent()
+                                                  : nullptr;
     }
     return true;
 }
@@ -2855,6 +2862,7 @@ void WebDelegate::InitWebViewWithSurface()
             delegate->RegisterAvoidAreaChangeListener();
             delegate->nweb_->SetDrawMode(renderMode);
             delegate->nweb_->SetDrawMode(layoutMode);
+            delegate->RegisterConfigObserver();
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebInitWebViewWithSurface");
 }
@@ -3136,6 +3144,7 @@ void WebDelegate::UpdateCacheMode(const WebCacheMode& mode)
     if (!context) {
         return;
     }
+
     context->GetTaskExecutor()->PostTask(
         [weak = WeakClaim(this), mode]() {
             auto delegate = weak.Upgrade();
@@ -3164,6 +3173,8 @@ void WebDelegate::UpdateDarkMode(const WebDarkMode& mode)
     if (!context) {
         return;
     }
+
+    current_dark_mode_ = mode;
     context->GetTaskExecutor()->PostTask(
         [weak = WeakClaim(this), mode]() {
             auto delegate = weak.Upgrade();
@@ -3171,21 +3182,16 @@ void WebDelegate::UpdateDarkMode(const WebDarkMode& mode)
             CHECK_NULL_VOID(delegate->nweb_);
             std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
             CHECK_NULL_VOID(setting);
+
             if (mode == WebDarkMode::On) {
-                delegate->UnRegisterConfigObserver();
                 setting->PutDarkSchemeEnabled(true);
                 if (delegate->forceDarkMode_) {
                     setting->PutForceDarkModeEnabled(true);
                 }
-                return;
-            }
-            if (mode == WebDarkMode::Off) {
-                delegate->UnRegisterConfigObserver();
+            } else if (mode == WebDarkMode::Off) {
                 setting->PutDarkSchemeEnabled(false);
                 setting->PutForceDarkModeEnabled(false);
-                return;
-            }
-            if (mode == WebDarkMode::Auto) {
+            } else if (mode == WebDarkMode::Auto) {
                 delegate->UpdateDarkModeAuto(delegate, setting);
             }
         },
@@ -3212,7 +3218,6 @@ void WebDelegate::UpdateDarkModeAuto(RefPtr<WebDelegate> delegate, std::shared_p
         setting->PutDarkSchemeEnabled(false);
         setting->PutForceDarkModeEnabled(false);
     }
-    delegate->RegisterConfigObserver();
 }
 
 void WebDelegate::UpdateForceDarkAccess(const bool& access)
@@ -3566,7 +3571,7 @@ void WebDelegate::UpdateDefaultFixedFontSize(int32_t defaultFixedFontSize)
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateDefaultFixedFontSize");
 }
 
-void WebDelegate::OnConfigurationUpdated(const std::string& colorMode)
+void WebDelegate::OnConfigurationUpdated(const OHOS::AppExecFwk::Configuration& configuration)
 {
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
@@ -3574,23 +3579,37 @@ void WebDelegate::OnConfigurationUpdated(const std::string& colorMode)
     auto executor = context->GetTaskExecutor();
     CHECK_NULL_VOID(executor);
 
+    std::string colorMode = configuration.GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    std::string themeTag = configuration.GetItem(OHOS::AAFwk::GlobalConfigurationKey::THEME);
+    uint8_t themeFlags = static_cast<uint8_t>(OHOS::NWeb::SystemThemeFlags::NONE);
+    if (!themeTag.empty()) {
+        std::unique_ptr<JsonValue> json = JsonUtil::ParseJsonString(themeTag);
+        if (json->GetInt("fonts")) {
+            themeFlags |= static_cast<uint8_t>(OHOS::NWeb::SystemThemeFlags::THEME_FONT);
+            TAG_LOGI(AceLogTag::ACE_WEB, "OnConfigurationUpdated fonts:%{public}s", themeTag.c_str());
+        }
+    }
+
     executor->PostTask(
-        [weak = WeakClaim(this), colorMode]() {
+        [weak = WeakClaim(this), colorMode, themeFlags, dark_mode = current_dark_mode_]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             auto nweb = delegate->GetNweb();
             CHECK_NULL_VOID(nweb);
+
+            std::shared_ptr<NWebSystemConfigurationImpl> configuration =
+                    std::make_shared<NWebSystemConfigurationImpl>(themeFlags);
+            nweb->OnConfigurationUpdated(configuration);
+
             auto setting = nweb->GetPreference();
             CHECK_NULL_VOID(setting);
-
-            if (colorMode == "dark") {
+            bool auto_dark_mode = (dark_mode == WebDarkMode::Auto);
+            if (auto_dark_mode && colorMode == "dark") {
                 setting->PutDarkSchemeEnabled(true);
                 if (delegate->GetForceDarkMode()) {
                     setting->PutForceDarkModeEnabled(true);
                 }
-                return;
-            }
-            if (colorMode == "light") {
+            } else if (auto_dark_mode && colorMode == "light") {
                 setting->PutDarkSchemeEnabled(false);
                 setting->PutForceDarkModeEnabled(false);
             }
@@ -5495,11 +5514,11 @@ void WebDelegate::OnMouseEvent(int32_t x, int32_t y, const MouseButton button, c
     }
 }
 
-void WebDelegate::OnFocus()
+void WebDelegate::OnFocus(const OHOS::NWeb::FocusReason& reason)
 {
     ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
-        nweb_->OnFocus(OHOS::NWeb::FocusReason::EVENT_REQUEST);
+        nweb_->OnFocus(reason);
     }
 }
 
@@ -5834,7 +5853,7 @@ void WebDelegate::SetSurface(const sptr<Surface>& surface)
     CHECK_NULL_VOID(rosenRenderContext);
     rsNode_ = rosenRenderContext->GetRSNode();
     CHECK_NULL_VOID(rsNode_);
-    surfaceNodeId_ = rsNode_->GetId();
+    surfaceNodeId_ = rsNode_->GetId() + 1;
 }
 #endif
 
@@ -6650,6 +6669,49 @@ void WebDelegate::OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHO
     if (changed) {
         OnSafeInsetsChange();
     }
+}
+
+void WebDelegate::OnInterceptKeyboardAttach(
+    const std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler,
+    const std::map<std::string, std::string> &attributes, bool &useSystemKeyboard, int32_t &enterKeyType)
+{
+    CHECK_NULL_VOID(onInterceptKeyboardAttachV2_);
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    WebKeyboardOption keyboardOpt;
+    std::function<void()> buildFunc = nullptr;
+    context->GetTaskExecutor()->PostSyncTask(
+        [weak = WeakClaim(this), &keyboardHandler, &attributes, &keyboardOpt]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto onInterceptKeyboardAttachV2_ = delegate->onInterceptKeyboardAttachV2_;
+            if (onInterceptKeyboardAttachV2_) {
+                auto param = AceType::MakeRefPtr<WebCustomKeyboardHandlerOhos>(keyboardHandler);
+                keyboardOpt = onInterceptKeyboardAttachV2_(std::make_shared<InterceptKeyboardEvent>(param, attributes));
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebHandleInterceptKeyboardAttach");
+
+    useSystemKeyboard = keyboardOpt.isSystemKeyboard_;
+    enterKeyType = keyboardOpt.enterKeyTpye_;
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->SetCustomKeyboardBuilder(keyboardOpt.customKeyboardBuilder_);
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebCustomKeyboard OnInterceptKeyboardAttach sync task end");
+}
+
+void WebDelegate::OnCustomKeyboardAttach()
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->AttachCustomKeyboard();
+}
+
+void WebDelegate::OnCustomKeyboardClose()
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->CloseCustomKeyboard();
 }
 
 void WebDelegate::OnSafeInsetsChange()

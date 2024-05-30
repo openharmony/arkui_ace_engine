@@ -208,7 +208,9 @@ void NavigationGroupNode::RemoveRedundantNavDestination(
     RefPtr<FrameNode>& navigationContentNode, const RefPtr<UINode>& remainChild, size_t slot, bool& hasChanged)
 {
     auto pattern = GetPattern<NavigationPattern>();
-    while (slot + hideNodes_.size() < navigationContentNode->GetChildren().size()) {
+    // record remove destination size
+    int32_t removeSize = 0;
+    while (slot + removeSize < navigationContentNode->GetChildren().size()) {
         // delete useless nodes that are not at the top
         auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(navigationContentNode->GetLastChild());
         if (!navDestination) {
@@ -221,40 +223,33 @@ void NavigationGroupNode::RemoveRedundantNavDestination(
             eventHub->FireChangeEvent(false);
         }
         auto uiNode = navDestination->GetPattern<NavDestinationPattern>()->GetCustomNode();
-        if (uiNode != remainChild) {
-            if (navDestination->IsOnAnimation()) {
-                // The NavDestination in the animation needs to be cleaned in the animation onfinish callback.
-                ++slot;
-                continue;
-            }
-            // remove content child
-            auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
-            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "remove child: %{public}s", navDestinationPattern->GetName().c_str());
-            if (navDestination->GetIndex() >= lastStandardIndex_) {
-                hideNodes_.emplace_back(std::make_pair(navDestination, true));
-                navDestination->SetCanReused(false);
-                continue;
-            }
-            if (navDestinationPattern->GetIsOnShow()) {
-                pattern->NotifyDestinationLifecycle(navDestination, NavDestinationLifecycle::ON_WILL_HIDE, true);
-                pattern->NotifyDestinationLifecycle(navDestination, NavDestinationLifecycle::ON_HIDE, true);
-                navDestinationPattern->SetIsOnShow(false);
-            }
-            pattern->NotifyDestinationLifecycle(navDestination, NavDestinationLifecycle::ON_WILL_DISAPPEAR, true);
-            auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
-            if (shallowBuilder) {
-                shallowBuilder->MarkIsExecuteDeepRenderDone(false);
-            }
-            if (navDestination->GetContentNode()) {
-                navDestination->GetContentNode()->Clean();
-            }
-            navigationContentNode->RemoveChild(navDestination, true);
-            hasChanged = true;
-        } else {
+        if (uiNode == remainChild) {
             // remain the last child for pop animation
             navDestination->MovePosition(slot);
             ++slot;
+            continue;
         }
+        if (navDestination->IsOnAnimation()) {
+            // The NavDestination in the animation needs to be cleaned in the animation onfinish callback.
+            ++slot;
+            continue;
+        }
+        // remove content child
+        auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "remove child: %{public}s", navDestinationPattern->GetName().c_str());
+        if (navDestination->GetIndex() >= lastStandardIndex_) {
+            hideNodes_.emplace_back(std::make_pair(navDestination, true));
+            navDestination->SetCanReused(false);
+            removeSize++;
+            auto index = static_cast<int32_t>(slot) + removeSize - 1;
+            // move current destination position to navigation stack size + remove navDestination nodes
+            if (index > 0) {
+                navDestination->MovePosition(index);
+            }
+            continue;
+        }
+        DealRemoveDestination(navDestination);
+        hasChanged = true;
     }
 }
 
@@ -397,25 +392,10 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
     bool isNavBar)
 {
     CHECK_NULL_VOID(preNode);
-    std::string prePageInfo;
-    std::string targetPageInfo;
 
     auto preNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
     CHECK_NULL_VOID(preNavDestination);
     preNavDestination->SetTransitionType(PageTransitionType::EXIT_POP);
-    prePageInfo = preNavDestination->GetNavDestinationPageInfo();
-    if (!curNode) {
-        targetPageInfo = navigationPageInfo_;
-    } else if (isNavBar) {
-        auto curNavigationNode = AceType::DynamicCast<NavigationGroupNode>(curNode);
-        CHECK_NULL_VOID(curNavigationNode);
-        targetPageInfo = curNavigationNode->GetNavigationPageInfo();
-    } else {
-        auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
-        CHECK_NULL_VOID(curNavDestination);
-        targetPageInfo = curNavDestination->GetNavDestinationPageInfo();
-    }
-    ACE_SCOPED_TRACE("Navigation Page from %s to %s", prePageInfo.c_str(), targetPageInfo.c_str());
 
     /* obtain preTitle, preBackIcon and preFrameSize of preNavDestination */
     auto preTitleNode = AceType::DynamicCast<TitleBarNode>(preNavDestination->GetTitleBarNode());
@@ -425,8 +405,9 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
 
     auto preFrameSize = preNode->GetGeometryNode()->GetFrameSize();
     RefPtr<TitleBarNode> curTitleBarNode;
-    GetCurTitleBarNode(curTitleBarNode, curNode, isNavBar);
-    CHECK_NULL_VOID(curTitleBarNode);
+    if (!GetCurTitleBarNode(curTitleBarNode, curNode, isNavBar)) {
+        return;
+    }
 
     /* create animation finish callback */
     CleanPopAnimations();
@@ -564,30 +545,22 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
 {
     CHECK_NULL_VOID(preNode);
     CHECK_NULL_VOID(curNode);
-    std::string prePageInfo;
-    std::string targetPageInfo;
 
     RefPtr<FrameNode> preTitleNode;
     if (isNavBar) {
         auto navBarNode = AceType::DynamicCast<NavBarNode>(preNode);
         navBarNode->SetTransitionType(PageTransitionType::EXIT_PUSH);
-        auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(navBarNode->GetParent());
-        CHECK_NULL_VOID(navigationNode);
-        prePageInfo = navigationNode->GetNavigationPageInfo();
         preTitleNode = navBarNode ? AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode()) : nullptr;
     } else {
         auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
         navDestination->SetTransitionType(PageTransitionType::EXIT_PUSH);
-        prePageInfo = navDestination->GetNavDestinationPageInfo();
         preTitleNode = navDestination ? AceType::DynamicCast<TitleBarNode>(navDestination->GetTitleBarNode()) : nullptr;
     }
-    CHECK_NULL_VOID(preTitleNode); 
+    CHECK_NULL_VOID(preTitleNode);
 
     auto mode = GetNavigationMode();
     auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
     CHECK_NULL_VOID(curNavDestination);
-    targetPageInfo = curNavDestination->GetNavDestinationPageInfo();
-    ACE_SCOPED_TRACE("Navigation Page from %s to %s", prePageInfo.c_str(), targetPageInfo.c_str());
     curNavDestination->SetTransitionType(PageTransitionType::ENTER_PUSH);
     auto curTitleNode = AceType::DynamicCast<TitleBarNode>(curNavDestination->GetTitleBarNode());
     CHECK_NULL_VOID(curTitleNode);
@@ -1035,6 +1008,13 @@ void NavigationGroupNode::FireHideNodeChange(NavDestinationLifecycle lifecycle)
         if (!navDestination) {
             continue;
         }
+        if (lifecycle == NavDestinationLifecycle::ON_WILL_DISAPPEAR) {
+            if (iter->second) {
+                navigationPattern->NotifyDestinationLifecycle(
+                    navDestination, NavDestinationLifecycle::ON_WILL_DISAPPEAR, true);
+            }
+            continue;
+        }
         auto pattern = AceType::DynamicCast<NavDestinationPattern>(navDestination->GetPattern());
         if (!pattern->GetIsOnShow()) {
             continue;
@@ -1045,10 +1025,6 @@ void NavigationGroupNode::FireHideNodeChange(NavDestinationLifecycle lifecycle)
         }
         if (lifecycle == NavDestinationLifecycle::ON_HIDE) {
             navigationPattern->NotifyDestinationLifecycle(navDestination, NavDestinationLifecycle::ON_HIDE, true);
-        }
-        if (iter->second) {
-            navigationPattern->NotifyDestinationLifecycle(
-                navDestination, NavDestinationLifecycle::ON_WILL_DISAPPEAR, true);
         }
     }
 }
@@ -1062,23 +1038,25 @@ float NavigationGroupNode::CheckLanguageDirection()
         return 1.0f;
     }
 }
-void NavigationGroupNode::GetCurTitleBarNode(
+bool NavigationGroupNode::GetCurTitleBarNode(
     RefPtr<TitleBarNode>& curTitleBarNode, const RefPtr<FrameNode>& curNode, bool isNavBar)
 {
     if (curNode) {
         if (isNavBar) {
             auto navBarNode = AceType::DynamicCast<NavBarNode>(curNode);
-            CHECK_NULL_VOID(navBarNode);
+            CHECK_NULL_RETURN(navBarNode, false);
             navBarNode->SetTransitionType(PageTransitionType::ENTER_POP);
             curTitleBarNode = navBarNode ? AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode()) : nullptr;
         } else {
             auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
-            CHECK_NULL_VOID(curNavDestination);
+            CHECK_NULL_RETURN(curNavDestination, false);
             curNavDestination->SetTransitionType(PageTransitionType::ENTER_POP);
             curTitleBarNode =
                 curNavDestination ? AceType::DynamicCast<TitleBarNode>(curNavDestination->GetTitleBarNode()) : nullptr;
         }
+        CHECK_NULL_RETURN(curTitleBarNode, false);
     }
+    return true;
 }
 
 void NavigationGroupNode::RemoveDialogDestination()
@@ -1115,11 +1093,6 @@ void NavigationGroupNode::DealRemoveDestination(const RefPtr<NavDestinationGroup
 {
     // remove content child
     auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
-    if (navDestination->GetIndex() >= lastStandardIndex_) {
-        hideNodes_.emplace_back(std::make_pair(navDestination, true));
-        navDestination->SetCanReused(false);
-        return;
-    }
     auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
     if (navDestinationPattern->GetIsOnShow()) {
         pattern->NotifyDestinationLifecycle(navDestination, NavDestinationLifecycle::ON_WILL_HIDE, true);

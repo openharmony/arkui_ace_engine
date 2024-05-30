@@ -1061,4 +1061,37 @@ HWTEST_F(ProgressTestNg, ProgressPrivacySensitiveTest001, TestSize.Level1)
     EXPECT_EQ(progressPaintProperty->GetIsSensitive().value_or(false), true);
     EXPECT_EQ(textPattern->IsSensitiveEnalbe(), true);
 }
+
+/**
+ * @tc.name: ProgressIsRightToLeftTest001
+ * @tc.desc: Test Progress OnLanguageConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressIsRightToLeftTest001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<ProgressPattern>();
+    EXPECT_FALSE(pattern == nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    EXPECT_FALSE(frameNode == nullptr);
+    pattern->progressModifier_ = AceType::MakeRefPtr<ProgressModifier>();
+    auto modifier = pattern->progressModifier_;
+    EXPECT_FALSE(modifier == nullptr);
+    /**
+     * @tc.steps: step1. set to RightToLeft mode, call OnLanguageConfigurationUpdate, then get current isRightToLeft_.
+     * @tc.expected: check whether the isRightToLeft_ is correct.
+     */
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    pattern->OnLanguageConfigurationUpdate();
+    EXPECT_EQ(modifier->isRightToLeft_->Get(), true);
+
+    /**
+     * @tc.steps: step2. set to LeftToRight mode, call OnLanguageConfigurationUpdate, then get current isRightToLeft_.
+     * @tc.expected: check whether the isRightToLeft_ is correct.
+     */
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+    pattern->OnLanguageConfigurationUpdate();
+    EXPECT_EQ(modifier->isRightToLeft_->Get(), false);
+}
 } // namespace OHOS::Ace::NG

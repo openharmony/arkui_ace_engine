@@ -82,6 +82,7 @@ constexpr Dimension MAX_DIAMETER = 3.5_vp;
 constexpr Dimension MIN_DIAMETER = 1.5_vp;
 constexpr Dimension MIN_ARROWHEAD_DIAMETER = 2.0_vp;
 constexpr Dimension ANIMATION_TEXT_OFFSET = 12.0_vp;
+constexpr float AGING_MIN_SCALE = 1.75f;
 
 void SetResponseRegion(RefPtr<FrameNode>& node)
 {
@@ -211,8 +212,12 @@ RefPtr<FrameNode> BuildButton(const std::string& data, const std::function<void(
     buttonWidth = MeasureTextWidth(textStyle, data);
     // Calculate the width of default option include button padding.
     buttonWidth = buttonWidth + padding.Left().ConvertToPx() + padding.Right().ConvertToPx();
-    buttonLayoutProperty->UpdateUserDefinedIdealSize(
-        { CalcLength(buttonWidth), CalcLength(textOverlayTheme->GetMenuButtonHeight()) });
+    if (GreatOrEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
+        buttonLayoutProperty->UpdateUserDefinedIdealSize({ CalcLength(buttonWidth), std::nullopt });
+    } else {
+        buttonLayoutProperty->UpdateUserDefinedIdealSize(
+            { CalcLength(buttonWidth), CalcLength(textOverlayTheme->GetMenuButtonHeight()) });
+    }
     buttonLayoutProperty->UpdateFlexShrink(0);
     button->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
 
@@ -278,8 +283,12 @@ RefPtr<FrameNode> BuildButton(
     auto buttonLayoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(buttonLayoutProperty, button);
     buttonLayoutProperty->UpdatePadding({ left, right, top, bottom });
-    buttonLayoutProperty->UpdateUserDefinedIdealSize(
-        { CalcLength(contentWidth), CalcLength(textOverlayTheme->GetMenuButtonHeight()) });
+    if (GreatOrEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
+        buttonLayoutProperty->UpdateUserDefinedIdealSize({ CalcLength(contentWidth), std::nullopt });
+    } else {
+        buttonLayoutProperty->UpdateUserDefinedIdealSize(
+            { CalcLength(contentWidth), CalcLength(textOverlayTheme->GetMenuButtonHeight()) });
+    }
     buttonLayoutProperty->UpdateFlexShrink(0);
     button->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     button->GetOrCreateGestureEventHub()->SetUserOnClick([callback, overlayId](GestureEvent& /*info*/) {
@@ -330,6 +339,19 @@ RefPtr<FrameNode> BuildMoreOrBackButton(int32_t overlayId, bool isMoreButton)
         auto right = CalcLength(padding.Right().ConvertToPx());
         auto top = CalcLength(padding.Top().ConvertToPx());
         auto bottom = CalcLength(padding.Bottom().ConvertToPx());
+        if (GreatOrEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
+            auto overlayManager = pipeline->GetSelectOverlayManager();
+            CHECK_NULL_RETURN(overlayManager, button);
+            auto selectOverlay = overlayManager->GetSelectOverlayNode(overlayId);
+            if (selectOverlay) {
+                auto selectMenu = AceType::DynamicCast<FrameNode>(selectOverlay->GetFirstChild());
+                CHECK_NULL_RETURN(selectMenu, button);
+                auto geometryNode = selectMenu->GetGeometryNode();
+                CHECK_NULL_RETURN(geometryNode, button);
+                auto selectMenuHeight = geometryNode->GetFrameSize().Height();
+                top = CalcLength((selectMenuHeight - sideWidth.GetDimension().Value()) / 2.0f);
+            }
+        }
         buttonLayoutProperty->UpdatePadding({ left, right, top, bottom });
         button->GetOrCreateGestureEventHub()->SetUserOnClick([overlayId](GestureEvent& /*info*/) {
             auto pipeline = PipelineContext::GetCurrentContext();
@@ -681,6 +703,9 @@ void SelectOverlayNode::MoreAnimation()
     AnimationUtils::Animate(
         extensionOption, [extensionContext, selectMenuInnerContext, id = Container::CurrentId(), shadowTheme]() {
             ContainerScope scope(id);
+            if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+                extensionContext->UpdateOpacity(1.0);
+            }
             extensionContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
             auto colorMode = SystemProperties::GetColorMode();
             extensionContext->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultMD, colorMode));
@@ -708,6 +733,12 @@ void SelectOverlayNode::MoreAnimation()
     selectOption.SetCurve(Curves::FRICTION);
     pipeline->FlushUITasks();
     AnimationUtils::OpenImplicitAnimation(selectOption, Curves::FRICTION, callback);
+    if (GreatOrEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
+        auto geometryNode = selectMenuInner_->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        auto selectMenuHeight = geometryNode->GetFrameSize().Height();
+        frameSize = CalcSize(CalcLength(toolbarHeight.ConvertToPx()), CalcLength(selectMenuHeight));
+    }
     selectProperty->UpdateUserDefinedIdealSize(frameSize);
     selectMenuInnerContext->UpdateTransformTranslate({ ANIMATION_TEXT_OFFSET.ConvertToPx(), 0.0f, 0.0f });
     selectMenu_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
@@ -760,6 +791,9 @@ void SelectOverlayNode::BackAnimation()
     AnimationUtils::Animate(
         extensionOption, [extensionContext, selectMenuInnerContext, id = Container::CurrentId()]() {
         ContainerScope scope(id);
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            extensionContext->UpdateOpacity(0.0);
+        }
         extensionContext->UpdateTransformTranslate({ 0.0f, MORE_MENU_TRANSLATE.ConvertToPx(), 0.0f });
         selectMenuInnerContext->UpdateOpacity(1.0);
     });
@@ -787,6 +821,12 @@ void SelectOverlayNode::BackAnimation()
     selectOption.SetCurve(Curves::FRICTION);
     pipeline->FlushUITasks();
     AnimationUtils::OpenImplicitAnimation(selectOption, Curves::FRICTION, callback);
+    if (GreatOrEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
+        auto geometryNode = selectMenu_->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        auto selectMenuHeight = geometryNode->GetFrameSize().Height();
+        frameSize = CalcSize(CalcLength(meanuWidth), CalcLength(selectMenuHeight));
+    }
     selectProperty->UpdateUserDefinedIdealSize(frameSize);
     selectMenuInnerContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
     selectContext->UpdateOffset(OffsetT<Dimension>(0.0_px, 0.0_px));
@@ -901,8 +941,11 @@ void SelectOverlayNode::AddExtensionMenuOptions(const std::vector<MenuOptionsPar
 
         extensionMenu_->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
         extensionMenuStatus_ = FrameNodeStatus::GONE;
-
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            extensionMenuContext->UpdateOpacity(0.0);
+        }
         extensionMenuContext->UpdateTransformTranslate({ 0.0f, MORE_MENU_TRANSLATE.ConvertToPx(), 0.0f });
+        extensionMenu_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         extensionMenu_->MarkModifyDone();
         menuPattern->SetSelectOverlayExtensionMenuShow();
     }
@@ -955,8 +998,10 @@ void SelectOverlayNode::CreateToolBar()
     auto bottom = CalcLength(padding.Bottom().ConvertToPx());
     selectMenuInner_->GetLayoutProperty()->UpdatePadding({ left, right, top, bottom });
 
-    selectMenuInner_->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-        { std::nullopt, CalcLength(textOverlayTheme->GetMenuToolbarHeight()) });
+    if (LessNotEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
+        selectMenuInner_->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+            { std::nullopt, CalcLength(textOverlayTheme->GetMenuToolbarHeight()) });
+    }
 
     if (info->menuInfo.menuIsShow) {
         selectMenu_->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);

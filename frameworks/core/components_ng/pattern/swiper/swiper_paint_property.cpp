@@ -26,7 +26,10 @@ const int32_t SwiperAnimationStyle::DEFAULT_DURATION = 400;
 void SwiperPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     PaintProperty::ToJsonValue(json, filter);
-
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     json->PutExtAttr("autoPlay", GetAutoPlay().value_or(false) ? "true" : "false", filter);
     json->PutExtAttr("interval",
         std::to_string(GetAutoPlayInterval().value_or(SwiperAnimationStyle::DEFAULT_INTERVAL)).c_str(), filter);

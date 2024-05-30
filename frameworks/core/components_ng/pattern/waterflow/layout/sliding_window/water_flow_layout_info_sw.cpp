@@ -22,24 +22,36 @@
 namespace OHOS::Ace::NG {
 void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, float mainGap)
 {
+    if (lanes_.empty()) {
+        return;
+    }
     startIndex_ = StartIndex();
     endIndex_ = EndIndex();
-    if (startIndex_ <= endIndex_) {
-        storedOffset_ = lanes_[idxToLane_.at(startIndex_)].startPos;
+    if (startIndex_ > endIndex_) {
+        return;
     }
+    if (!idxToLane_.count(startIndex_) || lanes_.size() <= idxToLane_.at(startIndex_)) {
+        return;
+    }
+    storedOffset_ = lanes_[idxToLane_.at(startIndex_)].startPos;
+
     delta_ = 0.0f;
     lastMainSize_ = mainSize;
     mainGap_ = mainGap;
     startPos_ = StartPos();
     endPos_ = EndPos();
 
-    itemStart_ = (startIndex_ == 0 && NonNegative(startPos_)) || GreatOrEqual(startPos_, mainSize);
-    itemEnd_ = endIndex_ == itemCnt - 1 || (itemCnt > 0 && NonPositive(endPos_));
-    if (!itemEnd_) {
-        footerHeight_ = 0.0f;
+    itemStart_ = startIndex_ == 0 && NonNegative(startPos_);
+    itemEnd_ = endIndex_ == itemCnt - 1;
+    if (footerIndex_ == 0) {
+        itemEnd_ &= LessOrEqual(endPos_, mainSize);
     }
     offsetEnd_ = itemEnd_ && LessOrEqual(endPos_ + footerHeight_, mainSize);
     maxHeight_ = std::max(endPos_ - startPos_ + footerHeight_, maxHeight_);
+
+    if (!itemEnd_) {
+        footerHeight_ = 0.0f;
+    }
 
     synced_ = true;
 }
@@ -85,9 +97,9 @@ bool WaterFlowLayoutInfoSW::OutOfBounds() const
     if (itemStart_ && Positive(lanes_[0].startPos)) {
         return true;
     }
-    if (itemEnd_) {
+    if (offsetEnd_) {
         return std::all_of(lanes_.begin(), lanes_.end(),
-            [mainSize = lastMainSize_](const Lane& lane) { return LessNotEqual(lane.endPos, mainSize); });
+            [this](const Lane& lane) { return LessNotEqual(lane.endPos + footerHeight_, lastMainSize_); });
     }
     return false;
 }
@@ -114,7 +126,7 @@ OverScrollOffset WaterFlowLayoutInfoSW::GetOverScrolledDelta(float delta) const
         return res;
     }
     float disToBot = EndPos() + footerHeight_ - lastMainSize_;
-    if (!itemEnd_) {
+    if (!offsetEnd_) {
         res.end = std::min(0.0f, disToBot + delta);
     } else if (Negative(delta)) {
         res.end = delta;
@@ -361,12 +373,11 @@ bool WaterFlowLayoutInfoSW::IsMisaligned() const
     if (lanes_.empty()) {
         return false;
     }
-    if (!itemStart_ || !NearZero(StartPos())) {
+    if (StartIndex() > 0) {
         return false;
     }
-    bool laneNotAligned = std::any_of(lanes_.begin(), lanes_.end(), [](const auto& lane) {
-        return !NearZero(lane.startPos);
-    });
+    bool laneNotAligned = std::any_of(
+        lanes_.begin(), lanes_.end(), [this](const auto& lane) { return !NearEqual(lane.startPos, StartPos()); });
     return laneNotAligned || lanes_[0].items_.front().idx != 0;
 }
 } // namespace OHOS::Ace::NG

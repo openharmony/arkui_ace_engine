@@ -77,7 +77,6 @@ const std::string MENU_ITEM_TEXT = "menuItem";
 const std::string MENU_ITEM_GROUP_TEXT = "menuItemGroup";
 const std::string MENU_TOUCH_EVENT_TYPE = "1";
 const DirtySwapConfig configDirtySwap = { false, false, false, false, true, false };
-constexpr Color ITEM_DISABLED_COLOR = Color(0x0c182431);
 const std::string IMAGE_SRC_URL = "file://data/data/com.example.test/res/example.svg";
 
 constexpr float FULL_SCREEN_WIDTH = 720.0f;
@@ -161,6 +160,7 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+    void MockPipelineContextGetTheme();
     void InitMenuTestNg();
     void InitMenuItemTestNg();
     PaintWrapper* GetPaintWrapper(RefPtr<MenuPaintProperty> paintProperty);
@@ -196,6 +196,23 @@ void MenuTestNg::TearDown()
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     ScreenSystemManager::GetInstance().dipScale_ = 1.0;
     SystemProperties::orientation_ = DeviceOrientation::PORTRAIT;
+}
+
+void MenuTestNg::MockPipelineContextGetTheme()
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextTheme::TypeId()) {
+            return AceType::MakeRefPtr<TextTheme>();
+        } else if (type == IconTheme::TypeId()) {
+            return AceType::MakeRefPtr<IconTheme>();
+        } else if (type == SelectTheme::TypeId()) {
+            return AceType::MakeRefPtr<SelectTheme>();
+        } else {
+            return AceType::MakeRefPtr<MenuTheme>();
+        }
+    });
 }
 
 void MenuTestNg::InitMenuTestNg()
@@ -1755,6 +1772,7 @@ HWTEST_F(MenuTestNg, MenuPatternTestNg028, TestSize.Level1)
  */
 HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg0, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     std::function<void()> action = [] {};
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem1", "", action);
@@ -1783,7 +1801,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg0, TestSize.Level1)
     layoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF());
-    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(0, 0));
+    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     menuPattern->isSelectMenu_ = true;
@@ -1798,6 +1816,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg0, TestSize.Level1)
  */
 HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg1, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     std::function<void()> action = [] {};
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem1", "", action);
@@ -1830,7 +1849,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg1, TestSize.Level1)
     layoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF());
-    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(0, 0));
+    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
     Placement placements[] = { Placement::TOP, Placement::BOTTOM, Placement::RIGHT, Placement::LEFT,
         Placement::TOP_LEFT, Placement::BOTTOM_LEFT, Placement::LEFT_BOTTOM, Placement::LEFT_TOP,
         Placement::RIGHT_BOTTOM, Placement::RIGHT_TOP, Placement::TOP_RIGHT, Placement::BOTTOM_RIGHT };
@@ -2595,7 +2614,8 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgAddSelectIcon002, TestSize.Level1)
         .WillOnce(Return(AceType::MakeRefPtr<TextTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<MenuTheme>()));
+        .WillOnce(Return(AceType::MakeRefPtr<MenuTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<ShadowTheme>()));
     // call AddSelectIcon
     itemPattern->OnModifyDone();
 
@@ -2802,6 +2822,7 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgUpdateIcon002, TestSize.Level1)
  */
 HWTEST_F(MenuTestNg, MenuItemPatternTestNgUpdateText001, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     MenuItemModelNG MenuItemModelInstance;
     MenuItemProperties itemOption;
     itemOption.content = "content";
@@ -2839,6 +2860,7 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgUpdateText001, TestSize.Level1)
  */
 HWTEST_F(MenuTestNg, MenuItemPatternTestNgUpdateText002, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     MenuItemModelNG MenuItemModelInstance;
     MenuItemProperties itemOption;
     itemOption.labelInfo = "label";
@@ -2877,8 +2899,8 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgUpdateText002, TestSize.Level1)
 HWTEST_F(MenuTestNg, MenuItemPatternTestNgUpdateText003, TestSize.Level1)
 {
     // mock theme
+    MockPipelineContextGetTheme();
     auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
-    selectTheme->SetDisabledMenuFontColor(ITEM_DISABLED_COLOR);
 
     // create menu item
     MenuItemModelNG MenuItemModelInstance;
@@ -2918,7 +2940,7 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgUpdateText003, TestSize.Level1)
     ASSERT_TRUE(content.has_value());
     EXPECT_EQ(content.value(), "item content");
     auto textRenderContext = contentNode->GetRenderContext();
-    EXPECT_EQ(textRenderContext->GetForegroundColor(), ITEM_DISABLED_COLOR);
+    EXPECT_EQ(textRenderContext->GetForegroundColor(), selectTheme->GetMenuFontColor());
 }
 
 /**
@@ -4235,6 +4257,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg008, TestSize.Level1)
  */
 HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg009, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     std::function<void()> action = [] {};
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem1", "", action);
@@ -4267,7 +4290,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg009, TestSize.Level1)
     layoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF());
-    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(0, 0));
+    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
     layoutAlgorithm->Layout(&layoutWrapper);
     EXPECT_EQ(geometryNode->GetMarginFrameOffset(), OffsetF(0.0f, 0.0f));
 }
@@ -4310,6 +4333,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg010, TestSize.Level1)
  */
 HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg011, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     std::function<void()> action = [] {};
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem1", "", action);
@@ -4340,7 +4364,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg011, TestSize.Level1)
     layoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF());
-    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(0, 0));
+    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
     layoutAlgorithm->Layout(&layoutWrapper);
     EXPECT_EQ(geometryNode->GetMarginFrameOffset(), OffsetF(0.0f, 0.0f));
 }
@@ -4352,6 +4376,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg011, TestSize.Level1)
  */
 HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg012, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem1", "", nullptr);
     optionParams.emplace_back("MenuItem2", "", nullptr);
@@ -4380,10 +4405,10 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg012, TestSize.Level1)
 
     layoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
-    EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF(0, 0));
-    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(0, 0));
+    EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF(POSITION_OFFSET, POSITION_OFFSET));
+    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
     layoutAlgorithm->Layout(&layoutWrapper);
-    EXPECT_EQ(geometryNode->GetMarginFrameOffset(), OffsetF(0, 0));
+    EXPECT_EQ(geometryNode->GetMarginFrameOffset(), OffsetF(POSITION_OFFSET, POSITION_OFFSET));
 }
 
 /**
@@ -7017,6 +7042,7 @@ HWTEST_F(MenuTestNg, MenuLayoutPropertyTestNg009, TestSize.Level1)
  */
 HWTEST_F(MenuTestNg, MenuLayoutPropertyTestNg010, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem1", "fakeIcon", nullptr);
     optionParams.emplace_back("MenuItem2", "", nullptr);
@@ -7083,6 +7109,7 @@ HWTEST_F(MenuTestNg, MenuLayoutPropertyTestNg012, TestSize.Level1)
  */
 HWTEST_F(MenuTestNg, MenuViewTestNgCreate001, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem1", "fakeIcon", nullptr);
     optionParams.emplace_back("MenuItem2", "", nullptr);
@@ -7119,6 +7146,7 @@ HWTEST_F(MenuTestNg, MenuViewTestNgCreate001, TestSize.Level1)
  */
 HWTEST_F(MenuTestNg, MenuViewTestNgCreate002, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem1", "fakeIcon", nullptr);
     optionParams.emplace_back("MenuItem2", "", nullptr);
@@ -7204,6 +7232,7 @@ HWTEST_F(MenuTestNg, MenuViewTestNgCreate004, TestSize.Level1)
  */
 HWTEST_F(MenuTestNg, MenuViewTestNgSetFontSize001, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     MenuModelNG MneuModelInstance;
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem", "", nullptr);
@@ -7229,6 +7258,7 @@ HWTEST_F(MenuTestNg, MenuViewTestNgSetFontSize001, TestSize.Level1)
  */
 HWTEST_F(MenuTestNg, MenuViewTestNgSetFontSize002, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     MenuModelNG MneuModelInstance;
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem", "", nullptr);
@@ -7253,6 +7283,7 @@ HWTEST_F(MenuTestNg, MenuViewTestNgSetFontSize002, TestSize.Level1)
  */
 HWTEST_F(MenuTestNg, MenuViewTestNgSetFontSize003, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     MenuModelNG MneuModelInstance;
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem", "", nullptr);
@@ -7275,6 +7306,7 @@ HWTEST_F(MenuTestNg, MenuViewTestNgSetFontSize003, TestSize.Level1)
  */
 HWTEST_F(MenuTestNg, MenuViewTestNgSetFontColor001, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     MenuModelNG MneuModelInstance;
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem", "", nullptr);
@@ -7300,6 +7332,7 @@ HWTEST_F(MenuTestNg, MenuViewTestNgSetFontColor001, TestSize.Level1)
  */
 HWTEST_F(MenuTestNg, MenuViewTestNgSetFontColor002, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     MenuModelNG MneuModelInstance;
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem", "", nullptr);
@@ -7322,6 +7355,7 @@ HWTEST_F(MenuTestNg, MenuViewTestNgSetFontColor002, TestSize.Level1)
  */
 HWTEST_F(MenuTestNg, MenuViewTestNgSetFontColor003, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     MenuModelNG MneuModelInstance;
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem", "", nullptr);
@@ -7349,6 +7383,7 @@ HWTEST_F(MenuTestNg, MenuViewTestNgSetFontColor003, TestSize.Level1)
  */
 HWTEST_F(MenuTestNg, MenuViewTestNgSetFontWeight001, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     MenuModelNG MneuModelInstance;
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem", "", nullptr);
@@ -7374,6 +7409,7 @@ HWTEST_F(MenuTestNg, MenuViewTestNgSetFontWeight001, TestSize.Level1)
  */
 HWTEST_F(MenuTestNg, MenuViewTestNgSetFontWeight002, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     MenuModelNG MneuModelInstance;
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem", "", nullptr);
@@ -7400,6 +7436,7 @@ HWTEST_F(MenuTestNg, MenuViewTestNgSetMenuPlacement001, TestSize.Level1)
      * @tc.steps: step1. create menuWrapperNode with menuItems and set MenuPlacement to Placement::TOP
      * @tc.expected: step1. Get menuPlacement is Placement::TOP
      */
+    MockPipelineContextGetTheme();
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem", "", nullptr);
     MenuParam menuParam;
@@ -8114,6 +8151,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg5900, TestSize.Level1)
      * @tc.steps: step1. Create a menuWrapperNode and menuNode.
      * @tc.expected: menuWrapperNode and menuNode are not null.
      */
+    MockPipelineContextGetTheme();
     std::function<void()> action = [] {};
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem1", "", action);
@@ -8151,7 +8189,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg5900, TestSize.Level1)
     layoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF());
-    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(0, 0));
+    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
 }
 
 /**
@@ -8165,6 +8203,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg6000, TestSize.Level1)
      * @tc.steps: step1. Create a menuWrapperNode and menuNode.
      * @tc.expected: menuWrapperNode and menuNode are not null.
      */
+    MockPipelineContextGetTheme();
     std::function<void()> action = [] {};
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem1", "", action);
@@ -8202,7 +8241,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg6000, TestSize.Level1)
     layoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF());
-    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(0, 0));
+    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
 }
 
 /**
@@ -9150,5 +9189,135 @@ HWTEST_F(MenuTestNg, MenuWrapperPatternTestNg011, TestSize.Level1)
     gestureEvent.offsetY_ = 1.0;
     (*menuItemPattern->longPressEvent_)(gestureEvent);
     ASSERT_FALSE(menuItemPattern->isSubMenuShowed_);
+}
+
+/**
+ * @tc.name: MenuViewTestNgTextMaxLines001
+ * @tc.desc: Verify MenuView's MaxLines.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuViewTestNgTextMaxLines001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set font scale to 1.75.
+     */
+    auto context = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->fontScale_ = 1.75f;
+
+    /**
+     * @tc.steps: step2. create menu and initialize.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextTheme::TypeId()) {
+            return AceType::MakeRefPtr<TextTheme>();
+        } else if (type == IconTheme::TypeId()) {
+            return AceType::MakeRefPtr<IconTheme>();
+        } else if (type == SelectTheme::TypeId()) {
+            return AceType::MakeRefPtr<SelectTheme>();
+        } else {
+            return AceType::MakeRefPtr<MenuTheme>();
+        }
+    });
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    InitMenuTestNg();
+    InitMenuItemTestNg();
+    std::vector<OptionParam> optionParams;
+    optionParams.emplace_back("MenuItem", "", nullptr);
+    MenuParam menuParam;
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), TARGET_ID, "", TYPE, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->OnModifyDone();
+
+    /**
+     * @tc.steps: step2. get textLayoutProperty and verify maxLines setting.
+     * @tc.expected: MenuView's maxLines == MenuTheme's maxLines
+     */
+    auto column = menuPattern->GetMenuColumn();
+    ASSERT_NE(column, nullptr);
+    auto children = column->GetChildren();
+    ASSERT_EQ(children.size(), 1);
+    auto optionNode = AceType::DynamicCast<FrameNode>(column->GetChildAtIndex(0));
+    ASSERT_NE(optionNode, nullptr);
+    auto optionPattern = optionNode->GetPattern<OptionPattern>();
+    ASSERT_NE(optionPattern, nullptr);
+    auto textNode = AceType::DynamicCast<FrameNode>(optionPattern->GetTextNode());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(textLayoutProperty->GetMaxLines().value(), menuTheme->GetTextMaxLines());
+}
+
+/**
+ * @tc.name: MenuItemTestNgTextMaxLines001
+ * @tc.desc: Verify MenuItem's MaxLines.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuItemTestNgTextMaxLines001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set font scale to 1.75.
+     */
+    auto context = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->fontScale_ = 1.75f;
+
+    /**
+     * @tc.steps: step2. create menu and initialize.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextTheme::TypeId()) {
+            return AceType::MakeRefPtr<TextTheme>();
+        } else if (type == IconTheme::TypeId()) {
+            return AceType::MakeRefPtr<IconTheme>();
+        } else if (type == SelectTheme::TypeId()) {
+            return AceType::MakeRefPtr<SelectTheme>();
+        } else {
+            return AceType::MakeRefPtr<MenuTheme>();
+        }
+    });
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    InitMenuTestNg();
+    InitMenuItemTestNg();
+    MenuModelNG menuModelInstance;
+    MenuItemModelNG menuItemModelInstance;
+    menuModelInstance.Create();
+    menuModelInstance.SetFontStyle(Ace::FontStyle::ITALIC);
+    MenuItemProperties itemOption;
+    itemOption.content = "content";
+    itemOption.labelInfo = "label";
+    menuItemModelInstance.Create(itemOption);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+    auto menuItemLayoutProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(menuItemLayoutProperty, nullptr);
+    itemPattern->OnModifyDone();
+
+    /**
+     * @tc.steps: step2. get textLayoutProperty and verify maxLines setting.
+     * @tc.expected: MenuItem's maxLines == MenuTheme's maxLines
+     */
+    auto contentNode = itemPattern->GetContentNode();
+    ASSERT_NE(contentNode, nullptr);
+    auto textLayoutProperty = contentNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(textLayoutProperty->GetMaxLines().value(), menuTheme->GetTextMaxLines());
 }
 } // namespace OHOS::Ace::NG

@@ -36,6 +36,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
+#include "core/common/ime/input_method_manager.h"
 #include "core/common/interaction/interaction_interface.h"
 #include "core/common/modal_ui_extension.h"
 #include "core/common/recorder/event_recorder.h"
@@ -49,6 +50,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
@@ -139,10 +141,72 @@ RefPtr<FrameNode> GetLastPage()
     return pageNode;
 }
 
-void ShowPreviewDisappearAnimation(const RefPtr<MenuWrapperPattern>& menuWrapperPattern)
+void ShowPreviewBgDisappearAnimationProc(const RefPtr<RenderContext>& previewRenderContext,
+    const RefPtr<MenuTheme>& menuTheme)
+{
+    auto shadow = previewRenderContext->GetBackShadow();
+    if (!shadow.has_value()) {
+        shadow = Shadow::CreateShadow(ShadowStyle::None);
+    }
+    previewRenderContext->UpdateBackShadow(shadow.value());
+    auto disappearDuration = menuTheme->GetDisappearDuration();
+    AnimationOption previewOption;
+    previewOption.SetCurve(Curves::SHARP);
+    previewOption.SetDuration(disappearDuration);
+    AnimationUtils::Animate(previewOption, [previewRenderContext, shadow]() mutable {
+        CHECK_NULL_VOID(previewRenderContext);
+        auto color = shadow->GetColor();
+        auto newColor = Color::FromARGB(1, color.GetRed(), color.GetGreen(), color.GetBlue());
+        shadow->SetColor(newColor);
+        previewRenderContext->UpdateBackShadow(shadow.value());
+        BorderRadiusProperty borderRadius;
+        borderRadius.SetRadius(0.0_vp);
+        previewRenderContext->UpdateBorderRadius(borderRadius);
+    });
+}
+
+bool ShowHoverImagePreviewDisappearAnimation(const RefPtr<MenuTheme>& menuTheme,
+    const RefPtr<MenuPattern>& menuPattern, RefPtr<FrameNode>& previewChild)
+{
+    CHECK_NULL_RETURN(menuPattern, false);
+    CHECK_NULL_RETURN(menuPattern->GetIsShowHoverImage(), false);
+
+    CHECK_NULL_RETURN(previewChild, false);
+    auto previewRenderContext = previewChild->GetRenderContext();
+    CHECK_NULL_RETURN(previewRenderContext, false);
+
+    auto duration = menuTheme->GetHoverImageDisAppearDuration();
+    if (previewChild->GetTag() == V2::MENU_PREVIEW_ETS_TAG) {
+        auto previewPattern = previewChild->GetPattern<MenuPreviewPattern>();
+        CHECK_NULL_RETURN(previewPattern, false);
+        // reverse scale
+        auto disappearScaleFrom = previewPattern->GetCustomPreviewScaleTo();
+        auto disappearScaleTo = previewPattern->GetCustomPreviewScaleFrom();
+        duration = menuTheme->GetHoverImagePreviewDisAppearDuration();
+        previewPattern->ShowHoverImagePreviewDisAppearAnimation(previewRenderContext,
+            disappearScaleFrom, disappearScaleTo, duration);
+        // not proc next
+        return false;
+    }
+
+    // hover image update opacity
+    previewRenderContext->UpdateOpacity(0.0);
+    AnimationOption option;
+    option.SetDuration(duration);
+    option.SetCurve(Curves::FRICTION);
+    AnimationUtils::Animate(
+        option, [previewRenderContext]() {
+            CHECK_NULL_VOID(previewRenderContext);
+            previewRenderContext->UpdateOpacity(1.0);
+        },
+        option.GetOnFinishEvent());
+    return true;
+}
+
+void ShowPreviewDisappearAnimationProc(const RefPtr<MenuWrapperPattern>& menuWrapperPattern,
+    RefPtr<FrameNode>& previewChild, float xDist = 0.0f, float yDist = 0.0f)
 {
     CHECK_NULL_VOID(menuWrapperPattern);
-    auto previewChild = menuWrapperPattern->GetPreview();
     CHECK_NULL_VOID(previewChild);
     auto previewRenderContext = previewChild->GetRenderContext();
     CHECK_NULL_VOID(previewRenderContext);
@@ -162,13 +226,16 @@ void ShowPreviewDisappearAnimation(const RefPtr<MenuWrapperPattern>& menuWrapper
     CHECK_NULL_VOID(pipelineContext);
     auto menuTheme = pipelineContext->GetTheme<MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
+    CHECK_NULL_VOID(ShowHoverImagePreviewDisappearAnimation(menuTheme, menuPattern, previewChild));
+
     auto springMotionResponse = menuTheme->GetPreviewDisappearSpringMotionResponse();
     auto springMotionDampingFraction = menuTheme->GetPreviewDisappearSpringMotionDampingFraction();
     AnimationOption scaleOption;
     auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(springMotionResponse, springMotionDampingFraction);
     scaleOption.SetCurve(motion);
     float previewScale = 1.0f;
-    if (menuPattern->GetPreviewMode() == MenuPreviewMode::IMAGE) {
+    if (menuPattern->GetPreviewMode() == MenuPreviewMode::IMAGE ||
+        (menuPattern->GetIsShowHoverImage() && previewChild->GetTag() == V2::IMAGE_ETS_TAG)) {
         auto previewGeometryNode = previewChild->GetGeometryNode();
         CHECK_NULL_VOID(previewGeometryNode);
         auto preivewSize = previewGeometryNode->GetFrameSize();
@@ -176,34 +243,33 @@ void ShowPreviewDisappearAnimation(const RefPtr<MenuWrapperPattern>& menuWrapper
             previewScale = menuPattern->GetTargetSize().Width() / preivewSize.Width();
         }
     }
-    AnimationUtils::Animate(scaleOption, [previewRenderContext, previewPosition, previewScale]() {
-        if (previewRenderContext) {
-            previewRenderContext->UpdateTransformScale(VectorF(previewScale, previewScale));
-            previewRenderContext->UpdatePosition(
-                OffsetT<Dimension>(Dimension(previewPosition.GetX()), Dimension(previewPosition.GetY())));
-        }
-    });
 
-    auto shadow = previewRenderContext->GetBackShadow();
-    if (!shadow.has_value()) {
-        shadow = Shadow::CreateShadow(ShadowStyle::None);
-    }
-    previewRenderContext->UpdateBackShadow(shadow.value());
-    auto disappearDuration = menuTheme->GetDisappearDuration();
-    AnimationOption previewOption;
-    previewOption.SetCurve(Curves::SHARP);
-    previewOption.SetDuration(disappearDuration);
-    AnimationUtils::Animate(previewOption, [previewRenderContext, shadow]() mutable {
-        if (previewRenderContext) {
-            auto color = shadow->GetColor();
-            auto newColor = Color::FromARGB(1, color.GetRed(), color.GetGreen(), color.GetBlue());
-            shadow->SetColor(newColor);
-            previewRenderContext->UpdateBackShadow(shadow.value());
-            BorderRadiusProperty borderRadius;
-            borderRadius.SetRadius(0.0_vp);
-            previewRenderContext->UpdateBorderRadius(borderRadius);
-        }
+    auto xPosition = previewPosition.GetX() + xDist;
+    auto yPosition = previewPosition.GetY() + yDist;
+    AnimationUtils::Animate(scaleOption, [previewRenderContext, xPosition, yPosition, previewScale]() {
+        CHECK_NULL_VOID(previewRenderContext);
+        previewRenderContext->UpdateTransformScale(VectorF(previewScale, previewScale));
+        previewRenderContext->UpdatePosition(
+            OffsetT<Dimension>(Dimension(xPosition), Dimension(yPosition)));
     });
+    ShowPreviewBgDisappearAnimationProc(previewRenderContext, menuTheme);
+}
+
+void ShowPreviewDisappearAnimation(const RefPtr<MenuWrapperPattern>& menuWrapperPattern)
+{
+    CHECK_NULL_VOID(menuWrapperPattern);
+    auto previewChild = menuWrapperPattern->GetPreview();
+    CHECK_NULL_VOID(previewChild);
+    ShowPreviewDisappearAnimationProc(menuWrapperPattern, previewChild);
+
+    CHECK_NULL_VOID(menuWrapperPattern->GetIsShowHoverImage());
+    auto hoverImagePreview = menuWrapperPattern->GetHoverImagePreview();
+    CHECK_NULL_VOID(hoverImagePreview);
+    auto previewPattern = previewChild->GetPattern<MenuPreviewPattern>();
+    CHECK_NULL_VOID(previewPattern);
+    auto xDist = previewPattern->GetCustomPreviewPositionXDist();
+    auto yDist = previewPattern->GetCustomPreviewPositionYDist();
+    ShowPreviewDisappearAnimationProc(menuWrapperPattern, hoverImagePreview, xDist, yDist);
 }
 
 void UpdateContextMenuDisappearPositionAnimation(const RefPtr<FrameNode>& menu, const NG::OffsetF& offset)
@@ -232,10 +298,9 @@ void UpdateContextMenuDisappearPositionAnimation(const RefPtr<FrameNode>& menu, 
     auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(springMotionResponse, springMotionDampingFraction);
     positionOption.SetCurve(motion);
     AnimationUtils::Animate(positionOption, [menuRenderContext, menuPosition]() {
-        if (menuRenderContext) {
-            menuRenderContext->UpdatePosition(
-                OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
-        }
+        CHECK_NULL_VOID(menuRenderContext);
+        menuRenderContext->UpdatePosition(
+            OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
     });
 }
 
@@ -265,10 +330,9 @@ void ShowContextMenuDisappearAnimation(
     auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(springMotionResponse, springMotionDampingFraction);
     positionOption.SetCurve(motion);
     AnimationUtils::Animate(positionOption, [menuRenderContext, menuPosition]() {
-        if (menuRenderContext) {
-            menuRenderContext->UpdatePosition(
-                OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
-        }
+        CHECK_NULL_VOID(menuRenderContext);
+        menuRenderContext->UpdatePosition(
+            OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
     });
 
     auto disappearDuration = menuTheme->GetDisappearDuration();
@@ -277,9 +341,8 @@ void ShowContextMenuDisappearAnimation(
     scaleOption.SetCurve(Curves::FAST_OUT_LINEAR_IN);
     scaleOption.SetDuration(disappearDuration);
     AnimationUtils::Animate(scaleOption, [menuRenderContext, menuAnimationScale]() {
-        if (menuRenderContext) {
-            menuRenderContext->UpdateTransformScale({ menuAnimationScale, menuAnimationScale });
-        }
+        CHECK_NULL_VOID(menuRenderContext);
+        menuRenderContext->UpdateTransformScale({ menuAnimationScale, menuAnimationScale });
     });
 
     option.SetDuration(disappearDuration);
@@ -287,9 +350,8 @@ void ShowContextMenuDisappearAnimation(
     AnimationUtils::Animate(
         option,
         [menuRenderContext]() {
-            if (menuRenderContext) {
-                menuRenderContext->UpdateOpacity(0.0);
-            }
+            CHECK_NULL_VOID(menuRenderContext);
+            menuRenderContext->UpdateOpacity(0.0);
         },
         option.GetOnFinishEvent());
 }
@@ -625,6 +687,7 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
     CHECK_NULL_VOID(wrapperPattern);
     wrapperPattern->CallMenuAboutToAppearCallback();
     wrapperPattern->SetMenuStatus(MenuStatus::ON_SHOW_ANIMATION);
+    SetIsMenuShow(true);
     if (wrapperPattern->HasTransitionEffect()) {
         UpdateMenuVisibility(menu);
         auto renderContext = menu->GetRenderContext();
@@ -717,9 +780,11 @@ void OverlayManager::OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK,
         (menuPattern->GetTargetTag() != V2::SELECT_ETS_TAG)) {
         SubwindowManager::GetInstance()->ClearMenuNG(instanceId, menuWrapperPattern->GetTargetId());
         overlayManager->ResetContextMenuDragHideFinished();
+        overlayManager->SetIsMenuShow(false);
         return;
     }
     overlayManager->RemoveMenuNotInSubWindow(menuWK, rootWeak, weak);
+    overlayManager->SetIsMenuShow(false);
 }
 
 void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation, bool startDrag)
@@ -941,6 +1006,7 @@ void OverlayManager::OpenToastAnimation(const RefPtr<FrameNode>& toastNode, int3
 
 void OverlayManager::PopToast(int32_t toastId)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "pop toast enter");
     AnimationOption option;
     auto curve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
     option.SetCurve(curve);
@@ -966,10 +1032,16 @@ void OverlayManager::PopToast(int32_t toastId)
 
         auto container = Container::Current();
         CHECK_NULL_VOID(container);
-        if (container->IsDialogContainer() ||
-            (container->IsSubContainer() && rootNode->GetChildren().empty())) {
+        auto pattern = toastUnderPop->GetPattern<ToastPattern>();
+        CHECK_NULL_VOID(pattern);
+        auto toastInfo = pattern->GetToastInfo();
+        if (container->IsDialogContainer() || (container->IsSubContainer() && rootNode->GetChildren().empty())) {
             // hide window when toast show in subwindow.
-            SubwindowManager::GetInstance()->HideSubWindowNG();
+            if (toastInfo.showMode == NG::ToastShowMode::SYSTEM_TOP_MOST) {
+                SubwindowManager::GetInstance()->HideSystemTopMostWindow();
+            } else {
+                SubwindowManager::GetInstance()->HideSubWindowNG();
+            }
         }
     });
     auto toastIter = toastMap_.find(toastId);
@@ -1327,7 +1399,7 @@ void OverlayManager::ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& custo
 
 void OverlayManager::RemoveIndexerPopupById(int32_t targetId)
 {
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "remove indexer popup byid enter");
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "remove indexer popup by id enter");
     if (customPopupMap_.empty()) {
         return;
     }
@@ -3091,16 +3163,9 @@ void OverlayManager::FireModalPageShow()
 
 void OverlayManager::ModalPageLostFocus(const RefPtr<FrameNode>& node)
 {
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    if (container->IsUIExtensionWindow()) {
-        FocusHub::NavCloseKeyboard();
-    } else {
-        auto pipeline = PipelineContext::GetCurrentContextSafely();
-        CHECK_NULL_VOID(pipeline);
-        auto textfieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
-        CHECK_NULL_VOID(textfieldManager);
-        textfieldManager->ProcessNavKeyboard();
+    auto pattern = node->GetPattern<FocusView>();
+    if (pattern) {
+        pattern->LostViewFocus();
     }
 }
 
@@ -3313,16 +3378,7 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
             if (sheetStyle.backgroundBlurStyle.has_value()) {
                 SetSheetBackgroundBlurStyle(topModalNode, sheetStyle.backgroundBlurStyle.value());
             }
-            auto layoutProperty = topModalNode->GetLayoutProperty<SheetPresentationProperty>();
-            if (sheetStyle.borderWidth.has_value()) {
-                layoutProperty->UpdateBorderWidth(sheetStyle.borderWidth.value());
-                topModalRenderContext->UpdateBorderWidth(sheetStyle.borderWidth.value());
-            } else {
-                BorderWidthProperty borderWidth;
-                borderWidth.SetBorderWidth(0.0_vp);
-                layoutProperty->UpdateBorderWidth(borderWidth);
-                topModalRenderContext->UpdateBorderWidth(borderWidth);
-            }
+            SetSheetBorderWidth(topModalNode, sheetTheme, sheetStyle);
             if (sheetStyle.borderStyle.has_value()) {
                 topModalRenderContext->UpdateBorderStyle(sheetStyle.borderStyle.value());
             }
@@ -3349,6 +3405,7 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
             topModalNodePattern->UpdateOnWidthDidChange(std::move(onWidthDidChange));
             topModalNodePattern->UpdateOnTypeDidChange(std::move(onTypeDidChange));
             topModalNodePattern->UpdateSheetSpringBack(std::move(sheetSpringBack));
+            auto layoutProperty = topModalNode->GetLayoutProperty<SheetPresentationProperty>();
             layoutProperty->UpdateSheetStyle(sheetStyle);
             topModalNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             pipeline->FlushUITasks();
@@ -3381,11 +3438,7 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
     if (sheetStyle.backgroundBlurStyle.has_value()) {
         SetSheetBackgroundBlurStyle(sheetNode, sheetStyle.backgroundBlurStyle.value());
     }
-    if (sheetStyle.borderWidth.has_value()) {
-        auto sheetLayoutProps = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
-        sheetLayoutProps->UpdateBorderWidth(sheetStyle.borderWidth.value());
-        sheetRenderContext->UpdateBorderWidth(sheetStyle.borderWidth.value());
-    }
+    SetSheetBorderWidth(sheetNode, sheetTheme, sheetStyle);
     if (sheetStyle.borderStyle.has_value()) {
         sheetRenderContext->UpdateBorderStyle(sheetStyle.borderStyle.value());
     }
@@ -3699,7 +3752,7 @@ void OverlayManager::PlaySheetTransition(
     option.SetFillMode(FillMode::FORWARDS);
     auto context = sheetNode->GetRenderContext();
     CHECK_NULL_VOID(context);
-    context->UpdateRenderGroup(true, true, true);
+    context->UpdateRenderGroup(true, false, true);
     TAG_LOGD(AceLogTag::ACE_SHEET, "UpdateRenderGroup start");
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
@@ -3732,7 +3785,7 @@ void OverlayManager::PlaySheetTransition(
                 CHECK_NULL_VOID(sheetNode);
                 auto context = sheetNode->GetRenderContext();
                 CHECK_NULL_VOID(context);
-                context->UpdateRenderGroup(false, true, true);
+                context->UpdateRenderGroup(false, false, true);
                 TAG_LOGD(AceLogTag::ACE_SHEET, "UpdateRenderGroup finished");
                 auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();
                 if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
@@ -3868,6 +3921,37 @@ void OverlayManager::PlaySheetMaskTransition(RefPtr<FrameNode> maskNode, bool is
                 HitTestMode::HTMTRANSPARENT);
         }
         context->OpacityAnimation(option, 1.0, 0.0);
+    }
+}
+
+void OverlayManager::SetSheetBorderWidth(const RefPtr<FrameNode>& sheetNode, const RefPtr<SheetTheme>& sheetTheme,
+    const NG::SheetStyle& sheetStyle)
+{
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    auto sheetType = sheetPattern->GetSheetType();
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto renderContext = sheetNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (sheetStyle.borderWidth.has_value()) {
+        auto sheetRadius = sheetTheme->GetSheetRadius();
+        auto borderWidth = sheetStyle.borderWidth.value();
+        BorderRadiusProperty borderRadius;
+        if ((sheetType == SheetType::SHEET_CENTER) || (sheetType == SheetType::SHEET_POPUP)) {
+            borderRadius.SetRadius(sheetRadius);
+        } else {
+            borderRadius = BorderRadiusProperty(sheetRadius, sheetRadius, 0.0_vp, 0.0_vp);
+            borderWidth.bottomDimen = 0.0_vp;
+        }
+        renderContext->UpdateBorderRadius(borderRadius);
+        layoutProperty->UpdateBorderWidth(borderWidth);
+        renderContext->UpdateBorderWidth(borderWidth);
+    } else if (renderContext->GetBorderWidth().has_value()) {
+        BorderWidthProperty borderWidth;
+        borderWidth.SetBorderWidth(0.0_vp);
+        layoutProperty->UpdateBorderWidth(borderWidth);
+        renderContext->UpdateBorderWidth(borderWidth);
     }
 }
 

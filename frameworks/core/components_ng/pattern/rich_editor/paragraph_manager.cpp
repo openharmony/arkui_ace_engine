@@ -19,6 +19,7 @@
 #include <ostream>
 
 #include "base/utils/utils.h"
+#include "core/components/common/properties/text_layout_info.h"
 
 namespace OHOS::Ace::NG {
 float ParagraphManager::GetHeight() const
@@ -115,6 +116,41 @@ int32_t ParagraphManager::GetIndex(Offset offset, bool clamp) const
     return paragraphs_.back().end;
 }
 
+PositionWithAffinity ParagraphManager::GetGlyphPositionAtCoordinate(Offset offset)
+{
+    TAG_LOGI(AceLogTag::ACE_TEXT,
+        "Get Glyph Position, coordinate = [%{public}.2f %{public}.2f]", offset.GetX(), offset.GetY());
+    PositionWithAffinity finalResult(0, TextAffinity::UPSTREAM);
+    CHECK_NULL_RETURN(!paragraphs_.empty(), finalResult);
+    if (LessNotEqual(offset.GetY(), 0.0)) {
+        return finalResult;
+    }
+    int idx = 0;
+    for (auto it = paragraphs_.begin(); it != paragraphs_.end(); ++it, ++idx) {
+        auto& info = *it;
+        if (LessOrEqual(offset.GetY(), info.paragraph->GetHeight()) ||
+            (idx == static_cast<int>(paragraphs_.size()) - 1)) {
+            auto result = info.paragraph->GetGlyphPositionAtCoordinate(offset);
+            finalResult.position_ = result.position_ + info.start;
+            TAG_LOGI(AceLogTag::ACE_TEXT,
+                "Current paragraph, originPos = %{public}zu, finalPos =%{public}zu and affinity = %{public}d",
+                result.position_, finalResult.position_, result.affinity_);
+            finalResult.affinity_ = static_cast<TextAffinity>(result.affinity_);
+            return finalResult;
+        }
+        // get offset relative to each paragraph
+        offset.SetY(offset.GetY() - info.paragraph->GetHeight());
+    }
+    auto info = paragraphs_.back();
+    auto result = info.paragraph->GetGlyphPositionAtCoordinate(offset);
+    finalResult.position_ = info.end;
+    finalResult.affinity_ = static_cast<TextAffinity>(result.affinity_);
+    TAG_LOGI(AceLogTag::ACE_TEXT,
+        "Current paragraph, final position = %{public}zu and affinity = %{public}d", finalResult.position_,
+        finalResult.affinity_);
+    return finalResult;
+}
+
 int32_t ParagraphManager::GetGlyphIndexByCoordinate(Offset offset, bool isSelectionPos) const
 {
     CHECK_NULL_RETURN(!paragraphs_.empty(), 0);
@@ -194,6 +230,25 @@ LineMetrics ParagraphManager::GetLineMetricsByRectF(RectF rect, int32_t paragrap
     rect.SetTop(rect.GetY() - height);
     auto lineMetrics = paragraphInfo.paragraph->GetLineMetricsByRectF(rect);
     lineMetrics.y += height;
+    return lineMetrics;
+}
+
+TextLineMetrics ParagraphManager::GetLineMetrics(size_t lineNumber)
+{
+    TextLineMetrics lineMetrics;
+    if (lineNumber > GetLineCount()) {
+        TAG_LOGE(AceLogTag::ACE_TEXT,
+            "GetLineMetrics failed, lineNumber is greater than max lines:%{public}zu", lineNumber);
+        return TextLineMetrics();
+    }
+    for (auto &&info : paragraphs_) {
+        auto lineCount = info.paragraph->GetLineCount();
+        if (lineNumber > lineCount) {
+            lineNumber -= lineCount;
+            continue;
+        }
+        lineMetrics = info.paragraph->GetLineMetrics(lineNumber);
+    }
     return lineMetrics;
 }
 

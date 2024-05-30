@@ -78,13 +78,13 @@ bool CanvasPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(canvasEventHub, false);
 
     if ((isCanvasInit_ == true) && (config.frameSizeChange || config.contentSizeChange)) {
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)) {
             isCanvasInit_ = !pixelGridRoundSizeChange;
         } else {
             isCanvasInit_ = false;
         }
     } else if ((isCanvasInit_ == true) && (config.frameOffsetChange || config.contentOffsetChange)) {
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)) {
             isCanvasInit_ = true;
         } else {
             isCanvasInit_ = false;
@@ -474,17 +474,33 @@ void CanvasPattern::PutImageData(const Ace::ImageData& imageData)
 #endif
 }
 
-void CanvasPattern::TransferFromImageBitmap(const RefPtr<OffscreenCanvasPattern>& offscreenCanvasPattern)
+#ifdef PIXEL_MAP_SUPPORTED
+void CanvasPattern::TransferFromImageBitmap(const RefPtr<PixelMap>& pixelMap)
 {
 #ifndef USE_FAST_TASKPOOL
-    auto task = [offscreenCanvasPattern](CanvasPaintMethod& paintMethod) {
-        paintMethod.TransferFromImageBitmap(offscreenCanvasPattern);
+    auto task = [pixelMap](CanvasPaintMethod& paintMethod) {
+        paintMethod.TransferFromImageBitmap(pixelMap);
     };
     paintMethod_->PushTask(task);
 #else
-    paintMethod_->PushTask<TransferFromImageBitmapOp>(offscreenCanvasPattern);
+    paintMethod_->PushTask<TransferFromImageBitmapOp>(pixelMap);
 #endif
 }
+#else
+void CanvasPattern::TransferFromImageBitmap(const Ace::ImageData& imageData)
+{
+#ifndef ACE_UNITTEST
+#ifndef USE_FAST_TASKPOOL
+    auto task = [imageData](CanvasPaintMethod& paintMethod) {
+        paintMethod.PutImageData(imageData);
+    };
+    paintMethod_->PushTask(task);
+#else
+    paintMethod_->PushTask<PutImageDataOp>(imageData);
+#endif
+#endif
+}
+#endif
 
 void CanvasPattern::CloseImageBitmap(const std::string& src)
 {
@@ -1146,7 +1162,7 @@ void CanvasPattern::ReleaseImageAnalyzer()
 
 void CanvasPattern::DumpAdvanceInfo()
 {
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)) {
         DumpLog::GetInstance().AddDesc(
             std::string("PixelGridRoundSize: ")
                 .append(dirtyPixelGridRoundSize_.ToString())

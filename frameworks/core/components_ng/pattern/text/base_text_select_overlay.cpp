@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -554,6 +555,9 @@ OffsetF BaseTextSelectOverlay::GetPaintOffsetWithoutTransform()
     CHECK_NULL_RETURN(pattern, OffsetF());
     OffsetF offset;
     auto parent = pattern->GetHost();
+    if (!hasTransform_) {
+        return parent->GetTransformRelativeOffset();
+    }
     while (parent) {
         auto renderContext = parent->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, OffsetF());
@@ -569,17 +573,22 @@ void BaseTextSelectOverlay::UpdateTransformFlag()
     CHECK_NULL_VOID(pattern);
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
+    auto hasTransform = false;
     while (host) {
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
-        auto noTransformRect = renderContext->GetPaintRectWithoutTransform();
-        auto transformRect = renderContext->GetPaintRectWithTransform();
-        hasTransform_ = noTransformRect != transformRect;
-        if (hasTransform_) {
+        if (host->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
+            hasTransform = false;
             break;
         }
-        host = host->GetAncestorNodeOfFrame();
+        if (!hasTransform) {
+            auto noTransformRect = renderContext->GetPaintRectWithoutTransform();
+            auto transformRect = renderContext->GetPaintRectWithTransform();
+            hasTransform = noTransformRect != transformRect;
+        }
+        host = host->GetAncestorNodeOfFrame(true);
     }
+    hasTransform_ = hasTransform;
 }
 
 void BaseTextSelectOverlay::SetkeyBoardChangeCallback()

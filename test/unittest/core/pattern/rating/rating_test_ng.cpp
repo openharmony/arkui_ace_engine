@@ -94,6 +94,10 @@ constexpr int32_t RATING_IMAGE_SUCCESS_CODE = 0b111;
 const std::string RATING_FOREGROUND_IMAGE_KEY = "foregroundImageSourceInfo";
 const std::string RATING_SECONDARY_IMAGE_KEY = "secondaryImageSourceInfo";
 const std::string RATING_BACKGROUND_IMAGE_KEY = "backgroundImageSourceInfo";
+const std::string TEST_RESULT_FIRST = "test_ok_1";
+const std::string TEST_RESULT_SECOND = "test_ok_2";
+const std::string TEST_RESULT_THIRD = "test_ok_3";
+const std::string TEST_RESULT_FORTH = "test_ok_4";
 } // namespace
 
 class RatingTestNg : public testing::Test {
@@ -1001,5 +1005,128 @@ HWTEST_F(RatingTestNg, RatingPatternOnKeyEvent001, TestSize.Level1)
     event.code = KeyCode::KEY_MENU;
     result = ratingPattern->OnKeyEvent(event);
     EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: RatingTestBuilderFunc001
+ * @tc.desc: SetBuilderFunc and get value, and test the result when the func changed, the func is not nullptr.
+ * This test will change 3 times:
+ * 1.Func set 1 star,expect the result is 1 star.
+ * 2.Func change to set 2 stars, and expect 2 stars.
+ * 3.Func change to set 3 stars, and expect 3 stars.
+ * This test whether the function can be excuted successfully by changing the function callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, RatingTestBuilderFunc001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create RatingModelNG.
+     * @tc.expected: step1. node is not null.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetIndicator(false);
+    rating.SetStepSize(1); // Default step size as 1.
+    rating.SetStars(5); // Default stars as 5.
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto ratingPattern = frameNode->GetPattern<RatingPattern>();
+
+    std::string result;
+    /**
+     * @tc.steps: step2. Create RatingBuilderFunc and test a node with rating star 1.
+     */
+    auto firstNodeFunc = [&result](RatingConfiguration config) -> RefPtr<FrameNode> {
+        result = TEST_RESULT_FIRST;
+        RatingModelNG rating;
+        rating.Create();
+        rating.SetStars(1); // First time, set stars as 1.
+        auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+        return frameNode;
+    };
+
+    /**
+     * @tc.steps: step3. Set paramaters to pattern Builderfunc.
+     */
+    ratingPattern->SetBuilderFunc(firstNodeFunc);
+    auto firstNode = ratingPattern->BuildContentModifierNode();
+
+    EXPECT_EQ(result, TEST_RESULT_FIRST);
+    EXPECT_EQ("Rating", firstNode->GetTag());
+    auto layoutProperty = firstNode->GetLayoutProperty<RatingLayoutProperty>();
+    EXPECT_EQ(layoutProperty->GetStars().value(), 1); // First time， set 1 star, and expect the result is 1.
+
+    /**
+     * @tc.steps: step4. Create RatingBuilderFunc and test a node with rating star 2.
+     */
+    auto secondNodeFunc = [&result](RatingConfiguration config) -> RefPtr<FrameNode> {
+        result = TEST_RESULT_SECOND;
+        RatingModelNG rating;
+        rating.Create();
+        rating.SetStars(2); // Second time, set stars as 2.
+        auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+        return frameNode;
+    };
+    ratingPattern->SetBuilderFunc(secondNodeFunc);
+    auto secondNode = ratingPattern->BuildContentModifierNode();
+    EXPECT_EQ(result, TEST_RESULT_SECOND);
+    auto secondLayoutProperty = secondNode->GetLayoutProperty<RatingLayoutProperty>();
+    EXPECT_EQ(secondLayoutProperty->GetStars().value(), 2); // Second time， set 2 star, and expect the result is 2.
+
+    /**
+     * @tc.steps: step5. Create RatingBuilderFunc and test a node with rating star 3,expect star is 3.
+     */
+    auto thirdNodeFunc = [&result](RatingConfiguration config) -> RefPtr<FrameNode> {
+        result = TEST_RESULT_THIRD;
+        RatingModelNG rating;
+        rating.Create();
+        rating.SetStars(3); // Third time, set stars as 3.
+        auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+        return frameNode;
+    };
+    ratingPattern->SetBuilderFunc(thirdNodeFunc);
+    auto thirdNode = ratingPattern->BuildContentModifierNode();
+    EXPECT_EQ(result, TEST_RESULT_THIRD);
+    auto thirdLayoutProperty = thirdNode->GetLayoutProperty<RatingLayoutProperty>();
+    EXPECT_EQ(thirdLayoutProperty->GetStars().value(), 3); // Third time， set 3 star, and expect the result is 3.
+}
+
+/**
+ * @tc.name: RatingTestBuilderFunc002
+ * @tc.desc: SetBuilderFunc and get value, and test the result when the func is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, RatingTestBuilderFunc002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create RatingModelNG.
+     * @tc.expected: step1. node is not null.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetIndicator(false);
+    rating.SetStepSize(1); // Default step size as 1.
+    rating.SetStars(5); // Default stars as 5.
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    auto ratingPattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(ratingPattern, nullptr);
+
+    std::string result;
+    /**
+     * @tc.steps: step2. Create RatingBuilderFunc and test a nullptr node.
+     * @tc.expected: step2. Func is excuted successfully.
+     */
+    auto forthNodeFunc = [&result](RatingConfiguration config) -> RefPtr<FrameNode> {
+        result = TEST_RESULT_FORTH;
+        return nullptr;
+    };
+
+    /**
+     * @tc.steps: step3. Set paramaters to pattern Builderfunc.
+     */
+    ratingPattern->SetBuilderFunc(forthNodeFunc);
+    auto forthNode = ratingPattern->BuildContentModifierNode();
+    EXPECT_EQ(result, TEST_RESULT_FORTH);
+    EXPECT_EQ(forthNode, nullptr);
 }
 } // namespace OHOS::Ace::NG

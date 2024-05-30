@@ -238,9 +238,9 @@ void XComponentPattern::InitializeRenderContext()
 #ifdef RENDER_EXTRACT_SUPPORTED
     auto contextType = type_ == XComponentType::TEXTURE ?
         RenderContext::ContextType::HARDWARE_TEXTURE : RenderContext::ContextType::HARDWARE_SURFACE;
-    static RenderContext::ContextParam param = { contextType, id_ + "Surface" };
+    RenderContext::ContextParam param = { contextType, id_ + "Surface" };
 #else
-    static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, id_ + "Surface" };
+    RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, id_ + "Surface" };
 #endif
 
     renderContextForSurface_->InitContext(false, param);
@@ -377,6 +377,13 @@ void XComponentPattern::OnAttachToFrameNode()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(host->GetId());
+    auto callbackId = pipeline->RegisterTransformHintChangeCallback([weak = WeakClaim(this)](uint32_t transform) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->SetRotation(transform);
+        }
+    });
+    UpdateTransformHintChangedCallbackId(callbackId);
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EnableSelfRender();
     }
@@ -554,6 +561,9 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
+    if (HasTransformHintChangedCallbackId()) {
+        pipeline->UnregisterTransformHintChangedCallback(transformHintChangedCallbackId_.value_or(-1));
+    }
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().DisableSelfRender();
     }
@@ -600,21 +610,13 @@ void XComponentPattern::OnDetachContext(PipelineContext* context)
     context->RemoveWindowStateChangedCallback(host->GetId());
 }
 
-void XComponentPattern::SetRotation()
+void XComponentPattern::SetRotation(uint32_t rotation)
 {
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto displayInfo = container->GetDisplayInfo();
-    CHECK_NULL_VOID(displayInfo);
-    auto dmRotation = displayInfo->GetRotation();
-    auto deviceRotation = displayInfo->GetDeviceRotation();
-    uint32_t newRotation = deviceRotation + 90 * static_cast<uint32_t>(dmRotation);
-    newRotation = newRotation % 360;
-    if (rotation_ != newRotation) {
-        rotation_ = newRotation;
-        CHECK_NULL_VOID(renderSurface_);
-        renderSurface_->SetTransformHint(newRotation);
+    if (type_ != XComponentType::SURFACE || isSurfaceLock_) {
+        return;
     }
+    CHECK_NULL_VOID(renderSurface_);
+    renderSurface_->SetTransformHint(rotation);
 }
 
 void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
@@ -666,9 +668,6 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
     }
 #endif
     host->MarkNeedSyncRenderTree();
-    if (type_ == XComponentType::SURFACE) {
-        AddAfterLayoutTaskForRotation();
-    }
 }
 
 #ifdef PLATFORM_VIEW_SUPPORTED
@@ -1462,17 +1461,6 @@ void XComponentPattern::AddAfterLayoutTaskForExportTexture()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->DoTextureExport();
-    });
-}
-
-void XComponentPattern::AddAfterLayoutTaskForRotation()
-{
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->SetRotation();
     });
 }
 

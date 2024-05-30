@@ -371,6 +371,10 @@ void ImageAnimatorPattern::UpdateEventCallback()
 void ImageAnimatorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     Pattern::ToJsonValue(json, filter);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     static const char* STATUS_MODE[] = { "AnimationStatus.Initial", "AnimationStatus.Running", "AnimationStatus.Paused",
         "AnimationStatus.Stopped" };
     json->PutExtAttr("state", STATUS_MODE[static_cast<int32_t>(status_)], filter);

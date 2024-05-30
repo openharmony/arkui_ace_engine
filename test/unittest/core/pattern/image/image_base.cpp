@@ -57,7 +57,7 @@ RefPtr<FrameNode> ImageBases::CreateImageNode(const std::string& src, const std:
 {
     ImageModelNG image;
     ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = src;
+    imageInfoConfig.src = std::make_shared<std::string>(src);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
     image.Create(imageInfoConfig, pixMap);
@@ -75,7 +75,7 @@ RefPtr<FrameNode> ImageBases::CreateImageNodeWithDefaultProp(
 {
     ImageModelNG image;
     ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = src;
+    imageInfoConfig.src = std::make_shared<std::string>(src);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
     image.Create(imageInfoConfig, pixMap);
@@ -100,7 +100,7 @@ RefPtr<FrameNode> ImageBases::CreateSyncImageNode()
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = PNG_IMAGE;
+    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
     image.Create(imageInfoConfig, pixMap);
@@ -115,7 +115,7 @@ RefPtr<FrameNode> ImageBases::CreateSyncWebImageNode()
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = WEB_IMAGE;
+    imageInfoConfig.src = std::make_shared<std::string>(WEB_IMAGE);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
     image.Create(imageInfoConfig, pixMap);

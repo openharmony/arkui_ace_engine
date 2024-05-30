@@ -29,7 +29,7 @@ public:
     void SetNavigationStackWithCreatorAndUpdater(std::function<RefPtr<NG::NavigationStack>()> creator,
         std::function<void(RefPtr<NG::NavigationStack>)> updater) override;
     void SetNavigationStackProvided(bool provided) override;
-    void SetNavigationGroupNodeInfo(std::string moduleName, std::string pagePath) override;
+    void SetNavigationPathInfo(const std::string& moduleName, const std::string& pagePath) override;
     bool ParseCommonTitle(bool hasSubTitle, bool hasMainTitle, const std::string& subtitle,
         const std::string& title, bool ignoreMainTitle = false) override;
     void SetTitle(const std::string& title, bool hasSubTitle = false) override;

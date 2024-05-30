@@ -506,10 +506,6 @@ public:
     {
         isBuildByJS_ = isBuildByJS;
     }
-    void AddAttachToMainTreeTask(std::function<void()>&& func)
-    {
-        attachToMainTreeTasks_.emplace_back(std::move(func));
-    }
 
     void* GetExternalData() const
     {
@@ -779,7 +775,6 @@ private:
 
     bool useOffscreenProcess_ = false;
 
-    std::list<std::function<void()>> attachToMainTreeTasks_;
     std::function<void(int32_t)> updateJSInstanceCallback_;
     std::function<void()> lazyBuilderFunc_;
     std::function<void(int32_t, RefPtr<UINode>&)> updateNodeFunc_;

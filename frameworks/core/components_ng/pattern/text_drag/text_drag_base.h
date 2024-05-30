@@ -18,7 +18,6 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/manager/select_overlay/selection_host.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/paragraph.h"
 
 constexpr uint32_t DRAGGED_TEXT_OPACITY = 0x66;

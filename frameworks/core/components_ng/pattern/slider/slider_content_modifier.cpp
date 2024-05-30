@@ -826,6 +826,9 @@ void SliderContentModifier::SetBlockShape(const RefPtr<BasicShape>& shape)
 
 void SliderContentModifier::UpdateContentDirtyRect(const SizeF& frameSize)
 {
+    if (useContentModifier_->Get()) {
+        return;
+    }
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SliderTheme>();

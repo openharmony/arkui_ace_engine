@@ -147,6 +147,10 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         LayoutProperty::ToJsonValue(json, filter);
+        if (filter.IsFastFilter()) {
+            json->PutFixedAttr("content", GetContent().value_or("").c_str(), filter, FIXED_ATTR_CONTENT);
+            return;
+        }
         if (GetStartIcon().has_value()) {
             json->PutExtAttr("startIcon", GetStartIcon()->GetSrc().c_str(), filter);
         }

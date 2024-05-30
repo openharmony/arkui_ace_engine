@@ -15,5 +15,8 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("slider_test_ng") {
   type = "new"
-  sources = [ "slider_test_ng.cpp" ]
+  sources = [
+    "slider_builder_test_ng.cpp",
+    "slider_test_ng.cpp",
+  ]
 }

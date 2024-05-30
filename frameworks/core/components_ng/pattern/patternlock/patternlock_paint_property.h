@@ -69,6 +69,10 @@ public:
         CHECK_NULL_VOID(pipeline);
         auto patternLockTheme = pipeline->GetTheme<V2::PatternLockTheme>();
         CHECK_NULL_VOID(patternLockTheme);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("circleRadius",
             GetCircleRadius().value_or(patternLockTheme->GetCircleRadius()).ToString().c_str(), filter);
         json->PutExtAttr("regularColor",

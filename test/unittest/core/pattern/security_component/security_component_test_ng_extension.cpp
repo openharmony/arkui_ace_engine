@@ -1328,6 +1328,12 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmUpdateVer
  */
 HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmUpdateHorizontalOffset001, TestSize.Level1)
 {
+    RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
+        0, V2::LOCATION_BUTTON_ETS_TAG);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutWrapperNode = CreateLayoutWrapper(frameNode);
+    auto layoutWrapper = reinterpret_cast<LayoutWrapper*>(Referenced::RawPtr(layoutWrapperNode));
+
     auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
     ASSERT_NE(buttonAlgorithm, nullptr);
 
@@ -1337,17 +1343,48 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmUpdateHor
     buttonAlgorithm->middle_.width_ = 2.0;
     buttonAlgorithm->icon_.height_ = 2.0;
     buttonAlgorithm->text_.height_ = 1.0;
-    buttonAlgorithm->UpdateHorizontalOffset(offsetIcon, offsetText);
+    buttonAlgorithm->UpdateHorizontalOffset(layoutWrapper, offsetIcon, offsetText);
     EXPECT_EQ(offsetText.GetX(), 4.0); // icon_.width_ + middle_.width_
     EXPECT_EQ(offsetText.GetY(), 0.5); // (icon_.height_ - text_.height_) / 2
 
     OffsetF offsetIcon1(0.0, 0.0);
     OffsetF offsetText1(0.0, 0.0);
     buttonAlgorithm->text_.height_ = 3.0;
-    buttonAlgorithm->UpdateHorizontalOffset(offsetIcon1, offsetText1);
+    buttonAlgorithm->UpdateHorizontalOffset(layoutWrapper, offsetIcon1, offsetText1);
     EXPECT_EQ(offsetText1.GetX(), 4.0); // icon_.height_ + middle_.height_
     EXPECT_EQ(offsetText1.GetY(), 0);
     EXPECT_EQ(offsetIcon1.GetY(), 0.5); // (text_.width_ - icon_.width_) / 2
+}
+
+/**
+ * @tc.name: SecurityComponentLayoutAlgorithmGetTextDirection001
+ * @tc.desc: Test security component GetTextDirectio
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmGetTextDirection001, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
+        0, V2::LOCATION_BUTTON_ETS_TAG);
+    ASSERT_NE(frameNode, nullptr);
+    auto textNode = GetSecCompChildNode(frameNode, V2::TEXT_ETS_TAG);
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto layoutWrapperNode = CreateLayoutWrapper(frameNode);
+    auto layoutWrapper = reinterpret_cast<LayoutWrapper*>(Referenced::RawPtr(layoutWrapperNode));
+
+    auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
+    ASSERT_NE(buttonAlgorithm, nullptr);
+    
+    textLayoutProperty->UpdateContent("test");
+    EXPECT_EQ(buttonAlgorithm->GetTextDirection(layoutWrapper), TextDirection::LTR);
+
+    textLayoutProperty->UpdateContent("تۇرۇشلۇق ئورۇن"); // this text is read from RTL
+    EXPECT_EQ(buttonAlgorithm->GetTextDirection(layoutWrapper), TextDirection::RTL);
+
+    textLayoutProperty->UpdateContent(""); // this text empty, should ret default LTR
+    EXPECT_EQ(buttonAlgorithm->GetTextDirection(layoutWrapper), TextDirection::LTR);
 }
 
 /**

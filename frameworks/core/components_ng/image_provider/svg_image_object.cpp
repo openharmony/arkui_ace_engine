@@ -41,8 +41,8 @@ RefPtr<SvgDomBase> SvgImageObject::GetSVGDom() const
     return svgDomBase_;
 }
 
-void SvgImageObject::MakeCanvasImage(
-    const RefPtr<ImageLoadingContext>& ctx, const SizeF& /*resizeTarget*/, bool /*forceResize*/, bool /*syncLoad*/)
+void SvgImageObject::MakeCanvasImage(const RefPtr<ImageLoadingContext>& ctx, const SizeF& /*resizeTarget*/,
+    bool /*forceResize*/, bool /*syncLoad*/, bool /*loadInVipChannel*/)
 {
     CHECK_NULL_VOID(GetSVGDom());
     // just set svgDom to canvasImage

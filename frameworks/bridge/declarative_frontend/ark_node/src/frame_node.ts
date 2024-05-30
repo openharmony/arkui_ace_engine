@@ -210,7 +210,19 @@ class FrameNode {
     __JSScopeUtil__.restoreInstanceId();
     if (!flag) {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
+    } else {
+      content.setAttachedParent(new WeakRef<FrameNode>(this));
     }
+  }
+
+  removeComponentContent(content: ComponentContent): void {
+    if (content === undefined || content === null || content.getNodePtr() === null || content.getNodePtr() == undefined) {
+      return;
+    }
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    getUINativeModule().frameNode.removeChild(this.nodePtr_, content.getNodePtr());
+    content.setAttachedParent(undefined);
+    __JSScopeUtil__.restoreInstanceId();
   }
 
   insertChildAfter(child: FrameNode, sibling: FrameNode): void {
@@ -621,7 +633,7 @@ class TypedFrameNode<T extends ArkComponent> extends FrameNode {
         if (nodeType === childType) {
           isValid = true;
         }
-      })
+      });
       return isValid;
     }
     return true;

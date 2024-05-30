@@ -165,6 +165,7 @@ void MovingPhotoPattern::InitEvent()
 
 void MovingPhotoPattern::HandleLongPress(GestureEvent& info)
 {
+    isFastKeyUp_ = false;
     if (currentPlayStatus_ == PlaybackStatus::STARTED || !isPrepared_ || isPlayByController_) {
         return;
     }
@@ -173,6 +174,9 @@ void MovingPhotoPattern::HandleLongPress(GestureEvent& info)
 
 void MovingPhotoPattern::HandleTouchEvent(TouchEventInfo& info)
 {
+    if (currentPlayStatus_ == PlaybackStatus::ERROR) {
+        ResetMediaPlayer();
+    }
     if (!isPrepared_ || isPlayByController_) {
         return;
     }
@@ -712,11 +716,13 @@ void MovingPhotoPattern::StartAnimation()
     animationOption.SetDuration(ANIMATION_DURATION_400);
     animationOption.SetCurve(Curves::FRICTION);
     animationOption.SetOnFinishEvent([this]() {
-        if (currentPlayStatus_ == PlaybackStatus::PAUSED || currentPlayStatus_ == PlaybackStatus::STOPPED) {
+        if (currentPlayStatus_ == PlaybackStatus::PAUSED || currentPlayStatus_ == PlaybackStatus::STOPPED
+                                                         || !startAnimationFlag_) {
             return;
         }
         HideImageNode();
     });
+    startAnimationFlag_ = true;
     AnimationUtils::Animate(animationOption, [imageCtx = imageRsContext, videoCtx = videoRsContext]() {
             imageCtx->UpdateOpacity(0.0);
             imageCtx->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
@@ -726,6 +732,7 @@ void MovingPhotoPattern::StartAnimation()
 
 void MovingPhotoPattern::StopPlayback()
 {
+    isFastKeyUp_ = false;
     if (currentPlayStatus_ != PlaybackStatus::STARTED || !isPrepared_) {
         return;
     }
@@ -736,6 +743,7 @@ void MovingPhotoPattern::StopPlayback()
 
 void MovingPhotoPattern::StopAnimation()
 {
+    startAnimationFlag_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto movingPhoto = AceType::DynamicCast<MovingPhotoNode>(host);
@@ -910,7 +918,7 @@ void MovingPhotoPattern::OnVisibleChange(bool isVisible)
 {
     CHECK_NULL_VOID(mediaPlayer_);
     if (!isVisible) {
-        OnWindowHide();
+        StopPlayback();
     }
 }
 

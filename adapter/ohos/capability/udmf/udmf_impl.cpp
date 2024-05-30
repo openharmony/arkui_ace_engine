@@ -17,6 +17,7 @@
 
 #include <memory>
 #include <unordered_map>
+#include <variant>
 
 #include "html.h"
 #include "image.h"
@@ -27,6 +28,7 @@
 #include "text.h"
 #include "plain_text.h"
 #include "udmf_client.h"
+#include "application_defined_record.h"
 #include "unified_data.h"
 #include "unified_data_napi.h"
 #include "unified_types.h"
@@ -372,5 +374,35 @@ std::pair<int32_t, std::string> UdmfClientImpl::GetErrorInfo(int32_t errorCode)
         default:
             return { ERROR_CODE_DRAG_DATA_ERROR, "GetData failed, data error." };
     }
+}
+
+void UdmfClientImpl::AddSpanStringRecord(
+    const RefPtr<UnifiedData>& unifiedData, std::vector<uint8_t>& data)
+{
+    auto udData = AceType::DynamicCast<UnifiedDataImpl>(unifiedData);
+    CHECK_NULL_VOID(udData);
+    CHECK_NULL_VOID(udData->GetUnifiedData());
+    auto record = std::make_shared<UDMF::ApplicationDefinedRecord>("OPENHARMONY_STYLED_STRING_UDMF", data);
+    udData->GetUnifiedData()->AddRecord(record);
+}
+
+std::vector<uint8_t> UdmfClientImpl::GetSpanStringRecord(const RefPtr<UnifiedData>& unifiedData)
+{
+    std::vector<uint8_t> arr;
+    auto udData = AceType::DynamicCast<UnifiedDataImpl>(unifiedData);
+    CHECK_NULL_RETURN(udData, arr);
+    CHECK_NULL_RETURN(udData->GetUnifiedData(), arr);
+    auto records = udData->GetUnifiedData()->GetRecords();
+    for (auto record: records) {
+        UDMF::UDType type = record->GetType();
+        if (type == UDMF::UDType::APPLICATION_DEFINED_RECORD) {
+            UDMF::ApplicationDefinedRecord* app = reinterpret_cast<UDMF::ApplicationDefinedRecord*>(record.get());
+            if (app->GetApplicationDefinedType() == "OPENHARMONY_STYLED_STRING_UDMF") {
+                arr = app->GetRawData();
+                return arr;
+            }
+        }
+    }
+    return arr;
 }
 } // namespace OHOS::Ace

@@ -59,7 +59,7 @@ struct Index {
         .width(TITLE_ICON_SIZE)
         .interpolation(ImageInterpolation.Medium)
         .focusable(false)
-        .margin({ left: TITLE_PADDING_START, right: TITLE_ELEMENT_MARGIN_HORIZONTAL })
+        .margin({ left: TITLE_ELEMENT_MARGIN_HORIZONTAL, right: TITLE_ELEMENT_MARGIN_HORIZONTAL })
         .opacity(this.iconOpacity)
         .draggable(false)
 
@@ -78,6 +78,6 @@ struct Index {
     .height(TITLE_ROW_HEIGHT)
     .justifyContent(FlexAlign.Start)
     .alignItems(VerticalAlign.Center)
-    .padding({ top: 6, bottom: 6 })
+    .padding({ top: 6, bottom: 6, left: 8, right: 8 })
    }
 }

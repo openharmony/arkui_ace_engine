@@ -1040,6 +1040,9 @@ void NavigationModelNG::SetTitleMode(NG::NavigationTitleMode mode)
     // create back button
     backButtonNode = FrameNode::CreateFrameNode(
         V2::BACK_BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    auto focusHub = backButtonNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusDependence(FocusDependence::SELF);
     auto gestureEventHub = backButtonNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
     auto context = PipelineContext::GetCurrentContext();
@@ -1542,12 +1545,12 @@ void NavigationModelNG::SetNavigationStack()
     }
 }
 
-void NavigationModelNG::SetNavigationGroupNodeInfo(std::string moduleName, std::string pagePath)
+void NavigationModelNG::SetNavigationPathInfo(const std::string& moduleName, const std::string& pagePath)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);
-    navigationGroupNode->SetNavigationPageInfo(moduleName, pagePath);
+    navigationGroupNode->SetNavigationPathInfo(moduleName, pagePath);
 }
 
 void NavigationModelNG::SetNavigationStackProvided(bool provided)
@@ -1804,6 +1807,9 @@ void NavigationModelNG::SetTitleMode(FrameNode* frameNode, NG::NavigationTitleMo
     // create back button
     backButtonNode = FrameNode::CreateFrameNode(
         V2::BACK_BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    auto focusHub = backButtonNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusDependence(FocusDependence::SELF);
     auto gestureEventHub = backButtonNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
     auto context = PipelineContext::GetCurrentContext();

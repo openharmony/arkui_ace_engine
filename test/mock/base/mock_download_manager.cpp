@@ -35,6 +35,10 @@ public:
     {
         return false;
     }
+    bool RemoveDownloadTask(const std::string& /* url */) override
+    {
+        return false;
+    }
 };
 
 DownloadManager* DownloadManager::GetInstance()

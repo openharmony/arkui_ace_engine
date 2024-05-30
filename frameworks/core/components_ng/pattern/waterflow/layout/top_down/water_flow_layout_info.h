@@ -113,6 +113,11 @@ public:
     float JumpToTargetAlign(const std::pair<float, float>& item) const;
     void JumpTo(const std::pair<float, float>& item);
 
+    bool IsMisaligned() const override
+    {
+        return false;
+    }
+
     /**
      * @brief Init data structures based on new WaterFlow Sections.
      *

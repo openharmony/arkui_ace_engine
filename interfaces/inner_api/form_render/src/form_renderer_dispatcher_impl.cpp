@@ -23,7 +23,7 @@
 
 namespace OHOS {
 namespace Ace {
-constexpr int32_t PROCESS_WAIT_TIME = 10;
+constexpr int32_t PROCESS_WAIT_TIME = 20;
 constexpr float DOUBLE = 2.0;
 FormRendererDispatcherImpl::FormRendererDispatcherImpl(
     const std::shared_ptr<UIContent> uiContent,

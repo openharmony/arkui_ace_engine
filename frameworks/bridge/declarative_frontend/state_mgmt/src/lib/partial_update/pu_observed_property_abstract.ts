@@ -184,11 +184,11 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     }
     let rawObject: T = ObservedObject.GetRawObject(wrappedValue);
     if (rawObject instanceof Map) {
-      return MapInfo.toObject(rawObject) as unknown as T;
+      return MapInfo.toObject(rawObject).keyToValue as unknown as T;
     } else if (rawObject instanceof Set) {
-      return SetInfo.toObject(rawObject) as unknown as T;
+      return SetInfo.toObject(rawObject).values as unknown as T;
     } else if (rawObject instanceof Date) {
-      return DateInfo.toObject(rawObject) as unknown as T;
+      return DateInfo.toObject(rawObject).date as unknown as T;
     }
     return rawObject;
   }

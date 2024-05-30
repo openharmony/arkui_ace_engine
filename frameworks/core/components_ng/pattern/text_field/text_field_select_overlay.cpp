@@ -275,6 +275,15 @@ void TextFieldSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overla
     CHECK_NULL_VOID(paintProperty);
     overlayInfo.handlerColor = paintProperty->GetCursorColor();
     overlayInfo.menuOptionItems = textFieldPattern->GetMenuOptionItems();
+    auto layoutProperty =
+        DynamicCast<TextFieldLayoutProperty>(textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>());
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->HasMaxLines()) {
+        uint32_t maxLine = layoutProperty->GetMaxLinesValue(Infinity<uint32_t>());
+        if (1 == maxLine) {
+            overlayInfo.isSingleLine = true;
+        }
+    }
 }
 
 RectF TextFieldSelectOverlay::GetSelectArea()
@@ -412,13 +421,14 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     } else {
         auto position = GetCaretPositionOnHandleMove(localOffset);
         if (isFirst) {
-            selectController->MoveFirstHandleToContentRect(position);
+            selectController->MoveFirstHandleToContentRect(position, false);
             UpdateSecondHandleOffset();
         } else {
             selectController->MoveSecondHandleToContentRect(position);
             UpdateFirstHandleOffset();
         }
     }
+    pattern->PlayScrollBarAppearAnimation();
     auto tmpHost = pattern->GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -453,6 +463,7 @@ void TextFieldSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
         overlayManager->MarkInfoChange(DIRTY_SECOND_HANDLE);
     }
     overlayManager->ShowOptionMenu();
+    pattern->ScheduleDisappearDelayTask();
     auto tmpHost = pattern->GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);

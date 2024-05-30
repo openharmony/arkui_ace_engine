@@ -521,6 +521,16 @@ public:
     void DumpOverlayInfo() const;
     void ReloadBuilderNodeConfig();
 
+    bool IsMenuShow() const
+    {
+        return isMenuShow_;
+    }
+
+    void SetIsMenuShow(bool isMenuShow)
+    {
+        isMenuShow_ = isMenuShow;
+    }
+
 private:
     void PopToast(int32_t targetId);
 
@@ -570,6 +580,8 @@ private:
     void FireModalPageHide();
 
     void SetSheetBackgroundBlurStyle(const RefPtr<FrameNode>& sheetNode, const BlurStyleOption& bgBlurStyle);
+    void SetSheetBorderWidth(const RefPtr<FrameNode>& sheetNode, const RefPtr<SheetTheme>& sheetTheme,
+        const NG::SheetStyle& sheetStyle);
     void SetSheetBackgroundColor(const RefPtr<FrameNode>& sheetNode, const RefPtr<SheetTheme>& sheetTheme,
         const NG::SheetStyle& sheetStyle);
 
@@ -691,6 +703,7 @@ private:
     bool hasGatherNode_ {false};
     WeakPtr<FrameNode> gatherNodeWeak_;
     std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo_;
+    bool isMenuShow_ = false;
 };
 } // namespace OHOS::Ace::NG
 

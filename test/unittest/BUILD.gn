@@ -107,8 +107,10 @@ ohos_source_set("ace_unittest_trace") {
     "$ace_root/adapter/ohos/osal/ace_trace.cpp",
     "$ace_root/frameworks/base/log/ace_trace.cpp",
   ]
-  deps = [ "//third_party/bounds_checking_function:libsec_static" ]
-  external_deps = [ "hitrace:hitrace_meter" ]
+  external_deps = [
+    "bounds_checking_function:libsec_static",
+    "hitrace:hitrace_meter",
+  ]
   configs = [ ":ace_unittest_config" ]
 }
 
@@ -241,6 +243,7 @@ ohos_source_set("ace_components_manager") {
   sources = [
     "$ace_root/frameworks/core/components_ng/manager/display_sync/ui_display_sync.cpp",
     "$ace_root/frameworks/core/components_ng/manager/display_sync/ui_display_sync_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/drag_drop/drag_drop_func_wrapper.cpp",
     "$ace_root/frameworks/core/components_ng/manager/drag_drop/drag_drop_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/drag_drop/drag_drop_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/manager/drag_drop/utils/drag_animation_helper.cpp",
@@ -332,6 +335,7 @@ ohos_source_set("ace_base") {
     "$ace_root/frameworks/base/utils/string_expression.cpp",
     "$ace_root/frameworks/base/utils/string_utils.cpp",
     "$ace_root/frameworks/base/utils/time_util.cpp",
+    "$ace_root/frameworks/base/utils/utf.cpp",
     "$ace_root/frameworks/base/utils/utils.cpp",
   ]
 
@@ -747,6 +751,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/navigation/nav_bar_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/nav_bar_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/navigation_content_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/navigation/navigation_event_hub.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/navigation_group_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/navigation_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/navigation_model_ng.cpp",
@@ -1081,9 +1086,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/test/mock/core/pattern/mock_web_pattern.cpp",
   ]
 
-  deps = [
-    "$ace_root/frameworks/core/components/theme:build_theme_code",
-    "//third_party/bounds_checking_function:libsec_static",
-  ]
+  deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+  external_deps = [ "bounds_checking_function:libsec_static" ]
   configs = [ ":ace_unittest_config" ]
 }

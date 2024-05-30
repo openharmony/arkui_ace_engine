@@ -56,7 +56,8 @@ public:
     bool CheckRange(int32_t start, int32_t length, bool allowLengthZero = false) const;
     void BindWithSpans(const std::vector<RefPtr<SpanBase>>& spans);
     bool EncodeTlv(std::vector<uint8_t>& buff);
-    static SpanString* DecodeTlv(std::vector<uint8_t>& buff);
+    static RefPtr<SpanString> DecodeTlv(std::vector<uint8_t>& buff);
+    static void DecodeSpanItemList(std::vector<uint8_t>& buff, int32_t& cursor, RefPtr<SpanString>& spanStr);
     void ClearSpans();
     void AppendSpanItem(const RefPtr<NG::SpanItem>& spanItem);
 protected:

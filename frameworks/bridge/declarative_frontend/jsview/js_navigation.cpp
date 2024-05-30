@@ -272,14 +272,16 @@ void JSNavigation::Create(const JSCallbackInfo& info)
         if (!JSNavPathStack::CheckIsValid(valueWrapper)) {
             TAG_LOGE(AceLogTag::ACE_NAVIGATION, "current stack is not navPathStack");
             auto infoObj = JSRef<JSObject>::Cast(info[0]);
-            if (!infoObj->GetProperty("moduleName")->IsString() || !infoObj->GetProperty("pagePath")->IsString()) {
+            if (!infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->IsString() ||
+                !infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->IsString()) {
                 TAG_LOGE(AceLogTag::ACE_NAVIGATION, "current pageInfo is invalid");
                 return;
             }
-            moduleName = infoObj->GetProperty("moduleName")->ToString();
-            pagePath = infoObj->GetProperty("pagePath")->ToString();
+            moduleName = infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->ToString();
+            pagePath = infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->ToString();
+        } else {
+            newObj = JSRef<JSObject>::Cast(info[0]);
         }
-        newObj = JSRef<JSObject>::Cast(info[0]);
     } else if (info.Length() > 1) {
         if (!info[0]->IsObject() || !info[1]->IsObject()) {
             TAG_LOGE(AceLogTag::ACE_NAVIGATION, "stack or pageInfo is invalid");
@@ -293,12 +295,13 @@ void JSNavigation::Create(const JSCallbackInfo& info)
         }
         newObj = JSRef<JSObject>::Cast(info[0]);
         auto infoObj = JSRef<JSObject>::Cast(info[1]);
-        if (!infoObj->GetProperty("moduleName")->IsString() || !infoObj->GetProperty("pagePath")->IsString()) {
+        if (!infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->IsString() ||
+            !infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->IsString()) {
             TAG_LOGE(AceLogTag::ACE_NAVIGATION, "current pageInfo is invalid");
             return;
         }
-        moduleName = infoObj->GetProperty("moduleName")->ToString();
-        pagePath = infoObj->GetProperty("pagePath")->ToString();
+        moduleName = infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->ToString();
+        pagePath = infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->ToString();
     }
 
     NavigationModel::GetInstance()->Create();
@@ -329,7 +332,7 @@ void JSNavigation::Create(const JSCallbackInfo& info)
         jsStack->SetJSExecutionContext(info.GetExecutionContext());
     };
     NavigationModel::GetInstance()->SetNavigationStackWithCreatorAndUpdater(stackCreator, stackUpdater);
-    NavigationModel::GetInstance()->SetNavigationGroupNodeInfo(moduleName, pagePath);
+    NavigationModel::GetInstance()->SetNavigationPathInfo(moduleName, pagePath);
 }
 
 void JSNavigation::JSBind(BindingTarget globalObj)
