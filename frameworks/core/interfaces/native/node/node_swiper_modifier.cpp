@@ -899,11 +899,11 @@ ArkUI_Int32 GetCachedCount(ArkUINodeHandle node)
     return SwiperModelNG::GetCachedCount(frameNode);
 }
 
-void SetSwiperNestedScroll(ArkUINodeHandle node, ArkUI_Int32* values)
+void SetSwiperNestedScroll(ArkUINodeHandle node, ArkUI_Int32 (*values)[1])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    SwiperModelNG::SetNestedScroll(frameNode, values[0]);
+    SwiperModelNG::SetNestedScroll(frameNode, (*values)[0]);
 }
 
 void ResetSwiperNestedScroll(ArkUINodeHandle node)
@@ -920,11 +920,11 @@ ArkUI_Int32 GetSwiperNestedScroll(ArkUINodeHandle node)
     return SwiperModelNG::GetNestedScroll(frameNode);
 }
 
-void SetSwiperToIndex(ArkUINodeHandle node, ArkUI_Int32* values)
+void SetSwiperToIndex(ArkUINodeHandle node, ArkUI_Int32 (*values)[2])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    SwiperModelNG::SetSwiperToIndex(frameNode, values[0], values[1]);
+    SwiperModelNG::SetSwiperToIndex(frameNode, (*values)[0], (*values)[1]);
 }
 void GetSwiperPrevMargin(ArkUINodeHandle node, ArkUI_Int32 unit, ArkUISwiperMarginOptions* options)
 {

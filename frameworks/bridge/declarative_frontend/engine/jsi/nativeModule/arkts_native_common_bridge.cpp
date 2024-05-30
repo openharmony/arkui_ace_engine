@@ -2532,7 +2532,7 @@ ArkUINativeModuleValue CommonBridge::SetForegroundBlurStyle(ArkUIRuntimeCallInfo
     intArray[NUM_1] = colorMode;
     intArray[NUM_2] = adaptiveColor;
     GetArkUINodeModifiers()->getCommonModifier()->setForegroundBlurStyle(
-        nativeNode, intArray, scale, blurOption.grayscale.data(), blurOption.grayscale.size());
+        nativeNode, &intArray, scale, blurOption.grayscale.data(), blurOption.grayscale.size());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -2630,7 +2630,7 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundBlurStyle(ArkUIRuntimeCallInfo
     intArray[NUM_1] = colorMode;
     intArray[NUM_2] = adaptiveColor;
     GetArkUINodeModifiers()->getCommonModifier()->setBackgroundBlurStyle(
-        nativeNode, intArray, scale, blurOption.grayscale.data(), blurOption.grayscale.size());
+        nativeNode, &intArray, scale, blurOption.grayscale.data(), blurOption.grayscale.size());
     return panda::JSValueRef::Undefined(vm);
 }
 
