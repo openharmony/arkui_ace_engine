@@ -368,11 +368,20 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
         GreatNotEqual((height - currentOffset_), sheetMaxHeight_) ? sheetMaxHeight_ : (height - currentOffset_);
     start_ = currentSheetHeight;
     TAG_LOGD(AceLogTag::ACE_SHEET, "Sheet HandleDragEnd, current height is: %{public}f", currentSheetHeight);
+
+    //when drag the sheet page, find the lower and upper index range
     auto lowerIter = std::lower_bound(sheetDetentHeight_.begin(), sheetDetentHeight_.end(), currentSheetHeight);
     auto upperIter = std::upper_bound(sheetDetentHeight_.begin(), sheetDetentHeight_.end(), currentSheetHeight);
+
+    //record the drag position
+    int32_t detentsLowerPos = 0;
+    int32_t detentsUpperPos = 0;
     if (lowerIter == sheetDetentHeight_.end()) {
+        //when drag over the highest sheet page
         upHeight = sheetDetentHeight_[sheetDetentsSize - 1];
         downHeight = sheetDetentHeight_[sheetDetentsSize - 1];
+        detentsLowerPos = sheetDetentsSize - 1;
+        detentsUpperPos = sheetDetentsSize - 1;
     } else {
         auto lowerPosition = std::distance(sheetDetentHeight_.begin(), lowerIter);
         auto upperPosition = std::distance(sheetDetentHeight_.begin(), upperIter);
@@ -380,42 +389,60 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
             upHeight = sheetDetentHeight_[lowerPosition];
             downHeight = 0;
         } else {
+            //the first largest height greater than the currentsheet height
             upHeight = sheetDetentHeight_[upperPosition];
+
+            //the largest height lower than the currentsheet height
             downHeight = sheetDetentHeight_[lowerPosition - 1];
+            detentsLowerPos = lowerPosition - 1;
+            detentsUpperPos = upperPosition;
         }
     }
-    // current sheet animation
+
+    // when drag velocity is under the threshold and the sheet height is not in the middle of lower and upper bound.
     if ((LessNotEqual(std::abs(dragVelocity), SHEET_VELOCITY_THRESHOLD)) &&
         (!NearEqual(std::abs(currentSheetHeight - upHeight), std::abs(currentSheetHeight - downHeight)))) {
+        // check whether the lower or upper index is closer to the current height of the sheet page
         if (GreatNotEqual(std::abs(currentSheetHeight - upHeight), std::abs(currentSheetHeight - downHeight))) {
             if (NearZero(downHeight)) {
                 SheetInteractiveDismiss(BindSheetDismissReason::SLIDE_DOWN, std::abs(dragVelocity));
             } else {
+                detentsIndex_ = detentsLowerPos;
                 ChangeSheetHeight(downHeight);
                 ChangeSheetPage(height);
                 SheetTransition(true, std::abs(dragVelocity));
             }
         } else if (LessNotEqual(std::abs(currentSheetHeight - upHeight), std::abs(currentSheetHeight - downHeight))) {
+            detentsIndex_ = detentsUpperPos;
             ChangeSheetHeight(upHeight);
             ChangeSheetPage(height);
             SheetTransition(true, std::abs(dragVelocity));
         }
     } else {
+        // when drag velocity is over the threshold
         if (GreatOrEqual(dragVelocity, 0.0f)) {
             if (NearZero(downHeight)) {
                 SheetInteractiveDismiss(BindSheetDismissReason::SLIDE_DOWN, std::abs(dragVelocity));
             } else {
+                detentsIndex_ = detentsLowerPos;
                 ChangeSheetHeight(downHeight);
                 ChangeSheetPage(height);
                 SheetTransition(true, std::abs(dragVelocity));
             }
         } else {
+            detentsIndex_ = detentsUpperPos;
             ChangeSheetHeight(upHeight);
-            if (!NearEqual(upHeight, downHeight)) {
-                ChangeSheetPage(height);
-            }
+            ChangeSheetPage(height);
             SheetTransition(true, std::abs(dragVelocity));
         }
+    }
+
+    //match the sorted detents index to the unsorted one
+    auto detentHeight = sheetDetentHeight_[detentsIndex_];
+    auto pos = std::find(unSortedSheetDentents_.begin(), unSortedSheetDentents_.end(), detentHeight);
+    if (pos != std::end(unSortedSheetDentents_)) {
+        auto idx = std::distance(unSortedSheetDentents_.begin(), pos);
+        detentsFinalIndex_ = idx;
     }
 }
 
@@ -957,6 +984,7 @@ void SheetPresentationPattern::CheckSheetHeightChange()
 void SheetPresentationPattern::InitSheetDetents()
 {
     sheetDetentHeight_.clear();
+    unSortedSheetDentents_.clear();
     float height = 0.0f;
     auto sheetNode = GetHost();
     CHECK_NULL_VOID(sheetNode);
@@ -1010,6 +1038,7 @@ void SheetPresentationPattern::InitSheetDetents()
                     }
                 }
                 sheetDetentHeight_.emplace_back(height);
+                unSortedSheetDentents_.emplace_back(height);
             }
             std::sort(sheetDetentHeight_.begin(), sheetDetentHeight_.end(), std::less<float>());
             sheetDetentHeight_.erase(
