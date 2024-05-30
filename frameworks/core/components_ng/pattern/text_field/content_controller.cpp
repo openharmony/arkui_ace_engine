@@ -67,7 +67,8 @@ std::string ContentController::PreprocessString(int32_t startIndex, int32_t endI
     auto addLength = static_cast<uint32_t>(wideTmp.length());
     auto delLength = static_cast<uint32_t>(std::abs(endIndex - startIndex));
     addLength = std::min(addLength, maxLength - curLength + delLength);
-    tmp = StringUtils::ToString(wideTmp.substr(0, addLength));
+    wideTmp = TextEmojiProcessor::SubWstring(0, addLength, wideTmp); // clamp emoji
+    tmp = StringUtils::ToString(wideTmp);
     return tmp;
 }
 
