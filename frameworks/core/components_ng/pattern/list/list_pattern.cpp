@@ -1682,7 +1682,7 @@ void ListPattern::ScrollPage(bool reverse, bool smooth)
 {
     float distance = reverse ? contentMainSize_ : -contentMainSize_;
     if (smooth) {
-        float position = -GetCurrentOffset().GetY() + distance;
+        float position = -GetTotalOffset() + distance;
         AnimateTo(-position, -1, nullptr, true);
     } else {
         StopAnimate();
