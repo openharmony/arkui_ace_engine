@@ -232,6 +232,42 @@ void ParseDialogTitleAndMessage(DialogProperties& properties, JSRef<JSObject> ob
     }
 }
 
+void ParseAlertShadow(DialogProperties& properties, JSRef<JSObject> obj)
+{
+    // Parse shadow.
+    auto shadowValue = obj->GetProperty("shadow");
+    Shadow shadow;
+    if ((shadowValue->IsObject() || shadowValue->IsNumber()) && JSAlertDialog::ParseShadowProps(shadowValue, shadow)) {
+        properties.shadow = shadow;
+    }
+}
+
+void ParseAlertBorderWidthAndColor(DialogProperties& properties, JSRef<JSObject> obj)
+{
+    auto borderWidthValue = obj->GetProperty("borderWidth");
+    NG::BorderWidthProperty borderWidth;
+    if (JSAlertDialog::ParseBorderWidthProps(borderWidthValue, borderWidth)) {
+        properties.borderWidth = borderWidth;
+        auto colorValue = obj->GetProperty("borderColor");
+        NG::BorderColorProperty borderColor;
+        if (JSAlertDialog::ParseBorderColorProps(colorValue, borderColor)) {
+            properties.borderColor = borderColor;
+        } else {
+            borderColor.SetColor(Color::BLACK);
+            properties.borderColor = borderColor;
+        }
+    }
+}
+
+void ParseAlertRadius(DialogProperties& properties, JSRef<JSObject> obj)
+{
+    auto cornerRadiusValue = obj->GetProperty("cornerRadius");
+    NG::BorderRadiusProperty radius;
+    if (JSAlertDialog::ParseBorderRadius(cornerRadiusValue, radius)) {
+        properties.borderRadius = radius;
+    }
+}
+
 void JSAlertDialog::Show(const JSCallbackInfo& args)
 {
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
@@ -249,9 +285,15 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
 
         ParseDialogTitleAndMessage(properties, obj);
         ParseButtons(execContext, properties, obj);
+        ParseAlertShadow(properties, obj);
+        ParseAlertBorderWidthAndColor(properties, obj);
+        ParseAlertRadius(properties, obj);
 
         auto onLanguageChange = [execContext, obj, parseContent = ParseDialogTitleAndMessage,
-                                    parseButton = ParseButtons, node = dialogNode](DialogProperties& dialogProps) {
+                                    parseButton = ParseButtons, parseShadow = ParseAlertShadow,
+                                    parseBorderProps = ParseAlertBorderWidthAndColor,
+                                    parseRadius = ParseAlertRadius,
+                                    node = dialogNode](DialogProperties& dialogProps) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execContext);
             ACE_SCORING_EVENT("AlertDialog.property.onLanguageChange");
             auto pipelineContext = PipelineContext::GetCurrentContextSafely();
@@ -259,6 +301,9 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
             pipelineContext->UpdateCurrentActiveNode(node);
             parseContent(dialogProps, obj);
             parseButton(execContext, dialogProps, obj);
+            parseShadow(dialogProps, obj);
+            parseBorderProps(dialogProps, obj);
+            parseRadius(dialogProps, obj);
         };
         properties.onLanguageChange = std::move(onLanguageChange);
 

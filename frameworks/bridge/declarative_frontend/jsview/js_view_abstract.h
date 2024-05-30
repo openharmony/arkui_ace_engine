@@ -317,6 +317,7 @@ public:
     static bool IsGetResourceByName(const JSRef<JSObject>& jsObj);
     static void GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bundleName, std::string& moduleName);
     static bool ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shadow);
+    static void ParseShadowOffsetX(const JSRef<JSObject>& jsObj, CalcDimension& offsetX, Shadow& shadow);
     static bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow);
     static bool ParseJsResource(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static bool ParseDataDetectorConfig(const JSCallbackInfo& info, std::string& types,
@@ -586,6 +587,8 @@ public:
     static bool ParseBorderColorProps(const JSRef<JSVal>& args, NG::BorderColorProperty& colorProperty);
     static bool ParseBorderStyleProps(const JSRef<JSVal>& args, NG::BorderStyleProperty& borderStyleProperty);
     static bool ParseBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius);
+    static void ParseCommonBorderRadiusProps(const JSRef<JSObject>& object, NG::BorderRadiusProperty& radius);
+    static void ParseBorderRadiusProps(const JSRef<JSObject>& object, NG::BorderRadiusProperty& radius);
     static void SetDialogProperties(const JSRef<JSObject>& obj, DialogProperties& properties);
     static std::function<void(NG::DrawingContext& context)> GetDrawCallback(
         const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx);

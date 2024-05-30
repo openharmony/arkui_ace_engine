@@ -511,7 +511,9 @@ bool ParseJsLengthMetrics(const JSRef<JSObject>& obj, CalcDimension& result)
 
 bool CheckLengthMetrics(const JSRef<JSObject>& object)
 {
-    if (object->HasProperty(START_PROPERTY) || object->HasProperty(END_PROPERTY)) {
+    if (object->HasProperty(START_PROPERTY) || object->HasProperty(END_PROPERTY) ||
+        object->HasProperty(TOP_START_PROPERTY) || object->HasProperty(TOP_END_PROPERTY) ||
+       	object->HasProperty(BOTTOM_START_PROPERTY) || object->HasProperty(BOTTOM_END_PROPERTY)) {
         return true;
     }
     if (object->HasProperty(TOP_PROPERTY) && object->GetProperty(TOP_PROPERTY)->IsObject()) {
@@ -8663,6 +8665,20 @@ bool JSViewAbstract::ParseJsonColor(const std::unique_ptr<JsonValue>& jsonValue,
     return true;
 }
 
+void JSViewAbstract::ParseShadowOffsetX(const JSRef<JSObject>& jsObj, CalcDimension& offsetX, Shadow& shadow)
+{
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (ParseJsResource(jsObj->GetProperty("offsetX"), offsetX)) {
+        double xValue = isRtl ? offsetX.Value() * (-1) : offsetX.Value();
+        shadow.SetOffsetX(xValue);
+    } else {
+        if (ParseJsDimensionVp(jsObj->GetProperty("offsetX"), offsetX)) {
+            double xValue = isRtl ? offsetX.Value() * (-1) : offsetX.Value();
+            shadow.SetOffsetX(xValue);
+        }
+    }
+}
+
 bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shadow)
 {
     int32_t shadowStyle = 0;
@@ -8681,14 +8697,7 @@ bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shado
     }
     shadow.SetBlurRadius(radius);
     CalcDimension offsetX;
-    if (ParseJsResource(jsObj->GetProperty("offsetX"), offsetX)) {
-        shadow.SetOffsetX(offsetX.Value());
-    } else {
-        if (ParseJsDimensionVp(jsObj->GetProperty("offsetX"), offsetX)) {
-            shadow.SetOffsetX(offsetX.Value());
-        }
-    }
-
+    ParseShadowOffsetX(jsObj, offsetX, shadow);
     CalcDimension offsetY;
     if (ParseJsResource(jsObj->GetProperty("offsetY"), offsetY)) {
         shadow.SetOffsetY(offsetY.Value());
@@ -9583,42 +9592,99 @@ bool JSViewAbstract::ParseBorderStyleProps(const JSRef<JSVal>& args, NG::BorderS
     return false;
 }
 
+void JSViewAbstract::ParseBorderRadiusProps(const JSRef<JSObject>& object, NG::BorderRadiusProperty& radius)
+{
+    std::optional<CalcDimension> radiusTopLeft;
+    std::optional<CalcDimension> radiusTopRight;
+    std::optional<CalcDimension> radiusBottomLeft;
+    std::optional<CalcDimension> radiusBottomRight;
+    CalcDimension topLeft;
+    if (ParseJsDimensionVpNG(object->GetProperty("topLeft"), topLeft, true)) {
+        radiusTopLeft = topLeft;
+    }
+    CalcDimension topRight;
+    if (ParseJsDimensionVpNG(object->GetProperty("topRight"), topRight, true)) {
+        radiusTopRight = topRight;
+    }
+    CalcDimension bottomLeft;
+    if (ParseJsDimensionVpNG(object->GetProperty("bottomLeft"), bottomLeft, true)) {
+        radiusBottomLeft = bottomLeft;
+    }
+    CalcDimension bottomRight;
+    if (ParseJsDimensionVpNG(object->GetProperty("bottomRight"), bottomRight, true)) {
+        radiusBottomRight = bottomRight;
+    }
+    CheckLengthMetrics(object);
+    radius.radiusTopLeft = radiusTopLeft;
+    radius.radiusTopRight = radiusTopRight;
+    radius.radiusBottomLeft = radiusBottomLeft;
+    radius.radiusBottomRight = radiusBottomRight;
+    radius.multiValued = true;
+    return;
+}
+
+void JSViewAbstract::ParseCommonBorderRadiusProps(const JSRef<JSObject>& object, NG::BorderRadiusProperty& radius)
+{
+    if (CheckLengthMetrics(object)) {
+        std::optional<CalcDimension> radiusTopStart;
+        std::optional<CalcDimension> radiusTopEnd;
+        std::optional<CalcDimension> radiusBottomStart;
+        std::optional<CalcDimension> radiusBottomEnd;
+        if (object->HasProperty(TOP_START_PROPERTY) && object->GetProperty(TOP_START_PROPERTY)->IsObject()) {
+            JSRef<JSObject> topStartObj = JSRef<JSObject>::Cast(object->GetProperty(TOP_START_PROPERTY));
+            CalcDimension calcDimension;
+            if (ParseJsLengthMetrics(topStartObj, calcDimension)) {
+                CheckDimensionUnit(calcDimension, false, true);
+                radiusTopStart = calcDimension;
+            }
+        }
+        if (object->HasProperty(TOP_END_PROPERTY) && object->GetProperty(TOP_END_PROPERTY)->IsObject()) {
+            JSRef<JSObject> topEndObj = JSRef<JSObject>::Cast(object->GetProperty(TOP_END_PROPERTY));
+            CalcDimension calcDimension;
+            if (ParseJsLengthMetrics(topEndObj, calcDimension)) {
+                CheckDimensionUnit(calcDimension, false, true);
+                radiusTopEnd = calcDimension;
+            }
+        }
+        if (object->HasProperty(BOTTOM_START_PROPERTY) && object->GetProperty(BOTTOM_START_PROPERTY)->IsObject()) {
+            JSRef<JSObject> bottomStartObj = JSRef<JSObject>::Cast(object->GetProperty(BOTTOM_START_PROPERTY));
+            CalcDimension calcDimension;
+            if (ParseJsLengthMetrics(bottomStartObj, calcDimension)) {
+                CheckDimensionUnit(calcDimension, false, true);
+                radiusBottomStart = calcDimension;
+            }
+        }
+        if (object->HasProperty(BOTTOM_END_PROPERTY) && object->GetProperty(BOTTOM_END_PROPERTY)->IsObject()) {
+            JSRef<JSObject> bottomEndObj = JSRef<JSObject>::Cast(object->GetProperty(BOTTOM_END_PROPERTY));
+            CalcDimension calcDimension;
+            if (ParseJsLengthMetrics(bottomEndObj, calcDimension)) {
+                CheckDimensionUnit(calcDimension, false, true);
+                radiusBottomEnd = calcDimension;
+            }
+        }
+        auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+        radius.radiusTopLeft = isRightToLeft ? radiusTopEnd : radiusTopStart;
+        radius.radiusTopRight = isRightToLeft ? radiusTopStart : radiusTopEnd;
+        radius.radiusBottomLeft = isRightToLeft ? radiusBottomEnd : radiusBottomStart;
+        radius.radiusBottomRight = isRightToLeft ? radiusBottomStart : radiusBottomEnd;
+        radius.multiValued = true;
+        return;
+    }
+    ParseBorderRadiusProps(object, radius);
+}
+
 bool JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius)
 {
     if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
         return false;
     }
-    std::optional<CalcDimension> radiusTopLeft;
-    std::optional<CalcDimension> radiusTopRight;
-    std::optional<CalcDimension> radiusBottomLeft;
-    std::optional<CalcDimension> radiusBottomRight;
     CalcDimension borderRadius;
     if (ParseJsDimensionVpNG(args, borderRadius, true)) {
         radius = NG::BorderRadiusProperty(borderRadius);
         radius.multiValued = false;
     } else if (args->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-        CalcDimension topLeft;
-        if (ParseJsDimensionVpNG(object->GetProperty("topLeft"), topLeft, true)) {
-            radiusTopLeft = topLeft;
-        }
-        CalcDimension topRight;
-        if (ParseJsDimensionVpNG(object->GetProperty("topRight"), topRight, true)) {
-            radiusTopRight = topRight;
-        }
-        CalcDimension bottomLeft;
-        if (ParseJsDimensionVpNG(object->GetProperty("bottomLeft"), bottomLeft, true)) {
-            radiusBottomLeft = bottomLeft;
-        }
-        CalcDimension bottomRight;
-        if (ParseJsDimensionVpNG(object->GetProperty("bottomRight"), bottomRight, true)) {
-            radiusBottomRight = bottomRight;
-        }
-        radius.radiusTopLeft = radiusTopLeft;
-        radius.radiusTopRight = radiusTopRight;
-        radius.radiusBottomLeft = radiusBottomLeft;
-        radius.radiusBottomRight = radiusBottomRight;
-        radius.multiValued = true;
+        ParseCommonBorderRadiusProps(object, radius);
     } else {
         return false;
     }

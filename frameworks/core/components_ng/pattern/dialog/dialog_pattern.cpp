@@ -276,11 +276,13 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
         auto layoutProps = contentNode->GetLayoutProperty<LinearLayoutProperty>();
         layoutProps->UpdateBorderWidth(props.borderWidth.value());
         contentRenderContext->UpdateBorderWidth(props.borderWidth.value());
+        contentNodeMap_[DialogContentNode::BORDERWIDTH] = contentNode;
     } else {
         BorderWidthProperty borderWidth;
         Dimension width = dialogTheme_->GetBackgroudBorderWidth();
         borderWidth.SetBorderWidth(width);
         contentRenderContext->UpdateBorderWidth(borderWidth);
+        contentNodeMap_[DialogContentNode::BORDERWIDTH] = contentNode;
     }
     if (props.borderStyle.has_value()) {
         contentRenderContext->UpdateBorderStyle(props.borderStyle.value());
@@ -1214,6 +1216,25 @@ void DialogPattern::OnLanguageConfigurationUpdate()
 
     if (dialogProperties_.type == DialogType::ACTION_SHEET) {
         UpdateSheetIconAndText();
+    }
+
+    if (dialogProperties_.shadow.has_value()) {
+        contentRenderContext_->UpdateBackShadow(dialogProperties_.shadow.value());
+    }
+
+    if (dialogProperties_.borderWidth.has_value() &&
+        contentNodeMap_.find(DialogContentNode::BORDERWIDTH) != contentNodeMap_.end()) {
+        auto layoutProps = contentNodeMap_[DialogContentNode::BORDERWIDTH]->GetLayoutProperty<LinearLayoutProperty>();
+        layoutProps->UpdateBorderWidth(dialogProperties_.borderWidth.value());
+        contentRenderContext_->UpdateBorderWidth(dialogProperties_.borderWidth.value());
+    }
+
+    if (dialogProperties_.borderColor.has_value()) {
+        contentRenderContext_->UpdateBorderColor(dialogProperties_.borderColor.value());
+    }
+
+    if (dialogProperties_.borderRadius.has_value()) {
+        contentRenderContext_->UpdateBorderRadius(dialogProperties_.borderRadius.value());
     }
 }
 
