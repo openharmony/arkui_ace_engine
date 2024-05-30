@@ -43,12 +43,11 @@ const BUTTON_HEIGHT: number = 28;
 const ARROW_ICON_WIDTH: number = 12;
 const ARROW_ICON_HEIGHT: number = 24;
 const SINGLE_ICON_ZONE_SIZE: number = 28;
-const RIGHT_SINGLE_ICON_SIZE: number = 24;
+const RIGHT_SINGLE_ICON_SIZE: ResourceStr = '24vp';
 const LOADING_SIZE: number = 24;
 const PADDING_LEVEL_2: number = 4;
 const MAX_RIGHT_WIDTH: Length = '34%';
 const MIN_FONT_SIZE: number = 1.75;
-const MAX_FONT_SIZE: number = 3.25;
 
 export enum OperationType {
   TEXT_ARROW = 0,
@@ -138,10 +137,11 @@ function disabledStyle() {
 }
 
 class SubHeaderModifier implements AttributeModifier<RowAttribute> {
-  public isAgeing: boolean = false;
+  public isAgeing: boolean = false
+
   applyNormalAttribute(instance: RowAttribute): void {
     if (this.isAgeing) {
-      instance.width('100%')
+      instance.width("100%")
     } else {
     }
   }
@@ -160,7 +160,6 @@ export struct SubHeader {
   @Prop operationType: OperationType = OperationType.BUTTON;
   operationItem: Array<OperationOption> | null = null;
   operationSymbolOptions?: Array<SymbolOptions> | null = null;
-
   callbackId: number | undefined = undefined;
   @State fontSize: number = 1;
   @State ageing: boolean = true;
@@ -202,66 +201,34 @@ export struct SubHeader {
     .padding({
       end: LengthMetrics.resource($r('sys.float.padding_level0')),
       top: this.ageing ? LengthMetrics.resource($r('sys.float.padding_level8')) :
-        LengthMetrics.resource($r('sys.float.padding_level4')),
+      LengthMetrics.resource($r('sys.float.padding_level4')),
       bottom: this.ageing ? LengthMetrics.resource($r('sys.float.padding_level1')) :
-        LengthMetrics.resource($r('sys.float.padding_level4')),
+      LengthMetrics.resource($r('sys.float.padding_level4')),
     })
   }
 
   @Styles
   private commonListPadding() {
-  .padding({
-    end: LengthMetrics.resource($r('sys.float.padding_level6')),
-    top: this.ageing ? LengthMetrics.resource($r('sys.float.padding_level8')) :
+    .padding({
+      end: LengthMetrics.resource($r('sys.float.padding_level6')),
+      top: this.ageing ? LengthMetrics.resource($r('sys.float.padding_level8')) :
       LengthMetrics.resource($r('sys.float.padding_level4')),
-    bottom: this.ageing ? LengthMetrics.resource($r('sys.float.padding_level1')) :
+      bottom: this.ageing ? LengthMetrics.resource($r('sys.float.padding_level0')) :
       LengthMetrics.resource($r('sys.float.padding_level4')),
-  })
-}
-
-  private envCallback: EnvironmentCallback = {
-    onConfigurationUpdated(config) {
-      this.fontSize = config.fontSizeScale;
-      if(this.fontSize >= MIN_FONT_SIZE) {
-        this.ageing = true;
-      } else {
-        this.ageing = false;
-      }
-      this.subHeaderModifier.isAgeing = this.ageing;
-    },
-    onMemoryLevel(level) {
-    }
+    })
   }
 
   async aboutToAppear(): Promise<void> {
-    let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
-    hilog.info(0x3900, 'Ace', `initConfig  context.config fontSizeScale: ${JSON.stringify(context.config.fontSizeScale)}`);
-    if (context.config.fontSizeScale) {
-      this.fontSize = context.config.fontSizeScale;
-      if(this.fontSize >= MIN_FONT_SIZE) {
-        this.ageing = true;
-      } else {
-        this.ageing = false;
-      }
-      this.subHeaderModifier.isAgeing = this.ageing;
-    }
-    this.callbackId = getContext().getApplicationContext().on('environment', this.envCallback);
     if (this.select) {
       this.selectedIndex = this.select.selected;
       this.selectValue = this.select.value;
     }
   }
 
-  aboutToDisappear(): void {
-    if (this.callbackId) {
-      getContext().getApplicationContext().off('environment', this.callbackId);
-    }
-  }
-
   build() {
     if (this.ageing && (this.operationType === OperationType.TEXT_ARROW ||
       this.operationType === OperationType.BUTTON)) {
-      Column(){
+      Column() {
         Row() {
           this.leftArea();
         }
@@ -298,8 +265,11 @@ export struct SubHeader {
 
   }
 
-  onMeasureSize(selfLayoutInfo: GeometryInfo, children: Measurable[], constraint: ConstraintSizeOptions) : SizeResult {
+  onMeasureSize(selfLayoutInfo: GeometryInfo, children: Measurable[], constraint: ConstraintSizeOptions): SizeResult {
     let result: SizeResult = { width: selfLayoutInfo.width, height: selfLayoutInfo.height };
+    let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
+    this.fontSize = context.config?.fontSizeScale ?? 1;
+    this.ageing = this.fontSize >= MIN_FONT_SIZE ? true : false;
     children.forEach((child) => {
       if (!this.contentMargin) {
         let width: number = Number(constraint.maxWidth);
@@ -514,6 +484,8 @@ export struct SubHeader {
   SelectStyle(selectParam: SelectOptions): void {
     Column() {
       Select(selectParam.options)
+        .height('auto')
+        .width('auto')
         .selected(this.selectedIndex)
         .value(this.selectValue)
         .onSelect((index: number, value?: string) => {
@@ -571,9 +543,11 @@ export struct SubHeader {
               .focusable(true)
           }
           .padding({
-            start: LengthMetrics.resource($r('sys.float.padding_level1')),
+            start: LengthMetrics.resource(this.ageing ? $r('sys.float.padding_level0') :
+            $r('sys.float.padding_level1')),
             end: LengthMetrics.resource($r('sys.float.padding_level1')),
-            top: LengthMetrics.resource($r('sys.float.padding_level2')),
+            top: LengthMetrics.resource(this.ageing ? $r('sys.float.padding_level1') :
+            $r('sys.float.padding_level2')),
             bottom: LengthMetrics.resource($r('sys.float.padding_level2'))
           })
           .margin({
@@ -630,7 +604,7 @@ export struct SubHeader {
       .focusable(true)
     }
     .margin({
-      start: LengthMetrics.resource($r('sys.float.padding_level4')),
+      start: LengthMetrics.resource(this.ageing ? $r('sys.float.padding_level0') : $r('sys.float.padding_level4')),
     })
     .justifyContent(FlexAlign.End)
   }
@@ -697,7 +671,7 @@ export struct SubHeader {
             .border({
               radius: $r('sys.float.corner_radius_level4'),
               width: $r('sys.float.outline_extra_larger'),
-              color: this.subHeaderTheme.borderFocusColor ,
+              color: this.subHeaderTheme.borderFocusColor,
             })
           },
           pressed: pressedStyle,
@@ -878,13 +852,25 @@ struct SingleIconStyle {
     }
   }
 
+  private symbolFontSize(fontSize: Length): Length {
+    if (typeof fontSize === 'string') {
+      const fontSizeNumber: number = parseInt(fontSize);
+      return fontSizeNumber + 'vp';
+    } else if (typeof fontSize === 'number') {
+      return fontSize + 'vp';
+    } else {
+      return resourceManager.getSystemResourceManager().getNumber(fontSize)+ 'vp';
+    }
+  }
+
   @Builder
   IconZone(): void {
     if (this.item && this.item.iconOptions) {
       if (Util.isSymbolResource(this.item.iconOptions.icon)) {
         SymbolGlyph(this.item.iconOptions?.icon)
           .focusable(true)
-          .fontSize(this.item.iconOptions?.symbolicIconOption?.fontSize ?? RIGHT_SINGLE_ICON_SIZE)
+          .fontSize(this.item.iconOptions?.symbolicIconOption?.fontSize ?
+            this.symbolFontSize(this.item.iconOptions?.symbolicIconOption?.fontSize) : RIGHT_SINGLE_ICON_SIZE)
           .fontColor(this.item.iconOptions?.symbolicIconOption?.fontColor ?? [this.subHeaderTheme.rightIconColor])
           .fontWeight(this.item.iconOptions?.symbolicIconOption?.fontWeight)
           .renderingStrategy(this.item.iconOptions?.symbolicIconOption?.renderingStrategy)
