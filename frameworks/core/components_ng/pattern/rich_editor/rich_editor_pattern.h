@@ -341,6 +341,7 @@ public:
     bool CursorMoveEnd();
     int32_t CalcMoveUpPos(OffsetF& caretOffsetUp, OffsetF& caretOffsetDown);
     int32_t CalcLineBeginPosition();
+    float GetTextThemeFontSize();
     int32_t CalcLineEndPosition();
     bool CursorMoveLineEndPos(OffsetF& caretOffsetUp, OffsetF& caretOffsetDown, OffsetF& nextCaretOffset);
     bool CursorMoveLineBegin();
