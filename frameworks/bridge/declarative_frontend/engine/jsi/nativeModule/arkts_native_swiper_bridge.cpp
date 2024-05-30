@@ -105,7 +105,8 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperNextMargin(ArkUIRuntimeCallInfo* r
         nextMargin.SetValue(0.0);
     }
     int32_t nextMarginUnit = static_cast<int32_t>(nextMargin.Unit());
-    GetArkUINodeModifiers()->getSwiperModifier()->setSwiperNextMargin(nativeNode, nextMargin.Value(), nextMarginUnit);
+    GetArkUINodeModifiers()->getSwiperModifier()->setSwiperNextMargin(
+        nativeNode, nextMargin.Value(), nextMarginUnit, 0);
     return panda::JSValueRef::Undefined(vm);
 }
 ArkUINativeModuleValue SwiperBridge::ResetSwiperNextMargin(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -131,7 +132,8 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperPrevMargin(ArkUIRuntimeCallInfo* r
         prevMargin.SetValue(0.0);
     }
     int32_t prevMarginUnit = static_cast<int32_t>(prevMargin.Unit());
-    GetArkUINodeModifiers()->getSwiperModifier()->setSwiperPrevMargin(nativeNode, prevMargin.Value(), prevMarginUnit);
+    GetArkUINodeModifiers()->getSwiperModifier()->setSwiperPrevMargin(
+        nativeNode, prevMargin.Value(), prevMarginUnit, 0);
     return panda::JSValueRef::Undefined(vm);
 }
 ArkUINativeModuleValue SwiperBridge::ResetSwiperPrevMargin(ArkUIRuntimeCallInfo* runtimeCallInfo)

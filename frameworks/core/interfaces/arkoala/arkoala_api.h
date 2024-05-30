@@ -531,6 +531,11 @@ struct ArkUIScrollerAnimationType {
     ArkUI_Int32 curve;
 };
 
+struct ArkUISwiperMarginOptions {
+    ArkUI_Float32 margin;
+    ArkUI_Bool ignoreBlank;
+};
+
 enum ArkUINodeType {
     ARKUI_TEXT = 1,
     ARKUI_SPAN,
@@ -1933,9 +1938,11 @@ struct ArkUIParticleModifier {
 };
 
 struct ArkUISwiperModifier {
-    void (*setSwiperNextMargin)(ArkUINodeHandle node, ArkUI_Float32 nextMarginValue, ArkUI_Int32 nextMarginUnit);
+    void (*setSwiperNextMargin)(
+        ArkUINodeHandle node, ArkUI_Float32 nextMarginValue, ArkUI_Int32 nextMarginUnit, ArkUI_Bool ignoreBlank);
     void (*resetSwiperNextMargin)(ArkUINodeHandle node);
-    void (*setSwiperPrevMargin)(ArkUINodeHandle node, ArkUI_Float32 prevMarginValue, ArkUI_Int32 prevMarginUnit);
+    void (*setSwiperPrevMargin)(
+        ArkUINodeHandle node, ArkUI_Float32 prevMarginValue, ArkUI_Int32 prevMarginUnit, ArkUI_Bool ignoreBlank);
     void (*resetSwiperPrevMargin)(ArkUINodeHandle node);
     void (*setSwiperDisplayCount)(ArkUINodeHandle node, ArkUI_CharPtr displayCountChar, ArkUI_CharPtr displayCountType);
     void (*resetSwiperDisplayCount)(ArkUINodeHandle node);
@@ -1992,8 +1999,8 @@ struct ArkUISwiperModifier {
     void (*resetSwiperNestedScroll)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSwiperNestedScroll)(ArkUINodeHandle node);
     void (*setSwiperToIndex)(ArkUINodeHandle node, ArkUI_Int32* values);
-    ArkUI_Float32 (*getSwiperPrevMargin)(ArkUINodeHandle node, ArkUI_Int32 unit);
-    ArkUI_Float32 (*getSwiperNextMargin)(ArkUINodeHandle node, ArkUI_Int32 unit);
+    void (*getSwiperPrevMargin)(ArkUINodeHandle node, ArkUI_Int32 unit, ArkUISwiperMarginOptions* options);
+    void (*getSwiperNextMargin)(ArkUINodeHandle node, ArkUI_Int32 unit, ArkUISwiperMarginOptions* options);
     void (*setSwiperIndicatorStyle)(ArkUINodeHandle node, ArkUISwiperIndicator* swiperIndicator);
     void (*getSwiperIndicator)(ArkUINodeHandle node, ArkUISwiperIndicator* swiperIndicator);
     ArkUINodeHandle (*getSwiperController)(ArkUINodeHandle node);

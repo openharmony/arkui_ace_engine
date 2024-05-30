@@ -672,6 +672,16 @@ public:
         prevMarginIgnoreBlank_ = prevMarginIgnoreBlank;
     }
 
+    bool GetPrevMarginIgnoreBlank()
+    {
+        return prevMarginIgnoreBlank_;
+    }
+
+    bool GetNextMarginIgnoreBlank()
+    {
+        return nextMarginIgnoreBlank_;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
