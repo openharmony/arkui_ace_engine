@@ -2356,12 +2356,18 @@ void JSWeb::Create(const JSCallbackInfo& info)
         WebModel::GetInstance()->SetOpenAppLinkFunction(std::move(openAppLinkCallback));
         WebModel::GetInstance()->SetDefaultFileSelectorShow(std::move(fileSelectorShowFromUserCallback));
         auto getCmdLineFunction = controller->GetProperty("getCustomeSchemeCmdLine");
+        if (!getCmdLineFunction->IsFunction()) {
+            return;
+        }
         std::string cmdLine = JSRef<JSFunc>::Cast(getCmdLineFunction)->Call(controller, 0, {})->ToString();
         if (!cmdLine.empty()) {
             WebModel::GetInstance()->SetCustomScheme(cmdLine);
         }
 
         auto getWebDebugingFunction = controller->GetProperty("getWebDebuggingAccess");
+        if (!getWebDebugingFunction->IsFunction()) {
+            return;
+        }
         bool webDebuggingAccess = JSRef<JSFunc>::Cast(getWebDebugingFunction)->Call(controller, 0, {})->ToBoolean();
         if (webDebuggingAccess == JSWeb::webDebuggingAccess_) {
             return;

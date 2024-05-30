@@ -648,7 +648,7 @@ ArkUI_CharPtr GetFontFamily(ArkUINodeHandle node)
     std::vector<std::string> fontFamilies = TextModelNG::GetFontFamily(frameNode);
     std::string families;
     //set index start
-    int index = 0;
+    uint32_t index = 0;
     for (auto& family : fontFamilies) {
         families += family;
         if (index != fontFamilies.size() - 1) {
@@ -702,7 +702,7 @@ void GetFont(ArkUINodeHandle node, ArkUITextFont* font)
     if (!value.fontFamilies.empty()) {
         std::string families;
         //set index start
-        int index = 0;
+        std::size_t index = 0;
         for (auto& family : value.fontFamilies) {
             families += family;
             if (index != value.fontFamilies.size() - 1) {
@@ -796,7 +796,7 @@ void SetTextDataDetectorConfig(ArkUINodeHandle node, ArkUI_Uint32* values, ArkUI
     std::string textTypes;
     for (int i = 0; i < size; i++) {
         auto index = values[i];
-        if (index < 0 || index >= static_cast<int32_t>(TEXT_DETECT_TYPES.size())) {
+        if (index < 0 || index >= TEXT_DETECT_TYPES.size()) {
             continue;
         }
         if (i != 0) {
@@ -816,7 +816,7 @@ ArkUI_Int32 GetTextDataDetectorConfig(ArkUINodeHandle node, ArkUI_Int32 (*values
     auto typeString = TextModelNG::GetTextDetectConfig(frameNode);
     std::vector<std::string> types;
     StringUtils::StringSplitter(typeString, ',', types);
-    for (int i = 0; i < types.size(); i++) {
+    for (uint32_t i = 0; i < types.size(); i++) {
         auto ret = std::find(TEXT_DETECT_TYPES.begin(), TEXT_DETECT_TYPES.end(), types[i]);
         (*values)[i] = ret != TEXT_DETECT_TYPES.end() ? ret - TEXT_DETECT_TYPES.begin() : -1;
     }
