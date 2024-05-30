@@ -447,8 +447,11 @@ GestureJudgeResult LongPressRecognizer::TriggerGestureJudgeCallback()
 {
     auto targetComponent = GetTargetComponent();
     CHECK_NULL_RETURN(targetComponent, GestureJudgeResult::CONTINUE);
+    auto gestureRecognizerJudgeFunc = targetComponent->GetOnGestureRecognizerJudgeBegin();
     auto callback = targetComponent->GetOnGestureJudgeBeginCallback();
-    CHECK_NULL_RETURN(callback, GestureJudgeResult::CONTINUE);
+    if (!callback && !gestureRecognizerJudgeFunc) {
+        return GestureJudgeResult::CONTINUE;
+    }
     auto info = std::make_shared<LongPressGestureEvent>();
     info->SetTimeStamp(time_);
     info->SetRepeat(repeat_);
@@ -467,6 +470,9 @@ GestureJudgeResult LongPressRecognizer::TriggerGestureJudgeCallback()
         info->SetTiltY(trackPoint.tiltY.value());
     }
     info->SetSourceTool(trackPoint.sourceTool);
+    if (gestureRecognizerJudgeFunc) {
+        return gestureRecognizerJudgeFunc(info, Claim(this), responseLinkRecognizer_);
+    }
     return callback(gestureInfo_, info);
 }
 

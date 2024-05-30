@@ -78,6 +78,7 @@ public:
     void SetDirection(const JSCallbackInfo& args);
     void SetDistance(const JSCallbackInfo& args);
     void SetFingers(const JSCallbackInfo& args);
+    void GetDirection(const JSCallbackInfo& args);
 
     void SetPanGestureOption(const RefPtr<PanGestureOption>& panGestureOption)
     {

@@ -870,11 +870,13 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest012, TestSize.Level1)
     OffsetF coordinateOffset;
     GetEventTargetImpl getEventTargetImpl;
     TouchTestResult result;
+    TouchTestResult responseLinkResult;
     const int32_t size = result.size();
     EXPECT_EQ(pattern_->scrollableEvent_->InBarRegion(localPoint, source), true);
 
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::LIST_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    pattern_->scrollableEvent_->BarCollectTouchTarget(coordinateOffset, getEventTargetImpl, result, frameNode, nullptr);
+    pattern_->scrollableEvent_->BarCollectTouchTarget(
+        coordinateOffset, getEventTargetImpl, result, frameNode, nullptr, responseLinkResult);
     EXPECT_FLOAT_EQ(pattern_->panRecognizer_->GetCoordinateOffset().GetX(), coordinateOffset.GetX());
     EXPECT_FLOAT_EQ(pattern_->panRecognizer_->GetCoordinateOffset().GetY(), coordinateOffset.GetY());
     EXPECT_EQ(result.size(), size + 1);
@@ -884,7 +886,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest012, TestSize.Level1)
     EXPECT_EQ(pattern_->scrollableEvent_->InBarRegion(localPoint, source), false);
 
     pattern_->panRecognizer_ = nullptr;
-    pattern_->scrollableEvent_->BarCollectTouchTarget(coordinateOffset, getEventTargetImpl, result, frameNode, nullptr);
+    pattern_->scrollableEvent_->BarCollectTouchTarget(
+        coordinateOffset, getEventTargetImpl, result, frameNode, nullptr, responseLinkResult);
     EXPECT_EQ(result.size(), size + 1);
 }
 
@@ -1418,11 +1421,12 @@ HWTEST_F(ScrollBarTestNg, BarCollectLongPressTarget001, TestSize.Level1)
     OffsetF coordinateOffset;
     GetEventTargetImpl getEventTargetImpl;
     TouchTestResult result;
+    TouchTestResult responseLinkResult;
     const int32_t size = result.size();
     EXPECT_EQ(pattern_->scrollableEvent_->InBarRectRegion(localPoint, source), true);
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::LIST_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     pattern_->scrollableEvent_->BarCollectLongPressTarget(
-        coordinateOffset, getEventTargetImpl, result, frameNode, nullptr);
+        coordinateOffset, getEventTargetImpl, result, frameNode, nullptr, responseLinkResult);
     EXPECT_FLOAT_EQ(pattern_->longPressRecognizer_->GetCoordinateOffset().GetX(), coordinateOffset.GetX());
     EXPECT_FLOAT_EQ(pattern_->longPressRecognizer_->GetCoordinateOffset().GetY(), coordinateOffset.GetY());
     EXPECT_EQ(result.size(), size + 1);
@@ -1433,7 +1437,7 @@ HWTEST_F(ScrollBarTestNg, BarCollectLongPressTarget001, TestSize.Level1)
 
     pattern_->longPressRecognizer_ = nullptr;
     pattern_->scrollableEvent_->BarCollectLongPressTarget(
-        coordinateOffset, getEventTargetImpl, result, frameNode, nullptr);
+        coordinateOffset, getEventTargetImpl, result, frameNode, nullptr, responseLinkResult);
     EXPECT_EQ(result.size(), size + 1);
 }
 

@@ -3171,3 +3171,13 @@ var TextDeleteDirection;
     TextDeleteDirection[TextDeleteDirection["BACKWARD"] = 0] = "BACKWARD";
     TextDeleteDirection[TextDeleteDirection["FORWARD"] = 1] = "FORWARD";
 })(TextDeleteDirection || (TextDeleteDirection = {}));
+
+var GestureRecognizerState;
+(function (GestureRecognizerState) {
+  GestureRecognizerState[GestureRecognizerState["READY"] = 0] = "READY";
+  GestureRecognizerState[GestureRecognizerState["DETECTING"] = 1] = "DETECTING";
+  GestureRecognizerState[GestureRecognizerState["PENDING"] = 2] = "PENDING";
+  GestureRecognizerState[GestureRecognizerState["BLOCKED"] = 3] = "BLOCKED";
+  GestureRecognizerState[GestureRecognizerState["SUCCESSFUL"] = 4] = "SUCCESSFUL";
+  GestureRecognizerState[GestureRecognizerState["FAILED"] = 5] = "FAILED";
+})(GestureRecognizerState || (GestureRecognizerState = {}));

@@ -532,6 +532,7 @@ void JSPanGestureOption::JSBind(BindingTarget globalObj)
     JSClass<JSPanGestureOption>::CustomMethod("setDirection", &JSPanGestureOption::SetDirection);
     JSClass<JSPanGestureOption>::CustomMethod("setDistance", &JSPanGestureOption::SetDistance);
     JSClass<JSPanGestureOption>::CustomMethod("setFingers", &JSPanGestureOption::SetFingers);
+    JSClass<JSPanGestureOption>::CustomMethod("getDirection", &JSPanGestureOption::GetDirection);
     JSClass<JSPanGestureOption>::Bind(globalObj, &JSPanGestureOption::Constructor, &JSPanGestureOption::Destructor);
 }
 
@@ -568,6 +569,15 @@ void JSPanGestureOption::SetFingers(const JSCallbackInfo& args)
     } else {
         panGestureOption_->SetFingers(DEFAULT_PAN_FINGER);
     }
+}
+
+void JSPanGestureOption::GetDirection(const JSCallbackInfo& args)
+{
+    PanDirection direction = { PanDirection::NONE };
+    if (panGestureOption_) {
+        direction = panGestureOption_->GetDirection();
+    }
+    args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(direction.type))));
 }
 
 void JSPanGestureOption::Constructor(const JSCallbackInfo& args)

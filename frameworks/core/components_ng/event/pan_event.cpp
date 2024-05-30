@@ -19,12 +19,11 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
-PanEventActuator::PanEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub,
-    PanDirection direction, int32_t fingers, float distance)
+PanEventActuator::PanEventActuator(
+    const WeakPtr<GestureEventHub>& gestureEventHub, PanDirection direction, int32_t fingers, float distance)
     : gestureEventHub_(gestureEventHub), direction_(direction), fingers_(fingers), distance_(distance)
 {
     if (fingers_ < DEFAULT_PAN_FINGER) {
@@ -43,7 +42,7 @@ PanEventActuator::PanEventActuator(const WeakPtr<GestureEventHub>& gestureEventH
 }
 
 void PanEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
+    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, TouchTestResult& responseLinkResult)
 {
     if (panEvents_.empty() && !userCallback_) {
         return;
@@ -128,21 +127,24 @@ void PanEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, con
         }
     };
     panRecognizer_->SetOnActionCancel(actionCancel);
+    panRecognizer_->SetIsSystemGesture(true);
+    panRecognizer_->SetRecognizerType(GestureTypeName::PAN_GESTURE);
 
     panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
     panRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
     result.emplace_back(panRecognizer_);
+    responseLinkResult.emplace_back(panRecognizer_);
 }
 
 void PanEventActuator::SetPanEventType(GestureTypeName typeName)
-    {
-        if (panEvents_.empty()) {
-            return;
-        }
-        auto gestureInfo = panRecognizer_->GetOrCreateGestureInfo();
-        CHECK_NULL_VOID(gestureInfo);
-        gestureInfo->SetType(typeName);
-        gestureInfo->SetIsSystemGesture(true);
+{
+    if (panEvents_.empty()) {
+        return;
     }
+    auto gestureInfo = panRecognizer_->GetOrCreateGestureInfo();
+    CHECK_NULL_VOID(gestureInfo);
+    gestureInfo->SetType(typeName);
+    gestureInfo->SetIsSystemGesture(true);
+}
 
 } // namespace OHOS::Ace::NG

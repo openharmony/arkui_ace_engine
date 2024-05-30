@@ -42,6 +42,7 @@
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/target_component.h"
 #include "core/components_ng/layout/layout_algorithm.h"
@@ -2109,12 +2110,14 @@ void FrameNode::AddJudgeToTargetComponent(RefPtr<TargetComponent>& targetCompone
         if (callbackNative) {
             targetComponent->SetOnGestureJudgeNativeBegin(std::move(callbackNative));
         }
+        auto gestureRecognizerJudgeCallback = gestureHub->GetOnGestureRecognizerJudgeBegin();
+        targetComponent->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeCallback));
     }
 }
 
 HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
-    bool isDispatch)
+    TouchTestResult& responseLinkResult, bool isDispatch)
 {
     if (!isActive_ || !eventHub_->IsEnabled() || bypass_) {
         if (SystemProperties::GetDebugEnabled()) {
@@ -2211,8 +2214,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         if (childNode != nullptr) {
             TAG_LOGD(AceLogTag::ACE_UIEVENT, "%{public}s do TouchTest, parameter isDispatch is true.",
                 childNode->GetInspectorId()->c_str());
-            auto hitResult = childNode->TouchTest(
-                globalPoint, localPoint, subRevertPoint, touchRestrict, newComingTargets, touchId, true);
+            auto hitResult = childNode->TouchTest(globalPoint, localPoint, subRevertPoint, touchRestrict,
+                newComingTargets, touchId, responseLinkResult, true);
             if (touchRes.strategy == TouchTestStrategy::FORWARD ||
                 touchRes.strategy == TouchTestStrategy::FORWARD_COMPETITION) {
                 touchRestrict.childTouchTestList.emplace_back(touchRes.id);
@@ -2252,8 +2255,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
             }
         }
 
-        auto childHitResult =
-            child->TouchTest(globalPoint, localPoint, subRevertPoint, touchRestrict, newComingTargets, touchId);
+        auto childHitResult = child->TouchTest(
+            globalPoint, localPoint, subRevertPoint, touchRestrict, newComingTargets, touchId, responseLinkResult);
         if (childHitResult == HitTestResult::STOP_BUBBLING) {
             preventBubbling = true;
             consumed = true;
@@ -2291,10 +2294,13 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
             auto gestureHub = eventHub_->GetGestureEventHub();
             if (gestureHub) {
                 TouchTestResult finalResult;
+                TouchTestResult newComingResponseLinkTargets;
                 const auto coordinateOffset = globalPoint - localPoint - localTransformOffset;
                 preventBubbling = gestureHub->ProcessTouchTestHit(coordinateOffset, touchRestrict, newComingTargets,
-                    finalResult, touchId, localPoint, targetComponent);
+                    finalResult, touchId, localPoint, targetComponent, newComingResponseLinkTargets);
                 newComingTargets.swap(finalResult);
+                TriggerShouldParallelInnerWith(newComingResponseLinkTargets, responseLinkResult);
+                responseLinkResult.splice(responseLinkResult.end(), std::move(newComingResponseLinkTargets));
             }
         } else if (touchRestrict.hitTestType == SourceType::MOUSE) {
             auto mouseHub = eventHub_->GetInputEventHub();
@@ -4477,5 +4483,45 @@ int FrameNode::GetValidLeafChildNumber(const RefPtr<FrameNode>& host, int32_t th
         }
     }
     return total;
+}
+
+void FrameNode::TriggerShouldParallelInnerWith(
+    const TouchTestResult& currentRecognizers, const TouchTestResult& responseLinkRecognizers)
+{
+    auto gestureHub = eventHub_->GetGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    auto shouldBuiltInRecognizerParallelWithFunc = gestureHub->GetParallelInnerGestureToFunc();
+    CHECK_NULL_VOID(shouldBuiltInRecognizerParallelWithFunc);
+    std::map<GestureTypeName, std::vector<RefPtr<TouchEventTarget>>> sortedResponseLinkRecognizers;
+
+    for (const auto& item : responseLinkRecognizers) {
+        auto recognizer = AceType::DynamicCast<NGGestureRecognizer>(item);
+        if (!recognizer) {
+            continue;
+        }
+        auto type = recognizer->GetRecognizerType();
+        sortedResponseLinkRecognizers[type].emplace_back(item);
+    }
+
+    for (const auto& item : currentRecognizers) {
+        auto currentRecognizer = AceType::DynamicCast<NGGestureRecognizer>(item);
+        if (!currentRecognizer || !currentRecognizer->IsSystemGesture() ||
+            currentRecognizer->GetRecognizerType() != GestureTypeName::PAN_GESTURE) {
+            continue;
+        }
+        auto iter = sortedResponseLinkRecognizers.find(currentRecognizer->GetRecognizerType());
+        std::vector<RefPtr<TouchEventTarget>> recognizersInSpecifiedType = {};
+        if (iter != sortedResponseLinkRecognizers.end()) {
+            recognizersInSpecifiedType = iter->second;
+        }
+        if (recognizersInSpecifiedType.empty()) {
+            continue;
+        }
+        auto result = shouldBuiltInRecognizerParallelWithFunc(item, recognizersInSpecifiedType);
+        if (result && currentRecognizer != result) {
+            currentRecognizer->SetBridgeMode(true);
+            result->AddBridgeObj(currentRecognizer);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG
