@@ -1539,6 +1539,8 @@ bool DragDropManager::UpdateDragMovePositionFinished(
     CHECK_NULL_RETURN(info_.imageNode, false);
     auto renderContext = info_.imageNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
+    SubwindowManager::GetInstance()->ContextMenuSwitchDragPreviewAnimation(info_.imageNode,
+        OffsetF(newOffset.GetX(), newOffset.GetY()));
     if (!needDoDragMoveAnimate) {
         renderContext->UpdateTransformTranslate({ newOffset.GetX(), newOffset.GetY(), 0.0f });
         if (!isMenuShow) {
