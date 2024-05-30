@@ -603,11 +603,9 @@ void BaseTextSelectOverlay::SetkeyBoardChangeCallback()
     CHECK_NULL_VOID(textFieldManager);
     textFieldManager->AddKeyboardChangeCallback(
         tmpHost->GetId(), [weak = WeakClaim(this)](bool isKeyboardChanged, bool isKeyboardShow) {
-            if (isKeyboardChanged) {
-                auto overlay = weak.Upgrade();
-                CHECK_NULL_VOID(overlay);
-                overlay->OnKeyboardChanged(isKeyboardShow);
-            }
+            auto overlay = weak.Upgrade();
+            CHECK_NULL_VOID(overlay);
+            overlay->OnKeyboardChanged(isKeyboardShow);
         });
 }
 
