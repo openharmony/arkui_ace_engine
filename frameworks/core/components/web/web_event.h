@@ -1929,6 +1929,29 @@ private:
     int32_t viewportFit_;
 };
 
+class ACE_EXPORT AdsBlockedEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(AdsBlockedEvent, BaseEventInfo);
+
+public:
+    AdsBlockedEvent(const std::string& url, const std::vector<std::string>& adsBlocked) :
+        BaseEventInfo("AdsBlockedEvent"), url_(url), adsBlocked_(adsBlocked) {}
+    ~AdsBlockedEvent() = default;
+
+    const std::string& GetUrl() const
+    {
+        return url_;
+    }
+
+    const std::vector<std::string>& GetAdsBlocked() const
+    {
+        return adsBlocked_;
+    }
+
+private:
+    std::string url_;
+    std::vector<std::string> adsBlocked_;
+};
+
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_WEB_EVENT_H

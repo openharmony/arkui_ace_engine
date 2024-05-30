@@ -962,6 +962,8 @@ public:
     void OnCustomKeyboardClose();
 
 
+    void OnAdsBlocked(const std::string& url, const std::vector<std::string>& adsBlocked);
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -1106,6 +1108,7 @@ private:
     EventCallbackV2 onRenderProcessRespondingV2_;
     EventCallbackV2 onViewportFitChangedV2_;
     std::function<WebKeyboardOption(const std::shared_ptr<BaseEventInfo>&)> onInterceptKeyboardAttachV2_;
+    EventCallbackV2 onAdsBlockedV2_;
 
     int32_t renderMode_;
     int32_t layoutMode_;

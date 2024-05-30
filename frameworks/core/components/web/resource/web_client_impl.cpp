@@ -1140,4 +1140,14 @@ void WebClientImpl::OnViewportFitChange(OHOS::NWeb::ViewportFit viewportFit)
     CHECK_NULL_VOID(delegate);
     delegate->OnViewportFitChange(viewportFit);
 }
+
+void WebClientImpl::OnAdsBlocked(const std::string& url, const std::vector<std::string>& adsBlocked)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnAdsBlocked(url, adsBlocked);
+}
 } // namespace OHOS::Ace

@@ -1934,6 +1934,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("selectionMenuOptions", &JSWeb::SelectionMenuOptions);
     JSClass<JSWeb>::StaticMethod("onViewportFitChanged", &JSWeb::OnViewportFitChanged);
     JSClass<JSWeb>::StaticMethod("onInterceptKeyboardAttach", &JSWeb::OnInterceptKeyboardAttach);
+    JSClass<JSWeb>::StaticMethod("onAdsBlocked", &JSWeb::OnAdsBlocked);
 
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -2192,6 +2193,22 @@ JSRef<JSVal> LoadOverrideEventToJSValue(const LoadOverrideEvent& eventInfo)
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
     requestEvent->SetLoadOverrideEvent(eventInfo);
     return JSRef<JSVal>::Cast(requestObj);
+}
+
+JSRef<JSVal> AdsBlockedEventToJSValue(const AdsBlockedEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("url", eventInfo.GetUrl());
+
+    JSRef<JSArray> adsBlockedArr = JSRef<JSArray>::New();
+    const std::vector<std::string>& adsBlocked = eventInfo.GetAdsBlocked();
+    for (int32_t idx = 0; idx < static_cast<int32_t>(adsBlocked.size()); ++idx) {
+        JSRef<JSVal> blockedUrl = JSRef<JSVal>::Make(ToJSValue(adsBlocked[idx]));
+        adsBlockedArr->SetValueAt(idx, blockedUrl);
+    }
+    obj->SetPropertyObject("adsBlocked", adsBlockedArr);
+
+    return JSRef<JSVal>::Cast(obj);
 }
 
 void JSWeb::ParseRawfileWebSrc(const JSRef<JSVal>& srcValue, std::string& webSrc)
@@ -4983,6 +5000,29 @@ void JSWeb::OnInterceptKeyboardAttach(const JSCallbackInfo& args)
         return opt;
     };
     WebModel::GetInstance()->SetOnInterceptKeyboardAttach(std::move(uiCallback));
+}
+
+void JSWeb::OnAdsBlocked(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        return;
+    }
+
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<AdsBlockedEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), AdsBlockedEventToJSValue);
+    auto instanceId = Container::CurrentId();
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
+                          const BaseEventInfo* info) {
+        ContainerScope scope(instanceId);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<AdsBlockedEvent>(info);
+        func->Execute(*eventInfo);
+    };
+    WebModel::GetInstance()->SetAdsBlockedEventId(jsCallback);
 }
 
 } // namespace OHOS::Ace::Framework
