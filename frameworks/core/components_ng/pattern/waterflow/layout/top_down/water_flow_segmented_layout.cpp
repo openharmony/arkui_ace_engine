@@ -291,22 +291,6 @@ void WaterFlowSegmentedLayout::InitFooter(float crossSize)
     }
 }
 
-namespace {
-float GetUserDefHeight(const RefPtr<WaterFlowSections>& sections, int32_t seg, int32_t idx)
-{
-    CHECK_NULL_RETURN(sections, -1.0f);
-    const auto& section = sections->GetSectionInfo()[seg];
-    if (section.onGetItemMainSizeByIndex) {
-        Dimension len(section.onGetItemMainSizeByIndex(idx), DimensionUnit::VP);
-        if (len.IsNegative()) {
-            return 0.0f;
-        }
-        return len.ConvertToPx();
-    }
-    return -1.0f;
-}
-} // namespace
-
 void WaterFlowSegmentedLayout::MeasureOnOffset()
 {
     bool forward = LessOrEqual(info_->currentOffset_ - info_->prevOffset_, 0.0f) || info_->endIndex_ == -1;
@@ -322,7 +306,8 @@ void WaterFlowSegmentedLayout::MeasureOnOffset()
         auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
         int32_t bound = std::min(oldStart, info_->endIndex_);
         for (int32_t i = info_->startIndex_; i <= bound; ++i) {
-            MeasureItem(props, i, info_->itemInfos_[i].crossIdx, GetUserDefHeight(sections_, info_->GetSegment(i), i));
+            MeasureItem(props, i, info_->itemInfos_[i].crossIdx,
+                WaterFlowLayoutUtils::GetUserDefHeight(sections_, info_->GetSegment(i), i));
         }
     }
 }
@@ -363,7 +348,8 @@ void WaterFlowSegmentedLayout::MeasureOnJump(int32_t jumpIdx)
     for (int32_t i = info_->startIndex_; i < jumpIdx; ++i) {
         auto seg = info_->GetSegment(i);
         if (sections_->GetSectionInfo()[seg].onGetItemMainSizeByIndex) {
-            MeasureItem(props, i, info_->itemInfos_[i].crossIdx, GetUserDefHeight(sections_, seg, i));
+            MeasureItem(
+                props, i, info_->itemInfos_[i].crossIdx, WaterFlowLayoutUtils::GetUserDefHeight(sections_, seg, i));
         }
     }
 }
@@ -414,7 +400,7 @@ void WaterFlowSegmentedLayout::MeasureToTarget(int32_t targetIdx)
     for (int32_t i = static_cast<int32_t>(info_->itemInfos_.size()); i <= targetIdx; ++i) {
         int32_t seg = info_->GetSegment(i);
         auto position = WaterFlowLayoutUtils::GetItemPosition(info_, i, mainGaps_[seg]);
-        float itemHeight = GetUserDefHeight(sections_, seg, i);
+        float itemHeight = WaterFlowLayoutUtils::GetUserDefHeight(sections_, seg, i);
         if (itemHeight < 0.0f) {
             auto item = MeasureItem(props, i, position.crossIndex, -1.0f);
             if (item) {
@@ -433,7 +419,7 @@ void WaterFlowSegmentedLayout::Fill(int32_t startIdx)
         if (GreatOrEqual(position.startMainPos + info_->currentOffset_, mainSize_)) {
             break;
         }
-        float itemHeight = GetUserDefHeight(sections_, info_->GetSegment(i), i);
+        float itemHeight = WaterFlowLayoutUtils::GetUserDefHeight(sections_, info_->GetSegment(i), i);
         auto item = MeasureItem(props, i, position.crossIndex, itemHeight);
         if (!item) {
             continue;
@@ -451,16 +437,7 @@ RefPtr<LayoutWrapper> WaterFlowSegmentedLayout::MeasureItem(
     CHECK_NULL_RETURN(item, nullptr);
     // override user-defined main size
     if (userDefMainSize >= 0.0f) {
-        auto props = item->GetLayoutProperty();
-        // get previously user defined ideal width
-        std::optional<CalcLength> crossSize;
-        const auto& layoutConstraint = props->GetCalcLayoutConstraint();
-        if (layoutConstraint && layoutConstraint->selfIdealSize) {
-            crossSize = axis_ == Axis::VERTICAL ? layoutConstraint->selfIdealSize->Width()
-                                                : layoutConstraint->selfIdealSize->Height();
-        }
-        props->UpdateUserDefinedIdealSize(axis_ == Axis::VERTICAL ? CalcSize(crossSize, CalcLength(userDefMainSize))
-                                                                  : CalcSize(CalcLength(userDefMainSize), crossSize));
+        WaterFlowLayoutUtils::UpdateItemIdealSize(item, axis_, userDefMainSize);
     }
     item->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
         { itemsCrossSize_[info_->GetSegment(idx)][crossIdx], mainSize_, axis_, userDefMainSize >= 0.0f }, props, item));

@@ -115,7 +115,7 @@ private:
      * @param userDefMainSize user-defined main-axis size of the FlowItem.
      * @return LayoutWrapper of the FlowItem.
      */
-    inline RefPtr<LayoutWrapper> MeasureItem(
+    RefPtr<LayoutWrapper> MeasureItem(
         const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, int32_t crossIdx, float userDefMainSize) const;
 
     /**

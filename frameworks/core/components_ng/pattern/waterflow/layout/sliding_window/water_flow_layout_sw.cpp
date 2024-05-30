@@ -92,6 +92,7 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
 
 void WaterFlowLayoutSW::Init(const SizeF& frameSize)
 {
+    mainLen_ = frameSize.MainSize(axis_);
     // omit footer from children count
     itemCnt_ = wrapper_->GetTotalChildCount() - info_->footerIndex_ - 1;
     sections_ = wrapper_->GetHostNode()->GetPattern<WaterFlowPattern>()->GetSections();
@@ -125,7 +126,6 @@ void WaterFlowLayoutSW::SingleInit(const SizeF& frameSize)
     mainGaps_ = { axis_ == Axis::HORIZONTAL ? columnsGap : rowsGap };
     crossGaps_ = { axis_ == Axis::VERTICAL ? columnsGap : rowsGap };
 
-    mainLen_ = frameSize.MainSize(axis_);
     float crossSize = frameSize.CrossSize(axis_);
     std::pair<std::vector<double>, double> cross;
     auto rowsTemplate = props->GetRowsTemplate().value_or("1fr");
@@ -491,7 +491,6 @@ void WaterFlowLayoutSW::MeasureOnJump(int32_t jumpIdx, ScrollAlign align)
 
 void WaterFlowLayoutSW::Jump(int32_t jumpIdx, ScrollAlign align, bool noSkip)
 {
-    // std::cout << "jump to " << jumpIdx << " skip = " << !noSkip << std::endl;
     switch (align) {
         case ScrollAlign::START: {
             if (noSkip) {
@@ -573,6 +572,10 @@ float WaterFlowLayoutSW::MeasureChild(const RefPtr<WaterFlowLayoutProperty>& pro
 {
     auto child = wrapper_->GetOrCreateChildByIndex(nodeIdx(idx));
     CHECK_NULL_RETURN(child, 0.0f);
+    float userHeight = WaterFlowLayoutUtils::GetUserDefHeight(sections_, info_->GetSegment(idx), idx);
+    if (Positive(userHeight)) {
+        WaterFlowLayoutUtils::UpdateItemIdealSize(child, axis_, userHeight);
+    }
     child->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
         { itemsCrossSize_[info_->GetSegment(idx)][lane], mainLen_, axis_ }, props, child));
     return child->GetGeometryNode()->GetMarginFrameSize().MainSize(info_->axis_);
@@ -581,15 +584,14 @@ float WaterFlowLayoutSW::MeasureChild(const RefPtr<WaterFlowLayoutProperty>& pro
 void WaterFlowLayoutSW::LayoutSection(
     size_t idx, const OffsetF& paddingOffset, float selfCrossLen, bool reverse, bool rtl)
 {
-    int32_t secIdx = info_->GetSegment(idx);
-    float crossPos = rtl ? selfCrossLen + mainGaps_[secIdx] : 0.0f;
+    float crossPos = rtl ? selfCrossLen + mainGaps_[idx] : 0.0f;
     for (size_t i = 0; i < info_->sections_[idx].size(); ++i) {
         if (rtl) {
-            crossPos -= itemsCrossSize_[idx][i] + crossGaps_[secIdx];
+            crossPos -= itemsCrossSize_[idx][i] + crossGaps_[idx];
         }
         auto& lane = info_->sections_[idx][i];
         float mainPos = lane.startPos;
-        for (auto& item : lane.items_) {
+        for (const auto& item : lane.items_) {
             auto child = wrapper_->GetOrCreateChildByIndex(nodeIdx(item.idx));
             if (!child) {
                 continue;
@@ -607,10 +609,10 @@ void WaterFlowLayoutSW::LayoutSection(
             } else {
                 child->GetHostNode()->ForceSyncGeometryNode();
             }
-            mainPos += item.mainSize + mainGaps_[secIdx];
+            mainPos += item.mainSize + mainGaps_[idx];
         }
         if (!rtl) {
-            crossPos += itemsCrossSize_[idx][i] + crossGaps_[secIdx];
+            crossPos += itemsCrossSize_[idx][i] + crossGaps_[idx];
         }
     }
 }

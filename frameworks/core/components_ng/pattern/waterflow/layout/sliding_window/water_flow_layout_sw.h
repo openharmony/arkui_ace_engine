@@ -143,6 +143,15 @@ private:
 
     float MeasureChild(const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, size_t lane);
 
+    /**
+     * @brief Layout a single section of items
+     * 
+     * @param idx section index.
+     * @param paddingOffset WaterFlow padding, need to add to the child offset.
+     * @param selfCrossLen cross length of WaterFlow.
+     * @param reverse true if reverse layout
+     * @param rtl true if layout right to left
+     */
     void LayoutSection(size_t idx, const OffsetF& paddingOffset, float selfCrossLen, bool reverse, bool rtl);
     void LayoutFooter(const OffsetF& paddingOffset, bool reverse);
 
