@@ -45,6 +45,7 @@ ohos_shared_library("plugincomponent") {
     "ability_base:base",
     "ability_base:want",
     "ability_runtime:abilitykit_native",
+    "ability_runtime:extensionkit_native",
     "access_token:libtokenid_sdk",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
