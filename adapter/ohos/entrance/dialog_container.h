@@ -53,6 +53,16 @@ public:
         return frontend_;
     }
 
+    ResourceConfiguration GetResourceConfiguration() const
+    {
+        return resourceInfo_.GetResourceConfiguration();
+    }
+
+    void SetResourceConfiguration(const ResourceConfiguration& config)
+    {
+        resourceInfo_.SetResourceConfiguration(config);
+    }
+
     RefPtr<PlatformResRegister> GetPlatformResRegister() const override
     {
         return resRegister_;
