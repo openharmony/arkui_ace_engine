@@ -205,6 +205,7 @@ void NavigationPattern::OnModifyDone()
         dividerNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
         dividerNode->MarkModifyDone();
     }
+    isInitialDone_ = true;
 }
 
 void NavigationPattern::OnLanguageConfigurationUpdate()
@@ -841,11 +842,8 @@ void NavigationPattern::OnNavBarStateChange(bool modeChange)
         return;
     }
 
-    // STACK mode, check navigationStack
-    if (navigationStack_->Empty()) {
-        eventHub->FireNavBarStateChangeEvent(true);
-    } else {
-        eventHub->FireNavBarStateChangeEvent(false);
+    if (currentNavigationMode == NavigationMode::STACK) {
+        eventHub->FireNavBarStateChangeEvent(navigationStack_->Empty());
     }
 }
 

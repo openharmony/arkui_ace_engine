@@ -357,6 +357,11 @@ public:
         parentNode_ = parentNode;
     }
 
+    bool IsInitializationDone()
+    {
+        return isInitialDone_;
+    }
+
     WeakPtr<UINode> GetParentCustomNode() const
     {
         return parentNode_;
@@ -443,6 +448,7 @@ private:
     bool isDividerDraggable_ = true;
     bool isAnimated_ = false;
     bool isReplace_ = false;
+    bool isInitialDone_ = false;
     int32_t lastPreIndex_ = false;
     std::shared_ptr<NavigationController> navigationController_;
     std::map<int32_t, std::function<void(bool)>> onStateChangeMap_;
