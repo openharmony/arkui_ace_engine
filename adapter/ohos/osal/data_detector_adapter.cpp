@@ -18,7 +18,9 @@
 #include "interfaces/inner_api/ace/modal_ui_extension_config.h"
 #include "want.h"
 
+#include "adapter/ohos/entrance/ace_container.h"
 #include "base/log/log_wrapper.h"
+#include "bridge/common/utils/engine_helper.h"
 #include "core/common/ai/data_detector_mgr.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
@@ -63,46 +65,73 @@ bool DataDetectorAdapter::ShowUIExtensionMenu(
     want.SetElementName(uiExtensionBundleName_, uiExtensionAbilityName_);
     SetWantParamaters(aiSpan, want);
 
-    auto uiExtNode = NG::UIExtensionModelNG::Create(want, callbacks);
-    CHECK_NULL_RETURN(uiExtNode, false);
-    auto onReceive = GetOnReceive(uiExtNode, aiRect, targetNode);
-    auto pattern = uiExtNode->GetPattern<NG::UIExtensionPattern>();
+    uiExtNode_ = NG::UIExtensionModelNG::Create(want, callbacks);
+    CHECK_NULL_RETURN(uiExtNode_, false);
+    auto onReceive = GetOnReceive(aiRect, targetNode);
+    auto pattern = uiExtNode_->GetPattern<NG::UIExtensionPattern>();
     CHECK_NULL_RETURN(pattern, false);
     pattern->SetOnReceiveCallback(std::move(onReceive));
-    uiExtNode->MarkModifyDone();
+    uiExtNode_->MarkModifyDone();
     return true;
 }
 
 std::function<void(const AAFwk::WantParams&)> DataDetectorAdapter::GetOnReceive(
-    const RefPtr<NG::FrameNode>& uiExtNode, NG::RectF aiRect, const RefPtr<NG::FrameNode>& targetNode)
+    NG::RectF aiRect, const RefPtr<NG::FrameNode>& targetNode)
 {
-    return [uiExtNode, aiRect, onClickMenu = onClickMenu_,
-               targetNodeWeak = AceType::WeakClaim(AceType::RawPtr(targetNode))](const AAFwk::WantParams& wantParams) {
+    return [aiRect, weak = AceType::WeakClaim(this), targetNodeWeak = AceType::WeakClaim(AceType::RawPtr(targetNode))](
+               const AAFwk::WantParams& wantParams) {
         TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExtension Ability onReceive");
-        CHECK_NULL_VOID(uiExtNode);
+        auto dataDetectorAdapter = weak.Upgrade();
+        CHECK_NULL_VOID(dataDetectorAdapter);
+        CHECK_NULL_VOID(dataDetectorAdapter->uiExtNode_);
         auto targetNode = targetNodeWeak.Upgrade();
         CHECK_NULL_VOID(targetNode);
         auto pipeline = NG::PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto overlayManager = pipeline->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
-        std::string action = wantParams.GetStringParam("action");
-        if (!action.empty() && onClickMenu) {
-            onClickMenu(action);
+        const std::string& action = wantParams.GetStringParam("action");
+        if (!action.empty() && dataDetectorAdapter->onClickMenu_) {
+            dataDetectorAdapter->onClickMenu_(action);
         }
-        std::string closeMenu = wantParams.GetStringParam("closeMenu");
+        const std::string& abilityType = wantParams.GetStringParam("abilityType");
+        if (!abilityType.empty()) {
+            auto abilityParams = wantParams.GetWantParams("abilityParams");
+            dataDetectorAdapter->StartAbilityByType(abilityType, abilityParams);
+        }
+        const std::string& closeMenu = wantParams.GetStringParam("closeMenu");
         if (closeMenu == "true") {
-            overlayManager->CloseUIExtensionMenu(onClickMenu, targetNode->GetId());
+            overlayManager->CloseUIExtensionMenu(targetNode->GetId());
             return;
         }
-        std::string longestContent = wantParams.GetStringParam("longestContent");
-        std::string menuSizeString = wantParams.GetStringParam("menuSize");
-        if (longestContent.empty() || menuSizeString.empty()) {
+        const std::string& longestContent = wantParams.GetStringParam("longestContent");
+        const int32_t& menuSize = wantParams.GetIntParam("menuSize", -1);
+        if (longestContent.empty() || menuSize == -1) {
             return;
         }
-        int32_t menuSize = static_cast<int32_t>(atoi(menuSizeString.c_str()));
-        overlayManager->ShowUIExtensionMenu(uiExtNode, aiRect, longestContent, menuSize, targetNode);
+        overlayManager->ShowUIExtensionMenu(
+            dataDetectorAdapter->uiExtNode_, aiRect, longestContent, menuSize, targetNode);
     };
+}
+
+void DataDetectorAdapter::StartAbilityByType(const std::string& type, AAFwk::WantParams& wantParams)
+{
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto runtimeContext = Platform::AceContainer::GetRuntimeContext(pipeline->GetInstanceId());
+    CHECK_NULL_VOID(runtimeContext);
+    auto abilityContext = OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(
+        runtimeContext->shared_from_this());
+    CHECK_NULL_VOID(abilityContext);
+
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    NativeEngine* nativaEngine = engine->GetNativeEngine();
+    auto env = reinterpret_cast<napi_env>(nativaEngine);
+    CHECK_NULL_VOID(env);
+    std::shared_ptr<OHOS::AbilityRuntime::JsUIExtensionCallback> callback =
+        std::make_shared<OHOS::AbilityRuntime::JsUIExtensionCallback>(env);
+    abilityContext->StartAbilityByType(type, wantParams, callback);
 }
 
 void DataDetectorAdapter::ResponseBestMatchItem(const AISpan& aiSpan)
@@ -304,12 +333,12 @@ std::function<void()> DataDetectorAdapter::GetDetectDelayTask(const std::map<int
                 wTextForAI.substr(startPos, std::min(AI_TEXT_MAX_LENGTH, wTextForAILength - startPos)));
             bool isSameDetectText = detectTextIdx < dataDetectorAdapter->detectTexts.size() &&
                                     detectText == dataDetectorAdapter->detectTexts[detectTextIdx];
-            while (!aiSpanMap.empty() && aiSpanMapIt != aiSpanMap.end() &&
-                   aiSpanMapIt->first < startPos + AI_TEXT_MAX_LENGTH - AI_TEXT_GAP) {
+            while (!aiSpanMap.empty() && aiSpanMapIt != aiSpanMap.end() && aiSpanMapIt->first >= 0 &&
+                   aiSpanMapIt->first < std::min(wTextForAILength, startPos + AI_TEXT_MAX_LENGTH - AI_TEXT_GAP)) {
                 auto aiContent = aiSpanMapIt->second.content;
                 auto wAIContent = StringUtils::ToWstring(aiContent);
-                if (isSameDetectText ||
-                    aiContent == StringUtils::ToString(wTextForAI.substr(aiSpanMapIt->first, wAIContent.length()))) {
+                if (isSameDetectText || aiContent == StringUtils::ToString(wTextForAI.substr(aiSpanMapIt->first,
+                    std::min(static_cast<int32_t>(wAIContent.length()), wTextForAILength - aiSpanMapIt->first)))) {
                     dataDetectorAdapter->aiSpanMap_[aiSpanMapIt->first] = aiSpanMapIt->second;
                     hasSame = true;
                 }
