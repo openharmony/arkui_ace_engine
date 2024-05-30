@@ -3009,6 +3009,13 @@ void OverlayManager::OnBindContentCover(bool isShow, std::function<void(const st
     auto rootNode = FindWindowScene(targetNode);
     CHECK_NULL_VOID(rootNode);
     if (isShow) {
+        if (rootNode->IsProhibitedAddChildNode()) {
+            TAG_LOGE(AceLogTag::ACE_OVERLAY,
+                "Prohibited add to rootNode due to already has modal %{public}d.", sessionId);
+            DeleteUIExtensionNode(sessionId);
+            return;
+        }
+
         auto modalTransition = modalStyle.modalTransition;
         if (!modalTransition.has_value()) {
             modalTransition = ModalTransition::DEFAULT;
@@ -3079,6 +3086,14 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
     SaveLastModalNode();
     modalNode->MountToParent(rootNode);
     modalNode->AddChild(builder);
+    if (!isAllowedBeCovered_ && rootNode) {
+        TAG_LOGI(AceLogTag::ACE_OVERLAY,
+            "RootNode %{public}d mark IsProhibitedAddChildNode when sessionId %{public}d.",
+            rootNode->GetId(), targetId);
+        rootNode->SetIsProhibitedAddChildNode(true);
+        SetCurSessionId(targetId);
+    }
+
     FireModalPageShow();
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     if (contentCoverParam.transitionEffect != nullptr) {
@@ -4648,10 +4663,47 @@ void OverlayManager::RemoveEventColumn()
     hasEvent_ = false;
 }
 
-int32_t OverlayManager::CreateModalUIExtension(
-    const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks, bool isProhibitBack, bool isAsyncModalBinding)
+bool OverlayManager::IsProhibitedAddToRootNode()
 {
+    auto rootNode = FindWindowScene(nullptr);
+    CHECK_NULL_RETURN(rootNode, false);
+    return rootNode->IsProhibitedAddChildNode();
+}
+
+void OverlayManager::ResetRootNode(int32_t sessionId)
+{
+    if (sessionId != curSessionId_) {
+        return;
+    }
+
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "ResetRootNode %{public}d.", sessionId);
+    SetCurSessionId(-1);
+    auto rootNode = FindWindowScene(nullptr);
+    CHECK_NULL_VOID(rootNode);
+    rootNode->SetIsProhibitedAddChildNode(false);
+}
+
+void OverlayManager::SetIsAllowedBeCovered(bool isAllowedBeCovered)
+{
+    isAllowedBeCovered_ = isAllowedBeCovered;
+}
+
+void OverlayManager::SetCurSessionId(int32_t sessionId)
+{
+    curSessionId_ = sessionId;
+}
+
+int32_t OverlayManager::CreateModalUIExtension(
+    const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks,
+    bool isProhibitBack, bool isAsyncModalBinding, bool isAllowedBeCovered)
+{
+    if (IsProhibitedAddToRootNode()) {
+        TAG_LOGE(AceLogTag::ACE_OVERLAY, "Prohibited add to rootNode due to already has modal.");
+        return 0;
+    }
+
     isProhibitBack_ = isProhibitBack;
+    SetIsAllowedBeCovered(isAllowedBeCovered);
     auto uiExtNode = ModalUIExtension::Create(want, callbacks, isAsyncModalBinding);
     auto layoutProperty = uiExtNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, 0);
@@ -4669,16 +4721,20 @@ int32_t OverlayManager::CreateModalUIExtension(
         // Convert the sessionId into a negative number to distinguish it from the targetId of other modal pages
         BindContentCover(true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr, nullptr, nullptr,
             ContentCoverParam(), nullptr, -(sessionId));
+        SetIsAllowedBeCovered(true); // Reset isAllowedBeCovered
     } else {
-        auto bindModalCallback = [weak = WeakClaim(this), buildNodeFunc, sessionId, id = Container::CurrentId()]() {
+        auto bindModalCallback = [weak = WeakClaim(this),
+            buildNodeFunc, sessionId, id = Container::CurrentId(), isAllowedBeCovered]() {
             ContainerScope scope(id);
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
+            overlayManager->SetIsAllowedBeCovered(isAllowedBeCovered);
             ModalStyle modalStyle;
             modalStyle.modalTransition = NG::ModalTransition::NONE;
             modalStyle.isUIExtension = true;
             overlayManager->BindContentCover(true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr,
                 nullptr, nullptr, ContentCoverParam(), nullptr, -(sessionId));
+            overlayManager->SetIsAllowedBeCovered(true);
         };
         ModalUIExtension::SetBindModalCallback(uiExtNode, std::move(bindModalCallback));
         uiExtNodes_[sessionId] = WeakClaim(RawPtr(uiExtNode));
@@ -4686,7 +4742,7 @@ int32_t OverlayManager::CreateModalUIExtension(
     return sessionId;
 }
 
-void OverlayManager::CloseModalUIExtension(int32_t sessionId)
+void OverlayManager::DeleteUIExtensionNode(int32_t sessionId)
 {
     auto iter = uiExtNodes_.find(sessionId);
     if (iter != uiExtNodes_.end()) {
@@ -4696,10 +4752,16 @@ void OverlayManager::CloseModalUIExtension(int32_t sessionId)
         }
         uiExtNodes_.erase(sessionId);
     }
+}
+
+void OverlayManager::CloseModalUIExtension(int32_t sessionId)
+{
+    DeleteUIExtensionNode(sessionId);
     ModalStyle modalStyle;
     modalStyle.modalTransition = NG::ModalTransition::NONE;
     BindContentCover(false, nullptr, nullptr, modalStyle, nullptr, nullptr, nullptr, nullptr, ContentCoverParam(),
         nullptr, -(sessionId));
+    ResetRootNode(-(sessionId));
 }
 
 RefPtr<FrameNode> OverlayManager::BindUIExtensionToMenu(const RefPtr<FrameNode>& uiExtNode,

@@ -431,7 +431,7 @@ public:
 
     // ui extension
     int32_t CreateModalUIExtension(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks,
-        bool isProhibitBack, bool isAsyncModalBinding = false);
+        bool isProhibitBack, bool isAsyncModalBinding = false, bool isAllowedBeCovered = true);
     void CloseModalUIExtension(int32_t sessionId);
 
     RefPtr<FrameNode> BindUIExtensionToMenu(const RefPtr<FrameNode>& uiExtNode,
@@ -530,6 +530,12 @@ public:
     {
         isMenuShow_ = isMenuShow;
     }
+
+    void SetIsAllowedBeCovered(bool isAllowedBeCovered = true);
+    bool IsProhibitedAddToRootNode();
+    void DeleteUIExtensionNode(int32_t sessionId);
+    void SetCurSessionId(int32_t curSessionId);
+    void ResetRootNode(int32_t sessionId);
 
 private:
     void PopToast(int32_t targetId);
@@ -702,6 +708,12 @@ private:
     WeakPtr<FrameNode> gatherNodeWeak_;
     std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo_;
     bool isMenuShow_ = false;
+
+    // Only used when CreateModalUIExtension
+    // No thread safety issue due to they are all run in UI thread
+    bool isAllowedBeCovered_ = true;
+    // Only hasValue when isAllowedBeCovered is false
+    int32_t curSessionId_ = -1;
 };
 } // namespace OHOS::Ace::NG
 

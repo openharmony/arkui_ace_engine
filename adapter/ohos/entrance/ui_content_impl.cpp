@@ -2580,14 +2580,14 @@ int32_t UIContentImpl::CreateModalUIExtension(
             CHECK_NULL_VOID(pipeline);
             auto overlay = pipeline->GetOverlayManager();
             CHECK_NULL_VOID(overlay);
-            sessionId =
-                overlay->CreateModalUIExtension(want, callbacks, config.isProhibitBack, config.isAsyncModalBinding);
+            sessionId = overlay->CreateModalUIExtension(want, callbacks,
+                config.isProhibitBack, config.isAsyncModalBinding, config.isAllowedBeCovered);
         },
         TaskExecutor::TaskType::UI, "ArkUICreateModalUIExtension");
     LOGI("[%{public}s][%{public}s][%{public}d]: UIExtension create modal page end, sessionId=%{public}d, "
-         "isProhibitBack=%{public}d, isAsyncModalBinding=%{public}d",
+         "isProhibitBack=%{public}d, isAsyncModalBinding=%{public}d, isAllowedBeCovered=%{public}d",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, sessionId, config.isProhibitBack,
-        config.isAsyncModalBinding);
+        config.isAsyncModalBinding, config.isAllowedBeCovered);
     return sessionId;
 }
 

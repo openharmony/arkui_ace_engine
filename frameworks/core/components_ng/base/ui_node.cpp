@@ -117,6 +117,12 @@ void UINode::DetachContext(bool recursive)
 void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot, bool silently, bool addDefaultTransition)
 {
     CHECK_NULL_VOID(child);
+    if (isProhibitedAddChildNode_) {
+        LOGW("Current Node(id: %{public}d) is prohibited add child(tag %{public}s, id: %{public}d)",
+            GetId(), child->GetTag().c_str(), child->GetId());
+        return;
+    }
+
     auto it = std::find(children_.begin(), children_.end(), child);
     if (it != children_.end()) {
         return;
