@@ -2268,6 +2268,14 @@ bool SwiperPattern::IsHorizontalAndRightToLeft() const
         host->GetLayoutProperty()->GetNonAutoLayoutDirection() == TextDirection::RTL;
 }
 
+TextDirection SwiperPattern::GetNonAutoLayoutDirection() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, TextDirection::LTR);
+    CHECK_NULL_RETURN(host->GetLayoutProperty(), TextDirection::LTR);
+    return host->GetLayoutProperty()->GetNonAutoLayoutDirection();
+}
+
 void SwiperPattern::HandleTouchBottomLoop()
 {
     auto currentFirstIndex = GetLoopIndex(currentFirstIndex_);
@@ -3740,6 +3748,7 @@ std::shared_ptr<SwiperParameters> SwiperPattern::GetSwiperParameters() const
         auto pipelineContext = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipelineContext, swiperParameters_);
         auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+        CHECK_NULL_RETURN(swiperIndicatorTheme, swiperParameters_);
         swiperParameters_->itemWidth = swiperIndicatorTheme->GetSize();
         swiperParameters_->itemHeight = swiperIndicatorTheme->GetSize();
         swiperParameters_->selectedItemWidth = swiperIndicatorTheme->GetSize();

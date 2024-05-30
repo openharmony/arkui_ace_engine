@@ -80,6 +80,9 @@ void SwiperIndicatorPattern::OnModifyDone()
                 V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
             lastTextNode = FrameNode::CreateFrameNode(
                 V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+            auto lastTextLayoutProperty = lastTextNode->GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_VOID(lastTextLayoutProperty);
+            lastTextLayoutProperty->UpdateLayoutDirection(swiperPattern->GetNonAutoLayoutDirection());
         }
         UpdateTextContent(layoutProperty, firstTextNode, lastTextNode);
         host->AddChild(firstTextNode);
@@ -569,7 +572,7 @@ void SwiperIndicatorPattern::UpdateTextContentSub(const RefPtr<SwiperIndicatorLa
             currentIndex = 1;
         }
     }
-    bool isRtl = swiperLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    bool isRtl = swiperPattern->GetNonAutoLayoutDirection() == TextDirection::RTL;
     std::string firstContent = isRtl ? std::to_string(swiperPattern->RealTotalCount()) : std::to_string(currentIndex);
     std::string lastContent = isRtl ? std::to_string(currentIndex) + "\\" :
         "/" + std::to_string(swiperPattern->RealTotalCount());

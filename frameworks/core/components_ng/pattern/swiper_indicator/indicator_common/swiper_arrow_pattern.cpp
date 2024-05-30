@@ -84,11 +84,8 @@ void SwiperArrowPattern::OnClick() const
     CHECK_NULL_VOID(swiperController);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto swiperLayoutProperty = GetSwiperArrowLayoutProperty();
-    CHECK_NULL_VOID(swiperLayoutProperty);
     if (host->GetTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG) {
-        if (swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL &&
-            swiperLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL) {
+        if (swiperPattern->IsHorizontalAndRightToLeft()) {
             swiperController->ShowNext();
         } else {
             swiperController->ShowPrevious();
@@ -96,8 +93,7 @@ void SwiperArrowPattern::OnClick() const
         return;
     }
     if (host->GetTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG) {
-        if (swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL &&
-            swiperLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL) {
+        if (swiperPattern->IsHorizontalAndRightToLeft()) {
             swiperController->ShowPrevious();
         } else {
             swiperController->ShowNext();
