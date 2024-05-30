@@ -134,7 +134,8 @@ public:
     }
 
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-        const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result) override;
+        const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result,
+        TouchTestResult& responseLinkResult) override;
     void SetThumbnailCallback(std::function<void(Offset)>&& callback);
     void SetFilter(const RefPtr<DragEventActuator>& actuator);
     static void UpdatePreviewPositionAndScale(const RefPtr<FrameNode>& imageNode, const OffsetF& frameOffset);

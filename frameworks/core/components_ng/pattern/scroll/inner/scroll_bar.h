@@ -470,7 +470,8 @@ public:
     void FlushBarWidth();
     void CalcReservedHeight();
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent);
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+        TouchTestResult& responseLinkResult);
     void ScheduleDisappearDelayTask();
 
     void SetDragFRCSceneCallback(DragFRCSceneCallback&& dragFRCSceneCallback)
@@ -529,7 +530,8 @@ public:
         scrollPageCallback_ = std::move(scrollPageCallback);
     }
     void OnCollectLongPressTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent);
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+        TouchTestResult& responseLinkResult);
     void InitLongPressEvent();
     void HandleLongPress(bool smooth);
     bool AnalysisUpOrDown(Point point, bool& reverse);

@@ -786,14 +786,14 @@ RefPtr<PipelineContext> UINode::GetContextRefPtr()
 
 HitTestResult UINode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
-    bool isDispatch)
+    TouchTestResult& responseLinkResult, bool isDispatch)
 {
     auto children = GetChildren();
     HitTestResult hitTestResult = HitTestResult::OUT_OF_REGION;
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         auto& child = *iter;
-        auto hitResult =
-            child->TouchTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, result, touchId);
+        auto hitResult = child->TouchTest(
+            globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, result, touchId, responseLinkResult);
         if (hitResult == HitTestResult::STOP_BUBBLING) {
             return HitTestResult::STOP_BUBBLING;
         }

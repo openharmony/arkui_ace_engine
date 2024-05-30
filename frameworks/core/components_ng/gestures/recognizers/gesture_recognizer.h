@@ -87,6 +87,8 @@ public:
     // Called when request of handling gesture sequence is rejected by gesture referee.
     virtual void OnRejected() = 0;
 
+    void OnRejectBridgeObj();
+
     // Called when request of handling gesture sequence is pending by gesture referee.
     virtual void OnPending()
     {
@@ -127,6 +129,11 @@ public:
     }
     bool HandleEvent(const TouchEvent& point) override;
     bool HandleEvent(const AxisEvent& event) override;
+
+    void HandleBridgeModeEvent(const TouchEvent& point);
+    void HandleEventToBridgeObjList(
+        const TouchEvent& point, const std::list<WeakPtr<NGGestureRecognizer>>& bridgeObjList);
+    void HandleBridgeModeEvent(const AxisEvent& event);
 
     GesturePriority GetPriority() const
     {
@@ -234,6 +241,10 @@ public:
         refereeState_ = RefereeState::READY;
         disposal_ = GestureDisposal::NONE;
         currentFingers_ = 0;
+        SetBridgeMode(false);
+        ClearBridgeObjList();
+        responseLinkRecognizer_.clear();
+        enabled_ = true;
         OnResetStatus();
     }
 
@@ -242,6 +253,10 @@ public:
     {
         refereeState_ = RefereeState::READY;
         OnResetStatus();
+        SetBridgeMode(false);
+        ClearBridgeObjList();
+        responseLinkRecognizer_.clear();
+        enabled_ = true;
     }
     virtual bool CheckTouchId(int32_t touchId) = 0;
 
@@ -291,6 +306,30 @@ public:
         }
     }
 
+    bool IsSystemGesture() const
+    {
+        if (!gestureInfo_) {
+            return false;
+        }
+        return gestureInfo_->IsSystemGesture();
+    }
+
+    GestureTypeName GetRecognizerType() const
+    {
+        if (!gestureInfo_) {
+            return GestureTypeName::UNKNOWN;
+        }
+        return gestureInfo_->GetRecognizerType();
+    }
+
+    void SetRecognizerType(GestureTypeName trueType)
+    {
+        if (!gestureInfo_) {
+            gestureInfo_ = MakeRefPtr<GestureInfo>();
+        }
+        gestureInfo_->SetRecognizerType(trueType);
+    }
+
     virtual void ForceCleanRecognizer() {};
     virtual void CleanRecognizerState() {};
 
@@ -314,6 +353,48 @@ public:
             gestureInfo_->SetUserData(userData);
         }
     }
+
+    void SetBridgeMode(bool bridgeMode)
+    {
+        bridgeMode_ = bridgeMode;
+    }
+
+    bool IsBridgeMode() const
+    {
+        return bridgeMode_;
+    }
+
+    void AddBridgeObj(const WeakPtr<NGGestureRecognizer>& bridgeObj)
+    {
+        bridgeObjList_.emplace_back(bridgeObj);
+    }
+
+    std::list<WeakPtr<NGGestureRecognizer>> GetBridgeObj() const
+    {
+        return bridgeObjList_;
+    }
+
+    void ClearBridgeObjList()
+    {
+        bridgeObjList_.clear();
+    }
+
+    void SetEnabled(bool enabled)
+    {
+        enabled_ = enabled;
+    }
+
+    bool IsEnabled() const
+    {
+        return enabled_;
+    }
+
+    RefereeState GetGestureState() const
+    {
+        return refereeState_;
+    }
+
+    void SetResponseLinkRecognizers(const std::list<RefPtr<TouchEventTarget>>& responseLinkResult);
 
 protected:
     void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
@@ -368,6 +449,10 @@ protected:
     RefPtr<GestureInfo> gestureInfo_;
     GestureJudgeFunc sysJudge_ = nullptr;
     bool isTouchEventFinished_ = false;
+    bool bridgeMode_ = false;
+    std::list<WeakPtr<NGGestureRecognizer>> bridgeObjList_;
+    bool enabled_ = true;
+    std::list<RefPtr<NGGestureRecognizer>> responseLinkRecognizer_;
 private:
     WeakPtr<NGGestureRecognizer> gestureGroup_;
     WeakPtr<NGGestureRecognizer> eventImportGestureGroup_;

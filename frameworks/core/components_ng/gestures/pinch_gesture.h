@@ -35,8 +35,10 @@ public:
     {
         if (gestureInfo_) {
             gestureInfo_->SetType(GestureTypeName::PINCH_GESTURE);
+            gestureInfo_->SetRecognizerType(GestureTypeName::PINCH_GESTURE);
         } else {
-            gestureInfo_ = MakeRefPtr<GestureInfo>(GestureTypeName::PINCH_GESTURE);
+            gestureInfo_ =
+                MakeRefPtr<GestureInfo>(GestureTypeName::PINCH_GESTURE, GestureTypeName::PINCH_GESTURE, false);
         }
     }
     ~PinchGesture() override = default;

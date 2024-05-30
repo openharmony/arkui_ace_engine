@@ -811,6 +811,17 @@ public:
         ViewAbstract::SetOnTouchIntercept(std::move(touchInterceptFunc));
     }
 
+    void SetShouldBuiltInRecognizerParallelWith(
+        NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc) override
+    {
+        ViewAbstract::SetShouldBuiltInRecognizerParallelWith(std::move(shouldBuiltInRecognizerParallelWithFunc));
+    }
+
+    void SetOnGestureRecognizerJudgeBegin(NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) override
+    {
+        ViewAbstract::SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc));
+    }
+
     void SetOnTouch(TouchEventFunc&& touchEventFunc) override
     {
         ViewAbstract::SetOnTouch(std::move(touchEventFunc));

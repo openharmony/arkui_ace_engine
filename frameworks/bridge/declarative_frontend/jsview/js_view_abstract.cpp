@@ -51,6 +51,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_key_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_on_area_change_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_on_size_change_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_should_built_in_recognizer_parallel_with_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_touch_intercept_function.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_value.h"
@@ -8155,6 +8156,10 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("onClick", &JSViewAbstract::JsOnClick);
     JSClass<JSViewAbstract>::StaticMethod("onGestureJudgeBegin", &JSViewAbstract::JsOnGestureJudgeBegin);
     JSClass<JSViewAbstract>::StaticMethod("onTouchIntercept", &JSViewAbstract::JsOnTouchIntercept);
+    JSClass<JSViewAbstract>::StaticMethod(
+        "shouldBuiltInRecognizerParallelWith", &JSViewAbstract::JsShouldBuiltInRecognizerParallelWith);
+    JSClass<JSViewAbstract>::StaticMethod(
+        "onGestureRecognizerJudgeBegin", &JSViewAbstract::JsOnGestureRecognizerJudgeBegin);
     JSClass<JSViewAbstract>::StaticMethod("clickEffect", &JSViewAbstract::JsClickEffect);
     JSClass<JSViewAbstract>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
     JSClass<JSViewAbstract>::StaticMethod("geometryTransition", &JSViewAbstract::JsGeometryTransition);
@@ -9172,6 +9177,50 @@ void JSViewAbstract::JsOnTouchIntercept(const JSCallbackInfo& info)
         return func->Execute(info);
     };
     ViewAbstractModel::GetInstance()->SetOnTouchIntercept(std::move(onTouchInterceptfunc));
+}
+
+void JSViewAbstract::JsShouldBuiltInRecognizerParallelWith(const JSCallbackInfo& info)
+{
+    if (info[0]->IsUndefined() || !info[0]->IsFunction()) {
+        ViewAbstractModel::GetInstance()->SetShouldBuiltInRecognizerParallelWith(nullptr);
+        return;
+    }
+
+    auto jsParallelInnerGestureToFunc =
+        AceType::MakeRefPtr<JsShouldBuiltInRecognizerParallelWithFunction>(JSRef<JSFunc>::Cast(info[0]));
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto shouldBuiltInRecognizerParallelWithFunc =
+        [execCtx = info.GetExecutionContext(), func = jsParallelInnerGestureToFunc, node = frameNode](
+            const RefPtr<TouchEventTarget>& current,
+            const std::vector<RefPtr<TouchEventTarget>>& others) -> RefPtr<NG::NGGestureRecognizer> {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, nullptr);
+        ACE_SCORING_EVENT("shouldBuiltInRecognizerParallelWith");
+        PipelineContext::SetCallBackNode(node);
+        return func->Execute(current, others);
+    };
+    ViewAbstractModel::GetInstance()->SetShouldBuiltInRecognizerParallelWith(
+        std::move(shouldBuiltInRecognizerParallelWithFunc));
+}
+
+void JSViewAbstract::JsOnGestureRecognizerJudgeBegin(const JSCallbackInfo& info)
+{
+    if (info[0]->IsUndefined() || !info[0]->IsFunction()) {
+        ViewAbstractModel::GetInstance()->SetOnGestureRecognizerJudgeBegin(nullptr);
+        return;
+    }
+
+    auto jsOnGestureRecognizerJudgeFunc = AceType::MakeRefPtr<JsGestureJudgeFunction>(JSRef<JSFunc>::Cast(info[0]));
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onGestureRecognizerJudgefunc =
+        [execCtx = info.GetExecutionContext(), func = jsOnGestureRecognizerJudgeFunc, node = frameNode](
+            const std::shared_ptr<BaseGestureEvent>& info, const RefPtr<NG::NGGestureRecognizer>& current,
+            const std::list<RefPtr<NG::NGGestureRecognizer>>& others) -> GestureJudgeResult {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, GestureJudgeResult::CONTINUE);
+        ACE_SCORING_EVENT("onGestureRecognizerJudgeBegin");
+        PipelineContext::SetCallBackNode(node);
+        return func->Execute(info, current, others);
+    };
+    ViewAbstractModel::GetInstance()->SetOnGestureRecognizerJudgeBegin(std::move(onGestureRecognizerJudgefunc));
 }
 
 void JSViewAbstract::JsClickEffect(const JSCallbackInfo& info)

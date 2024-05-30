@@ -69,7 +69,8 @@ public:
     explicit TestNode(int32_t nodeId) : UINode("TestNode", nodeId) {}
 
     HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const PointF& parentRevertPoint,
-        TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId, bool isDispatch = false) override
+        TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId, TouchTestResult& responseLinkResult,
+        bool isDispatch = false) override
     {
         return hitTestResult_;
     }
@@ -783,18 +784,22 @@ HWTEST_F(UINodeTestNg, UINodeTestNg023, TestSize.Level1)
      * @tc.expected: the return value is meetings expectations
      */
     TouchTestResult result;
+    TouchTestResult responseLinkResult;
     TouchRestrict restrict;
     const PointF GLOBAL_POINT { 20.0f, 20.0f };
     const PointF LOCAL_POINT { 15.0f, 15.0f };
     auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
     ZERO->AddChild(testNode, 1, false);
-    HitTestResult retResult = ZERO->UINode::TouchTest(GLOBAL_POINT, LOCAL_POINT, LOCAL_POINT, restrict, result, 1);
+    HitTestResult retResult =
+        ZERO->UINode::TouchTest(GLOBAL_POINT, LOCAL_POINT, LOCAL_POINT, restrict, result, 1, responseLinkResult);
     EXPECT_EQ(retResult, HitTestResult::OUT_OF_REGION);
     testNode->hitTestResult_ = HitTestResult::STOP_BUBBLING;
-    retResult = ZERO->UINode::TouchTest(GLOBAL_POINT, LOCAL_POINT, LOCAL_POINT, restrict, result, 1);
+    retResult =
+        ZERO->UINode::TouchTest(GLOBAL_POINT, LOCAL_POINT, LOCAL_POINT, restrict, result, 1, responseLinkResult);
     EXPECT_EQ(retResult, HitTestResult::STOP_BUBBLING);
     testNode->hitTestResult_ = HitTestResult::BUBBLING;
-    retResult = ZERO->UINode::TouchTest(GLOBAL_POINT, LOCAL_POINT, LOCAL_POINT, restrict, result, 1);
+    retResult =
+        ZERO->UINode::TouchTest(GLOBAL_POINT, LOCAL_POINT, LOCAL_POINT, restrict, result, 1, responseLinkResult);
     EXPECT_EQ(retResult, HitTestResult::BUBBLING);
     ZERO->Clean();
 }

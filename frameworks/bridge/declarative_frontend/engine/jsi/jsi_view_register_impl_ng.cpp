@@ -32,6 +32,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_should_built_in_recognizer_parallel_with_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_object_template.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_view_register.h"
 #include "frameworks/bridge/declarative_frontend/jsview/action_sheet/js_action_sheet.h"
@@ -643,6 +644,10 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
 #endif
     JSContentSlot::JSBind(globalObj);
     JSNodeContent::JSBind(globalObj);
+    JSGestureRecognizer::JSBind(globalObj);
+    JSEventTargetInfo::JSBind(globalObj);
+    JSScrollableTargetInfo::JSBind(globalObj);
+    JSPanRecognizer::JSBind(globalObj);
 }
 
 void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)

@@ -24,6 +24,7 @@
 #include "bridge/card_frontend/card_frontend_declarative.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_should_built_in_recognizer_parallel_with_function.h"
 #include "bridge/declarative_frontend/engine/js_object_template.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_extra_view_register.h"
@@ -833,6 +834,10 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "__PathShape__", JSPathShape::JSBind },
     { "ContentSlot", JSContentSlot::JSBind },
     { "ArkUINativeNodeContent", JSNodeContent::JSBind },
+    { "GestureRecognizer", JSGestureRecognizer::JSBind },
+    { "EventTargetInfo", JSEventTargetInfo::JSBind },
+    { "ScrollableTargetInfo", JSScrollableTargetInfo::JSBind },
+    { "PanRecognizer", JSPanRecognizer::JSBind }
 };
 
 void RegisterAllModule(BindingTarget globalObj, void* nativeEngine)

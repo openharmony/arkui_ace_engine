@@ -137,8 +137,9 @@ HWTEST_F(PanEventTestNg, PanEventOnCollectTouchTargetTest002, TestSize.Level1)
      * @tc.expected: OnCollectTouchTarget function will return directly and result size is 0.
      */
     TouchTestResult result;
+    TouchTestResult responseLinkResult;
     panEventActuator->OnCollectTouchTarget(
-        COORDINATE_OFFSET, PAN_EVENT_RESTRICT, eventHub->CreateGetEventTargetImpl(), result);
+        COORDINATE_OFFSET, PAN_EVENT_RESTRICT, eventHub->CreateGetEventTargetImpl(), result, responseLinkResult);
     EXPECT_EQ(result.size(), PAN_EVENT_TEST_RESULT_SIZE);
 
     /**
@@ -164,7 +165,7 @@ HWTEST_F(PanEventTestNg, PanEventOnCollectTouchTargetTest002, TestSize.Level1)
     panEventActuator->AddPanEvent(panEventNullptr);
     EXPECT_FALSE(panEventActuator->panEvents_.empty());
     panEventActuator->OnCollectTouchTarget(
-        COORDINATE_OFFSET, PAN_EVENT_RESTRICT, eventHub->CreateGetEventTargetImpl(), result);
+        COORDINATE_OFFSET, PAN_EVENT_RESTRICT, eventHub->CreateGetEventTargetImpl(), result, responseLinkResult);
     panEventActuator->ReplacePanEvent(panEvent);
     EXPECT_NE(panEventActuator->userCallback_, nullptr);
 
@@ -173,7 +174,7 @@ HWTEST_F(PanEventTestNg, PanEventOnCollectTouchTargetTest002, TestSize.Level1)
      * @tc.expected: result size was increased by one.
      */
     panEventActuator->OnCollectTouchTarget(
-        COORDINATE_OFFSET, PAN_EVENT_RESTRICT, eventHub->CreateGetEventTargetImpl(), result);
+        COORDINATE_OFFSET, PAN_EVENT_RESTRICT, eventHub->CreateGetEventTargetImpl(), result, responseLinkResult);
 
     EXPECT_NE(panEventActuator->panRecognizer_->onActionStart_, nullptr);
     EXPECT_NE(panEventActuator->panRecognizer_->onActionUpdate_, nullptr);

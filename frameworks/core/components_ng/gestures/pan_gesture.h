@@ -38,8 +38,9 @@ public:
         distance_ = distance;
         if (gestureInfo_) {
             gestureInfo_->SetType(GestureTypeName::PAN_GESTURE);
+            gestureInfo_->SetRecognizerType(GestureTypeName::PAN_GESTURE);
         } else {
-            gestureInfo_ = MakeRefPtr<GestureInfo>(GestureTypeName::PAN_GESTURE);
+            gestureInfo_ = MakeRefPtr<GestureInfo>(GestureTypeName::PAN_GESTURE, GestureTypeName::PAN_GESTURE, false);
         }
     };
     explicit PanGesture(RefPtr<PanGestureOption> panGestureOption)
@@ -47,8 +48,9 @@ public:
         panGestureOption_ = panGestureOption;
         if (gestureInfo_) {
             gestureInfo_->SetType(GestureTypeName::PAN_GESTURE);
+            gestureInfo_->SetRecognizerType(GestureTypeName::PAN_GESTURE);
         } else {
-            gestureInfo_ = MakeRefPtr<GestureInfo>(GestureTypeName::PAN_GESTURE);
+            gestureInfo_ = MakeRefPtr<GestureInfo>(GestureTypeName::PAN_GESTURE, GestureTypeName::PAN_GESTURE, false);
         }
     };
     ~PanGesture() override = default;

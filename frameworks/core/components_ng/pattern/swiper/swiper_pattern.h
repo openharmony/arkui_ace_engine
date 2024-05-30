@@ -37,7 +37,6 @@
 #include "core/components_ng/pattern/swiper/swiper_layout_algorithm.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
-#include "core/components_ng/pattern/swiper/swiper_paint_method.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
 #include "core/components_ng/pattern/swiper/swiper_utils.h"
 #include "core/components_ng/pattern/tabs/tab_content_transition_proxy.h"
@@ -89,18 +88,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
-    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
-    {
-        auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
-        CHECK_NULL_RETURN(layoutProperty, nullptr);
-        const auto& paddingProperty = layoutProperty->GetPaddingProperty();
-        bool needClipPadding = paddingProperty != nullptr;
-        bool needPaintFade = !IsLoop() && GetEdgeEffect() == EdgeEffect::FADE && !NearZero(fadeOffset_);
-        auto paintMethod = MakeRefPtr<SwiperPaintMethod>(GetDirection(), fadeOffset_);
-        paintMethod->SetNeedPaintFade(needPaintFade);
-        paintMethod->SetNeedClipPadding(needClipPadding);
-        return paintMethod;
-    }
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     RefPtr<EventHub> CreateEventHub() override
     {
@@ -681,6 +669,9 @@ public:
     {
         return nextMarginIgnoreBlank_;
     }
+
+    bool IsAtStart() const;
+    bool IsAtEnd() const;
 
 private:
     void OnModifyDone() override;

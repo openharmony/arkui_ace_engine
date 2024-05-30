@@ -227,6 +227,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest032, TestSize.Level1)
     TouchRestrict touchRestrict;
     std::list<RefPtr<NGGestureRecognizer>> innerTargets;
     TouchTestResult finalResult;
+    TouchTestResult responseLinkResult;
 
     /**
      * @tc.steps: step3. call externalExclusiveRecognizer_
@@ -244,7 +245,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest032, TestSize.Level1)
      * @tc.expected: finalResult is empty
      */
     gestureEventHub->ProcessTouchTestHierarchy(
-        COORDINATE_OFFSET, touchRestrict, innerTargets, finalResult, TOUCH_ID, nullptr);
+        COORDINATE_OFFSET, touchRestrict, innerTargets, finalResult, TOUCH_ID, nullptr, responseLinkResult);
     EXPECT_TRUE(finalResult.empty());
 }
 
