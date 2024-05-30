@@ -1129,27 +1129,30 @@ void NavigationModelNG::SetHideTitleBar(bool hideTitleBar)
 void NavigationModelNG::SetHideNavBar(bool hideNavBar)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    RefPtr<NavigationGroupNode> navigationGroupNode =
+        Referenced::Claim<NavigationGroupNode>(AceType::DynamicCast<NavigationGroupNode>(frameNode));
     CHECK_NULL_VOID(navigationGroupNode);
-    auto pattern = navigationGroupNode->GetPattern<NavigationPattern>();
-    CHECK_NULL_VOID(pattern);
-    auto navigationLayoutProperty = navigationGroupNode->GetLayoutProperty<NavigationLayoutProperty>();
-    CHECK_NULL_VOID(navigationLayoutProperty);
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
+    if (!navigationPattern->IsInitializationDone() ||
+        navigationPattern->GetNavigationMode() == NavigationMode::STACK) {
+        SetHideNavBarInner(navigationGroupNode, hideNavBar);
+        return;
+    }
 
-    auto lastHideNavBarValue = navigationLayoutProperty->GetHideNavBar();
-    if (lastHideNavBarValue.has_value()) {
-        pattern->SetNavBarVisibilityChange(hideNavBar != lastHideNavBarValue.value());
-    } else {
-        pattern->SetNavBarVisibilityChange(true);
-    }
-    auto navBarNode = AceType::DynamicCast<FrameNode>(navigationGroupNode->GetNavBarNode());
-    auto layoutProperty = navBarNode->GetLayoutProperty();
-    layoutProperty->UpdateVisibility(hideNavBar ? VisibleType::INVISIBLE : VisibleType::VISIBLE, true);
-    navBarNode->SetJSViewActive(!hideNavBar);
-    if (pattern->GetNavBarVisibilityChange()) {
-        navBarNode->MarkDirtyNode();
-    }
-    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, HideNavBar, hideNavBar);
+    AnimationOption option;
+    option.SetCurve(MODE_SWITCH_CURVE);
+    option.SetFillMode(FillMode::FORWARDS);
+    option.SetDuration(MODE_SWITCH_ANIMATION_DURATION);
+    AnimationUtils::Animate(option,
+        [hideNavBar, weakNavNode = WeakPtr<NavigationGroupNode>(navigationGroupNode)]() {
+        auto navNode = weakNavNode.Upgrade();
+        CHECK_NULL_VOID(navNode);
+        NavigationModelNG::SetHideNavBarInner(navNode, hideNavBar);
+        navNode->MarkDirtyNode();
+        auto pipeline = navNode->GetContext();
+        pipeline->FlushUITasks();
+    });
 }
 
 void NavigationModelNG::SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
@@ -1730,11 +1733,9 @@ void NavigationModelNG::SetBackButtonIcon(FrameNode* frameNode,
     titleBarNode->MarkModifyDone();
 }
 
-void NavigationModelNG::SetHideNavBar(FrameNode* frameNode, bool hideNavBar)
+void NavigationModelNG::SetHideNavBarInner(
+    const RefPtr<NavigationGroupNode>& navigationGroupNode, bool hideNavBar)
 {
-    CHECK_NULL_VOID(frameNode);
-    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
-    CHECK_NULL_VOID(navigationGroupNode);
     auto pattern = navigationGroupNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(pattern);
     auto navigationLayoutProperty = navigationGroupNode->GetLayoutProperty<NavigationLayoutProperty>();
@@ -1753,7 +1754,35 @@ void NavigationModelNG::SetHideNavBar(FrameNode* frameNode, bool hideNavBar)
     if (pattern->GetNavBarVisibilityChange()) {
         navBarNode->MarkDirtyNode();
     }
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, HideNavBar, hideNavBar, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, HideNavBar, hideNavBar, navigationGroupNode);
+}
+
+void NavigationModelNG::SetHideNavBar(FrameNode* frameNode, bool hideNavBar)
+{
+    auto navigationGroupNode =
+        Referenced::Claim<NavigationGroupNode>(AceType::DynamicCast<NavigationGroupNode>(frameNode));
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
+    if (!navigationPattern->IsInitializationDone() ||
+        navigationPattern->GetNavigationMode() == NavigationMode::STACK) {
+        SetHideNavBarInner(navigationGroupNode, hideNavBar);
+        return;
+    }
+
+    AnimationOption option;
+    option.SetCurve(MODE_SWITCH_CURVE);
+    option.SetFillMode(FillMode::FORWARDS);
+    option.SetDuration(MODE_SWITCH_ANIMATION_DURATION);
+    AnimationUtils::Animate(option,
+        [hideNavBar, weakNavNode = WeakPtr<NavigationGroupNode>(navigationGroupNode)]() {
+        auto navNode = weakNavNode.Upgrade();
+        CHECK_NULL_VOID(navNode);
+        NavigationModelNG::SetHideNavBarInner(navNode, hideNavBar);
+        navNode->MarkDirtyNode();
+        auto pipeline = navNode->GetContext();
+        pipeline->FlushUITasks();
+    });
 }
 
 void NavigationModelNG::SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar)
