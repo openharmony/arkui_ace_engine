@@ -88,7 +88,7 @@ void MenuItemGroupView::SetHeader(const std::string& headerStr)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         layoutProps->UpdateFontSize(TITLE_TEXT_FONT_SIZE);
         layoutProps->UpdateFontWeight(FontWeight::BOLD);
         layoutProps->UpdateTextColor(MENU_TEXT_COLOR);

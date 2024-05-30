@@ -78,7 +78,7 @@ void UpdateFontWeight(RefPtr<TextLayoutProperty>& textProperty, RefPtr<MenuLayou
     } else if (menuProperty && menuProperty->GetFontWeight().has_value()) {
         textProperty->UpdateFontWeight(menuProperty->GetFontWeight().value());
     } else {
-        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
             textProperty->UpdateFontWeight(FontWeight::MEDIUM);
         } else {
             textProperty->UpdateFontWeight(FontWeight::REGULAR);

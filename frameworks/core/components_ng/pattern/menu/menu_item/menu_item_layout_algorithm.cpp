@@ -69,7 +69,7 @@ void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto childConstraint = props->CreateChildConstraint();
     // set item min height
     auto minItemHeight = static_cast<float>(theme->GetOptionMinHeight().ConvertToPx());
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         childConstraint.minSize.SetHeight(MENU_ITEM_CHILD_MIN_HEIGHT.ConvertToPx());
     } else {
         childConstraint.minSize.SetHeight(minItemHeight);
@@ -94,10 +94,9 @@ void MenuItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
     float verticalInteval = 0.0f;
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         verticalInteval = static_cast<float>(MENU_ITEM_VERTICAL_PADDING.ConvertToPx());
     }
-    
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorderWithDefault(horInterval_,
         verticalInteval, 0.0f, 0.0f);
 

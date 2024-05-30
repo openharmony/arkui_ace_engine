@@ -908,7 +908,7 @@ void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
     renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
     // make menu round rect
     BorderRadiusProperty borderRadius;
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         borderRadius.SetRadius(MENU_DEFAULT_RADIUS);
     } else {
         borderRadius.SetRadius(theme->GetMenuBorderRadius());
