@@ -4973,8 +4973,12 @@ bool JSViewAbstract::ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, 
         return StringUtils::StringToCalcDimensionNG(value, result, false, DimensionUnit::FP);
     }
     if (jsValue->IsObject()) {
-        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-        double value = jsObj->GetProperty("value")->ToNumber<double>();
+        auto jsObj = JSRef<JSObject>::Cast(jsValue);
+        auto valObj = jsObj->GetProperty("value");
+        if (valObj->IsUndefined() || valObj->IsNull()) {
+            return false;
+        }
+        double value = valObj->ToNumber<double>();
         auto unit = static_cast<DimensionUnit>(jsObj->GetProperty("unit")->ToNumber<int32_t>());
         result = CalcDimension(value, unit);
         return true;
