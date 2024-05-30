@@ -448,7 +448,7 @@ RefPtr<LayoutWrapper> WaterFlowSegmentedLayout::MeasureItem(
                                                                   : CalcSize(CalcLength(userDefMainSize), crossSize));
     }
     item->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
-        { itemsCrossSize_[info_->GetSegment(idx)][crossIdx], mainSize_, axis_ }, props, item));
+        { itemsCrossSize_[info_->GetSegment(idx)][crossIdx], mainSize_, axis_, userDefMainSize >= 0.0f }, props, item));
     return item;
 }
 

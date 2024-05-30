@@ -30,6 +30,7 @@ public:
         float crossSize = 0.0f;
         float mainSize = 0.0f;
         Axis axis = Axis::VERTICAL;
+        bool haveUserDefSize = false;
     };
     static LayoutConstraintF CreateChildConstraint(const ConstraintParams& params,
         const RefPtr<WaterFlowLayoutProperty>& props, const RefPtr<LayoutWrapper>& child);
