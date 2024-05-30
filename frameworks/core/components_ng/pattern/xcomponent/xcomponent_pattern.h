@@ -286,6 +286,7 @@ public:
     void ClearIdealSurfaceOffset(bool isXAxis);
     void UpdateSurfaceBounds(bool needForceRender, bool frameOffsetChange = false);
     void EnableAnalyzer(bool enable);
+    void SetImageAIOptions(void* options);
     void StartImageAnalyzer(void* config, onAnalyzedCallback& onAnalyzed);
     void StopImageAnalyzer();
     RectF AdjustPaintRect(float positionX, float positionY, float width, float height, bool isRound);

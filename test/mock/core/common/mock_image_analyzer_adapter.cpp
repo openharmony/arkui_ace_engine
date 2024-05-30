@@ -25,6 +25,12 @@ void* ImageAnalyzerAdapter::ConvertPixmapNapi(const RefPtr<PixelMap>& pixelMap)
 {
     return nullptr;
 }
+
+bool ImageAnalyzerAdapter::HasImageAnalyzerConfig()
+{
+    return false;
+}
+
 ImageAnalyzerAdapter* CreateImageAnalyzerAdapter()
 {
     return nullptr;
