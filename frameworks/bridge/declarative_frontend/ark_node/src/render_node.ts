@@ -233,7 +233,7 @@ class ColorMetrics {
       const [, red, green, blue, alpha] = rgbaMatch;
       return new ColorMetrics(Number.parseInt(red, 10), Number.parseInt(green, 10), Number.parseInt(blue, 10), Number.parseFloat(alpha) * MAX_CHANNEL_VALUE);
     } else {
-      const error = new Error("Parameter error. The format of the input color string is not rgb or rgba.") as BusinessError;
+      const error = new Error('Parameter error. The format of the input color string is not RGB or RGBA.') as BusinessError;
       error.code = ERROR_CODE_COLOR_PARAMETER_INCORRECT;
       throw error;
     }
@@ -241,7 +241,7 @@ class ColorMetrics {
 
   static resourceColor(color: ResourceColor): ColorMetrics {
     if (color === undefined || color === null) {
-      const error = new Error("Parameter error. The type of input color parameter is not ResourceColor.") as BusinessError;
+      const error = new Error('Parameter error. The type of the input color parameter is not ResourceColor.') as BusinessError;
       error.code = ERROR_CODE_COLOR_PARAMETER_INCORRECT;
       throw error;
     }
@@ -249,7 +249,7 @@ class ColorMetrics {
     if (typeof color === 'object') {
       chanels = getUINativeModule().nativeUtils.parseResourceColor(color);
       if (chanels === undefined) {
-        const error = new Error("Get color resource failed.") as BusinessError;
+        const error = new Error('Failed to obtain the color resource.') as BusinessError;
         error.code = ERROR_CODE_RESOURCE_GET_FAILED;
         throw error;
       }
@@ -267,7 +267,7 @@ class ColorMetrics {
         return ColorMetrics.rgbOrRGBA(color);
       }
     } else {
-      const error = new Error("Parameter error. The type of input color parameter is not ResourceColor.") as BusinessError;
+      const error = new Error('Parameter error. The type of the input color parameter is not ResourceColor.') as BusinessError;
       error.code = ERROR_CODE_COLOR_PARAMETER_INCORRECT;
       throw error;
     }
@@ -304,13 +304,13 @@ class ColorMetrics {
   }
   blendColor(overlayColor: ColorMetrics): ColorMetrics {
     if (overlayColor === undefined || overlayColor === null) {
-      const error = new Error("Parameter error. The type of input parameter is not ColorMetrics.") as BusinessError;
+      const error = new Error('Parameter error. The type of the input parameter is not ColorMetrics.') as BusinessError;
       error.code = ERROR_CODE_COLOR_PARAMETER_INCORRECT;
       throw error;
     }
     const chanels = getUINativeModule().nativeUtils.blendColor(this.toNumeric(), overlayColor.toNumeric());
     if (chanels === undefined) {
-      const error = new Error("Parameter error. The type of input parameter is not ColorMetrics.") as BusinessError;
+      const error = new Error('Parameter error. The type of the input parameter is not ColorMetrics.') as BusinessError;
       error.code = ERROR_CODE_COLOR_PARAMETER_INCORRECT;
       throw error;
     }
