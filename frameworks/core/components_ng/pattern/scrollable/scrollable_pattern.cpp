@@ -1000,6 +1000,7 @@ void ScrollablePattern::PlaySpringAnimation(float position, float velocity, floa
 {
     if (!springOffsetProperty_) {
         InitSpringOffsetProperty();
+        CHECK_NULL_VOID(springOffsetProperty_);
     }
     scrollableEvent_->SetAnimateVelocityCallback([weakScroll = AceType::WeakClaim(this)]() -> double {
         auto pattern = weakScroll.Upgrade();
@@ -1040,6 +1041,7 @@ void ScrollablePattern::PlayCurveAnimation(
     InitOption(option, duration, curve);
     if (!curveOffsetProperty_) {
         InitCurveOffsetProperty();
+        CHECK_NULL_VOID(curveOffsetProperty_);
     }
     scrollableEvent_->SetAnimateVelocityCallback([weakScroll = AceType::WeakClaim(this)]() -> double {
         auto pattern = weakScroll.Upgrade();
