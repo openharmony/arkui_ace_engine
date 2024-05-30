@@ -285,6 +285,12 @@ private:
     bool isFocusActiveWhenFocused_ = false;
 };
 
+enum class ScopeFocusDirection {
+    VERTICAL = 0,
+    HORIZONTAL,
+    UNIVERSAL,
+};
+
 struct ScopeFocusAlgorithm final {
     ScopeFocusAlgorithm() = default;
     ScopeFocusAlgorithm(bool isVertical, bool isLeftToRight, ScopeType scopeType)
@@ -294,8 +300,18 @@ struct ScopeFocusAlgorithm final {
         : isVertical(isVertical), isLeftToRight(isLeftToRight), scopeType(scopeType),
           getNextFocusNode(std::move(function))
     {}
+    ScopeFocusAlgorithm(ScopeFocusDirection direction, bool isVertical, bool isLeftToRight, ScopeType scopeType)
+        : direction(direction), isVertical(isVertical), isLeftToRight(isLeftToRight), scopeType(scopeType)
+    {}
+    ScopeFocusAlgorithm(ScopeFocusDirection direction, bool isVertical, bool isLeftToRight, ScopeType scopeType,
+        GetNextFocusNodeFunc&& function)
+        : direction(direction), isVertical(isVertical), isLeftToRight(isLeftToRight), scopeType(scopeType),
+          getNextFocusNode(std::move(function))
+    {}
     ~ScopeFocusAlgorithm() = default;
 
+    // isVertical will be deleted
+    ScopeFocusDirection direction { ScopeFocusDirection::VERTICAL };
     bool isVertical { true };
     bool isLeftToRight { true };
     ScopeType scopeType { ScopeType::OTHERS };
