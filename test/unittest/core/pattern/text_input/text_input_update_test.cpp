@@ -23,6 +23,9 @@ class TextInputUpdateTestNg : public TextInputBases {
 public:
 };
 
+class TextInputAutoFillTest : public TextInputBases {
+public:
+};
 /**
  * @tc.name: HandleLongPress001
  * @tc.desc: Test textinput handle action.
@@ -807,5 +810,342 @@ HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest005, TestSize.Level1)
     EXPECT_EQ(didDirection, TextDeleteDirection::FORWARD);
     EXPECT_EQ(didOffset, 1);
     EXPECT_EQ(didValue, "b");
+}
+
+/**
+ * @tc.name: HandleSpaceEvent001
+ * @tc.desc: test for password response keyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, HandleSpaceEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetShowPasswordIcon(true);
+        model.SetType(TextInputType::NEW_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->focusIndex_ = FocuseIndex::UNIT;
+
+    /**
+     * @tc.steps: step2. call PasswordResponseKeyEvent.
+     */
+    EXPECT_TRUE(pattern_->HandleSpaceEvent());
+}
+
+/**
+ * @tc.name: HandleSpaceEvent002
+ * @tc.desc: test for unit response keyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, HandleSpaceEvent002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetShowUnderline(true);
+        model.SetType(TextInputType::TEXT);
+    });
+    GetFocus();
+
+    pattern_->focusIndex_ = FocuseIndex::UNIT;
+
+    /**
+     * @tc.steps: step2. call PasswordResponseKeyEvent.
+     */
+    EXPECT_TRUE(pattern_->HandleSpaceEvent());
+}
+
+/**
+ * @tc.name: HandleSpaceEvent003
+ * @tc.desc: test for unit response keyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, HandleSpaceEvent003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetShowUnderline(true);
+        model.SetType(TextInputType::TEXT);
+    });
+    GetFocus();
+
+    pattern_->focusIndex_ = FocuseIndex::CANCEL;
+    pattern_->CreateHandles();
+
+    /**
+     * @tc.steps: step2. call cleanNode response keyEvent.
+     */
+    EXPECT_TRUE(pattern_->HandleSpaceEvent());
+}
+
+/**
+ * @tc.name: OnTextInputScroll001
+ * @tc.desc: test for unit response keyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, OnTextInputScroll001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    pattern_->ProcessOverlay();
+    EXPECT_TRUE(pattern_->SelectOverlayIsOn());
+    pattern_->OnTextInputScroll(2.0f);
+    EXPECT_EQ(pattern_->selectController_->GetCaretRect().GetX(), 0.0f);
+}
+
+/**
+ * @tc.name: FromJson
+ * @tc.desc: test for text from json
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, FromJson, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default attrs
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetWidthAuto(true);
+        model.SetType(TextInputType::TEXT);
+        model.SetPlaceholderColor(DEFAULT_PLACE_HODER_COLOR);
+        model.SetTextColor(DEFAULT_TEXT_COLOR);
+        model.SetEnterKeyType(DEFAULT_ENTER_KEY_TYPE);
+        model.SetTextAlign(DEFAULT_TEXT_ALIGN);
+        model.SetCaretColor(DEFAULT_CARET_COLOR);
+        model.SetCaretStyle(DEFAULT_CARET_STYLE);
+        model.SetSelectedBackgroundColor(DEFAULT_SELECTED_BACKFROUND_COLOR);
+        model.SetMaxLength(DEFAULT_MAX_LENGTH);
+        model.SetMaxLines(DEFAULT_MAX_LINES);
+        model.SetFontSize(DEFAULT_FONT_SIZE);
+        model.SetFontWeight(DEFAULT_FONT_WEIGHT);
+        model.SetTextColor(DEFAULT_TEXT_COLOR);
+        model.SetInputFilter(DEFAULT_INPUT_FILTER, nullptr);
+        model.SetCopyOption(DEFAULT_COPY_OPTIONS);
+        model.SetBarState(DEFAULT_DISPLAY_MODE);
+        model.SetInputStyle(DEFAULT_INPUT_STYLE);
+        model.SetShowUnderline(true);
+        model.SetSelectAllValue(true);
+        model.SetShowCounterBorder(true);
+        model.SetWordBreak(WordBreak::BREAK_ALL);
+        model.SetTextOverflow(TextOverflow::CLIP);
+        model.SetTextIndent(DEFAULT_INDENT_SIZE);
+    });
+
+    /**
+     * @tc.expected: Check if all set properties are displayed in the TextArea JSON
+     */
+    auto json = JsonUtil::Create(true);
+    pattern_->ToJsonValue(json, filter);
+
+    /**
+     * @tc.expected: check decoration in TextArea JSON is NONE, BLACK, SOLID
+     */
+    EXPECT_EQ(json->GetString("text"), DEFAULT_TEXT.c_str());
+    EXPECT_EQ(json->GetString("type"), "InputType.Normal");
+    EXPECT_EQ(json->GetString("caretColor"), "#FF000000");
+    EXPECT_EQ(json->GetString("placeholderColor"), "#FFFF0000");
+    EXPECT_EQ(json->GetString("textAlign"), "TextAlign.Left");
+    EXPECT_EQ(json->GetString("enterKeyType"), "EnterKeyType.Done");
+    EXPECT_EQ(json->GetString("maxLength"), "30");
+    EXPECT_EQ(json->GetString("inputFilter"), "[a-z]");
+    EXPECT_EQ(json->GetString("copyOption"), "CopyOptions.InApp");
+    EXPECT_EQ(json->GetString("style"), "TextInputStyle.Inline");
+    EXPECT_EQ(json->GetString("maxLines"), "3");
+    EXPECT_EQ(json->GetString("barState"), "BarState.AUTO");
+    json = JsonUtil::Create(true);
+    layoutProperty_->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("caretPosition"), "");
+    EXPECT_TRUE(json->GetBool("showUnderline"));
+    EXPECT_TRUE(json->GetBool("selectAll"));
+    EXPECT_EQ(json->GetString("wordBreak"), "break-all");
+    EXPECT_EQ(json->GetString("textOverflow"), "TextOverflow.Clip");
+    EXPECT_EQ(json->GetString("textIndent"), "5.00vp");
+}
+
+/**
+ * @tc.name: UpdateRectByTextAlign001
+ * @tc.desc: test rect change by textalign
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, UpdateRectByTextAlign001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and focusHub
+     */
+    CreateTextField();
+    GetFocus();
+
+    RectF textRect = RectF(0.0f, 0.0f, 0.0f, 0.0f);
+    pattern_->UpdateRectByTextAlign(textRect);
+
+    EXPECT_EQ(textRect, RectF(0.0f, 0.0f, 0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: UpdateRectByTextAlign002
+ * @tc.desc: test rect change by textalign
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, UpdateRectByTextAlign002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and focusHub
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetTextAlign(TextAlign::START);
+    });
+    GetFocus();
+
+    RectF textRect = RectF(0.0f, 0.0f, 0.0f, 0.0f);
+    pattern_->UpdateRectByTextAlign(textRect);
+
+    EXPECT_EQ(textRect, RectF(0.0f, 0.0f, 0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: UpdateRectByTextAlign003
+ * @tc.desc: test rect change by textalign
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, UpdateRectByTextAlign003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and focusHub
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetTextAlign(TextAlign::CENTER);
+    });
+    GetFocus();
+
+    RectF textRect = RectF(0.0f, 0.0f, 0.0f, 0.0f);
+    pattern_->UpdateRectByTextAlign(textRect);
+
+    EXPECT_EQ(textRect, RectF(130.0f, 0.0f, 0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: UpdateRectByTextAlign004
+ * @tc.desc: test rect change by textalign
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, UpdateRectByTextAlign004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and focusHub
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetTextAlign(TextAlign::END);
+    });
+    GetFocus();
+
+    RectF textRect = RectF(0.0f, 0.0f, 0.0f, 0.0f);
+    pattern_->UpdateRectByTextAlign(textRect);
+
+    EXPECT_EQ(textRect, RectF(260.0f, 0.0f, 0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: NotifyFillRequestSuccess
+ * @tc.desc: Test NotifyFillRequestSuccess
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAutoFillTest, NotifyFillRequestSuccess, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+
+    pattern_->SetFillRequestFinish(false);
+    pattern_->NotifyFillRequestSuccess(nullptr, AceAutoFillType::ACE_PASSWORD);
+    EXPECT_EQ(pattern_->IsFillRequestFinish(), true);
+}
+
+/**
+ * @tc.name: NotifyFillRequestFailed
+ * @tc.desc: Test NotifyFillRequestFailed
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAutoFillTest, NotifyFillRequestFailed, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+
+    pattern_->SetFillRequestFinish(false);
+    pattern_->NotifyFillRequestFailed(1);
+    EXPECT_EQ(pattern_->IsFillRequestFinish(), true);
+}
+
+/**
+ * @tc.name: CheckAutoSave
+ * @tc.desc: Test CheckAutoSave
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAutoFillTest, CheckAutoSave, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+        model.SetEnableAutoFill(false);
+    });
+
+    EXPECT_EQ(pattern_->CheckAutoSave(), false);
+}
+
+/**
+ * @tc.name: ConvertToAceAutoFillType
+ * @tc.desc: Test ConvertToAceAutoFillType
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAutoFillTest, ConvertToAceAutoFillType, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+
+    EXPECT_EQ(pattern_->ConvertToAceAutoFillType(TextInputType::VISIBLE_PASSWORD),
+        AceAutoFillType::ACE_PASSWORD);
+    EXPECT_EQ(pattern_->ConvertToAceAutoFillType(TextInputType::USER_NAME),
+        AceAutoFillType::ACE_USER_NAME);
+    EXPECT_EQ(pattern_->ConvertToAceAutoFillType(TextInputType::NEW_PASSWORD),
+        AceAutoFillType::ACE_NEW_PASSWORD);
+}
+
+/**
+ * @tc.name: CheckAutoFill
+ * @tc.desc: Test CheckAutoFill
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAutoFillTest, CheckAutoFill, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+        model.SetEnableAutoFill(false);
+    });
+
+    EXPECT_EQ(pattern_->CheckAutoFill(), false);
+}
+
+/**
+ * @tc.name: ProcessAutoFill
+ * @tc.desc: Test ProcessAutoFill
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAutoFillTest, ProcessAutoFill, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+        model.SetEnableAutoFill(false);
+    });
+
+    bool isPopup = false;
+    EXPECT_EQ(pattern_->ProcessAutoFill(isPopup), false);
 }
 } // namespace OHOS::Ace::NG
