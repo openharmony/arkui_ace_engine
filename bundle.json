@@ -79,6 +79,7 @@
                 "bounds_checking_function",
                 "ffrt",
                 "icu",
+                "miscdevice",
                 "cJSON",
                 "curl",
                 "css-what",

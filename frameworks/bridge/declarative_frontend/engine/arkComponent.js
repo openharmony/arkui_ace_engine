@@ -19149,6 +19149,10 @@ class ArkAlphabetIndexerComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, AutoCollapseModifier.identity, AutoCollapseModifier, value);
     return this;
   }
+  enableHapticFeedback(value) {
+    modifierWithKey(this._modifiersWithKeys, EnableHapticFeedbackModifier.identity, EnableHapticFeedbackModifier, value);
+    return this;
+  }
 }
 // @ts-ignore
 if (globalThis.AlphabetIndexer !== undefined) {
@@ -19544,6 +19548,23 @@ class AutoCollapseModifier extends ModifierWithKey {
   }
 }
 AutoCollapseModifier.identity = Symbol('autoCollapse');
+class EnableHapticFeedbackModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().alphabetIndexer.resetEnableHapticFeedback(node);
+    }
+    else {
+      getUINativeModule().alphabetIndexer.setEnableHapticFeedback(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+EnableHapticFeedbackModifier.identity = Symbol('enableHapticFeedback');
 
 /// <reference path='./import.ts' />
 class TextStyleModifier extends ModifierWithKey {

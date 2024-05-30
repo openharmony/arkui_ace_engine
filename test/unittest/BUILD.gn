@@ -54,6 +54,7 @@ config("ace_unittest_config") {
     "$ace_root/frameworks",
     "$hilog_root/interfaces/native/innerkits/include",
     "$root_out_dir/arkui/framework",
+    "//base/sensors/miscdevice/interfaces/inner_api/vibrator",
     "//third_party/icu/icu4c/source/common",
     "//foundation/window/window_manager/interfaces/innerkits",
   ]
@@ -1082,6 +1083,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_pattern.cpp",
+    "$ace_root/test/mock/core/pattern/mock_indexer_vibrator.cpp",
     "$ace_root/test/mock/core/pattern/mock_web_pattern.cpp",
   ]
 
