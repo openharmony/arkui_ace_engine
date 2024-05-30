@@ -138,10 +138,10 @@ function disabledStyle() {
 }
 
 class SubHeaderModifier implements AttributeModifier<RowAttribute> {
-  isAgeing: boolean = false
+  public isAgeing: boolean = false;
   applyNormalAttribute(instance: RowAttribute): void {
     if (this.isAgeing) {
-      instance.width("100%")
+      instance.width('100%')
     } else {
     }
   }
