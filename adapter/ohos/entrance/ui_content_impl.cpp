@@ -3233,7 +3233,7 @@ void UIContentImpl::PreLayout()
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostSyncTask(
         [pipelineContext] {
-            pipelineContext->PreLayout(pipelineContext->GetTimeFromExternalTimer());
+            pipelineContext->PreLayout(pipelineContext->GetTimeFromExternalTimer(), 0);
         },
         TaskExecutor::TaskType::UI, "ArkUIPreLayout");
 }
