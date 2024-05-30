@@ -1922,9 +1922,6 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        if (!pattern->CheckSwiperPanEvent(info)) {
-            return;
-        }
         if (pattern) {
             if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
                 if (GreatNotEqual(info.GetMainDelta(), 0.0)) {
@@ -1940,10 +1937,6 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        if (!pattern->CheckSwiperPanEvent(info)) {
-            pattern->HandleDragEnd(0.0);
-            return;
-        }
         if (pattern) {
             TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper drag end. Velocity: %{public}f px/s, SourceTool: %{public}d",
                 info.GetMainVelocity(), info.GetSourceTool());
@@ -2605,6 +2598,9 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
         PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_SWIPER_SCROLL, false);
     }
     isTouchDown_ = false;
+    if (!CheckSwiperPanEvent(dragVelocity)) {
+        dragVelocity = 0.0;
+    }
     UpdateDragFRCSceneInfo(dragVelocity, SceneStatus::END);
     const auto& addEventCallback = swiperController_->GetAddTabBarEventCallback();
     if (addEventCallback) {
@@ -4752,6 +4748,7 @@ void SwiperPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
     }
     SetIsNestedInterrupt(false);
     childScrolling_ = false;
+    InitIndexCanChangeMap();
 }
 
 void SwiperPattern::NotifyParentScrollEnd()
@@ -4801,6 +4798,9 @@ ScrollResult SwiperPattern::HandleScroll(float offset, int32_t source, NestedSta
     }
     if (source == SCROLL_FROM_ANIMATION && AnimationRunning()) {
         // deny conflicting animation from child
+        return { offset, true };
+    }
+    if (!CheckSwiperPanEvent(offset)) {
         return { offset, true };
     }
     // mouse scroll triggers showNext / showPrev instead of updating offset
@@ -5364,13 +5364,13 @@ bool SwiperPattern::ContentWillChange(int32_t currentIndex, int32_t comingIndex)
     return true;
 }
 
-bool SwiperPattern::CheckSwiperPanEvent(const GestureEvent& info)
+bool SwiperPattern::CheckSwiperPanEvent(float mainDeltaOrVelocity)
 {
     int32_t currentIndex = GetCurrentIndex();
     int32_t comingIndex = currentIndex;
-    if (GreatNotEqual(info.GetMainDelta(), 0.0)) {
+    if (GreatNotEqual(mainDeltaOrVelocity, 0.0)) {
         comingIndex = comingIndex < 1 ? 0 : comingIndex - 1;
-    } else if (LessNotEqual(info.GetMainDelta(), 0.0)) {
+    } else if (LessNotEqual(mainDeltaOrVelocity, 0.0)) {
         comingIndex = comingIndex > TotalCount() - INDEX_DIFF_TWO ? TotalCount() - 1 : comingIndex + 1;
     }
 
