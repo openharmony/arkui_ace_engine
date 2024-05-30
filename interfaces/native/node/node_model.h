@@ -42,6 +42,7 @@ struct ArkUI_Node {
     void* userData = nullptr;
     void* swiperIndicator = nullptr;
     void* drawableDescriptor = nullptr;
+    int32_t linearGradientDirection = -1;
 };
 
 struct ArkUI_Context {

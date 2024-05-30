@@ -3776,6 +3776,7 @@ Dimension ViewAbstract::GetFrontBlur(FrameNode* frameNode)
     auto target = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(target, value);
     auto& property = target->GetForeground();
+    CHECK_NULL_RETURN(property, value);
     auto getValue = property->propBlurRadius;
     if (getValue.has_value()) {
         return getValue.value();
