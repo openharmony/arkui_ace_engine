@@ -2491,6 +2491,9 @@ void OverlayManager::CloseDialogInner(const RefPtr<FrameNode>& dialogNode)
         SetContainerButtonEnable(true);
     }
     CallOnHideDialogCallback();
+    if (dialogPattern->GetIsSuitableForAging()) {
+        context->SetFontScale(dialogPattern->GetFontScaleForElderly());
+    }
 }
 
 bool OverlayManager::RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackPressed, bool isPageRouter)
