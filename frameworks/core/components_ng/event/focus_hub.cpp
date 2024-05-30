@@ -874,7 +874,8 @@ bool FocusHub::RequestNextFocus(FocusStep moveStep, const RectF& rect)
                 nextFocusHub->GetFrameName().c_str(), nextFocusHub->GetFrameId(), ret);
             return ret;
         }
-        if (!IsFocusStepTab(moveStep) && focusAlgorithm_.isVertical != IsFocusStepVertical(moveStep)) {
+        if (focusAlgorithm_.direction != ScopeFocusDirection::UNIVERSAL && !IsFocusStepTab(moveStep) &&
+            focusAlgorithm_.isVertical != IsFocusStepVertical(moveStep)) {
             TAG_LOGI(AceLogTag::ACE_FOCUS,
                 "Request next focus failed because direction of node(%{public}d) is different with step(%{public}d).",
                 focusAlgorithm_.isVertical, moveStep);
