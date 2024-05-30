@@ -15,11 +15,15 @@
 
 #include <string>
 
-#include "bridge/declarative_frontend/jsview/js_layout_manager.h"
-
+#include "frameworks/bridge/common/utils/engine_helper.h"
+#include "frameworks/bridge/declarative_frontend/engine/js_converter.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_layout_manager.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
+#include "native_engine/impl/ark/ark_native_engine.h"
 
 namespace OHOS::Ace::Framework {
+const int32_t ARG_NUMBER = 2;
+
 void JSLayoutManager::GetLineCount(const JSCallbackInfo& args)
 {
     auto layoutInfoInterface = layoutInfoInterface_.Upgrade();
@@ -52,12 +56,63 @@ void JSLayoutManager::CreateJSLineMetrics(JSRef<JSObject>& lineMetricsObj, const
     lineMetricsObj->SetProperty<double>("baseline",  lineMetrics.baseline);
     lineMetricsObj->SetProperty<int32_t>("lineNumber",  lineMetrics.lineNumber);
     lineMetricsObj->SetProperty<double>("topHeight",  lineMetrics.y);
-    JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
-    JSRef<JSObject> runMetrics = objectTemplate->NewInstance();
-    for (const auto& [property, metrics] : lineMetrics.runMetrics) {
-        runMetrics->SetPropertyObject(std::to_string(property).c_str(), CreateJSRunMetrics(metrics));
+    lineMetricsObj->SetPropertyObject("runMetrics", ConvertMapToJSMap(lineMetrics.runMetrics));
+}
+
+NapiMap JSLayoutManager::CreateNapiMap(napi_env env)
+{
+    NapiMap res = { nullptr, nullptr };
+    napi_valuetype valueType;
+
+    napi_value global = nullptr;
+    CHECK_NULL_RETURN(!napi_get_global(env, &global) && global, res);
+
+    napi_value constructor = nullptr;
+    CHECK_NULL_RETURN(!napi_get_named_property(env, global, "Map", &constructor) && constructor, res);
+    CHECK_NULL_RETURN(!napi_typeof(env, constructor, &valueType) && valueType == napi_valuetype::napi_function, res);
+
+    napi_value mapInstance = nullptr;
+    CHECK_NULL_RETURN(!napi_new_instance(env, constructor, 0, nullptr, &mapInstance) && mapInstance, res);
+
+    napi_value mapSet = nullptr;
+    CHECK_NULL_RETURN(!napi_get_named_property(env, mapInstance, "set", &mapSet) && mapSet, res);
+    CHECK_NULL_RETURN(!napi_typeof(env, mapSet, &valueType) && valueType == napi_valuetype::napi_function, res);
+
+    res.instance = mapInstance;
+    res.setFunction = mapSet;
+
+    return res;
+}
+
+bool JSLayoutManager::NapiMapSet(napi_env& env, NapiMap& map, uint32_t key, const RunMetrics& runMetrics)
+{
+    napi_value keyValue = nullptr;
+    napi_create_int32(env, static_cast<int32_t>(key), &keyValue);
+    napi_value runMetricsValue = nullptr;
+    napi_create_object(env, &runMetricsValue);
+    napi_set_named_property(env, runMetricsValue, "textStyle",
+        JsConverter::ConvertJsValToNapiValue(CreateJSTextStyleResult(runMetrics.textStyle)));
+    napi_set_named_property(env, runMetricsValue, "fontMetrics",
+        JsConverter::ConvertJsValToNapiValue(CreateJSFontMetrics(runMetrics.fontMetrics)));
+    napi_value args[ARG_NUMBER] = { keyValue, runMetricsValue };
+    CHECK_NULL_RETURN(!napi_call_function(env, map.instance, map.setFunction, ARG_NUMBER, args, nullptr), false);
+    return true;
+}
+
+JSRef<JSVal> JSLayoutManager::ConvertMapToJSMap(const std::map<size_t, RunMetrics>& map)
+{
+    JSRef<JSVal> mapVal;
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, mapVal);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_RETURN(nativeEngine, mapVal);
+    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    auto mapReturn = CreateNapiMap(env);
+    for (const auto& [key, val] : map) {
+        NapiMapSet(env, mapReturn, static_cast<uint32_t>(key), val);
     }
-    lineMetricsObj->SetPropertyObject("runMetrics", runMetrics);
+    mapVal = JsConverter::ConvertNapiValueToJsVal(mapReturn.instance);
+    return mapVal;
 }
 
 JSRef<JSObject> JSLayoutManager::CreateJSRunMetrics(const RunMetrics& runMetrics)
