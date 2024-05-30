@@ -315,7 +315,7 @@ std::pair<float, float> GetPercent()
 {
     std::vector<double> result;
     StringUtils::StringSplitter(
-        system::GetParameter("const.ark.darkModeAppBGColorBrightness", "0.10,0.05"), ',', result);
+        system::GetParameter("const.ace.darkModeAppBGColorBrightness", "0.10,0.05"), ',', result);
     std::pair<float, float> percent(result.front(), result.back());
     return percent;
 }
