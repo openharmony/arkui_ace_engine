@@ -557,7 +557,7 @@ void RenderIndexer::MoveList(int32_t index)
     int32_t indexToJump = circleMode_ ? index : index + 1;
     lastHeadIndex_ = indexToJump;
     LOGI("[indexer] MoveList Jump to index[%{public}d], indexToJump[%{public}d]", index, indexToJump);
-    controller_->ScrollToIndex(indexToJump, false, ScrollAlign::START);
+    controller_->ScrollToIndex(indexToJump, false, ScrollAlign::START, std::nullopt);
 }
 
 RefPtr<RenderIndexerItem> RenderIndexer::GetSpecificItem(int32_t index)

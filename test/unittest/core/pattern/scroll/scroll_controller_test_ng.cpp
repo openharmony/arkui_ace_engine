@@ -31,7 +31,7 @@ HWTEST_F(ScrolleControllerTestNg, ScrollPositionController001, TestSize.Level1)
 {
     CreateWithContent();
     auto controller = pattern_->GetScrollPositionController();
-    controller->ScrollToIndex(1, false, ScrollAlign::START);
+    controller->ScrollToIndex(1, false, ScrollAlign::START, std::nullopt);
 
     /**
      * @tc.steps: step1. Test AnimateTo
@@ -135,7 +135,7 @@ HWTEST_F(ScrolleControllerTestNg, ScrollPositionController002, TestSize.Level1)
 {
     CreateWithContent([](ScrollModelNG model) { model.SetAxis(Axis::HORIZONTAL); });
     auto controller = pattern_->GetScrollPositionController();
-    controller->ScrollToIndex(1, false, ScrollAlign::START);
+    controller->ScrollToIndex(1, false, ScrollAlign::START, std::nullopt);
 
     /**
      * @tc.steps: step1. Test AnimateTo

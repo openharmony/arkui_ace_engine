@@ -19,7 +19,8 @@
 
 namespace OHOS::Ace::V2 {
 
-void GridPositionController::ScrollToIndex(int32_t index, bool /* smooth */, ScrollAlign /* align */)
+void GridPositionController::ScrollToIndex(
+    int32_t index, bool /* smooth */, ScrollAlign /* align */, std::optional<float> /* extraOffset */)
 {
     auto grid = AceType::DynamicCast<V2::RenderGridScroll>(scroll_.Upgrade());
     if (!grid) {
