@@ -404,7 +404,7 @@ void OverlayManager::UpdateContextMenuDisappearPosition(const NG::OffsetF& offse
 
 void OverlayManager::PostDialogFinishEvent(const WeakPtr<FrameNode>& nodeWk)
 {
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "post dialog finishi event enter");
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "post dialog finish event enter");
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
@@ -957,6 +957,7 @@ void OverlayManager::ShowToast(const std::string& message, int32_t duration, con
     CHECK_NULL_VOID(toastNode);
     auto toastId = toastNode->GetId();
     // mount to parent
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "toast mount to root");
     toastNode->MountToParent(rootNode);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     toastMap_[toastId] = toastNode;
@@ -965,6 +966,7 @@ void OverlayManager::ShowToast(const std::string& message, int32_t duration, con
 
 void OverlayManager::OpenToastAnimation(const RefPtr<FrameNode>& toastNode, int32_t duration)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "open toast animation enter");
     auto toastId = toastNode->GetId();
     AnimationOption option;
     auto curve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
@@ -1014,6 +1016,7 @@ void OverlayManager::PopToast(int32_t toastId)
     option.SetFillMode(FillMode::FORWARDS);
     // OnFinishEvent should be executed in UI thread.
     option.SetOnFinishEvent([weak = WeakClaim(this), toastId] {
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "start toast exit finish event");
         auto overlayManager = weak.Upgrade();
         CHECK_NULL_VOID(overlayManager);
         auto toastIter = overlayManager->toastMap_.find(toastId);
@@ -1026,6 +1029,7 @@ void OverlayManager::PopToast(int32_t toastId)
         CHECK_NULL_VOID(context);
         auto rootNode = context->GetRootElement();
         CHECK_NULL_VOID(rootNode);
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "toast remove from root");
         rootNode->RemoveChild(toastUnderPop);
         overlayManager->toastMap_.erase(toastId);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
