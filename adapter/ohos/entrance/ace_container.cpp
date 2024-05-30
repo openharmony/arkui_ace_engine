@@ -646,6 +646,7 @@ void AceContainer::OnActive(int32_t instanceId)
             }
             ContainerScope scope(container->GetInstanceId());
             pipelineContext->WindowFocus(true);
+            pipelineContext->ChangeDarkModeBrightness();
         },
         TaskExecutor::TaskType::UI, "ArkUIWindowFocus");
 }
@@ -682,6 +683,7 @@ void AceContainer::OnInactive(int32_t instanceId)
             }
             ContainerScope scope(container->GetInstanceId());
             pipelineContext->WindowFocus(false);
+            pipelineContext->ChangeDarkModeBrightness();
             if (container->IsScenceBoardWindow()) {
                 JankFrameReport::GetInstance().FlushRecord();
             }
@@ -2343,6 +2345,7 @@ void AceContainer::NotifyConfigurationChange(
                         // reload transition animation
                         pipeline->FlushReloadTransition();
                     }
+                    pipeline->ChangeDarkModeBrightness();
                 },
                 TaskExecutor::TaskType::UI, "ArkUIFlushReloadTransition");
         },
