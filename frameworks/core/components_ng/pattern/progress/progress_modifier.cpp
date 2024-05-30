@@ -718,7 +718,7 @@ void ProgressModifier::PaintLinear(RSCanvas& canvas, const OffsetF& offset, cons
     if (contentSize.Width() >= contentSize.Height()) {
         double barLength = contentSize.Width() - radius * INT32_TWO;
         CHECK_NULL_VOID(!NearEqual(barLength, 0.0));
-        double dateLength = barLength * value_->Get() / maxValue_->Get();
+        double dateLength = std::min(barLength * value_->Get() / maxValue_->Get(), barLength);
         canvas.AttachBrush(brush);
         canvas.DrawRoundRect(
             { { offset.GetX(), offset.GetY(), contentSize.Width() + offset.GetX(),
@@ -749,7 +749,7 @@ void ProgressModifier::PaintLinear(RSCanvas& canvas, const OffsetF& offset, cons
     } else {
         double barLength = contentSize.Height() - radius * INT32_TWO;
         CHECK_NULL_VOID(!NearEqual(barLength, 0.0));
-        double dateLength = barLength * value_->Get() / maxValue_->Get();
+        double dateLength = std::min(barLength * value_->Get() / maxValue_->Get(), barLength);
         canvas.AttachBrush(brush);
         canvas.DrawRoundRect(
             { { offset.GetX(), offset.GetY(), strokeWidth_->Get() + offset.GetX(),
@@ -871,7 +871,7 @@ void ProgressModifier::PaintRing(RSCanvas& canvas, const OffsetF& offset, const 
 {
     auto centerPt = PointF(contentSize.Width() / 2, contentSize.Height() / 2) + offset;
     auto radius = std::min(contentSize.Width() / 2, contentSize.Height() / 2);
-    auto angle = (value_->Get() / maxValue_->Get()) * ANGLE_360;
+    auto angle = std::min((value_->Get() / maxValue_->Get()) * ANGLE_360, static_cast<float>(ANGLE_360));
     auto thickness = strokeWidth_->Get();
     // No shadow is drawn if radius is less or equal to 10, because it is no enough space to draw both ring and shadow.
     auto paintShadow = paintShadow_->Get() && GreatNotEqual(radius, RING_SHADOW_VALID_RADIUS_MIN);
@@ -1389,7 +1389,7 @@ void ProgressModifier::PaintScaleRing(RSCanvas& canvas, const OffsetF& offset, c
     // start to draw cur value progress
     pen.SetColor(ToRSColor((color_->Get())));
     canvas.AttachPen(pen);
-    double angle = (value_->Get() / maxValue_->Get()) * ANGLE_360;
+    double angle = std::min((value_->Get() / maxValue_->Get()) * ANGLE_360, static_cast<float>(ANGLE_360));
     canvas.DrawArc(
         { centerPt.GetX() - radius, centerPt.GetY() - radius, centerPt.GetX() + radius, centerPt.GetY() + radius },
         ANGLE_270, angle);
@@ -1406,7 +1406,7 @@ void ProgressModifier::PaintMoon(RSCanvas& canvas, const OffsetF& offset, const 
     brush.SetAntiAlias(true);
     brush.SetAlpha(true);
     brush.SetColor(ToRSColor(bgColor_->Get()));
-    double angle = (value_->Get() / maxValue_->Get()) * totalDegree;
+    double angle = std::min((value_->Get() / maxValue_->Get()) * totalDegree, static_cast<float>(totalDegree));
 #ifndef USE_ROSEN_DRAWING
     RSPath path;
 #else
