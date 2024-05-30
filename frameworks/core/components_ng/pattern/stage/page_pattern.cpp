@@ -73,12 +73,17 @@ bool PagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper,
             firstBuildCallback_ = nullptr;
         }
     }
-    if (dynamicPageSizeCallback_) {
-        auto node = wrapper->GetGeometryNode();
-        CHECK_NULL_RETURN(node, false);
-        dynamicPageSizeCallback_(node->GetFrameSize());
-    }
     return false;
+}
+
+void PagePattern::BeforeSyncGeometryProperties(const DirtySwapConfig& /* config */)
+{
+    CHECK_NULL_VOID(dynamicPageSizeCallback_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto node = host->GetGeometryNode();
+    CHECK_NULL_VOID(node);
+    dynamicPageSizeCallback_(node->GetFrameSize());
 }
 
 bool PagePattern::TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish)
@@ -216,7 +221,8 @@ void PagePattern::OnShow()
     state_ = RouterPageState::ON_PAGE_SHOW;
     UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
     JankFrameReport::GetInstance().StartRecord(pageInfo_->GetPageUrl());
-    PerfMonitor::GetPerfMonitor()->SetPageUrl(pageInfo_->GetPageUrl());
+    std::string bundleName = container->GetBundleName();
+    NotifyPerfMonitorPageMsg(pageInfo_->GetPageUrl(), bundleName);
     auto pageUrlChecker = container->GetPageUrlChecker();
     if (pageUrlChecker != nullptr) {
         pageUrlChecker->NotifyPageShow(pageInfo_->GetPageUrl());
@@ -422,6 +428,16 @@ bool PagePattern::RemoveOverlay()
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
     return overlayManager_->RemoveOverlay(true);
+}
+
+void PagePattern::NotifyPerfMonitorPageMsg(const std::string& pageUrl, const std::string& bundleName)
+{
+    if (PerfMonitor::GetPerfMonitor() != nullptr) {
+        PerfMonitor::GetPerfMonitor()->SetPageUrl(pageUrl);
+        // The page contains only page url but not the page name
+        PerfMonitor::GetPerfMonitor()->SetPageName("");
+        PerfMonitor::GetPerfMonitor()->ReportPageShowMsg(pageUrl, bundleName);
+    }
 }
 
 void PagePattern::MarkDirtyOverlay()

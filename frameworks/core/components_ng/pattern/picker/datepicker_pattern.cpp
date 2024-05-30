@@ -2153,6 +2153,10 @@ const std::string DatePickerPattern::GetFormatString(PickerDateF date)
 
 void DatePickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto GetDateString = [](const PickerDate& pickerDate) {
         std::string ret;
         ret += std::to_string(pickerDate.GetYear());

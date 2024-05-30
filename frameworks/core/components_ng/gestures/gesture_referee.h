@@ -92,7 +92,7 @@ public:
     bool QueryAllDone(size_t touchId);
     bool CheckRecognizerState();
 
-    bool CheckGestureScopeState();
+    bool IsReady();
     bool HasFailRecognizer();
     void ForceCleanGestureScope();
     void CleanGestureScopeState();
@@ -135,7 +135,7 @@ public:
     void CleanAll(bool isBlocked = false);
     void CleanRedundanceScope();
 
-    bool CheckGestureRefereeState();
+    bool IsReady();
     bool HasFailRecognizer(int32_t touchId);
     void ForceCleanGestureReferee();
     void CleanGestureRefereeState(int32_t touchId);

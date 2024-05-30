@@ -144,6 +144,36 @@ public:
         return previewAnimationOptions_.scaleTo;
     }
 
+    void SetIsShowHoverImage(bool isShow)
+    {
+        isShowHoverImage_ = isShow;
+    }
+
+    bool GetIsShowHoverImage() const
+    {
+        return isShowHoverImage_;
+    }
+
+    void SetHoverImageBeforeAnimationScale(float scaleBeforeAnimation)
+    {
+        hoverImageAnimationOptions_.scaleFrom = scaleBeforeAnimation;
+    }
+
+    float GetHoverImageBeforeAnimationScale() const
+    {
+        return hoverImageAnimationOptions_.scaleFrom;
+    }
+
+    void SetHoverImageAfterAnimationScale(float scaleAfterAnimation)
+    {
+        hoverImageAnimationOptions_.scaleTo = scaleAfterAnimation;
+    }
+
+    float GetHoverImageAfterAnimationScale() const
+    {
+        return hoverImageAnimationOptions_.scaleTo;
+    }
+
     bool IsNavigationMenu() const
     {
         return type_ == MenuType::NAVIGATION_MENU;
@@ -437,6 +467,7 @@ public:
 
     BorderRadiusProperty CalcIdealBorderRadius(const BorderRadiusProperty& borderRadius, const SizeF& menuSize);
 
+    void OnItemPressed(const RefPtr<FrameNode>& parent, int32_t index, bool press);
 protected:
     void UpdateMenuItemChildren(RefPtr<FrameNode>& host);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
@@ -467,6 +498,7 @@ private:
 
     Offset GetTransformCenter() const;
     void ShowPreviewMenuAnimation();
+    void ShowPreviewMenuScaleAnimation();
     void ShowMenuAppearAnimation();
     void ShowStackExpandMenu();
     std::pair<OffsetF, OffsetF> GetMenuOffset(const RefPtr<FrameNode>& outterMenu,
@@ -498,6 +530,8 @@ private:
     bool isSelectMenu_ = false;
     MenuPreviewMode previewMode_ = MenuPreviewMode::NONE;
     MenuPreviewAnimationOptions previewAnimationOptions_;
+    bool isShowHoverImage_ = false;
+    MenuPreviewAnimationOptions hoverImageAnimationOptions_;
     bool isFirstShow_ = false;
     bool isExtensionMenuShow_ = false;
     bool isSubMenuShow_ = false;

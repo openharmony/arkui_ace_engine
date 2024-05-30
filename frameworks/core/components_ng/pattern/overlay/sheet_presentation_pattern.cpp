@@ -72,14 +72,13 @@ void SheetPresentationPattern::OnModifyDone()
         scale_ = pipeline->GetFontScale();
         auto sheetTheme = pipeline->GetTheme<SheetTheme>();
         CHECK_NULL_VOID(sheetTheme);
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-            BlurStyle blurStyle = static_cast<BlurStyle>(sheetTheme->GetSheetBackgroundBlurStyle());
-            if (blurStyle != BlurStyle::NO_MATERIAL) {
-                BlurStyleOption options;
-                options.blurStyle = blurStyle;
-                renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-                renderContext->UpdateBackBlurStyle(options);
-            }
+        BlurStyle blurStyle = static_cast<BlurStyle>(sheetTheme->GetSheetBackgroundBlurStyle());
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
+            && blurStyle != BlurStyle::NO_MATERIAL) {
+            BlurStyleOption options;
+            options.blurStyle = blurStyle;
+            renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+            renderContext->UpdateBackBlurStyle(options);
         } else {
             renderContext->UpdateBackgroundColor(sheetTheme->GetSheetBackgoundColor());
         }
@@ -349,7 +348,7 @@ void SheetPresentationPattern::HandleDragUpdate(const GestureEvent& info)
     ProcessColumnRect(height - currentOffset_);
     auto renderContext = host->GetRenderContext();
     renderContext->UpdateTransformTranslate({ 0.0f, offset, 0.0f });
-    if (sheetType_ == SheetType::SHEET_BOTTOM) {
+    if (IsSheetBottomStyle()) {
         OnHeightDidChange(height_ - currentOffset_ + sheetHeightUp_);
     }
 }
@@ -509,7 +508,7 @@ void SheetPresentationPattern::AvoidSafeArea()
         // offset: translate endpoint, calculated from top
         renderContext->UpdateTransformTranslate({ 0.0f, offset, 0.0f });
     }
-    if (sheetType_ == SheetType::SHEET_BOTTOM) {
+    if (IsSheetBottomStyle()) {
         OnHeightDidChange(height_ + sheetHeightUp_);
     }
 }
@@ -593,6 +592,7 @@ void SheetPresentationPattern::ModifyFireSheetTransition(float dragVelocity)
         }
         ref->AvoidAiBar();
         ref->isNeedProcessHeight_ = false;
+        ref->FireOnDetentsDidChange(ref->height_);
     };
 
     isAnimationProcess_ = true;
@@ -613,7 +613,7 @@ void SheetPresentationPattern::ModifyFireSheetTransition(float dragVelocity)
 
 void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVelocity)
 {
-    if (HasOnHeightDidChange() && sheetType_ == SheetType::SHEET_BOTTOM && isTransitionIn && isNeedProcessHeight_) {
+    if (HasOnHeightDidChange() && IsSheetBottomStyle() && isTransitionIn && isNeedProcessHeight_) {
         ModifyFireSheetTransition(dragVelocity);
         return;
     }
@@ -766,9 +766,7 @@ void SheetPresentationPattern::UpdateDragBarStatus()
         sheetDragBar->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         return;
     }
-    auto sheetType = GetSheetType();
-    if (((sheetType == SheetType::SHEET_BOTTOM) || (sheetType == SheetType::SHEET_BOTTOM_FREE_WINDOW)) &&
-        (sheetDetentHeight_.size() > 1)) {
+    if (IsSheetBottomStyle() && (sheetDetentHeight_.size() > 1)) {
         if (sheetStyle.isTitleBuilder.has_value()) {
             dragBarLayoutProperty->UpdateVisibility(showDragIndicator ? VisibleType::VISIBLE : VisibleType::INVISIBLE);
         } else {
@@ -808,14 +806,6 @@ void SheetPresentationPattern::UpdateCloseIconStatus()
     auto closeIconX = size.Width() - static_cast<float>(SHEET_CLOSE_ICON_WIDTH.ConvertToPx()) -
                       static_cast<float>(sheetTheme->GetTitleTextMargin().ConvertToPx());
     auto closeIconY = static_cast<float>(sheetTheme->GetTitleTextMargin().ConvertToPx());
-    if (GreatNotEqual(pipeline->GetFontScale(), SHEET_NORMAL_SCALE) && sheetStyle.sheetTitle.has_value()) {
-        auto operationPadding = (SHEET_TITLE_AERA_MARGIN + SHEET_DOUBLE_TITLE_TOP_PADDING).ConvertToPx();
-        closeIconY = (GetTitleHeight() - SHEET_CLOSE_ICON_HEIGHT.ConvertToPx()) / SHEET_HALF_HEIGHT + operationPadding;
-        if (sheetStyle.sheetSubtitle.has_value()) {
-            closeIconY = (GetTitleHeight() - SHEET_CLOSE_ICON_HEIGHT.ConvertToPx()) / SHEET_HALF_HEIGHT +
-                         SHEET_DOUBLE_TITLE_TOP_PADDING.ConvertToPx() + operationPadding;
-        }
-    }
     OffsetT<Dimension> positionOffset;
     positionOffset.SetX(Dimension(closeIconX));
     auto sheetType = GetSheetType();
@@ -841,9 +831,6 @@ void SheetPresentationPattern::UpdateSheetTitle()
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
-    auto maxlines =
-        (GreatNotEqual(pipeline->GetFontScale(), SHEET_NORMAL_SCALE)) ? SHEET_AGING_MAX_LINES : SHEET_TITLE_MAX_LINES;
     auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
@@ -854,17 +841,7 @@ void SheetPresentationPattern::UpdateSheetTitle()
         auto titleProp = titleNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(titleProp);
         titleProp->UpdateContent(sheetStyle.sheetTitle.value());
-        PaddingProperty padding;
         if (pipeline->GetFontScale() != scale_) {
-            if (GreatNotEqual(pipeline->GetFontScale(), SHEET_NORMAL_SCALE) && !sheetStyle.sheetSubtitle.has_value()) {
-                padding.top = CalcLength(SHEET_DOUBLE_TITLE_TOP_PADDING);
-                padding.bottom = CalcLength(SHEET_DOUBLE_TITLE_TOP_PADDING);
-            } else {
-                padding.top = CalcLength(0.0f);
-                padding.bottom = CalcLength(0.0f);
-            }
-            titleProp->UpdatePadding(padding);
-            titleProp->UpdateMaxLines(maxlines);
             titleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
         titleNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -875,18 +852,6 @@ void SheetPresentationPattern::UpdateSheetTitle()
             auto subtitleProp = subtitleNode->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(subtitleProp);
             subtitleProp->UpdateContent(sheetStyle.sheetSubtitle.value());
-            PaddingProperty subPadding;
-            if (GreatNotEqual(pipeline->GetFontScale(), SHEET_NORMAL_SCALE)) {
-                padding.top = CalcLength(SHEET_OPERATION_AREA_PADDING);
-                titleProp->UpdatePadding(padding);
-                subPadding.bottom = CalcLength(SHEET_OPERATION_AREA_PADDING);
-                subtitleProp->UpdatePadding(subPadding);
-            } else {
-                padding.top = CalcLength(0.0f);
-                titleProp->UpdatePadding(padding);
-                subPadding.bottom = CalcLength(0.0f);
-                subtitleProp->UpdatePadding(subPadding);
-            }
             subtitleNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         }
     }
@@ -910,7 +875,7 @@ void SheetPresentationPattern::UpdateFontScaleStatus()
         CHECK_NULL_VOID(layoutProps);
         auto titleLayoutProps = titleColumnNode->GetLayoutProperty<LinearLayoutProperty>();
         CHECK_NULL_VOID(titleLayoutProps);
-        if (GreatNotEqual(pipeline->GetFontScale(), SHEET_NORMAL_SCALE) && sheetStyle.sheetTitle.has_value()) {
+        if (GreatNotEqual(pipeline->GetFontScale(), SHEET_NORMAL_SCALE)) {
             layoutProps->ClearUserDefinedIdealSize(false, true);
             titleLayoutProps->ClearUserDefinedIdealSize(false, true);
         } else if (sheetStyle.isTitleBuilder.has_value()) {
@@ -1008,6 +973,12 @@ void SheetPresentationPattern::InitSheetDetents()
         mediumSize = MEDIUM_SIZE_PRE;
     }
     switch (sheetType) {
+        case SheetType::SHEET_BOTTOMLANDSPACE:
+            if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                height = sheetFrameHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx();
+                sheetDetentHeight_.emplace_back(height);
+                break;
+            }
         case SheetType::SHEET_BOTTOM:
         case SheetType::SHEET_BOTTOM_FREE_WINDOW:
             if (LessOrEqual(sheetStyle.detents.size(), 0)) {
@@ -1043,10 +1014,6 @@ void SheetPresentationPattern::InitSheetDetents()
             std::sort(sheetDetentHeight_.begin(), sheetDetentHeight_.end(), std::less<float>());
             sheetDetentHeight_.erase(
                 std::unique(sheetDetentHeight_.begin(), sheetDetentHeight_.end()), sheetDetentHeight_.end());
-            break;
-        case SheetType::SHEET_BOTTOMLANDSPACE:
-            height = sheetFrameHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx();
-            sheetDetentHeight_.emplace_back(height);
             break;
         case SheetType::SHEET_CENTER:
             height = (centerHeight_ + pageHeight_) / SHEET_HALF_HEIGHT;
@@ -1770,7 +1737,7 @@ void SheetPresentationPattern::FireOnDetentsDidChange(float height)
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
-    if (sheetType_ != SheetType::SHEET_BOTTOM || NearEqual(preDetentsHeight_, height) ||
+    if (!IsSheetBottomStyle() || NearEqual(preDetentsHeight_, height) ||
         LessOrEqual(sheetStyle.detents.size(), 0)) {
         return;
     }
@@ -1803,19 +1770,6 @@ void SheetPresentationPattern::FireOnTypeDidChange()
     preType_ = sheetType;
 }
 
-float SheetPresentationPattern::GetTitleHeight()
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, 0.0f);
-    auto titleId = GetTitleId();
-    auto titleNode = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetNodeById(titleId));
-    CHECK_NULL_RETURN(titleNode, 0.0f);
-    auto titleGeometryNode = titleNode->GetGeometryNode();
-    CHECK_NULL_RETURN(titleGeometryNode, 0.0f);
-    auto titleHeight = titleGeometryNode->GetFrameSize().Height();
-    return titleHeight;
-}
-
 void SheetPresentationPattern::OnScrollStartRecursive(float position, float velocity)
 {
     if (animation_ && isAnimationProcess_) {
@@ -1842,7 +1796,7 @@ ScrollResult SheetPresentationPattern::HandleScroll(float scrollOffset, int32_t 
             return HandleScrollWithSheet(scrollOffset);
         }
         if (isSheetPosChanged_) {
-            HandleDragEnd(SHEET_VELOCITY_THRESHOLD);
+            HandleDragEnd(scrollOffset > 0 ? SHEET_VELOCITY_THRESHOLD : -SHEET_VELOCITY_THRESHOLD);
             isSheetPosChanged_ = false;
         }
     } else if (state == NestedState::CHILD_OVER_SCROLL) {

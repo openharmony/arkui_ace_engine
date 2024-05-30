@@ -21,6 +21,7 @@
 #include "bridge/declarative_frontend/jsview/js_content_slot.h"
 #include "bridge/declarative_frontend/jsview/js_dynamic_component.h"
 #include "bridge/declarative_frontend/jsview/js_isolated_component.h"
+#include "bridge/declarative_frontend/jsview/js_layout_manager.h"
 #include "bridge/declarative_frontend/jsview/js_node_container.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "bridge/declarative_frontend/style_string/js_span_object.h"
@@ -461,6 +462,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSRichEditor::JSBind(globalObj);
     JSRichEditorController::JSBind(globalObj);
     JSRichEditorStyledStringController::JSBind(globalObj);
+    JSLayoutManager::JSBind(globalObj);
 #ifdef VIDEO_SUPPORTED
     JSVideo::JSBind(globalObj);
     JSVideoController::JSBind(globalObj);

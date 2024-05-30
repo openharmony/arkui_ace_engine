@@ -23,6 +23,22 @@ namespace OHOS::Ace::NG {
 void ListItemLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     LayoutProperty::ToJsonValue(json, filter);
+    auto editMode = propEditMode_.value_or(V2::EditMode::SHAM);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        if (editMode == V2::EditMode::NONE) {
+            json->PutFixedAttr("editable", "EditMode.None", filter, FIXED_ATTR_EDITABLE);
+        } else if (editMode == V2::EditMode::MOVABLE) {
+            json->PutFixedAttr("editable", "EditMode.Movable", filter, FIXED_ATTR_EDITABLE);
+        } else if (editMode == V2::EditMode::DELETABLE) {
+            json->PutFixedAttr("editable", "EditMode.Deletable", filter, FIXED_ATTR_EDITABLE);
+        } else if (editMode == (V2::EditMode::DELETABLE | V2::EditMode::MOVABLE)) {
+            json->PutFixedAttr("editable", true, filter, FIXED_ATTR_EDITABLE);
+        } else {
+            json->PutFixedAttr("editable", false, filter, FIXED_ATTR_EDITABLE);
+        }
+        return;
+    }
     auto sticky = propStickyMode_.value_or(V2::StickyMode::NONE);
     if (sticky == V2::StickyMode::NORMAL) {
         json->PutExtAttr("sticky", "Sticky.Normal", filter);
@@ -31,7 +47,6 @@ void ListItemLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const
     } else {
         json->PutExtAttr("sticky", "Sticky.None", filter);
     }
-    auto editMode = propEditMode_.value_or(V2::EditMode::SHAM);
     if (editMode == V2::EditMode::NONE) {
         json->PutFixedAttr("editable", "EditMode.None", filter, FIXED_ATTR_EDITABLE);
     } else if (editMode == V2::EditMode::MOVABLE) {

@@ -90,6 +90,10 @@ public:
     RefPtr<FrameNode> GetFocusParent() const;
     RefPtr<FocusHub> GetFirstFocusHubChild() const;
     void GetChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
+
+    // Only for the currently loaded children, do not expand.
+    void GetCurrentChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
+
     void GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const;
     void Clean(bool cleanDirectly = false, bool allowTransition = false);
     void RemoveChildAtIndex(int32_t index);
@@ -506,10 +510,6 @@ public:
     {
         isBuildByJS_ = isBuildByJS;
     }
-    void AddAttachToMainTreeTask(std::function<void()>&& func)
-    {
-        attachToMainTreeTasks_.emplace_back(std::move(func));
-    }
 
     void* GetExternalData() const
     {
@@ -779,7 +779,6 @@ private:
 
     bool useOffscreenProcess_ = false;
 
-    std::list<std::function<void()>> attachToMainTreeTasks_;
     std::function<void(int32_t)> updateJSInstanceCallback_;
     std::function<void()> lazyBuilderFunc_;
     std::function<void(int32_t, RefPtr<UINode>&)> updateNodeFunc_;

@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
 #include "core/components_ng/pattern/text_picker/toss_animation_controller.h"
+#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -808,6 +809,10 @@ std::string TextPickerPattern::GetSelectedObject(bool isColumnChange, int32_t st
 
 void TextPickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     if (!range_.empty()) {
         json->PutExtAttr("range", GetRangeStr().c_str(), filter);
     } else {

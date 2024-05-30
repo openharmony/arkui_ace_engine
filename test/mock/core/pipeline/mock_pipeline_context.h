@@ -35,6 +35,7 @@ public:
     MOCK_CONST_METHOD0(GetSafeArea, SafeAreaInsets());
     MOCK_CONST_METHOD0(GetSafeAreaWithoutProcess, SafeAreaInsets());
     MOCK_METHOD(void, FlushUITasks, (bool triggeredByImplicitAnimation), (override));
+    MOCK_METHOD(float, GetFontScale, ());
 
     bool GetIsDeclarative() const override
     {
@@ -44,6 +45,7 @@ public:
     static RefPtr<MockPipelineContext> pipeline_;
 
 protected:
+    float fontScale_ = 1.0f;
     bool isDeclarative_ = false;
     double dipScale_ = 1.0;
     RefPtr<TaskExecutor> taskExecutor_;

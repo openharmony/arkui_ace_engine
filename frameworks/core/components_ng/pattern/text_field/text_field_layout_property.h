@@ -88,8 +88,12 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         LayoutProperty::ToJsonValue(json, filter);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("showPasswordIcon", propShowPasswordIcon_.value_or(true), filter);
-        json->Put("showPassword", propShowPasswordText_.value_or(false));
+        json->PutExtAttr("showPassword", propShowPasswordText_.value_or(false), filter);
         json->PutExtAttr("errorText", propErrorText_.value_or("").c_str(), filter);
         json->PutExtAttr("showErrorText", propShowErrorText_.value_or(false), filter);
         json->PutExtAttr("showCounter", propShowCounter_.value_or(false), filter);

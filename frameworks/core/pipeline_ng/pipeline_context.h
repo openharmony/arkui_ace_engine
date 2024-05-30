@@ -58,6 +58,7 @@
 namespace OHOS::Ace::NG {
 
 using VsyncCallbackFun = std::function<void()>;
+using FrameCallbackFunc = std::function<void(uint64_t nanoTimestamp)>;
 
 class ACE_FORCE_EXPORT PipelineContext : public PipelineBase {
     DECLARE_ACE_TYPE(NG::PipelineContext, PipelineBase);
@@ -68,6 +69,7 @@ public:
     using SurfacePositionChangedCallbackMap = std::unordered_map<int32_t, std::function<void(int32_t, int32_t)>>;
     using FoldStatusChangedCallbackMap = std::unordered_map<int32_t, std::function<void(FoldStatus)>>;
     using FoldDisplayModeChangedCallbackMap = std::unordered_map<int32_t, std::function<void(FoldDisplayMode)>>;
+    using TransformHintChangedCallbackMap = std::unordered_map<int32_t, std::function<void(uint32_t)>>;
     using PredictTask = std::function<void(int64_t, bool)>;
     PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
         RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
@@ -92,35 +94,20 @@ public:
 
     static float GetCurrentRootHeight();
 
-    // handle close keyboard
-    RefPtr<FrameNode> HandleFocusNode();
-    void IsCloseSCBKeyboard();
-    void IsSCBWindowKeyboard(RefPtr<FrameNode> curFrameNode);
-    void IsNotSCBWindowKeyboard(RefPtr<FrameNode> curFrameNode);
-    void SetNeedSoftKeyboard(std::optional<bool> flag)
-    {
-        needSoftKeyboard_ = flag;
-    }
-
     void SetupRootElement() override;
 
     void SetupSubRootElement();
 
     bool NeedSoftKeyboard() override;
 
-    void SetFocusNode(RefPtr<FrameNode> node)
-    {
-        focusNode_ = node;
-    }
-
-    RefPtr<FrameNode> GetFocusNode()
-    {
-        return focusNode_;
-    }
-
     void SetOnWindowFocused(const std::function<void()>& callback) override
     {
         focusOnNodeCallback_ = callback;
+    }
+
+    const std::function<void()>& GetWindowFocusCallback() const
+    {
+        return focusOnNodeCallback_;
     }
 
     const RefPtr<FrameNode>& GetRootElement() const
@@ -194,6 +181,9 @@ public:
     void RemoveOnAreaChangeNode(int32_t nodeId);
 
     void HandleOnAreaChangeEvent(uint64_t nanoTimestamp);
+
+    // Just register notification, no need to update callback.
+    void AddVisibleAreaChangeNode(const int32_t nodeId);
 
     void AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node,
         const std::vector<double>& ratio, const VisibleRatioCallback& callback, bool isUserCallback = true);
@@ -282,6 +272,8 @@ public:
     void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) override;
     void UpdateNavSafeArea(const SafeAreaInsets& navSafeArea) override;
     void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) override;
+
+    float GetPageAvoidOffset() override;
 
     void CheckAndUpdateKeyboardInset() override;
 
@@ -496,6 +488,20 @@ public:
         surfacePositionChangedCallbackMap_.erase(callbackId);
     }
 
+    int32_t RegisterTransformHintChangeCallback(std::function<void(uint32_t)>&& callback)
+    {
+        if (callback) {
+            transformHintChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
+            return callbackId_;
+        }
+        return 0;
+    }
+
+    void UnregisterTransformHintChangedCallback(int32_t callbackId)
+    {
+        transformHintChangedCallbackMap_.erase(callbackId);
+    }
+
     void SetMouseStyleHoldNode(int32_t id)
     {
         if (mouseStyleNodeId_ == -1) {
@@ -612,6 +618,8 @@ public:
 
     void OnFoldStatusChange(FoldStatus foldStatus) override;
     void OnFoldDisplayModeChange(FoldDisplayMode foldDisplayMode) override;
+
+    void OnTransformHintChanged(uint32_t transform) override;
 
     // for frontend animation interface.
     void OpenFrontendAnimation(
@@ -738,6 +746,23 @@ public:
 
     void CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, AxisAction action) override;
 
+    void AddFrameCallback(FrameCallbackFunc&& frameCallbackFunc)
+    {
+        frameCallbackFuncs_.emplace_back(std::move(frameCallbackFunc));
+        RequestFrame();
+    }
+
+    void FlushFrameCallback(uint64_t nanoTimestamp);
+
+    void SetPredictNode(const RefPtr<FrameNode>& node)
+    {
+        predictNode_ = node;
+    }
+
+    void ResetPredictNode()
+    {
+        predictNode_.Reset();
+    }
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -749,6 +774,7 @@ protected:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
     void FlushFocus();
+    void FlushFocusWithNode(RefPtr<FrameNode> focusNode, bool isScope);
     void DispatchDisplaySync(uint64_t nanoTimestamp) override;
     void FlushAnimation(uint64_t nanoTimestamp) override;
     bool OnDumpInfo(const std::vector<std::string>& params) const override;
@@ -814,6 +840,8 @@ private:
 
     void FlushFrameRate();
 
+    void RegisterFocusCallback();
+
     template<typename T>
     struct NodeCompare {
         bool operator()(const T& nodeLeft, const T& nodeRight) const
@@ -876,6 +904,7 @@ private:
     SurfacePositionChangedCallbackMap surfacePositionChangedCallbackMap_;
     FoldStatusChangedCallbackMap foldStatusChangedCallbackMap_;
     FoldDisplayModeChangedCallbackMap foldDisplayModeChangedCallbackMap_;
+    TransformHintChangedCallbackMap transformHintChangedCallbackMap_;
 
     bool isOnAreaChangeNodesCacheVaild_ = false;
     std::vector<FrameNode*> onAreaChangeNodesCache_;
@@ -952,6 +981,8 @@ private:
     std::vector<Ace::RectF> overlayNodePositions_;
     std::function<void(std::vector<Ace::RectF>)> overlayNodePositionUpdateCallback_;
 
+    RefPtr<FrameNode> predictNode_;
+
     VsyncCallbackFun vsyncListener_;
     VsyncCallbackFun onceVsyncListener_;
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
@@ -964,6 +995,8 @@ private:
     bool isShowTitle_ = false;
     bool lastAnimationStatus_ = true;
     bool isDoKeyboardAvoidAnimate_ = true;
+
+    std::list<FrameCallbackFunc> frameCallbackFuncs_;
 };
 } // namespace OHOS::Ace::NG
 

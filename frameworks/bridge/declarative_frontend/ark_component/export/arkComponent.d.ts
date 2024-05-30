@@ -65,7 +65,7 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     backgroundBrightness(params: BackgroundBrightnessOptions): this;
     backgroundBrightnessInternal(params: BrightnessOptions): this;
     foregroundBrightness(params: BrightnessOptions): this;
-    dragPreviewOptions(value: DragPreviewOptions): this;
+    dragPreviewOptions(value: DragPreviewOptions, options?: DragInteractionOptions): this;
     responseRegion(value: Array<Rectangle> | Rectangle): this;
     mouseResponseRegion(value: Array<Rectangle> | Rectangle): this;
     size(value: SizeOptions): this;
@@ -175,8 +175,10 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     onDragLeave(event: (event?: DragEvent, extraParams?: string) => void): this;
     onDrop(event: (event?: DragEvent, extraParams?: string) => void): this;
     onDragEnd(event: (event: DragEvent, extraParams?: string) => void): this;
+    onPreDrag(event: (preDragStatus: PreDragStatus) => void): this;
     allowDrop(value: Array<UniformDataType>): this;
     draggable(value: boolean): this;
+    dragPreview(value: CustomBuilder | DragItemInfo | string): this;
     overlay(value: string | CustomBuilder, options?: {
         align?: Alignment;
         offset?: {
@@ -389,6 +391,22 @@ declare class ArkImageSpanComponent extends ArkComponent implements ImageSpanAtt
     constructor(nativePtr: KNode, classType?: ModifierType);
     objectFit(value: ImageFit): ImageSpanAttribute;
     verticalAlign(value: ImageSpanAlignment): ImageSpanAttribute;
+    onComplete(callback: (event?: {
+        width: number;
+        height: number;
+        componentWidth: number;
+        componentHeight: number;
+        loadingStatus: number;
+        contentWidth: number;
+        contentHeight: number;
+        contentOffsetX: number;
+        contentOffsetY: number;
+    }) => void): ImageSpanAttribute;
+    onError(callback: (event: {
+        componentWidth: number;
+        componentHeight: number;
+        message: string;
+    }) => void): ImageSpanAttribute;
 }
 declare class ArkPatternLockComponent extends ArkComponent implements PatternLockAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1511,6 +1529,7 @@ declare class ArkWebComponent extends ArkComponent implements WebAttribute {
     onViewportFitChanged(callback: (event: {
         viewportFit: ViewportFit;
     }) => void): this;
+    onAdsBlocked(callback: (details?: AdsBlockedDetails | undefined) => void): this;
 }
 declare class ArkXComponentComponent implements CommonMethod<XComponentAttribute> {
     _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;
@@ -1989,4 +2008,9 @@ declare class ArkComponent3DComponent extends ArkComponent implements Component3
     shaderInputBuffer(buffer: Array<number>): Component3DAttribute;
     renderWidth(value: Dimension): Component3DAttribute;
     renderHeight(value: Dimension): Component3DAttribute;
+}
+
+declare class ArkContainerSpanComponent extends ArkComponent implements ContainerSpanAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    textBackgroundStyle(value: TextBackgroundStyle): ContainerSpanAttribute;
 }

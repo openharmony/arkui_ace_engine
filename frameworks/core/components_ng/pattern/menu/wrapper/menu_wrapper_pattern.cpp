@@ -125,6 +125,7 @@ void MenuWrapperPattern::HandleInteraction(const TouchEventInfo& info)
     position -= host->GetPaintRectOffset();
     RefPtr<UINode> innerMenuNode = nullptr;
     auto menuZone = GetMenuZone(innerMenuNode);
+    CHECK_NULL_VOID(innerMenuNode);
     // get menuNode's touch region
     if (menuZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
         currentTouchItem_ = FindTouchedMenuItem(innerMenuNode, position);

@@ -212,7 +212,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
     if (this.resetLocalValue(newValue, /* needCopyObject */ false)) {
       TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ this.localCopyObservedObject_,
         this.notifyPropertyHasChangedPU,
-        this.notifyTrackedObjectPropertyHasChanged, this);
+        this.notifyTrackedObjectPropertyHasChanged, this, true);
     }
   }
 

@@ -36,6 +36,25 @@
 
 namespace OHOS::Ace::NG {
 
+/**
+ * Determine whether to start the layout from the upper left corner
+ */
+
+bool IsStartTopLeft(WrapDirection direction, TextDirection textDirection)
+{
+    switch (direction) {
+        case WrapDirection::HORIZONTAL:
+            return textDirection == TextDirection::LTR;
+        case WrapDirection::HORIZONTAL_REVERSE:
+            return textDirection == TextDirection::RTL;
+        case WrapDirection::VERTICAL:
+            return true;
+        case WrapDirection::VERTICAL_REVERSE:
+            return false;
+        default:
+            return true;
+    }
+}
 void WrapLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -54,8 +73,12 @@ void WrapLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     mainAlignment_ = flexProp->GetMainAlignment().value_or(WrapAlignment::START);
     // alignment for alignItems, crossAxisAlignment
     crossAlignment_ = flexProp->GetCrossAlignment().value_or(WrapAlignment::START);
+    textDir_ = flexProp->GetLayoutDirection();
+    if (textDir_ == TextDirection::AUTO) {
+        textDir_ = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
+    }
     isHorizontal_ = direction_ == WrapDirection::HORIZONTAL || direction_ == WrapDirection::HORIZONTAL_REVERSE;
-    isReverse_ = direction_ == WrapDirection::HORIZONTAL_REVERSE || direction_ == WrapDirection::VERTICAL_REVERSE;
+    isReverse_ = !IsStartTopLeft(direction_, textDir_);
     PerformLayoutInitialize(flexProp);
     totalMainLength_ = 0.0f;
     totalCrossLength_ = 0.0f;
@@ -232,11 +255,11 @@ void WrapLayoutAlgorithm::PerformLayoutInitialize(const RefPtr<LayoutProperty>& 
     }
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         if (isHorizontal_) {
-            mainLengthLimit_ = constraint->percentReference.Width();
-            crossLengthLimit_ = constraint->percentReference.Height();
+            mainLengthLimit_ = std::min(constraint->maxSize.Width(), constraint->percentReference.Width());
+            crossLengthLimit_ = std::min(constraint->maxSize.Height(), constraint->percentReference.Height());
         } else {
-            mainLengthLimit_ = constraint->percentReference.Height();
-            crossLengthLimit_ = constraint->percentReference.Width();
+            mainLengthLimit_ = std::min(constraint->maxSize.Height(), constraint->percentReference.Height());
+            crossLengthLimit_ = std::min(constraint->maxSize.Width(), constraint->percentReference.Width());
         }
     } else {
         if (isHorizontal_) {
@@ -273,11 +296,19 @@ void WrapLayoutAlgorithm::AddPaddingToStartPosition(OffsetF& startPosition) cons
         // horizontal or vertical will start from top left
         case WrapDirection::HORIZONTAL:
         case WrapDirection::VERTICAL:
-            startPosition.AddX(padding_.left.value_or(0.0f));
+            if (textDir_ == TextDirection::RTL) {
+                startPosition.AddX(-padding_.right.value_or(0.0f));
+            } else {
+                startPosition.AddX(padding_.left.value_or(0.0f));
+            }
             startPosition.AddY(padding_.top.value_or(0.0f));
             break;
         case WrapDirection::HORIZONTAL_REVERSE:
-            startPosition.AddX(-padding_.right.value_or(0.0f));
+            if (textDir_ == TextDirection::RTL) {
+                startPosition.AddX(padding_.left.value_or(0.0f));
+            } else {
+                startPosition.AddX(-padding_.right.value_or(0.0f));
+            }
             startPosition.AddY(padding_.top.value_or(0.0f));
             break;
         case WrapDirection::VERTICAL_REVERSE:

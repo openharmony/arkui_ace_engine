@@ -170,6 +170,122 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarChange005, TestSize.L
 }
 
 /**
+ * @tc.name: TabBarPatternHandleBottomTabBarChange006
+ * @tc.desc: test HandleBottomTabBarChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarChange006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step2. call HandleBottomTabBarChange function.
+     * @tc.expected: step2. expect The function is run ok.
+     */
+    Create([](TabsModelNG model) {
+        CreateSingleItem([](TabContentModelNG tabContentModel) {
+            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+        }, 0);
+        CreateSingleItem([](TabContentModelNG tabContentModel) {
+            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+        }, 1);
+    });
+    tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE, 0);
+    tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE, 1);
+    tabBarPattern_->indicator_ = 0;
+    IconStyle iconStyle;
+    iconStyle.unselectedColor = Color::WHITE;
+    iconStyle.selectedColor = Color::WHITE;
+    tabBarPattern_->SetIconStyle(iconStyle, 0);
+    tabBarPattern_->HandleBottomTabBarChange(1);
+    EXPECT_EQ(tabBarPattern_->indicator_, 0);
+}
+
+/**
+ * @tc.name: TabBarPatternHandleBottomTabBarChange007
+ * @tc.desc: test HandleBottomTabBarChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarChange007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step2. call HandleBottomTabBarChange function.
+     * @tc.expected: step2. expect The function is run ok.
+     */
+    Create([](TabsModelNG model) {
+        CreateSingleItem([](TabContentModelNG tabContentModel) {
+            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+        }, 0);
+        CreateSingleItem([](TabContentModelNG tabContentModel) {
+            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+        }, 1);
+    });
+    tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE, 0);
+    tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE, 1);
+    tabBarPattern_->indicator_ = 0;
+    IconStyle iconStyle;
+    iconStyle.selectedColor = Color::WHITE;
+    tabBarPattern_->SetIconStyle(iconStyle, 0);
+    tabBarPattern_->HandleBottomTabBarChange(1);
+    EXPECT_EQ(tabBarPattern_->indicator_, 0);
+}
+
+/**
+ * @tc.name: TabBarPatternHandleBottomTabBarChange008
+ * @tc.desc: test HandleBottomTabBarChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarChange008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step2. call HandleBottomTabBarChange function.
+     * @tc.expected: step2. expect The function is run ok.
+     */
+    Create([](TabsModelNG model) {
+        CreateSingleItem([](TabContentModelNG tabContentModel) {
+            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+        }, 0);
+        CreateSingleItem([](TabContentModelNG tabContentModel) {
+            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+        }, 1);
+    });
+    tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE, 0);
+    tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE, 1);
+    tabBarPattern_->indicator_ = 0;
+    IconStyle iconStyle;
+    iconStyle.unselectedColor = Color::WHITE;
+    tabBarPattern_->SetIconStyle(iconStyle, 0);
+    tabBarPattern_->HandleBottomTabBarChange(1);
+    EXPECT_EQ(tabBarPattern_->indicator_, 0);
+}
+
+/**
+ * @tc.name: TabBarPatternHandleBottomTabBarChange009
+ * @tc.desc: test HandleBottomTabBarChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarChange009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step2. call HandleBottomTabBarChange function.
+     * @tc.expected: step2. expect The function is run ok.
+     */
+    Create([](TabsModelNG model) {
+        CreateSingleItem([](TabContentModelNG tabContentModel) {
+            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+        }, 0);
+        CreateSingleItem([](TabContentModelNG tabContentModel) {
+            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+        }, 1);
+    });
+    tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE, 0);
+    tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE, 1);
+    tabBarPattern_->indicator_ = 0;
+    IconStyle iconStyle;
+    tabBarPattern_->SetIconStyle(iconStyle, 0);
+    tabBarPattern_->HandleBottomTabBarChange(1);
+    EXPECT_EQ(tabBarPattern_->indicator_, 0);
+}
+
+/**
  * @tc.name: TabBarLayoutAlgorithmHandleAlwaysAverageSplitLayoutStyle003
  * @tc.desc: test HandleAlwaysAverageSplitLayoutStyle
  * @tc.type: FUNC
@@ -244,6 +360,90 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarClick001, TestSize.Le
     CreateWithItem([](TabsModelNG model) {});
     int32_t selectedIndex = 1;
     int32_t unselectedIndex = 1;
+
+    /**
+     * @tc.steps: step2. Test function HandleBottomTabBarClick.
+     * @tc.expected: Related function runs ok.
+     */
+    tabBarPattern_->HandleBottomTabBarClick(selectedIndex, unselectedIndex);
+}
+
+/**
+ * @tc.name: TabBarPatternHandleBottomTabBarClick002
+ * @tc.desc: test HandleBottomTabBarClick
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarClick002, TestSize.Level1)
+{
+    CreateWithItem([](TabsModelNG model) {});
+    int32_t selectedIndex = 1;
+    int32_t unselectedIndex = 1;
+    IconStyle iconStyle;
+    iconStyle.unselectedColor = Color::WHITE;
+    iconStyle.selectedColor = Color::WHITE;
+    tabBarPattern_->SetIconStyle(iconStyle, 0);
+
+    /**
+     * @tc.steps: step2. Test function HandleBottomTabBarClick.
+     * @tc.expected: Related function runs ok.
+     */
+    tabBarPattern_->HandleBottomTabBarClick(selectedIndex, unselectedIndex);
+}
+
+/**
+ * @tc.name: TabBarPatternHandleBottomTabBarClick003
+ * @tc.desc: test HandleBottomTabBarClick
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarClick003, TestSize.Level1)
+{
+    CreateWithItem([](TabsModelNG model) {});
+    int32_t selectedIndex = 1;
+    int32_t unselectedIndex = 1;
+    IconStyle iconStyle;
+    iconStyle.selectedColor = Color::WHITE;
+    tabBarPattern_->SetIconStyle(iconStyle, 0);
+
+    /**
+     * @tc.steps: step2. Test function HandleBottomTabBarClick.
+     * @tc.expected: Related function runs ok.
+     */
+    tabBarPattern_->HandleBottomTabBarClick(selectedIndex, unselectedIndex);
+}
+
+/**
+ * @tc.name: TabBarPatternHandleBottomTabBarClick004
+ * @tc.desc: test HandleBottomTabBarClick
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarClick004, TestSize.Level1)
+{
+    CreateWithItem([](TabsModelNG model) {});
+    int32_t selectedIndex = 1;
+    int32_t unselectedIndex = 1;
+    IconStyle iconStyle;
+    iconStyle.unselectedColor = Color::WHITE;
+    tabBarPattern_->SetIconStyle(iconStyle, 0);
+
+    /**
+     * @tc.steps: step2. Test function HandleBottomTabBarClick.
+     * @tc.expected: Related function runs ok.
+     */
+    tabBarPattern_->HandleBottomTabBarClick(selectedIndex, unselectedIndex);
+}
+
+/**
+ * @tc.name: TabBarPatternHandleBottomTabBarClick005
+ * @tc.desc: test HandleBottomTabBarClick
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarClick005, TestSize.Level1)
+{
+    CreateWithItem([](TabsModelNG model) {});
+    int32_t selectedIndex = 1;
+    int32_t unselectedIndex = 1;
+    IconStyle iconStyle;
+    tabBarPattern_->SetIconStyle(iconStyle, 0);
 
     /**
      * @tc.steps: step2. Test function HandleBottomTabBarClick.

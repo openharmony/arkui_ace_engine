@@ -217,6 +217,12 @@ public:
                 childrenList.emplace_back(childFrameNode);
             }
         }
+        UpdateChildRenderContext(renderContext, childrenList);
+    }
+
+    void UpdateChildRenderContext(
+        const RefPtr<RenderContext>& renderContext, std::list<RefPtr<FrameNode>>& childrenList)
+    {
         bool isForegroundColor = renderContext->HasForegroundColor();
         for (auto child : childrenList) {
             auto childRenderContext = child->GetRenderContext();
@@ -352,7 +358,8 @@ public:
     virtual void DumpInfo() {}
     virtual void DumpAdvanceInfo() {}
     virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) {}
-    virtual void NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) {}
+    virtual void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
+        RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) {}
     virtual void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "") {}
     virtual bool CheckAutoSave()
     {

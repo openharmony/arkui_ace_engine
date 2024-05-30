@@ -42,6 +42,7 @@ public:
     bool CheckFixedAttr(const FixedAttrBit attrBit) const;
     bool CheckExtAttr(const std::string& attr) const;
     bool CheckFilterAttr(const FixedAttrBit fixedAttrBit, const char* extAttr) const;
+    bool IsFastFilter() const;
     void AddFilterAttr(const std::string& attr);
     void SetFilterID(const std::string& id);
     std::string GetFilterID(void) const;

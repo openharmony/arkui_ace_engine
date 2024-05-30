@@ -185,7 +185,7 @@ private:
     void RemoveRedundantNavDestination(RefPtr<FrameNode>& navigationContentNode,
         const RefPtr<UINode>& remainChild, size_t slot, bool& hasChanged);
     bool FindNavigationParent(const std::string& parentName);
-    void GetCurTitleBarNode(RefPtr<TitleBarNode>& curTitleBarNode, const RefPtr<FrameNode>& curNode,
+    bool GetCurTitleBarNode(RefPtr<TitleBarNode>& curTitleBarNode, const RefPtr<FrameNode>& curNode,
         bool isNavBar);
 
     void DealRemoveDestination(const RefPtr<NavDestinationGroupNode>& destination);

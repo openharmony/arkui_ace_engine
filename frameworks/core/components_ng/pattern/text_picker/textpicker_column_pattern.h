@@ -286,8 +286,6 @@ public:
         yLast_ = value;
     }
 
-    void UpdateFinishToss(double offsetY);
-
     void TossAnimationStoped();
 
     void PlayResetAnimation();
@@ -344,6 +342,16 @@ public:
     int32_t GetOverScrollDeltaIndex() const;
     void SetCanLoop(bool isLoop);
 
+    void SetScrollDirection(bool isDown)
+    {
+        isDownScroll_ = isDown;
+    }
+
+    bool IsDownScroll()
+    {
+        return isDownScroll_;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -363,10 +371,13 @@ private:
     std::vector<TextPickerOptionProperty> optionProperties_;
     std::vector<int32_t> algorithmOffset_;
     void ResetAlgorithmOffset();
-    void CalcAlgorithmOffset(ScrollDirection dir, double distancePercent);
+    void CalcAlgorithmOffset(double distancePercent);
     void SetOptionShiftDistance();
     double GetShiftDistanceForLandscape(int32_t index, ScrollDirection dir);
     double GetShiftDistance(int32_t index, ScrollDirection dir);
+    double GetSelectedDistance(int32_t index, int32_t nextIndex, ScrollDirection dir);
+    double GetUpCandidateDistance(int32_t index, int32_t nextIndex, ScrollDirection dir);
+    double GetDownCandidateDistance(int32_t index, int32_t nextIndex, ScrollDirection dir);
     void OnTouchDown();
     void OnTouchUp();
     void ParseTouchListener();
@@ -415,7 +426,10 @@ private:
     void SetAccessibilityAction();
 
     void ResetOptionPropertyHeight();
+    bool IsTextFadeOut();
+    void UpdateTexOverflow(bool isSel, const RefPtr<TextLayoutProperty>& textLayoutProperty);
 
+    bool isTossing_ = false;
     bool isTextFadeOut_ = false;
     float localDownDistance_ = 0.0f;
     Color pressColor_;
@@ -472,6 +486,7 @@ private:
     bool animationBreak_ = false;
     bool needOptionPropertyHeightReset_ = false;
     bool isLoop_ = true;
+    bool isDownScroll_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerColumnPattern);
 };

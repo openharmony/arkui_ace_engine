@@ -15,7 +15,10 @@
 
 #include "dynamic_component_renderer_impl.h"
 
+#include <iterator>
 #include <memory>
+
+#include "accessibility_element_info.h"
 
 #include "interfaces/inner_api/ace/ui_content.h"
 #include "native_engine/native_engine.h"
@@ -30,6 +33,7 @@
 #include "core/common/container_scope.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/ui_extension/isolated_pattern.h"
+#include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -38,6 +42,30 @@ constexpr int32_t WORKER_ERROR = 10002;
 constexpr char PARAM_NAME_RESTRICTED_WORKER_ERROR[] = "restrictedWorkerError";
 constexpr char PARAM_MSG_RESTRICTED_WORKER_ERROR[] = "Run not in restricted worker thread";
 }
+
+void ApplyAccessibilityElementInfoOffset(Accessibility::AccessibilityElementInfo& output, const OffsetF& offset)
+{
+    auto& rect = output.GetRectInScreen();
+    Accessibility::Rect bounds;
+    bounds.SetLeftTopScreenPostion(rect.GetLeftTopXScreenPostion() + offset.GetX(),
+        rect.GetLeftTopYScreenPostion() + offset.GetY());
+    bounds.SetRightBottomScreenPostion(rect.GetRightBottomXScreenPostion() + offset.GetX(),
+        rect.GetRightBottomYScreenPostion() + offset.GetY());
+    output.SetRectInScreen(bounds);
+}
+
+void ApplyAccessibilityElementInfoOffset(std::list<Accessibility::AccessibilityElementInfo>& output, size_t index,
+    const OffsetF& offset)
+{
+    auto iterator = output.begin();
+    if (index > 0) {
+        std::advance(iterator, index);
+    }
+    for (; iterator != output.end(); ++iterator) {
+        ApplyAccessibilityElementInfoOffset(*iterator, offset);
+    }
+}
+
 DynamicComponentRendererImpl::DynamicComponentRendererImpl(
     const RefPtr<FrameNode>& host, const std::string& hapPath,
     const std::string& abcPath, const std::string& entryPoint, void* runtime)
@@ -171,13 +199,6 @@ void DynamicComponentRendererImpl::RegisterSizeChangedCallback()
     pagePattern->SetDynamicPageSizeCallback(std::move(dynamicPageSizeCallback));
 }
 
-RefPtr<Platform::AceContainer> DynamicComponentRendererImpl::GetAceConainer(int32_t instanceId)
-{
-    auto container = Container::GetContainer(instanceId);
-    CHECK_NULL_RETURN(container, nullptr);
-    return DynamicCast<Platform::AceContainer>(container);
-}
-
 void DynamicComponentRendererImpl::RegisterConfigChangedCallback()
 {
     auto hostExecutor = GetHostTaskExecutor();
@@ -186,19 +207,19 @@ void DynamicComponentRendererImpl::RegisterConfigChangedCallback()
         [hostInstanceId = hostInstanceId_, subInstanceId = uiContent_->GetInstanceId()]() {
             auto configChangedCallback = [subInstanceId](
                                              const Platform::ParsedConfig& config, const std::string& configuration) {
-                auto subContainer = Container::GetContainer(subInstanceId);
+                auto subContainer = Platform::AceContainer::GetContainer(subInstanceId);
                 CHECK_NULL_VOID(subContainer);
                 subContainer->GetTaskExecutor()->PostTask(
-                    [subInstanceId, config, configuration]() {
-                        auto subContainer = GetAceConainer(subInstanceId);
+                    [weak = WeakClaim(RawPtr(subContainer)), config, configuration]() {
+                        auto subContainer = weak.Upgrade();
                         CHECK_NULL_VOID(subContainer);
-                        ContainerScope scope(subInstanceId);
+                        ContainerScope scope(subContainer->GetInstanceId());
                         subContainer->UpdateConfiguration(config, configuration);
                     },
                     TaskExecutor::TaskType::UI, "ArkUIDynamicComponentConfigurationChanged");
             };
 
-            auto hostContainer = GetAceConainer(hostInstanceId);
+            auto hostContainer = Platform::AceContainer::GetContainer(hostInstanceId);
             CHECK_NULL_VOID(hostContainer);
             hostContainer->AddOnConfigurationChange(subInstanceId, configChangedCallback);
         },
@@ -207,11 +228,9 @@ void DynamicComponentRendererImpl::RegisterConfigChangedCallback()
 
 void DynamicComponentRendererImpl::UnRegisterConfigChangedCallback()
 {
-    auto container = Container::GetContainer(hostInstanceId_);
+    auto container = Platform::AceContainer::GetContainer(hostInstanceId_);
     CHECK_NULL_VOID(container);
-    auto aceContainer = DynamicCast<Platform::AceContainer>(container);
-    CHECK_NULL_VOID(aceContainer);
-    aceContainer->RemoveOnConfigurationChange(uiContent_->GetInstanceId());
+    container->RemoveOnConfigurationChange(uiContent_->GetInstanceId());
 }
 
 void DynamicComponentRendererImpl::AttachRenderContext()
@@ -268,16 +287,62 @@ void DynamicComponentRendererImpl::TransferPointerEvent(const std::shared_ptr<MM
         TaskExecutor::TaskType::UI, "ArkUIDynamicComponentProcessPointer");
 }
 
-void DynamicComponentRendererImpl::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
+bool DynamicComponentRendererImpl::TransferKeyEvent(const KeyEvent& keyEvent)
+{
+    auto taskExecutor = GetTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, false);
+
+    auto rawKeyEvent = keyEvent.rawKeyEvent;
+    bool result = false;
+    std::weak_ptr<UIContent> weak = uiContent_;
+    taskExecutor->PostSyncTask(
+        [weak, keyEvent, &result]() {
+            auto uiContent = weak.lock();
+            CHECK_NULL_VOID(uiContent);
+            auto subInstanceId = uiContent->GetInstanceId();
+            ContainerScope scope(subInstanceId);
+            result = uiContent->ProcessKeyEvent(keyEvent.rawKeyEvent);
+            TAG_LOGI(AceLogTag::ACE_ISOLATED_COMPONENT, "send key event: %{public}s, result = %{public}d",
+                keyEvent.ToString().c_str(), result);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIDynamicComponentProcessKey");
+    return result;
+}
+
+void DynamicComponentRendererImpl::TransferFocusState(bool isFocus)
 {
     auto taskExecutor = GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
+    std::weak_ptr<UIContent> weak = uiContent_;
     taskExecutor->PostTask(
-        [uiContent = uiContent_, keyEvent]() {
+        [weak, isFocus]() {
+            auto uiContent = weak.lock();
+            CHECK_NULL_VOID(uiContent);
             ContainerScope scope(uiContent->GetInstanceId());
-            uiContent->ProcessKeyEvent(keyEvent);
+            TAG_LOGI(AceLogTag::ACE_ISOLATED_COMPONENT, "send focus state: %{public}d", isFocus);
+            if (isFocus) {
+                uiContent->Focus();
+            } else {
+                uiContent->UnFocus();
+            }
         },
-        TaskExecutor::TaskType::UI, "ArkUIDynamicComponentProcessKey");
+        TaskExecutor::TaskType::UI, "ArkUIDynamicComponentFocusState");
+}
+
+void DynamicComponentRendererImpl::TransferFocusActiveEvent(bool isFocus)
+{
+    auto taskExecutor = GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    std::weak_ptr<UIContent> weak = uiContent_;
+    taskExecutor->PostTask(
+        [weak, isFocus]() {
+            auto uiContent = weak.lock();
+            CHECK_NULL_VOID(uiContent);
+            ContainerScope scope(uiContent->GetInstanceId());
+            TAG_LOGI(AceLogTag::ACE_ISOLATED_COMPONENT, "send focus active event: %{public}d", isFocus);
+            uiContent->SetIsFocusActive(isFocus);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIDynamicComponentFocusActiveEvent");
 }
 
 void DynamicComponentRendererImpl::UpdateViewportConfig(const ViewportConfig& config,
@@ -311,11 +376,6 @@ void DynamicComponentRendererImpl::UpdateViewportConfig(const ViewportConfig& co
         auto uiContent = renderer->uiContent_;
         CHECK_NULL_VOID(uiContent);
         ContainerScope scope(uiContent->GetInstanceId());
-        auto width = vpConfig.Width();
-        auto height = vpConfig.Height();
-        uiContent->SetFormWidth(width);
-        uiContent->SetFormHeight(height);
-        uiContent->OnFormSurfaceChange(width, height);
         uiContent->UpdateViewportConfig(vpConfig, reason, rsTransaction);
     };
     bool contentReady = false;
@@ -346,6 +406,70 @@ void DynamicComponentRendererImpl::DestroyContent()
             uiContent->Destroy();
         },
         TaskExecutor::TaskType::UI, "ArkUIDynamicComponentDestroy");
+}
+
+void DynamicComponentRendererImpl::SearchElementInfoByAccessibilityId(int64_t elementId, int32_t mode,
+    int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
+{
+    CHECK_NULL_VOID(uiContent_);
+    auto size = output.size();
+    uiContent_->SearchElementInfoByAccessibilityId(elementId, mode, baseParent, output);
+    if (output.size() > size) {
+        auto host = host_.Upgrade();
+        CHECK_NULL_VOID(host);
+        auto offset = host->GetTransformRectRelativeToWindow().GetOffset();
+        ApplyAccessibilityElementInfoOffset(output, size, offset);
+    }
+}
+
+void DynamicComponentRendererImpl::SearchElementInfosByText(int64_t elementId, const std::string& text,
+    int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
+{
+    CHECK_NULL_VOID(uiContent_);
+    auto size = output.size();
+    uiContent_->SearchElementInfosByText(elementId, text, baseParent, output);
+    if (output.size() > size) {
+        auto host = host_.Upgrade();
+        CHECK_NULL_VOID(host);
+        auto offset = host->GetTransformRectRelativeToWindow().GetOffset();
+        ApplyAccessibilityElementInfoOffset(output, size, offset);
+    }
+}
+
+void DynamicComponentRendererImpl::FindFocusedElementInfo(int64_t elementId, int32_t focusType, int64_t baseParent,
+    Accessibility::AccessibilityElementInfo& output)
+{
+    CHECK_NULL_VOID(uiContent_);
+    uiContent_->FindFocusedElementInfo(elementId, focusType, baseParent, output);
+    auto host = host_.Upgrade();
+    CHECK_NULL_VOID(host);
+    auto offset = host->GetTransformRectRelativeToWindow().GetOffset();
+    ApplyAccessibilityElementInfoOffset(output, offset);
+}
+
+void DynamicComponentRendererImpl::FocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
+    Accessibility::AccessibilityElementInfo& output)
+{
+    CHECK_NULL_VOID(uiContent_);
+    uiContent_->FocusMoveSearch(elementId, direction, baseParent, output);
+    auto host = host_.Upgrade();
+    CHECK_NULL_VOID(host);
+    auto offset = host->GetTransformRectRelativeToWindow().GetOffset();
+    ApplyAccessibilityElementInfoOffset(output, offset);
+}
+
+bool DynamicComponentRendererImpl::NotifyExecuteAction(int64_t elementId, const std::map<std::string,
+    std::string>& actionArguments, int32_t action, int64_t offset)
+{
+    CHECK_NULL_RETURN(uiContent_, false);
+    return uiContent_->NotifyExecuteAction(elementId, actionArguments, action, offset);
+}
+
+void DynamicComponentRendererImpl::TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
+    int32_t eventType, int64_t timeMs)
+{
+    CHECK_NULL_VOID(uiContent_);
+    uiContent_->HandleAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
 }
 
 RefPtr<TaskExecutor> DynamicComponentRendererImpl::GetTaskExecutor()

@@ -167,6 +167,7 @@ private:
         const RefPtr<SwitchTheme>& switchTheme);
     void HandleBlurEvent(const RefPtr<SwitchPaintProperty>& switchPaintProperty,
         const RefPtr<SwitchTheme>& switchTheme);
+    void UpdateColorWhenIsOn(bool isOn);
     float GetSwitchWidth() const;
     float GetSwitchContentOffsetX() const;
 
@@ -212,6 +213,7 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     bool isTouch_ = false;
     bool isHover_ = false;
+    bool isFocus_ = false;
     bool isUserSetResponseRegion_ = false;
     bool showHoverEffect_ = true;
     bool enabled_ = true;

@@ -247,6 +247,15 @@ void SwiperModelNG::SetIndicatorStyle(const SwiperParameters& swiperParameters)
     pattern->SetSwiperParameters(swiperParameters);
 };
 
+void SwiperModelNG::SetArcDotIndicatorStyle(const SwiperArcDotParameters& swiperArcDotParameters)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSwiperArcDotParameters(swiperArcDotParameters);
+}
+
 void SwiperModelNG::SetDotIndicatorStyle(const SwiperParameters& swiperParameters)
 {
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -590,6 +599,14 @@ void SwiperModelNG::SetDotIndicatorStyle(FrameNode* frameNode, const SwiperParam
     pattern->SetSwiperParameters(swiperParameters);
 }
 
+void SwiperModelNG::SetArcDotIndicatorStyle(FrameNode* frameNode, const SwiperArcDotParameters& swiperArcDotParameters)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSwiperArcDotParameters(swiperArcDotParameters);
+}
+
 void SwiperModelNG::SetEnabled(FrameNode* frameNode, bool enabled)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(SwiperPaintProperty, Enabled, enabled, frameNode);
@@ -759,20 +776,26 @@ void SwiperModelNG::SetSwiperToIndex(FrameNode* frameNode, int32_t index, bool u
     pattern->ChangeIndex(index, useAnimation);
 }
 
-float SwiperModelNG::GetPreviousMargin(FrameNode* frameNode, int32_t unit)
+void SwiperModelNG::GetPreviousMargin(FrameNode* frameNode, int32_t unit, SwiperMarginOptions* options)
 {
     Dimension prevMargin(0.0f, static_cast<DimensionUnit>(unit));
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
         SwiperLayoutProperty, PrevMargin, prevMargin, frameNode, prevMargin);
-    return prevMargin.Value();
+    options->margin = prevMargin.Value();
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    options->ignoreBlank = pattern->GetPrevMarginIgnoreBlank();
 }
 
-float SwiperModelNG::GetNextMargin(FrameNode* frameNode, int32_t unit)
+void SwiperModelNG::GetNextMargin(FrameNode* frameNode, int32_t unit, SwiperMarginOptions* options)
 {
     Dimension nextMargin(0.0f, static_cast<DimensionUnit>(unit));
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
         SwiperLayoutProperty, NextMargin, nextMargin, frameNode, nextMargin);
-    return nextMargin.Value();
+    options->margin = nextMargin.Value();
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    options->ignoreBlank = pattern->GetNextMarginIgnoreBlank();
 }
 
 std::shared_ptr<SwiperParameters> SwiperModelNG::GetDotIndicator(FrameNode* frameNode)

@@ -408,6 +408,14 @@ void FormManagerDelegate::AddFormLinkInfoUpdateCallback(OnFormLinkInfoUpdateCall
     onFormLinkInfoUpdateCallback_ = std::move(callback);
 }
 
+void FormManagerDelegate::AddGetRectRelativeToWindowCallback(OnGetRectRelativeToWindowCallback&& callback)
+{
+    if (!callback || state_ == State::RELEASED) {
+        return;
+    }
+    onGetRectRelativeToWindowCallback_ = std::move(callback);
+}
+
 void FormManagerDelegate::AddActionEventHandle(const ActionEventHandle& callback)
 {
     if (!callback || state_ == State::RELEASED) {
@@ -543,6 +551,13 @@ void FormManagerDelegate::RegisterRenderDelegateEvent()
         formManagerDelegate->OnFormLinkInfoUpdate(formLinkInfos);
     };
     renderDelegate_->SetFormLinkInfoUpdateHandler(std::move(onFormLinkInfoUpdateHandler));
+
+    auto &&onGetRectRelativeToWindowHandler = [weak = WeakClaim(this)](int32_t &top, int32_t &left) {
+        auto formManagerDelegate = weak.Upgrade();
+        CHECK_NULL_VOID(formManagerDelegate);
+        formManagerDelegate->OnGetRectRelativeToWindow(top, left);
+    };
+    renderDelegate_->SetGetRectRelativeToWindowHandler(onGetRectRelativeToWindowHandler);
 }
 
 void FormManagerDelegate::OnActionEvent(const std::string& action)
@@ -683,6 +698,13 @@ void FormManagerDelegate::OnFormLinkInfoUpdate(const std::vector<std::string>& f
     }
 }
 
+void FormManagerDelegate::OnGetRectRelativeToWindow(int32_t &top, int32_t &left)
+{
+    if (onGetRectRelativeToWindowCallback_) {
+        onGetRectRelativeToWindowCallback_(top, left);
+    }
+}
+
 void FormManagerDelegate::OnFormAcquired(const std::string& param)
 {
     auto result = ParseMapFromString(param);
@@ -769,6 +791,25 @@ void FormManagerDelegate::SetObscured(bool isObscured)
 {
     CHECK_NULL_VOID(formRendererDispatcher_);
     formRendererDispatcher_->SetObscured(isObscured);
+}
+
+void FormManagerDelegate::OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId)
+{
+    CHECK_NULL_VOID(formRendererDispatcher_);
+    formRendererDispatcher_->OnAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
+}
+
+void FormManagerDelegate::OnAccessibilityChildTreeDeregister()
+{
+    CHECK_NULL_VOID(formRendererDispatcher_);
+    formRendererDispatcher_->OnAccessibilityChildTreeDeregister();
+}
+
+void FormManagerDelegate::OnAccessibilityDumpChildInfo(
+    const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    CHECK_NULL_VOID(formRendererDispatcher_);
+    formRendererDispatcher_->OnAccessibilityDumpChildInfo(params, info);
 }
 
 #ifdef OHOS_STANDARD_SYSTEM

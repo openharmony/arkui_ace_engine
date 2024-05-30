@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,13 +19,13 @@
 
 namespace OHOS::Ace::V2 {
 
-void GridPositionController::JumpTo(int32_t index, bool /* smooth */, ScrollAlign /* align */, int32_t source)
+void GridPositionController::ScrollToIndex(int32_t index, bool /* smooth */, ScrollAlign /* align */)
 {
     auto grid = AceType::DynamicCast<V2::RenderGridScroll>(scroll_.Upgrade());
     if (!grid) {
         return;
     }
-    grid->ScrollToIndex(index, source);
+    grid->ScrollToIndex(index);
 }
 
 bool GridPositionController::AnimateTo(

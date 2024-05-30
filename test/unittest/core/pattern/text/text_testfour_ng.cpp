@@ -262,4 +262,160 @@ HWTEST_F(TextTestFourNg, HandleKeyEvent001, TestSize.Level1)
         }
     }
 }
+
+/**
+ * @tc.name: UpdateMarqueeOptions001
+ * @tc.desc: test MarqueeOptions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFourNg, UpdateMarqueeOptions001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. test property.
+     * @tc.expect： expect property as expect.
+     */
+    TextMarqueeOptions options;
+    options.UpdateTextMarqueeStart(true);
+    options.UpdateTextMarqueeStep(3);
+    options.UpdateTextMarqueeLoop(3);
+    options.UpdateTextMarqueeDirection(MarqueeDirection::RIGHT);
+    options.UpdateTextMarqueeDelay(3);
+    options.UpdateTextMarqueeFadeout(false);
+    options.UpdateTextMarqueeStartPolicy(MarqueeStartPolicy::ON_FOCUS);
+    textModelNG.SetMarqueeOptions(options);
+    EXPECT_EQ(textLayoutProperty->GetTextMarqueeStart().value(), true);
+    EXPECT_EQ(textLayoutProperty->GetTextMarqueeStep().value(), 3);
+    EXPECT_EQ(textLayoutProperty->GetTextMarqueeLoop().value(), 3);
+    EXPECT_EQ(textLayoutProperty->GetTextMarqueeDirection().value(), MarqueeDirection::RIGHT);
+    EXPECT_EQ(textLayoutProperty->GetTextMarqueeDelay().value(), 3);
+    EXPECT_EQ(textLayoutProperty->GetTextMarqueeFadeout().value(), false);
+    EXPECT_EQ(textLayoutProperty->GetTextMarqueeStartPolicy().value(), MarqueeStartPolicy::ON_FOCUS);
+
+    TextMarqueeOptions defaultOptions;
+    textModelNG.SetMarqueeOptions(defaultOptions);
+    EXPECT_EQ(textLayoutProperty->GetTextMarqueeStart().value_or(true), true);
+    EXPECT_EQ(textLayoutProperty->GetTextMarqueeStep().value_or(6), 6);
+    EXPECT_EQ(textLayoutProperty->GetTextMarqueeLoop().value_or(6), 6);
+    EXPECT_EQ(textLayoutProperty->GetTextMarqueeDirection().value_or(MarqueeDirection::LEFT), MarqueeDirection::LEFT);
+    EXPECT_EQ(textLayoutProperty->GetTextMarqueeDelay().value_or(6), 6);
+    EXPECT_EQ(textLayoutProperty->GetTextMarqueeFadeout().value_or(true), true);
+    EXPECT_EQ(textLayoutProperty->GetTextMarqueeStartPolicy().value_or(MarqueeStartPolicy::DEFAULT),
+        MarqueeStartPolicy::DEFAULT);
+}
+
+/**
+ * @tc.name: TextInitEvents001
+ * @tc.desc: Test initializing focus and hover events.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFourNg, TextInitializingEvents001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set the TextOverflow value to Marquee.
+     */
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
+    textLayoutProperty->UpdateTextMarqueeStartPolicy(MarqueeStartPolicy::ON_FOCUS);
+
+    /**
+     * @tc.steps: step3. call OnModifyDone function.
+     * @tc.expected: The focus and hover events are initialized.
+     */
+    textPattern->OnModifyDone();
+    EXPECT_EQ(textPattern->focusInitialized_, true);
+    EXPECT_EQ(textPattern->hoverInitialized_, true);
+}
+
+/**
+ * @tc.name: TextRace001
+ * @tc.desc: test TextRace.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFourNg, TextRace001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set MARQUEE.
+     */
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
+
+    /**
+     * @tc.steps: step3. create textPaintMethod and call DoStartTextRace
+     */
+    RefPtr<TextContentModifier> textContentModifier =
+        AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
+    RefPtr<TextOverlayModifier> textOverlayModifier = AceType::MakeRefPtr<TextOverlayModifier>();
+    TextPaintMethod textPaintMethod(textPattern, BASE_LINE_OFFSET_VALUE, textContentModifier, textOverlayModifier);
+    textPaintMethod.DoStartTextRace();
+    textContentModifier->StopTextRace();
+}
+
+/**
+ * @tc.name: TextSetFadeout001
+ * @tc.desc: test text_pattern.cpp SetFadeout function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFourNg, TextSetFadeout001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern
+     */
+    auto [frameNode, pattern] = Init();
+
+    /**
+     * @tc.steps: step2. Set default fadeout
+     * @tc.expected: step2. Check the overlay node, it should not be created by EnsureOverlayExists()
+     */
+    pattern->SetFadeout(false, false, 0.0f);
+    auto overlayNode = frameNode->GetOverlayNode();
+    EXPECT_EQ(overlayNode, nullptr);
+
+    /**
+     * @tc.steps: step3. Set common fadeout values
+     * @tc.expected: step3. Check the overlay node
+     */
+    pattern->EnsureOverlayExists();
+    pattern->SetFadeout(true, false, 0.04f);
+    overlayNode = frameNode->GetOverlayNode();
+    ASSERT_NE(overlayNode, nullptr);
+
+    pattern->SetFadeout(false, true, 0.04f);
+    overlayNode = frameNode->GetOverlayNode();
+    ASSERT_NE(overlayNode, nullptr);
+
+    pattern->SetFadeout(true, true, 0.04f);
+    overlayNode = frameNode->GetOverlayNode();
+    ASSERT_NE(overlayNode, nullptr);
+}
+
 } // namespace OHOS::Ace::NG

@@ -713,7 +713,9 @@ uint32_t TextModelNG::GetMaxLines(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, defaultMaxLines);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, defaultMaxLines);
-    return layoutProperty->GetTextLineStyle()->GetMaxLines().value_or(defaultMaxLines);
+    auto& textLineStyle = layoutProperty->GetTextLineStyle();
+    CHECK_NULL_RETURN(textLineStyle, defaultMaxLines);
+    return textLineStyle->GetMaxLines().value_or(defaultMaxLines);
 }
 
 TextAlign TextModelNG::GetTextAlign(FrameNode* frameNode)
@@ -721,7 +723,9 @@ TextAlign TextModelNG::GetTextAlign(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, OHOS::Ace::TextAlign::START);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, OHOS::Ace::TextAlign::START);
-    return layoutProperty->GetTextLineStyle()->GetTextAlign().value_or(TextAlign::START);
+    auto& textLineStyle = layoutProperty->GetTextLineStyle();
+    CHECK_NULL_RETURN(textLineStyle, OHOS::Ace::TextAlign::START);
+    return textLineStyle->GetTextAlign().value_or(TextAlign::START);
 }
 
 TextOverflow TextModelNG::GetTextOverflow(FrameNode* frameNode)
@@ -729,7 +733,9 @@ TextOverflow TextModelNG::GetTextOverflow(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, TextOverflow::CLIP);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, TextOverflow::CLIP);
-    return layoutProperty->GetTextLineStyle()->GetTextOverflow().value_or(TextOverflow::CLIP);
+    auto& textLineStyle = layoutProperty->GetTextLineStyle();
+    CHECK_NULL_RETURN(textLineStyle, TextOverflow::CLIP);
+    return textLineStyle->GetTextOverflow().value_or(TextOverflow::CLIP);
 }
 
 Dimension TextModelNG::GetTextIndent(FrameNode* frameNode)
@@ -738,7 +744,9 @@ Dimension TextModelNG::GetTextIndent(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, defaultTextIndent);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, defaultTextIndent);
-    return layoutProperty->GetTextLineStyle()->GetTextIndent().value_or(defaultTextIndent);
+    auto& textLineStyle = layoutProperty->GetTextLineStyle();
+    CHECK_NULL_RETURN(textLineStyle, defaultTextIndent);
+    return textLineStyle->GetTextIndent().value_or(defaultTextIndent);
 }
 
 std::vector<std::string> TextModelNG::GetFontFamily(FrameNode* frameNode)

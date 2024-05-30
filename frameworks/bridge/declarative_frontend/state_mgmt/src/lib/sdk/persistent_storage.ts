@@ -19,13 +19,13 @@
  * Helper class to persist Map in Persistent storage
  *
  */
+type MapItem<K, V> = { key: K, value: V };
 class MapInfo<K, V> {
-  static readonly replacer: string = "ace_engine_state_mgmt_map_replacer";
+  static readonly replacer: string = '_____map_replacer__';
 
   constructor(
     public mapReplacer: string,
-    public keys: K[],
-    public values: V[]
+    public keyToValue: MapItem<K, V>[]
   ) { }
 
   // Check if the given object is of type MapInfo
@@ -39,14 +39,16 @@ class MapInfo<K, V> {
 
   // Convert Map to Object
   static toObject<K, V>(map: Map<K, V>): MapInfo<K, V> {
-    const keys: K[] = Array.from(map.keys());
-    const values: V[] = Array.from(map.values());
-    return new MapInfo(MapInfo.replacer, keys, values);
+    let mapItems: MapItem<K, V>[] = [];
+    map.forEach((val: V, key: K) => {
+      mapItems.push({ key: key, value: val })
+    })
+    return new MapInfo(MapInfo.replacer, mapItems);
   }
 
   // Convert Object to Map
   static toMap<K, V>(obj: MapInfo<K, V>): Map<K, V> {
-    return new Map<K, V>(obj.keys.map((key, i) => [key, obj.values[i]]));
+    return new Map<K, V>(obj.keyToValue.map((item: MapItem<K, V>) => [item.key, item.value]));
   }
 }
 
@@ -57,7 +59,7 @@ class MapInfo<K, V> {
  *
  */
 class SetInfo<V> {
-  static readonly replacer: string = "ace_engine_state_mgmt_set_replacer";
+  static readonly replacer: string = '_____set_replacer__';
 
   constructor(
     public setReplacer: string,
@@ -92,7 +94,7 @@ class SetInfo<V> {
  *
  */
 class DateInfo {
-  static readonly replacer: string = "ace_engine_state_mgmt_date_replacer";
+  static readonly replacer: string = '_____date_replacer__';
 
   constructor(
     public dateReplacer: string,

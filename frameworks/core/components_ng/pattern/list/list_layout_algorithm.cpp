@@ -712,6 +712,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
     float endPos = 0.0f;
     float itemTotalSize = 0.0f;
     float jumpIndexStartPos = 0.0f;
+    bool needLayoutBackward = false;
 
     if (jumpIndex_ && scrollAlign_ == ScrollAlign::AUTO) {
         auto it = itemPosition_.find(jumpIndex_.value());
@@ -751,11 +752,22 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
             scrollAlign_ = ScrollAlign::END;
         }
         UpdateSnapCenterContentOffset(layoutWrapper);
+        auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
+        CHECK_NULL_VOID(listLayoutProperty);
+        auto scrollSnapAlign = listLayoutProperty->GetScrollSnapAlign().value_or(V2::ScrollSnapAlign::NONE);
         if (IsScrollSnapAlignCenter(layoutWrapper)) {
             midIndex = GetMidIndex(layoutWrapper, true);
             midItemMidPos = (itemPosition_[midIndex].startPos + itemPosition_[midIndex].endPos) / 2.0f -
                 prevContentMainSize_ / 2.0f + contentMainSize_ / 2.0f;
             midIndex = std::min(midIndex, totalItemCount_ - 1);
+        } else if (scrollSnapAlign == V2::ScrollSnapAlign::START && Positive(contentStartOffset_)) {
+            startIndex = GetSnapStartIndex();
+            startPos = itemPosition_[startIndex].startPos;
+        } else if (scrollSnapAlign == V2::ScrollSnapAlign::END) {
+            auto snapEndIndex = GetSnapEndIndex();
+            needLayoutBackward = snapEndIndex != endIndex;
+            endIndex = snapEndIndex;
+            endPos = itemPosition_[endIndex].endPos;
         }
         OffScreenLayoutDirection();
         itemPosition_.clear();
@@ -804,9 +816,10 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
             startIndex = midIndex;
             endIndex = midIndex;
         }
-        if (NearZero(currentOffset_) || (!overScrollFeature_ && NonNegative(currentOffset_)) ||
+        if ((NearZero(currentOffset_) || (!overScrollFeature_ && NonNegative(currentOffset_)) ||
             (overScrollFeature_ && overScrollTop) ||
-            LessOrEqual(itemTotalSize, contentMainSize_ - contentStartOffset_ - contentEndOffset_)) {
+            LessOrEqual(itemTotalSize, contentMainSize_ - contentStartOffset_ - contentEndOffset_)) &&
+            !needLayoutBackward) {
             startIndex = GetLanesFloor(layoutWrapper, startIndex);
             if (overScrollTop && !canOverScroll_) {
                 startPos = startMainPos_ + contentStartOffset_;
@@ -824,7 +837,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
             }
         } else {
             endIndex = GetLanesCeil(layoutWrapper, endIndex);
-            if (overScrollFeature_ && !overScrollTop && !NearZero(prevContentMainSize_)) {
+            if (needLayoutBackward || (overScrollFeature_ && !overScrollTop && !NearZero(prevContentMainSize_))) {
                 endPos += contentMainSize_ - prevContentMainSize_;
             }
             if (IsScrollSnapAlignCenter(layoutWrapper)) {
@@ -1824,5 +1837,33 @@ void ListLayoutAlgorithm::OnItemPositionAddOrUpdate(LayoutWrapper* layoutWrapper
     if (!NearEqual(predictSnapEndPos, predictSnapEndPos_.value())) {
         predictSnapEndPos_ = predictSnapEndPos;
     }
+}
+
+int32_t ListLayoutAlgorithm::GetSnapStartIndex()
+{
+    auto startIndex = std::min(GetStartIndex(), totalItemCount_ - 1);
+    for (auto& pos : itemPosition_) {
+        if (NearEqual(pos.second.startPos, contentStartOffset_)) {
+            startIndex = pos.first;
+            return startIndex;
+        } else if (GreatNotEqual(pos.second.startPos, contentStartOffset_)) {
+            return startIndex;
+        }
+    }
+    return startIndex;
+}
+
+int32_t ListLayoutAlgorithm::GetSnapEndIndex()
+{
+    auto endIndex = std::min(GetEndIndex(), totalItemCount_ - 1);
+    for (auto pos = itemPosition_.rbegin(); pos != itemPosition_.rend(); ++pos) {
+        if (NearEqual(prevContentMainSize_ - pos->second.endPos, contentEndOffset_)) {
+            endIndex = pos->first;
+            return endIndex;
+        } else if (LessNotEqual(prevContentMainSize_ - pos->second.endPos, contentEndOffset_)) {
+            return endIndex;
+        }
+    }
+    return endIndex;
 }
 } // namespace OHOS::Ace::NG

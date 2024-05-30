@@ -28,6 +28,7 @@ public:
     OffscreenCanvasPaintMethod(int32_t width, int32_t height);
     ~OffscreenCanvasPaintMethod() override = default;
 
+    RefPtr<PixelMap> TransferToImageBitmap();
     void DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage);
     std::unique_ptr<Ace::ImageData> GetImageData(double left, double top, double width, double height);
     void GetImageData(const std::shared_ptr<Ace::ImageData>& imageData);

@@ -233,81 +233,54 @@ ArkUINativeModuleValue PatternLockBridge::ResetPatternLockSelectedColor(ArkUIRun
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue PatternLockBridge::SetPatternLockActiveCircleColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+ArkUINativeModuleValue PatternLockBridge::SetPatternLockActivateCircleStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+    if (!secondArg->IsObject()) {
         GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockActiveCircleColor(nativeNode);
+        GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockActiveCircleRadius(nativeNode);
+        GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockEnableWaveEffect(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getPatternLockModifier()->setPatternLockActiveCircleColor(
-            nativeNode, color.GetValue());
+        auto obj = secondArg->ToObject(vm);
+        auto jsColor = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "color"));
+        auto jsRadius = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "radius"));
+        auto jsEnable = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "enableWaveEffect"));
+        Color color;
+        if (!ArkTSUtils::ParseJsColorAlpha(vm, jsColor, color)) {
+            GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockActiveCircleColor(nativeNode);
+        } else {
+            GetArkUINodeModifiers()->getPatternLockModifier()->setPatternLockActiveCircleColor(
+                nativeNode, color.GetValue());
+        }
+        CalcDimension circleRadius;
+        if (jsRadius->IsObject() && ArkTSUtils::ParseJsLengthMetrics(vm, jsRadius, circleRadius) &&
+            !(circleRadius.IsNonPositive())) {
+            GetArkUINodeModifiers()->getPatternLockModifier()->setPatternLockActiveCircleRadius(
+                nativeNode, circleRadius.Value(), static_cast<int8_t>(circleRadius.Unit()));
+        } else {
+            GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockActiveCircleRadius(nativeNode);
+        }
+        uint32_t value = 1;
+        if (jsEnable->IsBoolean()) {
+            value = static_cast<uint32_t>(jsEnable->ToBoolean(vm)->Value());
+        }
+        GetArkUINodeModifiers()->getPatternLockModifier()->setPatternLockEnableWaveEffect(nativeNode, value);
     }
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue PatternLockBridge::ResetPatternLockActiveCircleColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+ArkUINativeModuleValue PatternLockBridge::ResetPatternLockActivateCircleStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockActiveCircleColor(nativeNode);
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue PatternLockBridge::SetPatternLockActiveCircleRadius(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    CalcDimension circleRadius;
-    if (ArkTSUtils::ParseJsDimensionVp(vm, secondArg, circleRadius) && !(circleRadius.IsNonPositive())) {
-        GetArkUINodeModifiers()->getPatternLockModifier()->setPatternLockActiveCircleRadius(
-            nativeNode, circleRadius.Value(), static_cast<int8_t>(circleRadius.Unit()));
-    } else {
-        GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockActiveCircleRadius(nativeNode);
-    }
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue PatternLockBridge::ResetPatternLockActiveCircleRadius(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockActiveCircleRadius(nativeNode);
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue PatternLockBridge::SetEnableWaveEffect(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    uint32_t value = 1;
-    if (secondArg->IsBoolean()) {
-        value = static_cast<uint32_t>(secondArg->ToBoolean(vm)->Value());
-    }
-    GetArkUINodeModifiers()->getPatternLockModifier()->setPatternLockEnableWaveEffect(nativeNode, value);
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue PatternLockBridge::ResetEnableWaveEffect(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockEnableWaveEffect(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }

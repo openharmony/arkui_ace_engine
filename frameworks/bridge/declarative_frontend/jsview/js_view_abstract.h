@@ -532,6 +532,9 @@ public:
                 return false;
             }
             JSRef<JSVal> args = jsObj->GetProperty("params");
+            if (!args->IsArray()) {
+                return false;
+            }
             JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
             auto param = params->GetValueAt(0);
             if (resType == static_cast<int32_t>(ResourceType::INTEGER)) {
@@ -592,6 +595,10 @@ public:
     static void JsFocusScopeId(const JSCallbackInfo& info);
     static void JsFocusScopePriority(const JSCallbackInfo& info);
     static int32_t ParseJsPropertyId(const JSRef<JSVal>& jsValue);
+    static void JsVisualEffect(const JSCallbackInfo& info);
+    static void JsBackgroundFilter(const JSCallbackInfo& info);
+    static void JsForegroundFilter(const JSCallbackInfo& info);
+    static void JsCompositingFilter(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 #endif // JS_VIEW_ABSTRACT_H

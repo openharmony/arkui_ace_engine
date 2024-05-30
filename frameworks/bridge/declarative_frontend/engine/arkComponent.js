@@ -2246,14 +2246,14 @@ class BackgroundBrightnessInternalModifier extends ModifierWithKey {
       getUINativeModule().common.resetBackgroundBrightnessInternal(node);
     }
     else {
-      getUINativeModule().common.setBackgroundBrightnessInternal(node, this.value.rate, this.value.lightUpDegree, this.value.cubicCoeff, 
+      getUINativeModule().common.setBackgroundBrightnessInternal(node, this.value.rate, this.value.lightUpDegree, this.value.cubicCoeff,
              this.value.quadCoeff, this.value.saturation, this.value.posRGB, this.value.negRGB, this.value.fraction);
     }
   }
   checkObjectDiff() {
     return !(this.value.rate === this.stageValue.rate && this.value.lightUpDegree === this.stageValue.lightUpDegree
           && this.value.cubicCoeff === this.stageValue.cubicCoeff && this.value.quadCoeff === this.stageValue.quadCoeff
-          && this.value.saturation === this.stageValue.saturation && this.value.posRGB === this.stageValue.posRGB 
+          && this.value.saturation === this.stageValue.saturation && this.value.posRGB === this.stageValue.posRGB
           && this.value.negRGB === this.stageValue.negRGB && this.value.fraction === this.stageValue.fraction);
   }
 }
@@ -2267,14 +2267,14 @@ class ForegroundBrightnessModifier extends ModifierWithKey {
         getUINativeModule().common.resetForegroundBrightness(node);
       }
       else {
-        getUINativeModule().common.setForegroundBrightness(node, this.value.rate, this.value.lightUpDegree, this.value.cubicCoeff, 
+        getUINativeModule().common.setForegroundBrightness(node, this.value.rate, this.value.lightUpDegree, this.value.cubicCoeff,
           this.value.quadCoeff, this.value.saturation, this.value.posRGB, this.value.negRGB, this.value.fraction);
       }
     }
     checkObjectDiff() {
       return !(this.value.rate === this.stageValue.rate && this.value.lightUpDegree === this.stageValue.lightUpDegree
         && this.value.cubicCoeff === this.stageValue.cubicCoeff && this.value.quadCoeff === this.stageValue.quadCoeff
-        && this.value.saturation === this.stageValue.saturation && this.value.posRGB === this.stageValue.posRGB 
+        && this.value.saturation === this.stageValue.saturation && this.value.posRGB === this.stageValue.posRGB
         && this.value.negRGB === this.stageValue.negRGB && this.value.fraction === this.stageValue.fraction);
   }
 }
@@ -2288,11 +2288,15 @@ class DragPreviewOptionsModifier extends ModifierWithKey {
       getUINativeModule().common.resetDragPreviewOptions(node);
     }
     else {
-      getUINativeModule().common.setDragPreviewOptions(node, this.value.mode);
+      getUINativeModule().common.setDragPreviewOptions(node, this.value.mode, this.value.numberBadge,
+        this.value.isMultiSelectionEnabled, this.value.defaultAnimationBeforeLifting);
     }
   }
   checkObjectDiff() {
-    return !(this.value.mode === this.stageValue.mode);
+    return !(this.value.mode === this.stageValue.mode
+      && this.value.numberBadge === this.stageValue.numberBadge
+      && this.value.isMultiSelectionEnabled === this.stageValue.isMultiSelectionEnabled
+      && this.value.defaultAnimationBeforeLifting === this.stageValue.defaultAnimationBeforeLifting);
   }
 }
 DragPreviewOptionsModifier.identity = Symbol('dragPreviewOptions');
@@ -2675,6 +2679,37 @@ class SharedTransitionModifier extends ModifierWithKey {
   }
 }
 SharedTransitionModifier.identity = Symbol('sharedTransition');
+
+class FocusScopeIdModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetFocusScopeId(node);
+    }
+    else {
+      getUINativeModule().common.setFocusScopeId(node, this.value.id, this.value.isGroup);
+    }
+  }
+}
+FocusScopeIdModifier.identity = Symbol('focusScopeId');
+
+class FocusScopePriorityModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetFocusScopePriority(node);
+    }
+    else {
+      getUINativeModule().common.setFocusScopePriority(node, this.value.scopeId, this.value.priority);
+    }
+  }
+}
+FocusScopePriorityModifier.identity = Symbol('focusScopePriority');
+
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 const isString = (val) => typeof val === 'string';
 const isNumber = (val) => typeof val === 'number';
@@ -2939,8 +2974,22 @@ class ArkComponent {
     modifierWithKey(this._modifiersWithKeys, ForegroundBrightnessModifier.identity, ForegroundBrightnessModifier, params);
      return this;
   }
-  dragPreviewOptions(value) {
-    modifierWithKey(this._modifiersWithKeys, DragPreviewOptionsModifier.identity, DragPreviewOptionsModifier, value);
+  dragPreviewOptions(value, options) {
+    if (isUndefined(value)) {
+      modifierWithKey(this._modifiersWithKeys, DragPreviewOptionsModifier.identity, DragPreviewOptionsModifier, undefined);
+      return this;
+    }
+    let arkDragPreviewOptions = new ArkDragPreviewOptions();
+    if (typeof value === 'object') {
+      arkDragPreviewOptions.mode = value.mode;
+      arkDragPreviewOptions.numberBadge = value.numberBadge;
+    }
+    if (typeof options === 'object') {
+      arkDragPreviewOptions.isMultiSelectionEnabled = options.isMultiSelectionEnabled;
+      arkDragPreviewOptions.defaultAnimationBeforeLifting = options.defaultAnimationBeforeLifting;
+    }
+    modifierWithKey(this._modifiersWithKeys, DragPreviewOptionsModifier.identity,
+      DragPreviewOptionsModifier, arkDragPreviewOptions);
     return this;
   }
   responseRegion(value) {
@@ -3637,6 +3686,9 @@ class ArkComponent {
   onDragEnd(event) {
     throw new Error('Method not implemented.');
   }
+  onPreDrag(event) {
+    throw new Error('Method not implemented.');
+  }
   allowDrop(value) {
     modifierWithKey(this._modifiersWithKeys, AllowDropModifier.identity, AllowDropModifier, value);
     return this;
@@ -3649,6 +3701,9 @@ class ArkComponent {
       modifierWithKey(this._modifiersWithKeys, DraggableModifier.identity, DraggableModifier, undefined);
     }
     return this;
+  }
+  dragPreview(value) {
+    throw new Error('Method not implemented.');
   }
   overlay(value, options) {
     if (typeof value === 'undefined') {
@@ -3844,6 +3899,30 @@ class ArkComponent {
   }
   systemBarEffect() {
     modifierWithKey(this._modifiersWithKeys, SystemBarEffectModifier.identity, SystemBarEffectModifier, null);
+    return this;
+  }
+  focusScopeId(id, isGroup) {
+    let arkFocusScopeId = new ArkFocusScopeId();
+    if (isString(id)) {
+      arkFocusScopeId.id = id;
+    }
+    if (typeof isGroup === 'boolean') {
+      arkFocusScopeId.isGroup = isGroup;
+    }
+    modifierWithKey(this._modifiersWithKeys, FocusScopeIdModifier.identity, FocusScopeIdModifier, arkFocusScopeId);
+    return this;
+  }
+  focusScopePriority(scopeId, priority) {
+    let arkFocusScopePriority = new ArkFocusScopePriority();
+    if (isString(scopeId)) {
+      arkFocusScopePriority.scopeId = scopeId;
+    }
+    if (typeof priority === 'number') {
+      arkFocusScopePriority.priority = priority;
+    }
+    modifierWithKey(
+      this._modifiersWithKeys, FocusScopePriorityModifier.identity, FocusScopePriorityModifier, arkFocusScopePriority);
+    return this;
   }
 }
 const isNull = (val) => typeof val === 'object' && val === null;
@@ -4057,12 +4136,12 @@ class GestureGroupHandler extends GestureHandler {
       this.gestures = options.gestures;
     }
   }
-  
+
   onCancel(event) {
     this.onCancelCallback = event;
     return this;
   }
-  
+
   tag(tag) {
     this.gestureTag = tag;
     return this;
@@ -4076,6 +4155,10 @@ class UICommonEvent {
   setNodePtr(nodePtr) {
     this._nodePtr = nodePtr;
   }
+  // the first param is used to indicate frameNode
+  // the second param is used to indicate the callback 
+  // the third param is used to indicate the instanceid
+  // other options will be indicated after them
   setOnClick(callback) {
     this._clickEvent = callback;
     getUINativeModule().frameNode.setOnClick(this._nodePtr, callback, this._instanceId);
@@ -4123,6 +4206,10 @@ class UICommonEvent {
   setOnSizeChange(callback) {
     this._onSizeChangeEvent = callback;
     getUINativeModule().frameNode.setOnSizeChange(this._nodePtr, callback, this._instanceId);
+  }
+  setOnVisibleAreaApproximateChange(options, callback) {
+    this._onVisibleAreaApproximateChange = callback;
+    getUINativeModule().frameNode.setOnVisibleAreaApproximateChange(this._nodePtr, callback, this._instanceId, options.ratios, options.expectedUpdateInterval ? options.expectedUpdateInterval : 1000);
   }
 }
 
@@ -4598,6 +4685,45 @@ class ColumnSpaceModifier extends ModifierWithKey {
 }
 ColumnSpaceModifier.identity = Symbol('columnSpace');
 
+class ColumnPointLightModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetPointLightStyle(node);
+    } else {
+      let positionX;
+      let positionY;
+      let positionZ;
+      let intensity;
+      let color;
+      let illuminated;
+      let bloom;
+      if (!isUndefined(this.value.lightSource) && this.value.lightSource != null) {
+        positionX = this.value.lightSource.positionX;
+        positionY = this.value.lightSource.positionY;
+        positionZ = this.value.lightSource.positionZ;
+        intensity = this.value.lightSource.intensity;
+        color = this.value.lightSource.color;
+      }
+      illuminated = this.value.illuminated;
+      bloom = this.value.bloom;
+      getUINativeModule().common.setPointLightStyle(node, positionX, positionY, positionZ, intensity, color,
+        illuminated, bloom);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.lightSource?.positionX, this.value.lightSource?.positionX) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.positionY, this.value.lightSource?.positionY) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.positionZ, this.value.lightSource?.positionZ) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.intensity, this.value.lightSource?.intensity) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.color, this.value.lightSource?.color) ||
+    !isBaseOrResourceEqual(this.stageValue.illuminated, this.value.illuminated) ||
+    !isBaseOrResourceEqual(this.stageValue.bloom, this.value.bloom);
+  }
+}
+ColumnPointLightModifier.identity = Symbol('columnPointLight');
 class ArkColumnComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -4617,7 +4743,8 @@ class ArkColumnComponent extends ArkComponent {
     return this;
   }
   pointLight(value) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ColumnPointLightModifier.identity, ColumnPointLightModifier, value);
+    return this;
   }
 }
 // @ts-ignore
@@ -4835,12 +4962,52 @@ class FlexInitializeModifier extends ModifierWithKey {
   }
 }
 FlexInitializeModifier.identity = Symbol('flexInitialize');
+class FlexPointLightModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetPointLightStyle(node);
+    } else {
+      let positionX;
+      let positionY;
+      let positionZ;
+      let intensity;
+      let color;
+      let illuminated;
+      let bloom;
+      if (!isUndefined(this.value.lightSource) && this.value.lightSource != null) {
+        positionX = this.value.lightSource.positionX;
+        positionY = this.value.lightSource.positionY;
+        positionZ = this.value.lightSource.positionZ;
+        intensity = this.value.lightSource.intensity;
+        color = this.value.lightSource.color;
+      }
+      illuminated = this.value.illuminated;
+      bloom = this.value.bloom;
+      getUINativeModule().common.setPointLightStyle(node, positionX, positionY, positionZ, intensity, color,
+        illuminated, bloom);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.lightSource?.positionX, this.value.lightSource?.positionX) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.positionY, this.value.lightSource?.positionY) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.positionZ, this.value.lightSource?.positionZ) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.intensity, this.value.lightSource?.intensity) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.color, this.value.lightSource?.color) ||
+    !isBaseOrResourceEqual(this.stageValue.illuminated, this.value.illuminated) ||
+    !isBaseOrResourceEqual(this.stageValue.bloom, this.value.bloom);
+  }
+}
+FlexPointLightModifier.identity = Symbol('flexPointLight');
 class ArkFlexComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
   pointLight(value) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, FlexPointLightModifier.identity, FlexPointLightModifier, value);
+    return this;
   }
   initialize(value) {
     if (value[0] !== undefined) {
@@ -5471,7 +5638,7 @@ class GridFlingSpeedLimitModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    if (reset) {    
+    if (reset) {
       getUINativeModule().grid.resetFlingSpeedLimit(node);
     }
     else {
@@ -6062,6 +6229,45 @@ class ImageTransitionModifier extends ModifierWithKey {
   }
 }
 ImageTransitionModifier.identity = Symbol('imageTransition');
+class ImagePointLightModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetPointLightStyle(node);
+    } else {
+      let positionX;
+      let positionY;
+      let positionZ;
+      let intensity;
+      let color;
+      let illuminated;
+      let bloom;
+      if (!isUndefined(this.value.lightSource) && this.value.lightSource != null) {
+        positionX = this.value.lightSource.positionX;
+        positionY = this.value.lightSource.positionY;
+        positionZ = this.value.lightSource.positionZ;
+        intensity = this.value.lightSource.intensity;
+        color = this.value.lightSource.color;
+      }
+      illuminated = this.value.illuminated;
+      bloom = this.value.bloom;
+      getUINativeModule().common.setPointLightStyle(node, positionX, positionY, positionZ, intensity, color,
+        illuminated, bloom);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.lightSource?.positionX, this.value.lightSource?.positionX) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.positionY, this.value.lightSource?.positionY) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.positionZ, this.value.lightSource?.positionZ) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.intensity, this.value.lightSource?.intensity) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.color, this.value.lightSource?.color) ||
+    !isBaseOrResourceEqual(this.stageValue.illuminated, this.value.illuminated) ||
+    !isBaseOrResourceEqual(this.stageValue.bloom, this.value.bloom);
+  }
+}
+ImagePointLightModifier.identity = Symbol('imagePointLight');
 class ImageeResizableModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -6170,9 +6376,7 @@ class ArkImageComponent extends ArkComponent {
     super(nativePtr, classType);
   }
   initialize(value) {
-    if (value[0] != undefined) {
-      modifierWithKey(this._modifiersWithKeys, ImageSrcModifier.identity, ImageSrcModifier, value[0]);
-    }
+    modifierWithKey(this._modifiersWithKeys, ImageSrcModifier.identity, ImageSrcModifier, value[0]);
     return this;
   }
   allowChildCount() {
@@ -6224,6 +6428,10 @@ class ArkImageComponent extends ArkComponent {
   }
   interpolation(value) {
     modifierWithKey(this._modifiersWithKeys, ImageInterpolationModifier.identity, ImageInterpolationModifier, value);
+    return this;
+  }
+  pointLight(value) {
+    modifierWithKey(this._modifiersWithKeys, ImagePointLightModifier.identity, ImagePointLightModifier, value);
     return this;
   }
   sourceSize(value) {
@@ -6636,6 +6844,34 @@ class ImageSpanAltModifier extends ModifierWithKey {
   }
 }
 ImageSpanAltModifier.identity = Symbol('imagespanAlt');
+class ImageSpanOnCompleteModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().imageSpan.resetOnComplete(node);
+    }
+    else {
+      getUINativeModule().imageSpan.setOnComplete(node, this.value);
+    }
+  }
+}
+ImageSpanOnCompleteModifier.identity = Symbol('imageSpanOnComplete');
+class ImageSpanOnErrorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().imageSpan.resetOnError(node);
+    }
+    else {
+      getUINativeModule().imageSpan.setOnError(node, this.value);
+    }
+  }
+}
+ImageSpanOnErrorModifier.identity = Symbol('imageSpanOnError');
 class ArkImageSpanComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -6658,6 +6894,14 @@ class ArkImageSpanComponent extends ArkComponent {
   }
   alt(value) {
     modifierWithKey(this._modifiersWithKeys, ImageSpanAltModifier.identity, ImageSpanAltModifier, value);
+    return this;
+  }
+  onComplete(callback) {
+    modifierWithKey(this._modifiersWithKeys, ImageSpanOnCompleteModifier.identity, ImageSpanOnCompleteModifier, callback);
+    return this;
+  }
+  onError(callback) {
+    modifierWithKey(this._modifiersWithKeys, ImageSpanOnErrorModifier.identity, ImageSpanOnErrorModifier, callback);
     return this;
   }
 }
@@ -6809,57 +7053,23 @@ class PatternLockAutoResetModifier extends ModifierWithKey {
   }
 }
 PatternLockAutoResetModifier.identity = Symbol('patternlockautoreset');
-class PatternLockActiveCircleColorModifier extends ModifierWithKey {
+class PatternLockActivateCircleStyleModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      getUINativeModule().patternLock.resetActiveCircleColor(node);
+      getUINativeModule().patternLock.resetActivateCircleStyle(node);
     }
     else {
-      getUINativeModule().patternLock.setActiveCircleColor(node, this.value);
+      getUINativeModule().patternLock.setActivateCircleStyle(node, this.value);
     }
   }
   checkObjectDiff() {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
-PatternLockActiveCircleColorModifier.identity = Symbol('patternLockActiveCircleColor');
-class PatternLockActiveCircleRadiusModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().patternLock.resetActiveCircleRadius(node);
-    }
-    else {
-      getUINativeModule().patternLock.setActiveCircleRadius(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-PatternLockActiveCircleRadiusModifier.identity = Symbol('patternLockActiveCircleRadius');
-class PatternLockEnableWaveEffectModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().patternLock.resetEnableWaveEffect(node);
-    }
-    else {
-      getUINativeModule().patternLock.setEnableWaveEffect(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return this.stageValue !== this.value;
-  }
-}
-PatternLockEnableWaveEffectModifier.identity = Symbol('patternLockEnableWaveEffect');
+PatternLockActivateCircleStyleModifier.identity = Symbol('patternLockActivateCircleStyle');
 class ArkPatternLockComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -6894,6 +7104,10 @@ class ArkPatternLockComponent extends ArkComponent {
   }
   autoReset(value) {
     modifierWithKey(this._modifiersWithKeys, PatternLockAutoResetModifier.identity, PatternLockAutoResetModifier, value);
+    return this;
+  }
+  activateCircleStyle(value) {
+    modifierWithKey(this._modifiersWithKeys, PatternLockActivateCircleStyleModifier.identity, PatternLockActivateCircleStyleModifier, value);
     return this;
   }
   onPatternComplete(callback) {
@@ -7105,6 +7319,45 @@ class RowSpaceModifier extends ModifierWithKey {
 }
 RowSpaceModifier.identity = Symbol('rowSpace');
 
+class RowPointLightModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetPointLightStyle(node);
+    } else {
+      let positionX;
+      let positionY;
+      let positionZ;
+      let intensity;
+      let color;
+      let illuminated;
+      let bloom;
+      if (!isUndefined(this.value.lightSource) && this.value.lightSource != null) {
+        positionX = this.value.lightSource.positionX;
+        positionY = this.value.lightSource.positionY;
+        positionZ = this.value.lightSource.positionZ;
+        intensity = this.value.lightSource.intensity;
+        color = this.value.lightSource.color;
+      }
+      illuminated = this.value.illuminated;
+      bloom = this.value.bloom;
+      getUINativeModule().common.setPointLightStyle(node, positionX, positionY, positionZ, intensity, color,
+        illuminated, bloom);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.lightSource?.positionX, this.value.lightSource?.positionX) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.positionY, this.value.lightSource?.positionY) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.positionZ, this.value.lightSource?.positionZ) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.intensity, this.value.lightSource?.intensity) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.color, this.value.lightSource?.color) ||
+    !isBaseOrResourceEqual(this.stageValue.illuminated, this.value.illuminated) ||
+    !isBaseOrResourceEqual(this.stageValue.bloom, this.value.bloom);
+  }
+}
+RowPointLightModifier.identity = Symbol('rowPointLight');
 class ArkRowComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -7124,7 +7377,8 @@ class ArkRowComponent extends ArkComponent {
     return this;
   }
   pointLight(value) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, RowPointLightModifier.identity, RowPointLightModifier, value);
+    return this;
   }
 }
 // @ts-ignore
@@ -7562,7 +7816,7 @@ class SearchMinFontSizeModifier extends ModifierWithKey {
         return !isBaseOrResourceEqual(this.stageValue, this.value);
     }
 }
-            
+
 SearchMinFontSizeModifier.identity = Symbol('searchMinFontSize');
 class SearchMaxFontSizeModifier extends ModifierWithKey {
     constructor(value) {
@@ -7602,7 +7856,7 @@ class SearchTextIndentModifier extends ModifierWithKey {
         super(value);
     }
     applyPeer(node, reset) {
-        if (reset) {  
+        if (reset) {
             getUINativeModule().search.resetTextIndent(node);
         } else {
             getUINativeModule().search.setTextIndent(node, this.value);
@@ -8342,7 +8596,7 @@ class SpanInputModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      getUINativeModule().span.setSpanSrc(node, "");
+      getUINativeModule().span.setSpanSrc(node, '');
     }
     else {
       getUINativeModule().span.setSpanSrc(node, this.value);
@@ -8362,9 +8616,7 @@ class ArkSpanComponent {
     this._nativePtrChanged = false;
   }
   initialize(value) {
-    if (value[0] != undefined) {
-      modifierWithKey(this._modifiersWithKeys, SpanInputModifier.identity, SpanInputModifier, value[0]);
-    }
+    modifierWithKey(this._modifiersWithKeys, SpanInputModifier.identity, SpanInputModifier, value[0]);
     return this;
   }
   applyModifierPatch() {
@@ -9143,7 +9395,50 @@ class ArkStackComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, StackAlignContentModifier.identity, StackAlignContentModifier, value);
     return this;
   }
+  pointLight(value) {
+    modifierWithKey(this._modifiersWithKeys, StackPointLightModifier.identity, StackPointLightModifier, value);
+    return this;
+  }
 }
+class StackPointLightModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetPointLightStyle(node);
+    } else {
+      let positionX;
+      let positionY;
+      let positionZ;
+      let intensity;
+      let color;
+      let illuminated;
+      let bloom;
+      if (!isUndefined(this.value.lightSource) && this.value.lightSource != null) {
+        positionX = this.value.lightSource.positionX;
+        positionY = this.value.lightSource.positionY;
+        positionZ = this.value.lightSource.positionZ;
+        intensity = this.value.lightSource.intensity;
+        color = this.value.lightSource.color;
+      }
+      illuminated = this.value.illuminated;
+      bloom = this.value.bloom;
+      getUINativeModule().common.setPointLightStyle(node, positionX, positionY, positionZ, intensity, color,
+        illuminated, bloom);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.lightSource?.positionX, this.value.lightSource?.positionX) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.positionY, this.value.lightSource?.positionY) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.positionZ, this.value.lightSource?.positionZ) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.intensity, this.value.lightSource?.intensity) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.color, this.value.lightSource?.color) ||
+    !isBaseOrResourceEqual(this.stageValue.illuminated, this.value.illuminated) ||
+    !isBaseOrResourceEqual(this.stageValue.bloom, this.value.bloom);
+  }
+}
+StackPointLightModifier.identity = Symbol('stackPointLight');
 class StackAlignContentModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -11546,7 +11841,7 @@ class TextInputTextIndentModifier extends ModifierWithKey {
             getUINativeModule().textInput.setTextIndent(node, this.value);
         }
     }
-    
+
     checkObjectDiff() {
         return !isBaseOrResourceEqual(this.stageValue, this.value);
     }
@@ -14022,6 +14317,24 @@ class ArkSymbolEffect {
       (this.action === another.action);
   }
 }
+class ArkFocusScopeId {
+  constructor() {
+    this.id = undefined;
+    this.isGroup = undefined;
+  }
+  isEqual(another) {
+    return (this.id === another.id) && (this.isGroup === another.isGroup);
+  }
+}
+class ArkFocusScopePriority {
+  constructor() {
+    this.scopeId = undefined;
+    this.priority = undefined;
+  }
+  isEqual(another) {
+    return (this.scopeId === another.scopeId) && (this.priority === another.priority);
+  }
+}
 /// <reference path='./import.ts' />
 /// <reference path='./ArkComponent.ts' />
 const FontWeightMap = {
@@ -14041,6 +14354,25 @@ const FontWeightMap = {
   800: '800',
   900: '900',
 };
+
+class ArkDragPreviewOptions {
+  constructor() {
+    this.mode = undefined;
+    this.numberBadge = undefined;
+    this.isMultiSelectionEnabled = undefined;
+    this.defaultAnimationBeforeLifting = undefined;
+  }
+
+  isEqual(another) {
+    return (
+      this.mode === another.mode &&
+      this.numberBadge === another.numberBadge &&
+      this.isMultiSelectionEnabled === another.isMultiSelectionEnabled &&
+      this.defaultAnimationBeforeLifting === another.defaultAnimationBeforeLifting
+    );
+  }
+}
+
 class ArkButtonComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -15361,8 +15693,8 @@ class ToggleSwitchStyleModifier extends ModifierWithKey {
                 this.stageValue.trackBorderRadius === this.value.trackBorderRadius);
         }
         else if (isResource(this.stageValue) && isResource(this.value)){
-          return !(isResourceEqual(this.stageValue.pointRadius, this.value.pointRadius) && 
-          isResourceEqual(this.stageValue.unselectedColor, this.value.unselectedColor) && 
+          return !(isResourceEqual(this.stageValue.pointRadius, this.value.pointRadius) &&
+          isResourceEqual(this.stageValue.unselectedColor, this.value.unselectedColor) &&
           isResourceEqual(this.stageValue.pointColor, this.value.pointColor) &&
           isResourceEqual(this.stageValue.trackBorderRadius, this.value.trackBorderRadius));
         }
@@ -16330,11 +16662,11 @@ class TimepickerDisappearTextStyleModifier extends ModifierWithKey {
     }
     else {
       getUINativeModule().timepicker.setDisappearTextStyle(node, (_b = (_a = this.value) === null ||
-      _a === void 0 ? void 0 : _a.color) !== null && _b !== void 0 ? _b : undefined, 
+      _a === void 0 ? void 0 : _a.color) !== null && _b !== void 0 ? _b : undefined,
       (_e = (_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null ||
-      _d === void 0 ? void 0 : _d.size) !== null && _e !== void 0 ? _e : undefined, 
+      _d === void 0 ? void 0 : _d.size) !== null && _e !== void 0 ? _e : undefined,
       (_h = (_g = (_f = this.value) === null || _f === void 0 ? void 0 : _f.font) === null ||
-      _g === void 0 ? void 0 : _g.weight) !== null && _h !== void 0 ? _h : undefined, 
+      _g === void 0 ? void 0 : _g.weight) !== null && _h !== void 0 ? _h : undefined,
       (_l = (_k = (_j = this.value) === null || _j === void 0 ? void 0 : _j.font) === null ||
       _k === void 0 ? void 0 : _k.family) !== null && _l !== void 0 ? _l : undefined,
       (_p = (_o = (_m = this.value) === null || _m === void 0 ? void 0 : _m.font) === null ||
@@ -16563,7 +16895,7 @@ class TextpickerTextStyleModifier extends ModifierWithKey {
       (_g = (_f = this.value) === null || _f === void 0 ? void 0 : _f.font) === null ||
       _g === void 0 ? void 0 : _g.weight) !== null && _h !== void 0 ? _h : undefined,
       (_l = (_k = (_j = this.value) === null || _j === void 0 ? void 0 : _j.font) === null ||
-      _k === void 0 ? void 0 : _k.family) !== null && _l !== void 0 ? _l : undefined, 
+      _k === void 0 ? void 0 : _k.family) !== null && _l !== void 0 ? _l : undefined,
       (_p = (_o = (_m = this.value) === null || _m === void 0 ? void 0 : _m.font) === null ||
       _o === void 0 ? void 0 : _o.style) !== null && _p !== void 0 ? _p : undefined);
     }
@@ -18889,6 +19221,10 @@ class ArkAlphabetIndexerComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, AutoCollapseModifier.identity, AutoCollapseModifier, value);
     return this;
   }
+  enableHapticFeedback(value) {
+    modifierWithKey(this._modifiersWithKeys, EnableHapticFeedbackModifier.identity, EnableHapticFeedbackModifier, value);
+    return this;
+  }
 }
 // @ts-ignore
 if (globalThis.AlphabetIndexer !== undefined) {
@@ -19284,6 +19620,23 @@ class AutoCollapseModifier extends ModifierWithKey {
   }
 }
 AutoCollapseModifier.identity = Symbol('autoCollapse');
+class EnableHapticFeedbackModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().alphabetIndexer.resetEnableHapticFeedback(node);
+    }
+    else {
+      getUINativeModule().alphabetIndexer.setEnableHapticFeedback(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+EnableHapticFeedbackModifier.identity = Symbol('enableHapticFeedback');
 
 /// <reference path='./import.ts' />
 class TextStyleModifier extends ModifierWithKey {
@@ -21878,6 +22231,9 @@ class ArkWebComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   onViewportFitChanged(callback) {
+    throw new Error('Method not implemented.');
+  }
+  onAdsBlocked(callback) {
     throw new Error('Method not implemented.');
   }
 }
@@ -25895,7 +26251,7 @@ class ParticleEmitterModifier extends ModifierWithKey {
         let emitRateValue = 5;
         if (isNumber(data.emitRate)) {
           dataArray.push(1);
-          if (data.emitRate > 0) {
+          if (data.emitRate >= 0) {
             emitRateValue = data.emitRate;
           }
           dataArray.push(emitRateValue);
@@ -26131,9 +26487,7 @@ class SystemBarEffectModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().common.setSystemBarEffect(node, true);
-    }
+    getUINativeModule().common.setSystemBarEffect(node, true);
   }
 }
 SystemBarEffectModifier.identity = Symbol('systemBarEffect');
@@ -26370,6 +26724,58 @@ if (globalThis.Component3D !== undefined) {
       return new ArkComponent3DComponent(nativePtr);
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.Component3DModifier(nativePtr, classType);
+    });
+  };
+}
+
+class ContainerSpanTextBackgroundStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().containerSpan.resetTextBackgroundStyle(node);
+    } else {
+      let textBackgroundStyle = new ArkTextBackGroundStyle();
+      if (!textBackgroundStyle.convertTextBackGroundStyleOptions(this.value)) {
+        getUINativeModule().containerSpan.resetTextBackgroundStyle(node);
+      } else {
+        getUINativeModule().containerSpan.setTextBackgroundStyle(node,textBackgroundStyle.color,
+          textBackgroundStyle.radius.topLeft,
+          textBackgroundStyle.radius.topRight,
+          textBackgroundStyle.radius.bottomLeft,
+          textBackgroundStyle.radius.bottomRight);
+      }
+    }
+  }
+  checkObjectDiff() {
+    let textBackgroundStyle = new ArkTextBackGroundStyle();
+    let stageTextBackGroundStyle = new ArkTextBackGroundStyle();
+    if (!textBackgroundStyle.convertTextBackGroundStyleOptions(this.value) || !stageTextBackGroundStyle.convertTextBackGroundStyleOptions(this.stageValue)) {
+      return false;
+    } else {
+      return textBackgroundStyle.checkObjectDiff(stageTextBackGroundStyle);
+    }
+  }
+}
+ContainerSpanTextBackgroundStyleModifier.identity = Symbol('containerSpanTextBackgroundStyle');
+/// <reference path='./import.ts' />
+class ArkContainerSpanComponent extends ArkComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+  }
+  textBackgroundStyle(value) {
+    modifierWithKey(this._modifiersWithKeys, ContainerSpanTextBackgroundStyleModifier.identity, ContainerSpanTextBackgroundStyleModifier, value);
+    return this;
+  }
+}
+// @ts-ignore
+if (globalThis.ContainerSpan !== undefined) {
+  globalThis.ContainerSpan.attributeModifier = function (modifier) {
+    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+      return new ArkContainerSpanComponent(nativePtr);
+    }, (nativePtr, classType, modifierJS) => {
+      return new modifierJS.ContainerSpanModifier(nativePtr, classType);
     });
   };
 }

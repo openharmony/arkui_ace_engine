@@ -502,6 +502,7 @@ void BuildSymbolToolbarMoreItemNode(const RefPtr<BarItemNode>& barItemNode)
     symbolProperty->UpdateSymbolColorList({ theme->GetToolbarIconColor() });
     symbolNode->MarkModifyDone();
     barItemNode->SetIconNode(symbolNode);
+    barItemNode->SetIsMoreItemNode(true);
     barItemNode->AddChild(symbolNode);
 }
 
@@ -1039,6 +1040,9 @@ void NavigationModelNG::SetTitleMode(NG::NavigationTitleMode mode)
     // create back button
     backButtonNode = FrameNode::CreateFrameNode(
         V2::BACK_BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    auto focusHub = backButtonNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusDependence(FocusDependence::SELF);
     auto gestureEventHub = backButtonNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
     auto context = PipelineContext::GetCurrentContext();
@@ -1795,6 +1799,9 @@ void NavigationModelNG::SetTitleMode(FrameNode* frameNode, NG::NavigationTitleMo
     // create back button
     backButtonNode = FrameNode::CreateFrameNode(
         V2::BACK_BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    auto focusHub = backButtonNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusDependence(FocusDependence::SELF);
     auto gestureEventHub = backButtonNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
     auto context = PipelineContext::GetCurrentContext();

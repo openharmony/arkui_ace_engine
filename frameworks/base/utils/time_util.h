@@ -38,6 +38,7 @@ int64_t GetSysTimestamp();
 * return milliseconds to 1970-1-1 0:0:0
 */
 int64_t GetCurrentTimestamp();
+int64_t GetCurrentTimestampMicroSecond();
 std::string ConvertTimestampToStr(int64_t timestamp);
 
 struct TimeOfNow final {

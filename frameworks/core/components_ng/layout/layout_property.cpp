@@ -119,7 +119,10 @@ void LayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
     magicItemProperty_.ToJsonValue(json, filter);
     ACE_PROPERTY_TO_JSON_VALUE(flexItemProperty_, FlexItemProperty);
     ACE_PROPERTY_TO_JSON_VALUE(gridProperty_, GridProperty);
-
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     if (padding_) {
         json->PutExtAttr("padding", padding_->ToJsonString().c_str(), filter);
     } else {

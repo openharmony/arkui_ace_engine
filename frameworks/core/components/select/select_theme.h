@@ -272,11 +272,12 @@ public:
             theme->menuLargeMargin_ = pattern->GetAttr<Dimension>("menu_large_margin", theme->menuLargeMargin_);
             theme->menuMediumMargin_ = pattern->GetAttr<Dimension>("menu_medium_margin", theme->menuMediumMargin_);
             theme->menuItemTopBottomMargin_ = pattern->GetAttr<Dimension>("menu_item_top_bottom_margin", 0.0_vp);
+            theme->menuItemLeftRightMargin_ = pattern->GetAttr<Dimension>("menu_item_left_right_margin", 0.0_vp);
             theme->menuTargetSecuritySpace_ = pattern->GetAttr<Dimension>("menu_target_security_space", 8.0_vp);
             theme->menuItemFocusedBgColor_ =
-                pattern->GetAttr<Color>("menu_item_focused_bg_color", theme->menuItemFocusedBgColor_);
+                pattern->GetAttr<Color>("menu_item_focused_bg_color", Color::TRANSPARENT);
             theme->menuItemFocusedTextColor_ =
-                pattern->GetAttr<Color>("menu_item_focused_text_color", theme->menuItemFocusedTextColor_);
+                pattern->GetAttr<Color>("menu_item_focused_text_color", Color(0xff182431));
             theme->menuItemFocusedShadowStyle_ =
                 static_cast<uint32_t>(pattern->GetAttr<double>("menu_item_focused_shadow_style", NONE_SHADOW_VALUE));
             theme->menuItemContentAlign_ =
@@ -384,6 +385,7 @@ public:
         theme->menuLargeMargin_ = menuLargeMargin_;
         theme->menuMediumMargin_ = menuMediumMargin_;
         theme->menuItemTopBottomMargin_ = menuItemTopBottomMargin_;
+        theme->menuItemLeftRightMargin_ = menuItemLeftRightMargin_;
         theme->menuTargetSecuritySpace_ = menuTargetSecuritySpace_;
         theme->menuItemFocusedBgColor_ = menuItemFocusedBgColor_;
         theme->menuItemFocusedTextColor_ = menuItemFocusedTextColor_;
@@ -1049,6 +1051,11 @@ public:
         return menuItemTopBottomMargin_;
     }
 
+    const Dimension& GetMenuItemLeftRightMargin() const
+    {
+        return menuItemLeftRightMargin_;
+    }
+
     const Dimension& GetMenuTargetSecuritySpace() const
     {
         return menuTargetSecuritySpace_;
@@ -1189,6 +1196,7 @@ private:
     Dimension menuLargeMargin_;
     Dimension menuMediumMargin_;
     Dimension menuItemTopBottomMargin_;
+    Dimension menuItemLeftRightMargin_;
     Dimension menuTargetSecuritySpace_;
     Color menuItemFocusedBgColor_;
     Color menuItemFocusedTextColor_;

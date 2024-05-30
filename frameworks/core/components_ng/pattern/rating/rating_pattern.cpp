@@ -798,6 +798,10 @@ void RatingPattern::OnModifyDone()
 // XTS inspector code
 void RatingPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto ratingLayoutProperty = GetLayoutProperty<RatingLayoutProperty>();
     if (isForegroundImageInfoFromTheme_) {
         json->PutExtAttr("foregroundImageSourceInfo", ImageSourceInfo("").ToString().c_str(), filter);

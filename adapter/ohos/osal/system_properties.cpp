@@ -70,7 +70,7 @@ using RsOrientation = Rosen::DisplayOrientation;
 
 bool IsOpIncEnabled()
 {
-    return (system::GetParameter(IS_OPINC_ENABLE, "0") == "2");
+    return (system::GetParameter(IS_OPINC_ENABLE, "2") == "2");
 }
 
 void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
@@ -620,6 +620,11 @@ bool SystemProperties::GetImageFrameworkEnabled()
 bool SystemProperties::GetDebugPixelMapSaveEnabled()
 {
     return system::GetBoolParameter("persist.ace.save.pixelmap.enabled", false);
+}
+
+bool SystemProperties::GetPixelRoundEnable()
+{
+    return system::GetBoolParameter("ace.debug.pixelround.enabled", true);
 }
 
 ACE_WEAK_SYM bool SystemProperties::GetIsUseMemoryMonitor()

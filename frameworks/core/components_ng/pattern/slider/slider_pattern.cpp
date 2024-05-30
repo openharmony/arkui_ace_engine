@@ -200,9 +200,6 @@ void SliderPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSiz
 
 void SliderPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    if (UseContentModifier()) {
-        return;
-    }
     if (clickListener_) {
         return;
     }
@@ -214,6 +211,10 @@ void SliderPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
 void SliderPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     if (UseContentModifier()) {
+        if (touchEvent_) {
+            gestureHub->RemoveTouchEvent(touchEvent_);
+            touchEvent_ = nullptr;
+        }
         return;
     }
     if (touchEvent_) {
@@ -694,6 +695,13 @@ void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void SliderPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
+    if (UseContentModifier()) {
+        focusHub->SetInnerFocusPaintRectCallback(nullptr);
+        focusHub->SetOnKeyEventInternal(nullptr);
+        focusHub->SetOnFocusInternal(nullptr);
+        focusHub->SetOnBlurInternal(nullptr);
+        return;
+    }
     auto getInnerPaintRectCallback = [wp = WeakClaim(this)](RoundRect& paintRect) {
         auto pattern = wp.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -927,6 +935,14 @@ bool SliderPattern::MoveStep(int32_t stepCount)
 void SliderPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputEventHub)
 {
     if (UseContentModifier()) {
+        if (hoverEvent_) {
+            inputEventHub->RemoveOnHoverEvent(hoverEvent_);
+            hoverEvent_ = nullptr;
+        }
+        if (mouseEvent_) {
+            inputEventHub->RemoveOnMouseEvent(mouseEvent_);
+            mouseEvent_ = nullptr;
+        }
         return;
     }
     auto hoverEvent = [weak = WeakClaim(this)](bool isHover) {
@@ -1038,8 +1054,8 @@ SliderContentModifier::Parameters SliderPattern::UpdateContentParameters()
     // Distance between slide track and Content boundary
     auto centerWidth = direction_ == Axis::HORIZONTAL ? contentSize->Height() : contentSize->Width();
     centerWidth *= HALF;
-    parameters.selectColor = paintProperty->GetSelectColor().value_or(theme->GetTrackSelectedColor());
-
+    Gradient defaultSelectGradientColor = SliderModelNG::CreateSolidGradient(theme->GetTrackSelectedColor());
+    parameters.selectGradientColor = paintProperty->GetSelectGradientColor().value_or(defaultSelectGradientColor);
     Gradient defaultValue = SliderModelNG::CreateSolidGradient(theme->GetTrackBgColor());
     parameters.trackBackgroundColor = paintProperty->GetTrackBackgroundColor().value_or(defaultValue);
     parameters.blockColor = paintProperty->GetBlockColor().value_or(theme->GetBlockColor());

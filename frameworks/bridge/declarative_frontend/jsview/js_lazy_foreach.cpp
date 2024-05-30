@@ -180,6 +180,9 @@ void JSLazyForEach::Create(const JSCallbackInfo& info)
         || !params[PARAM_ITEM_GENERATOR]->IsFunction()) {
             return;
     }
+    if (!params[PARAM_VIEW_ID]->IsString()) {
+        return;
+    }
     std::string viewId = ViewStackModel::GetInstance()->ProcessViewId(params[PARAM_VIEW_ID]->ToString());
 
     JSRef<JSObject> parentViewObj = JSRef<JSObject>::Cast(params[PARAM_PARENT_VIEW]);

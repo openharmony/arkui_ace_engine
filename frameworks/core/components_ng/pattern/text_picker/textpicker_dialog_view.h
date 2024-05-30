@@ -78,8 +78,12 @@ private:
     static bool OnKeyEvent(const KeyEvent& event);
     static void UpdateButtonConfirmLayoutProperty(const RefPtr<FrameNode>& buttonConfirmNode,
         RefPtr<PickerTheme> pickerTheme);
+    static void UpdateButtonCancelLayoutProperty(const RefPtr<FrameNode>& buttonCancelNode,
+        const RefPtr<PipelineContext>& pipeline);
     static void UpdateConfirmButtonTextLayoutProperty(
         const RefPtr<FrameNode>& textConfirmNode, const RefPtr<PickerTheme>& pickerTheme);
+    static void UpdateCancelButtonTextLayoutProperty(
+        const RefPtr<FrameNode>& textCancelNode, const RefPtr<PickerTheme>& pickerTheme);
     static void UpdateConfirmButtonMargin(
         const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<DialogTheme>& dialogTheme);
     static void UpdateCancelButtonMargin(

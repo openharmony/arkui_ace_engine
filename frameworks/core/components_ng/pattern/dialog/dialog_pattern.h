@@ -109,7 +109,10 @@ public:
         if (dialogProperties_.type == DialogType::ALERT_DIALOG || dialogProperties_.type == DialogType::ACTION_SHEET) {
             return { 0 };
         }
-        return { 0, 0 };
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            return { 0, 0 };
+        }
+        return { 0, 0, 0 };
     }
 
     void BuildChild(const DialogProperties& dialogProperties);
@@ -244,6 +247,23 @@ public:
         return foldDisplayModeChangedCallbackId_.has_value();
     }
 
+    bool GetNeeedUpdateOrientation()
+    {
+        return neeedUpdateOrientation_;
+    }
+
+    bool GetIsSuitableForAging()
+    {
+        return isSuitableForElderly_;
+    }
+
+    float GetFontScaleForElderly()
+    {
+        return fontScaleForElderly_;
+    }
+
+    void UpdateDeviceOrientation(const DeviceOrientation& deviceOrientation);
+
 private:
     bool AvoidKeyboard() const override
     {
@@ -268,6 +288,7 @@ private:
     // set render context properties of content frame
     void UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode, const DialogProperties& props);
     void UpdateBgBlurStyle(const RefPtr<RenderContext>& contentRenderContext, const DialogProperties& props);
+    void BuildCustomChild(const DialogProperties& props, const RefPtr<UINode>& customNode);
     RefPtr<FrameNode> BuildMainTitle(const DialogProperties& dialogProperties);
     void CreateTitleRowNode(const DialogProperties& dialogProperties, PaddingProperty& titlePadding);
     RefPtr<FrameNode> BuildSubTitle(const DialogProperties& dialogProperties);
@@ -288,7 +309,7 @@ private:
         const Dimension& dividerLength, const Dimension& dividerWidth, const Color& color, const Dimension& space);
     RefPtr<FrameNode> CreateButton(
         const ButtonInfo& params, int32_t index, bool isCancel = false, bool isVertical = false, int32_t length = 0);
-    RefPtr<FrameNode> CreateButtonText(const std::string& text, const std::string& colorStr);
+    RefPtr<FrameNode> CreateButtonText(const std::string& text, const std::string& colorStr, bool isVertical);
     // to close dialog when button is clicked
     void BindCloseCallBack(const RefPtr<GestureEventHub>& hub, int32_t buttonIdx);
     // build ActionSheet items
@@ -305,6 +326,10 @@ private:
     void UpdateNodeContent(const RefPtr<FrameNode>& node, std::string& text);
     void DumpBoolProperty();
     void DumpObjectProperty();
+    void UpdatePropertyForElderly(const std::vector<ButtonInfo>& buttons);
+    bool NeedsButtonDirectionChange(const std::vector<ButtonInfo>& buttons);
+    void UpdateLandSpaceTextFontSizeForElderly(bool isLandSpace);
+    void UpdateTitleTextFontSizeForElderly(bool isLandSpace);
     RefPtr<DialogTheme> dialogTheme_;
     WeakPtr<UINode> customNode_;
     RefPtr<ClickEvent> onClick_;
@@ -325,6 +350,13 @@ private:
     bool isFirstDefaultFocus_ = true;
     RefPtr<FrameNode> buttonContainer_;
     RefPtr<RenderContext> contentRenderContext_;
+    bool isSuitableForElderly_ = false;
+    bool isLandspace_ = false;
+    bool isThreeButtonsDialog_ = false;
+    bool neeedUpdateOrientation_ = false;
+    float fontScaleForElderly_ = 1.0f;
+    DeviceOrientation deviceOrientation_ = DeviceOrientation::PORTRAIT;
+    RefPtr<FrameNode> titleContainer_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DialogPattern);
 

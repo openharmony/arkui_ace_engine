@@ -23,15 +23,13 @@
 #include "frameworks/core/components_ng/render/adapter/animated_image.h"
 
 namespace OHOS::Ace::NG {
-void AnimatedImageObject::MakeCanvasImage(
-    const RefPtr<ImageLoadingContext>& ctx, const SizeF& size, bool forceResize, bool /*syncLoad*/)
+void AnimatedImageObject::MakeCanvasImage(const RefPtr<ImageLoadingContext>& ctx, const SizeF& size, bool forceResize,
+    bool /*syncLoad*/, bool /*loadInVipChannel*/)
 {
-    AnimatedImage::ResizeParam params {
-        .width = size.Width(),
+    AnimatedImage::ResizeParam params { .width = size.Width(),
         .height = size.Height(),
         .forceResize = forceResize,
-        .imageQuality = ctx->GetImageQuality()
-    };
+        .imageQuality = ctx->GetImageQuality() };
 
 #ifndef USE_ROSEN_DRAWING
     auto image = AnimatedImage::Create(DynamicCast<SkiaImageData>(data_), params, src_.GetSrc());

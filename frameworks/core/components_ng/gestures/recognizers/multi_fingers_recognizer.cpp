@@ -91,7 +91,9 @@ void MultiFingersRecognizer::OnFinishGestureReferee(int32_t touchId, bool isBloc
 
 void MultiFingersRecognizer::CleanRecognizerState()
 {
-    if ((refereeState_ == RefereeState::SUCCEED || refereeState_ == RefereeState::FAIL) &&
+    if ((refereeState_ == RefereeState::SUCCEED ||
+        refereeState_ == RefereeState::FAIL ||
+        refereeState_ == RefereeState::DETECTING) &&
         currentFingers_ == 0) {
         refereeState_ = RefereeState::READY;
         disposal_ = GestureDisposal::NONE;

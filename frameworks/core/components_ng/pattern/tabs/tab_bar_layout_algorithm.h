@@ -134,6 +134,8 @@ private:
     float scrollMargin_ = 0.0f;
     float maxHeight_ = 0.0f;
     float previousChildrenMainSize_ = 0.0f;
+    bool isRTL_ = false;
+    Axis axis_ = Axis::NONE;
 
     TabBarStyle tabBarStyle_;
     bool needSetCentered_ = false;

@@ -579,6 +579,10 @@ std::shared_ptr<RSData> Base64ImageLoader::LoadImageData(
         TAG_LOGW(AceLogTag::ACE_IMAGE, "error base64 image code!");
         return nullptr;
     }
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "base64 size=%{public}d, src=%{public}s", (int)base64Code.size(),
+            imageSourceInfo.ToString().c_str());
+    }
     return resData;
 }
 
@@ -680,18 +684,18 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
     }
     uint32_t resId = 0;
     if (!imageSourceInfo.GetIsUriPureNumber() && GetResourceId(uri, resId)) {
-        if (!resourceWrapper->GetMediaData(resId, dataLen, data, bundleName, moudleName)) {
+        if (resourceWrapper->GetMediaData(resId, dataLen, data, bundleName, moudleName)) {
+#ifndef USE_ROSEN_DRAWING
+            return SkData::MakeWithCopy(data.get(), dataLen);
+#else
+            auto drawingData = std::make_shared<RSData>();
+            drawingData->BuildWithCopy(data.get(), dataLen);
+            return drawingData;
+#endif
+        } else {
             TAG_LOGW(AceLogTag::ACE_IMAGE, "get image data by id failed, uri:%{private}s, id:%{public}u", uri.c_str(),
                 resId);
-            return nullptr;
         }
-#ifndef USE_ROSEN_DRAWING
-        return SkData::MakeWithCopy(data.get(), dataLen);
-#else
-        auto drawingData = std::make_shared<RSData>();
-        drawingData->BuildWithCopy(data.get(), dataLen);
-        return drawingData;
-#endif
     }
     std::string resName;
     if (GetResourceName(uri, resName)) {

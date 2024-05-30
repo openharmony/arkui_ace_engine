@@ -425,7 +425,11 @@ HWTEST_F(ImageTestTwoNg, ImageSetDraggable0001, TestSize.Level1)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
-    image.Create(IMAGE_SRC_URL, pixMap, BUNDLE_NAME, MODULE_NAME);
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
     image.SetDraggable(true);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_TRUE(frameNode->draggable_);
@@ -435,7 +439,11 @@ HWTEST_F(ImageTestTwoNg, ImageSetDraggable0002, TestSize.Level1)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
-    image.Create(IMAGE_SRC_URL, pixMap, BUNDLE_NAME, MODULE_NAME);
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
     image.SetDraggable(false);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_FALSE(frameNode->draggable_);
@@ -1101,7 +1109,11 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0011, TestSize.Level1)
 
     //切换Image数据源
     RefPtr<PixelMap> pixMap = nullptr;
-    imageModelNG.Create(PNG_IMAGE, pixMap, BUNDLE_NAME, MODULE_NAME);
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    imageModelNG.Create(imageInfoConfig, pixMap);
     imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -1149,7 +1161,11 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0012, TestSize.Level1)
 
     //切换Image数据源
     RefPtr<PixelMap> pixMap = nullptr;
-    imageModelNG.Create(PNG_IMAGE, pixMap, BUNDLE_NAME, MODULE_NAME);
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    imageModelNG.Create(imageInfoConfig, pixMap);
     imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -1197,7 +1213,11 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0013, TestSize.Level1)
 
     //切换Image数据源
     RefPtr<PixelMap> pixMap = nullptr;
-    imageModelNG.Create(PNG_IMAGE, pixMap, BUNDLE_NAME, MODULE_NAME);
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    imageModelNG.Create(imageInfoConfig, pixMap);
     imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -1245,7 +1265,11 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0014, TestSize.Level1)
 
     //切换Image数据源
     RefPtr<PixelMap> pixMap = nullptr;
-    imageModelNG.Create(PNG_IMAGE, pixMap, BUNDLE_NAME, MODULE_NAME);
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    imageModelNG.Create(imageInfoConfig, pixMap);
     imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -1293,7 +1317,11 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0015, TestSize.Level1)
 
     //切换Image数据源
     RefPtr<PixelMap> pixMap = nullptr;
-    imageModelNG.Create(PNG_IMAGE, pixMap, BUNDLE_NAME, MODULE_NAME);
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    imageModelNG.Create(imageInfoConfig, pixMap);
     imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -1341,7 +1369,11 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0016, TestSize.Level1)
 
     //切换Image数据源
     RefPtr<PixelMap> pixMap = nullptr;
-    imageModelNG.Create(PNG_IMAGE, pixMap, BUNDLE_NAME, MODULE_NAME);
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    imageModelNG.Create(imageInfoConfig, pixMap);
     imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -1389,7 +1421,11 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0017, TestSize.Level1)
 
     //切换Image数据源
     RefPtr<PixelMap> pixMap = nullptr;
-    imageModelNG.Create(PNG_IMAGE, pixMap, BUNDLE_NAME, MODULE_NAME);
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    imageModelNG.Create(imageInfoConfig, pixMap);
     imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -1437,7 +1473,11 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0018, TestSize.Level1)
 
     //切换Image数据源
     RefPtr<PixelMap> pixMap = nullptr;
-    imageModelNG.Create(PNG_IMAGE, pixMap, BUNDLE_NAME, MODULE_NAME);
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    imageModelNG.Create(imageInfoConfig, pixMap);
     imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -1485,7 +1525,11 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0019, TestSize.Level1)
 
     //切换Image数据源
     RefPtr<PixelMap> pixMap = nullptr;
-    imageModelNG.Create(PNG_IMAGE, pixMap, BUNDLE_NAME, MODULE_NAME);
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    imageModelNG.Create(imageInfoConfig, pixMap);
     imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -1533,7 +1577,11 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0020, TestSize.Level1)
 
     //切换Image数据源
     RefPtr<PixelMap> pixMap = nullptr;
-    imageModelNG.Create(PNG_IMAGE, pixMap, BUNDLE_NAME, MODULE_NAME);
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    imageModelNG.Create(imageInfoConfig, pixMap);
     imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -1557,7 +1605,11 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0021, TestSize.Level1)
 {
     ImageModelNG imageModelNG;
     RefPtr<PixelMap> pixMap = nullptr;
-    imageModelNG.Create(PNG_IMAGE, pixMap, BUNDLE_NAME, MODULE_NAME);
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    imageModelNG.Create(imageInfoConfig, pixMap);
     imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -1607,7 +1659,11 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0022, TestSize.Level1)
 {
     ImageModelNG imageModelNG;
     RefPtr<PixelMap> pixMap = nullptr;
-    imageModelNG.Create(PNG_IMAGE, pixMap, BUNDLE_NAME, MODULE_NAME);
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    imageModelNG.Create(imageInfoConfig, pixMap);
     imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -1655,7 +1711,11 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0023, TestSize.Level1)
 {
     ImageModelNG imageModelNG;
     RefPtr<PixelMap> pixMap = nullptr;
-    imageModelNG.Create(PNG_IMAGE, pixMap, BUNDLE_NAME, MODULE_NAME);
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    imageModelNG.Create(imageInfoConfig, pixMap);
     imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);

@@ -96,6 +96,11 @@ public:
         return image_;
     }
 
+    const RefPtr<CanvasImage>& GetAltCanvasImage()
+    {
+        return altImage_;
+    }
+
     RefPtr<FrameNode> GetClientHost() const override
     {
         return GetHost();
@@ -310,7 +315,25 @@ public:
         isImageAnimator_ = isImageAnimator;
     }
 
+    bool GetLoadInVipChannel()
+    {
+        return loadInVipChannel_;
+    }
+
+    void SetLoadInVipChannel(bool loadInVipChannel)
+    {
+        loadInVipChannel_ = loadInVipChannel;
+    }
+
     void SetOnProgressCallback(std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& onProgress);
+
+    SizeF GetRawImageSize()
+    {
+        if (!loadingCtx_) {
+            return SizeF(-1.0, -1.0);
+        }
+        return loadingCtx_->GetImageSize();
+    }
 
 protected:
     void RegisterWindowStateChangedCallback();
@@ -451,6 +474,7 @@ private:
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
 
     bool syncLoad_ = false;
+    bool loadInVipChannel_ = false;
     AIImageQuality imageQuality_ = AIImageQuality::NONE;
     bool isImageQualityChange_ = false;
     bool isEnableAnalyzer_ = false;

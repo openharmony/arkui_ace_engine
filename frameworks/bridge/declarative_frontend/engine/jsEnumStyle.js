@@ -318,6 +318,14 @@ var BarrierDirection;
   BarrierDirection[BarrierDirection["BOTTOM"] = 3] = "BOTTOM";
 })(BarrierDirection || (BarrierDirection = {}));
 
+var LocalizedBarrierDirection;
+(function (LocalizedBarrierDirection) {
+  LocalizedBarrierDirection[LocalizedBarrierDirection["START"] = 0] = "START";
+  LocalizedBarrierDirection[LocalizedBarrierDirection["END"] = 1] = "END";
+  LocalizedBarrierDirection[LocalizedBarrierDirection["TOP"] = 2] = "TOP";
+  LocalizedBarrierDirection[LocalizedBarrierDirection["BOTTOM"] = 3] = "BOTTOM";
+})(LocalizedBarrierDirection || (LocalizedBarrierDirection = {}));
+
 var BlendMode;
 (function (BlendMode) {
   BlendMode[BlendMode["NORMAL"] = 0] = "NORMAL";
@@ -1952,6 +1960,13 @@ var MarqueeUpdateStrategy;
   MarqueeUpdateStrategy["PRESERVE_POSITION"] = "preserve_position";
 })(MarqueeUpdateStrategy || (MarqueeUpdateStrategy = {}));
 
+var LaunchMode;
+(function (LaunchMode) {
+  LaunchMode[LaunchMode.STANDARD = 0] = "STANDARD";
+  LaunchMode[LaunchMode.MOVE_TO_TOP_SINGLETON = 1] = "MOVE_TO_TOP_SINGLETON";
+  LaunchMode[LaunchMode.POP_TO_SINGLETON = 2] = "POP_TO_SINGLETON";
+})(LaunchMode || (LaunchMode = {}));
+
 class NavPathInfo {
   constructor(name, param, onPop) {
     this.name = name;
@@ -1960,6 +1975,7 @@ class NavPathInfo {
     this.index = -1;
     // index that if check navdestination exists first
     this.checkNavDestinationFlag = false;
+    this.needUpdate = false;
   }
 }
 
@@ -2079,27 +2095,67 @@ class NavPathStack {
     this.nativeStack?.onStateChanged();
     return promise;
   }
-  pushPath(info, animated) {
+  parseNavigationOptions(param) {
+    let launchMode = LaunchMode.STANDARD;
+    let animated = true;
+    if (typeof param === 'boolean') {
+      animated = param;
+    } else if (param !== undefined) {
+      if (typeof param.animated === 'boolean') {
+        animated = param.animated;
+      }
+      if (param.launchMode !== undefined) {
+        launchMode = param.launchMode;
+      }
+    }
+    return [launchMode, animated];
+  }
+  pushWithLaunchModeAndAnimated(info, launchMode, animated, createPromise) {
+    if (launchMode === LaunchMode.MOVE_TO_TOP_SINGLETON || launchMode === LaunchMode.POP_TO_SINGLETON) {
+      let index = this.pathArray.findIndex(element => element.name === info.name);
+      if (index !== -1) {
+        this.pathArray[index].param = info.param;
+        this.pathArray[index].onPop = info.onPop;
+        this.pathArray[index].needUpdate = true;
+        if (launchMode === LaunchMode.MOVE_TO_TOP_SINGLETON) {
+          this.moveIndexToTop(index, animated);
+        } else {
+          this.popToIndex(index, undefined, animated);
+        }
+        let promise = null;
+        if (createPromise) {
+          promise = new Promise((resolve, reject) => {
+            resolve();
+          });
+        }
+        return [true, promise];
+      }
+    }
+    return [false, null];
+  }
+  pushPath(info, optionParam) {
+    let [launchMode, animated] = this.parseNavigationOptions(optionParam);
+    let [ret, _] = this.pushWithLaunchModeAndAnimated(info, launchMode, animated, false);
+    if (ret) {
+      return;
+    }
     this.pathArray.push(info);
     let name = this.pathArray[this.pathArray.length - 1].name;
     this.findInPopArray(name);
     this.isReplace = 0;
-    if (animated === undefined) {
-      this.animated = true;
-    } else {
-      this.animated = animated;
-    }
+    this.animated = animated;
     this.nativeStack?.onStateChanged();
   }
-  pushDestination(info, animated) {
+  pushDestination(info, optionParam) {
+    let [launchMode, animated] = this.parseNavigationOptions(optionParam);
+    let [ret, promiseRet] = this.pushWithLaunchModeAndAnimated(info, launchMode, animated, true);
+    if (ret) {
+      return promiseRet;
+    }
     info.checkNavDestinationFlag = true;
     this.pathArray.push(info);
     this.isReplace = 0;
-    if (animated === undefined) {
-      this.animated = true;
-    } else {
-      this.animated = animated;
-    }
+    this.animated = animated;
     let promise = this.nativeStack?.onPushDestination(info);
     if (!promise) {
       this.pathArray.pop();
@@ -2112,18 +2168,35 @@ class NavPathStack {
     this.nativeStack?.onStateChanged();
     return promise;
   }
-  replacePath(info, animated) {
-    if (this.pathArray.length !== 0) {
-      this.pathArray.pop();
+  replacePath(info, optionParam) {
+    let [launchMode, animated] = this.parseNavigationOptions(optionParam);
+    let index = -1;
+    if (launchMode === LaunchMode.MOVE_TO_TOP_SINGLETON || launchMode === LaunchMode.POP_TO_SINGLETON) {
+      index = this.pathArray.findIndex(element => element.name === info.name);
+      if (index !== -1) {
+        this.pathArray[index].param = info.param;
+        this.pathArray[index].onPop = info.onPop;
+        this.pathArray[index].index = -1;
+        if (index !== this.pathArray.length - 1) {
+          let targetInfo = this.pathArray.splice(index, 1);
+          if (launchMode === LaunchMode.MOVE_TO_TOP_SINGLETON) {
+            this.pathArray.pop();
+          } else {
+            this.pathArray.splice(index);
+          }
+          this.pathArray.push(targetInfo[0]);
+        }
+      }
     }
-    this.pathArray.push(info);
-    this.pathArray[this.pathArray.length - 1].index = -1;
+    if (index === -1) {
+      if (this.pathArray.length !== 0) {
+        this.pathArray.pop();
+      }
+      this.pathArray.push(info);
+      this.pathArray[this.pathArray.length - 1].index = -1;
+    }
     this.isReplace = 1;
-    if (animated === undefined) {
-      this.animated = true;
-    } else {
-      this.animated = animated;
-    }
+    this.animated = animated;
     this.nativeStack?.onStateChanged();
   }
   replacePathByName(name, param, animated) {

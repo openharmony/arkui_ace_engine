@@ -1502,4 +1502,25 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest047, TestSize.Level1)
 
     FRAME_NODE2->layoutProperty_ = nullptr;
 }
+
+/**
+ * @tc.name: FrameNodeTestNg_TriggerVisibleAreaChangeCallback0048
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback0048, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. build a object to TriggerVisibleAreaChangeCallback
+     * @tc.expected: expect The function is run ok.
+     */
+    VisibleCallbackInfo callbackInfo;
+    constexpr uint32_t minInterval = 100; // 100ms
+    int flag = 0;
+    callbackInfo.callback = [&flag](bool input1, double input2) { flag += 1; };
+    callbackInfo.period = minInterval;
+    FRAME_NODE2->SetVisibleAreaUserCallback({ 0.2, 0.8, 0.21, 0.79, 0.5 }, callbackInfo);
+    FRAME_NODE2->ProcessThrottledVisibleCallback(0.2);
+    EXPECT_EQ(FRAME_NODE2->throttledCallbackOnTheWay_, false);
+}
 } // namespace OHOS::Ace::NG

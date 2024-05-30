@@ -27,6 +27,7 @@
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_scroll_notifier.h"
 #include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
+#include "core/components_ng/pattern/scroll/scroll_event_hub.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
@@ -76,6 +77,10 @@ RefPtr<PaintProperty> ScrollablePattern::CreatePaintProperty()
 
 void ScrollablePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     json->PutExtAttr("friction", GetFriction(), filter);
     if (edgeEffect_ == EdgeEffect::SPRING) {
         json->PutExtAttr("edgeEffect", "EdgeEffect.Spring", filter);
@@ -376,7 +381,7 @@ void ScrollablePattern::AddScrollEvent()
     scrollable->SetOverScrollCallback([weak = WeakClaim(this)](float velocity) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
-        return pattern->HandleOverScroll(!pattern->IsReverse() ? velocity : -velocity);
+        return pattern->HandleOverScroll(velocity);
     });
 
     scrollable->SetIsReverseCallback([weak = WeakClaim(this)]() {
@@ -1515,9 +1520,10 @@ float ScrollablePattern::GetOffsetWithLimit(float offset) const
         auto totalOffset = GetTotalOffset();
         return std::min(totalOffset, offset);
     } else if (Negative(offset)) {
-        auto hostSize = GetHostFrameSize();
-        CHECK_NULL_RETURN(hostSize.has_value(), true);
-        auto remainHeight = GetTotalHeight() - GetTotalOffset() - hostSize->MainSize(axis_);
+        auto frameNode = GetHost();
+        CHECK_NULL_RETURN(frameNode, true);
+        auto hostSize = frameNode->GetGeometryNode()->GetFrameSize();
+        auto remainHeight = GetTotalHeight() - GetTotalOffset() - hostSize.MainSize(axis_);
         return std::max(offset, -remainHeight);
     }
     return 0;
@@ -1527,9 +1533,11 @@ void ScrollablePattern::LimitMouseEndOffset()
 {
     float limitedMainOffset = -1.0f;
     float limitedCrossOffset = -1.0f;
-    auto hostSize = GetHostFrameSize();
-    auto mainSize = hostSize->MainSize(axis_);
-    auto crossSize = hostSize->CrossSize(axis_);
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto hostSize = frameNode->GetGeometryNode()->GetFrameSize();
+    auto mainSize = hostSize.MainSize(axis_);
+    auto crossSize = hostSize.CrossSize(axis_);
     auto mainOffset = mouseEndOffset_.GetMainOffset(axis_);
     auto crossOffset = mouseEndOffset_.GetCrossOffset(axis_);
     if (LessNotEqual(mainOffset, 0.0f)) {
@@ -1754,8 +1762,8 @@ ScrollResult ScrollablePattern::HandleScrollSelfOnly(float& offset, int32_t sour
     ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
     ExecuteScrollFrameBegin(offset, scrollState);
     auto remainOffset = allOffset - offset;
-    auto overOffsets = GetOverScrollOffset(!IsReverse() ? offset : -offset);
-    auto overOffset = (!IsReverse() ? offset > 0 : offset < 0) ? overOffsets.start : overOffsets.end;
+    auto overOffsets = GetOverScrollOffset(offset);
+    auto overOffset = (offset > 0) ? overOffsets.start : overOffsets.end;
     remainOffset += overOffset;
     if (NearZero(remainOffset)) {
         SetCanOverScroll(false);
@@ -1821,9 +1829,9 @@ ScrollResult ScrollablePattern::HandleScroll(float offset, int32_t source, Neste
     CHECK_NULL_RETURN(host, result);
     auto nestedScroll = GetNestedScroll();
     auto parent = GetNestedScrollParent();
-    auto overOffsets = GetOverScrollOffset(!IsReverse() ? offset : -offset);
+    auto overOffsets = GetOverScrollOffset(offset);
     auto initOffset = offset;
-    float backOverOffset = (!IsReverse() ? offset > 0 : offset < 0) ? overOffsets.end : overOffsets.start;
+    float backOverOffset = (offset > 0) ? overOffsets.end : overOffsets.start;
     if (NearZero(offset) || !NearZero(backOverOffset)) {
         ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
         ExecuteScrollFrameBegin(offset, scrollState);
@@ -2584,9 +2592,6 @@ void ScrollablePattern::ScrollAtFixedVelocity(float velocity)
         fixedVelocityMotion_->AddListener([weakScroll = AceType::WeakClaim(this)](double offset) {
             auto pattern = weakScroll.Upgrade();
             CHECK_NULL_VOID(pattern);
-            if (pattern->IsReverse()) {
-                offset = -offset;
-            }
             pattern->UpdateCurrentOffset(offset, SCROLL_FROM_ANIMATION_CONTROLLER);
         });
         fixedVelocityMotion_->SetVelocity(velocity);
@@ -2757,27 +2762,34 @@ void ScrollablePattern::GetPaintPropertyDumpInfo()
     }
 }
 
-void ScrollablePattern::DumpAdvanceInfo()
+void ScrollablePattern::GetEventDumpInfo()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(hub);
-    GetEdgeEffectDumpInfo();
-    edgeEffectAlwaysEnabled_ ? DumpLog::GetInstance().AddDesc("edgeEffectAlwaysEnabled: true")
-                             : DumpLog::GetInstance().AddDesc("edgeEffectAlwaysEnabled: false");
     auto onScrollStart = hub->GetOnScrollStart();
     onScrollStart ? DumpLog::GetInstance().AddDesc("hasOnScrollStart: true")
                   : DumpLog::GetInstance().AddDesc("hasOnScrollStart: false");
     auto onScrollStop = hub->GetOnScrollStop();
     onScrollStop ? DumpLog::GetInstance().AddDesc("hasOnScrollStop: true")
                  : DumpLog::GetInstance().AddDesc("hasOnScrollStop: false");
-    auto onWillScroll = hub->GetOnWillScroll();
-    onWillScroll ? DumpLog::GetInstance().AddDesc("hasOnWillScroll: true")
-                 : DumpLog::GetInstance().AddDesc("hasOnWillScroll: false");
-    auto onDidScroll = hub->GetOnDidScroll();
-    onDidScroll ? DumpLog::GetInstance().AddDesc("hasOnDidScroll: true")
-                : DumpLog::GetInstance().AddDesc("hasOnDidScroll: false");
+    auto scrollHub = host->GetEventHub<ScrollEventHub>();
+    if (scrollHub) {
+        auto onWillScroll = scrollHub->GetOnWillScrollEvent();
+        onWillScroll ? DumpLog::GetInstance().AddDesc("hasOnWillScroll: true")
+                     : DumpLog::GetInstance().AddDesc("hasOnWillScroll: false");
+        auto onDidScroll = scrollHub->GetOnDidScrollEvent();
+        onDidScroll ? DumpLog::GetInstance().AddDesc("hasOnDidScroll: true")
+                    : DumpLog::GetInstance().AddDesc("hasOnDidScroll: false");
+    } else {
+        auto onWillScroll = hub->GetOnWillScroll();
+        onWillScroll ? DumpLog::GetInstance().AddDesc("hasOnWillScroll: true")
+                     : DumpLog::GetInstance().AddDesc("hasOnWillScroll: false");
+        auto onDidScroll = hub->GetOnDidScroll();
+        onDidScroll ? DumpLog::GetInstance().AddDesc("hasOnDidScroll: true")
+                    : DumpLog::GetInstance().AddDesc("hasOnDidScroll: false");
+    }
     auto onScrollFrameBegin = hub->GetOnScrollFrameBegin();
     onScrollFrameBegin ? DumpLog::GetInstance().AddDesc("hasOnScrollFrameBegin: true")
                        : DumpLog::GetInstance().AddDesc("hasOnScrollFrameBegin: false");
@@ -2787,8 +2799,16 @@ void ScrollablePattern::DumpAdvanceInfo()
     auto onReachEnd = hub->GetOnReachEnd();
     onReachEnd ? DumpLog::GetInstance().AddDesc("hasOnReachEnd: true")
                : DumpLog::GetInstance().AddDesc("hasOnReachEnd: false");
+}
+
+void ScrollablePattern::DumpAdvanceInfo()
+{
+    GetEdgeEffectDumpInfo();
+    edgeEffectAlwaysEnabled_ ? DumpLog::GetInstance().AddDesc("edgeEffectAlwaysEnabled: true")
+                             : DumpLog::GetInstance().AddDesc("edgeEffectAlwaysEnabled: false");
     IsScrollable() ? DumpLog::GetInstance().AddDesc("isScrollable: true")
                    : DumpLog::GetInstance().AddDesc("isScrollable: false");
+    GetEventDumpInfo();
     DumpLog::GetInstance().AddDesc(GetNestedScroll().ToString().c_str());
     GetIsSearchRefresh() ? DumpLog::GetInstance().AddDesc(std::string("isSearchRefresh: true"))
                          : DumpLog::GetInstance().AddDesc(std::string("isSearchRefresh: false"));

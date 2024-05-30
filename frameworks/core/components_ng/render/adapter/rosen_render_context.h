@@ -193,6 +193,11 @@ public:
     void OnParticleOptionArrayUpdate(const std::list<ParticleOption>& optionList) override;
     void OnClickEffectLevelUpdate(const ClickEffectInfo& info) override;
 
+    void UpdateVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect) override;
+    void UpdateBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter) override;
+    void UpdateForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter) override;
+    void UpdateCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) override;
+
     Rosen::SHADOW_COLOR_STRATEGY ToShadowColorStrategy(ShadowColorStrategy shadowColorStrategy);
     void OnBackShadowUpdate(const Shadow& shadow) override;
     void OnBackBlendModeUpdate(BlendMode blendMode) override;
@@ -218,6 +223,7 @@ public:
     void SetTransitionInCallback(std::function<void()>&& callback) override;
     void ClipWithRect(const RectF& rectF) override;
     void ClipWithRRect(const RectF& rectF, const RadiusF& radiusF) override;
+    void RemoveClipWithRRect() override;
 
     bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) override;
     void MaskAnimation(const Color& initialBackgroundColor, const Color& backgroundColor);
@@ -462,6 +468,7 @@ private:
     void OnNodeNameUpdate(const std::string& id) override;
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 
+    void SyncAdditionalGeometryProperties(const RectF& paintRect);
     void NotifyTransitionInner(const SizeF& frameSize, bool isTransitionIn);
     void NotifyTransition(bool isTransitionIn);
     bool HasTransitionOutAnimation() const override
@@ -592,6 +599,7 @@ private:
     std::shared_ptr<Rosen::RSNode> CreateHardwareTexture(
         const std::optional<ContextParam>& param, bool isTextureExportNode);
 #endif
+    void DetachModifiers();
 
     RefPtr<ImageLoadingContext> bgLoadingCtx_;
     RefPtr<CanvasImage> bgImage_;

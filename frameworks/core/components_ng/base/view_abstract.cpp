@@ -1495,12 +1495,10 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam>& param, const RefPtr<Frame
     CHECK_NULL_VOID(targetNode);
     auto targetId = targetNode->GetId();
     auto targetTag = targetNode->GetTag();
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    auto context = targetNode->GetContext();
     CHECK_NULL_VOID(context);
+    auto instanceId = context->GetInstanceId();
+
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     auto popupInfo = overlayManager->GetPopupInfo(targetId);
@@ -1509,7 +1507,7 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam>& param, const RefPtr<Frame
     auto showInSubWindow = param->IsShowInSubWindow();
     // subwindow model needs to use subContainer to get popupInfo
     if (showInSubWindow) {
-        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(instanceId);
         if (subwindow) {
             subwindow->GetPopupInfoNG(targetId, popupInfo);
         }
@@ -1529,7 +1527,7 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam>& param, const RefPtr<Frame
     } else {
         // Invisable
         if (!isShow) {
-            TAG_LOGW(AceLogTag::ACE_DIALOG, "get isShow failed");
+            TAG_LOGW(AceLogTag::ACE_DIALOG, "Popup is already hidden");
             return;
         }
         popupInfo.markNeedUpdate = true;
@@ -1559,7 +1557,7 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam>& param, const RefPtr<Frame
             targetNode->PushDestroyCallback(destructor);
         } else {
             // erase popup in subwindow when target node destroy
-            auto destructor = [id = targetNode->GetId(), containerId = Container::CurrentId()]() {
+            auto destructor = [id = targetNode->GetId(), containerId = instanceId]() {
                 auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
                 CHECK_NULL_VOID(subwindow);
                 auto overlayManager = subwindow->GetOverlayManager();
@@ -1594,7 +1592,7 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam>& param, const RefPtr<Frame
     if (showInSubWindow) {
         if (isShow) {
             SubwindowManager::GetInstance()->ShowPopupNG(
-                targetId, popupInfo, param->GetOnWillDismiss(), param->GetInteractiveDismiss());
+                targetNode, popupInfo, param->GetOnWillDismiss(), param->GetInteractiveDismiss());
         } else {
             SubwindowManager::GetInstance()->HidePopupNG(targetId);
         }
@@ -1672,7 +1670,8 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params, const Re
         SubwindowManager::GetInstance()->ShowMenuNG(menuNode, menuParam, targetNode, offset);
         return;
     }
-    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+
+    auto pipelineContext = targetNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto overlayManager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
@@ -1695,7 +1694,7 @@ void ViewAbstract::BindMenuWithCustomNode(std::function<void()>&& buildFunc, con
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     auto expandDisplay = theme->GetExpandDisplay();
-    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    auto pipelineContext = targetNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto overlayManager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
@@ -2229,6 +2228,38 @@ void ViewAbstract::SetBorderImageGradient(const Gradient& gradient)
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(BorderImageGradient, gradient);
+}
+
+void ViewAbstract::SetVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(VisualEffect, visualEffect);
+}
+
+void ViewAbstract::SetBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(BackgroundFilter, backgroundFilter);
+}
+
+void ViewAbstract::SetForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundFilter, foregroundFilter);
+}
+
+void ViewAbstract::SetCompositingFilter(const OHOS::Rosen::Filter* compositingFilter)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(CompositingFilter, compositingFilter);
 }
 
 void ViewAbstract::SetOverlay(const OverlayOptions& overlay)
@@ -2796,6 +2827,43 @@ void ViewAbstract::SetBloom(const float value)
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(Bloom, value);
+}
+
+void ViewAbstract::SetLightPosition(FrameNode* frameNode, const CalcDimension& positionX,
+    const CalcDimension& positionY, const CalcDimension& positionZ)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(LightPosition, TranslateOptions(positionX, positionY, positionZ), frameNode);
+}
+
+void ViewAbstract::SetLightIntensity(FrameNode* frameNode, const float value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(LightIntensity, value, frameNode);
+}
+
+void ViewAbstract::SetLightColor(FrameNode* frameNode, const Color& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(LightColor, value, frameNode);
+}
+
+void ViewAbstract::SetLightIlluminated(FrameNode* frameNode, const uint32_t value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(LightIlluminated, value, frameNode);
+}
+
+void ViewAbstract::SetIlluminatedBorderWidth(FrameNode* frameNode, const Dimension& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(IlluminatedBorderWidth, value, frameNode);
+}
+
+void ViewAbstract::SetBloom(FrameNode* frameNode, const float value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(Bloom, value, frameNode);
 }
 
 void ViewAbstract::SetMotionPath(FrameNode* frameNode, const MotionPathOption& motionPath)
@@ -3600,7 +3668,7 @@ NG::Gradient ViewAbstract::GetRadialGradient(FrameNode* frameNode)
     value.CreateGradientWithType(NG::GradientType::RADIAL);
     const auto& target = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(target, value);
-    return target->GetSweepGradientValue(value);
+    return target->GetRadialGradientValue(value);
 }
 
 RefPtr<BasicShape> ViewAbstract::GetMask(FrameNode* frameNode)
@@ -3783,7 +3851,7 @@ Dimension ViewAbstract::GetSepia(FrameNode* frameNode)
 
 Dimension ViewAbstract::GetContrast(FrameNode* frameNode)
 {
-    Dimension value;
+    Dimension value(1.0f);
     auto target = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(target, value);
     return target->GetFrontContrastValue(value);
@@ -4191,6 +4259,33 @@ void ViewAbstract::ClearJSFrameNodeOnSizeChange(FrameNode* frameNode)
     eventHub->ClearJSFrameNodeOnSizeChange();
 }
 
+void ViewAbstract::SetJSFrameNodeOnVisibleAreaApproximateChange(FrameNode* frameNode,
+    const std::function<void(bool, double)>&& jsCallback, const std::vector<double>& ratioList,
+    int32_t interval)
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->CleanVisibleAreaUserCallback(true);
+
+    constexpr uint32_t minInterval = 100; // 100ms
+    if (interval < minInterval) {
+        interval = minInterval;
+    }
+    VisibleCallbackInfo callback;
+    callback.callback = std::move(jsCallback);
+    callback.isCurrentVisible = false;
+    callback.period = static_cast<uint32_t>(interval);
+    pipeline->AddVisibleAreaChangeNode(frameNode->GetId());
+    frameNode->SetVisibleAreaUserCallback(ratioList, callback);
+}
+
+void ViewAbstract::ClearJSFrameNodeOnVisibleAreaApproximateChange(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->CleanVisibleAreaUserCallback(true);
+}
+
 void ViewAbstract::SetOnGestureJudgeBegin(FrameNode* frameNode, GestureJudgeFunc&& gestureJudgeFunc)
 {
     CHECK_NULL_VOID(frameNode);
@@ -4253,20 +4348,6 @@ float ViewAbstract::GetLayoutWeight(FrameNode* frameNode)
         return magicItemProperty.GetLayoutWeight().value_or(layoutWeight);
     }
     return layoutWeight;
-}
-
-void ViewAbstract::SetFocusScopeId(const std::string& focusScopeId, bool isGroup)
-{
-    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    focusHub->SetFocusScopeId(focusScopeId, isGroup);
-}
-
-void ViewAbstract::SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority)
-{
-    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    focusHub->SetFocusScopePriority(focusScopeId, focusPriority);
 }
 
 int32_t ViewAbstract::GetDisplayIndex(FrameNode* frameNode)
@@ -4412,5 +4493,36 @@ bool ViewAbstract::GetFocusOnTouch(FrameNode* frameNode)
     auto focusHub = frameNode->GetFocusHub();
     CHECK_NULL_RETURN(focusHub, false);
     return focusHub->IsFocusOnTouch().value_or(false);
+}
+
+void ViewAbstract::SetFocusScopeId(const std::string& focusScopeId, bool isGroup)
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusScopeId(focusScopeId, isGroup);
+}
+
+void ViewAbstract::SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority)
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusScopePriority(focusScopeId, focusPriority);
+}
+
+void ViewAbstract::SetFocusScopeId(FrameNode* frameNode, const std::string& focusScopeId, bool isGroup)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusScopeId(focusScopeId, isGroup);
+}
+
+void ViewAbstract::SetFocusScopePriority(FrameNode* frameNode, const std::string& focusScopeId,
+    const uint32_t focusPriority)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusScopePriority(focusScopeId, focusPriority);
 }
 } // namespace OHOS::Ace::NG

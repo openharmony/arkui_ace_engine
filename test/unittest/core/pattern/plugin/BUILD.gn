@@ -126,9 +126,7 @@ ohos_unittest("plugin_pattern_test_ng") {
     "$ace_root/interfaces/inner_api/ui_service_manager:ui_service_mgr",
     "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "$ace_root/test/unittest:ace_unittest_log",
-    "$cjson_root:cjson_static",
     "//third_party/googletest:gmock_main",
-    "//third_party/zlib:shared_libz",
   ]
 
   if (ace_use_rosen_drawing) {
@@ -138,6 +136,7 @@ ohos_unittest("plugin_pattern_test_ng") {
   }
 
   external_deps = [
+    "cJSON:cjson",
     "c_utils:utils",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
@@ -148,6 +147,7 @@ ohos_unittest("plugin_pattern_test_ng") {
     "window_manager:scene_session_manager",
     "window_manager:screen_session",
     "window_manager:screen_session_manager_client",
+    "zlib:shared_libz",
   ]
 
   if (os_account_exists) {

@@ -136,6 +136,11 @@ public:
         return animator_->GetFillMode();
     }
 
+    int32_t GetImagesSize()
+    {
+        return static_cast<int32_t>(images_.size());
+    }
+
 private:
     RefPtr<PictureAnimation<int32_t>> CreatePictureAnimation(int32_t size);
     void UpdateEventCallback();

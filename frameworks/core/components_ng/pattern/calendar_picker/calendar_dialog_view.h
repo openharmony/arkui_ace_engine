@@ -76,6 +76,10 @@ private:
         const RefPtr<FrameNode>& contentColumn);
     static void UpdateDefaultFocusByButtonInfo(const RefPtr<FrameNode>& optionsNode,
         const RefPtr<FrameNode>& accept, const RefPtr<FrameNode>& cancel);
+    static void UpdateButtonLayoutProperty(const RefPtr<FrameNode>& buttonNode, bool isConfirm,
+        const std::vector<ButtonInfo>& buttonInfos, const RefPtr<PipelineContext>& pipeline);
+    static void UpdateOptionLayoutProps(
+        const RefPtr<FrameNode>& contentRow, const RefPtr<PipelineContext>& pipelineContext);
 };
 } // namespace OHOS::Ace::NG
 

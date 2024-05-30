@@ -80,6 +80,7 @@ static napi_value JSRequestFocus(napi_env env, napi_callback_info info)
     };
     delegate->SetRequestFocusCallback(focusCallback);
     delegate->RequestFocus(key, true);
+    delegate->ResetRequestFocusCallback();
     napi_get_null(env, &obj);
     return obj;
 }

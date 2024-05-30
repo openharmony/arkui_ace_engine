@@ -224,7 +224,6 @@ void VideoElement::InitStatus(const RefPtr<VideoComponent>& videoComponent)
     if (!videoComponent->GetPlayer().Invalid() && !videoComponent->GetTexture().Invalid()) {
         player_ = videoComponent->GetPlayer().Upgrade();
         texture_ = videoComponent->GetTexture().Upgrade();
-
         if (player_ && texture_) {
             isExternalResource_ = true;
             videoComponent->SetPlayer(nullptr);

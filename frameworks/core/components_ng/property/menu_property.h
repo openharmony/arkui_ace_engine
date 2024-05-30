@@ -69,6 +69,8 @@ struct MenuParam {
     MenuType type = MenuType::MENU;
     MenuPreviewMode previewMode = MenuPreviewMode::NONE;
     MenuPreviewAnimationOptions previewAnimationOptions;
+    bool isShowHoverImage = false;
+    MenuPreviewAnimationOptions hoverImageAnimationOptions;
     std::optional<EffectOption> backgroundEffectOption;
     std::optional<Color> backgroundColor;
     std::optional<int32_t> backgroundBlurStyle;

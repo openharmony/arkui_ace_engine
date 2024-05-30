@@ -102,7 +102,9 @@ void TabsLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (!frameSize.IsPositive()) {
         return;
     }
-
+    auto layoutProperty = AceType::DynamicCast<TabsLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     auto tabBarWrapper = layoutWrapper->GetChildByIndex(TAB_BAR_INDEX);
     auto dividerWrapper = layoutWrapper->GetOrCreateChildByIndex(DIVIDER_INDEX);
     auto swiperWrapper = layoutWrapper->GetOrCreateChildByIndex(SWIPER_INDEX);
@@ -111,7 +113,27 @@ void TabsLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
 
     auto offsetList = LayoutOffsetList(layoutWrapper, tabBarWrapper, frameSize);
+    auto tabsWidth = geometryNode->GetFrameSize().Width();
+    if (isRTL) {
+        auto swiperWidth = swiperWrapper->GetGeometryNode()->GetFrameSize().Width();
+        OffsetF swiperOffset =
+            OffsetF((tabsWidth - offsetList[SWIPER_INDEX].GetX() - swiperWidth), offsetList[SWIPER_INDEX].GetY());
+        swiperWrapper->GetGeometryNode()->SetMarginFrameOffset(swiperOffset);
+        swiperWrapper->Layout();
 
+        auto dividerWidth = dividerWrapper->GetGeometryNode()->GetFrameSize().Width();
+        OffsetF dividerOffset =
+            OffsetF((tabsWidth - offsetList[DIVIDER_INDEX].GetX() - dividerWidth), offsetList[DIVIDER_INDEX].GetY());
+        dividerWrapper->GetGeometryNode()->SetMarginFrameOffset(dividerOffset);
+        dividerWrapper->Layout();
+
+        auto tabBarWidth = tabBarWrapper->GetGeometryNode()->GetFrameSize().Width();
+        OffsetF tabBarOffset =
+            OffsetF((tabsWidth - offsetList[TAB_BAR_INDEX].GetX() - tabBarWidth), offsetList[TAB_BAR_INDEX].GetY());
+        tabBarWrapper->GetGeometryNode()->SetMarginFrameOffset(tabBarOffset);
+        tabBarWrapper->Layout();
+        return;
+    }
     swiperWrapper->GetGeometryNode()->SetMarginFrameOffset(offsetList[SWIPER_INDEX]);
     swiperWrapper->Layout();
 

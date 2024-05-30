@@ -1682,7 +1682,7 @@ void ListPattern::ScrollPage(bool reverse, bool smooth)
 {
     float distance = reverse ? contentMainSize_ : -contentMainSize_;
     if (smooth) {
-        float position = -GetCurrentOffset().GetY() + distance;
+        float position = -GetTotalOffset() + distance;
         AnimateTo(-position, -1, nullptr, true);
     } else {
         StopAnimate();
@@ -2165,6 +2165,10 @@ int32_t ListPattern::GetItemIndexByPosition(float xOffset, float yOffset)
 void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     ScrollablePattern::ToJsonValue(json, filter);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     json->PutExtAttr("multiSelectable", multiSelectable_, filter);
     json->PutExtAttr("startIndex", startIndex_, filter);
     if (!itemPosition_.empty()) {

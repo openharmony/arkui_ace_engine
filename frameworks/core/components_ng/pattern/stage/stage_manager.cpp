@@ -27,6 +27,7 @@
 #include "base/utils/utils.h"
 #include "core/animation/page_transition_common.h"
 #include "core/common/container.h"
+#include "core/common/ime/input_method_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
@@ -55,11 +56,9 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
     auto stageManager = context->GetStageManager();
     CHECK_NULL_VOID(stageManager);
     stageManager->SetStageInTrasition(true);
-    auto safeAreaInsets = context->GetSafeAreaWithoutProcess();
-    auto statusBarHeight = static_cast<float>(safeAreaInsets.top_.Length());
     if (transitionType == PageTransitionType::EXIT_PUSH || transitionType == PageTransitionType::EXIT_POP) {
         pagePattern->TriggerPageTransition(
-            transitionType, [weak = WeakPtr<FrameNode>(page), transitionType, statusBarHeight]() {
+            transitionType, [weak = WeakPtr<FrameNode>(page), transitionType]() {
                 auto context = PipelineContext::GetCurrentContext();
                 CHECK_NULL_VOID(context);
                 auto page = weak.Upgrade();
@@ -82,15 +81,13 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
                 auto stageManager = context->GetStageManager();
                 CHECK_NULL_VOID(stageManager);
                 stageManager->SetStageInTrasition(false);
-                constexpr float REMOVE_CLIP_SIZE = 10000.0f;
-                page->GetRenderContext()->ClipWithRRect(RectF(0.0f, -statusBarHeight, REMOVE_CLIP_SIZE,
-                    REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
+                page->GetRenderContext()->RemoveClipWithRRect();
             });
         return;
     }
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
     pagePattern->TriggerPageTransition(
-        transitionType, [weak = WeakPtr<FrameNode>(page), statusBarHeight]() {
+        transitionType, [weak = WeakPtr<FrameNode>(page)]() {
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
             auto page = weak.Upgrade();
             CHECK_NULL_VOID(page);
@@ -104,9 +101,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
             auto context = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(context);
             context->MarkNeedFlushMouseEvent();
-            constexpr float REMOVE_CLIP_SIZE = 10000.0f;
-            page->GetRenderContext()->ClipWithRRect(RectF(0.0f, -statusBarHeight, REMOVE_CLIP_SIZE,
-                REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
+            page->GetRenderContext()->RemoveClipWithRRect();
             auto stageManager = context->GetStageManager();
             CHECK_NULL_VOID(stageManager);
             stageManager->SetStageInTrasition(false);
@@ -168,7 +163,7 @@ void StageManager::PageChangeCloseKeyboard()
         }
         if (!container->IsScenceBoardWindow()) {
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Container not ScenceBoardWindow.");
-            FocusHub::PushPageCloseKeyboard();
+            InputMethodManager::GetInstance()->CloseKeyboard();
         }
     }
 #endif

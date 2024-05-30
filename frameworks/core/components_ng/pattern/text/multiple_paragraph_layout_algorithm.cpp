@@ -144,7 +144,7 @@ void MultipleParagraphLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
 void MultipleParagraphLayoutAlgorithm::GetChildrenPlaceholderIndex(std::vector<int32_t>& placeholderIndex)
 {
-    for (auto && group : spans_) {
+    for (auto&& group : spans_) {
         for (const auto& child : group) {
             if (!child) {
                 continue;
@@ -186,6 +186,9 @@ void MultipleParagraphLayoutAlgorithm::GetSpanParagraphStyle(
     }
     if (lineStyle->HasLeadingMargin()) {
         pStyle.leadingMargin = lineStyle->GetLeadingMarginValue();
+    }
+    if (lineStyle->HasLineHeight()) {
+        pStyle.lineHeight = lineStyle->GetLineHeightValue();
     }
 }
 
@@ -429,7 +432,7 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
             }
             spanParagraphStyle.maxLines = std::max(maxLines, 0);
         }
-        auto && paragraph = Paragraph::Create(spanParagraphStyle, FontCollection::Current());
+        auto&& paragraph = Paragraph::Create(spanParagraphStyle, FontCollection::Current());
         CHECK_NULL_RETURN(paragraph, false);
         auto paraStart = spanTextLength;
         paragraphIndex++;

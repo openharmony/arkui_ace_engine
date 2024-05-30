@@ -57,6 +57,7 @@ protected:
     void Create(const std::function<void(WaterFlowModelNG)>& callback = nullptr, bool flushLayout = true);
     void CreateWithItem(const std::function<void(WaterFlowModelNG)>& callback = nullptr);
     static void CreateItem(int32_t number = 10);
+    static void CreateRandomItem(int32_t number);
     static void CreateItemWithHeight(float height);
     void UpdateCurrentOffset(float offset, int32_t source = SCROLL_FROM_UPDATE);
     void MouseSelect(Offset start, Offset end);

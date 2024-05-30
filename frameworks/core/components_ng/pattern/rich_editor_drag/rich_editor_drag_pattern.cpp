@@ -50,7 +50,9 @@ RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(const RefPtr<FrameNode>&
     auto data = CalculateTextDragData(hostPattern, dragNode);
     dragPattern->Initialize(data);
     dragPattern->SetLastLineHeight(data.lineHeight_);
-
+    float frameWidth = dragPattern->GetFrameWidth();
+    float frameHeight = dragPattern->GetFrameHeight();
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "CreateDragNode width=%{public}f, height=%{public}f", frameWidth, frameHeight);
     CalcSize size(NG::CalcLength(dragPattern->GetFrameWidth()), NG::CalcLength(dragPattern->GetFrameHeight()));
     dragNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(size);
     return dragNode;

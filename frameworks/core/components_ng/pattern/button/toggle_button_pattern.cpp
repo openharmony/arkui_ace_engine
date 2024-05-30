@@ -201,7 +201,7 @@ void ToggleButtonPattern::HandleBlurEvent(RefPtr<RenderContext> renderContext, R
         isShadow_ = false;
         renderContext->UpdateBackShadow(Shadow::CreateShadow(ShadowStyle::None));
     }
-    if (isScale_ || paintProperty->GetIsOnValue(false)) {
+    if (isScale_) {
         isScale_ = false;
         renderContext->SetScale(1.0, 1.0);
     }

@@ -22,6 +22,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/measure_util.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -39,6 +40,7 @@ namespace {
 const Dimension FONT_SIZE = Dimension(2.0);
 const Dimension FOCUS_SIZE = Dimension(1.0);
 const float MOVE_DISTANCE = 5.0f;
+const double MOVE_THRESHOLD = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ? 2.0 : 1.0;
 constexpr float FONTWEIGHT = 0.5f;
 constexpr float FONT_SIZE_PERCENT = 1.0f;
 constexpr int32_t HOVER_ANIMATION_DURATION = 40;
@@ -47,7 +49,7 @@ constexpr size_t MIXTURE_CHILD_COUNT = 2;
 const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
 const Dimension ICON_SIZE = 24.0_vp;
 const Dimension ICON_TEXT_SPACE = 8.0_vp;
-const std::string REGULAR_FONT_FAMILY = "sans-serif";
+const std::vector<std::string> FONT_FAMILY_DEFAULT = { "sans-serif" };
 const std::string MEASURE_STRING = "TEST";
 const int32_t HALF_NUMBER = 2;
 const int32_t BUFFER_NODE_NUMBER = 2;
@@ -116,15 +118,15 @@ void TextPickerColumnPattern::OnModifyDone()
             if (childIndex == midIndex) {
                 auto selectedOptionSize = theme->GetOptionStyle(true, false).GetFontSize();
                 measureContext.fontSize = selectedOptionSize;
-                measureContext.fontFamily = REGULAR_FONT_FAMILY;
+                measureContext.fontFamily = FONT_FAMILY_DEFAULT[0];
             } else if ((childIndex == (midIndex + 1)) || (childIndex == (midIndex - 1))) {
                 auto focusOptionSize = theme->GetOptionStyle(false, false).GetFontSize() + FONT_SIZE;
                 measureContext.fontSize = focusOptionSize;
-                measureContext.fontFamily = REGULAR_FONT_FAMILY;
+                measureContext.fontFamily = FONT_FAMILY_DEFAULT[0];
             } else {
                 auto normalOptionSize = theme->GetOptionStyle(false, false).GetFontSize();
                 measureContext.fontSize = normalOptionSize;
-                measureContext.fontFamily = REGULAR_FONT_FAMILY;
+                measureContext.fontFamily = FONT_FAMILY_DEFAULT[0];
             }
             if (childIndex == midIndex) {
                 prop.height = dividerSpacing_;
@@ -382,6 +384,24 @@ void TextPickerColumnPattern::ResetOptionPropertyHeight()
     }
 }
 
+bool TextPickerColumnPattern::IsTextFadeOut()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto textTheme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(textTheme, false);
+    return textTheme->GetIsTextFadeout();
+}
+
+void TextPickerColumnPattern::UpdateTexOverflow(bool isSel, const RefPtr<TextLayoutProperty>& textLayoutProperty)
+{
+    if (isTextFadeOut_) {
+        textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
+        textLayoutProperty->UpdateTextMarqueeFadeout(true);
+        textLayoutProperty->UpdateTextMarqueeStart(isSel && !isTossing_);
+    }
+}
+
 void TextPickerColumnPattern::FlushCurrentOptions(
     bool isDown, bool isUpateTextContentOnly, bool isDirectlyClear, bool isUpdateAnimationProperties)
 {
@@ -397,6 +417,7 @@ void TextPickerColumnPattern::FlushCurrentOptions(
     CHECK_NULL_VOID(parentNode);
     auto textPickerLayoutProperty = parentNode->GetLayoutProperty<TextPickerLayoutProperty>();
     CHECK_NULL_VOID(textPickerLayoutProperty);
+    isTextFadeOut_ = IsTextFadeOut();
 
     if (!isUpateTextContentOnly) {
         animationProperties_.clear();
@@ -467,6 +488,7 @@ void TextPickerColumnPattern::FlushCurrentTextOptions(
         CHECK_NULL_VOID(textPattern);
         auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
+        UpdateTexOverflow(index == middleIndex, textLayoutProperty);
         if (!isUpateTextContentOnly) {
             UpdatePickerTextProperties(textLayoutProperty, textPickerLayoutProperty, index, middleIndex, showCount);
         }
@@ -584,6 +606,7 @@ void TextPickerColumnPattern::FlushCurrentMixtureOptions(
         CHECK_NULL_VOID(textPattern);
         auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
+        UpdateTexOverflow(index == middleIndex, textLayoutProperty);
         if (!isUpateTextContentOnly) {
             UpdatePickerTextProperties(textLayoutProperty, textPickerLayoutProperty, index, middleIndex, showCount);
         }
@@ -677,13 +700,11 @@ void TextPickerColumnPattern::UpdateDisappearTextProperties(const RefPtr<PickerT
     }
     textLayoutProperty->UpdateFontWeight(textPickerLayoutProperty->GetDisappearWeight().value_or(
         pickerTheme->GetOptionStyle(false, false).GetFontWeight()));
-    textLayoutProperty->UpdateFontFamily(textPickerLayoutProperty->GetDisappearFontFamily().value_or(
-        pickerTheme->GetOptionStyle(false, false).GetFontFamilies()));
+    auto fontFamilyVector = textPickerLayoutProperty->GetDisappearFontFamily().value_or(
+        pickerTheme->GetOptionStyle(false, false).GetFontFamilies());
+    textLayoutProperty->UpdateFontFamily(fontFamilyVector.empty() ? FONT_FAMILY_DEFAULT : fontFamilyVector);
     textLayoutProperty->UpdateItalicFontStyle(textPickerLayoutProperty->GetDisappearFontStyle().value_or(
         pickerTheme->GetOptionStyle(false, false).GetFontStyle()));
-    if (isTextFadeOut_) {
-        textLayoutProperty->UpdateTextMarqueeStart(false);
-    }
 }
 
 void TextPickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerTheme>& pickerTheme,
@@ -702,13 +723,11 @@ void TextPickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerT
     }
     textLayoutProperty->UpdateFontWeight(
         textPickerLayoutProperty->GetWeight().value_or(pickerTheme->GetOptionStyle(false, false).GetFontWeight()));
-    textLayoutProperty->UpdateFontFamily(textPickerLayoutProperty->GetFontFamily().value_or(
-        pickerTheme->GetOptionStyle(false, false).GetFontFamilies()));
+    auto fontFamilyVector = textPickerLayoutProperty->GetFontFamily().value_or(
+        pickerTheme->GetOptionStyle(false, false).GetFontFamilies());
+    textLayoutProperty->UpdateFontFamily(fontFamilyVector.empty() ? FONT_FAMILY_DEFAULT : fontFamilyVector);
     textLayoutProperty->UpdateItalicFontStyle(
         textPickerLayoutProperty->GetFontStyle().value_or(pickerTheme->GetOptionStyle(false, false).GetFontStyle()));
-    if (isTextFadeOut_) {
-        textLayoutProperty->UpdateTextMarqueeStart(false);
-    }
 }
 
 void TextPickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme,
@@ -726,13 +745,11 @@ void TextPickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
     }
     textLayoutProperty->UpdateFontWeight(textPickerLayoutProperty->GetSelectedWeight().value_or(
         pickerTheme->GetOptionStyle(true, false).GetFontWeight()));
-    textLayoutProperty->UpdateFontFamily(textPickerLayoutProperty->GetSelectedFontFamily().value_or(
-        pickerTheme->GetOptionStyle(true, false).GetFontFamilies()));
+    auto fontFamilyVector = textPickerLayoutProperty->GetSelectedFontFamily().value_or(
+        pickerTheme->GetOptionStyle(true, false).GetFontFamilies());
+    textLayoutProperty->UpdateFontFamily(fontFamilyVector.empty() ? FONT_FAMILY_DEFAULT : fontFamilyVector);
     textLayoutProperty->UpdateItalicFontStyle(textPickerLayoutProperty->GetSelectedFontStyle().value_or(
         pickerTheme->GetOptionStyle(true, false).GetFontStyle()));
-    if (isTextFadeOut_) {
-        textLayoutProperty->UpdateTextMarqueeStart(true);
-    }
 }
 
 void TextPickerColumnPattern::AddAnimationTextProperties(
@@ -743,6 +760,16 @@ void TextPickerColumnPattern::AddAnimationTextProperties(
         MeasureContext measureContext;
         measureContext.textContent = MEASURE_STRING;
         measureContext.fontSize = textLayoutProperty->GetFontSize().value();
+        if (textLayoutProperty->HasFontFamily()) {
+            auto fontFamilyVector = textLayoutProperty->GetFontFamily().value();
+            if (fontFamilyVector.empty()) {
+                measureContext.fontFamily = FONT_FAMILY_DEFAULT[0];
+            } else {
+                measureContext.fontFamily = fontFamilyVector[0];
+            }
+        } else {
+            measureContext.fontFamily = FONT_FAMILY_DEFAULT[0];
+        }
         auto size = MeasureUtil::MeasureTextSize(measureContext);
         if (!optionProperties_.empty()) {
             optionProperties_[currentIndex].fontheight = size.Height();
@@ -782,16 +809,6 @@ void TextPickerColumnPattern::UpdatePickerTextProperties(const RefPtr<TextLayout
     CHECK_NULL_VOID(context);
     auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto textTheme = pipeline->GetTheme<TextTheme>();
-    CHECK_NULL_VOID(textTheme);
-    isTextFadeOut_ = textTheme->GetIsTextFadeout();
-    if (isTextFadeOut_) {
-        textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
-        textLayoutProperty->UpdateTextMarqueeFadeout(true);
-        textLayoutProperty->UpdateTextMarqueeStart(false);
-    }
     if (currentIndex == middleIndex) {
         UpdateSelectedTextProperties(pickerTheme, textLayoutProperty, textPickerLayoutProperty);
         textLayoutProperty->UpdateAlignment(Alignment::CENTER);
@@ -829,7 +846,7 @@ void TextPickerColumnPattern::TextPropertiesLinearAnimation(const RefPtr<TextLay
     }
     Dimension endFontSize;
     Color endColor;
-    if (!isDown) {
+    if (isDown) {
         endFontSize = animationProperties_[index].downFontSize;
         endColor = animationProperties_[index].downColor;
         if (GreatOrEqual(scale, FONTWEIGHT)) {
@@ -878,6 +895,7 @@ void TextPickerColumnPattern::UpdateTextPropertiesLinear(bool isDown, double sca
     CHECK_NULL_VOID(host);
     uint32_t showCount = GetShowOptionCount();
     auto child = host->GetChildren();
+    auto middleIndex = showCount / 2;
     auto iter = child.begin();
     if (child.size() != showCount) {
         return;
@@ -891,7 +909,11 @@ void TextPickerColumnPattern::UpdateTextPropertiesLinear(bool isDown, double sca
             CHECK_NULL_VOID(textPattern);
             textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(textLayoutProperty);
-            TextPropertiesLinearAnimation(textLayoutProperty, index, showCount, isDown, scale);
+            if (!isTossing_) {
+                UpdateTexOverflow(index == middleIndex, textLayoutProperty);
+            } else {
+                TextPropertiesLinearAnimation(textLayoutProperty, index, showCount, isDown, scale);
+            }
         } else if (columnkind_ == MIXTURE) {
             auto children = rangeNode->GetChildren();
             if (children.size() != MIXTURE_CHILD_COUNT) {
@@ -901,7 +923,11 @@ void TextPickerColumnPattern::UpdateTextPropertiesLinear(bool isDown, double sca
             auto textPattern = textNode->GetPattern<TextPattern>();
             textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(textLayoutProperty);
-            TextPropertiesLinearAnimation(textLayoutProperty, index, showCount, isDown, scale);
+            if (!isTossing_) {
+                UpdateTexOverflow(index == middleIndex, textLayoutProperty);
+            } else {
+                TextPropertiesLinearAnimation(textLayoutProperty, index, showCount, isDown, scale);
+            }
             textNode->MarkModifyDone();
             textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
@@ -917,7 +943,7 @@ Dimension TextPickerColumnPattern::LinearFontSize(
     if (percent > FONT_SIZE_PERCENT) {
         return startFontSize + (endFontSize - startFontSize);
     } else {
-        return startFontSize + (endFontSize - startFontSize) * percent;
+        return startFontSize + (endFontSize - startFontSize) * std::abs(percent);
     }
 }
 
@@ -1003,7 +1029,8 @@ void TextPickerColumnPattern::HandleDragMove(const GestureEvent& event)
         return;
     }
     if (event.GetInputEventType() == InputEventType::AXIS && event.GetSourceTool() == SourceTool::MOUSE) {
-        InnerHandleScroll(LessNotEqual(event.GetDelta().GetY(), 0.0), true);
+        SetScrollDirection(LessNotEqual(event.GetDelta().GetY(), 0.0));
+        InnerHandleScroll(isDownScroll_, true);
         return;
     }
     animationBreak_ = false;
@@ -1013,10 +1040,11 @@ void TextPickerColumnPattern::HandleDragMove(const GestureEvent& event)
     auto toss = GetToss();
     auto offsetY =
         event.GetGlobalPoint().GetY() + (event.GetInputEventType() == InputEventType::AXIS ? event.GetOffsetY() : 0.0);
-    if (NearEqual(offsetY, yLast_, 1.0)) { // if changing less than 1.0, no need to handle
+    if (NearEqual(offsetY, yLast_, MOVE_THRESHOLD)) { // if changing less than MOVE_THRESHOLD, no need to handle
         return;
     }
     toss->SetEnd(offsetY);
+    SetScrollDirection(GreatNotEqual(GetMainVelocity(), 0.0));
     UpdateColumnChildPosition(offsetY);
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -1048,15 +1076,15 @@ void TextPickerColumnPattern::HandleDragEnd()
         ScrollOption(0.0);
         return;
     }
-    ScrollDirection dir = scrollDelta_ > 0.0 ? ScrollDirection::DOWN : ScrollDirection::UP;
     int32_t middleIndex = GetShowOptionCount() / HALF_NUMBER;
-    auto shiftDistance = (dir == ScrollDirection::UP) ? optionProperties_[middleIndex].prevDistance
-                                                      : optionProperties_[middleIndex].nextDistance;
+    auto shiftDistance = isDownScroll_ ? optionProperties_[middleIndex].nextDistance
+                                       : optionProperties_[middleIndex].prevDistance;
     auto shiftThreshold = shiftDistance / HALF_NUMBER;
     if (std::abs(scrollDelta_) >= std::abs(shiftThreshold)) {
-        InnerHandleScroll(LessNotEqual(scrollDelta_, 0.0), true, false);
-        scrollDelta_ = scrollDelta_ - std::abs(shiftDistance) * (dir == ScrollDirection::UP ? -1 : 1);
+        InnerHandleScroll(!isDownScroll_, true, false);
+        scrollDelta_ = scrollDelta_ - std::abs(shiftDistance) * (isDownScroll_ ? 1 : -1);
     }
+    SetScrollDirection(GreatNotEqual(scrollDelta_, 0.0));
     CreateAnimation(scrollDelta_, 0.0);
     frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, mainVelocity_, SceneStatus::END);
     // AccessibilityEventType::SCROLL_END
@@ -1080,11 +1108,7 @@ void TextPickerColumnPattern::CreateAnimation()
     auto aroundClickCallback = [weak = AceType::WeakClaim(this)](float value) {
         auto column = weak.Upgrade();
         CHECK_NULL_VOID(column);
-        if (value > 0) {
-            column->UpdateColumnChildPosition(std::ceil(value));
-        } else {
-            column->UpdateColumnChildPosition(std::floor(value));
-        }
+        column->UpdateColumnChildPosition(value);
     };
     aroundClickProperty_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(aroundClickCallback));
     renderContext->AttachNodeAnimatableProperty(aroundClickProperty_);
@@ -1131,14 +1155,13 @@ void TextPickerColumnPattern::ScrollOption(double delta)
 {
     scrollDelta_ = delta;
     auto midIndex = GetShowOptionCount() / HALF_NUMBER;
-    ScrollDirection dir = delta > 0.0 ? ScrollDirection::DOWN : ScrollDirection::UP;
-    auto shiftDistance = (dir == ScrollDirection::UP) ? optionProperties_[midIndex].prevDistance
-                                                      : optionProperties_[midIndex].nextDistance;
+    auto shiftDistance = isDownScroll_ ? optionProperties_[midIndex].nextDistance
+                                       : optionProperties_[midIndex].prevDistance;
     distancePercent_ = delta / shiftDistance;
     auto textLinearPercent = 0.0;
     textLinearPercent = (std::abs(delta)) / (optionProperties_[midIndex].height);
-    UpdateTextPropertiesLinear(LessNotEqual(delta, 0.0), textLinearPercent);
-    CalcAlgorithmOffset(dir, distancePercent_);
+    UpdateTextPropertiesLinear(isDownScroll_, textLinearPercent);
+    CalcAlgorithmOffset(distancePercent_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
@@ -1162,16 +1185,17 @@ void TextPickerColumnPattern::UpdateScrollDelta(double delta)
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
-void TextPickerColumnPattern::CalcAlgorithmOffset(ScrollDirection dir, double distancePercent)
+void TextPickerColumnPattern::CalcAlgorithmOffset(double distancePercent)
 {
     algorithmOffset_.clear();
 
     uint32_t counts = GetShowOptionCount();
 
     for (uint32_t i = 0; i < counts; i++) {
-        double distance =
-            (dir == ScrollDirection::UP) ? optionProperties_[i].prevDistance : optionProperties_[i].nextDistance;
-        algorithmOffset_.emplace_back(static_cast<int32_t>(distance * distancePercent));
+        double distance = isDownScroll_ ? optionProperties_[i].nextDistance
+                                        : optionProperties_[i].prevDistance;
+        auto val  = std::trunc(distance * distancePercent);
+        algorithmOffset_.emplace_back(static_cast<int32_t>(val));
     }
 }
 
@@ -1185,7 +1209,6 @@ double TextPickerColumnPattern::GetShiftDistance(int32_t index, ScrollDirection 
     auto isDown = dir == ScrollDirection::DOWN;
     nextIndex = isDown ? (optionCounts + index + 1) % optionCounts : (optionCounts + index - 1) % optionCounts;
     double distance = 0.0;
-    double val = 0.0;
     switch (static_cast<OptionIndex>(index)) {
         case OptionIndex::COLUMN_INDEX_0: // first
             distance = (dir == ScrollDirection::DOWN) ? optionProperties_[index].height
@@ -1193,45 +1216,74 @@ double TextPickerColumnPattern::GetShiftDistance(int32_t index, ScrollDirection 
             break;
         case OptionIndex::COLUMN_INDEX_1:
             distance = (dir == ScrollDirection::DOWN) ? optionProperties_[index].height
-                                                      : (0.0 - optionProperties_[index].height);
+                                                      : (0.0 - optionProperties_[nextIndex].height);
             break;
         case OptionIndex::COLUMN_INDEX_2:
-            if (dir == ScrollDirection::UP) {
-                distance = -optionProperties_[nextIndex].height;
-            } else {
-                val = optionProperties_[index].height +
-                      (optionProperties_[nextIndex].height - optionProperties_[nextIndex].fontheight) / HALF_NUMBER;
-                distance = std::ceil(val);
-            }
+            distance = GetUpCandidateDistance(index, nextIndex, dir);
             break;
 
         case OptionIndex::COLUMN_INDEX_3:
-            val = optionProperties_[index].height / HALF_NUMBER + optionProperties_[nextIndex].height -
-                  optionProperties_[nextIndex].fontheight / HALF_NUMBER;
-            distance = (dir == ScrollDirection::DOWN) ? val : (0.0 - val);
-            distance = std::floor(distance);
+            distance = GetSelectedDistance(index, nextIndex, dir);
             break;
+
         case OptionIndex::COLUMN_INDEX_4:
-            if (dir == ScrollDirection::DOWN) {
-                distance = optionProperties_[nextIndex].height;
-            } else {
-                val = optionProperties_[index].height +
-                      (optionProperties_[nextIndex].height - optionProperties_[nextIndex].fontheight) / HALF_NUMBER;
-                distance = std::ceil(0.0f - val);
-            }
+            distance = GetDownCandidateDistance(index, nextIndex, dir);
             break;
         case OptionIndex::COLUMN_INDEX_5:
             distance = (dir == ScrollDirection::DOWN) ? optionProperties_[index].height
-                                                      : (0.0 - optionProperties_[index].height);
+                                                      : (0.0 - optionProperties_[nextIndex].height);
             break;
         case OptionIndex::COLUMN_INDEX_6: // last
             distance = (dir == ScrollDirection::DOWN) ? optionProperties_[index].height
-                                                      : (0.0 - optionProperties_[index].height);
+                                                      : (0.0 - optionProperties_[nextIndex].height);
             break;
         default:
             break;
     }
 
+    return distance;
+}
+
+double TextPickerColumnPattern::GetSelectedDistance(int32_t index, int32_t nextIndex, ScrollDirection dir)
+{
+    double val = 0.0;
+    val = optionProperties_[index].height / HALF_NUMBER + optionProperties_[nextIndex].height -
+          optionProperties_[nextIndex].fontheight / HALF_NUMBER;
+    val = (dir == ScrollDirection::DOWN) ? val : (0.0 - val);
+    if (GreatNotEqual(optionProperties_[nextIndex].fontheight, optionProperties_[index].height)) {
+        val = val - (optionProperties_[nextIndex].fontheight - optionProperties_[index].height);
+    }
+    return std::round(val);
+}
+
+double TextPickerColumnPattern::GetUpCandidateDistance(int32_t index, int32_t nextIndex, ScrollDirection dir)
+{
+    double distance = 0.0;
+    double val = 0.0;
+    if (dir == ScrollDirection::UP) {
+        distance = -optionProperties_[nextIndex].height;
+    } else {
+        val = optionProperties_[index].height +
+              (optionProperties_[nextIndex].height - optionProperties_[nextIndex].fontheight) / HALF_NUMBER;
+        distance = std::round(val);
+    }
+    return distance;
+}
+
+double TextPickerColumnPattern::GetDownCandidateDistance(int32_t index, int32_t nextIndex, ScrollDirection dir)
+{
+    double distance = 0.0;
+    double val = 0.0;
+    if (dir == ScrollDirection::DOWN) {
+        distance = optionProperties_[index].height;
+    } else {
+        val = optionProperties_[index].height +
+              (optionProperties_[nextIndex].height - optionProperties_[nextIndex].fontheight) / HALF_NUMBER;
+        if (GreatNotEqual(optionProperties_[nextIndex].fontheight, optionProperties_[index].height)) {
+            val = val + (optionProperties_[nextIndex].fontheight - optionProperties_[index].height);
+        }
+        distance = - std::round(val);
+    }
     return distance;
 }
 
@@ -1251,17 +1303,20 @@ double TextPickerColumnPattern::GetShiftDistanceForLandscape(int32_t index, Scro
             if (dir == ScrollDirection::UP) {
                 distance = 0.0 - optionProperties_[index].height;
             } else {
-                distance =
-                    optionProperties_[index].height +
-                    (optionProperties_[nextIndex].height - optionProperties_[nextIndex].fontheight) / HALF_NUMBER;
+                val = optionProperties_[index].height +
+                      (optionProperties_[nextIndex].height - optionProperties_[nextIndex].fontheight) / HALF_NUMBER;
+                distance = std::round(val);
             }
             break;
 
         case OptionIndex::COLUMN_INDEX_1:
             val = optionProperties_[index].height / HALF_NUMBER + optionProperties_[nextIndex].height -
                   optionProperties_[nextIndex].fontheight / HALF_NUMBER;
-            distance = (dir == ScrollDirection::DOWN) ? val : (0.0 - val);
-            distance = std::floor(distance);
+            val = (dir == ScrollDirection::DOWN) ? val : (0.0 - val);
+            if (GreatNotEqual(optionProperties_[nextIndex].fontheight, optionProperties_[index].height)) {
+                val = val - (optionProperties_[nextIndex].fontheight - optionProperties_[index].height);
+            }
+            distance = std::round(val);
             break;
 
         case OptionIndex::COLUMN_INDEX_2:
@@ -1270,7 +1325,10 @@ double TextPickerColumnPattern::GetShiftDistanceForLandscape(int32_t index, Scro
             } else {
                 val = optionProperties_[index].height +
                       (optionProperties_[nextIndex].height - optionProperties_[nextIndex].fontheight) / HALF_NUMBER;
-                distance = 0.0 - val;
+                if (GreatNotEqual(optionProperties_[nextIndex].fontheight, optionProperties_[index].height)) {
+                    val = val + (optionProperties_[nextIndex].fontheight - optionProperties_[index].height);
+                }
+                distance = - std::round(val);
             }
             break;
         default:
@@ -1298,6 +1356,7 @@ void TextPickerColumnPattern::SetOptionShiftDistance()
 
 void TextPickerColumnPattern::UpdateToss(double offsetY)
 {
+    isTossing_ = true;
     UpdateColumnChildPosition(offsetY);
 }
 
@@ -1311,19 +1370,8 @@ void TextPickerColumnPattern::TossStoped()
 void TextPickerColumnPattern::TossAnimationStoped()
 {
     yLast_ = 0.0;
-}
-
-void TextPickerColumnPattern::UpdateFinishToss(double offsetY)
-{
-    int32_t dragDelta = offsetY - yLast_;
-    if (!CanMove(LessNotEqual(dragDelta, 0))) {
-        return;
-    }
-    auto midIndex = GetShowOptionCount() / HALF_NUMBER;
-    ScrollDirection dir = dragDelta > 0.0 ? ScrollDirection::DOWN : ScrollDirection::UP;
-    auto shiftDistance = (dir == ScrollDirection::UP) ? optionProperties_[midIndex].prevDistance
-                                                      : optionProperties_[midIndex].nextDistance;
-    ScrollOption(shiftDistance);
+    isTossing_ = false;
+    ScrollOption(0.0);
 }
 
 std::string TextPickerColumnPattern::GetSelectedObject(bool isColumnChange, int32_t status) const
@@ -1351,19 +1399,27 @@ std::string TextPickerColumnPattern::GetSelectedObject(bool isColumnChange, int3
 
 void TextPickerColumnPattern::UpdateColumnChildPosition(double offsetY)
 {
+    offsetY = std::trunc(offsetY);
     int32_t dragDelta = offsetY - yLast_;
+    if (dragDelta == 0) {
+        return;
+    }
     offsetCurSet_ = 0.0;
     auto midIndex = GetShowOptionCount() / HALF_NUMBER;
-    ScrollDirection dir = dragDelta > 0.0 ? ScrollDirection::DOWN : ScrollDirection::UP;
-    auto shiftDistance = (dir == ScrollDirection::UP) ? optionProperties_[midIndex].prevDistance
-                                                      : optionProperties_[midIndex].nextDistance;
+    auto shiftDistance = isDownScroll_ ? optionProperties_[midIndex].nextDistance
+                                       : optionProperties_[midIndex].prevDistance;
     // the abs of drag delta is less than jump interval.
     dragDelta = dragDelta + yOffset_;
     auto useRebound = NotLoopOptions();
     auto isOverScroll = useRebound && overscroller_.IsOverScroll();
-    if (GreatOrEqual(std::abs(dragDelta), std::abs(shiftDistance)) && !isOverScroll) {
-        InnerHandleScroll(LessNotEqual(dragDelta, 0.0), true, false);
-        dragDelta = dragDelta % static_cast<int>(std::abs(shiftDistance));
+    if ((std::abs(dragDelta) >= std::abs(shiftDistance)) && !isOverScroll) {
+        int32_t shiftDistanceCount = std::abs(dragDelta) / static_cast<int>(std::abs(shiftDistance));
+        int32_t additionalShift = dragDelta % static_cast<int>(std::abs(shiftDistance));
+        for (int32_t i = 0; i < shiftDistanceCount; i++) {
+            ScrollOption(shiftDistance);
+            InnerHandleScroll(dragDelta < 0, true, false);
+        }
+        dragDelta = additionalShift;
     }
     if (useRebound && !isReboundInProgress_) {
         if (overscroller_.ApplyCurrentOffset(yLast_, offsetY, dragDelta)) {
@@ -1464,13 +1520,15 @@ bool TextPickerColumnPattern::HandleDirectionKey(KeyCode code)
     if (code == KeyCode::KEY_DPAD_UP) {
         auto totalCountAndIndex = totalOptionCount + currernIndex;
         SetCurrentIndex((totalCountAndIndex ? totalCountAndIndex - 1 : 0) % totalOptionCount);
+        SetScrollDirection(false);
         FlushCurrentOptions();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return true;
     }
     if (code == KeyCode::KEY_DPAD_DOWN) {
         SetCurrentIndex((totalOptionCount + currernIndex + 1) % totalOptionCount);
-        FlushCurrentOptions();
+        SetScrollDirection(true);
+        FlushCurrentOptions(isDownScroll_);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return true;
     }
@@ -1489,6 +1547,7 @@ void TextPickerColumnPattern::SetAccessibilityAction()
         if (!pattern->CanMove(true)) {
             return;
         }
+        pattern->SetScrollDirection(true);
         pattern->InnerHandleScroll(true);
         pattern->CreateAnimation(0.0 - pattern->jumpInterval_, 0.0);
         // AccessibilityEventType::SCROLL_END
@@ -1501,6 +1560,7 @@ void TextPickerColumnPattern::SetAccessibilityAction()
         if (!pattern->CanMove(false)) {
             return;
         }
+        pattern->SetScrollDirection(false);
         pattern->InnerHandleScroll(false);
         pattern->CreateAnimation(pattern->jumpInterval_, 0.0);
         // AccessibilityEventType::SCROLL_END
@@ -1514,8 +1574,9 @@ void TextPickerColumnPattern::OnAroundButtonClick(RefPtr<EventParam> param)
     }
     int32_t middleIndex = GetShowOptionCount() / HALF_NUMBER;
     int32_t step = param->itemIndex - middleIndex;
-    auto overFirst = currentIndex_ == 0 && step < 0;
-    auto overLast = currentIndex_ == (GetOptionCount() ? GetOptionCount() - 1 : 0) && step > 0;
+    auto overFirst = static_cast<int32_t>(currentIndex_) + step < 0 && step < 0;
+    auto overLast =
+        static_cast<int32_t>(currentIndex_) + step > (GetOptionCount() ? GetOptionCount() - 1 : 0) && step > 0;
     if (NotLoopOptions() && (overscroller_.IsOverScroll() || overFirst || overLast)) {
         return;
     }
@@ -1535,6 +1596,8 @@ void TextPickerColumnPattern::OnAroundButtonClick(RefPtr<EventParam> param)
         animation_ = AnimationUtils::StartAnimation(option, [weak = AceType::WeakClaim(this), step, distance]() {
             auto column = weak.Upgrade();
             CHECK_NULL_VOID(column);
+            auto isDown = step < 0;
+            column->SetScrollDirection(isDown);
             column->aroundClickProperty_->Set(step > 0 ? 0.0 - std::abs(distance) : std::abs(distance));
         });
         auto pipeline = PipelineBase::GetCurrentContext();
@@ -1545,16 +1608,17 @@ void TextPickerColumnPattern::OnAroundButtonClick(RefPtr<EventParam> param)
 
 void TextPickerColumnPattern::PlayResetAnimation()
 {
-    ScrollDirection dir = scrollDelta_ > 0.0 ? ScrollDirection::DOWN : ScrollDirection::UP;
     int32_t middleIndex = static_cast<int32_t>(GetShowOptionCount()) / HALF_NUMBER;
-    double shiftDistance = (dir == ScrollDirection::UP) ? optionProperties_[middleIndex].prevDistance
-                                                        : optionProperties_[middleIndex].nextDistance;
+    double shiftDistance = isDownScroll_ ? optionProperties_[middleIndex].nextDistance
+                                         : optionProperties_[middleIndex].prevDistance;
+
     double shiftThreshold = shiftDistance / HALF_NUMBER;
     if (std::abs(scrollDelta_) >= std::abs(shiftThreshold)) {
-        InnerHandleScroll(LessNotEqual(scrollDelta_, 0.0), true, false);
-        scrollDelta_ = scrollDelta_ - std::abs(shiftDistance) * (dir == ScrollDirection::UP ? -1 : 1);
+        InnerHandleScroll(!isDownScroll_, true, false);
+        scrollDelta_ = scrollDelta_ - std::abs(shiftDistance) * (isDownScroll_ ? 1 : -1);
     }
 
+    SetScrollDirection(GreatNotEqual(scrollDelta_, 0.0));
     CreateAnimation(scrollDelta_, 0.0);
 }
 

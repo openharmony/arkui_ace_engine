@@ -36,9 +36,10 @@ public:
     static void SetSideLength(const JSCallbackInfo& info);
     static void SetPathStrokeWidth(const JSCallbackInfo& info);
     static void SetAutoReset(const JSCallbackInfo& info);
-    static void SetActiveCircleColor(const JSCallbackInfo& info);
-    static void SetActiveCircleRadius(const JSCallbackInfo& info);
-    static void SetEnableWaveEffect(const JSCallbackInfo& info);
+    static void SetActiveCircleColor(const JSRef<JSVal>& info);
+    static void SetActiveCircleRadius(const JSRef<JSVal>& info);
+    static void SetEnableWaveEffect(const JSRef<JSVal>& info);
+    static void SetActivateCircleStyle(const JSCallbackInfo& info);
 
 protected:
     static void SetPatternComplete(const JSCallbackInfo& info);

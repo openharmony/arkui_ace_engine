@@ -117,7 +117,7 @@ export class Index extends ViewPU {
       Row.height(TITLE_ROW_HEIGHT);
       Row.justifyContent(FlexAlign.Start);
       Row.alignItems(VerticalAlign.Center);
-      Row.padding({ top: 6, bottom: 6 });
+      Row.padding({ top: 6, bottom: 6, left: 8, right: 8 });
       Row.clip(true);
       if (!isInitialRender) {
         Row.pop();
@@ -132,7 +132,7 @@ export class Index extends ViewPU {
       Image.width(TITLE_ICON_SIZE);
       Image.interpolation(ImageInterpolation.Medium);
       Image.focusable(false);
-      Image.margin({ left: TITLE_PADDING_START, right: TITLE_ELEMENT_MARGIN_HORIZONTAL });
+      Image.margin({ left: TITLE_ELEMENT_MARGIN_HORIZONTAL, right: TITLE_ELEMENT_MARGIN_HORIZONTAL });
       Image.opacity(this.iconOpacity);
       Image.draggable(false);
       if (!isInitialRender) {

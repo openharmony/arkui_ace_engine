@@ -1350,5 +1350,25 @@
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_List_CloseAllSwipeActions"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionItem_SetOnEnterActionAreaWithUserData"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionItem_SetOnActionWithUserData"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionItem_SetOnExitActionAreaWithUserData"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionItem_SetOnStateChangeWithUserData"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionOption_SetOnOffsetChangeWithUserData"
     }
 ]

@@ -25,6 +25,7 @@ namespace OHOS::Ace::NG {
 enum class ToastShowMode {
     DEFAULT = 0,
     TOP_MOST = 1,
+    SYSTEM_TOP_MOST = 2,
 };
 struct ToastInfo {
     std::string message;
@@ -66,6 +67,10 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         LayoutProperty::ToJsonValue(json, filter);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("Bottom", GetBottom()->ToString().c_str(), filter);
         json->PutExtAttr("ToastShowMode",
             GetShowModeValue(ToastShowMode::DEFAULT) == ToastShowMode::DEFAULT ? "DEFAULT" : "TOP_MOST", filter);

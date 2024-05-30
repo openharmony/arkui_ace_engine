@@ -276,6 +276,9 @@ int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventTyp
 
 int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType, int32_t targetId, void* userData)
 {
+    if (!nodePtr) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto originEventType = ConvertOriginEventType(eventType, nodePtr->type);
     if (originEventType < 0) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "event is not supported %{public}d", eventType);
@@ -369,6 +372,24 @@ void UnregisterOnEvent()
     g_eventReceiver = nullptr;
 }
 
+void SetNodeEvent(ArkUINodeEvent* innerEvent)
+{
+    auto nativeNodeEventType = GetNativeNodeEventType(innerEvent);
+    auto eventType = static_cast<ArkUI_NodeEventType>(nativeNodeEventType);
+    auto* nodePtr = reinterpret_cast<ArkUI_NodeHandle>(innerEvent->extraParam);
+    auto extraData = reinterpret_cast<ExtraData*>(nodePtr->extraData);
+    auto innerEventExtraParam = extraData->eventMap.find(eventType);
+    if (g_compatibleEventReceiver) {
+        ArkUI_CompatibleNodeEvent nodeEvent;
+        nodeEvent.node = nodePtr;
+        nodeEvent.eventId = innerEventExtraParam->second->targetId;
+        if (ConvertEvent(innerEvent, &nodeEvent)) {
+            g_compatibleEventReceiver(&nodeEvent);
+            ConvertEventResult(&nodeEvent, innerEvent);
+        }
+    }
+}
+
 void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
 {
     if (!innerEvent) {
@@ -415,15 +436,7 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
         }
         HandleNodeEvent(&event);
     }
-    if (g_compatibleEventReceiver) {
-        ArkUI_CompatibleNodeEvent event;
-        event.node = nodePtr;
-        event.eventId = innerEventExtraParam->second->targetId;
-        if (ConvertEvent(innerEvent, &event)) {
-            g_compatibleEventReceiver(&event);
-            ConvertEventResult(&event, innerEvent);
-        }
-    }
+    SetNodeEvent(innerEvent);
 }
 
 int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent)
@@ -483,7 +496,6 @@ void HandleNodeEvent(ArkUI_NodeEvent* event)
 
 int32_t CheckEvent(ArkUI_NodeEvent* event)
 {
-    // TODO.
     return 0;
 }
 
@@ -510,7 +522,7 @@ int32_t SetLengthMetricUnit(ArkUI_NodeHandle nodePtr, ArkUI_LengthMetricUnit uni
         return ERROR_CODE_PARAM_INVALID;
     }
     if (!InRegion(static_cast<int32_t>(ARKUI_LENGTH_METRIC_UNIT_DEFAULT),
-            static_cast<int32_t>(ARKUI_LENGTH_METRIC_UNIT_FP), static_cast<int32_t>(unit))) {
+        static_cast<int32_t>(ARKUI_LENGTH_METRIC_UNIT_FP), static_cast<int32_t>(unit))) {
         return ERROR_CODE_PARAM_INVALID;
     }
     nodePtr->lengthMetricUnit = unit;

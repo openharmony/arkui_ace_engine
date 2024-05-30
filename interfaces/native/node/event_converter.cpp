@@ -45,6 +45,33 @@ constexpr int32_t ORIGIN_MOUSE_BUTTON_MIDDLE = 4;
 constexpr int32_t ORIGIN_MOUSE_BUTTON_BACK = 8;
 constexpr int32_t ORIGIN_MOUSE_BUTTON_FORWARD = 16;
 
+void ConvertToOriginEvent(const ArkUITouchEvent& origin, ArkUI_NodeTouchEvent& event)
+{
+    if (origin.sourceType == UI_INPUT_EVENTT_SOURCE_TYPE_TOUCH_SCREEN) {
+        event.sourceType = NODE_SOURCE_TYPE_TOUCH_SCREEN;
+    } else {
+        event.sourceType = NODE_SOURCE_TYPE_UNKNOWN;
+    }
+    switch (origin.action) {
+        case static_cast<int32_t>(TouchType::DOWN):
+            event.action = NODE_ACTION_DOWN;
+            break;
+        // TouchType::UP
+        case static_cast<int32_t>(TouchType::UP):
+            event.action = NODE_ACTION_UP;
+            break;
+            // TouchType::MOVE
+        case static_cast<int32_t>(TouchType::MOVE):
+            event.action = NODE_ACTION_MOVE;
+            break;
+        case static_cast<int32_t>(TouchType::CANCEL):
+            event.action = NODE_ACTION_CANCEL;
+            break;
+        default:
+            event.action = static_cast<ArkUI_NodeTouchEventAction>(-1);
+    }
+}
+
 void ConvertToTouchEvent(const ArkUITouchEvent& origin, ArkUI_NodeTouchEvent& event)
 {
     memset_s(&event, sizeof(ArkUI_NodeTouchEvent), 0, sizeof(ArkUI_NodeTouchEvent));
@@ -67,30 +94,7 @@ void ConvertToTouchEvent(const ArkUITouchEvent& origin, ArkUI_NodeTouchEvent& ev
     event.actionTouch.rawY = origin.actionTouchPoint.rawY;
 
     event.timeStamp = origin.timeStamp;
-    if (origin.sourceType == UI_INPUT_EVENTT_SOURCE_TYPE_TOUCH_SCREEN) {
-        event.sourceType = NODE_SOURCE_TYPE_TOUCH_SCREEN;
-    } else {
-        event.sourceType = NODE_SOURCE_TYPE_UNKNOWN;
-    }
-
-    switch (origin.action) {
-        case static_cast<int32_t>(TouchType::DOWN):
-            event.action = NODE_ACTION_DOWN;
-            break;
-        // TouchType::UP
-        case static_cast<int32_t>(TouchType::UP):
-            event.action = NODE_ACTION_UP;
-            break;
-            // TouchType::MOVE
-        case static_cast<int32_t>(TouchType::MOVE):
-            event.action = NODE_ACTION_MOVE;
-            break;
-        case static_cast<int32_t>(TouchType::CANCEL):
-            event.action = NODE_ACTION_CANCEL;
-            break;
-        default:
-            event.action = static_cast<ArkUI_NodeTouchEventAction>(-1);
-    }
+    ConvertToOriginEvent(origin, event);
     static ArkUI_Uint32 touchPointSize = origin.touchPointSize;
     static ArkUITouchPoint* touchPoints = origin.touchPointes;
     auto getTouchPoints = [](ArkUI_NodeTouchPoint** points) -> ArkUI_Int32 {

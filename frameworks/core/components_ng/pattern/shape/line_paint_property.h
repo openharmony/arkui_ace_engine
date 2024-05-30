@@ -62,6 +62,10 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         ShapePaintProperty::ToJsonValue(json, filter);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         if (propStartPoint_.has_value()) {
             auto startPointArray = JsonUtil::CreateArray(true);
             startPointArray->Put("0", propStartPoint_.value().first.Value());

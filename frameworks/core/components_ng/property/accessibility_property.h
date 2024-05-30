@@ -431,6 +431,16 @@ public:
         accessibilityGroup_ = accessibilityGroup;
     }
 
+    void SetChildTreeId(int32_t childTreeId)
+    {
+        childTreeId_ = childTreeId;
+    }
+
+    void SetChildWindowId(int32_t childWindowId)
+    {
+        childWindowId_ = childWindowId;
+    }
+
     void SetAccessibilityText(const std::string& text)
     {
         accessibilityText_ = text;
@@ -449,6 +459,16 @@ public:
     bool IsAccessibilityGroup() const
     {
         return accessibilityGroup_;
+    }
+
+    int32_t GetChildTreeId() const
+    {
+        return childTreeId_;
+    }
+
+    int32_t GetChildWindowId() const
+    {
+        return childWindowId_;
     }
 
     void SaveAccessibilityVirtualNode(const RefPtr<UINode>& node)
@@ -620,6 +640,8 @@ protected:
     ActionLongClickImpl actionLongClickImpl_;
     ActionsImpl actionsImpl_;
     bool accessibilityGroup_ = false;
+    int32_t childTreeId_ = -1;
+    int32_t childWindowId_ = 0;
     RefPtr<UINode> accessibilityVirtualNode_;
     std::optional<std::string> accessibilityText_;
     std::optional<std::string> accessibilityDescription_;

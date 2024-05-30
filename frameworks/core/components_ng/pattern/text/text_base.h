@@ -23,7 +23,7 @@
 #include "core/common/container.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_client.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
-#include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -254,6 +254,8 @@ public:
     {
         return avoidKeyboardOffset_;
     }
+
+    virtual void OnHandleAreaChanged() {}
 
 protected:
     TextSelector textSelector_;

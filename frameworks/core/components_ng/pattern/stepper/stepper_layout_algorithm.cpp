@@ -276,6 +276,12 @@ void StepperLayoutAlgorithm::SuitAgeLayoutButton(
     } else {
         buttonOffset += OffsetF(stepperPadding.left.value_or(0.0), -stepperPadding.bottom.value_or(0.0));
     }
+    bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (isRightToLeft) {
+        auto frameWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
+        auto offsetX = frameWidth - ButtonWrapper->GetGeometryNode()->GetFrameSize().Width() - buttonOffset.GetX();
+        buttonOffset.SetX(offsetX);
+    }
     ButtonWrapper->GetGeometryNode()->SetMarginFrameOffset(buttonOffset);
     ButtonWrapper->Layout();
 }

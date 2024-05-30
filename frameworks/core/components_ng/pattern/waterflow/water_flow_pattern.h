@@ -20,8 +20,8 @@
 #include "core/components_ng/pattern/waterflow/water_flow_accessibility_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_content_modifier.h"
 #include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_algorithm_base.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_info_base.h"
+#include "core/components_ng/pattern/waterflow/layout/water_flow_layout_algorithm_base.h"
+#include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 
@@ -162,6 +162,9 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void CheckScrollable();
     bool IsOutOfBoundary(bool useCurrentDelta = true) override;
+
+    void TriggerPostLayoutEvents();
+
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     SizeF GetContentSize() const;
     void MarkDirtyNodeSelf();

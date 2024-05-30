@@ -135,6 +135,10 @@ OffsetF GridProperty::GetContainerPosition()
 void GridProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     const char* GRID_SIZE_TYPE[] = { "default", "sx", "sm", "md", "lg" };
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     if (!gridInfo_) {
         auto item = std::find_if(typedPropertySet_.begin(), typedPropertySet_.end(),
             [](const GridTypedProperty& p) { return p.type_ == GridSizeType::UNDEFINED; });

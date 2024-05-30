@@ -46,6 +46,7 @@ constexpr uint32_t COUNTER_TEXT_MAXLINE = 1;
 constexpr int32_t DEFAULT_MODE = -1;
 constexpr int32_t SHOW_COUNTER_PERCENT = 100;
 constexpr double TEXT_DECORATION_DISABLED_COLOR_ALPHA = 0.2;
+constexpr Dimension INLINE_MIN_WITH = 16.0_vp;
 } // namespace
 void TextFieldLayoutAlgorithm::ConstructTextStyles(
     const RefPtr<FrameNode>& frameNode, TextStyle& textStyle, std::string& textContent, bool& showPlaceHolder)
@@ -168,7 +169,8 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::InlineMeasureContent(const Layout
     GetInlineMeasureItem(contentConstraint, layoutWrapper, inlineIdealHeight);
     auto contentHeight = GreatNotEqual(paragraph_->GetLongestLine(), 0.0)
         ? paragraph_->GetHeight() : std::max(preferredHeight_, paragraph_->GetHeight());
-
+    auto minWidth = INLINE_MIN_WITH.ConvertToPx();
+    contentWidth = GreatNotEqual(contentWidth, minWidth) ? contentWidth : minWidth;
     return SizeF(contentWidth, std::min(inlineIdealHeight, contentHeight));
 }
 
@@ -947,11 +949,12 @@ bool TextFieldLayoutAlgorithm::AdaptInlineFocusMinFontSize(TextStyle& textStyle,
     auto textFieldLayoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(textFieldLayoutProperty, false);
     auto maxViewLines = textFieldLayoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
+    auto newContentConstraint = BuildInlineFocusLayoutConstraint(contentConstraint, layoutWrapper);
     auto maxSize = GetMaxMeasureSize(contentConstraint);
     GetSuitableSize(maxSize, layoutWrapper);
     while (GreatOrEqual(maxFontSize, minFontSize)) {
         textStyle.SetFontSize(Dimension(maxFontSize));
-        if (!CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper)) {
+        if (!CreateParagraphAndLayout(textStyle, content, newContentConstraint, layoutWrapper)) {
             return false;
         }
         if (!IsInlineFocusAdaptMinExceedLimit(maxSize, maxViewLines)) {
@@ -960,6 +963,26 @@ bool TextFieldLayoutAlgorithm::AdaptInlineFocusMinFontSize(TextStyle& textStyle,
         maxFontSize -= stepSize;
     }
     return true;
+}
+
+LayoutConstraintF TextFieldLayoutAlgorithm::BuildInlineFocusLayoutConstraint(
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+{
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(frameNode, contentConstraint);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, contentConstraint);
+    auto textFieldTheme = pattern->GetTheme();
+    CHECK_NULL_RETURN(textFieldTheme, contentConstraint);
+    auto safeBoundary = textFieldTheme->GetInlineBorderWidth().ConvertToPx() * 2;
+    auto inlineBoundary = static_cast<float>(safeBoundary) + PARAGRAPH_SAVE_BOUNDARY;
+    auto newContentConstraint = contentConstraint;
+    newContentConstraint.maxSize.SetWidth(newContentConstraint.maxSize.Width() - inlineBoundary);
+    if (newContentConstraint.selfIdealSize.Width()) {
+        newContentConstraint.selfIdealSize.SetWidth(newContentConstraint.selfIdealSize.Width().value() -
+            inlineBoundary);
+    }
+    return newContentConstraint;
 }
 
 bool TextFieldLayoutAlgorithm::IsInlineFocusAdaptMinExceedLimit(const SizeF& maxSize, uint32_t maxViewLines)

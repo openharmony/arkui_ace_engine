@@ -38,6 +38,16 @@ namespace {
 constexpr int32_t STANDARD_FRAME_DURATION = 100;
 constexpr int32_t FORM_REPEAT_COUNT = 1;
 constexpr float RESIZE_THRESHOLD = 0.7f;
+
+struct RSDataWrapper {
+    std::shared_ptr<RSData> data;
+};
+
+inline void RSDataWrapperReleaseProc(const void*, void* context)
+{
+    RSDataWrapper* wrapper = reinterpret_cast<RSDataWrapper*>(context);
+    delete wrapper;
+}
 } // namespace
 
 #ifndef USE_ROSEN_DRAWING
@@ -63,7 +73,8 @@ RefPtr<CanvasImage> AnimatedImage::Create(
     CHECK_NULL_RETURN(data, nullptr);
     auto rsData = data->GetRSData();
     CHECK_NULL_RETURN(rsData, nullptr);
-    auto skData = SkData::MakeWithoutCopy(rsData->GetData(), rsData->GetSize());
+    RSDataWrapper* wrapper = new RSDataWrapper{rsData};
+    auto skData = SkData::MakeWithProc(rsData->GetData(), rsData->GetSize(), RSDataWrapperReleaseProc, wrapper);
     auto codec = SkCodec::MakeFromData(skData);
     CHECK_NULL_RETURN(codec, nullptr);
     if (SystemProperties::GetImageFrameworkEnabled()) {

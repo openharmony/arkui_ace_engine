@@ -269,11 +269,11 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
     if (pageProfile_.compare(0, profilePrefix.size(), profilePrefix) == 0) {
         pageProfile_ = pageProfile_.substr(profilePrefix.length()).append(".json");
     }
-    auto targetVersion = options.targetVersion;
+    targetVersion_ = options.targetVersion;
     auto releaseType = options.releaseType;
     bool enablePartialUpdate = options.enablePartialUpdate;
     useNewPipeline_ = AceNewPipeJudgement::QueryAceNewPipeEnabledStage(
-        "", compatibleVersion_, targetVersion, releaseType, !enablePartialUpdate);
+        "", compatibleVersion_, targetVersion_, releaseType, !enablePartialUpdate);
 }
 
 UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, bool isCard)
@@ -339,6 +339,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window,
     rsWindow_ = window;
 
     AceApplicationInfo::GetInstance().SetLocale(language_, region_, script_, "");
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(targetVersion_);
     SetFontMgrConfig(containerSdkPath_);
     EventDispatcher::GetInstance().Initialize();
     SystemProperties::SetExtSurfaceEnabled(!containerSdkPath_.empty());
@@ -371,6 +372,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window,
     config.SetFontRatio(deviceConfig_.fontRatio);
     container->SetResourceConfiguration(config);
     container->SetPageProfile(pageProfile_);
+    container->SetApiTargetVersion(targetVersion_);
     std::vector<std::string> paths;
     paths.push_back(assetPath_);
     std::string appResourcesPath(appResourcesPath_);

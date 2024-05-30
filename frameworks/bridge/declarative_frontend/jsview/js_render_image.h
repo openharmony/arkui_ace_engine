@@ -26,6 +26,15 @@
 namespace OHOS::Ace::Framework {
 class JSCanvasRenderer;
 
+#define DELETE_RETURN_NULL(var) \
+    do {                        \
+        if (!(var)) {             \
+            delete var;         \
+            var = nullptr;      \
+        }                       \
+        return nullptr;         \
+    } while (0)                 \
+
 void BindNativeFunction(napi_env env, napi_value object, const char* name, napi_callback func);
 void* GetNapiCallbackInfoAndThis(napi_env env, napi_callback_info info);
 
@@ -35,6 +44,7 @@ public:
     ~JSRenderImage() override = default;
 
     static void JSBind(BindingTarget globalObj, void* nativeEngine = nullptr);
+    static void Finalizer(napi_env env, void* data, void* hint);
 
     static napi_value InitImageBitmap(napi_env env);
     static napi_value Constructor(napi_env env, napi_callback_info info);
@@ -50,9 +60,24 @@ public:
     void SetHeight(double height);
     std::string GetSrc();
     void SetCloseCallback(std::function<void()>&& callback);
-    RefPtr<PixelMap> GetPixelMap()
+    RefPtr<PixelMap> GetPixelMap() const
     {
         return pixelMap_;
+    }
+
+    void SetPixelMap(const RefPtr<PixelMap>& pixelMap)
+    {
+        pixelMap_ = pixelMap;
+    }
+
+    std::unique_ptr<Ace::ImageData> GetImageData() const
+    {
+        return std::make_unique<Ace::ImageData>(*imageData_);
+    }
+
+    void SetImageData(const std::unique_ptr<Ace::ImageData>& imageData)
+    {
+        imageData_ = std::make_unique<Ace::ImageData>(*imageData);
     }
 
     RefPtr<NG::SvgDomBase> GetSvgDom()
@@ -85,16 +110,6 @@ public:
         return imageSize_;
     }
 
-    void SetContextId(uint32_t id)
-    {
-        contextId_ = id;
-    }
-    
-    uint32_t GetContextId()
-    {
-        return contextId_;
-    }
-
     void SetUnit(CanvasUnit unit)
     {
         unit_ = unit;
@@ -119,15 +134,22 @@ private:
     napi_value OnSetHeight();
 
     void LoadImage(const std::string& src);
+    void LoadImage(const RefPtr<PixelMap>& pixmap);
     void LoadImage(const ImageSourceInfo& src);
     void OnImageDataReady();
     void OnImageLoadFail(const std::string& errorMsg);
     void OnImageLoadSuccess();
+    static bool NotFormSupport(const std::string& textString);
+    static std::string GetSrcString(napi_env env, napi_value value, size_t textLen);
+    #ifdef PIXEL_MAP_SUPPORTED
+    static RefPtr<PixelMap> GetPixelMap(napi_env env, napi_value value);
+    #endif
 
     RefPtr<NG::CanvasImage> image_;
     RefPtr<NG::ImageObject> imageObj_;
     RefPtr<NG::ImageLoadingContext> loadingCtx_;
     RefPtr<PixelMap> pixelMap_;
+    std::unique_ptr<Ace::ImageData> imageData_;
     RefPtr<NG::SvgDomBase> svgDom_;
     ImageSourceInfo sourceInfo_;
     ImageFit imageFit_ = ImageFit::NONE;
@@ -138,7 +160,6 @@ private:
     double width_ = 0;
     double height_ = 0;
     int32_t instanceId_ = 0;
-    uint32_t contextId_ = 0;
     CanvasUnit unit_ = CanvasUnit::DEFAULT;
 };
 

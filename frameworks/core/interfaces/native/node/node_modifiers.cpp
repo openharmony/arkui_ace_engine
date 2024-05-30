@@ -95,11 +95,13 @@
 #include "core/interfaces/native/node/node_refresh_modifier.h"
 #include "core/interfaces/native/node/node_symbol_glyph_modifier.h"
 #include "core/interfaces/native/node/node_symbol_span_modifier.h"
+#include "core/interfaces/native/node/tab_content_modifier.h"
 #include "core/interfaces/native/node/tabs_modifier.h"
 #include "core/interfaces/native/node/text_clock_modifier.h"
 #include "core/interfaces/native/node/text_timer_modifier.h"
 #include "core/interfaces/native/node/video_modifier.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
+#include "core/interfaces/native/node/node_container_span_modifier.h"
 
 #ifdef MODEL_COMPONENT_SUPPORTED
 #include "core/interfaces/native/node/node_component3d_modifier.h"
@@ -217,7 +219,7 @@ const ArkUINodeModifiers impl = {
     NodeModifier::GetFlexModifier, // FlexModifier
     nullptr, // ScrollBarModifier
     NodeModifier::GetScrollerModifier,
-    nullptr, // TabContentModifier
+    NodeModifier::GetTabContentModifier,
     nullptr, // TabsControllerModifier
     NodeModifier::GetSwiperControllerModifier,
     NodeModifier::GetGestureModifier, // GestureModifier
@@ -243,6 +245,8 @@ const ArkUINodeModifiers impl = {
 #else
     nullptr,
 #endif
+
+    NodeModifier::GetContainerSpanModifier,
 };
 } // namespace
 
