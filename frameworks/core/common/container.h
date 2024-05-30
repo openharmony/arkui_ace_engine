@@ -470,7 +470,7 @@ public:
         return false;
     }
 
-    virtual bool RequestAutoSave(const RefPtr<NG::FrameNode>& node)
+    virtual bool RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std::function<void()>& onFinish = nullptr)
     {
         return false;
     }

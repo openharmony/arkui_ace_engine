@@ -550,7 +550,7 @@ public:
 
     bool RequestAutoFill(const RefPtr<NG::FrameNode>& node,
         AceAutoFillType autoFillType, bool& isPopup, bool isNewPassWord = false) override;
-    bool RequestAutoSave(const RefPtr<NG::FrameNode>& node) override;
+    bool RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std::function<void()>& onFinish) override;
     std::shared_ptr<NavigationController> GetNavigationController(const std::string& navigationId) override;
     bool ChangeType(AbilityBase::ViewData& viewData);
     AceAutoFillType PlaceHolderToType(const std::string& onePlaceHolder) override;
