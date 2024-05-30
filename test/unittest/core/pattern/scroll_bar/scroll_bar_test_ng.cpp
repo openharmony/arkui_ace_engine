@@ -1446,8 +1446,8 @@ HWTEST_F(ScrollBarTestNg, BarCollectLongPressTarget001, TestSize.Level1)
 HWTEST_F(ScrollBarTestNg, ScrollBarTest020, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = CONTAINER_SIZE;
     layoutConstraint.selfIdealSize.SetSize(SCROLL_BAR_SELF_SIZE);
@@ -1470,7 +1470,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest020, TestSize.Level1)
         true, false, static_cast<int>(Axis::VERTICAL), static_cast<int>(DisplayMode::ON), layoutConstraint);
     ret = pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper_, config);
     EXPECT_EQ(ret, true);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1481,8 +1481,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest020, TestSize.Level1)
 HWTEST_F(ScrollBarTestNg, ScrollBarTest021, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = CONTAINER_SIZE;
     layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
@@ -1492,7 +1492,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest021, TestSize.Level1)
     auto scrollBarSize = layoutWrapper_->GetGeometryNode()->GetFrameSize();
     EXPECT_EQ(scrollBarSize, SCROLL_BAR_SELF_SIZE) << "scrollBarSize: " << scrollBarSize.ToString()
                                                    << " SCROLL_BAR_SELF_SIZE: " << SCROLL_BAR_SELF_SIZE.ToString();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1503,8 +1503,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest021, TestSize.Level1)
 HWTEST_F(ScrollBarTestNg, ScrollBarTest022, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = CONTAINER_SIZE;
     layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
@@ -1529,7 +1529,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest022, TestSize.Level1)
     scrollBarProxy->NotifyScrollBarNode(1.0, SCROLL_FROM_BAR);
     EXPECT_EQ(distance, 1.0);
     EXPECT_EQ(source, SCROLL_FROM_BAR);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1540,8 +1540,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest022, TestSize.Level1)
 HWTEST_F(ScrollBarTestNg, ScrollBarTest023, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
     LayoutConstraintF layoutConstraint;
@@ -1568,7 +1568,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest023, TestSize.Level1)
     pattern_->SetCurrentPosition(SCROLL_BAR_FLOAT_100);
     pattern_->HandleScrollBarOutBoundary(SCROLL_BAR_FLOAT_100);
     EXPECT_EQ(pattern_->scrollBar_->outBoundary_, SCROLL_BAR_FLOAT_100);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1579,8 +1579,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest023, TestSize.Level1)
 HWTEST_F(ScrollBarTestNg, ScrollBarTest024, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
     LayoutConstraintF layoutConstraint;
@@ -1602,7 +1602,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest024, TestSize.Level1)
     EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::GROW);
     scrollPaint->UpdateOverlayModifier(&paintWrapper);
     EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1613,8 +1613,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest024, TestSize.Level1)
 HWTEST_F(ScrollBarTestNg, ScrollBarTest063, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
     LayoutConstraintF layoutConstraint;
@@ -1641,7 +1641,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest063, TestSize.Level1)
     pattern_->SetCurrentPosition(SCROLL_BAR_FLOAT_10);
     pattern_->HandleScrollBarOutBoundary(SCROLL_BAR_FLOAT_10);
     EXPECT_EQ(pattern_->scrollBar_->outBoundary_, SCROLL_BAR_FLOAT_10);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1652,8 +1652,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest063, TestSize.Level1)
 HWTEST_F(ScrollBarTestNg, ScrollBarTest064, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
     LayoutConstraintF layoutConstraint;
@@ -1680,7 +1680,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest064, TestSize.Level1)
     pattern_->SetCurrentPosition(SCROLL_BAR_FLOAT_200);
     pattern_->HandleScrollBarOutBoundary(SCROLL_BAR_FLOAT_200);
     EXPECT_EQ(pattern_->scrollBar_->outBoundary_, SCROLL_BAR_FLOAT_200);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1691,8 +1691,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest064, TestSize.Level1)
 HWTEST_F(ScrollBarTestNg, ScrollBarTest065, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
     LayoutConstraintF layoutConstraint;
@@ -1719,7 +1719,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest065, TestSize.Level1)
     pattern_->SetCurrentPosition(SCROLL_BAR_FLOAT_100);
     pattern_->HandleScrollBarOutBoundary(SCROLL_BAR_FLOAT_100);
     EXPECT_EQ(pattern_->scrollBar_->outBoundary_, SCROLL_BAR_FLOAT_100);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1730,8 +1730,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest065, TestSize.Level1)
 HWTEST_F(ScrollBarTestNg, ScrollBarTest066, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
     LayoutConstraintF layoutConstraint;
@@ -1758,7 +1758,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest066, TestSize.Level1)
     pattern_->SetCurrentPosition(SCROLL_BAR_FLOAT_10);
     pattern_->HandleScrollBarOutBoundary(SCROLL_BAR_FLOAT_10);
     EXPECT_EQ(pattern_->scrollBar_->outBoundary_, SCROLL_BAR_FLOAT_10);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1769,8 +1769,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest066, TestSize.Level1)
 HWTEST_F(ScrollBarTestNg, ScrollBarTest067, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
     LayoutConstraintF layoutConstraint;
@@ -1797,7 +1797,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest067, TestSize.Level1)
     pattern_->SetCurrentPosition(SCROLL_BAR_FLOAT_200);
     pattern_->HandleScrollBarOutBoundary(SCROLL_BAR_FLOAT_200);
     EXPECT_EQ(pattern_->scrollBar_->outBoundary_, SCROLL_BAR_FLOAT_200);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1808,8 +1808,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest067, TestSize.Level1)
 HWTEST_F(ScrollBarTestNg, ScrollBarTest068, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
     LayoutConstraintF layoutConstraint;
@@ -1836,7 +1836,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest068, TestSize.Level1)
     pattern_->SetCurrentPosition(SCROLL_BAR_FLOAT_100);
     pattern_->HandleScrollBarOutBoundary(SCROLL_BAR_FLOAT_100);
     EXPECT_EQ(pattern_->scrollBar_->outBoundary_, SCROLL_BAR_FLOAT_100);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1847,8 +1847,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest068, TestSize.Level1)
 HWTEST_F(ScrollBarTestNg, ScrollBarTest069, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
     LayoutConstraintF layoutConstraint;
@@ -1875,7 +1875,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest069, TestSize.Level1)
     pattern_->SetCurrentPosition(SCROLL_BAR_FLOAT_10);
     pattern_->HandleScrollBarOutBoundary(SCROLL_BAR_FLOAT_10);
     EXPECT_EQ(pattern_->scrollBar_->outBoundary_, SCROLL_BAR_FLOAT_10);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1886,8 +1886,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest069, TestSize.Level1)
 HWTEST_F(ScrollBarTestNg, ScrollBarTest070, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
     LayoutConstraintF layoutConstraint;
@@ -1914,7 +1914,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest070, TestSize.Level1)
     pattern_->SetCurrentPosition(SCROLL_BAR_FLOAT_200);
     pattern_->HandleScrollBarOutBoundary(SCROLL_BAR_FLOAT_200);
     EXPECT_EQ(pattern_->scrollBar_->outBoundary_, SCROLL_BAR_FLOAT_200);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1925,8 +1925,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest070, TestSize.Level1)
 HWTEST_F(ScrollBarTestNg, ScrollBarTest071, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
     LayoutConstraintF layoutConstraint;
@@ -1953,7 +1953,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest071, TestSize.Level1)
     pattern_->SetCurrentPosition(SCROLL_BAR_FLOAT_100);
     pattern_->HandleScrollBarOutBoundary(SCROLL_BAR_FLOAT_100);
     EXPECT_EQ(pattern_->scrollBar_->outBoundary_, SCROLL_BAR_FLOAT_100);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1964,8 +1964,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest071, TestSize.Level1)
 HWTEST_F(ScrollBarTestNg, ScrollBarTest072, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
     LayoutConstraintF layoutConstraint;
@@ -1992,7 +1992,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest072, TestSize.Level1)
     pattern_->SetCurrentPosition(SCROLL_BAR_FLOAT_10);
     pattern_->HandleScrollBarOutBoundary(SCROLL_BAR_FLOAT_10);
     EXPECT_EQ(pattern_->scrollBar_->outBoundary_, SCROLL_BAR_FLOAT_10);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -2003,8 +2003,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest072, TestSize.Level1)
 HWTEST_F(ScrollBarTestNg, ScrollBarTest073, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
     LayoutConstraintF layoutConstraint;
@@ -2031,7 +2031,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest073, TestSize.Level1)
     pattern_->SetCurrentPosition(SCROLL_BAR_FLOAT_200);
     pattern_->HandleScrollBarOutBoundary(SCROLL_BAR_FLOAT_200);
     EXPECT_EQ(pattern_->scrollBar_->outBoundary_, SCROLL_BAR_FLOAT_200);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -2042,8 +2042,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest073, TestSize.Level1)
 HWTEST_F(ScrollBarTestNg, ScrollBarTest074, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
     LayoutConstraintF layoutConstraint;
@@ -2065,7 +2065,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest074, TestSize.Level1)
     EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::GROW);
     scrollPaint->UpdateOverlayModifier(&paintWrapper);
     EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -2076,8 +2076,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest074, TestSize.Level1)
 HWTEST_F(ScrollBarTestNg, ScrollBarTest075, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
     LayoutConstraintF layoutConstraint;
@@ -2099,7 +2099,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest075, TestSize.Level1)
     EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::GROW);
     scrollPaint->UpdateOverlayModifier(&paintWrapper);
     EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -2110,8 +2110,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest075, TestSize.Level1)
 HWTEST_F(ScrollBarTestNg, ScrollBarTest076, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
     LayoutConstraintF layoutConstraint;
@@ -2133,7 +2133,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest076, TestSize.Level1)
     EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::GROW);
     scrollPaint->UpdateOverlayModifier(&paintWrapper);
     EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -2144,8 +2144,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest076, TestSize.Level1)
 HWTEST_F(ScrollBarTestNg, ScrollBarTest077, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
     LayoutConstraintF layoutConstraint;
@@ -2167,7 +2167,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest077, TestSize.Level1)
     EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::GROW);
     scrollPaint->UpdateOverlayModifier(&paintWrapper);
     EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -2178,8 +2178,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest077, TestSize.Level1)
 HWTEST_F(ScrollBarTestNg, ScrollBarTest078, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
     LayoutConstraintF layoutConstraint;
@@ -2201,7 +2201,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest078, TestSize.Level1)
     EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::SHRINK);
     scrollPaint->UpdateOverlayModifier(&paintWrapper);
     EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -2212,8 +2212,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest078, TestSize.Level1)
 HWTEST_F(ScrollBarTestNg, ScrollBarTest79, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
     LayoutConstraintF layoutConstraint;
@@ -2235,7 +2235,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest79, TestSize.Level1)
     EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::SHRINK);
     scrollPaint->UpdateOverlayModifier(&paintWrapper);
     EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -2246,8 +2246,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest79, TestSize.Level1)
 HWTEST_F(ScrollBarTestNg, ScrollBarTest80, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
     LayoutConstraintF layoutConstraint;
@@ -2269,7 +2269,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest80, TestSize.Level1)
     EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::SHRINK);
     scrollPaint->UpdateOverlayModifier(&paintWrapper);
     EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -2280,8 +2280,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest80, TestSize.Level1)
 HWTEST_F(ScrollBarTestNg, ScrollBarTest081, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
     LayoutConstraintF layoutConstraint;
@@ -2303,7 +2303,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest081, TestSize.Level1)
     EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
     scrollPaint->UpdateOverlayModifier(&paintWrapper);
     EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -2314,8 +2314,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest081, TestSize.Level1)
 HWTEST_F(ScrollBarTestNg, ScrollBarTest82, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
     LayoutConstraintF layoutConstraint;
@@ -2337,7 +2337,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest82, TestSize.Level1)
     EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
     scrollPaint->UpdateOverlayModifier(&paintWrapper);
     EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -2348,8 +2348,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest82, TestSize.Level1)
 HWTEST_F(ScrollBarTestNg, ScrollBarTest083, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
     LayoutConstraintF layoutConstraint;
@@ -2371,6 +2371,6 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest083, TestSize.Level1)
     EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
     scrollPaint->UpdateOverlayModifier(&paintWrapper);
     EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 } // namespace OHOS::Ace::NG
