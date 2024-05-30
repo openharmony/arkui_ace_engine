@@ -145,6 +145,8 @@ public:
 
     void SetContentNodeGrayScale(float grayscale) override {};
 
+    void PreLayout() override {};
+
 private:
     UIContentErrorCode CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo,
         napi_value storage);

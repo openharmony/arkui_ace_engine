@@ -763,6 +763,9 @@ public:
     {
         predictNode_.Reset();
     }
+
+    void PreLayout(uint64_t nanoTimestamp, uint32_t frameCount);
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);

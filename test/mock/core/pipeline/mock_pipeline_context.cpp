@@ -606,6 +606,9 @@ void PipelineContext::CheckAndLogLastConsumedMouseEventInfo(int32_t eventId, Mou
 void PipelineContext::CheckAndLogLastReceivedAxisEventInfo(int32_t eventId, AxisAction action) {}
 
 void PipelineContext::CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, AxisAction action) {}
+
+void PipelineContext::PreLayout(uint64_t nanoTimestamp, uint32_t frameCount) {}
+
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 
