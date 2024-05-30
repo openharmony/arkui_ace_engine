@@ -130,9 +130,7 @@ ohos_unittest("plugin_pattern_test_ng") {
   ]
 
   if (ace_use_rosen_drawing) {
-    deps += [
-      "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics::2d_graphics",
-    ]
+    deps += [ "graphic_2d:2d_graphics" ]
   }
 
   external_deps = [

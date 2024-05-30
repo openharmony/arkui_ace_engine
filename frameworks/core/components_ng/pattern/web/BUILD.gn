@@ -15,21 +15,6 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 import(
     "//foundation/arkui/ace_engine/frameworks/core/components_ng/components.gni")
 
-if (is_ohos_standard_system) {
-  config("ohos_web_config") {
-    include_dirs = [
-      "$ability_runtime_path/interfaces/kits/native/appkit/app",
-      "//commonlibrary/c_utils/base/include",
-      "//foundation/window/window_manager/interfaces/innerkits/wm",
-      "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
-      "//foundation/graphic/graphic_2d/utils/buffer_handle/export",
-      "//foundation/multimedia/image_framework/interfaces/innerkits/include",
-      "//foundation/window/window_manager/interfaces/innerkits",
-      "//foundation/window/window_manager/interfaces/innerkits/dm",
-    ]
-  }
-}
-
 build_component_ng("web_pattern_ng") {
   if (is_arkui_x) {
     sources = [
@@ -55,8 +40,8 @@ build_component_ng("web_pattern_ng") {
       "web_pattern.cpp",
     ]
 
-    configs = [ ":ohos_web_config" ]
     external_deps = [
+      # Using the window.h path under window.
       "ability_runtime:app_manager",
       "app_file_service:fileuri_native",
       "c_utils:utils",

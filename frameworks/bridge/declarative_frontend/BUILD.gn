@@ -640,10 +640,6 @@ template("declarative_js_engine") {
         if (defined(config.dynamic_component_support) &&
             config.dynamic_component_support && !build_ohos_sdk) {
           external_deps += [ "ets_utils:worker" ]
-
-          include_dirs +=
-              [ "//commonlibrary/ets_utils/js_concurrent_module/common" ]
-
           sources += [
             "jsview/js_dynamic_component.cpp",
             "jsview/js_isolated_component.cpp",
@@ -915,9 +911,6 @@ template("declarative_js_engine_ng") {
       if (defined(config.dynamic_component_support) &&
           config.dynamic_component_support && !build_ohos_sdk) {
         external_deps += [ "ets_utils:worker" ]
-
-        include_dirs =
-            [ "//commonlibrary/ets_utils/js_concurrent_module/common" ]
 
         sources += [
           "jsview/js_dynamic_component.cpp",

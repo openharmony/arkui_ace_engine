@@ -73,7 +73,7 @@ template("js_engine_ark") {
       "jsi_stepper_bridge.cpp",
     ]
 
-    include_dirs = [ "$c_utils_root/base/include" ]
+    include_dirs = [ "//commonlibrary/c_utils/base/include" ]
     cflags_cc = [ "-Wno-thread-safety-attributes" ]
 
     # xcomponent components supports phone, TV and wearable except PC Preview

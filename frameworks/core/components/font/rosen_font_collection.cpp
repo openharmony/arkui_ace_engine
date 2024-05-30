@@ -32,7 +32,6 @@
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
 #include "core/components_ng/render/drawing.h"
-#include "rosen_text/properties/font_collection_txt.h"
 
 namespace OHOS::Ace {
 

@@ -135,11 +135,6 @@ template("build_component") {
         } else {
           external_deps += [ "graphic_2d:librender_service_client" ]
           if (ace_use_rosen_drawing) {
-            include_dirs += [
-              "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
-              "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text",
-            ]
-
             external_deps += [ "graphic_2d:2d_graphics" ]
           }
         }

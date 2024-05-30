@@ -103,21 +103,19 @@ ohos_source_set("preview_osal_source") {
       "//foundation/graphic/graphic_2d/rosen/modules/platform:image_native",
     ]
 
-    if (ace_use_rosen_drawing) {
-      deps += [
-        "//foundation/graphic/graphic_2d/interfaces/kits/napi/graphic/drawing:drawing_napi_impl",
-        "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
-      ]
-    }
-
     external_deps = [
       "curl:curl_shared",
       "hilog:libhilog",
     ]
 
-    configs = [ "$ace_root:ace_config" ]
+    if (ace_use_rosen_drawing) {
+      external_deps += [
+        "graphic_2d:2d_graphics",
+        "graphic_2d:drawing_napi_impl",
+      ]
+    }
 
-    include_dirs = [ "//commonlibrary/c_utils/base/include" ]
+    configs = [ "$ace_root:ace_config" ]
 
     if (is_ohos_standard_system) {
       sources += [
