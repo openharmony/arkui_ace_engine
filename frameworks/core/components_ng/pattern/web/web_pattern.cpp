@@ -3272,7 +3272,9 @@ void WebPattern::InitTouchEventListener()
     std::shared_ptr<TouchEventListener> listener = std::make_shared<TouchEventListener>();
     listener->SetPatternToListener(AceType::WeakClaim(this));
 
-    auto context = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
     CHECK_NULL_VOID(context);
 
     context->RegisterTouchEventListener(listener);
@@ -3282,7 +3284,9 @@ void WebPattern::UninitTouchEventListener()
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::UninitTouchEventListener");
 
-    auto context = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
     CHECK_NULL_VOID(context);
 
     context->UnregisterTouchEventListener(AceType::WeakClaim(this));

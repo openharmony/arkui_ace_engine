@@ -3699,11 +3699,11 @@ void PipelineContext::RegisterTouchEventListener(const std::shared_ptr<ITouchEve
     listenerVector_.emplace_back(listener);
 }
 
-void PipelineContext::UnregisterTouchEventListener(WeakPtr<NG::Pattern> pattern)
+void PipelineContext::UnregisterTouchEventListener(const WeakPtr<NG::Pattern>& pattern)
 {
     for (auto iter = listenerVector_.begin(); iter != listenerVector_.end();) {
-        auto rawPtr = (*iter)->GetPatternFromListener().GetRawPtr();
-        if (!rawPtr || rawPtr == pattern.GetRawPtr()) {
+        auto patternPtr = (*iter)->GetPatternFromListener();
+        if (patternPtr.Invalid() || patternPtr == pattern) {
             iter = listenerVector_.erase(iter);
         } else {
             iter++;

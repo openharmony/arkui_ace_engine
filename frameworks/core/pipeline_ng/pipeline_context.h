@@ -51,10 +51,10 @@
 #include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
+#include "core/components_ng/pattern/web/itouch_event_callback.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_base.h"
-#include "core/components_ng/pattern/web/itouch_event_callback.h"
 
 namespace OHOS::Ace::NG {
 
@@ -739,7 +739,7 @@ public:
     void FlushFrameCallback(uint64_t nanoTimestamp);
 
     void RegisterTouchEventListener(const std::shared_ptr<ITouchEventCallback>& listener);
-    void UnregisterTouchEventListener(WeakPtr<NG::Pattern> pattern);
+    void UnregisterTouchEventListener(const WeakPtr<NG::Pattern>& pattern);
 
     void SetPredictNode(const RefPtr<FrameNode>& node)
     {
