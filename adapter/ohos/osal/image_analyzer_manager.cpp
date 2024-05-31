@@ -258,7 +258,7 @@ void ImageAnalyzerManager::ReleaseImageAnalyzer()
 }
 
 void ImageAnalyzerManager::UpdatePressOverlay(
-    const RefPtr<OHOS::Ace::PixelMap> pixelMap,
+    const RefPtr<OHOS::Ace::PixelMap>& pixelMap,
     int offsetX,
     int offsetY,
     int rectWidth,

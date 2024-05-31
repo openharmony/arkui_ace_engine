@@ -4611,20 +4611,22 @@ void WebPattern::OnRebuildFrame()
     renderContext->AddChild(renderContextForSurface_, 0);
 }
 
-void WebPattern::CreateOverlay(const RefPtr<OHOS::Ace::PixelMap> pixelMap,
-                               int offsetX,
-                               int offsetY,
-                               int rectWidth,
-                               int rectHeight,
-                               int pointX,
-                               int pointY)
+void WebPattern::CreateOverlay(
+    const RefPtr<OHOS::Ace::PixelMap>& pixelMap,
+    int offsetX,
+    int offsetY,
+    int rectWidth,
+    int rectHeight,
+    int pointX,
+    int pointY)
 {
     if (!imageAnalyzerManager_) {
         imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(
             GetHost(),
             ImageAnalyzerHolder::WEB);
     }
-    TAG_LOGI(AceLogTag::ACE_WEB,
+    TAG_LOGI(
+        AceLogTag::ACE_WEB,
         "CreateOverlay, offsetX=%{public}d, offsetY=%{public}d, width=%{public}d, height=%{public}d",
         offsetX,
         offsetY,
@@ -4646,13 +4648,15 @@ void WebPattern::CreateOverlay(const RefPtr<OHOS::Ace::PixelMap> pixelMap,
         std::move(callback));
 }
 
-void WebPattern::OnOverlayStateChanged(int offsetX,
-                                       int offsetY,
-                                       int rectWidth,
-                                       int rectHeight)
+void WebPattern::OnOverlayStateChanged(
+    int offsetX,
+    int offsetY,
+    int rectWidth,
+    int rectHeight)
 {
     if (imageAnalyzerManager_) {
-        TAG_LOGI(AceLogTag::ACE_WEB,
+        TAG_LOGI(
+            AceLogTag::ACE_WEB,
             "OnOverlayStateChanged, offsetX=%{public}d, offsetY=%{public}d, width=%{public}d, height=%{public}d",
             offsetX,
             offsetY,

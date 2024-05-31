@@ -530,17 +530,19 @@ public:
     bool Backward();
     void OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMenuOption);
     void CloseKeyboard();
-    void CreateOverlay(const RefPtr<OHOS::Ace::PixelMap> pixelMap,
-                       int offsetX,
-                       int offsetY,
-                       int rectWidth,
-                       int rectHeight,
-                       int pointX,
-                       int pointY);
-    void OnOverlayStateChanged(int offsetX,
-                               int offsetY,
-                               int rectWidth,
-                               int rectHeight);
+    void CreateOverlay(
+        const RefPtr<OHOS::Ace::PixelMap>& pixelMap,
+        int offsetX,
+        int offsetY,
+        int rectWidth,
+        int rectHeight,
+        int pointX,
+        int pointY);
+    void OnOverlayStateChanged(
+        int offsetX,
+        int offsetY,
+        int rectWidth,
+        int rectHeight);
     void OnTextSelected();
     void DestroyAnalyzerOverlay();
     WebInfoType GetWebInfoType();

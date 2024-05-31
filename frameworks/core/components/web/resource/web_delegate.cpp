@@ -6778,16 +6778,17 @@ void WebDelegate::OnSafeInsetsChange()
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebSafeInsetsChange");
 }
 
-void WebDelegate::CreateOverlay(void* data,
-                                size_t len,
-                                int width,
-                                int height,
-                                int offsetX,
-                                int offsetY,
-                                int rectWidth,
-                                int rectHeight,
-                                int pointX,
-                                int pointY)
+void WebDelegate::CreateOverlay(
+    void* data,
+    size_t len,
+    int width,
+    int height,
+    int offsetX,
+    int offsetY,
+    int rectWidth,
+    int rectHeight,
+    int pointX,
+    int pointY)
 {
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
@@ -6805,17 +6806,19 @@ void WebDelegate::CreateOverlay(void* data,
         pointY);
 }
 
-void WebDelegate::OnOverlayStateChanged(int offsetX,
-                                        int offsetY,
-                                        int rectWidth,
-                                        int rectHeight)
+void WebDelegate::OnOverlayStateChanged(
+    int offsetX,
+    int offsetY,
+    int rectWidth,
+    int rectHeight)
 {
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
-    webPattern->OnOverlayStateChanged(offsetX,
-                                      offsetY,
-                                      rectWidth,
-                                      rectHeight);
+    webPattern->OnOverlayStateChanged(
+        offsetX,
+        offsetY,
+        rectWidth,
+        rectHeight);
 }
 
 void WebDelegate::OnTextSelected()

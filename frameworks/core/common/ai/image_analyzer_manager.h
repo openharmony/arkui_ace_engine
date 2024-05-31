@@ -42,22 +42,25 @@ public:
     void SetImageAnalyzerConfig(void* config);
     void SetImageAnalyzerCallback(onAnalyzedCallback& callback);
     bool IsOverlayCreated();
-    void UpdatePressOverlay(const RefPtr<OHOS::Ace::PixelMap> pixelMap,
-                            int offsetX,
-                            int offsetY,
-                            int rectWidth,
-                            int rectHeight,
-                            int pointX,
-                            int pointY,
-                            onTextSelectedCallback callback);
-    void UpdateOverlayTouchInfo(int touchPointX,
-                                int touchPointY,
-                                TouchType touchType);
-    void UpdateOverlayStatus(bool status,
-                             int offsetX,
-                             int offsetY,
-                             int rectWidth,
-                             int rectHeight);
+    void UpdatePressOverlay(
+        const RefPtr<OHOS::Ace::PixelMap>& pixelMap,
+        int offsetX,
+        int offsetY,
+        int rectWidth,
+        int rectHeight,
+        int pointX,
+        int pointY,
+        onTextSelectedCallback callback);
+    void UpdateOverlayTouchInfo(
+        int touchPointX,
+        int touchPointY,
+        TouchType touchType);
+    void UpdateOverlayStatus(
+        bool status,
+        int offsetX,
+        int offsetY,
+        int rectWidth,
+        int rectHeight);
 
 private:
     RefPtr<NG::FrameNode> frameNode_;

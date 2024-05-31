@@ -961,21 +961,23 @@ public:
 
     void OnCustomKeyboardClose();
 
-    void CreateOverlay(void* data,
-                       size_t len,
-                       int width,
-                       int height,
-                       int offsetX,
-                       int offsetY,
-                       int rectWidth,
-                       int rectHeight,
-                       int pointX,
-                       int pointY);
+    void CreateOverlay(
+        void* data,
+        size_t len,
+        int width,
+        int height,
+        int offsetX,
+        int offsetY,
+        int rectWidth,
+        int rectHeight,
+        int pointX,
+        int pointY);
 
-    void OnOverlayStateChanged(int offsetX,
-                               int offsetY,
-                               int rectWidth,
-                               int rectHeight);
+    void OnOverlayStateChanged(
+        int offsetX,
+        int offsetY,
+        int rectWidth,
+        int rectHeight);
 
     void OnTextSelected();
 
