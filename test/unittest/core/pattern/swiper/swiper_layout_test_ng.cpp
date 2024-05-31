@@ -1681,7 +1681,9 @@ HWTEST_F(SwiperLayoutTestNg, SwiperPatternAlgorithmMeasure003, TestSize.Level1)
  */
 HWTEST_F(SwiperLayoutTestNg, ItemWidth001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetIndicatorType(SwiperIndicatorType::DOT);
+    });
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     RefPtr<NodePaintMethod> nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
