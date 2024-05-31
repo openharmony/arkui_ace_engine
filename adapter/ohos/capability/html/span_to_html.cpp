@@ -28,7 +28,8 @@ namespace OHOS::Ace {
 const constexpr char* CONVERT_PNG_FORMAT = "image/png";
 const constexpr char* DEFAULT_SUFFIX = ".png";
 const mode_t CHOWN_RW_UG = 0660;
-const constexpr char* TEMP_PASTED_DATA_ROOT_PATH = "data/storage/el2/base/temp/pastedata";
+const constexpr size_t COLOR_MIN_LENGHT = 3;
+const constexpr char* TEMP_HTML_CONVERT_DATA_ROOT_PATH = "data/storage/el2/base/temp/htmlconvert";
 extern "C" ACE_FORCE_EXPORT int OHOS_ACE_ConvertHmtlToSpanString(std::vector<uint8_t>& span, std::string& html)
 {
     SpanToHtml convert;
@@ -74,12 +75,13 @@ std::string SpanToHtml::FontWeightToHtml(const std::optional<FontWeight>& value)
 
 void SpanToHtml::ToHtmlColor(std::string& color)
 {
-    if (color.length() < 3) {
+    if (color.length() < COLOR_MIN_LENGHT) {
         return;
     }
     // argb -> rgda
     char second = color[1];
     char third = color[2];
+    // earse 2 character after # and apped at end
     color.erase(1, 2);
     color.push_back(second);
     color.push_back(third);
@@ -133,17 +135,17 @@ std::string SpanToHtml::TextDecorationStyleToHtml(TextDecorationStyle decoration
     return ToHtmlStyleFormat("text-decoration-style", table[index].value);
 }
 
-std::string SpanToHtml::ToHtml(const std::string& key, const std::optional<Dimension>& space)
+std::string SpanToHtml::ToHtml(const std::string& key, const std::optional<Dimension>& dimension)
 {
-    if (!space) {
+    if (!dimension) {
         return "";
     }
-    auto& letterSpace = *space;
-    if (!letterSpace.IsValid()) {
+    auto& value = *dimension;
+    if (!value.IsValid()) {
         return "";
     }
 
-    return ToHtmlStyleFormat(key, letterSpace.ToString());
+    return ToHtmlStyleFormat(key, value.ToString());
 }
 
 std::string SpanToHtml::DeclarationToHtml(const NG::FontStyle& fontStyle)
@@ -155,7 +157,9 @@ std::string SpanToHtml::DeclarationToHtml(const NG::FontStyle& fontStyle)
     std::string html;
     auto color = fontStyle.GetTextDecorationColor();
     if (color) {
-        html += ToHtmlStyleFormat("text-decoration-color", color->ColorToString());
+        auto htmlColor = color->ColorToString();
+        ToHtmlColor(htmlColor);
+        html += ToHtmlStyleFormat("text-decoration-color", htmlColor);
     }
     html += TextDecorationToHtml(type);
     auto style = fontStyle.GetTextDecorationStyle();
@@ -182,9 +186,12 @@ std::string SpanToHtml::ToHtml(const std::optional<std::vector<Shadow>>& shadows
             continue;
         }
 
+        auto htmlColor = shadow.GetColor().ColorToString();
+        ToHtmlColor(htmlColor);
+
         style += Dimension(shadow.GetOffset().GetX()).ToString() + " " +
                  Dimension(shadow.GetOffset().GetY()).ToString() + " " + Dimension(shadow.GetBlurRadius()).ToString() +
-                 " " + shadow.GetColor().ColorToString() + ",";
+                 " " + htmlColor + ",";
     }
     style.pop_back();
 
@@ -356,9 +363,12 @@ int SpanToHtml::WriteLocalFile(RefPtr<PixelMap> pixelMap, std::string& filePath,
         fileName = std::to_string(now) + DEFAULT_SUFFIX;
     }
 
-    CreateDirectory(TEMP_PASTED_DATA_ROOT_PATH);
-    std::string localPath = TEMP_PASTED_DATA_ROOT_PATH + std::string("/") + fileName;
+    CreateDirectory(TEMP_HTML_CONVERT_DATA_ROOT_PATH);
+    std::string localPath = TEMP_HTML_CONVERT_DATA_ROOT_PATH + std::string("/") + fileName;
     RefPtr<ImagePacker> imagePacker = ImagePacker::Create();
+    if (imagePacker == nullptr) {
+        return -1;
+    }
     PackOption option;
     option.format = CONVERT_PNG_FORMAT;
     imagePacker->StartPacking(localPath, option);
@@ -393,7 +403,9 @@ std::string SpanToHtml::ImageToHtml(RefPtr<NG::SpanItem> item)
     }
 
     std::string urlName;
-    WriteLocalFile(pixelMap, *options.image, urlName);
+    int ret = WriteLocalFile(pixelMap, *options.image, urlName);
+    LOGI("img write ret: %{public}d height: %{public}d, width: %{public}d, size:%{public}d", ret, pixelMap->GetHeight(),
+        pixelMap->GetWidth(), pixelMap->GetByteCount());
     std::string imgHtml = "<img src=\"" + urlName + "\" ";
     imgHtml += ToHtml(options.imageAttribute->size);
     if (options.imageAttribute) {
@@ -410,7 +422,8 @@ std::string SpanToHtml::ImageToHtml(RefPtr<NG::SpanItem> item)
     return imgHtml;
 }
 
-std::string SpanToHtml::NormalStyleToHtml(const NG::FontStyle& fontStyle)
+std::string SpanToHtml::NormalStyleToHtml(
+    const NG::FontStyle& fontStyle, const OHOS::Ace::NG::TextLineStyle& textLineStyle)
 {
     std::string style = FontSizeToHtml(fontStyle.GetFontSize());
     style += FontStyleToHtml(fontStyle.GetItalicFontStyle());
@@ -418,6 +431,7 @@ std::string SpanToHtml::NormalStyleToHtml(const NG::FontStyle& fontStyle)
     style += ColorToHtml(fontStyle.GetTextColor());
     style += FontFamilyToHtml(fontStyle.GetFontFamily());
     style += DeclarationToHtml(fontStyle);
+    style += ToHtml("line-height", textLineStyle.GetLineHeight());
     style += ToHtml("letter-spacing", fontStyle.GetLetterSpacing());
     style += ToHtml(fontStyle.GetTextShadow());
     if (style.empty()) {
@@ -502,7 +516,6 @@ std::string SpanToHtml::LeadingMarginToHtml(const OHOS::Ace::NG::TextLineStyle& 
 std::string SpanToHtml::ParagraphStyleToHtml(const OHOS::Ace::NG::TextLineStyle& textLineStyle)
 {
     auto details = ToHtml(textLineStyle.GetTextAlign());
-    details += ToHtml("line-height", textLineStyle.GetLineHeight());
     details += ToHtml("text-indent", textLineStyle.GetBaselineOffset());
     details += ToHtml(textLineStyle.GetWordBreak());
     details += ToHtml(textLineStyle.GetTextOverflow());
@@ -528,7 +541,7 @@ std::string SpanToHtml::ToHtml(const SpanString& spanString)
             if (paragrapStart == 0) {
                 paragrapStart = out.length();
             }
-            out += "<span " + NormalStyleToHtml(*item->fontStyle) + ">";
+            out += "<span " + NormalStyleToHtml(*item->fontStyle, *item->textLineStyle) + ">";
             auto content = item->GetSpanContent();
             auto wContent = StringUtils::ToWstring(content);
             if (wContent.back() == L'\n') {

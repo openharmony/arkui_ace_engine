@@ -24,7 +24,8 @@ public:
     static std::string ToHtml(std::vector<uint8_t>& values);
 
 private:
-    static std::string NormalStyleToHtml(const NG::FontStyle& fontStyle);
+    static std::string NormalStyleToHtml(
+        const NG::FontStyle& fontStyle, const OHOS::Ace::NG::TextLineStyle& textLineStyle);
     static std::string ImageToHtml(RefPtr<NG::SpanItem> item);
     static std::string FontStyleToHtml(const std::optional<Ace::FontStyle>& value);
     static std::string FontSizeToHtml(const std::optional<Dimension>& value);
@@ -33,7 +34,7 @@ private:
     static std::string FontFamilyToHtml(const std::optional<std::vector<std::string>>& value);
     static std::string TextDecorationToHtml(TextDecoration decoration);
     static std::string TextDecorationStyleToHtml(TextDecorationStyle decorationStyle);
-    static std::string ToHtml(const std::string& key, const std::optional<Dimension>& space);
+    static std::string ToHtml(const std::string& key, const std::optional<Dimension>& value);
     static std::string DeclarationToHtml(const NG::FontStyle& fontStyle);
     static std::string ToHtml(const std::optional<std::vector<Shadow>>& shadows);
     static std::string ToHtml(const std::string& key, const std::optional<CalcDimension>& dimesion);

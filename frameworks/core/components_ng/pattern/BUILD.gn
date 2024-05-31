@@ -557,13 +557,8 @@ build_component_ng("pattern_ng") {
   }
 
   if (is_ohos_standard_system) {
-    sources += [
-      "text/html/html_to_span.cpp",
-      "text/html/span_to_html.cpp",
-    ]
     external_deps += [
       "graphic_2d:librender_service_client",
-      "libxml2:libxml2",
       "napi:ace_napi",
     ]
   } else if (is_arkui_x) {

@@ -70,7 +70,6 @@ std::vector<std::string> ParseFontFamily(const std::string& fontFamily)
     std::vector<std::string> fonts;
     std::stringstream ss(fontFamily);
     std::string token;
-
     while (std::getline(ss, token, ',')) {
         std::string font = std::string(token.begin(), token.end());
         font.erase(std::remove_if(font.begin(), font.end(), isspace), font.end());
@@ -243,11 +242,11 @@ void HtmlToSpan::InitParagrap(
         return;
     }
 
-    if (IsTextAlign(key)) {
+    if (key == "text-align") {
         style->align = StringToTextAlign(value);
-    } else if (IsWordBreak(key)) {
+    } else if (key == "word-break") {
         style->wordBreak = StringToWordBreak(value);
-    } else if (IsTextOverflow(key)) {
+    } else if (key == "text-overflow") {
         style->textOverflow = StringToTextOverflow(value);
     } else if (IsTextIndentAttr(key)) {
         style->textIndent = Dimension::FromString(value);
@@ -318,10 +317,7 @@ void HtmlToSpan::InitDecoration(
 
 bool HtmlToSpan::IsDecorationAttr(const std::string& key)
 {
-    if (key.compare(0, strlen("text-decoration"), "text-decoration") == 0) {
-        return true;
-    }
-    return false;
+    return key.compare(0, strlen("text-decoration"), "text-decoration") == 0;
 }
 
 template<class T>
@@ -341,10 +337,7 @@ void HtmlToSpan::InitDimension(
 
 bool HtmlToSpan::IsLetterSpacingAttr(const std::string& key)
 {
-    if (key.compare(0, strlen("letter-spacing"), "letter-spacing") == 0) {
-        return true;
-    }
-    return false;
+    return key.compare(0, strlen("letter-spacing"), "letter-spacing") == 0;
 }
 
 Color HtmlToSpan::ToSpanColor(const std::string& value)
@@ -353,6 +346,7 @@ Color HtmlToSpan::ToSpanColor(const std::string& value)
     std::string color = value;
     if (std::regex_match(value, matches, std::regex("#[0-9A-Fa-f]{6,8}"))) {
         auto rgb = value.substr(1);
+        // remove last 2 character rgba -> argb
         rgb.erase(rgb.length() - 2, 2);
         auto alpha = value.substr(value.length() - 2);
         color = "#" + alpha + rgb;
@@ -401,26 +395,17 @@ void HtmlToSpan::InitTextShadow(
 
 bool HtmlToSpan::IsTextShadowAttr(const std::string& key)
 {
-    if (key.compare(0, strlen("text-shadow"), "text-shadow") == 0) {
-        return true;
-    }
-    return false;
+    return key.compare(0, strlen("text-shadow"), "text-shadow") == 0;
 }
 
 bool HtmlToSpan::IsTextIndentAttr(const std::string& key)
 {
-    if (key.compare(0, strlen("text-indent"), "text-indent") == 0) {
-        return true;
-    }
-    return false;
+    return key.compare(0, strlen("text-indent"), "text-indent") == 0;
 }
 
 bool HtmlToSpan::IsLineHeightAttr(const std::string& key)
 {
-    if (key.compare(0, strlen("line-height"), "line-height") == 0) {
-        return true;
-    }
-    return false;
+    return key.compare(0, strlen("line-height"), "line-height");
 }
 
 bool HtmlToSpan::IsPaddingAttr(const std::string& key)
@@ -620,13 +605,22 @@ void HtmlToSpan::HandleImagePixelMap(const std::string& src, ImageSpanOptions& o
             AceType::MakeRefPtr<NG::ImageLoadingContext>(ImageSourceInfo(src), std::move(loadNotifier), true);
         CHECK_NULL_VOID(ctx);
         ctx->LoadImageData();
-
-        option.imagePixelMap = ctx->GetSourceInfo().GetPixmap();
+        ctx->MakeCanvasImageIfNeed(ctx->GetImageSize(), true, ImageFit::NONE);
+        auto image = ctx->MoveCanvasImage();
+        if (image != nullptr) {
+            option.imagePixelMap = image->GetPixelMap();
+        }
     } else if (head == "file") {
         std::string filePath = FileUriHelper::GetRealPath(src);
         auto imageSource = ImageSource::Create(filePath);
         CHECK_NULL_VOID(imageSource);
         option.imagePixelMap = imageSource->CreatePixelMap();
+    }
+
+    if (option.imagePixelMap.has_value() && option.imagePixelMap.value() != nullptr) {
+        auto pixel = option.imagePixelMap.value();
+        LOGI("img head:%{public}s height: %{public}d, width: %{public}d, size:%{public}d", head.c_str(),
+            pixel->GetHeight(), pixel->GetWidth(), pixel->GetByteCount());
     }
 }
 
@@ -672,14 +666,6 @@ TextAlign HtmlToSpan::StringToTextAlign(const std::string& value)
     return TextAlign::LEFT;
 }
 
-bool HtmlToSpan::IsTextAlign(const std::string& key)
-{
-    if (key == "text-align") {
-        return true;
-    }
-    return false;
-}
-
 WordBreak HtmlToSpan::StringToWordBreak(const std::string& value)
 {
     if (value == "normal") {
@@ -694,14 +680,6 @@ WordBreak HtmlToSpan::StringToWordBreak(const std::string& value)
     return WordBreak::NORMAL;
 }
 
-bool HtmlToSpan::IsWordBreak(const std::string& key)
-{
-    if (key == "word-break") {
-        return true;
-    }
-    return false;
-}
-
 TextOverflow HtmlToSpan::StringToTextOverflow(const std::string& value)
 {
     if (value == "clip") {
@@ -710,21 +688,10 @@ TextOverflow HtmlToSpan::StringToTextOverflow(const std::string& value)
     if (value == "ellipsis") {
         return TextOverflow::ELLIPSIS;
     }
-    if (value == "XXXXX") { // 明确使用那个标签
-        return TextOverflow::MARQUEE;
-    }
     return TextOverflow::NONE;
 }
 
-bool HtmlToSpan::IsTextOverflow(const std::string& key)
-{
-    if (key == "text-overflow") {
-        return true;
-    }
-    return false;
-}
-
-void HtmlToSpan::ToDefalutSpan(xmlNodePtr node, size_t len, size_t& pos)
+void HtmlToSpan::ToDefalutSpan(xmlNodePtr node, size_t len, size_t& pos, std::vector<SpanInfo>& spanInfos)
 {
     if (len == 0) {
         return;
@@ -734,7 +701,7 @@ void HtmlToSpan::ToDefalutSpan(xmlNodePtr node, size_t len, size_t& pos)
     info.type = HtmlType::DEFAULT;
     info.start = pos;
     info.end = pos + len;
-    spanInfos_.emplace_back(std::move(info));
+    spanInfos.emplace_back(std::move(info));
 }
 
 template<class T>
@@ -754,7 +721,7 @@ std::pair<bool, HtmlToSpan::StyleValue*> HtmlToSpan::GetStyleValue(
     return std::make_pair(true, &it->second);
 }
 
-void HtmlToSpan::ToParagraphSpan(xmlNodePtr node, size_t len, size_t& pos)
+void HtmlToSpan::ToParagraphSpan(xmlNodePtr node, size_t len, size_t& pos, std::vector<SpanInfo>& spanInfos)
 {
     SpanInfo info;
     info.type = HtmlType::PARAGRAPH;
@@ -773,7 +740,7 @@ void HtmlToSpan::ToParagraphSpan(xmlNodePtr node, size_t len, size_t& pos)
         }
     }
 
-    spanInfos_.emplace_back(std::move(info));
+    spanInfos.emplace_back(std::move(info));
 }
 
 std::map<std::string, HtmlToSpan::StyleValue> HtmlToSpan::ToTextSpanStyle(xmlAttrPtr curNode)
@@ -794,8 +761,6 @@ std::map<std::string, HtmlToSpan::StyleValue> HtmlToSpan::ToTextSpanStyle(xmlAtt
             InitDimension<LetterSpacingSpanParam>(key, value, "letterSpacing", styleValues);
         } else if (IsTextShadowAttr(key)) {
             InitTextShadow(key, value, "shadow", styleValues);
-        } else if (IsTextIndentAttr(key)) {
-            InitDimension<BaseLineSpanParam>(key, value, "textIndent", styleValues);
         } else if (IsLineHeightAttr(key)) {
             InitDimension<LineHeightSpanSparam>(key, value, "line-height", styleValues);
         } else if (IsParagraphAttr(key)) {
@@ -806,7 +771,7 @@ std::map<std::string, HtmlToSpan::StyleValue> HtmlToSpan::ToTextSpanStyle(xmlAtt
     return styleValues;
 }
 
-void HtmlToSpan::ToTextSpan(xmlNodePtr node, size_t len, size_t& pos)
+void HtmlToSpan::ToTextSpan(xmlNodePtr node, size_t len, size_t& pos, std::vector<SpanInfo>& spanInfos)
 {
     SpanInfo info;
     info.type = HtmlType::TEXT;
@@ -819,7 +784,7 @@ void HtmlToSpan::ToTextSpan(xmlNodePtr node, size_t len, size_t& pos)
             info.values.emplace_back(value);
         }
     }
-    spanInfos_.emplace_back(std::move(info));
+    spanInfos.emplace_back(std::move(info));
 }
 
 void HtmlToSpan::ToImageOptions(const std::map<std::string, std::string>& styles, ImageSpanOptions& option)
@@ -830,7 +795,7 @@ void HtmlToSpan::ToImageOptions(const std::map<std::string, std::string>& styles
     }
 }
 
-void HtmlToSpan::ToImage(xmlNodePtr node, size_t len, size_t& pos)
+void HtmlToSpan::ToImage(xmlNodePtr node, size_t len, size_t& pos, std::vector<SpanInfo>& spanInfos)
 {
     std::map<std::string, std::string> styleMap;
     xmlAttrPtr curNode = node->properties;
@@ -849,7 +814,7 @@ void HtmlToSpan::ToImage(xmlNodePtr node, size_t len, size_t& pos)
     info.start = pos;
     info.end = pos + len;
     info.values.emplace_back(std::move(option));
-    spanInfos_.emplace_back(std::move(info));
+    spanInfos.emplace_back(std::move(info));
 }
 
 bool HasElementNode(xmlNodePtr node)
@@ -874,7 +839,8 @@ bool HtmlToSpan::IsValidNode(const std::string& name)
     return false;
 }
 
-void HtmlToSpan::ToSpan(xmlNodePtr curNode, size_t& pos, std::string& allContent, size_t paragraphEndPos)
+void HtmlToSpan::ToSpan(
+    xmlNodePtr curNode, size_t& pos, std::string& allContent, size_t paragraphEndPos, std::vector<SpanInfo>& spanInfos)
 {
     std::string contentStr;
     size_t contentLen = 0;
@@ -907,39 +873,40 @@ void HtmlToSpan::ToSpan(xmlNodePtr curNode, size_t& pos, std::string& allContent
         } else {
             curPos = pos + contentLen + 1;
         }
-        ToParagraphSpan(curNode, contentLen + 1, pos);
+        ToParagraphSpan(curNode, contentLen + 1, pos, spanInfos);
     } else if (nameStr == "img") {
         contentLen++;
-        ToImage(curNode, contentLen, pos);
+        ToImage(curNode, contentLen, pos, spanInfos);
         curNodeLen++;
     } else if (nameStr == "span" || nameStr == "strong") {
-        ToTextSpan(curNode, contentLen, pos);
+        ToTextSpan(curNode, contentLen, pos, spanInfos);
     } else if (IsValidNode(nameStr)) {
-        ToDefalutSpan(curNode, contentLen, pos);
+        ToDefalutSpan(curNode, contentLen, pos, spanInfos);
     }
 
     if (IsValidNode(nameStr)) {
         pos += curNodeLen;
     }
 
-    ParaseHtmlToSpanInfo(curNode->children, pos, allContent, curPos);
+    ParaseHtmlToSpanInfo(curNode->children, pos, allContent, curPos, spanInfos);
 }
 
-void HtmlToSpan::ParaseHtmlToSpanInfo(xmlNodePtr node, size_t& pos, std::string& allContent, size_t paragraphPos)
+void HtmlToSpan::ParaseHtmlToSpanInfo(
+    xmlNodePtr node, size_t& pos, std::string& allContent, size_t paragraphPos, std::vector<SpanInfo>& spanInfos)
 {
     xmlNodePtr curNode = nullptr;
     for (curNode = node; curNode; curNode = curNode->next) {
         if (curNode->type == XML_ELEMENT_NODE) {
-            ToSpan(curNode, pos, allContent, paragraphPos);
+            ToSpan(curNode, pos, allContent, paragraphPos, spanInfos);
         }
     }
 }
 
-void HtmlToSpan::PrintSpanInfos()
+void HtmlToSpan::PrintSpanInfos(const std::vector<SpanInfo>& spanInfos)
 {
-    for (auto& info : spanInfos_) {
-        std::cout << "span type " << (int)info.type << " start:" << info.start << " end:" << info.end
-                  << " styple:" << info.values.size() << std::endl;
+    for (auto& info : spanInfos) {
+        LOGI("span type %{public}d start:%{public}zu end:%{public}zu, style size:%{public}zu",
+            static_cast<int>(info.type), info.start, info.end, info.values.size());
     }
 }
 
@@ -1035,11 +1002,12 @@ void HtmlToSpan::AddImageSpans(const SpanInfo& info, RefPtr<MutableSpanString> m
     }
 }
 
-RefPtr<MutableSpanString> HtmlToSpan::GenerateSpans(const std::string& allContent)
+RefPtr<MutableSpanString> HtmlToSpan::GenerateSpans(
+    const std::string& allContent, const std::vector<SpanInfo>& spanInfos)
 {
     auto mutableSpan = AceType::MakeRefPtr<MutableSpanString>(allContent);
     RefPtr<MutableSpanString> span;
-    for (auto& info : spanInfos_) {
+    for (auto& info : spanInfos) {
         if (info.type == HtmlType::PARAGRAPH) {
             AddSpans(info, mutableSpan);
         } else if (info.type == HtmlType::IMAGE) {
@@ -1054,7 +1022,7 @@ RefPtr<MutableSpanString> HtmlToSpan::GenerateSpans(const std::string& allConten
 
 RefPtr<MutableSpanString> HtmlToSpan::ToSpanString(const std::string& html)
 {
-    htmlDocPtr doc = htmlReadMemory(html.c_str(), html.length(), nullptr, "UTF-8", HTML_PARSE_NOIMPLIED);
+    htmlDocPtr doc = htmlReadMemory(html.c_str(), html.length(), nullptr, "UTF-8", 0);
     if (doc == nullptr) {
         return nullptr;
     }
@@ -1071,8 +1039,9 @@ RefPtr<MutableSpanString> HtmlToSpan::ToSpanString(const std::string& html)
 
     size_t pos = 0;
     std::string content;
-    ParaseHtmlToSpanInfo(root, pos, content, 0);
-    PrintSpanInfos();
-    return GenerateSpans(content);
+    std::vector<SpanInfo> spanInfos;
+    ParaseHtmlToSpanInfo(root, pos, content, 0, spanInfos);
+    PrintSpanInfos(spanInfos);
+    return GenerateSpans(content, spanInfos);
 }
 } // namespace OHOS::Ace
