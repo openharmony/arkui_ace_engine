@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace {
 
-class RelativeContainerModel {
+class ACE_FORCE_EXPORT RelativeContainerModel {
 public:
     static RelativeContainerModel* GetInstance();
     virtual ~RelativeContainerModel() = default;

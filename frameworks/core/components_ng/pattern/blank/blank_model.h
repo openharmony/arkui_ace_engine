@@ -21,7 +21,7 @@
 #include "core/components_ng/event/event_hub.h"
 
 namespace OHOS::Ace {
-class BlankModel {
+class ACE_FORCE_EXPORT BlankModel {
 public:
     static BlankModel* GetInstance();
     virtual ~BlankModel() = default;

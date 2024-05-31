@@ -27,7 +27,7 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT LongPressGesture : public Gesture {
+class ACE_FORCE_EXPORT LongPressGesture : public Gesture {
     DECLARE_ACE_TYPE(LongPressGesture, Gesture);
 
 public:

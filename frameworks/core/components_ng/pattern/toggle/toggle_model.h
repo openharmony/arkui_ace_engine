@@ -36,7 +36,7 @@ enum class ToggleType {
 
 namespace OHOS::Ace {
 
-class ToggleModel {
+class ACE_FORCE_EXPORT ToggleModel {
 public:
     static ToggleModel* GetInstance();
     virtual ~ToggleModel() = default;

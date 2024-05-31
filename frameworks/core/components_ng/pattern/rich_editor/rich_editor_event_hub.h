@@ -56,7 +56,7 @@ private:
     int32_t offsetInSpan_ = 0;
 };
 
-class RichEditorInsertValue : public BaseEventInfo {
+class ACE_FORCE_EXPORT RichEditorInsertValue : public BaseEventInfo {
     DECLARE_ACE_TYPE(RichEditorInsertValue, BaseEventInfo)
 public:
     RichEditorInsertValue() : BaseEventInfo("RichEditorInsertValue") {}
@@ -73,7 +73,7 @@ private:
 
 enum class SpanResultType { TEXT, IMAGE, SYMBOL };
 
-class RichEditorAbstractSpanResult {
+class ACE_FORCE_EXPORT RichEditorAbstractSpanResult {
 public:
     RichEditorAbstractSpanResult() = default;
     ~RichEditorAbstractSpanResult() = default;
@@ -190,7 +190,7 @@ private:
 
 enum class RichEditorDeleteDirection { BACKWARD = 0, FORWARD };
 
-class RichEditorDeleteValue : public BaseEventInfo {
+class ACE_FORCE_EXPORT RichEditorDeleteValue : public BaseEventInfo {
     DECLARE_ACE_TYPE(RichEditorDeleteValue, BaseEventInfo)
 public:
     RichEditorDeleteValue() : BaseEventInfo("RichEditorDeleteValue") {}

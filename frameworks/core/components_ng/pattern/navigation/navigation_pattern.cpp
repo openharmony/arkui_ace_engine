@@ -275,7 +275,7 @@ void NavigationPattern::UpdateNavPathList()
         auto pathName = pathNames[i];
         auto index = static_cast<int32_t>(indexes[i]);
         RefPtr<UINode> uiNode = nullptr;
-        if ((i == static_cast<uint32_t>(navigationStack_->Size() - 1)) && addByNavRouter_) {
+        if ((i == static_cast<uint32_t>(pathNames.size() - 1)) && addByNavRouter_) {
             addByNavRouter_ = false;
             uiNode = navigationStack_->Get();
         } else {
@@ -675,6 +675,11 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
             newTopNavDestination->SetTransitionType(PageTransitionType::ENTER_POP);
             auto parent = preTopNavDestination->GetParent();
             CHECK_NULL_VOID(parent);
+            auto preTopNavDestinationPattern = preTopNavDestination->GetPattern<NavDestinationPattern>();
+            auto shallowBuilder = preTopNavDestinationPattern->GetShallowBuilder();
+            if (shallowBuilder) {
+                shallowBuilder->MarkIsExecuteDeepRenderDone(false);
+            }
             if (preTopNavDestination->GetContentNode()) {
                 preTopNavDestination->GetContentNode()->Clean(false, true);
             }
@@ -706,12 +711,15 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
     if (preTopNavDestination) {
         auto parent = preTopNavDestination->GetParent();
         CHECK_NULL_VOID(parent);
+        auto preTopNavDestinationPattern = preTopNavDestination->GetPattern<NavDestinationPattern>();
+        auto shallowBuilder = preTopNavDestinationPattern->GetShallowBuilder();
+        if (shallowBuilder) {
+            shallowBuilder->MarkIsExecuteDeepRenderDone(false);
+        }
         if (preTopNavDestination->GetContentNode()) {
             preTopNavDestination->GetContentNode()->Clean(false, true);
         }
         parent->RemoveChild(preTopNavDestination, true);
-        auto preTopNavDestinationPattern = preTopNavDestination->GetPattern<NavDestinationPattern>();
-        CHECK_NULL_VOID(preTopNavDestinationPattern);
         navigationNode->SetNeedSetInvisible(false);
         auto navBar = AceType::DynamicCast<NavBarNode>(navBarNode);
         if (navBar) {

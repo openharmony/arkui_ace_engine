@@ -26,7 +26,7 @@ enum class DialogOperation {
     DIALOG_CLOSE,
 };
 
-class CustomDialogControllerModel {
+class ACE_FORCE_EXPORT CustomDialogControllerModel {
 public:
     static CustomDialogControllerModel* GetInstance();
     virtual ~CustomDialogControllerModel() = default;

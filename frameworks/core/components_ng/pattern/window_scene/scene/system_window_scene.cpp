@@ -137,6 +137,24 @@ void SystemWindowScene::OnDetachFromFrameNode(FrameNode* frameNode)
     }
 }
 
+void SystemWindowScene::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    context->SetIsNeedRebuildRSTree(true);
+}
+
+void SystemWindowScene::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    context->SetIsNeedRebuildRSTree(false);
+}
+
 void SystemWindowScene::RegisterEventCallback()
 {
     CHECK_NULL_VOID(session_);
@@ -255,7 +273,7 @@ void SystemWindowScene::RegisterFocusCallback()
             CHECK_NULL_VOID(self);
             CHECK_NULL_VOID(self->GetSession());
             pipeline->RestoreDefault(self->GetSession()->GetPersistentId());
-        }, "ArkUIWindowUnfocus", TaskExecutor::TaskType::UI);
+        }, "ArkUIWindowLostFocus", TaskExecutor::TaskType::UI);
     };
     session_->SetNotifyUILostFocusFunc(lostFocusCallback);
 }

@@ -688,7 +688,7 @@ void AceContainer::OnInactive(int32_t instanceId)
                 JankFrameReport::GetInstance().FlushRecord();
             }
         },
-        TaskExecutor::TaskType::UI, "ArkUIWindowUnFocus");
+        TaskExecutor::TaskType::UI, "ArkUIWindowUnfocus");
 }
 
 void AceContainer::OnNewWant(int32_t instanceId, const std::string& data)
@@ -2289,6 +2289,12 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
         resConfig.SetColorModeIsSetByApp(true);
     } else {
         resConfig.SetColorModeIsSetByApp(false);
+    }
+    if (!parsedConfig.mcc.empty()) {
+        resConfig.SetMcc(StringUtils::StringToUint(parsedConfig.mcc));
+    }
+    if (!parsedConfig.mnc.empty()) {
+        resConfig.SetMnc(StringUtils::StringToUint(parsedConfig.mnc));
     }
     SetFontScaleAndWeightScale(parsedConfig);
     SetResourceConfiguration(resConfig);

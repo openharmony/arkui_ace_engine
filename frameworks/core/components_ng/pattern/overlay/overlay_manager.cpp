@@ -5388,9 +5388,9 @@ void OverlayManager::ShowFilterAnimation(const RefPtr<FrameNode>& columnNode)
     filterRenderContext->UpdateBackBlurRadius(Dimension(0.0f));
     AnimationUtils::Animate(
         option,
-        [filterRenderContext, styleOption, maskColor]() {
+        [filterRenderContext, styleOption, maskColor, menuTheme]() {
             CHECK_NULL_VOID(filterRenderContext);
-            if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
+            if (menuTheme->GetHasBackBlur()) {
                 filterRenderContext->UpdateBackBlurStyle(styleOption);
             } else {
                 filterRenderContext->UpdateBackgroundColor(maskColor);

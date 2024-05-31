@@ -31,7 +31,7 @@
 namespace OHOS::Ace {
 using NavigationTransitionEvent = std::function<NG::NavigationTransition(
      RefPtr<NG::NavDestinationContext> from, RefPtr<NG::NavDestinationContext> to, NG::NavigationOperation operation)>;
-class NavigationModel {
+class ACE_FORCE_EXPORT NavigationModel {
 public:
     static NavigationModel* GetInstance();
     virtual ~NavigationModel() = default;

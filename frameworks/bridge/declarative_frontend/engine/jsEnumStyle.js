@@ -2716,6 +2716,7 @@ var SaveIconStyle;
 (function (SaveIconStyle) {
   SaveIconStyle[SaveIconStyle["FULL_FILLED"] = 0] = "FULL_FILLED";
   SaveIconStyle[SaveIconStyle["LINES"] = 1] = "LINES";
+  SaveIconStyle[SaveIconStyle["PICTURE"] = 2] = "PICTURE";
 })(SaveIconStyle || (SaveIconStyle = {}));
 
 var SaveDescription;

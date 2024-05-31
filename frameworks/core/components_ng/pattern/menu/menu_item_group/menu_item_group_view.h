@@ -23,7 +23,7 @@
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT MenuItemGroupView {
+class ACE_FORCE_EXPORT MenuItemGroupView {
 public:
     // createMenuItem with custom
     static void Create();

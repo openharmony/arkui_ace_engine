@@ -28,7 +28,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT ViewStackModel {
+class ACE_FORCE_EXPORT ViewStackModel {
 public:
     static ViewStackModel* GetInstance();
     virtual ~ViewStackModel() = default;

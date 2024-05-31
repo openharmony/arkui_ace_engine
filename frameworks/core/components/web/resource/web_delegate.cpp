@@ -1166,7 +1166,7 @@ void WebDelegate::Refresh()
                 delegate->nweb_->Reload();
             }
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIWebReload");
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebRefresh");
 }
 
 void WebDelegate::StopLoading()
@@ -2153,7 +2153,7 @@ void WebDelegate::SetWebCallBack()
                 if (delegate) {
                     delegate->LoadUrl(url, httpHeaders);
                 }
-            }, "ArkUIWebLoadUrl");
+            }, "ArkUIWebControllerLoadUrl");
         });
         webController->SetBackwardImpl([weak = WeakClaim(this), uiTaskExecutor]() {
             uiTaskExecutor.PostTask([weak]() {
@@ -2185,7 +2185,7 @@ void WebDelegate::SetWebCallBack()
                 if (delegate) {
                     delegate->ClearSslCache();
                 }
-            }, "ArkUIWebClearSslCache");
+            }, "ArkUIWebControllerClearSslCache");
         });
         webController->SetClearClientAuthenticationCacheImpl([weak = WeakClaim(this), uiTaskExecutor]() {
             uiTaskExecutor.PostTask([weak]() {
@@ -2193,7 +2193,7 @@ void WebDelegate::SetWebCallBack()
                 if (delegate) {
                     delegate->ClearClientAuthenticationCache();
                 }
-            }, "ArkUIWebClearClientAuthenticationCache");
+            }, "ArkUIWebControllerClearClientAuthnCache");
         });
         webController->SetAccessStepImpl([weak = WeakClaim(this)](int32_t step) {
             auto delegate = weak.Upgrade();
@@ -2239,7 +2239,7 @@ void WebDelegate::SetWebCallBack()
                     if (delegate) {
                         delegate->LoadDataWithBaseUrl(baseUrl, data, mimeType, encoding, historyUrl);
                     }
-                }, "ArkUIWebLoadDataWithBaseUrl");
+                }, "ArkUIWebControllerLoadDataWithBaseUrl");
             });
         webController->SetRefreshImpl([weak = WeakClaim(this), uiTaskExecutor]() {
             uiTaskExecutor.PostTask([weak]() {
@@ -2247,7 +2247,7 @@ void WebDelegate::SetWebCallBack()
                 if (delegate) {
                     delegate->Refresh();
                 }
-            }, "ArkUIWebRefresh");
+            }, "ArkUIWebControllerRefresh");
         });
         webController->SetStopLoadingImpl([weak = WeakClaim(this), uiTaskExecutor]() {
             uiTaskExecutor.PostTask([weak]() {
@@ -2255,7 +2255,7 @@ void WebDelegate::SetWebCallBack()
                 if (delegate) {
                     delegate->StopLoading();
                 }
-            }, "ArkUIWebStopLoading");
+            }, "ArkUIWebControllerStopLoading");
         });
         webController->SetGetHitTestResultImpl([weak = WeakClaim(this)]() {
             auto delegate = weak.Upgrade();
@@ -2345,7 +2345,7 @@ void WebDelegate::SetWebCallBack()
                     if (delegate) {
                         delegate->SetWebViewJavaScriptResultCallBack(std::move(javaScriptCallBackImpl));
                     }
-                }, "ArkUIWebSetJsResultCallBack");
+                }, "ArkUIWebControllerSetJsResultCallBack");
             });
         webController->SetAddJavascriptInterfaceImpl([weak = WeakClaim(this), uiTaskExecutor](std::string objectName,
                                                          const std::vector<std::string>& methodList) {
@@ -2354,7 +2354,7 @@ void WebDelegate::SetWebCallBack()
                 if (delegate) {
                     delegate->AddJavascriptInterface(objectName, methodList);
                 }
-            }, "ArkUIWebAddJsInterface");
+            }, "ArkUIWebControllerAddJsInterface");
         });
         webController->LoadInitJavascriptInterface();
         webController->SetRemoveJavascriptInterfaceImpl([weak = WeakClaim(this), uiTaskExecutor](std::string objectName,
@@ -2364,7 +2364,7 @@ void WebDelegate::SetWebCallBack()
                 if (delegate) {
                     delegate->RemoveJavascriptInterface(objectName, methodList);
                 }
-            }, "ArkUIWebRemoveJsInterface");
+            }, "ArkUIWebControllerRemoveJsInterface");
         });
         webController->SetOnInactiveImpl([weak = WeakClaim(this), uiTaskExecutor]() {
             uiTaskExecutor.PostTask([weak]() {
@@ -2397,7 +2397,7 @@ void WebDelegate::SetWebCallBack()
                 if (delegate) {
                     result = delegate->ZoomIn();
                 }
-            }, "ArkUIWebZoomIn");
+            }, "ArkUIWebControllerZoomIn");
             return result;
         });
         webController->SetZoomOutImpl([weak = WeakClaim(this), uiTaskExecutor]() {
@@ -2407,7 +2407,7 @@ void WebDelegate::SetWebCallBack()
                 if (delegate) {
                     result = delegate->ZoomOut();
                 }
-            }, "ArkUIWebZoomOut");
+            }, "ArkUIWebControllerZoomOut");
             return result;
         });
         webController->SetRequestFocusImpl([weak = WeakClaim(this), uiTaskExecutor]() {
@@ -2416,7 +2416,7 @@ void WebDelegate::SetWebCallBack()
                 if (delegate) {
                     delegate->RequestFocus();
                 }
-            }, "ArkUIWebRequestFocus");
+            }, "ArkUIWebControllerRequestFocus");
         });
 
         webController->SetSearchAllAsyncImpl([weak = WeakClaim(this), uiTaskExecutor](const std::string& searchStr) {
@@ -2425,7 +2425,7 @@ void WebDelegate::SetWebCallBack()
                 if (delegate) {
                     delegate->SearchAllAsync(searchStr);
                 }
-            }, "ArkUIWebSearchAllAsync");
+            }, "ArkUIWebControllerSearchAllAsync");
         });
         webController->SetClearMatchesImpl([weak = WeakClaim(this), uiTaskExecutor]() {
             uiTaskExecutor.PostTask([weak]() {
@@ -2433,7 +2433,7 @@ void WebDelegate::SetWebCallBack()
                 if (delegate) {
                     delegate->ClearMatches();
                 }
-            }, "ArkUIWebClearMatches");
+            }, "ArkUIWebControllerClearMatches");
         });
         webController->SetSearchNextImpl([weak = WeakClaim(this), uiTaskExecutor](bool forward) {
             uiTaskExecutor.PostTask([weak, forward]() {
@@ -2441,7 +2441,7 @@ void WebDelegate::SetWebCallBack()
                 if (delegate) {
                     delegate->SearchNext(forward);
                 }
-            }, "ArkUIWebSearchNext");
+            }, "ArkUIWebControllerSearchNext");
         });
         webController->SetGetUrlImpl([weak = WeakClaim(this)]() {
             auto delegate = weak.Upgrade();
@@ -3861,7 +3861,7 @@ void WebDelegate::LoadUrl()
                 delegate->nweb_->Load(src.value());
             }
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIWebLoadUrl");
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebLoadSrcUrl");
 }
 
 void WebDelegate::OnInactive()
@@ -5511,6 +5511,13 @@ bool WebDelegate::OnKeyEvent(int32_t keyCode, int32_t keyAction)
     return false;
 }
 
+bool WebDelegate::WebOnKeyEvent(int32_t keyCode, int32_t keyAction,
+    const std::vector<int32_t>& pressedCodes)
+{
+    CHECK_NULL_RETURN(nweb_, false);
+    return nweb_->WebSendKeyEvent(keyCode, keyAction, pressedCodes);
+}
+
 void WebDelegate::OnMouseEvent(int32_t x, int32_t y, const MouseButton button, const MouseAction action, int count)
 {
     if (nweb_) {
@@ -6716,6 +6723,13 @@ void WebDelegate::OnCustomKeyboardClose()
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
     webPattern->CloseCustomKeyboard();
+}
+
+void WebDelegate::KeyboardReDispatch(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event, bool isUsed)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->KeyboardReDispatch(event, isUsed);
 }
 
 void WebDelegate::OnSafeInsetsChange()

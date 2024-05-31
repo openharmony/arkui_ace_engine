@@ -157,11 +157,9 @@ void NativeView::MarkNeedUpdate()
 void NativeView::FinishUpdateFunc(int32_t elmtId)
 {
     LOGI("FinishUpdateFunc start");
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewStackProcessor::GetInstance()->FlushRerenderTask();
-        LOGI("FinishUpdateFunc finish");
-        return;
-    }
+    NG::ViewStackProcessor::GetInstance()->FlushRerenderTask();
+    LOGI("FinishUpdateFunc finish");
+    return;
 }
 
 

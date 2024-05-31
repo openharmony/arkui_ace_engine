@@ -399,7 +399,7 @@ struct ACE_EXPORT ConicGradient {
     std::optional<AnimatableDimension> startAngle;
 };
 
-class ACE_EXPORT Gradient final {
+class ACE_FORCE_EXPORT Gradient final {
 public:
     void AddColor(const GradientColor& color);
 
@@ -663,7 +663,7 @@ struct ClickEffectInfo {
     }
 };
 
-class ACE_EXPORT BackgroundImageSize final {
+class ACE_FORCE_EXPORT BackgroundImageSize final {
 public:
     BackgroundImageSize() = default;
     BackgroundImageSize(BackgroundImageSizeType type, double value) : typeX_(type), valueX_(value) {}
@@ -1574,7 +1574,7 @@ struct PathArgs {
     double para8 = 0.0;
 };
 
-class ACE_EXPORT CanvasPath2D : virtual public AceType {
+class ACE_FORCE_EXPORT CanvasPath2D : virtual public AceType {
     DECLARE_ACE_TYPE(CanvasPath2D, AceType)
 public:
     CanvasPath2D() = default;

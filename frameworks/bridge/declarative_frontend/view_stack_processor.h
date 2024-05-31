@@ -58,14 +58,14 @@ public:
     using SaveComponentEvent = std::function<void(std::unordered_map<std::string, RefPtr<Component>>)>;
     friend class ScopedViewStackProcessor;
 
-    static ViewStackProcessor* GetInstance();
+    ACE_FORCE_EXPORT static ViewStackProcessor* GetInstance();
     ~ViewStackProcessor() = default;
     // possible wrapping components
     RefPtr<FlexItemComponent> GetFlexItemComponent();
     RefPtr<StepperItemComponent> GetStepperItemComponent();
     RefPtr<DisplayComponent> GetStepperDisplayComponent();
     RefPtr<ScrollComponent> GetStepperScrollComponent();
-    RefPtr<BoxComponent> GetBoxComponent();
+    ACE_FORCE_EXPORT RefPtr<BoxComponent> GetBoxComponent();
     RefPtr<Component> GetMainComponent() const;
     RefPtr<DisplayComponent> GetDisplayComponent();
     bool HasDisplayComponent() const;
@@ -81,9 +81,9 @@ public:
     RefPtr<GestureComponent> GetGestureComponent();
     RefPtr<PositionedComponent> GetPositionedComponent();
     RefPtr<ComposedComponent> GetRootComponent(const std::string& id = "", const std::string& name = "");
-    RefPtr<PageTransitionComponent> GetPageTransitionComponent();
+    ACE_FORCE_EXPORT RefPtr<PageTransitionComponent> GetPageTransitionComponent();
     RefPtr<CoverageComponent> GetCoverageComponent();
-    void ClearPageTransitionComponent();
+    ACE_FORCE_EXPORT void ClearPageTransitionComponent();
     RefPtr<MenuComponent> GetMenuComponent(bool createNewComponent = true);
 #ifndef WEARABLE_PRODUCT
     RefPtr<PopupComponentV2> GetPopupComponent(bool createNewComponent = true);
