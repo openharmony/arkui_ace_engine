@@ -55,6 +55,19 @@ bool IsStartTopLeft(WrapDirection direction, TextDirection textDirection)
             return true;
     }
 }
+
+bool IsColumnReverse(WrapDirection direction)
+{
+    switch (direction) {
+        case WrapDirection::VERTICAL:
+            return false;
+        case WrapDirection::VERTICAL_REVERSE:
+            return true;
+        default:
+            return false;
+    }
+}
+
 void WrapLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -79,6 +92,8 @@ void WrapLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     isHorizontal_ = direction_ == WrapDirection::HORIZONTAL || direction_ == WrapDirection::HORIZONTAL_REVERSE;
     isReverse_ = !IsStartTopLeft(direction_, textDir_);
+    isRightDirection_ = textDir_ == TextDirection::RTL;
+    isColumnReverse_ = IsColumnReverse(direction_);
     PerformLayoutInitialize(flexProp);
     totalMainLength_ = 0.0f;
     totalCrossLength_ = 0.0f;
@@ -221,8 +236,14 @@ void WrapLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     OffsetF startPosition;
     OffsetF spaceBetweenContentsOnCrossAxis;
-    LayoutWholeWrap(startPosition, spaceBetweenContentsOnCrossAxis, layoutWrapper);
-    TraverseContent(startPosition, spaceBetweenContentsOnCrossAxis);
+    if (isHorizontal_) {
+        LayoutWholeWrap(startPosition, spaceBetweenContentsOnCrossAxis, layoutWrapper);
+        TraverseContent(startPosition, spaceBetweenContentsOnCrossAxis);
+    } else {
+        LayoutWholeColumnWrap(startPosition, spaceBetweenContentsOnCrossAxis, layoutWrapper);
+        TraverseColumnContent(startPosition, spaceBetweenContentsOnCrossAxis);
+    }
+
     for (const auto& child : children) {
         child->Layout();
     }
@@ -649,4 +670,158 @@ void WrapLayoutAlgorithm::CalcFlexGrowLayout(
     }
 }
 
+void WrapLayoutAlgorithm::AddPaddingToStartPositionForColumn(OffsetF& startPosition) const
+{
+    switch (direction_) {
+        // vertical will start from top left
+        case WrapDirection::VERTICAL:
+            if (isRightDirection_) {
+                startPosition.AddX(-padding_.right.value_or(0.0f));
+            } else {
+                startPosition.AddX(padding_.left.value_or(0.0f));
+            }
+            startPosition.AddY(padding_.top.value_or(0.0f));
+            break;
+        case WrapDirection::VERTICAL_REVERSE:
+            if (isRightDirection_) {
+                startPosition.AddX(-padding_.right.value_or(0.0f));
+            } else {
+                startPosition.AddX(padding_.left.value_or(0.0f));
+            }
+            startPosition.AddY(-padding_.bottom.value_or(0.0f));
+            break;
+        default:
+            LOGW("Unknown direction");
+    }
+}
+
+void WrapLayoutAlgorithm::UpdateStartPositionByAlign(
+    OffsetF& startPosition, float crossAxisRemainSpace, OffsetF& spaceBetweenContentsOnCrossAxis, int32_t contentNum)
+{
+    // switch align content enum, alignment when extra space exists in container extra spaces
+    switch (alignment_) {
+        case WrapAlignment::START:
+            break;
+        // for reverse cases, start position will not include "first" item's main axis size
+        case WrapAlignment::END: {
+            startPosition.AddX(crossAxisRemainSpace);
+            break;
+        }
+        case WrapAlignment::CENTER: {
+            // divided the space by two
+            crossAxisRemainSpace /= 2.0f;
+            startPosition.AddX(crossAxisRemainSpace);
+            break;
+        }
+        case WrapAlignment::SPACE_BETWEEN: {
+            // space between will not affect start position, update space between only
+            float crossSpace =
+                contentNum > 1 ? (crossLengthLimit_ - totalCrossLength_) / static_cast<float>(contentNum - 1) : 0.0f;
+            spaceBetweenContentsOnCrossAxis = isHorizontal_ ? OffsetF(0.0f, crossSpace) : OffsetF(crossSpace, 0.0f);
+            break;
+        }
+        case WrapAlignment::SPACE_EVENLY: {
+            float crossSpace = crossAxisRemainSpace / static_cast<float>(contentNum + 1);
+            startPosition.AddX(crossSpace);
+            spaceBetweenContentsOnCrossAxis =
+                isHorizontal_ ? OffsetF(0.0f, std::abs(crossSpace)) : OffsetF(std::abs(crossSpace), 0.0f);
+            break;
+        }
+        case WrapAlignment::SPACE_AROUND: {
+            float crossSpace = crossAxisRemainSpace / static_cast<float>(contentNum);
+            startPosition.AddX(crossSpace / 2.0f);
+            spaceBetweenContentsOnCrossAxis =
+                isHorizontal_ ? OffsetF(0.0f, std::abs(crossSpace)) : OffsetF(std::abs(crossSpace), 0.0);
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+void WrapLayoutAlgorithm::LayoutWholeColumnWrap(
+    OffsetF& startPosition, OffsetF& spaceBetweenContentsOnCrossAxis, LayoutWrapper* layoutWrapper)
+{
+    auto contentNum = static_cast<int32_t>(contentList_.size());
+    if (contentNum == 0) {
+        return;
+    }
+
+    const auto& layoutProp = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProp);
+    AddPaddingToStartPositionForColumn(startPosition);
+    if (isRightDirection_) {
+        startPosition.AddX(frameSize_.Width());
+    }
+    if (isColumnReverse_) {
+        AddExtraSpaceToStartPosition(startPosition, -frameSize_.Height(), true);
+    }
+    // if cross axis size is not set, cross axis size is as large as children cross axis size sum
+    // no need to set alignment_.
+    if ((!isHorizontal_ && hasIdealWidth_ && crossLengthLimit_ <= totalCrossLength_) ||
+        (!isHorizontal_ && !hasIdealWidth_)) {
+        return;
+    }
+    auto crossAxisRemainSpace = crossLengthLimit_ - totalCrossLength_;
+    if (isColumnReverse_) {
+        crossAxisRemainSpace = -crossAxisRemainSpace;
+    }
+    UpdateStartPositionByAlign(startPosition, crossAxisRemainSpace, spaceBetweenContentsOnCrossAxis, contentNum);
+}
+
+void WrapLayoutAlgorithm::LayoutColumnContent(const ContentInfo& content, const OffsetF& position)
+{
+    int32_t itemNum = content.count;
+    if (itemNum == 0) {
+        return;
+    }
+    OffsetF contentStartPosition(position.GetX(), position.GetY());
+    OffsetF spaceBetweenItemsOnMainAxis;
+    CalcItemMainAxisStartAndSpaceBetween(contentStartPosition, spaceBetweenItemsOnMainAxis, content);
+
+    FlexItemProperties flexItemProperties;
+    GetFlexItemProperties(content, flexItemProperties);
+    float remainSpace = mainLengthLimit_ - currentMainLength_;
+    for (const auto& itemWrapper : content.itemList) {
+        auto item = itemWrapper->GetGeometryNode();
+        if (GreatNotEqual(remainSpace, 0.0f)) {
+            CalcFlexGrowLayout(itemWrapper, flexItemProperties, remainSpace);
+        }
+        // calc start position and between space
+        auto itemMainAxisOffset = isHorizontal_ ? contentStartPosition.GetX() : contentStartPosition.GetY();
+        auto itemCrossAxisOffset = CalcItemCrossAxisOffset(content, contentStartPosition, item);
+        if (isRightDirection_) {
+            itemCrossAxisOffset -= GetItemCrossAxisLength(item);
+        }
+        OffsetF offset;
+        float contentMainAxisSpan = 0.0f;
+        if (isColumnReverse_) {
+            itemMainAxisOffset -= GetItemMainAxisLength(item);
+        }
+        offset = OffsetF(itemCrossAxisOffset, itemMainAxisOffset);
+        contentMainAxisSpan = item->GetMarginFrameSize().Height() + static_cast<float>(spacing_.ConvertToPx()) +
+                              spaceBetweenItemsOnMainAxis.GetY();
+        contentStartPosition.AddY(isColumnReverse_ ? -contentMainAxisSpan : contentMainAxisSpan);
+        itemWrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
+    }
+}
+
+void WrapLayoutAlgorithm::TraverseColumnContent(
+    const OffsetF& startPosition, const OffsetF& spaceBetweenContentsOnCrossAxis)
+{
+    // determine the content start position by main axis
+    OffsetF contentPosition(startPosition.GetX(), startPosition.GetY());
+    auto contentSpace = static_cast<float>(contentSpace_.ConvertToPx());
+    auto spaceBetween = spaceBetweenContentsOnCrossAxis.GetX();
+    for (const auto& content : contentList_) {
+        LayoutColumnContent(content, contentPosition);
+        if (isRightDirection_) {
+            float leftSpace = content.crossLength + contentSpace + spaceBetween;
+            contentPosition.AddX(-leftSpace);
+        } else {
+            contentPosition.AddX(content.crossLength + contentSpace + spaceBetween);
+        }
+    }
+}
 } // namespace OHOS::Ace::NG
