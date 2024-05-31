@@ -4288,7 +4288,7 @@ void ViewAbstract::SetJSFrameNodeOnVisibleAreaApproximateChange(FrameNode* frame
     frameNode->CleanVisibleAreaUserCallback(true);
 
     constexpr uint32_t minInterval = 100; // 100ms
-    if (interval < minInterval) {
+    if (interval < 0 || interval < minInterval) {
         interval = minInterval;
     }
     VisibleCallbackInfo callback;
