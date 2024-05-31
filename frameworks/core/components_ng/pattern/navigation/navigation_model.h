@@ -30,7 +30,7 @@
 namespace OHOS::Ace {
 using NavigationTransitionEvent = std::function<NG::NavigationTransition(
     NG::NavContentInfo from, NG::NavContentInfo to, NG::NavigationOperation operation)>;
-class NavigationModel {
+class ACE_FORCE_EXPORT NavigationModel {
 public:
     static NavigationModel* GetInstance();
     virtual ~NavigationModel() = default;

@@ -25,7 +25,7 @@
 namespace OHOS::Ace {
 using PageTransitionEventFunc = std::function<void(RouteType, const float&)>;
 
-class PageTransitionModel {
+class ACE_FORCE_EXPORT PageTransitionModel {
 public:
     static PageTransitionModel* GetInstance();
     virtual ~PageTransitionModel() = default;

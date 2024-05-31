@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace {
 using ScriptItems = std::map<std::string, std::vector<std::string>>;
-class WebModel {
+class ACE_FORCE_EXPORT WebModel {
 public:
     static WebModel* GetInstance();
     virtual ~WebModel() = default;

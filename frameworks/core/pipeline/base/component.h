@@ -64,7 +64,7 @@ enum class HoverAnimationType : int32_t {
 };
 
 // Component is a read-only structure, represent the basic information how to display it.
-class ACE_EXPORT Component : public virtual AceType {
+class ACE_FORCE_EXPORT Component : public virtual AceType {
     DECLARE_ACE_TYPE(Component, AceType);
 
 public:

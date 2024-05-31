@@ -46,7 +46,7 @@ using TextChangeEvent = std::function<void(const std::string&, double)>;
 using TextCascadeChangeEvent = std::function<void(const std::vector<std::string>&, const std::vector<double>&)>;
 using TextCascadeValueChangeEvent = std::function<void(const std::vector<std::string>&)>;
 using TextCascadeSelectedChangeEvent = std::function<void(const std::vector<double>&)>;
-class TextPickerModel {
+class ACE_FORCE_EXPORT TextPickerModel {
 public:
     static TextPickerModel* GetInstance();
     virtual ~TextPickerModel() = default;
