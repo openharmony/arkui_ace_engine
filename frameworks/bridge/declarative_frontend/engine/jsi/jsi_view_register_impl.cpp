@@ -1121,6 +1121,7 @@ void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)
     JSOffscreenRenderingContext::JSBind(globalObj);
     JSRenderingContextSettings::JSBind(globalObj);
     JSRenderImage::JSBind(globalObj, nativeEngine);
+    JSPath2D::JSBind(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework
