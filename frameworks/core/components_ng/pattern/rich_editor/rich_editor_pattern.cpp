@@ -2421,7 +2421,7 @@ void RichEditorPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub
     CHECK_NULL_VOID(tapSingleGesture);
     tapSingleGesture->SetOnActionId(clickSingleCallback);
     gestureGroup->AddGesture(tapSingleGesture);
-    gestureGroup->SetPriority(GesturePriority::High);
+    gestureGroup->SetPriority(GesturePriority::Parallel);
     
     gestureHub->AddGesture(gestureGroup);
     gestureHub->OnModifyDone();
@@ -8374,6 +8374,10 @@ bool RichEditorPattern::BeforeGestureAndClickOperate(GestureEvent& info, bool is
 
 void RichEditorPattern::HandleTripleClickEvent(OHOS::Ace::GestureEvent& info)
 {
+    auto focusHub = GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    CHECK_EQUAL_VOID(focusHub->IsFocusable(), false);
+
     auto textPaintOffset = GetTextRect().GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
     Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
         info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
@@ -8382,12 +8386,20 @@ void RichEditorPattern::HandleTripleClickEvent(OHOS::Ace::GestureEvent& info)
     int start = 0;
     int end = 0;
     auto& paragraphInfoList = paragraphs_.GetParagraphs();
-    for (const auto& paragraph : paragraphInfoList) {
-        if (pos >= paragraph.start && pos <= paragraph.end) {
-            start = paragraph.start;
-            end = paragraph.end;
-            break;
+    if (pos == paragraphInfoList.back().end) {
+        start = paragraphInfoList.back().start;
+        end = paragraphInfoList.back().end;
+    } else {
+        for (const auto& paragraph : paragraphInfoList) {
+            if (pos >= paragraph.start && pos < paragraph.end) {
+                start = paragraph.start;
+                end = paragraph.end;
+                break;
+            }
         }
+    }
+    if (paragraphInfoList.back().end != end) {
+        --end;
     }
     CHECK_NULL_VOID(end > start);
 
