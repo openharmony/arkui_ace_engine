@@ -963,6 +963,7 @@ public:
 
 
     void OnAdsBlocked(const std::string& url, const std::vector<std::string>& adsBlocked);
+    void SetSurfaceId(const std::string& surfaceId);
 
 private:
     void InitWebEvent();

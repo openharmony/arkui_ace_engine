@@ -2099,6 +2099,11 @@ void WebPattern::OnModifyDone()
             renderSurface_->InitSurface();
             renderSurface_->UpdateSurfaceConfig();
             delegate_->InitOHOSWeb(PipelineContext::GetCurrentContext(), renderSurface_);
+            if (renderMode_ == RenderMode::ASYNC_RENDER) {
+                std::string surfaceId = renderSurface_->GetUniqueId();
+                delegate_->SetSurfaceId(surfaceId);
+                TAG_LOGD(AceLogTag::ACE_WEB, "[getSurfaceId] set surfaceId is %{public}s", surfaceId.c_str());
+            }
         }
         UpdateJavaScriptOnDocumentStart();
         UpdateJavaScriptOnDocumentEnd();
