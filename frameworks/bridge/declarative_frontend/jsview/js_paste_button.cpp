@@ -68,7 +68,7 @@ bool JSPasteButton::ParseComponentStyle(const JSCallbackInfo& info,
             return false;
         }
     } else {
-        bg = BUTTON_TYPE_NULL;
+        bg = static_cast<int32_t>(ButtonType::CAPSULE);
     }
     return true;
 }
@@ -82,10 +82,10 @@ void JSPasteButton::Create(const JSCallbackInfo& info)
         PasteButtonModelNG::GetInstance()->Create(
             static_cast<int32_t>(PasteButtonPasteDescription::PASTE),
             static_cast<int32_t>(PasteButtonIconStyle::ICON_LINE),
-            static_cast<int32_t>(ButtonType::CAPSULE));
+            static_cast<int32_t>(ButtonType::CAPSULE), false);
     } else {
         PasteButtonModelNG::GetInstance()->Create(static_cast<int32_t>(textDesc),
-            static_cast<int32_t>(iconType), backgroundType);
+            static_cast<int32_t>(iconType), backgroundType, false);
     }
 }
 

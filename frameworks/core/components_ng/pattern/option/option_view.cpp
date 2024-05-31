@@ -161,7 +161,7 @@ void OptionView::CreatePasteButton(const RefPtr<FrameNode>& option, const RefPtr
 {
     auto pasteNode =
         PasteButtonModelNG::GetInstance()->CreateNode(static_cast<int32_t>(PasteButtonPasteDescription::PASTE),
-            static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL), static_cast<int32_t>(ButtonType::NORMAL));
+            static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL), static_cast<int32_t>(ButtonType::NORMAL), true);
     CHECK_NULL_VOID(pasteNode);
     auto pattern = option->GetPattern<OptionPattern>();
     CHECK_NULL_VOID(pattern);

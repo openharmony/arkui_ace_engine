@@ -124,7 +124,7 @@ RefPtr<FrameNode> BuildPasteButton(const std::function<void()>& callback, int32_
     auto pasteButton = PasteButtonModelNG::GetInstance()->CreateNode(
         descriptionId,
         static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL),
-        static_cast<int32_t>(ButtonType::CAPSULE));
+        static_cast<int32_t>(ButtonType::CAPSULE), true);
     CHECK_NULL_RETURN(pasteButton, nullptr);
 
     auto pipeline = PipelineContext::GetCurrentContext();

@@ -32,6 +32,8 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+const static uint8_t DEFAULT_TRANSPARENCY_THRESHOLD = 0x1A;
+const static uint8_t FULL_TRANSPARENCY_VALUE = 0xFF;
 RefPtr<SecurityComponentTheme> SecurityComponentModelNG::GetTheme()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -67,7 +69,7 @@ void SecurityComponentModelNG::InitLayoutProperty(RefPtr<FrameNode>& node, int32
 
 RefPtr<FrameNode> SecurityComponentModelNG::CreateNode(const std::string& tag, int32_t nodeId,
     SecurityComponentElementStyle& style,
-    const std::function<RefPtr<Pattern>(void)>& patternCreator)
+    const std::function<RefPtr<Pattern>(void)>& patternCreator, bool isArkuiComponent)
 {
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", tag.c_str(), nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(tag, nodeId, patternCreator);
@@ -112,6 +114,7 @@ RefPtr<FrameNode> SecurityComponentModelNG::CreateNode(const std::string& tag, i
     auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     CHECK_NULL_RETURN(property, nullptr);
     property->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+    property->UpdateIsArkuiComponent(isArkuiComponent);
     auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
     CHECK_NULL_RETURN(pipeline, nullptr);
     pipeline->AddWindowStateChangedCallback(nodeId);
@@ -119,7 +122,7 @@ RefPtr<FrameNode> SecurityComponentModelNG::CreateNode(const std::string& tag, i
 }
 
 void SecurityComponentModelNG::CreateCommon(const std::string& tag, int32_t text, int32_t icon,
-    int32_t backgroundType, const std::function<RefPtr<Pattern>(void)>& patternCreator)
+    int32_t backgroundType, const std::function<RefPtr<Pattern>(void)>& patternCreator, bool isArkuiComponent)
 {
     auto stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -128,7 +131,7 @@ void SecurityComponentModelNG::CreateCommon(const std::string& tag, int32_t text
         .icon = icon,
         .backgroundType = backgroundType
     };
-    auto frameNode = CreateNode(tag, nodeId, style, patternCreator);
+    auto frameNode = CreateNode(tag, nodeId, style, patternCreator, isArkuiComponent);
     CHECK_NULL_VOID(frameNode);
     stack->Push(frameNode);
 }
@@ -231,6 +234,22 @@ bool SecurityComponentModelNG::IsBackgroundVisible()
     return false;
 }
 
+bool SecurityComponentModelNG::IsArkuiComponent()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto prop = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    if (prop && prop->GetIsArkuiComponent().has_value()) {
+        return prop->GetIsArkuiComponent().value();
+    }
+    return false;
+}
+
+bool SecurityComponentModelNG::IsBelowThreshold(const Color& value)
+{
+    return value.GetAlpha() < DEFAULT_TRANSPARENCY_THRESHOLD;
+}
+
 void SecurityComponentModelNG::SetIconSize(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, IconSize, value);
@@ -272,7 +291,12 @@ void SecurityComponentModelNG::SetBackgroundColor(const Color& value)
         LOGW("background is not exist");
         return;
     }
-    ACE_UPDATE_PAINT_PROPERTY(SecurityComponentPaintProperty, BackgroundColor, value);
+
+    Color resColor = value;
+    if (!IsArkuiComponent() && IsBelowThreshold(value)) {
+        resColor = value.ChangeAlpha(FULL_TRANSPARENCY_VALUE);
+    }
+    ACE_UPDATE_PAINT_PROPERTY(SecurityComponentPaintProperty, BackgroundColor, resColor);
 }
 
 void SecurityComponentModelNG::SetBackgroundBorderWidth(const Dimension& value)
