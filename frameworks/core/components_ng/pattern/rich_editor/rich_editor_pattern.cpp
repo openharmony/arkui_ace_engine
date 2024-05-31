@@ -5843,10 +5843,10 @@ bool RichEditorPattern::IsHandlesShow()
 
 void RichEditorPattern::ResetSelection()
 {
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "ResetSelection");
     bool selectNothing = textSelector_.SelectNothing();
     textSelector_.Update(-1, -1);
     if (!selectNothing) {
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "ResetSelection");
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto eventHub = host->GetEventHub<RichEditorEventHub>();
