@@ -541,11 +541,9 @@ HWTEST_F(SpanTestNg, SpanItemUpdateParagraph005, TestSize.Level1)
 HWTEST_F(SpanTestNg, Create001, TestSize.Level1)
 {
     ImageModelNG imageSpan;
-    std::string bundleName;
-    std::string moduleName;
-    std::string src;
+    ImageInfoConfig imageInfoConfig;
     RefPtr<PixelMap> pixMap = nullptr;
-    imageSpan.Create(src, pixMap, bundleName, moduleName);
+    imageSpan.Create(imageInfoConfig, pixMap);
     ImageSpanView::SetObjectFit(ImageFit::FILL);
     ImageSpanView::SetVerticalAlign(VerticalAlign::TOP);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -595,11 +593,9 @@ HWTEST_F(SpanTestNg, SpanSetBaselineOffsetTest001, TestSize.Level1)
 HWTEST_F(SpanTestNg, ImageSpanSetBaselineOffset001, TestSize.Level1)
 {
     ImageModelNG imageSpan;
-    std::string bundleName;
-    std::string moduleName;
-    std::string src;
+    ImageInfoConfig imageInfoConfig;
     RefPtr<PixelMap> pixMap = nullptr;
-    imageSpan.Create(src, pixMap, bundleName, moduleName);
+    imageSpan.Create(imageInfoConfig, pixMap);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
@@ -1054,8 +1050,12 @@ HWTEST_F(SpanTestNg, SymbolSpanCreateTest001, TestSize.Level1)
 HWTEST_F(SpanTestNg, ImageSpanEventTest001, TestSize.Level1)
 {
     ImageModelNG imageSpan;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
     RefPtr<PixelMap> pixMap = nullptr;
-    imageSpan.Create(IMAGE_SRC_URL, pixMap, BUNDLE_NAME, MODULE_NAME);
+    imageSpan.Create(imageInfoConfig, pixMap);
     NG::ImageSpanView::Create();
     bool isTrigger = false;
     auto onComplete = [&isTrigger](const LoadImageSuccessEvent& info) { isTrigger = true; };
@@ -1078,8 +1078,12 @@ HWTEST_F(SpanTestNg, ImageSpanEventTest001, TestSize.Level1)
 HWTEST_F(SpanTestNg, ImageSpanEventTest002, TestSize.Level1)
 {
     ImageModelNG imageSpan;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
     RefPtr<PixelMap> pixMap = nullptr;
-    imageSpan.Create(IMAGE_SRC_URL, pixMap, BUNDLE_NAME, MODULE_NAME);
+    imageSpan.Create(imageInfoConfig, pixMap);
     NG::ImageSpanView::Create();
     bool isTrigger = false;
     auto onError = [&isTrigger](const LoadImageFailEvent& info) { isTrigger = true; };

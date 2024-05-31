@@ -52,6 +52,8 @@ public:
     MOCK_METHOD1(GetCharacterWidth, float(int32_t index));
     MOCK_METHOD1(SetParagraphSymbolAnimation, void(const RefPtr<FrameNode>& frameNode));
     MOCK_METHOD1(SetParagraphId, void(uint32_t id));
+    MOCK_METHOD1(GetLineMetrics, TextLineMetrics(size_t lineNumber));
+    MOCK_METHOD1(GetGlyphPositionAtCoordinate, PositionWithAffinity(const Offset& offset));
     MOCK_METHOD2(GetGlyphIndexByCoordinate, int32_t(const Offset& offset, bool isSelectionPos));
     MOCK_METHOD3(ComputeOffsetForCaretDownstream, bool(int32_t extent, CaretMetricsF& result,
         bool needLineHighest));
@@ -79,11 +81,6 @@ public:
     {
         LineMetrics lineMetrics;
         return lineMetrics;
-    }
-
-    TextLineMetrics GetLineMetrics(size_t lineNumber) override
-    {
-        return TextLineMetrics();
     }
     
     bool GetLineMetricsByCoordinate(const Offset& offset, LineMetrics& lineMetrics) override
