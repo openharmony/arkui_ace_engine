@@ -159,6 +159,36 @@ public:
         }
     }
 
+    void SetResponseLinkRecognizersRecursively(const TouchTestResult& responseLinkResult)
+    {
+        for (const auto& item : recognizers_) {
+            auto group = AceType::DynamicCast<RecognizerGroup>(item);
+            if (group) {
+                group->SetResponseLinkRecognizersRecursively(responseLinkResult);
+                continue;
+            }
+            auto recognizer = AceType::DynamicCast<NG::NGGestureRecognizer>(item);
+            if (recognizer) {
+                recognizer->SetResponseLinkRecognizers(responseLinkResult);
+            }
+        }
+    }
+
+    void CollectResponseLinkRecognizersRecursively(TouchTestResult& responseLinkResult)
+    {
+        for (const auto& item : recognizers_) {
+            auto group = AceType::DynamicCast<RecognizerGroup>(item);
+            if (group) {
+                group->CollectResponseLinkRecognizersRecursively(responseLinkResult);
+                continue;
+            }
+            auto recognizer = AceType::DynamicCast<NG::NGGestureRecognizer>(item);
+            if (recognizer) {
+                responseLinkResult.emplace_back(recognizer);
+            }
+        }
+    }
+
     RefPtr<Gesture> CreateGestureFromRecognizer() const override;
     virtual GestureMode GetGestureMode() const = 0;
 

@@ -247,6 +247,8 @@ public:
     static void JsOnClick(const JSCallbackInfo& info);
     static void JsOnGestureJudgeBegin(const JSCallbackInfo& args);
     static void JsOnTouchIntercept(const JSCallbackInfo& info);
+    static void JsShouldBuiltInRecognizerParallelWith(const JSCallbackInfo& info);
+    static void JsOnGestureRecognizerJudgeBegin(const JSCallbackInfo& info);
     static void JsClickEffect(const JSCallbackInfo& info);
     static void JsRestoreId(int32_t restoreId);
     static void JsOnVisibleAreaChange(const JSCallbackInfo& info);
@@ -317,6 +319,7 @@ public:
     static bool IsGetResourceByName(const JSRef<JSObject>& jsObj);
     static void GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bundleName, std::string& moduleName);
     static bool ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shadow);
+    static void ParseShadowOffsetX(const JSRef<JSObject>& jsObj, CalcDimension& offsetX, Shadow& shadow);
     static bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow);
     static bool ParseJsResource(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static bool ParseDataDetectorConfig(const JSCallbackInfo& info, std::string& types,
@@ -502,16 +505,15 @@ public:
     template<typename T>
     static bool ParseJsInteger(const JSRef<JSVal>& jsValue, T& result)
     {
-        if (!jsValue->IsNumber() && !jsValue->IsObject()) {
-            LOGE("arg is not number or Object.");
-            return false;
-        }
-
         if (jsValue->IsNumber()) {
             result = jsValue->ToNumber<T>();
             return true;
         }
 
+        if (!jsValue->IsObject()) {
+            LOGE("arg is not number or Object.");
+            return false;
+        }
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
         int32_t resType = jsObj->GetPropertyValue<int32_t>("type", -1);
         if (resType == -1) {
@@ -532,6 +534,9 @@ public:
                 return false;
             }
             JSRef<JSVal> args = jsObj->GetProperty("params");
+            if (!args->IsArray()) {
+                return false;
+            }
             JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
             auto param = params->GetValueAt(0);
             if (resType == static_cast<int32_t>(ResourceType::INTEGER)) {
@@ -583,6 +588,8 @@ public:
     static bool ParseBorderColorProps(const JSRef<JSVal>& args, NG::BorderColorProperty& colorProperty);
     static bool ParseBorderStyleProps(const JSRef<JSVal>& args, NG::BorderStyleProperty& borderStyleProperty);
     static bool ParseBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius);
+    static void ParseCommonBorderRadiusProps(const JSRef<JSObject>& object, NG::BorderRadiusProperty& radius);
+    static void ParseBorderRadiusProps(const JSRef<JSObject>& object, NG::BorderRadiusProperty& radius);
     static void SetDialogProperties(const JSRef<JSObject>& obj, DialogProperties& properties);
     static std::function<void(NG::DrawingContext& context)> GetDrawCallback(
         const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx);

@@ -304,13 +304,15 @@ void ParseSwiperIndexObject(const JSCallbackInfo& args, const JSRef<JSVal>& chan
 
 void JSSwiper::SetIndex(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || info.Length() > 2) {
+    auto length = info.Length();
+    if (length < 1 || length > 2) {
         return;
     }
 
     int32_t index = 0;
-    if (info.Length() > 0 && info[0]->IsNumber()) {
-        index = info[0]->ToNumber<int32_t>();
+    auto jsIndex = info[0];
+    if (length > 0 && jsIndex->IsNumber()) {
+        index = jsIndex->ToNumber<int32_t>();
     }
 
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
@@ -322,7 +324,7 @@ void JSSwiper::SetIndex(const JSCallbackInfo& info)
     }
     SwiperModel::GetInstance()->SetIndex(index);
 
-    if (info.Length() > 1 && info[1]->IsFunction()) {
+    if (length > 1 && info[1]->IsFunction()) {
         ParseSwiperIndexObject(info, info[1]);
     }
 }

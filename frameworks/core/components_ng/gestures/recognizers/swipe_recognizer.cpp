@@ -420,8 +420,11 @@ GestureJudgeResult SwipeRecognizer::TriggerGestureJudgeCallback()
 {
     auto targetComponent = GetTargetComponent();
     CHECK_NULL_RETURN(targetComponent, GestureJudgeResult::CONTINUE);
+    auto gestureRecognizerJudgeFunc = targetComponent->GetOnGestureRecognizerJudgeBegin();
     auto callback = targetComponent->GetOnGestureJudgeBeginCallback();
-    CHECK_NULL_RETURN(callback, GestureJudgeResult::CONTINUE);
+    if (!callback && !gestureRecognizerJudgeFunc) {
+        return GestureJudgeResult::CONTINUE;
+    }
     auto info = std::make_shared<SwipeGestureEvent>();
     info->SetTimeStamp(time_);
     UpdateFingerListInfo();
@@ -443,6 +446,9 @@ GestureJudgeResult SwipeRecognizer::TriggerGestureJudgeCallback()
     info->SetSourceTool(lastTouchEvent_.sourceTool);
     if (prevAngle_) {
         info->SetAngle(prevAngle_.value());
+    }
+    if (gestureRecognizerJudgeFunc) {
+        return gestureRecognizerJudgeFunc(info, Claim(this), responseLinkRecognizer_);
     }
     return callback(gestureInfo_, info);
 }

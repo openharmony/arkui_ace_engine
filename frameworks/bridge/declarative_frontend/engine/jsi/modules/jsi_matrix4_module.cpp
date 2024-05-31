@@ -358,6 +358,7 @@ shared_ptr<JsValue> Init(const shared_ptr<JsRuntime>& runtime, const shared_ptr<
 shared_ptr<JsValue> Identity(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
+    panda::JsiFastNativeScope scope(runtime->GetEcmaVm());
     shared_ptr<JsValue> matrixObj = runtime->NewObject();
     matrixObj->SetProperty(runtime, MATRIX_4X4, ConvertToJSValue(runtime, Matrix4::CreateIdentity()));
     AddCommonMatrixProperties(runtime, matrixObj);

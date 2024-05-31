@@ -311,6 +311,8 @@ public:
     void RemoveFilterAnimation();
     void RemoveEventColumn();
     void UpdateContextMenuDisappearPosition(const NG::OffsetF& offset);
+    void ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::FrameNode>& dragPreviewNode,
+        const NG::OffsetF& offset);
 
     void ResetContextMenuDragHideFinished()
     {
@@ -439,7 +441,7 @@ public:
     SizeF CaculateMenuSize(const RefPtr<FrameNode>& menuNode, const std::string& longestContent, int32_t menuSize);
     bool ShowUIExtensionMenu(const RefPtr<NG::FrameNode>& uiExtNode, const NG::RectF& aiRect,
         const std::string& longestContent, int32_t menuSize, const RefPtr<NG::FrameNode>& targetNode);
-    void CloseUIExtensionMenu(const std::function<void(const std::string&)>& onClickMenu, int32_t targetId);
+    void CloseUIExtensionMenu(int32_t targetId);
 
     void MarkDirty(PropertyChangeFlag flag);
     void MarkDirtyOverlay();

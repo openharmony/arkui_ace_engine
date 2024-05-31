@@ -184,6 +184,8 @@ public:
     void SetViewportFitChangedId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnInterceptKeyboardAttach(
         std::function<WebKeyboardOption(const BaseEventInfo* info)>&& jsCallback) override;
+
+    void SetAdsBlockedEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H

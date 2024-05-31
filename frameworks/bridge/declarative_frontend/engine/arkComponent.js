@@ -2246,14 +2246,14 @@ class BackgroundBrightnessInternalModifier extends ModifierWithKey {
       getUINativeModule().common.resetBackgroundBrightnessInternal(node);
     }
     else {
-      getUINativeModule().common.setBackgroundBrightnessInternal(node, this.value.rate, this.value.lightUpDegree, this.value.cubicCoeff, 
+      getUINativeModule().common.setBackgroundBrightnessInternal(node, this.value.rate, this.value.lightUpDegree, this.value.cubicCoeff,
              this.value.quadCoeff, this.value.saturation, this.value.posRGB, this.value.negRGB, this.value.fraction);
     }
   }
   checkObjectDiff() {
     return !(this.value.rate === this.stageValue.rate && this.value.lightUpDegree === this.stageValue.lightUpDegree
           && this.value.cubicCoeff === this.stageValue.cubicCoeff && this.value.quadCoeff === this.stageValue.quadCoeff
-          && this.value.saturation === this.stageValue.saturation && this.value.posRGB === this.stageValue.posRGB 
+          && this.value.saturation === this.stageValue.saturation && this.value.posRGB === this.stageValue.posRGB
           && this.value.negRGB === this.stageValue.negRGB && this.value.fraction === this.stageValue.fraction);
   }
 }
@@ -2267,14 +2267,14 @@ class ForegroundBrightnessModifier extends ModifierWithKey {
         getUINativeModule().common.resetForegroundBrightness(node);
       }
       else {
-        getUINativeModule().common.setForegroundBrightness(node, this.value.rate, this.value.lightUpDegree, this.value.cubicCoeff, 
+        getUINativeModule().common.setForegroundBrightness(node, this.value.rate, this.value.lightUpDegree, this.value.cubicCoeff,
           this.value.quadCoeff, this.value.saturation, this.value.posRGB, this.value.negRGB, this.value.fraction);
       }
     }
     checkObjectDiff() {
       return !(this.value.rate === this.stageValue.rate && this.value.lightUpDegree === this.stageValue.lightUpDegree
         && this.value.cubicCoeff === this.stageValue.cubicCoeff && this.value.quadCoeff === this.stageValue.quadCoeff
-        && this.value.saturation === this.stageValue.saturation && this.value.posRGB === this.stageValue.posRGB 
+        && this.value.saturation === this.stageValue.saturation && this.value.posRGB === this.stageValue.posRGB
         && this.value.negRGB === this.stageValue.negRGB && this.value.fraction === this.stageValue.fraction);
   }
 }
@@ -2679,6 +2679,37 @@ class SharedTransitionModifier extends ModifierWithKey {
   }
 }
 SharedTransitionModifier.identity = Symbol('sharedTransition');
+
+class FocusScopeIdModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetFocusScopeId(node);
+    }
+    else {
+      getUINativeModule().common.setFocusScopeId(node, this.value.id, this.value.isGroup);
+    }
+  }
+}
+FocusScopeIdModifier.identity = Symbol('focusScopeId');
+
+class FocusScopePriorityModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetFocusScopePriority(node);
+    }
+    else {
+      getUINativeModule().common.setFocusScopePriority(node, this.value.scopeId, this.value.priority);
+    }
+  }
+}
+FocusScopePriorityModifier.identity = Symbol('focusScopePriority');
+
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 const isString = (val) => typeof val === 'string';
 const isNumber = (val) => typeof val === 'number';
@@ -3870,6 +3901,29 @@ class ArkComponent {
     modifierWithKey(this._modifiersWithKeys, SystemBarEffectModifier.identity, SystemBarEffectModifier, null);
     return this;
   }
+  focusScopeId(id, isGroup) {
+    let arkFocusScopeId = new ArkFocusScopeId();
+    if (isString(id)) {
+      arkFocusScopeId.id = id;
+    }
+    if (typeof isGroup === 'boolean') {
+      arkFocusScopeId.isGroup = isGroup;
+    }
+    modifierWithKey(this._modifiersWithKeys, FocusScopeIdModifier.identity, FocusScopeIdModifier, arkFocusScopeId);
+    return this;
+  }
+  focusScopePriority(scopeId, priority) {
+    let arkFocusScopePriority = new ArkFocusScopePriority();
+    if (isString(scopeId)) {
+      arkFocusScopePriority.scopeId = scopeId;
+    }
+    if (typeof priority === 'number') {
+      arkFocusScopePriority.priority = priority;
+    }
+    modifierWithKey(
+      this._modifiersWithKeys, FocusScopePriorityModifier.identity, FocusScopePriorityModifier, arkFocusScopePriority);
+    return this;
+  }
 }
 const isNull = (val) => typeof val === 'object' && val === null;
 const isArray = (val) => Array.isArray(val);
@@ -4082,12 +4136,12 @@ class GestureGroupHandler extends GestureHandler {
       this.gestures = options.gestures;
     }
   }
-  
+
   onCancel(event) {
     this.onCancelCallback = event;
     return this;
   }
-  
+
   tag(tag) {
     this.gestureTag = tag;
     return this;
@@ -5584,7 +5638,7 @@ class GridFlingSpeedLimitModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    if (reset) {    
+    if (reset) {
       getUINativeModule().grid.resetFlingSpeedLimit(node);
     }
     else {
@@ -7762,7 +7816,7 @@ class SearchMinFontSizeModifier extends ModifierWithKey {
         return !isBaseOrResourceEqual(this.stageValue, this.value);
     }
 }
-            
+
 SearchMinFontSizeModifier.identity = Symbol('searchMinFontSize');
 class SearchMaxFontSizeModifier extends ModifierWithKey {
     constructor(value) {
@@ -7802,7 +7856,7 @@ class SearchTextIndentModifier extends ModifierWithKey {
         super(value);
     }
     applyPeer(node, reset) {
-        if (reset) {  
+        if (reset) {
             getUINativeModule().search.resetTextIndent(node);
         } else {
             getUINativeModule().search.setTextIndent(node, this.value);
@@ -11787,7 +11841,7 @@ class TextInputTextIndentModifier extends ModifierWithKey {
             getUINativeModule().textInput.setTextIndent(node, this.value);
         }
     }
-    
+
     checkObjectDiff() {
         return !isBaseOrResourceEqual(this.stageValue, this.value);
     }
@@ -14263,6 +14317,24 @@ class ArkSymbolEffect {
       (this.action === another.action);
   }
 }
+class ArkFocusScopeId {
+  constructor() {
+    this.id = undefined;
+    this.isGroup = undefined;
+  }
+  isEqual(another) {
+    return (this.id === another.id) && (this.isGroup === another.isGroup);
+  }
+}
+class ArkFocusScopePriority {
+  constructor() {
+    this.scopeId = undefined;
+    this.priority = undefined;
+  }
+  isEqual(another) {
+    return (this.scopeId === another.scopeId) && (this.priority === another.priority);
+  }
+}
 /// <reference path='./import.ts' />
 /// <reference path='./ArkComponent.ts' />
 const FontWeightMap = {
@@ -15621,8 +15693,8 @@ class ToggleSwitchStyleModifier extends ModifierWithKey {
                 this.stageValue.trackBorderRadius === this.value.trackBorderRadius);
         }
         else if (isResource(this.stageValue) && isResource(this.value)){
-          return !(isResourceEqual(this.stageValue.pointRadius, this.value.pointRadius) && 
-          isResourceEqual(this.stageValue.unselectedColor, this.value.unselectedColor) && 
+          return !(isResourceEqual(this.stageValue.pointRadius, this.value.pointRadius) &&
+          isResourceEqual(this.stageValue.unselectedColor, this.value.unselectedColor) &&
           isResourceEqual(this.stageValue.pointColor, this.value.pointColor) &&
           isResourceEqual(this.stageValue.trackBorderRadius, this.value.trackBorderRadius));
         }
@@ -16590,11 +16662,11 @@ class TimepickerDisappearTextStyleModifier extends ModifierWithKey {
     }
     else {
       getUINativeModule().timepicker.setDisappearTextStyle(node, (_b = (_a = this.value) === null ||
-      _a === void 0 ? void 0 : _a.color) !== null && _b !== void 0 ? _b : undefined, 
+      _a === void 0 ? void 0 : _a.color) !== null && _b !== void 0 ? _b : undefined,
       (_e = (_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null ||
-      _d === void 0 ? void 0 : _d.size) !== null && _e !== void 0 ? _e : undefined, 
+      _d === void 0 ? void 0 : _d.size) !== null && _e !== void 0 ? _e : undefined,
       (_h = (_g = (_f = this.value) === null || _f === void 0 ? void 0 : _f.font) === null ||
-      _g === void 0 ? void 0 : _g.weight) !== null && _h !== void 0 ? _h : undefined, 
+      _g === void 0 ? void 0 : _g.weight) !== null && _h !== void 0 ? _h : undefined,
       (_l = (_k = (_j = this.value) === null || _j === void 0 ? void 0 : _j.font) === null ||
       _k === void 0 ? void 0 : _k.family) !== null && _l !== void 0 ? _l : undefined,
       (_p = (_o = (_m = this.value) === null || _m === void 0 ? void 0 : _m.font) === null ||
@@ -16823,7 +16895,7 @@ class TextpickerTextStyleModifier extends ModifierWithKey {
       (_g = (_f = this.value) === null || _f === void 0 ? void 0 : _f.font) === null ||
       _g === void 0 ? void 0 : _g.weight) !== null && _h !== void 0 ? _h : undefined,
       (_l = (_k = (_j = this.value) === null || _j === void 0 ? void 0 : _j.font) === null ||
-      _k === void 0 ? void 0 : _k.family) !== null && _l !== void 0 ? _l : undefined, 
+      _k === void 0 ? void 0 : _k.family) !== null && _l !== void 0 ? _l : undefined,
       (_p = (_o = (_m = this.value) === null || _m === void 0 ? void 0 : _m.font) === null ||
       _o === void 0 ? void 0 : _o.style) !== null && _p !== void 0 ? _p : undefined);
     }
@@ -19149,6 +19221,10 @@ class ArkAlphabetIndexerComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, AutoCollapseModifier.identity, AutoCollapseModifier, value);
     return this;
   }
+  enableHapticFeedback(value) {
+    modifierWithKey(this._modifiersWithKeys, EnableHapticFeedbackModifier.identity, EnableHapticFeedbackModifier, value);
+    return this;
+  }
 }
 // @ts-ignore
 if (globalThis.AlphabetIndexer !== undefined) {
@@ -19544,6 +19620,23 @@ class AutoCollapseModifier extends ModifierWithKey {
   }
 }
 AutoCollapseModifier.identity = Symbol('autoCollapse');
+class EnableHapticFeedbackModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().alphabetIndexer.resetEnableHapticFeedback(node);
+    }
+    else {
+      getUINativeModule().alphabetIndexer.setEnableHapticFeedback(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+EnableHapticFeedbackModifier.identity = Symbol('enableHapticFeedback');
 
 /// <reference path='./import.ts' />
 class TextStyleModifier extends ModifierWithKey {
@@ -22140,6 +22233,9 @@ class ArkWebComponent extends ArkComponent {
   onViewportFitChanged(callback) {
     throw new Error('Method not implemented.');
   }
+  onAdsBlocked(callback) {
+    throw new Error('Method not implemented.');
+  }
 }
 // @ts-ignore
 if (globalThis.Web !== undefined) {
@@ -24440,6 +24536,10 @@ class ArkTabsComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, AnimationDurationModifier.identity, AnimationDurationModifier, value);
     return this;
   }
+  animateMode(value) {
+    modifierWithKey(this._modifiersWithKeys, AnimateModeModifier.identity, AnimateModeModifier, value);
+    return this;
+  }
   onChange(event) {
     throw new Error('Method not implemented.');
   }
@@ -24614,6 +24714,23 @@ class AnimationDurationModifier extends ModifierWithKey {
   }
 }
 AnimationDurationModifier.identity = Symbol('animationduration');
+class AnimateModeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().tabs.resetAnimateMode(node);
+    }
+    else {
+      getUINativeModule().tabs.setAnimateMode(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+AnimateModeModifier.identity = Symbol('animateMode');
 class ScrollableModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

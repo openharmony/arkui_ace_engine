@@ -1536,4 +1536,388 @@ HWTEST_F(TimePickerOrderTestNg, TimePickerOrder021, TestSize.Level1)
     auto minuteTextLayoutProperty = minuteTextPattern->GetLayoutProperty<TextLayoutProperty>();
     EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(), ZERO + std::to_string(MINUTE_PICKED));
 }
+
+/**
+ * @tc.name: TimePickerOrder022
+ * @tc.desc: Test the node sequence when system language is zh and time is MilitaryTime.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerOrderTestNg, TimePickerOrder022, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. set language to zh and create timepicker.
+     */
+    const std::string language = "zh";
+    const std::string countryOrRegion = "CN";
+    const std::string script = "Hans";
+    const std::string keywordsAndValues = "";
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme, true);
+    TimePickerModelNG::GetInstance()->SetHour24(true);
+    TimePickerModelNG::GetInstance()->SetSelectedTime(TIME_PICKED);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->amPmTimeOrder_ = AMPM_TIME;
+    timePickerRowPattern->UpdateAllChildNode();
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    /**
+     * @tc.step: step2. Check if the amPmDateTimeOrder of all child nodes is corrected.
+     * @tc.expected: amPmNode is the first, and minuteNode is the last.
+     */
+    auto hourColumn = allChildNode["hour"].Upgrade();
+    ASSERT_NE(hourColumn, nullptr);
+    auto hourColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
+    hourColumnPattern->SetCurrentIndex(CURRENT_INDEX);
+
+    auto minuteColumn = allChildNode["minute"].Upgrade();
+    ASSERT_NE(minuteColumn, nullptr);
+    auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
+    minuteColumnPattern->SetCurrentIndex(CURRENT_INDEX);
+
+    auto secondColumn = allChildNode["second"].Upgrade();
+    ASSERT_NE(secondColumn, nullptr);
+    auto secondColumnPattern = secondColumn->GetPattern<TimePickerColumnPattern>();
+    secondColumnPattern->SetCurrentIndex(CURRENT_INDEX);
+
+    auto hourTextNode = AceType::DynamicCast<FrameNode>(hourColumn->GetChildAtIndex(CURRENT_INDEX));
+    EXPECT_NE(hourTextNode, nullptr);
+    auto hourTextPattern = hourTextNode->GetPattern<TextPattern>();
+    auto hourTextLayoutProperty = hourTextPattern->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), "08:00:00");
+
+    auto minuteTextNode = AceType::DynamicCast<FrameNode>(minuteColumn->GetChildAtIndex(CURRENT_INDEX));
+    EXPECT_NE(minuteTextNode, nullptr);
+    auto minuteTextPattern = minuteTextNode->GetPattern<TextPattern>();
+    auto minuteTextLayoutProperty = minuteTextPattern->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(), ZERO + std::to_string(MINUTE_PICKED));
+
+    auto secondTextNode = AceType::DynamicCast<FrameNode>(secondColumn->GetChildAtIndex(CURRENT_INDEX));
+    EXPECT_NE(secondTextNode, nullptr);
+    auto secondTextPattern = secondTextNode->GetPattern<TextPattern>();
+    auto secondTextLayoutProperty = secondTextPattern->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(secondTextLayoutProperty->GetContentValue(), "08:00:00");
+}
+
+/**
+ * @tc.name: TimePickerOrder023
+ * @tc.desc: Test the node sequence when system language is en and time is MilitaryTime.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerOrderTestNg, TimePickerOrder023, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. set language to en and create timepicker.
+     */
+    const std::string language = "en";
+    const std::string countryOrRegion = "US";
+    const std::string script = "Latn";
+    const std::string keywordsAndValues = "";
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme, true);
+    TimePickerModelNG::GetInstance()->SetHour24(true);
+    TimePickerModelNG::GetInstance()->SetSelectedTime(TIME_PICKED);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->amPmTimeOrder_ = TIME_AMPM;
+    timePickerRowPattern->UpdateAllChildNode();
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    /**
+     * @tc.step: step2. Check if the amPmDateTimeOrder of all child nodes is corrected.
+     * @tc.expected: Hour is the first, and amPmNode is the last.
+     */
+    auto hourColumn = allChildNode["hour"].Upgrade();
+    ASSERT_NE(hourColumn, nullptr);
+    auto hourColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
+    hourColumnPattern->SetCurrentIndex(CURRENT_INDEX);
+
+    auto minuteColumn = allChildNode["minute"].Upgrade();
+    ASSERT_NE(minuteColumn, nullptr);
+    auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
+    minuteColumnPattern->SetCurrentIndex(CURRENT_INDEX);
+
+    auto secondColumn = allChildNode["second"].Upgrade();
+    ASSERT_NE(secondColumn, nullptr);
+    auto secondColumnPattern = secondColumn->GetPattern<TimePickerColumnPattern>();
+    secondColumnPattern->SetCurrentIndex(CURRENT_INDEX);
+
+    auto hourTextNode = AceType::DynamicCast<FrameNode>(hourColumn->GetChildAtIndex(AM_PM_INDEX));
+    EXPECT_NE(hourTextNode, nullptr);
+    auto hourTextPattern = hourTextNode->GetPattern<TextPattern>();
+    auto hourTextLayoutProperty = hourTextPattern->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), "08:00:00");
+
+    auto minuteTextNode = AceType::DynamicCast<FrameNode>(minuteColumn->GetChildAtIndex(CURRENT_INDEX));
+    EXPECT_NE(minuteTextNode, nullptr);
+    auto minuteTextPattern = minuteTextNode->GetPattern<TextPattern>();
+    auto minuteTextLayoutProperty = minuteTextPattern->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(), ZERO + std::to_string(MINUTE_PICKED));
+
+    auto secondTextNode = AceType::DynamicCast<FrameNode>(secondColumn->GetChildAtIndex(CURRENT_INDEX));
+    EXPECT_NE(secondTextNode, nullptr);
+    auto secondTextPattern = secondTextNode->GetPattern<TextPattern>();
+    auto secondTextLayoutProperty = secondTextPattern->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(secondTextLayoutProperty->GetContentValue(), "08:00:00");
+}
+
+/**
+ * @tc.name: TimePickerOrder024
+ * @tc.desc: Test the node sequence when system language is ur and time is MilitaryTime.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerOrderTestNg, TimePickerOrder024, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. set language to ur and create timepicker.
+     */
+    const std::string language = "ur";
+    const std::string countryOrRegion = "";
+    const std::string script = "";
+    const std::string keywordsAndValues = "";
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme, true);
+    TimePickerModelNG::GetInstance()->SetHour24(true);
+    TimePickerModelNG::GetInstance()->SetSelectedTime(TIME_PICKED);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->amPmTimeOrder_ = AMPM_TIME;
+    timePickerRowPattern->UpdateAllChildNode();
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    /**
+     * @tc.step: step2. Check if the amPmDateTimeOrder of all child nodes is corrected.
+     * @tc.expected: amPmNode is the first, and minuteNode is the last.
+     */
+    auto hourColumn = allChildNode["hour"].Upgrade();
+    ASSERT_NE(hourColumn, nullptr);
+    auto hourColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
+    hourColumnPattern->SetCurrentIndex(CURRENT_INDEX);
+
+    auto minuteColumn = allChildNode["minute"].Upgrade();
+    ASSERT_NE(minuteColumn, nullptr);
+    auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
+    minuteColumnPattern->SetCurrentIndex(CURRENT_INDEX);
+
+    auto secondColumn = allChildNode["second"].Upgrade();
+    ASSERT_NE(secondColumn, nullptr);
+    auto secondColumnPattern = secondColumn->GetPattern<TimePickerColumnPattern>();
+    secondColumnPattern->SetCurrentIndex(CURRENT_INDEX);
+
+    auto hourTextNode = AceType::DynamicCast<FrameNode>(hourColumn->GetChildAtIndex(CURRENT_INDEX));
+    EXPECT_NE(hourTextNode, nullptr);
+    auto hourTextPattern = hourTextNode->GetPattern<TextPattern>();
+    auto hourTextLayoutProperty = hourTextPattern->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), "08:00:00");
+
+    auto minuteTextNode = AceType::DynamicCast<FrameNode>(minuteColumn->GetChildAtIndex(CURRENT_INDEX));
+    EXPECT_NE(minuteTextNode, nullptr);
+    auto minuteTextPattern = minuteTextNode->GetPattern<TextPattern>();
+    auto minuteTextLayoutProperty = minuteTextPattern->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(), ZERO + std::to_string(MINUTE_PICKED));
+
+    auto secondTextNode = AceType::DynamicCast<FrameNode>(secondColumn->GetChildAtIndex(CURRENT_INDEX));
+    EXPECT_NE(secondTextNode, nullptr);
+    auto secondTextPattern = secondTextNode->GetPattern<TextPattern>();
+    auto secondTextLayoutProperty = secondTextPattern->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(secondTextLayoutProperty->GetContentValue(), "08:00:00");
+}
+
+/**
+ * @tc.name: TimePickerOrder025
+ * @tc.desc: Test the node sequence when system language is bo and time is MilitaryTime.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerOrderTestNg, TimePickerOrder025, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. set language to bo and create timepicker.
+     */
+    const std::string language = "bo";
+    const std::string countryOrRegion = "";
+    const std::string script = "";
+    const std::string keywordsAndValues = "";
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme, true);
+    TimePickerModelNG::GetInstance()->SetHour24(true);
+    TimePickerModelNG::GetInstance()->SetSelectedTime(TIME_PICKED);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->amPmTimeOrder_ = AMPM_TIME;
+    timePickerRowPattern->UpdateAllChildNode();
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    /**
+     * @tc.step: step2. Check if the amPmDateTimeOrder of all child nodes is corrected.
+     * @tc.expected: amPmNode is the first, and minuteNode is the last.
+     */
+    auto hourColumn = allChildNode["hour"].Upgrade();
+    ASSERT_NE(hourColumn, nullptr);
+    auto hourColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
+    hourColumnPattern->SetCurrentIndex(CURRENT_INDEX);
+
+    auto minuteColumn = allChildNode["minute"].Upgrade();
+    ASSERT_NE(minuteColumn, nullptr);
+    auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
+    minuteColumnPattern->SetCurrentIndex(CURRENT_INDEX);
+
+    auto secondColumn = allChildNode["second"].Upgrade();
+    ASSERT_NE(secondColumn, nullptr);
+    auto secondColumnPattern = secondColumn->GetPattern<TimePickerColumnPattern>();
+    secondColumnPattern->SetCurrentIndex(CURRENT_INDEX);
+
+    auto hourTextNode = AceType::DynamicCast<FrameNode>(hourColumn->GetChildAtIndex(CURRENT_INDEX));
+    EXPECT_NE(hourTextNode, nullptr);
+    auto hourTextPattern = hourTextNode->GetPattern<TextPattern>();
+    auto hourTextLayoutProperty = hourTextPattern->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), "08:00:00");
+
+    auto minuteTextNode = AceType::DynamicCast<FrameNode>(minuteColumn->GetChildAtIndex(CURRENT_INDEX));
+    EXPECT_NE(minuteTextNode, nullptr);
+    auto minuteTextPattern = minuteTextNode->GetPattern<TextPattern>();
+    auto minuteTextLayoutProperty = minuteTextPattern->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(), ZERO + std::to_string(MINUTE_PICKED));
+
+    auto secondTextNode = AceType::DynamicCast<FrameNode>(secondColumn->GetChildAtIndex(CURRENT_INDEX));
+    EXPECT_NE(secondTextNode, nullptr);
+    auto secondTextPattern = secondTextNode->GetPattern<TextPattern>();
+    auto secondTextLayoutProperty = secondTextPattern->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(secondTextLayoutProperty->GetContentValue(), "08:00:00");
+}
+
+/**
+ * @tc.name: TimePickerOrder026
+ * @tc.desc: Test the node sequence when system language is fa and time is not MilitaryTime.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerOrderTestNg, TimePickerOrder026, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. set language to fa and create timepicker.
+     */
+    const std::string language = "fa";
+    const std::string countryOrRegion = "";
+    const std::string script = "";
+    const std::string keywordsAndValues = "";
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme, true);
+    TimePickerModelNG::GetInstance()->SetHour24(true);
+    TimePickerModelNG::GetInstance()->SetSelectedTime(TIME_PICKED);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->amPmTimeOrder_ = TIME_AMPM;
+    timePickerRowPattern->UpdateAllChildNode();
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    /**
+     * @tc.step: step2. Check if the amPmDateTimeOrder of all child nodes is corrected.
+     * @tc.expected: Hour is the first, and amPmNode is the last.
+     */
+    auto hourColumn = allChildNode["hour"].Upgrade();
+    ASSERT_NE(hourColumn, nullptr);
+    auto hourColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
+    hourColumnPattern->SetCurrentIndex(CURRENT_INDEX);
+
+    auto minuteColumn = allChildNode["minute"].Upgrade();
+    ASSERT_NE(minuteColumn, nullptr);
+    auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
+    minuteColumnPattern->SetCurrentIndex(CURRENT_INDEX);
+
+    auto secondColumn = allChildNode["second"].Upgrade();
+    ASSERT_NE(secondColumn, nullptr);
+    auto secondColumnPattern = secondColumn->GetPattern<TimePickerColumnPattern>();
+    secondColumnPattern->SetCurrentIndex(CURRENT_INDEX);
+
+    auto hourTextNode = AceType::DynamicCast<FrameNode>(hourColumn->GetChildAtIndex(CURRENT_INDEX));
+    EXPECT_NE(hourTextNode, nullptr);
+    auto hourTextPattern = hourTextNode->GetPattern<TextPattern>();
+    auto hourTextLayoutProperty = hourTextPattern->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), "08:00:00");
+
+    auto minuteTextNode = AceType::DynamicCast<FrameNode>(minuteColumn->GetChildAtIndex(CURRENT_INDEX));
+    EXPECT_NE(minuteTextNode, nullptr);
+    auto minuteTextPattern = minuteTextNode->GetPattern<TextPattern>();
+    auto minuteTextLayoutProperty = minuteTextPattern->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(), ZERO + std::to_string(MINUTE_PICKED));
+
+    auto secondTextNode = AceType::DynamicCast<FrameNode>(secondColumn->GetChildAtIndex(CURRENT_INDEX));
+    EXPECT_NE(secondTextNode, nullptr);
+    auto secondTextPattern = secondTextNode->GetPattern<TextPattern>();
+    auto secondTextLayoutProperty = secondTextPattern->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(secondTextLayoutProperty->GetContentValue(), "08:00:00");
+}
+
+/**
+ * @tc.name: TimePickerOrder027
+ * @tc.desc: Test the node sequence when system language is iw and time is not MilitaryTime.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerOrderTestNg, TimePickerOrder027, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. set language to iw and create timepicker.
+     */
+    const std::string language = "iw";
+    const std::string countryOrRegion = "";
+    const std::string script = "";
+    const std::string keywordsAndValues = "";
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme, true);
+    TimePickerModelNG::GetInstance()->SetHour24(true);
+    TimePickerModelNG::GetInstance()->SetSelectedTime(TIME_PICKED);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->amPmTimeOrder_ = TIME_AMPM;
+    timePickerRowPattern->UpdateAllChildNode();
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    /**
+     * @tc.step: step2. Check if the amPmDateTimeOrder of all child nodes is corrected.
+     * @tc.expected: Hour is the first, and amPmNode is the last.
+     */
+    auto hourColumn = allChildNode["hour"].Upgrade();
+    ASSERT_NE(hourColumn, nullptr);
+    auto hourColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
+    hourColumnPattern->SetCurrentIndex(CURRENT_INDEX);
+
+    auto minuteColumn = allChildNode["minute"].Upgrade();
+    ASSERT_NE(minuteColumn, nullptr);
+    auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
+    minuteColumnPattern->SetCurrentIndex(CURRENT_INDEX);
+
+    auto secondColumn = allChildNode["second"].Upgrade();
+    ASSERT_NE(secondColumn, nullptr);
+    auto secondColumnPattern = secondColumn->GetPattern<TimePickerColumnPattern>();
+    secondColumnPattern->SetCurrentIndex(CURRENT_INDEX);
+
+    auto hourTextNode = AceType::DynamicCast<FrameNode>(hourColumn->GetChildAtIndex(CURRENT_INDEX));
+    EXPECT_NE(hourTextNode, nullptr);
+    auto hourTextPattern = hourTextNode->GetPattern<TextPattern>();
+    auto hourTextLayoutProperty = hourTextPattern->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), "08:00:00");
+
+    auto minuteTextNode = AceType::DynamicCast<FrameNode>(minuteColumn->GetChildAtIndex(CURRENT_INDEX));
+    EXPECT_NE(minuteTextNode, nullptr);
+    auto minuteTextPattern = minuteTextNode->GetPattern<TextPattern>();
+    auto minuteTextLayoutProperty = minuteTextPattern->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(), ZERO + std::to_string(MINUTE_PICKED));
+
+    auto secondTextNode = AceType::DynamicCast<FrameNode>(secondColumn->GetChildAtIndex(CURRENT_INDEX));
+    EXPECT_NE(secondTextNode, nullptr);
+    auto secondTextPattern = secondTextNode->GetPattern<TextPattern>();
+    auto secondTextLayoutProperty = secondTextPattern->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(secondTextLayoutProperty->GetContentValue(), "08:00:00");
+}
 } // namespace OHOS::Ace::NG

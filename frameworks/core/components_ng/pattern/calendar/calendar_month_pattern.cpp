@@ -43,6 +43,18 @@ bool CalendarMonthPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     return !(config.skipMeasure || dirty->SkipMeasureContent());
 }
 
+Dimension CalendarMonthPattern::GetDaySize(const RefPtr<CalendarTheme>& theme)
+{
+    auto pipeline = GetHost()->GetContext();
+    CHECK_NULL_RETURN(pipeline, theme->GetCalendarPickerDayWidthOrHeight());
+    auto fontSizeScale = pipeline->GetFontScale();
+    if (fontSizeScale < theme->GetCalendarPickerLargeScale()) {
+        return theme->GetCalendarPickerDayWidthOrHeight();
+    } else {
+        return theme->GetCalendarPickerDayLargeWidthOrHeight();
+    }
+}
+
 void CalendarMonthPattern::SetColRowSpace()
 {
     auto host = GetHost();
@@ -67,7 +79,7 @@ void CalendarMonthPattern::SetColRowSpace()
     auto paintProperty = GetPaintProperty<CalendarPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
 
-    auto calendarDaySize = theme->GetCalendarPickerDayWidthOrHeight();
+    auto calendarDaySize = GetDaySize(theme);
     auto space = (width - calendarDaySize.ConvertToPx() * CALENDAR_WEEK_DAYS) / (CALENDAR_WEEK_DAYS - 1);
     if (Positive(space)) {
         Dimension colSpace = 0.0_px;
@@ -76,6 +88,12 @@ void CalendarMonthPattern::SetColRowSpace()
     }
 
     auto rowCount = dataSize / CALENDAR_WEEK_DAYS;
+
+    auto pipeline = GetHost()->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetFontScale() >= theme->GetCalendarPickerLargerScale()) {
+        calendarDaySize = theme->GetCalendarPickerDayLargerHeight();
+    }
     space = (height - calendarDaySize.ConvertToPx() * (rowCount + 1)) / rowCount;
     if (!Positive(space)) {
         return;

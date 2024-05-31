@@ -77,6 +77,7 @@ void IndexerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
     json->PutExtAttr("popupHorizontalSpace", propPopupHorizontalSpace_.value_or(
         Dimension(NG::INDEXER_BUBBLE_INVALID_SPACE, DimensionUnit::VP)).ToString().c_str(), filter);
     json->PutExtAttr("adaptiveWidth", propAdaptiveWidth_.value_or(false) ? "true" : "false", filter);
+    json->PutExtAttr("enableHapticFeedback", propEnableHapticFeedback_.value_or(true) ? "true" : "false", filter);
 }
 
 std::unique_ptr<JsonValue> IndexerLayoutProperty::ToJsonObjectValue(const TextStyle& textStyle)

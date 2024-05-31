@@ -68,7 +68,7 @@ RefPtr<FrameNode> AppBarView::Create(const RefPtr<FrameNode>& stage)
     atomicService_ = atom;
     auto pattern = atom->GetPattern<AtomicServicePattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
-    pattern->UpdateColor();
+    pattern->UpdateColor(std::nullopt);
     pattern->UpdateLayout();
     return atom;
 }
@@ -377,5 +377,18 @@ std::optional<RectF> AppBarView::GetAppBarRect()
     CHECK_NULL_RETURN(manager, std::nullopt);
     offset.AddY(manager->GetSystemSafeArea().top_.Length());
     return RectF(offset, size);
+}
+
+void AppBarView::SetStatusBarItemColor(bool isLight)
+{
+    auto atom = atomicService_.Upgrade();
+    CHECK_NULL_VOID(atom);
+    auto pattern = atom->GetPattern<AtomicServicePattern>();
+    CHECK_NULL_VOID(pattern);
+    auto theme = GetAppBarTheme();
+    auto menuBar = pattern->GetMenuBar();
+    pattern->settedColorMode = isLight;
+    pattern->UpdateMenuBarColor(theme, menuBar, isLight);
+    pattern->UpdateColor(isLight);
 }
 } // namespace OHOS::Ace::NG

@@ -646,6 +646,7 @@ void AceContainer::OnActive(int32_t instanceId)
             }
             ContainerScope scope(container->GetInstanceId());
             pipelineContext->WindowFocus(true);
+            pipelineContext->ChangeDarkModeBrightness();
         },
         TaskExecutor::TaskType::UI, "ArkUIWindowFocus");
 }
@@ -682,6 +683,7 @@ void AceContainer::OnInactive(int32_t instanceId)
             }
             ContainerScope scope(container->GetInstanceId());
             pipelineContext->WindowFocus(false);
+            pipelineContext->ChangeDarkModeBrightness();
             if (container->IsScenceBoardWindow()) {
                 JankFrameReport::GetInstance().FlushRecord();
             }
@@ -1095,6 +1097,13 @@ OHOS::AppExecFwk::Ability* AceContainer::GetAbility(int32_t instanceId)
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
     CHECK_NULL_RETURN(container, nullptr);
     return container->GetAbilityInner().lock().get();
+}
+
+OHOS::AbilityRuntime::Context* AceContainer::GetRuntimeContext(int32_t instanceId)
+{
+    auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
+    CHECK_NULL_RETURN(container, nullptr);
+    return container->GetRuntimeContextInner().lock().get();
 }
 
 UIContentErrorCode AceContainer::RunPage(
@@ -1876,6 +1885,11 @@ std::weak_ptr<OHOS::AppExecFwk::Ability> AceContainer::GetAbilityInner() const
     return aceAbility_;
 }
 
+std::weak_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetRuntimeContextInner() const
+{
+    return runtimeContext_;
+}
+
 bool AceContainer::IsLauncherContainer()
 {
     auto runtime = runtimeContext_.lock();
@@ -2343,6 +2357,7 @@ void AceContainer::NotifyConfigurationChange(
                         // reload transition animation
                         pipeline->FlushReloadTransition();
                     }
+                    pipeline->ChangeDarkModeBrightness();
                 },
                 TaskExecutor::TaskType::UI, "ArkUIFlushReloadTransition");
         },

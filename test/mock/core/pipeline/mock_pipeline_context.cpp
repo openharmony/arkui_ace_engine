@@ -190,7 +190,7 @@ void PipelineContext::SetContainerWindow(bool isShow) {}
 
 void PipelineContext::SetAppBgColor(const Color& color) {}
 
-void PipelineContext::ChangeDarkModeBrightness(bool isFocus) {}
+void PipelineContext::ChangeDarkModeBrightness() {}
 
 void PipelineContext::SetAppTitle(const std::string& title) {}
 
@@ -767,6 +767,11 @@ bool PipelineBase::HasFloatTitle() const
 Dimension NG::PipelineContext::GetCustomTitleHeight()
 {
     return Dimension();
+}
+
+void PipelineBase::SetFontScale(float fontScale)
+{
+    fontScale_ = fontScale;
 }
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

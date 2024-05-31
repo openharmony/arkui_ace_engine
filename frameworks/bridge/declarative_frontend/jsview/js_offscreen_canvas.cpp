@@ -140,6 +140,7 @@ napi_value JSOffscreenCanvas::Constructor(napi_env env, napi_callback_info info)
     double fWidth = 0.0;
     double fHeight = 0.0;
     auto workCanvas = new (std::nothrow) JSOffscreenCanvas();
+    CHECK_NULL_RETURN(workCanvas, nullptr);
     if (argv[2] != nullptr) {
         int32_t unit = 0;
         napi_get_value_int32(env, argv[2], &unit);

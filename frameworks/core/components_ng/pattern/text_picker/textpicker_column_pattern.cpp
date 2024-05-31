@@ -598,7 +598,12 @@ void TextPickerColumnPattern::FlushCurrentMixtureOptions(
         layoutConstraint.selfIdealSize = idealSize;
         iconLayoutProperty->UpdateCalcLayoutProperty(layoutConstraint);
         MarginProperty margin;
-        margin.right = CalcLength(ICON_TEXT_SPACE);
+        bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+        if (isRtl) {
+            margin.left = CalcLength(ICON_TEXT_SPACE);
+        } else {
+            margin.right = CalcLength(ICON_TEXT_SPACE);
+        }
         iconLayoutProperty->UpdateMargin(margin);
 
         auto textNode = DynamicCast<FrameNode>(linearLayoutNode->GetLastChild());

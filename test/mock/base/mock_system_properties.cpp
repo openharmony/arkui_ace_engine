@@ -64,6 +64,7 @@ bool SystemProperties::debugBoundaryEnabled_ = false;
 bool SystemProperties::developerModeOn_ = false;
 bool SystemProperties::faultInjectEnabled_ = false;
 bool SystemProperties::imageFileCacheConvertAstc_ = true;
+bool SystemProperties::imageFrameworkEnable_ = true;
 std::pair<float, float> SystemProperties::brightUpPercent_ = {};
 int32_t SystemProperties::imageFileCacheConvertAstcThreshold_ = 3;
 
@@ -115,11 +116,6 @@ void SystemProperties::SetDeviceOrientation(int32_t orientation)
 bool SystemProperties::Is24HourClock()
 {
     return false;
-}
-
-bool SystemProperties::GetImageFrameworkEnabled()
-{
-    return true;
 }
 
 bool SystemProperties::GetTitleStyleEnabled()

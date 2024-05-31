@@ -105,7 +105,7 @@ public:
     int32_t LoadDestinationFile(const std::string& bundleName, const std::string& moduleName,
         const std::string& pageSourceFile, bool isSingleton);
 
-    const EcmaVM* GetEcmaVm() const
+    const EcmaVM* GetEcmaVm() const override
     {
         return GetThreadVm() ? GetThreadVm() : vm_;
     }

@@ -65,6 +65,7 @@ void IndexerPattern::OnModifyDone()
     auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
+    enableHapticFeedback_ = layoutProperty->GetEnableHapticFeedback().value_or(true);
     auto itemCountChanged = false;
     bool autoCollapseModeChanged = true;
     if (!isNewHeightCalculated_) {
@@ -781,6 +782,11 @@ void IndexerPattern::ApplyIndexChanged(
     }
     if (selectChanged) {
         ShowBubble();
+#ifdef INDEXER_SUPPORT_VIBRATOR
+        if (enableHapticFeedback_) {
+            VibraFeedback();
+        }
+#endif
     }
 }
 
@@ -1937,5 +1943,6 @@ void IndexerPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("PopupPositionY: ",
         layoutProperty->GetPopupPositionYValue(Dimension(NG::BUBBLE_POSITION_Y, DimensionUnit::VP)).ToString());
     DumpLog::GetInstance().AddDesc("AutoCollapse: ", autoCollapse_ ? "true" : "false");
+    DumpLog::GetInstance().AddDesc(std::string("EnableHapticFeedback: ").append(std::to_string(enableHapticFeedback_)));
 }
 } // namespace OHOS::Ace::NG

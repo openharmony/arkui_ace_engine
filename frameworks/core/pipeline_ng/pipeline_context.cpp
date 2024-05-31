@@ -3613,7 +3613,7 @@ bool PipelineContext::CheckNeedDisableUpdateBackgroundImage()
     return true;
 }
 
-void PipelineContext::ChangeDarkModeBrightness(bool isFocus)
+void PipelineContext::ChangeDarkModeBrightness()
 {
     auto windowManager = GetWindowManager();
     CHECK_NULL_VOID(windowManager);
@@ -3630,7 +3630,7 @@ void PipelineContext::ChangeDarkModeBrightness(bool isFocus)
     if (SystemProperties::GetColorMode() == ColorMode::DARK && appBgColor_.ColorToString().compare("#FF000000") == 0 &&
         mode != WindowMode::WINDOW_MODE_FULLSCREEN && !container->IsUIExtensionWindow() &&
         !container->IsDynamicRender()) {
-        if (!isFocus && mode == WindowMode::WINDOW_MODE_FLOATING) {
+        if (!onFocus_ && mode == WindowMode::WINDOW_MODE_FLOATING) {
             dimension.SetValue(1 + percent.second);
         } else {
             dimension.SetValue(1 + percent.first);

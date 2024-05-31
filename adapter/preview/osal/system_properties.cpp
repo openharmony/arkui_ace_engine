@@ -96,6 +96,7 @@ bool SystemProperties::sideBarContainerBlurEnable_ = false;
 bool SystemProperties::acePerformanceMonitorEnable_ = false;
 std::pair<float, float> SystemProperties::brightUpPercent_ = {};
 bool SystemProperties::faultInjectEnabled_ = false;
+bool SystemProperties::imageFrameworkEnable_ = false;
 
 bool SystemProperties::IsOpIncEnable()
 {
@@ -233,14 +234,14 @@ bool SystemProperties::IsFormAnimationLimited()
     return true;
 }
 
-bool SystemProperties::GetImageFrameworkEnabled()
+bool SystemProperties::GetDebugPixelMapSaveEnabled()
 {
     return false;
 }
 
-bool SystemProperties::GetDebugPixelMapSaveEnabled()
+bool SystemProperties::GetPixelRoundEnable()
 {
-    return false;
+    return true;
 }
 
 bool SystemProperties::GetResourceDecoupling()

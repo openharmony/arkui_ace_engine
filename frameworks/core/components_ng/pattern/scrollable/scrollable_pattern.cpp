@@ -666,19 +666,20 @@ void ScrollablePattern::InitScrollBarGestureEvent()
     scrollableEvent_->SetBarCollectTouchTargetCallback(
         [weak = AceType::WeakClaim(AceType::RawPtr(scrollBar_))](const OffsetF& coordinateOffset,
             const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
-            const RefPtr<TargetComponent>& targetComponent) {
+            const RefPtr<TargetComponent>& targetComponent, TouchTestResult& responseLinkResult) {
             auto scrollBar = weak.Upgrade();
             CHECK_NULL_VOID(scrollBar);
-            scrollBar->OnCollectTouchTarget(coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent);
+            scrollBar->OnCollectTouchTarget(
+                coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
         });
     scrollableEvent_->SetBarCollectLongPressTargetCallback(
         [weak = AceType::WeakClaim(AceType::RawPtr(scrollBar_))](const OffsetF& coordinateOffset,
             const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
-            const RefPtr<TargetComponent>& targetComponent) {
+            const RefPtr<TargetComponent>& targetComponent, TouchTestResult& responseLinkResult) {
             auto scrollBar = weak.Upgrade();
             CHECK_NULL_VOID(scrollBar);
             scrollBar->OnCollectLongPressTarget(
-                coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent);
+                coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
         });
     scrollableEvent_->SetInBarRectRegionCallback(
         [weak = AceType::WeakClaim(AceType::RawPtr(scrollBar_))](const PointF& point, SourceType source) {
@@ -1000,6 +1001,7 @@ void ScrollablePattern::PlaySpringAnimation(float position, float velocity, floa
 {
     if (!springOffsetProperty_) {
         InitSpringOffsetProperty();
+        CHECK_NULL_VOID(springOffsetProperty_);
     }
     scrollableEvent_->SetAnimateVelocityCallback([weakScroll = AceType::WeakClaim(this)]() -> double {
         auto pattern = weakScroll.Upgrade();
@@ -1040,6 +1042,7 @@ void ScrollablePattern::PlayCurveAnimation(
     InitOption(option, duration, curve);
     if (!curveOffsetProperty_) {
         InitCurveOffsetProperty();
+        CHECK_NULL_VOID(curveOffsetProperty_);
     }
     scrollableEvent_->SetAnimateVelocityCallback([weakScroll = AceType::WeakClaim(this)]() -> double {
         auto pattern = weakScroll.Upgrade();

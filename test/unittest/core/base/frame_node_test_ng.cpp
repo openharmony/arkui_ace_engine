@@ -282,6 +282,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest, TestSize.Level1)
     TouchRestrict touchRestrict = { TouchRestrict::NONE };
     auto globalPoint = PointF(10, 10);
     auto touchTestResult = std::list<RefPtr<TouchEventTarget>>();
+    TouchTestResult responseLinkResult;
 
     mockRenderContext->rect_ = RectF(0, 0, 100, 100);
     EXPECT_CALL(*mockRenderContext, GetPointWithTransform(_)).WillRepeatedly(DoAll(SetArgReferee<0>(localPoint)));
@@ -344,14 +345,14 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest, TestSize.Level1)
             for (auto hitTestModeofChild : hitTestModeofChilds) {
                 childNode->SetExclusiveEventForChild(isStack);
                 childEventHub->SetHitTestMode(hitTestModeofChild);
-                auto result = childNode->TouchTest(
-                    globalPoint, parentLocalPointOne, parentLocalPointOne, touchRestrict, touchTestResult, 0);
+                auto result = childNode->TouchTest(globalPoint, parentLocalPointOne, parentLocalPointOne, touchRestrict,
+                    touchTestResult, 0, responseLinkResult);
                 auto expectedResult =
                     (hitTestModeofGrandChild == HitTestMode::HTMBLOCK || hitTestModeofChild == HitTestMode::HTMBLOCK)
                         ? HitTestResult::STOP_BUBBLING
                         : HitTestResult::BUBBLING;
-                result = node->TouchTest(
-                    globalPoint, parentLocalPointOne, parentLocalPointOne, touchRestrict, touchTestResult, 0);
+                result = node->TouchTest(globalPoint, parentLocalPointOne, parentLocalPointOne, touchRestrict,
+                    touchTestResult, 0, responseLinkResult);
                 EXPECT_NE(result, expectedResult);
             }
         }
@@ -1008,11 +1009,14 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest0026, TestSize.Level1)
     PointF parentLocalPoint;
     TouchRestrict touchRestrict;
     TouchTestResult result;
+    TouchTestResult responseLinkResult;
     SystemProperties::debugEnabled_ = true;
-    FRAME_NODE2->TouchTest(globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1);
+    FRAME_NODE2->TouchTest(
+        globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1, responseLinkResult);
 
     SystemProperties::debugEnabled_ = false;
-    FRAME_NODE2->TouchTest(globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1);
+    FRAME_NODE2->TouchTest(
+        globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1, responseLinkResult);
 
     /**
      * @tc.steps: step2. set isActive_ and IsEnabled is false.
@@ -1020,7 +1024,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest0026, TestSize.Level1)
      */
     FRAME_NODE2->isActive_ = false;
     FRAME_NODE2->eventHub_->SetEnabled(false);
-    auto test = FRAME_NODE2->TouchTest(globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1);
+    auto test = FRAME_NODE2->TouchTest(
+        globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1, responseLinkResult);
     EXPECT_EQ(test, HitTestResult::OUT_OF_REGION);
 }
 
@@ -1520,7 +1525,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback0048, TestSiz
     callbackInfo.callback = [&flag](bool input1, double input2) { flag += 1; };
     callbackInfo.period = minInterval;
     FRAME_NODE2->SetVisibleAreaUserCallback({ 0.2, 0.8, 0.21, 0.79, 0.5 }, callbackInfo);
-    FRAME_NODE2->ProcessThrottledVisibleCallback(0.2);
+    FRAME_NODE2->ProcessThrottledVisibleCallback();
     EXPECT_EQ(FRAME_NODE2->throttledCallbackOnTheWay_, false);
 }
 } // namespace OHOS::Ace::NG

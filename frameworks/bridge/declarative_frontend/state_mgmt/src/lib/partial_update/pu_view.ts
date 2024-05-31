@@ -39,6 +39,10 @@ abstract class ViewPU extends PUV2ViewBase
 
   private hasBeenRecycled_: boolean = false;
 
+  private delayRecycleNodeRerender: boolean = false;
+
+  private delayRecycleNodeRerenderDeep: boolean = false;
+
   // @Provide'd variables by this class and its ancestors
   protected providedVars_: Map<string, ObservedPropertyAbstractPU<any>> = new Map<string, ObservedPropertyAbstractPU<any>>();
 
@@ -413,6 +417,16 @@ abstract class ViewPU extends PUV2ViewBase
     }
     stateMgmtConsole.debug(`${this.debugInfo__()}: forceCompleteRerender - end`);
     stateMgmtProfiler.end();
+  }
+
+  public delayCompleteRerender(deep: boolean = false): void {
+    this.delayRecycleNodeRerender = true;
+    this.delayRecycleNodeRerenderDeep = deep;
+  }
+
+  public flushDelayCompleteRerender(): void {
+    this.forceCompleteRerender(this.delayRecycleNodeRerenderDeep);
+    this.delayRecycleNodeRerender = false;
   }
 
   /**
@@ -843,7 +857,11 @@ abstract class ViewPU extends PUV2ViewBase
         }
       }
     }
-    this.updateDirtyElements();
+    if (!this.delayRecycleNodeRerender) {
+      this.updateDirtyElements();
+    } else {
+      this.flushDelayCompleteRerender();
+    }
     this.childrenWeakrefMap_.forEach((weakRefChild) => {
       const child = weakRefChild.deref();
       if (child) {

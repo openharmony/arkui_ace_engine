@@ -17,8 +17,12 @@
 
 #define protected public
 #define private public
+#include "core/common/agingadapation/aging_adapation_dialog_theme.h"
+#include "core/common/agingadapation/aging_adapation_dialog_util.h"
+#include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_algorithm.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
@@ -28,6 +32,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/pipeline/pipeline_base.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -48,14 +53,15 @@ constexpr float TITLE_FRAME_HEIGHT = 30.0f;
 constexpr float SUBTITLE_FRAME_WIDTH = 60.0f;
 constexpr float SUBTITLE_FRAME_HEIGHT = 20.0f;
 
-struct TestLayoutParams {
+struct UIComponents {
+    RefPtr<LayoutWrapperNode> layoutWrapper = nullptr;
+    RefPtr<FrameNode> frameNode = nullptr;
     RefPtr<LayoutWrapperNode> titleBarLayoutWrapper = nullptr;
+    RefPtr<NavDestinationGroupNode> navDestinationGroupNode = nullptr;
     RefPtr<TitleBarNode> titleBarNode = nullptr;
     RefPtr<TitleBarLayoutProperty> titleBarLayoutProperty = nullptr;
+    RefPtr<TitleBarPattern> titleBarPattern = nullptr;
     RefPtr<TitleBarLayoutAlgorithm> titleBarLayoutAlgorithm = nullptr;
-};
-
-struct TestGeometryOffsets {
     RefPtr<GeometryNode> backButtonGeometryNode = nullptr;
     RefPtr<GeometryNode> titleGeometryNode = nullptr;
     RefPtr<GeometryNode> subtitleGeometryNode = nullptr;
@@ -76,7 +82,7 @@ public:
     RefPtr<LayoutWrapperNode> CreateTitleBarWrapper(
         const RefPtr<FrameNode>& frameNode, const RefPtr<LayoutWrapperNode>& layoutWrapper);
     RefPtr<LayoutWrapperNode> CreateNavDestinationWrapper();
-    void InitChildrenComponent(TestLayoutParams& params, TestGeometryOffsets& offsets);
+    void InitChildrenComponent(UIComponents& ui);
 };
 
 void NavdestinationTestNg::SetUpTestSuite()
@@ -93,7 +99,15 @@ void NavdestinationTestNg::MockPipelineContextGetTheme()
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<NavigationBarTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == NavigationBarTheme::TypeId()) {
+            return AceType::MakeRefPtr<NavigationBarTheme>();
+        } else if (type == AgingAdapationDialogTheme::TypeId()) {
+            return AceType::MakeRefPtr<AgingAdapationDialogTheme>();
+        } else {
+            return AceType::MakeRefPtr<DialogTheme>();
+        }
+    });
 }
 
 RefPtr<LayoutWrapperNode> NavdestinationTestNg::CreateNavDestinationWrapper()
@@ -180,46 +194,46 @@ RefPtr<LayoutWrapperNode> NavdestinationTestNg::CreateSubtitleWrapper(
     return subtitleLayoutWrapper;
 }
 
-void NavdestinationTestNg::InitChildrenComponent(TestLayoutParams& params, TestGeometryOffsets& offsets)
+void NavdestinationTestNg::InitChildrenComponent(UIComponents& ui)
 {
     AceApplicationInfo::GetInstance().isRightToLeft_ = false;
-    auto layoutWrapper = CreateNavDestinationWrapper();
-    ASSERT_NE(layoutWrapper, nullptr);
-    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    ASSERT_NE(frameNode, nullptr);
-    params.titleBarLayoutWrapper = CreateTitleBarWrapper(frameNode, layoutWrapper);
-    ASSERT_NE(params.titleBarLayoutWrapper, nullptr);
-    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
-    ASSERT_NE(navDestinationNode, nullptr);
-    params.titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
-    ASSERT_NE(params.titleBarNode, nullptr);
-    auto backButtonLayoutWrapper = CreateBackButtonWrapper(params.titleBarNode, params.titleBarLayoutWrapper);
+    ui.layoutWrapper = CreateNavDestinationWrapper();
+    ASSERT_NE(ui.layoutWrapper, nullptr);
+    ui.frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(ui.frameNode, nullptr);
+    ui.titleBarLayoutWrapper = CreateTitleBarWrapper(ui.frameNode, ui.layoutWrapper);
+    ASSERT_NE(ui.titleBarLayoutWrapper, nullptr);
+    ui.navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(ui.frameNode);
+    ASSERT_NE(ui.navDestinationGroupNode, nullptr);
+    ui.titleBarNode = AceType::DynamicCast<TitleBarNode>(ui.navDestinationGroupNode->GetTitleBarNode());
+    ASSERT_NE(ui.titleBarNode, nullptr);
+    auto backButtonLayoutWrapper = CreateBackButtonWrapper(ui.titleBarNode, ui.titleBarLayoutWrapper);
     ASSERT_NE(backButtonLayoutWrapper, nullptr);
-    auto titleLayoutWrapper = CreateTitleWrapper(params.titleBarNode, params.titleBarLayoutWrapper);
+    auto titleLayoutWrapper = CreateTitleWrapper(ui.titleBarNode, ui.titleBarLayoutWrapper);
     ASSERT_NE(titleLayoutWrapper, nullptr);
-    auto subtitleLayoutWrapper = CreateSubtitleWrapper(params.titleBarNode, params.titleBarLayoutWrapper);
+    auto subtitleLayoutWrapper = CreateSubtitleWrapper(ui.titleBarNode, ui.titleBarLayoutWrapper);
     ASSERT_NE(subtitleLayoutWrapper, nullptr);
-    params.titleBarLayoutProperty = params.titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
-    ASSERT_NE(params.titleBarLayoutProperty, nullptr);
-    auto titleBarPattern = AceType::DynamicCast<TitleBarPattern>(params.titleBarNode->GetPattern());
-    ASSERT_NE(titleBarPattern, nullptr);
-    params.titleBarLayoutAlgorithm =
-        AccessibilityManager::DynamicCast<TitleBarLayoutAlgorithm>(titleBarPattern->CreateLayoutAlgorithm());
-    ASSERT_NE(params.titleBarLayoutAlgorithm, nullptr);
-    offsets.backButtonGeometryNode = backButtonLayoutWrapper->GetGeometryNode();
-    ASSERT_NE(offsets.backButtonGeometryNode, nullptr);
-    offsets.titleGeometryNode = titleLayoutWrapper->GetGeometryNode();
-    ASSERT_NE(offsets.titleGeometryNode, nullptr);
-    offsets.subtitleGeometryNode = subtitleLayoutWrapper->GetGeometryNode();
-    ASSERT_NE(offsets.subtitleGeometryNode, nullptr);
-    params.titleBarLayoutAlgorithm->showBackButton_ = true;
-    params.titleBarLayoutAlgorithm->maxPaddingStart_ = MAX_PADDING_START;
-    params.titleBarLayoutAlgorithm->LayoutBackButton(
-        AccessibilityManager::RawPtr(params.titleBarLayoutWrapper), params.titleBarNode, params.titleBarLayoutProperty);
-    params.titleBarLayoutAlgorithm->LayoutTitle(AccessibilityManager::RawPtr(params.titleBarLayoutWrapper),
-        params.titleBarNode, params.titleBarLayoutProperty, SUBTITLE_FRAME_HEIGHT);
-    params.titleBarLayoutAlgorithm->LayoutSubtitle(AccessibilityManager::RawPtr(params.titleBarLayoutWrapper),
-        params.titleBarNode, params.titleBarLayoutProperty, TITLE_FRAME_HEIGHT);
+    ui.titleBarLayoutProperty = ui.titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(ui.titleBarLayoutProperty, nullptr);
+    ui.titleBarPattern = AceType::DynamicCast<TitleBarPattern>(ui.titleBarNode->GetPattern());
+    ASSERT_NE(ui.titleBarPattern, nullptr);
+    ui.titleBarLayoutAlgorithm =
+        AccessibilityManager::DynamicCast<TitleBarLayoutAlgorithm>(ui.titleBarPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(ui.titleBarLayoutAlgorithm, nullptr);
+    ui.backButtonGeometryNode = backButtonLayoutWrapper->GetGeometryNode();
+    ASSERT_NE(ui.backButtonGeometryNode, nullptr);
+    ui.titleGeometryNode = titleLayoutWrapper->GetGeometryNode();
+    ASSERT_NE(ui.titleGeometryNode, nullptr);
+    ui.subtitleGeometryNode = subtitleLayoutWrapper->GetGeometryNode();
+    ASSERT_NE(ui.subtitleGeometryNode, nullptr);
+    ui.titleBarLayoutAlgorithm->showBackButton_ = true;
+    ui.titleBarLayoutAlgorithm->maxPaddingStart_ = MAX_PADDING_START;
+    ui.titleBarLayoutAlgorithm->LayoutBackButton(
+        AccessibilityManager::RawPtr(ui.titleBarLayoutWrapper), ui.titleBarNode, ui.titleBarLayoutProperty);
+    ui.titleBarLayoutAlgorithm->LayoutTitle(AccessibilityManager::RawPtr(ui.titleBarLayoutWrapper), ui.titleBarNode,
+        ui.titleBarLayoutProperty, SUBTITLE_FRAME_HEIGHT);
+    ui.titleBarLayoutAlgorithm->LayoutSubtitle(AccessibilityManager::RawPtr(ui.titleBarLayoutWrapper), ui.titleBarNode,
+        ui.titleBarLayoutProperty, TITLE_FRAME_HEIGHT);
 }
 
 /**
@@ -415,28 +429,27 @@ HWTEST_F(NavdestinationTestNg, NavdestinationMirrorLayoutTest001, TestSize.Level
     /**
      * @tc.steps: step2. set the system language to left to right and initialize children component.
      */
-    TestLayoutParams params;
-    TestGeometryOffsets offsets;
-    InitChildrenComponent(params, offsets);
-    auto ltrBackButton = offsets.backButtonGeometryNode->GetMarginFrameOffset().GetX();
-    auto ltrTitle = offsets.titleGeometryNode->GetMarginFrameOffset().GetX();
-    auto ltrSubtitle = offsets.subtitleGeometryNode->GetMarginFrameOffset().GetX();
+    UIComponents ui;
+    InitChildrenComponent(ui);
+    auto ltrBackButton = ui.backButtonGeometryNode->GetMarginFrameOffset().GetX();
+    auto ltrTitle = ui.titleGeometryNode->GetMarginFrameOffset().GetX();
+    auto ltrSubtitle = ui.subtitleGeometryNode->GetMarginFrameOffset().GetX();
     /**
      * @tc.steps: step3. set the system language to right to left, start layout and compare coordinates.
      * @tc.expected: NewOffsetX = titleBarWidth - componentWidth - offsetX.
      */
     AceApplicationInfo::GetInstance().isRightToLeft_ = true;
-    params.titleBarLayoutAlgorithm->LayoutBackButton(
-        AccessibilityManager::RawPtr(params.titleBarLayoutWrapper), params.titleBarNode, params.titleBarLayoutProperty);
-    params.titleBarLayoutAlgorithm->LayoutTitle(AccessibilityManager::RawPtr(params.titleBarLayoutWrapper),
-        params.titleBarNode, params.titleBarLayoutProperty, SUBTITLE_FRAME_HEIGHT);
-    params.titleBarLayoutAlgorithm->LayoutSubtitle(AccessibilityManager::RawPtr(params.titleBarLayoutWrapper),
-        params.titleBarNode, params.titleBarLayoutProperty, TITLE_FRAME_HEIGHT);
-    EXPECT_EQ(offsets.backButtonGeometryNode->GetMarginFrameOffset().GetX(),
+    ui.titleBarLayoutAlgorithm->LayoutBackButton(
+        AccessibilityManager::RawPtr(ui.titleBarLayoutWrapper), ui.titleBarNode, ui.titleBarLayoutProperty);
+    ui.titleBarLayoutAlgorithm->LayoutTitle(AccessibilityManager::RawPtr(ui.titleBarLayoutWrapper), ui.titleBarNode,
+        ui.titleBarLayoutProperty, SUBTITLE_FRAME_HEIGHT);
+    ui.titleBarLayoutAlgorithm->LayoutSubtitle(AccessibilityManager::RawPtr(ui.titleBarLayoutWrapper), ui.titleBarNode,
+        ui.titleBarLayoutProperty, TITLE_FRAME_HEIGHT);
+    EXPECT_EQ(ui.backButtonGeometryNode->GetMarginFrameOffset().GetX(),
         TITLEBAR_WIDTH - BACK_BUTTON_FRAME_SIZE - ltrBackButton);
-    EXPECT_EQ(offsets.titleGeometryNode->GetMarginFrameOffset().GetX(), TITLEBAR_WIDTH - TITLE_FRAME_WIDTH - ltrTitle);
-    EXPECT_EQ(offsets.subtitleGeometryNode->GetMarginFrameOffset().GetX(),
-        TITLEBAR_WIDTH - SUBTITLE_FRAME_WIDTH - ltrSubtitle);
+    EXPECT_EQ(ui.titleGeometryNode->GetMarginFrameOffset().GetX(), TITLEBAR_WIDTH - TITLE_FRAME_WIDTH - ltrTitle);
+    EXPECT_EQ(
+        ui.subtitleGeometryNode->GetMarginFrameOffset().GetX(), TITLEBAR_WIDTH - SUBTITLE_FRAME_WIDTH - ltrSubtitle);
 }
 
 /**
@@ -454,28 +467,27 @@ HWTEST_F(NavdestinationTestNg, NavdestinationMirrorLayoutTest002, TestSize.Level
     /**
      * @tc.steps: step2. initialize children component and get default offset.
      */
-    TestLayoutParams params;
-    TestGeometryOffsets offsets;
-    InitChildrenComponent(params, offsets);
-    auto ltrBackButton = offsets.backButtonGeometryNode->GetMarginFrameOffset().GetX();
-    auto ltrTitle = offsets.titleGeometryNode->GetMarginFrameOffset().GetX();
-    auto ltrSubtitle = offsets.subtitleGeometryNode->GetMarginFrameOffset().GetX();
+    UIComponents ui;
+    InitChildrenComponent(ui);
+    auto ltrBackButton = ui.backButtonGeometryNode->GetMarginFrameOffset().GetX();
+    auto ltrTitle = ui.titleGeometryNode->GetMarginFrameOffset().GetX();
+    auto ltrSubtitle = ui.subtitleGeometryNode->GetMarginFrameOffset().GetX();
     /**
      * @tc.steps: step3. set the system language to right to left, start layout and compare coordinates.
      * @tc.expected: NewOffsetX = titleBarWidth - componentWidth - offsetX.
      */
     AceApplicationInfo::GetInstance().isRightToLeft_ = true;
-    params.titleBarLayoutAlgorithm->LayoutBackButton(
-        AccessibilityManager::RawPtr(params.titleBarLayoutWrapper), params.titleBarNode, params.titleBarLayoutProperty);
-    params.titleBarLayoutAlgorithm->LayoutTitle(AccessibilityManager::RawPtr(params.titleBarLayoutWrapper),
-        params.titleBarNode, params.titleBarLayoutProperty, SUBTITLE_FRAME_HEIGHT);
-    params.titleBarLayoutAlgorithm->LayoutSubtitle(AccessibilityManager::RawPtr(params.titleBarLayoutWrapper),
-        params.titleBarNode, params.titleBarLayoutProperty, TITLE_FRAME_HEIGHT);
-    EXPECT_EQ(offsets.backButtonGeometryNode->GetMarginFrameOffset().GetX(),
+    ui.titleBarLayoutAlgorithm->LayoutBackButton(
+        AccessibilityManager::RawPtr(ui.titleBarLayoutWrapper), ui.titleBarNode, ui.titleBarLayoutProperty);
+    ui.titleBarLayoutAlgorithm->LayoutTitle(AccessibilityManager::RawPtr(ui.titleBarLayoutWrapper), ui.titleBarNode,
+        ui.titleBarLayoutProperty, SUBTITLE_FRAME_HEIGHT);
+    ui.titleBarLayoutAlgorithm->LayoutSubtitle(AccessibilityManager::RawPtr(ui.titleBarLayoutWrapper), ui.titleBarNode,
+        ui.titleBarLayoutProperty, TITLE_FRAME_HEIGHT);
+    EXPECT_EQ(ui.backButtonGeometryNode->GetMarginFrameOffset().GetX(),
         TITLEBAR_WIDTH - BACK_BUTTON_FRAME_SIZE - ltrBackButton);
-    EXPECT_EQ(offsets.titleGeometryNode->GetMarginFrameOffset().GetX(), TITLEBAR_WIDTH - TITLE_FRAME_WIDTH - ltrTitle);
-    EXPECT_EQ(offsets.subtitleGeometryNode->GetMarginFrameOffset().GetX(),
-        TITLEBAR_WIDTH - SUBTITLE_FRAME_WIDTH - ltrSubtitle);
+    EXPECT_EQ(ui.titleGeometryNode->GetMarginFrameOffset().GetX(), TITLEBAR_WIDTH - TITLE_FRAME_WIDTH - ltrTitle);
+    EXPECT_EQ(
+        ui.subtitleGeometryNode->GetMarginFrameOffset().GetX(), TITLEBAR_WIDTH - SUBTITLE_FRAME_WIDTH - ltrSubtitle);
 }
 
 /**
@@ -493,27 +505,256 @@ HWTEST_F(NavdestinationTestNg, NavdestinationMirrorLayoutTest003, TestSize.Level
     /**
      * @tc.steps: step2. set the system language to left to right and initialize children component.
      */
-    TestLayoutParams params;
-    TestGeometryOffsets offsets;
-    InitChildrenComponent(params, offsets);
-    auto ltrBackButton = offsets.backButtonGeometryNode->GetMarginFrameOffset().GetX();
-    auto ltrTitle = offsets.titleGeometryNode->GetMarginFrameOffset().GetX();
-    auto ltrSubtitle = offsets.subtitleGeometryNode->GetMarginFrameOffset().GetX();
+    UIComponents ui;
+    InitChildrenComponent(ui);
+    auto ltrBackButton = ui.backButtonGeometryNode->GetMarginFrameOffset().GetX();
+    auto ltrTitle = ui.titleGeometryNode->GetMarginFrameOffset().GetX();
+    auto ltrSubtitle = ui.subtitleGeometryNode->GetMarginFrameOffset().GetX();
     /**
      * @tc.steps: step3. set the system language to right to left, start layout and compare coordinates.
      * @tc.expected: NewOffsetX = titleBarWidth - componentWidth - offsetX.
      */
     AceApplicationInfo::GetInstance().isRightToLeft_ = true;
-    params.titleBarLayoutAlgorithm->LayoutBackButton(
-        AccessibilityManager::RawPtr(params.titleBarLayoutWrapper), params.titleBarNode, params.titleBarLayoutProperty);
-    params.titleBarLayoutAlgorithm->LayoutTitle(AccessibilityManager::RawPtr(params.titleBarLayoutWrapper),
-        params.titleBarNode, params.titleBarLayoutProperty, SUBTITLE_FRAME_HEIGHT);
-    params.titleBarLayoutAlgorithm->LayoutSubtitle(AccessibilityManager::RawPtr(params.titleBarLayoutWrapper),
-        params.titleBarNode, params.titleBarLayoutProperty, TITLE_FRAME_HEIGHT);
-    EXPECT_EQ(offsets.backButtonGeometryNode->GetMarginFrameOffset().GetX(),
+    ui.titleBarLayoutAlgorithm->LayoutBackButton(
+        AccessibilityManager::RawPtr(ui.titleBarLayoutWrapper), ui.titleBarNode, ui.titleBarLayoutProperty);
+    ui.titleBarLayoutAlgorithm->LayoutTitle(AccessibilityManager::RawPtr(ui.titleBarLayoutWrapper), ui.titleBarNode,
+        ui.titleBarLayoutProperty, SUBTITLE_FRAME_HEIGHT);
+    ui.titleBarLayoutAlgorithm->LayoutSubtitle(AccessibilityManager::RawPtr(ui.titleBarLayoutWrapper), ui.titleBarNode,
+        ui.titleBarLayoutProperty, TITLE_FRAME_HEIGHT);
+    EXPECT_EQ(ui.backButtonGeometryNode->GetMarginFrameOffset().GetX(),
         TITLEBAR_WIDTH - BACK_BUTTON_FRAME_SIZE - ltrBackButton);
-    EXPECT_EQ(offsets.titleGeometryNode->GetMarginFrameOffset().GetX(), TITLEBAR_WIDTH - TITLE_FRAME_WIDTH - ltrTitle);
-    EXPECT_EQ(offsets.subtitleGeometryNode->GetMarginFrameOffset().GetX(),
-        TITLEBAR_WIDTH - SUBTITLE_FRAME_WIDTH - ltrSubtitle);
+    EXPECT_EQ(ui.titleGeometryNode->GetMarginFrameOffset().GetX(), TITLEBAR_WIDTH - TITLE_FRAME_WIDTH - ltrTitle);
+    EXPECT_EQ(
+        ui.subtitleGeometryNode->GetMarginFrameOffset().GetX(), TITLEBAR_WIDTH - SUBTITLE_FRAME_WIDTH - ltrSubtitle);
+}
+
+/**
+ * @tc.name: NavDestinationPatternHandleLongPressTest001
+ * @tc.desc: test 1.75 scale of NavDestinationPattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, NavDestinationPatternHandleLongPressTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set platform version to VERSION_NINE, mock theme and set font scale to 1.75.
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->fontScale_ = 1.75f;
+    /**
+     * @tc.steps: step2. create NavDestination and initialize children component.
+     */
+    UIComponents ui;
+    InitChildrenComponent(ui);
+    auto navDestinationPattern = ui.navDestinationGroupNode->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(navDestinationPattern, nullptr);
+    /**
+     * @tc.steps: step2. call HandleLongPress.
+     * @tc.expected: dialog_ != nullptr
+     */
+    navDestinationPattern->HandleLongPress();
+    EXPECT_NE(navDestinationPattern->dialogNode_, nullptr);
+    /**
+     * @tc.steps: step3. call HandleLongPressActionEnd.
+     * @tc.expected: dialog_ == nullptr
+     */
+    navDestinationPattern->HandleLongPressActionEnd();
+    EXPECT_EQ(navDestinationPattern->dialogNode_, nullptr);
+}
+
+/**
+ * @tc.name: NavDestinationPatternHandleLongPressTest002
+ * @tc.desc: test 2 scale of NavDestinationPattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, NavDestinationPatternHandleLongPressTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set platform version to VERSION_NINE and set font scale to 2.
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->fontScale_ = 2.0f;
+    /**
+     * @tc.steps: step2. create NavDestination and initialize children component.
+     */
+    UIComponents ui;
+    InitChildrenComponent(ui);
+    auto navDestinationPattern = ui.navDestinationGroupNode->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(navDestinationPattern, nullptr);
+    /**
+     * @tc.steps: step2. call HandleLongPress.
+     * @tc.expected: dialog_ != nullptr
+     */
+    navDestinationPattern->HandleLongPress();
+    EXPECT_NE(navDestinationPattern->dialogNode_, nullptr);
+    /**
+     * @tc.steps: step3. call HandleLongPressActionEnd.
+     * @tc.expected: dialog_ == nullptr
+     */
+    navDestinationPattern->HandleLongPressActionEnd();
+    EXPECT_EQ(navDestinationPattern->dialogNode_, nullptr);
+}
+
+/**
+ * @tc.name: NavDestinationPatternHandleLongPressTest003
+ * @tc.desc: test 3.2 scale of NavDestinationPattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, NavDestinationPatternHandleLongPressTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set platform version to VERSION_NINE and set font scale to 3.2.
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->fontScale_ = 3.2f;
+    /**
+     * @tc.steps: step2. create NavDestination and initialize children component.
+     */
+    UIComponents ui;
+    InitChildrenComponent(ui);
+    auto navDestinationPattern = ui.navDestinationGroupNode->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(navDestinationPattern, nullptr);
+    /**
+     * @tc.steps: step2. call HandleLongPress.
+     * @tc.expected: dialog_ != nullptr
+     */
+    navDestinationPattern->HandleLongPress();
+    EXPECT_NE(navDestinationPattern->dialogNode_, nullptr);
+    /**
+     * @tc.steps: step3. call HandleLongPressActionEnd.
+     * @tc.expected: dialog_ == nullptr
+     */
+    navDestinationPattern->HandleLongPressActionEnd();
+    EXPECT_EQ(navDestinationPattern->dialogNode_, nullptr);
+}
+
+/**
+ * @tc.name: NavigationTitleUtilHandleLongPressTest001
+ * @tc.desc: test 1.75 scale of NavigationTitleUtil
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, NavigationTitleUtilHandleLongPressTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set platform version to VERSION_NINE and set font scale to 1.75.
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->fontScale_ = 1.75f;
+    /**
+     * @tc.steps: step2. create NavDestination and initialize children component.
+     */
+    UIComponents ui;
+    InitChildrenComponent(ui);
+    BarItem menuItem;
+    std::vector<NG::BarItem> menuItems;
+    menuItems.insert(menuItems.begin(), menuItem);
+    auto navDestinationMenuItems = NavigationTitleUtil::CreateMenuItems(
+        ElementRegister::GetInstance()->MakeUniqueId(), menuItems, ui.titleBarNode, true);
+    ASSERT_NE(navDestinationMenuItems, nullptr);
+    ui.titleBarNode->AddChild(navDestinationMenuItems);
+    auto menuNode = AceType::DynamicCast<FrameNode>(navDestinationMenuItems->GetFirstChild());
+    ASSERT_NE(menuNode, nullptr);
+    /**
+     * @tc.steps: step2. call HandleLongPress.
+     * @tc.expected: dialog_ != nullptr
+     */
+    NavigationTitleUtil::HandleLongPress(menuNode, menuItem, false);
+    EXPECT_NE(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
+    /**
+     * @tc.steps: step3. call HandleLongPressActionEnd.
+     * @tc.expected: dialog_ == nullptr
+     */
+    NavigationTitleUtil::HandleLongPressActionEnd(menuNode);
+    EXPECT_EQ(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
+}
+/**
+ * @tc.name: NavigationTitleUtilHandleLongPressTest002
+ * @tc.desc: test 2.0 scale of NavigationTitleUtil
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, NavigationTitleUtilHandleLongPressTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set platform version to VERSION_NINE and set font scale to 2.0.
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->fontScale_ = 2.0f;
+    /**
+     * @tc.steps: step2. create NavDestination and initialize children component.
+     */
+    UIComponents ui;
+    InitChildrenComponent(ui);
+    BarItem menuItem;
+    std::vector<NG::BarItem> menuItems;
+    menuItems.insert(menuItems.begin(), menuItem);
+    auto navDestinationMenuItems = NavigationTitleUtil::CreateMenuItems(
+        ElementRegister::GetInstance()->MakeUniqueId(), menuItems, ui.titleBarNode, true);
+    ASSERT_NE(navDestinationMenuItems, nullptr);
+    ui.titleBarNode->AddChild(navDestinationMenuItems);
+    auto menuNode = AceType::DynamicCast<FrameNode>(navDestinationMenuItems->GetFirstChild());
+    ASSERT_NE(menuNode, nullptr);
+    /**
+     * @tc.steps: step2. call HandleLongPress.
+     * @tc.expected: dialog_ != nullptr
+     */
+    NavigationTitleUtil::HandleLongPress(menuNode, menuItem, false);
+    EXPECT_NE(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
+    /**
+     * @tc.steps: step3. call HandleLongPressActionEnd.
+     * @tc.expected: dialog_ == nullptr
+     */
+    NavigationTitleUtil::HandleLongPressActionEnd(menuNode);
+    EXPECT_EQ(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
+}
+
+/**
+ * @tc.name: NavigationTitleUtilHandleLongPressTest003
+ * @tc.desc: test 3.2 scale of NavigationTitleUtil
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, NavigationTitleUtilHandleLongPressTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set platform version to VERSION_NINE and set font scale to 3.2.
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->fontScale_ = 3.2f;
+    /**
+     * @tc.steps: step2. create NavDestination and initialize children component.
+     */
+    UIComponents ui;
+    InitChildrenComponent(ui);
+    BarItem menuItem;
+    std::vector<NG::BarItem> menuItems;
+    menuItems.insert(menuItems.begin(), menuItem);
+    auto navDestinationMenuItems = NavigationTitleUtil::CreateMenuItems(
+        ElementRegister::GetInstance()->MakeUniqueId(), menuItems, ui.titleBarNode, true);
+    ASSERT_NE(navDestinationMenuItems, nullptr);
+    ui.titleBarNode->AddChild(navDestinationMenuItems);
+    auto menuNode = AceType::DynamicCast<FrameNode>(navDestinationMenuItems->GetFirstChild());
+    ASSERT_NE(menuNode, nullptr);
+    /**
+     * @tc.steps: step2. call HandleLongPress.
+     * @tc.expected: dialog_ != nullptr
+     */
+    NavigationTitleUtil::HandleLongPress(menuNode, menuItem, false);
+    EXPECT_NE(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
+    /**
+     * @tc.steps: step3. call HandleLongPressActionEnd.
+     * @tc.expected: dialog_ == nullptr
+     */
+    NavigationTitleUtil::HandleLongPressActionEnd(menuNode);
+    EXPECT_EQ(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
 }
 } // namespace OHOS::Ace::NG

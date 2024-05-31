@@ -28,7 +28,7 @@ LongPressEventActuator::LongPressEventActuator(const WeakPtr<GestureEventHub>& g
 {}
 
 void LongPressEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
+    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, TouchTestResult& responseLinkResult)
 {
     CHECK_NULL_VOID(longPressEvent_);
     auto gestureHub = gestureEventHub_.Upgrade();
@@ -40,10 +40,13 @@ void LongPressEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffse
         longPressRecognizer_ = MakeRefPtr<LongPressRecognizer>(isForDrag_, isDisableMouseLeft_);
     }
 
+    longPressRecognizer_->SetIsSystemGesture(true);
+    longPressRecognizer_->SetRecognizerType(GestureTypeName::LONG_PRESS_GESTURE);
     longPressRecognizer_->SetOnAction(GetGestureEventFunc());
     longPressRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
     longPressRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
     result.emplace_back(longPressRecognizer_);
+    responseLinkResult.emplace_back(longPressRecognizer_);
 }
 
 GestureEventFunc LongPressEventActuator::GetGestureEventFunc()

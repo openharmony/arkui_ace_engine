@@ -1689,6 +1689,7 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
         .isShowInSubWindow = dialogAttr.showInSubWindow,
         .isModal = dialogAttr.isModal,
         .maskRect = dialogAttr.maskRect,
+        .onLanguageChange = dialogAttr.onLanguageChange,
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {

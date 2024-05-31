@@ -697,6 +697,10 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
     CHECK_NULL_VOID(swiperLayoutProperty);
 
     auto currentIndex = startIndex - 1;
+    auto marginValue = NearZero(nextMargin_) ? 0.0f : nextMargin_ + spaceWidth_;
+    if (!NearZero(prevMargin_) && startIndex == 0 && swiperLayoutProperty->GetPrevMarginIgnoreBlankValue(false)) {
+        marginValue += prevMargin_;
+    }
     do {
         currentStartPos = currentEndPos;
         auto result =
@@ -726,8 +730,8 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
             endMainPos = targetIsSameWithStartFlag_ ? endMainPos_ : currentStartPos + contentMainSize_;
             targetIndex_.reset();
         }
-    } while (LessNotEqual(currentEndPos, nextMargin_ != 0.0f ? endMainPos + nextMargin_ + spaceWidth_ : endMainPos) ||
-             (targetIndex_ && currentIndex < targetIndex_.value()));
+    } while (LessNotEqual(currentEndPos, endMainPos + marginValue)
+        || (targetIndex_ && currentIndex < targetIndex_.value()));
 
     if (overScrollFeature_ && canOverScroll_) {
         return;

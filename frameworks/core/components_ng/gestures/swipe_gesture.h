@@ -34,8 +34,10 @@ public:
         speed_ = speed;
         if (gestureInfo_) {
             gestureInfo_->SetType(GestureTypeName::SWIPE_GESTURE);
+            gestureInfo_->SetRecognizerType(GestureTypeName::SWIPE_GESTURE);
         } else {
-            gestureInfo_ = MakeRefPtr<GestureInfo>(GestureTypeName::SWIPE_GESTURE);
+            gestureInfo_ =
+                MakeRefPtr<GestureInfo>(GestureTypeName::SWIPE_GESTURE, GestureTypeName::SWIPE_GESTURE, false);
         }
     };
 

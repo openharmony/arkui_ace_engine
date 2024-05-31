@@ -220,6 +220,23 @@ RefPtr<FrameNode> MenuPreviewPattern::GetMenuWrapper() const
 
 void MenuPreviewPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_VOID(mainPipeline);
+    auto dragDropManager = mainPipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    auto preDragFrameNode = dragDropManager->GetPrepareDragFrameNode().Upgrade();
+    CHECK_NULL_VOID(preDragFrameNode);
+    auto eventHub = preDragFrameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto targetGestureHub = eventHub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(targetGestureHub);
+    auto dragEventActuator = targetGestureHub->GetDragEventActuator();
+    auto actionStartTask = [actuator = AceType::WeakClaim(AceType::RawPtr(dragEventActuator))](
+                               const GestureEvent& info) {
+        auto dragEventActuator = actuator.Upgrade();
+        CHECK_NULL_VOID(dragEventActuator);
+        dragEventActuator->RestartDragTask(info);
+    };
     CHECK_NULL_VOID(gestureHub);
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
@@ -234,7 +251,7 @@ void MenuPreviewPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     };
     PanDirection panDirection;
     panDirection.type = PanDirection::ALL;
-    auto panEvent = MakeRefPtr<PanEvent>(nullptr, nullptr, std::move(actionEndTask), nullptr);
+    auto panEvent = MakeRefPtr<PanEvent>(std::move(actionStartTask), nullptr, std::move(actionEndTask), nullptr);
     gestureHub->AddPanEvent(panEvent, panDirection, 1, DEFAULT_PAN_DISTANCE);
 }
 
@@ -270,8 +287,12 @@ void MenuPreviewPattern::ShowHoverImagePreviewDisAppearAnimation(const RefPtr<Re
         option.GetOnFinishEvent());
 
     // custom preview update scale from final scale to hover image size
-    auto scaleBefore = LessNotEqual(scaleFrom, 0.0) ? 1.0f : scaleFrom;
-    auto scaleAfter = LessNotEqual(scaleTo, 0.0) ? 1.0f : scaleTo;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    auto scaleBefore = LessNotEqual(scaleFrom, 0.0) ? menuTheme->GetPreviewAfterAnimationScale() : scaleFrom;
+    auto scaleAfter = LessNotEqual(scaleTo, 0.0) ? menuTheme->GetPreviewBeforeAnimationScale() : scaleTo;
     context->UpdateTransformScale(VectorF(scaleBefore, scaleBefore));
 
     AnimationOption scaleOption = AnimationOption();

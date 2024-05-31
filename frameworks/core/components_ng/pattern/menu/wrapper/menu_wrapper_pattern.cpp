@@ -232,16 +232,14 @@ void MenuWrapperPattern::HideSubMenu()
     }
     auto focusMenu = MenuFocusViewShow();
     CHECK_NULL_VOID(focusMenu);
-    auto scroll = focusMenu->GetFirstChild();
-    CHECK_NULL_VOID(scroll);
-    auto innerMenu = AceType::DynamicCast<FrameNode>(scroll->GetFirstChild());
+    auto innerMenu = GetMenuChild(focusMenu);
     CHECK_NULL_VOID(innerMenu);
     auto innerMenuPattern = innerMenu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(innerMenuPattern);
     auto layoutProps = innerMenuPattern->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(layoutProps);
     auto expandingMode = layoutProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
-    if (expandingMode == SubMenuExpandingMode::STACK && menuPattern->IsSubMenu()) {
+    if (expandingMode == SubMenuExpandingMode::STACK && subMenuPattern->IsSubMenu()) {
         HideStackExpandMenu(subMenu);
     } else {
         host->RemoveChild(subMenu);

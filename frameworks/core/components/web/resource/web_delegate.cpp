@@ -1839,6 +1839,9 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
                                            webCom->GetViewportFitChangedId(), oldContext);
         onInterceptKeyboardAttachV2_ = useNewPipe ? eventHub->GetOnInterceptKeyboardAttachEvent()
                                                   : nullptr;
+        onAdsBlockedV2_ = useNewPipe ? eventHub->GetOnAdsBlockedEvent()
+                                     : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                         webCom->GetAdsBlockedEventId(), oldContext);
     }
     return true;
 }
@@ -4467,7 +4470,8 @@ void WebDelegate::OnPermissionRequestPrompt(const std::shared_ptr<OHOS::NWeb::NW
         [weak = WeakClaim(this), request]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
-            if (request->ResourceAcessId() & OHOS::NWeb::NWebAccessRequest::Resources::CLIPBOARD_READ_WRITE) {
+            uint32_t accessId = request->ResourceAcessId();
+            if (accessId & OHOS::NWeb::NWebAccessRequest::Resources::CLIPBOARD_READ_WRITE) {
                 auto webPattern = delegate->webPattern_.Upgrade();
                 CHECK_NULL_VOID(webPattern);
                 auto clipboardCallback = webPattern->GetPermissionClipboardCallback();
@@ -6786,5 +6790,23 @@ NG::WebInfoType WebDelegate::GetWebInfoType()
         return NG::WebInfoType::TYPE_2IN1;
     }
     return NG::WebInfoType::TYPE_UNKNOWN;
+}
+
+void WebDelegate::OnAdsBlocked(const std::string& url, const std::vector<std::string>& adsBlocked)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "OnAdsBlocked %{public}s", url.c_str());
+
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), url, adsBlocked]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto onAdsBlockedV2 = delegate->onAdsBlockedV2_;
+            if (onAdsBlockedV2) {
+                onAdsBlockedV2(std::make_shared<AdsBlockedEvent>(url, adsBlocked));
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUiWebAdsBlocked");
 }
 } // namespace OHOS::Ace

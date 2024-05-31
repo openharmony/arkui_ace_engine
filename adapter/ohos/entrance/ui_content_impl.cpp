@@ -1761,7 +1761,6 @@ void UIContentImpl::Focus()
     CHECK_NULL_VOID(container);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->ChangeDarkModeBrightness(true);
 }
 
 void UIContentImpl::UnFocus()
@@ -1772,7 +1771,6 @@ void UIContentImpl::UnFocus()
     CHECK_NULL_VOID(container);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->ChangeDarkModeBrightness(false);
 }
 
 void UIContentImpl::Destroy()
@@ -2054,7 +2052,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
         Platform::AceViewOhos::SurfacePositionChanged(aceView, config.Left(), config.Top());
         if (pipelineContext) {
             pipelineContext->CheckAndUpdateKeyboardInset();
-            pipelineContext->ChangeDarkModeBrightness(true);
+            pipelineContext->ChangeDarkModeBrightness();
         }
     };
 
@@ -2113,6 +2111,7 @@ void UIContentImpl::UpdateDecorVisible(bool visible, bool hasDeco)
            auto pipelineContext = container->GetPipelineContext();
            CHECK_NULL_VOID(pipelineContext);
            pipelineContext->ShowContainerTitle(visible, hasDeco);
+           pipelineContext->ChangeDarkModeBrightness();
         },
         TaskExecutor::TaskType::UI, "ArkUIUpdateDecorVisible");
 }
@@ -3238,4 +3237,13 @@ void UIContentImpl::PreLayout()
         TaskExecutor::TaskType::UI, "ArkUIPreLayout");
 }
 
+void UIContentImpl::SetStatusBarItemColor(uint32_t color)
+{
+    ContainerScope scope(instanceId_);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto appBar = container->GetAppBar();
+    CHECK_NULL_VOID(appBar);
+    appBar->SetStatusBarItemColor(IsDarkColor(color));
+}
 } // namespace OHOS::Ace

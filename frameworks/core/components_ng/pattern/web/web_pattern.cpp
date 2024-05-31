@@ -369,7 +369,7 @@ void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         // Determine if there is already a fixed nested scroll mode.
-        if (!pattern->GetIsFixedNestedScrollMode()) {
+        if (!pattern->GetIsFixedNestedScrollMode() || !pattern->GetNestedScrollParent()) {
             pattern->SetParentScrollable();
         }
         pattern->OnScrollStartRecursive(pattern->GetParentAxis() == Axis::HORIZONTAL
@@ -2083,6 +2083,7 @@ void WebPattern::OnModifyDone()
             static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE,
                 "RosenWeb" };
             renderContextForSurface_->InitContext(false, param);
+            renderContextForSurface_->UpdateBackgroundColor(renderContext->GetBackgroundColor().value_or(Color::WHITE));
             renderSurface_->SetInstanceId(instanceId);
             renderSurface_->SetRenderContext(host->GetRenderContext());
             if (renderMode_ == RenderMode::SYNC_RENDER) {
@@ -2105,7 +2106,6 @@ void WebPattern::OnModifyDone()
             static_cast<int32_t>(renderContext->GetBackgroundColor().value_or(Color::WHITE).GetValue())));
         delegate_->UpdateJavaScriptEnabled(GetJsEnabledValue(true));
         delegate_->UpdateBlockNetworkImage(!GetOnLineImageAccessEnabledValue(true));
-        delegate_->UpdateAllowFileAccess(GetFileAccessEnabledValue(true));
         delegate_->UpdateLoadsImagesAutomatically(GetImageAccessEnabledValue(true));
         delegate_->UpdateMixedContentMode(GetMixedModeValue(MixedModeContent::MIXED_CONTENT_NEVER_ALLOW));
         delegate_->UpdateSupportZoom(GetZoomAccessEnabledValue(true));
@@ -2152,6 +2152,7 @@ void WebPattern::OnModifyDone()
             GetOverScrollModeValue(isApiGteTwelve ? OverScrollMode::ALWAYS : OverScrollMode::NEVER));
         delegate_->UpdateCopyOptionMode(GetCopyOptionModeValue(static_cast<int32_t>(CopyOptions::Distributed)));
         delegate_->UpdateTextAutosizing(GetTextAutosizingValue(true));
+        delegate_->UpdateAllowFileAccess(GetFileAccessEnabledValue(isApiGteTwelve ? false : true));
         if (GetMetaViewport()) {
             delegate_->UpdateMetaViewport(GetMetaViewport().value());
         }
@@ -2822,8 +2823,8 @@ RectF WebPattern::ComputeClippedSelectionBounds(
     auto offset = GetCoordinatePoint().value_or(OffsetF());
     float selectX = params->GetSelectX();
     float selectY = params->GetSelectY();
-    float viewPortX = static_cast<float>((startHandle->GetViewPortX() + endHandle->GetViewPortX()) / 2);
-    float viewPortY = static_cast<float>((startHandle->GetViewPortY() + endHandle->GetViewPortY()) / 2);
+    float viewPortX = static_cast<float>((startHandle->GetViewPortX() + endHandle->GetViewPortX())) / 2;
+    float viewPortY = static_cast<float>((startHandle->GetViewPortY() + endHandle->GetViewPortY())) / 2;
     if (LessOrEqual(GetHostFrameSize().value_or(SizeF()).Height(), selectY)) {
         selectY = GetHostFrameSize().value_or(SizeF()).Height();
     } else if (LessOrEqual(static_cast<float>(selectY + params->GetSelectXHeight()), 0)) {
@@ -3024,7 +3025,7 @@ void WebPattern::UpdateCustomCursor(int32_t windowId, std::shared_ptr<OHOS::NWeb
     opt.editable = true;
     auto pixelMap = Media::PixelMap::Create(opt);
     CHECK_NULL_VOID(pixelMap);
-    uint64_t bufferSize = width * height * IMAGE_POINTER_CUSTOM_CHANNEL;
+    uint64_t bufferSize = static_cast<uint64_t>(width * height * IMAGE_POINTER_CUSTOM_CHANNEL);
     uint32_t status = pixelMap->WritePixels(static_cast<const uint8_t*>(buff), bufferSize);
     if (status != 0) {
         TAG_LOGE(AceLogTag::ACE_WEB, "write pixel map failed %{public}u", status);

@@ -85,43 +85,49 @@ RefPtr<FrameNode> GestureEventHub::GetFrameNode() const
 
 bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
     TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint,
-    const RefPtr<TargetComponent>& targetComponent)
+    const RefPtr<TargetComponent>& targetComponent, TouchTestResult& responseLinkResult)
 {
     auto host = GetFrameNode();
     CHECK_NULL_RETURN(host, false);
     auto eventHub = eventHub_.Upgrade();
     auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
     if (scrollableActuator_) {
-        scrollableActuator_->CollectTouchTarget(
-            coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets, localPoint, host, targetComponent);
+        scrollableActuator_->CollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets,
+            localPoint, host, targetComponent, responseLinkResult);
     }
     size_t idx = innerTargets.size();
     size_t newIdx = 0;
     if (touchEventActuator_) {
-        touchEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets);
+        touchEventActuator_->OnCollectTouchTarget(
+            coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets, responseLinkResult);
     }
     if (clickEventActuator_ && !redirectClick_) {
-        clickEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets);
+        clickEventActuator_->OnCollectTouchTarget(
+            coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets, responseLinkResult);
     }
     if (userParallelClickEventActuator_) {
         auto clickRecognizer = userParallelClickEventActuator_->GetClickRecognizer();
         if (clickRecognizer) {
-            clickRecognizer->SetGestureInfo(MakeRefPtr<GestureInfo>(GestureTypeName::CLICK, true));
+            clickRecognizer->SetGestureInfo(
+                MakeRefPtr<GestureInfo>(GestureTypeName::CLICK, GestureTypeName::CLICK, true));
             clickRecognizer->SetOnAction(userParallelClickEventActuator_->GetClickEvent());
             clickRecognizer->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
             clickRecognizer->SetGetEventTargetImpl(getEventTargetImpl);
         }
     }
     if (panEventActuator_) {
-        panEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets);
+        panEventActuator_->OnCollectTouchTarget(
+            coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets, responseLinkResult);
     }
 
     TouchTestResult dragTargets;
     if (longPressEventActuator_) {
-        longPressEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, dragTargets);
+        longPressEventActuator_->OnCollectTouchTarget(
+            coordinateOffset, touchRestrict, getEventTargetImpl, dragTargets, responseLinkResult);
     }
     if (dragEventActuator_) {
-        dragEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, dragTargets);
+        dragEventActuator_->OnCollectTouchTarget(
+            coordinateOffset, touchRestrict, getEventTargetImpl, dragTargets, responseLinkResult);
     }
 
     std::list<RefPtr<NGGestureRecognizer>> longPressRecognizers;
@@ -174,7 +180,8 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
         newIdx++; // not process previous recognizers
     }
 
-    ProcessTouchTestHierarchy(coordinateOffset, touchRestrict, innerRecognizers, finalResult, touchId, targetComponent);
+    ProcessTouchTestHierarchy(
+        coordinateOffset, touchRestrict, innerRecognizers, finalResult, touchId, targetComponent, responseLinkResult);
 
     return false;
 }
@@ -214,7 +221,7 @@ RefPtr<NGGestureRecognizer> GestureEventHub::PackInnerRecognizer(
 
 void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
     std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId,
-    const RefPtr<TargetComponent>& targetComponent)
+    const RefPtr<TargetComponent>& targetComponent, TouchTestResult& responseLinkResult)
 {
     auto host = GetFrameNode();
     if (!host) {
@@ -238,6 +245,9 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
         auto recognizerGroup = AceType::DynamicCast<RecognizerGroup>(recognizer);
         if (recognizerGroup) {
             recognizerGroup->SetRecognizerInfoRecursively(offset, host, targetComponent, getEventTargetImpl);
+            recognizerGroup->CollectResponseLinkRecognizersRecursively(responseLinkResult);
+        } else {
+            responseLinkResult.emplace_back(recognizer);
         }
 
         recognizer->AttachFrameNode(WeakPtr<FrameNode>(host));
@@ -1187,6 +1197,27 @@ void GestureEventHub::SetOnTouchIntercept(TouchInterceptFunc&& touchInterceptFun
 TouchInterceptFunc GestureEventHub::GetOnTouchIntercept() const
 {
     return touchInterceptFunc_;
+}
+
+void GestureEventHub::SetShouldBuildinRecognizerParallelWithFunc(
+    ShouldBuiltInRecognizerParallelWithFunc&& parallelGestureToFunc)
+{
+    shouldBuildinRecognizerParallelWithFunc_ = std::move(parallelGestureToFunc);
+}
+
+ShouldBuiltInRecognizerParallelWithFunc GestureEventHub::GetParallelInnerGestureToFunc() const
+{
+    return shouldBuildinRecognizerParallelWithFunc_;
+}
+
+void GestureEventHub::SetOnGestureRecognizerJudgeBegin(GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc)
+{
+    gestureRecognizerJudgeFunc_ = std::move(gestureRecognizerJudgeFunc);
+}
+
+GestureRecognizerJudgeFunc GestureEventHub::GetOnGestureRecognizerJudgeBegin() const
+{
+    return gestureRecognizerJudgeFunc_;
 }
 
 void GestureEventHub::SetOnGestureJudgeNativeBegin(GestureJudgeFunc&& gestureJudgeFunc)
