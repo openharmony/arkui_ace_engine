@@ -1982,4 +1982,30 @@ HWTEST_F(SearchTestNg, testInputFilter002, TestSize.Level1)
      */
     EXPECT_EQ(textFieldPattern->GetTextValue().compare(FILTER_NUM_TEXT), 0);
 }
+
+/**
+ * @tc.name: SetTextAlign002
+ * @tc.desc: Set Text Align
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetTextAlign002, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    ASSERT_NE(textFieldChild, nullptr);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    TextAlign textAligns[] = {TextAlign::CENTER, TextAlign::JUSTIFY, TextAlign::START, TextAlign::END};
+    TextDirection textDirectoins[] = {TextDirection::LTR, TextDirection::RTL, TextDirection::AUTO};
+    for (auto textAlign : textAligns) {
+        for (auto textDirection : textDirectoins) {
+            textFieldLayoutProperty->UpdateTextAlign(textAlign);
+            textFieldLayoutProperty->UpdateLayoutDirection(textDirection);
+            frameNode->MarkModifyDone();
+            EXPECT_EQ(textFieldLayoutProperty->GetTextAlign(), textAlign);
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

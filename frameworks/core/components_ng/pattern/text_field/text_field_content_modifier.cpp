@@ -514,10 +514,18 @@ void TextFieldContentModifier::ProcessErrorParagraph(DrawingContext& context, fl
         if (property && property->GetPaddingProperty()) {
             const auto& paddingProperty = property->GetPaddingProperty();
             padding = paddingProperty->left.value_or(CalcLength(0.0)).GetDimension().ConvertToPx() +
-                      paddingProperty->right.value_or(CalcLength(0.0)).GetDimension().ConvertToPx();
+                paddingProperty->right.value_or(CalcLength(0.0)).GetDimension().ConvertToPx();
         }
         errorParagraph->Layout(textFrameRect.Width() - padding);
-        errorParagraph->Paint(canvas, offset.GetX(), textFrameRect.Bottom() - textFrameRect.Top() + errorMargin);
+        auto isRTL = property->GetNonAutoLayoutDirection() == TextDirection::RTL;
+        if (isRTL) {
+            auto responseArea = textFieldPattern->GetResponseArea();
+            auto responseAreaWidth = responseArea ? responseArea->GetAreaRect().Width() : 0.0f;
+            errorParagraph->Paint(canvas, offset.GetX() - responseAreaWidth,
+                textFrameRect.Bottom() - textFrameRect.Top() + errorMargin);
+        } else {
+            errorParagraph->Paint(canvas, offset.GetX(), textFrameRect.Bottom() - textFrameRect.Top() + errorMargin);
+        }
     }
 }
 
