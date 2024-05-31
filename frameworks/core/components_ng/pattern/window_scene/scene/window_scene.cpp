@@ -34,8 +34,7 @@ const std::map<std::string, Rosen::RSAnimationTimingCurve> curveMap {
     { "spring",             Rosen::RSAnimationTimingCurve::SPRING             },
     { "interactiveSpring",  Rosen::RSAnimationTimingCurve::INTERACTIVE_SPRING },
 };
-
-const uint32_t cleanBlankDelayTime = 1000;
+const uint32_t CLEANBLANKDELAYTIME  = 1000;
 } // namespace
 
 WindowScene::WindowScene(const sptr<Rosen::Session>& session)
@@ -284,7 +283,7 @@ void WindowScene::BufferAvailableCallback()
     pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneBufferAvailable", TaskExecutor::TaskType::UI);
 }
 
-void WindowScene::BufferAvailableCallbackForBlank() 
+void WindowScene::BufferAvailableCallbackForBlank()
 {
     auto uiTask = [weakThis = WeakClaim(this)]() {
         ACE_SCOPED_TRACE("WindowScene::BufferAvailableCallbackForBlank");
@@ -292,9 +291,8 @@ void WindowScene::BufferAvailableCallbackForBlank()
         CHECK_NULL_VOID(self && self->session_);
 
         auto contentContext = AceType::DynamicCast<RosenRenderContext>(self->contentNode_->GetRenderContext());
-        CHECK_NULL_VOID(contentContext);
+        CHECK_NULL_VOID(contentContext && contentContext->GetRSNode());
         auto rsNode = contentContext->GetRSNode();
-        CHECK_NULL_VOID(rsNode);
         rsNode->SetAlpha(1);
         const auto& config =
             Rosen::SceneSessionManager::GetInstance().GetWindowSceneConfig().startingWindowAnimationConfig_;
@@ -505,14 +503,14 @@ void WindowScene::OnBackground()
 
 bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    auto size = dirty->GetGeometryNode()->GetFrameSize();
     if (attachToFrameNodeFlag_) {
         attachToFrameNodeFlag_ = false;
         CHECK_EQUAL_RETURN(IsMainWindow(), false, false);
         CHECK_EQUAL_RETURN(session_->GetShowRecent(), true, false);
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
+        CHECK_NULL_RETURN(dirty, false);
+        auto size = dirty->GetGeometryNode()->GetFrameSize();
         if (!(NearEqual(size.Width(), session_->GetSessionOldRect().width_) &&
             NearEqual(size.Height(), session_->GetSessionOldRect().height_)) && snapshotNode_) {
             RemoveChild(host, snapshotNode_, snapshotNodeName_);
@@ -558,10 +556,15 @@ void WindowScene::CleanBlankNode()
             self->RemoveChild(host, self->blankNode_, self->blankNodeName_);
             self->blankNode_.Reset();
             self->AddChild(host, self->contentNode_, self->contentNodeName_, 0);
+            auto context = AceType::DynamicCast<RosenRenderContext>(contentNode_->GetRenderContext());
+            CHECK_NULL_RETURN(context, false);
+            auto rsNode = context->GetRSNode();
+            CHECK_NULL_RETURN(rsNode, false);
+            rsNode->SetAlpha(1);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     });
     taskExecutor->PostDelayedTask(
-        deleteBlankTask_, TaskExecutor::TaskType::UI, cleanBlankDelayTime, "ArkUICleanBlankNode");
+        deleteBlankTask_, TaskExecutor::TaskType::UI, CLEANBLANKDELAYTIME, "ArkUICleanBlankNode");
 }
 } // namespace OHOS::Ace::NG
