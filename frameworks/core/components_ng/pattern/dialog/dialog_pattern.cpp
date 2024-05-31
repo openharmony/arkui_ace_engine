@@ -274,6 +274,7 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
     }
     if (props.borderWidth.has_value()) {
         auto layoutProps = contentNode->GetLayoutProperty<LinearLayoutProperty>();
+        CHECK_NULL_VOID(layoutProps);
         layoutProps->UpdateBorderWidth(props.borderWidth.value());
         contentRenderContext->UpdateBorderWidth(props.borderWidth.value());
         contentNodeMap_[DialogContentNode::BORDERWIDTH] = contentNode;
@@ -387,6 +388,7 @@ void DialogPattern::BuildChild(const DialogProperties& props)
         UpdateContentRenderContext(contentColumn, props);
         if (props.height.has_value()) {
             auto layoutProps = contentColumn->GetLayoutProperty<LinearLayoutProperty>();
+            CHECK_NULL_VOID(layoutProps);
             layoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_BETWEEN);
             layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
         }
