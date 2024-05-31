@@ -785,6 +785,7 @@ DataReadyNotifyTask ImagePattern::CreateDataReadyCallbackForAlt()
     return [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID(pattern->altLoadingCtx_);
         auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
         auto currentAltSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
