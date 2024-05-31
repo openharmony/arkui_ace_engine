@@ -1321,9 +1321,6 @@ void FrameNode::ProcessAllVisibleCallback(const std::vector<double>& visibleArea
     bool isHandled = false;
     bool isVisible = false;
     for (const auto& callbackRatio : visibleAreaUserRatios) {
-        if (isHandled) {
-            break;
-        }
         if (GreatNotEqual(currentVisibleRatio, callbackRatio) && LessOrEqual(lastVisibleRatio, callbackRatio)) {
             lastVisibleCallbackRatio_ = currentVisibleRatio;
             isVisible = true;
