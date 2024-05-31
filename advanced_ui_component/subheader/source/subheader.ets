@@ -20,9 +20,6 @@ import resourceManager from '@ohos.resourceManager';
 import { BusinessError } from '@ohos.base';
 import hilog from '@ohos.hilog';
 import common from '@ohos.app.ability.common';
-import EnvironmentCallback from '@ohos.app.ability.EnvironmentCallback';
-import window from '@ohos.window';
-
 
 const INDEX_ZERO: number = 0;
 const INDEX_ONE: number = 1;
@@ -36,7 +33,9 @@ const DOUBLE_LINE_HEIGHT: number = 72;
 const BORDER_WIDTH: number = 2;
 const RESOURCE_TYPE_SYMBOL: number = 40000;
 // 左边尺寸常量
-const LEFT_ICON_SIZE: number = 16;
+const LEFT_ICON_SIZE: ResourceStr = '16vp';
+const LEFT_ICON_SIZE_NUMBER: number = 16;
+const LEFT_TEXT_NUMBER: number = 8;
 // 右边尺寸常量
 const BUTTON_ZONE_SIZE: number = 32;
 const BUTTON_HEIGHT: number = 28;
@@ -141,7 +140,7 @@ class SubHeaderModifier implements AttributeModifier<RowAttribute> {
 
   applyNormalAttribute(instance: RowAttribute): void {
     if (this.isAgeing) {
-      instance.width("100%")
+      instance.width('100%')
     } else {
     }
   }
@@ -200,10 +199,8 @@ export struct SubHeader {
   private commonContentPadding() {
     .padding({
       end: LengthMetrics.resource($r('sys.float.padding_level0')),
-      top: this.ageing ? LengthMetrics.resource($r('sys.float.padding_level8')) :
-      LengthMetrics.resource($r('sys.float.padding_level4')),
-      bottom: this.ageing ? LengthMetrics.resource($r('sys.float.padding_level1')) :
-      LengthMetrics.resource($r('sys.float.padding_level4')),
+      top: LengthMetrics.resource($r('sys.float.padding_level4')),
+      bottom: LengthMetrics.resource($r('sys.float.padding_level4')),
     })
   }
 
@@ -211,10 +208,8 @@ export struct SubHeader {
   private commonListPadding() {
     .padding({
       end: LengthMetrics.resource($r('sys.float.padding_level6')),
-      top: this.ageing ? LengthMetrics.resource($r('sys.float.padding_level8')) :
-      LengthMetrics.resource($r('sys.float.padding_level4')),
-      bottom: this.ageing ? LengthMetrics.resource($r('sys.float.padding_level0')) :
-      LengthMetrics.resource($r('sys.float.padding_level4')),
+      top: LengthMetrics.resource($r('sys.float.padding_level4')),
+      bottom: LengthMetrics.resource($r('sys.float.padding_level4')),
     })
   }
 
@@ -226,17 +221,25 @@ export struct SubHeader {
   }
 
   build() {
-    if (this.ageing && (this.operationType === OperationType.TEXT_ARROW ||
-      this.operationType === OperationType.BUTTON)) {
+    if (this.ageing && ((this.operationType === OperationType.TEXT_ARROW) ||
+      this.operationType === OperationType.BUTTON) && this.operationItem
+      && (this.operationItem?.length > 0) && this.operationItem[0].value !== '') {
       Column() {
         Row() {
           this.leftArea();
         }
+        .margin({
+          top: $r('sys.float.padding_level8'),
+          bottom: $r('sys.float.padding_level1'),
+        })
         .width('100%')
 
         Row() {
           this.rightArea();
         }
+        .margin({
+          bottom: $r('sys.float.padding_level4'),
+        })
         .justifyContent(FlexAlign.Start)
         .width('100%')
       }
@@ -270,6 +273,7 @@ export struct SubHeader {
     let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
     this.fontSize = context.config?.fontSizeScale ?? 1;
     this.ageing = this.fontSize >= MIN_FONT_SIZE ? true : false;
+    this.subHeaderModifier.isAgeing = this.ageing;
     children.forEach((child) => {
       if (!this.contentMargin) {
         let width: number = Number(constraint.maxWidth);
@@ -396,7 +400,8 @@ export struct SubHeader {
     Flex({ direction: FlexDirection.Row, alignItems: ItemAlign.Center }) {
       if (Util.isSymbolResource($$.iconOptions?.icon)) {
         SymbolGlyph($$.iconOptions?.icon)
-          .fontSize($$.iconOptions?.symbolicIconOption?.fontSize ?? LEFT_ICON_SIZE)
+          .fontSize($$.iconOptions?.symbolicIconOption?.fontSize ?
+          Util.symbolFontSize($$.iconOptions?.symbolicIconOption?.fontSize) : LEFT_ICON_SIZE)
           .fontColor($$.iconOptions?.symbolicIconOption?.fontColor ?? [this.subHeaderTheme.leftIconColor])
           .fontWeight($$.iconOptions?.symbolicIconOption?.fontWeight)
           .renderingStrategy($$.iconOptions?.symbolicIconOption?.renderingStrategy)
@@ -546,11 +551,13 @@ export struct SubHeader {
             start: LengthMetrics.resource(this.ageing ? $r('sys.float.padding_level0') :
             $r('sys.float.padding_level1')),
             end: LengthMetrics.resource($r('sys.float.padding_level1')),
-            top: LengthMetrics.resource(this.ageing ? $r('sys.float.padding_level1') :
-            $r('sys.float.padding_level2')),
-            bottom: LengthMetrics.resource($r('sys.float.padding_level2'))
+            top: LengthMetrics.resource($r('sys.float.padding_level2')),
+            bottom: LengthMetrics.resource($r('sys.float.padding_level2')),
           })
           .margin({
+            start: (this.ageing && this.icon) ? LengthMetrics.vp((this.iconSymbolOptions?.fontSize ?
+            Util.numberToSize(this.iconSymbolOptions?.fontSize) : LEFT_ICON_SIZE_NUMBER) +
+              LEFT_TEXT_NUMBER) : LengthMetrics.vp(0),
             bottom: $r('sys.float.padding_level2'),
           })
           .backgroundColor(this.buttonBgColor)
@@ -640,8 +647,8 @@ export struct SubHeader {
           this.textArrowFocus = false;
         })
         .padding({
-          start: this.ageing ? LengthMetrics.vp(0) : this.getTextArrowPaddingLeft(),
-          bottom: this.ageing ? LengthMetrics.vp(8) : LengthMetrics.vp(0),
+          start: this.getTextArrowPaddingLeft(),
+          bottom: LengthMetrics.vp(0),
         })
         .onAreaChange((oldValue: Area, newValue: Area) => {
           this.textArrowStyleWidth = Number(newValue.width);
@@ -685,28 +692,33 @@ export struct SubHeader {
           }
         })
       }
+      .margin({
+        start: (this.ageing && this.icon) ? LengthMetrics.vp((this.iconSymbolOptions?.fontSize ?
+        Util.numberToSize(this.iconSymbolOptions?.fontSize) : LEFT_ICON_SIZE_NUMBER) +
+          LEFT_TEXT_NUMBER) : LengthMetrics.vp(0),
+      })
+      .onHover((isHover: boolean) => {
+        if (isHover) {
+          this.textArrowBgColor = this.subHeaderTheme.textArrowHoverBgColor;
+        } else {
+          this.textArrowBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
+        }
+      })
+      .onTouch((event) => {
+        if (event.type === TouchType.Down) {
+          this.textArrowBgColor = $r('sys.color.interactive_pressed');
+        }
+        if (event.type === TouchType.Up) {
+          this.textArrowBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
+        }
+      })
+      .onClick((event) => {
+        if (textArrow.action) {
+          textArrow.action();
+        }
+      })
     }
     .attributeModifier(this.subHeaderModifier)
-    .onHover((isHover: boolean) => {
-      if (isHover) {
-        this.textArrowBgColor = this.subHeaderTheme.textArrowHoverBgColor;
-      } else {
-        this.textArrowBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
-      }
-    })
-    .onTouch((event) => {
-      if (event.type === TouchType.Down) {
-        this.textArrowBgColor = $r('sys.color.interactive_pressed');
-      }
-      if (event.type === TouchType.Up) {
-        this.textArrowBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
-      }
-    })
-    .onClick((event) => {
-      if (textArrow.action) {
-        textArrow.action();
-      }
-    })
     .focusable(true)
     .justifyContent(this.ageing ? FlexAlign.SpaceBetween : FlexAlign.End)
     .margin({
@@ -852,17 +864,6 @@ struct SingleIconStyle {
     }
   }
 
-  private symbolFontSize(fontSize: Length): Length {
-    if (typeof fontSize === 'string') {
-      const fontSizeNumber: number = parseInt(fontSize);
-      return fontSizeNumber + 'vp';
-    } else if (typeof fontSize === 'number') {
-      return fontSize + 'vp';
-    } else {
-      return resourceManager.getSystemResourceManager().getNumber(fontSize)+ 'vp';
-    }
-  }
-
   @Builder
   IconZone(): void {
     if (this.item && this.item.iconOptions) {
@@ -870,7 +871,7 @@ struct SingleIconStyle {
         SymbolGlyph(this.item.iconOptions?.icon)
           .focusable(true)
           .fontSize(this.item.iconOptions?.symbolicIconOption?.fontSize ?
-            this.symbolFontSize(this.item.iconOptions?.symbolicIconOption?.fontSize) : RIGHT_SINGLE_ICON_SIZE)
+          Util.symbolFontSize(this.item.iconOptions?.symbolicIconOption?.fontSize) : RIGHT_SINGLE_ICON_SIZE)
           .fontColor(this.item.iconOptions?.symbolicIconOption?.fontColor ?? [this.subHeaderTheme.rightIconColor])
           .fontWeight(this.item.iconOptions?.symbolicIconOption?.fontWeight)
           .renderingStrategy(this.item.iconOptions?.symbolicIconOption?.renderingStrategy)
@@ -941,5 +942,20 @@ class Util {
       hilog.error(0x3900, 'Ace', `SubHeader getNumberByResource error, code: ${code}, message: ${message}`);
       return Util.DEFAULT_VALUE;
     }
+  }
+
+  public static numberToSize(fontSize: Length): number {
+    if (typeof fontSize === 'string') {
+      const fontSizeNumber: number = parseInt(fontSize);
+      return fontSizeNumber;
+    } else if (typeof fontSize === 'number') {
+      return fontSize;
+    } else {
+      return resourceManager.getSystemResourceManager().getNumber(fontSize);
+    }
+  }
+
+  public static symbolFontSize(fontsize: Length): Length {
+    return Util.numberToSize(fontsize) + 'vp';
   }
 }
