@@ -17,12 +17,6 @@ import(
 if (is_ohos_standard_system) {
   config("window_scene_config") {
     visibility = [ ":*" ]
-
-    include_dirs = [
-      "$window_manager_path/interfaces/innerkits",
-      "$window_manager_path/interfaces/innerkits/wm",
-      "$window_manager_path/wm/include",
-    ]
   }
 }
 
@@ -50,14 +44,15 @@ build_component_ng("window_scene") {
   if (is_ohos_standard_system) {
     configs = [ ":window_scene_config" ]
 
-    external_deps = [
+    # The path of libwm should take priority over graphic_2d
+    external_deps = [ "window_manager:libwm" ]
+    external_deps += [
       "ability_runtime:app_manager",
       "c_utils:utils",
       "graphic_2d:librender_service_client",
       "hilog:libhilog",
       "input:libmmi-client",
       "ipc:ipc_single",
-      "window_manager:libwm",
       "window_manager:scene_session",
       "window_manager:scene_session_manager",
       "window_manager:screen_session",
