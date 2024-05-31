@@ -203,12 +203,12 @@ void ButtonPattern::HandleFocusStyleTask(RefPtr<ButtonLayoutProperty> layoutProp
     if (scaleModify_) {
         buttonRenderContext->SetScale(scaleFocus, scaleFocus);
     }
-    if (buttonStyle != ButtonStyleMode::EMPHASIZE && controlSize == ControlSize::NORMAL) {
-        bool isTextButton = buttonStyle == ButtonStyleMode::TEXT;
-        bgColorModify_ = buttonRenderContext->GetBackgroundColor() == buttonTheme->GetBgColor(buttonStyle, buttonRole);
-        if (bgColorModify_) {
-            buttonRenderContext->UpdateBackgroundColor(
-                isTextButton ? buttonTheme->GetTextBackgroundFocus() : buttonTheme->GetNormalBackgroundFocus());
+    bgColorModify_ = buttonRenderContext->GetBackgroundColor() == buttonTheme->GetBgColor(buttonStyle, buttonRole);
+    if (bgColorModify_) {
+        if (buttonStyle == ButtonStyleMode::TEXT && controlSize == ControlSize::NORMAL) {
+            buttonRenderContext->UpdateBackgroundColor(buttonTheme->GetTextBackgroundFocus());
+        } else if (buttonStyle == ButtonStyleMode::NORMAL) {
+            buttonRenderContext->UpdateBackgroundColor(buttonTheme->GetNormalBackgroundFocus());
         }
     }
 
