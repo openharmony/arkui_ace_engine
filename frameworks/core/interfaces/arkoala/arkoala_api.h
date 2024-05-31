@@ -650,6 +650,7 @@ enum ArkUIEventSubKind {
     ON_SWIPER_ANIMATION_START,
     ON_SWIPER_ANIMATION_END,
     ON_SWIPER_GESTURE_SWIPE,
+    ON_SWIPER_DID_CONTENT_SCROLL,
 
     ON_SCROLL = ARKUI_MAX_EVENT_NUM * ARKUI_SCROLL,
     ON_SCROLL_FRAME_BEGIN,
@@ -681,6 +682,8 @@ enum ArkUIEventSubKind {
 
     ON_REFRESH_STATE_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_REFRESH,
     ON_REFRESH_REFRESHING,
+    ON_REFRESH_ON_OFFSET_CHANGE,
+    
     ON_DATE_PICKER_DATE_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_DATE_PICKER,
     ON_TIME_PICKER_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TIME_PICKER,
     ON_TEXT_PICKER_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TEXT_PICKER,
@@ -2897,6 +2900,9 @@ struct ArkUIRefreshModifier {
     void (*setPullToRefresh)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetPullToRefresh)(ArkUINodeHandle node);
     void (*setRefreshContent)(ArkUINodeHandle node, ArkUINodeHandle content);
+    void (*setPullDownRatio)(ArkUINodeHandle node, ArkUI_Float32 ratio);
+    void (*resetPullDownRatio)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getPullDownRatio)(ArkUINodeHandle node);
 };
 
 struct ArkUIHyperlinkModifier {

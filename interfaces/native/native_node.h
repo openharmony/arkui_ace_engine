@@ -4456,6 +4456,17 @@ typedef enum {
      *
      */
     NODE_REFRESH_CONTENT,
+    /**
+     * @brief 设置下拉跟手系数，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
+     * .value[0].f32：下拉跟手系数,有效值为0-1之间的值。
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].f32：下拉跟手系数,有效值为0-1之间的值。
+     *
+     */
+    NODE_REFRESH_PULL_DOWN_RATIO = 1009002,
 
     /**
      * @brief Defines the main axis direction of the <b><WaterFlow></b> component layout.
@@ -5271,6 +5282,23 @@ typedef enum {
      * start position of the swiper along the main axis. \n
      */
     NODE_SWIPER_EVENT_ON_GESTURE_SWIPE,
+    /**
+     * @brief 定义ARKUI_NODE_SWIPER监听Swiper页面滑动事件。
+     * 使用说明 ：\n
+     * 1、设置{@link ArkUI_SwiperDisplayModeType}属性为ARKUI_SWIPER_DISPLAY_MODE_AUTO_LINEAR时，该接口不生效。\n
+     * 2、循环场景下，设置prevMargin和nextMargin属性，使得Swiper前后端显示同一页面时，该接口不生效。\n
+     * 3、在页面滑动过程中，会对视窗内所有页面逐帧触发ContentDidScrollCallback回调。\n
+     * 例如，当视窗内有下标为0、1的两个页面时，会每帧触发两次index值分别为0和1的回调。\n
+     * 4、设置displayCount属性的swipeByGroup参数为true时，若同组中至少有一个页面在视窗内时，\n
+     * 则会对同组中所有页面触发回调。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中包含4个参数：\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：Swiper组件的索引，和onChange事件中的index值变化保持一致。\n
+     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>：视窗内某个页面的索引。\n
+     * <b>ArkUI_NodeComponentEvent.data[2].f32</b>：页面相对于Swiper主轴起始位置（selectedIndex对应页面的起始位置）的移动比例。\n
+     * <b>ArkUI_NodeComponentEvent.data[3].f32</b>：主轴方向上页面的长度。\n
+     */
+    NODE_SWIPER_EVENT_ON_CONTENT_DID_SCROLL,
 
     /**
      * @brief Defines the event triggered when the <b>ARKUI_NODE_SCROLL</b> component scrolls.
@@ -5472,6 +5500,15 @@ typedef enum {
      * {@link ArkUI_NodeComponentEvent} does not contain parameters:\n
      */
     NODE_REFRESH_ON_REFRESH,
+    /**
+     * @brief Defines the event that is triggered when the <b>ARKUI_NODE_REFRESH</b> drop-down distance changes.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: Pull-down distance. \n
+     */
+    NODE_REFRESH_ON_OFFSET_CHANGE = 1009002,
 
     /**
      * @brief Defines the event triggered when the <b>ARKUI_NODE_SCROLL</b> component is about to scroll.
