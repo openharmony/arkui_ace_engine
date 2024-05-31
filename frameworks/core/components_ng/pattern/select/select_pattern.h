@@ -197,6 +197,7 @@ public:
     void SetHasOptionWidth(bool hasOptionWidth);
     void SetControlSize(const ControlSize& controlSize);
     ControlSize GetControlSize();
+    void SetLayoutDirection(TextDirection value);
 
 private:
     void OnAttachToFrameNode() override;

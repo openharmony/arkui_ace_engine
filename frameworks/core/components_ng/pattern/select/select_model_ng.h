@@ -80,6 +80,7 @@ public:
     void SetMenuBackgroundColor(const Color& color) override;
     void SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle) override;
     void SetControlSize(const std::optional<ControlSize>& controlSize) override;
+    void SetLayoutDirection(TextDirection value) override;
     static void SetBuilderFunc(FrameNode* frameNode, NG::SelectMakeCallback&& makeFunc);
     static void ResetBuilderFunc(FrameNode* frameNode);
     static void SetChangeValue(FrameNode* frameNode, int index, const std::string& value);
