@@ -26,10 +26,11 @@
 #include "core/components_ng/pattern/navigation/navigation_options.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
 #include "core/components_ng/pattern/navigation/navigation_transition_proxy.h"
+#include "core/components_ng/pattern/navrouter/navdestination_context.h"
 
 namespace OHOS::Ace {
 using NavigationTransitionEvent = std::function<NG::NavigationTransition(
-    NG::NavContentInfo from, NG::NavContentInfo to, NG::NavigationOperation operation)>;
+     RefPtr<NG::NavDestinationContext> from, RefPtr<NG::NavDestinationContext> to, NG::NavigationOperation operation)>;
 class ACE_FORCE_EXPORT NavigationModel {
 public:
     static NavigationModel* GetInstance();
