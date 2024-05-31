@@ -561,10 +561,9 @@ build_component_ng("pattern_ng") {
       "graphic_2d:librender_service_client",
       "napi:ace_napi",
     ]
-    if (product_name != "ohos-sdk") {
-      external_deps += [ "miscdevice:vibrator_interface_native" ]
-      sources += [ "indexer/indexer_support_vibration.cpp" ]
-      defines = [ "INDEXER_SUPPORT_VIBRATOR" ]
+    if (product_name == "ohos-sdk") {
+      sources +=
+          [ "$ace_root/test/mock/core/pattern/mock_indexer_vibrator.cpp" ]
     }
   } else if (is_arkui_x) {
     deps += [

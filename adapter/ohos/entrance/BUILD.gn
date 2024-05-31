@@ -62,6 +62,9 @@ template("ace_ohos_standard_source_set") {
       # Dynamic Component
       "$ace_root/adapter/ohos/entrance/dynamic_component/dynamic_component_renderer_impl.cpp",
       "$ace_root/adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.cpp",
+
+      #Miscdevice Vibrator
+      "$ace_root/adapter/ohos/entrance/vibrator/vibrator_impl.cpp",
     ]
 
     if (target_cpu == "arm64") {
@@ -120,6 +123,7 @@ template("ace_ohos_standard_source_set") {
       "input:libmmi-client",
       "ipc:ipc_core",
       "ipc:ipc_napi",
+      "miscdevice:vibrator_interface_native",
       "napi:ace_napi",
       "preferences:native_preferences",
       "relational_store:native_dataability",
@@ -132,7 +136,7 @@ template("ace_ohos_standard_source_set") {
       "window_manager:screen_session_manager_client",
       "zlib:shared_libz",
     ]
-
+    defines += [ "INDEXER_SUPPORT_VIBRATOR" ]
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
       external_deps += [ "graphic_2d:librender_service_base" ]
     }

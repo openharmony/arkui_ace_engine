@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
 
+#include "adapter/ohos/entrance/vibrator/vibrator_impl.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/log/dump_log.h"
@@ -782,11 +783,9 @@ void IndexerPattern::ApplyIndexChanged(
     }
     if (selectChanged) {
         ShowBubble();
-#ifdef INDEXER_SUPPORT_VIBRATOR
         if (enableHapticFeedback_) {
-            VibraFeedback();
+            VibratorImpl::StartVibraFeedback();
         }
-#endif
     }
 }
 
