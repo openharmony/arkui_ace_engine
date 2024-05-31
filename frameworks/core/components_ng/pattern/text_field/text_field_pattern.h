@@ -1288,6 +1288,16 @@ public:
     {
         selectOverlay_->OnTouchTestHit(hitTestType);
     }
+    
+    int32_t GetPreviewTextStart() const
+    {
+        return hasPreviewText_ ? previewTextStart_ : selectController_->GetCaretIndex();
+    }
+
+    int32_t GetPreviewTextEnd() const
+    {
+        return hasPreviewText_ ? previewTextEnd_ : selectController_->GetCaretIndex();
+    }
 
     int32_t CheckPreviewTextValidate(const std::string& previewValue, const PreviewRange range) override;
     void HiddenMenu();
@@ -1499,16 +1509,6 @@ private:
     {
         previewTextStart_ = start;
         previewTextEnd_ = end;
-    }
-
-    int32_t GetPreviewTextStart() const
-    {
-        return hasPreviewText_ ? previewTextStart_ : selectController_->GetCaretIndex();
-    }
-
-    int32_t GetPreviewTextEnd() const
-    {
-        return hasPreviewText_ ? previewTextEnd_ : selectController_->GetCaretIndex();
     }
 
     void CalculatePreviewingTextMovingLimit(const Offset& touchOffset, double& limitL, double& limitR);

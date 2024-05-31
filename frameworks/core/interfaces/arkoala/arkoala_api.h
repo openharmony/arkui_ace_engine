@@ -2682,6 +2682,8 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaOnWillDelete)(ArkUINodeHandle node);
     void (*setTextAreaOnDidDelete)(ArkUINodeHandle node, ArkUI_Int64 callback);
     void (*resetTextAreaOnDidDelete)(ArkUINodeHandle node);
+    void (*setTextAreaEnablePreviewText)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*resetTextAreaEnablePreviewText)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -2872,6 +2874,8 @@ struct ArkUITextInputModifier {
     void (*setTextInputCaret)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     ArkUINodeHandle (*getTextInputController)(ArkUINodeHandle node);
     void (*getTextInputMargin)(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 length, ArkUI_Int32 unit);
+    void (*setTextInputEnablePreviewText)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*resetTextInputEnablePreviewText)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
@@ -3442,6 +3446,8 @@ struct ArkUISearchModifier {
     void (*resetSearchOnWillDelete)(ArkUINodeHandle node);
     void (*setSearchOnDidDelete)(ArkUINodeHandle node, ArkUI_Int64 callback);
     void (*resetSearchOnDidDelete)(ArkUINodeHandle node);
+    void (*setSearchEnablePreviewText)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*resetSearchEnablePreviewText)(ArkUINodeHandle node);
 };
 
 struct ArkUISearchControllerModifier {

@@ -402,12 +402,18 @@ void TextFieldModelImpl::SetOnSubmit(std::function<void(int32_t)>&& func)
     component->SetOnSubmit(std::move(func));
 }
 
-void TextFieldModelImpl::SetOnChange(std::function<void(const std::string&)>&& func)
+void TextFieldModelImpl::SetOnChange(std::function<void(const std::string&, TextRange&)>&& func)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
     CHECK_NULL_VOID(component);
-    component->SetOnChange(std::move(func));
+    auto onChange = [func] (const std::string& value) {
+        if (!func) {
+            TextRange range {};
+            func(value, range);
+        }
+    };
+    component->SetOnChange(std::move(onChange));
 }
 
 void TextFieldModelImpl::SetOnCopy(std::function<void(const std::string&)>&& func)

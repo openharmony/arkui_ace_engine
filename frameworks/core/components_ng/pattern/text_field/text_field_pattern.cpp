@@ -1621,7 +1621,8 @@ void TextFieldPattern::FireEventHubOnChange(const std::string& text)
 
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->FireOnChange(text);
+    TextRange range {};
+    eventHub->FireOnChange(text, range);
 }
 
 void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
@@ -2728,9 +2729,7 @@ bool TextFieldPattern::FireOnTextChangeEvent()
     }
     host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, contentController_->GetTextValue());
     AutoFillValueChanged();
-    if (!GetIsPreviewText()) {
-        AddTextFireOnChange();
-    }
+    AddTextFireOnChange();
     auto context = host->GetContextRefPtr();
     CHECK_NULL_RETURN(context, false);
     auto taskExecutor = context->GetTaskExecutor();
@@ -2767,7 +2766,10 @@ void TextFieldPattern::AddTextFireOnChange()
         auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
         layoutProperty->UpdateValue(pattern->GetTextContentController()->GetTextValue());
-        eventHub->FireOnChange(pattern->GetTextContentController()->GetTextValue());
+        TextRange range;
+        range.start = pattern->GetPreviewTextStart();
+        range.end = pattern->GetPreviewTextEnd();
+        eventHub->FireOnChange(pattern->GetTextContentController()->GetTextValue(), range);
     });
 }
 
@@ -7295,6 +7297,7 @@ void TextFieldPattern::FinishTextPreview()
 {
     inputOperations_.emplace(InputOperation::SET_PREVIEW_FINISH);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     ScrollToSafeArea();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
