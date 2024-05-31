@@ -99,6 +99,11 @@ public:
         return 1;
     }
 
+    int32_t CurrentFrameCount() const override
+    {
+        return 1;
+    }
+
     void SetCheckboxFlag(const bool checkboxFlag)
     {
         checkboxFlag_ = checkboxFlag;
@@ -646,6 +651,11 @@ public:
         return UINode::TotalChildCount();
     }
 
+    int32_t GetTotalChildCountWithoutExpanded() const
+    {
+        return UINode::CurrentFrameCount();
+    }
+
     const RefPtr<GeometryNode>& GetGeometryNode() const override
     {
         return geometryNode_;
@@ -666,8 +676,7 @@ public:
         uint32_t index, bool addToRenderTree = true, bool isCache = false) override;
     RefPtr<LayoutWrapper> GetChildByIndex(uint32_t index, bool isCache = false) override;
 
-    FrameNode* GetFrameNodeChildByIndex(uint32_t index, bool isCache = false);
-
+    FrameNode* GetFrameNodeChildByIndex(uint32_t index, bool isCache = false, bool isExpand = true);
     /**
      * @brief Get the index of Child among all FrameNode children of [this].
      * Handles intermediate SyntaxNodes like LazyForEach.
@@ -719,6 +728,7 @@ public:
     void SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& config);
     RefPtr<UINode> GetFrameChildByIndex(
         uint32_t index, bool needBuild, bool isCache = false, bool addToRenderTree = false) override;
+    RefPtr<UINode> GetFrameChildByIndexWithoutExpanded(uint32_t index) override;
     bool CheckNeedForceMeasureAndLayout() override;
 
     bool SetParentLayoutConstraint(const SizeF& size) const override;
