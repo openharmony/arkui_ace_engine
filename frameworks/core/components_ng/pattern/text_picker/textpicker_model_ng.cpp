@@ -637,7 +637,7 @@ void TextPickerDialogModelNG::SetTextPickerDialogShow(RefPtr<AceType>& PickerTex
             overlayManager->ShowTextDialog(
                 properties, settingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent, buttonInfos);
         },
-        TaskExecutor::TaskType::UI, "ArkUIDialogShowTextPicker");
+        TaskExecutor::TaskType::UI, "ArkUITextPickerShowTextDialog");
 }
 
 void TextPickerModelNG::SetCanLoop(FrameNode* frameNode, const bool value)

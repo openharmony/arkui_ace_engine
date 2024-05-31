@@ -605,7 +605,7 @@ int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(GestureEvent
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->DoTriggerOnclick(result);
-        }, TaskExecutor::TaskType::UI, "ArkUISecurityComponentTriggerOnClick");
+        }, TaskExecutor::TaskType::UI, "ArkUISecurityComponentGestureTriggerOnClick");
         return 0;
     };
 
@@ -644,7 +644,7 @@ int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(const KeyEve
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->DoTriggerOnclick(result);
-        }, TaskExecutor::TaskType::UI, "ArkUISecurityComponentTriggerOnClick");
+        }, TaskExecutor::TaskType::UI, "ArkUISecurityComponentKeyTriggerOnClick");
         return 0;
     };
 
