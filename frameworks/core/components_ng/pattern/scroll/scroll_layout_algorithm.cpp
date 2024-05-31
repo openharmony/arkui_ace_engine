@@ -44,31 +44,10 @@ void UpdateChildConstraint(Axis axis, const OptionalSizeF& selfIdealSize, Layout
 
 } // namespace
 
-void ScrollLayoutAlgorithm::SetInitialOffset(LayoutWrapper* layoutWrapper, Axis axis, const SizeF& selfSize)
-{
-    auto scrollNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(scrollNode);
-    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
-    CHECK_NULL_VOID(scrollPattern);
-    if (scrollPattern->NeedSetInitialOffset()) {
-        auto initialOffset = scrollPattern->GetInitialOffset();
-        if (axis == Axis::VERTICAL) {
-            auto offset = initialOffset.GetY();
-            currentOffset_ = offset.Unit() == DimensionUnit::PERCENT ?
-                             -offset.Value() * selfSize.Height() : -offset.ConvertToPx();
-        } else {
-            auto offset = initialOffset.GetX();
-            currentOffset_ = offset.Unit() == DimensionUnit::PERCENT ?
-                             -offset.Value() * selfSize.Width() : -offset.ConvertToPx();
-        }
-    }
-}
-
 void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto layoutProperty = AceType::DynamicCast<ScrollLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
     auto axis = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto idealSize = CreateIdealSize(constraint.value(), axis, MeasureType::MATCH_CONTENT);
@@ -98,9 +77,6 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(scrollNode);
     auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(scrollPattern);
-    auto scrollEdgeEffect = scrollPattern->GetScrollEdgeEffect();
-    CHECK_NULL_VOID(scrollEdgeEffect);
-    scrollEdgeEffect->SetScrollRtl(layoutDirection == TextDirection::RTL && axis == Axis::HORIZONTAL);
     if (scrollPattern->IsSelectScroll() && scrollPattern->GetHasOptionWidth()) {
         auto selectScrollWidth = scrollPattern->GetSelectScrollWidth();
         selfSize.SetWidth(selectScrollWidth);
@@ -111,7 +87,19 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         scrollPattern->AddScrollMeasureInfo(constraint, childLayoutConstraint, selfSize, childSize);
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(selfSize);
-    SetInitialOffset(layoutWrapper, axis, selfSize);
+    //set initial offset
+    if (scrollPattern->NeedSetInitialOffset()) {
+        auto initialOffset = scrollPattern->GetInitialOffset();
+        if (axis == Axis::VERTICAL) {
+            auto offset = initialOffset.GetY();
+            currentOffset_ = offset.Unit() == DimensionUnit::PERCENT ?
+                             -offset.Value() * selfSize.Height() : -offset.ConvertToPx();
+        } else {
+            auto offset = initialOffset.GetX();
+            currentOffset_ = offset.Unit() == DimensionUnit::PERCENT ?
+                             -offset.Value() * selfSize.Width() : -offset.ConvertToPx();
+        }
+    }
 }
 
 void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
