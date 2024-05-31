@@ -151,7 +151,9 @@ RefPtr<PipelineContext> PipelineContext::GetMainPipelineContext()
 
 bool PipelineContext::NeedSoftKeyboard()
 {
-    return InputMethodManager::GetInstance()->NeedSoftKeyboard();
+    auto needSoftKeyboard = InputMethodManager::GetInstance()->NeedSoftKeyboard();
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "window switch need keyboard %d", needSoftKeyboard);
+    return needSoftKeyboard;
 }
 
 RefPtr<PipelineContext> PipelineContext::GetContextByContainerId(int32_t containerId)

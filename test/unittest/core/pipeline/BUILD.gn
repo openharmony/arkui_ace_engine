@@ -94,6 +94,7 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/test/mock/core/rosen/testing_typography_style.cpp",
     "$ace_root/test/mock/interfaces/mock_ace_forward_compatibility.cpp",
     "$ace_root/test/unittest/core/pattern/text/mock/mock_text_layout_adapter.cpp",
+    "mock_input_method_manager.cpp",
     "pipeline_context_test_ng.cpp",
     "pipeline_context_test_ng_new.cpp",
   ]
