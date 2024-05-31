@@ -164,7 +164,7 @@ public:
     void SaveLayer();
     void RestoreLayer();
     void EnableAnalyzer(bool enable);
-    void StartImageAnalyzer(void* config, onAnalyzedCallback& onAnalyzed);
+    void StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnalyzed);
     void StopImageAnalyzer();
     void Reset();
 

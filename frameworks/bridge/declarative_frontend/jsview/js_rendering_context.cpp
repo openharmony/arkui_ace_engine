@@ -347,7 +347,7 @@ void JSRenderingContext::JsStartImageAnalyzer(const JSCallbackInfo& info)
         return;
     }
 
-    onAnalyzedCallback onAnalyzed_ = [asyncCtx, weakCtx = WeakClaim(this)](ImageAnalyzerState state) {
+    OnAnalyzedCallback onAnalyzed_ = [asyncCtx, weakCtx = WeakClaim(this)](ImageAnalyzerState state) {
         CHECK_NULL_VOID(asyncCtx);
         HandleDeferred(asyncCtx, state);
         auto ctx = weakCtx.Upgrade();

@@ -1652,7 +1652,7 @@ void XComponentPattern::EnableAnalyzer(bool enable)
     imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(host, ImageAnalyzerHolder::XCOMPONENT);
 }
 
-void XComponentPattern::StartImageAnalyzer(void* config, onAnalyzedCallback& onAnalyzed)
+void XComponentPattern::StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnalyzed)
 {
     if (!IsSupportImageAnalyzerFeature()) {
         CHECK_NULL_VOID(onAnalyzed);

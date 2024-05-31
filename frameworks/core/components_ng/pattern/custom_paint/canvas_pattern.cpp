@@ -1089,7 +1089,7 @@ void CanvasPattern::EnableAnalyzer(bool enable)
     });
 }
 
-void CanvasPattern::StartImageAnalyzer(void* config, onAnalyzedCallback& onAnalyzed)
+void CanvasPattern::StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnalyzed)
 {
     if (!IsSupportImageAnalyzerFeature()) {
         CHECK_NULL_VOID(onAnalyzed);

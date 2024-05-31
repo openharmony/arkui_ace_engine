@@ -59,7 +59,7 @@ void ImageAnalyzerManager::SetImageAnalyzerConfig(void* config)
 {
 }
 
-void ImageAnalyzerManager::SetImageAnalyzerCallback(onAnalyzedCallback& callback)
+void ImageAnalyzerManager::SetImageAnalyzerCallback(OnAnalyzedCallback& callback)
 {
 }
 

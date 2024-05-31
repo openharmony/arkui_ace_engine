@@ -40,7 +40,7 @@ public:
     void DestroyAnalyzerOverlay();
     void ReleaseImageAnalyzer();
     void SetImageAnalyzerConfig(void* config);
-    void SetImageAnalyzerCallback(onAnalyzedCallback& callback);
+    void SetImageAnalyzerCallback(OnAnalyzedCallback& callback);
     bool IsOverlayCreated();
     void UpdatePressOverlay(
         const RefPtr<OHOS::Ace::PixelMap>& pixelMap,
@@ -50,7 +50,7 @@ public:
         int rectHeight,
         int pointX,
         int pointY,
-        onTextSelectedCallback callback);
+        OnTextSelectedCallback callback);
     void UpdateOverlayTouchInfo(
         int touchPointX,
         int touchPointY,

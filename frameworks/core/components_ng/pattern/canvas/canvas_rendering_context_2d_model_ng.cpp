@@ -600,7 +600,7 @@ void CanvasRenderingContext2DModelNG::TransferFromImageBitmap(
 #endif
 
 void CanvasRenderingContext2DModelNG::StartImageAnalyzer(
-    RefPtr<AceType>& canvasPattern, void* config, onAnalyzedCallback& onAnalyzed)
+    RefPtr<AceType>& canvasPattern, void* config, OnAnalyzedCallback& onAnalyzed)
 {
     auto customPaintPattern = AceType::DynamicCast<NG::CanvasPattern>(canvasPattern);
     CHECK_NULL_VOID(customPaintPattern);

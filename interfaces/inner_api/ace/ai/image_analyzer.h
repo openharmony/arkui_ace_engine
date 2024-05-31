@@ -35,8 +35,8 @@
 
 namespace OHOS::Ace {
 enum class ImageAnalyzerState;
-using onAnalyzedCallback = std::optional<std::function<void(ImageAnalyzerState)>>;
-using onTextSelectedCallback = std::function<void()>;
+using OnAnalyzedCallback = std::optional<std::function<void(ImageAnalyzerState)>>;
+using OnTextSelectedCallback = std::function<void()>;
 
 enum class ImageAnalyzerType {
     SUBJECT = 0,
@@ -88,10 +88,10 @@ struct ImageAnalyzerInnerConfig {
     ImageAnalyzerHolder holder = ImageAnalyzerHolder::OTHERS;
     ImageFit imageFit = ImageFit::COVER;
     Matrix4 transformMat = Matrix4::CreateIdentity();
-    onAnalyzedCallback onAnalyzed;
+    OnAnalyzedCallback onAnalyzed;
     Status selectedStatus = Status::SELECTED;
     Status menuStatus = Status::MENU_SHOW;
-    onTextSelectedCallback onTextSelected;
+    OnTextSelectedCallback onTextSelected;
     void* pixelmapNapiVal = nullptr;
     OHOS::Ace::TouchInfo touchInfo;
 };

@@ -245,7 +245,7 @@ void ImageAnalyzerManager::SetImageAnalyzerConfig(void* config)
     }
 }
 
-void ImageAnalyzerManager::SetImageAnalyzerCallback(onAnalyzedCallback& callback)
+void ImageAnalyzerManager::SetImageAnalyzerCallback(OnAnalyzedCallback& callback)
 {
     analyzerUIConfig_.onAnalyzed = callback;
 }
@@ -265,7 +265,7 @@ void ImageAnalyzerManager::UpdatePressOverlay(
     int rectHeight,
     int pointX,
     int pointY,
-    onTextSelectedCallback callback)
+    OnTextSelectedCallback callback)
 {
     analyzerUIConfig_.overlayOffset.SetX(offsetX);
     analyzerUIConfig_.overlayOffset.SetY(offsetY);
