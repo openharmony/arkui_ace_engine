@@ -171,6 +171,8 @@ void TextLayoutProperty::ToJsonValueForOption(std::unique_ptr<JsonValue>& json, 
     json->PutExtAttr("ellipsisMode",
         V2::ConvertEllipsisModeToString(GetEllipsisMode().value_or(EllipsisMode::TAIL)).c_str(), filter);
     json->PutExtAttr("marqueeOptions", GetTextMarqueeOptionsString().c_str(), filter);
+    json->PutExtAttr("textSelectable", V2::ConvertWrapTextSelectableToString(
+        GetTextSelectableMode().value_or(TextSelectableMode::SELECTABLE_UNFOCUSABLE)).c_str(), filter);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     json->PutExtAttr("privacySensitive", host->IsPrivacySensitive(), filter);

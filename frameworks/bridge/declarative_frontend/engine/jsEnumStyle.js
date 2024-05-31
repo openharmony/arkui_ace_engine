@@ -118,6 +118,13 @@ var LineBreakStrategy;
   LineBreakStrategy[LineBreakStrategy["BALANCED"] = 2] = "balanced";
 })(LineBreakStrategy || (LineBreakStrategy = {}));
 
+var TextSelectableMode;
+(function (TextSelectableMode) {
+  TextSelectableMode[TextSelectableMode["SELECTABLE_UNFOCUSABLE"] = 0] = "selectable-unfocusable";
+  TextSelectableMode[TextSelectableMode["SELECTABLE_FOCUSABLE"] = 1] = "selectable-focusable";
+  TextSelectableMode[TextSelectableMode["UNSELECTABLE"] = 2] = "unselectable";
+})(TextSelectableMode || (TextSelectableMode = {}));
+
 var Curve;
 (function (Curve) {
   Curve["Linear"] = "linear";
