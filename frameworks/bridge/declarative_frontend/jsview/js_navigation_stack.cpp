@@ -776,9 +776,9 @@ int32_t JSNavigationStack::LoadDestination(const std::string& name, const JSRef<
     if (!navigationRoute->HasLoaded(name)) {
         int32_t res = navigationRoute->LoadPage(name);
         if (res != 0) {
-            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "load page failed: %{public}s, errCode: %{public}d",
-                name.c_str(), res);
-            return res;
+            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "load page failed: %{public}s", name.c_str());
+            return navDestBuilderFunc_->IsEmpty() ? ERROR_CODE_BUILDER_FUNCTION_NOT_REGISTERED
+                : ERROR_CODE_DESTINATION_NOT_FOUND;
         }
     }
     auto parentCustomNode = AceType::DynamicCast<NG::CustomNode>(customNode.Upgrade());
