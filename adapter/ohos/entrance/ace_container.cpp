@@ -124,7 +124,6 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
     const std::shared_ptr<OHOS::AbilityRuntime::Context>& context,
     const std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& abilityInfo, bool clearCache = false)
 {
-    auto containerId = Container::CurrentId();
     std::string bundleName = "";
     std::string moduleName = "";
     if (context) {
@@ -138,19 +137,13 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     if (context && context->GetResourceManager()) {
         resourceAdapter = AceType::MakeRefPtr<ResourceAdapterImplV2>(context->GetResourceManager(), resourceInfo);
-    } else if (containerId >= MIN_SUBCONTAINER_ID &&
-               ResourceManager::GetInstance().IsResourceAdapterRecord(bundleName, moduleName)) {
+    } else if (ResourceManager::GetInstance().IsResourceAdapterRecord(bundleName, moduleName)) {
         resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(bundleName, moduleName);
-    } else {
-        // form of same <bundle, module> reuse created resource adapter
-        if (pipelineContext->IsFormRender() && !bundleName.empty() && !moduleName.empty()) {
-            resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(bundleName, moduleName);
-        }
+    }
 
-        if (resourceAdapter == nullptr) {
-            resourceAdapter = ResourceAdapter::CreateV2();
-            resourceAdapter->Init(resourceInfo);
-        }
+    if (resourceAdapter == nullptr) {
+        resourceAdapter = ResourceAdapter::CreateV2();
+        resourceAdapter->Init(resourceInfo);
     }
 
     ThemeConstants::InitDeviceType();
@@ -168,7 +161,7 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
     auto defaultModuleName = "";
     ResourceManager::GetInstance().AddResourceAdapter(defaultBundleName, defaultModuleName, resourceAdapter, true);
     if (!bundleName.empty() && !moduleName.empty()) {
-        ResourceManager::GetInstance().AddResourceAdapter(bundleName, moduleName, resourceAdapter, true);
+        ResourceManager::GetInstance().RegisterMainResourceAdapter(bundleName, moduleName, resourceAdapter);
     }
 }
 

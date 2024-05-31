@@ -497,7 +497,7 @@ class UIContext {
         return windowName
     }
 
-    clearResourceManagerCache() {
+    clearResourceCache() {
         getUINativeModule().resource.clearCache();
     }
 
