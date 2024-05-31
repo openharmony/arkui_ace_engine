@@ -349,6 +349,7 @@ void TextSelectController::CalculateHandleOffset()
     secondHandle.SetOffset(secondHandleOffset);
     secondHandle.SetSize({ SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), secondHandleMetrics.height });
     secondHandle.SetHeight(secondHandleMetrics.height);
+    AdjustHandleOffset(secondHandle);
     secondHandleInfo_.rect = secondHandle;
 
     if (!IsSelected()) {
@@ -362,6 +363,7 @@ void TextSelectController::CalculateHandleOffset()
     RectF firstHandle;
     firstHandle.SetOffset(firstHandleOffset);
     firstHandle.SetSize({ SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), firstHandleMetrics.height });
+    AdjustHandleOffset(firstHandle);
     firstHandleInfo_.rect = firstHandle;
 }
 
@@ -430,7 +432,7 @@ void TextSelectController::AdjustHandleAtEdge(RectF& handleRect) const
     CHECK_NULL_VOID(pattern);
     auto textFiled = DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_VOID(textFiled);
-    handleRect.SetOffset(OffsetF(handleRect.GetX() - handleRect.Width() / 2, handleRect.GetY()));
+    AdjustHandleOffset(handleRect);
     // Adjusted handle to the content area when they are at the content area boundary.
     if (handleRect.GetX() < contentRect_.GetX()) {
         handleRect.SetOffset(OffsetF(contentRect_.GetX(), handleRect.GetY()));
@@ -441,6 +443,11 @@ void TextSelectController::AdjustHandleAtEdge(RectF& handleRect) const
         GreatNotEqual(contentRect_.Width(), 0.0) && !textFiled->GetTextValue().empty()) {
         handleRect.SetLeft(textRectRightBoundary - handleRect.Width());
     }
+}
+
+void TextSelectController::AdjustHandleOffset(RectF& handleRect) const
+{
+    handleRect.SetOffset(OffsetF(handleRect.GetX() - handleRect.Width() / 2.0f, handleRect.GetY()));
 }
 
 void TextSelectController::MoveFirstHandleToContentRect(int32_t index, bool moveHandle)
@@ -527,6 +534,7 @@ void TextSelectController::UpdateFirstHandleOffset()
     CalcCaretMetricsByPosition(GetFirstHandleIndex(), caretMetrics, TextAffinity::DOWNSTREAM);
     firstHandleInfo_.rect.SetOffset(caretMetrics.offset);
     firstHandleInfo_.rect.SetHeight(caretMetrics.height);
+    AdjustHandleOffset(firstHandleInfo_.rect);
 }
 
 void TextSelectController::UpdateSecondHandleOffset()
@@ -535,6 +543,7 @@ void TextSelectController::UpdateSecondHandleOffset()
     CalcCaretMetricsByPosition(GetSecondHandleIndex(), caretMetrics, TextAffinity::UPSTREAM);
     secondHandleInfo_.rect.SetOffset(caretMetrics.offset);
     secondHandleInfo_.rect.SetHeight(caretMetrics.height);
+    AdjustHandleOffset(secondHandleInfo_.rect);
 }
 
 void TextSelectController::UpdateCaretOffset(TextAffinity textAffinity, bool moveHandle)
