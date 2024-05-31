@@ -15,6 +15,8 @@
 
 #include "tabs_test_ng.h"
 
+#include "base/error/error_code.h"
+
 namespace OHOS::Ace::NG {
 
 namespace {} // namespace
@@ -1602,5 +1604,42 @@ HWTEST_F(TabsEventTestNg, TabBarPatternInitTurnPageRateEvent002, TestSize.Level1
     (*(tabBarPattern_->animationEndEvent_))(testswipingIndex, info);
     tabBarPattern_->turnPageRate_ = -1.0f;
     (*(tabBarPattern_->animationEndEvent_))(testswipingIndex, info);
+}
+
+/**
+ * @tc.name: TabsControllerPreloadItems001
+ * @tc.desc: test preloadItems
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsEventTestNg, TabsControllerPreloadItems001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Init preload items callback.
+     */
+    CreateWithItem([](TabsModelNG model) {});
+    int32_t code = ERROR_CODE_NO_ERROR;
+    auto onPreloadFinish = [&code](int32_t errorCode, std::string message) {
+        code = errorCode;
+    };
+
+    /**
+     * @tc.steps: steps2. Set preload items to different value
+     * @tc.expected: steps2. Check errorCode
+     */
+    std::set<int32_t> indexSet;
+    swiperController_->SetPreloadFinishCallback(onPreloadFinish);
+    swiperController_->PreloadItems(indexSet);
+    EXPECT_EQ(code, ERROR_CODE_PARAM_INVALID);
+
+    code = ERROR_CODE_NO_ERROR;
+    indexSet.insert(1);
+    swiperController_->SetPreloadFinishCallback(onPreloadFinish);
+    swiperController_->PreloadItems(indexSet);
+    EXPECT_EQ(code, ERROR_CODE_NO_ERROR);
+
+    indexSet.insert(-1);
+    swiperController_->SetPreloadFinishCallback(onPreloadFinish);
+    swiperController_->PreloadItems(indexSet);
+    EXPECT_EQ(code, ERROR_CODE_PARAM_INVALID);
 }
 } // namespace OHOS::Ace::NG

@@ -1632,77 +1632,100 @@ void SwiperPattern::PreloadItems(const std::set<int32_t>& indexSet)
 {
     std::set<int32_t> validIndexSet;
     auto childrenSize = RealTotalCount();
-    auto errorCode = ERROR_CODE_NO_ERROR;
     for (const auto& index : indexSet) {
         if (index < 0 || index >= childrenSize) {
-            errorCode = ERROR_CODE_PARAM_INVALID;
-            break;
+            FirePreloadFinishEvent(ERROR_CODE_PARAM_INVALID,
+                "BusinessError 401: Parameter error. Each value in indices must be valid index value of tab content.");
+            return;
         }
-
         validIndexSet.emplace(index);
     }
 
-    if (errorCode != ERROR_CODE_PARAM_INVALID) {
-        DoPreloadItems(validIndexSet, errorCode);
+    if (validIndexSet.empty()) {
+        FirePreloadFinishEvent(ERROR_CODE_PARAM_INVALID,
+            "BusinessError 401: Parameter error. The parameter indices must be a non-empty array.");
         return;
     }
 
-    FirePreloadFinishEvent(errorCode);
-}
-
-void SwiperPattern::FirePreloadFinishEvent(int32_t errorCode)
-{
-    if (swiperController_ && swiperController_->GetPreloadFinishCallback()) {
-        auto preloadFinishCallback = swiperController_->GetPreloadFinishCallback();
-        swiperController_->SetPreloadFinishCallback(nullptr);
-        preloadFinishCallback(errorCode);
-    }
-}
-
-void SwiperPattern::DoPreloadItems(const std::set<int32_t>& indexSet, int32_t errorCode)
-{
-    if (indexSet.empty()) {
-        FirePreloadFinishEvent(ERROR_CODE_PARAM_INVALID);
-        return;
-    }
-
-    auto preloadTask = [weak = WeakClaim(this), indexSet, errorCode]() {
+    auto preloadTask = [weak = WeakClaim(this), indexSet]() {
         auto swiperPattern = weak.Upgrade();
         CHECK_NULL_VOID(swiperPattern);
         auto host = swiperPattern->GetHost();
         CHECK_NULL_VOID(host);
-        auto targetNode = swiperPattern->FindLazyForEachNode(host);
-        if (targetNode.has_value()) {
-            auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(targetNode.value());
-            CHECK_NULL_VOID(lazyForEachNode);
-            for (auto index : indexSet) {
-                if (lazyForEachNode) {
-                    lazyForEachNode->GetFrameChildByIndex(index, true);
-                }
-            }
-        }
-        const auto& children = host->GetChildren();
-        for (const auto& child : children) {
-            if (child->GetTag() != V2::JS_FOR_EACH_ETS_TAG) {
-                continue;
-            }
-
-            auto forEachNode = AceType::DynamicCast<ForEachNode>(child);
-            for (auto index : indexSet) {
-                if (forEachNode && forEachNode->GetChildAtIndex(index)) {
-                    forEachNode->GetChildAtIndex(index)->Build(nullptr);
-                    continue;
-                }
-            }
+        auto parent = host->GetParent();
+        if (AceType::InstanceOf<TabsNode>(parent)) {
+            swiperPattern->DoTabsPreloadItems(indexSet);
+        } else {
+            swiperPattern->DoSwiperPreloadItems(indexSet);
         }
 
-        swiperPattern->FirePreloadFinishEvent(errorCode);
+        swiperPattern->FirePreloadFinishEvent(ERROR_CODE_NO_ERROR);
     };
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(preloadTask, TaskExecutor::TaskType::UI, "ArkUISwiperFirePreloadFinish");
+    taskExecutor->PostTask(preloadTask, TaskExecutor::TaskType::UI, "ArkUIFirePreloadFinish");
+}
+
+void SwiperPattern::FirePreloadFinishEvent(int32_t errorCode, std::string message)
+{
+    if (swiperController_ && swiperController_->GetPreloadFinishCallback()) {
+        auto preloadFinishCallback = swiperController_->GetPreloadFinishCallback();
+        swiperController_->SetPreloadFinishCallback(nullptr);
+        preloadFinishCallback(errorCode, message);
+    }
+}
+
+void SwiperPattern::DoTabsPreloadItems(const std::set<int32_t>& indexSet)
+{
+    for (auto index : indexSet) {
+        auto tabContent = GetCurrentFrameNode(index);
+        if (!tabContent) {
+            continue;
+        }
+        auto tabContentPattern = tabContent->GetPattern<TabContentPattern>();
+        if (!tabContentPattern) {
+            continue;
+        }
+        tabContentPattern->BeforeCreateLayoutWrapper();
+
+        for (const auto& child : tabContent->GetChildren()) {
+            child->Build(nullptr);
+        }
+    }
+}
+
+void SwiperPattern::DoSwiperPreloadItems(const std::set<int32_t>& indexSet)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto targetNode = FindLazyForEachNode(host);
+    if (targetNode.has_value()) {
+        auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(targetNode.value());
+        CHECK_NULL_VOID(lazyForEachNode);
+        for (auto index : indexSet) {
+            if (lazyForEachNode) {
+                lazyForEachNode->GetFrameChildByIndex(index, true);
+            }
+        }
+    }
+    const auto& children = host->GetChildren();
+    for (const auto& child : children) {
+        if (child->GetTag() != V2::JS_FOR_EACH_ETS_TAG) {
+            continue;
+        }
+
+        auto forEachNode = AceType::DynamicCast<ForEachNode>(child);
+        for (auto index : indexSet) {
+            if (forEachNode && forEachNode->GetChildAtIndex(index)) {
+                forEachNode->GetChildAtIndex(index)->Build(nullptr);
+                continue;
+            }
+        }
+    }
 }
 
 void SwiperPattern::OnTranslateAnimationFinish()

@@ -1136,12 +1136,13 @@ void JSSwiperController::PreloadItems(const JSCallbackInfo& args)
     }
 
     RefPtr<JsSwiperFunction> jsFunc = AceType::MakeRefPtr<JsSwiperFunction>(JSRef<JSFunc>::Cast(args[1]));
-    auto onPreloadFinish = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](int32_t errorCode) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("Swiper.preloadItems");
-        TAG_LOGD(AceLogTag::ACE_SWIPER, "SwiperController preloadItems callback execute.");
-        func->Execute(errorCode);
-    };
+    auto onPreloadFinish =
+        [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](int32_t errorCode, std::string message) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Swiper.preloadItems");
+            TAG_LOGD(AceLogTag::ACE_SWIPER, "SwiperController preloadItems callback execute.");
+            func->Execute(errorCode);
+        };
 
     controller_->SetPreloadFinishCallback(onPreloadFinish);
     controller_->PreloadItems(indexSet);
