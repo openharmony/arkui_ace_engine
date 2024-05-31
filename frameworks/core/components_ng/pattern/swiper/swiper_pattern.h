@@ -791,7 +791,7 @@ private:
     float GetCustomPropertyOffset() const;
     float GetCustomPropertyTargetOffset() const;
     void UpdateAnimationProperty(float velocity);
-    void TriggerAnimationEndOnForceStop(bool isInterrupt);
+    void TriggerAnimationEndOnForceStop(bool isInterrupt = false);
     void TriggerAnimationEndOnSwipeToLeft();
     void TriggerAnimationEndOnSwipeToRight();
     void TriggerEventOnFinish(int32_t nextIndex);
