@@ -18,5 +18,6 @@ ace_unittest("video_test_ng") {
   sources = [
     "video_test_ng.cpp",
     "video_test_ng_add.cpp",
+    "video_test_ng_extra_add.cpp",
   ]
 }
