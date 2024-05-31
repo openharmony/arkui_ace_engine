@@ -4637,6 +4637,7 @@ void WebPattern::CreateOverlay(
         CHECK_NULL_VOID(webPattern);
         webPattern->OnTextSelected();
     };
+    imageAnalyzerManager_->DestroyAnalyzerOverlay();
     imageAnalyzerManager_->UpdatePressOverlay(
         pixelMap,
         offsetX,
@@ -4646,6 +4647,7 @@ void WebPattern::CreateOverlay(
         pointX,
         pointY,
         std::move(callback));
+    imageAnalyzerManager_->CreateAnalyzerOverlay(nullptr);
 }
 
 void WebPattern::OnOverlayStateChanged(
@@ -4673,8 +4675,6 @@ void WebPattern::OnOverlayStateChanged(
 
 void WebPattern::OnTextSelected()
 {
-    imageAnalyzerManager_->DestroyAnalyzerOverlay();
-    imageAnalyzerManager_->CreateAnalyzerOverlay(nullptr);
     CHECK_NULL_VOID(delegate_);
     delegate_->OnTextSelected();
     overlayCreating_ = true;
