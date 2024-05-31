@@ -618,7 +618,7 @@ public:
 
     bool ContentWillChange(int32_t comingIndex);
     bool ContentWillChange(int32_t currentIndex, int32_t comingIndex);
-    bool CheckSwiperPanEvent(const GestureEvent& info);
+    bool CheckSwiperPanEvent(float mainDeltaOrVelocity);
     void InitIndexCanChangeMap()
     {
         indexCanChangeMap_.clear();
