@@ -17,10 +17,11 @@
 
 #include <malloc.h>
 
-#include "bridge/common/utils/engine_helper.h"
+#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 #include "bridge/cj_frontend/frontend/cj_frontend_abstract.h"
 
 using namespace OHOS::Ace;
+using namespace OHOS::Ace::Framework;
 
 namespace {
 std::vector<FontStyle> FONTSTYLE_TYPES = {
@@ -116,7 +117,7 @@ MeasureContext FromCJCreateMeasureContext(CJMeasureContextToC context)
 extern "C" {
 double FfiMeasureText(const CJMeasureContextToC cjcontext)
 {
-    auto frontend = AceType::DynamicCast<CJFrontendAbstract>(EngineHelper::GetCurrentFrontend());
+    auto frontend = AceType::DynamicCast<CJFrontendAbstract>(Utils::GetCurrentFrontend());
     if (!frontend) {
         LOGE("Can not get frontend.");
         return 0.0;
@@ -128,7 +129,7 @@ double FfiMeasureText(const CJMeasureContextToC cjcontext)
 
 CJSize FfiMeasureTextSize(const CJMeasureContextToC cjcontext)
 {
-    auto frontend = AceType::DynamicCast<CJFrontendAbstract>(EngineHelper::GetCurrentFrontend());
+    auto frontend = AceType::DynamicCast<CJFrontendAbstract>(Utils::GetCurrentFrontend());
     CJSize thisSize;
     thisSize.height = 0.0;
     thisSize.width = 0.0;
