@@ -216,7 +216,7 @@ class FrameNode {
   }
 
   removeComponentContent(content: ComponentContent): void {
-    if (content === undefined || content === null || content.getNodePtr() === null || content.getNodePtr() == undefined) {
+    if (content === undefined || content === null || content.getNodePtr() === null || content.getNodePtr() === undefined) {
       return;
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);

@@ -800,7 +800,7 @@ class FrameNode {
         }
     }
     removeComponentContent(content) {
-        if (content === undefined || content === null || content.getNodePtr() === null || content.getNodePtr() == undefined) {
+        if (content === undefined || content === null || content.getNodePtr() === null || content.getNodePtr() === undefined) {
             return;
         }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
@@ -2088,8 +2088,8 @@ class ComponentContent extends Content {
     }
     dispose() {
         this.detachFromParent();
-        this.attachNodeRef_.dispose();
-        this.builderNode_.dispose();
+        this.attachNodeRef_?.dispose();
+        this.builderNode_?.dispose();
     }
     detachFromParent() {
         if (this.parentWeak_ === undefined) {

@@ -49,8 +49,8 @@ class ComponentContent extends Content {
   }
   public dispose(): void {
     this.detachFromParent();
-    this.attachNodeRef_.dispose();
-    this.builderNode_.dispose();
+    this.attachNodeRef_?.dispose();
+    this.builderNode_?.dispose();
   }
 
   public detachFromParent() {
