@@ -557,7 +557,7 @@ void WindowScene::CleanBlankNode()
             CHECK_NULL_VOID(host);
             self->RemoveChild(host, self->blankNode_, self->blankNodeName_);
             self->blankNode_.Reset();
-            self->AddChild(host, self->contentNode_, self->contentNodeName_);
+            self->AddChild(host, self->contentNode_, self->contentNodeName_, 0);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     });
