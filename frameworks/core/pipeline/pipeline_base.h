@@ -229,7 +229,28 @@ public:
 
     virtual void OnSurfacePositionChanged(int32_t posX, int32_t posY) = 0;
 
-    virtual void OnSurfaceDensityChanged(double density) = 0;
+    virtual void OnSurfaceDensityChanged(double density)
+    {
+        for (auto&& [id, callback] : densityChangedCallbacks_) {
+            if (callback) {
+                callback(density);
+            }
+        }
+    }
+
+    int32_t RegisterDensityChangedCallback(std::function<void(double)>&& callback)
+    {
+        if (callback) {
+            densityChangedCallbacks_.emplace(++densityChangeCallbackId_, std::move(callback));
+            return densityChangeCallbackId_;
+        }
+        return 0;
+    }
+
+    void UnregisterDensityChangedCallback(int32_t callbackId)
+    {
+        densityChangedCallbacks_.erase(callbackId);
+    }
 
     virtual void OnTransformHintChanged(uint32_t transform) = 0;
 
@@ -1390,6 +1411,9 @@ private:
     uint32_t frameCount_ = 0;
     bool stateProfilerStatus_ = false;
     std::function<void(bool)> jsStateProfilerStatusCallback_;
+
+    int32_t densityChangeCallbackId_ = 0;
+    std::unordered_map<int32_t, std::function<void(double)>> densityChangedCallbacks_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };

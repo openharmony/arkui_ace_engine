@@ -2211,6 +2211,9 @@ void PipelineContext::OnSurfaceDensityChanged(double density)
     if (!NearZero(viewScale_)) {
         dipScale_ = density_ / viewScale_;
     }
+    if (isDensityUpdate_) {
+        PipelineBase::OnSurfaceDensityChanged(density);
+    }
 }
 
 void PipelineContext::OnSystemBarHeightChanged(double statusBar, double navigationBar)

@@ -34,7 +34,7 @@ namespace OHOS::Ace::Framework {
 class JSCanvasRenderer : public Referenced {
 public:
     JSCanvasRenderer();
-    ~JSCanvasRenderer() override = default;
+    ~JSCanvasRenderer() override;
 
     enum class FunctionCode {
         FILL_RECT = 0,
@@ -176,9 +176,9 @@ public:
         return unit_;
     }
 
-    double GetDensity()
+    inline double GetDensity()
     {
-        return (GetUnit() == CanvasUnit::DEFAULT) ? PipelineBase::GetCurrentDensity() : 1.0;
+        return (GetUnit() == CanvasUnit::DEFAULT) ? density_ : 1.0;
     }
 
     void SetInstanceId(int32_t id)
@@ -221,6 +221,8 @@ private:
     bool isOffscreenInitializeShadow_ = false;
     Dimension GetDimensionValue(const std::string& str);
     CanvasUnit unit_ = CanvasUnit::DEFAULT;
+    double density_ = 1.0;
+    int32_t densityCallbackId_ = 0;
 };
 
 } // namespace OHOS::Ace::Framework
