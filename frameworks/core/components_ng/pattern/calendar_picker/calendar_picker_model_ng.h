@@ -36,10 +36,11 @@ public:
     static void SetPadding(FrameNode* frameNode, const PaddingProperty& padding);
     static void LayoutPicker(const RefPtr<CalendarPickerPattern>& pickerPattern, RefPtr<FrameNode>& pickerNode,
         const CalendarSettingData& settingData, const RefPtr<CalendarTheme>& theme);
-    static RefPtr<FrameNode> CreateButtonChild(int32_t id, bool isAdd, const RefPtr<CalendarTheme>& theme);
+    static RefPtr<FrameNode> CreateButtonChild(
+        int32_t id, bool isAdd, const RefPtr<CalendarTheme>& theme, TextDirection textDirection);
     static RefPtr<FrameNode> CreateButtonImageChild(bool isAdd, const RefPtr<CalendarTheme>& theme);
-    static RefPtr<FrameNode> CreateCalendarNodeChild(
-        int32_t contentId, const CalendarSettingData& settingData, const RefPtr<CalendarTheme>& theme);
+    static RefPtr<FrameNode> CreateCalendarNodeChild(int32_t contentId,
+        const CalendarSettingData& settingData, const RefPtr<CalendarTheme>& theme, TextDirection textDirection);
     static RefPtr<FrameNode> CreateButtonFlexChild(int32_t buttonFlexId, const RefPtr<CalendarTheme>& theme);
     static void CreateDateNode(int32_t contentId, const CalendarSettingData& settingData);
     static RefPtr<FrameNode> CreateDateTextNode(const std::string& textContent);
@@ -54,6 +55,7 @@ public:
     static CalendarEdgeAlign GetEdgeAlignType(FrameNode* frameNode);
     static DimensionOffset GetEdgeOffset(FrameNode* frameNode);
     static void SetOnChangeWithNode(FrameNode* frameNode, SelectedChangeEvent&& onChange);
+    static std::map<std::size_t, std::string> GetDateNodeOrder(const CalendarSettingData& settingData);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CALENDAR_PICKER_CALENDAR_PICKER_MODEL_NG_H

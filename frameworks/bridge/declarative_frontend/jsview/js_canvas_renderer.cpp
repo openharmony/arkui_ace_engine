@@ -117,7 +117,6 @@ JSRef<JSObject> JSCanvasRenderer::createGradientObj(Gradient* gradient)
     return pasteObj;
 }
 
-
 // createLinearGradient(x0: number, y0: number, x1: number, y1: number): CanvasGradient
 void JSCanvasRenderer::JsCreateLinearGradient(const JSCallbackInfo& info)
 {
@@ -372,7 +371,8 @@ RefPtr<CanvasPath2D> JSCanvasRenderer::JsMakePath2D(const JSCallbackInfo& info)
             JSViewAbstract::ParseJsString(info[0], capStr);
             return AceType::MakeRefPtr<CanvasPath2D>(capStr);
         }
-        if (info[0]->IsObject()) {
+
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && info[0]->IsObject()) {
             auto* jsPath2d = info.UnwrapArg<JSPath2D>(0);
             CHECK_NULL_RETURN(jsPath2d, AceType::MakeRefPtr<CanvasPath2D>());
             auto canvasPath2D = jsPath2d->GetCanvasPath2d();
@@ -1262,7 +1262,7 @@ void JSCanvasRenderer::JsSetTransform(const JSCallbackInfo& info)
     }
 
     // >= API10: setTransform(transform?: Matrix2D): void
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)) {
         auto* jsMatrix2d = info.UnwrapArg<JSMatrix2d>(0);
         CHECK_NULL_VOID(jsMatrix2d);
         param = jsMatrix2d->GetTransform();
@@ -1323,7 +1323,7 @@ void JSCanvasRenderer::JsSetLineDash(const JSCallbackInfo& info)
         lineDash.insert(lineDash.end(), lineDash.begin(), lineDash.end());
     }
     double density = GetDensity();
-    if (!Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+    if (!Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TEN)) {
         for (auto i = 0U; i < lineDash.size(); i++) {
             lineDash[i] *= density;
         }

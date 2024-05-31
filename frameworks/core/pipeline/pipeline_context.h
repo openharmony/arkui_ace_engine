@@ -96,6 +96,7 @@ struct VisibleCallbackInfo {
     VisibleRatioCallback callback;
     double visibleRatio = 1.0;
     bool isCurrentVisible = false;
+    uint32_t period = 0;
 };
 
 using OnRouterChangeCallback = bool (*)(const std::string currentRouterPath);
@@ -270,6 +271,8 @@ public:
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
 
     void OnSurfaceDensityChanged(double density) override;
+
+    void OnTransformHintChanged(uint32_t transform) override {}
 
     void OnSystemBarHeightChanged(double statusBar, double navigationBar) override;
 

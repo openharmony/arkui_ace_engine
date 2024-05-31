@@ -180,7 +180,10 @@ public:
     virtual void SetRenderProcessRespondingId(std::function<void(const BaseEventInfo* info)> && jsCallback) = 0;
     virtual void SetSelectionMenuOptions(const WebMenuOptionsParam& webMenuOption) {};
     virtual void SetViewportFitChangedId(std::function<void(const BaseEventInfo* info)> && jsCallback) = 0;
+    virtual void SetOnInterceptKeyboardAttach(
+        std::function<WebKeyboardOption(const BaseEventInfo* info)>&& jsCallback) {}
 
+    virtual void SetAdsBlockedEventId(std::function<void(const BaseEventInfo* info)> && jsCallback) = 0;
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

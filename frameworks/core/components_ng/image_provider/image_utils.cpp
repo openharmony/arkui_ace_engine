@@ -18,7 +18,7 @@
 
 namespace OHOS::Ace::NG {
 void ImageUtils::PostTask(
-    std::function<void()>&& task, TaskExecutor::TaskType taskType, const char* taskTypeName)
+    std::function<void()>&& task, TaskExecutor::TaskType taskType, const char* taskTypeName, PriorityType priorityType)
 {
     auto taskExecutor = Container::CurrentTaskExecutor();
     if (!taskExecutor) {
@@ -31,22 +31,24 @@ void ImageUtils::PostTask(
             CHECK_NULL_VOID(task);
             task();
         },
-        taskType, std::string(taskTypeName));
+        taskType, std::string(taskTypeName), priorityType);
 }
 
-void ImageUtils::PostToUI(std::function<void()>&& task, const std::string& name, const int32_t containerId)
+void ImageUtils::PostToUI(
+    std::function<void()>&& task, const std::string& name, const int32_t containerId, PriorityType priorityType)
 {
     ContainerScope scope(containerId);
 
     CHECK_NULL_VOID(task);
-    ImageUtils::PostTask(std::move(task), TaskExecutor::TaskType::UI, name.c_str());
+    ImageUtils::PostTask(std::move(task), TaskExecutor::TaskType::UI, name.c_str(), priorityType);
 }
 
-void ImageUtils::PostToBg(std::function<void()>&& task, const std::string& name, const int32_t containerId)
+void ImageUtils::PostToBg(
+    std::function<void()>&& task, const std::string& name, const int32_t containerId, PriorityType priorityType)
 {
     ContainerScope scope(containerId);
 
     CHECK_NULL_VOID(task);
-    ImageUtils::PostTask(std::move(task), TaskExecutor::TaskType::BACKGROUND, name.c_str());
+    ImageUtils::PostTask(std::move(task), TaskExecutor::TaskType::BACKGROUND, name.c_str(), priorityType);
 }
 } // namespace OHOS::Ace::NG

@@ -34,6 +34,46 @@ struct LayoutConstraintT {
     OptionalSize<T> parentIdealSize;
     OptionalSize<T> selfIdealSize;
 
+    static bool CompareWithInfinityCheck(const OptionalSize<float>& first, const OptionalSize<float>& second)
+    {
+        if (first.Width().has_value() ^ second.Width().has_value()) {
+            return false;
+        }
+        auto widthBothInf = GreaterOrEqualToInfinity(first.Width().value_or(0.0f)) &&
+                            GreaterOrEqualToInfinity(second.Width().value_or(0.0f));
+        if (!widthBothInf && !NearEqual(first.Width().value_or(0), second.Width().value_or(0))) {
+            return false;
+        }
+        if (first.Height().has_value() ^ second.Height().has_value()) {
+            return false;
+        }
+        auto heightBothInf = GreaterOrEqualToInfinity(first.Height().value_or(0.0f)) &&
+                            GreaterOrEqualToInfinity(second.Height().value_or(0.0f));
+        if (!heightBothInf && !NearEqual(first.Height().value_or(0), second.Height().value_or(0))) {
+            return false;
+        }
+        return true;
+    }
+
+    static bool CompareWithInfinityCheck(const SizeT<float>& first, const SizeT<float>& second)
+    {
+        auto widthBothInf = GreaterOrEqualToInfinity(first.Width()) && GreaterOrEqualToInfinity(second.Width());
+        auto heightBothInf = GreaterOrEqualToInfinity(first.Height()) && GreaterOrEqualToInfinity(second.Height());
+        if (widthBothInf && heightBothInf) {
+            return true;
+        }
+        return NearEqual(first.Width(), second.Width()) && NearEqual(first.Height(), second.Height());
+    }
+
+    static bool CompareWithInfinityCheck(float first, float second)
+    {
+        auto bothInf = GreaterOrEqualToInfinity(first) && GreaterOrEqualToInfinity(second);
+        if (bothInf) {
+            return true;
+        }
+        return NearEqual(first, second);
+    }
+
     void ApplyAspectRatio(float ratio, const std::optional<CalcSize>& calcSize, bool greaterThanApiTen = false);
 
     void ApplyAspectRatioToParentIdealSize(bool useWidth, float ratio);
@@ -46,8 +86,8 @@ struct LayoutConstraintT {
 
     void Reset();
 
-    void MinusPadding(const std::optional<T>& left, const std::optional<T>& right,
-        const std::optional<T>& top, const std::optional<T>& bottom);
+    void MinusPadding(const std::optional<T>& left, const std::optional<T>& right, const std::optional<T>& top,
+        const std::optional<T>& bottom);
 
     void MinusPaddingToNonNegativeSize(const std::optional<T>& left, const std::optional<T>& right,
         const std::optional<T>& top, const std::optional<T>& bottom);
@@ -67,18 +107,22 @@ struct LayoutConstraintT {
 
     bool EqualWithoutPercentWidth(const LayoutConstraintT& layoutConstraint) const
     {
-        return (scaleProperty == layoutConstraint.scaleProperty) && (minSize == layoutConstraint.minSize) &&
-            (maxSize == layoutConstraint.maxSize) && (parentIdealSize == layoutConstraint.parentIdealSize) &&
-            (percentReference.Height() == layoutConstraint.percentReference.Height()) &&
-            (selfIdealSize == layoutConstraint.selfIdealSize);
+        return (scaleProperty == layoutConstraint.scaleProperty) &&
+               CompareWithInfinityCheck(minSize, layoutConstraint.minSize) &&
+               CompareWithInfinityCheck(maxSize, layoutConstraint.maxSize) &&
+               CompareWithInfinityCheck(parentIdealSize, layoutConstraint.parentIdealSize) &&
+               CompareWithInfinityCheck(percentReference.Height(), layoutConstraint.percentReference.Height()) &&
+               CompareWithInfinityCheck(selfIdealSize, layoutConstraint.selfIdealSize);
     }
 
     bool EqualWithoutPercentHeight(const LayoutConstraintT& layoutConstraint) const
     {
-        return (scaleProperty == layoutConstraint.scaleProperty) && (minSize == layoutConstraint.minSize) &&
-            (maxSize == layoutConstraint.maxSize) && (parentIdealSize == layoutConstraint.parentIdealSize) &&
-            (percentReference.Width() == layoutConstraint.percentReference.Width()) &&
-            (selfIdealSize == layoutConstraint.selfIdealSize);
+        return (scaleProperty == layoutConstraint.scaleProperty) &&
+               CompareWithInfinityCheck(minSize, layoutConstraint.minSize) &&
+               CompareWithInfinityCheck(maxSize, layoutConstraint.maxSize) &&
+               CompareWithInfinityCheck(parentIdealSize, layoutConstraint.parentIdealSize) &&
+               CompareWithInfinityCheck(percentReference.Width(), layoutConstraint.percentReference.Width()) &&
+               CompareWithInfinityCheck(selfIdealSize, layoutConstraint.selfIdealSize);
     }
 
     bool UpdateSelfMarginSizeWithCheck(const OptionalSize<T>& size)

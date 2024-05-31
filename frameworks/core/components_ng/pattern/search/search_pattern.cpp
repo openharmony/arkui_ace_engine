@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/event/touch_event.h"
 
 namespace OHOS::Ace::NG {
 
@@ -940,7 +941,7 @@ void SearchPattern::InitButtonTouchEvent(RefPtr<TouchEventImpl>& touchEvent, int
         if (touchType == TouchType::DOWN) {
             pattern->OnButtonTouchDown(childId);
         }
-        if (touchType == TouchType::UP) {
+        if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
             pattern->OnButtonTouchUp(childId);
         }
     };
@@ -1175,6 +1176,10 @@ bool SearchPattern::HandleInputChildOnFocus() const
 
 void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
@@ -1250,6 +1255,10 @@ std::string SearchPattern::SearchTypeToString() const
 
 void SearchPattern::ToJsonValueForSearchIcon(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto searchIconFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(IMAGE_INDEX));
@@ -1299,6 +1308,10 @@ void SearchPattern::ToJsonValueForSearchIcon(std::unique_ptr<JsonValue>& json, c
 
 void SearchPattern::ToJsonValueForCancelButton(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
@@ -1351,6 +1364,10 @@ void SearchPattern::ToJsonValueForCancelButton(std::unique_ptr<JsonValue>& json,
 void SearchPattern::ToJsonValueForSearchButtonOption(
     std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto searchButtonFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(BUTTON_INDEX));
@@ -1371,6 +1388,10 @@ void SearchPattern::ToJsonValueForSearchButtonOption(
 
 void SearchPattern::ToJsonValueForCursor(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
@@ -1526,13 +1547,10 @@ void SearchPattern::CreateSearchIcon(const std::string& src)
 void SearchPattern::CreateCancelIcon()
 {
     CHECK_NULL_VOID(GetSearchNode());
-    if (GetSearchNode()->HasCancelIconNodeCreated()) {
-        return;
-    }
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        CreateOrUpdateSymbol(CANCEL_IMAGE_INDEX, true);
+        CreateOrUpdateSymbol(CANCEL_IMAGE_INDEX, !GetSearchNode()->HasCancelIconNodeCreated());
     } else {
-        CreateOrUpdateImage(CANCEL_IMAGE_INDEX, "", true, "", "");
+        CreateOrUpdateImage(CANCEL_IMAGE_INDEX, "", !GetSearchNode()->HasCancelIconNodeCreated(), "", "");
     }
     GetSearchNode()->UpdateHasCancelIconNodeCreated(true);
 }

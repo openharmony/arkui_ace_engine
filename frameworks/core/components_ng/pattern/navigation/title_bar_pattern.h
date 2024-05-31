@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -272,6 +272,16 @@ public:
         return options_;
     }
 
+    RefPtr<FrameNode> GetLargeFontPopUpDialogNode() const
+    {
+        return largeFontPopUpDialogNode_.Upgrade();
+    }
+
+    void SetLargeFontPopUpDialogNode(const WeakPtr<FrameNode>& dialogNode)
+    {
+        largeFontPopUpDialogNode_ = dialogNode;
+    }
+
 private:
     void TransformScale(float overDragOffset, const RefPtr<FrameNode>& frameNode);
 
@@ -375,6 +385,8 @@ private:
     std::vector<NG::BarItem> titleBarMenuItems_;
     std::optional<int32_t> menuNodeId_;
     int32_t maxMenuNums_ = -1;
+
+    WeakPtr<FrameNode> largeFontPopUpDialogNode_;
 };
 
 } // namespace OHOS::Ace::NG

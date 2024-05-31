@@ -232,13 +232,29 @@ RefPtr<FrameNode> TimePickerDialogView::CreateDividerNode(const RefPtr<FrameNode
     auto dividerLayoutProps = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
     CHECK_NULL_RETURN(dividerLayoutProps, nullptr);
     dividerLayoutProps->UpdateVertical(true);
-
-    MarginProperty margin;
-    margin.top = CalcLength(dialogTheme->GetDividerHeight());
-    margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
-    dividerLayoutProps->UpdateMargin(margin);
     dividerLayoutProps->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(dialogTheme->GetDividerWidth()), CalcLength(dialogTheme->GetDividerHeight())));
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        MarginProperty margin;
+        margin.top = CalcLength(dialogTheme->GetDividerHeight());
+        margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
+        dividerLayoutProps->UpdateMargin(margin);
+        dividerLayoutProps->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(dialogTheme->GetDividerWidth()), CalcLength(dialogTheme->GetDividerHeight())));
+    } else {
+        auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+        auto dividerWrapper = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(false));
+        CHECK_NULL_RETURN(dividerWrapper, nullptr);
+        auto layoutProps = dividerWrapper->GetLayoutProperty<LinearLayoutProperty>();
+        CHECK_NULL_RETURN(layoutProps, nullptr);
+        layoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_AROUND);
+        layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+        layoutProps->UpdateUserDefinedIdealSize(CalcSize(
+            CalcLength(dialogTheme->GetActionsPadding().Bottom()), CalcLength(buttonTheme->GetHeight())));
+        dividerNode->MountToParent(dividerWrapper);
+        return dividerWrapper;
+    }
 
     return dividerNode;
 }
@@ -335,7 +351,6 @@ RefPtr<FrameNode> TimePickerDialogView::CreateConfirmNode(const RefPtr<FrameNode
     UpdateButtonLayoutProperty(buttonConfirmLayoutProperty, pickerTheme);
     auto buttonConfirmRenderContext = buttonConfirmNode->GetRenderContext();
     buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    UpdateConfirmButtonMargin(buttonConfirmNode, dialogTheme);
     UpdateButtonStyles(buttonInfos, ACCEPT_BUTTON_INDEX, buttonConfirmLayoutProperty, buttonConfirmRenderContext);
     UpdateButtonDefaultFocus(buttonInfos, buttonConfirmNode, true);
 
@@ -366,18 +381,52 @@ void TimePickerDialogView::UpdateButtonLayoutProperty(
     buttonConfirmLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     buttonConfirmLayoutProperty->UpdateType(ButtonType::CAPSULE);
     buttonConfirmLayoutProperty->UpdateFlexShrink(1.0);
-    buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(pickerTheme->GetButtonWidth()), CalcLength(pickerTheme->GetButtonHeight())));
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
+    UpdateConfirmButtonMargin(buttonConfirmLayoutProperty, dialogTheme);
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(pickerTheme->GetButtonWidth()), CalcLength(pickerTheme->GetButtonHeight())));
+    } else {
+        auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+        CHECK_NULL_VOID(buttonTheme);
+        buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(buttonTheme->GetHeight())));
+    }
 }
 
 void TimePickerDialogView::UpdateConfirmButtonMargin(
-    const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<DialogTheme>& dialogTheme)
+    const RefPtr<ButtonLayoutProperty>& buttonConfirmLayoutProperty, const RefPtr<DialogTheme>& dialogTheme)
 {
     MarginProperty margin;
-    margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
-    margin.top = CalcLength(dialogTheme->GetDividerHeight());
-    margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
-    buttonConfirmNode->GetLayoutProperty()->UpdateMargin(margin);
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
+        margin.top = CalcLength(dialogTheme->GetDividerHeight());
+        margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
+    } else {
+        margin.right = CalcLength(dialogTheme->GetActionsPadding().Right());
+        margin.top = CalcLength(dialogTheme->GetActionsPadding().Bottom());
+        margin.bottom = CalcLength(dialogTheme->GetActionsPadding().Bottom());
+    }
+    buttonConfirmLayoutProperty->UpdateMargin(margin);
+}
+
+void TimePickerDialogView::UpdateCancelButtonMargin(
+    const RefPtr<ButtonLayoutProperty>& buttonCancelLayoutProperty, const RefPtr<DialogTheme>& dialogTheme)
+{
+    MarginProperty margin;
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
+        margin.top = CalcLength(dialogTheme->GetDividerHeight());
+        margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
+    } else {
+        margin.left = CalcLength(dialogTheme->GetActionsPadding().Left());
+        margin.top = CalcLength(dialogTheme->GetActionsPadding().Bottom());
+        margin.bottom = CalcLength(dialogTheme->GetActionsPadding().Bottom());
+    }
+    buttonCancelLayoutProperty->UpdateMargin(margin);
 }
 
 RefPtr<FrameNode> TimePickerDialogView::CreateCancelNode(NG::DialogGestureEvent& cancelEvent,
@@ -386,6 +435,7 @@ RefPtr<FrameNode> TimePickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
@@ -410,19 +460,19 @@ RefPtr<FrameNode> TimePickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     CHECK_NULL_RETURN(buttonCancelEventHub, nullptr);
     buttonCancelEventHub->SetStateEffect(true);
 
-    MarginProperty margin;
-    margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
-    margin.top = CalcLength(dialogTheme->GetDividerHeight());
-    margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
-    buttonCancelNode->GetLayoutProperty()->UpdateMargin(margin);
-
     auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
     buttonCancelLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.cancel"));
     buttonCancelLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     buttonCancelLayoutProperty->UpdateType(ButtonType::CAPSULE);
     buttonCancelLayoutProperty->UpdateFlexShrink(1.0);
-    buttonCancelLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(pickerTheme->GetButtonWidth()), CalcLength(pickerTheme->GetButtonHeight())));
+    UpdateCancelButtonMargin(buttonCancelLayoutProperty, dialogTheme);
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        buttonCancelLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(pickerTheme->GetButtonWidth()), CalcLength(pickerTheme->GetButtonHeight())));
+    } else {
+        buttonCancelLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(buttonTheme->GetHeight())));
+    }
 
     auto buttonCancelRenderContext = buttonCancelNode->GetRenderContext();
     buttonCancelRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);

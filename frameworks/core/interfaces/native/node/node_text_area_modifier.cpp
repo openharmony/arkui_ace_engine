@@ -506,7 +506,7 @@ void GetTextAreaPlaceholderFont(ArkUINodeHandle node, ArkUITextFont* font)
     }
     if (!value.fontFamilies.empty()) {
         std::string families;
-        int index = 0;
+        uint32_t index = 0;
         for (auto& family : value.fontFamilies) {
             families += family;
             if (index != value.fontFamilies.size() - 1) {
@@ -1146,7 +1146,7 @@ void ResetTextAreaOnSubmitWithEvent(ArkUINodeHandle node)
     TextFieldModelNG::SetOnSubmit(frameNode, nullptr);
 }
 
-void SetTextAreaContentType(ArkUINodeHandle node, ArkUI_Uint32 contentType)
+void SetTextAreaContentType(ArkUINodeHandle node, ArkUI_Int32 contentType)
 {
     auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

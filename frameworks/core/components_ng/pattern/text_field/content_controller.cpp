@@ -86,8 +86,10 @@ bool ContentController::ReplaceSelectedValue(int32_t startIndex, int32_t endInde
                StringUtils::ToString(wideText.substr(endIndex, static_cast<int32_t>(wideText.length()) - endIndex));
     auto len = content_.length();
     FilterValue();
+    insertValue_ = tmp;
     if (value.length() == 1 && content_.length() < len) {
         content_ = str;
+        insertValue_ = "";
     }
     return !tmp.empty();
 }
@@ -341,6 +343,12 @@ void ContentController::erase(int32_t startIndex, int32_t length)
 int32_t ContentController::Delete(int32_t startIndex, int32_t length, bool isBackward)
 {
     return TextEmojiProcessor::Delete(startIndex, length, content_, isBackward);
+}
+
+int32_t ContentController::GetDeleteLength(int32_t startIndex, int32_t length, bool isBackward)
+{
+    auto content = content_;
+    return TextEmojiProcessor::Delete(startIndex, length, content, isBackward);
 }
 
 bool ContentController::IsIndexBeforeOrInEmoji(int32_t index)

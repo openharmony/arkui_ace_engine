@@ -66,7 +66,7 @@ constexpr float PIXELMAP_DRAG_SCALE_MULTIPLE = 1.05f;
 constexpr int32_t PIXELMAP_ANIMATION_TIME = 800;
 constexpr float SCALE_NUMBER = 0.95f;
 constexpr int32_t FILTER_TIMES = 250;
-constexpr int32_t PRE_DRAG_TIMER_DEADLINE = 50;
+constexpr int32_t PRE_DRAG_TIMER_DEADLINE = 50; // 50ms
 constexpr int32_t PIXELMAP_ANIMATION_DURATION = 300;
 constexpr float SPRING_RESPONSE = 0.416f;
 constexpr float SPRING_DAMPING_FRACTION = 0.73f;
@@ -97,12 +97,13 @@ DragEventActuator::DragEventActuator(
     }
 
     panRecognizer_ = MakeRefPtr<PanRecognizer>(fingers_, direction_, distance_);
-    panRecognizer_->SetGestureInfo(MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, true));
+    panRecognizer_->SetGestureInfo(MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, GestureTypeName::DRAG, true));
     longPressRecognizer_ = AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, fingers_, false, true);
-    longPressRecognizer_->SetGestureInfo(MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, true));
+    longPressRecognizer_->SetGestureInfo(MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, GestureTypeName::DRAG, true));
     previewLongPressRecognizer_ =
         AceType::MakeRefPtr<LongPressRecognizer>(PREVIEW_LONG_PRESS_RECONGNIZER, fingers_, false, true);
-    previewLongPressRecognizer_->SetGestureInfo(MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, true));
+    previewLongPressRecognizer_->SetGestureInfo(
+        MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, GestureTypeName::DRAG, true));
     previewLongPressRecognizer_->SetThumbnailDeadline(PRE_DRAG_TIMER_DEADLINE);
     isNotInPreviewState_ = false;
 }
@@ -149,11 +150,11 @@ bool DragEventActuator::IsGlobalStatusSuitableForDragging()
     CHECK_NULL_RETURN(pipeline, false);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_RETURN(dragDropManager, false);
-    if (dragDropManager->IsDragging() || dragDropManager->IsMsdpDragging()) {
+    if (dragDropManager->IsDragging() || dragDropManager->IsMSDPDragging()) {
         TAG_LOGI(AceLogTag::ACE_DRAG,
             "No need to collect drag gestures result, dragging is %{public}d,"
             "MSDP dragging is %{public}d",
-            dragDropManager->IsDragging(), dragDropManager->IsMsdpDragging());
+            dragDropManager->IsDragging(), dragDropManager->IsMSDPDragging());
         return false;
     }
 
@@ -181,8 +182,17 @@ bool DragEventActuator::IsCurrentNodeStatusSuitableForDragging(
     return true;
 }
 
+void DragEventActuator::RestartDragTask(const GestureEvent& info)
+{
+    auto gestureInfo = const_cast<GestureEvent&>(info);
+    if (actionStart_) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Restart drag for lifting status");
+        actionStart_(gestureInfo);
+    }
+}
+
 void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
+    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, TouchTestResult& responseLinkResult)
 {
     CHECK_NULL_VOID(userCallback_);
     isDragUserReject_ = false;
@@ -206,10 +216,10 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         CHECK_NULL_VOID(pipeline);
         auto dragDropManager = pipeline->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
-        if (dragDropManager->IsDragging() || dragDropManager->IsMsdpDragging()) {
+        if (dragDropManager->IsDragging() || dragDropManager->IsMSDPDragging()) {
             TAG_LOGI(AceLogTag::ACE_DRAG,
                 "It's already dragging now, dragging is %{public}d, MSDP dragging is %{public}d",
-                dragDropManager->IsDragging(), dragDropManager->IsMsdpDragging());
+                dragDropManager->IsDragging(), dragDropManager->IsMSDPDragging());
             return;
         }
         dragDropManager->SetHasGatherNode(false);
@@ -805,6 +815,10 @@ void DragEventActuator::CreatePreviewNode(const RefPtr<FrameNode>& frameNode, OH
     auto targetSize = CalcSize(NG::CalcLength(pixelMap->GetWidth()), NG::CalcLength(pixelMap->GetHeight()));
     props->UpdateUserDefinedIdealSize(targetSize);
 
+    auto imagePattern = imageNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(imagePattern);
+    imagePattern->SetSyncLoad(true);
+
     UpdatePreviewPositionAndScale(imageNode, frameOffset);
     UpdatePreviewAttr(frameNode, imageNode);
     imageNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
@@ -1023,7 +1037,7 @@ void DragEventActuator::UpdatePreviewOptionFromModifier(const RefPtr<FrameNode>&
     auto opacity = imageContext->GetOpacity();
 
     OptionsAfterApplied options;
-    if (opacity.has_value() && (opacity.value())<= MAX_OPACITY && (opacity.value()) > MIN_OPACITY) {
+    if (opacity.has_value() && (opacity.value()) <= MAX_OPACITY && (opacity.value()) > MIN_OPACITY) {
         options.opacity = opacity.value();
     } else {
         options.opacity = DEFAULT_OPACITY;
@@ -1185,6 +1199,7 @@ void DragEventActuator::HidePixelMap(bool startDrag, double x, double y, bool sh
         manager->RemovePreviewBadgeNode();
         manager->RemoveGatherNodeWithAnimation();
     }
+
     if (showAnimation) {
         manager->RemovePixelMapAnimation(startDrag, x, y);
     } else {
@@ -1261,7 +1276,7 @@ void DragEventActuator::ExecutePreDragAction(const PreDragStatus preDragStatus, 
     CHECK_NULL_VOID(mainPipeline);
     auto dragDropManager = mainPipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
-    if (dragDropManager->IsDragging() || dragDropManager->IsMsdpDragging()) {
+    if (dragDropManager->IsDragging() || dragDropManager->IsMSDPDragging()) {
         return;
     }
     RefPtr<EventHub> eventHub;
@@ -1527,12 +1542,13 @@ void DragEventActuator::CopyDragEvent(const RefPtr<DragEventActuator>& dragEvent
     userCallback_ = dragEventActuator->userCallback_;
     customCallback_ = dragEventActuator->customCallback_;
     panRecognizer_ = MakeRefPtr<PanRecognizer>(fingers_, direction_, distance_);
-    panRecognizer_->SetGestureInfo(MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, true));
+    panRecognizer_->SetGestureInfo(MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, GestureTypeName::DRAG, true));
     longPressRecognizer_ = AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, fingers_, false, false);
-    longPressRecognizer_->SetGestureInfo(MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, true));
+    longPressRecognizer_->SetGestureInfo(MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, GestureTypeName::DRAG, true));
     previewLongPressRecognizer_ =
         AceType::MakeRefPtr<LongPressRecognizer>(PREVIEW_LONG_PRESS_RECONGNIZER, fingers_, false, false);
-    previewLongPressRecognizer_->SetGestureInfo(MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, true));
+    previewLongPressRecognizer_->SetGestureInfo(
+        MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, GestureTypeName::DRAG, true));
     isNotInPreviewState_ = false;
     actionStart_ = dragEventActuator->actionStart_;
     longPressUpdate_ = dragEventActuator->longPressUpdate_;

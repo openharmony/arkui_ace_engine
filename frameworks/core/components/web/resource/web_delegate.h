@@ -123,6 +123,52 @@ private:
     WeakPtr<WebDelegate> webDelegate_;
 };
 
+class WebCustomKeyboardHandlerOhos : public WebCustomKeyboardHandler {
+    DECLARE_ACE_TYPE(WebCustomKeyboardHandlerOhos, WebCustomKeyboardHandler)
+
+public:
+    WebCustomKeyboardHandlerOhos(std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler) :
+    keyboardHandler_(keyboardHandler) {}
+
+    void InsertText(const std::string &text) override
+    {
+        if (keyboardHandler_) {
+            keyboardHandler_->InsertText(text);
+        }
+    }
+
+    void DeleteForward(int32_t length) override
+    {
+        if (keyboardHandler_) {
+            keyboardHandler_->DeleteForward(length);
+        }
+    }
+
+    void DeleteBackward(int32_t length) override
+    {
+        if (keyboardHandler_) {
+            keyboardHandler_->DeleteBackward(length);
+        }
+    }
+
+    void SendFunctionKey(int32_t key) override
+    {
+        if (keyboardHandler_) {
+            keyboardHandler_->SendFunctionKey(key);
+        }
+    }
+
+    void Close() override
+    {
+        if (keyboardHandler_) {
+            keyboardHandler_->Close();
+        }
+    }
+
+private:
+    std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler_;
+};
+
 class AuthResultOhos : public AuthResult {
     DECLARE_ACE_TYPE(AuthResultOhos, AuthResult)
 
@@ -557,6 +603,20 @@ enum class ScriptItemType {
     DOCUMENT_END
 };
 
+class NWebSystemConfigurationImpl : public OHOS::NWeb::NWebSystemConfiguration {
+public:
+    explicit NWebSystemConfigurationImpl(uint8_t flags) : theme_flags_(flags) {}
+    ~NWebSystemConfigurationImpl() = default;
+
+    uint8_t GetThemeFlags() override
+    {
+        return theme_flags_;
+    }
+
+private:
+    uint8_t theme_flags_ = static_cast<uint8_t>(NWeb::SystemThemeFlags::NONE);
+};
+
 class WebDelegate : public WebResource {
     DECLARE_ACE_TYPE(WebDelegate, WebResource);
 
@@ -629,7 +689,7 @@ public:
     void UpdateCacheMode(const WebCacheMode& mode);
     std::shared_ptr<OHOS::NWeb::NWeb> GetNweb();
     bool GetForceDarkMode();
-    void OnConfigurationUpdated(const std::string& colorMode);
+    void OnConfigurationUpdated(const OHOS::AppExecFwk::Configuration& configuration);
     void UpdateDarkMode(const WebDarkMode& mode);
     void UpdateDarkModeAuto(RefPtr<WebDelegate> delegate, std::shared_ptr<OHOS::NWeb::NWebPreference> setting);
     void UpdateForceDarkAccess(const bool& access);
@@ -683,7 +743,7 @@ public:
     void HandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY);
     bool OnKeyEvent(int32_t keyCode, int32_t keyAction);
     void OnMouseEvent(int32_t x, int32_t y, const MouseButton button, const MouseAction action, int count);
-    void OnFocus();
+    void OnFocus(const OHOS::NWeb::FocusReason& reason = OHOS::NWeb::FocusReason::EVENT_REQUEST);
     bool NeedSoftKeyboard();
     void OnBlur();
     void OnPermissionRequestPrompt(const std::shared_ptr<OHOS::NWeb::NWebAccessRequest>& request);
@@ -893,6 +953,16 @@ public:
     void OnAreaChange(const OHOS::Ace::Rect& area);
     void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type);
     NG::WebInfoType GetWebInfoType();
+    void OnInterceptKeyboardAttach(
+        const std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler,
+        const std::map<std::string, std::string> &attributes, bool &useSystemKeyboard, int32_t &enterKeyType);
+
+    void OnCustomKeyboardAttach();
+
+    void OnCustomKeyboardClose();
+
+
+    void OnAdsBlocked(const std::string& url, const std::vector<std::string>& adsBlocked);
 
 private:
     void InitWebEvent();
@@ -1037,6 +1107,8 @@ private:
     EventCallbackV2 onRenderProcessNotRespondingV2_;
     EventCallbackV2 onRenderProcessRespondingV2_;
     EventCallbackV2 onViewportFitChangedV2_;
+    std::function<WebKeyboardOption(const std::shared_ptr<BaseEventInfo>&)> onInterceptKeyboardAttachV2_;
+    EventCallbackV2 onAdsBlockedV2_;
 
     int32_t renderMode_;
     int32_t layoutMode_;
@@ -1058,6 +1130,7 @@ private:
     EGLSurface mEGLSurface = nullptr;
     WindowsSurfaceInfo surfaceInfo_;
     bool forceDarkMode_ = false;
+    WebDarkMode current_dark_mode_ = WebDarkMode::Auto;
     sptr<AppExecFwk::IConfigurationObserver> configChangeObserver_ = nullptr;
     OHOS::NWeb::BlurReason blurReason_ = OHOS::NWeb::BlurReason::FOCUS_SWITCH;
     bool isPopup_ = false;

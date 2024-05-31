@@ -145,6 +145,8 @@ public:
 
     void SetContentNodeGrayScale(float grayscale) override {};
 
+    void SetStatusBarItemColor(uint32_t color) override;
+
 private:
     UIContentErrorCode CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo,
         napi_value storage);
@@ -173,6 +175,7 @@ private:
     std::string compileMode_;
     std::string pageProfile_;
     int32_t compatibleVersion_ = 0;
+    int32_t targetVersion_ = 0;
     bool installationFree_ = false;
     uint32_t labelId_ = 0;
     bool useNewPipeline_ = true;

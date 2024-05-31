@@ -62,7 +62,9 @@ X(SetFontFamiliesOp)
 X(DrawSvgImageOp)
 X(DrawImageOp)
 X(DrawPixelMapOp)
+#ifdef PIXEL_MAP_SUPPORTED
 X(TransferFromImageBitmapOp)
+#endif
 X(StrokeTextOp)
 X(ResetCanvasOp)
 X(ResetTransformOp)

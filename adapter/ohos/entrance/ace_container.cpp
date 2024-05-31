@@ -25,7 +25,6 @@
 #include "ability_context.h"
 #include "ability_info.h"
 #include "auto_fill_manager.h"
-#include "display_info.h"
 #include "js_native_api.h"
 #include "pointer_event.h"
 #include "scene_board_judgement.h"
@@ -79,6 +78,7 @@
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_manager_impl.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/render/adapter/form_render_window.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "core/event/axis_event.h"
@@ -626,9 +626,10 @@ void AceContainer::OnActive(int32_t instanceId)
     if (front && !container->IsSubContainer()) {
         WeakPtr<Frontend> weakFrontend = front;
         taskExecutor->PostTask(
-            [weakFrontend]() {
+            [weakFrontend, instanceId]() {
                 auto frontend = weakFrontend.Upgrade();
                 if (frontend) {
+                    ContainerScope scope(instanceId);
                     frontend->UpdateState(Frontend::State::ON_ACTIVE);
                     frontend->OnActive();
                 }
@@ -643,7 +644,9 @@ void AceContainer::OnActive(int32_t instanceId)
                 LOGE("pipeline context is null, OnActive failed.");
                 return;
             }
+            ContainerScope scope(container->GetInstanceId());
             pipelineContext->WindowFocus(true);
+            pipelineContext->ChangeDarkModeBrightness();
         },
         TaskExecutor::TaskType::UI, "ArkUIWindowFocus");
 }
@@ -660,9 +663,10 @@ void AceContainer::OnInactive(int32_t instanceId)
     if (front && !container->IsSubContainer()) {
         WeakPtr<Frontend> weakFrontend = front;
         taskExecutor->PostTask(
-            [weakFrontend]() {
+            [weakFrontend, instanceId]() {
                 auto frontend = weakFrontend.Upgrade();
                 if (frontend) {
+                    ContainerScope scope(instanceId);
                     frontend->UpdateState(Frontend::State::ON_INACTIVE);
                     frontend->OnInactive();
                 }
@@ -677,7 +681,9 @@ void AceContainer::OnInactive(int32_t instanceId)
                 LOGE("pipeline context is null, OnInactive failed.");
                 return;
             }
+            ContainerScope scope(container->GetInstanceId());
             pipelineContext->WindowFocus(false);
+            pipelineContext->ChangeDarkModeBrightness();
             if (container->IsScenceBoardWindow()) {
                 JankFrameReport::GetInstance().FlushRecord();
             }
@@ -851,7 +857,8 @@ void AceContainer::InitializeCallback()
         ContainerScope scope(id);
         bool result = false;
         context->GetTaskExecutor()->PostSyncTask(
-            [context, event, &result]() {
+            [context, event, &result, id]() {
+                ContainerScope scope(id);
                 result = context->OnKeyEvent(event);
             },
             TaskExecutor::TaskType::UI, "ArkUIAceContainerKeyEvent");
@@ -925,6 +932,20 @@ void AceContainer::InitializeCallback()
         }
     };
     aceView_->RegisterDensityChangeCallback(densityChangeCallback);
+
+    auto&& transformHintChangeCallback = [context = pipelineContext_, id = instanceId_](uint32_t transform) {
+        ContainerScope scope(id);
+        ACE_SCOPED_TRACE("TransformHintChangeCallback(%d)", transform);
+        auto callback = [context, transform]() { context->OnTransformHintChanged(transform); };
+        auto taskExecutor = context->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+            callback();
+        } else {
+            taskExecutor->PostTask(callback, TaskExecutor::TaskType::UI, "ArkUITransformHintChanged");
+        }
+    };
+    aceView_->RegisterTransformHintChangeCallback(transformHintChangeCallback);
 
     auto&& systemBarHeightChangeCallback = [context = pipelineContext_, id = instanceId_](
                                                double statusBar, double navigationBar) {
@@ -1076,6 +1097,13 @@ OHOS::AppExecFwk::Ability* AceContainer::GetAbility(int32_t instanceId)
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
     CHECK_NULL_RETURN(container, nullptr);
     return container->GetAbilityInner().lock().get();
+}
+
+OHOS::AbilityRuntime::Context* AceContainer::GetRuntimeContext(int32_t instanceId)
+{
+    auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
+    CHECK_NULL_RETURN(container, nullptr);
+    return container->GetRuntimeContextInner().lock().get();
 }
 
 UIContentErrorCode AceContainer::RunPage(
@@ -1243,6 +1271,36 @@ bool AceContainer::ChangeType(AbilityBase::ViewData& viewData)
     return viewDataWrapOhos->GetPlaceHolderValue(viewData);
 }
 
+void AceContainer::FillAutoFillViewData(const RefPtr<NG::FrameNode> &node, RefPtr<ViewDataWrap> &viewDataWrap)
+{
+    CHECK_NULL_VOID(node);
+    CHECK_NULL_VOID(viewDataWrap);
+    auto nodeInfoWraps = viewDataWrap->GetPageNodeInfoWraps();
+    auto pattern = node->GetPattern<NG::TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto autoFillUserName = pattern->GetAutoFillUserName();
+    auto autoFillNewPassword = pattern->GetAutoFillNewPassword();
+    if (!autoFillUserName.empty()) {
+        for (auto nodeInfoWrap : nodeInfoWraps) {
+            if (nodeInfoWrap && nodeInfoWrap->GetAutoFillType() == AceAutoFillType::ACE_USER_NAME) {
+                nodeInfoWrap->SetValue(autoFillUserName);
+                viewDataWrap->SetUserSelected(true);
+                pattern->SetAutoFillUserName("");
+                break;
+            }
+        }
+    }
+    if (!autoFillNewPassword.empty()) {
+        for (auto nodeInfoWrap : nodeInfoWraps) {
+            if (nodeInfoWrap && nodeInfoWrap->GetAutoFillType() == AceAutoFillType::ACE_NEW_PASSWORD) {
+                nodeInfoWrap->SetValue(autoFillNewPassword);
+                pattern->SetAutoFillNewPassword("");
+                break;
+            }
+        }
+    }
+}
+
 bool AceContainer::RequestAutoFill(
     const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool& isPopup, bool isNewPassWord)
 {
@@ -1259,7 +1317,7 @@ bool AceContainer::RequestAutoFill(
     CHECK_NULL_RETURN(viewDataWrap, false);
     auto autoFillContainerNode = node->GetFirstAutoFillContainerNode();
     uiContentImpl->DumpViewData(autoFillContainerNode, viewDataWrap, true);
-
+    FillAutoFillViewData(node, viewDataWrap);
     auto callback = std::make_shared<FillRequestCallback>(pipelineContext, node, autoFillType);
     auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
     CHECK_NULL_RETURN(viewDataWrapOhos, false);
@@ -1827,6 +1885,11 @@ std::weak_ptr<OHOS::AppExecFwk::Ability> AceContainer::GetAbilityInner() const
     return aceAbility_;
 }
 
+std::weak_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetRuntimeContextInner() const
+{
+    return runtimeContext_;
+}
+
 bool AceContainer::IsLauncherContainer()
 {
     auto runtime = runtimeContext_.lock();
@@ -2294,6 +2357,7 @@ void AceContainer::NotifyConfigurationChange(
                         // reload transition animation
                         pipeline->FlushReloadTransition();
                     }
+                    pipeline->ChangeDarkModeBrightness();
                 },
                 TaskExecutor::TaskType::UI, "ArkUIFlushReloadTransition");
         },
@@ -2438,9 +2502,6 @@ RefPtr<DisplayInfo> AceContainer::GetDisplayInfo()
     auto displayManager = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     CHECK_NULL_RETURN(displayManager, nullptr);
     auto dmRotation = displayManager->GetRotation();
-    auto displayInfo = displayManager->GetDisplayInfo();
-    CHECK_NULL_RETURN(displayInfo, nullptr);
-    auto deviceRotation = displayInfo->GetDefaultDeviceRotationOffset();
     auto isFoldable = Rosen::DisplayManager::GetInstance().IsFoldable();
     auto dmFoldStatus = Rosen::DisplayManager::GetInstance().GetFoldStatus();
     std::vector<Rect> rects;
@@ -2459,7 +2520,6 @@ RefPtr<DisplayInfo> AceContainer::GetDisplayInfo()
     displayInfo_->SetIsFoldable(isFoldable);
     displayInfo_->SetFoldStatus(static_cast<FoldStatus>(static_cast<uint32_t>(dmFoldStatus)));
     displayInfo_->SetRotation(static_cast<Rotation>(static_cast<uint32_t>(dmRotation)));
-    displayInfo_->SetDeviceRotation(deviceRotation);
     displayInfo_->SetCurrentFoldCreaseRegion(rects);
     return displayInfo_;
 }

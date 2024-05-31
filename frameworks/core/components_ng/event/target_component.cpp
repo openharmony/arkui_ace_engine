@@ -63,4 +63,14 @@ void TargetComponent::SetOnGestureJudgeNativeBegin(GestureJudgeFunc&& onGestureJ
 {
     onGestureJudgeNativeBegin_ = std::move(onGestureJudgeBegin);
 }
+
+void TargetComponent::SetOnGestureRecognizerJudgeBegin(GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc)
+{
+    gestureRecognizerJudgeFunc_ = std::move(gestureRecognizerJudgeFunc);
+}
+
+GestureRecognizerJudgeFunc TargetComponent::GetOnGestureRecognizerJudgeBegin() const
+{
+    return gestureRecognizerJudgeFunc_;
+}
 } // namespace OHOS::Ace::NG

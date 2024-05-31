@@ -154,13 +154,43 @@ ImageSourceInfo::ImageSourceInfo(std::string imageSrc, std::string bundleName, s
     }
 }
 
+ImageSourceInfo::ImageSourceInfo(const std::shared_ptr<std::string>& imageSrc, std::string bundleName,
+    std::string moduleName, Dimension width, Dimension height, InternalResource::ResourceId resourceId,
+    const RefPtr<PixelMap>& pixmap)
+    : srcRef_(imageSrc), bundleName_(std::move(bundleName)), moduleName_(std::move(moduleName)), sourceWidth_(width),
+      sourceHeight_(height), resourceId_(resourceId), pixmap_(pixmap), isSvg_(IsSVGSource(*srcRef_, resourceId_)),
+      isPng_(IsPngSource(*srcRef_, resourceId_)), srcType_(ResolveSrcType())
+{
+    // count how many source set.
+    int32_t count = 0;
+    if (srcRef_ && !(*srcRef_).empty()) {
+        ++count;
+    }
+    if (resourceId_ != InternalResource::ResourceId::NO_ID) {
+        ++count;
+    }
+    if (pixmap != nullptr) {
+        ++count;
+    }
+    if (count > 1) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "ImageSourceInfo: multi image source set, only one will be load.");
+    }
+    GenerateCacheKey();
+
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    if (pipelineContext) {
+        localColorMode_ = pipelineContext->GetLocalColorMode();
+    }
+}
+
 SrcType ImageSourceInfo::ResolveSrcType() const
 {
     if (pixmap_) {
         return SrcType::PIXMAP;
     }
-    if (!src_.empty()) {
-        return ResolveURIType(src_);
+    auto& src = GetSrc();
+    if (!src.empty()) {
+        return ResolveURIType(src);
     }
     if (resourceId_ != InternalResource::ResourceId::NO_ID) {
         return SrcType::RESOURCE_ID;
@@ -174,6 +204,9 @@ void ImageSourceInfo::GenerateCacheKey()
     auto name = ToString() + AceApplicationInfo::GetInstance().GetAbilityName() + bundleName_ + moduleName_;
     cacheKey_ =
         std::to_string(std::hash<std::string> {}(name)) + std::to_string(static_cast<int32_t>(resourceId_)) + colorMode;
+    if (srcType_ == SrcType::BASE64) {
+        cacheKey_ += "SrcType:BASE64";
+    }
 }
 
 const std::string ImageSourceInfo::GetColorModeToString()
@@ -203,7 +236,7 @@ bool ImageSourceInfo::operator==(const ImageSourceInfo& info) const
         return false;
     }
     return ((!pixmap_ && !info.pixmap_) || (pixmap_ && info.pixmap_ && pixmap_ == info.pixmap_)) &&
-           src_ == info.src_ && resourceId_ == info.resourceId_;
+           GetSrc() == info.GetSrc() && resourceId_ == info.resourceId_;
 }
 
 bool ImageSourceInfo::operator!=(const ImageSourceInfo& info) const
@@ -213,10 +246,10 @@ bool ImageSourceInfo::operator!=(const ImageSourceInfo& info) const
 
 void ImageSourceInfo::SetSrc(const std::string& src, std::optional<Color> fillColor)
 {
-    src_ = src;
-    srcType_ = ResolveURIType(src_);
+    srcRef_.reset(new std::string(src));
+    srcType_ = ResolveURIType(src);
     resourceId_ = InternalResource::ResourceId::NO_ID;
-    isSvg_ = IsSVGSource(src_, resourceId_);
+    isSvg_ = IsSVGSource(src, resourceId_);
     fillColor_ = fillColor;
     pixmap_ = nullptr;
     GenerateCacheKey();
@@ -224,6 +257,9 @@ void ImageSourceInfo::SetSrc(const std::string& src, std::optional<Color> fillCo
 
 const std::string& ImageSourceInfo::GetSrc() const
 {
+    if (srcRef_) {
+        return *srcRef_;
+    }
     return src_;
 }
 
@@ -248,6 +284,7 @@ void ImageSourceInfo::SetPixMap(const RefPtr<PixelMap>& pixmap, std::optional<Co
     resourceId_ = InternalResource::ResourceId::NO_ID;
     srcType_ = SrcType::PIXMAP;
     src_.clear();
+    srcRef_.reset();
     isSvg_ = IsSVGSource(src_, resourceId_);
     fillColor_ = fillColor;
     pixmap_ = pixmap;
@@ -265,13 +302,14 @@ void ImageSourceInfo::SetModuleName(const std::string& moduleName)
 
 bool ImageSourceInfo::IsInternalResource() const
 {
-    return src_.empty() && resourceId_ != InternalResource::ResourceId::NO_ID && !pixmap_;
+    return GetSrc().empty() && resourceId_ != InternalResource::ResourceId::NO_ID && !pixmap_;
 }
 
 bool ImageSourceInfo::IsValid() const
 {
-    return (src_.empty() && resourceId_ != InternalResource::ResourceId::NO_ID) ||
-           (!src_.empty() && resourceId_ == InternalResource::ResourceId::NO_ID) || pixmap_;
+    auto& src = GetSrc();
+    return (src.empty() && resourceId_ != InternalResource::ResourceId::NO_ID) ||
+           (!src.empty() && resourceId_ == InternalResource::ResourceId::NO_ID) || pixmap_;
 }
 
 bool ImageSourceInfo::IsPng() const
@@ -306,8 +344,9 @@ SrcType ImageSourceInfo::GetSrcType() const
 
 std::string ImageSourceInfo::ToString() const
 {
-    if (!src_.empty()) {
-        return src_;
+    auto& src = GetSrc();
+    if (!src.empty()) {
+        return src;
     }
     if (resourceId_ != InternalResource::ResourceId::NO_ID) {
         return std::string("internal resource id: ") + std::to_string(static_cast<int32_t>(resourceId_));
@@ -342,6 +381,7 @@ Size ImageSourceInfo::GetSourceSize() const
 
 void ImageSourceInfo::Reset()
 {
+    srcRef_.reset();
     src_.clear();
     sourceWidth_ = Dimension(-1);
     sourceHeight_ = Dimension(-1);
@@ -370,7 +410,7 @@ bool ImageSourceInfo::SupportObjCache() const
     if (!needCache_) {
         return false;
     }
-    return !src_.empty() || resourceId_ != InternalResource::ResourceId::NO_ID;
+    return !GetSrc().empty() || resourceId_ != InternalResource::ResourceId::NO_ID;
 }
 
 std::string ImageSourceInfo::GetKey() const

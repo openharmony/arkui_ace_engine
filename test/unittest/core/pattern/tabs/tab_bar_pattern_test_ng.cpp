@@ -919,4 +919,412 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateImageColor005, TestSize.Level1)
     tabBarPattern_->SetMaskAnimationByCreate(false);
     EXPECT_EQ(tabBarPattern_->IsMaskAnimationByCreate(), false);
 }
+
+/**
+ * @tc.name: TabBarPatternUpdateTextColorAndFontWeight015
+ * @tc.desc: test UpdateTextColorAndFontWeight and UpdateImageColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight015, TestSize.Level1)
+{
+    Create([](TabsModelNG model) {
+        TabsItemDivider divider;
+        model.SetDivider(divider);
+        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
+    });
+    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    ASSERT_TRUE(pr.second);
+    /**
+     * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
+     * @tc.expected: Related functions run ok.
+     */
+    int32_t index = 0;
+    tabBarPattern_->UpdateTextColorAndFontWeight(index);
+    tabBarPattern_->UpdateImageColor(index);
+
+    IconStyle iconStyle;
+    iconStyle.unselectedColor = Color::WHITE;
+    iconStyle.selectedColor = Color::WHITE;
+    tabBarPattern_->SetIconStyle(iconStyle, 0);
+    LabelStyle labelStyle;
+    labelStyle.unselectedColor = Color::WHITE;
+    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    index = 0;
+    tabBarPattern_->UpdateTextColorAndFontWeight(index);
+    tabBarPattern_->UpdateImageColor(index);
+}
+
+/**
+ * @tc.name: TabBarPatternUpdateTextColorAndFontWeight016
+ * @tc.desc: test UpdateTextColorAndFontWeight and UpdateImageColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight016, TestSize.Level1)
+{
+    Create([](TabsModelNG model) {
+        TabsItemDivider divider;
+        model.SetDivider(divider);
+        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
+    });
+    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    ASSERT_TRUE(pr.second);
+    /**
+     * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
+     * @tc.expected: Related functions run ok.
+     */
+    int32_t index = 0;
+    tabBarPattern_->UpdateTextColorAndFontWeight(index);
+    tabBarPattern_->UpdateImageColor(index);
+
+    IconStyle iconStyle;
+    iconStyle.unselectedColor = Color::WHITE;
+    tabBarPattern_->SetIconStyle(iconStyle, 0);
+    LabelStyle labelStyle;
+    labelStyle.unselectedColor = Color::WHITE;
+    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    index = 0;
+    tabBarPattern_->UpdateTextColorAndFontWeight(index);
+    tabBarPattern_->UpdateImageColor(index);
+}
+
+/**
+ * @tc.name: TabBarPatternUpdateTextColorAndFontWeight017
+ * @tc.desc: test UpdateTextColorAndFontWeight and UpdateImageColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight017, TestSize.Level1)
+{
+    Create([](TabsModelNG model) {
+        TabsItemDivider divider;
+        model.SetDivider(divider);
+        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
+    });
+    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    ASSERT_TRUE(pr.second);
+    /**
+     * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
+     * @tc.expected: Related functions run ok.
+     */
+    int32_t index = 0;
+    tabBarPattern_->UpdateTextColorAndFontWeight(index);
+    tabBarPattern_->UpdateImageColor(index);
+
+    IconStyle iconStyle;
+    iconStyle.selectedColor = Color::WHITE;
+    tabBarPattern_->SetIconStyle(iconStyle, 0);
+    LabelStyle labelStyle;
+    labelStyle.unselectedColor = Color::WHITE;
+    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    index = 0;
+    tabBarPattern_->UpdateTextColorAndFontWeight(index);
+    tabBarPattern_->UpdateImageColor(index);
+}
+
+/**
+ * @tc.name: TabBarPatternUpdateTextColorAndFontWeight018
+ * @tc.desc: test UpdateTextColorAndFontWeight and UpdateImageColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight018, TestSize.Level1)
+{
+    Create([](TabsModelNG model) {
+        TabsItemDivider divider;
+        model.SetDivider(divider);
+        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
+    });
+    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    ASSERT_TRUE(pr.second);
+    /**
+     * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
+     * @tc.expected: Related functions run ok.
+     */
+    int32_t index = 0;
+    tabBarPattern_->UpdateTextColorAndFontWeight(index);
+    tabBarPattern_->UpdateImageColor(index);
+
+    IconStyle iconStyle;
+    tabBarPattern_->SetIconStyle(iconStyle, 0);
+    LabelStyle labelStyle;
+    labelStyle.unselectedColor = Color::WHITE;
+    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    index = 0;
+    tabBarPattern_->UpdateTextColorAndFontWeight(index);
+    tabBarPattern_->UpdateImageColor(index);
+}
+
+/**
+ * @tc.name: TabBarPatternUpdateTextColorAndFontWeight019
+ * @tc.desc: test UpdateTextColorAndFontWeight and UpdateImageColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight019, TestSize.Level1)
+{
+    Create([](TabsModelNG model) {
+        TabsItemDivider divider;
+        model.SetDivider(divider);
+        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
+    });
+    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    ASSERT_TRUE(pr.second);
+    /**
+     * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
+     * @tc.expected: Related functions run ok.
+     */
+    int32_t index = 0;
+    tabBarPattern_->UpdateTextColorAndFontWeight(index);
+    tabBarPattern_->UpdateImageColor(index);
+
+    IconStyle iconStyle;
+    iconStyle.unselectedColor = Color::WHITE;
+    iconStyle.selectedColor = Color::WHITE;
+    tabBarPattern_->SetIconStyle(iconStyle, 0);
+    LabelStyle labelStyle;
+    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    index = 0;
+    tabBarPattern_->UpdateTextColorAndFontWeight(index);
+    tabBarPattern_->UpdateImageColor(index);
+}
+
+/**
+ * @tc.name: TabBarPatternUpdateTextColorAndFontWeight020
+ * @tc.desc: test UpdateTextColorAndFontWeight and UpdateImageColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight020, TestSize.Level1)
+{
+    Create([](TabsModelNG model) {
+        TabsItemDivider divider;
+        model.SetDivider(divider);
+        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
+    });
+    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    ASSERT_TRUE(pr.second);
+    /**
+     * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
+     * @tc.expected: Related functions run ok.
+     */
+    int32_t index = 0;
+    tabBarPattern_->UpdateTextColorAndFontWeight(index);
+    tabBarPattern_->UpdateImageColor(index);
+
+    IconStyle iconStyle;
+    iconStyle.unselectedColor = Color::WHITE;
+    tabBarPattern_->SetIconStyle(iconStyle, 0);
+    LabelStyle labelStyle;
+    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    index = 0;
+    tabBarPattern_->UpdateTextColorAndFontWeight(index);
+    tabBarPattern_->UpdateImageColor(index);
+}
+
+/**
+ * @tc.name: TabBarPatternUpdateTextColorAndFontWeight021
+ * @tc.desc: test UpdateTextColorAndFontWeight and UpdateImageColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight021, TestSize.Level1)
+{
+    Create([](TabsModelNG model) {
+        TabsItemDivider divider;
+        model.SetDivider(divider);
+        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
+    });
+    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    ASSERT_TRUE(pr.second);
+    /**
+     * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
+     * @tc.expected: Related functions run ok.
+     */
+    int32_t index = 0;
+    tabBarPattern_->UpdateTextColorAndFontWeight(index);
+    tabBarPattern_->UpdateImageColor(index);
+
+    IconStyle iconStyle;
+    iconStyle.selectedColor = Color::WHITE;
+    tabBarPattern_->SetIconStyle(iconStyle, 0);
+    LabelStyle labelStyle;
+    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    index = 0;
+    tabBarPattern_->UpdateTextColorAndFontWeight(index);
+    tabBarPattern_->UpdateImageColor(index);
+}
+
+/**
+ * @tc.name: TabBarPatternUpdateTextColorAndFontWeight022
+ * @tc.desc: test UpdateTextColorAndFontWeight and UpdateImageColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight022, TestSize.Level1)
+{
+    Create([](TabsModelNG model) {
+        TabsItemDivider divider;
+        model.SetDivider(divider);
+        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
+    });
+    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    ASSERT_TRUE(pr.second);
+    /**
+     * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
+     * @tc.expected: Related functions run ok.
+     */
+    int32_t index = 0;
+    tabBarPattern_->UpdateTextColorAndFontWeight(index);
+    tabBarPattern_->UpdateImageColor(index);
+
+    IconStyle iconStyle;
+    tabBarPattern_->SetIconStyle(iconStyle, 0);
+    LabelStyle labelStyle;
+    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    index = 0;
+    tabBarPattern_->UpdateTextColorAndFontWeight(index);
+    tabBarPattern_->UpdateImageColor(index);
+}
+
+/**
+ * @tc.name: TabBarPatternPlayMaskAnimation002
+ * @tc.desc: test PlayMaskAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, TabBarPatternPlayMaskAnimation002, TestSize.Level1)
+{
+    CreateWithItem([](TabsModelNG model) {});
+
+    /**
+     * @tc.steps: step2. Test function PlayMaskAnimation.
+     * @tc.expected: Related function runs ok.
+     */
+    float selectedImageSize = 0.1f;
+    OffsetF originalSelectedMaskOffset(0.1f, 0.2f);
+    int32_t selectedIndex = 1;
+    float unselectedImageSize = 0.2f;
+    OffsetF originalUnselectedMaskOffset(0.1f, 0.2f);
+    int32_t unselectedIndex = 1;
+    IconStyle iconStyle;
+    iconStyle.unselectedColor = Color::WHITE;
+    iconStyle.selectedColor = Color::WHITE;
+    tabBarPattern_->SetIconStyle(iconStyle, 0);
+
+    auto maskNode1 = AceType::DynamicCast<FrameNode>(
+        tabBarNode_->GetChildAtIndex(tabBarNode_->GetChildren().size() - TEST_SELECTED_MASK_COUNT));
+    auto imageNode1 = AceType::DynamicCast<FrameNode>(maskNode1->GetChildren().front());
+
+    auto maskNode2 = AceType::DynamicCast<FrameNode>(
+        tabBarNode_->GetChildAtIndex(tabBarNode_->GetChildren().size() - TEST_SELECTED_MASK_COUNT + 1));
+    auto imageNode2 = AceType::DynamicCast<FrameNode>(maskNode2->GetChildren().front());
+
+    tabBarPattern_->PlayMaskAnimation(selectedImageSize, originalSelectedMaskOffset, selectedIndex, unselectedImageSize,
+        originalUnselectedMaskOffset, unselectedIndex);
+}
+
+/**
+ * @tc.name: TabBarPatternPlayMaskAnimation003
+ * @tc.desc: test PlayMaskAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, TabBarPatternPlayMaskAnimation003, TestSize.Level1)
+{
+    CreateWithItem([](TabsModelNG model) {});
+
+    /**
+     * @tc.steps: step2. Test function PlayMaskAnimation.
+     * @tc.expected: Related function runs ok.
+     */
+    float selectedImageSize = 0.1f;
+    OffsetF originalSelectedMaskOffset(0.1f, 0.2f);
+    int32_t selectedIndex = 1;
+    float unselectedImageSize = 0.2f;
+    OffsetF originalUnselectedMaskOffset(0.1f, 0.2f);
+    int32_t unselectedIndex = 1;
+    IconStyle iconStyle;
+    iconStyle.unselectedColor = Color::WHITE;
+    tabBarPattern_->SetIconStyle(iconStyle, 0);
+
+    auto maskNode1 = AceType::DynamicCast<FrameNode>(
+        tabBarNode_->GetChildAtIndex(tabBarNode_->GetChildren().size() - TEST_SELECTED_MASK_COUNT));
+    auto imageNode1 = AceType::DynamicCast<FrameNode>(maskNode1->GetChildren().front());
+
+    auto maskNode2 = AceType::DynamicCast<FrameNode>(
+        tabBarNode_->GetChildAtIndex(tabBarNode_->GetChildren().size() - TEST_SELECTED_MASK_COUNT + 1));
+    auto imageNode2 = AceType::DynamicCast<FrameNode>(maskNode2->GetChildren().front());
+
+    tabBarPattern_->PlayMaskAnimation(selectedImageSize, originalSelectedMaskOffset, selectedIndex, unselectedImageSize,
+        originalUnselectedMaskOffset, unselectedIndex);
+}
+
+/**
+ * @tc.name: TabBarPatternPlayMaskAnimation004
+ * @tc.desc: test PlayMaskAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, TabBarPatternPlayMaskAnimation004, TestSize.Level1)
+{
+    CreateWithItem([](TabsModelNG model) {});
+
+    /**
+     * @tc.steps: step2. Test function PlayMaskAnimation.
+     * @tc.expected: Related function runs ok.
+     */
+    float selectedImageSize = 0.1f;
+    OffsetF originalSelectedMaskOffset(0.1f, 0.2f);
+    int32_t selectedIndex = 1;
+    float unselectedImageSize = 0.2f;
+    OffsetF originalUnselectedMaskOffset(0.1f, 0.2f);
+    int32_t unselectedIndex = 1;
+    IconStyle iconStyle;
+    iconStyle.selectedColor = Color::WHITE;
+    tabBarPattern_->SetIconStyle(iconStyle, 0);
+
+    auto maskNode1 = AceType::DynamicCast<FrameNode>(
+        tabBarNode_->GetChildAtIndex(tabBarNode_->GetChildren().size() - TEST_SELECTED_MASK_COUNT));
+    auto imageNode1 = AceType::DynamicCast<FrameNode>(maskNode1->GetChildren().front());
+
+    auto maskNode2 = AceType::DynamicCast<FrameNode>(
+        tabBarNode_->GetChildAtIndex(tabBarNode_->GetChildren().size() - TEST_SELECTED_MASK_COUNT + 1));
+    auto imageNode2 = AceType::DynamicCast<FrameNode>(maskNode2->GetChildren().front());
+
+    tabBarPattern_->PlayMaskAnimation(selectedImageSize, originalSelectedMaskOffset, selectedIndex, unselectedImageSize,
+        originalUnselectedMaskOffset, unselectedIndex);
+}
+
+/**
+ * @tc.name: TabBarPatternPlayMaskAnimation005
+ * @tc.desc: test PlayMaskAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, TabBarPatternPlayMaskAnimation005, TestSize.Level1)
+{
+    CreateWithItem([](TabsModelNG model) {});
+
+    /**
+     * @tc.steps: step2. Test function PlayMaskAnimation.
+     * @tc.expected: Related function runs ok.
+     */
+    float selectedImageSize = 0.1f;
+    OffsetF originalSelectedMaskOffset(0.1f, 0.2f);
+    int32_t selectedIndex = 1;
+    float unselectedImageSize = 0.2f;
+    OffsetF originalUnselectedMaskOffset(0.1f, 0.2f);
+    int32_t unselectedIndex = 1;
+    IconStyle iconStyle;
+    tabBarPattern_->SetIconStyle(iconStyle, 0);
+
+    auto maskNode1 = AceType::DynamicCast<FrameNode>(
+        tabBarNode_->GetChildAtIndex(tabBarNode_->GetChildren().size() - TEST_SELECTED_MASK_COUNT));
+    auto imageNode1 = AceType::DynamicCast<FrameNode>(maskNode1->GetChildren().front());
+
+    auto maskNode2 = AceType::DynamicCast<FrameNode>(
+        tabBarNode_->GetChildAtIndex(tabBarNode_->GetChildren().size() - TEST_SELECTED_MASK_COUNT + 1));
+    auto imageNode2 = AceType::DynamicCast<FrameNode>(maskNode2->GetChildren().front());
+
+    tabBarPattern_->PlayMaskAnimation(selectedImageSize, originalSelectedMaskOffset, selectedIndex, unselectedImageSize,
+        originalUnselectedMaskOffset, unselectedIndex);
+}
 } // namespace OHOS::Ace::NG

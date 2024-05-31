@@ -48,7 +48,7 @@
 #endif
 
 #include "core/common/udmf/udmf_client.h"
-const int64_t MAX_NUMBER_OF_JS = 0x20000000000000;
+static const int64_t MAX_NUMBER_OF_JS = 0x20000000000000;
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -306,7 +306,7 @@ void FormPattern::OnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
         auto formPattern = weak.Upgrade();
         CHECK_NULL_VOID(formPattern);
         formPattern->HandleOnSnapshot(pixelMap);
-    }, "ArkUIFormHandleOnSnapshot");
+        }, "ArkUIFormHandleOnSnapshot");
 }
 
 void FormPattern::HandleOnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
@@ -317,6 +317,36 @@ void FormPattern::HandleOnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
     UpdateStaticCard();
     isSnapshot_ = true;
     needSnapshotAgain_ = false;
+}
+
+void FormPattern::OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId)
+{
+    TAG_LOGD(AceLogTag::ACE_FORM, "call, treeId: %{public}d, id: %{public}" PRId64, treeId, accessibilityId);
+    if (formManagerBridge_ == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "formManagerBridge_ is null");
+        return;
+    }
+    formManagerBridge_->OnAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
+}
+
+void FormPattern::OnAccessibilityChildTreeDeregister()
+{
+    TAG_LOGD(AceLogTag::ACE_FORM, "call.");
+    if (formManagerBridge_ == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "formManagerBridge_ is null");
+        return;
+    }
+    formManagerBridge_->OnAccessibilityChildTreeDeregister();
+}
+
+void FormPattern::OnAccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    TAG_LOGD(AceLogTag::ACE_FORM, "call.");
+    if (formManagerBridge_ == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "formManagerBridge_ is null");
+        return;
+    }
+    formManagerBridge_->OnAccessibilityDumpChildInfo(params, info);
 }
 
 void FormPattern::UpdateStaticCard()
@@ -894,7 +924,7 @@ void FormPattern::InitFormManagerDelegate()
             CHECK_NULL_VOID(container);
             container->SetWindowConfig({ formJsInfo.formWindow.designWidth, formJsInfo.formWindow.autoDesignWidth });
             container->RunCard(id, path, module, data, imageDataMap, formJsInfo.formSrc, frontendType, uiSyntax);
-        }, "ArkUIFormRunCard");
+            }, "ArkUIFormRunCard");
     });
 
     formManagerBridge_->AddFormUpdateCallback(
@@ -914,7 +944,7 @@ void FormPattern::InitFormManagerDelegate()
                 if (form->ISAllowUpdate()) {
                     form->GetSubContainer()->UpdateCard(data, imageDataMap);
                 }
-            }, "ArkUIFormUpdateCard");
+                }, "ArkUIFormUpdateCard");
         });
 
     formManagerBridge_->AddFormErrorCallback(
@@ -931,7 +961,7 @@ void FormPattern::InitFormManagerDelegate()
                 auto form = weak.Upgrade();
                 CHECK_NULL_VOID(form);
                 form->FireOnErrorEvent(code, msg);
-            }, "ArkUIFormFireErrorEvent");
+                }, "ArkUIFormFireErrorEvent");
         });
 
     formManagerBridge_->AddFormUninstallCallback([weak = WeakClaim(this), instanceID](int64_t formId) {
@@ -947,7 +977,7 @@ void FormPattern::InitFormManagerDelegate()
             auto form = weak.Upgrade();
             CHECK_NULL_VOID(form);
             form->FireOnUninstallEvent(formId);
-        }, "ArkUIFormFireUninstallEvent");
+            }, "ArkUIFormFireUninstallEvent");
     });
 
     formManagerBridge_->AddFormSurfaceNodeCallback(
@@ -965,7 +995,7 @@ void FormPattern::InitFormManagerDelegate()
                 auto form = weak.Upgrade();
                 CHECK_NULL_VOID(form);
                 form->FireFormSurfaceNodeCallback(node, isDynamic, isRecover);
-            }, "ArkUIFormFireSurfaceNodeCallback");
+                }, "ArkUIFormFireSurfaceNodeCallback");
         });
 
     formManagerBridge_->AddFormSurfaceChangeCallback([weak = WeakClaim(this), instanceID](float width, float height,
@@ -982,7 +1012,7 @@ void FormPattern::InitFormManagerDelegate()
             auto form = weak.Upgrade();
             CHECK_NULL_VOID(form);
             form->FireFormSurfaceChangeCallback(width, height, borderWidth);
-        }, "ArkUIFormFireSurfaceChange");
+            }, "ArkUIFormFireSurfaceChange");
     });
 
     formManagerBridge_->AddFormSurfaceDetachCallback([weak = WeakClaim(this), instanceID]() {
@@ -1013,7 +1043,7 @@ void FormPattern::InitFormManagerDelegate()
             auto formPattern = weak.Upgrade();
             CHECK_NULL_VOID(formPattern);
             formPattern->HandleUnTrustForm();
-        }, "ArkUIFormHandleUnTrust");
+            }, "ArkUIFormHandleUnTrust");
     });
 
     formManagerBridge_->AddSnapshotCallback([weak = WeakClaim(this), instanceID](const uint32_t& delayTime) {
@@ -1030,6 +1060,25 @@ void FormPattern::InitFormManagerDelegate()
             CHECK_NULL_VOID(formPattern);
             formPattern->SetFormLinkInfos(infos);
         });
+
+    formManagerBridge_->AddGetRectRelativeToWindowCallback(
+        [weak = WeakClaim(this), instanceID](int32_t &top, int32_t &left) {
+            ContainerScope scope(instanceID);
+            auto formPattern = weak.Upgrade();
+            CHECK_NULL_VOID(formPattern);
+            formPattern->GetRectRelativeToWindow(top, left);
+        });
+}
+
+void FormPattern::GetRectRelativeToWindow(int32_t &top, int32_t &left)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto rect = host->GetTransformRectRelativeToWindow();
+    top = rect.Top();
+    left = rect.Left();
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "elementId: %{public}" PRId64 ", top: %{public}d, left: %{public}d",
+        host->GetAccessibilityId(), top, left);
 }
 
 void FormPattern::ProcDeleteImageNode(bool isRecover)
@@ -1098,6 +1147,10 @@ void FormPattern::FireFormSurfaceNodeCallback(
     parent->RebuildRenderContextTree();
     renderContext->RequestNextFrame();
     OnLoadEvent();
+
+    auto formNode = DynamicCast<FormNode>(host);
+    CHECK_NULL_VOID(formNode);
+    formNode->NotifyAccessibilityChildTreeRegister();
 }
 
 void FormPattern::DelayDeleteImageNode()
@@ -1180,7 +1233,7 @@ void FormPattern::CreateCardContainer()
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->FireOnAcquiredEvent(id);
-        }, "ArkUIFormFireAcquiredEvent");
+            }, "ArkUIFormFireAcquiredEvent");
     });
 
     subContainer_->SetFormLoadCallback([weak = WeakClaim(this)]() {
@@ -1315,7 +1368,7 @@ void FormPattern::OnLoadEvent()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->FireOnLoadEvent();
-    }, "ArkUIFormFireLoadEvent");
+        }, "ArkUIFormFireLoadEvent");
 }
 
 void FormPattern::OnActionEvent(const std::string& action)
@@ -1350,7 +1403,7 @@ void FormPattern::OnActionEvent(const std::string& action)
                 auto eventAction = JsonUtil::ParseJsonString(action);
                 TAG_LOGI(AceLogTag::ACE_FORM, "UI task execute begin.");
                 pattern->FireOnRouterEvent(eventAction);
-            }, "ArkUIFormFireRouterEvent");
+                }, "ArkUIFormFireRouterEvent");
         }
     }
 

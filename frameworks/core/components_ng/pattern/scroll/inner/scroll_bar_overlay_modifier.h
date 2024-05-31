@@ -154,7 +154,7 @@ private:
     OpacityAnimationType opacityAnimatingType_ = OpacityAnimationType::NONE;
     PositionMode positionMode_ = PositionMode::RIGHT;
 
-    bool isScrollable_ = false;
+    bool isScrollable_ = true;
 };
 } // namespace OHOS::Ace::NG
 

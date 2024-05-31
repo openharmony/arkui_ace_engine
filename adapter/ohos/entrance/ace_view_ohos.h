@@ -49,6 +49,7 @@ public:
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
     static void SurfacePositionChanged(AceViewOhos* view, int32_t posX, int32_t posY);
     static void SetViewportMetrics(AceViewOhos* view, const ViewportConfig& config);
+    static void TransformHintChanged(AceViewOhos* view, uint32_t transform);
 
     static void DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr, const std::function<void()>& callback = nullptr,
@@ -108,6 +109,11 @@ public:
     void RegisterDensityChangeCallback(DensityChangeCallback&& callback) override
     {
         densityChangeCallback_ = std::move(callback);
+    }
+
+    void RegisterTransformHintChangeCallback(TransformHintChangeCallback&& callback) override
+    {
+        transformHintChangeCallback_ = std::move(callback);
     }
 
     void RegisterSystemBarHeightChangeCallback(SystemBarHeightChangeCallback&& callback) override
@@ -191,6 +197,17 @@ private:
         }
     }
 
+    void NotifyTransformHintChanged(uint32_t transform)
+    {
+        if (transform_ == transform) {
+            return;
+        }
+        if (transformHintChangeCallback_) {
+            transformHintChangeCallback_(transform);
+        }
+        transform_ = transform;
+    }
+
     void NotifySystemBarHeightChanged(double statusBar, double navigationBar) const
     {
         if (systemBarHeightChangeCallback_) {
@@ -212,6 +229,7 @@ private:
     ViewChangeCallback viewChangeCallback_;
     ViewPositionChangeCallback viewPositionChangeCallback_;
     DensityChangeCallback densityChangeCallback_;
+    TransformHintChangeCallback transformHintChangeCallback_;
     SystemBarHeightChangeCallback systemBarHeightChangeCallback_;
     SurfaceDestroyCallback surfaceDestroyCallback_;
     DragEventCallBack dragEventCallback_;

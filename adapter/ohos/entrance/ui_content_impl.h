@@ -79,6 +79,7 @@ public:
 
     // UI content event process
     bool ProcessBackPressed() override;
+    void UpdateDialogResourceConfiguration(RefPtr<Container>& container);
     bool ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent) override;
     bool ProcessPointerEventWithCallback(
         const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent, const std::function<void()>& callback) override;
@@ -155,6 +156,12 @@ public:
     void OnFormSurfaceChange(float width, float height) override;
 
     void SetFormBackgroundColor(const std::string& color) override;
+
+    void RegisterAccessibilityChildTree(
+        uint32_t parentWindowId, int32_t parentTreeId, int64_t parentElementId) override;
+    void SetAccessibilityGetParentRectHandler(std::function<void(int32_t&, int32_t&)>&& callback) override;
+    void DeregisterAccessibilityChildTree() override;
+    void AccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
 
     void SetFontScaleFollowSystem(const bool fontScaleFollowSystem) override;
 
@@ -305,6 +312,8 @@ public:
     void SetFormRenderingMode(int8_t renderMode) override;
 
     void SetContentNodeGrayScale(float grayscale) override;
+
+    void SetStatusBarItemColor(uint32_t color) override;
 
 private:
     UIContentErrorCode InitializeInner(

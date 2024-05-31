@@ -62,10 +62,18 @@ public:
     void SetToolbarOptions(NavigationToolbarOptions&& opt);
 
 private:
+    void OnModifyDone() override;
+    void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub, const RefPtr<FrameNode>& imageNode,
+        const RefPtr<FrameNode>& textNode, bool isMoreItemNode = false);
+    void HandleLongPressEvent(const RefPtr<FrameNode>& imageNode,
+        const RefPtr<FrameNode>& textNode, bool isMoreItemNode);
+    void HandleLongPressActionEnd();
+
     void SetDefaultBackgroundColorIfNeeded(RefPtr<FrameNode>& host);
     void UpdateBackgroundStyle(RefPtr<FrameNode>& host);
 
     NavigationToolbarOptions options_;
+    RefPtr<FrameNode> dialogNode_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -50,6 +50,89 @@ public:
         hasPreviewTransitionEffect_ = hasPreviewTransitionEffect;
     }
 
+    void SetIsShowHoverImage(bool isShow)
+    {
+        isShowHoverImage_ = isShow;
+    }
+
+    bool GetIsShowHoverImage() const
+    {
+        return isShowHoverImage_;
+    }
+
+    void SetCustomPreviewWidth(float width)
+    {
+        customPreviewWidth_ = width;
+    }
+
+    float GetCustomPreviewWidth() const
+    {
+        return customPreviewWidth_;
+    }
+
+    void SetCustomPreviewHeight(float height)
+    {
+        customPreviewHeight_ = height;
+    }
+
+    float GetCustomPreviewHeight() const
+    {
+        return customPreviewHeight_;
+    }
+
+    void SetCustomPreviewScaleFrom(float scaleFrom)
+    {
+        customPreviewScaleFrom_ = scaleFrom;
+    }
+
+    float GetCustomPreviewScaleFrom() const
+    {
+        return customPreviewScaleFrom_;
+    }
+
+    void SetCustomPreviewScaleTo(float scaleTo)
+    {
+        customPreviewScaleTo_ = scaleTo;
+    }
+
+    float GetCustomPreviewScaleTo() const
+    {
+        return customPreviewScaleTo_;
+    }
+
+    void SetHoverImageDisAppearScaleTo(float scaleTo)
+    {
+        hoverImageDisAppearScale_ = scaleTo;
+    }
+
+    float GetHoverImageDisAppearScaleTo() const
+    {
+        return hoverImageDisAppearScale_;
+    }
+
+    void SetCustomPreviewPositionXDist(float xDist)
+    {
+        previewPositionXDist_ = xDist;
+    }
+
+    float GetCustomPreviewPositionXDist()
+    {
+        return previewPositionXDist_;
+    }
+
+    void SetCustomPreviewPositionYDist(float yDist)
+    {
+        previewPositionYDist_ = yDist;
+    }
+
+    float GetCustomPreviewPositionYDist()
+    {
+        return previewPositionYDist_;
+    }
+
+    void ShowHoverImagePreviewDisAppearAnimation(const RefPtr<RenderContext>& context, float scaleFrom, float scaleTo,
+        int32_t duration = 0);
+
     RefPtr<FrameNode> GetMenuWrapper() const;
 
 private:
@@ -59,6 +142,15 @@ private:
     void HandleDragEnd(float offsetX, float offsetY, float velocity);
     bool isFirstShow_ = false;
     bool hasPreviewTransitionEffect_ = false;
+
+    bool isShowHoverImage_ = false;
+    float customPreviewWidth_ = 0.0f;
+    float customPreviewHeight_ = 0.0f;
+    float customPreviewScaleFrom_ = 1.0f;
+    float customPreviewScaleTo_ = 1.0f;
+    float hoverImageDisAppearScale_ = 1.0f;
+    float previewPositionXDist_ = 0.0f;
+    float previewPositionYDist_ = 0.0f;
     ACE_DISALLOW_COPY_AND_MOVE(MenuPreviewPattern);
 };
 } // namespace OHOS::Ace::NG

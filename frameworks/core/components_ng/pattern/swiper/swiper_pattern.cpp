@@ -43,6 +43,7 @@
 #include "core/components_ng/pattern/swiper/swiper_layout_algorithm.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
+#include "core/components_ng/pattern/swiper/swiper_paint_method.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
 #include "core/components_ng/pattern/swiper/swiper_utils.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_pattern.h"
@@ -179,6 +180,36 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     return swiperLayoutAlgorithm;
 }
 
+std::string SwiperPattern::GetArcDotIndicatorStyle() const
+{
+    auto swiperParameters = GetSwiperArcDotParameters();
+    CHECK_NULL_RETURN(swiperParameters, "");
+    auto jsonValue = JsonUtil::Create(true);
+    auto pipelineContext = GetHost()->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, "");
+    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_RETURN(swiperIndicatorTheme, "");
+
+    static const char* ARC_DIRECTION[] = { "ArcDirection.THREE_CLOCK_DIRECTION", "ArcDirection.SIX_CLOCK_DIRECTION",
+        "ArcDirection.NINE_CLOCK_DIRECTION" };
+    jsonValue->Put("arcDirection", ARC_DIRECTION[static_cast<int32_t>(swiperParameters->arcDirection.value_or(
+        SwiperArcDirection::SIX_CLOCK_DIRECTION))]);
+    jsonValue->Put("itemColor",
+        swiperParameters->itemColor.value_or(swiperIndicatorTheme->GetArcItemColor()).ColorToString().c_str());
+    jsonValue->Put("selectedItemColor",
+        swiperParameters->selectedItemColor.value_or(swiperIndicatorTheme->GetArcSelectedItemColor())
+            .ColorToString()
+            .c_str());
+    jsonValue->Put("containerColor",
+        swiperParameters->containerColor.value_or(swiperIndicatorTheme->GetArcContainerColor())
+            .ColorToString()
+            .c_str());
+    jsonValue->Put("maskColor",
+        GradientToJson(swiperParameters->maskColor.value_or(swiperIndicatorTheme->GetArcMaskColor())).c_str());
+
+    return jsonValue->ToString();
+}
+
 void SwiperPattern::OnIndexChange()
 {
     auto totalCount = RealTotalCount();
@@ -289,7 +320,7 @@ void SwiperPattern::InitCapture()
 
 void SwiperPattern::ResetOnForceMeasure()
 {
-    StopPropertyTranslateAnimation(isFinishAnimation_);
+    StopPropertyTranslateAnimation(isFinishAnimation_, false, true);
     StopTranslateAnimation();
     StopSpringAnimation();
     StopFadeAnimation();
@@ -326,6 +357,15 @@ void SwiperPattern::UpdateTabBarIndicatorCurve()
     swiperController_->SetUpdateCubicCurveCallback(std::move(updateCubicCurveCallback));
 }
 
+bool SwiperPattern::NeedForceMeasure() const
+{
+    auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+
+    return ((layoutProperty->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE) == PROPERTY_UPDATE_MEASURE) ||
+           (isSwipeByGroup_.has_value() && isSwipeByGroup_.value() != IsSwipeByGroup());
+}
+
 void SwiperPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -345,11 +385,12 @@ void SwiperPattern::OnModifyDone()
     InitHoverMouseEvent();
     StopAndResetSpringAnimation();
     OnLoopChange();
-    auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    if ((layoutProperty->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE) == PROPERTY_UPDATE_MEASURE) {
+
+    if (NeedForceMeasure()) {
         ResetOnForceMeasure();
     }
+
+    isSwipeByGroup_ = IsSwipeByGroup();
 
     bool disableSwipe = IsDisableSwipe();
     UpdateSwiperPanEvent(disableSwipe);
@@ -367,6 +408,7 @@ void SwiperPattern::OnModifyDone()
         StartAutoPlay();
     } else {
         translateTask_.Cancel();
+        isInAutoPlay_ = false;
     }
 
     SetAccessibilityAction();
@@ -575,6 +617,7 @@ void SwiperPattern::InitSurfaceChangedCallback()
                 auto currentIndex =
                     swiper->targetIndex_.has_value() ? swiper->targetIndex_.value() : swiper->currentIndex_;
 
+                swiper->needFireCustomAnimationEvent_ = swiper->translateAnimationIsRunning_;
                 swiper->StopPropertyTranslateAnimation(swiper->isFinishAnimation_);
                 swiper->StopTranslateAnimation();
                 swiper->StopSpringAnimation();
@@ -897,6 +940,12 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         if (NeedAutoPlay() && isUserFinish_) {
             PostTranslateTask(delayTime);
         }
+
+        if (SupportSwiperCustomAnimation() && needFireCustomAnimationEvent_) {
+            itemPositionInAnimation_ = itemPosition_;
+            FireSwiperCustomAnimationEvent();
+            itemPositionInAnimation_.clear();
+        }
     } else if (targetIndex_) {
         auto targetIndexValue = IsLoop() ? targetIndex_.value() : GetLoopIndex(targetIndex_.value());
         auto iter = itemPosition_.find(targetIndexValue);
@@ -967,6 +1016,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     crossMatchChild_ = swiperLayoutAlgorithm->IsCrossMatchChild();
     oldIndex_ = currentIndex_;
     oldChildrenSize_ = RealTotalCount();
+    needFireCustomAnimationEvent_ = true;
 
     if (windowSizeChangeReason_ == WindowSizeChangeReason::ROTATION) {
         StartAutoPlay();
@@ -986,7 +1036,7 @@ float SwiperPattern::IgnoreBlankOffset(bool isJump)
             if (targetIndexValue == 0 && prevMarginIgnoreBlank_) {
                 result += GetPrevMargin();
             }
-            if (targetIndexValue == (TotalCount() - GetDisplayCount()) && nextMarginIgnoreBlank_) {
+            if (targetIndexValue >= (TotalCount() - GetDisplayCount()) && nextMarginIgnoreBlank_) {
                 result -= GetNextMargin();
             }
         }
@@ -998,7 +1048,7 @@ float SwiperPattern::IgnoreBlankOffset(bool isJump)
             if (targetIndexValue == 0 && prevMarginIgnoreBlank_) {
                 result += GetPrevMargin();
             }
-            if (targetIndexValue == (TotalCount() - GetDisplayCount()) && nextMarginIgnoreBlank_) {
+            if (targetIndexValue >= (TotalCount() - GetDisplayCount()) && nextMarginIgnoreBlank_) {
                 result -= GetNextMargin();
             }
         }
@@ -1074,14 +1124,16 @@ void SwiperPattern::FireAnimationStartEvent(
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
 }
 
-void SwiperPattern::FireAnimationEndEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const
+void SwiperPattern::FireAnimationEndEvent(
+    int32_t currentIndex, const AnimationCallbackInfo& info, bool isInterrupt) const
 {
     if (currentIndex == -1) {
         return;
     }
     auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
-    swiperEventHub->FireAnimationEndEvent(currentIndex, info);
+    isInterrupt ? swiperEventHub->FireAnimationEndOnForceEvent(currentIndex, info)
+                : swiperEventHub->FireAnimationEndEvent(currentIndex, info);
 }
 
 void SwiperPattern::FireGestureSwipeEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const
@@ -1549,6 +1601,7 @@ void SwiperPattern::ChangeIndex(int32_t index, bool useAnimation)
     if (useAnimation) {
         SwipeTo(targetIndex);
     } else {
+        needFireCustomAnimationEvent_ = translateAnimationIsRunning_;
         SwipeToWithoutAnimation(targetIndex);
     }
 }
@@ -1791,6 +1844,8 @@ void SwiperPattern::InitIndicator()
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::DOT) == SwiperIndicatorType::DOT) {
         SaveDotIndicatorProperty(indicatorNode);
+    } else if (layoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::DOT) == SwiperIndicatorType::ARC_DOT) {
+        SaveCircleDotIndicatorProperty(indicatorNode);
     } else {
         SaveDigitIndicatorProperty(indicatorNode);
     }
@@ -1870,9 +1925,6 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        if (!pattern->CheckSwiperPanEvent(info)) {
-            return;
-        }
         if (pattern) {
             if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
                 if (GreatNotEqual(info.GetMainDelta(), 0.0)) {
@@ -1888,10 +1940,6 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        if (!pattern->CheckSwiperPanEvent(info)) {
-            pattern->HandleDragEnd(0.0);
-            return;
-        }
         if (pattern) {
             TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper drag end. Velocity: %{public}f px/s, SourceTool: %{public}d",
                 info.GetMainVelocity(), info.GetSourceTool());
@@ -2032,6 +2080,7 @@ bool SwiperPattern::OnKeyEvent(const KeyEvent& event)
 void SwiperPattern::StopAutoPlay()
 {
     if (IsAutoPlay()) {
+        isInAutoPlay_ = false;
         translateTask_.Cancel();
     }
 }
@@ -2552,6 +2601,9 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
         PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_SWIPER_SCROLL, false);
     }
     isTouchDown_ = false;
+    if (!CheckSwiperPanEvent(dragVelocity)) {
+        dragVelocity = 0.0;
+    }
     UpdateDragFRCSceneInfo(dragVelocity, SceneStatus::END);
     const auto& addEventCallback = swiperController_->GetAddTabBarEventCallback();
     if (addEventCallback) {
@@ -2574,13 +2626,13 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
         return;
     }
 
+    UpdateAnimationProperty(static_cast<float>(dragVelocity));
     // nested and reached end, need to pass velocity to parent scrollable
     auto parent = GetNestedScrollParent();
     if (!IsLoop() && parent && NearZero(GetDistanceToEdge())) {
         parent->HandleScrollVelocity(dragVelocity);
         StartAutoPlay();
     } else {
-        UpdateAnimationProperty(static_cast<float>(dragVelocity));
         NotifyParentScrollEnd();
     }
     if (pipeline) {
@@ -2848,7 +2900,12 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
 #ifdef OHOS_PLATFORM
-        ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+        if (!swiper->isInAutoPlay_) {
+            ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+        } else {
+            ResSchedReport::GetInstance().ResSchedDataReport("auto_play_off");
+        }
+        
 #endif
         if (!swiper->hasTabsAncestor_) {
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_SWIPER_FLING, true);
@@ -2881,7 +2938,12 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
         auto swiperPattern = swiper.Upgrade();
         CHECK_NULL_VOID(swiperPattern);
 #ifdef OHOS_PLATFORM
-        ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+        if (!swiperPattern->isInAutoPlay_) {
+            ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+        } else {
+            ResSchedReport::GetInstance().ResSchedDataReport("auto_play_on");
+        }
+        
 #endif
         if (!swiperPattern->hasTabsAncestor_) {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_SWIPER_FLING, PerfActionType::FIRST_MOVE, "");
@@ -2969,7 +3031,8 @@ void SwiperPattern::OnPropertyTranslateAnimationFinish(const OffsetF& offset)
     OnTranslateFinish(propertyAnimationIndex_, false, isFinishAnimation_);
 }
 
-void SwiperPattern::StopPropertyTranslateAnimation(bool isFinishAnimation, bool isBeforeCreateLayoutWrapper)
+void SwiperPattern::StopPropertyTranslateAnimation(
+    bool isFinishAnimation, bool isBeforeCreateLayoutWrapper, bool isInterrupt)
 {
     if (!usePropertyAnimation_) {
         return;
@@ -3015,7 +3078,7 @@ void SwiperPattern::StopPropertyTranslateAnimation(bool isFinishAnimation, bool 
     if (!isBeforeCreateLayoutWrapper) {
         UpdateOffsetAfterPropertyAnimation(currentOffset.GetMainOffset(GetDirection()));
     }
-    OnTranslateFinish(propertyAnimationIndex_, false, isFinishAnimation, true);
+    OnTranslateFinish(propertyAnimationIndex_, false, isFinishAnimation, true, isInterrupt);
 }
 
 RefPtr<Curve> SwiperPattern::GetCurveIncludeMotion()
@@ -3413,6 +3476,29 @@ bool SwiperPattern::IsOutOfEnd(float mainOffset) const
     return itemPosition_.rbegin()->first == TotalCount() - 1 && LessNotEqual(endPos, visibleWindowSize);
 }
 
+bool SwiperPattern::IsAtStart() const
+{
+    if (IsLoop() || itemPosition_.empty()) {
+        return false;
+    }
+
+    auto startPos = itemPosition_.begin()->second.startPos;
+    startPos = NearZero(startPos, PX_EPSILON) ? 0.f : startPos;
+    return itemPosition_.begin()->first == 0 && GreatOrEqual(startPos, 0.f);
+}
+
+bool SwiperPattern::IsAtEnd() const
+{
+    if (IsLoop() || itemPosition_.empty()) {
+        return false;
+    }
+
+    auto visibleWindowSize = CalculateVisibleSize();
+    auto endPos = itemPosition_.rbegin()->second.endPos;
+    endPos = NearEqual(endPos, visibleWindowSize, PX_EPSILON) ? visibleWindowSize : endPos;
+    return itemPosition_.rbegin()->first == TotalCount() - 1 && LessOrEqual(endPos, visibleWindowSize);
+}
+
 bool SwiperPattern::AutoLinearIsOutOfBoundary(float mainOffset) const
 {
     if (itemPosition_.empty() || static_cast<int32_t>(itemPosition_.size()) < TotalCount()) {
@@ -3688,6 +3774,23 @@ std::shared_ptr<SwiperParameters> SwiperPattern::GetSwiperParameters() const
     return swiperParameters_;
 }
 
+std::shared_ptr<SwiperArcDotParameters> SwiperPattern::GetSwiperArcDotParameters() const
+{
+    if (swiperArcDotParameters_ == nullptr) {
+        swiperArcDotParameters_ = std::make_shared<SwiperArcDotParameters>();
+        auto pipelineContext = GetHost()->GetContext();
+        CHECK_NULL_RETURN(pipelineContext, swiperArcDotParameters_);
+        auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+        
+        swiperArcDotParameters_->arcDirection = SwiperArcDirection::SIX_CLOCK_DIRECTION;
+        swiperArcDotParameters_->itemColor = swiperIndicatorTheme->GetArcItemColor();
+        swiperArcDotParameters_->selectedItemColor = swiperIndicatorTheme->GetArcSelectedItemColor();
+        swiperArcDotParameters_->containerColor = swiperIndicatorTheme->GetArcContainerColor();
+        swiperArcDotParameters_->maskColor = swiperIndicatorTheme->GetArcMaskColor();
+    }
+    return swiperArcDotParameters_;
+}
+
 std::shared_ptr<SwiperDigitalParameters> SwiperPattern::GetSwiperDigitalParameters() const
 {
     if (swiperDigitalParameters_ == nullptr) {
@@ -3869,6 +3972,34 @@ void SwiperPattern::UpdatePaintProperty(const RefPtr<FrameNode>& indicatorNode)
     indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
+void SwiperPattern::SaveCircleDotIndicatorProperty(const RefPtr<FrameNode>& indicatorNode)
+{
+    CHECK_NULL_VOID(indicatorNode);
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    CHECK_NULL_VOID(indicatorPattern);
+    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto paintProperty = indicatorNode->GetPaintProperty<CircleDotIndicatorPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto pipelineContext = GetHost()->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(swiperIndicatorTheme);
+    auto swiperParameters = GetSwiperArcDotParameters();
+    CHECK_NULL_VOID(swiperParameters);
+    layoutProperty->ResetIndicatorLayoutStyle();
+    paintProperty->UpdateArcDirection(swiperParameters->arcDirection.value_or(SwiperArcDirection::SIX_CLOCK_DIRECTION));
+    paintProperty->UpdateColor(swiperParameters->itemColor.value_or(swiperIndicatorTheme->GetArcItemColor()));
+    paintProperty->UpdateSelectedColor(
+        swiperParameters->selectedItemColor.value_or(swiperIndicatorTheme->GetArcSelectedItemColor()));
+    paintProperty->UpdateContainerColor(
+        swiperParameters->containerColor.value_or(swiperIndicatorTheme->GetArcContainerColor()));
+    paintProperty->UpdateMaskColor(
+        swiperParameters->maskColor.value_or(swiperIndicatorTheme->GetArcMaskColor()));
+    MarkDirtyNodeSelf();
+    indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
 void SwiperPattern::SaveDigitIndicatorProperty(const RefPtr<FrameNode>& indicatorNode)
 {
     CHECK_NULL_VOID(indicatorNode);
@@ -3929,6 +4060,7 @@ void SwiperPattern::PostTranslateTask(uint32_t delayTime)
     translateTask_.Reset([weak, delayTime] {
         auto swiper = weak.Upgrade();
         if (swiper) {
+            swiper->isInAutoPlay_ = true;
             auto childrenSize = swiper->TotalCount();
             auto displayCount = swiper->GetDisplayCount();
             if (childrenSize <= 0 || displayCount <= 0 || swiper->itemPosition_.empty()) {
@@ -3968,6 +4100,7 @@ void SwiperPattern::RegisterVisibleAreaChange()
         swiperPattern->isVisibleArea_ = visible;
         if (!visible) {
             swiperPattern->translateTask_.Cancel();
+            swiperPattern->isInAutoPlay_ = false;
             return;
         }
 
@@ -4069,7 +4202,7 @@ void SwiperPattern::UpdateIndexOnSwipePageStop(int32_t pauseTargetIndex)
     }
 }
 
-void SwiperPattern::TriggerAnimationEndOnForceStop()
+void SwiperPattern::TriggerAnimationEndOnForceStop(bool isInterrupt)
 {
     auto pauseTargetIndex = pauseTargetIndex_.has_value() ? pauseTargetIndex_.value() : currentIndex_;
     if (currentIndex_ != pauseTargetIndex) {
@@ -4090,7 +4223,7 @@ void SwiperPattern::TriggerAnimationEndOnForceStop()
         info.currentOffset = GetCustomPropertyOffset() +
             Dimension(-currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
     }
-    FireAnimationEndEvent(GetLoopIndex(currentIndex_), info);
+    FireAnimationEndEvent(GetLoopIndex(currentIndex_), info, isInterrupt);
     UpdateItemRenderGroup(false);
 }
 
@@ -4236,10 +4369,11 @@ void SwiperPattern::UpdateItemRenderGroup(bool itemRenderGroup)
     }
 }
 
-void SwiperPattern::OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, bool isFinishAnimation, bool forceStop)
+void SwiperPattern::OnTranslateFinish(
+    int32_t nextIndex, bool restartAutoPlay, bool isFinishAnimation, bool forceStop, bool isInterrupt)
 {
     if (forceStop && !isFinishAnimation) {
-        TriggerAnimationEndOnForceStop();
+        TriggerAnimationEndOnForceStop(isInterrupt);
     } else {
         TriggerEventOnFinish(nextIndex);
     }
@@ -4642,6 +4776,7 @@ void SwiperPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
     }
     SetIsNestedInterrupt(false);
     childScrolling_ = false;
+    InitIndexCanChangeMap();
 }
 
 void SwiperPattern::NotifyParentScrollEnd()
@@ -4691,6 +4826,9 @@ ScrollResult SwiperPattern::HandleScroll(float offset, int32_t source, NestedSta
     }
     if (source == SCROLL_FROM_ANIMATION && AnimationRunning()) {
         // deny conflicting animation from child
+        return { offset, true };
+    }
+    if (!CheckSwiperPanEvent(offset)) {
         return { offset, true };
     }
     // mouse scroll triggers showNext / showPrev instead of updating offset
@@ -4880,6 +5018,10 @@ void SwiperPattern::DumpAdvanceInfo()
             }
             case SwiperIndicatorType::DIGIT: {
                 DumpLog::GetInstance().AddDesc("SwiperIndicatorType:DIGIT");
+                break;
+            }
+            case SwiperIndicatorType::ARC_DOT: {
+                DumpLog::GetInstance().AddDesc("SwiperIndicatorType:ARC_DOT");
                 break;
             }
             default: {
@@ -5250,13 +5392,13 @@ bool SwiperPattern::ContentWillChange(int32_t currentIndex, int32_t comingIndex)
     return true;
 }
 
-bool SwiperPattern::CheckSwiperPanEvent(const GestureEvent& info)
+bool SwiperPattern::CheckSwiperPanEvent(float mainDeltaOrVelocity)
 {
     int32_t currentIndex = GetCurrentIndex();
     int32_t comingIndex = currentIndex;
-    if (GreatNotEqual(info.GetMainDelta(), 0.0)) {
+    if (GreatNotEqual(mainDeltaOrVelocity, 0.0)) {
         comingIndex = comingIndex < 1 ? 0 : comingIndex - 1;
-    } else if (LessNotEqual(info.GetMainDelta(), 0.0)) {
+    } else if (LessNotEqual(mainDeltaOrVelocity, 0.0)) {
         comingIndex = comingIndex > TotalCount() - INDEX_DIFF_TWO ? TotalCount() - 1 : comingIndex + 1;
     }
 
@@ -5346,5 +5488,18 @@ std::optional<RefPtr<UINode>> SwiperPattern::FindLazyForEachNode(RefPtr<UINode> 
         }
     }
     return std::nullopt;
+}
+
+RefPtr<NodePaintMethod> SwiperPattern::CreateNodePaintMethod()
+{
+    auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+    const auto& paddingProperty = layoutProperty->GetPaddingProperty();
+    bool needClipPadding = paddingProperty != nullptr;
+    bool needPaintFade = !IsLoop() && GetEdgeEffect() == EdgeEffect::FADE && !NearZero(fadeOffset_);
+    auto paintMethod = MakeRefPtr<SwiperPaintMethod>(GetDirection(), fadeOffset_);
+    paintMethod->SetNeedPaintFade(needPaintFade);
+    paintMethod->SetNeedClipPadding(needClipPadding);
+    return paintMethod;
 }
 } // namespace OHOS::Ace::NG

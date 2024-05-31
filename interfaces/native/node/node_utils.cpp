@@ -74,7 +74,7 @@ int32_t OH_ArkUI_NodeUtils_GetLayoutPositionInScreen(ArkUI_NodeHandle node, ArkU
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     ArkUI_Float32* tempOffset = new ArkUI_Float32[2];
     ;
-    impl->getNodeModifiers()->getFrameNodeModifier()->getPositionToWindow(node->uiNodeHandle, tempOffset, false);
+    impl->getNodeModifiers()->getFrameNodeModifier()->getPositionToScreen(node->uiNodeHandle, tempOffset, false);
     screenOffset->x = tempOffset[0];
     screenOffset->y = tempOffset[1];
 

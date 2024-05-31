@@ -21,6 +21,7 @@
 #include "bridge/declarative_frontend/jsview/js_content_slot.h"
 #include "bridge/declarative_frontend/jsview/js_dynamic_component.h"
 #include "bridge/declarative_frontend/jsview/js_isolated_component.h"
+#include "bridge/declarative_frontend/jsview/js_layout_manager.h"
 #include "bridge/declarative_frontend/jsview/js_node_container.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "bridge/declarative_frontend/style_string/js_span_object.h"
@@ -31,6 +32,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_should_built_in_recognizer_parallel_with_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_object_template.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_view_register.h"
 #include "frameworks/bridge/declarative_frontend/jsview/action_sheet/js_action_sheet.h"
@@ -461,6 +463,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSRichEditor::JSBind(globalObj);
     JSRichEditorController::JSBind(globalObj);
     JSRichEditorStyledStringController::JSBind(globalObj);
+    JSLayoutManager::JSBind(globalObj);
 #ifdef VIDEO_SUPPORTED
     JSVideo::JSBind(globalObj);
     JSVideoController::JSBind(globalObj);
@@ -641,6 +644,10 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
 #endif
     JSContentSlot::JSBind(globalObj);
     JSNodeContent::JSBind(globalObj);
+    JSGestureRecognizer::JSBind(globalObj);
+    JSEventTargetInfo::JSBind(globalObj);
+    JSScrollableTargetInfo::JSBind(globalObj);
+    JSPanRecognizer::JSBind(globalObj);
 }
 
 void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)

@@ -82,17 +82,20 @@ public:
 
     int32_t GetInstanceId();
     int32_t GetNodeId();
+    int32_t GetUiExtensionId() override;
+    int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId) override;
 
 protected:
-    virtual void DispatchPointerEvent(
-        const std::shared_ptr<MMI::PointerEvent>& pointerEvent) {}
-    virtual void DispatchKeyEvent(const KeyEvent& event) {}
+    virtual void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) {}
     virtual void DispatchFocusActiveEvent(bool isFocusActive) {}
-    virtual bool DispatchKeyEventSync(const KeyEvent& event) { return false; }
+    virtual bool HandleKeyEvent(const KeyEvent& event);
+    virtual void HandleFocusEvent();
+    virtual void HandleBlurEvent();
 
     AceLogTag tag_ = AceLogTag::ACE_DEFAULT_DOMAIN;
     int32_t platformId_ = -1;
     int32_t instanceId_ = Container::CurrentId();
+    int32_t uiExtensionId_ = 0;
 
 private:
     struct ErrorMsg {
@@ -107,9 +110,6 @@ private:
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
     void InitHoverEvent(const RefPtr<InputEventHub>& inputHub);
-    bool HandleKeyEvent(const KeyEvent& event);
-    void HandleFocusEvent();
-    void HandleBlurEvent();
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleMouseEvent(const MouseInfo& info);
     void HandleHoverEvent(bool isHover);

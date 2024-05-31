@@ -46,12 +46,18 @@ void PaintWrapper::SetNodePaintMethod(const RefPtr<NodePaintMethod>& nodePaintIm
         }
         renderContext->FlushContentModifier(contentModifier);
     }
-    auto overlayModifier = nodePaintImpl_->GetOverlayModifier(this);
+    auto overlayModifier = AceType::DynamicCast<OverlayModifier>(nodePaintImpl_->GetOverlayModifier(this));
     if (overlayModifier) {
+        if (extensionHandler_) {
+            overlayModifier->SetExtensionHandler(AceType::RawPtr(extensionHandler_));
+        }
         renderContext->FlushOverlayModifier(overlayModifier);
     }
-    auto foregroundModifier = nodePaintImpl_->GetForegroundModifier(this);
+    auto foregroundModifier = AceType::DynamicCast<ForegroundModifier>(nodePaintImpl_->GetForegroundModifier(this));
     if (foregroundModifier) {
+        if (extensionHandler_) {
+            foregroundModifier->SetExtensionHandler(AceType::RawPtr(extensionHandler_));
+        }
         renderContext->FlushForegroundModifier(foregroundModifier);
     }
 }
@@ -93,11 +99,17 @@ void PaintWrapper::FlushRender()
     auto overlayModifier = nodePaintImpl_ ? nodePaintImpl_->GetOverlayModifier(this) : nullptr;
     if (overlayModifier) {
         nodePaintImpl_->UpdateOverlayModifier(this);
+        if (extensionHandler_) {
+            extensionHandler_->InvalidateRender();
+        }
     }
 
     auto foregroundModifier = nodePaintImpl_ ? nodePaintImpl_->GetForegroundModifier(this) : nullptr;
     if (foregroundModifier) {
         nodePaintImpl_->UpdateForegroundModifier(this);
+        if (extensionHandler_) {
+            extensionHandler_->InvalidateRender();
+        }
     }
 
     renderContext->StartRecording();

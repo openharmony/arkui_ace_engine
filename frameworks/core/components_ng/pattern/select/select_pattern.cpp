@@ -933,6 +933,13 @@ void SelectPattern::InitSpinner(
 // XTS inspector code
 void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        ToJsonArrowAndText(json, filter);
+        ToJsonOptionAlign(json, filter);
+        ToJsonMenuBackgroundStyle(json, filter);
+        return;
+    }
     json->PutExtAttr("options", InspectorGetOptions().c_str(), filter);
     json->PutExtAttr("selected", std::to_string(selected_).c_str(), filter);
     ToJsonArrowAndText(json, filter);
@@ -971,6 +978,10 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
 
 void SelectPattern::ToJsonArrowAndText(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (!host->GetChildren().empty()) {
@@ -999,6 +1010,10 @@ void SelectPattern::ToJsonArrowAndText(std::unique_ptr<JsonValue>& json, const I
 void SelectPattern::ToJsonMenuBackgroundStyle(
     std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto menu = GetMenuNode();
     CHECK_NULL_VOID(menu);
     auto menuRenderContext = menu->GetRenderContext();
@@ -1018,6 +1033,10 @@ void SelectPattern::ToJsonMenuBackgroundStyle(
 
 void SelectPattern::ToJsonOptionAlign(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto optionAlignJson = JsonUtil::Create(true);
     std::string alignTypeString = "MenuAlignType.Start";
     if (menuAlign_.alignType == MenuAlignType::START) {

@@ -201,6 +201,7 @@ private:
     void OnAttachToFrameNode() override;
     void BeforeCreateLayoutWrapper() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& config) override;
+    void BeforeSyncGeometryProperties(const DirtySwapConfig& config) override;
     void FirePageTransitionFinish();
 
     void OnAttachToMainTree() override;
@@ -215,6 +216,8 @@ private:
     {
         return true;
     }
+
+    void NotifyPerfMonitorPageMsg(const std::string& pageUrl, const std::string& bundleName);
 
     RefPtr<PageInfo> pageInfo_;
     RefPtr<OverlayManager> overlayManager_;

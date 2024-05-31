@@ -601,6 +601,9 @@ RefPtr<FrameNode> SideBarContainerPattern::CreateControlButton(const RefPtr<Side
     CHECK_NULL_RETURN(buttonRenderContext, nullptr);
     buttonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     buttonRenderContext->UpdateZIndex(DEFAULT_CONTROL_BUTTON_ZINDEX);
+    auto focusHub = buttonNode->GetOrCreateFocusHub();
+    CHECK_NULL_RETURN(focusHub, nullptr);
+    focusHub->SetFocusDependence(FocusDependence::SELF);
     return buttonNode;
 }
 
@@ -891,13 +894,13 @@ void SideBarContainerPattern::UpdateControlButtonIcon()
         default:
             break;
     }
-    imageInfo_ = imgSourceInfo.value();
 
     if (!imgSourceInfo.has_value()) {
         imgSourceInfo = std::make_optional<ImageSourceInfo>();
         imgSourceInfo->SetResourceId(InternalResource::ResourceId::SIDE_BAR);
         imgSourceInfo->SetFillColor(controlButtonColor);
     }
+    imageInfo_ = imgSourceInfo.value();
     imageLayoutProperty->UpdateImageSourceInfo(imgSourceInfo.value());
     imgFrameNode->MarkModifyDone();
 }
@@ -1084,6 +1087,18 @@ void SideBarContainerPattern::InitDividerMouseEvent(const RefPtr<InputEventHub>&
     CHECK_NULL_VOID(inputHub);
     CHECK_NULL_VOID(!hoverEvent_);
 
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        CHECK_NULL_VOID(!dividerMouseEvent_);
+        auto mouseTask = [weak = WeakClaim(this)](MouseInfo& info) {
+            auto pattern = weak.Upgrade();
+            if (pattern) {
+                pattern->OnDividerMouseEvent(info);
+            }
+        };
+        dividerMouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
+        inputHub->AddOnMouseEvent(dividerMouseEvent_);
+    }
+
     auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
         auto pattern = weak.Upgrade();
         if (pattern) {
@@ -1092,6 +1107,45 @@ void SideBarContainerPattern::InitDividerMouseEvent(const RefPtr<InputEventHub>&
     };
     hoverEvent_ = MakeRefPtr<InputEvent>(std::move(hoverTask));
     inputHub->AddOnHoverEvent(hoverEvent_);
+}
+
+void SideBarContainerPattern::OnDividerMouseEvent(MouseInfo& info)
+{
+    if (info.GetAction() == MouseAction::PRESS) {
+        isMousePressing_ = true;
+        TAG_LOGI(AceLogTag::ACE_SIDEBAR, "sideBarContainer Divider mouse pressed.");
+    } else if (info.GetAction() == MouseAction::RELEASE) {
+        isMousePressing_ = false;
+        TAG_LOGI(AceLogTag::ACE_SIDEBAR, "sideBarContainer Divider mouse released.");
+    }
+
+    // release the mouse button, to check if still in the divider's region
+    if (info.GetAction() != MouseAction::RELEASE) {
+        return;
+    }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dividerFrameNode = GetDividerNode();
+    CHECK_NULL_VOID(dividerFrameNode);
+    auto defaultRect = RectF();
+    auto responseMouseRegionList = dividerFrameNode->GetResponseRegionList(defaultRect,
+        static_cast<int32_t>(SourceType::MOUSE));
+    auto localParentPoint = PointF(static_cast<float>(info.GetLocalLocation().GetX()),
+        static_cast<float>(info.GetLocalLocation().GetY()));
+
+    if (dividerFrameNode->InResponseRegionList(localParentPoint, responseMouseRegionList)) {
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_SIDEBAR, "sideBarContainer Divider is out of region.");
+    MouseFormat format = MouseFormat::DEFAULT;
+    auto windowId = pipeline->GetWindowId();
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    int32_t currentPointerStyle = 0;
+    mouseStyle->GetPointerStyle(static_cast<int32_t>(windowId), currentPointerStyle);
+    if (currentPointerStyle != static_cast<int32_t>(format)) {
+        mouseStyle->SetPointerStyle(static_cast<int32_t>(windowId), format);
+    }
+    isResizeMouseStyle_ = false;
 }
 
 void SideBarContainerPattern::OnHover(bool isHover)
@@ -1110,6 +1164,13 @@ void SideBarContainerPattern::OnHover(bool isHover)
         return;
     }
     isDividerDraggable_ = true;
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (isResizeMouseStyle_ && isMousePressing_) {
+            // we enterned the resizing status and leaves ther divider region with mouse button pressing,
+            // do not change the style back, the mouse up event will cover the change checking
+            return;
+        }
+    }
 
     MouseFormat format = isHover ? MouseFormat::RESIZE_LEFT_RIGHT : MouseFormat::DEFAULT;
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -1121,6 +1182,7 @@ void SideBarContainerPattern::OnHover(bool isHover)
     if (currentPointerStyle != static_cast<int32_t>(format)) {
         mouseStyle->SetPointerStyle(static_cast<int32_t>(windowId), format);
     }
+    isResizeMouseStyle_ = (format == MouseFormat::RESIZE_LEFT_RIGHT);
 }
 
 SideBarPosition SideBarContainerPattern::GetSideBarPositionWithRtl(

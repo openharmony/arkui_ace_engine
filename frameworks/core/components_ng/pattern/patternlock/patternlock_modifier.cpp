@@ -717,6 +717,9 @@ float PatternLockModifier::GetBackgroundCircleRadius(int32_t index) const
         return 0;
     }
     auto activeBackgroundRadius = activeBackgroundRadius_->Get();
+    float handleCircleRadius = std::min(activeBackgroundRadius,
+        sideLength_->Get() / PATTERN_LOCK_COL_COUNT * DIAMETER_TO_RADIUS);
+    activeBackgroundRadius = std::max(handleCircleRadius, 0.0f);
     if (Positive(activeBackgroundRadius)) {
         backgroundCircleRadius_.at(index)->Set(activeBackgroundRadius);
     } else {

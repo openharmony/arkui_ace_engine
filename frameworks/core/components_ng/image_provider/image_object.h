@@ -57,8 +57,8 @@ public:
         return src_.SupportObjCache();
     }
 
-    virtual void MakeCanvasImage(
-        const RefPtr<ImageLoadingContext>& ctx, const SizeF& resizeTarget, bool forceResize, bool syncLoad) = 0;
+    virtual void MakeCanvasImage(const RefPtr<ImageLoadingContext>& ctx, const SizeF& resizeTarget, bool forceResize,
+        bool syncLoad, bool loadInVipChannel = false) = 0;
 
 protected:
     const ImageSourceInfo src_;

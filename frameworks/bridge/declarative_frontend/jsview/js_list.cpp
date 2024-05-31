@@ -368,8 +368,8 @@ void JSList::SetLanes(const JSCallbackInfo& info)
             return;
         }
         ListModel::GetInstance()->SetLaneConstrain(minLengthValue, maxLengthValue);
-        ListModel::GetInstance()->SetLanes(1);
     }
+    ListModel::GetInstance()->SetLanes(1);
 }
 
 void JSList::SetSticky(int32_t sticky)

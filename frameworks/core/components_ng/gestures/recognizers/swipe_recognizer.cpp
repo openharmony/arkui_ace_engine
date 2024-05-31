@@ -160,6 +160,7 @@ void SwipeRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     TAG_LOGI(AceLogTag::ACE_GESTURE, "InputTracking id:%{public}d, swipe recognizer receives %{public}d touch up event",
         event.touchEventId, event.id);
     globalPoint_ = Point(event.x, event.y);
+    touchPoints_[event.id] = event;
     time_ = event.time;
     lastTouchEvent_ = event;
     if ((refereeState_ != RefereeState::DETECTING) && (refereeState_ != RefereeState::FAIL) &&
@@ -201,6 +202,8 @@ void SwipeRecognizer::HandleTouchUpEvent(const AxisEvent& event)
     TAG_LOGI(AceLogTag::ACE_GESTURE, "InputTracking id:%{public}d, swipe recognizer receives axis end event",
         event.touchEventId);
     globalPoint_ = Point(event.x, event.y);
+    touchPoints_[event.id] = TouchEvent();
+    UpdateTouchPointWithAxisEvent(event);
     time_ = event.time;
     lastAxisEvent_ = event;
     if ((refereeState_ != RefereeState::DETECTING) && (refereeState_ != RefereeState::FAIL)) {
@@ -417,8 +420,11 @@ GestureJudgeResult SwipeRecognizer::TriggerGestureJudgeCallback()
 {
     auto targetComponent = GetTargetComponent();
     CHECK_NULL_RETURN(targetComponent, GestureJudgeResult::CONTINUE);
+    auto gestureRecognizerJudgeFunc = targetComponent->GetOnGestureRecognizerJudgeBegin();
     auto callback = targetComponent->GetOnGestureJudgeBeginCallback();
-    CHECK_NULL_RETURN(callback, GestureJudgeResult::CONTINUE);
+    if (!callback && !gestureRecognizerJudgeFunc) {
+        return GestureJudgeResult::CONTINUE;
+    }
     auto info = std::make_shared<SwipeGestureEvent>();
     info->SetTimeStamp(time_);
     UpdateFingerListInfo();
@@ -440,6 +446,9 @@ GestureJudgeResult SwipeRecognizer::TriggerGestureJudgeCallback()
     info->SetSourceTool(lastTouchEvent_.sourceTool);
     if (prevAngle_) {
         info->SetAngle(prevAngle_.value());
+    }
+    if (gestureRecognizerJudgeFunc) {
+        return gestureRecognizerJudgeFunc(info, Claim(this), responseLinkRecognizer_);
     }
     return callback(gestureInfo_, info);
 }

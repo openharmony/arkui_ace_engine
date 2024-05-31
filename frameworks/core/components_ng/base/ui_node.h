@@ -90,6 +90,10 @@ public:
     RefPtr<FrameNode> GetFocusParent() const;
     RefPtr<FocusHub> GetFirstFocusHubChild() const;
     void GetChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
+
+    // Only for the currently loaded children, do not expand.
+    void GetCurrentChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
+
     void GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const;
     void Clean(bool cleanDirectly = false, bool allowTransition = false);
     void RemoveChildAtIndex(int32_t index);
@@ -271,7 +275,7 @@ public:
 
     virtual HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
         const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
-        bool isDispatch = false);
+        TouchTestResult& responseLinkResult, bool isDispatch = false);
     virtual HitTestMode GetHitTestMode() const
     {
         return HitTestMode::HTMDEFAULT;
@@ -505,10 +509,6 @@ public:
     void SetBuildByJs(bool isBuildByJS)
     {
         isBuildByJS_ = isBuildByJS;
-    }
-    void AddAttachToMainTreeTask(std::function<void()>&& func)
-    {
-        attachToMainTreeTasks_.emplace_back(std::move(func));
     }
 
     void* GetExternalData() const
@@ -779,7 +779,6 @@ private:
 
     bool useOffscreenProcess_ = false;
 
-    std::list<std::function<void()>> attachToMainTreeTasks_;
     std::function<void(int32_t)> updateJSInstanceCallback_;
     std::function<void()> lazyBuilderFunc_;
     std::function<void(int32_t, RefPtr<UINode>&)> updateNodeFunc_;

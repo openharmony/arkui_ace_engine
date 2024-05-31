@@ -1081,6 +1081,41 @@ void WebClientImpl::OnRenderProcessResponding()
     delegate->OnRenderProcessResponding();
 }
 
+void WebClientImpl::OnInterceptKeyboardAttach(
+    const std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler,
+    const std::map<std::string, std::string> &attributes, bool &useSystemKeyboard, int32_t &enterKeyType)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebCustomKeyboard OnInterceptKeyboardAttach override enter");
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnInterceptKeyboardAttach(keyboardHandler, attributes, useSystemKeyboard, enterKeyType);
+}
+
+void WebClientImpl::OnCustomKeyboardAttach()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebCustomKeyboard OnCustomKeyboardAttach override enter");
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnCustomKeyboardAttach();
+}
+
+void WebClientImpl::OnCustomKeyboardClose()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebCustomKeyboard OnCustomKeyboardClose override enter");
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnCustomKeyboardClose();
+}
+
 void WebClientImpl::OnShowAutofillPopup(
     const float offsetX, const float offsetY, const std::vector<std::string>& menu_items)
 {
@@ -1104,5 +1139,15 @@ void WebClientImpl::OnViewportFitChange(OHOS::NWeb::ViewportFit viewportFit)
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
     delegate->OnViewportFitChange(viewportFit);
+}
+
+void WebClientImpl::OnAdsBlocked(const std::string& url, const std::vector<std::string>& adsBlocked)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnAdsBlocked(url, adsBlocked);
 }
 } // namespace OHOS::Ace

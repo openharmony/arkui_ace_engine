@@ -51,6 +51,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_key_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_on_area_change_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_on_size_change_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_should_built_in_recognizer_parallel_with_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_touch_intercept_function.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_value.h"
@@ -511,7 +512,9 @@ bool ParseJsLengthMetrics(const JSRef<JSObject>& obj, CalcDimension& result)
 
 bool CheckLengthMetrics(const JSRef<JSObject>& object)
 {
-    if (object->HasProperty(START_PROPERTY) || object->HasProperty(END_PROPERTY)) {
+    if (object->HasProperty(START_PROPERTY) || object->HasProperty(END_PROPERTY) ||
+        object->HasProperty(TOP_START_PROPERTY) || object->HasProperty(TOP_END_PROPERTY) ||
+       	object->HasProperty(BOTTOM_START_PROPERTY) || object->HasProperty(BOTTOM_END_PROPERTY)) {
         return true;
     }
     if (object->HasProperty(TOP_PROPERTY) && object->GetProperty(TOP_PROPERTY)->IsObject()) {
@@ -3131,6 +3134,9 @@ std::vector<NG::OptionParam> ParseBindOptionParam(const JSCallbackInfo& info, si
     std::vector<NG::OptionParam> params(paramArray->Length());
     // parse paramArray
     for (size_t i = 0; i < paramArray->Length(); ++i) {
+        if (!paramArray->GetValueAt(i)->IsObject()) {
+            return std::vector<NG::OptionParam>();
+        }
         auto indexObject = JSRef<JSObject>::Cast(paramArray->GetValueAt(i));
         JSViewAbstract::ParseJsString(indexObject->GetProperty("value"), params[i].value);
         auto actionFunc = indexObject->GetProperty("action");
@@ -3349,24 +3355,27 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
 
 void ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam, size_t optionIndex)
 {
+    if (!info[optionIndex]->IsObject()) {
+        return;
+    }
     auto menuOptions = JSRef<JSObject>::Cast(info[optionIndex]);
     JSViewAbstract::ParseJsString(menuOptions->GetProperty("title"), menuParam.title);
     ParseMenuParam(info, menuOptions, menuParam);
 }
 
-void ParseAnimationScaleArray(const JSRef<JSArray>& scaleArray, NG::MenuParam& menuParam)
+void ParseAnimationScaleArray(const JSRef<JSArray>& scaleArray, MenuPreviewAnimationOptions& options)
 {
     constexpr int scaleArraySize = 2;
     if (scaleArray->Length() == scaleArraySize) {
         auto scalePropertyFrom = scaleArray->GetValueAt(0);
         if (scalePropertyFrom->IsNumber()) {
             auto scaleFrom = scalePropertyFrom->ToNumber<float>();
-            menuParam.previewAnimationOptions.scaleFrom = LessOrEqual(scaleFrom, 0.0) ? -1.0f : scaleFrom;
+            options.scaleFrom = LessOrEqual(scaleFrom, 0.0) ? -1.0f : scaleFrom;
         }
         auto scalePropertyTo = scaleArray->GetValueAt(1);
         if (scalePropertyTo->IsNumber()) {
             auto scaleTo = scalePropertyTo->ToNumber<float>();
-            menuParam.previewAnimationOptions.scaleTo = LessOrEqual(scaleTo, 0.0) ? -1.0f : scaleTo;
+            options.scaleTo = LessOrEqual(scaleTo, 0.0) ? -1.0f : scaleTo;
         }
     }
 }
@@ -3383,7 +3392,7 @@ void ParseContentPreviewAnimationOptionsParam(const JSCallbackInfo& info, const 
         auto scaleProperty = animationOptionsObj->GetProperty("scale");
         if (!scaleProperty->IsEmpty() && scaleProperty->IsArray()) {
             JSRef<JSArray> scaleArray = JSRef<JSArray>::Cast(scaleProperty);
-            ParseAnimationScaleArray(scaleArray, menuParam);
+            ParseAnimationScaleArray(scaleArray, menuParam.previewAnimationOptions);
         }
         auto previewTransition = animationOptionsObj->GetProperty("transition");
         menuParam.hasPreviewTransitionEffect = false;
@@ -3391,6 +3400,18 @@ void ParseContentPreviewAnimationOptionsParam(const JSCallbackInfo& info, const 
             auto obj = JSRef<JSObject>::Cast(previewTransition);
             menuParam.hasPreviewTransitionEffect = true;
             menuParam.previewTransition = ParseChainedTransition(obj, info.GetExecutionContext());
+        }
+        if (menuParam.previewMode != MenuPreviewMode::CUSTOM) {
+            return;
+        }
+        auto hoverScaleProperty = animationOptionsObj->GetProperty("hoverScale");
+        menuParam.isShowHoverImage = false;
+        menuParam.hoverImageAnimationOptions.scaleFrom = -1.0f;
+        menuParam.hoverImageAnimationOptions.scaleTo = -1.0f;
+        if (!hoverScaleProperty->IsEmpty() && hoverScaleProperty->IsArray()) {
+            JSRef<JSArray> hoverScaleArray = JSRef<JSArray>::Cast(hoverScaleProperty);
+            ParseAnimationScaleArray(hoverScaleArray, menuParam.hoverImageAnimationOptions);
+            menuParam.isShowHoverImage = true;
         }
     }
 }
@@ -3734,6 +3755,27 @@ void JSViewAbstract::JsBorder(const JSCallbackInfo& info)
     info.ReturnSelf();
 }
 
+bool IsBorderWidthObjUndefined(const JSRef<JSVal>& args)
+{
+    if (!args->IsObject()) {
+        return false;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args);
+    if (obj->IsUndefined()) {
+        return true;
+    }
+    if ((!obj->HasProperty(TOP_PROPERTY) || obj->GetProperty(TOP_PROPERTY)->IsUndefined()) &&
+        (!obj->HasProperty(RIGHT_PROPERTY) || obj->GetProperty(RIGHT_PROPERTY)->IsUndefined()) &&
+        (!obj->HasProperty(BOTTOM_PROPERTY) || obj->GetProperty(BOTTOM_PROPERTY)->IsUndefined()) &&
+        (!obj->HasProperty(LEFT_PROPERTY) || obj->GetProperty(LEFT_PROPERTY)->IsUndefined()) &&
+        (!obj->HasProperty(START_PROPERTY) || obj->GetProperty(START_PROPERTY)->IsUndefined()) &&
+        (!obj->HasProperty(END_PROPERTY) || obj->GetProperty(END_PROPERTY)->IsUndefined())) {
+        return true;
+    }
+    
+    return false;
+}
+
 void JSViewAbstract::JsBorderWidth(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
@@ -3742,6 +3784,12 @@ void JSViewAbstract::JsBorderWidth(const JSCallbackInfo& info)
         ViewAbstractModel::GetInstance()->SetBorderWidth({});
         return;
     }
+    
+    if (IsBorderWidthObjUndefined(info[0])) {
+        ViewAbstractModel::GetInstance()->SetBorderWidth({});
+        return;
+    }
+    
     ParseBorderWidth(info[0]);
 }
 
@@ -4941,6 +4989,9 @@ bool JSViewAbstract::ParseLengthMetricsToPositiveDimension(const JSRef<JSVal>& j
 
 bool JSViewAbstract::ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& result)
 {
+    if (!jsValue->IsObject()) {
+        return false;
+    }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     CompleteResourceObject(jsObj);
     if (jsObj->IsEmpty()) {
@@ -6272,6 +6323,9 @@ void JSViewAbstract::JsLinearGradient(const JSCallbackInfo& info)
 
 void JSViewAbstract::NewJsLinearGradient(const JSCallbackInfo& info, NG::Gradient& newGradient)
 {
+    if (!info[0]->IsObject()) {
+        return;
+    }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
     newGradient.CreateGradientWithType(NG::GradientType::LINEAR);
     // angle
@@ -8102,6 +8156,10 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("onClick", &JSViewAbstract::JsOnClick);
     JSClass<JSViewAbstract>::StaticMethod("onGestureJudgeBegin", &JSViewAbstract::JsOnGestureJudgeBegin);
     JSClass<JSViewAbstract>::StaticMethod("onTouchIntercept", &JSViewAbstract::JsOnTouchIntercept);
+    JSClass<JSViewAbstract>::StaticMethod(
+        "shouldBuiltInRecognizerParallelWith", &JSViewAbstract::JsShouldBuiltInRecognizerParallelWith);
+    JSClass<JSViewAbstract>::StaticMethod(
+        "onGestureRecognizerJudgeBegin", &JSViewAbstract::JsOnGestureRecognizerJudgeBegin);
     JSClass<JSViewAbstract>::StaticMethod("clickEffect", &JSViewAbstract::JsClickEffect);
     JSClass<JSViewAbstract>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
     JSClass<JSViewAbstract>::StaticMethod("geometryTransition", &JSViewAbstract::JsGeometryTransition);
@@ -8147,6 +8205,11 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
 
     JSClass<JSViewAbstract>::StaticMethod("focusScopeId", &JSViewAbstract::JsFocusScopeId);
     JSClass<JSViewAbstract>::StaticMethod("focusScopePriority", &JSViewAbstract::JsFocusScopePriority);
+
+    JSClass<JSViewAbstract>::StaticMethod("visualEffect", &JSViewAbstract::JsVisualEffect);
+    JSClass<JSViewAbstract>::StaticMethod("backgroundFilter", &JSViewAbstract::JsBackgroundFilter);
+    JSClass<JSViewAbstract>::StaticMethod("foregroundFilter", &JSViewAbstract::JsForegroundFilter);
+    JSClass<JSViewAbstract>::StaticMethod("compositingFilter", &JSViewAbstract::JsCompositingFilter);
 
     JSClass<JSViewAbstract>::Bind(globalObj);
 }
@@ -8320,7 +8383,7 @@ void JSViewAbstract::JsAlignRules(const JSCallbackInfo& info)
     if (valueObj->IsEmpty()) {
         return;
     }
-    const char* keys[] = { "left", "middle", "right", "top", "center", "bottom", "bias" };
+    const char* keys[] = { "left", "middle", "right", "top", "center", "bottom", "bias", "start", "end" };
     std::map<AlignDirection, AlignRule> alignRules;
     BiasPair biasPair(DEFAULT_BIAS, DEFAULT_BIAS);
     for (uint32_t i = 0; i < sizeof(keys) / sizeof(const char*); i++) {
@@ -8337,6 +8400,10 @@ void JSViewAbstract::JsAlignRules(const JSCallbackInfo& info)
             }
             if (i < VERTICAL_DIRECTION_RANGE) {
                 alignRules[static_cast<AlignDirection>(i)] = alignRule;
+            } else if (i == HORIZONTAL_DIRECTION_START_INDEX) {
+                alignRules[AlignDirection::LEFT] = alignRule;
+            } else if (i == HORIZONTAL_DIRECTION_END_INDEX) {
+                alignRules[AlignDirection::RIGHT] = alignRule;
             }
             auto biasX = val->GetProperty("horizontal");
             if (biasX->IsNumber()) {
@@ -8603,6 +8670,20 @@ bool JSViewAbstract::ParseJsonColor(const std::unique_ptr<JsonValue>& jsonValue,
     return true;
 }
 
+void JSViewAbstract::ParseShadowOffsetX(const JSRef<JSObject>& jsObj, CalcDimension& offsetX, Shadow& shadow)
+{
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (ParseJsResource(jsObj->GetProperty("offsetX"), offsetX)) {
+        double xValue = isRtl ? offsetX.Value() * (-1) : offsetX.Value();
+        shadow.SetOffsetX(xValue);
+    } else {
+        if (ParseJsDimensionVp(jsObj->GetProperty("offsetX"), offsetX)) {
+            double xValue = isRtl ? offsetX.Value() * (-1) : offsetX.Value();
+            shadow.SetOffsetX(xValue);
+        }
+    }
+}
+
 bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shadow)
 {
     int32_t shadowStyle = 0;
@@ -8621,14 +8702,7 @@ bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shado
     }
     shadow.SetBlurRadius(radius);
     CalcDimension offsetX;
-    if (ParseJsResource(jsObj->GetProperty("offsetX"), offsetX)) {
-        shadow.SetOffsetX(offsetX.Value());
-    } else {
-        if (ParseJsDimensionVp(jsObj->GetProperty("offsetX"), offsetX)) {
-            shadow.SetOffsetX(offsetX.Value());
-        }
-    }
-
+    ParseShadowOffsetX(jsObj, offsetX, shadow);
     CalcDimension offsetY;
     if (ParseJsResource(jsObj->GetProperty("offsetY"), offsetY)) {
         shadow.SetOffsetY(offsetY.Value());
@@ -9105,6 +9179,50 @@ void JSViewAbstract::JsOnTouchIntercept(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetOnTouchIntercept(std::move(onTouchInterceptfunc));
 }
 
+void JSViewAbstract::JsShouldBuiltInRecognizerParallelWith(const JSCallbackInfo& info)
+{
+    if (info[0]->IsUndefined() || !info[0]->IsFunction()) {
+        ViewAbstractModel::GetInstance()->SetShouldBuiltInRecognizerParallelWith(nullptr);
+        return;
+    }
+
+    auto jsParallelInnerGestureToFunc =
+        AceType::MakeRefPtr<JsShouldBuiltInRecognizerParallelWithFunction>(JSRef<JSFunc>::Cast(info[0]));
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto shouldBuiltInRecognizerParallelWithFunc =
+        [execCtx = info.GetExecutionContext(), func = jsParallelInnerGestureToFunc, node = frameNode](
+            const RefPtr<TouchEventTarget>& current,
+            const std::vector<RefPtr<TouchEventTarget>>& others) -> RefPtr<NG::NGGestureRecognizer> {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, nullptr);
+        ACE_SCORING_EVENT("shouldBuiltInRecognizerParallelWith");
+        PipelineContext::SetCallBackNode(node);
+        return func->Execute(current, others);
+    };
+    ViewAbstractModel::GetInstance()->SetShouldBuiltInRecognizerParallelWith(
+        std::move(shouldBuiltInRecognizerParallelWithFunc));
+}
+
+void JSViewAbstract::JsOnGestureRecognizerJudgeBegin(const JSCallbackInfo& info)
+{
+    if (info[0]->IsUndefined() || !info[0]->IsFunction()) {
+        ViewAbstractModel::GetInstance()->SetOnGestureRecognizerJudgeBegin(nullptr);
+        return;
+    }
+
+    auto jsOnGestureRecognizerJudgeFunc = AceType::MakeRefPtr<JsGestureJudgeFunction>(JSRef<JSFunc>::Cast(info[0]));
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onGestureRecognizerJudgefunc =
+        [execCtx = info.GetExecutionContext(), func = jsOnGestureRecognizerJudgeFunc, node = frameNode](
+            const std::shared_ptr<BaseGestureEvent>& info, const RefPtr<NG::NGGestureRecognizer>& current,
+            const std::list<RefPtr<NG::NGGestureRecognizer>>& others) -> GestureJudgeResult {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, GestureJudgeResult::CONTINUE);
+        ACE_SCORING_EVENT("onGestureRecognizerJudgeBegin");
+        PipelineContext::SetCallBackNode(node);
+        return func->Execute(info, current, others);
+    };
+    ViewAbstractModel::GetInstance()->SetOnGestureRecognizerJudgeBegin(std::move(onGestureRecognizerJudgefunc));
+}
+
 void JSViewAbstract::JsClickEffect(const JSCallbackInfo& info)
 {
     JSRef<JSVal> arg = info[0];
@@ -9523,42 +9641,99 @@ bool JSViewAbstract::ParseBorderStyleProps(const JSRef<JSVal>& args, NG::BorderS
     return false;
 }
 
+void JSViewAbstract::ParseBorderRadiusProps(const JSRef<JSObject>& object, NG::BorderRadiusProperty& radius)
+{
+    std::optional<CalcDimension> radiusTopLeft;
+    std::optional<CalcDimension> radiusTopRight;
+    std::optional<CalcDimension> radiusBottomLeft;
+    std::optional<CalcDimension> radiusBottomRight;
+    CalcDimension topLeft;
+    if (ParseJsDimensionVpNG(object->GetProperty("topLeft"), topLeft, true)) {
+        radiusTopLeft = topLeft;
+    }
+    CalcDimension topRight;
+    if (ParseJsDimensionVpNG(object->GetProperty("topRight"), topRight, true)) {
+        radiusTopRight = topRight;
+    }
+    CalcDimension bottomLeft;
+    if (ParseJsDimensionVpNG(object->GetProperty("bottomLeft"), bottomLeft, true)) {
+        radiusBottomLeft = bottomLeft;
+    }
+    CalcDimension bottomRight;
+    if (ParseJsDimensionVpNG(object->GetProperty("bottomRight"), bottomRight, true)) {
+        radiusBottomRight = bottomRight;
+    }
+    CheckLengthMetrics(object);
+    radius.radiusTopLeft = radiusTopLeft;
+    radius.radiusTopRight = radiusTopRight;
+    radius.radiusBottomLeft = radiusBottomLeft;
+    radius.radiusBottomRight = radiusBottomRight;
+    radius.multiValued = true;
+    return;
+}
+
+void JSViewAbstract::ParseCommonBorderRadiusProps(const JSRef<JSObject>& object, NG::BorderRadiusProperty& radius)
+{
+    if (CheckLengthMetrics(object)) {
+        std::optional<CalcDimension> radiusTopStart;
+        std::optional<CalcDimension> radiusTopEnd;
+        std::optional<CalcDimension> radiusBottomStart;
+        std::optional<CalcDimension> radiusBottomEnd;
+        if (object->HasProperty(TOP_START_PROPERTY) && object->GetProperty(TOP_START_PROPERTY)->IsObject()) {
+            JSRef<JSObject> topStartObj = JSRef<JSObject>::Cast(object->GetProperty(TOP_START_PROPERTY));
+            CalcDimension calcDimension;
+            if (ParseJsLengthMetrics(topStartObj, calcDimension)) {
+                CheckDimensionUnit(calcDimension, false, true);
+                radiusTopStart = calcDimension;
+            }
+        }
+        if (object->HasProperty(TOP_END_PROPERTY) && object->GetProperty(TOP_END_PROPERTY)->IsObject()) {
+            JSRef<JSObject> topEndObj = JSRef<JSObject>::Cast(object->GetProperty(TOP_END_PROPERTY));
+            CalcDimension calcDimension;
+            if (ParseJsLengthMetrics(topEndObj, calcDimension)) {
+                CheckDimensionUnit(calcDimension, false, true);
+                radiusTopEnd = calcDimension;
+            }
+        }
+        if (object->HasProperty(BOTTOM_START_PROPERTY) && object->GetProperty(BOTTOM_START_PROPERTY)->IsObject()) {
+            JSRef<JSObject> bottomStartObj = JSRef<JSObject>::Cast(object->GetProperty(BOTTOM_START_PROPERTY));
+            CalcDimension calcDimension;
+            if (ParseJsLengthMetrics(bottomStartObj, calcDimension)) {
+                CheckDimensionUnit(calcDimension, false, true);
+                radiusBottomStart = calcDimension;
+            }
+        }
+        if (object->HasProperty(BOTTOM_END_PROPERTY) && object->GetProperty(BOTTOM_END_PROPERTY)->IsObject()) {
+            JSRef<JSObject> bottomEndObj = JSRef<JSObject>::Cast(object->GetProperty(BOTTOM_END_PROPERTY));
+            CalcDimension calcDimension;
+            if (ParseJsLengthMetrics(bottomEndObj, calcDimension)) {
+                CheckDimensionUnit(calcDimension, false, true);
+                radiusBottomEnd = calcDimension;
+            }
+        }
+        auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+        radius.radiusTopLeft = isRightToLeft ? radiusTopEnd : radiusTopStart;
+        radius.radiusTopRight = isRightToLeft ? radiusTopStart : radiusTopEnd;
+        radius.radiusBottomLeft = isRightToLeft ? radiusBottomEnd : radiusBottomStart;
+        radius.radiusBottomRight = isRightToLeft ? radiusBottomStart : radiusBottomEnd;
+        radius.multiValued = true;
+        return;
+    }
+    ParseBorderRadiusProps(object, radius);
+}
+
 bool JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius)
 {
     if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
         return false;
     }
-    std::optional<CalcDimension> radiusTopLeft;
-    std::optional<CalcDimension> radiusTopRight;
-    std::optional<CalcDimension> radiusBottomLeft;
-    std::optional<CalcDimension> radiusBottomRight;
     CalcDimension borderRadius;
     if (ParseJsDimensionVpNG(args, borderRadius, true)) {
         radius = NG::BorderRadiusProperty(borderRadius);
         radius.multiValued = false;
     } else if (args->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-        CalcDimension topLeft;
-        if (ParseJsDimensionVpNG(object->GetProperty("topLeft"), topLeft, true)) {
-            radiusTopLeft = topLeft;
-        }
-        CalcDimension topRight;
-        if (ParseJsDimensionVpNG(object->GetProperty("topRight"), topRight, true)) {
-            radiusTopRight = topRight;
-        }
-        CalcDimension bottomLeft;
-        if (ParseJsDimensionVpNG(object->GetProperty("bottomLeft"), bottomLeft, true)) {
-            radiusBottomLeft = bottomLeft;
-        }
-        CalcDimension bottomRight;
-        if (ParseJsDimensionVpNG(object->GetProperty("bottomRight"), bottomRight, true)) {
-            radiusBottomRight = bottomRight;
-        }
-        radius.radiusTopLeft = radiusTopLeft;
-        radius.radiusTopRight = radiusTopRight;
-        radius.radiusBottomLeft = radiusBottomLeft;
-        radius.radiusBottomRight = radiusBottomRight;
-        radius.multiValued = true;
+        ParseCommonBorderRadiusProps(object, radius);
     } else {
         return false;
     }
@@ -9887,6 +10062,42 @@ int32_t JSViewAbstract::ParseJsPropertyId(const JSRef<JSVal>& jsValue)
         }
     }
     return resId;
+}
+
+void JSViewAbstract::JsVisualEffect(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    auto visualEffect = CreateRSEffectFromNapiValue(info[0]);
+    ViewAbstractModel::GetInstance()->SetVisualEffect(visualEffect);
+}
+
+void JSViewAbstract::JsBackgroundFilter(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    auto backgroundFilter = CreateRSFilterFromNapiValue(info[0]);
+    ViewAbstractModel::GetInstance()->SetBackgroundFilter(backgroundFilter);
+}
+
+void JSViewAbstract::JsForegroundFilter(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    auto foregroundFilter = CreateRSFilterFromNapiValue(info[0]);
+    ViewAbstractModel::GetInstance()->SetForegroundFilter(foregroundFilter);
+}
+
+void JSViewAbstract::JsCompositingFilter(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    auto compositingFilter = CreateRSFilterFromNapiValue(info[0]);
+    ViewAbstractModel::GetInstance()->SetCompositingFilter(compositingFilter);
 }
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_ParseJsMedia(void* value, void* resource)

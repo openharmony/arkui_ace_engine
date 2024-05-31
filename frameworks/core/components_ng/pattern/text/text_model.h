@@ -28,6 +28,7 @@
 #include "core/components/box/drag_drop_event.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/pattern/text/layout_info_interface.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
@@ -43,6 +44,7 @@ class ACE_EXPORT TextControllerBase : public AceType {
 public:
     virtual void CloseSelectionMenu() = 0;
     virtual void SetStyledString(const RefPtr<SpanStringBase>& value) = 0;
+    virtual WeakPtr<NG::LayoutInfoInterface> GetLayoutInfoInterface() = 0;
 };
 
 class ACE_EXPORT TextModel {

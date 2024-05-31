@@ -191,19 +191,21 @@ public:
 
     void SetVisibleAreaUserCallback(const std::vector<double>& ratios, const VisibleCallbackInfo& callback)
     {
-        eventHub_->SetVisibleAreaRatios(ratios, true);
-        eventHub_->SetVisibleAreaCallback(callback, true);
+        eventHub_->SetVisibleAreaRatiosAndCallback(callback, ratios, true);
     }
 
-    void CleanVisibleAreaUserCallback()
+    void CleanVisibleAreaUserCallback(bool isApproximate = false)
     {
-        eventHub_->CleanVisibleAreaCallback(true);
+        if (isApproximate) {
+            eventHub_->CleanVisibleAreaCallback(true, isApproximate);
+        } else {
+            eventHub_->CleanVisibleAreaCallback(true, false);
+        }
     }
 
     void SetVisibleAreaInnerCallback(const std::vector<double>& ratios, const VisibleCallbackInfo& callback)
     {
-        eventHub_->SetVisibleAreaRatios(ratios, false);
-        eventHub_->SetVisibleAreaCallback(callback, false);
+        eventHub_->SetVisibleAreaRatiosAndCallback(callback, ratios, false);
     }
 
     void CleanVisibleAreaInnerCallback()
@@ -311,7 +313,8 @@ public:
 
     // If return true, will prevent TouchTest Bubbling to parent and brother nodes.
     HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const PointF& parentRevertPoint,
-        TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId, bool isDispatch = false) override;
+        TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId, TouchTestResult& responseLinkResult,
+        bool isDispatch = false) override;
 
     HitTestResult MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint, MouseTestResult& onMouseResult,
         MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode) override;
@@ -785,7 +788,8 @@ public:
         }
     }
 
-    void NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType);
+    void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
+        RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType);
     void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "");
 
     int32_t GetUiExtensionId();
@@ -842,7 +846,6 @@ public:
 
     void SetGeometryTransitionInRecursive(bool isGeometryTransitionIn) override
     {
-        SetSkipSyncGeometryNode();
         UINode::SetGeometryTransitionInRecursive(isGeometryTransitionIn);
     }
     static std::pair<float, float> ContextPositionConvertToPX(
@@ -853,6 +856,11 @@ public:
     void NotifyTransformInfoChanged()
     {
         isLocalRevertMatrixAvailable_ = false;
+    }
+
+    void AddPredictLayoutNode(const RefPtr<FrameNode>& node)
+    {
+        predictLayoutNode_.emplace_back(node);
     }
 
     // this method will check the cache state and return the cached revert matrix preferentially,
@@ -920,6 +928,7 @@ private:
     void DumpOverlayInfo();
     void DumpCommonInfo();
     void DumpSafeAreaInfo();
+    void DumpAlignRulesInfo();
     void DumpExtensionHandlerInfo();
     void DumpAdvanceInfo() override;
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) override;
@@ -934,7 +943,11 @@ private:
     bool OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config);
 
     void ProcessAllVisibleCallback(const std::vector<double>& visibleAreaUserRatios,
-        VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio, double lastVisibleRatio);
+        VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio,
+        double lastVisibleRatio, bool isThrottled = false);
+    void ProcessThrottledVisibleCallback();
+    bool IsFrameDisappear();
+    void ThrottledVisibleTask();
 
     void OnPixelRoundFinish(const SizeF& pixelGridRoundSize);
 
@@ -963,6 +976,9 @@ private:
     void SetCachedTransformRelativeOffset(const std::pair<uint64_t, OffsetF>& timestampOffset);
 
     HitTestMode TriggerOnTouchIntercept(const TouchEvent& touchEvent);
+
+    void TriggerShouldParallelInnerWith(
+        const TouchTestResult& currentRecognizers, const TouchTestResult& responseLinkRecognizers);
 
     void AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEvent& touchEvent);
 
@@ -1022,6 +1038,10 @@ private:
 
     double lastVisibleRatio_ = 0.0;
     double lastVisibleCallbackRatio_ = 0.0;
+    double lastThrottledVisibleRatio_ = 0.0;
+    double lastThrottledVisibleCbRatio_ = 0.0;
+    int64_t lastThrottledTriggerTime_ = 0;
+    bool throttledCallbackOnTheWay_ = false;
 
     // internal node such as Text in Button CreateWithLabel
     // should not seen by preview inspector or accessibility
@@ -1065,6 +1085,7 @@ private:
         RectF currFrameRect;
     };
     std::vector<onSizeChangeDumpInfo> onSizeChangeDumpInfos;
+    std::list<WeakPtr<FrameNode>> predictLayoutNode_;
 
     friend class RosenRenderContext;
     friend class RenderContext;

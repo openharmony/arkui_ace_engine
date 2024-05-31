@@ -50,6 +50,7 @@ RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
     };
     imageLayoutProperty->UpdateMargin(imageMargin);
     imageNode->MountToParent(columnNode);
+    imageNode->MarkModifyDone();
     CreateDialogTextNode(columnNode, message);
     return CreateCustomDialog(columnNode);
 }
@@ -76,6 +77,7 @@ RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
     };
     symbolProperty->UpdateMargin(imageMargin);
     symbolNode->MountToParent(columnNode);
+    symbolNode->MarkModifyDone();
     CreateDialogTextNode(columnNode, message);
     return CreateCustomDialog(columnNode);
 }

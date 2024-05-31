@@ -289,6 +289,7 @@ void MenuItemLayoutAlgorithm::CheckNeedExpandContent(LayoutWrapper* layoutWrappe
 void MenuItemLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper,
     float width, float itemHeight, float minItemHeight, float expandableHeight)
 {
+    itemHeight += GetDividerStroke(layoutWrapper);
     auto clickableArea = layoutWrapper->GetOrCreateChildByIndex(CLICKABLE_AREA_VIEW_INDEX);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         auto height = std::max(itemHeight, minItemHeight);
@@ -300,5 +301,14 @@ void MenuItemLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper,
         layoutWrapper->GetGeometryNode()->SetContentSize(SizeF(width, itemHeight));
     }
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
+}
+
+float MenuItemLayoutAlgorithm::GetDividerStroke(LayoutWrapper* layoutWrapper)
+{
+    auto menuItemNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(menuItemNode, 0.0f);
+    auto pattern = menuItemNode->GetPattern<MenuItemPattern>();
+    CHECK_NULL_RETURN(pattern, 0.0f);
+    return pattern->GetDividerStroke();
 }
 } // namespace OHOS::Ace::NG

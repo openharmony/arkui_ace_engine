@@ -1093,4 +1093,24 @@ void WebModelNG::SetViewportFitChangedId(std::function<void(const BaseEventInfo*
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnViewportFitChangedEvent(std::move(uiCallback));
 }
+
+void WebModelNG::SetOnInterceptKeyboardAttach(std::function<WebKeyboardOption(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) -> WebKeyboardOption {
+        return func(info.get());
+    };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnInterceptKeyboardAttachEvent(std::move(uiCallback));
+}
+
+void WebModelNG::SetAdsBlockedEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnAdsBlockedEvent(std::move(uiCallback));
+}
 } // namespace OHOS::Ace::NG

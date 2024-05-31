@@ -185,6 +185,42 @@ void ParseConfirmButton(const JsiExecutionContext& execContext, DialogProperties
     }
 }
 
+void ParseShadow(DialogProperties& properties, JSRef<JSObject> obj)
+{
+    // Parse shadow.
+    auto shadowValue = obj->GetProperty("shadow");
+    Shadow shadow;
+    if ((shadowValue->IsObject() || shadowValue->IsNumber()) && JSActionSheet::ParseShadowProps(shadowValue, shadow)) {
+        properties.shadow = shadow;
+    }
+}
+
+void ParseBorderWidthAndColor(DialogProperties& properties, JSRef<JSObject> obj)
+{
+    auto borderWidthValue = obj->GetProperty("borderWidth");
+    NG::BorderWidthProperty borderWidth;
+    if (JSActionSheet::ParseBorderWidthProps(borderWidthValue, borderWidth)) {
+        properties.borderWidth = borderWidth;
+        auto colorValue = obj->GetProperty("borderColor");
+        NG::BorderColorProperty borderColor;
+        if (JSActionSheet::ParseBorderColorProps(colorValue, borderColor)) {
+            properties.borderColor = borderColor;
+        } else {
+            borderColor.SetColor(Color::BLACK);
+            properties.borderColor = borderColor;
+        }
+    }
+}
+
+void ParseRadius(DialogProperties& properties, JSRef<JSObject> obj)
+{
+    auto cornerRadiusValue = obj->GetProperty("cornerRadius");
+    NG::BorderRadiusProperty radius;
+    if (JSActionSheet::ParseBorderRadius(cornerRadiusValue, radius)) {
+        properties.borderRadius = radius;
+    }
+}
+
 void JSActionSheet::Show(const JSCallbackInfo& args)
 {
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
@@ -207,9 +243,13 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
 
     ParseTitleAndMessage(properties, obj);
     ParseConfirmButton(execContext, properties, obj);
+    ParseShadow(properties, obj);
+    ParseBorderWidthAndColor(properties, obj);
+    ParseRadius(properties, obj);
 
     auto onLanguageChange = [execContext, obj, parseContent = ParseTitleAndMessage, parseButton = ParseConfirmButton,
-                                node = dialogNode](DialogProperties& dialogProps) {
+                                parseShadow = ParseShadow, parseBorderProps = ParseBorderWidthAndColor,
+                                parseRadius = ParseRadius, node = dialogNode](DialogProperties& dialogProps) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execContext);
         ACE_SCORING_EVENT("ActionSheet.property.onLanguageChange");
         auto pipelineContext = PipelineContext::GetCurrentContextSafely();
@@ -217,6 +257,9 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
         pipelineContext->UpdateCurrentActiveNode(node);
         parseContent(dialogProps, obj);
         parseButton(execContext, dialogProps, obj);
+        parseShadow(dialogProps, obj);
+        parseBorderProps(dialogProps, obj);
+        parseRadius(dialogProps, obj);
         // Parse sheets
         auto sheetsVal = obj->GetProperty("sheets");
         if (sheetsVal->IsArray()) {

@@ -237,9 +237,7 @@ void GetMouseEventAction(int32_t action, MouseEvent& events, bool isScenceBoardW
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_DOWN:
             events.action = MouseAction::PRESS;
-            if (isScenceBoardWindow) {
-                events.pullAction = MouseAction::PULL_DOWN;
-            }
+            events.pullAction = MouseAction::PULL_DOWN;
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE:
             events.action = MouseAction::MOVE;
@@ -247,9 +245,7 @@ void GetMouseEventAction(int32_t action, MouseEvent& events, bool isScenceBoardW
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP:
             events.action = MouseAction::RELEASE;
-            if (isScenceBoardWindow) {
-                events.pullAction = MouseAction::PULL_UP;
-            }
+            events.pullAction = MouseAction::PULL_UP;
             break;
         default:
             events.action = MouseAction::NONE;
@@ -496,6 +492,11 @@ void CalculatePointerEvent(const NG::OffsetF& offsetF, const std::shared_ptr<MMI
     if (ret) {
         float xRelative = item.GetWindowX();
         float yRelative = item.GetWindowY();
+        if (point->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN &&
+            item.GetToolType() == OHOS::MMI::PointerEvent::TOOL_TYPE_PEN) {
+            xRelative = item.GetWindowXPos();
+            yRelative = item.GetWindowYPos();
+        }
         auto windowX = xRelative;
         auto windowY = yRelative;
         auto pipelineContext = PipelineBase::GetCurrentContext();
@@ -528,6 +529,8 @@ void CalculatePointerEvent(const NG::OffsetF& offsetF, const std::shared_ptr<MMI
 
         item.SetWindowX(static_cast<int32_t>(windowX));
         item.SetWindowY(static_cast<int32_t>(windowY));
+        item.SetWindowXPos(windowX);
+        item.SetWindowYPos(windowY);
         point->UpdatePointerItem(pointerId, item);
     }
 }
@@ -546,6 +549,11 @@ void CalculateWindowCoordinate(const NG::OffsetF& offsetF, const std::shared_ptr
         }
         float xRelative = item.GetDisplayX();
         float yRelative = item.GetDisplayY();
+        if (point->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN &&
+            item.GetToolType() == OHOS::MMI::PointerEvent::TOOL_TYPE_PEN) {
+            xRelative = item.GetDisplayXPos();
+            yRelative = item.GetDisplayYPos();
+        }
         float windowX = xRelative;
         float windowY = yRelative;
         int32_t deviceWidth = SystemProperties::GetDevicePhysicalWidth();
@@ -573,6 +581,8 @@ void CalculateWindowCoordinate(const NG::OffsetF& offsetF, const std::shared_ptr
 
         item.SetWindowX(static_cast<int32_t>(windowX));
         item.SetWindowY(static_cast<int32_t>(windowY));
+        item.SetWindowXPos(windowX);
+        item.SetWindowYPos(windowY);
         point->UpdatePointerItem(id, item);
     }
 }

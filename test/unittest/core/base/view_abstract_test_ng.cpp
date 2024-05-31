@@ -808,6 +808,13 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest014, TestSize.Level1)
     ViewAbstract::SetJSFrameNodeOnKeyCallback(AceType::RawPtr(FRAME_NODE_REGISTER), std::move(onKeyCallback));
     ViewAbstract::ClearJSFrameNodeOnKeyCallback(AceType::RawPtr(FRAME_NODE_REGISTER));
 
+    std::function<void(bool, double)> onVisibleChange;
+    const std::vector<double> ratios;
+    constexpr uint32_t minInterval = 100; // 100ms
+    ViewAbstract::SetJSFrameNodeOnVisibleAreaApproximateChange(
+        AceType::RawPtr(FRAME_NODE_REGISTER), std::move(onVisibleChange), ratios, minInterval);
+    ViewAbstract::ClearJSFrameNodeOnVisibleAreaApproximateChange(AceType::RawPtr(FRAME_NODE_REGISTER));
+
     /**
      * @tc.expected: Return expected results.
      */

@@ -386,7 +386,7 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
         JSRef<JSVal> builderObject = jsObj->GetProperty("builder");
         if (builderObject->IsFunction()) {
             ViewStackModel::GetInstance()->NewScope();
-            JsFunction jsBuilderFunc(info.This(), JSRef<JSObject>::Cast(builderObject));
+            JsFunction jsBuilderFunc(info.This(), JSRef<JSFunc>::Cast(builderObject));
             ACE_SCORING_EVENT("Navigation.title.builder");
             jsBuilderFunc.Execute();
             auto customNode = ViewStackModel::GetInstance()->Finish();
@@ -586,7 +586,7 @@ void JSNavigation::SetMenus(const JSCallbackInfo& info)
         auto builderObject = JSRef<JSObject>::Cast(info[0])->GetProperty("builder");
         if (builderObject->IsFunction()) {
             ViewStackModel::GetInstance()->NewScope();
-            JsFunction jsBuilderFunc(info.This(), JSRef<JSObject>::Cast(builderObject));
+            JsFunction jsBuilderFunc(info.This(), JSRef<JSFunc>::Cast(builderObject));
             ACE_SCORING_EVENT("Navigation.menu.builder");
             jsBuilderFunc.Execute();
             auto customNode = ViewStackModel::GetInstance()->Finish();
@@ -756,6 +756,10 @@ void JSNavigation::SetNavDestination(const JSCallbackInfo& info)
         return;
     }
 
+    if (!info[0]->IsObject()) {
+        return;
+    }
+
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     auto builder = obj->GetProperty("builder");
     if (!builder->IsFunction()) {
@@ -821,6 +825,9 @@ void JSNavigation::SetCustomNavContentTransition(const JSCallbackInfo& info)
             transition.timeout = NAVIGATION_ANIMATION_TIMEOUT;
         }
         JSRef<JSVal> transitionContext = transitionObj->GetProperty("transition");
+        if (!transitionContext->IsFunction()) {
+            return transition;
+        }
         auto jsOnTransition = AceType::MakeRefPtr<JsNavigationFunction>(JSRef<JSFunc>::Cast(transitionContext));
         if (transitionContext->IsFunction()) {
             auto onTransition = [execCtx, func = std::move(jsOnTransition)](

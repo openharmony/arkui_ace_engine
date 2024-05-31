@@ -39,6 +39,10 @@ abstract class ViewPU extends PUV2ViewBase
 
   private hasBeenRecycled_: boolean = false;
 
+  private delayRecycleNodeRerender: boolean = false;
+
+  private delayRecycleNodeRerenderDeep: boolean = false;
+
   // @Provide'd variables by this class and its ancestors
   protected providedVars_: Map<string, ObservedPropertyAbstractPU<any>> = new Map<string, ObservedPropertyAbstractPU<any>>();
 
@@ -413,6 +417,16 @@ abstract class ViewPU extends PUV2ViewBase
     }
     stateMgmtConsole.debug(`${this.debugInfo__()}: forceCompleteRerender - end`);
     stateMgmtProfiler.end();
+  }
+
+  public delayCompleteRerender(deep: boolean = false): void {
+    this.delayRecycleNodeRerender = true;
+    this.delayRecycleNodeRerenderDeep = deep;
+  }
+
+  public flushDelayCompleteRerender(): void {
+    this.forceCompleteRerender(this.delayRecycleNodeRerenderDeep);
+    this.delayRecycleNodeRerender = false;
   }
 
   /**
@@ -843,7 +857,11 @@ abstract class ViewPU extends PUV2ViewBase
         }
       }
     }
-    this.updateDirtyElements();
+    if (!this.delayRecycleNodeRerender) {
+      this.updateDirtyElements();
+    } else {
+      this.flushDelayCompleteRerender();
+    }
     this.childrenWeakrefMap_.forEach((weakRefChild) => {
       const child = weakRefChild.deref();
       if (child) {
@@ -1135,16 +1153,22 @@ abstract class ViewPU extends PUV2ViewBase
         const prop: any = Reflect.get(this, varName);
         if ('debugInfoDecorator' in prop) {
           const observedProp: ObservedPropertyAbstractPU<any> = prop as ObservedPropertyAbstractPU<any>;
-          let observedPropertyInfo: ObservedPropertyInfo = {
+          let observedPropertyInfo: ObservedPropertyInfo<any> = {
             decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(),
-            value: typeof observedProp.getUnmonitored() !== 'object' ? observedProp.getUnmonitored() : ObservedObject.GetRawObject(observedProp.getUnmonitored()),
-            dependentElementIds: observedProp.debugInfoDependentElmtIds(),
+            value: observedProp.getRawObjectValue(),
+            dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() == 'object'? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()): false),
             owningView: { componentName: this.constructor.name, id: this.id__() }, syncPeers: observedProp.dumpSyncPeers()
           };
           res.observedPropertiesInfo.push(observedPropertyInfo);
         }
       });
-    return JSON.stringify(res);
+      let resInfo: string = '';
+      try {
+        resInfo = JSON.stringify(res);
+      } catch (error) {
+        stateMgmtConsole.applicationError(`${this.debugInfo__()} has error in getInspector: ${(error as Error).message}`);
+      }
+    return resInfo;
   }
 
 

@@ -37,7 +37,6 @@
 #include "core/components_ng/pattern/swiper/swiper_layout_algorithm.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
-#include "core/components_ng/pattern/swiper/swiper_paint_method.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
 #include "core/components_ng/pattern/swiper/swiper_utils.h"
 #include "core/components_ng/pattern/tabs/tab_content_transition_proxy.h"
@@ -89,18 +88,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
-    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
-    {
-        auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
-        CHECK_NULL_RETURN(layoutProperty, nullptr);
-        const auto& paddingProperty = layoutProperty->GetPaddingProperty();
-        bool needClipPadding = paddingProperty != nullptr;
-        bool needPaintFade = !IsLoop() && GetEdgeEffect() == EdgeEffect::FADE && !NearZero(fadeOffset_);
-        auto paintMethod = MakeRefPtr<SwiperPaintMethod>(GetDirection(), fadeOffset_);
-        paintMethod->SetNeedPaintFade(needPaintFade);
-        paintMethod->SetNeedClipPadding(needClipPadding);
-        return paintMethod;
-    }
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     RefPtr<EventHub> CreateEventHub() override
     {
@@ -110,6 +98,10 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         Pattern::ToJsonValue(json, filter);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("currentIndex", currentIndex_, filter);
         json->PutExtAttr("currentOffset", currentOffset_, filter);
         json->PutExtAttr("uiCastJumpIndex", uiCastJumpIndex_.value_or(-1), filter);
@@ -119,10 +111,13 @@ public:
         }
 
         auto indicatorType = GetIndicatorType();
+        const char* indicator = "indicator";
         if (indicatorType == SwiperIndicatorType::DOT) {
-            json->PutExtAttr("indicator", GetDotIndicatorStyle().c_str(), filter);
+            json->PutExtAttr(indicator, GetDotIndicatorStyle().c_str(), filter);
+        } else if (indicatorType == SwiperIndicatorType::ARC_DOT) {
+            json->PutExtAttr(indicator, GetArcDotIndicatorStyle().c_str(), filter);
         } else {
-            json->PutExtAttr("indicator", GetDigitIndicatorStyle().c_str(), filter);
+            json->PutExtAttr(indicator, GetDigitIndicatorStyle().c_str(), filter);
         }
     }
 
@@ -200,6 +195,21 @@ public:
             V2::ConvertWrapFontWeightToStirng(swiperDigitalParameters_->selectedFontWeight.value_or(FontWeight::NORMAL))
                 .c_str());
         return jsonValue->ToString();
+    }
+
+    std::string GetArcDotIndicatorStyle() const;
+
+    std::string GradientToJson(Gradient colors) const
+    {
+        auto jsonArray = JsonUtil::CreateArray(true);
+        for (size_t index = 0; index < colors.GetColors().size(); ++index) {
+            auto gradientColor = colors.GetColors()[index];
+            auto gradientColorJson = JsonUtil::Create(true);
+            gradientColorJson->Put("color", gradientColor.GetLinearColor().ToColor().ColorToString().c_str());
+            gradientColorJson->Put("offset", std::to_string(gradientColor.GetDimension().Value()).c_str());
+            jsonArray->Put(std::to_string(index).c_str(), gradientColorJson);
+        }
+        return jsonArray->ToString();
     }
 
     int32_t GetCurrentShownIndex() const
@@ -378,6 +388,11 @@ public:
         swiperDigitalParameters_ = std::make_shared<SwiperDigitalParameters>(swiperDigitalParameters);
     }
 
+    void SetSwiperArcDotParameters(const SwiperArcDotParameters& swiperArcDotParameters)
+    {
+        swiperArcDotParameters_ = std::make_shared<SwiperArcDotParameters>(swiperArcDotParameters);
+    }
+
     void ShowNext();
     void ShowPrevious();
     void SwipeTo(int32_t index);
@@ -521,6 +536,7 @@ public:
     }
 
     std::shared_ptr<SwiperParameters> GetSwiperParameters() const;
+    std::shared_ptr<SwiperArcDotParameters> GetSwiperArcDotParameters() const;
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters() const;
 
     void ArrowHover(bool hoverFlag);
@@ -602,7 +618,7 @@ public:
 
     bool ContentWillChange(int32_t comingIndex);
     bool ContentWillChange(int32_t currentIndex, int32_t comingIndex);
-    bool CheckSwiperPanEvent(const GestureEvent& info);
+    bool CheckSwiperPanEvent(float mainDeltaOrVelocity);
     void InitIndexCanChangeMap()
     {
         indexCanChangeMap_.clear();
@@ -643,6 +659,19 @@ public:
     {
         prevMarginIgnoreBlank_ = prevMarginIgnoreBlank;
     }
+
+    bool GetPrevMarginIgnoreBlank()
+    {
+        return prevMarginIgnoreBlank_;
+    }
+
+    bool GetNextMarginIgnoreBlank()
+    {
+        return nextMarginIgnoreBlank_;
+    }
+
+    bool IsAtStart() const;
+    bool IsAtEnd() const;
 
 private:
     void OnModifyDone() override;
@@ -693,7 +722,8 @@ private:
     // use property animation feature
     void PlayPropertyTranslateAnimation(
         float translate, int32_t nextIndex, float velocity = 0.0f, bool stopAutoPlay = false);
-    void StopPropertyTranslateAnimation(bool isFinishAnimation, bool isBeforeCreateLayoutWrapper = false);
+    void StopPropertyTranslateAnimation(bool isFinishAnimation,
+        bool isBeforeCreateLayoutWrapper = false, bool isInterrupt = false);
     void UpdateOffsetAfterPropertyAnimation(float offset);
     void OnPropertyTranslateAnimationFinish(const OffsetF& offset);
     void PlayIndicatorTranslateAnimation(float translate, std::optional<int32_t> nextIndex = std::nullopt);
@@ -712,7 +742,8 @@ private:
     float GetMainContentSize() const;
     void FireChangeEvent() const;
     void FireAnimationStartEvent(int32_t currentIndex, int32_t nextIndex, const AnimationCallbackInfo& info) const;
-    void FireAnimationEndEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const;
+    void FireAnimationEndEvent(int32_t currentIndex,
+        const AnimationCallbackInfo& info, bool isInterrupt = false) const;
     void FireGestureSwipeEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const;
     void FireSwiperCustomAnimationEvent();
     void FireContentDidScrollEvent();
@@ -740,12 +771,14 @@ private:
     void OnIndexChange();
     bool IsOutOfHotRegion(const PointF& dragPoint) const;
     void SaveDotIndicatorProperty(const RefPtr<FrameNode>& indicatorNode);
+    void SaveCircleDotIndicatorProperty(const RefPtr<FrameNode>& indicatorNode);
     void SaveDigitIndicatorProperty(const RefPtr<FrameNode>& indicatorNode);
     void UpdatePaintProperty(const RefPtr<FrameNode>& indicatorNode);
     void PostTranslateTask(uint32_t delayTime);
     void RegisterVisibleAreaChange();
     bool NeedAutoPlay() const;
-    void OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, bool isFinishAnimation, bool forceStop = false);
+    void OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay,
+        bool isFinishAnimation, bool forceStop = false, bool isInterrupt = false);
     bool IsShowArrow() const;
     void SaveArrowProperty(const RefPtr<FrameNode>& arrowNode);
     RefPtr<FocusHub> GetFocusHubChild(std::string childFrameName);
@@ -758,7 +791,7 @@ private:
     float GetCustomPropertyOffset() const;
     float GetCustomPropertyTargetOffset() const;
     void UpdateAnimationProperty(float velocity);
-    void TriggerAnimationEndOnForceStop();
+    void TriggerAnimationEndOnForceStop(bool isInterrupt);
     void TriggerAnimationEndOnSwipeToLeft();
     void TriggerAnimationEndOnSwipeToRight();
     void TriggerEventOnFinish(int32_t nextIndex);
@@ -931,6 +964,7 @@ private:
     void CreateSpringProperty();
 
     std::optional<RefPtr<UINode>> FindLazyForEachNode(RefPtr<UINode> baseNode, bool isSelfNode = true) const;
+    bool NeedForceMeasure() const;
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -1010,6 +1044,7 @@ private:
 
     mutable std::shared_ptr<SwiperParameters> swiperParameters_;
     mutable std::shared_ptr<SwiperDigitalParameters> swiperDigitalParameters_;
+    mutable std::shared_ptr<SwiperArcDotParameters> swiperArcDotParameters_;
 
     WeakPtr<FrameNode> lastWeakShowNode_;
 
@@ -1085,6 +1120,10 @@ private:
     bool hasCachedCapture_ = false;
     bool isCaptureReverse_ = false;
     OffsetF captureFinalOffset_;
+    bool isInAutoPlay_ = false;
+
+    bool needFireCustomAnimationEvent_ = true;
+    std::optional<bool> isSwipeByGroup_;
 };
 } // namespace OHOS::Ace::NG
 

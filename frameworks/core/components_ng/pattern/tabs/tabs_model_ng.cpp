@@ -57,7 +57,89 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TABS_ETS_TAG, nodeId);
     auto tabsNode = GetOrCreateTabsNode(V2::TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
+    InitTabsNode(tabsNode, swiperController);
+    ViewStackProcessor::GetInstance()->Push(tabsNode);
 
+    SetTabBarPosition(barPosition);
+    if (!tabsNode->HasTabBarNode()) {
+        auto tabsFrameNode = AceType::DynamicCast<FrameNode>(tabsNode);
+        CHECK_NULL_VOID(tabsFrameNode);
+        auto tabsLayoutProperty = tabsFrameNode->GetLayoutProperty<TabsLayoutProperty>();
+        tabsLayoutProperty->UpdateIndex(index < 0 ? 0 : index);
+        return;
+    }
+    auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+    auto preIndex = tabsLayoutProperty->GetIndexValue(0);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    if (tabsPattern->GetInterceptStatus()) {
+        auto ret = tabsPattern->OnContentWillChange(preIndex, index);
+        if (ret.has_value() && !ret.value()) {
+            return;
+        }
+    }
+    if ((index != preIndex) && (index >= 0)) {
+        SetIndex(index);
+        auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+        auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+        tabBarPattern->SetMaskAnimationByCreate(true);
+        tabBarPattern->UpdateImageColor(index);
+    }
+}
+
+RefPtr<SwiperController> TabsModelNG::GetSwiperController(const RefPtr<FrameNode>& swiperNode,
+    const RefPtr<SwiperController>& swiperController)
+{
+    auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
+    swiperPaintProperty->UpdateEdgeEffect(EdgeEffect::SPRING);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_RETURN(tabTheme, nullptr);
+    swiperPaintProperty->UpdateDuration(tabTheme->GetTabContentAnimationDuration());
+    swiperPaintProperty->UpdateCurve(TabBarPhysicalCurve);
+    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    swiperLayoutProperty->UpdateLoop(false);
+    swiperLayoutProperty->UpdateCachedCount(0);
+    swiperLayoutProperty->UpdateShowIndicator(false);
+    swiperLayoutProperty->UpdateSafeAreaExpandOpts(
+        { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_TOP + SAFE_AREA_EDGE_BOTTOM });
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(swiperPattern, nullptr);
+    auto controller = swiperController ? swiperController : swiperPattern->GetSwiperController();
+    if (!controller) {
+        controller = AceType::MakeRefPtr<SwiperController>();
+    }
+    swiperPattern->SetSwiperController(controller);
+    swiperPattern->SetFinishCallbackType(FinishCallbackType::LOGICALLY);
+    swiperPattern->SetHasTabsAncestor(true);
+    return controller;
+}
+
+void TabsModelNG::InitSelectedMaskNode(const RefPtr<FrameNode>& selectedMaskNode)
+{
+    auto selectedImageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    selectedImageNode->MountToParent(selectedMaskNode);
+    auto selectedMaskRenderContext = selectedMaskNode->GetRenderContext();
+    auto selectedMaskProperty = selectedMaskNode->GetLayoutProperty<LinearLayoutProperty>();
+    selectedMaskProperty->UpdateCrossAxisAlign(FlexAlign::FLEX_START);
+    selectedMaskRenderContext->SetClipToBounds(true);
+}
+
+void TabsModelNG::InitUnselectedMaskNode(const RefPtr<FrameNode>& unselectedMaskNode)
+{
+    auto unselectedImageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    unselectedImageNode->MountToParent(unselectedMaskNode);
+    auto unselectedMaskRenderContext = unselectedMaskNode->GetRenderContext();
+    auto unselectedMaskProperty = unselectedMaskNode->GetLayoutProperty<LinearLayoutProperty>();
+    unselectedMaskProperty->UpdateCrossAxisAlign(FlexAlign::FLEX_START);
+    unselectedMaskRenderContext->SetClipToBounds(true);
+}
+
+void TabsModelNG::InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperController>& swiperController)
+{
     bool hasSwiperNode = tabsNode->HasSwiperNode();
     bool hasTabBarNode = tabsNode->HasTabBarNode();
     bool hasDividerNode = tabsNode->HasDividerNode();
@@ -72,30 +154,7 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
     // Create Swiper node to contain TabContent.
     auto swiperNode = FrameNode::GetOrCreateFrameNode(
         V2::SWIPER_ETS_TAG, swiperId, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
-    auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
-    swiperPaintProperty->UpdateEdgeEffect(EdgeEffect::SPRING);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
-    CHECK_NULL_VOID(tabTheme);
-    swiperPaintProperty->UpdateDuration(tabTheme->GetTabContentAnimationDuration());
-    swiperPaintProperty->UpdateCurve(TabBarPhysicalCurve);
-    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
-    swiperLayoutProperty->UpdateLoop(false);
-    swiperLayoutProperty->UpdateCachedCount(0);
-    swiperLayoutProperty->UpdateShowIndicator(false);
-    swiperLayoutProperty->UpdateSafeAreaExpandOpts(
-        { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_TOP + SAFE_AREA_EDGE_BOTTOM });
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_VOID(swiperPattern);
-    auto controller = swiperController ? swiperController : swiperPattern->GetSwiperController();
-    if (!controller) {
-        controller = AceType::MakeRefPtr<SwiperController>();
-    }
-    swiperPattern->SetSwiperController(controller);
-    swiperPattern->SetFinishCallbackType(FinishCallbackType::LOGICALLY);
-    swiperPattern->SetHasTabsAncestor(true);
-
+    auto controller = GetSwiperController(swiperNode, swiperController);
     auto dividerNode = FrameNode::GetOrCreateFrameNode(
         V2::DIVIDER_ETS_TAG, dividerId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
 
@@ -124,51 +183,21 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
     }
     if (!hasSelectedMaskNode) {
         selectedMaskNode->MountToParent(tabBarNode);
-        auto selectedImageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
-        selectedImageNode->MountToParent(selectedMaskNode);
-        auto selectedMaskRenderContext = selectedMaskNode->GetRenderContext();
-        auto selectedMaskProperty = selectedMaskNode->GetLayoutProperty<LinearLayoutProperty>();
-        selectedMaskProperty->UpdateCrossAxisAlign(FlexAlign::FLEX_START);
-        selectedMaskRenderContext->SetClipToBounds(true);
+        InitSelectedMaskNode(selectedMaskNode);
     }
     if (!hasUnselectedMaskNode) {
         unselectedMaskNode->MountToParent(tabBarNode);
-        auto unselectedImageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
-        unselectedImageNode->MountToParent(unselectedMaskNode);
-        auto unselectedMaskRenderContext = unselectedMaskNode->GetRenderContext();
-        auto unselectedMaskProperty = unselectedMaskNode->GetLayoutProperty<LinearLayoutProperty>();
-        unselectedMaskProperty->UpdateCrossAxisAlign(FlexAlign::FLEX_START);
-        unselectedMaskRenderContext->SetClipToBounds(true);
+        InitUnselectedMaskNode(unselectedMaskNode);
     }
+}
 
-    ViewStackProcessor::GetInstance()->Push(tabsNode);
-
-    SetTabBarPosition(barPosition);
-    if (!hasTabBarNode) {
-        auto tabsFrameNode = AceType::DynamicCast<FrameNode>(tabsNode);
-        CHECK_NULL_VOID(tabsFrameNode);
-        auto tabsLayoutProperty = tabsFrameNode->GetLayoutProperty<TabsLayoutProperty>();
-        tabsLayoutProperty->UpdateIndex(index < 0 ? 0 : index);
-        return;
-    }
-    auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
-    auto preIndex = tabsLayoutProperty->GetIndexValue(0);
-    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
-    CHECK_NULL_VOID(tabsPattern);
-    if (tabsPattern->GetInterceptStatus()) {
-        auto ret = tabsPattern->OnContentWillChange(preIndex, index);
-        if (ret.has_value() && !ret.value()) {
-            return;
-        }
-    }
-    if ((index != preIndex) && (index >= 0)) {
-        SetIndex(index);
-        auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
-        tabBarPattern->SetMaskAnimationByCreate(true);
-        tabBarPattern->UpdateImageColor(index);
-    }
+RefPtr<FrameNode> TabsModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto tabsNode = GetOrCreateTabsNode(V2::TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
+    InitTabsNode(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    tabBarNode->MarkModifyDone();
+    return tabsNode;
 }
 
 void TabsModelNG::SetTabBarPosition(BarPosition tabBarPosition)
@@ -951,5 +980,24 @@ void TabsModelNG::SetOnContentWillChange(std::function<bool(int32_t, int32_t)>&&
     CHECK_NULL_VOID(tabPattern);
     tabPattern->SetInterceptStatus(true);
     tabPattern->SetOnContentWillChange(std::move(callback));
+}
+
+void TabsModelNG::SetAnimateMode(TabAnimateMode mode)
+{
+    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabsNode);
+    auto tabPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabPattern);
+    tabPattern->SetAnimateMode(mode);
+}
+
+void TabsModelNG::SetAnimateMode(FrameNode* frameNode, TabAnimateMode mode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    CHECK_NULL_VOID(tabsNode);
+    auto tabPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabPattern);
+    tabPattern->SetAnimateMode(mode);
 }
 } // namespace OHOS::Ace::NG

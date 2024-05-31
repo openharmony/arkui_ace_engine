@@ -38,8 +38,10 @@ public:
     {
         if (gestureInfo_) {
             gestureInfo_->SetType(GestureTypeName::LONG_PRESS_GESTURE);
+            gestureInfo_->SetRecognizerType(GestureTypeName::LONG_PRESS_GESTURE);
         } else {
-            gestureInfo_ = MakeRefPtr<GestureInfo>(GestureTypeName::LONG_PRESS_GESTURE);
+            gestureInfo_ = MakeRefPtr<GestureInfo>(
+                GestureTypeName::LONG_PRESS_GESTURE, GestureTypeName::LONG_PRESS_GESTURE, false);
         }
     }
     ~LongPressGesture() override = default;

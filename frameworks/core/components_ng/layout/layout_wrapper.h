@@ -179,7 +179,7 @@ public:
     }
 
     RectF GetFrameRectWithoutSafeArea() const;
-    RectF GetFrameRectWithSafeArea() const;
+    RectF GetFrameRectWithSafeArea(bool checkPosition = false) const;
 
 protected:
     void CreateRootConstraint();

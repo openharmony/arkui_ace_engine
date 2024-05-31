@@ -173,7 +173,7 @@ void MarqueePattern::StartMarqueeAnimation()
     }
     FireStartEvent();
     bool needSecondPlay = repeatCount != 1;
-    auto startPosition = GetTextOffset();
+    auto startPosition = GetTextStart();
     PlayMarqueeAnimation(startPosition, repeatCount, needSecondPlay);
 }
 
@@ -192,7 +192,7 @@ void MarqueePattern::PlayMarqueeAnimation(float start, int32_t playCount, bool n
     if (GreatNotEqual(step, textWidth)) {
         step = DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx();
     }
-    bool isFirstStart = start == GetTextOffset() ? true : false;
+    bool isFirstStart = start == GetTextStart() ? true : false;
     float calculateEnd = CalculateEnd();
     float calculateStart = CalculateStart();
     auto direction = GetLayoutProperty<MarqueeLayoutProperty>()->GetNonAutoLayoutDirection();
@@ -287,7 +287,7 @@ void MarqueePattern::StopMarqueeAnimation(bool stopAndStart)
     AnimationOption option;
     option.SetCurve(Curves::LINEAR);
     option.SetDuration(0);
-    auto offset = stopAndStart ? GetTextOffset() : 0.0f;
+    auto offset = stopAndStart ? GetTextStart() : 0.0f;
     AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), position = offset]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -590,6 +590,27 @@ float MarqueePattern::GetTextNodeWidth()
     auto textGeoNode = textNode->GetGeometryNode();
     CHECK_NULL_RETURN(textGeoNode, 0.0f);
     return textGeoNode->GetFrameSize().Width();
+}
+
+float MarqueePattern::GetTextStart()
+{
+    float start = GetTextOffset();
+    auto direction = GetLayoutProperty<MarqueeLayoutProperty>()->GetNonAutoLayoutDirection();
+    bool isRtl = direction == TextDirection::RTL ? true : false;
+    if (!isRtl) return start;
+
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, start);
+    auto geoNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geoNode, start);
+    auto marqueeSize = geoNode->GetFrameSize();
+    auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_RETURN(textNode, start);
+    auto textGeoNode = textNode->GetGeometryNode();
+    CHECK_NULL_RETURN(textGeoNode, start);
+    auto textWidth = textGeoNode->GetFrameSize().Width();
+    start = marqueeSize.Width() - textWidth;
+    return start;
 }
 
 double MarqueePattern::GetScrollAmount()

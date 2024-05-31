@@ -271,6 +271,16 @@ public:
         return action_;
     }
 
+    void SetPullAction(MouseAction pullAction)
+    {
+        pullAction_ = pullAction;
+    }
+
+    MouseAction GetPullAction() const
+    {
+        return pullAction_;
+    }
+
     MouseInfo& SetGlobalLocation(const Offset& globalLocation)
     {
         globalLocation_ = globalLocation;
@@ -315,6 +325,7 @@ private:
     std::shared_ptr<MMI::PointerEvent> pointerEvent_;
     MouseButton button_ = MouseButton::NONE_BUTTON;
     MouseAction action_ = MouseAction::NONE;
+    MouseAction pullAction_ = MouseAction::NONE;
     // global position at which the touch point contacts the screen.
     Offset globalLocation_;
     // Different from global location, The local location refers to the location of the contact point relative to the
@@ -358,6 +369,7 @@ public:
         info.SetPointerEvent(event.pointerEvent);
         info.SetButton(event.button);
         info.SetAction(event.action);
+        info.SetPullAction(event.pullAction);
         info.SetGlobalLocation(event.GetOffset());
         Offset localLocation = Offset(
             event.GetOffset().GetX() - coordinateOffset_.GetX(), event.GetOffset().GetY() - coordinateOffset_.GetY());

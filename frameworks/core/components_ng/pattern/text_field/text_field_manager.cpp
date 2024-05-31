@@ -148,13 +148,14 @@ bool TextFieldManagerNG::ScrollTextFieldToSafeArea()
     CHECK_NULL_RETURN(pipeline, false);
     auto keyboardInset = pipeline->GetSafeAreaManager()->GetKeyboardInset();
     bool isShowKeyboard = keyboardInset.IsValid();
+    NotifyKeyboardChangedCallback(isShowKeyboard);
     if (isShowKeyboard) {
         auto bottomInset = pipeline->GetSafeArea().bottom_.Combine(keyboardInset);
         CHECK_NULL_RETURN(bottomInset.IsValid(), false);
         return ScrollToSafeAreaHelper(bottomInset, isShowKeyboard);
     } else if (pipeline->GetSafeAreaManager()->KeyboardSafeAreaEnabled()) {
         // hide keyboard only scroll when keyboard avoid mode is resize
-        return ScrollToSafeAreaHelper({0, 0}, isShowKeyboard);
+        return ScrollToSafeAreaHelper({ 0, 0 }, isShowKeyboard);
     }
     return false;
 }
@@ -176,13 +177,6 @@ void TextFieldManagerNG::UpdateScrollableParentViewPort(const RefPtr<FrameNode>&
     }
     auto scrollableRect = scrollableNode->GetTransformRectRelativeToWindow();
     scrollableNode->SetViewPort(scrollableRect);
-}
-void TextFieldManagerNG::ProcessNavKeyboard()
-{
-    if (imeShow_ || uiExtensionImeShow_) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Nav notNeedSoftKeyboard.");
-        FocusHub::NavCloseKeyboard();
-    }
 }
 
 void TextFieldManagerNG::AvoidKeyboard()
@@ -252,5 +246,21 @@ void TextFieldManagerNG::SetNavContentKeyboardOffset(RefPtr<FrameNode> navNode)
         }
     }
     navNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+}
+
+void TextFieldManagerNG::NotifyKeyboardChangedCallback(bool isShowKeyboard)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto safeAreaManager = context->GetSafeAreaManager();
+    CHECK_NULL_VOID(safeAreaManager);
+    auto keyboardOffset = safeAreaManager->GetKeyboardOffset();
+    auto isChanged = !NearEqual(lastKeyboardOffset_, keyboardOffset);
+    for (const auto& pair : keyboardChangeCallbackMap_) {
+        if (pair.second) {
+            pair.second(isChanged, isShowKeyboard);
+        }
+    }
+    lastKeyboardOffset_ = keyboardOffset;
 }
 } // namespace OHOS::Ace::NG

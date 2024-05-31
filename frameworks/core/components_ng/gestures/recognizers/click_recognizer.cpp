@@ -461,8 +461,9 @@ GestureJudgeResult ClickRecognizer::TriggerGestureJudgeCallback()
 {
     auto targetComponent = GetTargetComponent();
     CHECK_NULL_RETURN(targetComponent, GestureJudgeResult::CONTINUE);
+    auto gestureRecognizerJudgeFunc = targetComponent->GetOnGestureRecognizerJudgeBegin();
     auto callback = targetComponent->GetOnGestureJudgeBeginCallback();
-    if (!callback && !sysJudge_) {
+    if (!callback && !sysJudge_ && !gestureRecognizerJudgeFunc) {
         return GestureJudgeResult::CONTINUE;
     }
     auto info = std::make_shared<TapGestureEvent>();
@@ -484,6 +485,9 @@ GestureJudgeResult ClickRecognizer::TriggerGestureJudgeCallback()
     info->SetSourceTool(touchPoint.sourceTool);
     if (sysJudge_) {
         return sysJudge_(gestureInfo_, info);
+    }
+    if (gestureRecognizerJudgeFunc) {
+        return gestureRecognizerJudgeFunc(info, Claim(this), responseLinkRecognizer_);
     }
     return callback(gestureInfo_, info);
 }
@@ -522,7 +526,9 @@ RefPtr<Gesture> ClickRecognizer::CreateGestureFromRecognizer() const
 
 void ClickRecognizer::CleanRecognizerState()
 {
-    if ((refereeState_ == RefereeState::SUCCEED || refereeState_ == RefereeState::FAIL) &&
+    if ((refereeState_ == RefereeState::SUCCEED ||
+        refereeState_ == RefereeState::FAIL ||
+        refereeState_ == RefereeState::DETECTING) &&
         currentFingers_ == 0) {
         tappedCount_ = 0;
         refereeState_ = RefereeState::READY;

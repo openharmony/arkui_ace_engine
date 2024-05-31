@@ -70,7 +70,7 @@ using RsOrientation = Rosen::DisplayOrientation;
 
 bool IsOpIncEnabled()
 {
-    return (system::GetParameter(IS_OPINC_ENABLE, "0") == "2");
+    return (system::GetParameter(IS_OPINC_ENABLE, "2") == "2");
 }
 
 void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
@@ -223,6 +223,11 @@ bool IsGpuUploadEnabled()
             system::GetParameter("debug.ace.gpuupload.enabled", "0") == "1");
 }
 
+bool IsImageFrameworkEnabled()
+{
+    return system::GetBoolParameter("persist.ace.image.framework.enabled", true);
+}
+
 void OnAnimationScaleChanged(const char* key, const char* value, void* context)
 {
     CHECK_NULL_VOID(key);
@@ -315,7 +320,7 @@ std::pair<float, float> GetPercent()
 {
     std::vector<double> result;
     StringUtils::StringSplitter(
-        system::GetParameter("const.ark.darkModeAppBGColorBrightness", "0.10,0.05"), ',', result);
+        system::GetParameter("const.ace.darkModeAppBGColorBrightness", "0.10,0.05"), ',', result);
     std::pair<float, float> percent(result.front(), result.back());
     return percent;
 }
@@ -323,6 +328,7 @@ std::pair<float, float> GetPercent()
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::developerModeOn_ = IsDeveloperModeOn();
 bool SystemProperties::layoutTraceEnable_ = IsLayoutTraceEnabled() && developerModeOn_;
+bool SystemProperties::imageFrameworkEnable_ = IsImageFrameworkEnabled();
 bool SystemProperties::traceInputEventEnable_ = IsTraceInputEventEnabled() && developerModeOn_;
 bool SystemProperties::stateManagerEnable_ = IsStateManagerEnable();
 bool SystemProperties::buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
@@ -612,14 +618,14 @@ bool SystemProperties::GetAllowWindowOpenMethodEnabled()
     return system::GetBoolParameter("persist.web.allowWindowOpenMethod.enabled", false);
 }
 
-bool SystemProperties::GetImageFrameworkEnabled()
-{
-    return system::GetBoolParameter("persist.ace.image.framework.enabled", true);
-}
-
 bool SystemProperties::GetDebugPixelMapSaveEnabled()
 {
     return system::GetBoolParameter("persist.ace.save.pixelmap.enabled", false);
+}
+
+bool SystemProperties::GetPixelRoundEnable()
+{
+    return system::GetBoolParameter("ace.debug.pixelround.enabled", true);
 }
 
 ACE_WEAK_SYM bool SystemProperties::GetIsUseMemoryMonitor()

@@ -245,6 +245,9 @@ private:
     void UpdateNameIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
     void UpdateBackgroundColorIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
     void UpdateTitlebarVisibility(RefPtr<NavDestinationGroupNode>& hostNode);
+    void InitBackButtonLongPressEvent(RefPtr<NavDestinationGroupNode>& hostNode);
+    void HandleLongPress();
+    void HandleLongPressActionEnd();
 
     RefPtr<ShallowBuilder> shallowBuilder_;
     std::string name_;
@@ -259,6 +262,9 @@ private:
     uint64_t navDestinationId_ = 0;
     void OnAttachToFrameNode() override;
     float keyboardOffset_ = 0.0f;
+
+    RefPtr<LongPressEvent> longPressEvent_;
+    RefPtr<FrameNode> dialogNode_;
 };
 
 } // namespace OHOS::Ace::NG

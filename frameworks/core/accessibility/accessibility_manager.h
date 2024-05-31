@@ -47,6 +47,27 @@ enum class AccessibilityVersion {
     JS_DECLARATIVE_VERSION,
 };
 
+class AccessibilityChildTreeCallback {
+public:
+    AccessibilityChildTreeCallback() = default;
+    virtual ~AccessibilityChildTreeCallback() = default;
+    virtual bool OnRegister(uint32_t windowId, int32_t treeId) = 0;
+    virtual bool OnDeregister() = 0;
+    virtual bool OnSetChildTree(int32_t childWindowId, int32_t childTreeId) = 0;
+    virtual bool OnDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info) = 0;
+    int32_t GetChildTreeId() const
+    {
+        return childTreeId_;
+    }
+    void SetChildTreeId(int32_t childTreeId)
+    {
+        childTreeId_ = childTreeId;
+    }
+
+private:
+    int32_t childTreeId_ = 0;
+};
+
 using VisibleRatioCallback = std::function<void(bool, double)>;
 class AccessibilityManager : public AceType {
     DECLARE_ACE_TYPE(AccessibilityManager, AceType);
@@ -124,8 +145,28 @@ public:
         return version_;
     }
 
+    virtual void RegisterAccessibilityChildTreeCallback(
+        int64_t elementId, const std::shared_ptr<AccessibilityChildTreeCallback> &callback) {};
+
+    virtual void DeregisterAccessibilityChildTreeCallback(int64_t elementId) {};
+
+    virtual void RegisterInteractionOperationAsChildTree(
+        uint32_t parentWindowId, int32_t parentTreeId, int64_t parentElementId) {};
+    virtual void SetAccessibilityGetParentRectHandler(std::function<void(int32_t &, int32_t &)> &&callback) {};
+    virtual void DeregisterInteractionOperationAsChildTree() {};
+    bool IsRegister()
+    {
+        return isReg_;
+    }
+
+    void Register(bool state)
+    {
+        isReg_ = state;
+    }
+
 private:
     AccessibilityVersion version_ = AccessibilityVersion::JS_VERSION;
+    bool isReg_ = false;
 };
 
 } // namespace OHOS::Ace

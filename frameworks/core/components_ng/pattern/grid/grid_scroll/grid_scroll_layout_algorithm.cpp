@@ -86,7 +86,8 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (SystemProperties::GetGridCacheEnabled()) {
         FillCacheLineAtEnd(mainSize, crossSize, layoutWrapper);
         if (!predictBuildList_.empty()) {
-            PostIdleTask(layoutWrapper->GetHostNode(), { predictBuildList_, cachedChildConstraint_ });
+            PostIdleTask(layoutWrapper->GetHostNode(),
+                { predictBuildList_, cachedChildConstraint_, itemsCrossSize_, crossGap_ });
             predictBuildList_.clear();
         }
     }
@@ -2079,6 +2080,7 @@ void GridScrollLayoutAlgorithm::PostIdleTask(RefPtr<FrameNode> frameNode, const 
         if (!pattern->GetPredictLayoutParam().has_value()) {
             return;
         }
+        Axis axis = pattern->GetAxis();
         bool needMarkDirty = false;
         auto param = pattern->GetPredictLayoutParam().value();
         auto firstItem = param.items.begin();
@@ -2090,7 +2092,24 @@ void GridScrollLayoutAlgorithm::PostIdleTask(RefPtr<FrameNode> frameNode, const 
                 break;
             }
             auto wrapper = frameNode->GetOrCreateChildByIndex(*it, false, true);
-            needMarkDirty = PredictBuildItem(wrapper, param.layoutConstraint) || needMarkDirty;
+            CHECK_NULL_BREAK(wrapper);
+            auto itemProperty = DynamicCast<GridItemLayoutProperty>(wrapper->GetLayoutProperty());
+            CHECK_NULL_BREAK(itemProperty);
+            int32_t crossSpan = itemProperty->GetCrossSpan(axis);
+            int32_t crossStart = itemProperty->GetCrossStart(axis);
+            auto constraint = param.layoutConstraint;
+            if (crossSpan > 1) {
+                float itemCrossSize = param.crossGap * (crossSpan - 1);
+                for (int32_t index = 0; index < crossSpan; ++index) {
+                    int32_t crossIndex = (crossStart + index) % static_cast<int32_t>(param.itemsCrossSizes.size());
+                    if (crossIndex >= 0 && crossIndex < static_cast<int32_t>(param.itemsCrossSizes.size())) {
+                        itemCrossSize += param.itemsCrossSizes.at(crossIndex);
+                    }
+                }
+                constraint.maxSize.SetCrossSize(itemCrossSize, axis);
+                constraint.selfIdealSize.SetCrossSize(itemCrossSize, axis);
+            }
+            needMarkDirty = PredictBuildItem(wrapper, constraint) || needMarkDirty;
             param.items.erase(it++);
         }
         if (needMarkDirty) {

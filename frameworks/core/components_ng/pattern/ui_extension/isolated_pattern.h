@@ -57,17 +57,32 @@ public:
         onSizeChanged_ = std::move(callback);
     }
 
+    virtual void SearchExtensionElementInfoByAccessibilityId(int64_t elementId, int32_t mode, int64_t baseParent,
+        std::list<Accessibility::AccessibilityElementInfo>& output) override;
+    virtual void SearchElementInfosByText(int64_t elementId, const std::string& text, int64_t baseParent,
+        std::list<Accessibility::AccessibilityElementInfo>& output) override;
+    virtual void FindFocusedElementInfo(int64_t elementId, int32_t focusType, int64_t baseParent,
+        Accessibility::AccessibilityElementInfo& output) override;
+    virtual void FocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
+        Accessibility::AccessibilityElementInfo& output) override;
+    virtual bool TransferExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, int64_t offset) override;
+
     void DumpInfo() override;
     void FireOnErrorCallbackOnUI(
         int32_t code, const std::string& name, const std::string& msg);
 
-protected:
-    virtual void DispatchPointerEvent(
-        const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
-    virtual void DispatchKeyEvent(const KeyEvent& event) override;
-
 private:
     void InitializeRender(void* runtime);
+
+    void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
+    void DispatchFocusActiveEvent(bool isFocusActive) override;
+    bool HandleKeyEvent(const KeyEvent& event) override;
+    void HandleFocusEvent() override;
+    void HandleBlurEvent() override;
+
+    void OnAttachToFrameNode() override;
+
     int32_t ApplyIsolatedId();
 
     RefPtr<DynamicComponentRenderer> dynamicComponentRenderer_;

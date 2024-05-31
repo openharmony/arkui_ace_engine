@@ -249,6 +249,7 @@ private:
     void FireSwipeActionOffsetChange(float oldOffset, float newOffset);
     void FireSwipeActionStateChange(SwipeActionState newState);
     void ResetToItemChild();
+    bool ClickJudgeVertical(const SizeF& size, double xOffset, double yOffset);
     void ResetNodeSize()
     {
         startNodeSize_ = 0.0f;

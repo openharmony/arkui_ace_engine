@@ -24,6 +24,8 @@ constexpr float DEFAULT_OPACITY = 0.95f;
 constexpr Dimension PREVIEW_BORDER_RADIUS = 12.0_vp;
 constexpr float BLUR_SIGMA_SCALE = 0.57735f;
 constexpr float SCALE_HALF = 0.5f;
+constexpr float MIN_OPACITY { 0.0f };
+constexpr float MAX_OPACITY { 1.0f };
 }
 
 
@@ -65,7 +67,7 @@ void DragDropFuncWrapper::UpdateDragPreviewOptionsFromModifier(
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
     auto opacity = imageContext->GetOpacity();
-    if (opacity.has_value()) {
+    if (opacity.has_value() && (opacity.value()) <= MAX_OPACITY && (opacity.value()) > MIN_OPACITY) {
         option.options.opacity = opacity.value();
     } else {
         option.options.opacity = DEFAULT_OPACITY;

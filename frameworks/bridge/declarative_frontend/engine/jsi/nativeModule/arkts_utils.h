@@ -146,6 +146,8 @@ public:
         EcmaVM* vm, std::vector<uint32_t>& values, int32_t argsIndex);
     static void ParseOuterBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo,
         EcmaVM* vm, std::vector<ArkUI_Float32>& values, int32_t argsIndex);
+    static void ParseOuterBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo,
+        EcmaVM* vm, std::vector<ArkUI_Float32>& values, std::vector<ArkUI_Int32>& units, int32_t argsIndex);
     static void PushOuterBorderStyleVector(
         const std::optional<BorderStyle>& value, std::vector<uint32_t> &options);
     static void ParseOuterBorderStyle(ArkUIRuntimeCallInfo* runtimeCallInfo,

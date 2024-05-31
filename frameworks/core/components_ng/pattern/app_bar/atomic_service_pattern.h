@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ATOMIC_SERVICE_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ATOMIC_SERVICE_PATTERN_H
 
+#include <cstddef>
 #include "core/components_ng/pattern/app_bar/app_bar_theme.h"
 #include "core/components_ng/pattern/app_bar/atomic_service_layout_algorithm.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -44,15 +45,17 @@ public:
     RefPtr<FrameNode> GetCloseButton();
     RefPtr<FrameNode> GetMenuIcon();
     RefPtr<FrameNode> GetCloseIcon();
-    void UpdateColor();
+    void UpdateColor(std::optional<bool> isLight);
     void UpdateMenuBarColor(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& menuBar, bool isLight);
-    void UpdateButtonColor(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& button);
+    void UpdateButtonColor(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& button, bool isLight);
     void UpdateDividerColor(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& divider, bool isLight);
-    void UpdateIconColor(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& icon);
+    void UpdateIconColor(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& icon, bool isLight);
     void UpdateLayout();
     void UpdateMenuBarLayout(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& menuBar, bool isRtl);
     void UpdateButtonLayout(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& button, bool isLeft);
     void UpdateIconLayout(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& icon, bool isLeft);
+
+    std::optional<bool> settedColorMode = std::nullopt;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ATOMIC_SERVICE_PATTERN_H

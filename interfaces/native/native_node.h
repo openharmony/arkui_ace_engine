@@ -1922,17 +1922,6 @@ typedef enum {
      */
     NODE_TEXT_ENABLE_DATA_DETECTOR_CONFIG,
     /**
-     * @brief Defines the line break rule. This attribute can be set, reset, and obtained as required through APIs.
-     *
-     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].i32: The parameter type is {@link ArkUI_LineBreakStrategy}. \n
-     * \n
-     * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].i32: The parameter type is {@link ArkUI_LineBreakStrategy}. \n
-     *
-     */
-    NODE_TEXT_LINE_BREAK_STRATEGY,
-    /**
      * @brief 文本选中时的背景色属性，支持属性设置，属性重置和属性获取接口。
      *
      * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
@@ -4378,34 +4367,45 @@ typedef enum {
     NODE_SWIPER_CACHED_COUNT,
 
     /**
-     * @brief 设置 Swiper 组件的前边距，支持属性设置，属性重置和属性获取接口。
+     * @brief Defines the front margin of the wiper.
+     * The attribute can be set, reset, and obtained as required through APIs.
      *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].f32：前边距数值，单位为vp，默认值为0。 \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].f32：前边距数值，单位为vp。
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: the front margin. The unit is vp. The default value is <b>0.0</b>\n
+     * .value[1]?.i32: whether to ignore blanks, the default value is 0.
+     * The value <b>1</b> means to ignore blank areas, and <b>0</b> means the opposite. \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: the front margin, the unit is vp. \n
+     * .value[1].i32: whether to ignore blank areas. The value <b>1</b> means to ignore blank areas, and <b>0</b> means
+     * the opposite. \n
      */
     NODE_SWIPER_PREV_MARGIN,
 
     /**
-     * @brief 设置 Swiper 组件的后边距，支持属性设置，属性重置和属性获取接口。
+     * @brief Defines the back margin of the wiper.
+     * The attribute can be set, reset, and obtained as required through APIs.
      *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].f32：后边距数值，单位为vp，默认值为0。 \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].f32：后边距数值，单位为vp。
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: the back margin. The unit is vp. The default value is <b>0.0</b>\n
+     * .value[1]?.i32: whether to ignore blanks, the default value is 0.
+     * The value <b>1</b> means to ignore blank areas, and <b>0</b> means the opposite. \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: the back margin, the unit is vp. \n
+     * .value[1].i32: whether to ignore blank areas. The value <b>1</b> means to ignore blank areas, and <b>0</b> means
+     * the opposite. \n
      */
     NODE_SWIPER_NEXT_MARGIN,
 
     /**
-     * @brief 设置 Swiper 组件的导航指示器类型，支持属性设置，属性重置和属性获取接口。
+     * @brief Defines the navigation indicator type of the swiper.
+     * The attribute can be set, reset, and obtained as required through APIs.
      *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].i32：设置导航指示器的类型，参数类型{@link ArkUI_SwiperIndicatorType}。 \n
-     * .object：参数类型为{@link ArkUI_SwiperIndicator}。 \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：导航指示器的类型，参数类型{@link ArkUI_SwiperIndicatorType}。 \n
-     * .object：参数类型为{@link ArkUI_SwiperIndicator}。 \n
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: navigation indicator type, the parameter type is {@link ArkUI_SwiperIndicatorType}.\n
+     * .object: The parameter type is {@link ArkUI_SwiperIndicator}.\n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: navigation indicator type, the parameter type is {@link ArkUI_SwiperIndicatorType}.\n
+     * .object: The parameter type is {@link ArkUI_SwiperIndicator}.\n
      *
      */
     NODE_SWIPER_INDICATOR,
@@ -6777,8 +6777,8 @@ typedef void (*ArkUI_NodeContentCallback)(ArkUI_NodeContentEvent* event);
  * @brief Register a callback for this <b>ArkUI_NodeContentHandle</b> instance.
  *
  * @param handle Indicates the <b>ArkUI_NodeContentHandle</b> instance.
- * @param callback Indicates the callback of <b>ArkUI_NodeContentHandle</b> 
- * @return Returns the status code 
+ * @param callback Indicates the callback of <b>ArkUI_NodeContentHandle</b>
+ * @return Returns the status code
  * @since 12
  */
 int32_t OH_ArkUI_NodeContent_RegisterCallback(ArkUI_NodeContentHandle handle, ArkUI_NodeContentCallback callback);

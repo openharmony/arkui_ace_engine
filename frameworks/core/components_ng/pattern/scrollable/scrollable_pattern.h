@@ -584,6 +584,8 @@ public:
     
     void GetPaintPropertyDumpInfo();
 
+    void GetEventDumpInfo();
+
     void DumpAdvanceInfo() override;
 
     void HandleMoveEventInComp(const PointF& point);

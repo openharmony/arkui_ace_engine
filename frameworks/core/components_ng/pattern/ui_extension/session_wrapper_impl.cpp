@@ -569,6 +569,9 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
     std::shared_ptr<Rosen::RSTransaction> transaction;
     auto parentSession = session_->GetParentSession();
     auto reason = parentSession ? parentSession->GetSizeChangeReason() : session_->GetSizeChangeReason();
+    auto persistentId = parentSession ? parentSession->GetPersistentId() : session_->GetPersistentId();
+    ACE_SCOPED_TRACE("NotifyDisplayArea id: %d, reason [%d]", persistentId, reason);
+    UIEXT_LOGD("NotifyDisplayArea id: %{public}d, reason = %{public}d", persistentId, reason);
     if (reason == Rosen::SizeChangeReason::ROTATION) {
         if (transaction_.lock()) {
             transaction = transaction_.lock();
@@ -576,8 +579,11 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
         } else if (auto transactionController = Rosen::RSSyncTransactionController::GetInstance()) {
             transaction = transactionController->GetRSTransaction();
         }
-        if (transaction && parentSession) {
-            transaction->SetDuration(pipeline->GetSyncAnimationOption().GetDuration());
+        if (transaction) {
+            transaction->SetHostPid(AceApplicationInfo::GetInstance().GetPid());
+            if (parentSession) {
+                transaction->SetDuration(pipeline->GetSyncAnimationOption().GetDuration());
+            }
         }
     }
     session_->UpdateRect({ std::round(displayArea_.Left()), std::round(displayArea_.Top()),

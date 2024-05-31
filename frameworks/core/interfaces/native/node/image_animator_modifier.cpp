@@ -258,6 +258,13 @@ int32_t GetIteration(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, DEFAULT_ITERATION);
     return ImageAnimatorModelNG::GetIteration(frameNode);
 }
+
+int32_t GetImagesSize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    return ImageAnimatorModelNG::GetImagesSize(frameNode);
+}
 } // namespace ImageAnimatorModifier
 
 namespace NodeModifier {
@@ -284,7 +291,8 @@ const ArkUIImageAnimatorModifier* GetImageAnimatorModifier()
         ImageAnimatorModifier::GetState,
         ImageAnimatorModifier::GetIsFixedSize,
         ImageAnimatorModifier::GetFillMode,
-        ImageAnimatorModifier::GetIteration
+        ImageAnimatorModifier::GetIteration,
+        ImageAnimatorModifier::GetImagesSize
     };
 
     return &modifier;

@@ -237,6 +237,11 @@ public:
 
     bool IsReverse() const override;
 
+    Axis GetAxis() const override
+    {
+        return gridLayoutInfo_.axis_;
+    }
+
 private:
     /**
      * @brief calculate where startMainLine_ should be after spring animation.

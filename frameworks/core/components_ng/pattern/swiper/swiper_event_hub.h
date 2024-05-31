@@ -147,6 +147,21 @@ public:
         }
     }
 
+    void FireAnimationEndOnForceEvent(int32_t index, const AnimationCallbackInfo& info) const
+    {
+        if (!animationEndEvents_.empty()) {
+            auto context = GetFrameNode()->GetContext();
+            CHECK_NULL_VOID(context);
+            context->AddBuildFinishCallBack([this, index, info]() {
+                std::for_each(animationEndEvents_.begin(), animationEndEvents_.end(),
+                    [index, info](const AnimationEndEventPtr& animationEndEvent) {
+                        auto event = *animationEndEvent;
+                        event(index, info);
+                    });
+            });
+        }
+    }
+
     void FireGestureSwipeEvent(int32_t index, const AnimationCallbackInfo& info) const
     {
         if (gestureSwipeEvent_) {

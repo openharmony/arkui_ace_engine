@@ -103,7 +103,7 @@ LazyForEachChild NativeLazyForEachBuilder::OnGetChildByIndex(
         return child;
     }
     ArkUINodeAdapterEvent getChildEvent {
-        .index = index, .idSet = false, .type = ON_ADD_NODE_TO_ADAPTER, .nodeSet = false
+        .index = index, .id = getIdevent.id, .idSet = false, .type = ON_ADD_NODE_TO_ADAPTER, .nodeSet = false
     };
     getChildEvent.extraParam = reinterpret_cast<intptr_t>(userData_);
     receiver_(&getChildEvent);

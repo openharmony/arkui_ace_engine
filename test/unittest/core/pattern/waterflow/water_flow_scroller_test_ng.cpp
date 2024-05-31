@@ -156,9 +156,9 @@ HWTEST_F(WaterFlowScrollerTestNg, PositionController001, TestSize.Level1)
     /**
      * @tc.steps: step2. Test JumpTo func.
      */
-    controller->JumpTo(2, false, ScrollAlign::START, 0);
+    controller->ScrollToIndex(2, false, ScrollAlign::START);
     EXPECT_EQ(pattern_->layoutInfo_->jumpIndex_, 2);
-    controller->JumpTo(0, false, ScrollAlign::START, 0);
+    controller->ScrollToIndex(0, false, ScrollAlign::START);
     EXPECT_EQ(pattern_->layoutInfo_->jumpIndex_, 0);
 }
 

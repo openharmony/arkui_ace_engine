@@ -41,12 +41,22 @@ namespace OHOS::Ace::NG {
 PlatformPattern::PlatformPattern(AceLogTag tag, int32_t platformId)
     : tag_(tag), platformId_(platformId)
 {
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto uiExtensionManager = pipeline->GetUIExtensionManager();
+    CHECK_NULL_VOID(uiExtensionManager);
+    uiExtensionId_ = uiExtensionManager->ApplyExtensionId();
     PLATFORM_LOGI("The PlatformPattern is created");
 }
 
 PlatformPattern::~PlatformPattern()
 {
     PLATFORM_LOGI("The PlatformPattern is destroyed");
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto uiExtensionManager = pipeline->GetUIExtensionManager();
+    CHECK_NULL_VOID(uiExtensionManager);
+    uiExtensionManager->RecycleExtensionId(uiExtensionId_);
 }
 
 RefPtr<LayoutAlgorithm> PlatformPattern::CreateLayoutAlgorithm()
@@ -100,6 +110,7 @@ void PlatformPattern::InitKeyEvent(const RefPtr<FocusHub>& focusHub)
             pattern->DispatchFocusActiveEvent(false);
         }
     });
+
     focusHub->SetOnPaintFocusStateInternal([weak = WeakClaim(this)]() -> bool {
         auto pattern = weak.Upgrade();
         if (pattern) {
@@ -174,7 +185,7 @@ void PlatformPattern::InitHoverEvent(const RefPtr<InputEventHub>& inputHub)
 
 bool PlatformPattern::HandleKeyEvent(const KeyEvent& event)
 {
-    return DispatchKeyEventSync(event);
+    return false;
 }
 
 void PlatformPattern::HandleFocusEvent()
@@ -309,5 +320,15 @@ int32_t PlatformPattern::GetNodeId()
 int32_t PlatformPattern::GetInstanceId()
 {
     return instanceId_;
+}
+
+int32_t PlatformPattern::GetUiExtensionId()
+{
+    return uiExtensionId_;
+}
+
+int64_t PlatformPattern::WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId)
+{
+    return uiExtensionId_ * extensionOffset + abilityId;
 }
 } // namespace OHOS::Ace::NG

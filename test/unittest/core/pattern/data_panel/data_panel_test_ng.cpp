@@ -30,6 +30,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "core/pipeline/base/constants.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/common/mock_container.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -37,7 +38,6 @@ namespace OHOS::Ace::NG {
 namespace {
 const std::vector<double> VALUES = { 1.0, 2.0, 3.0, 4.0 };
 constexpr double MAX = 200.0;
-const double MAX_DEFAULT = 100.0;
 const std::vector<double> LONG_VALUES = { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0 };
 constexpr size_t TYPE_CYCLE = 0;
 constexpr size_t TYPE_LINE = 1;
@@ -106,12 +106,14 @@ private:
 
 void DataPanelTestNg::SetUpTestCase()
 {
+    MockContainer::SetUp();
     MockPipelineContext::SetUp();
 }
 
 void DataPanelTestNg::TearDownTestCase()
 {
     MockPipelineContext::TearDown();
+    MockContainer::TearDown();
 }
 
 void DataPanelTestNg::GradientColorSet(std::vector<Gradient>& valueColors, const int& length)
@@ -803,6 +805,10 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintProgressTest001, TestSize.Level1)
     ArcData arcData;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Rotate(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
 
     Gradient gradient;
     GradientColor gradientColorStart;
@@ -839,6 +845,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintBackgroundTest001, TestSize.Level1)
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawRoundRect(_)).Times(AtLeast(1));
     dataPanelModifier.PaintBackground(rsCanvas, OFFSET, TOTAL_WIDTH, TOTAL_HEIGHT, SEGMENTWIDTH);
     dataPanelModifier.PaintBackground(rsCanvas, OFFSET, TOTAL_WIDTH, TOTAL_HEIGHT * 4, SEGMENTWIDTH);
 }
@@ -853,15 +860,27 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintSpaceTest001, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataTheme));
 
     DataPanelModifier dataPanelModifier;
     Testing::MockCanvas rsCanvas;
-    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillOnce(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachBrush()).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Translate(_, _)).WillOnce(Return());
+    EXPECT_CALL(rsCanvas, Scale(_, _)).WillOnce(Return());
 
     LinearData linearData;
     dataPanelModifier.PaintSpace(rsCanvas, linearData, SPACEWIDTH);
+    
+    /**
+     * @tc.case: layout direction rtl
+     */
+    DataPanelModifier dataPanelModifierRtl;
+    dataPanelModifierRtl.SetIsRtl(true);
+    dataPanelModifierRtl.PaintSpace(rsCanvas, linearData, SPACEWIDTH);
 }
 
 /**
@@ -874,12 +893,17 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentTest001, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataTheme));
 
     DataPanelModifier dataPanelModifier;
     Testing::MockCanvas rsCanvas;
-    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillOnce(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachBrush()).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, DrawRoundRect(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Translate(_, _)).WillOnce(Return());
+    EXPECT_CALL(rsCanvas, Scale(_, _)).WillOnce(Return());
     LinearData linerData;
     linerData.offset = OFFSET;
     linerData.segmentWidth = SEGMENTWIDTH;
@@ -895,6 +919,13 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentTest001, TestSize.Level1)
     gradientColorEnd.SetDimension(Dimension(1.0));
     linerData.segmentColor = gradient;
     dataPanelModifier.PaintColorSegment(rsCanvas, linerData);
+    
+    /**
+     * @tc.case: layout direction rtl
+     */
+    DataPanelModifier dataPanelModifierRtl;
+    dataPanelModifierRtl.SetIsRtl(true);
+    dataPanelModifierRtl.PaintColorSegment(rsCanvas, linerData);
 }
 
 /**
@@ -914,6 +945,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintTrackBackgroundTest001, TestSize.Level1)
     ArcData arcData;
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillOnce(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
     dataPanelModifier.PaintTrackBackground(rsCanvas, arcData, START_COLOR);
 }
 
@@ -937,6 +969,9 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest001, TestSize.Level1)
     DrawingContext context { rsCanvas, -10.0f, -10.0f };
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Translate(_, _)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillOnce(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillOnce(ReturnRef(rsCanvas));
     dataPanelModifier.PaintCircle(context, OFFSET);
@@ -964,6 +999,11 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest002, TestSize.Level1)
     DrawingContext context { rsCanvas, 10.0f, 10.0f };
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Translate(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Rotate(_, _, _)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillOnce(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillOnce(ReturnRef(rsCanvas));
     dataPanelModifier.SetMax(100.0f);
@@ -997,6 +1037,11 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest003, TestSize.Level1)
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Rotate(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Translate(_, _)).Times(AtLeast(1));
     dataPanelModifier.SetMax(100.0f);
     std::vector<double> VALUES = { 0.001f, 20.0f };
     dataPanelModifier.SetValues(VALUES);
@@ -1025,22 +1070,16 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest003, TestSize.Level1)
      */
     dataPanelModifier.SetEffect(true);
     dataPanelModifier.PaintCircle(context, OFFSET);
-    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
     /**
      * case2: effect = false.
      */
     dataPanelModifier.SetEffect(false);
     dataPanelModifier.PaintCircle(context, OFFSET);
-    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
     /**
      * case3: isHasShadowValue = true.
      */
     dataPanelModifier.SetIsHasShadowValue(true);
     dataPanelModifier.PaintCircle(context, OFFSET);
-    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
 }
 
 /**
@@ -1067,6 +1106,10 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintLinearProgressTest001, TestSize.Level1)
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, DrawRoundRect(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(AtLeast(1));
     dataPanelModifier.SetMax(20.0f);
     std::vector<double> VALUES = { 10.0f, 10.0f };
     dataPanelModifier.SetValues(VALUES);
@@ -1120,6 +1163,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintLinearProgressTest002, TestSize.Level1)
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawRoundRect(_)).Times(AtLeast(1));
     dataPanelModifier.SetMax(-20.0f);
     std::vector<double> VALUES = { -5.0f, 0.0f };
     dataPanelModifier.SetValues(VALUES);
@@ -1150,6 +1194,10 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintLinearProgressTest003, TestSize.Level1)
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawRoundRect(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
     dataPanelModifier.SetMax(20.0f);
     std::vector<double> VALUES = { 0.0001f, 5.0f };
     dataPanelModifier.SetValues(VALUES);
@@ -1176,6 +1224,12 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentFilterMaskTest001, TestSize.
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Translate(_, _)).WillOnce(Return());
+    EXPECT_CALL(rsCanvas, Scale(_, _)).WillOnce(Return());
+    EXPECT_CALL(rsCanvas, DrawRoundRect(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
     dataPanelModifier.SetMax(20.0f);
     std::vector<double> VALUES = { 0.0001f, 5.0f };
     dataPanelModifier.SetValues(VALUES);
@@ -1206,6 +1260,13 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentFilterMaskTest001, TestSize.
     segmentLinearData.isEndData = true;
     dataPanelModifier.PaintColorSegmentFilterMask(rsCanvas, segmentLinearData);
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+
+    /**
+     * @tc.case: case. layout direction rtl
+     */
+    DataPanelModifier dataPanelModifierRtl;
+    dataPanelModifierRtl.SetIsRtl(true);
+    dataPanelModifierRtl.PaintColorSegmentFilterMask(rsCanvas, segmentLinearData);
 }
 
 /**
@@ -1260,6 +1321,10 @@ HWTEST_F(DataPanelTestNg, DataPanelOnDrawTest001, TestSize.Level1)
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Translate(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, DrawRoundRect(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
     DrawingContext context { rsCanvas, 10.0f, 10.0f };
 
     dataPanelModifier.onDraw(context);
@@ -1351,8 +1416,8 @@ HWTEST_F(DataPanelTestNg, DataPanelLineTypeBorderRadiusTest001, TestSize.Level1)
      * @tc.expected: Objects are created successfully.
      */
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dataPanelTheme = AceType::MakeRefPtr<OHOS::Ace::DataPanelTheme>();
@@ -1375,27 +1440,19 @@ HWTEST_F(DataPanelTestNg, DataPanelLineTypeBorderRadiusTest001, TestSize.Level1)
         defaultDimension };
     auto getRadius = renderContext->GetBorderRadiusValue(borderRadiusDefault);
 
-    if (getRadius.radiusTopLeft.has_value()) {
-        EXPECT_EQ(getRadius.radiusTopLeft.value().Value(), dataPanelTheme->GetDefaultBorderRadius().Value());
-        EXPECT_EQ(getRadius.radiusTopLeft.value().Unit(), dataPanelTheme->GetDefaultBorderRadius().Unit());
-    }
-
-    if (getRadius.radiusTopRight.has_value()) {
-        EXPECT_EQ(getRadius.radiusTopRight.value().Value(), dataPanelTheme->GetDefaultBorderRadius().Value());
-        EXPECT_EQ(getRadius.radiusTopRight.value().Unit(), dataPanelTheme->GetDefaultBorderRadius().Unit());
-    }
-
-    if (getRadius.radiusBottomLeft.has_value()) {
-        EXPECT_EQ(getRadius.radiusBottomLeft.value().Value(), dataPanelTheme->GetDefaultBorderRadius().Value());
-        EXPECT_EQ(getRadius.radiusBottomLeft.value().Unit(), dataPanelTheme->GetDefaultBorderRadius().Unit());
-    }
-
-    if (getRadius.radiusBottomRight.has_value()) {
-        EXPECT_EQ(getRadius.radiusBottomRight.value().Value(), dataPanelTheme->GetDefaultBorderRadius().Value());
-        EXPECT_EQ(getRadius.radiusBottomRight.value().Unit(), dataPanelTheme->GetDefaultBorderRadius().Unit());
-    }
-
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    EXPECT_TRUE(getRadius.radiusTopLeft.has_value());
+    EXPECT_EQ(getRadius.radiusTopLeft.value().Value(), dataPanelTheme->GetDefaultBorderRadius().Value());
+    EXPECT_EQ(getRadius.radiusTopLeft.value().Unit(), dataPanelTheme->GetDefaultBorderRadius().Unit());
+    EXPECT_TRUE(getRadius.radiusTopRight.has_value());
+    EXPECT_EQ(getRadius.radiusTopRight.value().Value(), dataPanelTheme->GetDefaultBorderRadius().Value());
+    EXPECT_EQ(getRadius.radiusTopRight.value().Unit(), dataPanelTheme->GetDefaultBorderRadius().Unit());
+    EXPECT_TRUE(getRadius.radiusBottomLeft.has_value());
+    EXPECT_EQ(getRadius.radiusBottomLeft.value().Value(), dataPanelTheme->GetDefaultBorderRadius().Value());
+    EXPECT_EQ(getRadius.radiusBottomLeft.value().Unit(), dataPanelTheme->GetDefaultBorderRadius().Unit());
+    EXPECT_TRUE(getRadius.radiusBottomRight.has_value());
+    EXPECT_EQ(getRadius.radiusBottomRight.value().Value(), dataPanelTheme->GetDefaultBorderRadius().Value());
+    EXPECT_EQ(getRadius.radiusBottomRight.value().Unit(), dataPanelTheme->GetDefaultBorderRadius().Unit());
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1410,8 +1467,8 @@ HWTEST_F(DataPanelTestNg, DataPanelLineTypeBorderRadiusTest002, TestSize.Level1)
      * @tc.expected: Objects are created successfully.
      */
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dataPanelTheme = AceType::MakeRefPtr<OHOS::Ace::DataPanelTheme>();
@@ -1429,7 +1486,6 @@ HWTEST_F(DataPanelTestNg, DataPanelLineTypeBorderRadiusTest002, TestSize.Level1)
      * @tc.steps: step2. get border radius.
      * @tc.expected: the border radius is the same as the customized setting.
      */
-
     Dimension setRadiusDimension = Dimension(10.0, DimensionUnit::VP);
     ViewAbstract::SetBorderRadius(setRadiusDimension);
     ViewAbstract::SetClipEdge(true);
@@ -1439,120 +1495,22 @@ HWTEST_F(DataPanelTestNg, DataPanelLineTypeBorderRadiusTest002, TestSize.Level1)
         defaultDimension };
     auto getRadius = renderContext->GetBorderRadiusValue(borderRadiusDefault);
 
-    if (getRadius.radiusTopLeft.has_value()) {
-        auto tlRadius = getRadius.radiusTopLeft.value();
-        EXPECT_EQ(tlRadius.Value(), setRadiusDimension.Value());
-        EXPECT_EQ(tlRadius.Unit(), setRadiusDimension.Unit());
-    }
-
-    if (getRadius.radiusTopRight.has_value()) {
-        auto trRadius = getRadius.radiusTopRight.value();
-        EXPECT_EQ(trRadius.Value(), setRadiusDimension.Value());
-        EXPECT_EQ(trRadius.Unit(), setRadiusDimension.Unit());
-    }
-
-    if (getRadius.radiusBottomLeft.has_value()) {
-        auto blRadius = getRadius.radiusBottomLeft.value();
-        EXPECT_EQ(blRadius.Value(), setRadiusDimension.Value());
-        EXPECT_EQ(blRadius.Unit(), setRadiusDimension.Unit());
-    }
-
-    if (getRadius.radiusBottomRight.has_value()) {
-        auto brRadius = getRadius.radiusBottomRight.value();
-        EXPECT_EQ(brRadius.Value(), setRadiusDimension.Value());
-        EXPECT_EQ(brRadius.Unit(), setRadiusDimension.Unit());
-    }
-
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
-}
-
-/**
- * @tc.name: DataPanelPatternTest013
- * @tc.desc: SetBuilderFunc and get value
- * @tc.type: FUNC
- */
-HWTEST_F(DataPanelTestNg, DataPanelPatternTest013, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Init DataPanel node
-     */
-    DataPanelModelNG dataPanelModelNG;
-    dataPanelModelNG.Create(VALUES, MAX, TYPE_CYCLE);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<DataPanelPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    auto node = [](DataPanelConfiguration config) -> RefPtr<FrameNode> {
-        EXPECT_EQ(VALUES, config.values_);
-        EXPECT_EQ(MAX, config.maxValue_);
-        return nullptr;
-    };
-
-    /**
-     * @tc.steps: step2. Set parameters to pattern builderFunc
-     */
-    pattern->SetBuilderFunc(node);
-    pattern->BuildContentModifierNode();
-}
-
-/**
- * @tc.name: DataPanelPatternTes个itt014
- * @tc.desc: SetBuilderFunc and get value
- * @tc.type: FUNC
- */
-HWTEST_F(DataPanelTestNg, DataPanelPatternTest014, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Init DataPanel node
-     */
-    DataPanelModelNG dataPanelModelNG;
-    dataPanelModelNG.Create(VALUES, MAX_DEFAULT, TYPE_CYCLE);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<DataPanelPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    auto node = [](DataPanelConfiguration config) -> RefPtr<FrameNode> {
-        EXPECT_EQ(VALUES, config.values_);
-        EXPECT_EQ(MAX_DEFAULT, config.maxValue_);
-        return nullptr;
-    };
-    /**
-     * @tc.steps: step2. Set parameters to pattern builderFunc
-     */
-    pattern->SetBuilderFunc(node);
-    pattern->BuildContentModifierNode();
-}
-
-/**
- * @tc.name: DataPanelPatternTest015
- * @tc.desc: SetBuilderFunc and get value
- * @tc.type: FUNC
- */
-HWTEST_F(DataPanelTestNg, DataPanelPatternTest015, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Init DataPanel node
-     */
-    DataPanelModelNG dataPanelModelNG;
-
-    dataPanelModelNG.Create(LONG_VALUES, MAX, TYPE_CYCLE);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<DataPanelPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    auto node = [](DataPanelConfiguration config) -> RefPtr<FrameNode> {
-        EXPECT_EQ(LONG_VALUES, config.values_);
-        EXPECT_EQ(MAX, config.maxValue_);
-        return nullptr;
-    };
-
-    /**
-     * @tc.steps: step2. Set parameters to pattern builderFunc
-     */
-    pattern->SetBuilderFunc(node);
-    pattern->BuildContentModifierNode();
+    EXPECT_TRUE(getRadius.radiusTopLeft.has_value());
+    auto tlRadius = getRadius.radiusTopLeft.value();
+    EXPECT_EQ(tlRadius.Value(), setRadiusDimension.Value());
+    EXPECT_EQ(tlRadius.Unit(), setRadiusDimension.Unit());
+    EXPECT_TRUE(getRadius.radiusTopRight.has_value());
+    auto trRadius = getRadius.radiusTopRight.value();
+    EXPECT_EQ(trRadius.Value(), setRadiusDimension.Value());
+    EXPECT_EQ(trRadius.Unit(), setRadiusDimension.Unit());
+    EXPECT_TRUE(getRadius.radiusBottomLeft.has_value());
+    auto blRadius = getRadius.radiusBottomLeft.value();
+    EXPECT_EQ(blRadius.Value(), setRadiusDimension.Value());
+    EXPECT_EQ(blRadius.Unit(), setRadiusDimension.Unit());
+    EXPECT_TRUE(getRadius.radiusBottomRight.has_value());
+    auto brRadius = getRadius.radiusBottomRight.value();
+    EXPECT_EQ(brRadius.Value(), setRadiusDimension.Value());
+    EXPECT_EQ(brRadius.Unit(), setRadiusDimension.Unit());
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 } // namespace OHOS::Ace::NG

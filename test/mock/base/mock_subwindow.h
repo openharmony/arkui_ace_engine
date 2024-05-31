@@ -39,6 +39,8 @@ public:
     MOCK_METHOD2(HideMenuNG, void(const RefPtr<NG::FrameNode>& menu, int32_t targetId));
     MOCK_METHOD2(HideMenuNG, void(bool showPreviewAnimation, bool startDrag));
     MOCK_METHOD1(UpdateHideMenuOffsetNG, void(const NG::OffsetF& offset));
+    MOCK_METHOD2(ContextMenuSwitchDragPreviewAnimationtNG, void(const RefPtr<NG::FrameNode>& dragPreviewNode,
+        const NG::OffsetF& offset));
     MOCK_METHOD2(ShowPopup, void(const RefPtr<Component>& newComponent, bool disableTouchEvent));
     MOCK_METHOD4(ShowPopupNG, void(int32_t targetId, const NG::PopupInfo& popupInfo,
                                   const std::function<void(int32_t)>&& onWillDismiss, bool interactiveDismiss));

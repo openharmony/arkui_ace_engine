@@ -167,10 +167,27 @@ RectF LayoutWrapper::GetFrameRectWithoutSafeArea() const
     return geometryNode->GetFrameRect();
 }
 
-RectF LayoutWrapper::GetFrameRectWithSafeArea() const
+RectF LayoutWrapper::GetFrameRectWithSafeArea(bool checkPosition) const
 {
     auto geometryNode = GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, RectF());
+    RectF rect {};
+    auto host = GetHostNode();
+    CHECK_NULL_RETURN(host, rect);
+    auto renderContext = host->GetRenderContext();
+    if (checkPosition && renderContext && renderContext->GetPositionProperty() &&
+        renderContext->GetPositionProperty()->HasPosition()) {
+        auto layoutProp = host->GetLayoutProperty();
+        CHECK_NULL_RETURN(layoutProp, rect);
+        auto layoutConstraint = layoutProp->GetLayoutConstraint();
+        CHECK_NULL_RETURN(layoutConstraint.has_value(), rect);
+        auto renderPosition = FrameNode::ContextPositionConvertToPX(
+            renderContext, layoutConstraint.value().percentReference);
+        auto size = (geometryNode->GetSelfAdjust() + geometryNode->GetFrameRect()).GetSize();
+        rect = RectF(OffsetF(static_cast<float>(renderPosition.first),
+            static_cast<float>(renderPosition.second)), size);
+        return rect;
+    }
     return geometryNode->GetSelfAdjust() + geometryNode->GetFrameRect();
 }
 

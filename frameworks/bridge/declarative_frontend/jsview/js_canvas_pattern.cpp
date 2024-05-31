@@ -47,7 +47,7 @@ void JSCanvasPattern::JSSetTransform(const JSCallbackInfo& info)
     if (info.Length() != SET_TRANSFORM_PARAMETER_SIZE || !info[0]->IsObject()) {
         return;
     }
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)) {
         auto* matrix = JSRef<JSObject>::Cast(info[0])->Unwrap<JSMatrix2d>();
         if (matrix) {
             auto canvasRenderer = canvasRenderWeak_.Upgrade();

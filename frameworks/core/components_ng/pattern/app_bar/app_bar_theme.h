@@ -104,9 +104,14 @@ public:
         return std::nullopt;
     }
 
-    const Color& GetIconColor() const
+    const Color& GetIconColorLight() const
     {
-        return iconColor_;
+        return iconColorLight_;
+    }
+
+    const Color& GetIconColorDark() const
+    {
+        return iconColorDark_;
     }
 
     const Color& GetDividerColor() const
@@ -124,15 +129,26 @@ public:
         return hoverColor_;
     }
 
-    const Color& GetClickEffectColor() const
+    const Color& GetClickEffectColorLight() const
     {
-        return clickEffectColor_;
+        return clickEffectColorLight_;
     }
 
-    const Color& GetFocusedOutlineColor() const
+    const Color& GetClickEffectColorDark() const
     {
-        return focusedOutlineColor_;
+        return clickEffectColorDark_;
     }
+
+    const Color& GetFocusedOutlineColorLight() const
+    {
+        return focusedOutlineColorLight_;
+    }
+
+    const Color& GetFocusedOutlineColorDark() const
+    {
+        return focusedOutlineColorDark_;
+    }
+
     const Color& GetBlurColorLight() const
     {
         return blurColorLight_;
@@ -266,24 +282,9 @@ private:
         theme->iconSize_ = appBarPattern->GetAttr<Dimension>("icon_size", 0.0_vp);
         theme->iconCornerRadius_ = appBarPattern->GetAttr<Dimension>("icon_corner_radius", 0.0_vp);
         theme->appBarFontSize_ = appBarPattern->GetAttr<Dimension>("app_bar_font_size", 0.0_vp);
-        theme->textColorPrimary_ = appBarPattern->GetAttr<Color>("text_color_primary", Color());
-        theme->appBarBgColor_ = appBarPattern->GetAttr<Color>("app_bar_bg_color", Color());
         theme->bundleName_ = appBarPattern->GetAttr<std::string>("app_bar_bundle_name", "com.ohos.hag.famanager");
         theme->abilityName_ = appBarPattern->GetAttr<std::string>("app_bar_ability_name", "FaPanelAbility");
         theme->stageAbilityName_ = appBarPattern->GetAttr<std::string>("app_bar_stage_ability_name", "PanelAbility");
-
-        theme->iconColor_ = appBarPattern->GetAttr<Color>("icon_color", Color());
-        theme->dividerColor_ = appBarPattern->GetAttr<Color>("divider_color", Color());
-        theme->borderColor_ = appBarPattern->GetAttr<Color>("border_color", Color());
-        theme->hoverColor_ = appBarPattern->GetAttr<Color>("hover_color", Color());
-        theme->clickEffectColor_ = appBarPattern->GetAttr<Color>("click_effect_color", Color());
-        theme->focusedOutlineColor_ = appBarPattern->GetAttr<Color>("focused_outline_color", Color());
-        theme->blurColorLight_ = appBarPattern->GetAttr<Color>("blur_color_light", Color(0x99FFFFFF));
-        theme->blurColorDark_ = appBarPattern->GetAttr<Color>("blur_color_dark", Color(0x99000000));
-        theme->dividerColorLight_ = appBarPattern->GetAttr<Color>("divider_color_light", Color(0x33000000));
-        theme->dividerColorDark_ = appBarPattern->GetAttr<Color>("divider_color_dark", Color(0x33FFFFFF));
-        theme->borderColorLight_ = appBarPattern->GetAttr<Color>("border_color_light", Color(0x33182431));
-        theme->borderColorDark_ = appBarPattern->GetAttr<Color>("border_color_dark", Color(0x4DFFFFFF));
         theme->bentRadius_ = appBarPattern->GetAttr<Dimension>("bent_radius", 18.0_vp);
         theme->rightAngle_ = appBarPattern->GetAttr<Dimension>("right_angle", 0.0_vp);
         theme->menuBarWidth_ = appBarPattern->GetAttr<Dimension>("menu_bar_width", 80.0_vp);
@@ -304,6 +305,29 @@ private:
         theme->blurRadius_ = appBarPattern->GetAttr<Dimension>("blur_radius", 5.0_vp);
     }
 
+    static void initColorParameters(const RefPtr<AppBarTheme>& theme, const RefPtr<ThemeStyle>& appBarPattern)
+    {
+        theme->textColorPrimary_ = appBarPattern->GetAttr<Color>("text_color_primary", Color());
+        theme->appBarBgColor_ = appBarPattern->GetAttr<Color>("app_bar_bg_color", Color());
+        theme->iconColorLight_ = appBarPattern->GetAttr<Color>("icon_color_light", Color(0xff182431));
+        theme->iconColorDark_ = appBarPattern->GetAttr<Color>("icon_color_dark", Color(0xdbffffff));
+        theme->dividerColor_ = appBarPattern->GetAttr<Color>("divider_color", Color());
+        theme->borderColor_ = appBarPattern->GetAttr<Color>("border_color", Color());
+        theme->hoverColor_ = appBarPattern->GetAttr<Color>("hover_color", Color());
+        theme->clickEffectColorLight_ = appBarPattern->GetAttr<Color>("click_effect_color_light", Color(0x19182431));
+        theme->clickEffectColorDark_ = appBarPattern->GetAttr<Color>("click_effect_color_Dark", Color(0x26ffffff));
+        theme->focusedOutlineColorLight_ = appBarPattern->GetAttr<Color>("focused_outline_color_light",
+            Color(0xff007dff));
+        theme->focusedOutlineColorDark_ = appBarPattern->GetAttr<Color>("focused_outline_color_dark",
+            Color(0xff3f97e9));
+        theme->blurColorLight_ = appBarPattern->GetAttr<Color>("blur_color_light", Color(0x99FFFFFF));
+        theme->blurColorDark_ = appBarPattern->GetAttr<Color>("blur_color_dark", Color(0x99000000));
+        theme->dividerColorLight_ = appBarPattern->GetAttr<Color>("divider_color_light", Color(0x33000000));
+        theme->dividerColorDark_ = appBarPattern->GetAttr<Color>("divider_color_dark", Color(0x33FFFFFF));
+        theme->borderColorLight_ = appBarPattern->GetAttr<Color>("border_color_light", Color(0x33182431));
+        theme->borderColorDark_ = appBarPattern->GetAttr<Color>("border_color_dark", Color(0x4DFFFFFF));
+    }
+
     Dimension appBarHeight_;
     Dimension iconSize_;
     Dimension iconCornerRadius_;
@@ -314,12 +338,15 @@ private:
     std::string abilityName_;
     std::string stageAbilityName_;
 
-    Color iconColor_;
+    Color iconColorLight_;
+    Color iconColorDark_;
     Color dividerColor_;
     Color borderColor_;
     Color hoverColor_;
-    Color clickEffectColor_;
-    Color focusedOutlineColor_;
+    Color clickEffectColorLight_;
+    Color clickEffectColorDark_;
+    Color focusedOutlineColorLight_;
+    Color focusedOutlineColorDark_;
     Color blurColorLight_;
     Color blurColorDark_;
     Color dividerColorLight_;

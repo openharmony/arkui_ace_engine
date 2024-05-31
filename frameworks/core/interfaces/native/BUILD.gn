@@ -24,6 +24,10 @@ template("ace_core_interfaces_native_node") {
     defines += invoker.defines
     configs = [ "$ace_root:ace_config" ]
 
+    if (ace_engine_feature_enable_point_light) {
+      defines += [ "POINT_LIGHT_ENABLE" ]
+    }
+
     # add common source file needed by all product platform here
     sources = [
       "node/alphabet_indexer_modifier.cpp",
@@ -65,6 +69,7 @@ template("ace_core_interfaces_native_node") {
       "node/node_checkbox_modifier.cpp",
       "node/node_common_modifier.cpp",
       "node/node_container_modifier.cpp",
+      "node/node_container_span_modifier.cpp",
       "node/node_content_modifier.cpp",
       "node/node_date_picker_modifier.cpp",
       "node/node_gesture_modifier.cpp",
@@ -112,6 +117,7 @@ template("ace_core_interfaces_native_node") {
       "node/side_bar_container_modifier.cpp",
       "node/stepper_item_modifier.cpp",
       "node/swiper_controller_modifier.cpp",
+      "node/tab_content_modifier.cpp",
       "node/tabs_modifier.cpp",
       "node/text_clock_modifier.cpp",
       "node/text_timer_modifier.cpp",

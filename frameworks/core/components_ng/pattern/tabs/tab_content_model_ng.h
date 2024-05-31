@@ -53,6 +53,9 @@ public:
         const RefPtr<UINode>& tabContent, int32_t position = DEFAULT_NODE_SLOT, bool update = false);
     static void RemoveTabBarItem(const RefPtr<TabContentNode>& tabContentNode);
     static RefPtr<TabsNode> FindTabsNode(const RefPtr<UINode>& tabContent);
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static void SetTabBarBuilder(FrameNode* node, TabBarBuilderFunc&& builder);
+    static void SetTabBarLabel(FrameNode* node, const std::string& label);
     void SetOnWillShow(std::function<void()>&& onWillShow) override;
     void SetOnWillHide(std::function<void()>&& onWillHide) override;
     void SetCustomStyleNode(const RefPtr<NG::FrameNode>& customStyleNode) override;

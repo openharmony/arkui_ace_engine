@@ -103,7 +103,6 @@ template("build_component_ng") {
         "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
         "//foundation/graphic/graphic_2d/rosen/modules/render_service_base/include/",
-        "//third_party/bounds_checking_function/include",
       ]
       if (enable_graphic_text_gine) {
         include_dirs += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export" ]
@@ -136,8 +135,10 @@ template("build_component_ng") {
       }
       external_deps += [ "graphic_2d:librender_service_client" ]
       if (platform == "ohos" || platform == "ohos_ng") {
-        deps += [ "//third_party/openGLES:libGLES" ]
-        external_deps += [ "graphic_2d:2d_graphics" ]
+        external_deps += [
+          "graphic_2d:2d_graphics",
+          "opengles:libGLES",
+        ]
         if (enable_graphic_text_gine) {
           external_deps += [ "graphic_2d:rosen_text" ]
         }

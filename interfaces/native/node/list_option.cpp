@@ -63,27 +63,58 @@ float OH_ArkUI_ListItemSwipeActionItem_GetActionAreaDistance(ArkUI_ListItemSwipe
 void OH_ArkUI_ListItemSwipeActionItem_SetOnEnterActionArea(ArkUI_ListItemSwipeActionItem* item, void (*callback)())
 {
     CHECK_NULL_VOID(item);
-    item->onEnterActionArea = callback;
+    item->onEnterActionArea = reinterpret_cast<void*>(callback);
+}
+
+void OH_ArkUI_ListItemSwipeActionItem_SetOnEnterActionAreaWithUserData(ArkUI_ListItemSwipeActionItem* item,
+    void* userData, void (*callback)(void* userData))
+{
+    CHECK_NULL_VOID(item);
+    item->onEnterActionArea = reinterpret_cast<void*>(callback);
+    item->onEnterActionAreaUserData = userData;
 }
 
 void OH_ArkUI_ListItemSwipeActionItem_SetOnAction(ArkUI_ListItemSwipeActionItem* item, void (*callback)())
 {
     CHECK_NULL_VOID(item);
-    item->onAction = callback;
+    item->onAction = reinterpret_cast<void*>(callback);
+}
+
+void OH_ArkUI_ListItemSwipeActionItem_SetOnActionWithUserData(ArkUI_ListItemSwipeActionItem* item,
+    void* userData, void (*callback)(void* userData))
+{
+    CHECK_NULL_VOID(item);
+    item->onAction = reinterpret_cast<void*>(callback);
+    item->onActionUserData = userData;
 }
 
 void OH_ArkUI_ListItemSwipeActionItem_SetOnExitActionArea(ArkUI_ListItemSwipeActionItem* item, void (*callback)())
 {
     CHECK_NULL_VOID(item);
-    item->onExitActionArea = callback;
+    item->onExitActionArea = reinterpret_cast<void*>(callback);
+}
+
+void OH_ArkUI_ListItemSwipeActionItem_SetOnExitActionAreaWithUserData(ArkUI_ListItemSwipeActionItem* item,
+    void* userData, void (*callback)(void* userData))
+{
+    CHECK_NULL_VOID(item);
+    item->onExitActionArea = reinterpret_cast<void*>(callback);
+    item->onExitActionAreaUserData = userData;
 }
 
 void OH_ArkUI_ListItemSwipeActionItem_SetOnStateChange(
     ArkUI_ListItemSwipeActionItem* item, void (*callback)(ArkUI_ListItemSwipeActionState swipeActionState))
 {
     CHECK_NULL_VOID(item);
-    auto onStateChange = reinterpret_cast<void (*)(ArkUI_Int32)>(callback);
-    item->onStateChange = onStateChange;
+    item->onStateChange = reinterpret_cast<void*>(callback);
+}
+
+void OH_ArkUI_ListItemSwipeActionItem_SetOnStateChangeWithUserData(ArkUI_ListItemSwipeActionItem* item,
+    void* userData, void (*callback)(ArkUI_ListItemSwipeActionState swipeActionState, void* userData))
+{
+    CHECK_NULL_VOID(item);
+    item->onStateChange = reinterpret_cast<void*>(callback);
+    item->onStateChangeUserData = userData;
 }
 
 ArkUI_ListItemSwipeActionOption* OH_ArkUI_ListItemSwipeActionOption_Create()
@@ -128,8 +159,15 @@ void OH_ArkUI_ListItemSwipeActionOption_SetOnOffsetChange(
     ArkUI_ListItemSwipeActionOption* option, void (*callback)(float offset))
 {
     CHECK_NULL_VOID(option);
-    auto onOffsetChange = reinterpret_cast<void (*)(ArkUI_Int32)>(callback);
-    option->onOffsetChange = onOffsetChange;
+    option->onOffsetChange = reinterpret_cast<void*>(callback);
+}
+
+void OH_ArkUI_ListItemSwipeActionOption_SetOnOffsetChangeWithUserData(ArkUI_ListItemSwipeActionOption* option,
+    void* userData, void (*callback)(float offset, void* userData))
+{
+    CHECK_NULL_VOID(option);
+    option->onOffsetChange = reinterpret_cast<void*>(callback);
+    option->userData = userData;
 }
 
 int32_t OH_ArkUI_List_CloseAllSwipeActions(ArkUI_NodeHandle node, void* userData, void (*onFinish)(void* userData))
@@ -177,6 +215,9 @@ float OH_ArkUI_ListChildrenMainSizeOption_GetDefaultMainSize(ArkUI_ListChildrenM
 void OH_ArkUI_ListChildrenMainSizeOption_Resize(ArkUI_ListChildrenMainSize* option, int32_t totalSize)
 {
     CHECK_NULL_VOID(option);
+    if (totalSize <= 0) {
+        return;
+    }
     option->mainSize.resize(std::max(totalSize, 0), -1.0f);
 }
 

@@ -158,10 +158,14 @@ public:
     static void OnRenderProcessResponding(const JSCallbackInfo& args);
     static void SelectionMenuOptions(const JSCallbackInfo& args);
     static void OnViewportFitChanged(const JSCallbackInfo& args);
+    static void OnInterceptKeyboardAttach(const JSCallbackInfo& args);
+    static void OnAdsBlocked(const JSCallbackInfo& args);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);
     static void ParseRawfileWebSrc(const JSRef<JSVal>& srcValue, std::string& webSrc);
+    static void ParseJsCustomKeyboardOption(const JsiExecutionContext& context,
+        const JSRef<JSVal>& keyboardOpt, WebKeyboardOption& keyboardOption);
 
 private:
     static void ParseScriptItems(const JSCallbackInfo& args, ScriptItems& scriptItems);

@@ -301,7 +301,9 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true };
+        FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::FORCE_NONE };
+        focusPattern.SetIsFocusActiveWhenFocused(true);
+        return focusPattern;
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override
@@ -403,6 +405,11 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeVideoPlayerConfig, NativeVideoPlayerConfigType);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SmoothDragResizeEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SelectionMenuOptions, WebMenuOptionsParam);
+
+    bool IsFocus() const
+    {
+        return isFocus_;
+    }
 
     void RequestFullScreen();
     void ExitFullScreen();
@@ -524,6 +531,12 @@ public:
     void CloseKeyboard();
     WebInfoType GetWebInfoType();
     void RequestFocus();
+    void SetCustomKeyboardBuilder(std::function<void()> customKeyboardBuilder)
+    {
+        customKeyboardBuilder_ = customKeyboardBuilder;
+    }
+    void AttachCustomKeyboard();
+    void CloseCustomKeyboard();
 
 private:
     friend class WebContextSelectOverlay;
@@ -857,6 +870,8 @@ private:
     bool isTouchUpEvent_ = false;
     int32_t zoomStatus_ = 0;
     int32_t zoomErrorCount_ = 0;
+    RefPtr<OverlayManager> keyboardOverlay_;
+    std::function<void()> customKeyboardBuilder_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 

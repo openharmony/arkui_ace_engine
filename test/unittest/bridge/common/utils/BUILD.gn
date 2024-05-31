@@ -31,6 +31,6 @@ ohos_unittest("bridge_utils_test") {
     "$ace_root/test/unittest:ace_base",
     "$ace_root/test/unittest:ace_components_mock",
     "$ace_root/test/unittest:ace_core_animation",
-    "$cjson_root:cjson",
   ]
+  external_deps = [ "cJSON:cjson" ]
 }

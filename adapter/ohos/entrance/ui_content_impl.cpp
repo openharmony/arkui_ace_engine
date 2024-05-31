@@ -802,7 +802,10 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
     float density = 1.0f;
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     if (defaultDisplay) {
-        density = defaultDisplay->GetVirtualPixelRatio();
+        auto displayInfo = defaultDisplay->GetDisplayInfo();
+        if (displayInfo) {
+            density = displayInfo->GetDensityInCurResolution();
+        }
         deviceWidth = defaultDisplay->GetWidth();
         deviceHeight = defaultDisplay->GetHeight();
         TAG_LOGI(AceLogTag::ACE_FORM,
@@ -1196,16 +1199,17 @@ void UIContentImpl::SetFontScaleAndWeightScale(const RefPtr<Platform::AceContain
 UIContentErrorCode UIContentImpl::CommonInitialize(
     OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, uint32_t focusWindowId)
 {
-    ACE_FUNCTION_TRACE();
     auto errorCode = UIContentErrorCode::NO_ERRORS;
     window_ = window;
     CHECK_NULL_RETURN(window_, UIContentErrorCode::NULL_WINDOW);
+    auto windowName = window->GetWindowName();
+    ACE_SCOPED_TRACE_COMMERCIAL("UI Initialize:%s", windowName.c_str());
     startUrl_ = contentInfo;
-    if (StringUtils::StartWith(window->GetWindowName(), SUBWINDOW_TOAST_DIALOG_PREFIX)) {
+    if (StringUtils::StartWith(windowName, SUBWINDOW_TOAST_DIALOG_PREFIX)) {
         InitializeSubWindow(window_, true);
         return errorCode;
     }
-    if (StringUtils::StartWith(window->GetWindowName(), SUBWINDOW_PREFIX)) {
+    if (StringUtils::StartWith(windowName, SUBWINDOW_PREFIX)) {
         InitializeSubWindow(window_);
         return errorCode;
     }
@@ -1604,6 +1608,10 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     bool halfLeading = std::any_of(metaData.begin(), metaData.end(),
         [](const auto& metaDataItem) { return metaDataItem.name == "half_leading" && metaDataItem.value == "true"; });
     pipeline->SetHalfLeading(halfLeading);
+    bool changePreviewTextSupported = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
+            return metaDataItem.name == "can_preview_text" && metaDataItem.value == "false";
+        });
+    pipeline->SetSupportPreviewText(changePreviewTextSupported);
     // Use metadata to control whether the cutout safeArea takes effect.
     bool useCutout = std::any_of(metaData.begin(), metaData.end(),
         [](const auto& metaDataItem) { return metaDataItem.name == "avoid_cutout" && metaDataItem.value == "true"; });
@@ -1644,8 +1652,6 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         if (!abilityContext->GetTempDir().empty()) {
             container->SetTempDir(abilityContext->GetTempDir());
         }
-    } else {
-        LOGI("UIContentImpl::OnStart abilityContext is null");
     }
 
     LayoutInspector::SetCallback(instanceId_);
@@ -1755,7 +1761,6 @@ void UIContentImpl::Focus()
     CHECK_NULL_VOID(container);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->ChangeDarkModeBrightness(true);
 }
 
 void UIContentImpl::UnFocus()
@@ -1766,7 +1771,6 @@ void UIContentImpl::UnFocus()
     CHECK_NULL_VOID(container);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->ChangeDarkModeBrightness(false);
 }
 
 void UIContentImpl::Destroy()
@@ -2042,13 +2046,13 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
         auto aceView = static_cast<Platform::AceViewOhos*>(container->GetAceView());
         CHECK_NULL_VOID(aceView);
         Platform::AceViewOhos::SetViewportMetrics(aceView, config); // update density into pipeline
+        Platform::AceViewOhos::TransformHintChanged(aceView, config.TransformHint());
         Platform::AceViewOhos::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
             static_cast<WindowSizeChangeReason>(reason), rsTransaction);
         Platform::AceViewOhos::SurfacePositionChanged(aceView, config.Left(), config.Top());
-        SubwindowManager::GetInstance()->ClearToastInSubwindow();
         if (pipelineContext) {
             pipelineContext->CheckAndUpdateKeyboardInset();
-            pipelineContext->ChangeDarkModeBrightness(true);
+            pipelineContext->ChangeDarkModeBrightness();
         }
     };
 
@@ -2107,6 +2111,7 @@ void UIContentImpl::UpdateDecorVisible(bool visible, bool hasDeco)
            auto pipelineContext = container->GetPipelineContext();
            CHECK_NULL_VOID(pipelineContext);
            pipelineContext->ShowContainerTitle(visible, hasDeco);
+           pipelineContext->ChangeDarkModeBrightness();
         },
         TaskExecutor::TaskType::UI, "ArkUIUpdateDecorVisible");
 }
@@ -2218,6 +2223,20 @@ void UIContentImpl::DumpInfo(const std::vector<std::string>& params, std::vector
     }
 }
 
+void UIContentImpl::UpdateDialogResourceConfiguration(RefPtr<Container>& container)
+{
+    auto dialogContainer = AceType::DynamicCast<Platform::DialogContainer>(container);
+    if (dialogContainer) {
+        auto aceResCfg = dialogContainer->GetResourceConfiguration();
+        aceResCfg.SetOrientation(SystemProperties::GetDeviceOrientation());
+        aceResCfg.SetDensity(SystemProperties::GetResolution());
+        aceResCfg.SetDeviceType(SystemProperties::GetDeviceType());
+        aceResCfg.SetColorMode(SystemProperties::GetColorMode());
+        aceResCfg.SetDeviceAccess(SystemProperties::GetDeviceAccess());
+        dialogContainer->SetResourceConfiguration(aceResCfg);
+    }
+}
+
 void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog)
 {
     window_ = window;
@@ -2233,6 +2252,7 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
         icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLanguage(), status);
         AceApplicationInfo::GetInstance().SetLocale(locale.getLanguage(), locale.getCountry(), locale.getScript(), "");
         container = AceType::MakeRefPtr<Platform::DialogContainer>(instanceId_, FrontendType::DECLARATIVE_JS);
+        UpdateDialogResourceConfiguration(container);
     } else {
 #ifdef NG_BUILD
         container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS,
@@ -2256,9 +2276,14 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
         }
 #endif
     }
-    if (context && context->GetApplicationInfo()) {
-        auto appInfo = context->GetApplicationInfo();
-        container->SetApiTargetVersion(appInfo->apiTargetVersion);
+    if (context) {
+        if (context->GetApplicationInfo()) {
+            auto appInfo = context->GetApplicationInfo();
+            container->SetApiTargetVersion(appInfo->apiTargetVersion);
+        }
+
+        container->SetBundlePath(context->GetBundleCodeDir());
+        container->SetFilesDataPath(context->GetFilesDir());
     }
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
     AceEngine::Get().AddContainer(instanceId_, container);
@@ -2370,6 +2395,47 @@ void UIContentImpl::SetFormLinkInfoUpdateHandler(std::function<void(const std::v
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->SetFormLinkInfoUpdateHandler(std::move(callback));
+}
+
+void UIContentImpl::RegisterAccessibilityChildTree(
+    uint32_t parentWindowId, int32_t parentTreeId, int64_t parentElementId)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto front = container->GetFrontend();
+    CHECK_NULL_VOID(front);
+    auto accessibilityManager = front->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->RegisterInteractionOperationAsChildTree(parentWindowId, parentTreeId, parentElementId);
+}
+
+void UIContentImpl::SetAccessibilityGetParentRectHandler(std::function<void(int32_t&, int32_t&)>&& callback)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto front = container->GetFrontend();
+    CHECK_NULL_VOID(front);
+    auto accessibilityManager = front->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->SetAccessibilityGetParentRectHandler(std::move(callback));
+}
+
+void UIContentImpl::DeregisterAccessibilityChildTree()
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto front = container->GetFrontend();
+    CHECK_NULL_VOID(front);
+    auto accessibilityManager = front->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->DeregisterInteractionOperationAsChildTree();
+}
+
+void UIContentImpl::AccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    container->Dump(params, info);
 }
 
 void UIContentImpl::SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback)
@@ -2502,6 +2568,7 @@ void UIContentImpl::SetIsFocusActive(bool isFocusActive)
         [container, isFocusActive]() {
             auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
             CHECK_NULL_VOID(pipelineContext);
+            ContainerScope scope(container->GetInstanceId());
             pipelineContext->SetIsFocusActive(isFocusActive);
         },
         TaskExecutor::TaskType::UI, "ArkUISetIsFocusActive");
@@ -3152,5 +3219,15 @@ void UIContentImpl::SetContentNodeGrayScale(float grayscale)
     auto renderContext = rootElement->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateFrontGrayScale(Dimension(grayscale));
+}
+
+void UIContentImpl::SetStatusBarItemColor(uint32_t color)
+{
+    ContainerScope scope(instanceId_);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto appBar = container->GetAppBar();
+    CHECK_NULL_VOID(appBar);
+    appBar->SetStatusBarItemColor(IsDarkColor(color));
 }
 } // namespace OHOS::Ace

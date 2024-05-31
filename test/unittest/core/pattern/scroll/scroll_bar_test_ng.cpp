@@ -156,8 +156,9 @@ HWTEST_F(ScrolleBarTestNg, OnCollectTouchTarget001, TestSize.Level1)
     OffsetF coordinateOffset;
     GetEventTargetImpl getEventTargetImpl;
     TouchTestResult result;
+    TouchTestResult responseLinkResult;
     pattern_->scrollableEvent_->BarCollectTouchTarget(
-        coordinateOffset, getEventTargetImpl, result, frameNode_, nullptr);
+        coordinateOffset, getEventTargetImpl, result, frameNode_, nullptr, responseLinkResult);
     EXPECT_EQ(result.size(), 1);
 }
 

@@ -107,6 +107,7 @@ private:
     WrapAlignment alignment_ = WrapAlignment::START;
     WrapAlignment mainAlignment_ = WrapAlignment::START;
     WrapAlignment crossAlignment_ = WrapAlignment::START;
+    TextDirection textDir_ = TextDirection::LTR;
 
     bool isHorizontal_ = true;
     bool isReverse_ = false;

@@ -240,6 +240,8 @@ public:
     void OnShowAutofillPopup(
         const float offsetX, const float offsetY, const std::vector<std::string>& menu_items) override;
     void OnHideAutofillPopup() override;
+    void OnAdsBlocked(const std::string& url, const std::vector<std::string>& adsBlocked) override;
+
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {
         webDelegate_ = delegate;
@@ -256,6 +258,15 @@ public:
     void OnRenderProcessResponding() override;
 
     void OnViewportFitChange(NWeb::ViewportFit viewportFit) override;
+    
+    void OnInterceptKeyboardAttach(
+        const std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler,
+        const std::map<std::string, std::string> &attributes, bool &useSystemKeyboard, int32_t &enterKeyType) override;
+
+    void OnCustomKeyboardAttach() override;
+
+    void OnCustomKeyboardClose() override;
+
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;
