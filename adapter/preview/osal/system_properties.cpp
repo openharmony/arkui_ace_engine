@@ -97,6 +97,8 @@ bool SystemProperties::acePerformanceMonitorEnable_ = false;
 std::pair<float, float> SystemProperties::brightUpPercent_ = {};
 bool SystemProperties::faultInjectEnabled_ = false;
 bool SystemProperties::imageFrameworkEnable_ = false;
+float SystemProperties::dragStartDampingRatio_ = 0.2f;
+float SystemProperties::dragStartPanDisThreshold_ = 10.0f;
 
 bool SystemProperties::IsOpIncEnable()
 {
@@ -307,5 +309,15 @@ float SystemProperties::GetDefaultResolution()
 std::string SystemProperties::GetAtomicServiceBundleName()
 {
     return UNDEFINED_PARAM;
+}
+
+float SystemProperties::GetDragStartDampingRatio()
+{
+    return dragStartDampingRatio_;
+}
+
+float SystemProperties::GetDragStartPanDistanceThreshold()
+{
+    return dragStartPanDisThreshold_;
 }
 } // namespace OHOS::Ace

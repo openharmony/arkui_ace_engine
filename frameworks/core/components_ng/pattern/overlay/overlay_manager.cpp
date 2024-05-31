@@ -4578,12 +4578,15 @@ void OverlayManager::RemovePixelMap()
     isOnAnimation_ = false;
 }
 
-void OverlayManager::RemovePixelMapAnimation(bool startDrag, double x, double y)
+void OverlayManager::RemovePixelMapAnimation(bool startDrag, double x, double y, bool isSubwindowOverlay)
 {
     if (isOnAnimation_ || !hasPixelMap_) {
         return;
     }
     if (startDrag) {
+        if (!isSubwindowOverlay) {
+            RemovePixelMap();
+        }
         return;
     }
     auto columnNode = pixmapColumnNodeWeak_.Upgrade();
@@ -4639,16 +4642,16 @@ void OverlayManager::RemovePixelMapAnimation(bool startDrag, double x, double y)
     scaleOption.SetCurve(motion);
 
     DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LANDING_STARTED);
-    scaleOption.SetOnFinishEvent([this] {
+    scaleOption.SetOnFinishEvent([weak = WeakClaim(this), isSubwindowOverlay] {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto dragDropManager = pipeline->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
         DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LANDING_FINISHED);
-        if (!dragDropManager->IsNeedDisplayInSubwindow()) {
+        if (!dragDropManager->IsNeedDisplayInSubwindow() && !isSubwindowOverlay) {
             InteractionInterface::GetInstance()->SetDragWindowVisible(true);
         }
-        auto overlayManager = AceType::Claim(this);
+        auto overlayManager = weak.Upgrade();
         CHECK_NULL_VOID(overlayManager);
         if (overlayManager->hasEvent_) {
             overlayManager->RemoveEventColumn();
@@ -5310,12 +5313,34 @@ void OverlayManager::UpdateGatherNodeToTop()
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
 }
 
-RefPtr<FrameNode> OverlayManager::GetPixelMapContentNode() const
+RefPtr<FrameNode> OverlayManager::GetPixelMapContentNode(bool isSubwindowOverlay) const
 {
+    if (isSubwindowOverlay) {
+        auto rootNode = rootNodeWeak_.Upgrade();
+        CHECK_NULL_RETURN(rootNode, nullptr);
+        auto menuWrapperNode = AceType::DynamicCast<FrameNode>(rootNode->GetFirstChild());
+        CHECK_NULL_RETURN(menuWrapperNode, nullptr);
+        auto imageNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetLastChild());
+        return imageNode;
+    }
     auto column = pixmapColumnNodeWeak_.Upgrade();
     CHECK_NULL_RETURN(column, nullptr);
     auto imageNode = AceType::DynamicCast<FrameNode>(column->GetFirstChild());
     return imageNode;
+}
+
+void OverlayManager::UpdatePixelMapPosition(const Point& point, const Rect& rect, bool isSubwindowOverlay)
+{
+    if (!isSubwindowOverlay && !hasPixelMap_) {
+        return;
+    }
+    RefPtr<FrameNode> imageNode = GetPixelMapContentNode(isSubwindowOverlay);
+    CHECK_NULL_VOID(imageNode);
+    auto imageContext = imageNode->GetRenderContext();
+    CHECK_NULL_VOID(imageContext);
+    auto offset = rect.GetOffset() + Offset(point.GetX(), point.GetY());
+    imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(offset.GetX()), Dimension(offset.GetY())));
+    imageContext->OnModifyDone();
 }
 
 RefPtr<FrameNode> OverlayManager::GetPixelMapBadgeNode() const

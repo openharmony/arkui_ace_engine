@@ -59,6 +59,8 @@ constexpr int32_t ORIENTATION_LANDSCAPE = 1;
 constexpr int DEFAULT_THRESHOLD_JANK = 15;
 constexpr float DEFAULT_ANIMATION_SCALE = 1.0f;
 float animationScale_ = DEFAULT_ANIMATION_SCALE;
+constexpr int32_t DEFAULT_DRAG_START_DAMPING_RATIO = 20;
+constexpr int32_t DEFAULT_DRAG_START_PAN_DISTANCE_THRESHOLD_IN_VP = 10;
 std::shared_mutex mutex_;
 #ifdef ENABLE_ROSEN_BACKEND
 constexpr char DISABLE_ROSEN_FILE_PATH[] = "/etc/disablerosen";
@@ -311,6 +313,17 @@ bool IsAcePerformanceMonitorEnabled()
 }
 } // namespace
 
+float ReadDragStartDampingRatio()
+{
+    return system::GetIntParameter("debug.ace.drag.damping.ratio", DEFAULT_DRAG_START_DAMPING_RATIO) / 100.0f;
+}
+
+float ReadDragStartPanDistanceThreshold()
+{
+    return system::GetIntParameter("debug.ace.drag.pan.threshold",
+        DEFAULT_DRAG_START_PAN_DISTANCE_THRESHOLD_IN_VP) * 1.0f;
+}
+
 bool IsFaultInjectEnabled()
 {
     return (system::GetParameter("persist.ace.fault.inject.enabled", "false") == "true");
@@ -383,7 +396,8 @@ bool SystemProperties::sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnabl
 bool SystemProperties::acePerformanceMonitorEnable_ = IsAcePerformanceMonitorEnabled();
 bool SystemProperties::faultInjectEnabled_  = IsFaultInjectEnabled();
 bool SystemProperties::opincEnabled_ = IsOpIncEnabled();
-
+float SystemProperties::dragStartDampingRatio_ = ReadDragStartDampingRatio();
+float SystemProperties::dragStartPanDisThreshold_ = ReadDragStartPanDistanceThreshold();
 bool SystemProperties::IsOpIncEnable()
 {
     return opincEnabled_;
@@ -749,5 +763,15 @@ void SystemProperties::SetDebugBoundaryEnabled(bool debugBoundaryEnabled)
 std::string SystemProperties::GetAtomicServiceBundleName()
 {
     return system::GetParameter(DISTRIBUTE_ENGINE_BUNDLE_NAME, "");
+}
+
+float SystemProperties::GetDragStartDampingRatio()
+{
+    return dragStartDampingRatio_;
+}
+
+float SystemProperties::GetDragStartPanDistanceThreshold()
+{
+    return dragStartPanDisThreshold_;
 }
 } // namespace OHOS::Ace

@@ -261,7 +261,7 @@ public:
         return pixmapColumnNodeWeak_.Upgrade();
     }
 
-    RefPtr<FrameNode> GetPixelMapContentNode() const;
+    RefPtr<FrameNode> GetPixelMapContentNode(bool isSubwindowOverlay = false) const;
 
     RefPtr<FrameNode> GetPixelMapBadgeNode() const;
 
@@ -305,11 +305,12 @@ public:
     void MountPixelMapToRootNode(const RefPtr<FrameNode>& columnNode);
     void MountEventToRootNode(const RefPtr<FrameNode>& columnNode);
     void RemovePixelMap();
-    void RemovePixelMapAnimation(bool startDrag, double x, double y);
+    void RemovePixelMapAnimation(bool startDrag, double x, double y, bool isSubwindowOverlay = false);
     void UpdatePixelMapScale(float& scale);
     void RemoveFilter();
     void RemoveFilterAnimation();
     void RemoveEventColumn();
+    void UpdatePixelMapPosition(const Point& point, const Rect& rect, bool isSubwindowOverlay = false);
     void UpdateContextMenuDisappearPosition(const NG::OffsetF& offset);
     void ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::FrameNode>& dragPreviewNode,
         const NG::OffsetF& offset);

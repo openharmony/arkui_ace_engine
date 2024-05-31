@@ -585,8 +585,6 @@ void DragDropManager::OnDragMove(const PointerEvent& pointerEvent, const std::st
     preTimeStamp_ = static_cast<uint64_t>(
         std::chrono::duration_cast<std::chrono::milliseconds>(pointerEvent.time.time_since_epoch()).count());
     SetIsWindowConsumed(false);
-    SubwindowManager::GetInstance()->UpdateHideMenuOffsetNG(OffsetF(static_cast<float>(point.GetX()),
-        static_cast<float>(point.GetY())));
     UpdateVelocityTrackerPoint(point, false);
     UpdateDragListener(point);
     auto dragFrameNode = FindDragFrameNodeByPosition(
@@ -1397,12 +1395,12 @@ void DragDropManager::UpdateVelocityTrackerPoint(const Point& point, bool isEnd)
 }
 
 bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager>& overlayManager,
-    DragPreviewInfo& dragPreviewInfo)
+    DragPreviewInfo& dragPreviewInfo, bool isSubwindowOverlay)
 {
-    if (!overlayManager->GetHasPixelMap()) {
+    if (!isSubwindowOverlay && !overlayManager->GetHasPixelMap()) {
         return false;
     }
-    auto imageNode = overlayManager->GetPixelMapContentNode();
+    auto imageNode = overlayManager->GetPixelMapContentNode(isSubwindowOverlay);
     CHECK_NULL_RETURN(imageNode, false);
     auto badgeNode = overlayManager->GetPixelMapBadgeNode();
     if (badgeNode) {
@@ -1565,10 +1563,12 @@ void DragDropManager::DoDragMoveAnimate(const PointerEvent& pointerEvent)
         option.GetOnFinishEvent());
 }
 
-void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager>& overlayManager, const GestureEvent& event)
+void DragDropManager::DoDragStartAnimation(
+    const RefPtr<OverlayManager>& overlayManager, const GestureEvent& event, bool isSubwindowOverlay)
 {
     CHECK_NULL_VOID(overlayManager);
-    if (!(GetDragPreviewInfo(overlayManager, info_)) || !IsNeedDisplayInSubwindow()) {
+    if (!(GetDragPreviewInfo(overlayManager, info_, isSubwindowOverlay))
+        || (!IsNeedDisplayInSubwindow() && !isSubwindowOverlay)) {
         if (isDragWithContextMenu_) {
             isDragFwkShow_ = false;
         }
@@ -1585,7 +1585,7 @@ void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager>& overlay
         gatherNodeCenter.GetY());
     constexpr decltype(distance) MAX_DISTANCE = 5.0;
     if ((distance < MAX_DISTANCE || !IsNeedScaleDragPreview()) &&
-        (maxDistance < MAX_DISTANCE || (!isMouseDragged_ && !isTouchGatherAnimationPlaying_))) {
+        (maxDistance < MAX_DISTANCE || (!isMouseDragged_ && !isTouchGatherAnimationPlaying_)) && !isSubwindowOverlay) {
         TransDragWindowToDragFwk(containerId);
         return;
     }
