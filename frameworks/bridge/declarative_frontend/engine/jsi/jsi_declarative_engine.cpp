@@ -23,6 +23,7 @@
 
 #include "dfx_jsnapi.h"
 
+#include "base/thread/task_executor.h"
 #include "base/utils/utils.h"
 #ifdef WINDOWS_PLATFORM
 #include <algorithm>
@@ -77,14 +78,17 @@ extern const char _binary_jsMockSystemPlugin_abc_end[];
 extern const char _binary_stateMgmt_abc_start[];
 extern const char _binary_jsEnumStyle_abc_start[];
 extern const char _binary_arkComponent_abc_start[];
+extern const char _binary_arkTheme_abc_start[];
 #if !defined(IOS_PLATFORM)
 extern const char _binary_stateMgmt_abc_end[];
 extern const char _binary_jsEnumStyle_abc_end[];
 extern const char _binary_arkComponent_abc_end[];
+extern const char _binary_arkTheme_abc_end[];
 #else
 extern const char* _binary_stateMgmt_abc_end;
 extern const char* _binary_jsEnumStyle_abc_end;
 extern const char* _binary_arkComponent_abc_end;
+extern const char* _binary_arkTheme_abc_end;
 #endif
 
 namespace OHOS::Ace::Framework {
@@ -171,15 +175,29 @@ inline bool PreloadJsEnums(const shared_ptr<JsRuntime>& runtime)
 
 inline bool PreloadStateManagement(const shared_ptr<JsRuntime>& runtime)
 {
-    uint8_t* codeStart = (uint8_t*)_binary_stateMgmt_abc_start;
-    int32_t codeLength = _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start;
-    return runtime->EvaluateJsCode(codeStart, codeLength);
+#ifdef STATE_MGMT_USE_AOT
+    auto container = Container::Current();
+    if (container && container->IsDynamicRender()) {
+        return runtime->EvaluateJsCode(
+            (uint8_t*)_binary_stateMgmt_abc_start, _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start);
+    }
+    return runtime->ExecuteJsBin("/etc/abc/framework/stateMgmt.abc");
+#else
+    return runtime->EvaluateJsCode(
+        (uint8_t*)_binary_stateMgmt_abc_start, _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start);
+#endif
 }
 
 inline bool PreloadArkComponent(const shared_ptr<JsRuntime>& runtime)
 {
     return runtime->EvaluateJsCode(
         (uint8_t*)_binary_arkComponent_abc_start, _binary_arkComponent_abc_end - _binary_arkComponent_abc_start);
+}
+
+inline bool PreloadArkTheme(const shared_ptr<JsRuntime>& runtime)
+{
+    return runtime->EvaluateJsCode(
+        (uint8_t*)_binary_arkTheme_abc_start, _binary_arkTheme_abc_end - _binary_arkTheme_abc_start);
 }
 
 bool PreloadConsole(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& global)
@@ -257,6 +275,8 @@ thread_local bool isUnique_ = false;
 
 thread_local bool isWorker_ = false;
 
+thread_local bool isDynamicModulePreloaded_ = false;
+
 JsiDeclarativeEngineInstance::~JsiDeclarativeEngineInstance()
 {
     CHECK_RUN_ON(JS);
@@ -294,6 +314,13 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
         EventReport::SendJsException(JsExcepType::JS_ENGINE_INIT_ERR);
         return false;
     }
+
+#if defined(PREVIEW)
+    auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime_);
+    arkRuntime->SetPkgNameList(pkgNameMap_);
+    arkRuntime->SetPkgAliasList(pkgAliasMap_);
+    arkRuntime->SetpkgContextInfoList(pkgContextInfoMap_);
+#endif
 
     runtime_->SetLogPrint(PrintLog);
     std::string libraryPath = "";
@@ -347,7 +374,8 @@ void JsiDeclarativeEngineInstance::InitJsObject()
         }
     } else {
         auto container = Container::Current();
-        if (container && container->IsDynamicRender()) {
+        if (container && container->IsDynamicRender() && !isDynamicModulePreloaded_) {
+            isDynamicModulePreloaded_ = true;
             LOGD("init ace module for dynamic component");
             auto vm = std::static_pointer_cast<ArkJSRuntime>(runtime_)->GetEcmaVm();
             LocalScope scope(vm);
@@ -368,6 +396,7 @@ void JsiDeclarativeEngineInstance::InitJsObject()
             PreloadRequireNative(runtime_, global);
             PreloadStateManagement(runtime_);
             PreloadArkComponent(runtime_);
+            PreloadArkTheme(runtime_);
         }
     }
 
@@ -393,6 +422,7 @@ void JsiDeclarativeEngineInstance::InitAceModule()
         PreloadStateManagement(runtime_);
         PreloadJsEnums(runtime_);
         PreloadArkComponent(runtime_);
+        PreloadArkTheme(runtime_);
     }
 #if defined(PREVIEW)
     std::string jsMockSystemPluginString(_binary_jsMockSystemPlugin_abc_start,
@@ -511,6 +541,14 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     // preload ark component
     bool arkComponentResult = PreloadArkComponent(arkRuntime);
     if (!arkComponentResult) {
+        std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
+        globalRuntime_ = nullptr;
+        return;
+    }
+
+    // preload ark styles
+    bool arkThemeResult = PreloadArkTheme(arkRuntime);
+    if (!arkThemeResult) {
         std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
         globalRuntime_ = nullptr;
         return;
@@ -1034,6 +1072,11 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     }
     engineInstance_->SetInstanceId(instanceId_);
     engineInstance_->SetDebugMode(NeedDebugBreakPoint());
+#if defined(PREVIEW)
+    engineInstance_->SetPkgNameList(pkgNameMap_);
+    engineInstance_->SetPkgAliasList(pkgAliasMap_);
+    engineInstance_->SetpkgContextInfoList(pkgContextInfoMap_);
+#endif
     bool result = engineInstance_->InitJsEnv(IsDebugVersion(), GetExtraNativeObject(), arkRuntime);
     if (!result) {
         return false;
@@ -1683,7 +1726,7 @@ bool JsiDeclarativeEngine::ExecuteJsForFastPreview(const std::string& jsCode, co
 }
 
 void JsiDeclarativeEngine::SetHspBufferTrackerCallback(
-    std::function<bool(const std::string&, uint8_t**, size_t*)>&& callback)
+    std::function<bool(const std::string&, uint8_t**, size_t*, std::string&)>&& callback)
 {
     CHECK_NULL_VOID(engineInstance_);
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(engineInstance_->GetJsRuntime());
@@ -1798,6 +1841,11 @@ void JsiDeclarativeEngine::FireExternalEvent(
             nativeXComponentImpl->SetSurface(nativeWindow);
         }
         nativeXComponentImpl->SetXComponentId(componentId);
+#ifdef XCOMPONENT_SUPPORTED
+        xcPattern->SetExpectedRateRangeInit();
+        xcPattern->OnFrameEventInit();
+        xcPattern->UnregisterOnFrameEventInit();
+#endif
         auto* arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine_);
         if (arkNativeEngine == nullptr) {
             return;
@@ -2282,6 +2330,41 @@ panda::Global<panda::ObjectRef> JsiDeclarativeEngine::GetNavigationBuilder(std::
     return targetBuilder->second;
 }
 
+void JsiDeclarativeEngine::JsStateProfilerResgiter()
+{
+    CHECK_NULL_VOID(runtime_);
+    auto engine = reinterpret_cast<NativeEngine*>(runtime_);
+    CHECK_NULL_VOID(engine);
+    auto vm = engine->GetEcmaVm();
+    CHECK_NULL_VOID(vm);
+    auto globalObj = JSNApi::GetGlobalObject(vm);
+    const auto globalObject = JSRef<JSObject>::Make(globalObj);
+
+    const JSRef<JSVal> setProfilerStatus = globalObject->GetProperty("setProfilerStatus");
+    if (!setProfilerStatus->IsFunction()) {
+        return;
+    }
+
+    const auto globalFunc = JSRef<JSFunc>::Cast(setProfilerStatus);
+    std::function<void(bool)> callback = [globalFunc, globalObject, instanceId = instanceId_](
+                                             bool enableStateProfiler) {
+        ContainerScope scope(instanceId);
+
+        const std::function<void()> task = [globalFunc, globalObject, enableStateProfiler]() {
+            auto isInStateProfiler = JSRef<JSVal>::Make(ToJSValue(enableStateProfiler));
+            globalFunc->Call(globalObject, 1, &isInStateProfiler);
+        };
+
+        auto executor = Container::CurrentTaskExecutor();
+        CHECK_NULL_VOID(executor);
+        executor->PostSyncTask(task, TaskExecutor::TaskType::UI, "setProfilerStatus");
+    };
+
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetStateProfilerStatusCallback(std::move(callback));
+}
+
 // ArkTsCard start
 #ifdef FORM_SUPPORTED
 void JsiDeclarativeEngineInstance::PreloadAceModuleCard(
@@ -2337,6 +2420,14 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(
     // preload ark component
     bool arkComponentResult = PreloadArkComponent(arkRuntime);
     if (!arkComponentResult) {
+        std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
+        globalRuntime_ = nullptr;
+        return;
+    }
+
+    // preload ark styles
+    bool arkThemeResult = PreloadArkTheme(arkRuntime);
+    if (!arkThemeResult) {
         std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
         globalRuntime_ = nullptr;
         return;

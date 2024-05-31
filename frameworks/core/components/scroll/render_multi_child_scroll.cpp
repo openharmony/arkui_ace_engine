@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -151,7 +151,7 @@ bool RenderMultiChildScroll::CalculateMainScrollExtent()
     return isScrollable;
 }
 
-void RenderMultiChildScroll::JumpToIndex(int32_t index, int32_t source)
+void RenderMultiChildScroll::JumpToIndex(int32_t index)
 {
     if (GetChildren().empty()) {
         LOGE("no list in scroll");
@@ -170,7 +170,7 @@ void RenderMultiChildScroll::JumpToIndex(int32_t index, int32_t source)
     }
     LOGI("jump to index:%{public}d position:%{public}lf", index, position);
     if (CalculateMainScrollExtent()) {
-        RenderScroll::JumpToPosition(position, source);
+        RenderScroll::JumpToPosition(position, SCROLL_FROM_JUMP);
     } else {
         LOGW("Current is not allow to jump index.");
     }
@@ -408,7 +408,6 @@ bool RenderMultiChildScroll::LayoutChild(
     Offset curOffset = lastOffset + lastSize;
     double mainOffset = GetMainOffset(curOffset);
     double mainExtent = GetMainSize(viewPort_);
-
     // The following children are not visible.
     if (lastChild && mainOffset >= mainExtent + cacheExtent_) {
         return false;
@@ -928,7 +927,6 @@ double RenderMultiChildScroll::GetFixPositionOnWatch(double destination, double 
             }
             double start = listBase->GetItemPosition(index);
             double end = start + listBase->GetMainSize(item->GetLayoutSize());
-
             if (start < centerPosition && end > centerPosition) {
                 centerIndex = index;
                 itemSize = GetMainSize(item->GetLayoutSize());

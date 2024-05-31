@@ -433,21 +433,27 @@ void SelectPattern::SetDisabledStyle()
     textProps->UpdateTextColor(theme->GetDisabledFontColor());
     text_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 
-    auto spinnerLayoutProperty = spinner_->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(spinnerLayoutProperty);
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto spinnerLayoutProperty = spinner_->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(spinnerLayoutProperty);
+        spinnerLayoutProperty->UpdateSymbolColorList({theme->GetDisabledSpinnerSymbolColor()});
+    } else {
+        auto spinnerLayoutProperty = spinner_->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(spinnerLayoutProperty);
 
-    ImageSourceInfo imageSourceInfo = spinnerLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo());
-    auto iconTheme = pipeline->GetTheme<IconTheme>();
-    CHECK_NULL_VOID(iconTheme);
-    auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::SPINNER_DISABLE);
-    imageSourceInfo.SetSrc(iconPath);
-    if (imageSourceInfo.IsSvg()) {
-        imageSourceInfo.SetFillColor(theme->GetDisabledSpinnerColor());
+        ImageSourceInfo imageSourceInfo = spinnerLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo());
+        auto iconTheme = pipeline->GetTheme<IconTheme>();
+        CHECK_NULL_VOID(iconTheme);
+        auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::SPINNER_DISABLE);
+        imageSourceInfo.SetSrc(iconPath);
+        if (imageSourceInfo.IsSvg()) {
+            imageSourceInfo.SetFillColor(theme->GetDisabledSpinnerColor());
+        }
+        spinnerLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+        auto spinnerRenderProperty = spinner_->GetPaintProperty<ImageRenderProperty>();
+        CHECK_NULL_VOID(spinnerRenderProperty);
+        spinnerRenderProperty->UpdateSvgFillColor(theme->GetDisabledSpinnerColor());
     }
-    spinnerLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-    auto spinnerRenderProperty = spinner_->GetPaintProperty<ImageRenderProperty>();
-    CHECK_NULL_VOID(spinnerRenderProperty);
-    spinnerRenderProperty->UpdateSvgFillColor(theme->GetDisabledSpinnerColor());
     spinner_->MarkModifyDone();
 
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -515,15 +521,21 @@ void SelectPattern::BuildChild()
     auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textProps);
     InitTextProps(textProps, theme);
-
-    spinner_ = FrameNode::GetOrCreateFrameNode(
-        V2::IMAGE_ETS_TAG, spinnerId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
-    CHECK_NULL_VOID(spinner_);
-    spinner_->SetInternal();
-    auto iconTheme = pipeline->GetTheme<IconTheme>();
-    CHECK_NULL_VOID(iconTheme);
-    InitSpinner(spinner_, iconTheme, theme);
-
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        spinner_ = FrameNode::GetOrCreateFrameNode(
+            V2::SYMBOL_ETS_TAG, spinnerId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+        CHECK_NULL_VOID(spinner_);
+        spinner_->SetInternal();
+        InitSpinner(spinner_, theme);
+    } else {
+        spinner_ = FrameNode::GetOrCreateFrameNode(
+            V2::IMAGE_ETS_TAG, spinnerId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+        CHECK_NULL_VOID(spinner_);
+        spinner_->SetInternal();
+        auto iconTheme = pipeline->GetTheme<IconTheme>();
+        CHECK_NULL_VOID(iconTheme);
+        InitSpinner(spinner_, iconTheme, theme);
+    }
     // mount triangle and text
     text_->MarkModifyDone();
     if (!hasTextNode) {
@@ -904,9 +916,30 @@ void SelectPattern::InitSpinner(
     spinnerRenderProperty->UpdateSvgFillColor(selectTheme->GetSpinnerColor());
 }
 
+void SelectPattern::InitSpinner(
+    const RefPtr<FrameNode>& spinner, const RefPtr<SelectTheme>& selectTheme)
+{
+    auto spinnerLayoutProperty = spinner->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(spinnerLayoutProperty);
+    uint32_t symbolId = selectTheme->GetSpinnerSource();
+    spinnerLayoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo{symbolId});
+    spinnerLayoutProperty->UpdateSymbolColorList({selectTheme->GetSpinnerSymbolColor()});
+    spinnerLayoutProperty->UpdateFontSize(selectTheme->GetFontSize());
+    MarginProperty margin;
+    margin.right = CalcLength(selectTheme->GetContentMargin());
+    spinnerLayoutProperty->UpdateMargin(margin);
+}
+
 // XTS inspector code
 void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        ToJsonArrowAndText(json, filter);
+        ToJsonOptionAlign(json, filter);
+        ToJsonMenuBackgroundStyle(json, filter);
+        return;
+    }
     json->PutExtAttr("options", InspectorGetOptions().c_str(), filter);
     json->PutExtAttr("selected", std::to_string(selected_).c_str(), filter);
     ToJsonArrowAndText(json, filter);
@@ -945,6 +978,10 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
 
 void SelectPattern::ToJsonArrowAndText(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (!host->GetChildren().empty()) {
@@ -967,15 +1004,16 @@ void SelectPattern::ToJsonArrowAndText(std::unique_ptr<JsonValue>& json, const I
     Color fontColor = props->GetTextColor().value_or(Color::BLACK);
     json->PutExtAttr("fontColor", fontColor.ColorToString().c_str(), filter);
     json->PutExtAttr("font", props->InspectorGetTextFont().c_str(), filter);
-
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        json->PutExtAttr("controlSize", ConvertControlSizeToString(controlSize_).c_str(), filter);
-    }
+    json->PutExtAttr("controlSize", ConvertControlSizeToString(controlSize_).c_str(), filter);
 }
 
 void SelectPattern::ToJsonMenuBackgroundStyle(
     std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto menu = GetMenuNode();
     CHECK_NULL_VOID(menu);
     auto menuRenderContext = menu->GetRenderContext();
@@ -995,6 +1033,10 @@ void SelectPattern::ToJsonMenuBackgroundStyle(
 
 void SelectPattern::ToJsonOptionAlign(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto optionAlignJson = JsonUtil::Create(true);
     std::string alignTypeString = "MenuAlignType.Start";
     if (menuAlign_.alignType == MenuAlignType::START) {
@@ -1332,13 +1374,9 @@ void SelectPattern::ResetParams()
     layoutProperty->UpdateCalcMinSize(CalcSize(CalcLength(selectTheme->GetSelectMinWidth(controlSize_)),
         CalcLength(selectTheme->GetSelectDefaultHeight(controlSize_))));
     SetFontSize(selectTheme->GetFontSize(controlSize_));
-    auto spinnerLayoutProperty = spinner_->GetLayoutProperty<ImageLayoutProperty>();
+    auto spinnerLayoutProperty = spinner_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(spinnerLayoutProperty);
-    CalcSize idealSize = { CalcLength(selectTheme->GetSpinnerWidth(controlSize_)),
-        CalcLength(selectTheme->GetSpinnerHeight(controlSize_)) };
-    MeasureProperty layoutConstraint;
-    layoutConstraint.selfIdealSize = idealSize;
-    spinnerLayoutProperty->UpdateCalcLayoutProperty(layoutConstraint);
+    spinnerLayoutProperty->UpdateFontSize(selectTheme->GetFontSize(controlSize_));
     auto renderContext = select->GetRenderContext();
     BorderRadiusProperty border;
     border.SetRadius(selectTheme->GetSelectDefaultBorderRadius(controlSize_));

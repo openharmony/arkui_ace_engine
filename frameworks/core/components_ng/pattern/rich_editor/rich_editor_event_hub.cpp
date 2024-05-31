@@ -168,6 +168,36 @@ double RichEditorAbstractSpanResult::GetFontSize() const
     return fontSize_;
 }
 
+void RichEditorAbstractSpanResult::SetValueResource(const RefPtr<ResourceObject>& valueResource)
+{
+    valueResource_ = valueResource;
+}
+
+const RefPtr<ResourceObject> RichEditorAbstractSpanResult::GetValueResource() const
+{
+    return valueResource_;
+}
+
+void RichEditorAbstractSpanResult::SetValueString(const std::string& valueString)
+{
+    valueString_ = valueString;
+}
+
+const std::string RichEditorAbstractSpanResult::GetValueString() const
+{
+    return valueString_;
+}
+
+void RichEditorAbstractSpanResult::SetSymbolSpanStyle(const SymbolSpanStyle& symbolSpanStyle)
+{
+    symbolSpanStyle_ = symbolSpanStyle;
+}
+
+const SymbolSpanStyle RichEditorAbstractSpanResult::GetSymbolSpanStyle() const
+{
+    return symbolSpanStyle_;
+}
+
 void RichEditorAbstractSpanResult::SetFontWeight(int32_t fontWeigth)
 {
     fontWeigth_ = fontWeigth;
@@ -308,22 +338,12 @@ const std::list<RichEditorAbstractSpanResult>& RichEditorDeleteValue::GetRichEdi
     return richEditorDeleteSpans_;
 }
 
-void RichEditorDeleteValue::SetKeyboardType(KeyboardType Keyboard)
-{
-    Keyboard_ = Keyboard;
-}
-
-KeyboardType RichEditorDeleteValue::GetKeyboardType() const
-{
-    return Keyboard_;
-}
-
 void RichEditorChangeValue::SetRichEditorOriginalSpans(const RichEditorAbstractSpanResult& span)
 {
     originalSpans_.emplace_back(span);
 }
 
-const std::list<RichEditorAbstractSpanResult>& RichEditorChangeValue::GetRichEditorOriginalSpans() const
+const std::vector<RichEditorAbstractSpanResult>& RichEditorChangeValue::GetRichEditorOriginalSpans() const
 {
     return originalSpans_;
 }
@@ -333,7 +353,7 @@ void RichEditorChangeValue::SetRichEditorReplacedSpans(const RichEditorAbstractS
     replacedSpans_.emplace_back(span);
 }
 
-const std::list<RichEditorAbstractSpanResult>& RichEditorChangeValue::GetRichEditorReplacedSpans() const
+const std::vector<RichEditorAbstractSpanResult>& RichEditorChangeValue::GetRichEditorReplacedSpans() const
 {
     return replacedSpans_;
 }
@@ -343,7 +363,7 @@ void RichEditorChangeValue::SetRichEditorReplacedImageSpans(const RichEditorAbst
     replacedImageSpans_.emplace_back(span);
 }
 
-const std::list<RichEditorAbstractSpanResult>& RichEditorChangeValue::GetRichEditorReplacedImageSpans() const
+const std::vector<RichEditorAbstractSpanResult>& RichEditorChangeValue::GetRichEditorReplacedImageSpans() const
 {
     return replacedImageSpans_;
 }
@@ -353,7 +373,7 @@ void RichEditorChangeValue::SetRichEditorReplacedSymbolSpans(const RichEditorAbs
     replacedSymbolSpans_.emplace_back(span);
 }
 
-const std::list<RichEditorAbstractSpanResult>& RichEditorChangeValue::GetRichEditorReplacedSymbolSpans() const
+const std::vector<RichEditorAbstractSpanResult>& RichEditorChangeValue::GetRichEditorReplacedSymbolSpans() const
 {
     return replacedSymbolSpans_;
 }

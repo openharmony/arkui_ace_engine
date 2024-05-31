@@ -38,6 +38,16 @@ namespace {
 constexpr int32_t STANDARD_FRAME_DURATION = 100;
 constexpr int32_t FORM_REPEAT_COUNT = 1;
 constexpr float RESIZE_THRESHOLD = 0.7f;
+
+struct RSDataWrapper {
+    std::shared_ptr<RSData> data;
+};
+
+inline void RSDataWrapperReleaseProc(const void*, void* context)
+{
+    RSDataWrapper* wrapper = reinterpret_cast<RSDataWrapper*>(context);
+    delete wrapper;
+}
 } // namespace
 
 #ifndef USE_ROSEN_DRAWING
@@ -63,7 +73,8 @@ RefPtr<CanvasImage> AnimatedImage::Create(
     CHECK_NULL_RETURN(data, nullptr);
     auto rsData = data->GetRSData();
     CHECK_NULL_RETURN(rsData, nullptr);
-    auto skData = SkData::MakeWithoutCopy(rsData->GetData(), rsData->GetSize());
+    RSDataWrapper* wrapper = new RSDataWrapper{rsData};
+    auto skData = SkData::MakeWithProc(rsData->GetData(), rsData->GetSize(), RSDataWrapperReleaseProc, wrapper);
     auto codec = SkCodec::MakeFromData(skData);
     CHECK_NULL_RETURN(codec, nullptr);
     if (SystemProperties::GetImageFrameworkEnabled()) {
@@ -308,10 +319,6 @@ AnimatedPixmap::AnimatedPixmap(
 {
     // resizing to a size >= 0.7 [~= sqrt(2) / 2] intrinsic size takes 2x longer to decode while memory usage is 1/2.
     // 0.7 is the balance point.
-    auto intrSize = src_->GetImageSize();
-    if (intrSize.first * RESIZE_THRESHOLD >= size_.width || intrSize.second * RESIZE_THRESHOLD >= size_.height) {
-        size_.forceResize = true;
-    }
 }
 
 RefPtr<PixelMap> AnimatedPixmap::GetPixelMap() const
@@ -322,12 +329,24 @@ RefPtr<PixelMap> AnimatedPixmap::GetPixelMap() const
 
 void AnimatedPixmap::DecodeImpl(uint32_t idx)
 {
+    if (intrSizeInitial_) {
+        auto intrSize = src_->GetImageSize();
+        if (intrSize.first * RESIZE_THRESHOLD >= size_.width || intrSize.second * RESIZE_THRESHOLD >= size_.height) {
+            size_.forceResize = true;
+        }
+        intrSizeInitial_ = false;
+    }
     RefPtr<PixelMap> frame;
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_IMAGE,
+            "gif decode to pixmap, src=%{public}s, idx = %{public}d, resolutionQuality = %{public}s",
+            GetCacheKey().c_str(), idx, GetResolutionQuality(size_.imageQuality).c_str());
+    }
     if (size_.forceResize) {
-        frame = src_->CreatePixelMap(idx, { size_.width, size_.height });
+        frame = src_->CreatePixelMap(idx, { size_.width, size_.height }, size_.imageQuality);
     } else {
         // decode to intrinsic size
-        frame = src_->CreatePixelMap(idx, { -1, -1 });
+        frame = src_->CreatePixelMap(idx, { -1, -1 }, size_.imageQuality);
     }
     std::scoped_lock<std::mutex> lock(frameMtx_);
     currentFrame_ = frame;

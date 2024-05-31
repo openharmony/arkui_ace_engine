@@ -94,6 +94,11 @@ public:
     {
         toastInfo_ = toastInfo;
     }
+
+    ToastInfo& GetToastInfo()
+    {
+        return toastInfo_;
+    }
     
 private:
     void BeforeCreateLayoutWrapper() override;

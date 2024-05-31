@@ -518,15 +518,84 @@ class ImageSrcModifier extends ModifierWithKey<ResourceStr | PixelMap | Drawable
   }
 }
 
+class ImageEnableAnalyzerModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('enableAnalyzer');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().image.enableAnalyzer(node);
+    } else {
+      getUINativeModule().image.enableAnalyzer(node, this.value!);
+    }
+  }
+}
+
+class ImageAnalyzerConfigModifier extends ModifierWithKey<object> {
+  constructor(value: object) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('analyzerConfig');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().image.analyzerConfig(node, '');
+    } else {
+      getUINativeModule().image.analyzerConfig(node, this.value!);
+    }
+  }
+}
+
+class ImagePointLightModifier extends ModifierWithKey<PointLightStyle> {
+  constructor(value: PointLightStyle) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('imagePointLight');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetPointLightStyle(node);
+    } else {
+      let positionX: Dimension | undefined;
+      let positionY: Dimension | undefined;
+      let positionZ: Dimension | undefined;
+      let intensity: number | undefined;
+      let color: ResourceColor | undefined;
+      let illuminated: number | undefined;
+      let bloom: number | undefined;
+      if (!isUndefined(this.value.lightSource) && this.value.lightSource != null) {
+        positionX = this.value.lightSource.positionX;
+        positionY = this.value.lightSource.positionY;
+        positionZ = this.value.lightSource.positionZ;
+        intensity = this.value.lightSource.intensity;
+        color = this.value.lightSource.color;
+      }
+      illuminated = this.value.illuminated;
+      bloom = this.value.bloom;
+      getUINativeModule().common.setPointLightStyle(node, positionX, positionY, positionZ, intensity, color,
+        illuminated, bloom);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.lightSource?.positionX, this.value.lightSource?.positionX) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.positionY, this.value.lightSource?.positionY) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.positionZ, this.value.lightSource?.positionZ) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.intensity, this.value.lightSource?.intensity) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.color, this.value.lightSource?.color) ||
+    !isBaseOrResourceEqual(this.stageValue.illuminated, this.value.illuminated) ||
+    !isBaseOrResourceEqual(this.stageValue.bloom, this.value.bloom);
+  }
+}
+
 class ArkImageComponent extends ArkComponent implements ImageAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
-  initialize(value: Object[]) {
-    if (value[0] != undefined) {
-      modifierWithKey(this._modifiersWithKeys, ImageSrcModifier.identity, ImageSrcModifier, value[0]);
-    }
+  initialize(value: Object[]): this {
+    modifierWithKey(this._modifiersWithKeys, ImageSrcModifier.identity, ImageSrcModifier, value[0]);
     return this;
+  }
+  allowChildCount(): number {
+    return 0;
   }
   draggable(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, ImageDraggableModifier.identity, ImageDraggableModifier, value);
@@ -546,6 +615,10 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
   }
   fitOriginalSize(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, ImageFitOriginalSizeModifier.identity, ImageFitOriginalSizeModifier, value);
+    return this;
+  }
+  pointLight(value: PointLightStyle): this {
+    modifierWithKey(this._modifiersWithKeys, ImagePointLightModifier.identity, ImagePointLightModifier, value);
     return this;
   }
   fillColor(value: ResourceColor): this {
@@ -649,6 +722,14 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
   enhancedImageQuality(value: ResolutionQuality): this {
     modifierWithKey(
       this._modifiersWithKeys, ImageDynamicRangeModeModifier.identity, ImageDynamicRangeModeModifier, value);
+    return this;
+  }
+  enableAnalyzer(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, ImageEnableAnalyzerModifier.identity, ImageEnableAnalyzerModifier, value);
+    return this;
+  }
+  analyzerConfig(value: object): this {
+    modifierWithKey(this._modifiersWithKeys, ImageAnalyzerConfigModifier.identity, ImageAnalyzerConfigModifier, value);
     return this;
   }
 }

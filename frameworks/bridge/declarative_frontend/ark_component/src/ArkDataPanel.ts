@@ -43,6 +43,10 @@ class ArkDataPanelComponent extends ArkComponent implements DataPanelAttribute {
     modifierWithKey(this._modifiersWithKeys, DataPanelTrackShadowModifier.identity, DataPanelTrackShadowModifier, value);
     return this;
   }
+  contentModifier(value: ContentModifier<DataPanelConfiguration>): this {
+    this.setContentModifier(value);
+    return this;
+  }
   setContentModifier(modifier: ContentModifier<DataPanelConfiguration>): this {
     if (modifier === undefined || modifier === null) {
       getUINativeModule().datapanel.setContentModifierBuilder(this.nativePtr, false);

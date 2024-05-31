@@ -18,7 +18,7 @@
 
 #include "base/utils/macros.h"
 #include "core/components_ng/pattern/canvas/rendering_context_2d_model.h"
-#include "core/components_ng/pattern/custom_paint/custom_paint_pattern.h"
+#include "core/components_ng/pattern/custom_paint/canvas_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -109,14 +109,19 @@ public:
     // All interfaces that only the 'CanvasRenderingContext2D' has.
     void GetWidth(RefPtr<AceType>& canvasPattern, double& width) override;
     void GetHeight(RefPtr<AceType>& canvasPattern, double& height) override;
-    void SetTransferFromImageBitmap(RefPtr<AceType>& canvasPattern, RefPtr<AceType> offscreenCPattern) override;
     void StartImageAnalyzer(RefPtr<AceType>& canvasPattern, void* config, onAnalyzedCallback& onAnalyzed) override;
     void StopImageAnalyzer(RefPtr<AceType>& canvasPattern) override;
+#ifdef PIXEL_MAP_SUPPORTED
+    void TransferFromImageBitmap(RefPtr<AceType>& canvasPattern, const RefPtr<AceType>& pixelMap) override;
+#else
+    void TransferFromImageBitmap(
+        RefPtr<AceType>& canvasPattern, const std::unique_ptr<Ace::ImageData>& imageData) override;
+#endif
 
 private:
     void GetImageData(const std::shared_ptr<Ace::ImageData>& imageData);
 
-    RefPtr<CustomPaintPattern> pattern_;
+    RefPtr<CanvasPattern> pattern_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CanvasRenderingContext2DModelNG);
 };

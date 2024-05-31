@@ -38,6 +38,7 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
   buttonNode: BuilderNode<[ButtonConfiguration]> | null = null;
   modifier: ContentModifier<ButtonConfiguration>;
   needRebuild: boolean = false;
+  applyContent: WrappedBuilder<[ButtonConfiguration]>;
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
@@ -89,16 +90,21 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
     modifierWithKey(this._modifiersWithKeys, ButtonSizeModifier.identity, ButtonSizeModifier, value);
     return this;
   }
+  contentModifier(value: ContentModifier<ButtonConfiguration>): this {
+    this.setContentModifier(value);
+    return this;
+  }
   setContentModifier(modifier: ContentModifier<ButtonConfiguration>): this {
     if (modifier === undefined || modifier === null) {
       getUINativeModule().button.setContentModifierBuilder(this.nativePtr, false);
       return;
     }
     this.needRebuild = false;
-    if (this.builder !== modifier.applyContent()) {
+    this.applyContent = modifier.applyContent();
+    if (this.builder !== this.applyContent) {
       this.needRebuild = true;
     }
-    this.builder = modifier.applyContent();
+    this.builder = this.applyContent;
     this.modifier = modifier;
     getUINativeModule().button.setContentModifierBuilder(this.nativePtr, this);
   }

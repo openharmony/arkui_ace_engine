@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -96,11 +96,11 @@ export class Index extends ViewPU {
     this.__iconOpacity.set(newValue);
   }
   onWindowFocused() {
-    this.textColor = 0xff000000;
+    this.textColor = $r("sys.color.ohos_id_color_primary");
     this.iconOpacity = 1;
   }
   onWindowUnfocused() {
-    this.textColor = 0x66000000;
+    this.textColor = $r("sys.color.ohos_id_color_primary");
     this.iconOpacity = 0.4;
   }
   setAppTitle(content) {
@@ -117,7 +117,7 @@ export class Index extends ViewPU {
       Row.height(TITLE_ROW_HEIGHT);
       Row.justifyContent(FlexAlign.Start);
       Row.alignItems(VerticalAlign.Center);
-      Row.padding({ top: 6, bottom: 6 });
+      Row.padding({ top: 6, bottom: 6, left: 8, right: 8 });
       Row.clip(true);
       if (!isInitialRender) {
         Row.pop();
@@ -132,7 +132,7 @@ export class Index extends ViewPU {
       Image.width(TITLE_ICON_SIZE);
       Image.interpolation(ImageInterpolation.Medium);
       Image.focusable(false);
-      Image.margin({ left: TITLE_PADDING_START, right: TITLE_ELEMENT_MARGIN_HORIZONTAL });
+      Image.margin({ left: TITLE_ELEMENT_MARGIN_HORIZONTAL, right: TITLE_ELEMENT_MARGIN_HORIZONTAL });
       Image.opacity(this.iconOpacity);
       Image.draggable(false);
       if (!isInitialRender) {
@@ -151,6 +151,7 @@ export class Index extends ViewPU {
       Text.textOverflow({ overflow: TextOverflow.Ellipsis });
       Text.textAlign(TextAlign.Start);
       Text.layoutWeight(1.0);
+      Text.opacity(this.iconOpacity);
       if (!isInitialRender) {
         Text.pop();
       }

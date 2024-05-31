@@ -36,8 +36,8 @@ namespace OHOS::Ace::NG {
 using namespace Framework;
 using OnNavigationAnimation = std::function<NavigationTransition(NavContentInfo, NavContentInfo,
         NavigationOperation)>;
-class NavigationPattern : public Pattern, public FocusView {
-    DECLARE_ACE_TYPE(NavigationPattern, Pattern, FocusView);
+class NavigationPattern : public Pattern {
+    DECLARE_ACE_TYPE(NavigationPattern, Pattern);
 
 public:
     NavigationPattern();
@@ -82,11 +82,6 @@ public:
     ScopeFocusAlgorithm GetScopeFocusAlgorithm() override
     {
         return { false, true, ScopeType::FLEX };
-    }
-
-    std::list<int32_t> GetRouteOfFirstScope() override
-    {
-        return {};
     }
 
     void SetNavDestination(std::function<void(std::string)>&& builder)
@@ -362,6 +357,11 @@ public:
         parentNode_ = parentNode;
     }
 
+    bool IsInitializationDone()
+    {
+        return isInitialDone_;
+    }
+
     WeakPtr<UINode> GetParentCustomNode() const
     {
         return parentNode_;
@@ -448,6 +448,7 @@ private:
     bool isDividerDraggable_ = true;
     bool isAnimated_ = false;
     bool isReplace_ = false;
+    bool isInitialDone_ = false;
     int32_t lastPreIndex_ = false;
     std::shared_ptr<NavigationController> navigationController_;
     std::map<int32_t, std::function<void(bool)>> onStateChangeMap_;

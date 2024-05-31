@@ -36,6 +36,11 @@ public:
         InternalResource::ResourceId resourceId = InternalResource::ResourceId::NO_ID,
         const RefPtr<PixelMap>& pixmap = nullptr);
 
+    ImageSourceInfo(const std::shared_ptr<std::string> &imageSrc, std::string bundleName, std::string moduleName,
+        Dimension width = Dimension(-1), Dimension height = Dimension(-1),
+        InternalResource::ResourceId resourceId = InternalResource::ResourceId::NO_ID,
+        const RefPtr<PixelMap>& pixmap = nullptr);
+
     explicit ImageSourceInfo(std::string imageSrc, Dimension width = Dimension(-1), Dimension height = Dimension(-1),
         InternalResource::ResourceId resourceId = InternalResource::ResourceId::NO_ID,
         const RefPtr<PixelMap>& pixmap = nullptr)
@@ -115,12 +120,22 @@ public:
     {
         return localColorMode_;
     }
+    bool IsFromReset()
+    {
+        return isFromReset_;
+    }
+    void SetIsFromReset(bool isFromReset)
+    {
+        isFromReset_ = isFromReset;
+    }
+    const std::string GetColorModeToString();
 
 private:
     SrcType ResolveSrcType() const;
     void GenerateCacheKey();
 
     std::string src_;
+    std::shared_ptr<std::string> srcRef_ = nullptr;
     std::string cacheKey_;
     // Interim programme
     std::string bundleName_;
@@ -134,6 +149,7 @@ private:
     bool needCache_ = true;
     bool isConfigurationChange_ = false;
     bool isUriPureNumber_ = false;
+    bool isFromReset_ = false;
     [[deprecated("in NG")]]
     std::optional<Color> fillColor_;
 

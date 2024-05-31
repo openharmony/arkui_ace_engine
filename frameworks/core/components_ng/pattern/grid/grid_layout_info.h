@@ -30,6 +30,8 @@ namespace OHOS::Ace::NG {
 struct GridPredictLayoutParam {
     std::list<int32_t> items;
     LayoutConstraintF layoutConstraint;
+    std::map<int32_t, float> itemsCrossSizes;
+    float crossGap;
 };
 
 constexpr int32_t EMPTY_JUMP_INDEX = -2;
@@ -278,6 +280,7 @@ struct GridLayoutInfo {
      * @return total height of the content.
      */
     float GetContentHeight(const GridLayoutOptions& options, int32_t endIdx, float mainGap) const;
+    void SkipStartIndexByOffset(const GridLayoutOptions& options, float mainGap);
     float GetCurrentLineHeight() const;
 
     /**
@@ -303,6 +306,23 @@ struct GridLayoutInfo {
      */
     float GetDistanceToBottom(float mainSize, float heightInView, float mainGap) const;
 
+    /**
+     * @brief Transforms scrollAlign_ into other ScrollAlign values, based on current position of
+     * target item.
+     *
+     * @param height number of rows the item occupies.
+     * @param mainSize The main-axis length of the grid.
+     * @return ScrollAlign value transformed from AUTO.
+     */
+    ScrollAlign TransformAutoScrollAlign(int32_t itemIdx, int32_t height, float mainSize, float mainGap) const;
+
+    /**
+     * @param targetIdx target item's index.
+     * @param height number of rows the item occupies.
+     * @return item position to scroll to through animation.
+     */
+    float GetAnimatePosIrregular(int32_t targetIdx, int32_t height, ScrollAlign align, float mainGap) const;
+
     bool GetGridItemAnimatePos(const GridLayoutInfo& currentGridLayoutInfo, int32_t targetIndex, ScrollAlign align,
         float mainGap, float& targetPos);
 
@@ -314,6 +334,8 @@ struct GridLayoutInfo {
 
     float currentOffset_ = 0.0f; // offset on the current top GridItem on [startMainLineIndex_]
     float prevOffset_ = 0.0f;
+    float currentHeight_ = 0.0f; // height from first item to current top GridItem on [startMainLineIndex_]
+    float prevHeight_ = 0.0f;
     float lastMainSize_ = 0.0f;
     float lastCrossSize_ = 0.0f;
     float totalHeightOfItemsInView_ = 0.0f;
@@ -365,10 +387,13 @@ struct GridLayoutInfo {
 
 private:
     float GetCurrentOffsetOfRegularGrid(float mainGap) const;
+    float GetContentHeightOfRegularGrid(float mainGap) const;
     int32_t GetItemIndexByPosition(int32_t position);
     int32_t GetPositionByItemIndex(int32_t itemIndex);
     void MoveItemsBack(int32_t from, int32_t to, int32_t itemIndex);
     void MoveItemsForward(int32_t from, int32_t to, int32_t itemIndex);
+    void GetLineHeights(
+        const GridLayoutOptions& options, float mainGap, float& regularHeight, float& irregularHeight) const;
 
     /**
      * @brief Find the number of GridItems in range [startLine, endLine].
@@ -380,6 +405,8 @@ private:
 
     int32_t currentMovingItemPosition_ = -1;
     std::map<int32_t, int32_t> positionItemIndexMap_;
+    float lastIrregularMainSize_ = 0.0f; // maybe no irregular item in current gridMatrix_
+    float lastRegularMainSize_ = 0.0f;
 };
 
 } // namespace OHOS::Ace::NG

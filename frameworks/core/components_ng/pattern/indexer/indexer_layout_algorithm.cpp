@@ -36,7 +36,8 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto indexerLayoutProperty = AceType::DynamicCast<IndexerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(indexerLayoutProperty);
-    auto maxItemWidth = GetMaxItemWidth(layoutWrapper);
+    auto adaptiveWidth = indexerLayoutProperty->GetAdaptiveWidthValue(false);
+    auto maxItemWidth = adaptiveWidth ? GetMaxItemWidth(layoutWrapper) : 0.0f;
     LayoutConstraintF layoutConstraint;
     if (indexerLayoutProperty->GetLayoutConstraint().has_value()) {
         layoutConstraint = indexerLayoutProperty->GetLayoutConstraint().value();
@@ -51,7 +52,6 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         static_cast<float>(defaultHorizontalPadding), static_cast<float>(defaultVerticalPadding), 0, 0);
     auto verticalPadding = (padding.top.value_or(0) + padding.bottom.value_or(0));
     auto horizontalPadding = padding.left.value_or(0.0f) + padding.right.value_or(0.0f);
-    auto adaptiveWidth = indexerLayoutProperty->GetAdaptiveWidthValue(false);
     auto contentWidth =
         (adaptiveWidth ? (GreatOrEqual(maxItemWidth, itemSize_) ? maxItemWidth : itemSize_) : itemSize_) +
         horizontalPadding;
@@ -79,7 +79,7 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         childLayoutConstraint.UpdateSelfMarginSizeWithCheck(OptionalSizeF(itemWidth_, itemSizeRender_));
         childWrapper->Measure(childLayoutConstraint);
     }
-    
+
     layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(actualWidth, actualHeight_));
 }
 
@@ -130,7 +130,7 @@ void IndexerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 OffsetT<Dimension> IndexerLayoutAlgorithm::GetPositionOfPopupNode(
     const RefPtr<IndexerLayoutProperty>& layoutProperty, float indexerWidth)
 {
-    auto alignMent = layoutProperty->GetAlignStyle().value_or(NG::AlignStyle::RIGHT);
+    auto alignment = layoutProperty->GetAlignStyle().value_or(NG::AlignStyle::END);
     auto userDefinePositionX =
         layoutProperty->GetPopupPositionX().value_or(Dimension(NG::BUBBLE_POSITION_X, DimensionUnit::VP)).ConvertToPx();
     auto userDefinePositionY =
@@ -140,7 +140,7 @@ OffsetT<Dimension> IndexerLayoutAlgorithm::GetPositionOfPopupNode(
     auto padding = layoutProperty->CreatePaddingWithoutBorder();
     auto left = padding.left.value_or(0);
     auto top = padding.top.value_or(0);
-    if (alignMent == NG::AlignStyle::LEFT) {
+    if (IsPopupAtLeft(layoutProperty, alignment)) {
         userDefinePositionX = (userDefineSpace ? userDefineSpace.value().ConvertToPx() + indexerWidth
                                     : userDefinePositionX + indexerWidth / 2) - left;
     } else {
@@ -150,6 +150,19 @@ OffsetT<Dimension> IndexerLayoutAlgorithm::GetPositionOfPopupNode(
     }
     userDefinePositionY -= top;
     return OffsetT<Dimension>(Dimension(userDefinePositionX), Dimension(userDefinePositionY));
+}
+
+bool IndexerLayoutAlgorithm::IsPopupAtLeft(
+    const RefPtr<IndexerLayoutProperty>& layoutProperty, NG::AlignStyle alignment) const
+{
+    auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+    bool isRtl = layoutDirection == TextDirection::RTL;
+    if (alignment == NG::AlignStyle::LEFT || (alignment == NG::AlignStyle::START && (!isRtl)) ||
+        (alignment == NG::AlignStyle::END && isRtl)) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 float IndexerLayoutAlgorithm::GetMaxItemWidth(LayoutWrapper* layoutWrapper)

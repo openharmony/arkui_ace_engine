@@ -42,6 +42,7 @@
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/picker/date_time_animation_controller.h"
@@ -53,6 +54,7 @@
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/ace_events.h"
 #undef private
@@ -99,7 +101,10 @@ constexpr int32_t SELECTED_YEAR = 2000;
 constexpr int32_t END_YEAR = 2090;
 constexpr int32_t CURRENT_DAY = 5;
 const int YEARINDEX = 1;
+const int ENORMOUS_SHOWCOUNT = 7;
+const int HUGE_SHOWCOUNT = 6;
 const int BIG_SHOWCOUNT = 5;
+const int MEDIUM_SHOWCOUNT = 4;
 const int SMALL_SHOWCOUNT = 3;
 const int MIDDLE_OF_COUNTS = 2;
 const vector<int> DEFAULT_DATE = { 1999, 9, 9 };
@@ -121,6 +126,10 @@ constexpr double COLUMN_VELOCITY = 2000.0;
 constexpr double COLUMN_WIDTH = 200.0;
 constexpr double SECLECTED_TEXTNODE_HEIGHT = 84.0;
 constexpr double OTHER_TEXTNODE_HEIGHT = 54.0;
+const std::string AM = "上午";
+const std::string PM = "下午";
+const std::string COLON = ":";
+const std::string ZERO = "0";
 } // namespace
 
 class DatePickerTestNg : public testing::Test {
@@ -174,6 +183,8 @@ void DatePickerTestNg::SetUp()
             return AceType::MakeRefPtr<DialogTheme>();
         } else if (type == PickerTheme::TypeId()) {
             return MockThemeDefault::GetPickerTheme();
+        } else if (type == ButtonTheme::TypeId()) {
+            return AceType::MakeRefPtr<ButtonTheme>();
         } else {
             return nullptr;
         }
@@ -3528,4 +3539,2018 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0012, TestSize.Level1)
     ASSERT_NE(dialogNode, nullptr);
 }
 
+/**
+ * @tc.name: DatePickerDialogViewUpdateButtonDefaultFocus001
+ * @tc.desc: Test UpdateButtonDefaultFocus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewUpdateButtonDefaultFocus001, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.isPrimary = true;
+    info1.isAcceptButton = true;
+    buttonInfos.push_back(info1);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonNode, nullptr);
+
+    DatePickerDialogView::UpdateButtonDefaultFocus(buttonInfos, buttonNode, true);
+    auto focusHub = buttonNode->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    EXPECT_EQ(focusHub->IsDefaultFocus(), true);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewUpdateButtonDefaultFocus002
+ * @tc.desc: Test UpdateButtonDefaultFocus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewUpdateButtonDefaultFocus002, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.isPrimary = true;
+    buttonInfos.push_back(info1);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonNode, nullptr);
+
+    DatePickerDialogView::UpdateButtonDefaultFocus(buttonInfos, buttonNode, false);
+    auto focusHub = buttonNode->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    EXPECT_EQ(focusHub->IsDefaultFocus(), true);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewUpdateButtonDefaultFocus003
+ * @tc.desc: Test UpdateButtonDefaultFocus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewUpdateButtonDefaultFocus003, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.isPrimary = true;
+    info1.isAcceptButton = true;
+    buttonInfos.push_back(info1);
+
+    ButtonInfo info2;
+    buttonInfos.push_back(info2);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonNode, nullptr);
+
+    DatePickerDialogView::UpdateButtonDefaultFocus(buttonInfos, buttonNode, true);
+    auto focusHub = buttonNode->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    EXPECT_EQ(focusHub->IsDefaultFocus(), true);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewShow0013
+ * @tc.desc: Test DatePickerDialogView Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0013, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(3, 3, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(SMALL_SHOWCOUNT) + COLON + std::to_string(SMALL_SHOWCOUNT));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewShow0014
+ * @tc.desc: Test DatePickerDialogView Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0014, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(3, 3, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(SMALL_SHOWCOUNT) + COLON + ZERO + std::to_string(SMALL_SHOWCOUNT));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewShow0015
+ * @tc.desc: Test DatePickerDialogView Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0015, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(3, 3, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + std::to_string(SMALL_SHOWCOUNT) + COLON + ZERO + std::to_string(SMALL_SHOWCOUNT));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewShow0016
+ * @tc.desc: Test DatePickerDialogView Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0016, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(3, 3, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + std::to_string(SMALL_SHOWCOUNT) + COLON + std::to_string(SMALL_SHOWCOUNT));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewShow0017
+ * @tc.desc: Test DatePickerDialogView Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0017, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(3, 4, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(SMALL_SHOWCOUNT) + COLON + std::to_string(MEDIUM_SHOWCOUNT));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewShow0018
+ * @tc.desc: Test DatePickerDialogView Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0018, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(3, 4, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(SMALL_SHOWCOUNT) + COLON + ZERO + std::to_string(MEDIUM_SHOWCOUNT));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewShow0019
+ * @tc.desc: Test DatePickerDialogView Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0019, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(3, 4, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + std::to_string(SMALL_SHOWCOUNT) + COLON + ZERO + std::to_string(MEDIUM_SHOWCOUNT));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewShow0020
+ * @tc.desc: Test DatePickerDialogView Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0020, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(3, 4, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + std::to_string(SMALL_SHOWCOUNT) + COLON + std::to_string(MEDIUM_SHOWCOUNT));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewShow0021
+ * @tc.desc: Test DatePickerDialogView Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0021, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(3, 5, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(SMALL_SHOWCOUNT) + COLON + std::to_string(BIG_SHOWCOUNT));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewShow0022
+ * @tc.desc: Test DatePickerDialogView Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0022, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(3, 5, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(SMALL_SHOWCOUNT) + COLON + ZERO + std::to_string(BIG_SHOWCOUNT));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewShow0023
+ * @tc.desc: Test DatePickerDialogView Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0023, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(3, 5, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + std::to_string(SMALL_SHOWCOUNT) + COLON + ZERO + std::to_string(BIG_SHOWCOUNT));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewShow0024
+ * @tc.desc: Test DatePickerDialogView Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0024, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(3, 5, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + std::to_string(SMALL_SHOWCOUNT) + COLON + std::to_string(BIG_SHOWCOUNT));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewShow0025
+ * @tc.desc: Test DatePickerDialogView Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0025, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(3, 6, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(SMALL_SHOWCOUNT) + COLON + std::to_string(HUGE_SHOWCOUNT));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewShow0026
+ * @tc.desc: Test DatePickerDialogView Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0026, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(3, 6, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(SMALL_SHOWCOUNT) + COLON + ZERO + std::to_string(HUGE_SHOWCOUNT));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewShow0027
+ * @tc.desc: Test DatePickerDialogView Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0027, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(3, 6, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + std::to_string(SMALL_SHOWCOUNT) + COLON + ZERO + std::to_string(HUGE_SHOWCOUNT));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewShow0028
+ * @tc.desc: Test DatePickerDialogView Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0028, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(3, 6, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + std::to_string(SMALL_SHOWCOUNT) + COLON + std::to_string(HUGE_SHOWCOUNT));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewShow0029
+ * @tc.desc: Test DatePickerDialogView Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0029, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(4, 7, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) + COLON + std::to_string(ENORMOUS_SHOWCOUNT));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewShow0030
+ * @tc.desc: Test DatePickerDialogView Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0030, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(4, 7, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) + COLON + ZERO + std::to_string(ENORMOUS_SHOWCOUNT));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewShow0031
+ * @tc.desc: Test DatePickerDialogView Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0031, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(4, 7, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + std::to_string(MEDIUM_SHOWCOUNT) + COLON + ZERO + std::to_string(ENORMOUS_SHOWCOUNT));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewShow0032
+ * @tc.desc: Test DatePickerDialogView Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0032, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(4, 7, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + std::to_string(MEDIUM_SHOWCOUNT) + COLON + std::to_string(ENORMOUS_SHOWCOUNT));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewShow0033
+ * @tc.desc: Test DatePickerDialogView Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0033, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(4, 4, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) + COLON + std::to_string(MEDIUM_SHOWCOUNT));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewShow0034
+ * @tc.desc: Test DatePickerDialogView Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0034, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(4, 4, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) + COLON + ZERO + std::to_string(MEDIUM_SHOWCOUNT));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewShow0035
+ * @tc.desc: Test DatePickerDialogView Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0035, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(4, 4, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + std::to_string(MEDIUM_SHOWCOUNT) + COLON + ZERO + std::to_string(MEDIUM_SHOWCOUNT));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewShow0036
+ * @tc.desc: Test DatePickerDialogView Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0036, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(4, 4, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + std::to_string(MEDIUM_SHOWCOUNT) + COLON + std::to_string(MEDIUM_SHOWCOUNT));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewShow0037
+ * @tc.desc: Test DatePickerDialogView Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0037, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(4, 5, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) + COLON + std::to_string(BIG_SHOWCOUNT));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewShow0038
+ * @tc.desc: Test DatePickerDialogView Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0038, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(4, 5, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) + COLON + ZERO + std::to_string(BIG_SHOWCOUNT));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewShow0039
+ * @tc.desc: Test DatePickerDialogView Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0039, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(4, 5, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + std::to_string(MEDIUM_SHOWCOUNT) + COLON + ZERO + std::to_string(BIG_SHOWCOUNT));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewShow0040
+ * @tc.desc: Test DatePickerDialogView Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0040, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(4, 5, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + std::to_string(MEDIUM_SHOWCOUNT) + COLON + std::to_string(BIG_SHOWCOUNT));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewShow0041
+ * @tc.desc: Test DatePickerDialogView Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0041, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(4, 6, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) + COLON + std::to_string(HUGE_SHOWCOUNT));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewShow0042
+ * @tc.desc: Test DatePickerDialogView Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0042, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(4, 6, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) + COLON + ZERO + std::to_string(HUGE_SHOWCOUNT));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewShow0043
+ * @tc.desc: Test DatePickerDialogView Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0043, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(4, 6, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + std::to_string(MEDIUM_SHOWCOUNT) + COLON + ZERO + std::to_string(HUGE_SHOWCOUNT));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewShow0044
+ * @tc.desc: Test DatePickerDialogView Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0044, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(4, 6, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + std::to_string(MEDIUM_SHOWCOUNT) + COLON + std::to_string(HUGE_SHOWCOUNT));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewShow0045
+ * @tc.desc: Test DatePickerDialogView Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0045, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(5, 5, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(BIG_SHOWCOUNT) + COLON + std::to_string(BIG_SHOWCOUNT));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewShow0046
+ * @tc.desc: Test DatePickerDialogView Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0046, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(5, 5, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(BIG_SHOWCOUNT) + COLON + ZERO + std::to_string(BIG_SHOWCOUNT));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewShow0047
+ * @tc.desc: Test DatePickerDialogView Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0047, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(5, 5, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + std::to_string(BIG_SHOWCOUNT) + COLON + ZERO + std::to_string(BIG_SHOWCOUNT));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewShow0048
+ * @tc.desc: Test DatePickerDialogView Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0048, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(5, 5, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + std::to_string(BIG_SHOWCOUNT) + COLON + std::to_string(BIG_SHOWCOUNT));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+}
 } // namespace OHOS::Ace::NG

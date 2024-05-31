@@ -52,6 +52,7 @@ TextFieldOverlayModifier::TextFieldOverlayModifier(
     showPreviewText_ = AceType::MakeRefPtr<PropertyBool>(false);
     changePreviewTextRects_ = AceType::MakeRefPtr<PropertyBool>(false);
     previewTextDecorationColor_ = AceType::MakeRefPtr<PropertyColor>(Color());
+    previewTextStyle_ = PreviewTextStyle::NORMAL;
 
     AttachProperty(cursorColor_);
     AttachProperty(cursorWidth_);
@@ -270,11 +271,8 @@ void TextFieldOverlayModifier::PaintScrollBar(DrawingContext& context)
 
 void TextFieldOverlayModifier::PaintPreviewTextDecoration(DrawingContext& context) const
 {
-    if (!showPreviewText_->Get() && !needPaintPreviewText) {
-        return;
-    }
-
-    if (previewTextStyle != PreviewTextStyle::UNDERLINE) {
+    if (previewTextStyle_ != PreviewTextStyle::UNDERLINE ||
+        (!showPreviewText_->Get() && !needPaintPreviewText)) {
         return;
     }
 
@@ -298,22 +296,32 @@ void TextFieldOverlayModifier::PaintPreviewTextDecoration(DrawingContext& contex
         return;
     }
 
-    RSPen pen;
-    pen.SetColor(ToRSColor(previewTextDecorationColor_->Get()));
-    pen.SetWidth(textFieldPattern->GetPreviewUnderlineWidth());
-    pen.SetAntiAlias(true);
-    canvas.AttachPen(pen);
-    for (const auto& drawRect : previewTextRect) {
-        float startX = drawRect.Left();
-        float startY = drawRect.Bottom();
-        float endX = drawRect.Right();
-        float endY = drawRect.Bottom();
-        Point leftPoint(startX + offsetX, startY + offsetY);
-        Point rightPoint(endX + offsetX, endY + offsetY);
-        canvas.DrawLine(ToRSPoint(PointF(leftPoint.GetX(), leftPoint.GetY())),
-            ToRSPoint(PointF(rightPoint.GetX(), rightPoint.GetY())));
+    auto paintOffset = contentOffset_->Get();
+    float clipRectHeight = paintOffset.GetY() + contentSize_->Get().Height();
+    RSRect clipInnerRect;
+    auto defaultStyle = !textFieldPattern->IsNormalInlineState() || isTextArea;
+    if (defaultStyle) {
+        clipInnerRect = RSRect(paintOffset.GetX(), paintOffset.GetY(),
+            paintOffset.GetX() + contentSize_->Get().Width() + textFieldPattern->GetInlinePadding(), clipRectHeight);
+        canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
+    } else {
+        clipInnerRect = RSRect(paintOffset.GetX(), 0.0f, paintOffset.GetX() + contentSize_->Get().Width(),
+            textFieldPattern->GetFrameRect().Height());
+        canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     }
-    canvas.DetachPen();
+
+    auto underlineWidth = textFieldPattern->GetPreviewUnderlineWidth();
+    RSBrush brush;
+    brush.SetAntiAlias(true);
+    brush.SetColor(ToRSColor(previewTextDecorationColor_->Get()));
+    canvas.AttachBrush(brush);
+    for (const auto& drawRect : previewTextRect) {
+        RSRect rect(drawRect.Left() + offsetX, drawRect.Bottom() + offsetY - underlineWidth,
+                drawRect.Right() + offsetX, drawRect.Bottom() + offsetY);
+        canvas.DrawRoundRect(RSRoundRect(rect, underlineWidth / 2, underlineWidth / 2));
+    }
+    canvas.DetachBrush();
+    canvas.Restore();
 }
 
 void TextFieldOverlayModifier::SetCursorColor(Color& value)
@@ -410,6 +418,6 @@ void TextFieldOverlayModifier::SetPreviewTextDecorationColor(const Color& value)
 }
 void TextFieldOverlayModifier::SetPreviewTextStyle(PreviewTextStyle style)
 {
-    previewTextStyle = style;
+    previewTextStyle_ = style;
 }
 } // namespace OHOS::Ace::NG

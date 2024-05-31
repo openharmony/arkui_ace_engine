@@ -38,9 +38,9 @@ public:
     static JSRef<JSVal> CreateJsOnIMEInputComplete(const NG::RichEditorAbstractSpanResult& textSpanResult);
     static JSRef<JSVal> CreateJsAboutToDelet(const NG::RichEditorDeleteValue& deleteValue);
     static void SetChangeTextSpans(
-        JSRef<JSArray>& jsArray, const std::list<NG::RichEditorAbstractSpanResult>& spanList);
+        JSRef<JSArray>& jsArray, const std::vector<NG::RichEditorAbstractSpanResult>& spanList);
     static JSRef<JSVal> CreateJsOnWillChange(const NG::RichEditorChangeValue& changeValue);
-    static JSRef<JSVal> CreateJsOnDidChange(const std::list<NG::RichEditorAbstractSpanResult>& spanList);
+    static JSRef<JSVal> CreateJsOnDidChange(const std::vector<NG::RichEditorAbstractSpanResult>& spanList);
     static void JsClip(const JSCallbackInfo& info);
     static void JsFocusable(const JSCallbackInfo& info);
     static void SetCopyOptions(const JSCallbackInfo& info);
@@ -78,6 +78,7 @@ private:
     static void CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::RichEditorAbstractSpanResult& spanResult);
     static void CreateImageStyleObj(JSRef<JSObject>& imageStyleObj, JSRef<JSObject>& spanResultObj,
         const NG::RichEditorAbstractSpanResult& spanResult);
+    static JSRef<JSArray> CreateJSDeleteSpans(const NG::RichEditorDeleteValue& deleteValue);
     static void ParseUserGesture(
         const JSCallbackInfo& args, UserGestureOptions& gestureOption, const std::string& spanType);
     static void ParseJsFont(const JSRef<JSObject>& fontObject, Font& font);
@@ -109,6 +110,9 @@ public:
     void CloseSelectionMenu();
     void IsEditing(const JSCallbackInfo& args);
     void StopEditing();
+    void SetSelection(const JSCallbackInfo& args);
+    bool FontSizeRangeIsNegative(const CalcDimension& size);
+    void GetLayoutManager(const JSCallbackInfo& args);
 
     void SetInstanceId(int32_t id)
     {
@@ -136,6 +140,7 @@ protected:
     void ParseTextShadow(
         const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
     JSRef<JSObject> JSObjectCast(JSRef<JSVal> jsValue);
+    void ParseJsSelectionOptions(const JSCallbackInfo& args, std::optional<SelectionOptions>& options);
 };
 
 class JSRichEditorController final : public JSRichEditorBaseController {
@@ -174,14 +179,12 @@ public:
     void UpdateParagraphStyle(const JSCallbackInfo& info);
     void GetSpansInfo(const JSCallbackInfo& args);
     void GetParagraphsInfo(const JSCallbackInfo& args);
-    void SetSelection(const JSCallbackInfo& args);
     void GetSelection(const JSCallbackInfo& args);
 
 private:
     bool ParseParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
     bool IsPixelMap(const JSRef<JSVal>& jsValue);
     bool IsDrawable(const JSRef<JSVal>& jsValue);
-    void ParseJsSelectionOptions(const JSCallbackInfo& args, std::optional<SelectionOptions>& options);
     static JSRef<JSVal> CreateJSSpansInfo(const SelectionInfo& info);
     static JSRef<JSVal> CreateJSParagraphsInfo(const std::vector<ParagraphInfo>& info);
     static void ParseWordBreakParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);

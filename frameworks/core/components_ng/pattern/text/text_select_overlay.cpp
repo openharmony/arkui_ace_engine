@@ -37,7 +37,8 @@ bool TextSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
     SetUsingMouse(textPattern->IsUsingMouse());
     auto host = textPattern->GetHost();
     CHECK_NULL_RETURN(host, false);
-    pipeline->AddOnAreaChangeNode(host->GetId());
+    SetScrollableParentCallback();
+    SetkeyBoardChangeCallback();
     textPattern->CalculateHandleOffsetAndShowOverlay();
     selectTextUseTopHandle = true;
     return true;
@@ -132,18 +133,6 @@ void TextSelectOverlay::OnResetTextSelection()
     textPattern->ResetSelection();
 }
 
-void TextSelectOverlay::AfterCloseOverlay()
-{
-    RemoveAreaChangeInner();
-}
-
-void TextSelectOverlay::RemoveAreaChangeInner()
-{
-    auto textPattern = GetPattern<TextPattern>();
-    CHECK_NULL_VOID(textPattern);
-    textPattern->RemoveAreaChangeInner();
-}
-
 void TextSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
 {
     auto textPattern = GetPattern<TextPattern>();
@@ -153,7 +142,7 @@ void TextSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto contentRect = textPattern->GetTextContentRect();
-    auto contentOffset = textPattern->GetTextPaintOffset() + contentRect.GetOffset();
+    auto contentOffset = GetPaintOffsetWithoutTransform() + contentRect.GetOffset();
     auto handleOffset = handleRect.GetOffset();
     if (!selectTextUseTopHandle) {
         bool isUseHandleTop = (isFirst != IsHandleReverse());
@@ -311,14 +300,15 @@ void TextSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType t
     }
 }
 
-void TextSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason)
+void TextSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info)
 {
     if (reason == CloseReason::CLOSE_REASON_HOLD_BY_OTHER || reason == CloseReason::CLOSE_REASON_TOOL_BAR) {
         auto textPattern = GetPattern<TextPattern>();
         CHECK_NULL_VOID(textPattern);
         textPattern->ResetSelection();
     }
-    RemoveAreaChangeInner();
+    ResetScrollableParentCallback();
+    RemoveKeyboardChangeCallback();
 }
 
 void TextSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType)

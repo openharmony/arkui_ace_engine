@@ -142,7 +142,8 @@ HWTEST_F(ObserverTestNg, ObserverTestNg004, TestSize.Level1)
     pattern->UpdateCurrentOffset(offset, SCROLL_FROM_AXIS);
 
     auto info = UIObserverHandler::GetInstance().GetScrollEventState(frameNode);
-    ASSERT_EQ(info->id, std::to_string(frameNode->GetId()));
+    ASSERT_EQ(info->id, frameNode->GetInspectorId().value_or(""));
+    ASSERT_EQ(info->uniqueId, frameNode->GetId());
     ASSERT_EQ(info->scrollEvent, ScrollEventType::SCROLL_START);
     ASSERT_EQ(info->offset, offset);
 }

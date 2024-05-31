@@ -32,7 +32,6 @@ public:
             // no need to apply custom theme colors
             return;
         }
-        CounterModel::GetInstance()->SetBackgroundColor(themeColors->CompBackgroundTertiary());
         ViewAbstractModel::GetInstance()->SetForegroundColor(themeColors->FontPrimary());
     }
 };

@@ -15,5 +15,11 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("search_test_ng") {
   type = "new"
-  sources = [ "search_test_ng.cpp" ]
+  sources = [
+    "search_base.cpp",
+    "search_decoration_test_ng.cpp",
+    "search_test_ng.cpp",
+    "search_test_update_ng.cpp",
+    "search_testtwo_ng.cpp",
+  ]
 }

@@ -1177,6 +1177,19 @@ class ArkGeometryTransition {
   }
 }
 
+class ArkSymbolEffect {
+  symbolEffect: SymbolEffect;
+  action: boolean | number | undefined;
+
+  constructor() {
+    this.symbolEffect = undefined;
+    this.action = undefined;
+  }
+  isEqual(another: ArkSymbolEffect): boolean {
+    return (this.symbolEffect === another.symbolEffect) && (this.action === another.action);
+  }
+}
+
 class ArkTextBackGroundStyle {
   color: ResourceColor;
   radius: Dimension | BorderRadiuses;
@@ -1216,6 +1229,18 @@ class ArkTextBackGroundStyle {
       }
     }
     return true;
+  }
+}
+
+class ArkScrollOffsetOptions {
+  xOffset: Dimension;
+  yOffset: Dimension;
+  constructor() {
+    this.xOffset = undefined;
+    this.yOffset = undefined;
+  }
+  isEqual(another: ArkScrollOffsetOptions): boolean {
+    return this.xOffset === another.xOffset && this.yOffset === another.yOffset;
   }
 }
 
@@ -1270,5 +1295,77 @@ class ArkPositionType {
     } else {
       return false;
     }
+  }
+}
+
+class ArkSelection {
+  selectionStart: number;
+  selectionEnd: number;
+  constructor() {
+    this.selectionStart = undefined;
+    this.selectionEnd = undefined;
+  }
+  isEqual(another: ArkSelection): boolean {
+    return this.selectionStart === another.selectionStart &&
+      this.selectionEnd === another.selectionEnd;
+  }
+}
+
+class TextDataDetectorConfig {
+  types: TextDataDetectorType;
+  onDetectResultUpdate: (result: string) => void;
+  constructor() {
+    this.types = undefined;
+    this.onDetectResultUpdate = undefined;
+  }
+  isEqual(another: TextDataDetectorConfig): boolean {
+    return (this.types === another.types) &&
+      (this.onDetectResultUpdate === another.onDetectResultUpdate);
+  }
+}
+
+class ArkDragPreviewOptions {
+  mode: DragPreviewMode | Array<DragPreviewMode> | undefined;
+  numberBadge: boolean | number | undefined;
+  isMultiSelectionEnabled: boolean | undefined;
+  defaultAnimationBeforeLifting: boolean | undefined;
+
+  constructor() {
+    this.mode = undefined;
+    this.numberBadge = undefined;
+    this.isMultiSelectionEnabled = undefined;
+    this.defaultAnimationBeforeLifting = undefined;
+  }
+
+  isEqual(another: ArkDragPreviewOptions): boolean {
+    return (
+      this.mode === another.mode &&
+      this.numberBadge === another.numberBadge &&
+      this.isMultiSelectionEnabled === another.isMultiSelectionEnabled &&
+      this.defaultAnimationBeforeLifting === another.defaultAnimationBeforeLifting
+    );
+  }
+
+class ArkFocusScopeId {
+  id: string | undefined;
+  isGroup: boolean | undefined;
+  constructor() {
+    this.id = undefined;
+    this.isGroup = undefined;
+  }
+  isEqual(another: ArkFocusScopeId): boolean {
+    return (this.id === another.id) && (this.isGroup === another.isGroup);
+  }
+}
+
+class ArkFocusScopePriority {
+  scopeId: string | undefined;
+  priority: number | undefined;
+  constructor() {
+    this.scopeId = undefined;
+    this.priority = undefined;
+  }
+  isEqual(another: ArkFocusScopePriority): boolean {
+    return (this.scopeId === another.scopeId) && (this.priority === another.priority);
   }
 }

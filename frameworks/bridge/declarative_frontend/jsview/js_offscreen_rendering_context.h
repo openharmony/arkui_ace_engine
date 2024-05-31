@@ -70,11 +70,6 @@ public:
         return height_;
     }
 
-    double GetDensity()
-    {
-        return (GetUnit() == CanvasUnit::DEFAULT) ? PipelineBase::GetCurrentDensity() : 1.0;
-    }
-
     ACE_DISALLOW_COPY_AND_MOVE(JSOffscreenRenderingContext);
 
 private:

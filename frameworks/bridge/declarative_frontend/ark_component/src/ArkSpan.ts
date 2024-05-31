@@ -112,7 +112,8 @@ class SpanTextBackgroundStyleModifier extends ModifierWithKey<TextBackgroundStyl
         getUINativeModule().span.resetTextBackgroundStyle(node);
       }
       else {
-        getUINativeModule().span.setTextBackgroundStyle(node, textBackgroundStyle.color, textBackgroundStyle.radius.topLeft, textBackgroundStyle.radius.topRight, textBackgroundStyle.radius.bottomLeft, textBackgroundStyle.radius.bottomRight);
+        getUINativeModule().span.setTextBackgroundStyle(node, textBackgroundStyle.color, textBackgroundStyle.radius.topLeft,
+          textBackgroundStyle.radius.topRight, textBackgroundStyle.radius.bottomLeft, textBackgroundStyle.radius.bottomRight);
       }
     }
   }
@@ -289,7 +290,7 @@ class SpanInputModifier extends ModifierWithKey<ResourceStr> {
   static identity: Symbol = Symbol('spanInput');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().span.setSpanSrc(node, "");
+      getUINativeModule().span.setSpanSrc(node, '');
     }
     else {
       getUINativeModule().span.setSpanSrc(node, this.value);
@@ -316,9 +317,7 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     this._nativePtrChanged = false;
   }
   initialize(value: Object[]) {
-    if (value[0] != undefined) {
-      modifierWithKey(this._modifiersWithKeys, SpanInputModifier.identity, SpanInputModifier, value[0]);
-    }
+    modifierWithKey(this._modifiersWithKeys, SpanInputModifier.identity, SpanInputModifier, value[0]);
     return this;
   }
   cleanStageValue(): void {
@@ -628,6 +627,14 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
   }
 
   onDisAppear(event: () => void): this {
+    throw new Error('Method not implemented.');
+  }
+
+  onAttach(event: () => void): this {
+    throw new Error('Method not implemented.');
+  }
+
+  onDetach(event: () => void): this {
     throw new Error('Method not implemented.');
   }
 

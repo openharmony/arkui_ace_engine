@@ -37,7 +37,7 @@ namespace OHOS::Ace::NG {
 namespace {
 // uncertainty range when comparing selectedTextBox to contentRect
 constexpr float BOX_EPSILON = 0.5f;
-constexpr int32_t REQUEST_SELECT_ALL = 1 << 1;
+constexpr uint32_t REQUEST_SELECT_ALL = 1 << 1;
 } // namespace
 
 bool TextFieldSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
@@ -58,6 +58,8 @@ bool TextFieldSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
     UpdatePattern(request);
     CHECK_NULL_RETURN(!pattern->IsTransparent(), false);
     pattern->ShowSelect();
+    SetScrollableParentCallback();
+    SetkeyBoardChangeCallback();
     return true;
 }
 
@@ -65,7 +67,7 @@ void TextFieldSelectOverlay::UpdatePattern(const OverlayRequest& request)
 {
     auto pattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
-    auto isRequestSelectAll = (request.requestCode & REQUEST_SELECT_ALL) == REQUEST_SELECT_ALL;
+    auto isRequestSelectAll = (static_cast<uint32_t>(request.requestCode) & REQUEST_SELECT_ALL) == REQUEST_SELECT_ALL;
     auto selectController = pattern->GetTextSelectController();
     selectController->CalculateHandleOffset();
     if (pattern->IsSelected() && selectController->IsHandleSamePosition()) {
@@ -98,12 +100,19 @@ void TextFieldSelectOverlay::OnAfterSelectOverlayShow(bool isCreate)
     latestReqeust_.reset();
 }
 
-void TextFieldSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason)
+void TextFieldSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info)
 {
+    auto pattern = GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
     CloseMagnifier();
     if (CloseReason::CLOSE_REASON_BACK_PRESSED == reason) {
         OnResetTextSelection();
+        if (info && info->CanBackPressed()) {
+            pattern->OnBackPressed();
+        }
     }
+    ResetScrollableParentCallback();
+    RemoveKeyboardChangeCallback();
 }
 
 void TextFieldSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType)
@@ -266,6 +275,15 @@ void TextFieldSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overla
     CHECK_NULL_VOID(paintProperty);
     overlayInfo.handlerColor = paintProperty->GetCursorColor();
     overlayInfo.menuOptionItems = textFieldPattern->GetMenuOptionItems();
+    auto layoutProperty =
+        DynamicCast<TextFieldLayoutProperty>(textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>());
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->HasMaxLines()) {
+        uint32_t maxLine = layoutProperty->GetMaxLinesValue(Infinity<uint32_t>());
+        if (1 == maxLine) {
+            overlayInfo.isSingleLine = true;
+        }
+    }
 }
 
 RectF TextFieldSelectOverlay::GetSelectArea()
@@ -390,7 +408,11 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
             selectController->CalcCaretOffsetByOffset(Offset(localOffset.GetX(), localOffset.GetY()));
         GetLocalPointWithTransform(movingCaretOffset);
         pattern->SetMovingCaretOffset(movingCaretOffset);
-        auto magnifierLocalOffset = localOffset;
+        auto contentRect = pattern->GetContentRect();
+        auto caretRect = pattern->GetCaretRect();
+        float x = std::clamp(localOffset.GetX(), contentRect.Left(), contentRect.Right() - caretRect.Width());
+        float y = std::clamp(localOffset.GetY(), contentRect.Top(), contentRect.Bottom() - caretRect.Height());
+        auto magnifierLocalOffset = OffsetF(x, y);
         GetLocalPointWithTransform(magnifierLocalOffset);
         pattern->GetMagnifierController()->SetLocalOffset(magnifierLocalOffset);
     }
@@ -399,13 +421,14 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     } else {
         auto position = GetCaretPositionOnHandleMove(localOffset);
         if (isFirst) {
-            selectController->MoveFirstHandleToContentRect(position);
+            selectController->MoveFirstHandleToContentRect(position, false);
             UpdateSecondHandleOffset();
         } else {
             selectController->MoveSecondHandleToContentRect(position);
             UpdateFirstHandleOffset();
         }
     }
+    pattern->PlayScrollBarAppearAnimation();
     auto tmpHost = pattern->GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -440,6 +463,7 @@ void TextFieldSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
         overlayManager->MarkInfoChange(DIRTY_SECOND_HANDLE);
     }
     overlayManager->ShowOptionMenu();
+    pattern->ScheduleDisappearDelayTask();
     auto tmpHost = pattern->GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -448,7 +472,7 @@ void TextFieldSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
 void TextFieldSelectOverlay::ProcessSelectAllOverlay(const OverlayRequest& request)
 {
     OverlayRequest newRequest = request;
-    newRequest.requestCode = newRequest.requestCode | REQUEST_SELECT_ALL;
+    newRequest.requestCode = static_cast<uint32_t>(newRequest.requestCode) | REQUEST_SELECT_ALL;
     ProcessOverlay(newRequest);
 }
 } // namespace OHOS::Ace::NG

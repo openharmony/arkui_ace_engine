@@ -121,6 +121,10 @@ public:
             theme->lineColor_ = pattern->GetAttr<Color>("line_color", theme->lineColor_);
             theme->spinnerColor_ = pattern->GetAttr<Color>("select_icon_color", theme->spinnerColor_);
             theme->disabledSpinnerColor_ = theme->spinnerColor_.BlendOpacity(theme->disabledFontColorAlpha_);
+            theme->spinnerSymbolColor_ = pattern->GetAttr<Color>("select_symbol_color", theme->spinnerSymbolColor_);
+            theme->disabledSpinnerSymbolColor_ =
+                theme->spinnerSymbolColor_.BlendOpacity(theme->disabledFontColorAlpha_);
+            theme->spinnerSource_ = themeConstants->GetSymbolByName("sys.symbol.arrowtriangle_down_fill");
             theme->selectBorderRadius_ = pattern->GetAttr<Dimension>("border_radius", theme->selectBorderRadius_);
             theme->menuBorderRadius_ = pattern->GetAttr<Dimension>("menu_border_radius", theme->menuBorderRadius_);
             theme->innerBorderRadius_ = pattern->GetAttr<Dimension>("inner_border_radius", theme->innerBorderRadius_);
@@ -268,11 +272,12 @@ public:
             theme->menuLargeMargin_ = pattern->GetAttr<Dimension>("menu_large_margin", theme->menuLargeMargin_);
             theme->menuMediumMargin_ = pattern->GetAttr<Dimension>("menu_medium_margin", theme->menuMediumMargin_);
             theme->menuItemTopBottomMargin_ = pattern->GetAttr<Dimension>("menu_item_top_bottom_margin", 0.0_vp);
+            theme->menuItemLeftRightMargin_ = pattern->GetAttr<Dimension>("menu_item_left_right_margin", 0.0_vp);
             theme->menuTargetSecuritySpace_ = pattern->GetAttr<Dimension>("menu_target_security_space", 8.0_vp);
             theme->menuItemFocusedBgColor_ =
-                pattern->GetAttr<Color>("menu_item_focused_bg_color", theme->menuItemFocusedBgColor_);
+                pattern->GetAttr<Color>("menu_item_focused_bg_color", Color::TRANSPARENT);
             theme->menuItemFocusedTextColor_ =
-                pattern->GetAttr<Color>("menu_item_focused_text_color", theme->menuItemFocusedTextColor_);
+                pattern->GetAttr<Color>("menu_item_focused_text_color", Color(0xff182431));
             theme->menuItemFocusedShadowStyle_ =
                 static_cast<uint32_t>(pattern->GetAttr<double>("menu_item_focused_shadow_style", NONE_SHADOW_VALUE));
             theme->menuItemContentAlign_ =
@@ -331,6 +336,9 @@ public:
         theme->normalTextDisableColor_ = normalTextDisableColor_;
         theme->spinnerColor_ = spinnerColor_;
         theme->disabledSpinnerColor_ = disabledSpinnerColor_;
+        theme->spinnerSymbolColor_ = spinnerSymbolColor_;
+        theme->disabledSpinnerSymbolColor_ = disabledSpinnerSymbolColor_;
+        theme->spinnerSource_ = spinnerSource_;
         theme->backgroundColor_ = backgroundColor_;
         theme->backgroundColorButton_ = backgroundColorButton_;
         theme->disabledBackgroundColor_ = disabledBackgroundColor_;
@@ -377,6 +385,7 @@ public:
         theme->menuLargeMargin_ = menuLargeMargin_;
         theme->menuMediumMargin_ = menuMediumMargin_;
         theme->menuItemTopBottomMargin_ = menuItemTopBottomMargin_;
+        theme->menuItemLeftRightMargin_ = menuItemLeftRightMargin_;
         theme->menuTargetSecuritySpace_ = menuTargetSecuritySpace_;
         theme->menuItemFocusedBgColor_ = menuItemFocusedBgColor_;
         theme->menuItemFocusedTextColor_ = menuItemFocusedTextColor_;
@@ -770,6 +779,21 @@ public:
         return disabledSpinnerColor_;
     }
 
+    const Color& GetSpinnerSymbolColor() const
+    {
+        return spinnerSymbolColor_;
+    }
+
+    const Color& GetDisabledSpinnerSymbolColor() const
+    {
+        return disabledSpinnerSymbolColor_;
+    }
+
+    const uint32_t& GetSpinnerSource() const
+    {
+        return spinnerSource_;
+    }
+
     const Color& GetMenuIconColor() const
     {
         return menuIconColor_;
@@ -1027,6 +1051,11 @@ public:
         return menuItemTopBottomMargin_;
     }
 
+    const Dimension& GetMenuItemLeftRightMargin() const
+    {
+        return menuItemLeftRightMargin_;
+    }
+
     const Dimension& GetMenuTargetSecuritySpace() const
     {
         return menuTargetSecuritySpace_;
@@ -1065,6 +1094,9 @@ private:
     Color lineColor_ = Color(0x33000000);
     Color spinnerColor_ = Color(0xE5182431);
     Color disabledSpinnerColor_;
+    Color spinnerSymbolColor_ = Color(0xff182431);
+    Color disabledSpinnerSymbolColor_;
+    uint32_t spinnerSource_ = 983615;
     Color menuIconColor_ = Color(0x99182431);
     Color menuFontColor_;
     Color disabledMenuFontColor_;
@@ -1164,6 +1196,7 @@ private:
     Dimension menuLargeMargin_;
     Dimension menuMediumMargin_;
     Dimension menuItemTopBottomMargin_;
+    Dimension menuItemLeftRightMargin_;
     Dimension menuTargetSecuritySpace_;
     Color menuItemFocusedBgColor_;
     Color menuItemFocusedTextColor_;

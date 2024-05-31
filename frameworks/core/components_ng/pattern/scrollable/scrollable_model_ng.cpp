@@ -63,7 +63,7 @@ void ScrollableModelNG::SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScro
     eventHub->SetOnScroll(std::move(onScroll));
 }
 
-void ScrollableModelNG::SetOnWillScroll(OnScrollEvent&& onScroll)
+void ScrollableModelNG::SetOnWillScroll(OnWillScrollEvent&& onScroll)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -72,7 +72,7 @@ void ScrollableModelNG::SetOnWillScroll(OnScrollEvent&& onScroll)
     eventHub->SetOnWillScroll(std::move(onScroll));
 }
 
-void ScrollableModelNG::SetOnWillScroll(FrameNode* frameNode, OnScrollEvent&& event)
+void ScrollableModelNG::SetOnWillScroll(FrameNode* frameNode, OnWillScrollEvent&& event)
 {
     CHECK_NULL_VOID(frameNode);
     const auto& eventHub = frameNode->GetEventHub<ScrollableEventHub>();
@@ -231,6 +231,14 @@ void ScrollableModelNG::SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onRea
     auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnReachEnd(std::move(onReachEnd));
+}
+
+void ScrollableModelNG::SetMaxFlingSpeed(FrameNode* frameNode, double max)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMaxFlingVelocity(max);
 }
 
 } // namespace OHOS::Ace::NG

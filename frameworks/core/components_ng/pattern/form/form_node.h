@@ -29,10 +29,11 @@ public:
     FormNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot = false)
         : FrameNode(tag, nodeId, pattern, isRoot)
     {}
-    ~FormNode() override = default;
+    ~FormNode() override;
 
     HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const PointF& parentRevertPoint,
-        TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId, bool isDispatch = false) override;
+        TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId, TouchTestResult& responseLinkResult,
+        bool isDispatch = false) override;
 
     static RefPtr<FormNode> GetOrCreateFormNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
@@ -44,6 +45,18 @@ public:
 
     OffsetF GetFormOffset() const;
 
+    void InitializeFormAccessibility();
+
+    void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId);
+
+    void OnAccessibilityChildTreeDeregister();
+
+    void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId);
+
+    void OnAccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info);
+
+    void NotifyAccessibilityChildTreeRegister();
+
     int32_t GetImageId()
     {
         if (!imageId_.has_value()) {
@@ -54,6 +67,7 @@ public:
 
 private:
     std::optional<int32_t> imageId_;
+    std::shared_ptr<AccessibilityChildTreeCallback> accessibilityChildTreeCallback_;
 };
 
 } // namespace OHOS::Ace::NG

@@ -35,6 +35,8 @@
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/shape/circle_model_ng.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
+#include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
+#include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
@@ -67,6 +69,8 @@
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
+#include "core/components_ng/pattern/select/select_model_ng.h"
+#include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/pipeline/base/element_register.h"
 
@@ -77,6 +81,7 @@ ArkUIAPICallbackMethod* callbacks = nullptr;
 void* createTextNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = TextModelNG::CreateFrameNode(nodeId, "");
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -84,6 +89,7 @@ void* createTextNode(ArkUI_Int32 nodeId)
 void* createSpanNode(ArkUI_Int32 nodeId)
 {
     auto spanNode = SpanModelNG::CreateSpanNode(nodeId, "");
+    CHECK_NULL_RETURN(spanNode, nullptr);
     spanNode->IncRefCount();
     return AceType::RawPtr(spanNode);
 }
@@ -91,13 +97,16 @@ void* createSpanNode(ArkUI_Int32 nodeId)
 void* createImageSpanNode(ArkUI_Int32 nodeId)
 {
     auto imageSpanNode = ImageSpanView::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(imageSpanNode, nullptr);
     imageSpanNode->IncRefCount();
     return AceType::RawPtr(imageSpanNode);
 }
+
 void* createImageNode(ArkUI_Int32 nodeId)
 {
     RefPtr<PixelMap> pixmap = nullptr;
     auto frameNode = ImageModelNG::CreateFrameNode(nodeId, "", pixmap, "", "", false);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -105,6 +114,7 @@ void* createImageNode(ArkUI_Int32 nodeId)
 void* createToggleNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = ToggleModelNG::CreateFrameNode(nodeId, NG::ToggleType::SWITCH, false);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -112,6 +122,7 @@ void* createToggleNode(ArkUI_Int32 nodeId)
 void* createLoadingProgress(ArkUI_Int32 nodeId)
 {
     auto frameNode = LoadingProgressModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -119,6 +130,7 @@ void* createLoadingProgress(ArkUI_Int32 nodeId)
 void* createTextInputNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = TextFieldModelNG::CreateFrameNode(nodeId, "", "", false);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -126,6 +138,7 @@ void* createTextInputNode(ArkUI_Int32 nodeId)
 void* createStackNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = StackModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -133,6 +146,7 @@ void* createStackNode(ArkUI_Int32 nodeId)
 void* createScrollNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = ScrollModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -140,6 +154,7 @@ void* createScrollNode(ArkUI_Int32 nodeId)
 void* createListNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = ListModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -147,6 +162,7 @@ void* createListNode(ArkUI_Int32 nodeId)
 void* createSwiperNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = SwiperModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -154,6 +170,7 @@ void* createSwiperNode(ArkUI_Int32 nodeId)
 void* createTextAreaNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = TextFieldModelNG::CreateFrameNode(nodeId, "", "", true);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -161,6 +178,7 @@ void* createTextAreaNode(ArkUI_Int32 nodeId)
 void* createButtonNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = ButtonModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -168,6 +186,7 @@ void* createButtonNode(ArkUI_Int32 nodeId)
 void* createProgressNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = ProgressModelNG::CreateFrameNode(nodeId, 0, 100, NG::ProgressType::LINEAR);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -175,6 +194,7 @@ void* createProgressNode(ArkUI_Int32 nodeId)
 void* createCheckBoxNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = CheckBoxModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -182,14 +202,15 @@ void* createCheckBoxNode(ArkUI_Int32 nodeId)
 void* createColumnNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = ColumnModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
-    TAG_LOGD(AceLogTag::ACE_NATIVE_NODE, "createColumnNode: frameNode %{public}p", AceType::RawPtr(frameNode));
     return AceType::RawPtr(frameNode);
 }
 
 void* createRowNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = RowModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -197,6 +218,7 @@ void* createRowNode(ArkUI_Int32 nodeId)
 void* createFlexNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = FlexModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -204,6 +226,7 @@ void* createFlexNode(ArkUI_Int32 nodeId)
 void* createListItemNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = ListItemModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -211,6 +234,7 @@ void* createListItemNode(ArkUI_Int32 nodeId)
 void* createRefreshNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = RefreshModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -234,6 +258,7 @@ void* createRootNode(ArkUI_Int32 nodeId)
 void* createComponentRootNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = CommonViewModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     TAG_LOGD(AceLogTag::ACE_NATIVE_NODE, "createComponentRootNode: frameNode %{public}p", AceType::RawPtr(frameNode));
     return AceType::RawPtr(frameNode);
@@ -251,6 +276,7 @@ void* createXComponentNode(ArkUI_Int32 nodeId)
 void* createListItemGroupNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = ListItemGroupModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -258,6 +284,7 @@ void* createListItemGroupNode(ArkUI_Int32 nodeId)
 void* createSliderNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = SliderModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -265,6 +292,7 @@ void* createSliderNode(ArkUI_Int32 nodeId)
 void* createCanvasNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = CanvasModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -272,6 +300,7 @@ void* createCanvasNode(ArkUI_Int32 nodeId)
 void* createDatePickerNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = DatePickerModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -279,6 +308,7 @@ void* createDatePickerNode(ArkUI_Int32 nodeId)
 void* createTimePickerNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = TimePickerModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -286,6 +316,7 @@ void* createTimePickerNode(ArkUI_Int32 nodeId)
 void* createTextPickerNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = TextPickerModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -293,6 +324,7 @@ void* createTextPickerNode(ArkUI_Int32 nodeId)
 void* createCalendarPickerNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = CalendarPickerModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -300,6 +332,7 @@ void* createCalendarPickerNode(ArkUI_Int32 nodeId)
 void* createCustomNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = StackModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -307,6 +340,7 @@ void* createCustomNode(ArkUI_Int32 nodeId)
 void* createWaterFlowNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = WaterFlowModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -314,6 +348,7 @@ void* createWaterFlowNode(ArkUI_Int32 nodeId)
 void* createFlowItemNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = WaterFlowItemModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -321,6 +356,7 @@ void* createFlowItemNode(ArkUI_Int32 nodeId)
 void* createCircleNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = CircleModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -328,12 +364,21 @@ void* createCircleNode(ArkUI_Int32 nodeId)
 void* createRelativeContainerNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = RelativeContainerModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
 void* createGridNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = GridModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createTabsNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = TabsModelNG::CreateFrameNode(nodeId);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -341,6 +386,7 @@ void* createGridNode(ArkUI_Int32 nodeId)
 void* createGridItemNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = GridItemModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -348,6 +394,7 @@ void* createGridItemNode(ArkUI_Int32 nodeId)
 void* createBlankNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = BlankModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -355,6 +402,7 @@ void* createBlankNode(ArkUI_Int32 nodeId)
 void* createDividerNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = DividerModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -362,6 +410,7 @@ void* createDividerNode(ArkUI_Int32 nodeId)
 void* createAlphabetIndexerNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = IndexerModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -369,6 +418,7 @@ void* createAlphabetIndexerNode(ArkUI_Int32 nodeId)
 void* createSearchNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = SearchModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -376,6 +426,7 @@ void* createSearchNode(ArkUI_Int32 nodeId)
 void* createGridRowNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = GridRowModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -383,6 +434,14 @@ void* createGridRowNode(ArkUI_Int32 nodeId)
 void* createGridColNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = GridColModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createImageAnimatorNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = ImageAnimatorModelNG::CreateFrameNode(nodeId);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -390,6 +449,22 @@ void* createGridColNode(ArkUI_Int32 nodeId)
 void* createRadioNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = RadioModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createSelectNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = SelectModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createTabContentNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = TabContentModelNG::CreateFrameNode(nodeId);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -418,7 +493,7 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
         createRowNode,
         createFlexNode,
         createListItemNode,
-        nullptr, // Tabs
+        createTabsNode,
         nullptr, // Navigator
         nullptr, // Web
         createSliderNode,
@@ -450,7 +525,10 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
         createSearchNode,
         createGridRowNode,
         createGridColNode,
+        createSelectNode,
+        createImageAnimatorNode,
         createCircleNode,
+        createTabContentNode,
     };
     if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to create %{public}d type of node", tag);
@@ -473,8 +551,12 @@ ArkUI_CharPtr GetName(void* nativePtr)
 void DisposeNode(void* nativePtr)
 {
     CHECK_NULL_VOID(nativePtr);
-    auto* frameNode = reinterpret_cast<UINode*>(nativePtr);
-    frameNode->DecRefCount();
+    auto* uiNode = reinterpret_cast<UINode*>(nativePtr);
+    auto* frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    if (frameNode) {
+        frameNode->SetExtensionHandler(nullptr);
+    }
+    uiNode->DecRefCount();
 }
 
 void AddChild(void* parentNode, void* childNode)
@@ -496,7 +578,8 @@ void RemoveChild(void* parentNode, void* childNode)
     CHECK_NULL_VOID(childNode);
     auto* parent = reinterpret_cast<UINode*>(parentNode);
     auto* child = reinterpret_cast<UINode*>(childNode);
-    parent->RemoveChild(AceType::Claim(child));
+    child->MarkRemoving();
+    parent->RemoveChild(AceType::Claim(child), true);
 }
 
 void InsertChildAt(void* parentNode, void* childNode, int32_t position)

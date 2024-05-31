@@ -237,6 +237,7 @@ public:
     TextStyle() = default;
     TextStyle(const std::vector<std::string>& fontFamilies, double fontSize, FontWeight fontWeight, FontStyle fontStyle,
         const Color& textColor);
+    TextStyle(double fontSize) : fontSize_(fontSize) {}
     ~TextStyle() = default;
 
     bool operator==(const TextStyle& rhs) const;
@@ -260,6 +261,11 @@ public:
     void SetTextBaseline(TextBaseline baseline)
     {
         textBaseline_ = baseline;
+    }
+
+    void ResetTextBaseline()
+    {
+        baselineOffset_.Reset();
     }
 
     void SetTextDecoration(TextDecoration textDecoration)
@@ -595,6 +601,46 @@ public:
     {
         return ellipsisMode_;
     }
+    
+    void SetHeightScale(double heightScale)
+    {
+        heightScale_ = heightScale;
+    }
+ 
+    double GetHeightScale() const
+    {
+        return heightScale_;
+    }
+ 
+    void SetHeightOnly(bool heightOnly)
+    {
+        heightOnly_ = heightOnly;
+    }
+ 
+    bool GetHeightOnly() const
+    {
+        return heightOnly_;
+    }
+ 
+    void SetEllipsis(std::u16string ellipsis)
+    {
+        ellipsis_ = ellipsis;
+    }
+ 
+    std::u16string GetEllipsis() const
+    {
+        return ellipsis_;
+    }
+ 
+    void SetLocale(std::string locale)
+    {
+        locale_ = locale;
+    }
+ 
+    std::string GetLocale() const
+    {
+        return locale_;
+    }
 
     bool isSymbolGlyph_ = false;
 
@@ -705,7 +751,7 @@ public:
 
 private:
     std::vector<std::string> fontFamilies_;
-    std::list<std::pair<std::string, int32_t>> fontFeatures_;
+    std::list<std::pair<std::string, int32_t>> fontFeatures_ { { "\"pnum\"", 1 } };
     std::vector<Dimension> preferFontSizes_;
     std::vector<TextSizeGroup> preferTextSizeGroups_;
     std::vector<Shadow> textShadows_;
@@ -749,6 +795,10 @@ private:
     std::optional<NG::SymbolEffectOptions> symbolEffectOptions_;
 
     std::optional<TextBackgroundStyle> textBackgroundStyle_;
+    double heightScale_ = 1.0;
+    bool heightOnly_ = false;
+    std::u16string ellipsis_;
+    std::string locale_;
 };
 
 namespace StringUtils {
@@ -797,21 +847,11 @@ inline WordBreak StringToWordBreak(const std::string& wordBreak)
 inline std::string FontWeightToString(const FontWeight& fontWeight)
 {
     static const LinearEnumMapNode<FontWeight, std::string> fontWeightTable[] = {
-        { FontWeight::W100, "100" },
-        { FontWeight::W200, "200" },
-        { FontWeight::W300, "300" },
-        { FontWeight::W400, "400" },
-        { FontWeight::W500, "500" },
-        { FontWeight::W600, "600" },
-        { FontWeight::W700, "700" },
-        { FontWeight::W800, "800" },
-        { FontWeight::W900, "900" },
-        { FontWeight::BOLD, "bold" },
-        { FontWeight::BOLDER, "bolder" },
-        { FontWeight::LIGHTER, "lighter" },
-        { FontWeight::MEDIUM, "medium" },
-        { FontWeight::NORMAL, "normal" },
-        { FontWeight::REGULAR, "regular" },
+        { FontWeight::W100, "100" }, { FontWeight::W200, "200" }, { FontWeight::W300, "300" },
+        { FontWeight::W400, "400" }, { FontWeight::W500, "500" }, { FontWeight::W600, "600" },
+        { FontWeight::W700, "700" }, { FontWeight::W800, "800" }, { FontWeight::W900, "900" },
+        { FontWeight::BOLD, "bold" }, { FontWeight::BOLDER, "bolder" }, { FontWeight::LIGHTER, "lighter" },
+        { FontWeight::MEDIUM, "medium" }, { FontWeight::NORMAL, "normal" }, { FontWeight::REGULAR, "regular" },
     };
     auto weightIter = BinarySearchFindIndex(fontWeightTable, ArraySize(fontWeightTable), fontWeight);
     return weightIter != -1 ? fontWeightTable[weightIter].value : "";

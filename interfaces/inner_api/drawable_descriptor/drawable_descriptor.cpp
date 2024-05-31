@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+#include "application_context.h"
+#endif
 #include "drawable_descriptor.h"
 
 #include <cstddef>
@@ -571,8 +574,23 @@ DrawableDescriptor::DrawableType LayeredDrawableDescriptor::GetDrawableType()
 std::string LayeredDrawableDescriptor::GetStaticMaskClipPath()
 {
     std::string data;
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+    std::shared_ptr<AbilityRuntime::Platform::ApplicationContext> applicationContext =
+        AbilityRuntime::Platform::ApplicationContext::GetInstance();
+    if (!applicationContext) {
+        HILOGE("Failed to get applicationContext!");
+        data = "";
+        return data;
+    }
+    auto resMgr = applicationContext->GetResourceManager();
+    if (!resMgr) {
+        HILOGE("Failed to get resource manager!");
+        data = "";
+        return data;
+    }
+#else
     std::shared_ptr<Global::Resource::ResourceManager> resMgr(Global::Resource::CreateResourceManager());
-
+#endif
 #ifdef PREVIEW
     std::string pathTmp = "";
 #ifdef WINDOWS_PLATFORM
@@ -639,5 +657,23 @@ int32_t AnimatedDrawableDescriptor::GetIterations()
         iterations_ = 1;
     }
     return iterations_;
+}
+
+void AnimatedDrawableDescriptor::SetDuration(int32_t duration)
+{
+    if (duration <= 0) {
+        duration_ = DEFAULT_DURATION * static_cast<int32_t>(pixelMapList_.size());
+    } else {
+        duration_ = duration;
+    }
+}
+
+void AnimatedDrawableDescriptor::SetIterations(int32_t iterations)
+{
+    if (iterations < -1) {
+        iterations_ = 1;
+    } else {
+        iterations_ = iterations;
+    }
 }
 } // namespace OHOS::Ace::Napi

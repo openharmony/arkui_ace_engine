@@ -30,6 +30,7 @@
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
 #include "bridge/declarative_frontend/jsview/js_image.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/jsview/js_layout_manager.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_textfield.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
@@ -41,6 +42,7 @@
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_base_controller.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
@@ -630,9 +632,15 @@ JSRef<JSVal> JSRichEditor::CreateJsAboutToDelet(const NG::RichEditorDeleteValue&
     AboutToDeletObj->SetProperty<int32_t>(
         "direction", static_cast<int32_t>(deleteValue.GetRichEditorDeleteDirection()));
     AboutToDeletObj->SetProperty<int32_t>("length", deleteValue.GetLength());
+    AboutToDeletObj->SetPropertyObject("richEditorDeleteSpans", CreateJSDeleteSpans(deleteValue));
+    return JSRef<JSVal>::Cast(AboutToDeletObj);
+}
+
+JSRef<JSArray> JSRichEditor::CreateJSDeleteSpans(const NG::RichEditorDeleteValue& deleteValue)
+{
     JSRef<JSArray> richEditorDeleteSpans = JSRef<JSArray>::New();
-    auto list = deleteValue.GetRichEditorDeleteSpans();
     int32_t index = 0;
+    auto list = deleteValue.GetRichEditorDeleteSpans();
     for (const auto& it : list) {
         JSRef<JSObject> spanResultObj = JSRef<JSObject>::New();
         JSRef<JSObject> spanPositionObj = JSRef<JSObject>::New();
@@ -665,17 +673,23 @@ JSRef<JSVal> JSRichEditor::CreateJsAboutToDelet(const NG::RichEditorDeleteValue&
                 spanResultObj->SetPropertyObject("imageStyle", imageStyleObj);
                 break;
             }
+            case NG::SpanResultType::SYMBOL: {
+                spanResultObj->SetProperty<std::string>("value", it.GetValueString());
+                spanResultObj->SetPropertyObject(
+                    "symbolSpanStyle", CreateJSSymbolSpanStyleResult(it.GetSymbolSpanStyle()));
+                spanResultObj->SetPropertyObject("valueResource", CreateJSValueResource(it.GetValueResource()));
+                break;
+            }
             default:
                 break;
         }
         richEditorDeleteSpans->SetValueAt(index++, spanResultObj);
     }
-    AboutToDeletObj->SetPropertyObject("richEditorDeleteSpans", richEditorDeleteSpans);
-    return JSRef<JSVal>::Cast(AboutToDeletObj);
+    return richEditorDeleteSpans;
 }
 
 void JSRichEditor::SetChangeTextSpans(
-    JSRef<JSArray>& jsArray, const std::list<NG::RichEditorAbstractSpanResult>& spanList)
+    JSRef<JSArray>& jsArray, const std::vector<NG::RichEditorAbstractSpanResult>& spanList)
 {
     int32_t index = 0;
     for (const auto& it : spanList) {
@@ -783,7 +797,7 @@ JSRef<JSVal> JSRichEditor::CreateJsOnWillChange(const NG::RichEditorChangeValue&
     return JSRef<JSVal>::Cast(OnWillChangeObj);
 }
 
-JSRef<JSVal> JSRichEditor::CreateJsOnDidChange(const std::list<NG::RichEditorAbstractSpanResult>& spanList)
+JSRef<JSVal> JSRichEditor::CreateJsOnDidChange(const std::vector<NG::RichEditorAbstractSpanResult>& spanList)
 {
     JSRef<JSArray> richEditorReplacedSpans = JSRef<JSArray>::New();
     SetChangeTextSpans(richEditorReplacedSpans, spanList);
@@ -1158,7 +1172,9 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSRichEditor>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSRichEditor>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSRichEditor>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSRichEditor>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSRichEditor>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSRichEditor>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSRichEditor>::StaticMethod("clip", &JSRichEditor::JsClip);
     JSClass<JSRichEditor>::StaticMethod("focusable", &JSRichEditor::JsFocusable);
@@ -1249,10 +1265,10 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
     JSRef<JSVal> fontSize = styleObject->GetProperty("fontSize");
     CalcDimension size;
     if (!fontSize->IsNull() && JSContainerBase::ParseJsDimensionFpNG(fontSize, size, false) &&
-        !size.IsNonPositive() && size.Unit() != DimensionUnit::PERCENT) {
+        !FontSizeRangeIsNegative(size) && size.Unit() != DimensionUnit::PERCENT) {
         updateSpanStyle.updateFontSize = size;
         style.SetFontSize(size);
-    } else if (size.IsNonPositive() || size.Unit() == DimensionUnit::PERCENT) {
+    } else if (FontSizeRangeIsNegative(size) || size.Unit() == DimensionUnit::PERCENT) {
         auto theme = JSContainerBase::GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
         size = theme->GetTextStyle().GetFontSize();
@@ -1707,47 +1723,6 @@ void JSRichEditorController::ParseOptions(const JSCallbackInfo& args, SpanOption
     }
 }
 
-void JSRichEditorController::SetSelection(const JSCallbackInfo& args)
-{
-    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
-    if (args.Length() < 2) { // 2:At least two parameters
-        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "Info length error.");
-        return;
-    }
-    int32_t selectionStart = 0;
-    int32_t selectionEnd = 0;
-    JSContainerBase::ParseJsInt32(args[0], selectionStart);
-    JSContainerBase::ParseJsInt32(args[1], selectionEnd);
-    auto controller = controllerWeak_.Upgrade();
-    auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
-    CHECK_NULL_VOID(richEditorController);
-    std::optional<SelectionOptions> options = std::nullopt;
-    ParseJsSelectionOptions(args, options);
-    richEditorController->SetSelection(selectionStart, selectionEnd, options);
-}
-
-void JSRichEditorController::ParseJsSelectionOptions(
-    const JSCallbackInfo& args, std::optional<SelectionOptions>& options)
-{
-    if (args.Length() < 3) { // 3:Protect operations
-        return;
-    }
-    auto temp = args[2]; // 2:Get the third parameter
-    if (!temp->IsObject()) {
-        return;
-    }
-    SelectionOptions optionTemp;
-    JSRef<JSObject> placeholderOptionObject = JSRef<JSObject>::Cast(temp);
-    JSRef<JSVal> menuPolicy = placeholderOptionObject->GetProperty("menuPolicy");
-    double tempPolicy = 0.0;
-    if (!menuPolicy->IsNull() && JSContainerBase::ParseJsDouble(menuPolicy, tempPolicy)) {
-        if (0 == tempPolicy || 1 == tempPolicy || 2 == tempPolicy) { // 0:DEFAULT, 1:HIDE, 2:SHOW
-            optionTemp.menuPolicy = static_cast<MenuPolicy>(tempPolicy);
-            options = optionTemp;
-        }
-    }
-}
-
 void JSRichEditorController::GetSelection(const JSCallbackInfo& args)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
@@ -1777,6 +1752,7 @@ void JSRichEditorController::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditorController>::CustomMethod("deleteSpans", &JSRichEditorController::DeleteSpans);
     JSClass<JSRichEditorController>::CustomMethod("setSelection", &JSRichEditorController::SetSelection);
     JSClass<JSRichEditorController>::CustomMethod("getSelection", &JSRichEditorController::GetSelection);
+    JSClass<JSRichEditorController>::CustomMethod("getLayoutManager", &JSRichEditorController::GetLayoutManager);
     JSClass<JSRichEditorController>::CustomMethod("isEditing", &JSRichEditorController::IsEditing);
     JSClass<JSRichEditorController>::Method("stopEditing", &JSRichEditorController::StopEditing);
     JSClass<JSRichEditorController>::Method("closeSelectionMenu", &JSRichEditorController::CloseSelectionMenu);
@@ -2060,6 +2036,14 @@ void JSRichEditorBaseController::SetTypingStyle(const JSCallbackInfo& info)
     controller->SetTypingStyle(typingStyle_, textStyle);
 }
 
+bool JSRichEditorBaseController::FontSizeRangeIsNegative(const CalcDimension& size)
+{
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        return size.IsNegative();
+    }
+    return size.IsNonPositive();
+}
+
 void JSRichEditorBaseController::ParseJsTextStyle(
     const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
 {
@@ -2074,10 +2058,10 @@ void JSRichEditorBaseController::ParseJsTextStyle(
     JSRef<JSVal> fontSize = styleObject->GetProperty("fontSize");
     CalcDimension size;
     if (!fontSize->IsNull() && JSContainerBase::ParseJsDimensionFpNG(fontSize, size) &&
-        !size.IsNonPositive() && size.Unit() != DimensionUnit::PERCENT) {
+        !FontSizeRangeIsNegative(size) && size.Unit() != DimensionUnit::PERCENT) {
         updateSpanStyle.updateFontSize = size;
         style.SetFontSize(size);
-    } else if (size.IsNonPositive() || size.Unit() == DimensionUnit::PERCENT) {
+    } else if (FontSizeRangeIsNegative(size) || size.Unit() == DimensionUnit::PERCENT) {
         auto theme = JSContainerBase::GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
         size = theme->GetTextStyle().GetFontSize();
@@ -2124,7 +2108,8 @@ void JSRichEditorBaseController::ParseJsLineHeightLetterSpacingTextStyle(const J
         height = theme->GetTextStyle().GetLineHeight();
         updateSpanStyle.updateLineHeight = height;
         style.SetLineHeight(height);
-    } else {
+    } else if (!lineHeight->IsUndefined() &&
+               !std::all_of(lineHeight->ToString().begin(), lineHeight->ToString().end(), ::isdigit)) {
         auto theme = JSContainerBase::GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
         height = theme->GetTextStyle().GetLineHeight();
@@ -2143,7 +2128,8 @@ void JSRichEditorBaseController::ParseJsLineHeightLetterSpacingTextStyle(const J
         letters = theme->GetTextStyle().GetLetterSpacing();
         updateSpanStyle.updateLetterSpacing = letters;
         style.SetLetterSpacing(letters);
-    } else {
+    } else if (!letterSpacing->IsUndefined() && !letterSpacing->IsNull() &&
+               !std::all_of(letterSpacing->ToString().begin(), letterSpacing->ToString().end(), ::isdigit)) {
         auto theme = JSContainerBase::GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
         letters = theme->GetTextStyle().GetLetterSpacing();
@@ -2299,6 +2285,60 @@ JSRef<JSObject> JSRichEditorBaseController::JSObjectCast(JSRef<JSVal> jsValue)
     return JSRef<JSObject>::Cast(jsValue);
 }
 
+void JSRichEditorBaseController::SetSelection(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
+    if (args.Length() < 2) { // 2:At least two parameters
+        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "Info length error.");
+        return;
+    }
+    int32_t selectionStart = 0;
+    int32_t selectionEnd = 0;
+    JSContainerBase::ParseJsInt32(args[0], selectionStart);
+    JSContainerBase::ParseJsInt32(args[1], selectionEnd);
+    auto controller = controllerWeak_.Upgrade();
+    CHECK_NULL_VOID(controller);
+    std::optional<SelectionOptions> options = std::nullopt;
+    ParseJsSelectionOptions(args, options);
+    controller->SetSelection(selectionStart, selectionEnd, options);
+}
+
+void JSRichEditorBaseController::GetLayoutManager(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
+    JSRef<JSObject> obj = JSClass<JSLayoutManager>::NewInstance();
+    auto jsLayoutManager = Referenced::Claim(obj->Unwrap<JSLayoutManager>());
+    CHECK_NULL_VOID(jsLayoutManager);
+    jsLayoutManager->IncRefCount();
+    auto controller = controllerWeak_.Upgrade();
+    CHECK_NULL_VOID(controller);
+    auto layoutInfoInterface = controller->GetLayoutInfoInterface();
+    jsLayoutManager->SetLayoutInfoInterface(layoutInfoInterface);
+    args.SetReturnValue(obj);
+}
+
+void JSRichEditorBaseController::ParseJsSelectionOptions(
+    const JSCallbackInfo& args, std::optional<SelectionOptions>& options)
+{
+    if (args.Length() < 3) { // 3:Protect operations
+        return;
+    }
+    auto temp = args[2]; // 2:Get the third parameter
+    if (!temp->IsObject()) {
+        return;
+    }
+    SelectionOptions optionTemp;
+    JSRef<JSObject> placeholderOptionObject = JSRef<JSObject>::Cast(temp);
+    JSRef<JSVal> menuPolicy = placeholderOptionObject->GetProperty("menuPolicy");
+    double tempPolicy = 0.0;
+    if (!menuPolicy->IsNull() && JSContainerBase::ParseJsDouble(menuPolicy, tempPolicy)) {
+        if (0 == tempPolicy || 1 == tempPolicy || 2 == tempPolicy) { // 0:DEFAULT, 1:HIDE, 2:SHOW
+            optionTemp.menuPolicy = static_cast<MenuPolicy>(tempPolicy);
+            options = optionTemp;
+        }
+    }
+}
+
 void JSRichEditorStyledStringController::GetSelection(const JSCallbackInfo& args)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
@@ -2436,6 +2476,8 @@ void JSRichEditorStyledStringController::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditorStyledStringController>::CustomMethod(
         "getSelection", &JSRichEditorStyledStringController::GetSelection);
     JSClass<JSRichEditorStyledStringController>::CustomMethod(
+        "setSelection", &JSRichEditorStyledStringController::SetSelection);
+    JSClass<JSRichEditorStyledStringController>::CustomMethod(
         "isEditing", &JSRichEditorStyledStringController::IsEditing);
     JSClass<JSRichEditorStyledStringController>::CustomMethod(
         "setStyledString", &JSRichEditorStyledStringController::SetStyledString);
@@ -2443,6 +2485,8 @@ void JSRichEditorStyledStringController::JSBind(BindingTarget globalObj)
         "getStyledString", &JSRichEditorStyledStringController::GetStyledString);
     JSClass<JSRichEditorStyledStringController>::CustomMethod(
         "onContentChanged", &JSRichEditorStyledStringController::OnContentChanged);
+    JSClass<JSRichEditorStyledStringController>::CustomMethod(
+        "getLayoutManager", &JSRichEditorStyledStringController::GetLayoutManager);
     JSClass<JSRichEditorStyledStringController>::Method(
         "stopEditing", &JSRichEditorStyledStringController::StopEditing);
     JSClass<JSRichEditorStyledStringController>::Method(

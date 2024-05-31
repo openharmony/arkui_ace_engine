@@ -20,6 +20,7 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/ui_extension/isolated_pattern.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -69,7 +70,7 @@ RefPtr<FrameNode> UIExtensionModelNG::Create(
 }
 
 void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, const RefPtr<FrameNode>& placeholderNode,
-    bool transferringCaller)
+    bool transferringCaller, bool densityDpi)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -79,6 +80,7 @@ void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, con
     CHECK_NULL_VOID(pattern);
     pattern->SetPlaceholderNode(placeholderNode);
     pattern->UpdateWant(wantWrap);
+    pattern->SetDensityDpi(densityDpi);
     stack->Push(frameNode);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -116,8 +118,8 @@ void UIExtensionModelNG::Create()
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::DYNAMIC_COMPONENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
-    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+        V2::ISOLATED_COMPONENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<IsolatedPattern>(); });
+    auto pattern = frameNode->GetPattern<IsolatedPattern>();
     CHECK_NULL_VOID(pattern);
     stack->Push(frameNode);
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -128,15 +130,23 @@ void UIExtensionModelNG::Create()
 void UIExtensionModelNG::InitializeDynamicComponent(const RefPtr<FrameNode>& frameNode, const std::string& hapPath,
     const std::string& abcPath, const std::string& entryPoint, void* runtime)
 {
-    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    auto pattern = frameNode->GetPattern<IsolatedPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->InitializeDynamicComponent(hapPath, abcPath, entryPoint, runtime);
+}
+
+void UIExtensionModelNG::InitializeIsolatedComponent(
+    const RefPtr<NG::FrameNode>& frameNode, const RefPtr<OHOS::Ace::WantWrap>& wantWrap, void* runtime)
+{
+    auto pattern = frameNode->GetPattern<IsolatedPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->InitializeIsolatedComponent(wantWrap, runtime);
 }
 
 void UIExtensionModelNG::SetOnSizeChanged(std::function<void(int32_t, int32_t)>&& onSizeChanged)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    auto pattern = frameNode->GetPattern<IsolatedPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetOnSizeChangedCallback(std::move(onSizeChanged));
 }
@@ -189,6 +199,17 @@ void UIExtensionModelNG::SetOnError(
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnErrorCallback(std::move(onError));
+}
+
+void UIExtensionModelNG::SetPlatformOnError(
+    std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<IsolatedPattern>();
+    CHECK_NULL_VOID(pattern);
     pattern->SetOnErrorCallback(std::move(onError));
 }
 } // namespace OHOS::Ace::NG

@@ -47,10 +47,12 @@ public:
     enum class SliderInteraction {
         SLIDE_AND_CLICK,
         SLIDE_ONLY,
+        SLIDE_AND_CLICK_UP,
     };
 
     class SliderValidRange final : public AceType {
     public:
+        SliderValidRange() = default;
         SliderValidRange(float from, float to) : fromValue(from), toValue(to) {}
         ~SliderValidRange() = default;
         float GetFromValue() const
@@ -82,6 +84,7 @@ public:
     virtual void SetTrackBackgroundColor(const Color& value) = 0;
     virtual void SetTrackBackgroundColor(const NG::Gradient& value, bool isResourceColor = false) = 0;
     virtual void SetSelectColor(const Color& value) = 0;
+    virtual void SetSelectColor(const NG::Gradient& value, bool isResourceColor = false) = 0;
     virtual void SetMinLabel(float value) = 0;
     virtual void SetMaxLabel(float value) = 0;
     virtual void SetMinResponsiveDistance(float value) {};

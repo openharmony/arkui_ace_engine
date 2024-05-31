@@ -130,7 +130,8 @@ void ImageProvider::FailCallback(const std::string& key, const std::string& erro
     }
 }
 
-void ImageProvider::SuccessCallback(const RefPtr<CanvasImage>& canvasImage, const std::string& key, bool sync)
+void ImageProvider::SuccessCallback(
+    const RefPtr<CanvasImage>& canvasImage, const std::string& key, bool sync, bool loadInVipChannel)
 {
     canvasImage->Cache(key);
     auto ctxs = EndTask(key);
@@ -144,10 +145,9 @@ void ImageProvider::SuccessCallback(const RefPtr<CanvasImage>& canvasImage, cons
             ctx->SuccessCallback(canvasImage->Clone());
         } else {
             // NOTE: contexts may belong to different arkui pipelines
-            auto notifyLoadSuccess = [ctx, canvasImage] {
-                ctx->SuccessCallback(canvasImage->Clone());
-            };
-            ImageUtils::PostToUI(std::move(notifyLoadSuccess), "ArkUIImageProviderSuccess", ctx->GetContainerId());
+            auto notifyLoadSuccess = [ctx, canvasImage] { ctx->SuccessCallback(canvasImage->Clone()); };
+            ImageUtils::PostToUI(std::move(notifyLoadSuccess), "ArkUIImageProviderSuccess", ctx->GetContainerId(),
+                loadInVipChannel ? PriorityType::VIP : PriorityType::LOW);
         }
     }
 }
@@ -159,7 +159,7 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
     auto imageLoader = ImageLoader::CreateImageLoader(src);
     if (!imageLoader) {
         std::string errorMessage("Failed to create image loader, Image source type not supported");
-        FailCallback(src.GetKey(), errorMessage, sync);
+        FailCallback(src.GetKey(), src.ToString() + errorMessage, sync);
         return;
     }
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -337,7 +337,7 @@ void ImageProvider::MakeCanvasImageHelper(const RefPtr<ImageObject>& obj, const 
     ImageDecoder decoder(obj, size, imageDecoderOptions.forceResize);
     RefPtr<CanvasImage> image;
     if (SystemProperties::GetImageFrameworkEnabled()) {
-        image = decoder.MakePixmapImage(imageDecoderOptions.imageQuality);
+        image = decoder.MakePixmapImage(imageDecoderOptions.imageQuality, imageDecoderOptions.isHdrDecoderNeed);
     } else {
 #ifndef USE_ROSEN_DRAWING
         image = decoder.MakeSkiaImage();
@@ -347,7 +347,7 @@ void ImageProvider::MakeCanvasImageHelper(const RefPtr<ImageObject>& obj, const 
     }
 
     if (image) {
-        SuccessCallback(image, key, imageDecoderOptions.sync);
+        SuccessCallback(image, key, imageDecoderOptions.sync, imageDecoderOptions.loadInVipChannel);
     } else {
         FailCallback(key, "Failed to decode image");
     }

@@ -414,6 +414,9 @@ public:
         if (args.Length() <= 0) {
             return;
         }
+        if (!args[0]->IsArray()) {
+            return;
+        }
         JSRef<JSArray> jsPorts = JSRef<JSArray>::Cast(args[0]);
         std::vector<RefPtr<WebMessagePort>> sendPorts;
         if (jsPorts->IsArray()) {
@@ -1022,6 +1025,9 @@ void JSWebController::SetJavascriptInterface(const JSCallbackInfo& args)
     std::vector<std::string> methods;
     methods_.clear();
     JSRef<JSVal> methodList = obj->GetProperty("methodList");
+    if (!methodList->IsArray()) {
+        return;
+    }
     JSRef<JSArray> array = JSRef<JSArray>::Cast(methodList);
     if (array->IsArray()) {
         for (size_t i = 0; i < array->Length(); i++) {

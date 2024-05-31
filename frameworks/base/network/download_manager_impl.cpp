@@ -59,6 +59,8 @@ constexpr int32_t MAXIMUM_WAITING_PERIOD = 2800;
 using NetStackRequest = NetStack::HttpClient::HttpClientRequest;
 using NetStackResponse = NetStack::HttpClient::HttpClientResponse;
 using NetStackError = NetStack::HttpClient::HttpClientError;
+using NetStackTask = NetStack::HttpClient::HttpClientTask;
+using NetStackTaskStatus = NetStack::HttpClient::TaskStatus;
 
 class ACE_FORCE_EXPORT DownloadManagerImpl : public DownloadManager {
 public:
@@ -94,9 +96,6 @@ public:
         // Some servers don't like requests that are made without a user-agent field, so we provide one
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_USERAGENT, "libcurl-agent/1.0");
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_URL, url.c_str());
-#if !defined(PREVIEW)
-        ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_CAINFO, "/etc/ssl/certs/cacert.pem");
-#endif
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_VERBOSE, 1L);
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_ERRORBUFFER, errorStr.data());
 
@@ -174,10 +173,10 @@ public:
                 onProgressCallback(dlTotal, dlNow, true, instanceId);
             });
         }
+        httpTaskMap_.emplace(url, task);
         auto result = task->Start();
-        LOGI("Task of netstack with src [%{private}s] [%{public}s]", url.c_str(),
-            result ? " started on another thread successfully"
-                   : " failed to start on another thread, please check netStack log");
+        LOGI("download src [%{private}s] [%{public}s]", url.c_str(),
+            result ? " successfully" : " failed to download, please check netStack log");
         return result;
     }
 
@@ -236,8 +235,24 @@ public:
                 onProgressCallback(dlTotal, dlNow, false, instanceId);
             });
         }
+        httpTaskMap_.emplace(url, task);
         auto result = task->Start();
         return HandleDownloadResult(result, std::move(downloadCallback), downloadCondition, instanceId, url);
+    }
+
+    bool RemoveDownloadTask(const std::string& url) override
+    {
+        auto iter = httpTaskMap_.find(url);
+        if (iter != httpTaskMap_.end()) {
+            auto task = iter->second;
+            if (task->GetStatus() == NetStackTaskStatus::RUNNING) {
+                LOGI("AceImage RemoveDownloadTask, url:%{private}s", url.c_str());
+                task->Cancel();
+            }
+            httpTaskMap_.erase(url);
+            return true;
+        }
+        return false;
     }
 
 private:
@@ -246,6 +261,7 @@ private:
         int32_t port = 0;
         std::string exclusions;
     };
+    std::unordered_map<std::string, std::shared_ptr<NetStackTask>> httpTaskMap_;
 
     bool HandleDownloadResult(bool result, DownloadCallback&& downloadCallback,
         const std::shared_ptr<DownloadCondition>& downloadCondition, int32_t instanceId, const std::string& url)

@@ -127,7 +127,7 @@ bool SharedTransitionExchange::CreateTranslateAnimation(const RefPtr<FrameNode>&
 {
     auto destOffset = dest->GetPaintRectOffsetToPage();
     auto srcOffset = src->GetPaintRectOffsetToPage();
-    TAG_LOGI(AceLogTag::ACE_ANIMATION,
+    TAG_LOGD(AceLogTag::ACE_ANIMATION,
         "Translate animation get Offset, share id: %{public}s. src: %{public}s, dest: %{public}s", GetShareId().c_str(),
         srcOffset.ToString().c_str(), destOffset.ToString().c_str());
     if (NearEqual(destOffset, srcOffset)) {
@@ -185,7 +185,7 @@ bool SharedTransitionExchange::CreateSizeAnimation(const RefPtr<FrameNode>& src,
             destSize.ToString().c_str(), GetShareId().c_str());
         return false;
     }
-    TAG_LOGI(AceLogTag::ACE_ANIMATION,
+    TAG_LOGD(AceLogTag::ACE_ANIMATION,
         "Size animation get size,  share id: %{public}s. src: %{public}s, dest: %{public}s", GetShareId().c_str(),
         srcSize.ToString().c_str(), destSize.ToString().c_str());
     if (NearEqual(srcSize, destSize)) {

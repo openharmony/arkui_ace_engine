@@ -16,12 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_CHILDREN_MAIN_SIZE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_CHILDREN_MAIN_SIZE_H
 
-
 #include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <optional>
 #include <tuple>
+#include <vector>
 
 #include "base/geometry/dimension.h"
 #include "core/components_ng/property/measure_property.h"
@@ -46,6 +46,8 @@ class ListChildrenMainSize : public virtual AceType {
     DECLARE_ACE_TYPE(ListChildrenMainSize, AceType)
 public:
     ListChildrenMainSize() = default;
+    ListChildrenMainSize(const std::vector<float>& mainSize, float defaulatMainSize)
+        : childrenSize_(mainSize), defaultSize_(defaulatMainSize) {};
     ~ListChildrenMainSize() override = default;
 
     void SetOnDataChange(std::function<void(std::tuple<int32_t, int32_t, int32_t>, ListChangeFlag)>&& func)
@@ -125,8 +127,8 @@ public:
             return defaultSize_;
         }
         if (Negative(childrenSize_[index])) {
-            TAG_LOGW(AceLogTag::ACE_LIST, "ChildrenMainSize child index:%{public}d, size:%{public}f.",
-                index, childrenSize_[index]);
+            TAG_LOGW(AceLogTag::ACE_LIST, "ChildrenMainSize child index:%{public}d, size:%{public}f.", index,
+                childrenSize_[index]);
         }
         return childrenSize_[index];
     }
@@ -135,6 +137,7 @@ public:
     {
         childrenSize_.resize(std::max(size, 0), DEFAULT_SIZE);
     }
+
 private:
     std::vector<float> childrenSize_;
     float defaultSize_ = 0.0f;

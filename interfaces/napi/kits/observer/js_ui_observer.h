@@ -53,6 +53,7 @@ private:
     napi_value ProcessDidClickUnRegister(napi_env env, napi_callback_info info);
     napi_value AddToScrollEventType(napi_env env);
     napi_value AddToRouterPageState(napi_env env);
+    napi_value CreateNavDestinationState(napi_env env);
     std::map<std::string, Func> registerProcessMap_;
     std::map<std::string, Func> unregisterProcessMap_;
 };

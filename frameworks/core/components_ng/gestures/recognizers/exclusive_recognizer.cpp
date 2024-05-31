@@ -39,12 +39,24 @@ void ExclusiveRecognizer::OnAccepted()
     }
 
     for (const auto& recognizer : recognizers_) {
-        if (recognizer && (recognizer != activeRecognizer_)) {
-            if (AceType::InstanceOf<RecognizerGroup>(recognizer)) {
-                auto group = AceType::DynamicCast<RecognizerGroup>(recognizer);
-                group->ForceReject();
-            } else {
-                recognizer->OnRejected();
+        if (!recognizer || recognizer == activeRecognizer_) {
+            continue;
+        }
+        if (AceType::InstanceOf<RecognizerGroup>(recognizer)) {
+            auto group = AceType::DynamicCast<RecognizerGroup>(recognizer);
+            group->ForceReject();
+            continue;
+        }
+        if (recognizer->IsBridgeMode()) {
+            continue;
+        }
+        recognizer->OnRejected();
+        auto bridgeObjList = recognizer->GetBridgeObj();
+        for (const auto& item : bridgeObjList) {
+            auto bridgeObj = item.Upgrade();
+            if (bridgeObj) {
+                bridgeObj->OnRejected();
+                bridgeObj->OnRejectBridgeObj();
             }
         }
     }
@@ -301,7 +313,9 @@ void ExclusiveRecognizer::CleanRecognizerState()
             child->CleanRecognizerState();
         }
     }
-    if ((refereeState_ == RefereeState::SUCCEED || refereeState_ == RefereeState::FAIL) &&
+    if ((refereeState_ == RefereeState::SUCCEED ||
+        refereeState_ == RefereeState::FAIL ||
+        refereeState_ == RefereeState::DETECTING) &&
         currentFingers_ == 0) {
         refereeState_ = RefereeState::READY;
         disposal_ = GestureDisposal::NONE;

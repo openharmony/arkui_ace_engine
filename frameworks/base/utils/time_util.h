@@ -38,6 +38,7 @@ int64_t GetSysTimestamp();
 * return milliseconds to 1970-1-1 0:0:0
 */
 int64_t GetCurrentTimestamp();
+int64_t GetCurrentTimestampMicroSecond();
 std::string ConvertTimestampToStr(int64_t timestamp);
 
 struct TimeOfNow final {
@@ -49,9 +50,9 @@ struct TimeOfNow final {
     int32_t hoursWest_ = INT_MAX;
     int32_t second_ = 0;
     int32_t minute_ = 0;
-    int32_t hour12_ = 0; // 12-hour clock
-    int32_t hour24_ = 0; // 24-hour clock
-    int64_t timeUsec_ = 0L;   // microsecond. 1 second = 1000 millisecond = 1000000 microsecond
+    int32_t hour12_ = 0;    // 12-hour clock
+    int32_t hour24_ = 0;    // 24-hour clock
+    int64_t timeUsec_ = 0L; // microsecond. 1 second = 1000 millisecond = 1000000 microsecond
 };
 
 bool IsHoursWestValid(int32_t& hoursWest);
@@ -65,13 +66,14 @@ struct TimeOfZone final {
     ~TimeOfZone() = default;
 
     // hours west of Greenwich, for e.g., [hoursWest] is [-8] in  UTC+8.
-    // Valid range of [hoursWest] is [-14, 12]. Set default value to DEFAULT_HOURS_WEST to use current time zone by default.
+    // Valid range of [hoursWest] is [-14, 12].
+    // Set default value to DEFAULT_HOURS_WEST to use current time zone by default.
     int32_t hoursWest_ = DEFAULT_HOURS_WEST;
     int32_t second_ = 0;
     int32_t minute_ = 0;
-    int32_t hour12_ = 0; // 12-hour clock
-    int32_t hour24_ = 0; // 24-hour clock
-    int64_t timeUsec_ = 0L;   // microsecond. 1 second = 1000 millisecond = 1000000 microsecond
+    int32_t hour12_ = 0;    // 12-hour clock
+    int32_t hour24_ = 0;    // 24-hour clock
+    int64_t timeUsec_ = 0L; // microsecond. 1 second = 1000 millisecond = 1000000 microsecond
 };
 
 bool HoursWestIsValid(int32_t& hoursWest);

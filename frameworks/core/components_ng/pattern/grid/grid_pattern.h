@@ -168,8 +168,6 @@ public:
     OverScrollOffset GetOverScrollOffset(double delta) const override;
     void GetEndOverScrollIrregular(OverScrollOffset& offset, float delta) const;
 
-    bool OutBoundaryCallback() override;
-
     void ScrollPage(bool reverse, bool smooth = false) override;
 
     bool UpdateStartIndex(int32_t index);
@@ -201,11 +199,7 @@ public:
     void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::AUTO) override;
     void AnimateToTarget(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper);
     bool AnimateToTargetImp(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper);
-    /**
-     * @brief irregular layout has items that occupy multiple rows, so Align::CENTER needs special treatment.
-     * @return target position to animateTo
-     */
-    float IrregularAnimateToCenter(float mainGap) const;
+
     int32_t GetOriginalIndex() const;
     int32_t GetCrossCount() const;
     int32_t GetChildrenCount() const;
@@ -242,6 +236,11 @@ public:
     bool IsPredictOutOfRange(int32_t index) const;
 
     bool IsReverse() const override;
+
+    Axis GetAxis() const override
+    {
+        return gridLayoutInfo_.axis_;
+    }
 
 private:
     /**
@@ -294,9 +293,6 @@ private:
     double GetNearestDistanceFromChildToCurFocusItemInMainAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);
     double GetNearestDistanceFromChildToCurFocusItemInCrossAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);
     void ResetAllDirectionsStep();
-
-    float prevHeight_ = 0;
-    float currentHeight_ = 0;
 
     bool supportAnimation_ = false;
     bool isConfigScrollable_ = false;

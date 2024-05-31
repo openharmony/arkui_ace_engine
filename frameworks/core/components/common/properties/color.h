@@ -163,6 +163,9 @@ private:
     static bool ParseUintColorString(const std::string& colorStr, Color& color, const Color& defaultColor);
     static bool IsRGBValid(int value);
     static bool IsOpacityValid(double value);
+    static bool FastCheckColorType(const std::string& colorStr, const std::string& expectPrefix,
+        const std::vector<size_t>& expectLengths);
+    static bool IsHexNumber(std::string& colorStr);
 
     float CalculateBlend(float alphaLeft, float alphaRight, float valueLeft, float valueRight) const;
     ColorParam colorValue_ { .value = 0xff000000 };
@@ -197,7 +200,7 @@ public:
     {}
     ~LinearColor() = default;
 
-    static const LinearColor TRANSPARENT;
+    ACE_FORCE_EXPORT static const LinearColor TRANSPARENT;
     static const LinearColor WHITE;
     static const LinearColor BLACK;
     static const LinearColor RED;

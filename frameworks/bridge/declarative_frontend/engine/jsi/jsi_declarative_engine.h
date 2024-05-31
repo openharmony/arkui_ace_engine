@@ -162,6 +162,21 @@ public:
     }
 
 #if defined(PREVIEW)
+    void SetPkgNameList(const std::map<std::string, std::string>& map)
+    {
+        pkgNameMap_ = map;
+    }
+
+    void SetPkgAliasList(const std::map<std::string, std::string>& map)
+    {
+        pkgAliasMap_ = map;
+    }
+
+    void SetpkgContextInfoList(const std::map<std::string, std::vector<std::vector<std::string>>>& map)
+    {
+        pkgContextInfoMap_ = map;
+    }
+
     bool CallCurlFunction(const OHOS::Ace::RequestData& requestData, int32_t callbackId)
     {
         auto dispatcher = dispatcher_.Upgrade();
@@ -220,6 +235,11 @@ private:
     //   If the stagingPage_ render failed, it will reset to runningPage_. So in running stage, runningPage_
     //   and stagingPage_ point to the same page. But it's better to use runningPage_ in dom update tasks,
     //   such as removeElement, updateElementAttrs and updateElementStyles.
+#if defined(PREVIEW)
+    std::map<std::string, std::string> pkgNameMap_;
+    std::map<std::string, std::string> pkgAliasMap_;
+    std::map<std::string, std::vector<std::vector<std::string>>> pkgContextInfoMap_;
+#endif
     RefPtr<JsAcePage> runningPage_;
     RefPtr<JsAcePage> stagingPage_;
 
@@ -395,6 +415,8 @@ public:
         return engineInstance_->GetFrameNodeValueByNodeId(nodeId);
     }
 
+    void JsStateProfilerResgiter();
+
 #if defined(PREVIEW)
     void ReplaceJSContent(const std::string& url, const std::string componentName) override;
     RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode, const std::string& viewID) override;
@@ -409,7 +431,8 @@ public:
         isBundle_ = isBundle;
     }
     // Support the hsp on the previewer
-    void SetHspBufferTrackerCallback(std::function<bool(const std::string&, uint8_t**, size_t*)>&& callback);
+    void SetHspBufferTrackerCallback(
+        std::function<bool(const std::string&, uint8_t**, size_t*, std::string&)>&& callback);
     // Support to execute the ets code mocked by developer
     void SetMockModuleList(const std::map<std::string, std::string>& mockJsonInfo);
     bool IsComponentPreview() override;
@@ -458,6 +481,25 @@ private:
     int32_t instanceId_ = 0;
     void* runtime_ = nullptr;
 #if defined(PREVIEW)
+    void SetPkgNameList(const std::map<std::string, std::string>& map) override
+    {
+        pkgNameMap_ = map;
+    }
+
+    void SetPkgAliasList(const std::map<std::string, std::string>& map) override
+    {
+        pkgAliasMap_ = map;
+    }
+
+    void SetpkgContextInfoList(const std::map<std::string, std::vector<std::vector<std::string>>>& map) override
+    {
+        pkgContextInfoMap_ = map;
+    }
+
+    std::map<std::string, std::string> pkgNameMap_;
+    std::map<std::string, std::string> pkgAliasMap_;
+    std::map<std::string, std::vector<std::vector<std::string>>> pkgContextInfoMap_;
+
     std::string assetPath_;
     std::string bundleName_;
     std::string moduleName_;

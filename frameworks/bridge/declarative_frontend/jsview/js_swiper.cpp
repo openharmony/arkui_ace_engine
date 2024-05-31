@@ -26,6 +26,8 @@
 #include "bridge/declarative_frontend/engine/functions/js_swiper_function.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/models/swiper_model_impl.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme_utils.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_swiper_theme.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "bridge/js_frontend/engine/jsi/js_value.h"
 #include "core/animation/curve.h"
@@ -97,6 +99,8 @@ void JSSwiper::Create(const JSCallbackInfo& info)
             jsController->SetController(controller);
         }
     }
+
+    JSSwiperTheme::ApplyThemeInConstructor();
 }
 
 void JSSwiper::JsRemoteMessage(const JSCallbackInfo& info)
@@ -139,7 +143,9 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSSwiper>::StaticMethod("remoteMessage", &JSSwiper::JsRemoteMessage);
     JSClass<JSSwiper>::StaticMethod("onClick", &JSSwiper::SetOnClick);
+    JSClass<JSSwiper>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSSwiper>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSSwiper>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSSwiper>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSSwiper>::StaticMethod("indicatorStyle", &JSSwiper::SetIndicatorStyle);
     JSClass<JSSwiper>::StaticMethod("enabled", &JSSwiper::SetEnabled);
@@ -298,13 +304,15 @@ void ParseSwiperIndexObject(const JSCallbackInfo& args, const JSRef<JSVal>& chan
 
 void JSSwiper::SetIndex(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || info.Length() > 2) {
+    auto length = info.Length();
+    if (length < 1 || length > 2) {
         return;
     }
 
     int32_t index = 0;
-    if (info.Length() > 0 && info[0]->IsNumber()) {
-        index = info[0]->ToNumber<int32_t>();
+    auto jsIndex = info[0];
+    if (length > 0 && jsIndex->IsNumber()) {
+        index = jsIndex->ToNumber<int32_t>();
     }
 
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
@@ -316,7 +324,7 @@ void JSSwiper::SetIndex(const JSCallbackInfo& info)
     }
     SwiperModel::GetInstance()->SetIndex(index);
 
-    if (info.Length() > 1 && info[1]->IsFunction()) {
+    if (length > 1 && info[1]->IsFunction()) {
         ParseSwiperIndexObject(info, info[1]);
     }
 }
@@ -435,6 +443,8 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     JSRef<JSVal> topValue = obj->GetProperty("topValue");
     JSRef<JSVal> rightValue = obj->GetProperty("rightValue");
     JSRef<JSVal> bottomValue = obj->GetProperty("bottomValue");
+    JSRef<JSVal> startValue = obj->GetProperty("startValue");
+    JSRef<JSVal> endValue = obj->GetProperty("endValue");
     JSRef<JSVal> itemWidthValue = obj->GetProperty("itemWidthValue");
     JSRef<JSVal> itemHeightValue = obj->GetProperty("itemHeightValue");
     JSRef<JSVal> selectedItemWidthValue = obj->GetProperty("selectedItemWidthValue");
@@ -451,6 +461,8 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     swiperParameters.dimTop = ParseIndicatorDimension(topValue);
     swiperParameters.dimRight = ParseIndicatorDimension(rightValue);
     swiperParameters.dimBottom = ParseIndicatorDimension(bottomValue);
+    swiperParameters.dimStart =  ParseIndicatorDimension(startValue);
+    swiperParameters.dimEnd =  ParseIndicatorDimension(endValue);
     CalcDimension dimPosition;
     bool parseItemWOk =
         ParseJsDimensionVp(itemWidthValue, dimPosition) && (dimPosition.Unit() != DimensionUnit::PERCENT);
@@ -592,6 +604,7 @@ void JSSwiper::SetDisplayArrow(const JSCallbackInfo& info)
             SwiperModel::GetInstance()->SetDisplayArrow(false);
             return;
         }
+        JSSwiperTheme::ApplyThemeToDisplayArrow(swiperArrowParameters, obj);
         SwiperModel::GetInstance()->SetArrowStyle(swiperArrowParameters);
         SwiperModel::GetInstance()->SetDisplayArrow(true);
     } else if (info[0]->IsBoolean()) {
@@ -607,6 +620,7 @@ void JSSwiper::SetDisplayArrow(const JSCallbackInfo& info)
             swiperArrowParameters.backgroundColor = swiperIndicatorTheme->GetSmallArrowBackgroundColor();
             swiperArrowParameters.arrowSize = swiperIndicatorTheme->GetSmallArrowSize();
             swiperArrowParameters.arrowColor = swiperIndicatorTheme->GetSmallArrowColor();
+            JSSwiperTheme::ApplyThemeToDisplayArrowForce(swiperArrowParameters);
             SwiperModel::GetInstance()->SetArrowStyle(swiperArrowParameters);
             SwiperModel::GetInstance()->SetDisplayArrow(true);
         } else {
@@ -642,20 +656,24 @@ void JSSwiper::SetIndicator(const JSCallbackInfo& info)
             auto type = typeParam->ToString();
             if (type == "DigitIndicator") {
                 SwiperDigitalParameters digitalParameters = GetDigitIndicatorInfo(obj);
+                JSSwiperTheme::ApplyThemeToDigitIndicator(digitalParameters, obj);
                 SwiperModel::GetInstance()->SetDigitIndicatorStyle(digitalParameters);
                 SwiperModel::GetInstance()->SetIndicatorType(SwiperIndicatorType::DIGIT);
             } else {
                 SwiperParameters swiperParameters = GetDotIndicatorInfo(obj);
+                JSSwiperTheme::ApplyThemeToDotIndicator(swiperParameters, obj);
                 SwiperModel::GetInstance()->SetDotIndicatorStyle(swiperParameters);
                 SwiperModel::GetInstance()->SetIndicatorType(SwiperIndicatorType::DOT);
             }
         } else {
             SwiperParameters swiperParameters = GetDotIndicatorInfo(obj);
+            JSSwiperTheme::ApplyThemeToDotIndicatorForce(swiperParameters);
             SwiperModel::GetInstance()->SetDotIndicatorStyle(swiperParameters);
             SwiperModel::GetInstance()->SetIndicatorType(SwiperIndicatorType::DOT);
         }
     } else {
         SwiperParameters swiperParameters = GetDotIndicatorInfo(JSRef<JSObject>::New());
+        JSSwiperTheme::ApplyThemeToDotIndicatorForce(swiperParameters);
         SwiperModel::GetInstance()->SetDotIndicatorStyle(swiperParameters);
         SwiperModel::GetInstance()->SetIndicatorType(SwiperIndicatorType::DOT);
     }

@@ -499,7 +499,9 @@ ArkUINativeModuleValue SpanBridge::SetTextBackgroundStyle(ArkUIRuntimeCallInfo* 
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color);
+    if (!(ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color))) {
+        color = Color::TRANSPARENT;
+    }
     ParseOuterBorderRadius(runtimeCallInfo, vm, radiusArray, valueUnits, NUM_2); // Border Radius args start index
     GetArkUINodeModifiers()->getSpanModifier()->setSpanTextBackgroundStyle(
         nativeNode, color.GetValue(), radiusArray.data(), valueUnits.data(), static_cast<int32_t>(radiusArray.size()));

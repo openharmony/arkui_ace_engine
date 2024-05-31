@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_gesture_function.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 #include "base/log/log.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
@@ -33,7 +34,9 @@ void JsGestureFunction::Execute(const GestureEvent& info)
 
 JSRef<JSObject> JsGestureFunction::CreateGestureEvent(const GestureEvent& info)
 {
-    JSRef<JSObject> gestureInfoObj = JSRef<JSObject>::New();
+    JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+    objectTemplate->SetInternalFieldCount(1);
+    JSRef<JSObject> gestureInfoObj = objectTemplate->NewInstance();
     gestureInfoObj->SetProperty<bool>("repeat", info.GetRepeat());
     gestureInfoObj->SetProperty<double>("offsetX", PipelineBase::Px2VpWithCurrentDensity(info.GetOffsetX()));
     gestureInfoObj->SetProperty<double>("offsetY", PipelineBase::Px2VpWithCurrentDensity(info.GetOffsetY()));
@@ -42,25 +45,13 @@ JSRef<JSObject> JsGestureFunction::CreateGestureEvent(const GestureEvent& info)
     gestureInfoObj->SetProperty<double>("speed", info.GetSpeed());
     gestureInfoObj->SetProperty<double>("timestamp", info.GetTimeStamp().time_since_epoch().count());
     gestureInfoObj->SetProperty<double>(
-        "globalX", PipelineBase::Px2VpWithCurrentDensity(info.GetGlobalLocation().GetX()));
-    gestureInfoObj->SetProperty<double>(
-        "globalY", PipelineBase::Px2VpWithCurrentDensity(info.GetGlobalLocation().GetY()));
-    gestureInfoObj->SetProperty<double>(
-        "localX", PipelineBase::Px2VpWithCurrentDensity(info.GetLocalLocation().GetX()));
-    gestureInfoObj->SetProperty<double>(
-        "localY", PipelineBase::Px2VpWithCurrentDensity(info.GetLocalLocation().GetY()));
-    gestureInfoObj->SetProperty<double>(
         "pinchCenterX", PipelineBase::Px2VpWithCurrentDensity(info.GetPinchCenter().GetX()));
     gestureInfoObj->SetProperty<double>(
         "pinchCenterY", PipelineBase::Px2VpWithCurrentDensity(info.GetPinchCenter().GetY()));
     gestureInfoObj->SetProperty<double>("source", static_cast<int32_t>(info.GetSourceDevice()));
     gestureInfoObj->SetProperty<double>("pressure", info.GetForce());
-    if (info.GetTiltX().has_value()) {
-        gestureInfoObj->SetProperty<double>("tiltX", info.GetTiltX().value());
-    }
-    if (info.GetTiltY().has_value()) {
-        gestureInfoObj->SetProperty<double>("tiltY", info.GetTiltY().value());
-    }
+    gestureInfoObj->SetProperty<double>("tiltX", info.GetTiltX().value_or(0.0f));
+    gestureInfoObj->SetProperty<double>("tiltY", info.GetTiltY().value_or(0.0f));
     gestureInfoObj->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
 
     gestureInfoObj->SetProperty<double>(
@@ -69,6 +60,9 @@ JSRef<JSObject> JsGestureFunction::CreateGestureEvent(const GestureEvent& info)
         "velocityY", PipelineBase::Px2VpWithCurrentDensity(info.GetVelocity().GetVelocityY()));
     gestureInfoObj->SetProperty<double>(
         "velocity", PipelineBase::Px2VpWithCurrentDensity(info.GetVelocity().GetVelocityValue()));
+    gestureInfoObj->SetPropertyObject(
+        "getModifierKeyState",
+        JSRef<JSFunc>::New<FunctionCallback>(NG::ArkTSUtils::JsGetModifierKeyState));
 
     JSRef<JSArray> fingerArr = JSRef<JSArray>::New();
     const std::list<FingerInfo>& fingerList = info.GetFingerList();
@@ -77,9 +71,9 @@ JSRef<JSObject> JsGestureFunction::CreateGestureEvent(const GestureEvent& info)
     for (const FingerInfo& fingerInfo : fingerList) {
         JSRef<JSObject> element = CreateFingerInfo(fingerInfo);
         if (fingerInfo.sourceType_ == SourceType::TOUCH && fingerInfo.sourceTool_ == SourceTool::FINGER) {
-            fingerArr->SetValueAt(fingerInfo.originalId_, element);
-            if (fingerInfo.originalId_ > maxFingerId) {
-                maxFingerId = fingerInfo.originalId_;
+            fingerArr->SetValueAt(fingerInfo.fingerId_, element);
+            if (fingerInfo.fingerId_ > maxFingerId) {
+                maxFingerId = fingerInfo.fingerId_;
             }
         } else {
             notTouchFingerList.emplace_back(fingerInfo);
@@ -96,6 +90,7 @@ JSRef<JSObject> JsGestureFunction::CreateGestureEvent(const GestureEvent& info)
     gestureInfoObj->SetPropertyObject("target", target);
     gestureInfoObj->SetProperty<float>("axisVertical", info.GetVerticalAxis());
     gestureInfoObj->SetProperty<float>("axisHorizontal", info.GetHorizontalAxis());
+    gestureInfoObj->Wrap<GestureEvent>(const_cast<GestureEvent*> (&info));
     return gestureInfoObj;
 }
 
@@ -105,7 +100,7 @@ JSRef<JSObject> JsGestureFunction::CreateFingerInfo(const FingerInfo& fingerInfo
     const OHOS::Ace::Offset& globalLocation = fingerInfo.globalLocation_;
     const OHOS::Ace::Offset& localLocation = fingerInfo.localLocation_;
     const OHOS::Ace::Offset& screenLocation  = fingerInfo.screenLocation_;
-    fingerInfoObj->SetProperty<int32_t>("id", fingerInfo.originalId_);
+    fingerInfoObj->SetProperty<int32_t>("id", fingerInfo.fingerId_);
     fingerInfoObj->SetProperty<double>("globalX", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX()));
     fingerInfoObj->SetProperty<double>("globalY", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY()));
     fingerInfoObj->SetProperty<double>("localX", PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX()));

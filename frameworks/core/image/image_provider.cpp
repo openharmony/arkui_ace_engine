@@ -44,6 +44,15 @@ namespace {
 // If a picture is a wide color gamut picture, its area value will be larger than this threshold.
 constexpr double SRGB_GAMUT_AREA = 0.104149;
 
+struct RSDataWrapper {
+    std::shared_ptr<RSData> data;
+};
+
+inline void RSDataWrapperReleaseProc(const void*, void* context)
+{
+    RSDataWrapper* wrapper = reinterpret_cast<RSDataWrapper*>(context);
+    delete wrapper;
+}
 } // namespace
 
 std::mutex ImageProvider::loadingImageMutex_;
@@ -321,14 +330,14 @@ void ImageProvider::GetSVGImageDOMAsyncFromSrc(const std::string& src,
                 if (skiaDom) {
                     taskExecutor->PostTask(
                         [successCallback, skiaDom] { successCallback(skiaDom); },
-                        TaskExecutor::TaskType::UI, "ArkUIImageGetSvgDomSuccess");
+                        TaskExecutor::TaskType::UI, "ArkUIImageGetSvgDomFromSrcSuccess");
                     return;
                 }
             }
         }
         LOGE("svg data wrong!");
         taskExecutor->PostTask(
-            [failedCallback] { failedCallback(); }, TaskExecutor::TaskType::UI, "ArkUIImageGetSvgDomFailed");
+            [failedCallback] { failedCallback(); }, TaskExecutor::TaskType::UI, "ArkUIImageGetSvgDomFromSrcFailed");
     };
     CancelableTask cancelableTask(std::move(task));
     if (onBackgroundTaskPostCallback) {
@@ -372,13 +381,13 @@ void ImageProvider::GetSVGImageDOMAsyncFromData(const std::shared_ptr<RSData>& d
             if (skiaDom) {
                 taskExecutor->PostTask(
                     [successCallback, skiaDom] { successCallback(skiaDom); },
-                    TaskExecutor::TaskType::UI, "ArkUIImageGetSvgDomSuccess");
+                    TaskExecutor::TaskType::UI, "ArkUIImageGetSvgDomFromDataSuccess");
                 return;
             }
         }
         LOGE("svg data wrong!");
         taskExecutor->PostTask(
-            [failedCallback] { failedCallback(); }, TaskExecutor::TaskType::UI, "ArkUIImageGetSvgDomFailed");
+            [failedCallback] { failedCallback(); }, TaskExecutor::TaskType::UI, "ArkUIImageGetSvgDomFromDataFailed");
     };
     CancelableTask cancelableTask(std::move(task));
     if (onBackgroundTaskPostCallback) {
@@ -667,7 +676,9 @@ std::shared_ptr<RSImage> ImageProvider::ApplySizeToDrawingImage(
                     if (!data) {
                         return;
                     }
-                    auto skData = SkData::MakeWithoutCopy(data->GetData(), data->GetSize());
+                    RSDataWrapper* wrapper = new RSDataWrapper{data};
+                    auto skData = SkData::MakeWithProc(data->GetData(), data->GetSize(),
+                        RSDataWrapperReleaseProc, wrapper);
                     if (!skData) {
                         LOGI("encode cache image into cache file failed.");
                         return;

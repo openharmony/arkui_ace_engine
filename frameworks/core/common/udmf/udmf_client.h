@@ -64,6 +64,9 @@ public:
     virtual std::vector<std::string> GetPlainTextRecords(const RefPtr<UnifiedData>& unifiedData) = 0;
     virtual int32_t GetVideoRecordUri(const RefPtr<UnifiedData>& unifiedData, std::string& uri) = 0;
     virtual std::pair<int32_t, std::string> GetErrorInfo(int32_t errorCode) = 0;
+    virtual void AddSpanStringRecord(
+        const RefPtr<UnifiedData>& unifiedData, std::vector<uint8_t>& data) = 0;
+    virtual std::vector<uint8_t> GetSpanStringRecord(const RefPtr<UnifiedData>& unifiedData) = 0;
 };
 } // namespace OHOS::Ace
 #endif

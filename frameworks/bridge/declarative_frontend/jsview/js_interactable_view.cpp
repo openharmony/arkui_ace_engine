@@ -190,15 +190,16 @@ void JSInteractableView::JsOnClick(const JSCallbackInfo& info)
     if (!jsOnClickVal->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onTap = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc, node = frameNode](GestureEvent& info) {
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> weak = AceType::WeakClaim(frameNode);
+    auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(jsOnClickVal));
+    auto onTap = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc, node = weak](GestureEvent& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onClick");
         PipelineContext::SetCallBackNode(node);
         func->Execute(info);
     };
-    auto onClick = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc, node = frameNode](
+    auto onClick = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc, node = weak](
                        const ClickInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onClick");
@@ -207,7 +208,7 @@ void JSInteractableView::JsOnClick(const JSCallbackInfo& info)
     };
 
     ViewAbstractModel::GetInstance()->SetOnClick(std::move(onTap), std::move(onClick));
-    auto focusHub = NG::ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetFocusable(true, false);
 }
@@ -260,6 +261,46 @@ void JSInteractableView::JsOnDisAppear(const JSCallbackInfo& info)
             func->Execute();
         };
         ViewAbstractModel::GetInstance()->SetOnDisAppear(std::move(onDisappear));
+    }
+}
+
+void JSInteractableView::JsOnAttach(const JSCallbackInfo& info)
+{
+    if (info[0]->IsUndefined() && IsDisableEventVersion()) {
+        ViewAbstractModel::GetInstance()->DisableOnAttach();
+        return;
+    }
+    if (info[0]->IsFunction()) {
+        RefPtr<JsFunction> jsOnAttachFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+        auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        auto onAttach = [execCtx = info.GetExecutionContext(), func = std::move(jsOnAttachFunc), node = frameNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("onAttach");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute();
+        };
+        ViewAbstractModel::GetInstance()->SetOnAttach(std::move(onAttach));
+    }
+}
+
+void JSInteractableView::JsOnDetach(const JSCallbackInfo& info)
+{
+    if (info[0]->IsUndefined() && IsDisableEventVersion()) {
+        ViewAbstractModel::GetInstance()->DisableOnDetach();
+        return;
+    }
+    if (info[0]->IsFunction()) {
+        RefPtr<JsFunction> jsOnDetachFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+        auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        auto onDetach = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDetachFunc), node = frameNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("onDetach");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute();
+        };
+        ViewAbstractModel::GetInstance()->SetOnDetach(std::move(onDetach));
     }
 }
 

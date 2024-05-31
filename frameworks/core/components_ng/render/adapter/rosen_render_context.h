@@ -40,6 +40,7 @@
 #include "core/components_ng/property/progress_mask_property.h"
 #include "core/components_ng/render/adapter/graphic_modifier.h"
 #include "core/components_ng/render/adapter/moon_progress_modifier.h"
+#include "core/components_ng/render/adapter/focus_animation_modifier.h"
 #include "core/components_ng/render/adapter/rosen_modifier_property.h"
 #include "core/components_ng/render/adapter/rosen_transition_effect.h"
 #include "core/components_ng/render/render_context.h"
@@ -69,9 +70,14 @@ public:
 
     void InitContext(bool isRoot, const std::optional<ContextParam>& param) override;
 
+    void SyncGeometryPropertiesWithoutAnimation(
+        GeometryNode* geometryNode, bool isRound = true, uint8_t flag = 0) override;
+
+    void SyncGeometryFrame(const RectF& paintRect);
+
     void SyncGeometryProperties(GeometryNode* geometryNode, bool isRound = true, uint8_t flag = 0) override;
 
-    void SyncGeometryProperties(const RectF& paintRect) override;
+    void SyncGeometryProperties(const RectF& paintRect, bool isSkipFrameTransition = false) override;
 
     void SetBorderRadius(const BorderRadiusProperty& value) override;
 
@@ -118,13 +124,13 @@ public:
 
     // Paint focus state by component's setting. It will paint along the paintRect
     void PaintFocusState(const RoundRect& paintRect, const Color& paintColor, const Dimension& paintWidth,
-        bool isAccessibilityFocus = false) override;
+        bool isAccessibilityFocus = false, bool isFocusBoxGlow = false) override;
     // Paint focus state by component's setting. It will paint along the frameRect(padding: focusPaddingVp)
     void PaintFocusState(const RoundRect& paintRect, const Dimension& focusPaddingVp, const Color& paintColor,
-        const Dimension& paintWidth, bool isAccessibilityFocus = false) override;
+        const Dimension& paintWidth, const PaintFocusExtraInfo& paintFocusExtraInfo) override;
     // Paint focus state by default. It will paint along the component rect(padding: focusPaddingVp)
-    void PaintFocusState(
-        const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth) override;
+    void PaintFocusState(const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth,
+        bool isFocusBoxGlow = false) override;
 
     void ClearFocusState() override;
 
@@ -160,6 +166,9 @@ public:
         rsNode_->SetVisible(visible);
     }
 
+    template<typename ModifierName, typename T>
+    void SetAnimatableProperty(std::shared_ptr<ModifierName>& modifier, const T& value);
+
     void FlushContentDrawFunction(CanvasDrawFunction&& contentDraw) override;
 
     void FlushForegroundDrawFunction(CanvasDrawFunction&& foregroundDraw) override;
@@ -183,6 +192,11 @@ public:
     void OnLightUpEffectUpdate(double radio) override;
     void OnParticleOptionArrayUpdate(const std::list<ParticleOption>& optionList) override;
     void OnClickEffectLevelUpdate(const ClickEffectInfo& info) override;
+
+    void UpdateVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect) override;
+    void UpdateBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter) override;
+    void UpdateForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter) override;
+    void UpdateCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) override;
 
     Rosen::SHADOW_COLOR_STRATEGY ToShadowColorStrategy(ShadowColorStrategy shadowColorStrategy);
     void OnBackShadowUpdate(const Shadow& shadow) override;
@@ -209,6 +223,7 @@ public:
     void SetTransitionInCallback(std::function<void()>&& callback) override;
     void ClipWithRect(const RectF& rectF) override;
     void ClipWithRRect(const RectF& rectF, const RadiusF& radiusF) override;
+    void RemoveClipWithRRect() override;
 
     bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) override;
     void MaskAnimation(const Color& initialBackgroundColor, const Color& backgroundColor);
@@ -316,6 +331,8 @@ public:
     void MarkDrivenRenderFramePaintState(bool flag) override;
     RefPtr<PixelMap> GetThumbnailPixelMap(bool needScale = false) override;
     void UpdateThumbnailPixelMapScale(float& scaleX, float& scaleY) override;
+    bool CreateThumbnailPixelMapAsyncTask(
+        bool needScale, std::function<void(const RefPtr<PixelMap>)> &&callback) override;
     std::vector<double> transInfo_;
     std::vector<double> GetTrans() override;
 #ifndef USE_ROSEN_DRAWING
@@ -367,6 +384,9 @@ public:
     void UpdateRenderGroup(bool isRenderGroup, bool isForced, bool includeProperty) override;
     void SavePaintRect(bool isRound = true, uint8_t flag = 0) override;
     void SyncPartialRsProperties() override;
+    void UpdatePaintRect(const RectF& paintRect) override;
+    Matrix4 GetRevertMatrix() override;
+    void SuggestOpIncNode(bool isOpincNode, bool isNeedCalculate) override;
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -426,8 +446,8 @@ private:
     void OnDynamicLightUpRateUpdate(const float rate) override;
     void OnDynamicDimDegreeUpdate(const float degree) override;
     void OnDynamicLightUpDegreeUpdate(const float degree) override;
-    void OnBgDynamicBrightnessOptionUpdate(const BrightnessOption& brightnessOption) override;
-    void OnFgDynamicBrightnessOptionUpdate(const BrightnessOption& brightnessOption) override;
+    void OnBgDynamicBrightnessOptionUpdate(const std::optional<BrightnessOption>& brightnessOption) override;
+    void OnFgDynamicBrightnessOptionUpdate(const std::optional<BrightnessOption>& brightnessOption) override;
 
     void OnOverlayTextUpdate(const OverlayOptions& overlay) override;
     void OnMotionPathUpdate(const MotionPathOption& motionPath) override;
@@ -448,6 +468,7 @@ private:
     void OnNodeNameUpdate(const std::string& id) override;
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 
+    void SyncAdditionalGeometryProperties(const RectF& paintRect);
     void NotifyTransitionInner(const SizeF& frameSize, bool isTransitionIn);
     void NotifyTransition(bool isTransitionIn);
     bool HasTransitionOutAnimation() const override
@@ -462,7 +483,6 @@ private:
     void OnTransitionInFinish();
     void OnTransitionOutFinish();
     void RemoveDefaultTransition();
-    static void GetBestBreakPoint(RefPtr<UINode>& breakPointChild, RefPtr<UINode>& breakPointParent);
     void SetTransitionPivot(const SizeF& frameSize, bool transitionIn);
     void SetPivot(float xPivot, float yPivot, float zPivot = 0.0f);
     void SetPositionToRSNode();
@@ -559,13 +579,19 @@ private:
     void RoundToPixelGrid(bool isRound, uint8_t flag);
     void OnePixelRounding();
     void OnePixelRounding(bool isRound, uint8_t flag);
-    Matrix4 GetRevertMatrix();
     Matrix4 GetMatrix();
     Matrix4 GetMatrixWithTransformRotate();
     bool IsUniRenderEnabled() override;
     void AddFrameNodeInfoToRsNode();
     // Use rect to update the drawRegion rect at index.
     void UpdateDrawRegion(uint32_t index, const std::shared_ptr<Rosen::RectF>& rect);
+    void NotifyHostTransformUpdated();
+
+    void InitAccessibilityFocusModidifer(const RoundRect&, const Color&, float);
+
+    void InitFocusStateModidifer(const RoundRect&, const Color&, float);
+
+    void InitFocusAnimationModidifer(const RoundRect&, const Color&, float);
 
     std::shared_ptr<Rosen::RSNode> CreateHardwareSurface(
         const std::optional<ContextParam>& param, bool isTextureExportNode);
@@ -573,12 +599,14 @@ private:
     std::shared_ptr<Rosen::RSNode> CreateHardwareTexture(
         const std::optional<ContextParam>& param, bool isTextureExportNode);
 #endif
-    
+    void DetachModifiers();
+
     RefPtr<ImageLoadingContext> bgLoadingCtx_;
     RefPtr<CanvasImage> bgImage_;
     RefPtr<ImageLoadingContext> bdImageLoadingCtx_;
     RefPtr<CanvasImage> bdImage_;
 
+    PatternType patternType_ = PatternType::DEFAULT;
     std::shared_ptr<Rosen::RSNode> rsNode_;
     bool isHdr_ = false;
     bool isHoveredScale_ = false;
@@ -595,6 +623,7 @@ private:
     int appearingTransitionCount_ = 0;
     int disappearingTransitionCount_ = 0;
     int sandBoxCount_ = 0;
+    bool isFocusBoxGlow_ = true;
     static constexpr uint32_t DRAW_REGION_RECT_COUNT = 6;
     std::map<std::string, RefPtr<ImageLoadingContext>> particleImageContextMap_;
     std::map<std::string, RefPtr<CanvasImage>> particleImageMap_;
@@ -618,9 +647,14 @@ private:
     std::unique_ptr<SharedTransitionModifier> sharedTransitionModifier_;
     std::shared_ptr<OverlayTextModifier> modifier_ = nullptr;
     std::shared_ptr<GradientStyleModifier> gradientStyleModifier_;
+    // translate and scale modifier for developer
+    std::shared_ptr<Rosen::RSTranslateModifier> translateXYUserModifier_;
+    std::shared_ptr<Rosen::RSTranslateZModifier> translateZUserModifier_;
+    std::shared_ptr<Rosen::RSScaleModifier> scaleXYUserModifier_;
     std::shared_ptr<Rosen::RectF> drawRegionRects_[DRAW_REGION_RECT_COUNT] = { nullptr };
+    RefPtr<FocusAnimationModifier> focusAnimationModifier_;
 
-    // translate modifiers for developer
+    // translate modifiers for interruption
     std::shared_ptr<Rosen::RSTranslateModifier> translateXY_;
 
     std::optional<OffsetF> frameOffset_;

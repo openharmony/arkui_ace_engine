@@ -29,16 +29,9 @@ ohos_source_set("utilsecurec_source") {
       defines += config.defines
     }
     if (platform == "windows") {
-      sources = [
-        "//third_party/bounds_checking_function/src/memset_s.c",
-        "//third_party/bounds_checking_function/src/securecutil.c",
-        "//third_party/bounds_checking_function/src/secureinput_w.c",
-        "//third_party/bounds_checking_function/src/secureprintoutput_a.c",
-        "//third_party/bounds_checking_function/src/secureprintoutput_w.c",
-      ]
+      external_deps = [ "bounds_checking_function:libsec_shared" ]
       cflags = [ "-Wno-inconsistent-dllimport" ]
     }
-    configs = [ "//third_party/bounds_checking_function:libsec_public_config" ]
   }
 }
 
@@ -77,6 +70,7 @@ ohos_source_set("preview_osal_source") {
       "frame_report.cpp",
       "image_packer_preview.cpp",
       "image_source_preview.cpp",
+      "input_method_manager_preview.cpp",
       "modal_ui_extension_impl.cpp",
       "mouse_style_ohos.cpp",
       "pixel_map_preview.cpp",
@@ -84,6 +78,9 @@ ohos_source_set("preview_osal_source") {
       "ressched_report.cpp",
       "socperf_client_impl.cpp",
       "stage_card_parser.cpp",
+      "stylus_detector_default.cpp",
+      "stylus_detector_loader.cpp",
+      "stylus_detector_mgr.cpp",
       "system_properties.cpp",
       "task/task_runner_adapter_impl.cpp",
       "time_event_proxy_preview.cpp",
@@ -104,7 +101,6 @@ ohos_source_set("preview_osal_source") {
     deps = [
       ":utilsecurec_source",
       "//foundation/graphic/graphic_2d/rosen/modules/platform:image_native",
-      "//third_party/curl:curl_shared",
     ]
 
     if (ace_use_rosen_drawing) {
@@ -114,12 +110,12 @@ ohos_source_set("preview_osal_source") {
       ]
     }
 
-    external_deps = [ "hilog:libhilog" ]
-
-    configs = [
-      "$ace_root:ace_config",
-      "//third_party/curl:curl_config",
+    external_deps = [
+      "curl:curl_shared",
+      "hilog:libhilog",
     ]
+
+    configs = [ "$ace_root:ace_config" ]
 
     include_dirs = [ "//commonlibrary/c_utils/base/include" ]
 

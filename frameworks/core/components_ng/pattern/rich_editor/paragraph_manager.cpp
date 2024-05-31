@@ -19,6 +19,7 @@
 #include <ostream>
 
 #include "base/utils/utils.h"
+#include "core/components/common/properties/text_layout_info.h"
 
 namespace OHOS::Ace::NG {
 float ParagraphManager::GetHeight() const
@@ -33,7 +34,7 @@ float ParagraphManager::GetHeight() const
 float ParagraphManager::GetMaxIntrinsicWidth() const
 {
     float res = 0.0f;
-    for (auto && info : paragraphs_) {
+    for (auto &&info : paragraphs_) {
         res = std::max(res, info.paragraph->GetMaxIntrinsicWidth());
     }
     return res;
@@ -41,7 +42,7 @@ float ParagraphManager::GetMaxIntrinsicWidth() const
 bool ParagraphManager::DidExceedMaxLines() const
 {
     bool res = false;
-    for (auto && info : paragraphs_) {
+    for (auto &&info : paragraphs_) {
         res |= info.paragraph->DidExceedMaxLines();
     }
     return res;
@@ -49,7 +50,7 @@ bool ParagraphManager::DidExceedMaxLines() const
 float ParagraphManager::GetLongestLine() const
 {
     float res = 0.0f;
-    for (auto && info : paragraphs_) {
+    for (auto &&info : paragraphs_) {
         res = std::max(res, info.paragraph->GetLongestLine());
     }
     return res;
@@ -57,7 +58,7 @@ float ParagraphManager::GetLongestLine() const
 float ParagraphManager::GetMaxWidth() const
 {
     float res = 0.0f;
-    for (auto && info : paragraphs_) {
+    for (auto &&info : paragraphs_) {
         res = std::max(res, info.paragraph->GetMaxWidth());
     }
     return res;
@@ -65,7 +66,7 @@ float ParagraphManager::GetMaxWidth() const
 float ParagraphManager::GetTextWidth() const
 {
     float res = 0.0f;
-    for (auto && info : paragraphs_) {
+    for (auto &&info : paragraphs_) {
         res = std::max(res, info.paragraph->GetTextWidth());
     }
     return res;
@@ -74,7 +75,7 @@ float ParagraphManager::GetTextWidth() const
 float ParagraphManager::GetTextWidthIncludeIndent() const
 {
     float res = 0.0f;
-    for (auto && info : paragraphs_) {
+    for (auto &&info : paragraphs_) {
         auto width = info.paragraph->GetTextWidth();
         if (info.paragraph->GetLineCount() == 1) {
             width += static_cast<float>(info.paragraphStyle.indent.ConvertToPx());
@@ -90,7 +91,7 @@ float ParagraphManager::GetTextWidthIncludeIndent() const
 size_t ParagraphManager::GetLineCount() const
 {
     size_t count = 0;
-    for (auto && info : paragraphs_) {
+    for (auto &&info : paragraphs_) {
         count += info.paragraph->GetLineCount();
     }
     return count;
@@ -115,11 +116,46 @@ int32_t ParagraphManager::GetIndex(Offset offset, bool clamp) const
     return paragraphs_.back().end;
 }
 
+PositionWithAffinity ParagraphManager::GetGlyphPositionAtCoordinate(Offset offset)
+{
+    TAG_LOGI(AceLogTag::ACE_TEXT,
+        "Get Glyph Position, coordinate = [%{public}.2f %{public}.2f]", offset.GetX(), offset.GetY());
+    PositionWithAffinity finalResult(0, TextAffinity::UPSTREAM);
+    CHECK_NULL_RETURN(!paragraphs_.empty(), finalResult);
+    if (LessNotEqual(offset.GetY(), 0.0)) {
+        return finalResult;
+    }
+    int idx = 0;
+    for (auto it = paragraphs_.begin(); it != paragraphs_.end(); ++it, ++idx) {
+        auto& info = *it;
+        if (LessOrEqual(offset.GetY(), info.paragraph->GetHeight()) ||
+            (idx == static_cast<int>(paragraphs_.size()) - 1)) {
+            auto result = info.paragraph->GetGlyphPositionAtCoordinate(offset);
+            finalResult.position_ = result.position_ + info.start;
+            TAG_LOGI(AceLogTag::ACE_TEXT,
+                "Current paragraph, originPos = %{public}zu, finalPos =%{public}zu and affinity = %{public}d",
+                result.position_, finalResult.position_, result.affinity_);
+            finalResult.affinity_ = static_cast<TextAffinity>(result.affinity_);
+            return finalResult;
+        }
+        // get offset relative to each paragraph
+        offset.SetY(offset.GetY() - info.paragraph->GetHeight());
+    }
+    auto info = paragraphs_.back();
+    auto result = info.paragraph->GetGlyphPositionAtCoordinate(offset);
+    finalResult.position_ = info.end;
+    finalResult.affinity_ = static_cast<TextAffinity>(result.affinity_);
+    TAG_LOGI(AceLogTag::ACE_TEXT,
+        "Current paragraph, final position = %{public}zu and affinity = %{public}d", finalResult.position_,
+        finalResult.affinity_);
+    return finalResult;
+}
+
 int32_t ParagraphManager::GetGlyphIndexByCoordinate(Offset offset, bool isSelectionPos) const
 {
     CHECK_NULL_RETURN(!paragraphs_.empty(), 0);
     for (auto it = paragraphs_.begin(); it != paragraphs_.end(); ++it) {
-        auto && info = *it;
+        auto &&info = *it;
         if (LessOrEqual(offset.GetY(), info.paragraph->GetHeight())) {
             return info.paragraph->GetGlyphIndexByCoordinate(offset, isSelectionPos) + info.start;
         }
@@ -136,7 +172,7 @@ bool ParagraphManager::GetWordBoundary(int32_t offset, int32_t& start, int32_t& 
     auto startIndex = 0;
     auto endIndex = 0;
     for (auto it = paragraphs_.begin(); it != paragraphs_.end(); ++it) {
-        auto && info = *it;
+        auto &&info = *it;
         if (LessNotEqual(offset, info.end)) {
             auto flag = info.paragraph->GetWordBoundary(offsetIndex, start, end);
             start += startIndex;
@@ -159,7 +195,7 @@ bool ParagraphManager::CalcCaretMetricsByPosition(
     auto offsetY = 0.0f;
     auto result = false;
     for (auto it = paragraphs_.begin(); it != paragraphs_.end(); ++it) {
-        auto && info = *it;
+        auto &&info = *it;
         if (textAffinity == TextAffinity::UPSTREAM || std::next(it) == paragraphs_.end()) {
             if (LessOrEqual(extent, info.end)) {
                 result = info.paragraph->CalcCaretMetricsByPosition(offsetIndex, caretCaretMetric, textAffinity);
@@ -195,6 +231,27 @@ LineMetrics ParagraphManager::GetLineMetricsByRectF(RectF rect, int32_t paragrap
     auto lineMetrics = paragraphInfo.paragraph->GetLineMetricsByRectF(rect);
     lineMetrics.y += height;
     return lineMetrics;
+}
+
+TextLineMetrics ParagraphManager::GetLineMetrics(size_t lineNumber)
+{
+    if (lineNumber > GetLineCount() - 1) {
+        TAG_LOGE(AceLogTag::ACE_TEXT,
+            "GetLineMetrics failed, lineNumber is greater than max lines:%{public}zu", lineNumber);
+        return TextLineMetrics();
+    }
+    size_t lineNumberParam = lineNumber;
+    for (auto &&info : paragraphs_) {
+        auto lineCount = info.paragraph->GetLineCount();
+        if (lineNumber > lineCount - 1) {
+            lineNumber -= lineCount;
+            continue;
+        }
+        auto lineMetrics = info.paragraph->GetLineMetrics(lineNumber);
+        lineMetrics.lineNumber = lineNumberParam;
+        return lineMetrics;
+    }
+    return TextLineMetrics();
 }
 
 std::vector<RectF> ParagraphManager::GetRects(int32_t start, int32_t end) const

@@ -156,18 +156,20 @@ void RichTextResource::CallResRegisterMethod(const std::string& method, const st
                                                          TaskExecutor::TaskType::PLATFORM);
 
     auto weakRes = AceType::WeakClaim(AceType::RawPtr(resRegister));
-    platformTaskExecutor.PostTask([method, param, weakRes, callback] {
-        auto resRegister = weakRes.Upgrade();
-        if (resRegister == nullptr) {
-            LOGE("resRegister is nullptr");
-            return;
-        }
-        std::string result;
-        resRegister->OnMethodCall(method, param, result);
-        if (callback) {
-            callback(result);
-        }
-    }, "ArkUIRichTextCallResRegister");
+    platformTaskExecutor.PostTask(
+        [method, param, weakRes, callback] {
+            auto resRegister = weakRes.Upgrade();
+            if (resRegister == nullptr) {
+                LOGE("resRegister is nullptr");
+                return;
+            }
+            std::string result;
+            resRegister->OnMethodCall(method, param, result);
+            if (callback) {
+                callback(result);
+            }
+        },
+        "ArkUIRichTextCallResRegister");
 }
 
 std::string RichTextResource::GetStringParam(const std::string& param, const std::string& name) const

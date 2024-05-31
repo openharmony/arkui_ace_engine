@@ -46,6 +46,14 @@ std::optional<SizeF> TextAreaLayoutAlgorithm::MeasureContent(
         textStyle.SetMaxLines(textFieldLayoutProperty->GetNormalMaxViewLines().value());
     }
 
+    if (isInlineStyle && textFieldLayoutProperty->HasTextOverflow()) {
+        if (textFieldLayoutProperty->HasTextOverflowMaxLines()) {
+            textStyle.SetMaxLines(textFieldLayoutProperty->GetTextOverflowMaxLinesValue());
+        } else if (textFieldLayoutProperty->HasNormalMaxViewLines()) {
+            textStyle.SetMaxLines(textFieldLayoutProperty->GetNormalMaxViewLines().value());
+        }
+    }
+
     direction_ = textFieldLayoutProperty->GetLayoutDirection();
 
     // Create paragraph.
@@ -141,7 +149,7 @@ void TextAreaLayoutAlgorithm::ConstraintHeight(LayoutWrapper* layoutWrapper, Opt
     const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         frameSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
-    } else {
+    } else if (!layoutWrapper->GetLayoutProperty()->GetLayoutRect()) {
         auto finalSize = UpdateOptionSizeByCalcLayoutConstraint(frameSize,
             layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint(),
             layoutWrapper->GetLayoutProperty()->GetLayoutConstraint()->percentReference);

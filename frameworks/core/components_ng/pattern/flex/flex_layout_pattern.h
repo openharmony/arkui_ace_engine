@@ -57,6 +57,11 @@ public:
         return true;
     }
 
+    bool IsNeedPercent() const override
+    {
+        return true;
+    }
+
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::SCOPE, true };
@@ -98,6 +103,10 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         auto property = GetLayoutProperty<FlexLayoutProperty>();
         CHECK_NULL_VOID(property);
         auto jsonConstructor = JsonUtil::Create(true);

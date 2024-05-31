@@ -27,6 +27,10 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr double MULTIPLE = 2.0;
+} // namespace
+
 void MarqueeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
@@ -68,8 +72,18 @@ void MarqueeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
 void MarqueeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
+    auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto child = layoutWrapper->GetAllChildrenWithBuild().front();
-    child->GetGeometryNode()->SetMarginFrameOffset({ 0.0f, 0.0f });
+    // init align center left, and get user defined alignment
+    auto align = Alignment::CENTER_LEFT;
+    if (layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
+        align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
+    }
+    OffsetF translate;
+    translate.SetX((1.0 + align.GetHorizontal()) *
+                   (frameSize.Width() - child->GetGeometryNode()->GetMarginFrameSize().Width()) / MULTIPLE);
+    translate.SetY(0.0f);
+    child->GetGeometryNode()->SetMarginFrameOffset(translate);
     child->Layout();
 }
 } // namespace OHOS::Ace::NG

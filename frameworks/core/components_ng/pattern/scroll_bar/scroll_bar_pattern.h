@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -115,14 +115,14 @@ public:
         controlDistance_ = controlDistance;
     }
 
-    float GetScrollOffset() const
+    float GetScrollableNodeOffset() const
     {
-        return scrollOffset_;
+        return scrollableNodeOffset_;
     }
 
-    void SetScrollOffset(float scrollOffset)
+    void SetScrollableNodeOffset(float scrollableNodeOffset)
     {
-        scrollOffset_ = scrollOffset;
+        scrollableNodeOffset_ = scrollableNodeOffset;
     }
 
     bool IsAtTop() const;
@@ -165,7 +165,8 @@ public:
     }
 
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent);
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+        TouchTestResult& responseLinkResult);
 
     float GetMainOffset(const Offset& offset) const
     {
@@ -196,14 +197,16 @@ public:
     void ScheduleCaretLongPress();
     void StartLongPressEventTimer();
     void OnCollectLongPressTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent);
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+        TouchTestResult& responseLinkResult);
     void SetScrollBar(DisplayMode displayMode);
-    void SetScrollProperties(const RefPtr<LayoutWrapper>& dirty);
     void UpdateScrollBarOffset();
     void HandleScrollBarOutBoundary(float scrollBarOutBoundaryExtent);
     void UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset);
     void RegisterScrollBarEventTask();
     bool UpdateScrollBarDisplay();
+    bool IsReverse() const;
+    void SetReverse(bool reverse);
 
     RefPtr<GestureEventHub> GetGestureHub()
     {
@@ -284,11 +287,32 @@ public:
         return false;
     }
 
+    void AddScrollBarLayoutInfo();
+
+    void GetAxisDumpInfo();
+
+    void GetDisplayModeDumpInfo();
+
+    void GetPanDirectionDumpInfo();
+
+    void DumpAdvanceInfo() override;
+
+    void SetScrollEnabled(bool enabled)
+    {
+        CHECK_NULL_VOID(scrollableEvent_);
+        scrollableEvent_->SetEnabled(enabled);
+        if (!enabled) {
+            scrollableEvent_->SetAxis(Axis::NONE);
+        } else {
+            scrollableEvent_->SetAxis(axis_);
+        }
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-    void ValidateOffset(int32_t source);
+    void ValidateOffset();
     void SetAccessibilityAction();
     void InitPanRecognizer();
     void HandleDragStart(const GestureEvent& info);
@@ -308,7 +332,7 @@ private:
     bool  controlDistanceChanged_ = false;
     bool hasChild_ = false;
     bool preFrameChildState_ = false;
-    float scrollOffset_ = 0.0f;
+    float scrollableNodeOffset_  = 0.0f;
     float friction_ = BAR_FRICTION;
     float frictionPosition_ = 0.0;
     float dragStartPosition_ = 0.0f;
@@ -317,7 +341,7 @@ private:
     RefPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier_;
     RefPtr<ScrollBar> scrollBar_;
 
-    float childOffset_ = 0.0f;
+    float childOffset_ = 0.0f;  // main size of child
     RefPtr<PanRecognizer> panRecognizer_;
     RefPtr<FrictionMotion> frictionMotion_;
     RefPtr<Animator> frictionController_;
@@ -335,6 +359,10 @@ private:
     //Determine whether the current scroll direction is scrolling upwards or downwards
     bool scrollingUp_ = false;
     bool scrollingDown_ = false;
+    bool isReverse_ = false;
+
+    // dump info
+    std::list<OuterScrollBarLayoutInfo> outerScrollBarLayoutInfos_;
 };
 
 } // namespace OHOS::Ace::NG

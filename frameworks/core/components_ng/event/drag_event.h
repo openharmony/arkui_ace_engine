@@ -76,12 +76,23 @@ public:
         actionLongPress_ = std::move(actionLongPress);
     }
 
+    const std::vector<KeyCode>& GetPressedKeyCodes() const
+    {
+        return pressedKeyCodes_;
+    }
+
+    void SetPressedKeyCodes(const std::vector<KeyCode>& pressedKeyCodes)
+    {
+        pressedKeyCodes_ = pressedKeyCodes;
+    }
+
 private:
     GestureEventFunc actionStart_;
     GestureEventFunc actionUpdate_;
     GestureEventFunc actionEnd_;
     GestureEventNoParameter actionCancel_;
     GestureEventFunc actionLongPress_;
+    std::vector<KeyCode> pressedKeyCodes_;
 };
 
 class ACE_EXPORT DragEventActuator : public GestureEventActuator {
@@ -107,6 +118,11 @@ public:
         customCallback_ = dragEvent;
     }
 
+    bool HasDragEvent() const
+    {
+        return static_cast<bool>(userCallback_);
+    }
+
     void ClearDragEvent()
     {
         if (userCallback_) {
@@ -118,7 +134,8 @@ public:
     }
 
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-        const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result) override;
+        const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result,
+        TouchTestResult& responseLinkResult) override;
     void SetThumbnailCallback(std::function<void(Offset)>&& callback);
     void SetFilter(const RefPtr<DragEventActuator>& actuator);
     static void UpdatePreviewPositionAndScale(const RefPtr<FrameNode>& imageNode, const OffsetF& frameOffset);
@@ -144,6 +161,7 @@ public:
     bool GetIsBindOverlayValue(const RefPtr<DragEventActuator>& actuator);
     bool IsAllowedDrag();
     void SetTextPixelMap(const RefPtr<GestureEventHub>& gestureHub);
+    void RestartDragTask(const GestureEvent& info);
     static OffsetF GetFloatImageOffset(const RefPtr<FrameNode>& frameNode, const RefPtr<PixelMap>& pixelMap);
     PanDirection GetDirection() const
     {
@@ -189,6 +207,16 @@ public:
         return isDragUserReject_;
     }
 
+    void SetIsDefaultOnDragStartExecuted(bool defaultOnDragStartExecuted)
+    {
+        defaultOnDragStartExecuted_ = defaultOnDragStartExecuted;
+    }
+
+    bool IsDefaultOnDragStartExecuted() const
+    {
+        return defaultOnDragStartExecuted_;
+    }
+
     void CopyDragEvent(const RefPtr<DragEventActuator>& dragEventActuator);
 
     void SetGatherNodeAboveFilter(const RefPtr<DragEventActuator>& actuator);
@@ -231,6 +259,8 @@ public:
     static RefPtr<FrameNode> CreateBadgeTextNode(
         const RefPtr<FrameNode>& frameNode, int32_t childSize, float previewScale, bool isUsePixelMapOffset = false);
 
+    void GetThumbnailPixelMapAsync(const RefPtr<GestureEventHub>& gestureHub);
+
 private:
     void UpdatePreviewOptionFromModifier(const RefPtr<FrameNode>& frameNode);
     void UpdatePreviewOptionDefaultAttr(const RefPtr<FrameNode>& frameNode);
@@ -270,6 +300,7 @@ private:
     bool isOnBeforeLiftingAnimation = false;
 
     bool isDragUserReject_ = false;
+    bool defaultOnDragStartExecuted_ = false;
 
     PanDirection direction_;
     int32_t fingers_ = 1;

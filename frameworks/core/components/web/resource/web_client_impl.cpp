@@ -165,6 +165,20 @@ bool WebClientImpl::OnFocus()
     CHECK_NULL_RETURN(delegate, false);
     bool isFocused = delegate->RequestFocus();
     delegate->OnRequestFocus();
+
+    delegate->SetToken();
+    return isFocused;
+}
+
+bool WebClientImpl::OnFocus(OHOS::NWeb::NWebFocusSource source)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_RETURN(delegate, false);
+    bool isFocused = delegate->RequestFocus(source);
+    delegate->OnRequestFocus();
+
+    delegate->SetToken();
     return isFocused;
 }
 
@@ -184,7 +198,7 @@ bool WebClientImpl::OnConsoleLog(const std::shared_ptr<OHOS::NWeb::NWebConsoleLo
         if (delegate) {
             jsMessage = delegate->OnConsoleLog(message);
         }
-    }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebConsoleLog");
+    }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientConsoleLog");
 
     return jsMessage;
 }
@@ -309,7 +323,7 @@ void WebClientImpl::OnHttpError(std::shared_ptr<OHOS::NWeb::NWebUrlResourceReque
         if (delegate) {
             delegate->OnHttpErrorReceive(request, response);
         }
-    }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebHttpError");
+    }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientHttpError");
 }
 
 void WebClientImpl::OnMessage(const std::string& param)
@@ -367,7 +381,7 @@ bool WebClientImpl::OnHandleInterceptRequest(std::shared_ptr<OHOS::NWeb::NWebUrl
     task->PostSyncTask(
         [&delegate, &webResponse, &param] {
             webResponse = delegate->OnInterceptRequest(param);
-        }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebInterceptRequest");
+        }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientInterceptRequest");
     if (webResponse == nullptr) {
         return false;
     }
@@ -467,7 +481,7 @@ bool WebClientImpl::OnFileSelectorShow(
         if (delegate) {
             jsResult = delegate->OnFileSelectorShow(param);
         }
-    }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebFileSelectorShow");
+    }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientFileSelectorShow");
     return jsResult;
 }
 
@@ -488,7 +502,7 @@ void WebClientImpl::OnResource(const std::string& url)
         if (delegate) {
             delegate->OnResourceLoad(url);
         }
-    }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebResourceLoad");
+    }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientResourceLoad");
 }
 
 void WebClientImpl::OnScaleChanged(float oldScaleFactor, float newScaleFactor)
@@ -531,7 +545,7 @@ bool WebClientImpl::OnHttpAuthRequestByJS(std::shared_ptr<NWeb::NWebJSHttpAuthRe
             if (delegate) {
                 jsResult = delegate->OnHttpAuthRequest(param);
             }
-        }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebHttpAuthRequest");
+        }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientHttpAuthRequest");
     return jsResult;
 }
 
@@ -555,7 +569,7 @@ bool WebClientImpl::OnSslErrorRequestByJS(std::shared_ptr<NWeb::NWebJSSslErrorRe
             if (delegate) {
                 jsResult = delegate->OnSslErrorRequest(param);
             }
-        }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebSslErrorRequest");
+        }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientSslErrorRequest");
     return jsResult;
 }
 
@@ -585,7 +599,7 @@ bool WebClientImpl::OnAllSslErrorRequestByJS(std::shared_ptr<NWeb::NWebJSAllSslE
             if (delegate) {
                 jsResult = delegate->OnAllSslErrorRequest(param);
             }
-        }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebAllSslErrorRequest");
+        }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientAllSslErrorRequest");
     return jsResult;
 }
 
@@ -615,7 +629,7 @@ bool WebClientImpl::OnSslSelectCertRequestByJS(
             if (delegate) {
                 jsResult = delegate->OnSslSelectCertRequest(param);
             }
-        }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebSslSelectCertRequest");
+        }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientSslSelectCertRequest");
 
     return jsResult;
 }
@@ -1021,7 +1035,7 @@ bool WebClientImpl::OnHandleOverrideUrlLoading(std::shared_ptr<OHOS::NWeb::NWebU
     }
 
     bool result = delegate->OnHandleOverrideLoading(request);
-    
+
     return result;
 }
 
@@ -1067,6 +1081,41 @@ void WebClientImpl::OnRenderProcessResponding()
     delegate->OnRenderProcessResponding();
 }
 
+void WebClientImpl::OnInterceptKeyboardAttach(
+    const std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler,
+    const std::map<std::string, std::string> &attributes, bool &useSystemKeyboard, int32_t &enterKeyType)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebCustomKeyboard OnInterceptKeyboardAttach override enter");
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnInterceptKeyboardAttach(keyboardHandler, attributes, useSystemKeyboard, enterKeyType);
+}
+
+void WebClientImpl::OnCustomKeyboardAttach()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebCustomKeyboard OnCustomKeyboardAttach override enter");
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnCustomKeyboardAttach();
+}
+
+void WebClientImpl::OnCustomKeyboardClose()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebCustomKeyboard OnCustomKeyboardClose override enter");
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnCustomKeyboardClose();
+}
+
 void WebClientImpl::OnShowAutofillPopup(
     const float offsetX, const float offsetY, const std::vector<std::string>& menu_items)
 {
@@ -1082,5 +1131,32 @@ void WebClientImpl::OnHideAutofillPopup()
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
     delegate->OnHideAutofillPopup();
+}
+
+void WebClientImpl::OnViewportFitChange(OHOS::NWeb::ViewportFit viewportFit)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnViewportFitChange(viewportFit);
+}
+
+void WebClientImpl::OnAdsBlocked(const std::string& url, const std::vector<std::string>& adsBlocked)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnAdsBlocked(url, adsBlocked);
+}
+
+void WebClientImpl::KeyboardReDispatch(
+    std::shared_ptr<OHOS::NWeb::NWebKeyEvent> event, bool isUsed)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->KeyboardReDispatch(event, isUsed);
 }
 } // namespace OHOS::Ace

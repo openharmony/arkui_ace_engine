@@ -68,7 +68,7 @@ bool JSPasteButton::ParseComponentStyle(const JSCallbackInfo& info,
             return false;
         }
     } else {
-        bg = BUTTON_TYPE_NULL;
+        bg = static_cast<int32_t>(ButtonType::CAPSULE);
     }
     return true;
 }
@@ -82,10 +82,10 @@ void JSPasteButton::Create(const JSCallbackInfo& info)
         PasteButtonModelNG::GetInstance()->Create(
             static_cast<int32_t>(PasteButtonPasteDescription::PASTE),
             static_cast<int32_t>(PasteButtonIconStyle::ICON_LINE),
-            static_cast<int32_t>(ButtonType::CAPSULE));
+            static_cast<int32_t>(ButtonType::CAPSULE), false);
     } else {
         PasteButtonModelNG::GetInstance()->Create(static_cast<int32_t>(textDesc),
-            static_cast<int32_t>(iconType), backgroundType);
+            static_cast<int32_t>(iconType), backgroundType, false);
     }
 }
 
@@ -102,12 +102,8 @@ void JsPasteButtonClickFunction::Execute(GestureEvent& info)
         static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
     clickEventParam->SetProperty<double>("source", static_cast<int32_t>(info.GetSourceDevice()));
     clickEventParam->SetProperty<double>("pressure", info.GetForce());
-    if (info.GetTiltX().has_value()) {
-        clickEventParam->SetProperty<double>("tiltX", info.GetTiltX().value());
-    }
-    if (info.GetTiltY().has_value()) {
-        clickEventParam->SetProperty<double>("tiltY", info.GetTiltY().value());
-    }
+    clickEventParam->SetProperty<double>("tiltX", info.GetTiltX().value_or(0.0f));
+    clickEventParam->SetProperty<double>("tiltY", info.GetTiltY().value_or(0.0f));
     clickEventParam->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
     auto target = CreateEventTargetObject(info);
     clickEventParam->SetPropertyObject("target", target);

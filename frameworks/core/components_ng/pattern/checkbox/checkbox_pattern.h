@@ -194,12 +194,16 @@ public:
 
     void SetIndicatorBuilder(const std::optional<std::function<void()>>& buildFunc)
     {
-        builder_ = buildFunc.value_or(nullptr);
+        builder_ = buildFunc;
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         Pattern::ToJsonValue(json, filter);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto checkBoxEventHub = host->GetEventHub<NG::CheckBoxEventHub>();
@@ -248,6 +252,9 @@ private:
     void HandleMouseEvent(bool isHover);
     void HandleFocusEvent();
     void HandleBlurEvent();
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
+    void OnIsFocusActiveUpdate(bool isFocusAcitve);
     void CheckPageNode();
     void LoadBuilder();
     void UpdateIndicator();
@@ -303,6 +310,7 @@ private:
     OriginalCheckBoxStyle originalStyle_ = OriginalCheckBoxStyle::CIRCULAR_STYLE;
     RefPtr<FrameNode> builderNode_;
     std::optional<std::function<void()>> builder_;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
 
     RefPtr<CheckBoxModifier> checkboxModifier_;
     WeakPtr<GroupManager> groupManager_;

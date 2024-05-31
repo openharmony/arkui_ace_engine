@@ -23,6 +23,7 @@
 
 #include "core/common/container.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
 class WindowPattern : public StackPattern {
@@ -55,6 +56,12 @@ protected:
     void CreateStartingNode();
     void CreateContentNode();
     void CreateSnapshotNode(std::optional<std::shared_ptr<Media::PixelMap>> snapshot = std::nullopt);
+    void ClearImageCache(const ImageSourceInfo& sourceInfo);
+
+    void AddChild(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& child,
+        const std::string& nodeType, int32_t index = DEFAULT_NODE_SLOT);
+    void RemoveChild(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& child,
+        const std::string& nodeType);
 
     virtual void OnActivation() {}
     virtual void OnConnect() {}
@@ -65,6 +72,9 @@ protected:
     RefPtr<FrameNode> startingNode_;
     RefPtr<FrameNode> contentNode_;
     RefPtr<FrameNode> snapshotNode_;
+    std::string startingNodeName_ = "startingNode";
+    std::string contentNodeName_ = "contentNode";
+    std::string snapshotNodeName_ = "snapshotNode";
 
     sptr<Rosen::Session> session_;
     int32_t instanceId_ = Container::CurrentId();

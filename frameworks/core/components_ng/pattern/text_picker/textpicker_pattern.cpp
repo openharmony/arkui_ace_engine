@@ -31,12 +31,13 @@
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
 #include "core/components_ng/pattern/text_picker/toss_animation_controller.h"
+#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-// TODO datepicker style modification
+// Datepicker style modification
 const Dimension PRESS_INTERVAL = 4.0_vp;
 const Dimension PRESS_RADIUS = 8.0_vp;
 constexpr uint32_t RATE = 2;
@@ -752,11 +753,11 @@ std::string TextPickerPattern::GetSelectedObjectMulti(const std::vector<std::str
     }
     result += std::string(",\"index\":") + "[";
     for (uint32_t i = 0; i < indexs.size(); i++) {
-        result += "\"" + std::to_string(indexs[i]);
+        result += std::to_string(indexs[i]);
         if (indexs.size() > 0 && indexs.size() != i + 1) {
-            result += "\",";
+            result += ",";
         } else {
-            result += "\"]";
+            result += "]";
         }
     }
     result += ",\"status\":" + std::to_string(status) + "}";
@@ -808,6 +809,10 @@ std::string TextPickerPattern::GetSelectedObject(bool isColumnChange, int32_t st
 
 void TextPickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     if (!range_.empty()) {
         json->PutExtAttr("range", GetRangeStr().c_str(), filter);
     } else {

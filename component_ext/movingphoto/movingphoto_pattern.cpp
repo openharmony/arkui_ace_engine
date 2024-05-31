@@ -23,6 +23,7 @@
 #include "base/log/ace_trace.h"
 #include "base/utils/system_properties.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -64,8 +65,8 @@ void MovingPhotoPattern::OnAttachToFrameNode()
     static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, "MediaPlayerSurface",
                                                  RenderContext::PatternType::VIDEO };
     renderContextForMediaPlayer_->InitContext(false, param);
-    renderContext->UpdateBackgroundColor(Color::BLACK);
-    renderContextForMediaPlayer_->UpdateBackgroundColor(Color::BLACK);
+    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    renderContextForMediaPlayer_->UpdateBackgroundColor(Color::TRANSPARENT);
     renderContext->SetClipToBounds(true);
 
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -94,6 +95,8 @@ void MovingPhotoPattern::OnAttachToFrameNode()
             pattern->StopPlayback();
         }, "ArkUIMovingPhotoStop");
     });
+
+    RegisterVisibleAreaChange();
 }
 
 void MovingPhotoPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -102,6 +105,7 @@ void MovingPhotoPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
+    hasVisibleChangeRegistered_ = false;
 }
 
 void MovingPhotoPattern::OnDetachFromMainTree()
@@ -161,7 +165,8 @@ void MovingPhotoPattern::InitEvent()
 
 void MovingPhotoPattern::HandleLongPress(GestureEvent& info)
 {
-    if (isPlaying_ || !isPrepared_ || isPlayByController_) {
+    isFastKeyUp_ = false;
+    if (currentPlayStatus_ == PlaybackStatus::STARTED || !isPrepared_ || isPlayByController_) {
         return;
     }
     Start();
@@ -169,18 +174,25 @@ void MovingPhotoPattern::HandleLongPress(GestureEvent& info)
 
 void MovingPhotoPattern::HandleTouchEvent(TouchEventInfo& info)
 {
-    if (!isPrepared_ || isPlayByController_ || !isShowVideo_) {
+    if (currentPlayStatus_ == PlaybackStatus::ERROR) {
+        ResetMediaPlayer();
+    }
+    if (!isPrepared_ || isPlayByController_) {
         return;
     }
     auto touchList = info.GetChangedTouches();
     CHECK_NULL_VOID(!touchList.empty());
     auto touchInfo = touchList.front();
     auto touchType = touchInfo.GetTouchType();
+    isFastKeyUp_ = false;
     if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
-        if (!isPlaying_) {
+        if (currentPlayStatus_ == PlaybackStatus::STARTED) {
+            StopPlayback();
+        } else if (currentPlayStatus_ == PlaybackStatus::PLAYBACK_COMPLETE) {
+            currentPlayStatus_ = PlaybackStatus::NONE;
             StopAnimation();
         } else {
-            StopPlayback();
+            isFastKeyUp_ = true;
         }
     }
 }
@@ -218,7 +230,6 @@ void MovingPhotoPattern::UpdateImageNode()
         imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
         imageLayoutProperty->UpdateImageFit(imageFit);
         image->MarkModifyDone();
-        isShowVideo_ = false;
     }
 }
 
@@ -242,7 +253,12 @@ void MovingPhotoPattern::PrepareMediaPlayer()
 {
     auto layoutProperty = GetLayoutProperty<MovingPhotoLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (!layoutProperty->HasVideoSource() || layoutProperty->GetVideoSource().value() == fd_) {
+    if (!layoutProperty->HasMovingPhotoUri() || layoutProperty->GetMovingPhotoUri().value() == uri_) {
+        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MovingPhoto source is null or the source has not changed.");
+        return;
+    }
+    uri_ = layoutProperty->GetMovingPhotoUri().value();
+    if (!layoutProperty->HasVideoSource()) {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer source is null or the source has not changed.");
         return;
     }
@@ -323,7 +339,7 @@ void MovingPhotoPattern::RegisterMediaPlayerEvent()
     };
 
     auto&& errorEvent = [movingPhotoPattern, uiTaskExecutor]() {
-        uiTaskExecutor.PostTask([movingPhotoPattern] {
+        uiTaskExecutor.PostSyncTask([movingPhotoPattern] {
             auto movingPhoto = movingPhotoPattern.Upgrade();
             CHECK_NULL_VOID(movingPhoto);
             ContainerScope scope(movingPhoto->instanceId_);
@@ -337,7 +353,7 @@ void MovingPhotoPattern::RegisterMediaPlayerEvent()
             CHECK_NULL_VOID(movingPhoto);
             ContainerScope scope(movingPhoto->instanceId_);
             movingPhoto->OnResolutionChange();
-        }, "ArkUIMovingResolutionChanged");
+        }, "ArkUIMovingPhotoResolutionChanged");
     };
 
     auto&& startRenderFrameEvent = [movingPhotoPattern, uiTaskExecutor]() {
@@ -346,7 +362,7 @@ void MovingPhotoPattern::RegisterMediaPlayerEvent()
             CHECK_NULL_VOID(movingPhoto);
             ContainerScope scope(movingPhoto->instanceId_);
             movingPhoto->OnStartRenderFrame();
-        }, "ArkUIMovingStartRender");
+        }, "ArkUIMovingPhotoStartRender");
     };
 
     mediaPlayer_->RegisterMediaPlayerEvent(
@@ -373,6 +389,10 @@ void MovingPhotoPattern::FireMediaPlayerStart()
     auto eventHub = GetEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireStartEvent();
+    if (isFastKeyUp_) {
+        isFastKeyUp_ = false;
+        StopPlayback();
+    }
 }
 
 void MovingPhotoPattern::FireMediaPlayerStop()
@@ -380,6 +400,13 @@ void MovingPhotoPattern::FireMediaPlayerStop()
     auto eventHub = GetEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireStopEvent();
+}
+
+void MovingPhotoPattern::FireMediaPlayerPause()
+{
+    auto eventHub = GetEventHub<MovingPhotoEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->FirePauseEvent();
 }
 
 void MovingPhotoPattern::FireMediaPlayerFinish()
@@ -452,18 +479,20 @@ bool MovingPhotoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     return false;
 }
 
-SizeF MovingPhotoPattern::CalculateFitContain(const SizeF& videoSize, const SizeF& layoutSize)
+SizeF MovingPhotoPattern::CalculateFitContain(const SizeF& rawSize, const SizeF& layoutSize)
 {
-    double layoutRatio = NearZero(layoutSize.Height()) ? 0.0 : layoutSize.Width() / layoutSize.Height();
-    double sourceRatio = NearZero(videoSize.Height()) ? layoutRatio : videoSize.Width() / videoSize.Height();
-
-    if (NearZero(layoutRatio) || NearZero(sourceRatio)) {
+    if (NearZero(rawSize.Height()) || NearZero(rawSize.Width()) || NearZero(layoutSize.Height())) {
         return layoutSize;
     }
+    double sourceRatio = rawSize.Width() / rawSize.Height();
+    double layoutRatio = layoutSize.Width() / layoutSize.Height();
     if (sourceRatio < layoutRatio) {
-        return { static_cast<float>(sourceRatio) * layoutSize.Height(), layoutSize.Height() };
+        float ratio = layoutSize.Height() / rawSize.Height();
+        return { rawSize.Width() * ratio, layoutSize.Height() };
+    } else {
+        float ratio = layoutSize.Width() / rawSize.Width();
+        return { layoutSize.Width(), rawSize.Height() * ratio };
     }
-    return { layoutSize.Width(), static_cast<float>(layoutSize.Width() / sourceRatio) };
 }
 
 SizeF MovingPhotoPattern::CalculateFitFill(const SizeF& layoutSize)
@@ -471,31 +500,64 @@ SizeF MovingPhotoPattern::CalculateFitFill(const SizeF& layoutSize)
     return layoutSize;
 }
 
-SizeF MovingPhotoPattern::CalculateFitCover(const SizeF& videoSize, const SizeF& layoutSize)
+SizeF MovingPhotoPattern::CalculateFitCover(const SizeF& rawSize, const SizeF& layoutSize)
 {
-    double layoutRatio = NearZero(layoutSize.Height()) ? 0.0 : layoutSize.Width() / layoutSize.Height();
-    double sourceRatio = NearZero(videoSize.Height()) ? layoutRatio : videoSize.Width() / videoSize.Height();
-
-    if (NearZero(layoutRatio) || NearZero(sourceRatio)) {
+    if (NearZero(rawSize.Height()) || NearZero(rawSize.Width()) || NearZero(layoutSize.Height())) {
         return layoutSize;
     }
+    double sourceRatio = rawSize.Width() / rawSize.Height();
+    double layoutRatio = layoutSize.Width() / layoutSize.Height();
+    float ratio = 1.0;
     if (sourceRatio < layoutRatio) {
-        return { layoutSize.Width(), static_cast<float>(layoutSize.Width() / sourceRatio) };
+        ratio = static_cast<float>(layoutSize.Width() / rawSize.Width());
+    } else {
+        ratio = static_cast<float>(layoutSize.Height() / rawSize.Height());
     }
-    return { static_cast<float>(layoutSize.Height() * sourceRatio), layoutSize.Height() };
+    return { rawSize.Width() * ratio, rawSize.Height() * ratio};
 }
 
-SizeF MovingPhotoPattern::CalculateFitNone(const SizeF& videoSize)
+SizeF MovingPhotoPattern::CalculateFitNone(const SizeF& rawSize)
 {
-    return videoSize;
+    return rawSize;
 }
 
-SizeF MovingPhotoPattern::CalculateFitScaleDown(const SizeF& videoSize, const SizeF& layoutSize)
+SizeF MovingPhotoPattern::CalculateFitScaleDown(const SizeF& rawSize, const SizeF& layoutSize)
 {
-    if (layoutSize.Width() > videoSize.Width()) {
-        return CalculateFitNone(videoSize);
+    if ((rawSize.Width() <= layoutSize.Width()) && (rawSize.Height() <= layoutSize.Height())) {
+        return CalculateFitNone(rawSize);
+    } else {
+        return CalculateFitContain(rawSize, layoutSize);
     }
-    return CalculateFitContain(videoSize, layoutSize);
+}
+
+SizeF MovingPhotoPattern::CalculateFitAuto(const SizeF& rawSize, const SizeF& layoutSize)
+{
+    if (NearZero(rawSize.Width()) || NearZero(rawSize.Height())) {
+        return layoutSize;
+    }
+    if ((rawSize.Width() <= layoutSize.Width()) && (rawSize.Height() <= layoutSize.Height())) {
+        double widthRatio = layoutSize.Width() / rawSize.Width();
+        double heightRatio = layoutSize.Height() / rawSize.Height();
+        float ratio = static_cast<float>(std::min(widthRatio, heightRatio));
+        return { rawSize.Width() * ratio, rawSize.Height() * ratio };
+    } else if ((rawSize.Width() > layoutSize.Width()) && (rawSize.Height() <= layoutSize.Height())) {
+        return CalculateFitContain(rawSize, layoutSize);
+    } else {
+        return CalculateFitCover(rawSize, layoutSize);
+    }
+}
+
+SizeF MovingPhotoPattern::GetRawImageSize()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, SizeF(-1, -1));
+    auto movingPhoto = AceType::DynamicCast<MovingPhotoNode>(host);
+    CHECK_NULL_RETURN(movingPhoto, SizeF(-1, -1));
+    auto image = AceType::DynamicCast<FrameNode>(movingPhoto->GetImage());
+    CHECK_NULL_RETURN(image, SizeF(-1, -1));
+    auto imagePattern = image->GetPattern<ImagePattern>();
+    CHECK_NULL_RETURN(image, SizeF(-1, -1));
+    return imagePattern->GetRawImageSize();
 }
 
 SizeF MovingPhotoPattern::MeasureContentLayout(const SizeF& layoutSize, const RefPtr<MovingPhotoLayoutProperty>& layoutProperty)
@@ -504,27 +566,27 @@ SizeF MovingPhotoPattern::MeasureContentLayout(const SizeF& layoutSize, const Re
         return layoutSize;
     }
 
-    auto videoSize = layoutProperty->GetVideoSizeValue(SizeF(0, 0));
+    auto rawImageSize = GetRawImageSize();
     auto imageFit = layoutProperty->GetObjectFitValue(ImageFit::COVER);
     SizeF contentSize = { 0.0, 0.0 };
     switch (imageFit) {
         case ImageFit::CONTAIN:
-            contentSize = CalculateFitContain(videoSize, layoutSize);
+            contentSize = CalculateFitContain(rawImageSize, layoutSize);
             break;
         case ImageFit::FILL:
             contentSize = CalculateFitFill(layoutSize);
             break;
         case ImageFit::COVER:
-            contentSize = CalculateFitCover(videoSize, layoutSize);
+            contentSize = CalculateFitCover(rawImageSize, layoutSize);
             break;
         case ImageFit::NONE:
-            contentSize = CalculateFitNone(videoSize);
+            contentSize = CalculateFitNone(rawImageSize);
             break;
         case ImageFit::SCALE_DOWN:
-            contentSize = CalculateFitScaleDown(videoSize, layoutSize);
+            contentSize = CalculateFitScaleDown(rawImageSize, layoutSize);
             break;
         default:
-            contentSize = CalculateFitContain(videoSize, layoutSize);
+            contentSize = CalculateFitAuto(rawImageSize, layoutSize);
     }
 
     return contentSize;
@@ -532,6 +594,7 @@ SizeF MovingPhotoPattern::MeasureContentLayout(const SizeF& layoutSize, const Re
 
 void MovingPhotoPattern::OnMediaPlayerStatusChanged(PlaybackStatus status)
 {
+    currentPlayStatus_ = status;
     switch (status) {
         case PlaybackStatus::ERROR:
             TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "Player current status is ERROR.");
@@ -539,7 +602,6 @@ void MovingPhotoPattern::OnMediaPlayerStatusChanged(PlaybackStatus status)
             break;
         case PlaybackStatus::IDLE:
             TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "Player current status is IDLE.");
-            isPlaying_ = false;
             break;
         case PlaybackStatus::PREPARED:
             TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "Player current status is PREPARED.");
@@ -547,14 +609,11 @@ void MovingPhotoPattern::OnMediaPlayerStatusChanged(PlaybackStatus status)
             break;
         case PlaybackStatus::STARTED:
             TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "Player current status is STARTED.");
-            isPlaying_ = true;
-            isStoped_ = false;
             FireMediaPlayerStart();
             break;
         case PlaybackStatus::PAUSED:
             TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "Player current status is PAUSED.");
-            isPlaying_ = false;
-            isStoped_ = false;
+            FireMediaPlayerPause();
             break;
         case PlaybackStatus::STOPPED:
             TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "Player current status is STOPPED.");
@@ -576,8 +635,6 @@ void MovingPhotoPattern::OnMediaPlayerStatusChanged(PlaybackStatus status)
 void MovingPhotoPattern::OnMediaPlayerPrepared()
 {
     ContainerScope scope(instanceId_);
-    isPlaying_ = false;
-    isStoped_ = false;
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
@@ -600,15 +657,12 @@ void MovingPhotoPattern::OnMediaPlayerPrepared()
 
 void MovingPhotoPattern::OnMediaPlayerStoped()
 {
-    isPlaying_ = false;
-    isStoped_ = true;
+    isPlayByController_ = false;
     FireMediaPlayerStop();
 }
 
 void MovingPhotoPattern::OnMediaPlayerCompletion()
 {
-    isPlaying_ = false;
-    isStoped_ = false;
     if (isPlayByController_) {
         isPlayByController_ = false;
         StopAnimation();
@@ -632,10 +686,11 @@ void MovingPhotoPattern::HideImageNode()
 
 void MovingPhotoPattern::StartPlayback()
 {
-    if (isPlaying_ || !isPrepared_) {
+    if (currentPlayStatus_ == PlaybackStatus::STARTED || !isPrepared_) {
         return;
     }
     isPlayByController_ = true;
+    isFastKeyUp_ = false;
     Start();
 }
 
@@ -657,38 +712,38 @@ void MovingPhotoPattern::StartAnimation()
     CHECK_NULL_VOID(videoRsContext);
     videoRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
 
-    AnimationOption opacityOption;
-    opacityOption.SetDuration(ANIMATION_DURATION_400);
-    opacityOption.SetCurve(Curves::FRICTION);
-    opacityOption.SetOnFinishEvent([this]() {
-        isShowVideo_ = true;
+    AnimationOption animationOption;
+    animationOption.SetDuration(ANIMATION_DURATION_400);
+    animationOption.SetCurve(Curves::FRICTION);
+    animationOption.SetOnFinishEvent([this]() {
+        if (currentPlayStatus_ == PlaybackStatus::PAUSED || currentPlayStatus_ == PlaybackStatus::STOPPED
+                                                         || !startAnimationFlag_) {
+            return;
+        }
         HideImageNode();
     });
-    AnimationUtils::Animate(opacityOption, [context = imageRsContext]() {
-            context->UpdateOpacity(0.0);
-         }, opacityOption.GetOnFinishEvent());
-
-    AnimationOption scaleOption;
-    scaleOption.SetDuration(ANIMATION_DURATION_400);
-    scaleOption.SetCurve(Curves::FRICTION);
-    AnimationUtils::Animate(scaleOption, [imageCtx = imageRsContext, videoCtx = videoRsContext]() {
+    startAnimationFlag_ = true;
+    AnimationUtils::Animate(animationOption, [imageCtx = imageRsContext, videoCtx = videoRsContext]() {
+            imageCtx->UpdateOpacity(0.0);
             imageCtx->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
             videoCtx->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
-         }, scaleOption.GetOnFinishEvent());
+         }, animationOption.GetOnFinishEvent());
 }
 
 void MovingPhotoPattern::StopPlayback()
 {
-    if (isStoped_ || !isPlaying_ || !isPrepared_) {
+    isFastKeyUp_ = false;
+    if (currentPlayStatus_ != PlaybackStatus::STARTED || !isPrepared_) {
         return;
     }
     isPlayByController_ = false;
-    Stop();
+    Pause();
     StopAnimation();
 }
 
 void MovingPhotoPattern::StopAnimation()
 {
+    startAnimationFlag_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto movingPhoto = AceType::DynamicCast<MovingPhotoNode>(host);
@@ -714,7 +769,7 @@ void MovingPhotoPattern::StopAnimation()
     option.SetDuration(ANIMATION_DURATION_300);
     option.SetCurve(Curves::FRICTION);
     option.SetOnFinishEvent([this]() {
-        isShowVideo_ = false;
+        Seek(1);
     });
     AnimationUtils::Animate(option, [imageCtx = imageRsContext, videoCtx = videoRsContext]() {
             imageCtx->UpdateOpacity(1.0);
@@ -730,7 +785,7 @@ void MovingPhotoPattern::Start()
         return;
     }
 
-    if (isStoped_ && mediaPlayer_->PrepareAsync() != 0) {
+    if ((currentPlayStatus_ == PlaybackStatus::STOPPED) && mediaPlayer_->PrepareAsync() != 0) {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "prepare MediaPlayer failed.");
         return;
     }
@@ -743,7 +798,25 @@ void MovingPhotoPattern::Start()
         auto mediaPlayer = weak.Upgrade();
         CHECK_NULL_VOID(mediaPlayer);
         mediaPlayer->Play();
-    }, "ArkUIMovingStartPlay");
+    }, "ArkUIMovingPhotoStartPlay");
+}
+
+void MovingPhotoPattern::Pause()
+{
+    if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
+        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer is null or invalid.");
+        return;
+    }
+    ContainerScope scope(instanceId_);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    
+    auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
+    platformTask.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_))] {
+        auto mediaPlayer = weak.Upgrade();
+        CHECK_NULL_VOID(mediaPlayer);
+        mediaPlayer->Pause();
+        }, "ArkUIMovingPhotoPausePlay");
 }
 
 void MovingPhotoPattern::Stop()
@@ -755,13 +828,31 @@ void MovingPhotoPattern::Stop()
     ContainerScope scope(instanceId_);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-
+    
     auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
     platformTask.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_))] {
         auto mediaPlayer = weak.Upgrade();
         CHECK_NULL_VOID(mediaPlayer);
         mediaPlayer->Stop();
-    }, "ArkUIMovingStopPlay");
+    }, "ArkUIMovingPhotoStopPlay");
+}
+
+void MovingPhotoPattern::Seek(int32_t position)
+{
+    if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
+        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer is null or invalid.");
+        return;
+    }
+    ContainerScope scope(instanceId_);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    
+    auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
+    platformTask.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_)), pos = position] {
+        auto mediaPlayer = weak.Upgrade();
+        CHECK_NULL_VOID(mediaPlayer);
+        mediaPlayer->Seek(pos, SeekMode::SEEK_PREVIOUS_SYNC);
+        }, "ArkUIMovingPhotoSeek");
 }
 
 void MovingPhotoPattern::UpdateMediaPlayerSpeed()
@@ -778,7 +869,7 @@ void MovingPhotoPattern::UpdateMediaPlayerSpeed()
         auto mediaPlayer = weak.Upgrade();
         CHECK_NULL_VOID(mediaPlayer);
         mediaPlayer->SetPlaybackSpeed(static_cast<float>(NORMAL_PLAY_SPEED));
-    }, "ArkUIMovingUpdateSpeed");
+    }, "ArkUIMovingPhotoUpdateSpeed");
 }
 
 void MovingPhotoPattern::UpdateMediaPlayerMuted()
@@ -796,7 +887,7 @@ void MovingPhotoPattern::UpdateMediaPlayerMuted()
         auto mediaPlayer = weak.Upgrade();
         CHECK_NULL_VOID(mediaPlayer);
         mediaPlayer->SetVolume(videoVolume, videoVolume);
-    }, "ArkUIMovingUpdateMuted");
+    }, "ArkUIMovingPhotoUpdateMuted");
 }
 
 void MovingPhotoPattern::OnAreaChangedInner()
@@ -827,7 +918,7 @@ void MovingPhotoPattern::OnVisibleChange(bool isVisible)
 {
     CHECK_NULL_VOID(mediaPlayer_);
     if (!isVisible) {
-        OnWindowHide();
+        StopPlayback();
     }
 }
 
@@ -847,7 +938,27 @@ void MovingPhotoPattern::OnWindowHide()
     CHECK_NULL_VOID(rsContext);
     rsContext->UpdateOpacity(1.0);
     image->MarkModifyDone();
-    isShowVideo_ = false;
+}
+
+void MovingPhotoPattern::RegisterVisibleAreaChange()
+{
+    if (hasVisibleChangeRegistered_) {
+        return;
+    }
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (!visible) {
+            pattern->StopPlayback();
+        }
+    };
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    std::vector<double> ratioList = {0.0};
+    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
+    hasVisibleChangeRegistered_ = true;
 }
 
 MovingPhotoPattern::~MovingPhotoPattern()

@@ -45,6 +45,7 @@
 #include "unicode/utypes.h"
 #include "unicode/uversion.h"
 
+#include "date_time_sequence.h"
 #include "base/json/json_util.h"
 #include "base/log/log.h"
 #include "base/resource/internal_resource.h"
@@ -378,6 +379,40 @@ bool Localization::GetDateColumnFormatOrder(std::vector<std::string>& outOrder)
     }
     order[position] = "day";
 
+    for (auto it = order.begin(); it != order.end(); ++it) {
+        outOrder.emplace_back(it->second);
+    }
+
+    return true;
+}
+
+bool Localization::GetDateOrder(std::vector<std::string>& outOrder)
+{
+    std::string dateOrder;
+    DateTimeSequence sequence;
+    std::string language = locale_->instance.getLanguage();
+    OrderResult orderResult = sequence.GetDateOrder(language);
+    dateOrder = orderResult.dateOrder;
+
+    std::map<std::size_t, std::string> order;
+    std::size_t position = dateOrder.find("y");
+    if (position == std::string::npos) {
+        return false;
+    }
+    order[position] = "year";
+
+    position = dateOrder.find("M");
+    if (position == std::string::npos) {
+        return false;
+    }
+    order[position] = "month";
+
+    position = dateOrder.find("d");
+    if (position == std::string::npos) {
+        return false;
+    }
+    order[position] = "day";
+    
     for (auto it = order.begin(); it != order.end(); ++it) {
         outOrder.emplace_back(it->second);
     }

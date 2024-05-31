@@ -650,4 +650,21 @@ void WebModelImpl::SetRenderProcessRespondingId(std::function<void(const BaseEve
     webComponent->SetRenderProcessRespondingId(eventMarker);
 }
 
+void WebModelImpl::SetViewportFitChangedId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    auto eventMarker = EventMarker(std::move(jsCallback));
+
+    webComponent->SetViewportFitChangedId(eventMarker);
+}
+
+void WebModelImpl::SetAdsBlockedEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    auto eventMarker = EventMarker(std::move(jsCallback));
+
+    webComponent->SetAdsBlockedEventId(eventMarker);
+}
 } // namespace OHOS::Ace::Framework

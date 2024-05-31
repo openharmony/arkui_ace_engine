@@ -44,7 +44,9 @@
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/recycle_view/recycle_dummy_node.h"
 #include "core/pipeline/base/element_register.h"
+#if defined(OHOS_PLATFORM)
 #include "foundation/ability/ability_runtime/frameworks/native/runtime/connect_server_manager.h"
+#endif
 
 namespace OHOS::Ace {
 
@@ -134,7 +136,7 @@ void JSView::RenderJSExecution()
 
 void JSView::SyncInstanceId()
 {
-    restoreInstanceIdStack_.push(Container::CurrentId());
+    restoreInstanceIdStack_.emplace_back(Container::CurrentId());
     ContainerScope::UpdateCurrent(instanceId_);
 }
 
@@ -144,8 +146,8 @@ void JSView::RestoreInstanceId()
         ContainerScope::UpdateCurrent(-1);
         return;
     }
-    ContainerScope::UpdateCurrent(restoreInstanceIdStack_.top());
-    restoreInstanceIdStack_.pop();
+    ContainerScope::UpdateCurrent(restoreInstanceIdStack_.back());
+    restoreInstanceIdStack_.pop_back();
 }
 
 void JSView::GetInstanceId(const JSCallbackInfo& info)
@@ -659,6 +661,13 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
         jsView->jsViewFunction_->ExecuteOnDumpInfo(params);
     };
 
+    auto onDumpInspectorFunc = [weak = AceType::WeakClaim(this)]() -> std::string {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_RETURN(jsView, "");
+        ContainerScope scope(jsView->GetInstanceId());
+        return jsView->jsViewFunction_->ExecuteOnDumpInfo();
+    };
+
     auto getThisFunc = [weak = AceType::WeakClaim(this)]() -> void* {
         auto jsView = weak.Upgrade();
         CHECK_NULL_RETURN(jsView, nullptr);
@@ -679,6 +688,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
         .recycleCustomNodeFunc = recycleCustomNode,
         .setActiveFunc = std::move(setActiveFunc),
         .onDumpInfoFunc = std::move(onDumpInfoFunc),
+        .onDumpInspectorFunc = std::move(onDumpInspectorFunc),
         .getThisFunc = std::move(getThisFunc),
         .hasMeasureOrLayout = jsViewFunction_->HasMeasure() || jsViewFunction_->HasLayout() ||
                               jsViewFunction_->HasMeasureSize() || jsViewFunction_->HasPlaceChildren(),
@@ -729,7 +739,9 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
     if (!jsViewExtraInfo->IsUndefined()) {
         JSRef<JSVal> jsPage = jsViewExtraInfo->GetProperty("page");
         JSRef<JSVal> jsLine = jsViewExtraInfo->GetProperty("line");
-        info.extraInfo = {.page = jsPage->ToString(), .line = jsLine->ToNumber<int32_t>()};
+        JSRef<JSVal> jsColumn = jsViewExtraInfo->GetProperty("col");
+        info.extraInfo = {.page = jsPage->ToString(), .line = jsLine->ToNumber<int32_t>(),
+            .col = jsColumn->ToNumber<int32_t>()};
     }
     
     if (isTitleNode) {
@@ -916,6 +928,9 @@ void JSViewPartialUpdate::JSGetNavDestinationInfo(const JSCallbackInfo& info)
         obj->SetProperty<std::string>("navigationId", result->navigationId);
         obj->SetProperty<std::string>("name", result->name);
         obj->SetProperty<int32_t>("state", static_cast<int32_t>(result->state));
+        obj->SetProperty<int32_t>("index", result->index);
+        obj->SetPropertyObject("param", JsConverter::ConvertNapiValueToJsVal(result->param));
+        obj->SetProperty<std::string>("navDestinationId", result->navDestinationId);
         info.SetReturnValue(obj);
     }
 }
@@ -979,21 +994,31 @@ void JSViewPartialUpdate::JSGetUniqueId(const JSCallbackInfo& info)
     info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(nodeId)));
 }
 
+void JSViewPartialUpdate::JSGetStateProfilerStatus(const JSCallbackInfo& info)
+{
+    ContainerScope scope(GetInstanceId());
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(pipeline->GetStateProfilerStatus())));
+}
+
 void JSViewPartialUpdate::JSSendStateInfo(const std::string& stateInfo)
 {
-#if defined(PREVIEW)
+#if defined(PREVIEW) || !defined(OHOS_PLATFORM)
     return;
 #else
-    TAG_LOGD(AceLogTag::ACE_STATE_MGMT, "ArkUI SendStateInfo %{public}s", stateInfo.c_str());
-    auto pipeline = NG::PipelineContext::GetContextByContainerId(GetInstanceId());
+    ContainerScope scope(GetInstanceId());
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    if (!pipeline->getProfilerStatus()) {
+    if (!pipeline->GetStateProfilerStatus()) {
         return;
     }
+    TAG_LOGD(AceLogTag::ACE_STATE_MGMT, "ArkUI SendStateInfo %{public}s", stateInfo.c_str());
     auto info = JsonUtil::ParseJsonString(stateInfo);
-    info->Put("VsyncID", (int32_t)pipeline->GetFrameCount());
-    info->Put("ProcessID", getpid());
-    info->Put("WindowID", (int32_t)pipeline->GetWindowId());
+    info->Put("timeStamp", GetCurrentTimestampMicroSecond());
+    info->Put("vsyncID", (int32_t)pipeline->GetFrameCount());
+    info->Put("processID", getpid());
+    info->Put("windowID", (int32_t)pipeline->GetWindowId());
     OHOS::AbilityRuntime::ConnectServerManager::Get().SendArkUIStateProfilerMessage(info->ToString());
 #endif
 }
@@ -1027,6 +1052,8 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
     JSClass<JSViewPartialUpdate>::CustomMethod(
         "queryRouterPageInfo", &JSViewPartialUpdate::JSGetRouterPageInfo);
     JSClass<JSViewPartialUpdate>::CustomMethod("getUIContext", &JSViewPartialUpdate::JSGetUIContext);
+    JSClass<JSViewPartialUpdate>::CustomMethod(
+        "getStateProfilerStatus", &JSViewPartialUpdate::JSGetStateProfilerStatus);
     JSClass<JSViewPartialUpdate>::Method("sendStateInfo", &JSViewPartialUpdate::JSSendStateInfo);
     JSClass<JSViewPartialUpdate>::CustomMethod("getUniqueId", &JSViewPartialUpdate::JSGetUniqueId);
     JSClass<JSViewPartialUpdate>::InheritAndBind<JSViewAbstract>(object, ConstructorCallback, DestructorCallback);

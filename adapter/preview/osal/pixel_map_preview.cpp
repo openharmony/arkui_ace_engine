@@ -47,6 +47,11 @@ RefPtr<PixelMap> PixelMap::ConvertSkImageToPixmap(
     return nullptr;
 }
 
+RefPtr<PixelMap> PixelMap::DecodeTlv(std::vector<uint8_t>& buff)
+{
+    return nullptr;
+}
+
 int32_t PixelMapPreview::GetWidth() const
 {
     return -1;
@@ -105,6 +110,11 @@ std::string PixelMapPreview::GetId()
 std::string PixelMapPreview::GetModifyId()
 {
     return "";
+}
+
+bool PixelMapPreview::EncodeTlv(std::vector<uint8_t>& buff)
+{
+    return false;
 }
 
 void PixelMapPreview::Scale(float xAxis, float yAxis) {}

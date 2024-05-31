@@ -30,8 +30,8 @@ public:
     {}
     ~StaticImageObject() override = default;
 
-    void MakeCanvasImage(
-        const RefPtr<ImageLoadingContext>& ctxWp, const SizeF& targetSize, bool forceResize, bool syncLoad) override;
+    void MakeCanvasImage(const RefPtr<ImageLoadingContext>& ctxWp, const SizeF& targetSize, bool forceResize,
+        bool syncLoad, bool loadInVipChannel = false) override;
 
     RefPtr<ImageObject> Clone() override;
 

@@ -47,6 +47,12 @@ class ACE_FORCE_EXPORT ImagePattern : public Pattern, public SelectOverlayClient
     DECLARE_ACE_TYPE(ImagePattern, Pattern, SelectionHost);
 
 public:
+    enum class ImageType {
+        BASE,
+        ANIMATION,
+        UNDEFINED,
+    };
+
     ImagePattern();
     ~ImagePattern() override;
 
@@ -88,6 +94,11 @@ public:
     const RefPtr<CanvasImage>& GetCanvasImage()
     {
         return image_;
+    }
+
+    const RefPtr<CanvasImage>& GetAltCanvasImage()
+    {
+        return altImage_;
     }
 
     RefPtr<FrameNode> GetClientHost() const override
@@ -153,7 +164,7 @@ public:
         }
     }
 
-    std::string GetDynamicModeString(DynamicRangeMode dynamicMode)
+    std::string GetDynamicModeString(DynamicRangeMode dynamicMode) const
     {
         switch (dynamicMode) {
             case DynamicRangeMode::HIGH:
@@ -217,6 +228,7 @@ public:
     void ImageAnimatorPattern();
     void SetImages(std::vector<ImageProperties>&& images)
     {
+        CHECK_NULL_VOID(images.size());
         images_ = std::move(images);
         durationTotal_ = 0;
         for (const auto& childImage : images_) {
@@ -232,7 +244,8 @@ public:
     {
         images_.clear();
     }
-
+    void ResetImage();
+    void ResetAltImage();
     void ResetImageProperties();
 
     void ResetImageAndAlt();
@@ -255,14 +268,19 @@ public:
         OnAnimatedModifyDone();
     }
 
-    void SetIsAnimation(bool isAnimation)
+    void SetImageType(ImageType imageType)
     {
-        isAnimation_ = isAnimation;
+        imageType_ = imageType;
+    }
+
+    ImageType GetImageType()
+    {
+        return imageType_;
     }
 
     bool GetIsAnimation() const
     {
-        return isAnimation_;
+        return imageType_ == ImageType::ANIMATION;
     }
 
     bool IsAtomicNode() const override
@@ -287,18 +305,42 @@ public:
     void SetDuration(int32_t duration);
     void SetIteration(int32_t iteration);
 
+    void SetSrcUndefined(bool isUndefined)
+    {
+        isSrcUndefined_ = isUndefined;
+    }
+
     void SetImageAnimator(bool isImageAnimator)
     {
         isImageAnimator_ = isImageAnimator;
     }
 
+    bool GetLoadInVipChannel()
+    {
+        return loadInVipChannel_;
+    }
+
+    void SetLoadInVipChannel(bool loadInVipChannel)
+    {
+        loadInVipChannel_ = loadInVipChannel;
+    }
+
     void SetOnProgressCallback(std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& onProgress);
+
+    SizeF GetRawImageSize()
+    {
+        if (!loadingCtx_) {
+            return SizeF(-1.0, -1.0);
+        }
+        return loadingCtx_->GetImageSize();
+    }
 
 protected:
     void RegisterWindowStateChangedCallback();
     void UnregisterWindowStateChangedCallback();
     void OnVisibleAreaChange(bool visible);
     bool isShow_ = true;
+    bool gifAnimation_ = false;
 
 private:
     class ObscuredImage : public CanvasImage {
@@ -405,12 +447,11 @@ private:
     void OnImageModifyDone();
     void SetColorFilter(const RefPtr<FrameNode>& imageFrameNode);
     void SetImageFit(const RefPtr<FrameNode>& imageFrameNode);
-    void ChangeRenderContextProperties();
     void ControlAnimation(int32_t index);
     void SetObscured();
 
     CopyOptions copyOption_ = CopyOptions::None;
-    ImageInterpolation interpolation_ = ImageInterpolation::NONE;
+    ImageInterpolation interpolation_ = ImageInterpolation::LOW;
 
     RefPtr<ImageLoadingContext> loadingCtx_;
     RefPtr<CanvasImage> image_;
@@ -433,6 +474,7 @@ private:
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
 
     bool syncLoad_ = false;
+    bool loadInVipChannel_ = false;
     AIImageQuality imageQuality_ = AIImageQuality::NONE;
     bool isImageQualityChange_ = false;
     bool isEnableAnalyzer_ = false;
@@ -444,7 +486,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(ImagePattern);
 
     //animation
-    bool isAnimation_ = false;
+    ImageType imageType_ = ImageType::BASE;
     RefPtr<Animator> animator_;
     std::vector<ImageProperties> images_;
     std::list<CacheImageStruct> cacheImages_;
@@ -461,6 +503,8 @@ private:
     bool isFormAnimationEnd_ = false;
     bool isImageAnimator_ = false;
     bool hasSizeChanged = false;
+    bool isPixelMapChanged_ = true;
+    bool isSrcUndefined_ = false;
 
     std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)> onProgressCallback_ = nullptr;
 };

@@ -240,8 +240,6 @@ void UpdateSearchStrategyByHitTestMode(HitTestMode hitTestMode, bool& shouldSear
             shouldSearchChildren = false;
             break;
         case HitTestMode::HTMTRANSPARENT:
-            shouldSearchSelf = false;
-            shouldSearchChildren = false;
             break;
         case HitTestMode::HTMNONE:
             shouldSearchSelf = false;
@@ -422,5 +420,167 @@ bool AccessibilityProperty::HasAction() const
         IsScrollable() ||
         IsEditable() ||
         IsDeletable();
+}
+
+void AccessibilityProperty::SetAccessibilityActions(uint32_t actions)
+{
+    accessibilityActions_ = actions;
+}
+
+void AccessibilityProperty::ResetAccessibilityActions()
+{
+    accessibilityActions_ = std::nullopt;
+}
+
+bool AccessibilityProperty::HasAccessibilityActions()
+{
+    return accessibilityActions_.has_value();
+}
+
+uint32_t AccessibilityProperty::GetAccessibilityActions() const
+{
+    return accessibilityActions_.value_or(0);
+}
+
+void AccessibilityProperty::SetAccessibilityRole(const std::string& role)
+{
+    accessibilityRole_ = role;
+}
+
+void AccessibilityProperty::ResetAccessibilityRole()
+{
+    accessibilityRole_ = std::nullopt;
+}
+
+bool AccessibilityProperty::HasAccessibilityRole()
+{
+    return accessibilityRole_.has_value();
+}
+
+std::string AccessibilityProperty::GetAccessibilityRole() const
+{
+    return accessibilityRole_.value_or("");
+}
+
+void AccessibilityProperty::SetActions(const ActionsImpl& actionsImpl)
+{
+    actionsImpl_ = actionsImpl;
+}
+
+bool AccessibilityProperty::ActionsDefined(uint32_t action)
+{
+    if (!HasAccessibilityActions()) {
+        return false;
+    }
+    if (!actionsImpl_) {
+        return false;
+    }
+    int result = GetAccessibilityActions() & action;
+    return result != 0;
+}
+
+void AccessibilityProperty::SetUserDisabled(const bool& isDisabled)
+{
+    isDisabled_ = isDisabled;
+}
+
+bool AccessibilityProperty::HasUserDisabled()
+{
+    return isDisabled_.has_value();
+}
+
+bool AccessibilityProperty::IsUserDisabled()
+{
+    return isDisabled_.value_or(false);
+}
+
+void AccessibilityProperty::SetUserSelected(const bool& isSelected)
+{
+    isSelected_ = isSelected;
+}
+
+bool AccessibilityProperty::HasUserSelected()
+{
+    return isSelected_.has_value();
+}
+
+bool AccessibilityProperty::IsUserSelected()
+{
+    return isSelected_.value_or(false);
+}
+
+void AccessibilityProperty::SetUserCheckedType(const int32_t& checkedType)
+{
+    checkedType_ = checkedType;
+}
+
+bool AccessibilityProperty::HasUserCheckedType()
+{
+    return checkedType_.has_value();
+}
+
+int32_t AccessibilityProperty::GetUserCheckedType()
+{
+    return checkedType_.value_or(0);
+}
+
+void AccessibilityProperty::SetUserMinValue(const int32_t& minValue)
+{
+    minValue_ = minValue;
+}
+
+bool AccessibilityProperty::HasUserMinValue()
+{
+    return minValue_.has_value();
+}
+
+int32_t AccessibilityProperty::GetUserMinValue()
+{
+    return minValue_.value_or(-1);
+}
+
+void AccessibilityProperty::SetUserMaxValue(const int32_t& maxValue)
+{
+    maxValue_ = maxValue;
+}
+
+bool AccessibilityProperty::HasUserMaxValue()
+{
+    return maxValue_.has_value();
+}
+
+int32_t AccessibilityProperty::GetUserMaxValue()
+{
+    return maxValue_.value_or(-1);
+}
+
+void AccessibilityProperty::SetUserCurrentValue(const int32_t& currentValue)
+{
+    currentValue_ = currentValue;
+}
+
+bool AccessibilityProperty::HasUserCurrentValue()
+{
+    return currentValue_.has_value();
+}
+
+int32_t AccessibilityProperty::GetUserCurrentValue()
+{
+    return currentValue_.value_or(-1);
+}
+
+void AccessibilityProperty::SetUserTextValue(const std::string& textValue)
+{
+    textValue_ = textValue;
+}
+
+bool AccessibilityProperty::HasUserTextValue()
+{
+    return textValue_.has_value();
+}
+
+std::string AccessibilityProperty::GetUserTextValue()
+{
+    return textValue_.value_or("");
 }
 } // namespace OHOS::Ace::NG

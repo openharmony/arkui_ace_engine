@@ -13,20 +13,22 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/node_refresh_modifier.h"
-#include "core/interfaces/native/node/node_refresh_modifier.h"
 
 #include "base/geometry/dimension.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/pipeline/base/element_register.h"
+#include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
-#include "core/components_ng/base/view_abstract.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
-#include "core/interfaces/native/node/node_api.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
+#include "core/interfaces/native/node/node_api.h"
+#include "core/interfaces/native/node/node_refresh_modifier.h"
+#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 namespace {
+const float ERROR_FLOAT_CODE = -1.0f;
 
 void SetRefreshing(ArkUINodeHandle node, ArkUI_Bool value)
 {
@@ -77,13 +79,45 @@ void SetRefreshContent(ArkUINodeHandle node, ArkUINodeHandle content)
     CHECK_NULL_VOID(contentNode);
     RefreshModelNG::SetCustomBuilder(frameNode, contentNode);
 }
+
+void SetPullDownRatio(ArkUINodeHandle node, ArkUI_Float32 ratio)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    float value = 0.0;
+    if (LessNotEqual(ratio, 0.0)) {
+        value = 0.0;
+    } else if (GreatNotEqual(ratio, 1.0)) {
+        value = 1.0;
+    }
+    value = ratio ;
+    std::optional<float> ratioValue = value;
+    RefreshModelNG::SetPullDownRatio(frameNode, ratioValue);
+}
+
+void ResetPullDownRatio(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<float> ratioValue = std::nullopt;
+    RefreshModelNG::SetPullDownRatio(frameNode, ratioValue);
+}
+
+ArkUI_Float32 GetPullDownRatio(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return RefreshModelNG::GetPullDownRatio(frameNode);
+}
+
 } // namespace
 namespace NodeModifier {
 
 const ArkUIRefreshModifier* GetRefreshModifier()
 {
     static const ArkUIRefreshModifier modifier = { SetRefreshing, GetRefreshing, SetRefreshOffset, ResetRefreshOffset,
-        SetPullToRefresh, ResetPullToRefresh, SetRefreshContent };
+        SetPullToRefresh, ResetPullToRefresh, SetRefreshContent, SetPullDownRatio, ResetPullDownRatio,
+        GetPullDownRatio };
     return &modifier;
 }
 
@@ -114,6 +148,21 @@ void SetOnRefreshing(ArkUINodeHandle node, void* extraParam)
         SendArkUIAsyncEvent(&event);
     };
     RefreshModelNG::SetOnRefreshing(frameNode, std::move(onEvent));
+}
+
+void SetRefreshOnOffsetChange(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam](const float value) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_REFRESH_ON_OFFSET_CHANGE;
+        event.componentAsyncEvent.data[0].f32 = value;
+        SendArkUIAsyncEvent(&event);
+    };
+    RefreshModelNG::SetOnOffsetChange(frameNode, std::move(onEvent));
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

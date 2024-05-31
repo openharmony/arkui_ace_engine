@@ -37,7 +37,6 @@ void WebResource::Release(const std::function<void(bool)>& onRelease)
     if (id_ == WEB_INVALID_ID) {
         return;
     }
-    // TODO: add support for ng.
     auto context = context_.Upgrade();
     if (!context) {
         return;
@@ -170,7 +169,7 @@ void WebResource::CallResRegisterMethod(
         if (callback) {
             callback(result);
         }
-    }, "ArkUIWebCallResRegister");
+    }, "ArkUIWebCallResRegisterMethod");
 }
 
 std::string WebResource::GetStringParam(const std::string& param, const std::string& name) const

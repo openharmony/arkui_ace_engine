@@ -23,6 +23,10 @@ namespace OHOS::Ace::NG {
 void ScrollablePaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     PaintProperty::ToJsonValue(json, filter);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     json->PutExtAttr("scrollBar", GetBarStateString().c_str(), filter);
     json->PutExtAttr("scrollBarColor", GetBarColor().ColorToString().c_str(), filter);
     json->PutExtAttr("scrollBarWidth", GetBarWidth().ToString().c_str(), filter);

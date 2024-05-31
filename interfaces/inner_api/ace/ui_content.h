@@ -118,10 +118,11 @@ public:
     virtual void Destroy() = 0;
     virtual void OnNewWant(const OHOS::AAFwk::Want& want) = 0;
 
-    // distribute
-    virtual UIContentErrorCode Restore(OHOS::Rosen::Window *window, const std::string &contentInfo,
-                                       napi_value storage) = 0;
-    virtual std::string GetContentInfo() const = 0;
+    // restore
+    virtual UIContentErrorCode Restore(
+        OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage,
+        ContentInfoType type = ContentInfoType::CONTINUATION) = 0;
+    virtual std::string GetContentInfo(ContentInfoType type = ContentInfoType::CONTINUATION) const = 0;
     virtual void DestroyUIDirector() = 0;
 
     // UI content event process
@@ -190,6 +191,11 @@ public:
     virtual void SetActionEventHandler(std::function<void(const std::string&)>&& actionCallback) {};
     virtual void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) {};
     virtual void SetFormLinkInfoUpdateHandler(std::function<void(const std::vector<std::string>&)>&& callback) {};
+    virtual void RegisterAccessibilityChildTree(
+        uint32_t parentWindowId, int32_t parentTreeId, int64_t parentElementId) {};
+    virtual void SetAccessibilityGetParentRectHandler(std::function<void(int32_t&, int32_t&)>&& callback) {};
+    virtual void DeregisterAccessibilityChildTree() {};
+    virtual void AccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info) {};
 
     // for distribute UI source
     virtual SerializeableObjectArray DumpUITree()
@@ -407,6 +413,8 @@ public:
     {
         return {};
     }
+
+    virtual void SetStatusBarItemColor(uint32_t color) {};
 };
 
 } // namespace OHOS::Ace

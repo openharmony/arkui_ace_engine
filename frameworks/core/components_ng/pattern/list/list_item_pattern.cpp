@@ -17,6 +17,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/size_t.h"
+#include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_property.h"
@@ -35,6 +36,7 @@ constexpr float SWIPER_TH = 0.25f;
 constexpr float NEW_SWIPER_TH = 0.5f;
 constexpr float SWIPER_SPEED_TH = 1500.f;
 constexpr float SWIPE_RATIO = 0.6f;
+constexpr float NEW_SWIPE_RATIO = 1.848f;
 constexpr float SWIPE_SPRING_MASS = 1.f;
 constexpr float SWIPE_SPRING_STIFFNESS = 228.f;
 constexpr float SWIPE_SPRING_DAMPING = 30.f;
@@ -228,16 +230,6 @@ void ListItemPattern::SetSwiperItemForList()
     auto listPattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(listPattern);
     listPattern->SetSwiperItem(AceType::WeakClaim(this));
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        auto scrollableEvent = listPattern->GetScrollableEvent();
-        CHECK_NULL_VOID(scrollableEvent);
-        auto clickJudgeCallback = [weak = WeakClaim(this)](const PointF& localPoint) -> bool {
-            auto item = weak.Upgrade();
-            CHECK_NULL_RETURN(item, false);
-            return item->ClickJudge(localPoint);
-        };
-        scrollableEvent->SetClickJudgeCallback(clickJudgeCallback);
-    }
 }
 
 void ListItemPattern::SetOffsetChangeCallBack(OnOffsetChangeFunc&& offsetChangeCallback)
@@ -352,7 +344,18 @@ void ListItemPattern::InitSwiperAction(bool axisChanged)
             }
             pattern->HandleDragEnd(info);
         };
-        GestureEventNoParameter actionCancelTask;
+
+        auto actionCancelTask = [weak]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto listPattern = pattern->GetListFrameNode()->GetPattern<ListPattern>();
+            CHECK_NULL_VOID(listPattern);
+            if (!listPattern->IsCurrentSwiperItem(weak)) {
+                return;
+            }
+            GestureEvent info;
+            pattern->HandleDragEnd(info);
+        };
         panEvent_ = MakeRefPtr<PanEvent>(std::move(actionStartTask), std::move(actionUpdateTask),
             std::move(actionEndTask), std::move(actionCancelTask));
         isPanInit = true;
@@ -400,6 +403,10 @@ float ListItemPattern::CalculateFriction(float gamma)
     float ratio = SWIPE_RATIO;
     if (GreatOrEqual(gamma, 1.0)) {
         gamma = 1.0f;
+    }
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        ratio = NEW_SWIPE_RATIO;
+        return exp(-ratio * gamma);
     }
     float result = ratio * std::pow(1.0 - gamma, SQUARE);
     if (!std::isnan(result) && LessNotEqual(result, 1.0f)) {
@@ -479,7 +486,7 @@ void ListItemPattern::UpdatePostion(float delta)
     auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(listItemEventHub);
     auto offset = curOffset_;
-    curOffset_ += delta;
+    IsRTLAndVertical() ? curOffset_ -= delta : curOffset_ += delta;
     ChangeDeleteAreaStage();
     auto edgeEffect = GetEdgeEffect();
     if (edgeEffect == V2::SwipeEdgeEffect::None) {
@@ -510,6 +517,27 @@ void ListItemPattern::UpdatePostion(float delta)
     if (!NearEqual(offset, curOffset_)) {
         MarkDirtyNode();
         FireSwipeActionOffsetChange(offset, curOffset_);
+    }
+}
+
+bool ListItemPattern::IsRTLAndVertical() const
+{
+    auto layoutProperty = GetLayoutProperty<ListItemLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+    if (layoutDirection == TextDirection::RTL && axis_ == Axis::VERTICAL) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+float ListItemPattern::SetReverseValue(float offset)
+{
+    if (IsRTLAndVertical()) {
+        return -offset;
+    } else {
+        return offset;
     }
 }
 
@@ -575,7 +603,11 @@ void ListItemPattern::StartSpringMotion(float start, float end, float velocity, 
             listItem->springController_->Stop();
             position = end;
         }
-        listItem->UpdatePostion(position - listItem->curOffset_);
+        if (listItem->IsRTLAndVertical()) {
+            listItem->UpdatePostion(listItem->curOffset_-position);
+        } else {
+            listItem->UpdatePostion(position - listItem->curOffset_);
+        }
     });
     springController_->ClearStopListeners();
     springController_->PlayMotion(springMotion_);
@@ -594,7 +626,7 @@ void ListItemPattern::StartSpringMotion(float start, float end, float velocity, 
     });
 }
 
-void ListItemPattern::DoDeleteAnimation(bool isRightDelete)
+void ListItemPattern::DoDeleteAnimation(bool isStartDelete)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -611,7 +643,7 @@ void ListItemPattern::DoDeleteAnimation(bool isRightDelete)
     context->OpenImplicitAnimation(option, option.GetCurve(), nullptr);
     swiperIndex_ = ListItemSwipeIndex::SWIPER_ACTION;
     float oldOffset = curOffset_;
-    curOffset_ = isRightDelete ? itemWidth : -itemWidth;
+    curOffset_ = isStartDelete ? itemWidth : -itemWidth;
     FireSwipeActionOffsetChange(oldOffset, curOffset_);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     context->FlushUITasks();
@@ -643,17 +675,28 @@ void ListItemPattern::FireSwipeActionStateChange(SwipeActionState newState)
     swipeActionState_ = newState;
     bool isStart = GreatNotEqual(curOffset_, 0.0);
     listItemEventHub->FireStateChangeEvent(newState, isStart);
-}
-
-void ListItemPattern::ResetToItemChild()
-{
     auto frameNode = GetListFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto listPattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(listPattern);
     auto scrollableEvent = listPattern->GetScrollableEvent();
     CHECK_NULL_VOID(scrollableEvent);
-    scrollableEvent->SetClickJudgeCallback(nullptr);
+    if (newState == SwipeActionState::COLLAPSED) {
+        TAG_LOGI(AceLogTag::ACE_LIST, "RemoveClickJudgeCallback");
+        scrollableEvent->SetClickJudgeCallback(nullptr);
+    } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto clickJudgeCallback = [weak = WeakClaim(this)](const PointF& localPoint) -> bool {
+            auto item = weak.Upgrade();
+            CHECK_NULL_RETURN(item, false);
+            return item->ClickJudge(localPoint);
+        };
+        TAG_LOGI(AceLogTag::ACE_LIST, "AddClickJudgeCallback");
+        scrollableEvent->SetClickJudgeCallback(clickJudgeCallback);
+    }
+}
+
+void ListItemPattern::ResetToItemChild()
+{
     swiperIndex_ = ListItemSwipeIndex::ITEM_CHILD;
     FireSwipeActionStateChange(SwipeActionState::COLLAPSED);
 }
@@ -676,8 +719,11 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
     float friction = GetFriction();
     float threshold = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) ? NEW_SWIPER_TH : SWIPER_TH;
     float speedThreshold = SWIPER_SPEED_TH;
-    bool reachRightSpeed = info.GetMainVelocity() > speedThreshold;
-    bool reachLeftSpeed = -info.GetMainVelocity() > speedThreshold;
+
+    float velocity = IsRTLAndVertical() ? -info.GetMainVelocity() : info.GetMainVelocity();
+    bool reachRightSpeed = velocity > speedThreshold;
+    bool reachLeftSpeed = -velocity > speedThreshold;
+    
     auto startOnDelete = listItemEventHub->GetStartOnDelete();
     auto endOnDelete = listItemEventHub->GetEndOnDelete();
 
@@ -702,7 +748,7 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
     if (GreatNotEqual(curOffset_, 0.0) && HasStartNode()) {
         float width = startNodeSize_;
         if (swiperIndex_ == ListItemSwipeIndex::ITEM_CHILD && reachLeftSpeed) {
-            StartSpringMotion(curOffset_, 0, info.GetMainVelocity() * friction);
+            StartSpringMotion(curOffset_, 0, velocity * friction);
             FireSwipeActionStateChange(SwipeActionState::COLLAPSED);
             return;
         }
@@ -716,8 +762,8 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
             (curOffset_ > width * threshold || reachRightSpeed)) {
             swiperIndex_ = ListItemSwipeIndex::SWIPER_START;
             FireSwipeActionStateChange(SwipeActionState::EXPANDED);
-        } else if (swiperIndex_ == ListItemSwipeIndex::SWIPER_START &&
-                   (curOffset_ < width * (1 - threshold) || (reachLeftSpeed && curOffset_ < width))) {
+        } else if (swiperIndex_ == ListItemSwipeIndex::SWIPER_START && (curOffset_ < width *
+                  (1 - threshold) || (reachLeftSpeed && curOffset_ < width))) {
             ResetToItemChild();
         } else if (swiperIndex_ == ListItemSwipeIndex::SWIPER_END ||
                    swiperIndex_ == ListItemSwipeIndex::SWIPER_ACTION) {
@@ -727,7 +773,7 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
     } else if (LessNotEqual(curOffset_, 0.0) && HasEndNode()) {
         float width = endNodeSize_;
         if (swiperIndex_ == ListItemSwipeIndex::ITEM_CHILD && reachRightSpeed) {
-            StartSpringMotion(curOffset_, 0, info.GetMainVelocity() * friction);
+            StartSpringMotion(curOffset_, 0, velocity * friction);
             FireSwipeActionStateChange(SwipeActionState::COLLAPSED);
             return;
         }
@@ -741,8 +787,8 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
             (width * threshold < -curOffset_ || reachLeftSpeed)) {
             swiperIndex_ = ListItemSwipeIndex::SWIPER_END;
             FireSwipeActionStateChange(SwipeActionState::EXPANDED);
-        } else if (swiperIndex_ == ListItemSwipeIndex::SWIPER_END &&
-                   (-curOffset_ < width * (1 - threshold) || (reachRightSpeed && -curOffset_ < width))) {
+        } else if (swiperIndex_ == ListItemSwipeIndex::SWIPER_END && (-curOffset_ < width *
+                  (1 - threshold) || (reachRightSpeed && -curOffset_ < width))) {
             ResetToItemChild();
         } else if (swiperIndex_ == ListItemSwipeIndex::SWIPER_START ||
                    swiperIndex_ == ListItemSwipeIndex::SWIPER_ACTION) {
@@ -750,7 +796,7 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
         }
         end = width * static_cast<int32_t>(swiperIndex_);
     }
-    StartSpringMotion(curOffset_, end, info.GetMainVelocity() * friction);
+    StartSpringMotion(curOffset_, end, velocity * friction);
 }
 
 void ListItemPattern::SwiperReset(bool isCloseSwipeAction)
@@ -927,7 +973,7 @@ void ListItemPattern::InitPressEvent()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto touchType = info.GetTouches().front().GetTouchType();
-        if (touchType == TouchType::DOWN || touchType == TouchType::UP) {
+        if (touchType == TouchType::DOWN || touchType == TouchType::UP || touchType == TouchType::CANCEL) {
             pattern->HandlePressEvent(touchType == TouchType::DOWN, pattern->GetHost());
         }
     };
@@ -983,6 +1029,55 @@ bool ListItemPattern::GetLayouted() const
     return isLayouted_;
 }
 
+void ListItemPattern::DumpAdvanceInfo()
+{
+    DumpLog::GetInstance().AddDesc("indexInList:" + std::to_string(indexInList_));
+    DumpLog::GetInstance().AddDesc("indexInListItemGroup:" + std::to_string(indexInListItemGroup_));
+    DumpLog::GetInstance().AddDesc("swiperAction.startNodeIndex:" + std::to_string(startNodeIndex_));
+    DumpLog::GetInstance().AddDesc("swiperAction.endNodeIndex:" + std::to_string(endNodeIndex_));
+    DumpLog::GetInstance().AddDesc("swiperAction.childNodeIndex:" + std::to_string(childNodeIndex_));
+    DumpLog::GetInstance().AddDesc("curOffset:" + std::to_string(curOffset_));
+    DumpLog::GetInstance().AddDesc("startNodeSize:" + std::to_string(startNodeSize_));
+    DumpLog::GetInstance().AddDesc("endNodeSize:" + std::to_string(endNodeSize_));
+    DumpLog::GetInstance().AddDesc("startDeleteAreaDistance:" + std::to_string(startDeleteAreaDistance_));
+    DumpLog::GetInstance().AddDesc("endDeleteAreaDistance:" + std::to_string(endDeleteAreaDistance_));
+    switch (swipeActionState_) {
+        case SwipeActionState::COLLAPSED:
+            DumpLog::GetInstance().AddDesc("SwipeActionState::COLLAPSED");
+            break;
+        case SwipeActionState::EXPANDED:
+            DumpLog::GetInstance().AddDesc("SwipeActionState::EXPANDED");
+            break;
+        case SwipeActionState::ACTIONING:
+            DumpLog::GetInstance().AddDesc("SwipeActionState::ACTIONING");
+            break;
+    }
+    hasStartDeleteArea_ ? DumpLog::GetInstance().AddDesc("hasStartDeleteArea:true")
+                     : DumpLog::GetInstance().AddDesc("hasStartDeleteArea:false");
+    hasEndDeleteArea_ ? DumpLog::GetInstance().AddDesc("hasEndDeleteArea:true")
+                     : DumpLog::GetInstance().AddDesc("hasEndDeleteArea:false");
+    inStartDeleteArea_ ? DumpLog::GetInstance().AddDesc("inStartDeleteArea:true")
+                     : DumpLog::GetInstance().AddDesc("inStartDeleteArea:false");
+    inEndDeleteArea_ ? DumpLog::GetInstance().AddDesc("inEndDeleteArea:true")
+                     : DumpLog::GetInstance().AddDesc("inEndDeleteArea:false");
+    selectable_ ? DumpLog::GetInstance().AddDesc("selectable:true")
+                : DumpLog::GetInstance().AddDesc("selectable:false");
+    isSelected_ ? DumpLog::GetInstance().AddDesc("isSelected:true")
+                : DumpLog::GetInstance().AddDesc("isSelected:false");
+    isHover_ ? DumpLog::GetInstance().AddDesc("isHover:true")
+                : DumpLog::GetInstance().AddDesc("isHover:false");
+    isPressed_ ? DumpLog::GetInstance().AddDesc("isPressed:true")
+                : DumpLog::GetInstance().AddDesc("isPressed:false");
+    isLayouted_ ? DumpLog::GetInstance().AddDesc("isLayouted:true")
+                : DumpLog::GetInstance().AddDesc("isLayouted:false");
+    if (enableOpacity_.has_value()) {
+        enableOpacity_.value() ? DumpLog::GetInstance().AddDesc("enableOpacity:true")
+                            : DumpLog::GetInstance().AddDesc("enableOpacity:false");
+    } else {
+        DumpLog::GetInstance().AddDesc("enableOpacity:null");
+    }
+}
+
 float ListItemPattern::GetEstimateHeight(float estimateHeight, Axis axis) const
 {
     auto layoutProperty = GetLayoutProperty<ListItemLayoutProperty>();
@@ -999,6 +1094,27 @@ float ListItemPattern::GetEstimateHeight(float estimateHeight, Axis axis) const
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, estimateHeight);
     return GetMainAxisSize(geometryNode->GetMarginFrameSize(), axis);
+}
+
+bool ListItemPattern::ClickJudgeVertical(const SizeF& size, double xOffset, double yOffset)
+{
+    if (yOffset < 0 || yOffset > size.Height()) {
+        return true;
+    }
+    if (!IsRTLAndVertical()) {
+        if (startNodeSize_ && xOffset > 0 && xOffset < startNodeSize_) {
+            return false;
+        } else if (endNodeSize_ && xOffset > size.Width() - endNodeSize_ && xOffset < size.Width()) {
+            return false;
+        }
+    } else {
+        if (endNodeSize_ && xOffset > 0 && xOffset < endNodeSize_) {
+            return false;
+        } else if (startNodeSize_ && xOffset > size.Width() - startNodeSize_ && xOffset < size.Width()) {
+            return false;
+        }
+    }
+    return true;
 }
 
 bool ListItemPattern::ClickJudge(const PointF& localPoint)
@@ -1020,13 +1136,7 @@ bool ListItemPattern::ClickJudge(const PointF& localPoint)
     auto xOffset = localPoint.GetX() - offset.GetX();
     auto yOffset = localPoint.GetY() - offset.GetY();
     if (GetAxis() == Axis::VERTICAL) {
-        if (yOffset > 0 && yOffset < size.Height()) {
-            if (startNodeSize_ && xOffset > 0 && xOffset < startNodeSize_) {
-                return false;
-            } else if (endNodeSize_ && xOffset > size.Width() - endNodeSize_ && xOffset < size.Width()) {
-                return false;
-            }
-        }
+        return ClickJudgeVertical(size, xOffset, yOffset);
     } else {
         if (xOffset > 0 && xOffset < size.Width()) {
             if (startNodeSize_ && yOffset > 0 && yOffset < startNodeSize_) {

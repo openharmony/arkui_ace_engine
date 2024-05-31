@@ -381,6 +381,15 @@ public:
     {
         return richTextInit_;
     }
+    Size GetDrawSize() const
+    {
+        return drawSize_;
+    }
+    bool IsVirtualKeyBoardShow() const
+    {
+        // cross platform is not support now;
+        return false;
+    }
 
 private:
     void RegistVirtualKeyBoardListener();

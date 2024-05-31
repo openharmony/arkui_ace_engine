@@ -59,6 +59,11 @@ struct RectCallback final {
     OutOfRectMouseCallback mouseCallback;
 };
 
+struct MarkProcessedEventInfo {
+    int32_t eventId = -1;
+    int64_t lastLogTimeStamp = 0;
+};
+
 class EventManager : public virtual AceType {
     DECLARE_ACE_TYPE(EventManager, AceType);
 
@@ -107,6 +112,9 @@ public:
     static bool DispatchRotationEvent(
         const RotationEvent& event, const RefPtr<RenderNode>& renderNode, const RefPtr<RenderNode>& requestFocusNode);
 
+    // If current focus node is Web, will skip some events processing.
+    static bool IsSkipEventNode(const RefPtr<NG::FrameNode>& focusNode);
+
     // mouse event target list.
     void MouseTest(const MouseEvent& touchPoint, const RefPtr<RenderNode>& renderNode);
     bool DispatchMouseEvent(const MouseEvent& event);
@@ -115,6 +123,7 @@ public:
 
     void LogPrintMouseTest();
     void MouseTest(const MouseEvent& event, const RefPtr<NG::FrameNode>& frameNode, TouchRestrict& touchRestrict);
+    void UpdateHoverNode(const MouseEvent& event, const TouchTestResult& testResult);
     bool DispatchMouseEventNG(const MouseEvent& event);
     void DispatchMouseHoverAnimationNG(const MouseEvent& event);
     bool DispatchMouseHoverEventNG(const MouseEvent& event);
@@ -247,15 +256,33 @@ public:
     void RecordHitEmptyMessage(
         const TouchEvent& touchPoint, const std::string& resultInfo, const RefPtr<NG::FrameNode>& frameNode);
 
+    void CheckAndLogLastReceivedTouchEventInfo(int32_t eventId, TouchType type);
+
+    void CheckAndLogLastConsumedTouchEventInfo(int32_t eventId, TouchType type);
+
+    void CheckAndLogLastReceivedMouseEventInfo(int32_t eventId, MouseAction action);
+
+    void CheckAndLogLastConsumedMouseEventInfo(int32_t eventId, MouseAction action);
+
+    void CheckAndLogLastReceivedAxisEventInfo(int32_t eventId, AxisAction action);
+
+    void CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, AxisAction action);
+
+    void CheckAndLogLastReceivedEventInfo(int32_t eventId, bool logImmediately = false);
+
+    void CheckAndLogLastConsumedEventInfo(int32_t eventId, bool logImmediately = false);
+
 private:
     void SetHittedFrameNode(const std::list<RefPtr<NG::NGGestureRecognizer>>& touchTestResults);
     void CleanGestureEventHub();
     void GetTouchTestIds(const TouchEvent& touchPoint, std::vector<std::string>& touchTestIds,
         bool& isMousePressAtSelectedNode, int32_t selectedNodeId);
     void CheckMouseTestResults(bool& isMousePressAtSelectedNode, int32_t selectedNodeId);
-    void LogTouchTestResultRecognizers(const TouchTestResult& result);
+    void LogTouchTestResultRecognizers(const TouchTestResult& result, int32_t touchEventId);
     void DispatchTouchEventToTouchTestResult(TouchEvent touchEvent, TouchTestResult touchTestResult,
         bool sendOnTouch);
+    void CleanRecognizersForDragBegin(TouchEvent& touchEvent);
+    void SetResponseLinkRecognizers(const TouchTestResult& result, const TouchTestResult& responseLinkRecognizers);
     bool innerEventWin_ = false;
     std::unordered_map<size_t, MouseTestResult> mouseTestResults_;
     MouseTestResult currMouseTestResults_;
@@ -287,6 +314,8 @@ private:
     TimeStamp lastEventTime_;
     std::set<int32_t> downFingerIds_;
     std::set<WeakPtr<NG::FrameNode>> hittedFrameNode_;
+    MarkProcessedEventInfo lastReceivedEvent_;
+    MarkProcessedEventInfo lastConsumedEvent_;
 };
 
 } // namespace OHOS::Ace

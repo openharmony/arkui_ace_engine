@@ -104,12 +104,19 @@ void JSNavDestinationContext::GetRouteInfo(const JSCallbackInfo& info)
     JSRef<JSObject> routeData = JSRef<JSObject>::New();
     routeData->SetProperty<std::string>("name", param->GetName().c_str());
     routeData->SetProperty<std::string>("pageSourceFile", routeInfo.pageSourceFile->c_str());
-    JSRef<JSObject> data = JSRef<JSObject>::New();
-    for (auto iter = routeInfo.data.begin(); iter != routeInfo.data.end(); iter++) {
-        data->SetProperty<std::string>(iter->first.c_str(), iter->second.c_str());
-    }
-    routeData->SetPropertyObject("data", data);
+    routeData->SetPropertyJsonObject("data", routeInfo.data.c_str());
     info.SetReturnValue(routeData);
+}
+
+void JSNavDestinationContext::SetNavDestinationId(const JSCallbackInfo& info)
+{
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navdestination context not support set navdestinationId");
+}
+
+void JSNavDestinationContext::GetNavDestinationId(const JSCallbackInfo& info)
+{
+    JSRef<JSString> idStr = JSRef<JSString>::New(std::to_string(context_->GetNavDestinationId()));
+    info.SetReturnValue(idStr);
 }
 
 void JSNavDestinationContext::JSBind(BindingTarget target)
@@ -119,6 +126,8 @@ void JSNavDestinationContext::JSBind(BindingTarget target)
         &JSNavDestinationContext::SetPathInfo);
     JSClass<JSNavDestinationContext>::CustomProperty("pathStack", &JSNavDestinationContext::GetPathStack,
         &JSNavDestinationContext::SetPathStack);
+    JSClass<JSNavDestinationContext>::CustomProperty("navDestinationId", &JSNavDestinationContext::GetNavDestinationId,
+        &JSNavDestinationContext::SetNavDestinationId);
     JSClass<JSNavDestinationContext>::CustomMethod("getConfigInRouteMap", &JSNavDestinationContext::GetRouteInfo);
     JSClass<JSNavDestinationContext>::Bind(
         target, &JSNavDestinationContext::Constructor, &JSNavDestinationContext::Destructor);

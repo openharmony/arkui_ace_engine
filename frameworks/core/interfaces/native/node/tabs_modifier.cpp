@@ -101,6 +101,12 @@ void SetBarBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetBarBackgroundColor(frameNode, Color(color));
 }
+void SetBarBackgroundBlurStyle(ArkUINodeHandle node, ArkUI_Int32 blurStyle)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetBarBackgroundBlurStyle(frameNode, static_cast<BlurStyle>(blurStyle));
+}
 void SetBarOverlap(ArkUINodeHandle node, ArkUI_Bool barOverlap)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -207,6 +213,12 @@ void ResetBarBackgroundColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetBarBackgroundColor(frameNode, Color::BLACK.BlendOpacity(0.0f));
 }
+void ResetBarBackgroundBlurStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetBarBackgroundBlurStyle(frameNode, BlurStyle::NO_MATERIAL);
+}
 void ResetBarOverlap(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -306,6 +318,20 @@ void ResetTabHeightAuto(ArkUINodeHandle node)
     TabsModelNG::SetHeightAuto(frameNode, false);
 }
 
+void SetAnimateMode(ArkUINodeHandle node, ArkUI_Uint32 mode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetAnimateMode(frameNode, static_cast<TabAnimateMode>(mode));
+}
+
+void ResetAnimateMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetAnimateMode(frameNode, TabAnimateMode::CONTENT_FIRST);
+}
+
 namespace NodeModifier {
 const ArkUITabsModifier* GetTabsModifier()
 {
@@ -316,6 +342,7 @@ const ArkUITabsModifier* GetTabsModifier()
         SetDivider,
         SetFadingEdge,
         SetBarBackgroundColor,
+        SetBarBackgroundBlurStyle,
         SetBarOverlap,
         SetIsVertical,
         SetTabBarPosition,
@@ -330,6 +357,7 @@ const ArkUITabsModifier* GetTabsModifier()
         ResetDivider,
         ResetFadingEdge,
         ResetBarBackgroundColor,
+        ResetBarBackgroundBlurStyle,
         ResetBarOverlap,
         ResetIsVertical,
         ResetTabBarPosition,
@@ -344,6 +372,8 @@ const ArkUITabsModifier* GetTabsModifier()
         ResetTabWidthAuto,
         SetTabHeightAuto,
         ResetTabHeightAuto,
+        SetAnimateMode,
+        ResetAnimateMode,
     };
 
     return &modifier;

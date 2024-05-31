@@ -22,6 +22,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/base/symbol_modifier.h"
 #include "core/components_ng/pattern/menu/menu_accessibility_property.h"
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
@@ -30,36 +31,26 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/components_ng/property/menu_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 constexpr int32_t DEFAULT_CLICK_DISTANCE = 15;
 constexpr uint32_t MAX_SEARCH_DEPTH = 5;
 namespace OHOS::Ace::NG {
-enum class MenuType {
-    // ----- Menu Containers ------
-    MENU,         // corresponds to .bindMenu attribute
-    CONTEXT_MENU, // corresponds to .bindContextMenu attribute, lives in a SubWindow
-    SUB_MENU,     // secondary menu container in a multi-level menu
-
-    // ----- innerMenu Node, corersponds to <Menu> tag in the frontend ------
-    MULTI_MENU,   // called multi because it's a multi-leveled menu, its MenuItems can trigger subMenus
-    DESKTOP_MENU, // menu specialized for desktop UI, enabled when multiple sibiling <Menu> nodes are present
-
-    // ----- special menu used in other components ------
-    NAVIGATION_MENU,               // menu used in a Navigation component
-    SELECT_OVERLAY_EXTENSION_MENU, // menu used in SelectOverlay Extension of text component,skip menu layout algorithm
-    SELECT_OVERLAY_CUSTOM_MENU,    // menu used in SelectOverlay for custom menu
-                                   // click menu item whill not trigger close menu
-    SELECT_OVERLAY_SUB_MENU,       // menu type used for select overlay sub menu
-    SELECT_OVERLAY_RIGHT_CLICK_MENU, // menu type used for select overlay menu triggered by right-click
-};
 
 struct SelectProperties {
     std::string value;
     std::string icon;
+    RefPtr<SymbolModifier> symbolModifier;
     int index;
     bool selected = false;
     bool selectEnable = true;
+};
+
+struct MenuItemInfo {
+    OffsetF originOffset = OffsetF();
+    OffsetF endOffset = OffsetF();
+    bool isFindTargetId = false;
 };
 
 class MenuPattern : public Pattern, public FocusView {
@@ -151,6 +142,36 @@ public:
     float GetPreviewAfterAnimationScale() const
     {
         return previewAnimationOptions_.scaleTo;
+    }
+
+    void SetIsShowHoverImage(bool isShow)
+    {
+        isShowHoverImage_ = isShow;
+    }
+
+    bool GetIsShowHoverImage() const
+    {
+        return isShowHoverImage_;
+    }
+
+    void SetHoverImageBeforeAnimationScale(float scaleBeforeAnimation)
+    {
+        hoverImageAnimationOptions_.scaleFrom = scaleBeforeAnimation;
+    }
+
+    float GetHoverImageBeforeAnimationScale() const
+    {
+        return hoverImageAnimationOptions_.scaleFrom;
+    }
+
+    void SetHoverImageAfterAnimationScale(float scaleAfterAnimation)
+    {
+        hoverImageAnimationOptions_.scaleTo = scaleAfterAnimation;
+    }
+
+    float GetHoverImageAfterAnimationScale() const
+    {
+        return hoverImageAnimationOptions_.scaleTo;
     }
 
     bool IsNavigationMenu() const
@@ -268,7 +289,11 @@ public:
 
     void UpdateSelectParam(const std::vector<SelectParam>& params);
 
-    void HideMenu(bool isMenuOnTouch = false) const;
+    void HideMenu(bool isMenuOnTouch = false, OffsetF position = OffsetF()) const;
+
+    bool HideStackExpandMenu(const OffsetF& position) const;
+
+    void HideStackMenu() const;
 
     void MountOption(const RefPtr<FrameNode>& option);
 
@@ -284,17 +309,17 @@ public:
     {
         return showedSubMenu_;
     }
-    
+
     void SetIsWidthModifiedBySelect(bool isModified)
     {
         isWidthModifiedBySelect_ = isModified;
     }
-    
+
     bool IsWidthModifiedBySelect() const
     {
         return isWidthModifiedBySelect_;
     }
-    
+
     float GetSelectMenuWidth();
     void HideSubMenu();
     void OnModifyDone() override;
@@ -328,6 +353,31 @@ public:
         return endOffset_;
     }
 
+    void SetSelectOverlayExtensionMenuShow()
+    {
+        isExtensionMenuShow_ = true;
+    }
+
+    void SetHasDisappearAnimation(bool hasAnimation)
+    {
+        hasAnimation_ = hasAnimation;
+    }
+
+    bool HasDisappearAnimation() const
+    {
+        return hasAnimation_;
+    }
+
+    void SetSubMenuShow()
+    {
+        isSubMenuShow_ = true;
+    }
+
+    void SetMenuShow()
+    {
+        isMenuShow_ = true;
+    }
+
     void SetPreviewOriginOffset(const OffsetF& offset)
     {
         previewOriginOffset_ = offset;
@@ -357,12 +407,12 @@ public:
     {
         return targetSize_;
     }
-	
+
     void SetIsHeightModifiedBySelect(bool isModified)
     {
         isHeightModifiedBySelect_ = isModified;
     }
-    
+
     bool IsHeightModifiedBySelect() const
     {
         return isHeightModifiedBySelect_;
@@ -373,11 +423,15 @@ public:
         return expandDisplay_;
     }
 
+    void ShowMenuDisappearAnimation();
+    void ShowStackExpandDisappearAnimation(const RefPtr<FrameNode>& menuNode,
+        const RefPtr<FrameNode>& subMenuNode, AnimationOption& option) const;
+
     void SetBuilderFunc(SelectMakeCallback&& makeFunc)
     {
         makeFunc_ = std::move(makeFunc);
     }
-    
+
     void ResetBuilderFunc()
     {
         makeFunc_ = std::nullopt;
@@ -392,8 +446,9 @@ public:
         selectProperties_.clear();
         for (size_t i = 0; i < params.size(); i++) {
             SelectProperties selectProperty;
-            selectProperty.value = params[i].first;
-            selectProperty.icon = params[i].second;
+            selectProperty.value = params[i].text;
+            selectProperty.icon = params[i].icon;
+            selectProperty.symbolModifier = params[i].symbolModifier;
             selectProperty.index = static_cast<int>(i);
             if (i < list.size()) {
                 selectProperty.selected = list[i].selected;
@@ -412,6 +467,7 @@ public:
 
     BorderRadiusProperty CalcIdealBorderRadius(const BorderRadiusProperty& borderRadius, const SizeF& menuSize);
 
+    void OnItemPressed(const RefPtr<FrameNode>& parent, int32_t index, bool press);
 protected:
     void UpdateMenuItemChildren(RefPtr<FrameNode>& host);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
@@ -442,6 +498,15 @@ private:
 
     Offset GetTransformCenter() const;
     void ShowPreviewMenuAnimation();
+    void ShowPreviewMenuScaleAnimation();
+    void ShowMenuAppearAnimation();
+    void ShowStackExpandMenu();
+    std::pair<OffsetF, OffsetF> GetMenuOffset(const RefPtr<FrameNode>& outterMenu,
+        bool isNeedRestoreNodeId = false) const;
+    MenuItemInfo GetInnerMenuOffset(const RefPtr<UINode>& child, bool isNeedRestoreNodeId) const;
+    MenuItemInfo GetMenuItemInfo(const RefPtr<UINode>& child, bool isNeedRestoreNodeId) const;
+    void ShowArrowRotateAnimation() const;
+    RefPtr<FrameNode> GetImageNode(const RefPtr<FrameNode>& host) const;
 
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragEnd(float offsetX, float offsetY, float velocity);
@@ -465,10 +530,18 @@ private:
     bool isSelectMenu_ = false;
     MenuPreviewMode previewMode_ = MenuPreviewMode::NONE;
     MenuPreviewAnimationOptions previewAnimationOptions_;
+    bool isShowHoverImage_ = false;
+    MenuPreviewAnimationOptions hoverImageAnimationOptions_;
     bool isFirstShow_ = false;
+    bool isExtensionMenuShow_ = false;
+    bool isSubMenuShow_ = false;
+    bool isMenuShow_ = false;
+    bool hasAnimation_ = true;
+
     OffsetF originOffset_;
     OffsetF endOffset_;
     OffsetF previewOriginOffset_;
+
     WeakPtr<FrameNode> builderNode_;
     bool isWidthModifiedBySelect_ = false;
     bool isHeightModifiedBySelect_ = false;

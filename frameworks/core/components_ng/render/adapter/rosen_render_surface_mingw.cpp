@@ -73,7 +73,7 @@ void RosenRenderSurface::SetExtSurfaceCallback(const RefPtr<ExtSurfaceCallbackIn
 {
 }
 
-void RosenRenderSurface::SetTransformHint(Rotation dmRotation)
+void RosenRenderSurface::SetTransformHint(uint32_t rotation)
 {
 }
 
@@ -89,7 +89,7 @@ void RosenRenderSurface::DrawBufferForXComponent(
     RSCanvas& canvas, float width, float height, float offsetX, float offsetY)
 {}
 
-void RosenRenderSurface::releaseSurfaceBuffers() {}
+void RosenRenderSurface::ReleaseSurfaceBuffers() {}
 
 void RosenRenderSurface::UpdateSurfaceSizeInUserData(uint32_t width, uint32_t height) {}
 

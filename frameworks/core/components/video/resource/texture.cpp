@@ -55,7 +55,7 @@ Texture::~Texture()
                 return;
             }
             resRegister->UnregisterEvent(eventHash);
-        }, "ArkUIVideoUnregisterEvent");
+        }, "ArkUIVideoTextureUnregisterEvent");
     }
 }
 

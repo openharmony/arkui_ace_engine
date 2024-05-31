@@ -202,8 +202,12 @@ void JSList::SetScroller(RefPtr<JSScroller> scroller)
 void JSList::Create(const JSCallbackInfo& args)
 {
     ListModel::GetInstance()->Create();
-    if (args.Length() >= 1 && args[0]->IsObject()) {
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+    if (args.Length() < 1) {
+        return;
+    }
+    JSRef<JSVal> arg0 = args[0];
+    if (arg0->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(arg0);
         JSRef<JSVal> spaceValue = obj->GetProperty("space");
         if (!spaceValue->IsNull()) {
             CalcDimension space;
@@ -222,8 +226,6 @@ void JSList::Create(const JSCallbackInfo& args)
             SetScroller(jsScroller);
         }
     }
-
-    args.ReturnSelf();
 }
 
 void JSList::SetChildrenMainSize(const JSCallbackInfo& args)
@@ -366,8 +368,8 @@ void JSList::SetLanes(const JSCallbackInfo& info)
             return;
         }
         ListModel::GetInstance()->SetLaneConstrain(minLengthValue, maxLengthValue);
-        ListModel::GetInstance()->SetLanes(1);
     }
+    ListModel::GetInstance()->SetLanes(1);
 }
 
 void JSList::SetSticky(int32_t sticky)
@@ -850,7 +852,9 @@ void JSList::BindInteractableViewMethods()
     JSClass<JSList>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSList>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSList>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSList>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSList>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSList>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSList>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
 }
 

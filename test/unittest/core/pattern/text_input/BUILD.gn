@@ -16,9 +16,18 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("TextInputTest") {
   type = "new"
   sources = [
+    "text_area_decoration_test.cpp",
     "text_area_test.cpp",
+    "text_field_controller_test.cpp",
+    "text_field_keyevent_test.cpp",
+    "text_input_area_model_test.cpp",
     "text_input_base.cpp",
+    "text_input_check_test.cpp",
+    "text_input_cursor_test.cpp",
+    "text_input_decoration_test.cpp",
+    "text_input_emoji_test.cpp",
     "text_input_modify_test.cpp",
+    "text_input_sub_2_test.cpp",
     "text_input_test.cpp",
     "text_input_update_test.cpp",
   ]

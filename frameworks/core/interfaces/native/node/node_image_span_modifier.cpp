@@ -136,6 +136,44 @@ void ResetImageSpanBaselineOffset(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ImageSpanView::SetBaselineOffset(frameNode, DEFAULT_BASELINE_OFFSET);
 }
+
+void SetImageSpanOnComplete(ArkUINodeHandle node, void *callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onComplete = reinterpret_cast<std::function<void(const LoadImageSuccessEvent&)>*>(callback);
+        ImageSpanView::SetOnComplete(frameNode, std::move(*onComplete));
+    } else {
+        ImageSpanView::SetOnComplete(frameNode, nullptr);
+    }
+}
+
+void ResetImageSpanOnComplete(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageSpanView::SetOnComplete(frameNode, nullptr);
+}
+
+void SetImageSpanOnError(ArkUINodeHandle node, void *callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onError = reinterpret_cast<std::function<void(const LoadImageFailEvent&)>*>(callback);
+        ImageSpanView::SetOnError(frameNode, std::move(*onError));
+    } else {
+        ImageSpanView::SetOnError(frameNode, nullptr);
+    }
+}
+
+void ResetImageSpanOnError(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageSpanView::SetOnError(frameNode, nullptr);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -144,7 +182,8 @@ const ArkUIImageSpanModifier* GetImageSpanModifier()
     static const ArkUIImageSpanModifier modifier = { SetImageSpanVerticalAlign, ResetImageSpanVerticalAlign,
         SetImageSpanObjectFit, ResetImageSpanObjectFit, GetImageSpanVerticalAlign, GetImageSpanObjectFit,
         SetImageSpanTextBackgroundStyle, ResetImageSpanTextBackgroundStyle, GetImageSpanTextBackgroundStyle,
-        SetImageSpanBaselineOffset, ResetImageSpanBaselineOffset};
+        SetImageSpanBaselineOffset, ResetImageSpanBaselineOffset, SetImageSpanOnComplete, ResetImageSpanOnComplete,
+        SetImageSpanOnError, ResetImageSpanOnError};
     return &modifier;
 }
 } // namespace NodeModifier

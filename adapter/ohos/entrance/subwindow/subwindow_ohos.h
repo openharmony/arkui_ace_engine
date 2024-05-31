@@ -58,14 +58,20 @@ public:
     void ResizeWindow() override;
     NG::RectF GetRect() override;
     void ShowMenu(const RefPtr<Component>& newComponent) override;
-    void ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset) override;
+    void ShowMenuNG(const RefPtr<NG::FrameNode> customNode, const NG::MenuParam& menuParam,
+        const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset) override;
+    void ShowMenuNG(std::function<void()>&& buildFunc, std::function<void()>&& previewBuildFunc,
+        const NG::MenuParam& menuParam, const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset) override;
     bool ShowPreviewNG() override;
     void HidePreviewNG() override;
     void HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId) override;
     void HideMenuNG(bool showPreviewAnimation, bool startDrag) override;
     void UpdateHideMenuOffsetNG(const NG::OffsetF& offset) override;
+    void ContextMenuSwitchDragPreviewAnimationtNG(const RefPtr<NG::FrameNode>& dragPreviewNode,
+        const NG::OffsetF& offset) override;
     void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true) override;
-    void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo) override;
+    void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo,
+        const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = true) override;
     void HidePopupNG(int32_t targetId) override;
     void GetPopupInfoNG(int32_t targetId, NG::PopupInfo& popupInfo) override;
     bool CancelPopup(const std::string& id) override;
@@ -139,6 +145,7 @@ public:
     void ResizeWindowForFoldStatus() override;
     void ResizeWindowForFoldStatus(int32_t parentContainerId) override;
     void MarkDirtyDialogSafeArea() override;
+
 private:
     RefPtr<StackElement> GetStack();
     void AddMenu(const RefPtr<Component>& newComponent);

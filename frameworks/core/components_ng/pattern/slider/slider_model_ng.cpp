@@ -83,6 +83,11 @@ void SliderModelNG::SetSelectColor(const Color& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, SelectColor, value);
 }
+void SliderModelNG::SetSelectColor(const Gradient& value, bool isResourceColor)
+{
+    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, SelectGradientColor, value);
+    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, SelectIsResourceColor, isResourceColor);
+}
 void SliderModelNG::SetMinLabel(float value)
 {
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, Min, value);
@@ -397,9 +402,10 @@ void SliderModelNG::SetTrackBackgroundColor(FrameNode* frameNode, const Gradient
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, TrackBackgroundColor, value, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, TrackBackgroundIsResourceColor, isResourceColor, frameNode);
 }
-void SliderModelNG::SetSelectColor(FrameNode* frameNode, const Color& value)
+void SliderModelNG::SetSelectColor(FrameNode* frameNode, const Gradient& value, bool isResourceColor)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, SelectColor, value, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, SelectGradientColor, value, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, SelectIsResourceColor, isResourceColor, frameNode);
 }
 void SliderModelNG::SetShowSteps(FrameNode* frameNode, bool value)
 {
@@ -560,6 +566,7 @@ void SliderModelNG::SetValidSlideRange(FrameNode* frameNode, float from, float t
     CHECK_NULL_VOID(paintProperty);
     auto minValue = paintProperty->GetMinValue(0.0f);
     auto maxValue = paintProperty->GetMaxValue(100.0f);
+    auto step = paintProperty->GetStepValue(1.0f);
     float fromValue = minValue;
     float toValue = maxValue;
     if (std::isfinite(from)) {
@@ -568,7 +575,12 @@ void SliderModelNG::SetValidSlideRange(FrameNode* frameNode, float from, float t
     if (std::isfinite(to)) {
         toValue = to;
     }
-    if (GreatOrEqual(fromValue, minValue) && LessOrEqual(toValue, maxValue)) {
+    if (GreatOrEqual(fromValue, minValue) && LessOrEqual(toValue, maxValue) && LessOrEqual(fromValue, toValue) &&
+        GreatNotEqual(step, 0.0f)) {
+        auto toValueCorrection = NearEqual(toValue - step * std::floor(toValue / step), 0) ? 0 : 1;
+        fromValue = LessOrEqual(fromValue, minValue) ? minValue : std::floor(fromValue / step) * step;
+        toValue = GreatOrEqual(toValue, maxValue) ?
+                  maxValue : (std::floor(toValue / step) + toValueCorrection) * step;
         auto sliderValue = std::clamp(paintProperty->GetValueValue(fromValue), fromValue, toValue);
         RefPtr<SliderModel::SliderValidRange> rangeValue =
             AceType::MakeRefPtr<SliderModel::SliderValidRange>(fromValue, toValue);
@@ -596,11 +608,12 @@ Gradient SliderModelNG::GetTrackBackgroundColor(FrameNode* frameNode)
     return value;
 }
 
-Color SliderModelNG::GetSelectColor(FrameNode* frameNode)
+Gradient SliderModelNG::GetSelectColor(FrameNode* frameNode)
 {
-    Color value;
+    Gradient value;
     ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
-        SliderPaintProperty, SelectColor, value, frameNode, Color(SELECTED_COLOR));
+        SliderPaintProperty, SelectGradientColor, value, frameNode,
+        SliderModelNG::CreateSolidGradient(Color(SELECTED_COLOR)));
     return value;
 }
 
@@ -687,6 +700,13 @@ RefPtr<BasicShape> SliderModelNG::GetBlockShape(FrameNode* frameNode)
     return value;
 }
 
+RefPtr<SliderModel::SliderValidRange> SliderModelNG::GetValidSlideRange(FrameNode* frameNode)
+{
+    RefPtr<SliderModel::SliderValidRange> value = AceType::MakeRefPtr<SliderModel::SliderValidRange>();
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(SliderPaintProperty, ValidSlideRange, value, frameNode, value);
+    return value;
+}
+
 Gradient SliderModelNG::CreateSolidGradient(Color value)
 {
     Gradient gradient;
@@ -738,5 +758,28 @@ Dimension SliderModelNG::GetThickness(FrameNode* frameNode)
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
         SliderLayoutProperty, Thickness, trackThickness, frameNode, defaultTrackThickness);
     return trackThickness;
+}
+
+void SliderModelNG::SetSelectedBorderRadius(FrameNode* frameNode, const Dimension& value)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, SelectedBorderRadius, value, frameNode);
+}
+
+void SliderModelNG::ResetSelectedBorderRadius(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+        SliderPaintProperty, SelectedBorderRadius, PROPERTY_UPDATE_RENDER, frameNode);
+}
+
+void SliderModelNG::ResetSliderInteractionMode(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+        SliderPaintProperty, SliderInteractionMode, PROPERTY_UPDATE_RENDER, frameNode);
+}
+
+void SliderModelNG::ResetMinResponsiveDistance(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+        SliderPaintProperty, MinResponsiveDistance, PROPERTY_UPDATE_RENDER, frameNode);
 }
 } // namespace OHOS::Ace::NG

@@ -79,9 +79,10 @@ void SwitchLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto pattern = host->GetPattern<SwitchPattern>();
     CHECK_NULL_VOID(pattern);
     if (layoutWrapper->GetHostTag() == V2::TOGGLE_ETS_TAG && !pattern->UseContentModifier()) {
-        // Checkbox does not have child nodes. If a child is added to a toggle, then hide the child.
+        // Switch does not have child nodes. If a child is added to a toggle, then hide the child.
         for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
-            child->GetGeometryNode()->SetFrameSize(SizeF());
+            child->GetGeometryNode()->Reset();
+            child->GetGeometryNode()->SetContentSize(SizeF());
         }
         PerformMeasureSelf(layoutWrapper);
     } else if (pattern->UseContentModifier()) {
@@ -89,6 +90,7 @@ void SwitchLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         std::list<RefPtr<LayoutWrapper>> builderChildList;
         for (const auto& child : childList) {
             if (child->GetHostNode()->GetId() != pattern->GetBuilderId()) {
+                child->GetGeometryNode()->Reset();
                 child->GetGeometryNode()->SetContentSize(SizeF());
             } else {
                 auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();

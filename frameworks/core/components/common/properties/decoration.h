@@ -137,6 +137,10 @@ struct BlurStyleOption {
     }
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const NG::InspectorFilter& filter) const
     {
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         static const char* STYLE[] = { "BlurStyle.NONE", "BlurStyle.Thin", "BlurStyle.Regular", "BlurStyle.Thick",
             "BlurStyle.BACKGROUND_THIN", "BlurStyle.BACKGROUND_REGULAR", "BlurStyle.BACKGROUND_THICK",
             "BlurStyle.BACKGROUND_ULTRA_THICK", "BlurStyle.COMPONENT_ULTRA_THIN", "BlurStyle.COMPONENT_THIN",
@@ -168,8 +172,8 @@ struct BrightnessOption {
     double cubicCoeff { 0.0f };
     double quadCoeff { 0.0f };
     double saturation { 1.0f };
-    std::vector<float> posRGB;
-    std::vector<float> negRGB;
+    std::vector<float> posRGB = { 0.0f, 0.0f, 0.0f };
+    std::vector<float> negRGB = { 0.0f, 0.0f, 0.0f };
     double fraction { 1.0f };
     bool operator==(const BrightnessOption& other) const
     {
@@ -178,8 +182,12 @@ struct BrightnessOption {
                NearEqual(saturation, other.saturation) && posRGB == other.posRGB && negRGB == other.negRGB &&
                NearEqual(fraction, other.fraction);
     }
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const NG::InspectorFilter& filter) const
     {
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         auto jsonBrightnessOption = JsonUtil::Create(true);
         jsonBrightnessOption->Put("rate", rate);
         jsonBrightnessOption->Put("lightUpDegree", lightUpDegree);
@@ -200,7 +208,7 @@ struct BrightnessOption {
         }
         jsonBrightnessOption->Put("negRGB", negRGBstr);
         jsonBrightnessOption->Put("fraction", fraction);
-        json->Put("brightnessEffect", jsonBrightnessOption);
+        json->PutExtAttr("brightnessEffect", jsonBrightnessOption, filter);
     }
 };
 

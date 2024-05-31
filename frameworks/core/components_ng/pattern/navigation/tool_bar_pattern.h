@@ -49,7 +49,8 @@ public:
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-            SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM};
+            SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
+                .edges = SAFE_AREA_EDGE_BOTTOM };
             host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
         }
 
@@ -61,10 +62,18 @@ public:
     void SetToolbarOptions(NavigationToolbarOptions&& opt);
 
 private:
+    void OnModifyDone() override;
+    void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub, const RefPtr<FrameNode>& imageNode,
+        const RefPtr<FrameNode>& textNode, bool isMoreItemNode = false);
+    void HandleLongPressEvent(const RefPtr<FrameNode>& imageNode,
+        const RefPtr<FrameNode>& textNode, bool isMoreItemNode);
+    void HandleLongPressActionEnd();
+
     void SetDefaultBackgroundColorIfNeeded(RefPtr<FrameNode>& host);
     void UpdateBackgroundStyle(RefPtr<FrameNode>& host);
 
     NavigationToolbarOptions options_;
+    RefPtr<FrameNode> dialogNode_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -365,6 +365,25 @@ void JSTabContent::GetLabelSelectedContent(const JSRef<JSVal> selectedColorValue
     }
 }
 
+bool ParseJsLengthMetrics(const JSRef<JSObject>& obj, CalcDimension& result)
+{
+    if (!obj->HasProperty("value")) {
+        return false;
+    }
+    auto value = obj->GetProperty("value");
+    if (!value->IsNumber()) {
+        return false;
+    }
+    auto unit = DimensionUnit::VP;
+    auto jsUnit = obj->GetProperty("unit");
+    if (jsUnit->IsNumber()) {
+        unit = static_cast<DimensionUnit>(jsUnit->ToNumber<int32_t>());
+    }
+    CalcDimension dimension(value->ToNumber<double>(), unit);
+    result = dimension;
+    return true;
+}
+
 void JSTabContent::SetPadding(const JSRef<JSVal>& info, bool isSubTabStyle)
 {
     CalcDimension length;
@@ -412,6 +431,43 @@ void JSTabContent::SetPadding(const JSRef<JSVal>& info, bool isSubTabStyle)
         CalcDimension bottom;
         if (ParseJsDimensionVp(paddingObj->GetProperty("bottom"), bottom) && NonNegative(bottom.Value()) &&
             bottom.Unit() != DimensionUnit::PERCENT) {
+            padding.bottom = NG::CalcLength(bottom);
+        }
+    }
+    if (info->IsObject()) {
+        JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info);
+        CalcDimension start;
+        CalcDimension end;
+        CalcDimension top;
+        CalcDimension bottom;
+        if (paddingObj->GetProperty("start")->IsObject()) {
+            JSRef<JSObject> startObj = JSRef<JSObject>::Cast(paddingObj->GetProperty("start"));
+            if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+                ParseJsLengthMetrics(startObj, start);
+                padding.right = NG::CalcLength(start);
+            } else {
+                ParseJsLengthMetrics(startObj, start);
+                padding.left = NG::CalcLength(start);
+            }
+        }
+        if (paddingObj->GetProperty("end")->IsObject()) {
+            JSRef<JSObject> endObj = JSRef<JSObject>::Cast(paddingObj->GetProperty("end"));
+            if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+                ParseJsLengthMetrics(endObj, end);
+                padding.left = NG::CalcLength(end);
+            } else {
+                ParseJsLengthMetrics(endObj, end);
+                padding.right = NG::CalcLength(end);
+            }
+        }
+        if (paddingObj->GetProperty("top")->IsObject()) {
+            JSRef<JSObject> topObj = JSRef<JSObject>::Cast(paddingObj->GetProperty("top"));
+            ParseJsLengthMetrics(topObj, top);
+            padding.top = NG::CalcLength(top);
+        }
+        if (paddingObj->GetProperty("bottom")->IsObject()) {
+            JSRef<JSObject> bottomObj = JSRef<JSObject>::Cast(paddingObj->GetProperty("bottom"));
+            ParseJsLengthMetrics(bottomObj, bottom);
             padding.bottom = NG::CalcLength(bottom);
         }
     }
@@ -573,18 +629,18 @@ void JSTabContent::SetBottomTabBarStyle(const JSCallbackInfo& info)
     std::optional<TabBarSymbol> tabBarSymbol = std::nullopt;
     if (ParseJsMedia(iconParam, icon)) {
         iconOpt = icon;
-    } else {
-        TabBarSymbol symbolApply;
+    } else if (iconParam->IsObject()) {
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(iconParam);
         JSRef<JSVal> normalModifier = jsObj->GetProperty("normal");
         JSRef<JSVal> selectedModifier = jsObj->GetProperty("selected");
         if (normalModifier->IsObject()) {
+            TabBarSymbol symbolApply;
             JSViewAbstract::SetTabBarSymbolOptionApply(info, symbolApply, normalModifier, selectedModifier);
+            if (selectedModifier->IsObject()) {
+                symbolApply.selectedFlag = true;
+            }
+            tabBarSymbol = symbolApply;
         }
-        if (selectedModifier->IsObject()) {
-            symbolApply.selectedFlag = true;
-        }
-        tabBarSymbol = symbolApply;
     }
 
     JSRef<JSVal> paddingParam = paramObject->GetProperty("padding");
@@ -647,7 +703,9 @@ void JSTabContent::JSBind(BindingTarget globalObj)
     JSClass<JSTabContent>::StaticMethod("create", &JSTabContent::Create);
     JSClass<JSTabContent>::StaticMethod("pop", &JSTabContent::Pop);
     JSClass<JSTabContent>::StaticMethod("tabBar", &JSTabContent::SetTabBar);
+    JSClass<JSTabContent>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSTabContent>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSTabContent>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSTabContent>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTabContent>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSTabContent>::StaticMethod("onHover", &JSInteractableView::JsOnHover);

@@ -19,6 +19,8 @@
 #include <functional>
 #include <string>
 
+#include "interfaces/native/node/styled_string.h"
+
 #include "core/components_ng/pattern/text/span_model.h"
 #include "core/components_ng/pattern/text/span_node.h"
 namespace OHOS::Ace::NG {
@@ -75,10 +77,16 @@ public:
     void CreateContainSpan() override;
     void SetTextBackgroundStyle(const TextBackgroundStyle& style) override;
     static void SetTextBackgroundStyle(UINode* uiNode, const TextBackgroundStyle& style);
+    static void SetTextBackgroundStyleByBaseSpan(UINode* uiNode, const TextBackgroundStyle& style);
     static TextBackgroundStyle GetSpanTextBackgroundStyle(UINode* uiNode);
     static void SetTextShadow(UINode* uiNode, const std::vector<Shadow>& value);
     static std::vector<Shadow> GetTextShadow(UINode* uiNode);
     static void SetOnClick(UINode* uiNode, GestureEventFunc&& click);
+#ifdef USE_GRAPHIC_TEXT_GINE
+    // impl in render/adapter/span_model_adapter.cpp
+    static RefPtr<SpanItem> CreateSpanItem(ArkUI_SpanItem* item);
+    static ParagraphStyle CreateParagraphStyle(ArkUI_StyledString* styledString);
+#endif
 };
 } // namespace OHOS::Ace::NG
 

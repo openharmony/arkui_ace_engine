@@ -34,39 +34,35 @@ HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayoutAlgorithm_NeedMeasureItem001, Te
      */
     int32_t groupNumber = 2;
     int32_t itemNumber = 3;
-
-    Create([=](ListModelNG model) {
-        // head + ListItem + SPACE + ListItem + SPACE + ListItem + Foot
-        // FrameNode = 2 * 3
-        CreateGroupWithSetting(groupNumber, Axis::VERTICAL, V2::ListItemGroupStyle::NONE, itemNumber);
-        model.SetSpace(Dimension(SPACE));
-    });
+    ListModelNG model = CreateList();
+    model.SetSpace(Dimension(SPACE));
+    // head + ListItem + SPACE + ListItem + SPACE + ListItem + Foot
+    // FrameNode = 2 * 3
+    CreateGroupWithSetting(groupNumber, Axis::VERTICAL, V2::ListItemGroupStyle::NONE, itemNumber);
+    CreateDone(frameNode_);
 
     /* *
      * @tc.steps: step2. get child frame node from index
      */
     auto groupFrameNode = GetChildFrameNode(frameNode_, 0);
-    ASSERT_NE(groupFrameNode, nullptr);
     auto groupPattern = groupFrameNode->GetPattern<ListItemGroupPattern>();
-    ASSERT_NE(groupPattern, nullptr);
-
     RefPtr<LayoutAlgorithm> layoutAl = groupPattern->CreateLayoutAlgorithm();
-    ASSERT_NE(layoutAl, nullptr);
 
     /* *
      * @tc.steps: step3. build a object about ListItemGroupLayoutAlgorithm
      */
     RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupAl = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAl);
-    ASSERT_NE(listItemGroupAl, nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper = AceType::DynamicCast<LayoutWrapper>(groupFrameNode);
+    LayoutWrapper* wrapper = AceType::RawPtr(layoutWrapper);
     EXPECT_TRUE(listItemGroupAl->forwardLayout_ && listItemGroupAl->headerIndex_ >= 0);
 
-    bool resTypeInit = listItemGroupAl->NeedMeasureItem();
+    bool resTypeInit = listItemGroupAl->NeedMeasureItem(wrapper);
     EXPECT_TRUE(resTypeInit);
 
     listItemGroupAl->headerMainSize_ = 3.1;
     listItemGroupAl->endPos_ = 1.1;
 
-    bool resType = listItemGroupAl->NeedMeasureItem();
+    bool resType = listItemGroupAl->NeedMeasureItem(wrapper);
     EXPECT_FALSE(resType);
 
     // init data
@@ -82,7 +78,7 @@ HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayoutAlgorithm_NeedMeasureItem001, Te
     listItemGroupAl->footerMainSize_ = 3.1;
     listItemGroupAl->startPos_ = 8.1;
 
-    resType = listItemGroupAl->NeedMeasureItem();
+    resType = listItemGroupAl->NeedMeasureItem(wrapper);
     EXPECT_FALSE(resType);
 }
 
@@ -98,30 +94,27 @@ HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayoutAlgorithm_NeedMeasureItem002, Te
      */
     int32_t groupNumber = 2;
     int32_t itemNumber = 3;
-
-    Create([=](ListModelNG model) {
-        // head + ListItem + SPACE + ListItem + SPACE + ListItem + Foot
-        // FrameNode = 2 * 3
-        CreateGroupWithSetting(groupNumber, Axis::VERTICAL, V2::ListItemGroupStyle::NONE, itemNumber);
-        model.SetSpace(Dimension(SPACE));
-    });
+    ListModelNG model = CreateList();
+    model.SetSpace(Dimension(SPACE));
+    // head + ListItem + SPACE + ListItem + SPACE + ListItem + Foot
+    // FrameNode = 2 * 3
+    CreateGroupWithSetting(groupNumber, Axis::VERTICAL, V2::ListItemGroupStyle::NONE, itemNumber);
+    CreateDone(frameNode_);
 
     /* *
      * @tc.steps: step2. get child frame node from index
      */
     auto groupFrameNode = GetChildFrameNode(frameNode_, 0);
-    ASSERT_NE(groupFrameNode, nullptr);
     auto groupPattern = groupFrameNode->GetPattern<ListItemGroupPattern>();
-    ASSERT_NE(groupPattern, nullptr);
 
     RefPtr<LayoutAlgorithm> layoutAl = groupPattern->CreateLayoutAlgorithm();
-    ASSERT_NE(layoutAl, nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper = AceType::DynamicCast<LayoutWrapper>(groupFrameNode);
+    LayoutWrapper* wrapper = AceType::RawPtr(layoutWrapper);
 
     /* *
      * @tc.steps: step3. build a object about ListItemGroupLayoutAlgorithm
      */
     RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupAl = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAl);
-    ASSERT_NE(listItemGroupAl, nullptr);
     EXPECT_TRUE(listItemGroupAl->forwardLayout_ && listItemGroupAl->headerIndex_ >= 0);
 
     // forwardLayout equ false, GreatNotEqual
@@ -131,7 +124,7 @@ HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayoutAlgorithm_NeedMeasureItem002, Te
     listItemGroupAl->totalMainSize_ = 10.1;
     listItemGroupAl->endPos_ = 1.1;
 
-    bool resType = listItemGroupAl->NeedMeasureItem();
+    bool resType = listItemGroupAl->NeedMeasureItem(wrapper);
     EXPECT_FALSE(resType);
 
     // init data
@@ -149,11 +142,11 @@ HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayoutAlgorithm_NeedMeasureItem002, Te
     listItemGroupAl->startPos_ = 8.1;
     listItemGroupAl->referencePos_ = 10.1;
 
-    resType = listItemGroupAl->NeedMeasureItem();
+    resType = listItemGroupAl->NeedMeasureItem(wrapper);
     EXPECT_FALSE(resType);
 
     listItemGroupAl->startPos_ = 6.1;
-    resType = listItemGroupAl->NeedMeasureItem();
+    resType = listItemGroupAl->NeedMeasureItem(wrapper);
     EXPECT_TRUE(resType);
 }
 
@@ -169,27 +162,23 @@ HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayoutAlgorithm_Layout, TestSize.Level
      */
     int32_t groupNumber = 2;
     int32_t itemNumber = 3;
-
-    Create([=](ListModelNG model) {
-        // head + ListItem + SPACE + ListItem + SPACE + ListItem + Foot
-        // FrameNode = 2 * 3
-        CreateGroupWithSetting(groupNumber, Axis::VERTICAL, V2::ListItemGroupStyle::NONE, itemNumber);
-        model.SetSpace(Dimension(SPACE));
-    });
+    ListModelNG model = CreateList();
+    model.SetSpace(Dimension(SPACE));
+    // head + ListItem + SPACE + ListItem + SPACE + ListItem + Foot
+    // FrameNode = 2 * 3
+    CreateGroupWithSetting(groupNumber, Axis::VERTICAL, V2::ListItemGroupStyle::NONE, itemNumber);
+    CreateDone(frameNode_);
 
     /* *
      * @tc.steps: step2. get child frame node from index
      */
     auto groupFrameNode = GetChildFrameNode(frameNode_, 0);
-    EXPECT_NE(groupFrameNode, nullptr);
 
     /* *
      * @tc.steps: step3. build a object about layoutWraper
      */
     RefPtr<LayoutWrapper> layoutWrapper = groupFrameNode->CreateLayoutWrapper(true, true);
-    EXPECT_NE(layoutWrapper, nullptr);
     RefPtr<LayoutWrapperNode> layoutWrapper_ = AceType::DynamicCast<LayoutWrapperNode>(layoutWrapper);
-
     // Set LayoutProperty null , CHECK_NULL_VOID eq null
     layoutWrapper_->layoutProperty_ = nullptr;
     const auto &layoutProperty = layoutWrapper->GetLayoutProperty();
@@ -199,15 +188,117 @@ HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayoutAlgorithm_Layout, TestSize.Level
      * @tc.steps: step4. build a object about ListItemGroupLayoutAlgorithm
      */
     auto groupPattern = groupFrameNode->GetPattern<ListItemGroupPattern>();
-    ASSERT_NE(groupPattern, nullptr);
-
     RefPtr<LayoutAlgorithm> layoutAl = groupPattern->CreateLayoutAlgorithm();
-    ASSERT_NE(layoutAl, nullptr);
-
     RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupAl = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAl);
-    ASSERT_NE(listItemGroupAl, nullptr);
-
     listItemGroupAl->headerIndex_ = -1;
     listItemGroupAl->Layout(AceType::RawPtr<LayoutWrapper>(layoutWrapper));
+}
+
+/**
+ * @tc.name: ListLayoutAlgorithmTest001
+ * @tc.desc: Test the list layout from right to left
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(ListGroupAlgTestNg, ListLayoutAlgorithmTest001, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    ASSERT_NE(listPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, -1, listPattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    /**
+     * @tc.steps: step2. call Layout function.
+     */
+    // set reverse true
+    auto listLayoutProperty = frameNode->GetLayoutProperty<ListLayoutProperty>();
+    listLayoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, geometryNode, listLayoutProperty);
+    ASSERT_NE(layoutWrapper, nullptr);
+    ListLayoutAlgorithm listLayoutAlgorithm;
+    LayoutConstraintF layoutConstraint;
+    layoutWrapper->layoutProperty_->layoutConstraint_ = layoutConstraint;
+    layoutWrapper->layoutProperty_->contentConstraint_ = layoutConstraint;
+    struct ListItemInfo listItemInfo1;
+    listItemInfo1.startPos = 0.0f;
+    listItemInfo1.endPos = 180.0f;
+    listLayoutAlgorithm.contentMainSize_ = 720.0f;
+    listLayoutAlgorithm.itemPosition_.empty();
+    listLayoutAlgorithm.itemPosition_.emplace(std::make_pair(0, listItemInfo1));
+    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(listLayoutAlgorithm.itemPosition_.begin()->first);
+    auto size = layoutWrapper->GetGeometryNode()->GetMarginFrameSize();
+    float crossSize = 300.0f;
+    int32_t startIndex = 0;
+    listLayoutAlgorithm.LayoutItem(wrapper, 0, listLayoutAlgorithm.itemPosition_.begin()->second,
+        startIndex, crossSize);
+    float crossOffset = listLayoutAlgorithm.CalculateLaneCrossOffset(crossSize, size.Width());
+    auto offset = OffsetF(crossSize - crossOffset - size.Width(), listItemInfo1.startPos);
+    EXPECT_EQ(listLayoutAlgorithm.contentMainSize_ - size.Width(), crossOffset);
+    auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
+    EXPECT_EQ(layoutDirection, TextDirection::RTL);
+}
+
+/**
+ * @tc.name: ListItemLayoutAlgorithmTest001
+ * @tc.desc: Test the listitem layout from right to left
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(ListGroupAlgTestNg, ListItemLayoutAlgorithmTest001, TestSize.Level1)
+{
+    RefPtr<ListItemPattern> listItemPattern = AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE);
+    ASSERT_NE(listItemPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, -1, listItemPattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    /**
+     * @tc.steps: step2. call Layout function.
+     */
+    // set reverse true
+    auto listItemLayoutProperty = frameNode->GetLayoutProperty<ListItemLayoutProperty>();
+    listItemLayoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, geometryNode, listItemLayoutProperty);
+    ASSERT_NE(layoutWrapper, nullptr);
+    ListItemLayoutAlgorithm listItemLayoutAlgorithm(0, 0, 0);
+    LayoutConstraintF layoutConstraint;
+    layoutWrapper->layoutProperty_->layoutConstraint_ = layoutConstraint;
+    layoutWrapper->layoutProperty_->contentConstraint_ = layoutConstraint;
+    listItemLayoutAlgorithm.Measure(AceType::RawPtr(layoutWrapper));
+    listItemLayoutAlgorithm.Layout(AceType::RawPtr(layoutWrapper));
+    auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
+    EXPECT_EQ(layoutDirection, TextDirection::RTL);
+}
+
+/**
+ * @tc.name: ListItemLayoutAlgorithmTest002
+ * @tc.desc: Test the listitem layout from right to left
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(ListGroupAlgTestNg, ListItemLayoutAlgorithmTest002, TestSize.Level1)
+{
+    RefPtr<ListItemPattern> listItemPattern = AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE);
+    ASSERT_NE(listItemPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, -1, listItemPattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    /**
+     * @tc.steps: step2. call Layout function.
+     */
+    // set reverse true
+    auto listItemLayoutProperty = frameNode->GetLayoutProperty<ListItemLayoutProperty>();
+    listItemLayoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, geometryNode, listItemLayoutProperty);
+    ASSERT_NE(layoutWrapper, nullptr);
+    ListItemLayoutAlgorithm listItemLayoutAlgorithm(0, 0, 0);
+    LayoutConstraintF layoutConstraint;
+    layoutWrapper->layoutProperty_->layoutConstraint_ = layoutConstraint;
+    layoutWrapper->layoutProperty_->contentConstraint_ = layoutConstraint;
+    listItemLayoutAlgorithm.Measure(AceType::RawPtr(layoutWrapper));
+    bool value = listItemLayoutAlgorithm.IsRTLAndVertical(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(value, true);
 }
 } // namespace OHOS::Ace::NG

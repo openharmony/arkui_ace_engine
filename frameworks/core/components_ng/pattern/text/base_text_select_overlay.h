@@ -177,6 +177,16 @@ public:
     bool IsPointInRect(const OffsetF& point, const OffsetF& leftBottom, const OffsetF& rightBottom,
         const OffsetF& rightTop, const OffsetF& leftTop);
 
+    void SetScrollableParentCallback();
+    void ResetScrollableParentCallback();
+    virtual void OnParentScrollStart();
+    virtual void OnParentScrollEnd() {}
+    virtual void OnParentScrolling();
+
+    void SetkeyBoardChangeCallback();
+    void RemoveKeyboardChangeCallback();
+    virtual void OnKeyboardChanged(bool isKeyboardShow);
+
 protected:
     RectF MergeSelectedBoxes(
         const std::vector<RectF>& boxes, const RectF& contentRect, const RectF& textRect, const OffsetF& paintOffset);
@@ -197,6 +207,8 @@ protected:
 
 private:
     void UpdateTransformFlag();
+    void FindScrollableParentAndSetCallback(const RefPtr<FrameNode>& host);
+    void RegisterParentScrollCallback(const RefPtr<FrameNode>& host, int32_t parentId);
     bool isSingleHandle_ = false;
     bool isShowPaste_ = false;
     bool isShowMenu_ = true;
@@ -204,6 +216,8 @@ private:
     bool isUsingMouse_ = false;
     OffsetF mouseMenuOffset_;
     WeakPtr<TextBase> hostTextBase_;
+    bool hasScrollableParent_ = true;
+    std::vector<int32_t> scrollableParentIds_;
 };
 
 } // namespace OHOS::Ace::NG

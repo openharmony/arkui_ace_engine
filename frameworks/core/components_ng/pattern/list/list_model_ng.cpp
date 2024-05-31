@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,11 +41,17 @@ void ListModelNG::Create()
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::LIST_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ListPattern>(); });
     stack->Push(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddScrollableFrameInfo(SCROLL_FROM_NONE);
 }
 
 RefPtr<FrameNode> ListModelNG::CreateFrameNode(int32_t nodeId)
 {
     auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, nodeId, AceType::MakeRefPtr<ListPattern>());
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_RETURN(pattern, frameNode);
+    pattern->AddScrollableFrameInfo(SCROLL_FROM_NONE);
     return frameNode;
 }
 
@@ -458,6 +464,12 @@ DisplayMode ListModelNG::GetDisplayMode() const
     return list->GetDefaultScrollBarDisplayMode();
 }
 
+
+void ListModelNG::SetInitialIndex(FrameNode* frameNode, int32_t initialIndex)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, InitialIndex, initialIndex, frameNode);
+}
+
 void ListModelNG::SetEditMode(FrameNode* frameNode, bool editMode)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, EditMode, editMode, frameNode);
@@ -633,7 +645,8 @@ void ListModelNG::SetLaneGutter(FrameNode* frameNode, const Dimension& laneGutte
 int32_t ListModelNG::GetListItemAlign(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0);
-    return static_cast<int32_t>(frameNode->GetLayoutProperty<ListLayoutProperty>()->GetListItemAlign().value());
+    return static_cast<int32_t>(
+        frameNode->GetLayoutProperty<ListLayoutProperty>()->GetListItemAlignValue(V2::ListItemAlign::START));
 }
 
 void ListModelNG::SetListItemAlign(FrameNode* frameNode, V2::ListItemAlign listItemAlign)
@@ -763,5 +776,22 @@ RefPtr<ListChildrenMainSize> ListModelNG::GetOrCreateListChildrenMainSize()
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     return pattern->GetOrCreateListChildrenMainSize();
+}
+
+void ListModelNG::SetListChildrenMainSize(
+    FrameNode* frameNode, float defaultSize, const std::vector<float>& mainSize)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetListChildrenMainSize(defaultSize, mainSize);
+}
+
+void ListModelNG::ResetListChildrenMainSize(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetChildrenSize();
 }
 } // namespace OHOS::Ace::NG

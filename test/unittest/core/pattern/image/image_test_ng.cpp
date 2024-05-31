@@ -13,209 +13,15 @@
  * limitations under the License.
  */
 
-#include <optional>
-#include <utility>
-#include <vector>
-
-#include "gtest/gtest.h"
-
-#define private public
-#define protected public
-
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_canvas_image.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/image/pixel_map.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "core/common/container.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/image/image_theme.h"
-#include "core/components/text/text_theme.h"
-#include "core/components/theme/icon_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/geometry_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/event/input_event.h"
-#include "core/components_ng/event/long_press_event.h"
-#include "core/components_ng/image_provider/image_loading_context.h"
-#include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/layout/layout_wrapper_node.h"
-#include "core/components_ng/pattern/image/image_model_ng.h"
-#include "core/components_ng/pattern/image/image_paint_method.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/event/mouse_event.h"
-#include "core/image/image_source_info.h"
-
-using namespace testing;
-using namespace testing::ext;
+#include "image_base.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-constexpr double RADIUS_DEFAULT = 50.0;
-constexpr double RADIUS_EXTREME = 300.0;
-constexpr double IMAGE_WIDTH_DEFAULT = -1.0;
-constexpr double IMAGE_HEIGHT_DEFAULT = -1.0;
-constexpr double IMAGE_COMPONENTWIDTH_DEFAULT = -1.0;
-constexpr double IMAGE_COMPONENTHEIGHT_DEFAULT = -1.0;
-constexpr double WIDTH = 400.0;
-constexpr double HEIGHT = 500.0;
-constexpr double IMAGE_COMPONENT_MAXSIZE_WIDTH = 600.0;
-constexpr double IMAGE_COMPONENT_MAXSIZE_HEIGHT = 700.0;
-constexpr double IMAGE_SOURCESIZE_WIDTH = 300.0;
-constexpr double IMAGE_SOURCESIZE_HEIGHT = 200.0;
-constexpr double ALT_SOURCESIZE_WIDTH = 100.0;
-constexpr double ALT_SOURCESIZE_HEIGHT = 200.0;
-constexpr Dimension IMAGE_SOURCEINFO_WIDTH = Dimension(IMAGE_SOURCESIZE_WIDTH);
-constexpr Dimension IMAGE_SOURCEINFO_HEIGHT = Dimension(IMAGE_SOURCESIZE_HEIGHT);
-constexpr Dimension ALT_SOURCEINFO_WIDTH = Dimension(ALT_SOURCESIZE_WIDTH);
-constexpr Dimension ALT_SOURCEINFO_HEIGHT = Dimension(ALT_SOURCESIZE_HEIGHT);
-constexpr ImageFit IMAGE_FIT_DEFAULT = ImageFit::COVER;
-constexpr ImageRepeat IMAGE_REPEAT_DEFAULT = ImageRepeat::REPEAT;
-constexpr ImageInterpolation IMAGE_INTERPOLATION_DEFAULT = ImageInterpolation::HIGH;
-constexpr ImageRenderMode IMAGE_RENDERMODE_DEFAULT = ImageRenderMode::ORIGINAL;
-constexpr bool MATCHTEXTDIRECTION_DEFAULT = true;
-const Color SVG_FILL_COLOR_DEFAULT = Color::BLUE;
-const std::vector<float> COLOR_FILTER_DEFAULT = { 1.0, 2.0, 3.0 };
-const SizeF CONTENT_SIZE = SizeF(400.0f, 500.0f);
-const OffsetF CONTENT_OFFSET = OffsetF(50.0f, 60.0f);
-constexpr bool SYNCMODE_DEFAULT = false;
-constexpr CopyOptions COPYOPTIONS_DEFAULT = CopyOptions::None;
-constexpr bool AUTORESIZE_DEFAULT = true;
-constexpr bool FIT_ORIGINAL_SIZE_DEFAULT = true;
-constexpr ImageRepeat IMAGE_NO_REPEAT = ImageRepeat::NO_REPEAT;
-constexpr ImageInterpolation IMAGE_NO_INTERPOLATION = ImageInterpolation::NONE;
-constexpr ImageRenderMode IMAGE_NO_RENDERMODE = ImageRenderMode::ORIGINAL;
-const std::string IMAGE_SRC_URL = "file://data/data/com.example.test/res/example.svg";
-const std::string ALT_SRC_URL = "file://data/data/com.example.test/res/exampleAlt.jpg";
-const std::string RESOURCE_URL = "resource:///ohos_test_image.svg";
-const std::string PNG_IMAGE = "/common/media/aaa.png";
-const std::string BUNDLE_NAME;
-const std::string MODULE_NAME;
-const std::string WEB_IMAGE =
-    "https://img2.baidu.com/it/u=3999091694,1705560228&fm=253&fmt=auto&app=120&f=JPEG?w=1280&h=800";
-constexpr int32_t DURATION_DEFAULT = 1000;
-constexpr int32_t ITERATION_DEFAULT = 1;
-constexpr int32_t STATE_START = 1;
-constexpr Dimension IMAGE_WIDTH = 170.0_vp;
-constexpr Dimension IMAGE_HEIGHT = 120.0_vp;
-constexpr Dimension IMAGE_TOP = 0.0_vp;
-constexpr Dimension IMAGE_LEFT = 0.0_vp;
-} // namespace
 
-class ImageTestNg : public testing::Test {
+namespace {} // namespace
+
+class ImageTestNg : public ImageBases {
 public:
-    static void SetUpTestSuite();
-    static void TearDownTestSuite();
-    static RefPtr<FrameNode> CreateImageNode(
-        const std::string& src, const std::string& alt, RefPtr<PixelMap> pixMap = nullptr);
-    static RefPtr<FrameNode> CreateImageNodeWithDefaultProp(
-        const std::string& src, const std::string& alt, RefPtr<PixelMap> pixMap = nullptr);
-    static RefPtr<FrameNode> CreateSyncImageNode();
-    static RefPtr<FrameNode> CreateSyncWebImageNode();
-    static RefPtr<PixelMap> CreatePixelMap(const std::string& src);
-    static RefPtr<FrameNode> CreatePixelMapAnimator(int32_t number = 1);
 };
-
-void ImageTestNg::SetUpTestSuite()
-{
-    MockPipelineContext::SetUp();
-    MockContainer::SetUp();
-    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-}
-
-void ImageTestNg::TearDownTestSuite()
-{
-    MockPipelineContext::TearDown();
-    MockContainer::TearDown();
-}
-
-RefPtr<PixelMap> ImageTestNg::CreatePixelMap(const std::string& src)
-{
-    RefPtr<PixelMap> pixelMap = nullptr;
-    return pixelMap;
-}
-
-RefPtr<FrameNode> ImageTestNg::CreatePixelMapAnimator(int32_t number)
-{
-    ImageModelNG imageModelNG;
-    std::vector<ImageProperties> images;
-    for (int32_t index = 0; index < number; index++) {
-        ImageProperties imageProperties;
-        imageProperties.pixelMap = ImageTestNg::CreatePixelMap(IMAGE_SRC_URL);
-        imageProperties.width = IMAGE_WIDTH;
-        imageProperties.height = IMAGE_HEIGHT;
-        imageProperties.top = IMAGE_TOP;
-        imageProperties.left = IMAGE_LEFT;
-        images.push_back(imageProperties);
-    }
-    imageModelNG.CreateAnimation(std::move(images), DURATION_DEFAULT, ITERATION_DEFAULT);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    return frameNode;
-}
-
-RefPtr<FrameNode> ImageTestNg::CreateImageNode(const std::string& src, const std::string& alt, RefPtr<PixelMap> pixMap)
-{
-    ImageModelNG image;
-    image.Create(src, pixMap, BUNDLE_NAME, MODULE_NAME);
-    image.SetAlt(ImageSourceInfo { alt });
-    auto onError = [](const LoadImageFailEvent& info) {};
-    image.SetOnError(std::move(onError));
-    auto onComplete = [](const LoadImageSuccessEvent& info) {};
-    image.SetOnComplete(std::move(onComplete));
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    return frameNode;
-}
-
-RefPtr<FrameNode> ImageTestNg::CreateImageNodeWithDefaultProp(
-    const std::string& src, const std::string& alt, RefPtr<PixelMap> pixMap)
-{
-    ImageModelNG image;
-    image.Create(src, pixMap, BUNDLE_NAME, MODULE_NAME);
-    image.SetAlt(ImageSourceInfo { alt });
-    image.SetImageFill(SVG_FILL_COLOR_DEFAULT);
-    image.SetImageFit(IMAGE_FIT_DEFAULT);
-    image.SetImageRenderMode(IMAGE_RENDERMODE_DEFAULT);
-    image.SetImageInterpolation(IMAGE_INTERPOLATION_DEFAULT);
-    image.SetMatchTextDirection(MATCHTEXTDIRECTION_DEFAULT);
-    image.SetImageRepeat(IMAGE_REPEAT_DEFAULT);
-    image.SetColorFilterMatrix(COLOR_FILTER_DEFAULT);
-    auto onError = [](const LoadImageFailEvent& info) {};
-    image.SetOnError(std::move(onError));
-    auto onComplete = [](const LoadImageSuccessEvent& info) {};
-    image.SetOnComplete(std::move(onComplete));
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    return frameNode;
-}
-
-RefPtr<FrameNode> ImageTestNg::CreateSyncImageNode()
-{
-    ImageModelNG image;
-    RefPtr<PixelMap> pixMap = nullptr;
-    image.Create(PNG_IMAGE, pixMap, BUNDLE_NAME, MODULE_NAME);
-    image.SetAlt(ImageSourceInfo { ALT_SRC_URL });
-    image.SetSyncMode(true);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    return frameNode;
-}
-
-RefPtr<FrameNode> ImageTestNg::CreateSyncWebImageNode()
-{
-    ImageModelNG image;
-    RefPtr<PixelMap> pixMap = nullptr;
-    image.Create(WEB_IMAGE, pixMap, BUNDLE_NAME, MODULE_NAME);
-    image.SetAlt(ImageSourceInfo { ALT_SRC_URL });
-    image.SetSyncMode(true);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    return frameNode;
-}
 
 /**
  * @tc.name: ImagePatternCreator001
@@ -885,7 +691,11 @@ HWTEST_F(ImageTestNg, ImageCreator001, TestSize.Level1)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
-    image.Create("", pixMap, BUNDLE_NAME, MODULE_NAME);
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>("");
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
@@ -900,7 +710,11 @@ HWTEST_F(ImageTestNg, ImageCreator002, TestSize.Level1)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
-    image.Create("", pixMap, BUNDLE_NAME, MODULE_NAME);
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>("");
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
@@ -925,7 +739,11 @@ HWTEST_F(ImageTestNg, ImageCreator003, TestSize.Level1)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
-    image.Create(IMAGE_SRC_URL, pixMap, BUNDLE_NAME, MODULE_NAME);
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
     image.SetImageFit(IMAGE_FIT_DEFAULT);
     image.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     image.SetSyncMode(SYNCMODE_DEFAULT);
@@ -944,7 +762,8 @@ HWTEST_F(ImageTestNg, ImageCreator003, TestSize.Level1)
 
     auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
     ASSERT_NE(imageLayoutProperty, nullptr);
-    EXPECT_EQ(imageLayoutProperty->GetImageSourceInfoValue(), ImageSourceInfo(IMAGE_SRC_URL));
+    auto srcInfo = imageLayoutProperty->GetImageSourceInfoValue();
+    EXPECT_EQ(srcInfo.GetSrc(), "");
     EXPECT_EQ(imageLayoutProperty->GetImageFitValue(), IMAGE_FIT_DEFAULT);
     EXPECT_EQ(imageLayoutProperty->GetAltValue(), ImageSourceInfo(ALT_SRC_URL));
     EXPECT_EQ(frameNode->GetPattern<ImagePattern>()->syncLoad_, false);
@@ -975,7 +794,11 @@ HWTEST_F(ImageTestNg, ImageEventTest001, TestSize.Level1)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
-    image.Create(IMAGE_SRC_URL, pixMap, BUNDLE_NAME, MODULE_NAME);
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
     LoadImageSuccessEvent curEvent(
         IMAGE_WIDTH_DEFAULT, IMAGE_HEIGHT_DEFAULT, IMAGE_COMPONENTWIDTH_DEFAULT, IMAGE_COMPONENTHEIGHT_DEFAULT, -1);
     auto onComplete = [&curEvent](const LoadImageSuccessEvent& info) { curEvent = info; };
@@ -1003,7 +826,11 @@ HWTEST_F(ImageTestNg, ImageEventTest002, TestSize.Level1)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
-    image.Create(IMAGE_SRC_URL, pixMap, BUNDLE_NAME, MODULE_NAME);
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
     LoadImageFailEvent curEvent(IMAGE_COMPONENTWIDTH_DEFAULT, IMAGE_COMPONENTHEIGHT_DEFAULT, "");
     auto onError = [&curEvent](const LoadImageFailEvent& info) { curEvent = info; };
     image.SetOnError(std::move(onError));
@@ -1028,7 +855,11 @@ HWTEST_F(ImageTestNg, ImageSvgTest001, TestSize.Level1)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
-    image.Create(IMAGE_SRC_URL, pixMap, BUNDLE_NAME, MODULE_NAME);
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
@@ -1044,7 +875,7 @@ HWTEST_F(ImageTestNg, ImageSvgTest001, TestSize.Level1)
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     ASSERT_NE(imagePattern, nullptr);
     ASSERT_NE(imagePattern->loadingCtx_, nullptr);
-    EXPECT_EQ(imagePattern->loadingCtx_->GetSourceInfo().GetSrc(), IMAGE_SRC_URL);
+    EXPECT_EQ(imagePattern->loadingCtx_->GetSourceInfo().GetSrc(), "");
     ASSERT_NE(imagePattern->altLoadingCtx_, nullptr);
     EXPECT_EQ(imagePattern->altLoadingCtx_->GetSourceInfo().GetSrc(), RESOURCE_URL);
 }
@@ -1059,7 +890,11 @@ HWTEST_F(ImageTestNg, ImageColorFilterTest001, TestSize.Level1)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
-    image.Create(IMAGE_SRC_URL, pixMap, BUNDLE_NAME, MODULE_NAME);
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -1704,7 +1539,7 @@ HWTEST_F(ImageTestNg, Resource001, TestSize.Level1)
     EXPECT_TRUE(pattern->loadingCtx_);
 
     pattern->OnLanguageConfigurationUpdate();
-    EXPECT_FALSE(pattern->loadingCtx_);
+    EXPECT_TRUE(pattern->loadingCtx_);
     frameNode->MarkModifyDone();
     EXPECT_TRUE(pattern->loadingCtx_);
 }
@@ -1981,537 +1816,5 @@ HWTEST_F(ImageTestNg, TestDraggable001, TestSize.Level1)
     frameNode->SetDraggable(false);
     frameNode->MarkModifyDone();
     EXPECT_EQ(frameNode->IsDraggable(), false);
-}
-
-/**
- * @tc.name: TestAutoResize001
- * @tc.desc: Test image autoResize.
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestNg, TestAutoResize001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create Image frameNode.
-     */
-    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
-    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
-
-    /**
-     * @tc.steps: step2. set autoResize
-     */
-    layoutProperty->UpdateAutoResize(false);
-    frameNode->MarkModifyDone();
-    EXPECT_EQ(layoutProperty->GetAutoResize(), false);
-
-    /**
-     * @tc.steps: step3. set autoResize
-     */
-    layoutProperty->UpdateAutoResize(true);
-    frameNode->MarkModifyDone();
-    EXPECT_EQ(layoutProperty->GetAutoResize(), true);
-}
-
-/**
- * @tc.name: TestFitOriginalSize001
- * @tc.desc: Test image fitOriginalSize.
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestNg, TestFitOriginalSize001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create Image frameNode.
-     */
-    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
-    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
-
-    /**
-     * @tc.steps: step2. set fitOriginalSize
-     */
-    layoutProperty->UpdateFitOriginalSize(false);
-    frameNode->MarkModifyDone();
-    EXPECT_EQ(layoutProperty->GetFitOriginalSize().value(), false);
-
-    /**
-     * @tc.steps: step3. set fitOriginalSize
-     */
-    layoutProperty->UpdateFitOriginalSize(true);
-    frameNode->MarkModifyDone();
-    EXPECT_EQ(layoutProperty->GetFitOriginalSize().value(), true);
-}
-
-/**
- * @tc.name: TestMatchTextDirection001
- * @tc.desc: Test image matchTextDirection.
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestNg, TestMatchTextDirection001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create Image frameNode.
-     */
-    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
-
-    /**
-     * @tc.steps: step2. get ImagePattern and  RadiusProperty.
-     */
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
-
-    /**
-     * @tc.steps: step3. set matchTextDirection
-     */
-    imageRenderProperty->UpdateMatchTextDirection(true);
-    frameNode->MarkModifyDone();
-    EXPECT_EQ(imageRenderProperty->GetMatchTextDirection(), true);
-
-    /**
-     * @tc.steps: step4. set matchTextDirection
-     */
-    imageRenderProperty->UpdateMatchTextDirection(false);
-    frameNode->MarkModifyDone();
-    EXPECT_EQ(imageRenderProperty->GetMatchTextDirection(), false);
-}
-
-/**
- * @tc.name: TestRenderMode001
- * @tc.desc: Test image renderMode.
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestNg, TestRenderMode001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create Image frameNode.
-     */
-    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
-
-    /**
-     * @tc.steps: step2. get ImagePattern and RadiusProperty.
-     */
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
-
-    /**
-     * @tc.steps: step3. set renderMode
-     */
-    imageRenderProperty->UpdateImageRenderMode(ImageRenderMode::ORIGINAL);
-    frameNode->MarkModifyDone();
-    EXPECT_EQ(imageRenderProperty->GetImageRenderMode(), ImageRenderMode::ORIGINAL);
-
-    /**
-     * @tc.steps: step4. set renderMode
-     */
-    imageRenderProperty->UpdateImageRenderMode(ImageRenderMode::TEMPLATE);
-    frameNode->MarkModifyDone();
-    EXPECT_EQ(imageRenderProperty->GetImageRenderMode(), ImageRenderMode::TEMPLATE);
-}
-
-/**
- * @tc.name: TestInterpolation001
- * @tc.desc: Test image interpolation.
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestNg, TestInterpolation001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create Image frameNode.
-     */
-    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
-
-    /**
-     * @tc.steps: step2. get ImagePattern and RadiusProperty.
-     */
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
-
-    /**
-     * @tc.steps: step3. set interpolation
-     */
-    imageRenderProperty->UpdateImageInterpolation(ImageInterpolation::NONE);
-    frameNode->MarkModifyDone();
-    EXPECT_EQ(imageRenderProperty->GetImageInterpolation(), ImageInterpolation::NONE);
-
-    /**
-     * @tc.steps: step4. set interpolation
-     */
-    imageRenderProperty->UpdateImageInterpolation(ImageInterpolation::LOW);
-    frameNode->MarkModifyDone();
-    EXPECT_EQ(imageRenderProperty->GetImageInterpolation(), ImageInterpolation::LOW);
-
-    /**
-     * @tc.steps: step5. set interpolation
-     */
-    imageRenderProperty->UpdateImageInterpolation(ImageInterpolation::MEDIUM);
-    frameNode->MarkModifyDone();
-    EXPECT_EQ(imageRenderProperty->GetImageInterpolation(), ImageInterpolation::MEDIUM);
-
-    /**
-     * @tc.steps: step6. set interpolation
-     */
-    imageRenderProperty->UpdateImageInterpolation(ImageInterpolation::HIGH);
-    frameNode->MarkModifyDone();
-    EXPECT_EQ(imageRenderProperty->GetImageInterpolation(), ImageInterpolation::HIGH);
-}
-
-/**
- * @tc.name: TestObjectRepeat001
- * @tc.desc: Test image objectRepeat.
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestNg, TestObjectRepeat001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create Image frameNode.
-     */
-    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
-
-    /**
-     * @tc.steps: step2. get ImagePattern and RadiusProperty.
-     */
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
-    const auto& geometryNode = frameNode->GetGeometryNode();
-
-    auto paintRect = imagePattern->CalcImageContentPaintSize(geometryNode);
-    /**
-     * @tc.steps: step3. set objectRepeat
-     */
-    imageRenderProperty->UpdateImageRepeat(ImageRepeat::REPEAT);
-    frameNode->MarkModifyDone();
-    EXPECT_EQ(imageRenderProperty->GetImageRepeat(), ImageRepeat::REPEAT);
-    EXPECT_EQ(paintRect.Left(), 0);
-    EXPECT_EQ(paintRect.Top(), 0);
-
-    /**
-     * @tc.steps: step4. set objectRepeat
-     */
-    imageRenderProperty->UpdateImageRepeat(ImageRepeat::REPEAT_X);
-    frameNode->MarkModifyDone();
-    EXPECT_EQ(imageRenderProperty->GetImageRepeat(), ImageRepeat::REPEAT_X);
-    EXPECT_EQ(paintRect.Left(), 0);
-    EXPECT_EQ(paintRect.Top(), 0);
-
-    /**
-     * @tc.steps: step5. set objectRepeat
-     */
-    imageRenderProperty->UpdateImageRepeat(ImageRepeat::REPEAT_Y);
-    frameNode->MarkModifyDone();
-    EXPECT_EQ(imageRenderProperty->GetImageRepeat(), ImageRepeat::REPEAT_Y);
-    EXPECT_EQ(paintRect.Left(), 0);
-    EXPECT_EQ(paintRect.Top(), 0);
-
-    /**
-     * @tc.steps: step6. set objectRepeat
-     */
-    imageRenderProperty->UpdateImageRepeat(ImageRepeat::NO_REPEAT);
-    frameNode->MarkModifyDone();
-    EXPECT_EQ(imageRenderProperty->GetImageRepeat(), ImageRepeat::NO_REPEAT);
-}
-
-/**
- * @tc.name: TestObjectFit001
- * @tc.desc: Test image objectFit.
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestNg, TestObjectFit001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create Image frameNode.
-     */
-    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
-
-    /**
-     * @tc.steps: step2. get ImagePattern RadiusProperty layoutProperty.
-     */
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
-    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
-
-    /**
-     * @tc.steps: step3. set objectFit
-     */
-    imageRenderProperty->UpdateImageFit(ImageFit::FILL);
-    layoutProperty->UpdateImageFit(ImageFit::FILL);
-    frameNode->MarkModifyDone();
-    EXPECT_EQ(imageRenderProperty->GetImageFit(), ImageFit::FILL);
-    EXPECT_EQ(layoutProperty->GetImageFit(), ImageFit::FILL);
-
-    /**
-     * @tc.steps: step5. set objectFit
-     */
-    imageRenderProperty->UpdateImageFit(ImageFit::CONTAIN);
-    layoutProperty->UpdateImageFit(ImageFit::CONTAIN);
-    frameNode->MarkModifyDone();
-    EXPECT_EQ(imageRenderProperty->GetImageFit(), ImageFit::CONTAIN);
-    EXPECT_EQ(layoutProperty->GetImageFit(), ImageFit::CONTAIN);
-
-    /**
-     * @tc.steps: step6. set objectFit
-     */
-    imageRenderProperty->UpdateImageFit(ImageFit::COVER);
-    layoutProperty->UpdateImageFit(ImageFit::COVER);
-    frameNode->MarkModifyDone();
-    EXPECT_EQ(imageRenderProperty->GetImageFit(), ImageFit::COVER);
-    EXPECT_EQ(layoutProperty->GetImageFit(), ImageFit::COVER);
-
-    /**
-     * @tc.steps: step7. set objectFit
-     */
-    imageRenderProperty->UpdateImageFit(ImageFit::FITWIDTH);
-    layoutProperty->UpdateImageFit(ImageFit::FITWIDTH);
-    frameNode->MarkModifyDone();
-    EXPECT_EQ(imageRenderProperty->GetImageFit(), ImageFit::FITWIDTH);
-    EXPECT_EQ(layoutProperty->GetImageFit(), ImageFit::FITWIDTH);
-
-    /**
-     * @tc.steps: step8. set objectFit
-     */
-    imageRenderProperty->UpdateImageFit(ImageFit::FITHEIGHT);
-    layoutProperty->UpdateImageFit(ImageFit::FITHEIGHT);
-    frameNode->MarkModifyDone();
-    EXPECT_EQ(imageRenderProperty->GetImageFit(), ImageFit::FITHEIGHT);
-    EXPECT_EQ(layoutProperty->GetImageFit(), ImageFit::FITHEIGHT);
-
-    /**
-     * @tc.steps: step9. set objectFit
-     */
-    imageRenderProperty->UpdateImageFit(ImageFit::NONE);
-    layoutProperty->UpdateImageFit(ImageFit::NONE);
-    frameNode->MarkModifyDone();
-    EXPECT_EQ(imageRenderProperty->GetImageFit(), ImageFit::NONE);
-    EXPECT_EQ(layoutProperty->GetImageFit(), ImageFit::NONE);
-
-    /**
-     * @tc.steps: step10. set objectFit
-     */
-    imageRenderProperty->UpdateImageFit(ImageFit::SCALE_DOWN);
-    layoutProperty->UpdateImageFit(ImageFit::SCALE_DOWN);
-    frameNode->MarkModifyDone();
-    EXPECT_EQ(imageRenderProperty->GetImageFit(), ImageFit::SCALE_DOWN);
-    EXPECT_EQ(layoutProperty->GetImageFit(), ImageFit::SCALE_DOWN);
-
-    /**
-     * @tc.steps: step11. set objectFit
-     */
-    imageRenderProperty->UpdateImageFit(ImageFit::TOP_LEFT);
-    layoutProperty->UpdateImageFit(ImageFit::TOP_LEFT);
-    frameNode->MarkModifyDone();
-    EXPECT_EQ(imageRenderProperty->GetImageFit(), ImageFit::TOP_LEFT);
-    EXPECT_EQ(layoutProperty->GetImageFit(), ImageFit::TOP_LEFT);
-}
-
-/**
- * @tc.name: TestDynamicRangeMode001
- * @tc.desc: Test image dynamicRangeMode.
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestNg, TestDynamicRangeMode001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create Image frameNode.
-     */
-    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
-
-    /**
-     * @tc.steps: step2. get ImagePattern ImageRenderProperty.
-     */
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
-
-    /**
-     * @tc.steps: step3. set dynamicRangeMode
-     */
-    imageRenderProperty->UpdateDynamicMode(DynamicRangeMode::CONSTRAINT);
-    frameNode->MarkModifyDone();
-    EXPECT_EQ(imageRenderProperty->GetDynamicMode(), DynamicRangeMode::CONSTRAINT);
-
-    /**
-     * @tc.steps: step4. set dynamicRangeMode
-     */
-    imageRenderProperty->UpdateDynamicMode(DynamicRangeMode::STANDARD);
-    frameNode->MarkModifyDone();
-    EXPECT_EQ(imageRenderProperty->GetDynamicMode(), DynamicRangeMode::STANDARD);
-
-    /**
-     * @tc.steps: step5. set dynamicRangeMode
-     */
-    imageRenderProperty->UpdateDynamicMode(DynamicRangeMode::HIGH);
-    frameNode->MarkModifyDone();
-    EXPECT_EQ(imageRenderProperty->GetDynamicMode(), DynamicRangeMode::HIGH);
-}
-
-/**
- * @tc.name: TestEnhancedImageQuality001
- * @tc.desc: Test image EnhancedImageQuality.
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestNg, TestEnhancedImageQuality001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create Image frameNode.
-     */
-    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
-
-    /**
-     * @tc.steps: step2. get ImagePattern ImageRenderProperty.
-     */
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
-
-    /**
-     * @tc.steps: step3. set EnhancedImageQuality
-     */
-    imagePattern->SetImageQuality(AIImageQuality::HIGH);
-    EXPECT_EQ(imagePattern->GetImageQuality(), AIImageQuality::HIGH);
-
-    /**
-     * @tc.steps: step3. set EnhancedImageQuality
-     */
-    imagePattern->SetImageQuality(AIImageQuality::NONE);
-    EXPECT_EQ(imagePattern->GetImageQuality(), AIImageQuality::NONE);
-
-    /**
-     * @tc.steps: step3. set EnhancedImageQuality
-     */
-    imagePattern->SetImageQuality(AIImageQuality::NORMAL);
-    EXPECT_EQ(imagePattern->GetImageQuality(), AIImageQuality::NORMAL);
-}
-
-/**
- * @tc.name: ImageSetDraggable0001
- * @tc.desc: Set the draggable attribute of ImageModelNG object.
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestNg, ImageSetDraggable0001, TestSize.Level1)
-{
-    ImageModelNG image;
-    RefPtr<PixelMap> pixMap = nullptr;
-    image.Create(IMAGE_SRC_URL, pixMap, BUNDLE_NAME, MODULE_NAME);
-    image.SetDraggable(true);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    EXPECT_TRUE(frameNode->draggable_);
-}
-
-HWTEST_F(ImageTestNg, ImageSetDraggable0002, TestSize.Level1)
-{
-    ImageModelNG image;
-    RefPtr<PixelMap> pixMap = nullptr;
-    image.Create(IMAGE_SRC_URL, pixMap, BUNDLE_NAME, MODULE_NAME);
-    image.SetDraggable(false);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    EXPECT_FALSE(frameNode->draggable_);
-}
-
-/**
- * @tc.name: ImageDumpInfo0001
- * @tc.desc: Output the relevant information of ImageModelNG object.
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestNg, ImageDumpInfo0001, TestSize.Level1)
-{
-    auto frameNode = ImageTestNg::CreateImageNode(RESOURCE_URL, ALT_SRC_URL);
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<ImagePattern>();
-    frameNode->MarkModifyDone();
-    pattern->DumpInfo();
-    EXPECT_TRUE(pattern->loadingCtx_);
-}
-
-/**
- * @tc.name: ImageDumpAdvanceInfo0001
- * @tc.desc: Output more information of ImageModelNG object.
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestNg, ImageDumpAdvanceInfo0001, TestSize.Level1)
-{
-    auto frameNode = ImageTestNg::CreateImageNode(RESOURCE_URL, ALT_SRC_URL);
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<ImagePattern>();
-    frameNode->MarkModifyDone();
-    pattern->DumpAdvanceInfo();
-    EXPECT_TRUE(pattern->loadingCtx_);
-}
-
-/**
- * @tc.name: ImageOnColorConfigurationUpdate0001
- * @tc.desc: Output more information of ImageModelNG object when the color configuration is updated.
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestNg, ImageOnColorConfigurationUpdate0001, TestSize.Level1)
-{
-    auto frameNode = ImageTestNg::CreateImageNode(RESOURCE_URL, ALT_SRC_URL);
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<ImagePattern>();
-    frameNode->MarkModifyDone();
-    pattern->OnColorConfigurationUpdate();
-    EXPECT_TRUE(pattern->loadingCtx_);
-    frameNode->MarkModifyDone();
-    EXPECT_TRUE(pattern->loadingCtx_);
-}
-
-/**
- * @tc.name: ImageSetImageAnalyzerConfig0001
- * @tc.desc: Set the configuration of the image analyzer.
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestNg, ImageSetImageAnalyzerConfig0001, TestSize.Level1)
-{
-    auto frameNode = ImageTestNg::CreateImageNode(RESOURCE_URL, ALT_SRC_URL);
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<ImagePattern>();
-    frameNode->MarkModifyDone();
-    pattern->EnableAnalyzer(true);
-    EXPECT_TRUE(pattern->loadingCtx_);
-}
-
-/**
- * @tc.name: ImagePixelMapListTest0001
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestNg, ImagePixelMapListTest0001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. images size is 0.
-     * @tc.expected: do nothing
-     */
-    auto frameNode = ImageTestNg::CreatePixelMapAnimator(0);
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
-    ASSERT_NE(layoutProperty, nullptr);
-
-    /**
-     * @tc.steps: step2. SetShowingIndex() greater than images size-1.
-     * @tc.expected: nowImageIndex_ not change
-     */
-    frameNode = CreatePixelMapAnimator(1);
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-    layoutProperty = frameNode->GetLayoutProperty();
-    ASSERT_NE(layoutProperty, nullptr);
-    imagePattern->SetShowingIndex(1);
-    EXPECT_EQ(imagePattern->nowImageIndex_, 0);
-
-    /**
-     * @tc.steps: step3. CreateAnimation() set PixelMap List.
-     * @tc.expected: images_ size is 2, other paramater is default value.
-     */
-    frameNode = CreatePixelMapAnimator(2);
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-    layoutProperty = frameNode->GetLayoutProperty();
-    ASSERT_NE(layoutProperty, nullptr);
-    EXPECT_TRUE(imagePattern->images_.size() == 2);
-    EXPECT_EQ(imagePattern->GetIsAnimation(), true);
-    EXPECT_EQ(imagePattern->status_, static_cast<Animator::Status>(STATE_START));
-    EXPECT_EQ(imagePattern->durationTotal_, DURATION_DEFAULT);
-    EXPECT_EQ(imagePattern->animator_->GetDuration(), DURATION_DEFAULT);
-    EXPECT_EQ(imagePattern->animator_->GetIteration(), ITERATION_DEFAULT);
 }
 } // namespace OHOS::Ace::NG

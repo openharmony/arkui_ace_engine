@@ -16,6 +16,8 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_JSI_TYPES_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_JSI_TYPES_H
 
+#include <string>
+
 #include "ecmascript/napi/include/jsnapi.h"
 
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
@@ -58,7 +60,7 @@ public:
     }
 
     template<class... Args>
-    static JsiType<T> New(Args&&... args);
+    static JsiType<T> New(Args &&... args);
 
     void SetWeakCallback(void *ref, panda::WeakRefClearCallBack callback);
     const panda::CopyableGlobal<T>& GetHandle() const;
@@ -112,11 +114,15 @@ public:
  * @brief A wrapper around a panda::StringRef
  *
  */
-class JsiString : public JsiValue {
+class JsiString : public JsiType<panda::StringRef> {
 public:
-    explicit JsiString(const char* str);
-    explicit JsiString(JsiValue str);
-    static JsiString New(const char* str);
+    JsiString() = default;
+    explicit JsiString(panda::Local<panda::StringRef> val);
+    explicit JsiString(const panda::CopyableGlobal<panda::StringRef>& val);
+    ~JsiString() override = default;
+
+    static panda::Local<panda::StringRef> New(const char* str);
+    static panda::Local<panda::StringRef> New(const std::string& str);
     FAKE_PTR_FOR_FUNCTION_ACCESS(JsiString)
 };
 
@@ -180,7 +186,7 @@ public:
     JsiObject();
     explicit JsiObject(panda::Local<panda::ObjectRef> val);
     explicit JsiObject(const EcmaVM *vm, panda::Local<panda::ObjectRef> val);
-    explicit JsiObject(const panda::CopyableGlobal<panda::ObjectRef>& val);
+    ACE_FORCE_EXPORT explicit JsiObject(const panda::CopyableGlobal<panda::ObjectRef>& val);
     bool IsUndefined() const;
     ~JsiObject() override = default;
     enum InternalFieldIndex { INSTANCE = 0 };
@@ -298,6 +304,7 @@ public:
     bool GetInt32Arg(size_t index, int32_t& value) const;
     bool GetUint32Arg(size_t index, uint32_t& value) const;
     bool GetDoubleArg(size_t index, double& value) const;
+    bool GetDoubleArrayArg(size_t index, std::vector<double>& valueArr) const;
     bool GetStringArg(size_t index, std::string& value) const;
 
 private:

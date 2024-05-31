@@ -36,7 +36,6 @@ public:
     bool CheckHandleVisible(const RectF& paintRect) override;
     bool CheckAndAdjustHandle(RectF& paintRect);
     void OnResetTextSelection() override;
-    void AfterCloseOverlay() override;
 
     // override SelectOverlayHolder
     std::optional<SelectHandleInfo> GetFirstHandleInfo() override;
@@ -51,7 +50,7 @@ public:
     void OnMenuItemAction(OptionMenuActionId id, OptionMenuType type) override;
     void OnHandleMove(const RectF& rect, bool isFirst) override;
     void OnHandleMoveDone(const RectF& rect, bool isFirst) override;
-    void OnCloseOverlay(OptionMenuType menuType, CloseReason reason) override;
+    void OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info = nullptr) override;
     void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType) override;
 
 protected:
@@ -59,8 +58,6 @@ protected:
     bool selectTextUseTopHandle = false;
 
 private:
-    void RemoveAreaChangeInner();
-
     ACE_DISALLOW_COPY_AND_MOVE(TextSelectOverlay);
 };
 

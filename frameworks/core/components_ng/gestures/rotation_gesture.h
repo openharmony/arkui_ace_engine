@@ -35,8 +35,10 @@ public:
     {
         if (gestureInfo_) {
             gestureInfo_->SetType(GestureTypeName::ROTATION_GESTURE);
+            gestureInfo_->SetRecognizerType(GestureTypeName::ROTATION_GESTURE);
         } else {
-            gestureInfo_ = MakeRefPtr<GestureInfo>(GestureTypeName::ROTATION_GESTURE);
+            gestureInfo_ =
+                MakeRefPtr<GestureInfo>(GestureTypeName::ROTATION_GESTURE, GestureTypeName::ROTATION_GESTURE, false);
         }
     }
     RotationGesture(int32_t fingers, double angle);

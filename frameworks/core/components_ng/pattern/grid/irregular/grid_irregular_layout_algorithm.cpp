@@ -177,7 +177,7 @@ void GridIrregularLayoutAlgorithm::CheckForReset()
         return;
     }
 
-    if (!wrapper_->IsContraintNoChanged()) {
+    if (!wrapper_->IsConstraintNoChanged()) {
         // need to remeasure all items in current view
         postJumpOffset_ = info.currentOffset_;
         PrepareJumpOnReset(info);
@@ -299,7 +299,8 @@ void GridIrregularLayoutAlgorithm::MeasureOnJump(float mainSize)
     }
 
     if (info.scrollAlign_ == ScrollAlign::AUTO) {
-        info.scrollAlign_ = TransformAutoScrollAlign(mainSize);
+        int32_t height = GridLayoutUtils::GetItemSize(&info, wrapper_, info.jumpIndex_).rows;
+        info.scrollAlign_ = info.TransformAutoScrollAlign(info.jumpIndex_, height, mainSize, mainGap_);
     }
     if (info.scrollAlign_ == ScrollAlign::NONE) {
         info.jumpIndex_ = EMPTY_JUMP_INDEX;
@@ -342,7 +343,17 @@ void GridIrregularLayoutAlgorithm::UpdateLayoutInfo()
     }
     info.prevOffset_ = info.currentOffset_;
 
-    auto props = DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
+    // validity check
+    for (int i = info.startMainLineIndex_; i <= info.endMainLineIndex_; ++i) {
+        if (info.lineHeightMap_.find(i) == info.lineHeightMap_.end()) {
+            TAG_LOGW(AceLogTag::ACE_GRID,
+                "lineHeight at line %d not ready. Data is corrupted. StartLine = %d, EndLine = %d", i,
+                info.startMainLineIndex_, info.endMainLineIndex_);
+            info.endMainLineIndex_ = i - 1;
+            info.endIndex_ = info.startIndex_ - 1;
+            return;
+        }
+    }
 }
 
 void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset)
@@ -411,33 +422,6 @@ std::vector<float> GridIrregularLayoutAlgorithm::CalculateCrossPositions(const P
         res[i] = res[i - 1] + crossLens_[i - 1] + crossGap_;
     }
     return res;
-}
-
-ScrollAlign GridIrregularLayoutAlgorithm::TransformAutoScrollAlign(float mainSize) const
-{
-    const auto& info = gridLayoutInfo_;
-    if (info.jumpIndex_ >= info.startIndex_ && info.jumpIndex_ <= info.endIndex_) {
-        auto [line, _] = info.FindItemInRange(info.jumpIndex_);
-        int32_t height = GridLayoutUtils::GetItemSize(&info, wrapper_, info.jumpIndex_).rows;
-        float topPos = info.GetItemTopPos(line, mainGap_);
-        float botPos = info.GetItemBottomPos(line, height, mainGap_);
-        if (NonPositive(topPos) && GreatOrEqual(botPos, mainSize)) {
-            // item occupies the whole viewport
-            return ScrollAlign::NONE;
-        }
-        // scrollAlign start / end if the item is not fully in viewport
-        if (Negative(topPos)) {
-            return ScrollAlign::START;
-        }
-        if (GreatNotEqual(botPos, mainSize)) {
-            return ScrollAlign::END;
-        }
-        return ScrollAlign::NONE;
-    }
-    if (info.jumpIndex_ > info.endIndex_) {
-        return ScrollAlign::END;
-    }
-    return ScrollAlign::START;
 }
 
 int32_t GridIrregularLayoutAlgorithm::FindJumpLineIdx(int32_t jumpIdx)

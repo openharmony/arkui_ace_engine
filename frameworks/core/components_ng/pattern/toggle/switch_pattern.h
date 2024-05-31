@@ -163,8 +163,11 @@ private:
     void OnTouchDown();
     void OnTouchUp();
     void HandleMouseEvent(bool isHover);
-    void HandleFocusEvent();
-    void HandleBlurEvent();
+    void HandleFocusEvent(const RefPtr<SwitchPaintProperty>& switchPaintProperty,
+        const RefPtr<SwitchTheme>& switchTheme);
+    void HandleBlurEvent(const RefPtr<SwitchPaintProperty>& switchPaintProperty,
+        const RefPtr<SwitchTheme>& switchTheme);
+    void UpdateColorWhenIsOn(bool isOn);
     float GetSwitchWidth() const;
     float GetSwitchContentOffsetX() const;
 
@@ -174,6 +177,10 @@ private:
     void InitTouchEvent();
     void InitMouseEvent();
     void InitFocusEvent();
+
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
+    void OnIsFocusActiveUpdate(bool isFocusAcitve);
 
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
@@ -206,9 +213,12 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     bool isTouch_ = false;
     bool isHover_ = false;
+    bool isFocus_ = false;
     bool isUserSetResponseRegion_ = false;
     bool showHoverEffect_ = true;
     bool enabled_ = true;
+    bool isBgColorUnselectFocus_ = false;
+    bool isPointColorUnselectFocus_ = false;
 
     float width_ = 0.0f;
     float height_ = 0.0f;
@@ -223,6 +233,7 @@ private:
     bool isDragEvent_ = false;
     RefPtr<SwitchModifier> switchModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(SwitchPattern);
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
 };
 } // namespace OHOS::Ace::NG
 

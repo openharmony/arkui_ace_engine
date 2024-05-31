@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
 #include <cstdint>
+#include <memory>
 #include <vector>
 #include "base/utils/utils.h"
 
@@ -54,15 +55,15 @@ namespace {
 namespace OHOS::Ace {
 
 namespace {
-ImageSourceInfo CreateSourceInfo(const std::string &src, RefPtr<PixelMap> &pixmap, const std::string &bundleName,
-    const std::string &moduleName)
+ImageSourceInfo CreateSourceInfo(const std::shared_ptr<std::string>& srcRef, RefPtr<PixelMap>& pixmap,
+    const std::string& bundleName, const std::string& moduleName)
 {
 #if defined(PIXEL_MAP_SUPPORTED)
     if (pixmap) {
         return ImageSourceInfo(pixmap);
     }
 #endif
-    return { src, bundleName, moduleName };
+    return { srcRef, bundleName, moduleName };
 }
 } // namespace
 
@@ -158,7 +159,8 @@ void JSImage::SetAlt(const JSCallbackInfo& args)
         pixmap = CreatePixelMapFromNapiValue(args[0]);
 #endif
     }
-    auto srcInfo = CreateSourceInfo(src, pixmap, bundleName, moduleName);
+    auto srcRef = std::make_shared<std::string>(src);
+    auto srcInfo = CreateSourceInfo(srcRef, pixmap, bundleName, moduleName);
     srcInfo.SetIsUriPureNumber((resId == -1));
     ImageModel::GetInstance()->SetAlt(srcInfo);
 }
@@ -250,6 +252,11 @@ void JSImage::OnFinish(const JSCallbackInfo& info)
 
 void JSImage::Create(const JSCallbackInfo& info)
 {
+    CreateImage(info);
+}
+
+void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
+{
     if (info.Length() < 1) {
         return;
     }
@@ -300,8 +307,10 @@ void JSImage::Create(const JSCallbackInfo& info)
         }
 #endif
     }
-
-    ImageModel::GetInstance()->Create(src, pixmap, bundleName, moduleName, (resId == -1));
+    ImageInfoConfig imageInfoConfig(
+        std::make_shared<std::string>(src), bundleName, moduleName, (resId == -1), isImageSpan
+    );
+    ImageModel::GetInstance()->Create(imageInfoConfig, pixmap);
 }
 
 bool JSImage::IsDrawable(const JSRef<JSVal>& jsValue)
@@ -342,11 +351,23 @@ void JSImage::JsImageResizable(const JSCallbackInfo& info)
         return;
     }
     auto sliceValue = resizableObject->GetProperty("slice");
+    if (!sliceValue->IsObject()) {
+        ImageModel::GetInstance()->SetResizableSlice(sliceResult);
+        return;
+    }
     JSRef<JSObject> sliceObj = JSRef<JSObject>::Cast(sliceValue);
     if (sliceObj->IsEmpty()) {
         ImageModel::GetInstance()->SetResizableSlice(sliceResult);
         return;
     }
+    UpdateSliceResult(sliceObj, sliceResult);
+
+    ImageModel::GetInstance()->SetResizableSlice(sliceResult);
+}
+
+void JSImage::UpdateSliceResult(const JSRef<JSObject>& sliceObj, ImageResizableSlice& sliceResult)
+{
+    // creatge a array has 4 elements for paresing sliceSize
     static std::array<std::string, 4> keys = { "left", "right", "top", "bottom" };
     for (uint32_t i = 0; i < keys.size(); i++) {
         auto sliceSize = sliceObj->GetProperty(keys.at(i).c_str());
@@ -652,7 +673,7 @@ void JSImage::SetEnhancedImageQuality(const JSCallbackInfo& info)
 void JSImage::CreateImageAnimation(std::vector<RefPtr<PixelMap>>& pixelMaps, int32_t duration, int32_t iterations)
 {
     std::vector<ImageProperties> imageList;
-    for (int i = 0; i < pixelMaps.size(); i++) {
+    for (int i = 0; i < static_cast<int32_t>(pixelMaps.size()); i++) {
         ImageProperties image;
         image.pixelMap = pixelMaps[i];
         imageList.push_back(image);
@@ -681,7 +702,9 @@ void JSImage::JSBind(BindingTarget globalObj)
 
     JSClass<JSImage>::StaticMethod("border", &JSImage::JsBorder);
     JSClass<JSImage>::StaticMethod("borderRadius", &JSImage::JsBorderRadius);
+    JSClass<JSImage>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSImage>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSImage>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSImage>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSImage>::StaticMethod("autoResize", &JSImage::SetAutoResize);
     JSClass<JSImage>::StaticMethod("resizable", &JSImage::JsImageResizable);

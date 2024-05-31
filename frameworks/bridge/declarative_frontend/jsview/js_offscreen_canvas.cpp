@@ -140,6 +140,7 @@ napi_value JSOffscreenCanvas::Constructor(napi_env env, napi_callback_info info)
     double fWidth = 0.0;
     double fHeight = 0.0;
     auto workCanvas = new (std::nothrow) JSOffscreenCanvas();
+    CHECK_NULL_RETURN(workCanvas, nullptr);
     if (argv[2] != nullptr) {
         int32_t unit = 0;
         napi_get_value_int32(env, argv[2], &unit);
@@ -313,7 +314,7 @@ napi_value JSOffscreenCanvas::OnSetHeight(napi_env env, napi_callback_info info)
 
 napi_value JSOffscreenCanvas::onTransferToImageBitmap(napi_env env)
 {
-    if (offscreenCanvasContext_ == nullptr) {
+    if (offscreenCanvasPattern_ == nullptr || offscreenCanvasContext_ == nullptr) {
         return nullptr;
     }
     napi_value global = nullptr;
@@ -338,10 +339,23 @@ napi_value JSOffscreenCanvas::onTransferToImageBitmap(napi_env env)
         return nullptr;
     }
     auto jsImage = (JSRenderImage*)nativeObj;
+    CHECK_NULL_RETURN(jsImage, nullptr);
+#ifdef PIXEL_MAP_SUPPORTED
+    auto pixelMap = offscreenCanvasPattern_->TransferToImageBitmap();
+    if (pixelMap == nullptr) {
+        return nullptr;
+    }
+    jsImage->SetPixelMap(pixelMap);
+#else
+    auto imageData = offscreenCanvasPattern_->GetImageData(0, 0, width_, height_);
+    if (imageData == nullptr) {
+        return nullptr;
+    }
+    jsImage->SetImageData(imageData);
+#endif
     jsImage->SetUnit(GetUnit());
     jsImage->SetWidth(GetWidth());
     jsImage->SetHeight(GetHeight());
-    jsImage->SetContextId(offscreenCanvasContext_->GetId());
     return renderImage;
 }
 

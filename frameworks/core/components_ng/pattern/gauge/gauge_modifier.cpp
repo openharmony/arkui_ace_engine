@@ -66,12 +66,16 @@ void GaugeModifier::UpdateValue()
     }
     float max = paintProperty->GetMaxValue();
     float min = paintProperty->GetMinValue();
-    if (NearEqual(value, value_->Get())) {
+    value = std::clamp(value, min, max);
+    float ratio = 0.0f;
+    if (Positive(max - min)) {
+        ratio = (value - min) / (max - min);
+    }
+    if (NearEqual(ratio, value_->Get())) {
         return;
     }
-    value = std::clamp(value, min, max);
     start_ = end_;
-    end_ = value;
+    end_ = ratio;
     value_->Set(start_);
     AnimationOption option = AnimationOption();
     auto curve =
@@ -257,7 +261,7 @@ void GaugeModifier::PaintDraw(RSCanvas& canvas, RefPtr<GaugePaintProperty>& pain
     float currentStart = ZERO_CIRCLE;
     float highLightStart = ZERO_CIRCLE;
     size_t highLightIndex = 0;
-    auto ratio = GetValueRatio(paintProperty);
+    auto ratio = value_->Get();
     for (int32_t index = static_cast<int32_t>(colors.size()) - 1; index >= 0; --index) {
         data.color = colors[index];
         data.color.ChangeAlpha(UNSELECT_ALPHA);
@@ -409,7 +413,7 @@ void GaugeModifier::PaintMonochromeCircular(
     }
     Color backgroundColor = color.ChangeOpacity(MONOCHROME_CIRCULAR_BACKGROUND_COLOR_OPACITY);
     float offsetDegree = GetOffsetDegree(data, data.thickness * PERCENT_HALF);
-    auto ratio = GetValueRatio(paintProperty);
+    auto ratio = value_->Get();
     RSBrush brush;
     brush.SetAntiAlias(true);
     
@@ -511,7 +515,7 @@ void GaugeModifier::PaintSingleSegmentGradientCircular(
     canvas.DrawPath(path);
     canvas.DetachPen();
 
-    auto ratio = GetValueRatio(paintProperty);
+    auto ratio = value_->Get();
     data.startDegree = QUARTER_CIRCLE;
     data.sweepDegree = data.sweepDegree * ratio;
     NewDrawIndicator(canvas, paintProperty, data);
@@ -596,7 +600,7 @@ void GaugeModifier::PaintMultiSegmentGradientCircular(
 
     PaintMultiSegmentGradientCircularShadow(canvas, data, paintProperty, colors, weights);
 
-    auto ratio = GetValueRatio(paintProperty);
+    auto ratio = value_->Get();
     data.startDegree = QUARTER_CIRCLE;
     data.sweepDegree = sweepDegree * ratio;
     SingleSegmentGradientInfo info;
@@ -782,22 +786,6 @@ float GaugeModifier::GetOffsetDegree(RenderRingInfo& data, float oppositeSide)
     return NearEqual(data.radius, data.thickness * PERCENT_HALF)
                ? ZERO_CIRCLE
                : std::tan((oppositeSide) / (data.radius - data.thickness * PERCENT_HALF)) * HALF_CIRCLE / M_PI;
-}
-
-float GaugeModifier::GetValueRatio(RefPtr<GaugePaintProperty>& paintProperty)
-{
-    CHECK_NULL_RETURN(paintProperty, ZERO_CIRCLE);
-    float min = paintProperty->GetMinValue();
-    float max = paintProperty->GetMaxValue();
-    float value = paintProperty->GetValueValue();
-
-    if (LessOrEqual(max, min)) {
-        min = DEFAULT_MIN_VALUE;
-        max = DEFAULT_MAX_VALUE;
-    }
-
-    value = std::clamp(value, min, max);
-    return (value_->Get() - min) / (max - min);
 }
 
 void GaugeModifier::NewDrawIndicator(

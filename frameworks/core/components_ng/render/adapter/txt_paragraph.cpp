@@ -15,13 +15,16 @@
 
 #include "core/components_ng/render/adapter/txt_paragraph.h"
 
+#include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
+#include "base/geometry/dimension.h"
 #include "core/components/font/constants_converter.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "core/components_ng/render/adapter/txt_font_collection.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/components/common/properties/text_layout_info.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -39,13 +42,20 @@ RefPtr<Paragraph> Paragraph::Create(const ParagraphStyle& paraStyle, const RefPt
     return AceType::MakeRefPtr<TxtParagraph>(paraStyle, sharedFontCollection);
 }
 
+RefPtr<Paragraph> Paragraph::Create(void* rsParagraph)
+{
+    return AceType::MakeRefPtr<TxtParagraph>(rsParagraph);
+}
+
 bool TxtParagraph::IsValid()
 {
-    return paragraph_ != nullptr;
+    return GetParagraph() != nullptr;
 }
 
 void TxtParagraph::CreateBuilder()
 {
+    ACE_TEXT_SCOPED_TRACE("TxtParagraph::CreateBuilder");
+    CHECK_NULL_VOID(!hasExternalParagraph_);
     placeholderPosition_.clear();
 #ifndef USE_GRAPHIC_TEXT_GINE
     txt::ParagraphStyle style;
@@ -87,6 +97,8 @@ void TxtParagraph::CreateBuilder()
 
 void TxtParagraph::PushStyle(const TextStyle& style)
 {
+    ACE_TEXT_SCOPED_TRACE("TxtParagraph::PushStyle");
+    CHECK_NULL_VOID(!hasExternalParagraph_);
     if (!builder_) {
         CreateBuilder();
     }
@@ -103,7 +115,8 @@ void TxtParagraph::PushStyle(const TextStyle& style)
 
 void TxtParagraph::PopStyle()
 {
-    CHECK_NULL_VOID(builder_);
+    ACE_TEXT_SCOPED_TRACE("TxtParagraph::PopStyle");
+    CHECK_NULL_VOID(!hasExternalParagraph_ && builder_);
 #ifndef USE_GRAPHIC_TEXT_GINE
     builder_->Pop();
 #else
@@ -113,10 +126,12 @@ void TxtParagraph::PopStyle()
 
 void TxtParagraph::AddText(const std::u16string& text)
 {
+    ACE_TEXT_SCOPED_TRACE("TxtParagraph::AddText");
     if (!builder_) {
         CreateBuilder();
     }
     text_ += text;
+    CHECK_NULL_VOID(!hasExternalParagraph_);
 #ifndef USE_GRAPHIC_TEXT_GINE
     builder_->AddText(text);
 #else
@@ -126,6 +141,8 @@ void TxtParagraph::AddText(const std::u16string& text)
 
 void TxtParagraph::AddSymbol(const std::uint32_t& symbolId)
 {
+    ACE_TEXT_SCOPED_TRACE("TxtParagraph::AddSymbol");
+    CHECK_NULL_VOID(!hasExternalParagraph_);
     if (!builder_) {
         CreateBuilder();
     }
@@ -135,6 +152,8 @@ void TxtParagraph::AddSymbol(const std::uint32_t& symbolId)
 
 int32_t TxtParagraph::AddPlaceholder(const PlaceholderRun& span)
 {
+    ACE_TEXT_SCOPED_TRACE("TxtParagraph::AddPlaceholder");
+    CHECK_NULL_RETURN(!hasExternalParagraph_, 0);
     if (!builder_) {
         CreateBuilder();
     }
@@ -156,7 +175,8 @@ int32_t TxtParagraph::AddPlaceholder(const PlaceholderRun& span)
 
 void TxtParagraph::Build()
 {
-    CHECK_NULL_VOID(builder_);
+    ACE_TEXT_SCOPED_TRACE("TxtParagraph::Build");
+    CHECK_NULL_VOID(!hasExternalParagraph_ && builder_);
 #ifndef USE_GRAPHIC_TEXT_GINE
     paragraph_ = builder_->Build();
 #else
@@ -185,88 +205,98 @@ void TxtParagraph::Reset()
 
 void TxtParagraph::Layout(float width)
 {
-    CHECK_NULL_VOID(paragraph_);
+    ACE_TEXT_SCOPED_TRACE("TxtParagraph::Layout");
+    CHECK_NULL_VOID(!hasExternalParagraph_ && paragraph_);
     paragraph_->Layout(width);
 }
 
 float TxtParagraph::GetHeight()
 {
-    CHECK_NULL_RETURN(paragraph_, 0.0f);
-    return static_cast<float>(paragraph_->GetHeight());
+    auto paragrah = GetParagraph();
+    CHECK_NULL_RETURN(paragrah, 0.0f);
+    return static_cast<float>(paragrah->GetHeight());
 }
 
 float TxtParagraph::GetTextWidth()
 {
-    CHECK_NULL_RETURN(paragraph_, 0.0f);
+    auto paragrah = GetParagraph();
+    CHECK_NULL_RETURN(paragrah, 0.0f);
     if (GetLineCount() == 1) {
 #ifndef USE_GRAPHIC_TEXT_GINE
-        return std::max(paragraph_->GetLongestLine(), paragraph_->GetMaxIntrinsicWidth());
+        return std::max(paragrah->GetLongestLine(), paragrah->GetMaxIntrinsicWidth());
 #else
-        return std::max(paragraph_->GetActualWidth(), paragraph_->GetMaxIntrinsicWidth());
+        return std::max(paragrah->GetActualWidth(), paragrah->GetMaxIntrinsicWidth());
 #endif
     }
 #ifndef USE_GRAPHIC_TEXT_GINE
-    return paragraph_->GetLongestLine();
+    return paragrah->GetLongestLine();
 #else
-    return paragraph_->GetActualWidth();
+    return paragrah->GetActualWidth();
 #endif
 }
 
 float TxtParagraph::GetMaxIntrinsicWidth()
 {
-    CHECK_NULL_RETURN(paragraph_, 0.0f);
-    return static_cast<float>(paragraph_->GetMaxIntrinsicWidth());
+    auto paragrah = GetParagraph();
+    CHECK_NULL_RETURN(paragrah, 0.0f);
+    return static_cast<float>(paragrah->GetMaxIntrinsicWidth());
 }
 
 bool TxtParagraph::DidExceedMaxLines()
 {
-    CHECK_NULL_RETURN(paragraph_, false);
-    return paragraph_->DidExceedMaxLines();
+    auto paragrah = GetParagraph();
+    CHECK_NULL_RETURN(paragrah, false);
+    return paragrah->DidExceedMaxLines();
 }
 
 float TxtParagraph::GetLongestLine()
 {
-    CHECK_NULL_RETURN(paragraph_, 0.0f);
+    auto paragrah = GetParagraph();
+    CHECK_NULL_RETURN(paragrah, 0.0f);
 #ifndef USE_GRAPHIC_TEXT_GINE
-    return static_cast<float>(paragraph_->GetLongestLine());
+    return static_cast<float>(paragrah->GetLongestLine());
 #else
-    return static_cast<float>(paragraph_->GetActualWidth());
+    return static_cast<float>(paragrah->GetActualWidth());
 #endif
 }
 
 float TxtParagraph::GetMaxWidth()
 {
-    CHECK_NULL_RETURN(paragraph_, 0.0f);
-    return static_cast<float>(paragraph_->GetMaxWidth());
+    auto paragrah = GetParagraph();
+    CHECK_NULL_RETURN(paragrah, 0.0f);
+    return static_cast<float>(paragrah->GetMaxWidth());
 }
 
 float TxtParagraph::GetAlphabeticBaseline()
 {
-    CHECK_NULL_RETURN(paragraph_, 0.0f);
-    return static_cast<float>(paragraph_->GetAlphabeticBaseline());
+    auto paragrah = GetParagraph();
+    CHECK_NULL_RETURN(paragrah, 0.0f);
+    return static_cast<float>(paragrah->GetAlphabeticBaseline());
 }
 
 size_t TxtParagraph::GetLineCount()
 {
 #ifndef USE_GRAPHIC_TEXT_GINE
-    auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(paragraph_.get());
+    auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(GetParagraph());
     CHECK_NULL_RETURN(paragraphTxt, 0);
     return paragraphTxt->GetLineCount();
 #else
-    CHECK_NULL_RETURN(paragraph_, 0);
-    return paragraph_->GetLineCount();
+    auto paragrah = GetParagraph();
+    CHECK_NULL_RETURN(paragrah, 0);
+    return paragrah->GetLineCount();
 #endif
 }
 
 float TxtParagraph::GetCharacterWidth(int32_t index)
 {
-    CHECK_NULL_RETURN(paragraph_, 0.0f);
+    auto paragrah = GetParagraph();
+    CHECK_NULL_RETURN(paragrah, 0.0f);
     auto next = index + 1;
 #ifndef USE_GRAPHIC_TEXT_GINE
-    auto boxes = paragraph_->GetRectsForRange(
+    auto boxes = paragrah->GetRectsForRange(
         index, next, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
 #else
-    auto boxes = paragraph_->GetTextRectsByBoundary(
+    auto boxes = paragrah->GetTextRectsByBoundary(
         index, next, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
 #endif
     if (boxes.empty()) {
@@ -282,13 +312,15 @@ float TxtParagraph::GetCharacterWidth(int32_t index)
 
 void TxtParagraph::Paint(RSCanvas& canvas, float x, float y)
 {
-    CHECK_NULL_VOID(paragraph_);
+    ACE_TEXT_SCOPED_TRACE("TxtParagraph::Paint");
+    auto paragrah = GetParagraph();
+    CHECK_NULL_VOID(paragrah);
 #ifndef USE_ROSEN_DRAWING
     SkCanvas* skCanvas = canvas.GetImpl<RSSkCanvas>()->ExportSkCanvas();
     CHECK_NULL_VOID(skCanvas);
-    paragraph_->Paint(skCanvas, x, y);
+    paragrah->Paint(skCanvas, x, y);
 #else
-    paragraph_->Paint(&canvas, x, y);
+    paragrah->Paint(&canvas, x, y);
 #endif
     if (paraStyle_.leadingMargin && paraStyle_.leadingMargin->pixmap) {
         auto size = paraStyle_.leadingMargin->size;
@@ -314,27 +346,46 @@ void TxtParagraph::Paint(RSCanvas& canvas, float x, float y)
 #ifndef USE_ROSEN_DRAWING
 void TxtParagraph::Paint(SkCanvas* skCanvas, float x, float y)
 {
-    CHECK_NULL_VOID(skCanvas);
-    paragraph_->Paint(skCanvas, x, y);
+    auto paragrah = GetParagraph();
+    CHECK_NULL_VOID(skCanvas && paragrah);
+    paragrah->Paint(skCanvas, x, y);
 }
 #endif
 
 // ToDo:adjust index
 int32_t TxtParagraph::GetGlyphIndexByCoordinate(const Offset& offset, bool isSelectionPos)
 {
-    if (!paragraph_) {
+    auto paragrah = GetParagraph();
+    if (!paragrah) {
         return 0;
     }
     int32_t index;
 #ifndef USE_GRAPHIC_TEXT_GINE
-    index = static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinate(offset.GetX(), offset.GetY()).position);
+    index = static_cast<int32_t>(paragrah->GetGlyphPositionAtCoordinate(offset.GetX(), offset.GetY()).position);
 #else
-    index = static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(offset.GetX(), offset.GetY()).index);
+    index = static_cast<int32_t>(paragrah->GetGlyphIndexByCoordinate(offset.GetX(), offset.GetY()).index);
 #endif
     if (isSelectionPos) {
         AdjustIndexForward(offset, true, index);
     }
     return index;
+}
+
+PositionWithAffinity TxtParagraph::GetGlyphPositionAtCoordinate(const Offset& offset)
+{
+    PositionWithAffinity finalResult(0, TextAffinity::UPSTREAM);
+    auto paragrah = GetParagraph();
+    CHECK_NULL_RETURN(paragrah, finalResult);
+#ifndef USE_GRAPHIC_TEXT_GINE
+    auto result = paragrah->GetGlyphPositionAtCoordinate(offset.GetX(), offset.GetY());
+    finalResult.position_ = result.pos_;
+    finalResult.affinity_ = static_cast<TextAffinity>(result.affinity_);
+#else
+    auto result = paragrah->GetGlyphIndexByCoordinate(offset.GetX(), offset.GetY());
+    finalResult.position_ = result.index;
+    finalResult.affinity_ = static_cast<TextAffinity>(result.affinity);
+#endif
+    return finalResult;
 }
 
 void TxtParagraph::AdjustIndexForward(const Offset& offset, bool compareOffset, int32_t& index)
@@ -356,11 +407,12 @@ void TxtParagraph::AdjustIndexForward(const Offset& offset, bool compareOffset, 
         index = start;
         next = end;
     }
+    auto paragrah = GetParagraph();
 #ifndef USE_GRAPHIC_TEXT_GINE
-    auto boxes = paragraph_->GetRectsForRange(
+    auto boxes = paragrah->GetRectsForRange(
         index, next, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
 #else
-    auto boxes = paragraph_->GetTextRectsByBoundary(
+    auto boxes = paragrah->GetTextRectsByBoundary(
         index, next, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
 #endif
     if (boxes.empty()) {
@@ -401,7 +453,8 @@ bool TxtParagraph::CalCulateAndCheckPreIsPlaceholder(int32_t index, int32_t& ext
 
 bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& result, bool needLineHighest)
 {
-    if (!paragraph_) {
+    auto paragrah = GetParagraph();
+    if (!paragrah) {
         return false;
     }
     if (empty()) {
@@ -421,10 +474,10 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
     int32_t graphemeClusterLength = StringUtils::NotInUtf16Bmp(prevChar) ? 2 : 1;
     int32_t prev = extent - graphemeClusterLength;
 #ifndef USE_GRAPHIC_TEXT_GINE
-    auto boxes = paragraph_->GetRectsForRange(
+    auto boxes = paragrah->GetRectsForRange(
         prev, extent, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
 #else
-    auto boxes = paragraph_->GetTextRectsByBoundary(prev, extent,
+    auto boxes = paragrah->GetTextRectsByBoundary(prev, extent,
         needLineHighest ? Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM : Rosen::TextRectHeightStyle::TIGHT,
         Rosen::TextRectWidthStyle::TIGHT);
 #endif
@@ -433,20 +486,20 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
         prev = extent - graphemeClusterLength;
         if (prev < 0) {
 #ifndef USE_GRAPHIC_TEXT_GINE
-            boxes = paragraph_->GetRectsForRange(
+            boxes = paragrah->GetRectsForRange(
                 0, extent, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
 #else
-            boxes = paragraph_->GetTextRectsByBoundary(0, extent,
+            boxes = paragrah->GetTextRectsByBoundary(0, extent,
                 needLineHighest ? Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM : Rosen::TextRectHeightStyle::TIGHT,
                 Rosen::TextRectWidthStyle::TIGHT);
 #endif
             break;
         }
 #ifndef USE_GRAPHIC_TEXT_GINE
-        boxes = paragraph_->GetRectsForRange(
+        boxes = paragrah->GetRectsForRange(
             prev, extent, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
 #else
-        boxes = paragraph_->GetTextRectsByBoundary(prev, extent,
+        boxes = paragrah->GetTextRectsByBoundary(prev, extent,
             needLineHighest ? Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM : Rosen::TextRectHeightStyle::TIGHT,
             Rosen::TextRectWidthStyle::TIGHT);
 #endif
@@ -488,7 +541,7 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
     double caretStart = isLtr ? textBox.rect.GetRight() : textBox.rect.GetLeft();
 #endif
     float offsetX = std::min(
-        static_cast<float>(caretStart), std::max(GetLongestLine(), static_cast<float>(paragraph_->GetMaxWidth())));
+        static_cast<float>(caretStart), std::max(GetLongestLine(), static_cast<float>(paragrah->GetMaxWidth())));
     result.offset.SetX(offsetX);
 #ifndef USE_GRAPHIC_TEXT_GINE
     result.offset.SetY(textBox.rect.fTop);
@@ -517,19 +570,20 @@ float TxtParagraph::MakeEmptyOffsetX()
 
 bool TxtParagraph::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF& result, bool needLineHighest)
 {
-    if (!paragraph_ || static_cast<size_t>(extent) >= GetParagraphLength()) {
+    auto paragrah = GetParagraph();
+    if (!paragrah || static_cast<size_t>(extent) >= GetParagraphLength()) {
         return false;
     }
 
     result.Reset();
 #ifndef USE_GRAPHIC_TEXT_GINE
-    auto getTextRects = [parapraph = &paragraph_](int32_t extent, int32_t next) {
-        return (*parapraph)->GetRectsForRange(
+    auto getTextRects = [parapraph = paragrah](int32_t extent, int32_t next) {
+        return parapraph->GetRectsForRange(
             extent, next, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
     };
 #else
-    auto getTextRects = [parapraph = &paragraph_, needLineHighest](int32_t extent, int32_t next) {
-        return (*parapraph)->GetTextRectsByBoundary(extent, next,
+    auto getTextRects = [parapraph = paragrah, needLineHighest](int32_t extent, int32_t next) {
+        return parapraph->GetTextRectsByBoundary(extent, next,
             needLineHighest ? Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM : Rosen::TextRectHeightStyle::TIGHT,
             Rosen::TextRectWidthStyle::TIGHT);
     };
@@ -559,7 +613,7 @@ bool TxtParagraph::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF
     double caretStart = isLtr ? textBox.rect.GetLeft() : textBox.rect.GetRight();
 #endif
     // Caret is within width of the downstream glyphs.
-    double offsetX = std::min(caretStart, paragraph_->GetMaxWidth());
+    double offsetX = std::min(caretStart, paragrah->GetMaxWidth());
     result.offset.SetX(offsetX);
 #ifndef USE_GRAPHIC_TEXT_GINE
     result.offset.SetY(textBox.rect.fTop);
@@ -581,12 +635,13 @@ void TxtParagraph::GetRectsForRange(int32_t start, int32_t end, std::vector<Rect
 
 void TxtParagraph::GetRectsForRangeInner(int32_t start, int32_t end, std::vector<RectF>& selectedRects)
 {
-    CHECK_NULL_VOID(paragraph_);
+    auto paragrah = GetParagraph();
+    CHECK_NULL_VOID(paragrah);
 #ifndef USE_GRAPHIC_TEXT_GINE
-    const auto& boxes = paragraph_->GetRectsForRange(
+    const auto& boxes = paragrah->GetRectsForRange(
         start, end, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
 #else
-    const auto& boxes = paragraph_->GetTextRectsByBoundary(
+    const auto& boxes = paragrah->GetTextRectsByBoundary(
         start, end, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
 #endif
     if (boxes.empty()) {
@@ -612,7 +667,8 @@ int32_t TxtParagraph::AdjustIndexForEmoji(int32_t index)
 
 bool TxtParagraph::IsIndexInEmoji(int32_t index, int32_t& emojiStart, int32_t& emojiEnd)
 {
-    CHECK_NULL_RETURN(paragraph_, false);
+    auto paragrah = GetParagraph();
+    CHECK_NULL_RETURN(paragrah, false);
     int32_t start = 0;
     int32_t end = 0;
     if (!GetWordBoundary(index, start, end)) {
@@ -632,11 +688,12 @@ bool TxtParagraph::IsIndexInEmoji(int32_t index, int32_t& emojiStart, int32_t& e
 
 void TxtParagraph::GetRectsForPlaceholders(std::vector<RectF>& selectedRects)
 {
-    CHECK_NULL_VOID(paragraph_);
+    auto paragrah = GetParagraph();
+    CHECK_NULL_VOID(paragrah);
 #ifndef USE_GRAPHIC_TEXT_GINE
-    const auto& boxes = paragraph_->GetRectsForPlaceholders();
+    const auto& boxes = paragrah->GetRectsForPlaceholders();
 #else
-    const auto& boxes = paragraph_->GetTextRectsOfPlaceholders();
+    const auto& boxes = paragrah->GetTextRectsOfPlaceholders();
 #endif
     if (boxes.empty()) {
         return;
@@ -699,9 +756,9 @@ bool TxtParagraph::CalcCaretMetricsByPosition(
 void TxtParagraph::SetIndents(const std::vector<float>& indents)
 {
 #ifndef USE_GRAPHIC_TEXT_GINE
-    auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(paragraph_.get());
+    auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(GetParagraph());
 #else
-    auto* paragraphTxt = static_cast<OHOS::Rosen::Typography*>(paragraph_.get());
+    auto* paragraphTxt = static_cast<OHOS::Rosen::Typography*>(GetParagraph());
 #endif
     CHECK_NULL_VOID(paragraphTxt);
     paragraphTxt->SetIndents(indents);
@@ -709,11 +766,12 @@ void TxtParagraph::SetIndents(const std::vector<float>& indents)
 
 bool TxtParagraph::GetWordBoundary(int32_t offset, int32_t& start, int32_t& end)
 {
-    CHECK_NULL_RETURN(paragraph_, false);
+    auto paragrah = GetParagraph();
+    CHECK_NULL_RETURN(paragrah, false);
 #ifndef USE_GRAPHIC_TEXT_GINE
-    auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(paragraph_.get());
+    auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(paragrah);
 #else
-    auto* paragraphTxt = static_cast<OHOS::Rosen::Typography*>(paragraph_.get());
+    auto* paragraphTxt = static_cast<OHOS::Rosen::Typography*>(paragrah);
 #endif
     CHECK_NULL_RETURN(paragraphTxt, false);
 #ifndef USE_GRAPHIC_TEXT_GINE
@@ -753,12 +811,17 @@ void TxtParagraph::HandleLeadingMargin(CaretMetricsF& result, LeadingMargin lead
 
 bool TxtParagraph::HandleCaretWhenEmpty(CaretMetricsF& result)
 {
-    if (!paragraph_ || paragraph_->GetLineCount() == 0) {
+    auto paragrah = GetParagraph();
+    if (!paragrah || paragrah->GetLineCount() == 0) {
         return false;
     }
 
     result.offset.Reset();
-    result.height = paragraph_->GetHeight();
+    result.height = paragrah->GetHeight();
+    auto lineHeight = paraStyle_.lineHeight;
+    if (lineHeight.IsValid()) {
+        result.offset.SetY(std::max(lineHeight.ConvertToPx() - result.height, 0.0));
+    }
     if (paraStyle_.align != TextAlign::START) {
         HandleTextAlign(result, paraStyle_.align);
     } else if (paraStyle_.leadingMargin) {
@@ -770,11 +833,12 @@ bool TxtParagraph::HandleCaretWhenEmpty(CaretMetricsF& result)
 LineMetrics TxtParagraph::GetLineMetricsByRectF(RectF& rect)
 {
 #ifndef USE_GRAPHIC_TEXT_GINE
-    auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(paragraph_.get());
+    auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(GetParagraph());
 #else
-    auto* paragraphTxt = static_cast<OHOS::Rosen::Typography*>(paragraph_.get());
+    auto* paragraphTxt = static_cast<OHOS::Rosen::Typography*>(GetParagraph());
 #endif
     LineMetrics lineMetrics;
+    CHECK_NULL_RETURN(paragraphTxt, lineMetrics);
     auto metrics = paragraphTxt->GetLineMetrics();
     if (metrics.empty()) {
         return lineMetrics;
@@ -796,6 +860,135 @@ LineMetrics TxtParagraph::GetLineMetricsByRectF(RectF& rect)
     return lineMetrics;
 }
 
+TextLineMetrics TxtParagraph::GetLineMetrics(size_t lineNumber)
+{
+#ifndef USE_GRAPHIC_TEXT_GINE
+    auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(GetParagraph());
+#else
+    auto* paragraphTxt = static_cast<OHOS::Rosen::Typography*>(GetParagraph());
+#endif
+    TextLineMetrics lineMetrics;
+    OHOS::Rosen::LineMetrics resMetric;
+    CHECK_NULL_RETURN(paragraphTxt, lineMetrics);
+    bool success = paragraphTxt->GetLineMetricsAt(lineNumber, &resMetric);
+    if (!success) {
+        TAG_LOGE(AceLogTag::ACE_TEXT, "TxtParagraph::GetLineMetrics failed");
+    }
+ 
+    lineMetrics.ascender = resMetric.ascender;
+    lineMetrics.descender = resMetric.descender;
+    lineMetrics.capHeight = resMetric.capHeight;
+    lineMetrics.xHeight = resMetric.xHeight;
+    lineMetrics.width = resMetric.width;
+    lineMetrics.height = resMetric.height;
+    lineMetrics.x = resMetric.x;
+    lineMetrics.y = resMetric.y;
+    lineMetrics.startIndex = resMetric.startIndex;
+    lineMetrics.endIndex = resMetric.endIndex;
+    lineMetrics.baseline = resMetric.baseline;
+    lineMetrics.lineNumber = resMetric.lineNumber;
+ 
+    if (resMetric.runMetrics.empty()) {
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "GetLineMetrics runMetrics is empty.");
+        return lineMetrics;
+    }
+ 
+    auto runMetricsResMap = resMetric.runMetrics;
+    for (const auto& it : runMetricsResMap) {
+        RunMetrics runMetrics;
+        auto runMetricsRes = it.second;
+        SetRunMetrics(runMetrics, runMetricsRes);
+        lineMetrics.runMetrics.insert(std::map<size_t, RunMetrics>::value_type(it.first, runMetrics));
+    }
+    return lineMetrics;
+}
+ 
+void TxtParagraph::SetRunMetrics(RunMetrics& runMetrics, const OHOS::Rosen::RunMetrics& runMetricsRes)
+{
+    auto textStyleRes = runMetricsRes.textStyle;
+    runMetrics.textStyle.SetTextDecoration(static_cast<TextDecoration>(textStyleRes->decoration));
+    runMetrics.textStyle.SetFontWeight(static_cast<FontWeight>(textStyleRes->fontWeight));
+    runMetrics.textStyle.SetFontStyle(static_cast<FontStyle>(textStyleRes->fontStyle));
+    runMetrics.textStyle.SetTextBaseline(static_cast<TextBaseline>(textStyleRes->baseline));
+    runMetrics.textStyle.SetFontFamilies(textStyleRes->fontFamilies);
+    runMetrics.textStyle.SetFontSize(Dimension(textStyleRes->fontSize, DimensionUnit::VP));
+    runMetrics.textStyle.SetLetterSpacing(Dimension(textStyleRes->letterSpacing, DimensionUnit::VP));
+    runMetrics.textStyle.SetWordSpacing(Dimension(textStyleRes->wordSpacing, DimensionUnit::VP));
+    runMetrics.textStyle.SetHeightScale(textStyleRes->heightScale);
+    runMetrics.textStyle.SetHalfLeading(textStyleRes->halfLeading);
+    runMetrics.textStyle.SetHeightOnly(textStyleRes->heightOnly);
+    runMetrics.textStyle.SetEllipsis(textStyleRes->ellipsis);
+    runMetrics.textStyle.SetEllipsisMode(static_cast<EllipsisMode>(textStyleRes->ellipsisModal));
+    runMetrics.textStyle.SetLocale(textStyleRes->locale);
+ 
+    auto fontMetricsRes = runMetricsRes.fontMetrics;
+    runMetrics.fontMetrics.fFlags = fontMetricsRes.fFlags;
+    runMetrics.fontMetrics.fTop = fontMetricsRes.fTop;
+    runMetrics.fontMetrics.fAscent = fontMetricsRes.fAscent;
+    runMetrics.fontMetrics.fDescent = fontMetricsRes.fDescent;
+    runMetrics.fontMetrics.fBottom = fontMetricsRes.fBottom;
+    runMetrics.fontMetrics.fLeading = fontMetricsRes.fLeading;
+    runMetrics.fontMetrics.fAvgCharWidth = fontMetricsRes.fAvgCharWidth;
+    runMetrics.fontMetrics.fMaxCharWidth = fontMetricsRes.fMaxCharWidth;
+    runMetrics.fontMetrics.fXMin = fontMetricsRes.fXMin;
+    runMetrics.fontMetrics.fXMax = fontMetricsRes.fXMax;
+    runMetrics.fontMetrics.fXHeight = fontMetricsRes.fXHeight;
+    runMetrics.fontMetrics.fCapHeight = fontMetricsRes.fCapHeight;
+    runMetrics.fontMetrics.fUnderlineThickness = fontMetricsRes.fUnderlineThickness;
+    runMetrics.fontMetrics.fUnderlinePosition = fontMetricsRes.fUnderlinePosition;
+    runMetrics.fontMetrics.fStrikeoutThickness = fontMetricsRes.fStrikeoutThickness;
+    runMetrics.fontMetrics.fStrikeoutPosition = fontMetricsRes.fStrikeoutPosition;
+}
+
+bool TxtParagraph::GetLineMetricsByCoordinate(const Offset& offset, LineMetrics& lineMetrics)
+{
+#ifndef USE_GRAPHIC_TEXT_GINE
+    auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(GetParagraph());
+#else
+    auto* paragraphTxt = static_cast<OHOS::Rosen::Typography*>(GetParagraph());
+#endif
+    CHECK_NULL_RETURN(paragraphTxt, false);
+    auto lineCount = static_cast<int32_t>(GetLineCount());
+    if (lineCount <= 0) {
+        return false;
+    }
+    auto height = GetHeight();
+    if (height <= 0) {
+        return false;
+    }
+    auto averageLineHeight = height / lineCount;
+    auto lineNumber = std::clamp(static_cast<int32_t>(offset.GetY() / averageLineHeight), 0, lineCount - 1);
+    Rosen::LineMetrics resMetric;
+    auto ret = paragraphTxt->GetLineMetricsAt(lineNumber, &resMetric);
+    while (ret) {
+        if (GreatOrEqual(offset.GetY(), resMetric.y) && LessOrEqual(offset.GetY(), resMetric.y + resMetric.height)) {
+            break;
+        }
+        if (LessNotEqual(offset.GetY(), resMetric.y)) {
+            lineNumber--;
+            ret = paragraphTxt->GetLineMetricsAt(lineNumber, &resMetric);
+            continue;
+        }
+        if (GreatNotEqual(offset.GetY(), resMetric.y + resMetric.height)) {
+            lineNumber++;
+            ret = paragraphTxt->GetLineMetricsAt(lineNumber, &resMetric);
+            continue;
+        }
+        ret = false;
+    }
+    if (ret) {
+        lineMetrics.x = resMetric.x;
+        lineMetrics.y = resMetric.y;
+        lineMetrics.ascender = resMetric.ascender;
+        lineMetrics.width = resMetric.width;
+        lineMetrics.height = resMetric.height;
+        lineMetrics.descender = resMetric.descender;
+        lineMetrics.capHeight = resMetric.capHeight;
+        lineMetrics.xHeight = resMetric.xHeight;
+    }
+    return ret;
+}
+
 std::u16string TxtParagraph::GetParagraphText()
 {
     return text_;
@@ -805,4 +998,19 @@ const ParagraphStyle& TxtParagraph::GetParagraphStyle() const
 {
     return paraStyle_;
 }
+
+#ifndef USE_GRAPHIC_TEXT_GINE
+txt::Paragraph* TxtParagraph::GetParagraph()
+{
+    return paragraph_.get();
+}
+#else
+RSParagraph* TxtParagraph::GetParagraph()
+{
+    if (paragraph_) {
+        return paragraph_.get();
+    }
+    return externalParagraph_;
+}
+#endif
 } // namespace OHOS::Ace::NG

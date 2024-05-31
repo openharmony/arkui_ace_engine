@@ -93,37 +93,40 @@ void PluginManagerDelegate::CreatePlatformResource(const WeakPtr<PipelineBase>& 
         SingleTaskExecutor::Make(pipelineContext->GetTaskExecutor(), TaskExecutor::TaskType::PLATFORM);
     auto resRegister = pipelineContext->GetPlatformResRegister();
     auto weakRes = AceType::WeakClaim(AceType::RawPtr(resRegister));
-    platformTaskExecutor.PostTask([weak = WeakClaim(this), weakRes, info] {
-        auto delegate = weak.Upgrade();
-        if (!delegate) {
-            return;
-        }
-        auto resRegister = weakRes.Upgrade();
-        auto context = delegate->context_.Upgrade();
-        if (!resRegister || !context) {
-            return;
-        }
+    platformTaskExecutor.PostTask(
+        [weak = WeakClaim(this), weakRes, info] {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            auto resRegister = weakRes.Upgrade();
+            auto context = delegate->context_.Upgrade();
+            if (!resRegister || !context) {
+                return;
+            }
 
-        delegate->id_ = CREATING_ID;
+            delegate->id_ = CREATING_ID;
 
-        std::stringstream paramStream;
-        paramStream << NTC_PARAM_RICH_TEXT << PLUGIN_MANAGER_PARAM_EQUALS << delegate->id_ << PLUGIN_MANAGER_PARAM_AND
-                    << "bundle" << PLUGIN_MANAGER_PARAM_EQUALS << info.bundleName << PLUGIN_MANAGER_PARAM_AND
-                    << "ability" << PLUGIN_MANAGER_PARAM_EQUALS << info.abilityName << PLUGIN_MANAGER_PARAM_AND
-                    << "module" << PLUGIN_MANAGER_PARAM_EQUALS << info.moduleName << PLUGIN_MANAGER_PARAM_AND << "name"
-                    << PLUGIN_MANAGER_PARAM_EQUALS << info.pluginName << PLUGIN_MANAGER_PARAM_AND << "dimension"
-                    << PLUGIN_MANAGER_PARAM_EQUALS << info.dimension << PLUGIN_MANAGER_PARAM_AND << "id"
-                    << PLUGIN_MANAGER_PARAM_EQUALS << info.id << PLUGIN_MANAGER_PARAM_AND;
+            std::stringstream paramStream;
+            paramStream << NTC_PARAM_RICH_TEXT << PLUGIN_MANAGER_PARAM_EQUALS << delegate->id_
+                        << PLUGIN_MANAGER_PARAM_AND << "bundle" << PLUGIN_MANAGER_PARAM_EQUALS << info.bundleName
+                        << PLUGIN_MANAGER_PARAM_AND << "ability" << PLUGIN_MANAGER_PARAM_EQUALS << info.abilityName
+                        << PLUGIN_MANAGER_PARAM_AND << "module" << PLUGIN_MANAGER_PARAM_EQUALS << info.moduleName
+                        << PLUGIN_MANAGER_PARAM_AND << "name" << PLUGIN_MANAGER_PARAM_EQUALS << info.pluginName
+                        << PLUGIN_MANAGER_PARAM_AND << "dimension" << PLUGIN_MANAGER_PARAM_EQUALS << info.dimension
+                        << PLUGIN_MANAGER_PARAM_AND << "id" << PLUGIN_MANAGER_PARAM_EQUALS << info.id
+                        << PLUGIN_MANAGER_PARAM_AND;
 
-        std::string param = paramStream.str();
-        delegate->id_ = resRegister->CreateResource(PLUGIN_ADAPTOR_RESOURCE_NAME, param);
-        if (delegate->id_ == INVALID_ID) {
-            return;
-        }
-        delegate->state_ = State::CREATED;
-        delegate->hash_ = delegate->MakeResourceHash();
-        delegate->RegisterEvent();
-    }, "ArkUIPluginCreatePlatformResource");
+            std::string param = paramStream.str();
+            delegate->id_ = resRegister->CreateResource(PLUGIN_ADAPTOR_RESOURCE_NAME, param);
+            if (delegate->id_ == INVALID_ID) {
+                return;
+            }
+            delegate->state_ = State::CREATED;
+            delegate->hash_ = delegate->MakeResourceHash();
+            delegate->RegisterEvent();
+        },
+        "ArkUIPluginCreatePlatformResource");
     OnPluginComplete("Complete");
 }
 

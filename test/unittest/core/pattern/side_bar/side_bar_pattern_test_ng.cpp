@@ -24,6 +24,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/progress/progress_paint_property.h"
@@ -32,11 +33,10 @@
 #include "core/components_ng/pattern/side_bar/side_bar_container_model_ng.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_pattern.h"
 #include "core/components_ng/pattern/side_bar/side_bar_theme.h"
-#include "test/mock/core/common/mock_theme_manager.h"
 #include "core/components_v2/extensions/extension.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "core/components_ng/pattern/custom/custom_node.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1754,6 +1754,43 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg057, TestSize.Level1)
     AceApplicationInfo::GetInstance().isRightToLeft_ = false;
     pattern->OnLanguageConfigurationUpdate();
     EXPECT_EQ(pattern->isRightToLeft_, false);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg058
+ * @tc.desc: Test SideBar InitLongPressEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg058, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto context = PipelineBase::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto sideBarTheme = context->GetTheme<SideBarTheme>();
+    ASSERT_NE(sideBarTheme, nullptr);
+    auto buttonNode = pattern->CreateControlButton(sideBarTheme);
+    ASSERT_NE(buttonNode, nullptr);
+
+    pattern->InitLongPressEvent(buttonNode);
+    EXPECT_NE(pattern->longPressEvent_, nullptr);
+    EXPECT_NE(pattern->longPressActionEnd_, nullptr);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg059
+ * @tc.desc: Test SideBar HandleLongPressActionEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg059, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->HandleLongPressActionEnd();
+    EXPECT_EQ(pattern->dialogNode_, nullptr);
+    EXPECT_FALSE(pattern->isDialogShow_);
 }
 
 /**

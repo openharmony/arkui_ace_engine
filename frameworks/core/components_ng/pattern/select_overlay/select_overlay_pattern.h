@@ -66,14 +66,14 @@ public:
         if (!selectOverlayContentModifier_) {
             selectOverlayContentModifier_ = AceType::MakeRefPtr<SelectOverlayContentModifier>();
         }
-
+        SetSelectMenuHeight();
         if (paintMethodCreated_) {
             return MakeRefPtr<SelectOverlayPaintMethod>(selectOverlayModifier_, selectOverlayContentModifier_, *info_,
-                defaultMenuEndOffset_, hasExtensionMenu_, hasShowAnimation_, true, isHiddenHandle_);
+                defaultMenuEndOffset_, selectMenuHeight_, hasExtensionMenu_, hasShowAnimation_, true, isHiddenHandle_);
         } else {
             paintMethodCreated_ = true;
             return MakeRefPtr<SelectOverlayPaintMethod>(selectOverlayModifier_, selectOverlayContentModifier_, *info_,
-                defaultMenuEndOffset_, hasExtensionMenu_, hasShowAnimation_, false, isHiddenHandle_);
+                defaultMenuEndOffset_, selectMenuHeight_, hasExtensionMenu_, hasShowAnimation_, false, isHiddenHandle_);
         }
     }
 
@@ -160,8 +160,15 @@ public:
         return info_ && info_->menuInfo.menuBuilder != nullptr;
     }
 
+    bool IsHiddenHandle()
+    {
+        return isHiddenHandle_;
+    }
+
     void StartHiddenHandleTask(bool isDelay = true);
     void UpdateSelectArea(const RectF& selectArea);
+
+    void SetIsNewAvoid(bool isNewAvoid);
 
 protected:
     virtual void CheckHandleReverse();
@@ -195,6 +202,7 @@ private:
     void StopHiddenHandleTask();
     void HiddenHandle();
     void UpdateOffsetOnMove(RectF& region, SelectHandleInfo& handleInfo, const OffsetF& offset, bool isFirst);
+    void SetSelectMenuHeight();
 
     RefPtr<TouchEventImpl> touchEvent_;
 
@@ -212,6 +220,8 @@ private:
     std::optional<float> menuHeight_;
 
     OffsetF defaultMenuEndOffset_;
+
+    float selectMenuHeight_ = 0.0f;
 
     RefPtr<SelectOverlayModifier> selectOverlayModifier_;
 

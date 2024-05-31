@@ -74,7 +74,7 @@ void ExtensionCompanionNode::SetCallbackId(ArkUIVMContext context, int id)
 void ExtensionCompanionNode::SetExtraParam(ArkUI_Int32 type, void* extraParam)
 {
     for (const auto& flag : NODE_FLAGS) {
-        if (type & flag) {
+        if (static_cast<uint32_t>(type) & flag) {
             auto it = extraParamMap_.find(flag);
             if (it != extraParamMap_.end()) {
                 it->second = extraParam;
@@ -97,7 +97,7 @@ ArkUI_Int64 ExtensionCompanionNode::GetExtraParam(ArkUI_Int32 type)
 void ExtensionCompanionNode::EraseExtraParam(ArkUI_Int32 type)
 {
     for (const auto& flag : NODE_FLAGS) {
-        if (type & flag) {
+        if (static_cast<uint32_t>(type) & flag) {
             auto it = extraParamMap_.find(type);
             if (it != extraParamMap_.end()) {
                 extraParamMap_.erase(it);
@@ -200,5 +200,22 @@ void ExtensionCompanionNode::OnOverlayDraw(DrawingContext& context)
     } else {
         InnerOverlayDraw(context);
     }
+}
+
+bool ExtensionCompanionNode::HasCustomerMeasure() const
+{
+    return (flags_ & ArkUIAPINodeFlags::CUSTOM_MEASURE) != 0;
+}
+
+bool ExtensionCompanionNode::HasCustomerLayout() const
+{
+    return (flags_ & ArkUIAPINodeFlags::CUSTOM_LAYOUT) != 0;
+}
+
+bool ExtensionCompanionNode::NeedRender() const
+{
+    ArkUI_Uint32 mask = ArkUIAPINodeFlags::CUSTOM_OVERLAY_DRAW | ArkUIAPINodeFlags::CUSTOM_FOREGROUND_DRAW |
+        ArkUIAPINodeFlags::CUSTOM_DRAW;
+    return (flags_ & mask) != 0;
 }
 } // namespace OHOS::Ace::NG

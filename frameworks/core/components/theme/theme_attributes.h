@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@ namespace OHOS::Ace {
 
 // theme attributes
 extern const char THEME_ATTR_BG_COLOR[];
+extern const char THEME_ATTR_HOVER_COLOR[];
 
 // component patterns
 extern const char THEME_PATTERN_BUTTON[];
@@ -82,6 +83,10 @@ extern const char THEME_PATTERN_GAUGE[];
 extern const char THEME_PATTERN_SHEET[];
 extern const char THEME_BLUR_STYLE_COMMON[];
 extern const char THEME_PATTERN_SHADOW[];
+extern const char THEME_PATTERN_LINEAR_LAYOUT[];
+extern const char THEME_PATTERN_STACK[];
+extern const char THEME_PATTERN_CONTAINER_MODAL[];
+extern const char THEME_PATTERN_AGING_ADAPATION_DIALOG[];
 
 // pattern general attributes
 extern const char PATTERN_FG_COLOR[];
@@ -192,6 +197,9 @@ extern const char POPUP_BUTTON_TEXT_FONT_SIZE[];
 // pattern attributes for badge
 extern const char BADGE_BORDER_COLOR[];
 extern const char BADGE_BORDER_WIDTH[];
+extern const char BADGE_AGE_FONT_SIZE[];
+extern const char BADGE_AGE_SIZE[];
+extern const char BADGE_AFE_ADD_PADDING[];
 // swiper attributes
 extern const char INDICATOR_TEXT_FONT_SIZE[];
 extern const char INDICATOR_TEXT_FONT_COLOR[];

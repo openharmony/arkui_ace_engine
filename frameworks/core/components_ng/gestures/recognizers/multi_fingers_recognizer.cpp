@@ -37,25 +37,18 @@ void MultiFingersRecognizer::UpdateFingerListInfo()
     fingerList_.clear();
     lastPointEvent_.reset();
     auto maxTimeStamp = TimeStamp::min().time_since_epoch().count();
-    size_t maxFingerCount = 0;
     for (const auto& point : touchPoints_) {
         PointF localPoint(point.second.x, point.second.y);
         NGGestureRecognizer::Transform(
             localPoint, GetAttachedNode(), false, isPostEventResult_, point.second.postEventNodeId);
-        FingerInfo fingerInfo = { point.first, point.second.GetOffset(), Offset(localPoint.GetX(), localPoint.GetY()),
-            point.second.GetScreenOffset(), point.second.sourceType, point.second.sourceTool, point.second.originalId };
+        FingerInfo fingerInfo = { point.second.originalId, point.second.GetOffset(),
+            Offset(localPoint.GetX(), localPoint.GetY()), point.second.GetScreenOffset(), point.second.sourceType,
+            point.second.sourceTool };
         fingerList_.emplace_back(fingerInfo);
         if (maxTimeStamp <= point.second.GetTimeStamp().time_since_epoch().count()
-            && maxFingerCount < point.second.pointers.size()
-            && maxFingerCount <= fingerList_.size()) {
+            && point.second.pointers.size() >= touchPoints_.size()) {
             lastPointEvent_ = point.second.pointerEvent;
             maxTimeStamp = point.second.GetTimeStamp().time_since_epoch().count();
-            maxFingerCount = point.second.pointers.size();
-        }
-        if (maxFingerCount < point.second.pointers.size()
-            && maxFingerCount <= fingerList_.size()) {
-            lastPointEvent_ = point.second.pointerEvent;
-            maxFingerCount = point.second.pointers.size();
         }
     }
 }
@@ -98,7 +91,9 @@ void MultiFingersRecognizer::OnFinishGestureReferee(int32_t touchId, bool isBloc
 
 void MultiFingersRecognizer::CleanRecognizerState()
 {
-    if ((refereeState_ == RefereeState::SUCCEED || refereeState_ == RefereeState::FAIL) &&
+    if ((refereeState_ == RefereeState::SUCCEED ||
+        refereeState_ == RefereeState::FAIL ||
+        refereeState_ == RefereeState::DETECTING) &&
         currentFingers_ == 0) {
         refereeState_ = RefereeState::READY;
         disposal_ = GestureDisposal::NONE;

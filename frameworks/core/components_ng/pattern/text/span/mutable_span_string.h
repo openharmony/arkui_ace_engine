@@ -49,6 +49,12 @@ public:
 private:
     WeakPtr<SpanWatcher> watcher_;
     void KeepSpansOrder();
+    std::list<RefPtr<NG::SpanItem>>::iterator HandleSpanOperation(
+        std::list<RefPtr<NG::SpanItem>>::iterator it, int32_t start, int32_t length,
+        const std::string& other, SpanStringOperation op, const std::pair<int32_t, int32_t>& intersection);
+    std::list<RefPtr<NG::SpanItem>>::iterator HandleSpanOperationStart(
+        std::list<RefPtr<NG::SpanItem>>::iterator it, int32_t spanItemStart, int32_t length,
+        const std::wstring& wContent, const std::string& other);
     void ApplyReplaceStringToSpans(int32_t start, int32_t length, const std::string& other, SpanStringOperation op);
     void ApplyInsertStringToSpans(int32_t start, const std::string& other);
     void ApplyReplaceStringToSpanBase(int32_t start, int32_t length, const std::string& other, SpanStringOperation op);

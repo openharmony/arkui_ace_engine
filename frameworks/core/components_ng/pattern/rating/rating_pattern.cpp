@@ -201,7 +201,9 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
         ratingModifier_->SetNeedDraw(true);
     }
     ratingModifier_->SetUseContentModifier(UseContentModifier());
-    auto reverse = ratingLayoutProperty->GetLayoutDirection() == TextDirection::RTL;
+    auto direction = ratingLayoutProperty->GetLayoutDirection();
+    auto reverse = direction == TextDirection::AUTO ? AceApplicationInfo::GetInstance().IsRightToLeft() :
+        direction == TextDirection::RTL;
     auto paintMethod = MakeRefPtr<RatingPaintMethod>(ratingModifier_, starNum, state_, reverse);
     paintMethod->UpdateFocusState(isfocus_, focusRatingScore_);
     return paintMethod;
@@ -277,7 +279,9 @@ void RatingPattern::RecalculatedRatingScoreBasedOnEventPoint(double eventPointX,
     CHECK_NULL_VOID(ratingRenderProperty);
     const auto& content = host->GetGeometryNode()->GetContent();
     CHECK_NULL_VOID(content);
-    auto reverse = ratingLayoutProperty->GetLayoutDirection() == TextDirection::RTL;
+    auto direction = ratingLayoutProperty->GetLayoutDirection();
+    auto reverse = direction == TextDirection::AUTO ? AceApplicationInfo::GetInstance().IsRightToLeft() :
+        direction == TextDirection::RTL;
     auto touchLocationX =
         reverse ? (content->GetRect().Right() - eventPointX) : (eventPointX - content->GetRect().Left());
 
@@ -477,7 +481,9 @@ void RatingPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto ratingScore = focusRatingScore_;
     auto wholeStarNum =
         fmax((NearEqual(ratingScore, std::round(ratingScore)) ? ratingScore : ceil(ratingScore)) - 1, 0.0);
-    auto reverse = property->GetLayoutDirection() == TextDirection::RTL;
+    auto direction = property->GetLayoutDirection();
+    auto reverse = direction == TextDirection::AUTO ? AceApplicationInfo::GetInstance().IsRightToLeft() :
+        direction == TextDirection::RTL;
     if (reverse) {
         double starNum = property->GetStarsValue(themeStarNum_);
         wholeStarNum = starNum - wholeStarNum - 1;
@@ -525,7 +531,7 @@ bool RatingPattern::OnKeyEvent(const KeyEvent& event)
     double ratingScore = focusRatingScore_;
     auto ratingLayoutProperty = GetLayoutProperty<RatingLayoutProperty>();
     double starNum = ratingLayoutProperty->GetStarsValue(themeStarNum_);
-    bool reverse = ratingLayoutProperty->GetLayoutDirection() == TextDirection::RTL;
+    bool reverse = ratingLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     const double stepSize = ratingRenderProperty->GetStepSizeValue(themeStepSize_);
     if (event.code == KeyCode::KEY_DPAD_LEFT) {
         ratingScore = reverse ? fmin(ratingScore + stepSize, starNum) : fmax(ratingScore - stepSize, 0.0);
@@ -792,6 +798,10 @@ void RatingPattern::OnModifyDone()
 // XTS inspector code
 void RatingPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto ratingLayoutProperty = GetLayoutProperty<RatingLayoutProperty>();
     if (isForegroundImageInfoFromTheme_) {
         json->PutExtAttr("foregroundImageSourceInfo", ImageSourceInfo("").ToString().c_str(), filter);

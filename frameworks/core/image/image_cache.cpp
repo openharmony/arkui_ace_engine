@@ -98,6 +98,7 @@ void ImageCache::CacheImageData(const std::string& key, const RefPtr<NG::ImageDa
     if (key.empty() || !imageData || dataSizeLimit_ == 0) {
         return;
     }
+    ACE_SCOPED_TRACE("CacheImageData key:%s", key.c_str());
     std::scoped_lock lock(dataCacheMutex_);
     auto dataSize = imageData->GetSize();
     auto iter = imageDataCache_.find(key);
@@ -117,7 +118,7 @@ void ImageCache::CacheImageData(const std::string& key, const RefPtr<NG::ImageDa
         imageDataCache_.emplace(key, dataCacheList_.begin());
     } else if (!largerHalfSize && inCache && oldSize >= dataSize) {
         // if the image is in the cache, and dataSize <= oldSize, we can replace the imageData in cache.
-        curDataSize_ += (dataSize - oldSize);
+        curDataSize_ = curDataSize_ + dataSize - oldSize;
         iter->second->cacheObj = imageData;
         dataCacheList_.splice(dataCacheList_.begin(), dataCacheList_, iter->second);
         iter->second = dataCacheList_.begin();
@@ -149,6 +150,7 @@ bool ImageCache::ProcessImageDataCacheInner(size_t dataSize)
 
 RefPtr<NG::ImageData> ImageCache::GetCacheImageData(const std::string& key)
 {
+    ACE_SCOPED_TRACE("GetCacheImageData key:%s", key.c_str());
     std::scoped_lock lock(dataCacheMutex_);
     auto iter = imageDataCache_.find(key);
     if (iter != imageDataCache_.end()) {
@@ -161,6 +163,7 @@ RefPtr<NG::ImageData> ImageCache::GetCacheImageData(const std::string& key)
 
 void ImageCache::ClearCacheImage(const std::string& key)
 {
+    ACE_SCOPED_TRACE("ClearCacheImage key:%s", key.c_str());
     {
         std::scoped_lock lock(imageCacheMutex_);
         auto iter = imageCache_.find(key);
@@ -182,6 +185,7 @@ void ImageCache::ClearCacheImage(const std::string& key)
 
 void ImageCache::Clear()
 {
+    ACE_SCOPED_TRACE("ImageCache Clear");
     {
         std::scoped_lock lock(imageCacheMutex_);
         cacheList_.clear();
@@ -213,7 +217,7 @@ void ImageCache::DumpCacheInfo()
     if (cacheSize == 0) {
         return;
     }
-    auto totalCount = 0;
+    uint32_t totalCount = 0;
     for (const auto& item : dataCacheList_) {
         auto imageObj = item.cacheObj;
         auto key = item.cacheKey;

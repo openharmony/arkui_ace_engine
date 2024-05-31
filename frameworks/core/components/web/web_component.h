@@ -648,7 +648,7 @@ public:
         tag_ = tag;
         tag_type_ = type;
     }
-    
+
     void SetSmoothDragResizeEnabled(bool isEnabled)
     {
         isSmoothDragResizeEnabled_ = isEnabled;
@@ -1080,6 +1080,28 @@ public:
     const EventMarker& GetRenderProcessRespondingId() const
     {
         return declaration_->GetRenderProcessRespondingId();
+    }
+
+    void SetViewportFitChangedId(const EventMarker& viewportFitId)
+    {
+        CHECK_NULL_VOID(declaration_);
+        declaration_->SetViewportFitChangedId(viewportFitId);
+    }
+
+    const EventMarker& GetViewportFitChangedId() const
+    {
+        return declaration_->GetViewportFitChangedId();
+    }
+
+    void SetAdsBlockedEventId(const EventMarker& adsBlockedEventId)
+    {
+        CHECK_NULL_VOID(declaration_);
+        declaration_->SetAdsBlockedEventId(adsBlockedEventId);
+    }
+
+    const EventMarker& GetAdsBlockedEventId() const
+    {
+        return declaration_->GetAdsBlockedEventId();
     }
 
 private:

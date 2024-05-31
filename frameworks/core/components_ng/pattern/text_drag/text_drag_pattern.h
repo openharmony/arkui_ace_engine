@@ -160,7 +160,7 @@ public:
         return selBackGroundPath_;
     }
 
-    std::shared_ptr<RSPath> GenerateBackgroundPath(float offset);
+    std::shared_ptr<RSPath> GenerateBackgroundPath(float offset, float radiusRatio = 1.0f);
 
     std::shared_ptr<RSPath> GenerateSelBackgroundPath(float offset);
 
@@ -197,12 +197,11 @@ public:
     }
 
 protected:
-    static TextDragData CalculateTextDragData(RefPtr<TextDragBase>& pattern, RefPtr<FrameNode>& dragContext,
-        float selectedWidth = 0.0);
+    static TextDragData CalculateTextDragData(RefPtr<TextDragBase>& pattern, RefPtr<FrameNode>& dragNode);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     std::shared_ptr<RSPath> GenerateClipPath();
     void GenerateBackgroundPoints(std::vector<TextPoint>& points, float offset, bool needAdjust = true);
-    void CalculateLineAndArc(std::vector<TextPoint>& points, std::shared_ptr<RSPath>& path);
+    void CalculateLineAndArc(std::vector<TextPoint>& points, std::shared_ptr<RSPath>& path, float radiusRatio);
     void CalculateLine(std::vector<TextPoint>& points, std::shared_ptr<RSPath>& path);
 
     void SetLastLineHeight(float lineHeight)

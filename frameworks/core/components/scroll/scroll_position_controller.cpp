@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,13 +48,13 @@ std::string ScrollEventInfo::ToJSONString() const
     }
 }
 
-void ScrollPositionController::JumpTo(int32_t index, bool /* smooth */, ScrollAlign /* align */, int32_t source)
+void ScrollPositionController::ScrollToIndex(int32_t index, bool /* smooth */, ScrollAlign /* align */)
 {
     RefPtr<RenderNode> node = scroll_.Upgrade();
     if (node) {
         auto scroll = AceType::DynamicCast<RenderScroll>(node);
         if (scroll) {
-            scroll->JumpToIndex(index, source);
+            scroll->JumpToIndex(index);
         }
     }
 }

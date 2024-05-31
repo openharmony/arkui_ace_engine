@@ -18,9 +18,15 @@
 namespace OHOS::Ace {
 void Scheduler::OnFrame(uint64_t nanoTimestamp) {}
 
-void Scheduler::Start() {}
+void Scheduler::Start()
+{
+    isRunning_ = true;
+}
 
-void Scheduler::Stop() {}
+void Scheduler::Stop()
+{
+    isRunning_ = false;
+}
 
 bool Scheduler::Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
     const std::function<void()> propertyCallback, const std::function<void()>& finishCallBack)

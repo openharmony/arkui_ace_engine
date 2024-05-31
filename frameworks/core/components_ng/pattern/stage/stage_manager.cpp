@@ -27,6 +27,7 @@
 #include "base/utils/utils.h"
 #include "core/animation/page_transition_common.h"
 #include "core/common/container.h"
+#include "core/common/ime/input_method_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
@@ -55,16 +56,14 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
     auto stageManager = context->GetStageManager();
     CHECK_NULL_VOID(stageManager);
     stageManager->SetStageInTrasition(true);
-    auto safeAreaInsets = context->GetSafeAreaWithoutProcess();
-    auto statusBarHeight = static_cast<float>(safeAreaInsets.top_.Length());
     if (transitionType == PageTransitionType::EXIT_PUSH || transitionType == PageTransitionType::EXIT_POP) {
         pagePattern->TriggerPageTransition(
-            transitionType, [weak = WeakPtr<FrameNode>(page), transitionType, statusBarHeight]() {
-                LOGI("pageTransition exit finish");
+            transitionType, [weak = WeakPtr<FrameNode>(page), transitionType]() {
                 auto context = PipelineContext::GetCurrentContext();
                 CHECK_NULL_VOID(context);
                 auto page = weak.Upgrade();
                 CHECK_NULL_VOID(page);
+                TAG_LOGI(AceLogTag::ACE_ANIMATION, "pageTransition exit finish, nodeId:%{public}d", page->GetId());
                 auto pattern = page->GetPattern<PagePattern>();
                 CHECK_NULL_VOID(pattern);
                 pattern->FocusViewHide();
@@ -82,19 +81,17 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
                 auto stageManager = context->GetStageManager();
                 CHECK_NULL_VOID(stageManager);
                 stageManager->SetStageInTrasition(false);
-                constexpr float REMOVE_CLIP_SIZE = 10000.0f;
-                page->GetRenderContext()->ClipWithRRect(RectF(0.0f, -statusBarHeight, REMOVE_CLIP_SIZE,
-                    REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
+                page->GetRenderContext()->RemoveClipWithRRect();
             });
         return;
     }
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
     pagePattern->TriggerPageTransition(
-        transitionType, [weak = WeakPtr<FrameNode>(page), statusBarHeight]() {
+        transitionType, [weak = WeakPtr<FrameNode>(page)]() {
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
-            LOGI("pageTransition in finish");
             auto page = weak.Upgrade();
             CHECK_NULL_VOID(page);
+            TAG_LOGI(AceLogTag::ACE_ANIMATION, "pageTransition in finish, nodeId:%{public}d", page->GetId());
             page->GetEventHub<EventHub>()->SetEnabled(true);
             auto pattern = page->GetPattern<PagePattern>();
             CHECK_NULL_VOID(pattern);
@@ -104,9 +101,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
             auto context = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(context);
             context->MarkNeedFlushMouseEvent();
-            constexpr float REMOVE_CLIP_SIZE = 10000.0f;
-            page->GetRenderContext()->ClipWithRRect(RectF(0.0f, -statusBarHeight, REMOVE_CLIP_SIZE,
-                REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
+            page->GetRenderContext()->RemoveClipWithRRect();
             auto stageManager = context->GetStageManager();
             CHECK_NULL_VOID(stageManager);
             stageManager->SetStageInTrasition(false);
@@ -123,6 +118,8 @@ void StageManager::StartTransition(const RefPtr<FrameNode>& srcPage, const RefPt
     sharedManager->StartSharedTransition(srcPage, destPage);
     srcPageNode_ = srcPage;
     destPageNode_ = destPage;
+    TAG_LOGI(AceLogTag::ACE_ANIMATION, "start pageTransition, from node %{public}d to %{public}d",
+        srcPage ? srcPage->GetId() : -1, destPage ? destPage->GetId() : -1);
     if (type == RouteType::PUSH) {
         FirePageTransition(srcPage, PageTransitionType::EXIT_PUSH);
         FirePageTransition(destPage, PageTransitionType::ENTER_PUSH);
@@ -166,7 +163,7 @@ void StageManager::PageChangeCloseKeyboard()
         }
         if (!container->IsScenceBoardWindow()) {
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Container not ScenceBoardWindow.");
-            FocusHub::PushPageCloseKeyboard();
+            InputMethodManager::GetInstance()->CloseKeyboard();
         }
     }
 #endif
@@ -345,9 +342,6 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTra
     if (needTransition) {
         // from the penultimate node, (popSize - 1) nodes are deleted.
         // the last node will be deleted after pageTransition
-        LOGI("PopPageToIndex, before pageTransition, to index:%{public}d, children size:%{public}zu, "
-             "stage children size:%{public}zu",
-            index, children.size(), stageNode_->GetChildren().size());
         for (int32_t current = 1; current < popSize; ++current) {
             auto pageNode = *(++children.rbegin());
             stageNode_->RemoveChild(pageNode);
@@ -527,4 +521,16 @@ RefPtr<FrameNode> StageManager::GetLastPageWithTransition() const
     }
 }
 
+RefPtr<FrameNode> StageManager::GetPrevPageWithTransition() const
+{
+    CHECK_NULL_RETURN(stageNode_, nullptr);
+    const auto& children = stageNode_->GetChildren();
+    if (children.empty()) {
+        return nullptr;
+    }
+    if (stageInTrasition_) {
+        return DynamicCast<FrameNode>(srcPageNode_.Upgrade());
+    }
+    return DynamicCast<FrameNode>(children.front());
+}
 } // namespace OHOS::Ace::NG

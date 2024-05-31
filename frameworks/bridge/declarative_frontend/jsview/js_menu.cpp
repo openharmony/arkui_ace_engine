@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/menu/menu_model.h"
 #include "core/components_ng/pattern/menu/menu_model_ng.h"
 #include "core/components_ng/property/measure_property.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_menu_theme.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<MenuModel> MenuModel::instance_ = nullptr;
@@ -50,6 +51,7 @@ namespace OHOS::Ace::Framework {
 void JSMenu::Create(const JSCallbackInfo& /* info */)
 {
     MenuModel::GetInstance()->Create();
+    JSMenuTheme::ApplyTheme();
 }
 
 void JSMenu::FontSize(const JSCallbackInfo& info)
@@ -68,7 +70,13 @@ void JSMenu::Font(const JSCallbackInfo& info)
 {
     CalcDimension fontSize;
     std::string weight;
-    if (info.Length() < 1 || !info[0]->IsObject()) {
+    if (!info[0]->IsObject()) {
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            MenuModel::GetInstance()->SetFontSize(CalcDimension());
+            MenuModel::GetInstance()->SetFontWeight(FontWeight::NORMAL);
+            MenuModel::GetInstance()->SetFontStyle(FontStyle::NORMAL);
+            MenuModel::GetInstance()->ResetFontFamily();
+        }
         return;
     } else {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
@@ -80,7 +88,6 @@ void JSMenu::Font(const JSCallbackInfo& info)
                 fontSize = CalcDimension();
             }
         }
-
         auto jsWeight = obj->GetProperty("weight");
         if (!jsWeight->IsNull()) {
             if (jsWeight->IsNumber()) {
@@ -89,7 +96,6 @@ void JSMenu::Font(const JSCallbackInfo& info)
                 ParseJsString(jsWeight, weight);
             }
         }
-
         auto jsStyle = obj->GetProperty("style");
         if (!jsStyle->IsNull()) {
             if (jsStyle->IsNumber()) {
@@ -100,7 +106,6 @@ void JSMenu::Font(const JSCallbackInfo& info)
                 MenuModel::GetInstance()->SetFontStyle(ConvertStrToFontStyle(style));
             }
         }
-
         auto jsFamily = obj->GetProperty("family");
         if (!jsFamily->IsNull() && jsFamily->IsString()) {
             auto familyVal = jsFamily->ToString();
@@ -206,6 +211,78 @@ void JSMenu::SetExpandingMode(const JSCallbackInfo& info)
     MenuModel::GetInstance()->SetExpandingMode(expandingMode);
 }
 
+void JSMenu::SetItemGroupDivider(const JSCallbackInfo& args)
+{
+    V2::ItemDivider divider;
+    if (args.Length() >= 1 && args[0]->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+        CalcDimension value;
+        if (!ParseLengthMetricsToPositiveDimension(obj->GetProperty("strokeWidth"), value)) {
+            value.Reset();
+        }
+        if (value.IsNegative()) {
+            value.Reset();
+        }
+        divider.strokeWidth = value;
+        if (!ParseLengthMetricsToPositiveDimension(obj->GetProperty("startMargin"), value)) {
+            value.Reset();
+        }
+        if (value.IsNegative()) {
+            value.Reset();
+        }
+        divider.startMargin = value;
+        if (!ParseLengthMetricsToPositiveDimension(obj->GetProperty("endMargin"), value)) {
+            value.Reset();
+        }
+        if (value.IsNegative()) {
+            value.Reset();
+        }
+        divider.endMargin = value;
+
+        if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
+            divider.color = Color::TRANSPARENT;
+        }
+    }
+    MenuModel::GetInstance()->SetItemGroupDivider(divider);
+    args.ReturnSelf();
+}
+
+void JSMenu::SetItemDivider(const JSCallbackInfo& args)
+{
+    V2::ItemDivider divider;
+    if (args.Length() >= 1 && args[0]->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+        CalcDimension value;
+        if (!ParseLengthMetricsToPositiveDimension(obj->GetProperty("strokeWidth"), value)) {
+            value.Reset();
+        }
+        if (value.IsNegative()) {
+            value.Reset();
+        }
+        divider.strokeWidth = value;
+        if (!ParseLengthMetricsToPositiveDimension(obj->GetProperty("startMargin"), value)) {
+            value.Reset();
+        }
+        if (value.IsNegative()) {
+            value.Reset();
+        }
+        divider.startMargin = value;
+        if (!ParseLengthMetricsToPositiveDimension(obj->GetProperty("endMargin"), value)) {
+            value.Reset();
+        }
+        if (value.IsNegative()) {
+            value.Reset();
+        }
+        divider.endMargin = value;
+
+        if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
+            divider.color = Color::TRANSPARENT;
+        }
+    }
+    MenuModel::GetInstance()->SetItemDivider(divider);
+    args.ReturnSelf();
+}
+
 void JSMenu::JSBind(BindingTarget globalObj)
 {
     JSClass<JSMenu>::Declare("Menu");
@@ -217,7 +294,11 @@ void JSMenu::JSBind(BindingTarget globalObj)
     JSClass<JSMenu>::StaticMethod("width", &JSMenu::SetWidth, opt);
     JSClass<JSMenu>::StaticMethod("radius", &JSMenu::SetRadius, opt);
     JSClass<JSMenu>::StaticMethod("subMenuExpandingMode", &JSMenu::SetExpandingMode);
+    JSClass<JSMenu>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
+    JSClass<JSMenu>::StaticMethod("menuItemDivider", &JSMenu::SetItemDivider);
+    JSClass<JSMenu>::StaticMethod("menuItemGroupDivider", &JSMenu::SetItemGroupDivider);
     JSClass<JSMenu>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSMenu>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSMenu>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSMenu>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSMenu>::InheritAndBind<JSViewAbstract>(globalObj);

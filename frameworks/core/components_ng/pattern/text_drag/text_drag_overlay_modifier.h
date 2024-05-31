@@ -54,8 +54,6 @@ public:
         AnimationUtils::Animate(option, propertyCallback, option.GetOnFinishEvent());
     }
 
-    virtual void StartFloatingCancelAnimate() {}
-
     bool IsHandlesShow()
     {
         return isHandlesShow_;

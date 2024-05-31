@@ -40,6 +40,11 @@ public:
         onStart_ = std ::move(onStart);
     }
 
+    MovingPhotoEventFunc GetOnStart()
+    {
+        return onStart_;
+    }
+
     void FireStartEvent()
     {
         if (onStart_) {
@@ -48,9 +53,27 @@ public:
         }
     }
 
+    void SetOnPause(MovingPhotoEventFunc&& onPause)
+    {
+        onPause_ = std ::move(onPause);
+    }
+
+    void FirePauseEvent()
+    {
+        if (onPause_) {
+            auto onPause = onPause_;
+            onPause();
+        }
+    }
+
     void SetOnStop(MovingPhotoEventFunc&& onStop)
     {
         onStop_ = std ::move(onStop);
+    }
+
+    MovingPhotoEventFunc GetOnStop()
+    {
+        return onStop_;
     }
 
     void FireStopEvent()
@@ -66,6 +89,11 @@ public:
         onFinish_ = std ::move(onFinish);
     }
 
+    MovingPhotoEventFunc GetOnFinish()
+    {
+        return onFinish_;
+    }
+
     void FireFinishEvent()
     {
         if (onFinish_) {
@@ -79,6 +107,11 @@ public:
         onError_ = std ::move(onError);
     }
 
+    MovingPhotoEventFunc GetOnError()
+    {
+        return onError_;
+    }
+
     void FireErrorEvent()
     {
         if (onError_) {
@@ -90,6 +123,7 @@ public:
 private:
     MovingPhotoEventFunc onStart_;
     MovingPhotoEventFunc onStop_;
+    MovingPhotoEventFunc onPause_;
     MovingPhotoEventFunc onFinish_;
     MovingPhotoEventFunc onError_;
 };

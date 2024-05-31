@@ -26,6 +26,10 @@ struct PositionProperty {
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("align",
             propAlignment.value_or(Alignment::CENTER).GetAlignmentStr(TextDirection::LTR).c_str(), filter);
     }

@@ -77,6 +77,7 @@ void VideoFullScreenPattern::RequestFullScreen(const RefPtr<VideoNode>& videoNod
     fullScreenNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     rootNode->RebuildRenderContextTree();
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FocusViewShow();
     OnFullScreenChange(true);
 }
 
@@ -104,6 +105,7 @@ bool VideoFullScreenPattern::ExitFullScreen()
     eventHub_->SetGestureEventHub(originGestureEventHub_);
     eventHub_->AttachHost(videoPattern->GetHost());
     videoNode->MarkModifyDone();
+    FocusViewClose();
     return true;
 }
 
@@ -115,6 +117,7 @@ void VideoFullScreenPattern::UpdateState()
     UpdateMuted(videoPattern->GetMuted());
     UpdateAutoPlay(videoPattern->GetAutoPlay());
     UpdateProgressRate(videoPattern->GetProgressRate());
+    UpdateAnalyzerState(videoPattern->GetAnalyzerState());
 
     // update full screen layout
     auto fullScreenNode = GetHost();

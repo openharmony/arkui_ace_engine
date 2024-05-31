@@ -538,8 +538,10 @@ std::string JsiBaseUtils::GetSourceInfo(const std::string& line, const std::stri
     std::string sourceInfo;
     MappingInfo mapInfo;
     if (isAppPage) {
+        CHECK_NULL_RETURN(appMap, "");
         mapInfo = appMap->Find(StringToInt(line) - offSet, StringToInt(column));
     } else {
+        CHECK_NULL_RETURN(pageMap, "");
         mapInfo = pageMap->Find(StringToInt(line) - offSet, StringToInt(column));
     }
     if (mapInfo.row == 0 || mapInfo.col == 0) {
@@ -590,7 +592,7 @@ void JsiBaseUtils::ReportJsErrorEvent(std::shared_ptr<JsValue> error, std::share
 
     std::string summaryBody = GenerateSummaryBody(error, runtime);
     LOGE("summaryBody: \n%{public}s", summaryBody.c_str());
-    EventReport::JsErrReport(AceApplicationInfo::GetInstance().GetPackageName(), "", summaryBody);
+    EventReport::JsErrReport(AceApplicationInfo::GetInstance().GetPackageName(), errorInfo.name, summaryBody);
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
     ExceptionHandler::HandleJsException(summaryBody, errorInfo);
 #endif
@@ -704,11 +706,6 @@ bool GetLogTag(
     if (argc < 1) {
         return false;
     }
-    // after stateMgmt.js remediation, this will be delete
-    if (!argv[0]->IsNumber(runtime)) {
-        tag = AceLogTag::ACE_STATE_MGMT;
-        return false;
-    }
     auto tagNum = argv[0]->ToInt32(runtime);
     switch (tagNum) {
         case 0:
@@ -791,9 +788,6 @@ shared_ptr<JsValue> JsLogPrint(
     auto getTagSuccess = GetLogTag(runtime, argv, argc, tag);
     if (getTagSuccess) {
         content = GetLogContentFromStartIndex(runtime, argv, argc, 1);
-    } else {
-        // after stateMgmt.js remediation, this will be delete
-        content = GetLogContentFromStartIndex(runtime, argv, argc, 0);
     }
     switch (level) {
         case JsLogLevel::DEBUG:

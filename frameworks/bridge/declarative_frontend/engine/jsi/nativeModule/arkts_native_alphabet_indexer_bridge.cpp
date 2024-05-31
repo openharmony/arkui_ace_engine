@@ -716,9 +716,11 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetAdaptiveWidth(ArkUIRuntimeCallI
     CalcDimension width;
     ArkTSUtils::ParseJsDimensionVpNG(vm, secondArg, width);
     if (width.Unit() == DimensionUnit::AUTO) {
+        CommonBridge::SetWidth(runtimeCallInfo);
         GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setAdaptiveWidth(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     } else {
+        CommonBridge::SetWidth(runtimeCallInfo);
         GetArkUINodeModifiers()->getAlphabetIndexerModifier()->resetAdaptiveWidth(nativeNode);
     }
     CommonBridge::SetWidth(runtimeCallInfo);
@@ -730,6 +732,59 @@ ArkUINativeModuleValue AlphabetIndexerBridge::ResetAdaptiveWidth(ArkUIRuntimeCal
     CommonBridge::ResetWidth(runtimeCallInfo);
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getAlphabetIndexerModifier()->resetAdaptiveWidth(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue AlphabetIndexerBridge::SetAutoCollapse(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> autoCollapseArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    bool autoCollapse = false;
+    if (autoCollapseArg->IsBoolean()) {
+        autoCollapse = autoCollapseArg->ToBoolean(vm)->Value();
+    }
+    GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setAutoCollapse(nativeNode, autoCollapse);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue AlphabetIndexerBridge::ResetAutoCollapse(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getAlphabetIndexerModifier()->resetAutoCollapse(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue AlphabetIndexerBridge::SetEnableHapticFeedback(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> hapticFeedbackArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    bool isHapticEnable = true;
+    if (hapticFeedbackArg->IsBoolean()) {
+        isHapticEnable = hapticFeedbackArg->ToBoolean(vm)->Value();
+    }
+    GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setEnableHapticFeedback(nativeNode, isHapticEnable);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue AlphabetIndexerBridge::ResetEnableHapticFeedback(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getAlphabetIndexerModifier()->resetEnableHapticFeedback(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

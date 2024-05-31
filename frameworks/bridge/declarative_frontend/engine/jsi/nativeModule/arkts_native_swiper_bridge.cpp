@@ -23,6 +23,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/jsview/models/swiper_model_impl.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_swiper.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -62,6 +63,34 @@ constexpr int32_t DOT_INDICATOR_BOTTOM = 12;
 constexpr double DEFAULT_PERCENT_VALUE = 100.0;
 } // namespace
 
+ArkUINativeModuleValue SwiperBridge::SetSwiperInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_NODE_INDEX);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+
+    auto nodePtr = GetArkUINodeModifiers()->getSwiperModifier()->getSwiperController(nativeNode);
+    auto node = AceType::Claim(reinterpret_cast<OHOS::Ace::SwiperController*>(nodePtr));
+
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    Framework::JSSwiperController* jsController =
+        Framework::JSRef<Framework::JSObject>::Cast(info[1])->Unwrap<Framework::JSSwiperController>();
+    if (jsController) {
+        jsController->SetInstanceId(Container::CurrentId());
+        jsController->SetController(node);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue SwiperBridge::ResetSwiperInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_NODE_INDEX);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSwiperModifier()->getSwiperController(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 ArkUINativeModuleValue SwiperBridge::SetSwiperNextMargin(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -76,7 +105,8 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperNextMargin(ArkUIRuntimeCallInfo* r
         nextMargin.SetValue(0.0);
     }
     int32_t nextMarginUnit = static_cast<int32_t>(nextMargin.Unit());
-    GetArkUINodeModifiers()->getSwiperModifier()->setSwiperNextMargin(nativeNode, nextMargin.Value(), nextMarginUnit);
+    GetArkUINodeModifiers()->getSwiperModifier()->setSwiperNextMargin(
+        nativeNode, nextMargin.Value(), nextMarginUnit, 0);
     return panda::JSValueRef::Undefined(vm);
 }
 ArkUINativeModuleValue SwiperBridge::ResetSwiperNextMargin(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -102,7 +132,8 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperPrevMargin(ArkUIRuntimeCallInfo* r
         prevMargin.SetValue(0.0);
     }
     int32_t prevMarginUnit = static_cast<int32_t>(prevMargin.Unit());
-    GetArkUINodeModifiers()->getSwiperModifier()->setSwiperPrevMargin(nativeNode, prevMargin.Value(), prevMarginUnit);
+    GetArkUINodeModifiers()->getSwiperModifier()->setSwiperPrevMargin(
+        nativeNode, prevMargin.Value(), prevMarginUnit, 0);
     return panda::JSValueRef::Undefined(vm);
 }
 ArkUINativeModuleValue SwiperBridge::ResetSwiperPrevMargin(ArkUIRuntimeCallInfo* runtimeCallInfo)

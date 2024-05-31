@@ -17,6 +17,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
+#include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
@@ -64,6 +65,7 @@ void IndexerPattern::OnModifyDone()
     auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
+    enableHapticFeedback_ = layoutProperty->GetEnableHapticFeedback().value_or(true);
     auto itemCountChanged = false;
     bool autoCollapseModeChanged = true;
     if (!isNewHeightCalculated_) {
@@ -449,6 +451,17 @@ void IndexerPattern::InitPopupInputEvent()
     popupInputEventHub->AddOnHoverEvent(popupOnHoverEvent);
 }
 
+void IndexerPattern::InitPopupPanEvent()
+{
+    CHECK_NULL_VOID(popupNode_);
+    auto gestureHub = popupNode_->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    PanDirection panDirection;
+    panDirection.type = PanDirection::ALL;
+    auto panEvent = MakeRefPtr<PanEvent>(nullptr, nullptr, nullptr, nullptr);
+    gestureHub->AddPanEvent(panEvent, panDirection, 1, 0.0_vp);
+}
+
 void IndexerPattern::OnTouchDown(const TouchEventInfo& info)
 {
     if (itemCount_ <= 0) {
@@ -769,6 +782,11 @@ void IndexerPattern::ApplyIndexChanged(
     }
     if (selectChanged) {
         ShowBubble();
+#ifdef INDEXER_SUPPORT_VIBRATOR
+        if (enableHapticFeedback_) {
+            VibraFeedback();
+        }
+#endif
     }
 }
 
@@ -785,6 +803,7 @@ void IndexerPattern::ShowBubble()
         popupNode_ = CreatePopupNode();
         AddPopupTouchListener(popupNode_);
         InitPopupInputEvent();
+        InitPopupPanEvent();
         UpdatePopupOpacity(0.0f);
     }
     if (!layoutProperty->GetIsPopupValue(false)) {
@@ -1020,6 +1039,7 @@ void IndexerPattern::UpdateBubbleLetterStackAndLetterTextView()
     CHECK_NULL_VOID(letterLayoutProperty);
     letterLayoutProperty->UpdateContent(arrayValue_[childPressIndex_ >= 0 ? childPressIndex_ : selected_].first);
     auto popupTextFont = layoutProperty->GetPopupFont().value_or(indexerTheme->GetPopupTextStyle());
+    letterLayoutProperty->UpdateMaxLines(1);
     letterLayoutProperty->UpdateFontSize(popupTextFont.GetFontSize());
     letterLayoutProperty->UpdateFontWeight(popupTextFont.GetFontWeight());
     letterLayoutProperty->UpdateFontFamily(popupTextFont.GetFontFamilies());
@@ -1338,9 +1358,7 @@ void IndexerPattern::UpdateBubbleListItem(
         textLayoutProperty->UpdateContent(currentListData.at(i));
         textLayoutProperty->UpdateFontSize(popupItemTextFontSize);
         textLayoutProperty->UpdateFontWeight(popupItemTextFontWeight);
-        if (autoCollapse_) textLayoutProperty->UpdateMaxLines(1);
-        textLayoutProperty->UpdateTextOverflow(autoCollapse_ ? TextOverflow::ELLIPSIS : TextOverflow::NONE);
-        textLayoutProperty->UpdateEllipsisMode(EllipsisMode::TAIL);
+        textLayoutProperty->UpdateMaxLines(1);
         textLayoutProperty->UpdateTextColor(i == popupClickedIndex_ ?
             popupSelectedTextColor : popupUnselectedTextColor);
         textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
@@ -1443,9 +1461,10 @@ void IndexerPattern::AddPopupTouchListener(RefPtr<FrameNode> popupNode)
     CHECK_NULL_VOID(popupNode);
     auto gesture = popupNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
-    auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+    auto touchCallback = [weak = WeakClaim(this)](TouchEventInfo& info) {
         auto indexerPattern = weak.Upgrade();
         CHECK_NULL_VOID(indexerPattern);
+        info.SetStopPropagation(true);
         auto touchType = info.GetTouches().front().GetTouchType();
         if (touchType == TouchType::DOWN) {
             indexerPattern->isTouch_ = true;
@@ -1909,5 +1928,21 @@ void IndexerPattern::UpdateChildBoundary(RefPtr<FrameNode>& frameNode)
     CHECK_NULL_VOID(pattern);
     auto isMeasureBoundary = layoutProperty->GetPropertyChangeFlag() ==  PROPERTY_UPDATE_NORMAL;
     pattern->SetIsMeasureBoundary(isMeasureBoundary);
+}
+
+void IndexerPattern::DumpInfo()
+{
+    auto layoutProperty = GetLayoutProperty<IndexerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    DumpLog::GetInstance().AddDesc(
+        "AlignStyle: ", static_cast<int32_t>(layoutProperty->GetAlignStyleValue(AlignStyle::END)));
+    auto offset = layoutProperty->GetPopupHorizontalSpace();
+    DumpLog::GetInstance().AddDesc("Offset: ", offset.has_value() ? offset.value().ToString() : "undefined");
+    DumpLog::GetInstance().AddDesc("PopupPositionX: ",
+        layoutProperty->GetPopupPositionXValue(Dimension(NG::BUBBLE_POSITION_X, DimensionUnit::VP)).ToString());
+    DumpLog::GetInstance().AddDesc("PopupPositionY: ",
+        layoutProperty->GetPopupPositionYValue(Dimension(NG::BUBBLE_POSITION_Y, DimensionUnit::VP)).ToString());
+    DumpLog::GetInstance().AddDesc("AutoCollapse: ", autoCollapse_ ? "true" : "false");
+    DumpLog::GetInstance().AddDesc(std::string("EnableHapticFeedback: ").append(std::to_string(enableHapticFeedback_)));
 }
 } // namespace OHOS::Ace::NG

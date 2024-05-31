@@ -76,6 +76,7 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
     static void ScrollToEdge(FrameNode* frameNode, ScrollEdgeType scrollEdgeType, bool smooth);
+    static void SetInitialIndex(FrameNode* frameNode, int32_t initialIndex);
     static void SetEditMode(FrameNode* frameNode, bool editMode);
     static void SetMultiSelectable(FrameNode* frameNode, bool selectable);
     static void SetChainAnimation(FrameNode* frameNode, bool chainAnimation);
@@ -124,6 +125,10 @@ public:
     static void SetScrollBy(FrameNode* frameNode, double x, double y);
     static void SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart);
     static void SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
+    static void SetListChildrenMainSize(
+        FrameNode* frameNode, float defaultSize, const std::vector<float>& mainSize);
+    static void ResetListChildrenMainSize(FrameNode* frameNode);
+
 private:
     void AddDragFrameNodeToManager() const;
 };

@@ -39,8 +39,8 @@ public:
     void SetSubtitle(const std::string& subtitle) override;
     void SetHideTitleBar(bool hideTitleBar) override;
     void SetHideNavBar(bool hideNavBar) override;
-    void SetBackButtonIcon(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap,
-        const std::string& bundleName, const std::string& moduleName) override;
+    void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const std::string& src,
+        const ImageOption& imageOption, RefPtr<PixelMap>& pixMap, const std::vector<std::string>& nameList) override;
     void SetHideBackButton(bool hideBackButton) override;
     void SetHideToolBar(bool hideToolBar) override;
     void SetCustomToolBar(const RefPtr<AceType>& customNode) override;
@@ -74,19 +74,23 @@ public:
     static void SetNavBarWidth(FrameNode* frameNode, const Dimension& value);
     static void SetNavBarPosition(FrameNode* frameNode, NG::NavBarPosition mode);
     static void SetUsrNavigationMode(FrameNode* frameNode, NavigationMode mode);
-    static void SetBackButtonIcon(
-        FrameNode* frameNode, const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap);
+    static void SetBackButtonIcon(FrameNode* frameNode, const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+        const std::string& src, const ImageOption& imageOption, RefPtr<PixelMap>& pixMap);
     static void SetHideNavBar(FrameNode* frameNode, bool hideNavBar);
     static void SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar);
     static void SetSubtitle(FrameNode* frameNode, const std::string& subtitle);
     static void SetHideBackButton(FrameNode* frameNode, bool hideBackButton);
     static void SetTitleMode(FrameNode* frameNode, NG::NavigationTitleMode mode);
+    
+    void SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) override;
+    static void SetIgnoreLayoutSafeArea(FrameNode* frameNode, const NG::SafeAreaExpandOpts& opts);
 
 private:
     bool CreateNavBarNodeIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode);
     bool CreateNavBarNodeChildsIfNeeded(const RefPtr<NavBarNode>& navBarNode);
     bool CreateContentNodeIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode);
     bool CreateDividerNodeIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode);
+    static void SetHideNavBarInner(const RefPtr<NavigationGroupNode>& navigationGroupNode, bool hideNavBar);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVIGATION_MODEL_NG_H

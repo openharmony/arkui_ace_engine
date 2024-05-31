@@ -25,6 +25,7 @@
 #include "base/memory/ace_type.h"
 #include "core/common/ace_page.h"
 #include "core/common/container.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
 
@@ -206,18 +207,38 @@ RefPtr<Subwindow> SubwindowManager::ShowPreviewNG()
     return subwindow;
 }
 
-void SubwindowManager::ShowMenuNG(
-    const RefPtr<NG::FrameNode>& menuNode, int32_t targetId, const NG::OffsetF& offset, bool isAboveApps)
+void SubwindowManager::ShowMenuNG(const RefPtr<NG::FrameNode>& menuNode, const NG::MenuParam& menuParam,
+    const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show menung enter");
-    auto containerId = Container::CurrentId();
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show menu ng enter");
+    CHECK_NULL_VOID(targetNode);
+    auto pipelineContext = targetNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto containerId = pipelineContext->GetInstanceId();
     auto subwindow = GetSubwindow(containerId);
     if (!subwindow) {
         subwindow = Subwindow::CreateSubwindow(containerId);
         subwindow->InitContainer();
         AddSubwindow(containerId, subwindow);
     }
-    subwindow->ShowMenuNG(menuNode, targetId, offset);
+    subwindow->ShowMenuNG(menuNode, menuParam, targetNode, offset);
+}
+
+void SubwindowManager::ShowMenuNG(std::function<void()>&& buildFunc, std::function<void()>&& previewBuildFunc,
+    const NG::MenuParam& menuParam, const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show menu ng enter");
+    CHECK_NULL_VOID(targetNode);
+    auto pipelineContext = targetNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto containerId = pipelineContext->GetInstanceId();
+    auto subwindow = GetSubwindow(containerId);
+    if (!subwindow) {
+        subwindow = Subwindow::CreateSubwindow(containerId);
+        subwindow->InitContainer();
+        AddSubwindow(containerId, subwindow);
+    }
+    subwindow->ShowMenuNG(std::move(buildFunc), std::move(previewBuildFunc), menuParam, targetNode, offset);
 }
 
 void SubwindowManager::HidePreviewNG()
@@ -239,7 +260,7 @@ void SubwindowManager::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t tar
 
 void SubwindowManager::HideMenuNG(bool showPreviewAnimation, bool startDrag)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "hide menung enter");
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "hide menu ng enter");
     auto subwindow = GetCurrentWindow();
     if (subwindow) {
         subwindow->HideMenuNG(showPreviewAnimation, startDrag);
@@ -254,9 +275,19 @@ void SubwindowManager::UpdateHideMenuOffsetNG(const NG::OffsetF& offset)
     }
 }
 
+void SubwindowManager::ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::FrameNode>& dragPreviewNode,
+    const NG::OffsetF& offset)
+{
+    CHECK_NULL_VOID(dragPreviewNode);
+    auto subwindow = GetCurrentWindow();
+    if (subwindow) {
+        subwindow->ContextMenuSwitchDragPreviewAnimationtNG(dragPreviewNode, offset);
+    }
+}
+
 void SubwindowManager::ClearMenuNG(int32_t instanceId, int32_t targetId, bool inWindow, bool showAnimation)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "clear menung enter");
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "clear menu ng enter");
     RefPtr<Subwindow> subwindow;
     if (instanceId != -1) {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -289,10 +320,15 @@ void SubwindowManager::ClearPopupInSubwindow(int32_t instanceId)
     }
 }
 
-void SubwindowManager::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo)
+void SubwindowManager::ShowPopupNG(const RefPtr<NG::FrameNode>& targetNode, const NG::PopupInfo& popupInfo,
+    const std::function<void(int32_t)>&& onWillDismiss, bool interactiveDismiss)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show popup ng enter");
-    auto containerId = Container::CurrentId();
+    CHECK_NULL_VOID(targetNode);
+    auto pipelineContext = targetNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto containerId = pipelineContext->GetInstanceId();
+
     auto manager = SubwindowManager::GetInstance();
     CHECK_NULL_VOID(manager);
     auto subwindow = manager->GetSubwindow(containerId);
@@ -301,7 +337,7 @@ void SubwindowManager::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupI
         subwindow->InitContainer();
         manager->AddSubwindow(containerId, subwindow);
     }
-    subwindow->ShowPopupNG(targetId, popupInfo);
+    subwindow->ShowPopupNG(targetNode->GetId(), popupInfo, std::move(onWillDismiss), interactiveDismiss);
 }
 
 void SubwindowManager::HidePopupNG(int32_t targetId, int32_t instanceId)
@@ -579,38 +615,64 @@ RefPtr<Subwindow> SubwindowManager::GetOrCreateSubWindow(bool isDialog)
     return subwindow;
 }
 
+RefPtr<Subwindow> SubwindowManager::GetOrCreateSystemSubWindow()
+{
+    auto containerId = Container::CurrentId();
+    auto subwindow = GetSystemToastWindow();
+    if (!subwindow) {
+        subwindow = Subwindow::CreateSubwindow(containerId);
+        CHECK_NULL_RETURN(subwindow, nullptr);
+        SetSystemToastWindow(subwindow);
+    }
+    return subwindow;
+}
+
 void SubwindowManager::ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
     const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show toast enter");
-    auto containerId = Container::CurrentIdSafely();
+    auto containerId = Container::CurrentId();
     // for pa service
     if (containerId >= MIN_PA_SERVICE_ID || containerId < 0) {
-        auto subwindow = GetOrCreateSubWindow();
+        auto subwindow =
+            showMode == NG::ToastShowMode::SYSTEM_TOP_MOST ? GetOrCreateSystemSubWindow() : GetOrCreateSubWindow();
         CHECK_NULL_VOID(subwindow);
         TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "before show toast");
-        subwindow->ShowToast(message, duration, bottom, showMode, alignment,  offset);
+        subwindow->ShowToast(message, duration, bottom, showMode, alignment, offset);
     } else {
         // for ability
-        auto container = Container::CurrentSafely();
-        auto taskExecutor = container->GetTaskExecutor();
+        auto taskExecutor = Container::CurrentTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
-            [containerId, message, duration, bottom, showMode, alignment,  offset] {
+            [containerId, message, duration, bottom, showMode, alignment, offset] {
                 auto manager = SubwindowManager::GetInstance();
                 CHECK_NULL_VOID(manager);
-                auto subwindow = manager->GetSubwindow(containerId);
-                if (!subwindow) {
-                    subwindow = Subwindow::CreateSubwindow(containerId);
-                    subwindow->SetAboveApps(showMode == NG::ToastShowMode::TOP_MOST);
-                    subwindow->InitContainer();
-                    manager->AddSubwindow(containerId, subwindow);
-                }
+                auto subwindow = manager->GetOrCreateToastWindow(containerId, showMode);
+                CHECK_NULL_VOID(subwindow);
                 TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "before show toast : %{public}d", containerId);
-                subwindow->ShowToast(message, duration, bottom, showMode, alignment,  offset);
+                subwindow->ShowToast(message, duration, bottom, showMode, alignment, offset);
             },
             TaskExecutor::TaskType::PLATFORM, "ArkUISubwindowShowToast");
     }
+}
+
+RefPtr<Subwindow> SubwindowManager::GetOrCreateToastWindow(int32_t containerId, const NG::ToastShowMode& showMode)
+{
+    auto isSystemTopMost = (showMode == NG::ToastShowMode::SYSTEM_TOP_MOST);
+    auto subwindow = isSystemTopMost ? GetSystemToastWindow() : GetSubwindow(containerId);
+    if (!subwindow) {
+        subwindow = Subwindow::CreateSubwindow(containerId);
+        subwindow->SetIsSystemTopMost(isSystemTopMost);
+        subwindow->SetAboveApps(showMode == NG::ToastShowMode::TOP_MOST);
+        subwindow->InitContainer();
+        if (isSystemTopMost) {
+            SetSystemToastWindow(subwindow);
+        } else {
+            AddSubwindow(containerId, subwindow);
+        }
+    }
+
+    return subwindow;
 }
 
 void SubwindowManager::ClearToastInSubwindow()
@@ -847,7 +909,6 @@ void SubwindowManager::ResizeWindowForFoldStatus(int32_t parentContainerId)
     subwindow->ResizeWindowForFoldStatus(parentContainerId);
 }
 
-
 void SubwindowManager::MarkDirtyDialogSafeArea()
 {
     auto containerId = Container::CurrentId();
@@ -856,5 +917,11 @@ void SubwindowManager::MarkDirtyDialogSafeArea()
     auto subwindow = manager->GetSubwindow(containerId);
     CHECK_NULL_VOID(subwindow);
     subwindow->MarkDirtyDialogSafeArea();
+}
+
+void SubwindowManager::HideSystemTopMostWindow()
+{
+    CHECK_NULL_VOID(systemToastWindow_);
+    systemToastWindow_->HideSubWindowNG();
 }
 } // namespace OHOS::Ace

@@ -74,6 +74,10 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         ShapePaintProperty::ToJsonValue(json, filter);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         if (!propTopLeftRadius_.has_value() || !propTopRightRadius_.has_value() || !propBottomLeftRadius_.has_value() ||
             !propBottomRightRadius_.has_value()) {
             return;

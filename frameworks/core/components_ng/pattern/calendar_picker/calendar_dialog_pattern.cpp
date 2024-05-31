@@ -62,6 +62,7 @@ void CalendarDialogPattern::OnModifyDone()
     UpdateDialogBackgroundColor();
     UpdateTitleArrowsColor();
     UpdateOptionsButtonColor();
+    UpdateTitleArrowsImage();
 }
 
 void CalendarDialogPattern::UpdateDialogBackgroundColor()
@@ -112,6 +113,45 @@ void CalendarDialogPattern::UpdateTitleArrowsColor()
     }
 }
 
+void CalendarDialogPattern::UpdateTitleArrowsImage()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto title = host->GetChildAtIndex(TITLE_NODE_INDEX);
+    CHECK_NULL_VOID(title);
+    auto textDirection = host->GetLayoutProperty()->GetNonAutoLayoutDirection();
+
+    auto lastYearNode = AceType::DynamicCast<FrameNode>(title->GetChildAtIndex(TITLE_LAST_YEAR_BUTTON_NODE_INDEX));
+    CHECK_NULL_VOID(lastYearNode);
+    auto lastMonthNode = AceType::DynamicCast<FrameNode>(title->GetChildAtIndex(TITLE_LAST_MONTH_BUTTON_NODE_INDEX));
+    CHECK_NULL_VOID(lastMonthNode);
+    auto nextMonthNode = AceType::DynamicCast<FrameNode>(title->GetChildAtIndex(TITLE_NEXT_MONTH_BUTTON_NODE_INDEX));
+    CHECK_NULL_VOID(nextMonthNode);
+    auto nextYearNode = AceType::DynamicCast<FrameNode>(title->GetChildAtIndex(TITLE_NEXT_YEAR_BUTTON_NODE_INDEX));
+    CHECK_NULL_VOID(nextYearNode);
+
+    if (textDirection == TextDirection::RTL) {
+        UpdateImage(lastYearNode, InternalResource::ResourceId::IC_PUBLIC_DOUBLE_ARROW_RIGHT_SVG);
+        UpdateImage(lastMonthNode, InternalResource::ResourceId::IC_PUBLIC_ARROW_RIGHT_SVG);
+        UpdateImage(nextMonthNode, InternalResource::ResourceId::IC_PUBLIC_ARROW_LEFT_SVG);
+        UpdateImage(nextYearNode, InternalResource::ResourceId::IC_PUBLIC_DOUBLE_ARROW_LEFT_SVG);
+    }
+}
+
+void CalendarDialogPattern::UpdateImage(
+    const RefPtr<FrameNode>& buttonNode, const InternalResource::ResourceId& resourceId)
+{
+    auto image = buttonNode->GetChildren().front();
+    CHECK_NULL_VOID(image);
+    auto imageNode = AceType::DynamicCast<FrameNode>(image);
+    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    auto imageInfo = imageLayoutProperty->GetImageSourceInfo();
+    imageInfo->SetResourceId(resourceId);
+    imageLayoutProperty->UpdateImageSourceInfo(imageInfo.value());
+    imageNode->MarkModifyDone();
+}
+
 void CalendarDialogPattern::UpdateOptionsButtonColor()
 {
     auto host = GetHost();
@@ -136,7 +176,7 @@ void CalendarDialogPattern::UpdateOptionsButtonColor()
             bool acceptNotUpdateBGColor =
                 buttonIndex == OPTION_ACCEPT_BUTTON_INDEX && !updateColorFlags[ACCEPT_BUTTON_BACKGROUND_COLOR_INDEX];
             if (!(cancelNotUpdateBGColor || acceptNotUpdateBGColor)) {
-                auto defaultBGColor = SystemProperties::GetDeviceType() == DeviceType::PHONE
+                auto defaultBGColor = calendarTheme->GetIsButtonTransparent()
                                           ? Color::TRANSPARENT
                                           : calendarTheme->GetDialogButtonBackgroundColor();
                 button->GetRenderContext()->UpdateBackgroundColor(defaultBGColor);

@@ -92,6 +92,9 @@ public:
     void Reset();
     void SetIsTouchDown(bool isTouchDown);
     void UpdateBoundsRect();
+    void SetActiveCircleColor(const LinearColor& activeCircleColor);
+    void SetActiveBackgroundRadius(float activeBackgroundRadius);
+    void SetEnableWaveEffect(bool enableWaveEffect);
 
 private:
     void DrawForApiNine(DrawingContext& context);
@@ -134,6 +137,7 @@ private:
     RefPtr<PropertyColor> wrongColor_;
     RefPtr<PropertyColor> correctColor_;
     RefPtr<AnimatablePropertyColor> pathColor_;
+    RefPtr<AnimatablePropertyColor> activeCircleColor_;
     RefPtr<AnimatablePropertyOffsetF> connectedLineTailPoint_;
     RefPtr<AnimatablePropertyOffsetF> canceledLineTailPoint_;
     RefPtr<AnimatablePropertyColor> pointAnimateColor_;
@@ -141,8 +145,10 @@ private:
     RefPtr<PropertyFloat> sideLength_;
     RefPtr<PropertyFloat> circleRadius_;
     RefPtr<PropertyFloat> pathStrokeWidth_;
+    RefPtr<PropertyFloat> activeBackgroundRadius_;
     RefPtr<PropertyBool> isMoveEventValid_;
     RefPtr<PropertyBool> isHover_;
+    RefPtr<PropertyBool> enableWaveEffect_;
     RefPtr<PropertyInt> hoverIndex_;
     std::optional<NG::PatternLockChallengeResult> challengeResult_;
     RefPtr<PropertyOffsetF> cellCenter_;

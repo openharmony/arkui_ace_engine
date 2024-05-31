@@ -114,6 +114,10 @@ public:
     void SetTextDecorationStyle(Ace::TextDecorationStyle value) override;
     void SetFontFeature(const FONT_FEATURES_LIST& value) override;
     void SetBackBorder() override;
+    void SetOnWillInsertValueEvent(std::function<bool(const InsertValueInfo&)>&& func) override;
+    void SetOnDidInsertValueEvent(std::function<void(const InsertValueInfo&)>&& func) override;
+    void SetOnWillDeleteEvent(std::function<bool(const DeleteValueInfo&)>&& func) override;
+    void SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func) override;
 
     static void SetTextDecoration(FrameNode* frameNode, TextDecoration value);
     static void SetTextDecorationColor(FrameNode* frameNode, const Color& value);
@@ -249,6 +253,19 @@ public:
     static bool GetCustomKeyboardOption(FrameNode* frameNode);
     static void SetShowKeyBoardOnFocus(FrameNode* frameNode, bool value);
     static bool GetShowKeyBoardOnFocus(FrameNode* frameNode);
+    static void SetNumberOfLines(FrameNode* frameNode, int32_t value);
+    static int32_t GetNumberOfLines(FrameNode* frameNode);
+    static void ResetNumberOfLines(FrameNode* frameNode);
+    static void SetBorderWidth(FrameNode* frameNode, NG::BorderWidthProperty borderWidth);
+    static void SetBorderRadius(FrameNode* frameNode, NG::BorderRadiusProperty borderRadius);
+    static void SetBorderColor(FrameNode* frameNode, NG::BorderColorProperty borderColors);
+    static void SetBorderStyle(FrameNode* frameNode, NG::BorderStyleProperty borderStyles);
+    static void SetMargin(FrameNode* frameNode, NG::PaddingProperty& margin);
+    static PaddingProperty GetMargin(FrameNode* frameNode);
+    static void SetOnWillInsertValueEvent(FrameNode* frameNode, std::function<bool(const InsertValueInfo&)>&& func);
+    static void SetOnDidInsertValueEvent(FrameNode* frameNode, std::function<void(const InsertValueInfo&)>&& func);
+    static void SetOnWillDeleteEvent(FrameNode* frameNode, std::function<bool(const DeleteValueInfo&)>&& func);
+    static void SetOnDidDeleteEvent(FrameNode* frameNode, std::function<void(const DeleteValueInfo&)>&& func);
 
 private:
     void AddDragFrameNodeToManager() const;

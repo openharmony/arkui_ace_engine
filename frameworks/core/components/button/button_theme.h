@@ -119,7 +119,18 @@ public:
             theme->shadowFocus_ = static_cast<uint32_t>(buttonPattern->GetAttr<double>("shadow_focus", 0.0));
             theme->scaleFocus_ =  buttonPattern->GetAttr<double>("scale_focus", 0.0);
             theme->paddingText_ = buttonPattern->GetAttr<Dimension>("padding_text", 0.0_vp);
-            theme->textBackgroundFocus_ =  buttonPattern->GetAttr<Color>("focus_bg_text", Color());
+            theme->textBackgroundFocus_ = buttonPattern->GetAttr<Color>("focus_bg_text", Color());
+            theme->focusBorderColor_ = buttonPattern->GetAttr<Color>("button_focus_border_color", Color(0xFF007DFF));
+            theme->focusBorderWidth_ = buttonPattern->GetAttr<Dimension>("button_focus_border_width", 2.0_vp);
+            theme->focusBoxGlow_ = static_cast<bool>(buttonPattern->GetAttr<double>("button_focus_effect_type", 0.0));
+            theme->defaultLightIlliminated_ =
+                static_cast<uint32_t>(buttonPattern->GetAttr<double>("button_default_light_illiminated", 0.0));
+            theme->normalBackgroundFocus_ = buttonPattern->GetAttr<Color>("normal_button_focus_bgcolor", Color());
+            theme->bigFontSizeScale_ = buttonPattern->GetAttr<double>("button_aging_big_font_size_scale", 0.0);
+            theme->largeFontSizeScale_ = buttonPattern->GetAttr<double>("button_aging_large_font_size_scale", 0.0);
+            theme->maxFontSizeScale_ = buttonPattern->GetAttr<double>("button_aging_max_font_size_scale", 0.0);
+            theme->agingNormalPadding_ = buttonPattern->GetAttr<Dimension>("button_aging_normal_padding", 0.0_vp);
+            theme->agingSmallPadding_ = buttonPattern->GetAttr<Dimension>("button_aging_small_padding", 0.0_vp);
             ParseSubStylePattern(buttonPattern, theme);
         }
 
@@ -267,6 +278,11 @@ public:
         return downloadHeight_;
     }
 
+    const Dimension& GetFocusBorderWidth() const
+    {
+        return focusBorderWidth_;
+    }
+
     const Edge& GetPadding() const
     {
         return padding_;
@@ -300,6 +316,11 @@ public:
     uint32_t GetShadowFocus() const
     {
         return shadowFocus_;
+    }
+
+    uint32_t GetDefaultLightIlliminated() const
+    {
+        return defaultLightIlliminated_;
     }
 
     double GetScaleFocus() const
@@ -400,7 +421,7 @@ public:
     {
         auto roleResult = textColorByRoleMap_.find(buttonRole);
         auto result = focusTextColorMap_.find(buttonStyle);
-        if (roleResult == textColorByRoleMap_.end() && result == focusTextColorMap_.end()) {
+        if (roleResult == textColorByRoleMap_.end() || result == focusTextColorMap_.end()) {
             return normalTextColor_;
         }
         if (buttonRole == ButtonRole::ERROR) {
@@ -459,6 +480,45 @@ public:
         return textBackgroundFocus_;
     }
 
+    const Color& GetFocusBorderColor() const
+    {
+        return focusBorderColor_;
+    }
+
+    bool IsFocusBoxGlow() const
+    {
+        return focusBoxGlow_;
+    }
+    const Color& GetNormalBackgroundFocus() const
+    {
+        return normalBackgroundFocus_;
+    }
+
+    float GetBigFontSizeScale() const
+    {
+        return bigFontSizeScale_;
+    }
+
+    float GetLargeFontSizeScale() const
+    {
+        return largeFontSizeScale_;
+    }
+
+    float GetMaxFontSizeScale() const
+    {
+        return maxFontSizeScale_;
+    }
+
+    const Dimension& GetAgingNormalPadding() const
+    {
+        return agingNormalPadding_;
+    }
+
+    const Dimension& GetAgingSmallPadding() const
+    {
+        return agingSmallPadding_;
+    }
+
 protected:
     ButtonTheme() = default;
 
@@ -482,6 +542,8 @@ private:
     Color downloadProgressColor_;
     Color borderColorSmall_;
     Color textBackgroundFocus_;
+    Color focusBorderColor_;
+    Color normalBackgroundFocus_;
     TextStyle textStyle_;
     Edge padding_;
     Edge minCircleButtonPadding_;
@@ -502,6 +564,7 @@ private:
     Dimension downloadHeight_;
     Dimension borderWidthSmall_;
     Dimension paddingText_;
+    Dimension focusBorderWidth_;
     std::unordered_map<ButtonRole, std::unordered_map<ButtonStyleMode, Color>> bgColorMap_;
     std::unordered_map<ButtonRole, Color> textColorByRoleMap_;
     std::unordered_map<ButtonStyleMode, Color> textColorMap_;
@@ -514,6 +577,13 @@ private:
     uint32_t textMaxLines_ = 1;
     uint32_t shadowNormal_ = 6;  // no shadow
     uint32_t shadowFocus_ = 6;  // no shadow
+    bool focusBoxGlow_ = false;
+    uint32_t defaultLightIlliminated_ = 0;
+    float bigFontSizeScale_ = 1.75f;
+    float largeFontSizeScale_ = 2.0f;
+    float maxFontSizeScale_ = 3.2f;
+    Dimension agingNormalPadding_;
+    Dimension agingSmallPadding_;
 };
 
 } // namespace OHOS::Ace

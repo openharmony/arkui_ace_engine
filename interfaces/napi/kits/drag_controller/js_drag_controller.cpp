@@ -43,6 +43,7 @@
 #include "core/common/ace_engine.h"
 #include "core/common/container_scope.h"
 #include "core/common/udmf/udmf_client.h"
+#include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/event/ace_events.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
@@ -460,7 +461,9 @@ void CallBackForJs(DragControllerAsyncCtx* asyncCtx, napi_value result)
     if (IsExecutingWithDragAction(asyncCtx) && asyncCtx->dragAction) {
         asyncCtx->dragAction->OnNapiCallback(result);
         if (asyncCtx->deferred != nullptr) {
-            napi_resolve_deferred(asyncCtx->env, asyncCtx->deferred, nullptr);
+            napi_value promiseResult = nullptr;
+            napi_get_undefined(asyncCtx->env, &promiseResult);
+            napi_resolve_deferred(asyncCtx->env, asyncCtx->deferred, promiseResult);
         }
     } else {
         napi_value resultVal[PARAMETER_NUM] = { nullptr };
@@ -614,9 +617,15 @@ void GetShadowInfoArray(DragControllerAsyncCtx* asyncCtx,
     std::vector<Msdp::DeviceStatus::ShadowInfo>& shadowInfos)
 {
     std::set<Media::PixelMap*> scaledPixelMaps;
+    auto minScaleWidth = GridSystemManager::GetInstance().GetMaxWidthWithColumnType(GridColumnType::DRAG_PANEL);
     for (const auto& pixelMap: asyncCtx->pixelMapList) {
+        double scale = 1.0;
         if (!scaledPixelMaps.count(pixelMap.get())) {
-            pixelMap->scale(asyncCtx->windowScale, asyncCtx->windowScale, Media::AntiAliasingOption::HIGH);
+            if (pixelMap->GetWidth() > minScaleWidth && asyncCtx->dragPreviewOption.isScaleEnabled) {
+                scale = minScaleWidth / pixelMap->GetWidth();
+            }
+            auto pixelMapScale = asyncCtx->windowScale * scale;
+            pixelMap->scale(pixelMapScale, pixelMapScale, Media::AntiAliasingOption::HIGH);
             scaledPixelMaps.insert(pixelMap.get());
         }
         int32_t width = pixelMap->GetWidth();
@@ -826,7 +835,13 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
             if (badgeNumber.has_value()) {
                 dataSize = badgeNumber.value();
             }
-            asyncCtx->pixelMap->scale(asyncCtx->windowScale, asyncCtx->windowScale, Media::AntiAliasingOption::HIGH);
+            double scale = 1.0;
+            auto minScaleWidth = GridSystemManager::GetInstance().GetMaxWidthWithColumnType(GridColumnType::DRAG_PANEL);
+            if (asyncCtx->pixelMap->GetWidth() > minScaleWidth && asyncCtx->dragPreviewOption.isScaleEnabled) {
+                scale = minScaleWidth / asyncCtx->pixelMap->GetWidth();
+            }
+            auto pixelMapScale = asyncCtx->windowScale * scale;
+            asyncCtx->pixelMap->scale(pixelMapScale, pixelMapScale, Media::AntiAliasingOption::HIGH);
             int32_t width = asyncCtx->pixelMap->GetWidth();
             int32_t height = asyncCtx->pixelMap->GetHeight();
             double x = ConvertToPx(asyncCtx, asyncCtx->touchPoint.GetX(), width);
@@ -1363,6 +1378,9 @@ bool CheckAndParseParams(DragControllerAsyncCtx* asyncCtx, std::string& errMsg)
 {
     // Check the number of the argument
     CHECK_NULL_RETURN(asyncCtx, false);
+    if (errMsg.empty()) {
+        return false;
+    }
     if ((asyncCtx->argc != 2) && (asyncCtx->argc != argCount3)) {
         errMsg = "The number of parameters must be 2 or 3.";
         return false;

@@ -70,6 +70,10 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("titleMode", GetTitleModeString().c_str(), filter);
         json->PutExtAttr("hideBackButton", GetHideBackButtonValue(false), filter);
         json->PutExtAttr("hideTitleBar", GetHideTitleBarValue(false), filter);
@@ -79,6 +83,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideTitleBar, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideToolBar, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideBackButton, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IgnoreLayoutSafeArea, SafeAreaExpandOpts, PROPERTY_UPDATE_MEASURE);
 };
 
 } // namespace OHOS::Ace::NG

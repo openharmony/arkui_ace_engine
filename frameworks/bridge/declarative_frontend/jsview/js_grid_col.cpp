@@ -79,6 +79,9 @@ void InheritGridContainerSize(const RefPtr<V2::GridContainerSize>& gridContainer
 void ParseGridContainerSizeArray(const JSRef<JSVal>& jsValue,
     std::optional<int32_t> (&containerSizeArray)[MAX_NUMBER_BREAKPOINT], bool isOrder)
 {
+    if (!jsValue->IsObject()) {
+        return;
+    }
     auto gridParam = JSRef<JSObject>::Cast(jsValue);
     auto xs = gridParam->GetProperty("xs");
     if (xs->IsNumber() && xs->ToNumber<int32_t>() >= 0) {
@@ -202,7 +205,9 @@ void JSGridCol::JSBind(BindingTarget globalObj)
     JSClass<JSGridCol>::StaticMethod("offset", &JSGridCol::Offset, MethodOptions::NONE);
     JSClass<JSGridCol>::StaticMethod("gridColOffset", &JSGridCol::Offset, MethodOptions::NONE);
     JSClass<JSGridCol>::StaticMethod("order", &JSGridCol::Order, MethodOptions::NONE);
+    JSClass<JSGridCol>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSGridCol>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSGridCol>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSGridCol>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSGridCol>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSGridCol>::InheritAndBind<JSContainerBase>(globalObj);

@@ -72,6 +72,7 @@ template("ace_core_source_set") {
       "common/ace_application_info.cpp",
       "common/ace_engine.cpp",
       "common/ace_engine_ext.cpp",
+      "common/agingadapation/aging_adapation_dialog_util.cpp",
       "common/anr_thread.cpp",
       "common/asset_manager_impl.cpp",
       "common/card_scope.cpp",
@@ -423,7 +424,7 @@ template("ace_core_source_set") {
     }
     if (defined(config.enable_image_compression) &&
         config.enable_image_compression) {
-      deps += [ "//third_party/opencl-headers:libcl" ]
+      external_deps += [ "opencl-headers:libcl" ]
       defines += [ "ENABLE_OPENCL" ]
     }
 
@@ -585,6 +586,11 @@ template("ace_core_source_set") {
       ]
     }
 
+    if (defined(config.use_platform_font) && config.use_platform_font) {
+      defines += [ "USE_PLATFORM_FONT" ]
+      sources += [ "common/font/font_platform_proxy.cpp" ]
+    }
+
     # arkoala C interface
     deps += [ "$ace_root/frameworks/core/interfaces/native:ace_core_interfaces_native_node_$platform" ]
 
@@ -647,6 +653,7 @@ template("ace_core_ng_source_set") {
       "common/ace_application_info.cpp",
       "common/ace_engine.cpp",
       "common/ace_engine_ext.cpp",
+      "common/agingadapation/aging_adapation_dialog_util.cpp",
       "common/anr_thread.cpp",
       "common/asset_manager_impl.cpp",
       "common/card_scope.cpp",
@@ -770,6 +777,7 @@ template("ace_core_ng_source_set") {
       # v1 deps
       "$root_out_dir/arkui/framework/core/components/theme/theme_constants_default.cpp",
       "$root_out_dir/arkui/framework/core/components/theme/theme_constants_tv.cpp",
+      "components/checkable/checkable_theme.cpp",
       "components/common/painter/rosen_svg_painter.cpp",
       "components/custom_paint/render_custom_paint_creator.cpp",
       "components/custom_paint/render_offscreen_canvas_creator.cpp",
@@ -825,6 +833,7 @@ template("ace_core_ng_source_set") {
       sources -= [ "components/declaration/common/declaration.cpp" ]
       sources += [
         "animation/card_transition_controller.cpp",
+        "common/platformview/platform_view_proxy.cpp",
         "components/common/properties/animatable_path.cpp",
         "components/common/properties/border_image_edge.cpp",
         "components/common/properties/color_factory.cpp",
@@ -1019,8 +1028,13 @@ template("ace_core_ng_source_set") {
 
     if (defined(config.enable_image_compression) &&
         config.enable_image_compression) {
-      deps += [ "//third_party/opencl-headers:libcl" ]
+      external_deps += [ "opencl-headers:libcl" ]
       defines += [ "ENABLE_OPENCL" ]
+    }
+
+    if (defined(config.use_platform_font) && config.use_platform_font) {
+      defines += [ "USE_PLATFORM_FONT" ]
+      sources += [ "common/font/font_platform_proxy.cpp" ]
     }
 
     cflags_cc = []

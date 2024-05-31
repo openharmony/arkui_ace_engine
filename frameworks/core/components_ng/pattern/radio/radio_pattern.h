@@ -139,6 +139,10 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         Pattern::ToJsonValue(json, filter);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto radioEventHub = host->GetEventHub<NG::RadioEventHub>();
@@ -205,6 +209,9 @@ private:
     void InitFocusEvent();
     void HandleFocusEvent();
     void HandleBlurEvent();
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
+    void OnIsFocusActiveUpdate(bool isFocusAcitve);
     ImageSourceInfo GetImageSourceInfoFromTheme(int32_t RadioIndicator);
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
     RefPtr<FrameNode> BuildContentModifierNode();
@@ -241,6 +248,7 @@ private:
     bool enabled_ = true;
     std::optional<RadioMakeCallback> makeFunc_;
     bool focusEventInitialized_ = false;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
     RefPtr<RadioModifier> radioModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(RadioPattern);
 };

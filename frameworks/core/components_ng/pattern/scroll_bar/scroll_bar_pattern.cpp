@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
 
+#include "base/log/dump_log.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -23,13 +24,14 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t BAR_DISAPPEAR_DELAY_DURATION = 2000; // 2000ms
-constexpr int32_t BAR_DISAPPEAR_DURATION = 400;        // 400ms
-constexpr int32_t BAR_APPEAR_DURATION = 100;        // 100ms
-constexpr int32_t BAR_DISAPPEAR_FRAME_RATE = 20;
+constexpr int32_t BAR_DISAPPEAR_DURATION = 300;        // 300ms
+constexpr int32_t BAR_APPEAR_DURATION = 100;           // 100ms
+constexpr int32_t BAR_DISAPPEAR_FRAME_RATE = 15;       // 15fps, the expected frame rate of opacity animation
 constexpr int32_t BAR_DISAPPEAR_MIN_FRAME_RATE = 0;
 constexpr int32_t BAR_DISAPPEAR_MAX_FRAME_RATE = 90;
 constexpr int32_t LONG_PRESS_PAGE_INTERVAL_MS = 100;
 constexpr int32_t LONG_PRESS_TIME_THRESHOLD_MS = 500;
+constexpr int32_t SCROLL_BAR_LAYOUT_INFO_COUNT = 120;
 } // namespace
 
 void ScrollBarPattern::OnAttachToFrameNode()
@@ -117,29 +119,29 @@ void ScrollBarPattern::OnModifyDone()
     );
     scrollableEvent_->SetBarCollectTouchTargetCallback(
         [weak = AceType::WeakClaim(this)](const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-            TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
-            const RefPtr<TargetComponent>& targetComponent) {
+            TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+            TouchTestResult& responseLinkResult) {
             auto scrollBarPattern = weak.Upgrade();
             CHECK_NULL_VOID(scrollBarPattern);
             if (!scrollBarPattern->HasChild()
                 && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
                 auto scrollBar = scrollBarPattern->scrollBar_;
                 CHECK_NULL_VOID(scrollBar);
-                scrollBar->OnCollectTouchTarget(coordinateOffset, getEventTargetImpl,
-                    result, frameNode, targetComponent);
+                scrollBar->OnCollectTouchTarget(
+                    coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
             } else {
-                scrollBarPattern->OnCollectTouchTarget(coordinateOffset, getEventTargetImpl,
-                    result, frameNode, targetComponent);
+                scrollBarPattern->OnCollectTouchTarget(
+                    coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
             }
         });
     scrollableEvent_->SetBarCollectLongPressTargetCallback(
         [weak = AceType::WeakClaim(this)](const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-            TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
-            const RefPtr<TargetComponent>& targetComponent) {
+            TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+            TouchTestResult& responseLinkResult) {
             auto scrollBar = weak.Upgrade();
             CHECK_NULL_VOID(scrollBar);
             scrollBar->OnCollectLongPressTarget(
-                coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent);
+                coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
         });
     scrollableEvent_->SetInBarRectRegionCallback(
         [weak = AceType::WeakClaim(this)](const PointF& point, SourceType source) {
@@ -204,14 +206,6 @@ void ScrollBarPattern::SetScrollBar(DisplayMode displayMode)
     }
 }
 
-void ScrollBarPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty)
-{
-    auto scrollBarPattern = AceType::DynamicCast<ScrollBarPattern>(dirty->GetHostNode()->GetPattern());
-    CHECK_NULL_VOID(scrollBarPattern);
-    currentOffset_ = scrollBarPattern->GetScrollOffset();
-    scrollableDistance_ = scrollBarPattern->GetScrollableDistance();
-}
-
 void ScrollBarPattern::HandleScrollBarOutBoundary(float scrollBarOutBoundaryExtent)
 {
     CHECK_NULL_VOID(scrollBar_ && scrollBar_->NeedScrollBar());
@@ -230,7 +224,7 @@ void ScrollBarPattern::UpdateScrollBarOffset()
     CHECK_NULL_VOID(layoutProperty);
     auto estimatedHeight = GetControlDistance() + (GetAxis() == Axis::VERTICAL ? viewSize.Height() : viewSize.Width());
 
-    UpdateScrollBarRegion(currentOffset_, estimatedHeight,
+    UpdateScrollBarRegion(scrollableNodeOffset_, estimatedHeight,
         Size(viewSize.Width(), viewSize.Height()), Offset(0.0f, 0.0f));
 }
 
@@ -304,7 +298,6 @@ bool ScrollBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     }
     bool updateFlag = false;
     if (!HasChild() && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        SetScrollProperties(dirty);
         UpdateScrollBarOffset();
         updateFlag = true;
     } else {
@@ -371,7 +364,7 @@ bool ScrollBarPattern::IsAtBottom() const
     return GreatOrEqual(currentOffset_, scrollableDistance_);
 }
 
-void ScrollBarPattern::ValidateOffset(int32_t source)
+void ScrollBarPattern::ValidateOffset()
 {
     if (scrollableDistance_ <= 0.0f) {
         return;
@@ -392,16 +385,125 @@ bool ScrollBarPattern::UpdateCurrentOffset(float delta, int32_t source)
 
     lastOffset_ = currentOffset_;
     currentOffset_ += delta;
-    ValidateOffset(source);
+    ValidateOffset();
     if (scrollBarProxy_ && lastOffset_ != currentOffset_) {
         scrollBarProxy_->NotifyScrollableNode(-delta, source, AceType::WeakClaim(this));
     }
+    AddScrollBarLayoutInfo();
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     } else {
         host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     }
     return true;
+}
+
+void ScrollBarPattern::AddScrollBarLayoutInfo()
+{
+    if (outerScrollBarLayoutInfos_.size() >= SCROLL_BAR_LAYOUT_INFO_COUNT) {
+        outerScrollBarLayoutInfos_.pop_front();
+    }
+    outerScrollBarLayoutInfos_.push_back(OuterScrollBarLayoutInfo({
+        .layoutTime_ = GetSysTimestamp(),
+        .currentOffset_ = currentOffset_,
+        .scrollableNodeOffset_ = scrollableNodeOffset_,
+    }));
+}
+
+void ScrollBarPattern::GetAxisDumpInfo()
+{
+    switch (axis_) {
+        case Axis::NONE: {
+            DumpLog::GetInstance().AddDesc("Axis: NONE");
+            break;
+        }
+        case Axis::VERTICAL: {
+            DumpLog::GetInstance().AddDesc("Axis: VERTICAL");
+            break;
+        }
+        case Axis::HORIZONTAL: {
+            DumpLog::GetInstance().AddDesc("Axis: HORIZONTAL");
+            break;
+        }
+        case Axis::FREE: {
+            DumpLog::GetInstance().AddDesc("Axis: FREE");
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+void ScrollBarPattern::GetDisplayModeDumpInfo()
+{
+    switch (displayMode_) {
+        case DisplayMode::OFF: {
+            DumpLog::GetInstance().AddDesc("outerScrollBarState: OFF");
+            break;
+        }
+        case DisplayMode::AUTO: {
+            DumpLog::GetInstance().AddDesc("outerScrollBarState: AUTO");
+            break;
+        }
+        case DisplayMode::ON: {
+            DumpLog::GetInstance().AddDesc("outerScrollBarState: ON");
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+void ScrollBarPattern::GetPanDirectionDumpInfo()
+{
+    if (panRecognizer_) {
+        switch (panRecognizer_->GetAxisDirection()) {
+            case Axis::NONE: {
+                DumpLog::GetInstance().AddDesc("panDirection: NONE");
+                break;
+            }
+            case Axis::VERTICAL: {
+                DumpLog::GetInstance().AddDesc("panDirection: VERTICAL");
+                break;
+            }
+            case Axis::HORIZONTAL: {
+                DumpLog::GetInstance().AddDesc("panDirection: HORIZONTAL");
+                break;
+            }
+            case Axis::FREE: {
+                DumpLog::GetInstance().AddDesc("panDirection: FREE");
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    } else {
+        DumpLog::GetInstance().AddDesc("panDirection is null");
+    }
+}
+
+void ScrollBarPattern::DumpAdvanceInfo()
+{
+    GetAxisDumpInfo();
+    GetDisplayModeDumpInfo();
+    GetPanDirectionDumpInfo();
+    hasChild_ ? DumpLog::GetInstance().AddDesc("hasChild: true") : DumpLog::GetInstance().AddDesc("hasChild: false");
+    preFrameChildState_ ? DumpLog::GetInstance().AddDesc("preFrameChildState: true")
+                        : DumpLog::GetInstance().AddDesc("preFrameChildState: false");
+    if (!hasChild_ && scrollBar_) {
+        scrollBar_->DumpAdvanceInfo();
+    }
+    DumpLog::GetInstance().AddDesc(std::string("childRect: ").append(childRect_.ToString()));
+    DumpLog::GetInstance().AddDesc(std::string("scrollableDistance: ").append(std::to_string(scrollableDistance_)));
+    DumpLog::GetInstance().AddDesc(std::string("controlDistance_: ").append(std::to_string(controlDistance_)));
+    DumpLog::GetInstance().AddDesc("==========================outerScrollBarLayoutInfos==========================");
+    for (const auto& info : outerScrollBarLayoutInfos_) {
+        DumpLog::GetInstance().AddDesc(info.ToString());
+    }
+    DumpLog::GetInstance().AddDesc("==========================outerScrollBarLayoutInfos==========================");
 }
 
 void ScrollBarPattern::StartDisappearAnimator()
@@ -492,8 +594,7 @@ void ScrollBarPattern::SetAccessibilityAction()
         if (pattern->GetAxis() == Axis::NONE || pattern->GetScrollableDistance() == 0.0f) {
             return;
         }
-        auto source = pattern->GetCurrentPosition();
-        pattern->UpdateCurrentOffset(pattern->GetChildOffset(), source);
+        pattern->UpdateCurrentOffset(pattern->GetChildOffset(), SCROLL_FROM_BAR);
         // AccessibilityEventType::SCROLL_END
     });
 
@@ -503,8 +604,7 @@ void ScrollBarPattern::SetAccessibilityAction()
         if (pattern->GetAxis() == Axis::NONE || pattern->GetScrollableDistance() == 0.0f) {
             return;
         }
-        auto source = pattern->GetCurrentPosition();
-        pattern->UpdateCurrentOffset(-pattern->GetChildOffset(), source);
+        pattern->UpdateCurrentOffset(-pattern->GetChildOffset(), SCROLL_FROM_BAR);
         // AccessibilityEventType::SCROLL_END
     });
 }
@@ -560,6 +660,9 @@ void ScrollBarPattern::HandleDragUpdate(const GestureEvent& info)
 {
     if (scrollPositionCallback_) {
         auto offset = info.GetMainDelta();
+        if (IsReverse()) {
+            offset = -offset;
+        }
         // The offset of the mouse wheel and gesture is opposite.
         if (info.GetInputEventType() == InputEventType::AXIS && !NearZero(controlDistance_)) {
             offset = - offset * scrollableDistance_ / controlDistance_;
@@ -631,7 +734,7 @@ void ScrollBarPattern::ProcessFrictionMotionStop()
 
 void ScrollBarPattern::OnCollectTouchTarget(const OffsetF& coordinateOffset,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
-    const RefPtr<TargetComponent>& targetComponent)
+    const RefPtr<TargetComponent>& targetComponent, TouchTestResult& responseLinkResult)
 {
     if (panRecognizer_) {
         panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
@@ -640,13 +743,15 @@ void ScrollBarPattern::OnCollectTouchTarget(const OffsetF& coordinateOffset,
         panRecognizer_->AttachFrameNode(frameNode);
         panRecognizer_->SetTargetComponent(targetComponent);
         panRecognizer_->SetIsSystemGesture(true);
+        panRecognizer_->SetRecognizerType(GestureTypeName::PAN_GESTURE);
         result.emplace_front(panRecognizer_);
+        responseLinkResult.emplace_back(panRecognizer_);
     }
 }
 
 void ScrollBarPattern::OnCollectLongPressTarget(const OffsetF& coordinateOffset,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
-    const RefPtr<TargetComponent>& targetComponent)
+    const RefPtr<TargetComponent>& targetComponent, TouchTestResult& responseLinkResult)
 {
     if (longPressRecognizer_) {
         longPressRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
@@ -655,7 +760,9 @@ void ScrollBarPattern::OnCollectLongPressTarget(const OffsetF& coordinateOffset,
         longPressRecognizer_->AttachFrameNode(frameNode);
         longPressRecognizer_->SetTargetComponent(targetComponent);
         longPressRecognizer_->SetIsSystemGesture(true);
+        longPressRecognizer_->SetRecognizerType(GestureTypeName::LONG_PRESS_GESTURE);
         result.emplace_front(longPressRecognizer_);
+        responseLinkResult.emplace_back(longPressRecognizer_);
     }
 }
 
@@ -779,5 +886,15 @@ void ScrollBarPattern::InitMouseEvent()
     };
     mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseCallback));
     inputHub->AddOnMouseEvent(mouseEvent_);
+}
+
+bool ScrollBarPattern::IsReverse() const
+{
+    return isReverse_;
+}
+
+void ScrollBarPattern::SetReverse(bool reverse)
+{
+    isReverse_ = reverse;
 }
 } // namespace OHOS::Ace::NG

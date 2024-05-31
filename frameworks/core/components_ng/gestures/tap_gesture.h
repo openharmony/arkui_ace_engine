@@ -37,16 +37,18 @@ public:
     {
         if (gestureInfo_) {
             gestureInfo_->SetType(GestureTypeName::TAP_GESTURE);
+            gestureInfo_->SetRecognizerType(GestureTypeName::TAP_GESTURE);
         } else {
-            gestureInfo_ = MakeRefPtr<GestureInfo>(GestureTypeName::TAP_GESTURE);
+            gestureInfo_ = MakeRefPtr<GestureInfo>(GestureTypeName::TAP_GESTURE, GestureTypeName::TAP_GESTURE, false);
         }
     }
     TapGesture(int32_t count, int32_t fingers) : Gesture(fingers), count_(count)
     {
         if (gestureInfo_) {
             gestureInfo_->SetType(GestureTypeName::TAP_GESTURE);
+            gestureInfo_->SetRecognizerType(GestureTypeName::TAP_GESTURE);
         } else {
-            gestureInfo_ = MakeRefPtr<GestureInfo>(GestureTypeName::TAP_GESTURE);
+            gestureInfo_ = MakeRefPtr<GestureInfo>(GestureTypeName::TAP_GESTURE, GestureTypeName::TAP_GESTURE, false);
         }
     }
     ~TapGesture() override = default;

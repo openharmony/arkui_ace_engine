@@ -41,6 +41,8 @@ struct ArkUI_Node {
     void* alignRuleOption = nullptr;  
     void* userData = nullptr;
     void* swiperIndicator = nullptr;
+    void* imageFrameInfos = nullptr;
+    void* drawableDescriptor = nullptr;
 };
 
 struct ArkUI_Context {
@@ -51,7 +53,9 @@ struct ArkUI_GuidelineStyle {
     std::string id;
     ArkUI_Axis direction;
     float start;
+    bool hasStart;
     float end;
+    bool hasEnd;
 };
 
 struct ArkUI_GuidelineOption {
@@ -91,7 +95,7 @@ struct ArkUI_AlignmentRuleOption {
     float biasVertical;
 };
 
-constexpr int BASIC_COMPONENT_NUM = 19;
+constexpr int BASIC_COMPONENT_NUM = 20;
 
 #ifdef __cplusplus
 };
@@ -100,6 +104,11 @@ constexpr int BASIC_COMPONENT_NUM = 19;
 struct ArkUIFullNodeAPI;
 
 namespace OHOS::Ace::NodeModel {
+
+inline bool UsePXUnit(ArkUI_NodeHandle nodePtr)
+{
+    return nodePtr && (nodePtr->lengthMetricUnit == ARKUI_LENGTH_METRIC_UNIT_PX);
+}
 
 bool InitialFullImpl();
 ArkUIFullNodeAPI* GetFullImpl();
@@ -137,4 +146,5 @@ void* GetUserData(ArkUI_NodeHandle node);
 int32_t SetLengthMetricUnit(ArkUI_NodeHandle nodePtr, ArkUI_LengthMetricUnit unit);
 int32_t AddNodeEventReceiver(ArkUI_NodeHandle node, void (*eventReceiver)(ArkUI_NodeEvent* event));
 int32_t RemoveNodeEventReceiver(ArkUI_NodeHandle node, void (*eventReceiver)(ArkUI_NodeEvent* event));
+void* GetParseJsMedia();
 }; // namespace OHOS::Ace::NodeModel

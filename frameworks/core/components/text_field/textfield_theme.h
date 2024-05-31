@@ -146,7 +146,7 @@ public:
                     .BlendOpacity(pattern->GetAttr<double>(UNDERLINE_COLOR_ALPHA, defaultUnderlineAlpha));
             theme->textColorDisable_ = pattern->GetAttr<Color>(PATTERN_DISABLED_TEXT_COLOR, Color());
             theme->cursorColor_ = pattern->GetAttr<Color>("cursor_color", Color());
-            theme->cursorWidth_ = pattern->GetAttr<Dimension>("cursor_width", 1.5_vp);
+            theme->cursorWidth_ = pattern->GetAttr<Dimension>("cursor_width", 2.0_vp);
             theme->hoverColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_HOVERED, Color());
             theme->pressColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_PRESSED, Color());
             theme->borderRadiusSize_ = Radius(pattern->GetAttr<Dimension>(BORDER_RADIUS_SIZE, 20.0_vp));
@@ -181,7 +181,6 @@ public:
             theme->showPasswordIcon_ = static_cast<bool>(pattern->GetAttr<double>("show_icon_text_input", 1.0));
 
             theme->cancelButtonIconColor_ = pattern->GetAttr<Color>("cancel_button_icon_color", Color());
-            theme->cancelButtonIconHeight_ = pattern->GetAttr<Dimension>("cancel_button_icon_height", Dimension());
             theme->previewUnderlineColor_ = pattern->GetAttr<Color>(PREVIEW_UNDERLINE_COLOR, Color());
             theme->previewBoardColor_ = pattern->GetAttr<Color>(PREVIEW_BOARD_COLOR, Color());
         }
@@ -544,11 +543,6 @@ public:
         return cancelButtonStyle_;
     }
 
-    const Dimension& GetCancelButtonIconHeight() const
-    {
-        return cancelButtonIconHeight_;
-    }
-
     const Color& GetCancelButtonIconColor() const
     {
         return cancelButtonIconColor_;
@@ -655,7 +649,6 @@ private:
     
     // cancelButton
     Color cancelButtonIconColor_;
-    Dimension cancelButtonIconHeight_;
     CancelButtonStyle cancelButtonStyle_ = CancelButtonStyle::INPUT;
     Color previewUnderlineColor_;
     Color previewBoardColor_;

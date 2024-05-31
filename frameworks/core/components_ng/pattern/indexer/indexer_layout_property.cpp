@@ -30,6 +30,10 @@ const std::string DEFAULT_FAMILY = "HarmonyOS Sans";
 void IndexerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     LayoutProperty::ToJsonValue(json, filter);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     json->PutExtAttr("selected", std::to_string(propSelected_.value_or(0)).c_str(), filter);
     json->PutExtAttr("color", propColor_.value_or(Color::WHITE).ColorToString().c_str(), filter);
     json->PutExtAttr("selectedColor", propSelectedColor_.value_or(Color::WHITE).ColorToString().c_str(), filter);
@@ -37,8 +41,8 @@ void IndexerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
     json->PutExtAttr("usingPopup", propUsingPopup_.value_or(false) ? "true" : "false", filter);
     json->PutExtAttr("itemSize",
         propItemSize_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
-    json->PutExtAttr("alignStyle", propAlignStyle_.value_or(AlignStyle::LEFT) == AlignStyle::LEFT ?
-        "IndexerAlign.Left" : "IndexerAlign.Right", filter);
+    std::string alignStyle = AlignStyleToString(propAlignStyle_.value_or(AlignStyle::END));
+    json->PutExtAttr("alignStyle", alignStyle.c_str(), filter);
     auto PopupPositionJsonObject = JsonUtil::Create(true);
     PopupPositionJsonObject->Put("popupPositionX", propPopupPositionX_.value_or(Dimension()).ToString().c_str());
     PopupPositionJsonObject->Put("popupPositionY", propPopupPositionY_.value_or(Dimension()).ToString().c_str());
@@ -57,12 +61,9 @@ void IndexerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
     auto fontFamily = std::vector<std::string>();
     fontFamily.emplace_back(DEFAULT_FAMILY);
     defaultFont.SetFontFamilies(fontFamily);
-    auto fontJsonObject = ToJsonObjectValue(propFont_.value_or(defaultFont));
-    json->PutExtAttr("font", fontJsonObject, filter);
-    auto selectFontJsonObject = ToJsonObjectValue(propSelectedFont_.value_or(defaultFont));
-    json->PutExtAttr("selectFont", selectFontJsonObject, filter);
-    auto popupFontJsonObject = ToJsonObjectValue(propPopupFont_.value_or(defaultFont));
-    json->PutExtAttr("popupFont", popupFontJsonObject, filter);
+    json->PutExtAttr("font", ToJsonObjectValue(propFont_.value_or(defaultFont)), filter);
+    json->PutExtAttr("selectFont", ToJsonObjectValue(propSelectedFont_.value_or(defaultFont)), filter);
+    json->PutExtAttr("popupFont", ToJsonObjectValue(propPopupFont_.value_or(defaultFont)), filter);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
@@ -76,6 +77,7 @@ void IndexerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
     json->PutExtAttr("popupHorizontalSpace", propPopupHorizontalSpace_.value_or(
         Dimension(NG::INDEXER_BUBBLE_INVALID_SPACE, DimensionUnit::VP)).ToString().c_str(), filter);
     json->PutExtAttr("adaptiveWidth", propAdaptiveWidth_.value_or(false) ? "true" : "false", filter);
+    json->PutExtAttr("enableHapticFeedback", propEnableHapticFeedback_.value_or(true) ? "true" : "false", filter);
 }
 
 std::unique_ptr<JsonValue> IndexerLayoutProperty::ToJsonObjectValue(const TextStyle& textStyle)
@@ -97,5 +99,28 @@ std::unique_ptr<JsonValue> IndexerLayoutProperty::ToJsonObjectValue(const TextSt
     fontJsonObject->Put("fontFamily", fontFamily.c_str());
     return fontJsonObject;
 }
+
+std::string IndexerLayoutProperty::AlignStyleToString(const AlignStyle& alignStyle)
+{
+    std::string alignStyleStr;
+    switch (alignStyle) {
+        case AlignStyle::LEFT:
+            alignStyleStr = "IndexerAlign.Left";
+            break;
+        case AlignStyle::RIGHT:
+            alignStyleStr = "IndexerAlign.Right";
+            break;
+        case AlignStyle::START:
+            alignStyleStr = "IndexerAlign.Start";
+            break;
+        case AlignStyle::END:
+            alignStyleStr = "IndexerAlign.End";
+            break;
+        default:
+            break;
+    }
+    return alignStyleStr;
+}
+
 
 } // namespace OHOS::Ace::NG

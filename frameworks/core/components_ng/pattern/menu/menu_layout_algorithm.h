@@ -37,6 +37,7 @@ struct MenuDumpInfo {
     std::string targetNode;
     OffsetF targetOffset;
     SizeF targetSize;
+    Rect wrapperRect;
     float previewBeginScale = 0.0f;
     float previewEndScale = 0.0f;
     float top = 0.0f;
@@ -111,6 +112,7 @@ private:
     void Initialize(LayoutWrapper* layoutWrapper);
     void InitializePadding(LayoutWrapper* layoutWrapper);
     void InitializePaddingAPI12(LayoutWrapper* layoutWrapper);
+    void InitializeParam();
     void InitWrapperRect(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
     void InitSpace(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
     void ModifyPositionToWrapper(LayoutWrapper* layoutWrapper, OffsetF& position);
@@ -170,6 +172,8 @@ private:
     void ModifyPreviewMenuPlacement(LayoutWrapper* layoutWrapper);
     void ModifyNormalPreviewMenuPlacement(LayoutWrapper* layoutWrapper);
     void ModifyNormalPreviewMenuPortraitPlacement(LayoutWrapper* layoutWrapper);
+    void GetPreviewNodeTotalSize(const RefPtr<LayoutWrapper>& child, const Rect& windowGlobalRect,
+        RefPtr<LayoutWrapper>& previewLayoutWrapper, SizeF& size, bool isShowHoverImage);
     SizeF GetPreviewNodeAndMenuNodeTotalSize(const RefPtr<FrameNode>& frameNode,
         RefPtr<LayoutWrapper>& previewLayoutWrapper, RefPtr<LayoutWrapper>& menuLayoutWrapper);
 
@@ -177,23 +181,23 @@ private:
     void LayoutNormalTopPreviewBottomMenu(const RefPtr<GeometryNode>& previewGeometryNode,
         const RefPtr<GeometryNode>& menuGeometryNode, SizeF& totalSize, float menuItemTotalHeight);
     void LayoutNormalTopPreviewBottomMenuLessThan(const RefPtr<GeometryNode>& previewGeometryNode,
-        const RefPtr<GeometryNode>& menuGeometryNode, const PreviewMenuParam& param, SizeF& totalSize);
+        const RefPtr<GeometryNode>& menuGeometryNode, SizeF& totalSize);
     void LayoutNormalTopPreviewBottomMenuGreateThan(const RefPtr<GeometryNode>& previewGeometryNode,
-        const RefPtr<GeometryNode>& menuGeometryNode, const PreviewMenuParam& param, SizeF& totalSize);
+        const RefPtr<GeometryNode>& menuGeometryNode, SizeF& totalSize);
     void LayoutNormalBottomPreviewTopMenu(const RefPtr<GeometryNode>& previewGeometryNode,
         const RefPtr<GeometryNode>& menuGeometryNode, SizeF& totalSize, float menuItemTotalHeight);
     void LayoutNormalBottomPreviewTopMenuLessThan(const RefPtr<GeometryNode>& previewGeometryNode,
-        const RefPtr<GeometryNode>& menuGeometryNode, const PreviewMenuParam& param, SizeF& totalSize);
+        const RefPtr<GeometryNode>& menuGeometryNode, SizeF& totalSize);
     void LayoutNormalBottomPreviewTopMenuGreateThan(const RefPtr<GeometryNode>& previewGeometryNode,
-        const RefPtr<GeometryNode>& menuGeometryNode, const PreviewMenuParam& param, SizeF& totalSize);
+        const RefPtr<GeometryNode>& menuGeometryNode, SizeF& totalSize);
 
     void LayoutOtherDevicePreviewMenu(LayoutWrapper* layoutWrapper);
     void LayoutOtherDeviceLeftPreviewRightMenu(const RefPtr<GeometryNode>& previewGeometryNode,
         const RefPtr<GeometryNode>& menuGeometryNode, SizeF& totalSize, float menuItemTotalHeight);
     void LayoutOtherDeviceLeftPreviewRightMenuLessThan(const RefPtr<GeometryNode>& previewGeometryNode,
-        const RefPtr<GeometryNode>& menuGeometryNode, const PreviewMenuParam& param, SizeF& totalSize);
+        const RefPtr<GeometryNode>& menuGeometryNode, SizeF& totalSize);
     void LayoutOtherDeviceLeftPreviewRightMenuGreateThan(const RefPtr<GeometryNode>& previewGeometryNode,
-        const RefPtr<GeometryNode>& menuGeometryNode, const PreviewMenuParam& param, SizeF& totalSize);
+        const RefPtr<GeometryNode>& menuGeometryNode, SizeF& totalSize);
     void UpdateScrollAndColumnLayoutConstraint(
         const RefPtr<LayoutWrapper>& previewLayoutWrapper, const RefPtr<LayoutWrapper>& menuLayoutWrapper);
     float GetMenuItemTotalHeight(const RefPtr<LayoutWrapper>& menuLayoutWrapper);
@@ -249,6 +253,7 @@ private:
     bool flag_ = false;
     // previewSacle_ must be greater than 0
     float previewScale_ = 1.0f;
+    PreviewMenuParam param_;
     MenuDumpInfo dumpInfo_;
 
     using PlacementFunc = OffsetF (MenuLayoutAlgorithm::*)(const SizeF&, const OffsetF&, const OffsetF&);

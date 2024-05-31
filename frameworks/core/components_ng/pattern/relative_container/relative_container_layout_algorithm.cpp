@@ -32,8 +32,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t HORIZONTAL_DIRECTION_RANGE = 3;
-constexpr int32_t VERTICAL_DIRECTION_RANGE = 6;
 constexpr float DEFAULT_BIAS = 0.5f;
 constexpr float HALF_MULTIPLY = 0.5f;
 const std::string CONCAT_ID_PREFIX = "@concat";
@@ -88,12 +86,14 @@ void RelativeContainerLayoutAlgorithm::DetermineTopologicalOrder(LayoutWrapper* 
     bool idealHeightValid = layoutConstraint.value().selfIdealSize.Height().has_value();
     auto idealSize = CreateIdealSizeByPercentRef(layoutConstraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT);
     if (!idealWidthValid) {
-        idealSize.SetWidth(std::min(idealSize.Width().value(), layoutConstraint.value().maxSize.Width()));
-        idealSize.SetWidth(std::max(idealSize.Width().value(), layoutConstraint.value().minSize.Width()));
+        idealSize.SetWidth(std::min(idealSize.Width().value_or(Infinity<float>()),
+            layoutConstraint.value().maxSize.Width()));
+        idealSize.SetWidth(std::max(idealSize.Width().value_or(0.0f), layoutConstraint.value().minSize.Width()));
     }
     if (!idealHeightValid) {
-        idealSize.SetHeight(std::min(idealSize.Height().value(), layoutConstraint.value().maxSize.Height()));
-        idealSize.SetHeight(std::max(idealSize.Height().value(), layoutConstraint.value().minSize.Height()));
+        idealSize.SetHeight(std::min(idealSize.Height().value_or(Infinity<float>()),
+            layoutConstraint.value().maxSize.Height()));
+        idealSize.SetHeight(std::max(idealSize.Height().value_or(0.0f), layoutConstraint.value().minSize.Height()));
     }
     containerSizeWithoutPaddingBorder_ = idealSize.ConvertToSizeT();
     layoutWrapper->GetGeometryNode()->SetFrameSize(containerSizeWithoutPaddingBorder_);
@@ -210,7 +210,8 @@ void RelativeContainerLayoutAlgorithm::CalcBarrier(LayoutWrapper* layoutWrapper)
             (idNodeMap_.find(barrierInfo.id) != idNodeMap_.end())) {
             continue;
         }
-        barriers_[barrierInfo.id] = std::make_pair(barrierInfo.direction, barrierInfo.referencedId);
+        auto barrierDirection = BarrierDirectionRtl(barrierInfo.direction);
+        barriers_[barrierInfo.id] = std::make_pair(barrierDirection, barrierInfo.referencedId);
     }
 }
 
@@ -821,6 +822,24 @@ void RelativeContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         pattern->SetTopologicalResult(result);
     }
 
+    MeasureChild(layoutWrapper);
+    const auto& calcLayoutConstraint = relativeContainerLayoutProperty->GetCalcLayoutConstraint();
+    CHECK_NULL_VOID(calcLayoutConstraint);
+    auto selfIdealSize = calcLayoutConstraint->selfIdealSize;
+    CHECK_NULL_VOID(selfIdealSize.has_value());
+    if ((selfIdealSize.value().Width().has_value() &&
+            selfIdealSize.value().Width().value().GetDimension().Unit() == DimensionUnit::AUTO) ||
+        (selfIdealSize.value().Height().has_value() &&
+            selfIdealSize.value().Height().value().GetDimension().Unit() == DimensionUnit::AUTO)) {
+        MeasureSelf(layoutWrapper);
+    }
+    AdjustOffsetRtl(layoutWrapper);
+}
+
+void RelativeContainerLayoutAlgorithm::MeasureChild(LayoutWrapper* layoutWrapper)
+{
+    auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(relativeContainerLayoutProperty);
     for (const auto& nodeName : renderList_) {
         if (IsBarrier(nodeName)) {
             MeasureBarrier(nodeName);
@@ -855,16 +874,6 @@ void RelativeContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
         CalcSizeParam(layoutWrapper, nodeName);
         CalcOffsetParam(layoutWrapper, nodeName);
-    }
-    const auto& calcLayoutConstraint = relativeContainerLayoutProperty->GetCalcLayoutConstraint();
-    CHECK_NULL_VOID(calcLayoutConstraint);
-    auto selfIdealSize = calcLayoutConstraint->selfIdealSize;
-    CHECK_NULL_VOID(selfIdealSize.has_value());
-    if ((selfIdealSize.value().Width().has_value() &&
-            selfIdealSize.value().Width().value().GetDimension().Unit() == DimensionUnit::AUTO) ||
-        (selfIdealSize.value().Height().has_value() &&
-            selfIdealSize.value().Height().value().GetDimension().Unit() == DimensionUnit::AUTO)) {
-        MeasureSelf(layoutWrapper);
     }
 }
 
@@ -912,12 +921,13 @@ void RelativeContainerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto left = padding_.left.value_or(0);
     auto top = padding_.top.value_or(0);
     auto paddingOffset = OffsetF(left, top);
+    auto textDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
     for (const auto& mapItem : idNodeMap_) {
         auto childWrapper = mapItem.second.layoutWrapper;
         if (!childWrapper) {
             continue;
         }
-        if (!childWrapper->GetLayoutProperty()->GetFlexItemProperty()) {
+        if (!childWrapper->GetLayoutProperty()->GetFlexItemProperty() && (textDirection != TextDirection::RTL)) {
             childWrapper->GetGeometryNode()->SetMarginFrameOffset(OffsetF(0.0f, 0.0f) + paddingOffset);
             childWrapper->Layout();
             continue;
@@ -1799,4 +1809,39 @@ bool RelativeContainerLayoutAlgorithm::IsAnchorLegal(const std::string& anchorNa
     return true;
 }
 
+BarrierDirection RelativeContainerLayoutAlgorithm::BarrierDirectionRtl(
+    BarrierDirection barrierDirection)
+{
+    auto barrierDirectionRtl = barrierDirection;
+    if (barrierDirection == BarrierDirection::START) {
+        barrierDirectionRtl = BarrierDirection::LEFT;
+    } else if (barrierDirection == BarrierDirection::END) {
+        barrierDirectionRtl = BarrierDirection::RIGHT;
+    }
+    return barrierDirectionRtl;
+}
+
+void RelativeContainerLayoutAlgorithm::AdjustOffsetRtl(LayoutWrapper* layoutWrapper)
+{
+    auto textDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
+    if (textDirection != TextDirection::RTL) {
+        return;
+    }
+    auto containerWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
+    for (const auto& nodeName : renderList_) {
+        auto it = idNodeMap_.find(nodeName);
+        if (it == idNodeMap_.end()) {
+            continue;
+        }
+        auto childWrapper = idNodeMap_[nodeName].layoutWrapper;
+        if (!childWrapper) {
+            continue;
+        }
+        auto oldNodeX = recordOffsetMap_[nodeName].GetX();
+        auto oldNodeY = recordOffsetMap_[nodeName].GetY();
+        auto nodeWidth = childWrapper->GetGeometryNode()->GetMarginFrameSize().Width();
+        auto newNodeX = containerWidth - nodeWidth - oldNodeX - padding_.Width();
+        recordOffsetMap_[nodeName] = OffsetF(newNodeX, oldNodeY);
+    }
+}
 } // namespace OHOS::Ace::NG

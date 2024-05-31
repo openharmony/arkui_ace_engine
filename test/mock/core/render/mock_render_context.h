@@ -20,6 +20,7 @@
 
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/rect_t.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
@@ -55,6 +56,20 @@ public:
     std::vector<double> GetTrans() override
     {
         return transInfo_;
+    }
+
+    void UpdatePaintRect(const RectF& rect) override
+    {
+        paintRect_ = rect;
+    }
+
+    void SavePaintRect(bool isRound = true, uint8_t flag = 0) override
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto geometryNode = host->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        paintRect_ = geometryNode->GetFrameRect();
     }
 
     RectF GetPaintRectWithTransform() override

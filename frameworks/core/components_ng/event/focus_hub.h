@@ -18,6 +18,7 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/geometry_node.h"
+#include "core/components_ng/event/focus_box.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/event/key_event.h"
 #include "core/gestures/gesture_event.h"
@@ -158,12 +159,21 @@ public:
     {
         focusPadding = padding;
     }
+    void SetFocusBoxGlow(bool focusBoxGlow)
+    {
+        focusBoxGlow_ = focusBoxGlow;
+    }
+    bool IsFocusBoxGlow() const
+    {
+        return focusBoxGlow_;
+    }
 
 private:
     std::optional<RoundRect> paintRect;
     std::optional<Color> paintColor;
     std::optional<Dimension> paintWidth;
     std::optional<Dimension> focusPadding;
+    bool focusBoxGlow_ = false;
 };
 
 class ACE_EXPORT FocusPattern : public virtual AceType {
@@ -193,6 +203,7 @@ public:
         if (paintParams.HasFocusPadding()) {
             paintParams_->SetFocusPadding(paintParams.GetFocusPadding());
         }
+        paintParams_->SetFocusBoxGlow(paintParams.IsFocusBoxGlow());
     }
     FocusPattern(const FocusPattern& focusPattern)
     {
@@ -254,6 +265,7 @@ public:
         if (paintParams.HasFocusPadding()) {
             paintParams_->SetFocusPadding(paintParams.GetFocusPadding());
         }
+        paintParams_->SetFocusBoxGlow(paintParams.IsFocusBoxGlow());
     }
 
     bool GetIsFocusActiveWhenFocused() const
@@ -273,6 +285,12 @@ private:
     bool isFocusActiveWhenFocused_ = false;
 };
 
+enum class ScopeFocusDirection {
+    VERTICAL = 0,
+    HORIZONTAL,
+    UNIVERSAL,
+};
+
 struct ScopeFocusAlgorithm final {
     ScopeFocusAlgorithm() = default;
     ScopeFocusAlgorithm(bool isVertical, bool isLeftToRight, ScopeType scopeType)
@@ -282,8 +300,18 @@ struct ScopeFocusAlgorithm final {
         : isVertical(isVertical), isLeftToRight(isLeftToRight), scopeType(scopeType),
           getNextFocusNode(std::move(function))
     {}
+    ScopeFocusAlgorithm(ScopeFocusDirection direction, bool isVertical, bool isLeftToRight, ScopeType scopeType)
+        : direction(direction), isVertical(isVertical), isLeftToRight(isLeftToRight), scopeType(scopeType)
+    {}
+    ScopeFocusAlgorithm(ScopeFocusDirection direction, bool isVertical, bool isLeftToRight, ScopeType scopeType,
+        GetNextFocusNodeFunc&& function)
+        : direction(direction), isVertical(isVertical), isLeftToRight(isLeftToRight), scopeType(scopeType),
+          getNextFocusNode(std::move(function))
+    {}
     ~ScopeFocusAlgorithm() = default;
 
+    // isVertical will be deleted
+    ScopeFocusDirection direction { ScopeFocusDirection::VERTICAL };
     bool isVertical { true };
     bool isLeftToRight { true };
     ScopeType scopeType { ScopeType::OTHERS };
@@ -347,14 +375,6 @@ public:
         return focusStyleType_;
     }
 
-    static void CloseKeyboard();
-
-    static void IsCloseKeyboard(RefPtr<FrameNode> frameNode);
-
-    static void PushPageCloseKeyboard();
-
-    static void NavCloseKeyboard();
-
     BlurReason GetBlurReason() const
     {
         return blurReason_;
@@ -378,6 +398,7 @@ public:
         if (paramsPtr->HasFocusPadding()) {
             focusPaintParamsPtr_->SetFocusPadding(paramsPtr->GetFocusPadding());
         }
+        focusPaintParamsPtr_->SetFocusBoxGlow(paramsPtr->IsFocusBoxGlow());
     }
 
     bool HasPaintRect() const
@@ -408,6 +429,12 @@ public:
     {
         CHECK_NULL_RETURN(focusPaintParamsPtr_, Dimension());
         return focusPaintParamsPtr_->GetPaintWidth();
+    }
+
+    bool IsFocusBoxGlow() const
+    {
+        CHECK_NULL_RETURN(focusPaintParamsPtr_, false);
+        return focusPaintParamsPtr_->IsFocusBoxGlow();
     }
 
     bool HasFocusPadding() const
@@ -467,6 +494,14 @@ public:
             focusPaintParamsPtr_ = std::unique_ptr<FocusPaintParam>();
         }
         focusPaintParamsPtr_->SetFocusPadding(padding);
+    }
+
+    void SetFocusBoxGlow(bool isFocusBoxGlow)
+    {
+        if (!focusPaintParamsPtr_) {
+            focusPaintParamsPtr_ = std::unique_ptr<FocusPaintParam>();
+        }
+        focusPaintParamsPtr_->SetFocusBoxGlow(isFocusBoxGlow);
     }
 
     RefPtr<FocusManager> GetFocusManager() const;
@@ -542,6 +577,8 @@ public:
         return currentFocus_;
     }
     bool IsCurrentFocusWholePath();
+
+    bool HasFocusedChild();
 
     void ClearUserOnFocus()
     {
@@ -742,6 +779,9 @@ public:
     void GetChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
 
     std::list<RefPtr<FocusHub>>::iterator FlushChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
+
+    // Only for the currently loaded children, do not expand.
+    std::list<RefPtr<FocusHub>>::iterator FlushCurrentChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
 
     std::list<RefPtr<FocusHub>> GetChildren()
     {
@@ -970,6 +1010,11 @@ public:
         return focusScopeId_;
     }
 
+    FocusBox& GetFocusBox()
+    {
+        return box_;
+    }
+
     FocusPriority GetFocusPriority() const
     {
         return focusPriority_;
@@ -979,6 +1024,7 @@ protected:
     bool OnKeyEvent(const KeyEvent& keyEvent);
     bool OnKeyEventNode(const KeyEvent& keyEvent);
     bool OnKeyEventScope(const KeyEvent& keyEvent);
+    bool RequestNextFocusOfKeyTab(const KeyEvent& keyEvent);
     bool OnKeyPreIme(KeyEventInfo& info, const KeyEvent& keyEvent);
 
     bool AcceptFocusOfSpecifyChild(FocusStep step);
@@ -1033,6 +1079,8 @@ private:
     bool IsNestingFocusGroup();
     void SetLastWeakFocusNodeWholeScope(const std::string &focusScopeId);
 
+    void RaiseZIndex(); // Recover z-index in ClearFocusState
+
     OnFocusFunc onFocusInternal_;
     OnBlurFunc onBlurInternal_;
     OnBlurReasonFunc onBlurReasonInternal_;
@@ -1060,11 +1108,13 @@ private:
     bool hasForwardMovement_ { false };
     bool hasBackwardMovement_ { false };
     bool isFocusActiveWhenFocused_ { false };
+    bool isRaisedZIndex_ { false };
 
     FocusType focusType_ = FocusType::DISABLE;
     FocusStyleType focusStyleType_ = FocusStyleType::NONE;
     std::unique_ptr<FocusPaintParam> focusPaintParamsPtr_;
     std::function<void(RoundRect&)> getInnerFocusRectFunc_;
+    FocusBox box_;
 
     RectF rectFromOrigin_;
     ScopeFocusAlgorithm focusAlgorithm_;

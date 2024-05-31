@@ -150,6 +150,23 @@ class PatternLockAutoResetModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class PatternLockActivateCircleStyleModifier extends ModifierWithKey<CircleStyleOptions> {
+  constructor(value: CircleStyleOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('patternLockActivateCircleStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().patternLock.resetActivateCircleStyle(node);
+    } else {
+      getUINativeModule().patternLock.setActivateCircleStyle(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ArkPatternLockComponent extends ArkComponent implements PatternLockAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -192,6 +209,11 @@ class ArkPatternLockComponent extends ArkComponent implements PatternLockAttribu
   autoReset(value: boolean): PatternLockAttribute {
     modifierWithKey(this._modifiersWithKeys, PatternLockAutoResetModifier.identity,
       PatternLockAutoResetModifier, value);
+    return this;
+  }
+  activateCircleStyle(value: CircleStyleOptions): PatternLockAttribute {
+    modifierWithKey(this._modifiersWithKeys, PatternLockActivateCircleStyleModifier.identity,
+      PatternLockActivateCircleStyleModifier, value);
     return this;
   }
   onPatternComplete(callback: (input: Array<number>) => void): PatternLockAttribute {

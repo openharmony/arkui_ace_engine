@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <functional>
+
 #include "modifier.h"
 
 #include "base/geometry/dimension.h"
@@ -37,12 +38,14 @@
 #include "core/components/common/properties/popup_param.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/shared_transition_option.h"
+#include "core/components_ng/event/focus_box.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/menu_property.h"
 #include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/property/progress_mask_property.h"
 #include "core/components_ng/property/transition_property.h"
@@ -66,48 +69,22 @@ struct OptionParam {
     OptionParam(const std::string &valueParam, const std::function<void()> &actionParam)
         : value(valueParam), icon(""), enabled(true), action(actionParam)
     {}
+    OptionParam(const std::string& valueParam, const std::string& iconParam,
+        const std::function<void()>& actionParam, const std::function<void(WeakPtr<NG::FrameNode>)> symbol)
+        : value(valueParam), icon(iconParam), enabled(true), action(actionParam), symbol(symbol)
+    {}
+    OptionParam(const std::string& valueParam, const std::string& iconParam, bool enabledParam,
+        const std::function<void()>& actionParam, const std::function<void(WeakPtr<NG::FrameNode>)> symbol)
+        : value(valueParam), icon(iconParam), enabled(enabledParam), action(actionParam), symbol(symbol)
+    {}
 
     ~OptionParam() = default;
-};
-
-enum class ContextMenuRegisterType : char {
-    NORMAL_TYPE = 0,
-    CUSTOM_TYPE = 1,
 };
 
 enum class OverlayType {
     BUILDER = 0,
     TEXT = 1,
     RESET = 2,
-};
-
-struct MenuParam {
-    std::string title;
-    OffsetF positionOffset;
-    bool setShow = false;
-    bool isShow = false;
-    ContextMenuRegisterType contextMenuRegisterType = ContextMenuRegisterType::NORMAL_TYPE;
-    std::function<void(const std::string&)> onStateChange;
-    std::optional<Placement> placement;
-    std::function<void()> onAppear;
-    std::function<void()> onDisappear;
-    std::function<void()> aboutToAppear;
-    std::function<void()> aboutToDisappear;
-    std::optional<bool> enableArrow;
-    std::optional<Dimension> arrowOffset;
-    bool isAboveApps = false;
-    bool isShowInSubWindow = false;
-    bool hasTransitionEffect = false;
-    RefPtr<NG::ChainedTransitionEffect> transition;
-    bool hasPreviewTransitionEffect = false;
-    RefPtr<NG::ChainedTransitionEffect> previewTransition;
-    MenuType type = MenuType::MENU;
-    MenuPreviewMode previewMode = MenuPreviewMode::NONE;
-    MenuPreviewAnimationOptions previewAnimationOptions;
-    std::optional<EffectOption> backgroundEffectOption;
-    std::optional<Color> backgroundColor;
-    std::optional<int32_t> backgroundBlurStyle;
-    std::optional<NG::BorderRadiusProperty> borderRadius;
 };
 
 class ACE_FORCE_EXPORT ViewAbstract {
@@ -163,6 +140,12 @@ public:
     static void SetBorderImage(const RefPtr<BorderImage> &borderImage);
     static void SetBorderImageSource(const std::string &bdImageSrc);
 
+    // visual
+    static void SetVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect);
+    static void SetBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter);
+    static void SetForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter);
+    static void SetCompositingFilter(const OHOS::Rosen::Filter* compositingFilter);
+
     // outer border
     static void SetOuterBorderRadius(const BorderRadiusProperty& value);
     static void SetOuterBorderRadius(const Dimension& value);
@@ -204,6 +187,7 @@ public:
     static void SetHueRotate(float value);
     static void SetColorBlend(const Color &value);
     static void SetSystemBarEffect(bool systemBarEffect);
+    static void SetSystemBarEffect(FrameNode *frameNode, bool enable);
 
     // gradient
     static void SetLinearGradient(const NG::Gradient &gradient);
@@ -246,6 +230,9 @@ public:
     static void SetOnClick(GestureEventFunc &&clickEventFunc);
     static void SetOnGestureJudgeBegin(GestureJudgeFunc &&gestureJudgeFunc);
     static void SetOnTouchIntercept(TouchInterceptFunc &&touchInterceptFunc);
+    static void SetShouldBuiltInRecognizerParallelWith(
+        NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc);
+    static void SetOnGestureRecognizerJudgeBegin(GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc);
     static void SetOnTouch(TouchEventFunc &&touchEventFunc);
     static void SetOnMouse(OnMouseEventFunc &&onMouseEventFunc);
     static void SetOnHover(OnHoverFunc &&onHoverEventFunc);
@@ -260,8 +247,11 @@ public:
     static void SetFocusOnTouch(bool isSet);
     static void SetDefaultFocus(bool isSet);
     static void SetGroupDefaultFocus(bool isSet);
+    static void SetFocusBoxStyle(const NG::FocusBoxStyle& style);
     static void SetOnAppear(std::function<void()> &&onAppear);
     static void SetOnDisappear(std::function<void()> &&onDisappear);
+    static void SetOnAttach(std::function<void()> &&onAttach);
+    static void SetOnDetach(std::function<void()> &&onDetach);
     static void SetOnAreaChanged(std::function<void(const RectF &oldRect, const OffsetF &oldOrigin, const RectF &rect,
         const OffsetF &origin)> &&onAreaChanged);
     static void SetOnVisibleChange(std::function<void(bool, double)> &&onVisibleChange,
@@ -310,8 +300,8 @@ public:
     static void DismissPopup();
     static void BindMenuWithItems(std::vector<OptionParam> &&params, const RefPtr<FrameNode> &targetNode,
         const NG::OffsetF &offset, const MenuParam &menuParam);
-    static void BindMenuWithCustomNode(const RefPtr<UINode> &customNode, const RefPtr<FrameNode> &targetNode,
-        const NG::OffsetF &offset, const MenuParam &menuParam, const RefPtr<UINode> &previewCustomNode = nullptr);
+    static void BindMenuWithCustomNode(std::function<void()>&& buildFunc, const RefPtr<FrameNode>& targetNode,
+        const NG::OffsetF& offset, MenuParam menuParam, std::function<void()>&& previewBuildFunc);
     static void ShowMenu(
         int32_t targetId, const NG::OffsetF& offset, bool isShowInSubWindow, bool isContextMenu = false);
     // inspector
@@ -354,6 +344,8 @@ public:
     static void DisableOnMouse();
     static void DisableOnAppear();
     static void DisableOnDisAppear();
+    static void DisableOnAttach();
+    static void DisableOnDetach();
     static void DisableOnAreaChange();
     static void DisableOnFocus();
     static void DisableOnBlur();
@@ -364,6 +356,8 @@ public:
     static void DisableOnMouse(FrameNode* frameNode);
     static void DisableOnAppear(FrameNode* frameNode);
     static void DisableOnDisappear(FrameNode* frameNode);
+    static void DisableOnAttach(FrameNode* frameNode);
+    static void DisableOnDetach(FrameNode* frameNode);
     static void DisableOnFocus(FrameNode* frameNode);
     static void DisableOnBlur(FrameNode* frameNode);
     static void DisableOnAreaChange(FrameNode* frameNode);
@@ -404,6 +398,13 @@ public:
     static void SetLightIlluminated(uint32_t value);
     static void SetIlluminatedBorderWidth(const Dimension& value);
     static void SetBloom(float value);
+    static void SetLightPosition(FrameNode* frameNode,
+        const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ);
+    static void SetLightIntensity(FrameNode* frameNode, float value);
+    static void SetLightColor(FrameNode* frameNode, const Color& value);
+    static void SetLightIlluminated(FrameNode* frameNode, uint32_t value);
+    static void SetIlluminatedBorderWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetBloom(FrameNode* frameNode, float value);
 
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
     static void SetWidth(FrameNode* frameNode, const CalcLength& width);
@@ -550,6 +551,8 @@ public:
 
     static void SetOnAppear(FrameNode* frameNode, std::function<void()> &&onAppear);
     static void SetOnDisappear(FrameNode* frameNode, std::function<void()> &&onDisappear);
+    static void SetOnAttach(FrameNode* frameNode, std::function<void()> &&onAttach);
+    static void SetOnDetach(FrameNode* frameNode, std::function<void()> &&onDetach);
     static void SetOnAreaChanged(FrameNode* frameNode, std::function<void(const RectF &oldRect,
         const OffsetF &oldOrigin, const RectF &rect, const OffsetF &origin)> &&onAreaChanged);
     static void SetOnFocus(FrameNode* frameNode, OnFocusFunc &&onFocusCallback);
@@ -603,6 +606,9 @@ public:
     static void SetJSFrameNodeOnMouse(FrameNode* frameNode, OnMouseEventFunc&& onMouseEventFunc);
     static void SetJSFrameNodeOnSizeChange(
         FrameNode* frameNode, std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged);
+    static void SetJSFrameNodeOnVisibleAreaApproximateChange(FrameNode* frameNode,
+        const std::function<void(bool, double)>&& jsCallback, const std::vector<double>& ratioList,
+        int32_t expectedUpdateInterval = 1000);
     static void ClearJSFrameNodeOnClick(FrameNode* frameNode);
     static void ClearJSFrameNodeOnTouch(FrameNode* frameNode);
     static void ClearJSFrameNodeOnAppear(FrameNode* frameNode);
@@ -613,6 +619,7 @@ public:
     static void ClearJSFrameNodeOnHover(FrameNode* frameNode);
     static void ClearJSFrameNodeOnMouse(FrameNode* frameNode);
     static void ClearJSFrameNodeOnSizeChange(FrameNode* frameNode);
+    static void ClearJSFrameNodeOnVisibleAreaApproximateChange(FrameNode* frameNode);
 
     static float GetFlexGrow(FrameNode* frameNode);
     static float GetFlexShrink(FrameNode* frameNode);
@@ -649,8 +656,6 @@ public:
     static BlendApplyType GetBlendApplyType(FrameNode* frameNode);
     static void SetOnTouchIntercept(FrameNode* frameNode, TouchInterceptFunc &&touchInterceptFunc);
     static float GetLayoutWeight(FrameNode* frameNode);
-    static void SetFocusScopeId(const std::string& focusScopeId, bool isGroup);
-    static void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority);
     static int32_t GetDisplayIndex(FrameNode* frameNode);
     static NG::BorderWidthProperty GetOuterBorderWidth(FrameNode* frameNode);
     static void SetBias(FrameNode* frameNode, const BiasPair& biasPair);
@@ -658,6 +663,11 @@ public:
     static RenderFit GetRenderFit(FrameNode* frameNode);
     static BorderColorProperty GetOuterBorderColor(FrameNode* frameNode);
     static bool GetRenderGroup(FrameNode* frameNode);
+    static void SetFocusScopeId(const std::string& focusScopeId, bool isGroup);
+    static void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority);
+    static void SetFocusScopeId(FrameNode* frameNode, const std::string& focusScopeId, bool isGroup);
+    static void SetFocusScopePriority(FrameNode* frameNode, const std::string& focusScopeId,
+        const uint32_t focusPriority);
     static void ResetBias(FrameNode* frameNode);
     static void ResetAlignRules(FrameNode* frameNode);
     static void SetOnVisibleChange(FrameNode* frameNode, std::function<void(bool, double)> &&onVisibleChange,
@@ -665,6 +675,10 @@ public:
     static Color GetColorBlend(FrameNode* frameNode);
     static void ResetAreaChanged(FrameNode* frameNode);
     static void ResetVisibleChange(FrameNode* frameNode);
+    static void SetLayoutRect(FrameNode* frameNode, const NG::RectF& rect);
+    static void ResetLayoutRect(FrameNode* frameNode);
+    static NG::RectF GetLayoutRect(FrameNode* frameNode);
+    static bool GetFocusOnTouch(FrameNode* frameNode);
 
 private:
     static void AddDragFrameNodeToManager();

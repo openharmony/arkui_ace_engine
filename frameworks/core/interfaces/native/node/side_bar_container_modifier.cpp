@@ -113,6 +113,7 @@ void ResetControlButton(ArkUINodeHandle node)
         SideBarContainerModelNG::SetControlButtonHeight(frameNode, DEFAULT_CONTROL_BUTTON_HEIGHT);
         SideBarContainerModelNG::ResetControlButtonLeft(frameNode);
         SideBarContainerModelNG::SetControlButtonTop(frameNode, DEFAULT_CONTROL_BUTTON_TOP);
+        SideBarContainerModelNG::ResetControlButtonIconInfo(frameNode);
         return;
     }
     SideBarContainerModelNG::SetControlButtonWidth(frameNode, DEFAULT_CONTROL_BUTTON_WIDTH);

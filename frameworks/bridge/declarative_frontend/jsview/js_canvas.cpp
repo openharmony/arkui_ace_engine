@@ -75,7 +75,9 @@ void JSCanvas::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSCanvas>::StaticMethod("create", &JSCanvas::Create, opt);
     JSClass<JSCanvas>::StaticMethod("onReady", &JSCanvas::OnReady);
+    JSClass<JSCanvas>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSCanvas>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSCanvas>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSCanvas>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSCanvas>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSCanvas>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
@@ -88,7 +90,7 @@ void JSCanvas::JSBind(BindingTarget globalObj)
 
 void JSCanvas::OnReady(const JSCallbackInfo& info)
 {
-    TAG_LOGD(AceLogTag::ACE_CANVAS, "Canvas onReady begins");
+    TAG_LOGI(AceLogTag::ACE_CANVAS, "Canvas onReady begins");
     if (info.Length() < 1 || !info[0]->IsFunction()) {
         return;
     }

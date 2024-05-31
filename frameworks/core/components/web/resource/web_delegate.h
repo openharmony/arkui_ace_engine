@@ -37,6 +37,7 @@
 #include "core/components/web/web_component.h"
 #include "core/components/web/web_event.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
+#include "core/components_ng/pattern/web/web_pattern.h"
 #include "nweb_accessibility_node_info.h"
 #include "surface_delegate.h"
 #ifdef OHOS_STANDARD_SYSTEM
@@ -120,6 +121,52 @@ public:
 private:
     std::shared_ptr<OHOS::NWeb::NWebFullScreenExitHandler> handler_;
     WeakPtr<WebDelegate> webDelegate_;
+};
+
+class WebCustomKeyboardHandlerOhos : public WebCustomKeyboardHandler {
+    DECLARE_ACE_TYPE(WebCustomKeyboardHandlerOhos, WebCustomKeyboardHandler)
+
+public:
+    WebCustomKeyboardHandlerOhos(std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler) :
+    keyboardHandler_(keyboardHandler) {}
+
+    void InsertText(const std::string &text) override
+    {
+        if (keyboardHandler_) {
+            keyboardHandler_->InsertText(text);
+        }
+    }
+
+    void DeleteForward(int32_t length) override
+    {
+        if (keyboardHandler_) {
+            keyboardHandler_->DeleteForward(length);
+        }
+    }
+
+    void DeleteBackward(int32_t length) override
+    {
+        if (keyboardHandler_) {
+            keyboardHandler_->DeleteBackward(length);
+        }
+    }
+
+    void SendFunctionKey(int32_t key) override
+    {
+        if (keyboardHandler_) {
+            keyboardHandler_->SendFunctionKey(key);
+        }
+    }
+
+    void Close() override
+    {
+        if (keyboardHandler_) {
+            keyboardHandler_->Close();
+        }
+    }
+
+private:
+    std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler_;
 };
 
 class AuthResultOhos : public AuthResult {
@@ -533,15 +580,41 @@ public:
     void SetGestureEventResult(bool result) override;
     bool HasSendTask() { return sendTask_; }
     void SetSendTask() { sendTask_ = true; }
+    bool GetEventResult() { return eventResult_; }
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebGestureEventResult> result_;
     bool sendTask_ = false;
+    bool eventResult_ = false;
+};
+
+class WebAvoidAreaChangedListener : public OHOS::Rosen::IAvoidAreaChangedListener {
+public:
+    explicit WebAvoidAreaChangedListener(WeakPtr<WebDelegate> webDelegate) : webDelegate_(webDelegate) {}
+    ~WebAvoidAreaChangedListener() = default;
+
+    void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type) override;
+private:
+    WeakPtr<WebDelegate> webDelegate_;
 };
 
 enum class ScriptItemType {
     DOCUMENT_START = 0,
     DOCUMENT_END
+};
+
+class NWebSystemConfigurationImpl : public OHOS::NWeb::NWebSystemConfiguration {
+public:
+    explicit NWebSystemConfigurationImpl(uint8_t flags) : theme_flags_(flags) {}
+    ~NWebSystemConfigurationImpl() = default;
+
+    uint8_t GetThemeFlags() override
+    {
+        return theme_flags_;
+    }
+
+private:
+    uint8_t theme_flags_ = static_cast<uint8_t>(NWeb::SystemThemeFlags::NONE);
 };
 
 class WebDelegate : public WebResource {
@@ -616,7 +689,7 @@ public:
     void UpdateCacheMode(const WebCacheMode& mode);
     std::shared_ptr<OHOS::NWeb::NWeb> GetNweb();
     bool GetForceDarkMode();
-    void OnConfigurationUpdated(const std::string& colorMode);
+    void OnConfigurationUpdated(const OHOS::AppExecFwk::Configuration& configuration);
     void UpdateDarkMode(const WebDarkMode& mode);
     void UpdateDarkModeAuto(RefPtr<WebDelegate> delegate, std::shared_ptr<OHOS::NWeb::NWebPreference> setting);
     void UpdateForceDarkAccess(const bool& access);
@@ -669,8 +742,9 @@ public:
     void HandleTouchpadFlingEvent(const double& x, const double& y, const double& vx, const double& vy);
     void HandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY);
     bool OnKeyEvent(int32_t keyCode, int32_t keyAction);
+    bool WebOnKeyEvent(int32_t keyCode, int32_t keyAction, const std::vector<int32_t>& pressedCodes);
     void OnMouseEvent(int32_t x, int32_t y, const MouseButton button, const MouseAction action, int count);
-    void OnFocus();
+    void OnFocus(const OHOS::NWeb::FocusReason& reason = OHOS::NWeb::FocusReason::EVENT_REQUEST);
     bool NeedSoftKeyboard();
     void OnBlur();
     void OnPermissionRequestPrompt(const std::shared_ptr<OHOS::NWeb::NWebAccessRequest>& request);
@@ -802,7 +876,7 @@ public:
     void OnNativeEmbedLifecycleChange(std::shared_ptr<NWeb::NWebNativeEmbedDataInfo> dataInfo);
     void OnNativeEmbedGestureEvent(std::shared_ptr<NWeb::NWebNativeEmbedTouchEvent> event);
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
-    bool RequestFocus();
+    bool RequestFocus(OHOS::NWeb::NWebFocusSource source = OHOS::NWeb::NWebFocusSource::FOCUS_SOURCE_DEFAULT);
     void SetDrawSize(const Size& drawSize);
     void SetEnhanceSurfaceFlag(const bool& isEnhanceSurface);
     EGLConfig GLGetConfig(int version, EGLDisplay eglDisplay);
@@ -865,12 +939,32 @@ public:
     std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);
     // Backward
     void Backward();
+    bool AccessBackward();
     bool OnOpenAppLink(const std::string& url, std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback);
 
     void OnRenderProcessNotResponding(
         const std::string& jsStack, int pid, OHOS::NWeb::RenderProcessNotRespondingReason reason);
     void OnRenderProcessResponding();
+    std::string GetSelectInfo() const;
+    Offset GetPosition(const std::string& embedId);
 
+    void OnOnlineRenderToForeground();
+
+    void OnViewportFitChange(OHOS::NWeb::ViewportFit viewportFit);
+    void OnAreaChange(const OHOS::Ace::Rect& area);
+    void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type);
+    NG::WebInfoType GetWebInfoType();
+    void OnInterceptKeyboardAttach(
+        const std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler,
+        const std::map<std::string, std::string> &attributes, bool &useSystemKeyboard, int32_t &enterKeyType);
+
+    void OnCustomKeyboardAttach();
+
+    void OnCustomKeyboardClose();
+
+    void OnAdsBlocked(const std::string& url, const std::vector<std::string>& adsBlocked);
+
+    void KeyboardReDispatch(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event, bool isUsed);
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -926,7 +1020,6 @@ private:
     void ClearClientAuthenticationCache();
     bool AccessStep(int32_t step);
     void BackOrForward(int32_t step);
-    bool AccessBackward();
     bool AccessForward();
 
     void SearchAllAsync(const std::string& searchStr);
@@ -943,7 +1036,6 @@ private:
     void UnregisterSurfacePositionChangedCallback();
 
     void NotifyPopupWindowResult(bool result);
-    void IsNativeType(const double& x, const double& y);
 
     EventCallbackV2 GetAudioStateChangedCallback(bool useNewPipe, const RefPtr<NG::WebEventHub>& eventHub);
     void SurfaceOcclusionCallback(float visibleRatio);
@@ -951,6 +1043,9 @@ private:
     void ratioStrToFloat(const std::string& str);
     // Return canonical encoding name according to the encoding alias name.
     std::string GetCanonicalEncodingName(const std::string& alias_name) const;
+    void RegisterAvoidAreaChangeListener();
+    void UnregisterAvoidAreaChangeListener();
+    void OnSafeInsetsChange();
 #endif
 
     WeakPtr<WebComponent> webComponent_;
@@ -1012,6 +1107,9 @@ private:
     EventCallbackV2 onIntelligentTrackingPreventionResultV2_;
     EventCallbackV2 onRenderProcessNotRespondingV2_;
     EventCallbackV2 onRenderProcessRespondingV2_;
+    EventCallbackV2 onViewportFitChangedV2_;
+    std::function<WebKeyboardOption(const std::shared_ptr<BaseEventInfo>&)> onInterceptKeyboardAttachV2_;
+    EventCallbackV2 onAdsBlockedV2_;
 
     int32_t renderMode_;
     int32_t layoutMode_;
@@ -1033,6 +1131,7 @@ private:
     EGLSurface mEGLSurface = nullptr;
     WindowsSurfaceInfo surfaceInfo_;
     bool forceDarkMode_ = false;
+    WebDarkMode current_dark_mode_ = WebDarkMode::Auto;
     sptr<AppExecFwk::IConfigurationObserver> configChangeObserver_ = nullptr;
     OHOS::NWeb::BlurReason blurReason_ = OHOS::NWeb::BlurReason::FOCUS_SWITCH;
     bool isPopup_ = false;
@@ -1058,6 +1157,11 @@ private:
     bool isSmoothDragResizeEnabled_ = false;
     double resizeWidth_ = 0.0;
     double resizeHeight_ = 0.0;
+    OHOS::Ace::Rect currentArea_;
+    NG::SafeAreaInsets systemSafeArea_;
+    NG::SafeAreaInsets cutoutSafeArea_;
+    NG::SafeAreaInsets navigationIndicatorSafeArea_;
+    sptr<Rosen::IAvoidAreaChangedListener> avoidAreaChangedListener_ = nullptr;
 #endif
 };
 

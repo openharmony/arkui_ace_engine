@@ -47,12 +47,14 @@ std::string ImageSourcePreview::GetProperty(const std::string& /* key */)
     return "";
 }
 
-RefPtr<PixelMap> ImageSourcePreview::CreatePixelMap(const Size& size, AIImageQuality imageQuality)
+RefPtr<PixelMap> ImageSourcePreview::CreatePixelMap(
+    const Size& size, AIImageQuality imageQuality, bool isHdrDecoderNeed)
 {
     return nullptr;
 }
 
-RefPtr<PixelMap> ImageSourcePreview::CreatePixelMap(uint32_t index, const Size& size, AIImageQuality imageQuality)
+RefPtr<PixelMap> ImageSourcePreview::CreatePixelMap(
+    uint32_t index, const Size& size, AIImageQuality imageQuality, bool isHdrDecoderNeed)
 {
     return nullptr;
 }

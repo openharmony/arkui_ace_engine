@@ -30,6 +30,7 @@ constexpr int32_t DEFAULT_ITERATION = 1;
 constexpr FillMode DEFAULT_FILL_MODE = FillMode::FORWARDS;
 constexpr uint32_t DEFAULT_ITERATIONS = 1;
 constexpr int32_t IMAGES_LENGTH = 4;
+constexpr int32_t DEFAULT_STATE = 0;
 
 namespace ImageAnimatorModifier {
 void ParseImage(CalcDimension* dimension, int32_t dimensionLength, const ArkUIImagePropertiesStruct* image)
@@ -178,6 +179,92 @@ void ResetImageAnimatorIteration(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ImageAnimatorModelNG::SetIteration(frameNode, DEFAULT_ITERATION);
 }
+
+void SetImageAnimatorSrc(ArkUINodeHandle node, ArkUIImageFrameInfo* imageInfos, ArkUI_Int32 size)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (size <= 0) {
+        ImageAnimatorModelNG::SetImages(frameNode, std::vector<ImageProperties>());
+        return;
+    }
+    CHECK_NULL_VOID(imageInfos);
+    std::vector<ImageProperties> imageList;
+    for (int32_t i = 0; i < size; i++) {
+        ArkUIImageFrameInfo* image = imageInfos + i;
+        CHECK_NULL_VOID(image);
+        ImageProperties property;
+        auto pixelmap = PixelMap::GetFromDrawable(image->drawable);
+        if (pixelmap) {
+            property.pixelMap = pixelmap;
+        } else {
+            property.src = std::string(image->src);
+        }
+        property.width = CalcDimension(static_cast<double>(image->width), static_cast<DimensionUnit>(image->unit));
+        property.height = CalcDimension(static_cast<double>(image->height), static_cast<DimensionUnit>(image->unit));
+        property.top = CalcDimension(static_cast<double>(image->top), static_cast<DimensionUnit>(image->unit));
+        property.left = CalcDimension(static_cast<double>(image->left), static_cast<DimensionUnit>(image->unit));
+        property.duration = image->duration;
+        imageList.emplace_back(property);
+    }
+    ImageAnimatorModelNG::SetImages(frameNode, imageList);
+}
+
+void ResetDuration(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageAnimatorModelNG::SetDuration(frameNode, DEFAULT_DURATION);
+}
+
+ArkUI_Bool GetIsReverse(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return static_cast<ArkUI_Bool>(ImageAnimatorModelNG::IsReverse(frameNode));
+}
+
+int32_t GetDuration(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, DEFAULT_DURATION);
+    return ImageAnimatorModelNG::GetDuration(frameNode);
+}
+
+int32_t GetState(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, DEFAULT_STATE);
+    return ImageAnimatorModelNG::GetState(frameNode);
+}
+
+ArkUI_Bool GetIsFixedSize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, true);
+    return static_cast<ArkUI_Bool>(ImageAnimatorModelNG::IsFixedSize(frameNode));
+}
+
+int32_t GetFillMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, static_cast<int32_t>(DEFAULT_FILL_MODE));
+    return ImageAnimatorModelNG::GetFillMode(frameNode);
+}
+
+int32_t GetIteration(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, DEFAULT_ITERATION);
+    return ImageAnimatorModelNG::GetIteration(frameNode);
+}
+
+int32_t GetImagesSize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    return ImageAnimatorModelNG::GetImagesSize(frameNode);
+}
 } // namespace ImageAnimatorModifier
 
 namespace NodeModifier {
@@ -196,10 +283,89 @@ const ArkUIImageAnimatorModifier* GetImageAnimatorModifier()
         ImageAnimatorModifier::SetImages,
         ImageAnimatorModifier::ResetImages,
         ImageAnimatorModifier::SetImageAnimatorIteration,
-        ImageAnimatorModifier::ResetImageAnimatorIteration
+        ImageAnimatorModifier::ResetImageAnimatorIteration,
+        ImageAnimatorModifier::SetImageAnimatorSrc,
+        ImageAnimatorModifier::ResetDuration,
+        ImageAnimatorModifier::GetIsReverse,
+        ImageAnimatorModifier::GetDuration,
+        ImageAnimatorModifier::GetState,
+        ImageAnimatorModifier::GetIsFixedSize,
+        ImageAnimatorModifier::GetFillMode,
+        ImageAnimatorModifier::GetIteration,
+        ImageAnimatorModifier::GetImagesSize
     };
 
     return &modifier;
+}
+
+void SetImageAnimatorOnStart(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam]() {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_IMAGE_ANIMATOR_ON_START;
+        SendArkUIAsyncEvent(&event);
+    };
+    ImageAnimatorModelNG::SetOnStart(frameNode, std::move(onEvent));
+}
+
+void SetImageAnimatorOnPause(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam]() {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_IMAGE_ANIMATOR_ON_PAUSE;
+        SendArkUIAsyncEvent(&event);
+    };
+    ImageAnimatorModelNG::SetOnPause(frameNode, std::move(onEvent));
+}
+
+void SetImageAnimatorOnRepeat(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam]() {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_IMAGE_ANIMATOR_ON_REPEAT;
+        SendArkUIAsyncEvent(&event);
+    };
+    ImageAnimatorModelNG::SetOnRepeat(frameNode, std::move(onEvent));
+}
+
+void SetImageAnimatorOnCancel(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam]() {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_IMAGE_ANIMATOR_ON_CANCEL;
+        SendArkUIAsyncEvent(&event);
+    };
+    ImageAnimatorModelNG::SetOnCancel(frameNode, std::move(onEvent));
+}
+
+void SetImageAnimatorOnFinish(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam]() {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_IMAGE_ANIMATOR_ON_FINISH;
+        SendArkUIAsyncEvent(&event);
+    };
+    ImageAnimatorModelNG::SetOnFinish(frameNode, std::move(onEvent));
 }
 }
 } // namespace OHOS::Ace::NG

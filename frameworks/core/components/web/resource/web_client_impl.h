@@ -145,6 +145,7 @@ public:
                             std::shared_ptr<NWeb::NWebFileSelectorParams> params) override;
 
     bool OnFocus() override;
+    bool OnFocus(OHOS::NWeb::NWebFocusSource source) override;
     void OnResourceLoadError(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error) override;
     void OnHttpError(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
@@ -239,6 +240,8 @@ public:
     void OnShowAutofillPopup(
         const float offsetX, const float offsetY, const std::vector<std::string>& menu_items) override;
     void OnHideAutofillPopup() override;
+    void OnAdsBlocked(const std::string& url, const std::vector<std::string>& adsBlocked) override;
+
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {
         webDelegate_ = delegate;
@@ -254,6 +257,17 @@ public:
         const std::string& jsStack, int pid, OHOS::NWeb::RenderProcessNotRespondingReason reason) override;
     void OnRenderProcessResponding() override;
 
+    void OnViewportFitChange(NWeb::ViewportFit viewportFit) override;
+    
+    void OnInterceptKeyboardAttach(
+        const std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler,
+        const std::map<std::string, std::string> &attributes, bool &useSystemKeyboard, int32_t &enterKeyType) override;
+
+    void OnCustomKeyboardAttach() override;
+
+    void OnCustomKeyboardClose() override;
+
+    void KeyboardReDispatch(std::shared_ptr<OHOS::NWeb::NWebKeyEvent> event, bool isUsed) override;
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;

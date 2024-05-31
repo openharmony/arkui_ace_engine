@@ -233,6 +233,11 @@ void SecurityComponentPattern::InitOnClick(RefPtr<FrameNode>& secCompNode, RefPt
 
 void SecurityComponentPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        ToJsonValueRect(json, filter);
+        return;
+    }
     auto node = GetHost();
     CHECK_NULL_VOID(node);
 
@@ -281,6 +286,10 @@ void SecurityComponentPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, con
 
 void SecurityComponentPattern::ToJsonValueRect(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto node = GetHost();
     CHECK_NULL_VOID(node);
 
@@ -596,7 +605,7 @@ int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(GestureEvent
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->DoTriggerOnclick(result);
-        }, TaskExecutor::TaskType::UI, "ArkUISecurityComponentTriggerOnClick");
+        }, TaskExecutor::TaskType::UI, "ArkUISecurityComponentGestureTriggerOnClick");
         return 0;
     };
 
@@ -635,7 +644,7 @@ int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(const KeyEve
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->DoTriggerOnclick(result);
-        }, TaskExecutor::TaskType::UI, "ArkUISecurityComponentTriggerOnClick");
+        }, TaskExecutor::TaskType::UI, "ArkUISecurityComponentKeyTriggerOnClick");
         return 0;
     };
 

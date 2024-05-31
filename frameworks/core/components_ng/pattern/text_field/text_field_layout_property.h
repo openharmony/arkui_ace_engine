@@ -82,13 +82,18 @@ public:
         ResetSelectAllValue();
         ResetShowHighlightBorder();
         ResetSetCounter();
+        ResetNumberOfLines();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         LayoutProperty::ToJsonValue(json, filter);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("showPasswordIcon", propShowPasswordIcon_.value_or(true), filter);
-        json->Put("showPassword", propShowPasswordText_.value_or(false));
+        json->PutExtAttr("showPassword", propShowPasswordText_.value_or(false), filter);
         json->PutExtAttr("errorText", propErrorText_.value_or("").c_str(), filter);
         json->PutExtAttr("showErrorText", propShowErrorText_.value_or(false), filter);
         json->PutExtAttr("showCounter", propShowCounter_.value_or(false), filter);
@@ -105,30 +110,26 @@ public:
         json->PutExtAttr("selectAll", propSelectAllValue_.value_or(false), filter);
         json->PutExtAttr("passwordRules", propPasswordRules_.value_or("").c_str(), filter);
         json->PutExtAttr("enableAutoFill", propEnableAutoFill_.value_or(true), filter);
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-            json->PutExtAttr("letterSpacing", GetLetterSpacing().value_or(Dimension()).ToString().c_str(), filter);
-            json->PutExtAttr("lineHeight", GetLineHeight().value_or(0.0_vp).ToString().c_str(), filter);
-            json->PutExtAttr("lineSpacing", GetLineSpacing().value_or(0.0_vp).ToString().c_str(), filter);
-            auto jsonDecoration = JsonUtil::Create(true);
-            std::string type = V2::ConvertWrapTextDecorationToStirng(
-                GetTextDecoration().value_or(TextDecoration::NONE));
-            jsonDecoration->Put("type", type.c_str());
-            jsonDecoration->Put("color", GetTextDecorationColor().value_or(Color::BLACK).ColorToString().c_str());
-            std::string style = V2::ConvertWrapTextDecorationStyleToString(
-                GetTextDecorationStyle().value_or(TextDecorationStyle::SOLID));
-            jsonDecoration->Put("style", style.c_str());
-            json->PutExtAttr("decoration", jsonDecoration->ToString().c_str(), filter);
-            json->PutExtAttr("minFontSize", GetAdaptMinFontSize().value_or(Dimension()).ToString().c_str(), filter);
-            json->PutExtAttr("maxFontSize", GetAdaptMaxFontSize().value_or(Dimension()).ToString().c_str(), filter);
-            json->PutExtAttr("heightAdaptivePolicy", V2::ConvertWrapTextHeightAdaptivePolicyToString(
-                GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST)).c_str(), filter);
-        }
+        json->PutExtAttr("letterSpacing", GetLetterSpacing().value_or(Dimension()).ToString().c_str(), filter);
+        json->PutExtAttr("lineHeight", GetLineHeight().value_or(0.0_vp).ToString().c_str(), filter);
+        json->PutExtAttr("lineSpacing", GetLineSpacing().value_or(0.0_vp).ToString().c_str(), filter);
+        auto jsonDecoration = JsonUtil::Create(true);
+        std::string type = V2::ConvertWrapTextDecorationToStirng(GetTextDecoration().value_or(TextDecoration::NONE));
+        jsonDecoration->Put("type", type.c_str());
+        jsonDecoration->Put("color", GetTextDecorationColor().value_or(Color::BLACK).ColorToString().c_str());
+        std::string style = V2::ConvertWrapTextDecorationStyleToString(
+            GetTextDecorationStyle().value_or(TextDecorationStyle::SOLID));
+        jsonDecoration->Put("style", style.c_str());
+        json->PutExtAttr("decoration", jsonDecoration->ToString().c_str(), filter);
+        json->PutExtAttr("minFontSize", GetAdaptMinFontSize().value_or(Dimension()).ToString().c_str(), filter);
+        json->PutExtAttr("maxFontSize", GetAdaptMaxFontSize().value_or(Dimension()).ToString().c_str(), filter);
+        json->PutExtAttr("heightAdaptivePolicy", V2::ConvertWrapTextHeightAdaptivePolicyToString(
+            GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST)).c_str(), filter);
         json->PutExtAttr("wordBreak",
             V2::ConvertWrapWordBreakToString(GetWordBreak().value_or(WordBreak::BREAK_WORD)).c_str(), filter);
         json->PutExtAttr("textOverflow",
             V2::ConvertWrapTextOverflowToString(GetTextOverflow().value_or(TextOverflow::CLIP)).c_str(), filter);
-        json->PutExtAttr("textIndent",
-            std::to_string(static_cast<int32_t>(GetTextIndent().value_or(0.0_vp).Value())).c_str(), filter);
+        json->PutExtAttr("textIndent", GetTextIndent().value_or(0.0_vp).ToString().c_str(), filter);
     }
 
     ACE_DEFINE_PROPERTY_GROUP(FontStyle, FontStyle);
@@ -157,6 +158,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, WordBreak, WordBreak, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextOverflow, TextOverflow, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextIndent, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, NumberOfLines, int32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Value, std::string, PROPERTY_UPDATE_NORMAL);
 
     ACE_DEFINE_PROPERTY_GROUP(PlaceholderFontStyle, FontStyle);
@@ -195,7 +197,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MaxViewLines, uint32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NormalMaxViewLines, uint32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsDisabled, bool, PROPERTY_UPDATE_MEASURE);
-
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextOverflowMaxLines, uint32_t, PROPERTY_UPDATE_MEASURE);
+    
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextContentTypeChanged, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(WidthAuto, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TypeChanged, bool, PROPERTY_UPDATE_MEASURE);

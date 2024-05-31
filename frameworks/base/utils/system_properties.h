@@ -76,6 +76,11 @@ public:
     static DeviceType GetDeviceType();
 
     /*
+     * Get if current device need avoid window.
+     */
+    static bool GetNeedAvoidWindow();
+
+    /*
      * check SystemCapability.
      */
     static bool IsSyscapExist(const char* cap);
@@ -223,9 +228,9 @@ public:
 
     static int32_t GetSvgMode();
 
-    static bool GetImageFrameworkEnabled();
-
     static bool GetDebugPixelMapSaveEnabled();
+
+    static bool GetPixelRoundEnable();
 
     static bool GetRosenBackendEnabled()
     {
@@ -262,11 +267,6 @@ public:
         return downloadByNetworkEnabled_;
     }
 
-    static bool GetTraceEnabled()
-    {
-        return traceEnabled_;
-    }
-
     static bool GetSvgTraceEnabled()
     {
         return svgTraceEnable_;
@@ -280,6 +280,11 @@ public:
     static bool GetSyncDebugTraceEnabled()
     {
         return syncDebugTraceEnable_;
+    }
+
+    static bool GetTextTraceEnabled()
+    {
+        return textTraceEnable_;
     }
 
     static bool GetTraceInputEventEnabled()
@@ -322,6 +327,11 @@ public:
     static bool GetGpuUploadEnabled()
     {
         return gpuUploadEnabled_;
+    }
+
+    static bool GetImageFrameworkEnabled()
+    {
+        return imageFrameworkEnable_;
     }
 
     /*
@@ -504,14 +514,17 @@ public:
         return brightUpPercent_;
     }
 
+    static bool IsOpIncEnable();
+
 private:
-    static bool traceEnabled_;
+    static bool opincEnabled_;
     static bool developerModeOn_;
     static bool svgTraceEnable_;
     static bool layoutTraceEnable_;
     static bool traceInputEventEnable_;
     static bool buildTraceEnable_;
     static bool syncDebugTraceEnable_;
+    static bool textTraceEnable_;
     static bool accessibilityEnabled_;
     static bool isRound_;
     static bool isDeviceAccess_;
@@ -521,6 +534,7 @@ private:
     static int32_t devicePhysicalHeight_;
     static double resolution_; // density of the default display
     static DeviceType deviceType_;
+    static bool needAvoidWindow_;
     static DeviceOrientation orientation_;
     static std::string brand_;
     static std::string manufacturer_;
@@ -559,6 +573,7 @@ private:
     static bool stateManagerEnable_;
     static bool acePerformanceMonitorEnable_;
     static bool faultInjectEnabled_;
+    static bool imageFrameworkEnable_;
     static std::pair<float, float> brightUpPercent_;
 };
 

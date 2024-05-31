@@ -119,7 +119,10 @@ void LayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
     magicItemProperty_.ToJsonValue(json, filter);
     ACE_PROPERTY_TO_JSON_VALUE(flexItemProperty_, FlexItemProperty);
     ACE_PROPERTY_TO_JSON_VALUE(gridProperty_, GridProperty);
-
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     if (padding_) {
         json->PutExtAttr("padding", padding_->ToJsonString().c_str(), filter);
     } else {
@@ -263,7 +266,6 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
 {
     layoutConstraint_ = parentConstraint;
     if (margin_) {
-        // TODO: add margin is negative case.
         marginResult_.reset();
         auto margin = CreateMargin();
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -299,6 +301,19 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
     CheckSelfIdealSize(parentConstraint, originMax);
     CheckBorderAndPadding();
     CheckAspectRatio();
+}
+
+void LayoutProperty::UpdateLayoutConstraintWithLayoutRect()
+{
+    CHECK_NULL_VOID(layoutRect_);
+    auto size = layoutRect_.value().GetSize();
+    layoutConstraint_ = {
+        .scaleProperty = ScaleProperty::CreateScaleProperty(),
+        .minSize = size,
+        .maxSize = size,
+        .percentReference = size,
+        .selfIdealSize = OptionalSizeF(size),
+    };
 }
 
 void LayoutProperty::CheckBorderAndPadding()
@@ -363,7 +378,6 @@ void LayoutProperty::CheckAspectRatio()
     if (selfWidth) {
         layoutConstraint_->selfIdealSize.SetWidth(selfWidth);
     }
-    // TODO: after measure done, need to check AspectRatio again.
 }
 
 void LayoutProperty::BuildGridProperty(const RefPtr<FrameNode>& host)
@@ -564,26 +578,27 @@ PaddingPropertyF LayoutProperty::CreatePaddingAndBorderWithDefault(float padding
         padding.bottom.value_or(paddingVerticalDefault) + borderWidth.bottomDimen.value_or(borderVerticalDefault) };
 }
 
-PaddingPropertyF LayoutProperty::CreatePaddingWithoutBorder(bool useRootConstraint)
+PaddingPropertyF LayoutProperty::CreatePaddingWithoutBorder(bool useRootConstraint, bool roundPixel)
 {
     if (layoutConstraint_.has_value()) {
         return ConvertToPaddingPropertyF(
-            padding_, layoutConstraint_->scaleProperty, layoutConstraint_->percentReference.Width());
+            padding_, layoutConstraint_->scaleProperty, layoutConstraint_->percentReference.Width(), roundPixel);
     }
 
     return ConvertToPaddingPropertyF(padding_, ScaleProperty::CreateScaleProperty(),
-        useRootConstraint ? PipelineContext::GetCurrentRootWidth() : 0.0f);
+        useRootConstraint ? PipelineContext::GetCurrentRootWidth() : 0.0f, roundPixel);
 }
 
 BorderWidthPropertyF LayoutProperty::CreateBorder()
 {
+    // no pixel rounding
     if (layoutConstraint_.has_value()) {
         return ConvertToBorderWidthPropertyF(
-            borderWidth_, layoutConstraint_->scaleProperty, layoutConstraint_->percentReference.Width());
+            borderWidth_, layoutConstraint_->scaleProperty, layoutConstraint_->percentReference.Width(), false);
     }
 
     return ConvertToBorderWidthPropertyF(
-        borderWidth_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
+        borderWidth_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth(), false);
 }
 
 MarginPropertyF LayoutProperty::CreateMargin()
@@ -608,12 +623,13 @@ MarginPropertyF LayoutProperty::CreateMarginWithoutCache()
     auto host = GetHost();
     CHECK_NULL_RETURN(host, MarginPropertyF());
     const auto& parentConstraint = host->GetGeometryNode()->GetParentLayoutConstraint();
+    // no pixel rounding
     if (parentConstraint) {
         return ConvertToMarginPropertyF(
-            margin_, parentConstraint->scaleProperty, parentConstraint->percentReference.Width());
+            margin_, parentConstraint->scaleProperty, parentConstraint->percentReference.Width(), false);
     }
     // the root width is not considered at present.
-    return ConvertToMarginPropertyF(margin_, ScaleProperty::CreateScaleProperty(), 0.0f);
+    return ConvertToMarginPropertyF(margin_, ScaleProperty::CreateScaleProperty(), 0.0f, false);
 }
 
 void LayoutProperty::SetHost(const WeakPtr<FrameNode>& host)
@@ -1198,13 +1214,18 @@ bool LayoutProperty::ConstraintEqual(const std::optional<LayoutConstraintF>& pre
     if (!preContentConstraint || !contentConstraint_) {
         return false;
     }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pattern = host->GetPattern();
+    CHECK_NULL_RETURN(pattern, false);
+    auto isNeedPercent = pattern->IsNeedPercent();
     const auto& layout = layoutConstraint_.value();
     const auto& content = contentConstraint_.value();
-    if (GreaterOrEqualToInfinity(layout.maxSize.Width()) && !widthPercentSensitive_) {
+    if (!isNeedPercent && GreaterOrEqualToInfinity(layout.maxSize.Width()) && !widthPercentSensitive_) {
         return (layout.EqualWithoutPercentWidth(preLayoutConstraint.value()) &&
                 content.EqualWithoutPercentWidth(preContentConstraint.value()));
     }
-    if (GreaterOrEqualToInfinity(layout.maxSize.Height()) && !heightPercentSensitive_) {
+    if (!isNeedPercent && GreaterOrEqualToInfinity(layout.maxSize.Height()) && !heightPercentSensitive_) {
         return (layout.EqualWithoutPercentHeight(preLayoutConstraint.value()) &&
                 content.EqualWithoutPercentHeight(preContentConstraint.value()));
     }

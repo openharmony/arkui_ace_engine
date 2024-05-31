@@ -52,6 +52,9 @@ void ListItemDragManager::InitDragDropEvent()
     CHECK_NULL_VOID(listItemEventHub);
     auto gestureHub = listItemEventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
+    if (gestureHub->HasDragEvent()) {
+        return;
+    }
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto manager = weak.Upgrade();
         CHECK_NULL_VOID(manager);
@@ -126,8 +129,16 @@ void ListItemDragManager::HandleOnItemLongPress(const GestureEvent& info)
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    prevScale_ = renderContext->GetTransformScaleValue({ 1.0f, 1.0f });
-    prevShadow_ = renderContext->GetBackShadowValue(ShadowConfig::NoneShadow);
+    if (renderContext->HasTransformScale()) {
+        prevScale_ = renderContext->GetTransformScaleValue({ 1.0f, 1.0f });
+    } else {
+        renderContext->UpdateTransformScale({ 1.0f, 1.0f });
+    }
+    if (renderContext->HasBackShadow()) {
+        prevShadow_ = renderContext->GetBackShadowValue(ShadowConfig::NoneShadow);
+    } else {
+        renderContext->UpdateBackShadow(ShadowConfig::NoneShadow);
+    }
     prevZIndex_ = renderContext->GetZIndexValue(0);
 
     AnimationOption option;
@@ -291,28 +302,67 @@ int32_t ListItemDragManager::ScaleNearItem(int32_t index, const RectF& rect, con
     return index;
 }
 
-void ListItemDragManager::HandleAutoScroll(int32_t index, const PointF& point, const RectF& frameRect)
+bool ListItemDragManager::IsInHotZone(int32_t index, const RectF& frameRect) const
 {
     auto parent = listNode_.Upgrade();
-    CHECK_NULL_VOID(parent);
+    CHECK_NULL_RETURN(parent, false);
     auto listGeometry = parent->GetGeometryNode();
-    CHECK_NULL_VOID(listGeometry);
+    CHECK_NULL_RETURN(listGeometry, false);
     auto listSize = listGeometry->GetFrameSize();
     float hotZone = axis_ == Axis::VERTICAL ?
         HOT_ZONE_HEIGHT_VP_DIM.ConvertToPx() : HOT_ZONE_WIDTH_VP_DIM.ConvertToPx();
     float startOffset = frameRect.GetOffset().GetMainOffset(axis_);
     float endOffset = startOffset + frameRect.GetSize().MainSize(axis_);
+    bool reachStart = (index == 0 && startOffset > hotZone);
+    bool reachEnd = (index == totalCount_ - 1) && endOffset < (listSize.MainSize(axis_) - hotZone);
+    return (!reachStart && !reachEnd);
+}
+
+void ListItemDragManager::HandleAutoScroll(int32_t index, const PointF& point, const RectF& frameRect)
+{
+    auto parent = listNode_.Upgrade();
+    CHECK_NULL_VOID(parent);
     auto pattern = parent->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
-    bool reachStart = (index == 0 && startOffset > hotZone);
-    bool rechEnd = (index == totalCount_ - 1) && endOffset < (listSize.MainSize(axis_) - hotZone);
-    if (!reachStart && !rechEnd) {
+    if (IsInHotZone(index, frameRect)) {
         pattern->HandleMoveEventInComp(point);
-        scrolling_ = true;
+        if (!scrolling_) {
+            pattern->SetHotZoneScrollCallback([weak = WeakClaim(this)]() {
+                auto manager = weak.Upgrade();
+                CHECK_NULL_VOID(manager);
+                manager->HandleScrollCallback();
+            });
+            scrolling_ = true;
+        }
     } else if (scrolling_) {
         pattern->HandleLeaveHotzoneEvent();
+        pattern->SetHotZoneScrollCallback(nullptr);
         scrolling_ = false;
     }
+}
+
+void ListItemDragManager::HandleScrollCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometry = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometry);
+    auto frameRect = geometry->GetMarginFrameRect();
+    int32_t from = GetIndex();
+    if (scrolling_ && !IsInHotZone(from, frameRect)) {
+        auto parent = listNode_.Upgrade();
+        CHECK_NULL_VOID(parent);
+        auto pattern = parent->GetPattern<ListPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleLeaveHotzoneEvent();
+        pattern->SetHotZoneScrollCallback(nullptr);
+        scrolling_ = false;
+    }
+    int32_t to = ScaleNearItem(from, frameRect, realOffset_ - frameRect.GetOffset());
+    if (to == from) {
+        return;
+    }
+    HandleSwapAnimation(from, to);
 }
 
 void ListItemDragManager::SetPosition(const OffsetF& offset)
@@ -333,19 +383,39 @@ void ListItemDragManager::HandleOnItemDragUpdate(const GestureEvent& info)
     CHECK_NULL_VOID(geometry);
     auto frameRect = geometry->GetMarginFrameRect();
     OffsetF gestureOffset(info.GetOffsetX(), info.GetOffsetY());
-    OffsetF realOffset = gestureOffset + dragOffset_;
+    realOffset_ = gestureOffset + dragOffset_;
     if (lanes_ == 1) {
-        realOffset.SetX(dragOffset_.GetX());
+        if (axis_ == Axis::VERTICAL) {
+            realOffset_.SetX(dragOffset_.GetX());
+        } else {
+            realOffset_.SetY(dragOffset_.GetY());
+        }
     }
-    SetPosition(realOffset);
+    SetPosition(realOffset_);
 
     int32_t from = GetIndex();
     PointF point(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
     HandleAutoScroll(from, point, frameRect);
 
-    int32_t to = ScaleNearItem(from, frameRect, realOffset - frameRect.GetOffset());
+    int32_t to = ScaleNearItem(from, frameRect, realOffset_ - frameRect.GetOffset());
     if (to == from) {
         return;
+    }
+    HandleSwapAnimation(from, to);
+}
+
+void ListItemDragManager::HandleSwapAnimation(int32_t from, int32_t to)
+{
+    auto forEach = forEachNode_.Upgrade();
+    CHECK_NULL_VOID(forEach);
+    CHECK_NULL_VOID(forEach->GetFrameNode(to));
+    auto list = listNode_.Upgrade();
+    CHECK_NULL_VOID(list);
+    if (list->CheckNeedForceMeasureAndLayout()) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        if (pipeline) {
+            pipeline->FlushUITasks();
+        }
     }
     AnimationOption option;
     auto curve = AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 400, 38); /* 400:stiffness, 38:damping */

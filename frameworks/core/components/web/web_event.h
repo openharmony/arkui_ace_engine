@@ -49,6 +49,12 @@ enum class RenderProcessNotRespondingReason {
     NAVIGATION_COMMIT_TIMEOUT,
 };
 
+enum class ViewportFit {
+    AUTO,
+    CONTAINS,
+    COVER,
+};
+
 class WebConsoleLog : public AceType {
     DECLARE_ACE_TYPE(WebConsoleLog, AceType)
 public:
@@ -151,6 +157,12 @@ public:
     virtual void HandleMimeType(std::string& mimeType) = 0;
     virtual void HandleStatusCodeAndReason(int32_t statusCode, std::string& reason) = 0;
     virtual void HandleResponseStatus(bool isReady) = 0;
+};
+
+struct WebKeyboardOption {
+    bool isSystemKeyboard_ = true;
+    int32_t enterKeyTpye_ = -1;
+    std::function<void()> customKeyboardBuilder_ = nullptr;
 };
 
 class ACE_EXPORT WebResponse : public AceType {
@@ -722,6 +734,20 @@ public:
     virtual void CancelLoad() = 0;
 };
 
+class ACE_EXPORT WebCustomKeyboardHandler : public AceType {
+    DECLARE_ACE_TYPE(WebCustomKeyboardHandler, AceType)
+
+public:
+    WebCustomKeyboardHandler() = default;
+    ~WebCustomKeyboardHandler() = default;
+
+    virtual void InsertText(const std::string &text) = 0;
+    virtual void DeleteForward(int32_t length) = 0;
+    virtual void DeleteBackward(int32_t length) = 0;
+    virtual void SendFunctionKey(int32_t key) = 0;
+    virtual void Close() = 0;
+};
+
 class ACE_EXPORT LoadWebPageStartEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(LoadWebPageStartEvent, BaseEventInfo);
 
@@ -915,6 +941,32 @@ public:
 
 private:
     RefPtr<WebRequest> request_;
+};
+
+class ACE_EXPORT InterceptKeyboardEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(InterceptKeyboardEvent, BaseEventInfo);
+
+public:
+    explicit InterceptKeyboardEvent(const RefPtr<WebCustomKeyboardHandler>& customKeyboardHandler,
+        const std::map<std::string, std::string> attributes) :
+        BaseEventInfo("InterceptKeyboardEvent"),
+        customKeyboardHandler_(customKeyboardHandler),
+        attributes_(attributes) {}
+    ~InterceptKeyboardEvent() = default;
+
+    const RefPtr<WebCustomKeyboardHandler>& GetCustomKeyboardHandler() const
+    {
+        return customKeyboardHandler_;
+    }
+
+    const std::map<std::string, std::string>& GetAttributesMap() const
+    {
+        return attributes_;
+    }
+
+private:
+    RefPtr<WebCustomKeyboardHandler> customKeyboardHandler_;
+    std::map<std::string, std::string> attributes_;
 };
 
 class ACE_EXPORT WebAppLinkEvent : public BaseEventInfo {
@@ -1858,6 +1910,46 @@ class ACE_EXPORT RenderProcessRespondingEvent : public BaseEventInfo {
 public:
     RenderProcessRespondingEvent() : BaseEventInfo("RenderProcessRespondingEvent") {}
     ~RenderProcessRespondingEvent() = default;
+};
+
+class ACE_EXPORT ViewportFitChangedEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(ViewportFitChangedEvent, BaseEventInfo);
+
+public:
+    ViewportFitChangedEvent(int32_t viewportFit)
+        : BaseEventInfo("ViewportFitChangedEvent"), viewportFit_(viewportFit) {}
+    ~ViewportFitChangedEvent() = default;
+
+    int32_t GetViewportFit() const
+    {
+        return viewportFit_;
+    }
+
+private:
+    int32_t viewportFit_;
+};
+
+class ACE_EXPORT AdsBlockedEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(AdsBlockedEvent, BaseEventInfo);
+
+public:
+    AdsBlockedEvent(const std::string& url, const std::vector<std::string>& adsBlocked) :
+        BaseEventInfo("AdsBlockedEvent"), url_(url), adsBlocked_(adsBlocked) {}
+    ~AdsBlockedEvent() = default;
+
+    const std::string& GetUrl() const
+    {
+        return url_;
+    }
+
+    const std::vector<std::string>& GetAdsBlocked() const
+    {
+        return adsBlocked_;
+    }
+
+private:
+    std::string url_;
+    std::vector<std::string> adsBlocked_;
 };
 
 } // namespace OHOS::Ace

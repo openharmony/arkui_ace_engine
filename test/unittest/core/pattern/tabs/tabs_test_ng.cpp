@@ -29,6 +29,8 @@ void TabsTestNg::SetUpTestSuite()
     tabTheme->tabBarDefaultHeight_ = Dimension(TABBAR_DEFAULT_HEIGHT);
     tabTheme->subTabBarHoverColor_ = Color::RED;
     tabTheme->subTabBarPressedColor_ = Color::GREEN;
+    tabTheme->bottomTabSymbolOn_ = Color::BLUE;
+    tabTheme->bottomTabIconOff_ = Color::BLACK;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(tabTheme));
 }
 
@@ -213,11 +215,11 @@ void TabsTestNg::SwipeToWithoutAnimation(int32_t index)
     FlushLayoutTask(frameNode_);
 }
 
-void TabsTestNg::ClickTo(Offset offset)
+void TabsTestNg::ClickTo(Offset offset, int32_t index)
 {
     GestureEvent info;
     info.SetLocalLocation(offset);
-    tabBarPattern_->HandleClick(info);
+    tabBarPattern_->HandleClick(info, index);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
     FlushLayoutTask(frameNode_);
 }
@@ -897,7 +899,7 @@ HWTEST_F(TabsTestNg, CustomAnimationTest001, TestSize.Level1)
     Offset offset(1, 1);
     info.SetLocalLocation(offset);
     tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
-    tabBarPattern_->HandleClick(info);
+    tabBarPattern_->HandleClick(info, 0);
     EXPECT_TRUE(swiperPattern_->IsDisableSwipe());
     EXPECT_FALSE(swiperPattern_->customAnimationToIndex_.has_value());
 
@@ -924,26 +926,5 @@ HWTEST_F(TabsTestNg, CustomAnimationTest002, TestSize.Level1)
         }
     });
     EXPECT_FALSE(swiperPattern_->IsDisableSwipe());
-}
-
-/**
- * @tc.name: SetCustomStyleNodeTest001
- * @tc.desc: test the node can be saved in the pattern
- * @tc.type: FUNC
- */
-HWTEST_F(TabsTestNg, SetCustomStyleNodeTest001, TestSize.Level1)
-{
-    auto frameNode = FrameNode::CreateFrameNode(
-        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-    ASSERT_NE(frameNode, nullptr);
-    Create([=](TabsModelNG model) {
-        CreateSingleItem([=](TabContentModelNG tabContentModel) {
-            tabContentModel.SetCustomStyleNode(frameNode);
-        }, 0);
-    });
-    auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
-    auto tabContentPattern = tabContentFrameNode->GetPattern<TabContentPattern>();
-    ASSERT_NE(tabContentPattern, nullptr);
-    EXPECT_TRUE(tabContentPattern->HasSubTabBarStyleNode());
 }
 } // namespace OHOS::Ace::NG

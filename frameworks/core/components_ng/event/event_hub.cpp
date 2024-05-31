@@ -26,6 +26,32 @@ void EventHub::AttachHost(const WeakPtr<FrameNode>& host)
     host_ = host;
 }
 
+void EventHub::OnAttachContext(PipelineContext *context)
+{
+    auto host = host_.Upgrade();
+    CHECK_NULL_VOID(host);
+    if (HasOnAreaChanged() || HasInnerOnAreaChanged()) {
+        context->AddOnAreaChangeNode(host->GetId());
+    }
+
+    if (HasVisibleAreaCallback(true) || HasVisibleAreaCallback(false)) {
+        context->AddVisibleAreaChangeNode(host->GetId());
+    }
+}
+
+void EventHub::OnDetachContext(PipelineContext *context)
+{
+    auto host = host_.Upgrade();
+    CHECK_NULL_VOID(host);
+    if (HasOnAreaChanged() || HasInnerOnAreaChanged()) {
+        context->RemoveOnAreaChangeNode(host->GetId());
+    }
+
+    if (HasVisibleAreaCallback(true) || HasVisibleAreaCallback(false)) {
+        context->RemoveVisibleAreaChangeNode(host->GetId());
+    }
+}
+
 RefPtr<FrameNode> EventHub::GetFrameNode() const
 {
     return host_.Upgrade();
@@ -196,7 +222,7 @@ void EventHub::FireCustomerOnDragFunc(DragFuncType dragFuncType, const RefPtr<OH
 void EventHub::FireOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
 {
     if (SystemProperties::GetDebugEnabled()) {
-        LOGI("DragDropManager fire onDragEnter");
+        TAG_LOGI(AceLogTag::ACE_DRAG, "DragDropManager fire onDragEnter");
     }
     if (onDragEnter_) {
         // callback may be overwritten in its invoke so we copy it first
@@ -208,7 +234,7 @@ void EventHub::FireOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info, const s
 void EventHub::FireOnDragLeave(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
 {
     if (SystemProperties::GetDebugEnabled()) {
-        LOGI("DragDropManager fire onDragLeave");
+        TAG_LOGI(AceLogTag::ACE_DRAG, "DragDropManager fire onDragLeave");
     }
     if (onDragLeave_) {
         // callback may be overwritten in its invoke so we copy it first
@@ -220,7 +246,7 @@ void EventHub::FireOnDragLeave(const RefPtr<OHOS::Ace::DragEvent>& info, const s
 void EventHub::FireOnDragMove(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
 {
     if (SystemProperties::GetDebugEnabled()) {
-        LOGI("DragDropManager fire onDragMove");
+        TAG_LOGI(AceLogTag::ACE_DRAG, "DragDropManager fire onDragMove");
     }
     if (onDragMove_) {
         // callback may be overwritten in its invoke so we copy it first
@@ -232,7 +258,7 @@ void EventHub::FireOnDragMove(const RefPtr<OHOS::Ace::DragEvent>& info, const st
 void EventHub::FireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
 {
     if (SystemProperties::GetDebugEnabled()) {
-        LOGI("DragDropManager fire onDrop");
+        TAG_LOGI(AceLogTag::ACE_DRAG, "DragDropManager fire onDrop");
     }
     if (onDrop_) {
         // callback may be overwritten in its invoke so we copy it first
@@ -318,6 +344,11 @@ bool EventHub::HasOnSizeChanged() const
     return static_cast<bool>(onSizeChanged_) || static_cast<bool>(onJsFrameNodeSizeChanged_);
 }
 
+bool EventHub::HasImmediatelyVisibleCallback()
+{
+    return visibleAreaUserCallback_.callback || visibleAreaInnerCallback_.callback;
+}
+
 void EventHub::ClearOnAreaChangedInnerCallbacks()
 {
     onAreaChangedInnerCallbacks_.clear();
@@ -350,26 +381,26 @@ void EventHub::ClearJSFrameNodeOnDisappear()
 void EventHub::FireOnAppear()
 {
     if (onAppear_ || onJSFrameNodeAppear_) {
-        auto* host = UnsafeRawPtr(host_);
-        CHECK_NULL_VOID(host);
-        auto* pipeline = host->GetContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafely();
         CHECK_NULL_VOID(pipeline);
         auto taskScheduler = pipeline->GetTaskExecutor();
         CHECK_NULL_VOID(taskScheduler);
-        pipeline->SetBuildAfterCallback([weak = WeakClaim(this)]() {
-            auto eventHub = weak.Upgrade();
-            CHECK_NULL_VOID(eventHub);
-            if (eventHub->onAppear_) {
-                // callback may be overwritten in its invoke so we copy it first
-                auto onAppear = eventHub->onAppear_;
-                onAppear();
-            }
-            if (eventHub->onJSFrameNodeAppear_) {
-                // callback may be overwritten in its invoke so we copy it first
-                auto onJSFrameNodeAppear = eventHub->onJSFrameNodeAppear_;
-                onJSFrameNodeAppear();
-            }
-        });
+        taskScheduler->PostTask(
+            [weak = WeakClaim(this)]() {
+                auto eventHub = weak.Upgrade();
+                CHECK_NULL_VOID(eventHub);
+                if (eventHub->onAppear_) {
+                    // callback may be overwritten in its invoke so we copy it first
+                    auto onAppear = eventHub->onAppear_;
+                    onAppear();
+                }
+                if (eventHub->onJSFrameNodeAppear_) {
+                    // callback may be overwritten in its invoke so we copy it first
+                    auto onJSFrameNodeAppear = eventHub->onJSFrameNodeAppear_;
+                    onJSFrameNodeAppear();
+                }
+            },
+            TaskExecutor::TaskType::UI, "ArkUIFrameNodeAppearEvent");
     }
 }
 
@@ -410,5 +441,41 @@ bool EventHub::HasInnerOnSizeChanged() const
 void EventHub::ClearInnerOnSizeChanged()
 {
     onSizeChangedInnerCallbacks_.clear();
+}
+
+void EventHub::SetOnAttach(std::function<void()>&& onAttach)
+{
+    onAttach_ = std::move(onAttach);
+}
+
+void EventHub::ClearOnAttach()
+{
+    onAttach_ = nullptr;
+}
+
+void EventHub::FireOnAttach()
+{
+    if (onAttach_) {
+        auto onAttach = onAttach_;
+        onAttach();
+    }
+}
+
+void EventHub::SetOnDetach(std::function<void()>&& onDetach)
+{
+    onDetach_ = std::move(onDetach);
+}
+
+void EventHub::ClearOnDetach()
+{
+    onDetach_ = nullptr;
+}
+
+void EventHub::FireOnDetach()
+{
+    if (onDetach_) {
+        auto onDetach = onDetach_;
+        onDetach();
+    }
 }
 } // namespace OHOS::Ace::NG

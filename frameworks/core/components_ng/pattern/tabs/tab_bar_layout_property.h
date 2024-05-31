@@ -73,6 +73,10 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         LayoutProperty::ToJsonValue(json, filter);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("barHeight", GetTabBarHeight().value_or(0.0_vp).ToString().c_str(), filter);
         json->PutExtAttr("currentIndex", propIndicator_.value_or(0), filter);
     }

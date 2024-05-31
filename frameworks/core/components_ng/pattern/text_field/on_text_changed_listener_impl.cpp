@@ -41,7 +41,7 @@ void OnTextChangedListenerImpl::InsertText(const std::u16string& text)
         auto client = textFieldPattern.Upgrade();
         CHECK_NULL_VOID(client);
         ContainerScope scope(client->GetInstanceId());
-        client->InsertValue(StringUtils::Str16ToStr8(text));
+        client->InsertValue(StringUtils::Str16ToStr8(text), true);
     };
     PostTaskToUI(task, "ArkUITextFieldInsertText");
 }
@@ -274,10 +274,7 @@ void OnTextChangedListenerImpl::HandleSelect(int32_t keyCode, int32_t cursorMove
 void OnTextChangedListenerImpl::PostSyncTaskToUI(const std::function<void()>& task, const std::string& name)
 {
     CHECK_NULL_VOID(task);
-    auto textFieldPattern = pattern_.Upgrade();
-    CHECK_NULL_VOID(textFieldPattern);
-    auto instanceId = textFieldPattern->GetInstanceId();
-    ContainerScope scope(instanceId);
+    ContainerScope scope(patternInstanceId_);
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
@@ -288,10 +285,7 @@ void OnTextChangedListenerImpl::PostSyncTaskToUI(const std::function<void()>& ta
 void OnTextChangedListenerImpl::PostTaskToUI(const std::function<void()>& task, const std::string& name)
 {
     CHECK_NULL_VOID(task);
-    auto textFieldPattern = pattern_.Upgrade();
-    CHECK_NULL_VOID(textFieldPattern);
-    auto instanceId = textFieldPattern->GetInstanceId();
-    ContainerScope scope(instanceId);
+    ContainerScope scope(patternInstanceId_);
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();

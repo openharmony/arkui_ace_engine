@@ -56,6 +56,10 @@ struct CurrentDayStyle {
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("dayColor", propDayColor.value_or(Color()).ColorToString().c_str(), filter);
         json->PutExtAttr("lunarColor", propLunarColor.value_or(Color()).ColorToString().c_str(), filter);
         json->PutExtAttr("markLunarColor", propMarkLunarColor.value_or(Color()).ColorToString().c_str(), filter);
@@ -110,6 +114,10 @@ struct NonCurrentDayStyle {
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("nonCurrentMonthDayColor",
             propNonCurrentMonthDayColor.value_or(Color()).ColorToString().c_str(), filter);
         json->PutExtAttr("nonCurrentMonthLunarColor",
@@ -129,6 +137,10 @@ struct TodayStyle {
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("focusedDayColor", propFocusedDayColor.value_or(Color()).ColorToString().c_str(), filter);
         json->PutExtAttr("focusedLunarColor",
             propFocusedLunarColor.value_or(Color()).ColorToString().c_str(), filter);
@@ -150,6 +162,10 @@ struct WeekStyle {
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("weekColor", propWeekColor.value_or(Color()).ColorToString().c_str(), filter);
         json->PutExtAttr("weekendDayColor", propWeekendDayColor.value_or(Color()).ColorToString().c_str(), filter);
         json->PutExtAttr("weekendLunarColor",
@@ -176,6 +192,10 @@ struct WorkStateStyle {
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("workDayMarkColor",
             propWorkDayMarkColor.value_or(Color()).ColorToString().c_str(), filter);
         json->PutExtAttr("offDayMarkColor", propOffDayMarkColor.value_or(Color()).ColorToString().c_str(), filter);
@@ -244,6 +264,15 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
+        ACE_PROPERTY_TO_JSON_VALUE(propCurrentDayStyle_, CurrentDayStyle);
+        ACE_PROPERTY_TO_JSON_VALUE(propNonCurrentDayStyle_, NonCurrentDayStyle);
+        ACE_PROPERTY_TO_JSON_VALUE(propTodayStyle_, TodayStyle);
+        ACE_PROPERTY_TO_JSON_VALUE(propWeekStyle_, WeekStyle);
+        ACE_PROPERTY_TO_JSON_VALUE(propWorkStateStyle_, WorkStateStyle);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("showLunar", propShowLunar_.value_or(false) ? "true" : "false", filter);
         json->PutExtAttr("showHoliday", propShowHoliday_.value_or(false) ? "true" : "false", filter);
         static const char* WEEK[] = { "Week.Mon", "Week.Tue", "Week.Wed", "Week.Tur", "Week.Fri", "Week.Sat",
@@ -251,11 +280,6 @@ public:
         json->PutExtAttr("startOfWeek", WEEK[static_cast<int32_t>(GetStartOfWeek().value_or(Week::Mon))], filter);
         const std::string DEFAULT_OFFDAYS = "5,6";
         json->PutExtAttr("offDays", propOffDays_.value_or(DEFAULT_OFFDAYS).c_str(), filter);
-        ACE_PROPERTY_TO_JSON_VALUE(propCurrentDayStyle_, CurrentDayStyle);
-        ACE_PROPERTY_TO_JSON_VALUE(propNonCurrentDayStyle_, NonCurrentDayStyle);
-        ACE_PROPERTY_TO_JSON_VALUE(propTodayStyle_, TodayStyle);
-        ACE_PROPERTY_TO_JSON_VALUE(propWeekStyle_, WeekStyle);
-        ACE_PROPERTY_TO_JSON_VALUE(propWorkStateStyle_, WorkStateStyle);
     }
 
     ACE_DEFINE_PROPERTY_GROUP(CurrentDayStyle, CurrentDayStyle);

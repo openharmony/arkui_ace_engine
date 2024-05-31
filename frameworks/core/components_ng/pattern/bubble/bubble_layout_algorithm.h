@@ -186,6 +186,7 @@ private:
         RefPtr<FrameNode> bubbleNode, bool showInSubWindow);
     void SetArrowOffsetsFromClip(const int16_t index, const float offsetX, const float offsetY);
     void SetHotAreas(bool showInSubWindow, bool isBlock, RefPtr<FrameNode> frameNode, int32_t containerId);
+    void SetBubbleRadius();
 
     OffsetF GetChildPosition(
         const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& layoutProp, bool UseArrowOffset);
@@ -209,6 +210,7 @@ private:
     OffsetF targetOffsetForPaint_;
     SizeF childSize_;
     OffsetF childOffset_;
+    // Offset from upper left corner of the screen
     OffsetF childOffsetForPaint_;
     OffsetF arrowPosition_;
     OffsetF arrowPositionForPaint_;
@@ -227,6 +229,7 @@ private:
     Dimension userSetTargetSpace_;
     bool showArrow_ = false;
     bool enableArrow_ = false;
+    bool isCaretMode_ = true;
     float scaledBubbleSpacing_ = 0.0f;
     float arrowHeight_ = 0.0f;
     float realArrowWidth_ = 20.0f;

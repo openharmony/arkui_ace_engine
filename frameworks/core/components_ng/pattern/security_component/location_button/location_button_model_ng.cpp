@@ -42,10 +42,10 @@ LocationButtonModelNG* LocationButtonModelNG::GetInstance()
 }
 
 void LocationButtonModelNG::Create(int32_t text, int32_t icon,
-    int32_t backgroundType)
+    int32_t backgroundType, bool isArkuiComponent)
 {
     SecurityComponentModelNG::CreateCommon(V2::LOCATION_BUTTON_ETS_TAG,
-        text, icon, backgroundType, []() { return AceType::MakeRefPtr<SecurityComponentPattern>(); });
+        text, icon, backgroundType, []() { return AceType::MakeRefPtr<SecurityComponentPattern>(); }, isArkuiComponent);
 }
 
 bool LocationButtonModelNG::GetIconResource(int32_t iconStyle, InternalResource::ResourceId& id)

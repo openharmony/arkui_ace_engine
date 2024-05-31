@@ -54,13 +54,21 @@ public:
     static RefPtr<FrameNode> CreateMenuItemButton(RefPtr<NavigationBarTheme> theme);
     static RefPtr<BarItemNode> CreateBarItemNode(const bool isButtonEnabled);
     static RefPtr<FrameNode> CreateBarItemTextNode(const std::string& text);
-    static RefPtr<FrameNode> CreateBarItemIconNode(const std::string& src, bool isButtonEnabled);
-    static void InitTitleBarButtonEvent(const RefPtr<FrameNode>& buttonNode, bool isMoreButton,
-        BarItem menuItem = BarItem(), bool isButtonEnabled = true);
+    static RefPtr<FrameNode> CreateBarItemIconNode(const BarItem& barItem, bool isButtonEnabled);
+    static void InitTitleBarButtonEvent(const RefPtr<FrameNode>& buttonNode, const RefPtr<FrameNode>& iconNode,
+        bool isMoreButton,  BarItem menuItem = BarItem(), bool isButtonEnabled = true);
     static void UpdateBarItemNodeWithItem(
         const RefPtr<BarItemNode>& barItemNode, const BarItem& barItem, bool isButtonEnabled);
     static void BuildMoreIemNode(const RefPtr<BarItemNode>& barItemNode, bool isButtonEnabled);
     static uint32_t GetOrInitMaxMenuNums(RefPtr<NavigationBarTheme>& theme, RefPtr<TitleBarNode> titleBarNode);
+    static void HandleLongPress(const WeakPtr<FrameNode>& buttonNode, const BarItem& menuItem, bool isMoreButton);
+    static void HandleLongPressActionEnd(const WeakPtr<FrameNode>& buttonNode);
+
+private:
+    static void InitTitleBarButtonLongPressEvent(const RefPtr<FrameNode>& buttonNode,
+        bool isMoreButton, const BarItem& menuItem);
+    static RefPtr<FrameNode> CreatePopupDialogNode(
+        const RefPtr<FrameNode> targetNode, const BarItem& menuItem, bool isMoreButton);
 };
 
 } // namespace OHOS::Ace::NG

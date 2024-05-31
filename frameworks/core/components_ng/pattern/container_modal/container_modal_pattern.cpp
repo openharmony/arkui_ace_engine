@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,14 +15,18 @@
 
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 
+#include "base/resource/internal_resource.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/components_ng/pattern/container_modal/container_modal_theme.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
 
@@ -43,8 +47,7 @@ void UpdateRowHeight(const RefPtr<FrameNode>& row, Dimension height)
     CHECK_NULL_VOID(row);
     auto layoutProperty = row->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(height)));
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(height)));
     row->MarkModifyDone();
     row->MarkDirtyNode();
 }
@@ -66,6 +69,7 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
 
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<ContainerModalTheme>();
     auto stackNode = GetStackNode();
     CHECK_NULL_VOID(stackNode);
     auto windowManager = pipelineContext->GetWindowManager();
@@ -96,7 +100,7 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
 
     auto renderContext = containerNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackgroundColor(isFocus_ ? CONTAINER_BACKGROUND_COLOR : CONTAINER_BACKGROUND_COLOR_LOST_FOCUS);
+    renderContext->UpdateBackgroundColor(theme->GetBackGroundColor(isFocus_));
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(isShow ? CONTAINER_OUTER_RADIUS : 0.0_vp);
     renderContext->UpdateBorderRadius(borderRadius);
@@ -134,7 +138,6 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
 
     auto controlButtonsContext = controlButtonsNode->GetRenderContext();
     CHECK_NULL_VOID(controlButtonsContext);
-    controlButtonsContext->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
     controlButtonsLayoutProperty->UpdateVisibility(isShow ? VisibleType::VISIBLE : VisibleType::GONE);
 }
 
@@ -289,10 +292,11 @@ void ContainerModalPattern::AddOrRemovePanEvent(const RefPtr<FrameNode>& control
         auto windowManager = pipeline->GetWindowManager();
         CHECK_NULL_VOID(windowManager);
         // touch the title to move the floating window
-        auto panActionStart = [wk = WeakClaim(RawPtr(windowManager))](const GestureEvent&) {
+        auto panActionStart = [wk = WeakClaim(RawPtr(windowManager))](const GestureEvent& event) {
             auto windowManager = wk.Upgrade();
             CHECK_NULL_VOID(windowManager);
-            if (windowManager->GetCurrentWindowMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
+            if ((windowManager->GetCurrentWindowMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) &&
+                (event.GetSourceTool() != SourceTool::TOUCHPAD)) {
                 windowManager->WindowStartMove();
                 SubwindowManager::GetInstance()->ClearToastInSubwindow();
             }
@@ -316,6 +320,7 @@ void ContainerModalPattern::OnWindowForceUnfocused() {}
 
 void ContainerModalPattern::WindowFocus(bool isFocus)
 {
+    auto theme = PipelineContext::GetCurrentContext()->GetTheme<ContainerModalTheme>();
     isFocus_ = isFocus;
     auto containerNode = GetHost();
     CHECK_NULL_VOID(containerNode);
@@ -323,7 +328,7 @@ void ContainerModalPattern::WindowFocus(bool isFocus)
     // update container modal background
     auto renderContext = containerNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackgroundColor(isFocus ? CONTAINER_BACKGROUND_COLOR : CONTAINER_BACKGROUND_COLOR_LOST_FOCUS);
+    renderContext->UpdateBackgroundColor(theme->GetBackGroundColor(isFocus));
     BorderColorProperty borderColor;
     borderColor.SetColor(isFocus ? CONTAINER_BORDER_COLOR : CONTAINER_BORDER_COLOR_LOST_FOCUS);
     renderContext->UpdateBorderColor(borderColor);
@@ -354,7 +359,7 @@ void ContainerModalPattern::ChangeControlButtons(bool isFocus)
     ChangeTitleButtonIcon(leftSplitButton,
         isFocus ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT
                 : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_SPLIT_LEFT,
-        isFocus);
+        isFocus, false);
 
     // hide leftSplit button when window mode is WINDOW_MODE_SPLIT_PRIMARY type or split button can not show
     bool hideLeftSplit = hideSplitButton_ || windowMode_ == WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
@@ -366,30 +371,24 @@ void ContainerModalPattern::ChangeControlButtons(bool isFocus)
     auto pipeline = PipelineContext::GetCurrentContext();
     auto windowManager = pipeline->GetWindowManager();
     MaximizeMode mode = windowManager->GetCurrentWindowMaximizeMode();
-    InternalResource::ResourceId maxId = InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE;
+    InternalResource::ResourceId maxId;
     if (mode == MaximizeMode::MODE_AVOID_SYSTEM_BAR || windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN) {
-        maxId = isFocus ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_RECOVER
-                        : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_RECOVER;
+        maxId = InternalResource::ResourceId::IC_WINDOW_RESTORES;
     } else {
-        maxId = isFocus ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE
-                        : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_MAXIMIZE;
+        maxId = InternalResource::ResourceId::IC_WINDOW_MAX;
     }
 
-    ChangeTitleButtonIcon(maximizeButton, maxId, isFocus);
+    ChangeTitleButtonIcon(maximizeButton, maxId, isFocus, false);
     // update minimize button
     auto minimizeButton =
         AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MINIMIZE_BUTTON_INDEX));
     ChangeTitleButtonIcon(minimizeButton,
-        isFocus ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE
-                : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_MINIMIZE,
-        isFocus);
+        InternalResource::ResourceId::IC_WINDOW_MIN, isFocus, false);
 
     // update close button
     auto closeButton = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, CLOSE_BUTTON_INDEX));
     ChangeTitleButtonIcon(closeButton,
-        isFocus ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE
-                : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_CLOSE,
-        isFocus);
+        InternalResource::ResourceId::IC_WINDOW_CLOSE, isFocus, true);
 }
 
 void ContainerModalPattern::ChangeFloatingTitle(bool isFocus)
@@ -402,19 +401,25 @@ void ContainerModalPattern::ChangeFloatingTitle(bool isFocus)
 }
 
 void ContainerModalPattern::ChangeTitleButtonIcon(
-    const RefPtr<FrameNode>& buttonNode, InternalResource::ResourceId icon, bool isFocus)
+    const RefPtr<FrameNode>& buttonNode, InternalResource::ResourceId icon, bool isFocus, bool isCloseBtn)
 {
+    auto theme = PipelineContext::GetCurrentContext()->GetTheme<ContainerModalTheme>();
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackgroundColor(
-        isFocus ? TITLE_BUTTON_BACKGROUND_COLOR : TITLE_BUTTON_BACKGROUND_COLOR_LOST_FOCUS);
+    auto colorType = isFocus ? ControlBtnColorType::NORMAL : ControlBtnColorType::UNFOCUS;
+    auto color = theme->GetControlBtnColor(isCloseBtn, colorType);
+    renderContext->UpdateBackgroundColor(color);
     auto buttonIcon = AceType::DynamicCast<FrameNode>(buttonNode->GetChildren().front());
     CHECK_NULL_VOID(buttonIcon);
     ImageSourceInfo imageSourceInfo;
     imageSourceInfo.SetResourceId(icon);
+    colorType = isFocus ? ControlBtnColorType::NORMAL_FILL : ControlBtnColorType::UNFOCUS_FILL;
+    color = theme->GetControlBtnColor(isCloseBtn,  colorType);
+    imageSourceInfo.SetFillColor(color);
     auto imageLayoutProperty = buttonIcon->GetLayoutProperty<ImageLayoutProperty>();
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     buttonIcon->MarkModifyDone();
+    buttonNode->MarkModifyDone();
 }
 
 bool ContainerModalPattern::CanShowFloatingTitle()
@@ -466,18 +471,19 @@ void ContainerModalPattern::SetTitleButtonHide(
     const RefPtr<FrameNode>& controlButtonsNode, bool hideSplit, bool hideMaximize, bool hideMinimize)
 {
     auto leftSplitButton =
-        AceType::DynamicCast<FrameNode>(controlButtonsNode->GetChildAtIndex(LEFT_SPLIT_BUTTON_INDEX));
+        AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, LEFT_SPLIT_BUTTON_INDEX));
     CHECK_NULL_VOID(leftSplitButton);
     leftSplitButton->GetLayoutProperty()->UpdateVisibility(hideSplit ? VisibleType::GONE : VisibleType::VISIBLE);
     leftSplitButton->MarkDirtyNode();
 
     auto maximizeButton =
-        AceType::DynamicCast<FrameNode>(controlButtonsNode->GetChildAtIndex(MAX_RECOVER_BUTTON_INDEX));
+        AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MAX_RECOVER_BUTTON_INDEX));
     CHECK_NULL_VOID(maximizeButton);
     maximizeButton->GetLayoutProperty()->UpdateVisibility(hideMaximize ? VisibleType::GONE : VisibleType::VISIBLE);
     maximizeButton->MarkDirtyNode();
 
-    auto minimizeButton = AceType::DynamicCast<FrameNode>(controlButtonsNode->GetChildAtIndex(MINIMIZE_BUTTON_INDEX));
+    auto minimizeButton = AceType::DynamicCast<FrameNode>(
+        GetTitleItemByIndex(controlButtonsNode, MINIMIZE_BUTTON_INDEX));
     CHECK_NULL_VOID(minimizeButton);
     minimizeButton->GetLayoutProperty()->UpdateVisibility(hideMinimize ? VisibleType::GONE : VisibleType::VISIBLE);
     minimizeButton->MarkDirtyNode();
@@ -507,6 +513,25 @@ void ContainerModalPattern::SetCloseButtonStatus(bool isEnabled)
     buttonEvent->SetEnabled(isEnabled);
 }
 
+void ContainerModalPattern::UpdateGestureRowVisible()
+{
+    auto gestureRow = GetGestureRow();
+    CHECK_NULL_VOID(gestureRow);
+    auto customTitleRow = GetCustomTitleRow();
+    CHECK_NULL_VOID(customTitleRow);
+    auto buttonsRow = GetControlButtonRow();
+    CHECK_NULL_VOID(buttonsRow);
+    auto gestureRowProp = gestureRow->GetLayoutProperty();
+    auto customTitleRowProp = customTitleRow->GetLayoutProperty();
+    auto buttonsRowProp = buttonsRow->GetLayoutProperty();
+    if (customTitleRowProp->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE &&
+        buttonsRowProp->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::VISIBLE) {
+        gestureRowProp->UpdateVisibility(VisibleType::VISIBLE);
+    } else {
+        gestureRowProp->UpdateVisibility(VisibleType::GONE);
+    }
+}
+
 void ContainerModalPattern::SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow)
 {
     customTitleSettedShow_ = customTitleSettedShow;
@@ -514,19 +539,14 @@ void ContainerModalPattern::SetContainerModalTitleVisible(bool customTitleSetted
     CHECK_NULL_VOID(customTitleRow);
     auto customTitleLayoutProperty = customTitleRow->GetLayoutProperty();
     auto containerModalLayoutProperty = GetHost()->GetLayoutProperty();
-    auto gestureRow = GetGestureRow();
-    CHECK_NULL_VOID(gestureRow);
-    auto gestureRowProp = gestureRow->GetLayoutProperty();
     PaddingProperty padding;
     if (customTitleLayoutProperty->GetVisibilityValue(VisibleType::GONE) == VisibleType::VISIBLE &&
         !customTitleSettedShow) {
         customTitleLayoutProperty->UpdateVisibility(VisibleType::GONE);
-        gestureRowProp->UpdateVisibility(VisibleType::VISIBLE);
     } else if (windowMode_ != WindowMode::WINDOW_MODE_FULLSCREEN &&
                windowMode_ != WindowMode::WINDOW_MODE_SPLIT_PRIMARY &&
                windowMode_ != WindowMode::WINDOW_MODE_SPLIT_SECONDARY && customTitleSettedShow) {
         customTitleLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-        gestureRowProp->UpdateVisibility(VisibleType::GONE);
         padding = { CalcLength(CONTENT_PADDING), CalcLength(CONTENT_PADDING), std::nullopt,
             CalcLength(CONTENT_PADDING) };
     }
@@ -545,6 +565,7 @@ void ContainerModalPattern::SetContainerModalTitleVisible(bool customTitleSetted
     auto buttonsRow = GetControlButtonRow();
     CHECK_NULL_VOID(buttonsRow);
     buttonsRow->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
+    UpdateGestureRowVisible();
 }
 
 void ContainerModalPattern::SetContainerModalTitleHeight(int32_t height)
@@ -601,7 +622,12 @@ bool ContainerModalPattern::GetContainerModalButtonsRect(RectF& containerModal, 
     }
 
     auto widthByPx = (TITLE_PADDING_START + TITLE_PADDING_END).ConvertToPx() + buttons.Width();
-    buttons.SetLeft(containerModal.Width() - widthByPx);
+    auto isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (isRtl) {
+        buttons.SetLeft(0);
+    } else {
+        buttons.SetLeft(containerModal.Width() - widthByPx);
+    }
     buttons.SetTop(0);
     buttons.SetWidth(widthByPx);
     buttons.SetHeight(titleHeight_.ConvertToPx());
@@ -661,6 +687,11 @@ void ContainerModalPattern::Init()
     InitLayoutProperty();
 }
 
+void ContainerModalPattern::OnColorConfigurationUpdate()
+{
+    WindowFocus(isFocus_);
+}
+
 void ContainerModalPattern::InitLayoutProperty()
 {
     auto containerModal = GetHost();
@@ -687,6 +718,7 @@ void ContainerModalPattern::InitLayoutProperty()
 
     InitTitleRowLayoutProperty(GetCustomTitleRow());
     InitTitleRowLayoutProperty(GetFloatingTitleRow());
+    InitButtonsLayoutProperty();
 
     containerModal->MarkModifyDone();
 }
@@ -700,7 +732,10 @@ void ContainerModalPattern::InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRo
         CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(CONTAINER_TITLE_HEIGHT)));
     titleRowProperty->UpdateMainAxisAlign(FlexAlign::FLEX_START);
     titleRowProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
-    PaddingProperty padding { std::nullopt, GetControlButtonRowWidth(), std::nullopt, std::nullopt };
+    auto isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    PaddingProperty padding;
+    auto sidePadding = isRtl ? &padding.left : & padding.right;
+    *sidePadding = GetControlButtonRowWidth();
     titleRowProperty->UpdatePadding(padding);
 }
 
@@ -733,6 +768,37 @@ void ContainerModalPattern::InitColumnTouchTestFunc()
         return defaultRes;
     };
     eventHub->SetOnTouchTestFunc(func);
+}
+
+void ContainerModalPattern::InitButtonsLayoutProperty()
+{
+    auto buttonsRow = GetControlButtonRow();
+    CHECK_NULL_VOID(buttonsRow);
+    auto isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    auto buttons = buttonsRow->GetChildren();
+    for (uint64_t index = 0; index < buttons.size(); index++) {
+        auto space = (index == CLOSE_BUTTON_INDEX) ? TITLE_PADDING_END : TITLE_ELEMENT_MARGIN_HORIZONTAL;
+        MarginProperty margin;
+        if (isRtl) {
+            margin.left = CalcLength(space);
+            margin.right = CalcLength();
+        } else {
+            margin.left = CalcLength();
+            margin.right = CalcLength(space);
+        }
+        auto button = AceType::DynamicCast<FrameNode>(buttonsRow->GetChildAtIndex(index));
+        CHECK_NULL_VOID(button);
+        auto layoutProp = button->GetLayoutProperty<ButtonLayoutProperty>();
+        layoutProp->UpdateMargin(margin);
+        button->MarkModifyDone();
+        button->MarkDirtyNode();
+    }
+}
+
+void ContainerModalPattern::OnLanguageConfigurationUpdate()
+{
+    InitTitle();
+    InitLayoutProperty();
 }
 
 Dimension ContainerModalPattern::GetCustomTitleHeight()

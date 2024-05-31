@@ -38,8 +38,6 @@ public:
     std::vector<ParagraphInfo> GetParagraphsInfo(int32_t start, int32_t end) override;
     void DeleteSpans(const RangeOptions& options) override;
     void UpdateParagraphStyle(int32_t start, int32_t end, const struct UpdateParagraphStyle& style) override;
-    void SetSelection(int32_t selectionStart, int32_t selectionEnd,
-        const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) override;
 
 private:
     struct UpdateSpanStyle updateSpanStyle_;

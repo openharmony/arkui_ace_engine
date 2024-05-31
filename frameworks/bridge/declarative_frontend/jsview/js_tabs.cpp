@@ -635,6 +635,21 @@ void JSTabs::SetOnContentWillChange(const JSCallbackInfo& info)
     TabsModel::GetInstance()->SetOnContentWillChange(std::move(callback));
 }
 
+void JSTabs::SetAnimateMode(const JSCallbackInfo& info)
+{
+    JSRef<JSVal> args = info[0];
+    if (!args->IsNumber()) {
+        TabsModel::GetInstance()->SetAnimateMode(TabAnimateMode::CONTENT_FIRST);
+        return;
+    }
+    uint32_t value = args->ToNumber<uint32_t>();
+    if (value >= static_cast<uint32_t>(TabAnimateMode::MAX_VALUE)) {
+        TabsModel::GetInstance()->SetAnimateMode(TabAnimateMode::CONTENT_FIRST);
+        return;
+    }
+    TabsModel::GetInstance()->SetAnimateMode(static_cast<TabAnimateMode>(value));
+}
+
 void JSTabs::JSBind(BindingTarget globalObj)
 {
     JsTabContentTransitionProxy::JSBind(globalObj);
@@ -658,7 +673,9 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("onAnimationStart", &JSTabs::SetOnAnimationStart);
     JSClass<JSTabs>::StaticMethod("onAnimationEnd", &JSTabs::SetOnAnimationEnd);
     JSClass<JSTabs>::StaticMethod("onGestureSwipe", &JSTabs::SetOnGestureSwipe);
+    JSClass<JSTabs>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSTabs>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSTabs>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSTabs>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTabs>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSTabs>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
@@ -673,6 +690,7 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("barGridAlign", &JSTabs::SetBarGridAlign);
     JSClass<JSTabs>::StaticMethod("customContentTransition", &JSTabs::SetCustomContentTransition);
     JSClass<JSTabs>::StaticMethod("onContentWillChange", &JSTabs::SetOnContentWillChange);
+    JSClass<JSTabs>::StaticMethod("animateMode", &JSTabs::SetAnimateMode);
 
     JSClass<JSTabs>::InheritAndBind<JSContainerBase>(globalObj);
 }

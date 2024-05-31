@@ -34,8 +34,10 @@
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/text/layout_info_interface.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
+#include "core/components_ng/pattern/text/span/mutable_span_string.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_accessibility_property.h"
 #include "core/components_ng/pattern/text/text_base.h"
@@ -63,7 +65,7 @@ struct SpanNodeInfo {
 };
 
 // TextPattern is the base class for text render node to perform paint text.
-class TextPattern : public virtual Pattern, public TextDragBase, public TextBase {
+class TextPattern : public virtual Pattern, public TextDragBase, public TextBase, public LayoutInfoInterface {
     DECLARE_ACE_TYPE(TextPattern, Pattern, TextDragBase, TextBase);
 
 public:
@@ -73,7 +75,7 @@ public:
         pManager_ = AceType::MakeRefPtr<ParagraphManager>();
     }
 
-    ~TextPattern() override = default;
+    ~TextPattern() override;
 
     SelectionInfo GetSpansInfo(int32_t start, int32_t end, GetSpansMethod method);
     std::list<ResultObject> GetSpansInfoInStyledString(int32_t start, int32_t end);
@@ -127,11 +129,16 @@ public:
 
     void OnModifyDone() override;
 
+    void OnWindowHide() override;
+
+    void OnWindowShow() override;
+
     void PreCreateLayoutWrapper();
 
     void BeforeCreateLayoutWrapper() override;
 
     void AddChildSpanItem(const RefPtr<UINode>& child);
+    void AddImageToSpanItem(const RefPtr<UINode>& child);
 
     FocusPattern GetFocusPattern() const override
     {
@@ -168,20 +175,7 @@ public:
 
     void GetGlobalOffset(Offset& offset);
 
-    RectF GetTextContentRect() const override
-    {
-        auto textRect = contentRect_;
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, textRect);
-        auto renderContext = host->GetRenderContext();
-        CHECK_NULL_RETURN(renderContext, textRect);
-        CHECK_NULL_RETURN(pManager_, textRect);
-        if (!renderContext->GetClipEdge().value_or(true) &&
-            LessNotEqual(textRect.Width(), pManager_->GetLongestLine())) {
-            textRect.SetWidth(pManager_->GetLongestLine());
-        }
-        return textRect;
-    }
+    RectF GetTextContentRect(bool isActualText = false) const override;
 
     float GetBaselineOffset() const
     {
@@ -348,6 +342,7 @@ public:
     ResultObject GetTextResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
     ResultObject GetSymbolSpanResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
     ResultObject GetImageResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
+    std::string GetFontInJson() const;
 
     const std::vector<std::string>& GetDragContents() const
     {
@@ -414,13 +409,7 @@ public:
     virtual void CheckHandles(SelectHandleInfo& handleInfo) {};
     OffsetF GetDragUpperLeftCoordinates() override;
     void SetTextSelection(int32_t selectionStart, int32_t selectionEnd);
-    void SetFadeout(const bool& left, const bool& right, const float& gradientPercent);
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-    static RSTypographyProperties::TextBox ConvertRect(const Rect& rect);
-#else
-    static RSTextRect ConvertRect(const Rect& rect);
-#endif
     // Deprecated: Use the TextSelectOverlay::OnHandleMove() instead.
     // It is currently used by RichEditorPattern.
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle) override;
@@ -467,7 +456,7 @@ public:
         return recoverEnd_;
     }
 
-    void OnAreaChangedInner() override;
+    void OnHandleAreaChanged() override;
     void RemoveAreaChangeInner();
 
     void ResetDragOption() override
@@ -539,6 +528,7 @@ public:
     void ResetSelection();
     bool IsSelectAll();
     void HandleOnCopy();
+    void HandleOnCopySpanString();
     virtual void HandleOnSelectAll();
 
     OffsetF GetTextPaintOffset() const override
@@ -589,6 +579,38 @@ public:
         customSpanPlaceholder_.clear();
     }
 
+    const std::list<RefPtr<UINode>>& GetChildNodes() const
+    {
+        return childNodes_;
+    }
+    // add for capi NODE_TEXT_CONTENT_WITH_STYLED_STRING
+    void SetExternalParagraph(void* paragraph)
+    {
+        externalParagraph_ = paragraph;
+    }
+
+    const std::optional<void*>& GetExternalParagraph()
+    {
+        return externalParagraph_;
+    }
+
+    void SetExternalSpanItem(const std::list<RefPtr<SpanItem>>& spans);
+
+    void SetExternalParagraphStyle(std::optional<ParagraphStyle> paragraphStyle)
+    {
+        externalParagraphStyle_ = paragraphStyle;
+    }
+
+    std::optional<ParagraphStyle> GetExternalParagraphStyle()
+    {
+        return externalParagraphStyle_;
+    }
+
+    size_t GetLineCount() const override;
+    bool DidExceedMaxLines() const override;
+    TextLineMetrics GetLineMetrics(int32_t lineNumber) override;
+    PositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y) override;
+
 protected:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
@@ -627,6 +649,14 @@ protected:
     bool CalculateClickedSpanPosition(const PointF& textOffset);
     void HiddenMenu();
     std::shared_ptr<SelectionMenuParams> GetMenuParams(TextSpanType type, TextResponseType responseType);
+    void InitKeyEvent();
+    bool HandleKeyEvent(const KeyEvent& keyEvent);
+    void HandleOnSelect(KeyCode code);
+    void HandleSelectionUp(int32_t start, int32_t end);
+    void HandleSelectionDown(int32_t start, int32_t end);
+    void HandleSelection(int32_t start, int32_t end);
+    float GetTextHeight();
+    int32_t GetTextLength();
 
     virtual bool CanStartAITask()
     {
@@ -654,6 +684,9 @@ protected:
     bool touchEventInitialized_ = false;
     bool focusInitialized_ = false;
     bool hoverInitialized_ = false;
+    bool isSpanStringMode_ = false;
+    RefPtr<MutableSpanString> spanString = MakeRefPtr<MutableSpanString>("");
+    bool keyEventInitialized_ = false;
 
     RefPtr<FrameNode> dragNode_;
     RefPtr<LongPressEvent> longPressEvent_;
@@ -667,6 +700,7 @@ protected:
     std::string textForDisplay_;
     std::optional<TextStyle> textStyle_;
     std::list<RefPtr<SpanItem>> spans_;
+    mutable std::list<RefPtr<UINode>> childNodes_;
     float baselineOffset_ = 0.0f;
     int32_t placeholderCount_ = 0;
     SelectMenuInfo selectMenuInfo_;
@@ -696,6 +730,7 @@ private:
     bool IsShowHandle();
     void SetAccessibilityAction();
     void CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanHasClick);
+    void CollectTextSpanNodes(const RefPtr<SpanNode>& child, bool& isSpanHasClick);
     void UpdateContainerChildren(const RefPtr<UINode>& parent, const RefPtr<UINode>& child);
     RefPtr<RenderContext> GetRenderContext();
     void ProcessBoundRectByTextShadow(RectF& rect);
@@ -707,7 +742,6 @@ private:
     void HandleMouseLeftReleaseAction(const MouseInfo& info, const Offset& textOffset);
     void HandleMouseLeftMoveAction(const MouseInfo& info, const Offset& textOffset);
     void InitSpanItem(std::stack<SpanNodeInfo> nodes);
-    void EnsureOverlayExists();
     int32_t GetSelectionSpanItemIndex(const MouseInfo& info);
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
     void ProcessBoundRectByTextMarquee(RectF& rect);
@@ -739,6 +773,7 @@ private:
     void AddUdmfTxtPreProcessor(const ResultObject src, ResultObject& result, bool isAppend);
     void ProcessOverlayAfterLayout();
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
+    Offset ConvertLocalOffsetToParagraphOffset(const Offset& offset);
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;
@@ -747,7 +782,6 @@ private:
     bool blockPress_ = false;
     bool hasClicked_ = false;
     bool isDoubleClick_ = false;
-    bool isSpanStringMode_ = false;
     bool showSelected_ = false;
     bool isSensitive_ = false;
     int32_t clickedSpanPosition_ = -1;
@@ -768,17 +802,18 @@ private:
     RefPtr<DragWindow> dragWindow_;
     RefPtr<DragDropProxy> dragDropProxy_;
     std::optional<int32_t> surfaceChangedCallbackId_;
-    SourceTool lastDragTool_;
+    SourceTool lastDragTool_ = SourceTool::UNKNOWN;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
     int32_t dragRecordSize_ = -1;
     RefPtr<TextController> textController_;
     TextSpanType oldSelectedType_ = TextSpanType::NONE;
-    mutable std::list<RefPtr<UINode>> childNodes_;
     bool isShowMenu_ = true;
     RefPtr<TextSelectOverlay> selectOverlay_;
     std::vector<WeakPtr<FrameNode>> imageNodeList_;
     std::vector<CustomSpanPlaceholderInfo> customSpanPlaceholder_;
     bool isDetachFromMainTree_ = false;
+    std::optional<void*> externalParagraph_;
+    std::optional<ParagraphStyle> externalParagraphStyle_;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
 };
 } // namespace OHOS::Ace::NG

@@ -20,7 +20,9 @@
 #include <optional>
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/ng/size_t.h"
 #include "core/components_ng/base/frame_scene_status.h"
+#include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 
 namespace OHOS::Ace {
 constexpr float DEFAULT_SCROLL_TO_MASS = 1.0f;
@@ -57,6 +59,16 @@ enum class ScrollPagingStatus {
     INVALID,
     // enablePaging is effective
     VALID,
+};
+
+// use in dumpInfo, excluding events truggered per frame,
+// such as onScroll, onScrollFrameBegin, onWillScroll, onDidScroll
+enum class ScrollableEventType {
+    ON_SCROLL_START = 0,
+    ON_SCROLL_STOP,
+    ON_SCROLL_EDGE,
+    ON_REACH_START,
+    ON_REACH_END,
 };
 
 struct ScrollInfo {
@@ -147,10 +159,210 @@ constexpr int32_t SCROLL_FROM_AXIS = 11;
 constexpr int32_t SCROLL_FROM_ANIMATION_CONTROLLER = 12;
 constexpr int32_t SCROLL_FROM_BAR_FLING = 13;
 
+inline std::string GetSourceStr(int32_t scrollSource)
+{
+    switch (scrollSource) {
+        case SCROLL_FROM_NONE:
+            return "SCROLL_FROM_NONE";
+        case SCROLL_FROM_UPDATE:
+            return "SCROLL_FROM_UPDATE";
+        case SCROLL_FROM_ANIMATION:
+            return "SCROLL_FROM_ANIMATION";
+        case SCROLL_FROM_JUMP:
+            return "SCROLL_FROM_JUMP";
+        case SCROLL_FROM_ANIMATION_SPRING:
+            return "SCROLL_FROM_ANIMATION_SPRING";
+        case SCROLL_FROM_CHILD:
+            return "SCROLL_FROM_CHILD";
+        case SCROLL_FROM_BAR:
+            return "SCROLL_FROM_BAR";
+        case SCROLL_FROM_FOCUS_JUMP:
+            return "SCROLL_FROM_FOCUS_JUMP";
+        case SCROLL_FROM_ROTATE:
+            return "SCROLL_FROM_ROTATE";
+        case SCROLL_FROM_INDEXER:
+            return "SCROLL_FROM_INDEXER";
+        case SCROLL_FROM_START:
+            return "SCROLL_FROM_START";
+        case SCROLL_FROM_AXIS:
+            return "SCROLL_FROM_AXIS";
+        case SCROLL_FROM_ANIMATION_CONTROLLER:
+            return "SCROLL_FROM_ANIMATION_CONTROLLER";
+        case SCROLL_FROM_BAR_FLING:
+            return "SCROLL_FROM_BAR_FLING";
+        default:
+            return "";
+    }
+}
+
+struct ScrollableEventsFiredInfo {
+    uint64_t eventFiredTime_ = 0;
+    ScrollableEventType eventType_;
+    int32_t scrollSource_ = 0;
+
+    std::string ToString() const
+    {
+        return std::string("event type: ")
+            .append(GetEventStr())
+            .append(" fired in ")
+            .append(std::to_string(eventFiredTime_))
+            .append(", source is ")
+            .append(GetSourceStr(scrollSource_));
+    }
+
+    std::string GetEventStr() const
+    {
+        switch (eventType_) {
+            case ScrollableEventType::ON_SCROLL_START:
+                return "onScrollStart";
+            case ScrollableEventType::ON_SCROLL_STOP:
+                return "onScrollStop";
+            case ScrollableEventType::ON_SCROLL_EDGE:
+                return "onScrollEdge";
+            case ScrollableEventType::ON_REACH_START:
+                return "onReachStart";
+            case ScrollableEventType::ON_REACH_END:
+                return "onReachEnd";
+            default:
+                return "";
+        }
+    }
+};
+
+struct ScrollableFrameInfo {
+    uint64_t scrollStateTime_ = 0;
+    int32_t scrollState_ = 0;
+    bool canOverScroll_ = false;
+    int32_t canOverScrollInfo_ = 0;
+
+    std::string ToString() const
+    {
+        return std::string("scroll from: ")
+            .append(GetSourceStr(scrollState_))
+            .append(" canOverScroll: ")
+            .append(std::to_string(canOverScroll_))
+            .append(" isScrollableSpringEffect: ")
+            .append((canOverScrollInfo_ >> 4) & 1 ? "true" : "false")
+            .append(" isScrollable: ")
+            .append((canOverScrollInfo_ >> 3) & 1 ? "true" : "false")
+            .append(" scrollableIdle: ")
+            .append((canOverScrollInfo_ >> 2) & 1 ? "true" : "false")
+            .append(" animateOverScroll: ")
+            .append((canOverScrollInfo_ >> 1) & 1 ? "true" : "false")
+            .append(" animateCanOverScroll: ")
+            .append(canOverScrollInfo_ & 1 ? "true" : "false")
+            .append(" fired in ")
+            .append(std::to_string(scrollStateTime_));
+    }
+};
+
+struct ScrollLayoutInfo {
+    uint64_t changedTime_ = 0;
+    float scrollableDistance_ = 0;
+    NG::SizeF scrollSize_;
+    NG::SizeF viewPort_;
+    NG::SizeF childSize_;
+
+    std::string ToString() const
+    {
+        return std::string("scrollableDistance changed, scrollableDistance: ")
+            .append(std::to_string(scrollableDistance_))
+            .append(" scrollSize: ")
+            .append(scrollSize_.ToString())
+            .append(" viewPort: ")
+            .append(viewPort_.ToString())
+            .append(" childSize: ")
+            .append(childSize_.ToString())
+            .append(" fired in ")
+            .append(std::to_string(changedTime_));
+    }
+};
+
+struct ScrollMeasureInfo {
+    uint64_t changedTime_ = 0;
+    std::optional<NG::LayoutConstraintF> parentConstraint_;
+    std::optional<NG::LayoutConstraintF> childConstraint_;
+    NG::SizeF selfSize_;
+    NG::SizeF childSize_;
+
+    std::string ToString() const
+    {
+        return std::string("Scroll Measure changed, parentConstraint: ")
+            .append(parentConstraint_->ToString())
+            .append(" childConstraint: ")
+            .append(childConstraint_->ToString())
+            .append(" selfSize: ")
+            .append(selfSize_.ToString())
+            .append(" childSize: ")
+            .append(childSize_.ToString())
+            .append(" fired in ")
+            .append(std::to_string(changedTime_));
+    }
+};
+
+struct InnerScrollBarLayoutInfo {
+    uint64_t layoutTime_ = 0;
+    Size viewPortSize_;
+    Offset lastOffset_;
+    double estimatedHeight_ = 0.0;
+    double outBoundary_ = 0.0;
+    Rect activeRect_;
+
+    std::string ToString() const
+    {
+        return std::string("inner scrollBar layout, viewPortSize:")
+            .append(viewPortSize_.ToString())
+            .append(" lastOffset: ")
+            .append(lastOffset_.ToString())
+            .append(" estimatedHeight: ")
+            .append(std::to_string(estimatedHeight_))
+            .append(" outBoundary: ")
+            .append(std::to_string(outBoundary_))
+            .append(" activeRect: ")
+            .append(activeRect_.ToString())
+            .append(" fired in ")
+            .append(std::to_string(layoutTime_));
+    }
+};
+
+struct OuterScrollBarLayoutInfo {
+    uint64_t layoutTime_ = 0;
+    float currentOffset_ = 0.f;
+    float scrollableNodeOffset_ = 0.f;
+
+    std::string ToString() const
+    {
+        return std::string("outer scrollBar layout, currentOffset:")
+            .append(std::to_string(currentOffset_))
+            .append(" scrollableNodeOffset: ")
+            .append(std::to_string(scrollableNodeOffset_))
+            .append(" fired in ")
+            .append(std::to_string(layoutTime_));
+    }
+};
+
+enum class ScrollSource {
+    DRAG = 0,           // constexpr int32_t SCROLL_FROM_UPDATE = 1;
+    FLING,              // constexpr int32_t SCROLL_FROM_ANIMATION = 2;
+    EDGE_EFFECT,        // constexpr int32_t SCROLL_FROM_ANIMATION_SPRING = 4;
+    OTHER_USER_INPUT,   // constexpr int32_t SCROLL_FROM_AXIS = 11;
+    SCROLL_BAR,         // constexpr int32_t SCROLL_FROM_BAR = 6;
+    SCROLL_BAR_FLING,   // constexpr int32_t SCROLL_FROM_BAR_FLING = 13;
+    SCROLLER,           // constexpr int32_t SCROLL_FROM_JUMP = 3;
+    SCROLLER_ANIMATION, // constexpr int32_t SCROLL_FROM_ANIMATION_CONTROLLER = 12;
+};
+
 // app tail animation
-constexpr char TRAILING_ANIMATION[] = "TRAILING_ANIMATION";
+constexpr char TRAILING_ANIMATION[] = "TRAILING_ANIMATION ";
+
+// scroller animation, such as scrollTo, scrollPage
+constexpr char SCROLLER_ANIMATION[] = "SCROLLER_ANIMATION ";
+
+// scrollToEdge at a fixed speed
+constexpr char SCROLLER_FIX_VELOCITY_ANIMATION[] = "SCROLLER_FIX_VELOCITY_ANIMATION ";
 
 using OnScrollEvent = std::function<void(Dimension, ScrollState)>;
+using OnWillScrollEvent = std::function<ScrollFrameResult(Dimension, ScrollState, ScrollSource)>;
 using OnScrollBeginEvent = std::function<ScrollInfo(Dimension, Dimension)>;
 using OnScrollFrameBeginEvent = std::function<ScrollFrameResult(Dimension, ScrollState)>;
 using OnScrollStartEvent = std::function<void()>;

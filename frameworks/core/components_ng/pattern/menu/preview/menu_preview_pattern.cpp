@@ -26,6 +26,10 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float PAN_MAX_VELOCITY = 2000.0f;
 
+// custom preview animation params when hover image
+const RefPtr<Curve> CUSTOM_PREVIEW_ANIMATION_CURVE =
+    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 280.0f, 30.0f);
+
 RefPtr<MenuPattern> GetMenuPattern(const RefPtr<FrameNode>& menuWrapper)
 {
     CHECK_NULL_RETURN(menuWrapper, nullptr);
@@ -36,9 +40,52 @@ RefPtr<MenuPattern> GetMenuPattern(const RefPtr<FrameNode>& menuWrapper)
     return menuNode->GetPattern<MenuPattern>();
 }
 
-void ShowScaleAnimation(
-    const RefPtr<RenderContext>& context, const RefPtr<MenuTheme>& menuTheme, const RefPtr<MenuPattern>& menuPattern)
+bool ShowPreviewAnimationAfterHoverImage(const RefPtr<RenderContext>& context, const RefPtr<MenuTheme>& menuTheme,
+    const RefPtr<MenuPattern>& menuPattern, float scaleFrom, float scaleTo)
 {
+    CHECK_NULL_RETURN(menuPattern, false);
+    if (!menuPattern->GetIsShowHoverImage()) {
+        return false;
+    }
+    CHECK_NULL_RETURN(context, false);
+    CHECK_NULL_RETURN(menuTheme, false);
+    context->UpdateOpacity(0.0);
+    // custom preview update opacity
+    AnimationOption option;
+    option.SetDuration(menuTheme->GetHoverImageSwitchToPreviewOpacityDuration());
+    option.SetDelay(menuTheme->GetHoverImageDelayDuration());
+    option.SetCurve(Curves::FRICTION);
+    AnimationUtils::Animate(
+        option, [context]() {
+            CHECK_NULL_VOID(context);
+            context->UpdateOpacity(1.0);
+        },
+        option.GetOnFinishEvent());
+
+    // custom preview update scale from hover image size to final scale
+    auto scaleBefore = LessNotEqual(scaleFrom, 0.0) ? menuTheme->GetPreviewBeforeAnimationScale() : scaleFrom;
+    auto scaleAfter = LessNotEqual(scaleTo, 0.0) ? menuTheme->GetPreviewAfterAnimationScale() : scaleTo;
+    context->UpdateTransformScale(VectorF(scaleBefore, scaleBefore));
+
+    AnimationOption scaleOption = AnimationOption();
+    scaleOption.SetCurve(CUSTOM_PREVIEW_ANIMATION_CURVE);
+    scaleOption.SetDelay(menuTheme->GetHoverImageDelayDuration());
+    AnimationUtils::Animate(
+        scaleOption,
+        [context, scaleAfter]() {
+            CHECK_NULL_VOID(context);
+            context->UpdateTransformScale(VectorF(scaleAfter, scaleAfter));
+        },
+        scaleOption.GetOnFinishEvent());
+    return true;
+}
+
+void ShowScaleAnimation(const RefPtr<RenderContext>& context, const RefPtr<MenuTheme>& menuTheme,
+    const RefPtr<MenuPattern>& menuPattern, float scaleFrom, float scaleTo)
+{
+    if (ShowPreviewAnimationAfterHoverImage(context, menuTheme, menuPattern, scaleFrom, scaleTo)) {
+        return;
+    }
     CHECK_NULL_VOID(context);
     CHECK_NULL_VOID(menuTheme);
     auto scaleBefore { -1.0f };
@@ -64,9 +111,8 @@ void ShowScaleAnimation(
     AnimationUtils::Animate(
         scaleOption,
         [context, previewAfterAnimationScale]() {
-            if (context) {
-                context->UpdateTransformScale(VectorF(previewAfterAnimationScale, previewAfterAnimationScale));
-            }
+            CHECK_NULL_VOID(context);
+            context->UpdateTransformScale(VectorF(previewAfterAnimationScale, previewAfterAnimationScale));
         },
         scaleOption.GetOnFinishEvent());
 }
@@ -77,6 +123,7 @@ void ShowGatherAnimation(const RefPtr<FrameNode>& imageNode, const RefPtr<FrameN
     CHECK_NULL_VOID(mainPipeline);
     auto manager = mainPipeline->GetOverlayManager();
     CHECK_NULL_VOID(manager);
+    manager->UpdateGatherNodeToTop();
     auto gatherNode = manager->GetGatherNode();
     CHECK_NULL_VOID(gatherNode);
     auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
@@ -107,9 +154,7 @@ void MenuPreviewPattern::OnModifyDone()
 
 bool MenuPreviewPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (!isFirstShow_) {
-        return false;
-    }
+    CHECK_NULL_RETURN(isFirstShow_, false);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto context = host->GetRenderContext();
@@ -127,28 +172,33 @@ bool MenuPreviewPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
 
     auto previewAnimationDuration = menuTheme->GetPreviewAnimationDuration();
     auto previewBorderRadius = menuTheme->GetPreviewBorderRadius();
+    auto delay = isShowHoverImage_ ? menuTheme->GetHoverImageDelayDuration() : 0;
     AnimationOption option;
     option.SetDuration(previewAnimationDuration);
-    option.SetCurve(Curves::SHARP);
+    if (isShowHoverImage_) {
+        option.SetCurve(CUSTOM_PREVIEW_ANIMATION_CURVE);
+    } else {
+        option.SetCurve(Curves::SHARP);
+    }
+    option.SetDelay(delay);
     AnimationUtils::Animate(
         option,
         [context, previewBorderRadius, shadow]() mutable {
-            if (context) {
-                auto color = shadow->GetColor();
-                auto newColor = Color::FromARGB(100, color.GetRed(), color.GetGreen(), color.GetBlue());
-                shadow->SetColor(newColor);
-                context->UpdateBackShadow(shadow.value());
-                BorderRadiusProperty borderRadius;
-                borderRadius.SetRadius(previewBorderRadius);
-                context->UpdateBorderRadius(borderRadius);
-            }
+            CHECK_NULL_VOID(context);
+            auto color = shadow->GetColor();
+            auto newColor = Color::FromARGB(100, color.GetRed(), color.GetGreen(), color.GetBlue());
+            shadow->SetColor(newColor);
+            context->UpdateBackShadow(shadow.value());
+            BorderRadiusProperty borderRadius;
+            borderRadius.SetRadius(previewBorderRadius);
+            context->UpdateBorderRadius(borderRadius);
         },
         option.GetOnFinishEvent());
     if (!hasPreviewTransitionEffect_) {
         auto menuWrapper = GetMenuWrapper();
         auto menuPattern = GetMenuPattern(menuWrapper);
-        ShowScaleAnimation(context, menuTheme, menuPattern);
         ShowGatherAnimation(host, menuWrapper);
+        ShowScaleAnimation(context, menuTheme, menuPattern, customPreviewScaleFrom_, customPreviewScaleTo_);
     }
     isFirstShow_ = false;
     return false;
@@ -170,6 +220,23 @@ RefPtr<FrameNode> MenuPreviewPattern::GetMenuWrapper() const
 
 void MenuPreviewPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_VOID(mainPipeline);
+    auto dragDropManager = mainPipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    auto preDragFrameNode = dragDropManager->GetPrepareDragFrameNode().Upgrade();
+    CHECK_NULL_VOID(preDragFrameNode);
+    auto eventHub = preDragFrameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto targetGestureHub = eventHub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(targetGestureHub);
+    auto dragEventActuator = targetGestureHub->GetDragEventActuator();
+    auto actionStartTask = [actuator = AceType::WeakClaim(AceType::RawPtr(dragEventActuator))](
+                               const GestureEvent& info) {
+        auto dragEventActuator = actuator.Upgrade();
+        CHECK_NULL_VOID(dragEventActuator);
+        dragEventActuator->RestartDragTask(info);
+    };
     CHECK_NULL_VOID(gestureHub);
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
@@ -184,7 +251,7 @@ void MenuPreviewPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     };
     PanDirection panDirection;
     panDirection.type = PanDirection::ALL;
-    auto panEvent = MakeRefPtr<PanEvent>(nullptr, nullptr, std::move(actionEndTask), nullptr);
+    auto panEvent = MakeRefPtr<PanEvent>(std::move(actionStartTask), nullptr, std::move(actionEndTask), nullptr);
     gestureHub->AddPanEvent(panEvent, panDirection, 1, DEFAULT_PAN_DISTANCE);
 }
 
@@ -199,5 +266,43 @@ void MenuPreviewPattern::HandleDragEnd(float offsetX, float offsetY, float veloc
     auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
     wrapperPattern->HideMenu();
+}
+
+void MenuPreviewPattern::ShowHoverImagePreviewDisAppearAnimation(const RefPtr<RenderContext>& context,
+    float scaleFrom, float scaleTo, int32_t duration)
+{
+    CHECK_NULL_VOID(isShowHoverImage_);
+    CHECK_NULL_VOID(context);
+
+    // custom preview update disappear opacity
+    context->UpdateOpacity(1.0);
+    AnimationOption option;
+    option.SetDuration(duration);
+    option.SetCurve(Curves::FRICTION);
+    AnimationUtils::Animate(
+        option, [context]() {
+            CHECK_NULL_VOID(context);
+            context->UpdateOpacity(0.0);
+        },
+        option.GetOnFinishEvent());
+
+    // custom preview update scale from final scale to hover image size
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    auto scaleBefore = LessNotEqual(scaleFrom, 0.0) ? menuTheme->GetPreviewAfterAnimationScale() : scaleFrom;
+    auto scaleAfter = LessNotEqual(scaleTo, 0.0) ? menuTheme->GetPreviewBeforeAnimationScale() : scaleTo;
+    context->UpdateTransformScale(VectorF(scaleBefore, scaleBefore));
+
+    AnimationOption scaleOption = AnimationOption();
+    scaleOption.SetCurve(CUSTOM_PREVIEW_ANIMATION_CURVE);
+    AnimationUtils::Animate(
+        scaleOption,
+        [context, scaleAfter]() {
+            CHECK_NULL_VOID(context);
+            context->UpdateTransformScale(VectorF(scaleAfter, scaleAfter));
+        },
+        scaleOption.GetOnFinishEvent());
 }
 } // namespace OHOS::Ace::NG

@@ -58,16 +58,17 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
     }
 
     int64_t refreshPeriod = static_cast<int64_t>(ONE_SECOND_IN_NANO / GetDisplayRefreshRate());
-    onVsyncCallback_ = [weakTask = taskExecutor_, id = id_, refreshPeriod](int64_t timeStampNanos, void* data) {
+    onVsyncCallback_ = [weakTask = taskExecutor_, id = id_, refreshPeriod](
+                           int64_t timeStampNanos, int64_t frameCount, void* data) {
         auto taskExecutor = weakTask.Upgrade();
-        auto onVsync = [id, timeStampNanos, refreshPeriod] {
+        auto onVsync = [id, timeStampNanos, frameCount, refreshPeriod] {
             ContainerScope scope(id);
             // use container to get window can make sure the window is valid
             auto container = Container::Current();
             CHECK_NULL_VOID(container);
             auto window = container->GetWindow();
             CHECK_NULL_VOID(window);
-            window->OnVsync(static_cast<uint64_t>(timeStampNanos), 0);
+            window->OnVsync(static_cast<uint64_t>(timeStampNanos), static_cast<uint64_t>(frameCount));
             auto pipeline = container->GetPipelineContext();
             if (pipeline) {
                 pipeline->OnIdle(timeStampNanos + refreshPeriod);
@@ -86,7 +87,7 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
     };
 
     frameCallback_.userData_ = nullptr;
-    frameCallback_.callback_ = onVsyncCallback_;
+    frameCallback_.callbackWithId_ = onVsyncCallback_;
 
     receiver_->RequestNextVSync(frameCallback_);
 
@@ -98,10 +99,11 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
     rsSurfaceNode_ = OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true);
     rsUIDirector_->SetRSSurfaceNode(rsSurfaceNode_);
 
-    rsUIDirector_->SetUITaskRunner([taskExecutor, id = id_](const std::function<void()>& task) {
+    rsUIDirector_->SetUITaskRunner([taskExecutor, id = id_](const std::function<void()>& task, uint32_t delay) {
         ContainerScope scope(id);
         CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIFormRenderServiceTask");
+        taskExecutor->PostDelayedTask(
+            task, TaskExecutor::TaskType::UI, delay, "ArkUIFormRenderServiceTask", PriorityType::HIGH);
     }, id);
 #else
     taskExecutor_ = nullptr;
@@ -140,8 +142,10 @@ void FormRenderWindow::SetRootFrameNode(const RefPtr<NG::FrameNode>& root)
         auto width = static_cast<float>(calcLayoutConstraint->maxSize->Width()->GetDimension().Value());
         auto height = static_cast<float>(calcLayoutConstraint->maxSize->Height()->GetDimension().Value());
         rootSRNode->SetBounds(0, 0, width, height);
+        CHECK_NULL_VOID(rsUIDirector_);
         rsUIDirector_->SetRoot(rosenRenderContext->GetRSNode()->GetId());
     }
+    CHECK_NULL_VOID(rsUIDirector_);
     rsUIDirector_->SendMessages();
 #endif
 }

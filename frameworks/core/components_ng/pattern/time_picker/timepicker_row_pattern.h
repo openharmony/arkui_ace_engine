@@ -18,6 +18,7 @@
 
 #include <optional>
 
+#include "base/i18n/date_time_sequence.h"
 #include "base/i18n/localization.h"
 #include "base/i18n/time_format.h"
 #include "core/components/common/properties/color.h"
@@ -393,6 +394,10 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("selected", selectedTime_.ToString(false, false).c_str(), filter);
     }
 
@@ -417,6 +422,18 @@ public:
     void SetFocusDisable();
     void SetFocusEnable();
 
+    void UpdateLanguageAndAmPmTimeOrder()
+    {
+        if (language_ == "ug") {
+            isPreLanguageUg_ = true;
+        }
+        language_ = AceApplicationInfo::GetInstance().GetLanguage();
+
+        auto preAmPmTimeOrder = amPmTimeOrder_;
+        amPmTimeOrder_ = DateTimeSequence::GetAmPmTimeOrder(language_).amPmTimeOrder;
+        preAmPmTimeOrder == amPmTimeOrder_ ? isAmPmTimeOrderUpdate_ = false : isAmPmTimeOrderUpdate_ = true;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -432,6 +449,14 @@ private:
     double SetAmPmButtonIdeaSize();
     void GetAllChildNodeWithSecond();
     void CreateOrDeleteSecondNode();
+    RefPtr<FrameNode> GetAmPmNode(std::list<RefPtr<UINode>>::iterator& iter);
+    RefPtr<FrameNode> GetHourNode(std::list<RefPtr<UINode>>::iterator& iter);
+    RefPtr<FrameNode> GetMinuteNode(std::list<RefPtr<UINode>>::iterator& iter);
+    RefPtr<FrameNode> GetSecondNode(std::list<RefPtr<UINode>>::iterator& iter);
+    void UpdateAllChildNodeForUg();
+    void UpdateNodePositionForUg();
+    void MountSecondNode(const RefPtr<FrameNode>& stackSecondNode);
+    void RemoveSecondNode();
 
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
@@ -472,6 +497,10 @@ private:
     bool isForceUpdate_ = false;
     bool isDateTimeOptionUpdate_ = false;
     std::optional<std::string> firedTimeStr_;
+    std::string language_;
+    std::string amPmTimeOrder_;
+    bool isAmPmTimeOrderUpdate_ = false;
+    bool isPreLanguageUg_ = false;
 };
 } // namespace OHOS::Ace::NG
 

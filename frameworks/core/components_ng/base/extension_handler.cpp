@@ -41,13 +41,11 @@ ExtensionLayoutConstraint ExtensionLayoutConstraint::Create(const LayoutConstrai
 void ExtensionHandler::Measure(const ExtensionLayoutConstraint& layoutConstraint)
 {
     OnMeasure(layoutConstraint);
-    InvalidateRender();
 }
 
 void ExtensionHandler::Layout(int32_t width, int32_t height, int32_t positionX, int32_t positionY)
 {
     OnLayout(width, height, positionX, positionY);
-    InvalidateRender();
 }
 
 void ExtensionHandler::Draw(DrawingContext& context)
@@ -147,7 +145,7 @@ void ExtensionHandler::InvalidateRender()
         invalidateRender_();
     } else {
         if (node_) {
-            node_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            node_->MarkNeedRenderOnly();
         }
     }
     needRender_ = true;

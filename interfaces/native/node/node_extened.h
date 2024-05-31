@@ -15,10 +15,14 @@
 
 #pragma once
 
+#include "drawable_descriptor.h"
 #include "native_node.h"
 #include "native_type.h"
+#include "resource.h"
 
 #include "frameworks/core/interfaces/arkoala/arkoala_api.h"
+#include "interfaces/inner_api/drawable_descriptor/drawable_descriptor.h"
+#include "pixelmap_native_impl.h"
 
 
 #ifdef __cplusplus
@@ -91,6 +95,11 @@ struct ArkUI_OptionalUint {
     uint32_t value;
 };
 
+struct ArkUI_OptionalCharPtr {
+    int32_t isSet;
+    const char* value;
+};
+
 struct ArkUI_SwiperIndicator {
     ArkUI_SwiperIndicatorType type;
     ArkUI_OptionalFloat dimLeft;
@@ -104,6 +113,29 @@ struct ArkUI_SwiperIndicator {
     ArkUI_OptionalInt maskValue;
     ArkUI_OptionalUint colorValue;
     ArkUI_OptionalUint selectedColorValue;
+};
+
+struct ArkUI_DrawableDescriptor {
+    OH_PixelmapNativeHandle pixelMap;
+    OH_PixelmapNativeHandle* pixelMapArray;
+    ArkUI_Int32 size;
+    std::shared_ptr<OHOS::Ace::Napi::DrawableDescriptor> drawableDescriptor;
+    std::shared_ptr<OHOS::Ace::Napi::AnimatedDrawableDescriptor> animatedDrawableDescriptor;
+    std::shared_ptr<OHOS::Ace::Napi::LayeredDrawableDescriptor> layeredDrawableDescriptor;
+    std::shared_ptr<ArkUI_Resource> resource;
+};
+
+struct ArkUI_AccessibilityState {
+    ArkUI_OptionalInt isDisabled;
+    ArkUI_OptionalInt isSelected;
+    ArkUI_OptionalInt checkedType;
+};
+
+struct ArkUI_AccessibilityValue {
+    ArkUI_OptionalInt min;
+    ArkUI_OptionalInt max;
+    ArkUI_OptionalInt current;
+    ArkUI_OptionalCharPtr text;
 };
 
 #ifdef __cplusplus

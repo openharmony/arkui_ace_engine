@@ -16,7 +16,7 @@
 #include "frameworks/core/components_ng/svg/parse/svg_line.h"
 
 #include "base/utils/utils.h"
-#include "frameworks/core/components/declaration/svg/svg_line_declaration.h"
+#include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -34,12 +34,10 @@ RefPtr<SvgNode> SvgLine::Create()
 SkPath SvgLine::AsPath(const Size& viewPort) const
 {
     SkPath path;
-    auto declaration = AceType::DynamicCast<SvgLineDeclaration>(declaration_);
-    CHECK_NULL_RETURN(declaration, path);
-    path.moveTo(ConvertDimensionToPx(declaration->GetX1(), viewPort, SvgLengthType::HORIZONTAL),
-        ConvertDimensionToPx(declaration->GetY1(), viewPort, SvgLengthType::VERTICAL));
-    path.lineTo(ConvertDimensionToPx(declaration->GetX2(), viewPort, SvgLengthType::HORIZONTAL),
-        ConvertDimensionToPx(declaration->GetY2(), viewPort, SvgLengthType::VERTICAL));
+    path.moveTo(ConvertDimensionToPx(lineAttr_.x1, viewPort, SvgLengthType::HORIZONTAL),
+        ConvertDimensionToPx(lineAttr_.y1, viewPort, SvgLengthType::VERTICAL));
+    path.lineTo(ConvertDimensionToPx(lineAttr_.x2, viewPort, SvgLengthType::HORIZONTAL),
+        ConvertDimensionToPx(lineAttr_.y2, viewPort, SvgLengthType::VERTICAL));
     return path;
 }
 #else
@@ -57,19 +55,19 @@ RSRecordingPath SvgLine::AsPath(const Size& viewPort) const
 bool SvgLine::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
 {
     static const LinearMapNode<void (*)(const std::string&, SvgLineAttribute&)> attrs[] = {
-        { DOM_SVG_X1,
+        { SVG_X1,
             [](const std::string& val, SvgLineAttribute& attr) {
                 attr.x1 = SvgAttributesParser::ParseDimension(val);
             } },
-        { DOM_SVG_X2,
+        { SVG_X2,
             [](const std::string& val, SvgLineAttribute& attr) {
                 attr.x2 = SvgAttributesParser::ParseDimension(val);
             } },
-        { DOM_SVG_Y1,
+        { SVG_Y1,
             [](const std::string& val, SvgLineAttribute& attr) {
                 attr.y1 = SvgAttributesParser::ParseDimension(val);
             } },
-        { DOM_SVG_Y2,
+        { SVG_Y2,
             [](const std::string& val, SvgLineAttribute& attr) {
                 attr.y2 = SvgAttributesParser::ParseDimension(val);
             } },

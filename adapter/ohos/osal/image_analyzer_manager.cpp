@@ -196,45 +196,35 @@ void ImageAnalyzerManager::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>
     CHECK_NULL_VOID(frameNode_);
     bool isUIConfigUpdate = false;
 
-    float paddingWidth = 0.0f;
-    float paddingHeight = 0.0f;
-    if (holder_ == ImageAnalyzerHolder::IMAGE) {
-        auto layoutProps = frameNode_->GetLayoutProperty<NG::ImageLayoutProperty>();
-        CHECK_NULL_VOID(layoutProps);
-        auto padding = layoutProps->CreatePaddingAndBorder();
-        paddingWidth = padding.left.value_or(0) + padding.right.value_or(0);
-        paddingHeight = padding.top.value_or(0) + padding.bottom.value_or(0);
+    auto layoutProps = frameNode_->GetLayoutProperty<NG::ImageLayoutProperty>();
+    CHECK_NULL_VOID(layoutProps);
+    if (holder_ == ImageAnalyzerHolder::IMAGE || holder_ == ImageAnalyzerHolder::VIDEO_CUSTOM) {
         if (analyzerUIConfig_.imageFit != layoutProps->GetImageFit().value_or(ImageFit::COVER)) {
             analyzerUIConfig_.imageFit = layoutProps->GetImageFit().value_or(ImageFit::COVER);
             isUIConfigUpdate = true;
         }
     }
 
-    NG::SizeF frameSize = geometryNode->GetFrameSize();
-    if (analyzerUIConfig_.contentWidth != frameSize.Width() - paddingWidth ||
-        analyzerUIConfig_.contentHeight != frameSize.Height() - paddingHeight) {
-        analyzerUIConfig_.contentWidth = frameSize.Width() - paddingWidth;
-        analyzerUIConfig_.contentHeight = frameSize.Height()- paddingHeight;
-        isUIConfigUpdate = true;
+    if (holder_ != ImageAnalyzerHolder::VIDEO_CUSTOM) {
+        auto padding = layoutProps->CreatePaddingAndBorder();
+        float paddingWidth = holder_ == ImageAnalyzerHolder::IMAGE ? padding.left.value_or(0) +
+                                                                     padding.right.value_or(0) : 0.0f;
+        float paddingHeight = holder_ == ImageAnalyzerHolder::IMAGE ? padding.top.value_or(0) +
+                                                                      padding.bottom.value_or(0) : 0.0f;
+        NG::SizeF frameSize = geometryNode->GetFrameSize();
+        if (analyzerUIConfig_.contentWidth != frameSize.Width() - paddingWidth ||
+            analyzerUIConfig_.contentHeight != frameSize.Height() - paddingHeight) {
+            analyzerUIConfig_.contentWidth = frameSize.Width() - paddingWidth;
+            analyzerUIConfig_.contentHeight = frameSize.Height()- paddingHeight;
+            isUIConfigUpdate = true;
+        }
     }
 
     auto renderContext = frameNode_->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto localCenter = renderContext->GetTransformCenterValue(DimensionOffset(0.5_pct, 0.5_pct));
-    auto localScale = renderContext->GetTransformScaleValue(NG::VectorF(1.0f, 1.0f));
-    Matrix4 localScaleMat = Matrix4::CreateTranslate(localCenter.GetX().Value(), localCenter.GetY().Value(), 0) *
-                            Matrix4::CreateScale(localScale.x, localScale.y, 1.0f) *
-                            Matrix4::CreateTranslate(-localCenter.GetX().Value(), -localCenter.GetY().Value(), 0);
-
     auto transformMat = renderContext->GetTransformMatrixValue(Matrix4::CreateIdentity());
-    const int centerCol = 3;
-    NG::VectorF transCenter(transformMat.Get(0, centerCol), transformMat.Get(1, centerCol));
-    Matrix4 transScaleMat = Matrix4::CreateTranslate(transCenter.x, transCenter.y, 0) *
-                            Matrix4::CreateScale(transformMat.GetScaleX(), transformMat.GetScaleY(), 1.0f) *
-                            Matrix4::CreateTranslate(-transCenter.x, -transCenter.y, 0);
-    Matrix4 scaleMat = localScaleMat * transScaleMat;
-    if (!(analyzerUIConfig_.transformMat == scaleMat)) {
-        analyzerUIConfig_.transformMat = scaleMat;
+    if (!(analyzerUIConfig_.transformMat == transformMat)) {
+        analyzerUIConfig_.transformMat = transformMat;
         isUIConfigUpdate = true;
     }
 

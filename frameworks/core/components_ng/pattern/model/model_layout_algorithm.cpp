@@ -59,7 +59,6 @@ std::optional<SizeF> ModelLayoutAlgorithm::MeasureContent(
             default:
                 break;
         }
-
     } while (false);
 
     auto size = contentConstraint.Constrain(componentSize);
