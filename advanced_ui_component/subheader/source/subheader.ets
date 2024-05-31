@@ -222,8 +222,8 @@ export struct SubHeader {
 
   build() {
     if (this.ageing && ((this.operationType === OperationType.TEXT_ARROW) ||
-      this.operationType === OperationType.BUTTON) && this.operationItem
-      && (this.operationItem?.length > 0) && this.operationItem[0].value !== '') {
+      this.operationType === OperationType.BUTTON) && this.operationItem&&
+      (this.operationItem?.length > 0) && this.operationItem[0].value !== '') {
       Column() {
         Row() {
           this.leftArea();
