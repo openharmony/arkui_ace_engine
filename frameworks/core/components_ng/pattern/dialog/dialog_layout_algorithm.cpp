@@ -609,13 +609,12 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             frameNode);
     }
     child->GetGeometryNode()->SetMarginFrameOffset(topLeftPoint_);
-    AdjustHeightForKeyboard(layoutWrapper, child, childSize);
+    AdjustHeightForKeyboard(layoutWrapper, child);
     child->Layout();
     SetSubWindowHotarea(dialogProp, childSize, selfSize, frameNode->GetId());
 }
 
-void DialogLayoutAlgorithm::AdjustHeightForKeyboard(
-    LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& child, const SizeF& childSize)
+void DialogLayoutAlgorithm::AdjustHeightForKeyboard(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& child)
 {
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE) || !child || !resizeFlag_) {
         return;
@@ -623,16 +622,11 @@ void DialogLayoutAlgorithm::AdjustHeightForKeyboard(
     auto childConstraint =
         CreateDialogChildConstraint(layoutWrapper, dialogChildSize_.Height(), dialogChildSize_.Width());
     child->Measure(childConstraint);
-    if (child->GetHostTag() == V2::SCROLL_ETS_TAG) {
-        for (const auto& grandson : child->GetAllChildrenWithBuild()) {
-            CHECK_NULL_VOID(grandson);
-            if (grandson->GetHostTag() == V2::COLUMN_ETS_TAG) {
-                auto grandsonConstraint =
-                    CreateDialogChildConstraint(layoutWrapper, childSize.Height(), childSize.Width());
-                grandson->Measure(grandsonConstraint);
-            }
-        }
-    }
+    child->GetGeometryNode()->SetFrameSize(dialogChildSize_);
+    auto renderContext = child->GetHostNode()->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetClipToFrame(true);
+    renderContext->UpdateClipEdge(true);
 }
 
 void DialogLayoutAlgorithm::SetSubWindowHotarea(
