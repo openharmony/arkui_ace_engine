@@ -636,6 +636,7 @@ public:
     void UpdateNextValidIndex();
     void CheckMarkForIndicatorBoundary();
     bool IsHorizontalAndRightToLeft() const;
+    TextDirection GetNonAutoLayoutDirection() const;
     void FireWillHideEvent(int32_t willHideIndex) const;
     void FireWillShowEvent(int32_t willShowIndex) const;
     void SetOnHiddenChangeForParent();

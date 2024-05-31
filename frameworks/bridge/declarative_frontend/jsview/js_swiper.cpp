@@ -461,8 +461,13 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     swiperParameters.dimTop = ParseIndicatorDimension(topValue);
     swiperParameters.dimRight = ParseIndicatorDimension(rightValue);
     swiperParameters.dimBottom = ParseIndicatorDimension(bottomValue);
-    swiperParameters.dimStart =  ParseIndicatorDimension(startValue);
-    swiperParameters.dimEnd =  ParseIndicatorDimension(endValue);
+    CalcDimension dimStart;
+    CalcDimension dimEnd;
+    swiperParameters.dimStart = ParseLengthMetricsToDimension(startValue, dimStart) ?
+        dimStart : ParseIndicatorDimension(startValue);
+    swiperParameters.dimEnd = ParseLengthMetricsToDimension(endValue, dimEnd) ?
+        dimEnd : ParseIndicatorDimension(endValue);
+
     CalcDimension dimPosition;
     bool parseItemWOk =
         ParseJsDimensionVp(itemWidthValue, dimPosition) && (dimPosition.Unit() != DimensionUnit::PERCENT);
@@ -489,6 +494,27 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     parseOk = ParseJsColor(selectedColorValue, colorVal);
     swiperParameters.selectedColorVal = parseOk ? colorVal : swiperIndicatorTheme->GetSelectedColor();
     return swiperParameters;
+}
+
+bool JSSwiper::ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result)
+{
+    if (jsValue->IsNumber()) {
+        result = CalcDimension(jsValue->ToNumber<double>(), DimensionUnit::VP);
+        return true;
+    }
+    if (jsValue->IsString()) {
+        auto value = jsValue->ToString();
+        StringUtils::StringToCalcDimensionNG(value, result, false, DimensionUnit::VP);
+        return true;
+    }
+    if (jsValue->IsObject()) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+        double value = jsObj->GetProperty("value")->ToNumber<double>();
+        auto unit = static_cast<DimensionUnit>(jsObj->GetProperty("unit")->ToNumber<int32_t>());
+        result = CalcDimension(value, unit);
+        return true;
+    }
+    return false;
 }
 
 SwiperDigitalParameters JSSwiper::GetDigitIndicatorInfo(const JSRef<JSObject>& obj)
