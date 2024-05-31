@@ -455,6 +455,7 @@ void WindowScene::OnForeground()
         self->RemoveChild(host, self->snapshotNode_, self->snapshotNodeName_);
         self->snapshotNode_.Reset();
         self->session_->SetNeedSnapshot(true);
+        self->AddChild(host, contentNode_, contentNodeName_, 0);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
 
