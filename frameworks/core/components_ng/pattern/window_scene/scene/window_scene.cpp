@@ -387,7 +387,7 @@ void WindowScene::DisposeSnapShotAndBlankNode()
     auto surfaceNode = session_->GetSurfaceNode();
     CHECK_NULL_VOID(surfaceNode);
     auto host = GetHost();
-    CHECK_NULL_VOID(surfaceNode);
+    CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto frameSize = geometryNode->GetFrameSize();
