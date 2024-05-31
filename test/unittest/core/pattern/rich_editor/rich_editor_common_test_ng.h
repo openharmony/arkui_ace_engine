@@ -166,6 +166,7 @@ const ImageSpanOptions IMAGE_SPAN_OPTIONS_1 = {
     .imagePixelMap = std::nullopt,
     .imageAttribute = IMAGE_SPAN_ATTRIBUTE_1
 };
+} // namespace
 
 struct TestCursorItem {
     int32_t index;
@@ -188,12 +189,12 @@ struct TestParagraphItem {
     std::vector<TestCursorItem> testCursorItems;
     std::vector<TestParagraphRect> testParagraphRects;
 };
-} // namespace
 
 class RichEditorCommonTestNg : public TestNG {
 public:
     void AddSpan(const std::string& content);
     void AddImageSpan();
+    void AddParagraph(TestParagraphItem testParagraphItem);
     void ClearParagraph();
     void ClearSpan();
     void InitAdjustObject(MockDataDetectorMgr& mockDataDetectorMgr);
