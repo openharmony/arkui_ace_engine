@@ -109,10 +109,7 @@ public:
         if (dialogProperties_.type == DialogType::ALERT_DIALOG || dialogProperties_.type == DialogType::ACTION_SHEET) {
             return { 0 };
         }
-        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-            return { 0, 0 };
-        }
-        return { 0, 0, 0 };
+        return { 0, 0 };
     }
 
     void BuildChild(const DialogProperties& dialogProperties);
