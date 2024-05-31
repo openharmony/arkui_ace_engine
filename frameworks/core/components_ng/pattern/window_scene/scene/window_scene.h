@@ -52,16 +52,16 @@ protected:
 private:
     std::shared_ptr<Rosen::RSSurfaceNode> CreateLeashWindowNode();
     void BufferAvailableCallback();
+    void BufferAvailableCallbackForBlank();
     void OnBoundsChanged(const Rosen::Vector4f& bounds);
     void RegisterFocusCallback();
+    void DisposeSnapshotAndBlankNode();
 
     bool destroyed_ = false;
     OHOS::Rosen::WindowMode initWindowMode_;
     ACE_DISALLOW_COPY_AND_MOVE(WindowScene);
     Rosen::WSRect oldWindowRect_ = {0, 0, 0, 0};
-    bool bufferAvailableCallbackFlag_ = true;
     CancelableCallback<void()> deleteBlankTask_;
-    void DisposeSnapshotAndBlankNode();
 };
 } // namespace OHOS::Ace::NG
 

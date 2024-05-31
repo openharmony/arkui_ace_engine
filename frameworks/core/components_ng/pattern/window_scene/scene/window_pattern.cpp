@@ -156,10 +156,12 @@ void WindowPattern::OnAttachToFrameNode()
 
 void WindowPattern::CreateBlankNode()
 {
-    ACE_SCOPED_TRACE("WindowPattern::CreateBlankNode");
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    ACE_SCOPED_TRACE("CreateBlankNode[id:%d][self:%d]", session_->GetPersistentId(), host->GetId());
     blankNode_ = FrameNode::CreateFrameNode(
-        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
-    auto layoutProperty = blankNode_->GetLayoutProperty<layoutProperty>();
+        V2::WINDOW_SCENE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto layoutProperty = blankNode_->GetLayoutProperty<LayoutProperty>();
     layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
     blankNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));

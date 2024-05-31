@@ -78,7 +78,6 @@ protected:
     std::string snapshotNodeName_ = "snapshotNode";
     std::string blankNodeName_ = "blankNode";
     bool attachToFrameNodeFlag_ = false;
-    uint32_t cleanBlankDelayTime_ = 2000;
 
     sptr<Rosen::Session> session_;
     int32_t instanceId_ = Container::CurrentId();
