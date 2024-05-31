@@ -433,7 +433,10 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
     bool hasValidSlice = renderProp && renderProp->HasImageResizableSlice();
     DynamicRangeMode dynamicMode = DynamicRangeMode::STANDARD;
     if (renderProp && renderProp->HasDynamicMode()) {
+        loadingCtx_->SetIsHdrDecoderNeed(true);
         dynamicMode = renderProp->GetDynamicMode().value_or(DynamicRangeMode::STANDARD);
+    } else {
+        loadingCtx_->SetIsHdrDecoderNeed(false);
     }
 
     if (loadingCtx_) {
