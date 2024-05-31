@@ -2290,6 +2290,12 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     } else {
         resConfig.SetColorModeIsSetByApp(false);
     }
+    if (!parsedConfig.mcc.empty()) {
+        resConfig.SetMcc(StringUtils::StringToUint(parsedConfig.mcc));
+    }
+    if (!parsedConfig.mnc.empty()) {
+        resConfig.SetMnc(StringUtils::StringToUint(parsedConfig.mnc));
+    }
     SetFontScaleAndWeightScale(parsedConfig);
     SetResourceConfiguration(resConfig);
     themeManager->UpdateConfig(resConfig);

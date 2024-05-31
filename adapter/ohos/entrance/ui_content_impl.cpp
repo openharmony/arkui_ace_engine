@@ -127,6 +127,19 @@ bool IsNeedAvoidWindowMode(OHOS::Rosen::Window* rsWindow)
     return mode == Rosen::WindowMode::WINDOW_MODE_FLOATING || mode == Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
             mode == Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
 }
+
+void AddMccAndMncToResConfig(
+    const std::shared_ptr<OHOS::AbilityRuntime::Context>& context, ResourceConfiguration& aceResCfg)
+{
+    if (!context || !context->GetResourceManager()) {
+        return;
+    }
+    auto resourceManager = context->GetResourceManager();
+    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+    resourceManager->GetResConfig(*resConfig);
+    aceResCfg.SetMcc(resConfig->GetMcc());
+    aceResCfg.SetMnc(resConfig->GetMnc());
+}
 } // namespace
 
 const std::string SUBWINDOW_PREFIX = "ARK_APP_SUBWINDOW_";
@@ -1040,6 +1053,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
     aceResCfg.SetDeviceType(SystemProperties::GetDeviceType());
     aceResCfg.SetColorMode(SystemProperties::GetColorMode());
     aceResCfg.SetDeviceAccess(SystemProperties::GetDeviceAccess());
+    AddMccAndMncToResConfig(context, aceResCfg);
     if (isFormRender_) {
         resPath = "/data/bundles/" + bundleName_ + "/" + moduleName_ + "/";
         hapPath = hapPath_;
@@ -1510,6 +1524,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     aceResCfg.SetDeviceType(SystemProperties::GetDeviceType());
     aceResCfg.SetColorMode(SystemProperties::GetColorMode());
     aceResCfg.SetDeviceAccess(SystemProperties::GetDeviceAccess());
+    AddMccAndMncToResConfig(context, aceResCfg);
     container->SetResourceConfiguration(aceResCfg);
     container->SetPackagePathStr(resPath);
     container->SetHapPath(hapPath);
@@ -1986,6 +2001,8 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
             parsedConfig.themeTag = config->GetItem("ohos.application.theme");
             parsedConfig.colorModeIsSetByApp =
                 config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP);
+            parsedConfig.mcc = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_MCC);
+            parsedConfig.mnc = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_MNC);
             // EtsCard Font followSytem disable
             if (formFontUseDefault) {
                 LOGW("[%{public}s] UIContentImpl: UpdateConfiguration use default", bundleName.c_str());
