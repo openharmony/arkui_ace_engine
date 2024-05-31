@@ -1135,10 +1135,10 @@ void OverlayManager::PopToast(int32_t toastId)
 
         auto container = Container::Current();
         CHECK_NULL_VOID(container);
-        auto pattern = toastUnderPop->GetPattern<ToastPattern>();
-        CHECK_NULL_VOID(pattern);
-        auto toastInfo = pattern->GetToastInfo();
         if (container->IsDialogContainer() || (container->IsSubContainer() && rootNode->GetChildren().empty())) {
+            auto pattern = toastUnderPop->GetPattern<ToastPattern>();
+            CHECK_NULL_VOID(pattern);
+            auto toastInfo = pattern->GetToastInfo();
             // hide window when toast show in subwindow.
             if (toastInfo.showMode == NG::ToastShowMode::SYSTEM_TOP_MOST) {
                 SubwindowManager::GetInstance()->HideSystemTopMostWindow();

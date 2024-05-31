@@ -139,6 +139,7 @@ public:
     {
         systemToastWindow_ = systemToastWindow;
     }
+    void ClearToastInSystemSubwindow();
 
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow(bool isDialog = false);
