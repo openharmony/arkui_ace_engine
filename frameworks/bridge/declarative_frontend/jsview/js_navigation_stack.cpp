@@ -316,13 +316,10 @@ RefPtr<NG::UINode> JSNavigationStack::CreateNodeByIndex(int32_t index, const Wea
 {
     auto name = GetNameByIndex(index);
     auto param = GetParamByIndex(index);
-    if (GetFlagByIndex(index)) {
-        auto node = GetNodeFromPreBuildList(name, param);
-        if (node != nullptr) {
-            return node;
-        }
-    }
     RefPtr<NG::UINode> node;
+    if (GetNodeFromPreBuildList(index, name, param, node)) {
+        return node;
+    }
     RefPtr<NG::NavDestinationGroupNode> desNode;
     NG::ScopedViewStackProcessor scopedViewStackProcessor;
     int32_t errorCode = LoadDestination(name, param, customNode, node, desNode);
@@ -662,23 +659,24 @@ void JSNavigationStack::RemoveInvalidPage(const JSRef<JSObject>& info)
 void JSNavigationStack::SaveNodeToPreBuildList(const std::string& name, const JSRef<JSVal>& param,
     RefPtr<NG::UINode>& node)
 {
-    preBuildNodeList_.emplace_back(name, param, node);
+    preBuildNodeList_.emplace_back(name, param, node, GetSize() - 1);
 }
 
-RefPtr<NG::UINode> JSNavigationStack::GetNodeFromPreBuildList(const std::string& name, const JSRef<JSVal>& param)
+bool JSNavigationStack::GetNodeFromPreBuildList(int32_t index, const std::string& name,
+    const JSRef<JSVal>& param, RefPtr<NG::UINode>& node)
 {
     auto isJsObjEqual = [](const JSRef<JSVal>& objLeft, const JSRef<JSVal>& objRight) {
         return (objLeft->IsEmpty() && objRight->IsEmpty()) ||
             (objLeft->GetLocalHandle()->IsStrictEquals(objLeft->GetEcmaVM(), objRight->GetLocalHandle()));
     };
     for (auto it = preBuildNodeList_.begin(); it != preBuildNodeList_.end(); ++it) {
-        if (it->name == name && isJsObjEqual(it->param, param)) {
-            auto uiNode = it->uiNode;
+        if (it->name == name && isJsObjEqual(it->param, param) && it->index == index) {
+            node = it->uiNode;
             preBuildNodeList_.erase(it);
-            return uiNode;
+            return true;
         }
     }
-    return nullptr;
+    return false;
 }
 
 void JSNavigationStack::ClearPreBuildNodeList()
@@ -712,25 +710,6 @@ int32_t JSNavigationStack::CheckNavDestinationExists(const JSRef<JSObject>& navP
     }
     SaveNodeToPreBuildList(name, param, node);
     return ERROR_CODE_NO_ERROR;
-}
-
-bool JSNavigationStack::GetFlagByIndex(int32_t index) const
-{
-    if (dataSourceObj_->IsEmpty()) {
-        return false;
-    }
-    auto getFunc = dataSourceObj_->GetProperty("getCheckNavDestinationFlagByIndex");
-    if (!getFunc->IsFunction()) {
-        return false;
-    }
-    auto func = JSRef<JSFunc>::Cast(getFunc);
-    JSRef<JSVal> params[1];
-    params[0] = JSRef<JSVal>::Make(ToJSValue(index));
-    auto res = func->Call(dataSourceObj_, 1, params);
-    if (res->IsBoolean()) {
-        return res->ToBoolean();
-    }
-    return false;
 }
 
 std::vector<std::string> JSNavigationStack::DumpStackInfo() const
@@ -990,5 +969,40 @@ void JSNavigationStack::SetNeedUpdatePathInfo(int32_t index, bool need)
         return;
     }
     path->SetProperty<bool>("needUpdate", need);
+}
+
+void JSNavigationStack::RecoveryNavigationStack()
+{
+    navPathList_ = preNavPathList_;
+    if (dataSourceObj_->IsEmpty()) {
+        return;
+    }
+    JSRef<JSArray> pathArray = JSRef<JSArray>::New();
+    for (uint32_t index = 0; index < navPathList_.size(); index++) {
+        auto node = navPathList_[index].second;
+        auto navDestinationGroupNode = AceType::DynamicCast<NG::NavDestinationGroupNode>(
+            NG::NavigationGroupNode::GetNavDestinationNode(node));
+        if (!navDestinationGroupNode) {
+            continue;
+        }
+        auto pattern = AceType::DynamicCast<NG::NavDestinationPattern>(navDestinationGroupNode->GetPattern());
+        if (!pattern) {
+            continue;
+        }
+        auto navPathInfo = pattern->GetNavPathInfo();
+        if (!navPathInfo) {
+            continue;
+        }
+        JSRef<JSObject> item = JSRef<JSObject>::New();
+        item->SetProperty<std::string>("name", navPathInfo->GetName());
+        item->SetProperty<int32_t>("index", navDestinationGroupNode->GetIndex());
+        auto jsPathInfo = AceType::DynamicCast<JSNavPathInfo>(navPathInfo);
+        if (jsPathInfo) {
+            item->SetProperty("param", jsPathInfo->GetParam());
+            item->SetProperty("onPop", jsPathInfo->GetOnPop());
+        }
+        pathArray->SetValueAt(index, item);
+    }
+    dataSourceObj_->SetPropertyObject("pathArray", pathArray);
 }
 } // namespace OHOS::Ace::Framework

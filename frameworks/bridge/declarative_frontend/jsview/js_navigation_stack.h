@@ -26,15 +26,17 @@
 namespace OHOS::Ace::Framework {
 
 struct NavPathInfoUINode {
-    NavPathInfoUINode(const std::string& name, const JSRef<JSVal>& param, RefPtr<NG::UINode>& uiNode)
+    NavPathInfoUINode(const std::string& name, const JSRef<JSVal>& param, RefPtr<NG::UINode>& uiNode, int32_t index)
     {
         this->name = name;
         this->param = param;
         this->uiNode = uiNode;
+        this->index = index;
     }
     std::string name;
     JSRef<JSVal> param;
     RefPtr<NG::UINode> uiNode;
+    int32_t index = -1;
 };
 
 class JSRouteInfo : public NG::RouteInfo {
@@ -108,6 +110,7 @@ public:
     int32_t GetJsIndexFromNativeIndex(int32_t index) override;
     void MoveIndexToTop(int32_t index) override;
     void UpdatePathInfoIfNeeded(RefPtr<NG::UINode>& uiNode, int32_t index) override;
+    void RecoveryNavigationStack() override;
 
 protected:
     JSRef<JSObject> dataSourceObj_;
@@ -133,7 +136,8 @@ private:
         RefPtr<NG::NavDestinationGroupNode>& desNode);
     bool GetFlagByIndex(int32_t index) const;
     void SaveNodeToPreBuildList(const std::string& name, const JSRef<JSVal>& param, RefPtr<NG::UINode>& node);
-    RefPtr<NG::UINode> GetNodeFromPreBuildList(const std::string& name, const JSRef<JSVal>& param);
+    bool GetNodeFromPreBuildList(int32_t index, const std::string& name,
+        const JSRef<JSVal>& param, RefPtr<NG::UINode>& node);
     bool CheckAndGetInterceptionFunc(const std::string& name, JSRef<JSFunc>& func);
 
     bool GetNeedUpdatePathInfo(int32_t index);

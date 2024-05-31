@@ -1072,6 +1072,10 @@ void NavigationGroupNode::RemoveDialogDestination()
             navDestination->SetJSViewActive(false);
             continue;
         }
+        auto parent = navDestination->GetParent();
+        if (!parent) {
+            continue;
+        }
         auto navDestinationPattern = AceType::DynamicCast<NavDestinationPattern>(navDestination->GetPattern());
         if (!navDestinationPattern) {
             continue;
@@ -1083,7 +1087,6 @@ void NavigationGroupNode::RemoveDialogDestination()
         if (navDestination->GetContentNode()) {
             navDestination->GetContentNode()->Clean();
         }
-        auto parent = navDestination->GetParent();
         parent->RemoveChild(navDestination);
     }
     hideNodes_.clear();
