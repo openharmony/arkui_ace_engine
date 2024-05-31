@@ -186,6 +186,8 @@ public:
     float footerHeight_ = 0.0f;
 
 private:
+    inline void PrepareJump();
+
     /* cache */
     float startPos_ = 0.0f;
     float endPos_ = 0.0f;

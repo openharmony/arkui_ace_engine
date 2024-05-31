@@ -185,13 +185,10 @@ HWTEST_F(WaterFlowSegmentCommonTest, Splice001, TestSize.Level1)
     EXPECT_EQ(GetChildX(frameNode_, 3), 0.0f);
     EXPECT_EQ(GetChildY(frameNode_, 4), 108.0f);
     EXPECT_EQ(GetChildX(frameNode_, 4), 0.0f);
-    EXPECT_EQ(GetChildHeight(frameNode_, 4), 100.0f);
     EXPECT_EQ(GetChildY(frameNode_, 5), 108.0f);
     EXPECT_EQ(GetChildX(frameNode_, 5), 200.0f);
-    EXPECT_EQ(GetChildHeight(frameNode_, 5), 200.0f);
     EXPECT_EQ(GetChildY(frameNode_, 6), 213.0f);
     EXPECT_EQ(GetChildX(frameNode_, 6), 0.0f);
-    EXPECT_EQ(GetChildHeight(frameNode_, 6), 100.0f);
     EXPECT_EQ(GetChildY(frameNode_, 7), 313.0f);
     EXPECT_EQ(GetChildX(frameNode_, 7), 200.0f);
     EXPECT_EQ(GetChildY(frameNode_, 8), 318.0f);

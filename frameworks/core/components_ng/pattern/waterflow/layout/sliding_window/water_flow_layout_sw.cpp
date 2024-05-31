@@ -44,6 +44,7 @@ void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
     }
 
     if (info_->jumpIndex_ != EMPTY_JUMP_INDEX) {
+        std::cout << "jump to " << info_->jumpIndex_ << std::endl;
         MeasureOnJump(info_->jumpIndex_, info_->align_);
     } else if (info_->targetIndex_) {
         MeasureToTarget(*info_->targetIndex_);
@@ -209,6 +210,7 @@ void WaterFlowLayoutSW::ApplyDelta(float delta)
     } else {
         int32_t idx = info_->EndIndex() + 1;
         info_->PrepareSection(idx, true);
+        std::cout << "start fill back from " << idx << std::endl;
         FillBack(mainLen_, idx, itemCnt_ - 1);
     }
 }
@@ -295,6 +297,8 @@ bool WaterFlowLayoutSW::FillBackSection(float viewportBound, int32_t& idx, int32
         info_->idxToLane_[idx] = laneIdx;
         float endPos = FillBackHelper(props, idx++, laneIdx);
         if (LessNotEqual(endPos, viewportBound)) {
+            std::cout << "push back end idx = " << idx - 1 << " pos = " << endPos << " laneIdx = " << laneIdx
+                      << std::endl;
             q.push({ endPos, laneIdx });
         }
     }

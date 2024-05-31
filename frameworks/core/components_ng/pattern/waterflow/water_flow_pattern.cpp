@@ -447,7 +447,6 @@ RefPtr<WaterFlowSections> WaterFlowPattern::GetOrCreateWaterFlowSections()
 void WaterFlowPattern::OnSectionChanged(int32_t start)
 {
     layoutInfo_->InitSegments(sections_->GetSectionInfo(), start);
-    layoutInfo_->margins_.clear();
 
     MarkDirtyNodeSelf();
 }

@@ -466,6 +466,8 @@ void WaterFlowLayoutInfo::InitSegments(const std::vector<WaterFlowSections::Sect
             items_[i][j] = {};
         }
     }
+
+    margins_.clear(); // to be initialized during layout
 }
 
 void WaterFlowLayoutInfo::PrepareSegmentStartPos()

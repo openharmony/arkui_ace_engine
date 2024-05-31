@@ -280,17 +280,18 @@ float WaterFlowLayoutInfoSW::CalcTargetPosition(int32_t idx, int32_t /* crossIdx
     return pos - totalOffset_;
 }
 
-void WaterFlowLayoutInfoSW::Reset()
-{
-    if (startIndex_ < endIndex_) {
+void WaterFlowLayoutInfoSW::PrepareJump() {
+
+    if (startIndex_ <= endIndex_) {
         align_ = ScrollAlign::START;
         jumpIndex_ = startIndex_;
-
-        auto sec = static_cast<size_t>(GetSegment(startIndex_));
-        float mainGap = mainGap_.size() > sec ? mainGap_[sec] : 0.0f;
-        delta_ = DistanceToTop(startIndex_, mainGap);
+        delta_ = storedOffset_;
     }
+}
 
+void WaterFlowLayoutInfoSW::Reset()
+{
+    PrepareJump();
     for (auto& section : sections_) {
         section.clear();
     }
@@ -443,6 +444,9 @@ bool WaterFlowLayoutInfoSW::IsMisaligned() const
 
 void WaterFlowLayoutInfoSW::InitSegments(const std::vector<WaterFlowSections::Section>& sections, int32_t start)
 {
+    synced_ = false;
+    PrepareJump();
+
     size_t n = sections.size();
     if (n == 0) {
         return;
@@ -456,6 +460,18 @@ void WaterFlowLayoutInfoSW::InitSegments(const std::vector<WaterFlowSections::Se
         sections_.erase(sections_.begin() + start, sections_.end());
     }
     sections_.resize(n, {});
+
+    int32_t endIdx = EndIndex();
+    std::cout << "clear from index " << endIdx + 1 << std::endl;
+    for (auto it = idxToLane_.begin(); it != idxToLane_.end();) {
+        if (it->first > endIdx) {
+            it = idxToLane_.erase(it);
+        } else {
+            ++it;
+        }
+    }
+
+    margins_.clear(); // to be initialized during layout
 }
 
 void WaterFlowLayoutInfoSW::PrepareSection(int32_t idx, bool forward)
