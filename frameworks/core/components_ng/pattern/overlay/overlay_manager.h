@@ -533,6 +533,11 @@ public:
         isMenuShow_ = isMenuShow;
     }
 
+    void SetCalendarDialogDirection(TextDirection textDirection)
+    {
+        calendarDialogDirection_ = textDirection;
+    }
+
 private:
     void PopToast(int32_t targetId);
 
@@ -706,6 +711,7 @@ private:
     WeakPtr<FrameNode> gatherNodeWeak_;
     std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo_;
     bool isMenuShow_ = false;
+    TextDirection calendarDialogDirection_ = TextDirection::AUTO;
 };
 } // namespace OHOS::Ace::NG
 

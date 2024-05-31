@@ -53,17 +53,15 @@ constexpr size_t ACCEPT_BUTTON_BACKGROUND_COLOR_INDEX = 3;
 RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogProperties,
     const CalendarSettingData& settingData, const std::vector<ButtonInfo>& buttonInfos,
     const std::map<std::string, NG::DialogEvent>& dialogEvent,
-    const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent)
+    const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent,
+    TextDirection direction)
 {
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<CalendarDialogPattern>());
-    auto pattern = contentColumn->GetPattern<CalendarDialogPattern>();
-    CHECK_NULL_RETURN(pattern, nullptr);
-    pattern->SetEntryNode(settingData.entryNode);
-    pattern->SetDialogOffset(OffsetF(dialogProperties.offset.GetX().Value(), dialogProperties.offset.GetY().Value()));
-    DisableResetOptionButtonColor(pattern, buttonInfos);
+    OperationsToPattern(contentColumn, settingData, dialogProperties, buttonInfos);
     auto layoutProperty = contentColumn->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
+    layoutProperty->UpdateLayoutDirection(direction);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
@@ -109,6 +107,17 @@ RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogPropert
     calendarNode->MarkModifyDone();
     dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return dialogNode;
+}
+
+void CalendarDialogView::OperationsToPattern(
+    const RefPtr<FrameNode>& frameNode, const CalendarSettingData& settingData,
+    const DialogProperties& dialogProperties, const std::vector<ButtonInfo>& buttonInfos)
+{
+    auto pattern = frameNode->GetPattern<CalendarDialogPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEntryNode(settingData.entryNode);
+    pattern->SetDialogOffset(OffsetF(dialogProperties.offset.GetX().Value(), dialogProperties.offset.GetY().Value()));
+    DisableResetOptionButtonColor(pattern, buttonInfos);
 }
 
 void CalendarDialogView::DisableResetOptionButtonColor(

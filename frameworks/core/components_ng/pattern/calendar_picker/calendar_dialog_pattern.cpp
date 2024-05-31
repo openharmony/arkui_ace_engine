@@ -59,10 +59,10 @@ void CalendarDialogPattern::OnModifyDone()
     InitTitleArrowsEvent();
     InitEntryChangeEvent();
 
+    UpdateTitleArrowsImage();
     UpdateDialogBackgroundColor();
     UpdateTitleArrowsColor();
     UpdateOptionsButtonColor();
-    UpdateTitleArrowsImage();
 }
 
 void CalendarDialogPattern::UpdateDialogBackgroundColor()
@@ -146,9 +146,10 @@ void CalendarDialogPattern::UpdateImage(
     auto imageNode = AceType::DynamicCast<FrameNode>(image);
     auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
-    auto imageInfo = imageLayoutProperty->GetImageSourceInfo();
-    imageInfo->SetResourceId(resourceId);
-    imageLayoutProperty->UpdateImageSourceInfo(imageInfo.value());
+
+    ImageSourceInfo imageSourceInfo;
+    imageSourceInfo.SetResourceId(resourceId);
+    imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     imageNode->MarkModifyDone();
 }
 
