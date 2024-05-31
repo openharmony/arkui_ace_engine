@@ -43,7 +43,8 @@ constexpr uint8_t MIN_RGB_VALUE = 0;
 constexpr uint8_t MAX_RGB_VALUE = 255;
 constexpr double MIN_RGBA_OPACITY = 0.0;
 constexpr double MAX_RGBA_OPACITY = 1.0;
-
+const std::vector<size_t> EXPECT_MAGIC_COLOR_LENGTHS = {7, 9};
+const std::vector<size_t> EXPECT_MAGIC_MINI_COLOR_LENGTHS = {4, 5};
 } // namespace
 
 const Color Color::TRANSPARENT = Color(0x00000000);
@@ -394,49 +395,88 @@ Color Color::ConvertLinearToGamma(double alpha, double linearRed, double linearG
     return FromARGB(gammaAlpha, gammaRed, gammaGreen, gammaBlue);
 }
 
-bool Color::MatchColorWithMagic(std::string& colorStr, uint32_t maskAlpha, Color& color)
+bool Color::IsHexNumber(std::string& colorStr)
 {
-    std::smatch matches;
-    // Regex match for #909090 or #90909090.
-    if (std::regex_match(colorStr, matches, COLOR_WITH_MAGIC)) {
-        colorStr.erase(0, 1);
-        auto value = stoul(colorStr, nullptr, COLOR_STRING_BASE);
-        if (colorStr.length() < COLOR_STRING_SIZE_STANDARD) {
-            // no alpha specified, set alpha to 0xff
-            value |= maskAlpha;
+    for (size_t i = 0; i < colorStr.size(); i++) {
+        if (colorStr[i] >= '0' && colorStr[i] <= '9') {
+            continue;
         }
-        color = Color(value);
+        if (colorStr[i] >= 'A' && colorStr[i] <= 'F') {
+            continue;
+        }
+        if (colorStr[i] >= 'a' && colorStr[i] <= 'f') {
+            continue;
+        }
+        return false;
+    }
+    return true;
+}
+
+bool Color::FastCheckColorType(const std::string& colorStr, const std::string& expectPrefix,
+    const std::vector<size_t>&  expectLengths)
+{
+    if (colorStr.rfind(expectPrefix, 0) != 0) {
+        return false;
+    }
+    if (expectLengths.size() == 0) {
         return true;
     }
-
+    for (size_t expectLength : expectLengths) {
+        if (expectLength == colorStr.size()) {
+            return true;
+        }
+    }
     return false;
+}
+
+bool Color::MatchColorWithMagic(std::string& colorStr, uint32_t maskAlpha, Color& color)
+{
+    // Regex match for #909090 or #90909090
+    if (!FastCheckColorType(colorStr, "#", EXPECT_MAGIC_COLOR_LENGTHS)) {
+        return false;
+    }
+    colorStr.erase(0, 1);
+    if (!IsHexNumber(colorStr)) {
+        return false;
+    }
+    auto value = stoul(colorStr, nullptr, COLOR_STRING_BASE);
+    if (colorStr.length() < COLOR_STRING_SIZE_STANDARD) {
+        // no alpha specified, set alpha to 0xff
+        value |= maskAlpha;
+    }
+    color = Color(value);
+    return true;
 }
 
 bool Color::MatchColorWithMagicMini(std::string& colorStr, uint32_t maskAlpha, Color& color)
 {
-    std::smatch matches;
-    if (std::regex_match(colorStr, matches, COLOR_WITH_MAGIC_MINI)) {
-        colorStr.erase(0, 1);
-        std::string newColorStr;
-        // translate #rgb or #rgba to #rrggbb or #rrggbbaa
-        for (auto& c : colorStr) {
-            newColorStr += c;
-            newColorStr += c;
-        }
-        auto value = stoul(newColorStr, nullptr, COLOR_STRING_BASE);
-        if (newColorStr.length() < COLOR_STRING_SIZE_STANDARD) {
-            // no alpha specified, set alpha to 0xff
-            value |= maskAlpha;
-        }
-        color = Color(value);
-        return true;
+    if (!FastCheckColorType(colorStr, "#", EXPECT_MAGIC_MINI_COLOR_LENGTHS)) {
+        return false;
     }
-
-    return false;
+    colorStr.erase(0, 1);
+    if (!IsHexNumber(colorStr)) {
+        return false;
+    }
+    std::string newColorStr;
+    // translate #rgb or #rgba to #rrggbb or #rrggbbaa
+    for (auto& c : colorStr) {
+        newColorStr += c;
+        newColorStr += c;
+    }
+    auto value = stoul(newColorStr, nullptr, COLOR_STRING_BASE);
+    if (newColorStr.length() < COLOR_STRING_SIZE_STANDARD) {
+        // no alpha specified, set alpha to 0xff
+        value |= maskAlpha;
+    }
+    color = Color(value);
+    return true;
 }
 
 bool Color::MatchColorWithRGB(const std::string& colorStr, Color& color)
 {
+    if (!FastCheckColorType(colorStr, "rgb(", {})) {
+        return false;
+    }
     std::smatch matches;
     if (std::regex_match(colorStr, matches, COLOR_WITH_RGB)) {
         if (matches.size() == RGB_SUB_MATCH_SIZE) {
@@ -459,6 +499,9 @@ bool Color::MatchColorWithRGB(const std::string& colorStr, Color& color)
 
 bool Color::MatchColorWithRGBA(const std::string& colorStr, Color& color)
 {
+    if (!FastCheckColorType(colorStr, "rgba(", {})) {
+        return false;
+    }
     std::smatch matches;
     if (std::regex_match(colorStr, matches, COLOR_WITH_RGBA)) {
         if (matches.size() == RGBA_SUB_MATCH_SIZE) {

@@ -101,12 +101,14 @@ void ToggleModelNG::SetSelectedColor(const std::optional<Color>& selectedColor)
     CHECK_NULL_VOID(stack);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    auto frameNode = stack->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     Color color;
     if (selectedColor.has_value()) {
         color = selectedColor.value();
     }
 
-    auto checkboxPattern = stack->GetMainFrameNodePattern<ToggleCheckBoxPattern>();
+    auto checkboxPattern = frameNode->GetPattern<ToggleCheckBoxPattern>();
     if (checkboxPattern) {
         if (!selectedColor.has_value()) {
             auto theme = pipeline->GetTheme<CheckboxTheme>();
@@ -117,7 +119,7 @@ void ToggleModelNG::SetSelectedColor(const std::optional<Color>& selectedColor)
         checkBoxModelNG.SetSelectedColor(color);
         return;
     }
-    auto buttonPattern = stack->GetMainFrameNodePattern<ToggleButtonPattern>();
+    auto buttonPattern = frameNode->GetPattern<ToggleButtonPattern>();
     if (buttonPattern) {
         if (!selectedColor.has_value()) {
             auto theme = pipeline->GetTheme<ToggleTheme>();
@@ -149,16 +151,16 @@ void ToggleModelNG::OnChange(ChangeEvent&& onChange)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     CHECK_NULL_VOID(stack);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = stack->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto checkboxPattern = stack->GetMainFrameNodePattern<ToggleCheckBoxPattern>();
+    auto checkboxPattern = frameNode->GetPattern<ToggleCheckBoxPattern>();
     if (checkboxPattern) {
         auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->SetOnChange(std::move(onChange));
         return;
     }
-    auto buttonPattern = stack->GetMainFrameNodePattern<ToggleButtonPattern>();
+    auto buttonPattern = frameNode->GetPattern<ToggleButtonPattern>();
     if (buttonPattern) {
         auto eventHub = frameNode->GetEventHub<ToggleButtonEventHub>();
         CHECK_NULL_VOID(eventHub);

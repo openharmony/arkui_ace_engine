@@ -223,6 +223,11 @@ bool IsGpuUploadEnabled()
             system::GetParameter("debug.ace.gpuupload.enabled", "0") == "1");
 }
 
+bool IsImageFrameworkEnabled()
+{
+    return system::GetBoolParameter("persist.ace.image.framework.enabled", true);
+}
+
 void OnAnimationScaleChanged(const char* key, const char* value, void* context)
 {
     CHECK_NULL_VOID(key);
@@ -323,6 +328,7 @@ std::pair<float, float> GetPercent()
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::developerModeOn_ = IsDeveloperModeOn();
 bool SystemProperties::layoutTraceEnable_ = IsLayoutTraceEnabled() && developerModeOn_;
+bool SystemProperties::imageFrameworkEnable_ = IsImageFrameworkEnabled();
 bool SystemProperties::traceInputEventEnable_ = IsTraceInputEventEnabled() && developerModeOn_;
 bool SystemProperties::stateManagerEnable_ = IsStateManagerEnable();
 bool SystemProperties::buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
@@ -610,11 +616,6 @@ int32_t SystemProperties::GetSvgMode()
 bool SystemProperties::GetAllowWindowOpenMethodEnabled()
 {
     return system::GetBoolParameter("persist.web.allowWindowOpenMethod.enabled", false);
-}
-
-bool SystemProperties::GetImageFrameworkEnabled()
-{
-    return system::GetBoolParameter("persist.ace.image.framework.enabled", true);
 }
 
 bool SystemProperties::GetDebugPixelMapSaveEnabled()
