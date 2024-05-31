@@ -1179,6 +1179,8 @@ void WebClientImpl::OnOverlayStateChanged(int offsetX,
                                     offsetY,
                                     rectWidth,
                                     rectHeight);
+}
+
 void WebClientImpl::OnAdsBlocked(const std::string& url, const std::vector<std::string>& adsBlocked)
 {
     ContainerScope scope(instanceId_);
