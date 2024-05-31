@@ -21,7 +21,6 @@
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "base/utils/system_properties.h"
 #include "core/components_ng/image_provider/image_utils.h"
-#include "core/components_ng/pattern/blank/blank_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/window_scene/scene/window_event_process.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
@@ -159,13 +158,11 @@ void WindowPattern::CreateBlankNode()
 {
     ACE_SCOPED_TRACE("WindowPattern::CreateBlankNode");
     blankNode_ = FrameNode::CreateFrameNode(
-        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<BlankPattern>());
-    auto blankLayoutProperty = blankNode_->GetLayoutProperty<BlankLayoutProperty>();
-    blankLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    blankNode_->SetHitTestMode(HitTestMode::HTMNONE);
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto layoutProperty = blankNode_->GetLayoutProperty<layoutProperty>();
+    layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
     blankNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
-    blankNode_->MarkModifyDone();
 }
 
 void WindowPattern::CreateContentNode()

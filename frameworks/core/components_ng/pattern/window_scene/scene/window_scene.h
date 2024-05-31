@@ -47,6 +47,7 @@ protected:
     void OnDisconnect() override;
     void OnBackground() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void CleanBlankNode();
 
 private:
     std::shared_ptr<Rosen::RSSurfaceNode> CreateLeashWindowNode();
@@ -59,6 +60,8 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(WindowScene);
     Rosen::WSRect oldWindowRect_ = {0, 0, 0, 0};
     bool bufferAvailableCallbackFlag_ = true;
+    CancelableCallback<void()> deleteBlankTask_;
+    void DisposeSnapshotAndBlankNode();
 };
 } // namespace OHOS::Ace::NG
 

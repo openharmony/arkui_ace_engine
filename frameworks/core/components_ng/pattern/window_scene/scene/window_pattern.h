@@ -57,12 +57,11 @@ protected:
     void CreateContentNode();
     void CreateSnapshotNode(std::optional<std::shared_ptr<Media::PixelMap>> snapshot = std::nullopt);
     void ClearImageCache(const ImageSourceInfo& sourceInfo);
-
+    void CreateBlankNode();
     void AddChild(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& child,
         const std::string& nodeType, int32_t index = DEFAULT_NODE_SLOT);
     void RemoveChild(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& child,
         const std::string& nodeType);
-    void CreateBlankNode();
 
     virtual void OnActivation() {}
     virtual void OnConnect() {}
@@ -79,7 +78,7 @@ protected:
     std::string snapshotNodeName_ = "snapshotNode";
     std::string blankNodeName_ = "blankNode";
     bool attachToFrameNodeFlag_ = false;
-    float contentOpacityEnd_ = 0.0f;
+    uint32_t cleanBlankDelayTime_ = 2000;
 
     sptr<Rosen::Session> session_;
     int32_t instanceId_ = Container::CurrentId();
