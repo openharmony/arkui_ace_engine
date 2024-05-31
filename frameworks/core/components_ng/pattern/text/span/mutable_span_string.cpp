@@ -179,8 +179,7 @@ std::list<RefPtr<NG::SpanItem>>::iterator MutableSpanString::HandleSpanOperation
         (*it)->content = StringUtils::ToString(GetWideStringSubstr(wContent, end - spanItemStart));
         (*it)->interval.first = end;
     }
-    ++it;
-    return it;
+    return ++it;
 }
 
 void MutableSpanString::ApplyReplaceStringToSpanBase(
