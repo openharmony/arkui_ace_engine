@@ -5511,6 +5511,13 @@ bool WebDelegate::OnKeyEvent(int32_t keyCode, int32_t keyAction)
     return false;
 }
 
+bool WebDelegate::WebOnKeyEvent(int32_t keyCode, int32_t keyAction,
+    const std::vector<int32_t>& pressedCodes)
+{
+    CHECK_NULL_RETURN(nweb_, false);
+    return nweb_->WebSendKeyEvent(keyCode, keyAction, pressedCodes);
+}
+
 void WebDelegate::OnMouseEvent(int32_t x, int32_t y, const MouseButton button, const MouseAction action, int count)
 {
     if (nweb_) {
@@ -6716,6 +6723,13 @@ void WebDelegate::OnCustomKeyboardClose()
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
     webPattern->CloseCustomKeyboard();
+}
+
+void WebDelegate::KeyboardReDispatch(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event, bool isUsed)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->KeyboardReDispatch(event, isUsed);
 }
 
 void WebDelegate::OnSafeInsetsChange()

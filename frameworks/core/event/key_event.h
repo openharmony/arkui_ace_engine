@@ -592,6 +592,7 @@ struct KeyEvent final {
     KeyIntention keyIntention { KeyIntention::INTENTION_UNKNOWN };
     bool enableCapsLock = false;
     bool isPreIme = false;
+    bool isRedispatch = false;
     std::vector<uint8_t> enhanceData;
     std::shared_ptr<MMI::KeyEvent> rawKeyEvent;
     std::string msg = "";

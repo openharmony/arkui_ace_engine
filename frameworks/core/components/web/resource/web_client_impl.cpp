@@ -1150,4 +1150,13 @@ void WebClientImpl::OnAdsBlocked(const std::string& url, const std::vector<std::
     }
     delegate->OnAdsBlocked(url, adsBlocked);
 }
+
+void WebClientImpl::KeyboardReDispatch(
+    std::shared_ptr<OHOS::NWeb::NWebKeyEvent> event, bool isUsed)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->KeyboardReDispatch(event, isUsed);
+}
 } // namespace OHOS::Ace
