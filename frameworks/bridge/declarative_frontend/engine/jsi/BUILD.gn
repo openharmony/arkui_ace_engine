@@ -226,6 +226,7 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_rating_bridge.cpp",
       "nativeModule/arkts_native_rect_bridge.cpp",
       "nativeModule/arkts_native_refresh_bridge.cpp",
+      "nativeModule/arkts_native_relative_container_bridge.cpp",
       "nativeModule/arkts_native_render_node_bridge.cpp",
       "nativeModule/arkts_native_resource_bridge.cpp",
       "nativeModule/arkts_native_rich_editor_bridge.cpp",
@@ -258,7 +259,6 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_water_flow_bridge.cpp",
       "nativeModule/arkts_utils.cpp",
       "nativeModule/ui_context_helper.cpp",
-      "nativeModule/arkts_native_relative_container_bridge.cpp",
     ]
 
     deps = [ "${ace_root}/frameworks/core/interfaces/native:ace_core_interfaces_native_node_$platform" ]

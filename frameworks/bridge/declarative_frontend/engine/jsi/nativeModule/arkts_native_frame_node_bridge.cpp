@@ -571,7 +571,7 @@ ArkUINativeModuleValue FrameNodeBridge::GetConfigBorderWidth(ArkUIRuntimeCallInf
     ArkUI_Float32 borderWidthValue[4];
     ArkUI_Int32 borderWidthUnit[4];
     GetArkUINodeModifiers()->getCommonModifier()->getBorderWidthDimension(
-        nativeNode, borderWidthValue, borderWidthUnit);
+        nativeNode, &borderWidthValue, &borderWidthUnit);
     for (int i = 0; i < 4; i++) {
         Framework::ArrayRef::SetValueAt(vm, valueArray, i * 2, panda::NumberRef::New(vm, borderWidthValue[i]));
         Framework::ArrayRef::SetValueAt(vm, valueArray, i * 2 + 1, panda::NumberRef::New(vm, borderWidthUnit[i]));
@@ -588,7 +588,7 @@ ArkUINativeModuleValue FrameNodeBridge::GetConfigPadding(ArkUIRuntimeCallInfo* r
     Local<Framework::ArrayRef> valueArray = Framework::ArrayRef::New(vm, 8);
     ArkUI_Float32 paddingValue[4];
     ArkUI_Int32 paddingUnit[4];
-    GetArkUINodeModifiers()->getCommonModifier()->getPaddingDimension(nativeNode, paddingValue, paddingUnit);
+    GetArkUINodeModifiers()->getCommonModifier()->getPaddingDimension(nativeNode, &paddingValue, &paddingUnit);
     for (int i = 0; i < 4; i++) {
         Framework::ArrayRef::SetValueAt(vm, valueArray, i * 2, panda::NumberRef::New(vm, paddingValue[i]));
         Framework::ArrayRef::SetValueAt(vm, valueArray, i * 2 + 1, panda::NumberRef::New(vm, paddingUnit[i]));
@@ -605,7 +605,7 @@ ArkUINativeModuleValue FrameNodeBridge::GetConfigMargin(ArkUIRuntimeCallInfo* ru
     Local<Framework::ArrayRef> valueArray = Framework::ArrayRef::New(vm, 8);
     ArkUI_Float32 marginValue[4];
     ArkUI_Int32 marginUnit[4];
-    GetArkUINodeModifiers()->getCommonModifier()->getMarginDimension(nativeNode, marginValue, marginUnit);
+    GetArkUINodeModifiers()->getCommonModifier()->getMarginDimension(nativeNode, &marginValue, &marginUnit);
     for (int i = 0; i < 4; i++) {
         Framework::ArrayRef::SetValueAt(vm, valueArray, i * 2, panda::NumberRef::New(vm, marginValue[i]));
         Framework::ArrayRef::SetValueAt(vm, valueArray, i * 2 + 1, panda::NumberRef::New(vm, marginUnit[i]));
@@ -622,7 +622,7 @@ ArkUINativeModuleValue FrameNodeBridge::GetConfigSize(ArkUIRuntimeCallInfo* runt
     Local<Framework::ArrayRef> valueArray = Framework::ArrayRef::New(vm, 4);
     ArkUI_Float32 sizeValue[2];
     ArkUI_Int32 sizeUnit[2];
-    GetArkUINodeModifiers()->getCommonModifier()->getConfigSize(nativeNode, sizeValue, sizeUnit);
+    GetArkUINodeModifiers()->getCommonModifier()->getConfigSize(nativeNode, &sizeValue, &sizeUnit);
     for (int i = 0; i < 2; i++) {
         Framework::ArrayRef::SetValueAt(vm, valueArray, i * 2, panda::NumberRef::New(vm, sizeValue[i]));
         Framework::ArrayRef::SetValueAt(vm, valueArray, i * 2 + 1, panda::NumberRef::New(vm, sizeUnit[i]));

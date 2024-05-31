@@ -404,7 +404,7 @@ float ListItemPattern::CalculateFriction(float gamma)
     if (GreatOrEqual(gamma, 1.0)) {
         gamma = 1.0f;
     }
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         ratio = NEW_SWIPE_RATIO;
         return exp(-ratio * gamma);
     }

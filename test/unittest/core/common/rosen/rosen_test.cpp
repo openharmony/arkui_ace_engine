@@ -104,42 +104,6 @@ HWTEST_F(RosenTest, CastToRosenTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: CastToRosenTest003
- * @tc.desc: Test cast to rosen.
- * @tc.type: FUNC
- */
-HWTEST_F(RosenTest, CastToRosenTest003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Build a object RSWindow.
-     */
-    Platform::RSWindow object;
-
-    /**
-     * @tc.steps: step2. callback RequestFrame.vsyncThread_ is null.
-     * @tc.expected: step2. Return expected results.
-     */
-    auto callback = [](uint64_t deltaNanoTimestamp, uint32_t deltaFrameCount) {
-        nanoTimestamp_ += deltaNanoTimestamp;
-        frameCount_ += deltaFrameCount;
-        if (callback_) {
-            callback_(nanoTimestamp_, frameCount_);
-        }
-    };
-    object.RegisterVsyncCallback(callback);
-    object.vsyncRequests_.Push(false);
-    object.RequestFrame();
-    EXPECT_FALSE(object.vsyncRequests_.queue_.front());
-
-    /**
-     * @tc.steps: step3. callback Destroy.
-     * @tc.expected: step3. Return expected results.
-     */
-    object.Destroy();
-    EXPECT_TRUE(object.vsyncRequests_.queue_.front());
-}
-
-/**
  * @tc.name: CastToRosenTest004
  * @tc.desc: Test cast to rosen.
  * @tc.type: FUNC

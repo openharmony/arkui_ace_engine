@@ -561,6 +561,10 @@ build_component_ng("pattern_ng") {
       "graphic_2d:librender_service_client",
       "napi:ace_napi",
     ]
+    if (product_name == "ohos-sdk") {
+      sources +=
+          [ "$ace_root/test/mock/core/pattern/mock_indexer_vibrator.cpp" ]
+    }
   } else if (is_arkui_x) {
     deps += [
       "$ace_graphic/rosen/modules/render_service_client:librender_service_client_static",

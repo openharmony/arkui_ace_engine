@@ -313,6 +313,9 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   onViewportFitChanged(callback: OnViewportFitChangedCallback): this {
     throw new Error('Method not implemented.');
   }
+  onAdsBlockedBlock(callback: (details: { url: string; adsBlocked: string[]; } | undefined) => void): this {
+    throw new Error('Method not implemented.');
+  }
 }
 
 // @ts-ignore

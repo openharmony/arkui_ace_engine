@@ -74,7 +74,7 @@ void ExtensionCompanionNode::SetCallbackId(ArkUIVMContext context, int id)
 void ExtensionCompanionNode::SetExtraParam(ArkUI_Int32 type, void* extraParam)
 {
     for (const auto& flag : NODE_FLAGS) {
-        if (type & flag) {
+        if (static_cast<uint32_t>(type) & flag) {
             auto it = extraParamMap_.find(flag);
             if (it != extraParamMap_.end()) {
                 it->second = extraParam;
@@ -97,7 +97,7 @@ ArkUI_Int64 ExtensionCompanionNode::GetExtraParam(ArkUI_Int32 type)
 void ExtensionCompanionNode::EraseExtraParam(ArkUI_Int32 type)
 {
     for (const auto& flag : NODE_FLAGS) {
-        if (type & flag) {
+        if (static_cast<uint32_t>(type) & flag) {
             auto it = extraParamMap_.find(type);
             if (it != extraParamMap_.end()) {
                 extraParamMap_.erase(it);

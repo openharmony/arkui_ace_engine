@@ -433,7 +433,10 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
     bool hasValidSlice = renderProp && renderProp->HasImageResizableSlice();
     DynamicRangeMode dynamicMode = DynamicRangeMode::STANDARD;
     if (renderProp && renderProp->HasDynamicMode()) {
+        loadingCtx_->SetIsHdrDecoderNeed(true);
         dynamicMode = renderProp->GetDynamicMode().value_or(DynamicRangeMode::STANDARD);
+    } else {
+        loadingCtx_->SetIsHdrDecoderNeed(false);
     }
 
     if (loadingCtx_) {
@@ -1729,7 +1732,7 @@ std::list<ImagePattern::CacheImageStruct>::iterator ImagePattern::FindCacheImage
 void ImagePattern::GenerateCachedImages()
 {
     CHECK_NULL_VOID(images_.size());
-    auto averageShowTime = animator_->GetDuration() / images_.size();
+    auto averageShowTime = static_cast<uint32_t>(animator_->GetDuration()) / images_.size();
     size_t cacheImageNum = averageShowTime >= CRITICAL_TIME ? 1 : 2;
     cacheImageNum = std::min(images_.size() - 1, cacheImageNum);
     if (cacheImages_.size() > cacheImageNum) {

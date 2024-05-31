@@ -860,9 +860,6 @@ void TextFieldPattern::SetFocusStyle()
     NotifyOnEditChanged(true);
 
     if (!IsShowError() && IsUnderlineMode()) {
-        auto renderContext = host->GetRenderContext();
-        auto textFieldTheme = GetTheme();
-        CHECK_NULL_VOID(textFieldTheme);
         underlineColor_ = userUnderlineColor_.typing.value_or(textFieldTheme->GetUnderlineTypingColor());
         underlineWidth_ = TYPING_UNDERLINE_WIDTH;
     }
@@ -874,12 +871,17 @@ void TextFieldPattern::SetFocusStyle()
             isFocusBGColorSet_ = true;
         }
     }
-
     auto defaultTextColor = textFieldTheme->GetTextColor();
     if (layoutProperty->GetTextColorValue(defaultTextColor) == defaultTextColor) {
         layoutProperty->UpdateTextColor(textFieldTheme->GetFocusTextColor());
         isFocusTextColorSet_ = true;
     }
+    auto defaultPlaceholderColor = textFieldTheme->GetPlaceholderColor();
+    if (layoutProperty->GetPlaceholderTextColorValue(defaultPlaceholderColor) == defaultPlaceholderColor) {
+        layoutProperty->UpdatePlaceholderTextColor(textFieldTheme->GetFocusPlaceholderColor());
+        isFocusPlaceholderColorSet_ = true;
+    }
+
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -889,6 +891,8 @@ void TextFieldPattern::ClearFocusStyle()
     CHECK_NULL_VOID(host);
     auto textFieldTheme = GetTheme();
     CHECK_NULL_VOID(textFieldTheme);
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
 
     if (isOnHover_) {
         RestoreDefaultMouseState();
@@ -900,13 +904,15 @@ void TextFieldPattern::ClearFocusStyle()
         renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
         isFocusBGColorSet_ = false;
     }
-
     if (isFocusTextColorSet_) {
-        auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-        CHECK_NULL_VOID(layoutProperty);
         layoutProperty->UpdateTextColor(textFieldTheme->GetTextColor());
         isFocusTextColorSet_ = false;
     }
+    if (isFocusPlaceholderColorSet_) {
+        layoutProperty->UpdatePlaceholderTextColor(textFieldTheme->GetPlaceholderColor());
+        isFocusPlaceholderColorSet_ = false;
+    }
+
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -2014,7 +2020,7 @@ void TextFieldPattern::InitClickEvent()
     CHECK_NULL_VOID(tapSingleGesture);
     tapSingleGesture->SetOnActionId(clickSingleCallback);
     gestureGroup->AddGesture(tapSingleGesture);
-    gestureGroup->SetPriority(GesturePriority::High);
+    gestureGroup->SetPriority(GesturePriority::Parallel);
     gesture->AddGesture(gestureGroup);
     gesture->OnModifyDone();
     clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickSingleCallback));
@@ -6197,7 +6203,7 @@ void TextFieldPattern::NotifyFillRequestFailed(int32_t errCode, const std::strin
             CHECK_NULL_VOID(context);
             auto taskExecutor = context->GetTaskExecutor();
             CHECK_NULL_VOID(taskExecutor);
-            taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::UI, 3000, "testInputMethodAutoFill");
+            taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::UI, 3000, "ArkUITextFieldTestAutoFillInput");
         }
         break;
     }
@@ -7038,7 +7044,8 @@ void TextFieldPattern::SetThemeAttr()
     CHECK_NULL_VOID(theme);
     SetThemeBorderAttr();
     if (!paintProperty->HasBackgroundColor()) {
-        auto backgroundColor = IsUnderlineMode() ? Color::TRANSPARENT : theme->GetBgColor();
+        auto backgroundColor = isFocusBGColorSet_ ? theme->GetFocusBgColor() : theme->GetBgColor();
+        backgroundColor = IsUnderlineMode() ? Color::TRANSPARENT : backgroundColor;
         renderContext->UpdateBackgroundColor(backgroundColor);
     } else {
         renderContext->UpdateBackgroundColor(paintProperty->GetBackgroundColorValue());
@@ -7065,7 +7072,8 @@ void TextFieldPattern::SetThemeAttr()
     }
 
     if (!paintProperty->HasTextColorFlagByUser()) {
-        layoutProperty->UpdateTextColor(theme->GetTextColor());
+        auto textColor = isFocusTextColorSet_ ? theme->GetFocusTextColor() : theme->GetTextColor();
+        layoutProperty->UpdateTextColor(textColor);
     } else {
         layoutProperty->UpdateTextColor(paintProperty->GetTextColorFlagByUserValue());
     }

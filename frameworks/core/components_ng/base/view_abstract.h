@@ -230,6 +230,9 @@ public:
     static void SetOnClick(GestureEventFunc &&clickEventFunc);
     static void SetOnGestureJudgeBegin(GestureJudgeFunc &&gestureJudgeFunc);
     static void SetOnTouchIntercept(TouchInterceptFunc &&touchInterceptFunc);
+    static void SetShouldBuiltInRecognizerParallelWith(
+        NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc);
+    static void SetOnGestureRecognizerJudgeBegin(GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc);
     static void SetOnTouch(TouchEventFunc &&touchEventFunc);
     static void SetOnMouse(OnMouseEventFunc &&onMouseEventFunc);
     static void SetOnHover(OnHoverFunc &&onHoverEventFunc);
@@ -653,8 +656,6 @@ public:
     static BlendApplyType GetBlendApplyType(FrameNode* frameNode);
     static void SetOnTouchIntercept(FrameNode* frameNode, TouchInterceptFunc &&touchInterceptFunc);
     static float GetLayoutWeight(FrameNode* frameNode);
-    static void SetFocusScopeId(const std::string& focusScopeId, bool isGroup);
-    static void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority);
     static int32_t GetDisplayIndex(FrameNode* frameNode);
     static NG::BorderWidthProperty GetOuterBorderWidth(FrameNode* frameNode);
     static void SetBias(FrameNode* frameNode, const BiasPair& biasPair);
@@ -662,6 +663,11 @@ public:
     static RenderFit GetRenderFit(FrameNode* frameNode);
     static BorderColorProperty GetOuterBorderColor(FrameNode* frameNode);
     static bool GetRenderGroup(FrameNode* frameNode);
+    static void SetFocusScopeId(const std::string& focusScopeId, bool isGroup);
+    static void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority);
+    static void SetFocusScopeId(FrameNode* frameNode, const std::string& focusScopeId, bool isGroup);
+    static void SetFocusScopePriority(FrameNode* frameNode, const std::string& focusScopeId,
+        const uint32_t focusPriority);
     static void ResetBias(FrameNode* frameNode);
     static void ResetAlignRules(FrameNode* frameNode);
     static void SetOnVisibleChange(FrameNode* frameNode, std::function<void(bool, double)> &&onVisibleChange,

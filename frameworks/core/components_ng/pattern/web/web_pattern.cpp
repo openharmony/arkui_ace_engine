@@ -67,6 +67,7 @@ const std::string IMAGE_POINTER_ALIAS_PATH = "etc/webview/ohos_nweb/alias.svg";
 constexpr int32_t UPDATE_WEB_LAYOUT_DELAY_TIME = 20;
 constexpr int32_t IMAGE_POINTER_CUSTOM_CHANNEL = 4;
 constexpr int32_t TOUCH_EVENT_MAX_SIZE = 5;
+constexpr int32_t KEYEVENT_MAX_NUM = 1000;
 const LinearEnumMapNode<OHOS::NWeb::CursorType, MouseFormat> g_cursorTypeMap[] = {
     { OHOS::NWeb::CursorType::CT_CROSS, MouseFormat::CROSS },
     { OHOS::NWeb::CursorType::CT_HAND, MouseFormat::HAND_POINTING },
@@ -369,7 +370,7 @@ void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         // Determine if there is already a fixed nested scroll mode.
-        if (!pattern->GetIsFixedNestedScrollMode()) {
+        if (!pattern->GetIsFixedNestedScrollMode() || !pattern->GetNestedScrollParent()) {
             pattern->SetParentScrollable();
         }
         pattern->OnScrollStartRecursive(pattern->GetParentAxis() == Axis::HORIZONTAL
@@ -1447,14 +1448,6 @@ bool WebPattern::HandleKeyEvent(const KeyEvent& keyEvent)
         keyEventCallback(info);
     }
 
-    auto preKeyEventCallback = eventHub->GetOnPreKeyEvent();
-    if (preKeyEventCallback) {
-        ret = preKeyEventCallback(info);
-        if (ret) {
-            return ret;
-        }
-    }
-
     ret = WebOnKeyEvent(keyEvent);
     return ret;
 }
@@ -1462,7 +1455,76 @@ bool WebPattern::HandleKeyEvent(const KeyEvent& keyEvent)
 bool WebPattern::WebOnKeyEvent(const KeyEvent& keyEvent)
 {
     CHECK_NULL_RETURN(delegate_, false);
-    return delegate_->OnKeyEvent(static_cast<int32_t>(keyEvent.code), static_cast<int32_t>(keyEvent.action));
+    if (webKeyEvent_.size() >= KEYEVENT_MAX_NUM) {
+        webKeyEvent_.clear();
+        TAG_LOGW(AceLogTag::ACE_WEB,
+            "WebPattern::WebOnKeyEvent keyevent list num overflow.");
+    }
+    TAG_LOGD(AceLogTag::ACE_WEB,
+        "WebPattern::WebOnKeyEvent keyEvent:%{public}s", keyEvent.ToString().c_str());
+    webKeyEvent_.push_back(keyEvent);
+    std::vector<int32_t> pressedCodes;
+    for (auto pCode : keyEvent.pressedCodes) {
+        pressedCodes.push_back(static_cast<int32_t>(pCode));
+    }
+    return delegate_->WebOnKeyEvent(static_cast<int32_t>(keyEvent.code),
+        static_cast<int32_t>(keyEvent.action), pressedCodes);
+}
+
+void WebPattern::ClearKeyEventBeforeUp(
+    const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event)
+{
+    auto keyEvent = webKeyEvent_.begin();
+    for (; keyEvent != webKeyEvent_.end();) {
+        if (static_cast<int32_t>(keyEvent->code) == event->GetKeyCode() &&
+            static_cast<int32_t>(keyEvent->action) == static_cast<int32_t>(KeyAction::DOWN)) {
+            keyEvent = webKeyEvent_.erase(keyEvent);
+        } else {
+            ++keyEvent;
+        }
+    }
+}
+
+void WebPattern::KeyboardReDispatch(
+    const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event, bool isUsed)
+{
+    CHECK_NULL_VOID(event);
+    if (event->GetAction() == static_cast<int32_t>(KeyAction::UP)) {
+        // When the up event is reported, delete the corresponding down event.
+        ClearKeyEventBeforeUp(event);
+    }
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto taskExecutor = pipelineContext->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    auto keyEvent = webKeyEvent_.rbegin();
+    for (; keyEvent != webKeyEvent_.rend(); ++keyEvent) {
+        if (static_cast<int32_t>(keyEvent->code) == event->GetKeyCode() &&
+            static_cast<int32_t>(keyEvent->action) == event->GetAction()) {
+            break;
+        }
+    }
+    if (keyEvent == webKeyEvent_.rend()) {
+        TAG_LOGW(AceLogTag::ACE_WEB,
+            "KeyEvent is not find keycode:%{public}d, action:%{public}d", event->GetKeyCode(), event->GetAction());
+        return;
+    }
+    if (!isUsed) {
+        taskExecutor->PostTask([context = AceType::WeakClaim(pipelineContext),
+            event = *keyEvent] () {
+            auto pipelineContext = context.Upgrade();
+            CHECK_NULL_VOID(pipelineContext);
+            TAG_LOGD(AceLogTag::ACE_WEB,
+                "WebPattern::KeyboardReDispatch key:%{public}s", event.ToString().c_str());
+            pipelineContext->ReDispatch(const_cast<KeyEvent&>(event));
+            },
+            TaskExecutor::TaskType::UI, "ArkUIWebKeyboardReDispatch");
+    }
+    webKeyEvent_.erase((++keyEvent).base());
 }
 
 void WebPattern::WebRequestFocus()
@@ -2083,6 +2145,7 @@ void WebPattern::OnModifyDone()
             static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE,
                 "RosenWeb" };
             renderContextForSurface_->InitContext(false, param);
+            renderContextForSurface_->UpdateBackgroundColor(renderContext->GetBackgroundColor().value_or(Color::WHITE));
             renderSurface_->SetInstanceId(instanceId);
             renderSurface_->SetRenderContext(host->GetRenderContext());
             if (renderMode_ == RenderMode::SYNC_RENDER) {
@@ -2105,7 +2168,6 @@ void WebPattern::OnModifyDone()
             static_cast<int32_t>(renderContext->GetBackgroundColor().value_or(Color::WHITE).GetValue())));
         delegate_->UpdateJavaScriptEnabled(GetJsEnabledValue(true));
         delegate_->UpdateBlockNetworkImage(!GetOnLineImageAccessEnabledValue(true));
-        delegate_->UpdateAllowFileAccess(GetFileAccessEnabledValue(true));
         delegate_->UpdateLoadsImagesAutomatically(GetImageAccessEnabledValue(true));
         delegate_->UpdateMixedContentMode(GetMixedModeValue(MixedModeContent::MIXED_CONTENT_NEVER_ALLOW));
         delegate_->UpdateSupportZoom(GetZoomAccessEnabledValue(true));
@@ -2152,6 +2214,7 @@ void WebPattern::OnModifyDone()
             GetOverScrollModeValue(isApiGteTwelve ? OverScrollMode::ALWAYS : OverScrollMode::NEVER));
         delegate_->UpdateCopyOptionMode(GetCopyOptionModeValue(static_cast<int32_t>(CopyOptions::Distributed)));
         delegate_->UpdateTextAutosizing(GetTextAutosizingValue(true));
+        delegate_->UpdateAllowFileAccess(GetFileAccessEnabledValue(isApiGteTwelve ? false : true));
         if (GetMetaViewport()) {
             delegate_->UpdateMetaViewport(GetMetaViewport().value());
         }
@@ -2822,8 +2885,8 @@ RectF WebPattern::ComputeClippedSelectionBounds(
     auto offset = GetCoordinatePoint().value_or(OffsetF());
     float selectX = params->GetSelectX();
     float selectY = params->GetSelectY();
-    float viewPortX = static_cast<float>((startHandle->GetViewPortX() + endHandle->GetViewPortX()) / 2);
-    float viewPortY = static_cast<float>((startHandle->GetViewPortY() + endHandle->GetViewPortY()) / 2);
+    float viewPortX = static_cast<float>((startHandle->GetViewPortX() + endHandle->GetViewPortX())) / 2;
+    float viewPortY = static_cast<float>((startHandle->GetViewPortY() + endHandle->GetViewPortY())) / 2;
     if (LessOrEqual(GetHostFrameSize().value_or(SizeF()).Height(), selectY)) {
         selectY = GetHostFrameSize().value_or(SizeF()).Height();
     } else if (LessOrEqual(static_cast<float>(selectY + params->GetSelectXHeight()), 0)) {
@@ -3024,7 +3087,7 @@ void WebPattern::UpdateCustomCursor(int32_t windowId, std::shared_ptr<OHOS::NWeb
     opt.editable = true;
     auto pixelMap = Media::PixelMap::Create(opt);
     CHECK_NULL_VOID(pixelMap);
-    uint64_t bufferSize = width * height * IMAGE_POINTER_CUSTOM_CHANNEL;
+    uint64_t bufferSize = static_cast<uint64_t>(width * height * IMAGE_POINTER_CUSTOM_CHANNEL);
     uint32_t status = pixelMap->WritePixels(static_cast<const uint8_t*>(buff), bufferSize);
     if (status != 0) {
         TAG_LOGE(AceLogTag::ACE_WEB, "write pixel map failed %{public}u", status);

@@ -102,6 +102,10 @@ const std::map<Accessibility::ActionType, std::function<bool(const Accessibility
         [](const AccessibilityActionParam& param) { return param.accessibilityProperty->ActActionCut(); } },
     { ActionType::ACCESSIBILITY_ACTION_PASTE,
         [](const AccessibilityActionParam& param) { return param.accessibilityProperty->ActActionPaste(); } },
+    { ActionType::ACCESSIBILITY_ACTION_CLICK,
+        [](const AccessibilityActionParam& param) { return param.accessibilityProperty->ActActionClick(); } },
+    { ActionType::ACCESSIBILITY_ACTION_LONG_CLICK,
+        [](const AccessibilityActionParam& param) { return param.accessibilityProperty->ActActionLongClick(); } },
     { ActionType::ACCESSIBILITY_ACTION_SELECT,
         [](const AccessibilityActionParam& param) { return param.accessibilityProperty->ActActionSelect(); } },
     { ActionType::ACCESSIBILITY_ACTION_CLEAR_SELECTION,
@@ -1127,6 +1131,9 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
     CHECK_NULL_VOID(node);
     auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
+    if (accessibilityProperty->HasAccessibilityRole()) {
+        nodeInfo.SetComponentType(accessibilityProperty->GetAccessibilityRole());
+    }
 
     if (accessibilityProperty->HasUserTextValue()) {
         nodeInfo.SetContent(accessibilityProperty->GetUserTextValue());
@@ -2560,7 +2567,7 @@ void JsAccessibilityManager::DumpHandleEvent(const std::vector<std::string>& par
             jsAccessibilityManager->AccessibilityActionEvent(
                 op, paramsMap, node, AceType::DynamicCast<PipelineContext>(pipeline));
         },
-        TaskExecutor::TaskType::UI, "ArkUIAccessibilityAction");
+        TaskExecutor::TaskType::UI, "ArkUIAccessibilityActionEvent");
 }
 
 void JsAccessibilityManager::DumpProperty(const RefPtr<AccessibilityNode>& node)
@@ -3157,8 +3164,12 @@ void JsAccessibilityManager::SearchElementInfosByTextNG(int64_t elementId, const
     CHECK_NULL_VOID(node);
     CommonProperty commonProperty;
     GenerateCommonProperty(ngPipeline, commonProperty, mainContext);
-    nlohmann::json textJson = nlohmann::json::parse(text, nullptr, false);
-    if (textJson.is_null() || !textJson.contains("type")) {
+    nlohmann::json textJson;
+    if (!nlohmann::json::accept(text)) {
+        return;
+    }
+    textJson = nlohmann::json::parse(text, nullptr, false);
+    if (textJson.is_null() || textJson.is_discarded() || !textJson.contains("type")) {
         return;
     }
     if (textJson["type"] == "textType") {
@@ -4737,14 +4748,23 @@ void JsAccessibilityManager::FindTextByTextHint(const RefPtr<NG::UINode>& node,
     auto frameNode = AceType::DynamicCast<NG::FrameNode>(node);
     if (frameNode && !frameNode->IsInternal()) {
         std::string text = searchParam.text;
-        nlohmann::json textJson = nlohmann::json::parse(text, nullptr, false);
+        nlohmann::json textJson;
+        if (!nlohmann::json::accept(text)) {
+            return;
+        }
+        textJson = nlohmann::json::parse(text, nullptr, false);
         std::string value = "";
-        if (!textJson.is_null() && textJson.contains("value")) {
+        if (!textJson.is_null() && textJson.contains("value") && !textJson.is_discarded()) {
             value = textJson["value"];
         }
         std::string textType = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetTextType();
-        nlohmann::json textTypeJson = nlohmann::json::parse(textType, nullptr, false);
-        if (!textTypeJson.is_null() && textTypeJson.contains("type") && textTypeJson["type"] == value) {
+        nlohmann::json textTypeJson;
+        if (!nlohmann::json::accept(textType)) {
+            return;
+        }
+        textTypeJson = nlohmann::json::parse(textType, nullptr, false);
+        if (!textTypeJson.is_null() && textTypeJson.contains("type") && textTypeJson["type"] == value &&
+            !textJson.is_discarded()) {
             AccessibilityElementInfo nodeInfo;
             UpdateAccessibilityElementInfo(frameNode, commonProperty, nodeInfo, context);
             infos.emplace_back(nodeInfo);

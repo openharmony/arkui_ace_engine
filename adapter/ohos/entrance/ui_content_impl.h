@@ -79,6 +79,7 @@ public:
 
     // UI content event process
     bool ProcessBackPressed() override;
+    void UpdateDialogResourceConfiguration(RefPtr<Container>& container);
     bool ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent) override;
     bool ProcessPointerEventWithCallback(
         const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent, const std::function<void()>& callback) override;
@@ -311,6 +312,8 @@ public:
     void SetFormRenderingMode(int8_t renderMode) override;
 
     void SetContentNodeGrayScale(float grayscale) override;
+
+    void SetStatusBarItemColor(uint32_t color) override;
 
 private:
     UIContentErrorCode InitializeInner(

@@ -22,7 +22,7 @@
 #include "core/components_ng/pattern/checkbox/checkbox_model.h"
 
 namespace OHOS::Ace {
-class CheckBoxGroupModel {
+class ACE_FORCE_EXPORT CheckBoxGroupModel {
 public:
     static CheckBoxGroupModel* GetInstance();
     virtual ~CheckBoxGroupModel() = default;

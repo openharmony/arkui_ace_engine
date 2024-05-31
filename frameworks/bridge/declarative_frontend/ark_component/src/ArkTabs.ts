@@ -65,6 +65,10 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     modifierWithKey(this._modifiersWithKeys, AnimationDurationModifier.identity, AnimationDurationModifier, value);
     return this;
   }
+  animateMode(value: AnimateMode): TabsAttribute {
+    modifierWithKey(this._modifiersWithKeys, AnimateModeModifier.identity, AnimateModeModifier, value);
+    return this;
+  }
   onChange(event: (index: number) => void): TabsAttribute {
     throw new Error('Method not implemented.');
   }
@@ -251,6 +255,26 @@ class AnimationDurationModifier extends ModifierWithKey<number> {
     } else {
       getUINativeModule().tabs.setAnimationDuration(node, this.value);
     }
+  }
+}
+
+
+class AnimateModeModifier extends ModifierWithKey<AnimateMode> {
+  constructor(value: AnimateMode) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('animateMode');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().tabs.resetAnimateMode(node);
+    } else {
+      getUINativeModule().tabs.setAnimateMode(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 

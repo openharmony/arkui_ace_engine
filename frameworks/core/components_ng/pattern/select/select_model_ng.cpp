@@ -763,4 +763,11 @@ void SelectModelNG::SetMenuBackgroundBlurStyle(FrameNode* frameNode, const BlurS
     CHECK_NULL_VOID(pattern);
     pattern->SetMenuBackgroundBlurStyle(blurStyle);
 }
+
+void SelectModelNG::SetLayoutDirection(TextDirection value)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetLayoutDirection(value);
+}
 } // namespace OHOS::Ace::NG

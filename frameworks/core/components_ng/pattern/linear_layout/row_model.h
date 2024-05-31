@@ -28,7 +28,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT RowModel {
+class ACE_FORCE_EXPORT RowModel {
 public:
     static RowModel* GetInstance();
     virtual ~RowModel() = default;

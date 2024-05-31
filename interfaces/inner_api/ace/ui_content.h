@@ -410,6 +410,8 @@ public:
         const std::function<void(std::vector<Ace::RectF>)>& callback) const {};
 
     virtual void SetContentNodeGrayScale(float grayscale) {};
+
+    virtual void SetStatusBarItemColor(uint32_t color) {};
 };
 
 } // namespace OHOS::Ace

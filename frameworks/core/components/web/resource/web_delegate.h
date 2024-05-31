@@ -742,6 +742,7 @@ public:
     void HandleTouchpadFlingEvent(const double& x, const double& y, const double& vx, const double& vy);
     void HandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY);
     bool OnKeyEvent(int32_t keyCode, int32_t keyAction);
+    bool WebOnKeyEvent(int32_t keyCode, int32_t keyAction, const std::vector<int32_t>& pressedCodes);
     void OnMouseEvent(int32_t x, int32_t y, const MouseButton button, const MouseAction action, int count);
     void OnFocus(const OHOS::NWeb::FocusReason& reason = OHOS::NWeb::FocusReason::EVENT_REQUEST);
     bool NeedSoftKeyboard();
@@ -961,7 +962,9 @@ public:
 
     void OnCustomKeyboardClose();
 
+    void OnAdsBlocked(const std::string& url, const std::vector<std::string>& adsBlocked);
 
+    void KeyboardReDispatch(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event, bool isUsed);
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -1106,6 +1109,7 @@ private:
     EventCallbackV2 onRenderProcessRespondingV2_;
     EventCallbackV2 onViewportFitChangedV2_;
     std::function<WebKeyboardOption(const std::shared_ptr<BaseEventInfo>&)> onInterceptKeyboardAttachV2_;
+    EventCallbackV2 onAdsBlockedV2_;
 
     int32_t renderMode_;
     int32_t layoutMode_;

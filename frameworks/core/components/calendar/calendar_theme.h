@@ -251,14 +251,34 @@ public:
             theme->dialogMargin_ = pattern->GetAttr<Dimension>("calendar_picker_dialog_margin", 0.0_vp);
             theme->calendarPickerDayWidthOrHeight_ = pattern->GetAttr<Dimension>(
                 "calendar_picker_day_width_height", 0.0_vp);
+            theme->calendarPickerDayLargeWidthOrHeight_ =
+                pattern->GetAttr<Dimension>("calendar_picker_day_large_width_height", 40.0_vp);
+            theme->calendarPickerDayLargerHeight_ =
+                pattern->GetAttr<Dimension>("calendar_picker_day_larger_height", 43.0_vp);
             theme->calendarDayFontSize_ = pattern->GetAttr<Dimension>("calendar_picker_day_font_size", 0.0_vp);
+            theme->calendarDayLargeFontSize_ =
+                pattern->GetAttr<Dimension>("calendar_picker_day_large_font_size", 28.0_vp);
+            theme->calendarDayLargerFontSize_ =
+                pattern->GetAttr<Dimension>("calendar_picker_day_larger_font_size", 32.0_vp);
             theme->distanceBetweenContainterAndDate_ = pattern->GetAttr<Dimension>(
                 "calendar_picker_distance_between_container_and_date", 0.0_vp);
             theme->distanceBetweenTitleAndDate_ = pattern->GetAttr<Dimension>(
                 "calendar_picker_distance_between_title_and_date", 0.0_vp);
             theme->dalendarContainerHeight_ = pattern->GetAttr<Dimension>("calendar_picker_container_height", 0.0_vp);
+            theme->calendarLargeContainerHeight_ =
+                pattern->GetAttr<Dimension>("calendar_picker_large_container_height", 316.0_vp);
+            theme->calendarLargerContainerHeight_ =
+                pattern->GetAttr<Dimension>("calendar_picker_larger_container_height", 337.0_vp);
             theme->calendarTitleFontSize_ = pattern->GetAttr<Dimension>("calendar_picker_title_font_size", 0.0_vp);
+            theme->calendarTitleLargeFontSize_ =
+                pattern->GetAttr<Dimension>("calendar_picker_title_large_font_size", 35.0_vp);
+            theme->calendarTitleLargerFontSize_ =
+                pattern->GetAttr<Dimension>("calendar_picker_title_larger_font_size", 40.0_vp);
             theme->calendarTitleRowHeight_ = pattern->GetAttr<Dimension>("calendar_picker_title_row_height", 0.0_vp);
+            theme->calendarTitleLargeRowHeight_ =
+                pattern->GetAttr<Dimension>("calendar_picker_title_large_row_height", 94.0_vp);
+            theme->calendarTitleLargerRowHeight_ =
+                pattern->GetAttr<Dimension>("calendar_picker_title_larger_row_height", 106.0_vp);
             theme->calendarTitleRowTopPadding_ = pattern->GetAttr<Dimension>(
                 "calendar_picker_title_row_top_padding", 0.0_vp);
             theme->calendarTitleRowLeftRightPadding_ = pattern->GetAttr<Dimension>(
@@ -274,6 +294,8 @@ public:
             theme->calendarActionRowBottomLeftRightPadding_ = pattern->GetAttr<Dimension>(
                 "calendar_picker_action_row_bottom_left_right_padding", 0.0_vp);
             theme->calendarActionRowHeight_ = pattern->GetAttr<Dimension>("calendar_picker_action_row_height", 0.0_vp);
+            theme->calendarActionLargeRowHeight_ =
+                pattern->GetAttr<Dimension>("calendar_picker_action_large_row_height", 48.0_vp);
             theme->calendarDayRadius_ = pattern->GetAttr<Dimension>("calendar_picker_day_radius", 0.0_vp);
             theme->calendarDayKeyFocusedWidth_ = pattern->GetAttr<Dimension>("calendar_day_key_focused_width", 0.0_vp);
             theme->calendarDayKeyFocusedPenWidth_ = pattern->GetAttr<Dimension>(
@@ -390,6 +412,8 @@ public:
             std::string isDividerTransparent =
                 pattern->GetAttr<std::string>("calendar_picker_dialog_divider_transparent", "false");
             theme->isDividerTransparent_ = (isDividerTransparent == "true");
+            theme->calendarPickerLargeScale_ = pattern->GetAttr<double>("calendar_picker_large_scale", 1.75);
+            theme->calendarPickerLargerScale_ = pattern->GetAttr<double>("calendar_picker_larger_scale", 2.0);
         }
     };
 
@@ -468,9 +492,29 @@ public:
         return calendarPickerDayWidthOrHeight_;
     }
 
+    const Dimension& GetCalendarPickerDayLargeWidthOrHeight() const
+    {
+        return calendarPickerDayLargeWidthOrHeight_;
+    }
+
+    const Dimension& GetCalendarPickerDayLargerHeight() const
+    {
+        return calendarPickerDayLargerHeight_;
+    }
+
     const Dimension& GetCalendarDayFontSize() const
     {
         return calendarDayFontSize_;
+    }
+
+    const Dimension& GetCalendarDayLargeFontSize() const
+    {
+        return calendarDayLargeFontSize_;
+    }
+
+    const Dimension& GetCalendarDayLargerFontSize() const
+    {
+        return calendarDayLargerFontSize_;
     }
 
     const Dimension& GetDistanceBetweenContainterAndDate() const
@@ -488,14 +532,44 @@ public:
         return dalendarContainerHeight_;
     }
 
+    const Dimension& GetCalendarLargeContainerHeight() const
+    {
+        return calendarLargeContainerHeight_;
+    }
+
+    const Dimension& GetCalendarLargerContainerHeight() const
+    {
+        return calendarLargerContainerHeight_;
+    }
+
     const Dimension& GetCalendarTitleFontSize() const
     {
         return calendarTitleFontSize_;
     }
 
+    const Dimension& GetCalendarTitleLargeFontSize() const
+    {
+        return calendarTitleLargeFontSize_;
+    }
+
+    const Dimension& GetCalendarTitleLargerFontSize() const
+    {
+        return calendarTitleLargerFontSize_;
+    }
+
     const Dimension& GetCalendarTitleRowHeight() const
     {
         return calendarTitleRowHeight_;
+    }
+
+    const Dimension& GetCalendarTitleLargeRowHeight() const
+    {
+        return calendarTitleLargeRowHeight_;
+    }
+
+    const Dimension& GetCalendarTitleLargerRowHeight() const
+    {
+        return calendarTitleLargerRowHeight_;
     }
 
     const Dimension& GetCalendarTitleRowTopPadding() const
@@ -536,6 +610,11 @@ public:
     const Dimension& GetCalendarActionRowHeight() const
     {
         return calendarActionRowHeight_;
+    }
+
+    const Dimension& GetCalendarActionLargeRowHeight() const
+    {
+        return calendarActionLargeRowHeight_;
     }
 
     const Dimension& GetCalendarDayRadius() const
@@ -642,6 +721,16 @@ public:
     {
         return isDividerTransparent_;
     }
+    
+    double GetCalendarPickerLargeScale() const
+    {
+        return calendarPickerLargeScale_;
+    }
+
+    double GetCalendarPickerLargerScale() const
+    {
+        return calendarPickerLargerScale_;
+    }
 protected:
     CalendarTheme() = default;
 
@@ -675,12 +764,22 @@ private:
     Dimension entryDateTopBottomMargin_;
     Dimension dialogMargin_;
     Dimension calendarPickerDayWidthOrHeight_;
+    Dimension calendarPickerDayLargeWidthOrHeight_;
+    Dimension calendarPickerDayLargerHeight_;
     Dimension calendarDayFontSize_;
+    Dimension calendarDayLargeFontSize_;
+    Dimension calendarDayLargerFontSize_;
     Dimension distanceBetweenContainterAndDate_;
     Dimension distanceBetweenTitleAndDate_;
     Dimension dalendarContainerHeight_;
+    Dimension calendarLargeContainerHeight_;
+    Dimension calendarLargerContainerHeight_;
     Dimension calendarTitleFontSize_;
+    Dimension calendarTitleLargeFontSize_;
+    Dimension calendarTitleLargerFontSize_;
     Dimension calendarTitleRowHeight_;
+    Dimension calendarTitleLargeRowHeight_;
+    Dimension calendarTitleLargerRowHeight_;
     Dimension calendarTitleRowTopPadding_;
     Dimension calendarTitleRowLeftRightPadding_;
     Dimension calendarTitleTextPadding_;
@@ -689,6 +788,7 @@ private:
     Dimension calendarActionRowTopPadding_;
     Dimension calendarActionRowBottomLeftRightPadding_;
     Dimension calendarActionRowHeight_;
+    Dimension calendarActionLargeRowHeight_;
     Dimension calendarDayRadius_;
     Dimension calendarDayKeyFocusedWidth_;
     Dimension calendarDayKeyFocusedPenWidth_;
@@ -696,6 +796,8 @@ private:
     Dimension dialogBorderRadius_;
     bool isButtonTransparent_ = true;
     bool isDividerTransparent_ = false;
+    double calendarPickerLargeScale_ = 0.0;
+    double calendarPickerLargerScale_ = 0.0;
 };
 
 } // namespace OHOS::Ace

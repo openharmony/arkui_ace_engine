@@ -1529,6 +1529,7 @@ declare class ArkWebComponent extends ArkComponent implements WebAttribute {
     onViewportFitChanged(callback: (event: {
         viewportFit: ViewportFit;
     }) => void): this;
+    onAdsBlocked(callback: (details?: AdsBlockedDetails | undefined) => void): this;
 }
 declare class ArkXComponentComponent implements CommonMethod<XComponentAttribute> {
     _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;
@@ -1840,6 +1841,7 @@ declare class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     barWidth(value: Length): TabsAttribute;
     barHeight(value: Length): TabsAttribute;
     animationDuration(value: number): TabsAttribute;
+    animateMode(value: AnimateMode): TabsAttribute;
     onChange(event: (index: number) => void): TabsAttribute;
     onTabBarClick(event: (index: number) => void): TabsAttribute;
     fadingEdge(value: boolean): TabsAttribute;

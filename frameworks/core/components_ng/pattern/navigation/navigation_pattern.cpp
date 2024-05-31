@@ -205,6 +205,7 @@ void NavigationPattern::OnModifyDone()
         dividerNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
         dividerNode->MarkModifyDone();
     }
+    isInitialDone_ = true;
 }
 
 void NavigationPattern::OnLanguageConfigurationUpdate()
@@ -273,7 +274,7 @@ void NavigationPattern::UpdateNavPathList()
         auto pathName = pathNames[i];
         auto index = static_cast<int32_t>(indexes[i]);
         RefPtr<UINode> uiNode = nullptr;
-        if ((i == (navigationStack_->Size() - 1)) && addByNavRouter_) {
+        if ((i == static_cast<uint32_t>(pathNames.size() - 1)) && addByNavRouter_) {
             addByNavRouter_ = false;
             uiNode = navigationStack_->Get();
         } else {
@@ -398,6 +399,11 @@ void NavigationPattern::CheckTopNavPathChange(
     CHECK_NULL_VOID(contentNode);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
+    // close the text selection menu before transition.
+    auto selectOverlayManager = context->GetSelectOverlayManager();
+    if (selectOverlayManager) {
+        selectOverlayManager->ResetSelectionAndDestroySelectOverlay();
+    }
     // fire onHidden and lostFocus event
     RefPtr<NavDestinationGroupNode> preTopNavDestination;
     int32_t lastPreIndex = -1;
@@ -663,6 +669,11 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
             newTopNavDestination->SetTransitionType(PageTransitionType::ENTER_POP);
             auto parent = preTopNavDestination->GetParent();
             CHECK_NULL_VOID(parent);
+            auto preTopNavDestinationPattern = preTopNavDestination->GetPattern<NavDestinationPattern>();
+            auto shallowBuilder = preTopNavDestinationPattern->GetShallowBuilder();
+            if (shallowBuilder) {
+                shallowBuilder->MarkIsExecuteDeepRenderDone(false);
+            }
             if (preTopNavDestination->GetContentNode()) {
                 preTopNavDestination->GetContentNode()->Clean(false, true);
             }
@@ -694,12 +705,15 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
     if (preTopNavDestination) {
         auto parent = preTopNavDestination->GetParent();
         CHECK_NULL_VOID(parent);
+        auto preTopNavDestinationPattern = preTopNavDestination->GetPattern<NavDestinationPattern>();
+        auto shallowBuilder = preTopNavDestinationPattern->GetShallowBuilder();
+        if (shallowBuilder) {
+            shallowBuilder->MarkIsExecuteDeepRenderDone(false);
+        }
         if (preTopNavDestination->GetContentNode()) {
             preTopNavDestination->GetContentNode()->Clean(false, true);
         }
         parent->RemoveChild(preTopNavDestination, true);
-        auto preTopNavDestinationPattern = preTopNavDestination->GetPattern<NavDestinationPattern>();
-        CHECK_NULL_VOID(preTopNavDestinationPattern);
         navigationNode->SetNeedSetInvisible(false);
         auto navBar = AceType::DynamicCast<NavBarNode>(navBarNode);
         if (navBar) {
@@ -841,11 +855,8 @@ void NavigationPattern::OnNavBarStateChange(bool modeChange)
         return;
     }
 
-    // STACK mode, check navigationStack
-    if (navigationStack_->Empty()) {
-        eventHub->FireNavBarStateChangeEvent(true);
-    } else {
-        eventHub->FireNavBarStateChangeEvent(false);
+    if (currentNavigationMode == NavigationMode::STACK) {
+        eventHub->FireNavBarStateChangeEvent(navigationStack_->Empty());
     }
 }
 
@@ -1729,7 +1740,7 @@ void NavigationPattern::UpdateIsAnimation(const std::optional<std::pair<std::str
         auto preDestination = AceType::DynamicCast<NavDestinationGroupNode>(
             NavigationGroupNode::GetNavDestinationNode(preTopNavPath->second));
         if (preDestination) {
-            isDialog |= preDestination->GetNavDestinationMode() == NavDestinationMode::DIALOG;
+            isDialog = isDialog || (preDestination->GetNavDestinationMode() == NavDestinationMode::DIALOG);
         }
     }
     auto topNode = navigationStack_->Get();
@@ -1737,7 +1748,7 @@ void NavigationPattern::UpdateIsAnimation(const std::optional<std::pair<std::str
         auto newTopDestination = AceType::DynamicCast<NavDestinationGroupNode>(
             NavigationGroupNode::GetNavDestinationNode(topNode));
         if (newTopDestination) {
-            isDialog |= newTopDestination->GetNavDestinationMode() == NavDestinationMode::DIALOG;
+            isDialog = isDialog || (newTopDestination->GetNavDestinationMode() == NavDestinationMode::DIALOG);
         }
     }
     if (!isDialog) {

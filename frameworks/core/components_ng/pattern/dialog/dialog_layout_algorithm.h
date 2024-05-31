@@ -91,8 +91,8 @@ private:
     void UpdateChildLayoutConstraint(const RefPtr<DialogLayoutProperty>& dialogProp,
         LayoutConstraintF& childLayoutConstraint, RefPtr<LayoutWrapper>& childLayoutWrapper);
     void ClipUIExtensionSubWindowContent(const RefPtr<FrameNode>& dialog, bool isClip);
-    void AdjustHeightForKeyboard(
-        LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& child, const SizeF& childSize);
+    void AdjustHeightForKeyboard(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& child);
+    void UpdateDialogAlignment();
     
     RectF touchRegion_;
     OffsetF topLeftPoint_;
@@ -100,6 +100,7 @@ private:
     SafeAreaInsets safeAreaInsets_;
     bool isModal_ = true;
     bool isShowInSubWindow_ = false;
+    bool isSuitableForElderly_ = false;
     int32_t gridCount_ = -1;
     int32_t subWindowId_ = -1;
     DimensionOffset dialogOffset_;

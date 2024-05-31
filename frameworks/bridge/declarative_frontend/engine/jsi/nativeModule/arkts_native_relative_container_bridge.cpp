@@ -25,6 +25,19 @@ constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
+constexpr int POSITION_DIMENSION = 2;
+
+void ParseReferencedId(EcmaVM* vm, int32_t referenceSize,
+    const panda::Local<panda::ArrayRef>& array, std::vector<std::string>& referencedIds)
+{
+    for (int32_t i = 0; i < referenceSize; i++) {
+        Local<JSValueRef> referencedId = panda::ArrayRef::GetValueAt(vm, array, i);
+        if (referencedId->IsString()) {
+            std::string str(referencedId->ToString(vm)->ToString());
+            referencedIds.push_back(str);
+        }
+    }
+}
 } // namespace
 
 ArkUINativeModuleValue RelativeContainerBridge::SetGuideLine(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -55,12 +68,14 @@ ArkUINativeModuleValue RelativeContainerBridge::SetGuideLine(ArkUIRuntimeCallInf
         if (directionVal->IsNumber()) {
             info.direction = static_cast<LineDirection>(directionVal->Int32Value(vm));
         }
-        Local<JSValueRef> posStartVal = panda::ArrayRef::GetValueAt(vm, positionsArr, i * 2);
+        Local<JSValueRef> posStartVal = panda::ArrayRef::GetValueAt(vm,
+            positionsArr, i * POSITION_DIMENSION);
         CalcDimension startPos;
         if (ArkTSUtils::ParseJsDimensionVpNG(vm, posStartVal, startPos)) {
             info.start = startPos;
         }
-        Local<JSValueRef> posEndVal = panda::ArrayRef::GetValueAt(vm, positionsArr, i * 2 + 1);
+        Local<JSValueRef> posEndVal = panda::ArrayRef::GetValueAt(vm,
+            positionsArr, i * POSITION_DIMENSION + 1);
         CalcDimension endPos;
         if (ArkTSUtils::ParseJsDimensionVpNG(vm, posEndVal, endPos)) {
             info.end = endPos;
@@ -112,17 +127,11 @@ ArkUINativeModuleValue RelativeContainerBridge::SetBarrier(ArkUIRuntimeCallInfo*
         if (directionVal->IsNumber()) {
             info.direction = static_cast<BarrierDirection>(directionVal->Int32Value(vm));
         }
-        if (referencedIdVal->IsArray(vm)) {
+        if (!referencedIdVal->IsArray(vm)) {
             auto array = panda::Local<panda::ArrayRef>(referencedIdVal);
             int32_t referenceSize = array->Length(vm);
             std::vector<std::string> referencedIds;
-            for (int32_t i = 0; i < referenceSize; i++) {
-                Local<JSValueRef> referencedId = panda::ArrayRef::GetValueAt(vm, array, i);
-                if (referencedId->IsString()) {
-                    std::string str(referencedId->ToString(vm)->ToString());
-                    referencedIds.push_back(str);
-                }
-            }
+            ParseReferencedId(vm, referenceSize, array, referencedIds);
             info.referencedId = referencedIds;
         }
         barrierInfos.push_back(info);

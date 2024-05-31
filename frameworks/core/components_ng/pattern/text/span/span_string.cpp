@@ -789,6 +789,7 @@ bool SpanString::EncodeTlv(std::vector<uint8_t>& buff)
     for (auto it = spans_.begin(); it != spans_.end(); ++it) {
         auto spanItem = (*it);
         if (spanItem->spanItemType == NG::SpanItemType::CustomSpan) {
+            TLVUtil::WriteInt32(buff, static_cast<int32_t>(NG::SpanItemType::NORMAL));
             auto placeHolderSpan = AceType::MakeRefPtr<NG::SpanItem>();
             placeHolderSpan->content = " ";
             placeHolderSpan->interval = spanItem->interval;

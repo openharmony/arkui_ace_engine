@@ -598,7 +598,12 @@ void TextPickerColumnPattern::FlushCurrentMixtureOptions(
         layoutConstraint.selfIdealSize = idealSize;
         iconLayoutProperty->UpdateCalcLayoutProperty(layoutConstraint);
         MarginProperty margin;
-        margin.right = CalcLength(ICON_TEXT_SPACE);
+        bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+        if (isRtl) {
+            margin.left = CalcLength(ICON_TEXT_SPACE);
+        } else {
+            margin.right = CalcLength(ICON_TEXT_SPACE);
+        }
         iconLayoutProperty->UpdateMargin(margin);
 
         auto textNode = DynamicCast<FrameNode>(linearLayoutNode->GetLastChild());
@@ -953,6 +958,9 @@ void TextPickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& event) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        if (event.GetInputEventType() == InputEventType::AXIS && event.GetSourceTool() == SourceTool::MOUSE) {
+            return;
+        }
         pattern->HandleDragStart(event);
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& event) {

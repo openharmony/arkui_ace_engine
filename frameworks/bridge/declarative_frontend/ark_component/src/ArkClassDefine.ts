@@ -1386,3 +1386,27 @@ class ArkRelativeContainerBarrier {
     );
   }
 }
+
+class ArkFocusScopeId {
+  id: string | undefined;
+  isGroup: boolean | undefined;
+  constructor() {
+    this.id = undefined;
+    this.isGroup = undefined;
+  }
+  isEqual(another: ArkFocusScopeId): boolean {
+    return (this.id === another.id) && (this.isGroup === another.isGroup);
+  }
+}
+
+class ArkFocusScopePriority {
+  scopeId: string | undefined;
+  priority: number | undefined;
+  constructor() {
+    this.scopeId = undefined;
+    this.priority = undefined;
+  }
+  isEqual(another: ArkFocusScopePriority): boolean {
+    return (this.scopeId === another.scopeId) && (this.priority === another.priority);
+  }
+}

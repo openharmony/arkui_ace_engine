@@ -917,11 +917,13 @@ void ViewAbstract::DisableOnAreaChange(FrameNode* frameNode)
 
 void ViewAbstract::SetOnClick(GestureEventFunc&& clickEventFunc)
 {
-    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetUserOnClick(std::move(clickEventFunc));
 
-    auto focusHub = NG::ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetFocusable(true, false);
 }
@@ -938,6 +940,21 @@ void ViewAbstract::SetOnTouchIntercept(TouchInterceptFunc&& touchInterceptFunc)
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetOnTouchIntercept(std::move(touchInterceptFunc));
+}
+
+void ViewAbstract::SetShouldBuiltInRecognizerParallelWith(
+    NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc)
+{
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetShouldBuildinRecognizerParallelWithFunc(std::move(shouldBuiltInRecognizerParallelWithFunc));
+}
+
+void ViewAbstract::SetOnGestureRecognizerJudgeBegin(GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc)
+{
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc));
 }
 
 void ViewAbstract::SetOnTouch(TouchEventFunc&& touchEventFunc)
@@ -977,13 +994,15 @@ void ViewAbstract::SetHoverEffectAuto(HoverEffectType hoverEffect)
 
 void ViewAbstract::SetEnabled(bool enabled)
 {
-    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     if (eventHub) {
         eventHub->SetEnabled(enabled);
     }
 
     // The SetEnabled of focusHub must be after at eventHub
-    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    auto focusHub = frameNode->GetOrCreateFocusHub();
     if (focusHub) {
         focusHub->SetEnabled(enabled);
     }
@@ -1280,7 +1299,7 @@ void ViewAbstract::SetVisibility(VisibleType visible)
         layoutProperty->UpdateVisibility(visible, true);
     }
 
-    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    auto focusHub = frameNode->GetOrCreateFocusHub();
     if (focusHub) {
         focusHub->SetShow(visible == VisibleType::VISIBLE);
     }
@@ -4269,7 +4288,7 @@ void ViewAbstract::SetJSFrameNodeOnVisibleAreaApproximateChange(FrameNode* frame
     frameNode->CleanVisibleAreaUserCallback(true);
 
     constexpr uint32_t minInterval = 100; // 100ms
-    if (interval < minInterval) {
+    if (interval < 0 || interval < minInterval) {
         interval = minInterval;
     }
     VisibleCallbackInfo callback;
@@ -4348,20 +4367,6 @@ float ViewAbstract::GetLayoutWeight(FrameNode* frameNode)
         return magicItemProperty.GetLayoutWeight().value_or(layoutWeight);
     }
     return layoutWeight;
-}
-
-void ViewAbstract::SetFocusScopeId(const std::string& focusScopeId, bool isGroup)
-{
-    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    focusHub->SetFocusScopeId(focusScopeId, isGroup);
-}
-
-void ViewAbstract::SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority)
-{
-    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    focusHub->SetFocusScopePriority(focusScopeId, focusPriority);
 }
 
 int32_t ViewAbstract::GetDisplayIndex(FrameNode* frameNode)
@@ -4507,5 +4512,36 @@ bool ViewAbstract::GetFocusOnTouch(FrameNode* frameNode)
     auto focusHub = frameNode->GetFocusHub();
     CHECK_NULL_RETURN(focusHub, false);
     return focusHub->IsFocusOnTouch().value_or(false);
+}
+
+void ViewAbstract::SetFocusScopeId(const std::string& focusScopeId, bool isGroup)
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusScopeId(focusScopeId, isGroup);
+}
+
+void ViewAbstract::SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority)
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusScopePriority(focusScopeId, focusPriority);
+}
+
+void ViewAbstract::SetFocusScopeId(FrameNode* frameNode, const std::string& focusScopeId, bool isGroup)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusScopeId(focusScopeId, isGroup);
+}
+
+void ViewAbstract::SetFocusScopePriority(FrameNode* frameNode, const std::string& focusScopeId,
+    const uint32_t focusPriority)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusScopePriority(focusScopeId, focusPriority);
 }
 } // namespace OHOS::Ace::NG

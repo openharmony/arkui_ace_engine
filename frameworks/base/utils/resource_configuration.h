@@ -107,6 +107,26 @@ public:
         return colorModeIsSetByApp_;
     }
 
+    void SetMcc(uint32_t mcc)
+    {
+        mcc_ = mcc;
+    }
+
+    uint32_t GetMcc() const
+    {
+        return mcc_;
+    }
+
+    void SetMnc(uint32_t mnc)
+    {
+        mnc_ = mnc;
+    }
+
+    uint32_t GetMnc() const
+    {
+        return mnc_;
+    }
+
 private:
     bool ParseJsonColorMode(const std::unique_ptr<JsonValue>& jsonConfig, uint32_t& updateFlags);
     bool ParseJsonFontRatio(const std::unique_ptr<JsonValue>& jsonConfig, uint32_t& updateFlags);
@@ -119,6 +139,8 @@ private:
     bool isDeviceAccess_ = false;
     ColorMode colorMode_ = ColorMode::LIGHT;
     bool colorModeIsSetByApp_ = false;
+    uint32_t mcc_ = 0;
+    uint32_t mnc_ = 0;
 };
 
 class ResourceInfo {

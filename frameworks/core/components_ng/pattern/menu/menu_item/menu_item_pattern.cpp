@@ -205,9 +205,9 @@ void MenuItemPattern::OnModifyDone()
         auto theme = pipeline->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(theme);
         MarginProperty margin;
-        auto defaultMargin = CalcLength(Dimension(0.0_vp));
+        auto horizontalMargin = CalcLength(theme->GetMenuItemLeftRightMargin());
         auto verticalMargin = CalcLength(theme->GetMenuItemTopBottomMargin());
-        margin.SetEdges(defaultMargin, defaultMargin, verticalMargin, verticalMargin);
+        margin.SetEdges(horizontalMargin, horizontalMargin, verticalMargin, verticalMargin);
         layoutProp->UpdateMargin(margin);
     }
 }
@@ -637,9 +637,9 @@ void MenuItemPattern::CloseMenu()
     auto outterMenu = menuWrapper->GetFirstChild();
     CHECK_NULL_VOID(outterMenu);
     if (IsSubMenu()) {
-        auto scroll = outterMenu->GetFirstChild();
-        CHECK_NULL_VOID(scroll);
-        auto innerMenu = AceType::DynamicCast<FrameNode>(scroll->GetFirstChild());
+        auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(menuWrapperPattern);
+        auto innerMenu = menuWrapperPattern->GetMenuChild(outterMenu);
         CHECK_NULL_VOID(innerMenu);
         auto innerMenuPattern = AceType::DynamicCast<MenuPattern>(innerMenu->GetPattern());
         CHECK_NULL_VOID(innerMenuPattern);

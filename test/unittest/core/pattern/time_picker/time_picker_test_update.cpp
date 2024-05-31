@@ -23,6 +23,7 @@
 
 #define private public
 #define protected public
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/common/mock_theme_default.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -100,11 +101,13 @@ public:
 void TimePickerPatternTestUpdate::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
+    MockContainer::SetUp();
 }
 
 void TimePickerPatternTestUpdate::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
+    MockContainer::TearDown();
 }
 
 void TimePickerPatternTestUpdate::SetUp()

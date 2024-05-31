@@ -911,14 +911,17 @@ std::optional<Shadow> GetShadowProps(napi_env env, const std::shared_ptr<PromptA
         napi_get_named_property(env, asyncContext->shadowApi, "offsetX", &offsetXApi);
         napi_get_named_property(env, asyncContext->shadowApi, "offsetY", &offsetYApi);
         ResourceInfo recv;
+        bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
         if (ParseResourceParam(env, offsetXApi, recv)) {
             auto resourceWrapper = CreateResourceWrapper(recv);
             auto offsetX = resourceWrapper->GetDimension(recv.resId);
-            shadow.SetOffsetX(offsetX.Value());
+            double xValue = isRtl ? offsetX.Value() * (-1) : offsetX.Value();
+            shadow.SetOffsetX(xValue);
         } else {
             CalcDimension offsetX;
             if (ParseNapiDimension(env, offsetX, offsetXApi, DimensionUnit::VP)) {
-                shadow.SetOffsetX(offsetX.Value());
+                double xValue = isRtl ? offsetX.Value() * (-1) : offsetX.Value();
+                shadow.SetOffsetX(xValue);
             }
         }
         if (ParseResourceParam(env, offsetYApi, recv)) {
@@ -1150,6 +1153,15 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             return nullptr;
         }
     }
+    auto onLanguageChange = [shadowProps](DialogProperties& dialogProps) {
+        if (shadowProps.has_value()) {
+            std::optional<Shadow> shadow = shadowProps.value();
+            bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+            double offsetX = isRtl ? shadow->GetOffset().GetX() * (-1) : shadow->GetOffset().GetX();
+            shadow->SetOffsetX(offsetX);
+            dialogProps.shadow = shadow.value();
+        }
+    };
     napi_value result = nullptr;
     if (asyncContext->callbackRef == nullptr) {
         napi_create_promise(env, &asyncContext->deferred, &result);
@@ -1228,7 +1240,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                 }
                 napi_close_handle_scope(asyncContext->env, scope);
             },
-            TaskExecutor::TaskType::JS, "ArkUIDialogParseCustomDialogContent");
+            TaskExecutor::TaskType::JS, "ArkUIDialogParseDialogCallback");
         asyncContext = nullptr;
     };
 
@@ -1244,6 +1256,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
         .shadow = shadowProps,
         .backgroundColor = backgroundColor,
         .backgroundBlurStyle = backgroundBlurStyle,
+        .onLanguageChange = onLanguageChange,
     };
 
 #ifdef OHOS_STANDARD_SYSTEM
@@ -1443,7 +1456,7 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                 }
                 napi_close_handle_scope(asyncContext->env, scope);
             },
-            TaskExecutor::TaskType::JS, "ArkUIDialogParseActionMenuResults");
+            TaskExecutor::TaskType::JS, "ArkUIDialogParseActionMenuCallback");
         asyncContext = nullptr;
     };
 
@@ -1757,7 +1770,7 @@ void ParseCustomDialogContentCallback(std::shared_ptr<PromptAsyncContext>& async
                 }
                 napi_close_handle_scope(asyncContext->env, scope);
             },
-            TaskExecutor::TaskType::JS, "ArkUIDialogParseCustomDialogContent");
+            TaskExecutor::TaskType::JS, "ArkUIDialogParseCustomDialogContentCallback");
         asyncContext = nullptr;
     };
 }
@@ -1809,7 +1822,7 @@ void ParseCustomDialogIdCallback(std::shared_ptr<PromptAsyncContext>& asyncConte
                 }
                 napi_close_handle_scope(asyncContext->env, scope);
             },
-            TaskExecutor::TaskType::JS, "ArkUIDialogParseCustomDialogId");
+            TaskExecutor::TaskType::JS, "ArkUIDialogParseCustomDialogIdCallback");
         asyncContext = nullptr;
     };
 }

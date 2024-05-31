@@ -534,6 +534,20 @@ void ResetAutoCollapse(ArkUINodeHandle node)
     IndexerModelNG::SetAutoCollapse(frameNode, false);
 }
 
+void SetEnableHapticFeedback(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    IndexerModelNG::SetEnableHapticFeedback(frameNode, value);
+}
+
+void ResetEnableHapticFeedback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    IndexerModelNG::SetEnableHapticFeedback(frameNode, true);
+}
+
 namespace NodeModifier {
 const ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()
 {
@@ -548,7 +562,7 @@ const ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()
         SetPopupPosition, ResetPopupPosition, SetPopupItemBorderRadius, ResetPopupItemBorderRadius, SetItemBorderRadius,
         ResetItemBorderRadius, SetPopupBackgroundBlurStyle, ResetPopupBackgroundBlurStyle, SetPopupTitleBackground,
         ResetPopupTitleBackground, SetAdaptiveWidth, ResetAdaptiveWidth, SetArrayValue, ResetArrayValue,
-        SetAutoCollapse, ResetAutoCollapse };
+        SetAutoCollapse, ResetAutoCollapse, SetEnableHapticFeedback, ResetEnableHapticFeedback };
 
     return &modifier;
 }

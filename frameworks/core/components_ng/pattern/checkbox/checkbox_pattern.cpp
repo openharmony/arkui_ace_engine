@@ -901,9 +901,11 @@ void CheckBoxPattern::OnAttachToMainTree()
         }
         parent = parent->GetParent();
     }
-    currentNavId_ = "";
-    groupManager->SetLastNavId(std::nullopt);
-    UpdateState();
+    if (!currentNavId_.value_or("").empty()) {
+        currentNavId_ = "";
+        groupManager->SetLastNavId(std::nullopt);
+        UpdateState();
+    }
 }
 
 std::string CheckBoxPattern::GetGroupNameWithNavId()

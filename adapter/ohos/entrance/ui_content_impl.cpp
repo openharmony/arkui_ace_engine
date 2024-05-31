@@ -127,6 +127,19 @@ bool IsNeedAvoidWindowMode(OHOS::Rosen::Window* rsWindow)
     return mode == Rosen::WindowMode::WINDOW_MODE_FLOATING || mode == Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
             mode == Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
 }
+
+void AddMccAndMncToResConfig(
+    const std::shared_ptr<OHOS::AbilityRuntime::Context>& context, ResourceConfiguration& aceResCfg)
+{
+    if (!context || !context->GetResourceManager()) {
+        return;
+    }
+    auto resourceManager = context->GetResourceManager();
+    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+    resourceManager->GetResConfig(*resConfig);
+    aceResCfg.SetMcc(resConfig->GetMcc());
+    aceResCfg.SetMnc(resConfig->GetMnc());
+}
 } // namespace
 
 const std::string SUBWINDOW_PREFIX = "ARK_APP_SUBWINDOW_";
@@ -308,7 +321,7 @@ private:
                 [pipeline] {
                     CHECK_NULL_VOID(pipeline);
                     pipeline->SetUIExtensionImeShow(false);
-                }, TaskExecutor::TaskType::UI, "ArkUISetUIExtensionImeShow");
+                }, TaskExecutor::TaskType::UI, "ArkUISetUIExtensionImeHide");
         }
     }
     int32_t instanceId_ = -1;
@@ -487,7 +500,7 @@ public:
                 auto aceDisplayMode = static_cast<FoldDisplayMode>(static_cast<uint32_t>(displayMode));
                 context->OnFoldDisplayModeChanged(aceDisplayMode);
             },
-            TaskExecutor::TaskType::UI, "ArkUIFoldDisplayModeChanged");
+            TaskExecutor::TaskType::UI, "ArkUIDialogFoldDisplayModeChanged");
     }
 
 private:
@@ -1040,6 +1053,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
     aceResCfg.SetDeviceType(SystemProperties::GetDeviceType());
     aceResCfg.SetColorMode(SystemProperties::GetColorMode());
     aceResCfg.SetDeviceAccess(SystemProperties::GetDeviceAccess());
+    AddMccAndMncToResConfig(context, aceResCfg);
     if (isFormRender_) {
         resPath = "/data/bundles/" + bundleName_ + "/" + moduleName_ + "/";
         hapPath = hapPath_;
@@ -1510,6 +1524,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     aceResCfg.SetDeviceType(SystemProperties::GetDeviceType());
     aceResCfg.SetColorMode(SystemProperties::GetColorMode());
     aceResCfg.SetDeviceAccess(SystemProperties::GetDeviceAccess());
+    AddMccAndMncToResConfig(context, aceResCfg);
     container->SetResourceConfiguration(aceResCfg);
     container->SetPackagePathStr(resPath);
     container->SetHapPath(hapPath);
@@ -1761,7 +1776,6 @@ void UIContentImpl::Focus()
     CHECK_NULL_VOID(container);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->ChangeDarkModeBrightness(true);
 }
 
 void UIContentImpl::UnFocus()
@@ -1772,7 +1786,6 @@ void UIContentImpl::UnFocus()
     CHECK_NULL_VOID(container);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->ChangeDarkModeBrightness(false);
 }
 
 void UIContentImpl::Destroy()
@@ -1825,7 +1838,7 @@ uint32_t UIContentImpl::GetBackgroundColor()
         },
         TaskExecutor::TaskType::UI, "ArkUIGetAppBackgroundColor");
 
-    LOGI("[%{public}s][%{public}s][%{public}d]: UIContentImpl GetBackgroundColor, value is %{public}u",
+    LOGD("[%{public}s][%{public}s][%{public}d]: UIContentImpl GetBackgroundColor, value is %{public}u",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, bgColor);
     return bgColor;
 }
@@ -1988,6 +2001,8 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
             parsedConfig.themeTag = config->GetItem("ohos.application.theme");
             parsedConfig.colorModeIsSetByApp =
                 config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP);
+            parsedConfig.mcc = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_MCC);
+            parsedConfig.mnc = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_MNC);
             // EtsCard Font followSytem disable
             if (formFontUseDefault) {
                 LOGW("[%{public}s] UIContentImpl: UpdateConfiguration use default", bundleName.c_str());
@@ -2052,10 +2067,9 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
         Platform::AceViewOhos::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
             static_cast<WindowSizeChangeReason>(reason), rsTransaction);
         Platform::AceViewOhos::SurfacePositionChanged(aceView, config.Left(), config.Top());
-        SubwindowManager::GetInstance()->ClearToastInSubwindow();
         if (pipelineContext) {
             pipelineContext->CheckAndUpdateKeyboardInset();
-            pipelineContext->ChangeDarkModeBrightness(true);
+            pipelineContext->ChangeDarkModeBrightness();
         }
     };
 
@@ -2114,6 +2128,7 @@ void UIContentImpl::UpdateDecorVisible(bool visible, bool hasDeco)
            auto pipelineContext = container->GetPipelineContext();
            CHECK_NULL_VOID(pipelineContext);
            pipelineContext->ShowContainerTitle(visible, hasDeco);
+           pipelineContext->ChangeDarkModeBrightness();
         },
         TaskExecutor::TaskType::UI, "ArkUIUpdateDecorVisible");
 }
@@ -2225,6 +2240,20 @@ void UIContentImpl::DumpInfo(const std::vector<std::string>& params, std::vector
     }
 }
 
+void UIContentImpl::UpdateDialogResourceConfiguration(RefPtr<Container>& container)
+{
+    auto dialogContainer = AceType::DynamicCast<Platform::DialogContainer>(container);
+    if (dialogContainer) {
+        auto aceResCfg = dialogContainer->GetResourceConfiguration();
+        aceResCfg.SetOrientation(SystemProperties::GetDeviceOrientation());
+        aceResCfg.SetDensity(SystemProperties::GetResolution());
+        aceResCfg.SetDeviceType(SystemProperties::GetDeviceType());
+        aceResCfg.SetColorMode(SystemProperties::GetColorMode());
+        aceResCfg.SetDeviceAccess(SystemProperties::GetDeviceAccess());
+        dialogContainer->SetResourceConfiguration(aceResCfg);
+    }
+}
+
 void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog)
 {
     window_ = window;
@@ -2240,6 +2269,7 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
         icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLanguage(), status);
         AceApplicationInfo::GetInstance().SetLocale(locale.getLanguage(), locale.getCountry(), locale.getScript(), "");
         container = AceType::MakeRefPtr<Platform::DialogContainer>(instanceId_, FrontendType::DECLARATIVE_JS);
+        UpdateDialogResourceConfiguration(container);
     } else {
 #ifdef NG_BUILD
         container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS,
@@ -3206,5 +3236,15 @@ void UIContentImpl::SetContentNodeGrayScale(float grayscale)
     auto renderContext = rootElement->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateFrontGrayScale(Dimension(grayscale));
+}
+
+void UIContentImpl::SetStatusBarItemColor(uint32_t color)
+{
+    ContainerScope scope(instanceId_);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto appBar = container->GetAppBar();
+    CHECK_NULL_VOID(appBar);
+    appBar->SetStatusBarItemColor(IsDarkColor(color));
 }
 } // namespace OHOS::Ace

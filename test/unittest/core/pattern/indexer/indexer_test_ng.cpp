@@ -1819,4 +1819,56 @@ HWTEST_F(IndexerTestNg, PerformActionTest001, TestSize.Level1)
     fifthTextaccessibilityProperty->ActActionClearSelection();
     EXPECT_EQ(pattern_->GetSelected(), 0);
 }
+
+/**
+ * @tc.name: IndexerEnableHapticFeedback001
+ * @tc.desc: Test property enableHapticFeedback by default
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerEnableHapticFeedback001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test with empty array.
+     * @tc.expected: Selected unchanged.
+     */
+    Create([](IndexerModelNG model) { }, std::vector<std::string>());
+    EXPECT_TRUE(pattern_->enableHapticFeedback_);
+}
+
+/**
+ * @tc.name: IndexerEnableHapticFeedback002
+ * @tc.desc: Test property enableHapticFeedback by Setter API
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerEnableHapticFeedback002, TestSize.Level1)
+{
+    std::vector<bool> testValues = { false, true, true, false, false };
+    for (auto testValue : testValues) {
+        Create([&](IndexerModelNG model) {
+            model.SetEnableHapticFeedback(testValue);
+        }, CREATE_ARRAY, 2);
+        ASSERT_NE(pattern_, nullptr);
+        EXPECT_EQ(pattern_->enableHapticFeedback_, testValue);
+    }
+}
+
+/**
+ * @tc.name: IndexerEnableHapticFeedback003
+ * @tc.desc: Test property enableHapticFeedback by Setter/Getter API
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerEnableHapticFeedback003, TestSize.Level1)
+{
+    std::vector<bool> testValues = { false, true, true, false, false };
+    for (auto testValue : testValues) {
+        Create([&](IndexerModelNG model) {
+            model.SetEnableHapticFeedback(testValue);
+        }, CREATE_ARRAY, 2);
+        ASSERT_NE(pattern_, nullptr);
+        auto indexerLayoutProperty = pattern_->GetLayoutProperty<IndexerLayoutProperty>();
+        ASSERT_NE(indexerLayoutProperty, nullptr);
+        auto value = indexerLayoutProperty->GetEnableHapticFeedback().value_or(!testValue);
+        EXPECT_EQ(value, testValue);
+    }
+}
 } // namespace OHOS::Ace::NG

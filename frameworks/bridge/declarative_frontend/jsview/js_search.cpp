@@ -640,29 +640,7 @@ void JSSearch::SetTextAlign(int32_t value)
 void JSSearch::JsBorder(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsBorder(info);
-    if (!info[0]->IsObject()) {
-        return;
-    }
-    RefPtr<Decoration> decoration = nullptr;
-    JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
-    auto valueWidth = object->GetProperty("width");
-    if (!valueWidth->IsUndefined()) {
-        ParseBorderWidth(valueWidth);
-    }
-    auto valueColor = object->GetProperty("color");
-    if (!valueColor->IsUndefined()) {
-        ParseBorderColor(valueColor);
-    }
-    auto valueRadius = object->GetProperty("radius");
-    if (!valueRadius->IsUndefined()) {
-        ParseBorderRadius(valueRadius);
-    }
-    auto valueStyle = object->GetProperty("style");
-    if (!valueStyle->IsUndefined()) {
-        ParseBorderStyle(valueStyle);
-    }
     SearchModel::GetInstance()->SetBackBorder();
-    info.ReturnSelf();
 }
 
 void JSSearch::JsBorderWidth(const JSCallbackInfo& info)

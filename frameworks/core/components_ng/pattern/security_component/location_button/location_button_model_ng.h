@@ -23,7 +23,7 @@ class ACE_EXPORT LocationButtonModelNG : public SecurityComponentModelNG {
 public:
     static LocationButtonModelNG* GetInstance();
     void Create(int32_t text, int32_t icon,
-        int32_t backgroundType) override;
+        int32_t backgroundType, bool isArkuiComponent) override;
     virtual bool GetIconResource(int32_t iconStyle, InternalResource::ResourceId& id) override;
     virtual bool GetTextResource(int32_t textStyle, std::string& text) override;
 private:

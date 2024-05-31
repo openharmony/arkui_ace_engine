@@ -102,6 +102,8 @@ std::shared_ptr<Global::Resource::ResConfig> ConvertConfigToGlobal(const Resourc
     newResCfg->SetColorMode(ConvertColorModeToGlobal(config.GetColorMode()));
     newResCfg->SetInputDevice(ConvertInputDevice(config.GetDeviceAccess()));
     newResCfg->SetAppColorMode(config.GetColorModeIsSetByApp());
+    newResCfg->SetMcc(config.GetMcc());
+    newResCfg->SetMnc(config.GetMnc());
     return newResCfg;
 }
 

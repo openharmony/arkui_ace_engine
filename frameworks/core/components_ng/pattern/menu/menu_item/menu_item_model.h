@@ -31,7 +31,7 @@ struct MenuItemProperties {
     std::function<void(WeakPtr<NG::FrameNode>)> startApply;
     std::function<void(WeakPtr<NG::FrameNode>)> endApply;
 };
-class MenuItemModel {
+class ACE_FORCE_EXPORT MenuItemModel {
 public:
     static MenuItemModel* GetInstance();
     virtual ~MenuItemModel() = default;

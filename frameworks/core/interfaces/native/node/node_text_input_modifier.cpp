@@ -250,16 +250,16 @@ void ResetTextInputStyle(ArkUINodeHandle node)
     TextFieldModelNG::SetInputStyle(frameNode, DEFAULT_INPUT_STYLE);
 }
 
-void GetTextInputContentRect(ArkUINodeHandle node, ArkUI_Float32* values)
+void GetTextInputContentRect(ArkUINodeHandle node, ArkUI_Float32 (*values)[4])
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto textFieldController = TextFieldModelNG::GetOrCreateController(frameNode);
     auto rect = textFieldController->GetTextContentRect();
-    values[CALL_ARG_0] = rect.Left();
-    values[CALL_ARG_1] = rect.Top();
-    values[CALL_ARG_2] = rect.Width();
-    values[CALL_ARG_3] = rect.Height();
+    (*values)[CALL_ARG_0] = rect.Left();
+    (*values)[CALL_ARG_1] = rect.Top();
+    (*values)[CALL_ARG_2] = rect.Width();
+    (*values)[CALL_ARG_3] = rect.Height();
 }
 
 ArkUI_Int32 GetTextInputContentLinesNum(ArkUINodeHandle node)
@@ -379,14 +379,14 @@ ArkUI_Int32 GetTextInputCaretIndex(ArkUINodeHandle node)
     return textFieldController->GetCaretIndex();
 }
 
-void GetTextInputCaretOffset(ArkUINodeHandle node, ArkUI_Float32* values)
+void GetTextInputCaretOffset(ArkUINodeHandle node, ArkUI_Float32 (*values)[2])
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto textFieldController = TextFieldModelNG::GetOrCreateController(frameNode);
     auto offset = textFieldController->GetCaretPosition();
-    values[0] = offset.GetX();
-    values[1] = offset.GetY();
+    (*values)[0] = offset.GetX();
+    (*values)[1] = offset.GetY();
 }
 
 void SetTextInputContentType(ArkUINodeHandle node, ArkUI_Uint32 contentType)
@@ -977,15 +977,15 @@ void SetTextInputUserUnderlineColor(ArkUINodeHandle node, const ArkUI_Uint32* va
     TextFieldModelNG::SetUserUnderlineColor(frameNode, userColor);
 }
 
-void GetTextInputUserUnderlineColor(ArkUINodeHandle node, ArkUI_Uint32* values)
+void GetTextInputUserUnderlineColor(ArkUINodeHandle node, ArkUI_Uint32 (*values)[4])
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     UserUnderlineColor userColor = TextFieldModelNG::GetUnderLineColor(frameNode);
-    values[CALL_ARG_0] = userColor.typing->GetValue();
-    values[CALL_ARG_1] = userColor.normal->GetValue();
-    values[CALL_ARG_2] = userColor.error->GetValue();
-    values[CALL_ARG_3] = userColor.disable->GetValue();
+    (*values)[CALL_ARG_0] = userColor.typing->GetValue();
+    (*values)[CALL_ARG_1] = userColor.normal->GetValue();
+    (*values)[CALL_ARG_2] = userColor.error->GetValue();
+    (*values)[CALL_ARG_3] = userColor.disable->GetValue();
 }
 
 void ResetTextInputUserUnderlineColor(ArkUINodeHandle node)

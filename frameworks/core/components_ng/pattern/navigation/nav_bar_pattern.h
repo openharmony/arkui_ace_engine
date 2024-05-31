@@ -175,6 +175,8 @@ private:
     void HandleOnDragStart(float offset);
     void HandleOnDragUpdate(float offset);
     void HandleOnDragEnd();
+    void OnColorConfigurationUpdate() override;
+    void SetNavBarMask(bool isWindowFocus);
 
     RefPtr<PanEvent> panEvent_;
     WeakPtr<FrameNode> scrollableNode_;
@@ -190,6 +192,7 @@ private:
     NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
     int32_t maxMenuNums_ = -1;
     float keyboardOffset_ = 0.0f;
+    bool isWindowFocus_ = true;
 };
 
 } // namespace OHOS::Ace::NG

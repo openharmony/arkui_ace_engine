@@ -375,6 +375,23 @@ void CalendarPattern::UpdateTitleNode()
     date.year = currentMonth_.year;
     date.month = currentMonth_.month - 1; // W3C's month start from 0 to 11
     textLayoutProperty->UpdateContent(Localization::GetInstance()->FormatDateTime(date, "YYYYMM"));
+
+    auto pipelineContext = GetHost()->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(theme);
+    auto fontSizeScale = pipelineContext->GetFontScale();
+    if (fontSizeScale < theme->GetCalendarPickerLargeScale()) {
+        textLayoutProperty->UpdateFontSize(theme->GetCalendarTitleFontSize());
+    } else {
+        textLayoutProperty->UpdateMaxLines(2);
+        if (fontSizeScale >= theme->GetCalendarPickerLargerScale()) {
+            textLayoutProperty->UpdateFontSize(theme->GetCalendarTitleLargerFontSize());
+        } else {
+            textLayoutProperty->UpdateFontSize(theme->GetCalendarTitleLargeFontSize());
+        }
+    }
+
     textTitleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     textTitleNode->MarkModifyDone();
 }

@@ -318,6 +318,14 @@ var BarrierDirection;
   BarrierDirection[BarrierDirection["BOTTOM"] = 3] = "BOTTOM";
 })(BarrierDirection || (BarrierDirection = {}));
 
+var LocalizedBarrierDirection;
+(function (LocalizedBarrierDirection) {
+  LocalizedBarrierDirection[LocalizedBarrierDirection["START"] = 0] = "START";
+  LocalizedBarrierDirection[LocalizedBarrierDirection["END"] = 1] = "END";
+  LocalizedBarrierDirection[LocalizedBarrierDirection["TOP"] = 2] = "TOP";
+  LocalizedBarrierDirection[LocalizedBarrierDirection["BOTTOM"] = 3] = "BOTTOM";
+})(LocalizedBarrierDirection || (LocalizedBarrierDirection = {}));
+
 var BlendMode;
 (function (BlendMode) {
   BlendMode[BlendMode["NORMAL"] = 0] = "NORMAL";
@@ -760,6 +768,13 @@ var BarMode;
   BarMode["Fixed"] = "Fixed";
   BarMode["Scrollable"] = "Scrollable";
 })(BarMode || (BarMode = {}));
+
+var AnimateMode;
+(function (AnimateMode) {
+  AnimateMode["CONTENT_FIRST"] = "CONTENT_FIRST";
+  AnimateMode["ACTION_FIRST"] = "ACTION_FIRST";
+  AnimateMode["NO_ANIMATION"] = "NO_ANIMATION";
+})(AnimateMode || (AnimateMode = {}));
 
 var SelectedMode;
 (function (SelectedMode) {
@@ -2712,6 +2727,7 @@ var SaveIconStyle;
 (function (SaveIconStyle) {
   SaveIconStyle[SaveIconStyle["FULL_FILLED"] = 0] = "FULL_FILLED";
   SaveIconStyle[SaveIconStyle["LINES"] = 1] = "LINES";
+  SaveIconStyle[SaveIconStyle["PICTURE"] = 2] = "PICTURE";
 })(SaveIconStyle || (SaveIconStyle = {}));
 
 var SaveDescription;
@@ -3163,3 +3179,13 @@ var TextDeleteDirection;
     TextDeleteDirection[TextDeleteDirection["BACKWARD"] = 0] = "BACKWARD";
     TextDeleteDirection[TextDeleteDirection["FORWARD"] = 1] = "FORWARD";
 })(TextDeleteDirection || (TextDeleteDirection = {}));
+
+var GestureRecognizerState;
+(function (GestureRecognizerState) {
+  GestureRecognizerState[GestureRecognizerState["READY"] = 0] = "READY";
+  GestureRecognizerState[GestureRecognizerState["DETECTING"] = 1] = "DETECTING";
+  GestureRecognizerState[GestureRecognizerState["PENDING"] = 2] = "PENDING";
+  GestureRecognizerState[GestureRecognizerState["BLOCKED"] = 3] = "BLOCKED";
+  GestureRecognizerState[GestureRecognizerState["SUCCESSFUL"] = 4] = "SUCCESSFUL";
+  GestureRecognizerState[GestureRecognizerState["FAILED"] = 5] = "FAILED";
+})(GestureRecognizerState || (GestureRecognizerState = {}));

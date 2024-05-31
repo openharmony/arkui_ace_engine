@@ -43,6 +43,7 @@ public:
     void SetTextStyle(TextStyle& textStyle, std::optional<Dimension>& fontSize, std::optional<FontWeight>& fontWeight,
         std::optional<std::vector<std::string>>& fontFamily, std::optional<FontStyle>& fontStyle);
     void SetAutoCollapse(bool state) override {}
+    void SetEnableHapticFeedback(bool state) override {}
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_FORM_MODEL_IMPL_H

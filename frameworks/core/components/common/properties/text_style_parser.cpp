@@ -340,7 +340,7 @@ void ParseFontFeatureSetting(
  * normal | <feature-tag-value>, where <feature-tag-value> = <string> [ <integer> | on | off ], like: "liga" 0
  * number of <feature-tag-value> can be single or multiple, and separated by comma ','
  */
-FONT_FEATURES_LIST ParseFontFeatureSettings(const std::string& fontFeatureSettings)
+ACE_FORCE_EXPORT FONT_FEATURES_LIST ParseFontFeatureSettings(const std::string& fontFeatureSettings)
 {
     FONT_FEATURES_LIST fontFeatures;
     if (fontFeatureSettings == FONT_FEATURE_NORMAL || fontFeatureSettings.empty()) {

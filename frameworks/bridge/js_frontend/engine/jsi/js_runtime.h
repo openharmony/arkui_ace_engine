@@ -82,6 +82,7 @@ public:
     virtual bool HasPendingException() = 0;
     virtual void ExecutePendingJob() = 0;
     virtual void DumpHeapSnapshot(bool isPrivate) {}
+    virtual const panda::EcmaVM* GetEcmaVm() const { return nullptr; }
     virtual void DestroyHeapProfiler() {}
     virtual void ForceFullGC() {}
     virtual void SetErrorEventHandler(
