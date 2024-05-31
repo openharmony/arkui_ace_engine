@@ -20,7 +20,6 @@ import resourceManager from '@ohos.resourceManager';
 import { Theme } from '@ohos.arkui.theme';
 import { LengthMetrics } from '@ohos.arkui.node';
 import common from '@ohos.app.ability.common';
-import EnvironmentCallback from '@ohos.app.ability.EnvironmentCallback';
 import window from '@ohos.window';
 
 export enum EditableLeftIconType {
