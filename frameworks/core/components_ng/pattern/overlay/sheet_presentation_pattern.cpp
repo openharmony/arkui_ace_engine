@@ -945,7 +945,7 @@ void SheetPresentationPattern::CheckSheetHeightChange()
                 renderContext->UpdateTransformTranslate({ 0.0f, Dimension(sheetOffsetY_), 0.0f });
                 renderContext->UpdateOpacity(SHEET_VISIABLE_ALPHA);
             }
-            overlayManager->PlaySheetTransition(host, true, false, true);
+            overlayManager->PlaySheetTransition(host, true, false);
             windowChanged_ = false;
         }
     }

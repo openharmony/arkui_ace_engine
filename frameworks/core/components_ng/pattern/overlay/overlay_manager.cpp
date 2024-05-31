@@ -3416,7 +3416,7 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
             ComputeSheetOffset(sheetStyle, topModalNode);
             auto sheetType = topModalNodePattern->GetSheetType();
             if (sheetType != SheetType::SHEET_POPUP && !topModalNodePattern->GetDismissProcess()) {
-                PlaySheetTransition(topModalNode, true, false, false);
+                PlaySheetTransition(topModalNode, true, false);
             }
             return;
         }
@@ -3750,7 +3750,7 @@ void OverlayManager::RemoveSheetNode(const RefPtr<FrameNode>& sheetNode)
 }
 
 void OverlayManager::PlaySheetTransition(
-    RefPtr<FrameNode> sheetNode, bool isTransitionIn, bool isFirstTransition, bool isModeChangeToAuto)
+    RefPtr<FrameNode> sheetNode, bool isTransitionIn, bool isFirstTransition)
 {
     // current sheet animation
     AnimationOption option;
@@ -3780,10 +3780,6 @@ void OverlayManager::PlaySheetTransition(
             if (NearZero(sheetHeight_)) {
                 return;
             }
-        }
-        if (isModeChangeToAuto) {
-            option.SetDuration(0);
-            option.SetCurve(Curves::LINEAR);
         }
         sheetPattern->FireOnTypeDidChange();
         sheetPattern->FireOnWidthDidChange(sheetNode);
