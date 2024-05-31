@@ -284,8 +284,6 @@ export struct EditableTitleBar {
 
   onMeasureSize(selfLayoutInfo: GeometryInfo, children: Measurable[], constraint: ConstraintSizeOptions): SizeResult {
     let result: SizeResult = { width: selfLayoutInfo.width, height: selfLayoutInfo.height };
-    let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
-    this.fontSize = context.config?.fontSizeScale ?? 1;
     children.forEach((child) => {
       let width: number = Number(constraint.maxWidth);
       if (!this.contentMargin) {
@@ -475,7 +473,8 @@ struct ImageMenuItem {
     .gesture(GestureGroup(GestureMode.Exclusive,
       LongPressGesture({ repeat: false, duration: 500 })
         .onAction((event: GestureEvent) => {
-          console.log('LongPressGesture success');
+          let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
+          this.fontSize = context.config?.fontSizeScale ?? 1;
           if (event) {
             if (this.fontSize >= this.minFontSize) {
               this.dialogController?.open()
