@@ -357,7 +357,7 @@ uint32_t GetTotalChildCount(ArkUI_NodeHandle node)
         return 0;
     }
     auto* impl = GetFullImpl();
-    return impl->getNodeModifiers()->getFrameNodeModifier()->getChildrenCount(node->uiNodeHandle);
+    return impl->getNodeModifiers()->getFrameNodeModifier()->getChildrenCount(node->uiNodeHandle, true);
 }
 
 ArkUI_NodeHandle GetChildAt(ArkUI_NodeHandle node, int32_t position)
@@ -366,7 +366,7 @@ ArkUI_NodeHandle GetChildAt(ArkUI_NodeHandle node, int32_t position)
         return nullptr;
     }
     auto* impl = GetFullImpl();
-    auto* value = impl->getNodeModifiers()->getFrameNodeModifier()->getChild(node->uiNodeHandle, position);
+    auto* value = impl->getNodeModifiers()->getFrameNodeModifier()->getChild(node->uiNodeHandle, position, true);
     void* attachNode = impl->getExtendedAPI()->getAttachNodePtr(value);
     if (attachNode) {
         return reinterpret_cast<ArkUI_NodeHandle>(attachNode);
@@ -380,7 +380,7 @@ ArkUI_NodeHandle GetFirstChild(ArkUI_NodeHandle node)
         return nullptr;
     }
     auto* impl = GetFullImpl();
-    auto* value = impl->getNodeModifiers()->getFrameNodeModifier()->getFirst(node->uiNodeHandle);
+    auto* value = impl->getNodeModifiers()->getFrameNodeModifier()->getFirst(node->uiNodeHandle, true);
     void* attachNode = impl->getExtendedAPI()->getAttachNodePtr(value);
     if (attachNode) {
         return reinterpret_cast<ArkUI_NodeHandle>(attachNode);
@@ -394,7 +394,7 @@ ArkUI_NodeHandle GetLastChild(ArkUI_NodeHandle node)
         return nullptr;
     }
     auto* impl = GetFullImpl();
-    auto* value = impl->getNodeModifiers()->getFrameNodeModifier()->getLast(node->uiNodeHandle);
+    auto* value = impl->getNodeModifiers()->getFrameNodeModifier()->getLast(node->uiNodeHandle, true);
     void* attachNode = impl->getExtendedAPI()->getAttachNodePtr(value);
     if (attachNode) {
         return reinterpret_cast<ArkUI_NodeHandle>(attachNode);
@@ -408,7 +408,7 @@ ArkUI_NodeHandle GetPreviousSibling(ArkUI_NodeHandle node)
         return nullptr;
     }
     auto* impl = GetFullImpl();
-    auto* value = impl->getNodeModifiers()->getFrameNodeModifier()->getPreviousSibling(node->uiNodeHandle);
+    auto* value = impl->getNodeModifiers()->getFrameNodeModifier()->getPreviousSibling(node->uiNodeHandle, true);
     void* attachNode = impl->getExtendedAPI()->getAttachNodePtr(value);
     if (attachNode) {
         return reinterpret_cast<ArkUI_NodeHandle>(attachNode);
@@ -422,7 +422,7 @@ ArkUI_NodeHandle GetNextSibling(ArkUI_NodeHandle node)
         return nullptr;
     }
     auto* impl = GetFullImpl();
-    auto* value = impl->getNodeModifiers()->getFrameNodeModifier()->getNextSibling(node->uiNodeHandle);
+    auto* value = impl->getNodeModifiers()->getFrameNodeModifier()->getNextSibling(node->uiNodeHandle, true);
     void* attachNode = impl->getExtendedAPI()->getAttachNodePtr(value);
     if (attachNode) {
         return reinterpret_cast<ArkUI_NodeHandle>(attachNode);

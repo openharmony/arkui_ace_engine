@@ -59,6 +59,11 @@ public:
         return 1;
     }
 
+    int32_t CurrentFrameCount() const override
+    {
+        return 1;
+    }
+
     void Render();
 
     void SetCompleteReloadFunc(RenderFunction&& func) override

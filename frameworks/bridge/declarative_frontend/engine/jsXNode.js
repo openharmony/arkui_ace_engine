@@ -725,9 +725,9 @@ class FrameNode {
         if (node === null) {
             return;
         }
-        let child = node.getFirstChild();
+        let child = node.getFirstChildWithoutExpand();
         FrameNode.disposeTreeRecursively(child);
-        let sibling = node.getNextSibling();
+        let sibling = node.getNextSiblingWithoutExpand();
         FrameNode.disposeTreeRecursively(sibling);
         node.dispose();
     }
@@ -868,8 +868,32 @@ class FrameNode {
         }
         return this.convertToFrameNode(result.nodePtr, result.nodeId);
     }
+    getFirstChildWithoutExpand() {
+        const result = getUINativeModule().frameNode.getFirst(this.getNodePtr(), false);
+        const nodeId = result?.nodeId;
+        if (nodeId === undefined || nodeId === -1) {
+            return null;
+        }
+        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+            return frameNode === undefined ? null : frameNode;
+        }
+        return this.convertToFrameNode(result.nodePtr, result.nodeId);
+    }
     getNextSibling() {
         const result = getUINativeModule().frameNode.getNextSibling(this.getNodePtr());
+        const nodeId = result?.nodeId;
+        if (nodeId === undefined || nodeId === -1) {
+            return null;
+        }
+        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+            return frameNode === undefined ? null : frameNode;
+        }
+        return this.convertToFrameNode(result.nodePtr, result.nodeId);
+    }
+    getNextSiblingWithoutExpand() {
+        const result = getUINativeModule().frameNode.getNextSibling(this.getNodePtr(), false);
         const nodeId = result?.nodeId;
         if (nodeId === undefined || nodeId === -1) {
             return null;
