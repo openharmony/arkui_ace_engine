@@ -58,7 +58,7 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
         CHECK_NULL_VOID(session);
         session->SetBufferAvailable(true);
         if (self->blankNode_) {
-            self->BufferAvailableCallbackForBlank()
+            self->BufferAvailableCallbackForBlank();
             self->deleteBlankTask_.Cancel();
         } else {
             self->BufferAvailableCallback();
@@ -143,7 +143,6 @@ void WindowScene::OnAttachToFrameNode()
 
 void WindowScene::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-    bufferAvailableCallbackFlag_ = true;
     CHECK_NULL_VOID(session_);
     session_->SetUINodeId(0);
     session_->SetAttachState(false, initWindowMode_);
@@ -285,7 +284,8 @@ void WindowScene::BufferAvailableCallback()
     pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneBufferAvailable", TaskExecutor::TaskType::UI);
 }
 
-void WindowScene::BufferAvailableCallbackForBlank() {
+void WindowScene::BufferAvailableCallbackForBlank() 
+{
     auto uiTask = [weakThis = WeakClaim(this)]() {
         ACE_SCOPED_TRACE("WindowScene::BufferAvailableCallbackForBlank");
         auto self = weakThis.Upgrade();
@@ -296,7 +296,6 @@ void WindowScene::BufferAvailableCallbackForBlank() {
         auto rsNode = contentContext->GetRSNode();
         CHECK_NULL_VOID(rsNode);
         rsNode->SetAlpha(1);
-
         const auto& config =
             Rosen::SceneSessionManager::GetInstance().GetWindowSceneConfig().startingWindowAnimationConfig_;
         if (config.enabled_) {
@@ -334,7 +333,7 @@ void WindowScene::BufferAvailableCallbackForBlank() {
     ContainerScope scope(instanceId_);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneBufferAvailableForBlank", TaskExecutor::TaskType::UI);
+    pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIBufferAvailableForBlank", TaskExecutor::TaskType::UI);
 }
 
 void WindowScene::OnActivation()
@@ -394,8 +393,8 @@ void WindowScene::DisposeSnapShotAndBlankNode()
     auto frameSize = geometryNode->GetFrameSize();
     AddChild(host, contentNode_, contentNodeName_);
     surfaceNode->SetBufferAvailableCallback(callback_);
-    if (NearEqual(frameSize.Width(), session_->GetOldRect().width_) &&
-        NearEqual(frameSize.Height(), session_->GetOldRect().height_)) {
+    if (NearEqual(frameSize.Width(), session_->GetSessionOldRect().width_) &&
+        NearEqual(frameSize.Height(), session_->GetSessionOldRect().height_)) {
         return;
     }
     RemoveChild(host, snapshotNode_, snapshotNodeName_);

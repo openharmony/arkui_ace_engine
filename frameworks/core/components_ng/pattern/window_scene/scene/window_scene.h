@@ -55,7 +55,7 @@ private:
     void BufferAvailableCallbackForBlank();
     void OnBoundsChanged(const Rosen::Vector4f& bounds);
     void RegisterFocusCallback();
-    void DisposeSnapshotAndBlankNode();
+    void DisposeSnapShotAndBlankNode();
 
     bool destroyed_ = false;
     OHOS::Rosen::WindowMode initWindowMode_;
