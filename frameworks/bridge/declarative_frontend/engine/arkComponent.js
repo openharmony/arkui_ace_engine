@@ -23800,12 +23800,102 @@ if (globalThis.ListItemGroup !== undefined) {
   };
 }
 
+class ArkRelativeContainerGuideLine {
+  constructor() {
+    this.ids = undefined;
+    this.directions = undefined;
+    this.positions = undefined;
+  }
+
+  isEqual(another) {
+    return (
+      this.ids === another.ids &&
+      this.directions === another.directions &&
+      this.positions === another.positions
+    );
+  }
+}
+
+class ArkRelativeContainerBarrier {
+  constructor() {
+    this.ids = undefined;
+    this.directions = undefined;
+    this.referencedIds = undefined;
+  }
+
+  isEqual(another) {
+    return (
+      this.ids === another.ids &&
+      this.directions === another.directions &&
+      this.referencedIds === another.positions
+    );
+  }
+}
+
+class RelativeContainerGuideLineModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().relativeContainer.resetGuideLine(node);
+    } else {
+      getUINativeModule().relativeContainer.setGuideLine(node,
+        this.value.ids, this.value.directions, this.value.positions);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.ids, this.value.ids) ||
+      !isBaseOrResourceEqual(this.stageValue.directions, this.value.directions) ||
+      !isBaseOrResourceEqual(this.stageValue.positions, this.value.positions);
+  }
+}
+RelativeContainerGuideLineModifier.identity = Symbol('relativeContainerGuideLine');
+class RelativeContainerBarrierModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().relativeContainer.resetBarrier(node);
+    } else {
+      getUINativeModule().relativeContainer.setBarrier(node,
+        this.value.ids, this.value.directions, this.value.referencedIds);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.ids, this.value.ids) ||
+      !isBaseOrResourceEqual(this.stageValue.directions, this.value.directions) ||
+      !isBaseOrResourceEqual(this.stageValue.referencedIds, this.value.referencedIds);
+  }
+}
+RelativeContainerBarrierModifier.identity = Symbol('relativeContainerBarrier');
 /// <reference path='./import.ts' />
 class ArkRelativeContainerComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
   initialize(value) {
+    return this;
+  }
+  guideLine(value) {
+    let guideLineInfo = new ArkRelativeContainerGuideLine();
+    guideLineInfo.ids = value.map(item => { return item.id; });
+    guideLineInfo.directions = value.map(item => { return item.direction; });
+    guideLineInfo.positions = new Array();
+    for (let i = 0; i < value.length; i++) {
+      guideLineInfo.positions.push(value[i].position.start);
+      guideLineInfo.positions.push(value[i].position.end);
+    }
+    modifierWithKey(this._modifiersWithKeys, RelativeContainerGuideLineModifier.identity, RelativeContainerGuideLineModifier, guideLineInfo);
+    return this;
+  }
+  barrier(value) {
+    let barrierInfo = new ArkRelativeContainerBarrier();
+    barrierInfo.ids = value.map(item => { return item.id; });
+    barrierInfo.directions = value.map(item => { return item.direction; });
+    barrierInfo.referencedIds = value.map(item => { return item.referencedId; });
+    modifierWithKey(this._modifiersWithKeys, RelativeContainerBarrierModifier.identity, RelativeContainerBarrierModifier, barrierInfo);
     return this;
   }
 }

@@ -1346,3 +1346,43 @@ class ArkDragPreviewOptions {
     );
   }
 }
+
+class ArkRelativeContainerGuideLine {
+  ids: Array<string> | undefined;
+  directions: Array<Axis> | undefined;
+  positions: Array<GuideLinePosition> | undefined;
+
+  constructor() {
+    this.ids = undefined;
+    this.directions = undefined;
+    this.positions = undefined;
+  }
+
+  isEqual(another: ArkRelativeContainerGuideLine): boolean {
+    return (
+      this.ids === another.ids &&
+      this.directions === another.directions &&
+      this.positions === another.positions
+    );
+  }
+}
+
+class ArkRelativeContainerBarrier {
+  ids: Array<string> | undefined;
+  directions: Array<BarrierDirection> | undefined;
+  referencedIds: Array<Array<string>> | undefined;
+
+  constructor() {
+    this.ids = undefined;
+    this.directions = undefined;
+    this.referencedIds = undefined;
+  }
+
+  isEqual(another: ArkRelativeContainerGuideLine): boolean {
+    return (
+      this.ids === another.ids &&
+      this.directions === another.directions &&
+      this.referencedIds === another.positions
+    );
+  }
+}
