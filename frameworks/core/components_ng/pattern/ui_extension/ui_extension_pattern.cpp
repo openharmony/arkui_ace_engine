@@ -154,15 +154,15 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
     }
 
     isKeyAsync_ = want.GetBoolParam(ABILITY_KEY_ASYNC, false);
-    bool isCallerSystem = IsCallerSystem(want);
-    UIEXT_LOGI("The ability KeyAsync %{public}d, isCallerSystem: %{public}d.",
-        isKeyAsync_, isCallerSystem);
+    bool shouldCallSystem = ShouldCallSystem(want);
+    UIEXT_LOGI("The ability KeyAsync %{public}d, shouldCallSystem: %{public}d.",
+        isKeyAsync_, shouldCallSystem);
     MountPlaceholderNode();
-    sessionWrapper_->CreateSession(want, isAsyncModalBinding_, isCallerSystem);
+    sessionWrapper_->CreateSession(want, isAsyncModalBinding_, shouldCallSystem);
     NotifyForeground();
 }
 
-bool UIExtensionPattern::IsCallerSystem(const AAFwk::Want& want)
+bool UIExtensionPattern::ShouldCallSystem(const AAFwk::Want& want)
 {
     if (sessionType_ != SessionType::UI_EXTENSION_ABILITY) {
         return false;
