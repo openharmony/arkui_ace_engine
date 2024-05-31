@@ -348,7 +348,7 @@ public:
         return isSubContainer_;
     }
 
-    bool IsFormRender() const
+    bool IsFormRender() const override
     {
         return isFormRender_;
     }
@@ -470,7 +470,7 @@ public:
         isSubContainer_ = isSubContainer;
     }
 
-    void SetIsFormRender(bool isFormRender)
+    void SetIsFormRender(bool isFormRender) override
     {
         isFormRender_ = isFormRender;
     }

@@ -4742,6 +4742,37 @@ void JSViewAbstract::CompleteResourceObject(JSRef<JSObject>& jsObj)
     }
 }
 
+void JSViewAbstract::CompleteResourceObjectWithBundleName(
+    JSRef<JSObject>& jsObj, std::string& bundleName, std::string& moduleName, int32_t& resId)
+{
+    JSRef<JSVal> tmp = jsObj->GetProperty("id");
+    ResourceType resType;
+
+    std::string targetModule;
+    std::string resName;
+    if (tmp->IsString()) {
+        JSRef<JSVal> type = jsObj->GetProperty("type");
+        int32_t typeNum = -1;
+        if (type->IsNumber()) {
+            typeNum = type->ToNumber<int32_t>();
+        }
+        if (!ParseDollarResource(tmp, targetModule, resType, resName, typeNum == UNKNOWN_RESOURCE_TYPE)) {
+            return;
+        }
+        CompleteResourceObjectFromId(type, jsObj, resType, resName);
+    } else if (!tmp->IsNull() && tmp->IsNumber()) {
+        resId = tmp->ToNumber<int32_t>();
+        if (resId == -1) {
+            CompleteResourceObjectFromParams(resId, jsObj, targetModule, resType, resName);
+        }
+    }
+    JSViewAbstract::GetJsMediaBundleInfo(jsObj, bundleName, moduleName);
+    if (bundleName.empty() && !moduleName.empty()) {
+        bundleName = GetBundleNameFromContainer();
+        jsObj->SetProperty<std::string>("bundleName", bundleName);
+    }
+}
+
 bool JSViewAbstract::ParseJsDimensionNG(
     const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit, bool isSupportPercent)
 {
@@ -5439,15 +5470,32 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     CompleteResourceObject(jsObj);
+    return ParseJSMediaInternal(jsObj, result);
+}
+
+bool JSViewAbstract::ParseJsMediaWithBundleName(
+    const JSRef<JSVal>& jsValue, std::string& result, std::string& bundleName, std::string& moduleName, int32_t& resId)
+{
+    if (!jsValue->IsObject() && !jsValue->IsString()) {
+        return JSViewAbstract::GetJsMediaBundleInfo(jsValue, bundleName, moduleName);
+    }
+    if (jsValue->IsString()) {
+        result = jsValue->ToString();
+        return JSViewAbstract::GetJsMediaBundleInfo(jsValue, bundleName, moduleName);
+    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    CompleteResourceObjectWithBundleName(jsObj, bundleName, moduleName, resId);
+    return ParseJSMediaInternal(jsObj, result);
+}
+
+bool JSViewAbstract::ParseJSMediaInternal(const JSRef<JSObject>& jsObj, std::string& result)
+{
     int32_t type = jsObj->GetPropertyValue<int32_t>("type", UNKNOWN_RESOURCE_TYPE);
     JSRef<JSVal> resId = jsObj->GetProperty("id");
     if (!resId->IsNull() && type != UNKNOWN_RESOURCE_TYPE && resId->IsNumber()) {
         auto resourceObject = GetResourceObjectByBundleAndModule(jsObj);
         auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
-        if (!resourceWrapper) {
-            return false;
-        }
-
+        CHECK_NULL_RETURN(resourceWrapper, false);
         if (type == static_cast<int32_t>(ResourceType::RAWFILE)) {
             JSRef<JSVal> args = jsObj->GetProperty("params");
             if (!args->IsArray()) {
@@ -5481,16 +5529,13 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
                 return true;
             }
             return false;
-        }
-        if (type == static_cast<int32_t>(ResourceType::MEDIA)) {
+        } else if (type == static_cast<int32_t>(ResourceType::MEDIA)) {
             result = resourceWrapper->GetMediaPath(resId->ToNumber<uint32_t>());
             return true;
-        }
-        if (type == static_cast<int32_t>(ResourceType::STRING)) {
+        } else if (type == static_cast<int32_t>(ResourceType::STRING)) {
             result = resourceWrapper->GetString(resId->ToNumber<uint32_t>());
             return true;
         }
-        return false;
     }
     return false;
 }
@@ -9470,10 +9515,10 @@ void JSViewAbstract::JSRenderFit(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetRenderFit(renderFit);
 }
 
-void JSViewAbstract::GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bundleName, std::string& moduleName)
+bool JSViewAbstract::GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bundleName, std::string& moduleName)
 {
     if (!jsValue->IsObject() || jsValue->IsString()) {
-        return;
+        return false;
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     if (!jsObj->IsUndefined()) {
@@ -9482,8 +9527,10 @@ void JSViewAbstract::GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::stri
         if (bundle->IsString() && module->IsString()) {
             bundleName = bundle->ToString();
             moduleName = module->ToString();
+            return true;
         }
     }
+    return false;
 }
 
 bool JSViewAbstract::ParseBorderColorProps(const JSRef<JSVal>& args, NG::BorderColorProperty& colorProperty)
