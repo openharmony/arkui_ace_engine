@@ -57,6 +57,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr VisibleType DEFAULT_VISIBILITY = static_cast<VisibleType>(0);
 constexpr float MAX_ANGLE = 360.0f;
+constexpr float DEFAULT_ANGLE = 180.0f;
 constexpr double PERCENT_100 = 100.0;
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
@@ -3000,7 +3001,7 @@ void ResetFlexGrow(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetFlexGrow(static_cast<float>(0.0));
+    ViewAbstract::SetFlexGrow(frameNode, static_cast<float>(0.0));
 }
 
 void SetFlexShrink(ArkUINodeHandle node, ArkUI_Float32 value)
@@ -4848,12 +4849,12 @@ ArkUI_Int32 GetRadialGradient(
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     auto gradient = ViewAbstract::GetRadialGradient(frameNode);
     auto radialGradient = gradient.GetRadialGradient();
-
+    CHECK_NULL_RETURN(radialGradient, ERROR_INT_CODE);
     values[NUM_0] = radialGradient->radialCenterX->GetNativeValue(static_cast<DimensionUnit>(unit));
     values[NUM_1] = radialGradient->radialCenterY->GetNativeValue(static_cast<DimensionUnit>(unit));
-    values[NUM_2] = gradient.GetInnerRadius();
+    values[NUM_2] =
+        gradient.GetRadialGradient()->radialHorizontalSize->GetNativeValue(static_cast<DimensionUnit>(unit));
     values[NUM_3] = gradient.GetRepeat();
-
     std::vector<GradientColor> gradientColors = gradient.GetColors();
     //0 start index
     int index = 0;
@@ -4995,7 +4996,7 @@ ArkUI_Int32 GetLinearGradient(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI
     auto gradient = ViewAbstract::GetLinearGradient(frameNode);
     auto angle = gradient.GetLinearGradient()->angle;
     //0 angle
-    values[0] = angle.has_value() ? angle.value().Value() : 0.0f;
+    values[0] = angle.has_value() ? angle.value().Value() : DEFAULT_ANGLE;
     //1 Direction
     values[1] = static_cast<int32_t>(convertToLinearGradientDirection(gradient.GetLinearGradient()));
     //2 Repeat
@@ -5474,22 +5475,29 @@ void SetOnClick(ArkUINodeHandle node, void* extraParam)
         Offset globalOffset = info.GetGlobalLocation();
         Offset localOffset = info.GetLocalLocation();
         Offset screenOffset = info.GetScreenLocation();
+        bool usePx = NodeModel::UsePXUnit(reinterpret_cast<ArkUI_Node*>(extraParam));
         //x
-        event.componentAsyncEvent.data[0].f32 = PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX());
+        event.componentAsyncEvent.data[0].f32 =
+            usePx ? PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()) : localOffset.GetX();
         //y
-        event.componentAsyncEvent.data[1].f32 = PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY());
+        event.componentAsyncEvent.data[1].f32 =
+            usePx ? PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()) : localOffset.GetY();
         //timestamp
         event.componentAsyncEvent.data[2].f32 = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
         //source
         event.componentAsyncEvent.data[3].i32 = static_cast<int32_t>(info.GetSourceDevice());
         //windowX
-        event.componentAsyncEvent.data[4].f32 = PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX());
+        event.componentAsyncEvent.data[4].f32 =
+            usePx ? PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()) : globalOffset.GetX();
         //windowY
-        event.componentAsyncEvent.data[5].f32 = PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY());
+        event.componentAsyncEvent.data[5].f32 =
+            usePx ? PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()) : globalOffset.GetY();
         //displayX
-        event.componentAsyncEvent.data[6].f32 = PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX());
+        event.componentAsyncEvent.data[6].f32 =
+            usePx ? PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()) : screenOffset.GetX();
         //displayY
-        event.componentAsyncEvent.data[7].f32 = PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY());
+        event.componentAsyncEvent.data[7].f32 =
+            usePx ? PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()) : screenOffset.GetY();
 
         SendArkUIAsyncEvent(&event);
     };

@@ -276,6 +276,10 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_LIST_DID_SCROLL;
         case NODE_LIST_ON_WILL_SCROLL:
             return ON_LIST_WILL_SCROLL;
+        case NODE_SWIPER_EVENT_ON_CONTENT_DID_SCROLL:
+            return ON_SWIPER_DID_CONTENT_SCROLL;
+        case NODE_REFRESH_ON_OFFSET_CHANGE:
+            return ON_REFRESH_ON_OFFSET_CHANGE;
         default:
             return -1;
     }
@@ -430,6 +434,10 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_TEXT_ON_DETECT_RESULT_UPDATE;
         case ON_RADIO_CHANGE:
             return NODE_RADIO_EVENT_ON_CHANGE;
+        case ON_SWIPER_DID_CONTENT_SCROLL:
+            return NODE_SWIPER_EVENT_ON_CONTENT_DID_SCROLL;
+        case ON_REFRESH_ON_OFFSET_CHANGE:
+            return NODE_REFRESH_ON_OFFSET_CHANGE;
         default:
             return -1;
     }

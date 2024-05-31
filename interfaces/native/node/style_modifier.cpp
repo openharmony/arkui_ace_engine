@@ -267,43 +267,43 @@ std::string CurveToString(int curve)
     std::string curveStr = "linear";
     switch (curve) {
         case ArkUI_AnimationCurve::ARKUI_CURVE_LINEAR:
-            curveStr = "Linear";
+            curveStr = "linear";
             break;
         case ArkUI_AnimationCurve::ARKUI_CURVE_EASE:
-            curveStr = "Ease";
+            curveStr = "ease";
             break;
         case ArkUI_AnimationCurve::ARKUI_CURVE_EASE_IN:
-            curveStr = "EaseIn";
+            curveStr = "ease-in";
             break;
         case ArkUI_AnimationCurve::ARKUI_CURVE_EASE_OUT:
-            curveStr = "EaseOut";
+            curveStr = "ease-out";
             break;
         case ArkUI_AnimationCurve::ARKUI_CURVE_EASE_IN_OUT:
-            curveStr = "EaseInOut";
+            curveStr = "ease-in-out";
             break;
         case ArkUI_AnimationCurve::ARKUI_CURVE_FAST_OUT_SLOW_IN:
-            curveStr = "FastOutSlowIn";
+            curveStr = "fast-out-slow-in";
             break;
         case ArkUI_AnimationCurve::ARKUI_CURVE_LINEAR_OUT_SLOW_IN:
-            curveStr = "LinearOutSlowIn";
+            curveStr = "linear-out-slow-in";
             break;
         case ArkUI_AnimationCurve::ARKUI_CURVE_FAST_OUT_LINEAR_IN:
-            curveStr = "FastOutLinearIn";
+            curveStr = "fast-out-linear-in";
             break;
         case ArkUI_AnimationCurve::ARKUI_CURVE_EXTREME_DECELERATION:
-            curveStr = "ExtremeDeceleration";
+            curveStr = "extreme-deceleration";
             break;
         case ArkUI_AnimationCurve::ARKUI_CURVE_SHARP:
-            curveStr = "Sharp";
+            curveStr = "sharp";
             break;
         case ArkUI_AnimationCurve::ARKUI_CURVE_RHYTHM:
-            curveStr = "Rhythm";
+            curveStr = "rhythm";
             break;
         case ArkUI_AnimationCurve::ARKUI_CURVE_SMOOTH:
-            curveStr = "Smooth";
+            curveStr = "smooth";
             break;
         case ArkUI_AnimationCurve::ARKUI_CURVE_FRICTION:
-            curveStr = "Friction";
+            curveStr = "friction";
             break;
         default:
             break;
@@ -1050,6 +1050,9 @@ int32_t SetBrightness(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (actualSize < 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
+    if (LessNotEqual(item->value[0].f32, 0.0f) || GreatNotEqual(item->value[0].f32, 2.0f)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto fullImpl = GetFullImpl();
     auto brightness = item->value[NUM_0].f32;
     fullImpl->getNodeModifiers()->getCommonModifier()->setBrightness(node->uiNodeHandle, brightness);
@@ -1187,7 +1190,7 @@ const ArkUI_AttributeItem* GetLinearGradient(ArkUI_NodeHandle node)
     static float gradientStops[NUM_10];
     for (int i = 0; i < resultValue; i++) {
         gradientColors[i] = colors[i];
-        gradientStops[i] = stops[i];
+        gradientStops[i] = stops[i] / 100.0f; //百分比转换为小数
     }
     colorStop.colors = gradientColors;
     colorStop.stops = gradientStops;
@@ -1236,7 +1239,7 @@ int32_t SetOpacity(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (item->size == 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    if (LessNotEqual(item->value[0].f32, 0.0f)) {
+    if (LessNotEqual(item->value[0].f32, 0.0f) || GreatNotEqual(item->value[0].f32, 1.0f)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     // already check in entry point.
@@ -1552,6 +1555,9 @@ int32_t SetClipShape(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     auto* fullImpl = GetFullImpl();
     if (item->value[0].i32 == ArkUI_ClipType::ARKUI_CLIP_TYPE_PATH) {
+        if (item->string == nullptr) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
         ArkUI_Float32 pathAttributes[NUM_2];
         if (LessNotEqual(item->value[NUM_1].f32, 0.0f) || LessNotEqual(item->value[NUM_2].f32, 0.0f)) {
             return ERROR_CODE_PARAM_INVALID;
@@ -1559,7 +1565,6 @@ int32_t SetClipShape(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
             pathAttributes[NUM_0] = item->value[NUM_1].f32;
             pathAttributes[NUM_1] = item->value[NUM_2].f32;
         }
-
         fullImpl->getNodeModifiers()->getCommonModifier()->setClipPath(
             node->uiNodeHandle, "path", pathAttributes, item->string);
     } else {
@@ -1587,20 +1592,28 @@ const ArkUI_AttributeItem* GetClipShape(ArkUI_NodeHandle node)
 {
     ArkUIClipShapeOptions options;
     GetFullImpl()->getNodeModifiers()->getCommonModifier()->getClipShape(node->uiNodeHandle, &options);
-    g_numberValues[NUM_0].i32 = options.type;
-    if (g_numberValues[NUM_0].i32 == ArkUI_ClipType::ARKUI_CLIP_TYPE_RECTANGLE) {
+    int type = options.type;
+    if (type == static_cast<ArkUI_Int32>(BasicShapeType::RECT)) {
+        g_numberValues[NUM_0].i32 = static_cast<ArkUI_Int32>(ArkUI_ClipType::ARKUI_CLIP_TYPE_RECTANGLE);
         g_numberValues[NUM_1].f32 = options.width;
         g_numberValues[NUM_2].f32 = options.height;
         g_numberValues[NUM_3].f32 = options.radiusWidth;
         g_numberValues[NUM_4].f32 = options.radiusHeight;
-    } else if (g_numberValues[NUM_0].i32 == ArkUI_ClipType::ARKUI_CLIP_TYPE_CIRCLE ||
-               g_numberValues[NUM_0].i32 == ArkUI_ClipType::ARKUI_CLIP_TYPE_ELLIPSE) {
+    } else if (type == static_cast<ArkUI_Int32>(BasicShapeType::CIRCLE)) {
+        g_numberValues[NUM_0].i32 = static_cast<ArkUI_Int32>(ArkUI_ClipType::ARKUI_CLIP_TYPE_CIRCLE);
         g_numberValues[NUM_1].f32 = options.width;
         g_numberValues[NUM_2].f32 = options.height;
-    } else {
+    } else if (type == static_cast<ArkUI_Int32>(BasicShapeType::ELLIPSE)) {
+        g_numberValues[NUM_0].i32 = static_cast<ArkUI_Int32>(ArkUI_ClipType::ARKUI_CLIP_TYPE_ELLIPSE);
+        g_numberValues[NUM_1].f32 = options.width;
+        g_numberValues[NUM_2].f32 = options.height;
+    } else if (type == static_cast<ArkUI_Int32>(BasicShapeType::PATH)) {
+        g_numberValues[NUM_0].i32 = static_cast<ArkUI_Int32>(ArkUI_ClipType::ARKUI_CLIP_TYPE_PATH);
         g_numberValues[NUM_1].f32 = options.width;
         g_numberValues[NUM_2].f32 = options.height;
         g_attributeItem.string = options.commands;
+    } else {
+        return nullptr;
     }
     return &g_attributeItem;
 }
@@ -2173,7 +2186,7 @@ const ArkUI_AttributeItem* GetSweepGradient(ArkUI_NodeHandle node)
     static float gradientStops[NUM_10];
     for (int i = 0; i < resultValue; i++) {
         gradientColors[i] = colors[i];
-        gradientStops[i] = stops[i];
+        gradientStops[i] = stops[i] / 100.0f; //百分比转换为小数
     }
     colorStop.colors = gradientColors;
     colorStop.stops = gradientStops;
@@ -2272,7 +2285,7 @@ const ArkUI_AttributeItem* GetRadialGradient(ArkUI_NodeHandle node)
     static float gradientStops[NUM_10];
     for (int i = 0; i < resultValue; i++) {
         gradientColors[i] = colors[i];
-        gradientStops[i] = stops[i];
+        gradientStops[i] = stops[i] / 100.0f; //百分比转换为小数
     }
     colorStop.colors = gradientColors;
     colorStop.stops = gradientStops;
@@ -2304,6 +2317,9 @@ int32_t SetMask(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         fullImpl->getNodeModifiers()->getCommonModifier()->setMaskPath(
             node->uiNodeHandle, "path", fill, stroke, strokeWidth, pathAttributes, item->string);
     } else if (item->value[0].i32 == ArkUI_MaskType::ARKUI_MASK_TYPE_PROGRESS) {
+        if (item->size != NUM_4) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
         ArkUI_Float32 progressAttributes[NUM_2];
         if (LessNotEqual(item->value[NUM_1].f32, 0.0f) || LessNotEqual(item->value[NUM_2].f32, 0.0f)) {
             return ERROR_CODE_PARAM_INVALID;
@@ -2314,6 +2330,13 @@ int32_t SetMask(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         fullImpl->getNodeModifiers()->getCommonModifier()->setProgressMask(
             node->uiNodeHandle, progressAttributes, color);
     } else {
+        if (item->value[NUM_3].i32 == ArkUI_MaskType::ARKUI_MASK_TYPE_RECTANGLE && item->size != NUM_8) {
+            return ERROR_CODE_PARAM_INVALID;
+        } else if ((item->value[NUM_3].i32 == ArkUI_MaskType::ARKUI_MASK_TYPE_ELLIPSE ||
+                       item->value[NUM_3].i32 == ArkUI_MaskType::ARKUI_MASK_TYPE_CIRCLE) &&
+                   item->size != NUM_4) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
         int fill = item->size > NUM_0 ? item->value[0].u32 : DEFAULT_FIll_COLOR;
         int stroke = item->size > NUM_1 ? item->value[NUM_1].u32 : DEFAULT_FIll_COLOR;
         float strokeWidth = item->size > NUM_2 ? item->value[NUM_2].f32 : NUM_0;
@@ -6331,7 +6354,7 @@ int32_t SetSwiperShowDisplayArrow(ArkUI_NodeHandle node, const ArkUI_AttributeIt
     if (item->size == 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    if (item->value[0].i32 < NUM_0 || item->value[0].i32 > NUM_1) {
+    if (!InRegion(NUM_0, NUM_2, item->value[NUM_0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
@@ -10539,6 +10562,33 @@ void ResetRefreshContent(ArkUI_NodeHandle node)
     GetFullImpl()->getNodeModifiers()->getRefreshModifier()->setRefreshContent(node->uiNodeHandle, nullptr);
 }
 
+int32_t SetRefreshPullDownRatio(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (item->size == 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (LessNotEqual(item->value[0].f32, 0.0f) || GreatNotEqual(item->value[0].f32, 1.0f)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    // already check in entry point.
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getRefreshModifier()->setPullDownRatio(node->uiNodeHandle, item->value[0].f32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetRefreshPullDownRatio(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getRefreshModifier()->resetPullDownRatio(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetRefreshPullDownRatio(ArkUI_NodeHandle node)
+{
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getRefreshModifier()->getPullDownRatio(node->uiNodeHandle);
+    g_numberValues[0].f32 = resultValue;
+    return &g_attributeItem;
+}
+
 // waterFlow attribute
 int32_t SetLayoutDirection(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
@@ -12436,7 +12486,7 @@ const ArkUI_AttributeItem* GetFlexAttribute(ArkUI_NodeHandle node, int32_t subTy
 
 int32_t SetRefreshAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
 {
-    static Setter* setters[] = { SetRefreshRefreshing, SetRefreshContent };
+    static Setter* setters[] = { SetRefreshRefreshing, SetRefreshContent, SetRefreshPullDownRatio };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "refresh node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -12446,7 +12496,7 @@ int32_t SetRefreshAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkU
 
 const ArkUI_AttributeItem* GetRefreshAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
-    static Getter* getters[] = { GetRefreshRefreshing, nullptr };
+    static Getter* getters[] = { GetRefreshRefreshing, nullptr, GetRefreshPullDownRatio };
     if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "refresh node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -12460,7 +12510,7 @@ const ArkUI_AttributeItem* GetRefreshAttribute(ArkUI_NodeHandle node, int32_t su
 
 void ResetRefreshAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
-    static Resetter* resetters[] = { nullptr, ResetRefreshContent };
+    static Resetter* resetters[] = { nullptr, ResetRefreshContent, ResetRefreshPullDownRatio };
     if (subTypeId >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "refresh node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

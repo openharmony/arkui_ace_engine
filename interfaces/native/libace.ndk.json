@@ -709,8 +709,12 @@
     },
     {
         "first_introduced": "12",
+        "name": "OH_ArkUI_WaterFlowSectionOption_GetSize"
+    },
+    {
+        "first_introduced": "12",
         "name": "OH_ArkUI_WaterFlowSectionOption_GetItemCount"
-    },      
+    },
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_WaterFlowSectionOption_GetCrossCount"
@@ -726,6 +730,14 @@
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_WaterFlowSectionOption_GetMargin"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_WaterFlowSectionOption_RegisterGetItemMainSizeCallbackByIndex"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_WaterFlowSectionOption_RegisterGetItemMainSizeCallbackByIndexWithUserData"
     },
     {
         "first_introduced": "12",
