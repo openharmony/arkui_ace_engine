@@ -386,18 +386,18 @@ std::pair<float, float> PipelineContext::GetResampleCoord(const std::vector<Touc
     if (history.empty() || current.empty()) {
         return std::make_pair(0.0f, 0.0f);
     }
-    uint64_t lastTime = 0;
+    uint64_t lastNanoTime = 0;
     float x = 0.0f;
     float y = 0.0f;
-    for (auto iter : current) {
-        uint64_t currentTime = static_cast<uint64_t>(iter.time.time_since_epoch().count());
-        if (lastTime < currentTime) {
-            lastTime = currentTime;
-            x = iter.x;
-            y = iter.y;
+    for (const auto& item : current) {
+        uint64_t currentNanoTime = static_cast<uint64_t>(item.time.time_since_epoch().count());
+        if (lastNanoTime < currentNanoTime) {
+            lastNanoTime = currentNanoTime;
+            x = item.x;
+            y = item.y;
         }
     }
-    if (nanoTimeStamp > RESAMPLE_COORD_TIME_THRESHOLD + lastTime) {
+    if (nanoTimeStamp > RESAMPLE_COORD_TIME_THRESHOLD + lastNanoTime) {
         return std::make_pair(x, y);
     }
     auto historyPoint = GetAvgPoint(history, isScreen);

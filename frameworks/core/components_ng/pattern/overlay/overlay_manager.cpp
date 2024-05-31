@@ -5192,8 +5192,8 @@ void OverlayManager::CheckReturnFocus(RefPtr<FrameNode> node) {}
 
 bool OverlayManager::isMaskNode(int32_t maskId)
 {
-    for (auto it = maskNodeIdMap_.begin(); it != maskNodeIdMap_.end(); it++) {
-        if (it->second == maskId) {
+    for (const auto& [key, value] : maskNodeIdMap_) {
+        if (value == maskId) {
             return true;
         }
     }
@@ -5202,18 +5202,12 @@ bool OverlayManager::isMaskNode(int32_t maskId)
 
 int32_t OverlayManager::GetMaskNodeIdWithDialogId(int32_t dialogId)
 {
-    int32_t maskNodeId = -1;
-    for (auto it = maskNodeIdMap_.begin(); it != maskNodeIdMap_.end(); it++) {
-        if (it->first == dialogId) {
-            maskNodeId = it->second;
-            break;
-        }
-    }
-    return maskNodeId;
+    auto iter = maskNodeIdMap_.find(dialogId);
+    return (iter == maskNodeIdMap_.end()) ? -1 : iter->second;
 }
 
 void OverlayManager::MountGatherNodeToRootNode(const RefPtr<FrameNode>& frameNode,
-    std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo)
+    const std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo)
 {
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
@@ -5226,7 +5220,8 @@ void OverlayManager::MountGatherNodeToRootNode(const RefPtr<FrameNode>& frameNod
 }
 
 void OverlayManager::MountGatherNodeToWindowScene(const RefPtr<FrameNode>& frameNode,
-    std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo, const RefPtr<UINode>& windowScene)
+    const std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo,
+    const RefPtr<UINode>& windowScene)
 {
     CHECK_NULL_VOID(windowScene);
     frameNode->MountToParent(windowScene);
@@ -5239,15 +5234,12 @@ void OverlayManager::MountGatherNodeToWindowScene(const RefPtr<FrameNode>& frame
 
 void OverlayManager::RemoveGatherNode()
 {
-    if (!hasGatherNode_) {
-        return;
-    }
+    CHECK_EQUAL_VOID(hasGatherNode_, false);
     auto frameNode = gatherNodeWeak_.Upgrade();
     CHECK_NULL_VOID(frameNode);
     auto rootNode = frameNode->GetParent();
     CHECK_NULL_VOID(rootNode);
     rootNode->RemoveChild(frameNode);
-    rootNode->RebuildRenderContextTree();
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     hasGatherNode_ = false;
     gatherNodeWeak_ = nullptr;
@@ -5264,20 +5256,29 @@ void OverlayManager::RemoveGatherNodeWithAnimation()
     option.SetCurve(Curves::SHARP);
 
     option.SetOnFinishEvent([weak = gatherNodeWeak_] {
-        auto frameNode = weak.Upgrade();
-        CHECK_NULL_VOID(frameNode);
-        auto rootNode = frameNode->GetParent();
-        CHECK_NULL_VOID(rootNode);
-        rootNode->RemoveChild(frameNode);
-        rootNode->RebuildRenderContextTree();
-        rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        auto taskExecutor = context->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        // animation finish event should be posted to UI thread.
+        taskExecutor->PostTask(
+            [weak, id = Container::CurrentId()]() {
+                ContainerScope scope(id);
+                auto frameNode = weak.Upgrade();
+                CHECK_NULL_VOID(frameNode);
+                auto rootNode = frameNode->GetParent();
+                CHECK_NULL_VOID(rootNode);
+                rootNode->RemoveChild(frameNode);
+                rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            },
+            TaskExecutor::TaskType::UI, "ArkUIOverlayRemoveGatherNodeEvent");
     });
     gatherNodeWeak_ = nullptr;
     hasGatherNode_ = false;
     AnimationUtils::Animate(
         option,
-        [gatherNodeChildrenInfo = gatherNodeChildrenInfo_]() mutable {
-            for (const auto& child : gatherNodeChildrenInfo) {
+        [gatherNodeChildrenInfo = gatherNodeChildrenInfo_]() {
+            for (auto& child : gatherNodeChildrenInfo) {
                 auto imageNode = child.imageNode.Upgrade();
                 CHECK_NULL_VOID(imageNode);
                 auto imageContext = imageNode->GetRenderContext();
