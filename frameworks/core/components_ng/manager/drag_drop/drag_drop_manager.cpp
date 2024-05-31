@@ -36,8 +36,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 int64_t g_proxyId = 0;
-constexpr float PIXELMAP_POSITION_WIDTH = 0.5f;
-constexpr float PIXELMAP_POSITION_HEIGHT = 0.2f;
 constexpr Dimension PIXELMAP_BORDER_RADIUS = 8.0_vp;
 constexpr Dimension PRESERVE_HEIGHT = 8.0_vp;
 constexpr float FIRST_PIXELMAP_OPACITY = 0.6f;
@@ -146,42 +144,6 @@ void DragDropManager::UpdateDragWindowPosition(int32_t globalX, int32_t globalY)
     CHECK_NULL_VOID(dragWindow_);
     dragWindow_->MoveTo(globalX, globalY);
 #endif
-}
-
-void DragDropManager::UpdatePixelMapPosition(int32_t globalX, int32_t globalY)
-{
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto manager = pipeline->GetOverlayManager();
-    CHECK_NULL_VOID(manager);
-    auto rootNode = pipeline->GetRootElement();
-    CHECK_NULL_VOID(rootNode);
-    if (manager->GetHasPixelMap()) {
-        auto columnNode = AceType::DynamicCast<NG::FrameNode>(rootNode->GetLastChild());
-        CHECK_NULL_VOID(columnNode);
-        auto imageNode = AceType::DynamicCast<NG::FrameNode>(columnNode->GetLastChild());
-        CHECK_NULL_VOID(imageNode);
-        auto geometryNode = imageNode->GetGeometryNode();
-        CHECK_NULL_VOID(geometryNode);
-        auto width = geometryNode->GetFrameSize().Width();
-        auto height = geometryNode->GetFrameSize().Height();
-        auto imageContext = imageNode->GetRenderContext();
-        CHECK_NULL_VOID(imageContext);
-        CHECK_NULL_VOID(draggedFrameNode_);
-        auto hub = draggedFrameNode_->GetOrCreateGestureEventHub();
-        CHECK_NULL_VOID(hub);
-        if (!hub->GetTextDraggable()) {
-            hub = columnNode->GetOrCreateGestureEventHub();
-            CHECK_NULL_VOID(hub);
-        }
-        RefPtr<PixelMap> pixelMap = hub->GetPixelMap();
-        CHECK_NULL_VOID(pixelMap);
-        float scale = NearZero(width) ? 1.0f : pixelMap->GetWidth() / width;
-        imageContext->UpdatePosition(NG::OffsetT<Dimension>(
-            Dimension(globalX - width * PIXELMAP_POSITION_WIDTH * scale - width / 2.0f + width * scale / 2.0f),
-            Dimension(globalY - height * PIXELMAP_POSITION_HEIGHT * scale - height / 2.0f + height * scale / 2.0f)));
-        imageContext->OnModifyDone();
-    }
 }
 
 void DragDropManager::HideDragPreviewOverlay()

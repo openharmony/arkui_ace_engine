@@ -130,7 +130,6 @@ public:
     uint32_t GetRecordSize() const;
     Rect GetDragWindowRect(const Point& point);
     RefPtr<DragDropProxy> CreateFrameworkDragDropProxy();
-    void UpdatePixelMapPosition(int32_t globalX, int32_t globalY);
     void HideDragPreviewOverlay();
     bool IsMSDPDragging() const;
     void UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const Point& point);
