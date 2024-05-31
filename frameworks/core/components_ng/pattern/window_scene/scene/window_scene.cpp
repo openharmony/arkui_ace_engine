@@ -556,10 +556,10 @@ void WindowScene::CleanBlankNode()
             self->RemoveChild(host, self->blankNode_, self->blankNodeName_);
             self->blankNode_.Reset();
             self->AddChild(host, self->contentNode_, self->contentNodeName_, 0);
-            auto context = AceType::DynamicCast<RosenRenderContext>(contentNode_->GetRenderContext());
-            CHECK_NULL_RETURN(context, false);
-            auto rsNode = context->GetRSNode();
-            CHECK_NULL_RETURN(rsNode, false);
+            auto contentNodeContext = AceType::DynamicCast<RosenRenderContext>(self->contentNode_->GetRenderContext());
+            CHECK_NULL_VOID(contentNodeContext);
+            auto rsNode = contentNodeContext->GetRSNode();
+            CHECK_NULL_VOID(rsNode);
             rsNode->SetAlpha(1);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
