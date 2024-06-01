@@ -194,14 +194,16 @@ RefPtr<FrameNode> TextPickerDialogView::OptionsShow(const DialogProperties& dial
     CHECK_NULL_RETURN(pipeline, nullptr);
     float scale = pipeline->GetFontScale();
     if (scale == 1.75 && GetIsOverRange(scale)) {
-        auto dialogNode = SeparatedOptionsShow(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent, scale);
+        auto dialogNode = SeparatedOptionsShow(
+            dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent, scale);
         return dialogNode;
     } else if (scale > 1.75 && GetIsOverRange(scale)) {
-        auto dialogNode = SeparatedOptionsShow(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent, scale);
+        auto dialogNode = SeparatedOptionsShow(
+            dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent, scale);
         return dialogNode;
     } else {
-        auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+        auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto textNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto textPickerNode = FrameNode::GetOrCreateFrameNode(
         V2::TEXT_PICKER_ETS_TAG, textNodeId, []() { return AceType::MakeRefPtr<TextPickerPattern>(); });
@@ -1075,7 +1077,6 @@ void TextPickerDialogView::SetDialogNodePageActive(RefPtr<FrameNode>& contentCol
             layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
         }
     }
-    TAG_LOGE(AceLogTag::ACE_SIDEBAR, "wxX SetDialogNodePageActive succ ");
     auto contentRow = contentColumn->GetLastChild();
     if (dialogNodePage == 0) {
         auto buttonCancel = contentRow->GetFirstChild();
@@ -1209,7 +1210,7 @@ RefPtr<FrameNode> TextPickerDialogView::CreateAgingButtonNode(
             CHECK_NULL_RETURN(gestureHub, nullptr);
             gestureHub->AddClickEvent(closeClick);
         } else if (i == 1) {
-            auto gestureHub = childNode->GetOrCreateGestureEventHub();  
+            auto gestureHub = childNode->GetOrCreateGestureEventHub();
             CHECK_NULL_RETURN(gestureHub, nullptr);
             gestureHub->AddClickEvent(nextClick);
         } else if (i == 2) {
@@ -1278,19 +1279,19 @@ RefPtr<FrameNode> TextPickerDialogView::SeparatedOptionsShow(const DialogPropert
     };
     uint32_t columnCount = settingData.options.size();
 
-    auto nextCallBack = [weak = WeakPtr<FrameNode>(dialogNode), weakText = WeakPtr<FrameNode>(textPickerNode), &dialogNodePage, columnCount, weakColumn = WeakPtr<FrameNode>(contentColumn)](const GestureEvent& /* info */) {
+    auto nextCallBack = [weak = WeakPtr<FrameNode>(dialogNode), weakText = WeakPtr<FrameNode>(textPickerNode),
+        &dialogNodePage, columnCount, weakColumn = WeakPtr<FrameNode>(contentColumn)](const GestureEvent& /* info */) {
         auto dialogNode = weak.Upgrade();
         auto textPickerNode = weakText.Upgrade();
         auto contentColumn = weakColumn.Upgrade();
         CHECK_NULL_VOID(dialogNode);
-        // TAG_LOGE(AceLogTag::ACE_SIDEBAR, "wxX nextCallBack columnCount %{public}d", columnCount);
-        // TAG_LOGE(AceLogTag::ACE_SIDEBAR, "wxX nextCallBack dialogNodePage %{public}d", dialogNodePage);
         if (dialogNodePage < columnCount) {
             dialogNodePage++;
         }
         SetDialogNodePageActive(contentColumn, textPickerNode, dialogNodePage, columnCount);
     };
-    auto previousCallBack = [weak = WeakPtr<FrameNode>(dialogNode), weakText = WeakPtr<FrameNode>(textPickerNode), &dialogNodePage, columnCount, weakColumn = WeakPtr<FrameNode>(contentColumn)](const GestureEvent& /* info */) {
+    auto previousCallBack = [weak = WeakPtr<FrameNode>(dialogNode), weakText = WeakPtr<FrameNode>(textPickerNode),
+        &dialogNodePage, columnCount, weakColumn = WeakPtr<FrameNode>(contentColumn)](const GestureEvent& /* info */) {
         auto dialogNode = weak.Upgrade();
         auto textPickerNode = weakText.Upgrade();
         auto contentColumn = weakColumn.Upgrade();
@@ -1304,7 +1305,6 @@ RefPtr<FrameNode> TextPickerDialogView::SeparatedOptionsShow(const DialogPropert
         CreateAgingButtonNode(textPickerNode, buttonInfos, dialogEvent, std::move(dialogCancelEvent),
             std::move(dialogMoveForwardEvent), std::move(dialogMoveBackwardFunc),
             closeCallBack, nextCallBack, previousCallBack);
-    //contentRow->AddChild(CreateDividerNode(textPickerNode), 1);
     contentRow->MountToParent(contentColumn);
     SetDialogNodePageActive(contentColumn, textPickerNode, dialogNodePage, columnCount);
     dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
