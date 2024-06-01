@@ -101,8 +101,8 @@ HWTEST_F(CheckBoxGroupLayoutAlgorithmTestNG, CheckBoxGroupLayoutAlgorithmTest001
      */
     CheckBoxGroupLayoutAlgorithm layoutAlgorithm;
     layoutAlgorithm.InitializeParam();
-    EXPECT_EQ(layoutAlgorithm.horizontalPadding_, DEFAULT_PADDING_SIZE.ConvertToPx());
-    EXPECT_EQ(layoutAlgorithm.verticalPadding_, DEFAULT_PADDING_SIZE.ConvertToPx());
+    EXPECT_EQ(layoutAlgorithm.horizontalPadding_, HORIZONTAL_PADDING.ConvertToPx());
+    EXPECT_EQ(layoutAlgorithm.verticalPadding_, VERTICAL_PADDING.ConvertToPx());
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 
@@ -167,8 +167,8 @@ HWTEST_F(CheckBoxGroupLayoutAlgorithmTestNG, CheckBoxGroupLayoutAlgorithmTest003
     layoutAlgorithm.InitializeParam();
     EXPECT_EQ(layoutAlgorithm.defaultWidth_, DEFAULT_WIDTH.ConvertToPx());
     EXPECT_EQ(layoutAlgorithm.defaultHeight_, DEFAULT_HEIGHT.ConvertToPx());
-    EXPECT_EQ(layoutAlgorithm.horizontalPadding_, DEFAULT_PADDING_SIZE.ConvertToPx());
-    EXPECT_EQ(layoutAlgorithm.verticalPadding_, DEFAULT_PADDING_SIZE.ConvertToPx());
+    EXPECT_EQ(layoutAlgorithm.horizontalPadding_, HORIZONTAL_PADDING.ConvertToPx());
+    EXPECT_EQ(layoutAlgorithm.verticalPadding_, VERTICAL_PADDING.ConvertToPx());
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 
