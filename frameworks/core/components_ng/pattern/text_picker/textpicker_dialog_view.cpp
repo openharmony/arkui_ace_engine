@@ -552,7 +552,7 @@ void TextPickerDialogView::UpdateForwardButtonTextLayoutProperty(
 {
     auto textForwardLayoutProperty = textForwardNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textForwardLayoutProperty);
-    textForwardLayoutProperty->UpdateContent("ÏÂÒ»²½");
+    textForwardLayoutProperty->UpdateContent("ä¸‹ä¸€æ­¥");
     textForwardLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
     textForwardLayoutProperty->UpdateFontSize(pickerTheme->GetOptionStyle(false, false).GetFontSize());
     textForwardLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
@@ -563,7 +563,7 @@ void TextPickerDialogView::UpdateBackwardButtonTextLayoutProperty(
 {
     auto textBackwardLayoutProperty = textBackwardNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textBackwardLayoutProperty);
-    textBackwardLayoutProperty->UpdateContent("ÉÏÒ»²½");
+    textBackwardLayoutProperty->UpdateContent("ä¸Šä¸€æ­¥");
     textBackwardLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
     textBackwardLayoutProperty->UpdateFontSize(pickerTheme->GetOptionStyle(false, false).GetFontSize());
     textBackwardLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
@@ -779,7 +779,7 @@ void TextPickerDialogView::UpdateButtonForwardLayoutProperty(
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     UpdateForwardButtonMargin(buttonForwardNode, dialogTheme);
     auto buttonForwardLayoutProperty = buttonForwardNode->GetLayoutProperty<ButtonLayoutProperty>();
-    buttonForwardLayoutProperty->UpdateLabel("ÏÂÒ»²½");
+    buttonForwardLayoutProperty->UpdateLabel("ä¸‹ä¸€æ­¥");
     buttonForwardLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     buttonForwardLayoutProperty->UpdateType(ButtonType::CAPSULE);
     buttonForwardLayoutProperty->UpdateFlexShrink(1.0);
@@ -800,7 +800,7 @@ void TextPickerDialogView::UpdateButtonBackwardLayoutProperty(
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     UpdateBackwardButtonMargin(buttonBackwardNode, dialogTheme);
     auto buttonBackwardLayoutProperty = buttonBackwardNode->GetLayoutProperty<ButtonLayoutProperty>();
-    buttonBackwardLayoutProperty->UpdateLabel("ÉÏÒ»²½");
+    buttonBackwardLayoutProperty->UpdateLabel("ä¸Šä¸€æ­¥");
     buttonBackwardLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     buttonBackwardLayoutProperty->UpdateType(ButtonType::CAPSULE);
     buttonBackwardLayoutProperty->UpdateFlexShrink(1.0);
