@@ -162,6 +162,8 @@ void JsNavigationTransitionProxy::UpdateTransition(const JSCallbackInfo& info)
     if (info[0]->IsNumber()) {
         progress = info[0]->ToNumber<float>();
     }
-    proxy_->UpdateTransition(progress);
+    if (progress >= 0 && progress <= 1) {
+        proxy_->UpdateTransition(progress);
+    }
 }
 }; // namespace OHOS::Ace::Framework
