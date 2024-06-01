@@ -2709,16 +2709,17 @@ void WebPattern::CloseSelectOverlay()
     CHECK_NULL_VOID(pipeline);
     if (selectOverlayProxy_) {
         TAG_LOGI(AceLogTag::ACE_WEB, "Close Select Overlay Now");
+        SetSelectOverlayDragging(false);
+        selectOverlayProxy_->Close();
+        pipeline->GetSelectOverlayManager()->DestroySelectOverlay(selectOverlayProxy_);
+        selectOverlayProxy_ = nullptr;
+
         for (auto& touchOverlayInfo : touchOverlayInfo_) {
             TAG_LOGI(AceLogTag::ACE_WEB,
                 "SelectOverlay send touch up id:%{public}d", touchOverlayInfo.id);
             delegate_->HandleTouchUp(touchOverlayInfo.id, touchOverlayInfo.x, touchOverlayInfo.y, true);
         }
-        SetSelectOverlayDragging(false);
         touchOverlayInfo_.clear();
-        selectOverlayProxy_->Close();
-        pipeline->GetSelectOverlayManager()->DestroySelectOverlay(selectOverlayProxy_);
-        selectOverlayProxy_ = nullptr;
     }
 }
 
