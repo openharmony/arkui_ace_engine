@@ -60,6 +60,14 @@ void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 std::min(layoutConstraint->maxSize.Width(), layoutConstraint->selfIdealSize.Width().value())) -
             padding.Width();
     }
+    auto menuNode = layoutWrapper->GetHostNode();
+    auto menuItemPattern = menuNode ? menuNode->GetPattern<MenuItemPattern>() : nullptr;
+    bool matchParent = menuItemPattern ? menuItemPattern->IsSubMenu()
+        && menuItemPattern->GetExpandingMode() == SubMenuExpandingMode::STACK : false;
+    if (matchParent) {
+        auto width = layoutConstraint->maxSize.Width();
+        layoutConstraint->minSize.SetWidth(width);
+    }
     float minRowWidth = layoutConstraint->minSize.Width();
 
     auto childConstraint = props->CreateChildConstraint();

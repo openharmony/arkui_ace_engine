@@ -468,6 +468,15 @@ public:
     BorderRadiusProperty CalcIdealBorderRadius(const BorderRadiusProperty& borderRadius, const SizeF& menuSize);
 
     void OnItemPressed(const RefPtr<FrameNode>& parent, int32_t index, bool press);
+    
+    void BlockFurtherExpand()
+    {
+        canExpand_ = false;
+    }
+    bool CanExpand()
+    {
+        return canExpand_;
+    }
 protected:
     void UpdateMenuItemChildren(RefPtr<FrameNode>& host);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
@@ -549,6 +558,7 @@ private:
     bool hasOptionWidth_ = false;
     SizeF targetSize_;
     bool expandDisplay_ = false;
+    bool canExpand_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);
 };

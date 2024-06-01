@@ -239,12 +239,33 @@ void MenuWrapperPattern::HideSubMenu()
     auto layoutProps = innerMenuPattern->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(layoutProps);
     auto expandingMode = layoutProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
-    if (expandingMode == SubMenuExpandingMode::STACK && subMenuPattern->IsSubMenu()) {
+    if (expandingMode == SubMenuExpandingMode::STACK) {
         HideStackExpandMenu(subMenu);
     } else {
         host->RemoveChild(subMenu);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     }
+}
+
+bool MenuWrapperPattern::HasStackSubMenu()
+{
+    auto menu = GetMenu();
+    CHECK_NULL_RETURN(menu, false);
+    auto scroll = menu->GetFirstChild();
+    CHECK_NULL_RETURN(scroll, false);
+    auto innerMenu = AceType::DynamicCast<FrameNode>(scroll->GetFirstChild());
+    CHECK_NULL_RETURN(innerMenu, false);
+    auto innerMenuPattern = innerMenu->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(innerMenuPattern, false);
+    auto layoutProps = innerMenuPattern->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProps, false);
+    auto expandingMode = layoutProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
+    if (expandingMode != SubMenuExpandingMode::STACK) {
+        return false;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    return host->GetChildren().size() > 1;
 }
 
 RefPtr<FrameNode> MenuWrapperPattern::MenuFocusViewShow()
