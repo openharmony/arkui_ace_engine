@@ -2424,26 +2424,31 @@ void MenuLayoutAlgorithm::InitHierarchicalParameters(bool isShowInSubWindow, con
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     auto expandDisplay = theme->GetExpandDisplay();
+    CHECK_NULL_VOID(menuPattern);
+    auto menuWrapperNode = menuPattern->GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapperNode);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    auto containerId = Container::CurrentIdSafely();
     if (expandDisplay && !isShowInSubWindow) {
-        hierarchicalParameters_ = false;
+        if (containerId >= MIN_SUBCONTAINER_ID && menuWrapperPattern->IsSelectMenu()) {
+            hierarchicalParameters_ = true;
+        } else {
+            hierarchicalParameters_ = false;
+        }
         return;
     }
 
     hierarchicalParameters_ = expandDisplay;
 
     RefPtr<Container> container = Container::Current();
-    auto containerId = Container::CurrentId();
     if (containerId >= MIN_SUBCONTAINER_ID) {
         auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
         container = AceEngine::Get().GetContainer(parentContainerId);
     }
 
     if (container && container->IsUIExtensionWindow()) {
-        CHECK_NULL_VOID(menuPattern);
-        auto menuWrapperNode = menuPattern->GetMenuWrapper();
-        CHECK_NULL_VOID(menuWrapperNode);
-        auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
-        if (menuWrapperPattern && menuWrapperPattern->IsContextMenu()) {
+        if (menuWrapperPattern->IsContextMenu()) {
             hierarchicalParameters_ = true;
         }
     }
