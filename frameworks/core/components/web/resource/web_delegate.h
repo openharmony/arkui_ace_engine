@@ -48,7 +48,7 @@
 #ifdef ENABLE_ROSEN_BACKEND
 #include "surface.h"
 #endif
-#include "window.h"
+#include "wm/window.h"
 #endif
 
 namespace OHOS::Ace {

@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/ability/ability_runtime/ability_runtime.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/build/ace_ext.gni")
 
@@ -46,14 +45,6 @@ template("ace_osal_ohos_source_set") {
 
       configs = [ "$ace_root:ace_config" ]
     }
-    include_dirs = [
-      "$ability_runtime_napi_path/inner/napi_common",
-      "//base/hiviewdfx/hicollie/interfaces/native/innerkits/include",
-      "//commonlibrary/c_utils/base/include",
-      "//foundation/window/window_manager/interfaces/innerkits",
-      "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
-      "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export",
-    ]
 
     sources = [
       "ace_checker.cpp",
@@ -136,7 +127,6 @@ template("ace_osal_ohos_source_set") {
         sources += [ "fake_accessibility_manager.cpp" ]
       }
       if (frame_trace_support) {
-        include_dirs += [ "//foundation/resourceschedule/frame_aware_sched/interfaces/innerkits/frameintf" ]
         sources += [ "frame_trace_adapter_impl.cpp" ]
         external_deps += [ "frame_aware_sched:frame_trace_intf" ]
       } else {
