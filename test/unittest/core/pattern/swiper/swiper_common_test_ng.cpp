@@ -994,7 +994,7 @@ HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest003, TestSize.Level1)
         5);
 
     /**
-     * @tc.steps: step2. ChangeIndex to 0 
+     * @tc.steps: step2. ChangeIndex to 0
      * @tc.expected: loop is true, ignoreBlank on the endpage is not effective
      */
     ChangeIndex(0);
