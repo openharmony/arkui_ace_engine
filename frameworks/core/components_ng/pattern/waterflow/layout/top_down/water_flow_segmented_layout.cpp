@@ -148,6 +148,9 @@ void WaterFlowSegmentedLayout::Init(const SizeF& frameSize)
     sections_ = wrapper_->GetHostNode()->GetPattern<WaterFlowPattern>()->GetSections();
     if (sections_) {
         const auto& sections = sections_->GetSectionInfo();
+        if (info_->segmentTails_.empty()) {
+            info_->InitSegments(sections, 0);
+        }
         if (info_->margins_.empty()) {
             // empty margins_ implies a segment change
             auto constraint = wrapper_->GetLayoutProperty()->GetLayoutConstraint();
@@ -155,9 +158,6 @@ void WaterFlowSegmentedLayout::Init(const SizeF& frameSize)
             info_->InitMargins(sections, constraint->scaleProperty, constraint->percentReference.Width());
         }
         SegmentInit(sections, frameSize);
-        if (info_->segmentTails_.empty()) {
-            info_->InitSegments(sections, 0);
-        }
     } else {
         RegularInit(frameSize);
         if (info_->footerIndex_ >= 0) {

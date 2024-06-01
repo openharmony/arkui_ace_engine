@@ -52,6 +52,11 @@ FlowItemPosition WaterFlowLayoutUtils::GetItemPosition(
     }
     int32_t segment = info->GetSegment(index);
     auto itemIndex = info->GetCrossIndexForNextItem(segment);
+    if (static_cast<int32_t>(info->segmentStartPos_.size()) <= segment) {
+        TAG_LOGI(AceLogTag::ACE_WATERFLOW, "The size of segmentStartPos %{public}zu is less than expected %{public}d.",
+            info->segmentStartPos_.size(), segment);
+        return { itemIndex.crossIndex, 0.0f };
+    }
     if (itemIndex.lastItemIndex < 0) {
         return { itemIndex.crossIndex, info->segmentStartPos_[segment] };
     }
