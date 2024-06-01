@@ -1201,6 +1201,7 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
             accessibilityProperty->GetChildWindowId());
     }
     nodeInfo.SetBelongTreeId(treeId_);
+    nodeInfo.SetParentWindowId(parentWindowId_);
 
     GridInfo gridInfo(accessibilityProperty->GetCollectionInfo().rows,
         accessibilityProperty->GetCollectionInfo().columns, accessibilityProperty->GetCollectionInfo().selectMode);
@@ -4000,6 +4001,7 @@ void JsAccessibilityManager::RegisterInteractionOperationAsChildTree(
     Register(retReg == RET_OK);
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(retReg == RET_OK);
     parentElementId_ = parentElementId;
+    parentWindowId_ = parentWindowId;
 }
 
 void JsAccessibilityManager::SetAccessibilityGetParentRectHandler(std::function<void(int32_t &, int32_t &)> &&callback)
@@ -4022,6 +4024,7 @@ void JsAccessibilityManager::DeregisterInteractionOperationAsChildTree()
     instance->DeregisterElementOperator(windowId);
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(false);
     parentElementId_ = INVALID_PARENT_ID;
+    parentWindowId_ = -1;
 }
 
 void JsAccessibilityManager::JsInteractionOperation::SetChildTreeIdAndWinId(

@@ -33,7 +33,7 @@ public:
     void TransferHoverEvent(const PointF& point, SourceType source,
         AccessibilityHoverEventType eventType, TimeStamp time) override;
 
-    virtual bool IgnoreHostNode() const override;
+    bool IgnoreHostNode() const override;
 
 private:
     WeakPtr<FormManagerDelegate> formManagerDelegate_;
