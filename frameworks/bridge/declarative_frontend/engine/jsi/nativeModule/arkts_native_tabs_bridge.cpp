@@ -677,12 +677,16 @@ ArkUINativeModuleValue TabsBridge::SetAnimateMode(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> animateModeArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    if (animateModeArg->IsNull() || animateModeArg->IsUndefined()) {
+    if (!animateModeArg->IsNumber()) {
         GetArkUINodeModifiers()->getTabsModifier()->resetAnimateMode(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    TabAnimateMode animateMode = Framework::ConvertStrToAnimateMode(animateModeArg->ToString(vm)->ToString());
-    GetArkUINodeModifiers()->getTabsModifier()->setAnimateMode(nativeNode, static_cast<uint32_t>(animateMode));
+    uint32_t animateModeValue = animateModeArg->Uint32Value(vm);
+    if (animateModeValue >= static_cast<uint32_t>(TabAnimateMode::MAX_VALUE)) {
+        GetArkUINodeModifiers()->getTabsModifier()->resetAnimateMode(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    GetArkUINodeModifiers()->getTabsModifier()->setAnimateMode(nativeNode, animateModeValue);
     return panda::JSValueRef::Undefined(vm);
 }
 
