@@ -3393,6 +3393,11 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
     if (IsVisibleChildrenSizeLessThanSwiper()) {
         delta = extentPair.Trailing();
     }
+    if (LessNotEqual(currentIndexOffset_, 0.0f) && prevMarginIgnoreBlank_) {
+        delta += GetNextMargin();
+    } else if (GreatNotEqual(currentIndexOffset_, 0.0f) && nextMarginIgnoreBlank_) {
+        delta -= GetPrevMargin();
+    }
     // spring curve: (velocity: 0.0, mass: 1.0, stiffness: 228.0, damping: 30.0)
     auto springCurve = MakeRefPtr<SpringCurve>(0.0f, 1.0f, 228.0f, 30.0f);
     AnimationOption option;

@@ -678,7 +678,8 @@ float SwiperLayoutAlgorithm::GetChildMainAxisSize(
     CHECK_NULL_RETURN(childProperty, mainAxisSize);
     auto visibilityValue = childProperty->GetVisibilityValue(VisibleType::VISIBLE);
     if (visibilityValue == VisibleType::INVISIBLE || visibilityValue == VisibleType::GONE) {
-        mainAxisSize = (contentMainSize_ - (displayCount - 1) * spaceWidth_) / displayCount;
+        mainAxisSize = (contentMainSize_ - nextMargin_ - prevMargin_ - (displayCount - 1) * spaceWidth_)
+            / displayCount;
     }
 
     return mainAxisSize;
