@@ -1469,19 +1469,6 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     }
     textProperty->UpdateTextAlign(isLabel ? TextAlign::CENTER : textAlign);
 
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
-    CHECK_NULL_VOID(menuTheme);
-    auto fontScale = pipeline->GetFontScale();
-    if (NearEqual(fontScale, menuTheme->GetBigFontSizeScale()) ||
-        NearEqual(fontScale, menuTheme->GetLargeFontSizeScale()) ||
-        NearEqual(fontScale, menuTheme->GetMaxFontSizeScale())) {
-        textProperty->UpdateMaxLines(menuTheme->GetTextMaxLines());
-    }
-
     node->MountToParent(row, isLabel ? 0 : DEFAULT_NODE_SLOT);
     node->MarkModifyDone();
     node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -1489,13 +1476,33 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
 
 void MenuItemPattern::UpdateTexOverflow(RefPtr<TextLayoutProperty>& textProperty)
 {
-    textProperty->UpdateMaxLines(1);
     if (isTextFadeOut_) {
         textProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
         textProperty->UpdateTextMarqueeFadeout(true);
         textProperty->UpdateTextMarqueeStart(false);
     } else {
         textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    }
+
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto deviceType = SystemProperties::GetDeviceType();
+        if (deviceType == DeviceType::TV || deviceType == DeviceType::TWO_IN_ONE) {
+            textProperty->UpdateMaxLines(1);
+        }
+    } else {
+        textProperty->UpdateMaxLines(1);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+        CHECK_NULL_VOID(menuTheme);
+        auto fontScale = pipeline->GetFontScale();
+        if (NearEqual(fontScale, menuTheme->GetBigFontSizeScale()) ||
+            NearEqual(fontScale, menuTheme->GetLargeFontSizeScale()) ||
+            NearEqual(fontScale, menuTheme->GetMaxFontSizeScale())) {
+            textProperty->UpdateMaxLines(menuTheme->GetTextMaxLines());
+        }
     }
 }
 
