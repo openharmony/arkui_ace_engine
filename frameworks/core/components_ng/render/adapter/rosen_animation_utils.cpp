@@ -15,6 +15,7 @@
 
 #include "render_service_client/core/animation/rs_animation.h"
 #include "render_service_client/core/ui/rs_node.h"
+#include "render_service_client/core/animation/rs_interactive_implict_animator.h"
 
 #include "core/animation/native_curve_helper.h"
 #include "core/common/container.h"
@@ -76,6 +77,12 @@ class AnimationUtils::Animation {
 private:
     std::vector<std::shared_ptr<OHOS::Rosen::RSAnimation>> animations_;
 
+    friend AnimationUtils;
+};
+
+class AnimationUtils::InteractiveAnimation {
+private:
+    std::shared_ptr<Rosen::RSInteractiveImplictAnimator> interactiveAnimation_;
     friend AnimationUtils;
 };
 
@@ -192,5 +199,56 @@ void AnimationUtils::ResumeAnimation(const std::shared_ptr<AnimationUtils::Anima
 void AnimationUtils::ExecuteWithoutAnimation(const PropertyCallback& callback)
 {
     Rosen::RSNode::ExecuteWithoutAnimation(callback);
+}
+
+std::shared_ptr<AnimationUtils::InteractiveAnimation> AnimationUtils::CreateInteractiveAnimation(
+    const InteractiveAnimationCallback& addCallback, const FinishCallback& callback)
+{
+    std::shared_ptr<AnimationUtils::InteractiveAnimation> interactiveAnimation =
+        std::make_shared<AnimationUtils::InteractiveAnimation>();
+    CHECK_NULL_RETURN(interactiveAnimation, nullptr);
+    auto wrappedOnFinish = GetWrappedCallback(callback);
+    auto wrappedStart = GetWrappedCallback(addCallback);
+    Rosen::RSAnimationTimingProtocol timingProtocol;
+    Rosen::RSAnimationTimingCurve curve;
+    interactiveAnimation->interactiveAnimation_ =
+        Rosen::RSInteractiveImplictAnimator::Create(timingProtocol, curve);
+    CHECK_NULL_RETURN(interactiveAnimation->interactiveAnimation_, nullptr);
+    interactiveAnimation->interactiveAnimation_->AddAnimation(wrappedStart);
+    interactiveAnimation->interactiveAnimation_->SetFinishCallBack(wrappedOnFinish);
+    return interactiveAnimation;
+}
+
+void AnimationUtils::StartInteractiveAnimation(
+    const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation)
+{
+    CHECK_NULL_VOID(interactiveAnimation);
+    CHECK_NULL_VOID(interactiveAnimation->interactiveAnimation_);
+    interactiveAnimation->interactiveAnimation_->StartAnimation();
+}
+
+void AnimationUtils::ContinueInteractiveAnimation(
+    const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation)
+{
+    CHECK_NULL_VOID(interactiveAnimation);
+    CHECK_NULL_VOID(interactiveAnimation->interactiveAnimation_);
+    interactiveAnimation->interactiveAnimation_->ContinueAnimation();
+}
+
+void AnimationUtils::ReverseInteractiveAnimation(
+    const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation)
+{
+    CHECK_NULL_VOID(interactiveAnimation);
+    CHECK_NULL_VOID(interactiveAnimation->interactiveAnimation_);
+    interactiveAnimation->interactiveAnimation_->ReverseAnimation();
+}
+
+void AnimationUtils::UpdateInteractiveAnimation(
+    const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation, float progress)
+{
+    CHECK_NULL_VOID(interactiveAnimation);
+    CHECK_NULL_VOID(interactiveAnimation->interactiveAnimation_);
+    interactiveAnimation->interactiveAnimation_->PauseAnimation();
+    interactiveAnimation->interactiveAnimation_->SetFraction(progress);
 }
 } // namespace OHOS::Ace

@@ -39,6 +39,10 @@ FormRendererDelegateStub::FormRendererDelegateStub()
         &FormRendererDelegateStub::HandleOnFormLinkInfoUpdate;
     memberFuncMap_[static_cast<uint32_t>(IFormRendererDelegate::Message::ON_FORMSURFACE_DETACH)] =
         &FormRendererDelegateStub::HandleOnSurfaceDetach;
+    memberFuncMap_[static_cast<uint32_t>(IFormRendererDelegate::Message::ON_GET_RECT_RELATIVE_TO_WINDOW)] =
+        &FormRendererDelegateStub::HandleOnGetRectRelativeToWindow;
+    memberFuncMap_[static_cast<uint32_t>(IFormRendererDelegate::Message::ON_ENABLE_FORM)] =
+        &FormRendererDelegateStub::HandleOnEnableForm;
 }
 
 FormRendererDelegateStub::~FormRendererDelegateStub()
@@ -194,6 +198,30 @@ int32_t FormRendererDelegateStub::HandleOnFormLinkInfoUpdate(MessageParcel& data
     std::vector<std::string> formLinkInfos;
     data.ReadStringVector(&formLinkInfos);
     int32_t errCode = OnFormLinkInfoUpdate(formLinkInfos);
+    reply.WriteInt32(errCode);
+    return ERR_OK;
+}
+
+int32_t FormRendererDelegateStub::HandleOnGetRectRelativeToWindow(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t top = 0;
+    int32_t left = 0;
+    int32_t errCode = OnGetRectRelativeToWindow(top, left);
+    reply.WriteInt32(errCode);
+    reply.WriteInt32(top);
+    reply.WriteInt32(left);
+    return ERR_OK;
+}
+
+int32_t FormRendererDelegateStub::HandleOnEnableForm(MessageParcel& data, MessageParcel& reply)
+{
+    std::unique_ptr<AppExecFwk::FormJsInfo> formJsInfo(data.ReadParcelable<AppExecFwk::FormJsInfo>());
+    if (formJsInfo == nullptr) {
+        HILOG_ERROR("formJsInfo is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    bool enable = data.ReadBool();
+    int32_t errCode = OnEnableForm(*formJsInfo, enable);
     reply.WriteInt32(errCode);
     return ERR_OK;
 }

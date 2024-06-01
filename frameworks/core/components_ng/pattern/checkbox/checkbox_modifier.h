@@ -207,7 +207,9 @@ public:
 
     void SetHasBuilder(bool hasBuilder)
     {
-        hasBuilder_ = hasBuilder;
+        if (hasBuilder_) {
+            hasBuilder_->Set(hasBuilder);
+        }
     }
 
     void SetHasUnselectedColor(bool hasUnselectedColor)
@@ -242,7 +244,6 @@ private:
     float hoverToTouchDuration_ = 0.0f;
     float touchDuration_ = 0.0f;
     float colorAnimationDuration_ = 0.0f;
-    bool hasBuilder_ = false;
     bool hasUnselectedColor_ = false;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
@@ -253,6 +254,7 @@ private:
 
     RefPtr<PropertyBool> enabled_;
     RefPtr<PropertyBool> useContentModifier_;
+    RefPtr<PropertyBool> hasBuilder_;
     RefPtr<AnimatablePropertyColor> animatableBoardColor_;
     RefPtr<AnimatablePropertyColor> animatableCheckColor_;
     RefPtr<AnimatablePropertyColor> animatableBorderColor_;

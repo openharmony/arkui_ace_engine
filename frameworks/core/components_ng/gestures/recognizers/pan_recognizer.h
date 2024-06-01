@@ -75,6 +75,16 @@ public:
 
     bool AboutToMinusCurrentFingers(int32_t touchId) override;
 
+    double GetDistance() const
+    {
+        return distance_;
+    }
+
+    PanDirection GetDirection() const
+    {
+        return direction_;
+    }
+
 private:
     class PanVelocity {
     public:
@@ -155,6 +165,7 @@ private:
     bool isFlushTouchEventsEnd_ = false;
     bool isForDrag_ = false;
     bool isAllowMouse_ = true;
+    bool isStartTriggered_ = false;
 };
 
 } // namespace OHOS::Ace::NG

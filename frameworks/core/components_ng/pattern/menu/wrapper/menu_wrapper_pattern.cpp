@@ -60,6 +60,35 @@ void MenuWrapperPattern::InitFocusEvent()
     focusHub->SetOnBlurInternal(std::move(blurTask));
 }
 
+RefPtr<FrameNode> MenuWrapperPattern::GetShowedSubMenu()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    return DynamicCast<FrameNode>(host->GetLastChild());
+}
+
+RectF MenuWrapperPattern::GetMenuZone(RefPtr<UINode>& innerMenuNode)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, RectF());
+    auto outterMenuNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
+    CHECK_NULL_RETURN(outterMenuNode, RectF());
+    auto menuZone = outterMenuNode->GetGeometryNode()->GetFrameRect();
+    innerMenuNode = GetMenuChild(outterMenuNode);
+    CHECK_NULL_RETURN(innerMenuNode, RectF());
+    auto subMenuNode = GetShowedSubMenu();
+    if (subMenuNode) {
+        innerMenuNode = subMenuNode;
+        auto scrollNode = DynamicCast<FrameNode>(innerMenuNode->GetChildAtIndex(0));
+        CHECK_NULL_RETURN(scrollNode, RectF());
+        innerMenuNode = DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
+        CHECK_NULL_RETURN(innerMenuNode, RectF());
+        auto offset = DynamicCast<FrameNode>(innerMenuNode)->GetOffsetRelativeToWindow();
+        menuZone.SetOffset(offset);
+    }
+    return menuZone;
+}
+
 RefPtr<FrameNode> MenuWrapperPattern::FindTouchedMenuItem(const RefPtr<UINode>& menuNode, const OffsetF& position)
 {
     CHECK_NULL_RETURN(menuNode, nullptr);
@@ -70,7 +99,6 @@ RefPtr<FrameNode> MenuWrapperPattern::FindTouchedMenuItem(const RefPtr<UINode>& 
             menuItem = AceType::DynamicCast<FrameNode>(child);
         } else {
             menuItem = FindTouchedMenuItem(child, position);
-            continue;
         }
         if (menuItem) {
             auto menuItemOffset = menuItem->GetPaintRectOffset();
@@ -95,41 +123,24 @@ void MenuWrapperPattern::HandleInteraction(const TouchEventInfo& info)
     auto position = OffsetF(
         static_cast<float>(touch.GetGlobalLocation().GetX()), static_cast<float>(touch.GetGlobalLocation().GetY()));
     position -= host->GetPaintRectOffset();
-    RefPtr<FrameNode> menuItem;
-    auto outterMenuNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
-    CHECK_NULL_VOID(outterMenuNode);
-    auto menuZone = outterMenuNode->GetGeometryNode()->GetFrameRect();
-    auto innerMenuNode = GetMenuChild(outterMenuNode);
+    RefPtr<UINode> innerMenuNode = nullptr;
+    auto menuZone = GetMenuZone(innerMenuNode);
     CHECK_NULL_VOID(innerMenuNode);
-    auto menuPattern = innerMenuNode->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    auto subMenuNode = menuPattern->GetShowedSubMenu();
-    if (subMenuNode) {
-        innerMenuNode = subMenuNode;
-        auto offset = innerMenuNode->GetOffsetRelativeToWindow();
-        menuZone.SetOffset(offset);
-        auto scrollNode = DynamicCast<FrameNode>(innerMenuNode->GetChildAtIndex(0));
-        CHECK_NULL_VOID(scrollNode);
-        innerMenuNode = DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
-        CHECK_NULL_VOID(innerMenuNode);
-    }
     // get menuNode's touch region
     if (menuZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
         currentTouchItem_ = FindTouchedMenuItem(innerMenuNode, position);
         auto lastTouchItem = GetLastTouchItem();
-        if (currentTouchItem_ != lastTouchItem_) {
-            if (currentTouchItem_) {
-                auto pipeline = PipelineBase::GetCurrentContext();
-                CHECK_NULL_VOID(pipeline);
-                auto theme = pipeline->GetTheme<SelectTheme>();
-                CHECK_NULL_VOID(theme);
-                auto menuItemPattern = currentTouchItem_->GetPattern<MenuItemPattern>();
-                CHECK_NULL_VOID(menuItemPattern);
-                if (!(menuItemPattern->IsDisabled())) {
-                    menuItemPattern->SetBgBlendColor(
-                        menuItemPattern->GetSubBuilder() ? theme->GetHoverColor() : theme->GetClickedColor());
-                    menuItemPattern->PlayBgColorAnimation(false);
-                }
+        if (currentTouchItem_ && currentTouchItem_ != lastTouchItem_) {
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto theme = pipeline->GetTheme<SelectTheme>();
+            CHECK_NULL_VOID(theme);
+            auto curMenuItemPattern = currentTouchItem_->GetPattern<MenuItemPattern>();
+            CHECK_NULL_VOID(curMenuItemPattern);
+            if (!(curMenuItemPattern->IsDisabled())) {
+                curMenuItemPattern->SetBgBlendColor(
+                    curMenuItemPattern->GetSubBuilder() ? theme->GetHoverColor() : theme->GetClickedColor());
+                curMenuItemPattern->PlayBgColorAnimation(false);
             }
             if (lastTouchItem_) {
                 auto lastMenuItemPattern = lastTouchItem_->GetPattern<MenuItemPattern>();
@@ -203,49 +214,80 @@ void MenuWrapperPattern::HideSubMenu()
         // sub menu not show
         return;
     }
+    auto menu = GetMenu();
+    CHECK_NULL_VOID(menu);
+    auto menuPattern = menu->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    menuPattern->SetShowedSubMenu(nullptr);
     auto subMenu = host->GetChildren().back();
-    auto iter = host->GetChildren().begin();
-    int32_t focusNodeId = 2;
-    std::advance(iter, host->GetChildren().size() - focusNodeId);
-    auto focusMenu = *iter;
-    if (focusMenu) {
-        auto menuHub = DynamicCast<FrameNode>(focusMenu);
-        CHECK_NULL_VOID(menuHub);
-        // SelectOverlay's custom menu does not need to be focused.
-        auto isCustomMenu = IsSelectOverlayCustomMenu(menuHub);
-        if (!isCustomMenu) {
-            auto menuPattern = menuHub->GetPattern<MenuPattern>();
-            CHECK_NULL_VOID(menuPattern);
-            menuPattern->FocusViewShow();
-        }
-    }
-
-    auto menuPattern = DynamicCast<FrameNode>(subMenu)->GetPattern<MenuPattern>();
-    if (menuPattern) {
-        menuPattern->RemoveParentHoverStyle();
-        auto frameNode = FrameNode::GetFrameNode(menuPattern->GetTargetTag(), menuPattern->GetTargetId());
+    auto subMenuPattern = DynamicCast<FrameNode>(subMenu)->GetPattern<MenuPattern>();
+    if (subMenuPattern) {
+        subMenuPattern->RemoveParentHoverStyle();
+        auto frameNode = FrameNode::GetFrameNode(subMenuPattern->GetTargetTag(), subMenuPattern->GetTargetId());
         CHECK_NULL_VOID(frameNode);
         auto menuItem = frameNode->GetPattern<MenuItemPattern>();
         if (menuItem) {
             menuItem->SetIsSubMenuShowed(false);
         }
     }
-    auto scroll = focusMenu->GetFirstChild();
-    CHECK_NULL_VOID(scroll);
-    auto innerMenu = AceType::DynamicCast<FrameNode>(scroll->GetFirstChild());
+    auto focusMenu = MenuFocusViewShow();
+    CHECK_NULL_VOID(focusMenu);
+    auto innerMenu = GetMenuChild(focusMenu);
     CHECK_NULL_VOID(innerMenu);
     auto innerMenuPattern = innerMenu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(innerMenuPattern);
     auto layoutProps = innerMenuPattern->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(layoutProps);
     auto expandingMode = layoutProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
-    if (!(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && menuPattern->IsSubMenu()) ||
-        menuPattern->IsSelectOverlaySubMenu()) {
+    if (expandingMode == SubMenuExpandingMode::STACK) {
+        HideStackExpandMenu(subMenu);
+    } else {
         host->RemoveChild(subMenu);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-    } else if (expandingMode == SubMenuExpandingMode::STACK && menuPattern->IsSubMenu()) {
-        HideStackExpandMenu(subMenu);
     }
+}
+
+bool MenuWrapperPattern::HasStackSubMenu()
+{
+    auto menu = GetMenu();
+    CHECK_NULL_RETURN(menu, false);
+    auto scroll = menu->GetFirstChild();
+    CHECK_NULL_RETURN(scroll, false);
+    auto innerMenu = AceType::DynamicCast<FrameNode>(scroll->GetFirstChild());
+    CHECK_NULL_RETURN(innerMenu, false);
+    auto innerMenuPattern = innerMenu->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(innerMenuPattern, false);
+    auto layoutProps = innerMenuPattern->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProps, false);
+    auto expandingMode = layoutProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
+    if (expandingMode != SubMenuExpandingMode::STACK) {
+        return false;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    return host->GetChildren().size() > 1;
+}
+
+RefPtr<FrameNode> MenuWrapperPattern::MenuFocusViewShow()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto iter = host->GetChildren().begin();
+    int32_t focusNodeId = 2;
+    std::advance(iter, host->GetChildren().size() - focusNodeId);
+    auto focusMenu = *iter;
+    if (focusMenu) {
+        auto menuHub = DynamicCast<FrameNode>(focusMenu);
+        CHECK_NULL_RETURN(menuHub, nullptr);
+        // SelectOverlay's custom menu does not need to be focused.
+        auto isCustomMenu = IsSelectOverlayCustomMenu(menuHub);
+        if (!isCustomMenu) {
+            auto menuPattern = menuHub->GetPattern<MenuPattern>();
+            CHECK_NULL_RETURN(menuPattern, nullptr);
+            menuPattern->FocusViewShow();
+        }
+    }
+    return DynamicCast<FrameNode>(focusMenu);
 }
 
 void MenuWrapperPattern::HideStackExpandMenu(const RefPtr<UINode>& subMenu)
@@ -317,21 +359,23 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
     auto children = host->GetChildren();
     if (touch.GetTouchType() == TouchType::DOWN) {
         for (auto child = children.rbegin(); child != children.rend(); ++child) {
-            // get menu frame node (child of menu wrapper)
-            auto menuNode = DynamicCast<FrameNode>(*child);
-            CHECK_NULL_VOID(menuNode);
-            // get menuNode's touch region
-            auto menuZone = menuNode->GetGeometryNode()->GetFrameRect();
-            if (menuZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
+            // get child frame node of menu wrapper
+            auto menuWrapperChildNode = DynamicCast<FrameNode>(*child);
+            CHECK_NULL_VOID(menuWrapperChildNode);
+            // get menuWrapperChildNode's touch region
+            auto menuWrapperChildZone = menuWrapperChildNode->GetGeometryNode()->GetFrameRect();
+            if (menuWrapperChildZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
                 return;
             }
             // if DOWN-touched outside the menu region, then hide menu
-            auto menuPattern = menuNode->GetPattern<MenuPattern>();
-            CHECK_NULL_VOID(menuPattern);
+            auto menuPattern = menuWrapperChildNode->GetPattern<MenuPattern>();
+            if (!menuPattern) {
+                continue;
+            }
             if (menuPattern->IsSubMenu() || menuPattern->IsSelectOverlaySubMenu()) {
                 HideSubMenu();
             } else {
-                HideMenu(menuNode);
+                HideMenu(menuWrapperChildNode);
             }
         }
     } else if (touch.GetTouchType() == TouchType::MOVE) {
@@ -547,7 +591,7 @@ RefPtr<FrameNode> MenuWrapperPattern::GetMenuChild(const RefPtr<UINode>& node)
             menuChild = DynamicCast<FrameNode>(child);
             break;
         }
-        child = node->GetChildAtIndex(0);
+        child = child->GetChildAtIndex(0);
     }
     return menuChild;
 }
@@ -560,6 +604,7 @@ void MenuWrapperPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("TargetNode: " + dumpInfo_.targetNode);
     DumpLog::GetInstance().AddDesc("TargetOffset: " + dumpInfo_.targetOffset.ToString());
     DumpLog::GetInstance().AddDesc("TargetSize: " + dumpInfo_.targetSize.ToString());
+    DumpLog::GetInstance().AddDesc("WrapperRect: " + dumpInfo_.wrapperRect.ToString());
     DumpLog::GetInstance().AddDesc("PreviewBeginScale: " + std::to_string(dumpInfo_.previewBeginScale));
     DumpLog::GetInstance().AddDesc("PreviewEndScale: " + std::to_string(dumpInfo_.previewEndScale));
     DumpLog::GetInstance().AddDesc("Top: " + std::to_string(dumpInfo_.top));

@@ -228,7 +228,9 @@ bool SceneRecord::IsFirstFrame()
 bool SceneRecord::IsDisplayAnimator(const std::string& sceneId)
 {
     if (sceneId == PerfConstants::APP_LIST_FLING || sceneId == PerfConstants::APP_SWIPER_SCROLL
-        || sceneId == PerfConstants::SNAP_RECENT_ANI) {
+        || sceneId == PerfConstants::SNAP_RECENT_ANI
+        || sceneId == PerfConstants::WINDOW_RECT_RESIZE
+        || sceneId == PerfConstants::WINDOW_RECT_MOVE) {
         return true;
     }
     return false;
@@ -267,6 +269,7 @@ void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const s
     if (IsSceneIdInSceneWhiteList(sceneId)) {
         isExceptAnimator = true;
     }
+    ACE_SCOPED_TRACE("Animation start and current sceneId=%s", sceneId.c_str());
     if (record == nullptr) {
         record = new SceneRecord();
         record->InitRecord(sceneId, type, mSourceType, note, inputTime);
@@ -280,6 +283,7 @@ void PerfMonitor::End(const std::string& sceneId, bool isRsRender)
 {
     std::lock_guard<std::mutex> Lock(mMutex);
     SceneRecord* record = GetRecord(sceneId);
+    ACE_SCOPED_TRACE("Animation end and current sceneId=%s", sceneId.c_str());
     if (record != nullptr) {
         if (IsSceneIdInSceneWhiteList(sceneId)) {
             isExceptAnimator = false;
@@ -365,6 +369,21 @@ void PerfMonitor::SetPageUrl(const std::string& pageUrl)
 std::string PerfMonitor::GetPageUrl()
 {
     return baseInfo.pageUrl;
+}
+
+void PerfMonitor::SetPageName(const std::string& pageName)
+{
+    baseInfo.pageName = pageName;
+}
+
+std::string PerfMonitor::GetPageName()
+{
+    return baseInfo.pageName;
+}
+
+void PerfMonitor::ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName)
+{
+    EventReport::ReportPageShowMsg(pageUrl, bundleName);
 }
 
 void PerfMonitor::RecordBaseInfo(SceneRecord* record)

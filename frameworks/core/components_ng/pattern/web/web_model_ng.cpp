@@ -203,10 +203,11 @@ void WebModelNG::SetOnGeolocationShow(std::function<void(const BaseEventInfo* in
 void WebModelNG::SetOnRequestFocus(std::function<void(const BaseEventInfo* info)>&& jsCallback)
 {
     auto func = jsCallback;
-    auto instanceId = Container::CurrentId();
+    WeakPtr<NG::FrameNode> weak = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
 
-    auto uiCallback = [func, instanceId](const std::shared_ptr<BaseEventInfo>& info) {
-        ContainerScope scope(instanceId);
+    auto uiCallback = [func, weak](const std::shared_ptr<BaseEventInfo>& info) {
+        auto frameNode = weak.Upgrade();
+        ContainerScope scope(frameNode->GetInstanceId());
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
         context->PostAsyncEvent([info, func]() { func(info.get()); }, "ArkUIWebRequestFocusCallback");
@@ -271,9 +272,10 @@ void WebModelNG::SetMediaPlayGestureAccess(bool isNeedGestureAccess)
 void WebModelNG::SetOnKeyEvent(std::function<void(KeyEventInfo& keyEventInfo)>&& jsCallback)
 {
     auto func = jsCallback;
-    auto instanceId = Container::CurrentId();
-    auto uiCallback = [func, instanceId](KeyEventInfo& keyEventInfo) {
-        ContainerScope scope(instanceId);
+    WeakPtr<NG::FrameNode> weak = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto uiCallback = [func, weak](KeyEventInfo& keyEventInfo) {
+        auto frameNode = weak.Upgrade();
+        ContainerScope scope(frameNode->GetInstanceId());
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
         context->PostSyncEvent([&keyEventInfo, func]() { func(keyEventInfo); }, "ArkUIWebKeyEventCallback");
@@ -513,9 +515,10 @@ void WebModelNG::SetWebDebuggingAccessEnabled(bool isWebDebuggingAccessEnabled)
 void WebModelNG::SetOnMouseEvent(std::function<void(MouseInfo& info)>&& jsCallback)
 {
     auto func = jsCallback;
-    auto instanceId = Container::CurrentId();
-    auto uiCallback = [func, instanceId](MouseInfo& info) {
-        ContainerScope scope(instanceId);
+    WeakPtr<NG::FrameNode> weak = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto uiCallback = [func, weak](MouseInfo& info) {
+        auto frameNode = weak.Upgrade();
+        ContainerScope scope(frameNode->GetInstanceId());
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
         context->PostSyncEvent([&info, func]() { func(info); }, "ArkUIWebMouseEventCallback");
@@ -763,9 +766,10 @@ void WebModelNG::SetPageVisibleId(OnWebAsyncFunc&& pageVisibleId)
 void WebModelNG::SetOnInterceptKeyEventCallback(std::function<bool(KeyEventInfo& keyEventInfo)>&& keyEventInfo)
 {
     auto func = keyEventInfo;
-    auto instanceId = Container::CurrentId();
-    auto onConsole = [func, instanceId](KeyEventInfo& keyEventInfo) -> bool {
-        ContainerScope scope(instanceId);
+    WeakPtr<NG::FrameNode> weak = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onConsole = [func, weak](KeyEventInfo& keyEventInfo) -> bool {
+        auto frameNode = weak.Upgrade();
+        ContainerScope scope(frameNode->GetInstanceId());
         auto context = PipelineBase::GetCurrentContext();
         bool result = false;
         CHECK_NULL_RETURN(context, result);
@@ -1092,5 +1096,33 @@ void WebModelNG::SetViewportFitChangedId(std::function<void(const BaseEventInfo*
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnViewportFitChangedEvent(std::move(uiCallback));
+}
+
+void WebModelNG::SetOnInterceptKeyboardAttach(std::function<WebKeyboardOption(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) -> WebKeyboardOption {
+        return func(info.get());
+    };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnInterceptKeyboardAttachEvent(std::move(uiCallback));
+}
+
+void WebModelNG::SetAdsBlockedEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnAdsBlockedEvent(std::move(uiCallback));
+}
+
+void WebModelNG::SetUpdateInstanceIdCallback(std::function<void(int32_t)>&& callback)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+
+    webPattern->SetUpdateInstanceIdCallback(std::move(callback));
 }
 } // namespace OHOS::Ace::NG

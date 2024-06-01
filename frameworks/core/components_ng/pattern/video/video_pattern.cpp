@@ -68,6 +68,7 @@ constexpr uint32_t SLIDER_POS = 2;
 constexpr uint32_t DURATION_POS = 3;
 constexpr uint32_t FULL_SCREEN_POS = 4;
 constexpr int32_t AVERAGE_VALUE = 2;
+constexpr int32_t ANALYZER_DELAY_TIME = 100;
 const Dimension LIFT_HEIGHT = 28.0_vp;
 const std::string PNG_FILE_EXTENSION = "png";
 
@@ -1009,6 +1010,10 @@ bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
             videoFrameSize.Height());
     }
 
+    if (IsSupportImageAnalyzer()) {
+        UpdateAnalyzerUIConfig(geometryNode);
+    }
+
     auto padding  = layoutProperty->CreatePaddingAndBorder();
     auto imageFit = layoutProperty->GetObjectFitValue(ImageFit::COVER);
     if (imageFit == ImageFit::COVER) {
@@ -1172,6 +1177,10 @@ RefPtr<FrameNode> VideoPattern::CreateSlider()
     };
     auto sliderEventHub = sliderNode->GetEventHub<SliderEventHub>();
     sliderEventHub->SetOnChange(std::move(sliderOnChangeEvent));
+    if (InstanceOf<VideoFullScreenPattern>(this)) {
+        auto focusHub = sliderNode->GetOrCreateFocusHub();
+        focusHub->SetIsDefaultFocus(true);
+    }
 
     auto sliderPaintProperty = sliderNode->GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_RETURN(sliderPaintProperty, nullptr);
@@ -1595,9 +1604,14 @@ void VideoPattern::EnableDrag()
             videoSrc = json->GetString(key);
         }
 
+        if (videoSrc == videoPattern->GetSrc()) {
+            return;
+        }
+
         std::regex extensionRegex("\\.(" + PNG_FILE_EXTENSION + ")$");
         bool isPng = std::regex_search(videoSrc, extensionRegex);
-        if (videoSrc == videoPattern->GetSrc() || isPng) {
+        if (isPng) {
+            event->SetResult(DragRet::DRAG_FAIL);
             return;
         }
 
@@ -1745,7 +1759,7 @@ void VideoPattern::StartImageAnalyzer()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->CreateAnalyzerOverlay();
-    }, 20, "ArkUIVideoCreateAnalyzerOverlay");
+    }, ANALYZER_DELAY_TIME, "ArkUIVideoCreateAnalyzerOverlay");
 }
 
 void VideoPattern::CreateAnalyzerOverlay()

@@ -187,6 +187,99 @@ private:
     RefPtr<FullScreenExitHandler> fullScreenExitHandler_;
 };
 
+class JSWebKeyboardController : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSWebKeyboardController>::Declare("WebKeyboardController");
+        JSClass<JSWebKeyboardController>::CustomMethod("insertText", &JSWebKeyboardController::InsertText);
+        JSClass<JSWebKeyboardController>::CustomMethod("deleteForward", &JSWebKeyboardController::DeleteForward);
+        JSClass<JSWebKeyboardController>::CustomMethod("deleteBackward", &JSWebKeyboardController::DeleteBackward);
+        JSClass<JSWebKeyboardController>::CustomMethod("sendFunctionKey", &JSWebKeyboardController::SendFunctionKey);
+        JSClass<JSWebKeyboardController>::CustomMethod("close", &JSWebKeyboardController::Close);
+        JSClass<JSWebKeyboardController>::Bind(
+            globalObj, &JSWebKeyboardController::Constructor, &JSWebKeyboardController::Destructor);
+    }
+
+    void SeWebKeyboardController(const RefPtr<WebCustomKeyboardHandler>& controller)
+    {
+        webKeyboardController_ = controller;
+    }
+
+    void InsertText(const JSCallbackInfo& args)
+    {
+        if (!webKeyboardController_) {
+            return;
+        }
+
+        if (args.Length() < 1 || !(args[0]->IsString())) {
+            return;
+        }
+
+        webKeyboardController_->InsertText(args[0]->ToString());
+    }
+
+    void DeleteForward(const JSCallbackInfo& args)
+    {
+        if (!webKeyboardController_) {
+            return;
+        }
+
+        if (args.Length() < 1 || !(args[0]->IsNumber())) {
+            return;
+        }
+
+        webKeyboardController_->DeleteForward(args[0]->ToNumber<int32_t>());
+    }
+
+    void DeleteBackward(const JSCallbackInfo& args)
+    {
+        if (!webKeyboardController_) {
+            return;
+        }
+
+        if (args.Length() < 1 || !(args[0]->IsNumber())) {
+            return;
+        }
+
+        webKeyboardController_->DeleteBackward(args[0]->ToNumber<int32_t>());
+    }
+
+    void SendFunctionKey(const JSCallbackInfo& args)
+    {
+        if (!webKeyboardController_) {
+            return;
+        }
+
+        if (args.Length() < 1 || !(args[0]->IsNumber())) {
+            return;
+        }
+
+        webKeyboardController_->SendFunctionKey(args[0]->ToNumber<int32_t>());
+    }
+
+    void Close(const JSCallbackInfo& args)
+    {
+        webKeyboardController_->Close();
+    }
+
+private:
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto jSWebKeyboardController = Referenced::MakeRefPtr<JSWebKeyboardController>();
+        jSWebKeyboardController->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jSWebKeyboardController));
+    }
+
+    static void Destructor(JSWebKeyboardController* jSWebKeyboardController)
+    {
+        if (jSWebKeyboardController != nullptr) {
+            jSWebKeyboardController->DecRefCount();
+        }
+    }
+    RefPtr<WebCustomKeyboardHandler> webKeyboardController_;
+};
+
 class JSWebHttpAuth : public Referenced {
 public:
     static void JSBind(BindingTarget globalObj)
@@ -1061,6 +1154,9 @@ public:
             JsiRef<JsiArrayBuffer> arrayBuffer = JsiRef<JsiArrayBuffer>::Cast(args[0]);
             int32_t bufferSize = arrayBuffer->ByteLength();
             void* buffer = arrayBuffer->GetBuffer();
+            const char* charPtr = static_cast<const char*>(buffer);
+            std::string data(charPtr, bufferSize);
+            response_->SetData(data);
             response_->SetBuffer(static_cast<char*>(buffer), bufferSize);
             return;
         }
@@ -1837,6 +1933,8 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onRenderProcessResponding", &JSWeb::OnRenderProcessResponding);
     JSClass<JSWeb>::StaticMethod("selectionMenuOptions", &JSWeb::SelectionMenuOptions);
     JSClass<JSWeb>::StaticMethod("onViewportFitChanged", &JSWeb::OnViewportFitChanged);
+    JSClass<JSWeb>::StaticMethod("onInterceptKeyboardAttach", &JSWeb::OnInterceptKeyboardAttach);
+    JSClass<JSWeb>::StaticMethod("onAdsBlocked", &JSWeb::OnAdsBlocked);
 
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -1860,6 +1958,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSScreenCaptureRequest::JSBind(globalObj);
     JSNativeEmbedGestureRequest::JSBind(globalObj);
     JSWebAppLinkCallback::JSBind(globalObj);
+    JSWebKeyboardController::JSBind(globalObj);
 }
 
 JSRef<JSVal> LoadWebConsoleLogEventToJSValue(const LoadWebConsoleLogEvent& eventInfo)
@@ -2096,6 +2195,22 @@ JSRef<JSVal> LoadOverrideEventToJSValue(const LoadOverrideEvent& eventInfo)
     return JSRef<JSVal>::Cast(requestObj);
 }
 
+JSRef<JSVal> AdsBlockedEventToJSValue(const AdsBlockedEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("url", eventInfo.GetUrl());
+
+    JSRef<JSArray> adsBlockedArr = JSRef<JSArray>::New();
+    const std::vector<std::string>& adsBlocked = eventInfo.GetAdsBlocked();
+    for (int32_t idx = 0; idx < static_cast<int32_t>(adsBlocked.size()); ++idx) {
+        JSRef<JSVal> blockedUrl = JSRef<JSVal>::Make(ToJSValue(adsBlocked[idx]));
+        adsBlockedArr->SetValueAt(idx, blockedUrl);
+    }
+    obj->SetPropertyObject("adsBlocked", adsBlockedArr);
+
+    return JSRef<JSVal>::Cast(obj);
+}
+
 void JSWeb::ParseRawfileWebSrc(const JSRef<JSVal>& srcValue, std::string& webSrc)
 {
     if (!srcValue->IsObject() || webSrc.substr(0, RAWFILE_PREFIX.size()) != RAWFILE_PREFIX) {
@@ -2241,12 +2356,28 @@ void JSWeb::Create(const JSCallbackInfo& info)
         WebModel::GetInstance()->SetOpenAppLinkFunction(std::move(openAppLinkCallback));
         WebModel::GetInstance()->SetDefaultFileSelectorShow(std::move(fileSelectorShowFromUserCallback));
         auto getCmdLineFunction = controller->GetProperty("getCustomeSchemeCmdLine");
+        if (!getCmdLineFunction->IsFunction()) {
+            return;
+        }
         std::string cmdLine = JSRef<JSFunc>::Cast(getCmdLineFunction)->Call(controller, 0, {})->ToString();
         if (!cmdLine.empty()) {
             WebModel::GetInstance()->SetCustomScheme(cmdLine);
         }
 
+        auto updateInstanceIdFunction = controller->GetProperty("updateInstanceId");
+        if (updateInstanceIdFunction->IsFunction()) {
+            std::function<void(int32_t)> updateInstanceIdCallback = [webviewController = controller,
+                func = JSRef<JSFunc>::Cast(updateInstanceIdFunction)](int32_t newId) {
+                auto newIdVal = JSRef<JSVal>::Make(ToJSValue(newId));
+                auto result = func->Call(webviewController, 1, &newIdVal);
+            };
+            NG::WebModelNG::GetInstance()->SetUpdateInstanceIdCallback(std::move(updateInstanceIdCallback));
+        }
+
         auto getWebDebugingFunction = controller->GetProperty("getWebDebuggingAccess");
+        if (!getWebDebugingFunction->IsFunction()) {
+            return;
+        }
         bool webDebuggingAccess = JSRef<JSFunc>::Cast(getWebDebugingFunction)->Call(controller, 0, {})->ToBoolean();
         if (webDebuggingAccess == JSWeb::webDebuggingAccess_) {
             return;
@@ -4783,6 +4914,131 @@ void JSWeb::OnViewportFitChanged(const JSCallbackInfo& args)
         func->Execute(*eventInfo);
     };
     WebModel::GetInstance()->SetViewportFitChangedId(jsCallback);
+}
+
+JSRef<JSVal> InterceptKeyboardEventToJSValue(const InterceptKeyboardEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    JSRef<JSObject> webKeyboardControllerObj = JSClass<JSWebKeyboardController>::NewInstance();
+    auto webKeyboardController = Referenced::Claim(webKeyboardControllerObj->Unwrap<JSWebKeyboardController>());
+    webKeyboardController->SeWebKeyboardController(eventInfo.GetCustomKeyboardHandler());
+    obj->SetPropertyObject("controller", webKeyboardControllerObj);
+
+    JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+    JSRef<JSObject> attributesObj = objectTemplate->NewInstance();
+    for (const auto& item : eventInfo.GetAttributesMap()) {
+        attributesObj->SetProperty(item.first.c_str(), item.second.c_str());
+    }
+    obj->SetPropertyObject("attributes", attributesObj);
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::ParseJsCustomKeyboardOption(const JsiExecutionContext& context, const JSRef<JSVal>& keyboardOpt,
+    WebKeyboardOption& keyboardOption)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebCustomKeyboard ParseJsCustomKeyboardOption enter");
+    if (!keyboardOpt->IsObject()) {
+        return;
+    }
+
+    JSRef<JSObject> keyboradOptObj = JSRef<JSObject>::Cast(keyboardOpt);
+    auto useSystemKeyboardObj = keyboradOptObj->GetProperty("useSystemKeyboard");
+    if (useSystemKeyboardObj->IsNull() || !useSystemKeyboardObj->IsBoolean()) {
+        return;
+    }
+
+    bool isSystemKeyboard = useSystemKeyboardObj->ToBoolean();
+    keyboardOption.isSystemKeyboard_ = isSystemKeyboard;
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebCustomKeyboard ParseJsCustomKeyboardOption isSystemKeyboard is %{public}d",
+        isSystemKeyboard);
+    if (isSystemKeyboard) {
+        auto enterKeyTypeObj = keyboradOptObj->GetProperty("enterKeyType");
+        if (enterKeyTypeObj->IsNull() || !enterKeyTypeObj->IsNumber()) {
+            return;
+        }
+        int32_t enterKeyType = enterKeyTypeObj->ToNumber<int32_t>();
+        keyboardOption.enterKeyTpye_ = enterKeyType;
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebCustomKeyboard ParseJsCustomKeyboardOption \
+            isSystemKeyboard is %{public}d, enterKeyType is %{public}d", isSystemKeyboard, enterKeyType);
+    } else {
+        auto builder = keyboradOptObj->GetProperty("customKeyboard");
+        if (builder->IsNull()) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "WebCustomKeyboard ParseJsCustomKeyboardOption" \
+                ", parse customKeyboard, builder is null");
+            return;
+        }
+
+        if (!builder->IsFunction()) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "WebCustomKeyboard ParseJsCustomKeyboardOption" \
+                ", parse customKeyboard, builder is invalid");
+            return;
+        }
+
+        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+        CHECK_NULL_VOID(builderFunc);
+        WeakPtr<NG::FrameNode> targetNode =
+            AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        auto buildFunc = [execCtx = context, func = std::move(builderFunc), node = targetNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("WebCustomKeyboard");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute();
+        };
+        keyboardOption.customKeyboardBuilder_ = buildFunc;
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebCustomKeyboard ParseJsCustomKeyboardOption" \
+            ", isSystemKeyboard is %{public}d, parseCustomBuilder end", isSystemKeyboard);
+    }
+}
+
+void JSWeb::OnInterceptKeyboardAttach(const JSCallbackInfo& args)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebCustomKeyboard OnInterceptKeyboardAttach register enter");
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<InterceptKeyboardEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), InterceptKeyboardEventToJSValue);
+    auto instanceId = Container::CurrentId();
+
+    auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
+                          const BaseEventInfo* info) -> WebKeyboardOption {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebCustomKeyboard OnInterceptKeyboardAttach invoke enter");
+        ContainerScope scope(instanceId);
+        WebKeyboardOption opt;
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, opt);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, opt);
+        pipelineContext->UpdateCurrentActiveNode(node);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<InterceptKeyboardEvent>(info);
+        JSRef<JSVal> keyboardOpt = func->ExecuteWithValue(*eventInfo);
+        ParseJsCustomKeyboardOption(execCtx, keyboardOpt, opt);
+        return opt;
+    };
+    WebModel::GetInstance()->SetOnInterceptKeyboardAttach(std::move(uiCallback));
+}
+
+void JSWeb::OnAdsBlocked(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        return;
+    }
+
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<AdsBlockedEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), AdsBlockedEventToJSValue);
+    auto instanceId = Container::CurrentId();
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
+                          const BaseEventInfo* info) {
+        ContainerScope scope(instanceId);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<AdsBlockedEvent>(info);
+        func->Execute(*eventInfo);
+    };
+    WebModel::GetInstance()->SetAdsBlockedEventId(jsCallback);
 }
 
 } // namespace OHOS::Ace::Framework

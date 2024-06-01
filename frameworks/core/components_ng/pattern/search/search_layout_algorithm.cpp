@@ -19,14 +19,12 @@
 
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
-#include "core/components/search/search_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/pattern/search/search_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_algorithm.h"
 #include "core/components_ng/property/layout_constraint.h"
@@ -42,6 +40,8 @@ constexpr int32_t CANCEL_BUTTON_INDEX = 3;
 constexpr int32_t BUTTON_INDEX = 4;
 constexpr int32_t MULTIPLE_2 = 2;
 constexpr float MAX_SEARCH_BUTTON_RATE = 0.4f;
+constexpr float AGING_MIN_SCALE = 1.75f;
+constexpr int TWO = 2;
 } // namespace
 
 bool SearchLayoutAlgorithm::IsFixedHeightMode(LayoutWrapper* layoutWrapper)
@@ -70,13 +70,12 @@ void SearchLayoutAlgorithm::CancelImageMeasure(LayoutWrapper* layoutWrapper)
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto imageConstraint = imageLayoutProperty->GetLayoutConstraint();
     auto searchHeight = CalcSearchHeight(constraint.value(), layoutWrapper);
-    auto defaultImageHeight =
-        imageConstraint->selfIdealSize.Height().value_or(searchTheme->GetIconSize().ConvertToPx());
+    auto defaultImageHeight = static_cast<float>(searchTheme->GetIconSize().ConvertToPx());
     auto iconStretchSize = (NearZero(defaultImageHeight) || !imageConstraint->maxSize.IsPositive()) &&
                            !layoutProperty->HasCancelButtonUDSize();
-    auto imageHeight =
-        std::min(iconStretchSize ? static_cast<float>(searchTheme->GetIconSize().ConvertToPx()) : defaultImageHeight,
-            static_cast<float>(searchHeight));
+    auto imageHeight = static_cast<float>(std::min(layoutProperty->HasCancelButtonUDSize() ?
+        layoutProperty->GetCancelButtonUDSizeValue().ConvertToPx() : defaultImageHeight,
+        searchHeight));
     CalcSize imageCalcSize;
     if (iconStretchSize) {
         imageCalcSize.SetWidth(CalcLength(imageHeight));
@@ -166,7 +165,9 @@ void SearchLayoutAlgorithm::TextFieldMeasure(LayoutWrapper* layoutWrapper)
     auto textFieldHeight = CalcSearchHeight(constraint.value(), layoutWrapper);
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     childLayoutConstraint.selfIdealSize.SetWidth(textFieldWidth);
-    SetTextFieldLayoutConstraintHeight(childLayoutConstraint, textFieldHeight, layoutWrapper);
+    if (LessNotEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
+        SetTextFieldLayoutConstraintHeight(childLayoutConstraint, textFieldHeight, layoutWrapper);
+    }
     textFieldWrapper->Measure(childLayoutConstraint);
     textFieldSizeMeasure_ = textFieldGeometryNode->GetFrameSize();
 }
@@ -537,71 +538,115 @@ void SearchLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     auto layoutProperty = DynamicCast<SearchLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
+    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    
 
-    // search theme
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto searchTheme = pipeline->GetTheme<SearchTheme>();
-    auto searchIconLeftSpace = searchTheme->GetSearchIconLeftSpace().ConvertToPx();
-    auto searchIconRightSpace = searchTheme->GetSearchIconRightSpace().ConvertToPx();
-    auto searchButtonSpace = searchTheme->GetSearchButtonSpace().ConvertToPx();
-    auto dividerSideSpace = searchTheme->GetDividerSideSpace().ConvertToPx();
-    auto dividerWidth = searchTheme->GetSearchDividerWidth().ConvertToPx();
 
-    // search size
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto searchSize = geometryNode->GetFrameSize();
     auto searchFrameWidth = searchSize.Width();
     auto searchFrameHeight = searchSize.Height();
 
-    // search icon size
-    auto imageWrapper = layoutWrapper->GetOrCreateChildByIndex(IMAGE_INDEX);
+    LayoutSearchParams params = {
+        .layoutWrapper = layoutWrapper,
+        .layoutProperty = layoutProperty,
+        .searchTheme = searchTheme,
+        .searchFrameWidth = searchFrameWidth,
+        .searchFrameHeight = searchFrameHeight,
+        .isRTL = isRTL
+    };
+    LayoutSearchIcon(params);
+    LayoutSearchButton(params);
+    LayoutCancelButton(params);
+    LayoutCancelImage(params);
+    LayoutTextField(params);
+
+    CalcChildrenHotZone(layoutWrapper);
+}
+
+void SearchLayoutAlgorithm::LayoutSearchIcon(const LayoutSearchParams& params)
+{
+    auto searchIconLeftSpace = params.searchTheme->GetSearchIconLeftSpace().ConvertToPx();
+    auto searchIconRightSpace = params.searchTheme->GetSearchIconRightSpace().ConvertToPx();
+
+    auto imageWrapper = params.layoutWrapper->GetOrCreateChildByIndex(IMAGE_INDEX);
     CHECK_NULL_VOID(imageWrapper);
     auto imageGeometryNode = imageWrapper->GetGeometryNode();
     CHECK_NULL_VOID(imageGeometryNode);
     auto iconFrameWidth = searchIconSizeMeasure_.Width();
     auto iconFrameHeight = searchIconSizeMeasure_.Height();
+    auto layoutProperty = params.layoutProperty;
     auto iconRenderWidth = layoutProperty->GetSearchIconUDSizeValue(Dimension(iconFrameWidth)).ConvertToPx();
 
-    // layout search icon
     auto padding = layoutProperty->CreatePaddingAndBorder();
     float topPadding = padding.top.value_or(0.0f);
-    float bottomPadding = padding.bottom.value_or(0.0f);
-    float leftOffset = padding.left.value_or(0.0f);
+    auto bottomPadding = padding.bottom.value_or(0.0f);
+    auto leftOffset = padding.left.value_or(0.0f);
+    auto rightOffset = padding.right.value_or(0.0f);
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         leftOffset = 0.0f;
     }
-    float iconHorizontalOffset = leftOffset + searchIconLeftSpace + (iconRenderWidth - iconFrameWidth) / 2;
+    float iconHorizontalOffset = params.isRTL ?
+        params.searchFrameWidth - searchIconRightSpace - iconRenderWidth - rightOffset :
+        leftOffset + searchIconLeftSpace + (iconRenderWidth - iconFrameWidth) / 2.0f;
+
     auto searchIconConstraint = imageWrapper->GetLayoutProperty()->GetLayoutConstraint();
     auto iconUserHeight =
-        searchIconConstraint->selfIdealSize.Height().value_or(searchTheme->GetIconHeight().ConvertToPx());
+        searchIconConstraint->selfIdealSize.Height().value_or(params.searchTheme->GetIconHeight().ConvertToPx());
     float imageVerticalOffset = topPadding;
     if (NearEqual(iconUserHeight, iconFrameHeight)) {
-        auto iconInterval = (searchFrameHeight - iconUserHeight) / 2;
+        float iconInterval = (params.searchFrameHeight - iconUserHeight) / 2;
         if (topPadding <= iconInterval && bottomPadding <= iconInterval) {
             imageVerticalOffset = iconInterval;
         } else if (topPadding <= iconInterval && bottomPadding > iconInterval) {
-            imageVerticalOffset = searchFrameHeight - (bottomPadding + iconFrameHeight);
+            imageVerticalOffset = params.searchFrameHeight - (bottomPadding + iconFrameHeight);
         }
     }
-    auto centerVerticalOffset = imageVerticalOffset + iconFrameHeight / 2;
     OffsetF imageOffset(iconHorizontalOffset, imageVerticalOffset);
     imageGeometryNode->SetMarginFrameOffset(imageOffset);
     imageWrapper->Layout();
+}
 
-    // layout textfield
-    auto textFieldWrapper = layoutWrapper->GetOrCreateChildByIndex(TEXTFIELD_INDEX);
-    CHECK_NULL_VOID(textFieldWrapper);
-    auto textFieldGeometryNode = textFieldWrapper->GetGeometryNode();
-    CHECK_NULL_VOID(textFieldGeometryNode);
-    float textFieldHorizontalOffset = leftOffset + searchIconLeftSpace + iconRenderWidth + searchIconRightSpace;
-    float textFieldVerticalOffset = centerVerticalOffset - textFieldGeometryNode->GetFrameSize().Height() / 2;
-    textFieldGeometryNode->SetMarginFrameOffset(OffsetF(textFieldHorizontalOffset, textFieldVerticalOffset));
-    textFieldWrapper->Layout();
+void SearchLayoutAlgorithm::LayoutSearchButton(const LayoutSearchParams& params)
+{
+    auto searchButtonSpace = params.searchTheme->GetSearchButtonSpace().ConvertToPx();
 
-    // cancel button size
-    auto cancelButtonWrapper = layoutWrapper->GetOrCreateChildByIndex(CANCEL_BUTTON_INDEX);
+    auto searchButtonWrapper = params.layoutWrapper->GetOrCreateChildByIndex(BUTTON_INDEX);
+    CHECK_NULL_VOID(searchButtonWrapper);
+    auto searchButtonGeometryNode = searchButtonWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(searchButtonGeometryNode);
+    auto searchButtonFrameSize = searchButtonGeometryNode->GetFrameSize();
+    float searchButtonVerticalOffset = (params.searchFrameHeight - searchButtonFrameSize.Height()) / TWO;
+
+    auto padding = params.layoutProperty->CreatePaddingAndBorder();
+    auto leftOffset = padding.left.value_or(0.0f);
+    auto rightOffset = padding.right.value_or(0.0f);
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        rightOffset = 0.0f;
+    }
+    float searchButtonHorizontalOffset = 0.0f;
+    if (params.isRTL) {
+        searchButtonHorizontalOffset = leftOffset + searchButtonSpace;
+    } else {
+        searchButtonHorizontalOffset =
+            params.searchFrameWidth - searchButtonFrameSize.Width() - searchButtonSpace - rightOffset;
+        searchButtonHorizontalOffset = std::max(searchButtonHorizontalOffset, 0.0f);
+    }
+    auto searchButtonOffset = OffsetF(searchButtonHorizontalOffset, searchButtonVerticalOffset);
+    searchButtonGeometryNode->SetMarginFrameOffset(searchButtonOffset);
+    searchButtonWrapper->Layout();
+}
+
+void SearchLayoutAlgorithm::LayoutCancelButton(const LayoutSearchParams& params)
+{
+    auto dividerSideSpace = params.searchTheme->GetDividerSideSpace().ConvertToPx();
+    auto dividerWidth = params.searchTheme->GetSearchDividerWidth().ConvertToPx();
+
+    auto cancelButtonWrapper = params.layoutWrapper->GetOrCreateChildByIndex(CANCEL_BUTTON_INDEX);
     CHECK_NULL_VOID(cancelButtonWrapper);
     auto cancelButtonGeometryNode = cancelButtonWrapper->GetGeometryNode();
     CHECK_NULL_VOID(cancelButtonGeometryNode);
@@ -609,8 +654,41 @@ void SearchLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto cancelButtonFrameWidth = cancelButtonFrameSize.Width();
     auto cancelButtonFrameHeight = cancelButtonFrameSize.Height();
 
-    // cancel image size
-    auto cancelImageWrapper = layoutWrapper->GetOrCreateChildByIndex(CANCEL_IMAGE_INDEX);
+    auto searchButtonWrapper = params.layoutWrapper->GetOrCreateChildByIndex(BUTTON_INDEX);
+    CHECK_NULL_VOID(searchButtonWrapper);
+    auto searchButtonGeometryNode = searchButtonWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(searchButtonGeometryNode);
+    auto searchButtonFrameSize = searchButtonGeometryNode->GetFrameSize();
+    auto searchButtonHorizontalOffset = searchButtonGeometryNode->GetMarginFrameOffset().GetX();
+
+    auto cancelButtonHorizontalOffset = 0;
+    auto cancelButtonVerticalOffset = (params.searchFrameHeight - cancelButtonFrameHeight) / 2;
+    auto searchButtonNode = searchButtonWrapper->GetHostNode();
+    auto searchButtonEvent = searchButtonNode->GetEventHub<ButtonEventHub>();
+    if (params.isRTL) {
+        if (searchButtonEvent->IsEnabled()) {
+            cancelButtonHorizontalOffset =
+                searchButtonHorizontalOffset + (searchButtonFrameSize.Width() + TWO * dividerSideSpace + dividerWidth);
+        } else {
+            cancelButtonHorizontalOffset = searchButtonHorizontalOffset;
+        }
+    } else {
+        if (searchButtonEvent->IsEnabled()) {
+            auto cancelButtonOffsetToSearchButton = cancelButtonFrameWidth + 2 * dividerSideSpace + dividerWidth;
+            cancelButtonHorizontalOffset =
+                std::max(searchButtonHorizontalOffset - cancelButtonOffsetToSearchButton, 0.0);
+        } else {
+            cancelButtonHorizontalOffset = params.searchFrameWidth - cancelButtonFrameWidth;
+        }
+    }
+    auto cancelButtonOffset = OffsetF(cancelButtonHorizontalOffset, cancelButtonVerticalOffset);
+    cancelButtonGeometryNode->SetMarginFrameOffset(cancelButtonOffset);
+    cancelButtonWrapper->Layout();
+}
+
+void SearchLayoutAlgorithm::LayoutCancelImage(const LayoutSearchParams& params)
+{
+    auto cancelImageWrapper = params.layoutWrapper->GetOrCreateChildByIndex(CANCEL_IMAGE_INDEX);
     CHECK_NULL_VOID(cancelImageWrapper);
     auto cancelImageGeometryNode = cancelImageWrapper->GetGeometryNode();
     CHECK_NULL_VOID(cancelImageGeometryNode);
@@ -618,47 +696,72 @@ void SearchLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto cancelImageFrameWidth = cancelImageFrameSize.Width();
     auto cancelImageFrameHeight = cancelImageFrameSize.Height();
 
-    // layout search button
-    auto searchButtonWrapper = layoutWrapper->GetOrCreateChildByIndex(BUTTON_INDEX);
-    CHECK_NULL_VOID(searchButtonWrapper);
-    auto searchButtonGeometryNode = searchButtonWrapper->GetGeometryNode();
-    CHECK_NULL_VOID(searchButtonGeometryNode);
-    auto searchButtonFrameSize = searchButtonGeometryNode->GetFrameSize();
-    float searchButtonVerticalOffset = centerVerticalOffset - searchButtonFrameSize.Height() / 2;
-    float rightOffset = padding.right.value_or(0.0f);
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-        rightOffset = 0.0f;
-    }
-    float searchButtonHorizontalOffset =
-        searchFrameWidth - searchButtonFrameSize.Width() - searchButtonSpace - rightOffset;
-    searchButtonHorizontalOffset = std::max(searchButtonHorizontalOffset, 0.0f);
-    OffsetF searchButtonOffset = OffsetF(searchButtonHorizontalOffset, searchButtonVerticalOffset);
-    searchButtonGeometryNode->SetMarginFrameOffset(searchButtonOffset);
-    searchButtonWrapper->Layout();
+    auto cancelButtonWrapper = params.layoutWrapper->GetOrCreateChildByIndex(CANCEL_BUTTON_INDEX);
+    CHECK_NULL_VOID(cancelButtonWrapper);
+    auto cancelButtonGeometryNode = cancelButtonWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(cancelButtonGeometryNode);
+    auto cancelButtonHorizontalOffset = cancelButtonGeometryNode->GetMarginFrameOffset().GetX();
+    auto cancelButtonFrameWidth = cancelButtonGeometryNode->GetFrameSize().Width();
 
-    // layout cancel button
-    float cancelButtonHorizontalOffset = 0;
-    float cancelButtonVerticalOffset = centerVerticalOffset - cancelButtonFrameHeight / 2;
-    auto searchButtonNode = searchButtonWrapper->GetHostNode();
-    auto searchButtonEvent = searchButtonNode->GetEventHub<ButtonEventHub>();
-    if (searchButtonEvent->IsEnabled()) {
-        auto cancelButtonOffsetToSearchButton = cancelButtonFrameWidth + 2 * dividerSideSpace + dividerWidth;
-        cancelButtonHorizontalOffset = std::max(searchButtonOffset.GetX() - cancelButtonOffsetToSearchButton, 0.0);
-    } else {
-        cancelButtonHorizontalOffset = searchFrameWidth - cancelButtonFrameWidth - searchButtonSpace - rightOffset;
-    }
-    OffsetF cancelButtonOffset = OffsetF(cancelButtonHorizontalOffset, cancelButtonVerticalOffset);
-    cancelButtonGeometryNode->SetMarginFrameOffset(cancelButtonOffset);
-    cancelButtonWrapper->Layout();
-
-    // layout cancel image
-    float cancelImageVerticalOffset = centerVerticalOffset - cancelImageFrameHeight / 2;
-    float cancelButtonImageCenterOffset = (cancelButtonFrameWidth - cancelImageFrameWidth) / 2;
-    float cancelImageHorizontalOffset = cancelButtonHorizontalOffset + cancelButtonImageCenterOffset;
-    OffsetF cancelImageOffset = OffsetF(cancelImageHorizontalOffset, cancelImageVerticalOffset);
+    auto cancelImageVerticalOffset = (params.searchFrameHeight - cancelImageFrameHeight) / 2;
+    auto cancelButtonImageCenterOffset = (cancelButtonFrameWidth - cancelImageFrameWidth) / 2;
+    auto cancelImageHorizontalOffset = cancelButtonHorizontalOffset + cancelButtonImageCenterOffset;
+    auto cancelImageOffset = OffsetF(cancelImageHorizontalOffset, cancelImageVerticalOffset);
     cancelImageGeometryNode->SetMarginFrameOffset(cancelImageOffset);
     cancelImageWrapper->Layout();
-    CalcChildrenHotZone(layoutWrapper);
 }
 
+void SearchLayoutAlgorithm::LayoutTextField(const LayoutSearchParams& params)
+{
+    auto searchIconLeftSpace = params.searchTheme->GetSearchIconLeftSpace().ConvertToPx();
+    auto searchIconRightSpace = params.searchTheme->GetSearchIconRightSpace().ConvertToPx();
+    auto dividerSideSpace = params.searchTheme->GetDividerSideSpace().ConvertToPx();
+    auto dividerWidth = params.searchTheme->GetSearchDividerWidth().ConvertToPx();
+
+    auto textFieldWrapper = params.layoutWrapper->GetOrCreateChildByIndex(TEXTFIELD_INDEX);
+    CHECK_NULL_VOID(textFieldWrapper);
+    auto textFieldGeometryNode = textFieldWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(textFieldGeometryNode);
+    auto textFieldHorizontalOffset = 0;
+
+    auto searchButtonWrapper = params.layoutWrapper->GetOrCreateChildByIndex(BUTTON_INDEX);
+    CHECK_NULL_VOID(searchButtonWrapper);
+    auto searchButtonGeometryNode = searchButtonWrapper->GetGeometryNode();
+    auto searchButtonFrameSize = searchButtonGeometryNode->GetFrameSize();
+    auto searchButtonHorizontalOffset = searchButtonGeometryNode->GetMarginFrameOffset().GetX();
+
+    auto cancelButtonWrapper = params.layoutWrapper->GetOrCreateChildByIndex(CANCEL_BUTTON_INDEX);
+    CHECK_NULL_VOID(cancelButtonWrapper);
+    auto cancelButtonGeometryNode = cancelButtonWrapper->GetGeometryNode();
+    auto cancelButtonFrameWidth = cancelButtonGeometryNode->GetFrameSize().Width();
+
+    auto searchButtonNode = searchButtonWrapper->GetHostNode();
+    auto searchButtonEvent = searchButtonNode->GetEventHub<ButtonEventHub>();
+
+    auto style = params.layoutProperty->GetCancelButtonStyle().value_or(CancelButtonStyle::INPUT);
+    if (params.isRTL) {
+        if (searchButtonEvent->IsEnabled()) {
+            if (style != CancelButtonStyle::INVISIBLE) {
+                textFieldHorizontalOffset = searchButtonHorizontalOffset + searchButtonFrameSize.Width() +
+                    TWO * dividerSideSpace + dividerWidth + searchIconLeftSpace + cancelButtonFrameWidth;
+            } else {
+                textFieldHorizontalOffset =
+                    searchButtonHorizontalOffset + searchButtonFrameSize.Width() + searchIconLeftSpace;
+            }
+        } else {
+            if (style != CancelButtonStyle::INVISIBLE) {
+                textFieldHorizontalOffset =
+                    searchButtonHorizontalOffset + cancelButtonFrameWidth + searchIconRightSpace;
+            } else {
+                textFieldHorizontalOffset = searchButtonHorizontalOffset + searchIconRightSpace;
+            }
+        }
+    } else {
+        textFieldHorizontalOffset = searchIconLeftSpace + searchIconRightSpace + searchIconRightSpace;
+    }
+
+    auto textFieldVerticalOffset = (params.searchFrameHeight - textFieldGeometryNode->GetFrameSize().Height()) / 2;
+    textFieldGeometryNode->SetMarginFrameOffset(OffsetF(textFieldHorizontalOffset, textFieldVerticalOffset));
+    textFieldWrapper->Layout();
+}
 } // namespace OHOS::Ace::NG

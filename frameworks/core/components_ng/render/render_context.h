@@ -46,10 +46,21 @@
 
 namespace OHOS::Rosen {
 class DrawCmdList;
+class VisualEffect;
+class Filter;
 enum class Gravity;
 }
 
 namespace OHOS::Ace::NG {
+
+typedef enum {
+    OPINC_INVALID,
+    OPINC_NODE,
+    OPINC_SUGGESTED_OR_EXCLUDED,
+    OPINC_PARENT_POSSIBLE,
+    OPINC_NODE_POSSIBLE,
+} OPINC_TYPE_E;
+
 class GeometryNode;
 class RenderPropertyNode;
 class FrameNode;
@@ -178,6 +189,8 @@ public:
 
     virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param) {}
 
+    virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param, bool isLayoutNode) {}
+
     virtual void SetSurfaceChangedCallBack(
         const std::function<void(float, float, float, float)>& callback) {}
     virtual void RemoveSurfaceChangedCallBack() {}
@@ -287,6 +300,13 @@ public:
     virtual void ResetBackBlurStyle() {}
     virtual void ClipWithRect(const RectF& rectF) {}
     virtual void ClipWithRRect(const RectF& rectF, const RadiusF& radiusF) {}
+    virtual void RemoveClipWithRRect() {}
+
+    // visual
+    virtual void UpdateVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect) {}
+    virtual void UpdateBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter) {}
+    virtual void UpdateForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter) {}
+    virtual void UpdateCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) {}
 
     virtual void OpacityAnimation(const AnimationOption& option, double begin, double end) {}
     virtual void ScaleAnimation(const AnimationOption& option, double begin, double end) {}
@@ -493,6 +513,7 @@ public:
 
     // Foreground
     ACE_DEFINE_PROPERTY_GROUP(Foreground, ForegroundProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Foreground, ForegroundEffect, float);
 
     // Background
     ACE_DEFINE_PROPERTY_GROUP(Background, BackgroundProperty);
@@ -518,7 +539,6 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(NodeName, std::string);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SuggestedRenderGroup, bool);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundColor, Color);
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundEffect, float);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundColorStrategy, ForegroundColorStrategy);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(DynamicRangeMode, DynamicRangeMode);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ForegroundColorFlag, bool);
@@ -657,6 +677,13 @@ public:
     }
 
     virtual void SetSurfaceRotation(bool isLock) {}
+
+    virtual Matrix4 GetRevertMatrix()
+    {
+        return Matrix4();
+    }
+
+    virtual void SuggestOpIncNode(bool isOpincNode, bool isNeedCalculate) {}
 
 protected:
     RenderContext() = default;

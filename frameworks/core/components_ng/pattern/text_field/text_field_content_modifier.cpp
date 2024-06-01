@@ -514,10 +514,18 @@ void TextFieldContentModifier::ProcessErrorParagraph(DrawingContext& context, fl
         if (property && property->GetPaddingProperty()) {
             const auto& paddingProperty = property->GetPaddingProperty();
             padding = paddingProperty->left.value_or(CalcLength(0.0)).GetDimension().ConvertToPx() +
-                      paddingProperty->right.value_or(CalcLength(0.0)).GetDimension().ConvertToPx();
+                paddingProperty->right.value_or(CalcLength(0.0)).GetDimension().ConvertToPx();
         }
         errorParagraph->Layout(textFrameRect.Width() - padding);
-        errorParagraph->Paint(canvas, offset.GetX(), textFrameRect.Bottom() - textFrameRect.Top() + errorMargin);
+        auto isRTL = property->GetNonAutoLayoutDirection() == TextDirection::RTL;
+        if (isRTL) {
+            auto responseArea = textFieldPattern->GetResponseArea();
+            auto responseAreaWidth = responseArea ? responseArea->GetAreaRect().Width() : 0.0f;
+            errorParagraph->Paint(canvas, offset.GetX() - responseAreaWidth,
+                textFrameRect.Bottom() - textFrameRect.Top() + errorMargin);
+        } else {
+            errorParagraph->Paint(canvas, offset.GetX(), textFrameRect.Bottom() - textFrameRect.Top() + errorMargin);
+        }
     }
 }
 
@@ -551,7 +559,7 @@ void TextFieldContentModifier::ModifyDecorationInTextStyle(TextStyle& textStyle)
 {
     if (textDecoration_.has_value() && textDecorationColor_.has_value() && textDecorationColorAlpha_) {
         if (textDecorationAnimatable_) {
-            uint8_t alpha = static_cast<int>(std::floor(textDecorationColorAlpha_->Get() + ROUND_VALUE));
+            uint8_t alpha = static_cast<uint8_t>(std::floor(textDecorationColorAlpha_->Get() + ROUND_VALUE));
             if (alpha == 0) {
                 textStyle.SetTextDecoration(TextDecoration::NONE);
                 textStyle.SetTextDecorationColor(textDecorationColor_.value());
@@ -572,7 +580,7 @@ void TextFieldContentModifier::ModifyDecorationInTextStyle(TextStyle& textStyle)
 void TextFieldContentModifier::UpdateTextDecorationMeasureFlag(PropertyChangeFlag& flag)
 {
     if (textDecoration_.has_value() && textDecorationColor_.has_value() && textDecorationColorAlpha_) {
-        uint8_t alpha = static_cast<int>(std::floor(textDecorationColorAlpha_->Get() + ROUND_VALUE));
+        uint8_t alpha = static_cast<uint8_t>(std::floor(textDecorationColorAlpha_->Get() + ROUND_VALUE));
         if (textDecoration_.value() == TextDecoration::UNDERLINE && alpha != textDecorationColor_.value().GetAlpha()) {
             flag |= PROPERTY_UPDATE_MEASURE;
         } else if (textDecoration_.value() == TextDecoration::NONE && alpha != 0.0) {

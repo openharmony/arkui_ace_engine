@@ -72,6 +72,7 @@ template("ace_core_source_set") {
       "common/ace_application_info.cpp",
       "common/ace_engine.cpp",
       "common/ace_engine_ext.cpp",
+      "common/agingadapation/aging_adapation_dialog_util.cpp",
       "common/anr_thread.cpp",
       "common/asset_manager_impl.cpp",
       "common/card_scope.cpp",
@@ -423,7 +424,7 @@ template("ace_core_source_set") {
     }
     if (defined(config.enable_image_compression) &&
         config.enable_image_compression) {
-      deps += [ "//third_party/opencl-headers:libcl" ]
+      external_deps += [ "opencl-headers:libcl" ]
       defines += [ "ENABLE_OPENCL" ]
     }
 
@@ -452,10 +453,6 @@ template("ace_core_source_set") {
         ]
       } else {
         if (ace_use_rosen_drawing) {
-          include_dirs += [
-            "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
-            "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text",
-          ]
           external_deps += [ "graphic_2d:2d_graphics" ]
         }
         external_deps += [ "graphic_2d:librender_service_client" ]
@@ -652,6 +649,7 @@ template("ace_core_ng_source_set") {
       "common/ace_application_info.cpp",
       "common/ace_engine.cpp",
       "common/ace_engine_ext.cpp",
+      "common/agingadapation/aging_adapation_dialog_util.cpp",
       "common/anr_thread.cpp",
       "common/asset_manager_impl.cpp",
       "common/card_scope.cpp",
@@ -918,16 +916,12 @@ template("ace_core_ng_source_set") {
     if (defined(config.web_components_support) &&
         config.web_components_support) {
       if (!is_arkui_x) {
-        include_dirs += [
-          "$ability_runtime_path/interfaces/kits/native/appkit/app",
-          "//foundation/window/window_manager/interfaces/innerkits/wm",
-          "//foundation/graphic/graphic_2d/utils/buffer_handle/export",
-        ]
         deps += [ "$ace_root/frameworks/core/components_ng/pattern/web:ace_core_components_web_pattern_ng_$platform" ]
         sources += [
           "components/web/resource/web_client_impl.cpp",
           "components/web/resource/web_configuration_observer.cpp",
           "components/web/resource/web_delegate.cpp",
+          "components/web/resource/web_javascript_execute_callback.cpp",
           "components/web/resource/web_javascript_result_callback.cpp",
           "components/web/resource/web_resource.cpp",
           "components/web/web_component.cpp",
@@ -958,13 +952,6 @@ template("ace_core_ng_source_set") {
       sources += [
         "animation/native_curve_helper.cpp",
         "common/rosen/rosen_convert_helper.cpp",
-      ]
-      include_dirs += [
-        "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
-        "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
-        "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
-        "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
-        "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export",
       ]
       if (is_ohos) {
         external_deps += [ "graphic_2d:libtexgine" ]
@@ -1026,7 +1013,7 @@ template("ace_core_ng_source_set") {
 
     if (defined(config.enable_image_compression) &&
         config.enable_image_compression) {
-      deps += [ "//third_party/opencl-headers:libcl" ]
+      external_deps += [ "opencl-headers:libcl" ]
       defines += [ "ENABLE_OPENCL" ]
     }
 

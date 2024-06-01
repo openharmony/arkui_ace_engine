@@ -358,6 +358,15 @@ void FormRenderer::OnFormLinkInfoUpdate(const std::vector<std::string>& formLink
     formRendererDelegate_->OnFormLinkInfoUpdate(formLinkInfos);
 }
 
+void FormRenderer::OnEnableForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo, const bool enable)
+{
+    if (!formRendererDelegate_) {
+        HILOG_ERROR("formRendererDelegate is null!");
+        return;
+    }
+    formRendererDelegate_->OnEnableForm(formJsInfo, enable);
+}
+
 void FormRenderer::SetRenderDelegate(const sptr<IRemoteObject>& remoteObj)
 {
     HILOG_INFO("Get renderRemoteObj, add death recipient.");
@@ -468,6 +477,15 @@ void FormRenderer::AttachUIContent(const OHOS::AAFwk::Want& want, const OHOS::Ap
     }
 
     uiContent_->Foreground();
+}
+
+void FormRenderer::GetRectRelativeToWindow(int32_t &top, int32_t &left) const
+{
+    if (!formRendererDelegate_) {
+        HILOG_ERROR("form renderer delegate is null!");
+        return;
+    }
+    formRendererDelegate_->OnGetRectRelativeToWindow(top, left);
 }
 
 void FormRenderer::RecycleForm(std::string& statusData)

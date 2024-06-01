@@ -147,6 +147,11 @@ struct PreviewTextInfo {
     PreviewRange range;
 };
 
+struct SourceAndValueInfo {
+    std::string insertValue;
+    bool isIME = false;
+};
+
 class TextFieldPattern : public ScrollablePattern,
                          public TextDragBase,
                          public ValueChangeObserver,
@@ -226,8 +231,8 @@ public:
     // Obtain the systemWindowsId when switching between windows
     uint32_t GetSCBSystemWindowId();
 
-    void InsertValue(const std::string& insertValue) override;
-    void InsertValueOperation(const std::string& insertValue);
+    void InsertValue(const std::string& insertValue, bool isIME = false) override;
+    void InsertValueOperation(const SourceAndValueInfo& info);
     void UpdateObscure(const std::string& insertValue, bool hasInsertValue);
     void UpdateCounterMargin();
     void CleanCounterNode();
@@ -330,6 +335,7 @@ public:
     void OnValueChanged(bool needFireChangeEvent = true, bool needFireSelectChangeEvent = true) override;
 
     void OnAreaChangedInner() override;
+    void OnHandleAreaChanged() override;
     void OnVisibleChange(bool isVisible) override;
     void HandleCounterBorder();
     std::wstring GetWideText()
@@ -389,11 +395,6 @@ public:
     void SetMovingCaretOffset(const OffsetF& offset)
     {
         movingCaretOffset_ = offset;
-    }
-
-    float GetCaretOffsetX() const
-    {
-        return selectController_->GetCaretRect().GetX();
     }
 
     CaretUpdateType GetCaretUpdateType() const
@@ -676,6 +677,10 @@ public:
         return true;
     }
 
+    void PlayScrollBarAppearAnimation();
+
+    void ScheduleDisappearDelayTask();
+
     bool IsAtTop() const override
     {
         return contentRect_.GetY() == textRect_.GetY();
@@ -718,7 +723,7 @@ public:
         return parentGlobalOffset_;
     }
 
-    RectF GetTextContentRect() const override
+    RectF GetTextContentRect(bool isActualText = false) const override
     {
         return contentRect_;
     }
@@ -813,11 +818,15 @@ public:
     void HandleFocusEvent();
     void SetFocusStyle();
     void ClearFocusStyle();
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
+    void OnIsFocusActiveUpdate(bool isFocusAcitve);
     bool OnBackPressed() override;
     void CheckScrollable();
     void HandleClickEvent(GestureEvent& info);
     bool CheckClickLocation(GestureEvent& info);
     void HandleDoubleClickEvent(GestureEvent& info);
+    void HandleTripleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info);
 
     void HandleSelectionUp();
@@ -1045,7 +1054,8 @@ public:
     void DumpInfo() override;
     void DumpAdvanceInfo() override;
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) override;
-    void NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) override;
+    void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
+        RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) override;
     void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "") override;
     bool CheckAutoSave() override;
     void OnColorConfigurationUpdate() override;
@@ -1157,7 +1167,6 @@ public:
 
     void CleanNodeResponseKeyEvent();
 
-    void OnVirtualKeyboardAreaChanged() override;
     void ScrollPage(bool reverse, bool smooth = false) override;
     void InitScrollBarClickEvent() override {}
     bool IsUnderlineMode();
@@ -1194,6 +1203,17 @@ public:
     {
         autoFillUserName_ = userName;
     }
+    
+    std::string GetAutoFillUserName()
+    {
+        return autoFillUserName_;
+    }
+
+    std::string GetAutoFillNewPassword()
+    {
+        return autoFillNewPassword_;
+    }
+
     void SetAutoFillNewPassword(const std::string& newPassword)
     {
         autoFillNewPassword_ = newPassword;
@@ -1207,7 +1227,7 @@ public:
 
     bool GetIsPreviewText() const
     {
-        return hasPreviewText;
+        return hasPreviewText_;
     }
 
     const Color& GetPreviewDecorationColor() const
@@ -1244,6 +1264,11 @@ public:
         return showKeyBoardOnFocus_;
     }
 
+    void SetSupportPreviewText(bool isSupported)
+    {
+        hasSupportedPreviewText_ = isSupported;
+    }
+
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override
@@ -1258,6 +1283,10 @@ protected:
 
 private:
     void GetTextSelectRectsInRangeAndWillChange();
+    bool BeforeIMEInsertValue(const std::string& insertValue, int32_t offset);
+    void AfterIMEInsertValue(const std::string& insertValue);
+    bool BeforeIMEDeleteValue(const std::string& deleteValue, TextDeleteDirection direction, int32_t offset);
+    void AfterIMEDeleteValue(const std::string& deleteValue, TextDeleteDirection direction);
     void OnAfterModifyDone() override;
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const Offset& offset);
@@ -1435,6 +1464,8 @@ private:
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
     void HandleCountStyle();
     void HandleDeleteOnCounterScene();
+    bool ParseFillContentJsonValue(const std::unique_ptr<JsonValue>& jsonObject,
+        std::unordered_map<std::string, std::variant<std::string, bool, int32_t>>& map);
     void HandleContentSizeChange(const RectF& textRect);
     void UpdatePreviewIndex(int32_t start, int32_t end)
     {
@@ -1444,17 +1475,21 @@ private:
 
     int32_t GetPreviewTextStart() const
     {
-        return hasPreviewText ? previewTextStart_ : selectController_->GetCaretIndex();
+        return hasPreviewText_ ? previewTextStart_ : selectController_->GetCaretIndex();
     }
 
     int32_t GetPreviewTextEnd() const
     {
-        return hasPreviewText ? previewTextEnd_ : selectController_->GetCaretIndex();
+        return hasPreviewText_ ? previewTextEnd_ : selectController_->GetCaretIndex();
     }
 
     bool CheckPreviewTextValidate(PreviewTextInfo info) const;
 
     void CalculatePreviewingTextMovingLimit(const Offset& touchOffset, double& limitL, double& limitR);
+
+    void TwinklingByFocus();
+
+    bool FinishTextPreviewByPreview(const std::string& insertValue);
 
     RectF frameRect_;
     RectF textRect_;
@@ -1589,7 +1624,7 @@ private:
 
     std::queue<int32_t> deleteBackwardOperations_;
     std::queue<int32_t> deleteForwardOperations_;
-    std::queue<std::string> insertValueOperations_;
+    std::queue<SourceAndValueInfo> insertValueOperations_;
     std::queue<InputOperation> inputOperations_;
     bool leftMouseCanMove_ = false;
     bool isLongPress_ = false;
@@ -1602,6 +1637,7 @@ private:
     std::string lastAutoFillPasswordTextValue_;
     bool isSupportCameraInput_ = false;
     std::function<void()> processOverlayDelayTask_;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
     FocuseIndex focusIndex_ = FocuseIndex::TEXT;
     bool isTouchCaret_ = false;
     bool needSelectAll_ = false;
@@ -1626,13 +1662,15 @@ private:
 
     bool isFocusBGColorSet_ = false;
     bool isFocusTextColorSet_ = false;
+    bool isFocusPlaceholderColorSet_ = false;
     Dimension previewUnderlineWidth_ = 2.0_vp;
-    bool hasSupportedPreviewText = true;
-    bool hasPreviewText = false;
-    std::queue<PreviewTextInfo> previewTextOperation;
+    bool hasSupportedPreviewText_ = true;
+    bool hasPreviewText_ = false;
+    std::queue<PreviewTextInfo> previewTextOperation_;
     int32_t previewTextStart_ = -1;
     int32_t previewTextEnd_ = -1;
     bool showKeyBoardOnFocus_ = true;
+    int32_t clickTimes_ = -1;
 };
 } // namespace OHOS::Ace::NG
 

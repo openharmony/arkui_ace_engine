@@ -40,7 +40,7 @@ public:                                                                         
     }                                                                                                          \
                                                                                                                \
 private:                                                                                                       \
-    std::function<type(const std::shared_ptr<BaseEventInfo>& info)> prop##name##Event_;
+    std::function<type(const std::shared_ptr<BaseEventInfo>& info)> prop##name##Event_
 
 namespace OHOS::Ace::NG {
 class WebEventHub : public EventHub {
@@ -169,6 +169,8 @@ public:
     ACE_WEB_EVENT_PROPERTY(OnRenderProcessNotResponding, void);
     ACE_WEB_EVENT_PROPERTY(OnRenderProcessResponding, void);
     ACE_WEB_EVENT_PROPERTY(OnViewportFitChanged, void);
+    ACE_WEB_EVENT_PROPERTY(OnInterceptKeyboardAttach,  WebKeyboardOption);
+    ACE_WEB_EVENT_PROPERTY(OnAdsBlocked, void);
 
 private:
     std::function<void(KeyEventInfo& keyEventInfo)> propOnKeyEvent_;

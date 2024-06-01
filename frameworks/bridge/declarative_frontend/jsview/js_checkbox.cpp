@@ -279,23 +279,21 @@ void JSCheckbox::SetCheckboxStyle(int32_t checkBoxStyle)
 }
 void JSCheckbox::Mark(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        return;
-    }
-
+    auto theme = GetTheme<CheckboxTheme>();
     if (!info[0]->IsObject()) {
+        CheckBoxModel::GetInstance()->SetCheckMarkColor(theme->GetPointColor());
+        CheckBoxModel::GetInstance()->SetCheckMarkSize(Dimension(CHECK_BOX_MARK_SIZE_INVALID_VALUE));
+        CheckBoxModel::GetInstance()->SetCheckMarkWidth(theme->GetCheckStroke());
         return;
     }
 
     auto markObj = JSRef<JSObject>::Cast(info[0]);
     auto strokeColorValue = markObj->GetProperty("strokeColor");
-    Color strokeColor;
-    auto theme = GetTheme<CheckboxTheme>();
+    Color strokeColor = theme->GetPointColor();
     if (!ParseJsColor(strokeColorValue, strokeColor)) {
-        strokeColor = theme->GetPointColor();
+        JSCheckBoxTheme::ObtainCheckMarkColor(strokeColor);
     }
     CheckBoxModel::GetInstance()->SetCheckMarkColor(strokeColor);
-
     auto sizeValue = markObj->GetProperty("size");
     CalcDimension size;
     if ((ParseJsDimensionVp(sizeValue, size)) && (size.Unit() != DimensionUnit::PERCENT) && (size.ConvertToVp() >= 0)) {
@@ -371,8 +369,9 @@ bool JSCheckbox::GetOldPadding(const JSCallbackInfo& info, NG::PaddingPropertyF&
 
 NG::PaddingProperty JSCheckbox::GetNewPadding(const JSCallbackInfo& info)
 {
-    NG::PaddingProperty padding(
-        { NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp) });
+    NG::PaddingProperty padding({
+        NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp)
+    });
     if (info[0]->IsObject()) {
         std::optional<CalcDimension> left;
         std::optional<CalcDimension> right;
@@ -414,8 +413,9 @@ NG::PaddingProperty JSCheckbox::GetPadding(const std::optional<CalcDimension>& t
     const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
     const std::optional<CalcDimension>& right)
 {
-    NG::PaddingProperty padding(
-        { NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp) });
+    NG::PaddingProperty padding({
+        NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp)
+    });
     if (left.has_value()) {
         if (left.value().Unit() == DimensionUnit::CALC) {
             padding.left =

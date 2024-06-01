@@ -214,7 +214,7 @@ protected:
     std::unique_ptr<GestureEventFunc> onActionEndId_;
     std::unique_ptr<GestureEventNoParameter> onActionCancelId_;
     RefPtr<GestureInfo> gestureInfo_;
-    void* userData_;
+    void* userData_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 

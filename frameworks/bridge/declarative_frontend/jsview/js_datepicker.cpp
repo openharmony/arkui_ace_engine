@@ -435,6 +435,7 @@ void JSDatePicker::SetDisappearTextStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
+    JSDatePickerTheme::ObtainTextStyle(textStyle);
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle);
     }
@@ -446,6 +447,7 @@ void JSDatePicker::SetTextStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
+    JSDatePickerTheme::ObtainTextStyle(textStyle);
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle);
     }
@@ -457,6 +459,7 @@ void JSDatePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
+    JSDatePickerTheme::ObtainSelectedTextStyle(textStyle);
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle);
     }
@@ -1292,8 +1295,12 @@ void JSTimePicker::Create(const JSCallbackInfo& info)
     CreateTimePicker(info, paramObject);
 }
 
-void JSTimePicker::Loop(bool isLoop)
+void JSTimePicker::Loop(const JSCallbackInfo& info)
 {
+    bool isLoop = true;
+    if (info[0]->IsBoolean()) {
+        isLoop = info[0]->ToBoolean();
+    }
     TimePickerModel::GetInstance()->SetWheelModeEnabled(isLoop);
 }
 
@@ -1358,6 +1365,7 @@ void JSTimePicker::SetDisappearTextStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
+    JSTimePickerTheme::ObtainTextStyle(textStyle);
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle);
     }
@@ -1369,6 +1377,7 @@ void JSTimePicker::SetTextStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
+    JSTimePickerTheme::ObtainTextStyle(textStyle);
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle);
     }
@@ -1380,6 +1389,7 @@ void JSTimePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
+    JSTimePickerTheme::ObtainSelectedTextStyle(textStyle);
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle);
     }

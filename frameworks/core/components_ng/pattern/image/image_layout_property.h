@@ -32,6 +32,10 @@ struct ImageSizeStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FitOriginalSize, bool);
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("sourceSize", propSourceSize.value_or(SizeF()).ToString().c_str(), filter);
         json->PutExtAttr("fitOriginalSize", propFitOriginalSize.value_or(false) ? "true" : "false", filter);
         json->PutExtAttr("autoResize", propAutoResize.value_or(true) ? "true" : "false", filter);
@@ -71,15 +75,10 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         LayoutProperty::ToJsonValue(json, filter);
-        static const char* OBJECTFITVALUE[] = { "ImageFit.Fill", "ImageFit.Contain", "ImageFit.Cover",
-            "ImageFit.Auto", "ImageFit.FitHeight", "ImageFit.None", "ImageFit.ScaleDown" };
-        static const char* VERTICALALIGNVALUE[] = { "VerticalAlign.NONE", "VerticalAlign.TOP", "VerticalAlign.CENTER",
-            "VerticalAlign.BOTTOM", "VerticalAlign.BASELINE", "VerticalAlign.NONE" };
-        json->PutExtAttr("alt", propAlt_.value_or(ImageSourceInfo("")).GetSrc().c_str(), filter);
-        json->PutExtAttr("objectFit",
-            OBJECTFITVALUE[static_cast<int32_t>(propImageFit_.value_or(ImageFit::COVER))], filter);
-        json->PutExtAttr("verticalAlign",
-            VERTICALALIGNVALUE[static_cast<int32_t>(propVerticalAlign_.value_or(VerticalAlign::BOTTOM))], filter);
+        ACE_PROPERTY_TO_JSON_VALUE(propImageSizeStyle_, ImageSizeStyle);
+        if (GetHasPlaceHolderStyle().has_value()) {
+            TextBackgroundStyle::ToJsonValue(json, GetPlaceHolderStyle(), filter);
+        }
         std::string src;
         if (propImageSourceInfo_.has_value()) {
             src = propImageSourceInfo_->GetSrc();
@@ -91,14 +90,23 @@ public:
                 character = tolower(character);
             }
         }
+        if (filter.IsFastFilter()) {
+            json->PutFixedAttr("src", src.c_str(), filter, FIXED_ATTR_SRC);
+            return;
+        }
+        static const char* OBJECTFITVALUE[] = { "ImageFit.Fill", "ImageFit.Contain", "ImageFit.Cover",
+            "ImageFit.Auto", "ImageFit.FitHeight", "ImageFit.None", "ImageFit.ScaleDown" };
+        static const char* VERTICALALIGNVALUE[] = { "VerticalAlign.NONE", "VerticalAlign.TOP", "VerticalAlign.CENTER",
+            "VerticalAlign.BOTTOM", "VerticalAlign.BASELINE", "VerticalAlign.NONE" };
+        json->PutExtAttr("alt", propAlt_.value_or(ImageSourceInfo("")).GetSrc().c_str(), filter);
+        json->PutExtAttr("objectFit",
+            OBJECTFITVALUE[static_cast<int32_t>(propImageFit_.value_or(ImageFit::COVER))], filter);
+        json->PutExtAttr("verticalAlign",
+            VERTICALALIGNVALUE[static_cast<int32_t>(propVerticalAlign_.value_or(VerticalAlign::BOTTOM))], filter);
         json->PutFixedAttr("src", src.c_str(), filter, FIXED_ATTR_SRC);
         json->PutExtAttr("rawSrc", propImageSourceInfo_->GetSrc().c_str(), filter);
         json->PutExtAttr("moduleName", propImageSourceInfo_->GetModuleName().c_str(), filter);
         json->PutExtAttr("baselineOffset", GetBaselineOffsetValue(Dimension(0)).Value(), filter);
-        ACE_PROPERTY_TO_JSON_VALUE(propImageSizeStyle_, ImageSizeStyle);
-        if (GetHasPlaceHolderStyle().has_value()) {
-            TextBackgroundStyle::ToJsonValue(json, GetPlaceHolderStyle(), filter);
-        }
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         json->PutExtAttr("privacySensitive", host->IsPrivacySensitive(), filter);

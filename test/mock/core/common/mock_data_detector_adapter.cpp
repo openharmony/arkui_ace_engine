@@ -30,9 +30,15 @@ bool DataDetectorAdapter::ShowUIExtensionMenu(
 
 void DataDetectorAdapter::ResponseBestMatchItem(const AISpan& aiSpan) {}
 
+void DataDetectorAdapter::StartAbilityByType(const std::string& type, AAFwk::WantParams& wantParams) {}
+
 std::function<void(const AAFwk::WantParams&)> DataDetectorAdapter::GetOnReceive(
-    const RefPtr<NG::FrameNode>& uiExtNode, NG::RectF aiRect, const RefPtr<NG::FrameNode>& targetNode)
+    NG::RectF aiRect, const RefPtr<NG::FrameNode>& targetNode)
 {
     return [](const AAFwk::WantParams& wantParams) {};
+}
+std::function<void()> GetDetectDelayTask(const std::map<int32_t, AISpan>& aiSpanMap)
+{
+    return []() {};
 }
 } // namespace OHOS::Ace

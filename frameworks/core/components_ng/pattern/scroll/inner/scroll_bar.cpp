@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include <cmath>
 
+#include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "core/animation/curve_animation.h"
 #include "core/animation/curves.h"
@@ -29,6 +30,7 @@ constexpr int32_t BAR_DISAPPRAE_DELAY_DURATION = 2000; // 2000ms
 constexpr double BAR_ADAPT_EPSLION = 1.0;
 constexpr int32_t LONG_PRESS_PAGE_INTERVAL_MS = 100;
 constexpr int32_t LONG_PRESS_TIME_THRESHOLD_MS = 500;
+constexpr int32_t SCROLL_BAR_LAYOUT_INFO_COUNT = 30;
 } // namespace
 
 ScrollBar::ScrollBar()
@@ -122,6 +124,9 @@ void ScrollBar::UpdateScrollBarRegion(
         lastOffset_ == lastOffset && NearEqual(estimatedHeight_, estimatedHeight, 0.000001f) && !isReverseUpdate_) {
         return;
     }
+    if (!NearEqual(estimatedHeight_, estimatedHeight, 0.000001f) || viewPortSize_ != size) {
+        needAddLayoutInfo = true;
+    }
     if (!NearZero(estimatedHeight)) {
         paintOffset_ = offset;
         viewPortSize_ = size;
@@ -137,6 +142,7 @@ void ScrollBar::UpdateScrollBarRegion(
         normalWidthUpdate_ = false;
         isReverseUpdate_ = false;
     }
+    needAddLayoutInfo =false;
 }
 
 void ScrollBar::UpdateActiveRectSize(double activeSize)
@@ -279,6 +285,7 @@ void ScrollBar::SetRectTrickRegion(
             hoverRegion_ = activeRect_ - hoverRegionOffset + hoverRegionSize;
         }
     }
+    AddScrollBarLayoutInfo();
     // If the scrollBar length changes, start the adaptation animation
     if (!NearZero(inactiveSize) && !NearEqual(activeSize, inactiveSize, BAR_ADAPT_EPSLION) && canUseAnimation &&
         !Negative(inactiveMainOffset) && !normalWidthUpdate_) {
@@ -354,6 +361,8 @@ void ScrollBar::SetGestureEvent()
             }
             auto touch = info.GetTouches().front();
             if (touch.GetTouchType() == TouchType::DOWN) {
+                TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "inner scrollBar touch down, panDirection: %{public}u",
+                    scrollBar->GetPanDirection());
                 Point point(touch.GetLocalLocation().GetX(), touch.GetLocalLocation().GetY());
                 bool inRegion = false;
                 if (info.GetSourceDevice() == SourceType::TOUCH) {
@@ -632,7 +641,8 @@ void ScrollBar::ProcessFrictionMotionStop()
 }
 
 void ScrollBar::OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-    TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent)
+    TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+    TouchTestResult& responseLinkResult)
 {
     if (panRecognizer_ && isScrollable_) {
         panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
@@ -641,7 +651,9 @@ void ScrollBar::OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetE
         panRecognizer_->AttachFrameNode(frameNode);
         panRecognizer_->SetTargetComponent(targetComponent);
         panRecognizer_->SetIsSystemGesture(true);
+        panRecognizer_->SetRecognizerType(GestureTypeName::PAN_GESTURE);
         result.emplace_front(panRecognizer_);
+        responseLinkResult.emplace_back(panRecognizer_);
     }
 }
 
@@ -659,12 +671,13 @@ void ScrollBar::ScheduleDisappearDelayTask()
             scrollBar->PlayScrollBarDisappearAnimation();
         });
         taskExecutor->PostDelayedTask(disappearDelayTask_, TaskExecutor::TaskType::UI, BAR_DISAPPRAE_DELAY_DURATION,
-            "ArkUIScrollBarDisappearAnimation");
+            "ArkUIScrollBarInnerDisappearAnimation");
     }
 }
 
 void ScrollBar::OnCollectLongPressTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-    TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent)
+    TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+    TouchTestResult& responseLinkResult)
 {
     if (longPressRecognizer_ && isScrollable_) {
         longPressRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
@@ -673,7 +686,9 @@ void ScrollBar::OnCollectLongPressTarget(const OffsetF& coordinateOffset, const 
         longPressRecognizer_->AttachFrameNode(frameNode);
         longPressRecognizer_->SetTargetComponent(targetComponent);
         longPressRecognizer_->SetIsSystemGesture(true);
+        longPressRecognizer_->SetRecognizerType(GestureTypeName::LONG_PRESS_GESTURE);
         result.emplace_front(longPressRecognizer_);
+        responseLinkResult.emplace_back(longPressRecognizer_);
     }
 }
 
@@ -727,6 +742,146 @@ void ScrollBar::ScheduleCaretLongPress()
             CHECK_NULL_VOID(pattern);
             pattern->HandleLongPress(true);
         },
-        TaskExecutor::TaskType::UI, LONG_PRESS_PAGE_INTERVAL_MS, "ArkUIScrollBarHandleLongPress");
+        TaskExecutor::TaskType::UI, LONG_PRESS_PAGE_INTERVAL_MS, "ArkUIScrollBarInnerHandleLongPress");
+}
+
+void ScrollBar::AddScrollBarLayoutInfo()
+{
+    CHECK_NULL_VOID(needAddLayoutInfo);
+    if (innerScrollBarLayoutInfos_.size() >= SCROLL_BAR_LAYOUT_INFO_COUNT) {
+        innerScrollBarLayoutInfos_.pop_front();
+    }
+    innerScrollBarLayoutInfos_.push_back(InnerScrollBarLayoutInfo({
+        .layoutTime_ = GetSysTimestamp(),
+        .viewPortSize_ = viewPortSize_,
+        .lastOffset_ = lastOffset_,
+        .estimatedHeight_ = estimatedHeight_,
+        .outBoundary_ = outBoundary_,
+        .activeRect_ = activeRect_,
+    }));
+}
+
+void ScrollBar::GetShapeModeDumpInfo()
+{
+    switch (shapeMode_) {
+        case ShapeMode::RECT: {
+            DumpLog::GetInstance().AddDesc("shapeMode: RECT");
+            break;
+        }
+        case ShapeMode::ROUND: {
+            DumpLog::GetInstance().AddDesc("shapeMode: ROUND");
+            break;
+        }
+        case ShapeMode::DEFAULT: {
+            DumpLog::GetInstance().AddDesc("shapeMode: DEFAULT");
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+void ScrollBar::GetPositionModeDumpInfo()
+{
+    switch (positionMode_) {
+        case PositionMode::RIGHT: {
+            DumpLog::GetInstance().AddDesc("positionMode: RIGHT");
+            DumpLog::GetInstance().AddDesc(std::string("padding.right: ").append(padding_.Right().ToString()));
+            break;
+        }
+        case PositionMode::LEFT: {
+            DumpLog::GetInstance().AddDesc("positionMode: LEFT");
+            DumpLog::GetInstance().AddDesc(std::string("padding.left: ").append(padding_.Left().ToString()));
+            break;
+        }
+        case PositionMode::BOTTOM: {
+            DumpLog::GetInstance().AddDesc("positionMode: BOTTOM");
+            DumpLog::GetInstance().AddDesc(std::string("padding.bottom: ").append(padding_.Bottom().ToString()));
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+void ScrollBar::GetAxisDumpInfo()
+{
+    switch (axis_) {
+        case Axis::NONE: {
+            DumpLog::GetInstance().AddDesc("axis: NONE");
+            break;
+        }
+        case Axis::VERTICAL: {
+            DumpLog::GetInstance().AddDesc("axis: VERTICAL");
+            break;
+        }
+        case Axis::HORIZONTAL: {
+            DumpLog::GetInstance().AddDesc("axis: HORIZONTAL");
+            break;
+        }
+        case Axis::FREE: {
+            DumpLog::GetInstance().AddDesc("axis: FREE");
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+void ScrollBar::GetPanDirectionDumpInfo()
+{
+    if (panRecognizer_) {
+        switch (panRecognizer_->GetAxisDirection()) {
+            case Axis::NONE: {
+                DumpLog::GetInstance().AddDesc("panDirection: NONE");
+                break;
+            }
+            case Axis::VERTICAL: {
+                DumpLog::GetInstance().AddDesc("panDirection: VERTICAL");
+                break;
+            }
+            case Axis::HORIZONTAL: {
+                DumpLog::GetInstance().AddDesc("panDirection: HORIZONTAL");
+                break;
+            }
+            case Axis::FREE: {
+                DumpLog::GetInstance().AddDesc("panDirection: FREE");
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    } else {
+        DumpLog::GetInstance().AddDesc("panDirection is null");
+    }
+}
+
+void ScrollBar::DumpAdvanceInfo()
+{
+    DumpLog::GetInstance().AddDesc(std::string("activeRect: ").append(activeRect_.ToString()));
+    DumpLog::GetInstance().AddDesc(std::string("touchRegion: ").append(touchRegion_.ToString()));
+    DumpLog::GetInstance().AddDesc(std::string("hoverRegion: ").append(hoverRegion_.ToString()));
+    DumpLog::GetInstance().AddDesc(std::string("normalWidth: ").append(normalWidth_.ToString()));
+    DumpLog::GetInstance().AddDesc(std::string("activeWidth: ").append(activeWidth_.ToString()));
+    DumpLog::GetInstance().AddDesc(std::string("touchWidth: ").append(touchWidth_.ToString()));
+    DumpLog::GetInstance().AddDesc(std::string("hoverWidth: ").append(hoverWidth_.ToString()));
+    GetShapeModeDumpInfo();
+    GetPositionModeDumpInfo();
+    GetAxisDumpInfo();
+    GetPanDirectionDumpInfo();
+    DumpLog::GetInstance().AddDesc(std::string("hostBorderRadius: ").append(hostBorderRadius_.ToString()));
+    DumpLog::GetInstance().AddDesc(std::string("startReservedHeight: ").append(startReservedHeight_.ToString()));
+    DumpLog::GetInstance().AddDesc(std::string("endReservedHeight: ").append(endReservedHeight_.ToString()));
+    DumpLog::GetInstance().AddDesc(std::string("isScrollable: ").append(std::to_string(isScrollable_)));
+    DumpLog::GetInstance().AddDesc(std::string("isReverse: ").append(std::to_string(isReverse_)));
+    DumpLog::GetInstance().AddDesc("==========================innerScrollBarLayoutInfos==========================");
+    for (const auto& info : innerScrollBarLayoutInfos_) {
+        DumpLog::GetInstance().AddDesc(info.ToString());
+    }
+    DumpLog::GetInstance().AddDesc("==========================innerScrollBarLayoutInfos==========================");
 }
 } // namespace OHOS::Ace::NG

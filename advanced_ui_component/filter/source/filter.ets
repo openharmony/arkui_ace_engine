@@ -15,6 +15,7 @@
 
 import measure from '@ohos.measure'
 import curves from '@ohos.curves'
+import { LengthMetrics } from '@ohos.arkui.node';
 
 const TEXT_HOT_AREA_WIDTH: number = 8
 const LIST_ROW_HEIGHT: number = 40
@@ -25,6 +26,7 @@ const ARROW_ANIMATION_DURATION: number = 200
 const ANIMATION_DURATION_250: number = 250
 const ANIMATION_DURATION_100: number = 100
 const FILTER_TOP_PADDING: number = 8
+const FILTER_BAR_MARGIN: number = 8
 const SEPARATOR_HEIGHT: number = 16
 const SEPARATOR_WIDTH: number = 1
 const FLOAT_OPACITY: number = 0.95
@@ -153,15 +155,15 @@ struct ListFilterRow {
                   style: BorderStyle.Solid
                 })
                 .padding({
-                  left: TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH,
-                  right: TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH
+                  start: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH),
+                  end: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH)
                 })
               },
               normal: {
                 .border({
                   radius: $r('sys.float.ohos_id_corner_radius_clicked'),
                   width: 0 })
-                .padding({ left: TEXT_HOT_AREA_WIDTH, right: TEXT_HOT_AREA_WIDTH })
+                .padding({ start: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH), end: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH) })
               }
             })
             .backgroundColor(this.isBackgroundHoverRow[colIndex] ? this.backgroundColorRow[colIndex] : TRANS_COLOR)
@@ -196,7 +198,7 @@ struct ListFilterRow {
                 })
               }
             })
-            .margin({ left: colIndex == 0 ? -TEXT_HOT_AREA_WIDTH : 0 })
+            .margin({ start: LengthMetrics.vp(colIndex === 0 ? -TEXT_HOT_AREA_WIDTH : 0) })
             .tabIndex(colIndex == 0 ? this.rowIndex : -1)
           })
         }
@@ -393,7 +395,7 @@ struct MultiFilterRow {
             textContent: this.filterRow?.options[0].toString(),
             fontSize: FILTER_FONT_SIZE
           })) + (TEXT_HOT_AREA_WIDTH * 2))
-          .margin({ left: -TEXT_HOT_AREA_WIDTH })
+          .margin({ start: LengthMetrics.vp(-TEXT_HOT_AREA_WIDTH) })
           .fontSize($r('sys.float.ohos_id_text_size_body3'))
           .fontColor(this.colorRow[0])
           .fontWeight(this.fontWeightRow[0])
@@ -442,15 +444,15 @@ struct MultiFilterRow {
                 style: BorderStyle.Solid
               })
               .padding({
-                left: TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH,
-                right: TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH
+                start: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH),
+                end: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH)
               })
             },
             normal: {
               .border({
                 radius: $r('sys.float.ohos_id_corner_radius_clicked'),
                 width: 0 })
-              .padding({ left: TEXT_HOT_AREA_WIDTH, right: TEXT_HOT_AREA_WIDTH })
+              .padding({ start: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH), end: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH) })
             }
           })
           .tabIndex(this.rowIndex)
@@ -511,15 +513,18 @@ struct MultiFilterRow {
                       style: BorderStyle.Solid
                     })
                     .padding({
-                      left: TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH,
-                      right: TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH
+                      start: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH),
+                      end: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH)
                     })
                   },
                   normal: {
                     .border({
                       radius: $r('sys.float.ohos_id_corner_radius_clicked'),
                       width: 0 })
-                    .padding({ left: TEXT_HOT_AREA_WIDTH, right: TEXT_HOT_AREA_WIDTH })
+                    .padding({
+                      start: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH),
+                      end: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH)
+                    })
                   }
                 })
                 .tabIndex(-1)
@@ -530,7 +535,7 @@ struct MultiFilterRow {
           }
         }.alignSelf(ItemAlign.Stretch)
       }.width(PERCENT_100)
-      .padding({ right: $r('sys.float.ohos_id_max_padding_end') })
+      .padding({ end: LengthMetrics.resource($r('sys.float.ohos_id_max_padding_end')) })
       .onAreaChange((_oldValue: Area, newValue: Area) => {
         this.filterColumnWidth = vp2px(parseInt(newValue.width.toString(), 0))
         if (this.twoLineModeItemNumRow.value === 0) {
@@ -542,7 +547,7 @@ struct MultiFilterRow {
           } else {
             this.arrowShowStateRow.value = false
           }
-        } else if (this.filterColumnWidth !== this.lastFilterColumnWidth){
+        } else if (this.filterColumnWidth !== this.lastFilterColumnWidth) {
           let curLineSum = this.calcMultiFilterRowItemNum()
           if (this.filterRow && curLineSum < this.filterRow.options.length - 1) {
             if (!this.arrowShowStateRow.value || this.isArrowIconDown.value) {
@@ -562,7 +567,10 @@ struct MultiFilterRow {
 
     }.width(PERCENT_100)
     .alignItems(VerticalAlign.Top)
-    .padding({ left: $r('sys.float.ohos_id_max_padding_start'), right: $r('sys.float.ohos_id_max_padding_end') })
+    .padding({
+      start: LengthMetrics.resource($r('sys.float.ohos_id_max_padding_start')),
+      end: LengthMetrics.resource($r('sys.float.ohos_id_max_padding_end'))
+    })
   }
 }
 
@@ -821,15 +829,15 @@ export struct Filter {
                 Text(this.additionFilters.name.toString())
                   .fontSize($r('sys.float.ohos_id_text_size_body3'))
                   .fontColor($r('sys.color.ohos_id_color_text_secondary'))
-                  .margin({ left: TEXT_HOT_AREA_WIDTH, right: TEXT_HOT_AREA_WIDTH })
-                  .padding({ left: $r('sys.float.ohos_id_max_padding_start')})
+                  .margin({ start: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH), end: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH) })
+                  .padding({ start: LengthMetrics.resource($r('sys.float.ohos_id_max_padding_start'))})
                 Row()
                   .width(SEPARATOR_WIDTH)
                   .height(SEPARATOR_HEIGHT)
                   .backgroundColor($r('sys.color.ohos_id_color_list_separator'))
               }
             }.height(PERCENT_100)
-            .margin({ left: -TEXT_HOT_AREA_WIDTH })
+            .margin({ start: LengthMetrics.vp(-TEXT_HOT_AREA_WIDTH) })
 
             ForEach(this.additionFilters.options, (option: Array<ResourceStr>, index: number) => {
               ListItem() {
@@ -885,15 +893,15 @@ export struct Filter {
                     style: BorderStyle.Solid
                   })
                   .padding({
-                    left: TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH,
-                    right: TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH
+                    start: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH),
+                    end: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH)
                   })
                 },
                 normal: {
                   .border({
                     radius: $r('sys.float.ohos_id_corner_radius_clicked'),
                     width: 0 })
-                  .padding({ left: TEXT_HOT_AREA_WIDTH, right: TEXT_HOT_AREA_WIDTH })
+                  .padding({ start: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH), end: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH) })
                 }
               })
               .onClick(() => {
@@ -1007,7 +1015,7 @@ export struct Filter {
               .focusable(true)
           }
           .height(LIST_ROW_HEIGHT)
-          .margin({ left: 8 })
+          .margin({ start: LengthMetrics.vp(FILTER_BAR_MARGIN) })
           .focusable(true)
         }.height(PERCENT_100)
         .alignItems(VerticalAlign.Center)
@@ -1092,7 +1100,7 @@ export struct Filter {
     }
     .width(PERCENT_100)
     .height(this.floatFilterBarHeight)
-    .padding({ left: FOCUS_BORDER_WIDTH, right: FOCUS_BORDER_WIDTH})
+    .padding({ start: LengthMetrics.vp(FOCUS_BORDER_WIDTH), end: LengthMetrics.vp(FOCUS_BORDER_WIDTH)})
     .backgroundColor($r('sys.color.ohos_id_color_background'))
     .opacity(FLOAT_OPACITY)
     .clip(true)

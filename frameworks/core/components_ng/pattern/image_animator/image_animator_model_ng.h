@@ -37,6 +37,7 @@ public:
     void SetOnCancel(std::function<void()>&& OnCancel) override;
     void SetOnFinish(std::function<void()>&& OnFinish) override;
 
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetImages(FrameNode* frameNode, const std::vector<ImageProperties>& images);
     static void SetIsReverse(FrameNode* frameNode, bool isReverse);
     static void SetDuration(FrameNode* frameNode, int32_t duration);
@@ -44,6 +45,18 @@ public:
     static void SetFixedSize(FrameNode* frameNode, bool fixedSize);
     static void SetFillMode(FrameNode* frameNode, int32_t fillMode);
     static void SetIteration(FrameNode* frameNode, int32_t iteration);
+    static bool IsReverse(FrameNode* frameNode);
+    static int32_t GetDuration(FrameNode* frameNode);
+    static int32_t GetState(FrameNode* frameNode);
+    static bool IsFixedSize(FrameNode* frameNode);
+    static int32_t GetFillMode(FrameNode* frameNode);
+    static int32_t GetIteration(FrameNode* frameNode);
+    static int32_t GetImagesSize(FrameNode* frameNode);
+    static void SetOnStart(FrameNode* frameNode, std::function<void()>&& onStart);
+    static void SetOnPause(FrameNode* frameNode, std::function<void()>&& onPause);
+    static void SetOnRepeat(FrameNode* frameNode, std::function<void()>&& onRepeat);
+    static void SetOnCancel(FrameNode* frameNode, std::function<void()>&& onCancel);
+    static void SetOnFinish(FrameNode* frameNode, std::function<void()>&& onFinish);
 private:
     static RefPtr<ImageAnimatorPattern> GetImageAnimatorPattern();
     static RefPtr<ImageAnimatorPattern> GetImageAnimatorPattern(FrameNode* frameNode);

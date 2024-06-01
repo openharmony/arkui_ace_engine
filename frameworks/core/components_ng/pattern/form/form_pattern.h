@@ -87,16 +87,31 @@ public:
         formLinkInfos_ = infos;
     }
 
+    void GetRectRelativeToWindow(int32_t &top, int32_t &left);
+
     bool IsJsCard() const
     {
         return isJsCard_;
     }
+
+    RefPtr<UINode> FindUINodeByTag(const std::string &tag);
 
     void SetObscured(bool isObscured)
     {
         isFormObscured_ = isObscured;
     }
 
+    void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId);
+
+    void OnAccessibilityChildTreeDeregister();
+
+    void OnAccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info);
+
+    void OnLanguageConfigurationUpdate() override;
+
+    void GetTimeLimitResource(std::string &content);
+
+    void UpdateTimeLimitResource(std::string &content);
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -138,20 +153,25 @@ private:
     void DeleteImageNodeAfterRecover();
     RefPtr<FrameNode> GetImageNode();
     void HandleStaticFormEvent(const PointF& touchPoint);
+    void ProcDeleteImageNode(bool isRecover);
+    void HandleEnableForm(const bool enable);
 
     void InitClickEvent();
     void HandleTouchDownEvent(const TouchEventInfo& event);
     void HandleTouchUpEvent(const TouchEventInfo& event);
 
     void LoadFormSkeleton();
+    void LoadDisableFormStyle();
+    void RemoveDisableFormStyle();
     int32_t GetFormDimensionHeight(int32_t dimension);
     void RemoveFormSkeleton();
     RefPtr<FrameNode> CreateColumnNode();
+    RefPtr<FrameNode> CreateTimeLimitNode();
     RefPtr<FrameNode> CreateRectNode(const RefPtr<FrameNode>& parent, const CalcSize& idealSize,
         const MarginProperty& margin, uint32_t fillColor, double opacity);
     void CreateSkeletonView(const RefPtr<FrameNode>& parent, const std::shared_ptr<FormSkeletonParams>& params,
         int32_t dimensionHeight);
-
+    
     // used by ArkTS Card, for RSSurfaceNode from FRS,
     RefPtr<RenderContext> externalRenderContext_;
 
@@ -175,6 +195,7 @@ private:
     TimeStamp touchDownTime_;
     bool shouldResponseClick_ = false;
     Offset lastTouchLocation_;
+    ColorMode colorMode = ColorMode::LIGHT;
 
     bool isFormObscured_ = false;
     bool isJsCard_ = true;

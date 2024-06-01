@@ -158,7 +158,7 @@ void JSRenderingContext::JSBind(BindingTarget globalObj)
     JSClass<JSRenderingContext>::CustomMethod("startImageAnalyzer", &JSRenderingContext::JsStartImageAnalyzer);
     JSClass<JSRenderingContext>::CustomMethod("stopImageAnalyzer", &JSRenderingContext::JsStopImageAnalyzer);
 
-    // Register the "CanvasRenderingContext2D" to the golbal object of the vm
+    // Register the "CanvasRenderingContext2D" to the global object of the vm
     JSClass<JSRenderingContext>::Bind(globalObj, JSRenderingContext::Constructor, JSRenderingContext::Destructor);
 }
 
@@ -246,12 +246,18 @@ void JSRenderingContext::JsTransferFromImageBitmap(const JSCallbackInfo& info)
         return;
     }
     auto jsImage = (JSRenderImage*)nativeObj;
-    uint32_t id = jsImage->GetContextId();
-
-    RefPtr<AceType> offscreenPattern = JSOffscreenRenderingContext::GetOffscreenPattern(id);
+    CHECK_NULL_VOID(jsImage);
     auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
     CHECK_NULL_VOID(canvasRenderingContext2DModel);
-    canvasRenderingContext2DModel->SetTransferFromImageBitmap(canvasPattern_, offscreenPattern);
+#ifdef PIXEL_MAP_SUPPORTED
+    auto pixelMap = jsImage->GetPixelMap();
+    CHECK_NULL_VOID(pixelMap);
+    canvasRenderingContext2DModel->TransferFromImageBitmap(canvasPattern_, pixelMap);
+#else
+    auto imageData = jsImage->GetImageData();
+    CHECK_NULL_VOID(imageData);
+    canvasRenderingContext2DModel->TransferFromImageBitmap(canvasPattern_, imageData);
+#endif
 }
 
 napi_value CreateErrorValue(napi_env env, int32_t errCode, const std::string& errMsg = "")

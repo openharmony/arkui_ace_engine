@@ -25,10 +25,12 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
+#include "base/utils/utils.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/picker/picker_data.h"
 #include "core/components_ng/animation/geometry_transition.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_type_define.h"
 #include "core/components_ng/pattern/overlay/content_cover_param.h"
@@ -75,7 +77,7 @@ struct GatherNodeChildInfo {
 };
 
 // StageManager is the base class for root render node to perform page switch.
-class ACE_EXPORT OverlayManager : public virtual AceType {
+class ACE_FORCE_EXPORT OverlayManager : public virtual AceType {
     DECLARE_ACE_TYPE(OverlayManager, AceType);
 
 public:
@@ -309,6 +311,8 @@ public:
     void RemoveFilterAnimation();
     void RemoveEventColumn();
     void UpdateContextMenuDisappearPosition(const NG::OffsetF& offset);
+    void ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::FrameNode>& dragPreviewNode,
+        const NG::OffsetF& offset);
 
     void ResetContextMenuDragHideFinished()
     {
@@ -377,7 +381,12 @@ public:
         std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack,
         const RefPtr<FrameNode>& targetNode);
     void CloseSheet(int32_t targetId);
-
+    void InitSheetMask(
+        const RefPtr<FrameNode>& maskNode, const RefPtr<FrameNode>& sheetNode, const SheetStyle& sheetStyle);
+    bool IsModalEmpty() const
+    {
+        return modalStack_.empty();
+    }
     void DismissSheet();
     void DismissContentCover();
     void SheetSpringBack();
@@ -386,7 +395,23 @@ public:
     {
         dismissTargetId_ = targetId;
     }
-
+    void SetDismissSheet(int32_t sheetId)
+    {
+        dismissSheetId_ = sheetId;
+    }
+    int32_t GetDismissSheet() const
+    {
+        return dismissSheetId_;
+    }
+    bool IsRootExpansive() const
+    {
+        auto rootNode = rootNodeWeak_.Upgrade();
+        CHECK_NULL_RETURN(rootNode, false);
+        auto layoutProp = DynamicCast<FrameNode>(rootNode)->GetLayoutProperty();
+        CHECK_NULL_RETURN(layoutProp, false);
+        const auto& opts = layoutProp->GetSafeAreaExpandOpts();
+        return opts && opts->Expansive();
+    }
     void RemoveSheetNode(const RefPtr<FrameNode>& sheetNode);
 
     void DestroySheet(const RefPtr<FrameNode>& sheetNode, int32_t targetId);
@@ -399,8 +424,6 @@ public:
     void PopTopModalNode();
 
     void DeleteModalNode(int32_t targetId, RefPtr<FrameNode>& modalNode, bool isModal, bool needOnWillDisappear);
-
-    void RemoveSheetMask(RefPtr<FrameNode>& sheetNode, RefPtr<UINode>& rootNode);
 
     void BindKeyboard(const std::function<void()>& keyboardBuilder, int32_t targetId);
     void BindKeyboardWithNode(const RefPtr<UINode>& keyboard, int32_t targetId);
@@ -418,7 +441,7 @@ public:
     SizeF CaculateMenuSize(const RefPtr<FrameNode>& menuNode, const std::string& longestContent, int32_t menuSize);
     bool ShowUIExtensionMenu(const RefPtr<NG::FrameNode>& uiExtNode, const NG::RectF& aiRect,
         const std::string& longestContent, int32_t menuSize, const RefPtr<NG::FrameNode>& targetNode);
-    void CloseUIExtensionMenu(const std::function<void(const std::string&)>& onClickMenu, int32_t targetId);
+    void CloseUIExtensionMenu(int32_t targetId);
 
     void MarkDirty(PropertyChangeFlag flag);
     void MarkDirtyOverlay();
@@ -460,9 +483,9 @@ public:
     void DismissPopup();
 
     void MountGatherNodeToRootNode(const RefPtr<FrameNode>& frameNode,
-        std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo);
+        const std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo);
     void MountGatherNodeToWindowScene(const RefPtr<FrameNode>& frameNode,
-        std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo,
+        const std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo,
         const RefPtr<UINode>& windowScene);
     void RemoveGatherNode();
     void RemoveGatherNodeWithAnimation();
@@ -498,6 +521,17 @@ public:
         }
     }
     void DumpOverlayInfo() const;
+    void ReloadBuilderNodeConfig();
+
+    bool IsMenuShow() const
+    {
+        return isMenuShow_;
+    }
+
+    void SetIsMenuShow(bool isMenuShow)
+    {
+        isMenuShow_ = isMenuShow;
+    }
 
 private:
     void PopToast(int32_t targetId);
@@ -548,6 +582,8 @@ private:
     void FireModalPageHide();
 
     void SetSheetBackgroundBlurStyle(const RefPtr<FrameNode>& sheetNode, const BlurStyleOption& bgBlurStyle);
+    void SetSheetBorderWidth(const RefPtr<FrameNode>& sheetNode, const RefPtr<SheetTheme>& sheetTheme,
+        const NG::SheetStyle& sheetStyle);
     void SetSheetBackgroundColor(const RefPtr<FrameNode>& sheetNode, const RefPtr<SheetTheme>& sheetTheme,
         const NG::SheetStyle& sheetStyle);
 
@@ -601,6 +637,7 @@ private:
     RefPtr<FrameNode> GetDialogNodeWithExistContent(const RefPtr<UINode>& node);
     void RegisterDialogLifeCycleCallback(const RefPtr<FrameNode>& dialog, const DialogProperties& dialogProps);
     void CustomDialogRecordEvent(const DialogProperties& dialogProps);
+    RefPtr<UINode> RebuildCustomBuilder(RefPtr<UINode>& contentNode);
 
     void DumpPopupMapInfo() const;
     void DumpMapInfo(
@@ -630,6 +667,7 @@ private:
     WeakPtr<UINode> rootNodeWeak_;
     int32_t dialogCount_ = 0;
     int32_t dismissTargetId_ = 0;
+    int32_t dismissSheetId_ = 0;
     int32_t dismissDialogId_ = 0;
     std::unordered_map<int32_t, int32_t> maskNodeIdMap_;
     int32_t subWindowId_ = -1;
@@ -667,6 +705,7 @@ private:
     bool hasGatherNode_ {false};
     WeakPtr<FrameNode> gatherNodeWeak_;
     std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo_;
+    bool isMenuShow_ = false;
 };
 } // namespace OHOS::Ace::NG
 

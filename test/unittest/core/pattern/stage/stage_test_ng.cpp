@@ -1298,6 +1298,36 @@ HWTEST_F(StageTestNg, PageTransitionModelTest001, TestSize.Level1)
     stageNode->GetPattern<PagePattern>()->GetTopTransition()->userCallback_(RouteType::PUSH, 2);
     EXPECT_EQ(iTemp, 0);
 }
+
+/**
+ * @tc.name: PageTransitionModelTest002
+ * @tc.desc: Testing .
+ * @tc.type: FUNC
+ */
+HWTEST_F(StageTestNg, PageTransitionModelTest002, TestSize.Level1)
+{
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    stageNode->pattern_ = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
+    ViewStackProcessor::GetInstance()->SetPageNode(stageNode);
+    PageTransitionModelNG pageTransitionModel;
+    PageTransitionOption option;
+    pageTransitionModel.CreateTransition(PageTransitionType::ENTER, option);
+    /**
+     * @tc.steps: step1. SetSlideEffect is START.
+     * @tc.expected: set Success;
+     */
+    pageTransitionModel.SetSlideEffect(SlideEffect::START);
+    EXPECT_EQ(stageNode->GetPattern<PagePattern>()->GetTopTransition()->slide_, SlideEffect::START);
+
+    /**
+     * @tc.steps: step2. SetSlideEffect is END.
+     * @tc.expected: set Success;
+     */
+    pageTransitionModel.SetSlideEffect(SlideEffect::END);
+    EXPECT_EQ(stageNode->GetPattern<PagePattern>()->GetTopTransition()->slide_, SlideEffect::END);
+}
+
 /**
  * @tc.name: StageLayoutAlgorithmTest001
  * @tc.desc: Testing .

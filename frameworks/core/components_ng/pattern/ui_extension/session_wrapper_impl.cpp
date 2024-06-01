@@ -136,7 +136,9 @@ void SessionWrapperImpl::InitAllCallback()
                 [weak, errcode] {
                     auto pattern = weak.Upgrade();
                     CHECK_NULL_VOID(pattern);
-                    pattern->FireOnErrorCallback(static_cast<int32_t>(errcode), START_FAIL_NAME, START_FAIL_MESSAGE);
+                    int32_t code = pattern->IsCompatibleOldVersion()
+                        ? static_cast<int32_t>(errcode) : ERROR_CODE_UIEXTENSION_FOREGROUND_FAILED;
+                    pattern->FireOnErrorCallback(code, START_FAIL_NAME, START_FAIL_MESSAGE);
                 },
                 TaskExecutor::TaskType::UI, "ArkUIUIExtensionForegroundError");
         }
@@ -147,8 +149,10 @@ void SessionWrapperImpl::InitAllCallback()
                 [weak, errcode] {
                     auto pattern = weak.Upgrade();
                     CHECK_NULL_VOID(pattern);
+                    int32_t code = pattern->IsCompatibleOldVersion()
+                        ? static_cast<int32_t>(errcode) : ERROR_CODE_UIEXTENSION_BACKGROUND_FAILED;
                     pattern->FireOnErrorCallback(
-                        static_cast<int32_t>(errcode), BACKGROUND_FAIL_NAME, BACKGROUND_FAIL_MESSAGE);
+                        code, BACKGROUND_FAIL_NAME, BACKGROUND_FAIL_MESSAGE);
                 },
                 TaskExecutor::TaskType::UI, "ArkUIUIExtensionBackgroundError");
         }
@@ -159,8 +163,10 @@ void SessionWrapperImpl::InitAllCallback()
                 [weak, errcode] {
                     auto pattern = weak.Upgrade();
                     CHECK_NULL_VOID(pattern);
+                    int32_t code = pattern->IsCompatibleOldVersion()
+                        ? static_cast<int32_t>(errcode) : ERROR_CODE_UIEXTENSION_DESTRUCTION_FAILED;
                     pattern->FireOnErrorCallback(
-                        static_cast<int32_t>(errcode), TERMINATE_FAIL_NAME, TERMINATE_FAIL_MESSAGE);
+                        code, TERMINATE_FAIL_NAME, TERMINATE_FAIL_MESSAGE);
                 },
                 TaskExecutor::TaskType::UI, "ArkUIUIExtensionDestructionError");
         }
@@ -172,7 +178,7 @@ void SessionWrapperImpl::InitAllCallback()
             [weak, code, want, sessionType]() {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
-                if (sessionType == SessionType::UI_EXTENSION_ABILITY) {
+                if (sessionType == SessionType::UI_EXTENSION_ABILITY && pattern->IsCompatibleOldVersion()) {
                     pattern->FireOnResultCallback(code, want);
                 } else {
                     pattern->FireOnTerminatedCallback(code, MakeRefPtr<WantWrapOhos>(want));
@@ -238,7 +244,8 @@ void SessionWrapperImpl::InitAllCallback()
 /************************************************ End: Initialization *************************************************/
 
 /************************************************ Begin: About session ************************************************/
-void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, bool isAsyncModalBinding)
+void SessionWrapperImpl::CreateSession(
+    const AAFwk::Want& want, bool isAsyncModalBinding, bool isCallerSystem)
 {
     UIEXT_LOGI("The session is created with want = %{private}s", want.ToString().c_str());
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -279,6 +286,7 @@ void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, bool isAsyncModa
         .rootToken_ = (isTransferringCaller_ && parentToken) ? parentToken : callerToken,
         .want = wantPtr,
         .isAsyncModalBinding_ = isAsyncModalBinding,
+        .isModal_ = !isCallerSystem,
     };
     session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
     CHECK_NULL_VOID(session_);
@@ -463,7 +471,7 @@ void SessionWrapperImpl::OnDisconnect(bool isAbnormal)
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->OnDisconnect(isAbnormal);
-            if (sessionType == SessionType::UI_EXTENSION_ABILITY) {
+            if (sessionType == SessionType::UI_EXTENSION_ABILITY && pattern->IsCompatibleOldVersion()) {
                 pattern->FireOnReleaseCallback(static_cast<int32_t>(isAbnormal));
                 return;
             }
@@ -563,6 +571,9 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
     std::shared_ptr<Rosen::RSTransaction> transaction;
     auto parentSession = session_->GetParentSession();
     auto reason = parentSession ? parentSession->GetSizeChangeReason() : session_->GetSizeChangeReason();
+    auto persistentId = parentSession ? parentSession->GetPersistentId() : session_->GetPersistentId();
+    ACE_SCOPED_TRACE("NotifyDisplayArea id: %d, reason [%d]", persistentId, reason);
+    UIEXT_LOGD("NotifyDisplayArea id: %{public}d, reason = %{public}d", persistentId, reason);
     if (reason == Rosen::SizeChangeReason::ROTATION) {
         if (transaction_.lock()) {
             transaction = transaction_.lock();
@@ -570,8 +581,11 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
         } else if (auto transactionController = Rosen::RSSyncTransactionController::GetInstance()) {
             transaction = transactionController->GetRSTransaction();
         }
-        if (transaction && parentSession) {
-            transaction->SetDuration(pipeline->GetSyncAnimationOption().GetDuration());
+        if (transaction) {
+            transaction->SetHostPid(AceApplicationInfo::GetInstance().GetPid());
+            if (parentSession) {
+                transaction->SetDuration(pipeline->GetSyncAnimationOption().GetDuration());
+            }
         }
     }
     session_->UpdateRect({ std::round(displayArea_.Left()), std::round(displayArea_.Top()),

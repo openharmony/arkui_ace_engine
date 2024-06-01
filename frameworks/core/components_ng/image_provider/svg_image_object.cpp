@@ -41,8 +41,8 @@ RefPtr<SvgDomBase> SvgImageObject::GetSVGDom() const
     return svgDomBase_;
 }
 
-void SvgImageObject::MakeCanvasImage(
-    const RefPtr<ImageLoadingContext>& ctx, const SizeF& /*resizeTarget*/, bool /*forceResize*/, bool /*syncLoad*/)
+void SvgImageObject::MakeCanvasImage(const RefPtr<ImageLoadingContext>& ctx, const SizeF& /*resizeTarget*/,
+    bool /*forceResize*/, bool /*syncLoad*/, bool /*loadInVipChannel*/)
 {
     CHECK_NULL_VOID(GetSVGDom());
     // just set svgDom to canvasImage
@@ -64,7 +64,6 @@ bool SvgImageObject::MakeSvgDom(const RefPtr<ImageData>& data, const ImageSource
 #endif
     CHECK_NULL_RETURN(svgDomBase_, false);
     imageSize_ = svgDomBase_->GetContainerSize();
-
     if (imageSize_.IsNonPositive()) {
         TAG_LOGI(AceLogTag::ACE_IMAGE,
             "[Engine Log] [Image] %{public}s doesn't have an intrinsic size. The developer must set a size for it.",

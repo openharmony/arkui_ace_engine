@@ -112,6 +112,16 @@ public:
         needSetInvisible_ = needSetInvisible;
     }
 
+    bool IsOnModeSwitchAnimation()
+    {
+        return isOnModeSwitchAnimation_;
+    }
+
+    void SetDoingModeSwitchAnimationFlag(bool isOnAnimation)
+    {
+        isOnModeSwitchAnimation_ = isOnAnimation;
+    }
+
     std::list<std::shared_ptr<AnimationUtils::Animation>>& GetPushAnimations()
     {
         return pushAnimations_;
@@ -174,6 +184,22 @@ public:
 
     float CheckLanguageDirection();
 
+    void RemoveDialogDestination();
+
+    void SetNavigationPathInfo(const std::string& moduleName, const std::string& pagePath)
+    {
+        navigationPathInfo_.clear();
+        navigationPathInfo_.append(NAVIGATION_MODULE_NAME);
+        navigationPathInfo_ += ": " + moduleName + ", ";
+        navigationPathInfo_.append(NAVIGATION_PAGE_PATH);
+        navigationPathInfo_ += ": " + pagePath;
+    }
+
+    const std::string& GetNavigationPathInfo() const
+    {
+        return navigationPathInfo_;
+    }
+
 private:
     bool UpdateNavDestinationVisibility(const RefPtr<NavDestinationGroupNode>& navDestination,
         const RefPtr<UINode>& remainChild, int32_t index, size_t destinationSize);
@@ -183,20 +209,26 @@ private:
     void RemoveRedundantNavDestination(RefPtr<FrameNode>& navigationContentNode,
         const RefPtr<UINode>& remainChild, size_t slot, bool& hasChanged);
     bool FindNavigationParent(const std::string& parentName);
-    void GetCurTitleBarNode(RefPtr<TitleBarNode>& curTitleBarNode, const RefPtr<FrameNode>& curNode,
+    bool GetCurTitleBarNode(RefPtr<TitleBarNode>& curTitleBarNode, const RefPtr<FrameNode>& curNode,
         bool isNavBar);
+
+    void DealRemoveDestination(const RefPtr<NavDestinationGroupNode>& destination);
 
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;
     RefPtr<UINode> dividerNode_;
-    std::vector<RefPtr<NavDestinationGroupNode>> hideNodes_; // dialog destination hide pages.
+    // dialog hideNodes, if is true, nodes need remove
+    std::vector<std::pair<RefPtr<NavDestinationGroupNode>, bool>> hideNodes_;
+    std::vector<RefPtr<NavDestinationGroupNode>> showNodes_;
     int32_t lastStandardIndex_ = -1;
     bool isOnAnimation_ { false };
     bool isModeChange_ { false };
     bool needSetInvisible_ { false };
+    bool isOnModeSwitchAnimation_ { false };
     std::string curId_;
     std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
     std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;
+    std::string navigationPathInfo_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_GROUP_NODE_H

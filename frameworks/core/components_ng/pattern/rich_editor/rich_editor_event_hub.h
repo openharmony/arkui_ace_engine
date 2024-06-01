@@ -56,7 +56,7 @@ private:
     int32_t offsetInSpan_ = 0;
 };
 
-class RichEditorInsertValue : public BaseEventInfo {
+class ACE_FORCE_EXPORT RichEditorInsertValue : public BaseEventInfo {
     DECLARE_ACE_TYPE(RichEditorInsertValue, BaseEventInfo)
 public:
     RichEditorInsertValue() : BaseEventInfo("RichEditorInsertValue") {}
@@ -73,7 +73,7 @@ private:
 
 enum class SpanResultType { TEXT, IMAGE, SYMBOL };
 
-class RichEditorAbstractSpanResult {
+class ACE_FORCE_EXPORT RichEditorAbstractSpanResult {
 public:
     RichEditorAbstractSpanResult() = default;
     ~RichEditorAbstractSpanResult() = default;
@@ -97,6 +97,12 @@ public:
     const FONT_FEATURES_LIST& GetFontFeatures() const;
     void SetFontSize(double fontSize);
     double GetFontSize() const;
+    void SetValueResource(const RefPtr<ResourceObject>&);
+    const RefPtr<ResourceObject> GetValueResource() const;
+    void SetValueString(const std::string& valueString);
+    const std::string GetValueString() const;
+    void SetSymbolSpanStyle(const SymbolSpanStyle& symbolSpanStyle);
+    const SymbolSpanStyle GetSymbolSpanStyle() const;
     void SetLineHeight(double lineHeight);
     double GetLineHeight() const;
     void SetLetterspacing(double letterSpacing);
@@ -177,11 +183,14 @@ private:
     ImageFit objectFit_;
     std::string borderRadius_;
     std::string margin_;
+    std::string valueString_;
+    SymbolSpanStyle symbolSpanStyle_;
+    RefPtr<ResourceObject> valueResource_;
 };
 
 enum class RichEditorDeleteDirection { BACKWARD = 0, FORWARD };
 
-class RichEditorDeleteValue : public BaseEventInfo {
+class ACE_FORCE_EXPORT RichEditorDeleteValue : public BaseEventInfo {
     DECLARE_ACE_TYPE(RichEditorDeleteValue, BaseEventInfo)
 public:
     RichEditorDeleteValue() : BaseEventInfo("RichEditorDeleteValue") {}

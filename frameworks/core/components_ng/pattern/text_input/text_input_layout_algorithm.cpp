@@ -35,7 +35,7 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
 
     auto isInlineStyle = pattern->IsNormalInlineState();
 
-    direction_ = textFieldLayoutProperty->GetLayoutDirection();
+    direction_ = textFieldLayoutProperty->GetNonAutoLayoutDirection();
 
     // Create paragraph.
     auto disableTextAlign = !pattern->IsTextArea() && !showPlaceHolder_ && !isInlineStyle;
@@ -112,7 +112,7 @@ void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         frameSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
-    } else {
+    } else if (!layoutWrapper->GetLayoutProperty()->GetLayoutRect()) {
         auto finalSize = UpdateOptionSizeByCalcLayoutConstraint(frameSize,
             layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint(),
             layoutWrapper->GetLayoutProperty()->GetLayoutConstraint()->percentReference);
@@ -162,7 +162,6 @@ void TextInputLayoutAlgorithm::ResponseAreaMeasure(LayoutWrapper* layoutWrapper,
 
 void TextInputLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
-    // update child position.
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
@@ -171,72 +170,119 @@ void TextInputLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                 SizeF(pattern->GetHorizontalPaddingAndBorderSum(), pattern->GetVerticalPaddingAndBorderSum());
     const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
     CHECK_NULL_VOID(content);
-    auto contentSize = content->GetRect().GetSize();
+    SizeT<float> contentSize = content->GetRect().GetSize();
     auto layoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    auto context = layoutWrapper->GetHostNode()->GetContext();
+    PipelineContext* context = layoutWrapper->GetHostNode()->GetContext();
     CHECK_NULL_VOID(context);
     parentGlobalOffset_ = layoutWrapper->GetHostNode()->GetPaintRectOffset() - context->GetRootRect().GetOffset();
-    auto align = Alignment::CENTER;
-    bool hasAlign = false;
-    if (layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
+    Alignment align = Alignment::CENTER;
+    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    auto hasAlign = false;
+    if (layoutProperty->GetPositionProperty()) {
         align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
         hasAlign = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().has_value();
     }
 
-    auto offsetBase = OffsetF(
-        pattern->GetPaddingLeft() + pattern->GetBorderLeft(), pattern->GetPaddingTop() + pattern->GetBorderTop());
+    OffsetF offsetBase = OffsetF(pattern->GetPaddingLeft() + pattern->GetBorderLeft(),
+        pattern->GetPaddingTop() + pattern->GetBorderTop());
 
-    // Update content position.
-    OffsetF contentOffset = offsetBase + Alignment::GetAlignPosition(size, contentSize, align);
-    content->SetOffset(OffsetF(offsetBase.GetX(), contentOffset.GetY()));
+    auto responseArea = pattern->GetResponseArea();
+    auto cleanNodeResponseArea = pattern->GetCleanNodeResponseArea();
+    auto unitNodeWidth = 0.0f;
+    if (responseArea) {
+        int32_t childIndex = frameNode->GetChildIndex(responseArea->GetFrameNode());
+        responseArea->Layout(layoutWrapper, childIndex, unitNodeWidth);
+    }
+    if (cleanNodeResponseArea) {
+        int32_t childIndex = frameNode->GetChildIndex(cleanNodeResponseArea->GetFrameNode());
+        cleanNodeResponseArea->Layout(layoutWrapper, childIndex, unitNodeWidth);
+    }
+
+    UpdateContentPositionParams params = {
+        .isRTL = isRTL,
+        .offsetBase = offsetBase,
+        .size = size,
+        .contentSize = contentSize,
+        .align = align,
+        .responseArea = responseArea
+    };
+    UpdateContentPosition(params, content);
+
     auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (LessOrEqual(textRect_.Width(), contentSize.Width())) {
-        // adjust text rect to the basic padding
+    UpdateTextRectParams updateTextRectParams = {
+        .layoutProperty = layoutProperty,
+        .pattern = pattern,
+        .contentSize = contentSize,
+        .isRTL = isRTL,
+        .responseArea = responseArea,
+        .offsetBase = offsetBase
+    };
+    UpdateTextRect(updateTextRectParams);
+
+    bool isInlineStyle = pattern->IsNormalInlineState();
+    if (layoutProperty->GetShowCounterValue(false) && layoutProperty->HasMaxLength() && !isInlineStyle) {
+        TextFieldLayoutAlgorithm::CounterLayout(layoutWrapper);
+    }
+}
+
+void TextInputLayoutAlgorithm::UpdateContentPosition(const UpdateContentPositionParams &params,
+    const std::unique_ptr<GeometryProperty> &content)
+{
+    OffsetF contentOffset =
+        params.offsetBase + Alignment::GetAlignPosition(params.size, params.contentSize, params.align);
+    if (params.isRTL) {
+        if (params.responseArea) {
+            RectF responseAreaRect = params.responseArea->GetAreaRect();
+            content->SetOffset(OffsetF(params.offsetBase.GetX() + responseAreaRect.Width(), contentOffset.GetY()));
+        } else {
+            content->SetOffset(OffsetF(params.offsetBase.GetX(), contentOffset.GetY()));
+        }
+    } else {
+        content->SetOffset(OffsetF(params.offsetBase.GetX(), contentOffset.GetY()));
+    }
+}
+
+void TextInputLayoutAlgorithm::UpdateTextRect(const UpdateTextRectParams& params)
+{
+    if (LessOrEqual(textRect_.Width(), params.contentSize.Width())) {
         float textRectOffsetX = 0.0f;
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-            textRectOffsetX = pattern->GetPaddingLeft();
+            textRectOffsetX = params.pattern->GetPaddingLeft();
         } else {
-            textRectOffsetX = pattern->GetPaddingLeft() + pattern->GetBorderLeft();
+            textRectOffsetX = params.pattern->GetPaddingLeft() + params.pattern->GetBorderLeft();
         }
-        auto isEmptyTextEditValue = pattern->GetTextValue().empty();
-        auto isInlineStyle = pattern->IsNormalInlineState();
+        bool isEmptyTextEditValue = params.pattern->GetTextValue().empty();
+        bool isInlineStyle = params.pattern->IsNormalInlineState();
         if (!isEmptyTextEditValue && !isInlineStyle) {
-            auto textAlign = layoutProperty->GetTextAlignValue(TextAlign::START);
-            pattern->CheckTextAlignByDirection(textAlign, direction_);
+            TextAlign textAlign = params.layoutProperty->GetTextAlignValue(TextAlign::START);
+            params.pattern->CheckTextAlignByDirection(textAlign, direction_);
             switch (textAlign) {
                 case TextAlign::START:
                     break;
                 case TextAlign::CENTER:
-                    textRectOffsetX += (contentSize.Width() - textRect_.Width()) * 0.5f;
+                    textRectOffsetX += (params.contentSize.Width() - textRect_.Width()) * 0.5f;
                     break;
                 case TextAlign::END:
-                    textRectOffsetX += contentSize.Width() - textRect_.Width();
+                    textRectOffsetX += params.contentSize.Width() - textRect_.Width();
                     break;
                 default:
                     break;
             }
         }
-        textRect_.SetOffset(OffsetF(textRectOffsetX, contentOffset.GetY()));
+        if (params.isRTL) {
+            if (params.responseArea) {
+                RectF responseAreaRect = params.responseArea->GetAreaRect();
+                textRect_.SetOffset(OffsetF(textRectOffsetX + responseAreaRect.Width(), params.offsetBase.GetY()));
+            } else {
+                textRect_.SetOffset(OffsetF(textRectOffsetX, params.offsetBase.GetY()));
+            }
+        } else {
+            textRect_.SetOffset(OffsetF(textRectOffsetX, params.offsetBase.GetY()));
+        }
     } else {
-        textRect_.SetOffset({ pattern->GetTextRect().GetOffset().GetX(), contentOffset.GetY() });
-    }
-    auto responseArea = pattern->GetResponseArea();
-    auto cleanNodeResponseArea = pattern->GetCleanNodeResponseArea();
-    float unitNodeWidth = 0.0f;
-    if (responseArea) {
-        auto childIndex = frameNode->GetChildIndex(responseArea->GetFrameNode());
-        responseArea->Layout(layoutWrapper, childIndex, unitNodeWidth);
-    }
-    if (cleanNodeResponseArea) {
-        auto childIndex = frameNode->GetChildIndex(cleanNodeResponseArea->GetFrameNode());
-        cleanNodeResponseArea->Layout(layoutWrapper, childIndex, unitNodeWidth);
-    }
-    // CounterNode Layout.
-    auto isInlineStyle = pattern->IsNormalInlineState();
-    if (layoutProperty->GetShowCounterValue(false) && layoutProperty->HasMaxLength() && !isInlineStyle) {
-        TextFieldLayoutAlgorithm::CounterLayout(layoutWrapper);
+        textRect_.SetOffset({ params.pattern->GetTextRect().GetOffset().GetX(), params.offsetBase.GetY() });
     }
 }
 

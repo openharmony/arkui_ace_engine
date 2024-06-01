@@ -78,6 +78,7 @@ void JSCheckboxGroup::JSBind(BindingTarget globalObj)
     JSClass<JSCheckboxGroup>::StaticMethod("selectedColor", &JSCheckboxGroup::SelectedColor);
     JSClass<JSCheckboxGroup>::StaticMethod("unselectedColor", &JSCheckboxGroup::UnSelectedColor);
     JSClass<JSCheckboxGroup>::StaticMethod("mark", &JSCheckboxGroup::Mark);
+    JSClass<JSCheckboxGroup>::StaticMethod("responseRegion", &JSCheckboxGroup::JsResponseRegion);
     JSClass<JSCheckboxGroup>::StaticMethod("size", &JSCheckboxGroup::JsSize);
     JSClass<JSCheckboxGroup>::StaticMethod("padding", &JSCheckboxGroup::JsPadding);
     JSClass<JSCheckboxGroup>::StaticMethod("checkboxShape", &JSCheckboxGroup::SetCheckboxGroupStyle);
@@ -234,13 +235,12 @@ void JSCheckboxGroup::Mark(const JSCallbackInfo& info)
 
     auto markObj = JSRef<JSObject>::Cast(info[0]);
     auto strokeColorValue = markObj->GetProperty("strokeColor");
-    Color strokeColor;
     auto theme = GetTheme<CheckboxTheme>();
+    Color strokeColor = theme->GetPointColor();
     if (!ParseJsColor(strokeColorValue, strokeColor)) {
-        strokeColor = theme->GetPointColor();
+        JSCheckBoxGroupTheme::ObtainCheckMarkColor(strokeColor);
     }
     CheckBoxGroupModel::GetInstance()->SetCheckMarkColor(strokeColor);
-
     auto sizeValue = markObj->GetProperty("size");
     CalcDimension size;
     if ((ParseJsDimensionVp(sizeValue, size)) && (size.Unit() != DimensionUnit::PERCENT) &&

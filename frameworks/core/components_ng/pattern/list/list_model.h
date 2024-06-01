@@ -28,7 +28,7 @@
 
 namespace OHOS::Ace {
 
-class ListModel {
+class ACE_FORCE_EXPORT ListModel {
 public:
     static ListModel* GetInstance();
     virtual ~ListModel() = default;

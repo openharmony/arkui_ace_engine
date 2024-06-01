@@ -28,7 +28,7 @@ namespace OHOS::Ace {
 class ScrollBarTheme;
 class ScrollControllerBase;
 
-class ScrollModel {
+class ACE_FORCE_EXPORT ScrollModel {
 public:
     static ScrollModel* GetInstance();
     virtual ~ScrollModel() = default;

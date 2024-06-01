@@ -12,11 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- import hilog from '@ohos.hilog';
+import hilog from '@ohos.hilog';
 import abilityManager from '@ohos.app.ability.abilityManager';
 import common from '@ohos.app.ability.common';
 import { Callback } from '@ohos.base';
 import AtomicServiceOptions from '@ohos.app.ability.AtomicServiceOptions';
+import commonEventManager from '@ohos.commonEventManager';
+import Base from '@ohos.base';
 
 @Component
 export struct FullScreenLaunchComponent {
@@ -25,6 +27,53 @@ export struct FullScreenLaunchComponent {
   appId: string = "";
   options?: AtomicServiceOptions
   @State private isShow: boolean = false;
+  private subscriber: commonEventManager.CommonEventSubscriber | null = null;
+  aboutToAppear() {
+    let subscribeInfo: commonEventManager.CommonEventSubscribeInfo = {
+      events: [commonEventManager.Support.COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOUT],
+    }
+
+    commonEventManager.createSubscriber(subscribeInfo,
+      (err: Base.BusinessError, data: commonEventManager.CommonEventSubscriber) => {
+        if (err) {
+          hilog.error(0x3900, 'FullScreenLaunchComponent',
+            'Failed to create subscriber, err: %{public}s.', JSON.stringify(err))
+          return;
+        }
+
+        if (data == null || data == undefined) {
+          hilog.error(0x3900, 'FullScreenLaunchComponent', 'Failed to create subscriber, data is null.')
+          return;
+        }
+
+        this.subscriber = data;
+        commonEventManager.subscribe(this.subscriber,
+          (err: Base.BusinessError, data: commonEventManager.CommonEventData) => {
+            if (err) {
+              hilog.error(0x3900, 'FullScreenLaunchComponent',
+                'Failed to subscribe common event, err: %{public}s.', JSON.stringify(err))
+              return;
+            }
+
+          hilog.info(0x3900, 'FullScreenLaunchComponent', 'Received account logout event.')
+          this.isShow = false;
+        })
+      })
+  }
+
+  aboutToDisappear() {
+    if (this.subscriber !== null) {
+      commonEventManager.unsubscribe(this.subscriber, (err) => {
+        if (err) {
+          hilog.error(0x3900, 'FullScreenLaunchComponent',
+            'UnsubscribeCallBack, err: %{public}s.', JSON.stringify(err))
+        } else {
+          hilog.info(0x3900, 'FullScreenLaunchComponent', 'Unsubscribe.')
+          this.subscriber = null
+        }
+      })
+    }
+  }
 
   @Builder
   doNothingBuilder() {
@@ -34,12 +83,14 @@ export struct FullScreenLaunchComponent {
     if (this.options?.parameters) {
       this.options.parameters['ohos.extra.param.key.showMode'] = 1;
       this.options.parameters['ability.want.params.IsNotifyOccupiedAreaChange'] = true;
+      this.options.parameters['ability.want.params.IsModal'] = true;
       hilog.info(0x3900, 'FullScreenLaunchComponent', 'replaced options is %{public}s !', JSON.stringify(this.options))
     } else {
       this.options = {
         parameters: {
           'ohos.extra.param.key.showMode': 1,
-          'ability.want.params.IsNotifyOccupiedAreaChange': true
+          'ability.want.params.IsNotifyOccupiedAreaChange': true,
+          'ability.want.params.IsModal': true
         }
       }
     }

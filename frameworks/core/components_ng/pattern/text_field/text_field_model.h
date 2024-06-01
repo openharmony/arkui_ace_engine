@@ -253,7 +253,7 @@ protected:
     std::function<void(void)> stopEditing_;
 };
 
-class ACE_EXPORT TextFieldModel {
+class ACE_FORCE_EXPORT TextFieldModel {
 public:
     static TextFieldModel* GetInstance();
     virtual ~TextFieldModel() = default;
@@ -353,6 +353,11 @@ public:
 
     virtual void SetTextOverflow(Ace::TextOverflow value) {};
     virtual void SetTextIndent(const Dimension& value) {};
+    virtual void SetOnWillInsertValueEvent(std::function<bool(const InsertValueInfo&)>&& func) = 0;
+    virtual void SetOnDidInsertValueEvent(std::function<void(const InsertValueInfo&)>&& func) = 0;
+    virtual void SetOnWillDeleteEvent(std::function<bool(const DeleteValueInfo&)>&& func) = 0;
+    virtual void SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func) = 0;
+
 private:
     static std::unique_ptr<TextFieldModel> instance_;
     static std::mutex mutex_;

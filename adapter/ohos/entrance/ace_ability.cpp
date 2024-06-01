@@ -689,13 +689,10 @@ void AceAbility::OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::Window
             Rect(Offset(rect.posX_, rect.posY_), Size(rect.width_, rect.height_)));
         pipelineContext->SetIsLayoutFullScreen(
             Ability::GetWindow()->GetMode() == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
-                auto isNeedAvoidWindowMode =
-                        (Ability::GetWindow()->GetMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING ||
-                         Ability::GetWindow()->GetMode() == Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-                         Ability::GetWindow()->GetMode()
-                         == Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
-                        (SystemProperties::GetDeviceType() == DeviceType::PHONE ||
-                         SystemProperties::GetDeviceType() == DeviceType::TABLET);
+        auto isNeedAvoidWindowMode = SystemProperties::GetNeedAvoidWindow() &&
+            (Ability::GetWindow()->GetMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING ||
+            Ability::GetWindow()->GetMode() == Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+            Ability::GetWindow()->GetMode() == Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
         pipelineContext->SetIsNeedAvoidWindow(isNeedAvoidWindowMode);
     }
     auto taskExecutor = container->GetTaskExecutor();
@@ -709,7 +706,7 @@ void AceAbility::OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::Window
             Platform::AceViewOhos::SurfaceChanged(aceView, rect.width_, rect.height_,
                 rect.height_ >= rect.width_ ? 0 : 1, static_cast<WindowSizeChangeReason>(reason), rsTransaction);
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUISurfaceChanged");
+        TaskExecutor::TaskType::PLATFORM, "ArkUIAbilitySurfaceChanged");
 }
 
 void AceAbility::OnModeChange(OHOS::Rosen::WindowMode mode, bool hasDeco)
@@ -748,7 +745,7 @@ void AceAbility::OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& i
                 CHECK_NULL_VOID(context);
                 context->OnVirtualKeyboardAreaChange(keyboardRect, rsTransaction);
             },
-            TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaChange");
+            TaskExecutor::TaskType::UI, "ArkUIAbilityVirtualKeyboardAreaChange");
     }
 }
 
@@ -861,7 +858,7 @@ uint32_t AceAbility::GetBackgroundColor()
             CHECK_NULL_VOID(pipelineContext);
             bgColor = pipelineContext->GetAppBgColor().GetValue();
         },
-        TaskExecutor::TaskType::UI, "ArkUIGetAppBackgroundColor");
+        TaskExecutor::TaskType::UI, "ArkUIAbilityGetAppBackgroundColor");
 
     LOGI("AceAbilityHandler GetBackgroundColor, value is %{public}u", bgColor);
     return bgColor;

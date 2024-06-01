@@ -70,6 +70,8 @@ public:
 
     void InitContext(bool isRoot, const std::optional<ContextParam>& param) override;
 
+    void InitContext(bool isRoot, const std::optional<ContextParam>& param, bool isLayoutNode) override;
+
     void SyncGeometryPropertiesWithoutAnimation(
         GeometryNode* geometryNode, bool isRound = true, uint8_t flag = 0) override;
 
@@ -193,6 +195,11 @@ public:
     void OnParticleOptionArrayUpdate(const std::list<ParticleOption>& optionList) override;
     void OnClickEffectLevelUpdate(const ClickEffectInfo& info) override;
 
+    void UpdateVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect) override;
+    void UpdateBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter) override;
+    void UpdateForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter) override;
+    void UpdateCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) override;
+
     Rosen::SHADOW_COLOR_STRATEGY ToShadowColorStrategy(ShadowColorStrategy shadowColorStrategy);
     void OnBackShadowUpdate(const Shadow& shadow) override;
     void OnBackBlendModeUpdate(BlendMode blendMode) override;
@@ -218,6 +225,7 @@ public:
     void SetTransitionInCallback(std::function<void()>&& callback) override;
     void ClipWithRect(const RectF& rectF) override;
     void ClipWithRRect(const RectF& rectF, const RadiusF& radiusF) override;
+    void RemoveClipWithRRect() override;
 
     bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) override;
     void MaskAnimation(const Color& initialBackgroundColor, const Color& backgroundColor);
@@ -379,6 +387,8 @@ public:
     void SavePaintRect(bool isRound = true, uint8_t flag = 0) override;
     void SyncPartialRsProperties() override;
     void UpdatePaintRect(const RectF& paintRect) override;
+    Matrix4 GetRevertMatrix() override;
+    void SuggestOpIncNode(bool isOpincNode, bool isNeedCalculate) override;
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -460,6 +470,7 @@ private:
     void OnNodeNameUpdate(const std::string& id) override;
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 
+    void SyncAdditionalGeometryProperties(const RectF& paintRect);
     void NotifyTransitionInner(const SizeF& frameSize, bool isTransitionIn);
     void NotifyTransition(bool isTransitionIn);
     bool HasTransitionOutAnimation() const override
@@ -570,13 +581,13 @@ private:
     void RoundToPixelGrid(bool isRound, uint8_t flag);
     void OnePixelRounding();
     void OnePixelRounding(bool isRound, uint8_t flag);
-    Matrix4 GetRevertMatrix();
     Matrix4 GetMatrix();
     Matrix4 GetMatrixWithTransformRotate();
     bool IsUniRenderEnabled() override;
     void AddFrameNodeInfoToRsNode();
     // Use rect to update the drawRegion rect at index.
     void UpdateDrawRegion(uint32_t index, const std::shared_ptr<Rosen::RectF>& rect);
+    void NotifyHostTransformUpdated();
 
     void InitAccessibilityFocusModidifer(const RoundRect&, const Color&, float);
 
@@ -590,7 +601,8 @@ private:
     std::shared_ptr<Rosen::RSNode> CreateHardwareTexture(
         const std::optional<ContextParam>& param, bool isTextureExportNode);
 #endif
-    
+    void DetachModifiers();
+
     RefPtr<ImageLoadingContext> bgLoadingCtx_;
     RefPtr<CanvasImage> bgImage_;
     RefPtr<ImageLoadingContext> bdImageLoadingCtx_;

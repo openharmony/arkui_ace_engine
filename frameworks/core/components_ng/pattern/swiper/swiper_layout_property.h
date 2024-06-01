@@ -54,7 +54,9 @@ public:
         value->propRight_ = CloneRight();
         value->propBottom_ = CloneBottom();
         value->propPrevMargin_ = ClonePrevMargin();
+        value->propPrevMarginIgnoreBlank_ = ClonePrevMarginIgnoreBlank();
         value->propNextMargin_ = CloneNextMargin();
+        value->propNextMarginIgnoreBlank_ = CloneNextMarginIgnoreBlank();
         value->propDisplayArrow_ = CloneDisplayArrow();
         value->propHoverShow_ = CloneHoverShow();
         value->propIsShowBackground_ = CloneIsShowBackground();
@@ -87,7 +89,9 @@ public:
         ResetRight();
         ResetBottom();
         ResetPrevMargin();
+        ResetPrevMarginIgnoreBlank();
         ResetNextMargin();
+        ResetNextMarginIgnoreBlank();
         ResetDisplayArrow();
         ResetHoverShow();
         ResetIsShowBackground();
@@ -105,6 +109,10 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         LayoutProperty::ToJsonValue(json, filter);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("index", std::to_string(propIndex_.value_or(0)).c_str(), filter);
         json->PutExtAttr("vertical",
             propDirection_.value_or(Axis::HORIZONTAL) == Axis::VERTICAL ? "true" : "false", filter);
@@ -120,8 +128,12 @@ public:
             propMinSize_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
         json->PutExtAttr("prevMargin",
             propPrevMargin_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("prevMarginIgnoreBlank",
+            propPrevMarginIgnoreBlank_.value_or(false) ? "true" : "false", filter);
         json->PutExtAttr("nextMargin",
             propNextMargin_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("nextMarginIgnoreBlank",
+            propNextMarginIgnoreBlank_.value_or(false) ? "true" : "false", filter);
         json->PutExtAttr("displayArrow", propDisplayArrow_.value_or(false) ? "true" : "false", filter);
         json->PutExtAttr("hoverShow", propHoverShow_.value_or(false) ? "true" : "false", filter);
         json->PutExtAttr("showBackground", propIsShowBackground_.value_or(false) ? "true" : "false", filter);
@@ -214,7 +226,9 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Right, Dimension, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Bottom, Dimension, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PrevMargin, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PrevMarginIgnoreBlank, bool, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NextMargin, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NextMarginIgnoreBlank, bool, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisplayArrow, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HoverShow, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsShowBackground, bool, PROPERTY_UPDATE_MEASURE);

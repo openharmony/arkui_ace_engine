@@ -12,48 +12,48 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
-#include "core/pipeline_ng/pipeline_context.h"
+
+#include "core/animation/animation_pub.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/event/gesture_event_hub.h"
-#include "core/animation/animation_pub.h"
-#include "core/components_ng/render/animation_utils.h"
-#include "core/components_ng/render/render_context.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/render/animation_utils.h"
+#include "core/components_ng/render/render_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-    constexpr int32_t BEFORE_LIFTING_TIME = 650;
-    constexpr int32_t IMAGE_SHOW_TIME = 50;
-    constexpr int32_t PIXELMAP_ANIMATION_DURATION = 300;
-    constexpr int32_t BADGE_ANIMATION_DURATION = 200;
-    constexpr float DEFAULT_ANIMATION_SCALE = 0.95f;
-    constexpr float GATHER_SPRING_RESPONSE = 0.304f;
-    constexpr float GATHER_SPRING_DAMPING_FRACTION = 0.97f;
-    constexpr float GRID_MOVE_SCALE = 0.2f;
-    constexpr float LIST_MOVE_SCALE = 0.2f;
-    constexpr float EULER_NUMBER = 2.71828f;
-    constexpr float GATHER_OFFSET_RADIUS = 0.1f;
-    constexpr float PIXELMAP_DRAG_SCALE_MULTIPLE = 1.05f;
-    constexpr float BADGE_FIRST_ANIMATION_SCALE = 1.2f;
-    constexpr float BADGE_SECOND_ANIMATION_SCALE = 1.0f;
-    constexpr Dimension BADGE_RELATIVE_OFFSET = 8.0_vp;
-    constexpr Dimension BADGE_DEFAULT_SIZE = 24.0_vp;
-    constexpr Dimension BADGE_TEXT_FONT_SIZE = 14.0_fp;
-    const Color BADGE_TEXT_FONT_COLOR = Color::FromString("#ffffffff");
-    const Color BADGE_BACKGROUND_COLOR = Color::FromString("#ff007dff");
-    constexpr float DEFAULT_INTERPOLATING_SPRING_VELOCITY = 10.0f;
-    constexpr float DEFAULT_INTERPOLATING_SPRING_MASS = 1.0f;
-    constexpr float DEFAULT_INTERPOLATING_SPRING_STIFFNESS = 410.0f;
-    constexpr float DEFAULT_INTERPOLATING_SPRING_DAMPING = 38.0f;
+constexpr int32_t BEFORE_LIFTING_TIME = 650;
+constexpr int32_t IMAGE_SHOW_TIME = 50;
+constexpr int32_t PIXELMAP_ANIMATION_DURATION = 300;
+constexpr int32_t BADGE_ANIMATION_DURATION = 200;
+constexpr int32_t BADGE_ANIMATION_DELAY = 100;
+constexpr float DEFAULT_ANIMATION_SCALE = 0.95f;
+constexpr float GATHER_SPRING_RESPONSE = 0.304f;
+constexpr float GATHER_SPRING_DAMPING_FRACTION = 0.97f;
+constexpr float GRID_MOVE_SCALE = 0.2f;
+constexpr float LIST_MOVE_SCALE = 0.2f;
+constexpr float EULER_NUMBER = 2.71828f;
+constexpr float GATHER_OFFSET_RADIUS = 0.1f;
+constexpr float PIXELMAP_DRAG_SCALE_MULTIPLE = 1.05f;
+constexpr float BADGE_ANIMATION_SCALE = 1.0f;
+constexpr Dimension BADGE_RELATIVE_OFFSET = 8.0_vp;
+constexpr Dimension BADGE_DEFAULT_SIZE = 24.0_vp;
+constexpr Dimension BADGE_TEXT_FONT_SIZE = 14.0_fp;
+const Color BADGE_TEXT_FONT_COLOR = Color::FromString("#ffffffff");
+const Color BADGE_BACKGROUND_COLOR = Color::FromString("#ff007dff");
+constexpr float DEFAULT_INTERPOLATING_SPRING_VELOCITY = 10.0f;
+constexpr float DEFAULT_INTERPOLATING_SPRING_MASS = 1.0f;
+constexpr float DEFAULT_INTERPOLATING_SPRING_STIFFNESS = 410.0f;
+constexpr float DEFAULT_INTERPOLATING_SPRING_DAMPING = 38.0f;
 }
 
-void DragAnimationHelper::CalcDistanceBeforeLifting(bool isGrid, float& maxDistance, float& minDistance,
-    float& maxTranslation, OffsetF gatherNodeCenter, std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo)
+void DragAnimationHelper::CalcDistanceBeforeLifting(bool isGrid, CalcResult& calcResult, OffsetF gatherNodeCenter,
+    const std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo)
 {
     for (const auto& child : gatherNodeChildrenInfo) {
         auto imageNode = child.imageNode.Upgrade();
@@ -63,102 +63,85 @@ void DragAnimationHelper::CalcDistanceBeforeLifting(bool isGrid, float& maxDista
         OffsetF curPos = {child.offset.GetX() + child.halfWidth, child.offset.GetY() + child.halfHeight};
         float dis = sqrt(pow(gatherNodeCenter.GetX() - curPos.GetX(), 2) +
             pow(gatherNodeCenter.GetY() - curPos.GetY(), 2));
-        maxDistance = std::max(maxDistance, dis);
-        minDistance = minDistance < 0 ? dis : std::min(minDistance, dis);
+        calcResult.maxDistance = std::max(calcResult.maxDistance, dis);
+        calcResult.minDistance = calcResult.minDistance < 0 ? dis : std::min(calcResult.minDistance, dis);
         if (isGrid) {
-            maxTranslation = maxTranslation < 0 ? std::min(width, height) :
-                std::min(maxTranslation, std::min(width, height));
+            calcResult.maxTranslation = calcResult.maxTranslation < 0 ? std::min(width, height) :
+                std::min(calcResult.maxTranslation, std::min(width, height));
         } else {
-            maxTranslation = maxTranslation < 0 ? height : std::min(maxTranslation, height);
+            calcResult.maxTranslation = calcResult.maxTranslation < 0 ? height :
+                std::min(calcResult.maxTranslation, height);
         }
     }
-    maxTranslation *= isGrid ? GRID_MOVE_SCALE : LIST_MOVE_SCALE;
+    calcResult.maxTranslation *= isGrid ? GRID_MOVE_SCALE : LIST_MOVE_SCALE;
 }
 
-OffsetF DragAnimationHelper::CalcOffsetToTarget(OffsetF curPos, OffsetF targetPos, float maxTranslation,
-    float maxDistance, float minDistance)
+OffsetF DragAnimationHelper::CalcOffsetToTarget(OffsetF curPos, OffsetF targetPos, CalcResult& calcResult)
 {
-    if (NearZero(maxDistance) || NearZero(minDistance) || maxTranslation < 0) {
-        return {0.0f, 0.0f};
+    if (NearZero(calcResult.maxDistance) || NearZero(calcResult.minDistance) || calcResult.maxTranslation < 0) {
+        return { 0.0f, 0.0f };
     }
 
     float xDis = targetPos.GetX() - curPos.GetX();
     float yDis = targetPos.GetY() - curPos.GetY();
     float dis = sqrt(pow(xDis, 2) + pow(yDis, 2));
     if (NearZero(dis)) {
-        return {0.0f, 0.0f};
+        return { 0.0f, 0.0f };
     }
-    auto trans = maxTranslation * pow(EULER_NUMBER, -(dis - minDistance) /
-        maxDistance * GATHER_OFFSET_RADIUS);
+    auto trans = calcResult.maxTranslation * pow(EULER_NUMBER, -(dis - calcResult.minDistance) /
+        calcResult.maxDistance * GATHER_OFFSET_RADIUS);
     float x = xDis * trans / dis;
     float y = yDis * trans / dis;
-    return {x, y};
+    return { x, y };
 }
 
 void DragAnimationHelper::PlayGatherNodeTranslateAnimation(const RefPtr<DragEventActuator>& actuator,
     const RefPtr<OverlayManager>& overlayManager)
 {
+    CHECK_NULL_VOID(actuator);
     AnimationOption option;
     option.SetDuration(BEFORE_LIFTING_TIME);
     option.SetCurve(Curves::SHARP);
-    CHECK_NULL_VOID(actuator);
     auto frameNode = actuator->GetFrameNode();
     auto gatherNodeCenter = frameNode->GetPaintRectCenter();
     auto gatherNodeChildrenInfo = overlayManager->GetGatherNodeChildrenInfo();
 
-    bool isGrid = frameNode->GetTag() == V2::GRID_ITEM_ETS_TAG ? true : false;
-    float maxDistance = 0.0f;
-    float minDistance = -1.0f;
-    float maxTranslation = -1.0f;
-    CalcDistanceBeforeLifting(isGrid, maxDistance, minDistance, maxTranslation,
-        gatherNodeCenter, gatherNodeChildrenInfo);
+    bool isGrid = frameNode->GetTag() == V2::GRID_ITEM_ETS_TAG;
+    CalcResult calcResult = { 0.0f, -1.0f, -1.0f };
+    CalcDistanceBeforeLifting(isGrid, calcResult, gatherNodeCenter, gatherNodeChildrenInfo);
     AnimationUtils::Animate(
         option,
-        [gatherNodeCenter, gatherNodeChildrenInfo, maxTranslation, maxDistance, minDistance]() mutable {
+        [gatherNodeCenter, gatherNodeChildrenInfo, calcResult]() mutable {
             for (const auto& child : gatherNodeChildrenInfo) {
                 auto imageNode = child.imageNode.Upgrade();
                 CHECK_NULL_VOID(imageNode);
                 auto imageContext = imageNode->GetRenderContext();
                 CHECK_NULL_VOID(imageContext);
                 auto curPos = child.offset + OffsetF(child.halfWidth, child.halfHeight);
-                auto offset = CalcOffsetToTarget(curPos, gatherNodeCenter, maxTranslation,
-                    maxDistance, minDistance);
+                auto offset = CalcOffsetToTarget(curPos, gatherNodeCenter, calcResult);
                 imageContext->UpdatePosition(OffsetT<Dimension>(
                     Dimension(child.offset.GetX() + offset.GetX()),
                     Dimension(child.offset.GetY() + offset.GetY())));
             }
-        },
-        option.GetOnFinishEvent());
+        });
 }
 
 void DragAnimationHelper::PlayGatherNodeOpacityAnimation(const RefPtr<OverlayManager>& overlayManager)
 {
     CHECK_NULL_VOID(overlayManager);
     auto gatherNodeChildrenInfo = overlayManager->GetGatherNodeChildrenInfo();
+
+    AnimationOption opacityOption;
+    opacityOption.SetDuration(IMAGE_SHOW_TIME);
+    opacityOption.SetCurve(AceType::MakeRefPtr<CubicCurve>(0.0f, 0.0f, 1.0f, 1.0f));
+    
     for (const auto& child : gatherNodeChildrenInfo) {
         auto imageNode = child.imageNode.Upgrade();
         CHECK_NULL_VOID(imageNode);
         auto imageContext = imageNode->GetRenderContext();
         CHECK_NULL_VOID(imageContext);
-        imageContext->UpdateOpacity(0.0f);
+        imageContext->OpacityAnimation(opacityOption, 0.0f, 1.0f);
     }
-
-    AnimationOption opacityOption;
-    opacityOption.SetDuration(IMAGE_SHOW_TIME);
-    opacityOption.SetCurve(AceType::MakeRefPtr<CubicCurve>(0.0f, 0.0f, 1.0f, 1.0f));
-
-    AnimationUtils::Animate(
-        opacityOption,
-        [gatherNodeChildrenInfo]() mutable {
-            for (const auto& child : gatherNodeChildrenInfo) {
-                auto imageNode = child.imageNode.Upgrade();
-                CHECK_NULL_VOID(imageNode);
-                auto imageContext = imageNode->GetRenderContext();
-                CHECK_NULL_VOID(imageContext);
-                imageContext->UpdateOpacity(1.0f);
-            }
-        },
-        opacityOption.GetOnFinishEvent());
 }
 
 void DragAnimationHelper::PlayGatherAnimationBeforeLifting(const RefPtr<DragEventActuator>& actuator)
@@ -176,8 +159,8 @@ void DragAnimationHelper::PlayGatherAnimationBeforeLifting(const RefPtr<DragEven
     auto gatherNode = actuator->GetGatherNode();
     actuator->SetGatherNode(nullptr);
     auto gatherNodeChildrenInfo = actuator->GetGatherNodeChildrenInfo();
-    actuator->ClearGatherNodeChildrenInfo();
     DragEventActuator::MountGatherNode(manager, frameNode, gatherNode, gatherNodeChildrenInfo);
+    actuator->ClearGatherNodeChildrenInfo();
     pipeline->FlushSyncGeometryNodeTasks();
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
@@ -199,17 +182,16 @@ void DragAnimationHelper::PlayNodeAnimationBeforeLifting(const RefPtr<FrameNode>
         DEFAULT_INTERPOLATING_SPRING_MASS, DEFAULT_INTERPOLATING_SPRING_STIFFNESS,
         DEFAULT_INTERPOLATING_SPRING_DAMPING);
     option.SetCurve(springCurve);
-    auto frameContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(frameContext);
-    frameContext->UpdateTransformScale({ 1.0, 1.0 });
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateTransformScale({ 1.0f, 1.0f });
 
     AnimationUtils::Animate(
         option,
-        [frameContext]() mutable {
-            CHECK_NULL_VOID(frameContext);
-            frameContext->UpdateTransformScale({ DEFAULT_ANIMATION_SCALE, DEFAULT_ANIMATION_SCALE });
-        },
-        option.GetOnFinishEvent());
+        [renderContext]() mutable {
+            CHECK_NULL_VOID(renderContext);
+            renderContext->UpdateTransformScale({ DEFAULT_ANIMATION_SCALE, DEFAULT_ANIMATION_SCALE });
+        });
 }
 
 void DragAnimationHelper::PlayNodeResetAnimation(const RefPtr<DragEventActuator>& actuator)
@@ -234,7 +216,7 @@ void DragAnimationHelper::PlayNodeResetAnimation(const RefPtr<DragEventActuator>
     AnimationUtils::Animate(
         option,
         [frameContext]() mutable {
-            frameContext->UpdateTransformScale({ 1.0, 1.0 });
+            frameContext->UpdateTransformScale({ 1.0f, 1.0f });
         },
         option.GetOnFinishEvent());
 }
@@ -296,30 +278,16 @@ void DragAnimationHelper::ShowBadgeAnimation(const RefPtr<FrameNode>& textNode)
     auto textNodeContext = textNode->GetRenderContext();
     CHECK_NULL_VOID(textNodeContext);
     textNodeContext->UpdateTransformScale({ 0.0f, 0.0f });
-    RefPtr<Curve> firstCubicCurve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.45f, 1.0f);
-    CHECK_NULL_VOID(firstCubicCurve);
+    RefPtr<Curve> interpolatingSpring = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 628.0f, 40.0f);
+    CHECK_NULL_VOID(interpolatingSpring);
     AnimationOption textOption;
     textOption.SetDuration(BADGE_ANIMATION_DURATION);
-    textOption.SetCurve(firstCubicCurve);
-    textOption.SetDelay(BADGE_ANIMATION_DURATION);
-    textOption.SetOnFinishEvent([textNodeContext]() {
-        RefPtr<Curve> secondCubicCurve = AceType::MakeRefPtr<CubicCurve>(0.24f, 0.0f, 0.36f, 1.0f);
-        CHECK_NULL_VOID(secondCubicCurve);
-        AnimationOption animationOption;
-        animationOption.SetDuration(BADGE_ANIMATION_DURATION);
-        animationOption.SetCurve(secondCubicCurve);
-        textNodeContext->UpdateTransformScale({ BADGE_FIRST_ANIMATION_SCALE, BADGE_FIRST_ANIMATION_SCALE });
-        AnimationUtils::Animate(
-            animationOption,
-            [textNodeContext]() mutable {
-                textNodeContext->UpdateTransformScale({ BADGE_SECOND_ANIMATION_SCALE, BADGE_SECOND_ANIMATION_SCALE });
-            },
-            animationOption.GetOnFinishEvent());
-    });
+    textOption.SetCurve(interpolatingSpring);
+    textOption.SetDelay(BADGE_ANIMATION_DELAY);
     AnimationUtils::Animate(
         textOption,
         [textNodeContext]() mutable {
-            textNodeContext->UpdateTransformScale({ BADGE_FIRST_ANIMATION_SCALE, BADGE_FIRST_ANIMATION_SCALE });
+            textNodeContext->UpdateTransformScale({ BADGE_ANIMATION_SCALE, BADGE_ANIMATION_SCALE });
         },
         textOption.GetOnFinishEvent());
 
@@ -354,7 +322,8 @@ void DragAnimationHelper::CalcBadgeTextPosition(const RefPtr<MenuPattern>& menuP
     auto dragDropManager = pipelineContext->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
     auto badgeNumber = dragDropManager->GetBadgeNumber();
-    auto childSize = badgeNumber > 0 ? badgeNumber : manager->GetGatherNodeChildrenInfo().size() + 1;
+    auto childSize = badgeNumber > 0 ? static_cast<size_t>(badgeNumber) :
+                                        manager->GetGatherNodeChildrenInfo().size() + 1;
     auto badgeLength = std::to_string(childSize).size();
     UpdateBadgeLayoutAndRenderContext(textNode, badgeLength, childSize);
     auto textRenderContext = textNode->GetRenderContext();

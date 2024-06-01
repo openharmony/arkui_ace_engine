@@ -22,7 +22,7 @@ if (!('finalizeConstruction' in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => { });
 }
 
-const noop = (f9) => {
+const noop = (g9) => {
 };
 const colorStops = [['rgba(0, 0, 0, 1)', 0], ['rgba(0, 0, 0, 0)', 1]];
 const defaultTheme = {
@@ -36,6 +36,7 @@ const defaultTheme = {
         selectedFillColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary_contrary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
     },
     chipGroupSpace: { itemSpace: 8, startSpace: 16, endSpace: 16 },
+    chipGroupPadding: { top: 14, bottom: 14 }
 };
 const iconGroupSuffixTheme = {
     backgroundColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_button_normal'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
@@ -48,72 +49,72 @@ const iconGroupSuffixTheme = {
     marginRight: 16,
     fillColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
 };
-function parseDimension(z8, a9, b9, c9) {
-    if (a9 === void (0) || a9 === null) {
-        return c9;
+function parseDimension(a9, b9, c9, d9) {
+    if (b9 === void (0) || b9 === null) {
+        return d9;
     }
-    const d9 = z8.getHostContext()?.resourceManager;
-    if (typeof a9 === "object") {
-        let e9 = a9;
-        if (e9.type === 10002 || e9.type === 10007) {
-            if (d9.getNumber(e9.id) >= 0) {
-                return a9;
+    const e9 = a9.getHostContext()?.resourceManager;
+    if (typeof b9 === "object") {
+        let f9 = b9;
+        if (f9.type === 10002 || f9.type === 10007) {
+            if (e9.getNumber(f9.id) >= 0) {
+                return b9;
             }
         }
-        else if (e9.type === 10003) {
-            if (isValidDimensionString(d9.getStringSync(e9.id))) {
-                return a9;
+        else if (f9.type === 10003) {
+            if (isValidDimensionString(e9.getStringSync(f9.id))) {
+                return b9;
             }
         }
     }
-    else if (typeof a9 === "number") {
-        if (a9 >= 0) {
-            return a9;
+    else if (typeof b9 === "number") {
+        if (b9 >= 0) {
+            return b9;
         }
     }
-    else if (typeof a9 === "string") {
-        if (b9(a9)) {
-            return a9;
+    else if (typeof b9 === "string") {
+        if (c9(b9)) {
+            return b9;
         }
     }
-    return c9;
+    return d9;
 }
-function isValidString(v8, w8) {
-    const x8 = v8.match(w8);
-    if (!x8 || x8.length < 3) {
+function isValidString(w8, x8) {
+    const y8 = w8.match(x8);
+    if (!y8 || y8.length < 3) {
         return false;
     }
-    const y8 = Number.parseFloat(x8[1]);
-    return y8 >= 0;
+    const z8 = Number.parseFloat(y8[1]);
+    return z8 >= 0;
 }
-function isValidDimensionString(u8) {
-    return isValidString(u8, new RegExp("(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$", "i"));
+function isValidDimensionString(v8) {
+    return isValidString(v8, new RegExp("(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$", "i"));
 }
-function isValidDimensionNoPercentageString(t8) {
-    return isValidString(t8, new RegExp("(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx)?$", "i"));
+function isValidDimensionNoPercentageString(u8) {
+    return isValidString(u8, new RegExp("(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx)?$", "i"));
 }
 export class IconGroupSuffix extends ViewPU {
-    constructor(n8, o8, p8, q8 = -1, r8 = undefined, s8) {
-        super(n8, p8, q8, s8);
-        if (typeof r8 === "function") {
-            this.paramsGenerator_ = r8;
+    constructor(o8, p8, q8, r8 = -1, s8 = undefined, t8) {
+        super(o8, q8, r8, t8);
+        if (typeof s8 === "function") {
+            this.paramsGenerator_ = s8;
         }
         this.__chipSize = this.initializeConsume("chipSize", "chipSize");
-        this.__items = new SynchedPropertyObjectOneWayPU(o8.items, this, "items");
-        this.setInitiallyProvidedValue(o8);
+        this.__items = new SynchedPropertyObjectOneWayPU(p8.items, this, "items");
+        this.setInitiallyProvidedValue(p8);
         this.finalizeConstruction();
     }
-    setInitiallyProvidedValue(m8) {
-        if (m8.items === undefined) {
+    setInitiallyProvidedValue(n8) {
+        if (n8.items === undefined) {
             this.__items.set([]);
         }
     }
-    updateStateVars(l8) {
-        this.__items.reset(l8.items);
+    updateStateVars(m8) {
+        this.__items.reset(m8.items);
     }
-    purgeVariableDependenciesOnElmtId(k8) {
-        this.__chipSize.purgeDependencyOnElmtId(k8);
-        this.__items.purgeDependencyOnElmtId(k8);
+    purgeVariableDependenciesOnElmtId(l8) {
+        this.__chipSize.purgeDependencyOnElmtId(l8);
+        this.__items.purgeDependencyOnElmtId(l8);
     }
     aboutToBeDeleted() {
         this.__chipSize.aboutToBeDeleted();
@@ -124,14 +125,14 @@ export class IconGroupSuffix extends ViewPU {
     get chipSize() {
         return this.__chipSize.get();
     }
-    set chipSize(j8) {
-        this.__chipSize.set(j8);
+    set chipSize(k8) {
+        this.__chipSize.set(k8);
     }
     get items() {
         return this.__items.get();
     }
-    set items(i8) {
-        this.__items.set(i8);
+    set items(j8) {
+        this.__items.set(j8);
     }
     getBackgroundSize() {
         if (this.chipSize === ChipSize.SMALL) {
@@ -141,28 +142,28 @@ export class IconGroupSuffix extends ViewPU {
             return iconGroupSuffixTheme.normalBackgroundSize;
         }
     }
-    getIconSize(g8) {
-        if (g8 === undefined) {
+    getIconSize(h8) {
+        if (h8 === undefined) {
             return this.chipSize === ChipSize.SMALL ? iconGroupSuffixTheme.smallIconSize : iconGroupSuffixTheme.normalIconSize;
         }
-        let h8;
+        let i8;
         if (this.chipSize === ChipSize.SMALL) {
-            h8 = parseDimension(this.getUIContext(), g8, isValidDimensionString, iconGroupSuffixTheme.smallIconSize);
+            i8 = parseDimension(this.getUIContext(), h8, isValidDimensionString, iconGroupSuffixTheme.smallIconSize);
         }
         else {
-            h8 = parseDimension(this.getUIContext(), g8, isValidDimensionString, iconGroupSuffixTheme.normalIconSize);
+            i8 = parseDimension(this.getUIContext(), h8, isValidDimensionString, iconGroupSuffixTheme.normalIconSize);
         }
-        return h8;
+        return i8;
     }
     initialRender() {
-        this.observeComponentCreation2((e8, f8) => {
+        this.observeComponentCreation2((f8, g8) => {
             Row.create();
         }, Row);
-        this.observeComponentCreation2((j7, k7) => {
+        this.observeComponentCreation2((k7, l7) => {
             ForEach.create();
-            const l7 = n7 => {
-                const o7 = n7;
-                this.observeComponentCreation2((b8, c8) => {
+            const m7 = o7 => {
+                const p7 = o7;
+                this.observeComponentCreation2((c8, d8) => {
                     Button.createWithChild();
                     Button.size({
                         width: this.getBackgroundSize(),
@@ -171,33 +172,33 @@ export class IconGroupSuffix extends ViewPU {
                     Button.backgroundColor(iconGroupSuffixTheme.backgroundColor);
                     Button.borderRadius(iconGroupSuffixTheme.borderRadius);
                     Button.onClick(() => {
-                        if (!(o7 instanceof SymbolGlyphModifier)) {
-                            o7.action();
+                        if (!(p7 instanceof SymbolGlyphModifier)) {
+                            p7.action();
                         }
                     });
                     Button.borderRadius(iconGroupSuffixTheme.borderRadius);
                 }, Button);
-                this.observeComponentCreation2((r7, s7) => {
+                this.observeComponentCreation2((s7, t7) => {
                     If.create();
-                    if (o7 instanceof SymbolGlyphModifier) {
+                    if (p7 instanceof SymbolGlyphModifier) {
                         this.ifElseBranchUpdateFunction(0, () => {
-                            this.observeComponentCreation2((z7, a8) => {
+                            this.observeComponentCreation2((a8, b8) => {
                                 SymbolGlyph.create();
                                 SymbolGlyph.fontColor([iconGroupSuffixTheme.fillColor]);
                                 SymbolGlyph.fontSize(this.getIconSize());
-                                SymbolGlyph.attributeModifier.bind(this)(o7);
+                                SymbolGlyph.attributeModifier.bind(this)(p7);
                                 SymbolGlyph.focusable(true);
                             }, SymbolGlyph);
                         });
                     }
                     else {
                         this.ifElseBranchUpdateFunction(1, () => {
-                            this.observeComponentCreation2((v7, w7) => {
-                                Image.create(o7.icon.src);
+                            this.observeComponentCreation2((w7, x7) => {
+                                Image.create(p7.icon.src);
                                 Image.fillColor(iconGroupSuffixTheme.fillColor);
                                 Image.size({
-                                    width: this.getIconSize(o7.icon?.size?.width),
-                                    height: this.getIconSize(o7.icon?.size?.height)
+                                    width: this.getIconSize(p7.icon?.size?.width),
+                                    height: this.getIconSize(p7.icon?.size?.height)
                                 });
                                 Image.focusable(true);
                             }, Image);
@@ -207,7 +208,7 @@ export class IconGroupSuffix extends ViewPU {
                 If.pop();
                 Button.pop();
             };
-            this.forEachUpdateFunction(j7, this.items || [], l7);
+            this.forEachUpdateFunction(k7, this.items || [], m7);
         }, ForEach);
         ForEach.pop();
         Row.pop();
@@ -217,74 +218,80 @@ export class IconGroupSuffix extends ViewPU {
     }
 }
 export class ChipGroup extends ViewPU {
-    constructor(b7, c7, d7, e7 = -1, f7 = undefined, g7) {
-        super(b7, d7, e7, g7);
-        if (typeof f7 === "function") {
-            this.paramsGenerator_ = f7;
+    constructor(c7, d7, e7, f7 = -1, g7 = undefined, h7) {
+        super(c7, e7, f7, h7);
+        if (typeof g7 === "function") {
+            this.paramsGenerator_ = g7;
         }
-        this.__items = new SynchedPropertyObjectOneWayPU(c7.items, this, "items");
-        this.__itemStyle = new SynchedPropertyObjectOneWayPU(c7.itemStyle, this, "itemStyle");
+        this.__items = new SynchedPropertyObjectOneWayPU(d7.items, this, "items");
+        this.__itemStyle = new SynchedPropertyObjectOneWayPU(d7.itemStyle, this, "itemStyle");
         this.__chipSize = new ObservedPropertyObjectPU(defaultTheme.itemStyle.size, this, "chipSize");
         this.addProvidedVar("chipSize", this.__chipSize, false);
-        this.__selectedIndexes = new SynchedPropertyObjectOneWayPU(c7.selectedIndexes, this, "selectedIndexes");
-        this.__multiple = new SynchedPropertySimpleOneWayPU(c7.multiple, this, "multiple");
-        this.__chipGroupSpace = new SynchedPropertyObjectOneWayPU(c7.chipGroupSpace, this, "chipGroupSpace");
+        this.__selectedIndexes = new SynchedPropertyObjectOneWayPU(d7.selectedIndexes, this, "selectedIndexes");
+        this.__multiple = new SynchedPropertySimpleOneWayPU(d7.multiple, this, "multiple");
+        this.__chipGroupSpace = new SynchedPropertyObjectOneWayPU(d7.chipGroupSpace, this, "chipGroupSpace");
         this.suffix = undefined;
         this.onChange = noop;
         this.scroller = new Scroller();
         this.__isReachEnd = new ObservedPropertySimplePU(this.scroller.isAtEnd(), this, "isReachEnd");
-        this.setInitiallyProvidedValue(c7);
+        this.__chipGroupPadding = new SynchedPropertyObjectOneWayPU(d7.chipGroupPadding, this, "chipGroupPadding");
+        this.setInitiallyProvidedValue(d7);
         this.declareWatch("itemStyle", this.itemStyleOnChange);
         this.declareWatch("multiple", this.onMultipleChange);
         this.finalizeConstruction();
     }
-    setInitiallyProvidedValue(a7) {
-        if (a7.items === undefined) {
+    setInitiallyProvidedValue(b7) {
+        if (b7.items === undefined) {
             this.__items.set([]);
         }
-        if (a7.itemStyle === undefined) {
+        if (b7.itemStyle === undefined) {
             this.__itemStyle.set(defaultTheme.itemStyle);
         }
-        if (a7.chipSize !== undefined) {
-            this.chipSize = a7.chipSize;
+        if (b7.chipSize !== undefined) {
+            this.chipSize = b7.chipSize;
         }
-        if (a7.selectedIndexes === undefined) {
+        if (b7.selectedIndexes === undefined) {
             this.__selectedIndexes.set([0]);
         }
-        if (a7.multiple === undefined) {
+        if (b7.multiple === undefined) {
             this.__multiple.set(false);
         }
-        if (a7.chipGroupSpace === undefined) {
+        if (b7.chipGroupSpace === undefined) {
             this.__chipGroupSpace.set(defaultTheme.chipGroupSpace);
         }
-        if (a7.suffix !== undefined) {
-            this.suffix = a7.suffix;
+        if (b7.suffix !== undefined) {
+            this.suffix = b7.suffix;
         }
-        if (a7.onChange !== undefined) {
-            this.onChange = a7.onChange;
+        if (b7.onChange !== undefined) {
+            this.onChange = b7.onChange;
         }
-        if (a7.scroller !== undefined) {
-            this.scroller = a7.scroller;
+        if (b7.scroller !== undefined) {
+            this.scroller = b7.scroller;
         }
-        if (a7.isReachEnd !== undefined) {
-            this.isReachEnd = a7.isReachEnd;
+        if (b7.isReachEnd !== undefined) {
+            this.isReachEnd = b7.isReachEnd;
+        }
+        if (b7.chipGroupPadding === undefined) {
+            this.__chipGroupPadding.set(defaultTheme.chipGroupPadding);
         }
     }
-    updateStateVars(z6) {
-        this.__items.reset(z6.items);
-        this.__itemStyle.reset(z6.itemStyle);
-        this.__selectedIndexes.reset(z6.selectedIndexes);
-        this.__multiple.reset(z6.multiple);
-        this.__chipGroupSpace.reset(z6.chipGroupSpace);
+    updateStateVars(a7) {
+        this.__items.reset(a7.items);
+        this.__itemStyle.reset(a7.itemStyle);
+        this.__selectedIndexes.reset(a7.selectedIndexes);
+        this.__multiple.reset(a7.multiple);
+        this.__chipGroupSpace.reset(a7.chipGroupSpace);
+        this.__chipGroupPadding.reset(a7.chipGroupPadding);
     }
-    purgeVariableDependenciesOnElmtId(y6) {
-        this.__items.purgeDependencyOnElmtId(y6);
-        this.__itemStyle.purgeDependencyOnElmtId(y6);
-        this.__chipSize.purgeDependencyOnElmtId(y6);
-        this.__selectedIndexes.purgeDependencyOnElmtId(y6);
-        this.__multiple.purgeDependencyOnElmtId(y6);
-        this.__chipGroupSpace.purgeDependencyOnElmtId(y6);
-        this.__isReachEnd.purgeDependencyOnElmtId(y6);
+    purgeVariableDependenciesOnElmtId(z6) {
+        this.__items.purgeDependencyOnElmtId(z6);
+        this.__itemStyle.purgeDependencyOnElmtId(z6);
+        this.__chipSize.purgeDependencyOnElmtId(z6);
+        this.__selectedIndexes.purgeDependencyOnElmtId(z6);
+        this.__multiple.purgeDependencyOnElmtId(z6);
+        this.__chipGroupSpace.purgeDependencyOnElmtId(z6);
+        this.__isReachEnd.purgeDependencyOnElmtId(z6);
+        this.__chipGroupPadding.purgeDependencyOnElmtId(z6);
     }
     aboutToBeDeleted() {
         this.__items.aboutToBeDeleted();
@@ -294,50 +301,57 @@ export class ChipGroup extends ViewPU {
         this.__multiple.aboutToBeDeleted();
         this.__chipGroupSpace.aboutToBeDeleted();
         this.__isReachEnd.aboutToBeDeleted();
+        this.__chipGroupPadding.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
     get items() {
         return this.__items.get();
     }
-    set items(x6) {
-        this.__items.set(x6);
+    set items(y6) {
+        this.__items.set(y6);
     }
     get itemStyle() {
         return this.__itemStyle.get();
     }
-    set itemStyle(w6) {
-        this.__itemStyle.set(w6);
+    set itemStyle(x6) {
+        this.__itemStyle.set(x6);
     }
     get chipSize() {
         return this.__chipSize.get();
     }
-    set chipSize(v6) {
-        this.__chipSize.set(v6);
+    set chipSize(w6) {
+        this.__chipSize.set(w6);
     }
     get selectedIndexes() {
         return this.__selectedIndexes.get();
     }
-    set selectedIndexes(u6) {
-        this.__selectedIndexes.set(u6);
+    set selectedIndexes(v6) {
+        this.__selectedIndexes.set(v6);
     }
     get multiple() {
         return this.__multiple.get();
     }
-    set multiple(t6) {
-        this.__multiple.set(t6);
+    set multiple(u6) {
+        this.__multiple.set(u6);
     }
     get chipGroupSpace() {
         return this.__chipGroupSpace.get();
     }
-    set chipGroupSpace(s6) {
-        this.__chipGroupSpace.set(s6);
+    set chipGroupSpace(t6) {
+        this.__chipGroupSpace.set(t6);
     }
     get isReachEnd() {
         return this.__isReachEnd.get();
     }
-    set isReachEnd(r6) {
-        this.__isReachEnd.set(r6);
+    set isReachEnd(s6) {
+        this.__isReachEnd.set(s6);
+    }
+    get chipGroupPadding() {
+        return this.__chipGroupPadding.get();
+    }
+    set chipGroupPadding(r6) {
+        this.__chipGroupPadding.set(r6);
     }
     onMultipleChange() {
         this.selectedIndexes = [0];
@@ -470,12 +484,18 @@ export class ChipGroup extends ViewPU {
             });
         }
     }
+    getPaddingTop() {
+        return parseDimension(this.getUIContext(), this.chipGroupPadding.top, isValidDimensionNoPercentageString, defaultTheme.chipGroupPadding.top);
+    }
+    getPaddingBottom() {
+        return parseDimension(this.getUIContext(), this.chipGroupPadding.bottom, isValidDimensionNoPercentageString, defaultTheme.chipGroupPadding.bottom);
+    }
     initialRender() {
         this.observeComponentCreation2((b6, c6) => {
             Row.create();
             Row.align(Alignment.End);
             Row.width("100%");
-            Row.height(64);
+            Row.padding({ top: this.getPaddingTop(), bottom: this.getPaddingBottom() });
         }, Row);
         this.observeComponentCreation2((z5, a6) => {
             Stack.create();

@@ -31,6 +31,7 @@
 #include "core/common/ime/text_input_proxy.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/common/ime/text_selection.h"
+#include "core/components/common/properties/text_layout_info.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_accessibility_property.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_content_modifier.h"
@@ -47,6 +48,7 @@
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/select_overlay/magnifier.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
+#include "core/components_ng/pattern/text/layout_info_interface.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -98,7 +100,7 @@ public:
     ~RichEditorPattern() override;
 
     struct OperationRecord {
-        OperationRecord() : deleteCaretPostion(-1) {}
+        OperationRecord() : beforeCaretPosition(-1), afterCaretPosition(-1), deleteCaretPostion(-1) {}
         std::optional<std::string> addText;
         std::optional<std::string> deleteText;
         int32_t beforeCaretPosition;
@@ -171,7 +173,7 @@ public:
 
     PreviewTextStyle GetPreviewTextStyle() const;
 
-    void InsertValueInPreview(const std::string& insertValue);
+    void UpdatePreviewTextOnInsert(const std::string& insertValue);
 
     bool BetweenPreviewTextPosition(const Offset& globalOffset);
 
@@ -288,8 +290,7 @@ public:
 
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = true) override;
-    void InsertValue(const std::string& insertValue) override;
-    void InsertValue(const std::string& insertValue, bool isIME);
+    void InsertValue(const std::string& insertValue, bool isIME = false) override;
     void InsertValueOperation(
         const std::string& insertValue, OperationRecord* const record = nullptr, bool isIME = true);
     void DeleteSelectOperation(OperationRecord* const record);
@@ -340,6 +341,7 @@ public:
     bool CursorMoveEnd();
     int32_t CalcMoveUpPos(OffsetF& caretOffsetUp, OffsetF& caretOffsetDown);
     int32_t CalcLineBeginPosition();
+    float GetTextThemeFontSize();
     int32_t CalcLineEndPosition();
     bool CursorMoveLineEndPos(OffsetF& caretOffsetUp, OffsetF& caretOffsetDown, OffsetF& nextCaretOffset);
     bool CursorMoveLineBegin();
@@ -357,7 +359,7 @@ public:
     int32_t GetParagraphEndPosition(int32_t caretPosition);
     int32_t CaretPositionSelectEmoji(CaretMoveIntent direction);
     void HandleSelect(CaretMoveIntent direction) override;
-    bool SetCaretPosition(int32_t pos);
+    bool SetCaretPosition(int32_t pos, bool needNotifyImf = true);
     int32_t GetCaretPosition();
     int32_t GetTextContentLength() override;
     bool GetCaretVisible() const;
@@ -425,7 +427,7 @@ public:
     void HandleOnSelectAll() override;
     void OnCopyOperation(bool isUsingExternalKeyboard = false);
     void HandleOnCopy(bool isUsingExternalKeyboard = false) override;
-    void HandleDraggableFlag(bool isInterceptEvent);
+    void HandleDraggableFlag(bool isTouchSelectArea);
     bool JudgeContentDraggable();
     std::pair<OffsetF, float> CalculateCaretOffsetAndHeight();
     OffsetF CalculateEmptyValueCaretRect();
@@ -434,6 +436,7 @@ public:
     RefPtr<GestureEventHub> GetGestureEventHub();
     float GetSelectedMaxWidth();
     void AfterAddImage(RichEditorChangeValue& changeValue);
+    void OnWindowHide() override;
     bool BeforeAddImage(RichEditorChangeValue& changeValue, const ImageSpanOptions& options, int32_t insertIndex);
 
     bool IsUsingMouse() const
@@ -493,6 +496,7 @@ public:
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
     void ResetSelection();
+    bool BetweenSelection(const Offset& globalOffset);
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
     void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) override;
     void HandleSurfacePositionChanged(int32_t posX, int32_t posY) override;
@@ -539,22 +543,22 @@ public:
         selectionMenuMap_.clear();
     }
     void DumpInfo() override;
+    void MouseDoubleClickParagraphEnd(int32_t& index);
+    void DoubleClickExcludeSymbol(int32_t& start, int32_t& end);
     void InitSelection(const Offset& pos);
     bool HasFocus() const;
     void OnColorConfigurationUpdate() override;
     bool IsDisabled() const;
     float GetLineHeight() const override;
+    size_t GetLineCount() const override;
+    TextLineMetrics GetLineMetrics(int32_t lineNumber) override;
     float GetLetterSpacing() const;
     std::vector<RectF> GetTextBoxes() override;
     bool OnBackPressed() override;
 
     // Add for Scroll
 
-    void OnAttachToFrameNode() override
-    {
-        TextPattern::OnAttachToFrameNode();
-        richEditorInstanceId_ = Container::CurrentIdSafely();
-    }
+    void OnAttachToFrameNode() override;
 
     void OnDetachFromFrameNode(FrameNode* node) override
     {
@@ -717,10 +721,23 @@ public:
     bool AdjustSelectorForEmoji(int32_t& index, HandleType handleType, SelectorAdjustPolicy policy);
     void UpdateSelector(int32_t start, int32_t end);
     std::list<RefPtr<SpanItem>>::iterator GetSpanIter(int32_t index);
+    
+    void DumpAdvanceInfo() override {}
 
     void SetContentChange(bool onChange)
     {
         contentChange_ = onChange;
+    }
+
+    PositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y) override;
+    RectF GetTextContentRect(bool isActualText = false) const override
+    {
+        return contentRect_;
+    }
+
+    bool IsMoveCaretAnywhere() const
+    {
+        return isMoveCaretAnywhere_;
     }
 
 protected:
@@ -836,12 +853,14 @@ private:
     bool CloseKeyboard(bool forceClose) override;
     void CalcInsertValueObj(TextInsertValueInfo& info);
     void CalcDeleteValueObj(int32_t currentPosition, int32_t length, RichEditorDeleteValue& info);
+    RefPtr<SpanNode> GetSpanNodeBySpanItem(const RefPtr<SpanItem> spanItem);
     int32_t DeleteValueSetBuilderSpan(const RefPtr<SpanItem>& spanItem, RichEditorAbstractSpanResult& spanResult);
     int32_t DeleteValueSetImageSpan(const RefPtr<SpanItem>& spanItem, RichEditorAbstractSpanResult& spanResult);
     int32_t DeleteValueSetSymbolSpan(const RefPtr<SpanItem>& spanItem, RichEditorAbstractSpanResult& spanResult);
     int32_t DeleteValueSetTextSpan(const RefPtr<SpanItem>& spanItem, int32_t currentPosition, int32_t length,
         RichEditorAbstractSpanResult& spanResult);
     void DeleteByDeleteValueInfo(const RichEditorDeleteValue& info);
+    int32_t ProcessDeleteNodes(std::list<RichEditorAbstractSpanResult>& deleteSpans);
     bool OnKeyEvent(const KeyEvent& keyEvent);
     void MoveCaretAfterTextChange();
     bool BeforeIMEInsertValue(const std::string& insertValue);
@@ -937,6 +956,11 @@ private:
     void OnTextInputActionUpdate(TextInputAction value);
     void CloseSystemMenu();
     void SetAccessibilityAction();
+    bool BeforeGestureAndClickOperate(GestureEvent& info, bool isDoubleClick);
+    void HandleTripleClickEvent(OHOS::Ace::GestureEvent& info);
+    void UpdateSelectionByTouchMove(const Offset& offset);
+    void MoveCaretAnywhere(const Offset& touchOffset);
+    void ShowCaretNoTwinkling(const Offset& textOffset);
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
@@ -1034,6 +1058,9 @@ private:
     float lastFontScale_ = -1;
     bool isCaretInContentArea_ = false;
     OffsetF movingHandleOffset_;
+    bool mouseClickRelease_ = false;
+    int32_t initSelectStart_ = 0;
+    bool isMoveCaretAnywhere_ = false;
 };
 } // namespace OHOS::Ace::NG
 

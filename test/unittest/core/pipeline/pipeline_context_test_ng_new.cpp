@@ -1344,7 +1344,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg076, TestSize.Level1)
     EXPECT_NE(pipeline, nullptr);
     EXPECT_FALSE(pipeline->NeedSoftKeyboard());
     auto frameNode = FrameNode::GetOrCreateFrameNode("test", 10, nullptr);
-    pipeline->SetFocusNode(frameNode);
     EXPECT_FALSE(pipeline->NeedSoftKeyboard());
 
     /**
@@ -1383,7 +1382,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg077, TestSize.Level1)
      */
     auto pipeline = PipelineContext::GetMainPipelineContext();
     EXPECT_NE(pipeline, nullptr);
-    EXPECT_EQ(pipeline->HandleFocusNode(), nullptr);
 
     /**
      * @tc.steps2: Changing node information affects the return results.
@@ -1400,9 +1398,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg077, TestSize.Level1)
     frameNode->AddChild(frameNode1);
     frameNode->AddChild(frameNode2);
     pipeline->SetScreenNode(frameNode);
-    EXPECT_NE(pipeline->HandleFocusNode(), nullptr);
     frameNode1->GetOrCreateFocusHub()->currentFocus_ = true;
-    EXPECT_NE(pipeline->HandleFocusNode(), nullptr);
     auto frameNode3 = FrameNode::GetOrCreateFrameNode("test", 8, nullptr);
     auto frameNode4 = FrameNode::GetOrCreateFrameNode("test", 9, nullptr);
     frameNode2->AddChild(frameNode3);
@@ -1413,7 +1409,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg077, TestSize.Level1)
     frameNode4->GetOrCreateFocusHub()->focusable_ = false;
     frameNode3->GetOrCreateFocusHub()->SetFocusType(FocusType::NODE);
     frameNode4->GetOrCreateFocusHub()->SetFocusType(FocusType::NODE);
-    EXPECT_NE(pipeline->HandleFocusNode(), nullptr);
 }
 
 /**

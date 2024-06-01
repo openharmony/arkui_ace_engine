@@ -33,9 +33,7 @@ void WebDeclaration::InitSpecialized()
 bool WebDeclaration::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
 {
     static const LinearMapNode<void (*)(WebDeclaration&, const std::string&)> webAttrOperators[] = {
-                { DOM_WEB_WEBSRC, [](WebDeclaration& declaration, const std::string& src) {
-                    declaration.SetWebSrc(src);
-                } },
+        { DOM_WEB_WEBSRC, [](WebDeclaration& declaration, const std::string& src) { declaration.SetWebSrc(src); } },
     };
     auto operatorIter = BinarySearchFindIndex(webAttrOperators, ArraySize(webAttrOperators), attr.first.c_str());
     if (operatorIter != -1) {
@@ -48,33 +46,33 @@ bool WebDeclaration::SetSpecializedAttr(const std::pair<std::string, std::string
 bool WebDeclaration::SetSpecializedEvent(int32_t pageId, const std::string& eventId, const std::string& event)
 {
     static const LinearMapNode<void (*)(WebDeclaration&, const EventMarker&)> eventOperators[] = {
-            { DOM_PAGEERROR,
-                [](WebDeclaration& declaration, const EventMarker& event) {
-                    auto& webEvent = declaration.MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
-                    if (webEvent.IsValid()) {
-                        webEvent.pageErrorEventId = event;
-                    }
+        { DOM_PAGEERROR,
+            [](WebDeclaration& declaration, const EventMarker& event) {
+                auto& webEvent = declaration.MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+                if (webEvent.IsValid()) {
+                    webEvent.pageErrorEventId = event;
+                }
             } },
-            { DOM_WEB_MESSAGE,
-                [](WebDeclaration& declaration, const EventMarker& event) {
-                    auto& webEvent = declaration.MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
-                    if (webEvent.IsValid()) {
-                        webEvent.messageEventId = event;
-                    }
+        { DOM_WEB_MESSAGE,
+            [](WebDeclaration& declaration, const EventMarker& event) {
+                auto& webEvent = declaration.MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+                if (webEvent.IsValid()) {
+                    webEvent.messageEventId = event;
+                }
             } },
-            { DOM_PAGEFINISH,
-                [](WebDeclaration& declaration, const EventMarker& event) {
-                    auto& webEvent = declaration.MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
-                    if (webEvent.IsValid()) {
-                        webEvent.pageFinishEventId = event;
-                    }
+        { DOM_PAGEFINISH,
+            [](WebDeclaration& declaration, const EventMarker& event) {
+                auto& webEvent = declaration.MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+                if (webEvent.IsValid()) {
+                    webEvent.pageFinishEventId = event;
+                }
             } },
-            { DOM_PAGESTART,
-                [](WebDeclaration& declaration, const EventMarker& event) {
-                    auto& webEvent = declaration.MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
-                    if (webEvent.IsValid()) {
-                        webEvent.pageStartEventId = event;
-                    }
+        { DOM_PAGESTART,
+            [](WebDeclaration& declaration, const EventMarker& event) {
+                auto& webEvent = declaration.MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+                if (webEvent.IsValid()) {
+                    webEvent.pageStartEventId = event;
+                }
             } },
     };
     auto operatorIter = BinarySearchFindIndex(eventOperators, ArraySize(eventOperators), event.c_str());

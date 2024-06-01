@@ -27,7 +27,7 @@
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_model.h"
 
 namespace OHOS::Ace {
-class ScrollBarModel {
+class ACE_FORCE_EXPORT ScrollBarModel {
 public:
     static ScrollBarModel* GetInstance();
     virtual ~ScrollBarModel() = default;

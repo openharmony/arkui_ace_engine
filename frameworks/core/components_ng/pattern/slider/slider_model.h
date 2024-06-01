@@ -29,7 +29,7 @@
 #include "core/components_ng/property/gradient_property.h"
 
 namespace OHOS::Ace {
-class ACE_EXPORT SliderModel {
+class ACE_FORCE_EXPORT SliderModel {
 public:
     enum class SliderMode {
         OUTSET,  // block on track, track is thin
@@ -84,6 +84,7 @@ public:
     virtual void SetTrackBackgroundColor(const Color& value) = 0;
     virtual void SetTrackBackgroundColor(const NG::Gradient& value, bool isResourceColor = false) = 0;
     virtual void SetSelectColor(const Color& value) = 0;
+    virtual void SetSelectColor(const NG::Gradient& value, bool isResourceColor = false) = 0;
     virtual void SetMinLabel(float value) = 0;
     virtual void SetMaxLabel(float value) = 0;
     virtual void SetMinResponsiveDistance(float value) {};

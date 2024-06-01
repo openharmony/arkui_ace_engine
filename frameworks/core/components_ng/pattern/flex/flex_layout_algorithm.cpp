@@ -359,7 +359,6 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(
                 for (const auto& child : childList) {
                     allocatedSize_ -= GetChildMainAxisSize(child.layoutWrapper);
                     allocatedSize_ -= space_;
-                    // TODO: reset size validity and baseline properties.
                     child.layoutWrapper->SetActive(false);
                     child.layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF());
                 }
@@ -676,6 +675,7 @@ void FlexLayoutAlgorithm::SecondaryMeasureByProperty(
     }
 
     // child need to second show
+    int32_t childMeasureCount = 0;
     iter = secondaryMeasureList_.rbegin();
     while (iter != secondaryMeasureList_.rend()) {
         auto child = *iter;
@@ -688,6 +688,21 @@ void FlexLayoutAlgorithm::SecondaryMeasureByProperty(
         crossAxisSize_ = std::max(crossAxisSize_, GetChildCrossAxisSize(childLayoutWrapper));
         CheckBaselineProperties(child.layoutWrapper);
         ++iter;
+        ++childMeasureCount;
+    }
+    // if child has secondary measure, calculate crossAxis again
+    if (childMeasureCount) {
+        float chilMaxHeight = -1.0f;
+        iter = secondaryMeasureList_.rbegin();
+        while (iter != secondaryMeasureList_.rend()) {
+            auto child = *iter;
+            auto childLayoutWrapper = child.layoutWrapper;
+            chilMaxHeight = std::max(GetChildCrossAxisSize(childLayoutWrapper), chilMaxHeight);
+            ++iter;
+        }
+        if (GreatNotEqual(chilMaxHeight, 0.0f)) {
+            crossAxisSize_ = chilMaxHeight;
+        }
     }
 }
 
@@ -811,7 +826,7 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
      */
     const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
     const auto& rawConstraint = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint();
-    bool needToConstraint = CheckSetConstraint(rawConstraint);
+    bool needToConstraint = CheckSetConstraint(rawConstraint) && children.empty();
     const auto& measureType = layoutWrapper->GetLayoutProperty()->GetMeasureType();
     InitFlexProperties(layoutWrapper);
     Axis axis = (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) ? Axis::HORIZONTAL

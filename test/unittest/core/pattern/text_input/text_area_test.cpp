@@ -1360,4 +1360,27 @@ HWTEST_F(TextFieldUXTest, TextAreaLineBreakStrategy001, TestSize.Level1)
     frameNode_->MarkModifyDone();
     EXPECT_EQ(layoutProperty_->GetLineBreakStrategy(), LineBreakStrategy::BALANCED);
 }
+
+
+/**
+ * @tc.name: TextAreaTextAlign001
+ * @tc.desc: test testArea text align
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaTextAlign001, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    TextAlign textAligns[] = {TextAlign::CENTER, TextAlign::JUSTIFY, TextAlign::START,
+        TextAlign::END};
+    TextDirection textDirectoins[] = {TextDirection::LTR, TextDirection::RTL, TextDirection::AUTO};
+    for (auto textAlign : textAligns) {
+        for (auto textDirectoin : textDirectoins) {
+            layoutProperty_->UpdateTextAlign(textAlign);
+            layoutProperty_->UpdateLayoutDirection(textDirectoin);
+            frameNode_->MarkModifyDone();
+            EXPECT_EQ(layoutProperty_->GetTextAlign(), textAlign);
+            EXPECT_EQ(layoutProperty_->GetLayoutDirection(), textDirectoin);
+        }
+    }
+}
 }

@@ -359,6 +359,7 @@ void RotationRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>
             info.SetSourceTool(touchPoint.sourceTool);
         }
         info.SetPointerEvent(lastPointEvent_);
+        info.SetPressedKeyCodes(touchPoint.pressedKeyCodes_);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         callbackFunction(info);
@@ -369,8 +370,11 @@ GestureJudgeResult RotationRecognizer::TriggerGestureJudgeCallback()
 {
     auto targetComponent = GetTargetComponent();
     CHECK_NULL_RETURN(targetComponent, GestureJudgeResult::CONTINUE);
+    auto gestureRecognizerJudgeFunc = targetComponent->GetOnGestureRecognizerJudgeBegin();
     auto callback = targetComponent->GetOnGestureJudgeBeginCallback();
-    CHECK_NULL_RETURN(callback, GestureJudgeResult::CONTINUE);
+    if (!callback && !gestureRecognizerJudgeFunc) {
+        return GestureJudgeResult::CONTINUE;
+    }
     auto info = std::make_shared<RotationGestureEvent>();
     info->SetTimeStamp(time_);
     UpdateFingerListInfo();
@@ -390,6 +394,9 @@ GestureJudgeResult RotationRecognizer::TriggerGestureJudgeCallback()
         info->SetTiltY(touchPoint.tiltY.value());
     }
     info->SetSourceTool(touchPoint.sourceTool);
+    if (gestureRecognizerJudgeFunc) {
+        return gestureRecognizerJudgeFunc(info, Claim(this), responseLinkRecognizer_);
+    }
     return callback(gestureInfo_, info);
 }
 

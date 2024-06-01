@@ -352,6 +352,9 @@ double PinchRecognizer::ComputeAverageDeviation()
 
 Offset PinchRecognizer::ComputePinchCenter()
 {
+    if (touchPoints_.empty()) {
+        return Offset();
+    }
     double sumOfX = 0.0;
     double sumOfY = 0.0;
     for (auto& id : activeFingers_) {
@@ -363,7 +366,7 @@ Offset PinchRecognizer::ComputePinchCenter()
 
     PointF localPoint(focalX, focalY);
     NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
-        isPostEventResult_, touchPoints_[0].postEventNodeId);
+        isPostEventResult_, touchPoints_[touchPoints_.begin()->first].postEventNodeId);
     Offset pinchCenter = Offset(localPoint.GetX(), localPoint.GetY());
 
     return pinchCenter;
@@ -402,6 +405,7 @@ void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
             info.SetSourceTool(lastTouchEvent_.sourceTool);
         }
         info.SetPointerEvent(lastPointEvent_);
+        info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         callbackFunction(info);
@@ -412,8 +416,11 @@ GestureJudgeResult PinchRecognizer::TriggerGestureJudgeCallback()
 {
     auto targetComponent = GetTargetComponent();
     CHECK_NULL_RETURN(targetComponent, GestureJudgeResult::CONTINUE);
+    auto gestureRecognizerJudgeFunc = targetComponent->GetOnGestureRecognizerJudgeBegin();
     auto callback = targetComponent->GetOnGestureJudgeBeginCallback();
-    CHECK_NULL_RETURN(callback, GestureJudgeResult::CONTINUE);
+    if (!callback && !gestureRecognizerJudgeFunc) {
+        return GestureJudgeResult::CONTINUE;
+    }
     auto info = std::make_shared<PinchGestureEvent>();
     info->SetTimeStamp(time_);
     UpdateFingerListInfo();
@@ -430,6 +437,9 @@ GestureJudgeResult PinchRecognizer::TriggerGestureJudgeCallback()
         info->SetTiltY(lastTouchEvent_.tiltY.value());
     }
     info->SetSourceTool(lastTouchEvent_.sourceTool);
+    if (gestureRecognizerJudgeFunc) {
+        return gestureRecognizerJudgeFunc(info, Claim(this), responseLinkRecognizer_);
+    }
     return callback(gestureInfo_, info);
 }
 

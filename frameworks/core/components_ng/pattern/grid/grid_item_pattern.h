@@ -97,6 +97,10 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         Pattern::ToJsonValue(json, filter);
+        if (filter.IsFastFilter()) {
+            json->PutFixedAttr("selectable", selectable_ ? "true" : "false", filter, FIXED_ATTR_SELECTABLE);
+            return;
+        }
         json->PutExtAttr("forceRebuild", forceRebuild_ ? "true" : "false", filter);
         json->PutFixedAttr("selectable", selectable_ ? "true" : "false", filter, FIXED_ATTR_SELECTABLE);
     }

@@ -176,7 +176,7 @@ void JSOffscreenRenderingContext::Constructor(const JSCallbackInfo& args)
     jsRenderContext->SetAntiAlias();
 
     int32_t unit = 0;
-    if (args.GetInt32Arg(3, unit) && (static_cast<CanvasUnit>(unit) == CanvasUnit::PX)) {
+    if (args.GetInt32Arg(3, unit) && (static_cast<CanvasUnit>(unit) == CanvasUnit::PX)) { // 3: index of parameter
         jsRenderContext->SetUnit(CanvasUnit::PX);
     }
 }
@@ -219,11 +219,21 @@ void JSOffscreenRenderingContext::JsTransferToImageBitmap(const JSCallbackInfo& 
         return;
     }
     auto jsImage = (JSRenderImage*)nativeObj;
+    CHECK_NULL_VOID(jsImage);
+    auto offscreenCanvasPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(GetOffscreenPattern(id));
+    CHECK_NULL_VOID(offscreenCanvasPattern);
+#ifdef PIXEL_MAP_SUPPORTED
+    auto pixelMap = offscreenCanvasPattern->TransferToImageBitmap();
+    CHECK_NULL_VOID(pixelMap);
+    jsImage->SetPixelMap(pixelMap);
+#else
+    auto imageData = offscreenCanvasPattern->GetImageData(0, 0, width_, height_);
+    CHECK_NULL_VOID(imageData);
+    jsImage->SetImageData(imageData);
+#endif
     jsImage->SetUnit(GetUnit());
     jsImage->SetWidth(GetWidth());
     jsImage->SetHeight(GetHeight());
-    jsImage->SetContextId(id);
-
     info.SetReturnValue(JsConverter::ConvertNapiValueToJsVal(renderImage));
 }
 

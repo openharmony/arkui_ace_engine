@@ -741,7 +741,7 @@ HWTEST_F(TabsAttrTestNg, TabContentModel002, TestSize.Level1)
     auto symbolProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
     auto pipeline = PipelineContext::GetCurrentContext();
     auto tabTheme = pipeline->GetTheme<TabTheme>();
-    auto defaultColorOn = tabTheme->GetBottomTabIconOn();
+    auto defaultColorOn = tabTheme->GetBottomTabSymbolOn();
     EXPECT_EQ(symbolProperty->GetSymbolColorListValue({})[0], defaultColorOn);
 }
 /**

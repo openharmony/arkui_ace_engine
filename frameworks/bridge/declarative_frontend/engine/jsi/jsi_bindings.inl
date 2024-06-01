@@ -411,6 +411,7 @@ panda::Local<panda::JSValueRef> JsiClass<C>::InternalMemberFunctionCallback(pand
     }
     STATIC_API_DURATION();
     ACE_BUILD_TRACE_BEGIN("[%s][%s]", ThisJSClass::JSName(), binding->Name());
+    panda::JsiFastNativeScope scope(vm);
     auto fnPtr = static_cast<FunctionBinding<T, panda::Local<panda::JSValueRef>, Args...>*>(binding)->Get();
     (instance->*fnPtr)(runtimeCallInfo);
     ACE_BUILD_TRACE_END()
@@ -440,6 +441,7 @@ panda::Local<panda::JSValueRef> JsiClass<C>::InternalJSMemberFunctionCallback(
     }
     STATIC_API_DURATION();
     ACE_BUILD_TRACE_BEGIN("[%s][%s]", ThisJSClass::JSName(), binding->Name());
+    panda::JsiFastNativeScope scope(vm);
     auto fnPtr = static_cast<FunctionBinding<T, void, const JSCallbackInfo&>*>(binding)->Get();
     JsiCallbackInfo info(runtimeCallInfo);
     (instance->*fnPtr)(info);
@@ -468,6 +470,7 @@ panda::Local<panda::JSValueRef> JsiClass<C>::MethodCallback(panda::JsiRuntimeCal
     }
     STATIC_API_DURATION();
     ACE_BUILD_TRACE_BEGIN("[%s][%s]", ThisJSClass::JSName(), binding->Name());
+    panda::JsiFastNativeScope scope(vm);
     auto fnPtr = static_cast<FunctionBinding<Class, R, Args...>*>(binding)->Get();
     auto tuple = __detail__::ToTuple<std::decay_t<Args>...>(runtimeCallInfo);
     bool returnSelf = binding->Options() & MethodOptions::RETURN_SELF;
@@ -513,6 +516,7 @@ panda::Local<panda::JSValueRef> JsiClass<C>::JSMethodCallback(panda::JsiRuntimeC
     }
     STATIC_API_DURATION();
     ACE_BUILD_TRACE_BEGIN("[%s][%s]", ThisJSClass::JSName(), binding->Name());
+    panda::JsiFastNativeScope scope(vm);
     JsiCallbackInfo info(runtimeCallInfo);
     auto fnPtr = static_cast<FunctionBinding<Class, R, Args...>*>(binding)->Get();
     (instance->*fnPtr)(info);
@@ -530,6 +534,7 @@ panda::Local<panda::JSValueRef> JsiClass<C>::StaticMethodCallback(panda::JsiRunt
     }
     STATIC_API_DURATION();
     ACE_BUILD_TRACE_BEGIN("[%s][%s]", ThisJSClass::JSName(), binding->Name());
+    panda::JsiFastNativeScope scope(vm);
     auto fnPtr = binding->Get();
     auto tuple = __detail__::ToTuple<std::decay_t<Args>...>(runtimeCallInfo);
     bool returnSelf = binding->Options() & MethodOptions::RETURN_SELF;
@@ -571,6 +576,7 @@ panda::Local<panda::JSValueRef> JsiClass<C>::JSStaticMethodCallback(panda::JsiRu
     }
     STATIC_API_DURATION();
     ACE_BUILD_TRACE_BEGIN("[%s][%s]", ThisJSClass::JSName(), binding->Name());
+    panda::JsiFastNativeScope scope(vm);
     auto fnPtr = binding->Get();
     JsiCallbackInfo info(runtimeCallInfo);
     fnPtr(info);

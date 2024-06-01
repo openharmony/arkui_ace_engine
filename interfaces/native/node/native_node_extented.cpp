@@ -39,8 +39,8 @@ ArkUI_LayoutConstraint* OH_ArkUI_LayoutConstraint_Create()
 
 ArkUI_LayoutConstraint* OH_ArkUI_LayoutConstraint_Copy(const ArkUI_LayoutConstraint* constraint)
 {
-    ArkUI_LayoutConstraint* layoutConstraint = new ArkUI_LayoutConstraint { 0, 0, 0, 0, 0, 0 };
     CHECK_NULL_RETURN(constraint, nullptr);
+    ArkUI_LayoutConstraint* layoutConstraint = new ArkUI_LayoutConstraint { 0, 0, 0, 0, 0, 0 };
     layoutConstraint->minWidth = constraint->minWidth;
     layoutConstraint->maxWidth = constraint->maxWidth;
     layoutConstraint->minHeight = constraint->minHeight;
@@ -220,14 +220,14 @@ void OH_ArkUI_SwiperIndicator_Dispose(ArkUI_SwiperIndicator* indicator)
     delete indicator;
 }
 
-void OH_ArkUI_SwiperIndicator_SetLeftPosition(ArkUI_SwiperIndicator* indicator, float value)
+void OH_ArkUI_SwiperIndicator_SetStartPosition(ArkUI_SwiperIndicator* indicator, float value)
 {
     CHECK_NULL_VOID(indicator);
     indicator->dimLeft.isSet = 1;
     indicator->dimLeft.value = value;
 }
 
-float OH_ArkUI_SwiperIndicator_GetLeftPosition(ArkUI_SwiperIndicator* indicator)
+float OH_ArkUI_SwiperIndicator_GetStartPosition(ArkUI_SwiperIndicator* indicator)
 {
     CHECK_NULL_RETURN(indicator, 0.0f);
     return indicator->dimLeft.value;
@@ -246,14 +246,14 @@ float OH_ArkUI_SwiperIndicator_GetTopPosition(ArkUI_SwiperIndicator* indicator)
     return indicator->dimTop.value;
 }
 
-void OH_ArkUI_SwiperIndicator_SetRightPosition(ArkUI_SwiperIndicator* indicator, float value)
+void OH_ArkUI_SwiperIndicator_SetEndPosition(ArkUI_SwiperIndicator* indicator, float value)
 {
     CHECK_NULL_VOID(indicator);
     indicator->dimRight.isSet = 1;
     indicator->dimRight.value = value;
 }
 
-float OH_ArkUI_SwiperIndicator_GetRightPosition(ArkUI_SwiperIndicator* indicator)
+float OH_ArkUI_SwiperIndicator_GetEndPosition(ArkUI_SwiperIndicator* indicator)
 {
     CHECK_NULL_RETURN(indicator, 0.0f);
     return indicator->dimRight.value;
@@ -427,6 +427,126 @@ void OH_ArkUI_StyledString_AddPlaceholder(ArkUI_StyledString* storage, OH_Drawin
     ArkUI_SpanItem* spanItem = new ArkUI_SpanItem;
     spanItem->placeholder = placeholder;
     storage->items.emplace_back(spanItem);
+}
+
+ArkUI_AccessibilityState* OH_ArkUI_AccessibilityState_Create()
+{
+    ArkUI_AccessibilityState* state = new ArkUI_AccessibilityState;
+    state->isDisabled = ArkUI_OptionalInt { 0, 0 };
+    state->isSelected = ArkUI_OptionalInt { 0, 0 };
+    state->checkedType = ArkUI_OptionalInt { 0, 0 };
+    return state;
+}
+
+void OH_ArkUI_AccessibilityState_Dispose(ArkUI_AccessibilityState* state)
+{
+    delete state;
+}
+
+void OH_ArkUI_AccessibilityState_SetDisabled(ArkUI_AccessibilityState* state, int32_t isDisabled)
+{
+    CHECK_NULL_VOID(state);
+    state->isDisabled.isSet = 1;
+    state->isDisabled.value = isDisabled;
+}
+
+int32_t OH_ArkUI_AccessibilityState_IsDisabled(ArkUI_AccessibilityState* state)
+{
+    CHECK_NULL_RETURN(state, 0);
+    return state->isDisabled.value;
+}
+
+void OH_ArkUI_AccessibilityState_SetSelected(ArkUI_AccessibilityState* state, int32_t isSelected)
+{
+    CHECK_NULL_VOID(state);
+    state->isSelected.isSet = 1;
+    state->isSelected.value = isSelected;
+}
+
+int32_t OH_ArkUI_AccessibilityState_IsSelected(ArkUI_AccessibilityState* state)
+{
+    CHECK_NULL_RETURN(state, 0);
+    return state->isSelected.value;
+}
+
+void OH_ArkUI_AccessibilityState_SetCheckedState(ArkUI_AccessibilityState* state, int32_t checkedState)
+{
+    CHECK_NULL_VOID(state);
+    state->checkedType.isSet = 1;
+    state->checkedType.value = checkedState;
+}
+
+int32_t OH_ArkUI_AccessibilityState_GetCheckedState(ArkUI_AccessibilityState* state)
+{
+    CHECK_NULL_RETURN(state, 0);
+    return state->checkedType.value;
+}
+
+ArkUI_AccessibilityValue* OH_ArkUI_AccessibilityValue_Create()
+{
+    ArkUI_AccessibilityValue* value = new ArkUI_AccessibilityValue;
+    value->min = ArkUI_OptionalInt { 0, -1 };
+    value->max = ArkUI_OptionalInt { 0, -1 };
+    value->current = ArkUI_OptionalInt { 0, -1 };
+    value->text = ArkUI_OptionalCharPtr { 0, "" };
+    return value;
+}
+
+void OH_ArkUI_AccessibilityValue_Dispose(ArkUI_AccessibilityValue* value)
+{
+    delete value;
+}
+
+void OH_ArkUI_AccessibilityValue_SetMin(ArkUI_AccessibilityValue* value, int32_t min)
+{
+    CHECK_NULL_VOID(value);
+    value->min.isSet = 1;
+    value->min.value = min;
+}
+
+int32_t OH_ArkUI_AccessibilityValue_GetMin(ArkUI_AccessibilityValue* value)
+{
+    CHECK_NULL_RETURN(value, -1);
+    return value->min.value;
+}
+
+void OH_ArkUI_AccessibilityValue_SetMax(ArkUI_AccessibilityValue* value, int32_t max)
+{
+    CHECK_NULL_VOID(value);
+    value->max.isSet = 1;
+    value->max.value = max;
+}
+
+int32_t OH_ArkUI_AccessibilityValue_GetMax(ArkUI_AccessibilityValue* value) 
+{
+    CHECK_NULL_RETURN(value, -1);
+    return value->max.value;
+}
+
+void OH_ArkUI_AccessibilityValue_SetCurrent(ArkUI_AccessibilityValue* value, int32_t current)
+{
+    CHECK_NULL_VOID(value);
+    value->current.isSet = 1;
+    value->current.value = current;
+}
+
+int32_t OH_ArkUI_AccessibilityValue_GetCurrent(ArkUI_AccessibilityValue* value)
+{
+    CHECK_NULL_RETURN(value, -1);
+    return value->current.value;
+}
+
+void OH_ArkUI_AccessibilityValue_SetText(ArkUI_AccessibilityValue* value, const char* text)
+{
+    CHECK_NULL_VOID(value);
+    value->text.isSet = 1;
+    value->text.value = text;
+}
+
+const char* OH_ArkUI_AccessibilityValue_GetText(ArkUI_AccessibilityValue* value)
+{
+    CHECK_NULL_RETURN(value, "");
+    return value->text.value;
 }
 #ifdef __cplusplus
 };

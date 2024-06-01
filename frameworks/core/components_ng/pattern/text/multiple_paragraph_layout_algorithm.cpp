@@ -30,6 +30,7 @@
 #include "core/components_ng/render/font_collection.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -71,6 +72,11 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
 
     textStyle = CreateTextStyleUsingTheme(
         textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
+    auto fontManager = pipeline->GetFontManager();
+    if (fontManager && !(fontManager->GetAppCustomFont().empty()) &&
+        !(textLayoutProperty->GetFontFamily().has_value())) {
+        textStyle.SetFontFamilies(Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont()));
+    }
     if (contentModifier) {
         SetPropertyToModifier(textLayoutProperty, contentModifier);
         contentModifier->ModifyTextStyle(textStyle);
@@ -144,7 +150,7 @@ void MultipleParagraphLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
 void MultipleParagraphLayoutAlgorithm::GetChildrenPlaceholderIndex(std::vector<int32_t>& placeholderIndex)
 {
-    for (auto && group : spans_) {
+    for (auto&& group : spans_) {
         for (const auto& child : group) {
             if (!child) {
                 continue;
@@ -186,6 +192,9 @@ void MultipleParagraphLayoutAlgorithm::GetSpanParagraphStyle(
     }
     if (lineStyle->HasLeadingMargin()) {
         pStyle.leadingMargin = lineStyle->GetLeadingMarginValue();
+    }
+    if (lineStyle->HasLineHeight()) {
+        pStyle.lineHeight = lineStyle->GetLineHeightValue();
     }
 }
 
@@ -368,6 +377,7 @@ TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirection(
 
 bool MultipleParagraphLayoutAlgorithm::ParagraphReLayout(const LayoutConstraintF& contentConstraint)
 {
+    ACE_TEXT_SCOPED_TRACE("ParagraphReLayout");
     // Confirmed specification: The width of the text paragraph covers the width of the component, so this code is
     // generally not allowed to be modified
     CHECK_NULL_RETURN(paragraphManager_, false);
@@ -412,7 +422,7 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
     int32_t paragraphIndex = -1;
     preParagraphsPlaceholderCount_ = 0;
     currentParagraphPlaceholderCount_ = 0;
-
+    paragraphFontSize_ = paraStyle.fontSize;
     auto maxLines = static_cast<int32_t>(paraStyle.maxLines);
     for (auto && group : spans_) {
         ParagraphStyle spanParagraphStyle = paraStyle;
@@ -428,7 +438,7 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
             }
             spanParagraphStyle.maxLines = std::max(maxLines, 0);
         }
-        auto && paragraph = Paragraph::Create(spanParagraphStyle, FontCollection::Current());
+        auto&& paragraph = Paragraph::Create(spanParagraphStyle, FontCollection::Current());
         CHECK_NULL_RETURN(paragraph, false);
         auto paraStart = spanTextLength;
         paragraphIndex++;
@@ -529,13 +539,15 @@ void MultipleParagraphLayoutAlgorithm::AddImageToParagraph(RefPtr<ImageSpanItem>
     CHECK_NULL_VOID(geometryNode);
     placeholderStyle.width = geometryNode->GetMarginFrameSize().Width();
     placeholderStyle.height = geometryNode->GetMarginFrameSize().Height();
+    placeholderStyle.paragraphFontSize = Dimension(paragraphFontSize_);
+    auto parentNode = frameNode->GetParentFrameNode();
     if (NearZero(baselineOffset.Value())) {
         imageSpanItem->placeholderIndex =
-            imageSpanItem->UpdateParagraph(frameNode, paragraph, isSpanStringMode_, placeholderStyle);
+            imageSpanItem->UpdateParagraph(parentNode, paragraph, isSpanStringMode_, placeholderStyle);
     } else {
         placeholderStyle.baselineOffset = (baselineOffset - Dimension(IMAGE_SPAN_BASELINE_OFFSET)).ConvertToPx();
         imageSpanItem->placeholderIndex =
-            imageSpanItem->UpdateParagraph(frameNode, paragraph, isSpanStringMode_, placeholderStyle);
+            imageSpanItem->UpdateParagraph(parentNode, paragraph, isSpanStringMode_, placeholderStyle);
     }
     currentParagraphPlaceholderCount_++;
     imageSpanItem->placeholderIndex += preParagraphsPlaceholderCount_;

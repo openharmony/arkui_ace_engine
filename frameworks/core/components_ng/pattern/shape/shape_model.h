@@ -25,7 +25,7 @@
 #include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace {
-class ShapeModel {
+class ACE_FORCE_EXPORT ShapeModel {
 public:
     static ShapeModel* GetInstance();
     virtual ~ShapeModel() = default;

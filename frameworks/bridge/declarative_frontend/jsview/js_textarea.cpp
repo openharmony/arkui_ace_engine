@@ -105,6 +105,10 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("caretStyle", &JSTextField::SetCaretStyle);
     JSClass<JSTextArea>::StaticMethod("textIndent", &JSTextField::SetTextIndent);
     JSClass<JSTextArea>::StaticMethod("textOverflow", &JSTextField::SetTextOverflow);
+    JSClass<JSTextArea>::StaticMethod("onWillInsert", &JSTextField::OnWillInsertValue);
+    JSClass<JSTextArea>::StaticMethod("onDidInsert", &JSTextField::OnDidInsertValue);
+    JSClass<JSTextArea>::StaticMethod("onWillDelete", &JSTextField::OnWillDelete);
+    JSClass<JSTextArea>::StaticMethod("onDidDelete", &JSTextField::OnDidDelete);
     JSClass<JSTextArea>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 

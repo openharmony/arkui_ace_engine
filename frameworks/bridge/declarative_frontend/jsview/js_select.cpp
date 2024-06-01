@@ -25,6 +25,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "bridge/declarative_frontend/jsview/js_symbol_modifier.h"
 #include "bridge/declarative_frontend/jsview/models/select_model_impl.h"
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_select_theme.h"
 #include "core/components_ng/base/view_abstract_model.h"
@@ -78,9 +79,20 @@ void JSSelect::Create(const JSCallbackInfo& info)
             auto indexObject = JSRef<JSObject>::Cast(indexVal);
             auto selectValue = indexObject->GetProperty("value");
             auto selectIcon = indexObject->GetProperty("icon");
+            auto selectSymbolIcon = indexObject->GetProperty("symbolIcon");
+            RefPtr<JSSymbolGlyphModifier> selectSymbol = AceType::MakeRefPtr<JSSymbolGlyphModifier>();
+            selectSymbol->symbol_ = selectSymbolIcon;
+            params[i].symbolModifier = selectSymbol;
             ParseJsString(selectValue, value);
-            ParseJsMedia(selectIcon, icon);
-            params[i] = { value, icon };
+            params[i].text = value;
+            if (selectSymbolIcon->IsObject()) {
+                std::function<void(WeakPtr<NG::FrameNode>)> symbolApply = nullptr;
+                JSViewAbstract::SetSymbolOptionApply(info, symbolApply, selectSymbolIcon);
+                params[i].symbolIcon = symbolApply;
+            } else {
+                ParseJsMedia(selectIcon, icon);
+                params[i].icon = icon;
+            }
         }
         SelectModel::GetInstance()->Create(params);
         JSSelectTheme::ApplyTheme();
@@ -122,6 +134,7 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("menuBackgroundColor", &JSSelect::SetMenuBackgroundColor, opt);
     JSClass<JSSelect>::StaticMethod("menuBackgroundBlurStyle", &JSSelect::SetMenuBackgroundBlurStyle, opt);
     JSClass<JSSelect>::StaticMethod("controlSize", &JSSelect::SetControlSize);
+    JSClass<JSSelect>::StaticMethod("direction", &JSSelect::SetDirection, opt);
 
     JSClass<JSSelect>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSSelect>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -822,5 +835,20 @@ void JSSelect::SetControlSize(const JSCallbackInfo& info)
     } else {
         LOGE("JSSelect::SetControlSize Is not Number.");
     }
+}
+
+void JSSelect::SetDirection(const std::string& dir)
+{
+    TextDirection direction = TextDirection::AUTO;
+    if (dir == "Ltr") {
+        direction = TextDirection::LTR;
+    } else if (dir == "Rtl") {
+        direction = TextDirection::RTL;
+    } else if (dir == "Auto") {
+        direction = TextDirection::AUTO;
+    } else if (dir == "undefined" && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+        direction = TextDirection::AUTO;
+    }
+    SelectModel::GetInstance()->SetLayoutDirection(direction);
 }
 } // namespace OHOS::Ace::Framework

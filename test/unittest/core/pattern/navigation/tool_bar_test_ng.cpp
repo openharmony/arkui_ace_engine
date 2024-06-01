@@ -17,10 +17,15 @@
 
 #define protected public
 #define private public
+#include "core/common/agingadapation/aging_adapation_dialog_theme.h"
+#include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/navigation/tool_bar_layout_algorithm.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
@@ -211,5 +216,62 @@ HWTEST_F(ToolBarTestNg, ToolBarPatternTest006, TestSize.Level1)
     EXPECT_NE(navToolbarPattern, nullptr);
     navToolbarPattern->options_.bgOptions.color = std::make_optional(FRONT_COLOR);
     navToolbarPattern->SetDefaultBackgroundColorIfNeeded(frameNode);
+}
+
+/**
+ * @tc.name: ToolBarPatternTest007
+ * @tc.desc: Test the InitLongPressEvent function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, ToolBarPatternTest007, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavToolbarPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto navToolbarPattern = frameNode->GetPattern<NavToolbarPattern>();
+    EXPECT_NE(navToolbarPattern, nullptr);
+
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    auto imageNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(imageNode, nullptr);
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+
+    navToolbarPattern->InitLongPressEvent(gestureHub, imageNode, textNode, false);
+    auto longPressRecognizer = gestureHub->GetLongPressRecognizer();
+    EXPECT_NE(longPressRecognizer, nullptr);
+    EXPECT_NE(longPressRecognizer->onActionEnd_, nullptr);
+}
+
+/**
+ * @tc.name: ToolBarPatternTest008
+ * @tc.desc: Test the HandleLongPressActionEnd function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, ToolBarPatternTest008, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavToolbarPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto navToolbarPattern = frameNode->GetPattern<NavToolbarPattern>();
+    EXPECT_NE(navToolbarPattern, nullptr);
+
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    auto imageNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(imageNode, nullptr);
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+
+    navToolbarPattern->dialogNode_ =
+        FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<NavToolbarPattern>());
+    ASSERT_NE(navToolbarPattern->dialogNode_, nullptr);
+    navToolbarPattern->HandleLongPressActionEnd();
+    EXPECT_EQ(navToolbarPattern->dialogNode_, nullptr);
 }
 } // namespace OHOS::Ace::NG

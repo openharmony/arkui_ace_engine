@@ -34,6 +34,10 @@ void BorderStyleProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, std::uni
         "OutlineStyle.NONE",
     };
     const char** style = isOutline ? OUTLINE_STYLE : BORDER_STYLE;
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     if (multiValued) {
         auto res = JsonUtil::Create(true);
         res->Put("left", style[static_cast<int>(styleLeft.value_or(BorderStyle::SOLID))]);
@@ -62,6 +66,10 @@ std::string BorderWidthPropertyT<Dimension>::ToString() const
 void BorderWidthPropertyT<Dimension>::ToJsonValue(std::unique_ptr<JsonValue>& json,
     std::unique_ptr<JsonValue>& borderJson, const InspectorFilter& filter, bool isOutline) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     if (multiValued) {
         auto res = JsonUtil::Create(true);
         res->Put("left", leftDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
@@ -103,6 +111,10 @@ bool BorderWidthPropertyT<Dimension>::UpdateWithCheck(const BorderWidthPropertyT
 void BorderColorProperty::ToJsonValue(std::unique_ptr<JsonValue>& json,
     std::unique_ptr<JsonValue>& borderJson, const InspectorFilter& filter, bool isOutline) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     if (multiValued) {
         auto res = JsonUtil::Create(true);
         res->Put("left", leftColor.value_or(Color()).ColorToString().c_str());
@@ -132,6 +144,10 @@ std::string BorderColorProperty::ToString() const
 void BorderRadiusPropertyT<Dimension>::ToJsonValue(std::unique_ptr<JsonValue>& json,
     std::unique_ptr<JsonValue>& borderJson, const InspectorFilter& filter, bool isOutline) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     if (multiValued) {
         auto res = JsonUtil::Create(true);
         res->Put("topLeft", radiusTopLeft.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());

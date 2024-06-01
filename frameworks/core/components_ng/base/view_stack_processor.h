@@ -22,6 +22,8 @@
 #include <vector>
 
 #include "base/memory/referenced.h"
+#include "core/common/container.h"
+#include "core/common/container_scope.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
@@ -260,10 +262,10 @@ public:
     void Pop();
 
     // pop the last container
-    void PopContainer();
+    ACE_FORCE_EXPORT void PopContainer();
 
     // End of Render function, create component tree and flush modify task.
-    RefPtr<UINode> Finish();
+    ACE_FORCE_EXPORT RefPtr<UINode> Finish();
 
     // Set key to be used for next node on the stack
     void PushKey(const std::string& key);
@@ -276,16 +278,6 @@ public:
 
     // Clear the key pushed to the stack
     void PopKey();
-
-    // Prevent predict mark dirty when creating predict node
-    void SetPredict(RefPtr<UINode> predictNode)
-    {
-        predictNode_ = predictNode;
-    }
-
-    void ResetPredict() {
-        predictNode_.Reset();
-    }
 
     // Check whether the current node is in the corresponding polymorphic style state.
     // When the polymorphic style is not set on the front end, it returns true regardless of the current node state;
@@ -338,7 +330,7 @@ public:
     void ImplicitPopBeforeContinue();
 
     // End of Rerender function, flush modifier task.
-    void FlushRerenderTask();
+    ACE_FORCE_EXPORT void FlushRerenderTask();
 
     /**
      * start 'get' access recording
@@ -350,6 +342,10 @@ public:
     {
         accountGetAccessToNodeId_ = elmtId;
         reservedNodeId_ = elmtId;
+        if (containerId_ != OHOS::Ace::INSTANCE_ID_UNDEFINED) {
+            restoreInstanceId_ = Container::CurrentId();
+            ContainerScope::UpdateCurrent(containerId_);
+        }
     }
 
     int32_t ClaimNodeId()
@@ -377,6 +373,10 @@ public:
      */
     void StopGetAccessRecording()
     {
+        if (restoreInstanceId_ != OHOS::Ace::INSTANCE_ID_UNDEFINED) {
+            ContainerScope::UpdateCurrent(restoreInstanceId_);
+            restoreInstanceId_ = OHOS::Ace::INSTANCE_ID_UNDEFINED;
+        }
         accountGetAccessToNodeId_ = ElementRegister::UndefinedElementId;
         reservedNodeId_ = ElementRegister::UndefinedElementId;
     }
@@ -448,6 +448,10 @@ public:
         return isExportTexture_;
     }
 
+    void SetRebuildContainerId(int32_t containerId)
+    {
+        containerId_ = containerId;
+    }
 private:
     ViewStackProcessor();
 
@@ -468,13 +472,13 @@ private:
     std::string viewKey_;
     std::stack<size_t> keyStack_;
 
-    RefPtr<UINode> predictNode_;
-
     std::stack<int32_t> parentIdStack_;
 
     std::optional<UIState> visualState_ = std::nullopt;
     bool isBuilderNode_ = false;
     bool isExportTexture_ = false;
+    int32_t containerId_ = OHOS::Ace::INSTANCE_ID_UNDEFINED;
+    int32_t restoreInstanceId_ = OHOS::Ace::INSTANCE_ID_UNDEFINED;
 
     // elmtId reserved for next component creation
     ElementIdType reservedNodeId_ = ElementRegister::UndefinedElementId;
@@ -487,9 +491,9 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(ViewStackProcessor);
 };
 
-class ACE_EXPORT ScopedViewStackProcessor final {
+class ACE_FORCE_EXPORT ScopedViewStackProcessor final {
 public:
-    ScopedViewStackProcessor();
+    ScopedViewStackProcessor(int32_t containerId = OHOS::Ace::INSTANCE_ID_UNDEFINED);
     ~ScopedViewStackProcessor();
 
 private:

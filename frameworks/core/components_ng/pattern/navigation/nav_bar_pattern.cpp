@@ -40,6 +40,7 @@ namespace OHOS::Ace::NG {
 namespace {
 // titlebar ZINDEX
 constexpr static int32_t DEFAULT_TITLEBAR_ZINDEX = 2;
+constexpr float DEFAULT_NAV_BAR_MASK_OPACITY = 0.6f;
 void BuildMoreItemNodeAction(const RefPtr<FrameNode>& buttonNode, const RefPtr<BarItemNode>& barItemNode,
     const RefPtr<FrameNode>& barMenuNode, const RefPtr<NavBarNode>& navBarNode)
 {
@@ -68,24 +69,31 @@ void BuildMoreItemNodeAction(const RefPtr<FrameNode>& buttonNode, const RefPtr<B
 
         auto menuPattern = menuNode->GetPattern<MenuPattern>();
         CHECK_NULL_VOID(menuPattern);
-        // navigation menu show like select.
-        menuPattern->SetIsSelectMenu(true);
-
-        overlayManager->ShowMenu(id, OffsetF(0.0f, 0.0f), menu);
-
-        auto symbol = AceType::DynamicCast<FrameNode>(barItemNode->GetChildren().front());
-        CHECK_NULL_VOID(symbol);
-        auto symbolProperty = symbol->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(symbolProperty);
-        auto symbolEffectOptions = symbolProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
-        symbolEffectOptions.SetEffectType(SymbolEffectType::BOUNCE);
-        symbolEffectOptions.SetIsTxtActive(true);
-        symbolEffectOptions.SetIsTxtActiveSource(0);
-        symbolProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
-        symbol->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
         auto navBarNode = weakNavBarNode.Upgrade();
         CHECK_NULL_VOID(navBarNode);
+
+        auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
+        CHECK_NULL_VOID(navBarPattern);
+
+        // navigation menu show like select.
+        menuPattern->SetIsSelectMenu(true);
+        OffsetF offset(0.0f, 0.0f);
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            auto symbol = AceType::DynamicCast<FrameNode>(barItemNode->GetChildren().front());
+            CHECK_NULL_VOID(symbol);
+            auto symbolProperty = symbol->GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_VOID(symbolProperty);
+            auto symbolEffectOptions = symbolProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
+            symbolEffectOptions.SetEffectType(SymbolEffectType::BOUNCE);
+            symbolEffectOptions.SetIsTxtActive(true);
+            symbolEffectOptions.SetIsTxtActiveSource(0);
+            symbolProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
+            symbol->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        } else {
+            offset = navBarPattern->GetShowMenuOffset(barItemNode, menuNode);
+        }
+        overlayManager->ShowMenu(id, offset, menu);
         navBarNode->SetIsTitleMenuNodeShowing(true);
         auto hidMenuCallback = [weakNavBarNode = WeakPtr<NavBarNode>(navBarNode)]() {
             auto navBarNode = weakNavBarNode.Upgrade();
@@ -329,6 +337,30 @@ void MountToolBar(const RefPtr<NavBarNode>& hostNode)
 }
 } // namespace
 
+OffsetF NavBarPattern::GetShowMenuOffset(const RefPtr<BarItemNode> barItemNode, RefPtr<FrameNode> menuNode)
+{
+    auto imageNode = barItemNode->GetChildAtIndex(0);
+    CHECK_NULL_RETURN(imageNode, OffsetF(0.0f, 0.0f));
+
+    auto imageFrameNode = AceType::DynamicCast<FrameNode>(imageNode);
+    CHECK_NULL_RETURN(imageFrameNode, OffsetF(0.0f, 0.0f));
+    auto imgOffset = imageFrameNode->GetOffsetRelativeToWindow();
+    auto imageSize = imageFrameNode->GetGeometryNode()->GetFrameSize();
+
+    auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_RETURN(menuLayoutProperty, OffsetF(0.0f, 0.0f));
+    menuLayoutProperty->UpdateTargetSize(imageSize);
+
+    bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (isRightToLeft) {
+        imgOffset.SetX(imgOffset.GetX() + imageSize.Width());
+    } else {
+        imgOffset.SetX(imgOffset.GetX());
+    }
+    imgOffset.SetY(imgOffset.GetY() + imageSize.Height());
+    return imgOffset;
+}
+
 void NavBarPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -548,6 +580,17 @@ void NavBarPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 
 void NavBarPattern::WindowFocus(bool isFocus)
 {
+    isWindowFocus_ = isFocus;
+    SetNavBarMask(isFocus);
+}
+
+void NavBarPattern::OnColorConfigurationUpdate()
+{
+    SetNavBarMask(isWindowFocus_);
+}
+
+void NavBarPattern::SetNavBarMask(bool isWindowFocus)
+{
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
     auto navBarNode = GetHost();
@@ -562,9 +605,9 @@ void NavBarPattern::WindowFocus(bool isFocus)
     if (navigationPattern && navigationPattern->GetNavigationMode() == NavigationMode::SPLIT) {
         auto renderContext = navBarNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
-        Color maskColor = theme->GetNavBarUnfocusColor();
+        Color maskColor = theme->GetNavBarUnfocusColor().BlendOpacity(DEFAULT_NAV_BAR_MASK_OPACITY);
         auto maskProperty = AceType::MakeRefPtr<ProgressMaskProperty>();
-        maskProperty->SetColor(isFocus ? Color::TRANSPARENT : maskColor);
+        maskProperty->SetColor(isWindowFocus ? Color::TRANSPARENT : maskColor);
         renderContext->UpdateProgressMask(maskProperty);
     }
 }

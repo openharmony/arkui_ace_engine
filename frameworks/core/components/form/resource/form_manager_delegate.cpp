@@ -408,12 +408,29 @@ void FormManagerDelegate::AddFormLinkInfoUpdateCallback(OnFormLinkInfoUpdateCall
     onFormLinkInfoUpdateCallback_ = std::move(callback);
 }
 
+void FormManagerDelegate::AddGetRectRelativeToWindowCallback(OnGetRectRelativeToWindowCallback&& callback)
+{
+    if (!callback || state_ == State::RELEASED) {
+        return;
+    }
+    onGetRectRelativeToWindowCallback_ = std::move(callback);
+}
+
 void FormManagerDelegate::AddActionEventHandle(const ActionEventHandle& callback)
 {
     if (!callback || state_ == State::RELEASED) {
         return;
     }
     actionEventHandle_ = callback;
+}
+
+void FormManagerDelegate::AddEnableFormCallback(EnableFormCallback&& callback)
+{
+    if (!callback || state_ == State::RELEASED) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "EnableFormCallback is null");
+        return;
+    }
+    enableFormCallback_ = std::move(callback);
 }
 
 void FormManagerDelegate::OnActionEventHandle(const std::string& action)
@@ -543,6 +560,21 @@ void FormManagerDelegate::RegisterRenderDelegateEvent()
         formManagerDelegate->OnFormLinkInfoUpdate(formLinkInfos);
     };
     renderDelegate_->SetFormLinkInfoUpdateHandler(std::move(onFormLinkInfoUpdateHandler));
+
+    auto &&onGetRectRelativeToWindowHandler = [weak = WeakClaim(this)](int32_t &top, int32_t &left) {
+        auto formManagerDelegate = weak.Upgrade();
+        CHECK_NULL_VOID(formManagerDelegate);
+        formManagerDelegate->OnGetRectRelativeToWindow(top, left);
+    };
+    renderDelegate_->SetGetRectRelativeToWindowHandler(onGetRectRelativeToWindowHandler);
+
+    auto&& enableFormEventHandler = [weak = WeakClaim(this)](const OHOS::AppExecFwk::FormJsInfo& formInfo,
+        const bool enable) {
+        auto formManagerDelegate = weak.Upgrade();
+        CHECK_NULL_VOID(formManagerDelegate);
+        formManagerDelegate->OnEnableForm(formInfo, enable);
+    };
+    renderDelegate_->SetEnableFormEventHandler(std::move(enableFormEventHandler));
 }
 
 void FormManagerDelegate::OnActionEvent(const std::string& action)
@@ -683,6 +715,13 @@ void FormManagerDelegate::OnFormLinkInfoUpdate(const std::vector<std::string>& f
     }
 }
 
+void FormManagerDelegate::OnGetRectRelativeToWindow(int32_t &top, int32_t &left)
+{
+    if (onGetRectRelativeToWindowCallback_) {
+        onGetRectRelativeToWindowCallback_(top, left);
+    }
+}
+
 void FormManagerDelegate::OnFormAcquired(const std::string& param)
 {
     auto result = ParseMapFromString(param);
@@ -731,6 +770,13 @@ void FormManagerDelegate::OnFormError(const std::string& code, const std::string
     }
 }
 
+void FormManagerDelegate::OnEnableForm(const AppExecFwk::FormJsInfo& formInfo, const bool enable)
+{
+    TAG_LOGI(AceLogTag::ACE_FORM, "FormManagerDelegate::OnEnableForm,formInfo.formId = %{public}" PRId64 "",
+        formInfo.formId);
+    HandleEnableFormCallback(enable);
+}
+
 void FormManagerDelegate::HandleUnTrustFormCallback()
 {
     TAG_LOGI(AceLogTag::ACE_FORM, "HandleUnTrustFormCallback.");
@@ -747,8 +793,20 @@ void FormManagerDelegate::HandleSnapshotCallback(const uint32_t& delayTime)
     }
 }
 
+void FormManagerDelegate::HandleEnableFormCallback(const bool enable)
+{
+    if (!enableFormCallback_) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "enableFormCallback_. is null");
+    }
+    enableFormCallback_(enable);
+}
+
 void FormManagerDelegate::ReAddForm()
 {
+    {
+        std::lock_guard<std::mutex> lock(recycleMutex_);
+        recycleStatus_ = RecycleStatus::RECOVERED;
+    }
     formRendererDispatcher_ = nullptr; // formRendererDispatcher_ need reset, otherwise PointerEvent will disable
     auto clientInstance = OHOS::AppExecFwk::FormHostClient::GetInstance();
     auto ret =
@@ -765,6 +823,25 @@ void FormManagerDelegate::SetObscured(bool isObscured)
 {
     CHECK_NULL_VOID(formRendererDispatcher_);
     formRendererDispatcher_->SetObscured(isObscured);
+}
+
+void FormManagerDelegate::OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId)
+{
+    CHECK_NULL_VOID(formRendererDispatcher_);
+    formRendererDispatcher_->OnAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
+}
+
+void FormManagerDelegate::OnAccessibilityChildTreeDeregister()
+{
+    CHECK_NULL_VOID(formRendererDispatcher_);
+    formRendererDispatcher_->OnAccessibilityChildTreeDeregister();
+}
+
+void FormManagerDelegate::OnAccessibilityDumpChildInfo(
+    const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    CHECK_NULL_VOID(formRendererDispatcher_);
+    formRendererDispatcher_->OnAccessibilityDumpChildInfo(params, info);
 }
 
 #ifdef OHOS_STANDARD_SYSTEM

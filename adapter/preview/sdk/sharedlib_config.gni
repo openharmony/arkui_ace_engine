@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -263,6 +263,13 @@ napi_modules = [
         lib_names = [ "buffer" ]
       },
       {
+        label =
+            "//foundation/window/window_manager/previewer:previewer_window_napi"
+        subsystem_name = "window"
+        part_name = "window_manager"
+        lib_names = [ "previewer_window_napi" ]
+      },
+      {
         label = "//foundation/arkui/ace_engine/interfaces/napi/kits:napi_group"
         subsystem_name = "arkui"
         part_name = "ace_engine"
@@ -311,6 +318,12 @@ napi_modules = [
   {
     prefix = "arkui/advanced"
     shard_libs = [
+      {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/arcslider/interfaces:arcslider"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "arcslider" ]
+      },
       {
         label = "//foundation/arkui/ace_engine/advanced_ui_component/chip/interfaces:chip"
         subsystem_name = "arkui"
@@ -442,6 +455,17 @@ napi_modules = [
         subsystem_name = "arkui"
         part_name = "ace_engine"
         lib_names = [ "fullscreenlaunchcomponent" ]
+      },
+    ]
+  },
+  {
+    prefix = "atomicservice"
+    shard_libs = [
+      {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/atomicservicenavigation/interfaces:atomicservicenavigation"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "atomicservicenavigation" ]
       },
     ]
   },

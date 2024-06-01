@@ -45,7 +45,7 @@ enum class RouterPageState {
 };
 
 // PagePattern is the base class for page root render node.
-class ACE_EXPORT PagePattern : public ContentRootPattern, public FocusView, public AutoFillTriggerStateHolder {
+class ACE_FORCE_EXPORT PagePattern : public ContentRootPattern, public FocusView, public AutoFillTriggerStateHolder {
     DECLARE_ACE_TYPE(PagePattern, ContentRootPattern, FocusView, AutoFillTriggerStateHolder);
 
 public:
@@ -184,6 +184,11 @@ public:
         return overlayManager_;
     }
 
+    void DeleteOverlayManager()
+    {
+        overlayManager_.Reset();
+    }
+
     bool RemoveOverlay();
     void MarkDirtyOverlay();
 
@@ -196,6 +201,7 @@ private:
     void OnAttachToFrameNode() override;
     void BeforeCreateLayoutWrapper() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& config) override;
+    void BeforeSyncGeometryProperties(const DirtySwapConfig& config) override;
     void FirePageTransitionFinish();
 
     void OnAttachToMainTree() override;
@@ -210,6 +216,8 @@ private:
     {
         return true;
     }
+
+    void NotifyPerfMonitorPageMsg(const std::string& pageUrl, const std::string& bundleName);
 
     RefPtr<PageInfo> pageInfo_;
     RefPtr<OverlayManager> overlayManager_;

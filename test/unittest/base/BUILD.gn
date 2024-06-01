@@ -36,6 +36,8 @@ ace_unittest("util_test") {
     "base_utils_test.cpp",
     "json_util_test.cpp",
   ]
+
+  external_deps = [ "bounds_checking_function:libsec_shared" ]
 }
 
 group("base_unittest") {

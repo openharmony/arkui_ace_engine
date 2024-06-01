@@ -19,6 +19,12 @@
 #include "core/components_ng/base/view_stack_processor.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr Dimension MIN_PC_MENU_WIDTH = 64.0_vp;
+constexpr Dimension MIN_MOBILE_MENU_WIDTH = 64.0_vp;
+constexpr double MAX_PC_MENU_WIDTH_RATIO = 0.67;
+} // namespace
+
 void MenuModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -95,8 +101,10 @@ void MenuModelNG::SetBorderRadius(const std::optional<Dimension>& radiusTopLeft,
 
 void MenuModelNG::SetWidth(const Dimension& width)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, MenuWidth, width);
-    ViewAbstract::SetWidth(NG::CalcLength(width));
+    const Dimension adjustedWidth = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ?
+        CalculateBoundedWidth(width) : width;
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, MenuWidth, adjustedWidth);
+    ViewAbstract::SetWidth(NG::CalcLength(adjustedWidth));
 }
 
 void MenuModelNG::SetFontFamily(const std::vector<std::string>& families)
@@ -104,9 +112,34 @@ void MenuModelNG::SetFontFamily(const std::vector<std::string>& families)
     ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, FontFamily, families);
 }
 
+void MenuModelNG::ResetFontFamily()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(MenuLayoutProperty, FontFamily, PROPERTY_UPDATE_MEASURE);
+}
+
 void MenuModelNG::SetExpandingMode(const SubMenuExpandingMode& expandingMode)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, ExpandingMode, expandingMode);
+}
+
+void MenuModelNG::SetItemDivider(const V2::ItemDivider& divider)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemDivider, divider);
+}
+
+void MenuModelNG::SetItemDivider(FrameNode* frameNode, const V2::ItemDivider& divider)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemDivider, divider, frameNode);
+}
+
+void MenuModelNG::SetItemGroupDivider(const V2::ItemDivider& divider)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemGroupDivider, divider);
+}
+
+void MenuModelNG::SetItemGroupDivider(FrameNode* frameNode, const V2::ItemDivider& divider)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemGroupDivider, divider, frameNode);
 }
 
 void MenuModelNG::SetFontColor(FrameNode* frameNode, const std::optional<Color>& color)
@@ -173,7 +206,35 @@ void MenuModelNG::SetBorderRadius(FrameNode* frameNode, const std::optional<Dime
 
 void MenuModelNG::SetWidth(FrameNode* frameNode, const Dimension& width)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, MenuWidth, width, frameNode);
-    ViewAbstract::SetWidth(frameNode, NG::CalcLength(width));
+    const Dimension adjustedWidth = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ?
+        CalculateBoundedWidth(width) : width;
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, MenuWidth, adjustedWidth, frameNode);
+    ViewAbstract::SetWidth(frameNode, NG::CalcLength(adjustedWidth));
 }
+
+Dimension MenuModelNG::CalculateBoundedWidth(const Dimension& inputWidth)
+{
+    const DeviceType deviceType = SystemProperties::GetDeviceType();
+    return deviceType == DeviceType::TWO_IN_ONE ? CalculateBoundedWidthForPC(inputWidth) :
+        CalculateBoundedWidthForMobile(inputWidth);
+}
+
+Dimension MenuModelNG::CalculateBoundedWidthForPC(const Dimension& inputWidth)
+{
+    const int32_t deviceWidth = SystemProperties::GetDeviceWidth();
+    const Dimension MAX_PC_MENU_WIDTH(deviceWidth * MAX_PC_MENU_WIDTH_RATIO, OHOS::Ace::DimensionUnit::VP);
+    if (inputWidth < MIN_PC_MENU_WIDTH)
+        return MIN_PC_MENU_WIDTH;
+    if (inputWidth > MAX_PC_MENU_WIDTH)
+        return MAX_PC_MENU_WIDTH;
+    return inputWidth;
+}
+
+Dimension MenuModelNG::CalculateBoundedWidthForMobile(const Dimension& inputWidth)
+{
+    if (inputWidth < MIN_MOBILE_MENU_WIDTH)
+        return MIN_MOBILE_MENU_WIDTH;
+    return inputWidth;
+}
+
 } // namespace OHOS::Ace::NG

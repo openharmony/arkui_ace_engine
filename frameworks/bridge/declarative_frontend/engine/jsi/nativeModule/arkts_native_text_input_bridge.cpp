@@ -39,7 +39,6 @@ constexpr int PARAM_ARR_LENGTH_2 = 2;
 constexpr int32_t ARG_GROUP_LENGTH = 4;
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 constexpr uint32_t ILLEGAL_VALUE = 0;
-constexpr uint32_t DEFAULT_MODE = -1;
 const int32_t MINI_VALID_VALUE = 1;
 const int32_t MAX_VALID_VALUE = 100;
 constexpr uint32_t DEFAULT_OVERFLOW = 4;
@@ -716,13 +715,10 @@ ArkUINativeModuleValue TextInputBridge::SetShowError(ArkUIRuntimeCallInfo *runti
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    bool visible;
-    std::string error = "";
-    if (secondArg->IsString()) {
+    bool visible = false;
+    std::string error;
+    if (ArkTSUtils::ParseJsString(vm, secondArg, error)) {
         visible = true;
-        error = secondArg->ToString(vm)->ToString();
-    } else {
-        visible = false;
     }
 
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputShowError(nativeNode, error.c_str(),
@@ -1411,13 +1407,16 @@ ArkUINativeModuleValue TextInputBridge::SetShowCounter(ArkUIRuntimeCallInfo* run
     if (highlightBorderArg->IsBoolean()) {
         highlightBorder = highlightBorderArg->BooleaValue();
     }
-    auto thresholdValue = DEFAULT_MODE;
+    int32_t thresholdValue = -1;
     if (thresholdArg->IsNumber()) {
         thresholdValue = thresholdArg->Int32Value(vm);
         if (thresholdValue < MINI_VALID_VALUE || thresholdValue > MAX_VALID_VALUE) {
             thresholdValue = ILLEGAL_VALUE;
             showCounter = false;
         }
+    }
+    if (thresholdValue == -1) {
+        return panda::JSValueRef::Undefined(vm);
     }
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputShowCounter(
         nativeNode, static_cast<uint32_t>(showCounter), thresholdValue, static_cast<uint32_t>(highlightBorder));

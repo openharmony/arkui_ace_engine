@@ -146,6 +146,8 @@ public:
         EcmaVM* vm, std::vector<uint32_t>& values, int32_t argsIndex);
     static void ParseOuterBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo,
         EcmaVM* vm, std::vector<ArkUI_Float32>& values, int32_t argsIndex);
+    static void ParseOuterBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo,
+        EcmaVM* vm, std::vector<ArkUI_Float32>& values, std::vector<ArkUI_Int32>& units, int32_t argsIndex);
     static void PushOuterBorderStyleVector(
         const std::optional<BorderStyle>& value, std::vector<uint32_t> &options);
     static void ParseOuterBorderStyle(ArkUIRuntimeCallInfo* runtimeCallInfo,
@@ -153,6 +155,12 @@ public:
     static void SetBorderWidthArray(const EcmaVM* vm, const Local<JSValueRef>& args,
         ArkUI_Float32 values[], int units[], int index);
     static ArkUISizeType ParseJsToArkUISize(const EcmaVM *vm, const Local<JSValueRef> &arg);
+    static void ThrowError(const EcmaVM* vm, const std::string& msg, int32_t code);
+    static bool CheckKeysPressed(
+        const EcmaVM* vm, const std::vector<KeyCode>& pressedKeyCodes, std::vector<std::string>& checkKeyCodes);
+    static Local<JSValueRef> GetModifierKeyState(
+        ArkUIRuntimeCallInfo* info, const std::vector<KeyCode>& pressedKeyCodes);
+    static Local<JSValueRef> JsGetModifierKeyState(ArkUIRuntimeCallInfo* info);
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_UTILS_H

@@ -1264,21 +1264,19 @@ HWTEST_F(TextInputCursorTest, CheckPreviewTextValidate001, TestSize.Level1)
     EXPECT_EQ(pattern_->GetCaretIndex(), static_cast<int>(DEFAULT_TEXT.size()));
 
     /**
-     * @tc.expected: call CheckPreviewTextValidate and check return false
+     * @tc.expected: call CheckPreviewTextValidate and check return true
+     */
+    EXPECT_TRUE(pattern_->CheckPreviewTextValidate({PREVIEW_THR}));
+
+    /**
+     * @tc.steps:call invalid CheckPreviewTextValidate
+     * @tc.expected: check return false
      */
     EXPECT_FALSE(pattern_->CheckPreviewTextValidate({PREVIEW_BAD_DATA}));
-    EXPECT_FALSE(pattern_->CheckPreviewTextValidate({PREVIEW_THR}));
 
     /**
      * @tc.steps:Set select and call CheckPreviewTextValidate
      * @tc.expected: check return false
-     */
-    EXPECT_FALSE(pattern_->CheckPreviewTextValidate({PREVIEW_BAD_DATA}));
-    EXPECT_FALSE(pattern_->CheckPreviewTextValidate({PREVIEW_THR}));
-
-    /**
-     * @tc.steps:Set caretPosition and call CheckPreviewTextValidate
-     * @tc.expected: check return true
      */
     auto controller = pattern_->GetTextSelectController();
     controller->UpdateCaretIndex(5);
@@ -1427,7 +1425,9 @@ HWTEST_F(TextInputCursorTest, FinishTextPreview003, TestSize.Level1)
      * @tc.steps: call InsertValueOperation
      * @tc.expected: check GetIsPreviewText return false
      */
-    pattern_->InsertValueOperation(HELLO_TEXT);
+    SourceAndValueInfo info;
+    info.insertValue = HELLO_TEXT;
+    pattern_->InsertValueOperation(info);
     EXPECT_TRUE(pattern_->inputOperations_.front() == InputOperation::SET_PREVIEW_FINISH);
     FlushLayoutTask(frameNode_);
 }

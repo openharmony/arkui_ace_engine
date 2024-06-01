@@ -124,7 +124,9 @@ LoadFailNotifyTask ImagePattern::CreateLoadFailCallback()
                 currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
-        pattern->OnImageLoadFail(errorMsg);
+        if (!currentSourceInfo.IsFromReset()) {
+            pattern->OnImageLoadFail(errorMsg);
+        }
     };
 }
 
@@ -431,7 +433,10 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
     bool hasValidSlice = renderProp && renderProp->HasImageResizableSlice();
     DynamicRangeMode dynamicMode = DynamicRangeMode::STANDARD;
     if (renderProp && renderProp->HasDynamicMode()) {
+        loadingCtx_->SetIsHdrDecoderNeed(true);
         dynamicMode = renderProp->GetDynamicMode().value_or(DynamicRangeMode::STANDARD);
+    } else {
+        loadingCtx_->SetIsHdrDecoderNeed(false);
     }
 
     if (loadingCtx_) {
@@ -564,6 +569,7 @@ void ImagePattern::LoadImage(const ImageSourceInfo& src)
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGI(AceLogTag::ACE_IMAGE, "start loading image %{public}s", src.ToString().c_str());
     }
+    loadingCtx_->SetLoadInVipChannel(GetLoadInVipChannel());
     if (onProgressCallback_) {
         loadingCtx_->SetOnProgressCallback(std::move(onProgressCallback_));
     }
@@ -785,6 +791,7 @@ DataReadyNotifyTask ImagePattern::CreateDataReadyCallbackForAlt()
     return [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID(pattern->altLoadingCtx_);
         auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
         auto currentAltSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
@@ -864,9 +871,7 @@ void ImagePattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
 
 void ImagePattern::OnNotifyMemoryLevel(int32_t level)
 {
-    // TODO: do different data cleaning operation according to level
     // when image component is [onShow], do not clean image data
-    // TODO: use [isActive_] to determine image data management
     if (isShow_) {
         return;
     }
@@ -878,7 +883,6 @@ void ImagePattern::OnNotifyMemoryLevel(int32_t level)
     altImage_ = nullptr;
 
     // clean rs node to release the sk_sp<SkImage> held by it
-    // TODO: release PixelMap resource when use PixelMap resource to draw image
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     auto rsRenderContext = frameNode->GetRenderContext();
@@ -1163,6 +1167,10 @@ void ImagePattern::HandleCopy()
 
 void ImagePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     static const char* COPY_OPTIONS[] = { "CopyOptions.None", "CopyOptions.InApp", "CopyOptions.Local",
         "CopyOptions.Distributed" };
     json->PutExtAttr("copyOption", COPY_OPTIONS[static_cast<int32_t>(copyOption_)], filter);
@@ -1172,6 +1180,13 @@ void ImagePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspector
     CHECK_NULL_VOID(host);
     json->PutExtAttr("draggable", host->IsDraggable() ? "true" : "false", filter);
     json->PutExtAttr("enableAnalyzer", isEnableAnalyzer_ ? "true" : "false", filter);
+    auto renderProp = GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(renderProp);
+    DynamicRangeMode dynamicMode = DynamicRangeMode::STANDARD;
+    if (renderProp->HasDynamicMode()) {
+        dynamicMode = renderProp->GetDynamicMode().value_or(DynamicRangeMode::STANDARD);
+    }
+    json->PutExtAttr("dynamicRangeMode", GetDynamicModeString(dynamicMode).c_str(), filter);
 }
 
 void ImagePattern::UpdateFillColorIfForegroundColor()
@@ -1332,6 +1347,7 @@ void ImagePattern::OnLanguageConfigurationUpdate()
     if (src.GetSrcType() == SrcType::RESOURCE) {
         loadingCtx_.Reset();
     }
+    OnConfigurationUpdate();
 }
 
 void ImagePattern::OnColorConfigurationUpdate()
@@ -1716,7 +1732,7 @@ std::list<ImagePattern::CacheImageStruct>::iterator ImagePattern::FindCacheImage
 void ImagePattern::GenerateCachedImages()
 {
     CHECK_NULL_VOID(images_.size());
-    auto averageShowTime = animator_->GetDuration() / images_.size();
+    auto averageShowTime = static_cast<uint32_t>(animator_->GetDuration()) / images_.size();
     size_t cacheImageNum = averageShowTime >= CRITICAL_TIME ? 1 : 2;
     cacheImageNum = std::min(images_.size() - 1, cacheImageNum);
     if (cacheImages_.size() > cacheImageNum) {
@@ -1925,6 +1941,34 @@ void ImagePattern::ResetImageProperties()
 {
     SetCopyOption(CopyOptions::None);
     OnImageModifyDone();
+}
+
+void ImagePattern::ResetImage()
+{
+    image_ = nullptr;
+    imageQuality_ = AIImageQuality::NONE;
+    isImageQualityChange_ = false;
+    loadingCtx_.Reset();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!altImage_) {
+        auto rsRenderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(rsRenderContext);
+        rsRenderContext->ClearDrawCommands();
+    }
+}
+
+void ImagePattern::ResetAltImage()
+{
+    altImage_ = nullptr;
+    altLoadingCtx_.Reset();
+    if (!image_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto rsRenderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(rsRenderContext);
+        rsRenderContext->ClearDrawCommands();
+    }
 }
 
 void ImagePattern::ResetImageAndAlt()

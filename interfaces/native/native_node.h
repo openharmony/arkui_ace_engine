@@ -89,6 +89,8 @@ typedef enum {
     ARKUI_NODE_SLIDER = 17,
     /** Radio */
     ARKUI_NODE_RADIO = 18,
+    /** 帧动画组件 */
+    ARKUI_NODE_IMAGE_ANIMATOR = 19,
     /** Stack container. */
     ARKUI_NODE_STACK = MAX_NODE_SCOPE_NUM,
     /** Swiper. */
@@ -1527,6 +1529,63 @@ typedef enum {
     NODE_BORDER_RADIUS_PERCENT,
 
     /**
+     * @brief Accessible ID, which can be obtained as required through APIs.
+     *
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32：Accessible ID。\n
+     *
+     */
+    NODE_ACCESSIBILITY_ID = 87,
+
+    /**
+     * @brief Define accessible actions, which can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].u32：accessible action types，and uses the {@link ArkUI_AccessibilityActionType} enumeration value.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].u32：accessible action types，and uses the {@link ArkUI_AccessibilityActionType} enumeration value.\n
+     *
+     */
+    NODE_ACCESSIBILITY_ACTIONS = 88,
+
+    /**
+     * @brief Define accessible role, which can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].u32：accessible role type，and uses the {@link ArkUI_NodeType} enumeration value.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].u32：accessible role type，and uses the {@link ArkUI_NodeType} enumeration value.\n
+     *
+     */
+    NODE_ACCESSIBILITY_ROLE = 89,
+
+    /**
+     * @brief Define accessible state, which can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object：the parameter type is {@link ArkUI_AccessibilityState}.\n
+     * \n
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object：the parameter type is {@link ArkUI_AccessibilityState}.\n
+     *
+     */
+    NODE_ACCESSIBILITY_STATE = 90,
+
+    /**
+     * @brief Define accessible value, which can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object：the parameter type is {@link ArkUI_AccessibilityValue}.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object：the parameter type is {@link ArkUI_AccessibilityValue}.\n
+     *
+     */
+    NODE_ACCESSIBILITY_VALUE = 91,
+
+    /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
@@ -1838,7 +1897,7 @@ typedef enum {
      * Attribute obtaining method return value {@Link ArkUI_AttributeItem} format:\n
      * .string indicates the content of the text feature. Multiple text features are separated by commas (,). \n
      */
-    NODE_FONT_FEATURE,
+    NODE_TEXT_FONT_FEATURE,
 
     /**
      * @brief 设置使能文本识别。
@@ -1862,17 +1921,6 @@ typedef enum {
      *
      */
     NODE_TEXT_ENABLE_DATA_DETECTOR_CONFIG,
-    /**
-     * @brief Defines the line break rule. This attribute can be set, reset, and obtained as required through APIs.
-     *
-     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].i32: The parameter type is {@link ArkUI_LineBreakStrategy}. \n
-     * \n
-     * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].i32: The parameter type is {@link ArkUI_LineBreakStrategy}. \n
-     *
-     */
-    NODE_TEXT_LINE_BREAK_STRATEGY,
     /**
      * @brief 文本选中时的背景色属性，支持属性设置，属性重置和属性获取接口。
      *
@@ -2012,10 +2060,12 @@ typedef enum {
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
      * .value[0].f32 to .value[19].f32: filter matrix array. \n
      * .size: 5 x 4 filter array size. \n
+     * .object: the pointer to OH_Drawing_ColorFilter. Either .value or .object is set. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].f32 to .value[19].f32: filter matrix array. \n
      * .size: 5 x 4 filter array size. \n
+     * .object: the pointer to OH_Drawing_ColorFilter. \n
      *
      */
     NODE_IMAGE_COLOR_FILTER,
@@ -4103,6 +4153,17 @@ typedef enum {
     NODE_LIST_ALIGN_LIST_ITEM,
 
     /**
+     * @brief Set the default spindle size for the List subcomponent.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: The parameter format is {@ ArkUI-ListChildrenMainSize} \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object: The parameter format is {@ ArkUI-ListChildrenMainSize} \n
+     */
+    NODE_LIST_CHILDREN_MAIN_SIZE = 1003007,
+
+    /**
      * @brief Defines whether to enable loop playback for the swiper. This attribute can be set, reset, and obtained
      * as required through APIs.
      *
@@ -4306,34 +4367,45 @@ typedef enum {
     NODE_SWIPER_CACHED_COUNT,
 
     /**
-     * @brief 设置 Swiper 组件的前边距，支持属性设置，属性重置和属性获取接口。
+     * @brief Defines the front margin of the wiper.
+     * The attribute can be set, reset, and obtained as required through APIs.
      *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].f32：前边距数值，单位为vp，默认值为0。 \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].f32：前边距数值，单位为vp。
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: the front margin. The unit is vp. The default value is <b>0.0</b>\n
+     * .value[1]?.i32: whether to ignore blanks, the default value is 0.
+     * The value <b>1</b> means to ignore blank areas, and <b>0</b> means the opposite. \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: the front margin, the unit is vp. \n
+     * .value[1].i32: whether to ignore blank areas. The value <b>1</b> means to ignore blank areas, and <b>0</b> means
+     * the opposite. \n
      */
     NODE_SWIPER_PREV_MARGIN,
 
     /**
-     * @brief 设置 Swiper 组件的后边距，支持属性设置，属性重置和属性获取接口。
+     * @brief Defines the back margin of the wiper.
+     * The attribute can be set, reset, and obtained as required through APIs.
      *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].f32：后边距数值，单位为vp，默认值为0。 \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].f32：后边距数值，单位为vp。
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: the back margin. The unit is vp. The default value is <b>0.0</b>\n
+     * .value[1]?.i32: whether to ignore blanks, the default value is 0.
+     * The value <b>1</b> means to ignore blank areas, and <b>0</b> means the opposite. \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: the back margin, the unit is vp. \n
+     * .value[1].i32: whether to ignore blank areas. The value <b>1</b> means to ignore blank areas, and <b>0</b> means
+     * the opposite. \n
      */
     NODE_SWIPER_NEXT_MARGIN,
 
     /**
-     * @brief 设置 Swiper 组件的导航指示器类型，支持属性设置，属性重置和属性获取接口。
+     * @brief Defines the navigation indicator type of the swiper.
+     * The attribute can be set, reset, and obtained as required through APIs.
      *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].i32：设置导航指示器的类型，参数类型{@link ArkUI_SwiperIndicatorType}。 \n
-     * .object：参数类型为{@link ArkUI_SwiperIndicator}。 \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：导航指示器的类型，参数类型{@link ArkUI_SwiperIndicatorType}。 \n
-     * .object：参数类型为{@link ArkUI_SwiperIndicator}。 \n
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: navigation indicator type, the parameter type is {@link ArkUI_SwiperIndicatorType}.\n
+     * .object: The parameter type is {@link ArkUI_SwiperIndicator}.\n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: navigation indicator type, the parameter type is {@link ArkUI_SwiperIndicatorType}.\n
+     * .object: The parameter type is {@link ArkUI_SwiperIndicator}.\n
      *
      */
     NODE_SWIPER_INDICATOR,
@@ -4417,6 +4489,17 @@ typedef enum {
      *
      */
     NODE_LIST_ITEM_GROUP_SET_DIVIDER,
+
+    /**
+     * @brief Set the default spindle size for the ListItem Group subcomponent.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: The parameter format is {@ ArkUI-ListChildrenMainSize} \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object: The parameter format is {@ ArkUI-ListChildrenMainSize} \n
+     */
+    NODE_LIST_ITEM_GROUP_CHILDREN_MAIN_SIZE = 1005003,
 
     /**
      * @brief Defines the horizontal alignment mode of child components in the column.
@@ -4524,6 +4607,17 @@ typedef enum {
      *
      */
     NODE_REFRESH_CONTENT,
+    /**
+     * @brief 设置下拉跟手系数，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
+     * .value[0].f32：下拉跟手系数,有效值为0-1之间的值。
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].f32：下拉跟手系数,有效值为0-1之间的值。
+     *
+     */
+    NODE_REFRESH_PULL_DOWN_RATIO = 1009002,
 
     /**
      * @brief Defines the main axis direction of the <b><WaterFlow></b> component layout.
@@ -4775,6 +4869,86 @@ typedef enum {
      */
     NODE_RELATIVE_CONTAINER_BARRIER,
 
+    /**
+     * @brief 设置帧动画组件的图片帧信息集合。不支持动态更新。支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .size：图片帧的数量； \n
+     * .object：图片帧数组，参数类型为{@ArkUI_ImageFrameInfo}数组； \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .size：图片帧的数量； \n
+     * .object：图片帧数组，参数类型为{@ArkUI_ImageFrameInfo}数组； \n
+     *
+    */
+    NODE_IMAGE_ANIMATOR_IMAGES = ARKUI_NODE_IMAGE_ANIMATOR * MAX_NODE_SCOPE_NUM,
+    /**
+     * @brief 控制帧动画组件的播放状态。支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：控制动画的播放状态，参数类型为{@link ArkUI_AnimationStatus}，默认值为初始状态。 \n
+     *
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：控制动画的播放状态，参数类型为{@link ArkUI_AnimationStatus}。 \n
+     *
+    */
+    NODE_IMAGE_ANIMATOR_STATE = 19001,
+    /**
+     * @brief 设置帧动画的播放时长，当数组中任意一帧图片单独设置了duration属性后，该属性设置无效。
+     * 支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：播放时长，单位为毫秒，默认值1000。 \n
+     *
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：播放时长，单位为毫秒，默认值1000。 \n
+     *
+    */
+    NODE_IMAGE_ANIMATOR_DURATION = 19002,
+    /**
+     * @brief 设置帧动画的播放方向。支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：播放方向，0表示从第一张图片播放到最后一张，1表示从最后一张图片播放到第一张，默认值为0。 \n
+     *
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：播放方向，0表示从第一张图片播放到最后一张，1表示从最后一张图片播放到第一张。 \n
+     *
+    */
+    NODE_IMAGE_ANIMATOR_REVERSE = 19003,
+    /**
+     * @brief 设置图片大小是否固定为组件大小。支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：设置图片大小是否固定为组件大小，1表示图片大小与组件大小一致。0表示每一张图片的width、height、top和left都要单独设置，默认值为1。\n
+     *
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：设置图片大小是否固定为组件大小，1表示图片大小与组件大小一致。0表示每一张图片的width、height、top和left都要单独设置。 \n
+     *
+    */
+    NODE_IMAGE_ANIMATOR_FIXED_SIZE = 19004,
+    /**
+     * @brief 设置帧动画在当前播放方向下，动画开始前和结束后的状态。支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：当前播放方向下，动画开始前和结束后的状态，参数类型为{ArkUI_AnimationFillMode}，默认值为FORWARDS。 \n
+     *
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：当前播放方向下，动画开始前和结束后的状态，参数类型为{ArkUI_AnimationFillMode}。 \n
+     *
+    */
+    NODE_IMAGE_ANIMATOR_FILL_MODE = 19005,
+    /**
+     * @brief 设置帧动画的播放次数。支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：播放次数。 \n
+     *
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：播放次数。 \n
+     *
+    */
+    NODE_IMAGE_ANIMATOR_ITERATION = 19006,
 } ArkUI_NodeAttributeType;
 
 #define MAX_COMPONENT_EVENT_ARG_NUM 12
@@ -4960,6 +5134,16 @@ typedef enum {
      * {@link ArkUI_NodeComponentEvent} does not contain parameters.
      */
     NODE_EVENT_ON_DETACH,
+    /**
+     * @brief 无障碍支持操作事件触发。
+     *
+     * 触发该事件的条件：已设置无障碍操作类型，并进行相应操作。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中包含1个参数: \n
+     * <b>ArkUI_NodeComponentEvent.data[0].u32</b>: 触发回调的操作类型，参数类型{@link ArkUI_AccessibilityActionType} \n
+     *
+     */
+    NODE_ON_ACCESSIBILITY_ACTIONS,
     /**
      * @brief 文本设置TextDataDetectorConfig且识别成功时，触发onDetectResultUpdate回调。
      *
@@ -5575,6 +5759,15 @@ typedef enum {
      * {@link ArkUI_NodeComponentEvent} does not contain parameters:\n
      */
     NODE_REFRESH_ON_REFRESH,
+    /**
+     * @brief Defines the event that is triggered when the <b>ARKUI_NODE_REFRESH</b> drop-down distance changes.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: Pull-down distance. \n
+     */
+    NODE_REFRESH_ON_OFFSET_CHANGE = 1009002,
 
     /**
      * @brief Defines the event triggered when the <b>ARKUI_NODE_SCROLL</b> component is about to scroll.
@@ -5622,6 +5815,57 @@ typedef enum {
      * the end position of the currently displayed waterfall. \n
      */
     NODE_WATER_FLOW_ON_SCROLL_INDEX,
+
+    /**
+     * @brief 定义帧动画开始的状态回调。
+     *
+     * 触发该事件的条件：\n
+     * 1、帧动画开始播放时。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中不包含参数。\n
+     *
+    */
+    NODE_IMAGE_ANIMATOR_EVENT_ON_START = MAX_NODE_SCOPE_NUM * ARKUI_NODE_IMAGE_ANIMATOR,
+    /**
+     * @brief 定义帧动画播放暂停时的状态回调。
+     *
+     * 触发该事件的条件：\n
+     * 1、帧动画暂停播放时。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中不包含参数。\n
+     *
+    */
+    NODE_IMAGE_ANIMATOR_EVENT_ON_PAUSE = 19001,
+    /**
+     * @brief 定义帧动画c重复播放时的状态回调。
+     *
+     * 触发该事件的条件：\n
+     * 1、帧动画重复播放时。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中不包含参数。\n
+     *
+    */
+    NODE_IMAGE_ANIMATOR_EVENT_ON_REPEAT = 19002,
+    /**
+     * @brief 定义帧动画返回最初状态时的状态回调。
+     *
+     * 触发该事件的条件：\n
+     * 1、帧动画返回最初状态时。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中不包含参数。\n
+     *
+    */
+    NODE_IMAGE_ANIMATOR_EVENT_ON_CANCEL = 19003,
+    /**
+     * @brief 定义帧动画播放完成时或者停止播放时的状态回调。
+     *
+     * 触发该事件的条件：\n
+     * 1、帧动画播放完成时或停止播放时。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中不包含参数。\n
+     *
+    */
+    NODE_IMAGE_ANIMATOR_EVENT_ON_FINISH = 19004,
 } ArkUI_NodeEventType;
 
 /**
@@ -6543,8 +6787,8 @@ typedef void (*ArkUI_NodeContentCallback)(ArkUI_NodeContentEvent* event);
  * @brief Register a callback for this <b>ArkUI_NodeContentHandle</b> instance.
  *
  * @param handle Indicates the <b>ArkUI_NodeContentHandle</b> instance.
- * @param callback Indicates the callback of <b>ArkUI_NodeContentHandle</b> 
- * @return Returns the status code 
+ * @param callback Indicates the callback of <b>ArkUI_NodeContentHandle</b>
+ * @return Returns the status code
  * @since 12
  */
 int32_t OH_ArkUI_NodeContent_RegisterCallback(ArkUI_NodeContentHandle handle, ArkUI_NodeContentCallback callback);
@@ -6558,6 +6802,98 @@ int32_t OH_ArkUI_NodeContent_RegisterCallback(ArkUI_NodeContentHandle handle, Ar
  */
 ArkUI_NodeContentEventType OH_ArkUI_NodeContentEvent_GetEventType(ArkUI_NodeContentEvent* event);
 
+/**
+ * @brief Get the size of the component layout area.
+ * The layout area size does not include graphic variation attributes such as scaling.
+ *
+ * @param node ArkUI_NodeHandle pointer.
+ * @param size The drawing area size of the component handle, in px.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 12
+ */
+int32_t OH_ArkUI_NodeUtils_GetLayoutSize(ArkUI_NodeHandle node, ArkUI_IntSize* size);
+
+/**
+ * @brief Obtain the position of the component layout area relative to the parent component.
+ * The relative position of the layout area does not include graphic variation attributes, such as translation.
+ *
+ * @param node ArkUI_NodeHandle pointer.
+ * @param localOffset The offset value of the component handle relative to the parent component, in px.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 12
+ */
+int32_t OH_ArkUI_NodeUtils_GetLayoutPosition(ArkUI_NodeHandle node, ArkUI_IntOffset* localOffset);
+
+/**
+ * @brief Obtain the position of the component layout area relative to the window.
+ * The relative position of the layout area does not include graphic variation attributes, such as translation.
+ *
+ * @param node ArkUI_NodeHandle pointer.
+ * @param globalOffset The offset value of the component handle relative to the window, in px.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 12
+ */
+int32_t OH_ArkUI_NodeUtils_GetLayoutPositionInWindow(ArkUI_NodeHandle node, ArkUI_IntOffset* globalOffset);
+
+/**
+ * @brief Obtain the position of the component layout area relative to the screen.
+ * The relative position of the layout area does not include graphic variation attributes, such as translation.
+ *
+ * @param node ArkUI_NodeHandle pointer.
+ * @param screenOffset The offset value of the component handle relative to the screen, in px.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 12
+ */
+int32_t OH_ArkUI_NodeUtils_GetLayoutPositionInScreen(ArkUI_NodeHandle node, ArkUI_IntOffset* screenOffset);
+
+/**
+ * @brief Obtain the position of the component in the window, including the properties of graphic translation changes.
+ *
+ * @param node ArkUI_NodeHandle pointer.
+ * @param translateOffset The cumulative offset value of the component handle itself,
+ * parent components, and ancestor nodes, in px.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 12
+ */
+int32_t OH_ArkUI_NodeUtils_GetPositionWithTranslateInWindow(ArkUI_NodeHandle node, ArkUI_IntOffset* translateOffset);
+
+/**
+ * @brief Obtain the position of the component on the screen, including the attributes of graphic translation changes.
+ *
+ * @param node ArkUI_NodeHandle pointer.
+ * @param translateOffset The cumulative offset value of the component handle itself,
+ * parent components, and ancestor nodes, in px.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 12
+ */
+int32_t OH_ArkUI_NodeUtils_GetPositionWithTranslateInScreen(ArkUI_NodeHandle node, ArkUI_IntOffset* translateOffset);
+
+/**
+* @brief The event called when the sliding operation offset changes.
+*
+* @param node Indicates the target node.
+* @param userData Indicates the custom data to be saved.
+* @param onFinish Callback Events.
+*        offset Slide offset.
+* @return Error code.
+*         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+*         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+*         {@link ARKUI_ERROR_CODE_ATTRIBUTE_OR_EVENT_NOT_SUPPORTED} The component does not support this event.
+* @since 12
+*/
+int32_t OH_ArkUI_List_CloseAllSwipeActions(ArkUI_NodeHandle node, void* userData, void (*onFinish)(void* userData));
 #ifdef __cplusplus
 };
 #endif

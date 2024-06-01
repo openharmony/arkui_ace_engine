@@ -98,6 +98,12 @@ public:
 
     // app exit from multitasking
     static constexpr char EXIT_RECENT_2_HOME_ANI[] = "EXIT_RECENT_2_HOME_ANI";
+
+    // PC window resize
+    static constexpr char WINDOW_RECT_RESIZE[] = "WINDOW_RECT_RESIZE";
+
+    // PC window move
+    static constexpr char WINDOW_RECT_MOVE[] = "WINDOW_RECT_MOVE";
 };
 } // namespace OHOS::Ace
 #endif // ARKUI_PERF_SCENE_ID_H

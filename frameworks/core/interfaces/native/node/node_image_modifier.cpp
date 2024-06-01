@@ -17,6 +17,7 @@
 #include <cstdint>
 
 #include "base/utils/utils.h"
+#include "base/image/drawing_color_filter.h"
 #include "core/common/card_scope.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/image/image_component.h"
@@ -27,6 +28,8 @@
 #include "core/pipeline/base/element_register.h"
 #include "frameworks/core/components/common/layout/constants.h"
 
+#include "effect/color_filter.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int NUM_1 = 1;
@@ -34,11 +37,9 @@ constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int RESIZEABLE_VEC_LENGTH = 12;
 constexpr CopyOptions DEFAULT_IMAGE_COPYOPTION = CopyOptions::None;
-constexpr bool DEFAULT_IMAGE_AUTORESIZE = true;
 constexpr bool DEFAULT_SYNC_LOAD_VALUE = false;
 constexpr ImageFit DEFAULT_OBJECT_FIT_VALUE = ImageFit::COVER;
 constexpr bool DEFAULT_FIT_ORIGINAL_SIZE = false;
-constexpr ImageInterpolation DEFAULT_IMAGE_INTERPOLATION = ImageInterpolation::NONE;
 constexpr bool DEFAULT_DRAGGABLE = false;
 constexpr ArkUI_Float32 DEFAULT_IMAGE_EDGE_ANTIALIASING = 0;
 constexpr ImageResizableSlice DEFAULT_IMAGE_SLICE;
@@ -212,7 +213,7 @@ void SetAutoResize(ArkUINodeHandle node, ArkUI_Bool autoResize)
 int32_t GetAutoResize(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, DEFAULT_IMAGE_AUTORESIZE);
+    CHECK_NULL_RETURN(frameNode, true);
     return ImageModelNG::GetAutoResize(frameNode);
 }
 
@@ -220,7 +221,7 @@ void ResetAutoResize(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelNG::SetAutoResize(frameNode, DEFAULT_IMAGE_AUTORESIZE);
+    ImageModelNG::ResetAutoResize(frameNode);
 }
 
 void SetObjectRepeat(ArkUINodeHandle node, ArkUI_Int32 imageRepeat)
@@ -398,7 +399,9 @@ const char* GetAlt(ArkUINodeHandle node)
 
 void ResetAlt(ArkUINodeHandle node)
 {
-    return;
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::ResetImageAlt(frameNode);
 }
 
 void SetImageInterpolation(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -424,7 +427,7 @@ void ResetImageInterpolation(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelNG::SetImageInterpolation(frameNode, DEFAULT_IMAGE_INTERPOLATION);
+    ImageModelNG::ResetImageInterpolation(frameNode);
 }
 
 void SetColorFilter(ArkUINodeHandle node, const ArkUI_Float32* array, int length)
@@ -446,7 +449,7 @@ void GetColorFilter(ArkUINodeHandle node, ArkUIFilterColorType* colorFilter)
     auto filterFloatArray = ImageModelNG::GetColorFilter(frameNode);
     colorFilter->filterSize = filterFloatArray.size() < MAX_COLOR_FILTER_SIZE ? filterFloatArray.size() :
         MAX_COLOR_FILTER_SIZE;
-    for (size_t i = 0; i < colorFilter->filterSize && i < MAX_COLOR_FILTER_SIZE; i++) {
+    for (size_t i = 0; i < static_cast<size_t>(colorFilter->filterSize) && i < MAX_COLOR_FILTER_SIZE; i++) {
         *(colorFilter->filterArray+i) = filterFloatArray[i];
     }
 }
@@ -456,6 +459,28 @@ void ResetColorFilter(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetColorFilterMatrix(frameNode, DEFAULT_COLOR_FILTER);
+}
+
+void SetDrawingColorFilter(ArkUINodeHandle node, void* colorFilter)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto filter = reinterpret_cast<OHOS::Rosen::Drawing::ColorFilter*>(colorFilter);
+    auto filterPtr = std::make_shared<OHOS::Rosen::Drawing::ColorFilter>(*filter);
+    auto drawingColorFilter = DrawingColorFilter::CreateDrawingColorFilterFromNative(static_cast<void*>(&filterPtr));
+    ImageModelNG::SetDrawingColorFilter(frameNode, drawingColorFilter);
+}
+
+void* GetDrawingColorFilter(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto drawingColorFilter = ImageModelNG::GetDrawingColorFilter(frameNode);
+    CHECK_NULL_RETURN(drawingColorFilter, nullptr);
+    auto filterSptr = reinterpret_cast<std::shared_ptr<OHOS::Rosen::Drawing::ColorFilter>*>(
+        drawingColorFilter->GetDrawingColorFilterSptrAddr());
+    CHECK_NULL_RETURN(filterSptr, nullptr);
+    return (*filterSptr).get();
 }
 
 void SetImageSyncLoad(ArkUINodeHandle node, ArkUI_Bool syncLoadValue)
@@ -566,7 +591,7 @@ void SetImageOpacity(ArkUINodeHandle node, ArkUI_Float32 opacity)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if ((LessNotEqual(opacity, 0.0)) || opacity > 1) {
-        opacity = 1.0f;
+        opacity = 0.0f;
     }
     ViewAbstract::SetOpacity(frameNode, opacity);
 }
@@ -575,7 +600,7 @@ void ResetImageOpacity(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetOpacity(frameNode, 1.0f);
+    ViewAbstract::SetOpacity(frameNode, 0.0f);
 }
 
 void SetEdgeAntialiasing(ArkUINodeHandle node, ArkUI_Float32 edgeAntialiasing)
@@ -728,6 +753,13 @@ void AnalyzerConfig(ArkUINodeHandle node, void* config)
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetImageAnalyzerConfig(frameNode, config);
 }
+
+void ResetImageSrc(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::ResetImageSrc(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -746,7 +778,7 @@ const ArkUIImageModifier* GetImageModifier()
         ResetEnhancedImageQuality, GetImageSrc, GetAutoResize, GetObjectRepeat, GetObjectFit,
         GetImageInterpolation, GetColorFilter, GetAlt, GetImageDraggable, GetRenderMode, SetImageResizable,
         GetImageResizable, GetFitOriginalSize, GetFillColor, SetPixelMap, SetPixelMapArray, SetResourceSrc,
-        EnableAnalyzer, AnalyzerConfig };
+        EnableAnalyzer, AnalyzerConfig, SetDrawingColorFilter, GetDrawingColorFilter, ResetImageSrc };
     return &modifier;
 }
 

@@ -21,6 +21,7 @@
 #include <unordered_set>
 
 #include "base/memory/ace_type.h"
+#include "interfaces/native/native_type.h"
 #include "core/accessibility/accessibility_utils.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/ui_node.h"
@@ -39,6 +40,9 @@ using ActionClearSelectionImpl = ActionNoParam;
 using ActionMoveTextImpl = std::function<void(int32_t moveUnit, bool forward)>;
 using ActionSetCursorIndexImpl = std::function<void(int32_t index)>;
 using ActionGetCursorIndexImpl = std::function<int32_t(void)>;
+using ActionClickImpl = ActionNoParam;
+using ActionLongClickImpl = ActionNoParam;
+using ActionsImpl = std::function<void((uint32_t actionType))>;
 
 class FrameNode;
 using AccessibilityHoverTestPath = std::vector<RefPtr<FrameNode>>;
@@ -311,6 +315,10 @@ public:
 
     bool ActActionCopy()
     {
+        if (ActionsDefined(static_cast<uint32_t>(ARKUI_ACCESSIBILITY_ACTION_COPY))) {
+            actionsImpl_(static_cast<uint32_t>(ARKUI_ACCESSIBILITY_ACTION_COPY));
+            return true;
+        }
         if (actionCopyImpl_) {
             actionCopyImpl_();
             return true;
@@ -325,6 +333,10 @@ public:
 
     bool ActActionCut()
     {
+        if (ActionsDefined(static_cast<uint32_t>(ARKUI_ACCESSIBILITY_ACTION_CUT))) {
+            actionsImpl_(static_cast<uint32_t>(ARKUI_ACCESSIBILITY_ACTION_CUT));
+            return true;
+        }
         if (actionCutImpl_) {
             actionCutImpl_();
             return true;
@@ -339,8 +351,48 @@ public:
 
     bool ActActionPaste()
     {
+        if (ActionsDefined(static_cast<uint32_t>(ARKUI_ACCESSIBILITY_ACTION_PASTE))) {
+            actionsImpl_(static_cast<uint32_t>(ARKUI_ACCESSIBILITY_ACTION_PASTE));
+            return true;
+        }
         if (actionPasteImpl_) {
             actionPasteImpl_();
+            return true;
+        }
+        return false;
+    }
+
+    void SetActionLongClick(const ActionLongClickImpl& actionLongClickImpl)
+    {
+        actionLongClickImpl_ = actionLongClickImpl;
+    }
+
+    bool ActActionLongClick()
+    {
+        if (ActionsDefined(static_cast<uint32_t>(ARKUI_ACCESSIBILITY_ACTION_LONG_CLICK))) {
+            actionsImpl_(static_cast<uint32_t>(ARKUI_ACCESSIBILITY_ACTION_LONG_CLICK));
+            return true;
+        }
+        if (actionLongClickImpl_) {
+            actionLongClickImpl_();
+            return true;
+        }
+        return false;
+    }
+
+    void SetActionClick(const ActionClickImpl& actionClickImpl)
+    {
+        actionClickImpl_ = actionClickImpl;
+    }
+
+    bool ActActionClick()
+    {
+        if (ActionsDefined(static_cast<uint32_t>(ARKUI_ACCESSIBILITY_ACTION_CLICK))) {
+            actionsImpl_(static_cast<uint32_t>(ARKUI_ACCESSIBILITY_ACTION_CLICK));
+            return true;
+        }
+        if (actionClickImpl_) {
+            actionClickImpl_();
             return true;
         }
         return false;
@@ -379,6 +431,16 @@ public:
         accessibilityGroup_ = accessibilityGroup;
     }
 
+    void SetChildTreeId(int32_t childTreeId)
+    {
+        childTreeId_ = childTreeId;
+    }
+
+    void SetChildWindowId(int32_t childWindowId)
+    {
+        childWindowId_ = childWindowId;
+    }
+
     void SetAccessibilityText(const std::string& text)
     {
         accessibilityText_ = text;
@@ -397,6 +459,16 @@ public:
     bool IsAccessibilityGroup() const
     {
         return accessibilityGroup_;
+    }
+
+    int32_t GetChildTreeId() const
+    {
+        return childTreeId_;
+    }
+
+    int32_t GetChildWindowId() const
+    {
+        return childWindowId_;
     }
 
     void SaveAccessibilityVirtualNode(const RefPtr<UINode>& node)
@@ -481,6 +553,47 @@ public:
     */
     static bool IsAccessibilityFocusableDebug(const RefPtr<FrameNode>& node, std::unique_ptr<JsonValue>& info);
 
+    void SetAccessibilityActions(uint32_t actions);
+    void ResetAccessibilityActions();
+    bool HasAccessibilityActions();
+    uint32_t GetAccessibilityActions() const;
+
+    void SetAccessibilityRole(const std::string& role);
+    void ResetAccessibilityRole();
+    bool HasAccessibilityRole();
+    std::string GetAccessibilityRole() const;
+
+    void SetActions(const ActionsImpl& actionsImpl);
+    bool ActionsDefined(uint32_t action);
+
+    void SetUserDisabled(const bool& isDisabled);
+    bool HasUserDisabled();
+    bool IsUserDisabled();
+
+    void SetUserSelected(const bool& isSelected);
+    bool HasUserSelected();
+    bool IsUserSelected();
+
+    void SetUserCheckedType(const int32_t& checkedType);
+    bool HasUserCheckedType();
+    int32_t GetUserCheckedType();
+
+    void SetUserMinValue(const int32_t& minValue);
+    bool HasUserMinValue();
+    int32_t GetUserMinValue();
+
+    void SetUserMaxValue(const int32_t& maxValue);
+    bool HasUserMaxValue();
+    int32_t GetUserMaxValue();
+
+    void SetUserCurrentValue(const int32_t& currentValue);
+    bool HasUserCurrentValue();
+    int32_t GetUserCurrentValue();
+
+    void SetUserTextValue(const std::string& textValue);
+    bool HasUserTextValue();
+    std::string GetUserTextValue();
+
 private:
     // node should be not-null
     static bool HoverTestRecursive(
@@ -523,13 +636,29 @@ protected:
     ActionClearSelectionImpl actionClearSelectionImpl_;
     ActionSetCursorIndexImpl actionSetCursorIndexImpl_;
     ActionGetCursorIndexImpl actionGetCursorIndexImpl_;
+    ActionClickImpl actionClickImpl_;
+    ActionLongClickImpl actionLongClickImpl_;
+    ActionsImpl actionsImpl_;
     bool accessibilityGroup_ = false;
+    int32_t childTreeId_ = -1;
+    int32_t childWindowId_ = 0;
     RefPtr<UINode> accessibilityVirtualNode_;
     std::optional<std::string> accessibilityText_;
     std::optional<std::string> accessibilityDescription_;
     std::optional<std::string> accessibilityLevel_;
     std::optional<std::string> textTypeHint_;
+    std::optional<uint32_t> accessibilityActions_;
+    std::optional<std::string> accessibilityRole_;
     ACE_DISALLOW_COPY_AND_MOVE(AccessibilityProperty);
+
+    std::optional<bool> isDisabled_;
+    std::optional<bool> isSelected_;
+    std::optional<int32_t> checkedType_;
+
+    std::optional<int32_t> minValue_;
+    std::optional<int32_t> maxValue_;
+    std::optional<int32_t> currentValue_;
+    std::optional<std::string> textValue_;
 };
 } // namespace OHOS::Ace::NG
 

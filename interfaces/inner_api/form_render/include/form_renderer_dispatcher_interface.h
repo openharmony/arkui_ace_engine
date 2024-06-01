@@ -52,11 +52,19 @@ public:
     virtual void DispatchSurfaceChangeEvent(float width, float height, float borderWidth = 0.0) = 0;
     virtual void SetObscured(bool isObscured) = 0;
 
+    virtual void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId) = 0;
+    virtual void OnAccessibilityChildTreeDeregister() = 0;
+    virtual void OnAccessibilityDumpChildInfo(
+        const std::vector<std::string>& params, std::vector<std::string>& info) = 0;
+
     enum Message : uint32_t {
         DISPATCH_POINTER_EVENT = 1,
         SET_ALLOW_UPDATE,
         DISPATCH_SURFACE_CHANGE_EVENT,
         SET_OBSCURED,
+        ACCESSIBILITY_CHILD_TREE_REGISTER,
+        ACCESSIBILITY_CHILD_TREE_DEREGISTER,
+        ACCESSIBILITY_DUMP_CHILD_INFO,
     };
 };
 }  // namespace Ace

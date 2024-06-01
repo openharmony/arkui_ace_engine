@@ -62,17 +62,25 @@ int32_t RegisterNodeCustomEvent(ArkUI_NodeHandle node, ArkUI_NodeCustomEventType
     if (!node) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    if (eventType <= 0 || node->type != ARKUI_NODE_CUSTOM) {
+    if (eventType <= 0) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Custom event is not supported %{public}d", eventType);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
     }
 
     if (eventType & ARKUI_NODE_CUSTOM_EVENT_ON_MEASURE) {
-        NodeAddExtraData(node, ARKUI_NODE_CUSTOM_EVENT_ON_MEASURE, targetId, userData);
+        if (node->type == ARKUI_NODE_CUSTOM) {
+            NodeAddExtraData(node, ARKUI_NODE_CUSTOM_EVENT_ON_MEASURE, targetId, userData);
+        } else {
+            return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
+        }
     }
 
     if (eventType & ARKUI_NODE_CUSTOM_EVENT_ON_LAYOUT) {
-        NodeAddExtraData(node, ARKUI_NODE_CUSTOM_EVENT_ON_LAYOUT, targetId, userData);
+        if (node->type == ARKUI_NODE_CUSTOM) {
+            NodeAddExtraData(node, ARKUI_NODE_CUSTOM_EVENT_ON_LAYOUT, targetId, userData);
+        } else {
+            return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
+        }
     }
 
     if (eventType & ARKUI_NODE_CUSTOM_EVENT_ON_DRAW) {
@@ -349,7 +357,7 @@ uint32_t GetTotalChildCount(ArkUI_NodeHandle node)
         return 0;
     }
     auto* impl = GetFullImpl();
-    return impl->getNodeModifiers()->getFrameNodeModifier()->getChildrenCount(node->uiNodeHandle);
+    return impl->getNodeModifiers()->getFrameNodeModifier()->getChildrenCount(node->uiNodeHandle, true);
 }
 
 ArkUI_NodeHandle GetChildAt(ArkUI_NodeHandle node, int32_t position)
@@ -358,7 +366,7 @@ ArkUI_NodeHandle GetChildAt(ArkUI_NodeHandle node, int32_t position)
         return nullptr;
     }
     auto* impl = GetFullImpl();
-    auto* value = impl->getNodeModifiers()->getFrameNodeModifier()->getChild(node->uiNodeHandle, position);
+    auto* value = impl->getNodeModifiers()->getFrameNodeModifier()->getChild(node->uiNodeHandle, position, true);
     void* attachNode = impl->getExtendedAPI()->getAttachNodePtr(value);
     if (attachNode) {
         return reinterpret_cast<ArkUI_NodeHandle>(attachNode);
@@ -372,7 +380,7 @@ ArkUI_NodeHandle GetFirstChild(ArkUI_NodeHandle node)
         return nullptr;
     }
     auto* impl = GetFullImpl();
-    auto* value = impl->getNodeModifiers()->getFrameNodeModifier()->getFirst(node->uiNodeHandle);
+    auto* value = impl->getNodeModifiers()->getFrameNodeModifier()->getFirst(node->uiNodeHandle, true);
     void* attachNode = impl->getExtendedAPI()->getAttachNodePtr(value);
     if (attachNode) {
         return reinterpret_cast<ArkUI_NodeHandle>(attachNode);
@@ -386,7 +394,7 @@ ArkUI_NodeHandle GetLastChild(ArkUI_NodeHandle node)
         return nullptr;
     }
     auto* impl = GetFullImpl();
-    auto* value = impl->getNodeModifiers()->getFrameNodeModifier()->getLast(node->uiNodeHandle);
+    auto* value = impl->getNodeModifiers()->getFrameNodeModifier()->getLast(node->uiNodeHandle, true);
     void* attachNode = impl->getExtendedAPI()->getAttachNodePtr(value);
     if (attachNode) {
         return reinterpret_cast<ArkUI_NodeHandle>(attachNode);
@@ -400,7 +408,7 @@ ArkUI_NodeHandle GetPreviousSibling(ArkUI_NodeHandle node)
         return nullptr;
     }
     auto* impl = GetFullImpl();
-    auto* value = impl->getNodeModifiers()->getFrameNodeModifier()->getPreviousSibling(node->uiNodeHandle);
+    auto* value = impl->getNodeModifiers()->getFrameNodeModifier()->getPreviousSibling(node->uiNodeHandle, true);
     void* attachNode = impl->getExtendedAPI()->getAttachNodePtr(value);
     if (attachNode) {
         return reinterpret_cast<ArkUI_NodeHandle>(attachNode);
@@ -414,7 +422,7 @@ ArkUI_NodeHandle GetNextSibling(ArkUI_NodeHandle node)
         return nullptr;
     }
     auto* impl = GetFullImpl();
-    auto* value = impl->getNodeModifiers()->getFrameNodeModifier()->getNextSibling(node->uiNodeHandle);
+    auto* value = impl->getNodeModifiers()->getFrameNodeModifier()->getNextSibling(node->uiNodeHandle, true);
     void* attachNode = impl->getExtendedAPI()->getAttachNodePtr(value);
     if (attachNode) {
         return reinterpret_cast<ArkUI_NodeHandle>(attachNode);

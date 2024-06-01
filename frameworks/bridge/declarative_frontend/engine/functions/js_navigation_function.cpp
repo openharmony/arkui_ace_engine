@@ -14,8 +14,8 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_navigation_function.h"
-
-#include "js_navigation_function.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_navigation_stack.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_navdestination_context.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -28,6 +28,12 @@ void JsNavigationTransitionProxy::JSBind(BindingTarget globalObj)
         "to", &JsNavigationTransitionProxy::GetToContentInfo, &JsNavigationTransitionProxy::SetToContentInfo);
     JSClass<JsNavigationTransitionProxy>::CustomMethod(
         "finishTransition", &JsNavigationTransitionProxy::FinishTransition);
+    JSClass<JsNavigationTransitionProxy>::CustomProperty("isInteractive", &JsNavigationTransitionProxy::GetInteractive,
+        &JsNavigationTransitionProxy::SetInteractive);
+    JSClass<JsNavigationTransitionProxy>::CustomMethod("cancelTransition",
+        &JsNavigationTransitionProxy::CancelAnimation);
+    JSClass<JsNavigationTransitionProxy>::CustomMethod("updateTransition",
+        &JsNavigationTransitionProxy::UpdateTransition);
     JSClass<JsNavigationTransitionProxy>::Bind(
         globalObj, &JsNavigationTransitionProxy::Constructor, &JsNavigationTransitionProxy::Destructor);
 }
@@ -39,9 +45,9 @@ void JsNavigationTransitionProxy::SetFromContentInfo(const JSCallbackInfo& args)
 
 void JsNavigationTransitionProxy::GetFromContentInfo(const JSCallbackInfo& args)
 {
-    NG::NavContentInfo from;
+    RefPtr<NG::NavDestinationContext> from;
     if (proxy_) {
-        from = proxy_->GetPreDestination();
+        from = proxy_->GetPreDestinationContext();
     }
     auto fromVal = ConvertContentInfo(from);
     args.SetReturnValue(fromVal);
@@ -54,9 +60,9 @@ void JsNavigationTransitionProxy::SetToContentInfo(const JSCallbackInfo& args)
 
 void JsNavigationTransitionProxy::GetToContentInfo(const JSCallbackInfo& args)
 {
-    NG::NavContentInfo to;
+    RefPtr<NG::NavDestinationContext> to;
     if (proxy_) {
-        to = proxy_->GetTopDestination();
+        to = proxy_->GetTopDestinationContext();
     }
     auto toVal = ConvertContentInfo(to);
     args.SetReturnValue(toVal);
@@ -83,16 +89,22 @@ void JsNavigationTransitionProxy::Destructor(JsNavigationTransitionProxy* proxy)
     }
 }
 
-JSRef<JSVal> JsNavigationTransitionProxy::ConvertContentInfo(NG::NavContentInfo info)
+JSRef<JSVal> JsNavigationTransitionProxy::ConvertContentInfo(RefPtr<NG::NavDestinationContext> context)
 {
     auto value = JSRef<JSObject>::New();
-    if (info.index == -1) {
+    if (!context) {
         // current nav content is navBar.Don't need to set name and mode.
         value->SetProperty<int32_t>("index", -1);
-    } else {
-        value->SetProperty<std::string>("name", info.name);
-        value->SetProperty<int32_t>("index", info.index);
-        value->SetProperty<int32_t>("mode", static_cast<int32_t>(info.mode));
+        return value;
+    }
+    auto info = context->GetNavPathInfo();
+    CHECK_NULL_RETURN(info, value);
+    value->SetProperty<std::string>("name", info->GetName());
+    value->SetProperty<int32_t>("index", context->GetIndex());
+    value->SetProperty<int32_t>("mode", static_cast<int32_t>(context->GetMode()));
+    auto jsPathInfo = AceType::DynamicCast<JSNavPathInfo>(info);
+    if (jsPathInfo) {
+        value->SetPropertyObject("param", jsPathInfo->GetParam());
     }
     return value;
 }
@@ -102,8 +114,8 @@ void JsNavigationFunction::JSBind(BindingTarget globalObj)
     JsNavigationTransitionProxy::JSBind(globalObj);
 }
 
-JSRef<JSVal> JsNavigationFunction::Execute(
-    NG::NavContentInfo from, NG::NavContentInfo to, NG::NavigationOperation navigationOperation)
+JSRef<JSVal> JsNavigationFunction::Execute(RefPtr<NG::NavDestinationContext> from,
+    RefPtr<NG::NavDestinationContext> to, NG::NavigationOperation navigationOperation)
 {
     JSRef<JSVal> fromVal = JsNavigationTransitionProxy::ConvertContentInfo(from);
     JSRef<JSVal> toVal = JsNavigationTransitionProxy::ConvertContentInfo(to);
@@ -120,5 +132,36 @@ void JsNavigationFunction::Execute(const RefPtr<NG::NavigationTransitionProxy>& 
     jsProxy->SetProxy(proxy);
     JSRef<JSVal> param = JSRef<JSObject>::Cast(proxyObj);
     JsFunction::ExecuteJS(1, &param);
+}
+
+void JsNavigationTransitionProxy::SetInteractive(const JSCallbackInfo& info)
+{
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "not support set interactive attribute");
+}
+
+void JsNavigationTransitionProxy::GetInteractive(const JSCallbackInfo& info)
+{
+    auto interactive = proxy_ ? proxy_->GetInteractive() : false;
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(interactive)));
+}
+
+void JsNavigationTransitionProxy::CancelAnimation(const JSCallbackInfo& info)
+{
+    if (proxy_ == nullptr) {
+        return;
+    }
+    proxy_->CancelInteractiveAnimation();
+}
+
+void JsNavigationTransitionProxy::UpdateTransition(const JSCallbackInfo& info)
+{
+    if (!proxy_) {
+        return;
+    }
+    float progress = 0;
+    if (info[0]->IsNumber()) {
+        progress = info[0]->ToNumber<float>();
+    }
+    proxy_->UpdateTransition(progress);
 }
 }; // namespace OHOS::Ace::Framework

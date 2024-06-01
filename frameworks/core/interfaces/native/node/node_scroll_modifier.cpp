@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -134,17 +134,17 @@ void ResetScrollFriction(ArkUINodeHandle node)
     ScrollModelNG::SetFriction(frameNode, FRICTION_DEFAULT);
 }
 
-ArkUI_Int32 GetScrollScrollSnap(ArkUINodeHandle node, ArkUI_Int32* values)
+ArkUI_Int32 GetScrollScrollSnap(ArkUINodeHandle node, ArkUI_Float32 (*values)[32])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, 0);
     ScrollSnapOptions options = ScrollModelNG::GetScrollSnap(frameNode);
-    values[0] = static_cast<ArkUI_Int32>(options.snapAlign);
-    values[1] = static_cast<ArkUI_Int32>(options.enableSnapToStart);
-    values[2] = static_cast<ArkUI_Int32>(options.enableSnapToEnd);
+    (*values)[0] = static_cast<ArkUI_Int32>(options.snapAlign);
+    (*values)[1] = static_cast<ArkUI_Int32>(options.enableSnapToStart);
+    (*values)[2] = static_cast<ArkUI_Int32>(options.enableSnapToEnd);
     auto index = 3;
     for (auto item : options.paginationParams) {
-        values[index] = item.ConvertToVp();
+        (*values)[index] = item.ConvertToVp();
         index++;
     }
     return index;
@@ -300,12 +300,12 @@ void ResetScrollScrollBarWidth(ArkUINodeHandle node)
     ScrollModelNG::SetScrollBarWidth(frameNode, width);
 }
 
-ArkUI_Int32 GetScrollEdgeEffect(ArkUINodeHandle node, ArkUI_Int32* values)
+ArkUI_Int32 GetScrollEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 (*values)[2])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
-    values[SCROLL_TO_INDEX_0] = static_cast<ArkUI_Int32>(ScrollModelNG::GetEdgeEffect(frameNode));
-    values[SCROLL_TO_INDEX_1] = static_cast<ArkUI_Int32>(ScrollModelNG::GetEdgeEffectAlways(frameNode));
+    (*values)[SCROLL_TO_INDEX_0] = static_cast<ArkUI_Int32>(ScrollModelNG::GetEdgeEffect(frameNode));
+    (*values)[SCROLL_TO_INDEX_1] = static_cast<ArkUI_Int32>(ScrollModelNG::GetEdgeEffectAlways(frameNode));
     return SCROLL_TO_INDEX_2;
 }
 
@@ -358,20 +358,20 @@ RefPtr<ScrollControllerBase> GetController(ArkUINodeHandle node)
     return nullptr;
 }
 
-void SetScrollTo(ArkUINodeHandle node, const ArkUI_Float32* values)
+void SetScrollTo(ArkUINodeHandle node, const ArkUI_Float32 (*values)[8])
 {
     RefPtr<ScrollControllerBase> scrollControllerBase = GetController(node);
     CHECK_NULL_VOID(scrollControllerBase);
-    Dimension xOffset(values[0], static_cast<OHOS::Ace::DimensionUnit>(values[1]));
-    Dimension yOffset(values[2], static_cast<OHOS::Ace::DimensionUnit>(values[3]));
-    float duration = values[4];
+    Dimension xOffset((*values)[0], static_cast<OHOS::Ace::DimensionUnit>((*values)[1]));
+    Dimension yOffset((*values)[2], static_cast<OHOS::Ace::DimensionUnit>((*values)[3]));
+    float duration = (*values)[4];
     RefPtr<Curve> curve = Curves::EASE;
-    if (static_cast<int>(values[SCROLL_TO_INDEX_CURVE]) < static_cast<int>(CurvesVector.size())) {
-        curve = CurvesVector[static_cast<int>(values[SCROLL_TO_INDEX_CURVE])];
+    if (static_cast<int>((*values)[SCROLL_TO_INDEX_CURVE]) < static_cast<int>(CurvesVector.size())) {
+        curve = CurvesVector[static_cast<int>((*values)[SCROLL_TO_INDEX_CURVE])];
     }
-    auto smooth = static_cast<bool>(values[6]);
+    auto smooth = static_cast<bool>((*values)[6]);
     //index 7 is canOverScroll
-    auto canOverScroll = static_cast<bool>(values[7]);
+    auto canOverScroll = static_cast<bool>((*values)[7]);
     auto direction = scrollControllerBase->GetScrollDirection();
     auto position = direction == Axis::VERTICAL ? yOffset : xOffset;
     scrollControllerBase->AnimateTo(position, duration, curve, smooth, canOverScroll);
@@ -386,8 +386,8 @@ void SetScrollEdge(ArkUINodeHandle node, ArkUI_Int32 value)
 
 void ResetScrollTo(ArkUINodeHandle node)
 {
-    std::vector<float> values = { DEFAULT_OFFSET_VALUE, DEFAULT_OFFSET_VALUE };
-    SetScrollTo(node, values.data());
+    const ArkUI_Float32 values[8] = { DEFAULT_OFFSET_VALUE };
+    SetScrollTo(node, &values);
 }
 
 void ResetScrollEdge(ArkUINodeHandle node)
@@ -418,22 +418,22 @@ void ResetScrollEnablePaging(ArkUINodeHandle node)
     ScrollModelNG::SetEnablePaging(frameNode, false);
 }
 
-void GetScrollNestedScroll(ArkUINodeHandle node, ArkUI_Int32* values)
+void GetScrollNestedScroll(ArkUINodeHandle node, ArkUI_Int32 (*values)[2])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NestedScrollOptions options = ScrollModelNG::GetNestedScroll(frameNode);
-    values[0] = static_cast<ArkUI_Int32>(options.forward);
-    values[1] = static_cast<ArkUI_Int32>(options.backward);
+    (*values)[0] = static_cast<ArkUI_Int32>(options.forward);
+    (*values)[1] = static_cast<ArkUI_Int32>(options.backward);
 }
 
-void GetScrollOffset(ArkUINodeHandle node, ArkUI_Float32* values)
+void GetScrollOffset(ArkUINodeHandle node, ArkUI_Float32 (*values)[2])
 {
     RefPtr<ScrollControllerBase> scrollControllerBase = GetController(node);
     CHECK_NULL_VOID(scrollControllerBase);
     Offset offset = scrollControllerBase->GetCurrentOffset();
-    values[0] = offset.GetX();
-    values[1] = offset.GetY();
+    (*values)[0] = offset.GetX();
+    (*values)[1] = offset.GetY();
 }
 
 ArkUI_Int32 GetScrollEdge(ArkUINodeHandle node)

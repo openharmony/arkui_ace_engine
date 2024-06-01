@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace {
 
-class SearchModel {
+class ACE_FORCE_EXPORT SearchModel {
 public:
     static SearchModel* GetInstance();
     virtual ~SearchModel() = default;
@@ -62,6 +62,10 @@ public:
     virtual void SetOnCut(std::function<void(const std::string&)>&& func);
     virtual void SetOnPaste(std::function<void(const std::string&)>&& func);
     virtual void SetOnPasteWithEvent(std::function<void(const std::string&, NG::TextCommonEvent&)>&& func);
+    virtual void SetOnWillInsertValueEvent(std::function<bool(const InsertValueInfo&)>&& func);
+    virtual void SetOnDidInsertValueEvent(std::function<void(const InsertValueInfo&)>&& func);
+    virtual void SetOnWillDeleteEvent(std::function<bool(const DeleteValueInfo&)>&& func);
+    virtual void SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func);
     virtual void SetOnChangeEvent(std::function<void(const std::string&)>&& onChangeEvent);
     virtual void SetSelectionMenuHidden(bool selectionMenuHidden) = 0;
     virtual void SetCustomKeyboard(const std::function<void ()> &&buildFunc, bool supportAvoidance = false);

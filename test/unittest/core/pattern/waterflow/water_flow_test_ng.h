@@ -36,26 +36,36 @@
 #undef protected
 
 namespace OHOS::Ace::NG {
+using namespace testing;
+using namespace testing::ext;
+const InspectorFilter filter;
+constexpr float WATERFLOW_WIDTH = 480.f;
+constexpr float WATERFLOW_HEIGHT = 800.f;
+constexpr int32_t TOTAL_LINE_NUMBER = 10;
+constexpr int32_t VIEW_LINE_NUMBER = 8;
+constexpr float ITEM_HEIGHT = WATERFLOW_HEIGHT / VIEW_LINE_NUMBER;
+constexpr float BIG_ITEM_HEIGHT = ITEM_HEIGHT * 2;
+
 class WaterFlowTestNg : public TestNG {
 protected:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
     void SetUp() override;
     void TearDown() override;
-    void GetInstance();
+    virtual void GetInstance();
 
     void Create(const std::function<void(WaterFlowModelNG)>& callback = nullptr, bool flushLayout = true);
     void CreateWithItem(const std::function<void(WaterFlowModelNG)>& callback = nullptr);
     static void CreateItem(int32_t number = 10);
+    static void CreateRandomItem(int32_t number);
     static void CreateItemWithHeight(float height);
     void UpdateCurrentOffset(float offset, int32_t source = SCROLL_FROM_UPDATE);
     void MouseSelect(Offset start, Offset end);
     void MouseSelectRelease();
     static std::function<void()> GetDefaultHeaderBuilder();
-
     void AddItems(int32_t number);
-
     AssertionResult IsEqualTotalOffset(float expectOffset);
+    void HandleDrag(float offset);
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<WaterFlowPattern> pattern_;

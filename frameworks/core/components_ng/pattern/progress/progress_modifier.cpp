@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -77,7 +77,8 @@ ProgressModifier::ProgressModifier(const ProgressAnimatableProperty& progressAni
       progressStatus_(AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(ProgressStatus::PROGRESSING))),
       isItalic_(AceType::MakeRefPtr<PropertyBool>(false)),
       smoothEffect_(AceType::MakeRefPtr<PropertyBool>(true)),
-      useContentModifier_(AceType::MakeRefPtr<PropertyBool>(false))
+      useContentModifier_(AceType::MakeRefPtr<PropertyBool>(false)),
+      isRightToLeft_(AceType::MakeRefPtr<PropertyBool>(false))
 {
     AttachProperty(strokeWidth_);
     AttachProperty(color_);
@@ -102,6 +103,7 @@ ProgressModifier::ProgressModifier(const ProgressAnimatableProperty& progressAni
     AttachProperty(linearSweepEffect_);
     AttachProperty(isItalic_);
     AttachProperty(smoothEffect_);
+    AttachProperty(isRightToLeft_);
 }
 
 void ProgressModifier::onDraw(DrawingContext& context)
@@ -716,7 +718,7 @@ void ProgressModifier::PaintLinear(RSCanvas& canvas, const OffsetF& offset, cons
     if (contentSize.Width() >= contentSize.Height()) {
         double barLength = contentSize.Width() - radius * INT32_TWO;
         CHECK_NULL_VOID(!NearEqual(barLength, 0.0));
-        double dateLength = barLength * value_->Get() / maxValue_->Get();
+        double dateLength = std::min(barLength * value_->Get() / maxValue_->Get(), barLength);
         canvas.AttachBrush(brush);
         canvas.DrawRoundRect(
             { { offset.GetX(), offset.GetY(), contentSize.Width() + offset.GetX(),
@@ -732,18 +734,22 @@ void ProgressModifier::PaintLinear(RSCanvas& canvas, const OffsetF& offset, cons
 #else
         RSRecordingPath path;
 #endif
-        path.AddRoundRect(
-            { offset.GetX(), offset.GetY(), dateLength + offset.GetX() + radius * INT32_TWO,
-              strokeWidth_->Get() + offset.GetY() },
-            radius, radius);
+        float leftTopX = !isRightToLeft_->Get()
+                             ? offset.GetX()
+                             : contentSize.Width() + offset.GetX() - (dateLength + radius * INT32_TWO);
+        float leftTopY = offset.GetY();
+        float rightBottomX = !isRightToLeft_->Get() ? dateLength + offset.GetX() + radius * INT32_TWO
+                                                    : contentSize.Width() + offset.GetX();
+        float rightBottomY = strokeWidth_->Get() + offset.GetY();
+        path.AddRoundRect({ leftTopX, leftTopY, rightBottomX, rightBottomY }, radius, radius);
         canvas.DrawPath(path);
         canvas.DetachBrush();
         canvas.Restore();
-        PaintLinearSweeping(canvas, offset, path, true);
+        PaintLinearSweeping(canvas, offset, path, true, contentSize);
     } else {
         double barLength = contentSize.Height() - radius * INT32_TWO;
         CHECK_NULL_VOID(!NearEqual(barLength, 0.0));
-        double dateLength = barLength * value_->Get() / maxValue_->Get();
+        double dateLength = std::min(barLength * value_->Get() / maxValue_->Get(), barLength);
         canvas.AttachBrush(brush);
         canvas.DrawRoundRect(
             { { offset.GetX(), offset.GetY(), strokeWidth_->Get() + offset.GetX(),
@@ -766,12 +772,12 @@ void ProgressModifier::PaintLinear(RSCanvas& canvas, const OffsetF& offset, cons
         canvas.DrawPath(path);
         canvas.DetachBrush();
         canvas.Restore();
-        PaintLinearSweeping(canvas, offset, path, false);
+        PaintLinearSweeping(canvas, offset, path, false, contentSize);
     }
 }
 
 void ProgressModifier::PaintLinearSweeping(
-    RSCanvas& canvas, const OffsetF& offset, const RSPath& path, bool isHorizontal) const
+    RSCanvas& canvas, const OffsetF& offset, const RSPath& path, bool isHorizontal, const SizeF& contentSize) const
 {
     if (NearZero(value_->Get()) || NearZero(maxValue_->Get())) {
         return;
@@ -792,9 +798,12 @@ void ProgressModifier::PaintLinearSweeping(
     float rightBottomX = 0.0f;
     float rightBottomY = 0.0f;
     if (isHorizontal) {
-        leftTopX = offset.GetX() + sweepingDate_->Get() - LINEAR_SWEEPING_LEN.ConvertToPx();
+        leftTopX = !isRightToLeft_->Get() ? offset.GetX() + sweepingDate_->Get() - LINEAR_SWEEPING_LEN.ConvertToPx()
+                                          : contentSize.Width() + offset.GetX() - sweepingDate_->Get();
         leftTopY = offset.GetY();
-        rightBottomX = offset.GetX() + sweepingDate_->Get();
+        rightBottomX = !isRightToLeft_->Get() ? offset.GetX() + sweepingDate_->Get()
+                                              : contentSize.Width() + offset.GetX() - sweepingDate_->Get() +
+                                                    LINEAR_SWEEPING_LEN.ConvertToPx();
         rightBottomY = offset.GetY() + strokeWidth_->Get();
     } else {
         leftTopX = offset.GetX();
@@ -840,7 +849,9 @@ void ProgressModifier::GenerateLinearSweepingGradientInfo(
     GradientColor gradientColorMiddle;
     gradientColorMiddle.SetColor(sweepingColorMiddle);
     gradientColorMiddle.SetDimension(
-        Dimension(stageLen.ConvertToPx() / LINEAR_SWEEPING_LEN.ConvertToPx(), DimensionUnit::PERCENT));
+        Dimension(!isRightToLeft_->Get() ? stageLen.ConvertToPx() / LINEAR_SWEEPING_LEN.ConvertToPx()
+                                         : 1 - stageLen.ConvertToPx() / LINEAR_SWEEPING_LEN.ConvertToPx(),
+            DimensionUnit::PERCENT));
     gradient.AddColor(gradientColorMiddle);
 
     Color sweepingColorStart = sweepingColorBase.ChangeOpacity(0.0);
@@ -860,7 +871,7 @@ void ProgressModifier::PaintRing(RSCanvas& canvas, const OffsetF& offset, const 
 {
     auto centerPt = PointF(contentSize.Width() / 2, contentSize.Height() / 2) + offset;
     auto radius = std::min(contentSize.Width() / 2, contentSize.Height() / 2);
-    auto angle = (value_->Get() / maxValue_->Get()) * ANGLE_360;
+    auto angle = std::min((value_->Get() / maxValue_->Get()) * ANGLE_360, static_cast<float>(ANGLE_360));
     auto thickness = strokeWidth_->Get();
     // No shadow is drawn if radius is less or equal to 10, because it is no enough space to draw both ring and shadow.
     auto paintShadow = paintShadow_->Get() && GreatNotEqual(radius, RING_SHADOW_VALID_RADIUS_MIN);
@@ -882,7 +893,10 @@ void ProgressModifier::PaintRing(RSCanvas& canvas, const OffsetF& offset, const 
     ringData.shadowBlurSigma = shadowBlurSigma;
 
     PaintRingBackground(canvas, ringData);
-
+    if (isRightToLeft_->Get()) {
+        canvas.Scale(-1, 1);
+        canvas.Translate(-((radius + shadowBlurOffset) * INT32_TWO + thickness), 0);
+    }
     if (isLoading_) {
         PaintTrailing(canvas, ringData);
         return;
@@ -1364,6 +1378,10 @@ void ProgressModifier::PaintScaleRing(RSCanvas& canvas, const OffsetF& offset, c
 #endif
     pen.SetColor(ToRSColor(bgColor_->Get()));
     canvas.AttachPen(pen);
+    if (isRightToLeft_->Get()) {
+        canvas.Scale(-1, 1);
+        canvas.Translate(-radius * INT32_TWO, 0);
+    }
     canvas.DrawArc(
         { centerPt.GetX() - radius, centerPt.GetY() - radius, centerPt.GetX() + radius, centerPt.GetY() + radius },
         ANGLE_270, ANGLE_360);
@@ -1371,11 +1389,12 @@ void ProgressModifier::PaintScaleRing(RSCanvas& canvas, const OffsetF& offset, c
     // start to draw cur value progress
     pen.SetColor(ToRSColor((color_->Get())));
     canvas.AttachPen(pen);
-    double angle = (value_->Get() / maxValue_->Get()) * ANGLE_360;
+    double angle = std::min((value_->Get() / maxValue_->Get()) * ANGLE_360, static_cast<float>(ANGLE_360));
     canvas.DrawArc(
         { centerPt.GetX() - radius, centerPt.GetY() - radius, centerPt.GetX() + radius, centerPt.GetY() + radius },
         ANGLE_270, angle);
     canvas.DetachPen();
+    canvas.Restore();
 }
 
 void ProgressModifier::PaintMoon(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const
@@ -1387,7 +1406,7 @@ void ProgressModifier::PaintMoon(RSCanvas& canvas, const OffsetF& offset, const 
     brush.SetAntiAlias(true);
     brush.SetAlpha(true);
     brush.SetColor(ToRSColor(bgColor_->Get()));
-    double angle = (value_->Get() / maxValue_->Get()) * totalDegree;
+    double angle = std::min((value_->Get() / maxValue_->Get()) * totalDegree, static_cast<float>(totalDegree));
 #ifndef USE_ROSEN_DRAWING
     RSPath path;
 #else
@@ -1400,24 +1419,22 @@ void ProgressModifier::PaintMoon(RSCanvas& canvas, const OffsetF& offset, const 
     canvas.AttachBrush(brush);
     path.AddArc(
         { centerPt.GetX() - radius, centerPt.GetY() - radius, centerPt.GetX() + radius, centerPt.GetY() + radius },
-        ANGLE_90, ANGLE_180);
+        ANGLE_90, !isRightToLeft_->Get() ? ANGLE_180 : -ANGLE_180);
     if (angle <= FLOAT_ZERO_FIVE) {
         double progressOffset = radius - radius * angle / FLOAT_ZERO_FIVE;
         path.MoveTo(centerPt.GetX(), centerPt.GetY() - radius);
         // startAngle:270  sweepAngle:-180
-        path.AddArc(
-            { centerPt.GetX() - progressOffset, centerPt.GetY() - radius, centerPt.GetX() + progressOffset,
+        path.AddArc({ centerPt.GetX() - progressOffset, centerPt.GetY() - radius, centerPt.GetX() + progressOffset,
                         centerPt.GetY() + radius },
-            ANGLE_270, -ANGLE_180);
+            ANGLE_270, !isRightToLeft_->Get() ? -ANGLE_180 : ANGLE_180);
         canvas.DrawPath(path);
     } else {
         double progressOffset = radius * (angle - FLOAT_ZERO_FIVE) / FLOAT_ZERO_FIVE;
         path.MoveTo(centerPt.GetX(), centerPt.GetY() - radius);
         // startAngle:270  sweepAngle:180
-        path.AddArc(
-            { centerPt.GetX() - progressOffset, centerPt.GetY() - radius, centerPt.GetX() + progressOffset,
+        path.AddArc({ centerPt.GetX() - progressOffset, centerPt.GetY() - radius, centerPt.GetX() + progressOffset,
                         centerPt.GetY() + radius },
-            ANGLE_270, ANGLE_180);
+            ANGLE_270, !isRightToLeft_->Get() ? ANGLE_180 : -ANGLE_180);
         canvas.DrawPath(path);
     }
     canvas.DetachBrush();
@@ -1466,25 +1483,46 @@ void ProgressModifier::PaintCapsule(RSCanvas& canvas, const OffsetF& offset, con
     canvas.DetachPen();
     brush.SetColor(ToRSColor((color_->Get())));
     canvas.AttachBrush(brush);
-    path.AddArc(
-        { offsetX, offsetY, INT32_TWO * radius + offsetX, contentSize.Height() + offsetY }, ANGLE_90, ANGLE_180);
-    if (LessNotEqual(progressWidth, radius)) {
-        // startAngle:270  sweepAngle:-180
+    if (!isRightToLeft_->Get()) {
         path.AddArc(
-            { offsetX + progressWidth, offsetY, INT32_TWO * radius - progressWidth + offsetX,
+            { offsetX, offsetY, INT32_TWO * radius + offsetX, contentSize.Height() + offsetY }, ANGLE_90, ANGLE_180);
+    } else {
+        path.AddArc({ offsetX + contentSize.Width() - INT32_TWO * radius, offsetY, offsetX + contentSize.Width(),
                         contentSize.Height() + offsetY },
-            ANGLE_270, -ANGLE_180);
+            ANGLE_270, ANGLE_180);
+    }
+    if (LessNotEqual(progressWidth, radius)) {
+        if (!isRightToLeft_->Get()) {
+            // startAngle:270  sweepAngle:-180
+            path.AddArc({ offsetX + progressWidth, offsetY, INT32_TWO * radius - progressWidth + offsetX,
+                            contentSize.Height() + offsetY },
+                ANGLE_270, -ANGLE_180);
+        } else {
+            path.AddArc({ offsetX + contentSize.Width() - INT32_TWO * radius + progressWidth, offsetY,
+                            offsetX + contentSize.Width() - progressWidth, contentSize.Height() + offsetY },
+                ANGLE_90, -ANGLE_180);
+        }
     } else if (GreatNotEqual(progressWidth, contentSize.Width() - radius)) {
         path.AddRect(
             { offsetX + radius, offsetY, contentSize.Width() + offsetX - radius, contentSize.Height() + offsetY });
-        // startAngle:270  sweepAngle:180
-        path.AddArc(
-            { offsetX + (contentSize.Width() - radius) * FLOAT_TWO_ZERO - progressWidth, offsetY,
-                        offsetX + progressWidth, contentSize.Height() + offsetY },
-            ANGLE_270, ANGLE_180);
+        if (!isRightToLeft_->Get()) {
+            // startAngle:270  sweepAngle:180
+            path.AddArc({ offsetX + (contentSize.Width() - radius) * FLOAT_TWO_ZERO - progressWidth, offsetY,
+                            offsetX + progressWidth, contentSize.Height() + offsetY },
+                ANGLE_270, ANGLE_180);
+        } else {
+            path.AddArc({ offsetX + contentSize.Width() - progressWidth, offsetY,
+                            offsetX - contentSize.Width() + progressWidth + INT32_TWO * radius,
+                            contentSize.Height() + offsetY },
+                ANGLE_90, ANGLE_180);
+        }
     } else {
-        path.AddRect(
-            { radius + offsetX, offsetY, progressWidth + offsetX, contentSize.Height() + offsetY });
+        if (!isRightToLeft_->Get()) {
+            path.AddRect({ radius + offsetX, offsetY, progressWidth + offsetX, contentSize.Height() + offsetY });
+        } else {
+            path.AddRect({ offsetX + contentSize.Width() - progressWidth, offsetY,
+                contentSize.Width() + offsetX - radius, contentSize.Height() + offsetY });
+        }
     }
     canvas.DrawPath(path);
     canvas.DetachBrush();
@@ -1589,10 +1627,14 @@ void ProgressModifier::PaintCapsuleLightSweep(
             RSTileMode::CLAMP));
     } else {
         brush.SetShaderEffect(RSShaderEffect::CreateLinearGradient(
-            ToRSPoint(
-                PointF(offset.GetX() + endPos - SWEEP_WIDTH.ConvertToPx(), offset.GetY() + contentSize.Height() / 2)),
-            ToRSPoint(PointF(offset.GetX() + endPos, offset.GetY() + contentSize.Height() / 2)), colors, pos,
-            RSTileMode::CLAMP));
+            ToRSPoint(PointF(!isRightToLeft_->Get() ? offset.GetX() + endPos - SWEEP_WIDTH.ConvertToPx()
+                                                    : offset.GetX() + contentSize.Width() - endPos,
+                offset.GetY() + contentSize.Height() / 2)),
+            ToRSPoint(PointF(!isRightToLeft_->Get()
+                                 ? offset.GetX() + endPos
+                                 : offset.GetX() + contentSize.Width() - endPos + SWEEP_WIDTH.ConvertToPx(),
+                offset.GetY() + contentSize.Height() / 2)),
+            colors, pos, RSTileMode::CLAMP));
     }
 #else
     if (isVertical) {
@@ -1604,10 +1646,14 @@ void ProgressModifier::PaintCapsuleLightSweep(
             colors, pos, RSTileMode::CLAMP));
     } else {
         brush.SetShaderEffect(RSRecordingShaderEffect::CreateLinearGradient(
-            ToRSPoint(PointF(offset.GetX() + endPos - SWEEP_WIDTH.ConvertToPx() + capsuleBorderWidth_->Get(),
+            ToRSPoint(PointF(!isRightToLeft_->Get()
+                                 ? offset.GetX() + endPos - SWEEP_WIDTH.ConvertToPx() + capsuleBorderWidth_->Get()
+                                 : offset.GetX() + contentSize.Width() - endPos + capsuleBorderWidth_->Get(),
                 offset.GetY() + contentSize.Height() / 2)),
-            ToRSPoint(
-                PointF(offset.GetX() + endPos - capsuleBorderWidth_->Get(), offset.GetY() + contentSize.Height() / 2)),
+            ToRSPoint(PointF(!isRightToLeft_->Get() ? offset.GetX() + endPos - capsuleBorderWidth_->Get()
+                                                    : offset.GetX() + contentSize.Width() - endPos +
+                                                          SWEEP_WIDTH.ConvertToPx() - capsuleBorderWidth_->Get(),
+                offset.GetY() + contentSize.Height() / 2)),
             colors, pos, RSTileMode::CLAMP));
     }
 #endif
@@ -1622,9 +1668,13 @@ void ProgressModifier::PaintCapsuleLightSweep(
             { offsetX, offsetY + endPos - SWEEP_WIDTH.ConvertToPx(),
             offsetX + contentSize.Width(), offsetY + endPos });
     } else {
-        canvas.DrawRect(
-            { offsetX + endPos - SWEEP_WIDTH.ConvertToPx(), offsetY,
-            offsetX + endPos, offsetY + contentSize.Height() });
+        if (!isRightToLeft_->Get()) {
+            canvas.DrawRect({ offsetX + endPos - SWEEP_WIDTH.ConvertToPx(), offsetY, offsetX + endPos,
+                offsetY + contentSize.Height() });
+        } else {
+            canvas.DrawRect({ offsetX + contentSize.Width() - endPos, offsetY,
+                offsetX + contentSize.Width() - endPos + SWEEP_WIDTH.ConvertToPx(), offsetY + contentSize.Height() });
+        }
     }
     canvas.DetachBrush();
     canvas.Restore();
@@ -1635,14 +1685,16 @@ Gradient ProgressModifier::CreateCapsuleGradient() const
     Gradient gradient;
     Color lightSweepColorBase = Color::WHITE;
     Color lightSweepColorEnd = lightSweepColorBase.ChangeOpacity(0.0);
+    Color lightSweepColorMiddle = lightSweepColorBase.ChangeOpacity(0.2);
     GradientColor gradientColorEnd;
-    gradientColorEnd.SetColor(lightSweepColorEnd);
+    isRightToLeft_->Get() ? gradientColorEnd.SetColor(lightSweepColorMiddle)
+                          : gradientColorEnd.SetColor(lightSweepColorEnd);
     gradientColorEnd.SetDimension(Dimension(0.0, DimensionUnit::VP));
     gradient.AddColor(gradientColorEnd);
 
-    Color lightSweepColorMiddle = lightSweepColorBase.ChangeOpacity(0.2);
     GradientColor gradientColorMiddle;
-    gradientColorMiddle.SetColor(lightSweepColorMiddle);
+    isRightToLeft_->Get() ? gradientColorMiddle.SetColor(lightSweepColorEnd)
+                          : gradientColorMiddle.SetColor(lightSweepColorMiddle);
     gradientColorMiddle.SetDimension(SWEEP_WIDTH);
     gradient.AddColor(gradientColorMiddle);
     return gradient;
@@ -1660,6 +1712,14 @@ bool ProgressModifier::PostTask(const TaskExecutor::Task& task, const std::strin
 void ProgressModifier::SetStrokeRadius(float strokeRaidus)
 {
     strokeRadius_->Set(strokeRaidus);
+}
+
+void ProgressModifier::SetIsRightToLeft(bool value)
+{
+    if (isRightToLeft_->Get() == value) {
+        return;
+    }
+    isRightToLeft_->Set(value);
 }
 
 void ProgressModifier::PaintScaleRingForApiNine(RSCanvas& canvas, const OffsetF& offset, const SizeF& frameSize) const
@@ -1689,14 +1749,14 @@ void ProgressModifier::PaintScaleRingForApiNine(RSCanvas& canvas, const OffsetF&
     canvas.AttachPen(pen);
     canvas.DrawArc({
         centerPt.GetX() - radius, centerPt.GetY() - radius, centerPt.GetX() + radius, centerPt.GetY() + radius },
-            ANGLE_270, ANGLE_360);
+        ANGLE_270, ANGLE_360);
     canvas.DetachPen();
     pen.SetColor(ToRSColor((color_->Get())));
     canvas.AttachPen(pen);
     double angle = (value_->Get() / maxValue_->Get()) * ANGLE_360;
     canvas.DrawArc({
         centerPt.GetX() - radius, centerPt.GetY() - radius, centerPt.GetX() + radius, centerPt.GetY() + radius },
-            ANGLE_270, angle);
+        ANGLE_270, angle);
     canvas.DetachPen();
 }
 
@@ -1721,7 +1781,7 @@ void ProgressModifier::PaintCapsuleForApiNine(RSCanvas& canvas, const OffsetF& o
         // startAngle:270  sweepAngle:-180
         path.AddArc({
             offsetX + progressWidth, offsetY, 2 * radius - progressWidth + offsetX, frameSize.Height() + offsetY },
-                ANGLE_270, -ANGLE_180);
+            ANGLE_270, -ANGLE_180);
     } else if (GreatNotEqual(progressWidth, frameSize.Width() - radius)) {
         path.AddRect({ offsetX + radius, offsetY, frameSize.Width() + offsetX - radius,
             frameSize.Height() + offsetY });
@@ -1763,7 +1823,7 @@ void ProgressModifier::PaintVerticalCapsuleForApiNine(
             offsetX, offsetY + radius, frameSize.Width() + offsetX, frameSize.Height() - radius + offsetY });
         // startAngle:180  sweepAngle:-180
         path.AddArc({ offsetX, offsetY + (frameSize.Height() - radius) * 2.0 - progressWidth,
-                        frameSize.Width() + offsetX, progressWidth + offsetY }, ANGLE_180, -ANGLE_180);
+            frameSize.Width() + offsetX, progressWidth + offsetY }, ANGLE_180, -ANGLE_180);
     } else {
         path.AddRect({ offsetX, radius + offsetY, offsetX + frameSize.Width(), progressWidth + offsetY });
     }

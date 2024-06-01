@@ -22,6 +22,7 @@
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components/scroll_bar/scroll_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/pattern/waterflow/layout/water_flow_layout_algorithm_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 
 namespace OHOS::Ace {
@@ -35,6 +36,7 @@ public:
     virtual RefPtr<ScrollControllerBase> CreateScrollController() = 0;
     virtual RefPtr<ScrollProxy> CreateScrollBarProxy() = 0;
     virtual void SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy) = 0;
+    virtual void SetLayoutMode(NG::WaterFlowLayoutMode mode) = 0;
 
     virtual void SetColumnsTemplate(const std::string& value) = 0;
     virtual void SetRowsTemplate(const std::string& value) = 0;

@@ -94,6 +94,16 @@ public:
         drawModifier_ = drawModifier;
     }
 
+    virtual bool HasCustomerMeasure() const
+    {
+        return false;
+    }
+
+    virtual bool HasCustomerLayout() const
+    {
+        return false;
+    }
+
     virtual bool NeedRender() const
     {
         return drawModifier_ || needRender_ ;

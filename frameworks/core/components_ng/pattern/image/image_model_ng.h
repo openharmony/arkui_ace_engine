@@ -27,8 +27,7 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT ImageModelNG : public OHOS::Ace::ImageModel {
 public:
-    void Create(const std::string &src, RefPtr<PixelMap> &pixMap, const std::string &bundleName,
-        const std::string &moduleName, bool isUriPureNumber = false) override;
+    void Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMap>& pixMap) override;
     void CreateAnimation(const std::vector<ImageProperties>& imageList, int32_t duration, int32_t iteration) override;
     bool GetIsAnimation() override;
     void SetAlt(const ImageSourceInfo &src) override;
@@ -75,6 +74,7 @@ public:
     static void SetSmoothEdge(FrameNode *frameNode, float value);
     static void SetCopyOption(FrameNode *frameNode, CopyOptions copyOption);
     static void SetAutoResize(FrameNode *frameNode, bool autoResize);
+    static void ResetAutoResize(FrameNode *frameNode);
     static void SetImageRepeat(FrameNode *frameNode, ImageRepeat imageRepeat);
     static void SetImageRenderMode(FrameNode *frameNode, ImageRenderMode imageRenderMode);
     static void SetSyncMode(FrameNode *frameNode, bool syncMode);
@@ -86,6 +86,7 @@ public:
     static void SetImageFill(FrameNode *frameNode, const Color &color);
     static void SetAlt(FrameNode *frameNode, const ImageSourceInfo &src);
     static void SetImageInterpolation(FrameNode *frameNode, ImageInterpolation interpolation);
+    static void ResetImageInterpolation(FrameNode *frameNode);
     static void SetColorFilterMatrix(FrameNode *frameNode, const std::vector<float> &matrix);
     static void SetDraggable(FrameNode *frameNode, bool draggable);
     static void SetBackBorder(FrameNode *frameNode);
@@ -115,6 +116,9 @@ public:
     static void SetResource(FrameNode* frameNode, void* resource);
     static void EnableAnalyzer(FrameNode* frameNode, bool isEnableAnalyzer);
     static void SetImageAnalyzerConfig(FrameNode* frameNode, void* config);
+    static RefPtr<DrawingColorFilter> GetDrawingColorFilter(FrameNode* frameNode);
+    static void ResetImageSrc(FrameNode* frameNode);
+    static void ResetImageAlt(FrameNode* frameNode);
 private:
     RefPtr<ImagePattern> GetImagePattern();
 };

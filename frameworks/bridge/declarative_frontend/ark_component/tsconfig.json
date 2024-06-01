@@ -96,7 +96,10 @@
         "src/ArkDatePicker.ts",
         "src/ArkEffectComponent.ts",
         "src/ArkRemoteWindow.ts",
-        "src/ArkSymbolGlyph.ts"
+        "src/ArkSymbolGlyph.ts",
+        "src/ArkSymbolSpan.ts",
+        "src/ArkComponent3D.ts",
+        "src/ArkContainerSpan.ts"
     ],
     "compilerOptions": {
         "module": "none",

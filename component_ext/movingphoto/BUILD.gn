@@ -44,6 +44,7 @@ gen_obj("multimedia_movingphotoview_abc") {
 ohos_shared_library("movingphotoview") {
   defines = [ "USE_ARK_ENGINE" ]
   sources = [
+    "$ace_root/frameworks/core/components_ng/base/inspector_filter.cpp",
     "${component_ext_path}/ext_common/ext_napi_utils.cpp",
     "${component_ext_path}/movingphoto/movingphoto_layout_algorithm.cpp",
     "${component_ext_path}/movingphoto/movingphoto_model_ng.cpp",

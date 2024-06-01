@@ -15,72 +15,93 @@
 
 const display = requireNapi('display');
 const mediaquery = requireNapi('mediaquery');
+const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 
 export const defaultTheme = {
     icon: {
         size: { width: 32, height: 32 },
-        margin: { top: 12, bottom: 12, left: 12, right: 12 },
+        margin: {
+            top: LengthMetrics.vp(12),
+            bottom: LengthMetrics.vp(12),
+            start: LengthMetrics.vp(12),
+            end: LengthMetrics.vp(12)
+        },
         fillColor: '',
         borderRadius: {
             "id": -1,
             "type": 10002,
             params: ['sys.float.ohos_id_corner_radius_default_s'],
-            "bundleName": "",
-            "moduleName": ""
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         }
     },
     title: {
-        margin: { bottom: 2 },
+        margin: { bottom: LengthMetrics.vp(2) },
         minFontSize: 12,
         fontWeight: FontWeight.Medium,
         fontSize: {
             "id": -1,
             "type": 10002,
             params: ['sys.float.ohos_id_text_size_sub_title2'],
-            "bundleName": "",
-            "moduleName": ""
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         },
         fontColor: {
             "id": -1,
             "type": 10001,
             params: ['sys.color.font_primary'],
-            "bundleName": "",
-            "moduleName": ""
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         }
     },
     button: {
-        margin: { top: 16, bottom: 16, left: 16, right: 16 },
-        padding: { top: 4, bottom: 4, left: 4, right: 4 },
+        margin: {
+            top: LengthMetrics.vp(16),
+            bottom: LengthMetrics.vp(16),
+            start: LengthMetrics.vp(16),
+            end: LengthMetrics.vp(16)
+        },
+        padding: {
+            top: LengthMetrics.vp(4),
+            bottom: LengthMetrics.vp(4),
+            start: LengthMetrics.vp(4),
+            end: LengthMetrics.vp(4)
+        },
         fontSize: {
             "id": -1,
             "type": 10002,
             params: ['sys.float.ohos_id_text_size_button2'],
-            "bundleName": "",
-            "moduleName": ""
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         },
         fontColor: {
             "id": -1,
             "type": 10001,
             params: ['sys.color.font_emphasize'],
-            "bundleName": "",
-            "moduleName": ""
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         },
-        textMargin: { top: 8, bottom: 8, left: 8, right: 8 },
+        textMargin: {
+            top: LengthMetrics.vp(8),
+            bottom: LengthMetrics.vp(8),
+            start: LengthMetrics.vp(8),
+            end: LengthMetrics.vp(8)
+        },
         minFontSize: 9,
         fontWeight: FontWeight.Medium,
         hoverColor: {
             "id": -1,
             "type": 10001,
             params: ['sys.color.ohos_id_color_hover'],
-            "bundleName": "",
-            "moduleName": ""
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         },
         backgroundColor: {
             "id": -1,
             "type": 10001,
             params: ['sys.color.ohos_id_color_background_transparent'],
-            "bundleName": "",
-            "moduleName": ""
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         }
     },
     message: {
@@ -88,120 +109,143 @@ export const defaultTheme = {
             "id": -1,
             "type": 10002,
             params: ['sys.float.ohos_id_text_size_body2'],
-            "bundleName": "",
-            "moduleName": ""
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         },
         fontColor: {
             "id": -1,
             "type": 10001,
             params: ['sys.color.font_secondary'],
-            "bundleName": "",
-            "moduleName": ""
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         },
         fontWeight: FontWeight.Regular,
         plainFontColor: {
             "id": -1,
             "type": 10001,
             params: ['sys.color.font_primary'],
-            "bundleName": "",
-            "moduleName": ""
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         }
     },
     windows: {
-        padding: { top: 12, bottom: 12, left: 12, right: 12 },
+        padding: {
+            top: LengthMetrics.vp(12),
+            bottom: LengthMetrics.vp(12),
+            start: LengthMetrics.vp(12),
+            end: LengthMetrics.vp(12)
+        },
     },
     closeButton: {
         size: { width: 22, height: 22 },
         imageSize: { width: 18, height: 18 },
-        padding: { top: 2, bottom: 2, left: 2, right: 2 },
-        margin: { top: 12, bottom: 12, left: 12, right: 12 },
+        padding: {
+            top: LengthMetrics.vp(2),
+            bottom: LengthMetrics.vp(2),
+            start: LengthMetrics.vp(2),
+            end: LengthMetrics.vp(2)
+        },
+        margin: {
+            top: LengthMetrics.vp(12),
+            bottom: LengthMetrics.vp(12),
+            start: LengthMetrics.vp(12),
+            end: LengthMetrics.vp(12)
+        },
         image: {
             "id": -1,
             "type": 20000,
             params: ['sys.media.ohos_ic_public_cancel'],
-            "bundleName": "",
-            "moduleName": ""
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         },
         fillColor: {
             "id": -1,
             "type": 10001,
             params: ['sys.color.icon_secondary'],
-            "bundleName": "",
-            "moduleName": ""
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         },
         hoverColor: {
             "id": -1,
             "type": 10001,
             params: ['sys.color.ohos_id_color_hover'],
-            "bundleName": "",
-            "moduleName": ""
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         },
         backgroundColor: {
             "id": -1,
             "type": 10001,
             params: ['sys.color.ohos_id_color_background_transparent'],
-            "bundleName": "",
-            "moduleName": ""
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         }
     },
 };
 const noop = () => {
 };
 
-export function Popup(f1, b1 = null) {
+export function Popup(r29, s29 = null) {
+    const t29 = r29;
     {
-        (b1 ? b1 : this).observeComponentCreation2((b, c) => {
-            if (c) {
-                let d1 = () => {
+        (s29 ? s29 : this).observeComponentCreation2((v29, w29, x29 = t29) => {
+            if (w29) {
+                let y29 = new PopupComponent(typeof PUV2ViewBase !== "undefined" && s29 instanceof PUV2ViewBase ? s29 : this, {
+                    icon: x29.icon,
+                    title: x29.title,
+                    message: x29.message,
+                    popupDirection: x29.direction,
+                    showClose: x29.showClose,
+                    onClose: x29.onClose,
+                    buttons: x29.buttons
+                }, undefined, v29, () => {
+                }, { page: "library/src/main/ets/components/popup/popup.ets", line: 198, col: 3 });
+                ViewPU.create(y29);
+                let z29 = () => {
                     return {
-                        icon: f1.icon,
-                        title: f1.title,
-                        message: f1.message,
-                        showClose: f1.showClose,
-                        onClose: f1.onClose,
-                        buttons: f1.buttons
+                        icon: x29.icon,
+                        title: x29.title,
+                        message: x29.message,
+                        popupDirection: x29.direction,
+                        showClose: x29.showClose,
+                        onClose: x29.onClose,
+                        buttons: x29.buttons
                     };
                 };
-                ViewPU.create(new PopupComponent(b1 ? b1 : this, {
-                    icon: f1.icon,
-                    title: f1.title,
-                    message: f1.message,
-                    showClose: f1.showClose,
-                    onClose: f1.onClose,
-                    buttons: f1.buttons
-                }, undefined, b, d1, { page: "library/src/main/ets/components/mainpage/Popup.ets", line: 160 }));
+                y29.paramsGenerator_ = z29;
             }
             else {
-                (b1 ? b1 : this).updateStateVarsOfChildByElmtId(b, {
-                    icon: f1.icon,
-                    title: f1.title,
-                    message: f1.message,
-                    showClose: f1.showClose,
-                    buttons: f1.buttons
+                (s29 ? s29 : this).updateStateVarsOfChildByElmtId(v29, {
+                    icon: x29.icon,
+                    title: x29.title,
+                    message: x29.message,
+                    popupDirection: x29.direction,
+                    showClose: x29.showClose,
+                    buttons: x29.buttons
                 });
             }
-        }, null);
+        }, { name: "PopupComponent" });
     }
 }
 
 export class PopupComponent extends ViewPU {
-    constructor(b1, a1, c1, b = -1, d1 = undefined, e1) {
-        super(b1, c1, b, e1);
-        if (typeof d1 === "function") {
-            this.paramsGenerator_ = d1;
+    constructor(l29, m29, n29, o29 = -1, p29 = undefined, q29) {
+        super(l29, n29, o29, q29);
+        if (typeof p29 === "function") {
+            this.paramsGenerator_ = p29;
         }
         this.onClose = noop;
         this.theme = defaultTheme;
-        this.__icon = new SynchedPropertyObjectOneWayPU(a1.icon, this, "icon");
-        this.__title = new SynchedPropertyObjectOneWayPU(a1.title, this, "title");
-        this.__message = new SynchedPropertyObjectOneWayPU(a1.message, this, "message");
-        this.__showClose = new SynchedPropertyObjectOneWayPU(a1.showClose, this, "showClose");
-        this.__buttons = new SynchedPropertyObjectOneWayPU(a1.buttons, this, "buttons");
+        this.__icon = new SynchedPropertyObjectOneWayPU(m29.icon, this, "icon");
+        this.__title = new SynchedPropertyObjectOneWayPU(m29.title, this, "title");
+        this.__message = new SynchedPropertyObjectOneWayPU(m29.message, this, "message");
+        this.__popupDirection = new SynchedPropertySimpleOneWayPU(m29.popupDirection, this, "popupDirection");
+        this.__showClose = new SynchedPropertyObjectOneWayPU(m29.showClose, this, "showClose");
+        this.__buttons = new SynchedPropertyObjectOneWayPU(m29.buttons, this, "buttons");
         this.textHeight = 0;
         this.__titleHeight = new ObservedPropertySimplePU(0, this, "titleHeight");
         this.__applyHeight = new ObservedPropertySimplePU(0, this, "applyHeight");
         this.__buttonHeight = new ObservedPropertySimplePU(0, this, "buttonHeight");
-        this.__messageMaxWeight = new ObservedPropertyObjectPU(0, this, 'messageMaxWeight');
+        this.__messageMaxWeight = new ObservedPropertyObjectPU(0, this, "messageMaxWeight");
         this.__beforeScreenStatus = new ObservedPropertySimplePU(undefined, this, "beforeScreenStatus");
         this.__currentScreenStatus = new ObservedPropertySimplePU(true, this, "currentScreenStatus");
         this.__applySizeOptions = new ObservedPropertyObjectPU(undefined, this, "applySizeOptions");
@@ -209,127 +253,135 @@ export class PopupComponent extends ViewPU {
             "id": -1,
             "type": 10001,
             params: ['sys.color.ohos_id_color_background_transparent'],
-            "bundleName": "",
-            "moduleName": ""
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         }, this, "closeButtonBackgroundColor");
         this.__firstButtonBackgroundColor = new ObservedPropertyObjectPU({
             "id": -1,
             "type": 10001,
             params: ['sys.color.ohos_id_color_background_transparent'],
-            "bundleName": "",
-            "moduleName": ""
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         }, this, "firstButtonBackgroundColor");
         this.__secondButtonBackgroundColor = new ObservedPropertyObjectPU({
             "id": -1,
             "type": 10001,
             params: ['sys.color.ohos_id_color_background_transparent'],
-            "bundleName": "",
-            "moduleName": ""
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         }, this, "secondButtonBackgroundColor");
         this.__closeButtonFillColorWithTheme = new ObservedPropertyObjectPU({
-            'id': -1,
-            'type': 10001,
+            "id": -1,
+            "type": 10001,
             params: ['sys.color.icon_secondary'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__',
-        }, this, 'closeButtonFillColorWithTheme');
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
+        }, this, "closeButtonFillColorWithTheme");
         this.listener = mediaquery.matchMediaSync('(orientation: landscape)');
-        this.setInitiallyProvidedValue(a1);
+        this.setInitiallyProvidedValue(m29);
+        this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(a1) {
-        if (a1.onClose !== undefined) {
-            this.onClose = a1.onClose;
+    setInitiallyProvidedValue(k29) {
+        if (k29.onClose !== undefined) {
+            this.onClose = k29.onClose;
         }
-        if (a1.theme !== undefined) {
-            this.theme = a1.theme;
+        if (k29.theme !== undefined) {
+            this.theme = k29.theme;
         }
-        if (a1.icon === undefined) {
+        if (k29.icon === undefined) {
             this.__icon.set({ image: '' });
         }
-        if (a1.title === undefined) {
+        if (k29.title === undefined) {
             this.__title.set({ text: '' });
         }
-        if (a1.message === undefined) {
+        if (k29.message === undefined) {
             this.__message.set({ text: '' });
         }
-        if (a1.showClose === undefined) {
+        if (k29.popupDirection === undefined) {
+            this.__popupDirection.set(Direction.Auto);
+        }
+        if (k29.showClose === undefined) {
             this.__showClose.set(true);
         }
-        if (a1.buttons === undefined) {
+        if (k29.buttons === undefined) {
             this.__buttons.set([{ text: '' }, { text: '' }]);
         }
-        if (a1.textHeight !== undefined) {
-            this.textHeight = a1.textHeight;
+        if (k29.textHeight !== undefined) {
+            this.textHeight = k29.textHeight;
         }
-        if (a1.titleHeight !== undefined) {
-            this.titleHeight = a1.titleHeight;
+        if (k29.titleHeight !== undefined) {
+            this.titleHeight = k29.titleHeight;
         }
-        if (a1.applyHeight !== undefined) {
-            this.applyHeight = a1.applyHeight;
+        if (k29.applyHeight !== undefined) {
+            this.applyHeight = k29.applyHeight;
         }
-        if (a1.buttonHeight !== undefined) {
-            this.buttonHeight = a1.buttonHeight;
+        if (k29.buttonHeight !== undefined) {
+            this.buttonHeight = k29.buttonHeight;
         }
-        if (a1.messageMaxWeight !== undefined) {
-            this.messageMaxWeight = a1.messageMaxWeight;
+        if (k29.messageMaxWeight !== undefined) {
+            this.messageMaxWeight = k29.messageMaxWeight;
         }
-        if (a1.beforeScreenStatus !== undefined) {
-            this.beforeScreenStatus = a1.beforeScreenStatus;
+        if (k29.beforeScreenStatus !== undefined) {
+            this.beforeScreenStatus = k29.beforeScreenStatus;
         }
-        if (a1.currentScreenStatus !== undefined) {
-            this.currentScreenStatus = a1.currentScreenStatus;
+        if (k29.currentScreenStatus !== undefined) {
+            this.currentScreenStatus = k29.currentScreenStatus;
         }
-        if (a1.applySizeOptions !== undefined) {
-            this.applySizeOptions = a1.applySizeOptions;
+        if (k29.applySizeOptions !== undefined) {
+            this.applySizeOptions = k29.applySizeOptions;
         }
-        if (a1.closeButtonBackgroundColor !== undefined) {
-            this.closeButtonBackgroundColor = a1.closeButtonBackgroundColor;
+        if (k29.closeButtonBackgroundColor !== undefined) {
+            this.closeButtonBackgroundColor = k29.closeButtonBackgroundColor;
         }
-        if (a1.firstButtonBackgroundColor !== undefined) {
-            this.firstButtonBackgroundColor = a1.firstButtonBackgroundColor;
+        if (k29.firstButtonBackgroundColor !== undefined) {
+            this.firstButtonBackgroundColor = k29.firstButtonBackgroundColor;
         }
-        if (a1.secondButtonBackgroundColor !== undefined) {
-            this.secondButtonBackgroundColor = a1.secondButtonBackgroundColor;
+        if (k29.secondButtonBackgroundColor !== undefined) {
+            this.secondButtonBackgroundColor = k29.secondButtonBackgroundColor;
         }
-        if (a1.closeButtonFillColorWithTheme !== undefined) {
-            this.closeButtonFillColorWithTheme = a1.closeButtonFillColorWithTheme;
+        if (k29.closeButtonFillColorWithTheme !== undefined) {
+            this.closeButtonFillColorWithTheme = k29.closeButtonFillColorWithTheme;
         }
-        if (a1.listener !== undefined) {
-            this.listener = a1.listener;
+        if (k29.listener !== undefined) {
+            this.listener = k29.listener;
         }
     }
 
-    updateStateVars(a1) {
-        this.__icon.reset(a1.icon);
-        this.__title.reset(a1.title);
-        this.__message.reset(a1.message);
-        this.__showClose.reset(a1.showClose);
-        this.__buttons.reset(a1.buttons);
+    updateStateVars(j29) {
+        this.__icon.reset(j29.icon);
+        this.__title.reset(j29.title);
+        this.__message.reset(j29.message);
+        this.__popupDirection.reset(j29.popupDirection);
+        this.__showClose.reset(j29.showClose);
+        this.__buttons.reset(j29.buttons);
     }
 
-    purgeVariableDependenciesOnElmtId(z) {
-        this.__icon.purgeDependencyOnElmtId(z);
-        this.__title.purgeDependencyOnElmtId(z);
-        this.__message.purgeDependencyOnElmtId(z);
-        this.__showClose.purgeDependencyOnElmtId(z);
-        this.__buttons.purgeDependencyOnElmtId(z);
-        this.__titleHeight.purgeDependencyOnElmtId(z);
-        this.__applyHeight.purgeDependencyOnElmtId(z);
-        this.__buttonHeight.purgeDependencyOnElmtId(z);
-        this.__messageMaxWeight.purgeDependencyOnElmtId(z);
-        this.__beforeScreenStatus.purgeDependencyOnElmtId(z);
-        this.__currentScreenStatus.purgeDependencyOnElmtId(z);
-        this.__applySizeOptions.purgeDependencyOnElmtId(z);
-        this.__closeButtonBackgroundColor.purgeDependencyOnElmtId(z);
-        this.__firstButtonBackgroundColor.purgeDependencyOnElmtId(z);
-        this.__secondButtonBackgroundColor.purgeDependencyOnElmtId(z);
+    purgeVariableDependenciesOnElmtId(i29) {
+        this.__icon.purgeDependencyOnElmtId(i29);
+        this.__title.purgeDependencyOnElmtId(i29);
+        this.__message.purgeDependencyOnElmtId(i29);
+        this.__popupDirection.purgeDependencyOnElmtId(i29);
+        this.__showClose.purgeDependencyOnElmtId(i29);
+        this.__buttons.purgeDependencyOnElmtId(i29);
+        this.__titleHeight.purgeDependencyOnElmtId(i29);
+        this.__applyHeight.purgeDependencyOnElmtId(i29);
+        this.__buttonHeight.purgeDependencyOnElmtId(i29);
+        this.__messageMaxWeight.purgeDependencyOnElmtId(i29);
+        this.__beforeScreenStatus.purgeDependencyOnElmtId(i29);
+        this.__currentScreenStatus.purgeDependencyOnElmtId(i29);
+        this.__applySizeOptions.purgeDependencyOnElmtId(i29);
+        this.__closeButtonBackgroundColor.purgeDependencyOnElmtId(i29);
+        this.__firstButtonBackgroundColor.purgeDependencyOnElmtId(i29);
+        this.__secondButtonBackgroundColor.purgeDependencyOnElmtId(i29);
+        this.__closeButtonFillColorWithTheme.purgeDependencyOnElmtId(i29);
     }
 
     aboutToBeDeleted() {
         this.__icon.aboutToBeDeleted();
         this.__title.aboutToBeDeleted();
         this.__message.aboutToBeDeleted();
+        this.__popupDirection.aboutToBeDeleted();
         this.__showClose.aboutToBeDeleted();
         this.__buttons.aboutToBeDeleted();
         this.__titleHeight.aboutToBeDeleted();
@@ -342,6 +394,7 @@ export class PopupComponent extends ViewPU {
         this.__closeButtonBackgroundColor.aboutToBeDeleted();
         this.__firstButtonBackgroundColor.aboutToBeDeleted();
         this.__secondButtonBackgroundColor.aboutToBeDeleted();
+        this.__closeButtonFillColorWithTheme.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -350,167 +403,174 @@ export class PopupComponent extends ViewPU {
         return this.__icon.get();
     }
 
-    set icon(y) {
-        this.__icon.set(y);
+    set icon(h29) {
+        this.__icon.set(h29);
     }
 
     get title() {
         return this.__title.get();
     }
 
-    set title(y) {
-        this.__title.set(y);
+    set title(g29) {
+        this.__title.set(g29);
     }
 
     get message() {
         return this.__message.get();
     }
 
-    set message(y) {
-        this.__message.set(y);
+    set message(f29) {
+        this.__message.set(f29);
+    }
+
+    get popupDirection() {
+        return this.__popupDirection.get();
+    }
+
+    set popupDirection(e29) {
+        this.__popupDirection.set(e29);
     }
 
     get showClose() {
         return this.__showClose.get();
     }
 
-    set showClose(y) {
-        this.__showClose.set(y);
+    set showClose(d29) {
+        this.__showClose.set(d29);
     }
 
     get buttons() {
         return this.__buttons.get();
     }
 
-    set buttons(y) {
-        this.__buttons.set(y);
+    set buttons(c29) {
+        this.__buttons.set(c29);
     }
 
     get titleHeight() {
         return this.__titleHeight.get();
     }
 
-    set titleHeight(y) {
-        this.__titleHeight.set(y);
+    set titleHeight(b29) {
+        this.__titleHeight.set(b29);
     }
 
     get applyHeight() {
         return this.__applyHeight.get();
     }
 
-    set applyHeight(y) {
-        this.__applyHeight.set(y);
+    set applyHeight(a29) {
+        this.__applyHeight.set(a29);
     }
 
     get buttonHeight() {
         return this.__buttonHeight.get();
     }
 
-    set buttonHeight(y) {
-        this.__buttonHeight.set(y);
+    set buttonHeight(z28) {
+        this.__buttonHeight.set(z28);
     }
 
     get messageMaxWeight() {
         return this.__messageMaxWeight.get();
     }
 
-    set messageMaxWeight(y) {
-        this.__messageMaxWeight.set(y);
+    set messageMaxWeight(y28) {
+        this.__messageMaxWeight.set(y28);
     }
 
     get beforeScreenStatus() {
         return this.__beforeScreenStatus.get();
     }
 
-    set beforeScreenStatus(y) {
-        this.__beforeScreenStatus.set(y);
+    set beforeScreenStatus(x28) {
+        this.__beforeScreenStatus.set(x28);
     }
 
     get currentScreenStatus() {
         return this.__currentScreenStatus.get();
     }
 
-    set currentScreenStatus(y) {
-        this.__currentScreenStatus.set(y);
+    set currentScreenStatus(w28) {
+        this.__currentScreenStatus.set(w28);
     }
 
     get applySizeOptions() {
         return this.__applySizeOptions.get();
     }
 
-    set applySizeOptions(y) {
-        this.__applySizeOptions.set(y);
+    set applySizeOptions(v28) {
+        this.__applySizeOptions.set(v28);
     }
 
     get closeButtonBackgroundColor() {
         return this.__closeButtonBackgroundColor.get();
     }
 
-    set closeButtonBackgroundColor(y) {
-        this.__closeButtonBackgroundColor.set(y);
+    set closeButtonBackgroundColor(u28) {
+        this.__closeButtonBackgroundColor.set(u28);
     }
 
     get firstButtonBackgroundColor() {
         return this.__firstButtonBackgroundColor.get();
     }
 
-    set firstButtonBackgroundColor(y) {
-        this.__firstButtonBackgroundColor.set(y);
+    set firstButtonBackgroundColor(t28) {
+        this.__firstButtonBackgroundColor.set(t28);
     }
 
     get secondButtonBackgroundColor() {
         return this.__secondButtonBackgroundColor.get();
     }
 
-    set secondButtonBackgroundColor(y) {
-        this.__secondButtonBackgroundColor.set(y);
+    set secondButtonBackgroundColor(s28) {
+        this.__secondButtonBackgroundColor.set(s28);
     }
 
     get closeButtonFillColorWithTheme() {
         return this.__closeButtonFillColorWithTheme.get();
     }
 
-    set closeButtonFillColorWithTheme(i6) {
-        this.__closeButtonFillColorWithTheme.set(i6);
+    set closeButtonFillColorWithTheme(r28) {
+        this.__closeButtonFillColorWithTheme.set(r28);
     }
 
     getIconWidth() {
-        var d, e;
-        return (e = (d = this.icon) === null || d === void 0 ? void 0 : d.width) !== null && e !== void 0 ? e : this.theme.icon.size.width;
+        return this.icon?.width ?? this.theme.icon.size.width;
     }
 
     getIconHeight() {
-        var d, e;
-        return (e = (d = this.icon) === null || d === void 0 ? void 0 : d.height) !== null && e !== void 0 ? e : this.theme.icon.size.height;
+        return this.icon?.height ?? this.theme.icon.size.height;
     }
 
     getIconFillColor() {
-        var d, e;
-        return (e = (d = this.icon) === null || d === void 0 ? void 0 : d.fillColor) !== null && e !== void 0 ? e : this.theme.icon.fillColor;
+        return this.icon?.fillColor ?? this.theme.icon.fillColor;
     }
 
     getIconBorderRadius() {
-        var d, e;
-        return (e = (d = this.icon) === null || d === void 0 ? void 0 : d.borderRadius) !== null && e !== void 0 ? e : this.theme.icon.borderRadius;
+        return this.icon?.borderRadius ?? this.theme.icon.borderRadius;
     }
 
     getIconMargin() {
-        return { left: this.theme.button.margin.left / 2,
-            right: this.theme.icon.margin.right - (this.theme.button.margin.right / 2) };
+        return {
+            start: new LengthMetrics(this.theme.button.margin.start.value / 2, this.theme.button.margin.start.unit),
+            end: new LengthMetrics(this.theme.icon.margin.start.value - (this.theme.button.margin.end.value / 2), this.theme.button.margin.start.unit)
+        };
     }
 
     getIconImage() {
-        var d;
-        return (d = this.icon) === null || d === void 0 ? void 0 : d.image;
+        return this.icon?.image;
     }
 
     getTitleText() {
-        var d;
-        return (d = this.title) === null || d === void 0 ? void 0 : d.text;
+        return this.title?.text;
     }
 
     getTitlePadding() {
-        return { left: this.theme.button.margin.left / 2, right: this.theme.closeButton.margin.right };
+        return {
+            start: new LengthMetrics(this.theme.button.margin.start.value / 2, this.theme.button.margin.start.unit),
+            end: this.theme.closeButton.margin.end
+        };
     }
 
     getTitleMargin() {
@@ -522,18 +582,15 @@ export class PopupComponent extends ViewPU {
     }
 
     getTitleFontWeight() {
-        var d, e;
-        return (e = (d = this.title) === null || d === void 0 ? void 0 : d.fontWeight) !== null && e !== void 0 ? e : this.theme.title.fontWeight;
+        return this.title?.fontWeight ?? this.theme.title.fontWeight;
     }
 
     getTitleFontSize() {
-        var d, e;
-        return (e = (d = this.title) === null || d === void 0 ? void 0 : d.fontSize) !== null && e !== void 0 ? e : this.theme.title.fontSize;
+        return this.title?.fontSize ?? this.theme.title.fontSize;
     }
 
     getTitleFontColor() {
-        var d, e;
-        return (e = (d = this.title) === null || d === void 0 ? void 0 : d.fontColor) !== null && e !== void 0 ? e : this.theme.title.fontColor;
+        return this.title?.fontColor ?? this.theme.title.fontColor;
     }
 
     getCloseButtonWidth() {
@@ -577,53 +634,55 @@ export class PopupComponent extends ViewPU {
     }
 
     getMessageFontSize() {
-        var d;
-        return (d = this.message.fontSize) !== null && d !== void 0 ? d : this.theme.message.fontSize;
+        return this.message.fontSize ?? this.theme.message.fontSize;
     }
 
     getMessageFontColor() {
-        let x;
+        let q28;
         if (this.message.fontColor) {
-            x = this.message.fontColor;
+            q28 = this.message.fontColor;
         }
         else {
             if (this.title.text !== '' && this.title.text !== void (0)) {
-                x = this.theme.message.fontColor;
+                q28 = this.theme.message.fontColor;
             }
             else {
-                x = this.theme.message.plainFontColor;
+                q28 = this.theme.message.plainFontColor;
             }
         }
-        return x;
+        return q28;
     }
 
     getMessagePadding() {
-        let w;
+        let p28;
         if (this.title.text !== '' && this.title.text !== void (0)) {
-            w = { left: this.theme.button.margin.left / 2 };
+            p28 = { start: LengthMetrics.vp(this.theme.button.margin.start.value / 2) };
         }
         else {
-            w = { left: this.theme.button.margin.left / 2, right: this.theme.closeButton.margin.right };
+            p28 = {
+                start: LengthMetrics.vp(this.theme.button.margin.start.value / 2),
+                end: LengthMetrics.vp(this.theme.closeButton.margin.end.value)
+            };
         }
-        return w;
+        return p28;
     }
 
     getMessageMaxWeight() {
-        let v = undefined;
-        let n = display.getDefaultDisplaySync();
+        let n28 = undefined;
+        let o28 = display.getDefaultDisplaySync();
         if (this.showClose || this.showClose === void (0)) {
-            if (px2vp(n.width) > 400) {
-                v = 400;
+            if (px2vp(o28.width) > 400) {
+                n28 = 400;
             }
             else {
-                v = px2vp(n.width) - 40 - 40;
+                n28 = px2vp(o28.width) - 40 - 40;
             }
-            v -= (this.theme.windows.padding.left - (this.theme.button.margin.right / 2));
-            v -= this.theme.windows.padding.right;
-            v -= this.theme.button.margin.left / 2;
-            v -= this.getCloseButtonWidth();
+            n28 -= (this.theme.windows.padding.start.value - (this.theme.button.margin.end.value / 2));
+            n28 -= this.theme.windows.padding.end.value;
+            n28 -= this.theme.button.margin.start.value / 2;
+            n28 -= this.getCloseButtonWidth();
         }
-        return v;
+        return n28;
     }
 
     getMessageFontWeight() {
@@ -631,15 +690,16 @@ export class PopupComponent extends ViewPU {
     }
 
     getButtonMargin() {
-        return { top: this.theme.button.textMargin.top / 2 - 4,
-            bottom: this.theme.button.textMargin.bottom / 2 - 4,
-            left: this.theme.button.margin.left / 2 - 4,
-            right: this.theme.button.margin.right / 2 - 4
+        return {
+            top: LengthMetrics.vp(this.theme.button.textMargin.top.value / 2 - 4),
+            bottom: LengthMetrics.vp(this.theme.button.textMargin.bottom.value / 2 - 4),
+            start: LengthMetrics.vp(this.theme.button.margin.start.value / 2 - 4),
+            end: LengthMetrics.vp(this.theme.button.margin.end.value / 2 - 4)
         };
     }
 
     getButtonTextMargin() {
-        return { top: this.theme.button.textMargin.bottom / 2 };
+        return { top: LengthMetrics.vp(this.theme.button.textMargin.bottom.value / 2) };
     }
 
     getButtonTextPadding() {
@@ -655,33 +715,27 @@ export class PopupComponent extends ViewPU {
     }
 
     getFirstButtonText() {
-        var d, e;
-        return (e = (d = this.buttons) === null || d === void 0 ? void 0 : d[0]) === null || e === void 0 ? void 0 : e.text;
+        return this.buttons?.[0]?.text;
     }
 
     getSecondButtonText() {
-        var d, e;
-        return (e = (d = this.buttons) === null || d === void 0 ? void 0 : d[1]) === null || e === void 0 ? void 0 : e.text;
+        return this.buttons?.[1]?.text;
     }
 
     getFirstButtonFontSize() {
-        var d, e, f;
-        return (f = (e = (d = this.buttons) === null || d === void 0 ? void 0 : d[0]) === null || e === void 0 ? void 0 : e.fontSize) !== null && f !== void 0 ? f : this.theme.button.fontSize;
+        return this.buttons?.[0]?.fontSize ?? this.theme.button.fontSize;
     }
 
     getSecondButtonFontSize() {
-        var d, e, f;
-        return (f = (e = (d = this.buttons) === null || d === void 0 ? void 0 : d[1]) === null || e === void 0 ? void 0 : e.fontSize) !== null && f !== void 0 ? f : this.theme.button.fontSize;
+        return this.buttons?.[1]?.fontSize ?? this.theme.button.fontSize;
     }
 
     getFirstButtonFontColor() {
-        var d, e, f;
-        return (f = (e = (d = this.buttons) === null || d === void 0 ? void 0 : d[0]) === null || e === void 0 ? void 0 : e.fontColor) !== null && f !== void 0 ? f : this.theme.button.fontColor;
+        return this.buttons?.[0]?.fontColor ?? this.theme.button.fontColor;
     }
 
     getSecondButtonFontColor() {
-        var d, e, f;
-        return (f = (e = (d = this.buttons) === null || d === void 0 ? void 0 : d[1]) === null || e === void 0 ? void 0 : e.fontColor) !== null && f !== void 0 ? f : this.theme.button.fontColor;
+        return this.buttons?.[1]?.fontColor ?? this.theme.button.fontColor;
     }
 
     getButtonMinFontSize() {
@@ -695,23 +749,25 @@ export class PopupComponent extends ViewPU {
     getWindowsPadding() {
         return {
             top: this.theme.windows.padding.top,
-            bottom: this.theme.windows.padding.bottom - (this.theme.button.textMargin.bottom / 2),
-            left: this.theme.windows.padding.left - (this.theme.button.margin.right / 2),
-            right: this.theme.windows.padding.right
+            bottom: LengthMetrics.vp(this.theme.windows.padding.bottom.value -
+                (this.theme.button.textMargin.bottom.value / 2)),
+            start: LengthMetrics.vp(this.theme.windows.padding.start.value -
+                (this.theme.button.margin.end.value / 2)),
+            end: this.theme.windows.padding.end
         };
     }
 
-    onWillApplyTheme(o10) {
-        this.theme.title.fontColor = o10.colors.fontPrimary;
-        this.theme.button.fontColor = o10.colors.fontEmphasize;
-        this.theme.message.fontColor = o10.colors.fontSecondary;
-        this.theme.message.plainFontColor = o10.colors.fontPrimary;
-        this.closeButtonFillColorWithTheme = o10.colors.iconSecondary;
+    onWillApplyTheme(m28) {
+        this.theme.title.fontColor = m28.colors.fontPrimary;
+        this.theme.button.fontColor = m28.colors.fontEmphasize;
+        this.theme.message.fontColor = m28.colors.fontSecondary;
+        this.theme.message.plainFontColor = m28.colors.fontPrimary;
+        this.closeButtonFillColorWithTheme = m28.colors.iconSecondary;
     }
 
     aboutToAppear() {
-        this.listener.on("change", (u) => {
-            this.currentScreenStatus = u.matches;
+        this.listener.on("change", (l28) => {
+            this.currentScreenStatus = l28.matches;
         });
     }
 
@@ -720,81 +776,83 @@ export class PopupComponent extends ViewPU {
     }
 
     getScrollMaxHeight() {
-        let t = undefined;
+        let j28 = undefined;
         if (this.currentScreenStatus !== this.beforeScreenStatus) {
             this.applySizeOptions = this.getApplyMaxSize();
             this.beforeScreenStatus = this.currentScreenStatus;
-            return t;
+            return j28;
         }
-        t = this.applyHeight;
-        t -= this.titleHeight;
-        t -= this.buttonHeight;
-        t -= this.theme.windows.padding.top;
-        t -= (this.theme.button.textMargin.bottom / 2);
-        t -= this.theme.title.margin.bottom;
-        t -= (this.theme.windows.padding.bottom - (this.theme.button.textMargin.bottom / 2));
-        if (Math.floor(this.textHeight) > Math.floor(t + 1)) {
-            return t;
+        j28 = this.applyHeight;
+        j28 -= this.titleHeight;
+        j28 -= this.buttonHeight;
+        j28 -= this.theme.windows.padding.top.value;
+        j28 -= (this.theme.button.textMargin.bottom.value / 2);
+        j28 -= this.theme.title.margin.bottom.value;
+        j28 -= (this.theme.windows.padding.bottom.value -
+            (this.theme.button.textMargin.bottom.value / 2));
+        if (Math.floor(this.textHeight) > Math.floor(j28 + 1)) {
+            return j28;
         }
         else {
-            t = undefined;
-            return t;
+            j28 = undefined;
+            return j28;
         }
     }
 
     getLayoutWeight() {
-        var d, e, f, g, o, p, q, r;
-        let s;
+        let i28;
         if ((this.icon.image !== '' && this.icon.image !== void (0)) ||
             (this.title.text !== '' && this.title.text !== void (0)) ||
-            (((e = (d = this.buttons) === null || d === void 0 ? void 0 : d[0]) === null || e === void 0 ? void 0 : e.text) !== '' && ((g = (f = this.buttons) === null || f === void 0 ? void 0 : f[0]) === null || g === void 0 ? void 0 : g.text) !== void (0)) ||
-            (((p = (o = this.buttons) === null || o === void 0 ? void 0 : o[1]) === null || p === void 0 ? void 0 : p.text) !== '' && ((r = (q = this.buttons) === null || q === void 0 ? void 0 : q[1]) === null || r === void 0 ? void 0 : r.text) !== void (0))) {
-            s = 1;
+            (this.buttons?.[0]?.text !== '' && this.buttons?.[0]?.text !== void (0)) ||
+            (this.buttons?.[1]?.text !== '' && this.buttons?.[1]?.text !== void (0))) {
+            i28 = 1;
         }
         else {
-            s = 0;
+            i28 = 0;
         }
-        return s;
+        return i28;
     }
 
     getApplyMaxSize() {
-        let k = undefined;
-        let l = undefined;
-        let m = undefined;
-        let n = display.getDefaultDisplaySync();
-        if (px2vp(n.width) > 400) {
-            k = 400;
+        let e28 = undefined;
+        let f28 = undefined;
+        let g28 = undefined;
+        let h28 = display.getDefaultDisplaySync();
+        if (px2vp(h28.width) > 400) {
+            e28 = 400;
         }
         else {
-            k = px2vp(n.width) - 40 - 40;
+            e28 = px2vp(h28.width) - 40 - 40;
         }
-        if (px2vp(n.height) > 480) {
-            l = 480;
+        if (px2vp(h28.height) > 480) {
+            f28 = 480;
         }
         else {
-            l = px2vp(n.height) - 40 - 40;
+            f28 = px2vp(h28.height) - 40 - 40;
         }
-        m = { maxWidth: k, maxHeight: l };
+        g28 = { maxWidth: e28, maxHeight: f28 };
         this.messageMaxWeight = this.getMessageMaxWeight();
-        return m;
+        return g28;
     }
 
     initialRender() {
-        this.observeComponentCreation2((b, c) => {
+        this.observeComponentCreation2((z27, a28) => {
             Row.create();
+            Row.direction(this.popupDirection);
             Row.alignItems(VerticalAlign.Top);
             Row.padding(this.getWindowsPadding());
             Row.constraintSize(ObservedObject.GetRawObject(this.applySizeOptions));
-            Row.onAreaChange((i, j) => {
-                this.applyHeight = j.height;
+            Row.onAreaChange((c28, d28) => {
+                this.applyHeight = d28.height;
             });
         }, Row);
-        this.observeComponentCreation2((b, c) => {
+        this.observeComponentCreation2((s27, t27) => {
             If.create();
             if (this.icon.image !== '' && this.icon.image !== void (0)) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((b, c) => {
+                    this.observeComponentCreation2((x27, y27) => {
                         Image.create(this.getIconImage());
+                        Image.direction(this.popupDirection);
                         Image.width(this.getIconWidth());
                         Image.height(this.getIconHeight());
                         Image.margin(this.getIconMargin());
@@ -809,24 +867,26 @@ export class PopupComponent extends ViewPU {
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((b, c) => {
+        this.observeComponentCreation2((m22, n22) => {
             If.create();
             if (this.title.text !== '' && this.title.text !== void (0)) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((b, c) => {
+                    this.observeComponentCreation2((q27, r27) => {
                         Column.create();
                         Column.layoutWeight(this.getLayoutWeight());
                     }, Column);
-                    this.observeComponentCreation2((b, c) => {
+                    this.observeComponentCreation2((l27, m27) => {
                         Flex.create({ alignItems: ItemAlign.Start });
+                        Flex.direction(this.popupDirection);
                         Flex.width("100%");
                         Flex.margin(this.getTitleMargin());
-                        Flex.onAreaChange((i, j) => {
-                            this.titleHeight = j.height;
+                        Flex.onAreaChange((o27, p27) => {
+                            this.titleHeight = p27.height;
                         });
                     }, Flex);
-                    this.observeComponentCreation2((b, c) => {
+                    this.observeComponentCreation2((j27, k27) => {
                         Text.create(this.getTitleText());
+                        Text.direction(this.popupDirection);
                         Text.flexGrow(1);
                         Text.maxLines(2);
                         Text.align(Alignment.Start);
@@ -839,18 +899,19 @@ export class PopupComponent extends ViewPU {
                         Text.constraintSize({ minHeight: this.getCloseButtonHeight() });
                     }, Text);
                     Text.pop();
-                    this.observeComponentCreation2((b, c) => {
+                    this.observeComponentCreation2((w26, x26) => {
                         If.create();
                         if (this.showClose || this.showClose === void (0)) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((b, c) => {
+                                this.observeComponentCreation2((e27, f27) => {
                                     Button.createWithChild();
+                                    Button.direction(this.popupDirection);
                                     Button.width(this.getCloseButtonWidth());
                                     Button.height(this.getCloseButtonHeight());
                                     Button.padding(this.getCloseButtonPadding());
                                     Button.backgroundColor(ObservedObject.GetRawObject(this.closeButtonBackgroundColor));
-                                    Button.onHover((h) => {
-                                        if (h) {
+                                    Button.onHover((i27) => {
+                                        if (i27) {
                                             this.closeButtonBackgroundColor = this.getCloseButtonHoverColor();
                                         }
                                         else {
@@ -863,8 +924,9 @@ export class PopupComponent extends ViewPU {
                                         }
                                     });
                                 }, Button);
-                                this.observeComponentCreation2((b, c) => {
+                                this.observeComponentCreation2((c27, d27) => {
                                     Image.create(this.getCloseButtonImage());
+                                    Image.direction(this.popupDirection);
                                     Image.focusable(true);
                                     Image.width(this.getCloseButtonImageWidth());
                                     Image.height(this.getCloseButtonImageHeight());
@@ -880,8 +942,9 @@ export class PopupComponent extends ViewPU {
                     }, If);
                     If.pop();
                     Flex.pop();
-                    this.observeComponentCreation2((b, c) => {
+                    this.observeComponentCreation2((u26, v26) => {
                         Scroll.create();
+                        Scroll.direction(this.popupDirection);
                         Scroll.width("100%");
                         Scroll.align(Alignment.TopStart);
                         Scroll.padding(this.getMessagePadding());
@@ -889,38 +952,40 @@ export class PopupComponent extends ViewPU {
                         Scroll.scrollable(ScrollDirection.Vertical);
                         Scroll.constraintSize({ maxHeight: this.getScrollMaxHeight() });
                     }, Scroll);
-                    this.observeComponentCreation2((b, c) => {
+                    this.observeComponentCreation2((p26, q26) => {
                         Text.create(this.getMessageText());
+                        Text.direction(this.popupDirection);
                         Text.fontSize(this.getMessageFontSize());
                         Text.fontColor(this.getMessageFontColor());
                         Text.fontWeight(this.getMessageFontWeight());
                         Text.constraintSize({ minHeight: this.getCloseButtonHeight() });
-                        Text.onAreaChange((i, j) => {
-                            this.textHeight = j.height;
+                        Text.onAreaChange((s26, t26) => {
+                            this.textHeight = t26.height;
                         });
                     }, Text);
                     Text.pop();
                     Scroll.pop();
-                    this.observeComponentCreation2((b, c) => {
+                    this.observeComponentCreation2((k26, l26) => {
                         Flex.create({ wrap: FlexWrap.Wrap });
+                        Flex.direction(this.popupDirection);
                         Flex.margin(this.getButtonTextMargin());
                         Flex.flexGrow(1);
-                        Flex.onAreaChange((i, j) => {
-                            this.buttonHeight = j.height;
+                        Flex.onAreaChange((n26, o26) => {
+                            this.buttonHeight = o26.height;
                         });
                     }, Flex);
-                    this.observeComponentCreation2((b, c) => {
-                        var d, e, f, g;
+                    this.observeComponentCreation2((x25, y25) => {
                         If.create();
-                        if (((e = (d = this.buttons) === null || d === void 0 ? void 0 : d[0]) === null || e === void 0 ? void 0 : e.text) !== '' && ((g = (f = this.buttons) === null || f === void 0 ? void 0 : f[0]) === null || g === void 0 ? void 0 : g.text) !== void (0)) {
+                        if (this.buttons?.[0]?.text !== '' && this.buttons?.[0]?.text !== void (0)) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((b, c) => {
+                                this.observeComponentCreation2((f26, g26) => {
                                     Button.createWithChild();
+                                    Button.direction(this.popupDirection);
                                     Button.margin(this.getButtonMargin());
                                     Button.padding(this.getButtonTextPadding());
                                     Button.backgroundColor(ObservedObject.GetRawObject(this.firstButtonBackgroundColor));
-                                    Button.onHover((h) => {
-                                        if (h) {
+                                    Button.onHover((j26) => {
+                                        if (j26) {
                                             this.firstButtonBackgroundColor = this.getButtonHoverColor();
                                         }
                                         else {
@@ -928,14 +993,14 @@ export class PopupComponent extends ViewPU {
                                         }
                                     });
                                     Button.onClick(() => {
-                                        var d, e, f, g;
-                                        if ((e = (d = this.buttons) === null || d === void 0 ? void 0 : d[0]) === null || e === void 0 ? void 0 : e.action) {
-                                            (g = (f = this.buttons) === null || f === void 0 ? void 0 : f[0]) === null || g === void 0 ? void 0 : g.action();
+                                        if (this.buttons?.[0]?.action) {
+                                            this.buttons?.[0]?.action();
                                         }
                                     });
                                 }, Button);
-                                this.observeComponentCreation2((b, c) => {
+                                this.observeComponentCreation2((d26, e26) => {
                                     Text.create(this.getFirstButtonText());
+                                    Text.direction(this.popupDirection);
                                     Text.maxLines(2);
                                     Text.focusable(true);
                                     Text.fontSize(this.getFirstButtonFontSize());
@@ -954,18 +1019,18 @@ export class PopupComponent extends ViewPU {
                         }
                     }, If);
                     If.pop();
-                    this.observeComponentCreation2((b, c) => {
-                        var d, e, f, g;
+                    this.observeComponentCreation2((k25, l25) => {
                         If.create();
-                        if (((e = (d = this.buttons) === null || d === void 0 ? void 0 : d[1]) === null || e === void 0 ? void 0 : e.text) !== '' && ((g = (f = this.buttons) === null || f === void 0 ? void 0 : f[1]) === null || g === void 0 ? void 0 : g.text) !== void (0)) {
+                        if (this.buttons?.[1]?.text !== '' && this.buttons?.[1]?.text !== void (0)) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((b, c) => {
+                                this.observeComponentCreation2((s25, t25) => {
                                     Button.createWithChild();
+                                    Button.direction(this.popupDirection);
                                     Button.margin(this.getButtonMargin());
                                     Button.padding(this.getButtonTextPadding());
                                     Button.backgroundColor(ObservedObject.GetRawObject(this.secondButtonBackgroundColor));
-                                    Button.onHover((h) => {
-                                        if (h) {
+                                    Button.onHover((w25) => {
+                                        if (w25) {
                                             this.secondButtonBackgroundColor = this.getButtonHoverColor();
                                         }
                                         else {
@@ -973,14 +1038,14 @@ export class PopupComponent extends ViewPU {
                                         }
                                     });
                                     Button.onClick(() => {
-                                        var d, e, f, g;
-                                        if ((e = (d = this.buttons) === null || d === void 0 ? void 0 : d[1]) === null || e === void 0 ? void 0 : e.action) {
-                                            (g = (f = this.buttons) === null || f === void 0 ? void 0 : f[1]) === null || g === void 0 ? void 0 : g.action();
+                                        if (this.buttons?.[1]?.action) {
+                                            this.buttons?.[1]?.action();
                                         }
                                     });
                                 }, Button);
-                                this.observeComponentCreation2((b, c) => {
+                                this.observeComponentCreation2((q25, r25) => {
                                     Text.create(this.getSecondButtonText());
+                                    Text.direction(this.popupDirection);
                                     Text.maxLines(2);
                                     Text.focusable(true);
                                     Text.fontSize(this.getSecondButtonFontSize());
@@ -1005,17 +1070,20 @@ export class PopupComponent extends ViewPU {
             }
             else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((b, c) => {
+                    this.observeComponentCreation2((y24, z24) => {
                         Column.create();
+                        Column.direction(this.popupDirection);
                         Column.layoutWeight(this.getLayoutWeight());
                     }, Column);
-                    this.observeComponentCreation2((b, c) => {
+                    this.observeComponentCreation2((w24, x24) => {
                         Row.create();
+                        Row.direction(this.popupDirection);
                         Row.alignItems(VerticalAlign.Top);
                         Row.margin(this.getTitleMargin());
                     }, Row);
-                    this.observeComponentCreation2((b, c) => {
+                    this.observeComponentCreation2((u24, v24) => {
                         Scroll.create();
+                        Scroll.direction(this.popupDirection);
                         Scroll.layoutWeight(this.getLayoutWeight());
                         Scroll.align(Alignment.TopStart);
                         Scroll.padding(this.getMessagePadding());
@@ -1023,8 +1091,9 @@ export class PopupComponent extends ViewPU {
                         Scroll.scrollable(ScrollDirection.Vertical);
                         Scroll.constraintSize({ maxHeight: this.getScrollMaxHeight() });
                     }, Scroll);
-                    this.observeComponentCreation2((b, c) => {
+                    this.observeComponentCreation2((p24, q24) => {
                         Text.create(this.getMessageText());
+                        Text.direction(this.popupDirection);
                         Text.fontSize(this.getMessageFontSize());
                         Text.fontColor(this.getMessageFontColor());
                         Text.fontWeight(this.getMessageFontWeight());
@@ -1032,24 +1101,25 @@ export class PopupComponent extends ViewPU {
                             maxWidth: this.messageMaxWeight,
                             minHeight: this.getCloseButtonHeight()
                         });
-                        Text.onAreaChange((i, j) => {
-                            this.textHeight = j.height;
+                        Text.onAreaChange((s24, t24) => {
+                            this.textHeight = t24.height;
                         });
                     }, Text);
                     Text.pop();
                     Scroll.pop();
-                    this.observeComponentCreation2((b, c) => {
+                    this.observeComponentCreation2((c24, d24) => {
                         If.create();
                         if (this.showClose || this.showClose === void (0)) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((b, c) => {
+                                this.observeComponentCreation2((k24, l24) => {
                                     Button.createWithChild();
+                                    Button.direction(this.popupDirection);
                                     Button.width(this.getCloseButtonWidth());
                                     Button.height(this.getCloseButtonHeight());
                                     Button.padding(this.getCloseButtonPadding());
                                     Button.backgroundColor(ObservedObject.GetRawObject(this.closeButtonBackgroundColor));
-                                    Button.onHover((h) => {
-                                        if (h) {
+                                    Button.onHover((o24) => {
+                                        if (o24) {
                                             this.closeButtonBackgroundColor = this.getCloseButtonHoverColor();
                                         }
                                         else {
@@ -1062,8 +1132,9 @@ export class PopupComponent extends ViewPU {
                                         }
                                     });
                                 }, Button);
-                                this.observeComponentCreation2((b, c) => {
+                                this.observeComponentCreation2((i24, j24) => {
                                     Image.create(this.getCloseButtonImage());
+                                    Image.direction(this.popupDirection);
                                     Image.focusable(true);
                                     Image.width(this.getCloseButtonImageWidth());
                                     Image.height(this.getCloseButtonImageHeight());
@@ -1079,26 +1150,26 @@ export class PopupComponent extends ViewPU {
                     }, If);
                     If.pop();
                     Row.pop();
-                    this.observeComponentCreation2((b, c) => {
+                    this.observeComponentCreation2((x23, y23) => {
                         Flex.create({ wrap: FlexWrap.Wrap });
                         Flex.margin(this.getButtonTextMargin());
                         Flex.flexGrow(1);
-                        Flex.onAreaChange((i, j) => {
-                            this.buttonHeight = j.height;
+                        Flex.onAreaChange((a24, b24) => {
+                            this.buttonHeight = b24.height;
                         });
                     }, Flex);
-                    this.observeComponentCreation2((b, c) => {
-                        var d, e, f, g;
+                    this.observeComponentCreation2((k23, l23) => {
                         If.create();
-                        if (((e = (d = this.buttons) === null || d === void 0 ? void 0 : d[0]) === null || e === void 0 ? void 0 : e.text) !== '' && ((g = (f = this.buttons) === null || f === void 0 ? void 0 : f[0]) === null || g === void 0 ? void 0 : g.text) !== void (0)) {
+                        if (this.buttons?.[0]?.text !== '' && this.buttons?.[0]?.text !== void (0)) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((b, c) => {
+                                this.observeComponentCreation2((s23, t23) => {
                                     Button.createWithChild();
+                                    Button.direction(this.popupDirection);
                                     Button.margin(this.getButtonMargin());
                                     Button.padding(this.getButtonTextPadding());
                                     Button.backgroundColor(ObservedObject.GetRawObject(this.firstButtonBackgroundColor));
-                                    Button.onHover((h) => {
-                                        if (h) {
+                                    Button.onHover((w23) => {
+                                        if (w23) {
                                             this.firstButtonBackgroundColor = this.getButtonHoverColor();
                                         }
                                         else {
@@ -1106,14 +1177,14 @@ export class PopupComponent extends ViewPU {
                                         }
                                     });
                                     Button.onClick(() => {
-                                        var d, e, f, g;
-                                        if ((e = (d = this.buttons) === null || d === void 0 ? void 0 : d[0]) === null || e === void 0 ? void 0 : e.action) {
-                                            (g = (f = this.buttons) === null || f === void 0 ? void 0 : f[0]) === null || g === void 0 ? void 0 : g.action();
+                                        if (this.buttons?.[0]?.action) {
+                                            this.buttons?.[0]?.action();
                                         }
                                     });
                                 }, Button);
-                                this.observeComponentCreation2((b, c) => {
+                                this.observeComponentCreation2((q23, r23) => {
                                     Text.create(this.getFirstButtonText());
+                                    Text.direction(this.popupDirection);
                                     Text.maxLines(2);
                                     Text.focusable(true);
                                     Text.fontSize(this.getFirstButtonFontSize());
@@ -1132,18 +1203,18 @@ export class PopupComponent extends ViewPU {
                         }
                     }, If);
                     If.pop();
-                    this.observeComponentCreation2((b, c) => {
-                        var d, e, f, g;
+                    this.observeComponentCreation2((x22, y22) => {
                         If.create();
-                        if (((e = (d = this.buttons) === null || d === void 0 ? void 0 : d[1]) === null || e === void 0 ? void 0 : e.text) !== '' && ((g = (f = this.buttons) === null || f === void 0 ? void 0 : f[1]) === null || g === void 0 ? void 0 : g.text) !== void (0)) {
+                        if (this.buttons?.[1]?.text !== '' && this.buttons?.[1]?.text !== void (0)) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((b, c) => {
+                                this.observeComponentCreation2((f23, g23) => {
                                     Button.createWithChild();
+                                    Button.direction(this.popupDirection);
                                     Button.margin(this.getButtonMargin());
                                     Button.padding(this.getButtonTextPadding());
                                     Button.backgroundColor(ObservedObject.GetRawObject(this.secondButtonBackgroundColor));
-                                    Button.onHover((h) => {
-                                        if (h) {
+                                    Button.onHover((j23) => {
+                                        if (j23) {
                                             this.secondButtonBackgroundColor = this.getButtonHoverColor();
                                         }
                                         else {
@@ -1151,14 +1222,14 @@ export class PopupComponent extends ViewPU {
                                         }
                                     });
                                     Button.onClick(() => {
-                                        var d, e, f, g;
-                                        if ((e = (d = this.buttons) === null || d === void 0 ? void 0 : d[1]) === null || e === void 0 ? void 0 : e.action) {
-                                            (g = (f = this.buttons) === null || f === void 0 ? void 0 : f[1]) === null || g === void 0 ? void 0 : g.action();
+                                        if (this.buttons?.[1]?.action) {
+                                            this.buttons?.[1]?.action();
                                         }
                                     });
                                 }, Button);
-                                this.observeComponentCreation2((b, c) => {
+                                this.observeComponentCreation2((d23, e23) => {
                                     Text.create(this.getSecondButtonText());
+                                    Text.direction(this.popupDirection);
                                     Text.maxLines(2);
                                     Text.focusable(true);
                                     Text.fontSize(this.getSecondButtonFontSize());
@@ -1190,4 +1261,5 @@ export class PopupComponent extends ViewPU {
         this.updateDirtyElements();
     }
 }
+
 export default { Popup };

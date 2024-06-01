@@ -55,13 +55,7 @@ constexpr int32_t BLACK_POINT_DURATION = 400;
 void DotIndicatorModifier::onDraw(DrawingContext& context)
 {
     ContentProperty contentProperty;
-    if (isFocused_->Get()) {
-        auto swiperTheme = GetSwiperIndicatorTheme();
-        CHECK_NULL_VOID(swiperTheme);
-        contentProperty.backgroundColor = swiperTheme->GetFocusedBgColor();
-    } else {
-        contentProperty.backgroundColor = backgroundColor_->Get().ToColor();
-    }
+    contentProperty.backgroundColor = backgroundColor_->Get().ToColor();
     contentProperty.vectorBlackPointCenterX = vectorBlackPointCenterX_->Get();
     contentProperty.longPointLeftCenterX = longPointLeftCenterX_->Get();
     contentProperty.longPointRightCenterX = longPointRightCenterX_->Get();
@@ -71,32 +65,33 @@ void DotIndicatorModifier::onDraw(DrawingContext& context)
     contentProperty.indicatorPadding = indicatorPadding_->Get();
     contentProperty.indicatorMargin = indicatorMargin_->Get();
     contentProperty.itemHalfSizes = itemHalfSizes_->Get();
+    SetFocusedAndSelectedColor(contentProperty);
     PaintBackground(context, contentProperty);
     PaintContent(context, contentProperty);
 }
 
-void DotIndicatorModifier::SetFocusedAndSelectedColor(PaintWrapper* paintWrapper)
+void DotIndicatorModifier::SetFocusedAndSelectedColor(ContentProperty& contentProperty)
 {
-    auto paintProperty = DynamicCast<DotIndicatorPaintProperty>(paintWrapper->GetPaintProperty());
-    CHECK_NULL_VOID(paintProperty);
     auto swiperTheme = GetSwiperIndicatorTheme();
     CHECK_NULL_VOID(swiperTheme);
-    Color unselectedFocusedColor = swiperTheme->GetColor();
-    Color selectedFocusedColor = swiperTheme->GetSelectedColor();
+    Color currentSelectedColor = selectedColor_->Get().ToColor();
+    Color currentUnselectedColor = unselectedColor_->Get();
     if (isFocused_->Get()) {
-        if (selectedFocusedColor == paintProperty->GetSelectedColor()) {
-            SetSelectedColor(swiperTheme->GetFocusedSelectedColor());
+        if (swiperTheme->GetColor() == currentUnselectedColor) {
+            originalUnselectColor_ = swiperTheme->GetFocusUnSelectedColor();
         } else {
-            SetSelectedColor(paintProperty->GetSelectedColorValue(selectedFocusedColor));
+            originalUnselectColor_ = currentUnselectedColor;
         }
-        if (unselectedFocusedColor == paintProperty->GetColor()) {
-            SetUnselectedColor(swiperTheme->GetFocusUnSelectedColor());
+        if (swiperTheme->GetSelectedColor() == currentSelectedColor) {
+            originalSelectColor_ = swiperTheme->GetFocusedSelectedColor();
         } else {
-            SetUnselectedColor(paintProperty->GetColorValue(unselectedFocusedColor));
+            originalSelectColor_ = currentSelectedColor;
         }
+        contentProperty.backgroundColor = swiperTheme->GetFocusedBgColor();
     } else {
-        SetUnselectedColor(paintProperty->GetColorValue(unselectedFocusedColor));
-        SetSelectedColor(paintProperty->GetSelectedColorValue(selectedFocusedColor));
+        originalUnselectColor_ = currentUnselectedColor;
+        originalSelectColor_ = currentSelectedColor;
+        contentProperty.backgroundColor = backgroundColor_->Get().ToColor();
     }
 }
 
@@ -208,11 +203,11 @@ void DotIndicatorModifier::PaintContent(DrawingContext& context, ContentProperty
         LinearVector<float> itemHalfSizes = GetItemHalfSizes(i, contentProperty);
         OffsetF center = { contentProperty.vectorBlackPointCenterX[i], centerY_ };
         if (i != currentIndex_) {
-            PaintUnselectedIndicator(canvas, center, itemHalfSizes, false, LinearColor(unselectedColor_->Get()));
+            PaintUnselectedIndicator(canvas, center, itemHalfSizes, false, LinearColor(originalUnselectColor_));
         } else {
             selectedCenter = center;
             PaintUnselectedIndicator(canvas, center, itemHalfSizes, isCustomSize_,
-                LinearColor(unselectedColor_->Get()));
+                LinearColor(originalUnselectColor_));
         }
     }
 
@@ -296,7 +291,7 @@ void DotIndicatorModifier::PaintSelectedIndicator(RSCanvas& canvas, const Offset
 {
     RSBrush brush;
     brush.SetAntiAlias(true);
-    brush.SetColor(ToRSColor(selectedColor_->Get()));
+    brush.SetColor(ToRSColor(originalSelectColor_));
     canvas.AttachBrush(brush);
 
     float rectLeft = (axis_ == Axis::HORIZONTAL ? leftCenter.GetX() - itemHalfSizes[SELECTED_ITEM_HALF_WIDTH]

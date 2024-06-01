@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <memory>
 #include <regex>
 #include <utility>
 
@@ -98,6 +99,14 @@ ImageSourceInfo::ImageSourceInfo(std::string imageSrc, std::string bundleName, s
     : src_(std::move(imageSrc)), bundleName_(std::move(bundleName)), moduleName_(std::move(moduleName)),
       sourceWidth_(width), sourceHeight_(height), resourceId_(resourceId), pixmap_(pixmap),
       isSvg_(IsSVGSource(src_, resourceId_)), isPng_(IsPngSource(src_, resourceId_)), srcType_(ResolveSrcType())
+{}
+
+ImageSourceInfo::ImageSourceInfo(const std::shared_ptr<std::string>& imageSrc, std::string bundleName,
+    std::string moduleName, Dimension width, Dimension height, InternalResource::ResourceId resourceId,
+    const RefPtr<PixelMap>& pixmap)
+    : bundleName_(std::move(bundleName)), moduleName_(std::move(moduleName)), sourceWidth_(width),
+      sourceHeight_(height), resourceId_(resourceId), pixmap_(pixmap), isSvg_(IsSVGSource(src_, resourceId_)),
+      isPng_(IsPngSource(src_, resourceId_)), srcType_(ResolveSrcType())
 {}
 
 SrcType ImageSourceInfo::ResolveSrcType() const

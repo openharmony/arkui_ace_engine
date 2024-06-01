@@ -28,6 +28,7 @@ public:
     OffscreenCanvasPaintMethod(int32_t width, int32_t height);
     ~OffscreenCanvasPaintMethod() override = default;
 
+    RefPtr<PixelMap> TransferToImageBitmap();
     void DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage);
     std::unique_ptr<Ace::ImageData> GetImageData(double left, double top, double width, double height);
     void GetImageData(const std::shared_ptr<Ace::ImageData>& imageData);
@@ -69,6 +70,8 @@ private:
     bool UpdateOffParagraph(const std::string& text, bool isStroke, const PaintState& state, bool hasShadow = false);
     void UpdateTextStyleForeground(bool isStroke, RSTextStyle& txtStyle, bool hasShadow);
     void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas,
+        const RSBrush* brush = nullptr, const RSPen* pen = nullptr, RSSaveLayerOps* slo = nullptr) override;
+    void PaintImageShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas,
         const RSBrush* brush = nullptr, const RSPen* pen = nullptr, RSSaveLayerOps* slo = nullptr) override;
     void Path2DRect(const PathArgs& args) override;
     RSCanvas* GetRawPtrOfRSCanvas() override

@@ -241,7 +241,7 @@ HWTEST_F(TextFieldControllerTest, LayoutProperty001, TestSize.Level1)
     EXPECT_TRUE(json->GetBool("selectAll"));
     EXPECT_EQ(json->GetString("wordBreak"), "break-all");
     EXPECT_EQ(json->GetString("textOverflow"), "TextOverflow.Clip");
-    EXPECT_EQ(json->GetString("textIndent"), "5");
+    EXPECT_EQ(json->GetString("textIndent"), "5.00vp");
 }
 
 /**

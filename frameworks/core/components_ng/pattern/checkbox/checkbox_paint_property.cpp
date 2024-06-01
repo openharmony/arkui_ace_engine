@@ -30,6 +30,10 @@ void CheckBoxPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
     auto checkboxTheme = pipeline->GetTheme<CheckboxTheme>();
     CHECK_NULL_VOID(checkboxTheme);
     PaintProperty::ToJsonValue(json, filter);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     json->PutExtAttr("isOn", GetCheckBoxSelect().value_or(false) ? "true" : "false", filter);
     json->PutExtAttr("selectedColor",
         GetCheckBoxSelectedColor().value_or(DEFAULT_SELECTED_COLOR).ColorToString().c_str(), filter);

@@ -32,7 +32,6 @@
 #include "serializeable_object.h"
 #include "viewport_config.h"
 #include "constants.h"
-
 namespace OHOS {
 
 namespace AbilityRuntime {
@@ -192,7 +191,11 @@ public:
     virtual void SetActionEventHandler(std::function<void(const std::string&)>&& actionCallback) {};
     virtual void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) {};
     virtual void SetFormLinkInfoUpdateHandler(std::function<void(const std::vector<std::string>&)>&& callback) {};
-
+    virtual void RegisterAccessibilityChildTree(
+        uint32_t parentWindowId, int32_t parentTreeId, int64_t parentElementId) {};
+    virtual void SetAccessibilityGetParentRectHandler(std::function<void(int32_t&, int32_t&)>&& callback) {};
+    virtual void DeregisterAccessibilityChildTree() {};
+    virtual void AccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info) {};
 
     // for distribute UI source
     virtual SerializeableObjectArray DumpUITree()
@@ -405,6 +408,13 @@ public:
         const std::function<void(std::vector<Ace::RectF>)>& callback) const {};
 
     virtual void SetContentNodeGrayScale(float grayscale) {};
+    
+    virtual sptr<IRemoteObject> GetRemoteObj()
+    {
+        return {};
+    }
+
+    virtual void SetStatusBarItemColor(uint32_t color) {};
 };
 
 } // namespace OHOS::Ace

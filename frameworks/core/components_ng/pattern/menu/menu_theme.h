@@ -28,7 +28,16 @@ constexpr uint8_t GRADIENT_END_GRADIENT = 255;
 constexpr uint32_t DEFAULT_BACKGROUND_COLOR = 0xFFFFFFF;
 constexpr uint32_t MENU_MIN_GRID_COUNTS = 2;
 constexpr uint32_t MENU_MAX_GRID_COUNTS = 6;
+constexpr int32_t HOVER_IMAGE_OPACITY_CHANGE_DURATION = 150;
+constexpr int32_t HOVER_IMAGE_DELAY_DURATION = 800;
+constexpr int32_t HOVER_IMAGE_CUSTOM_PREVIEW_SCALE_DURATION = 650;
+constexpr int32_t HOVER_IMAGE_PREVIEW_DISAPPEAR_DURATION = 450;
+constexpr int32_t HOVER_IMAGE_DISAPPEAR_DURATION = 650;
 constexpr double OUTBORDER_RADIUS = 19.75; // Default value of outBorderRadius
+constexpr float MENU_BIG_FONT_SIZE_SCALE = 1.75f;
+constexpr float MENU_LARGE_FONT_SIZE_SCALE_ = 2.0f;
+constexpr float MENU_MAX_FONT_SIZE_SCALE = 3.2f;
+constexpr int32_t MENU_TEXT_MAX_LINES = std::numeric_limits<int32_t>::max();
 
 /**
  * MenuTheme defines styles of menu item. MenuTheme should be built
@@ -81,9 +90,14 @@ public:
             theme->innerBorderRadius_ = pattern->GetAttr<Dimension>("menu_inner_border_radius", 0.0_vp);
             theme->innerBorderColor_ = pattern->GetAttr<Color>("menu_inner_border_color", Color::TRANSPARENT);
             theme->borderWidth_ = pattern->GetAttr<Dimension>("menu_border_width", 0.0_vp);
-            theme->borderColor_ = pattern->GetAttr<Color>("menu_border_color", Color::TRANSPARENT);
+            theme->borderColor_ = pattern->GetAttr<Color>("menu_border_color", Color::BLACK);
             theme->filterAnimationDuration_ = 250;
             theme->previewAnimationDuration_ = 300;
+            theme->hoverImageSwitchToPreviewOpacityDuration_ = HOVER_IMAGE_OPACITY_CHANGE_DURATION;
+            theme->hoverImageDelayDuration_ = HOVER_IMAGE_DELAY_DURATION;
+            theme->hoverImageCustomPreviewScaleDuration_ = HOVER_IMAGE_CUSTOM_PREVIEW_SCALE_DURATION;
+            theme->hoverImagePreviewDisappearDuration_ = HOVER_IMAGE_PREVIEW_DISAPPEAR_DURATION;
+            theme->hoverImageDisappearDuration_ = HOVER_IMAGE_DISAPPEAR_DURATION;
             theme->previewBeforeAnimationScale_ = 0.95f;
             theme->previewAfterAnimationScale_ = 1.1f;
             theme->menuAnimationScale_ = 0.4f;
@@ -97,6 +111,15 @@ public:
             theme->filterRadius_ = Dimension(100.0f);
             theme->previewBorderRadius_ = 16.0_vp;
             theme->previewMenuScaleNumber_ = 0.95f;
+            std::string hasFilter = pattern->GetAttr<std::string>("menu_has_filter", "true");
+            theme->hasFilter_ = (hasFilter == "true");
+            theme->bigFontSizeScale_ = MENU_BIG_FONT_SIZE_SCALE;
+            theme->largeFontSizeScale_ = MENU_LARGE_FONT_SIZE_SCALE_;
+            theme->maxFontSizeScale_ = MENU_MAX_FONT_SIZE_SCALE;
+            theme->textMaxLines_ = MENU_TEXT_MAX_LINES;
+            theme->normalLayout_ = pattern->GetAttr<int>("menu_normal_layout", 1);
+            theme->normalPlacement_ = pattern->GetAttr<int>("menu_normal_placement", 1);
+            theme->hasBackBlur_ = pattern->GetAttr<int>("menu_back_blur", 1);
         }
     };
 
@@ -115,6 +138,31 @@ public:
     int32_t GetPreviewAnimationDuration() const
     {
         return previewAnimationDuration_;
+    }
+
+    int32_t GetHoverImageSwitchToPreviewOpacityDuration() const
+    {
+        return hoverImageSwitchToPreviewOpacityDuration_;
+    }
+
+    int32_t GetHoverImageDelayDuration() const
+    {
+        return hoverImageDelayDuration_;
+    }
+
+    int32_t GetHoverImageCustomPreviewScaleDuration() const
+    {
+        return hoverImageCustomPreviewScaleDuration_;
+    }
+
+    int32_t GetHoverImagePreviewDisAppearDuration() const
+    {
+        return hoverImagePreviewDisappearDuration_;
+    }
+
+    int32_t GetHoverImageDisAppearDuration() const
+    {
+        return hoverImageDisappearDuration_;
     }
 
     float GetPreviewBeforeAnimationScale() const
@@ -257,12 +305,57 @@ public:
         return borderWidth_;
     }
 
+    bool GetHasFilter() const
+    {
+        return hasFilter_;
+    }
+
+    float GetBigFontSizeScale() const
+    {
+        return bigFontSizeScale_;
+    }
+
+    float GetLargeFontSizeScale() const
+    {
+        return largeFontSizeScale_;
+    }
+
+    float GetMaxFontSizeScale() const
+    {
+        return maxFontSizeScale_;
+    }
+
+    int32_t GetTextMaxLines() const
+    {
+        return textMaxLines_;
+    }
+
+    bool GetNormalLayout() const
+    {
+        return normalLayout_;
+    }
+
+    bool GetNormalPlacement() const
+    {
+        return normalPlacement_;
+    }
+
+    bool GetHasBackBlur() const
+    {
+        return hasBackBlur_;
+    }
+
 protected:
     MenuTheme() = default;
 
 private:
     int32_t filterAnimationDuration_ = 0;
     int32_t previewAnimationDuration_ = 0;
+    int32_t hoverImageSwitchToPreviewOpacityDuration_ = 0;
+    int32_t hoverImageDelayDuration_ = 0;
+    int32_t hoverImageCustomPreviewScaleDuration_ = 0;
+    int32_t hoverImagePreviewDisappearDuration_ = 0;
+    int32_t hoverImageDisappearDuration_ = 0;
     float previewBeforeAnimationScale_ = 1.0f;
     float previewAfterAnimationScale_ = 1.0f;
     float menuAnimationScale_ = 1.0f;
@@ -292,6 +385,14 @@ private:
     Color borderColor_ = Color::TRANSPARENT;
     Dimension borderWidth_;
     uint32_t symbolId_;
+    bool hasFilter_ = true;
+    float bigFontSizeScale_ = 1.75f;
+    float largeFontSizeScale_ = 2.0f;
+    float maxFontSizeScale_ = 3.2f;
+    int32_t textMaxLines_ = std::numeric_limits<int32_t>::max();
+    bool normalLayout_ = true;
+    bool normalPlacement_ = true;
+    bool hasBackBlur_ = true;
 };
 
 } // namespace OHOS::Ace::NG

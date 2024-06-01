@@ -24,7 +24,7 @@
 #include "core/components/texttimer/texttimer_controller.h"
 
 namespace OHOS::Ace {
-class TextTimerModel {
+class ACE_FORCE_EXPORT TextTimerModel {
 public:
     static TextTimerModel* GetInstance();
     virtual ~TextTimerModel() = default;
@@ -38,7 +38,7 @@ public:
     virtual void SetItalicFontStyle(Ace::FontStyle value) = 0;
     virtual void SetFontWeight(FontWeight value) = 0;
     virtual void SetFontFamily(const std::vector<std::string>& value) = 0;
-    virtual void SetOnTimer(std::function<void(int64_t, int64_t)> && onChange) = 0;
+    virtual void SetOnTimer(std::function<void(int64_t, int64_t)> &&onChange) = 0;
     virtual void SetTextShadow(const std::vector<Shadow>& value) = 0;
 
 private:

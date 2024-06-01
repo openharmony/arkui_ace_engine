@@ -2211,6 +2211,9 @@ void PipelineContext::OnSurfaceDensityChanged(double density)
     if (!NearZero(viewScale_)) {
         dipScale_ = density_ / viewScale_;
     }
+    if (isDensityUpdate_) {
+        PipelineBase::OnSurfaceDensityChanged(density);
+    }
 }
 
 void PipelineContext::OnSystemBarHeightChanged(double statusBar, double navigationBar)
@@ -3131,6 +3134,8 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
         pageOffset_ = GetPageRect().GetOffset();
     }
 
+    event->SetPressedKeyCodes(pointerEvent.pressedKeyCodes_);
+
     if (action != DragEventAction::DRAG_EVENT_END) {
         ProcessDragEvent(renderNode, event, globalPoint);
     } else {
@@ -3344,7 +3349,9 @@ bool PipelineContext::GetIsDeclarative() const
 {
     RefPtr<Frontend> front = GetFrontend();
     if (front) {
-        return (front->GetType() == FrontendType::DECLARATIVE_JS || front->GetType() == FrontendType::JS_PLUGIN);
+        return (front->GetType() == FrontendType::DECLARATIVE_JS ||
+                front->GetType() == FrontendType::JS_PLUGIN ||
+                front->GetType() == FrontendType::DECLARATIVE_CJ);
     }
     return false;
 }

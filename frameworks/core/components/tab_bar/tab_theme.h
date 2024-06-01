@@ -71,6 +71,7 @@ public:
                 theme->bottomTabTextOff_ = pattern->GetAttr<Color>("bottom_tab_text_off", Color::WHITE);
                 theme->bottomTabIconOn_ = pattern->GetAttr<Color>("bottom_tab_icon", Color::WHITE);
                 theme->bottomTabIconOff_ = pattern->GetAttr<Color>("bottom_tab_icon_off", Color::WHITE);
+                theme->bottomTabSymbolOn_ = pattern->GetAttr<Color>("bottom_tab_symbol", Color(0xFF007DFF));
                 theme->bottomTabSymbolOff_ = pattern->GetAttr<Color>("bottom_tab_symbol_off", Color(0x66182431));
                 theme->bottomTabImageSize_ = pattern->GetAttr<Dimension>("bottom_tab_image_size", 0.0_vp);
                 theme->bottomTabTextSize_ = pattern->GetAttr<Dimension>("bottom_tab_text_size", 0.0_vp);
@@ -293,6 +294,11 @@ public:
         return bottomTabIconOff_;
     }
 
+    const Color& GetBottomTabSymbolOn() const
+    {
+        return bottomTabSymbolOn_;
+    }
+
     const Color& GetBottomTabSymbolOff() const
     {
         return bottomTabSymbolOff_;
@@ -455,6 +461,7 @@ private:
     Color bottomTabTextOff_;
     Color bottomTabIconOn_;
     Color bottomTabIconOff_;
+    Color bottomTabSymbolOn_;
     Color bottomTabSymbolOff_;
     Dimension bottomTabImageSize_;
     Dimension bottomTabTextSize_;

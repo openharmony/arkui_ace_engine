@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -680,7 +680,7 @@ bool RenderScroll::HandleMouseEvent(const MouseEvent& event)
     return isInBarRegion;
 }
 
-void RenderScroll::JumpToIndex(int32_t index, int32_t source)
+void RenderScroll::JumpToIndex(int32_t index)
 {
     LOGE("Do not support in base RenderScroll");
 }

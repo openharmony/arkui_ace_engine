@@ -26,6 +26,32 @@ void EventHub::AttachHost(const WeakPtr<FrameNode>& host)
     host_ = host;
 }
 
+void EventHub::OnAttachContext(PipelineContext *context)
+{
+    auto host = host_.Upgrade();
+    CHECK_NULL_VOID(host);
+    if (HasOnAreaChanged() || HasInnerOnAreaChanged()) {
+        context->AddOnAreaChangeNode(host->GetId());
+    }
+
+    if (HasVisibleAreaCallback(true) || HasVisibleAreaCallback(false)) {
+        context->AddVisibleAreaChangeNode(host->GetId());
+    }
+}
+
+void EventHub::OnDetachContext(PipelineContext *context)
+{
+    auto host = host_.Upgrade();
+    CHECK_NULL_VOID(host);
+    if (HasOnAreaChanged() || HasInnerOnAreaChanged()) {
+        context->RemoveOnAreaChangeNode(host->GetId());
+    }
+
+    if (HasVisibleAreaCallback(true) || HasVisibleAreaCallback(false)) {
+        context->RemoveVisibleAreaChangeNode(host->GetId());
+    }
+}
+
 RefPtr<FrameNode> EventHub::GetFrameNode() const
 {
     return host_.Upgrade();
@@ -196,7 +222,7 @@ void EventHub::FireCustomerOnDragFunc(DragFuncType dragFuncType, const RefPtr<OH
 void EventHub::FireOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
 {
     if (SystemProperties::GetDebugEnabled()) {
-        LOGI("DragDropManager fire onDragEnter");
+        TAG_LOGI(AceLogTag::ACE_DRAG, "DragDropManager fire onDragEnter");
     }
     if (onDragEnter_) {
         // callback may be overwritten in its invoke so we copy it first
@@ -208,7 +234,7 @@ void EventHub::FireOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info, const s
 void EventHub::FireOnDragLeave(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
 {
     if (SystemProperties::GetDebugEnabled()) {
-        LOGI("DragDropManager fire onDragLeave");
+        TAG_LOGI(AceLogTag::ACE_DRAG, "DragDropManager fire onDragLeave");
     }
     if (onDragLeave_) {
         // callback may be overwritten in its invoke so we copy it first
@@ -220,7 +246,7 @@ void EventHub::FireOnDragLeave(const RefPtr<OHOS::Ace::DragEvent>& info, const s
 void EventHub::FireOnDragMove(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
 {
     if (SystemProperties::GetDebugEnabled()) {
-        LOGI("DragDropManager fire onDragMove");
+        TAG_LOGI(AceLogTag::ACE_DRAG, "DragDropManager fire onDragMove");
     }
     if (onDragMove_) {
         // callback may be overwritten in its invoke so we copy it first
@@ -232,7 +258,7 @@ void EventHub::FireOnDragMove(const RefPtr<OHOS::Ace::DragEvent>& info, const st
 void EventHub::FireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
 {
     if (SystemProperties::GetDebugEnabled()) {
-        LOGI("DragDropManager fire onDrop");
+        TAG_LOGI(AceLogTag::ACE_DRAG, "DragDropManager fire onDrop");
     }
     if (onDrop_) {
         // callback may be overwritten in its invoke so we copy it first
@@ -316,6 +342,11 @@ void EventHub::ClearJSFrameNodeOnSizeChange()
 bool EventHub::HasOnSizeChanged() const
 {
     return static_cast<bool>(onSizeChanged_) || static_cast<bool>(onJsFrameNodeSizeChanged_);
+}
+
+bool EventHub::HasImmediatelyVisibleCallback()
+{
+    return visibleAreaUserCallback_.callback || visibleAreaInnerCallback_.callback;
 }
 
 void EventHub::ClearOnAreaChangedInnerCallbacks()

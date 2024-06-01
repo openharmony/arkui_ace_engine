@@ -29,26 +29,34 @@ void SetOptionBuilder(FrameNode* frameNode, ArkUIListItemSwipeActionItemHandle i
         CalcDimension length { item->actionAreaDistance, DimensionUnit::VP };
         auto onAction = [item]() {
             if (item->onAction) {
-                item->onAction();
+                using FuncType = void (*)(void*);
+                FuncType func = reinterpret_cast<FuncType>(item->onAction);
+                func(item->onActionUserData);
             }
         };
         auto onEnterActionArea = [item]() {
-            if (item->onExitActionArea) {
-                item->onExitActionArea();
+            if (item->onEnterActionArea) {
+                using FuncType = void (*)(void*);
+                FuncType func = reinterpret_cast<FuncType>(item->onEnterActionArea);
+                func(item->onEnterActionAreaUserData);
             }
         };
         auto onExitActionArea = [item]() {
             if (item->onExitActionArea) {
-                item->onExitActionArea();
+                using FuncType = void (*)(void*);
+                FuncType func = reinterpret_cast<FuncType>(item->onExitActionArea);
+                func(item->onExitActionAreaUserData);
             }
         };
         auto onStateChange = [item](OHOS::Ace::SwipeActionState swipeActionState) {
             if (item->onStateChange) {
-                item->onStateChange(static_cast<int32_t>(swipeActionState));
+                using FuncType = float (*)(int32_t, void*);
+                FuncType func = reinterpret_cast<FuncType>(item->onStateChange);
+                func(static_cast<int32_t>(swipeActionState), item->onStateChangeUserData);
             }
         };
-        ListItemModelNG::SetDeleteArea(frameNode, reinterpret_cast<FrameNode*>(item->node), onAction,
-            onEnterActionArea, onExitActionArea, onStateChange, length, isStart);
+        ListItemModelNG::SetDeleteArea(frameNode, reinterpret_cast<FrameNode*>(item->node), onAction, onEnterActionArea,
+            onExitActionArea, onStateChange, length, isStart);
     } else {
         CalcDimension length;
         ListItemModelNG::SetDeleteArea(frameNode, nullptr, nullptr, nullptr, nullptr, nullptr, length, isStart);
@@ -65,7 +73,9 @@ void SetListItemSwiperAction(ArkUINodeHandle node, ArkUIListItemSwipeActionOptio
 
     auto onOffsetChange = [option](int32_t offset) {
         if (option->onOffsetChange) {
-            option->onOffsetChange(offset);
+            using FuncType = float (*)(float, void*);
+            FuncType func = reinterpret_cast<FuncType>(option->onOffsetChange);
+            func(static_cast<float>(offset), option->userData);
         }
     };
     auto edgeEffect = static_cast<V2::SwipeEdgeEffect>(option->edgeEffect);

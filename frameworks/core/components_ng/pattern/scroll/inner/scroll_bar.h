@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -470,7 +470,8 @@ public:
     void FlushBarWidth();
     void CalcReservedHeight();
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent);
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+        TouchTestResult& responseLinkResult);
     void ScheduleDisappearDelayTask();
 
     void SetDragFRCSceneCallback(DragFRCSceneCallback&& dragFRCSceneCallback)
@@ -529,11 +530,31 @@ public:
         scrollPageCallback_ = std::move(scrollPageCallback);
     }
     void OnCollectLongPressTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent);
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+        TouchTestResult& responseLinkResult);
     void InitLongPressEvent();
     void HandleLongPress(bool smooth);
     bool AnalysisUpOrDown(Point point, bool& reverse);
     void ScheduleCaretLongPress();
+
+    Axis GetPanDirection() const
+    {
+        CHECK_NULL_RETURN(panRecognizer_, Axis::NONE);
+        return panRecognizer_->GetAxisDirection();
+    }
+
+    // infos for dump
+    void AddScrollBarLayoutInfo();
+
+    void GetShapeModeDumpInfo();
+
+    void GetPositionModeDumpInfo();
+
+    void GetAxisDumpInfo();
+
+    void GetPanDirectionDumpInfo();
+
+    void DumpAdvanceInfo();
 
 protected:
     void InitTheme();
@@ -629,6 +650,10 @@ private:
     RefPtr<LongPressRecognizer> longPressRecognizer_;
     bool isMousePressed_ = false;
     Offset locationInfo_;
+
+    // dump info
+    std::list<InnerScrollBarLayoutInfo> innerScrollBarLayoutInfos_;
+    bool needAddLayoutInfo = false;
 };
 
 } // namespace OHOS::Ace::NG

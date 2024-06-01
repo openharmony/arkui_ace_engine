@@ -60,6 +60,21 @@ public:
         isMuted_ = isMuted;
     }
 
+    bool GetMuted()
+    {
+        return isMuted_;
+    }
+
+    bool GetPrepared()
+    {
+        return isPrepared_;
+    }
+
+    bool GetPlayByController()
+    {
+        return isPlayByController_;
+    }
+
     void OnVisibleChange(bool isVisible) override;
 
     void OnAreaChangedInner() override;
@@ -93,12 +108,14 @@ private:
 
     void UpdateImageNode();
     void UpdateVideoNode();
-    SizeF CalculateFitContain(const SizeF& videoSize, const SizeF& layoutSize);
+    SizeF CalculateFitContain(const SizeF& rawSize, const SizeF& layoutSize);
     SizeF CalculateFitFill(const SizeF& layoutSize);
-    SizeF CalculateFitCover(const SizeF& videoSize, const SizeF& layoutSize);
-    SizeF CalculateFitNone(const SizeF& videoSize);
-    SizeF CalculateFitScaleDown(const SizeF& videoSize, const SizeF& layoutSize);
+    SizeF CalculateFitCover(const SizeF& rawSize, const SizeF& layoutSize);
+    SizeF CalculateFitNone(const SizeF& rawSize);
+    SizeF CalculateFitScaleDown(const SizeF& rawSize, const SizeF& layoutSize);
+    SizeF CalculateFitAuto(const SizeF& rawSize, const SizeF& layoutSize);
     SizeF MeasureContentLayout(const SizeF& layoutSize, const RefPtr<MovingPhotoLayoutProperty>& layoutProperty);
+    SizeF GetRawImageSize();
 
     void PrepareMediaPlayer();
     void ResetMediaPlayer();
@@ -140,6 +157,7 @@ private:
 
     int32_t fd_ = -1;
     std::string uri_ = "";
+    bool startAnimationFlag_ = false;
     bool isPrepared_ = false;
     bool isMuted_ = false;
     bool isPlayByController_ = false;

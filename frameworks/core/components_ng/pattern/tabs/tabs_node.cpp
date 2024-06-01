@@ -63,8 +63,12 @@ void TabsNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
 void TabsNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     FrameNode::ToJsonValue(json, filter);
-    json->PutExtAttr("index", std::to_string(GetIndex()).c_str(), filter);
     json->PutFixedAttr("scrollable", Scrollable(), filter, FIXED_ATTR_SCROLLABLE);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    json->PutExtAttr("index", std::to_string(GetIndex()).c_str(), filter);
     json->PutExtAttr("animationDuration", GetAnimationDuration(), filter);
     if (GetTabBarMode() == TabBarMode::SCROLLABLE) {
         auto optionsJson = JsonUtil::Create(true);

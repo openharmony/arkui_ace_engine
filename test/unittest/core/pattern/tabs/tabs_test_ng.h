@@ -80,7 +80,11 @@ const SizeF INFINITY_SIZE(INFINITY_NUM, INFINITY_NUM);
 constexpr float NEGTIVE_NUM = -100.0f;
 const SizeF NEGTIVE_SIZE(NEGTIVE_NUM, NEGTIVE_NUM);
 constexpr float TABBAR_WIDTH = 50.0f;
+constexpr float TABBAR_HEIGHT = 40.0f;
 constexpr float SWIPER_WIDTH = 750.0f;
+constexpr float SWIPER_HEIGHT = 500.0f;
+constexpr float DIVIDER_STROKE_WIDTH = 10.0f;
+constexpr float TABS_PADDING = 20.0f;
 const double DEFAULT_OFFSET = -1.0f;
 const int DEFAULT_ITEMCOUNT = 1;
 const int DEFAULT_INDEX = -1;
@@ -128,7 +132,7 @@ public:
         const std::function<void(TabContentModelNG)>& callback, int32_t nodeId);
     static TabBarBuilderFunc TabBarItemBuilder();
     void SwipeToWithoutAnimation(int32_t index);
-    void ClickTo(Offset offset);
+    void ClickTo(Offset offset, int32_t index);
     void MouseTo(MouseAction action, Offset location, bool isHover);
     void TouchTo(TouchType type, Offset location);
 

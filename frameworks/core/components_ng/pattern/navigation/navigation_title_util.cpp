@@ -19,6 +19,8 @@
 
 #include "base/i18n/localization.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/agingadapation/aging_adapation_dialog_theme.h"
+#include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
@@ -193,6 +195,9 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItemButton(RefPtr<NavigationBar
     auto menuItemNode = FrameNode::CreateFrameNode(
         V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), buttonPattern);
     CHECK_NULL_RETURN(menuItemNode, nullptr);
+    auto focusHub = menuItemNode->GetOrCreateFocusHub();
+    CHECK_NULL_RETURN(focusHub, nullptr);
+    focusHub->SetFocusDependence(FocusDependence::SELF);
     auto menuItemLayoutProperty = menuItemNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(menuItemLayoutProperty, nullptr);
     menuItemLayoutProperty->UpdateType(ButtonType::NORMAL);
@@ -287,6 +292,7 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateBarItemIconNode(const BarItem& barI
 void NavigationTitleUtil::InitTitleBarButtonEvent(const RefPtr<FrameNode>& buttonNode,
     const RefPtr<FrameNode>& iconNode, bool isMoreButton, const BarItem menuItem, bool isButtonEnabled)
 {
+    InitTitleBarButtonLongPressEvent(buttonNode, isMoreButton, menuItem);
     auto eventHub = buttonNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(eventHub);
 
@@ -359,7 +365,35 @@ void NavigationTitleUtil::UpdateBarItemNodeWithItem(
     barItemNode->MarkModifyDone();
 }
 
-void NavigationTitleUtil::BuildMoreIemNode(const RefPtr<BarItemNode>& barItemNode, const bool isButtonEnabled)
+void BuildImageMoreItemNode(const RefPtr<BarItemNode>& barItemNode, const bool isButtonEnabled)
+{
+    int32_t imageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, imageNodeId, AceType::MakeRefPtr<ImagePattern>());
+    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+
+    auto info = ImageSourceInfo("");
+    info.SetResourceId(theme->GetMoreResourceId());
+    if (isButtonEnabled) {
+        info.SetFillColor(theme->GetMenuIconColor());
+    } else {
+        info.SetFillColor(theme->GetMenuIconColor().BlendOpacity(theme->GetAlphaDisabled()));
+    }
+
+    imageLayoutProperty->UpdateImageSourceInfo(info);
+    auto iconSize = theme->GetMenuIconSize();
+    imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
+    imageNode->MarkModifyDone();
+
+    barItemNode->SetIsMoreItemNode(true);
+    barItemNode->SetIconNode(imageNode);
+    barItemNode->AddChild(imageNode);
+    barItemNode->MarkModifyDone();
+}
+
+void BuildSymbolMoreItemNode(const RefPtr<BarItemNode>& barItemNode, const bool isButtonEnabled)
 {
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
@@ -374,15 +408,22 @@ void NavigationTitleUtil::BuildMoreIemNode(const RefPtr<BarItemNode>& barItemNod
     if (isButtonEnabled) {
         symbolProperty->UpdateSymbolColorList({ theme->GetMenuIconColor() });
     } else {
-        symbolProperty->UpdateSymbolColorList({ theme->GetMenuIconColor()
-            .BlendOpacity(theme->GetAlphaDisabled()) });
+        symbolProperty->UpdateSymbolColorList({ theme->GetMenuIconColor().BlendOpacity(theme->GetAlphaDisabled()) });
     }
     symbolNode->MarkModifyDone();
     barItemNode->SetIsMoreItemNode(true);
     barItemNode->SetIconNode(symbolNode);
     barItemNode->AddChild(symbolNode);
     barItemNode->MarkModifyDone();
-    return;
+}
+
+void NavigationTitleUtil::BuildMoreIemNode(const RefPtr<BarItemNode>& barItemNode, const bool isButtonEnabled)
+{
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        BuildSymbolMoreItemNode(barItemNode, isButtonEnabled);
+    } else {
+        BuildImageMoreItemNode(barItemNode, isButtonEnabled);
+    }
 }
 
 RefPtr<BarItemNode> NavigationTitleUtil::CreateBarItemNode(const bool isButtonEnabled)
@@ -395,5 +436,114 @@ RefPtr<BarItemNode> NavigationTitleUtil::CreateBarItemNode(const bool isButtonEn
     barItemLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     BuildMoreIemNode(barItemNode, isButtonEnabled);
     return barItemNode;
+}
+
+void NavigationTitleUtil::HandleLongPress(
+    const WeakPtr<FrameNode>& weakTargetNode, const BarItem& menuItem, bool isMoreButton)
+{
+    auto targetNode = weakTargetNode.Upgrade();
+    CHECK_NULL_VOID(targetNode);
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto dialogTheme = context->GetTheme<AgingAdapationDialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
+    float scale = context->GetFontScale();
+    if (LessNotEqual(scale, dialogTheme->GetBigFontSizeScale())) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+            "The current system font scale is %{public}f; dialogTheme font scale is %{public}f", scale,
+            dialogTheme->GetBigFontSizeScale());
+        return;
+    }
+    auto dialogNode = CreatePopupDialogNode(targetNode, menuItem, isMoreButton);
+    CHECK_NULL_VOID(dialogNode);
+    auto navigationMenuNode = targetNode->GetParentFrameNode();
+    CHECK_NULL_VOID(navigationMenuNode);
+    auto titleBarNode = navigationMenuNode->GetParentFrameNode();
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    if (titleBarPattern->GetLargeFontPopUpDialogNode() != nullptr) {
+        HandleLongPressActionEnd(targetNode);
+    }
+    titleBarPattern->SetLargeFontPopUpDialogNode(dialogNode);
+}
+
+void NavigationTitleUtil::HandleLongPressActionEnd(const WeakPtr<FrameNode>& weakTargetNode)
+{
+    auto targetNode = weakTargetNode.Upgrade();
+    CHECK_NULL_VOID(targetNode);
+    auto navigationMenuNode = targetNode->GetParentFrameNode();
+    CHECK_NULL_VOID(navigationMenuNode);
+    auto titleBarNode = navigationMenuNode->GetParentFrameNode();
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    auto dialogNode = titleBarPattern->GetLargeFontPopUpDialogNode();
+    CHECK_NULL_VOID(dialogNode);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->CloseDialog(dialogNode);
+    titleBarPattern->SetLargeFontPopUpDialogNode(nullptr);
+}
+
+void NavigationTitleUtil::InitTitleBarButtonLongPressEvent(
+    const RefPtr<FrameNode>& buttonNode, bool isMoreButton, const BarItem& menuItem)
+{
+    CHECK_NULL_VOID(buttonNode);
+    auto gestureHub = buttonNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+
+    auto longPressCallback = [weakTargetNode = WeakPtr<FrameNode>(buttonNode),
+        menuItem, isMoreButton](GestureEvent& info) {
+        NavigationTitleUtil::HandleLongPress(weakTargetNode, menuItem, isMoreButton);
+    };
+    auto longPressEvent = AceType::MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
+    gestureHub->SetLongPressEvent(longPressEvent);
+
+    auto longPressRecognizer = gestureHub->GetLongPressRecognizer();
+    CHECK_NULL_VOID(longPressRecognizer);
+
+    auto longPressEndCallback = [weakTargetNode = WeakPtr<FrameNode>(buttonNode)](GestureEvent& info) {
+        NavigationTitleUtil::HandleLongPressActionEnd(weakTargetNode);
+    };
+    longPressRecognizer->SetOnActionEnd(longPressEndCallback);
+}
+
+RefPtr<FrameNode> NavigationTitleUtil::CreatePopupDialogNode(
+    const RefPtr<FrameNode> targetNode, const BarItem& menuItem, bool isMoreButton)
+{
+    auto accessibilityProperty = targetNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, nullptr);
+    ImageSourceInfo imageSourceInfo;
+    std::string message;
+    RefPtr<FrameNode> dialogNode;
+    if (isMoreButton) {
+        auto theme = NavigationGetTheme();
+        CHECK_NULL_RETURN(theme, nullptr);
+        message = Localization::GetInstance()->GetEntryLetters("common.more");
+        if (message.empty()) {
+            message = accessibilityProperty->GetAccessibilityText();
+        }
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            dialogNode =
+                AgingAdapationDialogUtil::ShowLongPressDialog(message, SymbolSourceInfo(theme->GetMoreSymbolId()));
+            return dialogNode;
+        }
+        imageSourceInfo.SetResourceId(theme->GetMoreResourceId());
+        dialogNode = AgingAdapationDialogUtil::ShowLongPressDialog(message, imageSourceInfo);
+        return dialogNode;
+    }
+    if (menuItem.text.has_value() && !menuItem.text.value().empty()) {
+        message = menuItem.text.value();
+    } else {
+        message = accessibilityProperty->GetAccessibilityText();
+    }
+    if (menuItem.icon.has_value() && !menuItem.icon.value().empty()) {
+        imageSourceInfo = ImageSourceInfo(menuItem.icon.value());
+    }
+    dialogNode = AgingAdapationDialogUtil::ShowLongPressDialog(message, imageSourceInfo);
+    return dialogNode;
 }
 } // namespace OHOS::Ace::NG

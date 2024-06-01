@@ -1189,4 +1189,97 @@ HWTEST_F(SpanStringTestNg, MutableSpanString017, TestSize.Level1)
     EXPECT_EQ(spans.size(), 3);
 }
 
+/**
+ * @tc.name: MutableSpanString018
+ * @tc.desc: Test serialization and unserialization of SpanString
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, MutableSpanString018, TestSize.Level1)
+{
+    std::vector<uint8_t> buff;
+    Font testFont { OHOS::Ace::FontWeight::BOLD, Dimension(29.0, DimensionUnit::PX), OHOS::Ace::FontStyle::ITALIC,
+    std::vector<std::string>(test_str, test_str + 10), OHOS::Ace::Color::RED };
+    Font testFont2 { OHOS::Ace::FontWeight::W300, Dimension(49.0, DimensionUnit::VP), OHOS::Ace::FontStyle::ITALIC,
+    std::vector<std::string>(test_str, test_str + 5), OHOS::Ace::Color::BLUE };
+    auto spanStr = AceType::MakeRefPtr<SpanString>("dddd当地经的123456");
+    spanStr->AddSpan(AceType::MakeRefPtr<LineHeightSpan>(Dimension(30), 0, 3));
+    spanStr->AddSpan(AceType::MakeRefPtr<LineHeightSpan>(Dimension(10), 0, 2));
+    spanStr->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont, 1, 2));
+    spanStr->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont2, 4, 5));
+    spanStr->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(15), 8, 9));
+    spanStr->AddSpan(AceType::MakeRefPtr<BaselineOffsetSpan>(Dimension(16), 9, 10));
+    SpanParagraphStyle spanParagraphStyle;
+    spanParagraphStyle.align = TextAlign::END;
+    spanParagraphStyle.maxLines = 4;
+    spanParagraphStyle.wordBreak = WordBreak::BREAK_ALL;
+    spanParagraphStyle.textOverflow = TextOverflow::ELLIPSIS;
+    spanParagraphStyle.textIndent = Dimension(23);
+    spanParagraphStyle.leadingMargin = LeadingMargin();
+    spanParagraphStyle.leadingMargin->size = LeadingMarginSize(Dimension(25.0), Dimension(26.0));
+    spanStr->AddSpan(AceType::MakeRefPtr<ParagraphStyleSpan>(spanParagraphStyle, 10, 11));
+    spanStr->EncodeTlv(buff);
+    auto spanString2 = SpanString::DecodeTlv(buff);
+    std::list<RefPtr<NG::SpanItem>> spans = spanString2->GetSpanItems();
+    
+    EXPECT_EQ(spans.size(), 10);
+    EXPECT_EQ(spanStr->GetString(), "dddd当地经的123456");
+    auto it = spans.begin();
+    EXPECT_EQ((*it)->content, "d");
+    EXPECT_EQ((*it)->interval.first, 0);
+    EXPECT_EQ((*it)->interval.second, 1);
+    EXPECT_EQ((*it)->textLineStyle->GetLineHeight().value(), Dimension(10));
+    ++it;
+    EXPECT_EQ((*it)->content, "d");
+    EXPECT_EQ((*it)->interval.first, 1);
+    EXPECT_EQ((*it)->interval.second, 2);
+    EXPECT_EQ((*it)->fontStyle->GetFontSize().value(), Dimension(29));
+    EXPECT_EQ((*it)->fontStyle->GetTextColor().value(), OHOS::Ace::Color::RED);
+    EXPECT_EQ((*it)->fontStyle->GetItalicFontStyle().value(), OHOS::Ace::FontStyle::ITALIC);
+    EXPECT_EQ((*it)->fontStyle->GetFontWeight().value(), OHOS::Ace::FontWeight::BOLD);
+    EXPECT_EQ((*it)->textLineStyle->GetLineHeight().value(), Dimension(10));
+    ++it;
+    EXPECT_EQ((*it)->content, "d");
+    EXPECT_EQ((*it)->interval.first, 2);
+    EXPECT_EQ((*it)->interval.second, 3);
+    EXPECT_EQ((*it)->textLineStyle->GetLineHeight().value(), Dimension(30));
+    ++it;
+    EXPECT_EQ((*it)->content, "d");
+    EXPECT_EQ((*it)->interval.first, 3);
+    EXPECT_EQ((*it)->interval.second, 4);
+    ++it;
+    EXPECT_EQ((*it)->content, "当");
+    EXPECT_EQ((*it)->interval.first, 4);
+    EXPECT_EQ((*it)->interval.second, 5);
+    EXPECT_EQ((*it)->fontStyle->GetFontSize().value(), Dimension(49, OHOS::Ace::DimensionUnit::VP));
+    EXPECT_EQ((*it)->fontStyle->GetTextColor().value(), OHOS::Ace::Color::BLUE);
+    EXPECT_EQ((*it)->fontStyle->GetItalicFontStyle().value(), OHOS::Ace::FontStyle::ITALIC);
+    EXPECT_EQ((*it)->fontStyle->GetFontWeight().value(), OHOS::Ace::FontWeight::W300);
+    ++it;
+    EXPECT_EQ((*it)->content, "地经的");
+    EXPECT_EQ((*it)->interval.first, 5);
+    EXPECT_EQ((*it)->interval.second, 8);
+    ++it;
+    EXPECT_EQ((*it)->content, "1");
+    EXPECT_EQ((*it)->interval.first, 8);
+    EXPECT_EQ((*it)->interval.second, 9);
+    EXPECT_EQ((*it)->fontStyle->GetLetterSpacing().value(), Dimension(15));
+    ++it;
+    EXPECT_EQ((*it)->content, "2");
+    EXPECT_EQ((*it)->interval.first, 9);
+    EXPECT_EQ((*it)->interval.second, 10);
+    EXPECT_EQ((*it)->textLineStyle->GetBaselineOffset().value(), Dimension(16));
+    ++it;
+    EXPECT_EQ((*it)->content, "3");
+    EXPECT_EQ((*it)->interval.first, 10);
+    EXPECT_EQ((*it)->interval.second, 11);
+    EXPECT_EQ((*it)->textLineStyle->GetTextOverflow().value(), TextOverflow::ELLIPSIS);
+    EXPECT_EQ((*it)->textLineStyle->GetTextAlign().value(), TextAlign::END);
+    EXPECT_EQ((*it)->textLineStyle->GetMaxLines().value(), 4);
+    EXPECT_EQ((*it)->textLineStyle->GetTextIndent().value(), Dimension(23));
+    EXPECT_EQ((*it)->textLineStyle->GetWordBreak().value(), WordBreak::BREAK_ALL);
+    ++it;
+    EXPECT_EQ((*it)->content, "456");
+    EXPECT_EQ((*it)->interval.first, 11);
+    EXPECT_EQ((*it)->interval.second, 14);
+}
 } // namespace OHOS::Ace::NG

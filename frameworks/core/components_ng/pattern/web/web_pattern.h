@@ -86,6 +86,13 @@ enum WebOverlayType { INSERT_OVERLAY, SELECTION_OVERLAY, INVALID_OVERLAY };
 #endif
 } // namespace
 
+enum class WebInfoType : int32_t {
+    TYPE_MOBILE,
+    TYPE_TABLET,
+    TYPE_2IN1,
+    TYPE_UNKNOWN
+};
+
 class WebPattern : public NestableScrollContainer, public TextBase {
     DECLARE_ACE_TYPE(WebPattern, NestableScrollContainer, TextBase);
 
@@ -120,8 +127,6 @@ public:
 
     bool NeedSoftKeyboard() const override;
 
-    void UpdateSlideOffset(bool isNeedReset = false) override;
-
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<WebEventHub>();
@@ -131,6 +136,7 @@ public:
     {
         return MakeRefPtr<WebAccessibilityProperty>();
     }
+
 
     void OnModifyDone() override;
 
@@ -188,7 +194,6 @@ public:
 
     void SetWebController(const RefPtr<WebController>& webController)
     {
-        // TODO: add web controller diff function.
         webController_ = webController;
     }
 
@@ -296,7 +301,9 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true };
+        FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::FORCE_NONE };
+        focusPattern.SetIsFocusActiveWhenFocused(true);
+        return focusPattern;
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override
@@ -399,6 +406,11 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SmoothDragResizeEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SelectionMenuOptions, WebMenuOptionsParam);
 
+    bool IsFocus() const
+    {
+        return isFocus_;
+    }
+
     void RequestFullScreen();
     void ExitFullScreen();
     bool IsFullScreen() const
@@ -469,7 +481,8 @@ public:
     void UpdateJavaScriptOnDocumentEnd();
     void JavaScriptOnDocumentStart(const ScriptItems& scriptItems);
     void JavaScriptOnDocumentEnd(const ScriptItems& scriptItems);
-    void SetTouchEventInfo(const TouchEvent& touchEvent, TouchEventInfo& touchEventInfo);
+    void SetTouchEventInfo(const TouchEvent& touchEvent,
+        TouchEventInfo& touchEventInfo, const std::string& embdedId);
     DragRet GetDragAcceptableStatus();
     Offset GetDragOffset() const;
     void OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling);
@@ -510,11 +523,24 @@ public:
     void SetAccessibilityState(bool state);
     void UpdateFocusedAccessibilityId(int64_t accessibilityId = -1);
     void OnTooltip(const std::string& tooltip);
+    bool IsDefaultFocusNodeExist();
     bool IsRootNeedExportTexture();
     std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);
-    void Backward();
+    bool Backward();
     void OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMenuOption);
     void CloseKeyboard();
+    WebInfoType GetWebInfoType();
+    void RequestFocus();
+    void SetCustomKeyboardBuilder(std::function<void()> customKeyboardBuilder)
+    {
+        customKeyboardBuilder_ = customKeyboardBuilder;
+    }
+    void AttachCustomKeyboard();
+    void CloseCustomKeyboard();
+    void KeyboardReDispatch(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event, bool isUsed);
+    void OnAttachContext(PipelineContext *context) override;
+    void OnDetachContext(PipelineContext *context) override;
+    void SetUpdateInstanceIdCallback(std::function<void(int32_t)> &&callabck);
 
 private:
     friend class WebContextSelectOverlay;
@@ -522,14 +548,18 @@ private:
         TextResponseType responseType = TextResponseType::RIGHT_CLICK, bool handleReverse = false);
     void CloseContextSelectionMenu();
     RectF ComputeMouseClippedSelectionBounds(int32_t x, int32_t y, int32_t w, int32_t h);
-    void RegistVirtualKeyBoardListener();
+    void RegistVirtualKeyBoardListener(const RefPtr<PipelineContext> &context);
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
     void UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard);
     void UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, double keyboard, double oldWebHeight);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void BeforeSyncGeometryProperties(const DirtySwapConfig& config) override;
 
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnAttachToMainTree() override;
+    void OnDetachFromMainTree() override;
+
     void OnWindowShow() override;
     void OnWindowHide() override;
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
@@ -594,6 +624,7 @@ private:
     int GetWebId();
 
     void InitEvent();
+    void InitConfigChangeCallback(const RefPtr<PipelineContext>& context);
     void InitFeatureParam();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
@@ -626,6 +657,8 @@ private:
     void CalculateHorizontalDrawRect(bool isNeedReset);
     void CalculateVerticalDrawRect(bool isNeedReset);
     void InitPinchEvent(const RefPtr<GestureEventHub>& gestureHub);
+    bool CheckZoomStatus(const double& curScale);
+    bool ZoomOutAndIn(const double& curScale, double& scale);
     void HandleScaleGestureChange(const GestureEvent& event);
 
     NG::DragDropInfo HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent>& info);
@@ -719,8 +752,9 @@ private:
     void CalculateTooltipMargin(RefPtr<FrameNode>& textNode, MarginProperty& textMargin);
     void HandleShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
     void ShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
-    void RegisterVisibleAreaChangeCallback();
+    void RegisterVisibleAreaChangeCallback(const RefPtr<PipelineContext> &context);
     bool CheckSafeAreaIsExpand();
+    bool CheckSafeAreaKeyBoard();
     void SelectCancel() const;
     std::string GetSelectInfo() const;
     void UpdateRunQuickMenuSelectInfo(SelectOverlayInfo& selectInfo,
@@ -728,7 +762,10 @@ private:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertTouchHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> beginTouchHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endTouchHandle);
-    double GetNewScale(double& scale);
+    double GetNewScale(double& scale) const;
+    void UpdateSlideOffset(bool isNeedReset = false);
+    void ClearKeyEventBeforeUp(
+        const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -765,6 +802,7 @@ private:
     Size drawSize_;
     Size rootLayerChangeSize_;
     Size drawSizeCache_;
+    Size areaChangeSize_;
     bool isNeedReDrawRect_ = false;
     bool needUpdateWeb_ = true;
     bool isFocus_ = false;
@@ -820,6 +858,7 @@ private:
     std::optional<ScriptItems> onDocumentStartScriptItems_;
     std::optional<ScriptItems> onDocumentEndScriptItems_;
     bool isOfflineMode_ = false;
+    bool isAttachedToMainTree_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
     bool accessibilityState_ = false;
     RefPtr<WebAccessibilityNode> webAccessibilityNode_;
@@ -829,14 +868,19 @@ private:
     ReachEdge isFlingReachEdge_ = { false, false };
     RefPtr<PinchGesture> pinchGesture_ = nullptr;
     std::queue<TouchEventInfo> touchEventQueue_;
-    std::unordered_map<int32_t, bool> naitve_map_;
     std::vector<NG::MenuOptionsParam> menuOptionParam_ {};
-    bool embedNeedKeyboard_ = false;
+    std::list<KeyEvent> webKeyEvent_ {};
     double startPinchScale_ = -1.0;
     double preScale_ = -1.0;
     double pageScale_ = 1.0;
     int32_t pinchIndex_ = 0;
     bool zoomOutSwitch_ = false;
+    bool isTouchUpEvent_ = false;
+    int32_t zoomStatus_ = 0;
+    int32_t zoomErrorCount_ = 0;
+    RefPtr<OverlayManager> keyboardOverlay_;
+    std::function<void()> customKeyboardBuilder_ = nullptr;
+    std::function<void(int32_t)> updateInstanceIdCallback_;
 };
 } // namespace OHOS::Ace::NG
 

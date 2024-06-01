@@ -51,10 +51,23 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr char ABILITY_KEY_ASYNC[] = "ability.want.params.KeyAsync";
+constexpr char ABILITY_KEY_IS_MODAL[] = "ability.want.params.IsModal";
+constexpr char ATOMIC_SERVICE_PREFIX[] = "com.atomicservice.";
+
+bool StartWith(const std::string &source, const std::string &prefix)
+{
+    if (source.empty() || prefix.empty()) {
+        return false;
+    }
+
+    return source.find(prefix) == 0;
 }
+}
+
 UIExtensionPattern::UIExtensionPattern(
     bool isTransferringCaller, bool isModal, bool isAsyncModalBinding, SessionType sessionType)
-    : isTransferringCaller_(isTransferringCaller), isModal_(isModal), isAsyncModalBinding_(isAsyncModalBinding)
+    : isTransferringCaller_(isTransferringCaller), isModal_(isModal),
+    isAsyncModalBinding_(isAsyncModalBinding), sessionType_(sessionType)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -141,10 +154,32 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
     }
 
     isKeyAsync_ = want.GetBoolParam(ABILITY_KEY_ASYNC, false);
-    UIEXT_LOGI("The ability KeyAsync %{public}d.", isKeyAsync_);
+    bool shouldCallSystem = ShouldCallSystem(want);
+    UIEXT_LOGI("The ability KeyAsync %{public}d, shouldCallSystem: %{public}d.",
+        isKeyAsync_, shouldCallSystem);
     MountPlaceholderNode();
-    sessionWrapper_->CreateSession(want, isAsyncModalBinding_);
+    sessionWrapper_->CreateSession(want, isAsyncModalBinding_, shouldCallSystem);
     NotifyForeground();
+}
+
+bool UIExtensionPattern::ShouldCallSystem(const AAFwk::Want& want)
+{
+    if (sessionType_ != SessionType::UI_EXTENSION_ABILITY) {
+        return false;
+    }
+
+    if (isModal_) {
+        return false;
+    }
+
+    bool wantParamModal = want.GetBoolParam(ABILITY_KEY_IS_MODAL, false);
+    auto bundleName = want.GetElement().GetBundleName();
+    bool startWithAtomicService = StartWith(bundleName, ATOMIC_SERVICE_PREFIX);
+    if (wantParamModal && startWithAtomicService) {
+        return false;
+    }
+
+    return true;
 }
 
 void UIExtensionPattern::OnConnect()
@@ -218,11 +253,6 @@ void UIExtensionPattern::OnDisconnect(bool isAbnormal)
     CHECK_NULL_VOID(host);
     host->RemoveChild(contentNode_);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-}
-
-void UIExtensionPattern::OnAreaChangedInner()
-{
-    DispatchDisplayArea();
 }
 
 bool UIExtensionPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -299,6 +329,20 @@ void UIExtensionPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(pipeline);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    OnAreaChangedFunc onAreaChangedFunc = [weak = WeakClaim(this)](
+        const RectF& oldRect,
+        const OffsetF& oldOrigin,
+        const RectF& rect,
+        const OffsetF& origin) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->DispatchDisplayArea();
+    };
+    eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
+
     pipeline->AddOnAreaChangeNode(host->GetId());
     callbackId_ = pipeline->RegisterSurfacePositionChangedCallback([weak = WeakClaim(this)](int32_t, int32_t) {
         auto pattern = weak.Upgrade();
@@ -495,6 +539,9 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
 void UIExtensionPattern::HandleMouseEvent(const MouseInfo& info)
 {
     if (info.GetSourceDevice() != SourceType::MOUSE) {
+        return;
+    }
+    if (info.GetPullAction() == MouseAction::PULL_MOVE || info.GetPullAction() == MouseAction::PULL_UP) {
         return;
     }
     const auto pointerEvent = info.GetPointerEvent();
@@ -695,6 +742,12 @@ void UIExtensionPattern::FireOnResultCallback(int32_t code, const AAFwk::Want& w
         onResultCallback_(code, want);
     }
     state_ = AbilityState::DESTRUCTION;
+}
+
+bool UIExtensionPattern::IsCompatibleOldVersion()
+{
+    ContainerScope scope(instanceId_);
+    return (sessionType_ == SessionType::UI_EXTENSION_ABILITY) && (onTerminatedCallback_ == nullptr);
 }
 
 void UIExtensionPattern::SetOnTerminatedCallback(

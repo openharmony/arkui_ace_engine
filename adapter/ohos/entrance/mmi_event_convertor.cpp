@@ -24,6 +24,7 @@
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/event/ace_events.h"
+#include "core/event/key_event.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::Platform {
@@ -159,6 +160,10 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
         event.screenX = item.GetDisplayXPos();
         event.screenY = item.GetDisplayYPos();
     }
+    event.pressedKeyCodes_.clear();
+    for (const auto& curCode : pointerEvent->GetPressedKeys()) {
+        event.pressedKeyCodes_.emplace_back(static_cast<KeyCode>(curCode));
+    }
     return event;
 }
 
@@ -232,9 +237,7 @@ void GetMouseEventAction(int32_t action, MouseEvent& events, bool isScenceBoardW
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_DOWN:
             events.action = MouseAction::PRESS;
-            if (isScenceBoardWindow) {
-                events.pullAction = MouseAction::PULL_DOWN;
-            }
+            events.pullAction = MouseAction::PULL_DOWN;
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE:
             events.action = MouseAction::MOVE;
@@ -242,9 +245,7 @@ void GetMouseEventAction(int32_t action, MouseEvent& events, bool isScenceBoardW
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP:
             events.action = MouseAction::RELEASE;
-            if (isScenceBoardWindow) {
-                events.pullAction = MouseAction::PULL_UP;
-            }
+            events.pullAction = MouseAction::PULL_UP;
             break;
         default:
             events.action = MouseAction::NONE;
@@ -328,9 +329,9 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         events.originalId = events.id;
     }
     events.touchEventId = pointerEvent->GetId();
-    events.pressedCodes.clear();
+    events.pressedKeyCodes_.clear();
     for (const auto& curCode : pointerEvent->GetPressedKeys()) {
-        events.pressedCodes.emplace_back(static_cast<KeyCode>(curCode));
+        events.pressedKeyCodes_.emplace_back(static_cast<KeyCode>(curCode));
     }
 }
 
@@ -440,6 +441,10 @@ void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     event.time = TimeStamp(std::chrono::microseconds(pointerEvent->GetActionTime()));
     event.sourceTool = GetSourceTool(pointerItem.GetToolType());
     event.targetWindowId = pointerItem.GetTargetWindowId();
+    event.pressedKeyCodes_.clear();
+    for (const auto& curCode : pointerEvent->GetPressedKeys()) {
+        event.pressedKeyCodes_.emplace_back(static_cast<KeyCode>(curCode));
+    }
 }
 
 void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_t instanceId)
@@ -487,6 +492,11 @@ void CalculatePointerEvent(const NG::OffsetF& offsetF, const std::shared_ptr<MMI
     if (ret) {
         float xRelative = item.GetWindowX();
         float yRelative = item.GetWindowY();
+        if (point->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN &&
+            item.GetToolType() == OHOS::MMI::PointerEvent::TOOL_TYPE_PEN) {
+            xRelative = item.GetWindowXPos();
+            yRelative = item.GetWindowYPos();
+        }
         auto windowX = xRelative;
         auto windowY = yRelative;
         auto pipelineContext = PipelineBase::GetCurrentContext();
@@ -519,6 +529,8 @@ void CalculatePointerEvent(const NG::OffsetF& offsetF, const std::shared_ptr<MMI
 
         item.SetWindowX(static_cast<int32_t>(windowX));
         item.SetWindowY(static_cast<int32_t>(windowY));
+        item.SetWindowXPos(windowX);
+        item.SetWindowYPos(windowY);
         point->UpdatePointerItem(pointerId, item);
     }
 }
@@ -537,6 +549,11 @@ void CalculateWindowCoordinate(const NG::OffsetF& offsetF, const std::shared_ptr
         }
         float xRelative = item.GetDisplayX();
         float yRelative = item.GetDisplayY();
+        if (point->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN &&
+            item.GetToolType() == OHOS::MMI::PointerEvent::TOOL_TYPE_PEN) {
+            xRelative = item.GetDisplayXPos();
+            yRelative = item.GetDisplayYPos();
+        }
         float windowX = xRelative;
         float windowY = yRelative;
         int32_t deviceWidth = SystemProperties::GetDevicePhysicalWidth();
@@ -564,6 +581,8 @@ void CalculateWindowCoordinate(const NG::OffsetF& offsetF, const std::shared_ptr
 
         item.SetWindowX(static_cast<int32_t>(windowX));
         item.SetWindowY(static_cast<int32_t>(windowY));
+        item.SetWindowXPos(windowX);
+        item.SetWindowYPos(windowY);
         point->UpdatePointerItem(id, item);
     }
 }

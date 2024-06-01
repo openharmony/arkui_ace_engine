@@ -457,7 +457,7 @@ void XComponentElement::OnXComponentSizeInit(int64_t textureId, int32_t textureW
                 xcomponentElement->OnXComponentInit("");
             }
         }
-    }, "ArkUIXComponentSurfaceInit");
+    }, "ArkUIXComponentSurfaceSizeInit");
 #else
     if (texture_) {
         texture_->SetSize(textureId, textureWidth, textureHeight,

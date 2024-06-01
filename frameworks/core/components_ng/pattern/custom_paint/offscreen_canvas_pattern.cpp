@@ -443,7 +443,8 @@ size_t OffscreenCanvasPattern::GetBitmapSize()
 void OffscreenCanvasPattern::Reset()
 {
     offscreenPaintMethod_->Reset();
-    currentSetTextDirection_ = TextDirection::INHERIT;
+    offscreenPaintMethod_->SetTextDirection(
+        AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
 }
 
 void OffscreenCanvasPattern::UpdateTextDefaultDirection()
@@ -453,5 +454,10 @@ void OffscreenCanvasPattern::UpdateTextDefaultDirection()
     }
     offscreenPaintMethod_->SetTextDirection(
         AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
+}
+
+RefPtr<PixelMap> OffscreenCanvasPattern::TransferToImageBitmap()
+{
+    return offscreenPaintMethod_->TransferToImageBitmap();
 }
 } // namespace OHOS::Ace::NG

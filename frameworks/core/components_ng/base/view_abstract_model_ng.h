@@ -178,6 +178,26 @@ public:
         ViewAbstract::SetDisallowDropForcedly(isDisallowDropForcedly);
     }
 
+    void SetVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect) override
+    {
+        ViewAbstract::SetVisualEffect(visualEffect);
+    }
+
+    void SetBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter) override
+    {
+        ViewAbstract::SetBackgroundFilter(backgroundFilter);
+    }
+
+    void SetForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter) override
+    {
+        ViewAbstract::SetForegroundFilter(foregroundFilter);
+    }
+
+    void SetCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) override
+    {
+        ViewAbstract::SetCompositingFilter(compositingFilter);
+    }
+
     void SetPadding(const CalcDimension& value) override
     {
         if (value.Unit() == DimensionUnit::CALC) {
@@ -789,6 +809,17 @@ public:
     void SetOnTouchIntercept(NG::TouchInterceptFunc&& touchInterceptFunc) override
     {
         ViewAbstract::SetOnTouchIntercept(std::move(touchInterceptFunc));
+    }
+
+    void SetShouldBuiltInRecognizerParallelWith(
+        NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc) override
+    {
+        ViewAbstract::SetShouldBuiltInRecognizerParallelWith(std::move(shouldBuiltInRecognizerParallelWithFunc));
+    }
+
+    void SetOnGestureRecognizerJudgeBegin(NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) override
+    {
+        ViewAbstract::SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc));
     }
 
     void SetOnTouch(TouchEventFunc&& touchEventFunc) override

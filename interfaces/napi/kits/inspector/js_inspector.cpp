@@ -73,10 +73,10 @@ static size_t ParseArgs(
     return argc;
 }
 
-void ComponentObserver::callUserFunction(std::list<napi_ref>& cbList)
+void ComponentObserver::callUserFunction(napi_env env, std::list<napi_ref>& cbList)
 {
     napi_handle_scope scope = nullptr;
-    napi_open_handle_scope(env_, &scope);
+    napi_open_handle_scope(env, &scope);
     if (scope == nullptr) {
         return;
     }
@@ -84,21 +84,21 @@ void ComponentObserver::callUserFunction(std::list<napi_ref>& cbList)
     std::list<napi_value> cbs;
     for (auto& cbRef : cbList) {
         napi_value cb = nullptr;
-        napi_get_reference_value(env_, cbRef, &cb);
+        napi_get_reference_value(env, cbRef, &cb);
         cbs.emplace_back(cb);
     }
     for (auto& cb : cbs) {
         napi_value resultArg = nullptr;
         napi_value result = nullptr;
-        napi_call_function(env_, nullptr, cb, 1, &resultArg, &result);
+        napi_call_function(env, nullptr, cb, 1, &resultArg, &result);
     }
-    napi_close_handle_scope(env_, scope);
+    napi_close_handle_scope(env, scope);
 }
 
-std::list<napi_ref>::iterator ComponentObserver::FindCbList(napi_value cb, CalloutType calloutType)
+std::list<napi_ref>::iterator ComponentObserver::FindCbList(napi_env env, napi_value cb, CalloutType calloutType)
 {
     if (calloutType == CalloutType::LAYOUTCALLOUT) {
-        return std::find_if(cbLayoutList_.begin(), cbLayoutList_.end(), [env = env_, cb](const napi_ref& item) -> bool {
+        return std::find_if(cbLayoutList_.begin(), cbLayoutList_.end(), [env, cb](const napi_ref& item) -> bool {
             bool result = false;
             napi_value refItem;
             napi_get_reference_value(env, item, &refItem);
@@ -106,7 +106,7 @@ std::list<napi_ref>::iterator ComponentObserver::FindCbList(napi_value cb, Callo
             return result;
         });
     } else {
-        return std::find_if(cbDrawList_.begin(), cbDrawList_.end(), [env = env_, cb](const napi_ref& item) -> bool {
+        return std::find_if(cbDrawList_.begin(), cbDrawList_.end(), [env, cb](const napi_ref& item) -> bool {
             bool result = false;
             napi_value refItem;
             napi_get_reference_value(env, item, &refItem);
@@ -119,7 +119,7 @@ std::list<napi_ref>::iterator ComponentObserver::FindCbList(napi_value cb, Callo
 void ComponentObserver::AddCallbackToList(
     napi_value cb, std::list<napi_ref>& cbList, CalloutType calloutType, napi_env env, napi_handle_scope scope)
 {
-    auto iter = FindCbList(cb, calloutType);
+    auto iter = FindCbList(env, cb, calloutType);
     if (iter != cbList.end()) {
         napi_close_handle_scope(env, scope);
         return;
@@ -135,14 +135,14 @@ void ComponentObserver::DeleteCallbackFromList(
 {
     if (argc == 1) {
         for (auto& item : cbList) {
-            napi_delete_reference(env_, item);
+            napi_delete_reference(env, item);
         }
         cbList.clear();
     } else {
         NAPI_ASSERT_RETURN_VOID(env, (argc == PARA_COUNT && cb != nullptr), "Invalid arguments");
-        auto iter = FindCbList(cb, calloutType);
+        auto iter = FindCbList(env, cb, calloutType);
         if (iter != cbList.end()) {
-            napi_delete_reference(env_, *iter);
+            napi_delete_reference(env, *iter);
             cbList.erase(iter);
         }
     }
@@ -229,6 +229,7 @@ void ComponentObserver::NapiSerializer(napi_env& env, napi_value& result)
         env, result, this,
         [](napi_env env, void* data, void* hint) {
             ComponentObserver* observer = static_cast<ComponentObserver*>(data);
+            observer->Destroy(env);
             if (observer != nullptr) {
                 delete observer;
             }
@@ -240,15 +241,28 @@ void ComponentObserver::NapiSerializer(napi_env& env, napi_value& result)
     napi_close_handle_scope(env, scope);
 }
 
+void ComponentObserver::Destroy(napi_env env)
+{
+    for (auto& layoutitem : cbLayoutList_) {
+        napi_delete_reference(env, layoutitem);
+    }
+    for (auto& drawitem : cbDrawList_) {
+        napi_delete_reference(env, drawitem);
+    }
+    auto jsEngine = EngineHelper::GetCurrentEngineSafely();
+    if (!jsEngine) {
+        return;
+    }
+    jsEngine->UnregisterLayoutInspectorCallback(layoutEvent_, componentId_);
+    jsEngine->UnregisterDrawInspectorCallback(drawEvent_, componentId_);
+}
+
 void ComponentObserver::Initialize(napi_env env, napi_value thisVar)
 {
     napi_handle_scope scope = nullptr;
     napi_open_handle_scope(env, &scope);
     if (scope == nullptr) {
         return;
-    }
-    if (env_ == nullptr) {
-        env_ = env;
     }
     napi_close_handle_scope(env, scope);
 }
@@ -277,10 +291,10 @@ static napi_value JSCreateComponentObserver(napi_env env, napi_callback_info inf
     ComponentObserver* observer = new ComponentObserver(componentIdStr);
     napi_value result = nullptr;
     observer->NapiSerializer(env, result);
-    auto layoutCallback = [observer]() { observer->callUserFunction(observer->cbLayoutList_); };
+    auto layoutCallback = [observer, env]() { observer->callUserFunction(env, observer->cbLayoutList_); };
     observer->layoutEvent_ = AceType::MakeRefPtr<InspectorEvent>(std::move(layoutCallback));
 
-    auto drawCallback = [observer]() { observer->callUserFunction(observer->cbDrawList_); };
+    auto drawCallback = [observer, env]() { observer->callUserFunction(env, observer->cbDrawList_); };
     observer->drawEvent_ = AceType::MakeRefPtr<InspectorEvent>(std::move(drawCallback));
 
     auto jsEngine = EngineHelper::GetCurrentEngineSafely();

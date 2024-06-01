@@ -75,17 +75,19 @@ public:
 
     // Called on Main Thread.
     void AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty);
+    void AddLayoutNode(const RefPtr<FrameNode>& layoutNode);
     void AddDirtyRenderNode(const RefPtr<FrameNode>& dirty);
     void AddPredictTask(PredictTask&& task);
-    void AddAfterLayoutTask(std::function<void()>&& task);
+    void AddAfterLayoutTask(std::function<void()>&& task, bool isFlushInImplicitAnimationTask = false);
     void AddAfterRenderTask(std::function<void()>&& task);
     void AddPersistAfterLayoutTask(std::function<void()>&& task);
 
     void FlushLayoutTask(bool forceUseMainThread = false);
     void FlushRenderTask(bool forceUseMainThread = false);
-    void FlushTask();
+    void FlushTask(bool triggeredByImplicitAnimation = false);
     void FlushPredictTask(int64_t deadline, bool canUseLongPredictTask = false);
     void FlushAfterLayoutTask();
+    void FlushAfterLayoutCallbackInImplicitAnimationTask();
     void FlushAfterRenderTask();
     void FlushPersistAfterLayoutTask();
     void ExpandSafeArea();
@@ -143,6 +145,8 @@ public:
 private:
     bool NeedAdditionalLayout();
 
+    void SetLayoutNodeRect();
+
     template<typename T>
     struct NodeCompare {
         bool operator()(const T& nodeLeft, const T& nodeRight) const
@@ -164,12 +168,15 @@ private:
     };
 
     using PageDirtySet = std::set<RefPtr<FrameNode>, NodeCompare<RefPtr<FrameNode>>>;
+    using LayoutNodesSet = std::set<RefPtr<FrameNode>, NodeCompare<RefPtr<FrameNode>>>;
     using RootDirtyMap = std::map<uint32_t, PageDirtySet>;
 
     std::list<RefPtr<FrameNode>> dirtyLayoutNodes_;
+    std::list<RefPtr<FrameNode>> layoutNodes_;
     RootDirtyMap dirtyRenderNodes_;
     std::list<PredictTask> predictTask_;
     std::list<std::function<void()>> afterLayoutTasks_;
+    std::list<std::function<void()>> afterLayoutCallbacksInImplicitAnimationTask_;
     std::list<std::function<void()>> afterRenderTasks_;
     std::list<std::function<void()>> persistAfterLayoutTasks_;
     std::list<std::function<void()>> syncGeometryNodeTasks_;

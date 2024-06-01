@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,6 +52,11 @@ public:
             InitAnimatableProperty(progressAnimatableProperty);
             progressModifier_ = AceType::MakeRefPtr<ProgressModifier>(progressAnimatableProperty);
         }
+        bool isRtl = progressLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+        if (isRightToLeft_ != isRtl) {
+            isRightToLeft_ = isRtl;
+        }
+        progressModifier_->SetIsRightToLeft(isRightToLeft_);
         progressModifier_->SetVisible(visibilityProp_);
         progressModifier_->SetUseContentModifier(UseContentModifier());
         return MakeRefPtr<ProgressPaintMethod>(progressType_, strokeWidth_, progressModifier_);
@@ -122,6 +127,8 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
+    void DumpInfo() override;
+    void OnLanguageConfigurationUpdate() override;
     void InitTouchEvent();
     void RemoveTouchEvent();
     void OnPress(const TouchEventInfo& info);
@@ -148,6 +155,7 @@ private:
     ProgressType progressType_ = ProgressType::LINEAR;
     bool isTextFromUser_ = false;
     bool visibilityProp_ = true;
+    bool isRightToLeft_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(ProgressPattern);
 };
 } // namespace OHOS::Ace::NG

@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/text/text_styles.h"
+#include "core/components_ng/pattern/text/span/tlv_util.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/utils.h"
@@ -140,6 +141,9 @@ public:                                                                         
     }
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr double DEFAULT_FONT_SIZE_VALUE = 16.0;
+}
 using FONT_FEATURES_LIST = std::list<std::pair<std::string, int32_t>>;
 class InspectorFilter;
 class Paragraph;
@@ -152,6 +156,7 @@ struct PlaceholderStyle {
     double baselineOffset = 0.0f;
     VerticalAlign verticalAlign = VerticalAlign::BOTTOM;
     TextBaseline baseline = TextBaseline::ALPHABETIC;
+    Dimension paragraphFontSize = Dimension(DEFAULT_FONT_SIZE_VALUE, DimensionUnit::FP);
 };
 
 struct CustomSpanPlaceholderInfo {
@@ -272,6 +277,9 @@ public:
     std::string GetSpanContent();
     uint32_t GetSymbolUnicode();
     std::string SymbolColorToString();
+
+    virtual bool EncodeTlv(std::vector<uint8_t>& buff);
+    static RefPtr<SpanItem> DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor);
 
 private:
     std::optional<TextStyle> textStyle_;
@@ -600,6 +608,9 @@ public:
     ResultObject GetSpanResultObject(int32_t start, int32_t end) override;
     RefPtr<SpanItem> GetSameStyleSpanItem() const override;
     ACE_DISALLOW_COPY_AND_MOVE(ImageSpanItem);
+
+    bool EncodeTlv(std::vector<uint8_t>& buff) override;
+    static RefPtr<ImageSpanItem> DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor);
 
     ImageSpanOptions options;
 };

@@ -33,6 +33,7 @@
 
 namespace OHOS::Ace {
 
+std::string FontManager::appCustomFont_ = "";
 float FontManager::fontWeightScale_ = 1.0f;
 bool FontManager::isDefaultFontChanged_ = false;
 
@@ -62,7 +63,6 @@ void FontManager::RegisterFont(const std::string& familyName, const std::string&
 
 void FontManager::SetFontFamily(const char* familyName, const char* familySrc)
 {
-    isDefaultFontChanged_ = true;
     RefPtr<FontLoader> fontLoader = FontLoader::Create(familyName, familySrc);
     fontLoader->SetDefaultFontFamily(familyName, familySrc);
 }
@@ -74,6 +74,21 @@ bool FontManager::IsDefaultFontChanged()
         isDefaultFontChanged_ = true;
     }
     return isDefaultFontChanged_;
+}
+
+bool FontManager::IsUseAppCustomFont()
+{
+    return !appCustomFont_.empty();
+}
+
+void FontManager::SetAppCustomFont(const std::string& familyName)
+{
+    appCustomFont_ = familyName;
+}
+
+const std::string& FontManager::GetAppCustomFont() const
+{
+    return appCustomFont_;
 }
 
 void FontManager::GetSystemFontList(std::vector<std::string>& fontList)
@@ -165,7 +180,7 @@ bool FontManager::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
         fontInfo.family = systemFontDesc->fontFamily;
         fontInfo.subfamily = systemFontDesc->fontSubfamily;
         fontInfo.weight = static_cast<uint32_t>(systemFontDesc->weight);
-        fontInfo.width = systemFontDesc->width;
+        fontInfo.width = static_cast<uint32_t>(systemFontDesc->width);
         fontInfo.italic = systemFontDesc->italic;
         fontInfo.monoSpace = systemFontDesc->monoSpace;
         fontInfo.symbolic = systemFontDesc->symbolic;
@@ -181,14 +196,12 @@ bool FontManager::RegisterCallback(
     const WeakPtr<RenderNode>& node, const std::string& familyName, const std::function<void()>& callback)
 {
     CHECK_NULL_RETURN(callback, false);
-    bool isCustomFont = false;
     for (auto& fontLoader : fontLoaders_) {
         if (fontLoader->GetFamilyName() == familyName) {
             fontLoader->SetOnLoaded(node, callback);
-            isCustomFont = true;
         }
     }
-    return isCustomFont;
+    return false;
 }
 
 const std::vector<std::string>& FontManager::GetFontNames() const
@@ -311,14 +324,12 @@ bool FontManager::RegisterCallbackNG(
     const WeakPtr<NG::UINode>& node, const std::string& familyName, const std::function<void()>& callback)
 {
     CHECK_NULL_RETURN(callback, false);
-    bool isCustomFont = false;
     for (auto& fontLoader : fontLoaders_) {
         if (fontLoader->GetFamilyName() == familyName) {
             fontLoader->SetOnLoadedNG(node, callback);
-            isCustomFont = true;
         }
     }
-    return isCustomFont;
+    return false;
 }
 
 void FontManager::AddFontNodeNG(const WeakPtr<NG::UINode>& node)

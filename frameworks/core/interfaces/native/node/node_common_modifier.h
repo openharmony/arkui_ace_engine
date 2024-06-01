@@ -32,4 +32,5 @@ void SetOnTouch(ArkUINodeHandle node, void* extraParam);
 void SetOnTouchIntercept(ArkUINodeHandle node, void* extraParam);
 void SetOnHover(ArkUINodeHandle node, void* extraParam);
 void SetOnMouse(ArkUINodeHandle node, void* extraParam);
+void SetOnAccessibilityActions(ArkUINodeHandle node, void* extraParam);
 } // namespace OHOS::Ace::NG::NodeModifier

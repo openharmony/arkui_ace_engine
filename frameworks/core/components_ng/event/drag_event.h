@@ -76,12 +76,23 @@ public:
         actionLongPress_ = std::move(actionLongPress);
     }
 
+    const std::vector<KeyCode>& GetPressedKeyCodes() const
+    {
+        return pressedKeyCodes_;
+    }
+
+    void SetPressedKeyCodes(const std::vector<KeyCode>& pressedKeyCodes)
+    {
+        pressedKeyCodes_ = pressedKeyCodes;
+    }
+
 private:
     GestureEventFunc actionStart_;
     GestureEventFunc actionUpdate_;
     GestureEventFunc actionEnd_;
     GestureEventNoParameter actionCancel_;
     GestureEventFunc actionLongPress_;
+    std::vector<KeyCode> pressedKeyCodes_;
 };
 
 class ACE_EXPORT DragEventActuator : public GestureEventActuator {
@@ -107,6 +118,11 @@ public:
         customCallback_ = dragEvent;
     }
 
+    bool HasDragEvent() const
+    {
+        return static_cast<bool>(userCallback_);
+    }
+
     void ClearDragEvent()
     {
         if (userCallback_) {
@@ -118,7 +134,8 @@ public:
     }
 
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-        const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result) override;
+        const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result,
+        TouchTestResult& responseLinkResult) override;
     void SetThumbnailCallback(std::function<void(Offset)>&& callback);
     void SetFilter(const RefPtr<DragEventActuator>& actuator);
     static void UpdatePreviewPositionAndScale(const RefPtr<FrameNode>& imageNode, const OffsetF& frameOffset);
@@ -144,6 +161,7 @@ public:
     bool GetIsBindOverlayValue(const RefPtr<DragEventActuator>& actuator);
     bool IsAllowedDrag();
     void SetTextPixelMap(const RefPtr<GestureEventHub>& gestureHub);
+    void RestartDragTask(const GestureEvent& info);
     static OffsetF GetFloatImageOffset(const RefPtr<FrameNode>& frameNode, const RefPtr<PixelMap>& pixelMap);
     PanDirection GetDirection() const
     {
@@ -189,13 +207,23 @@ public:
         return isDragUserReject_;
     }
 
+    void SetIsDefaultOnDragStartExecuted(bool defaultOnDragStartExecuted)
+    {
+        defaultOnDragStartExecuted_ = defaultOnDragStartExecuted;
+    }
+
+    bool IsDefaultOnDragStartExecuted() const
+    {
+        return defaultOnDragStartExecuted_;
+    }
+
     void CopyDragEvent(const RefPtr<DragEventActuator>& dragEventActuator);
 
     void SetGatherNodeAboveFilter(const RefPtr<DragEventActuator>& actuator);
     bool IsBelongToMultiItemNode(const RefPtr<FrameNode>& frameNode);
     bool IsSelectedItemNode(const RefPtr<UINode>& uiNode);
-    void FindItemFatherNode(const RefPtr<FrameNode>& frameNode);
-    bool IsNeedGather();
+    void FindItemParentNode(const RefPtr<FrameNode>& frameNode);
+    bool IsNeedGather() const;
     static RefPtr<FrameNode> GetOrCreateGatherNode(const RefPtr<NG::OverlayManager>& overlayManager,
         const RefPtr<DragEventActuator>& actuator, std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo);
     static RefPtr<FrameNode> CreateGatherNode(const RefPtr<DragEventActuator>& actuator);
@@ -204,17 +232,17 @@ public:
     static void MarkDirtyGatherNode(const RefPtr<FrameNode>& gatherNode);
     static void ResetNode(const RefPtr<FrameNode>& frameNode);
     static void MountGatherNode(const RefPtr<OverlayManager>& overlayManager, const RefPtr<FrameNode>& frameNode,
-        const RefPtr<FrameNode>& gatherNode, std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo);
+        const RefPtr<FrameNode>& gatherNode, const std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo);
     static void GetFrameNodePreviewPixelMap(const RefPtr<FrameNode>& frameNode);
     void SetGatherNode(const RefPtr<FrameNode>& gatherNode);
-    RefPtr<FrameNode> GetGatherNode();
-    std::vector<GatherNodeChildInfo> GetGatherNodeChildrenInfo();
+    RefPtr<FrameNode> GetGatherNode() const;
+    const std::vector<GatherNodeChildInfo>& GetGatherNodeChildrenInfo() const;
     void ClearGatherNodeChildrenInfo();
     void PushBackGatherNodeChild(GatherNodeChildInfo& gatherNodeChild);
     void HandleTouchUpEvent();
     void HandleTouchMoveEvent();
     void HandleTouchCancelEvent();
-    RefPtr<FrameNode> GetItemFatherNode();
+    const RefPtr<FrameNode> GetItemParentNode() const;
     RefPtr<FrameNode> GetFrameNode();
     static void PrepareShadowParametersForDragData(const RefPtr<FrameNode>& frameNode,
        std::unique_ptr<JsonValue>& arkExtraInfoJson, float scale);
@@ -250,7 +278,7 @@ private:
 
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
-    WeakPtr<FrameNode> itemFatherNode_;
+    WeakPtr<FrameNode> itemParentNode_;
     RefPtr<DragEvent> userCallback_;
     RefPtr<DragEvent> customCallback_;
     RefPtr<PanRecognizer> panRecognizer_;
@@ -272,6 +300,7 @@ private:
     bool isOnBeforeLiftingAnimation = false;
 
     bool isDragUserReject_ = false;
+    bool defaultOnDragStartExecuted_ = false;
 
     PanDirection direction_;
     int32_t fingers_ = 1;

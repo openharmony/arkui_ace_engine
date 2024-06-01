@@ -21,7 +21,7 @@
 #include "iconsumer_surface.h"
 #include "surface.h"
 #include "surface_delegate.h"
-#include "window.h"
+#include "surface/window.h"
 #endif
 
 #include "base/memory/referenced.h"
@@ -127,7 +127,7 @@ public:
 
     void SetExtSurfaceCallback(const RefPtr<ExtSurfaceCallbackInterface>& extSurfaceCallback) override;
 
-    void SetTransformHint(Rotation dmRotation) override;
+    void SetTransformHint(uint32_t rotation) override;
 
     void DumpInfo() override;
 

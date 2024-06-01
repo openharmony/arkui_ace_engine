@@ -49,7 +49,7 @@ bool JSSaveButton::ParseComponentStyle(const JSCallbackInfo& info,
     if (value->IsNumber()) {
         icon = static_cast<SaveButtonIconStyle>(value->ToNumber<int32_t>());
         if ((icon < SaveButtonIconStyle::ICON_FULL_FILLED) ||
-            (icon > SaveButtonIconStyle::ICON_LINE)) {
+            (icon > SaveButtonIconStyle::ICON_PICTURE)) {
             return false;
         }
     } else {
@@ -69,7 +69,7 @@ bool JSSaveButton::ParseComponentStyle(const JSCallbackInfo& info,
             return false;
         }
     } else {
-        bg = BUTTON_TYPE_NULL;
+        bg = static_cast<int32_t>(ButtonType::CAPSULE);
     }
     return true;
 }
@@ -83,10 +83,10 @@ void JSSaveButton::Create(const JSCallbackInfo& info)
         SaveButtonModelNG::GetInstance()->Create(
             static_cast<int32_t>(SaveButtonSaveDescription::DOWNLOAD),
             static_cast<int32_t>(SaveButtonIconStyle::ICON_FULL_FILLED),
-            static_cast<int32_t>(ButtonType::CAPSULE));
+            static_cast<int32_t>(ButtonType::CAPSULE), false);
     } else {
         SaveButtonModelNG::GetInstance()->Create(static_cast<int32_t>(textDesc),
-            static_cast<int32_t>(iconType), backgroundType);
+            static_cast<int32_t>(iconType), backgroundType, false);
     }
 }
 
@@ -103,12 +103,8 @@ void JsSaveButtonClickFunction::Execute(GestureEvent& info)
         static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
     clickEventParam->SetProperty<double>("source", static_cast<int32_t>(info.GetSourceDevice()));
     clickEventParam->SetProperty<double>("pressure", info.GetForce());
-    if (info.GetTiltX().has_value()) {
-        clickEventParam->SetProperty<double>("tiltX", info.GetTiltX().value());
-    }
-    if (info.GetTiltY().has_value()) {
-        clickEventParam->SetProperty<double>("tiltY", info.GetTiltY().value());
-    }
+    clickEventParam->SetProperty<double>("tiltX", info.GetTiltX().value_or(0.0f));
+    clickEventParam->SetProperty<double>("tiltY", info.GetTiltY().value_or(0.0f));
     clickEventParam->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
     auto target = CreateEventTargetObject(info);
     clickEventParam->SetPropertyObject("target", target);

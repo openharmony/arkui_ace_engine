@@ -88,6 +88,7 @@ ohos_unittest("parse_test_ng") {
     "$ace_root/test/mock/core/svg/mock_rosen_svg_painter.cpp",
     "$ace_root/test/mock/core/svg/mock_shared_transition_effect.cpp",
     "parse_test_ng.cpp",
+    "parse_testtwo_ng.cpp",
   ]
   defines = [ "USE_ROSEN_DRAWING" ]
   if (ace_use_rosen_drawing) {
@@ -104,6 +105,7 @@ ohos_unittest("parse_test_ng") {
   ]
 
   external_deps = [
+    "bounds_checking_function:libsec_static",
     "eventhandler:libeventhandler",
     "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
@@ -118,7 +120,6 @@ ohos_unittest("parse_test_ng") {
     "$ace_root/test/unittest:ace_core_animation",
     "$ace_root/test/unittest:ace_core_extra",
     "$skia_root_new:skia_ohos",
-    "//third_party/bounds_checking_function:libsec_static",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
   ]
@@ -187,6 +188,7 @@ ohos_unittest("svg_dom_test_ng") {
   ]
 
   external_deps = [
+    "bounds_checking_function:libsec_static",
     "eventhandler:libeventhandler",
     "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
@@ -201,7 +203,6 @@ ohos_unittest("svg_dom_test_ng") {
     "$ace_root/test/unittest:ace_core_animation",
     "$ace_root/test/unittest:ace_core_extra",
     "$skia_root_new:skia_ohos",
-    "//third_party/bounds_checking_function:libsec_static",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
   ]

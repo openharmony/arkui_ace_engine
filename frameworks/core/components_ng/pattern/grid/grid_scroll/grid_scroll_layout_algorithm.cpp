@@ -86,7 +86,8 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (SystemProperties::GetGridCacheEnabled()) {
         FillCacheLineAtEnd(mainSize, crossSize, layoutWrapper);
         if (!predictBuildList_.empty()) {
-            PostIdleTask(layoutWrapper->GetHostNode(), { predictBuildList_, cachedChildConstraint_ });
+            PostIdleTask(layoutWrapper->GetHostNode(),
+                { predictBuildList_, cachedChildConstraint_, itemsCrossSize_, crossGap_ });
             predictBuildList_.clear();
         }
     }
@@ -259,6 +260,10 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             gridItemLayoutProperty->UpdateMainIndex(line->first);
             gridItemLayoutProperty->UpdateCrossIndex(iter->first);
             UpdateRealGridItemPositionInfo(wrapper, line->first, iter->first);
+            auto frameNode = AceType::DynamicCast<FrameNode>(wrapper);
+            if (frameNode) {
+                frameNode->MarkAndCheckNewOpIncNode();
+            }
         }
         prevLineHeight += gridLayoutInfo_.lineHeightMap_[line->first] + mainGap_;
     }
@@ -2075,6 +2080,7 @@ void GridScrollLayoutAlgorithm::PostIdleTask(RefPtr<FrameNode> frameNode, const 
         if (!pattern->GetPredictLayoutParam().has_value()) {
             return;
         }
+        Axis axis = pattern->GetAxis();
         bool needMarkDirty = false;
         auto param = pattern->GetPredictLayoutParam().value();
         auto firstItem = param.items.begin();
@@ -2086,7 +2092,24 @@ void GridScrollLayoutAlgorithm::PostIdleTask(RefPtr<FrameNode> frameNode, const 
                 break;
             }
             auto wrapper = frameNode->GetOrCreateChildByIndex(*it, false, true);
-            needMarkDirty = PredictBuildItem(wrapper, param.layoutConstraint) || needMarkDirty;
+            CHECK_NULL_BREAK(wrapper);
+            auto itemProperty = DynamicCast<GridItemLayoutProperty>(wrapper->GetLayoutProperty());
+            CHECK_NULL_BREAK(itemProperty);
+            int32_t crossSpan = itemProperty->GetCrossSpan(axis);
+            int32_t crossStart = itemProperty->GetCrossStart(axis);
+            auto constraint = param.layoutConstraint;
+            if (crossSpan > 1) {
+                float itemCrossSize = param.crossGap * (crossSpan - 1);
+                for (int32_t index = 0; index < crossSpan; ++index) {
+                    int32_t crossIndex = (crossStart + index) % static_cast<int32_t>(param.itemsCrossSizes.size());
+                    if (crossIndex >= 0 && crossIndex < static_cast<int32_t>(param.itemsCrossSizes.size())) {
+                        itemCrossSize += param.itemsCrossSizes.at(crossIndex);
+                    }
+                }
+                constraint.maxSize.SetCrossSize(itemCrossSize, axis);
+                constraint.selfIdealSize.SetCrossSize(itemCrossSize, axis);
+            }
+            needMarkDirty = PredictBuildItem(wrapper, constraint) || needMarkDirty;
             param.items.erase(it++);
         }
         if (needMarkDirty) {
@@ -2126,7 +2149,7 @@ void GridScrollLayoutAlgorithm::UpdateMainLineOnReload(int32_t startIdx)
     }
 }
 
-std::pair<bool, bool> GridScrollLayoutAlgorithm::GetResetMode(int32_t updateIdx)
+std::pair<bool, bool> GridScrollLayoutAlgorithm::GetResetMode(LayoutWrapper* layoutWrapper, int32_t updateIdx)
 {
     if (updateIdx == -1) {
         return { 0, 0 };
@@ -2136,14 +2159,17 @@ std::pair<bool, bool> GridScrollLayoutAlgorithm::GetResetMode(int32_t updateIdx)
         int32_t startLine = 0;
         outOfMatrix = !IsIndexInMatrix(updateIdx, startLine);
     }
-    return { !gridLayoutInfo_.hasBigItem_ || outOfMatrix, gridLayoutInfo_.hasBigItem_ && !outOfMatrix };
+    auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    bool hasOptions = gridLayoutProperty->GetLayoutOptions().has_value();
+    return { !gridLayoutInfo_.hasBigItem_ || outOfMatrix || hasOptions,
+        gridLayoutInfo_.hasBigItem_ && !outOfMatrix && !hasOptions };
 }
 
 void GridScrollLayoutAlgorithm::CheckReset(float mainSize, float crossSize, LayoutWrapper* layoutWrapper)
 {
     int32_t updateIdx = layoutWrapper->GetHostNode()->GetChildrenUpdated();
     // [resetFromStart,resetFromUpdate]
-    std::pair<bool, bool> resetMode = GetResetMode(updateIdx);
+    std::pair<bool, bool> resetMode = GetResetMode(layoutWrapper, updateIdx);
     if (gridLayoutInfo_.lastCrossCount_ != crossCount_ || resetMode.first || gridLayoutInfo_.IsResetted()) {
         gridLayoutInfo_.lastCrossCount_ = crossCount_;
         gridLayoutInfo_.lineHeightMap_.clear();

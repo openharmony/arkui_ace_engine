@@ -17,7 +17,7 @@
 #define FOUNDATION_ARKUI_FRAMEWORKS_CORE_COMMON_ANR_THREAD_H
 
 #include <functional>
-#include <stdint.h>
+#include <cstdint>
 #include <string>
 
 namespace OHOS::Ace {

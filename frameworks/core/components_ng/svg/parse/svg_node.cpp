@@ -328,6 +328,13 @@ void SvgNode::InitStyle(const SvgBaseAttribute& attr)
                 attributes_.fillState.SetGradient(gradient.value());
             }
         }
+        href = attributes_.strokeState.GetHref();
+        if (!href.empty()) {
+            auto gradient = GetGradient(href);
+            if (gradient) {
+                attributes_.strokeState.SetGradient(gradient.value());
+            }
+        }
     }
     if (hrefRender_) {
         hrefClipPath_ = attributes_.clipState.GetHref();

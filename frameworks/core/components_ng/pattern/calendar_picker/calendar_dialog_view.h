@@ -76,6 +76,13 @@ private:
         const RefPtr<FrameNode>& contentColumn);
     static void UpdateDefaultFocusByButtonInfo(const RefPtr<FrameNode>& optionsNode,
         const RefPtr<FrameNode>& accept, const RefPtr<FrameNode>& cancel);
+    static void UpdateButtonLayoutProperty(const RefPtr<FrameNode>& buttonNode, bool isConfirm,
+        const std::vector<ButtonInfo>& buttonInfos, const RefPtr<PipelineContext>& pipeline);
+    static void UpdateOptionLayoutProps(
+        const RefPtr<FrameNode>& contentRow, const RefPtr<PipelineContext>& pipelineContext);
+    static void SetCalendarIdealSize(
+        const RefPtr<CalendarTheme>& theme, const RefPtr<LayoutProperty>& calendarLayoutProperty);
+    static void SetTitleIdealSize(const RefPtr<CalendarTheme>& theme, const RefPtr<LinearLayoutProperty>& layoutProps);
 };
 } // namespace OHOS::Ace::NG
 

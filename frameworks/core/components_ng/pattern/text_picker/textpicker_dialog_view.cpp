@@ -374,13 +374,33 @@ RefPtr<FrameNode> TextPickerDialogView::CreateDividerNode(const RefPtr<FrameNode
     auto dividerLayoutProps = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
     CHECK_NULL_RETURN(dividerLayoutProps, nullptr);
     dividerLayoutProps->UpdateVertical(true);
-
-    MarginProperty margin;
-    margin.top = CalcLength(dialogTheme->GetDividerHeight());
-    margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
-    dividerLayoutProps->UpdateMargin(margin);
     dividerLayoutProps->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(dialogTheme->GetDividerWidth()), CalcLength(dialogTheme->GetDividerHeight())));
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        MarginProperty margin;
+        margin.top = CalcLength(dialogTheme->GetDividerHeight());
+        margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
+        dividerLayoutProps->UpdateMargin(margin);
+        dividerLayoutProps->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(dialogTheme->GetDividerWidth()), CalcLength(dialogTheme->GetDividerHeight())));
+    } else {
+        auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+        auto dividerWrapper = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(false));
+        CHECK_NULL_RETURN(dividerWrapper, nullptr);
+        auto layoutProps = dividerWrapper->GetLayoutProperty<LinearLayoutProperty>();
+        CHECK_NULL_RETURN(layoutProps, nullptr);
+        MarginProperty margin;
+        margin.top = CalcLength(dialogTheme->GetActionsPadding().Top());
+        margin.bottom = CalcLength(dialogTheme->GetActionsPadding().Bottom());
+        layoutProps->UpdateMargin(margin);
+        layoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_AROUND);
+        layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+        layoutProps->UpdateUserDefinedIdealSize(CalcSize(
+            CalcLength(dialogTheme->GetActionsPadding().Bottom()), CalcLength(buttonTheme->GetHeight())));
+        dividerNode->MountToParent(dividerWrapper);
+        return dividerWrapper;
+    }
 
     return dividerNode;
 }
@@ -426,8 +446,20 @@ void TextPickerDialogView::UpdateButtonConfirmLayoutProperty(const RefPtr<FrameN
     buttonConfirmLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     buttonConfirmLayoutProperty->UpdateType(ButtonType::CAPSULE);
     buttonConfirmLayoutProperty->UpdateFlexShrink(1.0);
-    buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(pickerTheme->GetButtonWidth()), CalcLength(pickerTheme->GetButtonHeight())));
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
+    UpdateConfirmButtonMargin(buttonConfirmNode, dialogTheme);
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(pickerTheme->GetButtonWidth()), CalcLength(pickerTheme->GetButtonHeight())));
+    } else {
+        auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+        CHECK_NULL_VOID(buttonTheme);
+        buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(buttonTheme->GetHeight())));
+    }
 }
 
 RefPtr<FrameNode> TextPickerDialogView::CreateConfirmNode(const RefPtr<FrameNode>& dateNode,
@@ -456,7 +488,6 @@ RefPtr<FrameNode> TextPickerDialogView::CreateConfirmNode(const RefPtr<FrameNode
     CHECK_NULL_RETURN(buttonConfirmLayoutProperty, nullptr);
     UpdateButtonStyles(buttonInfos, ACCEPT_BUTTON_INDEX, buttonConfirmLayoutProperty, buttonConfirmRenderContext);
     UpdateButtonDefaultFocus(buttonInfos, buttonConfirmNode, true);
-    UpdateConfirmButtonMargin(buttonConfirmNode, dialogTheme);
 
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto eventConfirmHub = buttonConfirmNode->GetOrCreateGestureEventHub();
@@ -494,13 +525,30 @@ void TextPickerDialogView::UpdateConfirmButtonTextLayoutProperty(
     textLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
 }
 
+void TextPickerDialogView::UpdateCancelButtonTextLayoutProperty(
+    const RefPtr<FrameNode>& textCancelNode, const RefPtr<PickerTheme>& pickerTheme)
+{
+    auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textCancelLayoutProperty);
+    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+    textCancelLayoutProperty->UpdateFontSize(pickerTheme->GetOptionStyle(false, false).GetFontSize());
+    textCancelLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
+}
+
 void TextPickerDialogView::UpdateConfirmButtonMargin(
     const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<DialogTheme>& dialogTheme)
 {
     MarginProperty margin;
-    margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
-    margin.top = CalcLength(dialogTheme->GetDividerHeight());
-    margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
+        margin.top = CalcLength(dialogTheme->GetDividerHeight());
+        margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
+    } else {
+        margin.right = CalcLength(dialogTheme->GetActionsPadding().Right());
+        margin.top = CalcLength(dialogTheme->GetActionsPadding().Top());
+        margin.bottom = CalcLength(dialogTheme->GetActionsPadding().Bottom());
+    }
     buttonConfirmNode->GetLayoutProperty()->UpdateMargin(margin);
 }
 
@@ -508,9 +556,15 @@ void TextPickerDialogView::UpdateCancelButtonMargin(
     const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<DialogTheme>& dialogTheme)
 {
     MarginProperty margin;
-    margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
-    margin.top = CalcLength(dialogTheme->GetDividerHeight());
-    margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
+        margin.top = CalcLength(dialogTheme->GetDividerHeight());
+        margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
+    } else {
+        margin.left = CalcLength(dialogTheme->GetActionsPadding().Left());
+        margin.top = CalcLength(dialogTheme->GetActionsPadding().Top());
+        margin.bottom = CalcLength(dialogTheme->GetActionsPadding().Bottom());
+    }
     buttonCancelNode->GetLayoutProperty()->UpdateMargin(margin);
 }
 
@@ -589,7 +643,6 @@ RefPtr<FrameNode> TextPickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
-    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
@@ -598,11 +651,7 @@ RefPtr<FrameNode> TextPickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_RETURN(textCancelNode, nullptr);
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(textCancelLayoutProperty, nullptr);
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
-    textCancelLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
-    textCancelLayoutProperty->UpdateFontSize(pickerTheme->GetOptionStyle(false, false).GetFontSize());
-    textCancelLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
+    UpdateCancelButtonTextLayoutProperty(textCancelNode, pickerTheme);
     auto textPattern = textPickerNode->GetPattern<TextPickerPattern>();
     textPattern->SetCancelNode(buttonCancelNode);
     textCancelNode->MountToParent(buttonCancelNode);
@@ -623,23 +672,38 @@ RefPtr<FrameNode> TextPickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     CHECK_NULL_RETURN(buttonCancelEventHub, nullptr);
     buttonCancelEventHub->SetStateEffect(true);
 
-    UpdateCancelButtonMargin(buttonCancelNode, dialogTheme);
-
-    auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
-    buttonCancelLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.cancel"));
-    buttonCancelLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    buttonCancelLayoutProperty->UpdateType(ButtonType::CAPSULE);
-    buttonCancelLayoutProperty->UpdateFlexShrink(1.0);
-    buttonCancelLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(pickerTheme->GetButtonWidth()), CalcLength(pickerTheme->GetButtonHeight())));
-
+    UpdateButtonCancelLayoutProperty(buttonCancelNode, pipeline);
+    
     auto buttonCancelRenderContext = buttonCancelNode->GetRenderContext();
     buttonCancelRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
     UpdateButtonStyles(buttonInfos, CANCEL_BUTTON_INDEX, buttonCancelLayoutProperty, buttonCancelRenderContext);
     UpdateButtonDefaultFocus(buttonInfos, buttonCancelNode, false);
 
     buttonCancelNode->MarkModifyDone();
     return buttonCancelNode;
+}
+
+
+void TextPickerDialogView::UpdateButtonCancelLayoutProperty(
+    const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<PipelineContext>& pipeline)
+{
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    UpdateCancelButtonMargin(buttonCancelNode, dialogTheme);
+    auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
+    buttonCancelLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    buttonCancelLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+    buttonCancelLayoutProperty->UpdateType(ButtonType::CAPSULE);
+    buttonCancelLayoutProperty->UpdateFlexShrink(1.0);
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        buttonCancelLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(pickerTheme->GetButtonWidth()), CalcLength(pickerTheme->GetButtonHeight())));
+    } else {
+        buttonCancelLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(buttonTheme->GetHeight())));
+    }
 }
 
 void TextPickerDialogView::SetSelected(const RefPtr<TextPickerPattern>& textPickerPattern, uint32_t value)

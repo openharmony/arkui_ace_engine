@@ -36,6 +36,8 @@ struct SwiperParameters {
     std::optional<Dimension> dimTop;
     std::optional<Dimension> dimRight;
     std::optional<Dimension> dimBottom;
+    std::optional<Dimension> dimStart;
+    std::optional<Dimension> dimEnd;
     std::optional<Dimension> itemWidth;
     std::optional<Dimension> itemHeight;
     std::optional<Dimension> selectedItemWidth;
@@ -58,6 +60,14 @@ struct SwiperDigitalParameters {
     std::optional<FontWeight> selectedFontWeight;
 };
 
+struct SwiperArcDotParameters {
+    std::optional<SwiperArcDirection> arcDirection;
+    std::optional<Color> itemColor;
+    std::optional<Color> selectedItemColor;
+    std::optional<Color> containerColor;
+    std::optional<NG::Gradient> maskColor;
+};
+
 struct SwiperArrowParameters {
     std::optional<bool> isShowBackground;
     std::optional<bool> isSidebarMiddle;
@@ -73,6 +83,11 @@ struct AnimationCallbackInfo {
     std::optional<float> velocity;
 };
 
+struct SwiperMarginOptions {
+    float margin;
+    bool ignoreBlank;
+};
+
 using AnimationStartEvent = std::function<void(int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info)>;
 using AnimationStartEventPtr = std::shared_ptr<AnimationStartEvent>;
 using AnimationEndEvent = std::function<void(int32_t index, const AnimationCallbackInfo& info)>;
@@ -81,7 +96,7 @@ using GestureSwipeEvent = std::function<void(int32_t index, const AnimationCallb
 using ContentDidScrollEvent =
     std::function<void(int32_t selectedIndex, int32_t index, float position, float mainAxisLength)>;
 
-class ACE_EXPORT SwiperModel {
+class ACE_FORCE_EXPORT SwiperModel {
 public:
     static SwiperModel* GetInstance();
     virtual ~SwiperModel() = default;
@@ -121,6 +136,7 @@ public:
     virtual void SetIndicatorType(SwiperIndicatorType indicatorType) {}
     virtual void SetIsIndicatorCustomSize(bool isCustomSize) {}
     virtual void SetDotIndicatorStyle(const SwiperParameters& swiperParameters) {}
+    virtual void SetArcDotIndicatorStyle(const SwiperArcDotParameters& swiperArcDotParameters) {}
     virtual void SetDigitIndicatorStyle(const SwiperDigitalParameters& swiperDigitalParameters) {}
     virtual void SetPreviousMargin(const Dimension& prevMargin, bool ignoreBlank) {}
     virtual void SetNextMargin(const Dimension& nextMargin, bool ignoreBlank) {}

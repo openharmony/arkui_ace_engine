@@ -125,6 +125,7 @@ private:
     void InitCurrentInputEvent();
     void InitChildInputEvent(RefPtr<FrameNode>& itemNode, int32_t childIndex);
     void InitPopupInputEvent();
+    void InitPopupPanEvent();
     void InitOnKeyEvent();
     bool OnKeyEvent(const KeyEvent& event);
     void OnHover(bool isHover);
@@ -179,7 +180,7 @@ private:
         const RefPtr<FrameNode>& listNode, RefPtr<IndexerTheme>& indexerTheme, uint32_t pos);
     void UpdateBubbleListItemMarkModify(RefPtr<FrameNode>& textNode, RefPtr<FrameNode>& listItemNode);
     void StartCollapseDelayTask(RefPtr<FrameNode>& hostNode, uint32_t duration = INDEXER_COLLAPSE_WAIT_DURATION);
-    
+
     RefPtr<FrameNode> popupNode_;
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<PanEvent> panEvent_;
@@ -218,6 +219,7 @@ private:
     bool lastIndexFromPress_ = false;
     bool selectChanged_ = false;
     bool autoCollapse_ = false;
+    bool enableHapticFeedback_ = true;
     float actualIndexerHeight_ = 0.0f;
     bool isNewHeightCalculated_ = false;
     IndexerCollapsingMode lastCollapsingMode_ = IndexerCollapsingMode::INVALID;

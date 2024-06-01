@@ -58,6 +58,7 @@ public:
     void SetDescription(const JSCallbackInfo& args);
     void GetVelocityX(const JSCallbackInfo& args);
     void GetVelocityY(const JSCallbackInfo& args);
+    void GetModifierKeyState(const JSCallbackInfo& args);
     void GetVelocity(const JSCallbackInfo& args);
     void SetData(const JSCallbackInfo& args);
     void GetData(const JSCallbackInfo& args);

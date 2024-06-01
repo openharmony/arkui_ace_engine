@@ -339,13 +339,13 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     public __mkRepeatAPI: <I>(arr: Array<I>) => RepeatAPI<I> = <I>(arr: Array<I>): RepeatAPI<I> => {
         // factory is for future extensions, currently always return the same
         const elmtId = this.getCurrentlyRenderedElmtId();
-        let repeat = this.elmtId2Repeat_.get(elmtId) as __RepeatV2<I>
+        let repeat = this.elmtId2Repeat_.get(elmtId) as __RepeatV2<I>;
         if (!repeat) {
             repeat = new __RepeatV2<I>(arr);
             this.elmtId2Repeat_.set(elmtId, repeat);
         } else {
-            repeat.updateArr(arr)
+            repeat.updateArr(arr);
         }
         return repeat;
-    }
+    };
 }

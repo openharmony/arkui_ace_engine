@@ -713,7 +713,9 @@ uint32_t TextModelNG::GetMaxLines(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, defaultMaxLines);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, defaultMaxLines);
-    return layoutProperty->GetTextLineStyle()->GetMaxLines().value_or(defaultMaxLines);
+    auto& textLineStyle = layoutProperty->GetTextLineStyle();
+    CHECK_NULL_RETURN(textLineStyle, defaultMaxLines);
+    return textLineStyle->GetMaxLines().value_or(defaultMaxLines);
 }
 
 TextAlign TextModelNG::GetTextAlign(FrameNode* frameNode)
@@ -721,7 +723,9 @@ TextAlign TextModelNG::GetTextAlign(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, OHOS::Ace::TextAlign::START);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, OHOS::Ace::TextAlign::START);
-    return layoutProperty->GetTextLineStyle()->GetTextAlign().value_or(TextAlign::START);
+    auto& textLineStyle = layoutProperty->GetTextLineStyle();
+    CHECK_NULL_RETURN(textLineStyle, OHOS::Ace::TextAlign::START);
+    return textLineStyle->GetTextAlign().value_or(TextAlign::START);
 }
 
 TextOverflow TextModelNG::GetTextOverflow(FrameNode* frameNode)
@@ -729,7 +733,9 @@ TextOverflow TextModelNG::GetTextOverflow(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, TextOverflow::CLIP);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, TextOverflow::CLIP);
-    return layoutProperty->GetTextLineStyle()->GetTextOverflow().value_or(TextOverflow::CLIP);
+    auto& textLineStyle = layoutProperty->GetTextLineStyle();
+    CHECK_NULL_RETURN(textLineStyle, TextOverflow::CLIP);
+    return textLineStyle->GetTextOverflow().value_or(TextOverflow::CLIP);
 }
 
 Dimension TextModelNG::GetTextIndent(FrameNode* frameNode)
@@ -738,7 +744,9 @@ Dimension TextModelNG::GetTextIndent(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, defaultTextIndent);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, defaultTextIndent);
-    return layoutProperty->GetTextLineStyle()->GetTextIndent().value_or(defaultTextIndent);
+    auto& textLineStyle = layoutProperty->GetTextLineStyle();
+    CHECK_NULL_RETURN(textLineStyle, defaultTextIndent);
+    return textLineStyle->GetTextIndent().value_or(defaultTextIndent);
 }
 
 std::vector<std::string> TextModelNG::GetFontFamily(FrameNode* frameNode)
@@ -992,5 +1000,39 @@ void TextModelNG::SetTextContentWithStyledString(FrameNode* frameNode, ArkUI_Sty
 #endif
     }
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void TextModelNG::SetTextSelection(FrameNode* frameNode, int32_t startIndex, int32_t endIndex)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetTextSelection(startIndex, endIndex);
+}
+
+void TextModelNG::SetTextDetectConfig(FrameNode* frameNode, const std::string& value,
+    std::function<void(const std::string&)>&& onResult)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetTextDetectTypes(value);
+    textPattern->SetOnResult(std::move(onResult));
+}
+
+void TextModelNG::SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnCopy(std::move(func));
+}
+
+void TextModelNG::SetOnTextSelectionChange(FrameNode* frameNode, std::function<void(int32_t, int32_t)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSelectionChange(std::move(func));
 }
 } // namespace OHOS::Ace::NG

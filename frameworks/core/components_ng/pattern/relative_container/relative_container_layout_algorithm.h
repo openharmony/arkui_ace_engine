@@ -132,6 +132,9 @@ private:
     void UpdateTwoAlignValues(TwoAlignedValues& twoAlignedValues, AlignRule alignRule, LineDirection direction);
     void UpdateSizeWhenChildrenEmpty(LayoutWrapper* layoutWrapper);
     bool IsAnchorLegal(const std::string& anchorName);
+    void MeasureChild(LayoutWrapper* layoutWrapper);
+    BarrierDirection BarrierDirectionRtl(BarrierDirection barrierDirection);
+    void AdjustOffsetRtl(LayoutWrapper* layoutWrapper);
 
     bool isHorizontalRelyOnContainer_ = false;
     bool isVerticalRelyOnContainer_ = false;

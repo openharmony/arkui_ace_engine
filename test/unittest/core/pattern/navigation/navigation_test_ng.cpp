@@ -906,7 +906,11 @@ HWTEST_F(NavigationTestNg, NavigationStackTest001, TestSize.Level1)
     /**
      * @tc.steps: step2.add page A
      */
-    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode("temp", 245, AceType::MakeRefPtr<ButtonPattern>());
+    auto* viewStack = ViewStackProcessor::GetInstance();
+    // navDestination node
+    int32_t nodeId = viewStack->ClaimNodeId();
+    auto frameNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     auto pattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
     auto stack = pattern->GetNavigationStack();
     stack->Add("A", frameNode);
@@ -920,7 +924,9 @@ HWTEST_F(NavigationTestNg, NavigationStackTest001, TestSize.Level1)
     /**
      * @tc.steps: step3. replace pageA
      */
-    RefPtr<FrameNode> replaceNode = FrameNode::CreateFrameNode("temp", 245, AceType::MakeRefPtr<ButtonPattern>());
+        nodeId = viewStack->ClaimNodeId();
+    auto replaceNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     stack->Pop();
     stack->Add("C", replaceNode);
     navigationPattern->OnModifyDone();
@@ -1209,7 +1215,7 @@ HWTEST_F(NavigationTestNg, NavDestinationDialogTest001, TestSize.Level1)
     pattern->OnModifyDone();
     pattern->MarkNeedSyncWithJsStack();
     pattern->SyncWithJsStackIfNeeded();
-    navigationNode->hideNodes_.emplace_back(navDestination);
+    navigationNode->hideNodes_.emplace_back(std::make_pair(navDestination, false));
     PipelineContext::GetCurrentContext()->FlushBuildFinishCallbacks();
     EXPECT_EQ(layoutPropertyB->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::INVISIBLE);
     EXPECT_EQ(destinationProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::INVISIBLE);

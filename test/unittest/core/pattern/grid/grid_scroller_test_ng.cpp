@@ -607,7 +607,7 @@ HWTEST_F(GridScrollerTestNg, PositionController001, TestSize.Level1)
     CreateDone(frameNode_);
     EXPECT_FALSE(pattern_->isConfigScrollable_);
     auto controller = pattern_->positionController_;
-    controller->JumpTo(1, false, ScrollAlign::START, 3);
+    controller->ScrollToIndex(1, false, ScrollAlign::START);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().jumpIndex_, EMPTY_JUMP_INDEX);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
 
@@ -621,13 +621,13 @@ HWTEST_F(GridScrollerTestNg, PositionController001, TestSize.Level1)
     CreateFixedItems(10);
     CreateDone(frameNode_);
     controller = pattern_->positionController_;
-    controller->JumpTo(1, false, ScrollAlign::START, 3);
+    controller->ScrollToIndex(1, false, ScrollAlign::START);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
-    controller->JumpTo(9, false, ScrollAlign::START, 3);
+    controller->ScrollToIndex(9, false, ScrollAlign::START);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
-    controller->JumpTo(5, false, ScrollAlign::START, 3);
+    controller->ScrollToIndex(5, false, ScrollAlign::START);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
 
@@ -637,13 +637,13 @@ HWTEST_F(GridScrollerTestNg, PositionController001, TestSize.Level1)
     CreateFixedItems(10);
     CreateDone(frameNode_);
     controller = pattern_->positionController_;
-    controller->JumpTo(1, false, ScrollAlign::CENTER, 3);
+    controller->ScrollToIndex(1, false, ScrollAlign::CENTER);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
-    controller->JumpTo(6, false, ScrollAlign::CENTER, 3);
+    controller->ScrollToIndex(6, false, ScrollAlign::CENTER);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
-    controller->JumpTo(5, false, ScrollAlign::CENTER, 3);
+    controller->ScrollToIndex(5, false, ScrollAlign::CENTER);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, -100.f);
 
@@ -653,29 +653,13 @@ HWTEST_F(GridScrollerTestNg, PositionController001, TestSize.Level1)
     CreateFixedItems(10);
     CreateDone(frameNode_);
     controller = pattern_->positionController_;
-    controller->JumpTo(1, false, ScrollAlign::END, 3);
+    controller->ScrollToIndex(1, false, ScrollAlign::END);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
-    controller->JumpTo(6, false, ScrollAlign::END, 3);
+    controller->ScrollToIndex(6, false, ScrollAlign::END);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
-    controller->JumpTo(5, false, ScrollAlign::END, 3);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
-
-    ClearOldNodes();
-    model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr");
-    CreateFixedItems(10);
-    CreateDone(frameNode_);
-    controller = pattern_->positionController_;
-    controller->JumpTo(1, false, ScrollAlign::AUTO, 3);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
-    controller->JumpTo(6, false, ScrollAlign::AUTO, 3);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
-    controller->JumpTo(5, false, ScrollAlign::AUTO, 3);
+    controller->ScrollToIndex(5, false, ScrollAlign::END);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
 
@@ -685,13 +669,29 @@ HWTEST_F(GridScrollerTestNg, PositionController001, TestSize.Level1)
     CreateFixedItems(10);
     CreateDone(frameNode_);
     controller = pattern_->positionController_;
-    controller->JumpTo(1, false, ScrollAlign::NONE, 3);
+    controller->ScrollToIndex(1, false, ScrollAlign::AUTO);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
-    controller->JumpTo(6, false, ScrollAlign::NONE, 3);
+    controller->ScrollToIndex(6, false, ScrollAlign::AUTO);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
-    controller->JumpTo(5, false, ScrollAlign::NONE, 3);
+    controller->ScrollToIndex(5, false, ScrollAlign::AUTO);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
+
+    ClearOldNodes();
+    model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
+    controller = pattern_->positionController_;
+    controller->ScrollToIndex(1, false, ScrollAlign::NONE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
+    controller->ScrollToIndex(6, false, ScrollAlign::NONE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
+    controller->ScrollToIndex(5, false, ScrollAlign::NONE);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
 }
@@ -898,6 +898,367 @@ HWTEST_F(GridScrollerTestNg, PositionController006, TestSize.Level1)
         FlushLayoutTask(frameNode_);
     }
     EXPECT_TRUE(pattern_->IsAtTop());
+}
+
+namespace {
+constexpr float SCROLL_FIXED_VELOCITY_007 = 100.f;
+constexpr float OFFSET_TIME_007 = 100.f;
+constexpr int32_t TIME_CHANGED_COUNTS_007 = 20;
+} // namespace
+/**
+ * @tc.name: PositionController007
+ * @tc.desc: Test positionController func in VERTICAL Grid
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, PositionController007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Grid Item
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step2. Scroll to the left edge
+     * expected: Fixed Verify is is 0.
+     */
+    auto controller = pattern_->positionController_;
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_LEFT, SCROLL_FIXED_VELOCITY_007);
+    EXPECT_FALSE(pattern_->fixedVelocityMotion_);
+
+    /**
+     * @tc.steps: step3. Scroll to the right edge
+     * expected: Fixed Verify is is 0.
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_RIGHT, SCROLL_FIXED_VELOCITY_007);
+    EXPECT_FALSE(pattern_->fixedVelocityMotion_);
+
+    /**
+     * @tc.steps: step4. Scroll to the bottom edge
+     * expected: 1.Fixed Verify is is non-zero.
+     *           2.The current Velocity is equal to the set fixed velocity
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, SCROLL_FIXED_VELOCITY_007);
+    EXPECT_TRUE(pattern_->fixedVelocityMotion_);
+    EXPECT_EQ(pattern_->fixedVelocityMotion_->GetCurrentVelocity(), -SCROLL_FIXED_VELOCITY_007);
+
+    /**
+     * @tc.steps: step5. 1. Set offset time
+     *                   2. Set changed count
+     *                   3. Flush layout
+     * expected: Scroll to the bottom edge
+     */
+    int32_t offsetTime = OFFSET_TIME_007;
+    for (int i = 0; i < TIME_CHANGED_COUNTS_007; i++) {
+        pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
+        offsetTime = offsetTime + OFFSET_TIME_007;
+        FlushLayoutTask(frameNode_);
+    }
+    EXPECT_TRUE(pattern_->IsAtBottom());
+
+    /**
+     * @tc.steps: step6. Scroll to the top edge
+     * expected: 1.Fixed Verify is is non-zero.
+     *           2.The current Velocity is equal to the set fixed velocity
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, SCROLL_FIXED_VELOCITY_007);
+    EXPECT_TRUE(pattern_->fixedVelocityMotion_);
+    EXPECT_EQ(pattern_->fixedVelocityMotion_->GetCurrentVelocity(), SCROLL_FIXED_VELOCITY_007);
+
+    /**
+     * @tc.steps: step7. 1. Set offset time
+     *                   2. Set changed count
+     *                   3. Flush layout
+     * expected: Scroll to the top edge
+     */
+    offsetTime = OFFSET_TIME_007;
+    for (int i = 0; i < TIME_CHANGED_COUNTS_007; i++) {
+        pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
+        offsetTime = offsetTime + OFFSET_TIME_007;
+        FlushLayoutTask(frameNode_);
+    }
+    EXPECT_TRUE(pattern_->IsAtTop());
+
+    /**
+     * @tc.steps: step8. Test GetScrollDirection func.
+     * @tc.expected: The scrolling direction is landscape
+     */
+    EXPECT_EQ(controller->GetScrollDirection(), Axis::VERTICAL);
+}
+
+namespace {
+constexpr float SCROLL_FIXED_VELOCITY_008 = 300.f;
+constexpr float OFFSET_TIME_008 = 100.f;
+constexpr int32_t TIME_CHANGED_COUNTS_008 = 20;
+} // namespace
+/**
+ * @tc.name: PositionController008
+ * @tc.desc: Test positionController func with AnimateTo
+ */
+HWTEST_F(GridScrollerTestNg, PositionController008, TestSize.Level1)
+{
+    bool isTrigger = false;
+    /**
+     * @tc.steps: step1. Create Grid Item
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step2. Scroll to the left edge
+     * expected: Fixed Verify is is 0.
+     */
+    auto controller = pattern_->positionController_;
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_LEFT, SCROLL_FIXED_VELOCITY_008);
+    EXPECT_FALSE(pattern_->fixedVelocityMotion_);
+
+    /**
+     * @tc.steps: step3. Scroll to the right edge
+     * expected: Fixed Verify is is 0.
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_RIGHT, SCROLL_FIXED_VELOCITY_008);
+    EXPECT_FALSE(pattern_->fixedVelocityMotion_);
+
+    /**
+     * @tc.steps: step4. Scroll to the bottom edge
+     * expected: 1.Fixed Verify is is non-zero.
+     *           2.The current Velocity is equal to the set fixed velocity
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, SCROLL_FIXED_VELOCITY_008);
+    EXPECT_TRUE(pattern_->fixedVelocityMotion_);
+    EXPECT_EQ(pattern_->fixedVelocityMotion_->GetCurrentVelocity(), -SCROLL_FIXED_VELOCITY_008);
+
+    /**
+     * @tc.steps: step5. 1. Set offset time
+     *                   2. Set changed count
+     *                   3. Flush layout
+     * expected: Scroll to the bottom edge
+     */
+    int32_t offsetTime = OFFSET_TIME_008;
+    for (int i = 0; i < TIME_CHANGED_COUNTS_008; i++) {
+        pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
+        offsetTime = offsetTime + OFFSET_TIME_008;
+        FlushLayoutTask(frameNode_);
+    }
+    EXPECT_TRUE(pattern_->IsAtBottom());
+
+    /**
+     * @tc.steps: step6. Scroll to the top edge
+     * expected: 1.Fixed Verify is is non-zero.
+     *           2.The current Velocity is equal to the set fixed velocity
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, SCROLL_FIXED_VELOCITY_008);
+    EXPECT_TRUE(pattern_->fixedVelocityMotion_);
+    EXPECT_EQ(pattern_->fixedVelocityMotion_->GetCurrentVelocity(), SCROLL_FIXED_VELOCITY_008);
+
+    /**
+     * @tc.steps: step7. 1. Set offset time
+     *                   2. Set changed count
+     *                   3. Flush layout
+     * expected: Scroll to the top edge
+     */
+    offsetTime = OFFSET_TIME_008;
+    for (int i = 0; i < TIME_CHANGED_COUNTS_008; i++) {
+        pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
+        offsetTime = offsetTime + OFFSET_TIME_008;
+        FlushLayoutTask(frameNode_);
+    }
+    EXPECT_TRUE(pattern_->IsAtTop());
+
+    /**
+     * @tc.steps: step8. When Animation is running, call AnimateTo
+     * @tc.expected: onScrollStart event will not be triggered
+     */
+    isTrigger = false;             // reset val
+    pattern_->scrollAbort_ = true; // set running
+    pattern_->AnimateTo(ITEM_HEIGHT * 2, 200.f, Curves::LINEAR, true);
+    EXPECT_FALSE(isTrigger);
+}
+
+namespace {
+constexpr float SCROLL_FIXED_VELOCITY_009 = 400.f;
+constexpr float OFFSET_TIME_009 = 100.f;
+constexpr int32_t TIME_CHANGED_COUNTS_009 = 20;
+} // namespace
+/**
+ * @tc.name: PositionController009
+ * @tc.desc: Test positionController with AnimateTo
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, PositionController009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Grid Item
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step2. Scroll to the left edge
+     * expected: Fixed Verify is is 0.
+     */
+    auto controller = pattern_->positionController_;
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_LEFT, SCROLL_FIXED_VELOCITY_009);
+    EXPECT_FALSE(pattern_->fixedVelocityMotion_);
+
+    /**
+     * @tc.steps: step3. Scroll to the right edge
+     * expected: Fixed Verify is is 0.
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_RIGHT, SCROLL_FIXED_VELOCITY_009);
+    EXPECT_FALSE(pattern_->fixedVelocityMotion_);
+    
+    /**
+     * @tc.steps: step4. Scroll to the bottom edge
+     * expected: 1.Fixed Verify is is non-zero.
+     *           2.The current Velocity is equal to the set fixed velocity
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, SCROLL_FIXED_VELOCITY_009);
+    EXPECT_TRUE(pattern_->fixedVelocityMotion_);
+    EXPECT_EQ(pattern_->fixedVelocityMotion_->GetCurrentVelocity(), -SCROLL_FIXED_VELOCITY_009);
+
+    /**
+     * @tc.steps: step5. 1. Set offset time
+     *                   2. Set changed count
+     *                   3. Flush layout
+     * expected: Scroll to the bottom edge
+     */
+    int32_t offsetTime = OFFSET_TIME_009;
+    for (int i = 0; i < TIME_CHANGED_COUNTS_009; i++) {
+        pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
+        offsetTime = offsetTime + OFFSET_TIME_009;
+        FlushLayoutTask(frameNode_);
+    }
+    EXPECT_TRUE(pattern_->IsAtBottom());
+
+    /**
+     * @tc.steps: step6. Scroll to the top edge
+     * expected: 1.Fixed Verify is is non-zero.
+     *           2.The current Velocity is equal to the set fixed velocity
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, SCROLL_FIXED_VELOCITY_009);
+    EXPECT_TRUE(pattern_->fixedVelocityMotion_);
+    EXPECT_EQ(pattern_->fixedVelocityMotion_->GetCurrentVelocity(), SCROLL_FIXED_VELOCITY_009);
+
+    /**
+     * @tc.steps: step7. 1. Set offset time
+     *                   2. Set changed count
+     *                   3. Flush layout
+     * expected: Scroll to the top edge
+     */
+    offsetTime = OFFSET_TIME_009;
+    for (int i = 0; i < TIME_CHANGED_COUNTS_009; i++) {
+        pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
+        offsetTime = offsetTime + OFFSET_TIME_009;
+        FlushLayoutTask(frameNode_);
+    }
+    EXPECT_TRUE(pattern_->IsAtTop());
+
+    /**
+     * @tc.steps: step8. Test AnimateTo function
+     * @tc.expected: pattern_->isAnimationStop_ is false
+     */
+    pattern_->AnimateTo(1.5, 1.f, Curves::LINEAR, false);
+    EXPECT_FALSE(pattern_->isAnimationStop_);
+}
+
+namespace {
+constexpr float SCROLL_FIXED_VELOCITY_010 = 500.f;
+constexpr float OFFSET_TIME_010 = 100.f;
+constexpr int32_t TIME_CHANGED_COUNTS_010 = 20;
+} // namespace
+/**
+ * @tc.name: PositionController010
+ * @tc.desc: Test positionController func with ScrollToIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, PositionController010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Grid Item
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step2. Scroll to the left edge
+     * expected: Fixed Verify is is 0.
+     */
+    auto controller = pattern_->positionController_;
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_LEFT, SCROLL_FIXED_VELOCITY_010);
+    EXPECT_FALSE(pattern_->fixedVelocityMotion_);
+
+    /**
+     * @tc.steps: step3. Scroll to the right edge
+     * expected: Fixed Verify is is 0.
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_RIGHT, SCROLL_FIXED_VELOCITY_010);
+    EXPECT_FALSE(pattern_->fixedVelocityMotion_);
+    
+    /**
+     * @tc.steps: step4. Scroll to the bottom edge
+     * expected: 1.Fixed Verify is is non-zero.
+     *           2.The current Velocity is equal to the set fixed velocity
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, SCROLL_FIXED_VELOCITY_010);
+    EXPECT_TRUE(pattern_->fixedVelocityMotion_);
+    EXPECT_EQ(pattern_->fixedVelocityMotion_->GetCurrentVelocity(), -SCROLL_FIXED_VELOCITY_010);
+
+    /**
+     * @tc.steps: step5. 1. Set offset time
+     *                   2. Set changed count
+     *                   3. Flush layout
+     * expected: Scroll to the bottom edge
+     */
+    int32_t offsetTime = OFFSET_TIME_010;
+    for (int i = 0; i < TIME_CHANGED_COUNTS_010; i++) {
+        pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
+        offsetTime = offsetTime + OFFSET_TIME_010;
+        FlushLayoutTask(frameNode_);
+    }
+    EXPECT_TRUE(pattern_->IsAtBottom());
+
+    /**
+     * @tc.steps: step6. Scroll to the top edge
+     * expected: 1.Fixed Verify is is non-zero.
+     *           2.The current Velocity is equal to the set fixed velocity
+     */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, SCROLL_FIXED_VELOCITY_010);
+    EXPECT_TRUE(pattern_->fixedVelocityMotion_);
+    EXPECT_EQ(pattern_->fixedVelocityMotion_->GetCurrentVelocity(), SCROLL_FIXED_VELOCITY_010);
+        
+    /**
+     * @tc.steps: step7. 1. Set offset time
+     *                   2. Set changed count
+     *                   3. Flush layout
+     * expected: Scroll to the top edge
+     */
+    offsetTime = OFFSET_TIME_010;
+    for (int i = 0; i < TIME_CHANGED_COUNTS_010; i++) {
+        pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
+        offsetTime = offsetTime + OFFSET_TIME_010;
+        FlushLayoutTask(frameNode_);
+    }
+    EXPECT_TRUE(pattern_->IsAtTop());
+
+    /**
+     * @tc.steps: step7. Set scroll index
+     * expected: finalPosition_ is is 0.
+     */
+    int32_t targetIndex = 0;
+    ScrollAlign align = ScrollAlign::START;
+    targetIndex = 0;
+    pattern_->ScrollToIndex(targetIndex, true, align);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->finalPosition_, 0.0f);
 }
 
 /**

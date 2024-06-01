@@ -80,11 +80,46 @@ void JSNavDestination::Create()
 
 void JSNavDestination::Create(const JSCallbackInfo& info)
 {
-    if (info.Length() <= 0 && !info[0]->IsFunction()) {
+    if (info.Length() <= 0) {
         NavDestinationModel::GetInstance()->Create();
         return;
     }
 
+    std::string moduleName;
+    std::string pagePath;
+    if (info.Length() == 1) {
+        if (info[0]->IsFunction()) {
+            auto builderFunctionJS = info[0];
+            auto builderFunc = [context = info.GetExecutionContext(), builder = std::move(builderFunctionJS)]() {
+                JAVASCRIPT_EXECUTION_SCOPE(context)
+                JSRef<JSFunc>::Cast(builder)->Call(JSRef<JSObject>());
+            };
+            auto ctx = AceType::MakeRefPtr<NG::NavDestinationContext>();
+            auto navPathInfo = AceType::MakeRefPtr<JSNavPathInfo>();
+            ctx->SetNavPathInfo(navPathInfo);
+            NavDestinationModel::GetInstance()->Create(std::move(builderFunc), std::move(ctx));
+            return;
+        } else if (info[0]->IsObject()) {
+            auto infoObj = JSRef<JSObject>::Cast(info[0]);
+            if (!infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->IsString() ||
+                !infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->IsString()) {
+                TAG_LOGE(AceLogTag::ACE_NAVIGATION, "navDestination current pageInfo is invalid");
+                return;
+            }
+            moduleName = infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->ToString();
+            pagePath = infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->ToString();
+            NavDestinationModel::GetInstance()->Create();
+            NavDestinationModel::GetInstance()->SetNavDestinationPathInfo(moduleName, pagePath);
+            return;
+        }
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION,
+            "current input info is neither buildFunction or navDestination usefulInfo");
+        return;
+    }
+    if (!info[0]->IsFunction() || !info[1]->IsObject()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "buider or pageInfo is invalid");
+        return;
+    }
     auto builderFunctionJS = info[0];
     auto builderFunc = [context = info.GetExecutionContext(), builder = std::move(builderFunctionJS)]() {
         JAVASCRIPT_EXECUTION_SCOPE(context)
@@ -93,7 +128,17 @@ void JSNavDestination::Create(const JSCallbackInfo& info)
     auto ctx = AceType::MakeRefPtr<NG::NavDestinationContext>();
     auto navPathInfo = AceType::MakeRefPtr<JSNavPathInfo>();
     ctx->SetNavPathInfo(navPathInfo);
+    
+    auto infoObj = JSRef<JSObject>::Cast(info[1]);
+    if (!infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->IsString() ||
+        !infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->IsString()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "navDestination current pageInfo is invalid");
+        return;
+    }
+    moduleName = infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->ToString();
+    pagePath = infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->ToString();
     NavDestinationModel::GetInstance()->Create(std::move(builderFunc), std::move(ctx));
+    NavDestinationModel::GetInstance()->SetNavDestinationPathInfo(moduleName, pagePath);
 }
 
 void JSNavDestination::SetHideTitleBar(bool hide)
@@ -170,25 +215,31 @@ void JSNavDestination::SetBackButtonIcon(const JSCallbackInfo& info)
     auto noPixMap = ParseJsMedia(info[0], src);
 
     RefPtr<PixelMap> pixMap = nullptr;
+    auto isValidImage = false;
 #if defined(PIXEL_MAP_SUPPORTED)
     if (!noPixMap) {
         pixMap = CreatePixelMapFromNapiValue(info[0]);
     }
 #endif
+    if (noPixMap || pixMap != nullptr) {
+        isValidImage = true;
+    }
     std::vector<std::string> nameList;
+    NG::ImageOption imageOption;
     std::string bundleName;
     std::string moduleName;
     GetJsMediaBundleInfo(info[0], bundleName, moduleName);
     nameList.emplace_back(bundleName);
     nameList.emplace_back(moduleName);
+    imageOption.noPixMap = noPixMap;
+    imageOption.isValidImage = isValidImage;
     std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
-    if (info[0]->IsObject()) {
-        if (src.empty() && pixMap == nullptr) {
-            SetSymbolOptionApply(info, iconSymbol, info[0]);
-        }
+    auto isSymbol = info[0]->IsObject() && src.empty() && pixMap == nullptr;
+    if (isSymbol) {
+        SetSymbolOptionApply(info, iconSymbol, info[0]);
     }
 
-    NavDestinationModel::GetInstance()->SetBackButtonIcon(iconSymbol, src, noPixMap, pixMap, nameList);
+    NavDestinationModel::GetInstance()->SetBackButtonIcon(iconSymbol, src, imageOption, pixMap, nameList);
 }
 
 void JSNavDestination::SetOnShown(const JSCallbackInfo& info)

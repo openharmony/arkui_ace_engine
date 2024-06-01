@@ -109,6 +109,8 @@ public:
 
     void ScrollPage(bool reverse, bool smooth);
 
+    void SetScrollEnabled(bool scrollEnabled, const WeakPtr<ScrollablePattern>& weakScrollableNode) const;
+
 private:
     /*
      * Drag the built-in or external scroll bar to slide the Scroll.

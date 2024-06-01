@@ -355,6 +355,10 @@ public:
         posMap_ = posMap;
     }
 
+    int32_t GetSnapStartIndex();
+
+    int32_t GetSnapEndIndex();
+
 protected:
     virtual void UpdateListItemConstraint(
         Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
@@ -379,6 +383,7 @@ protected:
         bool forwardLayout, const RefPtr<ListLayoutProperty>& layoutProperty, bool groupNeedAllLayout,
         bool needAdjustRefPos = false);
     static void SetListItemIndex(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index);
+    void ReMeasureListItemGroup(LayoutWrapper* layoutWrapper, bool forwardLayout);
     void CheckListItemGroupRecycle(
         LayoutWrapper* layoutWrapper, int32_t index, float referencePos, bool forwardLayout) const;
     void AdjustPostionForListItemGroup(LayoutWrapper* layoutWrapper, Axis axis, int32_t index, bool forwardLayout);

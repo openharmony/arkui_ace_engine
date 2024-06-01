@@ -520,6 +520,34 @@ void ResetArrayValue(ArkUINodeHandle node)
     IndexerModelNG::SetArrayValue(frameNode, valueVector);
 }
 
+void SetAutoCollapse(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    IndexerModelNG::SetAutoCollapse(frameNode, value);
+}
+
+void ResetAutoCollapse(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    IndexerModelNG::SetAutoCollapse(frameNode, false);
+}
+
+void SetEnableHapticFeedback(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    IndexerModelNG::SetEnableHapticFeedback(frameNode, value);
+}
+
+void ResetEnableHapticFeedback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    IndexerModelNG::SetEnableHapticFeedback(frameNode, true);
+}
+
 namespace NodeModifier {
 const ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()
 {
@@ -533,7 +561,8 @@ const ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()
         ResetPopupHorizontalSpace, SetPopupSelectedColor, ResetPopupSelectedColor, SetItemSize, ResetItemSize,
         SetPopupPosition, ResetPopupPosition, SetPopupItemBorderRadius, ResetPopupItemBorderRadius, SetItemBorderRadius,
         ResetItemBorderRadius, SetPopupBackgroundBlurStyle, ResetPopupBackgroundBlurStyle, SetPopupTitleBackground,
-        ResetPopupTitleBackground, SetAdaptiveWidth, ResetAdaptiveWidth, SetArrayValue, ResetArrayValue };
+        ResetPopupTitleBackground, SetAdaptiveWidth, ResetAdaptiveWidth, SetArrayValue, ResetArrayValue,
+        SetAutoCollapse, ResetAutoCollapse, SetEnableHapticFeedback, ResetEnableHapticFeedback };
 
     return &modifier;
 }

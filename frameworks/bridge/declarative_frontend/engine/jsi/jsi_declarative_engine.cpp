@@ -175,9 +175,17 @@ inline bool PreloadJsEnums(const shared_ptr<JsRuntime>& runtime)
 
 inline bool PreloadStateManagement(const shared_ptr<JsRuntime>& runtime)
 {
-    uint8_t* codeStart = (uint8_t*)_binary_stateMgmt_abc_start;
-    int32_t codeLength = _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start;
-    return runtime->EvaluateJsCode(codeStart, codeLength);
+#ifdef STATE_MGMT_USE_AOT
+    auto container = Container::Current();
+    if (container && container->IsDynamicRender()) {
+        return runtime->EvaluateJsCode(
+            (uint8_t*)_binary_stateMgmt_abc_start, _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start);
+    }
+    return runtime->ExecuteJsBin("/etc/abc/framework/stateMgmt.abc");
+#else
+    return runtime->EvaluateJsCode(
+        (uint8_t*)_binary_stateMgmt_abc_start, _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start);
+#endif
 }
 
 inline bool PreloadArkComponent(const shared_ptr<JsRuntime>& runtime)
@@ -266,6 +274,8 @@ thread_local bool isUnique_ = false;
 // ArkTsCard end
 
 thread_local bool isWorker_ = false;
+
+thread_local bool isDynamicModulePreloaded_ = false;
 
 JsiDeclarativeEngineInstance::~JsiDeclarativeEngineInstance()
 {
@@ -364,7 +374,8 @@ void JsiDeclarativeEngineInstance::InitJsObject()
         }
     } else {
         auto container = Container::Current();
-        if (container && container->IsDynamicRender()) {
+        if (container && container->IsDynamicRender() && !isDynamicModulePreloaded_) {
+            isDynamicModulePreloaded_ = true;
             LOGD("init ace module for dynamic component");
             auto vm = std::static_pointer_cast<ArkJSRuntime>(runtime_)->GetEcmaVm();
             LocalScope scope(vm);
@@ -1715,7 +1726,7 @@ bool JsiDeclarativeEngine::ExecuteJsForFastPreview(const std::string& jsCode, co
 }
 
 void JsiDeclarativeEngine::SetHspBufferTrackerCallback(
-    std::function<bool(const std::string&, uint8_t**, size_t*)>&& callback)
+    std::function<bool(const std::string&, uint8_t**, size_t*, std::string&)>&& callback)
 {
     CHECK_NULL_VOID(engineInstance_);
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(engineInstance_->GetJsRuntime());

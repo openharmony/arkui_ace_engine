@@ -17,6 +17,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "bridge/declarative_frontend/engine/functions/js_should_built_in_recognizer_parallel_with_function.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/gestures/base_gesture_event.h"
 
@@ -33,47 +34,38 @@ GestureJudgeResult JsGestureJudgeFunction::Execute(
     }
     gestureInfoObj->SetProperty<int32_t>("type", static_cast<int32_t>(gestureInfo->GetType()));
     gestureInfoObj->SetProperty<bool>("isSystemGesture", gestureInfo->IsSystemGesture());
-
-    JSRef<JSObject> obj = JSRef<JSObject>::New();
-    SetUniqueAttributes(obj, gestureInfo->GetType(), info);
-    obj->SetProperty<double>("timestamp", info->GetTimeStamp().time_since_epoch().count());
-    obj->SetProperty<double>("source", static_cast<int32_t>(info->GetSourceDevice()));
-    obj->SetProperty<double>("pressure", info->GetForce());
-    if (info->GetTiltX().has_value()) {
-        obj->SetProperty<double>("tiltX", info->GetTiltX().value());
-    }
-    if (info->GetTiltY().has_value()) {
-        obj->SetProperty<double>("tiltY", info->GetTiltY().value());
-    }
-    obj->SetProperty<double>("sourceTool", static_cast<int32_t>(info->GetSourceTool()));
-
-    JSRef<JSArray> fingerArr = JSRef<JSArray>::New();
-    const std::list<FingerInfo>& fingerList = info->GetFingerList();
-    std::list<FingerInfo> notTouchFingerList;
-    int32_t maxFingerId = -1;
-    for (const FingerInfo& fingerInfo : fingerList) {
-        JSRef<JSObject> element = CreateFingerInfo(fingerInfo);
-        if (fingerInfo.sourceType_ == SourceType::TOUCH && fingerInfo.sourceTool_ == SourceTool::FINGER) {
-            fingerArr->SetValueAt(fingerInfo.fingerId_, element);
-            if (fingerInfo.fingerId_ > maxFingerId) {
-                maxFingerId = fingerInfo.fingerId_;
-            }
-        } else {
-            notTouchFingerList.emplace_back(fingerInfo);
-        }
-    }
-    auto idx = maxFingerId + 1;
-    for (const FingerInfo& fingerInfo : notTouchFingerList) {
-        JSRef<JSObject> element = CreateFingerInfo(fingerInfo);
-        fingerArr->SetValueAt(idx++, element);
-    }
-    obj->SetPropertyObject("fingerList", fingerArr);
-    auto target = CreateEventTargetObject(info);
-    obj->SetPropertyObject("target", target);
+    auto obj = CreateGestureEventObject(info, gestureInfo->GetType());
     int32_t paramCount = 2;
     JSRef<JSVal> params[paramCount];
     params[0] = gestureInfoObj;
     params[1] = obj;
+    auto jsValue = JsFunction::ExecuteJS(paramCount, params);
+    auto returnValue = GestureJudgeResult::CONTINUE;
+    if (jsValue->IsNumber()) {
+        returnValue = static_cast<GestureJudgeResult>(jsValue->ToNumber<int32_t>());
+    }
+    return returnValue;
+}
+
+GestureJudgeResult JsGestureJudgeFunction::Execute(const std::shared_ptr<BaseGestureEvent>& info,
+    const RefPtr<NG::NGGestureRecognizer>& current, const std::list<RefPtr<NG::NGGestureRecognizer>>& others)
+{
+    CHECK_NULL_RETURN(info, GestureJudgeResult::CONTINUE);
+    auto gestureInfo = current->GetGestureInfo();
+    CHECK_NULL_RETURN(gestureInfo, GestureJudgeResult::CONTINUE);
+    auto obj = CreateGestureEventObject(info, gestureInfo->GetRecognizerType());
+    int32_t paramCount = 3;
+    JSRef<JSVal> params[paramCount];
+    params[0] = obj;
+    auto currentObj = JsShouldBuiltInRecognizerParallelWithFunction::CreateRecognizerObject(current);
+    params[1] = currentObj;
+    JSRef<JSArray> othersArr = JSRef<JSArray>::New();
+    uint32_t othersIdx = 0;
+    for (const auto& item : others) {
+        auto othersObj = JsShouldBuiltInRecognizerParallelWithFunction::CreateRecognizerObject(item);
+        othersArr->SetValueAt(othersIdx++, othersObj);
+    }
+    params[2] = othersArr;
     auto jsValue = JsFunction::ExecuteJS(paramCount, params);
     auto returnValue = GestureJudgeResult::CONTINUE;
     if (jsValue->IsNumber()) {
@@ -175,5 +167,43 @@ void JsGestureJudgeFunction::SetUniqueAttributes(
         default:
             break;
     }
+}
+
+JSRef<JSObject> JsGestureJudgeFunction::CreateGestureEventObject(
+    const std::shared_ptr<BaseGestureEvent>& info, GestureTypeName typeName)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    SetUniqueAttributes(obj, typeName, info);
+    obj->SetProperty<double>("timestamp", info->GetTimeStamp().time_since_epoch().count());
+    obj->SetProperty<double>("source", static_cast<int32_t>(info->GetSourceDevice()));
+    obj->SetProperty<double>("pressure", info->GetForce());
+    obj->SetProperty<double>("tiltX", info->GetTiltX().value_or(0.0f));
+    obj->SetProperty<double>("tiltY", info->GetTiltY().value_or(0.0f));
+    obj->SetProperty<double>("sourceTool", static_cast<int32_t>(info->GetSourceTool()));
+
+    JSRef<JSArray> fingerArr = JSRef<JSArray>::New();
+    const std::list<FingerInfo>& fingerList = info->GetFingerList();
+    std::list<FingerInfo> notTouchFingerList;
+    int32_t maxFingerId = -1;
+    for (const FingerInfo& fingerInfo : fingerList) {
+        JSRef<JSObject> element = CreateFingerInfo(fingerInfo);
+        if (fingerInfo.sourceType_ == SourceType::TOUCH && fingerInfo.sourceTool_ == SourceTool::FINGER) {
+            fingerArr->SetValueAt(fingerInfo.fingerId_, element);
+            if (fingerInfo.fingerId_ > maxFingerId) {
+                maxFingerId = fingerInfo.fingerId_;
+            }
+        } else {
+            notTouchFingerList.emplace_back(fingerInfo);
+        }
+    }
+    auto idx = maxFingerId + 1;
+    for (const FingerInfo& fingerInfo : notTouchFingerList) {
+        JSRef<JSObject> element = CreateFingerInfo(fingerInfo);
+        fingerArr->SetValueAt(idx++, element);
+    }
+    obj->SetPropertyObject("fingerList", fingerArr);
+    auto target = CreateEventTargetObject(info);
+    obj->SetPropertyObject("target", target);
+    return obj;
 }
 } // namespace OHOS::Ace::Framework

@@ -154,7 +154,7 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (isSingleCase) {
         contentIdealSize = CreateIdealSizeByPercentRef(contentConstraint, axis, MeasureType::MATCH_CONTENT);
         if (mainSizeIsMeasured_) {
-            if (layoutWrapper->IsContraintNoChanged()) {
+            if (layoutWrapper->IsConstraintNoChanged()) {
                 contentIdealSize.SetMainSize(contentMainSize_, axis);
             } else {
                 mainSizeIsMeasured_ = false;
@@ -162,15 +162,16 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
     } else {
         contentIdealSize = CreateIdealSizeByPercentRef(contentConstraint, axis, MeasureType::MATCH_PARENT_MAIN_AXIS);
-        if (!layoutWrapper->IsContraintNoChanged()) {
-            const auto& changeFlags = layoutWrapper->GetContentChanges();
-            if (changeFlags.minSize && !changeFlags.parentIdealSize) {
-                mainSizeIsMeasured_ = false;
-                jumpIndex_ = currentIndex_;
-            }
+        if (!layoutWrapper->IsConstraintNoChanged()) {
+            mainSizeIsMeasured_ = false;
+            jumpIndex_ = currentIndex_;
         }
     }
 
+    auto mainSize = contentIdealSize.MainSize(axis);
+    if (mainSize.has_value()) {
+        SwiperUtils::CheckAutoFillDisplayCount(swiperLayoutProperty, mainSize.value(), realTotalCount_);
+    }
     const auto& padding = swiperLayoutProperty->CreatePaddingAndBorder();
     paddingBeforeContent_ = axis == Axis::HORIZONTAL ? padding.left.value_or(0) : padding.top.value_or(0);
     paddingAfterContent_ = axis == Axis::HORIZONTAL ? padding.right.value_or(0) : padding.bottom.value_or(0);
@@ -677,7 +678,8 @@ float SwiperLayoutAlgorithm::GetChildMainAxisSize(
     CHECK_NULL_RETURN(childProperty, mainAxisSize);
     auto visibilityValue = childProperty->GetVisibilityValue(VisibleType::VISIBLE);
     if (visibilityValue == VisibleType::INVISIBLE || visibilityValue == VisibleType::GONE) {
-        mainAxisSize = (contentMainSize_ - (displayCount - 1) * spaceWidth_) / displayCount;
+        mainAxisSize = (contentMainSize_ - nextMargin_ - prevMargin_ - (displayCount - 1) * spaceWidth_)
+            / displayCount;
     }
 
     return mainAxisSize;
@@ -696,6 +698,10 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
     CHECK_NULL_VOID(swiperLayoutProperty);
 
     auto currentIndex = startIndex - 1;
+    auto marginValue = NearZero(nextMargin_) ? 0.0f : nextMargin_ + spaceWidth_;
+    if (!NearZero(prevMargin_) && startIndex == 0 && swiperLayoutProperty->GetPrevMarginIgnoreBlankValue(false)) {
+        marginValue += prevMargin_;
+    }
     do {
         currentStartPos = currentEndPos;
         auto result =
@@ -725,8 +731,8 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
             endMainPos = targetIsSameWithStartFlag_ ? endMainPos_ : currentStartPos + contentMainSize_;
             targetIndex_.reset();
         }
-    } while (LessNotEqual(currentEndPos, nextMargin_ != 0.0f ? endMainPos + nextMargin_ + spaceWidth_ : endMainPos) ||
-             (targetIndex_ && currentIndex < targetIndex_.value()));
+    } while (LessNotEqual(currentEndPos, endMainPos + marginValue)
+        || (targetIndex_ && currentIndex < targetIndex_.value()));
 
     if (overScrollFeature_ && canOverScroll_) {
         return;
@@ -979,9 +985,15 @@ void SwiperLayoutAlgorithm::LayoutItem(
             offset += OffsetF(crossOffset, prevMargin_ + spaceWidth_);
         }
     } else {
-        offset += OffsetF(pos.second.startPos, crossOffset);
-        if (!NearZero(prevMargin_)) {
+        CHECK_NULL_VOID(layoutWrapper->GetLayoutProperty());
+        bool isRtl = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection() == TextDirection::RTL;
+        float offsetPos = isRtl ? contentMainSize_ - pos.second.endPos : pos.second.startPos;
+        offset += OffsetF(offsetPos, crossOffset);
+        if (!NearZero(prevMargin_) && !isRtl) {
             offset += OffsetF(prevMargin_ + spaceWidth_, crossOffset);
+        }
+        if (!NearZero(prevMargin_) && isRtl) {
+            offset -= OffsetF(prevMargin_ + spaceWidth_, crossOffset);
         }
     }
     wrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
@@ -993,10 +1005,6 @@ void SwiperLayoutAlgorithm::CaptureLayout(LayoutWrapper* layoutWrapper)
     if (!hasCachedCapture_ || itemPosition_.empty()) {
         return;
     }
-    auto hostNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(hostNode);
-    auto swiperPattern = hostNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_VOID(swiperPattern);
     auto leftCaptureWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::SWIPER_LEFT_CAPTURE_ETS_TAG);
     auto rightCaptureWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::SWIPER_RIGHT_CAPTURE_ETS_TAG);
     if (isCaptureReverse_) {
@@ -1026,8 +1034,16 @@ void SwiperLayoutAlgorithm::CaptureLayout(LayoutWrapper* layoutWrapper)
         leftOffset += OffsetF(0.0f, leftPosition + deltaOffset);
         rightOffset += OffsetF(0.0f, rightPosition + deltaOffset);
     } else {
-        leftOffset += OffsetF(leftPosition + deltaOffset, 0.0f);
-        rightOffset += OffsetF(rightPosition + deltaOffset, 0.0f);
+        bool isRtl = swiperLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+        if (isRtl) {
+            leftPosition = contentMainSize_ - itemPosition_.begin()->second.startPos + spaceWidth_;
+            rightPosition = contentMainSize_ - itemPosition_.rbegin()->second.endPos - spaceWidth_ - leftCaptureSize;
+            leftOffset += OffsetF(leftPosition - deltaOffset, 0.0f);
+            rightOffset += OffsetF(rightPosition - deltaOffset, 0.0f);
+        } else {
+            leftOffset += OffsetF(leftPosition + deltaOffset, 0.0f);
+            rightOffset += OffsetF(rightPosition + deltaOffset, 0.0f);
+        }
     }
     leftCaptureWrapper->GetGeometryNode()->SetMarginFrameOffset(leftOffset);
     leftCaptureWrapper->Layout();

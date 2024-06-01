@@ -94,20 +94,7 @@ template("build_component_ng") {
         cflags_cc = []
         cflags_cc += invoker.cflags_cc
       }
-
-      # using graphic_2d drawing lib
-      include_dirs = [
-        "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
-        "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
-        "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
-        "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
-        "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
-        "//foundation/graphic/graphic_2d/rosen/modules/render_service_base/include/",
-        "//third_party/bounds_checking_function/include",
-      ]
-      if (enable_graphic_text_gine) {
-        include_dirs += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export" ]
-      }
+      include_dirs = []
       if (is_arkui_x) {
         include_dirs += [
           "//foundation/graphic/graphic_2d/interfaces/inner_api/common",
@@ -120,6 +107,13 @@ template("build_component_ng") {
           "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics",
           "//foundation/graphic/graphic_2d/utils/color_manager/export",
           "//foundation/multimedia/image_framework/interfaces/innerkits/include",
+          "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
+          "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
+          "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
+          "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
+          "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
+          "//foundation/graphic/graphic_2d/rosen/modules/render_service_base/include/",
+          "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export",
         ]
         defines += [ "CROSS_PLATFORM" ]
         if (ace_enable_gpu) {
@@ -130,14 +124,13 @@ template("build_component_ng") {
       if (!is_arkui_x && defined(config.enable_drag_framework) &&
           config.enable_drag_framework) {
         external_deps += [ "device_status:devicestatus_client" ]
-        include_dirs += [
-          "//base/msdp/device_status/interfaces/innerkits/interaction/include",
-        ]
       }
       external_deps += [ "graphic_2d:librender_service_client" ]
       if (platform == "ohos" || platform == "ohos_ng") {
-        deps += [ "//third_party/openGLES:libGLES" ]
-        external_deps += [ "graphic_2d:2d_graphics" ]
+        external_deps += [
+          "graphic_2d:2d_graphics",
+          "opengles:libGLES",
+        ]
         if (enable_graphic_text_gine) {
           external_deps += [ "graphic_2d:rosen_text" ]
         }

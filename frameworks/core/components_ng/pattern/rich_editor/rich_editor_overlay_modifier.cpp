@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/progress/progress_modifier.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
+#include "core/components_ng/pattern/select_overlay/magnifier_painter.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -28,7 +29,7 @@ namespace OHOS::Ace::NG {
 RichEditorOverlayModifier::RichEditorOverlayModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern,
     const WeakPtr<ScrollBarOverlayModifier>& scrollbarOverlayModifier, WeakPtr<ScrollEdgeEffect>&& edgeEffect)
     : TextOverlayModifier(), pattern_(pattern), edgeEffect_(edgeEffect),
-      scrollBarOverlayModifier_(scrollbarOverlayModifier), magnifierPainter_(pattern)
+      scrollBarOverlayModifier_(scrollbarOverlayModifier)
 {
     caretVisible_ = AceType::MakeRefPtr<PropertyBool>(false);
     AttachProperty(caretVisible_);
@@ -56,6 +57,7 @@ RichEditorOverlayModifier::RichEditorOverlayModifier(const WeakPtr<OHOS::Ace::NG
     AttachProperty(previewTextUnderlineWidth_);
     showPreviewTextDecoration_ = AceType::MakeRefPtr<PropertyBool>(false);
     AttachProperty(showPreviewTextDecoration_);
+    magnifierPainter_ = AceType::MakeRefPtr<MagnifierPainter>(pattern);
 }
 
 void RichEditorOverlayModifier::SetPreviewTextDecorationColor(const Color& value)
@@ -158,18 +160,19 @@ void RichEditorOverlayModifier::PaintPreviewTextDecoration(DrawingContext& drawi
 
     auto previewTextDecorationColor = ToRSColor(previewTextDecorationColor_->Get());
     auto previewTextUnderlineWidth = previewTextUnderlineWidth_->Get();
+    auto roundRectRadius = previewTextUnderlineWidth / 2;
     auto previewTextRects = pattern->GetPreviewTextRects();
     drawingContext.canvas.Save();
-    RSPen pen;
-    pen.SetColor(previewTextDecorationColor);
-    pen.SetWidth(previewTextUnderlineWidth);
-    drawingContext.canvas.AttachPen(pen);
+    RSBrush brush;
+    brush.SetAntiAlias(true);
+    brush.SetColor(previewTextDecorationColor);
+    drawingContext.canvas.AttachBrush(brush);
     for (const auto& previewTextRect : previewTextRects) {
-        drawingContext.canvas.DrawLine(
-            ToRSPoint(PointF(previewTextRect.Left(), previewTextRect.Bottom() - previewTextUnderlineWidth)),
-            ToRSPoint(PointF(previewTextRect.Right(), previewTextRect.Bottom() - previewTextUnderlineWidth)));
+        RSRect rect(previewTextRect.Left(), previewTextRect.Bottom() - previewTextUnderlineWidth,
+            previewTextRect.Right(), previewTextRect.Bottom());
+        drawingContext.canvas.DrawRoundRect(RSRoundRect(rect, roundRectRadius, roundRectRadius));
     }
-    drawingContext.canvas.DetachPen();
+    drawingContext.canvas.DetachBrush();
     drawingContext.canvas.Restore();
 }
 
@@ -232,7 +235,8 @@ void RichEditorOverlayModifier::onDraw(DrawingContext& drawingContext)
     drawingContext.canvas.Restore();
     PaintScrollBar(drawingContext);
     PaintEdgeEffect(frameSize_->Get(), drawingContext.canvas);
-    magnifierPainter_.PaintMagnifier(drawingContext.canvas);
+    CHECK_NULL_VOID(magnifierPainter_);
+    magnifierPainter_->PaintMagnifier(drawingContext.canvas);
 }
 
 void RichEditorOverlayModifier::UpdateScrollBar(PaintWrapper* paintWrapper)

@@ -64,6 +64,10 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         ShapePaintProperty::ToJsonValue(json, filter);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         auto viewBoxJson = JsonUtil::Create(true);
         if (propShapeViewBox_.has_value()) {
             viewBoxJson->Put("x", propShapeViewBox_.value().Left().ToString().c_str());

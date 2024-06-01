@@ -49,13 +49,20 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         PaintProperty::ToJsonValue(json, filter);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         auto pipelineContext = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<DividerTheme>();
         CHECK_NULL_VOID(theme);
         json->PutExtAttr("color", propDividerColor_.value_or(theme->GetColor()).ColorToString().c_str(), filter);
-        json->PutExtAttr("lineCap", propLineCap_.value_or(LineCap::SQUARE) == LineCap::BUTT ?
-            "BUTT" : (propLineCap_.value_or(LineCap::SQUARE) == LineCap::ROUND ? "ROUND" : "SQUARE"), filter);
+        json->PutExtAttr("lineCap",
+            propLineCap_.value_or(LineCap::SQUARE) == LineCap::BUTT
+                ? "BUTT"
+                : (propLineCap_.value_or(LineCap::SQUARE) == LineCap::ROUND ? "ROUND" : "SQUARE"),
+            filter);
     }
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override

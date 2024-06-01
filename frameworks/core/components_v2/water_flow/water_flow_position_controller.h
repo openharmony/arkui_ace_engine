@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +28,7 @@ public:
     ~WaterFlowPositionController() override = default;
     Axis GetScrollDirection() const override;
 
-    void JumpTo(int32_t index, bool smooth, ScrollAlign align, int32_t source) override;
+    void ScrollToIndex(int32_t index, bool smooth, ScrollAlign align) override;
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(WaterFlowPositionController);

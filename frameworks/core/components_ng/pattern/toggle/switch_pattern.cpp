@@ -136,6 +136,7 @@ void SwitchPattern::HandleBlurEvent(const RefPtr<SwitchPaintProperty>& switchPai
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(switchModifier_);
     RemoveIsFocusActiveUpdateEvent();
+    isFocus_ = false;
     switchModifier_->SetIsFocused(false);
     if (isBgColorUnselectFocus_) {
         isBgColorUnselectFocus_ = false;
@@ -155,7 +156,7 @@ void SwitchPattern::HandleFocusEvent(const RefPtr<SwitchPaintProperty>& switchPa
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(switchModifier_);
     AddIsFocusActiveUpdateEvent();
-
+    isFocus_ = true;
     switchModifier_->SetIsFocused(true);
     Color bgColor = switchTheme->GetInactiveColor();
     if (!isOn_.value_or(false)) {
@@ -376,10 +377,45 @@ void SwitchPattern::OnClick()
     }
     isOn_ = !isOn_.value_or(false);
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "switch click result %{public}d", isOn_.value_or(false));
+    UpdateColorWhenIsOn(isOn_.value_or(false));
     OnChange();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->OnAccessibilityEvent(AccessibilityEventType::COMPONENT_CHANGE);
+}
+
+void SwitchPattern::UpdateColorWhenIsOn(bool isOn)
+{
+    if (!isFocus_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto switchPaintProperty = host->GetPaintProperty<SwitchPaintProperty>();
+    CHECK_NULL_VOID(switchPaintProperty);
+    auto pipeline = GetHost()->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto switchTheme = pipeline->GetTheme<SwitchTheme>();
+    CHECK_NULL_VOID(switchTheme);
+    if (isOn) {
+        isBgColorUnselectFocus_ = false;
+        isPointColorUnselectFocus_ = false;
+        switchPaintProperty->UpdateSwitchPointColor(switchTheme->GetPointColor());
+        switchPaintProperty->UpdateUnselectedColor(switchTheme->GetInactiveColor());
+    } else {
+        Color bgColor = switchTheme->GetInactiveColor();
+        if (!switchPaintProperty->HasUnselectedColor() || switchPaintProperty->GetUnselectedColor() == bgColor) {
+            isBgColorUnselectFocus_ = true;
+            Color focusedBGColor = switchTheme->GetFocusedBGColorUnselected();
+            switchPaintProperty->UpdateUnselectedColor(focusedBGColor);
+        }
+        Color pointColor = switchTheme->GetPointColor();
+        if (!switchPaintProperty->HasSwitchPointColor() || switchPaintProperty->GetSwitchPointColor() == pointColor) {
+            isPointColorUnselectFocus_ = true;
+            Color focusPointColor = switchTheme->GetPointColorUnselectedFocus();
+            switchPaintProperty->UpdateSwitchPointColor(focusPointColor);
+        }
+    }
 }
 
 void SwitchPattern::OnTouchDown()
