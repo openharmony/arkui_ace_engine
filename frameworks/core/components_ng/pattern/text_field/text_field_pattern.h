@@ -1297,6 +1297,7 @@ private:
     void HandleTouchDown(const Offset& offset);
     void HandleTouchUp();
     void HandleTouchMove(const TouchEventInfo& info);
+    void HandleTouchMoveAfterLongPress(const TouchEventInfo& info);
     void UpdateCaretByTouchMove(const TouchEventInfo& info);
     void InitDisableColor();
     void InitFocusEvent();
@@ -1491,6 +1492,10 @@ private:
     bool CheckPreviewTextValidate(PreviewTextInfo info) const;
 
     void CalculatePreviewingTextMovingLimit(const Offset& touchOffset, double& limitL, double& limitR);
+    void UpdateParam(GestureEvent& info, bool shouldProcessOverlayAfterLayout);
+    void ShowCaretAndStopTwinkling();
+    void OnCaretMoveDone(const TouchEventInfo& info);
+    void ChangeEditState();
 
     void TwinklingByFocus();
 
