@@ -156,9 +156,7 @@ void NavRouterGroupNode::AddNavDestinationToNavigation()
         if (uiNode) {
             navigationPattern->AddOnStateChangeItem(uiNode->GetId(), navRouterEventHub->GetOnStateChange());
         }
-        SetNavigationId(navigationNode, uiNode);
     } else if (navDestination) {
-        SetNavigationId(navigationNode, navDestination);
         auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
         CHECK_NULL_VOID(navDestinationPattern);
         auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
