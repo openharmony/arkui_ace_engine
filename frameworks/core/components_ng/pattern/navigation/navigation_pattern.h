@@ -377,7 +377,7 @@ private:
     void TransitionWithAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage, bool isNeedVisible = false);
     bool TriggerCustomAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
-        const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
+        const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage, bool isNeedInvisible = false);
 
     void OnCustomAnimationFinish(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
@@ -423,8 +423,10 @@ private:
         const RefPtr<NavDestinationGroupNode>& topDestination, bool isPopPage, bool isAnimated);
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void RefreshFocusToDestination();
-
-    void ExecuteAddAnimation(const RefPtr<NavDestinationGroupNode>& preTopDestination,
+    void StartDefaultAnimation(const RefPtr<NavDestinationGroupNode>& preTopDestination,
+        const RefPtr<NavDestinationGroupNode>& topDestination,
+        bool isPopPage, bool isNeedInVisible = false);
+    bool ExecuteAddAnimation(const RefPtr<NavDestinationGroupNode>& preTopDestination,
         const RefPtr<NavDestinationGroupNode>& topDestination,
         bool isPopPage, const RefPtr<NavigationTransitionProxy>& proxy);
 
