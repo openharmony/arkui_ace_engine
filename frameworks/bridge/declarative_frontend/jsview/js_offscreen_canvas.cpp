@@ -351,7 +351,7 @@ napi_value JSOffscreenCanvas::onTransferToImageBitmap(napi_env env)
     if (imageData == nullptr) {
         return nullptr;
     }
-    jsImage->SetImageData(imageData);
+    jsImage->SetImageData(std::make_shared<Ace::ImageData>(*imageData));
 #endif
     jsImage->SetUnit(GetUnit());
     jsImage->SetWidth(GetWidth());
