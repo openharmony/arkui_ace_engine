@@ -707,7 +707,7 @@ void PipelineContext::FlushFocusWithNode(RefPtr<FrameNode> focusNode, bool isSco
 {
     auto focusNodeHub = focusNode->GetFocusHub();
     if (focusNodeHub && !focusNodeHub->RequestFocusImmediately()) {
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on %{public}s: %{public}s/%{public}d return false",  
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on %{public}s: %{public}s/%{public}d return false",
             isScope ? "scope" : "node", focusNode->GetTag().c_str(), focusNode->GetId());
     }
     dirtyFocusNode_.Reset();
@@ -1859,6 +1859,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     auto oriPoint = point;
     auto scalePoint = point.CreateScalePoint(GetViewScale());
     ResSchedReport::GetInstance().OnTouchEvent(scalePoint.type);
+
     if (scalePoint.type != TouchType::MOVE && scalePoint.type != TouchType::PULL_MOVE &&
         scalePoint.type != TouchType::HOVER_MOVE) {
         eventManager_->GetEventTreeRecord().AddTouchPoint(scalePoint);
@@ -1868,6 +1869,15 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
             "type=%{public}d",
             scalePoint.touchEventId, scalePoint.id, scalePoint.x, scalePoint.y, (int)scalePoint.type);
     }
+
+    if (scalePoint.type == TouchType::MOVE) {
+        for (auto listenerItem : listenerVector_) {
+            if (listenerItem) {
+                listenerItem->OnTouchEvent();
+            }
+        }
+    }
+
     eventManager_->SetInstanceId(GetInstanceId());
     if (scalePoint.type != TouchType::MOVE && historyPointsById_.find(scalePoint.id) != historyPointsById_.end()) {
         historyPointsById_.erase(scalePoint.id);
@@ -3738,6 +3748,26 @@ void PipelineContext::FlushFrameCallback(uint64_t nanoTimestamp)
         decltype(frameCallbackFuncs_) tasks(std::move(frameCallbackFuncs_));
         for (const auto& frameCallbackFunc : tasks) {
             frameCallbackFunc(nanoTimestamp);
+        }
+    }
+}
+
+void PipelineContext::RegisterTouchEventListener(const std::shared_ptr<ITouchEventCallback>& listener)
+{
+    if (!listener) {
+        return;
+    }
+    listenerVector_.emplace_back(listener);
+}
+
+void PipelineContext::UnregisterTouchEventListener(const WeakPtr<NG::Pattern>& pattern)
+{
+    for (auto iter = listenerVector_.begin(); iter != listenerVector_.end();) {
+        auto patternPtr = (*iter)->GetPatternFromListener();
+        if (patternPtr.Invalid() || patternPtr == pattern) {
+            iter = listenerVector_.erase(iter);
+        } else {
+            iter++;
         }
     }
 }
