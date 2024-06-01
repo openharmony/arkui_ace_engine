@@ -34,6 +34,7 @@
 
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_view_ohos.h"
+#include "adapter/ohos/entrance/cj_utils/cj_utils.h"
 #include "adapter/ohos/entrance/data_ability_helper_standard.h"
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "adapter/ohos/entrance/hap_asset_provider_impl.h"
@@ -278,7 +279,7 @@ void AceContainer::InitializeTask(std::shared_ptr<TaskWrapper> taskWrapper)
     taskExecutorImpl->InitPlatformThread(useCurrentEventRunner_);
     taskExecutor_ = taskExecutorImpl;
     // No need to create JS Thread for DECLARATIVE_JS
-    if (type_ == FrontendType::DECLARATIVE_JS) {
+    if (type_ == FrontendType::DECLARATIVE_JS || type_ == FrontendType::DECLARATIVE_CJ) {
         GetSettings().useUIAsJSThread = true;
     } else {
         taskExecutorImpl->InitJsThread();
@@ -297,7 +298,7 @@ void AceContainer::Initialize()
 {
     ContainerScope scope(instanceId_);
     // For DECLARATIVE_JS frontend use UI as JS Thread, so InitializeFrontend after UI thread created.
-    if (type_ != FrontendType::DECLARATIVE_JS) {
+    if (type_ != FrontendType::DECLARATIVE_JS && type_ != FrontendType::DECLARATIVE_CJ) {
         InitializeFrontend();
     }
 }
@@ -437,6 +438,18 @@ void AceContainer::InitializeFrontend()
             declarativeFrontend->SetPageProfile(pageProfile_);
             declarativeFrontend->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
             declarativeFrontend->SetDebugVersion(AceApplicationInfo::GetInstance().IsDebugVersion());
+        } else {
+            frontend_ = OHOS::Ace::Platform::AceContainer::GetContainer(parentId_)->GetFrontend();
+            return;
+        }
+    } else if (type_ == FrontendType::DECLARATIVE_CJ) {
+        LOGD("cj Frontend");
+        if (!isSubContainer_) {
+            auto cjFrontend = CJUtils::LoadCjFrontend(useNewPipeline_, useStageModel_);
+            if (cjFrontend == nullptr) {
+                LOGE("Create cj frontend failed.");
+            }
+            frontend_ = AceType::Claim(reinterpret_cast<Frontend*>(cjFrontend));
         } else {
             frontend_ = OHOS::Ace::Platform::AceContainer::GetContainer(parentId_)->GetFrontend();
             return;
@@ -1120,7 +1133,8 @@ UIContentErrorCode AceContainer::RunPage(
         return UIContentErrorCode::NULL_URL;
     }
 
-    if (!isFormRender && !isNamedRouter && isStageModel && !CheckUrlValid(content, container->GetHapPath())) {
+    if (content.find('/') != std::string::npos && !isFormRender && !isNamedRouter &&
+        isStageModel && !CheckUrlValid(content, container->GetHapPath())) {
         return UIContentErrorCode::INVALID_URL;
     }
 
@@ -1610,7 +1624,7 @@ void AceContainer::AddAssetPath(int32_t instanceId, const std::string& packagePa
     } else {
         assetManagerImpl = Referenced::MakeRefPtr<AssetManagerImpl>();
         container->assetManager_ = assetManagerImpl;
-        if (container->type_ != FrontendType::DECLARATIVE_JS) {
+        if (container->type_ != FrontendType::DECLARATIVE_JS && container->type_ != FrontendType::DECLARATIVE_CJ) {
             container->frontend_->SetAssetManager(assetManagerImpl);
         }
     }
@@ -1641,7 +1655,7 @@ void AceContainer::AddLibPath(int32_t instanceId, const std::vector<std::string>
     } else {
         assetManagerImpl = Referenced::MakeRefPtr<AssetManagerImpl>();
         container->assetManager_ = assetManagerImpl;
-        if (container->type_ != FrontendType::DECLARATIVE_JS) {
+        if (container->type_ != FrontendType::DECLARATIVE_JS && container->type_ != FrontendType::DECLARATIVE_CJ) {
             container->frontend_->SetAssetManager(assetManagerImpl);
         }
     }
@@ -1661,7 +1675,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, dou
         taskExecutorImpl->InitOtherThreads(aceView->GetThreadModelImpl());
     }
     ContainerScope scope(instanceId);
-    if (type_ == FrontendType::DECLARATIVE_JS) {
+    if (type_ == FrontendType::DECLARATIVE_JS || type_ == FrontendType::DECLARATIVE_CJ) {
         // For DECLARATIVE_JS frontend display UI in JS thread temporarily.
         taskExecutorImpl->InitJsThread(false);
         InitializeFrontend();
@@ -1848,7 +1862,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, dou
             AceEngine::Get().RegisterToWatchDog(instanceId, taskExecutor_, GetSettings().useUIAsJSThread);
         }
         frontend_->AttachPipelineContext(pipelineContext_);
-    } else {
+    } else if (frontend_->GetType() == FrontendType::DECLARATIVE_JS) {
         if (declarativeFrontend) {
             declarativeFrontend->AttachSubPipelineContext(pipelineContext_);
         }
