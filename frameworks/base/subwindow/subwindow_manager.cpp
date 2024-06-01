@@ -932,4 +932,13 @@ void SubwindowManager::HideSystemTopMostWindow()
     CHECK_NULL_VOID(systemToastWindow_);
     systemToastWindow_->HideSubWindowNG();
 }
+
+void SubwindowManager::ClearToastInSystemSubwindow()
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "clear toast in system subwindow enter");
+    auto subwindow = GetSystemToastWindow();
+    if (subwindow) {
+        subwindow->ClearToast();
+    }
+}
 } // namespace OHOS::Ace
