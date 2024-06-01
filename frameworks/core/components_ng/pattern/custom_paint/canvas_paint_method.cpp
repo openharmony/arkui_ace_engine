@@ -42,8 +42,8 @@ namespace {
 #ifndef ACE_UNITTEST
 constexpr double DEFAULT_QUALITY = 0.92;
 constexpr int32_t MAX_LENGTH = 2048 * 2048;
-#endif
 constexpr double HANGING_PERCENT = 0.8;
+#endif
 constexpr int32_t DEFAULT_SAVE_COUNT = 1;
 const std::string UNSUPPORTED = "data:image/png";
 const std::string URL_PREFIX = "data:";
@@ -435,7 +435,7 @@ void CanvasPaintMethod::FillText(const std::string& text, double x, double y, st
 {
     auto success = UpdateParagraph(text, false, HasShadow());
     CHECK_NULL_VOID(success);
-    PaintText(lastLayoutSize_, x, y, maxWidth, false, HasShadow());
+    PaintText(lastLayoutSize_.Width(), x, y, maxWidth, false, HasShadow());
 }
 
 void CanvasPaintMethod::StrokeText(const std::string& text, double x, double y, std::optional<double> maxWidth)
@@ -443,12 +443,12 @@ void CanvasPaintMethod::StrokeText(const std::string& text, double x, double y, 
     if (HasShadow()) {
         auto success = UpdateParagraph(text, true, true);
         CHECK_NULL_VOID(success);
-        PaintText(lastLayoutSize_, x, y, maxWidth, true, true);
+        PaintText(lastLayoutSize_.Width(), x, y, maxWidth, true, true);
     }
 
     auto success = UpdateParagraph(text, true);
     CHECK_NULL_VOID(success);
-    PaintText(lastLayoutSize_, x, y, maxWidth, true);
+    PaintText(lastLayoutSize_.Width(), x, y, maxWidth, true);
 }
 
 double CanvasPaintMethod::MeasureText(const std::string& text, const PaintState& state)
@@ -541,82 +541,6 @@ TextMetrics CanvasPaintMethod::MeasureTextMetrics(const std::string& text, const
 #else
     return TextMetrics {};
 #endif
-}
-
-void CanvasPaintMethod::PaintText(const SizeF& frameSize, double x, double y,
-    std::optional<double> maxWidth, bool isStroke, bool hasShadow)
-{
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)) {
-        paragraph_->Layout(FLT_MAX);
-    } else {
-        paragraph_->Layout(frameSize.Width());
-    }
-    auto width = paragraph_->GetMaxIntrinsicWidth();
-    if (frameSize.Width() > width) {
-        paragraph_->Layout(std::ceil(width));
-    }
-    auto align = isStroke ? state_.strokeState.GetTextAlign() : state_.fillState.GetTextAlign();
-    double dx = x + GetAlignOffset(align, paragraph_);
-    auto baseline = isStroke ? state_.strokeState.GetTextStyle().GetTextBaseline()
-                             : state_.fillState.GetTextStyle().GetTextBaseline();
-    double dy = y + GetBaselineOffset(baseline, paragraph_);
-
-    std::optional<double> scale = CalcTextScale(paragraph_->GetMaxIntrinsicWidth(), maxWidth);
-    if (hasShadow) {
-        rsCanvas_->Save();
-        auto shadowOffsetX = state_.shadow.GetOffset().GetX();
-        auto shadowOffsetY = state_.shadow.GetOffset().GetY();
-        if (scale.has_value()) {
-            if (!NearZero(scale.value())) {
-                dx /= scale.value();
-                shadowOffsetX /= scale.value();
-            }
-            rsCanvas_->Scale(scale.value(), 1.0);
-        }
-        paragraph_->Paint(rsCanvas_.get(), dx + shadowOffsetX, dy + shadowOffsetY);
-        rsCanvas_->Restore();
-        return;
-    }
-    if (scale.has_value()) {
-        if (!NearZero(scale.value())) {
-            dx /= scale.value();
-        }
-        rsCanvas_->Save();
-        rsCanvas_->Scale(scale.value(), 1.0);
-        paragraph_->Paint(rsCanvas_.get(), dx, dy);
-        rsCanvas_->Restore();
-    } else {
-        paragraph_->Paint(rsCanvas_.get(), dx, dy);
-    }
-}
-
-double CanvasPaintMethod::GetBaselineOffset(TextBaseline baseline, std::unique_ptr<RSParagraph>& paragraph)
-{
-    double y = 0.0;
-    switch (baseline) {
-        case TextBaseline::ALPHABETIC:
-            y = -paragraph->GetAlphabeticBaseline();
-            break;
-        case TextBaseline::IDEOGRAPHIC:
-            y = -paragraph->GetIdeographicBaseline();
-            break;
-        case TextBaseline::BOTTOM:
-            y = -paragraph->GetHeight();
-            break;
-        case TextBaseline::TOP:
-            y = 0.0;
-            break;
-        case TextBaseline::MIDDLE:
-            y = -paragraph->GetHeight() / 2;
-            break;
-        case TextBaseline::HANGING:
-            y = -HANGING_PERCENT * (paragraph->GetHeight() - paragraph->GetAlphabeticBaseline());
-            break;
-        default:
-            y = -paragraph->GetAlphabeticBaseline();
-            break;
-    }
-    return y;
 }
 
 bool CanvasPaintMethod::UpdateParagraph(const std::string& text, bool isStroke, bool hasShadow)
