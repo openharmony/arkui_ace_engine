@@ -97,9 +97,31 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& ho
     return titleBarHeight;
 }
 
+MarginPropertyF GetNavigationMargin(const RefPtr<NavBarNode>& hostNode)
+{
+    CHECK_NULL_RETURN(hostNode, MarginPropertyF());
+    auto parent = AceType::DynamicCast<NavigationGroupNode>(hostNode->GetParent());
+    CHECK_NULL_RETURN(parent, MarginPropertyF());
+    auto layoutProperty = parent->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty,  MarginPropertyF());
+    const auto& margin = layoutProperty->CreateMargin();
+    return margin;
+}
+
 bool CheckTopEdgeOverlap(const RefPtr<NavBarLayoutProperty>& navBarLayoutProperty,
     const RefPtr<NavBarNode>& hostNode, SafeAreaExpandOpts opts)
 {
+    if (!navBarLayoutProperty || !hostNode) {
+        return false;
+    }
+    const auto& margin = GetNavigationMargin(hostNode);
+    float topMargin = margin.top.value_or(0.0f);
+    const auto& padding = navBarLayoutProperty->CreatePaddingAndBorder();
+    float topPadding = padding.top.value_or(0.0f);
+    if (!NearEqual(topPadding, 0.0f) || !NearEqual(topMargin, 0.0f)) {
+        return false;
+    }
+
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
@@ -130,6 +152,17 @@ bool CheckTopEdgeOverlap(const RefPtr<NavBarLayoutProperty>& navBarLayoutPropert
 bool CheckBottomEdgeOverlap(const RefPtr<NavBarLayoutProperty>& navBarLayoutProperty,
     const RefPtr<NavBarNode>& hostNode, SafeAreaExpandOpts opts)
 {
+    if (!navBarLayoutProperty || !hostNode) {
+        return false;
+    }
+    const auto& margin = GetNavigationMargin(hostNode);
+    float bottomMargin = margin.bottom.value_or(0.0f);
+    const auto& padding = navBarLayoutProperty->CreatePaddingAndBorder();
+    float bottomPadding = padding.bottom.value_or(0.0f);
+    if (!NearEqual(bottomPadding, 0.0f) || !NearEqual(bottomMargin, 0.0f)) {
+        return false;
+    }
+
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
