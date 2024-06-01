@@ -43,6 +43,7 @@ ArkUI_Bool GetIsExpanded(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Int32 inde
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     Local<JSValueRef> isExpandedArg = runtimeCallInfo->GetCallArgRef(index);
+    CHECK_NULL_RETURN(!isExpandedArg.IsNull(), true);
     return isExpandedArg->IsBoolean() ? isExpandedArg->ToBoolean(vm)->Value() : true;
 }
 } // namespace
