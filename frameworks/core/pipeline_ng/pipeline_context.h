@@ -246,6 +246,8 @@ public:
 
     void AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty);
 
+    void AddLayoutNode(const RefPtr<FrameNode>& layoutNode);
+
     void AddDirtyRenderNode(const RefPtr<FrameNode>& dirty);
 
     void AddPredictTask(PredictTask&& task);

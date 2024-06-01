@@ -189,6 +189,8 @@ public:
 
     virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param) {}
 
+    virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param, bool isLayoutNode) {}
+
     virtual void SetSurfaceChangedCallBack(
         const std::function<void(float, float, float, float)>& callback) {}
     virtual void RemoveSurfaceChangedCallBack() {}

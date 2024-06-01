@@ -240,6 +240,11 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
     RequestFrame();
 }
 
+void PipelineContext::AddLayoutNode(const RefPtr<FrameNode>& layoutNode)
+{
+    taskScheduler_->AddLayoutNode(layoutNode);
+}
+
 void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
 {
     CHECK_RUN_ON(UI);

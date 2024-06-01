@@ -81,16 +81,24 @@ public:
     static RefPtr<FrameNode> GetOrCreateFrameNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 
+    static RefPtr<FrameNode> GetOrCreateCommonNode(const std::string& tag, int32_t nodeId, bool isLayoutNode,
+        const std::function<RefPtr<Pattern>(void)>& patternCreator);
+
     // create a new element with new pattern.
     static RefPtr<FrameNode> CreateFrameNode(
         const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot = false);
+
+    static RefPtr<FrameNode> CreateCommonNode(const std::string& tag, int32_t nodeId, bool isLayoutNode,
+        const RefPtr<Pattern>& pattern, bool isRoot = false);
 
     // get element with nodeId from node map.
     static RefPtr<FrameNode> GetFrameNode(const std::string& tag, int32_t nodeId);
 
     static void ProcessOffscreenNode(const RefPtr<FrameNode>& node);
     // avoid use creator function, use CreateFrameNode
-    FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot = false);
+
+    FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern,
+        bool isRoot = false, bool isLayoutNode = false);
 
     ~FrameNode() override;
 
@@ -171,6 +179,16 @@ public:
     }
 
     void OnMountToParentDone();
+
+    bool GetIsLayoutNode();
+
+    bool GetIsFind();
+
+    void SetIsFind(bool isFind);
+
+    void GetOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& children);
+
+    void GetOneDepthVisibleFrameWithOffset(std::list<RefPtr<FrameNode>>& children, OffsetF& offset);
 
     void UpdateLayoutConstraint(const MeasureProperty& calcLayoutConstraint);
 
@@ -925,6 +943,8 @@ private:
 
     void OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList) override;
     void OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList) override;
+    void OnGenerateOneDepthVisibleFrameWithOffset(
+        std::list<RefPtr<FrameNode>>& visibleList, OffsetF& offset) override;
     void OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList) override;
 
     bool IsMeasureBoundary();
@@ -1073,10 +1093,13 @@ private:
     Matrix4 localRevertMatrix_ = Matrix4::CreateIdentity();
     // control the localMat_ and localRevertMatrix_ available or not, set to false when any transform info is set
     bool isLocalRevertMatrixAvailable_ = false;
+    bool isFind_ = false;
 
     bool isRestoreInfoUsed_ = false;
     bool checkboxFlag_ = false;
     bool isDisallowDropForcedly_ = false;
+
+    bool isLayoutNode_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 
