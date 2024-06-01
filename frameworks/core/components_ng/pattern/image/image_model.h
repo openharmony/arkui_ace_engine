@@ -32,7 +32,7 @@
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
 namespace OHOS::Ace {
-struct ImageInfoConfig {
+struct ACE_FORCE_EXPORT ImageInfoConfig {
     std::shared_ptr<std::string> src;
     std::string bundleName;
     std::string moduleName;
@@ -52,7 +52,7 @@ struct ImageInfoConfig {
           isImageSpan(isImageSpan_)
     {}
 };
-class ImageModel {
+class ACE_FORCE_EXPORT ImageModel {
 public:
     static ImageModel *GetInstance();
     virtual ~ImageModel() = default;

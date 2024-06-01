@@ -71,7 +71,7 @@ public:
     virtual void DetachContext(bool recursive = false);
 
     virtual int32_t FrameCount() const;
-
+    virtual int32_t CurrentFrameCount() const;
     virtual RefPtr<LayoutWrapperNode> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false);
 
     // Tree operation start.
@@ -108,6 +108,16 @@ public:
     // process offscreen process.
     void ProcessOffscreenTask(bool recursive = false);
 
+    bool IsProhibitedAddChildNode()
+    {
+        return isProhibitedAddChildNode_;
+    }
+
+    void SetIsProhibitedAddChildNode(bool isProhibitedAddChildNode)
+    {
+        isProhibitedAddChildNode_ = isProhibitedAddChildNode;
+    }
+
     int32_t TotalChildCount() const;
 
     // Returns index in the flatten tree structure
@@ -140,6 +150,8 @@ public:
 
     void GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList);
     void GenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList);
+    void GenerateOneDepthVisibleFrameWithOffset(
+        std::list<RefPtr<FrameNode>>& visibleList, OffsetF& offset);
     void GenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& visibleList);
 
     int32_t GetChildIndexById(int32_t id);
@@ -405,8 +417,9 @@ public:
     virtual void FastPreviewUpdateChildDone() {}
     virtual RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false,
         bool addToRenderTree = false);
-    virtual int32_t GetFrameNodeIndex(RefPtr<FrameNode> node);
-
+    virtual RefPtr<UINode> GetFrameChildByIndexWithoutExpanded(uint32_t index);
+    // Get current frameNode index with or without expanded all LazyForEachNode;
+    virtual int32_t GetFrameNodeIndex(RefPtr<FrameNode> node, bool isExpanded = true);
     void SetDebugLine(const std::string& line)
     {
         debugLine_ = line;
@@ -699,6 +712,9 @@ protected:
 
     virtual void OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList);
 
+    virtual void OnGenerateOneDepthVisibleFrameWithOffset(
+        std::list<RefPtr<FrameNode>>& visibleList, OffsetF& offset);
+
     virtual void OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList)
     {
         for (const auto& child : GetChildren()) {
@@ -788,6 +804,7 @@ private:
     std::string viewId_;
     void* externalData_ = nullptr;
     std::function<void(int32_t)> destroyCallback_;
+    bool isProhibitedAddChildNode_ = false;
     friend class RosenRenderContext;
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
 };

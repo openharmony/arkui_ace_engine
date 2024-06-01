@@ -183,13 +183,16 @@ std::optional<SelectHandleInfo> TextFieldSelectOverlay::GetHandleInfo(HandleInde
     return handleInfo;
 }
 
-bool TextFieldSelectOverlay::CheckHandleVisible(const RectF& paintRect)
+bool TextFieldSelectOverlay::CheckHandleVisible(const RectF& handlePaintRect)
 {
     auto pattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, false);
     // use global offset.
     auto contentRect = pattern->GetContentRect();
     auto visibleRect = GetVisibleContentRect();
+    // revert to original offset.
+    auto paintRect = handlePaintRect;
+    paintRect.SetOffset(OffsetF(paintRect.GetX() + paintRect.Width() / 2.0f, paintRect.GetY()));
     if (!pattern->IsTextArea()) {
         auto verticalEpsilon = std::max(0.0f, paintRect.Height() - contentRect.Height());
         return GreatOrEqual(paintRect.Top() + verticalEpsilon, visibleRect.Top()) &&

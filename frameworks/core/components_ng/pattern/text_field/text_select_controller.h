@@ -202,6 +202,7 @@ public:
         int32_t index, TextAffinity textAffinity = TextAffinity::UPSTREAM, bool isEditorValueChanged = true);
     void MoveHandleToContentRect(RectF& handleRect, float boundaryAdjustment = 0.0f) const;
     void AdjustHandleAtEdge(RectF& handleRect) const;
+    void AdjustHandleOffset(RectF& handleRect) const;
     static int32_t GetGraphemeClusterLength(const std::wstring& text, int32_t extend, bool checkPrev = false);
     void CalculateHandleOffset();
     std::vector<RectF> GetSelectedRects() const;

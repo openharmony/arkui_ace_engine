@@ -111,6 +111,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
 
 void StageManager::StartTransition(const RefPtr<FrameNode>& srcPage, const RefPtr<FrameNode>& destPage, RouteType type)
 {
+    AddPageTransitionTrace(srcPage, destPage);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto sharedManager = pipeline->GetSharedOverlayManager();
@@ -532,5 +533,45 @@ RefPtr<FrameNode> StageManager::GetPrevPageWithTransition() const
         return DynamicCast<FrameNode>(srcPageNode_.Upgrade());
     }
     return DynamicCast<FrameNode>(children.front());
+}
+
+void StageManager::AddPageTransitionTrace(const RefPtr<FrameNode>& srcPage, const RefPtr<FrameNode>& destPage)
+{
+    CHECK_NULL_VOID(srcPage);
+    CHECK_NULL_VOID(destPage);
+    auto srcPattern = srcPage->GetPattern<NG::PagePattern>();
+    CHECK_NULL_VOID(srcPattern);
+    auto destPattern = destPage->GetPattern<NG::PagePattern>();
+    CHECK_NULL_VOID(destPattern);
+    auto srcUrl = srcPattern->GetPageUrl();
+    if (srcUrl.empty()) {
+        return;
+    }
+    auto srcPageInfo = srcPattern->GetPageInfo();
+    CHECK_NULL_VOID(srcPageInfo);
+    auto srcPagePath = srcPageInfo->GetPagePath();
+    if (srcPagePath.empty()) {
+        srcPagePath = srcUrl;
+    }
+    constexpr int32_t JS_FILE_EXTENSION_LENGTH = 3;
+    auto srcPos = srcPagePath.rfind(".js");
+    if (srcPos == srcPagePath.length() - JS_FILE_EXTENSION_LENGTH) {
+        srcPagePath = srcPagePath.substr(0, srcPos);
+    }
+    auto destUrl = destPattern->GetPageUrl();
+    if (destUrl.empty()) {
+        return;
+    }
+    auto destPageInfo = destPattern->GetPageInfo();
+    CHECK_NULL_VOID(destPageInfo);
+    auto destPagePath = destPageInfo->GetPagePath();
+    if (destPagePath.empty()) {
+        destPagePath = destUrl;
+    }
+    auto destPos = destPagePath.rfind(".js");
+    if (destPos == destPagePath.length() - JS_FILE_EXTENSION_LENGTH) {
+        destPagePath = destPagePath.substr(0, destPos);
+    }
+    ACE_SCOPED_TRACE_COMMERCIAL("Router Page from %s to %s", srcPagePath.c_str(), destPagePath.c_str());
 }
 } // namespace OHOS::Ace::NG

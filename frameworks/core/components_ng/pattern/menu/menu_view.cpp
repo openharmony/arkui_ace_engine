@@ -238,8 +238,21 @@ bool GetHasSymbol(const std::vector<OptionParam>& params)
     return false;
 }
 
-OffsetF GetFloatImageOffset(const RefPtr<FrameNode>& frameNode)
+OffsetF GetFloatImageOffset(const RefPtr<FrameNode>& frameNode, const RefPtr<PixelMap>& pixelMap = nullptr)
 {
+    if (pixelMap) {
+        CHECK_NULL_RETURN(frameNode, OffsetF());
+        auto centerPosition = frameNode->GetPaintRectCenter(true);
+        float width = 0.0f;
+        float height = 0.0f;
+        if (pixelMap) {
+            width = pixelMap->GetWidth();
+            height = pixelMap->GetHeight();
+        }
+        auto offsetX = centerPosition.GetX() - width / 2.0f;
+        auto offsetY = centerPosition.GetY() - height / 2.0f;
+        return OffsetF(offsetX, offsetY);
+    }
     auto offsetToWindow = frameNode->GetPaintRectOffset();
     auto offsetX = offsetToWindow.GetX();
     auto offsetY = offsetToWindow.GetY();
@@ -394,7 +407,14 @@ void ShowGatherAnimation(const RefPtr<FrameNode>& imageNode, const RefPtr<FrameN
     textNode->MarkModifyDone();
     auto menuPattern = GetMenuPattern(menuNode);
     CHECK_NULL_VOID(menuPattern);
-    mainPipeline->AddAfterRenderTask([imageNode, manager, textNode, menuPattern]() {
+    mainPipeline->AddAfterRenderTask([weakImageNode = AceType::WeakClaim(AceType::RawPtr(imageNode)),
+        weakManager = AceType::WeakClaim(AceType::RawPtr(manager)),
+        weakTextNode = AceType::WeakClaim(AceType::RawPtr(textNode)),
+        weakMenuPattern = AceType::WeakClaim(AceType::RawPtr(menuPattern))]() {
+        auto imageNode = weakImageNode.Upgrade();
+        auto manager = weakManager.Upgrade();
+        auto textNode = weakTextNode.Upgrade();
+        auto menuPattern = weakMenuPattern.Upgrade();
         DragAnimationHelper::PlayGatherAnimation(imageNode, manager);
         DragAnimationHelper::CalcBadgeTextPosition(menuPattern, manager, imageNode, textNode);
         DragAnimationHelper::ShowBadgeAnimation(textNode);
@@ -436,7 +456,23 @@ void InitPanEvent(const RefPtr<GestureEventHub>& targetGestureHub, const RefPtr<
     panDirection.type = PanDirection::ALL;
     auto panEvent =
         AceType::MakeRefPtr<PanEvent>(std::move(actionStartTask), nullptr, std::move(actionEndTask), nullptr);
-    gestureHub->AddPanEvent(panEvent, panDirection, 1, DEFAULT_PAN_DISTANCE);
+    auto distance = SystemProperties::GetDragStartPanDistanceThreshold();
+    gestureHub->AddPanEvent(panEvent, panDirection, 1, Dimension(distance));
+
+    // add TouchEvent for Menu dragStart Move
+    auto touchTask = [actuator = AceType::WeakClaim(AceType::RawPtr(dragEventActuator))](const TouchEventInfo& info) {
+        auto dragEventActuator = actuator.Upgrade();
+        CHECK_NULL_VOID(dragEventActuator);
+        auto touchPoint = Point(
+            info.GetTouches().front().GetGlobalLocation().GetX(), info.GetTouches().front().GetGlobalLocation().GetY());
+        if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
+            dragEventActuator->SetDragDampStartPointInfo(touchPoint, info.GetTouches().front().GetFingerId());
+        } else if (info.GetTouches().front().GetTouchType() == TouchType::MOVE) {
+            dragEventActuator->HandleDragDampingMove(touchPoint, info.GetTouches().front().GetFingerId(), true);
+        }
+    };
+    auto touchListener = AceType::MakeRefPtr<TouchEventImpl>(std::move(touchTask));
+    gestureHub->AddTouchEvent(touchListener);
 }
 
 float GetHoverImageCustomPreviewBaseScaleInfo(const MenuParam& menuParam, int32_t width, int32_t height,
@@ -499,8 +535,7 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
     auto width = pixelMap->GetWidth();
     auto height = pixelMap->GetHeight();
     SetHoverImageCustomPreviewInfo(previewNode, menuParam, width, height);
-
-    auto imageOffset = GetFloatImageOffset(target);
+    auto imageOffset = GetFloatImageOffset(target, pixelMap);
     auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
     auto renderProps = imageNode->GetPaintProperty<ImageRenderProperty>();

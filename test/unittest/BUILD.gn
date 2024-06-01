@@ -21,6 +21,7 @@ group("unittest") {
   if (!is_asan) {
     deps += [
       ":linux_unittest",
+      "adapter:adapter_unittest",
       "base:base_unittest",
       "bridge:bridge_unittest",
       "core:core_unittest",
@@ -54,7 +55,6 @@ config("ace_unittest_config") {
     "$ace_root/frameworks",
     "$hilog_root/interfaces/native/innerkits/include",
     "$root_out_dir/arkui/framework",
-    "//base/sensors/miscdevice/interfaces/inner_api/vibrator",
     "//third_party/icu/icu4c/source/common",
     "//foundation/window/window_manager/interfaces/innerkits",
   ]
@@ -452,6 +452,8 @@ ohos_source_set("ace_components_mock") {
   testonly = true
   sources = [
     "$ace_root/test/mock/adapter/mock_app_bar_helper_impl.cpp",
+    "$ace_root/test/mock/adapter/mock_file_uri_helper_ohos.cpp",
+    "$ace_root/test/mock/adapter/mock_image_packer_ohos.cpp",
     "$ace_root/test/mock/adapter/mock_modal_ui_extension.cpp",
     "$ace_root/test/mock/adapter/mock_view_data_wrap_ohos.cpp",
     "$ace_root/test/mock/base/mock_ace_performance_check.cpp",
@@ -752,6 +754,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/navigation/nav_bar_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/nav_bar_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/navigation_content_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/navigation/navigation_event_hub.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/navigation_group_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/navigation_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/navigation_model_ng.cpp",

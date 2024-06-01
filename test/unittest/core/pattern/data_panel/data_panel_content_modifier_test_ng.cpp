@@ -158,7 +158,7 @@ HWTEST_F(DataPanelContentModifierTestNg, DataPanelPatternTest013, TestSize.Level
 }
 
 /**
- * @tc.name: DataPanelPatternTes个itt014
+ * @tc.name: DataPanelPatternTest014
  * @tc.desc: SetBuilderFunc and get value
  * @tc.type: FUNC
  */

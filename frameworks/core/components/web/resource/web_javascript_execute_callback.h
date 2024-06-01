@@ -19,48 +19,45 @@
 #include <string>
 
 #include "nweb_value_callback.h"
-#include "core/common/container_scope.h"
+#include "foundation/arkui/ace_engine/frameworks/base/memory/referenced.h"
 
 namespace OHOS::Ace {
 using namespace OHOS::NWeb;
+
+class WebDelegate;
+
 class WebJavaScriptExecuteCallBack : public OHOS::NWeb::NWebMessageValueCallback {
 public:
-    WebJavaScriptExecuteCallBack() = delete;
-    explicit WebJavaScriptExecuteCallBack(int32_t instanceId) : instanceId_(instanceId) {}
+    WebJavaScriptExecuteCallBack() = default;
+    explicit WebJavaScriptExecuteCallBack(const WeakPtr<WebDelegate>& delegate) : webDelegate_(delegate) {}
+    virtual ~WebJavaScriptExecuteCallBack() = default;
 
-    void OnReceiveValue(std::shared_ptr<NWebMessage> result) override
-    {
-        ContainerScope scope(instanceId_);
-        if (callback_ && result && result->GetType() == NWebValue::Type::STRING) {
-            callback_(result->GetString());
-        }
-    }
+    virtual void OnReceiveValue(std::shared_ptr<NWebMessage> result) override;
     void SetCallBack(const std::function<void(std::string)>&& callback)
     {
         callback_ = callback;
     }
+
     std::function<void(std::string)> callback_;
-    int32_t instanceId_;
+private:
+    WeakPtr<WebDelegate> webDelegate_;
 };
 
 class WebMessageValueCallBackImpl : public OHOS::NWeb::NWebMessageValueCallback {
 public:
-    WebMessageValueCallBackImpl() = delete;
-    explicit WebMessageValueCallBackImpl(int32_t instanceId) : instanceId_(instanceId) {}
+    WebMessageValueCallBackImpl() = default;
+    explicit WebMessageValueCallBackImpl(const WeakPtr<WebDelegate>& delegate) : webDelegate_(delegate) {}
+    virtual ~WebMessageValueCallBackImpl() = default;
 
-    void OnReceiveValue(std::shared_ptr<NWebMessage> result) override
-    {
-        ContainerScope scope(instanceId_);
-        if (callback_ && result && result->GetType() == NWebValue::Type::STRING) {
-            callback_(result->GetString());
-        }
-    }
+    virtual void OnReceiveValue(std::shared_ptr<NWebMessage> result) override;
     void SetCallBack(const std::function<void(std::string)>&& callback)
     {
         callback_ = callback;
     }
+
     std::function<void(std::string)> callback_;
-    int32_t instanceId_;
+private:
+    WeakPtr<WebDelegate> webDelegate_;
 };
 } // namespace OHOS::Ace
 

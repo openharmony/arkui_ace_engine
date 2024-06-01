@@ -34,20 +34,8 @@ ExternalString FfiOHOSAceFrameworkComponentIdGetInspectorByKey(const char* id)
         return {};
     }
     std::string key = id;
-    if (container->IsUseNewPipeline()) {
-        auto resultStr = NG::Inspector::GetInspectorNodeByKey(key);
-        return Utils::MallocCString(resultStr);
-    }
-#if !defined(NG_BUILD)
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
-    if (pipelineContext == nullptr) {
-        return {};
-    }
-    auto resultStr = V2::Inspector::GetInspectorNodeByKey(pipelineContext, key);
+    auto resultStr = NG::Inspector::GetInspectorNodeByKey(key);
     return Utils::MallocCString(resultStr);
-#else
-    return {};
-#endif
 }
 
 ExternalString FfiOHOSAceFrameworkComponentIdGetInspectorTree()
@@ -57,20 +45,8 @@ ExternalString FfiOHOSAceFrameworkComponentIdGetInspectorTree()
     if (!container) {
         return {};
     }
-    if (container->IsUseNewPipeline()) {
-        auto nodeInfos = NG::Inspector::GetInspector();
-        return Utils::MallocCString(nodeInfos);
-    }
-#if !defined(NG_BUILD)
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
-    if (pipelineContext == nullptr) {
-        return {};
-    }
-    auto nodeInfos = V2::Inspector::GetInspectorTree(pipelineContext);
+    auto nodeInfos = NG::Inspector::GetInspector();
     return Utils::MallocCString(nodeInfos);
-#else
-    return {};
-#endif
 }
 
 bool FfiOHOSAceFrameworkComponentIdSendEventByKey(char* id, int action, char* params)
@@ -82,20 +58,8 @@ bool FfiOHOSAceFrameworkComponentIdSendEventByKey(char* id, int action, char* pa
     }
     std::string key = id;
     std::string s_params = params;
-    if (container->IsUseNewPipeline()) {
-        auto result = NG::Inspector::SendEventByKey(key, action, s_params);
-        return result;
-    }
-#if !defined(NG_BUILD)
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
-    if (pipelineContext == nullptr) {
-        return false;
-    }
-    auto result = V2::Inspector::SendEventByKey(pipelineContext, key, action, s_params);
+    auto result = NG::Inspector::SendEventByKey(key, action, s_params);
     return result;
-#else
-    return false;
-#endif
 }
 
 static TouchEvent GetTouchPointFromCJ(const CJTouchInfo& cJTouchInfo)

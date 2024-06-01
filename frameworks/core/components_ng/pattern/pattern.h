@@ -70,7 +70,7 @@ private:
 };
 
 // Pattern is the base class for different measure, layout and paint behavior.
-class Pattern : public virtual AceType {
+class ACE_FORCE_EXPORT Pattern : public virtual AceType {
     DECLARE_ACE_TYPE(Pattern, AceType);
 
 public:
@@ -480,6 +480,7 @@ public:
     virtual void OnDirectionConfigurationUpdate() {}
     virtual void OnDpiConfigurationUpdate() {}
     virtual void OnIconConfigurationUpdate() {}
+    virtual void OnFontConfigurationUpdate() {}
 
     virtual bool ShouldDelayChildPressedState() const
     {

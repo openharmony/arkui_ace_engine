@@ -112,6 +112,9 @@ public:
     static bool DispatchRotationEvent(
         const RotationEvent& event, const RefPtr<RenderNode>& renderNode, const RefPtr<RenderNode>& requestFocusNode);
 
+    // If current focus node is Web, will skip some events processing.
+    static bool IsSkipEventNode(const RefPtr<NG::FrameNode>& focusNode);
+
     // mouse event target list.
     void MouseTest(const MouseEvent& touchPoint, const RefPtr<RenderNode>& renderNode);
     bool DispatchMouseEvent(const MouseEvent& event);

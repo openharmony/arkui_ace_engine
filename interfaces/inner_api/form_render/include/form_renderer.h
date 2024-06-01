@@ -59,6 +59,7 @@ public:
     void OnError(const std::string& code, const std::string& msg);
     void OnSurfaceChange(float width, float height, float borderWidth = 0.0);
     void OnFormLinkInfoUpdate(const std::vector<std::string>& formLinkInfos);
+    void OnEnableForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo, const bool enable);
     void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
     void AttachForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
     void RecycleForm(std::string& statusData);

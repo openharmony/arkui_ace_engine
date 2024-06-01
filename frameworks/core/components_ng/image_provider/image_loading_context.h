@@ -102,6 +102,16 @@ public:
         dynamicMode_ = dynamicMode;
     }
 
+    void SetIsHdrDecoderNeed(bool isHdrDecoderNeed)
+    {
+        isHdrDecoderNeed_ = isHdrDecoderNeed;
+    }
+
+    bool GetIsHdrDecoderNeed()
+    {
+        return isHdrDecoderNeed_;
+    }
+
     DynamicRangeMode GetDynamicRangeMode()
     {
         return dynamicMode_;
@@ -182,6 +192,7 @@ private:
     // the container of the creator thread of this image loading context
     const int32_t containerId_ {0};
 
+    bool isHdrDecoderNeed_ = false;
     bool autoResize_ = true;
     bool syncLoad_ = false;
     bool loadInVipChannel_ = false;

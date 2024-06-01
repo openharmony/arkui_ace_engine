@@ -76,11 +76,17 @@ RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogPropert
     CHECK_NULL_RETURN(calendarNode, nullptr);
     auto titleNode = CreateTitleNode(calendarNode);
     CHECK_NULL_RETURN(titleNode, nullptr);
+    auto titleLayoutProperty = titleNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(titleLayoutProperty, nullptr);
+    titleLayoutProperty->UpdateLayoutDirection(direction);
     titleNode->MountToParent(contentColumn);
     calendarNode->MountToParent(contentColumn);
 
     auto dialogNode = DialogView::CreateDialogNode(dialogProperties, contentColumn);
     CHECK_NULL_RETURN(dialogNode, nullptr);
+    auto dialogLayoutProperty = dialogNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(dialogLayoutProperty, nullptr);
+    dialogLayoutProperty->UpdateLayoutDirection(direction);
 
     auto childNode = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild());
     CHECK_NULL_RETURN(childNode, nullptr);

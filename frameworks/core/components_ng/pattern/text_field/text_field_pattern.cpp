@@ -452,8 +452,8 @@ void TextFieldPattern::BeforeCreateLayoutWrapper()
                 break;
             }
             case InputOperation::SET_PREVIEW_TEXT:
-                SetPreviewTextOperation(previewTextOperation.front());
-                previewTextOperation.pop();
+                SetPreviewTextOperation(previewTextOperation_.front());
+                previewTextOperation_.pop();
                 break;
             case InputOperation::SET_PREVIEW_FINISH:
                 FinishTextPreviewOperation();
@@ -860,9 +860,6 @@ void TextFieldPattern::SetFocusStyle()
     NotifyOnEditChanged(true);
 
     if (!IsShowError() && IsUnderlineMode()) {
-        auto renderContext = host->GetRenderContext();
-        auto textFieldTheme = GetTheme();
-        CHECK_NULL_VOID(textFieldTheme);
         underlineColor_ = userUnderlineColor_.typing.value_or(textFieldTheme->GetUnderlineTypingColor());
         underlineWidth_ = TYPING_UNDERLINE_WIDTH;
     }
@@ -874,12 +871,17 @@ void TextFieldPattern::SetFocusStyle()
             isFocusBGColorSet_ = true;
         }
     }
-
     auto defaultTextColor = textFieldTheme->GetTextColor();
     if (layoutProperty->GetTextColorValue(defaultTextColor) == defaultTextColor) {
         layoutProperty->UpdateTextColor(textFieldTheme->GetFocusTextColor());
         isFocusTextColorSet_ = true;
     }
+    auto defaultPlaceholderColor = textFieldTheme->GetPlaceholderColor();
+    if (layoutProperty->GetPlaceholderTextColorValue(defaultPlaceholderColor) == defaultPlaceholderColor) {
+        layoutProperty->UpdatePlaceholderTextColor(textFieldTheme->GetFocusPlaceholderColor());
+        isFocusPlaceholderColorSet_ = true;
+    }
+
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -889,6 +891,8 @@ void TextFieldPattern::ClearFocusStyle()
     CHECK_NULL_VOID(host);
     auto textFieldTheme = GetTheme();
     CHECK_NULL_VOID(textFieldTheme);
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
 
     if (isOnHover_) {
         RestoreDefaultMouseState();
@@ -900,13 +904,15 @@ void TextFieldPattern::ClearFocusStyle()
         renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
         isFocusBGColorSet_ = false;
     }
-
     if (isFocusTextColorSet_) {
-        auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-        CHECK_NULL_VOID(layoutProperty);
         layoutProperty->UpdateTextColor(textFieldTheme->GetTextColor());
         isFocusTextColorSet_ = false;
     }
+    if (isFocusPlaceholderColorSet_) {
+        layoutProperty->UpdatePlaceholderTextColor(textFieldTheme->GetPlaceholderColor());
+        isFocusPlaceholderColorSet_ = false;
+    }
+
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -1238,6 +1244,7 @@ void TextFieldPattern::HandleBlurEvent()
     if (!eventHub->HasOnAreaChanged()) {
         context->RemoveOnAreaChangeNode(host->GetId());
     }
+    needToRequestKeyboardInner_ = false;
     ClearFocusStyle();
     RemoveIsFocusActiveUpdateEvent();
     isCursorAlwaysDisplayed_ = false;
@@ -1658,6 +1665,7 @@ void TextFieldPattern::UpdateCaretByTouchMove(const TouchEventInfo& info)
     } else {
         selectController_->UpdateCaretInfoByOffset(touchOffset);
     }
+    UpdateCaretInfoToController();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -3322,7 +3330,7 @@ void TextFieldPattern::KeyboardContentTypeToInputType()
 
 bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard)
 {
-    if (!showKeyBoardOnFocus_) {
+    if (!showKeyBoardOnFocus_ || !HasFocus()) {
         return false;
     }
 
@@ -5409,15 +5417,22 @@ void TextFieldPattern::SetShowError()
 
 void TextFieldPattern::CreateErrorParagraph(const std::string& content)
 {
+    auto isRTL = GetHost()->GetLayoutProperty()->GetNonAutoLayoutDirection() == TextDirection::RTL;
     auto theme = GetTheme();
     CHECK_NULL_VOID(theme);
     TextStyle errorTextStyle = theme->GetErrorTextStyle();
     std::string errorText = content;
-    ParagraphStyle paraStyle { .align = TextAlign::START,
+    ParagraphStyle paraStyle {
+        .direction = TextFieldLayoutAlgorithm::GetTextDirection(contentController_->GetTextValue()),
+        .align = TextAlign::START,
         .maxLines = 1,
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
         .textOverflow = TextOverflow::ELLIPSIS,
-        .fontSize = errorTextStyle.GetFontSize().ConvertToPx() };
+        .fontSize = errorTextStyle.GetFontSize().ConvertToPx()
+    };
+    if (isRTL) {
+        paraStyle.direction = TextDirection::RTL;
+    }
     errorParagraph_ = Paragraph::Create(paraStyle, FontCollection::Current());
     CHECK_NULL_VOID(errorParagraph_);
     errorParagraph_->PushStyle(errorTextStyle);
@@ -6197,7 +6212,7 @@ void TextFieldPattern::NotifyFillRequestFailed(int32_t errCode, const std::strin
             CHECK_NULL_VOID(context);
             auto taskExecutor = context->GetTaskExecutor();
             CHECK_NULL_VOID(taskExecutor);
-            taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::UI, 3000, "testInputMethodAutoFill");
+            taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::UI, 3000, "ArkUITextFieldTestAutoFillInput");
         }
         break;
     }
@@ -7107,7 +7122,7 @@ int32_t TextFieldPattern::SetPreviewText(const std::string &previewValue, const 
     auto host = GetHost();
     CHECK_NULL_RETURN(host, PREVIEW_NULL_POINTER);
     inputOperations_.emplace(InputOperation::SET_PREVIEW_TEXT);
-    previewTextOperation.emplace(info);
+    previewTextOperation_.emplace(info);
     CloseSelectOverlay(true);
     ScrollToSafeArea();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);

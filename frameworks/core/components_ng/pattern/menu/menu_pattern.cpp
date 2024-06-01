@@ -610,9 +610,9 @@ bool MenuPattern::HideStackExpandMenu(const OffsetF& position) const
     CHECK_NULL_RETURN(wrapper, false);
     auto outterMenu = wrapper->GetFirstChild();
     CHECK_NULL_RETURN(outterMenu, false);
-    auto scroll = outterMenu->GetFirstChild();
-    CHECK_NULL_RETURN(scroll, false);
-    auto innerMenu = AceType::DynamicCast<FrameNode>(scroll->GetFirstChild());
+    auto menuWrapperPattern = wrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_RETURN(menuWrapperPattern, false);
+    auto innerMenu = menuWrapperPattern->GetMenuChild(outterMenu);
     CHECK_NULL_RETURN(innerMenu, false);
     auto innerMenuPattern = AceType::DynamicCast<MenuPattern>(innerMenu->GetPattern());
     CHECK_NULL_RETURN(innerMenuPattern, false);
@@ -623,7 +623,7 @@ bool MenuPattern::HideStackExpandMenu(const OffsetF& position) const
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
         auto hostZone = host->GetPaintRectOffset();
-        scroll = host->GetFirstChild();
+        auto scroll = host->GetFirstChild();
         CHECK_NULL_RETURN(scroll, false);
         auto column = scroll->GetFirstChild();
         CHECK_NULL_RETURN(column, false);
@@ -634,6 +634,19 @@ bool MenuPattern::HideStackExpandMenu(const OffsetF& position) const
         clickAreaZone.SetTop(hostZone.GetY());
         if (clickAreaZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
             HideStackMenu();
+            return true;
+        }
+    } else if (expandingMode == SubMenuExpandingMode::STACK) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto hostZone = host->GetPaintRectOffset();
+        auto clickAreaZone = host->GetGeometryNode()->GetFrameRect();
+        clickAreaZone.SetLeft(hostZone.GetX());
+        clickAreaZone.SetTop(hostZone.GetY());
+        if (clickAreaZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
+            auto wrapperPattern = wrapper->GetPattern<MenuWrapperPattern>();
+            CHECK_NULL_RETURN(wrapperPattern, false);
+            wrapperPattern->HideSubMenu();
             return true;
         }
     }
@@ -1383,8 +1396,14 @@ BorderRadiusProperty MenuPattern::CalcIdealBorderRadius(const BorderRadiusProper
     auto radiusBottomRight = borderRadius.radiusBottomRight.value_or(Dimension()).ConvertToPx();
     auto maxRadiusW = std::max(radiusTopLeft + radiusTopRight, radiusBottomLeft + radiusBottomRight);
     auto maxRadiusH = std::max(radiusTopLeft + radiusBottomLeft, radiusTopRight + radiusBottomRight);
-    if (LessOrEqual(maxRadiusW, menuSize.Width()) && LessOrEqual(maxRadiusH, menuSize.Height())) {
-        radius = borderRadius;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (LessOrEqual(maxRadiusW, menuSize.Width()) && LessOrEqual(maxRadiusH, menuSize.Height())) {
+            radius = borderRadius;
+        }
+    } else {
+        if (LessNotEqual(maxRadiusW, menuSize.Width())) {
+            radius = borderRadius;
+        }
     }
 
     return radius;

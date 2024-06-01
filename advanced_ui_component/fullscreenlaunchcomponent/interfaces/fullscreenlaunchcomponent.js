@@ -124,13 +124,15 @@ export class FullScreenLaunchComponent extends ViewPU {
         if (this.options?.parameters) {
             this.options.parameters['ohos.extra.param.key.showMode'] = 1;
             this.options.parameters['ability.want.params.IsNotifyOccupiedAreaChange'] = true;
+            this.options.parameters['ability.want.params.IsModal'] = true;
             hilog.info(0x3900, 'FullScreenLaunchComponent', 'replaced options is %{public}s !', JSON.stringify(this.options));
         }
         else {
             this.options = {
                 parameters: {
                     'ohos.extra.param.key.showMode': 1,
-                    'ability.want.params.IsNotifyOccupiedAreaChange': true
+                    'ability.want.params.IsNotifyOccupiedAreaChange': true,
+                    'ability.want.params.IsModal': true
                 }
             };
         }

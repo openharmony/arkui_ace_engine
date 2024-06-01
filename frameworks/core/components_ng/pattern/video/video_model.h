@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace {
 using VideoEventFunc = std::function<void(const std::string&)>;
-class VideoModel {
+class ACE_FORCE_EXPORT VideoModel {
 public:
     static VideoModel* GetInstance();
     virtual ~VideoModel() = default;

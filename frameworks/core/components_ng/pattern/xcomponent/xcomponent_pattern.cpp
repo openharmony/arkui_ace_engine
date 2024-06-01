@@ -1106,7 +1106,7 @@ void XComponentPattern::ReportSlideToRss()
         CHECK_NULL_VOID(self);
         self->slideCount_ ++;
         ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
-        }, DELAY_TIME, "xcomponent_pattern_slide_on");
+    }, DELAY_TIME, "ArkUIXComponentSlideOn");
     uiTaskExecutor.PostDelayedTask([weakThis = WeakClaim(this)] {
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
@@ -1114,8 +1114,7 @@ void XComponentPattern::ReportSlideToRss()
         if (self->slideCount_.load() == 0) {
             ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
         }
-        }, GetFlingDuration(GetUpVelocity(lastTouchInfo_, touchEventPoint_)) + DELAY_TIME,
-        "xcomponent_pattern_slide_off");
+    }, GetFlingDuration(GetUpVelocity(lastTouchInfo_, touchEventPoint_)) + DELAY_TIME, "ArkUIXComponentSlideOff");
 }
 
 float XComponentPattern::GetUpVelocity(OH_NativeXComponent_TouchEvent lastMoveInfo,

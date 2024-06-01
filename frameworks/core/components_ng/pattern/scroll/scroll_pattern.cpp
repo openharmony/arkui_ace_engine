@@ -79,6 +79,7 @@ void ScrollPattern::OnModifyDone()
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     Register2DragDropManager();
+    SetEdgeRtl();
 }
 
 bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -1195,5 +1196,18 @@ void ScrollPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
 bool ScrollPattern::OnScrollSnapCallback(double targetOffset, double velocity)
 {
     return ScrollSnapTrigger();
+}
+
+void ScrollPattern::SetEdgeRtl()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto scrollEdgeEffect = GetScrollEdgeEffect();
+    CHECK_NULL_VOID(scrollEdgeEffect);
+    auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+    auto axis = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
+    scrollEdgeEffect->SetScrollRtl(layoutDirection == TextDirection::RTL && axis == Axis::HORIZONTAL);
 }
 } // namespace OHOS::Ace::NG

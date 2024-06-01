@@ -30,6 +30,7 @@
 #include "core/components_ng/render/font_collection.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -71,6 +72,11 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
 
     textStyle = CreateTextStyleUsingTheme(
         textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
+    auto fontManager = pipeline->GetFontManager();
+    if (fontManager && !(fontManager->GetAppCustomFont().empty()) &&
+        !(textLayoutProperty->GetFontFamily().has_value())) {
+        textStyle.SetFontFamilies(Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont()));
+    }
     if (contentModifier) {
         SetPropertyToModifier(textLayoutProperty, contentModifier);
         contentModifier->ModifyTextStyle(textStyle);

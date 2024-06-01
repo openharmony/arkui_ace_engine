@@ -160,6 +160,9 @@ public:
     void HideTextAnimation(bool startDrag = false, double globalX = 0, double globalY = 0);
     bool GetIsBindOverlayValue(const RefPtr<DragEventActuator>& actuator);
     bool IsAllowedDrag();
+    void AddDragDampTouchEvent(const RefPtr<GestureEventHub>& gestureHub, bool hasContextMenu);
+    void SetDragDampStartPointInfo(const Point& point, int32_t pointerId, bool isSubwindowOverlay = false);
+    void HandleDragDampingMove(const Point& point, int32_t pointerId, bool isSubwindowOverlay = false);
     void SetTextPixelMap(const RefPtr<GestureEventHub>& gestureHub);
     void RestartDragTask(const GestureEvent& info);
     static OffsetF GetFloatImageOffset(const RefPtr<FrameNode>& frameNode, const RefPtr<PixelMap>& pixelMap);
@@ -222,8 +225,8 @@ public:
     void SetGatherNodeAboveFilter(const RefPtr<DragEventActuator>& actuator);
     bool IsBelongToMultiItemNode(const RefPtr<FrameNode>& frameNode);
     bool IsSelectedItemNode(const RefPtr<UINode>& uiNode);
-    void FindItemFatherNode(const RefPtr<FrameNode>& frameNode);
-    bool IsNeedGather();
+    void FindItemParentNode(const RefPtr<FrameNode>& frameNode);
+    bool IsNeedGather() const;
     static RefPtr<FrameNode> GetOrCreateGatherNode(const RefPtr<NG::OverlayManager>& overlayManager,
         const RefPtr<DragEventActuator>& actuator, std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo);
     static RefPtr<FrameNode> CreateGatherNode(const RefPtr<DragEventActuator>& actuator);
@@ -232,17 +235,17 @@ public:
     static void MarkDirtyGatherNode(const RefPtr<FrameNode>& gatherNode);
     static void ResetNode(const RefPtr<FrameNode>& frameNode);
     static void MountGatherNode(const RefPtr<OverlayManager>& overlayManager, const RefPtr<FrameNode>& frameNode,
-        const RefPtr<FrameNode>& gatherNode, std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo);
+        const RefPtr<FrameNode>& gatherNode, const std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo);
     static void GetFrameNodePreviewPixelMap(const RefPtr<FrameNode>& frameNode);
     void SetGatherNode(const RefPtr<FrameNode>& gatherNode);
-    RefPtr<FrameNode> GetGatherNode();
-    std::vector<GatherNodeChildInfo> GetGatherNodeChildrenInfo();
+    RefPtr<FrameNode> GetGatherNode() const;
+    const std::vector<GatherNodeChildInfo>& GetGatherNodeChildrenInfo() const;
     void ClearGatherNodeChildrenInfo();
     void PushBackGatherNodeChild(GatherNodeChildInfo& gatherNodeChild);
     void HandleTouchUpEvent();
     void HandleTouchMoveEvent();
     void HandleTouchCancelEvent();
-    RefPtr<FrameNode> GetItemFatherNode();
+    const RefPtr<FrameNode> GetItemParentNode() const;
     RefPtr<FrameNode> GetFrameNode();
     static void PrepareShadowParametersForDragData(const RefPtr<FrameNode>& frameNode,
        std::unique_ptr<JsonValue>& arkExtraInfoJson, float scale);
@@ -278,7 +281,7 @@ private:
 
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
-    WeakPtr<FrameNode> itemFatherNode_;
+    WeakPtr<FrameNode> itemParentNode_;
     RefPtr<DragEvent> userCallback_;
     RefPtr<DragEvent> customCallback_;
     RefPtr<PanRecognizer> panRecognizer_;

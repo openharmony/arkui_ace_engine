@@ -134,6 +134,7 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("menuBackgroundColor", &JSSelect::SetMenuBackgroundColor, opt);
     JSClass<JSSelect>::StaticMethod("menuBackgroundBlurStyle", &JSSelect::SetMenuBackgroundBlurStyle, opt);
     JSClass<JSSelect>::StaticMethod("controlSize", &JSSelect::SetControlSize);
+    JSClass<JSSelect>::StaticMethod("direction", &JSSelect::SetDirection, opt);
 
     JSClass<JSSelect>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSSelect>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -834,5 +835,20 @@ void JSSelect::SetControlSize(const JSCallbackInfo& info)
     } else {
         LOGE("JSSelect::SetControlSize Is not Number.");
     }
+}
+
+void JSSelect::SetDirection(const std::string& dir)
+{
+    TextDirection direction = TextDirection::AUTO;
+    if (dir == "Ltr") {
+        direction = TextDirection::LTR;
+    } else if (dir == "Rtl") {
+        direction = TextDirection::RTL;
+    } else if (dir == "Auto") {
+        direction = TextDirection::AUTO;
+    } else if (dir == "undefined" && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+        direction = TextDirection::AUTO;
+    }
+    SelectModel::GetInstance()->SetLayoutDirection(direction);
 }
 } // namespace OHOS::Ace::Framework

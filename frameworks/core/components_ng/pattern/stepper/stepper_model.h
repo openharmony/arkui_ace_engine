@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT StepperModel {
+class ACE_FORCE_EXPORT StepperModel {
 public:
     using RoutineCallbackEvent = std::function<void()>;
     using IndexCallbackEvent = std::function<void(int32_t, int32_t)>;

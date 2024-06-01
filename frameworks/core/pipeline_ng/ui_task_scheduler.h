@@ -75,6 +75,7 @@ public:
 
     // Called on Main Thread.
     void AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty);
+    void AddLayoutNode(const RefPtr<FrameNode>& layoutNode);
     void AddDirtyRenderNode(const RefPtr<FrameNode>& dirty);
     void AddPredictTask(PredictTask&& task);
     void AddAfterLayoutTask(std::function<void()>&& task, bool isFlushInImplicitAnimationTask = false);
@@ -144,6 +145,8 @@ public:
 private:
     bool NeedAdditionalLayout();
 
+    void SetLayoutNodeRect();
+
     template<typename T>
     struct NodeCompare {
         bool operator()(const T& nodeLeft, const T& nodeRight) const
@@ -165,9 +168,11 @@ private:
     };
 
     using PageDirtySet = std::set<RefPtr<FrameNode>, NodeCompare<RefPtr<FrameNode>>>;
+    using LayoutNodesSet = std::set<RefPtr<FrameNode>, NodeCompare<RefPtr<FrameNode>>>;
     using RootDirtyMap = std::map<uint32_t, PageDirtySet>;
 
     std::list<RefPtr<FrameNode>> dirtyLayoutNodes_;
+    std::list<RefPtr<FrameNode>> layoutNodes_;
     RootDirtyMap dirtyRenderNodes_;
     std::list<PredictTask> predictTask_;
     std::list<std::function<void()>> afterLayoutTasks_;

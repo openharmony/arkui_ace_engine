@@ -2421,7 +2421,7 @@ void RichEditorPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub
     CHECK_NULL_VOID(tapSingleGesture);
     tapSingleGesture->SetOnActionId(clickSingleCallback);
     gestureGroup->AddGesture(tapSingleGesture);
-    gestureGroup->SetPriority(GesturePriority::High);
+    gestureGroup->SetPriority(GesturePriority::Parallel);
     
     gestureHub->AddGesture(gestureGroup);
     gestureHub->OnModifyDone();
@@ -2689,6 +2689,10 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "caretUpdateType=%{public}d", caretUpdateType_);
     if (IsPreviewTextInputting()) {
         TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "do not handle DoubleClickOrLongPress in previewTextInputting");
+        return;
+    }
+    if (IsDragging()) {
+        TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "do not handle DoubleClickOrLongPress during drag");
         return;
     }
     auto host = GetHost();
@@ -3041,6 +3045,8 @@ void RichEditorPattern::OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event)
     Offset textOffset = { touchX - textRect.GetX() - GetParentGlobalOffset().GetX(),
         touchY - textRect.GetY() - GetParentGlobalOffset().GetY() - theme->GetInsertCursorOffset().ConvertToPx() };
     auto position = isShowPlaceholder_? 0 : paragraphs_.GetIndex(textOffset);
+    ResetSelection();
+    CloseSelectOverlay();
     SetCaretPosition(position);
     CalcAndRecordLastClickCaretInfo(textOffset);
     auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
@@ -5837,10 +5843,10 @@ bool RichEditorPattern::IsHandlesShow()
 
 void RichEditorPattern::ResetSelection()
 {
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "ResetSelection");
     bool selectNothing = textSelector_.SelectNothing();
     textSelector_.Update(-1, -1);
     if (!selectNothing) {
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "ResetSelection");
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto eventHub = host->GetEventHub<RichEditorEventHub>();
@@ -8374,6 +8380,10 @@ bool RichEditorPattern::BeforeGestureAndClickOperate(GestureEvent& info, bool is
 
 void RichEditorPattern::HandleTripleClickEvent(OHOS::Ace::GestureEvent& info)
 {
+    auto focusHub = GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    CHECK_EQUAL_VOID(focusHub->IsFocusable(), false);
+
     auto textPaintOffset = GetTextRect().GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
     Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
         info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
@@ -8382,12 +8392,20 @@ void RichEditorPattern::HandleTripleClickEvent(OHOS::Ace::GestureEvent& info)
     int start = 0;
     int end = 0;
     auto& paragraphInfoList = paragraphs_.GetParagraphs();
-    for (const auto& paragraph : paragraphInfoList) {
-        if (pos >= paragraph.start && pos <= paragraph.end) {
-            start = paragraph.start;
-            end = paragraph.end;
-            break;
+    if (pos == paragraphInfoList.back().end) {
+        start = paragraphInfoList.back().start;
+        end = paragraphInfoList.back().end;
+    } else {
+        for (const auto& paragraph : paragraphInfoList) {
+            if (pos >= paragraph.start && pos < paragraph.end) {
+                start = paragraph.start;
+                end = paragraph.end;
+                break;
+            }
         }
+    }
+    if (paragraphInfoList.back().end != end) {
+        --end;
     }
     CHECK_NULL_VOID(end > start);
 

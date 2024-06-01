@@ -69,6 +69,13 @@ build_component_ng("render_ng") {
     "adapter/rosen_transition_effect.cpp",
     "adapter/rosen_window.cpp",
   ]
+  external_deps = []
+  if (is_ohos_standard_system && !use_mingw_win && !use_mac && !use_linux) {
+    external_deps += [
+      "graphic_surface:surface",
+      "window_manager:libwm",
+    ]
+  }
 
   if (ace_use_rosen_drawing) {
     sources -= [
@@ -94,7 +101,7 @@ build_component_ng("render_ng") {
 
   if (is_ohos_standard_system && !use_mingw_win && !use_mac && !use_linux &&
       enable_player_framework) {
-    external_deps = [ "player_framework:media_client" ]
+    external_deps += [ "player_framework:media_client" ]
   }
 
   if (!enable_player_framework) {

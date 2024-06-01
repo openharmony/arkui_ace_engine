@@ -135,6 +135,11 @@ void CalendarDialogPattern::UpdateTitleArrowsImage()
         UpdateImage(lastMonthNode, InternalResource::ResourceId::IC_PUBLIC_ARROW_RIGHT_SVG);
         UpdateImage(nextMonthNode, InternalResource::ResourceId::IC_PUBLIC_ARROW_LEFT_SVG);
         UpdateImage(nextYearNode, InternalResource::ResourceId::IC_PUBLIC_DOUBLE_ARROW_LEFT_SVG);
+    } else {
+        UpdateImage(lastYearNode, InternalResource::ResourceId::IC_PUBLIC_DOUBLE_ARROW_LEFT_SVG);
+        UpdateImage(lastMonthNode, InternalResource::ResourceId::IC_PUBLIC_ARROW_LEFT_SVG);
+        UpdateImage(nextMonthNode, InternalResource::ResourceId::IC_PUBLIC_ARROW_RIGHT_SVG);
+        UpdateImage(nextYearNode, InternalResource::ResourceId::IC_PUBLIC_DOUBLE_ARROW_RIGHT_SVG);
     }
 }
 

@@ -2264,6 +2264,14 @@ bool SwiperPattern::IsHorizontalAndRightToLeft() const
         host->GetLayoutProperty()->GetNonAutoLayoutDirection() == TextDirection::RTL;
 }
 
+TextDirection SwiperPattern::GetNonAutoLayoutDirection() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, TextDirection::LTR);
+    CHECK_NULL_RETURN(host->GetLayoutProperty(), TextDirection::LTR);
+    return host->GetLayoutProperty()->GetNonAutoLayoutDirection();
+}
+
 void SwiperPattern::HandleTouchBottomLoop()
 {
     auto currentFirstIndex = GetLoopIndex(currentFirstIndex_);
@@ -3275,7 +3283,11 @@ void SwiperPattern::OnSpringAndFadeAnimationFinish()
     currentIndexOffset_ = indexStartPos;
     UpdateItemRenderGroup(false);
     NotifyParentScrollEnd();
-    StartAutoPlay();
+
+    if (!isTouchDown_) {
+        StartAutoPlay();
+    }
+
     fadeAnimationIsRunning_ = false;
 }
 
@@ -3384,6 +3396,11 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
     auto delta = currentIndexOffset_ < 0.0f ? extentPair.Leading() : extentPair.Trailing();
     if (IsVisibleChildrenSizeLessThanSwiper()) {
         delta = extentPair.Trailing();
+    }
+    if (LessNotEqual(currentIndexOffset_, 0.0f) && prevMarginIgnoreBlank_) {
+        delta += GetNextMargin();
+    } else if (GreatNotEqual(currentIndexOffset_, 0.0f) && nextMarginIgnoreBlank_) {
+        delta -= GetPrevMargin();
     }
     // spring curve: (velocity: 0.0, mass: 1.0, stiffness: 228.0, damping: 30.0)
     auto springCurve = MakeRefPtr<SpringCurve>(0.0f, 1.0f, 228.0f, 30.0f);
@@ -3763,6 +3780,7 @@ std::shared_ptr<SwiperParameters> SwiperPattern::GetSwiperParameters() const
         auto pipelineContext = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipelineContext, swiperParameters_);
         auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+        CHECK_NULL_RETURN(swiperIndicatorTheme, swiperParameters_);
         swiperParameters_->itemWidth = swiperIndicatorTheme->GetSize();
         swiperParameters_->itemHeight = swiperIndicatorTheme->GetSize();
         swiperParameters_->selectedItemWidth = swiperIndicatorTheme->GetSize();

@@ -88,7 +88,7 @@ int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkU
                 return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND;
             }
             auto* child = impl->getNodeModifiers()->getFrameNodeModifier()->getChild(
-                reinterpret_cast<ArkUINodeHandle>(frameNode), 0);
+                reinterpret_cast<ArkUINodeHandle>(frameNode), 0, true);
             if (!child) {
                 LOGE("fail to get child in BuilderProxyNode");
                 return OHOS::Ace::ERROR_CODE_PARAM_INVALID;

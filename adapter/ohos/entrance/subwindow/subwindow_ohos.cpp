@@ -221,6 +221,7 @@ void SubwindowOhos::ResizeWindow()
 {
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     CHECK_NULL_VOID(defaultDisplay);
+    CHECK_NULL_VOID(window_);
     auto ret = window_->Resize(defaultDisplay->GetWidth(), defaultDisplay->GetHeight());
     if (ret != Rosen::WMError::WM_OK) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Resize window by default display failed with errCode: %{public}d",
@@ -286,6 +287,7 @@ void SubwindowOhos::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     ShowWindow(popupInfo.focusable);
+    CHECK_NULL_VOID(window_);
     window_->SetTouchable(true);
     ResizeWindow();
     ContainerScope scope(childContainerId_);
@@ -566,6 +568,7 @@ void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> customNode, const NG:
     }
     ShowWindow();
     ResizeWindow();
+    CHECK_NULL_VOID(window_);
     window_->SetTouchable(true);
     overlay->ShowMenuInSubWindow(targetNode->GetId(), offset, menuNode);
 }
@@ -583,6 +586,7 @@ void SubwindowOhos::ShowMenuNG(std::function<void()>&& buildFunc, std::function<
     CHECK_NULL_VOID(overlay);
     ShowWindow();
     ResizeWindow();
+    CHECK_NULL_VOID(window_);
     window_->SetTouchable(true);
     NG::ScopedViewStackProcessor builderViewStackProcessor;
     buildFunc();
@@ -640,6 +644,19 @@ void SubwindowOhos::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t target
     HidePixelMap(false, 0, 0, false);
     HideFilter(false);
     HideFilter(true);
+}
+
+void SubwindowOhos::UpdatePreviewPosition(const NG::OffsetF& offset, const Rect& rect)
+{
+    ContainerScope scope(childContainerId_);
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto overlay = pipelineContext->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    if (overlay->GetHasPixelMap()) {
+        return;
+    }
+    overlay->UpdatePixelMapPosition(Point(offset.GetX(), offset.GetY()), rect, true);
 }
 
 void SubwindowOhos::UpdateHideMenuOffsetNG(const NG::OffsetF& offset)
@@ -749,6 +766,7 @@ void SubwindowOhos::DeleteHotAreas(int32_t nodeId)
     for (auto it = hotAreasMap_.begin(); it != hotAreasMap_.end(); it++) {
         hotAreas.insert(hotAreas.end(), it->second.begin(), it->second.end());
     }
+    CHECK_NULL_VOID(window_);
     window_->SetTouchHotAreas(hotAreas);
 }
 
@@ -811,6 +829,7 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
     SubwindowManager::GetInstance()->SetDialogSubWindowId(
         SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
     ShowWindow();
+    CHECK_NULL_RETURN(window_, nullptr);
     window_->SetFullScreen(true);
     window_->SetTouchable(true);
     ResizeWindow();
@@ -845,6 +864,7 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNGWithNode(
     SubwindowManager::GetInstance()->SetDialogSubWindowId(
         SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
     ShowWindow();
+    CHECK_NULL_RETURN(window_, nullptr);
     window_->SetFullScreen(true);
     window_->SetTouchable(true);
     ResizeWindow();
@@ -893,6 +913,7 @@ void SubwindowOhos::OpenCustomDialogNG(const DialogProperties& dialogProps, std:
     SubwindowManager::GetInstance()->SetDialogSubWindowId(
         SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
     ShowWindow();
+    CHECK_NULL_VOID(window_);
     window_->SetFullScreen(true);
     window_->SetTouchable(true);
     ResizeWindow();
@@ -1106,6 +1127,7 @@ void SubwindowOhos::ShowToastForAbility(const std::string& message, int32_t dura
         showMode == NG::ToastShowMode::SYSTEM_TOP_MOST) {
         ShowWindow(false);
         ResizeWindow();
+        CHECK_NULL_VOID(window_);
         window_->SetTouchable(false);
     }
     delegate->ShowToast(message, duration, bottom, showMode, alignment, offset);
@@ -1502,6 +1524,7 @@ Rect SubwindowOhos::GetUIExtensionHostWindowRect() const
 
 void SubwindowOhos::RequestFocus()
 {
+    CHECK_NULL_VOID(window_);
     if (window_->IsFocused()) {
         TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "subwindow id:%{public}u already focused", window_->GetWindowId());
         // already focused, no need to focus
@@ -1518,6 +1541,7 @@ void SubwindowOhos::RequestFocus()
 
 bool SubwindowOhos::IsFocused()
 {
+    CHECK_NULL_RETURN(window_, false);
     return window_->IsFocused();
 }
 
@@ -1555,7 +1579,7 @@ void SubwindowOhos::HidePixelMap(bool startDrag, double x, double y, bool showAn
         manager->RemoveGatherNodeWithAnimation();
     }
     if (showAnimation) {
-        manager->RemovePixelMapAnimation(startDrag, x, y);
+        manager->RemovePixelMapAnimation(startDrag, x, y, true);
     } else {
         manager->RemovePixelMap();
     }
@@ -1611,6 +1635,7 @@ void SubwindowOhos::ResizeWindowForFoldStatus()
 {
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplaySync();
     CHECK_NULL_VOID(defaultDisplay);
+    CHECK_NULL_VOID(window_);
     auto ret = window_->Resize(defaultDisplay->GetWidth(), defaultDisplay->GetHeight());
     if (ret != Rosen::WMError::WM_OK) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Resize window by default display failed with errCode: %{public}d",

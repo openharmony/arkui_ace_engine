@@ -29,7 +29,7 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT TapGesture : public Gesture {
+class ACE_FORCE_EXPORT TapGesture : public Gesture {
     DECLARE_ACE_TYPE(TapGesture, Gesture);
 
 public:

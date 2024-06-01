@@ -158,7 +158,7 @@ void JSRenderingContext::JSBind(BindingTarget globalObj)
     JSClass<JSRenderingContext>::CustomMethod("startImageAnalyzer", &JSRenderingContext::JsStartImageAnalyzer);
     JSClass<JSRenderingContext>::CustomMethod("stopImageAnalyzer", &JSRenderingContext::JsStopImageAnalyzer);
 
-    // Register the "CanvasRenderingContext2D" to the golbal object of the vm
+    // Register the "CanvasRenderingContext2D" to the global object of the vm
     JSClass<JSRenderingContext>::Bind(globalObj, JSRenderingContext::Constructor, JSRenderingContext::Destructor);
 }
 

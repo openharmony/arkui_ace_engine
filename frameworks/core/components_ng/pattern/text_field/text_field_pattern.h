@@ -1662,10 +1662,11 @@ private:
 
     bool isFocusBGColorSet_ = false;
     bool isFocusTextColorSet_ = false;
+    bool isFocusPlaceholderColorSet_ = false;
     Dimension previewUnderlineWidth_ = 2.0_vp;
     bool hasSupportedPreviewText_ = true;
     bool hasPreviewText_ = false;
-    std::queue<PreviewTextInfo> previewTextOperation;
+    std::queue<PreviewTextInfo> previewTextOperation_;
     int32_t previewTextStart_ = -1;
     int32_t previewTextEnd_ = -1;
     bool showKeyBoardOnFocus_ = true;

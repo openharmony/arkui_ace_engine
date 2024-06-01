@@ -337,7 +337,7 @@ void ImageProvider::MakeCanvasImageHelper(const RefPtr<ImageObject>& obj, const 
     ImageDecoder decoder(obj, size, imageDecoderOptions.forceResize);
     RefPtr<CanvasImage> image;
     if (SystemProperties::GetImageFrameworkEnabled()) {
-        image = decoder.MakePixmapImage(imageDecoderOptions.imageQuality);
+        image = decoder.MakePixmapImage(imageDecoderOptions.imageQuality, imageDecoderOptions.isHdrDecoderNeed);
     } else {
 #ifndef USE_ROSEN_DRAWING
         image = decoder.MakeSkiaImage();

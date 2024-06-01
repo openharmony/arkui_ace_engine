@@ -283,9 +283,6 @@ void CalendarPickerModelNG::SetEdgeAlign(const CalendarEdgeAlign& alignType, con
     CHECK_NULL_VOID(pickerPattern);
     pickerPattern->SetCalendarEdgeAlign(alignType);
     pickerPattern->SetCalendarDialogOffset(offset);
-
-    ACE_UPDATE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, DialogAlignType, alignType);
-    ACE_UPDATE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, DialogOffset, offset);
 }
 
 void CalendarPickerModelNG::SetTextStyle(const PickerTextStyle& textStyle)
@@ -406,9 +403,6 @@ void CalendarPickerModelNG::SetEdgeAlign(
     CHECK_NULL_VOID(pickerPattern);
     pickerPattern->SetCalendarEdgeAlign(alignType);
     pickerPattern->SetCalendarDialogOffset(offset);
-
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, DialogAlignType, alignType, frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, DialogOffset, offset, frameNode);
 }
 
 void CalendarPickerModelNG::SetPadding(FrameNode* frameNode, const PaddingProperty& padding)

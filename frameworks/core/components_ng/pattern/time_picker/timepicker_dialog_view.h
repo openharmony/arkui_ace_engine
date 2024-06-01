@@ -63,8 +63,31 @@ private:
         const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext,
         const RefPtr<ButtonTheme>& buttonTheme);
     static void SetTextProperties(const RefPtr<PickerTheme>& pickerTheme, const PickerTextProperties& properties);
-    static void UpdateButtonDefaultFocus(const std::vector<ButtonInfo>& buttonInfos,
-        const RefPtr<FrameNode>& buttonNode, bool isConfirm);
+    static void UpdateButtonDefaultFocus(
+        const std::vector<ButtonInfo>& buttonInfos, const RefPtr<FrameNode>& buttonNode, bool isConfirm);
+    static RefPtr<FrameNode> ShowForAging(const DialogProperties& dialogProperties,
+        const TimePickerSettingData& settingData, const std::vector<ButtonInfo>& buttonInfos,
+        std::map<std::string, PickerTime> timePickerProperty, std::map<std::string, NG::DialogEvent> dialogEvent,
+        std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
+
+    static void BuildDialogAcceptAndCancelButton(const std::vector<ButtonInfo>& buttonInfos,
+        const TimePickerSettingData& settingData, const RefPtr<FrameNode>& acceptNode,
+        const RefPtr<FrameNode>& timePickerNode, const RefPtr<FrameNode>& dialogNode,
+        const RefPtr<FrameNode>& contentColumn, std::map<std::string, NG::DialogEvent> dialogEvent,
+        std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
+
+    static RefPtr<FrameNode> CreateNextPrevButtonNode(std::function<void()>& timePickerSwitchEvent,
+        const RefPtr<FrameNode>& timeNode, const std::vector<ButtonInfo>& buttonInfos);
+    static RefPtr<FrameNode> CreateButtonNodeForAging(const RefPtr<FrameNode>& frameNode,
+        const RefPtr<FrameNode>& timePickerNode, const std::vector<ButtonInfo>& buttonInfos,
+        std::map<std::string, NG::DialogEvent> dialogEvent,
+        std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
+    static bool NeedadaptForAging();
+    static std::function<void()> CreateAndSetTimePickerSwitchEvent(const RefPtr<FrameNode>& timePicker,
+        const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<FrameNode>& buttonConfirmNode);
+    static void SwitchTimePickerPage(const RefPtr<FrameNode>& timePickerNode, const RefPtr<FrameNode>& buttonCancelNode,
+        const RefPtr<FrameNode>& buttonConfirmNode);
+    static bool switchFlag_;
 };
 } // namespace OHOS::Ace::NG
 

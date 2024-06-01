@@ -84,6 +84,8 @@ void FormManagerDelegate::AddGetRectRelativeToWindowCallback(OnGetRectRelativeTo
 
 void FormManagerDelegate::AddSnapshotCallback(SnapshotCallback&& callback) {}
 
+void FormManagerDelegate::AddEnableFormCallback(EnableFormCallback&& callback) {}
+
 void FormManagerDelegate::ResetForm() {}
 
 void FormManagerDelegate::ReleaseForm() {}

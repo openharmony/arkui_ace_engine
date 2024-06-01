@@ -409,7 +409,6 @@ public:
     virtual void CheckHandles(SelectHandleInfo& handleInfo) {};
     OffsetF GetDragUpperLeftCoordinates() override;
     void SetTextSelection(int32_t selectionStart, int32_t selectionEnd);
-    void SetFadeout(const bool& left, const bool& right, const float& gradientPercent);
 
     // Deprecated: Use the TextSelectOverlay::OnHandleMove() instead.
     // It is currently used by RichEditorPattern.
@@ -743,7 +742,6 @@ private:
     void HandleMouseLeftReleaseAction(const MouseInfo& info, const Offset& textOffset);
     void HandleMouseLeftMoveAction(const MouseInfo& info, const Offset& textOffset);
     void InitSpanItem(std::stack<SpanNodeInfo> nodes);
-    void EnsureOverlayExists();
     int32_t GetSelectionSpanItemIndex(const MouseInfo& info);
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
     void ProcessBoundRectByTextMarquee(RectF& rect);

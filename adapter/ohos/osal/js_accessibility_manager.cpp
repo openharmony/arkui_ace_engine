@@ -102,6 +102,10 @@ const std::map<Accessibility::ActionType, std::function<bool(const Accessibility
         [](const AccessibilityActionParam& param) { return param.accessibilityProperty->ActActionCut(); } },
     { ActionType::ACCESSIBILITY_ACTION_PASTE,
         [](const AccessibilityActionParam& param) { return param.accessibilityProperty->ActActionPaste(); } },
+    { ActionType::ACCESSIBILITY_ACTION_CLICK,
+        [](const AccessibilityActionParam& param) { return param.accessibilityProperty->ActActionClick(); } },
+    { ActionType::ACCESSIBILITY_ACTION_LONG_CLICK,
+        [](const AccessibilityActionParam& param) { return param.accessibilityProperty->ActActionLongClick(); } },
     { ActionType::ACCESSIBILITY_ACTION_SELECT,
         [](const AccessibilityActionParam& param) { return param.accessibilityProperty->ActActionSelect(); } },
     { ActionType::ACCESSIBILITY_ACTION_CLEAR_SELECTION,
@@ -1127,6 +1131,9 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
     CHECK_NULL_VOID(node);
     auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
+    if (accessibilityProperty->HasAccessibilityRole()) {
+        nodeInfo.SetComponentType(accessibilityProperty->GetAccessibilityRole());
+    }
 
     if (accessibilityProperty->HasUserTextValue()) {
         nodeInfo.SetContent(accessibilityProperty->GetUserTextValue());
@@ -2224,6 +2231,7 @@ void JsAccessibilityManager::SendExtensionAccessibilityEvent(
 
 void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent)
 {
+    ACE_ACCESS_SCOPED_TRACE("SendAccessibilityAsyncEvent");
     auto context = GetPipelineContext().Upgrade();
     CHECK_NULL_VOID(context);
     int32_t windowId = static_cast<int32_t>(context->GetFocusWindowId());
@@ -2560,7 +2568,7 @@ void JsAccessibilityManager::DumpHandleEvent(const std::vector<std::string>& par
             jsAccessibilityManager->AccessibilityActionEvent(
                 op, paramsMap, node, AceType::DynamicCast<PipelineContext>(pipeline));
         },
-        TaskExecutor::TaskType::UI, "ArkUIAccessibilityAction");
+        TaskExecutor::TaskType::UI, "ArkUIAccessibilityActionEvent");
 }
 
 void JsAccessibilityManager::DumpProperty(const RefPtr<AccessibilityNode>& node)

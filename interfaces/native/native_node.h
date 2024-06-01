@@ -5135,6 +5135,16 @@ typedef enum {
      */
     NODE_EVENT_ON_DETACH,
     /**
+     * @brief 无障碍支持操作事件触发。
+     *
+     * 触发该事件的条件：已设置无障碍操作类型，并进行相应操作。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中包含1个参数: \n
+     * <b>ArkUI_NodeComponentEvent.data[0].u32</b>: 触发回调的操作类型，参数类型{@link ArkUI_AccessibilityActionType} \n
+     *
+     */
+    NODE_ON_ACCESSIBILITY_ACTIONS,
+    /**
      * @brief 文本设置TextDataDetectorConfig且识别成功时，触发onDetectResultUpdate回调。
      *
      * 触发该事件的条件：文本设置TextDataDetectorConfig且识别成功后。\n

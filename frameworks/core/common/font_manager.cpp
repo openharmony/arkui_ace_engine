@@ -33,6 +33,7 @@
 
 namespace OHOS::Ace {
 
+std::string FontManager::appCustomFont_ = "";
 float FontManager::fontWeightScale_ = 1.0f;
 bool FontManager::isDefaultFontChanged_ = false;
 
@@ -73,6 +74,21 @@ bool FontManager::IsDefaultFontChanged()
         isDefaultFontChanged_ = true;
     }
     return isDefaultFontChanged_;
+}
+
+bool FontManager::IsUseAppCustomFont()
+{
+    return !appCustomFont_.empty();
+}
+
+void FontManager::SetAppCustomFont(const std::string& familyName)
+{
+    appCustomFont_ = familyName;
+}
+
+const std::string& FontManager::GetAppCustomFont() const
+{
+    return appCustomFont_;
 }
 
 void FontManager::GetSystemFontList(std::vector<std::string>& fontList)

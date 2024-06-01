@@ -83,6 +83,11 @@ void PageRouterManager::LoadOhmUrl(const RouterPageInfo& target)
 void PageRouterManager::RunPage(const std::string& url, const std::string& params)
 {
     PerfMonitor::GetPerfMonitor()->SetAppStartStatus();
+    auto pagePath = Framework::JsiDeclarativeEngine::GetPagePath(url);
+    if (pagePath.empty()) {
+        pagePath = url;
+    }
+    ACE_SCOPED_TRACE_COMMERCIAL("PageRouterManager::RunPage, Router Main Page: %s", pagePath.c_str());
     CHECK_RUN_ON(JS);
     RouterPageInfo info { url, params };
 #if !defined(PREVIEW)
@@ -147,12 +152,17 @@ void PageRouterManager::RunPage(const std::shared_ptr<std::vector<uint8_t>>& con
     CHECK_NULL_VOID(pageRouterManager);
     taskExecutor->PostTask(
         [pageRouterManager, info]() { pageRouterManager->LoadOhmUrl(info); },
-        TaskExecutor::TaskType::JS, "ArkUIPageRouterLoadOhmUrl");
+        TaskExecutor::TaskType::JS, "ArkUIPageRouterLoadOhmUrlContent");
 #endif
 }
 
 void PageRouterManager::RunPageByNamedRouter(const std::string& name, const std::string& params)
 {
+    auto pagePath = Framework::JsiDeclarativeEngine::GetPagePath(name);
+    if (pagePath.empty()) {
+        pagePath = name;
+    }
+    ACE_SCOPED_TRACE_COMMERCIAL("PageRouterManager::RunPage, Router Main Page: %s", pagePath.c_str());
     RouterPageInfo info { name, params };
     info.isNamedRouterMode = true;
     RouterOptScope scope(this);
@@ -909,7 +919,7 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
                                               int32_t errorCode, const std::string& errorMsg) {
             ContainerScope scope(instanceId);
             taskExecutor->PostTask([errorCallback, errorCode, errorMsg]() { errorCallback(errorMsg, errorCode); },
-                TaskExecutor::TaskType::JS, "ArkUIPageRouterErrorCallback");
+                TaskExecutor::TaskType::JS, "ArkUIPageRouterPushErrorCallback");
         };
 
         pageUrlChecker->LoadPageUrl(target.url, callback, silentInstallErrorCallBack);
@@ -1007,7 +1017,7 @@ void PageRouterManager::StartReplace(const RouterPageInfo& target)
                                               int32_t errorCode, const std::string& errorMsg) {
             ContainerScope scope(instanceId);
             taskExecutor->PostTask([errorCallback, errorCode, errorMsg]() { errorCallback(errorMsg, errorCode); },
-                TaskExecutor::TaskType::JS, "ArkUIPageRouterErrorCallback");
+                TaskExecutor::TaskType::JS, "ArkUIPageRouterReplaceErrorCallback");
         };
 
         pageUrlChecker->LoadPageUrl(target.url, callback, silentInstallErrorCallBack);

@@ -64,14 +64,17 @@ struct ParsedConfig {
     std::string direction;
     std::string densitydpi;
     std::string themeTag;
+    std::string fontFamily;
     std::string fontScale;
     std::string fontWeightScale;
     std::string colorModeIsSetByApp;
+    std::string mcc;
+    std::string mnc;
     bool IsValid() const
     {
         return !(colorMode.empty() && deviceAccess.empty() && languageTag.empty() && direction.empty() &&
-                 densitydpi.empty() && themeTag.empty() && fontScale.empty() && fontWeightScale.empty() &&
-                 colorModeIsSetByApp.empty());
+                 densitydpi.empty() && themeTag.empty() && fontScale.empty() && fontFamily.empty() &&
+                 fontWeightScale.empty() && colorModeIsSetByApp.empty() && mcc.empty() && mnc.empty());
     }
 };
 

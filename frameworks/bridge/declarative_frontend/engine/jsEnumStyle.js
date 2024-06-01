@@ -769,12 +769,12 @@ var BarMode;
   BarMode["Scrollable"] = "Scrollable";
 })(BarMode || (BarMode = {}));
 
-var AnimateMode;
-(function (AnimateMode) {
-  AnimateMode["CONTENT_FIRST"] = "CONTENT_FIRST";
-  AnimateMode["ACTION_FIRST"] = "ACTION_FIRST";
-  AnimateMode["NO_ANIMATION"] = "NO_ANIMATION";
-})(AnimateMode || (AnimateMode = {}));
+var AnimationMode;
+(function (AnimationMode) {
+  AnimationMode[AnimationMode["CONTENT_FIRST"] = 0] = "CONTENT_FIRST";
+  AnimationMode[AnimationMode["ACTION_FIRST"] = 1] = "ACTION_FIRST";
+  AnimationMode[AnimationMode["NO_ANIMATION"] = 2] = "NO_ANIMATION";
+})(AnimationMode || (AnimationMode = {}));
 
 var SelectedMode;
 (function (SelectedMode) {
@@ -1980,8 +1980,6 @@ class NavPathInfo {
     this.param = param;
     this.onPop = onPop;
     this.index = -1;
-    // index that if check navdestination exists first
-    this.checkNavDestinationFlag = false;
     this.needUpdate = false;
   }
 }
@@ -2080,7 +2078,6 @@ class NavPathStack {
     } else {
       info = new NavPathInfo(name, param, onPop);
     }
-    info.checkNavDestinationFlag = true;
     this.pathArray.push(info);
     this.isReplace = 0;
     if (typeof onPop === 'boolean') {
@@ -2159,7 +2156,6 @@ class NavPathStack {
     if (ret) {
       return promiseRet;
     }
-    info.checkNavDestinationFlag = true;
     this.pathArray.push(info);
     this.isReplace = 0;
     this.animated = animated;
@@ -2380,7 +2376,7 @@ class NavPathStack {
   }
   removeInvalidPage(name, param) {
     for (let i = 0; i < this.pathArray.length; i++) {
-      if (this.pathArray[i].checkNavDestinationFlag && this.pathArray[i].name === name &&
+      if (this.pathArray[i].name === name &&
         this.pathArray[i].param === param) {
         this.pathArray.splice(i, 1);
         return;
@@ -2422,13 +2418,6 @@ class NavPathStack {
       return undefined;
     }
     return item.name;
-  }
-  getCheckNavDestinationFlagByIndex(index) {
-    let item = this.pathArray[index];
-    if (item === undefined) {
-      return undefined;
-    }
-    return item.checkNavDestinationFlag;
   }
   getOnPopByIndex(index) {
     let item = this.pathArray[index];
@@ -2727,6 +2716,7 @@ var SaveIconStyle;
 (function (SaveIconStyle) {
   SaveIconStyle[SaveIconStyle["FULL_FILLED"] = 0] = "FULL_FILLED";
   SaveIconStyle[SaveIconStyle["LINES"] = 1] = "LINES";
+  SaveIconStyle[SaveIconStyle["PICTURE"] = 2] = "PICTURE";
 })(SaveIconStyle || (SaveIconStyle = {}));
 
 var SaveDescription;

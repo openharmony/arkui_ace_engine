@@ -31,6 +31,7 @@
 #include <GLES3/gl3.h>
 #include "base/image/pixel_map.h"
 #include "core/common/recorder/event_recorder.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/web/resource/web_client_impl.h"
 #include "core/components/web/resource/web_resource.h"
@@ -48,7 +49,7 @@
 #ifdef ENABLE_ROSEN_BACKEND
 #include "surface.h"
 #endif
-#include "window.h"
+#include "wm/window.h"
 #endif
 
 namespace OHOS::Ace {
@@ -564,6 +565,8 @@ public:
     {}
     ~WebDelegateObserver();
     void NotifyDestory();
+    void OnAttachContext(const RefPtr<NG::PipelineContext> &context);
+    void OnDetachContext();
 
 private:
     RefPtr<WebDelegate> delegate_;
@@ -639,7 +642,10 @@ public:
     WebDelegate() = delete;
     ~WebDelegate() override;
     WebDelegate(const WeakPtr<PipelineBase>& context, ErrorCallback&& onError, const std::string& type)
-        : WebResource(type, context, std::move(onError))
+        : WebResource(type, context, std::move(onError)), instanceId_(Container::CurrentId())
+    {}
+    WebDelegate(const WeakPtr<PipelineBase>& context, ErrorCallback&& onError, const std::string& type, int32_t id)
+        : WebResource(type, context, std::move(onError)), instanceId_(id)
     {}
 
     void UnRegisterScreenLockFunction();
@@ -742,6 +748,7 @@ public:
     void HandleTouchpadFlingEvent(const double& x, const double& y, const double& vx, const double& vy);
     void HandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY);
     bool OnKeyEvent(int32_t keyCode, int32_t keyAction);
+    bool WebOnKeyEvent(int32_t keyCode, int32_t keyAction, const std::vector<int32_t>& pressedCodes);
     void OnMouseEvent(int32_t x, int32_t y, const MouseButton button, const MouseAction action, int count);
     void OnFocus(const OHOS::NWeb::FocusReason& reason = OHOS::NWeb::FocusReason::EVENT_REQUEST);
     bool NeedSoftKeyboard();
@@ -961,9 +968,18 @@ public:
 
     void OnCustomKeyboardClose();
 
+    void OnAttachContext(const RefPtr<NG::PipelineContext> &context);
+    void OnDetachContext();
+
+    int32_t GetInstanceId() const
+    {
+        return instanceId_;
+    }
 
     void OnAdsBlocked(const std::string& url, const std::vector<std::string>& adsBlocked);
+    void SetSurfaceId(const std::string& surfaceId);
 
+    void KeyboardReDispatch(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event, bool isUsed);
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -1161,6 +1177,7 @@ private:
     NG::SafeAreaInsets cutoutSafeArea_;
     NG::SafeAreaInsets navigationIndicatorSafeArea_;
     sptr<Rosen::IAvoidAreaChangedListener> avoidAreaChangedListener_ = nullptr;
+    int32_t instanceId_;
 #endif
 };
 

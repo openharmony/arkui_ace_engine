@@ -49,7 +49,8 @@ void StaticImageObject::MakeCanvasImage(const RefPtr<ImageLoadingContext>& ctx, 
         .sync = syncLoad,
         .loadInVipChannel = loadInVipChannel,
         .dynamicMode = ctx->GetDynamicRangeMode(),
-        .imageQuality = ctx->GetImageQuality()
+        .imageQuality = ctx->GetImageQuality(),
+        .isHdrDecoderNeed = ctx->GetIsHdrDecoderNeed()
     });
 }
 

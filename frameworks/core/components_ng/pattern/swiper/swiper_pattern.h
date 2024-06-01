@@ -636,6 +636,7 @@ public:
     void UpdateNextValidIndex();
     void CheckMarkForIndicatorBoundary();
     bool IsHorizontalAndRightToLeft() const;
+    TextDirection GetNonAutoLayoutDirection() const;
     void FireWillHideEvent(int32_t willHideIndex) const;
     void FireWillShowEvent(int32_t willShowIndex) const;
     void SetOnHiddenChangeForParent();
@@ -791,7 +792,7 @@ private:
     float GetCustomPropertyOffset() const;
     float GetCustomPropertyTargetOffset() const;
     void UpdateAnimationProperty(float velocity);
-    void TriggerAnimationEndOnForceStop(bool isInterrupt);
+    void TriggerAnimationEndOnForceStop(bool isInterrupt = false);
     void TriggerAnimationEndOnSwipeToLeft();
     void TriggerAnimationEndOnSwipeToRight();
     void TriggerEventOnFinish(int32_t nextIndex);

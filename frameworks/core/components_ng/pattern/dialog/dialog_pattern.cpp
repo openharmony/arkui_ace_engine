@@ -439,27 +439,12 @@ void DialogPattern::BuildCustomChild(const DialogProperties& props, const RefPtr
     auto contentWrapper = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
     CHECK_NULL_VOID(contentWrapper);
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        if (!props.customStyle) {
-            UpdateContentRenderContext(contentWrapper, props);
-        }
-        customNode->MountToParent(contentWrapper);
-        auto dialog = GetHost();
-        contentWrapper->MountToParent(dialog);
-    } else {
-        auto scroll = FrameNode::CreateFrameNode(
-            V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
-        CHECK_NULL_VOID(contentWrapper);
-        if (!props.customStyle) {
-            UpdateContentRenderContext(scroll, props);
-        }
-        customNode->MountToParent(contentWrapper);
-        contentWrapper->MountToParent(scroll);
-        auto dialog = GetHost();
-        scroll->MountToParent(dialog);
-        scroll->MarkModifyDone();
-        dialog->MarkModifyDone();
+    if (!props.customStyle) {
+        UpdateContentRenderContext(contentWrapper, props);
     }
+    customNode->MountToParent(contentWrapper);
+    auto dialog = GetHost();
+    contentWrapper->MountToParent(dialog);
 }
 
 RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogProperties)
@@ -1189,10 +1174,22 @@ void DialogPattern::OnColorConfigurationUpdate()
     host->MarkDirtyNode();
 }
 
+void DialogPattern::UpdateAlignmentAndOffset()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto props = host->GetLayoutProperty<DialogLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    auto dialogProp = GetDialogProperties();
+    props->UpdateDialogAlignment(dialogProp.alignment);
+    props->UpdateDialogOffset(dialogProp.offset);
+}
+
 void DialogPattern::OnLanguageConfigurationUpdate()
 {
     CHECK_NULL_VOID(dialogProperties_.onLanguageChange);
     dialogProperties_.onLanguageChange(dialogProperties_);
+    UpdateAlignmentAndOffset();
     if (!dialogProperties_.title.empty() && contentNodeMap_.find(DialogContentNode::TITLE) != contentNodeMap_.end()) {
         UpdateNodeContent(contentNodeMap_[DialogContentNode::TITLE], dialogProperties_.title);
         title_ = dialogProperties_.title;
