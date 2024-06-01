@@ -27,6 +27,7 @@
 #include "node_extened.h"
 #include "node_model.h"
 #include "waterflow_section_option.h"
+#include "list_option.h"
 
 #include "base/error/error_code.h"
 #include "base/log/log_wrapper.h"
@@ -5166,6 +5167,23 @@ const ArkUI_AttributeItem* GetListAlignListItem(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+int32_t SetListChildrenMainSize(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(item->object, ERROR_CODE_PARAM_INVALID);
+    auto* listChildrenMainSize = reinterpret_cast<ArkUIListChildrenMainSize>(item->object);
+    int32_t unit = GetDefaultUnit(node, UNIT_VP);
+    GetFullImpl()->getNodeModifiers()->getListModifier()->setListChildrenMainSize(
+        node->uiNodeHandle, listChildrenMainSize, unit);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetListChildrenMainSize(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getListModifier()->resetListChildrenMainSize(node->uiNodeHandle);
+}
+
 int32_t SetListScrollToIndex(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
@@ -6810,10 +6828,41 @@ void ResetListItemGroupDivider(ArkUI_NodeHandle node)
 {
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
-
     fullImpl->getNodeModifiers()->getListItemGroupModifier()->listItemGroupResetDivider(node->uiNodeHandle);
 }
 
+int32_t SetListItemGroupChildrenMainSize(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(item->object, ERROR_CODE_PARAM_INVALID);
+    auto* listChildrenMainSize = reinterpret_cast<ArkUIListChildrenMainSize>(item->object);
+    int32_t unit = GetDefaultUnit(node, UNIT_VP);
+    GetFullImpl()->getNodeModifiers()->getListItemGroupModifier()->setListItemGroupChildrenMainSize(
+        node->uiNodeHandle, listChildrenMainSize, unit);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetListItemGroupChildrenMainSize(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getListItemGroupModifier()->resetListItemGroupChildrenMainSize(node->uiNodeHandle);
+}
+
+int32_t SetListItemSwiperAction(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(item->object, ERROR_CODE_PARAM_INVALID);
+    auto* listItemSwipeActionOption = reinterpret_cast<ArkUIListItemSwipeActionOptionHandle>(item->object);
+    GetFullImpl()->getNodeModifiers()->getListItemModifier()->setListItemSwipeAction(
+        node->uiNodeHandle, listItemSwipeActionOption);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetListItemSwiperAction(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getListItemModifier()->resetListItemSwipeAction(node->uiNodeHandle);
+}
 // datepicker
 
 const ArkUI_AttributeItem* GetDatePickerLunar(ArkUI_NodeHandle node)
@@ -12337,7 +12386,7 @@ void ResetScrollAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 int32_t SetListAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* value)
 {
     static Setter* setters[] = { SetListDirection, SetListSticky, SetListSpace, SetListNodeAdapter,
-        SetListCachedCount, SetListScrollToIndex, SetListAlignListItem };
+        SetListCachedCount, SetListScrollToIndex, SetListAlignListItem, SetListChildrenMainSize };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "list node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -12359,7 +12408,7 @@ const ArkUI_AttributeItem* GetListAttribute(ArkUI_NodeHandle node, int32_t subTy
 void ResetListAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Resetter* resetters[] = { ResetListDirection, ResetListSticky, ResetListSpace, ResetListNodeAdapter,
-        ResetListCachedCount, nullptr, ResetListAlignListItem };
+        ResetListCachedCount, nullptr, ResetListAlignListItem, ResetListChildrenMainSize };
     if (subTypeId >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "list node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -12367,9 +12416,32 @@ void ResetListAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
     return resetters[subTypeId](node);
 }
 
+int32_t SetListItemAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
+{
+    static Setter* setters[] = { SetListItemSwiperAction };
+    if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "listitem node attribute: %{public}d NOT IMPLEMENT", subTypeId);
+        return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
+    }
+    return setters[subTypeId](node, item);
+}
+
+void ResetListItemAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
+{
+    static Resetter* resetters[] = { ResetListItemSwiperAction };
+    if (subTypeId >= sizeof(resetters) / sizeof(Resetter*)) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "listitem node attribute: %{public}d NOT IMPLEMENT", subTypeId);
+        return;
+    }
+    if (resetters[subTypeId]) {
+        return resetters[subTypeId](node);
+    }
+}
+
 int32_t SetListItemGroupAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
 {
-    static Setter* setters[] = { SetListItemGroupHeader, SetListItemGroupFooter, SetListItemGroupDivider };
+    static Setter* setters[] = { SetListItemGroupHeader, SetListItemGroupFooter, SetListItemGroupDivider,
+        SetListItemGroupChildrenMainSize };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "listitemgroup node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -12379,7 +12451,7 @@ int32_t SetListItemGroupAttribute(ArkUI_NodeHandle node, int32_t subTypeId, cons
 
 void ResetListItemGroupAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
-    static Resetter* resetters[] = { nullptr, nullptr, ResetListItemGroupDivider };
+    static Resetter* resetters[] = { nullptr, nullptr, ResetListItemGroupDivider, ResetListItemGroupChildrenMainSize };
     if (subTypeId >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "list node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -12629,9 +12701,9 @@ int32_t SetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, co
         SetTextInputAttribute, SetTextAreaAttribute, SetButtonAttribute, SetProgressAttribute, SetCheckboxAttribute,
         SetXComponentAttribute, SetDatePickerAttribute, SetTimePickerAttribute, SetTextPickerAttribute,
         SetCalendarPickerAttribute, SetSliderAttribute, SetRadioAttribute, SetStackAttribute, SetSwiperAttribute,
-        SetScrollAttribute, SetListAttribute, nullptr, SetListItemGroupAttribute, SetColumnAttribute, SetRowAttribute,
-        SetFlexAttribute, SetRefreshAttribute, SetWaterFlowAttribute, nullptr, SetRelativeContainerAttribute,
-        SetGridAttribute, nullptr};
+        SetScrollAttribute, SetListAttribute, SetListItemAttribute, SetListItemGroupAttribute, SetColumnAttribute,
+        SetRowAttribute, SetFlexAttribute, SetRefreshAttribute, SetWaterFlowAttribute, nullptr,
+        SetRelativeContainerAttribute, SetGridAttribute, nullptr};
     int32_t subTypeClass = type / MAX_NODE_SCOPE_NUM;
     int32_t subTypeId = type % MAX_NODE_SCOPE_NUM;
     int32_t nodeSubTypeClass =
@@ -12684,7 +12756,7 @@ int32_t ResetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type)
         ResetTextInputAttribute, ResetTextAreaAttribute, ResetButtonAttribute, ResetProgressAttribute,
         ResetCheckboxAttribute, ResetXComponentAttribute, ResetDatePickerAttribute, ResetTimePickerAttribute,
         ResetTextPickerAttribute, ResetCalendarPickerAttribute, ResetSliderAttribute, ResetRadioAttribute,
-        ResetStackAttribute, ResetSwiperAttribute, ResetScrollAttribute, ResetListAttribute, nullptr,
+        ResetStackAttribute, ResetSwiperAttribute, ResetScrollAttribute, ResetListAttribute, ResetListItemAttribute,
         ResetListItemGroupAttribute, ResetColumnAttribute, ResetRowAttribute, ResetFlexAttribute, ResetRefreshAttribute,
         ResetWaterFlowAttribute, nullptr, ResetRelativeContainerAttribute, ResetGridAttribute, nullptr};
     int32_t subTypeClass = type / MAX_NODE_SCOPE_NUM;

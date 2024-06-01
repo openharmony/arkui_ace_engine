@@ -4036,16 +4036,27 @@ typedef enum {
     NODE_LIST_SCROLL_TO_INDEX,
 
     /**
-    * @brief 设置List交叉轴方向宽度大于ListItem交叉轴宽度 * lanes时，
-    * ListItem在List交叉轴方向的布局方式，支持属性设置，属性重置和属性获取接口。
-    *
-    * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * @brief 设置List交叉轴方向宽度大于ListItem交叉轴宽度 * lanes时，
+     * ListItem在List交叉轴方向的布局方式，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
      * .value[0].i32：交叉轴方向的布局方式。参数类型{@link ArkUI_ListItemAlignment} \n
      * \n
      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
      * .value[0].i32：交叉轴方向的布局方式。参数类型{@link ArkUI_ListItemAlignment}  \n
-    */
+     */
     NODE_LIST_ALIGN_LIST_ITEM,
+
+    /**
+     * @brief Set the default spindle size for the List subcomponent.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: The parameter format is {@ ArkUI-ListChildrenMainSize} \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object: The parameter format is {@ ArkUI-ListChildrenMainSize} \n
+     */
+    NODE_LIST_CHILDREN_MAIN_SIZE = 1003007,
 
     /**
      * @brief Defines whether to enable loop playback for the swiper. This attribute can be set, reset, and obtained
@@ -4308,6 +4319,19 @@ typedef enum {
     NODE_SWIPER_SWIPE_TO_INDEX,
 
     /**
+     * @brief: Set the delineation component of the ListItem, supporting property settings, property resets, and
+     * property acquisition interfaces.
+     *
+     * Attribute setting method parameter {@link ArkUI_AttributeItem} format: \n
+     * .object: Construct using the {@link ArkUI_ListitemSwipeActionOption} object. \n
+     * \n
+     * The return value of the attribute acquisition method {@link ArkUI_AttributeItem} format: \n
+     * .object: Construct using the {@link ArkUI_ListitemSwipeActionOption} object. \n
+     *
+     */
+    NODE_LIST_ITEM_SWIPE_ACTION = MAX_NODE_SCOPE_NUM * ARKUI_NODE_LIST_ITEM,
+
+    /**
      * @brief Defines the header of the list item group.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -4349,6 +4373,17 @@ typedef enum {
      *
      */
     NODE_LIST_ITEM_GROUP_SET_DIVIDER,
+
+    /**
+     * @brief Set the default spindle size for the ListItem Group subcomponent.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: The parameter format is {@ ArkUI-ListChildrenMainSize} \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object: The parameter format is {@ ArkUI-ListChildrenMainSize} \n
+     */
+    NODE_LIST_ITEM_GROUP_CHILDREN_MAIN_SIZE = 1005003,
 
     /**
      * @brief Defines the horizontal alignment mode of child components in the column.
@@ -6492,6 +6527,98 @@ int32_t OH_ArkUI_NodeContent_RegisterCallback(ArkUI_NodeContentHandle handle, Ar
  */
 ArkUI_NodeContentEventType OH_ArkUI_NodeContentEvent_GetEventType(ArkUI_NodeContentEvent* event);
 
+/**
+ * @brief Get the size of the component layout area.
+ * The layout area size does not include graphic variation attributes such as scaling.
+ *
+ * @param node ArkUI_NodeHandle pointer.
+ * @param size The drawing area size of the component handle, in px.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 12
+ */
+int32_t OH_ArkUI_NodeUtils_GetLayoutSize(ArkUI_NodeHandle node, ArkUI_IntSize* size);
+
+/**
+ * @brief Obtain the position of the component layout area relative to the parent component.
+ * The relative position of the layout area does not include graphic variation attributes, such as translation.
+ *
+ * @param node ArkUI_NodeHandle pointer.
+ * @param localOffset The offset value of the component handle relative to the parent component, in px.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 12
+ */
+int32_t OH_ArkUI_NodeUtils_GetLayoutPosition(ArkUI_NodeHandle node, ArkUI_IntOffset* localOffset);
+
+/**
+ * @brief Obtain the position of the component layout area relative to the window.
+ * The relative position of the layout area does not include graphic variation attributes, such as translation.
+ *
+ * @param node ArkUI_NodeHandle pointer.
+ * @param globalOffset The offset value of the component handle relative to the window, in px.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 12
+ */
+int32_t OH_ArkUI_NodeUtils_GetLayoutPositionInWindow(ArkUI_NodeHandle node, ArkUI_IntOffset* globalOffset);
+
+/**
+ * @brief Obtain the position of the component layout area relative to the screen.
+ * The relative position of the layout area does not include graphic variation attributes, such as translation.
+ *
+ * @param node ArkUI_NodeHandle pointer.
+ * @param screenOffset The offset value of the component handle relative to the screen, in px.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 12
+ */
+int32_t OH_ArkUI_NodeUtils_GetLayoutPositionInScreen(ArkUI_NodeHandle node, ArkUI_IntOffset* screenOffset);
+
+/**
+ * @brief Obtain the position of the component in the window, including the properties of graphic translation changes.
+ *
+ * @param node ArkUI_NodeHandle pointer.
+ * @param translateOffset The cumulative offset value of the component handle itself,
+ * parent components, and ancestor nodes, in px.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 12
+ */
+int32_t OH_ArkUI_NodeUtils_GetPositionWithTranslateInWindow(ArkUI_NodeHandle node, ArkUI_IntOffset* translateOffset);
+
+/**
+ * @brief Obtain the position of the component on the screen, including the attributes of graphic translation changes.
+ *
+ * @param node ArkUI_NodeHandle pointer.
+ * @param translateOffset The cumulative offset value of the component handle itself,
+ * parent components, and ancestor nodes, in px.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 12
+ */
+int32_t OH_ArkUI_NodeUtils_GetPositionWithTranslateInScreen(ArkUI_NodeHandle node, ArkUI_IntOffset* translateOffset);
+
+/**
+* @brief The event called when the sliding operation offset changes.
+*
+* @param node Indicates the target node.
+* @param userData Indicates the custom data to be saved.
+* @param onFinish Callback Events.
+*        offset Slide offset.
+* @return Error code.
+*         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+*         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+*         {@link ARKUI_ERROR_CODE_ATTRIBUTE_OR_EVENT_NOT_SUPPORTED} The component does not support this event.
+* @since 12
+*/
+int32_t OH_ArkUI_List_CloseAllSwipeActions(ArkUI_NodeHandle node, void* userData, void (*onFinish)(void* userData));
 #ifdef __cplusplus
 };
 #endif

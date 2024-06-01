@@ -22,8 +22,8 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_v2/list/list_properties.h"
 #include "core/components_ng/pattern/list/list_item_group_model.h"
+#include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
 
@@ -40,6 +40,9 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetHeader(FrameNode* frameNode, FrameNode* headerNode);
     static void SetFooter(FrameNode* frameNode, FrameNode* footerNode);
+    static void SetListChildrenMainSize(
+        FrameNode* frameNode, float defaultSize, const std::vector<float>& mainSize);
+    static void ResetListChildrenMainSize(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

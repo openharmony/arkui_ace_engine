@@ -17,8 +17,7 @@
 
 #include <cstdint>
 
-#include "interfaces/native/node/node_model.h"
-
+#include "interfaces/native/node/list_option.h"
 #include "base/error/error_code.h"
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
@@ -569,6 +568,44 @@ void ResetInitialIndex(ArkUINodeHandle node)
     ListModelNG::SetInitialIndex(frameNode, 0);
 }
 
+void SetListChildrenMainSize(ArkUINodeHandle node, ArkUIListChildrenMainSize option, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    for (int i = 0; i < option->mainSize.size(); i++) {
+        if (option->mainSize[i] > 0) {
+            option->mainSize[i] =
+                Dimension(option->mainSize[i], static_cast<OHOS::Ace::DimensionUnit>(unit)).ConvertToPx();
+        }
+    }
+    if (option->defaultMainSize > 0) {
+        option->defaultMainSize =
+            Dimension(option->defaultMainSize, static_cast<OHOS::Ace::DimensionUnit>(unit)).ConvertToPx();
+    }
+    ListModelNG::SetListChildrenMainSize(frameNode, option->defaultMainSize, option->mainSize);
+}
+
+void ResetListChildrenMainSize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::ResetListChildrenMainSize(frameNode);
+}
+
+void SetListCloseAllSwipeActions(ArkUINodeHandle node, void* userData, void (onFinish) (void* userData))
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<ScrollControllerBase> scrollControllerBase = ListModelNG::GetOrCreateController(frameNode);
+    if (onFinish) {
+        auto onEvent = [userData, onFinish]() {
+            onFinish(userData);
+        };
+        scrollControllerBase->CloseAllSwipeActions(std::move(onEvent));
+    } else {
+        scrollControllerBase->CloseAllSwipeActions(nullptr);
+    }
+}
 } // namespace
 
 namespace NodeModifier {
@@ -585,7 +622,8 @@ const ArkUIListModifier* GetListModifier()
         SetScrollSnapAlign, ResetScrollSnapAlign, SetContentStartOffset, ResetContentStartOffset, SetContentEndOffset,
         ResetContentEndOffset, ListSetDivider, ListResetDivider, SetChainAnimationOptions, ResetChainAnimationOptions,
         GetListSpace, SetListSpace, ResetListSpace, SetFadingEdge, ResetFadingEdge, SetNodeAdapter, ResetNodeAdapter,
-        GetNodeAdapter, GetCachedCount, SetScrollToIndex, SetScrollBy, SetInitialIndex, ResetInitialIndex };
+        GetNodeAdapter, GetCachedCount, SetScrollToIndex, SetScrollBy, SetInitialIndex, ResetInitialIndex,
+        SetListChildrenMainSize, ResetListChildrenMainSize, SetListCloseAllSwipeActions };
     return &modifier;
 }
 
