@@ -60,8 +60,6 @@ public:
     void OnOffscreenProcess(bool recursive) override;
 
 private:
-    void SetNavigationId(
-        const RefPtr<NavigationGroupNode>& navigationNode, const RefPtr<UINode>& node);
     void AddNavDestinationToNavigation();
 
     void ProcessDestinationChangeEvent();
