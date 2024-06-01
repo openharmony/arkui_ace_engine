@@ -50,6 +50,10 @@ void GridIrregularLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             gridLayoutInfo_.currentOffset_ = postJumpOffset_;
             MeasureOnOffset(mainSize);
         }
+        if (gridLayoutInfo_.extraOffset_.has_value()) {
+            gridLayoutInfo_.currentOffset_ += gridLayoutInfo_.extraOffset_.value();
+            gridLayoutInfo_.extraOffset_.reset();
+        }
     } else {
         MeasureOnOffset(mainSize);
     }

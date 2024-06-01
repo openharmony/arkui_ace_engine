@@ -336,6 +336,10 @@ void WaterFlowSegmentedLayout::MeasureOnJump(int32_t jumpIdx)
         info_->align_ = TransformAutoScroll(item);
     }
     info_->currentOffset_ = SolveJumpOffset(item) + postJumpOffset_;
+    if (info_->extraOffset_.has_value()) {
+        info_->currentOffset_ += info_->extraOffset_.value();
+        info_->extraOffset_.reset();
+    }
 
     Fill(jumpIdx);
     info_->Sync(mainSize_, false);

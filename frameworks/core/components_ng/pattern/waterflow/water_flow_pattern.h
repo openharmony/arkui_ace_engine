@@ -117,7 +117,8 @@ public:
 
     void ScrollPage(bool reverse, bool smooth = false) override;
 
-    void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START) override;
+    void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START,
+        std::optional<float> extraOffset = std::nullopt) override;
 
     double GetStoredOffset() const
     {
