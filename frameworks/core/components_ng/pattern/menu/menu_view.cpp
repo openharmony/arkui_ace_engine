@@ -457,7 +457,7 @@ void InitPanEvent(const RefPtr<GestureEventHub>& targetGestureHub, const RefPtr<
     auto panEvent =
         AceType::MakeRefPtr<PanEvent>(std::move(actionStartTask), nullptr, std::move(actionEndTask), nullptr);
     auto distance = SystemProperties::GetDragStartPanDistanceThreshold();
-    gestureHub->AddPanEvent(panEvent, panDirection, 1, Dimension(distance));
+    gestureHub->AddPanEvent(panEvent, panDirection, 1, Dimension(distance, DimensionUnit::VP));
 
     // add TouchEvent for Menu dragStart Move
     auto touchTask = [actuator = AceType::WeakClaim(AceType::RawPtr(dragEventActuator))](const TouchEventInfo& info) {
