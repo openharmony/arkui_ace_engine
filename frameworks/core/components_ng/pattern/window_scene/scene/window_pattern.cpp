@@ -130,8 +130,12 @@ void WindowPattern::OnAttachToFrameNode()
 
     if (state == Rosen::SessionState::STATE_BACKGROUND && session_->GetScenePersistence() &&
         session_->GetScenePersistence()->HasSnapshot()) {
+        if (!session_->GetShowRecent()) {
+            AddChild(host, contentNode_, contentNodeName_, 0);
+        }
         CreateSnapshotNode();
         AddChild(host, snapshotNode_, snapshotNodeName_);
+        attachToFrameNodeFlag_ = true;
         return;
     }
 
@@ -148,6 +152,19 @@ void WindowPattern::OnAttachToFrameNode()
         AddChild(host, startingNode_, startingNodeName_);
         surfaceNode->SetBufferAvailableCallback(callback_);
     }
+}
+
+void WindowPattern::CreateBlankNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    ACE_SCOPED_TRACE("CreateBlankNode[id:%d][self:%d]", session_->GetPersistentId(), host->GetId());
+    blankNode_ = FrameNode::CreateFrameNode(
+        V2::WINDOW_SCENE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto layoutProperty = blankNode_->GetLayoutProperty<LayoutProperty>();
+    layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
+    blankNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
 }
 
 void WindowPattern::CreateContentNode()
