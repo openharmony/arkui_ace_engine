@@ -384,7 +384,7 @@ ArkUINodeHandle GetFrameNodeByUniqueId(ArkUI_Int32 uniqueId)
         if (parent && parent->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
             node = parent;
         } else {
-            node = node->GetFirstChild();
+            node = node->GetFrameChildByIndexWithoutExpanded(0);
         }
     }
 
