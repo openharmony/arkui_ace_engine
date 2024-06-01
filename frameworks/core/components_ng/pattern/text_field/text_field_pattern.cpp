@@ -3333,71 +3333,79 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     if (!showKeyBoardOnFocus_ || !HasFocus()) {
         return false;
     }
+    auto tmpHost = GetHost();
+    CHECK_NULL_RETURN(tmpHost, false);
+    CHECK_NULL_RETURN(needShowSoftKeyboard, true);
+    if (customKeyboard_ || customKeyboardBuilder_) {
+        return RequestCustomKeyboard();
+    }
+    bool ok = true;
+    KeyboardContentTypeToInputType();
+#if defined(ENABLE_STANDARD_INPUT)
+    if (textChangeListener_ == nullptr) {
+        textChangeListener_ = new OnTextChangedListenerImpl(WeakClaim(this));
+    }
+    auto inputMethod = MiscServices::InputMethodController::GetInstance();
+    if (!inputMethod) {
+        return false;
+    }
+    auto optionalTextConfig = GetMiscTextConfig();
+    CHECK_NULL_RETURN(optionalTextConfig.has_value(), false);
+    MiscServices::TextConfig textConfig = optionalTextConfig.value();
+    TAG_LOGI(
+        AceLogTag::ACE_TEXT_FIELD, "node %{public}d RequestKeyboard set calling window id:%{public}u"
+        " inputType: %{public}d enterKeyType: %{public}d", tmpHost->GetId(), textConfig.windowId,
+        textConfig.inputAttribute.inputPattern, textConfig.inputAttribute.enterKeyType);
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto systemWindowId = GetSCBSystemWindowId();
+    if (systemWindowId) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "windowId From %{public}u to %{public}u.", textConfig.windowId,
+            systemWindowId);
+        textConfig.windowId = systemWindowId;
+    }
+#endif
+    if ((customKeyboard_ || customKeyboardBuilder_) && isCustomKeyboardAttached_) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Request Softkeyboard, Close CustomKeyboard.");
+        CloseCustomKeyboard();
+    }
+    inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, textConfig);
+    UpdateKeyboardOffset(textConfig.positionY, textConfig.height);
+#else
+    ok = RequestKeyboardCrossPlatForm(isFocusViewChanged);
+#endif
+    return ok;
+}
 
+bool TextFieldPattern::RequestKeyboardCrossPlatForm(bool isFocusViewChanged)
+{
+#if !defined(ENABLE_STANDARD_INPUT)
     auto tmpHost = GetHost();
     CHECK_NULL_RETURN(tmpHost, false);
     auto context = tmpHost->GetContextRefPtr();
     CHECK_NULL_RETURN(context, false);
+    if (!HasConnection()) {
+        TextInputConfiguration config;
+        config.type = keyboard_;
+        config.action = GetTextInputActionValue(GetDefaultTextInputAction());
+        config.inputFilter = GetInputFilter();
+        config.maxLength = GetMaxLength();
+        if (keyboard_ == TextInputType::VISIBLE_PASSWORD || keyboard_ == TextInputType::NEW_PASSWORD) {
+            config.obscureText = textObscured_;
+        }
+        connection_ = TextInputProxy::GetInstance().Attach(
+            WeakClaim(this), config, context->GetTaskExecutor(), GetInstanceId());
 
-    if (needShowSoftKeyboard) {
-        if (customKeyboard_ || customKeyboardBuilder_) {
-            return RequestCustomKeyboard();
-        }
-    KeyboardContentTypeToInputType();
-#if defined(ENABLE_STANDARD_INPUT)
-        if (textChangeListener_ == nullptr) {
-            textChangeListener_ = new OnTextChangedListenerImpl(WeakClaim(this));
-        }
-        auto inputMethod = MiscServices::InputMethodController::GetInstance();
-        if (!inputMethod) {
+        if (!HasConnection()) {
             return false;
         }
-        auto optionalTextConfig = GetMiscTextConfig();
-        CHECK_NULL_RETURN(optionalTextConfig.has_value(), false);
-        MiscServices::TextConfig textConfig = optionalTextConfig.value();
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
-            "RequestKeyboard set calling window id:%{public}u"
-            "inputType: %{public}d",
-            textConfig.windowId, textConfig.inputAttribute.inputPattern);
-#ifdef WINDOW_SCENE_SUPPORTED
-        auto systemWindowId = GetSCBSystemWindowId();
-        if (systemWindowId) {
-            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "windowId From %{public}u to %{public}u.", textConfig.windowId,
-                systemWindowId);
-            textConfig.windowId = systemWindowId;
-        }
-#endif
-        if ((customKeyboard_ || customKeyboardBuilder_) && isCustomKeyboardAttached_) {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Request Softkeyboard, Close CustomKeyboard.");
-            CloseCustomKeyboard();
-        }
-        inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, textConfig);
-        UpdateKeyboardOffset(textConfig.positionY, textConfig.height);
-#else
-        if (!HasConnection()) {
-            TextInputConfiguration config;
-            config.type = keyboard_;
-            config.action = GetTextInputActionValue(GetDefaultTextInputAction());
-            config.inputFilter = GetInputFilter();
-            config.maxLength = GetMaxLength();
-            if (keyboard_ == TextInputType::VISIBLE_PASSWORD || keyboard_ == TextInputType::NEW_PASSWORD) {
-                config.obscureText = textObscured_;
-            }
-            connection_ = TextInputProxy::GetInstance().Attach(
-                WeakClaim(this), config, context->GetTaskExecutor(), GetInstanceId());
-
-            if (!HasConnection()) {
-                return false;
-            }
-            TextEditingValue value;
-            value.text = contentController_->GetTextValue();
-            value.hint = GetPlaceHolder();
-            value.selection.Update(selectController_->GetStartIndex(), selectController_->GetEndIndex());
-            connection_->SetEditingState(value, GetInstanceId());
-        }
-        connection_->Show(isFocusViewChanged, GetInstanceId());
-#endif
+        TextEditingValue value;
+        value.text = contentController_->GetTextValue();
+        value.hint = GetPlaceHolder();
+        value.selection.Update(selectController_->GetStartIndex(), selectController_->GetEndIndex());
+        connection_->SetEditingState(value, GetInstanceId());
     }
+    connection_->Show(isFocusViewChanged, GetInstanceId());
+#endif
     return true;
 }
 
@@ -3429,6 +3437,10 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
         positionY += static_cast<double>(inlineMeasureItem_.inlineSizeHeight) + safeBoundary;
         height = offset;
     }
+
+    TAG_LOGI(
+        AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d MiscTextConfig positionY: %{public}f, height: %{public}f",
+        tmpHost->GetId(), positionY, height);
 
     MiscServices::CursorInfo cursorInfo { .left = selectController_->GetCaretRect().Left() + windowRect.Left() +
                                                   textPaintOffset.GetX(),
