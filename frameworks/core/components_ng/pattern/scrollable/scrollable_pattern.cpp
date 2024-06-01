@@ -978,9 +978,6 @@ void ScrollablePattern::AnimateTo(
     if (NearEqual(position, GetTotalOffset())) {
         return;
     }
-#ifdef OHOS_PLATFORM
-    ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
-#endif
     finalPosition_ = position;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1067,9 +1064,6 @@ void ScrollablePattern::PlayCurveAnimation(
             CHECK_NULL_VOID(host);
             AceAsyncTraceEnd(host->GetId(), (SCROLLER_ANIMATION + std::to_string(host->GetAccessibilityId())).c_str());
             pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->GetCurrentVelocity(), SceneStatus::END);
-#ifdef OHOS_PLATFORM
-            ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
-#endif
         });
     NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, GetCurrentVelocity(), SceneStatus::START);
 }
