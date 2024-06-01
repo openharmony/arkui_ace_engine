@@ -892,4 +892,120 @@ HWTEST_F(SwiperCommonTestNg, OnKeyEvent004, TestSize.Level1)
     EXPECT_EQ(pattern_->GetCurrentIndex(), 0);
     EXPECT_TRUE(GetChildFocusHub(frameNode_, 0)->IsCurrentFocus());
 }
+
+/**
+ * @tc.name: MarginIgnoreBlankTest001
+ * @tc.desc: Test Swiper PrevMargin IgnoreBlank
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. CreateWithItem SetLoop false
+     */
+    CreateWithItem(
+        [](SwiperModelNG model) {
+            model.SetDirection(Axis::HORIZONTAL);
+            model.SetDisplayCount(3);
+            model.SetLoop(false);
+            model.SetPreviousMargin(Dimension(20), true);
+            model.SetNextMargin(Dimension(20), true);
+        },
+        5);
+
+    /**
+     * @tc.steps: step2. ChangeIndex to 0
+     * @tc.expected: Verify ignoreBlank on the homepage is effective
+     */
+    ChangeIndex(0);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+    const float itemWidth = (SWIPER_WIDTH - 2 * 20.0f) / 3.0f;
+    float offset = 0.0f;
+    for (int i = 0; i < pattern_->itemPosition_.size(); ++i) {
+        EXPECT_EQ(GetChildOffset(frameNode_, i).GetX(), offset);
+        offset += itemWidth;
+    }
+
+    /**
+     * @tc.steps: step3. ChangeIndex to 1
+     * @tc.expected: Verify ignoreBlank is not effective
+     */
+    ChangeIndex(1);
+    EXPECT_EQ(pattern_->currentIndex_, 1);
+    float offset2 = 20.0f;
+    for (int i = 1; i < pattern_->itemPosition_.size(); ++i) {
+        EXPECT_EQ(GetChildOffset(frameNode_, i).GetX(), offset2);
+        offset2 += itemWidth;
+    }
+}
+
+/**
+ * @tc.name: MarginIgnoreBlankTest002
+ * @tc.desc: Test Swiper NextMargin IgnoreBlank
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. CreateWithItem SetLoop false
+     */
+    CreateWithItem(
+        [](SwiperModelNG model) {
+            model.SetDirection(Axis::HORIZONTAL);
+            model.SetDisplayCount(3);
+            model.SetLoop(false);
+            model.SetPreviousMargin(Dimension(20), true);
+            model.SetNextMargin(Dimension(20), true);
+        },
+        5);
+
+    /**
+     * @tc.steps: step2. ChangeIndex to 0
+     * @tc.expected: Verify ignoreBlank on the endpage is effective
+     */
+    ChangeIndex(2);
+    EXPECT_EQ(pattern_->currentIndex_, 2);
+    const float itemWidth = (SWIPER_WIDTH - 2 * 20.0f) / 3.0f;
+    float offset =  40.0f;
+    for (int i = 2; i < pattern_->itemPosition_.size(); ++i) {
+        EXPECT_EQ(GetChildOffset(frameNode_, i).GetX(), offset);
+        offset += itemWidth;
+    }
+}
+
+/**
+ * @tc.name: MarginIgnoreBlankTest003
+ * @tc.desc: Test Swiper IgnoreBlank Not effective in loop scenarios
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. CreateWith SetLoop true
+     */
+    CreateWithItem(
+        [](SwiperModelNG model) {
+            model.SetDirection(Axis::HORIZONTAL);
+            model.SetDisplayCount(3);
+            model.SetLoop(true);
+            model.SetPreviousMargin(Dimension(20), true);
+            model.SetNextMargin(Dimension(20), true);
+        },
+        5);
+
+    /**
+     * @tc.steps: step2. ChangeIndex to 0 
+     * @tc.expected: loop is true, ignoreBlank on the endpage is not effective
+     */
+    ChangeIndex(0);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+    const float itemWidth = (SWIPER_WIDTH - 2 * 20.0f) / 3.0f;
+    float offset = 20.0f;
+    float lastOffset = GetChildOffset(frameNode_, pattern_->itemPosition_.size() - 1).GetX();
+    EXPECT_EQ(lastOffset, offset - itemWidth);
+    for (int i = 0; i < pattern_->itemPosition_.size() - 1; ++i) {
+        EXPECT_EQ(GetChildOffset(frameNode_, i).GetX(), offset);
+        offset += itemWidth;
+    }
+}
 } // namespace OHOS::Ace::NG
