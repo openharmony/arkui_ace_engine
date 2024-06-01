@@ -29,6 +29,8 @@ template("ace_capability_ohos_source_set") {
       "clipboard/clipboard_impl.cpp",
       "environment/environment_impl.cpp",
       "environment/environment_proxy_impl.cpp",
+      "html/html_to_span.cpp",
+      "html/span_to_html.cpp",
       "preference/storage_impl.cpp",
       "time/time_event_proxy_ohos.cpp",
     ]
@@ -39,6 +41,7 @@ template("ace_capability_ohos_source_set") {
       "hicollie:libhicollie",
       "hilog:libhilog",
       "ipc:ipc_core",
+      "libxml2:libxml2",
       "preferences:native_preferences",
     ]
     if (defined(config.enable_system_clipboard) &&
