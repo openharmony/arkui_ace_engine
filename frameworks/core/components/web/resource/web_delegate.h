@@ -31,6 +31,7 @@
 #include <GLES3/gl3.h>
 #include "base/image/pixel_map.h"
 #include "core/common/recorder/event_recorder.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/web/resource/web_client_impl.h"
 #include "core/components/web/resource/web_resource.h"
@@ -564,6 +565,8 @@ public:
     {}
     ~WebDelegateObserver();
     void NotifyDestory();
+    void OnAttachContext(const RefPtr<NG::PipelineContext> &context);
+    void OnDetachContext();
 
 private:
     RefPtr<WebDelegate> delegate_;
@@ -639,7 +642,10 @@ public:
     WebDelegate() = delete;
     ~WebDelegate() override;
     WebDelegate(const WeakPtr<PipelineBase>& context, ErrorCallback&& onError, const std::string& type)
-        : WebResource(type, context, std::move(onError))
+        : WebResource(type, context, std::move(onError)), instanceId_(Container::CurrentId())
+    {}
+    WebDelegate(const WeakPtr<PipelineBase>& context, ErrorCallback&& onError, const std::string& type, int32_t id)
+        : WebResource(type, context, std::move(onError)), instanceId_(id)
     {}
 
     void UnRegisterScreenLockFunction();
@@ -962,6 +968,14 @@ public:
 
     void OnCustomKeyboardClose();
 
+    void OnAttachContext(const RefPtr<NG::PipelineContext> &context);
+    void OnDetachContext();
+
+    int32_t GetInstanceId() const
+    {
+        return instanceId_;
+    }
+
     void OnAdsBlocked(const std::string& url, const std::vector<std::string>& adsBlocked);
     void SetSurfaceId(const std::string& surfaceId);
 
@@ -1163,6 +1177,7 @@ private:
     NG::SafeAreaInsets cutoutSafeArea_;
     NG::SafeAreaInsets navigationIndicatorSafeArea_;
     sptr<Rosen::IAvoidAreaChangedListener> avoidAreaChangedListener_ = nullptr;
+    int32_t instanceId_;
 #endif
 };
 

@@ -667,4 +667,8 @@ void WebModelImpl::SetAdsBlockedEventId(std::function<void(const BaseEventInfo* 
 
     webComponent->SetAdsBlockedEventId(eventMarker);
 }
+
+void WebModelImpl::SetUpdateInstanceIdCallback(std::function<void(int32_t)>&& callback)
+{
+}
 } // namespace OHOS::Ace::Framework

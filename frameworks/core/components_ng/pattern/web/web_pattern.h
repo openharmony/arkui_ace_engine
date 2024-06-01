@@ -538,6 +538,9 @@ public:
     void AttachCustomKeyboard();
     void CloseCustomKeyboard();
     void KeyboardReDispatch(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event, bool isUsed);
+    void OnAttachContext(PipelineContext *context) override;
+    void OnDetachContext(PipelineContext *context) override;
+    void SetUpdateInstanceIdCallback(std::function<void(int32_t)> &&callabck);
 
 private:
     friend class WebContextSelectOverlay;
@@ -545,7 +548,7 @@ private:
         TextResponseType responseType = TextResponseType::RIGHT_CLICK, bool handleReverse = false);
     void CloseContextSelectionMenu();
     RectF ComputeMouseClippedSelectionBounds(int32_t x, int32_t y, int32_t w, int32_t h);
-    void RegistVirtualKeyBoardListener();
+    void RegistVirtualKeyBoardListener(const RefPtr<PipelineContext> &context);
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
     void UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard);
     void UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, double keyboard, double oldWebHeight);
@@ -621,6 +624,7 @@ private:
     int GetWebId();
 
     void InitEvent();
+    void InitConfigChangeCallback(const RefPtr<PipelineContext>& context);
     void InitFeatureParam();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
@@ -748,7 +752,7 @@ private:
     void CalculateTooltipMargin(RefPtr<FrameNode>& textNode, MarginProperty& textMargin);
     void HandleShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
     void ShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
-    void RegisterVisibleAreaChangeCallback();
+    void RegisterVisibleAreaChangeCallback(const RefPtr<PipelineContext> &context);
     bool CheckSafeAreaIsExpand();
     bool CheckSafeAreaKeyBoard();
     void SelectCancel() const;
@@ -876,6 +880,7 @@ private:
     int32_t zoomErrorCount_ = 0;
     RefPtr<OverlayManager> keyboardOverlay_;
     std::function<void()> customKeyboardBuilder_ = nullptr;
+    std::function<void(int32_t)> updateInstanceIdCallback_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -32,7 +32,6 @@
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_manager.h"
-#include "core/common/container.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/web/render_web.h"
 #include "core/components/web/web_event.h"
@@ -720,6 +719,16 @@ void WebDelegateObserver::NotifyDestory()
         TaskExecutor::TaskType::UI, DESTRUCT_DELAY_MILLISECONDS, "ArkUIWebNotifyDestory");
 }
 
+void WebDelegateObserver::OnAttachContext(const RefPtr<NG::PipelineContext> &context)
+{
+    context_ = context;
+}
+
+void WebDelegateObserver::OnDetachContext()
+{
+    context_ = nullptr;
+}
+
 void GestureEventResultOhos::SetGestureEventResult(bool result)
 {
     if (result_) {
@@ -732,7 +741,7 @@ void GestureEventResultOhos::SetGestureEventResult(bool result)
 void WebDelegate::UnRegisterScreenLockFunction()
 {
     if (nweb_) {
-        nweb_->UnRegisterScreenLockFunction(Container::CurrentId());
+        nweb_->UnRegisterScreenLockFunction(instanceId_);
     }
 }
 
@@ -1031,7 +1040,7 @@ void WebDelegate::ExecuteTypeScript(const std::string& jscode, const std::functi
                 return;
             }
             if (delegate->nweb_) {
-                auto callbackImpl = std::make_shared<WebJavaScriptExecuteCallBack>(Container::CurrentId());
+                auto callbackImpl = std::make_shared<WebJavaScriptExecuteCallBack>(weak);
                 if (callbackImpl && callback) {
                     callbackImpl->SetCallBack([weak, func = std::move(callback)](std::string result) {
                         auto delegate = weak.Upgrade();
@@ -1245,7 +1254,7 @@ void WebDelegate::SetWebViewJavaScriptResultCallBack(
             if (delegate == nullptr || delegate->nweb_ == nullptr) {
                 return;
             }
-            auto webJSResultCallBack = std::make_shared<WebJavaScriptResultCallBack>(Container::CurrentId());
+            auto webJSResultCallBack = std::make_shared<WebJavaScriptResultCallBack>(weak);
             if (webJSResultCallBack) {
                 webJSResultCallBack->SetJavaScriptCallBack(std::move(javaScriptCallBackImpl));
                 delegate->nweb_->SetNWebJavaScriptResultCallBack(webJSResultCallBack);
@@ -1298,7 +1307,7 @@ void WebDelegate::PostPortMessage(std::string& port, std::string& data)
 void WebDelegate::SetPortMessageCallback(std::string& port, std::function<void(const std::string&)>&& callback)
 {
     if (nweb_) {
-        auto callbackImpl = std::make_shared<WebMessageValueCallBackImpl>(Container::CurrentId());
+        auto callbackImpl = std::make_shared<WebMessageValueCallBackImpl>(WeakClaim(this));
         if (callbackImpl && callback) {
             callbackImpl->SetCallBack([weak = WeakClaim(this), func = std::move(callback)](std::string result) {
                 auto delegate = weak.Upgrade();
@@ -2491,16 +2500,16 @@ void WebDelegate::InitWebViewWithWindow()
             if (delegate->cookieManager_ == nullptr) {
                 return;
             }
-            auto webviewClient = std::make_shared<WebClientImpl>(Container::CurrentId());
+            auto webviewClient = std::make_shared<WebClientImpl>();
             webviewClient->SetWebDelegate(weak);
             delegate->nweb_->SetNWebHandler(webviewClient);
 
             // Set downloadListenerImpl
-            auto downloadListenerImpl = std::make_shared<DownloadListenerImpl>(Container::CurrentId());
+            auto downloadListenerImpl = std::make_shared<DownloadListenerImpl>();
             downloadListenerImpl->SetWebDelegate(weak);
             delegate->nweb_->PutDownloadCallback(downloadListenerImpl);
 
-            auto findListenerImpl = std::make_shared<FindListenerImpl>(Container::CurrentId());
+            auto findListenerImpl = std::make_shared<FindListenerImpl>();
             findListenerImpl->SetWebDelegate(weak);
             delegate->nweb_->PutFindCallback(findListenerImpl);
 
@@ -2711,7 +2720,8 @@ void WebDelegate::RegisterSurfaceOcclusionChangeFun()
     auto ret = OHOS::Rosen::RSInterfaces::GetInstance().RegisterSurfaceOcclusionChangeCallback(
         surfaceNodeId_,
         [weak = WeakClaim(this), weakContext = context_](float visibleRatio) {
-            auto context = weakContext.Upgrade();
+            auto delegate = weak.Upgrade();
+            auto context = delegate->context_.Upgrade();
             CHECK_NULL_VOID(context);
             context->GetTaskExecutor()->PostTask(
                 [weakDelegate = weak, webVisibleRatio = visibleRatio]() {
@@ -2837,9 +2847,9 @@ void WebDelegate::InitWebViewWithSurface()
             CHECK_NULL_VOID(delegate->nweb_);
             delegate->cookieManager_ = OHOS::NWeb::NWebHelper::Instance().GetCookieManager();
             CHECK_NULL_VOID(delegate->cookieManager_);
-            auto nweb_handler = std::make_shared<WebClientImpl>(Container::CurrentId());
+            auto nweb_handler = std::make_shared<WebClientImpl>();
             nweb_handler->SetWebDelegate(weak);
-            auto downloadListenerImpl = std::make_shared<DownloadListenerImpl>(Container::CurrentId());
+            auto downloadListenerImpl = std::make_shared<DownloadListenerImpl>();
             downloadListenerImpl->SetWebDelegate(weak);
             delegate->nweb_->SetNWebHandler(nweb_handler);
             delegate->nweb_->PutDownloadCallback(downloadListenerImpl);
@@ -2847,14 +2857,15 @@ void WebDelegate::InitWebViewWithSurface()
             auto screenLockCallback = std::make_shared<NWebScreenLockCallbackImpl>(context);
             delegate->nweb_->RegisterScreenLockFunction(Container::CurrentId(), screenLockCallback);
 #endif
-            auto findListenerImpl = std::make_shared<FindListenerImpl>(Container::CurrentId());
+            auto findListenerImpl = std::make_shared<FindListenerImpl>();
             findListenerImpl->SetWebDelegate(weak);
             delegate->nweb_->PutFindCallback(findListenerImpl);
             delegate->UpdateSettting(Container::IsCurrentUseNewPipeline());
             delegate->RunSetWebIdAndHapPathCallback();
             delegate->RunJsProxyCallback();
-            auto releaseSurfaceListenerImpl = std::make_shared<ReleaseSurfaceImpl>(Container::CurrentId());
+            auto releaseSurfaceListenerImpl = std::make_shared<ReleaseSurfaceImpl>();
             releaseSurfaceListenerImpl->SetSurfaceDelegate(delegate->GetSurfaceDelegateClient());
+            releaseSurfaceListenerImpl->SetWebDelegate(weak);
             delegate->nweb_->PutReleaseSurfaceCallback(releaseSurfaceListenerImpl);
             auto upgradeContext = context.Upgrade();
             CHECK_NULL_VOID(upgradeContext);
@@ -6376,7 +6387,7 @@ void WebDelegate::SetAccessibilityState(bool state)
             delegate->nweb_->SetAccessibilityState(state);
             if (state) {
                 auto accessibilityEventListenerImpl =
-                    std::make_shared<AccessibilityEventListenerImpl>(Container::CurrentId());
+                    std::make_shared<AccessibilityEventListenerImpl>();
                 CHECK_NULL_VOID(accessibilityEventListenerImpl);
                 accessibilityEventListenerImpl->SetWebDelegate(weak);
                 delegate->nweb_->PutAccessibilityIdGenerator(NG::UINode::GenerateAccessibilityId);
@@ -6525,6 +6536,25 @@ bool WebDelegate::OnHandleOverrideLoading(std::shared_ptr<OHOS::NWeb::NWebUrlRes
         result = webCom->OnOverrideUrlLoading(param.get());
     }, "ArkUIWebHandleOverrideLoading");
     return result;
+}
+
+void WebDelegate::OnDetachContext()
+{
+    instanceId_ = INSTANCE_ID_UNDEFINED;
+    context_ = nullptr;
+    UnRegisterScreenLockFunction();
+}
+
+void WebDelegate::OnAttachContext(const RefPtr<NG::PipelineContext> &context)
+{
+    instanceId_ = context->GetInstanceId();
+    context_ = context;
+    if (nweb_) {
+        auto screenLockCallback = std::make_shared<NWebScreenLockCallbackImpl>(context);
+        nweb_->RegisterScreenLockFunction(instanceId_, screenLockCallback);
+        auto windowId = context->GetWindowId();
+        nweb_->SetWindowId(windowId);
+    }
 }
 
 void WebDelegate::UpdateMetaViewport(bool isMetaViewportEnabled)

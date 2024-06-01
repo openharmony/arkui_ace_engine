@@ -342,17 +342,16 @@ void WebPattern::InitEvent()
     auto focusHub = eventHub->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitFocusEvent(focusHub);
+}
 
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
+void WebPattern::InitConfigChangeCallback(const RefPtr<PipelineContext> &context)
+{
     auto langTask = [weak = AceType::WeakClaim(this)]() {
         auto WebPattern = weak.Upgrade();
         CHECK_NULL_VOID(WebPattern);
         WebPattern->UpdateLocale();
     };
-    context->SetConfigChangedCallback(std::move(langTask));
-
-    RegisterVisibleAreaChangeCallback();
+    context->SetConfigChangedCallback(GetHost()->GetId(), std::move(langTask));
 }
 
 void WebPattern::InitFeatureParam()
@@ -2057,6 +2056,89 @@ bool WebPattern::IsRootNeedExportTexture()
     return isNeedExportTexture;
 }
 
+void WebPattern::OnAttachContext(PipelineContext *context)
+{
+    auto pipelineContext = Claim(context);
+    int32_t newId = pipelineContext->GetInstanceId();
+    if (delegate_) {
+        delegate_->OnAttachContext(pipelineContext);
+    }
+
+    if (observer_) {
+        observer_->OnAttachContext(pipelineContext);
+    }
+
+    if (updateInstanceIdCallback_) {
+        updateInstanceIdCallback_(newId);
+    }
+
+    if (renderSurface_) {
+        renderSurface_->SetInstanceId(newId);
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    int32_t nodeId = host->GetId();
+    auto dragDropManager = pipelineContext->GetDragDropManager();
+    if (dragDropManager) {
+        dragDropManager->AddDragFrameNode(host->GetId(), AceType::WeakClaim(AceType::RawPtr(host)));
+    }
+
+    pipelineContext->AddOnAreaChangeNode(nodeId);
+    RegisterVisibleAreaChangeCallback(pipelineContext);
+    needUpdateWeb_= true;
+    RegistVirtualKeyBoardListener(pipelineContext);
+    InitConfigChangeCallback(pipelineContext);
+}
+
+void WebPattern::OnDetachContext(PipelineContext *contextPtr)
+{
+    auto context = AceType::Claim(contextPtr);
+    CHECK_NULL_VOID(context);
+
+    auto host = GetHost();
+    int32_t nodeId = host->GetId();
+
+    context->RemoveOnAreaChangeNode(nodeId);
+    context->RemoveVisibleAreaChangeNode(nodeId);
+    context->RemoveVirtualKeyBoardCallback(nodeId);
+    context->RemoveConfigChangedCallback(nodeId);
+
+    if (delegate_) {
+        delegate_->OnDetachContext();
+    }
+
+    if (observer_) {
+        observer_->OnDetachContext();
+    }
+
+    auto dragDropManager = context->GetDragDropManager();
+    if (dragDropManager) {
+        dragDropManager->RemoveDragFrameNode(nodeId);
+    }
+
+    if (selectOverlayProxy_) {
+        auto selectOverlayManager = context->GetSelectOverlayManager();
+        if (selectOverlayManager) {
+            selectOverlayManager->DestroySelectOverlay(selectOverlayProxy_);
+        }
+        selectOverlayProxy_ = nullptr;
+    }
+
+    if (tooltipId_ != -1) {
+        auto overlayManager = context->GetOverlayManager();
+        if (overlayManager) {
+            overlayManager->RemoveIndexerPopupById(tooltipId_);
+        }
+        tooltipId_ = -1;
+    }
+}
+
+void WebPattern::SetUpdateInstanceIdCallback(std::function<void(int32_t)>&& callback)
+{
+    updateInstanceIdCallback_ = callback;
+}
+
 void WebPattern::OnScrollBarColorUpdate(const std::string& value)
 {
     if (delegate_) {
@@ -2079,14 +2161,12 @@ void WebPattern::OnNativeVideoPlayerConfigUpdate(const std::tuple<bool, bool>& c
     }
 }
 
-void WebPattern::RegistVirtualKeyBoardListener()
+void WebPattern::RegistVirtualKeyBoardListener(const RefPtr<PipelineContext> &pipelineContext)
 {
     if (!needUpdateWeb_) {
         return;
     }
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->SetVirtualKeyBoardCallback(
+    pipelineContext->SetVirtualKeyBoardCallback(GetHost()->GetId(),
         [weak = AceType::WeakClaim(this)](int32_t width, int32_t height, double keyboard) {
             auto webPattern = weak.Upgrade();
             CHECK_NULL_RETURN(webPattern, false);
@@ -2112,12 +2192,12 @@ void WebPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    RegistVirtualKeyBoardListener();
     bool isFirstCreate = false;
     if (!delegate_) {
         // first create case,
         isFirstCreate = true;
-        delegate_ = AceType::MakeRefPtr<WebDelegate>(PipelineContext::GetCurrentContext(), nullptr, "");
+        delegate_ = AceType::MakeRefPtr<WebDelegate>(PipelineContext::GetCurrentContext(), nullptr, "",
+            Container::CurrentId());
         CHECK_NULL_VOID(delegate_);
         observer_ = AceType::MakeRefPtr<WebDelegateObserver>(delegate_, PipelineContext::GetCurrentContext());
         CHECK_NULL_VOID(observer_);
@@ -2277,7 +2357,6 @@ void WebPattern::OnModifyDone()
 
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->AddOnAreaChangeNode(host->GetId());
 
     // offline mode
     if (host->GetNodeStatus() != NodeStatus::NORMAL_NODE && isFirstCreate) {
@@ -4484,12 +4563,10 @@ void WebPattern::SetTouchLocationInfo(const TouchEvent& touchEvent, const TouchL
     }
 }
 
-void WebPattern::RegisterVisibleAreaChangeCallback()
+void WebPattern::RegisterVisibleAreaChangeCallback(const RefPtr<PipelineContext> &pipeline)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
         auto webPattern = weak.Upgrade();
         CHECK_NULL_VOID(webPattern);
