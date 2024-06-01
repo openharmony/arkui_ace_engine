@@ -1470,9 +1470,6 @@ void FrameNode::ProcessAllVisibleCallback(const std::vector<double>& visibleArea
     double* lastVisibleCallbackRatio = isThrottled ? &lastThrottledVisibleCbRatio_ : &lastVisibleCallbackRatio_;
 
     for (const auto& callbackRatio : visibleAreaUserRatios) {
-        if (isHandled) {
-            break;
-        }
         if (GreatNotEqual(currentVisibleRatio, callbackRatio) && LessOrEqual(lastVisibleRatio, callbackRatio)) {
             *lastVisibleCallbackRatio = currentVisibleRatio;
             isVisible = true;
