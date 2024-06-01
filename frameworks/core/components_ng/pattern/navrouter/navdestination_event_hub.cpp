@@ -39,7 +39,6 @@ void NavDestinationEventHub::FireOnDisappear()
         CHECK_NULL_VOID(pattern);
         UIObserverHandler::GetInstance().NotifyNavigationStateChange(pattern, NavDestinationState::ON_DISAPPEAR);
         eventHub->FireDisappearCallback();
-        auto pattern = destination->GetPattern<NavDestinationPattern>();
         pattern->SetCustomNode(nullptr);
     });
 }
