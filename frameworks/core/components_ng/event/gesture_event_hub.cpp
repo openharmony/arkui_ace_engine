@@ -66,6 +66,8 @@ constexpr int32_t CREATE_PIXELMAP_TIME = 80;
 constexpr int32_t MAX_BUILDER_DEPTH = 5;
 #endif
 constexpr uint32_t EXTRA_INFO_MAX_LENGTH = 200;
+constexpr int32_t PIXELMAP_ANIMATION_DURATION = 250;
+constexpr float PIXELMAP_OPACITY_RATE = 0.95f;
 } // namespace
 const std::string DEFAULT_MOUSE_DRAG_IMAGE { "/system/etc/device_status/drag_icon/Copy_Drag.svg" };
 constexpr const char* HIT_TEST_MODE[] = {
@@ -458,7 +460,8 @@ void GestureEventHub::InitDragDropEvent()
 
     auto dragEvent = MakeRefPtr<DragEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
-    SetDragEvent(dragEvent, { PanDirection::ALL }, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+    auto distance = SystemProperties::GetDragStartPanDistanceThreshold();
+    SetDragEvent(dragEvent, { PanDirection::ALL }, DEFAULT_PAN_FINGER, Dimension(distance));
 }
 
 bool GestureEventHub::IsAllowedDrag(RefPtr<EventHub> eventHub)
@@ -901,8 +904,11 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     } else {
         dragDropManager->SetIsDragWithContextMenu(false);
     }
+    auto focusHub = frameNode->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    bool hasContextMenu = focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
     if (IsNeedSwitchToSubWindow() || isMenuShow) {
-        imageNode = overlayManager->GetPixelMapContentNode();
+        imageNode = overlayManager->GetPixelMapContentNode(hasContextMenu);
         DragEventActuator::CreatePreviewNode(frameNode, imageNode);
         auto frameTag = frameNode->GetTag();
         if (IsPixelMapNeedScale() && GetTextDraggable() && IsTextCategoryComponent(frameTag)) {
@@ -1008,7 +1014,23 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         DragEventActuator::MountPixelMap(subWindowOverlayManager, eventHub->GetGestureEventHub(), imageNode, textNode);
         pipeline->FlushSyncGeometryNodeTasks();
         DragAnimationHelper::ShowBadgeAnimation(textNode);
-        dragDropManager->DoDragStartAnimation(subWindowOverlayManager, info);
+        dragDropManager->DoDragStartAnimation(subWindowOverlayManager, info, hasContextMenu);
+        if (hasContextMenu) {
+            //response: 0.347, dampingRatio: 0.99, blendDuration: 0.0
+            const RefPtr<Curve> curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.347f, 0.99f, 0.0f);
+            AnimationOption option;
+            option.SetCurve(curve);
+            option.SetDuration(PIXELMAP_ANIMATION_DURATION);
+            auto renderContext = imageNode->GetRenderContext();
+            AnimationUtils::Animate(
+                option,
+                [renderContext]() {
+                    if (renderContext) {
+                        renderContext->UpdateOpacity(PIXELMAP_OPACITY_RATE);
+                    }
+                },
+                option.GetOnFinishEvent());
+        }
     }
     if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && IsNeedSwitchToSubWindow()) {
         ret = RegisterCoordinationListener(pipeline);
@@ -1659,7 +1681,11 @@ bool GestureEventHub::IsDragForbidden()
 
 bool GestureEventHub::IsNeedSwitchToSubWindow() const
 {
-    if (IsPixelMapNeedScale()) {
+    auto frameNode = GetFrameNode();
+    auto focusHub = frameNode->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    bool hasContextMenu = focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
+    if (IsPixelMapNeedScale() || hasContextMenu) {
         return true;
     }
     CHECK_NULL_RETURN(dragEventActuator_, false);

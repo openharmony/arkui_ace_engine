@@ -521,6 +521,10 @@ public:
 
     static bool IsOpIncEnable();
 
+    static float GetDragStartDampingRatio();
+
+    static float GetDragStartPanDistanceThreshold();
+
 private:
     static bool opincEnabled_;
     static bool developerModeOn_;
@@ -581,6 +585,8 @@ private:
     static bool faultInjectEnabled_;
     static bool imageFrameworkEnable_;
     static std::pair<float, float> brightUpPercent_;
+    static float dragStartDampingRatio_;
+    static float dragStartPanDisThreshold_;
 };
 
 } // namespace OHOS::Ace

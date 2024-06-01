@@ -163,6 +163,16 @@ public:
         isDragged_ = isDragged;
     }
 
+    void SetDragDampStartPoint(const Point& point)
+    {
+        dragDampStartPoint_ = point;
+    }
+
+    const Point& GetDragDampStartPoint() const
+    {
+        return dragDampStartPoint_;
+    }
+
     void SetIsDragCancel(bool isDragCancel)
     {
         isDragCancel_ = isDragCancel;
@@ -291,7 +301,8 @@ public:
     } DragPreviewInfo;
     bool IsNeedScaleDragPreview();
     void DoDragMoveAnimate(const PointerEvent& pointerEvent);
-    void DoDragStartAnimation(const RefPtr<OverlayManager>& overlayManager, const GestureEvent& event);
+    void DoDragStartAnimation(const RefPtr<OverlayManager>& overlayManager,
+        const GestureEvent& event, bool isSubwindowOverlay = false);
     void SetDragResult(const DragNotifyMsgCore& notifyMessage, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
     void SetDragBehavior(const DragNotifyMsgCore& notifyMessage, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
     void ResetDragPreviewInfo()
@@ -409,8 +420,8 @@ private:
         const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
     bool UpdateDragMovePositionFinished(
         bool needDoDragMoveAnimate, bool isMenuShow, const Offset& newOffset, int32_t containerId);
-    bool GetDragPreviewInfo(
-        const OHOS::Ace::RefPtr<OHOS::Ace::NG::OverlayManager>& overlayManager, DragPreviewInfo& dragPreviewInfo);
+    bool GetDragPreviewInfo(const OHOS::Ace::RefPtr<OHOS::Ace::NG::OverlayManager>& overlayManager,
+        DragPreviewInfo& dragPreviewInfo, bool isSubwindowOverlay = false);
     bool IsNeedDoDragMoveAnimate(const PointerEvent& pointerEvent);
     RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY, DragType dragType, bool findDrop);
     void FireOnDragEvent(
@@ -492,6 +503,7 @@ private:
     bool eventStrictReportingEnabled_ = false;
     int32_t badgeNumber_ = -1;
     bool isDragWithContextMenu_ = false;
+    Point dragDampStartPoint_ { 1, 1 };
 
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
 };
