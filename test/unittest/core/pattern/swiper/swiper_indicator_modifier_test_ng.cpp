@@ -14,6 +14,7 @@
  */
 
 #include "swiper_test_ng.h"
+#include "core/components_ng/pattern/swiper/swiper_paint_method.h"
 
 namespace OHOS::Ace::NG {
 
