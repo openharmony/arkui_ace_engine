@@ -156,6 +156,8 @@ void NavRouterGroupNode::AddNavDestinationToNavigation()
         if (uiNode) {
             navigationPattern->AddOnStateChangeItem(uiNode->GetId(), navRouterEventHub->GetOnStateChange());
         }
+        navDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+            NavigationGroupNode::GetNavDestinationNode(uiNode));
     } else if (navDestination) {
         auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
         CHECK_NULL_VOID(navDestinationPattern);
@@ -171,6 +173,10 @@ void NavRouterGroupNode::AddNavDestinationToNavigation()
         navDestinationPattern->SetNavigationStack(stack);
         name = navDestinationPattern->GetName();
         navigationPattern->AddNavDestinationNode(name, navDestination, navRouteMode);
+    }
+    if (navDestination) {
+        auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
+        navDestinationPattern->SetNavigationId(navigationNode->GetInspectorId().value_or(""));
     }
 
     // when js navigationStack is provided, modifyDone will be called by state manager.
