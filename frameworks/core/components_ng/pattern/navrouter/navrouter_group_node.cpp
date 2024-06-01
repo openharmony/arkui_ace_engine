@@ -185,16 +185,4 @@ void NavRouterGroupNode::AddNavDestinationToNavigation()
         navigationNode->MarkDirtyNode();
     }
 }
-
-void NavRouterGroupNode::SetNavigationId(const RefPtr<NavigationGroupNode>& navigationNode,
-    const RefPtr<UINode>& node)
-{
-    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(
-        NavigationGroupNode::GetNavDestinationNode(node));
-    CHECK_NULL_VOID(navDestinationNode);
-    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
-    if (navDestinationPattern) {
-        navDestinationPattern->SetNavigationId(navigationNode->GetInspectorId().value_or(""));
-    }
-}
 } // namespace OHOS::Ace::NG
