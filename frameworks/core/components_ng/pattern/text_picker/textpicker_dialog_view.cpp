@@ -40,6 +40,8 @@ const int32_t BUFFER_NODE_NUMBER = 2;
 constexpr uint8_t PIXEL_ROUND = 18;
 constexpr size_t ACCEPT_BUTTON_INDEX = 0;
 constexpr size_t CANCEL_BUTTON_INDEX = 1;
+constexpr size_t BACKWARD_BUTTON_INDEX = 2;
+constexpr size_t FORWAED_BUTTON_INDEX = 3;
 } // namespace
 
 WeakPtr<FrameNode> TextPickerDialogView::dialogNode_ = nullptr;
@@ -193,11 +195,11 @@ RefPtr<FrameNode> TextPickerDialogView::OptionsShow(const DialogProperties& dial
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     float scale = pipeline->GetFontScale();
-    if (scale == 1.75 && GetIsOverRange(scale)) {
+    if (scale == 1.75f && GetIsOverRange(scale)) {
         auto dialogNode = SeparatedOptionsShow(
             dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent, scale);
         return dialogNode;
-    } else if (scale > 1.75 && GetIsOverRange(scale)) {
+    } else if (scale > 1.75f && GetIsOverRange(scale)) {
         auto dialogNode = SeparatedOptionsShow(
             dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent, scale);
         return dialogNode;
@@ -1106,7 +1108,7 @@ void TextPickerDialogView::SetDialogNodePageActive(RefPtr<FrameNode>& contentCol
         auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<LayoutProperty>();
         CHECK_NULL_VOID(buttonConfirmLayoutProperty);
         buttonConfirmLayoutProperty->UpdateVisibility(VisibleType::GONE);
-    } else if (dialogNodePage == (columnCount - 2)) {
+    } else if (dialogNodePage == (columnCount - BACKWARD_BUTTON_INDEX)) {
         auto buttonCancel = contentRow->GetFirstChild();
         auto buttonCancelNode = AceType::DynamicCast<FrameNode>(buttonCancel);
         buttonCancelNode->SetActive(false);
@@ -1205,7 +1207,7 @@ RefPtr<FrameNode> TextPickerDialogView::CreateAgingButtonNode(
         auto child = contentRow->GetChildAtIndex(i);
         auto childNode = AceType::DynamicCast<FrameNode>(child);
         CHECK_NULL_RETURN(childNode, nullptr);
-        if (i == 0 || i == 3) {
+        if (i == 0 || i == FORWAED_BUTTON_INDEX) {
             auto gestureHub = childNode->GetOrCreateGestureEventHub();
             CHECK_NULL_RETURN(gestureHub, nullptr);
             gestureHub->AddClickEvent(closeClick);
@@ -1213,8 +1215,8 @@ RefPtr<FrameNode> TextPickerDialogView::CreateAgingButtonNode(
             auto gestureHub = childNode->GetOrCreateGestureEventHub();
             CHECK_NULL_RETURN(gestureHub, nullptr);
             gestureHub->AddClickEvent(nextClick);
-        } else if (i == 2) {
-            auto gestureHub = childNode->GetOrCreateGestureEventHub();  
+        } else if (i == BACKWARD_BUTTON_INDEX) {
+            auto gestureHub = childNode->GetOrCreateGestureEventHub();
             CHECK_NULL_RETURN(gestureHub, nullptr);
             gestureHub->AddClickEvent(previousClick);
         }
