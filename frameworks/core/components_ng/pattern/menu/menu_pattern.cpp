@@ -1383,8 +1383,14 @@ BorderRadiusProperty MenuPattern::CalcIdealBorderRadius(const BorderRadiusProper
     auto radiusBottomRight = borderRadius.radiusBottomRight.value_or(Dimension()).ConvertToPx();
     auto maxRadiusW = std::max(radiusTopLeft + radiusTopRight, radiusBottomLeft + radiusBottomRight);
     auto maxRadiusH = std::max(radiusTopLeft + radiusBottomLeft, radiusTopRight + radiusBottomRight);
-    if (LessOrEqual(maxRadiusW, menuSize.Width()) && LessOrEqual(maxRadiusH, menuSize.Height())) {
-        radius = borderRadius;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (LessOrEqual(maxRadiusW, menuSize.Width()) && LessOrEqual(maxRadiusH, menuSize.Height())) {
+            radius = borderRadius;
+        }
+    } else {
+        if (LessNotEqual(maxRadiusW, menuSize.Width())) {
+            radius = borderRadius;
+        }
     }
 
     return radius;
