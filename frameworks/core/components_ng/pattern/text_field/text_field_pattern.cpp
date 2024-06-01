@@ -452,8 +452,8 @@ void TextFieldPattern::BeforeCreateLayoutWrapper()
                 break;
             }
             case InputOperation::SET_PREVIEW_TEXT:
-                SetPreviewTextOperation(previewTextOperation.front());
-                previewTextOperation.pop();
+                SetPreviewTextOperation(previewTextOperation_.front());
+                previewTextOperation_.pop();
                 break;
             case InputOperation::SET_PREVIEW_FINISH:
                 FinishTextPreviewOperation();
@@ -1664,6 +1664,7 @@ void TextFieldPattern::UpdateCaretByTouchMove(const TouchEventInfo& info)
     } else {
         selectController_->UpdateCaretInfoByOffset(touchOffset);
     }
+    UpdateCaretInfoToController();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -7113,7 +7114,7 @@ int32_t TextFieldPattern::SetPreviewText(const std::string &previewValue, const 
     auto host = GetHost();
     CHECK_NULL_RETURN(host, PREVIEW_NULL_POINTER);
     inputOperations_.emplace(InputOperation::SET_PREVIEW_TEXT);
-    previewTextOperation.emplace(info);
+    previewTextOperation_.emplace(info);
     CloseSelectOverlay(true);
     ScrollToSafeArea();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
