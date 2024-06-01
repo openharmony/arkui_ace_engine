@@ -720,6 +720,7 @@ abstract class ViewPU extends PUV2ViewBase
       if (!this.isViewV3) {
         // Enable PU state tracking only in PU @Components
         this.currentlyRenderedElmtIdStack_.push(elmtId);
+        stateMgmtDFX.inRenderingElementId_.push(elmtId);
       }
 
       // if V2 @Observed/@Track used anywhere in the app (there is no more fine grained criteria),
@@ -746,6 +747,7 @@ abstract class ViewPU extends PUV2ViewBase
       }
       if (!this.isViewV3) {
         this.currentlyRenderedElmtIdStack_.pop();
+        stateMgmtDFX.inRenderingElementId_.pop();
       }
       ViewStackProcessor.StopGetAccessRecording();
 
@@ -1156,7 +1158,7 @@ abstract class ViewPU extends PUV2ViewBase
           let observedPropertyInfo: ObservedPropertyInfo<any> = {
             decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(),
             value: observedProp.getRawObjectValue(),
-            dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() == 'object'? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()): false),
+            dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() == 'object'? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()): false, false),
             owningView: { componentName: this.constructor.name, id: this.id__() }, syncPeers: observedProp.dumpSyncPeers()
           };
           res.observedPropertiesInfo.push(observedPropertyInfo);
