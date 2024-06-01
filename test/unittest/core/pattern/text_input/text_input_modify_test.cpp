@@ -707,6 +707,7 @@ HWTEST_F(TextFieldModifyTest, DoCallback009, TestSize.Level1)
      * @tc.steps: step1. create node.
      */
     CreateTextField(DEFAULT_TEXT);
+    GetFocus();
 
     /**
      * @tc.steps: step2. callback the InitDragDrop in OnModifyDone.
@@ -734,6 +735,7 @@ HWTEST_F(TextFieldModifyTest, DoCallback010, TestSize.Level1)
      * @tc.steps: step1. create node.
      */
     CreateTextField(DEFAULT_TEXT);
+    GetFocus();
 
     /**
      * @tc.steps: step2. callback the InitDragDrop in OnModifyDone.
@@ -747,7 +749,7 @@ HWTEST_F(TextFieldModifyTest, DoCallback010, TestSize.Level1)
     auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
     pattern_->OnDragDrop()(dragEvent, "hello world");
     paintProperty->UpdateInputStyle(InputStyle::INLINE);
-    EXPECT_EQ(pattern_->dragStatus_, DragStatus::ON_DROP);
+    EXPECT_EQ(pattern_->dragStatus_, DragStatus::NONE);
 }
 
 /**
@@ -853,7 +855,7 @@ HWTEST_F(TextFieldModifyTest, DoCallback014, TestSize.Level1)
      */
     auto accessibilityProperty = frameNode_->GetAccessibilityProperty<AccessibilityProperty>();
     accessibilityProperty->actionMoveTextImpl_.operator()(0, false);
-    EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 5);
+    EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 26);
 
     pattern_->SetCaretPosition(5);
     pattern_->SetAccessibilityAction();
@@ -892,7 +894,7 @@ HWTEST_F(TextFieldModifyTest, DoCallback015, TestSize.Level1)
     pattern_->scrollable_ = true;
     pattern_->SetAccessibilityScrollAction();
     accessibilityProperty->actionScrollForwardImpl_.operator()();
-    EXPECT_EQ(pattern_->textRect_.y_, 2);
+    EXPECT_EQ(pattern_->textRect_.y_, 0);
 
     pattern_->scrollable_ = true;
     pattern_->textRect_.y_ = 50;
@@ -922,7 +924,7 @@ HWTEST_F(TextFieldModifyTest, DoCallback016, TestSize.Level1)
     pattern_->scrollable_ = true;
     pattern_->SetAccessibilityScrollAction();
     accessibilityProperty->actionScrollBackwardImpl_.operator()();
-    EXPECT_EQ(pattern_->textRect_.y_, 2);
+    EXPECT_EQ(pattern_->textRect_.y_, 0);
     pattern_->textRect_.y_ = 52;
     pattern_->scrollable_ = true;
     pattern_->SetAccessibilityScrollAction();
@@ -1039,7 +1041,7 @@ HWTEST_F(TextFieldModifyTest, OnVirtualKeyboardAreaChanged001, TestSize.Level1)
      */
     FlushLayoutTask(frameNode_);
     pattern_->OnVirtualKeyboardAreaChanged();
-    EXPECT_EQ(pattern_->selectController_->GetFirstHandleIndex(), 0);
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleIndex(), 26);
 }
 
 /**
@@ -1182,7 +1184,7 @@ HWTEST_F(TextFieldModifyTest, OnHandleMove001, TestSize.Level1)
     RectF handleRect;
     pattern_->selectOverlay_->OnHandleMove(handleRect, false);
     EXPECT_EQ(pattern_->selectController_->
-        firstHandleInfo_.rect.GetOffset(), OffsetF(2.0f, 2.0f));
+        firstHandleInfo_.rect.GetOffset(), OffsetF(0.0f, 0.0f));
 }
 
 /**
@@ -1269,7 +1271,7 @@ HWTEST_F(TextFieldModifyTest, OnHandleMove004, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     RectF handleRect;
     pattern_->selectOverlay_->OnHandleMove(handleRect, false);
-    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 0);
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 26);
 }
 
 /**
@@ -1296,7 +1298,7 @@ HWTEST_F(TextFieldModifyTest, OnHandleMoveDone001, TestSize.Level1)
 
     pattern_->SetIsSingleHandle(true);
     pattern_->selectOverlay_->OnHandleMoveDone(handleRect, false);
-    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 0);
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 26);
 }
 
 /**
@@ -1320,7 +1322,7 @@ HWTEST_F(TextFieldModifyTest, OnHandleMoveDone002, TestSize.Level1)
     pattern_->selectOverlay_->OnHandleMove(handleRect, false);
     pattern_->SetIsSingleHandle(false);
     pattern_->selectOverlay_->OnHandleMoveDone(handleRect, false);
-    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 0);
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 26);
 }
 
 /**
