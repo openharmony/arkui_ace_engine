@@ -32,7 +32,7 @@ namespace OHOS::Ace {
 struct ModalUIExtensionConfig {
     bool isProhibitBack = false;
     bool isAsyncModalBinding = false;
-    bool isAllowedBeCovered = true;
+    bool isAllowedBeCovered = false;
 };
 
 struct ModalUIExtensionCallbacks {
