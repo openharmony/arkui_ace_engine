@@ -930,6 +930,7 @@ template("ace_core_ng_source_set") {
           "components/web/resource/web_client_impl.cpp",
           "components/web/resource/web_configuration_observer.cpp",
           "components/web/resource/web_delegate.cpp",
+          "components/web/resource/web_javascript_execute_callback.cpp",
           "components/web/resource/web_javascript_result_callback.cpp",
           "components/web/resource/web_resource.cpp",
           "components/web/web_component.cpp",
