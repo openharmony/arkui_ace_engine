@@ -13,8 +13,14 @@
  * limitations under the License.
  */
 #include "test/unittest/core/pattern/waterflow/water_flow_test_ng.h"
+#include "water_flow_item_maps.h"
 
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.h"
+
+#define private public
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#undef private
+
 namespace OHOS::Ace::NG {
 class WaterFlowSWTest : public WaterFlowTestNg {
 protected:
@@ -362,7 +368,7 @@ HWTEST_F(WaterFlowSWTest, OverScroll003, TestSize.Level1)
     EXPECT_EQ(info_->startIndex_, 0);
     EXPECT_EQ(info_->endIndex_, 0);
     EXPECT_EQ(info_->TopFinalPos(), -1000.0f);
-    for (auto& lane : info_->lanes_) {
+    for (auto& lane : info_->sections_[0]) {
         if (lane.items_.empty()) {
             EXPECT_EQ(lane.startPos, lane.endPos);
         } else {
@@ -397,7 +403,7 @@ HWTEST_F(WaterFlowSWTest, OverScroll004, TestSize.Level1)
     EXPECT_EQ(info_->startIndex_, 49);
     EXPECT_EQ(info_->endIndex_, 49);
     EXPECT_EQ(info_->BottomFinalPos(WATERFLOW_HEIGHT), 1000.0f);
-    for (auto& lane : info_->lanes_) {
+    for (auto& lane : info_->sections_[0]) {
         if (lane.items_.empty()) {
             EXPECT_EQ(lane.startPos, lane.endPos);
         } else {
@@ -637,5 +643,39 @@ HWTEST_F(WaterFlowSWTest, ScrollToEdge005, TestSize.Level1)
             info_->lanes_[i].startPos + info_->lanes_[i].items_.front().mainSize);
         ASSERT_EQ(GetChildRect(frameNode_, i).Bottom(), info_->lanes_[i].endPos);
     }
+}
+
+/**
+ * @tc.name: ResetSections001
+ * @tc.desc: Layout WaterFlow and then reset to old layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, ResetSections001, TestSize.Level1)
+{
+    Create(
+        [](WaterFlowModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(400.0f));
+            ViewAbstract::SetHeight(CalcLength(600.f));
+            CreateItem(60);
+        },
+        false);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_5);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    FlushLayoutTask(frameNode_);
+
+    UpdateCurrentOffset(-205.0f);
+    EXPECT_EQ(info_->startIndex_, 3);
+    EXPECT_EQ(info_->endIndex_, 11);
+    EXPECT_EQ(info_->storedOffset_, -100.0f);
+
+    // fallback to layout without sections
+    pattern_->ResetSections();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 3);
+    EXPECT_EQ(info_->storedOffset_, -100.0f);
+    EXPECT_EQ(info_->GetCrossCount(), 1);
+    EXPECT_EQ(info_->segmentTails_.size(), 1);
+    EXPECT_EQ(info_->margins_.size(), 1);
 }
 } // namespace OHOS::Ace::NG

@@ -1470,6 +1470,7 @@ HWTEST_F(WaterFlowSegmentTest, ResetSections001, TestSize.Level1)
 
     UpdateCurrentOffset(-205.0f);
     EXPECT_EQ(info->currentOffset_, -205.0f);
+    EXPECT_EQ(info->storedOffset_, -100.0f);
     EXPECT_EQ(info->startIndex_, 3);
     EXPECT_EQ(info->endIndex_, 11);
 
@@ -1480,13 +1481,8 @@ HWTEST_F(WaterFlowSegmentTest, ResetSections001, TestSize.Level1)
     EXPECT_EQ(info->startIndex_, 1);
     EXPECT_EQ(info->endIndex_, 5);
     EXPECT_EQ(info->GetCrossCount(), 1);
-    if (SystemProperties::WaterFlowUseSegmentedLayout()) {
         EXPECT_EQ(info->segmentTails_.size(), 1);
         EXPECT_EQ(info->margins_.size(), 1);
-    } else {
-        EXPECT_TRUE(info->segmentTails_.empty());
-        EXPECT_TRUE(info->margins_.empty());
-    }
 
     UpdateCurrentOffset(250.0f);
     EXPECT_EQ(info->currentOffset_, 0.0f);

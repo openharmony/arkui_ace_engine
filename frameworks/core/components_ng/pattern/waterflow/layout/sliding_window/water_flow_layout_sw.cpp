@@ -44,7 +44,6 @@ void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
     }
 
     if (info_->jumpIndex_ != EMPTY_JUMP_INDEX) {
-        std::cout << "jump to " << info_->jumpIndex_ << std::endl;
         MeasureOnJump(info_->jumpIndex_, info_->align_);
     } else if (info_->targetIndex_) {
         MeasureToTarget(*info_->targetIndex_);
@@ -99,6 +98,7 @@ void WaterFlowLayoutSW::Init(const SizeF& frameSize)
     sections_ = wrapper_->GetHostNode()->GetPattern<WaterFlowPattern>()->GetSections();
     if (sections_) {
         const auto& sections = sections_->GetSectionInfo();
+        // implies section update
         if (info_->margins_.empty()) {
             auto constraint = wrapper_->GetLayoutProperty()->GetLayoutConstraint();
             info_->InitMargins(sections, constraint->scaleProperty, constraint->percentReference.Width());
@@ -118,6 +118,7 @@ void WaterFlowLayoutSW::SingleInit(const SizeF& frameSize)
 {
     info_->sections_.resize(1);
     info_->segmentTails_ = { itemCnt_ - 1 };
+    info_->segmentCache_.clear();
     info_->margins_.resize(1);
 
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
@@ -210,7 +211,6 @@ void WaterFlowLayoutSW::ApplyDelta(float delta)
     } else {
         int32_t idx = info_->EndIndex() + 1;
         info_->PrepareSection(idx, true);
-        std::cout << "start fill back from " << idx << std::endl;
         FillBack(mainLen_, idx, itemCnt_ - 1);
     }
 }
@@ -297,8 +297,6 @@ bool WaterFlowLayoutSW::FillBackSection(float viewportBound, int32_t& idx, int32
         info_->idxToLane_[idx] = laneIdx;
         float endPos = FillBackHelper(props, idx++, laneIdx);
         if (LessNotEqual(endPos, viewportBound)) {
-            std::cout << "push back end idx = " << idx - 1 << " pos = " << endPos << " laneIdx = " << laneIdx
-                      << std::endl;
             q.push({ endPos, laneIdx });
         }
     }
@@ -471,6 +469,7 @@ void WaterFlowLayoutSW::MeasureOnJump(int32_t jumpIdx, ScrollAlign align)
         // jump to footer
         info_->delta_ = -Infinity<float>();
     }
+    jumpIdx = std::min(itemCnt_ - 1, jumpIdx);
     overScroll_ = false;
 
     bool inView = info_->ItemInView(jumpIdx);
@@ -555,10 +554,8 @@ void WaterFlowLayoutSW::AdjustOverScroll()
     if (overScroll_) {
         return;
     }
-    if (!info_->margins_.empty()) {
-        maxEnd += info_->BotMargin();
-        minStart -= info_->TopMargin();
-    }
+    maxEnd += info_->BotMargin();
+    minStart -= info_->TopMargin();
 
     int32_t startIdx = info_->StartIndex();
     if (startIdx == 0 && Positive(minStart)) {
@@ -569,6 +566,12 @@ void WaterFlowLayoutSW::AdjustOverScroll()
             delta = std::min(-minStart, delta);
         }
         ApplyDelta(delta);
+
+        // handle special case when content < viewport && jump to end items
+        minStart = info_->StartPos() - info_->TopMargin();
+        if (info_->StartIndex() == 0 && Positive(minStart)) {
+            ApplyDelta(-minStart);
+        }
     }
 }
 
@@ -577,7 +580,7 @@ float WaterFlowLayoutSW::MeasureChild(const RefPtr<WaterFlowLayoutProperty>& pro
     auto child = wrapper_->GetOrCreateChildByIndex(nodeIdx(idx));
     CHECK_NULL_RETURN(child, 0.0f);
     float userHeight = WaterFlowLayoutUtils::GetUserDefHeight(sections_, info_->GetSegment(idx), idx);
-    if (Positive(userHeight)) {
+    if (NonNegative(userHeight)) {
         WaterFlowLayoutUtils::UpdateItemIdealSize(child, axis_, userHeight);
     }
     child->Measure(WaterFlowLayoutUtils::CreateChildConstraint(

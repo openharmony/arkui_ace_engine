@@ -157,11 +157,17 @@ public:
 
     inline float TopMargin() const
     {
+        if (margins_.empty()) {
+            return 0.0f;
+        }
         return (axis_ == Axis::VERTICAL ? margins_.front().top : margins_.front().left).value_or(0.0f);
     }
     inline float BotMargin() const
     {
-        return (axis_ == Axis::VERTICAL ? margins_.front().top : margins_.front().left).value_or(0.0f);
+        if (margins_.empty()) {
+            return 0.0f;
+        }
+        return (axis_ == Axis::VERTICAL ? margins_.back().bottom : margins_.back().right).value_or(0.0f);
     }
 
     /**

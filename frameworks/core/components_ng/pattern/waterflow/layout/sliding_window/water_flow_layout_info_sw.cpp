@@ -280,8 +280,8 @@ float WaterFlowLayoutInfoSW::CalcTargetPosition(int32_t idx, int32_t /* crossIdx
     return pos - totalOffset_;
 }
 
-void WaterFlowLayoutInfoSW::PrepareJump() {
-
+void WaterFlowLayoutInfoSW::PrepareJump()
+{
     if (startIndex_ <= endIndex_) {
         align_ = ScrollAlign::START;
         jumpIndex_ = startIndex_;
@@ -446,7 +446,6 @@ void WaterFlowLayoutInfoSW::InitSegments(const std::vector<WaterFlowSections::Se
 {
     synced_ = false;
     PrepareJump();
-
     size_t n = sections.size();
     if (n == 0) {
         return;
@@ -462,7 +461,6 @@ void WaterFlowLayoutInfoSW::InitSegments(const std::vector<WaterFlowSections::Se
     sections_.resize(n, {});
 
     int32_t endIdx = EndIndex();
-    std::cout << "clear from index " << endIdx + 1 << std::endl;
     for (auto it = idxToLane_.begin(); it != idxToLane_.end();) {
         if (it->first > endIdx) {
             it = idxToLane_.erase(it);

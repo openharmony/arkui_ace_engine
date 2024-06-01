@@ -466,7 +466,7 @@ void WaterFlowPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign ali
     SetScrollSource(SCROLL_FROM_JUMP);
     SetScrollAlign(align);
     StopAnimate();
-    if ((index >= 0) || (index == LAST_ITEM)) {
+    if (index > EMPTY_JUMP_INDEX && index < GetChildrenCount()) {
         if (smooth) {
             SetExtraOffset(extraOffset);
             if (!ScrollToTargetIndex(index)) {

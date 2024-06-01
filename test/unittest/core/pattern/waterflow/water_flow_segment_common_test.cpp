@@ -15,7 +15,6 @@
 #include "test/unittest/core/pattern/waterflow/water_flow_item_maps.h"
 #include "test/unittest/core/pattern/waterflow/water_flow_test_ng.h"
 
-#include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.h"
 // mock
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 namespace OHOS::Ace::NG {
@@ -62,22 +61,25 @@ HWTEST_F(WaterFlowSegmentCommonTest, Illegal001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentCommonTest, Illegal002, TestSize.Level1)
 {
-    // Create(
-    //     [](WaterFlowModelNG model) {
-    //         ViewAbstract::SetWidth(CalcLength(400.0f));
-    //         ViewAbstract::SetHeight(CalcLength(600.f));
-    //         CreateItem(10);
-    //     },
-    //     false);
-    // auto secObj = pattern_->GetOrCreateWaterFlowSections();
-    // secObj->ChangeData(0, 0, SECTION_8);
-    // MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    // FlushLayoutTask(frameNode_);
+    Create(
+        [](WaterFlowModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(400.0f));
+            ViewAbstract::SetHeight(CalcLength(600.f));
+            CreateItem(10);
+        },
+        false);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_8);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    FlushLayoutTask(frameNode_);
 
-    // // user-defined negative size would be treated as 0
-    // UpdateCurrentOffset(-205.0f);
-    // EXPECT_EQ(info_->startIndex_, 0);
-    // EXPECT_EQ(info_->endIndex_, 9);
+    // user-defined negative size would be treated as 0
+    UpdateCurrentOffset(-205.0f);
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->endIndex_, 9);
+    for (int i = 0; i <= 9; ++i) {
+        EXPECT_EQ(GetChildHeight(frameNode_, i), 0.0f);
+    }
 }
 
 /**
@@ -98,10 +100,6 @@ HWTEST_F(WaterFlowSegmentCommonTest, Add001, TestSize.Level1)
     secObj->ChangeData(0, 0, SECTION_5);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     FlushLayoutTask(frameNode_);
-    // EXPECT_EQ(info_->sections_.size(), 5);
-    // for (int i = 0; i < 5; ++i) {
-    //     EXPECT_EQ(info_->sections_[i].size(), SECTION_5[i].crossCount.value_or(1));
-    // }
     EXPECT_EQ(info_->startIndex_, 0);
     EXPECT_EQ(info_->endIndex_, 10);
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
@@ -165,7 +163,6 @@ HWTEST_F(WaterFlowSegmentCommonTest, Splice001, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 2), -95.0f);
 
     // replace second section
-    std::cout << "start replace" << std::endl;
     secObj->ChangeData(1, 1, ADD_SECTION_6);
     AddItems(7);
     frameNode_->ChildrenUpdatedFrom(37);
@@ -493,6 +490,8 @@ HWTEST_F(WaterFlowSegmentCommonTest, Replace004, TestSize.Level1)
     EXPECT_EQ(info_->segmentTails_[0], 9);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info_->endIndex_, 9);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(GetChildRect(frameNode_, 9).Bottom(), 400.0f);
 }
 
 /**
@@ -565,8 +564,7 @@ HWTEST_F(WaterFlowSegmentCommonTest, Replace006, TestSize.Level1)
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
 
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(info_->startIndex_, 0);
-    EXPECT_EQ(info_->endIndex_, -1);
+    EXPECT_TRUE(info_->startIndex_ > info_->endIndex_);
 
     secObj->ChangeData(0, 1, SECTION_9);
     AddItems(6);
@@ -575,5 +573,221 @@ HWTEST_F(WaterFlowSegmentCommonTest, Replace006, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info_->endIndex_, 5);
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+}
+
+/**
+ * @tc.name: Reset005
+ * @tc.desc: Test Changing cross gap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentCommonTest, Reset005, TestSize.Level1)
+{
+    Create([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        model.SetColumnsGap(Dimension(5.0f));
+        model.SetRowsGap(Dimension(1.0f));
+        CreateItem(200);
+        ViewStackProcessor::GetInstance()->Pop();
+    });
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->endIndex_, 21);
+    for (int i = 0; i <= 21; ++i) {
+        EXPECT_EQ(GetChildWidth(frameNode_, i), 116.25f);
+    }
+
+    layoutProperty_->UpdateColumnsGap(Dimension(1.0f));
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->endIndex_, 21);
+    for (int i = 0; i <= 21; ++i) {
+        EXPECT_EQ(GetChildWidth(frameNode_, i), 119.25f);
+    }
+}
+
+/**
+ * @tc.name: Segmented006
+ * @tc.desc: Layout WaterFlow with SEGMENT_7 and change RowGaps
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentCommonTest, Segmented006, TestSize.Level1)
+{
+    Create(
+        [](WaterFlowModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(400.0f));
+            ViewAbstract::SetHeight(CalcLength(600.f));
+            CreateItem(37);
+        },
+        false);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_7);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(*info_->margins_[0].top, 5.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 5.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 4), 408.0f);
+
+    UpdateCurrentOffset(-600.0f);
+
+    EXPECT_EQ(GetChildY(frameNode_, 6), -92.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 7), 21.0f);
+    EXPECT_EQ(info_->startIndex_, 6);
+
+    layoutProperty_->UpdateRowsGap(10.0_vp);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 6);
+
+    UpdateCurrentOffset(600.0f);
+    EXPECT_EQ(info_->startIndex_, 0);
+    layoutProperty_->UpdateRowsGap(11.0_vp);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->endIndex_, 6);
+}
+
+/**
+ * @tc.name: Segmented007
+ * @tc.desc: Layout WaterFlow with SEGMENT_7 and change RowGaps
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentCommonTest, Segmented007, TestSize.Level1)
+{
+    Create(
+        [](WaterFlowModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(400.0f));
+            ViewAbstract::SetHeight(CalcLength(600.f));
+            CreateItem(60);
+        },
+        false);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_4);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(0, 0, 400.0f / 3, 100)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(2), Rect(400.0f / 3 * 2, 0, 400.0f / 3, 100)));
+
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(400.0f / 3 * 2, 0, 400.0f / 3, 100)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(2), Rect(0, 0, 400.0f / 3, 100)));
+}
+
+/**
+ * @tc.name: CheckHeight001
+ * @tc.desc: Layout WaterFlow and check if callback height is used
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentCommonTest, CheckHeight001, TestSize.Level1)
+{
+    Create(
+        [](WaterFlowModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(400.0f));
+            ViewAbstract::SetHeight(CalcLength(600.f));
+            CreateItem(37);
+        },
+        false);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_7);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->endIndex_, 6);
+    EXPECT_EQ(GetChildY(frameNode_, 6), 508.0f);
+
+    UpdateCurrentOffset(-10000.0f);
+    EXPECT_EQ(info_->Offset(), -3082.0f);
+    EXPECT_EQ(info_->startIndex_, 31);
+    EXPECT_EQ(info_->endIndex_, 36);
+    EXPECT_EQ(GetChildY(frameNode_, 36), 497.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 35), 395.0f);
+    for (int i = 31; i <= 36; ++i) {
+        EXPECT_EQ(GetChildHeight(frameNode_, i), 100.0f);
+    }
+
+    for (const auto& child : frameNode_->GetChildren()) {
+        auto node = AceType::DynamicCast<FrameNode>(child);
+        node->GetGeometryNode()->SetFrameSize({});
+        node->GetLayoutProperty()->UpdateUserDefinedIdealSize({ CalcLength(50.0f), CalcLength(50.0f) });
+    }
+
+    UpdateCurrentOffset(10000.0f);
+    EXPECT_EQ(info_->Offset(), 0.0f);
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->endIndex_, 6);
+    for (int i = 0; i <= 6; ++i) {
+        EXPECT_EQ(GetChildHeight(frameNode_, i), 100.0f);
+    }
+}
+
+/**
+ * @tc.name: ScrollToEdge
+ * @tc.desc: Layout WaterFlow and check if callback height is used
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentCommonTest, ScrollToEdge, TestSize.Level1)
+{
+    Create(
+        [](WaterFlowModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(400.0f));
+            ViewAbstract::SetHeight(CalcLength(600.f));
+            CreateItem(37);
+        },
+        false);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_7);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    FlushLayoutTask(frameNode_);
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 36), 500.0f);
+
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+}
+
+/**
+ * @tc.name: Constraint001
+ * @tc.desc: Test Layout when the layoutConstraint changes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentCommonTest, Constraint001, TestSize.Level1)
+{
+    Create(
+        [](WaterFlowModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(400.0f));
+            ViewAbstract::SetHeight(CalcLength(600.f));
+            CreateItem(60);
+        },
+        false);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_5);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->endIndex_, 10);
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(0, 0, 400.f / 3, 100)));
+
+    layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(500.0f), CalcLength(Dimension(600.0f))));
+    FlushLayoutTask(frameNode_);
+    for (int i = 0; i < 5; i++) {
+        EXPECT_EQ(GetChildWidth(frameNode_, i), 500.f / 3);
+    }
+    for (int i = 5; i < 10; i++) {
+        EXPECT_EQ(GetChildWidth(frameNode_, i), (500.f - 3) / 5);
+    }
+    EXPECT_EQ(GetChildWidth(frameNode_, 10), 500.f);
+    EXPECT_EQ(info_->endIndex_, 10);
+
+    layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(400.0f), CalcLength(Dimension(700.0f))));
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(0, 0, 400.f / 3, 100)));
+    EXPECT_EQ(info_->endIndex_, 11);
+
+    layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(500.0f), CalcLength(Dimension(700.0f))));
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(0, 0, 500.f / 3, 100)));
+    EXPECT_EQ(info_->endIndex_, 11);
 }
 } // namespace OHOS::Ace::NG

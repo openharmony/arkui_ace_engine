@@ -145,7 +145,7 @@ private:
 
     /**
      * @brief Layout a single section of items
-     * 
+     *
      * @param idx section index.
      * @param paddingOffset WaterFlow padding, need to add to the child offset.
      * @param selfCrossLen cross length of WaterFlow.
