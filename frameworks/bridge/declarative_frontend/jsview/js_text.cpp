@@ -29,6 +29,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_layout_manager.h"
 #include "bridge/declarative_frontend/jsview/js_text.h"
@@ -129,13 +130,13 @@ void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(tmpInfo);
-    auto fontSize = paramObject->GetProperty("size");
+    auto fontSize = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::SIZE));
     CalcDimension size;
     if (ParseJsDimensionFpNG(fontSize, size, false) && size.IsNonNegative()) {
         font.fontSize = size;
     }
     std::string weight;
-    auto fontWeight = paramObject->GetProperty("weight");
+    auto fontWeight = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::WEIGHT));
     if (!fontWeight->IsNull()) {
         if (fontWeight->IsNumber()) {
             weight = std::to_string(fontWeight->ToNumber<int32_t>());
@@ -144,14 +145,14 @@ void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
         }
         font.fontWeight = ConvertStrToFontWeight(weight);
     }
-    auto fontFamily = paramObject->GetProperty("family");
+    auto fontFamily = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::FAMILY));
     if (!fontFamily->IsNull()) {
         std::vector<std::string> fontFamilies;
         if (JSContainerBase::ParseJsFontFamilies(fontFamily, fontFamilies)) {
             font.fontFamilies = fontFamilies;
         }
     }
-    auto style = paramObject->GetProperty("style");
+    auto style = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::STYLE));
     if (!style->IsNull() || style->IsNumber()) {
         font.fontStyle = static_cast<FontStyle>(style->ToNumber<int32_t>());
     }

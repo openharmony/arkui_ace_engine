@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_types.h"
 
+#include "frameworks/bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 
@@ -190,10 +191,20 @@ JsiRef<JsiValue> JsiArray::GetProperty(const char* prop) const
     return refValue;
 }
 
+JsiRef<JsiValue> JsiArray::GetProperty(int32_t propertyIndex) const
+{
+    auto vm = GetEcmaVM();
+    auto stringRef = panda::ExternalStringCache::GetCachedString(vm, propertyIndex);
+    auto value = GetHandle()->Get(vm, stringRef);
+    auto func = JsiValue(vm, value);
+    auto refValue = JsiRef<JsiValue>(func);
+    return refValue;
+}
+
 size_t JsiArray::Length() const
 {
     size_t length = -1;
-    JsiRef<JsiValue> propLength = GetProperty("length");
+    JsiRef<JsiValue> propLength = GetProperty(static_cast<int32_t>(ArkUIIndex::LENGTH));
     if (propLength->IsNumber()) {
         length = propLength->ToNumber<int32_t>();
     }
@@ -274,6 +285,24 @@ JsiRef<JsiArray> JsiObject::GetPropertyNames() const
 {
     auto vm = GetEcmaVM();
     return JsiRef<JsiArray>::Make(GetHandle()->GetOwnPropertyNames(vm));
+}
+
+JsiRef<JsiValue> JsiObject::GetProperty(int32_t propertyIndex) const
+{
+    auto vm = GetEcmaVM();
+    auto str = panda::ExternalStringCache::GetCachedString(vm, propertyIndex);
+    auto value = GetHandle()->Get(vm, str);
+    auto func = JsiValue(vm, value);
+    auto refValue = JsiRef<JsiValue>(func);
+    return refValue;
+}
+
+bool JsiObject::HasProperty(int32_t propertyIndex) const
+{
+    auto vm = GetEcmaVM();
+    auto stringRef = panda::ExternalStringCache::GetCachedString(vm, propertyIndex);
+    bool has = GetHandle()->Has(vm, stringRef);
+    return has;
 }
 
 JsiRef<JsiValue> JsiObject::GetProperty(const char* prop) const
