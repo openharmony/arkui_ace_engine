@@ -123,11 +123,19 @@ private:
     static bool GetIsOverRange(const float& scale);
     static void SetDialogNodePageActive(RefPtr<FrameNode>& contentRow, RefPtr<FrameNode>& textPickerNode,
         const uint32_t& dialogNodePage, const uint32_t& showCount);
-    static RefPtr<FrameNode> SeparatedOptionsShow(const DialogProperties& dialogProperties,
-        const TextPickerSettingData& settingData, const std::vector<ButtonInfo>& buttonInfos,
+    static RefPtr<FrameNode> SeparatedOptionsShow(RefPtr<FrameNode>& contentColumn, RefPtr<FrameNode>& textPickerNode,
+        const std::vector<ButtonInfo>& buttonInfos,
+        const TextPickerSettingData& settingData,
         std::map<std::string, NG::DialogTextEvent>& dialogEvent,
-        std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent, const float& scale);
+        std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent,
+        const float& scale, GestureEventFunc closeCallBack, RefPtr<FrameNode>& dialogNode);
+    static void SetDialogButtonActive(RefPtr<FrameNode>& contentColumn,
+        const uint32_t& dialogNodePage, const uint32_t& columnCount);
+    static void SetFirstDialogButtonActive(RefPtr<UINode>& contentRow);
+    static void SetSecondDialogButtonActive(RefPtr<UINode>& contentRow);
+    static void SetThirdDialogButtonActive(RefPtr<UINode>& contentRow);
     static WeakPtr<FrameNode> dialogNode_;
+    static uint32_t dialogNodePage_;
 };
 } // namespace OHOS::Ace::NG
 
