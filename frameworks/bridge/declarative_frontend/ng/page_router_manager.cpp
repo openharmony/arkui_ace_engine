@@ -83,6 +83,11 @@ void PageRouterManager::LoadOhmUrl(const RouterPageInfo& target)
 void PageRouterManager::RunPage(const std::string& url, const std::string& params)
 {
     PerfMonitor::GetPerfMonitor()->SetAppStartStatus();
+    auto pagePath = Framework::JsiDeclarativeEngine::GetPagePath(url);
+    if (pagePath.empty()) {
+        pagePath = url;
+    }
+    ACE_SCOPED_TRACE_COMMERCIAL("PageRouterManager::RunPage, Router Main Page: %s", pagePath.c_str());
     CHECK_RUN_ON(JS);
     RouterPageInfo info { url, params };
 #if !defined(PREVIEW)
@@ -153,6 +158,11 @@ void PageRouterManager::RunPage(const std::shared_ptr<std::vector<uint8_t>>& con
 
 void PageRouterManager::RunPageByNamedRouter(const std::string& name, const std::string& params)
 {
+    auto pagePath = Framework::JsiDeclarativeEngine::GetPagePath(name);
+    if (pagePath.empty()) {
+        pagePath = name;
+    }
+    ACE_SCOPED_TRACE_COMMERCIAL("PageRouterManager::RunPage, Router Main Page: %s", pagePath.c_str());
     RouterPageInfo info { name, params };
     info.isNamedRouterMode = true;
     RouterOptScope scope(this);

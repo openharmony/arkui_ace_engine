@@ -1784,15 +1784,34 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
     const RefPtr<NavDestinationGroupNode>& topDestination,
     bool isAnimated, bool isPopPage, bool isNeedVisible)
 {
-    if (preDestination) {
-        preDestination->SetIsAnimated(isAnimated);
-    }
-    if (topDestination) {
-        topDestination->SetIsAnimated(isAnimated);
-    }
-    // fire onWillHide
+    std::string fromPathInfo;
+    std::string toPathInfo;
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
+
+    if (preDestination) {
+        fromPathInfo = preDestination->GetNavDestinationPathInfo();
+        auto preDestinationPattern = preDestination->GetPattern<NavDestinationPattern>();
+        CHECK_NULL_VOID(preDestinationPattern);
+        auto navDestinationName = preDestinationPattern->GetName();
+        fromPathInfo += ", navDesitinationName: " + navDestinationName;
+        preDestination->SetIsAnimated(isAnimated);
+    } else {
+        fromPathInfo = hostNode->GetNavigationPathInfo();
+    }
+    if (topDestination) {
+        toPathInfo = topDestination->GetNavDestinationPathInfo();
+        auto topDestinationPattern = topDestination->GetPattern<NavDestinationPattern>();
+        CHECK_NULL_VOID(topDestinationPattern);
+        auto navDestinationName = topDestinationPattern->GetName();
+        toPathInfo += ", navDesitinationName: " + navDestinationName;
+        topDestination->SetIsAnimated(isAnimated);
+    } else {
+        toPathInfo = hostNode->GetNavigationPathInfo();
+    }
+    ACE_SCOPED_TRACE_COMMERCIAL("NavDestination Page from %s to %s", fromPathInfo.c_str(), toPathInfo.c_str());
+
+    // fire onWillHide
     if (!isPopPage && !preDestination && navigationMode_ == NavigationMode::STACK) {
         // NavBar will be covered in STACK mode
         auto navBarNode = AceType::DynamicCast<FrameNode>(hostNode->GetNavBarNode());
