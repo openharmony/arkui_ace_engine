@@ -296,6 +296,40 @@ int32_t FormRendererDelegateProxy::OnGetRectRelativeToWindow(int32_t &top, int32
     return ERR_OK;
 }
 
+int32_t FormRendererDelegateProxy::OnEnableForm(
+    const OHOS::AppExecFwk::FormJsInfo& formJsInfo, const bool enable)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("%{public}s, failed to write interface token", __func__);
+        return ERR_INVALID_VALUE;
+    }
+    if (!data.WriteParcelable(&formJsInfo)) {
+        HILOG_ERROR("%{public}s fail, write formJsInfo error", __func__);
+        return ERR_INVALID_VALUE;
+    }
+    if (!data.WriteBool(enable)) {
+        HILOG_ERROR("%{public}s fail, write enable error", __func__);
+        return ERR_INVALID_VALUE;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    auto remoteProxy = Remote();
+    if (!remoteProxy) {
+        HILOG_ERROR("Send surfaceNode failed, ipc remoteObj is null");
+        return IPC_PROXY_ERR;
+    }
+    int32_t error = remoteProxy->SendRequest(
+        static_cast<uint32_t>(IFormRendererDelegate::Message::ON_ENABLE_FORM), data, reply, option);
+    if (error != NO_ERROR) {
+        HILOG_ERROR("%{public}s, failed to SendRequest: %{public}d", __func__, error);
+        return error;
+    }
+
+    return reply.ReadInt32();
+}
+
 bool FormRendererDelegateProxy::WriteInterfaceToken(MessageParcel& data)
 {
     if (!data.WriteInterfaceToken(FormRendererDelegateProxy::GetDescriptor())) {
