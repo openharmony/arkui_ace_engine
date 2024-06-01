@@ -1378,9 +1378,6 @@ bool CheckAndParseParams(DragControllerAsyncCtx* asyncCtx, std::string& errMsg)
 {
     // Check the number of the argument
     CHECK_NULL_RETURN(asyncCtx, false);
-    if (errMsg.empty()) {
-        return false;
-    }
     if ((asyncCtx->argc != 2) && (asyncCtx->argc != argCount3)) {
         errMsg = "The number of parameters must be 2 or 3.";
         return false;
