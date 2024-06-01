@@ -605,6 +605,7 @@ private:
 
     void BeforeShowDialog(const RefPtr<FrameNode>& dialogNode);
     void RemoveDialogFromMap(const RefPtr<FrameNode>& node);
+    void RemoveMaskFromMap(const RefPtr<FrameNode>& dialogNode);
     bool DialogInMapHoldingFocus();
     void PlayKeyboardTransition(const RefPtr<FrameNode>& customKeyboard, bool isTransitionIn);
     void FireNavigationStateChange(bool show, const RefPtr<UINode>& node = nullptr);

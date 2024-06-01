@@ -2369,6 +2369,16 @@ void OverlayManager::RemoveDialogFromMap(const RefPtr<FrameNode>& node)
     dialogMap_.erase(node->GetId());
 }
 
+void OverlayManager::RemoveMaskFromMap(const RefPtr<FrameNode>& dialogNode)
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "remove mask from map enter");
+    CHECK_NULL_VOID(dialogNode);
+    if (maskNodeIdMap_.find(dialogNode->GetId()) == maskNodeIdMap_.end()) {
+        return;
+    }
+    maskNodeIdMap_.erase(dialogNode->GetId());
+}
+
 bool OverlayManager::DialogInMapHoldingFocus()
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "dialog in map holding focus enter");
@@ -2482,6 +2492,7 @@ void OverlayManager::CloseDialogInner(const RefPtr<FrameNode>& dialogNode)
         CloseDialogAnimation(dialogNode);
     }
     dialogCount_--;
+    overlayManager->RemoveMaskFromMap(dialogNode);
     // set close button enable
     if (dialogCount_ == 0) {
         SetContainerButtonEnable(true);
