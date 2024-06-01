@@ -248,16 +248,6 @@ public:
         weakButtonBackward_ = buttonBackwardNode;
     }
 
-    void SetForwardNode(WeakPtr<FrameNode> buttonForwardNode)
-    {
-        weakButtonForward_ = buttonForwardNode;
-    }
-
-    void SetBackwardNode(WeakPtr<FrameNode> buttonBackwardNode)
-    {
-        weakButtonBackward_ = buttonBackwardNode;
-    }
-
     void OnLanguageConfigurationUpdate() override;
 
     void SetValues(const std::vector<std::string>& values)
