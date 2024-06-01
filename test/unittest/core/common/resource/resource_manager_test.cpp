@@ -80,7 +80,7 @@ HWTEST_F(ResourceManagerTest, ResourceManagerTest001, TestSize.Level1)
      */
     ResourceManager::GetInstance().RemoveResourceAdapter(bundleName, moduleName);
     EXPECT_EQ(ResourceManager::GetInstance().resourceAdapters_.size(), 1);
-    EXPECT_EQ(ResourceManager::GetInstance().resourceAdapters_.find(std::make_pair(bundleName, moduleName)),
+    EXPECT_EQ(ResourceManager::GetInstance().resourceAdapters_.find(MakeCacheKey(bundleName, moduleName)),
         ResourceManager::GetInstance().resourceAdapters_.end());
 
     /**
