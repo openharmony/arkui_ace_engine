@@ -6823,4 +6823,22 @@ void WebDelegate::OnAdsBlocked(const std::string& url, const std::vector<std::st
         },
         TaskExecutor::TaskType::JS, "ArkUiWebAdsBlocked");
 }
+
+void WebDelegate::SetSurfaceId(const std::string& surfaceId)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), surfaceId]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                CHECK_NULL_VOID(setting);
+                setting->SetSurfaceId(surfaceId);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetSurfaceId");
+}
 } // namespace OHOS::Ace
