@@ -3283,7 +3283,11 @@ void SwiperPattern::OnSpringAndFadeAnimationFinish()
     currentIndexOffset_ = indexStartPos;
     UpdateItemRenderGroup(false);
     NotifyParentScrollEnd();
-    StartAutoPlay();
+
+    if (!isTouchDown_) {
+        StartAutoPlay();
+    }
+
     fadeAnimationIsRunning_ = false;
 }
 
