@@ -108,6 +108,16 @@ public:
     // process offscreen process.
     void ProcessOffscreenTask(bool recursive = false);
 
+    bool IsProhibitedAddChildNode()
+    {
+        return isProhibitedAddChildNode_;
+    }
+
+    void SetIsProhibitedAddChildNode(bool isProhibitedAddChildNode)
+    {
+        isProhibitedAddChildNode_ = isProhibitedAddChildNode;
+    }
+
     int32_t TotalChildCount() const;
 
     // Returns index in the flatten tree structure
@@ -794,6 +804,7 @@ private:
     std::string viewId_;
     void* externalData_ = nullptr;
     std::function<void(int32_t)> destroyCallback_;
+    bool isProhibitedAddChildNode_ = false;
     friend class RosenRenderContext;
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
 };
