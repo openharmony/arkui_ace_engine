@@ -6194,12 +6194,17 @@ size_t RichEditorPattern::GetLineCount() const
 
 TextLineMetrics RichEditorPattern::GetLineMetrics(int32_t lineNumber)
 {
-    if (lineNumber < 0 || lineNumber > GetLineCount()) {
+    if (lineNumber < 0 || lineNumber > GetLineCount() - 1) {
         TAG_LOGE(AceLogTag::ACE_RICH_TEXT,
                 "GetLineMetrics failed, lineNumber not between 0 and max lines:%{public}d", lineNumber);
         return TextLineMetrics();
     }
-    return paragraphs_.GetLineMetrics(lineNumber);
+    auto lineMetrics = paragraphs_.GetLineMetrics(lineNumber);
+    const auto& textRect = GetTextRect();
+    lineMetrics.x += textRect.GetX();
+    lineMetrics.y += textRect.GetY();
+    lineMetrics.baseline += textRect.GetY();
+    return lineMetrics;
 }
 
 float RichEditorPattern::GetLetterSpacing() const
