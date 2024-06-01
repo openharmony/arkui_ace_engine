@@ -15,7 +15,6 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 
-#include "bridge/common/utils/engine_helper.h"
 #include "bridge/cj_frontend/frontend/cj_frontend_abstract.h"
 
 using namespace OHOS::Ace;
@@ -35,33 +34,17 @@ ExternalString Utils::MallocCString(const std::string& origin)
     return {res, reinterpret_cast<void(*)(const void*)>(free)};
 }
 
-bool Utils::IsStageModel()
+RefPtr<Frontend> Utils::GetCurrentFrontend()
 {
-    auto frontend = EngineHelper::GetCurrentFrontend();
-    auto cjFrontend = AceType::DynamicCast<CJFrontendAbstract>(frontend);
-    return cjFrontend && cjFrontend->IsStageModel();
-}
-
-std::weak_ptr<void> Utils::GetAbilityPointer()
-{
-    auto frontend = EngineHelper::GetCurrentFrontend();
-    auto cjFrontend = AceType::DynamicCast<CJFrontendAbstract>(frontend);
-    if (cjFrontend) {
-        return cjFrontend->GetAceAbility();
-    } else {
-        return std::weak_ptr<void>();
+    auto container = Container::Current();
+    if (!container) {
+        container = Container::GetActive();
+        if (!container) {
+            LOGE("Can not found valid container");
+            return nullptr;
+        }
     }
-}
-
-std::weak_ptr<void> Utils::GetRuntimeContextPointer()
-{
-    auto frontend = EngineHelper::GetCurrentFrontend();
-    auto cjFrontend = AceType::DynamicCast<CJFrontendAbstract>(frontend);
-    if (cjFrontend) {
-        return cjFrontend->GetRuntimeContext();
-    } else {
-        return std::weak_ptr<void>();
-    }
+    return container->GetFrontend();
 }
 
 std::string Utils::GetFunctionKey(int32_t functionKey)

@@ -3557,9 +3557,10 @@ RefPtr<LayoutWrapper> FrameNode::GetChildByIndex(uint32_t index, bool isCache)
     return frameProxy_->GetFrameNodeByIndex(index, false, isCache, false);
 }
 
-FrameNode* FrameNode::GetFrameNodeChildByIndex(uint32_t index, bool isCache)
+FrameNode* FrameNode::GetFrameNodeChildByIndex(uint32_t index, bool isCache, bool isExpand)
 {
-    auto frameNode = DynamicCast<FrameNode>(frameProxy_->GetFrameNodeByIndex(index, true, isCache, false));
+    auto frameNode = isExpand ? DynamicCast<FrameNode>(frameProxy_->GetFrameNodeByIndex(index, true, isCache, false))
+                              : DynamicCast<FrameNode>(UINode::GetFrameChildByIndexWithoutExpanded(index));
     return RawPtr(frameNode);
 }
 
@@ -3678,6 +3679,11 @@ RefPtr<UINode> FrameNode::GetFrameChildByIndex(uint32_t index, bool needBuild, b
         return nullptr;
     }
     return Claim(this);
+}
+
+RefPtr<UINode> FrameNode::GetFrameChildByIndexWithoutExpanded(uint32_t index)
+{
+    return GetFrameChildByIndex(index, false);
 }
 
 const RefPtr<LayoutAlgorithmWrapper>& FrameNode::GetLayoutAlgorithm(bool needReset)

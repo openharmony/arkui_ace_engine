@@ -24,7 +24,7 @@
 #include "core/components/text_clock/text_clock_controller.h"
 
 namespace OHOS::Ace {
-class TextClockModel {
+class ACE_FORCE_EXPORT TextClockModel {
 public:
     static TextClockModel* GetInstance();
     virtual ~TextClockModel() = default;

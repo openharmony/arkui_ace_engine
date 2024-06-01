@@ -73,7 +73,9 @@ void SliderPattern::OnModifyDone()
         sliderPaintProperty->GetSliderInteractionModeValue(SliderModelNG::SliderInteraction::SLIDE_AND_CLICK);
     minResponse_ = sliderPaintProperty->GetMinResponsiveDistance().value_or(0.0f);
     InitWindowSizeChanged(host);
-    UpdateToValidValue();
+    if (!panMoveFlag_) {
+        UpdateToValidValue();
+    }
     UpdateBlock();
     InitClickEvent(gestureHub);
     InitTouchEvent(gestureHub);

@@ -662,6 +662,10 @@ bool FocusHub::OnKeyPreIme(KeyEventInfo& info, const KeyEvent& keyEvent)
 bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
 {
     ACE_DCHECK(IsCurrentFocus());
+    // ReDispatch keyEvent will NOT be consumed again.
+    if (keyEvent.isRedispatch) {
+        return false;
+    }
 
     auto frameNode = GetFrameNode();
     CHECK_NULL_RETURN(frameNode, false);

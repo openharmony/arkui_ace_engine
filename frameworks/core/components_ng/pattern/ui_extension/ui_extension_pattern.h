@@ -206,6 +206,7 @@ private:
     void RegisterVisibleAreaChange();
     void MountPlaceholderNode();
     void RemovePlaceholderNode();
+    bool ShouldCallSystem(const AAFwk::Want& want);
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;

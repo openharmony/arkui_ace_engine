@@ -20,14 +20,15 @@
 
 #include "ability_info.h"
 #include "display_manager.h"
+#include "dm/display_manager.h"
 #include "interfaces/inner_api/ace/arkui_rect.h"
 #include "interfaces/inner_api/ace/ui_content.h"
 #include "interfaces/inner_api/ace/viewport_config.h"
+#include "interfaces/inner_api/ui_session/ui_content_stub_impl.h"
 #include "key_event.h"
 #include "native_engine/native_engine.h"
 #include "native_engine/native_value.h"
 #include "wm/window.h"
-#include "dm/display_manager.h"
 
 #include "adapter/ohos/entrance/distributed_ui_manager.h"
 #include "adapter/ohos/entrance/ace_viewport_config.h"
@@ -313,6 +314,10 @@ public:
 
     void SetContentNodeGrayScale(float grayscale) override;
 
+    sptr<IRemoteObject> GetRemoteObj() override
+    {
+        return instance_;
+    }
     void SetStatusBarItemColor(uint32_t color) override;
 
 private:
@@ -379,6 +384,7 @@ private:
     std::shared_ptr<TaskWrapper> taskWrapper_;
 
     sptr<IRemoteObject> parentToken_ = nullptr;
+    sptr<IRemoteObject> instance_ = new (std::nothrow) UIContentServiceStubImpl();
     RefPtr<RenderBoundaryManager> renderBoundaryManager_ = Referenced::MakeRefPtr<RenderBoundaryManager>();
     bool isUIExtensionSubWindow_ = false;
     bool isUIExtensionAbilityProcess_ = false;

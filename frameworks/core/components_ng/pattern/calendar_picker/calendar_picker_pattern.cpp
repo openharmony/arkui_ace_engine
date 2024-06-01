@@ -525,7 +525,7 @@ bool CalendarPickerPattern::HandleYearKeyWaitingEvent(
     if (yearPrefixZeroCount_ > 0 && yearPrefixZeroCount_ < YEAR_LENTH - 1 && number == 0 &&
         yearEnterCount_ == yearPrefixZeroCount_ + 1) {
         yearPrefixZeroCount_++;
-        PostTaskToUI(std::move(zeroStartTask), "ArkUICalendarPickerYearZeroStart");
+        PostTaskToUI(std::move(zeroStartTask), "ArkUICalendarPickerYearKeyWaitingZeroStart");
         return true;
     } else if (yearPrefixZeroCount_ >= YEAR_LENTH - 1 && number == 0) {
         yearPrefixZeroCount_ = 0;
@@ -542,7 +542,7 @@ bool CalendarPickerPattern::HandleYearKeyWaitingEvent(
     if (yearEnterCount_ < YEAR_LENTH) {
         json->Replace("year", static_cast<int32_t>(newYear));
         SetDate(json->ToString());
-        PostTaskToUI(std::move(task), "ArkUICalendarPickerYearChange");
+        PostTaskToUI(std::move(task), "ArkUICalendarPickerYearKeyWaitingChange");
         return true;
     }
     newYear = std::max(newYear, MIN_YEAR);

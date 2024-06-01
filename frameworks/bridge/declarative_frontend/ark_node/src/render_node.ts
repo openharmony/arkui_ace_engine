@@ -565,8 +565,9 @@ class RenderNode {
   set lengthMetricsUnit(unit: LengthMetricsUnit) {
     if (unit === undefined || unit == null) {
       this.lengthMetricsUnit = LengthMetricsUnit.DEFAULT;
+    } else {
+      this.lengthMetricsUnit = unit;
     }
-    this.lengthMetricsUnit = unit;
   }
   get backgroundColor(): number {
     return this.backgroundColorValue;
@@ -617,7 +618,7 @@ class RenderNode {
     return this.translationValue;
   }
   get lengthMetricsUnit() {
-    return this.lengthMetricsUnit;
+    return this.lengthMetricsUnitValue;
 }
   checkUndefinedOrNullWithDefaultValue<T>(arg: T, defaultValue: T): T {
     if (arg === undefined || arg === null) {

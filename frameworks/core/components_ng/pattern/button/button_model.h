@@ -22,7 +22,7 @@
 #include "core/components_ng/pattern/button/button_request_data.h"
 
 namespace OHOS::Ace {
-class ButtonModel {
+class ACE_FORCE_EXPORT ButtonModel {
 public:
     static ButtonModel* GetInstance();
     virtual ~ButtonModel() = default;

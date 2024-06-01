@@ -82,13 +82,13 @@ void AnimatedImagePlayer::RenderFrame(const int32_t& index)
 #ifdef PREVIEW
             player->successCallback_(player->imageSource_, canvasImage);
         },
-        TaskExecutor::TaskType::UI, "ArkUIImageRenderAnimatedFrame");
+        TaskExecutor::TaskType::UI, "ArkUIImagePlayerRenderAnimatedFrame");
 #else
             taskExecutor->PostTask([callback = player->successCallback_, canvasImage,
                                        source = player->imageSource_] { callback(source, canvasImage); },
                 TaskExecutor::TaskType::UI, "ArkUIImageRenderAnimatedFrameSuccess");
         },
-        TaskExecutor::TaskType::IO, "ArkUIImageRenderAnimatedFrame");
+        TaskExecutor::TaskType::IO, "ArkUIImagePlayerRenderAnimatedFrame");
 #endif
 }
 

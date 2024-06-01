@@ -30,7 +30,7 @@ constexpr int32_t DEFAULT_HOURS_WEST = -8;
 /**
 * The GetMicroTickCount function get current microseconds since the system was started.
 */
-ACE_EXPORT int64_t GetMicroTickCount();
+ACE_FORCE_EXPORT int64_t GetMicroTickCount();
 
 int64_t GetSysTimestamp();
 

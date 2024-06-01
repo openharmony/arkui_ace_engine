@@ -29,7 +29,7 @@ const std::vector<V2::AlignStyle> ALIGN_STYLE = { V2::AlignStyle::LEFT, V2::Alig
 const std::vector<NG::AlignStyle> NG_ALIGN_STYLE = { NG::AlignStyle::LEFT, NG::AlignStyle::RIGHT, NG::AlignStyle::START,
     NG::AlignStyle::END };
 }; // namespace
-class IndexerModel {
+class ACE_FORCE_EXPORT IndexerModel {
 public:
     static IndexerModel* GetInstance();
     virtual ~IndexerModel() = default;

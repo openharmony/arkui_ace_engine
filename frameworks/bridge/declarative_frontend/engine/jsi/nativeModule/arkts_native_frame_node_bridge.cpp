@@ -38,6 +38,13 @@ constexpr double VISIBLE_RATIO_MIN = 0.0;
 constexpr double VISIBLE_RATIO_MAX = 1.0;
 constexpr int32_t INDEX_OF_INTERVAL = 4;
 constexpr int32_t INDEX_OF_OPTION_OF_VISIBLE = 3;
+
+ArkUI_Bool GetIsExpanded(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Int32 index)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> isExpandedArg = runtimeCallInfo->GetCallArgRef(index);
+    return isExpandedArg->IsBoolean() ? isExpandedArg->ToBoolean(vm)->Value() : true;
+}
 } // namespace
 ArkUI_Bool FrameNodeBridge::IsCustomFrameNode(FrameNode* node)
 {
@@ -372,15 +379,18 @@ ArkUINativeModuleValue FrameNodeBridge::ClearChildren(ArkUIRuntimeCallInfo* runt
     GetArkUINodeModifiers()->getFrameNodeModifier()->clearChildren(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
 ArkUINativeModuleValue FrameNodeBridge::GetChildrenCount(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     CHECK_NULL_RETURN(!firstArg.IsNull(), panda::NumberRef::New(vm, 0));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    auto number = GetArkUINodeModifiers()->getFrameNodeModifier()->getChildrenCount(nativeNode);
+    int isExpanded = GetIsExpanded(runtimeCallInfo, 1);
+    auto number = GetArkUINodeModifiers()->getFrameNodeModifier()->getChildrenCount(nativeNode, isExpanded);
     return panda::NumberRef::New(vm, number);
 }
+
 ArkUINativeModuleValue FrameNodeBridge::GetChild(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -389,40 +399,48 @@ ArkUINativeModuleValue FrameNodeBridge::GetChild(ArkUIRuntimeCallInfo* runtimeCa
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     int index = secondArg->ToNumber(vm)->Value();
-    auto nodePtr = GetArkUINodeModifiers()->getFrameNodeModifier()->getChild(nativeNode, index);
+    int isExpanded = GetIsExpanded(runtimeCallInfo, 2);
+    auto nodePtr = GetArkUINodeModifiers()->getFrameNodeModifier()->getChild(nativeNode, index, isExpanded);
     CHECK_NULL_RETURN(nodePtr, panda::JSValueRef::Undefined(vm));
     return FrameNodeBridge::MakeFrameNodeInfo(vm, nodePtr);
 }
+
 ArkUINativeModuleValue FrameNodeBridge::GetFirst(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     CHECK_NULL_RETURN(!firstArg.IsNull(), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    auto nodePtr = GetArkUINodeModifiers()->getFrameNodeModifier()->getFirst(nativeNode);
+    int isExpanded = GetIsExpanded(runtimeCallInfo, 1);
+    auto nodePtr = GetArkUINodeModifiers()->getFrameNodeModifier()->getFirst(nativeNode, isExpanded);
     CHECK_NULL_RETURN(nodePtr, panda::JSValueRef::Undefined(vm));
     return FrameNodeBridge::MakeFrameNodeInfo(vm, nodePtr);
 }
+
 ArkUINativeModuleValue FrameNodeBridge::GetNextSibling(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     CHECK_NULL_RETURN(!firstArg.IsNull(), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    auto nodePtr = GetArkUINodeModifiers()->getFrameNodeModifier()->getNextSibling(nativeNode);
+    int isExpanded = GetIsExpanded(runtimeCallInfo, 1);
+    auto nodePtr = GetArkUINodeModifiers()->getFrameNodeModifier()->getNextSibling(nativeNode, isExpanded);
     CHECK_NULL_RETURN(nodePtr, panda::JSValueRef::Undefined(vm));
     return FrameNodeBridge::MakeFrameNodeInfo(vm, nodePtr);
 }
+
 ArkUINativeModuleValue FrameNodeBridge::GetPreviousSibling(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     CHECK_NULL_RETURN(!firstArg.IsNull(), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    auto nodePtr = GetArkUINodeModifiers()->getFrameNodeModifier()->getPreviousSibling(nativeNode);
+    int isExpanded = GetIsExpanded(runtimeCallInfo, 1);
+    auto nodePtr = GetArkUINodeModifiers()->getFrameNodeModifier()->getPreviousSibling(nativeNode, isExpanded);
     CHECK_NULL_RETURN(nodePtr, panda::JSValueRef::Undefined(vm));
     return FrameNodeBridge::MakeFrameNodeInfo(vm, nodePtr);
 }
+
 ArkUINativeModuleValue FrameNodeBridge::GetParent(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

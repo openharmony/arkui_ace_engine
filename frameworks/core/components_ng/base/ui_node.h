@@ -71,7 +71,7 @@ public:
     virtual void DetachContext(bool recursive = false);
 
     virtual int32_t FrameCount() const;
-
+    virtual int32_t CurrentFrameCount() const;
     virtual RefPtr<LayoutWrapperNode> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false);
 
     // Tree operation start.
@@ -405,8 +405,9 @@ public:
     virtual void FastPreviewUpdateChildDone() {}
     virtual RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false,
         bool addToRenderTree = false);
-    virtual int32_t GetFrameNodeIndex(RefPtr<FrameNode> node);
-
+    virtual RefPtr<UINode> GetFrameChildByIndexWithoutExpanded(uint32_t index);
+    // Get current frameNode index with or without expanded all LazyForEachNode;
+    virtual int32_t GetFrameNodeIndex(RefPtr<FrameNode> node, bool isExpanded = true);
     void SetDebugLine(const std::string& line)
     {
         debugLine_ = line;

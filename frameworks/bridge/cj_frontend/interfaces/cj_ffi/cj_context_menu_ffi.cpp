@@ -26,12 +26,8 @@ extern "C" {
 void FfiOHOSAceFrameworkContextMenuClose()
 {
 #if defined(MULTIPLE_WINDOW_SUPPORTED)
-    if (Container::IsCurrentUseNewPipeline()) {
-        SubwindowManager::GetInstance()->HideMenuNG();
-    } else {
-        SubwindowManager::GetInstance()->CloseMenu();
-    }
-#elif !defined(NG_BUILD)
+    SubwindowManager::GetInstance()->HideMenuNG();
+#endif
     // Close context menu.
     auto container = Container::CurrentSafely();
     if (!container) {
@@ -49,6 +45,5 @@ void FfiOHOSAceFrameworkContextMenuClose()
             }
         },
         TaskExecutor::TaskType::UI, "FfiOHOSAceFrameworkContextMenuClose");
-#endif
 }
 }

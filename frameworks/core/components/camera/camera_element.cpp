@@ -103,7 +103,7 @@ void CameraElement::ReleasePlatformResource()
 #if defined(ENABLE_NATIVE_VIEW)
             texture_->Release();
             // Make sure it's destroyed when it's release task done.
-            platformTaskExecutor.PostTask([texture = texture_]() {}, "ArkUICameraTextureRelease");
+            platformTaskExecutor.PostTask([texture = texture_]() {}, "ArkUICameraTextureReleaseCheck");
 #else
             auto gpuTaskExecutor =
                 SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::GPU);
@@ -117,7 +117,7 @@ void CameraElement::ReleasePlatformResource()
                 }
                 texture->Release();
                 // Make sure it's destroyed when it's release task done.
-                platformTaskExecutor.PostTask([texture]() {}, "ArkUICameraTextureRelease");
+                platformTaskExecutor.PostTask([texture]() {}, "ArkUICameraTextureReleaseCheck");
             }, "ArkUICameraTextureRelease");
 #endif
         }
@@ -587,7 +587,7 @@ void CameraElement::SetMethodCall(const RefPtr<CameraComponent>& cameraComponent
                         if (cameraElement) {
                             cameraElement->TakePhoto(params);
                         }
-                    }, "ArkUICameraTakePhoto");
+                    }, "ArkUICameraControllerTakePhoto");
         });
 #ifdef OHOS_STANDARD_SYSTEM
         cameraController->SetStartRecordImpl(
@@ -608,7 +608,7 @@ void CameraElement::SetMethodCall(const RefPtr<CameraComponent>& cameraComponent
                         if (cameraElement) {
                             cameraElement->CloseRecorder(params);
                         }
-                    }, "ArkUICameraCloseRecorder");
+                    }, "ArkUICameraControllerCloseRecorder");
         });
 #endif
     }
@@ -634,7 +634,7 @@ void CameraElement::InitListener()
                 if (camera) {
                     camera->OnTakePhotoCallBack(result);
                 }
-            }, "ArkUICameraTakePhoto");
+            }, "ArkUICameraTakePhotoCallBack");
     };
     camera_->AddTakePhotoListener(takePhotoListener);
 

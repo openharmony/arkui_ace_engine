@@ -27,47 +27,28 @@ namespace OHOS::Ace {
 namespace Framework {
 bool LoadNativeView(const sptr<NativeView>& view)
 {
-#ifdef NG_BUILD
     return LoadNativeViewNG(view.GetRefPtr());
-#else
-    if (Container::IsCurrentUseNewPipeline()) {
-        return LoadNativeViewNG(view.GetRefPtr());
-    } else {
-        return LoadNativeViewClassic(view.GetRefPtr());
-    }
-#endif
 }
 
 RefPtr<Frontend> LoadAndCreateCJFrontend(bool useNewPipeline)
 {
-#ifdef NG_BUILD
-    return AceType::MakeRefPtr<CJFrontendNG>();
-#else
-    if (useNewPipeline) {
-        return AceType::MakeRefPtr<CJFrontendNG>();
-    } else {
-        return AceType::MakeRefPtr<CJFrontend>();
+    if (!useNewPipeline) {
+        LOGE("only support new pipeline.");
+        return nullptr;
     }
-#endif
+    return AceType::MakeRefPtr<CJFrontendNG>();
 }
 
 extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_CreateCJFrontend(bool useNewPipeline, bool isStageModel)
 {
-    CJFrontendAbstract* frontend_ = nullptr;
-#ifdef NG_BUILD
-    frontend_ = new CJFrontendNG();
-    return frontend_;
-#else
-    if (useNewPipeline) {
-        frontend_ = new CJFrontendNG();
-        frontend_->SetStageModel(isStageModel);
-        return frontend_;
-    } else {
-        frontend_ = new CJFrontend();
-        frontend_->SetStageModel(isStageModel);
-        return frontend_;
+    if (!useNewPipeline) {
+        LOGE("only support new pipeline.");
+        return nullptr;
     }
-#endif
+    CJFrontendAbstract* frontend_ = nullptr;
+    frontend_ = new CJFrontendNG();
+    frontend_->SetStageModel(isStageModel);
+    return frontend_;
 }
 }
 }

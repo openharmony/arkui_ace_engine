@@ -21,7 +21,7 @@
 #include "core/components/common/properties/animation_option.h"
 
 namespace OHOS::Ace {
-class ViewContextModel {
+class ACE_FORCE_EXPORT ViewContextModel {
 public:
     static ViewContextModel* GetInstance();
     virtual ~ViewContextModel() = default;

@@ -23,14 +23,14 @@
 #include "base/utils/noncopyable.h"
 #include "core/animation/page_transition_common.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/stage/stage_pattern.h"
 
 namespace OHOS::Ace::NG {
 class FrameNode;
-class StagePattern;
 class OverlayManager;
 
 // StageManager is the base class for root render node to perform page switch.
-class ACE_EXPORT StageManager : public virtual AceType {
+class ACE_FORCE_EXPORT StageManager : public virtual AceType {
     DECLARE_ACE_TYPE(StageManager, AceType);
 
 public:

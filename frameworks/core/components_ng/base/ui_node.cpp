@@ -853,6 +853,15 @@ int32_t UINode::TotalChildCount() const
     return count;
 }
 
+int32_t UINode::CurrentFrameCount() const
+{
+    int32_t count = 0;
+    for (const auto& child : GetChildren()) {
+        count += child->CurrentFrameCount();
+    }
+    return count;
+}
+
 int32_t UINode::GetChildIndexById(int32_t id)
 {
     int32_t pos = 0;
@@ -1150,22 +1159,32 @@ RefPtr<UINode> UINode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool
     return nullptr;
 }
 
-int32_t UINode::GetFrameNodeIndex(RefPtr<FrameNode> node)
+RefPtr<UINode> UINode::GetFrameChildByIndexWithoutExpanded(uint32_t index)
+{
+    for (const auto& child : GetChildren()) {
+        uint32_t count = static_cast<uint32_t>(child->CurrentFrameCount());
+        if (count > index) {
+            return child->GetFrameChildByIndexWithoutExpanded(index);
+        }
+        index -= count;
+    }
+    return nullptr;
+}
+
+int32_t UINode::GetFrameNodeIndex(RefPtr<FrameNode> node, bool isExpanded)
 {
     int32_t index = 0;
     for (const auto& child : GetChildren()) {
         if (InstanceOf<FrameNode>(child)) {
             if (child == node) {
                 return index;
-            } else {
-                return -1;
             }
         }
-        int32_t childIndex = child->GetFrameNodeIndex(node);
+        int32_t childIndex = child->GetFrameNodeIndex(node, isExpanded);
         if (childIndex >= 0) {
             return index + childIndex;
         }
-        index += child->FrameCount();
+        index += isExpanded ? child->FrameCount() : child->CurrentFrameCount();
     }
     return -1;
 }

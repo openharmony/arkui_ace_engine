@@ -219,6 +219,80 @@ const std::vector<std::string> ACCESSIBILITY_LEVEL_VECTOR = { "auto", "yes", "no
 std::map<std::string, int32_t> ACCESSIBILITY_LEVEL_MAP = { { "auto", 0 }, { "yes", 1 }, { "no", 2 },
     { "no-hide-descendants", 3 } };
 
+std::unordered_map<uint32_t, std::string> ACCESSIBILITY_ROLE_CONVERT_PROPERTY_MAP = {
+    { static_cast<uint32_t>(ARKUI_NODE_CUSTOM), "Custom" },
+    { static_cast<uint32_t>(ARKUI_NODE_TEXT), "Text" },
+    { static_cast<uint32_t>(ARKUI_NODE_SPAN), "Span" },
+    { static_cast<uint32_t>(ARKUI_NODE_IMAGE_SPAN), "ImageSpan" },
+    { static_cast<uint32_t>(ARKUI_NODE_IMAGE), "Image" },
+    { static_cast<uint32_t>(ARKUI_NODE_TOGGLE), "Toggle" },
+    { static_cast<uint32_t>(ARKUI_NODE_LOADING_PROGRESS), "LoadingProgress" },
+    { static_cast<uint32_t>(ARKUI_NODE_TEXT_INPUT), "TextInput" },
+    { static_cast<uint32_t>(ARKUI_NODE_TEXT_AREA), "TextArea" },
+    { static_cast<uint32_t>(ARKUI_NODE_BUTTON), "Button" },
+    { static_cast<uint32_t>(ARKUI_NODE_PROGRESS), "Progress" },
+    { static_cast<uint32_t>(ARKUI_NODE_CHECKBOX), "Checkbox" },
+    { static_cast<uint32_t>(ARKUI_NODE_XCOMPONENT), "Xcomponent" },
+    { static_cast<uint32_t>(ARKUI_NODE_DATE_PICKER), "DatePicker" },
+    { static_cast<uint32_t>(ARKUI_NODE_TIME_PICKER), "TimePicker" },
+    { static_cast<uint32_t>(ARKUI_NODE_TEXT_PICKER), "TextPicker" },
+    { static_cast<uint32_t>(ARKUI_NODE_CALENDAR_PICKER), "CalendarPicker" },
+    { static_cast<uint32_t>(ARKUI_NODE_SLIDER), "Slider" },
+    { static_cast<uint32_t>(ARKUI_NODE_RADIO), "Radio" },
+    { static_cast<uint32_t>(ARKUI_NODE_STACK), "Stack" },
+    { static_cast<uint32_t>(ARKUI_NODE_SWIPER), "Swiper" },
+    { static_cast<uint32_t>(ARKUI_NODE_SCROLL), "Scroll" },
+    { static_cast<uint32_t>(ARKUI_NODE_LIST), "List" },
+    { static_cast<uint32_t>(ARKUI_NODE_LIST_ITEM), "ListItem" },
+    { static_cast<uint32_t>(ARKUI_NODE_LIST_ITEM_GROUP), "ListItemGroup" },
+    { static_cast<uint32_t>(ARKUI_NODE_COLUMN), "Column" },
+    { static_cast<uint32_t>(ARKUI_NODE_ROW), "Row" },
+    { static_cast<uint32_t>(ARKUI_NODE_FLEX), "Flex" },
+    { static_cast<uint32_t>(ARKUI_NODE_REFRESH), "Refresh" },
+    { static_cast<uint32_t>(ARKUI_NODE_WATER_FLOW), "WaterFlow" },
+    { static_cast<uint32_t>(ARKUI_NODE_FLOW_ITEM), "FlowItem" },
+    { static_cast<uint32_t>(ARKUI_NODE_RELATIVE_CONTAINER), "RelativeContainer" },
+    { static_cast<uint32_t>(ARKUI_NODE_GRID), "Grid" },
+    { static_cast<uint32_t>(ARKUI_NODE_GRID_ITEM), "GridItem" },
+};
+
+std::unordered_map<std::string, uint32_t> ACCESSIBILITY_ROLE_CONVERT_NATIVE_MAP = {
+    { "Custom", static_cast<uint32_t>(ARKUI_NODE_CUSTOM) },
+    { "Text", static_cast<uint32_t>(ARKUI_NODE_TEXT) },
+    { "Span", static_cast<uint32_t>(ARKUI_NODE_SPAN) },
+    { "ImageSpan", static_cast<uint32_t>(ARKUI_NODE_IMAGE_SPAN) },
+    { "Image", static_cast<uint32_t>(ARKUI_NODE_IMAGE) },
+    { "Toggle", static_cast<uint32_t>(ARKUI_NODE_TOGGLE) },
+    { "LoadingProgress", static_cast<uint32_t>(ARKUI_NODE_LOADING_PROGRESS) },
+    { "TextInput", static_cast<uint32_t>(ARKUI_NODE_TEXT_INPUT) },
+    { "TextArea", static_cast<uint32_t>(ARKUI_NODE_TEXT_AREA) },
+    { "Button", static_cast<uint32_t>(ARKUI_NODE_BUTTON) },
+    { "Progress", static_cast<uint32_t>(ARKUI_NODE_PROGRESS) },
+    { "Checkbox", static_cast<uint32_t>(ARKUI_NODE_CHECKBOX) },
+    { "Xcomponent", static_cast<uint32_t>(ARKUI_NODE_XCOMPONENT) },
+    { "DatePicker", static_cast<uint32_t>(ARKUI_NODE_DATE_PICKER) },
+    { "TimePicker", static_cast<uint32_t>(ARKUI_NODE_TIME_PICKER) },
+    { "TextPicker", static_cast<uint32_t>(ARKUI_NODE_TEXT_PICKER) },
+    { "CalendarPicker", static_cast<uint32_t>(ARKUI_NODE_CALENDAR_PICKER) },
+    { "Slider", static_cast<uint32_t>(ARKUI_NODE_SLIDER) },
+    { "Radio", static_cast<uint32_t>(ARKUI_NODE_RADIO) },
+    { "Stack", static_cast<uint32_t>(ARKUI_NODE_STACK) },
+    { "Swiper", static_cast<uint32_t>(ARKUI_NODE_SWIPER) },
+    { "Scroll", static_cast<uint32_t>(ARKUI_NODE_SCROLL) },
+    { "List", static_cast<uint32_t>(ARKUI_NODE_LIST) },
+    { "ListItem", static_cast<uint32_t>(ARKUI_NODE_LIST_ITEM) },
+    { "ListItemGroup", static_cast<uint32_t>(ARKUI_NODE_LIST_ITEM_GROUP) },
+    { "Column", static_cast<uint32_t>(ARKUI_NODE_COLUMN) },
+    { "Row", static_cast<uint32_t>(ARKUI_NODE_ROW) },
+    { "Flex", static_cast<uint32_t>(ARKUI_NODE_FLEX) },
+    { "Refresh", static_cast<uint32_t>(ARKUI_NODE_REFRESH) },
+    { "WaterFlow", static_cast<uint32_t>(ARKUI_NODE_WATER_FLOW) },
+    { "FlowItem", static_cast<uint32_t>(ARKUI_NODE_FLOW_ITEM) },
+    { "RelativeContainer", static_cast<uint32_t>(ARKUI_NODE_RELATIVE_CONTAINER) },
+    { "Grid", static_cast<uint32_t>(ARKUI_NODE_GRID) },
+    { "GridItem", static_cast<uint32_t>(ARKUI_NODE_GRID_ITEM) },
+};
+
 void ResetAttributeItem()
 {
     for (int i = 0; i < MAX_ATTRIBUTE_ITEM_LEN; ++i) {
@@ -381,6 +455,26 @@ int32_t UnConvertAnimationDirection(int32_t animationPlayMode)
         return static_cast<int32_t>(ARKUI_ANIMATION_PLAY_MODE_ALTERNATE);
     }
     return animationPlayMode;
+}
+
+std::string ConvertAccessibilityRole(uint32_t nodeTypeInt)
+{
+    std::string nodeTypeString = EMPTY_STR;
+    auto it = ACCESSIBILITY_ROLE_CONVERT_PROPERTY_MAP.find(nodeTypeInt);
+    if (it != ACCESSIBILITY_ROLE_CONVERT_PROPERTY_MAP.end()) {
+        return ACCESSIBILITY_ROLE_CONVERT_PROPERTY_MAP[nodeTypeInt];
+    }
+    return nodeTypeString;
+}
+
+uint32_t UnConvertAccessibilityRole(const std::string& nodeTypeString)
+{
+    uint32_t nodeTypeInt = ERROR_CODE;
+    auto it = ACCESSIBILITY_ROLE_CONVERT_NATIVE_MAP.find(nodeTypeString);
+    if (it != ACCESSIBILITY_ROLE_CONVERT_NATIVE_MAP.end()) {
+        return ACCESSIBILITY_ROLE_CONVERT_NATIVE_MAP[nodeTypeString];
+    }
+    return nodeTypeInt;
 }
 
 bool IsLeapYear(uint32_t year)
@@ -2132,6 +2226,68 @@ void ResetAccessibilityDescription(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getCommonModifier()->resetAccessibilityDescription(node->uiNodeHandle);
+}
+
+int32_t SetAccessibilityActions(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (item->value[0].u32 > 0b11111) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->setAccessibilityActions(
+        node->uiNodeHandle, item->value[0].u32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetAccessibilityActions(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetAccessibilityActions(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetAccessibilityActions(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    g_numberValues[0].u32 = fullImpl->getNodeModifiers()->getCommonModifier()->getAccessibilityActions(
+        node->uiNodeHandle);
+    g_attributeItem.size = REQUIRED_ONE_PARAM;
+    return &g_attributeItem;
+}
+
+int32_t SetAccessibilityRole(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    std::string nodeTypeString = ConvertAccessibilityRole(item->value[0].u32);
+    if (nodeTypeString == EMPTY_STR) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->setAccessibilityRole(
+        node->uiNodeHandle, nodeTypeString.c_str());
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetAccessibilityRole(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetAccessibilityRole(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetAccessibilityRole(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    std::string nodeTypeString = fullImpl->getNodeModifiers()->getCommonModifier()->getAccessibilityRole(
+        node->uiNodeHandle);
+    g_numberValues[0].u32 = UnConvertAccessibilityRole(nodeTypeString);
+    g_attributeItem.size = REQUIRED_ONE_PARAM;
+    return &g_attributeItem;
 }
 
 int32_t SetDefaultFocus(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -12034,8 +12190,8 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetBorderWidthPercent,
         SetBorderRadiusPercent,
         nullptr,
-        nullptr,
-        nullptr,
+        SetAccessibilityActions,
+        SetAccessibilityRole,
         SetAccessibilityState,
         SetAccessibilityValue,
     };
@@ -12137,8 +12293,8 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         GetBorderWidthPercent,
         GetBorderRadiusPercent,
         GetAccessibilityID,
-        nullptr,
-        nullptr,
+        GetAccessibilityActions,
+        GetAccessibilityRole,
         GetAccessibilityState,
         GetAccessibilityValue,
     };
@@ -12244,8 +12400,8 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetBorderWidthPercent,
         ResetBorderRadiusPercent,
         nullptr,
-        nullptr,
-        nullptr,
+        ResetAccessibilityActions,
+        ResetAccessibilityRole,
         ResetAccessibilityState,
         ResetAccessibilityValue,
     };

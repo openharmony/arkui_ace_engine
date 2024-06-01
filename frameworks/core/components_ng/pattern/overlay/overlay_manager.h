@@ -77,7 +77,7 @@ struct GatherNodeChildInfo {
 };
 
 // StageManager is the base class for root render node to perform page switch.
-class ACE_EXPORT OverlayManager : public virtual AceType {
+class ACE_FORCE_EXPORT OverlayManager : public virtual AceType {
     DECLARE_ACE_TYPE(OverlayManager, AceType);
 
 public:
@@ -483,9 +483,9 @@ public:
     void DismissPopup();
 
     void MountGatherNodeToRootNode(const RefPtr<FrameNode>& frameNode,
-        std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo);
+        const std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo);
     void MountGatherNodeToWindowScene(const RefPtr<FrameNode>& frameNode,
-        std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo,
+        const std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo,
         const RefPtr<UINode>& windowScene);
     void RemoveGatherNode();
     void RemoveGatherNodeWithAnimation();

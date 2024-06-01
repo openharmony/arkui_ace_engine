@@ -69,7 +69,7 @@ bool JSLocationButton::ParseComponentStyle(const JSCallbackInfo& info,
             return false;
         }
     } else {
-        bg = BUTTON_TYPE_NULL;
+        bg = static_cast<int32_t>(ButtonType::CAPSULE);
     }
     return true;
 }
@@ -83,10 +83,10 @@ void JSLocationButton::Create(const JSCallbackInfo& info)
         LocationButtonModelNG::GetInstance()->Create(
             static_cast<int32_t>(LocationButtonLocationDescription::CURRENT_LOCATION),
             static_cast<int32_t>(LocationButtonIconStyle::ICON_LINE),
-            static_cast<int32_t>(ButtonType::CAPSULE));
+            static_cast<int32_t>(ButtonType::CAPSULE), false);
     } else {
         LocationButtonModelNG::GetInstance()->Create(static_cast<int32_t>(textDesc),
-            static_cast<int32_t>(iconType), backgroundType);
+            static_cast<int32_t>(iconType), backgroundType, false);
     }
 }
 

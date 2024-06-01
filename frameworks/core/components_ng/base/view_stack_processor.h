@@ -262,10 +262,10 @@ public:
     void Pop();
 
     // pop the last container
-    void PopContainer();
+    ACE_FORCE_EXPORT void PopContainer();
 
     // End of Render function, create component tree and flush modify task.
-    RefPtr<UINode> Finish();
+    ACE_FORCE_EXPORT RefPtr<UINode> Finish();
 
     // Set key to be used for next node on the stack
     void PushKey(const std::string& key);
@@ -330,7 +330,7 @@ public:
     void ImplicitPopBeforeContinue();
 
     // End of Rerender function, flush modifier task.
-    void FlushRerenderTask();
+    ACE_FORCE_EXPORT void FlushRerenderTask();
 
     /**
      * start 'get' access recording
@@ -491,7 +491,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(ViewStackProcessor);
 };
 
-class ACE_EXPORT ScopedViewStackProcessor final {
+class ACE_FORCE_EXPORT ScopedViewStackProcessor final {
 public:
     ScopedViewStackProcessor(int32_t containerId = OHOS::Ace::INSTANCE_ID_UNDEFINED);
     ~ScopedViewStackProcessor();

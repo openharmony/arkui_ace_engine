@@ -25,7 +25,7 @@
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 
-class ACE_EXPORT Inspector {
+class ACE_FORCE_EXPORT Inspector {
 public:
     static RefPtr<FrameNode> GetFrameNodeByKey(const std::string& key);
     static std::string GetInspectorNodeByKey(const std::string& key,

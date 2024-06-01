@@ -29,7 +29,7 @@ struct JsKeyEvent final {
     int32_t deviceId = 0;
 };
 
-class ACE_EXPORT Inspector {
+class ACE_FORCE_EXPORT Inspector {
 public:
     static std::string GetInspectorNodeByKey(const RefPtr<PipelineContext>& context, const std::string& key);
 

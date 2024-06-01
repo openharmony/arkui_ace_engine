@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT RenderStack : public RenderNode {
+class ACE_FORCE_EXPORT RenderStack : public RenderNode {
     DECLARE_ACE_TYPE(RenderStack, RenderNode);
 
 public:
