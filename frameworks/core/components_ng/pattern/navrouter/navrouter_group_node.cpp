@@ -156,7 +156,9 @@ void NavRouterGroupNode::AddNavDestinationToNavigation()
         if (uiNode) {
             navigationPattern->AddOnStateChangeItem(uiNode->GetId(), navRouterEventHub->GetOnStateChange());
         }
+        SetNavigationId(navigationNode, uiNode);
     } else if (navDestination) {
+        SetNavigationId(navigationNode, navDestination);
         auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
         CHECK_NULL_VOID(navDestinationPattern);
         auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
@@ -177,6 +179,18 @@ void NavRouterGroupNode::AddNavDestinationToNavigation()
     if (!navigationPattern->GetNavigationStackProvided()) {
         navigationNode->MarkModifyDone();
         navigationNode->MarkDirtyNode();
+    }
+}
+
+void NavRouterGroupNode::SetNavigationId(const RefPtr<NavigationGroupNode>& navigationNode,
+    const RefPtr<UINode>& node)
+{
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(
+        NavigationGroupNode::GetNavDestinationNode(node));
+    CHECK_NULL_VOID(navDestinationNode);
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    if (navDestinationPattern) {
+        navDestinationPattern->SetNavigationId(navigationNode->GetInspectorId().value_or(""));
     }
 }
 } // namespace OHOS::Ace::NG
