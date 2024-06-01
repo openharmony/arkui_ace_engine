@@ -1092,6 +1092,7 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     if (configurationChange.fontUpdate) {
+        pattern_->OnFontConfigurationUpdate();
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
