@@ -362,6 +362,12 @@ void UIExtensionPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     pipeline->UnregisterSurfacePositionChangedCallback(callbackId_);
 }
 
+void UIExtensionPattern::NotifyWindowMode(OHOS::Rosen::WindowMode mode)
+{
+    CHECK_NULL_VOID(sessionWrapper_);
+    sessionWrapper_->NotifyWindowMode(mode);
+}
+
 void UIExtensionPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
