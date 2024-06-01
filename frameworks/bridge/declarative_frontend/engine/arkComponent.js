@@ -24536,8 +24536,8 @@ class ArkTabsComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, AnimationDurationModifier.identity, AnimationDurationModifier, value);
     return this;
   }
-  animateMode(value) {
-    modifierWithKey(this._modifiersWithKeys, AnimateModeModifier.identity, AnimateModeModifier, value);
+  animationMode(value) {
+    modifierWithKey(this._modifiersWithKeys, AnimationModeModifier.identity, AnimationModeModifier, value);
     return this;
   }
   onChange(event) {
@@ -24714,7 +24714,7 @@ class AnimationDurationModifier extends ModifierWithKey {
   }
 }
 AnimationDurationModifier.identity = Symbol('animationduration');
-class AnimateModeModifier extends ModifierWithKey {
+class AnimationModeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
@@ -24730,7 +24730,7 @@ class AnimateModeModifier extends ModifierWithKey {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
-AnimateModeModifier.identity = Symbol('animateMode');
+AnimationModeModifier.identity = Symbol('animationMode');
 class ScrollableModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

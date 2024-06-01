@@ -690,7 +690,7 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("barGridAlign", &JSTabs::SetBarGridAlign);
     JSClass<JSTabs>::StaticMethod("customContentTransition", &JSTabs::SetCustomContentTransition);
     JSClass<JSTabs>::StaticMethod("onContentWillChange", &JSTabs::SetOnContentWillChange);
-    JSClass<JSTabs>::StaticMethod("animateMode", &JSTabs::SetAnimateMode);
+    JSClass<JSTabs>::StaticMethod("animationMode", &JSTabs::SetAnimateMode);
 
     JSClass<JSTabs>::InheritAndBind<JSContainerBase>(globalObj);
 }

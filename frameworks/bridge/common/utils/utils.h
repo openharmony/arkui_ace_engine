@@ -441,19 +441,6 @@ inline TabBarMode ConvertStrToTabBarMode(const std::string& value)
     return temp == "fixed" ? TabBarMode::FIXED : TabBarMode::SCROLLABLE;
 }
 
-inline TabAnimateMode ConvertStrToAnimateMode(const std::string& value)
-{
-    std::string temp = value;
-    transform(temp.begin(), temp.end(), temp.begin(), tolower);
-    if (temp == "action_first") {
-        return TabAnimateMode::ACTION_FIRST;
-    } else if (temp == "no_animation") {
-        return TabAnimateMode::NO_ANIMATION;
-    } else {
-        return TabAnimateMode::CONTENT_FIRST;
-    }
-}
-
 ACE_FORCE_EXPORT RefPtr<Curve> CreateBuiltinCurve(const std::string& aniTimFunc);
 
 ACE_FORCE_EXPORT RefPtr<Curve> CreateCustomCurve(const std::string& aniTimFunc);
