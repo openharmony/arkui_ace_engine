@@ -523,6 +523,9 @@ void RefreshPattern::FireChangeEvent(const std::string& value)
 
 void RefreshPattern::FireOnOffsetChange(float value)
 {
+    if (NearZero(value)) {
+        value = 0.0f;
+    }
     if (!NearEqual(lastScrollOffset_, value)) {
         auto refreshEventHub = GetEventHub<RefreshEventHub>();
         CHECK_NULL_VOID(refreshEventHub);
@@ -652,6 +655,7 @@ void RefreshPattern::InitOffsetProperty()
             CHECK_NULL_VOID(pattern);
             pattern->scrollOffset_ = scrollOffset;
             pattern->UpdateFirstChildPlacement();
+            pattern->FireOnOffsetChange(scrollOffset);
         };
         offsetProperty_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
         auto host = GetHost();
@@ -777,7 +781,6 @@ void RefreshPattern::SpeedTriggerAnimation(float speed)
     } else if (NearZero(targetOffset)) {
         SwitchToFinish();
     }
-    FireOnOffsetChange(targetOffset);
     ResetAnimation();
     AnimationOption option;
     auto curve = AceType::MakeRefPtr<InterpolatingSpring>(dealSpeed, 1.0f, 228.0f, 30.0f);
@@ -828,7 +831,6 @@ void RefreshPattern::SpeedAnimationFinish()
 
 void RefreshPattern::QuickFirstChildAppear()
 {
-    FireOnOffsetChange(static_cast<float>(refreshOffset_.ConvertToPx()));
     isSourceFromAnimation_ = false;
     UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, GetFollowRatio());
     ResetAnimation();
@@ -841,7 +843,6 @@ void RefreshPattern::QuickFirstChildAppear()
 
 void RefreshPattern::QuickFirstChildDisappear()
 {
-    FireOnOffsetChange(0.0f);
     ResetAnimation();
     AnimationOption option;
     option.SetCurve(DEFAULT_CURVE);
