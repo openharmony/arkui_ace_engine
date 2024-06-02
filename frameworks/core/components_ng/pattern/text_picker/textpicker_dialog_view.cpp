@@ -239,7 +239,7 @@ RefPtr<FrameNode> TextPickerDialogView::OptionsShow(const DialogProperties& dial
         overlayManager->CloseDialog(dialogNode);
     };
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, nullptr);
     float scale = pipeline->GetFontScale();
     if (scale >= LARGE_SCALE && GetIsOverRange(scale)) {
@@ -556,10 +556,11 @@ void TextPickerDialogView::UpdateForwardButtonTextLayoutProperty(
 {
     auto textForwardLayoutProperty = textForwardNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textForwardLayoutProperty);
+    auto pickerThemeOptionStyle = pickerTheme->GetOptionStyle(true, false);
     textForwardLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("stepper.next"));
-    textForwardLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+    textForwardLayoutProperty->UpdateTextColor(pickerThemeOptionStyle.GetTextColor());
     textForwardLayoutProperty->UpdateFontSize(pickerTheme->GetOptionStyle(false, false).GetFontSize());
-    textForwardLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
+    textForwardLayoutProperty->UpdateFontWeight(pickerThemeOptionStyle.GetFontWeight());
 }
 
 void TextPickerDialogView::UpdateBackwardButtonTextLayoutProperty(
@@ -567,10 +568,11 @@ void TextPickerDialogView::UpdateBackwardButtonTextLayoutProperty(
 {
     auto textBackwardLayoutProperty = textBackwardNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textBackwardLayoutProperty);
+    auto pickerThemeOptionStyle = pickerTheme->GetOptionStyle(true, false);
     textBackwardLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("stepper.back"));
-    textBackwardLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+    textBackwardLayoutProperty->UpdateTextColor(pickerThemeOptionStyle.GetTextColor());
     textBackwardLayoutProperty->UpdateFontSize(pickerTheme->GetOptionStyle(false, false).GetFontSize());
-    textBackwardLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
+    textBackwardLayoutProperty->UpdateFontWeight(pickerThemeOptionStyle.GetFontWeight());
 }
 
 void TextPickerDialogView::UpdateConfirmButtonMargin(
@@ -975,7 +977,7 @@ bool TextPickerDialogView::GetIsOverRange(const float& scale)
 RefPtr<FrameNode> TextPickerDialogView::CreateForwardNode(NG::DialogGestureEvent& moveForwardEvent,
     const RefPtr<FrameNode>& textPickerNode, const std::vector<ButtonInfo>& buttonInfos)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     auto buttonForwardNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
@@ -1007,7 +1009,7 @@ RefPtr<FrameNode> TextPickerDialogView::CreateForwardNode(NG::DialogGestureEvent
 
     UpdateButtonForwardLayoutProperty(buttonForwardNode, pipeline);
     
-    auto buttonForwardRenderContext = buttonForwardNode->GetRenderContext();
+    const auto& buttonForwardRenderContext = buttonForwardNode->GetRenderContext();
     buttonForwardRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     auto buttonForwardLayoutProperty = buttonForwardNode->GetLayoutProperty<ButtonLayoutProperty>();
     UpdateButtonStyles(buttonInfos, ACCEPT_BUTTON_INDEX, buttonForwardLayoutProperty, buttonForwardRenderContext);
@@ -1020,7 +1022,7 @@ RefPtr<FrameNode> TextPickerDialogView::CreateForwardNode(NG::DialogGestureEvent
 RefPtr<FrameNode> TextPickerDialogView::CreateBackwardNode(NG::DialogGestureEvent& moveBackwardEvent,
     const RefPtr<FrameNode>& textPickerNode, const std::vector<ButtonInfo>& buttonInfos)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     auto buttonBackwardNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
@@ -1052,7 +1054,7 @@ RefPtr<FrameNode> TextPickerDialogView::CreateBackwardNode(NG::DialogGestureEven
 
     UpdateButtonBackwardLayoutProperty(buttonBackwardNode, pipeline);
     
-    auto buttonBackwardRenderContext = buttonBackwardNode->GetRenderContext();
+    const auto& buttonBackwardRenderContext = buttonBackwardNode->GetRenderContext();
     buttonBackwardRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     auto buttonBackwardLayoutProperty = buttonBackwardNode->GetLayoutProperty<ButtonLayoutProperty>();
     UpdateButtonStyles(buttonInfos, CANCEL_BUTTON_INDEX, buttonBackwardLayoutProperty, buttonBackwardRenderContext);

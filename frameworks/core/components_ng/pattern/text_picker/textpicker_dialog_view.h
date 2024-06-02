@@ -51,15 +51,13 @@ public:
     static RefPtr<FrameNode> CreateButtonNode(const RefPtr<FrameNode>& frameNode,
         const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, NG::DialogTextEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent, GestureEventFunc callback);
-    static RefPtr<FrameNode> CreateAgingButtonNode(
-        RefPtr<FrameNode>& textPickerNode,
+    static RefPtr<FrameNode> CreateAgingButtonNode(RefPtr<FrameNode>& textPickerNode,
         const std::vector<ButtonInfo>& buttonInfos,
         std::map<std::string, NG::DialogTextEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent>dialogCancelEvent,
         std::map<std::string, NG::DialogGestureEvent>dialogMoveForwardEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogMoveBackwardEvent,
-        GestureEventFunc closeCallback,
-        GestureEventFunc nextCallBack, GestureEventFunc previousCallBack);
+        GestureEventFunc closeCallback, GestureEventFunc nextCallBack, GestureEventFunc previousCallBack);
     static RefPtr<FrameNode> CreateDividerNode(const RefPtr<FrameNode>& dateNode);
     static RefPtr<FrameNode> CreateConfirmNode(const RefPtr<FrameNode>& dateNode,
         const RefPtr<FrameNode>& textPickerNode, const std::vector<ButtonInfo>& buttonInfos, DialogEvent& acceptEvent);
