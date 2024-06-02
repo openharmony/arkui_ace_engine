@@ -335,10 +335,10 @@ bool ButtonLayoutAlgorithm::NeedAgingMeasure(LayoutWrapper* layoutWrapper)
             NearEqual(fontScale, buttonTheme->GetMaxFontSizeScale()))) {
         return false;
     }
-    
-    float adaptOldPadding = buttonTheme->GetAgingNormalPadding().ConvertToPx() * 2.0f;
+
+    float agingPadding = buttonTheme->GetAgingNormalPadding().ConvertToPx() * 2.0f;
     if (buttonLayoutProperty->HasControlSize() && buttonLayoutProperty->GetControlSize() == ControlSize::SMALL) {
-        adaptOldPadding = buttonTheme->GetAgingSmallPadding().ConvertToPx() * 2.0f;
+        agingPadding = buttonTheme->GetAgingSmallPadding().ConvertToPx() * 2.0f;
     }
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
@@ -349,9 +349,9 @@ bool ButtonLayoutAlgorithm::NeedAgingMeasure(LayoutWrapper* layoutWrapper)
         auto childGeometryNode = childWrapper->GetGeometryNode();
         CHECK_NULL_RETURN(childGeometryNode, false);
         auto childFrameSize = childGeometryNode->GetContentSize();
-        frameSize.SetHeight(childFrameSize.Height() + adaptOldPadding);
+        frameSize.SetHeight(childFrameSize.Height() + agingPadding);
     } else {
-        frameSize.SetHeight(frameSize.Height() + adaptOldPadding);
+        frameSize.SetHeight(frameSize.Height() + agingPadding);
     }
     geometryNode->SetFrameSize(frameSize);
     HandleBorderRadius(layoutWrapper);
