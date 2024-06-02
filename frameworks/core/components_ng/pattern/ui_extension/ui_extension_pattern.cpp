@@ -158,7 +158,7 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
     UIEXT_LOGI("The ability KeyAsync %{public}d, shouldCallSystem: %{public}d.",
         isKeyAsync_, shouldCallSystem);
     MountPlaceholderNode();
-    sessionWrapper_->CreateSession(want, isAsyncModalBinding_, shouldCallSystem);
+    sessionWrapper_->CreateSession(want, isAsyncModalBinding_);
     NotifyForeground();
 }
 
