@@ -117,9 +117,6 @@ void TextPattern::OnAttachToFrameNode()
             host->GetRenderContext()->SetClipToFrame(true);
         }
     }
-    if (host->GetTag() != V2::RICH_EDITOR_ETS_TAG) {
-        host->GetRenderContext()->SetUsingContentRectForRenderFrame(true, true);
-    }
     InitSurfaceChangedCallback();
     InitSurfacePositionChangedCallback();
     pipeline->AddWindowStateChangedCallback(host->GetId());
