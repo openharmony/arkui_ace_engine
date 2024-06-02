@@ -103,7 +103,7 @@ napi_value UdmfClientImpl::TransformSummary(std::map<std::string, int64_t>& summ
 
 int32_t UdmfClientImpl::SetData(const RefPtr<UnifiedData>& unifiedData, std::string& key)
 {
-    auto client = UDMF::UdmfClient::GetInstance();
+    auto& client = UDMF::UdmfClient::GetInstance();
     UDMF::CustomOption udCustomOption;
     udCustomOption.intention = UDMF::Intention::UD_INTENTION_DRAG;
     auto udData = AceType::DynamicCast<UnifiedDataImpl>(unifiedData);
@@ -114,7 +114,7 @@ int32_t UdmfClientImpl::SetData(const RefPtr<UnifiedData>& unifiedData, std::str
 
 int32_t UdmfClientImpl::GetData(const RefPtr<UnifiedData>& unifiedData, const std::string& key)
 {
-    auto client = UDMF::UdmfClient::GetInstance();
+    auto& client = UDMF::UdmfClient::GetInstance();
     UDMF::QueryOption queryOption;
     queryOption.key = key;
     auto udData = AceType::DynamicCast<UnifiedDataImpl>(unifiedData);
@@ -125,7 +125,7 @@ int32_t UdmfClientImpl::GetData(const RefPtr<UnifiedData>& unifiedData, const st
 
 int32_t UdmfClientImpl::GetSummary(std::string& key, std::map<std::string, int64_t>& summaryMap)
 {
-    auto client = UDMF::UdmfClient::GetInstance();
+    auto& client = UDMF::UdmfClient::GetInstance();
     UDMF::Summary summary;
     UDMF::QueryOption queryOption;
     queryOption.key = key;
@@ -136,7 +136,7 @@ int32_t UdmfClientImpl::GetSummary(std::string& key, std::map<std::string, int64
 
 bool UdmfClientImpl::GetRemoteStatus(std::string& key)
 {
-    auto client = UDMF::UdmfClient::GetInstance();
+    auto& client = UDMF::UdmfClient::GetInstance();
     bool isRemoteData = false;
     UDMF::QueryOption queryOption;
     queryOption.key = key;
