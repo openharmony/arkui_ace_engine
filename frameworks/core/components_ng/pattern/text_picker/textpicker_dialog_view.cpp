@@ -242,11 +242,7 @@ RefPtr<FrameNode> TextPickerDialogView::OptionsShow(const DialogProperties& dial
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     float scale = pipeline->GetFontScale();
-    if (scale == LARGE_SCALE && GetIsOverRange(scale)) {
-        dialogNode = SeparatedOptionsShow(contentColumn, textPickerNode, buttonInfos, settingData,
-            dialogEvent, dialogCancelEvent, scale, closeCallBack, dialogNode);
-        return dialogNode;
-    } else if (scale > LARGE_SCALE && GetIsOverRange(scale)) {
+    if (scale >= LARGE_SCALE && GetIsOverRange(scale)) {
         dialogNode = SeparatedOptionsShow(contentColumn, textPickerNode, buttonInfos, settingData,
             dialogEvent, dialogCancelEvent, scale, closeCallBack, dialogNode);
         return dialogNode;
