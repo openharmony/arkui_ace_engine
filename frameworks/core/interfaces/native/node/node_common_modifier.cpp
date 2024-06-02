@@ -1716,13 +1716,17 @@ ArkUIBlurStyleOptionType GetBackgroundBlurStyle(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, styleOptionType);
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, styleOptionType);
-    if (!renderContext->GetBackBlurStyle().has_value()) {
+    auto backBlurStyleOption = renderContext->GetBackBlurStyle();
+    if (!backBlurStyleOption.has_value()) {
         return styleOptionType;
     }
-    styleOptionType.blurStyle = static_cast<int32_t>(renderContext->GetBackBlurStyle()->blurStyle);
-    styleOptionType.colorMode = static_cast<int32_t>(renderContext->GetBackBlurStyle()->colorMode);
-    styleOptionType.adaptiveColor = static_cast<int32_t>(renderContext->GetBackBlurStyle()->adaptiveColor);
-    styleOptionType.scale = renderContext->GetBackBlurStyle()->scale;
+    styleOptionType.blurStyle = static_cast<int32_t>(backBlurStyleOption->blurStyle);
+    styleOptionType.colorMode = static_cast<int32_t>(backBlurStyleOption->colorMode);
+    styleOptionType.adaptiveColor = static_cast<int32_t>(backBlurStyleOption->adaptiveColor);
+    styleOptionType.scale = backBlurStyleOption->scale;
+    auto greyScaleVector = backBlurStyleOption->blurOption.grayscale;
+    styleOptionType.greyScaleStart = greyScaleVector.size() > NUM_0 ? greyScaleVector[NUM_0] : 0.0f;
+    styleOptionType.greyScaleEnd = greyScaleVector.size() > NUM_1 ? greyScaleVector[NUM_1] : 0.0f;
     return styleOptionType;
 }
 
