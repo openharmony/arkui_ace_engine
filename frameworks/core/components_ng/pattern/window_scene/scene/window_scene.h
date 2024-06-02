@@ -59,9 +59,10 @@ private:
 
     bool destroyed_ = false;
     OHOS::Rosen::WindowMode initWindowMode_;
-    ACE_DISALLOW_COPY_AND_MOVE(WindowScene);
-    Rosen::WSRect oldWindowRect_ = {0, 0, 0, 0};
+    Rosen::WSRect lastWindowRect_;
     CancelableCallback<void()> deleteBlankTask_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(WindowScene);
 };
 } // namespace OHOS::Ace::NG
 

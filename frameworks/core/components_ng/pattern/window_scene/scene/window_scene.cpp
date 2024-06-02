@@ -34,7 +34,7 @@ const std::map<std::string, Rosen::RSAnimationTimingCurve> curveMap {
     { "spring",             Rosen::RSAnimationTimingCurve::SPRING             },
     { "interactiveSpring",  Rosen::RSAnimationTimingCurve::INTERACTIVE_SPRING },
 };
-const uint32_t CLEANBLANKDELAYTIME  = 1000;
+const uint32_t CLEAN_BLANK_DELAY_TIME  = 1000;
 } // namespace
 
 WindowScene::WindowScene(const sptr<Rosen::Session>& session)
@@ -53,16 +53,16 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
     callback_ = [weakThis = WeakClaim(this), weakSession = wptr(session_)]() {
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
-        auto session = weakSession.promote();
-        CHECK_NULL_VOID(session);
-        session->SetBufferAvailable(true);
         if (self->blankNode_) {
             self->BufferAvailableCallbackForBlank();
             self->deleteBlankTask_.Cancel();
         } else {
+            auto session = weakSession.promote();
+            CHECK_NULL_VOID(session);
+            session->SetBufferAvailable(true);
             self->BufferAvailableCallback();
+            Rosen::SceneSessionManager::GetInstance().NotifyCompleteFirstFrameDrawing(session->GetPersistentId());
         }
-        Rosen::SceneSessionManager::GetInstance().NotifyCompleteFirstFrameDrawing(session->GetPersistentId());
     };
 }
 
@@ -145,8 +145,8 @@ void WindowScene::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(session_);
     session_->SetUINodeId(0);
     session_->SetAttachState(false, initWindowMode_);
-    oldWindowRect_ = session_->GetSessionRect();
-    session_->SetSessionOldRect(oldWindowRect_);
+    lastWindowRect_ = session_->GetSessionRect();
+    session_->SetSessionLastRect(lastWindowRect_);
     CHECK_NULL_VOID(frameNode);
     if (IsMainWindow()) {
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "[WMSMain] id: %{public}d, node id: %{public}d, name: %{public}s",
@@ -391,8 +391,8 @@ void WindowScene::DisposeSnapShotAndBlankNode()
     auto frameSize = geometryNode->GetFrameSize();
     AddChild(host, contentNode_, contentNodeName_);
     surfaceNode->SetBufferAvailableCallback(callback_);
-    if (NearEqual(frameSize.Width(), session_->GetSessionOldRect().width_) &&
-        NearEqual(frameSize.Height(), session_->GetSessionOldRect().height_)) {
+    if (NearEqual(frameSize.Width(), session_->GetSessionLastRect().width_) &&
+        NearEqual(frameSize.Height(), session_->GetSessionLastRect().height_)) {
         return;
     }
     RemoveChild(host, snapshotNode_, snapshotNodeName_);
@@ -406,8 +406,8 @@ void WindowScene::DisposeSnapShotAndBlankNode()
 
 void WindowScene::OnConnect()
 {
-    oldWindowRect_ = session_->GetSessionRect();
-    session_->SetSessionOldRect(oldWindowRect_);
+    lastWindowRect_ = session_->GetSessionRect();
+    session_->SetSessionLastRect(lastWindowRect_);
     auto uiTask = [weakThis = WeakClaim(this)]() {
         ACE_SCOPED_TRACE("WindowScene::OnConnect");
         auto self = weakThis.Upgrade();
@@ -496,8 +496,8 @@ void WindowScene::OnDisconnect()
 
 void WindowScene::OnBackground()
 {
-    oldWindowRect_ = session_->GetSessionRect();
-    session_->SetSessionOldRect(oldWindowRect_);
+    lastWindowRect_ = session_->GetSessionRect();
+    session_->SetSessionLastRect(lastWindowRect_);
     WindowPattern::OnBackground();
 }
 
@@ -511,15 +511,15 @@ bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         CHECK_NULL_RETURN(host, false);
         CHECK_NULL_RETURN(dirty, false);
         auto size = dirty->GetGeometryNode()->GetFrameSize();
-        if (!(NearEqual(size.Width(), session_->GetSessionOldRect().width_) &&
-            NearEqual(size.Height(), session_->GetSessionOldRect().height_)) && snapshotNode_) {
+        if (!(NearEqual(size.Width(), session_->GetSessionLastRect().width_) &&
+            NearEqual(size.Height(), session_->GetSessionLastRect().height_)) && snapshotNode_) {
             RemoveChild(host, snapshotNode_, snapshotNodeName_);
             snapshotNode_.Reset();
-            oldWindowRect_ = {
+            lastWindowRect_ = {
                 .width_ = size.Width(),
                 .height_ = size.Height()
             };
-            session_->SetSessionOldRect(oldWindowRect_);
+            session_->SetSessionLastRect(lastWindowRect_);
             auto context = AceType::DynamicCast<RosenRenderContext>(contentNode_->GetRenderContext());
             CHECK_NULL_RETURN(context, false);
             auto rsNode = context->GetRSNode();
@@ -565,6 +565,6 @@ void WindowScene::CleanBlankNode()
         }
     });
     taskExecutor->PostDelayedTask(
-        deleteBlankTask_, TaskExecutor::TaskType::UI, CLEANBLANKDELAYTIME, "ArkUICleanBlankNode");
+        deleteBlankTask_, TaskExecutor::TaskType::UI, CLEAN_BLANK_DELAY_TIME, "ArkUICleanBlankNode");
 }
 } // namespace OHOS::Ace::NG
