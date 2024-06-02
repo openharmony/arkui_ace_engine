@@ -88,11 +88,14 @@ float ParagraphManager::GetTextWidthIncludeIndent() const
     return res;
 }
 
-size_t ParagraphManager::GetLineCount() const
+size_t ParagraphManager::GetLineCount(bool isSkipEmptyParagraphs) const
 {
     size_t count = 0;
     for (auto &&info : paragraphs_) {
-        count += info.paragraph->GetLineCount();
+        if (!isSkipEmptyParagraphs ||
+            (!NonPositive(info.paragraph->GetLongestLine()) && !NonPositive(info.paragraph->GetHeight()))) {
+            count += info.paragraph->GetLineCount();
+        }
     }
     return count;
 }
