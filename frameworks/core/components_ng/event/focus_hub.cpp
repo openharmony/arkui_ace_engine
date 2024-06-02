@@ -999,7 +999,9 @@ void FocusHub::SwitchFocus(const RefPtr<FocusHub>& focusNode)
         focusNodeNeedBlur ? focusNodeNeedBlur->GetFrameId() : -1, focusNode->GetFrameName().c_str(),
         focusNode->GetFrameId());
     if (IsCurrentFocus()) {
-        GetFocusManager()->UpdateCurrentFocus(Claim(this));
+        auto focusManger = GetFocusManager();
+        CHECK_NULL_VOID(focusManger);
+        focusManger->UpdateCurrentFocus(Claim(this));
         if (focusNodeNeedBlur && focusNodeNeedBlur != focusNode) {
             focusNodeNeedBlur->LostFocus();
         }
