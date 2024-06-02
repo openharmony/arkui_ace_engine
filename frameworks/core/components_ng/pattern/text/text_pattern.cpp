@@ -3394,12 +3394,19 @@ bool TextPattern::DidExceedMaxLines() const
 
 TextLineMetrics TextPattern::GetLineMetrics(int32_t lineNumber)
 {
+    CHECK_NULL_RETURN(pManager_, TextLineMetrics());
     if (lineNumber < 0 || lineNumber > GetLineCount()) {
         TAG_LOGI(AceLogTag::ACE_TEXT, "GetLineMetrics failed, lineNumber not between 0 and max lines:%{public}d",
             lineNumber);
         return TextLineMetrics();
     }
-    return pManager_->GetLineMetrics(lineNumber);
+    auto lineMetrics = pManager_->GetLineMetrics(lineNumber);
+    RectF textContentRect = contentRect_;
+    textContentRect.SetTop(contentRect_.GetY() - std::min(baselineOffset_, 0.0f));
+    lineMetrics.x += textContentRect.GetX();
+    lineMetrics.y += textContentRect.GetY();
+    lineMetrics.baseline += textContentRect.GetY();
+    return lineMetrics;
 }
 
 Offset TextPattern::ConvertLocalOffsetToParagraphOffset(const Offset& offset)
