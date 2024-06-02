@@ -337,7 +337,7 @@ ParagraphStyle MultipleParagraphLayoutAlgorithm::GetParagraphStyle(
         .align = textStyle.GetTextAlign(),
         .maxLines = static_cast<int32_t>(textStyle.GetMaxLines()) < 0 ? UINT32_MAX : textStyle.GetMaxLines(),
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
-        .wordBreak = textStyle.GetWordBreak(),
+        .wordBreak = textStyle.GetWordBreak(), // 字体引擎
         .ellipsisMode = textStyle.GetEllipsisMode(),
         .textOverflow = textStyle.GetTextOverflow(),
         .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
@@ -380,6 +380,22 @@ bool MultipleParagraphLayoutAlgorithm::ParagraphReLayout(const LayoutConstraintF
     ACE_TEXT_SCOPED_TRACE("ParagraphReLayout");
     // Confirmed specification: The width of the text paragraph covers the width of the component, so this code is
     // generally not allowed to be modified
+    // constraint 500  fontSize 30  ---> typography 200
+    // typography 200 重新layout
+
+    // paragraphManager_->GetTextWidthIncludeIndent() 200
+    // paragraphManager_->GetMaxWidth() 500
+    // GetMaxMeasureSize(contentConstraint).Width() 500
+
+    // yoga增加一个跳过measure过程
+    // Constraint 202
+    // 属性不变化
+    // typography 200
+
+    // flexGrow flexShrink stretch
+    // 500：200 200（flexGrow 1）
+    // constraints 会发生变化
+    // 
     CHECK_NULL_RETURN(paragraphManager_, false);
     auto paragraphs = paragraphManager_->GetParagraphs();
     float paragraphNewWidth =
@@ -392,6 +408,11 @@ bool MultipleParagraphLayoutAlgorithm::ParagraphReLayout(const LayoutConstraintF
             auto paragraph = pIter->paragraph;
             CHECK_NULL_RETURN(paragraph, false);
             if (!NearEqual(paragraphNewWidth, paragraph->GetMaxWidth())) {
+                // 重新layout
+                // paragraphNewWidth 500
+                // OH_Drawing_TypographyLayout(500)
+                // paragraphNewWidth 500 -> 200
+                // paragraph->Layout(500);
                 paragraph->Layout(std::ceil(paragraphNewWidth));
             }
         }
@@ -657,6 +678,7 @@ void MultipleParagraphLayoutAlgorithm::ApplyIndent(
     paragraph->SetIndents(indents);
 }
 
+// Symbol()
 void MultipleParagraphLayoutAlgorithm::UpdateSymbolSpanEffect(
     RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph, const std::list<RefPtr<SpanItem>>& spans)
 {

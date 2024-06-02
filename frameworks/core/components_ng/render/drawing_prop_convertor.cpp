@@ -234,6 +234,11 @@ RSTextStyle ToRSTextStyle(const RefPtr<PipelineBase>& context, const TextStyle& 
     rsTextStyle.fontWeight = ToRSFontWeight(textStyle.GetFontWeight());
     rsTextStyle.fontStyle = static_cast<RSFontStyle>(textStyle.GetFontStyle());
     rsTextStyle.baseline = static_cast<RSTextBaseline>(textStyle.GetTextBaseline());
+    // 保证fontFamily生效
+    // 1. 有这个ttf文件
+    // 2. 应用要把这个ttf注册到引擎中
+    // 3. 转换
+    // TS: fontRegister C-API: FontRegister
     rsTextStyle.fontFamilies = textStyle.GetFontFamilies();
 #endif
     if (textStyle.GetTextOverflow() == TextOverflow::ELLIPSIS) {

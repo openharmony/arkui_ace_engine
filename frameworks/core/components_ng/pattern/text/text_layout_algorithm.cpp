@@ -121,7 +121,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     if (textStyle.GetTextOverflow() == TextOverflow::MARQUEE) { // create a paragraph with all text in 1 line
         return BuildTextRaceParagraph(textStyle, textLayoutProperty, contentConstraint, layoutWrapper);
     }
-
+    // 属性字符串 SpannableString
     if (isSpanStringMode_) {
         if (spanStringHasMaxLines_) {
             textStyle.SetMaxLines(UINT32_MAX);
@@ -165,9 +165,11 @@ bool TextLayoutAlgorithm::AddPropertiesAndAnimations(TextStyle& textStyle,
 {
     bool result = false;
     switch (textLayoutProperty->GetHeightAdaptivePolicyValue(TextHeightAdaptivePolicy::MAX_LINES_FIRST)) {
+        // RN如果不设置对应的adjustFontSizeToFit
         case TextHeightAdaptivePolicy::MAX_LINES_FIRST:
             result = BuildParagraph(textStyle, textLayoutProperty, contentConstraint, layoutWrapper);
             break;
+        // adjustFontSizeToFit minFontSize
         case TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST:
             result = BuildParagraphAdaptUseMinFontSize(textStyle, textLayoutProperty, contentConstraint, layoutWrapper);
             break;
@@ -292,12 +294,16 @@ bool TextLayoutAlgorithm::CreateParagraph(
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, false);
     pattern->ClearCustomSpanPlaceholderInfo();
+    // privacySensitive
+    // password(TextInput)
     if (pattern->IsSensitiveEnalbe()) {
         UpdateSensitiveContent(content);
     }
     auto useExternalParagraph = pattern->GetExternalParagraph() && !pattern->NeedShowAIDetect();
     auto externalParagraphStyle = pattern->GetExternalParagraphStyle();
     // default paragraph style
+    // 段落样式
+    // dataDectorType
     auto paraStyle = GetParagraphStyle(textStyle, content, layoutWrapper);
     if (pattern->GetExternalParagraph()) {
         if (!useExternalParagraph && externalParagraphStyle) {
@@ -307,12 +313,17 @@ bool TextLayoutAlgorithm::CreateParagraph(
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) || isSpanStringMode_) {
         paraStyle.fontSize = textStyle.GetFontSize().ConvertToPx();
     }
+    // 整段缩进
     paraStyle.leadingMarginAlign = Alignment::CENTER;
 
     // SymbolGlyph
+    // 类emoji 特殊的一个unicode
+    // Symbol组件
     if (frameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
         return UpdateSymbolTextStyle(textStyle, paraStyle, layoutWrapper, frameNode);
     }
+    // Text { Span("dasdaas") Span("dsffds") }
+    // Text("sadadsdada")
     if (spans_.empty() || useExternalParagraph) {
         // only use for text.
         return UpdateSingleParagraph(layoutWrapper, paraStyle, textStyle, content, maxWidth);
@@ -381,6 +392,9 @@ bool TextLayoutAlgorithm::CreateParagraphAndLayout(const TextStyle& textStyle, c
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool needLayout)
 {
     ACE_TEXT_SCOPED_TRACE("CreateParagraphAndLayout");
+    // 布局约束
+    // attributedstring
+    // 段落属性
     auto maxSize = MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(contentConstraint);
     if (!CreateParagraph(textStyle, content, layoutWrapper, maxSize.Width())) {
         return false;
@@ -390,6 +404,7 @@ bool TextLayoutAlgorithm::CreateParagraphAndLayout(const TextStyle& textStyle, c
     for (auto pIter = paragraphInfo.begin(); pIter != paragraphInfo.end(); pIter++) {
         auto paragraph = pIter->paragraph;
         CHECK_NULL_RETURN(paragraph, false);
+        // Layout
         paragraph->Layout(maxSize.Width());
     }
     return true;
@@ -404,6 +419,8 @@ OffsetF TextLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper)
 bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::string& content,
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
+    // Text().maxFontSize(20).minFontSize(4)
+    // Typography calculate
     ACE_TEXT_SCOPED_TRACE("TextLayoutAlgorithm::AdaptMinTextSize");
     double maxFontSize = 0.0;
     double minFontSize = 0.0;
@@ -468,6 +485,7 @@ bool TextLayoutAlgorithm::UpdateSingleParagraph(LayoutWrapper* layoutWrapper, Pa
     CHECK_NULL_RETURN(pattern, false);
     auto externalParagraph = pattern->GetExternalParagraph();
     RefPtr<Paragraph> paragraph;
+    // 是否复用开发者的typography
     if (externalParagraph) {
         paragraph = Paragraph::Create(externalParagraph.value());
     } else {
@@ -476,6 +494,7 @@ bool TextLayoutAlgorithm::UpdateSingleParagraph(LayoutWrapper* layoutWrapper, Pa
     CHECK_NULL_RETURN(paragraph, false);
     auto textStyleTmp = textStyle;
     textStyleTmp.ResetTextBaseline();
+    // pushStyle
     paragraph->PushStyle(textStyleTmp);
     if (pattern->NeedShowAIDetect()) {
         UpdateParagraphForAISpan(textStyle, layoutWrapper, paragraph);
@@ -486,9 +505,11 @@ bool TextLayoutAlgorithm::UpdateSingleParagraph(LayoutWrapper* layoutWrapper, Pa
         } else {
             auto value = content;
             StringUtils::TransformStrCase(value, static_cast<int32_t>(textStyle.GetTextCase()));
+            // add text
             paragraph->AddText(StringUtils::Str8ToStr16(value));
         }
     }
+    // build
     paragraph->Build();
     ApplyIndent(paraStyle, paragraph, maxWidth);
     paragraphManager_->AddParagraph({ .paragraph = paragraph,
