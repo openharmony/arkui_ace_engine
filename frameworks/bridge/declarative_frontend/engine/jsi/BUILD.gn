@@ -127,7 +127,11 @@ if (!is_arkui_x) {
   }
 }
 
-abc_sources = [ "stateMgmt" ]
+if (!is_arkui_x) {
+  abc_sources = [ "stateMgmt" ]
+} else {
+  abc_sources = []
+}
 
 foreach(item, abc_sources) {
   ohos_prebuilt_etc("copy_" + item + "_abc") {
