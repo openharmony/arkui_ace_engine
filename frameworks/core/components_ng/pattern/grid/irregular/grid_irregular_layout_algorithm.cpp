@@ -115,10 +115,7 @@ void GridIrregularLayoutAlgorithm::Init(const RefPtr<GridLayoutProperty>& props)
         crossLens_.push_back(crossSize);
     }
 
-    if (res.second) {
-        // compress, no more gaps
-        crossGap_ = 0.0f;
-    }
+    crossGap_ = res.second;
 
     info.crossCount_ = static_cast<int32_t>(crossLens_.size());
     CheckForReset();

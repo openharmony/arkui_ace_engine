@@ -124,7 +124,7 @@ void WaterFlowLayoutSW::Init(const SizeF& frameSize)
 
     mainLen_ = frameSize.MainSize(axis_);
     float crossSize = frameSize.CrossSize(axis_);
-    std::pair<std::vector<double>, bool> cross;
+    std::pair<std::vector<double>, double> cross;
     auto rowsTemplate = props->GetRowsTemplate().value_or("1fr");
     auto columnsTemplate = props->GetColumnsTemplate().value_or("1fr");
     if (axis_ == Axis::VERTICAL) {
@@ -135,9 +135,7 @@ void WaterFlowLayoutSW::Init(const SizeF& frameSize)
     if (cross.first.empty()) {
         cross.first = { crossSize };
     }
-    if (cross.second) {
-        crossGap_ = 0.0f;
-    }
+    crossGap_ = cross.second;
 
     for (const auto& len : cross.first) {
         itemCrossSize_.push_back(static_cast<float>(len));
