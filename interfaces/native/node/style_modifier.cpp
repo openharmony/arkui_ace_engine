@@ -4089,7 +4089,9 @@ void ResetPlaceholderColor(ArkUI_NodeHandle node)
 
 int32_t SetTextInputPlaceholderFont(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    // already check in entry point.
+    if (item == nullptr) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto* fullImpl = GetFullImpl();
     struct ArkUIResourceLength size = { 16.0, GetDefaultUnit(node, UNIT_FP) };
     int weight = ARKUI_FONT_WEIGHT_NORMAL;
@@ -5593,6 +5595,9 @@ int32_t SetListScrollToIndex(ArkUI_NodeHandle node, const ArkUI_AttributeItem* i
 
 int32_t SetTextAreaPlaceholderFont(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
+    if (item == nullptr) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto* fullImpl = GetFullImpl();
     struct ArkUIResourceLength size = { 16.0, GetDefaultUnit(node, UNIT_FP) };
     int weight = ARKUI_FONT_WEIGHT_NORMAL;
@@ -5813,7 +5818,7 @@ void ResetTextAreaSelectionMenuHidden(ArkUI_NodeHandle node)
 // button
 int32_t SetButtonLabel(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (item->string == nullptr) {
+    if (item == nullptr || item->string == nullptr) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
@@ -5970,7 +5975,7 @@ int32_t SetXComponentId(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
-    if (!item->string) {
+    if (item == nullptr || !item->string) {
         return ERROR_CODE_PARAM_INVALID;
     }
     fullImpl->getNodeModifiers()->getXComponentModifier()->setXComponentId(node->uiNodeHandle, item->string);
