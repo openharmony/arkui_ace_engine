@@ -65,6 +65,7 @@ public:
 
     void FireFinishCallback()
     {
+        isSuccess_ = true;
         if (interactive_) {
             FinishInteractiveAnimation();
             return;
@@ -108,6 +109,7 @@ public:
         if (!cancelAnimation_ || hasFinished_ || !interactive_) {
             return;
         }
+        isSuccess_ = false;
         cancelAnimation_();
     }
 
