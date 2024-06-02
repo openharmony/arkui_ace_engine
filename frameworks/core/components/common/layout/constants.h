@@ -243,6 +243,12 @@ enum class TextOverflow {
     DEFAULT,
 };
 
+enum class TextSelectableMode {
+    SELECTABLE_UNFOCUSABLE = 0,
+    SELECTABLE_FOCUSABLE,
+    UNSELECTABLE,
+};
+
 namespace StringUtils {
 inline std::string ToString(const TextOverflow& textOverflow)
 {

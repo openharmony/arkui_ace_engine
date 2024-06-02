@@ -593,7 +593,10 @@ void TextPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
                     return;
                 }
             }
-            if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) == CopyOptions::None ||
+
+            auto mode = textLayoutProperty->GetTextSelectableModeValue(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
+            if (mode == TextSelectableMode::UNSELECTABLE ||
+                textLayoutProperty->GetCopyOptionValue(CopyOptions::None) == CopyOptions::None ||
                 textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE) {
                 return;
             }
@@ -925,7 +928,11 @@ bool TextPattern::ShowUIExtensionMenu(const AISpan& aiSpan, const CalculateHandl
 void TextPattern::HandleDoubleClickEvent(GestureEvent& info)
 {
     CheckOnClickEvent(info);
-    if (copyOption_ == CopyOptions::None || textForDisplay_.empty()) {
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto mode = textLayoutProperty->GetTextSelectableModeValue(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
+    if (mode == TextSelectableMode::UNSELECTABLE ||
+        copyOption_ == CopyOptions::None || textForDisplay_.empty()) {
         return;
     }
     auto host = GetHost();
@@ -1065,7 +1072,10 @@ void TextPattern::InitHoverEvent()
 
 void TextPattern::HandleMouseEvent(const MouseInfo& info)
 {
-    if (copyOption_ == CopyOptions::None) {
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto mode = textLayoutProperty->GetTextSelectableModeValue(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
+    if (copyOption_ == CopyOptions::None || mode == TextSelectableMode::UNSELECTABLE) {
         return;
     }
 
@@ -1366,6 +1376,21 @@ int32_t TextPattern::GetTextLength()
         return static_cast<int32_t>(GetWideText().length()) + placeholderCount_;
     }
     return static_cast<int32_t>(GetWideText().length());
+}
+
+void TextPattern::SetTextSelectableMode(TextSelectableMode value)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    if (value == TextSelectableMode::SELECTABLE_FOCUSABLE) {
+        focusHub->SetFocusable(true);
+        focusHub->SetIsFocusOnTouch(true);
+    } else {
+        focusHub->SetFocusable(false);
+        focusHub->SetIsFocusOnTouch(false);
+    }
 }
 
 bool TextPattern::IsDraggable(const Offset& offset)
@@ -2769,7 +2794,9 @@ void TextPattern::SetAccessibilityAction()
             CHECK_NULL_VOID(pattern);
             auto textLayoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(textLayoutProperty);
-            if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) != CopyOptions::None) {
+            auto mode = textLayoutProperty->GetTextSelectableModeValue(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
+            if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) != CopyOptions::None &&
+                mode != TextSelectableMode::UNSELECTABLE) {
                 pattern->ActSetSelection(start, end);
             }
         });
@@ -2779,7 +2806,9 @@ void TextPattern::SetAccessibilityAction()
         CHECK_NULL_VOID(pattern);
         auto textLayoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) != CopyOptions::None) {
+        auto mode = textLayoutProperty->GetTextSelectableModeValue(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
+        if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) != CopyOptions::None &&
+            mode != TextSelectableMode::UNSELECTABLE) {
             pattern->CloseSelectOverlay(true);
             pattern->ResetSelection();
         }
@@ -2790,7 +2819,9 @@ void TextPattern::SetAccessibilityAction()
         CHECK_NULL_VOID(pattern);
         auto textLayoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) != CopyOptions::None) {
+        auto mode = textLayoutProperty->GetTextSelectableModeValue(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
+        if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) != CopyOptions::None &&
+            mode != TextSelectableMode::UNSELECTABLE) {
             pattern->HandleOnCopy();
             pattern->CloseSelectOverlay(true);
             pattern->ResetSelection();
