@@ -101,7 +101,7 @@ public:
     static SwiperModel* GetInstance();
     virtual ~SwiperModel() = default;
 
-    virtual RefPtr<SwiperController> Create();
+    virtual RefPtr<SwiperController> Create(bool isCreateArc = false);
     virtual void SetDirection(Axis axis);
     virtual void SetIndex(uint32_t index);
     virtual void SetIndicatorInteractive(bool interactive) {}

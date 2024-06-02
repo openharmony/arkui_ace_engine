@@ -31,7 +31,7 @@
 namespace OHOS::Ace::NG {
 class ACE_FORCE_EXPORT SwiperModelNG : public OHOS::Ace::SwiperModel {
 public:
-    RefPtr<SwiperController> Create() override;
+    RefPtr<SwiperController> Create(bool isCreateArc = false) override;
     void SetDirection(Axis axis) override;
     void SetIndex(uint32_t index) override;
     void SetIndicatorInteractive(bool interactive) override;
