@@ -21,7 +21,9 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension MIN_PC_MENU_WIDTH = 64.0_vp;
+constexpr Dimension DEFAULT_PC_MENU_WIDTH = 160.0_vp;
 constexpr Dimension MIN_MOBILE_MENU_WIDTH = 64.0_vp;
+constexpr Dimension DEFAULT_MOBILE_MENU_WIDTH = 224.0_vp;
 constexpr double MAX_PC_MENU_WIDTH_RATIO = 0.67;
 } // namespace
 
@@ -222,18 +224,22 @@ Dimension MenuModelNG::CalculateBoundedWidth(const Dimension& inputWidth)
 Dimension MenuModelNG::CalculateBoundedWidthForPC(const Dimension& inputWidth)
 {
     const int32_t deviceWidth = SystemProperties::GetDeviceWidth();
-    const Dimension MAX_PC_MENU_WIDTH(deviceWidth * MAX_PC_MENU_WIDTH_RATIO, OHOS::Ace::DimensionUnit::VP);
-    if (inputWidth < MIN_PC_MENU_WIDTH)
-        return MIN_PC_MENU_WIDTH;
-    if (inputWidth > MAX_PC_MENU_WIDTH)
+    const Dimension MENU_WIDTH_PX(deviceWidth * MAX_PC_MENU_WIDTH_RATIO, OHOS::Ace::DimensionUnit::PX);
+    const Dimension MAX_PC_MENU_WIDTH(MENU_WIDTH_PX.ConvertToVp(), OHOS::Ace::DimensionUnit::VP);
+    if (inputWidth < MIN_PC_MENU_WIDTH) {
+        return DEFAULT_PC_MENU_WIDTH;
+    }
+    if (inputWidth > MAX_PC_MENU_WIDTH) {
         return MAX_PC_MENU_WIDTH;
+    }
     return inputWidth;
 }
 
 Dimension MenuModelNG::CalculateBoundedWidthForMobile(const Dimension& inputWidth)
 {
-    if (inputWidth < MIN_MOBILE_MENU_WIDTH)
-        return MIN_MOBILE_MENU_WIDTH;
+    if (inputWidth < MIN_MOBILE_MENU_WIDTH || inputWidth > DEFAULT_MOBILE_MENU_WIDTH) {
+        return DEFAULT_MOBILE_MENU_WIDTH;
+    }
     return inputWidth;
 }
 
