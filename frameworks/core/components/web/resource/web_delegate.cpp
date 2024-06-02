@@ -38,6 +38,7 @@
 #include "core/components/web/web_property.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "adapter/ohos/capability/html/span_to_html.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_render_surface.h"
@@ -2513,6 +2514,10 @@ void WebDelegate::InitWebViewWithWindow()
             findListenerImpl->SetWebDelegate(weak);
             delegate->nweb_->PutFindCallback(findListenerImpl);
 
+            auto spanstringConvertHtmlImpl = std::make_shared<SpanstringConvertHtmlImpl>(Container::CurrentId());
+            spanstringConvertHtmlImpl->SetWebDelegate(weak);
+            delegate->nweb_->PutSpanstringConvertHtmlCallback(spanstringConvertHtmlImpl);
+
             std::optional<std::string> src;
             auto isNewPipe = Container::IsCurrentUseNewPipeline();
             delegate->UpdateSettting(isNewPipe);
@@ -2877,6 +2882,9 @@ void WebDelegate::InitWebViewWithSurface()
             delegate->nweb_->SetDrawMode(renderMode);
             delegate->nweb_->SetDrawMode(layoutMode);
             delegate->RegisterConfigObserver();
+            auto spanstringConvertHtmlImpl = std::make_shared<SpanstringConvertHtmlImpl>(Container::CurrentId());
+            spanstringConvertHtmlImpl->SetWebDelegate(weak);
+            delegate->nweb_->PutSpanstringConvertHtmlCallback(spanstringConvertHtmlImpl);
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebInitWebViewWithSurface");
 }
@@ -6878,5 +6886,14 @@ void WebDelegate::SetSurfaceId(const std::string& surfaceId)
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetSurfaceId");
+}
+
+std::string WebDelegate::SpanstringConvertHtml(const std::vector<uint8_t> &content)
+{
+    std::vector<uint8_t> tempVec(content.begin(), content.end());
+    std::string htmlStr = OHOS::Ace::SpanToHtml::ToHtml(tempVec);
+    TAG_LOGD(AceLogTag::ACE_WEB, "pasteboard spasntring convert html success,"
+        " string length = %{public}u", static_cast<int32_t>(htmlStr.length()));
+    return htmlStr;
 }
 } // namespace OHOS::Ace

@@ -4725,7 +4725,7 @@ void JSWeb::OnOverrideUrlLoading(const JSCallbackInfo& args)
 
 void JSWeb::CopyOption(int32_t copyOption)
 {
-    auto mode = CopyOptions::Distributed;
+    auto mode = CopyOptions::Local;
     switch (copyOption) {
         case static_cast<int32_t>(CopyOptions::None):
             mode = CopyOptions::None;
@@ -4740,7 +4740,7 @@ void JSWeb::CopyOption(int32_t copyOption)
             mode = CopyOptions::Distributed;
             break;
         default:
-            mode = CopyOptions::Distributed;
+            mode = CopyOptions::Local;
             break;
     }
     WebModel::GetInstance()->SetCopyOptionMode(mode);
