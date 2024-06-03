@@ -497,28 +497,19 @@ std::shared_ptr<RSData> NetworkImageLoader::LoadImageData(
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGI(AceLogTag::ACE_IMAGE, "Download network image, uri=%{public}s", uri.c_str());
     }
-    std::string result;
-    DownloadCallback downloadCallback;
-    downloadCallback.successCallback = [result](const std::string&& imageData, bool async, int32_t instanceId) mutable {
-        result = imageData;
-    };
-    downloadCallback.failCallback = [](std::string errorMessage, bool async, int32_t instanceId) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "Download network image %{public}s failed!", errorMessage.c_str());
-    };
-    downloadCallback.cancelCallback = downloadCallback.failCallback;
-    if (!DownloadManager::GetInstance()->DownloadSync(std::move(downloadCallback), uri, Container::CurrentId()) ||
-        result.empty()) {
+    std::vector<uint8_t> imageData;
+    if (!DownloadManager::GetInstance()->Download(uri, imageData) || imageData.empty()) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "Download network image %{private}s failed!", uri.c_str());
         return nullptr;
     }
 #ifndef USE_ROSEN_DRAWING
-    sk_sp<SkData> data = SkData::MakeWithCopy(result.data(), result.length());
+    sk_sp<SkData> data = SkData::MakeWithCopy(imageData.data(), imageData.size());
 #else
     auto data = std::make_shared<RSData>();
-    data->BuildWithCopy(result.data(), result.length());
+    data->BuildWithCopy(imageData.data(), imageData.size());
 #endif
     // 3. write it into file cache.
-    WriteCacheToFile(uri, result);
+    WriteCacheToFile(uri, imageData);
     return data;
 }
 
