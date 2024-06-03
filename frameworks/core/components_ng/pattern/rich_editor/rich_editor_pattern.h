@@ -344,6 +344,7 @@ public:
     bool CursorMoveToParagraphEnd();
     bool CursorMoveHome();
     bool CursorMoveEnd();
+    float CalcLineHeightByPosition(int32_t position);
     int32_t CalcMoveUpPos(OffsetF& caretOffsetUp, OffsetF& caretOffsetDown);
     int32_t CalcLineBeginPosition();
     float GetTextThemeFontSize();
