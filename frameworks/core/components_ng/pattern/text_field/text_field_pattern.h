@@ -1400,6 +1400,7 @@ private:
 
     void CalculateDefaultCursor();
     void RequestKeyboardOnFocus();
+    bool IsModalCovered();
     void SetNeedToRequestKeyboardOnFocus();
     void SetAccessibilityAction();
     void SetAccessibilityActionGetAndSetCaretPosition();
