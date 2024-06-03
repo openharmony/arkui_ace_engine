@@ -44,7 +44,7 @@ void FormRendererDispatcherImpl::DispatchPointerEvent(
     serializedGesture.data.clear();
 
     if (pointerEvent && pointerEvent->GetPointerAction() == OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN) {
-        LOGI("renderer receive down event");
+        HILOG_INFO("renderer receive down event");
         auto uiContent = uiContent_.lock();
         if (!uiContent) {
             HILOG_ERROR("uiContent is nullptr");
