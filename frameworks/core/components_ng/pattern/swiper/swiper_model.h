@@ -52,6 +52,8 @@ struct SwiperDigitalParameters {
     std::optional<Dimension> dimTop;
     std::optional<Dimension> dimRight;
     std::optional<Dimension> dimBottom;
+    std::optional<Dimension> dimStart;
+    std::optional<Dimension> dimEnd;
     std::optional<Color> fontColor;
     std::optional<Color> selectedFontColor;
     std::optional<Dimension> fontSize;

@@ -461,10 +461,9 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     swiperParameters.dimBottom = ParseIndicatorDimension(bottomValue);
     CalcDimension dimStart;
     CalcDimension dimEnd;
-    swiperParameters.dimStart = ParseLengthMetricsToDimension(startValue, dimStart) ?
-        dimStart : ParseIndicatorDimension(startValue);
-    swiperParameters.dimEnd = ParseLengthMetricsToDimension(endValue, dimEnd) ?
-        dimEnd : ParseIndicatorDimension(endValue);
+    std::optional<Dimension> indicatorDimension;
+    swiperParameters.dimStart =  ParseLengthMetricsToDimension(startValue, dimStart) ? dimStart : indicatorDimension;
+    swiperParameters.dimEnd =  ParseLengthMetricsToDimension(endValue, dimEnd) ? dimEnd : indicatorDimension;
 
     CalcDimension dimPosition;
     bool parseItemWOk =
@@ -512,6 +511,11 @@ bool JSSwiper::ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDi
         result = CalcDimension(value, unit);
         return true;
     }
+    if (jsValue->IsNull()) {
+        result = CalcDimension(0.0f, DimensionUnit::VP);
+        return true;
+    }
+
     return false;
 }
 
@@ -521,6 +525,8 @@ SwiperDigitalParameters JSSwiper::GetDigitIndicatorInfo(const JSRef<JSObject>& o
     JSRef<JSVal> dotTopValue = obj->GetProperty("topValue");
     JSRef<JSVal> dotRightValue = obj->GetProperty("rightValue");
     JSRef<JSVal> dotBottomValue = obj->GetProperty("bottomValue");
+    JSRef<JSVal> startValue = obj->GetProperty("startValue");
+    JSRef<JSVal> endValue = obj->GetProperty("endValue");
     JSRef<JSVal> fontColorValue = obj->GetProperty("fontColorValue");
     JSRef<JSVal> selectedFontColorValue = obj->GetProperty("selectedFontColorValue");
     JSRef<JSVal> digitFontValue = obj->GetProperty("digitFontValue");
@@ -534,6 +540,12 @@ SwiperDigitalParameters JSSwiper::GetDigitIndicatorInfo(const JSRef<JSObject>& o
     digitalParameters.dimTop = ParseIndicatorDimension(dotTopValue);
     digitalParameters.dimRight = ParseIndicatorDimension(dotRightValue);
     digitalParameters.dimBottom = ParseIndicatorDimension(dotBottomValue);
+    std::optional<Dimension> indicatorDimension;
+    CalcDimension dimStart;
+    CalcDimension dimEnd;
+    digitalParameters.dimStart =  ParseLengthMetricsToDimension(startValue, dimStart) ? dimStart : indicatorDimension;
+    digitalParameters.dimEnd =  ParseLengthMetricsToDimension(endValue, dimEnd) ? dimEnd : indicatorDimension;
+
     Color fontColor;
     auto parseOk = JSViewAbstract::ParseJsColor(fontColorValue, fontColor);
     digitalParameters.fontColor =
