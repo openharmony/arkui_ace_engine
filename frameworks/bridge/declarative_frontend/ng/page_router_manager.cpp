@@ -49,8 +49,11 @@ constexpr int32_t BUNDLE_START_POS = 8;
 constexpr int32_t INVALID_PAGE_INDEX = -1;
 constexpr int32_t MAX_ROUTER_STACK_SIZE = 32;
 constexpr int32_t JS_FILE_EXTENSION_LENGTH = 3;
-constexpr char DEBUG_PATH[] = "entry|entry|1.0.0|src/main/ets/";
+constexpr char ETS_PATH[] = "/src/main/ets/";
+constexpr char DEBUG_PATH[] = "entry/build/default/cache/default/default@CompileArkTS/esmodule/debug/";
+constexpr char NEW_PATH[] = "entry|entry|1.0.0|src/main/ets/";
 constexpr char TS_SUFFIX[] = ".ts";
+constexpr char ETS_SUFFIX[] = ".ets";
 
 void ExitToDesktop()
 {
@@ -756,10 +759,20 @@ RefPtr<Framework::RevSourceMap> PageRouterManager::GetCurrentPageSourceMap(const
     if (container->IsUseStageModel()) {
         auto pagePath = entryPageInfo->GetPagePath();
         auto moduleName = container->GetModuleName();
-        std::string judgePath = DEBUG_PATH +
-            pagePath.substr(0, pagePath.size() - JS_FILE_EXTENSION_LENGTH) + TS_SUFFIX;
+        std::string judgePath = "";
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            judgePath = DEBUG_PATH + moduleName + ETS_PATH +
+                        pagePath.substr(0, pagePath.size() - JS_FILE_EXTENSION_LENGTH) + TS_SUFFIX;
+        } else {
+            judgePath = moduleName + ETS_PATH +
+                        pagePath.substr(0, pagePath.size() - JS_FILE_EXTENSION_LENGTH) + ETS_SUFFIX;
+        }
         if (Framework::GetAssetContentImpl(assetManager, "sourceMaps.map", jsSourceMap)) {
             auto jsonPages = JsonUtil::ParseJsonString(jsSourceMap);
+            auto child = jsonPages->GetChild();
+            if (!child->GetValue("entry-package-info")->IsNull()) {
+                judgePath = NEW_PATH + pagePath.substr(0, pagePath.size() - JS_FILE_EXTENSION_LENGTH) + TS_SUFFIX;
+            }
             auto jsonPage = jsonPages->GetValue(judgePath)->ToString();
             auto stagePageMap = MakeRefPtr<Framework::RevSourceMap>();
             stagePageMap->Init(jsonPage);
