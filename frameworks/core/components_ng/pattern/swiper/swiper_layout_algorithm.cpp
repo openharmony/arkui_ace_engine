@@ -913,18 +913,13 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
     auto paddingOffset = padding.Offset();
-    auto hostNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(hostNode);
-    auto swiperPattern = hostNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_VOID(swiperPattern);
-    auto ignoreBlankOffset = swiperPattern->IgnoreBlankOffset(true);
 
     // layout items.
     std::set<int32_t> layoutIndexSet;
     for (auto& pos : itemPosition_) {
         layoutIndexSet.insert(GetLoopIndex(pos.first));
-        pos.second.startPos -= currentOffset_ + ignoreBlankOffset;
-        pos.second.endPos -= currentOffset_ + ignoreBlankOffset;
+        pos.second.startPos -= currentOffset_;
+        pos.second.endPos -= currentOffset_;
         LayoutItem(layoutWrapper, axis, paddingOffset, pos);
     }
     for (auto& pos : itemPositionInAnimation_) {
@@ -935,6 +930,10 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     // Layout swiper indicator
     if (swiperLayoutProperty->GetShowIndicatorValue(true)) {
+        auto hostNode = layoutWrapper->GetHostNode();
+        CHECK_NULL_VOID(hostNode);
+        auto swiperPattern = hostNode->GetPattern<SwiperPattern>();
+        CHECK_NULL_VOID(swiperPattern);
         auto indicatorWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::SWIPER_INDICATOR_ETS_TAG);
         if (indicatorWrapper) {
             if (swiperLayoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::DOT) == SwiperIndicatorType::DIGIT) {
@@ -945,6 +944,11 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
 
     if (swiperLayoutProperty->GetDisplayArrowValue(false)) {
+        auto hostNode = layoutWrapper->GetHostNode();
+        CHECK_NULL_VOID(hostNode);
+        auto swiperPattern = hostNode->GetPattern<SwiperPattern>();
+        CHECK_NULL_VOID(swiperPattern);
+
         if (swiperPattern->HasLeftButtonNode() && swiperPattern->HasRightButtonNode()) {
             auto leftArrowWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::SWIPER_LEFT_ARROW_ETS_TAG);
             auto rightArrowWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::SWIPER_RIGHT_ARROW_ETS_TAG);
