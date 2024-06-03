@@ -771,10 +771,12 @@ void RefreshPattern::SpeedTriggerAnimation(float speed)
     if (!NearEqual(scrollOffset_, targetOffset)) {
         dealSpeed = speed / (targetOffset - scrollOffset_);
     }
+    bool recycle = true;
     if (!isSourceFromAnimation_ && refreshStatus_ == RefreshStatus::OVER_DRAG) {
         UpdateRefreshStatus(RefreshStatus::REFRESH);
         UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_TO_RECYCLE, GetFollowRatio());
     } else if (NearZero(targetOffset)) {
+        recycle = false;
         SwitchToFinish();
     }
     FireOnOffsetChange(targetOffset);
@@ -789,10 +791,14 @@ void RefreshPattern::SpeedTriggerAnimation(float speed)
             CHECK_NULL_VOID(pattern);
             pattern->offsetProperty_->Set(targetOffset);
         },
-        [weak = AceType::WeakClaim(this)]() {
+        [weak = AceType::WeakClaim(this), recycle]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->SpeedAnimationFinish();
+            if (recycle) {
+                pattern->UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, pattern->GetFollowRatio());
+            } else {
+                pattern->UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_HAND, pattern->GetFollowRatio());
+            }
         });
     auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
