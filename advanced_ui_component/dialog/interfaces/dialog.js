@@ -823,16 +823,13 @@ export class SelectDialog extends ViewPU {
                     if (this.currentFocusIndex === this.radioContent.length - 1) {
                         this.contentScroller.scrollEdge(Edge.Bottom);
                         this.currentFocusIndex = -1;
-                    }
-                    else if (this.currentFocusIndex === FIRST_ITEM_INDEX) {
+                    } else if (this.currentFocusIndex === FIRST_ITEM_INDEX) {
                         this.contentScroller.scrollEdge(Edge.Top);
                         this.currentFocusIndex = -1;
-                    }
-                    else {
+                    } else {
                         if (i20 > 0) {
                             this.contentScroller.scrollBy(0, j20);
-                        }
-                        else if (i20 < 0) {
+                        } else if (i20 < 0) {
                             this.contentScroller.scrollBy(0, 0 - j20);
                         }
                     }
@@ -3168,8 +3165,7 @@ class ButtonComponent extends ViewPU {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.buildVerticalAlignButtons.bind(this)(this);
                             });
-                        }
-                        else {
+                        } else {
                             this.ifElseBranchUpdateFunction(1, () => {
                                 this.buildHorizontalAlignButtons.bind(this)(this);
                             });
