@@ -386,34 +386,28 @@ void RadioModifier::PaintIndicator(
     pen.SetWidth(borderWidth_ * borderOpacityScale_->Get());
     outPen.SetAntiAlias(true);
     brush.SetAntiAlias(true);
-    if (uiStatus_->Get() == static_cast<int32_t>(UIStatus::SELECTED)) {
-        if (!enabled_->Get()) {
-            outPen.SetColor(
-                ToRSColor(activeColor_->Get().BlendOpacity(static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA)));
-        } else {
-            outPen.SetColor(ToRSColor(activeColor_->Get().BlendOpacity(opacityScale_->Get())));
-        }
-        pen.SetColor(ToRSColor(inactiveColor_->Get().BlendOpacity(borderOpacityScale_->Get())));
-        brush.SetColor(ToRSColor(inactivePointColor_.BlendOpacity(borderOpacityScale_->Get())));
-        auto outWidth = outCircleRadius * totalScale_->Get();
-        if (outWidth < borderWidth_) {
-            outWidth = borderWidth_;
-        }
-        canvas.AttachPen(pen);
-        canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * totalScale_->Get() - borderWidth_ / CALC_RADIUS);
-        canvas.DetachPen();
-        outPen.SetWidth(outWidth);
-
-        canvas.AttachBrush(brush);
-        canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * totalScale_->Get() - borderWidth_);
-        canvas.DetachBrush();
-
-        canvas.AttachPen(outPen);
-        canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * totalScale_->Get() - outWidth / CALC_RADIUS);
-        canvas.DetachPen();
-    } else if (uiStatus_->Get() == static_cast<int32_t>(UIStatus::UNSELECTED)) {
-        PaintUnselectedIndicator(canvas, outCircleRadius, centerX, centerY);
+    auto alphaCalculate = static_cast<float>(enabled_->Get() ? ENABLED_ALPHA : DISABLED_ALPHA) / ENABLED_ALPHA;
+    outPen.SetColor(ToRSColor(activeColor_->Get().BlendOpacity(opacityScale_->Get()).BlendOpacity(alphaCalculate)));
+    pen.SetColor(
+        ToRSColor(inactiveColor_->Get().BlendOpacity(borderOpacityScale_->Get()).BlendOpacity(alphaCalculate)));
+    brush.SetColor(
+        ToRSColor(inactivePointColor_.BlendOpacity(borderOpacityScale_->Get()).BlendOpacity(alphaCalculate)));
+    auto outWidth = outCircleRadius * totalScale_->Get();
+    if (outWidth < borderWidth_) {
+        outWidth = borderWidth_;
     }
+    canvas.AttachPen(pen);
+    canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * totalScale_->Get() - borderWidth_ / CALC_RADIUS);
+    canvas.DetachPen();
+
+    canvas.AttachBrush(brush);
+    canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * totalScale_->Get() - borderWidth_);
+    canvas.DetachBrush();
+
+    outPen.SetWidth(outWidth);
+    canvas.AttachPen(outPen);
+    canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * totalScale_->Get() - outWidth / CALC_RADIUS);
+    canvas.DetachPen();
 }
 
 void RadioModifier::DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset) const
