@@ -4302,18 +4302,11 @@ void WebDelegate::OnPageStarted(const std::string& param)
         [weak = WeakClaim(this), param]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
-            auto onPageStarted = delegate->onPageStarted_;
-            if (onPageStarted) {
-                std::string paramStart = std::string(R"(")").append(param).append(std::string(R"(")"));
-                std::string urlParam = std::string(R"("pagestart",{"url":)").append(paramStart.append("},null"));
-                onPageStarted(urlParam);
-            }
-
-            // ace 2.0
-            auto onPageStartedV2 = delegate->onPageStartedV2_;
-            if (onPageStartedV2) {
-                onPageStartedV2(std::make_shared<LoadWebPageStartEvent>(param));
-            }
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto webEventHub = webPattern->GetWebEventHub();
+            CHECK_NULL_VOID(webEventHub);
+            webEventHub->FireOnPageStartedEvent(std::make_shared<LoadWebPageStartEvent>(param));
             delegate->RecordWebEvent(Recorder::EventType::WEB_PAGE_BEGIN, param);
         },
         TaskExecutor::TaskType::JS, "ArkUIWebPageStarted");
@@ -4327,19 +4320,11 @@ void WebDelegate::OnPageFinished(const std::string& param)
         [weak = WeakClaim(this), param]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
-            auto onPageFinished = delegate->onPageFinished_;
-            if (onPageFinished) {
-                std::string paramFinish = std::string(R"(")").append(param).append(std::string(R"(")"));
-                std::string urlParam = std::string(R"("pagefinish",{"url":)").append(paramFinish.append("},null"));
-                onPageFinished(urlParam);
-            }
-            // ace 2.0
-            auto onPageFinishedV2 = delegate->onPageFinishedV2_;
-            if (onPageFinishedV2) {
-                onPageFinishedV2(std::make_shared<LoadWebPageFinishEvent>(param));
-            }
             auto webPattern = delegate->webPattern_.Upgrade();
             CHECK_NULL_VOID(webPattern);
+            auto webEventHub = webPattern->GetWebEventHub();
+            CHECK_NULL_VOID(webEventHub);
+            webEventHub->FireOnPageFinishedEvent(std::make_shared<LoadWebPageFinishEvent>(param));
             webPattern->OnScrollEndRecursive(std::nullopt);
             delegate->RecordWebEvent(Recorder::EventType::WEB_PAGE_END, param);
         },
@@ -4812,36 +4797,14 @@ void WebDelegate::OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequ
         [weak = WeakClaim(this), request, error]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
-            auto onPageError = delegate->onPageError_;
-            if (onPageError) {
-                std::string url = request->Url();
-                int errorCode = error->ErrorCode();
-                std::string description = error->ErrorInfo();
-                std::string paramUrl = std::string(R"(")").append(url).append(std::string(R"(")")).append(",");
-                std::string paramErrorCode =
-                    std::string(R"(")")
-                        .append(NTC_PARAM_ERROR_CODE)
-                        .append(std::string(R"(")"))
-                        .append(":")
-                        .append(std::to_string(errorCode))
-                        .append(",");
-                std::string paramDesc =
-                    std::string(R"(")")
-                        .append(NTC_PARAM_DESCRIPTION)
-                        .append(std::string(R"(")"))
-                        .append(":")
-                        .append(std::string(R"(")").append(description).append(std::string(R"(")")));
-                std::string errorParam =
-                    std::string(R"("error",{"url":)").append((paramUrl + paramErrorCode + paramDesc).append("},null"));
-                onPageError(errorParam);
-            }
-            auto onErrorReceiveV2 = delegate->onErrorReceiveV2_;
-            if (onErrorReceiveV2) {
-                onErrorReceiveV2(std::make_shared<ReceivedErrorEvent>(
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto webEventHub = webPattern->GetWebEventHub();
+            CHECK_NULL_VOID(webEventHub);
+            webEventHub->FireOnErrorReceiveEvent(std::make_shared<ReceivedErrorEvent>(
                     AceType::MakeRefPtr<WebRequest>(request->RequestHeaders(), request->Method(), request->Url(),
                         request->FromGesture(), request->IsAboutMainFrame(), request->IsRequestRedirect()),
                     AceType::MakeRefPtr<WebError>(error->ErrorInfo(), error->ErrorCode())));
-            }
         },
         TaskExecutor::TaskType::JS, "ArkUIWebErrorReceive");
 }
