@@ -639,7 +639,8 @@ void ListModelNG::SetLaneGutter(FrameNode* frameNode, const Dimension& laneGutte
 int32_t ListModelNG::GetListItemAlign(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0);
-    return static_cast<int32_t>(frameNode->GetLayoutProperty<ListLayoutProperty>()->GetListItemAlign().value());
+    return static_cast<int32_t>(
+        frameNode->GetLayoutProperty<ListLayoutProperty>()->GetListItemAlignValue(V2::ListItemAlign::START));
 }
 
 void ListModelNG::SetListItemAlign(FrameNode* frameNode, V2::ListItemAlign listItemAlign)

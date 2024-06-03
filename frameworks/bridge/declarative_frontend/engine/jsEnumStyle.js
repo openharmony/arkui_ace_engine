@@ -460,7 +460,7 @@ var ScrollSource;
   ScrollSource[ScrollSource["DRAG"] = 0] = "DRAG";
   ScrollSource[ScrollSource["FLING"] = 1] = "FLING";
   ScrollSource[ScrollSource["EDGE_EFFECT"] = 2] = "EDGE_EFFECT";
-  ScrollSource[ScrollSource["OHTER_USER_INPUT"] = 3] = "OHTER_USER_INPUT";
+  ScrollSource[ScrollSource["OTHER_USER_INPUT"] = 3] = "OTHER_USER_INPUT";
   ScrollSource[ScrollSource["SCROLL_BAR"] = 4] = "SCROLL_BAR";
   ScrollSource[ScrollSource["SCROLL_BAR_FLING"] = 5] = "SCROLL_BAR_FLING";
   ScrollSource[ScrollSource["SCROLLER"] = 6] = "SCROLLER";
