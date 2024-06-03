@@ -241,6 +241,25 @@ class HeightModifier extends ModifierWithKey {
   }
 }
 HeightModifier.identity = Symbol('height');
+
+class ChainModeifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetChainMode(node);
+    }
+    else {
+      getUINativeModule().common.setChainMode(node, this.value.direction, this.value.style);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+ChainModeifier.identity = Symbol('chainMode');
+
 class BorderRadiusModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -3333,6 +3352,15 @@ class ArkComponent {
   parallelGesture(gesture, mask) {
     throw new Error('Method not implemented.');
   }
+
+  chainMode(direction, style) {
+    let arkChainMode = new ArkChainMode();
+    arkChainMode.direction = direction ;
+    arkChainMode.style = style;
+    modifierWithKey(this._modifiersWithKeys, ChainModeifier.identity, ChainModeifier, arkChainMode);
+    return this;
+  }
+
   blur(value, options) {
     let blur = new ArkBlurOptions();
     blur.value = value;
@@ -14268,6 +14296,15 @@ class ArkWaterFlowEdgeEffect {
   isEqual(another) {
     return (this.value === another.value) &&
       (this.options === another.options);
+  }
+}
+class ArkChainMode{
+  constructor() {
+    this.direction = undefined;
+    this.style = undefined;
+  }
+  isEqual(another) {
+    return (this.direction === another.direction) && (this.style === another.style);
   }
 }
 class ArkMesh {

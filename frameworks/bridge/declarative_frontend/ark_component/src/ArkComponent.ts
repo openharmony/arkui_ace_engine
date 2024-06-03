@@ -302,6 +302,24 @@ class HeightModifier extends ModifierWithKey<Length> {
   }
 }
 
+class ChainModeifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('chainMode');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetChainMode(node);
+    } else {
+      getUINativeModule().common.setChainMode(node, this.value.direction, this.value.style);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class BorderRadiusModifier extends ModifierWithKey<Length | BorderRadiuses> {
   constructor(value: Length | BorderRadiuses) {
     super(value);
@@ -3921,6 +3939,14 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
+  chainMode(direction: Axis, style: ChainStyle): this {
+    let arkChainMode = new ArkChainMode();
+    arkChainMode.direction = direction ;
+    arkChainMode.style = style;
+    modifierWithKey(this._modifiersWithKeys, ChainModeifier.identity, ChainModeifier, arkChainMode);
+    return this;
+  }
+  
   key(value: string): this {
     if (typeof value === 'string') {
       modifierWithKey(this._modifiersWithKeys, KeyModifier.identity, KeyModifier, value);
