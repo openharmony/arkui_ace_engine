@@ -119,7 +119,7 @@ public:
     virtual bool IsAtBottom() const = 0;
     virtual bool OutBoundaryCallback()
     {
-        return IsAtTop() || IsAtBottom();
+        return IsOutOfBoundary();
     }
 
     virtual bool IsOutOfBoundary(bool useCurrentDelta = true)
