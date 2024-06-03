@@ -44,6 +44,7 @@ struct ArkUI_Node {
     void* imageFrameInfos = nullptr;
     void* drawableDescriptor = nullptr;
     int32_t linearGradientDirection = -1;
+    void* customEventListeners = nullptr;
 };
 
 struct ArkUI_Context {
