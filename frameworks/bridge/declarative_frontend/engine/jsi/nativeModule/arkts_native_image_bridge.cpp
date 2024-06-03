@@ -516,11 +516,9 @@ ArkUINativeModuleValue ImageBridge::SetAlt(ArkUIRuntimeCallInfo* runtimeCallInfo
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     std::string src;
     if (!ArkTSUtils::ParseJsMedia(vm, secondArg, src)) {
-        GetArkUINodeModifiers()->getImageModifier()->resetAlt(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
     if (ImageSourceInfo::ResolveURIType(src) == SrcType::NETWORK) {
-        GetArkUINodeModifiers()->getImageModifier()->resetAlt(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
     std::string bundleName;
@@ -534,10 +532,6 @@ ArkUINativeModuleValue ImageBridge::SetAlt(ArkUIRuntimeCallInfo* runtimeCallInfo
 ArkUINativeModuleValue ImageBridge::ResetAlt(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getImageModifier()->resetAlt(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
