@@ -380,6 +380,7 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
         }
     } else if (touch.GetTouchType() == TouchType::MOVE) {
         auto menuNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
+        CHECK_NULL_VOID(menuNode);
         if (GetPreviewMode() != MenuPreviewMode::NONE || IsSelectOverlayCustomMenu(menuNode)) {
             return;
         }

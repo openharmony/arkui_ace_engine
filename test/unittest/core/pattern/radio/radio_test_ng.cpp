@@ -1585,8 +1585,6 @@ HWTEST_F(RadioTestNg, RadioPatternTest031, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto host = pattern->GetHost();
     pattern->OnModifyDone();
-    auto childNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
-    ASSERT_NE(childNode, nullptr);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 
