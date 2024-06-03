@@ -185,7 +185,7 @@ bool UITaskScheduler::NeedAdditionalLayout()
             }
             const auto& geometryTransition = node->GetLayoutProperty()->GetGeometryTransition();
             if (geometryTransition != nullptr) {
-                ret = ret || geometryTransition->OnAdditionalLayout(node);
+                ret |= geometryTransition->OnAdditionalLayout(node);
             }
         }
     }
