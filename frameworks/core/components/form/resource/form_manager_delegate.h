@@ -55,7 +55,8 @@ public:
     using OnGetRectRelativeToWindowCallback = std::function<void(int32_t&, int32_t&)>;
     using OnFormErrorCallback = std::function<void(const std::string&, const std::string&)>;
     using OnFormUninstallCallback = std::function<void(int64_t)>;
-    using OnFormSurfaceNodeCallback = std::function<void(const std::shared_ptr<Rosen::RSSurfaceNode>&, const AAFwk::Want&)>;
+    using OnFormSurfaceNodeCallback = std::function<void(const std::shared_ptr<Rosen::RSSurfaceNode>&,
+        const AAFwk::Want&)>;
     using OnFormSurfaceChangeCallback = std::function<void(float width, float height, float borderWidth)>;
     using OnFormSurfaceDetachCallback = std::function<void()>;
     using ActionEventHandle = std::function<void(const std::string&)>;

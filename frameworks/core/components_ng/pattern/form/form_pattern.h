@@ -154,6 +154,7 @@ private:
     RefPtr<FrameNode> GetImageNode();
     void HandleStaticFormEvent(const PointF& touchPoint);
     void ProcDeleteImageNode(const AAFwk::Want& want);
+    void AttachRSNode(const std::shared_ptr<Rosen::RSSurfaceNode>& node, const AAFwk::Want& want);
     void HandleEnableForm(const bool enable);
 
     void InitClickEvent();

@@ -668,7 +668,7 @@ void FormManagerDelegate::DispatchPointerEvent(const
                 pipelineContext->GetEventManager()->SetInnerFlag(true);
                 LOGI("set event manager inner flag");
             }
-            LOGI("form is recycled, recover it first, action=%{public}d, formId=%{public}" PRID64,
+            LOGI("form is recycled, recover it first, action=%{public}d, formId=%{public}" PRId64 "",
                 pointerEvent->GetPointerAction(), runningCardId_);
             recycleStatus_ = RecycleStatus::RECOVERING;
             pointerEventCache_.emplace_back(pointerEvent);

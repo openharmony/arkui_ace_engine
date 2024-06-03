@@ -1241,17 +1241,10 @@ void FormPattern::ProcDeleteImageNode(const AAFwk::Want& want)
     }
 }
 
-void FormPattern::FireFormSurfaceNodeCallback(
-    const std::shared_ptr<Rosen::RSSurfaceNode>& node, const AAFwk::Want& want)
+void FormPattern::AttachRSNode(const std::shared_ptr<Rosen::RSSurfaceNode>& node, const AAFwk::Want& want)
 {
-    ACE_FUNCTION_TRACE();
-    CHECK_NULL_VOID(node);
-    node->CreateNodeInRenderThread();
-
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    RemoveFormSkeleton();
-
     auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
     CHECK_NULL_VOID(externalRenderContext);
     externalRenderContext->SetRSNode(node);
@@ -1279,7 +1272,20 @@ void FormPattern::FireFormSurfaceNodeCallback(
         renderContext->ClearChildren();
     }
     renderContext->AddChild(externalRenderContext, 0);
+}
 
+void FormPattern::FireFormSurfaceNodeCallback(
+    const std::shared_ptr<Rosen::RSSurfaceNode>& node, const AAFwk::Want& want)
+{
+    ACE_FUNCTION_TRACE();
+    CHECK_NULL_VOID(node);
+    node->CreateNodeInRenderThread();
+
+    RemoveFormSkeleton();
+    AttachRSNode(node, want);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
@@ -1290,7 +1296,7 @@ void FormPattern::FireFormSurfaceNodeCallback(
     isLoaded_ = true;
     isUnTrust_ = false;
     isFrsNodeDetached_ = false;
-    isDynamic_ = isDynamic;
+    isDynamic_ = want.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_IS_DYNAMIC, false);
 
     ProcDeleteImageNode(want);
 
@@ -1299,6 +1305,8 @@ void FormPattern::FireFormSurfaceNodeCallback(
     CHECK_NULL_VOID(parent);
     parent->MarkNeedSyncRenderTree();
     parent->RebuildRenderContextTree();
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     renderContext->RequestNextFrame();
     OnLoadEvent();
 
