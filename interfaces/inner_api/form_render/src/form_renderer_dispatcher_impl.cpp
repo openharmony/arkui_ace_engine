@@ -205,5 +205,24 @@ void FormRendererDispatcherImpl::OnAccessibilityDumpChildInfo(
         uiContent->AccessibilityDumpChildInfo(params, info);
     });
 }
+
+void FormRendererDispatcherImpl::OnAccessibilityTransferHoverEvent(float pointX, float pointY, int32_t sourceType,
+    int32_t eventType, int64_t timeMs)
+{
+    auto handler = eventHandler_.lock();
+    if (!handler) {
+        HILOG_ERROR("eventHandler is nullptr");
+        return;
+    }
+    handler->PostTask([content = uiContent_, pointX, pointY, sourceType, eventType, timeMs]() {
+        auto uiContent = content.lock();
+        if (!uiContent) {
+            HILOG_ERROR("uiContent is nullptr");
+            return;
+        }
+        HILOG_INFO("OnAccessibilityTransferHoverEvent");
+        uiContent->HandleAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
+    });
+}
 } // namespace Ace
 } // namespace OHOS

@@ -369,6 +369,11 @@ void FormPattern::OnAccessibilityDumpChildInfo(const std::vector<std::string>& p
     formManagerBridge_->OnAccessibilityDumpChildInfo(params, info);
 }
 
+RefPtr<AccessibilitySessionAdapter> FormPattern::GetAccessibilitySessionAdapter()
+{
+    return accessibilitySessionAdapter_;
+}
+
 void FormPattern::UpdateStaticCard()
 {
     // 1. Use imageNode to display pixelMap
@@ -783,7 +788,7 @@ void FormPattern::LoadDisableFormStyle()
     }
     renderContext->UpdateBackgroundColor(Color(CONTENT_BG_COLOR_DARK));
     renderContext->UpdateOpacity(TIME_LIMIT_TRANSPARENT_VAL);
-    
+
     auto textNode = CreateTimeLimitNode();
     CHECK_NULL_VOID(textNode);
     textNode->MarkModifyDone();
@@ -968,7 +973,7 @@ RefPtr<FrameNode> FormPattern::CreateColumnNode()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-        
+
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     CHECK_NULL_RETURN(columnNode, nullptr);
@@ -1035,6 +1040,7 @@ void FormPattern::InitFormManagerDelegate()
         formManagerBridge_->SetFormUtils(formUtils);
     }
     int32_t instanceID = context->GetInstanceId();
+    accessibilitySessionAdapter_ = AceType::MakeRefPtr<AccessibilitySessionAdapterForm>(formManagerBridge_);
     formManagerBridge_->AddFormAcquireCallback([weak = WeakClaim(this), instanceID](int64_t id, const std::string& path,
                                                    const std::string& module, const std::string& data,
                                                    const std::map<std::string, sptr<AppExecFwk::FormAshmem>>&
