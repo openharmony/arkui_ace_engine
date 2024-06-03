@@ -110,7 +110,7 @@ export class TipsDialog extends ViewPU {
             'moduleName': '__harDefaultModuleName__'
         }, this, 'fontColorWithTheme');
         this.theme = new CustomThemeImpl({});
-        this.themeColorMode = undefined;
+        this.themeColorMode = ThemeColorMode.SYSTEM;
         this.__fontSizeScale = new ObservedPropertySimplePU(1, this, 'fontSizeScale');
         this.__windowSize = new ObservedPropertyObjectPU({ width: 0, height: 0 }, this, 'windowSize');
         this.updateButtonHeight = (h25) => {
@@ -687,7 +687,7 @@ export class SelectDialog extends ViewPU {
             'moduleName': '__harDefaultModuleName__'
         }, this, 'dividerColorWithTheme');
         this.theme = new CustomThemeImpl({});
-        this.themeColorMode = undefined;
+        this.themeColorMode = ThemeColorMode.SYSTEM;
         this.contentScroller = new Scroller();
         this.__fontSizeScale = new ObservedPropertySimplePU(1, this, 'fontSizeScale');
         this.__windowSize = new ObservedPropertyObjectPU({ width: 0, height: 0 }, this, 'windowSize');
@@ -1241,7 +1241,7 @@ export class ConfirmDialog extends ViewPU {
             'moduleName': '__harDefaultModuleName__'
         }, this, 'fontColorWithTheme');
         this.theme = new CustomThemeImpl({});
-        this.themeColorMode = undefined;
+        this.themeColorMode = ThemeColorMode.SYSTEM;
         this.onCheckedChange = undefined;
         this.contentScroller = new Scroller();
         this.buttons = undefined;
@@ -1650,7 +1650,7 @@ export class AlertDialog extends ViewPU {
             'moduleName': '__harDefaultModuleName__'
         }, this, 'fontColorWithTheme');
         this.theme = new CustomThemeImpl({});
-        this.themeColorMode = undefined;
+        this.themeColorMode = ThemeColorMode.SYSTEM;
         this.__windowSize = new ObservedPropertyObjectPU({ width: MAX_DIALOG_WIDTH, height: 0 }, this, 'windowSize');
         this.__fontSizeScale = new ObservedPropertySimplePU(1, this, 'fontSizeScale');
         this.setInitiallyProvidedValue(h14);
@@ -1930,7 +1930,7 @@ export class CustomContentDialog extends ViewPU {
         this.contentAreaPadding = undefined;
         this.buttons = undefined;
         this.theme = new CustomThemeImpl({});
-        this.themeColorMode = undefined;
+        this.themeColorMode = ThemeColorMode.SYSTEM;
         this.__fontSizeScale = new ObservedPropertySimplePU(1, this, 'fontSizeScale');
         this.__windowSize = new ObservedPropertyObjectPU({ width: 0, height: 0 }, this, 'windowSize');
         this.setInitiallyProvidedValue(p12);
@@ -2073,7 +2073,7 @@ class CustomDialogContentComponent extends ViewPU {
         this.contentAreaPadding = undefined;
         this.keyIndex = 0;
         this.theme = new CustomThemeImpl({});
-        this.themeColorMode = undefined;
+        this.themeColorMode = ThemeColorMode.SYSTEM;
         this.__titleHeight = new ObservedPropertySimplePU(0, this, 'titleHeight');
         this.__buttonHeight = new ObservedPropertySimplePU(0, this, 'buttonHeight');
         this.__contentMaxHeight = new ObservedPropertySimplePU(`calc(100% - ${this.titleHeight}vp - ${this.buttonHeight}vp)`, this, 'contentMaxHeight');
@@ -2240,13 +2240,14 @@ class CustomDialogContentComponent extends ViewPU {
         }, WithTheme);
         this.observeComponentCreation2((d11, e11) => {
             Scroll.create();
-            Scroll.backgroundColor({
-                'id': -1,
-                'type': 10001,
-                params: ['sys.color.comp_background_primary'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            });
+            Scroll.backgroundColor(this.themeColorMode === ThemeColorMode.SYSTEM || undefined ?
+            Color.Transparent : {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.comp_background_primary'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                });
         }, Scroll);
         this.observeComponentCreation2((b11, c11) => {
             Column.create();
@@ -3620,7 +3621,7 @@ export class LoadingDialog extends ViewPU {
             'moduleName': '__harDefaultModuleName__'
         }, this, 'loadingProgressIconColorWithTheme');
         this.theme = new CustomThemeImpl({});
-        this.themeColorMode = undefined;
+        this.themeColorMode = ThemeColorMode.SYSTEM;
         this.__fontSizeScale = new ObservedPropertySimplePU(1, this, 'fontSizeScale');
         this.__windowSize = new ObservedPropertyObjectPU({ width: 0, height: 0 }, this, 'windowSize');
         this.setInitiallyProvidedValue(z1);
