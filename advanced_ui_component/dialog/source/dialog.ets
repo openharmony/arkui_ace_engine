@@ -102,7 +102,7 @@ export struct TipsDialog {
   contentScroller: Scroller = new Scroller();
   @State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
-  themeColorMode?: ThemeColorMode | undefined = ThemeColorMode.SYSTEM;
+  themeColorMode?: ThemeColorMode = ThemeColorMode.SYSTEM;
   @State fontSizeScale: number = 1;
   @State windowSize: Size = { width: 0, height: 0 };
   updateButtonHeight: (height: number) => void = (height: number) => {
@@ -335,7 +335,7 @@ export struct SelectDialog {
   @State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   @State dividerColorWithTheme: ResourceColor = $r('sys.color.comp_divider');
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
-  themeColorMode?: ThemeColorMode | undefined = ThemeColorMode.SYSTEM;
+  themeColorMode?: ThemeColorMode = ThemeColorMode.SYSTEM;
   // the controller of content list
   contentScroller: Scroller = new Scroller();
   @State fontSizeScale: number = 1;
@@ -534,7 +534,7 @@ export struct ConfirmDialog {
   secondaryButton?: ButtonOptions = { value: "" }
   @State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
-  themeColorMode?: ThemeColorMode | undefined = ThemeColorMode.SYSTEM;
+  themeColorMode?: ThemeColorMode = ThemeColorMode.SYSTEM;
   onCheckedChange?: Callback<boolean>;
   contentScroller: Scroller = new Scroller();
   buttons?: ButtonOptions[] | undefined = undefined;
@@ -690,7 +690,7 @@ export struct AlertDialog {
   contentScroller: Scroller = new Scroller();
   @State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
-  themeColorMode?: ThemeColorMode | undefined = ThemeColorMode.SYSTEM;
+  themeColorMode?: ThemeColorMode = ThemeColorMode.SYSTEM;
   @State windowSize: Size = { width: MAX_DIALOG_WIDTH, height: 0 };
   @State fontSizeScale: number = 1;
 
@@ -808,7 +808,7 @@ export struct CustomContentDialog {
   contentAreaPadding?: Padding;
   buttons?: ButtonOptions[];
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
-  themeColorMode?: ThemeColorMode | undefined = ThemeColorMode.SYSTEM;
+  themeColorMode?: ThemeColorMode = ThemeColorMode.SYSTEM;
   @State fontSizeScale: number = 1;
   @State windowSize: Size = { width: 0, height: 0 };
 
@@ -840,7 +840,7 @@ struct CustomDialogContentComponent {
   contentAreaPadding?: Padding;
   keyIndex: number = 0;
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
-  themeColorMode?: ThemeColorMode | undefined = ThemeColorMode.SYSTEM;
+  themeColorMode?: ThemeColorMode = ThemeColorMode.SYSTEM;
 
   @Builder
   defaultContentBuilder(): void {
@@ -1509,7 +1509,7 @@ export struct LoadingDialog {
   @State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   @State loadingProgressIconColorWithTheme: ResourceColor = $r('sys.color.icon_secondary');
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
-  themeColorMode?: ThemeColorMode | undefined = ThemeColorMode.SYSTEM;
+  themeColorMode?: ThemeColorMode = ThemeColorMode.SYSTEM;
   @State fontSizeScale: number = 1;
   @State windowSize: Size = { width: 0, height: 0 };
 
