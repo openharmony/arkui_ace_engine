@@ -249,6 +249,11 @@ void ImageModelNG::SetBorder(const Border &border) {}
 void ImageModelNG::SetBackBorder()
 {
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, NeedBorderRadius, true);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetNeedBorderRadius(true);
 }
 
 void ImageModelNG::SetBackBorder(FrameNode *frameNode)

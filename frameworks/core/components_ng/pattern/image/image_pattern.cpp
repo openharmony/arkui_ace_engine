@@ -908,6 +908,9 @@ void ImagePattern::OnRecycle()
 void ImagePattern::OnReuse()
 {
     RegisterWindowStateChangedCallback();
+    auto renderProp = GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(renderProp);
+    renderProp->UpdateNeedBorderRadius(needBorderRadius_);
     LoadImageDataIfNeed();
 }
 
