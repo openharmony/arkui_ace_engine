@@ -678,6 +678,10 @@ public:
 
     virtual void SetSurfaceRotation(bool isLock) {}
 
+    void SetHandleChildBounds(bool value) {
+        handleChildBounds_ = value;
+    }
+
     virtual Matrix4 GetRevertMatrix()
     {
         return Matrix4();
@@ -692,6 +696,7 @@ protected:
     bool isModalRootNode_ = false;
     bool isSynced_ = false;
     bool isNeedRebuildRSTree_ = true;
+    bool handleChildBounds_ = false;
 
     virtual void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) {}
     virtual void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) {}

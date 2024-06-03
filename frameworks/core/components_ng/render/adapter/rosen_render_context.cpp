@@ -566,6 +566,9 @@ void RosenRenderContext::SyncGeometryFrame(const RectF& paintRect)
 {
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetBounds(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
+    if (handleChildBounds_) {
+        SetChildBounds(paintRect);
+    }
     if (useContentRectForRSFrame_) {
         SetContentRectToFrame(paintRect);
     } else {
@@ -574,6 +577,15 @@ void RosenRenderContext::SyncGeometryFrame(const RectF& paintRect)
     if (frameOffset_.has_value()) {
         rsNode_->SetFrame(paintRect.GetX() + frameOffset_->GetX(), paintRect.GetY() + frameOffset_->GetY(),
             paintRect.Width(), paintRect.Height());
+    }
+}
+
+void RosenRenderContext::SetChildBounds(const RectF& paintRect) const
+{
+    auto childRsNodeId = rsNode_->GetChildIdByIndex(0);
+    if (childRsNodeId.has_value()) {
+        auto childRsNode = Rosen::RSNodeMap::Instance().GetNode(childRsNodeId.value());
+        childRsNode->SetBounds(0.0f, 0.0f, paintRect.Width(), paintRect.Height());
     }
 }
 

@@ -554,7 +554,6 @@ private:
     void UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard);
     void UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, double keyboard, double oldWebHeight);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-    void BeforeSyncGeometryProperties(const DirtySwapConfig& config) override;
 
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
