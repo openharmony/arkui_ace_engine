@@ -619,6 +619,25 @@ void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& men
     }
 }
 
+void SetPreviewInfoToMenu(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& wrapperNode,
+    const RefPtr<FrameNode>& previewNode, const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
+{
+    CHECK_NULL_VOID(menuNode);
+    CHECK_NULL_VOID(targetNode);
+    if (menuParam.previewMode != MenuPreviewMode::NONE || targetNode->IsDraggable()) {
+        SetFilter(targetNode, wrapperNode);
+    }
+    if (menuParam.previewMode == MenuPreviewMode::IMAGE || menuParam.previewMode == MenuPreviewMode::NONE ||
+        menuParam.isShowHoverImage) {
+        SetPixelMap(targetNode, wrapperNode, previewNode, menuParam);
+    }
+    if (menuParam.previewMode == MenuPreviewMode::NONE) {
+        auto renderContext = menuNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateZIndex(1);
+    }
+}
+
 void SetHasCustomRadius(
     const RefPtr<FrameNode>& menuWrapperNode, const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
 {
@@ -800,16 +819,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     }
     if (type == MenuType::CONTEXT_MENU) {
         auto targetNode = FrameNode::GetFrameNode(targetTag, targetId);
-        SetFilter(targetNode, wrapperNode);
-        if (menuParam.previewMode == MenuPreviewMode::IMAGE || menuParam.previewMode == MenuPreviewMode::NONE ||
-            menuParam.isShowHoverImage) {
-            SetPixelMap(targetNode, wrapperNode, previewNode, menuParam);
-        }
-        if (menuParam.previewMode == MenuPreviewMode::NONE) {
-            auto renderContext = menuNode->GetRenderContext();
-            CHECK_NULL_RETURN(renderContext, wrapperNode);
-            renderContext->UpdateZIndex(1);
-        }
+        SetPreviewInfoToMenu(targetNode, wrapperNode, previewNode, menuNode, menuParam);
         if (menuParam.previewMode == MenuPreviewMode::CUSTOM) {
             previewNode->MountToParent(wrapperNode);
             previewNode->MarkModifyDone();
