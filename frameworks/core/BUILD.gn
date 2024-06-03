@@ -573,6 +573,7 @@ template("ace_core_source_set") {
         "common/rosen/rosen_window.cpp",
       ]
       deps += [ "//third_party/libuv:uv" ]
+
     }
 
     if (defined(config.window_scene_support) && config.window_scene_support) {

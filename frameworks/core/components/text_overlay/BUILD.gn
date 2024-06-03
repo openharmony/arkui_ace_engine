@@ -24,6 +24,7 @@ build_component("text_overlay") {
     "text_overlay_manager.cpp",
   ]
 
+  external_deps = [ "window_manager:libwm" ]
   rosen_sources = [ "rosen_render_text_overlay.cpp" ]
 }
 
@@ -36,7 +37,7 @@ build_component("text_overlay_for_web") {
     "text_overlay_manager.cpp",
   ]
 
-  external_deps = []
+  external_deps = [ "window_manager:libwm" ]
   if (is_ohos_standard_system) {
     external_deps += [ "opengles:libGLES" ]
   }
