@@ -59,7 +59,8 @@ bool SecurityComponentPattern::OnKeyEvent(const KeyEvent& event)
     if (event.action != KeyAction::DOWN) {
         return false;
     }
-    if ((event.code == KeyCode::KEY_SPACE) || (event.code == KeyCode::KEY_ENTER)) {
+    if ((event.code == KeyCode::KEY_SPACE) || (event.code == KeyCode::KEY_ENTER) ||
+        (event.code == KeyCode::KEY_NUMPAD_ENTER)) {
         auto frameNode = GetHost();
         CHECK_NULL_RETURN(frameNode, false);
         int32_t res = 1;
