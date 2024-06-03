@@ -743,15 +743,11 @@ void JSSwiper::SetPreviousMargin(const JSCallbackInfo& info)
     }
 
     CalcDimension value;
-    bool ignoreBlank = false;
     if (!ParseJsDimensionVp(info[0], value) || info[0]->IsNull() || info[0]->IsUndefined() ||
         LessNotEqual(value.Value(), 0.0)) {
         value.SetValue(0.0);
     }
-    if (info.Length() > 1 && info[1]->IsBoolean()) {
-        ignoreBlank = info[1]->ToBoolean();
-    }
-    SwiperModel::GetInstance()->SetPreviousMargin(value, ignoreBlank);
+    SwiperModel::GetInstance()->SetPreviousMargin(value);
 }
 
 void JSSwiper::SetNextMargin(const JSCallbackInfo& info)
@@ -761,15 +757,11 @@ void JSSwiper::SetNextMargin(const JSCallbackInfo& info)
     }
 
     CalcDimension value;
-    bool ignoreBlank = false;
     if (!ParseJsDimensionVp(info[0], value) || info[0]->IsNull() || info[0]->IsUndefined() ||
         LessNotEqual(value.Value(), 0.0)) {
         value.SetValue(0.0);
     }
-    if (info.Length() > 1 && info[1]->IsBoolean()) {
-        ignoreBlank = info[1]->ToBoolean();
-    }
-    SwiperModel::GetInstance()->SetNextMargin(value, ignoreBlank);
+    SwiperModel::GetInstance()->SetNextMargin(value);
 }
 
 void JSSwiper::SetDisplayMode(int32_t index)
