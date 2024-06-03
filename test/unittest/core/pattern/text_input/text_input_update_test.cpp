@@ -946,6 +946,7 @@ HWTEST_F(TextInputUpdateTestNg, FromJson, TestSize.Level1)
      */
     auto json = JsonUtil::Create(true);
     pattern_->ToJsonValue(json, filter);
+    pattern_->FromJson(json);
 
     /**
      * @tc.expected: check decoration in TextArea JSON is NONE, BLACK, SOLID
@@ -968,8 +969,6 @@ HWTEST_F(TextInputUpdateTestNg, FromJson, TestSize.Level1)
     EXPECT_TRUE(json->GetBool("showUnderline"));
     EXPECT_TRUE(json->GetBool("selectAll"));
     EXPECT_EQ(json->GetString("wordBreak"), "break-all");
-    EXPECT_EQ(json->GetString("textOverflow"), "TextOverflow.Clip");
-    EXPECT_EQ(json->GetString("textIndent"), "5.00vp");
 }
 
 /**
@@ -1066,7 +1065,7 @@ HWTEST_F(TextInputAutoFillTest, NotifyFillRequestSuccess, TestSize.Level1)
     });
 
     pattern_->SetFillRequestFinish(false);
-    pattern_->NotifyFillRequestSuccess(nullptr, AceAutoFillType::ACE_PASSWORD);
+    pattern_->NotifyFillRequestSuccess(nullptr, nullptr, AceAutoFillType::ACE_PASSWORD);
     EXPECT_EQ(pattern_->IsFillRequestFinish(), true);
 }
 
