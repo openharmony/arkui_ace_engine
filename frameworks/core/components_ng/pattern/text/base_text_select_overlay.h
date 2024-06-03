@@ -145,10 +145,7 @@ public:
     virtual bool CheckHandleVisible(const RectF& paintRect) = 0;
     virtual void OnResetTextSelection() {}
 
-    virtual bool IsAcceptResetSelectionEvent(SourceType sourceType, TouchType touchType)
-    {
-        return (sourceType == SourceType::MOUSE || sourceType == SourceType::TOUCH) && touchType == TouchType::DOWN;
-    }
+    virtual bool IsAcceptResetSelectionEvent(SourceType sourceType, TouchType touchType);
 
     bool HasRenderTransform()
     {
