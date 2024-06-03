@@ -496,7 +496,8 @@ void PageRouterManager::StartRestore(const RouterPageInfo& target)
 int32_t PageRouterManager::GetStackSize() const
 {
     CHECK_RUN_ON(JS);
-    return static_cast<int32_t>(pageRouterStack_.size());
+    auto realSize = isNewPageReplacing_ ? pageRouterStack_.size() - 1 : pageRouterStack_.size();
+    return static_cast<int32_t>(realSize);
 }
 
 RouterPageInfo PageRouterManager::GetPageInfoByIndex(int32_t index, const std::string& params)
@@ -545,6 +546,13 @@ void PageRouterManager::GetState(int32_t& index, std::string& name, std::string&
         return;
     }
     index = static_cast<int32_t>(pageRouterStack_.size());
+    if (isNewPageReplacing_) {
+        if (index <= 1) {
+            TAG_LOGD(AceLogTag::ACE_ROUTER, "router stack size invalid while replacing");
+        } else {
+            index = index - 1;
+        }
+    }
     auto pageNode = pageRouterStack_.back().Upgrade();
     CHECK_NULL_VOID(pageNode);
     auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
@@ -1526,37 +1534,25 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
     auto stageManager = pipelineContext->GetStageManager();
     auto stageNode = stageManager->GetStageNode();
     auto popNode = stageNode->GetChildren().back();
-    int8_t popIndex = static_cast<int8_t>(stageNode->GetChildren().size() - 1);
-    do {
-        if (popIndex < 0) {
-            break;
-        }
-        auto lastIter = pageRouterStack_.begin();
-        std::advance(lastIter, popIndex);
-        if (lastIter == pageRouterStack_.end()) {
-            break;
-        }
-        lastIter = pageRouterStack_.erase(lastIter);
-        for (auto iter = lastIter; iter != pageRouterStack_.end(); iter++, popIndex++) {
-            auto pageNode = iter->Upgrade();
-            if (!pageNode) {
-                continue;
-            }
-            auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
-            pagePattern->GetPageInfo()->SetPageIndex(popIndex);
-        }
-    } while (0);
+    int32_t popIndex = static_cast<int32_t>(stageNode->GetChildren().size() - 1);
     bool findPage = false;
     if (info.routerMode == RouterMode::SINGLE) {
         auto pageInfo = FindPageInStack(info.url);
+        if (pageInfo.first == popIndex) {
+            // replace top self in SINGLE mode, do nothing
+            return;
+        }
         if (pageInfo.second) {
             // find page in stack, move position and update params.
             MovePageToFront(pageInfo.first, pageInfo.second, info, false, true, false);
+            popIndex = popIndex - 1;
             findPage = true;
         }
     }
     if (!findPage) {
+        isNewPageReplacing_ = true;
         LoadPage(GenerateNextPageId(), info, true, false);
+        isNewPageReplacing_ = false;
     }
     if (popIndex < 0 || popNode == stageNode->GetChildren().back() ||
         stageNode->GetChildIndex(popNode) != popIndex) {
@@ -1564,9 +1560,17 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
     }
     auto iter = pageRouterStack_.begin();
     std::advance(iter, popIndex);
-    pageRouterStack_.erase(iter);
+    auto lastIter = pageRouterStack_.erase(iter);
     pageRouterStack_.emplace_back(WeakPtr<FrameNode>(AceType::DynamicCast<FrameNode>(popNode)));
     popNode->MovePosition(stageNode->GetChildren().size() - 1);
+    for (auto iter = lastIter; iter != pageRouterStack_.end(); ++iter, ++popIndex) {
+        auto pageNode = iter->Upgrade();
+        if (!pageNode) {
+            continue;
+        }
+        auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+        pagePattern->GetPageInfo()->SetPageIndex(popIndex);
+    }
     PopPage("", false, false);
 }
 } // namespace OHOS::Ace::NG
