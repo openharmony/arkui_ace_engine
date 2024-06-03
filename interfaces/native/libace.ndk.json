@@ -1074,5 +1074,149 @@
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_CreateFromNapiDrawable"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionItem_Create"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionItem_Dispose"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionItem_SetContent"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionItem_SetActionAreaDistance"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionItem_GetActionAreaDistance"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionItem_SetOnEnterActionArea"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionItem_SetOnAction"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionItem_SetOnExitActionArea"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionItem_SetOnStateChange"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionOption_Create"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionOption_Dispose"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionOption_SetStart"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionOption_SetEnd"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionOption_SetEdgeEffect"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionOption_GetEdgeEffect"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionOption_SetOnOffsetChange"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeUtils_GetLayoutSize"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeUtils_GetLayoutPosition"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeUtils_GetLayoutPositionInWindow"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeUtils_GetLayoutPositionInScreen"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeUtils_GetPositionWithTranslateInWindow"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeUtils_GetPositionWithTranslateInScreen"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListChildrenMainSizeOption_Create"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListChildrenMainSizeOption_Dispose"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListChildrenMainSizeOption_SetDefaultMainSize"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListChildrenMainSizeOption_GetDefaultMainSize"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListChildrenMainSizeOption_Resize"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListChildrenMainSizeOption_Splice"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListChildrenMainSizeOption_UpdateSize"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListChildrenMainSizeOption_GetMainSize"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_List_CloseAllSwipeActions"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionItem_SetOnEnterActionAreaWithUserData"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionItem_SetOnActionWithUserData"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionItem_SetOnExitActionAreaWithUserData"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionItem_SetOnStateChangeWithUserData"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionOption_SetOnOffsetChangeWithUserData"
     }
 ]
