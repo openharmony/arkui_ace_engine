@@ -108,6 +108,7 @@ private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnLanguageConfigurationUpdate() override;
     void DumpInfo() override;
     void InitTextClockController();
 

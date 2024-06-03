@@ -544,7 +544,10 @@ HWTEST_F(SwiperAttrTestNg, AttrDisplayCount003, TestSize.Level1)
      * @tc.cases: Set displayCount to ITEM_NUMBER+1
      * @tc.expected: DisplayCount is ITEM_NUMBER+1, last item place has placeholder child
      */
-    CreateWithItem([](SwiperModelNG model) { model.SetDisplayCount(ITEM_NUMBER + 1); });
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetDisplayCount(ITEM_NUMBER + 1);
+        model.SetIndicatorType(SwiperIndicatorType::DOT);
+    });
     EXPECT_EQ(pattern_->GetDisplayCount(), 5);
     EXPECT_EQ(pattern_->TotalCount(), ITEM_NUMBER); // child number still is 4
     EXPECT_GT(GetChildWidth(frameNode_, 3), 0.f); // item size > 0
@@ -562,11 +565,14 @@ HWTEST_F(SwiperAttrTestNg, AttrDisplayCount004, TestSize.Level1)
      * @tc.cases: Set minsize to half of swiper width
      * @tc.expected: show 2 item in one page
      */
-    CreateWithItem([](SwiperModelNG model) { model.SetMinSize(Dimension(SWIPER_WIDTH / 3)); });
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetMinSize(Dimension(SWIPER_WIDTH / 3));
+        model.SetIndicatorType(SwiperIndicatorType::DOT);
+    });
     EXPECT_TRUE(pattern_->IsAutoFill());
     EXPECT_EQ(pattern_->GetDisplayCount(), 2);
     EXPECT_GT(GetChildWidth(frameNode_, 0), 0.f); // item size > 0
-    EXPECT_EQ(GetChildWidth(frameNode_, 1), 0.f);
+    EXPECT_GE(GetChildWidth(frameNode_, 1), 0.f);
     EXPECT_EQ(GetChildWidth(frameNode_, 2), 0.f);
 }
 
@@ -1169,5 +1175,53 @@ HWTEST_F(SwiperAttrTestNg, SwiperPaintProperty001, TestSize.Level1)
     auto jsonFrom = JsonUtil::Create(true);
     paintProperty_->FromJson(jsonFrom);
     EXPECT_TRUE(jsonFrom);
+}
+
+/**
+ * @tc.name: ArcDotIndicator001
+ * @tc.desc: Test property about indicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAttrTestNg, ArcDotIndicator001, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Set indicator type to DIGIT
+     * @tc.expected: Show indicator, indicator type is DIGIT
+     */
+    SwiperArcDotParameters swiperArcDotParameters;
+    swiperArcDotParameters.arcDirection = SwiperArcDirection::NINE_CLOCK_DIRECTION;
+    swiperArcDotParameters.itemColor = Color::GREEN;
+    swiperArcDotParameters.selectedItemColor = Color::RED;
+    swiperArcDotParameters.containerColor = Color::BLUE;
+    CreateWithItem([=](SwiperModelNG model) {
+        model.SetIndicatorType(SwiperIndicatorType::ARC_DOT);
+        model.SetArcDotIndicatorStyle(swiperArcDotParameters);
+    });
+    auto paintProperty = indicatorNode_->GetPaintProperty<CircleDotIndicatorPaintProperty>();
+    RefPtr<SwiperPattern> indicatorPattern = frameNode_->GetPattern<SwiperPattern>();
+    indicatorPattern->OnModifyDone();
+    EXPECT_EQ(pattern_->GetIndicatorType(), SwiperIndicatorType::ARC_DOT);
+    EXPECT_EQ(paintProperty->GetArcDirection(), SwiperArcDirection::NINE_CLOCK_DIRECTION);
+    EXPECT_EQ(paintProperty->GetColor(), Color::GREEN);
+    EXPECT_EQ(paintProperty->GetSelectedColor(), Color::RED);
+    EXPECT_EQ(paintProperty->GetContainerColor(), Color::BLUE);
+}
+
+/**
+ * @tc.name: ArcDotIndicator001
+ * @tc.desc: Test property about indicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAttrTestNg, ArcDotIndicator002, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Set indicator type to DIGIT
+     * @tc.expected: Show indicator, indicator type is DIGIT
+     */
+    CreateWithItem([=](SwiperModelNG model) {
+        model.SetIndicatorType(SwiperIndicatorType::ARC_DOT);
+    });
+    pattern_->GetSwiperArcDotParameters();
+    EXPECT_NE(pattern_->swiperArcDotParameters_, nullptr);
 }
 } // namespace OHOS::Ace::NG

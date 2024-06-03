@@ -101,7 +101,7 @@ RefPtr<CanvasImage> ImageDecoder::MakeDrawingImage()
     return canvasImage;
 }
 
-RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(AIImageQuality imageQuality)
+RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(AIImageQuality imageQuality, bool isHdrDecoderNeed)
 {
     CHECK_NULL_RETURN(obj_ && data_, nullptr);
 #ifndef USE_ROSEN_DRAWING
@@ -118,7 +118,7 @@ RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(AIImageQuality imageQuality)
     auto srcStr = src.GetSrcType() == SrcType::BASE64 ? src.GetKey() : src.ToString();
     ACE_SCOPED_TRACE("CreateImagePixelMap %s, sourceSize: [ %d, %d ], targetSize: [ %d, %d ]", srcStr.c_str(),
         sourceSize.first, sourceSize.second, static_cast<int32_t>(width), static_cast<int32_t>(height));
-    auto pixmap = source->CreatePixelMap({ width, height }, imageQuality);
+    auto pixmap = source->CreatePixelMap({ width, height }, imageQuality, isHdrDecoderNeed);
 
     CHECK_NULL_RETURN(pixmap, nullptr);
     auto image = PixelMapImage::Create(pixmap);

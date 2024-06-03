@@ -776,6 +776,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetFocusScopePriority));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFocusScopePriority"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetFocusScopePriority));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setChainMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetChainMode));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetChainMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetChainMode));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "common"), common);
 
     auto nativeUtils = panda::ObjectRef::New(vm);
@@ -1039,6 +1043,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetSelection));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelection"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetSelection));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextSelectableMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetTextSelectableMode));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextSelectableMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetTextSelectableMode));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDataDetectorConfig"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetDataDetectorConfig));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDataDetectorConfig"),

@@ -190,8 +190,8 @@ void JSSymbol::parseSymbolEffect(const JSRef<JSObject> symbolEffectObj, NG::Symb
     auto fillStyleProperty = symbolEffectObj->GetProperty("fillStyle");
     if (fillStyleProperty->IsNumber()) {
         auto fillStyleNum = fillStyleProperty->ToNumber<uint32_t>();
-        if (fillStyleNum >= static_cast<int>(FillStyle::CUMULATIVE) &&
-            fillStyleNum <= static_cast<int>(FillStyle::ITERATIVE)) {
+        if (fillStyleNum >= static_cast<uint32_t>(FillStyle::CUMULATIVE) &&
+            fillStyleNum <= static_cast<uint32_t>(FillStyle::ITERATIVE)) {
             symbolEffectOptions.SetFillStyle(static_cast<FillStyle>(fillStyleNum));
         }
     }

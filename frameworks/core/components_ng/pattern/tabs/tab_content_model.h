@@ -119,7 +119,7 @@ struct TabBarSymbol {
     bool selectedFlag = false;
 };
 
-class TabContentModel {
+class ACE_FORCE_EXPORT TabContentModel {
 public:
     static TabContentModel* GetInstance();
     virtual ~TabContentModel() = default;

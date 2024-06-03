@@ -265,6 +265,7 @@ struct SelectOverlayInfo {
 
     OHOS::Ace::WeakPtr<FrameNode> callerFrameNode;
     std::optional<CallerFrameNodeInfo> callerNodeInfo;
+    std::optional<RectF> ancestorViewPort;
 
     bool isHandleLineShow = true;
     std::string selectText;
@@ -288,6 +289,8 @@ struct SelectOverlayInfo {
         JSON_STRING_PUT_STRING(jsonValue, selectText);
         return jsonValue->ToString();
     }
+
+    void GetCallerNodeAncestorViewPort(RectF& viewPort);
 };
 
 } // namespace OHOS::Ace::NG

@@ -17,7 +17,7 @@
 
 #include "bridge/cj_frontend/frontend/cj_frontend_abstract.h"
 #include "bridge/cj_frontend/frontend/cj_page_router_abstract.h"
-#include "bridge/common/utils/engine_helper.h"
+#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 #include "core/common/container.h"
 #include "core/components/page/page_target.h"
 
@@ -31,7 +31,7 @@ void FfiOHOSAceFrameworkRouterPush(const char* url, const char* param)
         LOGE("RouterPush fail, no current container");
         return;
     }
-    auto frontend = EngineHelper::GetCurrentFrontend();
+    auto frontend = Utils::GetCurrentFrontend();
     if (!frontend) {
         LOGE("can not get frontend.");
         return;
@@ -45,7 +45,7 @@ void FfiOHOSAceFrameworkRouterBack(const char* url, const char* param)
         LOGE("RouterBack fail, no current container");
         return;
     }
-    auto frontend = AceType::DynamicCast<CJFrontendAbstract>(EngineHelper::GetCurrentFrontend());
+    auto frontend = AceType::DynamicCast<CJFrontendAbstract>(Utils::GetCurrentFrontend());
     if (!frontend) {
         LOGE("can not get frontend.");
         return;
@@ -60,7 +60,7 @@ ExternalString FfiOHOSAceFrameworkRouterGetParams()
         return {};
     }
 
-    auto frontend = AceType::DynamicCast<CJFrontendAbstract>(EngineHelper::GetCurrentFrontend());
+    auto frontend = AceType::DynamicCast<CJFrontendAbstract>(Utils::GetCurrentFrontend());
     if (!frontend) {
         LOGE("can not get frontend.");
         return {};

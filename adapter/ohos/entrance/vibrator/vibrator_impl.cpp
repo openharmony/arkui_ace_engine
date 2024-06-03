@@ -13,16 +13,20 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/indexer/indexer_pattern.h"
 #include "vibrator_agent.h"
+#include "adapter/ohos/entrance/vibrator/vibrator_impl.h"
+
+using namespace OHOS::Sensors;
 
 namespace OHOS::Ace::NG {
-void IndexerPattern::VibraFeedback()
+void VibratorImpl::StartVibraFeedback()
 {
+#ifdef INDEXER_SUPPORT_VIBRATOR
     bool state { false };
     Sensors::IsSupportEffect(VIBRATOR_TYPE_SLIDE, &state);
     if (state) {
         Sensors::StartVibrator(VIBRATOR_TYPE_SLIDE);
     }
+#endif
 }
 } // namespace OHOS::Ace::NG

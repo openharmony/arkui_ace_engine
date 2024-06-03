@@ -88,11 +88,14 @@ float ParagraphManager::GetTextWidthIncludeIndent() const
     return res;
 }
 
-size_t ParagraphManager::GetLineCount() const
+size_t ParagraphManager::GetLineCount(bool isSkipEmptyParagraphs) const
 {
     size_t count = 0;
     for (auto &&info : paragraphs_) {
-        count += info.paragraph->GetLineCount();
+        if (!isSkipEmptyParagraphs ||
+            (!NonPositive(info.paragraph->GetLongestLine()) && !NonPositive(info.paragraph->GetHeight()))) {
+            count += info.paragraph->GetLineCount();
+        }
     }
     return count;
 }
@@ -240,15 +243,24 @@ TextLineMetrics ParagraphManager::GetLineMetrics(size_t lineNumber)
             "GetLineMetrics failed, lineNumber is greater than max lines:%{public}zu", lineNumber);
         return TextLineMetrics();
     }
+    size_t endIndex = 0;
+    double paragraphsHeight = 0.0;
     size_t lineNumberParam = lineNumber;
     for (auto &&info : paragraphs_) {
         auto lineCount = info.paragraph->GetLineCount();
         if (lineNumber > lineCount - 1) {
             lineNumber -= lineCount;
+            paragraphsHeight += info.paragraph->GetHeight();
+            auto lastLineMetrics = info.paragraph->GetLineMetrics(lineCount - 1);
+            endIndex += lastLineMetrics.endIndex + 1;
             continue;
         }
         auto lineMetrics = info.paragraph->GetLineMetrics(lineNumber);
+        lineMetrics.startIndex += endIndex;
+        lineMetrics.endIndex += endIndex;
         lineMetrics.lineNumber = lineNumberParam;
+        lineMetrics.y += paragraphsHeight;
+        lineMetrics.baseline += paragraphsHeight;
         return lineMetrics;
     }
     return TextLineMetrics();

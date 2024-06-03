@@ -350,6 +350,7 @@ public:
     RefPtr<FrameNode> GetMenuChild(const RefPtr<UINode>& node);
     RefPtr<FrameNode> GetShowedSubMenu();
     bool IsSelectOverlayCustomMenu(const RefPtr<FrameNode>& menu) const;
+    bool HasStackSubMenu();
 
 protected:
     void OnTouchEvent(const TouchEventInfo& info);

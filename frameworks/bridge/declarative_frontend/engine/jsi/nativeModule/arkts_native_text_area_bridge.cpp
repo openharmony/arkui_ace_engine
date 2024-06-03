@@ -386,11 +386,11 @@ ArkUINativeModuleValue TextAreaBridge::SetShowCounter(ArkUIRuntimeCallInfo *runt
     if (highlightBorderArg->IsBoolean()) {
         highlightBorder = highlightBorderArg->BooleaValue();
     }
-    auto thresholdValue = DEFAULT_MODE;
+    auto thresholdValue = static_cast<int32_t>(DEFAULT_MODE);
     if (thresholdArg->IsNumber()) {
         thresholdValue = thresholdArg->Int32Value(vm);
         if (thresholdValue < MINI_VALID_VALUE || thresholdValue > MAX_VALID_VALUE) {
-            thresholdValue = ILLEGAL_VALUE;
+            thresholdValue = static_cast<int32_t>(ILLEGAL_VALUE);
             showCounter = false;
         }
     }

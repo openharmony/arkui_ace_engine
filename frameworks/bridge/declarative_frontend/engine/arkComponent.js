@@ -241,6 +241,25 @@ class HeightModifier extends ModifierWithKey {
   }
 }
 HeightModifier.identity = Symbol('height');
+
+class ChainModeifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetChainMode(node);
+    }
+    else {
+      getUINativeModule().common.setChainMode(node, this.value.direction, this.value.style);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+ChainModeifier.identity = Symbol('chainMode');
+
 class BorderRadiusModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -3333,6 +3352,15 @@ class ArkComponent {
   parallelGesture(gesture, mask) {
     throw new Error('Method not implemented.');
   }
+
+  chainMode(direction, style) {
+    let arkChainMode = new ArkChainMode();
+    arkChainMode.direction = direction ;
+    arkChainMode.style = style;
+    modifierWithKey(this._modifiersWithKeys, ChainModeifier.identity, ChainModeifier, arkChainMode);
+    return this;
+  }
+
   blur(value, options) {
     let blur = new ArkBlurOptions();
     blur.value = value;
@@ -10080,6 +10108,22 @@ class TextSelectionModifier extends ModifierWithKey {
   }
 }
 TextSelectionModifier.identity = Symbol('textSelection');
+class TextSelectableModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetTextSelectableMode(node);
+    } else {
+      getUINativeModule().text.setTextSelectableMode(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextSelectableModifier.identity = Symbol('textTextSelectable');
 class TextDataDetectorConfigModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -10265,6 +10309,10 @@ class ArkTextComponent extends ArkComponent {
     arkSelection.selectionStart = selectionStart;
     arkSelection.selectionEnd = selectionEnd;
     modifierWithKey(this._modifiersWithKeys, TextSelectionModifier.identity, TextSelectionModifier, arkSelection);
+    return this;
+  }
+  textSelectable(value) {
+    modifierWithKey(this._modifiersWithKeys, TextSelectableModifier.identity, TextSelectableModifier, value);
     return this;
   }
   ellipsisMode(value) {
@@ -14248,6 +14296,15 @@ class ArkWaterFlowEdgeEffect {
   isEqual(another) {
     return (this.value === another.value) &&
       (this.options === another.options);
+  }
+}
+class ArkChainMode{
+  constructor() {
+    this.direction = undefined;
+    this.style = undefined;
+  }
+  isEqual(another) {
+    return (this.direction === another.direction) && (this.style === another.style);
   }
 }
 class ArkMesh {
@@ -24536,8 +24593,8 @@ class ArkTabsComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, AnimationDurationModifier.identity, AnimationDurationModifier, value);
     return this;
   }
-  animateMode(value) {
-    modifierWithKey(this._modifiersWithKeys, AnimateModeModifier.identity, AnimateModeModifier, value);
+  animationMode(value) {
+    modifierWithKey(this._modifiersWithKeys, AnimationModeModifier.identity, AnimationModeModifier, value);
     return this;
   }
   onChange(event) {
@@ -24714,7 +24771,7 @@ class AnimationDurationModifier extends ModifierWithKey {
   }
 }
 AnimationDurationModifier.identity = Symbol('animationduration');
-class AnimateModeModifier extends ModifierWithKey {
+class AnimationModeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
@@ -24730,7 +24787,7 @@ class AnimateModeModifier extends ModifierWithKey {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
-AnimateModeModifier.identity = Symbol('animateMode');
+AnimationModeModifier.identity = Symbol('animationMode');
 class ScrollableModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

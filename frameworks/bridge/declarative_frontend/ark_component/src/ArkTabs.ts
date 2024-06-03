@@ -65,8 +65,8 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     modifierWithKey(this._modifiersWithKeys, AnimationDurationModifier.identity, AnimationDurationModifier, value);
     return this;
   }
-  animateMode(value: AnimateMode): TabsAttribute {
-    modifierWithKey(this._modifiersWithKeys, AnimateModeModifier.identity, AnimateModeModifier, value);
+  animationMode(value: AnimationMode): TabsAttribute {
+    modifierWithKey(this._modifiersWithKeys, AnimationModeModifier.identity, AnimationModeModifier, value);
     return this;
   }
   onChange(event: (index: number) => void): TabsAttribute {
@@ -259,11 +259,11 @@ class AnimationDurationModifier extends ModifierWithKey<number> {
 }
 
 
-class AnimateModeModifier extends ModifierWithKey<AnimateMode> {
-  constructor(value: AnimateMode) {
+class AnimationModeModifier extends ModifierWithKey<AnimationMode> {
+  constructor(value: AnimationMode) {
     super(value);
   }
-  static identity: Symbol = Symbol('animateMode');
+  static identity: Symbol = Symbol('animationMode');
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {

@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT EnvironmentProxy : public EnvironmentInterface {
+class ACE_FORCE_EXPORT EnvironmentProxy : public EnvironmentInterface {
 public:
     static EnvironmentProxy* GetInstance();
 

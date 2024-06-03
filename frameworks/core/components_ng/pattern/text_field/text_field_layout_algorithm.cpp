@@ -23,6 +23,7 @@
 #include "base/log/log_wrapper.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "bridge/common/utils/utils.h"
 #include "core/common/font_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
@@ -75,6 +76,11 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
     }
     
     textIndent_ = textStyle.GetTextIndent();
+    auto fontManager = pipeline->GetFontManager();
+    if (fontManager && !(fontManager->GetAppCustomFont().empty()) &&
+        !(textFieldLayoutProperty->GetFontFamily().has_value())) {
+        textStyle.SetFontFamilies(Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont()));
+    }
     // use for modifier.
     auto contentModifier = pattern->GetContentModifier();
     if (contentModifier) {
@@ -417,13 +423,23 @@ void TextFieldLayoutAlgorithm::CounterLayout(LayoutWrapper* layoutWrapper)
         const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
         CHECK_NULL_VOID(content);
         if (!pattern->IsTextArea()) {
-            auto contentRect = layoutWrapper->GetGeometryNode()->GetContentRect();
-            auto counterWidth = counterNode->GetGeometryNode()->GetFrameSize().Width();
-            auto textGeometryNode = counterNode->GetGeometryNode();
-            CHECK_NULL_VOID(textGeometryNode);
-            textGeometryNode->SetFrameOffset(OffsetF(
-                contentRect.Width() - counterWidth, frameRect.Height() + textGeometryNode->GetFrameRect().Height()));
-            counterNode->Layout();
+            auto property = frameNode->GetLayoutProperty();
+            CHECK_NULL_VOID(property);
+            auto isRTL = property->GetNonAutoLayoutDirection() == TextDirection::RTL;
+            if (isRTL) {
+                auto contentRect = layoutWrapper->GetGeometryNode()->GetContentRect();
+                textGeometryNode->SetFrameOffset(
+                    OffsetF(contentRect.GetX(), frameRect.Height() + textGeometryNode->GetFrameRect().Height()));
+                counterNode->Layout();
+            } else {
+                auto contentRect = layoutWrapper->GetGeometryNode()->GetContentRect();
+                auto counterWidth = counterNode->GetGeometryNode()->GetFrameSize().Width();
+                auto textGeometryNode = counterNode->GetGeometryNode();
+                CHECK_NULL_VOID(textGeometryNode);
+                textGeometryNode->SetFrameOffset(OffsetF(contentRect.Width() - counterWidth,
+                    frameRect.Height() + textGeometryNode->GetFrameRect().Height()));
+                counterNode->Layout();
+            }
         } else {
             textGeometryNode->SetFrameOffset(OffsetF(content->GetRect().GetX(),
                 frameRect.Height() - pattern->GetPaddingBottom() - textGeometryNode->GetFrameRect().Height()));

@@ -180,7 +180,6 @@ private:
         const RefPtr<FrameNode>& listNode, RefPtr<IndexerTheme>& indexerTheme, uint32_t pos);
     void UpdateBubbleListItemMarkModify(RefPtr<FrameNode>& textNode, RefPtr<FrameNode>& listItemNode);
     void StartCollapseDelayTask(RefPtr<FrameNode>& hostNode, uint32_t duration = INDEXER_COLLAPSE_WAIT_DURATION);
-    void VibraFeedback();
 
     RefPtr<FrameNode> popupNode_;
     RefPtr<TouchEventImpl> touchListener_;

@@ -1269,6 +1269,11 @@ public:
         hasSupportedPreviewText_ = isSupported;
     }
 
+    void OnTouchTestHit(SourceType hitTestType) override
+    {
+        selectOverlay_->OnTouchTestHit(hitTestType);
+    }
+
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override
@@ -1292,6 +1297,7 @@ private:
     void HandleTouchDown(const Offset& offset);
     void HandleTouchUp();
     void HandleTouchMove(const TouchEventInfo& info);
+    void HandleTouchMoveAfterLongPress(const TouchEventInfo& info);
     void UpdateCaretByTouchMove(const TouchEventInfo& info);
     void InitDisableColor();
     void InitFocusEvent();
@@ -1486,6 +1492,10 @@ private:
     bool CheckPreviewTextValidate(PreviewTextInfo info) const;
 
     void CalculatePreviewingTextMovingLimit(const Offset& touchOffset, double& limitL, double& limitR);
+    void UpdateParam(GestureEvent& info, bool shouldProcessOverlayAfterLayout);
+    void ShowCaretAndStopTwinkling();
+    void OnCaretMoveDone(const TouchEventInfo& info);
+    void ChangeEditState();
 
     void TwinklingByFocus();
 
@@ -1662,10 +1672,11 @@ private:
 
     bool isFocusBGColorSet_ = false;
     bool isFocusTextColorSet_ = false;
+    bool isFocusPlaceholderColorSet_ = false;
     Dimension previewUnderlineWidth_ = 2.0_vp;
     bool hasSupportedPreviewText_ = true;
     bool hasPreviewText_ = false;
-    std::queue<PreviewTextInfo> previewTextOperation;
+    std::queue<PreviewTextInfo> previewTextOperation_;
     int32_t previewTextStart_ = -1;
     int32_t previewTextEnd_ = -1;
     bool showKeyBoardOnFocus_ = true;

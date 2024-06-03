@@ -405,6 +405,20 @@ export struct ChipGroup {
     }
   }
 
+  private getChipGroupHeight() {
+    if (typeof this.chipSize === 'string') {
+      if (this.chipSize === ChipSize.NORMAL) {
+        return ChipGroupHeight.NORMAL;
+      } else {
+        return ChipGroupHeight.SMALL;
+      }
+    } else if (typeof this.chipSize === 'object') {
+      return this.chipSize.height as number + ChipGroupHeight.AMEND
+    } else {
+      return ChipGroupHeight.DEFAULT
+    }
+  }
+
   private getPaddingTop() {
     return parseDimension(
       this.getUIContext(),

@@ -197,20 +197,7 @@ public:
         return jsonValue->ToString();
     }
 
-    std::string GetArcDotIndicatorStyle() const;
-
-    std::string GradientToJson(Gradient colors) const
-    {
-        auto jsonArray = JsonUtil::CreateArray(true);
-        for (size_t index = 0; index < colors.GetColors().size(); ++index) {
-            auto gradientColor = colors.GetColors()[index];
-            auto gradientColorJson = JsonUtil::Create(true);
-            gradientColorJson->Put("color", gradientColor.GetLinearColor().ToColor().ColorToString().c_str());
-            gradientColorJson->Put("offset", std::to_string(gradientColor.GetDimension().Value()).c_str());
-            jsonArray->Put(std::to_string(index).c_str(), gradientColorJson);
-        }
-        return jsonArray->ToString();
-    }
+    virtual std::string GetArcDotIndicatorStyle() const { return ""; }
 
     int32_t GetCurrentShownIndex() const
     {
@@ -388,10 +375,7 @@ public:
         swiperDigitalParameters_ = std::make_shared<SwiperDigitalParameters>(swiperDigitalParameters);
     }
 
-    void SetSwiperArcDotParameters(const SwiperArcDotParameters& swiperArcDotParameters)
-    {
-        swiperArcDotParameters_ = std::make_shared<SwiperArcDotParameters>(swiperArcDotParameters);
-    }
+    virtual void SetSwiperArcDotParameters(const SwiperArcDotParameters& swiperArcDotParameters) {}
 
     void ShowNext();
     void ShowPrevious();
@@ -536,7 +520,7 @@ public:
     }
 
     std::shared_ptr<SwiperParameters> GetSwiperParameters() const;
-    std::shared_ptr<SwiperArcDotParameters> GetSwiperArcDotParameters() const;
+    virtual std::shared_ptr<SwiperArcDotParameters> GetSwiperArcDotParameters() const { return nullptr; }
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters() const;
 
     void ArrowHover(bool hoverFlag);
@@ -636,6 +620,7 @@ public:
     void UpdateNextValidIndex();
     void CheckMarkForIndicatorBoundary();
     bool IsHorizontalAndRightToLeft() const;
+    TextDirection GetNonAutoLayoutDirection() const;
     void FireWillHideEvent(int32_t willHideIndex) const;
     void FireWillShowEvent(int32_t willShowIndex) const;
     void SetOnHiddenChangeForParent();
@@ -660,6 +645,8 @@ public:
         prevMarginIgnoreBlank_ = prevMarginIgnoreBlank;
     }
 
+    virtual void SaveCircleDotIndicatorProperty(const RefPtr<FrameNode>& indicatorNode) {}
+
     bool GetPrevMarginIgnoreBlank()
     {
         return prevMarginIgnoreBlank_;
@@ -672,6 +659,9 @@ public:
 
     bool IsAtStart() const;
     bool IsAtEnd() const;
+
+protected:
+    void MarkDirtyNodeSelf();
 
 private:
     void OnModifyDone() override;
@@ -771,7 +761,6 @@ private:
     void OnIndexChange();
     bool IsOutOfHotRegion(const PointF& dragPoint) const;
     void SaveDotIndicatorProperty(const RefPtr<FrameNode>& indicatorNode);
-    void SaveCircleDotIndicatorProperty(const RefPtr<FrameNode>& indicatorNode);
     void SaveDigitIndicatorProperty(const RefPtr<FrameNode>& indicatorNode);
     void UpdatePaintProperty(const RefPtr<FrameNode>& indicatorNode);
     void PostTranslateTask(uint32_t delayTime);
@@ -811,7 +800,7 @@ private:
     void OnLoopChange();
     void StopSpringAnimationAndFlushImmediately();
     void UpdateItemRenderGroup(bool itemRenderGroup);
-    void MarkDirtyNodeSelf();
+    
     void ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex);
     int32_t GetLoopIndex(int32_t index, int32_t childrenSize) const;
     bool IsAutoLinear() const;
@@ -901,8 +890,9 @@ private:
     int32_t CheckTargetIndex(int32_t targetIndex, bool isForceBackward = false);
 
     void PreloadItems(const std::set<int32_t>& indexSet);
-    void DoPreloadItems(const std::set<int32_t>& indexSet, int32_t errorCode);
-    void FirePreloadFinishEvent(int32_t errorCode);
+    void DoTabsPreloadItems(const std::set<int32_t>& indexSet);
+    void DoSwiperPreloadItems(const std::set<int32_t>& indexSet);
+    void FirePreloadFinishEvent(int32_t errorCode, std::string message = "");
     // capture node start
     void InitCapture();
     int32_t GetLeftCaptureId()
@@ -1044,7 +1034,6 @@ private:
 
     mutable std::shared_ptr<SwiperParameters> swiperParameters_;
     mutable std::shared_ptr<SwiperDigitalParameters> swiperDigitalParameters_;
-    mutable std::shared_ptr<SwiperArcDotParameters> swiperArcDotParameters_;
 
     WeakPtr<FrameNode> lastWeakShowNode_;
 

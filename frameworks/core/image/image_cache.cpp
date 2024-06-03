@@ -228,7 +228,7 @@ void ImageCache::DumpCacheInfo()
                 break;
             }
         }
-        totalCount += imageObj->GetSize();
+        totalCount += static_cast<int32_t>(imageObj->GetSize());
         DumpLog::GetInstance().Print("Cache Obj of key: " + key + ", src:" + srcStr + "," + imageObj->ToString());
     }
     DumpLog::GetInstance().Print("Cache total size: " + std::to_string(totalCount));

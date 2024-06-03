@@ -380,6 +380,8 @@ UITaskScheduler::~UITaskScheduler() = default;
 
 void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty) {}
 
+void PipelineContext::AddLayoutNode(const RefPtr<FrameNode>& layoutNode) {}
+
 void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty) {}
 
 void PipelineContext::AddBuildFinishCallBack(std::function<void()>&& callback)

@@ -553,6 +553,10 @@ float WaterFlowLayoutInfo::JumpToTargetAlign(const std::pair<float, float>& item
 void WaterFlowLayoutInfo::JumpTo(const std::pair<float, float>& item)
 {
     currentOffset_ = JumpToTargetAlign(item);
+    if (extraOffset_.has_value()) {
+        currentOffset_ += extraOffset_.value();
+        extraOffset_.reset();
+    }
     align_ = ScrollAlign::START;
     jumpIndex_ = EMPTY_JUMP_INDEX;
 }

@@ -51,7 +51,19 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr char ABILITY_KEY_ASYNC[] = "ability.want.params.KeyAsync";
+constexpr char ABILITY_KEY_IS_MODAL[] = "ability.want.params.IsModal";
+constexpr char ATOMIC_SERVICE_PREFIX[] = "com.atomicservice.";
+
+bool StartWith(const std::string &source, const std::string &prefix)
+{
+    if (source.empty() || prefix.empty()) {
+        return false;
+    }
+
+    return source.find(prefix) == 0;
 }
+}
+
 UIExtensionPattern::UIExtensionPattern(
     bool isTransferringCaller, bool isModal, bool isAsyncModalBinding, SessionType sessionType)
     : isTransferringCaller_(isTransferringCaller), isModal_(isModal),
@@ -142,10 +154,32 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
     }
 
     isKeyAsync_ = want.GetBoolParam(ABILITY_KEY_ASYNC, false);
-    UIEXT_LOGI("The ability KeyAsync %{public}d.", isKeyAsync_);
+    bool shouldCallSystem = ShouldCallSystem(want);
+    UIEXT_LOGI("The ability KeyAsync %{public}d, shouldCallSystem: %{public}d.",
+        isKeyAsync_, shouldCallSystem);
     MountPlaceholderNode();
     sessionWrapper_->CreateSession(want, isAsyncModalBinding_);
     NotifyForeground();
+}
+
+bool UIExtensionPattern::ShouldCallSystem(const AAFwk::Want& want)
+{
+    if (sessionType_ != SessionType::UI_EXTENSION_ABILITY) {
+        return false;
+    }
+
+    if (isModal_) {
+        return false;
+    }
+
+    bool wantParamModal = want.GetBoolParam(ABILITY_KEY_IS_MODAL, false);
+    auto bundleName = want.GetElement().GetBundleName();
+    bool startWithAtomicService = StartWith(bundleName, ATOMIC_SERVICE_PREFIX);
+    if (wantParamModal && startWithAtomicService) {
+        return false;
+    }
+
+    return true;
 }
 
 void UIExtensionPattern::OnConnect()

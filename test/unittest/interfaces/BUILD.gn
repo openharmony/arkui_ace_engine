@@ -30,12 +30,6 @@ ohos_unittest("ui_content_test") {
     "ui_content_test.cpp",
   ]
 
-  include_dirs = [
-    "$window_manager_path/interfaces/innerkits",
-    "$window_manager_path/interfaces/innerkits/wm",
-    "$window_manager_path/wm/include",
-  ]
-
   deps = [
     "$ace_root/frameworks/base:ace_memory_monitor_ohos",
     "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
@@ -63,10 +57,7 @@ ohos_unittest("ui_content_test") {
 
 ohos_unittest("form_render_test") {
   module_out_path = interface_test_output_path
-  include_dirs = [
-    "$ace_root/interfaces/inner_api/form_render/include",
-    "${accessibility_path}/interfaces/innerkits/common/include/",
-  ]
+  include_dirs = [ "$ace_root/interfaces/inner_api/form_render/include" ]
   sources = [
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer.cpp",
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_delegate_impl.cpp",
@@ -140,10 +131,7 @@ ohos_unittest("form_render_test") {
 
 ohos_unittest("form_render_group_test") {
   module_out_path = interface_test_output_path
-  include_dirs = [
-    "$ace_root/interfaces/inner_api/form_render/include",
-    "${accessibility_path}/interfaces/innerkits/common/include/",
-  ]
+  include_dirs = [ "$ace_root/interfaces/inner_api/form_render/include" ]
   sources = [
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer.cpp",
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_delegate_impl.cpp",
@@ -219,12 +207,18 @@ ohos_unittest("drawable_descriptor_test") {
 
   sources = [
     "$ace_root/interfaces/inner_api/drawable_descriptor/drawable_descriptor.cpp",
-    "$ace_root/interfaces/inner_api/drawable_descriptor/drawable_descriptor.h",
     "$ace_root/interfaces/inner_api/drawable_descriptor/image_converter.cpp",
+    "$ace_root/interfaces/native/node/native_drawable_descriptor.cpp",
     "drawable_descriptor_test.cpp",
   ]
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+
+  include_dirs = [
+    "$ace_root/interfaces/native/node",
+    "$ace_root/interfaces/native/",
+    "$ace_root/interfaces/inner_api/drawable_descriptor",
+  ]
 
   deps = [
     "$skia_root_new:skia_ohos",

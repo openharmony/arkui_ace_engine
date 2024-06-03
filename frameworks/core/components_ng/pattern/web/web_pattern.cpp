@@ -48,6 +48,7 @@
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/pattern/web/touch_event_listener.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
@@ -67,6 +68,7 @@ const std::string IMAGE_POINTER_ALIAS_PATH = "etc/webview/ohos_nweb/alias.svg";
 constexpr int32_t UPDATE_WEB_LAYOUT_DELAY_TIME = 20;
 constexpr int32_t IMAGE_POINTER_CUSTOM_CHANNEL = 4;
 constexpr int32_t TOUCH_EVENT_MAX_SIZE = 5;
+constexpr int32_t KEYEVENT_MAX_NUM = 1000;
 const LinearEnumMapNode<OHOS::NWeb::CursorType, MouseFormat> g_cursorTypeMap[] = {
     { OHOS::NWeb::CursorType::CT_CROSS, MouseFormat::CROSS },
     { OHOS::NWeb::CursorType::CT_HAND, MouseFormat::HAND_POINTING },
@@ -220,6 +222,7 @@ WebPattern::WebPattern(const std::string& webSrc,
 WebPattern::~WebPattern()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "NWEB ~WebPattern start");
+    UninitTouchEventListener();
     if (delegate_) {
         TAG_LOGD(AceLogTag::ACE_WEB, "NWEB ~WebPattern delegate_ start SetAudioMuted");
         delegate_->SetAudioMuted(true);
@@ -341,17 +344,16 @@ void WebPattern::InitEvent()
     auto focusHub = eventHub->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitFocusEvent(focusHub);
+}
 
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
+void WebPattern::InitConfigChangeCallback(const RefPtr<PipelineContext> &context)
+{
     auto langTask = [weak = AceType::WeakClaim(this)]() {
         auto WebPattern = weak.Upgrade();
         CHECK_NULL_VOID(WebPattern);
         WebPattern->UpdateLocale();
     };
-    context->SetConfigChangedCallback(std::move(langTask));
-
-    RegisterVisibleAreaChangeCallback();
+    context->SetConfigChangedCallback(GetHost()->GetId(), std::move(langTask));
 }
 
 void WebPattern::InitFeatureParam()
@@ -1447,14 +1449,6 @@ bool WebPattern::HandleKeyEvent(const KeyEvent& keyEvent)
         keyEventCallback(info);
     }
 
-    auto preKeyEventCallback = eventHub->GetOnPreKeyEvent();
-    if (preKeyEventCallback) {
-        ret = preKeyEventCallback(info);
-        if (ret) {
-            return ret;
-        }
-    }
-
     ret = WebOnKeyEvent(keyEvent);
     return ret;
 }
@@ -1462,7 +1456,76 @@ bool WebPattern::HandleKeyEvent(const KeyEvent& keyEvent)
 bool WebPattern::WebOnKeyEvent(const KeyEvent& keyEvent)
 {
     CHECK_NULL_RETURN(delegate_, false);
-    return delegate_->OnKeyEvent(static_cast<int32_t>(keyEvent.code), static_cast<int32_t>(keyEvent.action));
+    if (webKeyEvent_.size() >= KEYEVENT_MAX_NUM) {
+        webKeyEvent_.clear();
+        TAG_LOGW(AceLogTag::ACE_WEB,
+            "WebPattern::WebOnKeyEvent keyevent list num overflow.");
+    }
+    TAG_LOGD(AceLogTag::ACE_WEB,
+        "WebPattern::WebOnKeyEvent keyEvent:%{public}s", keyEvent.ToString().c_str());
+    webKeyEvent_.push_back(keyEvent);
+    std::vector<int32_t> pressedCodes;
+    for (auto pCode : keyEvent.pressedCodes) {
+        pressedCodes.push_back(static_cast<int32_t>(pCode));
+    }
+    return delegate_->WebOnKeyEvent(static_cast<int32_t>(keyEvent.code),
+        static_cast<int32_t>(keyEvent.action), pressedCodes);
+}
+
+void WebPattern::ClearKeyEventBeforeUp(
+    const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event)
+{
+    auto keyEvent = webKeyEvent_.begin();
+    for (; keyEvent != webKeyEvent_.end();) {
+        if (static_cast<int32_t>(keyEvent->code) == event->GetKeyCode() &&
+            static_cast<int32_t>(keyEvent->action) == static_cast<int32_t>(KeyAction::DOWN)) {
+            keyEvent = webKeyEvent_.erase(keyEvent);
+        } else {
+            ++keyEvent;
+        }
+    }
+}
+
+void WebPattern::KeyboardReDispatch(
+    const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event, bool isUsed)
+{
+    CHECK_NULL_VOID(event);
+    if (event->GetAction() == static_cast<int32_t>(KeyAction::UP)) {
+        // When the up event is reported, delete the corresponding down event.
+        ClearKeyEventBeforeUp(event);
+    }
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto taskExecutor = pipelineContext->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    auto keyEvent = webKeyEvent_.rbegin();
+    for (; keyEvent != webKeyEvent_.rend(); ++keyEvent) {
+        if (static_cast<int32_t>(keyEvent->code) == event->GetKeyCode() &&
+            static_cast<int32_t>(keyEvent->action) == event->GetAction()) {
+            break;
+        }
+    }
+    if (keyEvent == webKeyEvent_.rend()) {
+        TAG_LOGW(AceLogTag::ACE_WEB,
+            "KeyEvent is not find keycode:%{public}d, action:%{public}d", event->GetKeyCode(), event->GetAction());
+        return;
+    }
+    if (!isUsed) {
+        taskExecutor->PostTask([context = AceType::WeakClaim(pipelineContext),
+            event = *keyEvent] () {
+            auto pipelineContext = context.Upgrade();
+            CHECK_NULL_VOID(pipelineContext);
+            TAG_LOGD(AceLogTag::ACE_WEB,
+                "WebPattern::KeyboardReDispatch key:%{public}s", event.ToString().c_str());
+            pipelineContext->ReDispatch(const_cast<KeyEvent&>(event));
+            },
+            TaskExecutor::TaskType::UI, "ArkUIWebKeyboardReDispatch");
+    }
+    webKeyEvent_.erase((++keyEvent).base());
 }
 
 void WebPattern::WebRequestFocus()
@@ -1562,7 +1625,7 @@ void WebPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
 
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
- 
+
     auto rect = renderContext->GetPaintRectWithoutTransform();
     auto size = Size(rect.Width(), rect.Height());
     if (renderContextForSurface_) {
@@ -1995,6 +2058,89 @@ bool WebPattern::IsRootNeedExportTexture()
     return isNeedExportTexture;
 }
 
+void WebPattern::OnAttachContext(PipelineContext *context)
+{
+    auto pipelineContext = Claim(context);
+    int32_t newId = pipelineContext->GetInstanceId();
+    if (delegate_) {
+        delegate_->OnAttachContext(pipelineContext);
+    }
+
+    if (observer_) {
+        observer_->OnAttachContext(pipelineContext);
+    }
+
+    if (updateInstanceIdCallback_) {
+        updateInstanceIdCallback_(newId);
+    }
+
+    if (renderSurface_) {
+        renderSurface_->SetInstanceId(newId);
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    int32_t nodeId = host->GetId();
+    auto dragDropManager = pipelineContext->GetDragDropManager();
+    if (dragDropManager) {
+        dragDropManager->AddDragFrameNode(host->GetId(), AceType::WeakClaim(AceType::RawPtr(host)));
+    }
+
+    pipelineContext->AddOnAreaChangeNode(nodeId);
+    RegisterVisibleAreaChangeCallback(pipelineContext);
+    needUpdateWeb_= true;
+    RegistVirtualKeyBoardListener(pipelineContext);
+    InitConfigChangeCallback(pipelineContext);
+}
+
+void WebPattern::OnDetachContext(PipelineContext *contextPtr)
+{
+    auto context = AceType::Claim(contextPtr);
+    CHECK_NULL_VOID(context);
+
+    auto host = GetHost();
+    int32_t nodeId = host->GetId();
+
+    context->RemoveOnAreaChangeNode(nodeId);
+    context->RemoveVisibleAreaChangeNode(nodeId);
+    context->RemoveVirtualKeyBoardCallback(nodeId);
+    context->RemoveConfigChangedCallback(nodeId);
+
+    if (delegate_) {
+        delegate_->OnDetachContext();
+    }
+
+    if (observer_) {
+        observer_->OnDetachContext();
+    }
+
+    auto dragDropManager = context->GetDragDropManager();
+    if (dragDropManager) {
+        dragDropManager->RemoveDragFrameNode(nodeId);
+    }
+
+    if (selectOverlayProxy_) {
+        auto selectOverlayManager = context->GetSelectOverlayManager();
+        if (selectOverlayManager) {
+            selectOverlayManager->DestroySelectOverlay(selectOverlayProxy_);
+        }
+        selectOverlayProxy_ = nullptr;
+    }
+
+    if (tooltipId_ != -1) {
+        auto overlayManager = context->GetOverlayManager();
+        if (overlayManager) {
+            overlayManager->RemoveIndexerPopupById(tooltipId_);
+        }
+        tooltipId_ = -1;
+    }
+}
+
+void WebPattern::SetUpdateInstanceIdCallback(std::function<void(int32_t)>&& callback)
+{
+    updateInstanceIdCallback_ = callback;
+}
+
 void WebPattern::OnScrollBarColorUpdate(const std::string& value)
 {
     if (delegate_) {
@@ -2017,14 +2163,12 @@ void WebPattern::OnNativeVideoPlayerConfigUpdate(const std::tuple<bool, bool>& c
     }
 }
 
-void WebPattern::RegistVirtualKeyBoardListener()
+void WebPattern::RegistVirtualKeyBoardListener(const RefPtr<PipelineContext> &pipelineContext)
 {
     if (!needUpdateWeb_) {
         return;
     }
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->SetVirtualKeyBoardCallback(
+    pipelineContext->SetVirtualKeyBoardCallback(GetHost()->GetId(),
         [weak = AceType::WeakClaim(this)](int32_t width, int32_t height, double keyboard) {
             auto webPattern = weak.Upgrade();
             CHECK_NULL_RETURN(webPattern, false);
@@ -2050,12 +2194,12 @@ void WebPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    RegistVirtualKeyBoardListener();
     bool isFirstCreate = false;
     if (!delegate_) {
         // first create case,
         isFirstCreate = true;
-        delegate_ = AceType::MakeRefPtr<WebDelegate>(PipelineContext::GetCurrentContext(), nullptr, "");
+        delegate_ = AceType::MakeRefPtr<WebDelegate>(PipelineContext::GetCurrentContext(), nullptr, "",
+            Container::CurrentId());
         CHECK_NULL_VOID(delegate_);
         observer_ = AceType::MakeRefPtr<WebDelegateObserver>(delegate_, PipelineContext::GetCurrentContext());
         CHECK_NULL_VOID(observer_);
@@ -2099,6 +2243,11 @@ void WebPattern::OnModifyDone()
             renderSurface_->InitSurface();
             renderSurface_->UpdateSurfaceConfig();
             delegate_->InitOHOSWeb(PipelineContext::GetCurrentContext(), renderSurface_);
+            if (renderMode_ == RenderMode::ASYNC_RENDER) {
+                std::string surfaceId = renderSurface_->GetUniqueId();
+                delegate_->SetSurfaceId(surfaceId);
+                TAG_LOGD(AceLogTag::ACE_WEB, "[getSurfaceId] set surfaceId is %{public}s", surfaceId.c_str());
+            }
         }
         UpdateJavaScriptOnDocumentStart();
         UpdateJavaScriptOnDocumentEnd();
@@ -2199,6 +2348,13 @@ void WebPattern::OnModifyDone()
         PostTaskToUI(std::move(task), "ArkUIWebInitSlideUpdateListener");
     }
 
+    auto touchMoveListenerTask = [weak = AceType::WeakClaim(this)]() {
+        auto webPattern = weak.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->InitTouchEventListener();
+    };
+    PostTaskToUI(std::move(touchMoveListenerTask), "ArkUIWebInitTouchEventListener");
+
     auto embedEnabledTask = [weak = AceType::WeakClaim(this)]() {
         auto webPattern = weak.Upgrade();
         CHECK_NULL_VOID(webPattern);
@@ -2210,7 +2366,6 @@ void WebPattern::OnModifyDone()
 
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->AddOnAreaChangeNode(host->GetId());
 
     // offline mode
     if (host->GetNodeStatus() != NodeStatus::NORMAL_NODE && isFirstCreate) {
@@ -2554,16 +2709,17 @@ void WebPattern::CloseSelectOverlay()
     CHECK_NULL_VOID(pipeline);
     if (selectOverlayProxy_) {
         TAG_LOGI(AceLogTag::ACE_WEB, "Close Select Overlay Now");
+        SetSelectOverlayDragging(false);
+        selectOverlayProxy_->Close();
+        pipeline->GetSelectOverlayManager()->DestroySelectOverlay(selectOverlayProxy_);
+        selectOverlayProxy_ = nullptr;
+
         for (auto& touchOverlayInfo : touchOverlayInfo_) {
             TAG_LOGI(AceLogTag::ACE_WEB,
                 "SelectOverlay send touch up id:%{public}d", touchOverlayInfo.id);
             delegate_->HandleTouchUp(touchOverlayInfo.id, touchOverlayInfo.x, touchOverlayInfo.y, true);
         }
-        SetSelectOverlayDragging(false);
         touchOverlayInfo_.clear();
-        selectOverlayProxy_->Close();
-        pipeline->GetSelectOverlayManager()->DestroySelectOverlay(selectOverlayProxy_);
-        selectOverlayProxy_ = nullptr;
     }
 }
 
@@ -3251,6 +3407,39 @@ void WebPattern::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMe
     overlayManager->ShowMenu(id, offset, menu);
 }
 
+void WebPattern::NotifyForNextTouchEvent()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::NotifyForNextTouchEvent");
+    CHECK_NULL_VOID(delegate_);
+    delegate_->NotifyForNextTouchEvent();
+}
+
+void WebPattern::InitTouchEventListener()
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::InitTouchEventListener");
+    std::shared_ptr<TouchEventListener> listener = std::make_shared<TouchEventListener>();
+    listener->SetPatternToListener(AceType::WeakClaim(this));
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+
+    context->RegisterTouchEventListener(listener);
+}
+
+void WebPattern::UninitTouchEventListener()
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::UninitTouchEventListener");
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+
+    context->UnregisterTouchEventListener(AceType::WeakClaim(this));
+}
+
 void WebPattern::OnDateTimeChooserPopup(std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser> chooser,
     const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
     std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback)
@@ -3588,7 +3777,9 @@ void WebPattern::OnWindowShow()
 
 void WebPattern::OnWindowHide()
 {
-    delegate_->OnRenderToBackground();
+    if (!isOfflineMode_) {
+        delegate_->OnRenderToBackground();
+    }
     if (!isWindowShow_ || !isVisible_) {
         return;
     }
@@ -4317,7 +4508,7 @@ void WebPattern::UpdateFocusedAccessibilityId(int64_t accessibilityId)
         renderContext->UpdateAccessibilityFocus(false);
         return;
     }
-    
+
     renderContext->UpdateAccessibilityFocusRect(rect);
     renderContext->UpdateAccessibilityFocus(true);
 }
@@ -4417,12 +4608,10 @@ void WebPattern::SetTouchLocationInfo(const TouchEvent& touchEvent, const TouchL
     }
 }
 
-void WebPattern::RegisterVisibleAreaChangeCallback()
+void WebPattern::RegisterVisibleAreaChangeCallback(const RefPtr<PipelineContext> &pipeline)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
         auto webPattern = weak.Upgrade();
         CHECK_NULL_VOID(webPattern);

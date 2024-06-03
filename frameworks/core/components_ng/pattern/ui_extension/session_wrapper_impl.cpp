@@ -244,7 +244,8 @@ void SessionWrapperImpl::InitAllCallback()
 /************************************************ End: Initialization *************************************************/
 
 /************************************************ Begin: About session ************************************************/
-void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, bool isAsyncModalBinding)
+void SessionWrapperImpl::CreateSession(
+    const AAFwk::Want& want, bool isAsyncModalBinding, bool isCallerSystem)
 {
     UIEXT_LOGI("The session is created with want = %{private}s", want.ToString().c_str());
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -285,6 +286,7 @@ void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, bool isAsyncModa
         .rootToken_ = (isTransferringCaller_ && parentToken) ? parentToken : callerToken,
         .want = wantPtr,
         .isAsyncModalBinding_ = isAsyncModalBinding,
+        .isModal_ = !isCallerSystem,
     };
     session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
     CHECK_NULL_VOID(session_);

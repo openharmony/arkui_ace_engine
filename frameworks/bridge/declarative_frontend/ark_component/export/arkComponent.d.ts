@@ -732,6 +732,7 @@ declare class ArkTextComponent extends ArkComponent implements TextAttribute {
     lineBreakStrategy(value: LineBreakStrategy): TextAttribute;
     onCopy(callback: (value: string) => void): TextAttribute;
     selection(selectionStart: number, selectionEnd: number): TextAttribute;
+    textSelectable(value: TextSelectableMode): TextAttribute;
     ellipsisMode(value: EllipsisMode): TextAttribute;
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
 }
@@ -1841,7 +1842,7 @@ declare class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     barWidth(value: Length): TabsAttribute;
     barHeight(value: Length): TabsAttribute;
     animationDuration(value: number): TabsAttribute;
-    animateMode(value: AnimateMode): TabsAttribute;
+    animationMode(value: AnimationMode): TabsAttribute;
     onChange(event: (index: number) => void): TabsAttribute;
     onTabBarClick(event: (index: number) => void): TabsAttribute;
     fadingEdge(value: boolean): TabsAttribute;

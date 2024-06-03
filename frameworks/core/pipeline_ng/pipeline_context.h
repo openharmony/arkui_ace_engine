@@ -51,6 +51,7 @@
 #include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
+#include "core/components_ng/pattern/web/itouch_event_callback.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_base.h"
@@ -138,6 +139,9 @@ public:
     // Called by container when key event received.
     // if return false, then this event needs platform to handle it.
     bool OnKeyEvent(const KeyEvent& event) override;
+
+    // ReDispatch KeyEvent from Web process.
+    void ReDispatch(KeyEvent& keyEvent);
 
     // Called by view when mouse event received.
     void OnMouseEvent(const MouseEvent& event) override;
@@ -242,6 +246,8 @@ public:
     void AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode);
 
     void AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty);
+
+    void AddLayoutNode(const RefPtr<FrameNode>& layoutNode);
 
     void AddDirtyRenderNode(const RefPtr<FrameNode>& dirty);
 
@@ -754,6 +760,9 @@ public:
 
     void FlushFrameCallback(uint64_t nanoTimestamp);
 
+    void RegisterTouchEventListener(const std::shared_ptr<ITouchEventCallback>& listener);
+    void UnregisterTouchEventListener(const WeakPtr<NG::Pattern>& pattern);
+
     void SetPredictNode(const RefPtr<FrameNode>& node)
     {
         predictNode_ = node;
@@ -820,6 +829,10 @@ private:
     void InspectDrew();
 
     bool TriggerKeyEventDispatch(const KeyEvent& event);
+
+    bool DispatchTabKey(const KeyEvent& event, const RefPtr<FocusView>& curFocusView);
+
+    bool IsSkipShortcutAndFocusMove();
 
     void FlushBuildFinishCallbacks();
 
@@ -994,6 +1007,7 @@ private:
 
     RefPtr<NavigationManager> navigationMgr_ = MakeRefPtr<NavigationManager>();
     std::atomic<int32_t> localColorMode_ = static_cast<int32_t>(ColorMode::COLOR_MODE_UNDEFINED);
+    std::vector<std::shared_ptr<ITouchEventCallback>> listenerVector_;
     bool customTitleSettedShow_ = true;
     bool isShowTitle_ = false;
     bool lastAnimationStatus_ = true;

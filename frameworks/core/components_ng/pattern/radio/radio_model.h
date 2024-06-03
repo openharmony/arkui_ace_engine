@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace {
 
-class RadioModel {
+class ACE_FORCE_EXPORT RadioModel {
 public:
     static RadioModel* GetInstance();
     virtual ~RadioModel() = default;

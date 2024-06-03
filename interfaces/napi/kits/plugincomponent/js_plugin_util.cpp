@@ -17,7 +17,7 @@
 #include <cinttypes>
 #include <cstring>
 
-#include "napi/native_engine/native_value.h"
+#include "native_value.h"
 #include "securec.h"
 
 #include "core/common/container.h"

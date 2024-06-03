@@ -287,6 +287,11 @@ public:
         return textTraceEnable_;
     }
 
+    static bool GetAccessTraceEnabled()
+    {
+        return accessTraceEnable_;
+    }
+
     static bool GetTraceInputEventEnabled()
     {
         return traceInputEventEnable_;
@@ -516,6 +521,10 @@ public:
 
     static bool IsOpIncEnable();
 
+    static float GetDragStartDampingRatio();
+
+    static float GetDragStartPanDistanceThreshold();
+
 private:
     static bool opincEnabled_;
     static bool developerModeOn_;
@@ -525,6 +534,7 @@ private:
     static bool buildTraceEnable_;
     static bool syncDebugTraceEnable_;
     static bool textTraceEnable_;
+    static bool accessTraceEnable_;
     static bool accessibilityEnabled_;
     static bool isRound_;
     static bool isDeviceAccess_;
@@ -575,6 +585,8 @@ private:
     static bool faultInjectEnabled_;
     static bool imageFrameworkEnable_;
     static std::pair<float, float> brightUpPercent_;
+    static float dragStartDampingRatio_;
+    static float dragStartPanDisThreshold_;
 };
 
 } // namespace OHOS::Ace

@@ -625,7 +625,7 @@ void Player::Release(const std::function<void(bool)>& onRelease)
                     player->UnregisterEvent();
                 }
             },
-            "ArkUIVideoUnregisterEvent");
+            "ArkUIVideoPlayerUnregisterEvent");
     }
 
     Resource::Release(onRelease);

@@ -351,6 +351,18 @@ class ArkSharedTransition {
   }
 }
 
+class ArkChainMode {
+  direction: Axis | undefined;
+  style: ChainStyle  | undefined;
+  constructor() {
+    this.direction = undefined;
+    this.style = undefined;
+  }
+  isEqual(another: ArkChainMode): boolean {
+    return (this.direction === another.direction) && (this.style === another.style);
+  }
+}
+
 class ArkListEdgeEffect {
   value: EdgeEffect;
   options?: EdgeEffectOptions | undefined;

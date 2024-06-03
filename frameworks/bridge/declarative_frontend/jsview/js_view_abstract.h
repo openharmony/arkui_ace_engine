@@ -286,6 +286,7 @@ public:
     static bool ParseJsDimensionVp(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static bool ParseJsDimensionFp(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static bool ParseJsDimensionPx(const JSRef<JSVal>& jsValue, CalcDimension& result);
+    static bool ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static bool ParseLengthMetricsToPositiveDimension(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static bool ParseColorMetricsToColor(const JSRef<JSVal>& jsValue, Color& result);
     static bool ParseJsDouble(const JSRef<JSVal>& jsValue, double& result);

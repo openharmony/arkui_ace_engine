@@ -1010,6 +1010,8 @@ HWTEST_F(SearchTestNg, SetTextColor001, TestSize.Level1)
  */
 HWTEST_F(SearchTestNg, Create001, TestSize.Level1)
 {
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     SearchModelNG searchModelInstance;
 
     searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, EMPTY_VALUE);
@@ -1027,14 +1029,15 @@ HWTEST_F(SearchTestNg, Create001, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     auto searchIconFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
     ASSERT_NE(searchIconFrameNode, nullptr);
-    EXPECT_EQ(searchIconFrameNode.GetTag(), V2::IMAGE_ETS_TAG);
+    EXPECT_EQ(searchIconFrameNode->GetTag(), V2::IMAGE_ETS_TAG);
     auto cancelIconFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
     ASSERT_NE(cancelIconFrameNode, nullptr);
-    EXPECT_EQ(cancelIconFrameNode.GetTag(), V2::SYMBOL_ETS_TAG);
+    EXPECT_EQ(cancelIconFrameNode->GetTag(), V2::SYMBOL_ETS_TAG);
     auto cancelButtonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_BUTTON_INDEX));
     ASSERT_NE(cancelButtonFrameNode, nullptr);
     auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
     EXPECT_NE(buttonFrameNode, nullptr);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(backupApiVersion));
 }
 
 /**
@@ -1981,5 +1984,31 @@ HWTEST_F(SearchTestNg, testInputFilter002, TestSize.Level1)
      * @tc.expected: Check if the text filter patterns for the input box are compliant
      */
     EXPECT_EQ(textFieldPattern->GetTextValue().compare(FILTER_NUM_TEXT), 0);
+}
+
+/**
+ * @tc.name: SetTextAlign002
+ * @tc.desc: Set Text Align
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetTextAlign002, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    ASSERT_NE(textFieldChild, nullptr);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    TextAlign textAligns[] = {TextAlign::CENTER, TextAlign::JUSTIFY, TextAlign::START, TextAlign::END};
+    TextDirection textDirectoins[] = {TextDirection::LTR, TextDirection::RTL, TextDirection::AUTO};
+    for (auto textAlign : textAligns) {
+        for (auto textDirection : textDirectoins) {
+            textFieldLayoutProperty->UpdateTextAlign(textAlign);
+            textFieldLayoutProperty->UpdateLayoutDirection(textDirection);
+            frameNode->MarkModifyDone();
+            EXPECT_EQ(textFieldLayoutProperty->GetTextAlign(), textAlign);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

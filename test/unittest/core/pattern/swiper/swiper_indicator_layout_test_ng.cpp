@@ -30,7 +30,10 @@ public:
  */
 HWTEST_F(SwiperIndicatorLayoutTestNg, SwiperIndicatorLayoutAlgorithmMeasure001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetDirection(Axis::VERTICAL);
+        model.SetIndicatorType(SwiperIndicatorType::DOT);
+    });
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     RefPtr<NodePaintMethod> nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
@@ -55,6 +58,7 @@ HWTEST_F(SwiperIndicatorLayoutTestNg, SwiperIndicatorLayoutAlgorithmMeasure002, 
 {
     CreateWithItem([](SwiperModelNG model) {
         model.SetDirection(Axis::VERTICAL);
+        model.SetIndicatorType(SwiperIndicatorType::DOT);
     });
     layoutProperty_->UpdateDirection(Axis::VERTICAL);
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
@@ -386,5 +390,88 @@ HWTEST_F(SwiperIndicatorLayoutTestNg, SwiperDigitIndicatorLayoutAlgorithmLayout0
     auto hostNode = layoutWrapper.GetHostNode();
     auto children = hostNode->GetChildren();
     EXPECT_FALSE(children.empty());
+}
+
+/**
+ * @tc.name: CircleDotIndicatorLayoutAlgorithmMeasure001
+ * @tc.desc: Test LayoutWrapper CircleDotIndicatorLayoutAlgorithm Measure
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorLayoutTestNg, CircleDotIndicatorLayoutAlgorithmMeasure001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetDirection(Axis::VERTICAL);
+        model.SetIndicatorType(SwiperIndicatorType::ARC_DOT);
+    });
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    indicatorPattern->OnModifyDone();
+    auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(indicatorNode_, geometryNode, indicatorNode_->GetLayoutProperty());
+    LayoutConstraintF layoutConstraint;
+
+    /**
+     * @tc.steps: step2. call Measure.
+     */
+    algorithm->Measure(&layoutWrapper);
+    EXPECT_TRUE(IsEqual(layoutWrapper.GetGeometryNode()->GetFrameSize(), SizeF(SWIPER_WIDTH, SWIPER_HEIGHT)));
+}
+
+/**
+ * @tc.name: CircleDotIndicatorLayoutAlgorithmLayout001
+ * @tc.desc: Test CircleDotIndicatorLayoutAlgorithm CircleDotIndicatorLayoutAlgorithmLayout
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorLayoutTestNg, CircleDotIndicatorLayoutAlgorithmLayout001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetIndicatorType(SwiperIndicatorType::ARC_DOT);
+    });
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(indicatorNode_, geometryNode, indicatorNode_->GetLayoutProperty());
+
+    /**
+     * @tc.steps: step2. call Layout.
+     */
+    algorithm->Layout(&layoutWrapper);
+    EXPECT_TRUE(IsEqual(layoutWrapper.GetGeometryNode()->GetMarginFrameOffset(), OffsetF(0.0f, 0.0f)));
+}
+
+/**
+ * @tc.name: CircleDotIndicatorFlushLayoutTask001
+ * @tc.desc: Test CircleDotIndicatorLayoutAlgorithm FlushLayoutTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorLayoutTestNg, CircleDotIndicatorFlushLayoutTask001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetIndicatorType(SwiperIndicatorType::ARC_DOT);
+    });
+
+    /**
+     * @tc.steps: step2. call FlushLayoutTask.
+     */
+    FlushLayoutTask(indicatorNode_);
+    EXPECT_TRUE(IsEqual(indicatorNode_->GetGeometryNode()->GetFrameSize(), SizeF(SWIPER_WIDTH, SWIPER_HEIGHT)));
+    ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(300.f));
+    ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(500.f));
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetFrameSize(), SizeF(300.f, 500.f)));
+    FlushLayoutTask(indicatorNode_);
+    EXPECT_TRUE(IsEqual(indicatorNode_->GetGeometryNode()->GetFrameSize(), SizeF(300.f, 500.f)));
+    EXPECT_TRUE(IsEqual(indicatorNode_->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(0.0f, 0.0f)));
 }
 } // namespace OHOS::Ace::NG

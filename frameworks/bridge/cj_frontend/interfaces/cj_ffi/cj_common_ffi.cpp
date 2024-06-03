@@ -28,28 +28,9 @@ void FfiOHOSAceFrameworkRegisterCJFuncs(AtCPackage cjFuncs)
     CJRuntimeDelegate::GetInstance()->RegisterCJFuncs(cjFuncs);
 }
 
-void* FfiOHOSAceFrameworkGetAbilityPointer()
-{
-    auto wp = ::Utils::GetAbilityPointer();
-    if (wp.expired()) {
-        return nullptr;
-    }
-    return wp.lock().get();
-}
-
-bool FfiOHOSAceFrameworkIsStageModel()
-{
-    return ::Utils::IsStageModel();
-}
-
 int64_t FfiGeneralSizeOfPointer()
 {
     return sizeof(void*);
-}
-
-bool FfiOHOSAceFrameworkIsPartialUpdate()
-{
-    return Container::IsCurrentUsePartialUpdate();
 }
 }
 

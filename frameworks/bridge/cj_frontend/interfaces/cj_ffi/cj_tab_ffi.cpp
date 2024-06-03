@@ -37,21 +37,15 @@ namespace OHOS::Ace::Framework {
 
 namespace {
 
-#ifndef NG_BUILD
 int32_t g_tabControllerId = 0;
-#endif
 
 } // namespace
 
 TabsController::TabsController() : FFIData()
 {
-#ifdef NG_BUILD
-    return;
-#else
     controller_ = TabController::GetController(++g_tabControllerId);
     swiperController_ = AceType::MakeRefPtr<SwiperController>();
     LOGI("Native TabsController constructed: %{public}" PRId64, GetID());
-#endif
 }
 
 TabsController::~TabsController()
@@ -69,11 +63,9 @@ void TabsController::ChangeIndex(int32_t index)
         }
         swiperController_->SwipeTo(index);
     }
-#ifndef NG_BUILD
     if (controller_) {
         controller_->SetIndexByController(index, false);
     }
-#endif
 }
 
 } // namespace OHOS::Ace::Framework
@@ -94,9 +86,7 @@ void FfiOHOSAceFrameworkTabsCreate(int32_t barPosition, int64_t controllerId, in
 
     tabController = nativeTabsController->GetController();
     swiperController = nativeTabsController->GetSwiperController();
-#ifndef NG_BUILD
     tabController->SetInitialIndex(index);
-#endif
     TabsModel::GetInstance()->Create(BAR_POSITIONS[barPosition], index, tabController, swiperController);
 }
 

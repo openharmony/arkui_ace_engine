@@ -42,14 +42,14 @@ PasteButtonModelNG* PasteButtonModelNG::GetInstance()
 }
 
 void PasteButtonModelNG::Create(int32_t text, int32_t icon,
-    int32_t backgroundType)
+    int32_t backgroundType, bool isArkuiComponent)
 {
     SecurityComponentModelNG::CreateCommon(V2::PASTE_BUTTON_ETS_TAG,
-        text, icon, backgroundType, []() { return AceType::MakeRefPtr<SecurityComponentPattern>(); });
+        text, icon, backgroundType, []() { return AceType::MakeRefPtr<SecurityComponentPattern>(); }, isArkuiComponent);
 }
 
 RefPtr<FrameNode> PasteButtonModelNG::CreateNode(int32_t text, int32_t icon,
-    int32_t backgroundType)
+    int32_t backgroundType, bool isArkuiComponent)
 {
     SecurityComponentElementStyle style = {
         .text = text,
@@ -58,7 +58,7 @@ RefPtr<FrameNode> PasteButtonModelNG::CreateNode(int32_t text, int32_t icon,
     };
     return SecurityComponentModelNG::CreateNode(V2::PASTE_BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(),
-        style, []() { return AceType::MakeRefPtr<SecurityComponentPattern>(); });
+        style, []() { return AceType::MakeRefPtr<SecurityComponentPattern>(); }, isArkuiComponent);
 }
 
 bool PasteButtonModelNG::GetIconResource(int32_t iconStyle, InternalResource::ResourceId& id)

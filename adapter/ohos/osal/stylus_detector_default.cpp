@@ -49,6 +49,8 @@ void StylusDetectorDefault::UnRegisterStylusInteractionListener()
 bool StylusDetectorDefault::Notify(const NotifyInfo& notifyInfo)
 {
     defaultNodeId_ = notifyInfo.componentId;
+    LOGI("Stylus default notify receviecis (%{public}d, %{public}d). TargetNode id is %{public}d", notifyInfo.x,
+        notifyInfo.y, notifyInfo.componentId);
     return true;
 }
 

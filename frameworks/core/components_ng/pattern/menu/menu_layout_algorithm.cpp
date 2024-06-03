@@ -322,9 +322,12 @@ void MenuLayoutAlgorithm::ModifyPreviewMenuPlacement(LayoutWrapper* layoutWrappe
     CHECK_NULL_VOID(layoutWrapper);
     auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(props);
-
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
     auto hasPlacement = props->GetMenuPlacement().has_value();
-    if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
+    if (menuTheme->GetNormalPlacement()) {
         ModifyNormalPreviewMenuPlacement(layoutWrapper);
     } else {
         if (!hasPlacement) {
@@ -1230,7 +1233,11 @@ void MenuLayoutAlgorithm::LayoutPreviewMenu(LayoutWrapper* layoutWrapper)
     auto paintProperty = GetPaintProperty(layoutWrapper);
     CHECK_NULL_VOID(paintProperty);
     paintProperty->UpdateEnableArrow(false);
-    if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    if (menuTheme->GetNormalLayout()) {
         LayoutNormalPreviewMenu(layoutWrapper);
     } else {
         LayoutOtherDevicePreviewMenu(layoutWrapper);

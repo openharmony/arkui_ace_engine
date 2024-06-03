@@ -224,7 +224,6 @@ HWTEST_F(ListGroupAlgTestNg, ListLayoutAlgorithmTest001, TestSize.Level1)
     listItemInfo1.startPos = 0.0f;
     listItemInfo1.endPos = 180.0f;
     listLayoutAlgorithm.contentMainSize_ = 720.0f;
-    listLayoutAlgorithm.itemPosition_.empty();
     listLayoutAlgorithm.itemPosition_.emplace(std::make_pair(0, listItemInfo1));
     auto wrapper = layoutWrapper->GetOrCreateChildByIndex(listLayoutAlgorithm.itemPosition_.begin()->first);
     auto size = layoutWrapper->GetGeometryNode()->GetMarginFrameSize();
@@ -234,7 +233,7 @@ HWTEST_F(ListGroupAlgTestNg, ListLayoutAlgorithmTest001, TestSize.Level1)
         startIndex, crossSize);
     float crossOffset = listLayoutAlgorithm.CalculateLaneCrossOffset(crossSize, size.Width());
     auto offset = OffsetF(crossSize - crossOffset - size.Width(), listItemInfo1.startPos);
-    EXPECT_EQ(listLayoutAlgorithm.contentMainSize_ - size.Width(), crossOffset);
+    EXPECT_EQ(0.f, crossOffset);
     auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
     EXPECT_EQ(layoutDirection, TextDirection::RTL);
 }

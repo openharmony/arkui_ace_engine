@@ -530,6 +530,7 @@ public:
     void HandleOnCopy();
     void HandleOnCopySpanString();
     virtual void HandleOnSelectAll();
+    void SetTextSelectableMode(TextSelectableMode value);
 
     OffsetF GetTextPaintOffset() const override
     {
@@ -610,6 +611,11 @@ public:
     bool DidExceedMaxLines() const override;
     TextLineMetrics GetLineMetrics(int32_t lineNumber) override;
     PositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y) override;
+
+    void OnTouchTestHit(SourceType hitTestType) override
+    {
+        selectOverlay_->OnTouchTestHit(hitTestType);
+    }
 
 protected:
     void OnAttachToFrameNode() override;

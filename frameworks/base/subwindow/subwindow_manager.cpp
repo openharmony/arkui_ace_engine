@@ -285,6 +285,14 @@ void SubwindowManager::ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::Fr
     }
 }
 
+void SubwindowManager::UpdatePreviewPosition(const NG::OffsetF& offset, const Rect& rect)
+{
+    auto subwindow = GetCurrentWindow();
+    if (subwindow) {
+        subwindow->UpdatePreviewPosition(offset, rect);
+    }
+}
+
 void SubwindowManager::ClearMenuNG(int32_t instanceId, int32_t targetId, bool inWindow, bool showAnimation)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "clear menu ng enter");
@@ -923,5 +931,14 @@ void SubwindowManager::HideSystemTopMostWindow()
 {
     CHECK_NULL_VOID(systemToastWindow_);
     systemToastWindow_->HideSubWindowNG();
+}
+
+void SubwindowManager::ClearToastInSystemSubwindow()
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "clear toast in system subwindow enter");
+    auto subwindow = GetSystemToastWindow();
+    if (subwindow) {
+        subwindow->ClearToast();
+    }
 }
 } // namespace OHOS::Ace

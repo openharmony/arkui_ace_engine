@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
 
+#include "adapter/ohos/entrance/vibrator/vibrator_impl.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/log/dump_log.h"
@@ -736,7 +737,6 @@ void IndexerPattern::ApplyIndexChanged(
             nodeLayoutProperty->UpdateFontSize(selectedFont.GetFontSize());
             auto fontWeight = selectedFont.GetFontWeight();
             nodeLayoutProperty->UpdateFontWeight(fontWeight);
-            nodeLayoutProperty->UpdateFontFamily(selectedFont.GetFontFamilies());
             nodeLayoutProperty->UpdateItalicFontStyle(selectedFont.GetFontStyle());
             childNode->MarkModifyDone();
             if (isTextNodeInTree) {
@@ -771,7 +771,6 @@ void IndexerPattern::ApplyIndexChanged(
         auto defaultFont = layoutProperty->GetFont().value_or(indexerTheme->GetDefaultTextStyle());
         nodeLayoutProperty->UpdateFontSize(defaultFont.GetFontSize());
         nodeLayoutProperty->UpdateFontWeight(defaultFont.GetFontWeight());
-        nodeLayoutProperty->UpdateFontFamily(defaultFont.GetFontFamilies());
         nodeLayoutProperty->UpdateItalicFontStyle(defaultFont.GetFontStyle());
         nodeLayoutProperty->UpdateTextColor(layoutProperty->GetColor().value_or(indexerTheme->GetDefaultTextColor()));
         index++;
@@ -782,11 +781,9 @@ void IndexerPattern::ApplyIndexChanged(
     }
     if (selectChanged) {
         ShowBubble();
-#ifdef INDEXER_SUPPORT_VIBRATOR
         if (enableHapticFeedback_) {
-            VibraFeedback();
+            VibratorImpl::StartVibraFeedback();
         }
-#endif
     }
 }
 
@@ -1042,7 +1039,6 @@ void IndexerPattern::UpdateBubbleLetterStackAndLetterTextView()
     letterLayoutProperty->UpdateMaxLines(1);
     letterLayoutProperty->UpdateFontSize(popupTextFont.GetFontSize());
     letterLayoutProperty->UpdateFontWeight(popupTextFont.GetFontWeight());
-    letterLayoutProperty->UpdateFontFamily(popupTextFont.GetFontFamilies());
     letterLayoutProperty->UpdateItalicFontStyle(popupTextFont.GetFontStyle());
     letterLayoutProperty->UpdateTextColor(layoutProperty->GetPopupColor().value_or(indexerTheme->GetPopupTextColor()));
     letterLayoutProperty->UpdateTextAlign(TextAlign::CENTER);

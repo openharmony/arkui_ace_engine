@@ -69,6 +69,7 @@ public:
     void UpdateHideMenuOffsetNG(const NG::OffsetF& offset) override;
     void ContextMenuSwitchDragPreviewAnimationtNG(const RefPtr<NG::FrameNode>& dragPreviewNode,
         const NG::OffsetF& offset) override;
+    void UpdatePreviewPosition(const NG::OffsetF& offset, const Rect& rect) override;
     void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true) override;
     void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo,
         const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = true) override;

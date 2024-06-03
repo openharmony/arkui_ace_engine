@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/indexer/indexer_pattern.h"
+#include "adapter/ohos/entrance/vibrator/vibrator_impl.h"
 
 namespace OHOS::Ace::NG {
-void IndexerPattern::VibraFeedback()
+void VibratorImpl::StartVibraFeedback()
 {
 }
-};
+} // namespace OHOS::Ace::NG

@@ -129,12 +129,6 @@ ohos_unittest("plugin_pattern_test_ng") {
     "//third_party/googletest:gmock_main",
   ]
 
-  if (ace_use_rosen_drawing) {
-    deps += [
-      "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics::2d_graphics",
-    ]
-  }
-
   external_deps = [
     "cJSON:cjson",
     "c_utils:utils",
@@ -149,6 +143,10 @@ ohos_unittest("plugin_pattern_test_ng") {
     "window_manager:screen_session_manager_client",
     "zlib:shared_libz",
   ]
+
+  if (ace_use_rosen_drawing) {
+    external_deps += [ "graphic_2d:2d_graphics" ]
+  }
 
   if (os_account_exists) {
     external_deps += [ "os_account:os_account_innerkits" ]

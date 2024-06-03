@@ -33,7 +33,7 @@ struct ForEachFunc {
     std::function<void(int32_t index)> itemGenFunc_;
 };
 
-class ACE_EXPORT ForEachModel {
+class ACE_FORCE_EXPORT ForEachModel {
 public:
     static ForEachModel* GetInstance();
     virtual ~ForEachModel() = default;

@@ -34,8 +34,8 @@
 namespace OHOS::Ace::NG {
 
 using namespace Framework;
-using OnNavigationAnimation = std::function<NavigationTransition(NavContentInfo, NavContentInfo,
-        NavigationOperation)>;
+using OnNavigationAnimation = std::function<NavigationTransition(RefPtr<NavDestinationContext>,
+        RefPtr<NavDestinationContext>, NavigationOperation)>;
 class NavigationPattern : public Pattern {
     DECLARE_ACE_TYPE(NavigationPattern, Pattern);
 
@@ -327,6 +327,10 @@ public:
 
     void SetNavigationTransition(const OnNavigationAnimation navigationAnimation)
     {
+        if (currentProxy_ && !currentProxy_->GetIsFinished()) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "not support to update callback during animation");
+            return;
+        }
         onTransition_ = std::move(navigationAnimation);
     }
 
@@ -373,7 +377,7 @@ private:
     void TransitionWithAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage, bool isNeedVisible = false);
     bool TriggerCustomAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
-        const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
+        const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage, bool isNeedInvisible = false);
 
     void OnCustomAnimationFinish(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
@@ -383,6 +387,7 @@ private:
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
     RefPtr<RenderContext> GetTitleBarRenderContext();
     void DoAnimation(NavigationMode usrNavigationMode);
+    void RecoveryToLastStack();
     RefPtr<UINode> GenerateUINodeByIndex(int32_t index);
     RefPtr<FrameNode> GetDividerNode() const;
     void FireInterceptionEvent(bool isBefore,
@@ -418,6 +423,12 @@ private:
         const RefPtr<NavDestinationGroupNode>& topDestination, bool isPopPage, bool isAnimated);
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void RefreshFocusToDestination();
+    void StartDefaultAnimation(const RefPtr<NavDestinationGroupNode>& preTopDestination,
+        const RefPtr<NavDestinationGroupNode>& topDestination,
+        bool isPopPage, bool isNeedInVisible = false);
+    bool ExecuteAddAnimation(const RefPtr<NavDestinationGroupNode>& preTopDestination,
+        const RefPtr<NavDestinationGroupNode>& topDestination,
+        bool isPopPage, const RefPtr<NavigationTransitionProxy>& proxy);
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;

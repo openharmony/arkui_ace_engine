@@ -2364,6 +2364,16 @@ void JSWeb::Create(const JSCallbackInfo& info)
             WebModel::GetInstance()->SetCustomScheme(cmdLine);
         }
 
+        auto updateInstanceIdFunction = controller->GetProperty("updateInstanceId");
+        if (updateInstanceIdFunction->IsFunction()) {
+            std::function<void(int32_t)> updateInstanceIdCallback = [webviewController = controller,
+                func = JSRef<JSFunc>::Cast(updateInstanceIdFunction)](int32_t newId) {
+                auto newIdVal = JSRef<JSVal>::Make(ToJSValue(newId));
+                auto result = func->Call(webviewController, 1, &newIdVal);
+            };
+            NG::WebModelNG::GetInstance()->SetUpdateInstanceIdCallback(std::move(updateInstanceIdCallback));
+        }
+
         auto getWebDebugingFunction = controller->GetProperty("getWebDebuggingAccess");
         if (!getWebDebugingFunction->IsFunction()) {
             return;

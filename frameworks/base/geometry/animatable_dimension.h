@@ -29,7 +29,7 @@ using RenderNodeAnimationCallback = std::function<void()>;
 /*
  * AnimatableDimension is a Dimension with AnimationOption and Animator.
  */
-class ACE_EXPORT AnimatableDimension : public CalcDimension {
+class ACE_FORCE_EXPORT AnimatableDimension : public CalcDimension {
 public:
     AnimatableDimension() = default;
     ~AnimatableDimension() = default;
