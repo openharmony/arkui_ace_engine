@@ -19,6 +19,7 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/components/text/render_text.h"
+#include "core/components_ng/property/property.h"
 #include "core/pipeline/base/render_node.h"
 #include "core/components_ng/base/frame_node.h"
 #ifdef ENABLE_ROSEN_BACKEND
@@ -264,7 +265,7 @@ void FontManager::RebuildFontNodeNG()
         CHECK_NULL_VOID(fontNode);
         auto uiNode = DynamicCast<NG::UINode>(fontNode);
         if (uiNode) {
-            uiNode->MarkDirtyNode(NG::PROPERTY_UPDATE_LAYOUT);
+            uiNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
             ++iter;
         } else {
             iter = fontNodesNG_.erase(iter);
