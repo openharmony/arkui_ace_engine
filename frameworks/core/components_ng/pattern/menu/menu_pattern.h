@@ -489,6 +489,14 @@ public:
         lastSelectedItem_ = lastSelectedItem;
     }
 
+    void SetIsEmbedded()
+    {
+        isEmbedded_ = true;
+    }
+    bool IsEmbedded()
+    {
+        return isEmbedded_;
+    }
 protected:
     void UpdateMenuItemChildren(RefPtr<FrameNode>& host);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
@@ -572,6 +580,7 @@ private:
     bool expandDisplay_ = false;
     bool canExpand_ = true;
     RefPtr<FrameNode> lastSelectedItem_ = nullptr;
+    bool isEmbedded_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);
 };

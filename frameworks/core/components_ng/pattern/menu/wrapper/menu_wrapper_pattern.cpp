@@ -96,7 +96,9 @@ RefPtr<FrameNode> MenuWrapperPattern::FindTouchedMenuItem(const RefPtr<UINode>& 
     const auto& children = menuNode->GetChildren();
     for (auto child : children) {
         if (child->GetTag() == V2::MENU_ITEM_ETS_TAG) {
-            menuItem = AceType::DynamicCast<FrameNode>(child);
+            auto frameNode = AceType::DynamicCast<FrameNode>(child);
+            auto pattern = frameNode ? frameNode->GetPattern<MenuItemPattern>() : nullptr;
+            menuItem = pattern ? pattern->FindTouchedEmbeddedMenuItem(position) : nullptr;
         } else {
             menuItem = FindTouchedMenuItem(child, position);
         }
