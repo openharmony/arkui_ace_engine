@@ -782,6 +782,17 @@ void SheetPresentationPattern::UpdateDragBarStatus()
     sheetDragBar->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+float SheetPresentationPattern::GetCloseIconPosX(const SizeF& sheetSize, const RefPtr<SheetTheme>& sheetTheme)
+{
+    auto closeIconX = sheetSize.Width() - static_cast<float>(SHEET_CLOSE_ICON_WIDTH.ConvertToPx()) -
+                      static_cast<float>(sheetTheme->GetTitleTextMargin().ConvertToPx());
+    if (AceApplicationInfo::GetInstance().IsRightToLeft() &&
+        AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        closeIconX = static_cast<float>(sheetTheme->GetTitleTextMargin().ConvertToPx());
+    }
+    return closeIconX;
+}
+
 void SheetPresentationPattern::UpdateCloseIconStatus()
 {
     if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -803,8 +814,7 @@ void SheetPresentationPattern::UpdateCloseIconStatus()
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto size = geometryNode->GetFrameSize();
-    auto closeIconX = size.Width() - static_cast<float>(SHEET_CLOSE_ICON_WIDTH.ConvertToPx()) -
-                      static_cast<float>(sheetTheme->GetTitleTextMargin().ConvertToPx());
+    auto closeIconX = GetCloseIconPosX(size, sheetTheme);
     auto closeIconY = static_cast<float>(sheetTheme->GetTitleTextMargin().ConvertToPx());
     OffsetT<Dimension> positionOffset;
     positionOffset.SetX(Dimension(closeIconX));

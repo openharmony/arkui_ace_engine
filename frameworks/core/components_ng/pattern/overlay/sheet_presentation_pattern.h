@@ -560,6 +560,7 @@ private:
     void SetColumnMinSize(bool reset = false);
     void UpdateDragBarStatus();
     void UpdateCloseIconStatus();
+    float GetCloseIconPosX(const SizeF& sheetSize, const RefPtr<SheetTheme>& sheetTheme);
     void UpdateSheetTitle();
     void UpdateFontScaleStatus();
     RefPtr<RenderContext> GetRenderContext();
