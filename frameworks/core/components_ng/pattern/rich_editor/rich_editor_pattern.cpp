@@ -5997,7 +5997,8 @@ void RichEditorPattern::InitSelection(const Offset& pos)
 {
     int32_t currentPosition = paragraphs_.GetIndex(pos);
     currentPosition = std::min(currentPosition, GetTextContentLength());
-    if (IsTouchBeforeCaret(currentPosition, pos)) {
+    bool currentPosEqualParagraphBegin = currentPosition == GetParagraphBeginPosition(currentPosition);
+    if (IsTouchBeforeCaret(currentPosition, pos) && !currentPosEqualParagraphBegin) {
         currentPosition = std::max(0, currentPosition - 1);
     }
     int32_t nextPosition = currentPosition + GetGraphemeClusterLength(GetWideText(), currentPosition);
