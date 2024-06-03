@@ -876,7 +876,7 @@ int32_t RichEditorPattern::AddTextSpanOperation(
         auto tmpLongPressFunc = options.userGestureOption.onLongPress;
         spanItem->SetLongPressEvent(std::move(tmpLongPressFunc));
     }
-    if (updateCaretPosition) {
+    if (updateCaretPosition && !previewTextRecord_.isPreviewTextInputting) {
         if (options.offset.has_value()) {
             SetCaretPosition(options.offset.value() + StringUtils::ToWstring(options.value).length());
         } else {
@@ -3492,7 +3492,7 @@ bool RichEditorPattern::InitPreviewText(const std::string& previewTextValue, con
         return false;
     }
     previewTextRecord_.isPreviewTextInputting = true;
-    if (textSelector_.IsValid()) {
+    if (!textSelector_.SelectNothing()) {
         DeleteBackward(1);
     }
     TextSpanOptions options;
