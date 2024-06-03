@@ -432,14 +432,14 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
     auto renderProp = host->GetPaintProperty<ImageRenderProperty>();
     bool hasValidSlice = renderProp && renderProp->HasImageResizableSlice();
     DynamicRangeMode dynamicMode = DynamicRangeMode::STANDARD;
+    bool isHdrDecoderNeed = false;
     if (renderProp && renderProp->HasDynamicMode()) {
-        loadingCtx_->SetIsHdrDecoderNeed(true);
+        isHdrDecoderNeed = true;
         dynamicMode = renderProp->GetDynamicMode().value_or(DynamicRangeMode::STANDARD);
-    } else {
-        loadingCtx_->SetIsHdrDecoderNeed(false);
     }
 
     if (loadingCtx_) {
+        loadingCtx_->SetIsHdrDecoderNeed(isHdrDecoderNeed);
         loadingCtx_->SetDynamicRangeMode(dynamicMode);
         loadingCtx_->SetImageQuality(GetImageQuality());
         loadingCtx_->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize, hasValidSlice);
