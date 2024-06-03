@@ -245,25 +245,24 @@ void RichEditorPattern::InsertValueInStyledString(const std::string& insertValue
     int32_t changeStart = caretPosition_;
     int32_t changeLength = 0;
     if (textSelector_.IsValid()) {
-        auto start = textSelector_.GetTextStart();
-        auto end = textSelector_.GetTextEnd();
-        SetCaretPosition(start);
-        changeStart = caretPosition_;
-        changeLength = end - start;
-        DeleteForwardInStyledString(changeLength, false);
-        CloseSelectOverlay();
-        ResetSelection();
+        changeStart = textSelector_.GetTextStart();
+        changeLength = textSelector_.GetTextEnd() - changeStart;
     }
     bool isPreventChange = false;
+    RefPtr<SpanString> insertStyledString = nullptr;
     if (typingStyle_.has_value() && typingTextStyle_.has_value()) {
-        auto insertStyledString =
-            CreateStyledStringByTextStyle(insertValue, typingStyle_.value(), typingTextStyle_.value());
+        insertStyledString = CreateStyledStringByTextStyle(insertValue, typingStyle_.value(), typingTextStyle_.value());
         isPreventChange = !BeforeStyledStringChange(changeStart, changeLength, insertStyledString);
-        CHECK_NULL_VOID(!isPreventChange);
-        styledString_->InsertSpanString(changeStart, insertStyledString);
     } else {
         isPreventChange = !BeforeStyledStringChange(changeStart, changeLength, insertValue);
-        CHECK_NULL_VOID(!isPreventChange);
+    }
+    CHECK_NULL_VOID(!isPreventChange);
+    if (changeLength > 0) {
+        DeleteForwardInStyledString(changeLength, false);
+    }
+    if (insertStyledString) {
+        styledString_->InsertSpanString(changeStart, insertStyledString);
+    } else {
         styledString_->InsertString(changeStart, insertValue);
     }
     if (!caretVisible_) {
@@ -343,18 +342,18 @@ RefPtr<DecorationSpan> RichEditorPattern::CreateDecorationSpanByTextStyle(
 void RichEditorPattern::DeleteBackwardInStyledString(int32_t length)
 {
     CHECK_NULL_VOID(styledString_);
-    if (textSelector_.IsValid()) {
-        if (!textSelector_.StartEqualToDest()) {
-            length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
-        }
-        SetCaretPosition(textSelector_.GetTextEnd());
-        CloseSelectOverlay();
-        ResetSelection();
+    if (!textSelector_.SelectNothing()) {
+        length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
     }
     CHECK_NULL_VOID(caretPosition_ != 0);
     int32_t changeStart = caretPosition_ - length;
     bool isPreventChange = !BeforeStyledStringChange(changeStart, length, "");
     CHECK_NULL_VOID(!isPreventChange);
+    if (textSelector_.IsValid()) {
+        SetCaretPosition(textSelector_.GetTextEnd());
+        CloseSelectOverlay();
+        ResetSelection();
+    }
     styledString_->RemoveString(changeStart, length);
     if (!caretVisible_) {
         StartTwinkling();
@@ -371,18 +370,18 @@ void RichEditorPattern::DeleteBackwardInStyledString(int32_t length)
 void RichEditorPattern::DeleteForwardInStyledString(int32_t length, bool isIME)
 {
     CHECK_NULL_VOID(styledString_);
-    if (textSelector_.IsValid()) {
-        if (!textSelector_.StartEqualToDest()) {
-            length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
-        }
-        SetCaretPosition(textSelector_.GetTextStart());
-        CloseSelectOverlay();
-        ResetSelection();
+    if (!textSelector_.SelectNothing()) {
+        length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
     }
     CHECK_NULL_VOID(GetTextContentLength() != 0);
     int32_t changeStart = caretPosition_;
     bool isPreventChange = isIME && !BeforeStyledStringChange(changeStart, length, "");
     CHECK_NULL_VOID(!isPreventChange);
+    if (textSelector_.IsValid()) {
+        SetCaretPosition(textSelector_.GetTextStart());
+        CloseSelectOverlay();
+        ResetSelection();
+    }
     styledString_->RemoveString(changeStart, length);
     if (!caretVisible_) {
         StartTwinkling();
@@ -6004,7 +6003,9 @@ void RichEditorPattern::InitSelection(const Offset& pos)
     nextPosition = std::min(nextPosition, GetTextContentLength());
     MouseDoubleClickParagraphEnd(currentPosition);
     DoubleClickExcludeSymbol(currentPosition, nextPosition);
-    adjusted_ = AdjustWordSelection(currentPosition, nextPosition);
+    if (!IsCustomSpanInCaretPos(currentPosition, true)) {
+        AdjustWordSelection(currentPosition, nextPosition);
+    }
     textSelector_.Update(currentPosition, nextPosition);
     auto selectedRects = paragraphs_.GetRects(currentPosition, nextPosition);
     bool isSelectEmpty = selectedRects.empty() || (selectedRects.size() == 1 && NearZero((selectedRects[0].Width())));
