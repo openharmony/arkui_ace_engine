@@ -185,7 +185,7 @@ void FocusHub::DumpFocusNodeTree(int32_t depth)
             information += (" previous-focus-in-" + focusScopeId_);
         }
         auto focusMgr = GetFocusManager();
-        if (focusMgr && focusMgr == this) {
+        if (focusMgr && focusMgr->GetLastFocusStateNode() == this) {
             information += " [Painted]";
         }
         DumpLog::GetInstance().Print(depth, information, 0);
@@ -226,7 +226,7 @@ void FocusHub::DumpFocusScopeTree(int32_t depth)
             information += (" previous-focus-in-" + focusScopeId_);
         }
         auto focusMgr = GetFocusManager();
-        if (focusMgr && focusMgr == this) {
+        if (focusMgr && focusMgr->GetLastFocusStateNode() == this) {
             information += " [Painted]";
         }
         DumpLog::GetInstance().Print(depth, information, static_cast<int32_t>(focusNodes.size()));
@@ -1363,6 +1363,9 @@ bool FocusHub::PaintFocusState(bool isNeedStateStyles)
     } else {
         paintWidth = appTheme->GetFocusWidthVp();
     }
+    if (NEAR_ZERO(paintWidth.Value())) {
+        return true;
+    }
 
     if (focusStyleType_ == FocusStyleType::CUSTOM_BORDER) {
         if (!HasPaintRect()) {
@@ -1468,6 +1471,9 @@ bool FocusHub::PaintInnerFocusState(const RoundRect& paintRect, bool forceUpdate
         paintWidth = appTheme->GetFocusWidthVp();
     }
     renderContext->ClearFocusState();
+    if (NEAR_ZERO(paintWidth.Value())) {
+        return true;
+    }
     renderContext->PaintFocusState(paintRect, paintColor, paintWidth);
     return true;
 }

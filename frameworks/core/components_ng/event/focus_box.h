@@ -21,6 +21,7 @@
 #include "base/geometry/calc_dimension.h"
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/color.h"
+#include "frameworks/base/json/json_util.h"
 
 namespace OHOS::Ace::NG {
 
