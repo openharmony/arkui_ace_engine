@@ -718,4 +718,12 @@ std::optional<RectF> BaseTextSelectOverlay::GetAncestorNodeViewPort()
     }
     return std::nullopt;
 }
+
+bool BaseTextSelectOverlay::IsAcceptResetSelectionEvent(SourceType sourceType, TouchType touchType)
+{
+    if ((sourceType == SourceType::MOUSE) && (touchType == TouchType::MOVE)) {
+        resetSelectionHitTest_ = false;
+    }
+    return (sourceType == SourceType::MOUSE || sourceType == SourceType::TOUCH) && touchType == TouchType::DOWN;
+}
 } // namespace OHOS::Ace::NG
