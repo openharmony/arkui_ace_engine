@@ -127,7 +127,11 @@ if (!is_arkui_x) {
   }
 }
 
-abc_sources = [ "stateMgmt" ]
+if (!is_arkui_x) {
+  abc_sources = [ "stateMgmt" ]
+} else {
+  abc_sources = []
+}
 
 foreach(item, abc_sources) {
   ohos_prebuilt_etc("copy_" + item + "_abc") {
@@ -256,7 +260,11 @@ template("declarative_js_engine_ark") {
     ]
 
     deps = [ "${ace_root}/frameworks/core/interfaces/native:ace_core_interfaces_native_node_$platform" ]
-    external_deps = [ "graphic_2d:drawing_napi_impl" ]
+    if (is_arkui_x) {
+      deps += [ "//foundation/graphic/graphic_2d/interfaces/kits/napi/graphic/drawing:drawing_napi_impl" ]
+    } else {
+      external_deps = [ "graphic_2d:drawing_napi_impl" ]
+    }
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]
     }

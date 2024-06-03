@@ -385,6 +385,11 @@ void WebPattern::WebRequestFocus()
     focusHub->RequestFocusImmediately();
 }
 
+WebInfoType WebPattern::GetWebInfoType()
+{
+    return WebInfoType::TYPE_MOBILE;
+}
+
 void WebPattern::UpdateContentOffset(const RefPtr<LayoutWrapper>& dirty)
 {
     CHECK_NULL_VOID(dirty);
@@ -1191,9 +1196,14 @@ void WebPattern::InitSlideUpdateListener()
     // cross platform is not support now;
 }
 
-void WebPattern::UpdateSlideOffset()
+void WebPattern::UpdateSlideOffset(bool isNeedReset)
 {
    // cross platform is not support now;
+}
+
+void WebPattern::Backward()
+{
+    // cross platform is not support now;
 }
 
 void WebPattern::CalculateHorizontalDrawRect()
