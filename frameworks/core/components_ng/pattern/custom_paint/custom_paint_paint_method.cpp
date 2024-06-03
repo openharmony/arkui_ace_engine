@@ -1318,7 +1318,7 @@ void CustomPaintPaintMethod::Translate(double x, double y)
 void CustomPaintPaintMethod::PaintText(const float width, double x, double y,
     std::optional<double> maxWidth, bool isStroke, bool hasShadow)
 {
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)) {
         paragraph_->Layout(FLT_MAX);
     } else {
         paragraph_->Layout(width);

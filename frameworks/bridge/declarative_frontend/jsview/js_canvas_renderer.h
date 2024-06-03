@@ -178,7 +178,7 @@ public:
 
     inline double GetDensity()
     {
-        return (GetUnit() == CanvasUnit::DEFAULT) ? density_ : 1.0;
+        return ((GetUnit() == CanvasUnit::DEFAULT) && !NearZero(density_)) ? density_ : 1.0;
     }
 
     void SetInstanceId(int32_t id)
