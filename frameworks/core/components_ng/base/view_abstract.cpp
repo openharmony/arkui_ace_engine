@@ -405,6 +405,11 @@ void ViewAbstract::SetPixelRound(uint8_t value)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, PixelRound, value);
 }
 
+void ViewAbstract::SetPixelRound(FrameNode* frameNode, uint8_t value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, PixelRound, value, frameNode);
+}
+
 void ViewAbstract::SetLayoutDirection(TextDirection value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {

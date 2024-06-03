@@ -2728,7 +2728,30 @@ class FocusScopePriorityModifier extends ModifierWithKey {
   }
 }
 FocusScopePriorityModifier.identity = Symbol('focusScopePriority');
-
+class PixelRoundModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetPixelRound(node);
+    }
+    else {
+      if (!isObject(this.value)) {
+        getUINativeModule().common.resetPixelRound(node);
+      } else {
+        getUINativeModule().common.setPixelRound(node, this.value.start, this.value.top, this.value.end, this.value.bottom);
+      }
+    }
+  }
+  checkObjectDiff() {
+    return !(this.stageValue.start === this.value.start &&
+      this.stageValue.end === this.value.end &&
+      this.stageValue.top === this.value.top &&
+      this.stageValue.bottom === this.value.bottom);
+  }
+}
+PixelRoundModifier.identity = Symbol('pixelRound');
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 const isString = (val) => typeof val === 'string';
 const isNumber = (val) => typeof val === 'number';
@@ -3950,6 +3973,10 @@ class ArkComponent {
     }
     modifierWithKey(
       this._modifiersWithKeys, FocusScopePriorityModifier.identity, FocusScopePriorityModifier, arkFocusScopePriority);
+    return this;
+  }
+  pixelRound(value) {
+    modifierWithKey(this._modifiersWithKeys, PixelRoundModifier.identity, PixelRoundModifier, value);
     return this;
   }
 }

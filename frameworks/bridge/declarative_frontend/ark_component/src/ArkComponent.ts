@@ -2831,6 +2831,35 @@ class SystemBarEffectModifier extends ModifierWithKey<null> {
     getUINativeModule().common.setSystemBarEffect(node, true);
   }
 }
+class PixelRoundModifier extends ModifierWithKey<PixelRoundPolicy> {
+  constructor(value: PixelRoundPolicy) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('pixelRound');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetPixelRound(node);
+    } else {
+      let start: PixelRoundCalcPolicy;
+      let top: PixelRoundCalcPolicy;
+      let end: PixelRoundCalcPolicy;
+      let bottom: PixelRoundCalcPolicy;
+      if (isObject(this.value)) {
+        start = (this.value as PixelRoundCalcPolicy)?.start;
+        top = (this.value as PixelRoundCalcPolicy)?.top;
+        end = (this.value as PixelRoundCalcPolicy)?.end;
+        bottom = (this.value as PixelRoundCalcPolicy)?.bottom;
+      }
+      getUINativeModule().common.setPixelRound(node, start, top, end, bottom);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !(this.stageValue.start === this.value.start &&
+      this.stageValue.end === this.value.end &&
+      this.stageValue.top === this.value.top &&
+      this.stageValue.bottom === this.value.bottom);
+  }
+}
 
 class FocusScopeIdModifier extends ModifierWithKey<ArkFocusScopeId> {
   constructor(value: ArkFocusScopeId) {
@@ -4138,6 +4167,9 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     modifierWithKey(
       this._modifiersWithKeys, FocusScopePriorityModifier.identity, FocusScopePriorityModifier, arkFocusScopePriority);
     return this;
+  }
+  pixelRound(value:PixelRoundPolicy):this {
+    modifierWithKey(this._modifiersWithKeys, PixelRoundModifier.identity, PixelRoundModifier, value);
   }
 }
 
