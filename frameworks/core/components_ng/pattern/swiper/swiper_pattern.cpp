@@ -159,7 +159,6 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     swiperLayoutAlgorithm->SetContentMainSize(contentMainSize_);
     swiperLayoutAlgorithm->SetCurrentDelta(currentDelta_);
     swiperLayoutAlgorithm->SetItemsPosition(itemPosition_);
-    swiperLayoutAlgorithm->SetIsNeedResetPrevMarginAndNextMargin();
     if (IsOutOfBoundary() && !IsLoop()) {
         swiperLayoutAlgorithm->SetOverScrollFeature();
     }
@@ -469,10 +468,6 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
             StopIndicatorAnimation();
         }
         currentDelta_ = 0.0f;
-    }
-    if (mainSizeIsMeasured_ && isNeedResetPrevMarginAndNextMargin_) {
-        layoutProperty->UpdatePrevMarginWithoutMeasure(0.0_px);
-        layoutProperty->UpdateNextMarginWithoutMeasure(0.0_px);
     }
     if (oldIndex_ != currentIndex_ && !isInit_ && !IsUseCustomAnimation()) {
         FireWillShowEvent(currentIndex_);
@@ -925,14 +920,14 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
             bool isNeedForwardTranslate = false;
             if (!hasCachedCapture_ && IsLoop()) {
-                auto lastItemIndex = Positive(swiperLayoutProperty->GetNextMarginValue(0.0_px).ConvertToPx())
+                auto lastItemIndex = Positive(swiperLayoutProperty->GetCalculatedNextMargin())
                                          ? targetIndexValue + GetDisplayCount()
                                          : targetIndexValue + GetDisplayCount() - 1;
                 isNeedForwardTranslate = itemPosition_.find(lastItemIndex) == itemPosition_.end();
             }
             bool isNeedBackwardTranslate = false;
             if (!hasCachedCapture_ && IsLoop() && targetIndexValue < currentIndex_) {
-                auto firstItemIndex = Positive(swiperLayoutProperty->GetPrevMarginValue(0.0_px).ConvertToPx())
+                auto firstItemIndex = Positive(swiperLayoutProperty->GetCalculatedPrevMargin())
                                           ? targetIndexValue + TotalCount() - 1
                                           : targetIndexValue + TotalCount();
                 isNeedBackwardTranslate = itemPosition_.find(firstItemIndex) != itemPosition_.end();
@@ -975,7 +970,6 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         pauseTargetIndex_ = targetIndex_;
     }
     mainSizeIsMeasured_ = swiperLayoutAlgorithm->GetMainSizeIsMeasured();
-    isNeedResetPrevMarginAndNextMargin_ = swiperLayoutAlgorithm->GetIsNeedResetPrevMarginAndNextMargin();
     contentCrossSize_ = swiperLayoutAlgorithm->GetContentCrossSize();
     currentDelta_ = 0.0f;
     contentMainSize_ = swiperLayoutAlgorithm->GetContentMainSize();
@@ -3597,18 +3591,14 @@ float SwiperPattern::GetPrevMargin() const
 {
     auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(swiperLayoutProperty, 0.0f);
-    return SwiperUtils::IsStretch(swiperLayoutProperty) ?
-        ConvertToPx(swiperLayoutProperty->GetPrevMargin().value_or(0.0_vp),
-        swiperLayoutProperty->GetLayoutConstraint()->scaleProperty, 0).value_or(0) : 0.0f;
+    return swiperLayoutProperty->GetCalculatedPrevMargin();
 }
 
 float SwiperPattern::GetNextMargin() const
 {
     auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(swiperLayoutProperty, 0.0f);
-    return SwiperUtils::IsStretch(swiperLayoutProperty) ?
-        ConvertToPx(swiperLayoutProperty->GetNextMargin().value_or(0.0_vp),
-        swiperLayoutProperty->GetLayoutConstraint()->scaleProperty, 0).value_or(0) : 0.0f;
+    return swiperLayoutProperty->GetCalculatedNextMargin();
 }
 
 Axis SwiperPattern::GetDirection() const
@@ -3717,8 +3707,8 @@ bool SwiperPattern::IsLoop() const
     CHECK_NULL_RETURN(layoutProperty, true);
     if (TotalDisPlayCount() > TotalCount() ||
         (TotalDisPlayCount() == TotalCount() && SwiperUtils::IsStretch(layoutProperty) &&
-            (NonPositive(layoutProperty->GetPrevMarginValue(0.0_px).ConvertToPx()) ||
-                NonPositive(layoutProperty->GetNextMarginValue(0.0_px).ConvertToPx())))) {
+            (NonPositive(layoutProperty->GetCalculatedPrevMargin()) ||
+                NonPositive(layoutProperty->GetCalculatedNextMargin())))) {
         return false;
     }
     return layoutProperty->GetLoop().value_or(true);
@@ -4627,10 +4617,10 @@ int32_t SwiperPattern::TotalDisPlayCount() const
     CHECK_NULL_RETURN(swiperLayoutProperty, 1);
     auto displayCount = GetDisplayCount();
     if (SwiperUtils::IsStretch(swiperLayoutProperty)) {
-        if (Positive(swiperLayoutProperty->GetPrevMarginValue(0.0_px).ConvertToPx())) {
+        if (Positive(swiperLayoutProperty->GetCalculatedPrevMargin())) {
             displayCount++;
         }
-        if (Positive(swiperLayoutProperty->GetNextMarginValue(0.0_px).ConvertToPx())) {
+        if (Positive(swiperLayoutProperty->GetCalculatedNextMargin())) {
             displayCount++;
         }
     }
@@ -4958,8 +4948,6 @@ void SwiperPattern::DumpAdvanceInfo()
                        : DumpLog::GetInstance().AddDesc("isFinishAnimation:false");
     mainSizeIsMeasured_ ? DumpLog::GetInstance().AddDesc("mainSizeIsMeasured:true")
                         : DumpLog::GetInstance().AddDesc("mainSizeIsMeasured:false");
-    isNeedResetPrevMarginAndNextMargin_ ? DumpLog::GetInstance().AddDesc("isNeedResetPrevMarginAndNextMargin:true")
-                                        : DumpLog::GetInstance().AddDesc("isNeedResetPrevMarginAndNextMargin:false");
     usePropertyAnimation_ ? DumpLog::GetInstance().AddDesc("usePropertyAnimation:true")
                           : DumpLog::GetInstance().AddDesc("usePropertyAnimation:false");
     isUserFinish_ ? DumpLog::GetInstance().AddDesc("isUserFinish:true")
