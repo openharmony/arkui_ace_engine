@@ -6906,4 +6906,46 @@ ArkUINativeModuleValue CommonBridge::SetFocusScopePriority(ArkUIRuntimeCallInfo*
     GetArkUINodeModifiers()->getCommonModifier()->setFocusScopePriority(nativeNode, scopeId.c_str(), priority);
     return panda::JSValueRef::Undefined(vm);
 }
+ArkUINativeModuleValue CommonBridge::SetPixelRound(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    auto startArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto topArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    auto endArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    auto bottomArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+    if (startArg->IsUndefined() && topArg->IsUndefined() && endArg->IsUndefined() && bottomArg->IsUndefined()) {
+        GetArkUINodeModifiers()->getCommonModifier()->resetPixelRound(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    int32_t values[] = { -1, -1, -1, -1 };
+    if (startArg->IsInt()) {
+        values[NUM_0] = startArg->Int32Value(vm);
+    }
+    if (topArg->IsInt()) {
+        values[NUM_1] = topArg->Int32Value(vm);
+    }
+    if (endArg->IsInt()) {
+        values[NUM_2] = endArg->Int32Value(vm);
+    }
+    if (bottomArg->IsInt()) {
+        values[NUM_3] = bottomArg->Int32Value(vm);
+    }
+    GetArkUINodeModifiers()->getCommonModifier()->setPixelRound(
+        nativeNode, values, (sizeof(values) / sizeof(values[NUM_0])));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetPixelRound(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonModifier()->resetPixelRound(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG
