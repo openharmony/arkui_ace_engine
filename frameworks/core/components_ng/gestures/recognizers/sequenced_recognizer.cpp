@@ -122,16 +122,19 @@ bool SequencedRecognizer::HandleEvent(const TouchEvent& point)
         GroupAdjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return true;
     }
+    if (point.type == TouchType::DOWN && !point.childTouchTestList.empty()) {
+        childTouchTestList_ = point.childTouchTestList;
+    }
     touchPoints_[point.id] = point;
-    if (currentIndex_ > 0) {
-        auto prevState = curRecognizer->GetRefereeState();
-        if (prevState == RefereeState::READY) {
-            // the prevState is ready, need to pase down event to the new coming recognizer.
-            for (auto& item : touchPoints_) {
-                item.second.type = TouchType::DOWN;
-                curRecognizer->HandleEvent(item.second);
-                AddGestureProcedure(item.second, curRecognizer);
+    if (currentIndex_ > 0 && curRecognizer->GetRefereeState() == RefereeState::READY) {
+        // the prevState is ready, need to pase down event to the new coming recognizer.
+        for (auto& item : touchPoints_) {
+            item.second.type = TouchType::DOWN;
+            if (!childTouchTestList_.empty()) {
+                item.second.childTouchTestList = childTouchTestList_;
             }
+            curRecognizer->HandleEvent(item.second);
+            AddGestureProcedure(item.second, curRecognizer);
         }
     }
     switch (point.type) {
