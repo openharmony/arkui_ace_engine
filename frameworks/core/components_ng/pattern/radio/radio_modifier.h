@@ -219,6 +219,10 @@ private:
     Color shadowColor_;
     Color clickEffectColor_;
     Color hoverColor_;
+    Color focusedBgUnchecked_;
+    Color focusedRingUnchecked_;
+    Color focusedBgColor_;
+    Dimension sizeFocused_;
     Dimension hotZoneHorizontalPadding_;
     Dimension defaultPadding_;
     float hoverDuration_ = 0.0f;
