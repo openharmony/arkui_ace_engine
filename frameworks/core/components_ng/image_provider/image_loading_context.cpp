@@ -172,6 +172,7 @@ void ImageLoadingContext::OnDataLoading()
         if (auto obj = ImageProvider::QueryImageObjectFromCache(src_); obj) {
             TAG_LOGD(AceLogTag::ACE_IMAGE, "%{public}s Hit the Cache, not need Create imageObject.",
                 src_.GetSrc().c_str());
+            ImageProvider::PrepareImageData(obj);
             DataReadyCallback(obj);
             return;
         }
