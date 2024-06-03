@@ -514,6 +514,11 @@ void SheetPresentationPattern::AvoidSafeArea()
     CHECK_NULL_VOID(host->GetFocusHub()->IsCurrentFocus());
     auto heightUp = GetSheetHeightChange();
     sheetHeightUp_ = heightUp;
+    if (isDismissProcess_) {
+        TAG_LOGD(AceLogTag::ACE_SHEET,
+            "The sheet will disappear, so there's no need to handle canceling keyboard avoidance here.");
+        return;
+    }
     TAG_LOGD(AceLogTag::ACE_SHEET, "To avoid Keyboard, sheet height increase %{public}f.", heightUp);
     auto offset = pageHeight_ - height_ - heightUp;
     auto renderContext = host->GetRenderContext();
@@ -681,6 +686,7 @@ void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVe
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
             overlayManager->DestroySheet(host, pattern->GetTargetId());
+            pattern->FireCallback("false");
         }
     });
     StartSheetTransitionAnimation(option, isTransitionIn, offset);
@@ -719,7 +725,7 @@ void SheetPresentationPattern::DismissTransition(bool isTransitionIn, float drag
     const auto& overlayManager = GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->ModalPageLostFocus(GetHost());
-    if (!isTransitionIn && !HasCallback()) {
+    if (!isTransitionIn) {
         const auto& layoutProp = GetLayoutProperty<SheetPresentationProperty>();
         CHECK_NULL_VOID(layoutProp);
         auto showInPage = layoutProp->GetSheetStyleValue(SheetStyle()).showInPage.value_or(false);
@@ -1297,7 +1303,6 @@ void SheetPresentationPattern::StartSheetTransitionAnimation(
             },
             option.GetOnFinishEvent());
     } else {
-        sheetPattern->FireCallback("false");
         if (sheetPattern->HasCallback()) {
             sheetParent->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
                 HitTestMode::HTMTRANSPARENT);
