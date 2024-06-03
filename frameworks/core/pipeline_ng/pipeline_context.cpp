@@ -1430,8 +1430,6 @@ void PipelineContext::CheckVirtualKeyboardHeight()
 
 void PipelineContext::DetachNode(RefPtr<UINode> uiNode)
 {
-    dirtyNodes_.erase(uiNode);
-
     auto frameNode = DynamicCast<FrameNode>(uiNode);
 
     CHECK_NULL_VOID(frameNode);
