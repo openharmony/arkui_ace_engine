@@ -336,10 +336,11 @@ public:
         return loadingCtx_->GetImageSize();
     }
 
+    void OnVisibleAreaChange(bool visible);
+
 protected:
     void RegisterWindowStateChangedCallback();
     void UnregisterWindowStateChangedCallback();
-    void OnVisibleAreaChange(bool visible);
     bool isShow_ = true;
     bool gifAnimation_ = false;
 
