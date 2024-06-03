@@ -1446,6 +1446,7 @@ private:
 
 #if defined(ENABLE_STANDARD_INPUT)
     std::optional<MiscServices::TextConfig> GetMiscTextConfig() const;
+    void GetInlinePositionYAndHeight(double& positionY, double& height) const;
 #endif
     void SetIsSingleHandle(bool isSingleHandle)
     {
