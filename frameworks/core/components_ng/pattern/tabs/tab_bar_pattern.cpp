@@ -1143,6 +1143,10 @@ void TabBarPattern::HandleBottomTabBarChange(int32_t index)
     auto preIndex = GetImageColorOnIndex().value_or(indicator_);
     UpdateImageColor(index);
     UpdateSymbolStats(index, preIndex);
+    if (preIndex < 0 || preIndex >= static_cast<int32_t>(tabBarStyles_.size()) ||
+        index < 0 || index >= static_cast<int32_t>(tabBarStyles_.size())) {
+        return;
+    }
     if (preIndex != index && (tabBarStyles_[preIndex] == TabBarStyle::BOTTOMTABBATSTYLE ||
                                    tabBarStyles_[index] == TabBarStyle::BOTTOMTABBATSTYLE)) {
         int32_t selectedIndex = -1;
