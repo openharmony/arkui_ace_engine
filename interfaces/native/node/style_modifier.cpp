@@ -7909,6 +7909,30 @@ void ResetLayoutRect(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getCommonModifier()->resetLayoutRect(node->uiNodeHandle);
 }
 
+int32_t SetFocusOnTouch(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (item->size == 0 || !CheckAttributeIsBool(item->value[0].i32)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->setFocusOnTouch(
+        node->uiNodeHandle, item->value[NUM_0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetFocusOnTouch(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetFocusOnTouch(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetFocusOnTouch(ArkUI_NodeHandle node)
+{
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getCommonModifier()->getFocusOnTouch(node->uiNodeHandle);
+    g_numberValues[0].i32 = resultValue;
+    return &g_attributeItem;
+}
+
 bool CheckTransformCenter(const ArkUI_AttributeItem* item, int32_t size)
 {
     CHECK_NULL_RETURN(item, false);
@@ -11339,6 +11363,7 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetColorBlend,
         SetForegroundBlurStyle,
         SetLayoutRect,
+        SetFocusOnTouch
     };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -11434,6 +11459,7 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         GetColorBlend,
         GetForegroundBlurStyle,
         GetLayoutRect,
+        GetFocusOnTouch
     };
     if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -11533,6 +11559,7 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetColorBlend,
         ResetForegroundBlurStyle,
         ResetLayoutRect,
+        ResetFocusOnTouch
     };
     if (subTypeId >= sizeof(resetters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);

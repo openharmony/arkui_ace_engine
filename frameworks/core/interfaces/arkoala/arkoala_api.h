@@ -1407,6 +1407,7 @@ struct ArkUICommonModifier {
     void (*setLayoutRect)(ArkUINodeHandle node, ArkUI_Int32* values);
     void (*getLayoutRect)(ArkUINodeHandle node, ArkUI_Int32* values);
     void (*resetLayoutRect)(ArkUINodeHandle node);
+    ArkUI_Bool (*getFocusOnTouch)(ArkUINodeHandle node);
 };
 
 struct ArkUICommonShapeModifier {
