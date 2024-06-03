@@ -635,6 +635,13 @@ void ImageModelNG::SetImageAnalyzerConfig(void* config)
     pattern->SetImageAnalyzerConfig(config);
 }
 
+void ImageModelNG::SetImageAIOptions(void* options)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetImageAIOptions(options);
+}
+
 bool ImageModelNG::IsSrcSvgImage(FrameNode* frameNode)
 {
     return false;

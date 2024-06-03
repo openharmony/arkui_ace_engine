@@ -302,6 +302,21 @@ void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
         std::make_shared<std::string>(src), bundleName, moduleName, (resId == -1), isImageSpan
     );
     ImageModel::GetInstance()->Create(imageInfoConfig, pixmap);
+
+    if (info.Length() > 1) {
+        auto options = info[1];
+        if (!options->IsObject()) {
+            return;
+        }
+        auto engine = EngineHelper::GetCurrentEngine();
+        CHECK_NULL_VOID(engine);
+        NativeEngine* nativeEngine = engine->GetNativeEngine();
+        panda::Local<JsiValue> value = options.Get().GetLocalHandle();
+        JSValueWrapper valueWrapper = value;
+        ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
+        napi_value optionsValue = nativeEngine->ValueToNapiValue(valueWrapper);
+        ImageModel::GetInstance()->SetImageAIOptions(optionsValue);
+    }
 }
 
 bool JSImage::IsDrawable(const JSRef<JSVal>& jsValue)
@@ -798,6 +813,7 @@ void JSImage::AnalyzerConfig(const JSCallbackInfo &info)
     auto engine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_VOID(engine);
     NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_VOID(nativeEngine);
     panda::Local<JsiValue> value = configParams.Get().GetLocalHandle();
     JSValueWrapper valueWrapper = value;
     ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
