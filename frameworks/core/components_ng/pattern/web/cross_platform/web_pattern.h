@@ -70,6 +70,13 @@ struct TouchHandleState {
 enum WebOverlayType { INSERT_OVERLAY, SELECTION_OVERLAY, INVALID_OVERLAY };
 } // namespace
 
+enum class WebInfoType : int32_t {
+    TYPE_MOBILE,
+    TYPE_TABLET,
+    TYPE_2IN1,
+    TYPE_UNKNOWN
+};
+
 class WebPattern : public Pattern, public SelectionHost {
     DECLARE_ACE_TYPE(WebPattern, Pattern, SelectionHost);
 
@@ -78,6 +85,8 @@ public:
     using SetHapPathCallback = std::function<void(const std::string&)>;
     using JsProxyCallback = std::function<void()>;
     using OnControllerAttachedCallback = std::function<void()>;
+    using PermissionClipboardCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
+    using DefaultFileSelectorShowCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     WebPattern();
     WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController,
                 RenderMode renderMode = RenderMode::ASYNC_RENDER, bool incognitoMode = false);
@@ -107,8 +116,6 @@ public:
     {
         return true;
     }
-
-    void UpdateSlideOffset() override;
 
     RefPtr<EventHub> CreateEventHub() override
     {
@@ -391,6 +398,15 @@ public:
         return false;
     }
 
+    void Backward();
+
+    void SetDefaultFileSelectorShowCallback(DefaultFileSelectorShowCallback&& Callback)
+    {
+        
+    }
+
+    WebInfoType GetWebInfoType();
+
 private:
     void RegistVirtualKeyBoardListener();
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
@@ -471,8 +487,9 @@ private:
     void ResetDragAction();
     void UpdateRelativeOffset();
     void InitSlideUpdateListener();
-    void CalculateHorizontalDrawRect(const SizeF frameSize);
-    void CalculateVerticalDrawRect(const SizeF frameSize);
+    void CalculateHorizontalDrawRect();
+    void CalculateVerticalDrawRect();
+    void UpdateSlideOffset(bool isNeedReset = false);
     void OnNativeEmbedModeEnabledUpdate(bool value);
     void OnNativeEmbedRuleTagUpdate(const std::string& tag);
     void OnNativeEmbedRuleTypeUpdate(const std::string& type);
