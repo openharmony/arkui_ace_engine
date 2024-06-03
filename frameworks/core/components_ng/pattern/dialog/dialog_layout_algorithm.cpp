@@ -63,8 +63,7 @@ constexpr int32_t TEXT_ALIGN_CONTENT_CENTER = 1;
 constexpr int32_t DIALOG_DEVICE_COLUMN_TWO = 2;
 constexpr int32_t DIALOG_DEVICE_COLUMN_THREE = 3;
 constexpr int32_t DIALOG_DEVICE_COLUMN_FOUR = 4;
-constexpr double LANDSPACE_DIALOG_WIDTH_RATIO = 0.75;
-constexpr double DIALOG_HEIGHT_RATIO_FOR_AGING = 0.9;
+constexpr double LANDSCAPE_DIALOG_WIDTH_RATIO = 0.75;
 } // namespace
 
 void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -118,9 +117,8 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         UpdateChildLayoutConstraint(dialogProp, childLayoutConstraint, child);
     }
 
-    if (dialogPattern->GetIsSuitableForAging() &&
-        SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
-        childLayoutConstraint.maxSize.SetWidth(LANDSPACE_DIALOG_WIDTH_RATIO * pipeline->GetRootWidth());
+    if (isSuitableForElderly_ && SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
+        childLayoutConstraint.maxSize.SetWidth(LANDSCAPE_DIALOG_WIDTH_RATIO * pipeline->GetRootWidth());
     }
     // childSize_ and childOffset_ is used in Layout.
     child->Measure(childLayoutConstraint);
@@ -312,6 +310,12 @@ bool DialogLayoutAlgorithm::ComputeInnerLayoutSizeParam(LayoutConstraintF& inner
         innerLayout.minSize = SizeF(width, 0.0);
         innerLayout.maxSize = SizeF(width, height);
     }
+    if (isSuitableForElderly_) {
+        if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
+            innerLayout.minSize = SizeF(width, 0.0);
+            innerLayout.maxSize.SetWidth(pipeline->GetRootWidth() * LANDSCAPE_DIALOG_WIDTH_RATIO);
+        }
+    }
     // update percentRef
     innerLayout.percentReference = innerLayout.maxSize;
     return true;
@@ -350,7 +354,6 @@ void DialogLayoutAlgorithm::ComputeInnerLayoutParam(LayoutConstraintF& innerLayo
 {
     CHECK_EQUAL_VOID(ComputeInnerLayoutSizeParam(innerLayout, dialogProp), true);
     auto maxSize = innerLayout.maxSize;
-    auto maxHeight = maxSize.Height();
     // Set different layout param for different devices
     // need to use theme json to replace this function.
     // get grid size type based on the screen where the dialog locate
@@ -399,12 +402,7 @@ void DialogLayoutAlgorithm::ComputeInnerLayoutParam(LayoutConstraintF& innerLayo
     if (isSuitableForElderly_) {
         if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
             innerLayout.minSize = SizeF(width, 0.0);
-            width = pipelineContext->GetRootWidth();
-            innerLayout.maxSize =
-                SizeF(width * LANDSPACE_DIALOG_WIDTH_RATIO, maxHeight * DIALOG_HEIGHT_RATIO_FOR_AGING);
-        } else {
-            innerLayout.minSize = SizeF(width, 0.0);
-            innerLayout.maxSize = SizeF(width, maxSize.Height() * DIALOG_HEIGHT_RATIO_FOR_AGING);
+            innerLayout.maxSize.SetWidth(pipelineContext->GetRootWidth() * LANDSCAPE_DIALOG_WIDTH_RATIO);
         }
     }
     // update percentRef

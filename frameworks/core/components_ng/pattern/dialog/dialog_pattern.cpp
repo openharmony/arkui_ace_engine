@@ -498,9 +498,7 @@ RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogPr
     } else {
         titleRowProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
     }
-    if (!isSuitableForElderly_) {
-        titleRowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    }
+    titleRowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     title->MountToParent(titleRow);
     title->MarkModifyDone();
     contentNodeMap_[dialogProperties.title.empty() ? DialogContentNode::SUBTITLE : DialogContentNode::TITLE] = title;
@@ -577,9 +575,7 @@ RefPtr<FrameNode> DialogPattern::BuildSubTitle(const DialogProperties& dialogPro
     } else {
         subtitleRowProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
     }
-    if (!isSuitableForElderly_) {
-        subtitleRowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    }
+    subtitleRowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     subtitle->MountToParent(subtitleRow);
     subtitle->MarkModifyDone();
     contentNodeMap_[DialogContentNode::SUBTITLE] = subtitle;
@@ -727,7 +723,7 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
     ParseButtonFontColorAndBgColor(params, textColor, bgColor);
 
     // append text inside button
-    auto textNode = CreateButtonText(params.text, textColor, isVertical);
+    auto textNode = CreateButtonText(params.text, textColor);
     CHECK_NULL_RETURN(textNode, nullptr);
     textNode->MountToParent(buttonNode);
     textNode->MarkModifyDone();
@@ -792,6 +788,12 @@ void DialogPattern::UpdateDialogButtonProperty(
         buttonProp->UpdateLayoutWeight(1);
         buttonProp->UpdateFlexGrow(1.0);
         buttonProp->UpdateFlexShrink(1.0);
+        if (isSuitableForElderly_ && index != 0) {
+            MarginProperty margin = {
+                .left = CalcLength(dialogTheme_->GetMarginLeft()),
+            };
+            buttonProp->UpdateMargin(margin);
+        }
     } else if (isVertical && index != (length - 1)) {
         // update button space in vertical
         auto buttonSpace = dialogTheme_->GetMutiButtonPaddingVertical();
@@ -840,18 +842,14 @@ RefPtr<FrameNode> DialogPattern::BuildButtons(
         CHECK_NULL_RETURN(container, nullptr);
         auto layoutProps = container->GetLayoutProperty<LinearLayoutProperty>();
         layoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_BETWEEN);
-        if (!isSuitableForElderly_) {
-            layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-        }
+        layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     } else {
         // use vertical layout
         isVertical = true;
         container = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, Id, AceType::MakeRefPtr<LinearLayoutPattern>(true));
         auto layoutProps = container->GetLayoutProperty<LinearLayoutProperty>();
         layoutProps->UpdateCrossAxisAlign(FlexAlign::STRETCH);
-        if (!isSuitableForElderly_) {
-            layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
-        }
+        layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
     }
     CHECK_NULL_RETURN(container, nullptr);
     // set action's padding
@@ -882,7 +880,7 @@ void DialogPattern::AddButtonAndDivider(
     auto buttonSpace = dialogTheme_->GetMutiButtonPaddingHorizontal();
     auto length = buttons.size();
     for (size_t i = 0; i < length; ++i) {
-        if (i != 0 && !isVertical) {
+        if (i != 0 && !isVertical && !isSuitableForElderly_) {
             auto dividerNode = CreateDivider(dividerLength, dividerWidth, dividerColor, buttonSpace);
             CHECK_NULL_VOID(dividerNode);
             container->AddChild(dividerNode);
@@ -897,7 +895,7 @@ void DialogPattern::AddButtonAndDivider(
     }
 }
 
-RefPtr<FrameNode> DialogPattern::CreateButtonText(const std::string& text, const std::string& colorStr, bool isVertical)
+RefPtr<FrameNode> DialogPattern::CreateButtonText(const std::string& text, const std::string& colorStr)
 {
     auto textNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
@@ -907,15 +905,19 @@ RefPtr<FrameNode> DialogPattern::CreateButtonText(const std::string& text, const
     CHECK_NULL_RETURN(textProps, nullptr);
     textProps->UpdateContent(text);
     textProps->UpdateFontWeight(FontWeight::MEDIUM);
-    if (isSuitableForElderly_ && isVertical) {
-        textProps->UpdateMaxLines(DIALOG_TEXT_MAXLINES_WITH_ELDERLY);
-    } else {
-        textProps->UpdateMaxLines(1);
-    }
+    textProps->UpdateMaxLines(1);
     textProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     Dimension buttonTextSize =
         dialogTheme_->GetButtonTextSize().IsValid() ? dialogTheme_->GetButtonTextSize() : DIALOG_BUTTON_TEXT_SIZE;
     textProps->UpdateFontSize(buttonTextSize);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    if (isSuitableForElderly_) {
+        MarginProperty margin;
+        margin.top = CalcLength(8.0_vp);
+        margin.bottom = CalcLength(8.0_vp);
+        textProps->UpdateMargin(margin);
+    }
     // update text color
     Color color;
     if (Color::ParseColorString(colorStr, color)) {
