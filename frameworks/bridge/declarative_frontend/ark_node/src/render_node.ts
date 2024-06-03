@@ -411,13 +411,18 @@ class RenderNode {
   private _frameNode: WeakRef<FrameNode>;
   private lengthMetricsUnitValue: LengthMetricsUnit;
   private markNodeGroupValue: boolean;
+  private apiTargetVersion: number;
 
   constructor(type: string) {
     this.nodePtr = null;
     this.childrenList = [];
     this.parentRenderNode = null;
     this.backgroundColorValue = 0;
+    this.apiTargetVersion = getUINativeModule().common.getApiTargetVersion();
     this.clipToFrameValue = true;
+    if (this.apiTargetVersion && this.apiTargetVersion < 12) {
+        this.clipToFrameValue = false;
+    }
     this.frameValue = { x: 0, y: 0, width: 0, height: 0 };
     this.opacityValue = 1.0;
     this.pivotValue = { x: 0.5, y: 0.5 };
@@ -440,7 +445,11 @@ class RenderNode {
     }
     this._nativeRef = getUINativeModule().renderNode.createRenderNode(this);
     this.nodePtr = this._nativeRef?.getNativeHandle();
-    this.clipToFrame = true;
+    if (this.apiTargetVersion && this.apiTargetVersion < 12) {
+      this.clipToFrame = false;
+  } else {
+      this.clipToFrame = true;
+  }
   }
 
   set backgroundColor(color: number) {

@@ -6948,4 +6948,43 @@ ArkUINativeModuleValue CommonBridge::ResetPixelRound(ArkUIRuntimeCallInfo* runti
     GetArkUINodeModifiers()->getCommonModifier()->resetPixelRound(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue CommonBridge::GreatOrEqualAPITargetVersion(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (firstArg->IsNull() || firstArg->IsUndefined() || !firstArg->IsNumber()) {
+        return panda::BooleanRef::New(vm, false);
+    }
+    int32_t apiTargetVersion = firstArg->Int32Value(vm);
+    auto platformVersion = static_cast<PlatformVersion>(apiTargetVersion);
+    return panda::BooleanRef::New(vm, Container::GreatOrEqualAPITargetVersion(platformVersion));
+}
+
+ArkUINativeModuleValue CommonBridge::LessThanAPITargetVersion(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (firstArg->IsNull() || firstArg->IsUndefined() || !firstArg->IsNumber()) {
+        return panda::BooleanRef::New(vm, false);
+    }
+    int32_t apiTargetVersion = firstArg->Int32Value(vm);
+    auto platformVersion = static_cast<PlatformVersion>(apiTargetVersion);
+    return panda::BooleanRef::New(vm, Container::LessThanAPITargetVersion(platformVersion));
+}
+
+ArkUINativeModuleValue CommonBridge::GetApiTargetVersion(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_RETURN(container, panda::JSValueRef::Undefined(vm));
+    int32_t apiTargetVersion = container->GetApiTargetVersion();
+    return panda::NumberRef::New(vm, apiTargetVersion);
+}
 } // namespace OHOS::Ace::NG
