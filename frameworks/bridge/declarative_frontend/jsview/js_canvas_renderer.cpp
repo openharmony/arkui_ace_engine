@@ -295,7 +295,7 @@ void JSCanvasRenderer::JsGetLineDash(const JSCallbackInfo& info)
     JSRef<JSArray> lineDashObj = JSRef<JSArray>::New();
     double density = GetDensity();
     for (auto i = 0U; i < lineDash.size(); i++) {
-        lineDashObj->SetValueAt(i, JSRef<JSVal>::Make(ToJSValue(lineDash[i] * density)));
+        lineDashObj->SetValueAt(i, JSRef<JSVal>::Make(ToJSValue(lineDash[i] / density)));
     }
     info.SetReturnValue(lineDashObj);
 }

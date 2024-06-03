@@ -65,7 +65,8 @@ public:
 
     double GetDensity()
     {
-        return (GetUnit() == CanvasUnit::DEFAULT) ? PipelineBase::GetCurrentDensity() : 1.0;
+        double density = PipelineBase::GetCurrentDensity();
+        return ((GetUnit() == CanvasUnit::DEFAULT) && !NearZero(density)) ? density : 1.0;
     }
 
     ACE_DISALLOW_COPY_AND_MOVE(JSCanvasPattern);

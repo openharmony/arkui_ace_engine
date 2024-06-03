@@ -846,6 +846,7 @@ void CanvasPattern::UpdateLineDash(const std::vector<double>& segments)
 #else
     paintMethod_->PushTask<SetLineDashOp>(segments);
 #endif
+    paintMethod_->SetLineDashParam(segments);
 }
 
 void CanvasPattern::Save()

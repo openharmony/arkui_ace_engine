@@ -236,7 +236,6 @@ napi_value JSOffscreenCanvas::OnGetWidth(napi_env env)
 {
     double fWidth = GetWidth();
     double density = GetDensity();
-    density = (density == 0.0 ? 1.0 : density);
     fWidth /= density;
     napi_value width = nullptr;
     napi_create_double(env, fWidth, &width);
@@ -247,7 +246,6 @@ napi_value JSOffscreenCanvas::OnGetHeight(napi_env env)
 {
     double fHeight = GetHeight();
     double density = GetDensity();
-    density = (density == 0.0 ? 1.0 : density);
     fHeight /= density;
     napi_value height = nullptr;
     napi_create_double(env, fHeight, &height);

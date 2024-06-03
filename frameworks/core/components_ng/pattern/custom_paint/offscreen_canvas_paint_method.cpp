@@ -577,4 +577,9 @@ TransformParam OffscreenCanvasPaintMethod::GetTransform() const
     }
     return param;
 }
+
+LineDashParam OffscreenCanvasPaintMethod::GetLineDash() const
+{
+    return state_.strokeState.GetLineDash();
+}
 } // namespace OHOS::Ace::NG
