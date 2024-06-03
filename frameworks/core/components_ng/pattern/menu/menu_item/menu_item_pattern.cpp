@@ -461,7 +461,9 @@ void MenuItemPattern::ShowSubMenu()
     auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
     bool isSelectOverlayMenu = IsSelectOverlayMenu();
     MenuParam param;
-    param.isShowInSubWindow = layoutProps->GetShowInSubWindowValue(false);
+    auto outterMenuLayoutProps = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(outterMenuLayoutProps);
+    param.isShowInSubWindow = outterMenuLayoutProps->GetShowInSubWindowValue(false);
     auto focusMenuRenderContext = menuNode->GetRenderContext();
     CHECK_NULL_VOID(focusMenuRenderContext);
     if (focusMenuRenderContext->GetBackBlurStyle().has_value()) {
