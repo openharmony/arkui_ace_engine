@@ -216,11 +216,6 @@ void SelectPattern::ShowSelectMenu()
         offset.AddY(selectSize_.Height());
     }
 
-    auto direction = select->GetLayoutProperty<LayoutProperty>()->GetNonAutoLayoutDirection();
-    if (direction == TextDirection::RTL) {
-        offset.AddX(-selectSize_.Width());
-    }
-
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "select click to show menu.");
     overlayManager->ShowMenu(GetHost()->GetId(), offset, menuWrapper_);
 }
