@@ -65,7 +65,7 @@ public:
     RefPtr<StepperItemComponent> GetStepperItemComponent();
     RefPtr<DisplayComponent> GetStepperDisplayComponent();
     RefPtr<ScrollComponent> GetStepperScrollComponent();
-    ACE_FORCE_EXPORT RefPtr<BoxComponent> GetBoxComponent();
+    RefPtr<BoxComponent> GetBoxComponent();
     RefPtr<Component> GetMainComponent() const;
     RefPtr<DisplayComponent> GetDisplayComponent();
     bool HasDisplayComponent() const;
@@ -81,9 +81,9 @@ public:
     RefPtr<GestureComponent> GetGestureComponent();
     RefPtr<PositionedComponent> GetPositionedComponent();
     RefPtr<ComposedComponent> GetRootComponent(const std::string& id = "", const std::string& name = "");
-    ACE_FORCE_EXPORT RefPtr<PageTransitionComponent> GetPageTransitionComponent();
+    RefPtr<PageTransitionComponent> GetPageTransitionComponent();
     RefPtr<CoverageComponent> GetCoverageComponent();
-    ACE_FORCE_EXPORT void ClearPageTransitionComponent();
+    void ClearPageTransitionComponent();
     RefPtr<MenuComponent> GetMenuComponent(bool createNewComponent = true);
 #ifndef WEARABLE_PRODUCT
     RefPtr<PopupComponentV2> GetPopupComponent(bool createNewComponent = true);

@@ -142,7 +142,6 @@ template("cj_frontend") {
       "interfaces/cj_ffi/cj_relative_container_ffi.cpp",
       "interfaces/cj_ffi/cj_richeditor_controller_ffi.cpp",
       "interfaces/cj_ffi/cj_richeditor_ffi.cpp",
-      "interfaces/cj_ffi/cj_richtext_ffi.cpp",
       "interfaces/cj_ffi/cj_row_ffi.cpp",
       "interfaces/cj_ffi/cj_row_split_ffi.cpp",
       "interfaces/cj_ffi/cj_scroll_ffi.cpp",
@@ -202,7 +201,6 @@ template("cj_frontend") {
       sources -= [
         "interfaces/cj_ffi/cj_richeditor_controller_ffi.cpp",
         "interfaces/cj_ffi/cj_richeditor_ffi.cpp",
-        "interfaces/cj_ffi/cj_richtext_ffi.cpp",
         "interfaces/cj_ffi/state_manage/cj_environment.cpp",
         "interfaces/cj_ffi/state_manage/cj_persistent_storage_ffi.cpp",
       ]
@@ -213,6 +211,12 @@ template("cj_frontend") {
         "interfaces/cj_ffi/state_manage/mock/cj_state_manage_mock.cpp",
       ]
     }
+
+    if (defined(config.web_components_support) &&
+        config.web_components_support) {
+      sources += [ "interfaces/cj_ffi/cj_richtext_ffi.cpp" ]
+    }
+
     if (defined(config.video_components_support) &&
         config.video_components_support) {
       sources += [ "interfaces/cj_ffi/cj_video_ffi.cpp" ]
