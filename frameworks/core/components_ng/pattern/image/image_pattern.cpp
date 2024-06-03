@@ -560,7 +560,7 @@ void ImagePattern::CreateObscuredImage()
     }
 }
 
-void ImagePattern::LoadImage(const ImageSourceInfo& src)
+void ImagePattern::LoadImage(const ImageSourceInfo& src, const PropertyChangeFlag& propertyChangeFlag)
 {
     LoadNotifier loadNotifier(CreateDataReadyCallback(), CreateLoadSuccessCallback(), CreateLoadFailCallback());
     loadNotifier.onDataReadyComplete_ = CreateCompleteCallBackInDataReady();
@@ -573,11 +573,7 @@ void ImagePattern::LoadImage(const ImageSourceInfo& src)
     if (onProgressCallback_) {
         loadingCtx_->SetOnProgressCallback(std::move(onProgressCallback_));
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto layoutProp = host->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(layoutProp);
-    if (!((layoutProp->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE) == PROPERTY_UPDATE_MEASURE)) {
+    if (!((propertyChangeFlag & PROPERTY_UPDATE_MEASURE) == PROPERTY_UPDATE_MEASURE)) {
         loadingCtx_->FinishMearuse();
     }
     loadingCtx_->LoadImageData();
@@ -607,7 +603,7 @@ void ImagePattern::LoadImageDataIfNeed()
                                                               loadPixelMap->GetRawPixelMapPtr();
     }
     if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != src || isImageQualityChange_) {
-        LoadImage(src);
+        LoadImage(src, imageLayoutProperty->GetPropertyChangeFlag());
     } else {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
@@ -856,7 +852,7 @@ void ImagePattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
         return;
     }
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = GetHost()->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
     CHECK_NULL_VOID(iconTheme);
@@ -1385,7 +1381,7 @@ void ImagePattern::OnConfigurationUpdate()
     UpdateInternalResource(src);
     src.SetIsConfigurationChange(true);
 
-    LoadImage(src);
+    LoadImage(src, imageLayoutProperty->GetPropertyChangeFlag());
     if (loadingCtx_->NeedAlt() && imageLayoutProperty->GetAlt()) {
         auto altImageSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
         if (altLoadingCtx_ && altLoadingCtx_->GetSourceInfo() == altImageSourceInfo) {

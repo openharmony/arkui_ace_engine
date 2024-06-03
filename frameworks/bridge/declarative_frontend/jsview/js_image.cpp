@@ -263,31 +263,22 @@ void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
 
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    bool isCard = context->IsFormRender() && !container->IsDynamicRender();
+    bool isCard = container->IsFormRender() && !container->IsDynamicRender();
 
     // Interim programme
     std::string bundleName;
     std::string moduleName;
     std::string src;
-    bool srcValid = ParseJsMedia(info[0], src);
+    auto imageInfo = info[0];
     int32_t resId = 0;
-    if (info[0]->IsObject()) {
-        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
-        JSRef<JSVal> tmp = jsObj->GetProperty("id");
-        if (!tmp->IsNull() && tmp->IsNumber()) {
-            resId = tmp->ToNumber<int32_t>();
-        }
-    }
-    if (isCard && info[0]->IsString()) {
+    bool srcValid = ParseJsMediaWithBundleName(imageInfo, src, bundleName, moduleName, resId);
+    if (isCard && imageInfo->IsString()) {
         SrcType srcType = ImageSourceInfo::ResolveURIType(src);
         bool notSupport = (srcType == SrcType::NETWORK || srcType == SrcType::FILE || srcType == SrcType::DATA_ABILITY);
         if (notSupport) {
             src.clear();
         }
     }
-    GetJsMediaBundleInfo(info[0], bundleName, moduleName);
     RefPtr<PixelMap> pixmap = nullptr;
 
     // input is PixelMap / Drawable
@@ -296,14 +287,14 @@ void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
         std::vector<RefPtr<PixelMap>> pixelMaps;
         int32_t duration = -1;
         int32_t iterations = 1;
-        if (IsDrawable(info[0])) {
-            if (GetPixelMapListFromAnimatedDrawable(info[0], pixelMaps, duration, iterations)) {
+        if (IsDrawable(imageInfo)) {
+            if (GetPixelMapListFromAnimatedDrawable(imageInfo, pixelMaps, duration, iterations)) {
                 CreateImageAnimation(pixelMaps, duration, iterations);
                 return;
             }
-            pixmap = GetDrawablePixmap(info[0]);
+            pixmap = GetDrawablePixmap(imageInfo);
         } else {
-            pixmap = CreatePixelMapFromNapiValue(info[0]);
+            pixmap = CreatePixelMapFromNapiValue(imageInfo);
         }
 #endif
     }
