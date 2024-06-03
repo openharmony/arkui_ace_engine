@@ -58,6 +58,7 @@ void OH_ArkUI_GuidelineOption_SetPositionStart(ArkUI_GuidelineOption* guideline,
     if (guideline == nullptr || index < 0 || index >= static_cast<int32_t>(guideline->styles.size())) {
         return;
     }
+    guideline->styles[index].hasStart = true;
     guideline->styles[index].start = value;
 }
 
@@ -66,6 +67,7 @@ void OH_ArkUI_GuidelineOption_SetPositionEnd(ArkUI_GuidelineOption* guideline, f
     if (guideline == nullptr || index < 0 || index >= static_cast<int32_t>(guideline->styles.size())) {
         return;
     }
+    guideline->styles[index].hasEnd = true;
     guideline->styles[index].end = value;
 }
 

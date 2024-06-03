@@ -131,7 +131,7 @@ void ResetScrollFriction(ArkUINodeHandle node)
     ScrollModelNG::SetFriction(frameNode, FRICTION_DEFAULT);
 }
 
-ArkUI_Int32 GetScrollScrollSnap(ArkUINodeHandle node, ArkUI_Int32* values)
+ArkUI_Int32 GetScrollScrollSnap(ArkUINodeHandle node, ArkUI_Float32* values)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, 0);

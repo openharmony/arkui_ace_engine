@@ -51,7 +51,9 @@ struct ArkUI_GuidelineStyle {
     std::string id;
     ArkUI_Axis direction;
     float start;
+    bool hasStart;
     float end;
+    bool hasEnd;
 };
 
 struct ArkUI_GuidelineOption {
