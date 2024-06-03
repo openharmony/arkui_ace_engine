@@ -1744,6 +1744,9 @@ declare class ArkListComponent extends ArkComponent implements ListAttribute {
     alignListItem(value: ListItemAlign): this;
     listDirection(value: Axis): this;
     scrollBar(value: BarState): this;
+    scrollBarWidth(value: string | number): this;
+    scrollBarColor(value: string | number | Color): this;
+    flingSpeedLimit(value: number): this;
     edgeEffect(value: EdgeEffect, options?: EdgeEffectOptions | undefined): this;
     contentStartOffset(value: number): this;
     contentEndOffset(value: number): this;

@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 107
+#define ARKUI_FULL_API_VERSION 108
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 107
+#define ARKUI_NODE_API_VERSION 108
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 7
@@ -1943,6 +1943,8 @@ struct ArkUIListModifier {
     void (*resetListChildrenMainSize)(ArkUINodeHandle node);
     void (*setListCloseAllSwipeActions)(ArkUINodeHandle node, void* userData, void(onFinish)(void* userData));
     ArkUI_Int32 (*getInitialIndex)(ArkUINodeHandle node);
+    void (*setListFlingSpeedLimit)(ArkUINodeHandle node, ArkUI_Float32 maxSpeed);
+    void (*resetListFlingSpeedLimit)(ArkUINodeHandle node);
 };
 
 struct ArkUIListItemGroupModifier {
