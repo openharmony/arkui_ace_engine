@@ -3217,7 +3217,7 @@ void FrameNode::CheckSecurityComponentStatus(std::vector<RectF>& rect)
 bool FrameNode::CheckRectIntersect(const RectF& dest, std::vector<RectF>& origin)
 {
     for (auto originRect : origin) {
-        if (originRect.IsInnerIntersectWith(dest)) {
+        if (originRect.IsInnerIntersectWithRound(dest)) {
             return true;
         }
     }
