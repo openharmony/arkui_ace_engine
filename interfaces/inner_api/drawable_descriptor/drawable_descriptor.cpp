@@ -49,6 +49,8 @@ const char DRAWABLEDESCRIPTOR_JSON_KEY_BACKGROUND[] = "background";
 const char DRAWABLEDESCRIPTOR_JSON_KEY_FOREGROUND[] = "foreground";
 #endif
 constexpr float SIDE = 192.0f;
+constexpr float BADGED_SIDE_X = 20.0f;
+constexpr float BADGED_SIDE_Y = 7.0f;
 const int DEFAULT_DURATION = 1000;
 const std::string DEFAULT_MASK = "ohos_icon_mask";
 
@@ -472,45 +474,8 @@ bool LayeredDrawableDescriptor::GetCompositePixelMapWithBadge(
     const std::shared_ptr<Media::PixelMap> badgedPixelMap,
     std::shared_ptr<Media::PixelMap> &compositePixelMap)
 {
-    if ((layeredPixelMap == nullptr) || (badgedPixelMap == nullptr)) {
-        HILOGE("failed due to nullptr");
-        return false;
-    }
-    HILOGI("wtt GetCompositePixelMapWithBadge start");
-    SkPaint paint;
-    paint.setAntiAlias(true);
-    auto colorType = ImageConverter::PixelFormatToSkColorType(layeredPixelMap->GetPixelFormat());
-    auto alphaType = ImageConverter::AlphaTypeToSkAlphaType(layeredPixelMap->GetAlphaType());
-    auto imageInfo = SkImageInfo::Make(SIDE, SIDE, colorType, alphaType);
-    SkBitmap tempCache;
-    tempCache.allocPixels(imageInfo);
-    SkCanvas bitmapCanvas(tempCache);
-    paint.setBlendMode(SkBlendMode::kSrc);
-    std::shared_ptr<SkBitmap> layeredBitmap = ImageConverter::PixelMapToBitmap(layeredPixelMap);
-    if (layeredBitmap) {
-        DrawOntoCanvas(layeredBitmap, SIDE, SIDE, bitmapCanvas, paint);
-    } else {
-        HILOGE("failed due to layeredBitmap is nullptr");
-        return false;
-    }
-
-    paint.setBlendMode(SkBlendMode::kDstATop);
-    std::shared_ptr<SkBitmap> badgedBitmap = ImageConverter::PixelMapToBitmap(badgedPixelMap);
-    if (badgedBitmap) {
-        DrawOntoCanvas(badgedBitmap, SIDE, SIDE, bitmapCanvas, paint);
-    } else {
-        HILOGE("failed due to badgedBitmap is nullptr");
-        return false;
-    }
-    bitmapCanvas.readPixels(tempCache, 0, 0);
-
-    // convert bitmap back to pixelMap
-    Media::InitializationOptions initializationOptions;
-    initializationOptions.alphaType = layeredPixelMap->GetAlphaType();
-    initializationOptions.pixelFormat = Media::PixelFormat::BGRA_8888;
-    compositePixelMap = ImageConverter::BitmapToPixelMap(std::make_shared<SkBitmap>(tempCache), initializationOptions);
-    HILOGI("wtt GetCompositePixelMapWithBadge end");
-    return true;
+    HILOGE("not support");
+    return false;
 }
 #else
 bool LayeredDrawableDescriptor::CreatePixelMap()
@@ -603,63 +568,49 @@ bool LayeredDrawableDescriptor::GetCompositePixelMapWithBadge(
     std::shared_ptr<Media::PixelMap> &compositePixelMap)
 {
     if ((layeredPixelMap == nullptr) || (badgedPixelMap == nullptr)) {
+        HILOGE("failed due to nullptr");
         return false;
     }
-    HILOGI("wtt GetCompositePixelMapWithBadge start");
     Rosen::Drawing::Brush brush;
     brush.SetAntiAlias(true);
     Rosen::Drawing::ColorType colorType = ImageConverter::PixelFormatToColorType(layeredPixelMap->GetPixelFormat());
     Rosen::Drawing::AlphaType alphaType = ImageConverter::AlphaTypeToAlphaType(layeredPixelMap->GetAlphaType());
-    Rosen::Drawing::ImageInfo imageInfo(210, 196, colorType, alphaType);
+    Rosen::Drawing::ImageInfo imageInfo(SIDE + BADGED_SIDE_X, SIDE + BADGED_SIDE_Y, colorType, alphaType);
     Rosen::Drawing::Bitmap tempCache;
     tempCache.Build(imageInfo);
     Rosen::Drawing::Canvas bitmapCanvas;
     bitmapCanvas.Bind(tempCache);
-
     std::shared_ptr<Rosen::Drawing::Bitmap> layeredBitmap = ImageConverter::PixelMapToBitmap(layeredPixelMap);
     if (layeredBitmap) {
         brush.SetBlendMode(Rosen::Drawing::BlendMode::SRC);
         bitmapCanvas.AttachBrush(brush);
-        // DrawOntoCanvas(layeredBitmap, SIDE, SIDE, bitmapCanvas);
-        Rosen::Drawing::Rect rect1(0, 0, static_cast<float>(layeredBitmap->GetWidth()),
-            static_cast<float>(layeredBitmap->GetHeight()));
-        Rosen::Drawing::Rect rect2(0, 0, 189, 189);
+        Rosen::Drawing::Rect srcRect(0, 0, layeredBitmap->GetWidth(), layeredBitmap->GetHeight());
+        Rosen::Drawing::Rect dstRect(0, 0, SIDE, SIDE);
         Rosen::Drawing::Image image;
         image.BuildFromBitmap(*layeredBitmap);
-        bitmapCanvas.DrawImageRect(image, rect1, rect2, Rosen::Drawing::SamplingOptions(Rosen::Drawing::FilterMode::LINEAR),
-            Rosen::Drawing::SrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
-    
+        bitmapCanvas.DrawImageRect(image, srcRect, dstRect,
+            Rosen::Drawing::SamplingOptions(), Rosen::Drawing::SrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
         bitmapCanvas.DetachBrush();
-    } else {
-        HILOGE("wtt layeredBitmap is nullptr");
-        return false;
     }
     std::shared_ptr<Rosen::Drawing::Bitmap> badgedBitmap = ImageConverter::PixelMapToBitmap(badgedPixelMap);
     if (badgedBitmap) {
         brush.SetBlendMode(Rosen::Drawing::BlendMode::SRC_OVER);
         bitmapCanvas.AttachBrush(brush);
-        // DrawOntoCanvas(badgedBitmap, SIDE, SIDE, bitmapCanvas);
-        Rosen::Drawing::Rect rect1(0, 0, static_cast<float>(badgedBitmap->GetWidth()),
-            static_cast<float>(badgedBitmap->GetHeight()));
-        Rosen::Drawing::Rect rect2(147, 133, 210, 196);
+        Rosen::Drawing::Rect srcRect(0, 0, badgedBitmap->GetWidth(), badgedBitmap->GetHeight());
+        Rosen::Drawing::Rect dstRect(SIDE + BADGED_SIDE_X - badgedBitmap->GetWidth(),
+            SIDE + BADGED_SIDE_Y - badgedBitmap->GetHeight(), SIDE + BADGED_SIDE_X, SIDE + BADGED_SIDE_Y);
         Rosen::Drawing::Image image;
         image.BuildFromBitmap(*badgedBitmap);
-        bitmapCanvas.DrawImageRect(image, rect1, rect2, Rosen::Drawing::SamplingOptions(Rosen::Drawing::FilterMode::LINEAR),
-            Rosen::Drawing::SrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
-
+        bitmapCanvas.DrawImageRect(image, srcRect, dstRect,
+            Rosen::Drawing::SamplingOptions(), Rosen::Drawing::SrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
         bitmapCanvas.DetachBrush();
-    } else {
-        HILOGE("wtt badgedBitmap is nullptr");
-        return false;
     }
     bitmapCanvas.ReadPixels(imageInfo, tempCache.GetPixels(), tempCache.GetRowBytes(), 0, 0);
-    // convert bitmap back to pixelMap
     Media::InitializationOptions initializationOptions;
     initializationOptions.alphaType = layeredPixelMap->GetAlphaType();
     initializationOptions.pixelFormat = Media::PixelFormat::BGRA_8888;
     compositePixelMap = ImageConverter::BitmapToPixelMap(std::make_shared<Rosen::Drawing::Bitmap>(tempCache),
         initializationOptions);
-    HILOGI("wtt 002 GetCompositePixelMapWithBadge start");
     return true;
 }
 #endif
