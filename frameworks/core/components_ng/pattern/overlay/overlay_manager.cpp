@@ -2731,10 +2731,8 @@ bool OverlayManager::RemoveModalInOverlay()
     if (topModalNode->GetTag() == V2::SHEET_PAGE_TAG) {
         auto sheetPattern = topModalNode->GetPattern<SheetPresentationPattern>();
         CHECK_NULL_RETURN(sheetPattern, false);
-        if (sheetPattern->HasShouldDismiss() || sheetPattern->HasOnWillDismiss()) {
-            sheetPattern->SheetInteractiveDismiss(BindSheetDismissReason::BACK_PRESSED);
-            return true;
-        }
+        sheetPattern->SheetInteractiveDismiss(BindSheetDismissReason::BACK_PRESSED);
+        return true;
     } else if (topModalNode->GetTag() == V2::MODAL_PAGE_TAG) {
         auto modalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
         CHECK_NULL_RETURN(modalPattern, false);
