@@ -113,7 +113,9 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
 void FormRenderWindow::RequestFrame()
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    receiver_->RequestNextVSync(frameCallback_);
+    if (receiver_ != nullptr) {
+        receiver_->RequestNextVSync(frameCallback_);
+    }
 #endif
 }
 
