@@ -539,11 +539,12 @@ void JSCanvasRenderer::ExtractInfoToImage(CanvasImage& image, const JSCallbackIn
 // createPattern(image: ImageBitmap, repetition: string | null): CanvasPattern | null
 void JSCanvasRenderer::JsCreatePattern(const JSCallbackInfo& info)
 {
-    std::string repeat;
     auto arg0 = info[0];
-    if (arg0->IsObject() && info.GetStringArg(1, repeat)) {
+    if (arg0->IsObject()) {
         JSRenderImage* jsImage = UnwrapNapiImage(info[0]);
         CHECK_NULL_VOID(jsImage);
+        std::string repeat;
+        info.GetStringArg(1, repeat);
         auto pattern = std::make_shared<Pattern>();
         pattern->SetImgSrc(jsImage->GetSrc());
         pattern->SetImageWidth(jsImage->GetWidth());
