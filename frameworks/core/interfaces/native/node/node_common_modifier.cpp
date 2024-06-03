@@ -3805,47 +3805,67 @@ void SetClip(ArkUINodeHandle node, ArkUI_Int32 isClip)
     ViewAbstract::SetClipEdge(frameNode, static_cast<bool>(isClip));
 }
 
-void SetClipShape(ArkUINodeHandle node, ArkUI_CharPtr type, const ArkUI_Float32* attribute, ArkUI_Int32 length)
+void SetClipShape(
+    ArkUINodeHandle node, ArkUI_CharPtr type, const ArkUI_Float32* attribute, ArkUI_Int32 length, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (std::strcmp(type, "rect") == 0) {
         auto shape = AceType::MakeRefPtr<ShapeRect>();
-        auto width = Dimension(attribute[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(1));
-        auto height = Dimension(attribute[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(1));
-        auto radiusWidth = Dimension(attribute[NUM_2], static_cast<OHOS::Ace::DimensionUnit>(1));
-        auto radiusHeight = Dimension(attribute[NUM_3], static_cast<OHOS::Ace::DimensionUnit>(1));
+        auto width = Dimension(attribute[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(unit));
+        auto height = Dimension(attribute[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(unit));
+        auto radiusWidth = Dimension(attribute[NUM_2], static_cast<OHOS::Ace::DimensionUnit>(unit));
+        auto radiusHeight = Dimension(attribute[NUM_3], static_cast<OHOS::Ace::DimensionUnit>(unit));
         shape->SetWidth(width);
         shape->SetHeight(height);
         shape->SetRadiusWidth(radiusWidth);
         shape->SetRadiusHeight(radiusHeight);
+        if (length > NUM_4) {
+            auto topLeftRadius = length > NUM_4
+                                     ? Dimension(attribute[NUM_4], static_cast<OHOS::Ace::DimensionUnit>(unit))
+                                     : Dimension(0);
+            auto bottomLeftRadius = length > NUM_5
+                                        ? Dimension(attribute[NUM_5], static_cast<OHOS::Ace::DimensionUnit>(unit))
+                                        : Dimension(0);
+            auto topRightRadius = length > NUM_6
+                                      ? Dimension(attribute[NUM_6], static_cast<OHOS::Ace::DimensionUnit>(unit))
+                                      : Dimension(0);
+            auto bottomRightRadius = length > NUM_7
+                                         ? Dimension(attribute[NUM_7], static_cast<OHOS::Ace::DimensionUnit>(unit))
+                                         : Dimension(0);
+            shape->SetTopLeftRadius(Radius(topLeftRadius));
+            shape->SetBottomLeftRadius(Radius(bottomLeftRadius));
+            shape->SetTopRightRadius(Radius(topRightRadius));
+            shape->SetBottomRightRadius(Radius(bottomRightRadius));
+        }
         ViewAbstract::SetClipShape(frameNode, shape);
     }
     if (std::strcmp(type, "circle") == 0) {
         auto shape = AceType::MakeRefPtr<Circle>();
-        auto width = Dimension(attribute[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(1));
-        auto height = Dimension(attribute[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(1));
+        auto width = Dimension(attribute[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(unit));
+        auto height = Dimension(attribute[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(unit));
         shape->SetWidth(width);
         shape->SetHeight(height);
         ViewAbstract::SetClipShape(frameNode, shape);
     }
     if (std::strcmp(type, "ellipse") == 0) {
         auto shape = AceType::MakeRefPtr<Ellipse>();
-        auto width = Dimension(attribute[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(1));
-        auto height = Dimension(attribute[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(1));
+        auto width = Dimension(attribute[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(unit));
+        auto height = Dimension(attribute[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(unit));
         shape->SetWidth(width);
         shape->SetHeight(height);
         ViewAbstract::SetClipShape(frameNode, shape);
     }
 }
 
-void SetClipPath(ArkUINodeHandle node, ArkUI_CharPtr type, const ArkUI_Float32 (*attribute)[2], ArkUI_CharPtr commands)
+void SetClipPath(ArkUINodeHandle node, ArkUI_CharPtr type, const ArkUI_Float32 (*attribute)[2], ArkUI_CharPtr commands,
+    ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto path = AceType::MakeRefPtr<Path>();
-    auto width = Dimension((*attribute)[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(1));
-    auto height = Dimension((*attribute)[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(1));
+    auto width = Dimension((*attribute)[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(unit));
+    auto height = Dimension((*attribute)[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(unit));
     std::string pathCommands(commands);
     path->SetWidth(width);
     path->SetHeight(height);
@@ -4355,18 +4375,18 @@ ArkUIMoveTransitionType GetMoveTransition(ArkUINodeHandle node)
 }
 
 void SetMaskShape(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, ArkUI_Uint32 stroke,
-    ArkUI_Float32 strokeWidth, const ArkUI_Float32* attribute, ArkUI_Int32 length)
+    ArkUI_Float32 strokeWidth, const ArkUI_Float32* attribute, ArkUI_Int32 length, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::string shapeType(type);
-    auto strokeWidth_ = Dimension(strokeWidth, static_cast<OHOS::Ace::DimensionUnit>(1));
+    auto strokeWidth_ = Dimension(strokeWidth, static_cast<OHOS::Ace::DimensionUnit>(unit));
     if (shapeType == "rect") {
         auto shape = AceType::MakeRefPtr<ShapeRect>();
-        auto width = Dimension(attribute[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(1));
-        auto height = Dimension(attribute[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(1));
-        auto radiusWidth = Dimension(attribute[NUM_2], static_cast<OHOS::Ace::DimensionUnit>(1));
-        auto radiusHeight = Dimension(attribute[NUM_3], static_cast<OHOS::Ace::DimensionUnit>(1));
+        auto width = Dimension(attribute[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(unit));
+        auto height = Dimension(attribute[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(unit));
+        auto radiusWidth = Dimension(attribute[NUM_2], static_cast<OHOS::Ace::DimensionUnit>(unit));
+        auto radiusHeight = Dimension(attribute[NUM_3], static_cast<OHOS::Ace::DimensionUnit>(unit));
         shape->SetWidth(width);
         shape->SetHeight(height);
         shape->SetRadiusWidth(radiusWidth);
@@ -4374,6 +4394,24 @@ void SetMaskShape(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, A
         shape->SetColor(Color(fill));
         shape->SetStrokeColor(stroke);
         shape->SetStrokeWidth(strokeWidth);
+        if (length > NUM_4) {
+            auto topLeftRadius = length > NUM_4
+                                     ? Dimension(attribute[NUM_4], static_cast<OHOS::Ace::DimensionUnit>(unit))
+                                     : Dimension(0);
+            auto bottomLeftRadius = length > NUM_5
+                                        ? Dimension(attribute[NUM_5], static_cast<OHOS::Ace::DimensionUnit>(unit))
+                                        : Dimension(0);
+            auto topRightRadius = length > NUM_6
+                                      ? Dimension(attribute[NUM_6], static_cast<OHOS::Ace::DimensionUnit>(unit))
+                                      : Dimension(0);
+            auto bottomRightRadius = length > NUM_7
+                                         ? Dimension(attribute[NUM_7], static_cast<OHOS::Ace::DimensionUnit>(unit))
+                                         : Dimension(0);
+            shape->SetTopLeftRadius(Radius(topLeftRadius));
+            shape->SetBottomLeftRadius(Radius(bottomLeftRadius));
+            shape->SetTopRightRadius(Radius(topRightRadius));
+            shape->SetBottomRightRadius(Radius(bottomRightRadius));
+        }
         ViewAbstract::SetMask(frameNode, shape);
     } else if (shapeType == "circle") {
         auto shape = AceType::MakeRefPtr<Circle>();
@@ -4402,14 +4440,14 @@ void SetMaskShape(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, A
 }
 
 void SetMaskPath(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, ArkUI_Uint32 stroke,
-    ArkUI_Float32 strokeWidth, const ArkUI_Float32* attribute, ArkUI_CharPtr commands)
+    ArkUI_Float32 strokeWidth, const ArkUI_Float32* attribute, ArkUI_CharPtr commands, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    auto strokeWidth_ = Dimension(strokeWidth, static_cast<OHOS::Ace::DimensionUnit>(1));
+    auto strokeWidth_ = Dimension(strokeWidth, static_cast<OHOS::Ace::DimensionUnit>(unit));
     CHECK_NULL_VOID(frameNode);
     auto path = AceType::MakeRefPtr<Path>();
-    auto width = Dimension(attribute[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(1));
-    auto height = Dimension(attribute[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(1));
+    auto width = Dimension(attribute[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(unit));
+    auto height = Dimension(attribute[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(unit));
     std::string pathCommands(commands);
     path->SetWidth(width);
     path->SetHeight(height);
@@ -4888,13 +4926,13 @@ ArkUI_Int32 GetClip(ArkUINodeHandle node)
     return static_cast<ArkUI_Int32>(ViewAbstract::GetClip(frameNode));
 }
 
-void GetClipShape(ArkUINodeHandle node, ArkUIClipShapeOptions* options)
+void GetClipShape(ArkUINodeHandle node, ArkUIClipShapeOptions* options, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto basicShape = ViewAbstract::GetClipShape(frameNode);
-    options->width = basicShape->GetWidth().Value();
-    options->height = basicShape->GetHeight().Value();
+    options->width = basicShape->GetWidth().GetNativeValue(static_cast<DimensionUnit>(unit));
+    options->height = basicShape->GetHeight().GetNativeValue(static_cast<DimensionUnit>(unit));
     options->type = static_cast<ArkUI_Int32>(basicShape->GetBasicShapeType());
     switch (basicShape->GetBasicShapeType()) {
         case BasicShapeType::PATH: {
@@ -4904,10 +4942,24 @@ void GetClipShape(ArkUINodeHandle node, ArkUIClipShapeOptions* options)
         }
         case BasicShapeType::RECT: {
             auto shapeRect = AceType::DynamicCast<ShapeRect>(basicShape);
-            //radius x
-            options->radiusWidth = shapeRect->GetTopLeftRadius().GetX().Value();
-            //radius y
-            options->radiusHeight = shapeRect->GetTopLeftRadius().GetY().Value();
+            //radiusWidth
+            options->radiusWidth =
+                shapeRect->GetTopLeftRadius().GetX().GetNativeValue(static_cast<DimensionUnit>(unit));
+            //radiusHeight
+            options->radiusHeight =
+                shapeRect->GetTopLeftRadius().GetY().GetNativeValue(static_cast<DimensionUnit>(unit));
+            //topLeftRadius
+            options->topLeftRadius =
+                shapeRect->GetTopLeftRadius().GetX().GetNativeValue(static_cast<DimensionUnit>(unit));
+            //bottomLeftRadius
+            options->bottomLeftRadius =
+                shapeRect->GetBottomLeftRadius().GetX().GetNativeValue(static_cast<DimensionUnit>(unit));
+            //topRightRadius
+            options->topRightRadius =
+                shapeRect->GetTopRightRadius().GetX().GetNativeValue(static_cast<DimensionUnit>(unit));
+            //bottomRightRadius
+            options->bottomRightRadius =
+                shapeRect->GetBottomRightRadius().GetX().GetNativeValue(static_cast<DimensionUnit>(unit));
             break;
         }
         default:
@@ -5015,7 +5067,7 @@ ArkUI_Int32 GetRadialGradient(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], 
     return index;
 }
 
-void GetMask(ArkUINodeHandle node, ArkUIMaskOptions* options)
+void GetMask(ArkUINodeHandle node, ArkUIMaskOptions* options, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -5024,15 +5076,25 @@ void GetMask(ArkUINodeHandle node, ArkUIMaskOptions* options)
     options->fill = basicShape->GetColor().GetValue();
     options->strokeColor = basicShape->GetStrokeColor();
     options->strokeWidth = basicShape->GetStrokeWidth();
-    options->width = basicShape->GetWidth().Value();
-    options->height = basicShape->GetHeight().Value();
+    options->width = basicShape->GetWidth().GetNativeValue(static_cast<DimensionUnit>(unit));
+    options->height = basicShape->GetHeight().GetNativeValue(static_cast<DimensionUnit>(unit));
     if (basicShape->GetBasicShapeType() == BasicShapeType::PATH) {
         auto path = AceType::DynamicCast<Path>(basicShape);
         options->commands = path->GetValue().c_str();
     } else if (basicShape->GetBasicShapeType() == BasicShapeType::RECT) {
         auto shapeRect = AceType::DynamicCast<ShapeRect>(basicShape);
-        options->radiusWidth = shapeRect->GetTopLeftRadius().GetX().Value();
-        options->radiusHeight = shapeRect->GetTopLeftRadius().GetY().Value();
+        options->radiusWidth =
+            shapeRect->GetTopLeftRadius().GetX().GetNativeValue(static_cast<DimensionUnit>(unit));
+        options->radiusHeight =
+            shapeRect->GetTopLeftRadius().GetY().GetNativeValue(static_cast<DimensionUnit>(unit));
+        options->topLeftRadius =
+            shapeRect->GetTopLeftRadius().GetX().GetNativeValue(static_cast<DimensionUnit>(unit));
+        options->bottomLeftRadius =
+            shapeRect->GetBottomLeftRadius().GetX().GetNativeValue(static_cast<DimensionUnit>(unit));
+        options->topRightRadius =
+            shapeRect->GetTopRightRadius().GetX().GetNativeValue(static_cast<DimensionUnit>(unit));
+        options->bottomRightRadius =
+            shapeRect->GetBottomRightRadius().GetX().GetNativeValue(static_cast<DimensionUnit>(unit));
     } else {
         auto process = ViewAbstract::GetMaskProgress(frameNode);
         options->value = process->GetValue();

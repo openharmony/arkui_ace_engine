@@ -794,4 +794,11 @@ void ListModelNG::ResetListChildrenMainSize(FrameNode* frameNode)
     CHECK_NULL_VOID(pattern);
     pattern->ResetChildrenSize();
 }
+
+int32_t ListModelNG::GetInitialIndex(FrameNode* frameNode)
+{
+    int32_t value = 1;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ListLayoutProperty, InitialIndex, value, frameNode, value);
+    return value;
+}
 } // namespace OHOS::Ace::NG

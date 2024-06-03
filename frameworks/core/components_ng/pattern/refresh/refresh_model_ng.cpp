@@ -35,6 +35,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr double DEFAULT_INDICATOR_OFFSET = 16.0;
 constexpr int32_t DEFAULT_FRICTION_RATIO = 62;
+constexpr double DEFAULT_REFRESH_OFFSET = 64.0f;
 } // namespace
 
 void RefreshModelNG::Create()
@@ -250,6 +251,20 @@ float RefreshModelNG::GetPullDownRatio(FrameNode* frameNode)
 {
     float value = 0.0;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(RefreshLayoutProperty, PullDownRatio, value, frameNode, value);
+    return value;
+}
+
+Dimension RefreshModelNG::GetRefreshOffset(FrameNode* frameNode)
+{
+    Dimension value(DEFAULT_REFRESH_OFFSET, DimensionUnit::VP);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(RefreshLayoutProperty, RefreshOffset, value, frameNode, value);
+    return value;
+}
+
+bool RefreshModelNG::GetPullToRefresh(FrameNode* frameNode)
+{
+    bool value = true;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(RefreshLayoutProperty, PullToRefresh, value, frameNode, value);
     return value;
 }
 } // namespace OHOS::Ace::NG
