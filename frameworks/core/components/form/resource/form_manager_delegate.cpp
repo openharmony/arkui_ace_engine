@@ -207,11 +207,15 @@ void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo
         return;
     }
 
-    bool isRecoverFormToHandleClickEvent =
+    bool needHandleCachedClick =
         want.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT, false);
-    bool isRecover = recycleStatus_ == RecycleStatus::RECYCLED || isRecoverFormToHandleClickEvent;
+    bool isRecover = recycleStatus_ == RecycleStatus::RECYCLED || needHandleCachedClick;
+    AAFwk::Want newWant;
+    newWant.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_DYNAMIC, formInfo.isDynamic);
+    newWant.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM, isRecover);
+    newWant.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT, needHandleCachedClick);
 
-    onFormSurfaceNodeCallback_(rsSurfaceNode, formInfo.isDynamic, isRecover);
+    onFormSurfaceNodeCallback_(rsSurfaceNode, newWant);
     if (!formRendererDispatcher_) {
         sptr<IRemoteObject> proxy = want.GetRemoteObject(FORM_RENDERER_DISPATCHER);
         formRendererDispatcher_ = iface_cast<IFormRendererDispatcher>(proxy);
@@ -221,14 +225,14 @@ void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo
     if (!formInfo.isDynamic) {
         HandleSnapshotCallback(DELAY_TIME_FOR_FORM_SNAPSHOT_10S);
     }
-
-    if (isDynamic_ && isRecoverFormToHandleClickEvent) {
-        HandleCachedClickEvents();
-    }
 }
 
 void FormManagerDelegate::HandleCachedClickEvents()
 {
+    if (!isDynamic_) {
+        LOGE("failed to handle cached click, not dynamic card");
+        return;
+    }
     {
         std::lock_guard<std::mutex> lock(recycleMutex_);
         LOGI("process click event after recover form, pointerEventCache_.size: %{public}s",
@@ -650,7 +654,7 @@ void FormManagerDelegate::DispatchPointerEvent(const
     std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     SerializedGesture& serializedGesture)
 {
-    if (!isDynamic_) {
+    if (!isDynamic_ || !pointerEvent) {
         return;
     }
 
@@ -658,7 +662,14 @@ void FormManagerDelegate::DispatchPointerEvent(const
     if (formRendererDispatcher_ == nullptr) {
         std::lock_guard<std::mutex> lock(recycleMutex_);
         if (recycleStatus_ == RecycleStatus::RECYCLED) {
-            LOGI("form is recycled, recover it first");
+            auto pipelineContext = context_.Upgrade();
+            if (pipelineContext && pipelineContext->GetEventManager()) {
+                // avoid context dispatch mocked cancel event
+                pipelineContext->GetEventManager()->SetInnerFlag(true);
+                LOGI("set event manager inner flag");
+            }
+            LOGI("form is recycled, recover it first, action=%{public}d, formId=%{public}" PRID64,
+                pointerEvent->GetPointerAction(), runningCardId_);
             recycleStatus_ = RecycleStatus::RECOVERING;
             pointerEventCache_.emplace_back(pointerEvent);
 
@@ -667,12 +678,15 @@ void FormManagerDelegate::DispatchPointerEvent(const
             want.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT, true);
             OHOS::AppExecFwk::FormMgr::GetInstance().RecoverForms(formIds, want);
         } else if (recycleStatus_ == RecycleStatus::RECOVERING) {
-            LOGI("form is recovering, cache pointer event");
+            LOGI("form is recovering, cache pointer event, action=%{public}d", pointerEvent->GetPointerAction());
             pointerEventCache_.emplace_back(pointerEvent);
         } else {
             LOGE("formRendererDispatcher_ is null");
         }
         return;
+    }
+    if (pointerEvent->GetPointerAction() == OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN) {
+        LOGI("dispatch down event to renderer");
     }
     formRendererDispatcher_->DispatchPointerEvent(pointerEvent, serializedGesture);
 }
@@ -680,6 +694,7 @@ void FormManagerDelegate::DispatchPointerEvent(const
 void FormManagerDelegate::SetAllowUpdate(bool allowUpdate)
 {
     if (formRendererDispatcher_ == nullptr) {
+        LOGE("formRendererDispatcher_ is null");
         return;
     }
 
@@ -689,6 +704,7 @@ void FormManagerDelegate::SetAllowUpdate(bool allowUpdate)
 void FormManagerDelegate::NotifySurfaceChange(float width, float height, float borderWidth)
 {
     if (formRendererDispatcher_ == nullptr) {
+        LOGE("formRendererDispatcher_ is nullptr");
         return;
     }
     formRendererDispatcher_->DispatchSurfaceChangeEvent(width, height, borderWidth);
@@ -847,6 +863,7 @@ void FormManagerDelegate::OnAccessibilityDumpChildInfo(
 #ifdef OHOS_STANDARD_SYSTEM
 void FormManagerDelegate::ResetForm()
 {
+    TAG_LOGI(AceLogTag::ACE_FORM, "Reset form id is %{public}" PRId64 "", runningCardId_);
     runningCardId_ = -1;
     runningCompId_.clear();
     formRendererDispatcher_ = nullptr;
