@@ -21,20 +21,45 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int NUM_0 = 0;
-constexpr int NUM_1 = 1;
-constexpr int NUM_2 = 2;
-constexpr int NUM_3 = 3;
 constexpr int POSITION_DIMENSION = 2;
 
+ArkUI_CharPtr ParseStringToCharPtr(std::string str)
+{
+    char* id = static_cast<char*>(malloc((str.length()) * sizeof(char)));
+    str.copy(id, str.length());
+    return id;
+}
+
+void FreeGuideLineCharPtr(ArkUIGuidelineStyle* values, ArkUI_Int32 size)
+{
+    for (int32_t i = 0; i < size; ++i) {
+        free(const_cast<char*>(values[i].id));
+        values[i].id = nullptr;
+    }
+}
+
+void FreeBarrierCharPtr(ArkUIBarrierStyle* values, ArkUI_Int32 size)
+{
+    for (int32_t i = 0; i < size; ++i) {
+        free(const_cast<char*>(values[i].id));
+        values[i].id = nullptr;
+        auto referencedIdChar = values[i].referencedId;
+        auto referencedIdSize = values[i].referencedIdSize;
+        for (int32_t j = 0; j < referencedIdSize; ++j) {
+            free(const_cast<char*>(referencedIdChar[j]));
+            referencedIdChar[j] = nullptr;
+        }
+    }
+}
+
 void ParseReferencedId(EcmaVM* vm, int32_t referenceSize,
-    const panda::Local<panda::ArrayRef>& array, std::vector<std::string>& referencedIds)
+    const panda::Local<panda::ArrayRef>& array, std::vector<ArkUI_CharPtr>& referencedIds)
 {
     for (int32_t i = 0; i < referenceSize; i++) {
         Local<JSValueRef> referencedId = panda::ArrayRef::GetValueAt(vm, array, i);
         if (referencedId->IsString()) {
-            std::string str(referencedId->ToString(vm)->ToString());
-            referencedIds.push_back(str);
+            std::string str = referencedId->ToString(vm)->ToString();
+            referencedIds.push_back(ParseStringToCharPtr(str));
         }
     }
 }
@@ -44,47 +69,50 @@ ArkUINativeModuleValue RelativeContainerBridge::SetGuideLine(ArkUIRuntimeCallInf
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> idsArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    Local<JSValueRef> directionsArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    Local<JSValueRef> positionsArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> idsArg = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> directionsArg = runtimeCallInfo->GetCallArgRef(2);
+    Local<JSValueRef> positionsArg = runtimeCallInfo->GetCallArgRef(3);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (!idsArg->IsArray(vm) || !directionsArg->IsArray(vm) || !positionsArg->IsArray(vm)) {
         GetArkUINodeModifiers()->getRelativeContainerModifier()->resetGuideline(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    std::vector<GuidelineInfo> guidelineInfos;
+    std::vector<ArkUIGuidelineStyle> guidelineInfos;
     auto idsArr = panda::Local<panda::ArrayRef>(idsArg);
     auto directionsArr = panda::Local<panda::ArrayRef>(directionsArg);
     auto positionsArr = panda::Local<panda::ArrayRef>(positionsArg);
     int32_t size = idsArr->Length(vm);
     for (int32_t i = 0; i < size; i++) {
-        GuidelineInfo info;
+        ArkUIGuidelineStyle info;
         Local<JSValueRef> idVal = panda::ArrayRef::GetValueAt(vm, idsArr, i);
         if (idVal->IsString()) {
-            info.id = idVal->ToString(vm)->ToString();
+            std::string str = idVal->ToString(vm)->ToString();
+            info.id = ParseStringToCharPtr(str);
         }
         Local<JSValueRef> directionVal = panda::ArrayRef::GetValueAt(vm, directionsArr, i);
         if (directionVal->IsNumber()) {
-            info.direction = static_cast<LineDirection>(directionVal->Int32Value(vm));
+            info.direction = directionVal->Int32Value(vm);
         }
         Local<JSValueRef> posStartVal = panda::ArrayRef::GetValueAt(vm,
             positionsArr, i * POSITION_DIMENSION);
         CalcDimension startPos;
         if (ArkTSUtils::ParseJsDimensionVpNG(vm, posStartVal, startPos)) {
-            info.start = startPos;
+            info.start = startPos.Value();
+            info.hasStart = true;
         }
         Local<JSValueRef> posEndVal = panda::ArrayRef::GetValueAt(vm,
             positionsArr, i * POSITION_DIMENSION + 1);
         CalcDimension endPos;
         if (ArkTSUtils::ParseJsDimensionVpNG(vm, posEndVal, endPos)) {
-            info.end = endPos;
+            info.end = endPos.Value();
+            info.hasEnd = true;
         }
         guidelineInfos.push_back(info);
     }
-    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
-    CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
-    RelativeContainerModelNG::SetGuideline(frameNode, guidelineInfos);
+    ArkUIGuidelineStyle* values = guidelineInfos.data();
+    GetArkUINodeModifiers()->getRelativeContainerModifier()->setGuideLine(nativeNode, values, size);
+    FreeGuideLineCharPtr(values, size);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -102,43 +130,47 @@ ArkUINativeModuleValue RelativeContainerBridge::SetBarrier(ArkUIRuntimeCallInfo*
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> idsArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    Local<JSValueRef> directionsArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    Local<JSValueRef> referenceIdsArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> idsArg = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> directionsArg = runtimeCallInfo->GetCallArgRef(2);
+    Local<JSValueRef> referenceIdsArg = runtimeCallInfo->GetCallArgRef(3);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (!idsArg->IsArray(vm) || !directionsArg->IsArray(vm) || !referenceIdsArg->IsArray(vm)) {
         GetArkUINodeModifiers()->getRelativeContainerModifier()->resetBarrier(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    std::vector<BarrierInfo> barrierInfos;
+    std::vector<ArkUIBarrierStyle> barrierInfos;
     auto idsArr = panda::Local<panda::ArrayRef>(idsArg);
     auto directionsArr = panda::Local<panda::ArrayRef>(directionsArg);
     auto referenceIdsArr = panda::Local<panda::ArrayRef>(referenceIdsArg);
     int32_t size = idsArr->Length(vm);
     for (int32_t i = 0; i < size; i++) {
-        BarrierInfo info;
+        ArkUIBarrierStyle info;
         Local<JSValueRef> idVal = panda::ArrayRef::GetValueAt(vm, idsArr, i);
         Local<JSValueRef> directionVal = panda::ArrayRef::GetValueAt(vm, directionsArr, i);
         Local<JSValueRef> referencedIdVal = panda::ArrayRef::GetValueAt(vm, referenceIdsArr, i);
         if (idVal->IsString()) {
-            info.id = idVal->ToString(vm)->ToString();
+            std::string str = idVal->ToString(vm)->ToString();
+            info.id = ParseStringToCharPtr(str);
         }
         if (directionVal->IsNumber()) {
-            info.direction = static_cast<BarrierDirection>(directionVal->Int32Value(vm));
+            info.direction = directionVal->Int32Value(vm);
         }
-        if (!referencedIdVal->IsArray(vm)) {
+        if (referencedIdVal->IsArray(vm)) {
             auto array = panda::Local<panda::ArrayRef>(referencedIdVal);
             int32_t referenceSize = array->Length(vm);
-            std::vector<std::string> referencedIds;
+            std::vector<ArkUI_CharPtr> referencedIds;
             ParseReferencedId(vm, referenceSize, array, referencedIds);
-            info.referencedId = referencedIds;
+            info.referencedId = referencedIds.data();
+            info.referencedIdSize = referenceSize;
+        } else {
+            info.referencedIdSize = 0;
         }
         barrierInfos.push_back(info);
     }
-    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
-    CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
-    RelativeContainerModelNG::SetBarrier(frameNode, barrierInfos);
+    ArkUIBarrierStyle* values = barrierInfos.data();
+    GetArkUINodeModifiers()->getRelativeContainerModifier()->setBarrier(nativeNode, values, size);
+    FreeBarrierCharPtr(values, size);
     return panda::JSValueRef::Undefined(vm);
 }
 
