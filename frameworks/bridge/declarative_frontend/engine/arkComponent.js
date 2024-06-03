@@ -3355,7 +3355,7 @@ class ArkComponent {
 
   chainMode(direction, style) {
     let arkChainMode = new ArkChainMode();
-    arkChainMode.direction = direction ;
+    arkChainMode.direction = direction;
     arkChainMode.style = style;
     modifierWithKey(this._modifiersWithKeys, ChainModeifier.identity, ChainModeifier, arkChainMode);
     return this;
@@ -14278,7 +14278,7 @@ class ArkWaterFlowEdgeEffect {
       (this.options === another.options);
   }
 }
-class ArkChainMode{
+class ArkChainMode {
   constructor() {
     this.direction = undefined;
     this.style = undefined;
