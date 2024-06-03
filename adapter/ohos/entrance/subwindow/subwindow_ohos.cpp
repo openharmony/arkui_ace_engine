@@ -36,6 +36,7 @@
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "adapter/ohos/entrance/dialog_container.h"
+#include "adapter/ohos/entrance/ui_content_impl.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "base/log/frame_report.h"
 #include "base/utils/system_properties.h"
@@ -165,6 +166,10 @@ void SubwindowOhos::InitContainer()
     // set view
     Platform::AceContainer::SetView(aceView, density, width, height, window_, callback);
     Platform::AceViewOhos::SurfaceChanged(aceView, width, height, config.Orientation());
+
+    auto uiContentImpl = reinterpret_cast<UIContentImpl*>(window_->GetUIContent());
+    CHECK_NULL_VOID(uiContentImpl);
+    uiContentImpl->SetFontScaleAndWeightScale(container, childContainerId_);
 
 #ifndef NG_BUILD
 #ifdef ENABLE_ROSEN_BACKEND
