@@ -724,6 +724,7 @@ public:
     void UpdateBlockNetwork(bool isNetworkBlocked);
     void UpdateHorizontalScrollBarAccess(bool isHorizontalScrollBarAccessEnabled);
     void UpdateVerticalScrollBarAccess(bool isVerticalScrollBarAccessEnabled);
+    void UpdateOverlayScrollbarEnabled(bool isEnabled);
     void UpdateScrollBarColor(const std::string& colorValue);
     void UpdateOverScrollMode(const int32_t overscrollModeValue);
     void UpdateNativeEmbedModeEnabled(bool isEmbedModeEnabled);
