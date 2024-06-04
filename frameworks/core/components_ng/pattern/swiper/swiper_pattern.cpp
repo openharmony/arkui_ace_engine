@@ -2566,6 +2566,7 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
 {
     auto velocity = info.GetMainVelocity();
     UpdateDragFRCSceneInfo(velocity, SceneStatus::RUNNING);
+    UpdateNodeRate();
     auto mainDelta = static_cast<float>(info.GetMainDelta());
     if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::TOUCHPAD) {
         isTouchPad_ = true;
@@ -2856,6 +2857,10 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
 
     AnimationOption option;
     option.SetDuration(GetDuration());
+    auto iter = frameRateRange_.find(SwiperDynamicSyncSceneType::ANIMATE);
+    if (iter  != frameRateRange_.end()) {
+        option.SetFrameRateRange(iter->second);
+    }
     motionVelocity_ = velocity / translate;
     auto curve = GetCurveIncludeMotion();
     auto minimumAmplitudeRatio = DEFAULT_MINIMUM_AMPLITUDE_PX / translate;
@@ -3187,6 +3192,10 @@ void SwiperPattern::PlayTranslateAnimation(
     motionVelocity_ = velocity / (endPos - startPos);
     option.SetCurve(GetCurveIncludeMotion());
     option.SetDuration(GetDuration());
+    auto iter = frameRateRange_.find(SwiperDynamicSyncSceneType::ANIMATE);
+    if (iter != frameRateRange_.end()) {
+        option.SetFrameRateRange(iter->second);
+    }
 
     host->UpdateAnimatablePropertyFloat(TRANSLATE_PROPERTY_NAME, startPos);
     translateAnimationIsRunning_ = true;
@@ -5475,5 +5484,21 @@ RefPtr<NodePaintMethod> SwiperPattern::CreateNodePaintMethod()
     paintMethod->SetNeedPaintFade(needPaintFade);
     paintMethod->SetNeedClipPadding(needClipPadding);
     return paintMethod;
+}
+
+void SwiperPattern::UpdateNodeRate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto frameRateManager = pipelineContext->GetFrameRateManager();
+    CHECK_NULL_VOID(frameRateManager);
+    auto nodeId = host->GetId();
+    auto iter = frameRateRange_.find(SwiperDynamicSyncSceneType::GESTURE);
+    if (iter != frameRateRange_.end()) {
+        auto expectedRate = iter->second->preferred_;
+        frameRateManager->UpdateNodeRate(nodeId, expectedRate);
+    }
 }
 } // namespace OHOS::Ace::NG
